@@ -1,0 +1,731 @@
+/* Mobile-First Responsive Design for POS Cash Restaurant */
+/* Base styles for mobile devices */
+
+:root {
+  --pos-cash-primary: #2E7D9A;
+  --pos-cash-secondary: #54C6EB;
+  --pos-cash-accent: #F39800;
+  --pos-cash-success: #4CAF50;
+  --pos-cash-warning: #FF9800;
+  --pos-cash-danger: #F44336;
+  --pos-cash-dark: #263238;
+  --pos-cash-light: #FAFAFA;
+  
+  --touch-target-size: 48px;
+  --mobile-padding: 16px;
+  --mobile-border-radius: 12px;
+  --mobile-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Mobile-first base styles */
+.pos-cash-mobile {
+  font-size: 16px; /* Prevent zoom on iOS */
+  line-height: 1.5;
+  -webkit-tap-highlight-color: transparent;
+  
+  /* Touch-friendly interactions */
+  .btn, .touch-target {
+    min-height: var(--touch-target-size);
+    min-width: var(--touch-target-size);
+    padding: 12px 20px;
+    border-radius: var(--mobile-border-radius);
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: all 0.2s ease;
+    
+    &:active {
+      transform: scale(0.98);
+    }
+  }
+  
+  /* Card-based layout */
+  .pos-card {
+    background: white;
+    border-radius: var(--mobile-border-radius);
+    box-shadow: var(--mobile-shadow);
+    margin-bottom: var(--mobile-padding);
+    overflow: hidden;
+    
+    .card-header {
+      padding: var(--mobile-padding);
+      background: var(--pos-cash-light);
+      border-bottom: 1px solid #E0E0E0;
+      
+      h3, h4 {
+        margin: 0;
+        color: var(--pos-cash-dark);
+        font-weight: 700;
+      }
+    }
+    
+    .card-body {
+      padding: var(--mobile-padding);
+    }
+  }
+}
+
+/* POS Interface Layout */
+.pos-cash-interface {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--pos-cash-light);
+  
+  /* Header with restaurant info and user menu */
+  .pos-header {
+    background: var(--pos-cash-primary);
+    color: white;
+    padding: 12px var(--mobile-padding);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 56px;
+    box-shadow: var(--mobile-shadow);
+    
+    .restaurant-info {
+      display: flex;
+      align-items: center;
+      
+      .logo {
+        width: 32px;
+        height: 32px;
+        margin-right: 12px;
+        border-radius: 6px;
+      }
+      
+      .info {
+        h1 {
+          font-size: 18px;
+          font-weight: 700;
+          margin: 0;
+        }
+        
+        .location {
+          font-size: 12px;
+          opacity: 0.8;
+        }
+      }
+    }
+    
+    .user-menu {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      
+      .notification-badge {
+        position: relative;
+        
+        .badge {
+          position: absolute;
+          top: -6px;
+          right: -6px;
+          background: var(--pos-cash-accent);
+          color: white;
+          font-size: 10px;
+          min-width: 18px;
+          height: 18px;
+          border-radius: 9px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+      }
+    }
+  }
+  
+  /* Main content area */
+  .pos-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    
+    /* Tab navigation */
+    .pos-tabs {
+      background: white;
+      border-bottom: 2px solid var(--pos-cash-light);
+      display: flex;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      
+      .tab {
+        flex: none;
+        padding: 16px 20px;
+        text-align: center;
+        border-bottom: 3px solid transparent;
+        color: #666;
+        font-weight: 600;
+        white-space: nowrap;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        
+        &.active {
+          color: var(--pos-cash-primary);
+          border-bottom-color: var(--pos-cash-primary);
+          background: rgba(46, 125, 154, 0.05);
+        }
+        
+        &:hover {
+          background: rgba(46, 125, 154, 0.1);
+        }
+      }
+    }
+    
+    /* Content area */
+    .pos-content {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: var(--mobile-padding);
+    }
+  }
+  
+  /* Bottom action bar */
+  .pos-action-bar {
+    background: white;
+    border-top: 1px solid #E0E0E0;
+    padding: var(--mobile-padding);
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+    
+    .action-buttons {
+      display: flex;
+      gap: 12px;
+      
+      .btn-primary {
+        flex: 1;
+        background: var(--pos-cash-primary);
+        border: none;
+        color: white;
+        
+        &:hover {
+          background: #1e5f7a;
+        }
+      }
+      
+      .btn-secondary {
+        background: white;
+        border: 2px solid var(--pos-cash-primary);
+        color: var(--pos-cash-primary);
+        
+        &:hover {
+          background: var(--pos-cash-primary);
+          color: white;
+        }
+      }
+    }
+  }
+}
+
+/* Product Grid */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: var(--mobile-padding);
+  padding: var(--mobile-padding) 0;
+  
+  .product-card {
+    background: white;
+    border-radius: var(--mobile-border-radius);
+    box-shadow: var(--mobile-shadow);
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    &:active {
+      transform: scale(0.98);
+    }
+    
+    .product-image {
+      width: 100%;
+      height: 120px;
+      background: var(--pos-cash-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      
+      img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: cover;
+      }
+      
+      .placeholder {
+        color: #999;
+        font-size: 48px;
+      }
+    }
+    
+    .product-info {
+      padding: 12px;
+      
+      .name {
+        font-weight: 600;
+        color: var(--pos-cash-dark);
+        margin-bottom: 4px;
+        font-size: 14px;
+        line-height: 1.3;
+      }
+      
+      .price {
+        color: var(--pos-cash-primary);
+        font-weight: 700;
+        font-size: 16px;
+      }
+      
+      .description {
+        font-size: 12px;
+        color: #666;
+        line-height: 1.3;
+        margin-top: 4px;
+      }
+    }
+  }
+}
+
+/* Order Summary */
+.order-summary {
+  background: white;
+  border-radius: var(--mobile-border-radius);
+  box-shadow: var(--mobile-shadow);
+  
+  .order-header {
+    padding: var(--mobile-padding);
+    border-bottom: 1px solid #E0E0E0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    
+    h3 {
+      margin: 0;
+      color: var(--pos-cash-dark);
+    }
+    
+    .table-info {
+      font-size: 14px;
+      color: #666;
+    }
+  }
+  
+  .order-items {
+    max-height: 300px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    
+    .order-item {
+      padding: 12px var(--mobile-padding);
+      border-bottom: 1px solid #F0F0F0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      
+      .quantity-controls {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        
+        .qty-btn {
+          width: 32px;
+          height: 32px;
+          border-radius: 16px;
+          background: var(--pos-cash-light);
+          border: 1px solid #DDD;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          
+          &:active {
+            background: #DDD;
+          }
+        }
+        
+        .quantity {
+          min-width: 24px;
+          text-align: center;
+          font-weight: 600;
+        }
+      }
+      
+      .item-details {
+        flex: 1;
+        
+        .name {
+          font-weight: 600;
+          color: var(--pos-cash-dark);
+          margin-bottom: 2px;
+        }
+        
+        .modifications {
+          font-size: 12px;
+          color: #666;
+        }
+      }
+      
+      .item-price {
+        font-weight: 700;
+        color: var(--pos-cash-primary);
+      }
+    }
+  }
+  
+  .order-totals {
+    padding: var(--mobile-padding);
+    border-top: 2px solid var(--pos-cash-light);
+    
+    .total-line {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      
+      &.subtotal {
+        color: #666;
+      }
+      
+      &.tax {
+        color: #666;
+        font-size: 14px;
+      }
+      
+      &.total {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--pos-cash-dark);
+        border-top: 1px solid #DDD;
+        padding-top: 8px;
+        margin-top: 8px;
+      }
+    }
+  }
+}
+
+/* Payment Interface */
+.payment-interface {
+  .payment-methods {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+    
+    .payment-method {
+      background: white;
+      border: 2px solid #DDD;
+      border-radius: var(--mobile-border-radius);
+      padding: 16px 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      
+      &.active {
+        border-color: var(--pos-cash-primary);
+        background: rgba(46, 125, 154, 0.05);
+      }
+      
+      .icon {
+        font-size: 24px;
+        margin-bottom: 8px;
+        color: var(--pos-cash-primary);
+      }
+      
+      .label {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--pos-cash-dark);
+      }
+    }
+  }
+  
+  .tip-selection {
+    background: white;
+    border-radius: var(--mobile-border-radius);
+    padding: var(--mobile-padding);
+    margin-bottom: 24px;
+    
+    h4 {
+      margin: 0 0 12px 0;
+      color: var(--pos-cash-dark);
+    }
+    
+    .tip-buttons {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      
+      .tip-btn {
+        flex: 1;
+        padding: 12px;
+        background: var(--pos-cash-light);
+        border: 1px solid #DDD;
+        border-radius: 8px;
+        text-align: center;
+        cursor: pointer;
+        font-weight: 600;
+        
+        &.active {
+          background: var(--pos-cash-primary);
+          color: white;
+          border-color: var(--pos-cash-primary);
+        }
+      }
+    }
+    
+    .custom-tip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      
+      label {
+        font-weight: 600;
+        color: var(--pos-cash-dark);
+      }
+      
+      input {
+        flex: 1;
+        padding: 12px;
+        border: 1px solid #DDD;
+        border-radius: 8px;
+        font-size: 16px;
+        
+        &:focus {
+          outline: none;
+          border-color: var(--pos-cash-primary);
+        }
+      }
+    }
+  }
+}
+
+/* Table Management */
+.floor-plan {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 12px;
+  padding: var(--mobile-padding);
+  
+  .table-item {
+    aspect-ratio: 1;
+    border-radius: var(--mobile-border-radius);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    
+    &.available {
+      background: var(--pos-cash-success);
+      color: white;
+    }
+    
+    &.occupied {
+      background: var(--pos-cash-warning);
+      color: white;
+    }
+    
+    &.reserved {
+      background: var(--pos-cash-secondary);
+      color: white;
+    }
+    
+    &.needs-cleaning {
+      background: var(--pos-cash-danger);
+      color: white;
+    }
+    
+    .table-number {
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+    
+    .table-status {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+  }
+}
+
+/* Kitchen Display */
+.kitchen-display {
+  .order-tickets {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--mobile-padding);
+    
+    .ticket {
+      background: white;
+      border-radius: var(--mobile-border-radius);
+      box-shadow: var(--mobile-shadow);
+      overflow: hidden;
+      
+      &.new {
+        border-left: 4px solid var(--pos-cash-accent);
+      }
+      
+      &.in-progress {
+        border-left: 4px solid var(--pos-cash-warning);
+      }
+      
+      &.ready {
+        border-left: 4px solid var(--pos-cash-success);
+      }
+      
+      .ticket-header {
+        padding: 12px var(--mobile-padding);
+        background: var(--pos-cash-light);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        
+        .order-info {
+          .order-number {
+            font-weight: 700;
+            color: var(--pos-cash-dark);
+          }
+          
+          .table-number {
+            font-size: 12px;
+            color: #666;
+          }
+        }
+        
+        .timer {
+          font-weight: 700;
+          padding: 4px 8px;
+          border-radius: 4px;
+          
+          &.urgent {
+            background: var(--pos-cash-danger);
+            color: white;
+          }
+          
+          &.normal {
+            background: var(--pos-cash-success);
+            color: white;
+          }
+        }
+      }
+      
+      .ticket-items {
+        padding: var(--mobile-padding);
+        
+        .item {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 8px;
+          
+          .name {
+            font-weight: 600;
+            color: var(--pos-cash-dark);
+          }
+          
+          .quantity {
+            color: var(--pos-cash-primary);
+            font-weight: 700;
+          }
+          
+          .modifications {
+            font-size: 12px;
+            color: #666;
+            margin-left: 16px;
+          }
+        }
+      }
+      
+      .ticket-actions {
+        padding: 12px var(--mobile-padding);
+        border-top: 1px solid #E0E0E0;
+        display: flex;
+        gap: 8px;
+        
+        .btn {
+          flex: 1;
+          padding: 8px;
+          border-radius: 6px;
+          font-size: 12px;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+      }
+    }
+  }
+}
+
+/* Responsive Tablet Styles */
+@media (min-width: 768px) {
+  .pos-cash-interface {
+    .pos-main {
+      flex-direction: row;
+      
+      .pos-content {
+        flex: 2;
+      }
+      
+      .order-sidebar {
+        flex: 1;
+        max-width: 400px;
+        border-left: 1px solid #E0E0E0;
+        overflow-y: auto;
+      }
+    }
+  }
+  
+  .product-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+  
+  .floor-plan {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
+}
+
+/* Responsive Desktop Styles */
+@media (min-width: 1024px) {
+  .product-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  }
+  
+  .kitchen-display .order-tickets {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --pos-cash-light: #1a1a1a;
+    --pos-cash-dark: #ffffff;
+  }
+  
+  .pos-cash-interface {
+    background: #121212;
+    
+    .pos-card, .order-summary, .payment-interface .tip-selection {
+      background: #1e1e1e;
+      color: white;
+    }
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .pos-cash-interface {
+    --pos-cash-primary: #000000;
+    --pos-cash-secondary: #ffffff;
+    
+    .btn {
+      border: 2px solid currentColor;
+    }
+  }
+} 
