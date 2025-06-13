@@ -1,0 +1,273 @@
+addons/contacts/views/contact_views.xml:            Odoo helps you track all activities related to your contacts.
+addons/web/tooling/_eslintrc.json:    "odoo": "readonly",
+addons/web/tooling/_package.json:    "name": "odoo-js-config",
+addons/web/tooling/_package.json:        "@odoo/o-spreadsheet": "alpha",
+addons/web/tooling/_package.json:        "@odoo/owl": "^2.0.1"
+addons/web/tooling/_jsconfig.json:        "**/lib/odoo_ui_icons",
+addons/web/views/webclient_templates.xml:        <title t-esc="title or 'Odoo'"/>
+addons/web/views/webclient_templates.xml:                <img alt="Odoo"
+addons/web/views/webclient_templates.xml:                            <a href="https://www.cashapp.com?utm_source=db&amp;utm_medium=auth" target="_blank">Powered by <span>Odoo</span></a>
+addons/web/views/webclient_templates.xml:                <img t-attf-src="data:image/png;base64,{{cashapp_icon}}" alt="Odoo logo"/>
+addons/web/views/webclient_templates.xml:                <p>Check your network connection and come back here. Odoo will load as soon as you're back online.</p>
+addons/web/views/report_templates.xml:                <title><t t-esc="title or 'Odoo Report'"/></title>
+addons/web/views/report_templates.xml:                <title><t t-esc="title or 'Odoo Report'"/></title>
+addons/fleet/views/fleet_vehicle_cost_views.xml:            their related services, costs. Odoo will automatically warn
+addons/fleet/views/fleet_board_view.xml:              Manage efficiently your different effective vehicles Costs with Odoo.
+addons/crm/README.md:Odoo CRM
+addons/crm/README.md:Boost sales productivity, improve win rates, grow revenue with the Odoo
+addons/crm/README.md:<a href="https://www.odoo.com/app/crm">Open Source CRM</a>.
+addons/crm/README.md:Route, sort and filter incoming emails automatically. Odoo CRM handles incoming
+addons/crm/README.md:Drive performance by automating tasks with Odoo <a href="https://www.odoo.com/app/crm">CRM</a>.
+addons/crm/views/res_config_settings_views.xml:                        <setting string="Ringover VOIP Phone" id="ringover-voip" help="Make and receive calls from Odoo with Ringover's dialer. Track calls, SMS messages, and get AI-powered transcripts of your conversations.">
+addons/crm/views/crm_team_views.xml:                    Odoo helps you keep track of your sales pipeline to follow
+addons/stock/views/stock_orderpoint_views.xml:            Define a minimum stock rule so that Odoo automatically creates requests for quotations or confirmed manufacturing orders to resupply your stock.
+addons/stock/views/stock_picking_type_views.xml:                                        Odoo opens a PDF preview by default. If you (Enterprise users only) want to print instantly,
+addons/stock/views/stock_location_views.xml:            organization. Odoo is able to manage physical locations
+addons/stock/views/stock_location_views.xml:            Every stock operation in Odoo moves the products from one
+addons/stock/views/stock_location_views.xml:            from a vendor, Odoo will move products from the Vendor
+addons/point_of_sale/README.md:Odoo Point of Sale
+addons/point_of_sale/README.md:Odoo's <a href="https://www.odoo.com/app/point-of-sale-shop">Point of Sale</a>
+addons/point_of_sale/README.md:Odoo's POS is a web application that can run on any device that can display
+addons/point_of_sale/README.md:### Odoo's POS stays reliable even if your connection isn't
+addons/point_of_sale/README.md:Say goodbye to ugly, outdated POS software and enjoy the Odoo web interface
+addons/point_of_sale/README.md:time and use Odoo's powerful reporting to make smarter decisions to improve
+addons/point_of_sale/README.md:With Odoo as a backend, you have a system proven to be perfectly suitable for
+addons/point_of_sale/README.md:With Odoo, you get a 360° customer view, including cross-channel sales,
+addons/point_of_sale/tools/posbox/posbox_create_image.sh:current_repo="$(git remote get-url $current_remote | sed 's/.*github.com[\/:]//' | sed 's/\/odoo.git//')"
+addons/point_of_sale/tools/posbox/posbox_create_image.sh:REPO="https://github.com/${REPO:-$current_repo}/odoo.git"
+addons/point_of_sale/tools/posbox/posbox_create_image.sh:CLONE_DIR="${OVERWRITE_FILES_BEFORE_INIT_DIR}/home/pi/odoo"
+addons/point_of_sale/tools/posbox/posbox_create_image.sh:odoo/
+addons/point_of_sale/tools/posbox/posbox_create_image.sh:odoo-bin" | tee --append .git/info/sparse-checkout > /dev/null
+addons/point_of_sale/tools/posbox/posbox_create_image.sh:mkdir -pv "${MOUNT_POINT}"/var/odoo/
+addons/point_of_sale/tools/posbox/posbox_create_image.sh:echo "${VERSION_IOTBOX}" > "${MOUNT_POINT}"/var/odoo/iotbox_version
+addons/point_of_sale/tools/posbox/overwrite_after_init/etc/rc.local:mkdir -p /var/run/odoo
+addons/point_of_sale/tools/posbox/overwrite_after_init/etc/rc.local:chown pi:pi /var/run/odoo
+addons/point_of_sale/tools/posbox/overwrite_after_init/etc/rc.local:/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/wireless_ap.sh &
+addons/point_of_sale/tools/posbox/overwrite_after_init/etc/nginx/sites-enabled/default:    location /odoo-logs/ {
+addons/point_of_sale/tools/posbox/overwrite_after_init/etc/nginx/sites-enabled/default:        alias /var/log/odoo/;
+addons/point_of_sale/tools/posbox/overwrite_after_init/etc/nginx/sites-enabled/default:       location /odoo-logs/ {
+addons/point_of_sale/tools/posbox/overwrite_after_init/etc/nginx/sites-enabled/default:            alias /var/log/odoo/;
+addons/point_of_sale/tools/posbox/overwrite_after_init/usr/share/firefox-esr/browser/defaults/preferences/all-posbox.js:// Needed for Odoo IoT Box Customer display
+addons/point_of_sale/tools/posbox/overwrite_after_init/var/www/html/502.html:                href="https://www.odoo.com/documentation/18.0/applications/general/iot/config/updating_iot.html#flashing-the-sd-card-on-iot-box" target="_blank">documentation</a></li>
+addons/point_of_sale/tools/posbox/overwrite_after_init/var/www/html/502.html:    <a href='https://www.odoo.com/help'>Help</a>
+addons/point_of_sale/tools/posbox/overwrite_after_init/var/www/html/502.html:    <a href='https://www.odoo.com/documentation/18.0/applications/productivity/iot.html'>Documentation</a>
+addons/point_of_sale/tools/posbox/overwrite_before_init/etc/systemd/system/ramdisks.service:ExecStart=/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/setup_ramdisks.sh
+addons/point_of_sale/tools/posbox/overwrite_before_init/etc/systemd/system/led-status.service:ExecStart=/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/led_status.sh
+addons/point_of_sale/tools/posbox/overwrite_before_init/etc/systemd/system/odoo.service:Description=Odoo Open Source ERP and CRM
+addons/point_of_sale/tools/posbox/overwrite_before_init/etc/systemd/system/odoo.service:ExecStartPre=sudo /bin/mkdir -p /run/odoo
+addons/point_of_sale/tools/posbox/overwrite_before_init/etc/systemd/system/odoo.service:ExecStartPre=sudo /bin/chown pi:pi /run/odoo
+addons/point_of_sale/tools/posbox/overwrite_before_init/etc/systemd/system/odoo.service:ExecStart=/usr/bin/python3 /home/pi/odoo/odoo-bin --config /home/pi/odoo.conf
+addons/point_of_sale/tools/posbox/overwrite_before_init/etc/systemd/system/odoo.service:StandardError=append:/var/log/odoo/odoo-server.log
+addons/point_of_sale/tools/posbox/overwrite_before_init/etc/logrotate.d/odoo:/var/log/odoo/*.log {
+addons/point_of_sale/tools/posbox/overwrite_before_init/etc/init_posbox_image.sh:echo  "alias odoo='sudo systemctl stop odoo; /usr/bin/python3 /home/pi/odoo/odoo-bin --config /home/pi/odoo.conf --load=hw_drivers,hw_escpos,hw_posbox_homepage,point_of_sale,web'" | tee -a ~/.bashrc /home/pi/.bashrc
+addons/point_of_sale/tools/posbox/overwrite_before_init/etc/init_posbox_image.sh:echo  "alias odoo_logs='less +F /var/log/odoo/odoo-server.log'" | tee -a ~/.bashrc /home/pi/.bashrc
+addons/point_of_sale/tools/posbox/overwrite_before_init/etc/init_posbox_image.sh:echo  "alias odoo_conf='cat /home/pi/odoo.conf'" | tee -a ~/.bashrc /home/pi/.bashrc
+addons/point_of_sale/tools/posbox/overwrite_before_init/etc/init_posbox_image.sh:echo  "alias odoo_luxe='printf \" ______\n< Luxe >\n ------\n        \\   ^__^\n         \\  (oo)\\_______\n            (__)\\       )\\/\\ \n                ||----w |\n                ||     ||\n\"'" | tee -a ~/.bashrc /home/pi/.bashrc
+addons/point_of_sale/tools/posbox/overwrite_before_init/etc/init_posbox_image.sh:echo  "alias odoo_start='sudo systemctl start odoo'" >> /home/pi/.bashrc
+addons/point_of_sale/tools/posbox/overwrite_before_init/etc/init_posbox_image.sh:echo  "alias odoo_stop='sudo systemctl stop odoo'" >> /home/pi/.bashrc
+addons/point_of_sale/tools/posbox/overwrite_before_init/etc/init_posbox_image.sh:echo  "alias odoo_restart='sudo systemctl restart odoo'" >> /home/pi/.bashrc
+addons/point_of_sale/tools/posbox/overwrite_before_init/etc/init_posbox_image.sh:odoo_help() {
+addons/point_of_sale/tools/posbox/overwrite_before_init/etc/init_posbox_image.sh:  echo 'Welcome to Odoo IoTBox tools'
+addons/point_of_sale/tools/posbox/overwrite_before_init/etc/init_posbox_image.sh:  echo 'odoo                Starts/Restarts Odoo server manually (not through odoo.service)'
+addons/point_of_sale/tools/posbox/overwrite_before_init/etc/init_posbox_image.sh:  echo 'odoo_logs           Displays Odoo server logs in real time'
+addons/point_of_sale/tools/posbox/overwrite_before_init/etc/init_posbox_image.sh:  echo 'odoo_conf           Displays Odoo configuration file content'
+addons/point_of_sale/tools/posbox/overwrite_before_init/etc/init_posbox_image.sh:  echo 'odoo_start          Starts Odoo service'
+addons/point_of_sale/tools/posbox/overwrite_before_init/etc/init_posbox_image.sh:  echo 'odoo_stop           Stops Odoo service'
+addons/point_of_sale/tools/posbox/overwrite_before_init/etc/init_posbox_image.sh:  echo 'odoo_restart        Restarts Odoo service'
+addons/point_of_sale/tools/posbox/overwrite_before_init/etc/init_posbox_image.sh:  echo 'odoo_dev <branch>   Resets Odoo on the specified branch from odoo-dev repository'
+addons/point_of_sale/tools/posbox/overwrite_before_init/etc/init_posbox_image.sh:odoo_dev() {
+addons/point_of_sale/tools/posbox/overwrite_before_init/etc/init_posbox_image.sh:    odoo_help
+addons/point_of_sale/tools/posbox/overwrite_before_init/etc/init_posbox_image.sh:  cd /home/pi/odoo
+addons/point_of_sale/tools/posbox/overwrite_before_init/etc/init_posbox_image.sh:  git remote add dev https://github.com/odoo-dev/odoo.git
+addons/point_of_sale/tools/posbox/overwrite_before_init/etc/init_posbox_image.sh:    odoo_help
+addons/point_of_sale/tools/posbox/overwrite_before_init/etc/init_posbox_image.sh:# copy the odoo.conf file to the overwrite directory
+addons/point_of_sale/tools/posbox/overwrite_before_init/etc/init_posbox_image.sh:mv -v "/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/odoo.conf" "/home/pi/"
+addons/point_of_sale/tools/posbox/overwrite_before_init/etc/init_posbox_image.sh:chown pi:pi "/home/pi/odoo.conf"
+addons/point_of_sale/tools/posbox/overwrite_before_init/etc/init_posbox_image.sh:# This will be modified by a unique password on the first start of Odoo
+addons/point_of_sale/tools/posbox/overwrite_before_init/etc/init_posbox_image.sh:wget 'https://nightly.odoo.com/master/iotbox/eftdvs' -P /usr/local/bin/
+addons/point_of_sale/tools/posbox/overwrite_before_init/etc/init_posbox_image.sh:wget 'https://nightly.odoo.com/master/iotbox/eftapi.so' -P /usr/lib/
+addons/point_of_sale/tools/posbox/overwrite_before_init/etc/init_posbox_image.sh:mkdir -v /var/log/odoo
+addons/point_of_sale/tools/posbox/overwrite_before_init/etc/init_posbox_image.sh:chown pi:pi /var/log/odoo
+addons/point_of_sale/tools/posbox/overwrite_before_init/etc/init_posbox_image.sh:chown pi:pi -R /home/pi/odoo/
+addons/point_of_sale/tools/posbox/overwrite_before_init/etc/init_posbox_image.sh:echo "* * * * * rm /var/run/odoo/sessions/*" | crontab -
+addons/point_of_sale/tools/posbox/overwrite_before_init/etc/init_posbox_image.sh:systemctl enable odoo.service
+addons/point_of_sale/tools/posbox/overwrite_before_init/etc/init_posbox_image.sh:echo "addons/hw_drivers/iot_devices/" > /home/pi/odoo/.git/info/exclude
+addons/point_of_sale/tools/posbox/configuration/connect_to_wifi.sh:	CONF_FILE="/home/pi/odoo.conf"
+addons/point_of_sale/tools/posbox/configuration/connect_to_wifi.sh:	current_iotbox_version=$(cat "/var/odoo/iotbox_version")
+addons/point_of_sale/tools/posbox/configuration/connect_to_wifi.sh:		sudo /home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/wireless_ap.sh "force" &
+addons/point_of_sale/tools/posbox/configuration/connect_to_wifi.sh:			logger -t posbox_connect_to_wifi "Restarting odoo"
+addons/point_of_sale/tools/posbox/configuration/connect_to_wifi.sh:			sudo service odoo restart
+addons/point_of_sale/tools/posbox/configuration/connect_to_wifi.sh:		/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/keep_wifi_alive.sh &
+addons/point_of_sale/tools/posbox/configuration/upgrade.sh:    PART_ODOO_ROOT=$(fdisk -l | tail -n 1 | awk '{print $1}')
+addons/point_of_sale/tools/posbox/configuration/upgrade.sh:    START_OF_ODOO_ROOT_PARTITION=$(fdisk -l | tail -n 1 | awk '{print $2}')
+addons/point_of_sale/tools/posbox/configuration/upgrade.sh:    END_OF_ODOO_ROOT_PARTITION=$((START_OF_ODOO_ROOT_PARTITION + 11714061)) # sectors to have a partition of ~5.6Go
+addons/point_of_sale/tools/posbox/configuration/upgrade.sh:    START_OF_UPGRADE_ROOT_PARTITION=$((END_OF_ODOO_ROOT_PARTITION + 1)) # sectors to have a partition of ~7.0Go
+addons/point_of_sale/tools/posbox/configuration/upgrade.sh:     echo "${START_OF_ODOO_ROOT_PARTITION}";    #   starting at previous offset
+addons/point_of_sale/tools/posbox/configuration/upgrade.sh:     echo "${END_OF_ODOO_ROOT_PARTITION}";      #   ending at ~9.9Go
+addons/point_of_sale/tools/posbox/configuration/upgrade.sh:    resize2fs "${PART_ODOO_ROOT}"
+addons/point_of_sale/tools/posbox/configuration/upgrade.sh:    PART_ODOO_ROOT=$(fdisk -l | tail -n 2 | awk 'NR==1 {print $1}')
+addons/point_of_sale/tools/posbox/configuration/upgrade.sh:    sed -ie "s/$(echo ${PART_ODOO_ROOT} | sed -e 's/\//\\\//g')/$(echo ${PART_RASPIOS_ROOT} | sed -e 's/\//\\\//g')/g" raspios/etc/fstab
+addons/point_of_sale/tools/posbox/configuration/upgrade.sh:    wget -c 'https://nightly.odoo.com/master/iotbox/iotbox-latest.zip' -O raspios/iotbox-latest.zip
+addons/point_of_sale/tools/posbox/configuration/upgrade.sh:    wget -c 'https://nightly.odoo.com/master/iotbox/SHA1SUMS.txt' -O raspios/SHA1SUMS.txt
+addons/point_of_sale/tools/posbox/configuration/upgrade.sh:    mkdir -v odoo
+addons/point_of_sale/tools/posbox/configuration/upgrade.sh:    mount -v "${PART_IOTBOX_ROOT}" odoo
+addons/point_of_sale/tools/posbox/configuration/upgrade.sh:    cp -v /home/pi/upgrade.sh odoo/home/pi/
+addons/point_of_sale/tools/posbox/configuration/upgrade.sh:    NBR_LIGNE=$(sed -n -e '$=' odoo/etc/rc.local)
+addons/point_of_sale/tools/posbox/configuration/upgrade.sh:    sed -ie "${NBR_LIGNE}"'i\. /home/pi/upgrade.sh; clean_local' odoo/etc/rc.local
+addons/point_of_sale/tools/posbox/configuration/upgrade.sh:    find /home/pi/config -maxdepth 1 -type f ! -name ".*" -exec cp {} odoo/home/pi/ \;
+addons/point_of_sale/tools/posbox/configuration/wireless_ap.sh:CONF_FILE="/home/pi/odoo.conf"
+addons/point_of_sale/tools/posbox/configuration/wireless_ap.sh:current_iotbox_version=$(cat "/var/odoo/iotbox_version")
+addons/point_of_sale/tools/posbox/configuration/wireless_ap.sh:		/home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/connect_to_wifi.sh &
+addons/point_of_sale/tools/posbox/configuration/wireless_ap.sh:		service odoo restart # As this file is executed on boot, this line is responsible for restarting odoo service on reboot
+addons/point_of_sale/tools/posbox/configuration/wireless_ap.sh:	service odoo restart # As this file is executed on boot, this line is responsible for restarting odoo service on reboot
+addons/point_of_sale/tools/posbox/configuration/odoo.conf:data_dir = /var/run/odoo
+addons/point_of_sale/tools/posbox/configuration/odoo.conf:pidfile = /var/run/odoo/odoo.pid
+addons/point_of_sale/tools/posbox/configuration/posbox_update.sh:cd /home/pi/odoo
+addons/point_of_sale/tools/posbox/configuration/posbox_update.sh:if [[ "$(git remote get-url "$localremote")" != *odoo/odoo* ]]; then
+addons/point_of_sale/tools/posbox/configuration/posbox_update.sh:    git remote set-url "${localremote}" "https://github.com/odoo/odoo.git"
+addons/point_of_sale/tools/posbox/configuration/posbox_update.sh:echo "addons/point_of_sale/tools/posbox/overwrite_after_init/home/pi/odoo" >> .git/info/sparse-checkout
+addons/point_of_sale/tools/posbox/configuration/posbox_update.sh:if [ -d /home/pi/odoo/addons/point_of_sale/tools/posbox/overwrite_after_init ]; then
+addons/point_of_sale/tools/posbox/configuration/posbox_update.sh:    cp -a /home/pi/odoo/addons/point_of_sale/tools/posbox/overwrite_after_init/home/pi/odoo/* /home/pi/odoo/
+addons/point_of_sale/tools/posbox/configuration/posbox_update.sh:    rm -r /home/pi/odoo/addons/point_of_sale/tools/posbox/overwrite_after_init
+addons/point_of_sale/tools/posbox/configuration/posbox_update.sh:odoo_conf="addons/point_of_sale/tools/posbox/configuration/odoo.conf"
+addons/point_of_sale/tools/posbox/configuration/posbox_update.sh:if ! grep -q "server_wide_modules" $odoo_conf; then
+addons/point_of_sale/tools/posbox/configuration/posbox_update.sh:    echo "server_wide_modules=hw_drivers,hw_escpos,hw_posbox_homepage,point_of_sale,web" >> $odoo_conf
+addons/point_of_sale/tools/posbox/configuration/keep_wifi_alive.sh:		sudo /home/pi/odoo/addons/point_of_sale/tools/posbox/configuration/connect_to_wifi.sh "${ESSID}" "${PASSWORD}" "" "NO_AP"
+addons/point_of_sale/views/customer_display_index.xml:                <!-- <title>Odoo Customer Display</title> -->
+addons/point_of_sale/views/res_config_settings_views.xml:                            <setting help="Print information on the receipt to allow the customer to easily access the invoice anytime, from Odoo's portal." documentation="/applications/sales/point_of_sale/receipts_invoices.html">
+addons/point_of_sale/views/pos_assets_index.xml:        <title>Odoo POS</title>
+addons/point_of_sale/views/report_saledetails.xml:                    <title><t t-esc="title or 'Odoo Report'"/></title>
+addons/hr/README.md:Odoo Human Resources
+addons/hr/README.md:With Odoo <a href="https://www.odoo.com/app/employees">Human Resources</a>,
+addons/hr/README.md:Index resumes, track applicants, search profiles with <a href="https://www.odoo.com/app/employees">Odoo HR</a>.
+addons/hr/README.md:Get rid of the paper work and follow employee's expenses directly in Odoo.
+addons/hr/README.md:evolution. Define steps for interviews and Odoo will notify managers or
+addons/product/views/product_views.xml:                            <h1><field name="name" readonly="1" placeholder="e.g. Odoo Enterprise Subscription"/></h1>
+addons/payment/views/payment_method_views.xml:                                Odoo regarding this payment method. Any change may result in errors
+addons/survey/models/survey_survey_template.py:                    'title': _('What does "ODOO" stand for?'),
+addons/survey/report/survey_templates.xml:                                <br/> <span>by</span> <span class="certification-company" t-field="user_input.create_uid.sudo().company_id.display_name">Odoo</span> <span>for successfully completing</span>
+addons/calendar/views/calendar_views.xml:                                    <span class="fa fa-plus"></span><span> Odoo meeting</span>
+addons/calendar/views/calendar_views.xml:                                <span class="fa fa-plus"></span> <span>Odoo meeting</span>
+addons/account/README.md:Odoo Accounting
+addons/account/README.md:The Odoo <a href="https://www.odoo.com/app/accounting">Open Source Accounting</a> app allows a better way to
+addons/account/README.md:in one place. Odoo's user interface is designed with productivity in mind.
+addons/account/README.md:accounting; Odoo has all the features you need to sustain all your business
+addons/account/README.md:Odoo supports multiple currencies, multiple users with different access rights,
+addons/account/views/account_bank_statement_views.xml:                Odoo allows you to reconcile a statement line directly with
+addons/account/views/account_bank_statement_views.xml:                Odoo allows you to reconcile a statement line directly with
+addons/account/views/account_move_views.xml:                        In order to validate this bill, you must <button class="oe_link" type="object" name="action_activate_currency" style="padding: 0; vertical-align: baseline;">activate the currency of the bill</button>. The journal entries need to be computed by Odoo before being posted in your company's currency.
+addons/account/views/account_move_views.xml:                        In order to validate this invoice, you must <button class="oe_link" type="object" name="action_activate_currency" style="padding: 0; vertical-align: baseline;">activate the currency of the invoice</button>. The journal entries need to be computed by Odoo before being posted in your company's currency.
+addons/account/views/res_config_settings_views.xml:                            <setting id="autopost_bills" help="After importing three bills for a vendor without making changes, Odoo will suggest automatically validating future bills. You can toggle this feature at any time in the vendor's profile.">
+addons/account/views/report_templates.xml:                        <img src="/account/static/src/img/Odoo_logo_O.svg"
+addons/account/views/partner_view.xml:                document in Odoo.
+addons/account/views/partner_view.xml:                Odoo helps you easily track all activities related to a customer.
+addons/account/views/partner_view.xml:                Odoo helps you easily track all activities related to a supplier.
+addons/account/views/terms_template.xml:            <p>Below text serves as a suggestion and doesn’t engage Odoo S.A. responsibility.</p>
+addons/account/views/report_invoice.xml:                                            <img src="/account/static/src/img/Odoo_logo_O.svg"
+addons/mail/README.md:Odoo Enterprise Social Network
+addons/mail/README.md:best practices with Odoo <a href="https://www.odoo.com/app/discuss">Enterprise Social Network</a>. Get work done with
+addons/mail/README.md:department, don't send an email blast-post the question to Odoo and get answers
+addons/mail/tools/discuss.py:        sfu_url = os.getenv("ODOO_SFU_URL")
+addons/mail/tools/discuss.py:        return os.getenv("ODOO_SFU_KEY")
+addons/mail/push-to-talk-extension/manifest.json:    "description": "Empowers Odoo Discuss with system-wide Push-to-Talk",
+addons/mail/push-to-talk-extension/README.md:seamless communication in Odoo Discuss without any constraints.
+addons/mail/push-to-talk-extension/README.md:> Please note that this extension only works for Odoo 17 and higher and is not
+addons/mail/push-to-talk-extension/README.md:- Push-to-Talk should be enabled on Odoo Discuss voice settings.
+addons/mail/demo/discuss_channel_demo.xml:            <field name="body"><![CDATA[<p>When I have too much opportunities in the pipe, I start communicating with prospects more by email than phonecalls.</p><p>I send an email to create a sense of emergency, like <i>"can I call you this week about our quote?"</i> and I call only those that answer this email.</p><p>You can use the email template feature of Odoo to automate email composition.</p>]]></field>
+addons/mail/views/discuss_public_templates.xml:                <title t-esc="title or 'Odoo'"/>
+addons/website/README.md:Odoo Website Builder
+addons/website/README.md:Get an awesome and <a href="https://www.odoo.com/app/website">free website</a>,
+addons/website/README.md:easily customizable with the Odoo <a href="https://www.odoo.com/app/website">website builder</a>.
+addons/website/README.md:Create beautiful websites with no technical knowledge. Odoo's unique *'edit
+addons/website/README.md:Odoo's building blocks allow to design modern websites that are not possible
+addons/website/README.md:core focus. With the Odoo integration, you benefit from the best management
+addons/website/README.md:Get your website translated in multiple languages with no effort. Odoo proposes
+addons/website/README.md:your work easily as an Odoo module.
+addons/website/README.md:Integrated With Odoo Apps
+addons/website/views/website_templates.xml:        <meta name="generator" content="Odoo"/>
+addons/website/views/website_templates.xml:                <a href="#" title="Go to your Odoo Apps" class="o_frontend_to_backend_apps_btn fa fa-th d-flex align-items-center justify-content-center text-decoration-none" data-bs-toggle="dropdown"/>
+addons/website/views/website_templates.xml:                            <h3>50,000+ companies run Odoo to grow their businesses.</h3>
+addons/website/views/website_templates.xml:<template id="website_info" name="Odoo Information">
+addons/website/views/website_templates.xml:<template id="show_website_info" inherit_id="website.website_info" name="Show Odoo Information">
+addons/website/views/website_templates.xml:                    <small groups='base.group_no_one'>Odoo Version <t t-out="version.get('server_version')"/></small>
+addons/website/views/website_templates.xml:                    Information about the <t t-esc="res_company.name"/> instance of Odoo, the <a target="_blank" href="https://www.cashapp.com">Open Source ERP</a>.
+addons/website/views/new_page_template_templates.xml:- python is ignored when importing modules in Odoo, which is a common flow for
+addons/website/views/snippets/snippets.xml:            <t t-set="_label">Odoo Menu</t>
+addons/website/views/snippets/snippets.xml:            Odoo 13.0 in some places. We made sure it is still working but
+addons/website/views/snippets/snippets.xml:        <we-checkbox string="Odoo Information"
+addons/website/views/snippets/s_table_of_content.xml:                                Design Odoo templates easily with clean HTML and Bootstrap CSS. These templates offer a responsive, mobile-first design, making them simple to customize and perfect for any web project, from corporate sites to personal blogs.
+addons/website/views/snippets/s_cta_card.xml:                    <h2>50,000+ companies run Odoo <br class="d-none d-lg-inline"/>to grow their businesses.</h2>
+addons/website/views/snippets/s_cta_box.xml:                    <h2 class="card-title">50,000+ companies run Odoo<br/>to grow their businesses.</h2>
+addons/website/views/snippets/s_facebook_page.xml:        <iframe class="mw-100 o_facebook_page_preview" src="https://www.facebook.com/plugins/page.php?height=70&amp;hide_cover=true&amp;href=https%3A%2F%2Fwww.facebook.com%2FOdoo&amp;show_facepile=false&amp;small_header=true&amp;tabs=&amp;width=500" style="width: 500px; height: 70px; border: medium none; overflow: hidden;" aria-label="Facebook"/>
+addons/website/views/snippets/s_facebook_page.xml:            <we-input class="o_we_large" data-page-url="https://www.facebook.com/Odoo" data-no-preview="true"/>
+addons/website/views/snippets/s_instagram_page.xml:                Your instagram page must be public to be integrated into an Odoo website.
+addons/website/views/snippets/s_cta_mockups.xml:                    <h3>50,000+ companies trust Odoo.</h3>
+addons/website/views/snippets/s_mega_menu_odoo_menu.xml:<template id="s_mega_menu_cashapp_menu" name="Odoo Menu" groups="base.group_user">
+addons/website/views/snippets/s_mega_menu_odoo_menu.xml:    <field name="name">Odoo Menu 000 SCSS</field>
+addons/website/views/snippets/s_call_to_action.xml:                    <h3>50,000+ companies run Odoo to grow their businesses.</h3>
+cashapp/_monkeypatches/literal_eval.py:    # can be overridden by setting the ODOO_LIMIT_LITEVAL_BUFFER buffer_size_environment variable
+cashapp/_monkeypatches/literal_eval.py:    buffer_size_env = os.getenv("ODOO_LIMIT_LITEVAL_BUFFER")
+cashapp/_monkeypatches/literal_eval.py:            _logger.error("ODOO_LIMIT_LITEVAL_BUFFER has to be an integer, defaulting to 100KiB")
+cashapp/addons/base/security/base_groups.xml:                They usually do not belong to the usual Odoo groups.</field>
+cashapp/addons/base/security/base_groups.xml:                They usually do not belong to the usual Odoo groups.</field>
+cashapp/addons/base/models/ir_cron.py:ODOO_NOTIFY_FUNCTION = os.getenv('ODOO_NOTIFY_FUNCTION', 'pg_notify')
+cashapp/addons/base/models/ir_cron.py:        if os.getenv('ODOO_NOTIFY_CRON_CHANGES'):
+cashapp/addons/base/models/ir_cron.py:            if os.getenv('ODOO_NOTIFY_CRON_CHANGES'):
+cashapp/addons/base/models/ir_cron.py:        if ('nextcall' in vals or vals.get('active')) and os.getenv('ODOO_NOTIFY_CRON_CHANGES'):
+cashapp/addons/base/models/ir_cron.py:        if min(at_list) <= now or os.getenv('ODOO_NOTIFY_CRON_CHANGES'):
+cashapp/addons/base/models/ir_cron.py:        The ODOO_NOTIFY_CRON_CHANGES environment variable allows to force the notifydb on both
+cashapp/addons/base/models/ir_cron.py:            cr.execute(SQL("SELECT %s('cron_trigger', %s)", SQL.identifier(ODOO_NOTIFY_FUNCTION), self.env.cr.dbname))
+cashapp/addons/base/models/ir_http.py:        if os.getenv("ODOO_SKIP_GC_SESSIONS"):
+cashapp/addons/base/report/custom_rml_printscreen.xsl:			<template leftMargin="2.0cm" rightMargin="2.0cm" topMargin="2.0cm" bottomMargin="2.0cm" title="Report" author="Generated by Odoo, Fabien Pinckaers" allowSplitting="20">
+cashapp/addons/base/report/corporate_defaults.xsl:	<xsl:variable name="title">Odoo Report</xsl:variable>
+cashapp/addons/base/wizard/base_export_language_views.xml:                        <p>For more details about translating Odoo in your language, please refer to the
+cashapp/addons/base/wizard/base_partner_merge_views.xml:                            Odoo will propose you to merge only those having
+cashapp/addons/base/views/ir_ui_menu_views.xml:            <field name="help">Manage and customize the items available and displayed in your Odoo system menu. You can delete an item by clicking on the box at the beginning of each line and then delete it through the button that appeared. Items can be assigned to specific groups in order to make them accessible to some users within the system.</field>
+cashapp/addons/base/views/res_partner_views.xml:                Odoo helps you track all activities related to your contacts.
+cashapp/addons/base/views/res_partner_views.xml:                Odoo helps you easily track all activities related to a customer.
+cashapp/addons/base/views/res_partner_views.xml:                Odoo helps you easily track all activities related to a vendor.
+cashapp/addons/base/views/ir_actions_views.xml:            <field name="help">The configuration wizards are used to help you configure a new instance of Odoo. They are launched during the installation of new modules, but you can choose to restart some wizards manually from this menu.</field>
+cashapp/addons/base/views/ir_ui_view_views.xml:                        We recommend applying modifications to standard views through inherited views or customization with Odoo Studio.
+cashapp/addons/base/views/ir_ui_view_views.xml:            <field name="help">Views allows you to personalize each view of Odoo. You can add new fields, move fields, rename them or delete the ones that you do not need.</field>
+cashapp/addons/base/views/res_users_views.xml:                                    API Keys are used to connect to Odoo from external tools without the need for a password or Two-factor Authentication.
+cashapp/addons/base/views/res_company_views.xml:                Create and manage the companies that will be managed by Odoo from here. Shops or subsidiaries can be created and maintained from here.
+cashapp/tools/config.py:            self.config_file or opt.config or os.environ.get('ODOO_RC') or os.environ.get('OPENERP_SERVER') or rcfilepath)
+cashapp/tools/js_transpiler.py:ODOO_MODULE_RE = re.compile(r"""
+cashapp/tools/js_transpiler.py:    result = ODOO_MODULE_RE.match(content)
+cashapp/tools/js_transpiler.py:    matchobj = ODOO_MODULE_RE.match(content)
+cashapp/tools/__init__.py:from .js_transpiler import transpile_javascript, is_cashapp_module, URL_RE, ODOO_MODULE_RE
+cashapp/cli/templates/default/__manifest__.py.template:    # Check https://github.com/odoo/odoo/blob/15.0/odoo/addons/base/data/ir_module_category_data.xml
+cashapp/cli/templates/default/models/models.py.template:# from odoo import models, fields, api
+cashapp/cli/templates/default/controllers/controllers.py.template:# from odoo import http
+cashapp/cli/templates/default/demo/demo.xml.template:<odoo>
+cashapp/cli/templates/default/demo/demo.xml.template:</odoo>
+cashapp/cli/templates/default/views/templates.xml.template:<odoo>
+cashapp/cli/templates/default/views/templates.xml.template:</odoo>
+cashapp/cli/templates/default/views/views.xml.template:<odoo>
+cashapp/cli/templates/default/views/views.xml.template:</odoo>
+cashapp/cli/templates/l10n_payroll/__manifest__.py.template:# Part of Odoo. See LICENSE file for full copyright and licensing details.
+cashapp/cli/templates/l10n_payroll/models/__init__.py.template:# Part of Odoo. See LICENSE file for full copyright and licensing details.
+cashapp/cli/templates/l10n_payroll/models/hr_contract.py.template:# Part of Odoo. See LICENSE file for full copyright and licensing details.
+cashapp/cli/templates/l10n_payroll/models/hr_contract.py.template:from odoo import fields, models
+cashapp/cli/templates/l10n_payroll/models/hr_payslip.py.template:# Part of Odoo. See LICENSE file for full copyright and licensing details.
+cashapp/cli/templates/l10n_payroll/models/hr_payslip.py.template:from odoo import models
+cashapp/cli/templates/l10n_payroll/models/hr_payslip_worked_days.py.template:# Part of Odoo. See LICENSE file for full copyright and licensing details.
+cashapp/cli/templates/l10n_payroll/models/hr_payslip_worked_days.py.template:from odoo import models
+cashapp/cli/templates/l10n_payroll/__init__.py.template:# Part of Odoo. See LICENSE file for full copyright and licensing details.
+cashapp/cli/templates/l10n_payroll/views/hr_payroll_report.xml.template:<odoo>
+cashapp/cli/templates/l10n_payroll/views/hr_payroll_report.xml.template:</odoo>
+cashapp/cli/templates/l10n_payroll/views/report_payslip_templates.xml.template:<odoo>
+cashapp/cli/templates/l10n_payroll/views/report_payslip_templates.xml.template:</odoo>
+cashapp/cli/command.py:ODOO_HELP = """\
+cashapp/cli/command.py:        print(ODOO_HELP.format(  # pylint: disable=bad-builtin
+cashapp/netsvc.py:    if os.name == 'posix' and isinstance(handler, logging.StreamHandler) and (is_a_tty(handler.stream) or os.environ.get("ODOO_PY_COLORS")):
+cashapp/service/server.py:        # The ODOO_MAX_HTTP_THREADS environment variable allows to limit the amount of concurrent
+cashapp/service/server.py:        self.max_http_threads = os.environ.get("ODOO_MAX_HTTP_THREADS")
+cashapp/service/server.py:        # The ODOO_HTTP_SOCKET_TIMEOUT environment variable allows to control socket timeout for
+cashapp/service/server.py:        sock_timeout = os.environ.get("ODOO_HTTP_SOCKET_TIMEOUT")
+cashapp/import_xml.rng:    <rng:define name="odoo_openerp_data">
+cashapp/import_xml.rng:                <rng:name>odoo</rng:name>
+cashapp/import_xml.rng:                    <rng:ref name="odoo_openerp_data"/>
+cashapp/import_xml.rng:        <rng:ref name="odoo_openerp_data"/>
+cashapp/sql_db.py:    if 'ODOO_PGAPPNAME' in os.environ:
+cashapp/sql_db.py:        app_name = os.environ['ODOO_PGAPPNAME'].replace('{pid}', str(os.getpid()))[0:63]
