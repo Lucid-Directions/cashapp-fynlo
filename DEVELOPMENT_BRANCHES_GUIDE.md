@@ -15,6 +15,8 @@ This guide helps junior developers understand which branches to work on and what
 - `PR_DOCUMENT_MAIN.md` - Master project requirements
 - `ARCHITECTURE_OVERVIEW.md` - System architecture
 - `SETUP_GUIDE.md` - Developer environment setup
+- `CURSOR_SETUP_GUIDE.md` - Cursor AI development guide
+- `.cursorrules` - Cursor AI safety rules
 
 **Who**: All developers should reference this branch for requirements
 
@@ -174,9 +176,18 @@ This guide helps junior developers understand which branches to work on and what
    # Example: feature/backend-api-endpoints/authentication
    ```
 
-4. **Start Development**
+4. **Setup Cursor AI (Recommended)**
+   ```bash
+   # Open project in Cursor
+   cursor .
+   # Cursor will detect .cursorrules automatically
+   # Follow CURSOR_SETUP_GUIDE.md for best practices
+   ```
+
+5. **Start Development**
    - Follow the task document for your feature
    - Reference the main docs for architecture
+   - Use Cursor AI with proper safety guidelines
    - Create PR when ready
 
 ---
