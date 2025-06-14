@@ -1,0 +1,246 @@
+# Fynlo POS - Cursor AI Development Rules
+
+## Project Context
+You are working on **Fynlo POS**, a professional iOS restaurant point-of-sale system built with React Native and Python/Odoo backend. This is a production-ready commercial application that will compete with systems like Clover.
+
+## Core Principles
+- **SAFETY FIRST**: Never modify core system files, configuration files, or production data
+- **DOCUMENTATION DRIVEN**: Always reference the project documentation before making changes
+- **TEST EVERYTHING**: Write tests for all new functionality
+- **FOLLOW PATTERNS**: Maintain consistency with existing codebase patterns
+
+## Project Structure Understanding
+```
+cashapp-fynlo/
+├── docs/project-requirements-planning/     # Read-only documentation
+├── CashApp-iOS/CashAppPOS/                 # React Native iOS app
+├── addons/point_of_sale/                   # Odoo POS addon
+├── cashapp/                                # Python backend core
+└── config/                                 # Database configs
+```
+
+## Allowed Operations
+
+### ✅ YOU CAN:
+1. **Read and analyze** any project files
+2. **Create new files** in appropriate directories:
+   - `CashApp-iOS/CashAppPOS/src/` (React Native components)
+   - `addons/point_of_sale/` (POS backend code)
+   - `addons/point_of_sale_api/` (New API endpoints)
+   - Test files anywhere with `.test.` or `.spec.` in filename
+3. **Modify existing code files** but ONLY:
+   - React Native components (`.tsx`, `.ts`, `.js` files)
+   - Python business logic files (`.py` files in addons)
+   - Stylesheet files (`.scss`, `.css`)
+   - Configuration files specific to features you're working on
+4. **Install dependencies** via npm/pip when necessary
+5. **Run tests** and development servers
+6. **Create git commits** for your changes
+
+### ❌ YOU CANNOT:
+1. **Never modify these critical files**:
+   - `.cursorrules` (this file)
+   - `README.md` (project documentation)
+   - `package.json` (unless adding specific dependencies)
+   - Database schema files (`.sql`)
+   - Production configuration files
+   - Git configuration (`.gitignore`, `.gitattributes`)
+2. **Never delete** existing files without explicit permission
+3. **Never modify** documentation files in `docs/` branch
+4. **Never change** the project structure or move directories
+5. **Never install** global packages or modify system configuration
+6. **Never commit** sensitive data (API keys, passwords, tokens)
+
+## Development Guidelines
+
+### Branch Management
+- **ALWAYS** work on feature branches, never directly on `main`
+- Follow naming: `feature/[area]/[specific-task]`
+- Reference the appropriate task documentation:
+  - Backend work: `BACKEND_API_TASKS.md`
+  - iOS work: `IOS_APP_TASKS.md`
+  - Payment work: `PAYMENT_INTEGRATION_TASKS.md`
+  - etc.
+
+### Code Quality Standards
+```typescript
+// TypeScript/React Native Standards
+- Use TypeScript for all new files
+- Follow existing component patterns
+- Add proper type definitions
+- Use functional components with hooks
+- Add error boundaries where appropriate
+```
+
+```python
+# Python/Odoo Standards  
+- Follow PEP 8 style guidelines
+- Add docstrings to all functions/classes
+- Use type hints where possible
+- Follow Odoo ORM patterns
+- Add proper error handling
+```
+
+### File Creation Rules
+```bash
+# React Native Files - Place in:
+CashApp-iOS/CashAppPOS/src/
+├── components/          # Reusable UI components
+├── screens/            # Screen components
+├── services/           # API and business logic
+├── hooks/              # Custom React hooks
+├── types/              # TypeScript definitions
+└── utils/              # Helper functions
+
+# Backend Files - Place in:
+addons/point_of_sale_api/
+├── controllers/        # API endpoints
+├── models/            # Data models
+├── views/             # XML views
+└── security/          # Access control
+```
+
+### Testing Requirements
+- **Unit tests**: Required for all business logic
+- **Component tests**: Required for all UI components
+- **Integration tests**: Required for API endpoints
+- **Test files naming**: `ComponentName.test.tsx` or `test_module.py`
+- **Run tests** before committing any changes
+
+### API Development Rules
+When creating new API endpoints:
+```python
+# Follow this pattern
+@http.route('/api/v1/endpoint', type='json', auth='user', methods=['POST'])
+def endpoint_name(self):
+    try:
+        # Validate input
+        # Process business logic
+        # Return structured response
+        return {'success': True, 'data': result}
+    except Exception as e:
+        return {'success': False, 'error': str(e)}
+```
+
+### React Native Development Rules
+When creating React Native components:
+```typescript
+// Follow this pattern
+interface ComponentProps {
+  // Define props with types
+}
+
+const Component: React.FC<ComponentProps> = ({ prop1, prop2 }) => {
+  // Use hooks appropriately
+  // Handle errors gracefully
+  // Follow accessibility guidelines
+  
+  return (
+    // JSX with proper styling
+  );
+};
+
+export default Component;
+```
+
+## Security Guidelines
+- **Never log** sensitive information (passwords, tokens, PII)
+- **Always validate** user input on both frontend and backend
+- **Use parameterized queries** to prevent SQL injection
+- **Implement proper authentication** checks on all API endpoints
+- **Follow PCI compliance** requirements for payment processing
+- **Encrypt sensitive data** at rest and in transit
+
+## Performance Guidelines
+- **Optimize database queries** - use indexes, avoid N+1 problems
+- **Implement caching** where appropriate (Redis)
+- **Lazy load** components and data where possible
+- **Optimize images** and assets for mobile
+- **Use React.memo** and useCallback for expensive operations
+- **Profile performance** before and after changes
+
+## Error Handling Patterns
+```typescript
+// Frontend error handling
+try {
+  const result = await apiCall();
+  return result;
+} catch (error) {
+  console.error('Specific operation failed:', error);
+  // Show user-friendly error message
+  showErrorToast('Something went wrong. Please try again.');
+}
+```
+
+```python
+# Backend error handling
+try:
+    # Business logic
+    return {'success': True, 'data': result}
+except ValidationError as e:
+    return {'success': False, 'error': 'Invalid input', 'details': str(e)}
+except Exception as e:
+    _logger.error(f"Unexpected error in {operation}: {e}")
+    return {'success': False, 'error': 'Internal server error'}
+```
+
+## Git Commit Guidelines
+```bash
+# Commit message format
+feat: Add user authentication endpoint
+fix: Resolve order calculation bug  
+test: Add unit tests for payment processing
+docs: Update API documentation
+refactor: Optimize database queries
+
+# Always include:
+- Clear description of what changed
+- Reference to issue/task if applicable
+- Breaking changes if any
+```
+
+## Before You Start Any Task
+1. **Read** the relevant task documentation (BACKEND_API_TASKS.md, etc.)
+2. **Understand** the existing codebase patterns
+3. **Check** for existing similar implementations
+4. **Plan** your approach and ask for clarification if needed
+5. **Create** a feature branch with descriptive name
+6. **Write tests** first (TDD approach recommended)
+
+## Code Review Checklist
+Before submitting any changes:
+- [ ] Code follows project patterns and standards
+- [ ] All tests pass (unit, integration, e2e)
+- [ ] No console.log or print statements left in code
+- [ ] No hardcoded values or magic numbers
+- [ ] Proper error handling implemented
+- [ ] Documentation updated if needed
+- [ ] No sensitive data in code
+- [ ] Performance impact considered
+- [ ] Accessibility requirements met (for UI)
+
+## Emergency Protocols
+If you accidentally:
+- **Break something**: Immediately revert changes and report issue
+- **Delete important files**: Stop work and ask for help
+- **Commit sensitive data**: Stop and ask for immediate assistance
+- **Modify system files**: Revert immediately
+
+## Questions and Clarifications
+When in doubt:
+1. **Check documentation** first
+2. **Look for similar patterns** in existing code
+3. **Ask specific questions** about business logic
+4. **Provide context** about what you're trying to achieve
+
+## Success Metrics
+Your code should:
+- ✅ Pass all existing tests
+- ✅ Add appropriate new tests
+- ✅ Follow established patterns
+- ✅ Improve or maintain performance
+- ✅ Be readable and maintainable
+- ✅ Handle errors gracefully
+- ✅ Meet security requirements
+
+Remember: This is a production system that will be used by real restaurants. Quality, security, and reliability are paramount.
