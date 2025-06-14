@@ -1,11 +1,8 @@
 # 🚀 Fynlo POS - Complete iOS Restaurant Point of Sale System
 
-<div align="center">
-  <img src="CashApp-iOS/CashAppPOS/assets/fynlo-logo.png" alt="Fynlo Logo" width="120" height="120">
+  Professional iOS Point of Sale System for Restaurants**
   
-  **Professional iOS Point of Sale System for Restaurants**
-  
-  *Modern • Fast • Better than Clover*
+  Modern • Fast • Better than Clover*
 </div>
 
 ---
@@ -13,23 +10,24 @@
 ## 🎯 **Quick Start for New Developers**
 
 ### **📱 Current Status: READY TO TEST**
+
 - ✅ **Complete iOS app** built and functional
 - ✅ **Xcode project** ready for development  
 - ✅ **Fynlo branding** fully integrated
 - ✅ **Database backend** optimized for mobile
 - ✅ **Professional POS interface** implemented
 
-**👤 Taking over development?** Follow the [Developer Setup Guide](#-developer-setup-guide) below.
-
 ---
 
 ## ⚡ **Immediate Testing (5 Minutes)**
 
 ### **Prerequisites:**
+
 - macOS with Xcode 15+
 - Git installed
 
 ### **Quick Test Steps:**
+
 ```bash
 # 1. Clone repository
 git clone https://github.com/ryand2626/cashapp.git
@@ -51,6 +49,7 @@ open ios/CashAppPOS.xcworkspace
 ## 🛠️ **Developer Setup Guide**
 
 ### **📋 Required Software**
+
 ```bash
 ✅ macOS 12+ (Monterey or later)
 ✅ Xcode 15+ (download from App Store)
@@ -61,6 +60,7 @@ open ios/CashAppPOS.xcworkspace
 ### **🔧 Complete Installation**
 
 #### **Step 1: Install Dependencies**
+
 ```bash
 # Install Homebrew (if needed)
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -73,6 +73,7 @@ npm install -g @expo/cli
 ```
 
 #### **Step 2: Project Setup**
+
 ```bash
 # Clone and setup
 git clone https://github.com/ryand2626/cashapp.git
@@ -86,6 +87,7 @@ npx pod-install ios
 ```
 
 #### **Step 3: Database Setup (Optional for UI development)**
+
 ```bash
 # Start database services
 brew services start postgresql@14
@@ -97,6 +99,7 @@ chmod +x ../../scripts/setup_mobile_db.sh
 ```
 
 #### **Step 4: Run the App**
+
 ```bash
 # Open Xcode project
 open ios/CashAppPOS.xcworkspace
@@ -112,11 +115,13 @@ open ios/CashAppPOS.xcworkspace
 ## 📱 **What You'll See - Fynlo POS Features**
 
 ### **🎨 Modern Interface**
+
 - **Header**: Fynlo logo + "Fynlo POS" branding
 - **Professional Design**: Clean, touch-optimized layout
 - **Color Scheme**: Professional blue-gray theme
 
 ### **🍽️ Restaurant Features**
+
 - **Visual Menu**: Food items with emoji icons (🍔🍕🥗)
 - **Category Filtering**: All, Main, Appetizers, Salads, Sides, Desserts, Drinks
 - **Smart Cart**: Add/remove items with +/- quantity controls
@@ -124,6 +129,7 @@ open ios/CashAppPOS.xcworkspace
 - **Order Management**: Real-time total calculations
 
 ### **💡 Key Interactions to Test**
+
 1. **Browse Categories**: Horizontal scroll through food categories
 2. **Add to Cart**: Tap any menu item to add to order
 3. **Modify Quantities**: Use +/- buttons in cart
@@ -135,7 +141,7 @@ open ios/CashAppPOS.xcworkspace
 ## 🏗️ **Project Architecture**
 
 ### **📁 File Structure**
-```
+
 cashapp/
 ├── CashApp-iOS/CashAppPOS/           # Main iOS App
 │   ├── ios/CashAppPOS.xcworkspace    # ← Open this in Xcode
@@ -148,9 +154,9 @@ cashapp/
 ├── scripts/                          # Setup automation  
 ├── BUILD_PLAN.md                     # Complete development guide
 └── README.md                         # This file
-```
 
 ### **🔧 Key Technologies**
+
 - **Frontend**: React Native 0.80.0 + TypeScript
 - **iOS**: Native Xcode project with CocoaPods
 - **Backend**: PostgreSQL + Redis + pgbouncer
@@ -161,6 +167,7 @@ cashapp/
 ## 🧪 **Testing & Development**
 
 ### **✅ What's Working Now**
+
 - ✅ **iOS Simulator**: Full functionality
 - ✅ **Xcode Integration**: Build and run successfully
 - ✅ **UI Components**: All POS features operational
@@ -168,12 +175,14 @@ cashapp/
 - ✅ **Touch Interactions**: Smooth, responsive interface
 
 ### **📱 Testing on Physical iPhone**
+
 1. **Connect iPhone** via USB cable
 2. **In Xcode**: Select your iPhone from device menu
 3. **Click Run**: App installs and launches on device
 4. **Trust Developer**: Go to iPhone Settings → General → VPN & Device Management → Trust your Apple ID
 
 ### **🔄 Live Development**
+
 - **Hot Reload**: Code changes update instantly
 - **Debugging**: Full Xcode debugging tools available
 - **Console Logs**: View app logs in Xcode debug area
@@ -183,18 +192,21 @@ cashapp/
 ## 🚀 **Next Development Steps**
 
 ### **🎯 Priority Features (Days 3-4)**
+
 - [ ] **Apple Pay Integration**: Native iOS payment processing
 - [ ] **Real-time Orders**: WebSocket integration for live updates
 - [ ] **Table Management**: Restaurant table selection and tracking
 - [ ] **Kitchen Display**: Order management for kitchen staff
 
 ### **📈 Advanced Features (Days 5-7)**
+
 - [ ] **Analytics Dashboard**: Sales reports and insights
 - [ ] **Staff Management**: Employee login and permissions
 - [ ] **Inventory Tracking**: Stock management integration
 - [ ] **App Store Preparation**: Screenshots, descriptions, submission
 
 ### **🏪 Production Readiness**
+
 - [ ] **Performance Testing**: Load testing with multiple orders
 - [ ] **Security Audit**: Payment processing security review
 - [ ] **Restaurant Testing**: Real-world restaurant deployment
@@ -205,6 +217,7 @@ cashapp/
 ## 🔧 **Common Issues & Solutions**
 
 ### **Build Errors**
+
 ```bash
 # Clean build if issues occur
 # In Xcode: Product → Clean Build Folder
@@ -216,6 +229,7 @@ npx pod-install ios
 ```
 
 ### **Simulator Issues**
+
 ```bash
 # Reset iOS Simulator
 # Simulator → Device → Erase All Content and Settings
@@ -225,6 +239,7 @@ npx pod-install ios
 ```
 
 ### **Database Connection (if needed)**
+
 ```bash
 # Check services running
 brew services list | grep -E "(postgresql|redis)"
@@ -239,6 +254,7 @@ brew services restart redis
 ## 📊 **Development Progress**
 
 ### **✅ Completed (Days 1-2)**
+
 - ✅ **iOS App**: Complete functional POS system
 - ✅ **Xcode Project**: Native iOS development ready
 - ✅ **Fynlo Branding**: Full brand transformation
@@ -246,11 +262,13 @@ brew services restart redis
 - ✅ **Professional UI**: Better-than-Clover design
 
 ### **🔄 In Progress**
+
 - 🔄 **Advanced Features**: Apple Pay, real-time updates
 - 🔄 **Production Polish**: Performance optimization
 - 🔄 **App Store Prep**: Assets and submission materials
 
 ### **⏳ Planned**
+
 - ⏳ **Restaurant Features**: Table management, kitchen display
 - ⏳ **Analytics**: Sales reporting and insights
 - ⏳ **Deployment**: Live restaurant testing
@@ -260,6 +278,7 @@ brew services restart redis
 ## 🤝 **Development Workflow**
 
 ### **Daily Development**
+
 1. **Pull Latest**: `git pull origin main`
 2. **Make Changes**: Edit TypeScript/React Native code
 3. **Test Changes**: Live reload in Xcode simulator
@@ -267,6 +286,7 @@ brew services restart redis
 5. **Push Updates**: `git push origin main`
 
 ### **Feature Development**
+
 1. **Create Branch**: `git checkout -b feature/new-feature`
 2. **Develop Feature**: Implement and test thoroughly
 3. **Test on Device**: Verify on physical iPhone
@@ -277,16 +297,19 @@ brew services restart redis
 ## 📞 **Support & Resources**
 
 ### **📚 Documentation**
+
 - **BUILD_PLAN.md**: Comprehensive development guide
-- **React Native Docs**: https://reactnative.dev/docs/getting-started
+- **React Native Docs**: <https://reactnative.dev/docs/getting-started>
 - **Xcode Documentation**: Built into Xcode (Help menu)
 
 ### **🐛 Getting Help**
+
 - **GitHub Issues**: Report bugs or questions
-- **React Native Community**: https://reactnative.dev/help
+- **React Native Community**: <https://reactnative.dev/help>
 - **Stack Overflow**: Tag questions with `react-native`, `ios`, `xcode`
 
 ### **💻 Development Tools**
+
 - **VS Code**: Recommended editor with React Native extensions
 - **Flipper**: React Native debugging tool
 - **Xcode**: Complete iOS development environment
@@ -296,19 +319,12 @@ brew services restart redis
 ## 🎉 **Success! You're Ready to Build**
 
 ### **🚀 What You Have**
+
 - **Complete iOS App**: Functional Fynlo POS system
 - **Professional Interface**: Modern, touch-optimized design  
 - **Solid Foundation**: Mobile-optimized backend
 - **Development Environment**: Xcode project ready for enhancement
 
 ### **🎯 Your Mission**
+
 Take this solid foundation and build the future of restaurant POS systems. The app is already better than Clover - now make it extraordinary!
-
-**Happy coding! 🍽️📱**
-
----
-
-<div align="center">
-  <p><strong>Built with ❤️ for restaurants everywhere</strong></p>
-  <p>Fynlo POS - Making restaurant technology simple, powerful, and beautiful</p>
-</div> 
