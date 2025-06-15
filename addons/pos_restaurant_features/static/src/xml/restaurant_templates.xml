@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <!-- Table Management Template -->
+    <t t-name="pos_restaurant_features.TableManagement" owl="1">
+        <div class="restaurant-container">
+            <div class="restaurant-header">
+                <h1>Table Management</h1>
+                <div class="restaurant-controls">
+                    <div class="control-group">
+                        <label>Section:</label>
+                        <select t-on-change="onSectionChange">
+                            <option value="all">All Sections</option>
+                            <t t-foreach="state.sections" t-as="section" t-key="section.id">
+                                <option t-att-value="section.id" t-esc="section.name"/>
+                            </t>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>
+                            <input type="checkbox" t-model="state.realTimeUpdates" t-on-change="toggleRealTimeUpdates"/>
+                            Real-time Updates
+                        </label>
+                    </div>
+                    <div class="control-group">
+                        <label>
+                            <input type="checkbox" t-model="state.editMode" t-on-change="toggleEditMode"/>
+                            Edit Mode
+                        </label>
+                    </div>
+                    <button class="btn btn-primary" t-on-click="generateTableReport">
+                        <i class="fa fa-chart-bar"/> Reports
+                    </button>
+                </div>
+            </div>
+            
+            <div class="floor-plan-container">
+                <div class="floor-plan-sidebar">
+                    <div t-if="state.selectedTable" class="table-details">
+                        <h3 t-esc="state.selectedTable.display_name"/>
+                        <div class="table-info">
+                            <div class="table-info-item">
+                                <span>Status:</span>
+                                <span t-esc="state.selectedTable.status"/>
+                            </div>
+                            <div class="table-info-item">
+                                <span>Capacity:</span>
+                                <span t-esc="state.selectedTable.capacity"/>
+                            </div>
+                            <div class="table-info-item" t-if="state.selectedTable.server">
+                                <span>Server:</span>
+                                <span t-esc="state.selectedTable.server.name"/>
+                            </div>
+                            <div class="table-info-item" t-if="state.selectedTable.current_order">
+                                <span>Order:</span>
+                                <span t-esc="state.selectedTable.current_order.name"/>
+                            </div>
+                        </div>
+                        <div class="table-actions">
+                            <button class="btn btn-success" t-on-click="() => this.setTableAvailable(state.selectedTable)">
+                                Available
+                            </button>
+                            <button class="btn btn-warning" t-on-click="() => this.setTableOccupied(state.selectedTable)">
+                                Occupied
+                            </button>
+                            <button class="btn btn-info" t-on-click="() => this.setTableCleaning(state.selectedTable)">
+                                Cleaning
+                            </button>
+                            <button class="btn btn-primary" t-on-click="closeTableDetails">
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="floor-plan">
+                    <div t-if="state.loading" class="loading-spinner">
+                        <div class="spinner"/>
+                    </div>
+                    <div t-else="">
+                        <t t-foreach="state.tables" t-as="table" t-key="table.id">
+                            <div class="restaurant-table"
+                                 t-att-class="'table-' + table.status + ' ' + table.shape"
+                                 t-att-data-table-id="table.id"
+                                 t-att-style="'left: ' + table.position.x + 'px; top: ' + table.position.y + 'px; width: ' + table.position.width + 'px; height: ' + table.position.height + 'px;'"
+                                 t-on-click="() => this.selectTable(table)"
+                                 t-on-mousedown="(ev) => this.onTableMouseDown(ev, table)">
+                                <span t-esc="table.name"/>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+
+    <!-- Kitchen Display Template -->
+    <t t-name="pos_restaurant_features.KitchenDisplay" owl="1">
+        <div class="kitchen-container">
+            <div class="kitchen-header">
+                <h1>Kitchen Display</h1>
+                <div class="kitchen-controls">
+                    <div class="control-group">
+                        <label>Stations:</label>
+                        <div class="station-selector">
+                            <t t-foreach="state.stations" t-as="station" t-key="station.id">
+                                <button class="station-btn"
+                                        t-att-class="state.selectedStations.includes(station.id) ? 'active' : ''"
+                                        t-att-style="'border-color: ' + station.color"
+                                        t-on-click="() => this.toggleStationSelection(station.id)">
+                                    <span t-esc="station.name"/>
+                                </button>
+                            </t>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label>Layout:</label>
+                        <select t-model="state.layout" t-on-change="(ev) => this.changeLayout(ev.target.value)">
+                            <option value="grid">Grid</option>
+                            <option value="list">List</option>
+                            <option value="kanban">Kanban</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>
+                            <input type="checkbox" t-model="state.autoRefresh" t-on-change="toggleAutoRefresh"/>
+                            Auto Refresh
+                        </label>
+                    </div>
+                    <div class="control-group">
+                        <label>
+                            <input type="checkbox" t-model="state.soundEnabled" t-on-change="toggleSoundEnabled"/>
+                            Sound
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="kitchen-orders">
+                <div t-if="state.loading" class="loading-spinner">
+                    <div class="spinner"/>
+                </div>
+                <div t-elif="state.orders.length === 0" class="empty-state">
+                    <i class="fa fa-utensils"/>
+                    <h3>No Active Orders</h3>
+                    <p>Kitchen orders will appear here when placed.</p>
+                </div>
+                <div t-else="" class="orders-grid">
+                    <t t-foreach="state.orders" t-as="order" t-key="order.id">
+                        <div class="order-card" t-att-class="getOrderPriorityClass(order)">
+                            <div class="order-header">
+                                <div class="order-number" t-esc="order.name"/>
+                                <div class="order-time" t-att-class="getElapsedTimeClass(order.elapsed_minutes)">
+                                    <span t-esc="formatElapsedTime(order.elapsed_minutes)"/>
+                                </div>
+                            </div>
+                            
+                            <div class="order-items">
+                                <t t-foreach="order.items" t-as="item" t-key="item.id">
+                                    <div class="order-item">
+                                        <div class="item-name" t-esc="item.product_name"/>
+                                        <div class="item-quantity" t-esc="item.quantity"/>
+                                        <div class="item-status" t-att-class="getItemStatusClass(item.status)" t-esc="item.status"/>
+                                    </div>
+                                </t>
+                            </div>
+                            
+                            <div class="order-actions">
+                                <t t-foreach="order.items" t-as="item" t-key="item.id">
+                                    <button t-if="item.status === 'pending'" 
+                                            class="btn btn-primary" 
+                                            t-on-click="() => this.startItemPreparation(item.id)">
+                                        Start
+                                    </button>
+                                    <button t-if="item.status === 'preparing'" 
+                                            class="btn btn-success" 
+                                            t-on-click="() => this.markItemReady(item.id)">
+                                        Ready
+                                    </button>
+                                </t>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates> 
