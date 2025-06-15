@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- POS API Security Groups -->
+        <record id="group_pos_api_user" model="res.groups">
+            <field name="name">POS API User</field>
+            <field name="category_id" ref="base.module_category_point_of_sale"/>
+            <field name="comment">Can access POS API endpoints for basic operations</field>
+        </record>
+
+        <record id="group_pos_api_manager" model="res.groups">
+            <field name="name">POS API Manager</field>
+            <field name="category_id" ref="base.module_category_point_of_sale"/>
+            <field name="implied_ids" eval="[(4, ref('group_pos_api_user'))]"/>
+            <field name="comment">Can access all POS API endpoints including management operations</field>
+        </record>
+
+        <!-- API Key Model Security -->
+        <record id="pos_api_key_rule_own" model="ir.rule">
+            <field name="name">POS API Key: Own Keys Only</field>
+            <field name="model_id" ref="model_pos_api_key"/>
+            <field name="domain_force">[('user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('group_pos_api_user'))]"/>
+        </record>
+
+        <record id="pos_api_key_rule_manager" model="ir.rule">
+            <field name="name">POS API Key: Manager Access</field>
+            <field name="model_id" ref="model_pos_api_key"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_pos_api_manager'))]"/>
+        </record>
+
+        <!-- API Session Log Security -->
+        <record id="pos_api_session_log_rule" model="ir.rule">
+            <field name="name">POS API Session Log: Manager Only</field>
+            <field name="model_id" ref="model_pos_api_session_log"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('group_pos_api_manager'))]"/>
+        </record>
+
+        <!-- Assign POS users to API groups -->
+        <record id="pos_user_inherit_api_access" model="res.groups">
+            <field name="name">POS User</field>
+            <field name="implied_ids" eval="[(4, ref('group_pos_api_user'))]"/>
+        </record>
+
+        <record id="pos_manager_inherit_api_access" model="res.groups">
+            <field name="name">POS Manager</field>
+            <field name="implied_ids" eval="[(4, ref('group_pos_api_manager'))]"/>
+        </record>
+
+    </data>
+</odoo> 

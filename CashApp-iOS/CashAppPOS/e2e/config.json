@@ -1,0 +1,16 @@
+{
+  "testEnvironment": "./e2e/environment.js",
+  "testRunner": "jest-circus/runner",
+  "testTimeout": 120000,
+  "testRegex": "\\.e2e\\.js$",
+  "reporters": [
+    "default",
+    ["jest-junit", {
+      "outputDirectory": "e2e/reports",
+      "outputName": "e2e-results.xml",
+      "suiteName": "E2E Tests"
+    }]
+  ],
+  "setupFilesAfterEnv": ["./e2e/setup.js"],
+  "verbose": true
+}
