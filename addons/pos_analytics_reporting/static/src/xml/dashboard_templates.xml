@@ -1,0 +1,401 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <!-- Main Analytics Dashboard Template -->
+    <t t-name="pos_analytics_reporting.AnalyticsDashboard" owl="1">
+        <div class="pos_analytics_dashboard">
+            <!-- Header -->
+            <div class="dashboard_header mb-4">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h2 class="mb-0">
+                            <i class="fa fa-dashboard text-primary"></i>
+                            POS Analytics Dashboard
+                        </h2>
+                        <p class="text-muted">Real-time business insights and analytics</p>
+                    </div>
+                    <div class="col-md-6 text-right">
+                        <div class="btn-group mr-2">
+                            <select t-model="state.dateRange" t-on-change="onDateRangeChange" class="form-control">
+                                <option value="today">Today</option>
+                                <option value="yesterday">Yesterday</option>
+                                <option value="this_week">This Week</option>
+                                <option value="last_week">Last Week</option>
+                                <option value="this_month">This Month</option>
+                                <option value="last_month">Last Month</option>
+                                <option value="custom">Custom Range</option>
+                            </select>
+                        </div>
+                        <button t-on-click="toggleAutoRefresh" 
+                                t-att-class="'btn btn-sm ' + (state.autoRefresh ? 'btn-success' : 'btn-outline-secondary')">
+                            <i t-att-class="'fa ' + (state.autoRefresh ? 'fa-pause' : 'fa-play')"></i>
+                            Auto Refresh
+                        </button>
+                        <button t-on-click="exportDashboard" class="btn btn-primary btn-sm ml-2">
+                            <i class="fa fa-download"></i> Export
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Custom Date Range -->
+                <div t-if="state.dateRange === 'custom'" class="row mt-3">
+                    <div class="col-md-3">
+                        <label>From Date:</label>
+                        <input type="date" t-model="state.dateFrom" t-on-change="onDateChange" class="form-control"/>
+                    </div>
+                    <div class="col-md-3">
+                        <label>To Date:</label>
+                        <input type="date" t-model="state.dateTo" t-on-change="onDateChange" class="form-control"/>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading Spinner -->
+            <div t-if="state.loading" class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+                <p class="mt-2">Loading dashboard data...</p>
+            </div>
+
+            <!-- Dashboard Content -->
+            <div t-if="!state.loading" class="dashboard_content">
+                <!-- KPI Cards -->
+                <div class="row mb-4">
+                    <div class="col-lg-3 col-md-6">
+                        <div class="card bg-primary text-white">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h4 class="mb-0" t-esc="formatCurrency(state.data.summary?.total_sales || 0)"/>
+                                        <p class="mb-0">Total Sales</p>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="fa fa-dollar-sign fa-2x"></i>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <small t-if="state.data.summary?.sales_change !== undefined">
+                                        <i t-att-class="'fa ' + (state.data.summary.sales_change >= 0 ? 'fa-arrow-up' : 'fa-arrow-down')"></i>
+                                        <t t-esc="formatPercentage(Math.abs(state.data.summary.sales_change))"/> vs previous period
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-3 col-md-6">
+                        <div class="card bg-success text-white">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h4 class="mb-0" t-esc="formatNumber(state.data.summary?.total_orders || 0)"/>
+                                        <p class="mb-0">Total Orders</p>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="fa fa-shopping-cart fa-2x"></i>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <small t-if="state.data.summary?.orders_change !== undefined">
+                                        <i t-att-class="'fa ' + (state.data.summary.orders_change >= 0 ? 'fa-arrow-up' : 'fa-arrow-down')"></i>
+                                        <t t-esc="formatPercentage(Math.abs(state.data.summary.orders_change))"/> vs previous period
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-3 col-md-6">
+                        <div class="card bg-info text-white">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h4 class="mb-0" t-esc="formatCurrency(state.data.summary?.avg_order_value || 0)"/>
+                                        <p class="mb-0">Avg Order Value</p>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="fa fa-calculator fa-2x"></i>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <small t-if="state.data.summary?.aov_change !== undefined">
+                                        <i t-att-class="'fa ' + (state.data.summary.aov_change >= 0 ? 'fa-arrow-up' : 'fa-arrow-down')"></i>
+                                        <t t-esc="formatPercentage(Math.abs(state.data.summary.aov_change))"/> vs previous period
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-3 col-md-6">
+                        <div class="card bg-warning text-white">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <h4 class="mb-0" t-esc="formatNumber(state.data.summary?.total_customers || 0)"/>
+                                        <p class="mb-0">Total Customers</p>
+                                    </div>
+                                    <div class="align-self-center">
+                                        <i class="fa fa-users fa-2x"></i>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <small t-if="state.data.summary?.customers_change !== undefined">
+                                        <i t-att-class="'fa ' + (state.data.summary.customers_change >= 0 ? 'fa-arrow-up' : 'fa-arrow-down')"></i>
+                                        <t t-esc="formatPercentage(Math.abs(state.data.summary.customers_change))"/> vs previous period
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Row 1 -->
+                <div class="row mb-4">
+                    <div class="col-lg-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Sales Trends</h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="salesTrendChart" height="100"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Payment Methods</h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="paymentMethodsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Row 2 -->
+                <div class="row mb-4">
+                    <div class="col-lg-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Hourly Sales</h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="hourlySalesChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Staff Performance</h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="staffPerformanceChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Row 3 -->
+                <div class="row mb-4">
+                    <div class="col-lg-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Top Products</h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="productPerformanceChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Revenue vs Profit</h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="revenueProfitChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alerts and Notifications -->
+                <div t-if="state.data.alerts and state.data.alerts.length" class="row">
+                    <div class="col-12">
+                        <div class="card border-warning">
+                            <div class="card-header bg-warning text-dark">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-exclamation-triangle"></i>
+                                    Alerts &amp; Notifications
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div t-foreach="state.data.alerts" t-as="alert" t-key="alert_index" class="alert alert-warning mb-2">
+                                    <strong t-esc="alert.title"/>: <span t-esc="alert.message"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+
+    <!-- Staff Performance Dashboard Template -->
+    <t t-name="pos_analytics_reporting.StaffPerformanceDashboard" owl="1">
+        <div class="staff_performance_dashboard">
+            <!-- Header -->
+            <div class="dashboard_header mb-4">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h2 class="mb-0">
+                            <i class="fa fa-users text-primary"></i>
+                            Staff Performance Dashboard
+                        </h2>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-row">
+                            <div class="col">
+                                <select t-model="state.selectedEmployee" t-on-change="onEmployeeChange" class="form-control">
+                                    <option value="">All Employees</option>
+                                    <t t-foreach="state.data.employees || []" t-as="employee" t-key="employee.id">
+                                        <option t-att-value="employee.id" t-esc="employee.name"/>
+                                    </t>
+                                </select>
+                            </div>
+                            <div class="col">
+                                <input type="date" t-model="state.dateFrom" t-on-change="onDateChange" class="form-control"/>
+                            </div>
+                            <div class="col">
+                                <input type="date" t-model="state.dateTo" t-on-change="onDateChange" class="form-control"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading -->
+            <div t-if="state.loading" class="text-center py-5">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2">Loading staff performance data...</p>
+            </div>
+
+            <!-- Staff Performance Content -->
+            <div t-if="!state.loading" class="performance_content">
+                <!-- Summary Cards -->
+                <div class="row mb-4">
+                    <div class="col-lg-3">
+                        <div class="card bg-primary text-white">
+                            <div class="card-body text-center">
+                                <h3 t-esc="state.data.summary?.total_staff || 0"/>
+                                <p class="mb-0">Active Staff</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="card bg-success text-white">
+                            <div class="card-body text-center">
+                                <h3 t-esc="(state.data.summary?.avg_performance || 0).toFixed(1)"/>
+                                <p class="mb-0">Avg Performance</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="card bg-info text-white">
+                            <div class="card-body text-center">
+                                <h3 t-esc="formatCurrency(state.data.summary?.total_sales || 0)"/>
+                                <p class="mb-0">Total Sales</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="card bg-warning text-white">
+                            <div class="card-body text-center">
+                                <h3 t-esc="(state.data.summary?.total_hours || 0).toFixed(1)"/>
+                                <p class="mb-0">Total Hours</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top Performers -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Top Performers</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Employee</th>
+                                                <th>Performance Score</th>
+                                                <th>Sales/Hour</th>
+                                                <th>Orders/Hour</th>
+                                                <th>Efficiency</th>
+                                                <th>Grade</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr t-foreach="state.data.top_performers || []" t-as="performer" t-key="performer.employee_name">
+                                                <td t-esc="performer.employee_name"/>
+                                                <td>
+                                                    <span class="badge badge-success" t-esc="performer.performance_score.toFixed(1)"/>
+                                                </td>
+                                                <td t-esc="formatCurrency(performer.sales_per_hour)"/>
+                                                <td t-esc="performer.orders_per_hour.toFixed(1)"/>
+                                                <td t-esc="formatPercentage(performer.efficiency_rate)"/>
+                                                <td>
+                                                    <span t-att-class="'badge badge-' + (performer.performance_score >= 90 ? 'success' : performer.performance_score >= 80 ? 'info' : performer.performance_score >= 70 ? 'warning' : 'danger')"
+                                                          t-esc="performer.performance_score >= 90 ? 'Excellent' : performer.performance_score >= 80 ? 'Good' : performer.performance_score >= 70 ? 'Average' : 'Needs Improvement'"/>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Performance Distribution -->
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Performance Grade Distribution</h5>
+                            </div>
+                            <div class="card-body">
+                                <div t-foreach="Object.entries(state.data.grade_distribution || {})" t-as="grade_entry" t-key="grade_entry[0]">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span t-esc="grade_entry[0].charAt(0).toUpperCase() + grade_entry[0].slice(1).replace('_', ' ')"/>
+                                        <span class="badge badge-primary" t-esc="grade_entry[1]"/>
+                                    </div>
+                                    <div class="progress mb-3">
+                                        <div class="progress-bar" 
+                                             t-att-style="'width: ' + (grade_entry[1] / (state.data.summary?.total_staff || 1) * 100) + '%'"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Performance Trends</h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="performanceTrendsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates> 

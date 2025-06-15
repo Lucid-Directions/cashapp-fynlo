@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Automated Staff Performance Report Generation -->
+    <record id="cron_generate_staff_performance" model="ir.cron">
+        <field name="name">Generate Daily Staff Performance Reports</field>
+        <field name="model_id" ref="model_pos_staff_performance"/>
+        <field name="state">code</field>
+        <field name="code">model.action_generate_daily_reports()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="numbercall">-1</field>
+        <field name="active" eval="True"/>
+        <field name="doall" eval="False"/>
+        <field name="nextcall" eval="(DateTime.now() + timedelta(days=1)).replace(hour=1, minute=0, second=0)"/>
+    </record>
+
+    <!-- Automated Report Scheduler -->
+    <record id="cron_run_scheduled_reports" model="ir.cron">
+        <field name="name">Run Scheduled Reports</field>
+        <field name="model_id" ref="model_pos_report_scheduler"/>
+        <field name="state">code</field>
+        <field name="code">model.cron_run_scheduled_reports()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">hours</field>
+        <field name="numbercall">-1</field>
+        <field name="active" eval="True"/>
+        <field name="doall" eval="False"/>
+    </record>
+</odoo> 
