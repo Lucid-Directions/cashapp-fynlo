@@ -1,11 +1,15 @@
 const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
 
 /**
- * Metro configuration
- * https://reactnative.dev/docs/metro
- *
- * @type {import('@react-native/metro-config').MetroConfig}
+ * Metro configuration for Fynlo POS
+ * Enhanced to support TypeScript path mapping and react-native-vector-icons
  */
-const config = {};
+const config = {
+  resolver: {
+    alias: {
+      '@': './src',
+    },
+  },
+};
 
 module.exports = mergeConfig(getDefaultConfig(__dirname), config);
