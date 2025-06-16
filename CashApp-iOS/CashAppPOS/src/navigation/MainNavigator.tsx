@@ -1,32 +1,31 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createStackNavigator } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { MainTabParamList, MainStackParamList, DrawerParamList } from '../types';
+import { MainTabParamList, MainStackParamList } from '../types';
 import POSScreen from '../screens/main/POSScreen';
 import OrdersScreen from '../screens/main/OrdersScreen';
-import ReportsScreen from '../screens/main/ReportsScreen';
-import SettingsScreen from '../screens/main/SettingsScreen';
-import ProfileScreen from '../screens/main/ProfileScreen';
-import OrderDetailsScreen from '../screens/main/OrderDetailsScreen';
-import { TableSelectionScreen } from '../screens/main/TableSelectionScreen';
+import ReportsScreen from '../screens/reports/ReportsScreen';
+import MoreScreen from '../screens/more/MoreScreen';
+import EmployeesScreen from '../screens/employees/EmployeesScreen';
+import CustomersScreen from '../screens/customers/CustomersScreen';
+import InventoryScreen from '../screens/inventory/InventoryScreen';
 import useAppStore from '../store/useAppStore';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
-const Drawer = createDrawerNavigator<DrawerParamList>();
 const Stack = createStackNavigator<MainStackParamList>();
 
-// Colors
+// Clover POS Colors
 const Colors = {
-  primary: '#2C3E50',
-  secondary: '#3498DB',
-  background: '#F8F9FA',
+  primary: '#00A651',      // Clover Green
+  secondary: '#0066CC',    // Clover Blue
+  background: '#F5F5F5',
   white: '#FFFFFF',
-  lightGray: '#ECF0F1',
-  text: '#2C3E50',
-  tabActive: '#3498DB',
-  tabInactive: '#95A5A6',
+  lightGray: '#E5E5E5',
+  text: '#333333',
+  tabActive: '#00A651',
+  tabInactive: '#666666',
+  border: '#DDDDDD',
 };
 
 const MainTabNavigator: React.FC = () => {
@@ -39,14 +38,14 @@ const MainTabNavigator: React.FC = () => {
           let iconName: string;
 
           switch (route.name) {
-            case 'POS':
-              iconName = 'point-of-sale';
+            case 'Home':
+              iconName = 'home';
               break;
             case 'Orders':
               iconName = 'receipt';
               break;
-            case 'Reports':
-              iconName = 'analytics';
+            case 'More':
+              iconName = 'more-horiz';
               break;
             default:
               iconName = 'home';
@@ -59,7 +58,7 @@ const MainTabNavigator: React.FC = () => {
         tabBarStyle: {
           backgroundColor: Colors.white,
           borderTopWidth: 1,
-          borderTopColor: Colors.lightGray,
+          borderTopColor: Colors.border,
           paddingTop: 8,
           paddingBottom: 8,
           height: 80,
@@ -73,71 +72,28 @@ const MainTabNavigator: React.FC = () => {
       })}
     >
       <Tab.Screen
-        name="POS"
+        name="Home"
         component={POSScreen}
         options={{
+          tabBarLabel: 'Home',
           tabBarBadge: cartItemCount > 0 ? cartItemCount : undefined,
         }}
       />
       <Tab.Screen
         name="Orders"
         component={OrdersScreen}
+        options={{
+          tabBarLabel: 'Orders',
+        }}
       />
       <Tab.Screen
-        name="Reports"
-        component={ReportsScreen}
+        name="More"
+        component={MoreScreen}
+        options={{
+          tabBarLabel: 'More',
+        }}
       />
     </Tab.Navigator>
-  );
-};
-
-const DrawerNavigator: React.FC = () => {
-  return (
-    <Drawer.Navigator
-      screenOptions={{
-        headerShown: false,
-        drawerStyle: {
-          backgroundColor: Colors.background,
-          width: 280,
-        },
-        drawerLabelStyle: {
-          fontSize: 16,
-          fontWeight: '600',
-          color: Colors.text,
-        },
-        drawerActiveTintColor: Colors.primary,
-        drawerInactiveTintColor: Colors.text,
-      }}
-    >
-      <Drawer.Screen
-        name="Home"
-        component={MainTabNavigator}
-        options={{
-          drawerLabel: 'Point of Sale',
-          drawerIcon: ({ color }) => (
-            <Icon name="store" size={24} color={color} />
-          ),
-        }}
-      />
-      <Drawer.Screen
-        name="Profile"
-        component={ProfileScreen}
-        options={{
-          drawerIcon: ({ color }) => (
-            <Icon name="person" size={24} color={color} />
-          ),
-        }}
-      />
-      <Drawer.Screen
-        name="Settings"
-        component={SettingsScreen}
-        options={{
-          drawerIcon: ({ color }) => (
-            <Icon name="settings" size={24} color={color} />
-          ),
-        }}
-      />
-    </Drawer.Navigator>
   );
 };
 
@@ -146,30 +102,39 @@ const MainNavigator: React.FC = () => {
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
+        cardStyle: { backgroundColor: Colors.background },
       }}
     >
       <Stack.Screen
-        name="Drawer"
-        component={DrawerNavigator}
+        name="MainTabs"
+        component={MainTabNavigator}
       />
       <Stack.Screen
-        name="TableSelection"
-        component={TableSelectionScreen}
+        name="Reports"
+        component={ReportsScreen}
         options={{
-          headerShown: true,
-          headerTitle: 'Select Table',
-          headerStyle: {
-            backgroundColor: Colors.primary,
-          },
-          headerTintColor: Colors.white,
+          headerShown: false,
         }}
       />
       <Stack.Screen
-        name="OrderDetails"
-        component={OrderDetailsScreen}
+        name="Employees"
+        component={EmployeesScreen}
         options={{
-          presentation: 'modal',
-          gestureEnabled: true,
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="Customers"
+        component={CustomersScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="Inventory"
+        component={InventoryScreen}
+        options={{
+          headerShown: false,
         }}
       />
     </Stack.Navigator>

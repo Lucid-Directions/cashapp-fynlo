@@ -90,7 +90,19 @@ export type RootStackParamList = {
 };
 
 export type MainStackParamList = {
-  Drawer: undefined;
+  MainTabs: undefined;
+  Reports: undefined;
+  Employees: undefined;
+  Customers: undefined;
+  Inventory: undefined;
+  MenuManagement: undefined;
+  Dashboard: undefined;
+  BusinessSettings: undefined;
+  Hardware: undefined;
+  PaymentSettings: undefined;
+  AppSettings: undefined;
+  Profile: undefined;
+  Help: undefined;
   TableSelection: undefined;
   POS: { 
     tableId?: string; 
@@ -101,15 +113,9 @@ export type MainStackParamList = {
 };
 
 export type MainTabParamList = {
-  POS: undefined;
-  Orders: undefined;
-  Reports: undefined;
-};
-
-export type DrawerParamList = {
   Home: undefined;
-  Profile: undefined;
-  Settings: undefined;
+  Orders: undefined;
+  More: undefined;
 };
 
 export type AuthStackParamList = {

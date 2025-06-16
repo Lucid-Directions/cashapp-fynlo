@@ -20,16 +20,17 @@ import Logo from '../../components/Logo';
 
 const { width, height } = Dimensions.get('window');
 
+// Clover POS Color Scheme
 const Colors = {
-  primary: '#2C3E50',
-  secondary: '#3498DB',
-  success: '#27AE60',
-  background: '#F8F9FA',
+  primary: '#00A651',      // Clover Green
+  secondary: '#0066CC',    // Clover Blue  
+  success: '#00A651',
+  background: '#F5F5F5',   // Light Gray Background
   white: '#FFFFFF',
-  lightGray: '#ECF0F1',
-  text: '#2C3E50',
-  lightText: '#95A5A6',
-  accent: '#E74C3C',
+  lightGray: '#E5E5E5',
+  text: '#333333',         // Dark Gray Text
+  lightText: '#666666',    // Medium Gray Text
+  accent: '#0066CC',       // Clover Blue Accent
 };
 
 const LoginScreen: React.FC = () => {
@@ -192,7 +193,7 @@ const LoginScreen: React.FC = () => {
           {/* Footer */}
           <View style={styles.footer}>
             <Text style={styles.footerText}>
-              Fynlo POS • Powered by CashApp
+              Clover POS System • Secure Payment Processing
             </Text>
           </View>
         </View>

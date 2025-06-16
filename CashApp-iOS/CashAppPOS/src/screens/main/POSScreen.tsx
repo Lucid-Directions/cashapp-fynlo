@@ -16,11 +16,10 @@ import {
   Image,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useNavigation, DrawerActions } from '@react-navigation/native';
-import { DrawerNavigationProp } from '@react-navigation/drawer';
+import { useNavigation } from '@react-navigation/native';
 import useAppStore from '../../store/useAppStore';
 import useUIStore from '../../store/useUIStore';
-import { MenuItem, OrderItem, DrawerParamList } from '../../types';
+import { MenuItem, OrderItem } from '../../types';
 import DatabaseService from '../../services/DatabaseService';
 
 // Get screen dimensions
@@ -264,10 +263,14 @@ const POSScreen: React.FC = () => {
         </TouchableOpacity>
         
         <View style={styles.headerCenter}>
-          <Text style={styles.cloverLogo}>Clover</Text>
+          <Text style={styles.cloverLogo}>CLOVER POS SYSTEM</Text>
+          <Text style={styles.headerSubtitle}>TEST MODE - CHANGES ACTIVE</Text>
         </View>
         
         <View style={styles.headerRight}>
+          <TouchableOpacity style={styles.headerIconButton}>
+            <Icon name="search" size={24} color={Colors.white} />
+          </TouchableOpacity>
           <TouchableOpacity
             style={styles.cartButton}
             onPress={() => setShowCartModal(true)}
@@ -283,8 +286,24 @@ const POSScreen: React.FC = () => {
       </View>
 
       <View style={styles.mainContent}>
-        {/* Full Width - Menu */}
-        <View style={styles.fullPanel}>
+        {/* Split Layout: Menu + Cart */}
+        <View style={styles.leftPanel}>
+          {/* Quick Stats Bar */}
+          <View style={styles.statsBar}>
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>{cartItemCount()}</Text>
+              <Text style={styles.statLabel}>Items</Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>£{cartTotal().toFixed(2)}</Text>
+              <Text style={styles.statLabel}>Subtotal</Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text style={styles.statValue}>#{Math.floor(Math.random() * 1000).toString().padStart(3, '0')}</Text>
+              <Text style={styles.statLabel}>Order</Text>
+            </View>
+          </View>
+
           {/* Category Tabs */}
           <ScrollView
             horizontal
@@ -321,6 +340,66 @@ const POSScreen: React.FC = () => {
             contentContainerStyle={styles.menuGrid}
             showsVerticalScrollIndicator={false}
           />
+        </View>
+
+        {/* Right Panel - Cart Preview */}
+        <View style={styles.rightPanel}>
+          <View style={styles.cartHeader}>
+            <View style={styles.cartTitleSection}>
+              <Text style={styles.cartTitle}>Current Order</Text>
+              <Text style={styles.cartSubtitle}>
+                Table 1 • {new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+              </Text>
+            </View>
+            {cart.length > 0 && (
+              <TouchableOpacity style={styles.clearButton} onPress={clearCart}>
+                <Icon name="delete-outline" size={20} color={Colors.warning} />
+              </TouchableOpacity>
+            )}
+          </View>
+          
+          {cart.length === 0 ? (
+            <View style={styles.emptyCart}>
+              <Icon name="restaurant-menu" size={48} color={Colors.lightGray} />
+              <Text style={styles.emptyCartText}>No items yet</Text>
+              <Text style={styles.emptyCartSubtext}>Tap menu items to add</Text>
+            </View>
+          ) : (
+            <>
+              <ScrollView style={styles.cartList}>
+                {cart.map((item) => (
+                  <CartItem key={item.id} item={item} />
+                ))}
+              </ScrollView>
+              
+              <View style={styles.cartFooter}>
+                <View style={styles.cartSummary}>
+                  <View style={styles.summaryRow}>
+                    <Text style={styles.summaryLabel}>Subtotal</Text>
+                    <Text style={styles.summaryValue}>£{cartTotal().toFixed(2)}</Text>
+                  </View>
+                  <View style={styles.summaryRow}>
+                    <Text style={styles.summaryLabel}>VAT (20%)</Text>
+                    <Text style={styles.summaryValue}>£{(cartTotal() * 0.2).toFixed(2)}</Text>
+                  </View>
+                  <View style={[styles.summaryRow, styles.totalRow]}>
+                    <Text style={styles.totalLabel}>Total</Text>
+                    <Text style={styles.totalAmount}>£{(cartTotal() * 1.2).toFixed(2)}</Text>
+                  </View>
+                </View>
+                
+                <TouchableOpacity
+                  style={styles.chargeButton}
+                  onPress={() => setShowPaymentModal(true)}
+                >
+                  <Icon name="credit-card" size={20} color={Colors.white} style={{marginRight: 8}} />
+                  <Text style={styles.chargeButtonText}>
+                    Charge £{(cartTotal() * 1.2).toFixed(2)}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </>
+          )}
         </View>
       </View>
 
@@ -513,23 +592,6 @@ const POSScreen: React.FC = () => {
         </View>
       </Modal>
       
-      {/* Clover Bottom Tab Navigation */}
-      <View style={styles.bottomTabs}>
-        <TouchableOpacity style={[styles.tab, styles.activeTab]}>
-          <Icon name="home" size={24} color={Colors.primary} />
-          <Text style={[styles.tabText, styles.activeTabText]}>Home</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={styles.tab}>
-          <Icon name="receipt" size={24} color={Colors.darkGray} />
-          <Text style={styles.tabText}>Orders</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={styles.tab}>
-          <Icon name="more-horiz" size={24} color={Colors.darkGray} />
-          <Text style={styles.tabText}>More</Text>
-        </TouchableOpacity>
-      </View>
     </SafeAreaView>
   );
 };
@@ -546,13 +608,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 12,
-    height: 60,
+    height: 70,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5,
   },
   cloverLogo: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
     color: Colors.white,
     letterSpacing: -0.5,
+  },
+  headerSubtitle: {
+    fontSize: 12,
+    color: 'rgba(255, 255, 255, 0.8)',
+    marginTop: 2,
   },
   headerTitle: {
     fontSize: 20,
@@ -562,6 +634,10 @@ const styles = StyleSheet.create({
   headerRight: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  headerIconButton: {
+    padding: 8,
+    marginRight: 12,
   },
   headerButton: {
     marginLeft: 20,
@@ -601,6 +677,32 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
   },
+  leftPanel: {
+    flex: 2,
+    backgroundColor: Colors.white,
+  },
+  statsBar: {
+    flexDirection: 'row',
+    backgroundColor: Colors.white,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+    justifyContent: 'space-around',
+  },
+  statItem: {
+    alignItems: 'center',
+  },
+  statValue: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: Colors.primary,
+  },
+  statLabel: {
+    fontSize: 12,
+    color: Colors.darkGray,
+    marginTop: 2,
+  },
   fullPanel: {
     flex: 1,
     backgroundColor: Colors.white,
@@ -636,8 +738,8 @@ const styles = StyleSheet.create({
     color: Colors.white,
   },
   menuGrid: {
-    padding: 20,
-    paddingBottom: 100,
+    padding: 16,
+    paddingBottom: 120,
   },
   menuRow: {
     justifyContent: 'space-around',
@@ -645,17 +747,19 @@ const styles = StyleSheet.create({
   },
   menuCard: {
     backgroundColor: Colors.cardBg,
-    borderRadius: 12,
-    padding: 16,
-    margin: 8,
+    borderRadius: 16,
+    padding: 18,
+    margin: 6,
     flex: 1,
-    minHeight: 180,
+    minHeight: 140,
     width: (screenWidth - 80) / 3,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.04)',
   },
   menuCardDisabled: {
     opacity: 0.6,
@@ -666,24 +770,29 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   menuItemEmoji: {
-    fontSize: 40,
-    marginBottom: 12,
+    fontSize: 32,
+    marginBottom: 8,
   },
   menuItemName: {
-    fontSize: 14,
-    fontWeight: '500',
+    fontSize: 13,
+    fontWeight: '600',
     color: Colors.text,
     textAlign: 'center',
-    marginBottom: 8,
-    lineHeight: 18,
-    minHeight: 36,
+    marginBottom: 6,
+    lineHeight: 16,
+    minHeight: 32,
     flexWrap: 'wrap',
   },
   menuItemPrice: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.accent,
+    fontSize: 15,
+    fontWeight: '700',
+    color: Colors.primary,
     textAlign: 'center',
+    backgroundColor: 'rgba(0, 166, 81, 0.1)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    overflow: 'hidden',
   },
   menuItemQuantityControls: {
     flexDirection: 'row',
@@ -713,15 +822,17 @@ const styles = StyleSheet.create({
   },
   rightPanel: {
     flex: 1,
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.background,
     borderLeftWidth: 1,
     borderLeftColor: Colors.border,
+    maxWidth: isTablet ? 400 : 320,
   },
   cartHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 20,
+    backgroundColor: Colors.white,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
   },
@@ -835,6 +946,7 @@ const styles = StyleSheet.create({
   cartFooter: {
     borderTopWidth: 1,
     borderTopColor: Colors.border,
+    backgroundColor: Colors.white,
     padding: 20,
   },
   cartSummary: {
@@ -879,15 +991,22 @@ const styles = StyleSheet.create({
     color: Colors.text,
   },
   chargeButton: {
-    backgroundColor: Colors.accent,
-    borderRadius: 8,
-    paddingVertical: 16,
+    backgroundColor: Colors.primary,
+    borderRadius: 12,
+    paddingVertical: 18,
+    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 6,
   },
   chargeButtonText: {
     color: Colors.white,
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 17,
+    fontWeight: 'bold',
   },
   modalOverlay: {
     flex: 1,
@@ -1068,35 +1187,6 @@ const styles = StyleSheet.create({
   confirmButtonText: {
     color: Colors.white,
     fontSize: 16,
-    fontWeight: '600',
-  },
-  // Clover Bottom Tab Styles
-  bottomTabs: {
-    flexDirection: 'row',
-    backgroundColor: Colors.white,
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
-    paddingVertical: 8,
-    paddingBottom: Platform.OS === 'ios' ? 20 : 8,
-  },
-  tab: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: 8,
-  },
-  activeTab: {
-    backgroundColor: 'rgba(0, 166, 81, 0.1)',
-    borderRadius: 8,
-    marginHorizontal: 4,
-  },
-  tabText: {
-    fontSize: 12,
-    color: Colors.darkGray,
-    marginTop: 4,
-    fontWeight: '500',
-  },
-  activeTabText: {
-    color: Colors.primary,
     fontWeight: '600',
   },
 });
