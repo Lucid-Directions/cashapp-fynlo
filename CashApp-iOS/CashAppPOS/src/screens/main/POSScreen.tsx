@@ -22,30 +22,29 @@ import useAppStore from '../../store/useAppStore';
 import useUIStore from '../../store/useUIStore';
 import { MenuItem, OrderItem, DrawerParamList } from '../../types';
 import DatabaseService from '../../services/DatabaseService';
-import Logo from '../../components/Logo';
 
 // Get screen dimensions
 const { width: screenWidth } = Dimensions.get('window');
 const isTablet = screenWidth > 768;
 
-// Modern POS Color Scheme (matching screenshots)
+// Clover POS Color Scheme
 const Colors = {
-  primary: '#1a1f36',        // Dark navy background
+  primary: '#00A651',        // Clover Green header
   secondary: '#ffffff',      // White for contrast
-  accent: '#4c6ef5',        // Bright blue accent
-  success: '#37d67a',       // Green for success
-  warning: '#f47068',       // Red/coral for warnings
-  background: '#f0f3f7',    // Light gray background
-  cardBg: '#ffffff',        // White cards
-  darkBg: '#0f1419',        // Very dark background
+  accent: '#0066CC',         // Clover Blue accent
+  success: '#00A651',        // Clover Green for success
+  warning: '#FF6B35',        // Orange for warnings
+  background: '#F5F5F5',     // Light gray background
+  cardBg: '#ffffff',         // White cards
+  darkBg: '#2C3E50',         // Dark background
   white: '#FFFFFF',
-  lightGray: '#e1e8ed',     // Light gray borders
-  mediumGray: '#8899a6',    // Medium gray text
-  darkGray: '#657786',      // Dark gray secondary text
-  text: '#14171a',          // Almost black text
-  lightText: '#657786',     // Gray secondary text
-  border: '#e1e8ed',        // Light border color
-  hover: '#f7f9fa',         // Hover state background
+  lightGray: '#E5E5E5',      // Light gray borders
+  mediumGray: '#999999',     // Medium gray text
+  darkGray: '#666666',       // Dark gray secondary text
+  text: '#333333',           // Dark text
+  lightText: '#666666',      // Gray secondary text
+  border: '#DDDDDD',         // Light border color
+  hover: '#F0F0F0',          // Hover state background
 };
 
 // Authentic Mexican Restaurant Menu Items
@@ -258,32 +257,19 @@ const POSScreen: React.FC = () => {
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor={Colors.primary} barStyle="light-content" />
       
-      {/* Header */}
+      {/* Clover Header */}
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.menuButton}
-          onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
-        >
+        <TouchableOpacity style={styles.menuButton}>
           <Icon name="menu" size={24} color={Colors.white} />
         </TouchableOpacity>
         
         <View style={styles.headerCenter}>
-          <Logo 
-            size="small" 
-            showText={false}
-            style={styles.logoContainer}
-          />
+          <Text style={styles.cloverLogo}>Clover</Text>
         </View>
         
         <View style={styles.headerRight}>
-          <TouchableOpacity style={styles.headerButton}>
-            <Icon name="search" size={24} color={Colors.white} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.headerButton}>
-            <Icon name="notifications" size={24} color={Colors.white} />
-          </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.headerButton, styles.cartButton]}
+            style={styles.cartButton}
             onPress={() => setShowCartModal(true)}
           >
             <Icon name="shopping-cart" size={24} color={Colors.white} />
@@ -292,9 +278,6 @@ const POSScreen: React.FC = () => {
                 <Text style={styles.cartBadgeText}>{cartItemCount()}</Text>
               </View>
             )}
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.headerButton}>
-            <Icon name="person" size={24} color={Colors.white} />
           </TouchableOpacity>
         </View>
       </View>
@@ -529,6 +512,24 @@ const POSScreen: React.FC = () => {
           </View>
         </View>
       </Modal>
+      
+      {/* Clover Bottom Tab Navigation */}
+      <View style={styles.bottomTabs}>
+        <TouchableOpacity style={[styles.tab, styles.activeTab]}>
+          <Icon name="home" size={24} color={Colors.primary} />
+          <Text style={[styles.tabText, styles.activeTabText]}>Home</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity style={styles.tab}>
+          <Icon name="receipt" size={24} color={Colors.darkGray} />
+          <Text style={styles.tabText}>Orders</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity style={styles.tab}>
+          <Icon name="more-horiz" size={24} color={Colors.darkGray} />
+          <Text style={styles.tabText}>More</Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 };
@@ -543,8 +544,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingVertical: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    height: 60,
+  },
+  cloverLogo: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: Colors.white,
+    letterSpacing: -0.5,
   },
   headerTitle: {
     fontSize: 20,
@@ -1060,6 +1068,35 @@ const styles = StyleSheet.create({
   confirmButtonText: {
     color: Colors.white,
     fontSize: 16,
+    fontWeight: '600',
+  },
+  // Clover Bottom Tab Styles
+  bottomTabs: {
+    flexDirection: 'row',
+    backgroundColor: Colors.white,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+    paddingVertical: 8,
+    paddingBottom: Platform.OS === 'ios' ? 20 : 8,
+  },
+  tab: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  activeTab: {
+    backgroundColor: 'rgba(0, 166, 81, 0.1)',
+    borderRadius: 8,
+    marginHorizontal: 4,
+  },
+  tabText: {
+    fontSize: 12,
+    color: Colors.darkGray,
+    marginTop: 4,
+    fontWeight: '500',
+  },
+  activeTabText: {
+    color: Colors.primary,
     fontWeight: '600',
   },
 });
