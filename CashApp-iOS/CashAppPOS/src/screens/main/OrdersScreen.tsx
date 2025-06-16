@@ -191,7 +191,7 @@ const OrdersScreen: React.FC = () => {
               {order.paymentMethod?.replace('_', ' ').toUpperCase()}
             </Text>
           </View>
-          <Text style={styles.totalAmount}>${order.total.toFixed(2)}</Text>
+                        <Text style={styles.totalAmount}>£{order.total.toFixed(2)}</Text>
         </View>
       </View>
     </TouchableOpacity>

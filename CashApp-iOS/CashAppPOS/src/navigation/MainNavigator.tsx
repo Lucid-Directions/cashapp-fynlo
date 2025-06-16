@@ -3,18 +3,19 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createStackNavigator } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { MainTabParamList, RootStackParamList } from '../types';
+import { MainTabParamList, MainStackParamList, DrawerParamList } from '../types';
 import POSScreen from '../screens/main/POSScreen';
 import OrdersScreen from '../screens/main/OrdersScreen';
 import ReportsScreen from '../screens/main/ReportsScreen';
 import SettingsScreen from '../screens/main/SettingsScreen';
 import ProfileScreen from '../screens/main/ProfileScreen';
 import OrderDetailsScreen from '../screens/main/OrderDetailsScreen';
+import { TableSelectionScreen } from '../screens/main/TableSelectionScreen';
 import useAppStore from '../store/useAppStore';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
-const Drawer = createDrawerNavigator();
-const Stack = createStackNavigator<RootStackParamList>();
+const Drawer = createDrawerNavigator<DrawerParamList>();
+const Stack = createStackNavigator<MainStackParamList>();
 
 // Colors
 const Colors = {
@@ -109,7 +110,7 @@ const DrawerNavigator: React.FC = () => {
       }}
     >
       <Drawer.Screen
-        name="MainTabs"
+        name="Home"
         component={MainTabNavigator}
         options={{
           drawerLabel: 'Point of Sale',
@@ -148,8 +149,20 @@ const MainNavigator: React.FC = () => {
       }}
     >
       <Stack.Screen
-        name="Main"
+        name="Drawer"
         component={DrawerNavigator}
+      />
+      <Stack.Screen
+        name="TableSelection"
+        component={TableSelectionScreen}
+        options={{
+          headerShown: true,
+          headerTitle: 'Select Table',
+          headerStyle: {
+            backgroundColor: Colors.primary,
+          },
+          headerTintColor: Colors.white,
+        }}
       />
       <Stack.Screen
         name="OrderDetails"

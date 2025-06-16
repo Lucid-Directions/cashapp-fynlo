@@ -22,10 +22,10 @@ import useAppStore from '../../store/useAppStore';
 import useUIStore from '../../store/useUIStore';
 import { MenuItem, OrderItem, DrawerParamList } from '../../types';
 import DatabaseService from '../../services/DatabaseService';
-// import Logo from '../../components/Logo'; // Temporarily disabled due to JSX runtime error
+// import Logo from '../../components/Logo';
 
 // Get screen dimensions
-const { width: screenWidth } = Dimensions.get('window');
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 const isTablet = screenWidth > 768;
 
 // Modern POS Color Scheme (matching screenshots)
@@ -117,6 +117,8 @@ const POSScreen: React.FC = () => {
     clearCart,
     cartTotal,
     cartItemCount,
+    user,
+    session,
   } = useAppStore();
   
   const {
@@ -167,92 +169,63 @@ const POSScreen: React.FC = () => {
     );
   };
 
-  const MenuItemCard = ({ item }: { item: MenuItem }) => {
-    const existingItem = cart.find(cartItem => cartItem.id === item.id);
-    
-    return (
-      <View style={[
+  const MenuItemCard = ({ item }: { item: MenuItem }) => (
+    <TouchableOpacity
+      style={[
         styles.menuCard,
         !item.available && styles.menuCardDisabled,
-      ]}>
-        <TouchableOpacity
-          style={styles.menuCardContent}
-          onPress={() => item.available && handleAddToCart(item)}
-          activeOpacity={0.7}
-          disabled={!item.available}
-        >
-          <Text style={styles.menuItemEmoji}>{item.emoji}</Text>
-          <Text style={styles.menuItemName} numberOfLines={2}>
-            {item.name}
-          </Text>
-          <Text style={styles.menuItemPrice}>
-            £{item.price.toFixed(2)}
-          </Text>
-        </TouchableOpacity>
-        
-        {/* Quick Quantity Controls */}
-        {existingItem && (
-          <View style={styles.menuItemQuantityControls}>
-            <TouchableOpacity
-              style={styles.menuQuantityButton}
-              onPress={() => handleUpdateQuantity(item.id, existingItem.quantity - 1)}
-            >
-              <Icon name="remove" size={16} color={Colors.white} />
-            </TouchableOpacity>
-            <Text style={styles.menuQuantityText}>{existingItem.quantity}</Text>
-            <TouchableOpacity
-              style={styles.menuQuantityButton}
-              onPress={() => handleUpdateQuantity(item.id, existingItem.quantity + 1)}
-            >
-              <Icon name="add" size={16} color={Colors.white} />
-            </TouchableOpacity>
-          </View>
+      ]}
+      onPress={() => item.available && handleAddToCart(item)}
+      activeOpacity={0.7}
+      disabled={!item.available}
+    >
+      <View style={styles.menuItemImage}>
+        <Text style={styles.menuItemEmoji}>{item.emoji}</Text>
+      </View>
+      <View style={styles.menuItemInfo}>
+        <Text style={styles.menuItemName} numberOfLines={2}>
+          {item.name}
+        </Text>
+        <Text style={styles.menuItemPrice}>
+          {item.price === 0 ? 'FREE' : `£${item.price.toFixed(2)}`}
+        </Text>
+        {!item.available && (
+          <Text style={styles.unavailableText}>Unavailable</Text>
         )}
       </View>
-    );
-  };
+    </TouchableOpacity>
+  );
 
-  const CartItem = ({ item }: { item: OrderItem }) => {
-    const menuItem = menuItems.find(mi => mi.id === item.id);
-    return (
-      <View style={styles.cartItem}>
+  const CartItem = ({ item }: { item: OrderItem }) => (
+    <View style={styles.cartItem}>
+      <View style={styles.cartItemLeft}>
+        <Text style={styles.cartItemEmoji}>{item.emoji}</Text>
         <View style={styles.cartItemInfo}>
-          <View style={styles.cartItemHeader}>
-            <Text style={styles.cartItemEmoji}>{item.emoji}</Text>
-            <View style={styles.cartItemDetails}>
-              <Text style={styles.cartItemName}>{item.name}</Text>
-              <Text style={styles.cartItemPrice}>£{item.price.toFixed(2)} each</Text>
-            </View>
-          </View>
-          {menuItem?.description && (
-            <Text style={styles.cartItemDescription} numberOfLines={2}>
-              {menuItem.description}
-            </Text>
-          )}
-        </View>
-        <View style={styles.cartItemActions}>
-          <View style={styles.cartItemQuantity}>
-            <TouchableOpacity
-              style={styles.quantityButton}
-              onPress={() => handleUpdateQuantity(item.id, item.quantity - 1)}
-            >
-              <Icon name="remove" size={16} color={Colors.text} />
-            </TouchableOpacity>
-            <Text style={styles.quantityText}>{item.quantity}</Text>
-            <TouchableOpacity
-              style={styles.quantityButton}
-              onPress={() => handleUpdateQuantity(item.id, item.quantity + 1)}
-            >
-              <Icon name="add" size={16} color={Colors.text} />
-            </TouchableOpacity>
-          </View>
-          <Text style={styles.cartItemTotal}>
-            £{(item.price * item.quantity).toFixed(2)}
+          <Text style={styles.cartItemName} numberOfLines={1}>
+            {item.name}
+          </Text>
+          <Text style={styles.cartItemPrice}>
+            £{item.price.toFixed(2)} each
           </Text>
         </View>
       </View>
-    );
-  };
+      <View style={styles.cartItemRight}>
+        <TouchableOpacity
+          style={styles.quantityButton}
+          onPress={() => handleUpdateQuantity(item.id, item.quantity - 1)}
+        >
+          <Icon name="remove" size={18} color={Colors.text} />
+        </TouchableOpacity>
+        <Text style={styles.quantityText}>{item.quantity}</Text>
+        <TouchableOpacity
+          style={styles.quantityButton}
+          onPress={() => handleUpdateQuantity(item.id, item.quantity + 1)}
+        >
+          <Icon name="add" size={18} color={Colors.text} />
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -267,26 +240,35 @@ const POSScreen: React.FC = () => {
           <Icon name="menu" size={24} color={Colors.white} />
         </TouchableOpacity>
         
-        <View style={styles.headerCenter}>
-          <Image 
-            source={require('../../../assets/fynlo-logo.png')} 
-            style={styles.logo}
-            resizeMode="contain"
-          />
-        </View>
+        <Text style={styles.headerTitle}>Fynlo POS System</Text>
         
         <View style={styles.headerRight}>
-          <TouchableOpacity style={styles.headerButton}>
-            <Icon name="search" size={24} color={Colors.white} />
+          <TouchableOpacity 
+            style={styles.headerButton}
+            onPress={() => {
+              Alert.alert(
+                'Table Selection',
+                'Select order type: Dine In, Takeout, Pickup, or Delivery',
+                [
+                  { text: 'Dine In', onPress: () => console.log('Dine In selected') },
+                  { text: 'Takeout', onPress: () => console.log('Takeout selected') },
+                  { text: 'Pickup', onPress: () => console.log('Pickup selected') },
+                  { text: 'Delivery', onPress: () => console.log('Delivery selected') },
+                  { text: 'Cancel', style: 'cancel' }
+                ]
+              );
+            }}
+          >
+            <Icon name="restaurant" size={20} color={Colors.white} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.headerButton}>
-            <Icon name="notifications" size={24} color={Colors.white} />
+            <Icon name="notifications" size={20} color={Colors.white} />
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.headerButton, styles.cartButton]}
             onPress={() => setShowCartModal(true)}
           >
-            <Icon name="shopping-cart" size={24} color={Colors.white} />
+            <Icon name="shopping-cart" size={20} color={Colors.white} />
             {cartItemCount() > 0 && (
               <View style={styles.cartBadge}>
                 <Text style={styles.cartBadgeText}>{cartItemCount()}</Text>
@@ -294,33 +276,42 @@ const POSScreen: React.FC = () => {
             )}
           </TouchableOpacity>
           <TouchableOpacity style={styles.headerButton}>
-            <Icon name="person" size={24} color={Colors.white} />
+            <Icon name="person" size={20} color={Colors.white} />
           </TouchableOpacity>
         </View>
       </View>
 
+      {/* Session Info */}
+      {session && (
+        <View style={styles.sessionInfo}>
+          <Text style={styles.sessionText}>
+            Session: {session.id || 'Active'} • User: {user?.name || 'Demo User'}
+          </Text>
+        </View>
+      )}
+
       <View style={styles.mainContent}>
-        {/* Full Width - Menu */}
-        <View style={styles.fullPanel}>
-          {/* Category Tabs */}
+        {/* Left Side - Menu */}
+        <View style={styles.leftPanel}>
+          {/* Category Filter */}
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            style={styles.categoryTabs}
-            contentContainerStyle={styles.categoryTabsContent}
+            style={styles.categoryScroll}
+            contentContainerStyle={styles.categoryScrollContent}
           >
             {categories.map((category) => (
               <TouchableOpacity
                 key={category}
                 style={[
-                  styles.categoryTab,
-                  selectedCategory === category && styles.categoryTabActive,
+                  styles.categoryButton,
+                  selectedCategory === category && styles.categoryButtonActive
                 ]}
                 onPress={() => setSelectedCategory(category)}
               >
                 <Text style={[
-                  styles.categoryTabText,
-                  selectedCategory === category && styles.categoryTabTextActive,
+                  styles.categoryButtonText,
+                  selectedCategory === category && styles.categoryButtonTextActive
                 ]}>
                   {category}
                 </Text>
@@ -328,7 +319,7 @@ const POSScreen: React.FC = () => {
             ))}
           </ScrollView>
 
-          {/* Menu Grid */}
+          {/* Menu Items Grid */}
           <FlatList
             data={filteredItems}
             renderItem={({ item }) => <MenuItemCard item={item} />}
@@ -338,6 +329,50 @@ const POSScreen: React.FC = () => {
             contentContainerStyle={styles.menuGrid}
             showsVerticalScrollIndicator={false}
           />
+        </View>
+
+        {/* Right Side - Cart */}
+        <View style={styles.rightPanel}>
+          <View style={styles.cartHeader}>
+            <Text style={styles.cartTitle}>Current Order</Text>
+            {cart.length > 0 && (
+              <TouchableOpacity
+                style={styles.clearButton}
+                onPress={clearCart}
+              >
+                <Text style={styles.clearButtonText}>Clear</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+          
+          {cart.length === 0 ? (
+            <View style={styles.emptyCart}>
+              <Icon name="shopping-cart" size={48} color={Colors.lightGray} />
+              <Text style={styles.emptyCartText}>Cart is empty</Text>
+            </View>
+          ) : (
+            <>
+              <ScrollView style={styles.cartList}>
+                {cart.map((item) => (
+                  <CartItem key={item.id} item={item} />
+                ))}
+              </ScrollView>
+              
+              <View style={styles.cartFooter}>
+                <View style={styles.totalSection}>
+                  <Text style={styles.totalLabel}>Total</Text>
+                  <Text style={styles.totalAmount}>£{cartTotal().toFixed(2)}</Text>
+                </View>
+                
+                <TouchableOpacity
+                  style={styles.checkoutButton}
+                  onPress={() => setShowPaymentModal(true)}
+                >
+                  <Text style={styles.checkoutButtonText}>Charge £{cartTotal().toFixed(2)}</Text>
+                </TouchableOpacity>
+              </View>
+            </>
+          )}
         </View>
       </View>
 
@@ -350,24 +385,19 @@ const POSScreen: React.FC = () => {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.cartModal}>
-            <View style={styles.cartModalHeader}>
-              <View style={styles.cartTitleSection}>
-                <Text style={styles.cartTitle}>Current Order</Text>
-                <Text style={styles.cartSubtitle}>
-                  Order #{Math.floor(Math.random() * 1000).toString().padStart(3, '0')} • {new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                </Text>
-              </View>
-              <View style={styles.cartModalButtons}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.cartTitle}>Current Order</Text>
+              <View style={styles.modalHeaderButtons}>
                 {cart.length > 0 && (
                   <TouchableOpacity
                     style={styles.clearButton}
                     onPress={clearCart}
                   >
-                    <Text style={styles.clearButtonText}>Clear All</Text>
+                    <Icon name="clear" size={20} color={Colors.accent} />
                   </TouchableOpacity>
                 )}
                 <TouchableOpacity
-                  style={styles.modalCloseButton}
+                  style={styles.closeButton}
                   onPress={() => setShowCartModal(false)}
                 >
                   <Icon name="close" size={24} color={Colors.text} />
@@ -377,9 +407,8 @@ const POSScreen: React.FC = () => {
             
             {cart.length === 0 ? (
               <View style={styles.emptyCart}>
-                <Icon name="shopping-cart" size={64} color={Colors.lightGray} />
-                <Text style={styles.emptyCartText}>Cart is empty</Text>
-                <Text style={styles.emptyCartSubtext}>Add items to get started</Text>
+                <Icon name="shopping-cart" size={60} color={Colors.lightText} />
+                <Text style={styles.emptyCartSubtext}>Add items to start your order</Text>
               </View>
             ) : (
               <>
@@ -390,43 +419,20 @@ const POSScreen: React.FC = () => {
                 </ScrollView>
                 
                 <View style={styles.cartFooter}>
-                  <View style={styles.cartSummary}>
-                    <View style={styles.summarySection}>
-                      <Text style={styles.summarySectionTitle}>Order Summary</Text>
-                      <View style={styles.summaryRow}>
-                        <Text style={styles.summaryLabel}>Items ({cartItemCount()})</Text>
-                        <Text style={styles.summaryValue}>£{cartTotal().toFixed(2)}</Text>
-                      </View>
-                    </View>
-                    
-                    <View style={styles.summarySection}>
-                      <Text style={styles.summarySectionTitle}>Taxes & Fees</Text>
-                      <View style={styles.summaryRow}>
-                        <Text style={styles.summaryLabel}>VAT (20%)</Text>
-                        <Text style={styles.summaryValue}>£{(cartTotal() * 0.2).toFixed(2)}</Text>
-                      </View>
-                      <View style={styles.summaryRow}>
-                        <Text style={styles.summaryLabel}>Service Fee</Text>
-                        <Text style={styles.summaryValue}>£0.00</Text>
-                      </View>
-                    </View>
-                    
-                    <View style={[styles.summaryRow, styles.totalRow]}>
-                      <Text style={styles.totalLabel}>Total</Text>
-                      <Text style={styles.totalAmount}>£{(cartTotal() * 1.2).toFixed(2)}</Text>
-                    </View>
+                  <View style={styles.totalSection}>
+                    <Text style={styles.totalLabel}>Total</Text>
+                    <Text style={styles.totalAmount}>£{cartTotal().toFixed(2)}</Text>
                   </View>
                   
                   <TouchableOpacity
-                    style={styles.chargeButton}
+                    style={styles.checkoutButton}
                     onPress={() => {
                       setShowCartModal(false);
                       setShowPaymentModal(true);
                     }}
                   >
-                    <Text style={styles.chargeButtonText}>
-                      Charge £{(cartTotal() * 1.2).toFixed(2)}
-                    </Text>
+                    <Icon name="payment" size={20} color={Colors.white} />
+                    <Text style={styles.checkoutButtonText}>Process Payment</Text>
                   </TouchableOpacity>
                 </View>
               </>
@@ -438,86 +444,59 @@ const POSScreen: React.FC = () => {
       {/* Payment Modal */}
       <Modal
         visible={showPaymentModal}
-        animationType="fade"
+        animationType="slide"
         transparent={true}
         onRequestClose={() => setShowPaymentModal(false)}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.paymentModal}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Payment</Text>
+              <Text style={styles.paymentTitle}>Process Payment</Text>
               <TouchableOpacity
+                style={styles.closeButton}
                 onPress={() => setShowPaymentModal(false)}
-                style={styles.modalCloseButton}
               >
                 <Icon name="close" size={24} color={Colors.text} />
               </TouchableOpacity>
             </View>
             
-            <View style={styles.modalContent}>
+            <View style={styles.paymentSection}>
+              <Text style={styles.paymentLabel}>Customer Name (Optional)</Text>
               <TextInput
-                style={styles.input}
-                placeholder="Customer name (optional)"
+                style={styles.paymentInput}
                 value={customerName}
                 onChangeText={setCustomerName}
-                placeholderTextColor={Colors.darkGray}
+                placeholder="Enter customer name"
+                placeholderTextColor={Colors.lightText}
               />
-              
-              {/* Order Summary */}
-              <View style={styles.orderSummary}>
-                <Text style={styles.orderSummaryTitle}>Order Summary</Text>
-                {cart.map((item) => {
-                  const menuItem = menuItems.find(mi => mi.id === item.id);
-                  return (
-                    <View key={item.id} style={styles.orderSummaryItem}>
-                      <View style={styles.orderSummaryItemHeader}>
-                        <Text style={styles.orderSummaryEmoji}>{item.emoji}</Text>
-                        <Text style={styles.orderSummaryItemName}>{item.name}</Text>
-                        <Text style={styles.orderSummaryQuantity}>x{item.quantity}</Text>
-                        <Text style={styles.orderSummaryPrice}>£{(item.price * item.quantity).toFixed(2)}</Text>
-                      </View>
-                      {menuItem?.description && (
-                        <Text style={styles.orderSummaryDescription} numberOfLines={1}>
-                          {menuItem.description}
-                        </Text>
-                      )}
-                    </View>
-                  );
-                })}
-              </View>
-              
-              <View style={styles.paymentMethodsSection}>
-                <Text style={styles.paymentMethodsTitle}>Payment Method</Text>
-                <View style={styles.paymentMethods}>
-                  <TouchableOpacity style={[styles.paymentMethod, styles.paymentMethodSelected]}>
-                    <Icon name="credit-card" size={24} color={Colors.accent} />
-                    <Text style={styles.paymentMethodText}>Card</Text>
-                    <Text style={styles.paymentMethodSubtext}>Tap, chip & PIN</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.paymentMethod}>
-                    <Icon name="attach-money" size={24} color={Colors.success} />
-                    <Text style={styles.paymentMethodText}>Cash</Text>
-                    <Text style={styles.paymentMethodSubtext}>Exact change</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.paymentMethod}>
-                    <Icon name="phone-iphone" size={24} color={Colors.accent} />
-                    <Text style={styles.paymentMethodText}>Mobile</Text>
-                    <Text style={styles.paymentMethodSubtext}>Apple Pay, Google Pay</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.paymentMethod}>
-                    <Icon name="card-giftcard" size={24} color={Colors.warning} />
-                    <Text style={styles.paymentMethodText}>Gift Card</Text>
-                    <Text style={styles.paymentMethodSubtext}>Store credit</Text>
-                  </TouchableOpacity>
+            </View>
+
+            <View style={styles.paymentSummary}>
+              <Text style={styles.paymentSummaryTitle}>Order Summary</Text>
+              {cart.map((item) => (
+                <View key={item.id} style={styles.summaryItem}>
+                  <Text style={styles.summaryItemText}>
+                    {item.name} x{item.quantity}
+                  </Text>
+                  <Text style={styles.summaryItemPrice}>
+                    £{(item.price * item.quantity).toFixed(2)}
+                  </Text>
                 </View>
-              </View>
-              
-              <View style={styles.modalTotal}>
-                <Text style={styles.modalTotalLabel}>Total to Pay</Text>
-                <Text style={styles.modalTotalAmount}>
-                  £{(cartTotal() * 1.2).toFixed(2)}
+              ))}
+              <View style={styles.summaryTotal}>
+                <Text style={styles.summaryTotalText}>
+                  Total: £{cartTotal().toFixed(2)}
                 </Text>
               </View>
+            </View>
+
+            <View style={styles.paymentButtons}>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => setShowPaymentModal(false)}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
               
               <TouchableOpacity
                 style={styles.confirmButton}
@@ -540,24 +519,16 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: Colors.primary,
+    paddingHorizontal: 20,
+    paddingVertical: 15,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: Colors.white,
-  },
-  headerRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  headerButton: {
-    marginLeft: 20,
-    padding: 4,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   menuButton: {
     padding: 8,
@@ -565,30 +536,26 @@ const styles = StyleSheet.create({
   headerCenter: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
   },
-  logo: {
-    width: 40,
-    height: 40,
+  headerRight: {
+    flexDirection: 'row',
+  },
+  headerButton: {
+    padding: 8,
+    marginLeft: 8,
   },
   cartButton: {
     position: 'relative',
   },
-  cartBadge: {
-    position: 'absolute',
-    top: -4,
-    right: -4,
-    backgroundColor: Colors.warning,
-    borderRadius: 10,
-    minWidth: 20,
-    height: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
+  sessionInfo: {
+    backgroundColor: Colors.secondary,
+    paddingHorizontal: 20,
+    paddingVertical: 8,
   },
-  cartBadgeText: {
+  sessionText: {
     color: Colors.white,
-    fontSize: 12,
-    fontWeight: 'bold',
+    fontSize: 14,
+    textAlign: 'center',
   },
   mainContent: {
     flex: 1,
@@ -596,291 +563,239 @@ const styles = StyleSheet.create({
   },
   fullPanel: {
     flex: 1,
-    backgroundColor: Colors.white,
+    padding: 15,
   },
-  categoryTabs: {
-    backgroundColor: Colors.white,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+  categoryScroll: {
+    marginBottom: 15,
   },
-  categoryTabsContent: {
-    paddingHorizontal: 20,
-    paddingVertical: 20,
+  categoryScrollContent: {
+    paddingRight: 20,
   },
-  categoryTab: {
-    paddingHorizontal: 20,
-    paddingVertical: 12,
+  categoryButton: {
+    backgroundColor: Colors.cream,
+    paddingHorizontal: 22,
+    paddingVertical: 14,
+    borderRadius: 30,
     marginRight: 12,
-    borderRadius: 25,
-    backgroundColor: Colors.background,
-    minHeight: 40,
-    justifyContent: 'center',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    borderWidth: 2,
+    borderColor: Colors.terracotta,
   },
-  categoryTabActive: {
-    backgroundColor: Colors.accent,
+  categoryButtonActive: {
+    backgroundColor: Colors.secondary,
+    borderColor: Colors.gold,
+    borderWidth: 2,
+    transform: [{ scale: 1.05 }],
   },
-  categoryTabText: {
-    fontSize: 16,
-    fontWeight: '500',
+  categoryButtonText: {
     color: Colors.text,
-    textAlign: 'center',
+    fontWeight: '600',
+    fontSize: 14,
   },
-  categoryTabTextActive: {
+  categoryButtonTextActive: {
     color: Colors.white,
   },
   menuGrid: {
-    padding: 20,
-    paddingBottom: 100,
+    paddingBottom: 20,
   },
   menuRow: {
-    justifyContent: 'space-around',
-    paddingHorizontal: 10,
+    justifyContent: 'space-between',
+    marginBottom: 15,
   },
   menuCard: {
-    backgroundColor: Colors.cardBg,
-    borderRadius: 12,
-    padding: 16,
-    margin: 8,
-    flex: 1,
-    minHeight: 180,
-    width: (screenWidth - 80) / 3,
+    backgroundColor: Colors.cream,
+    borderRadius: 16,
+    padding: 18,
+    width: isTablet ? '31%' : '48%',
+    marginBottom: 15,
+    elevation: 6,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    borderWidth: 1,
+    borderColor: Colors.terracotta,
+    borderTopWidth: 3,
+    borderTopColor: Colors.secondary,
   },
   menuCardDisabled: {
-    opacity: 0.6,
+    opacity: 0.5,
   },
-  menuCardContent: {
+  menuItemImage: {
     alignItems: 'center',
-    justifyContent: 'space-between',
-    flex: 1,
+    marginBottom: 10,
   },
   menuItemEmoji: {
     fontSize: 40,
-    marginBottom: 12,
+  },
+  menuItemInfo: {
+    alignItems: 'center',
   },
   menuItemName: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: Colors.text,
-    textAlign: 'center',
-    marginBottom: 8,
-    lineHeight: 18,
-    minHeight: 36,
-    flexWrap: 'wrap',
-  },
-  menuItemPrice: {
     fontSize: 16,
     fontWeight: '600',
+    color: Colors.text,
+    textAlign: 'center',
+    marginBottom: 5,
+  },
+  menuItemPrice: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: Colors.secondary,
+  },
+  unavailableText: {
+    fontSize: 12,
     color: Colors.accent,
-    textAlign: 'center',
-  },
-  menuItemQuantityControls: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 8,
-    backgroundColor: Colors.accent,
-    borderRadius: 15,
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-  },
-  menuQuantityButton: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  menuQuantityText: {
-    color: Colors.white,
-    fontSize: 14,
     fontWeight: '600',
-    marginHorizontal: 12,
-    minWidth: 20,
-    textAlign: 'center',
+    marginTop: 4,
   },
-  rightPanel: {
-    flex: 1,
-    backgroundColor: Colors.white,
-    borderLeftWidth: 1,
-    borderLeftColor: Colors.border,
+  cartModal: {
+    backgroundColor: Colors.cream,
+    borderRadius: 24,
+    padding: 32,
+    width: '90%',
+    maxWidth: 520,
+    maxHeight: '80%',
+    borderWidth: 3,
+    borderColor: Colors.terracotta,
+    borderTopWidth: 6,
+    borderTopColor: Colors.primary,
+    elevation: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
   },
-  cartHeader: {
+  modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-  },
-  cartTitleSection: {
-    flex: 1,
+    marginBottom: 30,
   },
   cartTitle: {
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: 24,
+    fontWeight: 'bold',
     color: Colors.text,
   },
-  cartSubtitle: {
-    fontSize: 12,
-    color: Colors.darkGray,
-    marginTop: 2,
+  modalHeaderButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   clearButton: {
     padding: 8,
   },
-  clearButtonText: {
-    color: Colors.warning,
-    fontSize: 14,
-    fontWeight: '500',
+  closeButton: {
+    padding: 4,
   },
   emptyCart: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 40,
-  },
-  emptyCartText: {
-    fontSize: 18,
-    fontWeight: '500',
-    color: Colors.text,
-    marginTop: 16,
   },
   emptyCartSubtext: {
-    fontSize: 14,
-    color: Colors.darkGray,
-    marginTop: 8,
-    textAlign: 'center',
+    fontSize: 16,
+    color: Colors.lightText,
+    marginTop: 10,
   },
   cartList: {
     flex: 1,
+    padding: 20,
   },
   cartItem: {
-    padding: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 15,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: Colors.lightGray,
   },
-  cartItemInfo: {
-    flex: 1,
-    marginBottom: 12,
-  },
-  cartItemHeader: {
+  cartItemLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    flex: 1,
   },
   cartItemEmoji: {
     fontSize: 24,
-    marginRight: 12,
+    marginRight: 15,
   },
-  cartItemDetails: {
+  cartItemInfo: {
     flex: 1,
   },
   cartItemName: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '600',
     color: Colors.text,
-    marginBottom: 2,
   },
   cartItemPrice: {
-    fontSize: 12,
-    color: Colors.darkGray,
-  },
-  cartItemDescription: {
-    fontSize: 12,
+    fontSize: 14,
     color: Colors.lightText,
-    lineHeight: 16,
-    marginLeft: 36,
+    marginTop: 2,
   },
-  cartItemActions: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  cartItemQuantity: {
+  cartItemRight: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   quantityButton: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.lightGray,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
   },
   quantityText: {
-    fontSize: 14,
-    fontWeight: '500',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginHorizontal: 15,
     color: Colors.text,
-    marginHorizontal: 12,
-  },
-  cartItemTotal: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.text,
+    minWidth: 20,
+    textAlign: 'center',
   },
   cartFooter: {
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
     padding: 20,
+    borderTopWidth: 1,
+    borderTopColor: Colors.lightGray,
   },
-  cartSummary: {
-    marginBottom: 20,
-  },
-  summarySection: {
-    marginBottom: 16,
-  },
-  summarySectionTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.text,
-    marginBottom: 8,
-  },
-  summaryRow: {
+  totalSection: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 8,
-  },
-  summaryLabel: {
-    fontSize: 14,
-    color: Colors.darkGray,
-  },
-  summaryValue: {
-    fontSize: 14,
-    color: Colors.text,
-  },
-  totalRow: {
-    marginTop: 8,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
+    alignItems: 'center',
+    marginBottom: 20,
   },
   totalLabel: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 20,
+    fontWeight: 'bold',
     color: Colors.text,
   },
   totalAmount: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: Colors.text,
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: Colors.secondary,
   },
-  chargeButton: {
-    backgroundColor: Colors.accent,
-    borderRadius: 8,
-    paddingVertical: 16,
+  checkoutButton: {
+    backgroundColor: Colors.success,
+    paddingVertical: 18,
+    borderRadius: 16,
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    borderWidth: 2,
+    borderColor: Colors.gold,
   },
-  chargeButtonText: {
+  checkoutButtonText: {
     color: Colors.white,
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginLeft: 8,
   },
   modalOverlay: {
     flex: 1,
@@ -888,180 +803,143 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  cartModal: {
-    backgroundColor: Colors.white,
-    borderRadius: 16,
-    width: '90%',
-    maxWidth: 500,
-    maxHeight: '80%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.1,
-    shadowRadius: 20,
-    elevation: 10,
-  },
-  cartModalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-  },
-  cartModalButtons: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
   paymentModal: {
-    backgroundColor: Colors.white,
-    borderRadius: 16,
+    backgroundColor: Colors.cream,
+    borderRadius: 24,
+    padding: 32,
     width: '90%',
-    maxWidth: 400,
+    maxWidth: 520,
+    maxHeight: '80%',
+    borderWidth: 3,
+    borderColor: Colors.terracotta,
+    borderTopWidth: 6,
+    borderTopColor: Colors.primary,
+    elevation: 12,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.1,
-    shadowRadius: 20,
-    elevation: 10,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
   },
-  modalHeader: {
+  paymentTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: Colors.text,
+  },
+  paymentSection: {
+    marginBottom: 30,
+  },
+  paymentLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.text,
+    marginBottom: 10,
+  },
+  paymentInput: {
+    borderWidth: 1,
+    borderColor: Colors.lightGray,
+    borderRadius: 8,
+    padding: 15,
+    fontSize: 16,
+    color: Colors.text,
+  },
+  paymentSummary: {
+    backgroundColor: Colors.background,
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 30,
+  },
+  paymentSummaryTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: Colors.text,
+    marginBottom: 15,
+  },
+  summaryItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    paddingVertical: 8,
   },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: Colors.text,
-  },
-  modalCloseButton: {
-    padding: 4,
-  },
-  modalContent: {
-    padding: 20,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+  summaryItemText: {
     fontSize: 16,
-    color: Colors.text,
-    marginBottom: 20,
-  },
-  orderSummary: {
-    marginBottom: 20,
-    backgroundColor: Colors.background,
-    borderRadius: 8,
-    padding: 16,
-  },
-  orderSummaryTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.text,
-    marginBottom: 12,
-  },
-  orderSummaryItem: {
-    marginBottom: 12,
-  },
-  orderSummaryItemHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  orderSummaryEmoji: {
-    fontSize: 16,
-    marginRight: 8,
-  },
-  orderSummaryItemName: {
-    fontSize: 14,
-    fontWeight: '500',
     color: Colors.text,
     flex: 1,
   },
-  orderSummaryQuantity: {
-    fontSize: 14,
-    color: Colors.darkGray,
-    marginRight: 12,
-  },
-  orderSummaryPrice: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.text,
-  },
-  orderSummaryDescription: {
-    fontSize: 12,
-    color: Colors.lightText,
-    marginLeft: 24,
-    fontStyle: 'italic',
-  },
-  paymentMethodsSection: {
-    marginBottom: 30,
-  },
-  paymentMethodsTitle: {
+  summaryItemPrice: {
     fontSize: 16,
     fontWeight: '600',
     color: Colors.text,
-    marginBottom: 16,
   },
-  paymentMethods: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+  summaryTotal: {
+    borderTopWidth: 1,
+    borderTopColor: Colors.lightGray,
+    paddingTop: 15,
+    marginTop: 15,
   },
-  paymentMethod: {
-    alignItems: 'center',
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: Colors.border,
-    backgroundColor: Colors.white,
-    width: '48%',
-    marginBottom: 12,
-  },
-  paymentMethodSelected: {
-    borderColor: Colors.accent,
-    backgroundColor: 'rgba(76, 110, 245, 0.05)',
-  },
-  paymentMethodText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: Colors.text,
-    marginTop: 8,
-  },
-  paymentMethodSubtext: {
-    fontSize: 11,
-    color: Colors.darkGray,
-    marginTop: 2,
+  summaryTotalText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: Colors.secondary,
     textAlign: 'center',
   },
-  modalTotal: {
-    alignItems: 'center',
-    marginBottom: 20,
+  paymentButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
-  modalTotalLabel: {
-    fontSize: 14,
-    color: Colors.darkGray,
-    marginBottom: 4,
+  cancelButton: {
+    backgroundColor: Colors.lightGray,
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    borderRadius: 12,
+    flex: 1,
+    marginRight: 10,
   },
-  modalTotalAmount: {
-    fontSize: 28,
-    fontWeight: '700',
+  cancelButtonText: {
     color: Colors.text,
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
   },
   confirmButton: {
     backgroundColor: Colors.success,
-    borderRadius: 8,
-    paddingVertical: 16,
-    alignItems: 'center',
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    borderRadius: 12,
+    flex: 1,
+    marginLeft: 10,
   },
   confirmButtonText: {
     color: Colors.white,
     fontSize: 16,
     fontWeight: '600',
+    textAlign: 'center',
+  },
+  cartBadge: {
+    backgroundColor: Colors.accent,
+    borderRadius: 16,
+    paddingHorizontal: 4,
+    paddingVertical: 2,
+    marginLeft: 8,
+  },
+  cartBadgeText: {
+    color: Colors.white,
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  logoContainer: {
+    backgroundColor: Colors.primary,
+    borderRadius: 6,
+    width: 32,
+    height: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Colors.secondary,
+  },
+  logoText: {
+    color: Colors.white,
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 });
 

@@ -85,8 +85,18 @@ export type RootStackParamList = {
   POS: undefined;
   Orders: undefined;
   Reports: undefined;
-  Settings: undefined;
-  Profile: undefined;
+  OrderDetails: { orderId: number };
+  TableSelection: undefined;
+};
+
+export type MainStackParamList = {
+  Drawer: undefined;
+  TableSelection: undefined;
+  POS: { 
+    tableId?: string; 
+    tableName?: string; 
+    orderType?: 'dine_in' | 'takeout' | 'pickup' | 'delivery';
+  };
   OrderDetails: { orderId: number };
 };
 
@@ -94,6 +104,12 @@ export type MainTabParamList = {
   POS: undefined;
   Orders: undefined;
   Reports: undefined;
+};
+
+export type DrawerParamList = {
+  Home: undefined;
+  Profile: undefined;
+  Settings: undefined;
 };
 
 export type AuthStackParamList = {

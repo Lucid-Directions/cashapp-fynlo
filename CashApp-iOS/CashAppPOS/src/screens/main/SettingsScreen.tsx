@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import useAppStore from '../../store/useAppStore';
+import Logo from '../../components/Logo';
 
 const Colors = {
   primary: '#2C3E50',
@@ -161,6 +162,7 @@ const SettingsScreen: React.FC = () => {
 
         {/* App Info */}
         <View style={styles.appInfo}>
+          <Logo size="small" showText={false} style={styles.appLogo} />
           <Text style={styles.appInfoText}>Fynlo POS v1.0.0</Text>
           <Text style={styles.appInfoText}>Powered by CashApp</Text>
         </View>
@@ -233,6 +235,9 @@ const styles = StyleSheet.create({
   appInfo: {
     alignItems: 'center',
     paddingVertical: 30,
+  },
+  appLogo: {
+    marginBottom: 12,
   },
   appInfoText: {
     fontSize: 14,

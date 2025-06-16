@@ -86,6 +86,11 @@ class OrdersController(POSAPIController):
                 'pricelist_id': session.config_id.pricelist_id.id,
                 'fiscal_position_id': data.get('fiscal_position_id'),
                 'user_id': auth_info.get('user_id'),
+                # Restaurant-specific fields
+                'order_type': data.get('order_type', 'dine_in'),
+                'table_id': data.get('table_id'),
+                'guest_count': data.get('guest_count', 1),
+                'kitchen_status': 'new',
             }
             
             order = request.env['pos.order'].create(order_vals)
@@ -500,6 +505,12 @@ class OrdersController(POSAPIController):
             'amount_paid': float(order.amount_paid),
             'amount_return': float(order.amount_return),
             'line_count': len(order.lines),
+            # Restaurant-specific fields
+            'order_type': order.order_type if hasattr(order, 'order_type') else 'dine_in',
+            'table_id': order.table_id.id if hasattr(order, 'table_id') and order.table_id else None,
+            'table_name': order.table_id.display_name if hasattr(order, 'table_id') and order.table_id else None,
+            'guest_count': order.guest_count if hasattr(order, 'guest_count') else 0,
+            'kitchen_status': order.kitchen_status if hasattr(order, 'kitchen_status') else 'new',
         }
         
         if detailed:

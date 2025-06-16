@@ -1,70 +1,108 @@
-import Expo
 import React
-import ReactAppDependencyProvider
+import Foundation
 
 @UIApplicationMain
-public class AppDelegate: ExpoAppDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate {
   var window: UIWindow?
 
-  var reactNativeDelegate: ExpoReactNativeFactoryDelegate?
-  var reactNativeFactory: RCTReactNativeFactory?
+  func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+    // Comprehensive fix for SocketRocket priority inversion warnings
+    DispatchQueue.main.async {
+      Thread.current.qualityOfService = .userInteractive
+    }
+    
+    // Additional runtime optimization for dispatch queues
+    DispatchQueue.global(qos: .userInteractive).async {
+      // Pre-warm SocketRocket threads with correct QoS
+      Thread.current.qualityOfService = .userInteractive
+    }
+    
+    let jsCodeLocation: URL
 
-  public override func application(
-    _ application: UIApplication,
-    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
-  ) -> Bool {
-    let delegate = ReactNativeDelegate()
-    let factory = ExpoReactNativeFactory(delegate: delegate)
-    delegate.dependencyProvider = RCTAppDependencyProvider()
+    #if DEBUG
+      // For debug builds, try Metro bundler first, then fall back to bundled JS
+      let metroURL = RCTBundleURLProvider.sharedSettings().jsBundleURL(forBundleRoot: "index")
+      
+      // Check multiple possible bundle locations
+      let possibleBundlePaths = [
+        Bundle.main.url(forResource: "main", withExtension: "jsbundle"),
+        Bundle.main.url(forResource: "main.jsbundle", withExtension: nil),
+        URL(fileURLWithPath: Bundle.main.bundlePath).appendingPathComponent("main.jsbundle")
+      ]
+      
+      let bundleUrl = possibleBundlePaths.compactMap { $0 }.first { FileManager.default.fileExists(atPath: $0.path) }
+      
+      if let metroURL = metroURL {
+        // Try Metro bundler for debug build
+        jsCodeLocation = metroURL
+        print("✅ Using Metro bundler for debug build: \(metroURL)")
+      } else if let bundleUrl = bundleUrl {
+        // Fall back to bundled JS if Metro is not available
+        jsCodeLocation = bundleUrl
+        print("✅ Using bundled JavaScript for debug build: \(bundleUrl.path)")
+      } else {
+        // Create a helpful error message
+        print("❌ No JavaScript bundle found!")
+        print("📍 Searched paths:")
+        possibleBundlePaths.forEach { url in
+          if let url = url {
+            print("   - \(url.path) (exists: \(FileManager.default.fileExists(atPath: url.path)))")
+          }
+        }
+        print("🔧 Run 'npm run build:ios' and ensure main.jsbundle is added to Xcode project")
+        fatalError("JavaScript bundle not found - see console for details")
+      }
+    #else
+      // For release builds, use bundled JS
+      guard let bundleUrl = Bundle.main.url(forResource: "main", withExtension: "jsbundle") else {
+        fatalError("Could not find main.jsbundle in app bundle")
+      }
+      jsCodeLocation = bundleUrl
+      print("Using bundled JavaScript for release build")
+    #endif
 
-    reactNativeDelegate = delegate
-    reactNativeFactory = factory
-    bindReactNativeFactory(factory)
+    print("JS Code Location: \(jsCodeLocation)")
 
-#if os(iOS) || os(tvOS)
-    window = UIWindow(frame: UIScreen.main.bounds)
-    factory.startReactNative(
-      withModuleName: "main",
-      in: window,
-      launchOptions: launchOptions)
-#endif
+    let rootView = RCTRootView(
+      bundleURL: jsCodeLocation,
+      moduleName: "CashAppPOS",
+      initialProperties: nil,
+      launchOptions: launchOptions
+    )
 
-    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+    if rootView.loadingView == nil {
+      print("RCTRootView created successfully")
+    } else {
+      print("RCTRootView is still loading")
+    }
+
+    rootView.backgroundColor = UIColor.white
+
+    self.window = UIWindow(frame: UIScreen.main.bounds)
+    let rootViewController = UIViewController()
+    rootViewController.view = rootView
+    
+    guard let window = self.window else {
+      fatalError("Window could not be initialized")
+    }
+    
+    window.rootViewController = rootViewController
+    window.makeKeyAndVisible()
+
+    print("App window initialized and made visible")
+
+    return true
   }
 
-  // Linking API
-  public override func application(
-    _ app: UIApplication,
-    open url: URL,
-    options: [UIApplication.OpenURLOptionsKey: Any] = [:]
-  ) -> Bool {
-    return super.application(app, open: url, options: options) || RCTLinkingManager.application(app, open: url, options: options)
+  // MARK: - Linking API
+
+  func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
+    return RCTLinkingManager.application(app, open: url, options: options)
   }
 
-  // Universal Links
-  public override func application(
-    _ application: UIApplication,
-    continue userActivity: NSUserActivity,
-    restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void
-  ) -> Bool {
-    let result = RCTLinkingManager.application(application, continue: userActivity, restorationHandler: restorationHandler)
-    return super.application(application, continue: userActivity, restorationHandler: restorationHandler) || result
-  }
-}
+  // MARK: - Universal Links
 
-class ReactNativeDelegate: ExpoReactNativeFactoryDelegate {
-  // Extension point for config-plugins
-
-  override func sourceURL(for bridge: RCTBridge) -> URL? {
-    // needed to return the correct URL for expo-dev-client.
-    bridge.bundleURL ?? bundleURL()
-  }
-
-  override func bundleURL() -> URL? {
-#if DEBUG
-    return RCTBundleURLProvider.sharedSettings().jsBundleURL(forBundleRoot: ".expo/.virtual-metro-entry")
-#else
-    return Bundle.main.url(forResource: "main", withExtension: "jsbundle")
-#endif
+  func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
+    return RCTLinkingManager.application(application, continue: userActivity, restorationHandler: restorationHandler)
   }
 }

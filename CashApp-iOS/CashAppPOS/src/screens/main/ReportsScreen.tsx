@@ -68,7 +68,7 @@ const ReportsScreen: React.FC = () => {
           <View style={styles.statsGrid}>
             <StatCard
               title="Total Sales"
-              value={`$${todaysStats.sales.toFixed(2)}`}
+              value={`£${todaysStats.sales.toFixed(2)}`}
               icon="attach-money"
               color={Colors.success}
             />
@@ -80,7 +80,7 @@ const ReportsScreen: React.FC = () => {
             />
             <StatCard
               title="Avg Order"
-              value={`$${todaysStats.avgOrder.toFixed(2)}`}
+              value={`£${todaysStats.avgOrder.toFixed(2)}`}
               icon="trending-up"
               color={Colors.warning}
             />

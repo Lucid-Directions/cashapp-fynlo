@@ -10,13 +10,13 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
-  Image,
   Dimensions,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import useAppStore from '../../store/useAppStore';
 import DatabaseService from '../../services/DatabaseService';
+import Logo from '../../components/Logo';
 
 const { width, height } = Dimensions.get('window');
 
@@ -107,10 +107,7 @@ const LoginScreen: React.FC = () => {
         <View style={styles.content}>
           {/* Logo Section */}
           <View style={styles.logoSection}>
-            <View style={styles.logoContainer}>
-              <Text style={styles.logoText}>Fynlo</Text>
-              <Text style={styles.logoSubtext}>Point of Sale</Text>
-            </View>
+            <Logo size="large" />
           </View>
 
           {/* Login Form */}
@@ -220,21 +217,6 @@ const styles = StyleSheet.create({
   logoSection: {
     alignItems: 'center',
     marginBottom: 50,
-  },
-  logoContainer: {
-    alignItems: 'center',
-  },
-  logoText: {
-    fontSize: 48,
-    fontWeight: 'bold',
-    color: Colors.primary,
-    letterSpacing: -2,
-  },
-  logoSubtext: {
-    fontSize: 16,
-    color: Colors.lightText,
-    marginTop: 5,
-    letterSpacing: 1,
   },
   formSection: {
     marginBottom: 40,

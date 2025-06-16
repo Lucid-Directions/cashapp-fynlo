@@ -306,6 +306,115 @@ class DatabaseService {
     }
   }
 
+  // Restaurant-specific operations
+  async getRestaurantFloorPlan(sectionId?: string | null): Promise<any> {
+    try {
+      const endpoint = sectionId 
+        ? `/restaurant/floor_plan?section_id=${sectionId}`
+        : '/restaurant/floor_plan';
+      
+      const response = await this.apiRequest(endpoint, {
+        method: 'GET',
+      });
+      
+      return response || { tables: [], sections: [] };
+    } catch (error) {
+      console.error('Failed to fetch floor plan:', error);
+      // Return mock data for development
+      return this.getMockFloorPlan();
+    }
+  }
+
+  async updateTableStatus(tableId: string, status: string, additionalData?: any): Promise<any> {
+    try {
+      const response = await this.apiRequest('/restaurant/table/update_status', {
+        method: 'POST',
+        body: JSON.stringify({
+          table_id: tableId,
+          status,
+          ...additionalData,
+        }),
+      });
+      
+      return response;
+    } catch (error) {
+      console.error('Failed to update table status:', error);
+      throw error;
+    }
+  }
+
+  async assignServerToTable(tableId: string, serverId: string): Promise<any> {
+    try {
+      const response = await this.apiRequest('/restaurant/table/assign_server', {
+        method: 'POST',
+        body: JSON.stringify({
+          table_id: tableId,
+          server_id: serverId,
+        }),
+      });
+      
+      return response;
+    } catch (error) {
+      console.error('Failed to assign server to table:', error);
+      throw error;
+    }
+  }
+
+  async getRestaurantSections(): Promise<any[]> {
+    try {
+      const response = await this.apiRequest('/restaurant/sections', {
+        method: 'GET',
+      });
+      
+      return response.sections || [];
+    } catch (error) {
+      console.error('Failed to fetch restaurant sections:', error);
+      return [];
+    }
+  }
+
+  // Analytics and Reporting
+  async getDailySalesReport(date?: string): Promise<any> {
+    try {
+      const endpoint = date 
+        ? `/pos/reports/daily_sales?date=${date}`
+        : '/pos/reports/daily_sales';
+      
+      const response = await this.apiRequest(endpoint, {
+        method: 'GET',
+      });
+      
+      return response || this.getMockDailyReport();
+    } catch (error) {
+      console.error('Failed to fetch daily sales report:', error);
+      // Return mock data for development
+      return this.getMockDailyReport();
+    }
+  }
+
+  async getSalesSummary(dateFrom?: string, dateTo?: string): Promise<any> {
+    try {
+      let endpoint = '/pos/reports/sales_summary';
+      const params = [];
+      
+      if (dateFrom) params.push(`date_from=${dateFrom}`);
+      if (dateTo) params.push(`date_to=${dateTo}`);
+      
+      if (params.length > 0) {
+        endpoint += '?' + params.join('&');
+      }
+      
+      const response = await this.apiRequest(endpoint, {
+        method: 'GET',
+      });
+      
+      return response || this.getMockSalesSummary();
+    } catch (error) {
+      console.error('Failed to fetch sales summary:', error);
+      return this.getMockSalesSummary();
+    }
+  }
+
   // Cache management
   async syncOfflineData(): Promise<void> {
     try {
@@ -346,6 +455,144 @@ class DatabaseService {
       { id: 5, name: 'Desserts', active: true },
       { id: 6, name: 'Drinks', active: true },
     ];
+  }
+
+  private getMockFloorPlan(): any {
+    return {
+      tables: [
+        {
+          id: '1',
+          name: 'T1',
+          display_name: 'Main Floor - Table T1',
+          capacity: 4,
+          status: 'available',
+          section: { id: '1', name: 'Main Floor', color: '#3498db' },
+          stats: { orders_today: 3, revenue_today: 125.50 }
+        },
+        {
+          id: '2',
+          name: 'T2',
+          display_name: 'Main Floor - Table T2',
+          capacity: 2,
+          status: 'occupied',
+          section: { id: '1', name: 'Main Floor', color: '#3498db' },
+          current_order: { id: '101', name: 'Order 101', amount: 45.99 },
+          server: { id: '1', name: 'John Doe' },
+          occupied_since: new Date().toISOString(),
+          stats: { orders_today: 5, revenue_today: 225.00 }
+        },
+        {
+          id: '3',
+          name: 'T3',
+          display_name: 'Main Floor - Table T3',
+          capacity: 6,
+          status: 'reserved',
+          section: { id: '1', name: 'Main Floor', color: '#3498db' },
+          stats: { orders_today: 2, revenue_today: 180.00 }
+        },
+        {
+          id: '4',
+          name: 'P1',
+          display_name: 'Patio - Table P1',
+          capacity: 4,
+          status: 'available',
+          section: { id: '2', name: 'Patio', color: '#27ae60' },
+          stats: { orders_today: 1, revenue_today: 65.00 }
+        },
+        {
+          id: '5',
+          name: 'P2',
+          display_name: 'Patio - Table P2',
+          capacity: 4,
+          status: 'cleaning',
+          section: { id: '2', name: 'Patio', color: '#27ae60' },
+          stats: { orders_today: 4, revenue_today: 195.00 }
+        },
+        {
+          id: '6',
+          name: 'B1',
+          display_name: 'Bar - Table B1',
+          capacity: 2,
+          status: 'available',
+          section: { id: '3', name: 'Bar', color: '#e74c3c' },
+          stats: { orders_today: 6, revenue_today: 145.00 }
+        },
+      ],
+      sections: [
+        { id: '1', name: 'Main Floor', color: '#3498db', table_count: 3, total_capacity: 12 },
+        { id: '2', name: 'Patio', color: '#27ae60', table_count: 2, total_capacity: 8 },
+        { id: '3', name: 'Bar', color: '#e74c3c', table_count: 1, total_capacity: 2 },
+      ]
+    };
+  }
+
+  private getMockDailyReport(): any {
+    const today = new Date().toISOString().split('T')[0];
+    return {
+      report_info: {
+        type: 'daily',
+        date: today,
+        generated_at: new Date().toISOString(),
+        total_orders: 47
+      },
+      summary: {
+        total_sales: 1847.50,
+        net_sales: 1685.00,
+        total_tax: 162.50,
+        total_orders: 47,
+        average_ticket: 39.31,
+        total_items: 124,
+        average_items_per_order: 2.64,
+        refund_amount: 25.99,
+        refund_count: 1,
+        discount_amount: 89.75
+      },
+      hourly_breakdown: [
+        { hour: '09:00', sales: 45.50, orders: 2, items: 3 },
+        { hour: '10:00', sales: 128.75, orders: 4, items: 8 },
+        { hour: '11:00', sales: 234.20, orders: 7, items: 15 },
+        { hour: '12:00', sales: 387.90, orders: 12, items: 28 },
+        { hour: '13:00', sales: 445.60, orders: 11, items: 31 },
+        { hour: '14:00', sales: 198.30, orders: 5, items: 14 },
+        { hour: '15:00', sales: 156.75, orders: 3, items: 9 },
+        { hour: '16:00', sales: 89.25, orders: 2, items: 5 },
+        { hour: '17:00', sales: 161.25, orders: 1, items: 11 }
+      ],
+      payment_methods: [
+        { method: 'Card', amount: 1234.50, count: 35, orders: 35, percentage: 66.8 },
+        { method: 'Cash', amount: 455.75, count: 11, orders: 11, percentage: 24.7 },
+        { method: 'Apple Pay', amount: 157.25, count: 1, orders: 1, percentage: 8.5 }
+      ],
+      top_products: [
+        { name: 'Classic Burger', qty: 18, amount: 233.82, orders: 15, category: 'Main' },
+        { name: 'Margherita Pizza', qty: 12, amount: 191.88, orders: 11, category: 'Main' },
+        { name: 'Caesar Salad', qty: 8, amount: 79.92, orders: 8, category: 'Salads' },
+        { name: 'Chicken Wings', qty: 14, amount: 167.86, orders: 7, category: 'Appetizers' },
+        { name: 'French Fries', qty: 22, amount: 109.78, orders: 18, category: 'Sides' }
+      ]
+    };
+  }
+
+  private getMockSalesSummary(): any {
+    return {
+      period: {
+        from: new Date().toISOString().split('T')[0],
+        to: new Date().toISOString().split('T')[0]
+      },
+      summary: {
+        total_sales: 1847.50,
+        net_sales: 1685.00,
+        total_tax: 162.50,
+        total_orders: 47,
+        average_ticket: 39.31
+      },
+      order_types: {
+        dine_in: 32,
+        takeout: 12,
+        delivery: 3
+      },
+      generated_at: new Date().toISOString()
+    };
   }
 }
 

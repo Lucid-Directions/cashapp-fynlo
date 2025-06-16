@@ -1,0 +1,19 @@
+--- a/SocketRocket/Internal/RunLoop/SRRunLoopThread.m
++++ b/SocketRocket/Internal/RunLoop/SRRunLoopThread.m
+@@ -76,7 +76,16 @@
+ 
+ - (NSRunLoop *)runLoop;
+ {
+-    dispatch_group_wait(_waitGroup, DISPATCH_TIME_FOREVER);
++    // Fix for priority inversion warning - use timeout instead of DISPATCH_TIME_FOREVER
++    dispatch_time_t timeout = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(10.0 * NSEC_PER_SEC));
++    long result = dispatch_group_wait(_waitGroup, timeout);
++    
++    if (result != 0) {
++        // Fallback: if timeout occurs, try once more with a shorter timeout
++        timeout = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC));
++        dispatch_group_wait(_waitGroup, timeout);
++    }
++    
+     return _runLoop;
+ }

@@ -79,12 +79,12 @@ const OrderDetailsScreen: React.FC = () => {
       <Text style={styles.itemEmoji}>{item.emoji}</Text>
       <View style={styles.itemDetails}>
         <Text style={styles.itemName}>{item.name}</Text>
-        <Text style={styles.itemPrice}>${item.price.toFixed(2)} each</Text>
+                    <Text style={styles.itemPrice}>£{item.price.toFixed(2)} each</Text>
       </View>
       <View style={styles.itemQuantity}>
         <Text style={styles.quantityText}>x{item.quantity}</Text>
         <Text style={styles.itemTotal}>
-          ${(item.price * item.quantity).toFixed(2)}
+          £{(item.price * item.quantity).toFixed(2)}
         </Text>
       </View>
     </View>
@@ -177,15 +177,15 @@ const OrderDetailsScreen: React.FC = () => {
           <View style={styles.summaryCard}>
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>Subtotal</Text>
-              <Text style={styles.summaryValue}>${mockOrder.subtotal.toFixed(2)}</Text>
+              <Text style={styles.summaryValue}>£{mockOrder.subtotal.toFixed(2)}</Text>
             </View>
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>Tax</Text>
-              <Text style={styles.summaryValue}>${mockOrder.tax.toFixed(2)}</Text>
+              <Text style={styles.summaryValue}>£{mockOrder.tax.toFixed(2)}</Text>
             </View>
             <View style={[styles.summaryRow, styles.totalRow]}>
               <Text style={styles.totalLabel}>Total</Text>
-              <Text style={styles.totalValue}>${mockOrder.total.toFixed(2)}</Text>
+              <Text style={styles.totalValue}>£{mockOrder.total.toFixed(2)}</Text>
             </View>
           </View>
         </View>

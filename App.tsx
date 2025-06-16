@@ -127,7 +127,7 @@ function App(): React.JSX.Element {
       </View>
       <View style={styles.menuItemInfo}>
         <Text style={styles.menuItemName}>{item.name}</Text>
-        <Text style={styles.menuItemPrice}>${item.price.toFixed(2)}</Text>
+                  <Text style={styles.menuItemPrice}>£{item.price.toFixed(2)}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -138,7 +138,7 @@ function App(): React.JSX.Element {
         <Text style={styles.cartItemEmoji}>{item.image}</Text>
         <View>
           <Text style={styles.cartItemName}>{item.name}</Text>
-          <Text style={styles.cartItemPrice}>${item.price.toFixed(2)}</Text>
+          <Text style={styles.cartItemPrice}>£{item.price.toFixed(2)}</Text>
         </View>
       </View>
       <View style={styles.cartItemRight}>
@@ -240,7 +240,7 @@ function App(): React.JSX.Element {
               <View style={styles.cartFooter}>
                 <View style={styles.totalSection}>
                   <Text style={styles.totalLabel}>Total</Text>
-                  <Text style={styles.totalAmount}>${getTotalAmount().toFixed(2)}</Text>
+                  <Text style={styles.totalAmount}>£{getTotalAmount().toFixed(2)}</Text>
                 </View>
                 
                 <TouchableOpacity 
@@ -285,12 +285,12 @@ function App(): React.JSX.Element {
                     {item.name} x{item.quantity}
                   </Text>
                   <Text style={styles.summaryItemPrice}>
-                    ${(item.price * item.quantity).toFixed(2)}
+                    £{(item.price * item.quantity).toFixed(2)}
                   </Text>
                 </View>
               ))}
               <View style={styles.summaryTotal}>
-                <Text style={styles.summaryTotalText}>Total: ${getTotalAmount().toFixed(2)}</Text>
+                <Text style={styles.summaryTotalText}>Total: £{getTotalAmount().toFixed(2)}</Text>
               </View>
             </View>
 

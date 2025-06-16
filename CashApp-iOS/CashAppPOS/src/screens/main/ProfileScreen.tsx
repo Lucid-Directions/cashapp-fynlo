@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import useAppStore from '../../store/useAppStore';
+import Logo from '../../components/Logo';
 
 const Colors = {
   primary: '#2C3E50',
@@ -58,6 +59,7 @@ const ProfileScreen: React.FC = () => {
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Profile Header */}
         <View style={styles.profileHeader}>
+          <Logo size="small" showText={false} style={styles.profileLogo} />
           <View style={styles.avatar}>
             <Icon name="person" size={48} color={Colors.white} />
           </View>
@@ -115,7 +117,7 @@ const ProfileScreen: React.FC = () => {
                 <View style={styles.sessionItem}>
                   <Text style={styles.sessionLabel}>Total Sales</Text>
                   <Text style={styles.sessionValue}>
-                    ${session.totalSales.toFixed(2)}
+                    £{session.totalSales.toFixed(2)}
                   </Text>
                 </View>
               </View>
@@ -175,6 +177,9 @@ const styles = StyleSheet.create({
   profileHeader: {
     alignItems: 'center',
     paddingVertical: 30,
+  },
+  profileLogo: {
+    marginBottom: 16,
   },
   avatar: {
     width: 100,
