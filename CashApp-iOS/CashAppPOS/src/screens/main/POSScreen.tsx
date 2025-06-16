@@ -22,7 +22,7 @@ import useAppStore from '../../store/useAppStore';
 import useUIStore from '../../store/useUIStore';
 import { MenuItem, OrderItem, DrawerParamList } from '../../types';
 import DatabaseService from '../../services/DatabaseService';
-// import Logo from '../../components/Logo'; // Temporarily disabled due to JSX runtime error
+import Logo from '../../components/Logo';
 
 // Get screen dimensions
 const { width: screenWidth } = Dimensions.get('window');
@@ -268,10 +268,10 @@ const POSScreen: React.FC = () => {
         </TouchableOpacity>
         
         <View style={styles.headerCenter}>
-          <Image 
-            source={require('../../../assets/fynlo-logo.png')} 
-            style={styles.logo}
-            resizeMode="contain"
+          <Logo 
+            size="small" 
+            showText={false}
+            style={styles.logoContainer}
           />
         </View>
         
@@ -567,9 +567,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  logo: {
-    width: 40,
-    height: 40,
+  logoContainer: {
+    // Container for logo component
   },
   cartButton: {
     position: 'relative',

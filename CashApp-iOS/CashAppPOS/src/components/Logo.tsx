@@ -85,16 +85,10 @@ const Logo: React.FC<LogoProps> = ({
           onError={() => console.log('Logo failed to load')}
         />
       ) : (
-        <View
-          style={[
-            styles.logoFallback,
-            {
-              width: sizeStyles.width,
-              height: sizeStyles.height,
-            },
-          ]}
-        >
-          <Text style={styles.logoFallbackText}>F</Text>
+        <View style={styles.logoTextContainer}>
+          <Text style={[styles.logoMainText, { fontSize: sizeStyles.fontSize }]}>
+            Fynl<Text style={[styles.logoMainText, styles.orangeO, { fontSize: sizeStyles.fontSize }]}>o</Text>
+          </Text>
         </View>
       )}
       {showText && (
@@ -129,24 +123,17 @@ const styles = StyleSheet.create({
   logoImage: {
     marginBottom: 8,
   },
-  logoFallback: {
-    backgroundColor: Colors.primary,
-    borderRadius: 8,
-    justifyContent: 'center',
+  logoTextContainer: {
     alignItems: 'center',
     marginBottom: 8,
-    borderWidth: 1,
-    borderColor: Colors.secondary,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.15,
-    shadowRadius: 2,
   },
-  logoFallbackText: {
-    color: Colors.white,
+  logoMainText: {
     fontWeight: 'bold',
-    fontSize: 32,
+    color: Colors.white,
+    letterSpacing: -1,
+  },
+  orangeO: {
+    color: Colors.gold, // Orange color for the 'o'
   },
   textContainer: {
     alignItems: 'center',
