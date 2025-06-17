@@ -1,0 +1,55 @@
+{
+  "summary": {
+    "start_time": "2025-06-17T13:16:08.648135",
+    "end_time": "2025-06-17T13:16:10.463770",
+    "total_duration": 1.815635,
+    "total_tests": 4,
+    "total_passed": 4,
+    "total_failed": 0,
+    "overall_success_rate": 100.0,
+    "production_ready": false
+  },
+  "unit_tests": {},
+  "integration_tests": {},
+  "performance_tests": {
+    "total_tests": 4,
+    "passed": 4,
+    "failed": 0,
+    "results": [
+      {
+        "test_name": "API Response Time",
+        "avg_response_time": 0.0531149705251058,
+        "target_time": 0.1,
+        "passed": true,
+        "details": "Average: 0.053s, Target: 0.1s"
+      },
+      {
+        "test_name": "Database Performance",
+        "avg_query_time": 0.023685193061828612,
+        "target_time": 0.05,
+        "passed": true,
+        "details": "Average: 0.024s, Target: 0.05s"
+      },
+      {
+        "test_name": "WebSocket Performance",
+        "avg_message_time": 0.011694817543029786,
+        "target_time": 0.05,
+        "passed": true,
+        "details": "Average: 0.012s, Target: 0.05s"
+      },
+      {
+        "test_name": "Concurrent Load",
+        "tested_users": 100,
+        "successful_users": 100,
+        "success_rate": 100.0,
+        "target_users": 2000,
+        "passed": true,
+        "details": "Tested: 100 users, Success: 100.0%"
+      }
+    ],
+    "success_rate": 100.0
+  },
+  "security_tests": {},
+  "load_tests": {},
+  "coverage": {}
+}
