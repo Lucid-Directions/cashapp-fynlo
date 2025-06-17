@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
+import { useAuth } from '../../contexts/AuthContext';
 import useAppStore from '../../store/useAppStore';
 
 // Clover POS Color Scheme
@@ -42,6 +43,7 @@ interface MenuOption {
 const MoreScreen: React.FC = () => {
   const navigation = useNavigation();
   const { user } = useAppStore();
+  const { signOut } = useAuth();
 
   const menuSections = [
     {
@@ -146,11 +148,14 @@ const MoreScreen: React.FC = () => {
     },
   ];
 
-  const handleOptionPress = (option: MenuOption) => {
+  const handleOptionPress = async (option: MenuOption) => {
     if (option.id === 'logout') {
-      // Handle logout
-      const logout = useAppStore.getState().logout;
-      logout();
+      // Handle logout using AuthContext
+      try {
+        await signOut();
+      } catch (error) {
+        console.error('Error signing out:', error);
+      }
     } else if (option.route) {
       // Navigate to the route
       navigation.navigate(option.route as never);

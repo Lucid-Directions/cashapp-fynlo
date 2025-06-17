@@ -10,6 +10,8 @@ import MoreScreen from '../screens/more/MoreScreen';
 import EmployeesScreen from '../screens/employees/EmployeesScreen';
 import CustomersScreen from '../screens/customers/CustomersScreen';
 import InventoryScreen from '../screens/inventory/InventoryScreen';
+import MenuManagementScreen from '../screens/settings/app/MenuManagementScreen';
+import DashboardScreen from '../screens/main/DashboardScreen';
 import SettingsNavigator from './SettingsNavigator';
 import useAppStore from '../store/useAppStore';
 
@@ -134,6 +136,20 @@ const MainNavigator: React.FC = () => {
       <Stack.Screen
         name="Inventory"
         component={InventoryScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="MenuManagement"
+        component={MenuManagementScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="Dashboard"
+        component={DashboardScreen}
         options={{
           headerShown: false,
         }}
