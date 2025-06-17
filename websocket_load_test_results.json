@@ -1,0 +1,983 @@
+{
+  "test_execution": {
+    "start_time": 1750197368.234847,
+    "scenarios_planned": 3,
+    "scenarios_completed": 3,
+    "end_time": 1750197743.986751,
+    "total_duration": 375.7519040107727
+  },
+  "scenario_results": {
+    "Light Load Test": {
+      "config": {
+        "base_url": "ws://localhost:8765",
+        "max_connections": 100,
+        "ramp_up_connections": 100,
+        "ramp_up_interval": 1.0,
+        "test_duration": 60,
+        "message_rate": 10,
+        "broadcast_rate": 50,
+        "ping_interval": 30,
+        "connection_timeout": 10,
+        "message_timeout": 5,
+        "max_message_size": 1024,
+        "target_delivery_time": 0.05,
+        "target_connection_success": 0.95,
+        "target_uptime": 0.99,
+        "max_cpu_usage": 0.7,
+        "max_memory_usage": 0.8
+      },
+      "results": {
+        "test_configuration": {
+          "max_connections": 100,
+          "test_duration": 60,
+          "target_delivery_time": 0.05,
+          "broadcast_rate": 50
+        },
+        "test_execution": {
+          "start_time": 1750197368.234924,
+          "end_time": 1750197430.867541,
+          "total_duration": 62.63261699676514
+        },
+        "connection_performance": {
+          "ramp_up": {
+            "target_connections": 100,
+            "successful_connections": 100,
+            "failed_connections": 0,
+            "ramp_up_time": 0.018838882446289062,
+            "connection_batches": [
+              {
+                "batch_number": 1,
+                "batch_size": 100,
+                "successful": 100,
+                "failed": 0,
+                "batch_time": 0.01826310157775879
+              }
+            ]
+          },
+          "final_stats": {
+            "total_connections": 110,
+            "active_connections": 100,
+            "connection_success_rate": 0.9090909090909091,
+            "average_response_time": 1.461927132988567,
+            "median_response_time": 1.2819766998291016,
+            "p95_response_time": 1.884472370147705,
+            "p99_response_time": 7.60922908782959,
+            "total_messages_sent": 44191,
+            "total_messages_received": 0,
+            "connection_errors": 0,
+            "message_errors": 0,
+            "message_success_rate": 1.0
+          }
+        },
+        "message_performance": {
+          "broadcasting": {
+            "total_broadcasts": 442,
+            "broadcast_errors": 0,
+            "broadcast_success_rate": 1.0,
+            "average_broadcast_time": 141.62931345167203,
+            "median_broadcast_time": 141.56508445739746,
+            "p95_broadcast_time": 162.19499111175537,
+            "p99_broadcast_time": 173.78037452697754,
+            "messages_per_second": 703.1833333333333,
+            "peak_messages_per_second": 800
+          }
+        },
+        "stability_performance": {
+          "stability": {
+            "test_duration": 60,
+            "samples_collected": 12,
+            "average_uptime": 1.0,
+            "minimum_uptime": 1.0,
+            "uptime_stability": 0.0,
+            "average_response_time": 1.2386907216179315,
+            "response_time_stability": 0.3948426563861608,
+            "stability_samples": [
+              {
+                "timestamp": 1750197368.254358,
+                "active_connections": 100,
+                "connection_success_rate": 1.0,
+                "message_success_rate": 0.0,
+                "average_response_time": 0.0
+              },
+              {
+                "timestamp": 1750197373.270249,
+                "active_connections": 100,
+                "connection_success_rate": 1.0,
+                "message_success_rate": 1.0,
+                "average_response_time": 1.2902439268011796
+              },
+              {
+                "timestamp": 1750197378.367486,
+                "active_connections": 100,
+                "connection_success_rate": 1.0,
+                "message_success_rate": 1.0,
+                "average_response_time": 1.284540133042769
+              },
+              {
+                "timestamp": 1750197383.49543,
+                "active_connections": 100,
+                "connection_success_rate": 1.0,
+                "message_success_rate": 1.0,
+                "average_response_time": 1.2708168029785156
+              },
+              {
+                "timestamp": 1750197388.618051,
+                "active_connections": 100,
+                "connection_success_rate": 1.0,
+                "message_success_rate": 1.0,
+                "average_response_time": 1.2749847650527955
+              },
+              {
+                "timestamp": 1750197393.744173,
+                "active_connections": 100,
+                "connection_success_rate": 1.0,
+                "message_success_rate": 1.0,
+                "average_response_time": 1.321492886543274
+              },
+              {
+                "timestamp": 1750197398.7787929,
+                "active_connections": 100,
+                "connection_success_rate": 1.0,
+                "message_success_rate": 1.0,
+                "average_response_time": 1.365586519241333
+              },
+              {
+                "timestamp": 1750197403.8392918,
+                "active_connections": 100,
+                "connection_success_rate": 1.0,
+                "message_success_rate": 1.0,
+                "average_response_time": 1.412465763092041
+              },
+              {
+                "timestamp": 1750197408.9810681,
+                "active_connections": 100,
+                "connection_success_rate": 1.0,
+                "message_success_rate": 1.0,
+                "average_response_time": 1.3998564720153808
+              },
+              {
+                "timestamp": 1750197414.0992892,
+                "active_connections": 100,
+                "connection_success_rate": 1.0,
+                "message_success_rate": 1.0,
+                "average_response_time": 1.3909466028213502
+              },
+              {
+                "timestamp": 1750197419.215143,
+                "active_connections": 100,
+                "connection_success_rate": 1.0,
+                "message_success_rate": 1.0,
+                "average_response_time": 1.411622977256775
+              },
+              {
+                "timestamp": 1750197424.316362,
+                "active_connections": 100,
+                "connection_success_rate": 1.0,
+                "message_success_rate": 1.0,
+                "average_response_time": 1.4417318105697632
+              }
+            ]
+          },
+          "recovery": {
+            "total_recovery_tests": 10,
+            "successful_recoveries": 10,
+            "recovery_success_rate": 1.0,
+            "average_recovery_time": 139.1176462173462,
+            "fastest_recovery": 128.36313247680664,
+            "slowest_recovery": 164.22700881958008,
+            "recovery_results": [
+              {
+                "original_connection": "load_test_conn_0",
+                "new_connection": "load_test_conn_0_recovery_0",
+                "recovery_time_ms": 134.5682144165039,
+                "success": true
+              },
+              {
+                "original_connection": "load_test_conn_1",
+                "new_connection": "load_test_conn_1_recovery_1",
+                "recovery_time_ms": 128.40604782104492,
+                "success": true
+              },
+              {
+                "original_connection": "load_test_conn_2",
+                "new_connection": "load_test_conn_2_recovery_2",
+                "recovery_time_ms": 128.525972366333,
+                "success": true
+              },
+              {
+                "original_connection": "load_test_conn_3",
+                "new_connection": "load_test_conn_3_recovery_3",
+                "recovery_time_ms": 136.83509826660156,
+                "success": true
+              },
+              {
+                "original_connection": "load_test_conn_4",
+                "new_connection": "load_test_conn_4_recovery_4",
+                "recovery_time_ms": 144.5329189300537,
+                "success": true
+              },
+              {
+                "original_connection": "load_test_conn_5",
+                "new_connection": "load_test_conn_5_recovery_5",
+                "recovery_time_ms": 161.38529777526855,
+                "success": true
+              },
+              {
+                "original_connection": "load_test_conn_6",
+                "new_connection": "load_test_conn_6_recovery_6",
+                "recovery_time_ms": 164.22700881958008,
+                "success": true
+              },
+              {
+                "original_connection": "load_test_conn_7",
+                "new_connection": "load_test_conn_7_recovery_7",
+                "recovery_time_ms": 130.16080856323242,
+                "success": true
+              },
+              {
+                "original_connection": "load_test_conn_8",
+                "new_connection": "load_test_conn_8_recovery_8",
+                "recovery_time_ms": 128.36313247680664,
+                "success": true
+              },
+              {
+                "original_connection": "load_test_conn_9",
+                "new_connection": "load_test_conn_9_recovery_9",
+                "recovery_time_ms": 134.1719627380371,
+                "success": true
+              }
+            ]
+          }
+        },
+        "resource_performance": {
+          "cpu_usage": {
+            "current": 34.3,
+            "average": 27.096774193548388,
+            "peak": 54.5,
+            "samples": 31
+          },
+          "memory_usage": {
+            "current": 83.0,
+            "average": 82.95806451612903,
+            "peak": 83.0,
+            "samples": 31
+          },
+          "monitoring_duration": 62.6392388343811,
+          "total_samples": 31
+        },
+        "success_criteria": {
+          "connection_success": {
+            "target": 0.95,
+            "actual": 0.9090909090909091,
+            "passed": false
+          },
+          "delivery_time": {
+            "target_ms": 50.0,
+            "actual_ms": 141.62931345167203,
+            "passed": false
+          },
+          "cpu_usage": {
+            "target_percent": 70.0,
+            "actual_percent": 54.5,
+            "passed": true
+          },
+          "memory_usage": {
+            "target_percent": 80.0,
+            "actual_percent": 83.0,
+            "passed": false
+          },
+          "uptime": {
+            "target": 0.99,
+            "actual": 1.0,
+            "passed": true
+          },
+          "overall": {
+            "passed_criteria": 2,
+            "total_criteria": 5,
+            "success_rate": 0.4,
+            "passed": false
+          }
+        }
+      },
+      "success": false
+    },
+    "Medium Load Test": {
+      "config": {
+        "base_url": "ws://localhost:8765",
+        "max_connections": 500,
+        "ramp_up_connections": 100,
+        "ramp_up_interval": 1.0,
+        "test_duration": 120,
+        "message_rate": 10,
+        "broadcast_rate": 250,
+        "ping_interval": 30,
+        "connection_timeout": 10,
+        "message_timeout": 5,
+        "max_message_size": 1024,
+        "target_delivery_time": 0.05,
+        "target_connection_success": 0.95,
+        "target_uptime": 0.99,
+        "max_cpu_usage": 0.7,
+        "max_memory_usage": 0.8
+      },
+      "results": {
+        "test_configuration": {
+          "max_connections": 500,
+          "test_duration": 120,
+          "target_delivery_time": 0.05,
+          "broadcast_rate": 250
+        },
+        "test_execution": {
+          "start_time": 1750197442.5044422,
+          "end_time": 1750197516.6832829,
+          "total_duration": 74.17884063720703
+        },
+        "connection_performance": {
+          "ramp_up": {
+            "target_connections": 500,
+            "successful_connections": 500,
+            "failed_connections": 0,
+            "ramp_up_time": 4.142220973968506,
+            "connection_batches": [
+              {
+                "batch_number": 1,
+                "batch_size": 100,
+                "successful": 100,
+                "failed": 0,
+                "batch_time": 0.03131532669067383
+              },
+              {
+                "batch_number": 2,
+                "batch_size": 100,
+                "successful": 100,
+                "failed": 0,
+                "batch_time": 0.023899316787719727
+              },
+              {
+                "batch_number": 3,
+                "batch_size": 100,
+                "successful": 100,
+                "failed": 0,
+                "batch_time": 0.0234377384185791
+              },
+              {
+                "batch_number": 4,
+                "batch_size": 100,
+                "successful": 100,
+                "failed": 0,
+                "batch_time": 0.021994829177856445
+              },
+              {
+                "batch_number": 5,
+                "batch_size": 100,
+                "successful": 100,
+                "failed": 0,
+                "batch_time": 0.03703618049621582
+              }
+            ]
+          },
+          "final_stats": {
+            "total_connections": 510,
+            "active_connections": 500,
+            "connection_success_rate": 0.9803921568627451,
+            "average_response_time": 1.4407608563682346,
+            "median_response_time": 1.277923583984375,
+            "p95_response_time": 1.4351844787597656,
+            "p99_response_time": 7.585048675537109,
+            "total_messages_sent": 46991,
+            "total_messages_received": 0,
+            "connection_errors": 0,
+            "message_errors": 0,
+            "message_success_rate": 1.0
+          }
+        },
+        "message_performance": {
+          "broadcasting": {
+            "total_broadcasts": 94,
+            "broadcast_errors": 0,
+            "broadcast_success_rate": 1.0,
+            "average_broadcast_time": 744.9987264389688,
+            "median_broadcast_time": 746.2013959884644,
+            "p95_broadcast_time": 783.4568023681641,
+            "p99_broadcast_time": 0.0,
+            "messages_per_second": 674.85,
+            "peak_messages_per_second": 1000
+          }
+        },
+        "stability_performance": {
+          "stability": {
+            "test_duration": 60,
+            "samples_collected": 12,
+            "average_uptime": 1.0,
+            "minimum_uptime": 1.0,
+            "uptime_stability": 0.0,
+            "average_response_time": 1.3320539322580036,
+            "response_time_stability": 0.41954725116738595,
+            "stability_samples": [
+              {
+                "timestamp": 1750197446.647742,
+                "active_connections": 500,
+                "connection_success_rate": 1.0,
+                "message_success_rate": 0.0,
+                "average_response_time": 0.0
+              },
+              {
+                "timestamp": 1750197451.9363441,
+                "active_connections": 500,
+                "connection_success_rate": 1.0,
+                "message_success_rate": 1.0,
+                "average_response_time": 1.4576702799115862
+              },
+              {
+                "timestamp": 1750197457.297903,
+                "active_connections": 500,
+                "connection_success_rate": 1.0,
+                "message_success_rate": 1.0,
+                "average_response_time": 1.4689741134643555
+              },
+              {
+                "timestamp": 1750197462.489027,
+                "active_connections": 500,
+                "connection_success_rate": 1.0,
+                "message_success_rate": 1.0,
+                "average_response_time": 1.4574799310593378
+              },
+              {
+                "timestamp": 1750197467.744965,
+                "active_connections": 500,
+                "connection_success_rate": 1.0,
+                "message_success_rate": 1.0,
+                "average_response_time": 1.4535829680306571
+              },
+              {
+                "timestamp": 1750197473.031728,
+                "active_connections": 500,
+                "connection_success_rate": 1.0,
+                "message_success_rate": 1.0,
+                "average_response_time": 1.4536127771650043
+              },
+              {
+                "timestamp": 1750197478.37743,
+                "active_connections": 500,
+                "connection_success_rate": 1.0,
+                "message_success_rate": 1.0,
+                "average_response_time": 1.4574941453479586
+              },
+              {
+                "timestamp": 1750197483.5391529,
+                "active_connections": 500,
+                "connection_success_rate": 1.0,
+                "message_success_rate": 1.0,
+                "average_response_time": 1.452730655670166
+              },
+              {
+                "timestamp": 1750197488.661669,
+                "active_connections": 500,
+                "connection_success_rate": 1.0,
+                "message_success_rate": 1.0,
+                "average_response_time": 1.448095670768193
+              },
+              {
+                "timestamp": 1750197493.9025412,
+                "active_connections": 500,
+                "connection_success_rate": 1.0,
+                "message_success_rate": 1.0,
+                "average_response_time": 1.447709113832504
+              },
+              {
+                "timestamp": 1750197499.0087092,
+                "active_connections": 500,
+                "connection_success_rate": 1.0,
+                "message_success_rate": 1.0,
+                "average_response_time": 1.4440330164773123
+              },
+              {
+                "timestamp": 1750197504.266639,
+                "active_connections": 500,
+                "connection_success_rate": 1.0,
+                "message_success_rate": 1.0,
+                "average_response_time": 1.4432645153689694
+              }
+            ]
+          },
+          "recovery": {
+            "total_recovery_tests": 10,
+            "successful_recoveries": 10,
+            "recovery_success_rate": 1.0,
+            "average_recovery_time": 720.4483270645142,
+            "fastest_recovery": 661.9322299957275,
+            "slowest_recovery": 779.6502113342285,
+            "recovery_results": [
+              {
+                "original_connection": "load_test_conn_0",
+                "new_connection": "load_test_conn_0_recovery_0",
+                "recovery_time_ms": 661.9322299957275,
+                "success": true
+              },
+              {
+                "original_connection": "load_test_conn_1",
+                "new_connection": "load_test_conn_1_recovery_1",
+                "recovery_time_ms": 704.2169570922852,
+                "success": true
+              },
+              {
+                "original_connection": "load_test_conn_2",
+                "new_connection": "load_test_conn_2_recovery_2",
+                "recovery_time_ms": 712.5771045684814,
+                "success": true
+              },
+              {
+                "original_connection": "load_test_conn_3",
+                "new_connection": "load_test_conn_3_recovery_3",
+                "recovery_time_ms": 710.137128829956,
+                "success": true
+              },
+              {
+                "original_connection": "load_test_conn_4",
+                "new_connection": "load_test_conn_4_recovery_4",
+                "recovery_time_ms": 734.1518402099609,
+                "success": true
+              },
+              {
+                "original_connection": "load_test_conn_5",
+                "new_connection": "load_test_conn_5_recovery_5",
+                "recovery_time_ms": 732.5530052185059,
+                "success": true
+              },
+              {
+                "original_connection": "load_test_conn_6",
+                "new_connection": "load_test_conn_6_recovery_6",
+                "recovery_time_ms": 710.1819515228271,
+                "success": true
+              },
+              {
+                "original_connection": "load_test_conn_7",
+                "new_connection": "load_test_conn_7_recovery_7",
+                "recovery_time_ms": 720.9808826446533,
+                "success": true
+              },
+              {
+                "original_connection": "load_test_conn_8",
+                "new_connection": "load_test_conn_8_recovery_8",
+                "recovery_time_ms": 738.1019592285156,
+                "success": true
+              },
+              {
+                "original_connection": "load_test_conn_9",
+                "new_connection": "load_test_conn_9_recovery_9",
+                "recovery_time_ms": 779.6502113342285,
+                "success": true
+              }
+            ]
+          }
+        },
+        "resource_performance": {
+          "cpu_usage": {
+            "current": 30.3,
+            "average": 26.556756756756755,
+            "peak": 40.0,
+            "samples": 37
+          },
+          "memory_usage": {
+            "current": 83.0,
+            "average": 83.0,
+            "peak": 83.0,
+            "samples": 37
+          },
+          "monitoring_duration": 74.2134141921997,
+          "total_samples": 37
+        },
+        "success_criteria": {
+          "connection_success": {
+            "target": 0.95,
+            "actual": 0.9803921568627451,
+            "passed": true
+          },
+          "delivery_time": {
+            "target_ms": 50.0,
+            "actual_ms": 744.9987264389688,
+            "passed": false
+          },
+          "cpu_usage": {
+            "target_percent": 70.0,
+            "actual_percent": 40.0,
+            "passed": true
+          },
+          "memory_usage": {
+            "target_percent": 80.0,
+            "actual_percent": 83.0,
+            "passed": false
+          },
+          "uptime": {
+            "target": 0.99,
+            "actual": 1.0,
+            "passed": true
+          },
+          "overall": {
+            "passed_criteria": 3,
+            "total_criteria": 5,
+            "success_rate": 0.6,
+            "passed": false
+          }
+        }
+      },
+      "success": false
+    },
+    "Heavy Load Test": {
+      "config": {
+        "base_url": "ws://localhost:8765",
+        "max_connections": 1000,
+        "ramp_up_connections": 100,
+        "ramp_up_interval": 1.0,
+        "test_duration": 300,
+        "message_rate": 10,
+        "broadcast_rate": 500,
+        "ping_interval": 30,
+        "connection_timeout": 10,
+        "message_timeout": 5,
+        "max_message_size": 1024,
+        "target_delivery_time": 0.05,
+        "target_connection_success": 0.95,
+        "target_uptime": 0.99,
+        "max_cpu_usage": 0.7,
+        "max_memory_usage": 0.8
+      },
+      "results": {
+        "test_configuration": {
+          "max_connections": 1000,
+          "test_duration": 300,
+          "target_delivery_time": 0.05,
+          "broadcast_rate": 500
+        },
+        "test_execution": {
+          "start_time": 1750197526.9141371,
+          "end_time": 1750197733.462803,
+          "total_duration": 206.54866576194763
+        },
+        "connection_performance": {
+          "ramp_up": {
+            "target_connections": 1000,
+            "successful_connections": 1000,
+            "failed_connections": 0,
+            "ramp_up_time": 9.245818853378296,
+            "connection_batches": [
+              {
+                "batch_number": 1,
+                "batch_size": 100,
+                "successful": 100,
+                "failed": 0,
+                "batch_time": 0.017666101455688477
+              },
+              {
+                "batch_number": 2,
+                "batch_size": 100,
+                "successful": 100,
+                "failed": 0,
+                "batch_time": 0.05226016044616699
+              },
+              {
+                "batch_number": 3,
+                "batch_size": 100,
+                "successful": 100,
+                "failed": 0,
+                "batch_time": 0.01667022705078125
+              },
+              {
+                "batch_number": 4,
+                "batch_size": 100,
+                "successful": 100,
+                "failed": 0,
+                "batch_time": 0.014434814453125
+              },
+              {
+                "batch_number": 5,
+                "batch_size": 100,
+                "successful": 100,
+                "failed": 0,
+                "batch_time": 0.015551090240478516
+              },
+              {
+                "batch_number": 6,
+                "batch_size": 100,
+                "successful": 100,
+                "failed": 0,
+                "batch_time": 0.016164064407348633
+              },
+              {
+                "batch_number": 7,
+                "batch_size": 100,
+                "successful": 100,
+                "failed": 0,
+                "batch_time": 0.030677080154418945
+              },
+              {
+                "batch_number": 8,
+                "batch_size": 100,
+                "successful": 100,
+                "failed": 0,
+                "batch_time": 0.0226290225982666
+              },
+              {
+                "batch_number": 9,
+                "batch_size": 100,
+                "successful": 100,
+                "failed": 0,
+                "batch_time": 0.027710914611816406
+              },
+              {
+                "batch_number": 10,
+                "batch_size": 100,
+                "successful": 100,
+                "failed": 0,
+                "batch_time": 0.02015399932861328
+              }
+            ]
+          },
+          "final_stats": {
+            "total_connections": 1010,
+            "active_connections": 1000,
+            "connection_success_rate": 0.9900990099009901,
+            "average_response_time": 1.3836378257474553,
+            "median_response_time": 1.2750625610351562,
+            "p95_response_time": 1.3427734375,
+            "p99_response_time": 5.814085006713867,
+            "total_messages_sent": 137990,
+            "total_messages_received": 0,
+            "connection_errors": 0,
+            "message_errors": 0,
+            "message_success_rate": 1.0
+          }
+        },
+        "message_performance": {
+          "broadcasting": {
+            "total_broadcasts": 138,
+            "broadcast_errors": 0,
+            "broadcast_success_rate": 1.0,
+            "average_broadcast_time": 1429.6317411505659,
+            "median_broadcast_time": 1432.6335191726685,
+            "p95_broadcast_time": 1473.083508014679,
+            "p99_broadcast_time": 1484.5548605918884,
+            "messages_per_second": 1000,
+            "peak_messages_per_second": 1000
+          }
+        },
+        "stability_performance": {
+          "stability": {
+            "test_duration": 60,
+            "samples_collected": 11,
+            "average_uptime": 1.0,
+            "minimum_uptime": 1.0,
+            "uptime_stability": 0.0,
+            "average_response_time": 1.2548028064561096,
+            "response_time_stability": 0.41617550101340617,
+            "stability_samples": [
+              {
+                "timestamp": 1750197536.1610298,
+                "active_connections": 1000,
+                "connection_success_rate": 1.0,
+                "message_success_rate": 0.0,
+                "average_response_time": 0.0
+              },
+              {
+                "timestamp": 1750197541.837543,
+                "active_connections": 1000,
+                "connection_success_rate": 1.0,
+                "message_success_rate": 1.0,
+                "average_response_time": 1.3748202919960022
+              },
+              {
+                "timestamp": 1750197547.587455,
+                "active_connections": 1000,
+                "connection_success_rate": 1.0,
+                "message_success_rate": 1.0,
+                "average_response_time": 1.3813375532627106
+              },
+              {
+                "timestamp": 1750197553.3074062,
+                "active_connections": 1000,
+                "connection_success_rate": 1.0,
+                "message_success_rate": 1.0,
+                "average_response_time": 1.381779154141744
+              },
+              {
+                "timestamp": 1750197558.995928,
+                "active_connections": 1000,
+                "connection_success_rate": 1.0,
+                "message_success_rate": 1.0,
+                "average_response_time": 1.381161168217659
+              },
+              {
+                "timestamp": 1750197564.729017,
+                "active_connections": 1000,
+                "connection_success_rate": 1.0,
+                "message_success_rate": 1.0,
+                "average_response_time": 1.3799610137939453
+              },
+              {
+                "timestamp": 1750197570.45454,
+                "active_connections": 1000,
+                "connection_success_rate": 1.0,
+                "message_success_rate": 1.0,
+                "average_response_time": 1.3808801472187042
+              },
+              {
+                "timestamp": 1750197576.2093172,
+                "active_connections": 1000,
+                "connection_success_rate": 1.0,
+                "message_success_rate": 1.0,
+                "average_response_time": 1.380800494125911
+              },
+              {
+                "timestamp": 1750197581.937012,
+                "active_connections": 1000,
+                "connection_success_rate": 1.0,
+                "message_success_rate": 1.0,
+                "average_response_time": 1.3798805698752403
+              },
+              {
+                "timestamp": 1750197587.7068439,
+                "active_connections": 1000,
+                "connection_success_rate": 1.0,
+                "message_success_rate": 1.0,
+                "average_response_time": 1.3803371389706929
+              },
+              {
+                "timestamp": 1750197593.506612,
+                "active_connections": 1000,
+                "connection_success_rate": 1.0,
+                "message_success_rate": 1.0,
+                "average_response_time": 1.3818733394145966
+              }
+            ]
+          },
+          "recovery": {
+            "total_recovery_tests": 10,
+            "successful_recoveries": 10,
+            "recovery_success_rate": 1.0,
+            "average_recovery_time": 1416.0990238189697,
+            "fastest_recovery": 1322.1709728240967,
+            "slowest_recovery": 1471.5509414672852,
+            "recovery_results": [
+              {
+                "original_connection": "load_test_conn_0",
+                "new_connection": "load_test_conn_0_recovery_0",
+                "recovery_time_ms": 1322.1709728240967,
+                "success": true
+              },
+              {
+                "original_connection": "load_test_conn_1",
+                "new_connection": "load_test_conn_1_recovery_1",
+                "recovery_time_ms": 1388.3781433105469,
+                "success": true
+              },
+              {
+                "original_connection": "load_test_conn_2",
+                "new_connection": "load_test_conn_2_recovery_2",
+                "recovery_time_ms": 1465.3089046478271,
+                "success": true
+              },
+              {
+                "original_connection": "load_test_conn_3",
+                "new_connection": "load_test_conn_3_recovery_3",
+                "recovery_time_ms": 1442.2659873962402,
+                "success": true
+              },
+              {
+                "original_connection": "load_test_conn_4",
+                "new_connection": "load_test_conn_4_recovery_4",
+                "recovery_time_ms": 1404.4339656829834,
+                "success": true
+              },
+              {
+                "original_connection": "load_test_conn_5",
+                "new_connection": "load_test_conn_5_recovery_5",
+                "recovery_time_ms": 1454.0159702301025,
+                "success": true
+              },
+              {
+                "original_connection": "load_test_conn_6",
+                "new_connection": "load_test_conn_6_recovery_6",
+                "recovery_time_ms": 1471.5509414672852,
+                "success": true
+              },
+              {
+                "original_connection": "load_test_conn_7",
+                "new_connection": "load_test_conn_7_recovery_7",
+                "recovery_time_ms": 1426.1040687561035,
+                "success": true
+              },
+              {
+                "original_connection": "load_test_conn_8",
+                "new_connection": "load_test_conn_8_recovery_8",
+                "recovery_time_ms": 1379.9080848693848,
+                "success": true
+              },
+              {
+                "original_connection": "load_test_conn_9",
+                "new_connection": "load_test_conn_9_recovery_9",
+                "recovery_time_ms": 1406.853199005127,
+                "success": true
+              }
+            ]
+          }
+        },
+        "resource_performance": {
+          "cpu_usage": {
+            "current": 15.3,
+            "average": 16.889320388349514,
+            "peak": 35.2,
+            "samples": 103
+          },
+          "memory_usage": {
+            "current": 83.0,
+            "average": 83.0,
+            "peak": 83.0,
+            "samples": 103
+          },
+          "monitoring_duration": 206.6399109363556,
+          "total_samples": 103
+        },
+        "success_criteria": {
+          "connection_success": {
+            "target": 0.95,
+            "actual": 0.9900990099009901,
+            "passed": true
+          },
+          "delivery_time": {
+            "target_ms": 50.0,
+            "actual_ms": 1429.6317411505659,
+            "passed": false
+          },
+          "cpu_usage": {
+            "target_percent": 70.0,
+            "actual_percent": 35.2,
+            "passed": true
+          },
+          "memory_usage": {
+            "target_percent": 80.0,
+            "actual_percent": 83.0,
+            "passed": false
+          },
+          "uptime": {
+            "target": 0.99,
+            "actual": 1.0,
+            "passed": true
+          },
+          "overall": {
+            "passed_criteria": 3,
+            "total_criteria": 5,
+            "success_rate": 0.6,
+            "passed": false
+          }
+        }
+      },
+      "success": false
+    }
+  },
+  "overall_assessment": {
+    "successful_scenarios": 0,
+    "total_scenarios": 3,
+    "success_rate": 0.0,
+    "overall_success": false
+  }
+}
