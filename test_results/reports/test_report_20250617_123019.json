@@ -1,0 +1,94 @@
+{
+  "summary": {
+    "start_time": "2025-06-17T12:30:17.020583",
+    "end_time": "2025-06-17T12:30:19.002789",
+    "total_duration": 1.982206,
+    "total_tests": 8,
+    "total_passed": 7,
+    "total_failed": 1,
+    "overall_success_rate": 87.5,
+    "production_ready": false
+  },
+  "unit_tests": {},
+  "integration_tests": {},
+  "performance_tests": {
+    "total_tests": 4,
+    "passed": 4,
+    "failed": 0,
+    "results": [
+      {
+        "test_name": "API Response Time",
+        "avg_response_time": 0.05416266123453776,
+        "target_time": 0.1,
+        "passed": true,
+        "details": "Average: 0.054s, Target: 0.1s"
+      },
+      {
+        "test_name": "Database Performance",
+        "avg_query_time": 0.023456621170043945,
+        "target_time": 0.05,
+        "passed": true,
+        "details": "Average: 0.023s, Target: 0.05s"
+      },
+      {
+        "test_name": "WebSocket Performance",
+        "avg_message_time": 0.012069711685180664,
+        "target_time": 0.05,
+        "passed": true,
+        "details": "Average: 0.012s, Target: 0.05s"
+      },
+      {
+        "test_name": "Concurrent Load",
+        "tested_users": 100,
+        "successful_users": 100,
+        "success_rate": 100.0,
+        "target_users": 2000,
+        "passed": true,
+        "details": "Tested: 100 users, Success: 100.0%"
+      }
+    ],
+    "success_rate": 100.0
+  },
+  "security_tests": {
+    "total_tests": 4,
+    "passed": 3,
+    "failed": 1,
+    "results": [
+      {
+        "test_name": "SQL Injection Protection",
+        "malicious_payloads": 3,
+        "blocked_attempts": 2,
+        "success_rate": 66.66666666666666,
+        "passed": false,
+        "details": "Blocked 2/3 injection attempts"
+      },
+      {
+        "test_name": "XSS Protection",
+        "xss_payloads": 3,
+        "sanitized_inputs": 3,
+        "success_rate": 100.0,
+        "passed": true,
+        "details": "Sanitized 3/3 XSS attempts"
+      },
+      {
+        "test_name": "Authentication Security",
+        "total_checks": 4,
+        "passed_checks": 3,
+        "success_rate": 75.0,
+        "passed": true,
+        "details": "Passed 3/4 security checks"
+      },
+      {
+        "test_name": "Authorization Controls",
+        "total_checks": 4,
+        "passed_checks": 4,
+        "success_rate": 100.0,
+        "passed": true,
+        "details": "Passed 4/4 authorization checks"
+      }
+    ],
+    "success_rate": 75.0
+  },
+  "load_tests": {},
+  "coverage": {}
+}
