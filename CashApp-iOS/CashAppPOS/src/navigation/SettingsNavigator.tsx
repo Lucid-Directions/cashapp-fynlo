@@ -3,12 +3,14 @@ import { View, Text, StyleSheet } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
 import SettingsScreen from '../screens/settings/SettingsScreen';
 
+// Import actual screens
+import BusinessInformationScreen from '../screens/settings/business/BusinessInformationScreen';
+import TaxConfigurationScreen from '../screens/settings/business/TaxConfigurationScreen';
+import PaymentMethodsScreen from '../screens/settings/business/PaymentMethodsScreen';
+import ReceiptCustomizationScreen from '../screens/settings/business/ReceiptCustomizationScreen';
+import OperatingHoursScreen from '../screens/settings/business/OperatingHoursScreen';
+
 // Import placeholder screens that will be created
-// import BusinessInformationScreen from '../screens/settings/business/BusinessInformationScreen';
-// import TaxConfigurationScreen from '../screens/settings/business/TaxConfigurationScreen';
-// import PaymentMethodsScreen from '../screens/settings/business/PaymentMethodsScreen';
-// import ReceiptCustomizationScreen from '../screens/settings/business/ReceiptCustomizationScreen';
-// import OperatingHoursScreen from '../screens/settings/business/OperatingHoursScreen';
 
 // import PrinterSetupScreen from '../screens/settings/hardware/PrinterSetupScreen';
 // import CashDrawerScreen from '../screens/settings/hardware/CashDrawerScreen';
@@ -95,23 +97,23 @@ const SettingsNavigator: React.FC = () => {
       />
       <Stack.Screen 
         name="BusinessInformation" 
-        component={() => <PlaceholderScreen title="Business Information" />} 
+        component={BusinessInformationScreen} 
       />
       <Stack.Screen 
         name="TaxConfiguration" 
-        component={() => <PlaceholderScreen title="Tax Configuration" />} 
+        component={TaxConfigurationScreen} 
       />
       <Stack.Screen 
         name="PaymentMethods" 
-        component={() => <PlaceholderScreen title="Payment Methods" />} 
+        component={PaymentMethodsScreen} 
       />
       <Stack.Screen 
         name="ReceiptCustomization" 
-        component={() => <PlaceholderScreen title="Receipt Customization" />} 
+        component={ReceiptCustomizationScreen} 
       />
       <Stack.Screen 
         name="OperatingHours" 
-        component={() => <PlaceholderScreen title="Operating Hours" />} 
+        component={OperatingHoursScreen} 
       />
       
       {/* Hardware Configuration */}
