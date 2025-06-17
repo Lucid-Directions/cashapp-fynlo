@@ -79,16 +79,26 @@
 
 ## **📋 Phase 2: Payment Processing Service** ✅ **100% COMPLETE**
 
-### **Stripe Integration** ✅ **PRODUCTION READY**
+### **Open Banking Integration** 🚀 **NEW PRIMARY PAYMENT METHOD**
+- 🆕 **QR Code Generation**: Unique QR codes for each transaction (lowest fees)
+- 🆕 **Fee Structure**: 0.2% open banking + 1% Fynlo fee (cheapest option)
+- 🆕 **Payment Flow**: Customer scans QR → Bank app → Instant approval
+- 🆕 **Fallback System**: Automatic Stripe fallback if customer declines
+- 🆕 **Fee Transparency**: Clear fee comparison showing savings vs card payments
+- 🆕 **Transaction Management**: 15-minute QR expiry, real-time status tracking
+
+### **Stripe Integration** ✅ **PRODUCTION READY (FALLBACK METHOD)**
 - ✅ **PaymentIntent Management**: Create, confirm, capture, cancel (650+ lines)
 - ✅ **3D Secure Support**: Automatic SCA handling for compliance
+- ✅ **Fee Pass-through**: 2.9% + $0.30 Stripe fee + 1% Fynlo fee to customer
+- ✅ **Fee Toggle**: Customer can refuse to pay fees (restaurant absorbs cost)
 - ✅ **Webhook Processing**: Real-time payment status updates with HMAC verification
 - ✅ **Error Handling**: Comprehensive Stripe error management and retry logic
 - ✅ **Transaction Logging**: Complete audit trail for all payment operations
 - ✅ **Health Monitoring**: Service health checks and API connectivity validation
 - ✅ **Environment Management**: Test/Live mode configuration and security
 
-### **Apple Pay Integration** ✅ **PRODUCTION READY**
+### **Apple Pay Integration** ✅ **PRODUCTION READY (PREMIUM OPTION)**
 - ✅ **Merchant Validation**: Domain validation with certificate management (520+ lines)
 - ✅ **Payment Requests**: Dynamic payment sheet configuration for iOS
 - ✅ **Token Processing**: Secure payment token decryption and validation
@@ -96,16 +106,24 @@
 - ✅ **Network Support**: Visa, Mastercard, Amex, Discover integration
 - ✅ **iOS Compatibility**: PassKit framework and native wallet integration
 
-### **Transaction Management** ✅ **PRODUCTION READY**
-- ✅ **Multi-Payment Support**: Combine cash, card, and digital payments (800+ lines)
+### **Transaction Management** ✅ **PRODUCTION READY + ENHANCED**
+- ✅ **Multi-Payment Support**: Open banking, Stripe, Apple Pay, cash (800+ lines)
+- 🆕 **Smart Payment Routing**: Prioritize open banking for cost savings
+- 🆕 **Fee Management**: Transparent fee calculation and customer choice
+- 🆕 **Gratuity System**: 5%, 10%, 20% options with toggle on/off
 - ✅ **Transaction Validation**: Business rule enforcement and amount validation
 - ✅ **Payment Rollback**: Automatic failure recovery and transaction reversal
-- ✅ **Cash Drawer Integration**: Till operations, opening/closing balance management
-- ✅ **Refund Management**: Automated Stripe refunds, manual Apple Pay refunds
+- ✅ **Digital Cash Management**: Mobile till operations and reconciliation
+- ✅ **Refund Management**: Automated refunds across all payment methods
 - ✅ **Partial Payments**: Support for split payments and overpayment handling
 - ✅ **Manager Approval**: Workflow for refund authorization and overrides
+- 🆕 **Fynlo Revenue Tracking**: 1% fee collection and reporting
 
-### **Payment API Endpoints** ✅ **PRODUCTION READY**
+### **Payment API Endpoints** ✅ **PRODUCTION READY + ENHANCED**
+- 🆕 **Open Banking Endpoints**: QR generation, callback handling, status tracking (8 new endpoints)
+- 🆕 **Fee Calculator Endpoints**: Real-time fee calculation and comparison
+- 🆕 **Gratuity Endpoints**: Tip calculation and management
+- 🆕 **UI Configuration**: Payment toggle settings and preferences
 - ✅ **Stripe Endpoints**: create-intent, confirm-intent, capture, refund, status (15 endpoints)
 - ✅ **Apple Pay Endpoints**: validate-merchant, create-request, process-token
 - ✅ **Transaction Endpoints**: process, status tracking, multi-payment handling
@@ -332,6 +350,7 @@
 - ✅ Payment method setup and management
 - ✅ Receipt customization and branding
 - ✅ Operating hours and holiday configuration
+
 
 ### **App Configuration** ✅ **FOUNDATION COMPLETE**
 - ✅ Menu category and item management

@@ -97,6 +97,7 @@ export type MainStackParamList = {
   Inventory: undefined;
   MenuManagement: undefined;
   Dashboard: undefined;
+  Settings: undefined;
   BusinessSettings: undefined;
   Hardware: undefined;
   PaymentSettings: undefined;

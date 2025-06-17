@@ -107,35 +107,11 @@ const MoreScreen: React.FC = () => {
       title: 'Settings & Configuration',
       options: [
         {
-          id: 'business-settings',
-          title: 'Business Settings',
-          subtitle: 'Company info, taxes, and receipts',
-          icon: 'business',
-          route: 'BusinessSettings',
-          color: Colors.darkGray,
-        },
-        {
-          id: 'hardware',
-          title: 'Hardware',
-          subtitle: 'Printers, cash drawers, and devices',
-          icon: 'devices',
-          route: 'Hardware',
-          color: Colors.darkGray,
-        },
-        {
-          id: 'payment-settings',
-          title: 'Payment Settings',
-          subtitle: 'Payment methods and processing',
-          icon: 'payment',
-          route: 'PaymentSettings',
-          color: Colors.darkGray,
-        },
-        {
-          id: 'app-settings',
-          title: 'App Settings',
-          subtitle: 'Preferences and configuration',
+          id: 'settings',
+          title: 'Settings',
+          subtitle: 'Business, hardware, and app configuration',
           icon: 'settings',
-          route: 'AppSettings',
+          route: 'Settings',
           color: Colors.darkGray,
         },
       ],
@@ -249,8 +225,8 @@ const MoreScreen: React.FC = () => {
 
         {/* App Version */}
         <View style={styles.footer}>
-          <Text style={styles.versionText}>Clover POS v1.0.0</Text>
-          <Text style={styles.copyrightText}>© 2024 Clover Network, Inc.</Text>
+          <Text style={styles.versionText}>Fynlo POS v1.0.0</Text>
+          <Text style={styles.copyrightText}>© 2024 Fynlo Ltd.</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
