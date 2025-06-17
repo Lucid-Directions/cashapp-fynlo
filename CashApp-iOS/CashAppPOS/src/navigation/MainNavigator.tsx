@@ -4,7 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { MainTabParamList, MainStackParamList } from '../types';
 import POSScreen from '../screens/main/POSScreen';
-import OrdersScreen from '../screens/main/OrdersScreen';
+import OrdersScreen from '../screens/orders/OrdersScreen';
 import ReportsScreen from '../screens/reports/ReportsScreen';
 import MoreScreen from '../screens/more/MoreScreen';
 import EmployeesScreen from '../screens/employees/EmployeesScreen';
@@ -75,7 +75,7 @@ const MainTabNavigator: React.FC = () => {
         name="Home"
         component={POSScreen}
         options={{
-          tabBarLabel: 'Home',
+          tabBarLabel: 'POS',
           tabBarBadge: cartItemCount > 0 ? cartItemCount : undefined,
         }}
       />

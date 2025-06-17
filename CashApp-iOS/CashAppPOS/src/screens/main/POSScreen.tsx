@@ -258,13 +258,18 @@ const POSScreen: React.FC = () => {
       
       {/* Clover Header */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.menuButton}>
-          <Icon name="menu" size={24} color={Colors.white} />
-        </TouchableOpacity>
+        <View style={styles.headerLeft}>
+          <TouchableOpacity style={styles.menuButton}>
+            <Icon name="menu" size={24} color={Colors.white} />
+          </TouchableOpacity>
+          <View style={styles.logoContainer}>
+            <Text style={styles.logoText}>
+              Fynl<Text style={styles.logoOrange}>o</Text>
+            </Text>
+          </View>
+        </View>
         
         <View style={styles.headerCenter}>
-          <Text style={styles.cloverLogo}>CLOVER POS SYSTEM</Text>
-          <Text style={styles.headerSubtitle}>TEST MODE - CHANGES ACTIVE</Text>
         </View>
         
         <View style={styles.headerRight}>
@@ -286,8 +291,8 @@ const POSScreen: React.FC = () => {
       </View>
 
       <View style={styles.mainContent}>
-        {/* Split Layout: Menu + Cart */}
-        <View style={styles.leftPanel}>
+        {/* Full Width Menu */}
+        <View style={styles.fullWidthPanel}>
           {/* Quick Stats Bar */}
           <View style={styles.statsBar}>
             <View style={styles.statItem}>
@@ -340,66 +345,6 @@ const POSScreen: React.FC = () => {
             contentContainerStyle={styles.menuGrid}
             showsVerticalScrollIndicator={false}
           />
-        </View>
-
-        {/* Right Panel - Cart Preview */}
-        <View style={styles.rightPanel}>
-          <View style={styles.cartHeader}>
-            <View style={styles.cartTitleSection}>
-              <Text style={styles.cartTitle}>Current Order</Text>
-              <Text style={styles.cartSubtitle}>
-                Table 1 • {new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-              </Text>
-            </View>
-            {cart.length > 0 && (
-              <TouchableOpacity style={styles.clearButton} onPress={clearCart}>
-                <Icon name="delete-outline" size={20} color={Colors.warning} />
-              </TouchableOpacity>
-            )}
-          </View>
-          
-          {cart.length === 0 ? (
-            <View style={styles.emptyCart}>
-              <Icon name="restaurant-menu" size={48} color={Colors.lightGray} />
-              <Text style={styles.emptyCartText}>No items yet</Text>
-              <Text style={styles.emptyCartSubtext}>Tap menu items to add</Text>
-            </View>
-          ) : (
-            <>
-              <ScrollView style={styles.cartList}>
-                {cart.map((item) => (
-                  <CartItem key={item.id} item={item} />
-                ))}
-              </ScrollView>
-              
-              <View style={styles.cartFooter}>
-                <View style={styles.cartSummary}>
-                  <View style={styles.summaryRow}>
-                    <Text style={styles.summaryLabel}>Subtotal</Text>
-                    <Text style={styles.summaryValue}>£{cartTotal().toFixed(2)}</Text>
-                  </View>
-                  <View style={styles.summaryRow}>
-                    <Text style={styles.summaryLabel}>VAT (20%)</Text>
-                    <Text style={styles.summaryValue}>£{(cartTotal() * 0.2).toFixed(2)}</Text>
-                  </View>
-                  <View style={[styles.summaryRow, styles.totalRow]}>
-                    <Text style={styles.totalLabel}>Total</Text>
-                    <Text style={styles.totalAmount}>£{(cartTotal() * 1.2).toFixed(2)}</Text>
-                  </View>
-                </View>
-                
-                <TouchableOpacity
-                  style={styles.chargeButton}
-                  onPress={() => setShowPaymentModal(true)}
-                >
-                  <Icon name="credit-card" size={20} color={Colors.white} style={{marginRight: 8}} />
-                  <Text style={styles.chargeButtonText}>
-                    Charge £{(cartTotal() * 1.2).toFixed(2)}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </>
-          )}
         </View>
       </View>
 
@@ -615,6 +560,31 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  logoContainer: {
+    marginLeft: 16,
+    flexDirection: 'row',
+    alignItems: 'baseline',
+  },
+  logoText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: Colors.white,
+    letterSpacing: -0.5,
+  },
+  logoOrange: {
+    color: '#FF6B35',
+  },
+  posSubtext: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: 'rgba(255, 255, 255, 0.8)',
+    marginLeft: 4,
+  },
   cloverLogo: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -675,10 +645,9 @@ const styles = StyleSheet.create({
   },
   mainContent: {
     flex: 1,
-    flexDirection: 'row',
   },
-  leftPanel: {
-    flex: 2,
+  fullWidthPanel: {
+    flex: 1,
     backgroundColor: Colors.white,
   },
   statsBar: {
@@ -819,13 +788,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 12,
     minWidth: 20,
     textAlign: 'center',
-  },
-  rightPanel: {
-    flex: 1,
-    backgroundColor: Colors.background,
-    borderLeftWidth: 1,
-    borderLeftColor: Colors.border,
-    maxWidth: isTablet ? 400 : 320,
   },
   cartHeader: {
     flexDirection: 'row',

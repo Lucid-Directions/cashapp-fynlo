@@ -43,5 +43,36 @@ The fix works by:
 1. Suppressing compile-time warnings for SocketRocket specifically
 2. Setting proper thread priorities at app launch
 3. Pre-warming dispatch queues with correct QoS levels
+4. Applying a patch to SocketRocket source code to replace DISPATCH_TIME_FOREVER with timeout-based waiting
+
+## Applying the Fix
+
+The patch is automatically applied during `pod install` via the Podfile post-install hook. If you need to manually apply it:
+
+```bash
+cd ios
+./apply-socketrocket-patch.sh
+```
+
+## What the Patch Does
+The patch modifies `SRRunLoopThread.m` line 79 to replace:
+```objc
+dispatch_group_wait(_waitGroup, DISPATCH_TIME_FOREVER);
+```
+
+With a timeout-based approach:
+```objc
+// Fix for priority inversion warning - use timeout instead of DISPATCH_TIME_FOREVER
+dispatch_time_t timeout = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(10.0 * NSEC_PER_SEC));
+long result = dispatch_group_wait(_waitGroup, timeout);
+
+if (result != 0) {
+    // Fallback: if timeout occurs, try once more with a shorter timeout
+    timeout = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC));
+    dispatch_group_wait(_waitGroup, timeout);
+}
+```
+
+This prevents the priority inversion by avoiding infinite waits that can cause high-priority threads to be blocked by lower-priority ones.
 
 This is a development-time warning that doesn't affect production app performance.

@@ -193,7 +193,7 @@ const LoginScreen: React.FC = () => {
           {/* Footer */}
           <View style={styles.footer}>
             <Text style={styles.footerText}>
-              Clover POS System • Secure Payment Processing
+              Fynlo POS System • Secure Payment Processing
             </Text>
           </View>
         </View>

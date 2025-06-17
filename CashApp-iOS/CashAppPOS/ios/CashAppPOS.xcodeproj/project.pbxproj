@@ -11,7 +11,6 @@
 		2F35FBD5920E05EA81AEFAEB /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = D736FE8CE469B82F94153051 /* PrivacyInfo.xcprivacy */; };
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
 		68E0525B93D1D783F833B5C4 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08848095BBC2C152057FAB65 /* ExpoModulesProvider.swift */; };
-		B8F7E1234567890ABCDEF123 /* main.jsbundle in Resources */ = {isa = PBXBuildFile; fileRef = A9E6D1234567890ABCDEF124 /* main.jsbundle */; };
 		BB013B9F51EE42F854BF771D /* libPods-CashAppPOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E72375891359D42FABC52439 /* libPods-CashAppPOS.a */; };
 		F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11748412D0307B40044C1D9 /* AppDelegate.swift */; };
 /* End PBXBuildFile section */
@@ -23,7 +22,6 @@
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = CashAppPOS/Info.plist; sourceTree = "<group>"; };
 		3CDBF677197D311F6C7CC05A /* Pods-CashAppPOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CashAppPOS.debug.xcconfig"; path = "Target Support Files/Pods-CashAppPOS/Pods-CashAppPOS.debug.xcconfig"; sourceTree = "<group>"; };
 		54B6453D4D885CCAC7716B25 /* Pods-CashAppPOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-CashAppPOS.release.xcconfig"; path = "Target Support Files/Pods-CashAppPOS/Pods-CashAppPOS.release.xcconfig"; sourceTree = "<group>"; };
-		A9E6D1234567890ABCDEF124 /* main.jsbundle */ = {isa = PBXFileReference; lastKnownFileType = text; name = main.jsbundle; path = CashAppPOS/main.jsbundle; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = CashAppPOS/SplashScreen.storyboard; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
 		D736FE8CE469B82F94153051 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = CashAppPOS/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
@@ -55,7 +53,6 @@
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
 				D736FE8CE469B82F94153051 /* PrivacyInfo.xcprivacy */,
-				A9E6D1234567890ABCDEF124 /* main.jsbundle */,
 			);
 			name = CashAppPOS;
 			sourceTree = "<group>";
@@ -196,7 +193,6 @@
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
 				2F35FBD5920E05EA81AEFAEB /* PrivacyInfo.xcprivacy in Resources */,
-				B8F7E1234567890ABCDEF123 /* main.jsbundle in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
