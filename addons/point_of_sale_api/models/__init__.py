@@ -4,4 +4,11 @@ from . import payment_gateway
 from . import apple_pay
 from . import cash_management
 from . import tip_processing
-from . import pos_order_extension 
+from . import pos_order_extension
+from . import pos_session_extension
+from . import pos_product_extension
+from . import pos_payment_extension
+from . import sync_tracker
+from . import websocket
+from . import redis_client
+from . import pos_order_state_machine 
