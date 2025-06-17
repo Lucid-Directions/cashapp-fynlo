@@ -1,0 +1,460 @@
+{
+  "basic_query_performance": {
+    "overall_average": 1.2000316224293783,
+    "query_results": [
+      {
+        "query_name": "Simple SELECT",
+        "query_sql": "SELECT 1;",
+        "average_time": 0.1745334011502564,
+        "min_time": 0.07062498480081558,
+        "max_time": 0.8542500145267695,
+        "runs": 10,
+        "all_times": [
+          0.8542500145267695,
+          0.10341699817217886,
+          0.07779200677759945,
+          0.08379100472666323,
+          0.13520900392904878,
+          0.07387500954791903,
+          0.14704099157825112,
+          0.07241699495352805,
+          0.12691700248979032,
+          0.07062498480081558
+        ]
+      },
+      {
+        "query_name": "Current Time",
+        "query_sql": "SELECT NOW();",
+        "average_time": 0.3331957064801827,
+        "min_time": 0.07424998329952359,
+        "max_time": 2.376332995481789,
+        "runs": 10,
+        "all_times": [
+          2.376332995481789,
+          0.1820419856812805,
+          0.11220801388844848,
+          0.13629102613776922,
+          0.10562501847743988,
+          0.10641702101565897,
+          0.07895802264101803,
+          0.07424998329952359,
+          0.08258299203589559,
+          0.0772500061430037
+        ]
+      },
+      {
+        "query_name": "Database Info",
+        "query_sql": "SELECT current_database(), current_user;",
+        "average_time": 0.13789190270472318,
+        "min_time": 0.07416700827889144,
+        "max_time": 0.5784590030089021,
+        "runs": 10,
+        "all_times": [
+          0.5784590030089021,
+          0.09041701559908688,
+          0.08416699711233377,
+          0.0858750136103481,
+          0.08108300971798599,
+          0.07416700827889144,
+          0.08683401392772794,
+          0.11820899089798331,
+          0.0964159844443202,
+          0.08329199044965208
+        ]
+      },
+      {
+        "query_name": "Table Count",
+        "query_sql": "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';",
+        "average_time": 5.248949900851585,
+        "min_time": 0.8311659912578762,
+        "max_time": 36.113708978518844,
+        "runs": 10,
+        "all_times": [
+          36.113708978518844,
+          1.7727499944157898,
+          1.2497910065576434,
+          1.40508302138187,
+          1.2200000055599958,
+          1.1990420171059668,
+          1.4644160110037774,
+          0.9961669857148081,
+          6.237374996999279,
+          0.8311659912578762
+        ]
+      },
+      {
+        "query_name": "Version Check",
+        "query_sql": "SELECT version();",
+        "average_time": 0.1055872009601444,
+        "min_time": 0.08062500273808837,
+        "max_time": 0.20466698333621025,
+        "runs": 10,
+        "all_times": [
+          0.20466698333621025,
+          0.1221249985974282,
+          0.094832998001948,
+          0.09354099165648222,
+          0.09116600267589092,
+          0.10266600293107331,
+          0.08062500273808837,
+          0.09320798562839627,
+          0.08633302059024572,
+          0.08670802344568074
+        ]
+      }
+    ],
+    "total_queries": 5,
+    "measurement_type": "real_database"
+  },
+  "concurrent_load": {
+    "total_time": 50.7684999902267,
+    "successful_queries": 50,
+    "expected_queries": 50,
+    "success_rate": 1.0,
+    "average_query_time": 3.0246476019965485,
+    "min_query_time": 1.626625016797334,
+    "max_query_time": 6.544417003169656,
+    "num_threads": 10,
+    "queries_per_thread": 5,
+    "all_results": [
+      {
+        "worker_id": 0,
+        "query_number": 1,
+        "query_time": 3.6123339959885925,
+        "timestamp": "2025-06-17T15:50:03.829407"
+      },
+      {
+        "worker_id": 0,
+        "query_number": 2,
+        "query_time": 4.331708012614399,
+        "timestamp": "2025-06-17T15:50:03.833891"
+      },
+      {
+        "worker_id": 0,
+        "query_number": 3,
+        "query_time": 2.4615419970359653,
+        "timestamp": "2025-06-17T15:50:03.836366"
+      },
+      {
+        "worker_id": 0,
+        "query_number": 4,
+        "query_time": 2.347000001464039,
+        "timestamp": "2025-06-17T15:50:03.838722"
+      },
+      {
+        "worker_id": 0,
+        "query_number": 5,
+        "query_time": 2.3569170152768493,
+        "timestamp": "2025-06-17T15:50:03.841087"
+      },
+      {
+        "worker_id": 1,
+        "query_number": 1,
+        "query_time": 5.8496669807937,
+        "timestamp": "2025-06-17T15:50:03.835464"
+      },
+      {
+        "worker_id": 1,
+        "query_number": 2,
+        "query_time": 2.311165997525677,
+        "timestamp": "2025-06-17T15:50:03.837791"
+      },
+      {
+        "worker_id": 1,
+        "query_number": 3,
+        "query_time": 2.3318330058827996,
+        "timestamp": "2025-06-17T15:50:03.840131"
+      },
+      {
+        "worker_id": 1,
+        "query_number": 4,
+        "query_time": 2.4364170094486326,
+        "timestamp": "2025-06-17T15:50:03.842574"
+      },
+      {
+        "worker_id": 1,
+        "query_number": 5,
+        "query_time": 2.5469170068390667,
+        "timestamp": "2025-06-17T15:50:03.845135"
+      },
+      {
+        "worker_id": 2,
+        "query_number": 1,
+        "query_time": 3.1290000188164413,
+        "timestamp": "2025-06-17T15:50:03.838770"
+      },
+      {
+        "worker_id": 2,
+        "query_number": 2,
+        "query_time": 2.3371250135824084,
+        "timestamp": "2025-06-17T15:50:03.841114"
+      },
+      {
+        "worker_id": 2,
+        "query_number": 3,
+        "query_time": 2.3932089970912784,
+        "timestamp": "2025-06-17T15:50:03.843513"
+      },
+      {
+        "worker_id": 2,
+        "query_number": 4,
+        "query_time": 2.4619169998914003,
+        "timestamp": "2025-06-17T15:50:03.845982"
+      },
+      {
+        "worker_id": 2,
+        "query_number": 5,
+        "query_time": 2.398417011136189,
+        "timestamp": "2025-06-17T15:50:03.848387"
+      },
+      {
+        "worker_id": 3,
+        "query_number": 1,
+        "query_time": 2.815499989083037,
+        "timestamp": "2025-06-17T15:50:03.840752"
+      },
+      {
+        "worker_id": 3,
+        "query_number": 2,
+        "query_time": 2.3814589949324727,
+        "timestamp": "2025-06-17T15:50:03.843144"
+      },
+      {
+        "worker_id": 3,
+        "query_number": 3,
+        "query_time": 2.4489170173183084,
+        "timestamp": "2025-06-17T15:50:03.845605"
+      },
+      {
+        "worker_id": 3,
+        "query_number": 4,
+        "query_time": 2.531333011575043,
+        "timestamp": "2025-06-17T15:50:03.848150"
+      },
+      {
+        "worker_id": 3,
+        "query_number": 5,
+        "query_time": 2.520499983802438,
+        "timestamp": "2025-06-17T15:50:03.850679"
+      },
+      {
+        "worker_id": 4,
+        "query_number": 1,
+        "query_time": 2.815791987814009,
+        "timestamp": "2025-06-17T15:50:03.847786"
+      },
+      {
+        "worker_id": 4,
+        "query_number": 2,
+        "query_time": 2.4609999964013696,
+        "timestamp": "2025-06-17T15:50:03.850269"
+      },
+      {
+        "worker_id": 4,
+        "query_number": 3,
+        "query_time": 2.4697920016478747,
+        "timestamp": "2025-06-17T15:50:03.852759"
+      },
+      {
+        "worker_id": 4,
+        "query_number": 4,
+        "query_time": 2.3882079985924065,
+        "timestamp": "2025-06-17T15:50:03.855167"
+      },
+      {
+        "worker_id": 4,
+        "query_number": 5,
+        "query_time": 2.4103749892674387,
+        "timestamp": "2025-06-17T15:50:03.857590"
+      },
+      {
+        "worker_id": 5,
+        "query_number": 1,
+        "query_time": 2.7215000009164214,
+        "timestamp": "2025-06-17T15:50:03.850716"
+      },
+      {
+        "worker_id": 5,
+        "query_number": 2,
+        "query_time": 2.4162080080714077,
+        "timestamp": "2025-06-17T15:50:03.853137"
+      },
+      {
+        "worker_id": 5,
+        "query_number": 3,
+        "query_time": 2.424292004434392,
+        "timestamp": "2025-06-17T15:50:03.855569"
+      },
+      {
+        "worker_id": 5,
+        "query_number": 4,
+        "query_time": 2.3805420205462724,
+        "timestamp": "2025-06-17T15:50:03.857955"
+      },
+      {
+        "worker_id": 5,
+        "query_number": 5,
+        "query_time": 5.989583005430177,
+        "timestamp": "2025-06-17T15:50:03.863956"
+      },
+      {
+        "worker_id": 6,
+        "query_number": 1,
+        "query_time": 2.793791994918138,
+        "timestamp": "2025-06-17T15:50:03.853347"
+      },
+      {
+        "worker_id": 6,
+        "query_number": 2,
+        "query_time": 2.390209003351629,
+        "timestamp": "2025-06-17T15:50:03.855742"
+      },
+      {
+        "worker_id": 6,
+        "query_number": 3,
+        "query_time": 2.3726249928586185,
+        "timestamp": "2025-06-17T15:50:03.858121"
+      },
+      {
+        "worker_id": 6,
+        "query_number": 4,
+        "query_time": 6.544417003169656,
+        "timestamp": "2025-06-17T15:50:03.864673"
+      },
+      {
+        "worker_id": 6,
+        "query_number": 5,
+        "query_time": 2.0564580045174807,
+        "timestamp": "2025-06-17T15:50:03.866749"
+      },
+      {
+        "worker_id": 7,
+        "query_number": 1,
+        "query_time": 1.626625016797334,
+        "timestamp": "2025-06-17T15:50:03.855225"
+      },
+      {
+        "worker_id": 7,
+        "query_number": 2,
+        "query_time": 2.4135420098900795,
+        "timestamp": "2025-06-17T15:50:03.857653"
+      },
+      {
+        "worker_id": 7,
+        "query_number": 3,
+        "query_time": 6.401958002243191,
+        "timestamp": "2025-06-17T15:50:03.864065"
+      },
+      {
+        "worker_id": 7,
+        "query_number": 4,
+        "query_time": 3.7858340074308217,
+        "timestamp": "2025-06-17T15:50:03.867869"
+      },
+      {
+        "worker_id": 7,
+        "query_number": 5,
+        "query_time": 2.5170839799102396,
+        "timestamp": "2025-06-17T15:50:03.870396"
+      },
+      {
+        "worker_id": 8,
+        "query_number": 1,
+        "query_time": 3.0849169997964054,
+        "timestamp": "2025-06-17T15:50:03.859080"
+      },
+      {
+        "worker_id": 8,
+        "query_number": 2,
+        "query_time": 5.0232079811394215,
+        "timestamp": "2025-06-17T15:50:03.864114"
+      },
+      {
+        "worker_id": 8,
+        "query_number": 3,
+        "query_time": 3.6937500117346644,
+        "timestamp": "2025-06-17T15:50:03.867819"
+      },
+      {
+        "worker_id": 8,
+        "query_number": 4,
+        "query_time": 2.498500020010397,
+        "timestamp": "2025-06-17T15:50:03.870338"
+      },
+      {
+        "worker_id": 8,
+        "query_number": 5,
+        "query_time": 2.4147079966496676,
+        "timestamp": "2025-06-17T15:50:03.872769"
+      },
+      {
+        "worker_id": 9,
+        "query_number": 1,
+        "query_time": 6.422582984669134,
+        "timestamp": "2025-06-17T15:50:03.864782"
+      },
+      {
+        "worker_id": 9,
+        "query_number": 2,
+        "query_time": 3.410625009564683,
+        "timestamp": "2025-06-17T15:50:03.868200"
+      },
+      {
+        "worker_id": 9,
+        "query_number": 3,
+        "query_time": 2.3775839945301414,
+        "timestamp": "2025-06-17T15:50:03.870598"
+      },
+      {
+        "worker_id": 9,
+        "query_number": 4,
+        "query_time": 2.443333010887727,
+        "timestamp": "2025-06-17T15:50:03.873077"
+      },
+      {
+        "worker_id": 9,
+        "query_number": 5,
+        "query_time": 2.480458002537489,
+        "timestamp": "2025-06-17T15:50:03.875578"
+      }
+    ],
+    "measurement_type": "real_database_concurrent"
+  },
+  "schema_performance": {
+    "average_time": 1.8799584941007197,
+    "successful_queries": 2,
+    "total_queries": 4,
+    "query_results": [
+      {
+        "query_name": "Check Tables",
+        "query_time": 2.271042001666501,
+        "row_count": 0,
+        "success": true
+      },
+      {
+        "query_name": "Schema Info",
+        "query_time": 1.4888749865349382,
+        "row_count": 0,
+        "success": true
+      },
+      {
+        "query_name": "Index Performance",
+        "error": "column \"tablename\" does not exist\nLINE 2:                     SELECT schemaname, tablename, indexname,...\n                                               ^\n",
+        "success": false
+      },
+      {
+        "query_name": "Database Stats",
+        "error": "current transaction is aborted, commands ignored until end of transaction block\n",
+        "success": false
+      }
+    ],
+    "measurement_type": "real_database_schema"
+  },
+  "overall_assessment": {
+    "basic_query_avg": 1.2000316224293783,
+    "concurrent_load_avg": 3.0246476019965485,
+    "schema_query_avg": 1.8799584941007197,
+    "database_available": true,
+    "test_timestamp": "2025-06-17T15:50:03.881760"
+  }
+}
