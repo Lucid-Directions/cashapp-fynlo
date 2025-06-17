@@ -1,0 +1,57 @@
+{
+  "summary": {
+    "start_time": "2025-06-17T13:20:58.527787",
+    "end_time": "2025-06-17T13:20:58.528357",
+    "total_duration": 0.00057,
+    "total_tests": 4,
+    "total_passed": 3,
+    "total_failed": 1,
+    "overall_success_rate": 75.0,
+    "production_ready": false
+  },
+  "unit_tests": {},
+  "integration_tests": {},
+  "performance_tests": {},
+  "security_tests": {
+    "total_tests": 4,
+    "passed": 3,
+    "failed": 1,
+    "results": [
+      {
+        "test_name": "SQL Injection Protection",
+        "malicious_payloads": 3,
+        "blocked_attempts": 2,
+        "success_rate": 66.66666666666666,
+        "passed": false,
+        "details": "Blocked 2/3 injection attempts"
+      },
+      {
+        "test_name": "XSS Protection",
+        "xss_payloads": 3,
+        "sanitized_inputs": 3,
+        "success_rate": 100.0,
+        "passed": true,
+        "details": "Sanitized 3/3 XSS attempts"
+      },
+      {
+        "test_name": "Authentication Security",
+        "total_checks": 4,
+        "passed_checks": 3,
+        "success_rate": 75.0,
+        "passed": true,
+        "details": "Passed 3/4 security checks"
+      },
+      {
+        "test_name": "Authorization Controls",
+        "total_checks": 4,
+        "passed_checks": 4,
+        "success_rate": 100.0,
+        "passed": true,
+        "details": "Passed 4/4 authorization checks"
+      }
+    ],
+    "success_rate": 75.0
+  },
+  "load_tests": {},
+  "coverage": {}
+}

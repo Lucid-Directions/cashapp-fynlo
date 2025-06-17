@@ -79,3 +79,43 @@ logs/
 *.temp
 .DS_Store
 Thumbs.db
+
+# Dependencies
+node_modules/
+*.pyc
+__pycache__/
+.env
+.venv/
+venv/
+
+# Database
+*.db
+*.sqlite3
+
+# Logs
+*.log
+logs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build outputs
+dist/
+build/
+*.egg-info/
+
+# Test outputs
+.pytest_cache/
+.coverage
+htmlcov/
+test_results_*.json
+
+# Odoo dependencies
+odoo-source/
+test_data/
+
+# Development tools
+*.conf
