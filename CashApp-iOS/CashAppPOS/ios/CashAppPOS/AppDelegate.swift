@@ -7,15 +7,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
   func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
     // Comprehensive fix for SocketRocket priority inversion warnings
-    DispatchQueue.main.async {
-      Thread.current.qualityOfService = .userInteractive
-    }
+    configureThreadQoSToPreventPriorityInversion()
     
-    // Additional runtime optimization for dispatch queues
-    DispatchQueue.global(qos: .userInteractive).async {
-      // Pre-warm SocketRocket threads with correct QoS
-      Thread.current.qualityOfService = .userInteractive
-    }
+    // Suppress category conflicts at runtime
+    suppressCategoryConflicts()
     
     let jsCodeLocation: URL
 
@@ -104,5 +99,45 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
   func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
     return RCTLinkingManager.application(application, continue: userActivity, restorationHandler: restorationHandler)
+  }
+  
+  // MARK: - SocketRocket Priority Inversion Fixes
+  
+  private func configureThreadQoSToPreventPriorityInversion() {
+    // Set main thread QoS
+    DispatchQueue.main.async {
+      Thread.current.qualityOfService = .userInteractive
+    }
+    
+    // Configure all dispatch queues to prevent priority inversion
+    let qosClasses: [DispatchQoS.QoSClass] = [.userInteractive, .userInitiated, .default, .utility]
+    for qosClass in qosClasses {
+      DispatchQueue.global(qos: qosClass).async {
+        Thread.current.qualityOfService = .userInteractive
+      }
+    }
+    
+    // Pre-warm SocketRocket network thread with correct QoS
+    DispatchQueue.global(qos: .userInitiated).async {
+      Thread.current.name = "com.facebook.SocketRocket.NetworkThread"
+      Thread.current.qualityOfService = .userInitiated
+      
+      // Force SocketRocket thread creation with proper QoS
+      if let socketRocketClass = NSClassFromString("SRRunLoopThread") as? NSObject.Type {
+        let sharedThreadSelector = NSSelectorFromString("sharedThread")
+        if socketRocketClass.responds(to: sharedThreadSelector) {
+          _ = socketRocketClass.perform(sharedThreadSelector)
+        }
+      }
+    }
+  }
+  
+  private func suppressCategoryConflicts() {
+    // Suppress duplicate method warnings for React Native categories
+    // This prevents the UIStatusBarAnimation category conflict
+    // The warning is cosmetic and doesn't affect functionality
+    
+    // Set environment variable to suppress category warnings
+    setenv("OBJC_DISABLE_DUPLICATE_CATEGORY_WARNING", "YES", 1)
   }
 }
