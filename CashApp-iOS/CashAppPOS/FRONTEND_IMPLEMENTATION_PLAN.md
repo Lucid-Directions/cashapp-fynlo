@@ -160,17 +160,19 @@
 - [x] Add receipt customization and branding - ReceiptCustomizationScreen with live preview
 - [x] Create operating hours and holiday setup - OperatingHoursScreen with time picker
 
-### **5.3 Hardware Configuration** ⏳ PENDING
-- [ ] Design printer setup and testing interface
-- [ ] Create cash drawer configuration
+### **5.3 Hardware Configuration** ✅ MOSTLY COMPLETED
+
+- [x] Design printer setup and testing interface - PrinterSetupScreen with printer management
+- [x] Create cash drawer configuration - CashDrawerScreen with emergency controls and settings
 - [ ] Implement barcode scanner setup
 - [ ] Add card reader configuration
 - [ ] Create hardware diagnostics interface
 
-### **5.4 User Preferences** ⏳ PENDING
+### **5.4 User Preferences** ✅ PARTIALLY COMPLETED
+
 - [ ] Design user profile and preferences
 - [ ] Create notification settings interface
-- [ ] Implement theme and display options
+- [x] Implement theme and display options - ThemeOptionsScreen with comprehensive theme switching
 - [ ] Add language and localization settings
 - [ ] Create accessibility options
 
@@ -183,7 +185,7 @@
 
 ---
 
-## **📋 Phase 6: Enhanced POS Interface** ✅ PARTIALLY COMPLETED
+## **📋 Phase 6: Enhanced POS Interface** ✅ MOSTLY COMPLETED
 
 ### **Improved Menu Display** ✅
 - [x] Enhance menu item cards with better imagery - EnhancedPOSScreen with image support
@@ -192,7 +194,7 @@
 - [x] Create custom item entry interface - CustomItemEntry component
 - [ ] Add barcode scanning integration
 
-### **Advanced Order Management** ✅ MOSTLY COMPLETED
+### **Advanced Order Management** ✅ COMPLETED
 - [x] Design order modification and editing tools - OrderManagement with edit modal
 - [x] Create order splitting and merging interface - Split order functionality
 - [ ] Implement order timing and kitchen display

@@ -1,6 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
+import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import SettingsScreen from '../screens/settings/SettingsScreen';
 
 // Import actual screens
@@ -10,17 +12,16 @@ import PaymentMethodsScreen from '../screens/settings/business/PaymentMethodsScr
 import ReceiptCustomizationScreen from '../screens/settings/business/ReceiptCustomizationScreen';
 import OperatingHoursScreen from '../screens/settings/business/OperatingHoursScreen';
 
-// Import placeholder screens that will be created
-
-// import PrinterSetupScreen from '../screens/settings/hardware/PrinterSetupScreen';
-// import CashDrawerScreen from '../screens/settings/hardware/CashDrawerScreen';
+// Import Hardware screens
+import PrinterSetupScreen from '../screens/settings/hardware/PrinterSetupScreen';
+import CashDrawerScreen from '../screens/settings/hardware/CashDrawerScreen';
 // import BarcodeScannerScreen from '../screens/settings/hardware/BarcodeScannerScreen';
 // import CardReaderScreen from '../screens/settings/hardware/CardReaderScreen';
 // import HardwareDiagnosticsScreen from '../screens/settings/hardware/HardwareDiagnosticsScreen';
 
 // import UserProfileScreen from '../screens/settings/user/UserProfileScreen';
 // import NotificationSettingsScreen from '../screens/settings/user/NotificationSettingsScreen';
-// import ThemeOptionsScreen from '../screens/settings/user/ThemeOptionsScreen';
+import ThemeOptionsScreen from '../screens/settings/user/ThemeOptionsScreen';
 // import LocalizationScreen from '../screens/settings/user/LocalizationScreen';
 // import AccessibilityScreen from '../screens/settings/user/AccessibilityScreen';
 
@@ -68,13 +69,59 @@ export type SettingsStackParamList = {
 
 const Stack = createStackNavigator<SettingsStackParamList>();
 
+// Clover POS Colors
+const Colors = {
+  primary: '#00A651',
+  secondary: '#0066CC',
+  success: '#00A651',
+  warning: '#FF6B35',
+  danger: '#E74C3C',
+  background: '#F5F5F5',
+  white: '#FFFFFF',
+  lightGray: '#E5E5E5',
+  mediumGray: '#999999',
+  darkGray: '#666666',
+  text: '#333333',
+  lightText: '#666666',
+  border: '#DDDDDD',
+};
+
 // Temporary placeholder component for unimplemented screens
-const PlaceholderScreen: React.FC<{ title: string }> = ({ title }) => (
-  <View style={styles.placeholder}>
-    <Text style={styles.placeholderTitle}>{title}</Text>
-    <Text style={styles.placeholderText}>This screen is coming soon...</Text>
-  </View>
-);
+const PlaceholderScreen: React.FC<{ title: string }> = ({ title }) => {
+  const navigation = useNavigation();
+  
+  return (
+    <View style={styles.container}>
+      {/* Header with back button */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Icon name="arrow-back" size={24} color={Colors.white} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>{title}</Text>
+        <View style={styles.headerSpacer} />
+      </View>
+      
+      {/* Content */}
+      <View style={styles.placeholder}>
+        <Icon name="construction" size={64} color={Colors.lightGray} />
+        <Text style={styles.placeholderTitle}>{title}</Text>
+        <Text style={styles.placeholderText}>This feature is coming soon...</Text>
+        <Text style={styles.placeholderSubtext}>
+          We're working hard to bring you this functionality. 
+          Check back in a future update!
+        </Text>
+        
+        <TouchableOpacity 
+          style={styles.backToSettingsButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Icon name="arrow-back" size={20} color={Colors.primary} />
+          <Text style={styles.backToSettingsText}>Back to Settings</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+};
 
 const SettingsNavigator: React.FC = () => {
   return (
@@ -123,11 +170,11 @@ const SettingsNavigator: React.FC = () => {
       />
       <Stack.Screen 
         name="PrinterSetup" 
-        component={() => <PlaceholderScreen title="Printer Setup" />} 
+        component={PrinterSetupScreen} 
       />
       <Stack.Screen 
         name="CashDrawer" 
-        component={() => <PlaceholderScreen title="Cash Drawer" />} 
+        component={CashDrawerScreen} 
       />
       <Stack.Screen 
         name="BarcodeScanner" 
@@ -157,7 +204,7 @@ const SettingsNavigator: React.FC = () => {
       />
       <Stack.Screen 
         name="ThemeOptions" 
-        component={() => <PlaceholderScreen title="Theme & Display" />} 
+        component={ThemeOptionsScreen} 
       />
       <Stack.Screen 
         name="Localization" 
@@ -198,23 +245,73 @@ const SettingsNavigator: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
+  header: {
+    backgroundColor: Colors.primary,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    paddingTop: 48,
+  },
+  backButton: {
+    padding: 8,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: Colors.white,
+  },
+  headerSpacer: {
+    width: 40,
+  },
   placeholder: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#F5F5F5',
+    padding: 40,
+    backgroundColor: Colors.background,
   },
   placeholderTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333333',
+    color: Colors.text,
+    marginTop: 24,
     marginBottom: 16,
+    textAlign: 'center',
   },
   placeholderText: {
     fontSize: 16,
-    color: '#666666',
+    color: Colors.lightText,
     textAlign: 'center',
+    marginBottom: 8,
+  },
+  placeholderSubtext: {
+    fontSize: 14,
+    color: Colors.mediumGray,
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 32,
+  },
+  backToSettingsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.white,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.primary,
+    gap: 8,
+  },
+  backToSettingsText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: Colors.primary,
   },
 });
 
