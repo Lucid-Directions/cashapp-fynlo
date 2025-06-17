@@ -10,6 +10,7 @@ import MoreScreen from '../screens/more/MoreScreen';
 import EmployeesScreen from '../screens/employees/EmployeesScreen';
 import CustomersScreen from '../screens/customers/CustomersScreen';
 import InventoryScreen from '../screens/inventory/InventoryScreen';
+import SettingsNavigator from './SettingsNavigator';
 import useAppStore from '../store/useAppStore';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -133,6 +134,13 @@ const MainNavigator: React.FC = () => {
       <Stack.Screen
         name="Inventory"
         component={InventoryScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="Settings"
+        component={SettingsNavigator}
         options={{
           headerShown: false,
         }}
