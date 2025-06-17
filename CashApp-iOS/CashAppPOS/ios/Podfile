@@ -101,6 +101,24 @@ target 'CashAppPOS' do
     # Additional SocketRocket optimization - suppress priority inversion at runtime
     puts "🔧 Configuring SocketRocket priority inversion suppression..."
     
+    # Apply the enhanced SocketRocket patch to fix priority inversion
+    socketrocket_enhanced_patch = File.join(__dir__, 'socketrocket-enhanced-fix.patch')
+    socketrocket_original_patch = File.join(__dir__, 'socketrocket-priority-fix.patch')
+    socketrocket_file_path = File.join(__dir__, 'Pods/SocketRocket/SocketRocket/Internal/RunLoop/SRRunLoopThread.m')
+    
+    if File.exist?(socketrocket_file_path)
+      puts "📝 Applying enhanced SocketRocket priority inversion fix..."
+      # First, revert any previous patches
+      system("cd '#{File.join(__dir__, 'Pods/SocketRocket')}' && git checkout . 2>/dev/null || true")
+      
+      # Apply the enhanced patch
+      if File.exist?(socketrocket_enhanced_patch)
+        system("patch -p1 < '#{socketrocket_enhanced_patch}' -d '#{File.join(__dir__, 'Pods/SocketRocket')}'") || puts("⚠️  Enhanced patch may have already been applied")
+      elsif File.exist?(socketrocket_original_patch)
+        system("patch -p1 < '#{socketrocket_original_patch}' -d '#{File.join(__dir__, 'Pods/SocketRocket')}'") || puts("⚠️  Original patch may have already been applied")
+      end
+    end
+    
     # Add preprocessor definitions to suppress the warning at compile time
     installer.pods_project.targets.each do |target|
       if target.name == "SocketRocket"
@@ -116,5 +134,25 @@ target 'CashAppPOS' do
     end
     
     puts "✅ SocketRocket priority inversion suppression configured!"
+    
+    # Fix deprecated ld_classic linker warning and category conflicts
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |config|
+        # Fix deprecated ld_classic warning
+        if config.build_settings['OTHER_LDFLAGS']
+          config.build_settings['OTHER_LDFLAGS'] = config.build_settings['OTHER_LDFLAGS'].gsub('-ld_classic', '') if config.build_settings['OTHER_LDFLAGS'].is_a?(String)
+          config.build_settings['OTHER_LDFLAGS'] = config.build_settings['OTHER_LDFLAGS'].reject { |flag| flag == '-ld_classic' } if config.build_settings['OTHER_LDFLAGS'].is_a?(Array)
+        end
+        
+        # Use modern linker settings
+        config.build_settings['LD_RUNPATH_SEARCH_PATHS'] = ['$(inherited)', '@executable_path/Frameworks']
+        
+        # Fix React-CoreModules category conflict
+        if target.name == 'React-CoreModules'
+          config.build_settings['OTHER_CFLAGS'] = "$(inherited) -Wno-objc-protocol-method-implementation"
+          config.build_settings['GCC_WARN_DUPLICATE_METHOD_MATCH'] = 'NO'
+        end
+      end
+    end
   end
 end
