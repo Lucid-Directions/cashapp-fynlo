@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback, memo } from 'react';
 import {
   StyleSheet,
   Text,
@@ -22,6 +22,10 @@ import { useNavigation } from '@react-navigation/native';
 import useAppStore from '../../store/useAppStore';
 import useUIStore from '../../store/useUIStore';
 import { MenuItem, OrderItem } from '../../types';
+import LazyLoadingWrapper from '../../components/performance/LazyLoadingWrapper';
+import { MenuItemSkeleton } from '../../components/performance/SkeletonLoader';
+import { usePerformanceMonitor, performanceUtils } from '../../hooks/usePerformanceMonitor';
+import { OptimizedGrid } from '../../components/performance/OptimizedFlatList';
 
 // Get screen dimensions
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
@@ -160,7 +164,15 @@ const EnhancedPOSScreen: React.FC = () => {
   const [quantity, setQuantity] = useState(1);
   const [specialInstructions, setSpecialInstructions] = useState('');
   const [showCartModal, setShowCartModal] = useState(false);
+  const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
   const animatedValue = useRef(new Animated.Value(0)).current;
+
+  // Performance monitoring
+  const performanceMetrics = usePerformanceMonitor({
+    componentName: 'EnhancedPOSScreen',
+    enableMemoryTracking: true,
+    logToConsole: __DEV__,
+  });
 
   // Zustand stores
   const {
@@ -178,13 +190,21 @@ const EnhancedPOSScreen: React.FC = () => {
     setSelectedCategory,
   } = useUIStore();
 
-  // Filter items based on category and search
-  const filteredItems = enhancedMenuItems.filter(item => {
-    const matchesCategory = selectedCategory === 'All' || item.category === selectedCategory;
-    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         item.description?.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  // Debounced search query for performance
+  const debouncedSearchQuery = useMemo(
+    () => performanceUtils.debounce((query: string) => query, 300),
+    []
+  );
+
+  // Memoized filtered items for performance
+  const filteredItems = useMemo(() => {
+    return enhancedMenuItems.filter(item => {
+      const matchesCategory = selectedCategory === 'All' || item.category === selectedCategory;
+      const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           item.description?.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesCategory && matchesSearch;
+    });
+  }, [enhancedMenuItems, selectedCategory, searchQuery]);
 
   // Animate modifier modal
   useEffect(() => {
@@ -266,6 +286,39 @@ const EnhancedPOSScreen: React.FC = () => {
     return (selectedItem.price + modifierPrice) * quantity;
   };
 
+  const handleBarcodeScanned = (barcode: string) => {
+    setShowBarcodeScanner(false);
+    
+    // Mock barcode scanning - in real implementation, you'd match against actual barcodes
+    const mockBarcodes: { [key: string]: number } = {
+      '123456789': 1, // Nachos
+      '987654321': 2, // Quesadillas
+      '456789123': 3, // Soft Tacos
+      '789123456': 4, // Hard Tacos
+      '321654987': 5, // Chips & Salsa
+    };
+    
+    const itemId = mockBarcodes[barcode];
+    if (itemId) {
+      const item = enhancedMenuItems.find(item => item.id === itemId);
+      if (item && item.available) {
+        handleItemPress(item);
+        Alert.alert('Success', `Found "${item.name}" by barcode!`);
+      } else {
+        Alert.alert('Error', 'Item not available or not found');
+      }
+    } else {
+      Alert.alert('Not Found', `No item found for barcode: ${barcode}`);
+    }
+  };
+
+  const handleAddToCart = () => {
+    if (selectedItem) {
+      addItemToCart(selectedItem, quantity, selectedModifiers, specialInstructions);
+      setShowModifierModal(false);
+    }
+  };
+
   const renderSpicyLevel = (level?: number) => {
     if (!level) return null;
     return (
@@ -305,19 +358,28 @@ const EnhancedPOSScreen: React.FC = () => {
     );
   };
 
-  const MenuItemCard = ({ item }: { item: EnhancedMenuItem }) => {
+  const MenuItemCard = memo(({ item }: { item: EnhancedMenuItem }) => {
     const existingItem = cart.find(cartItem => cartItem.id === item.id);
     
+    const handlePress = useCallback(() => {
+      handleItemPress(item);
+    }, [item]);
+    
     return (
-      <TouchableOpacity
-        style={[
-          styles.menuCard,
-          !item.available && styles.menuCardDisabled,
-        ]}
-        onPress={() => handleItemPress(item)}
-        activeOpacity={0.7}
-        disabled={!item.available}
+      <LazyLoadingWrapper
+        delay={50}
+        placeholder={<MenuItemSkeleton />}
+        condition={performanceMetrics.isReady}
       >
+        <TouchableOpacity
+          style={[
+            styles.menuCard,
+            !item.available && styles.menuCardDisabled,
+          ]}
+          onPress={handlePress}
+          activeOpacity={0.7}
+          disabled={!item.available}
+        >
         {/* Item Image */}
         <View style={styles.menuItemImageContainer}>
           {item.image ? (
@@ -386,8 +448,9 @@ const EnhancedPOSScreen: React.FC = () => {
           )
         )}
       </TouchableOpacity>
+      </LazyLoadingWrapper>
     );
-  };
+  });
 
   const renderModifierModal = () => {
     if (!selectedItem) return null;
@@ -557,6 +620,12 @@ const EnhancedPOSScreen: React.FC = () => {
                 <Icon name="clear" size={20} color={Colors.lightText} />
               </TouchableOpacity>
             )}
+            <TouchableOpacity 
+              style={styles.barcodeButton}
+              onPress={() => setShowBarcodeScanner(true)}
+            >
+              <Icon name="qr-code-scanner" size={20} color={Colors.lightText} />
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -605,24 +674,95 @@ const EnhancedPOSScreen: React.FC = () => {
       </ScrollView>
 
       {/* Menu Items */}
-      <FlatList
+      <OptimizedGrid
         data={filteredItems}
-        renderItem={({ item }) => <MenuItemCard item={item} />}
+        renderItem={(item) => <MenuItemCard item={item} />}
         keyExtractor={(item) => item.id.toString()}
         numColumns={isTablet ? 3 : 2}
-        contentContainerStyle={styles.menuGrid}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
-          <View style={styles.emptyState}>
-            <Icon name="search-off" size={64} color={Colors.lightGray} />
-            <Text style={styles.emptyStateText}>No items found</Text>
-            <Text style={styles.emptyStateSubtext}>Try adjusting your search or category</Text>
-          </View>
-        }
+        itemHeight={220} // Approximate height for better performance
+        spacing={12}
       />
 
       {/* Modifiers Modal */}
       {renderModifierModal()}
+
+      {/* Barcode Scanner Modal */}
+      <Modal
+        visible={showBarcodeScanner}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowBarcodeScanner(false)}
+      >
+        <View style={styles.barcodeModalOverlay}>
+          <View style={styles.barcodeModalContainer}>
+            <View style={styles.barcodeHeader}>
+              <Text style={styles.barcodeTitle}>Barcode Scanner</Text>
+              <TouchableOpacity 
+                onPress={() => setShowBarcodeScanner(false)}
+                style={styles.barcodeCloseButton}
+              >
+                <Icon name="close" size={24} color={Colors.text} />
+              </TouchableOpacity>
+            </View>
+            
+            <View style={styles.barcodeScanArea}>
+              <View style={styles.barcodeScanFrame}>
+                <Icon name="qr-code-scanner" size={100} color={Colors.primary} />
+                <Text style={styles.barcodeScanText}>Point camera at barcode</Text>
+                <Text style={styles.barcodeScanSubtext}>
+                  Position the barcode within the frame to scan
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.barcodeTestSection}>
+              <Text style={styles.testSectionTitle}>Test with sample barcodes:</Text>
+              <View style={styles.testBarcodesContainer}>
+                {[
+                  { code: '123456789', item: 'Nachos' },
+                  { code: '987654321', item: 'Quesadillas' },
+                  { code: '456789123', item: 'Soft Tacos' },
+                  { code: '789123456', item: 'Hard Tacos' },
+                ].map(({ code, item }) => (
+                  <TouchableOpacity
+                    key={code}
+                    style={styles.testBarcodeButton}
+                    onPress={() => handleBarcodeScanned(code)}
+                  >
+                    <Icon name="qr-code" size={20} color={Colors.secondary} />
+                    <View style={styles.testBarcodeInfo}>
+                      <Text style={styles.testBarcodeCode}>{code}</Text>
+                      <Text style={styles.testBarcodeItem}>{item}</Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            <View style={styles.barcodeActions}>
+              <TouchableOpacity
+                style={styles.manualEntryButton}
+                onPress={() => {
+                  setShowBarcodeScanner(false);
+                  Alert.prompt(
+                    'Manual Entry',
+                    'Enter barcode manually:',
+                    (text) => {
+                      if (text) handleBarcodeScanned(text);
+                    },
+                    'plain-text',
+                    '',
+                    'numeric'
+                  );
+                }}
+              >
+                <Icon name="keyboard" size={20} color={Colors.secondary} />
+                <Text style={styles.manualEntryText}>Manual Entry</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -1040,6 +1180,127 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: Colors.white,
+  },
+  barcodeButton: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  barcodeModalOverlay: {
+    flex: 1,
+    backgroundColor: Colors.overlay,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  barcodeModalContainer: {
+    width: '90%',
+    maxWidth: 500,
+    backgroundColor: Colors.white,
+    borderRadius: 16,
+    paddingTop: 20,
+    maxHeight: '80%',
+  },
+  barcodeHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  barcodeTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: Colors.text,
+  },
+  barcodeCloseButton: {
+    padding: 4,
+  },
+  barcodeScanArea: {
+    alignItems: 'center',
+    padding: 40,
+  },
+  barcodeScanFrame: {
+    width: 200,
+    height: 200,
+    borderWidth: 2,
+    borderColor: Colors.primary,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: Colors.background,
+  },
+  barcodeScanText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: Colors.text,
+    marginTop: 16,
+    textAlign: 'center',
+  },
+  barcodeScanSubtext: {
+    fontSize: 14,
+    color: Colors.lightText,
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  barcodeTestSection: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+  },
+  testSectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.text,
+    marginBottom: 12,
+  },
+  testBarcodesContainer: {
+    gap: 8,
+  },
+  testBarcodeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    backgroundColor: Colors.background,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  testBarcodeInfo: {
+    marginLeft: 12,
+    flex: 1,
+  },
+  testBarcodeCode: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: Colors.text,
+  },
+  testBarcodeItem: {
+    fontSize: 12,
+    color: Colors.lightText,
+    marginTop: 2,
+  },
+  barcodeActions: {
+    padding: 20,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+  },
+  manualEntryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 12,
+    backgroundColor: Colors.background,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: Colors.secondary,
+  },
+  manualEntryText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: Colors.secondary,
+    marginLeft: 8,
   },
 });
 

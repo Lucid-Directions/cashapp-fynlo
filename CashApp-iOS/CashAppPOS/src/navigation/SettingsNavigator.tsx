@@ -15,21 +15,21 @@ import OperatingHoursScreen from '../screens/settings/business/OperatingHoursScr
 // Import Hardware screens
 import PrinterSetupScreen from '../screens/settings/hardware/PrinterSetupScreen';
 import CashDrawerScreen from '../screens/settings/hardware/CashDrawerScreen';
-// import BarcodeScannerScreen from '../screens/settings/hardware/BarcodeScannerScreen';
-// import CardReaderScreen from '../screens/settings/hardware/CardReaderScreen';
-// import HardwareDiagnosticsScreen from '../screens/settings/hardware/HardwareDiagnosticsScreen';
+import BarcodeScannerScreen from '../screens/settings/hardware/BarcodeScannerScreen';
+import CardReaderScreen from '../screens/settings/hardware/CardReaderScreen';
+import HardwareDiagnosticsScreen from '../screens/settings/hardware/HardwareDiagnosticsScreen';
 
-// import UserProfileScreen from '../screens/settings/user/UserProfileScreen';
-// import NotificationSettingsScreen from '../screens/settings/user/NotificationSettingsScreen';
+import UserProfileScreen from '../screens/settings/user/UserProfileScreen';
+import NotificationSettingsScreen from '../screens/settings/user/NotificationSettingsScreen';
 import ThemeOptionsScreen from '../screens/settings/user/ThemeOptionsScreen';
-// import LocalizationScreen from '../screens/settings/user/LocalizationScreen';
-// import AccessibilityScreen from '../screens/settings/user/AccessibilityScreen';
+import LocalizationScreen from '../screens/settings/user/LocalizationScreen';
+import AccessibilityScreen from '../screens/settings/user/AccessibilityScreen';
 
-// import MenuManagementScreen from '../screens/settings/app/MenuManagementScreen';
-// import PricingDiscountsScreen from '../screens/settings/app/PricingDiscountsScreen';
-// import BackupRestoreScreen from '../screens/settings/app/BackupRestoreScreen';
-// import DataExportScreen from '../screens/settings/app/DataExportScreen';
-// import SystemDiagnosticsScreen from '../screens/settings/app/SystemDiagnosticsScreen';
+import MenuManagementScreen from '../screens/settings/app/MenuManagementScreen';
+import PricingDiscountsScreen from '../screens/settings/app/PricingDiscountsScreen';
+import BackupRestoreScreen from '../screens/settings/app/BackupRestoreScreen';
+import DataExportScreen from '../screens/settings/app/DataExportScreen';
+import SystemDiagnosticsScreen from '../screens/settings/app/SystemDiagnosticsScreen';
 
 export type SettingsStackParamList = {
   Settings: undefined;
@@ -178,15 +178,15 @@ const SettingsNavigator: React.FC = () => {
       />
       <Stack.Screen 
         name="BarcodeScanner" 
-        component={() => <PlaceholderScreen title="Barcode Scanner" />} 
+        component={BarcodeScannerScreen} 
       />
       <Stack.Screen 
         name="CardReader" 
-        component={() => <PlaceholderScreen title="Card Reader" />} 
+        component={CardReaderScreen} 
       />
       <Stack.Screen 
         name="HardwareDiagnostics" 
-        component={() => <PlaceholderScreen title="Hardware Diagnostics" />} 
+        component={HardwareDiagnosticsScreen} 
       />
       
       {/* User Preferences */}
@@ -196,11 +196,11 @@ const SettingsNavigator: React.FC = () => {
       />
       <Stack.Screen 
         name="UserProfile" 
-        component={() => <PlaceholderScreen title="User Profile" />} 
+        component={UserProfileScreen} 
       />
       <Stack.Screen 
         name="NotificationSettings" 
-        component={() => <PlaceholderScreen title="Notification Settings" />} 
+        component={NotificationSettingsScreen} 
       />
       <Stack.Screen 
         name="ThemeOptions" 
@@ -208,11 +208,11 @@ const SettingsNavigator: React.FC = () => {
       />
       <Stack.Screen 
         name="Localization" 
-        component={() => <PlaceholderScreen title="Language & Region" />} 
+        component={LocalizationScreen} 
       />
       <Stack.Screen 
         name="Accessibility" 
-        component={() => <PlaceholderScreen title="Accessibility" />} 
+        component={AccessibilityScreen} 
       />
       
       {/* App Configuration */}
@@ -222,23 +222,23 @@ const SettingsNavigator: React.FC = () => {
       />
       <Stack.Screen 
         name="MenuManagement" 
-        component={() => <PlaceholderScreen title="Menu Management" />} 
+        component={MenuManagementScreen} 
       />
       <Stack.Screen 
         name="PricingDiscounts" 
-        component={() => <PlaceholderScreen title="Pricing & Discounts" />} 
+        component={PricingDiscountsScreen} 
       />
       <Stack.Screen 
         name="BackupRestore" 
-        component={() => <PlaceholderScreen title="Backup & Restore" />} 
+        component={BackupRestoreScreen} 
       />
       <Stack.Screen 
         name="DataExport" 
-        component={() => <PlaceholderScreen title="Data Export" />} 
+        component={DataExportScreen} 
       />
       <Stack.Screen 
         name="SystemDiagnostics" 
-        component={() => <PlaceholderScreen title="System Diagnostics" />} 
+        component={SystemDiagnosticsScreen} 
       />
     </Stack.Navigator>
   );
