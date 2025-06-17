@@ -249,8 +249,8 @@ const MoreScreen: React.FC = () => {
 
         {/* App Version */}
         <View style={styles.footer}>
-          <Text style={styles.versionText}>Clover POS v1.0.0</Text>
-          <Text style={styles.copyrightText}>© 2024 Clover Network, Inc.</Text>
+          <Text style={styles.versionText}>Fynlo POS v1.0.0</Text>
+          <Text style={styles.copyrightText}>© 2024 Fynlo Ltd.</Text>
         </View>
       </ScrollView>
     </SafeAreaView>

@@ -234,6 +234,34 @@
 
 ---
 
+## **🚨 CRITICAL: Development Environment Setup & Cache Issues** ✅ RESOLVED
+
+### **Metro Bundler Cache Issue Resolution** ✅
+- [x] **ISSUE IDENTIFIED**: Xcode was configured to use static `main.jsbundle` files instead of connecting to live Metro bundler
+- [x] **ROOT CAUSE**: Static bundle references in `ios/CashAppPOS.xcodeproj/project.pbxproj` were causing cached versions to load
+- [x] **SOLUTION IMPLEMENTED**: 
+  - Removed all static bundle references from Xcode project configuration
+  - Deleted cached `main.jsbundle` files from iOS directories
+  - Ensured Metro bundler connects directly to live development server
+- [x] **VERIFICATION**: App now shows live changes with "FYNLO POS SYSTEM" header and correct navigation tabs
+- [x] **DOCUMENTATION**: This fix documented to prevent future cache issues
+
+### **Critical Development Commands** ✅
+- [x] **Metro Reset**: `npx react-native start --reset-cache` - Clears all Metro caches
+- [x] **iOS Clean**: `cd ios && xcodebuild clean -workspace CashAppPOS.xcworkspace -scheme CashAppPOS`
+- [x] **Bundle Removal**: Remove any `main.jsbundle` files from iOS directories
+- [x] **Live Development**: Always ensure Metro is running before building iOS app
+
+### **Signs of Cache Issues**
+- App showing old implementations despite code changes
+- Xcode error: `lstat(...main.jsbundle): No such file or directory` (this is GOOD - means no cached bundle)
+- Changes not reflecting in simulator/device
+- Old navigation structure or currency symbols appearing
+
+**⚠️ IMPORTANT**: If changes don't appear, check for static bundle files and remove them immediately!
+
+---
+
 ## **📋 Phase 8: Testing & Quality Assurance**
 
 ### **Unit Testing**

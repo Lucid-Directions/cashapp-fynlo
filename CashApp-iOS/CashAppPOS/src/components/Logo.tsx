@@ -54,10 +54,48 @@ const Logo: React.FC<LogoProps> = ({
 
   const sizeStyles = getSizeStyles();
 
-  // Always show Clover text logo with proper branding
+  // Try different approaches to load the logo
+  let logoSource;
+  try {
+    logoSource = require('../../assets/fynlo-logo.png');
+  } catch (error) {
+    console.log('Failed to load logo from assets folder');
+    try {
+      logoSource = require('../../../assets/fynlo-logo.png');
+    } catch (error2) {
+      try {
+        logoSource = require('../../../../assets/fynlo-logo.png');
+      } catch (error3) {
+        console.log('Failed to load logo from all locations, using Fynlo text fallback');
+        logoSource = null;
+      }
+    }
+  }
+
   return (
     <View style={[styles.container, style]}>
-      {showText ? (
+      {logoSource ? (
+        <Image
+          source={logoSource}
+          style={[
+            styles.logoImage,
+            {
+              width: sizeStyles.width,
+              height: sizeStyles.height,
+            },
+            imageStyle,
+          ]}
+          resizeMode="contain"
+          onError={() => console.log('Logo failed to load')}
+        />
+      ) : (
+        <View style={styles.logoTextContainer}>
+          <Text style={[styles.logoMainText, { fontSize: sizeStyles.fontSize }]}>
+            Fynl<Text style={[styles.logoMainText, styles.orangeO, { fontSize: sizeStyles.fontSize }]}>o</Text>
+          </Text>
+        </View>
+      )}
+      {showText && (
         <View style={styles.textContainer}>
           <Text
             style={[
@@ -66,7 +104,7 @@ const Logo: React.FC<LogoProps> = ({
               textStyle,
             ]}
           >
-            Clover
+            Fynl<Text style={[styles.logoText, styles.orangeO, { fontSize: sizeStyles.fontSize }]}>o</Text>
           </Text>
           <Text
             style={[
@@ -75,12 +113,6 @@ const Logo: React.FC<LogoProps> = ({
             ]}
           >
             Point of Sale
-          </Text>
-        </View>
-      ) : (
-        <View style={styles.logoTextContainer}>
-          <Text style={[styles.logoMainText, { fontSize: sizeStyles.fontSize }]}>
-            Clover
           </Text>
         </View>
       )}
@@ -116,6 +148,9 @@ const styles = StyleSheet.create({
     color: Colors.lightText,
     marginTop: 4,
     letterSpacing: 0.5,
+  },
+  orangeO: {
+    color: Colors.accent, // Orange color for the "o" in Fynlo
   },
 });
 
