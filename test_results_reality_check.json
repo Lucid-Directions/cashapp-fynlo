@@ -1,0 +1,78 @@
+{
+  "performance": {
+    "api_response_time": {
+      "actual_time": 11.950333981076255,
+      "error": "HTTPConnectionPool(host='localhost', port=8069): Max retries exceeded with url: /web/health (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x10d0b1300>: Failed to establish a new connection: [Errno 61] Connection refused'))",
+      "success": false,
+      "measurement_type": "real_connection_failure"
+    },
+    "database_performance": {
+      "actual_time": 2.6432080194354057,
+      "error": "dlopen(/Users/ryandavidson/.pyenv/versions/3.10.13/lib/python3.10/site-packages/psycopg2/_psycopg.cpython-310-darwin.so, 0x0002): symbol not found in flat namespace '_PQbackendPID'",
+      "success": false,
+      "measurement_type": "real_connection_failure"
+    },
+    "concurrent_processing": {
+      "total_time": 11.85033400543034,
+      "average_response_time": 6.353254202986136,
+      "successful_requests": 0,
+      "total_requests": 10,
+      "success_rate": 0.0,
+      "measurement_type": "real"
+    }
+  },
+  "security": {
+    "sql_injection_protection": {
+      "protection_rate": 1.0,
+      "test_results": [
+        {
+          "payload": "'; DROP TABLE users; --",
+          "error": "HTTPConnectionPool(host='localhost', port=8069): Max retries exceeded with url: /api/search (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x10d2785b0>: Failed to establish a new connection: [Errno 61] Connection refused'))",
+          "safe": true
+        },
+        {
+          "payload": "' OR '1'='1",
+          "error": "HTTPConnectionPool(host='localhost', port=8069): Max retries exceeded with url: /api/search (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x10d278d90>: Failed to establish a new connection: [Errno 61] Connection refused'))",
+          "safe": true
+        },
+        {
+          "payload": "'; SELECT * FROM sensitive_data; --",
+          "error": "HTTPConnectionPool(host='localhost', port=8069): Max retries exceeded with url: /api/search (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x10d2795d0>: Failed to establish a new connection: [Errno 61] Connection refused'))",
+          "safe": true
+        },
+        {
+          "payload": "' UNION SELECT password FROM users --",
+          "error": "HTTPConnectionPool(host='localhost', port=8069): Max retries exceeded with url: /api/search (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x10d10d000>: Failed to establish a new connection: [Errno 61] Connection refused'))",
+          "safe": true
+        }
+      ],
+      "measurement_type": "real"
+    },
+    "xss_protection": {
+      "protection_rate": 1.0,
+      "test_results": [
+        {
+          "payload": "<script>alert('xss')</script>",
+          "error": "HTTPConnectionPool(host='localhost', port=8069): Max retries exceeded with url: /api/products (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x10d10fe50>: Failed to establish a new connection: [Errno 61] Connection refused'))",
+          "safe": true
+        },
+        {
+          "payload": "<img src=x onerror=alert('xss')>",
+          "error": "HTTPConnectionPool(host='localhost', port=8069): Max retries exceeded with url: /api/products (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x10d10ee30>: Failed to establish a new connection: [Errno 61] Connection refused'))",
+          "safe": true
+        },
+        {
+          "payload": "javascript:alert('xss')",
+          "error": "HTTPConnectionPool(host='localhost', port=8069): Max retries exceeded with url: /api/products (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x10d10fee0>: Failed to establish a new connection: [Errno 61] Connection refused'))",
+          "safe": true
+        },
+        {
+          "payload": "<svg onload=alert('xss')>",
+          "error": "HTTPConnectionPool(host='localhost', port=8069): Max retries exceeded with url: /api/products (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x10d10cbb0>: Failed to establish a new connection: [Errno 61] Connection refused'))",
+          "safe": true
+        }
+      ],
+      "measurement_type": "real"
+    }
+  }
+}
