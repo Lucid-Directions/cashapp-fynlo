@@ -18,10 +18,10 @@ import LazyLoadingWrapper from '../../components/performance/LazyLoadingWrapper'
 
 const { width: screenWidth } = Dimensions.get('window');
 
-// Clover POS Color Scheme
+// Fynlo POS Color Scheme
 const Colors = {
-  primary: '#00A651',      // Clover Green
-  secondary: '#0066CC',    // Clover Blue
+  primary: '#00A651',      // Fynlo Green
+  secondary: '#0066CC',    // Fynlo Blue
   success: '#00A651',
   warning: '#FF6B35',
   danger: '#E74C3C',
@@ -57,7 +57,7 @@ interface RestaurantStatus {
 
 const PlatformDashboardScreen: React.FC = () => {
   const navigation = useNavigation();
-  const { user, platform, managedRestaurants, loadPlatformData } = useAuth();
+  const { user, platform, managedRestaurants, loadPlatformData, signOut } = useAuth();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedTimeframe, setSelectedTimeframe] = useState<'today' | 'week' | 'month'>('today');
 
@@ -134,6 +134,21 @@ const PlatformDashboardScreen: React.FC = () => {
     Alert.alert('Quick Action', `${action} functionality will be implemented in Phase 2`);
   };
 
+  const handleSignOut = () => {
+    Alert.alert(
+      'Sign Out',
+      'Are you sure you want to sign out?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Sign Out', 
+          style: 'destructive',
+          onPress: () => signOut()
+        }
+      ]
+    );
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'online': return Colors.success;
@@ -173,15 +188,23 @@ const PlatformDashboardScreen: React.FC = () => {
             Welcome back, {user?.firstName} • {platform?.totalRestaurants} restaurants
           </Text>
         </View>
-        <TouchableOpacity
-          style={styles.notificationButton}
-          onPress={() => handleQuickAction('Notifications')}
-        >
-          <Icon name="notifications" size={24} color={Colors.text} />
-          <View style={styles.notificationBadge}>
-            <Text style={styles.notificationBadgeText}>3</Text>
-          </View>
-        </TouchableOpacity>
+        <View style={styles.headerRight}>
+          <TouchableOpacity
+            style={styles.notificationButton}
+            onPress={() => handleQuickAction('Notifications')}
+          >
+            <Icon name="notifications" size={24} color={Colors.text} />
+            <View style={styles.notificationBadge}>
+              <Text style={styles.notificationBadgeText}>3</Text>
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.logoutButton}
+            onPress={handleSignOut}
+          >
+            <Icon name="exit-to-app" size={24} color={Colors.danger} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView
@@ -354,6 +377,10 @@ const styles = StyleSheet.create({
   headerLeft: {
     flex: 1,
   },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -366,6 +393,10 @@ const styles = StyleSheet.create({
   },
   notificationButton: {
     position: 'relative',
+    padding: 8,
+    marginRight: 12,
+  },
+  logoutButton: {
     padding: 8,
   },
   notificationBadge: {

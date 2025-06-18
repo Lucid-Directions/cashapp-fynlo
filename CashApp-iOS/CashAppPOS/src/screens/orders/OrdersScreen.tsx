@@ -16,10 +16,10 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import { generateSalesHistory } from '../../utils/mockDataGenerator';
 
-// Clover POS Color Scheme
+// Fynlo POS Color Scheme
 const Colors = {
-  primary: '#00A651',      // Clover Green
-  secondary: '#0066CC',    // Clover Blue
+  primary: '#00A651',      // Fynlo Green
+  secondary: '#0066CC',    // Fynlo Blue
   success: '#00A651',
   warning: '#FF6B35',
   danger: '#E74C3C',
@@ -53,6 +53,8 @@ const OrdersScreen: React.FC = () => {
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [dateRange, setDateRange] = useState('today');
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [showOrderDetails, setShowOrderDetails] = useState(false);
 
   useEffect(() => {
     loadOrders();
@@ -140,6 +142,11 @@ const OrdersScreen: React.FC = () => {
     setTimeout(() => setRefreshing(false), 1000);
   };
 
+  const handleOrderPress = (order: Order) => {
+    setSelectedOrder(order);
+    setShowOrderDetails(true);
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed': return Colors.success;
@@ -176,7 +183,11 @@ const OrdersScreen: React.FC = () => {
   };
 
   const renderOrder = ({ item }: { item: Order }) => (
-    <TouchableOpacity style={styles.orderCard}>
+    <TouchableOpacity 
+      style={styles.orderCard}
+      onPress={() => handleOrderPress(item)}
+      activeOpacity={0.7}
+    >
       <View style={styles.orderHeader}>
         <View>
           <Text style={styles.orderId}>{item.id}</Text>
@@ -378,6 +389,93 @@ const OrdersScreen: React.FC = () => {
                 </TouchableOpacity>
               ))}
             </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Order Details Modal */}
+      <Modal
+        visible={showOrderDetails}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowOrderDetails(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.orderDetailsModal}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Order Details</Text>
+              <TouchableOpacity onPress={() => setShowOrderDetails(false)}>
+                <Icon name="close" size={24} color={Colors.text} />
+              </TouchableOpacity>
+            </View>
+            
+            {selectedOrder && (
+              <ScrollView style={styles.orderDetailsContent}>
+                <View style={styles.orderDetailHeader}>
+                  <Text style={styles.orderDetailId}>{selectedOrder.id}</Text>
+                  <View style={[styles.statusBadge, { backgroundColor: getStatusColor(selectedOrder.status) }]}>
+                    <Text style={styles.statusText}>{selectedOrder.status}</Text>
+                  </View>
+                </View>
+                
+                <View style={styles.orderDetailSection}>
+                  <Text style={styles.sectionTitle}>Order Information</Text>
+                  <View style={styles.detailRow}>
+                    <Icon name="schedule" size={20} color={Colors.darkGray} />
+                    <Text style={styles.detailText}>{formatDate(selectedOrder.date)}</Text>
+                  </View>
+                  <View style={styles.detailRow}>
+                    <Icon name="person" size={20} color={Colors.darkGray} />
+                    <Text style={styles.detailText}>
+                      {selectedOrder.customerName || 'Walk-in Customer'}
+                    </Text>
+                  </View>
+                  <View style={styles.detailRow}>
+                    <Icon name="badge" size={20} color={Colors.darkGray} />
+                    <Text style={styles.detailText}>Served by {selectedOrder.employee}</Text>
+                  </View>
+                  <View style={styles.detailRow}>
+                    <Icon name={getPaymentIcon(selectedOrder.paymentMethod)} size={20} color={Colors.darkGray} />
+                    <Text style={styles.detailText}>
+                      {selectedOrder.paymentMethod.charAt(0).toUpperCase() + selectedOrder.paymentMethod.slice(1)} Payment
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={styles.orderDetailSection}>
+                  <Text style={styles.sectionTitle}>Order Summary</Text>
+                  <View style={styles.summaryRow}>
+                    <Text style={styles.summaryLabel}>Items:</Text>
+                    <Text style={styles.summaryValue}>{selectedOrder.items}</Text>
+                  </View>
+                  <View style={styles.summaryRow}>
+                    <Text style={styles.summaryLabel}>Subtotal:</Text>
+                    <Text style={styles.summaryValue}>£{(selectedOrder.total * 0.8).toFixed(2)}</Text>
+                  </View>
+                  <View style={styles.summaryRow}>
+                    <Text style={styles.summaryLabel}>VAT (20%):</Text>
+                    <Text style={styles.summaryValue}>£{(selectedOrder.total * 0.2).toFixed(2)}</Text>
+                  </View>
+                  <View style={[styles.summaryRow, styles.totalRow]}>
+                    <Text style={styles.summaryLabel}>Total:</Text>
+                    <Text style={styles.summaryTotal}>£{selectedOrder.total.toFixed(2)}</Text>
+                  </View>
+                </View>
+
+                {selectedOrder.status === 'completed' && (
+                  <View style={styles.orderActions}>
+                    <TouchableOpacity style={[styles.actionButton, styles.refundButton]}>
+                      <Icon name="undo" size={20} color={Colors.white} />
+                      <Text style={styles.actionButtonText}>Process Refund</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[styles.actionButton, styles.receiptButton]}>
+                      <Icon name="receipt" size={20} color={Colors.white} />
+                      <Text style={styles.actionButtonText}>Resend Receipt</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </ScrollView>
+            )}
           </View>
         </View>
       </Modal>
@@ -625,6 +723,96 @@ const styles = StyleSheet.create({
   filterOptionTextActive: {
     color: Colors.primary,
     fontWeight: '600',
+  },
+  orderDetailsModal: {
+    backgroundColor: Colors.white,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingTop: 20,
+    maxHeight: '90%',
+  },
+  orderDetailsContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+  },
+  orderDetailHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  orderDetailId: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: Colors.text,
+  },
+  orderDetailSection: {
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.text,
+    marginBottom: 12,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  detailText: {
+    fontSize: 14,
+    color: Colors.text,
+    marginLeft: 12,
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  summaryLabel: {
+    fontSize: 14,
+    color: Colors.darkGray,
+  },
+  summaryValue: {
+    fontSize: 14,
+    color: Colors.text,
+  },
+  totalRow: {
+    marginTop: 8,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+  },
+  summaryTotal: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: Colors.primary,
+  },
+  orderActions: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 20,
+  },
+  actionButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  refundButton: {
+    backgroundColor: Colors.danger,
+  },
+  receiptButton: {
+    backgroundColor: Colors.secondary,
+  },
+  actionButtonText: {
+    color: Colors.white,
+    fontSize: 14,
+    fontWeight: '600',
+    marginLeft: 8,
   },
 });
 

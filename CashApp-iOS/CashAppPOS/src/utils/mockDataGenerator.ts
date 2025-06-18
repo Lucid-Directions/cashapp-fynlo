@@ -134,10 +134,11 @@ export const generateSalesHistory = (startDate: Date = new Date(Date.now() - 365
 };
 
 const menuItems = [
-  'Nachos', 'Quesadillas', 'Chorizo Quesadilla', 'Chicken Quesadilla', 'Tostada',
-  'Carnitas', 'Cochinita', 'Barbacoa de Res', 'Chorizo', 'Rellena',
-  'Chicken Fajita', 'Haggis', 'Pescado', 'Dorados', 'Dorados Papa',
-  'Carne Asada', 'Camaron', 'Pulpos', 'Regular Burrito', 'Special Burrito'
+  'Potatoes', 'Tomatoes', 'Onions', 'Carrots', 'Bell Peppers',
+  'Jalapeños', 'Cilantro', 'Lettuce', 'Avocados', 'Limes',
+  'Tortillas (Corn)', 'Tortillas (Flour)', 'Rice', 'Black Beans', 'Pinto Beans',
+  'Chicken Breast', 'Ground Beef', 'Pork Shoulder', 'Shrimp', 'Fish Fillets',
+  'Cheese (Cheddar)', 'Cheese (Mexican)', 'Sour Cream', 'Salsa', 'Hot Sauce'
 ];
 
 const generateTopItems = (dailyTotal: number) => {
@@ -255,7 +256,7 @@ export const generateEmployees = (): EmployeeData[] => {
 // Generate inventory data
 export const generateInventory = (): InventoryData[] => {
   const suppliers = ['UK Foods Ltd', 'Fresh Produce Co', 'Beverage Direct', 'Mexican Imports UK', 'Local Suppliers'];
-  const categories = ['Snacks', 'Tacos', 'Special Tacos', 'Burritos', 'Sides', 'Drinks'];
+  const categories = ['Vegetables', 'Proteins', 'Dairy', 'Grains', 'Condiments', 'Tortillas'];
   
   return menuItems.map((item, index) => {
     const category = categories[Math.floor(index / 4) % categories.length];

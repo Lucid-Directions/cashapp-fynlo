@@ -20,18 +20,19 @@ import { useNavigation } from '@react-navigation/native';
 import useAppStore from '../../store/useAppStore';
 import useUIStore from '../../store/useUIStore';
 import { MenuItem, OrderItem } from '../../types';
-import DatabaseService from '../../services/DatabaseService';
+import DataService from '../../services/DataService';
+import ErrorBoundary from '../../components/ErrorBoundary';
 
 // Get screen dimensions
 const { width: screenWidth } = Dimensions.get('window');
 const isTablet = screenWidth > 768;
 
-// Clover POS Color Scheme
+// Fynlo POS Color Scheme
 const Colors = {
-  primary: '#00A651',        // Clover Green header
+  primary: '#00A651',        // Fynlo Green header
   secondary: '#ffffff',      // White for contrast
-  accent: '#0066CC',         // Clover Blue accent
-  success: '#00A651',        // Clover Green for success
+  accent: '#0066CC',         // Fynlo Blue accent
+  success: '#00A651',        // Fynlo Green for success
   warning: '#FF6B35',        // Orange for warnings
   background: '#F5F5F5',     // Light gray background
   cardBg: '#ffffff',         // White cards
@@ -106,6 +107,12 @@ const POSScreen: React.FC = () => {
   const [customerName, setCustomerName] = useState('');
   const [showCartModal, setShowCartModal] = useState(false);
   
+  // Data state - will use DataService or fallback to local mock data
+  const [products, setProducts] = useState<MenuItem[]>(menuItems);
+  const [productCategories, setProductCategories] = useState<string[]>(categories);
+  const [loading, setLoading] = useState(false);
+  const [dataService] = useState(() => DataService.getInstance());
+  
   // Zustand stores
   const {
     cart,
@@ -124,9 +131,39 @@ const POSScreen: React.FC = () => {
     setShowPaymentModal,
   } = useUIStore();
 
+  // Load data from DataService on component mount
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        
+        // Try to load products from DataService (will fallback to mock data if API unavailable)
+        const productsData = await dataService.getProducts();
+        if (productsData && productsData.length > 0) {
+          setProducts(productsData);
+        }
+        
+        // Try to load categories from DataService
+        const categoriesData = await dataService.getCategories();
+        if (categoriesData && categoriesData.length > 0) {
+          const categoryNames = ['All', ...categoriesData.map(cat => cat.name)];
+          setProductCategories(categoryNames);
+        }
+        
+      } catch (error) {
+        console.log('Failed to load data from DataService, using local fallback:', error);
+        // Keep using the existing menuItems and categories as fallback
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [dataService]);
+
   const filteredItems = selectedCategory === 'All'
-    ? menuItems
-    : menuItems.filter(item => item.category === selectedCategory);
+    ? products
+    : products.filter(item => item.category === selectedCategory);
 
   const handleAddToCart = (item: MenuItem) => {
     const orderItem: OrderItem = {
@@ -211,7 +248,7 @@ const POSScreen: React.FC = () => {
   };
 
   const CartItem = ({ item }: { item: OrderItem }) => {
-    const menuItem = menuItems.find(mi => mi.id === item.id);
+    const menuItem = products.find(mi => mi.id === item.id);
     return (
       <View style={styles.cartItem}>
         <View style={styles.cartItemInfo}>
@@ -256,16 +293,15 @@ const POSScreen: React.FC = () => {
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor={Colors.primary} barStyle="light-content" />
       
-      {/* Clover Header */}
+      {/* Fynlo Header */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <TouchableOpacity style={styles.menuButton}>
-            <Icon name="menu" size={24} color={Colors.white} />
-          </TouchableOpacity>
           <View style={styles.logoContainer}>
-            <Text style={styles.logoText}>
-              Fynl<Text style={styles.logoOrange}>o</Text>
-            </Text>
+            <Image
+              source={require('../../assets/fynlo-logo.png')}
+              style={styles.headerLogo}
+              resizeMode="contain"
+            />
           </View>
         </View>
         
@@ -316,7 +352,7 @@ const POSScreen: React.FC = () => {
             style={styles.categoryTabs}
             contentContainerStyle={styles.categoryTabsContent}
           >
-            {categories.map((category) => (
+            {productCategories.map((category) => (
               <TouchableOpacity
                 key={category}
                 style={[
@@ -474,7 +510,7 @@ const POSScreen: React.FC = () => {
               <View style={styles.orderSummary}>
                 <Text style={styles.orderSummaryTitle}>Order Summary</Text>
                 {cart.map((item) => {
-                  const menuItem = menuItems.find(mi => mi.id === item.id);
+                  const menuItem = products.find(mi => mi.id === item.id);
                   return (
                     <View key={item.id} style={styles.orderSummaryItem}>
                       <View style={styles.orderSummaryItemHeader}>
@@ -566,12 +602,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   logoContainer: {
-    marginLeft: 16,
+    marginLeft: -8,
     flexDirection: 'row',
     alignItems: 'baseline',
   },
   logoText: {
-    fontSize: 24,
+    fontSize: 32,
     fontWeight: 'bold',
     color: Colors.white,
     letterSpacing: -0.5,
@@ -579,13 +615,17 @@ const styles = StyleSheet.create({
   logoOrange: {
     color: '#FF6B35',
   },
+  headerLogo: {
+    width: 125,
+    height: 125,
+  },
   posSubtext: {
     fontSize: 12,
     fontWeight: '500',
     color: 'rgba(255, 255, 255, 0.8)',
     marginLeft: 4,
   },
-  cloverLogo: {
+  fynloLogo: {
     fontSize: 24,
     fontWeight: 'bold',
     color: Colors.white,
@@ -613,16 +653,10 @@ const styles = StyleSheet.create({
     marginLeft: 20,
     padding: 4,
   },
-  menuButton: {
-    padding: 8,
-  },
   headerCenter: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  logoContainer: {
-    // Container for logo component
   },
   cartButton: {
     position: 'relative',
@@ -1153,4 +1187,10 @@ const styles = StyleSheet.create({
   },
 });
 
-export default POSScreen;
+const WrappedPOSScreen: React.FC = () => (
+  <ErrorBoundary>
+    <POSScreen />
+  </ErrorBoundary>
+);
+
+export default WrappedPOSScreen;

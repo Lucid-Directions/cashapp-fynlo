@@ -16,10 +16,10 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import { generateInventory, InventoryData } from '../../utils/mockDataGenerator';
 
-// Clover POS Color Scheme
+// Fynlo POS Color Scheme
 const Colors = {
-  primary: '#00A651',      // Clover Green
-  secondary: '#0066CC',    // Clover Blue
+  primary: '#00A651',      // Fynlo Green
+  secondary: '#0066CC',    // Fynlo Blue
   success: '#00A651',
   warning: '#FF6B35',
   danger: '#E74C3C',
@@ -42,6 +42,7 @@ const InventoryScreen: React.FC = () => {
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedItem, setSelectedItem] = useState<InventoryData | null>(null);
   const [showRestockModal, setShowRestockModal] = useState(false);
+  const [showAddItemModal, setShowAddItemModal] = useState(false);
 
   useEffect(() => {
     loadInventory();
@@ -187,7 +188,7 @@ const InventoryScreen: React.FC = () => {
     );
   };
 
-  const categories = ['Snacks', 'Tacos', 'Special Tacos', 'Burritos', 'Sides', 'Drinks'];
+  const categories = ['Vegetables', 'Proteins', 'Dairy', 'Grains', 'Condiments', 'Tortillas'];
   const stats = {
     total: inventory.length,
     lowStock: inventory.filter(item => item.currentStock <= item.minimumStock).length,
@@ -213,7 +214,10 @@ const InventoryScreen: React.FC = () => {
           <Text style={styles.headerSubtitle}>{filteredInventory.length} items</Text>
         </View>
         
-        <TouchableOpacity style={styles.scanButton}>
+        <TouchableOpacity 
+          style={styles.scanButton}
+          onPress={() => Alert.alert('QR Scanner', 'Camera functionality will scan inventory barcodes when connected to hardware')}
+        >
           <Icon name="qr-code-scanner" size={24} color={Colors.white} />
         </TouchableOpacity>
       </View>
@@ -480,6 +484,124 @@ const InventoryScreen: React.FC = () => {
                 </TouchableOpacity>
               </View>
             )}
+          </View>
+        </View>
+      </Modal>
+
+      {/* Floating Action Button */}
+      <TouchableOpacity 
+        style={styles.fab}
+        onPress={() => setShowAddItemModal(true)}
+        activeOpacity={0.8}
+      >
+        <Icon name="add" size={28} color={Colors.white} />
+      </TouchableOpacity>
+
+      {/* Add Item Modal */}
+      <Modal
+        visible={showAddItemModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowAddItemModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.addItemModal}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Add New Inventory Item</Text>
+              <TouchableOpacity onPress={() => setShowAddItemModal(false)}>
+                <Icon name="close" size={24} color={Colors.text} />
+              </TouchableOpacity>
+            </View>
+            
+            <ScrollView style={styles.addItemContent}>
+              <View style={styles.inputSection}>
+                <Text style={styles.inputLabel}>Item Name</Text>
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="e.g. Roma Tomatoes"
+                  placeholderTextColor={Colors.darkGray}
+                />
+              </View>
+
+              <View style={styles.inputSection}>
+                <Text style={styles.inputLabel}>Category</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  <View style={styles.categorySelector}>
+                    {categories.map(cat => (
+                      <TouchableOpacity
+                        key={cat}
+                        style={[styles.categoryOption, styles.categoryOptionSelected]}
+                      >
+                        <Text style={[styles.categoryOptionText, styles.categoryOptionTextSelected]}>
+                          {cat}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </ScrollView>
+              </View>
+
+              <View style={styles.inputRow}>
+                <View style={[styles.inputSection, { flex: 1, marginRight: 8 }]}>
+                  <Text style={styles.inputLabel}>Unit Cost (£)</Text>
+                  <TextInput
+                    style={styles.textInput}
+                    placeholder="0.00"
+                    keyboardType="decimal-pad"
+                    placeholderTextColor={Colors.darkGray}
+                  />
+                </View>
+                <View style={[styles.inputSection, { flex: 1, marginLeft: 8 }]}>
+                  <Text style={styles.inputLabel}>Current Stock</Text>
+                  <TextInput
+                    style={styles.textInput}
+                    placeholder="0"
+                    keyboardType="numeric"
+                    placeholderTextColor={Colors.darkGray}
+                  />
+                </View>
+              </View>
+
+              <View style={styles.inputRow}>
+                <View style={[styles.inputSection, { flex: 1, marginRight: 8 }]}>
+                  <Text style={styles.inputLabel}>Min Stock</Text>
+                  <TextInput
+                    style={styles.textInput}
+                    placeholder="20"
+                    keyboardType="numeric"
+                    placeholderTextColor={Colors.darkGray}
+                  />
+                </View>
+                <View style={[styles.inputSection, { flex: 1, marginLeft: 8 }]}>
+                  <Text style={styles.inputLabel}>Max Stock</Text>
+                  <TextInput
+                    style={styles.textInput}
+                    placeholder="100"
+                    keyboardType="numeric"
+                    placeholderTextColor={Colors.darkGray}
+                  />
+                </View>
+              </View>
+
+              <View style={styles.inputSection}>
+                <Text style={styles.inputLabel}>Supplier</Text>
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="Select or enter supplier name"
+                  placeholderTextColor={Colors.darkGray}
+                />
+              </View>
+
+              <TouchableOpacity 
+                style={styles.addItemButton}
+                onPress={() => {
+                  Alert.alert('Success', 'Item added to inventory!');
+                  setShowAddItemModal(false);
+                }}
+              >
+                <Text style={styles.addItemButtonText}>Add Item to Inventory</Text>
+              </TouchableOpacity>
+            </ScrollView>
           </View>
         </View>
       </Modal>
@@ -917,6 +1039,93 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   confirmRestockText: {
+    color: Colors.white,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  fab: {
+    position: 'absolute',
+    right: 20,
+    bottom: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: Colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+  },
+  addItemModal: {
+    backgroundColor: Colors.white,
+    borderRadius: 16,
+    width: '90%',
+    maxHeight: '80%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  addItemContent: {
+    padding: 20,
+  },
+  inputSection: {
+    marginBottom: 20,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.text,
+    marginBottom: 8,
+  },
+  textInput: {
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 16,
+    color: Colors.text,
+  },
+  inputRow: {
+    flexDirection: 'row',
+    marginBottom: 20,
+  },
+  categorySelector: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  categoryOption: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    backgroundColor: Colors.background,
+  },
+  categoryOptionSelected: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+  },
+  categoryOptionText: {
+    fontSize: 14,
+    color: Colors.text,
+  },
+  categoryOptionTextSelected: {
+    color: Colors.white,
+  },
+  addItemButton: {
+    backgroundColor: Colors.primary,
+    borderRadius: 8,
+    paddingVertical: 16,
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  addItemButtonText: {
     color: Colors.white,
     fontSize: 16,
     fontWeight: '600',

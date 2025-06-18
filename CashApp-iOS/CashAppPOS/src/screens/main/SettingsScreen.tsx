@@ -10,6 +10,7 @@ import {
   Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useNavigation } from '@react-navigation/native';
 import useAppStore from '../../store/useAppStore';
 import Logo from '../../components/Logo';
 
@@ -26,6 +27,7 @@ const Colors = {
 };
 
 const SettingsScreen: React.FC = () => {
+  const navigation = useNavigation();
   const { logout } = useAppStore();
 
   const handleLogout = () => {
@@ -77,7 +79,14 @@ const SettingsScreen: React.FC = () => {
       
       {/* Header */}
       <View style={styles.header}>
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Icon name="arrow-back" size={24} color={Colors.white} />
+        </TouchableOpacity>
         <Text style={styles.headerTitle}>Settings</Text>
+        <View style={styles.headerSpacer} />
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
@@ -180,11 +189,20 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
     paddingHorizontal: 20,
     paddingVertical: 15,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     elevation: 4,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
+  },
+  backButton: {
+    padding: 8,
+  },
+  headerSpacer: {
+    width: 40,
   },
   headerTitle: {
     color: Colors.white,
