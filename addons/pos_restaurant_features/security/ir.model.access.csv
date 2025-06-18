@@ -1,0 +1,13 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_restaurant_section_user,restaurant.section.user,model_restaurant_section,point_of_sale.group_pos_user,1,0,0,0
+access_restaurant_section_manager,restaurant.section.manager,model_restaurant_section,point_of_sale.group_pos_manager,1,1,1,1
+access_restaurant_table_user,restaurant.table.user,model_restaurant_table,point_of_sale.group_pos_user,1,1,0,0
+access_restaurant_table_manager,restaurant.table.manager,model_restaurant_table,point_of_sale.group_pos_manager,1,1,1,1
+access_kitchen_station_user,kitchen.station.user,model_kitchen_station,point_of_sale.group_pos_user,1,0,0,0
+access_kitchen_station_manager,kitchen.station.manager,model_kitchen_station,point_of_sale.group_pos_manager,1,1,1,1
+access_kitchen_display_user,kitchen.display.user,model_kitchen_display,point_of_sale.group_pos_user,1,0,0,0
+access_kitchen_display_manager,kitchen.display.manager,model_kitchen_display,point_of_sale.group_pos_manager,1,1,1,1
+access_kitchen_order_item_user,kitchen.order.item.user,model_kitchen_order_item,point_of_sale.group_pos_user,1,1,1,0
+access_kitchen_order_item_manager,kitchen.order.item.manager,model_kitchen_order_item,point_of_sale.group_pos_manager,1,1,1,1
+access_kitchen_display_controller_user,kitchen.display.controller.user,model_kitchen_display_controller,point_of_sale.group_pos_user,1,0,0,0
+access_kitchen_display_controller_manager,kitchen.display.controller.manager,model_kitchen_display_controller,point_of_sale.group_pos_manager,1,1,1,1 

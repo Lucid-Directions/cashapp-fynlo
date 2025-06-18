@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        
+        <!-- Restaurant Sections -->
+        <record id="section_main_dining" model="restaurant.section">
+            <field name="name">Main Dining</field>
+            <field name="description">Main dining area with regular tables</field>
+            <field name="color">#3498db</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="section_patio" model="restaurant.section">
+            <field name="name">Patio</field>
+            <field name="description">Outdoor patio seating area</field>
+            <field name="color">#2ecc71</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="section_bar" model="restaurant.section">
+            <field name="name">Bar Area</field>
+            <field name="description">Bar seating and high tables</field>
+            <field name="color">#e74c3c</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="section_private" model="restaurant.section">
+            <field name="name">Private Dining</field>
+            <field name="description">Private dining rooms for special events</field>
+            <field name="color">#9b59b6</field>
+            <field name="active">True</field>
+        </record>
+
+        <!-- Restaurant Tables -->
+        <!-- Main Dining Tables -->
+        <record id="table_main_01" model="restaurant.table">
+            <field name="name">1</field>
+            <field name="section_id" ref="section_main_dining"/>
+            <field name="capacity">4</field>
+            <field name="shape">round</field>
+            <field name="pos_x">150</field>
+            <field name="pos_y">100</field>
+            <field name="width">80</field>
+            <field name="height">80</field>
+            <field name="status">available</field>
+            <field name="wheelchair_accessible">True</field>
+        </record>
+
+        <record id="table_main_02" model="restaurant.table">
+            <field name="name">2</field>
+            <field name="section_id" ref="section_main_dining"/>
+            <field name="capacity">2</field>
+            <field name="shape">square</field>
+            <field name="pos_x">300</field>
+            <field name="pos_y">100</field>
+            <field name="width">60</field>
+            <field name="height">60</field>
+            <field name="status">available</field>
+            <field name="wheelchair_accessible">True</field>
+        </record>
+
+        <record id="table_main_03" model="restaurant.table">
+            <field name="name">3</field>
+            <field name="section_id" ref="section_main_dining"/>
+            <field name="capacity">6</field>
+            <field name="shape">rectangle</field>
+            <field name="pos_x">450</field>
+            <field name="pos_y">100</field>
+            <field name="width">120</field>
+            <field name="height">80</field>
+            <field name="status">available</field>
+            <field name="wheelchair_accessible">True</field>
+        </record>
+
+        <record id="table_main_04" model="restaurant.table">
+            <field name="name">4</field>
+            <field name="section_id" ref="section_main_dining"/>
+            <field name="capacity">4</field>
+            <field name="shape">round</field>
+            <field name="pos_x">150</field>
+            <field name="pos_y">250</field>
+            <field name="width">80</field>
+            <field name="height">80</field>
+            <field name="status">available</field>
+            <field name="wheelchair_accessible">True</field>
+        </record>
+
+        <record id="table_main_05" model="restaurant.table">
+            <field name="name">5</field>
+            <field name="section_id" ref="section_main_dining"/>
+            <field name="capacity">8</field>
+            <field name="shape">oval</field>
+            <field name="pos_x">350</field>
+            <field name="pos_y">250</field>
+            <field name="width">140</field>
+            <field name="height">100</field>
+            <field name="status">available</field>
+            <field name="wheelchair_accessible">True</field>
+        </record>
+
+        <!-- Patio Tables -->
+        <record id="table_patio_01" model="restaurant.table">
+            <field name="name">P1</field>
+            <field name="section_id" ref="section_patio"/>
+            <field name="capacity">4</field>
+            <field name="shape">round</field>
+            <field name="pos_x">100</field>
+            <field name="pos_y">400</field>
+            <field name="width">80</field>
+            <field name="height">80</field>
+            <field name="status">available</field>
+            <field name="outdoor">True</field>
+            <field name="wheelchair_accessible">True</field>
+        </record>
+
+        <record id="table_patio_02" model="restaurant.table">
+            <field name="name">P2</field>
+            <field name="section_id" ref="section_patio"/>
+            <field name="capacity">2</field>
+            <field name="shape">square</field>
+            <field name="pos_x">250</field>
+            <field name="pos_y">400</field>
+            <field name="width">60</field>
+            <field name="height">60</field>
+            <field name="status">available</field>
+            <field name="outdoor">True</field>
+            <field name="wheelchair_accessible">True</field>
+        </record>
+
+        <record id="table_patio_03" model="restaurant.table">
+            <field name="name">P3</field>
+            <field name="section_id" ref="section_patio"/>
+            <field name="capacity">6</field>
+            <field name="shape">rectangle</field>
+            <field name="pos_x">400</field>
+            <field name="pos_y">400</field>
+            <field name="width">120</field>
+            <field name="height">80</field>
+            <field name="status">available</field>
+            <field name="outdoor">True</field>
+            <field name="wheelchair_accessible">False</field>
+        </record>
+
+        <!-- Bar Tables -->
+        <record id="table_bar_01" model="restaurant.table">
+            <field name="name">B1</field>
+            <field name="section_id" ref="section_bar"/>
+            <field name="capacity">2</field>
+            <field name="shape">round</field>
+            <field name="pos_x">600</field>
+            <field name="pos_y">100</field>
+            <field name="width">50</field>
+            <field name="height">50</field>
+            <field name="status">available</field>
+            <field name="has_power_outlet">True</field>
+        </record>
+
+        <record id="table_bar_02" model="restaurant.table">
+            <field name="name">B2</field>
+            <field name="section_id" ref="section_bar"/>
+            <field name="capacity">3</field>
+            <field name="shape">round</field>
+            <field name="pos_x">700</field>
+            <field name="pos_y">100</field>
+            <field name="width">60</field>
+            <field name="height">60</field>
+            <field name="status">available</field>
+            <field name="has_power_outlet">True</field>
+        </record>
+
+        <!-- Private Dining -->
+        <record id="table_private_01" model="restaurant.table">
+            <field name="name">VIP1</field>
+            <field name="section_id" ref="section_private"/>
+            <field name="capacity">12</field>
+            <field name="shape">rectangle</field>
+            <field name="pos_x">600</field>
+            <field name="pos_y">300</field>
+            <field name="width">200</field>
+            <field name="height">120</field>
+            <field name="status">available</field>
+            <field name="wheelchair_accessible">True</field>
+            <field name="has_power_outlet">True</field>
+        </record>
+
+        <!-- Kitchen Stations -->
+        <record id="station_grill" model="kitchen.station">
+            <field name="name">Grill Station</field>
+            <field name="code">GRILL</field>
+            <field name="station_type">grill</field>
+            <field name="sequence">10</field>
+            <field name="color">#e74c3c</field>
+            <field name="max_concurrent_orders">8</field>
+            <field name="avg_prep_time">12</field>
+            <field name="priority_level">high</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="station_fryer" model="kitchen.station">
+            <field name="name">Fryer Station</field>
+            <field name="code">FRYER</field>
+            <field name="station_type">fryer</field>
+            <field name="sequence">20</field>
+            <field name="color">#f39c12</field>
+            <field name="max_concurrent_orders">6</field>
+            <field name="avg_prep_time">8</field>
+            <field name="priority_level">normal</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="station_salad" model="kitchen.station">
+            <field name="name">Salad &amp; Cold Station</field>
+            <field name="code">SALAD</field>
+            <field name="station_type">salad</field>
+            <field name="sequence">30</field>
+            <field name="color">#2ecc71</field>
+            <field name="max_concurrent_orders">10</field>
+            <field name="avg_prep_time">5</field>
+            <field name="priority_level">normal</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="station_dessert" model="kitchen.station">
+            <field name="name">Dessert Station</field>
+            <field name="code">DESSERT</field>
+            <field name="station_type">dessert</field>
+            <field name="sequence">40</field>
+            <field name="color">#9b59b6</field>
+            <field name="max_concurrent_orders">5</field>
+            <field name="avg_prep_time">6</field>
+            <field name="priority_level">low</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="station_beverage" model="kitchen.station">
+            <field name="name">Beverage Station</field>
+            <field name="code">BEV</field>
+            <field name="station_type">beverage</field>
+            <field name="sequence">50</field>
+            <field name="color">#3498db</field>
+            <field name="max_concurrent_orders">15</field>
+            <field name="avg_prep_time">3</field>
+            <field name="priority_level">urgent</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="station_expo" model="kitchen.station">
+            <field name="name">Expo Station</field>
+            <field name="code">EXPO</field>
+            <field name="station_type">expo</field>
+            <field name="sequence">60</field>
+            <field name="color">#34495e</field>
+            <field name="max_concurrent_orders">20</field>
+            <field name="avg_prep_time">2</field>
+            <field name="priority_level">urgent</field>
+            <field name="active">True</field>
+        </record>
+
+        <!-- Kitchen Displays -->
+        <record id="display_main_kitchen" model="kitchen.display">
+            <field name="name">Main Kitchen Display</field>
+            <field name="layout">grid</field>
+            <field name="max_orders_display">20</field>
+            <field name="auto_refresh_interval">5</field>
+            <field name="show_elapsed_time">True</field>
+            <field name="show_customer_notes">True</field>
+            <field name="warning_time">15</field>
+            <field name="critical_time">25</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="display_grill_station" model="kitchen.display">
+            <field name="name">Grill Station Display</field>
+            <field name="layout">list</field>
+            <field name="max_orders_display">10</field>
+            <field name="auto_refresh_interval">3</field>
+            <field name="show_elapsed_time">True</field>
+            <field name="show_customer_notes">True</field>
+            <field name="warning_time">10</field>
+            <field name="critical_time">20</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="display_expo_station" model="kitchen.display">
+            <field name="name">Expo Display</field>
+            <field name="layout">kanban</field>
+            <field name="max_orders_display">30</field>
+            <field name="auto_refresh_interval">2</field>
+            <field name="show_elapsed_time">True</field>
+            <field name="show_customer_notes">False</field>
+            <field name="warning_time">5</field>
+            <field name="critical_time">10</field>
+            <field name="active">True</field>
+        </record>
+
+        <!-- Link stations to displays -->
+        <record id="display_main_kitchen_stations" model="kitchen.display">
+            <field name="id" ref="display_main_kitchen"/>
+            <field name="station_ids" eval="[(6, 0, [ref('station_grill'), ref('station_fryer'), ref('station_salad')])]"/>
+        </record>
+
+        <record id="display_grill_station_link" model="kitchen.display">
+            <field name="id" ref="display_grill_station"/>
+            <field name="station_ids" eval="[(6, 0, [ref('station_grill')])]"/>
+        </record>
+
+        <record id="display_expo_station_link" model="kitchen.display">
+            <field name="id" ref="display_expo_station"/>
+            <field name="station_ids" eval="[(6, 0, [ref('station_expo')])]"/>
+        </record>
+
+    </data>
+</odoo> 

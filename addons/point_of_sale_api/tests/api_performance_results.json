@@ -1,0 +1,592 @@
+{
+  "api_endpoint_performance": {
+    "overall_average": 4.2852833978637745,
+    "endpoint_results": [
+      {
+        "endpoint_name": "GET /api/pos/health",
+        "method": "GET",
+        "path": "/api/pos/health",
+        "average_time": 5.366654301178642,
+        "min_time": 1.735625002766028,
+        "max_time": 19.370916998013854,
+        "successful_requests": 10,
+        "all_times": [
+          19.370916998013854,
+          14.674792008008808,
+          2.297708997502923,
+          2.1746670245192945,
+          2.1697499905712903,
+          2.5442499900236726,
+          1.735625002766028,
+          4.663041996536776,
+          2.221958013251424,
+          1.8138329905923456
+        ]
+      },
+      {
+        "endpoint_name": "GET /api/pos/orders",
+        "method": "GET",
+        "path": "/api/pos/orders",
+        "average_time": 2.8132125036790967,
+        "min_time": 1.834333990700543,
+        "max_time": 9.21329201082699,
+        "successful_requests": 10,
+        "all_times": [
+          2.965207997476682,
+          2.0219580037519336,
+          1.8617500027175993,
+          2.1172910055611283,
+          1.9846250070258975,
+          9.21329201082699,
+          2.3672080133110285,
+          1.8898340058512986,
+          1.834333990700543,
+          1.8766249995678663
+        ]
+      },
+      {
+        "endpoint_name": "GET /api/pos/products",
+        "method": "GET",
+        "path": "/api/pos/products",
+        "average_time": 3.31857499841135,
+        "min_time": 1.8189999973401427,
+        "max_time": 8.279875008156523,
+        "successful_requests": 10,
+        "all_times": [
+          2.1892919903621078,
+          8.279875008156523,
+          2.2654580243397504,
+          2.1132910042069852,
+          2.953207993414253,
+          2.1922499872744083,
+          1.8189999973401427,
+          2.675958996405825,
+          6.239332986297086,
+          2.458083996316418
+        ]
+      },
+      {
+        "endpoint_name": "GET /api/pos/performance",
+        "method": "GET",
+        "path": "/api/pos/performance",
+        "average_time": 4.427574994042516,
+        "min_time": 3.341917006764561,
+        "max_time": 7.592915993882343,
+        "successful_requests": 10,
+        "all_times": [
+          3.704583999933675,
+          3.9035420049913228,
+          3.6017500096932054,
+          3.953499981435016,
+          5.890874977922067,
+          3.341917006764561,
+          4.628915979992598,
+          3.6331249866634607,
+          7.592915993882343,
+          4.0246249991469085
+        ]
+      },
+      {
+        "endpoint_name": "POST /api/pos/orders",
+        "method": "POST",
+        "path": "/api/pos/orders",
+        "average_time": 2.8127418918302283,
+        "min_time": 1.9479169859550893,
+        "max_time": 7.450833014445379,
+        "successful_requests": 10,
+        "all_times": [
+          1.9479169859550893,
+          2.291833981871605,
+          2.3827499826438725,
+          2.2642500116489828,
+          2.556916995672509,
+          7.450833014445379,
+          2.6139169931411743,
+          2.2729169868398458,
+          2.2427499934565276,
+          2.103333972627297
+        ]
+      },
+      {
+        "endpoint_name": "POST /api/pos/payments",
+        "method": "POST",
+        "path": "/api/pos/payments",
+        "average_time": 6.972941698040813,
+        "min_time": 4.883749992586672,
+        "max_time": 12.555291003081948,
+        "successful_requests": 10,
+        "all_times": [
+          5.043374985689297,
+          12.555291003081948,
+          4.883749992586672,
+          10.332959005609155,
+          6.106790999183431,
+          5.192791984882206,
+          5.613208981230855,
+          8.130500005790964,
+          6.878167012473568,
+          4.992583009880036
+        ]
+      }
+    ],
+    "total_endpoints": 6,
+    "successful_endpoints": 6,
+    "measurement_type": "real_api_server"
+  },
+  "concurrent_api_load": {
+    "total_time": 94.28454199223779,
+    "successful_requests": 50,
+    "expected_requests": 50,
+    "success_rate": 1.0,
+    "average_response_time": 16.51205664209556,
+    "min_response_time": 6.118207995314151,
+    "max_response_time": 52.51175002194941,
+    "num_threads": 10,
+    "requests_per_thread": 5,
+    "all_results": [
+      {
+        "worker_id": 0,
+        "request_number": 1,
+        "endpoint": "/api/pos/health",
+        "response_time": 13.379207986872643,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.852368"
+      },
+      {
+        "worker_id": 0,
+        "request_number": 2,
+        "endpoint": "/api/pos/orders",
+        "response_time": 9.579375007888302,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.861964"
+      },
+      {
+        "worker_id": 0,
+        "request_number": 3,
+        "endpoint": "/api/pos/products",
+        "response_time": 15.335959004005417,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.877309"
+      },
+      {
+        "worker_id": 0,
+        "request_number": 4,
+        "endpoint": "/api/pos/health",
+        "response_time": 8.234291017288342,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.885556"
+      },
+      {
+        "worker_id": 0,
+        "request_number": 5,
+        "endpoint": "/api/pos/orders",
+        "response_time": 40.97608299343847,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.926540"
+      },
+      {
+        "worker_id": 1,
+        "request_number": 1,
+        "endpoint": "/api/pos/health",
+        "response_time": 12.703792017418891,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.852171"
+      },
+      {
+        "worker_id": 1,
+        "request_number": 2,
+        "endpoint": "/api/pos/orders",
+        "response_time": 10.991375020239502,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.863169"
+      },
+      {
+        "worker_id": 1,
+        "request_number": 3,
+        "endpoint": "/api/pos/products",
+        "response_time": 7.652959000552073,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.870831"
+      },
+      {
+        "worker_id": 1,
+        "request_number": 4,
+        "endpoint": "/api/pos/health",
+        "response_time": 11.511457996675745,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.882353"
+      },
+      {
+        "worker_id": 1,
+        "request_number": 5,
+        "endpoint": "/api/pos/orders",
+        "response_time": 41.01083299610764,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.923373"
+      },
+      {
+        "worker_id": 2,
+        "request_number": 1,
+        "endpoint": "/api/pos/health",
+        "response_time": 14.796875009778887,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.854647"
+      },
+      {
+        "worker_id": 2,
+        "request_number": 2,
+        "endpoint": "/api/pos/orders",
+        "response_time": 9.446582989767194,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.864101"
+      },
+      {
+        "worker_id": 2,
+        "request_number": 3,
+        "endpoint": "/api/pos/products",
+        "response_time": 15.019416983705014,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.879129"
+      },
+      {
+        "worker_id": 2,
+        "request_number": 4,
+        "endpoint": "/api/pos/health",
+        "response_time": 46.41604199423455,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.925558"
+      },
+      {
+        "worker_id": 2,
+        "request_number": 5,
+        "endpoint": "/api/pos/orders",
+        "response_time": 6.669541995506734,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.932234"
+      },
+      {
+        "worker_id": 3,
+        "request_number": 1,
+        "endpoint": "/api/pos/health",
+        "response_time": 11.025124986190349,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.851307"
+      },
+      {
+        "worker_id": 3,
+        "request_number": 2,
+        "endpoint": "/api/pos/orders",
+        "response_time": 11.186458985321224,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.862499"
+      },
+      {
+        "worker_id": 3,
+        "request_number": 3,
+        "endpoint": "/api/pos/products",
+        "response_time": 12.559249997138977,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.875065"
+      },
+      {
+        "worker_id": 3,
+        "request_number": 4,
+        "endpoint": "/api/pos/health",
+        "response_time": 9.100875002332032,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.884177"
+      },
+      {
+        "worker_id": 3,
+        "request_number": 5,
+        "endpoint": "/api/pos/orders",
+        "response_time": 11.762957990868017,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.895951"
+      },
+      {
+        "worker_id": 4,
+        "request_number": 1,
+        "endpoint": "/api/pos/health",
+        "response_time": 16.550625005038455,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.857318"
+      },
+      {
+        "worker_id": 4,
+        "request_number": 2,
+        "endpoint": "/api/pos/orders",
+        "response_time": 15.610083006322384,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.872937"
+      },
+      {
+        "worker_id": 4,
+        "request_number": 3,
+        "endpoint": "/api/pos/products",
+        "response_time": 10.101000021677464,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.883053"
+      },
+      {
+        "worker_id": 4,
+        "request_number": 4,
+        "endpoint": "/api/pos/health",
+        "response_time": 15.23487499798648,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.898295"
+      },
+      {
+        "worker_id": 4,
+        "request_number": 5,
+        "endpoint": "/api/pos/orders",
+        "response_time": 10.305500007234514,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.908608"
+      },
+      {
+        "worker_id": 5,
+        "request_number": 1,
+        "endpoint": "/api/pos/health",
+        "response_time": 49.14374998770654,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.890390"
+      },
+      {
+        "worker_id": 5,
+        "request_number": 2,
+        "endpoint": "/api/pos/orders",
+        "response_time": 7.203083019703627,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.897608"
+      },
+      {
+        "worker_id": 5,
+        "request_number": 3,
+        "endpoint": "/api/pos/products",
+        "response_time": 11.89687501755543,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.909514"
+      },
+      {
+        "worker_id": 5,
+        "request_number": 4,
+        "endpoint": "/api/pos/health",
+        "response_time": 7.975624990649521,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.917498"
+      },
+      {
+        "worker_id": 5,
+        "request_number": 5,
+        "endpoint": "/api/pos/orders",
+        "response_time": 9.826958004850894,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.927332"
+      },
+      {
+        "worker_id": 6,
+        "request_number": 1,
+        "endpoint": "/api/pos/health",
+        "response_time": 52.51175002194941,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.894138"
+      },
+      {
+        "worker_id": 6,
+        "request_number": 2,
+        "endpoint": "/api/pos/orders",
+        "response_time": 13.474042003508657,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.907619"
+      },
+      {
+        "worker_id": 6,
+        "request_number": 3,
+        "endpoint": "/api/pos/products",
+        "response_time": 6.118207995314151,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.913752"
+      },
+      {
+        "worker_id": 6,
+        "request_number": 4,
+        "endpoint": "/api/pos/health",
+        "response_time": 6.63583300774917,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.920411"
+      },
+      {
+        "worker_id": 6,
+        "request_number": 5,
+        "endpoint": "/api/pos/orders",
+        "response_time": 9.148042008746415,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.929566"
+      },
+      {
+        "worker_id": 7,
+        "request_number": 1,
+        "endpoint": "/api/pos/health",
+        "response_time": 15.396750008221716,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.857483"
+      },
+      {
+        "worker_id": 7,
+        "request_number": 2,
+        "endpoint": "/api/pos/orders",
+        "response_time": 11.966584017500281,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.869463"
+      },
+      {
+        "worker_id": 7,
+        "request_number": 3,
+        "endpoint": "/api/pos/products",
+        "response_time": 11.185167008079588,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.880664"
+      },
+      {
+        "worker_id": 7,
+        "request_number": 4,
+        "endpoint": "/api/pos/health",
+        "response_time": 43.879374978132546,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.924556"
+      },
+      {
+        "worker_id": 7,
+        "request_number": 5,
+        "endpoint": "/api/pos/orders",
+        "response_time": 8.229208993725479,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.932792"
+      },
+      {
+        "worker_id": 8,
+        "request_number": 1,
+        "endpoint": "/api/pos/health",
+        "response_time": 50.15520899905823,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.892631"
+      },
+      {
+        "worker_id": 8,
+        "request_number": 2,
+        "endpoint": "/api/pos/orders",
+        "response_time": 7.527417008532211,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.900165"
+      },
+      {
+        "worker_id": 8,
+        "request_number": 3,
+        "endpoint": "/api/pos/products",
+        "response_time": 15.106790990103036,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.915280"
+      },
+      {
+        "worker_id": 8,
+        "request_number": 4,
+        "endpoint": "/api/pos/health",
+        "response_time": 6.411582988221198,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.921703"
+      },
+      {
+        "worker_id": 8,
+        "request_number": 5,
+        "endpoint": "/api/pos/orders",
+        "response_time": 9.794875018997118,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.931504"
+      },
+      {
+        "worker_id": 9,
+        "request_number": 1,
+        "endpoint": "/api/pos/health",
+        "response_time": 48.41654101619497,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.891339"
+      },
+      {
+        "worker_id": 9,
+        "request_number": 2,
+        "endpoint": "/api/pos/orders",
+        "response_time": 9.848540998063982,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.901194"
+      },
+      {
+        "worker_id": 9,
+        "request_number": 3,
+        "endpoint": "/api/pos/products",
+        "response_time": 11.092083004768938,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.912293"
+      },
+      {
+        "worker_id": 9,
+        "request_number": 4,
+        "endpoint": "/api/pos/health",
+        "response_time": 6.228165992069989,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.918529"
+      },
+      {
+        "worker_id": 9,
+        "request_number": 5,
+        "endpoint": "/api/pos/orders",
+        "response_time": 9.269833011785522,
+        "status_code": 200,
+        "timestamp": "2025-06-17T15:49:39.927806"
+      }
+    ],
+    "measurement_type": "real_api_concurrent"
+  },
+  "database_api_performance": {
+    "overall_average": 3.8758915979997255,
+    "endpoint_results": [
+      {
+        "endpoint_name": "Orders List",
+        "method": "GET",
+        "path": "/api/pos/orders",
+        "average_time": 2.130133198807016,
+        "successful_requests": 5
+      },
+      {
+        "endpoint_name": "Products List",
+        "method": "GET",
+        "path": "/api/pos/products",
+        "average_time": 4.025616403669119,
+        "successful_requests": 5
+      },
+      {
+        "endpoint_name": "Create Order",
+        "method": "POST",
+        "path": "/api/pos/orders",
+        "average_time": 3.384366602404043,
+        "successful_requests": 5
+      },
+      {
+        "endpoint_name": "Process Payment",
+        "method": "POST",
+        "path": "/api/pos/payments",
+        "average_time": 5.963450187118724,
+        "successful_requests": 5
+      }
+    ],
+    "measurement_type": "real_api_database_simulation"
+  },
+  "overall_assessment": {
+    "api_endpoint_avg": 4.2852833978637745,
+    "concurrent_load_avg": 16.51205664209556,
+    "database_api_avg": 3.8758915979997255,
+    "server_available": true,
+    "server_url": "http://localhost:52556",
+    "test_timestamp": "2025-06-17T15:49:40.011209"
+  }
+}

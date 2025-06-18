@@ -1,0 +1,736 @@
+import React, { useState, useEffect } from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  StatusBar,
+  SafeAreaView,
+  TouchableOpacity,
+  ScrollView,
+  FlatList,
+  TextInput,
+  Modal,
+} from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useNavigation } from '@react-navigation/native';
+import { generateCustomers, CustomerData } from '../../utils/mockDataGenerator';
+
+// Clover POS Color Scheme
+const Colors = {
+  primary: '#00A651',      // Clover Green
+  secondary: '#0066CC',    // Clover Blue
+  success: '#00A651',
+  warning: '#FF6B35',
+  danger: '#E74C3C',
+  background: '#F5F5F5',
+  white: '#FFFFFF',
+  lightGray: '#E5E5E5',
+  mediumGray: '#999999',
+  darkGray: '#666666',
+  text: '#333333',
+  lightText: '#666666',
+  border: '#DDDDDD',
+  gold: '#FFD700',
+};
+
+const CustomersScreen: React.FC = () => {
+  const navigation = useNavigation();
+  const [customers, setCustomers] = useState<CustomerData[]>([]);
+  const [filteredCustomers, setFilteredCustomers] = useState<CustomerData[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedSegment, setSelectedSegment] = useState('all');
+  const [selectedCustomer, setSelectedCustomer] = useState<CustomerData | null>(null);
+
+  useEffect(() => {
+    loadCustomers();
+  }, []);
+
+  useEffect(() => {
+    filterCustomers();
+  }, [customers, searchQuery, selectedSegment]);
+
+  const loadCustomers = () => {
+    const customerData = generateCustomers(200);
+    setCustomers(customerData);
+  };
+
+  const filterCustomers = () => {
+    let filtered = customers;
+
+    // Apply segment filter
+    if (selectedSegment !== 'all') {
+      switch (selectedSegment) {
+        case 'vip':
+          filtered = filtered.filter(customer => customer.totalSpent > 500);
+          break;
+        case 'regular':
+          filtered = filtered.filter(customer => customer.orderCount >= 10);
+          break;
+        case 'new':
+          filtered = filtered.filter(customer => {
+            const daysSinceJoined = (Date.now() - customer.joinedDate.getTime()) / (1000 * 60 * 60 * 24);
+            return daysSinceJoined <= 30;
+          });
+          break;
+        case 'loyalty':
+          filtered = filtered.filter(customer => customer.loyaltyPoints > 1000);
+          break;
+      }
+    }
+
+    // Apply search query
+    if (searchQuery) {
+      filtered = filtered.filter(customer =>
+        customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        customer.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        customer.phone.includes(searchQuery)
+      );
+    }
+
+    setFilteredCustomers(filtered);
+  };
+
+  const getCustomerLevel = (customer: CustomerData) => {
+    if (customer.totalSpent > 1000) return { level: 'VIP', color: Colors.gold };
+    if (customer.totalSpent > 500) return { level: 'Premium', color: Colors.secondary };
+    if (customer.orderCount >= 10) return { level: 'Regular', color: Colors.primary };
+    return { level: 'New', color: Colors.darkGray };
+  };
+
+  const formatDate = (date: Date) => {
+    const days = Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24));
+    if (days === 0) return 'Today';
+    if (days === 1) return 'Yesterday';
+    if (days < 7) return `${days} days ago`;
+    if (days < 30) return `${Math.floor(days / 7)} weeks ago`;
+    if (days < 365) return `${Math.floor(days / 30)} months ago`;
+    return `${Math.floor(days / 365)} years ago`;
+  };
+
+  const renderCustomer = ({ item }: { item: CustomerData }) => {
+    const customerLevel = getCustomerLevel(item);
+    
+    return (
+      <TouchableOpacity 
+        style={styles.customerCard}
+        onPress={() => setSelectedCustomer(item)}
+        activeOpacity={0.7}
+      >
+        <View style={styles.customerHeader}>
+          <View style={styles.customerAvatar}>
+            <Icon name="account-circle" size={50} color={Colors.primary} />
+          </View>
+          <View style={styles.customerInfo}>
+            <View style={styles.customerNameRow}>
+              <Text style={styles.customerName}>{item.name}</Text>
+              <View style={[styles.levelBadge, { backgroundColor: `${customerLevel.color}20` }]}>
+                <Text style={[styles.levelText, { color: customerLevel.color }]}>
+                  {customerLevel.level}
+                </Text>
+              </View>
+            </View>
+            <Text style={styles.customerEmail}>{item.email}</Text>
+            <Text style={styles.customerPhone}>{item.phone}</Text>
+          </View>
+          <View style={styles.customerStats}>
+            <Text style={styles.statValue}>£{item.totalSpent.toFixed(2)}</Text>
+            <Text style={styles.statLabel}>Total Spent</Text>
+          </View>
+        </View>
+
+        <View style={styles.customerMetrics}>
+          <View style={styles.metricItem}>
+            <Icon name="shopping-cart" size={16} color={Colors.darkGray} />
+            <Text style={styles.metricText}>{item.orderCount} orders</Text>
+          </View>
+          <View style={styles.metricItem}>
+            <Icon name="star" size={16} color={Colors.warning} />
+            <Text style={styles.metricText}>{item.loyaltyPoints} points</Text>
+          </View>
+          <View style={styles.metricItem}>
+            <Icon name="schedule" size={16} color={Colors.darkGray} />
+            <Text style={styles.metricText}>Last visit {formatDate(item.lastVisit)}</Text>
+          </View>
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
+  const stats = {
+    total: customers.length,
+    vip: customers.filter(c => c.totalSpent > 1000).length,
+    new: customers.filter(c => {
+      const days = (Date.now() - c.joinedDate.getTime()) / (1000 * 60 * 60 * 24);
+      return days <= 30;
+    }).length,
+    avgSpent: customers.reduce((sum, c) => sum + c.totalSpent, 0) / customers.length,
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <StatusBar backgroundColor={Colors.primary} barStyle="light-content" />
+      
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Icon name="arrow-back" size={24} color={Colors.white} />
+        </TouchableOpacity>
+        
+        <View style={styles.headerCenter}>
+          <Text style={styles.headerTitle}>Customers</Text>
+          <Text style={styles.headerSubtitle}>{filteredCustomers.length} customers</Text>
+        </View>
+        
+        <TouchableOpacity style={styles.addButton}>
+          <Icon name="add" size={24} color={Colors.white} />
+        </TouchableOpacity>
+      </View>
+
+      {/* Stats Bar */}
+      <View style={styles.statsBar}>
+        <View style={styles.statCard}>
+          <Text style={styles.statValue}>{stats.total}</Text>
+          <Text style={styles.statLabel}>Total</Text>
+        </View>
+        <View style={styles.statCard}>
+          <Text style={[styles.statValue, { color: Colors.gold }]}>{stats.vip}</Text>
+          <Text style={styles.statLabel}>VIP</Text>
+        </View>
+        <View style={styles.statCard}>
+          <Text style={[styles.statValue, { color: Colors.success }]}>{stats.new}</Text>
+          <Text style={styles.statLabel}>New (30d)</Text>
+        </View>
+        <View style={styles.statCard}>
+          <Text style={[styles.statValue, { color: Colors.secondary }]}>
+            £{stats.avgSpent.toFixed(0)}
+          </Text>
+          <Text style={styles.statLabel}>Avg Spent</Text>
+        </View>
+      </View>
+
+      {/* Search and Filter */}
+      <View style={styles.searchSection}>
+        <View style={styles.searchContainer}>
+          <Icon name="search" size={20} color={Colors.darkGray} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search customers..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholderTextColor={Colors.darkGray}
+          />
+        </View>
+
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false}
+          style={styles.segmentFilters}
+        >
+          {[
+            { key: 'all', label: 'All' },
+            { key: 'vip', label: 'VIP' },
+            { key: 'regular', label: 'Regular' },
+            { key: 'new', label: 'New' },
+            { key: 'loyalty', label: 'Loyalty' },
+          ].map(segment => (
+            <TouchableOpacity
+              key={segment.key}
+              style={[
+                styles.segmentFilter,
+                selectedSegment === segment.key && styles.segmentFilterActive
+              ]}
+              onPress={() => setSelectedSegment(segment.key)}
+            >
+              <Text style={[
+                styles.segmentFilterText,
+                selectedSegment === segment.key && styles.segmentFilterTextActive
+              ]}>
+                {segment.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+
+      {/* Customers List */}
+      <FlatList
+        data={filteredCustomers}
+        renderItem={renderCustomer}
+        keyExtractor={item => item.id.toString()}
+        contentContainerStyle={styles.customersList}
+        showsVerticalScrollIndicator={false}
+        ListEmptyComponent={
+          <View style={styles.emptyState}>
+            <Icon name="people" size={64} color={Colors.lightGray} />
+            <Text style={styles.emptyStateText}>No customers found</Text>
+            <Text style={styles.emptyStateSubtext}>
+              {searchQuery ? 'Try adjusting your search' : 'Add your first customer'}
+            </Text>
+          </View>
+        }
+      />
+
+      {/* Customer Detail Modal */}
+      <Modal
+        visible={!!selectedCustomer}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setSelectedCustomer(null)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.customerModal}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Customer Details</Text>
+              <TouchableOpacity onPress={() => setSelectedCustomer(null)}>
+                <Icon name="close" size={24} color={Colors.text} />
+              </TouchableOpacity>
+            </View>
+            
+            {selectedCustomer && (
+              <ScrollView style={styles.modalContent}>
+                <View style={styles.customerProfile}>
+                  <View style={styles.profileAvatar}>
+                    <Icon name="account-circle" size={80} color={Colors.primary} />
+                  </View>
+                  <Text style={styles.profileName}>{selectedCustomer.name}</Text>
+                  <View style={[styles.profileLevel, { backgroundColor: `${getCustomerLevel(selectedCustomer).color}20` }]}>
+                    <Text style={[styles.profileLevelText, { color: getCustomerLevel(selectedCustomer).color }]}>
+                      {getCustomerLevel(selectedCustomer).level} Customer
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={styles.detailsSection}>
+                  <Text style={styles.sectionTitle}>Contact Information</Text>
+                  <View style={styles.detailRow}>
+                    <Icon name="email" size={20} color={Colors.darkGray} />
+                    <Text style={styles.detailText}>{selectedCustomer.email}</Text>
+                  </View>
+                  <View style={styles.detailRow}>
+                    <Icon name="phone" size={20} color={Colors.darkGray} />
+                    <Text style={styles.detailText}>{selectedCustomer.phone}</Text>
+                  </View>
+                  <View style={styles.detailRow}>
+                    <Icon name="calendar-today" size={20} color={Colors.darkGray} />
+                    <Text style={styles.detailText}>
+                      Customer since {selectedCustomer.joinedDate.toLocaleDateString('en-GB')}
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={styles.detailsSection}>
+                  <Text style={styles.sectionTitle}>Purchase History</Text>
+                  <View style={styles.purchaseGrid}>
+                    <View style={styles.purchaseCard}>
+                      <Text style={styles.purchaseValue}>£{selectedCustomer.totalSpent.toFixed(2)}</Text>
+                      <Text style={styles.purchaseLabel}>Total Spent</Text>
+                    </View>
+                    <View style={styles.purchaseCard}>
+                      <Text style={styles.purchaseValue}>{selectedCustomer.orderCount}</Text>
+                      <Text style={styles.purchaseLabel}>Orders</Text>
+                    </View>
+                    <View style={styles.purchaseCard}>
+                      <Text style={styles.purchaseValue}>£{selectedCustomer.averageOrderValue.toFixed(2)}</Text>
+                      <Text style={styles.purchaseLabel}>Avg Order</Text>
+                    </View>
+                    <View style={styles.purchaseCard}>
+                      <Text style={[styles.purchaseValue, { color: Colors.warning }]}>
+                        {selectedCustomer.loyaltyPoints}
+                      </Text>
+                      <Text style={styles.purchaseLabel}>Loyalty Points</Text>
+                    </View>
+                  </View>
+                </View>
+
+                <View style={styles.detailsSection}>
+                  <Text style={styles.sectionTitle}>Preferred Items</Text>
+                  <View style={styles.preferredItems}>
+                    {selectedCustomer.preferredItems.map((item, index) => (
+                      <View key={index} style={styles.preferredItem}>
+                        <Text style={styles.preferredItemText}>{item}</Text>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+
+                {selectedCustomer.tags.length > 0 && (
+                  <View style={styles.detailsSection}>
+                    <Text style={styles.sectionTitle}>Tags</Text>
+                    <View style={styles.customerTags}>
+                      {selectedCustomer.tags.map((tag, index) => (
+                        <View key={index} style={styles.customerTag}>
+                          <Text style={styles.customerTagText}>{tag}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  </View>
+                )}
+
+                <View style={styles.actionButtons}>
+                  <TouchableOpacity style={[styles.actionButton, styles.editButton]}>
+                    <Icon name="edit" size={20} color={Colors.white} />
+                    <Text style={styles.actionButtonText}>Edit</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={[styles.actionButton, styles.orderButton]}>
+                    <Icon name="add-shopping-cart" size={20} color={Colors.white} />
+                    <Text style={styles.actionButtonText}>New Order</Text>
+                  </TouchableOpacity>
+                </View>
+              </ScrollView>
+            )}
+          </View>
+        </View>
+      </Modal>
+    </SafeAreaView>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
+  header: {
+    backgroundColor: Colors.primary,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    height: 60,
+  },
+  backButton: {
+    padding: 8,
+  },
+  headerCenter: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: Colors.white,
+  },
+  headerSubtitle: {
+    fontSize: 12,
+    color: 'rgba(255, 255, 255, 0.8)',
+  },
+  addButton: {
+    padding: 8,
+  },
+  statsBar: {
+    flexDirection: 'row',
+    backgroundColor: Colors.white,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+    gap: 12,
+  },
+  statCard: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  statValue: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: Colors.primary,
+  },
+  statLabel: {
+    fontSize: 12,
+    color: Colors.darkGray,
+    marginTop: 4,
+  },
+  searchSection: {
+    backgroundColor: Colors.white,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.background,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginHorizontal: 16,
+    marginBottom: 12,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    color: Colors.text,
+    marginLeft: 12,
+  },
+  segmentFilters: {
+    paddingHorizontal: 16,
+  },
+  segmentFilter: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    marginRight: 8,
+    borderRadius: 20,
+    backgroundColor: Colors.background,
+  },
+  segmentFilterActive: {
+    backgroundColor: Colors.primary,
+  },
+  segmentFilterText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: Colors.text,
+  },
+  segmentFilterTextActive: {
+    color: Colors.white,
+  },
+  customersList: {
+    padding: 16,
+  },
+  customerCard: {
+    backgroundColor: Colors.white,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  customerHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  customerAvatar: {
+    marginRight: 12,
+  },
+  customerInfo: {
+    flex: 1,
+  },
+  customerNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  customerName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.text,
+    marginRight: 8,
+  },
+  levelBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  levelText: {
+    fontSize: 10,
+    fontWeight: '600',
+  },
+  customerEmail: {
+    fontSize: 12,
+    color: Colors.darkGray,
+    marginBottom: 2,
+  },
+  customerPhone: {
+    fontSize: 12,
+    color: Colors.darkGray,
+  },
+  customerStats: {
+    alignItems: 'flex-end',
+  },
+  customerMetrics: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+  },
+  metricItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  metricText: {
+    fontSize: 12,
+    color: Colors.darkGray,
+    marginLeft: 4,
+  },
+  emptyState: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 100,
+  },
+  emptyStateText: {
+    fontSize: 18,
+    fontWeight: '500',
+    color: Colors.text,
+    marginTop: 16,
+  },
+  emptyStateSubtext: {
+    fontSize: 14,
+    color: Colors.darkGray,
+    marginTop: 8,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  customerModal: {
+    backgroundColor: Colors.white,
+    borderRadius: 16,
+    width: '90%',
+    maxHeight: '80%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: Colors.text,
+  },
+  modalContent: {
+    padding: 20,
+  },
+  customerProfile: {
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  profileAvatar: {
+    marginBottom: 12,
+  },
+  profileName: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: Colors.text,
+    marginBottom: 8,
+  },
+  profileLevel: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  profileLevelText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  detailsSection: {
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: Colors.text,
+    marginBottom: 12,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  detailText: {
+    fontSize: 14,
+    color: Colors.text,
+    marginLeft: 12,
+  },
+  purchaseGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  purchaseCard: {
+    flex: 1,
+    minWidth: '45%',
+    backgroundColor: Colors.background,
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+  },
+  purchaseValue: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: Colors.primary,
+  },
+  purchaseLabel: {
+    fontSize: 12,
+    color: Colors.darkGray,
+    marginTop: 4,
+    textAlign: 'center',
+  },
+  preferredItems: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  preferredItem: {
+    backgroundColor: Colors.primary + '20',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  preferredItemText: {
+    fontSize: 12,
+    color: Colors.primary,
+    fontWeight: '500',
+  },
+  customerTags: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  customerTag: {
+    backgroundColor: Colors.secondary + '20',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  customerTagText: {
+    fontSize: 12,
+    color: Colors.secondary,
+    fontWeight: '500',
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 24,
+  },
+  actionButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  editButton: {
+    backgroundColor: Colors.secondary,
+  },
+  orderButton: {
+    backgroundColor: Colors.success,
+  },
+  actionButtonText: {
+    color: Colors.white,
+    fontSize: 14,
+    fontWeight: '600',
+    marginLeft: 8,
+  },
+});
+
+export default CustomersScreen;

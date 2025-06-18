@@ -1,0 +1,7 @@
+{
+  "name": "CashAppPOS",
+  "displayName": "CashAppPOS",
+  "ios": {
+    "bundleIdentifier": "com.anonymous.cashapppos"
+  }
+}

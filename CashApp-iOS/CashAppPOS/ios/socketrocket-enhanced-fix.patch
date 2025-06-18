@@ -1,0 +1,40 @@
+--- a/SocketRocket/Internal/RunLoop/SRRunLoopThread.m
++++ b/SocketRocket/Internal/RunLoop/SRRunLoopThread.m
+@@ -29,6 +29,8 @@
+     dispatch_once(&onceToken, ^{
+         thread = [[SRRunLoopThread alloc] init];
+         thread.name = @"com.facebook.SocketRocket.NetworkThread";
++        // Set QoS to match caller to prevent priority inversion
++        thread.qualityOfService = NSQualityOfServiceUserInitiated;
+         [thread start];
+     });
+     return thread;
+@@ -76,15 +78,20 @@
+ 
+ - (NSRunLoop *)runLoop;
+ {
+-    // Fix for priority inversion warning - use timeout instead of DISPATCH_TIME_FOREVER
+-    dispatch_time_t timeout = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(10.0 * NSEC_PER_SEC));
+-    long result = dispatch_group_wait(_waitGroup, timeout);
+-    
+-    if (result != 0) {
+-        // Fallback: if timeout occurs, try once more with a shorter timeout
+-        timeout = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC));
+-        dispatch_group_wait(_waitGroup, timeout);
++    // Ensure we're not causing priority inversion
++    if ([NSThread isMainThread]) {
++        // For main thread, use a non-blocking check
++        if (dispatch_group_wait(_waitGroup, DISPATCH_TIME_NOW) != 0) {
++            // If not ready, return nil to prevent blocking
++            return nil;
++        }
++    } else {
++        // For background threads, use a reasonable timeout
++        dispatch_time_t timeout = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC));
++        long result = dispatch_group_wait(_waitGroup, timeout);
++        if (result != 0) {
++            return nil; // Return nil if timeout occurs
++        }
+     }
+     
+     return _runLoop;
