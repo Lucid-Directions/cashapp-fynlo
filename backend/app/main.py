@@ -65,6 +65,19 @@ app.add_middleware(
 # Include API routes
 app.include_router(api_router, prefix="/api/v1")
 
+# WebSocket routes
+from app.websocket.endpoints import (
+    websocket_endpoint,
+    kitchen_websocket_endpoint,
+    pos_websocket_endpoint,
+    management_websocket_endpoint
+)
+
+app.websocket("/ws/{restaurant_id}")(websocket_endpoint)
+app.websocket("/ws/kitchen/{restaurant_id}")(kitchen_websocket_endpoint)
+app.websocket("/ws/pos/{restaurant_id}")(pos_websocket_endpoint)
+app.websocket("/ws/management/{restaurant_id}")(management_websocket_endpoint)
+
 @app.get("/")
 async def root():
     """Health check endpoint"""
