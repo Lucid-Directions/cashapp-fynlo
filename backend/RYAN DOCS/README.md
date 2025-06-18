@@ -31,7 +31,7 @@ Welcome to the Fynlo POS backend documentation directory. This contains all tech
   - Integration guides and technical specifications
 
 ### **📋 Archived Documentation**
-- **[../../Archived Docs/](../../Archived%20Docs/)** - Historical project documentation
+- **[../../../ARCHIVED DOCS/](../../../ARCHIVED%20DOCS/)** - Historical project documentation
   - Previous implementation reports and phase documentation
   - Legacy planning documents and completion summaries
 
