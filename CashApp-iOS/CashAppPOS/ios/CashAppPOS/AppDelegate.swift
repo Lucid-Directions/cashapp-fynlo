@@ -15,45 +15,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     let jsCodeLocation: URL
 
     #if DEBUG
-      // For debug builds, try Metro bundler first, then fall back to bundled JS
-      let metroURL = RCTBundleURLProvider.sharedSettings().jsBundleURL(forBundleRoot: "index")
-      
-      // Check multiple possible bundle locations
-      let possibleBundlePaths = [
-        Bundle.main.url(forResource: "main", withExtension: "jsbundle"),
-        Bundle.main.url(forResource: "main.jsbundle", withExtension: nil),
-        URL(fileURLWithPath: Bundle.main.bundlePath).appendingPathComponent("main.jsbundle")
-      ]
-      
-      let bundleUrl = possibleBundlePaths.compactMap { $0 }.first { FileManager.default.fileExists(atPath: $0.path) }
-      
-      if let metroURL = metroURL {
-        // Try Metro bundler for debug build
-        jsCodeLocation = metroURL
-        print("✅ Using Metro bundler for debug build: \(metroURL)")
-      } else if let bundleUrl = bundleUrl {
-        // Fall back to bundled JS if Metro is not available
-        jsCodeLocation = bundleUrl
-        print("✅ Using bundled JavaScript for debug build: \(bundleUrl.path)")
-      } else {
-        // Create a helpful error message
-        print("❌ No JavaScript bundle found!")
-        print("📍 Searched paths:")
-        possibleBundlePaths.forEach { url in
-          if let url = url {
-            print("   - \(url.path) (exists: \(FileManager.default.fileExists(atPath: url.path)))")
-          }
-        }
-        print("🔧 Run 'npm run build:ios' and ensure main.jsbundle is added to Xcode project")
-        fatalError("JavaScript bundle not found - see console for details")
-      }
+      // For debug builds, use Metro bundler
+      jsCodeLocation = RCTBundleURLProvider.sharedSettings().jsBundleURL(forBundleRoot: "index")
+      print("✅ Using Metro bundler for debug build: \(jsCodeLocation)")
     #else
       // For release builds, use bundled JS
-      guard let bundleUrl = Bundle.main.url(forResource: "main", withExtension: "jsbundle") else {
-        fatalError("Could not find main.jsbundle in app bundle")
-      }
-      jsCodeLocation = bundleUrl
-      print("Using bundled JavaScript for release build")
+      jsCodeLocation = Bundle.main.url(forResource: "main", withExtension: "jsbundle")!
+      print("✅ Using bundled JavaScript for release build")
     #endif
 
     print("JS Code Location: \(jsCodeLocation)")
