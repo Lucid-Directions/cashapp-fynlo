@@ -1,0 +1,41 @@
+# Fynlo POS Backend Dependencies
+# Clean PostgreSQL-based implementation
+
+# Core Framework
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+python-multipart==0.0.6
+
+# Database
+psycopg2-binary==2.9.9
+sqlalchemy==2.0.23
+alembic==1.13.0
+
+# Authentication & Security
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.6
+
+# Payment Processing
+stripe==7.8.0
+requests==2.31.0
+
+# Real-time Features
+websockets==12.0
+redis==5.0.1
+
+# QR Code Generation
+qrcode[pil]==7.4.2
+
+# Background Tasks
+celery==5.3.4
+
+# Monitoring & Logging
+python-dotenv==1.0.0
+python-json-logger==2.0.7
+
+# Development
+pytest==7.4.3
+pytest-asyncio==0.21.1
+black==23.11.0
