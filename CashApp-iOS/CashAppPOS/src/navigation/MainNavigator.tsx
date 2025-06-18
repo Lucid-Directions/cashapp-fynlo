@@ -12,6 +12,8 @@ import CustomersScreen from '../screens/customers/CustomersScreen';
 import InventoryScreen from '../screens/inventory/InventoryScreen';
 import MenuManagementScreen from '../screens/settings/app/MenuManagementScreen';
 import DashboardScreen from '../screens/main/DashboardScreen';
+import ProfileScreen from '../screens/main/ProfileScreen';
+import HelpScreen from '../screens/support/HelpScreen';
 import SettingsNavigator from './SettingsNavigator';
 import useAppStore from '../store/useAppStore';
 
@@ -150,6 +152,20 @@ const MainNavigator: React.FC = () => {
       <Stack.Screen
         name="Dashboard"
         component={DashboardScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="Help"
+        component={HelpScreen}
         options={{
           headerShown: false,
         }}

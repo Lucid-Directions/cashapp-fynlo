@@ -85,8 +85,44 @@ const EnhancedPaymentScreen: React.FC = () => {
     return subtotal + tax + service + tipAmount;
   };
 
+  // QR Code Payment State
+  const [showQRModal, setShowQRModal] = useState(false);
+  const [qrPaymentStatus, setQRPaymentStatus] = useState<'generating' | 'waiting' | 'completed' | 'expired'>('generating');
+  const [qrCode, setQRCode] = useState('');
+
+  // Generate QR Code for payment
+  const generateQRCode = () => {
+    const paymentData = {
+      amount: calculateGrandTotal(),
+      currency: 'GBP',
+      merchantId: 'fynlo-pos-001',
+      orderId: `ORDER-${Date.now()}`,
+      timestamp: Date.now(),
+    };
+    
+    // In a real implementation, this would be a proper QR code
+    const qrString = `FYNLO-PAY:${btoa(JSON.stringify(paymentData))}`;
+    setQRCode(qrString);
+    setQRPaymentStatus('waiting');
+    
+    // Simulate QR code expiration after 5 minutes
+    setTimeout(() => {
+      if (qrPaymentStatus === 'waiting') {
+        setQRPaymentStatus('expired');
+      }
+    }, 300000); // 5 minutes
+  };
+
   // Payment methods configuration
   const availablePaymentMethods: PaymentMethod[] = [
+    {
+      id: 'qrCode',
+      name: 'QR Payment',
+      icon: 'qr-code-scanner',
+      color: Colors.primary,
+      enabled: true,
+      requiresAuth: false,
+    },
     {
       id: 'cash',
       name: 'Cash',
@@ -185,6 +221,9 @@ const EnhancedPaymentScreen: React.FC = () => {
       setSelectedPaymentMethod(methodId);
       if (methodId === 'cash') {
         setShowCashModal(true);
+      } else if (methodId === 'qrCode') {
+        setShowQRModal(true);
+        generateQRCode();
       }
     }
   };
@@ -308,6 +347,134 @@ const EnhancedPaymentScreen: React.FC = () => {
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
+    </Modal>
+  );
+
+  const QRPaymentModal = () => (
+    <Modal
+      visible={showQRModal}
+      transparent
+      animationType="slide"
+      onRequestClose={() => setShowQRModal(false)}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.qrModalContent}>
+          <View style={styles.qrModalHeader}>
+            <Text style={styles.qrModalTitle}>QR Code Payment</Text>
+            <TouchableOpacity onPress={() => setShowQRModal(false)}>
+              <Icon name="close" size={24} color={Colors.darkGray} />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.qrModalBody}>
+            <View style={styles.amountDue}>
+              <Text style={styles.amountDueLabel}>Amount Due</Text>
+              <Text style={styles.amountDueValue}>£{calculateGrandTotal().toFixed(2)}</Text>
+            </View>
+
+            {qrPaymentStatus === 'generating' && (
+              <View style={styles.qrSection}>
+                <View style={styles.qrLoadingContainer}>
+                  <Icon name="hourglass-empty" size={48} color={Colors.lightText} />
+                  <Text style={styles.qrStatusText}>Generating QR Code...</Text>
+                </View>
+              </View>
+            )}
+
+            {qrPaymentStatus === 'waiting' && (
+              <View style={styles.qrSection}>
+                <View style={styles.qrCodeContainer}>
+                  {/* QR Code Placeholder - In real app, use a QR library */}
+                  <View style={styles.qrCodePlaceholder}>
+                    <Icon name="qr-code" size={120} color={Colors.primary} />
+                  </View>
+                  <Text style={styles.qrCodeText}>
+                    Scan this QR code with your banking app
+                  </Text>
+                  <Text style={styles.qrOrderId}>
+                    Order ID: {qrCode.slice(-12)}
+                  </Text>
+                </View>
+                
+                <View style={styles.qrInstructions}>
+                  <Text style={styles.instructionTitle}>How to pay:</Text>
+                  <Text style={styles.instructionText}>1. Open your banking app</Text>
+                  <Text style={styles.instructionText}>2. Select "Pay by QR" or "Scan to Pay"</Text>
+                  <Text style={styles.instructionText}>3. Scan this QR code</Text>
+                  <Text style={styles.instructionText}>4. Confirm the payment</Text>
+                </View>
+
+                <View style={styles.paymentBenefits}>
+                  <Text style={styles.benefitsTitle}>Why QR Payment?</Text>
+                  <View style={styles.benefitRow}>
+                    <Icon name="security" size={16} color={Colors.success} />
+                    <Text style={styles.benefitText}>Secure & Safe</Text>
+                  </View>
+                  <View style={styles.benefitRow}>
+                    <Icon name="speed" size={16} color={Colors.success} />
+                    <Text style={styles.benefitText}>Instant Payment</Text>
+                  </View>
+                  <View style={styles.benefitRow}>
+                    <Icon name="money-off" size={16} color={Colors.success} />
+                    <Text style={styles.benefitText}>Lowest Fees (1.2%)</Text>
+                  </View>
+                </View>
+              </View>
+            )}
+
+            {qrPaymentStatus === 'expired' && (
+              <View style={styles.qrSection}>
+                <View style={styles.qrErrorContainer}>
+                  <Icon name="access-time" size={48} color={Colors.warning} />
+                  <Text style={styles.qrStatusText}>QR Code Expired</Text>
+                  <Text style={styles.qrSubText}>Please generate a new QR code</Text>
+                  <TouchableOpacity 
+                    style={styles.regenerateButton}
+                    onPress={generateQRCode}
+                  >
+                    <Text style={styles.regenerateButtonText}>Generate New QR</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+
+            {qrPaymentStatus === 'completed' && (
+              <View style={styles.qrSection}>
+                <View style={styles.qrSuccessContainer}>
+                  <Icon name="check-circle" size={48} color={Colors.success} />
+                  <Text style={styles.qrStatusText}>Payment Received!</Text>
+                  <Text style={styles.qrSubText}>Processing your order...</Text>
+                </View>
+              </View>
+            )}
+          </View>
+
+          <View style={styles.qrModalFooter}>
+            <TouchableOpacity
+              style={styles.qrCancelButton}
+              onPress={() => setShowQRModal(false)}
+            >
+              <Text style={styles.qrCancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+            
+            {qrPaymentStatus === 'waiting' && (
+              <TouchableOpacity
+                style={styles.qrTestButton}
+                onPress={() => {
+                  // Simulate successful payment for demo
+                  setQRPaymentStatus('completed');
+                  setTimeout(() => {
+                    setShowQRModal(false);
+                    handleProcessPayment();
+                  }, 2000);
+                }}
+              >
+                <Text style={styles.qrTestButtonText}>Simulate Payment</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+      </View>
     </Modal>
   );
 
@@ -590,6 +757,9 @@ const EnhancedPaymentScreen: React.FC = () => {
 
       {/* Cash Payment Modal */}
       <CashPaymentModal />
+      
+      {/* QR Payment Modal */}
+      <QRPaymentModal />
     </View>
   );
 };
@@ -1037,6 +1207,173 @@ const styles = StyleSheet.create({
   },
   cashConfirmButtonText: {
     fontSize: 18,
+    fontWeight: '600',
+    color: Colors.white,
+  },
+  
+  // QR Modal Styles
+  qrModalContent: {
+    backgroundColor: Colors.white,
+    borderRadius: 16,
+    width: '95%',
+    maxWidth: 450,
+    maxHeight: '85%',
+  },
+  qrModalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  qrModalTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: Colors.text,
+  },
+  qrModalBody: {
+    padding: 20,
+    maxHeight: 500,
+  },
+  qrSection: {
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  qrLoadingContainer: {
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  qrCodeContainer: {
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  qrCodePlaceholder: {
+    width: 180,
+    height: 180,
+    backgroundColor: Colors.background,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+    borderWidth: 2,
+    borderColor: Colors.primary,
+  },
+  qrCodeText: {
+    fontSize: 16,
+    color: Colors.text,
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  qrOrderId: {
+    fontSize: 14,
+    color: Colors.lightText,
+    fontFamily: 'monospace',
+  },
+  qrStatusText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: Colors.text,
+    textAlign: 'center',
+    marginTop: 16,
+  },
+  qrSubText: {
+    fontSize: 14,
+    color: Colors.lightText,
+    textAlign: 'center',
+    marginTop: 8,
+  },
+  qrInstructions: {
+    backgroundColor: Colors.background,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    width: '100%',
+  },
+  instructionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.text,
+    marginBottom: 12,
+  },
+  instructionText: {
+    fontSize: 14,
+    color: Colors.lightText,
+    marginBottom: 6,
+    paddingLeft: 8,
+  },
+  paymentBenefits: {
+    backgroundColor: Colors.background,
+    borderRadius: 12,
+    padding: 16,
+    width: '100%',
+  },
+  benefitsTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.text,
+    marginBottom: 12,
+  },
+  benefitRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  benefitText: {
+    fontSize: 14,
+    color: Colors.text,
+    marginLeft: 8,
+  },
+  qrErrorContainer: {
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  qrSuccessContainer: {
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  regenerateButton: {
+    backgroundColor: Colors.primary,
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    marginTop: 16,
+  },
+  regenerateButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.white,
+  },
+  qrModalFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 20,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+  },
+  qrCancelButton: {
+    flex: 1,
+    backgroundColor: Colors.background,
+    borderRadius: 8,
+    paddingVertical: 12,
+    alignItems: 'center',
+    marginRight: 8,
+  },
+  qrCancelButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.text,
+  },
+  qrTestButton: {
+    flex: 1,
+    backgroundColor: Colors.primary,
+    borderRadius: 8,
+    paddingVertical: 12,
+    alignItems: 'center',
+    marginLeft: 8,
+  },
+  qrTestButtonText: {
+    fontSize: 16,
     fontWeight: '600',
     color: Colors.white,
   },
