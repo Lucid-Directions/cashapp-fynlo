@@ -14,6 +14,13 @@ from pydantic import BaseModel, EmailStr
 from app.core.database import get_db, User
 from app.core.config import settings
 from app.core.redis_client import get_redis, RedisClient
+from app.core.responses import APIResponseHelper, iOSResponseHelper
+from app.core.exceptions import (
+    AuthenticationException,
+    ValidationException,
+    ConflictException,
+    iOSErrorHelper
+)
 
 router = APIRouter()
 security = HTTPBearer()
@@ -94,34 +101,31 @@ async def get_current_user(
     # Check if token is blacklisted in Redis
     is_blacklisted = await redis.exists(f"blacklist:{credentials.credentials}")
     if is_blacklisted:
-        raise credentials_exception
+        raise iOSErrorHelper.token_expired()
     
     user = db.query(User).filter(User.id == user_id).first()
     if user is None:
-        raise credentials_exception
+        raise AuthenticationException("User not found")
     
     if not user.is_active:
-        raise HTTPException(status_code=400, detail="Inactive user")
+        raise AuthenticationException("Account is inactive")
     
     return user
 
-@router.post("/login", response_model=Token)
+@router.post("/login")
 async def login(
     user_data: UserLogin,
     db: Session = Depends(get_db),
     redis: RedisClient = Depends(get_redis)
 ):
-    """User login"""
+    """User login with standardized iOS response"""
     user = db.query(User).filter(User.email == user_data.email).first()
     
     if not user or not verify_password(user_data.password, user.password_hash):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password"
-        )
+        raise iOSErrorHelper.invalid_credentials()
     
     if not user.is_active:
-        raise HTTPException(status_code=400, detail="Inactive user")
+        raise AuthenticationException("Account is inactive")
     
     # Update last login
     user.last_login = datetime.utcnow()
@@ -143,26 +147,35 @@ async def login(
         "login_time": datetime.utcnow().isoformat()
     })
     
-    return Token(
+    user_response = {
+        "id": str(user.id),
+        "email": user.email,
+        "first_name": user.first_name,
+        "last_name": user.last_name,
+        "role": user.role,
+        "restaurant_id": str(user.restaurant_id) if user.restaurant_id else None,
+        "platform_id": str(user.platform_id) if user.platform_id else None,
+        "is_active": user.is_active,
+        "last_login": user.last_login.isoformat() if user.last_login else None
+    }
+    
+    return iOSResponseHelper.login_success(
         access_token=access_token,
-        user_id=str(user.id),
-        role=user.role,
-        restaurant_id=str(user.restaurant_id) if user.restaurant_id else None,
-        platform_id=str(user.platform_id) if user.platform_id else None
+        user_data=user_response
     )
 
-@router.post("/register", response_model=UserResponse)
+@router.post("/register")
 async def register(
     user_data: UserRegister,
     db: Session = Depends(get_db)
 ):
-    """User registration"""
+    """User registration with standardized response"""
     # Check if user already exists
     existing_user = db.query(User).filter(User.email == user_data.email).first()
     if existing_user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email already registered"
+        raise ConflictException(
+            message="Email already registered",
+            conflicting_field="email"
         )
     
     # Create new user
@@ -181,15 +194,21 @@ async def register(
     db.commit()
     db.refresh(new_user)
     
-    return UserResponse(
-        id=str(new_user.id),
-        email=new_user.email,
-        first_name=new_user.first_name,
-        last_name=new_user.last_name,
-        role=new_user.role,
-        restaurant_id=str(new_user.restaurant_id) if new_user.restaurant_id else None,
-        platform_id=str(new_user.platform_id) if new_user.platform_id else None,
-        is_active=new_user.is_active
+    user_response = {
+        "id": str(new_user.id),
+        "email": new_user.email,
+        "first_name": new_user.first_name,
+        "last_name": new_user.last_name,
+        "role": new_user.role,
+        "restaurant_id": str(new_user.restaurant_id) if new_user.restaurant_id else None,
+        "platform_id": str(new_user.platform_id) if new_user.platform_id else None,
+        "is_active": new_user.is_active,
+        "created_at": new_user.created_at.isoformat() if hasattr(new_user, 'created_at') else None
+    }
+    
+    return APIResponseHelper.created(
+        data=user_response,
+        message="User registered successfully"
     )
 
 @router.post("/logout")
@@ -198,25 +217,31 @@ async def logout(
     current_user: User = Depends(get_current_user),
     redis: RedisClient = Depends(get_redis)
 ):
-    """User logout"""
+    """User logout with standardized response"""
     # Add token to blacklist
     await redis.set(f"blacklist:{credentials.credentials}", "1", expire=86400)  # 24 hours
     
     # Remove session
     await redis.delete_session(str(current_user.id))
     
-    return {"message": "Successfully logged out"}
+    return iOSResponseHelper.logout_success()
 
-@router.get("/me", response_model=UserResponse)
+@router.get("/me")
 async def get_current_user_info(current_user: User = Depends(get_current_user)):
-    """Get current user information"""
-    return UserResponse(
-        id=str(current_user.id),
-        email=current_user.email,
-        first_name=current_user.first_name,
-        last_name=current_user.last_name,
-        role=current_user.role,
-        restaurant_id=str(current_user.restaurant_id) if current_user.restaurant_id else None,
-        platform_id=str(current_user.platform_id) if current_user.platform_id else None,
-        is_active=current_user.is_active
+    """Get current user information with standardized response"""
+    user_data = {
+        "id": str(current_user.id),
+        "email": current_user.email,
+        "first_name": current_user.first_name,
+        "last_name": current_user.last_name,
+        "role": current_user.role,
+        "restaurant_id": str(current_user.restaurant_id) if current_user.restaurant_id else None,
+        "platform_id": str(current_user.platform_id) if current_user.platform_id else None,
+        "is_active": current_user.is_active,
+        "last_login": current_user.last_login.isoformat() if current_user.last_login else None
+    }
+    
+    return APIResponseHelper.success(
+        data=user_data,
+        message="User information retrieved successfully"
     )

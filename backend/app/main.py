@@ -15,6 +15,8 @@ from app.core.database import init_db
 from app.api.v1.api import api_router
 from app.core.redis_client import init_redis
 from app.websocket.manager import websocket_manager
+from app.core.exceptions import register_exception_handlers
+from app.core.responses import APIResponseHelper
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -62,6 +64,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Register standardized exception handlers
+register_exception_handlers(app)
+
 # Include API routes
 app.include_router(api_router, prefix="/api/v1")
 
@@ -80,22 +85,29 @@ app.websocket("/ws/management/{restaurant_id}")(management_websocket_endpoint)
 
 @app.get("/")
 async def root():
-    """Health check endpoint"""
-    return {
-        "message": "Fynlo POS Backend API",
-        "version": "1.0.0",
-        "status": "healthy"
-    }
+    """Health check endpoint with standardized response"""
+    return APIResponseHelper.success(
+        data={
+            "service": "Fynlo POS Backend API",
+            "version": "1.0.0",
+            "status": "healthy"
+        },
+        message="Fynlo POS API is running"
+    )
 
 @app.get("/health")
 async def health_check():
-    """Detailed health check"""
-    return {
-        "status": "healthy",
-        "database": "connected",
-        "redis": "connected",
-        "websocket": "ready"
-    }
+    """Detailed health check with standardized response"""
+    return APIResponseHelper.success(
+        data={
+            "status": "healthy",
+            "database": "connected",
+            "redis": "connected",
+            "websocket": "ready",
+            "timestamp": datetime.utcnow().isoformat()
+        },
+        message="All systems operational"
+    )
 
 if __name__ == "__main__":
     uvicorn.run(
