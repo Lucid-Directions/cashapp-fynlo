@@ -15,6 +15,7 @@ import { generateSalesHistory, calculateBusinessMetrics, SalesData } from '../..
 import LazyLoadingWrapper from '../../components/performance/LazyLoadingWrapper';
 import { ReportCardSkeleton } from '../../components/performance/SkeletonLoader';
 import { usePerformanceMonitor, performanceUtils } from '../../hooks/usePerformanceMonitor';
+import ErrorBoundary from '../../components/ErrorBoundary';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -46,7 +47,7 @@ interface ReportCard {
   changePositive?: boolean;
 }
 
-const ReportsScreen: React.FC = () => {
+const ReportsScreenContent: React.FC = () => {
   const navigation = useNavigation();
   const [salesHistory, setSalesHistory] = useState<SalesData[]>([]);
   const [metrics, setMetrics] = useState<any>({});
@@ -617,5 +618,13 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
 });
+
+const ReportsScreen: React.FC = () => {
+  return (
+    <ErrorBoundary>
+      <ReportsScreenContent />
+    </ErrorBoundary>
+  );
+};
 
 export default ReportsScreen;

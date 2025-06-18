@@ -12,6 +12,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import useAppStore from '../../store/useAppStore';
 import Logo from '../../components/Logo';
+import ErrorBoundary from '../../components/ErrorBoundary';
 
 const Colors = {
   primary: '#2C3E50',
@@ -24,7 +25,7 @@ const Colors = {
   lightText: '#95A5A6',
 };
 
-const ProfileScreen: React.FC = () => {
+const ProfileScreenContent: React.FC = () => {
   const { user, session } = useAppStore();
 
   const InfoCard = ({ 
@@ -107,17 +108,19 @@ const ProfileScreen: React.FC = () => {
                 <View style={styles.sessionItem}>
                   <Text style={styles.sessionLabel}>Started</Text>
                   <Text style={styles.sessionValue}>
-                    {session.startTime.toLocaleTimeString()}
+                    {session.startTime instanceof Date 
+                      ? session.startTime.toLocaleTimeString()
+                      : new Date(session.startTime).toLocaleTimeString()}
                   </Text>
                 </View>
                 <View style={styles.sessionItem}>
                   <Text style={styles.sessionLabel}>Orders</Text>
-                  <Text style={styles.sessionValue}>{session.ordersCount}</Text>
+                  <Text style={styles.sessionValue}>{session.ordersCount || 0}</Text>
                 </View>
                 <View style={styles.sessionItem}>
                   <Text style={styles.sessionLabel}>Total Sales</Text>
                   <Text style={styles.sessionValue}>
-                    £{session.totalSales.toFixed(2)}
+                    £{(session.totalSales || 0).toFixed(2)}
                   </Text>
                 </View>
               </View>
@@ -301,5 +304,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 });
+
+const ProfileScreen: React.FC = () => {
+  return (
+    <ErrorBoundary>
+      <ProfileScreenContent />
+    </ErrorBoundary>
+  );
+};
 
 export default ProfileScreen;

@@ -30,6 +30,7 @@ import PricingDiscountsScreen from '../screens/settings/app/PricingDiscountsScre
 import BackupRestoreScreen from '../screens/settings/app/BackupRestoreScreen';
 import DataExportScreen from '../screens/settings/app/DataExportScreen';
 import SystemDiagnosticsScreen from '../screens/settings/app/SystemDiagnosticsScreen';
+import DeveloperSettingsScreen from '../screens/settings/DeveloperSettingsScreen';
 
 export type SettingsStackParamList = {
   Settings: undefined;
@@ -65,6 +66,7 @@ export type SettingsStackParamList = {
   BackupRestore: undefined;
   DataExport: undefined;
   SystemDiagnostics: undefined;
+  DeveloperSettings: undefined;
 };
 
 const Stack = createStackNavigator<SettingsStackParamList>();
@@ -239,6 +241,10 @@ const SettingsNavigator: React.FC = () => {
       <Stack.Screen 
         name="SystemDiagnostics" 
         component={SystemDiagnosticsScreen} 
+      />
+      <Stack.Screen 
+        name="DeveloperSettings" 
+        component={DeveloperSettingsScreen} 
       />
     </Stack.Navigator>
   );

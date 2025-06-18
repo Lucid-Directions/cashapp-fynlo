@@ -233,6 +233,13 @@ const SettingsScreen: React.FC = () => {
           icon: 'bug-report',
           route: 'SystemDiagnostics',
         },
+        ...__DEV__ ? [{
+          id: 'developer-settings',
+          title: 'Developer Settings',
+          description: 'Mock data, API toggles, and debug options',
+          icon: 'developer-mode',
+          route: 'DeveloperSettings',
+        }] : [],
       ],
     },
   ];
