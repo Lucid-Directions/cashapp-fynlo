@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import {
   StyleSheet,
   Text,
@@ -12,6 +12,9 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import { generateSalesHistory, calculateBusinessMetrics, SalesData } from '../../utils/mockDataGenerator';
+import LazyLoadingWrapper from '../../components/performance/LazyLoadingWrapper';
+import { ReportCardSkeleton } from '../../components/performance/SkeletonLoader';
+import { usePerformanceMonitor, performanceUtils } from '../../hooks/usePerformanceMonitor';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -48,6 +51,13 @@ const ReportsScreen: React.FC = () => {
   const [salesHistory, setSalesHistory] = useState<SalesData[]>([]);
   const [metrics, setMetrics] = useState<any>({});
   const [selectedPeriod, setSelectedPeriod] = useState('month');
+
+  // Performance monitoring
+  const performanceMetrics = usePerformanceMonitor({
+    componentName: 'ReportsScreen',
+    enableMemoryTracking: true,
+    logToConsole: __DEV__,
+  });
 
   useEffect(() => {
     loadReportsData();

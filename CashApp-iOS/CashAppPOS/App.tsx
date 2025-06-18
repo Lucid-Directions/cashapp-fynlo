@@ -6,6 +6,7 @@
 import React, { useEffect, useState } from 'react';
 import { LogBox, View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import 'react-native-gesture-handler';
+import { AuthProvider } from './src/contexts/AuthContext';
 import AppNavigator from './src/navigation/AppNavigator';
 
 // Suppress specific warnings for development
@@ -56,7 +57,11 @@ const App: React.FC = () => {
     );
   }
 
-  return <AppNavigator />;
+  return (
+    <AuthProvider>
+      <AppNavigator />
+    </AuthProvider>
+  );
 };
 
 const styles = StyleSheet.create({
