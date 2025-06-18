@@ -13,10 +13,16 @@ from contextlib import asynccontextmanager
 from app.core.config import settings
 from app.core.database import init_db
 from app.api.v1.api import api_router
+from app.api.mobile.endpoints import router as mobile_router
 from app.core.redis_client import init_redis
 from app.websocket.manager import websocket_manager
 from app.core.exceptions import register_exception_handlers
 from app.core.responses import APIResponseHelper
+from app.core.mobile_middleware import (
+    MobileCompatibilityMiddleware,
+    MobileDataOptimizationMiddleware
+)
+from datetime import datetime
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -64,11 +70,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Add mobile compatibility middleware
+app.add_middleware(MobileCompatibilityMiddleware, enable_cors=True, enable_port_redirect=True)
+app.add_middleware(MobileDataOptimizationMiddleware)
+
 # Register standardized exception handlers
 register_exception_handlers(app)
 
 # Include API routes
 app.include_router(api_router, prefix="/api/v1")
+
+# Include mobile-optimized routes (both prefixed and Odoo-style)
+app.include_router(mobile_router, prefix="/api/mobile", tags=["mobile"])
+app.include_router(mobile_router, prefix="", tags=["mobile-compatibility"])  # For Odoo-style endpoints
 
 # WebSocket routes
 from app.websocket.endpoints import (
