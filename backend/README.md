@@ -230,9 +230,9 @@ docker run -p 8000:8000 fynlo-pos-backend
 ## 📚 Documentation
 
 ### **For Developers**
-- **[docs/RYAN_BACKEND_HANDOVER.md](./docs/RYAN_BACKEND_HANDOVER.md)** - Complete backend development guide
-- **[docs/BACKEND_INTEGRATION_STATUS.md](./docs/BACKEND_INTEGRATION_STATUS.md)** - Current implementation status
-- **[docs/README.md](./docs/README.md)** - Documentation index
+- **[RYAN DOCS/RYAN_BACKEND_HANDOVER.md](./RYAN%20DOCS/RYAN_BACKEND_HANDOVER.md)** - Complete backend development guide
+- **[RYAN DOCS/BACKEND_INTEGRATION_STATUS.md](./RYAN%20DOCS/BACKEND_INTEGRATION_STATUS.md)** - Current implementation status
+- **[RYAN DOCS/README.md](./RYAN%20DOCS/README.md)** - Documentation index
 
 ### **For Project Management**
 - **Current Status**: 85% Complete - Production Ready Foundation

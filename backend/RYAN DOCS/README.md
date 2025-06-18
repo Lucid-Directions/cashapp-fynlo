@@ -30,6 +30,11 @@ Welcome to the Fynlo POS backend documentation directory. This contains all tech
   - FRONTEND_IMPLEMENTATION_PLAN.md - iOS frontend requirements
   - Integration guides and technical specifications
 
+### **📋 Archived Documentation**
+- **[../../Archived Docs/](../../Archived%20Docs/)** - Historical project documentation
+  - Previous implementation reports and phase documentation
+  - Legacy planning documents and completion summaries
+
 ## 🚀 **Quick Navigation**
 
 ### **For New Backend Developers**
