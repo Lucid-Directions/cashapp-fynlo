@@ -13,6 +13,8 @@ from datetime import datetime
 from app.core.database import get_db, Product, Category
 from app.api.v1.endpoints.auth import get_current_user, User
 from app.core.redis_client import get_redis, RedisClient
+from app.core.responses import APIResponseHelper
+from app.core.exceptions import FynloException, ErrorCodes
 
 router = APIRouter()
 
@@ -128,7 +130,10 @@ async def get_categories(
     # Cache for 5 minutes
     await redis.set(f"categories:{restaurant_id}", result, expire=300)
     
-    return result
+    return APIResponseHelper.success(
+        data=result,
+        message=f"Retrieved {len(result)} categories"
+    )
 
 @router.post("/categories", response_model=CategoryResponse)
 async def create_category(
@@ -161,7 +166,7 @@ async def create_category(
     await redis.delete(f"categories:{restaurant_id}")
     await redis.delete(f"menu:{restaurant_id}")
     
-    return CategoryResponse(
+    category_response = CategoryResponse(
         id=str(new_category.id),
         name=new_category.name,
         description=new_category.description,
@@ -170,6 +175,11 @@ async def create_category(
         sort_order=new_category.sort_order,
         is_active=new_category.is_active,
         created_at=new_category.created_at
+    )
+    
+    return APIResponseHelper.success(
+        data=category_response.dict(),
+        message=f"Category '{new_category.name}' created successfully"
     )
 
 # Product endpoints
@@ -230,7 +240,16 @@ async def get_products(
     # Cache for 5 minutes
     await redis.set(cache_key, result, expire=300)
     
-    return result
+    return APIResponseHelper.success(
+        data=result,
+        message=f"Retrieved {len(result)} products",
+        meta={
+            "restaurant_id": restaurant_id,
+            "category_id": category_id,
+            "active_only": active_only,
+            "total_count": len(result)
+        }
+    )
 
 @router.get("/menu", response_model=MenuResponse)
 async def get_full_menu(
@@ -301,7 +320,15 @@ async def get_full_menu(
     # Cache for 10 minutes
     await redis.cache_menu(restaurant_id, result.dict(), expire=600)
     
-    return result
+    return APIResponseHelper.success(
+        data=result.dict(),
+        message=f"Retrieved complete menu with {len(result.categories)} categories and {len(result.products)} products",
+        meta={
+            "restaurant_id": restaurant_id,
+            "categories_count": len(result.categories),
+            "products_count": len(result.products)
+        }
+    )
 
 @router.post("/", response_model=ProductResponse)
 async def create_product(

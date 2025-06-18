@@ -4,7 +4,7 @@ API Router for Fynlo POS Backend
 
 from fastapi import APIRouter
 
-from app.api.v1.endpoints import auth, restaurants, products, orders, payments, customers, analytics
+from app.api.v1.endpoints import auth, restaurants, products, orders, payments, customers, analytics, files
 
 api_router = APIRouter()
 
@@ -16,3 +16,4 @@ api_router.include_router(orders.router, prefix="/orders", tags=["orders"])
 api_router.include_router(payments.router, prefix="/payments", tags=["payments"])
 api_router.include_router(customers.router, prefix="/customers", tags=["customers"])
 api_router.include_router(analytics.router, prefix="/analytics", tags=["analytics"])
+api_router.include_router(files.router, prefix="/files", tags=["file_upload"])
