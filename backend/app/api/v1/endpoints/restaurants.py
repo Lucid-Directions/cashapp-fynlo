@@ -11,6 +11,8 @@ from datetime import datetime, timedelta
 
 from app.core.database import get_db, Restaurant, Platform, User, Order, Customer
 from app.api.v1.endpoints.auth import get_current_user
+from app.core.responses import APIResponseHelper
+from app.core.exceptions import FynloException, ErrorCodes
 
 router = APIRouter()
 
@@ -95,7 +97,7 @@ async def get_restaurants(
             Restaurant.id == current_user.restaurant_id
         ).all()
     
-    return [
+    result = [
         RestaurantResponse(
             id=str(restaurant.id),
             platform_id=str(restaurant.platform_id) if restaurant.platform_id else None,
@@ -114,6 +116,16 @@ async def get_restaurants(
         )
         for restaurant in restaurants
     ]
+    
+    return APIResponseHelper.success(
+        data=result,
+        message=f"Retrieved {len(result)} restaurants",
+        meta={
+            "user_role": current_user.role,
+            "platform_id": platform_id,
+            "active_only": active_only
+        }
+    )
 
 @router.get("/current", response_model=RestaurantResponse)
 async def get_current_restaurant(

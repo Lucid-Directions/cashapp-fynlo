@@ -13,6 +13,8 @@ import uuid
 from app.core.database import get_db, Order, Product
 from app.api.v1.endpoints.auth import get_current_user, User
 from app.core.redis_client import get_redis, RedisClient
+from app.core.responses import APIResponseHelper
+from app.core.exceptions import FynloException, ErrorCodes
 from app.websocket.manager import websocket_manager
 
 router = APIRouter()
@@ -120,7 +122,7 @@ async def get_orders(
     
     orders = query.order_by(desc(Order.created_at)).offset(offset).limit(limit).all()
     
-    return [
+    result = [
         OrderSummary(
             id=str(order.id),
             order_number=order.order_number,
@@ -132,6 +134,20 @@ async def get_orders(
         )
         for order in orders
     ]
+    
+    return APIResponseHelper.success(
+        data=result,
+        message=f"Retrieved {len(result)} orders",
+        meta={
+            "total_count": len(result),
+            "filters": {
+                "status": status,
+                "order_type": order_type,
+                "date_range": f"{date_from} to {date_to}" if date_from or date_to else None
+            },
+            "pagination": {"limit": limit, "offset": offset}
+        }
+    )
 
 @router.get("/today", response_model=List[OrderSummary])
 async def get_todays_orders(
@@ -180,7 +196,15 @@ async def get_todays_orders(
     # Cache for 1 minute (frequent updates expected)
     await redis.set(cache_key, result, expire=60)
     
-    return result
+    return APIResponseHelper.success(
+        data=result,
+        message=f"Retrieved {len(result)} active orders for today",
+        meta={
+            "restaurant_id": restaurant_id,
+            "date": today_start.date().isoformat(),
+            "active_statuses": ["pending", "confirmed", "preparing", "ready"]
+        }
+    )
 
 @router.post("/", response_model=OrderResponse)
 async def create_order(
@@ -296,7 +320,12 @@ async def get_order(
     
     order = db.query(Order).filter(Order.id == order_id).first()
     if not order:
-        raise HTTPException(status_code=404, detail="Order not found")
+        raise FynloException(
+            message="Order not found",
+            error_code=ErrorCodes.NOT_FOUND,
+            details={"order_id": order_id},
+            status_code=404
+        )
     
     return OrderResponse(
         id=str(order.id),
@@ -331,7 +360,12 @@ async def update_order(
     
     order = db.query(Order).filter(Order.id == order_id).first()
     if not order:
-        raise HTTPException(status_code=404, detail="Order not found")
+        raise FynloException(
+            message="Order not found",
+            error_code=ErrorCodes.NOT_FOUND,
+            details={"order_id": order_id},
+            status_code=404
+        )
     
     # Update fields if provided
     update_data = order_data.dict(exclude_unset=True)
@@ -406,10 +440,20 @@ async def confirm_order(
     
     order = db.query(Order).filter(Order.id == order_id).first()
     if not order:
-        raise HTTPException(status_code=404, detail="Order not found")
+        raise FynloException(
+            message="Order not found",
+            error_code=ErrorCodes.NOT_FOUND,
+            details={"order_id": order_id},
+            status_code=404
+        )
     
     if order.status != "pending":
-        raise HTTPException(status_code=400, detail="Order cannot be confirmed")
+        raise FynloException(
+            message=f"Order cannot be confirmed - current status: {order.status}",
+            error_code=ErrorCodes.VALIDATION_ERROR,
+            details={"current_status": order.status, "required_status": "pending"},
+            status_code=400
+        )
     
     order.status = "confirmed"
     order.updated_at = datetime.utcnow()
@@ -438,7 +482,10 @@ async def confirm_order(
         "special_instructions": order.special_instructions
     })
     
-    return {"message": "Order confirmed", "status": order.status}
+    return APIResponseHelper.success(
+        data={"order_id": str(order.id), "status": order.status},
+        message=f"Order {order.order_number} confirmed for kitchen preparation"
+    )
 
 @router.post("/{order_id}/cancel")
 async def cancel_order(
@@ -452,10 +499,20 @@ async def cancel_order(
     
     order = db.query(Order).filter(Order.id == order_id).first()
     if not order:
-        raise HTTPException(status_code=404, detail="Order not found")
+        raise FynloException(
+            message="Order not found",
+            error_code=ErrorCodes.NOT_FOUND,
+            details={"order_id": order_id},
+            status_code=404
+        )
     
     if order.status in ["completed", "cancelled"]:
-        raise HTTPException(status_code=400, detail="Order cannot be cancelled")
+        raise FynloException(
+            message=f"Order cannot be cancelled - current status: {order.status}",
+            error_code=ErrorCodes.VALIDATION_ERROR,
+            details={"current_status": order.status, "invalid_statuses": ["completed", "cancelled"]},
+            status_code=400
+        )
     
     order.status = "cancelled"
     order.updated_at = datetime.utcnow()
@@ -480,4 +537,7 @@ async def cancel_order(
         "reason": reason
     })
     
-    return {"message": "Order cancelled", "status": order.status}
+    return APIResponseHelper.success(
+        data={"order_id": str(order.id), "status": order.status, "reason": reason},
+        message=f"Order {order.order_number} cancelled successfully"
+    )
