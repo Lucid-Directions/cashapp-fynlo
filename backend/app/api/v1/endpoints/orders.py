@@ -15,7 +15,7 @@ from app.api.v1.endpoints.auth import get_current_user, User
 from app.core.redis_client import get_redis, RedisClient
 from app.core.responses import APIResponseHelper
 from app.core.exceptions import FynloException, ErrorCodes
-from app.websocket.manager import websocket_manager
+from app.core.websocket import websocket_manager
 
 router = APIRouter()
 
