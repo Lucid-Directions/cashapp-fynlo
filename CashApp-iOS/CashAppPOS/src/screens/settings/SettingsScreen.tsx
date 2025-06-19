@@ -242,6 +242,23 @@ const SettingsScreen: React.FC = () => {
         }] : [],
       ],
     },
+    {
+      id: 'integrations',
+      title: 'Integrations',
+      description: 'Connect with accounting and business tools',
+      icon: 'integration-instructions',
+      route: 'XeroSettings',
+      color: '#1271FF',
+      settings: [
+        {
+          id: 'xero-integration',
+          title: 'Xero Accounting',
+          description: 'Sync sales, customers, and products with Xero',
+          icon: 'account-balance',
+          route: 'XeroSettings',
+        },
+      ],
+    },
   ];
 
   React.useEffect(() => {
