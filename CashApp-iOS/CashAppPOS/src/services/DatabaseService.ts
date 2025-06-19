@@ -97,7 +97,7 @@ class DatabaseService {
     }
   }
 
-  // API request helper
+  // API request helper - FIXED: Handle REST API responses properly
   private async apiRequest(endpoint: string, options: RequestInit = {}): Promise<any> {
     const url = `${API_BASE_URL}${endpoint}`;
     
@@ -114,11 +114,15 @@ class DatabaseService {
         headers,
       });
 
+      const data = await response.json();
+      
+      // Handle both successful and error responses from FastAPI backend
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        // Backend returns error in standardized format
+        const errorMessage = data.message || data.detail || `HTTP error! status: ${response.status}`;
+        throw new Error(errorMessage);
       }
 
-      const data = await response.json();
       return data;
     } catch (error) {
       console.error(`API request failed for ${endpoint}:`, error);
@@ -126,24 +130,20 @@ class DatabaseService {
     }
   }
 
-  // Authentication
+  // Authentication - FIXED: Convert from JSONRPC to REST API format
   async login(username: string, password: string): Promise<boolean> {
     try {
-      const response = await this.apiRequest('/web/session/authenticate', {
+      const response = await this.apiRequest('/api/v1/auth/login', {
         method: 'POST',
         body: JSON.stringify({
-          jsonrpc: '2.0',
-          method: 'call',
-          params: {
-            db: DB_CONFIG.database,
-            login: username,
-            password: password,
-          },
+          email: username, // Backend expects email field
+          password: password,
         }),
       });
 
-      if (response.result && response.result.uid) {
-        await this.saveAuthToken(response.result.session_id);
+      // Backend returns standardized response format
+      if (response.success && response.data && response.data.access_token) {
+        await this.saveAuthToken(response.data.access_token);
         return true;
       }
       return false;
@@ -155,7 +155,7 @@ class DatabaseService {
 
   async logout(): Promise<void> {
     try {
-      await this.apiRequest('/web/session/destroy', { method: 'POST' });
+      await this.apiRequest('/api/v1/auth/logout', { method: 'POST' });
       this.authToken = null;
       await AsyncStorage.removeItem('auth_token');
     } catch (error) {
@@ -306,109 +306,99 @@ class DatabaseService {
     }
   }
 
-  // Restaurant-specific operations
+  // Restaurant-specific operations - FIXED: Convert to REST API endpoints
   async getRestaurantFloorPlan(sectionId?: string | null): Promise<any> {
     try {
       const endpoint = sectionId 
-        ? `/restaurant/floor_plan?section_id=${sectionId}`
-        : '/restaurant/floor_plan';
+        ? `/api/v1/restaurant/floor-plan?section_id=${sectionId}`
+        : '/api/v1/restaurant/floor-plan';
       
       const response = await this.apiRequest(endpoint, {
         method: 'GET',
       });
       
-      return response || { tables: [], sections: [] };
+      return response.data || this.getMockFloorPlan();
     } catch (error) {
       console.error('Failed to fetch floor plan:', error);
-      // Return mock data for development
       return this.getMockFloorPlan();
     }
   }
 
   async updateTableStatus(tableId: string, status: string, additionalData?: any): Promise<any> {
     try {
-      const response = await this.apiRequest('/restaurant/table/update_status', {
-        method: 'POST',
+      const response = await this.apiRequest(`/api/v1/restaurant/tables/${tableId}/status`, {
+        method: 'PUT',
         body: JSON.stringify({
-          table_id: tableId,
-          status,
+          status: status,
           ...additionalData,
         }),
       });
       
-      return response;
+      return response.data;
     } catch (error) {
       console.error('Failed to update table status:', error);
-      throw error;
+      return null;
     }
   }
 
   async assignServerToTable(tableId: string, serverId: string): Promise<any> {
     try {
-      const response = await this.apiRequest('/restaurant/table/assign_server', {
-        method: 'POST',
+      const response = await this.apiRequest(`/api/v1/restaurant/tables/${tableId}/server`, {
+        method: 'PUT',
         body: JSON.stringify({
-          table_id: tableId,
           server_id: serverId,
         }),
       });
       
-      return response;
+      return response.data;
     } catch (error) {
       console.error('Failed to assign server to table:', error);
-      throw error;
+      return null;
     }
   }
 
   async getRestaurantSections(): Promise<any[]> {
     try {
-      const response = await this.apiRequest('/restaurant/sections', {
+      const response = await this.apiRequest('/api/v1/restaurant/sections', {
         method: 'GET',
       });
       
-      return response.sections || [];
+      return response.data || [];
     } catch (error) {
       console.error('Failed to fetch restaurant sections:', error);
       return [];
     }
   }
 
-  // Analytics and Reporting
   async getDailySalesReport(date?: string): Promise<any> {
     try {
-      const endpoint = date 
-        ? `/pos/reports/daily_sales?date=${date}`
-        : '/pos/reports/daily_sales';
-      
-      const response = await this.apiRequest(endpoint, {
+      const queryParam = date ? `?date=${date}` : '';
+      const response = await this.apiRequest(`/api/v1/reports/daily-sales${queryParam}`, {
         method: 'GET',
       });
       
-      return response || this.getMockDailyReport();
+      return response.data || this.getMockDailyReport();
     } catch (error) {
       console.error('Failed to fetch daily sales report:', error);
-      // Return mock data for development
       return this.getMockDailyReport();
     }
   }
 
   async getSalesSummary(dateFrom?: string, dateTo?: string): Promise<any> {
     try {
-      let endpoint = '/pos/reports/sales_summary';
-      const params = [];
-      
-      if (dateFrom) params.push(`date_from=${dateFrom}`);
-      if (dateTo) params.push(`date_to=${dateTo}`);
-      
-      if (params.length > 0) {
-        endpoint += '?' + params.join('&');
+      let queryParams = '';
+      if (dateFrom || dateTo) {
+        const params = new URLSearchParams();
+        if (dateFrom) params.append('date_from', dateFrom);
+        if (dateTo) params.append('date_to', dateTo);
+        queryParams = `?${params.toString()}`;
       }
       
-      const response = await this.apiRequest(endpoint, {
+      const response = await this.apiRequest(`/api/v1/reports/sales-summary${queryParams}`, {
         method: 'GET',
       });
       
-      return response || this.getMockSalesSummary();
+      return response.data || this.getMockSalesSummary();
     } catch (error) {
       console.error('Failed to fetch sales summary:', error);
       return this.getMockSalesSummary();
