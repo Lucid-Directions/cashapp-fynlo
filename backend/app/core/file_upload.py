@@ -6,12 +6,12 @@ Handles base64 image uploads from iOS with validation and processing
 import base64
 import os
 import uuid
-# Conditional import for python-magic with fallback
+# Import python-magic with proper error handling
 try:
     import magic
     MAGIC_AVAILABLE = True
 except (ImportError, OSError):
-    # libmagic not available - use fallback detection
+    # This should not happen with python-magic-bin, but keep fallback for safety
     MAGIC_AVAILABLE = False
     print("Warning: libmagic not available. Using fallback MIME type detection.")
 from typing import Optional, Tuple, List

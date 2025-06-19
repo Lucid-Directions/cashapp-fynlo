@@ -28,7 +28,7 @@ redis==5.0.1
 # QR Code Generation & Image Processing
 qrcode[pil]==7.4.2
 Pillow==10.0.1
-python-magic==0.4.27
+python-magic-bin==0.4.14
 
 # Background Tasks
 celery==5.3.4
