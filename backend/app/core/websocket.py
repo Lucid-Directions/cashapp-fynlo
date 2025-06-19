@@ -518,7 +518,68 @@ async def notify_user_activity(user_id: str, restaurant_id: str, activity_type: 
         exclude_user_id=user_id
     )
 
-# Utility functions
+    async def broadcast_order_update(self, restaurant_id: str, order_data: Dict[str, Any]):
+        """Broadcast order update to all relevant connections"""
+        action = order_data.get("action", "updated")
+        
+        if action == "created":
+            await notify_order_created(
+                order_id=order_data["id"],
+                restaurant_id=restaurant_id,
+                order_data=order_data
+            )
+        else:
+            message = WebSocketMessage(
+                event_type=EventType.ORDER_STATUS_CHANGED,
+                data={
+                    "order_id": order_data["id"],
+                    "order_number": order_data.get("order_number"),
+                    "status": order_data.get("status"),
+                    "action": action,
+                    "total_amount": order_data.get("total_amount"),
+                    "table_number": order_data.get("table_number"),
+                    "items": order_data.get("items"),
+                    "reason": order_data.get("reason"),
+                    "updated_at": datetime.now().isoformat()
+                },
+                restaurant_id=restaurant_id,
+                connection_types=[ConnectionType.POS, ConnectionType.KITCHEN, ConnectionType.MANAGEMENT]
+            )
+            
+            await self.broadcast_to_restaurant(
+                restaurant_id,
+                message,
+                connection_types=[ConnectionType.POS, ConnectionType.KITCHEN, ConnectionType.MANAGEMENT]
+            )
+    
+    async def broadcast_kitchen_update(self, restaurant_id: str, kitchen_data: Dict[str, Any]):
+        """Broadcast kitchen update to kitchen displays and POS"""
+        message = WebSocketMessage(
+            event_type=EventType.KITCHEN_UPDATE,
+            data={
+                "order_id": kitchen_data.get("order_id"),
+                "order_number": kitchen_data.get("order_number"),
+                "status": kitchen_data.get("status"),
+                "action": kitchen_data.get("action", "new_order"),
+                "items": kitchen_data.get("items"),
+                "table_number": kitchen_data.get("table_number"),
+                "special_instructions": kitchen_data.get("special_instructions"),
+                "updated_at": datetime.now().isoformat()
+            },
+            restaurant_id=restaurant_id,
+            connection_types=[ConnectionType.KITCHEN, ConnectionType.POS]
+        )
+        
+        await self.broadcast_to_restaurant(
+            restaurant_id,
+            message,
+            connection_types=[ConnectionType.KITCHEN, ConnectionType.POS]
+        )
+
+# Global WebSocket manager instance
+websocket_manager = WebSocketManager()
+
+# Utility functions  
 def get_websocket_manager() -> WebSocketManager:
     """Get the global WebSocket manager instance"""
     return websocket_manager
