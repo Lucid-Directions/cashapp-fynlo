@@ -15,7 +15,14 @@ from app.api.v1.endpoints.auth import get_current_user, User
 from app.core.redis_client import get_redis, RedisClient
 from app.core.responses import APIResponseHelper
 from app.core.exceptions import FynloException, ErrorCodes
-from app.core.websocket import websocket_manager
+from app.core.websocket import (
+    websocket_manager, 
+    notify_order_created, 
+    notify_order_status_changed, 
+    notify_kitchen_update,
+    WebSocketMessage,
+    EventType
+)
 
 router = APIRouter()
 
@@ -272,11 +279,10 @@ async def create_order(
     await redis.delete(f"orders:today:{restaurant_id}")
     
     # Broadcast order creation to WebSocket clients
-    await websocket_manager.broadcast_order_update(restaurant_id, {
+    await notify_order_created(str(new_order.id), restaurant_id, {
         "id": str(new_order.id),
         "order_number": new_order.order_number,
         "status": new_order.status,
-        "action": "created",
         "items": new_order.items,
         "total_amount": new_order.total_amount,
         "table_number": new_order.table_number
@@ -397,16 +403,21 @@ async def update_order(
     restaurant_id = str(order.restaurant_id)
     await redis.delete(f"orders:today:{restaurant_id}")
     
-    # Broadcast order update
-    await websocket_manager.broadcast_order_update(restaurant_id, {
-        "id": str(order.id),
-        "order_number": order.order_number,
-        "status": order.status,
-        "action": "updated",
-        "items": order.items,
-        "total_amount": order.total_amount,
-        "table_number": order.table_number
-    })
+    # Broadcast order update via WebSocket
+    message = WebSocketMessage(
+        event_type=EventType.ORDER_STATUS_CHANGED,
+        data={
+            "id": str(order.id),
+            "order_number": order.order_number,
+            "status": order.status,
+            "action": "updated",
+            "items": order.items,
+            "total_amount": order.total_amount,
+            "table_number": order.table_number
+        },
+        target_restaurant=restaurant_id
+    )
+    await websocket_manager.broadcast_to_restaurant(restaurant_id, message)
     
     return OrderResponse(
         id=str(order.id),
@@ -472,11 +483,11 @@ async def confirm_order(
     restaurant_id = str(order.restaurant_id)
     await redis.delete(f"orders:today:{restaurant_id}")
     
-    await websocket_manager.broadcast_kitchen_update(restaurant_id, {
+    # Send kitchen notification
+    await notify_kitchen_update(str(order.id), restaurant_id, "new_order", {
         "order_id": str(order.id),
         "order_number": order.order_number,
         "status": "confirmed",
-        "action": "new_order",
         "items": order.items,
         "table_number": order.table_number,
         "special_instructions": order.special_instructions
@@ -514,6 +525,8 @@ async def cancel_order(
             status_code=400
         )
     
+    # Capture original status for notification
+    original_status = order.status
     order.status = "cancelled"
     order.updated_at = datetime.utcnow()
     
@@ -529,11 +542,10 @@ async def cancel_order(
     await redis.delete(f"order:{order_id}")
     
     # Broadcast cancellation
-    await websocket_manager.broadcast_order_update(restaurant_id, {
+    await notify_order_status_changed(str(order.id), restaurant_id, original_status, "cancelled", {
         "id": str(order.id),
         "order_number": order.order_number,
         "status": "cancelled",
-        "action": "cancelled",
         "reason": reason
     })
     
