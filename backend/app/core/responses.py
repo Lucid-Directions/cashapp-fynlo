@@ -277,6 +277,7 @@ class ErrorCodes:
     """Standardized error codes for iOS app handling"""
     
     # Authentication errors
+    AUTHENTICATION_ERROR = "AUTHENTICATION_ERROR"
     INVALID_CREDENTIALS = "INVALID_CREDENTIALS"
     TOKEN_EXPIRED = "TOKEN_EXPIRED"
     TOKEN_INVALID = "TOKEN_INVALID"
