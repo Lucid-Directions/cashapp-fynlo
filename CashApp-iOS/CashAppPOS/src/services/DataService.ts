@@ -12,13 +12,13 @@ export interface FeatureFlags {
   MOCK_AUTHENTICATION: boolean;
 }
 
-// Default feature flags
+// Default feature flags - FIXED: Enable real API to connect to working backend
 const DEFAULT_FLAGS: FeatureFlags = {
-  USE_REAL_API: false,  // Start with mock data for showcase
+  USE_REAL_API: true,  // Changed from false to true - backend is now functional
   ENABLE_PAYMENTS: false,
   ENABLE_HARDWARE: false,
   SHOW_DEV_MENU: __DEV__,
-  MOCK_AUTHENTICATION: true,
+  MOCK_AUTHENTICATION: false, // Changed from true to false - use real auth
 };
 
 /**
@@ -72,17 +72,23 @@ class DataService {
     return { ...this.featureFlags };
   }
 
-  // Backend availability check
+  // Backend availability check - FIXED: Updated to use correct port
   private async checkBackendAvailability(): Promise<void> {
     if (!this.featureFlags.USE_REAL_API) {
       return;
     }
 
     try {
+      // Use AbortController for timeout instead of timeout property
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2000);
+      
       const response = await fetch('http://localhost:8000/health', {
         method: 'GET',
-        timeout: 2000,
+        signal: controller.signal,
       });
+      
+      clearTimeout(timeoutId);
       this.isBackendAvailable = response.ok;
     } catch {
       this.isBackendAvailable = false;

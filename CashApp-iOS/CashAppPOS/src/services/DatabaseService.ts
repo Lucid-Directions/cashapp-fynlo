@@ -1,14 +1,14 @@
 // DatabaseService.ts - Mobile database API service for CashApp POS
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Database configuration
-const API_BASE_URL = 'http://localhost:8069'; // CashApp backend URL
+// Database configuration - FIXED: Updated to match FastAPI backend
+const API_BASE_URL = 'http://localhost:8000'; // Updated from 8069 to 8000 to match FastAPI backend
 const DB_CONFIG = {
   host: 'localhost',
-  port: 6432, // pgbouncer port for connection pooling
-  database: 'cashapp_mobile',
-  user: 'cashapp_user',
-  password: 'cashapp_mobile_password',
+  port: 5432, // Updated from 6432 to 5432 for direct PostgreSQL connection
+  database: 'fynlo_pos', // Updated from 'cashapp_mobile' to match backend database name
+  user: 'fynlo_user', // Updated from 'cashapp_user' to match backend user
+  password: 'fynlo_password', // Updated to match backend password
 };
 
 // Types for our data models
