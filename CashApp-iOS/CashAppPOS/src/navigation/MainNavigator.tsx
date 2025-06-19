@@ -5,7 +5,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { MainTabParamList, MainStackParamList } from '../types';
 import POSScreen from '../screens/main/POSScreen';
 import OrdersScreen from '../screens/orders/OrdersScreen';
-import ReportsScreen from '../screens/reports/ReportsScreen';
+import ReportsScreen from '../screens/reports/ReportsScreenSimple';
 import MoreScreen from '../screens/more/MoreScreen';
 import EmployeesScreen from '../screens/employees/EmployeesScreen';
 import CustomersScreen from '../screens/customers/CustomersScreen';
