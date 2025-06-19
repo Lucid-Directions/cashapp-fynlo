@@ -4,6 +4,7 @@ Clean FastAPI implementation for hardware-free restaurant management
 """
 
 from fastapi import FastAPI, Depends, HTTPException, status
+from datetime import datetime
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer
 import uvicorn
@@ -15,7 +16,7 @@ from app.core.database import init_db
 from app.api.v1.api import api_router
 from app.api.mobile.endpoints import router as mobile_router
 from app.core.redis_client import init_redis
-from app.websocket.manager import websocket_manager
+from app.core.websocket import websocket_manager
 from app.core.exceptions import register_exception_handlers
 from app.core.responses import APIResponseHelper
 from app.core.mobile_middleware import (
@@ -43,15 +44,13 @@ async def lifespan(app: FastAPI):
     await init_redis()
     logger.info("✅ Redis connected")
     
-    # Initialize WebSocket manager
-    await websocket_manager.initialize()
+    # WebSocket manager is ready (no initialization needed)
     logger.info("✅ WebSocket manager ready")
     
     yield
     
     # Cleanup on shutdown
     logger.info("🔄 Shutting down Fynlo POS Backend...")
-    await websocket_manager.cleanup()
     logger.info("✅ Cleanup complete")
 
 app = FastAPI(
@@ -84,18 +83,7 @@ app.include_router(api_router, prefix="/api/v1")
 app.include_router(mobile_router, prefix="/api/mobile", tags=["mobile"])
 app.include_router(mobile_router, prefix="", tags=["mobile-compatibility"])  # For Odoo-style endpoints
 
-# WebSocket routes
-from app.websocket.endpoints import (
-    websocket_endpoint,
-    kitchen_websocket_endpoint,
-    pos_websocket_endpoint,
-    management_websocket_endpoint
-)
-
-app.websocket("/ws/{restaurant_id}")(websocket_endpoint)
-app.websocket("/ws/kitchen/{restaurant_id}")(kitchen_websocket_endpoint)
-app.websocket("/ws/pos/{restaurant_id}")(pos_websocket_endpoint)
-app.websocket("/ws/management/{restaurant_id}")(management_websocket_endpoint)
+# WebSocket routes are handled through the websocket router in api.py
 
 @app.get("/")
 async def root():

@@ -1,18 +1,20 @@
 """
-Analytics and reporting endpoints for Fynlo POS
+Enhanced Analytics and reporting endpoints for Fynlo POS
+Real-time dashboard metrics optimized for mobile consumption
 """
 
-from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, Query
+from typing import List, Optional, Dict, Any
+from fastapi import APIRouter, Depends, HTTPException, Query, Path
 from sqlalchemy.orm import Session
 from sqlalchemy import func, and_, desc
 from datetime import datetime, timedelta
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from app.core.database import get_db, Order, Customer, User, Restaurant
 from app.api.v1.endpoints.auth import get_current_user
 from app.core.responses import APIResponseHelper
 from app.core.exceptions import FynloException, ErrorCodes
+from app.core.analytics_engine import get_analytics_engine, AnalyticsTimeframe
 
 router = APIRouter()
 
@@ -55,14 +57,103 @@ class AnalyticsDashboard(BaseModel):
     peak_hours: List[dict]
     top_products: List[dict]
 
+@router.get("/dashboard/overview")
+async def get_enhanced_dashboard_overview(
+    timeframe: str = Query("day", description="Timeframe: hour, day, week, month, quarter, year"),
+    start_date: Optional[str] = Query(None, description="Custom start date (ISO format)"),
+    end_date: Optional[str] = Query(None, description="Custom end date (ISO format)"),
+    restaurant_id: Optional[str] = Query(None, description="Specific restaurant ID (platform owners)"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Get enhanced dashboard overview with real-time metrics
+    Optimized for mobile consumption with comprehensive analytics
+    """
+    try:
+        # Determine restaurant scope
+        if current_user.role == "platform_owner":
+            target_restaurant_id = restaurant_id or str(current_user.restaurant_id)
+        else:
+            target_restaurant_id = str(current_user.restaurant_id)
+        
+        if not target_restaurant_id:
+            raise FynloException(
+                message="Restaurant context required",
+                error_code=ErrorCodes.VALIDATION_ERROR,
+                status_code=400
+            )
+        
+        # Parse dates if provided
+        parsed_start_date = None
+        parsed_end_date = None
+        
+        if start_date:
+            try:
+                parsed_start_date = datetime.fromisoformat(start_date.replace("Z", "+00:00"))
+            except ValueError:
+                raise FynloException(
+                    message="Invalid start_date format",
+                    error_code=ErrorCodes.VALIDATION_ERROR,
+                    status_code=400
+                )
+        
+        if end_date:
+            try:
+                parsed_end_date = datetime.fromisoformat(end_date.replace("Z", "+00:00"))
+            except ValueError:
+                raise FynloException(
+                    message="Invalid end_date format",
+                    error_code=ErrorCodes.VALIDATION_ERROR,
+                    status_code=400
+                )
+        
+        # Validate timeframe
+        try:
+            analytics_timeframe = AnalyticsTimeframe(timeframe)
+        except ValueError:
+            raise FynloException(
+                message=f"Invalid timeframe: {timeframe}",
+                error_code=ErrorCodes.VALIDATION_ERROR,
+                status_code=400
+            )
+        
+        # Get analytics engine and generate dashboard
+        analytics_engine = get_analytics_engine(db)
+        dashboard_data = analytics_engine.get_dashboard_overview(
+            restaurant_id=target_restaurant_id,
+            timeframe=analytics_timeframe,
+            start_date=parsed_start_date,
+            end_date=parsed_end_date
+        )
+        
+        return APIResponseHelper.success(
+            data=dashboard_data,
+            message="Dashboard overview retrieved successfully",
+            meta={
+                "restaurant_id": target_restaurant_id,
+                "timeframe": timeframe,
+                "mobile_optimized": True
+            }
+        )
+        
+    except FynloException:
+        raise
+    except Exception as e:
+        raise FynloException(
+            message=f"Failed to get dashboard overview: {str(e)}",
+            error_code=ErrorCodes.INTERNAL_ERROR,
+            status_code=500
+        )
+
 @router.get("/dashboard", response_model=AnalyticsDashboard)
-async def get_analytics_dashboard(
+async def get_legacy_analytics_dashboard(
     restaurant_id: Optional[str] = Query(None),
     days: int = Query(30, le=365),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Get comprehensive analytics dashboard"""
+    """Get legacy analytics dashboard (maintained for backward compatibility)"""
     
     # Determine restaurant scope
     if current_user.role == "platform_owner":
@@ -235,59 +326,407 @@ async def get_analytics_dashboard(
         top_products=top_products
     )
 
-@router.get("/revenue")
-async def get_revenue_analytics(
-    period: str = Query("month", enum=["day", "week", "month", "year"]),
-    restaurant_id: Optional[str] = Query(None),
+@router.get("/sales")
+async def get_enhanced_sales_analytics(
+    timeframe: str = Query("day", description="Timeframe: hour, day, week, month, quarter, year"),
+    start_date: Optional[str] = Query(None, description="Custom start date (ISO format)"),
+    end_date: Optional[str] = Query(None, description="Custom end date (ISO format)"),
+    restaurant_id: Optional[str] = Query(None, description="Specific restaurant ID (platform owners)"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Get detailed revenue analytics"""
-    
-    # Implementation would provide detailed revenue breakdown
-    return {
-        "period": period,
-        "total_revenue": 25430.75,
-        "completed_orders": 312,
-        "average_order_value": 81.50,
-        "revenue_by_day": [],
-        "revenue_by_payment_method": {},
-        "top_revenue_items": []
-    }
+    """
+    Get enhanced sales analytics with comprehensive reporting
+    Optimized for mobile consumption with detailed sales insights
+    """
+    try:
+        # Determine restaurant scope
+        if current_user.role == "platform_owner":
+            target_restaurant_id = restaurant_id or str(current_user.restaurant_id)
+        else:
+            target_restaurant_id = str(current_user.restaurant_id)
+        
+        if not target_restaurant_id:
+            raise FynloException(
+                message="Restaurant context required",
+                error_code=ErrorCodes.VALIDATION_ERROR,
+                status_code=400
+            )
+        
+        # Parse dates if provided
+        parsed_start_date = None
+        parsed_end_date = None
+        
+        if start_date:
+            try:
+                parsed_start_date = datetime.fromisoformat(start_date.replace("Z", "+00:00"))
+            except ValueError:
+                raise FynloException(
+                    message="Invalid start_date format",
+                    error_code=ErrorCodes.VALIDATION_ERROR,
+                    status_code=400
+                )
+        
+        if end_date:
+            try:
+                parsed_end_date = datetime.fromisoformat(end_date.replace("Z", "+00:00"))
+            except ValueError:
+                raise FynloException(
+                    message="Invalid end_date format",
+                    error_code=ErrorCodes.VALIDATION_ERROR,
+                    status_code=400
+                )
+        
+        # Validate timeframe
+        try:
+            analytics_timeframe = AnalyticsTimeframe(timeframe)
+        except ValueError:
+            raise FynloException(
+                message=f"Invalid timeframe: {timeframe}",
+                error_code=ErrorCodes.VALIDATION_ERROR,
+                status_code=400
+            )
+        
+        # Get analytics engine and generate sales data
+        analytics_engine = get_analytics_engine(db)
+        sales_data = analytics_engine.get_sales_analytics(
+            restaurant_id=target_restaurant_id,
+            timeframe=analytics_timeframe,
+            start_date=parsed_start_date,
+            end_date=parsed_end_date
+        )
+        
+        return APIResponseHelper.success(
+            data=sales_data,
+            message="Sales analytics retrieved successfully",
+            meta={
+                "restaurant_id": target_restaurant_id,
+                "timeframe": timeframe,
+                "mobile_optimized": True
+            }
+        )
+        
+    except FynloException:
+        raise
+    except Exception as e:
+        raise FynloException(
+            message=f"Failed to get sales analytics: {str(e)}",
+            error_code=ErrorCodes.INTERNAL_ERROR,
+            status_code=500
+        )
+
+@router.get("/employees")
+async def get_enhanced_employee_performance(
+    timeframe: str = Query("day", description="Timeframe: hour, day, week, month, quarter, year"),
+    start_date: Optional[str] = Query(None, description="Custom start date (ISO format)"),
+    end_date: Optional[str] = Query(None, description="Custom end date (ISO format)"),
+    restaurant_id: Optional[str] = Query(None, description="Specific restaurant ID (platform owners)"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Get enhanced employee performance analytics
+    Optimized for mobile consumption with staff productivity insights
+    """
+    try:
+        # Determine restaurant scope
+        if current_user.role == "platform_owner":
+            target_restaurant_id = restaurant_id or str(current_user.restaurant_id)
+        else:
+            target_restaurant_id = str(current_user.restaurant_id)
+        
+        if not target_restaurant_id:
+            raise FynloException(
+                message="Restaurant context required",
+                error_code=ErrorCodes.VALIDATION_ERROR,
+                status_code=400
+            )
+        
+        # Parse dates if provided
+        parsed_start_date = None
+        parsed_end_date = None
+        
+        if start_date:
+            try:
+                parsed_start_date = datetime.fromisoformat(start_date.replace("Z", "+00:00"))
+            except ValueError:
+                raise FynloException(
+                    message="Invalid start_date format",
+                    error_code=ErrorCodes.VALIDATION_ERROR,
+                    status_code=400
+                )
+        
+        if end_date:
+            try:
+                parsed_end_date = datetime.fromisoformat(end_date.replace("Z", "+00:00"))
+            except ValueError:
+                raise FynloException(
+                    message="Invalid end_date format",
+                    error_code=ErrorCodes.VALIDATION_ERROR,
+                    status_code=400
+                )
+        
+        # Validate timeframe
+        try:
+            analytics_timeframe = AnalyticsTimeframe(timeframe)
+        except ValueError:
+            raise FynloException(
+                message=f"Invalid timeframe: {timeframe}",
+                error_code=ErrorCodes.VALIDATION_ERROR,
+                status_code=400
+            )
+        
+        # Get analytics engine and generate employee performance data
+        analytics_engine = get_analytics_engine(db)
+        employee_data = analytics_engine.get_employee_performance(
+            restaurant_id=target_restaurant_id,
+            timeframe=analytics_timeframe,
+            start_date=parsed_start_date,
+            end_date=parsed_end_date
+        )
+        
+        return APIResponseHelper.success(
+            data=employee_data,
+            message="Employee performance analytics retrieved successfully",
+            meta={
+                "restaurant_id": target_restaurant_id,
+                "timeframe": timeframe,
+                "mobile_optimized": True
+            }
+        )
+        
+    except FynloException:
+        raise
+    except Exception as e:
+        raise FynloException(
+            message=f"Failed to get employee performance analytics: {str(e)}",
+            error_code=ErrorCodes.INTERNAL_ERROR,
+            status_code=500
+        )
 
 @router.get("/customers")
-async def get_customer_analytics(
-    period: str = Query("month", enum=["day", "week", "month", "year"]),
-    restaurant_id: Optional[str] = Query(None),
+async def get_enhanced_customer_analytics(
+    timeframe: str = Query("day", description="Timeframe: hour, day, week, month, quarter, year"),
+    start_date: Optional[str] = Query(None, description="Custom start date (ISO format)"),
+    end_date: Optional[str] = Query(None, description="Custom end date (ISO format)"),
+    restaurant_id: Optional[str] = Query(None, description="Specific restaurant ID (platform owners)"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Get detailed customer analytics"""
-    
-    return {
-        "period": period,
-        "total_customers": 1245,
-        "new_customers": 89,
-        "returning_customers": 456,
-        "customer_segments": [],
-        "loyalty_distribution": {},
-        "top_customers": []
-    }
+    """
+    Get enhanced customer behavior analytics and insights
+    Optimized for mobile consumption with customer lifecycle data
+    """
+    try:
+        # Determine restaurant scope
+        if current_user.role == "platform_owner":
+            target_restaurant_id = restaurant_id or str(current_user.restaurant_id)
+        else:
+            target_restaurant_id = str(current_user.restaurant_id)
+        
+        if not target_restaurant_id:
+            raise FynloException(
+                message="Restaurant context required",
+                error_code=ErrorCodes.VALIDATION_ERROR,
+                status_code=400
+            )
+        
+        # Parse dates if provided
+        parsed_start_date = None
+        parsed_end_date = None
+        
+        if start_date:
+            try:
+                parsed_start_date = datetime.fromisoformat(start_date.replace("Z", "+00:00"))
+            except ValueError:
+                raise FynloException(
+                    message="Invalid start_date format",
+                    error_code=ErrorCodes.VALIDATION_ERROR,
+                    status_code=400
+                )
+        
+        if end_date:
+            try:
+                parsed_end_date = datetime.fromisoformat(end_date.replace("Z", "+00:00"))
+            except ValueError:
+                raise FynloException(
+                    message="Invalid end_date format",
+                    error_code=ErrorCodes.VALIDATION_ERROR,
+                    status_code=400
+                )
+        
+        # Validate timeframe
+        try:
+            analytics_timeframe = AnalyticsTimeframe(timeframe)
+        except ValueError:
+            raise FynloException(
+                message=f"Invalid timeframe: {timeframe}",
+                error_code=ErrorCodes.VALIDATION_ERROR,
+                status_code=400
+            )
+        
+        # Get analytics engine and generate customer analytics
+        analytics_engine = get_analytics_engine(db)
+        customer_data = analytics_engine.get_customer_analytics(
+            restaurant_id=target_restaurant_id,
+            timeframe=analytics_timeframe,
+            start_date=parsed_start_date,
+            end_date=parsed_end_date
+        )
+        
+        return APIResponseHelper.success(
+            data=customer_data,
+            message="Customer analytics retrieved successfully",
+            meta={
+                "restaurant_id": target_restaurant_id,
+                "timeframe": timeframe,
+                "mobile_optimized": True
+            }
+        )
+        
+    except FynloException:
+        raise
+    except Exception as e:
+        raise FynloException(
+            message=f"Failed to get customer analytics: {str(e)}",
+            error_code=ErrorCodes.INTERNAL_ERROR,
+            status_code=500
+        )
 
-@router.get("/products")
-async def get_product_analytics(
-    period: str = Query("month", enum=["day", "week", "month", "year"]),
-    restaurant_id: Optional[str] = Query(None),
+@router.get("/inventory")
+async def get_enhanced_inventory_analytics(
+    timeframe: str = Query("day", description="Timeframe: hour, day, week, month, quarter, year"),
+    start_date: Optional[str] = Query(None, description="Custom start date (ISO format)"),
+    end_date: Optional[str] = Query(None, description="Custom end date (ISO format)"),
+    restaurant_id: Optional[str] = Query(None, description="Specific restaurant ID (platform owners)"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Get detailed product performance analytics"""
-    
-    return {
-        "period": period,
-        "total_items_sold": 2845,
-        "top_selling_items": [],
-        "category_performance": {},
-        "inventory_insights": [],
-        "profit_margins": {}
-    }
+    """
+    Get enhanced inventory analytics and stock insights
+    Optimized for mobile consumption with product performance data
+    """
+    try:
+        # Determine restaurant scope
+        if current_user.role == "platform_owner":
+            target_restaurant_id = restaurant_id or str(current_user.restaurant_id)
+        else:
+            target_restaurant_id = str(current_user.restaurant_id)
+        
+        if not target_restaurant_id:
+            raise FynloException(
+                message="Restaurant context required",
+                error_code=ErrorCodes.VALIDATION_ERROR,
+                status_code=400
+            )
+        
+        # Parse dates if provided
+        parsed_start_date = None
+        parsed_end_date = None
+        
+        if start_date:
+            try:
+                parsed_start_date = datetime.fromisoformat(start_date.replace("Z", "+00:00"))
+            except ValueError:
+                raise FynloException(
+                    message="Invalid start_date format",
+                    error_code=ErrorCodes.VALIDATION_ERROR,
+                    status_code=400
+                )
+        
+        if end_date:
+            try:
+                parsed_end_date = datetime.fromisoformat(end_date.replace("Z", "+00:00"))
+            except ValueError:
+                raise FynloException(
+                    message="Invalid end_date format",
+                    error_code=ErrorCodes.VALIDATION_ERROR,
+                    status_code=400
+                )
+        
+        # Validate timeframe
+        try:
+            analytics_timeframe = AnalyticsTimeframe(timeframe)
+        except ValueError:
+            raise FynloException(
+                message=f"Invalid timeframe: {timeframe}",
+                error_code=ErrorCodes.VALIDATION_ERROR,
+                status_code=400
+            )
+        
+        # Get analytics engine and generate inventory analytics
+        analytics_engine = get_analytics_engine(db)
+        inventory_data = analytics_engine.get_inventory_analytics(
+            restaurant_id=target_restaurant_id,
+            timeframe=analytics_timeframe,
+            start_date=parsed_start_date,
+            end_date=parsed_end_date
+        )
+        
+        return APIResponseHelper.success(
+            data=inventory_data,
+            message="Inventory analytics retrieved successfully",
+            meta={
+                "restaurant_id": target_restaurant_id,
+                "timeframe": timeframe,
+                "mobile_optimized": True
+            }
+        )
+        
+    except FynloException:
+        raise
+    except Exception as e:
+        raise FynloException(
+            message=f"Failed to get inventory analytics: {str(e)}",
+            error_code=ErrorCodes.INTERNAL_ERROR,
+            status_code=500
+        )
+
+@router.get("/real-time")
+async def get_real_time_metrics(
+    restaurant_id: Optional[str] = Query(None, description="Specific restaurant ID (platform owners)"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Get real-time metrics for live dashboard updates
+    Optimized for mobile consumption with current operational data
+    """
+    try:
+        # Determine restaurant scope
+        if current_user.role == "platform_owner":
+            target_restaurant_id = restaurant_id or str(current_user.restaurant_id)
+        else:
+            target_restaurant_id = str(current_user.restaurant_id)
+        
+        if not target_restaurant_id:
+            raise FynloException(
+                message="Restaurant context required",
+                error_code=ErrorCodes.VALIDATION_ERROR,
+                status_code=400
+            )
+        
+        # Get analytics engine and generate real-time metrics
+        analytics_engine = get_analytics_engine(db)
+        real_time_data = analytics_engine.get_real_time_metrics(
+            restaurant_id=target_restaurant_id
+        )
+        
+        return APIResponseHelper.success(
+            data=real_time_data,
+            message="Real-time metrics retrieved successfully",
+            meta={
+                "restaurant_id": target_restaurant_id,
+                "mobile_optimized": True,
+                "refresh_interval": 30  # Seconds
+            }
+        )
+        
+    except FynloException:
+        raise
+    except Exception as e:
+        raise FynloException(
+            message=f"Failed to get real-time metrics: {str(e)}",
+            error_code=ErrorCodes.INTERNAL_ERROR,
+            status_code=500
+        )
