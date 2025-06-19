@@ -21,7 +21,7 @@ class APIResponse(BaseModel):
 
     class Config:
         json_encoders = {
-            datetime: lambda v: v.isoformat()
+            datetime: lambda v: v.isoformat() if v else None
         }
 
 
@@ -64,7 +64,7 @@ class APIResponseHelper:
         
         return JSONResponse(
             status_code=status_code,
-            content=response_data.dict()
+            content=response_data.model_dump(mode='json')
         )
     
     @staticmethod
@@ -100,13 +100,13 @@ class APIResponseHelper:
         response_data = APIResponse(
             success=False,
             message="Request failed",
-            error=error_detail.dict(),
+            error=error_detail.model_dump(),
             timestamp=datetime.utcnow()
         )
         
         return JSONResponse(
             status_code=status_code,
-            content=response_data.dict()
+            content=response_data.model_dump(mode='json')
         )
     
     @staticmethod
@@ -207,7 +207,7 @@ class APIResponseHelper:
         return APIResponseHelper.success(
             data=data,
             message=message,
-            meta={"pagination": pagination_meta.dict()}
+            meta={"pagination": pagination_meta.model_dump()}
         )
 
 

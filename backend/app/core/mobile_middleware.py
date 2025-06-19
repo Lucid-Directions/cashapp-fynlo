@@ -4,7 +4,7 @@ Handles port compatibility and mobile-specific request processing
 """
 
 from fastapi import Request, Response
-from fastapi.middleware.base import BaseHTTPMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 from typing import Callable
 import json
 import logging
