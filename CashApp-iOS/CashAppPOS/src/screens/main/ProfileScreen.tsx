@@ -10,8 +10,8 @@ import {
   Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useNavigation } from '@react-navigation/native';
 import useAppStore from '../../store/useAppStore';
-import Logo from '../../components/Logo';
 import ErrorBoundary from '../../components/ErrorBoundary';
 
 const Colors = {
@@ -26,6 +26,7 @@ const Colors = {
 };
 
 const ProfileScreenContent: React.FC = () => {
+  const navigation = useNavigation();
   const { user, session } = useAppStore();
 
   const InfoCard = ({ 
@@ -54,13 +55,26 @@ const ProfileScreenContent: React.FC = () => {
       
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Profile</Text>
+        <View style={styles.headerLeft}>
+          <TouchableOpacity 
+            style={styles.headerButton}
+            onPress={() => navigation.goBack()}
+          >
+            <Icon name="arrow-back" size={24} color={Colors.white} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Profile</Text>
+        </View>
+        <TouchableOpacity 
+          style={styles.headerButton}
+          onPress={() => navigation.navigate('POS' as never)}
+        >
+          <Icon name="home" size={24} color={Colors.white} />
+        </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Profile Header */}
         <View style={styles.profileHeader}>
-          <Logo size="small" showText={false} style={styles.profileLogo} />
           <View style={styles.avatar}>
             <Icon name="person" size={48} color={Colors.white} />
           </View>
@@ -167,6 +181,18 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  headerButton: {
+    padding: 8,
+    marginRight: 12,
   },
   headerTitle: {
     color: Colors.white,

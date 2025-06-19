@@ -256,16 +256,15 @@ const POSScreen: React.FC = () => {
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor={Colors.primary} barStyle="light-content" />
       
-      {/* Clover Header */}
+      {/* Fynlo Header */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <TouchableOpacity style={styles.menuButton}>
-            <Icon name="menu" size={24} color={Colors.white} />
-          </TouchableOpacity>
           <View style={styles.logoContainer}>
-            <Text style={styles.logoText}>
-              Fynl<Text style={styles.logoOrange}>o</Text>
-            </Text>
+            <Image
+              source={require('../../assets/fynlo-logo.png')}
+              style={styles.headerLogo}
+              resizeMode="contain"
+            />
           </View>
         </View>
         
@@ -622,7 +621,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   logoContainer: {
-    // Container for logo component
+    marginLeft: -8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  headerLogo: {
+    width: 125,
+    height: 125,
+  },
+  logoText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: Colors.white,
+  },
+  logoOrange: {
+    color: Colors.warning,
   },
   cartButton: {
     position: 'relative',

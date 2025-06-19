@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useNavigation } from '@react-navigation/native';
 import Chart from '../../components/analytics/Chart';
 import { AnalyticsService, AnalyticsData } from '../../services/AnalyticsService';
 
@@ -32,6 +33,7 @@ const Colors = {
 };
 
 const PlatformAnalyticsScreen: React.FC = () => {
+  const navigation = useNavigation();
   const [selectedPeriod, setSelectedPeriod] = useState<'today' | 'week' | 'month' | 'year'>('month');
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -131,8 +133,18 @@ const PlatformAnalyticsScreen: React.FC = () => {
       
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Platform Analytics</Text>
-        <Text style={styles.headerSubtitle}>Cross-restaurant insights</Text>
+        <View style={styles.headerLeft}>
+          <TouchableOpacity 
+            style={styles.headerButton}
+            onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('PlatformDashboard' as never)}
+          >
+            <Icon name="arrow-back" size={24} color={Colors.text} />
+          </TouchableOpacity>
+          <View>
+            <Text style={styles.headerTitle}>Platform Analytics</Text>
+            <Text style={styles.headerSubtitle}>Cross-restaurant insights</Text>
+          </View>
+        </View>
         <TouchableOpacity onPress={handleRefresh} style={styles.refreshButton}>
           <Icon name="refresh" size={24} color={Colors.primary} />
         </TouchableOpacity>
@@ -348,6 +360,15 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  headerButton: {
+    padding: 8,
+    marginRight: 12,
   },
   refreshButton: {
     padding: 8,
