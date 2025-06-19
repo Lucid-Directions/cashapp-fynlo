@@ -12,6 +12,8 @@ import {
   RefreshControl,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import { useAuth } from '../../contexts/AuthContext';
 
 // Clover POS Color Scheme
@@ -32,6 +34,7 @@ const Colors = {
 };
 
 const RestaurantsScreen: React.FC = () => {
+  const navigation = useNavigation<StackNavigationProp<any>>();
   const { managedRestaurants, switchRestaurant } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -183,7 +186,7 @@ const RestaurantsScreen: React.FC = () => {
       {/* Add Restaurant FAB */}
       <TouchableOpacity
         style={styles.fab}
-        onPress={() => Alert.alert('Add Restaurant', 'Restaurant onboarding will be implemented in Phase 2')}
+        onPress={() => navigation.navigate('RestaurantOnboarding')}
       >
         <Icon name="add" size={24} color={Colors.white} />
       </TouchableOpacity>

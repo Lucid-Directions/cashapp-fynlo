@@ -10,6 +10,7 @@ import RestaurantsScreen from '../screens/platform/RestaurantsScreen';
 import PlatformAnalyticsScreen from '../screens/platform/PlatformAnalyticsScreen';
 import SystemMonitoringScreen from '../screens/platform/SystemMonitoringScreen';
 import UserManagementScreen from '../screens/platform/UserManagementScreen';
+import RestaurantOnboardingScreen from '../screens/platform/onboarding/RestaurantOnboardingScreen';
 
 // Clover POS Color Scheme
 const Colors = {
@@ -46,6 +47,7 @@ const RestaurantsStack = () => (
     }}
   >
     <Stack.Screen name="RestaurantsList" component={RestaurantsScreen} />
+    <Stack.Screen name="RestaurantOnboarding" component={RestaurantOnboardingScreen} />
   </Stack.Navigator>
 );
 
