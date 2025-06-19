@@ -16,7 +16,7 @@ import { useNavigation } from '@react-navigation/native';
 import useAppStore from '../../store/useAppStore';
 import useSettingsStore from '../../store/useSettingsStore';
 
-// Clover POS Color Scheme
+// Fynlo POS Color Scheme
 const Colors = {
   primary: '#00A651',
   secondary: '#0066CC',

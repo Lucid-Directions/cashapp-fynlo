@@ -12,6 +12,8 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import { Order } from '../../types';
+import DataService from '../../services/DataService';
+import ErrorBoundary from '../../components/ErrorBoundary';
 
 const Colors = {
   primary: '#2C3E50',
@@ -79,6 +81,8 @@ const OrdersScreen: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>(mockOrders);
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState<'all' | 'preparing' | 'ready' | 'completed'>('all');
+  const [loading, setLoading] = useState(false);
+  const [dataService] = useState(() => DataService.getInstance());
 
   const statusColors = {
     draft: Colors.lightText,
@@ -98,14 +102,46 @@ const OrdersScreen: React.FC = () => {
     cancelled: 'cancel',
   };
 
+  // Load data from DataService on component mount
+  useEffect(() => {
+    const loadOrders = async () => {
+      try {
+        setLoading(true);
+        
+        // Try to load orders from DataService (will fallback to mock data if API unavailable)
+        const ordersData = await dataService.getRecentOrders(50);
+        if (ordersData && ordersData.length > 0) {
+          setOrders(ordersData);
+        }
+        
+      } catch (error) {
+        console.log('Failed to load orders from DataService, using local fallback:', error);
+        // Keep using the existing mockOrders as fallback
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadOrders();
+  }, [dataService]);
+
   const filteredOrders = filter === 'all' 
     ? orders 
     : orders.filter(order => order.status === filter);
 
   const onRefresh = async () => {
     setRefreshing(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    try {
+      // Try to refresh from DataService
+      const ordersData = await dataService.getRecentOrders(50);
+      if (ordersData && ordersData.length > 0) {
+        setOrders(ordersData);
+      }
+    } catch (error) {
+      console.log('Failed to refresh orders from DataService:', error);
+    }
+    
     setRefreshing(false);
   };
 
@@ -478,4 +514,10 @@ const styles = StyleSheet.create({
   },
 });
 
-export default OrdersScreen;
+const WrappedOrdersScreen: React.FC = () => (
+  <ErrorBoundary>
+    <OrdersScreen />
+  </ErrorBoundary>
+);
+
+export default WrappedOrdersScreen;

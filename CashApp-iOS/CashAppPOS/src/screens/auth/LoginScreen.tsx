@@ -20,17 +20,17 @@ import Logo from '../../components/Logo';
 
 const { width, height } = Dimensions.get('window');
 
-// Clover POS Color Scheme
+// Fynlo POS Color Scheme
 const Colors = {
-  primary: '#00A651',      // Clover Green
-  secondary: '#0066CC',    // Clover Blue  
+  primary: '#00A651',      // Fynlo Green
+  secondary: '#0066CC',    // Fynlo Blue  
   success: '#00A651',
   background: '#F5F5F5',   // Light Gray Background
   white: '#FFFFFF',
   lightGray: '#E5E5E5',
   text: '#333333',         // Dark Gray Text
   lightText: '#666666',    // Medium Gray Text
-  accent: '#0066CC',       // Clover Blue Accent
+  accent: '#0066CC',       // Fynlo Blue Accent
 };
 
 const LoginScreen: React.FC = () => {

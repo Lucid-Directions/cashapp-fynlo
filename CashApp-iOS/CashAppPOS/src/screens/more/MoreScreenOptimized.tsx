@@ -16,10 +16,10 @@ import { useAuth } from '../../contexts/AuthContext';
 import useAppStore from '../../store/useAppStore';
 import { usePerformanceMonitor, performanceUtils } from '../../hooks/usePerformanceMonitor';
 
-// Clover POS Color Scheme
+// Fynlo POS Color Scheme
 const Colors = {
-  primary: '#00A651',      // Clover Green
-  secondary: '#0066CC',    // Clover Blue
+  primary: '#00A651',      // Fynlo Green
+  secondary: '#0066CC',    // Fynlo Blue
   success: '#00A651',
   warning: '#FF6B35',
   danger: '#E74C3C',

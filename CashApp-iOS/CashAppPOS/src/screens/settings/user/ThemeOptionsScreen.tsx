@@ -12,7 +12,7 @@ import { useNavigation } from '@react-navigation/native';
 import ThemeSwitcher, { ThemeToggle } from '../../../components/theme/ThemeSwitcher';
 import { useTheme } from '../../../design-system/ThemeProvider';
 
-// Clover POS Color Scheme
+// Fynlo POS Color Scheme
 const Colors = {
   primary: '#00A651',
   secondary: '#0066CC',

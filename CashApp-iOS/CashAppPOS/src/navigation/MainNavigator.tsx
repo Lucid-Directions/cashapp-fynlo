@@ -20,10 +20,10 @@ import useAppStore from '../store/useAppStore';
 const Tab = createBottomTabNavigator<MainTabParamList>();
 const Stack = createStackNavigator<MainStackParamList>();
 
-// Clover POS Colors
+// Fynlo POS Colors
 const Colors = {
-  primary: '#00A651',      // Clover Green
-  secondary: '#0066CC',    // Clover Blue
+  primary: '#00A651',      // Fynlo Green
+  secondary: '#0066CC',    // Fynlo Blue
   background: '#F5F5F5',
   white: '#FFFFFF',
   lightGray: '#E5E5E5',

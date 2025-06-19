@@ -14,7 +14,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useAuth } from '../../contexts/AuthContext';
 
-// Clover POS Color Scheme
+// Fynlo POS Color Scheme
 const Colors = {
   primary: '#00A651',
   secondary: '#0066CC',

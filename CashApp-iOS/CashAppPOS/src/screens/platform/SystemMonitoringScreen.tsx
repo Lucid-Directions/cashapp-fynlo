@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   StyleSheet,
   Text,
@@ -8,10 +8,13 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { MonitoringService, SystemHealth, ErrorLog, Incident, PerformanceMetrics } from '../../services/MonitoringService';
 
-// Clover POS Color Scheme
+// Fynlo POS Color Scheme
 const Colors = {
   primary: '#00A651',
   secondary: '#0066CC',
@@ -30,28 +33,167 @@ const Colors = {
 
 const SystemMonitoringScreen: React.FC = () => {
   const [selectedTab, setSelectedTab] = useState<'health' | 'errors' | 'incidents'>('health');
+  const [systemHealth, setSystemHealth] = useState<SystemHealth | null>(null);
+  const [recentErrors, setRecentErrors] = useState<ErrorLog[]>([]);
+  const [activeIncidents, setActiveIncidents] = useState<Incident[]>([]);
+  const [performanceMetrics, setPerformanceMetrics] = useState<PerformanceMetrics | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const handleMonitoringAction = (action: string) => {
-    Alert.alert('System Monitoring', `${action} functionality will be implemented in Phase 3`);
+  const monitoringService = MonitoringService.getInstance();
+  const unsubscribeRefs = useRef<(() => void)[]>([]);
+
+  useEffect(() => {
+    loadMonitoringData();
+    setupRealTimeUpdates();
+
+    return () => {
+      // Cleanup subscriptions
+      unsubscribeRefs.current.forEach(unsubscribe => unsubscribe());
+    };
+  }, []);
+
+  const loadMonitoringData = async () => {
+    try {
+      setLoading(true);
+      const [health, errors, incidents, performance] = await Promise.all([
+        monitoringService.getSystemHealth(),
+        monitoringService.getRecentErrors(10),
+        monitoringService.getActiveIncidents(),
+        monitoringService.getPerformanceMetrics(),
+      ]);
+
+      setSystemHealth(health);
+      setRecentErrors(errors);
+      setActiveIncidents(incidents);
+      setPerformanceMetrics(performance);
+    } catch (error) {
+      console.error('Failed to load monitoring data:', error);
+      Alert.alert('Error', 'Failed to load monitoring data');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const systemHealthData = [
-    { name: 'API Response Time', value: '125ms', status: 'good', icon: 'speed' },
-    { name: 'Database Performance', value: '98.9%', status: 'good', icon: 'storage' },
-    { name: 'Payment Gateway', value: '99.8%', status: 'good', icon: 'payment' },
-    { name: 'Network Latency', value: '45ms', status: 'warning', icon: 'network-check' },
-  ];
+  const setupRealTimeUpdates = () => {
+    // Subscribe to real-time updates
+    const healthUnsubscribe = monitoringService.subscribe('health-updated', (health: SystemHealth) => {
+      setSystemHealth(health);
+    });
 
-  const recentErrors = [
-    { id: 1, type: 'Payment', message: 'Card reader timeout - Fynlo Fine Dining', time: '2 min ago', severity: 'high' },
-    { id: 2, type: 'Network', message: 'Connection timeout - Fynlo Pizza Palace', time: '15 min ago', severity: 'medium' },
-    { id: 3, type: 'System', message: 'Database slow query warning', time: '1 hour ago', severity: 'low' },
-  ];
+    const errorUnsubscribe = monitoringService.subscribe('error-created', (error: ErrorLog) => {
+      setRecentErrors(prev => [error, ...prev.slice(0, 9)]);
+    });
 
-  const activeIncidents = [
-    { id: 1, title: 'Payment Processing Delay', status: 'investigating', affected: 3, created: '30 min ago' },
-    { id: 2, title: 'Network Connectivity Issues', status: 'monitoring', affected: 1, created: '2 hours ago' },
-  ];
+    const incidentUnsubscribe = monitoringService.subscribe('incident-updated', (incident: Incident) => {
+      setActiveIncidents(prev => 
+        prev.map(i => i.id === incident.id ? incident : i)
+      );
+    });
+
+    const performanceUnsubscribe = monitoringService.subscribe('performance-updated', (performance: PerformanceMetrics) => {
+      setPerformanceMetrics(performance);
+    });
+
+    unsubscribeRefs.current = [healthUnsubscribe, errorUnsubscribe, incidentUnsubscribe, performanceUnsubscribe];
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await loadMonitoringData();
+    setRefreshing(false);
+  };
+
+  const handleCreateIncident = () => {
+    Alert.prompt(
+      'Create Incident',
+      'Enter incident title:',
+      async (title) => {
+        if (title) {
+          try {
+            const incident = await monitoringService.createIncident(
+              title,
+              'New incident created from monitoring dashboard',
+              'medium',
+              ['1', '2']
+            );
+            setActiveIncidents(prev => [incident, ...prev]);
+            Alert.alert('Success', 'Incident created successfully');
+          } catch (error) {
+            Alert.alert('Error', 'Failed to create incident');
+          }
+        }
+      }
+    );
+  };
+
+  const handleUpdateIncident = (incident: Incident) => {
+    const statusOptions = ['investigating', 'monitoring', 'resolved', 'closed'];
+    
+    Alert.alert(
+      'Update Incident',
+      'Choose new status:',
+      statusOptions.map(status => ({
+        text: status.charAt(0).toUpperCase() + status.slice(1),
+        onPress: async () => {
+          try {
+            await monitoringService.updateIncidentStatus(incident.id, status as any);
+            Alert.alert('Success', 'Incident status updated');
+          } catch (error) {
+            Alert.alert('Error', 'Failed to update incident');
+          }
+        },
+      })).concat([{ text: 'Cancel', style: 'cancel' }])
+    );
+  };
+
+  const handleResolveError = async (errorId: string) => {
+    try {
+      await monitoringService.resolveError(errorId);
+      setRecentErrors(prev => 
+        prev.map(error => error.id === errorId ? { ...error, resolved: true } : error)
+      );
+      Alert.alert('Success', 'Error marked as resolved');
+    } catch (error) {
+      Alert.alert('Error', 'Failed to resolve error');
+    }
+  };
+
+  const handleMonitoringAction = (action: string) => {
+    switch (action) {
+      case 'Real-time Logs':
+        Alert.alert('Real-time Logs', 'Opening system logs dashboard...');
+        break;
+      case 'Performance Dashboard':
+        Alert.alert('Performance Dashboard', 'Opening detailed performance metrics...');
+        break;
+      case 'Alert Rules':
+        Alert.alert('Alert Rules', 'Opening alert configuration...');
+        break;
+      case 'System Diagnostics':
+        Alert.alert('Diagnostics', 'Running system diagnostics...');
+        break;
+      case 'View Error Details':
+        Alert.alert('Error Details', 'Opening detailed error information...');
+        break;
+      case 'View All Errors':
+        Alert.alert('All Errors', 'Opening error log viewer...');
+        break;
+      default:
+        Alert.alert('Monitoring', `${action} functionality available`);
+    }
+  };
+
+  if (loading && !systemHealth) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={Colors.primary} />
+          <Text style={styles.loadingText}>Loading monitoring data...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -86,16 +228,21 @@ const SystemMonitoringScreen: React.FC = () => {
       
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>System Monitoring</Text>
-        <Text style={styles.headerSubtitle}>Real-time platform health</Text>
+        <View>
+          <Text style={styles.headerTitle}>System Monitoring</Text>
+          <Text style={styles.headerSubtitle}>Real-time platform health</Text>
+        </View>
+        <TouchableOpacity onPress={handleRefresh} style={styles.refreshButton}>
+          <Icon name="refresh" size={24} color={Colors.primary} />
+        </TouchableOpacity>
       </View>
 
       {/* Tab Selector */}
       <View style={styles.tabSelector}>
         {[
           { key: 'health', label: 'System Health', badge: null },
-          { key: 'errors', label: 'Errors', badge: 3 },
-          { key: 'incidents', label: 'Incidents', badge: 2 },
+          { key: 'errors', label: 'Errors', badge: recentErrors.filter(e => !e.resolved).length || 0 },
+          { key: 'incidents', label: 'Incidents', badge: activeIncidents.length || 0 },
         ].map(tab => (
           <TouchableOpacity
             key={tab.key}
@@ -111,7 +258,7 @@ const SystemMonitoringScreen: React.FC = () => {
             ]}>
               {tab.label}
             </Text>
-            {tab.badge && (
+            {tab.badge !== null && tab.badge > 0 && (
               <View style={styles.tabBadge}>
                 <Text style={styles.tabBadgeText}>{tab.badge}</Text>
               </View>
@@ -120,21 +267,30 @@ const SystemMonitoringScreen: React.FC = () => {
         ))}
       </View>
 
-      <ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        style={styles.scrollContent} 
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+        }
+      >
         {selectedTab === 'health' && (
           <>
             {/* System Health Overview */}
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>System Health</Text>
               <View style={styles.healthGrid}>
-                {systemHealthData.map((item, index) => (
+                {systemHealth && Object.values(systemHealth).map((item, index) => (
                   <View key={index} style={styles.healthCard}>
                     <View style={styles.healthHeader}>
                       <Icon name={item.icon} size={24} color={getStatusColor(item.status)} />
                       <View style={[styles.statusDot, { backgroundColor: getStatusColor(item.status) }]} />
                     </View>
-                    <Text style={styles.healthValue}>{item.value}</Text>
-                    <Text style={styles.healthLabel}>{item.name}</Text>
+                    <Text style={styles.healthValue}>{item.value || 'N/A'}</Text>
+                    <Text style={styles.healthLabel}>{item.name || 'Unknown'}</Text>
+                    <Text style={[styles.trendText, { color: (item.trend || 0) > 0 ? Colors.danger : Colors.success }]}>
+                      {(item.trend || 0) > 0 ? '+' : ''}{(item.trend || 0).toFixed(1)}%
+                    </Text>
                   </View>
                 ))}
               </View>
@@ -146,16 +302,30 @@ const SystemMonitoringScreen: React.FC = () => {
               <View style={styles.card}>
                 <View style={styles.metricRow}>
                   <View style={styles.metric}>
-                    <Text style={styles.metricValue}>99.9%</Text>
+                    <Text style={styles.metricValue}>{performanceMetrics?.uptime?.toFixed(1) || '0'}%</Text>
                     <Text style={styles.metricLabel}>Uptime (30 days)</Text>
                   </View>
                   <View style={styles.metric}>
-                    <Text style={styles.metricValue}>2.3M</Text>
+                    <Text style={styles.metricValue}>{performanceMetrics ? (performanceMetrics.requestsPerDay / 1000000).toFixed(1) : '0'}M</Text>
                     <Text style={styles.metricLabel}>Requests/day</Text>
                   </View>
                   <View style={styles.metric}>
-                    <Text style={styles.metricValue}>0.01%</Text>
+                    <Text style={styles.metricValue}>{performanceMetrics?.errorRate?.toFixed(2) || '0'}%</Text>
                     <Text style={styles.metricLabel}>Error Rate</Text>
+                  </View>
+                </View>
+                <View style={styles.metricRow}>
+                  <View style={styles.metric}>
+                    <Text style={styles.metricValue}>{performanceMetrics?.avgResponseTime?.toFixed(0) || '0'}ms</Text>
+                    <Text style={styles.metricLabel}>Avg Response</Text>
+                  </View>
+                  <View style={styles.metric}>
+                    <Text style={styles.metricValue}>{performanceMetrics?.memoryUsage?.toFixed(1) || '0'}%</Text>
+                    <Text style={styles.metricLabel}>Memory Usage</Text>
+                  </View>
+                  <View style={styles.metric}>
+                    <Text style={styles.metricValue}>{performanceMetrics?.cpuUsage?.toFixed(1) || '0'}%</Text>
+                    <Text style={styles.metricLabel}>CPU Usage</Text>
                   </View>
                 </View>
               </View>
@@ -167,7 +337,7 @@ const SystemMonitoringScreen: React.FC = () => {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Recent Errors</Text>
             {recentErrors.map((error) => (
-              <View key={error.id} style={styles.errorCard}>
+              <View key={error.id} style={[styles.errorCard, error.resolved && styles.resolvedError]}>
                 <View style={styles.errorHeader}>
                   <View style={styles.errorInfo}>
                     <View style={styles.errorTypeRow}>
@@ -175,13 +345,28 @@ const SystemMonitoringScreen: React.FC = () => {
                         <Text style={styles.severityText}>{error.severity.toUpperCase()}</Text>
                       </View>
                       <Text style={styles.errorType}>{error.type}</Text>
+                      {error.resolved && (
+                        <View style={styles.resolvedBadge}>
+                          <Text style={styles.resolvedText}>RESOLVED</Text>
+                        </View>
+                      )}
                     </View>
                     <Text style={styles.errorMessage}>{error.message}</Text>
-                    <Text style={styles.errorTime}>{error.time}</Text>
+                    <Text style={styles.errorTime}>
+                      {error.restaurantName ? `${error.restaurantName} • ` : ''}
+                      {error.timestamp ? new Date(error.timestamp).toLocaleTimeString() : 'Unknown time'}
+                    </Text>
                   </View>
-                  <TouchableOpacity onPress={() => handleMonitoringAction('View Error Details')}>
-                    <Icon name="chevron-right" size={20} color={Colors.mediumGray} />
-                  </TouchableOpacity>
+                  <View style={styles.errorActions}>
+                    {!error.resolved && (
+                      <TouchableOpacity onPress={() => handleResolveError(error.id)} style={styles.resolveButton}>
+                        <Icon name="check" size={16} color={Colors.success} />
+                      </TouchableOpacity>
+                    )}
+                    <TouchableOpacity onPress={() => handleMonitoringAction('View Error Details')}>
+                      <Icon name="chevron-right" size={20} color={Colors.mediumGray} />
+                    </TouchableOpacity>
+                  </View>
                 </View>
               </View>
             ))}
@@ -207,8 +392,15 @@ const SystemMonitoringScreen: React.FC = () => {
                   </View>
                 </View>
                 <View style={styles.incidentDetails}>
-                  <Text style={styles.incidentInfo}>{incident.affected} restaurants affected</Text>
-                  <Text style={styles.incidentTime}>Created {incident.created}</Text>
+                  <Text style={styles.incidentInfo}>
+                    {incident.affectedRestaurants.length} restaurants affected
+                  </Text>
+                  <Text style={styles.incidentTime}>
+                    Created {incident.createdAt ? new Date(incident.createdAt).toLocaleString() : 'Unknown date'}
+                  </Text>
+                  {incident.description && (
+                    <Text style={styles.incidentDescription}>{incident.description}</Text>
+                  )}
                 </View>
                 <View style={styles.incidentActions}>
                   <TouchableOpacity
@@ -219,7 +411,7 @@ const SystemMonitoringScreen: React.FC = () => {
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.incidentButton}
-                    onPress={() => handleMonitoringAction('Update Incident')}
+                    onPress={() => handleUpdateIncident(incident)}
                   >
                     <Text style={styles.incidentButtonText}>Update Status</Text>
                   </TouchableOpacity>
@@ -229,7 +421,7 @@ const SystemMonitoringScreen: React.FC = () => {
             
             <TouchableOpacity
               style={styles.createIncidentButton}
-              onPress={() => handleMonitoringAction('Create Incident')}
+              onPress={handleCreateIncident}
             >
               <Icon name="add" size={20} color={Colors.white} />
               <Text style={styles.createIncidentButtonText}>Create Incident</Text>
@@ -285,11 +477,27 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 16,
     backgroundColor: Colors.white,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
+  },
+  refreshButton: {
+    padding: 8,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: Colors.text,
   },
   headerTitle: {
     fontSize: 24,
@@ -392,6 +600,11 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: Colors.lightText,
   },
+  trendText: {
+    fontSize: 10,
+    fontWeight: '500',
+    marginTop: 2,
+  },
   card: {
     backgroundColor: Colors.white,
     borderRadius: 12,
@@ -435,6 +648,31 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+  },
+  resolvedError: {
+    opacity: 0.6,
+  },
+  resolvedBadge: {
+    backgroundColor: Colors.success,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 8,
+    marginLeft: 8,
+  },
+  resolvedText: {
+    color: Colors.white,
+    fontSize: 10,
+    fontWeight: 'bold',
+  },
+  errorActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  resolveButton: {
+    padding: 4,
+    borderRadius: 4,
+    backgroundColor: Colors.background,
   },
   errorInfo: {
     flex: 1,
@@ -526,6 +764,12 @@ const styles = StyleSheet.create({
   incidentTime: {
     fontSize: 12,
     color: Colors.lightText,
+  },
+  incidentDescription: {
+    fontSize: 12,
+    color: Colors.lightText,
+    marginTop: 4,
+    fontStyle: 'italic',
   },
   incidentActions: {
     flexDirection: 'row',

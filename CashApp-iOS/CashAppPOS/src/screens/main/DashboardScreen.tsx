@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -10,10 +10,12 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
+import DataService from '../../services/DataService';
+import ErrorBoundary from '../../components/ErrorBoundary';
 
 const Colors = {
-  primary: '#00A651',      // Clover Green
-  secondary: '#0066CC',    // Clover Blue
+  primary: '#00A651',      // Fynlo Green
+  secondary: '#0066CC',    // Fynlo Blue
   success: '#27AE60',
   warning: '#F39C12',
   danger: '#E74C3C',
@@ -45,9 +47,14 @@ interface AlertItem {
 
 const DashboardScreen: React.FC = () => {
   const navigation = useNavigation();
+  
+  // State for dashboard data
+  const [dashboardData, setDashboardData] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [dataService] = useState(() => DataService.getInstance());
 
-  // Mock KPI data
-  const kpiData: KPICardProps[] = [
+  // Mock KPI data (fallback)
+  const defaultKpiData: KPICardProps[] = [
     {
       title: "Today's Revenue",
       value: "£1,247.50",
@@ -113,6 +120,70 @@ const DashboardScreen: React.FC = () => {
       time: '2 hours ago',
     },
   ];
+
+  // Load dashboard data from DataService
+  useEffect(() => {
+    const loadDashboardData = async () => {
+      try {
+        setLoading(true);
+        
+        // Try to load dashboard data from DataService
+        const dailyReport = await dataService.getDailySalesReport();
+        if (dailyReport && dailyReport.summary) {
+          setDashboardData(dailyReport);
+        }
+        
+      } catch (error) {
+        console.log('Failed to load dashboard data from DataService, using local fallback:', error);
+        // Keep using the existing mock data as fallback
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadDashboardData();
+  }, [dataService]);
+
+  // Use dynamic data if available, otherwise fallback to mock data
+  const kpiData = dashboardData ? transformDashboardData(dashboardData) : defaultKpiData;
+
+  // Helper function to transform API data to KPI format
+  function transformDashboardData(data: any): KPICardProps[] {
+    return [
+      {
+        title: "Today's Revenue",
+        value: `£${data.summary?.totalRevenue?.toFixed(2) || '0.00'}`,
+        change: `${data.summary?.revenueChange || 0}%`,
+        changeType: (data.summary?.revenueChange || 0) >= 0 ? "positive" : "negative",
+        icon: "attach-money",
+        color: Colors.success,
+      },
+      {
+        title: "Orders Today",
+        value: data.summary?.totalOrders?.toString() || '0',
+        change: `${data.summary?.ordersChange || 0}%`,
+        changeType: (data.summary?.ordersChange || 0) >= 0 ? "positive" : "negative",
+        icon: "receipt",
+        color: Colors.secondary,
+      },
+      {
+        title: "Avg Order Value",
+        value: `£${data.summary?.avgOrderValue?.toFixed(2) || '0.00'}`,
+        change: `${data.summary?.avgOrderChange || 0}%`,
+        changeType: (data.summary?.avgOrderChange || 0) >= 0 ? "positive" : "negative",
+        icon: "trending-up",
+        color: Colors.warning,
+      },
+      {
+        title: "Customer Satisfaction",
+        value: data.summary?.satisfaction?.toFixed(1) || '5.0',
+        change: `${data.summary?.satisfactionChange || 0}`,
+        changeType: (data.summary?.satisfactionChange || 0) >= 0 ? "positive" : "negative",
+        icon: "star",
+        color: Colors.primary,
+      },
+    ];
+  }
 
   const KPICard: React.FC<KPICardProps> = ({ title, value, change, changeType, icon, color }) => (
     <View style={styles.kpiCard}>
@@ -529,4 +600,10 @@ const styles = StyleSheet.create({
   },
 });
 
-export default DashboardScreen;
+const WrappedDashboardScreen: React.FC = () => (
+  <ErrorBoundary>
+    <DashboardScreen />
+  </ErrorBoundary>
+);
+
+export default WrappedDashboardScreen;

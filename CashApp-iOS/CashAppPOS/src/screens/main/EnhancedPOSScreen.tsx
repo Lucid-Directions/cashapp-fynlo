@@ -31,7 +31,7 @@ import { OptimizedGrid } from '../../components/performance/OptimizedFlatList';
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 const isTablet = screenWidth > 768;
 
-// Clover POS Color Scheme
+// Fynlo POS Color Scheme
 const Colors = {
   primary: '#00A651',
   secondary: '#0066CC',

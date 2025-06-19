@@ -13,10 +13,10 @@ import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../contexts/AuthContext';
 import useAppStore from '../../store/useAppStore';
 
-// Clover POS Color Scheme
+// Fynlo POS Color Scheme
 const Colors = {
-  primary: '#00A651',      // Clover Green
-  secondary: '#0066CC',    // Clover Blue
+  primary: '#00A651',      // Fynlo Green
+  secondary: '#0066CC',    // Fynlo Blue
   success: '#00A651',
   warning: '#FF6B35',
   danger: '#E74C3C',
@@ -185,7 +185,7 @@ const MoreScreen: React.FC = () => {
           <View style={styles.userInfo}>
             <Text style={styles.userName}>{user?.name || 'Manager'}</Text>
             <Text style={styles.userRole}>{user?.role || 'Admin'}</Text>
-            <Text style={styles.userEmail}>{user?.email || 'manager@cloverpos.com'}</Text>
+            <Text style={styles.userEmail}>{user?.email || 'manager@fynlo.com'}</Text>
           </View>
         </View>
 

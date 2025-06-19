@@ -11,7 +11,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { SettingsHeader, SettingsSection, SettingsCard, ToggleSwitch } from '../../../components/settings';
 import useSettingsStore from '../../../store/useSettingsStore';
 
-// Clover POS Color Scheme
+// Fynlo POS Color Scheme
 const Colors = {
   primary: '#00A651',
   secondary: '#0066CC',

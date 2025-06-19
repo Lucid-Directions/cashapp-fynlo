@@ -1,5 +1,5 @@
 // Comprehensive Design System for Fynlo POS
-// Clover-style POS theme with professional styling
+// Fynlo POS theme with professional styling
 
 import { Dimensions, Platform } from 'react-native';
 
@@ -22,7 +22,7 @@ export const breakpoints = {
   xxl: 1400,
 };
 
-// Color Palette - Clover POS Professional
+// Color Palette - Fynlo POS Professional
 export const colors = {
   // Primary Colors
   primary: {
@@ -31,7 +31,7 @@ export const colors = {
     200: '#A0D5A0',
     300: '#7AC47A',
     400: '#5CB85C',
-    500: '#00A651', // Main Clover Green
+    500: '#00A651', // Main Fynlo Green
     600: '#009547',
     700: '#00823C',
     800: '#006F32',
@@ -45,7 +45,7 @@ export const colors = {
     200: '#80C0FF',
     300: '#4DA7FF',
     400: '#1A8EFF',
-    500: '#0066CC', // Clover Blue
+    500: '#0066CC', // Fynlo Blue
     600: '#0052A3',
     700: '#003D7A',
     800: '#002951',

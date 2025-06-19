@@ -10,6 +10,7 @@ import {
   FlatList,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import ErrorBoundary from '../../components/ErrorBoundary';
 
 const Colors = {
   primary: '#2C3E50',
@@ -23,7 +24,7 @@ const Colors = {
   lightText: '#95A5A6',
 };
 
-const ReportsScreen: React.FC = () => {
+const ReportsScreenContent: React.FC = () => {
   const [selectedPeriod, setSelectedPeriod] = useState<'today' | 'week' | 'month'>('today');
   const [selectedChart, setSelectedChart] = useState<'sales' | 'orders' | 'customers'>('sales');
   const [selectedTab, setSelectedTab] = useState<'overview' | 'items' | 'staff' | 'payments'>('overview');
@@ -804,5 +805,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 });
+
+const ReportsScreen: React.FC = () => {
+  return (
+    <ErrorBoundary>
+      <ReportsScreenContent />
+    </ErrorBoundary>
+  );
+};
 
 export default ReportsScreen;

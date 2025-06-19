@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet, Animated, Dimensions } from 'react-native';
 
-// Clover POS Color Scheme
+// Fynlo POS Color Scheme
 const Colors = {
   background: '#F5F5F5',
   lightGray: '#E5E5E5',

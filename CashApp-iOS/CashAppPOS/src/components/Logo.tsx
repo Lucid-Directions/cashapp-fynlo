@@ -10,8 +10,8 @@ interface LogoProps {
 }
 
 const Colors = {
-  primary: '#00A651',        // Clover Green
-  secondary: '#0066CC',      // Clover Blue
+  primary: '#00A651',        // Fynlo Green
+  secondary: '#0066CC',      // Fynlo Blue
   accent: '#FF6B35',         // Orange accent
   gold: '#F39C12',           // Professional orange
   lightText: '#666666',      // Medium gray
@@ -54,23 +54,8 @@ const Logo: React.FC<LogoProps> = ({
 
   const sizeStyles = getSizeStyles();
 
-  // Try different approaches to load the logo
-  let logoSource;
-  try {
-    logoSource = require('../../assets/fynlo-logo.png');
-  } catch (error) {
-    console.log('Failed to load logo from assets folder');
-    try {
-      logoSource = require('../../../assets/fynlo-logo.png');
-    } catch (error2) {
-      try {
-        logoSource = require('../../../../assets/fynlo-logo.png');
-      } catch (error3) {
-        console.log('Failed to load logo from all locations, using Fynlo text fallback');
-        logoSource = null;
-      }
-    }
-  }
+  // Use the actual logo image from assets
+  const logoSource = require('../../assets/fynlo-logo.png');
 
   return (
     <View style={[styles.container, style]}>
@@ -86,7 +71,6 @@ const Logo: React.FC<LogoProps> = ({
             imageStyle,
           ]}
           resizeMode="contain"
-          onError={() => console.log('Logo failed to load')}
         />
       ) : (
         <View style={styles.logoTextContainer}>
@@ -97,15 +81,6 @@ const Logo: React.FC<LogoProps> = ({
       )}
       {showText && (
         <View style={styles.textContainer}>
-          <Text
-            style={[
-              styles.logoText,
-              { fontSize: sizeStyles.fontSize },
-              textStyle,
-            ]}
-          >
-            Fynl<Text style={[styles.logoText, styles.orangeO, { fontSize: sizeStyles.fontSize }]}>o</Text>
-          </Text>
           <Text
             style={[
               styles.logoSubtext,

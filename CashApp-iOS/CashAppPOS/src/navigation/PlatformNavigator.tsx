@@ -11,10 +11,10 @@ import PlatformAnalyticsScreen from '../screens/platform/PlatformAnalyticsScreen
 import SystemMonitoringScreen from '../screens/platform/SystemMonitoringScreen';
 import UserManagementScreen from '../screens/platform/UserManagementScreen';
 
-// Clover POS Color Scheme
+// Fynlo POS Color Scheme
 const Colors = {
-  primary: '#00A651',      // Clover Green
-  secondary: '#0066CC',    // Clover Blue
+  primary: '#00A651',      // Fynlo Green
+  secondary: '#0066CC',    // Fynlo Blue
   background: '#F5F5F5',
   white: '#FFFFFF',
   lightGray: '#E5E5E5',

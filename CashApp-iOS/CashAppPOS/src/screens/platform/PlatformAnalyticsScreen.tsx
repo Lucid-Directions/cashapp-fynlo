@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -8,10 +8,13 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import Chart from '../../components/analytics/Chart';
+import { AnalyticsService, AnalyticsData } from '../../services/AnalyticsService';
 
-// Clover POS Color Scheme
+// Fynlo POS Color Scheme
 const Colors = {
   primary: '#00A651',
   secondary: '#0066CC',
@@ -30,10 +33,97 @@ const Colors = {
 
 const PlatformAnalyticsScreen: React.FC = () => {
   const [selectedPeriod, setSelectedPeriod] = useState<'today' | 'week' | 'month' | 'year'>('month');
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const analyticsService = AnalyticsService.getInstance();
+
+  useEffect(() => {
+    loadAnalyticsData();
+  }, [selectedPeriod]);
+
+  const loadAnalyticsData = async () => {
+    try {
+      setLoading(true);
+      const data = await analyticsService.getAnalyticsData(selectedPeriod);
+      setAnalyticsData(data);
+    } catch (error) {
+      console.error('Failed to load analytics data:', error);
+      Alert.alert('Error', 'Failed to load analytics data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await loadAnalyticsData();
+    setRefreshing(false);
+  };
+
+  const handleExportData = async (format: 'csv' | 'json' | 'pdf') => {
+    try {
+      Alert.alert('Exporting', 'Generating export file...');
+      const result = await analyticsService.exportData(format, selectedPeriod);
+      Alert.alert('Export Complete', `File exported: ${result.filename}`);
+    } catch (error) {
+      Alert.alert('Export Failed', 'Failed to export data');
+    }
+  };
+
+  const handleCustomReport = async () => {
+    try {
+      Alert.alert('Generating Report', 'Creating custom report...');
+      const report = await analyticsService.generateCustomReport(
+        ['revenue', 'transactions', 'avgOrderValue'],
+        ['1', '2', '3', '4'],
+        { start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), end: new Date() }
+      );
+      Alert.alert('Report Generated', `Report ID: ${report.reportId}`);
+    } catch (error) {
+      Alert.alert('Report Failed', 'Failed to generate custom report');
+    }
+  };
 
   const handleAnalyticsAction = (action: string) => {
-    Alert.alert('Analytics', `${action} functionality will be implemented in Phase 2`);
+    switch (action) {
+      case 'Custom Reports':
+        handleCustomReport();
+        break;
+      case 'Data Export':
+        Alert.alert(
+          'Export Data',
+          'Choose export format:',
+          [
+            { text: 'CSV', onPress: () => handleExportData('csv') },
+            { text: 'JSON', onPress: () => handleExportData('json') },
+            { text: 'PDF', onPress: () => handleExportData('pdf') },
+            { text: 'Cancel', style: 'cancel' },
+          ]
+        );
+        break;
+      case 'Forecasting':
+        Alert.alert('Forecasting', 'Advanced forecasting tools coming soon');
+        break;
+      case 'Benchmarking':
+        Alert.alert('Benchmarking', 'Industry benchmarking tools coming soon');
+        break;
+      default:
+        Alert.alert('Analytics', `${action} functionality available`);
+    }
   };
+
+  if (loading && !analyticsData) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={Colors.primary} />
+          <Text style={styles.loadingText}>Loading analytics...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -43,6 +133,9 @@ const PlatformAnalyticsScreen: React.FC = () => {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Platform Analytics</Text>
         <Text style={styles.headerSubtitle}>Cross-restaurant insights</Text>
+        <TouchableOpacity onPress={handleRefresh} style={styles.refreshButton}>
+          <Icon name="refresh" size={24} color={Colors.primary} />
+        </TouchableOpacity>
       </View>
 
       {/* Period Selector */}
@@ -77,20 +170,34 @@ const PlatformAnalyticsScreen: React.FC = () => {
                 <Icon name="more-vert" size={20} color={Colors.mediumGray} />
               </TouchableOpacity>
             </View>
-            <Text style={styles.largeValue}>£125,400</Text>
-            <Text style={styles.changeText}>+12.5% from last month</Text>
+            <Text style={styles.largeValue}>£{analyticsData?.revenue.total.toLocaleString()}</Text>
+            <Text style={styles.changeText}>+{analyticsData?.revenue.growth}% from last {selectedPeriod}</Text>
             
             <View style={styles.metricRow}>
               <View style={styles.metric}>
-                <Text style={styles.metricValue}>£32,800</Text>
+                <Text style={styles.metricValue}>£{analyticsData?.revenue.commission.toLocaleString()}</Text>
                 <Text style={styles.metricLabel}>Commission Earned</Text>
               </View>
               <View style={styles.metric}>
-                <Text style={styles.metricValue}>2.3%</Text>
+                <Text style={styles.metricValue}>{analyticsData?.revenue.avgCommissionRate}%</Text>
                 <Text style={styles.metricLabel}>Avg Commission</Text>
               </View>
             </View>
           </View>
+
+          {/* Revenue Trend Chart */}
+          {analyticsData && (
+            <Chart
+              title="Revenue Trend"
+              type="line"
+              data={analyticsData.revenue.byPeriod.map(item => ({
+                label: item.period,
+                value: item.value,
+                color: Colors.primary,
+              }))}
+              height={200}
+            />
+          )}
         </View>
 
         {/* Performance Analytics */}
@@ -104,23 +211,35 @@ const PlatformAnalyticsScreen: React.FC = () => {
               </TouchableOpacity>
             </View>
             
-            {[
-              { name: 'Fynlo Coffee Shop', revenue: '£45,200', growth: '+15.2%' },
-              { name: 'Fynlo Burger Bar', revenue: '£38,900', growth: '+8.7%' },
-              { name: 'Fynlo Pizza Palace', revenue: '£32,800', growth: '+5.3%' },
-            ].map((restaurant, index) => (
+            {analyticsData?.performance.rankings.slice(0, 3).map((restaurant, index) => (
               <View key={index} style={styles.rankingItem}>
                 <View style={styles.rankingNumber}>
-                  <Text style={styles.rankingNumberText}>{index + 1}</Text>
+                  <Text style={styles.rankingNumberText}>{restaurant.rank}</Text>
                 </View>
                 <View style={styles.rankingInfo}>
                   <Text style={styles.rankingName}>{restaurant.name}</Text>
-                  <Text style={styles.rankingGrowth}>{restaurant.growth}</Text>
+                  <Text style={[styles.rankingGrowth, { color: restaurant.growth > 0 ? Colors.success : Colors.danger }]}>
+                    {restaurant.growth > 0 ? '+' : ''}{restaurant.growth}%
+                  </Text>
                 </View>
-                <Text style={styles.rankingRevenue}>{restaurant.revenue}</Text>
+                <Text style={styles.rankingRevenue}>£{restaurant.revenue.toLocaleString()}</Text>
               </View>
             ))}
           </View>
+
+          {/* Performance Comparison Chart */}
+          {analyticsData && (
+            <Chart
+              title="Restaurant Performance Comparison"
+              type="bar"
+              data={analyticsData.performance.rankings.map(item => ({
+                label: item.name.replace('Fynlo ', ''),
+                value: item.score,
+                color: item.score >= 90 ? Colors.success : item.score >= 80 ? Colors.primary : Colors.warning,
+              }))}
+              height={250}
+            />
+          )}
         </View>
 
         {/* Transaction Analytics */}
@@ -129,17 +248,48 @@ const PlatformAnalyticsScreen: React.FC = () => {
           <View style={styles.statsGrid}>
             <View style={styles.statCard}>
               <Icon name="receipt" size={24} color={Colors.secondary} />
-              <Text style={styles.statValue}>28,473</Text>
+              <Text style={styles.statValue}>{analyticsData?.transactions.total.toLocaleString()}</Text>
               <Text style={styles.statLabel}>Total Transactions</Text>
-              <Text style={styles.statChange}>+8.2%</Text>
+              <Text style={styles.statChange}>+{analyticsData?.transactions.growth}%</Text>
             </View>
             <View style={styles.statCard}>
               <Icon name="trending-up" size={24} color={Colors.primary} />
-              <Text style={styles.statValue}>£44.30</Text>
+              <Text style={styles.statValue}>£{analyticsData?.transactions.avgValue}</Text>
               <Text style={styles.statLabel}>Avg Transaction</Text>
               <Text style={styles.statChange}>+3.1%</Text>
             </View>
           </View>
+
+          {/* Payment Methods Chart */}
+          {analyticsData && (
+            <Chart
+              title="Payment Methods Distribution"
+              type="pie"
+              data={analyticsData.transactions.byPaymentMethod.map(item => ({
+                label: item.method,
+                value: item.percentage,
+                color: item.method === 'Card' ? Colors.primary : 
+                       item.method === 'Contactless' ? Colors.secondary :
+                       item.method === 'Mobile Pay' ? Colors.success : 
+                       Colors.mediumGray,
+              }))}
+              height={200}
+            />
+          )}
+
+          {/* Transaction Trend Chart */}
+          {analyticsData && (
+            <Chart
+              title="Transaction Volume Trend"
+              type="line"
+              data={analyticsData.transactions.byPeriod.map(item => ({
+                label: item.period,
+                value: item.value,
+                color: Colors.secondary,
+              }))}
+              height={200}
+            />
+          )}
         </View>
 
         {/* Quick Actions */}
@@ -190,11 +340,27 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 16,
     backgroundColor: Colors.white,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
+  },
+  refreshButton: {
+    padding: 8,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: Colors.text,
   },
   headerTitle: {
     fontSize: 24,

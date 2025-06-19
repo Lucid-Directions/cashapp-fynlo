@@ -71,7 +71,7 @@ export type SettingsStackParamList = {
 
 const Stack = createStackNavigator<SettingsStackParamList>();
 
-// Clover POS Colors
+// Fynlo POS Colors
 const Colors = {
   primary: '#00A651',
   secondary: '#0066CC',
