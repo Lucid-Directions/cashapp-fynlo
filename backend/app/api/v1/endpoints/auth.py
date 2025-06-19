@@ -66,6 +66,25 @@ def get_password_hash(password: str) -> str:
     """Hash password"""
     return pwd_context.hash(password)
 
+def authenticate_user(db: Session, email: str, password: str) -> Optional[User]:
+    """Authenticate user with email and password
+    
+    This function is used by mobile endpoints for authentication.
+    Returns the user if authentication succeeds, None if it fails.
+    """
+    user = db.query(User).filter(User.email == email).first()
+    
+    if not user:
+        return None
+    
+    if not verify_password(password, user.password_hash):
+        return None
+    
+    if not user.is_active:
+        return None
+    
+    return user
+
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     """Create JWT access token"""
     to_encode = data.copy()
@@ -109,6 +128,37 @@ async def get_current_user(
     
     if not user.is_active:
         raise AuthenticationException("Account is inactive")
+    
+    return user
+
+async def get_current_user_optional(
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
+    db: Session = Depends(get_db),
+    redis: RedisClient = Depends(get_redis)
+) -> Optional[User]:
+    """Get current authenticated user, returns None if not authenticated"""
+    if not credentials:
+        return None
+    
+    try:
+        payload = jwt.decode(credentials.credentials, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        user_id: str = payload.get("sub")
+        if user_id is None:
+            return None
+    except JWTError:
+        return None
+    
+    # Check if token is blacklisted in Redis
+    try:
+        is_blacklisted = await redis.exists(f"blacklist:{credentials.credentials}")
+        if is_blacklisted:
+            return None
+    except:
+        return None
+    
+    user = db.query(User).filter(User.id == user_id).first()
+    if user is None or not user.is_active:
+        return None
     
     return user
 
