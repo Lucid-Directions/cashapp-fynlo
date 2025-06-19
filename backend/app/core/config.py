@@ -12,10 +12,11 @@ class Settings(BaseSettings):
     # Application
     APP_NAME: str = "Fynlo POS"
     DEBUG: bool = True
+    ENVIRONMENT: str = "development"
     API_V1_STR: str = "/api/v1"
     
     # Database
-    DATABASE_URL: str = "sqlite:///./fynlo_pos.db"
+    DATABASE_URL: str = "postgresql://fynlo_user:fynlo_password@localhost:5432/fynlo_pos"
     
     # Redis
     REDIS_URL: str = "redis://localhost:6379/0"
@@ -45,5 +46,6 @@ class Settings(BaseSettings):
     class Config:
         case_sensitive = True
         env_file = ".env"
+        extra = "ignore"  # Allow extra environment variables
 
 settings = Settings()
