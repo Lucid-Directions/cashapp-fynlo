@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     
     # Database
-    DATABASE_URL: str = "postgresql://fynlo_user:fynlo_password@localhost:5432/fynlo_pos"
+    DATABASE_URL: str = "sqlite:///./fynlo_pos.db"
     
     # Redis
     REDIS_URL: str = "redis://localhost:6379/0"
