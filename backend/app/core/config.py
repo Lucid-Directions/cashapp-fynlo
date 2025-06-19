@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     APP_NAME: str = "Fynlo POS"
     DEBUG: bool = True
     API_V1_STR: str = "/api/v1"
+    ENVIRONMENT: str = "development"
     
     # Database
     DATABASE_URL: str = "postgresql://fynlo_user:fynlo_password@localhost:5432/fynlo_pos"
