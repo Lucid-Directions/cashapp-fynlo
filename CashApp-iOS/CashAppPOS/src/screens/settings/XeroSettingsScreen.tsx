@@ -447,6 +447,7 @@ const XeroSettingsScreen: React.FC = () => {
         </View>
       </View>
     </ScrollView>
+    </View>
   );
 };
 
@@ -454,6 +455,29 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: Colors.primary,
+    paddingTop: 50,
+    paddingBottom: 15,
+    paddingHorizontal: 16,
+  },
+  backButton: {
+    padding: 8,
+  },
+  headerTitle: {
+    color: Colors.white,
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  headerSpacer: {
+    width: 40,
+  },
+  content: {
+    flex: 1,
     padding: 16,
   },
   loadingContainer: {
