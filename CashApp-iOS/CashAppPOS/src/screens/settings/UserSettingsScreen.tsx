@@ -66,22 +66,6 @@ const UserSettingsScreen: React.FC = () => {
       route: 'ThemeOptions',
       value: 'Light Mode',
     },
-    {
-      id: 'localization',
-      title: 'Language & Region',
-      description: 'Language, currency, and date formats',
-      icon: 'language',
-      route: 'Localization',
-      value: 'English (UK)',
-    },
-    {
-      id: 'accessibility',
-      title: 'Accessibility',
-      description: 'Font sizes, contrast, and screen reader',
-      icon: 'accessibility',
-      route: 'Accessibility',
-      value: 'Standard',
-    },
   ];
 
   const handleSettingPress = (item: UserSettingsItem) => {
@@ -119,6 +103,7 @@ const UserSettingsScreen: React.FC = () => {
         <TouchableOpacity 
           style={styles.backButton}
           onPress={() => navigation.goBack()}
+          testID="back-button"
         >
           <Icon name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>

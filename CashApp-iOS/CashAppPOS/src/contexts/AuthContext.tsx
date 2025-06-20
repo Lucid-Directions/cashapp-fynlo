@@ -297,6 +297,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (storedBusiness) {
           setBusiness(JSON.parse(storedBusiness));
         }
+      } else {
+        // Auto-login with demo user for development
+        const demoUser = MOCK_USERS.find(u => u.email === 'demo@fynlopos.com');
+        const demoBusiness = MOCK_RESTAURANTS.find(b => b.id === 'restaurant1');
+        
+        if (demoUser && demoBusiness) {
+          setUser({ ...demoUser, lastLogin: new Date() });
+          setBusiness(demoBusiness);
+        }
       }
     } catch (error) {
       console.error('Error loading stored auth:', error);

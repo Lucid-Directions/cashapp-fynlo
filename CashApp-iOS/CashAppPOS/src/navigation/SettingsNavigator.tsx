@@ -34,9 +34,11 @@ import SystemDiagnosticsScreen from '../screens/settings/app/SystemDiagnosticsSc
 import DeveloperSettingsScreen from '../screens/settings/DeveloperSettingsScreen';
 import XeroSettingsScreen from '../screens/settings/XeroSettingsScreen';
 import XeroSyncDashboard from '../screens/xero/XeroSyncDashboard';
+import RestaurantSetupScreen from '../screens/onboarding/RestaurantSetupScreen';
+import RestaurantProfileScreen from '../screens/settings/RestaurantProfileScreen';
 
 export type SettingsStackParamList = {
-  Settings: undefined;
+  SettingsMain: undefined;
   
   // Business Settings
   BusinessSettings: undefined;
@@ -74,6 +76,10 @@ export type SettingsStackParamList = {
   // Integrations
   XeroSettings: undefined;
   XeroSyncDashboard: undefined;
+  
+  // Onboarding
+  RestaurantSetup: undefined;
+  RestaurantProfile: undefined;
 };
 
 const Stack = createStackNavigator<SettingsStackParamList>();
@@ -82,6 +88,7 @@ const Stack = createStackNavigator<SettingsStackParamList>();
 const SettingsNavigator: React.FC = () => {
   return (
     <Stack.Navigator
+      initialRouteName="SettingsMain"
       screenOptions={{
         headerShown: false,
         cardStyle: { backgroundColor: '#F5F5F5' },
@@ -89,7 +96,7 @@ const SettingsNavigator: React.FC = () => {
     >
       {/* Main Settings Hub */}
       <Stack.Screen 
-        name="Settings" 
+        name="SettingsMain" 
         component={SettingsScreen} 
       />
       
@@ -209,6 +216,16 @@ const SettingsNavigator: React.FC = () => {
       <Stack.Screen 
         name="XeroSyncDashboard" 
         component={XeroSyncDashboard} 
+      />
+      
+      {/* Onboarding */}
+      <Stack.Screen 
+        name="RestaurantSetup" 
+        component={RestaurantSetupScreen} 
+      />
+      <Stack.Screen 
+        name="RestaurantProfile" 
+        component={RestaurantProfileScreen} 
       />
     </Stack.Navigator>
   );
