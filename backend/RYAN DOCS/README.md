@@ -5,6 +5,11 @@ Welcome to the Fynlo POS backend documentation directory. This contains all tech
 ## 📋 **Documentation Index**
 
 ### **👥 Developer Handovers**
+- **[FRONTEND_BACKEND_API_REQUIREMENTS.md](./FRONTEND_BACKEND_API_REQUIREMENTS.md)** - 🚨 **URGENT: Current Requirements**
+  - Critical missing API endpoints for immediate implementation
+  - Exact response formats required by frontend
+  - Complete API specifications and testing requirements
+  - GitHub Issue #57 implementation guide
 - **[RYAN_BACKEND_HANDOVER.md](./RYAN_BACKEND_HANDOVER.md)** - Complete backend development guide for Ryan
   - Project overview and current status
   - Prioritized task list with technical specifications
@@ -60,10 +65,15 @@ Welcome to the Fynlo POS backend documentation directory. This contains all tech
 
 ## 🎯 **Current Priorities**
 
-1. **iOS Integration** - Complete remaining 15% for seamless mobile app support
-2. **File Upload System** - Menu item images and restaurant branding
-3. **Real-time Features** - WebSocket events for live updates
-4. **Push Notifications** - APNs integration for iOS alerts
+1. **🚨 URGENT: Missing API Endpoints** - See FRONTEND_BACKEND_API_REQUIREMENTS.md
+   - POS Sessions management endpoints
+   - Mobile-optimized products endpoints  
+   - Restaurant floor plan endpoints
+   - Response format standardization
+2. **iOS Integration** - Complete remaining endpoints for seamless mobile app support
+3. **File Upload System** - Menu item images and restaurant branding
+4. **Real-time Features** - WebSocket events for live updates
+5. **Push Notifications** - APNs integration for iOS alerts
 
 ---
 
