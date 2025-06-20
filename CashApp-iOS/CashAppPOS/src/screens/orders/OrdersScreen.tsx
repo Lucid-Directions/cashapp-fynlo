@@ -40,7 +40,7 @@ interface Order {
   total: number;
   items: number;
   status: 'completed' | 'pending' | 'refunded' | 'cancelled';
-  paymentMethod: 'card' | 'cash' | 'mobile' | 'giftCard';
+  paymentMethod: 'card' | 'cash' | 'mobile' | 'qrCode';
   employee: string;
 }
 
@@ -95,7 +95,7 @@ const OrdersScreen: React.FC = () => {
         const status = Math.random() > 0.95 ? 'refunded' : 
                       Math.random() > 0.98 ? 'cancelled' : 'completed';
 
-        const paymentMethods: Array<'card' | 'cash' | 'mobile' | 'giftCard'> = ['card', 'cash', 'mobile', 'giftCard'];
+        const paymentMethods: Array<'card' | 'cash' | 'mobile' | 'qrCode'> = ['card', 'cash', 'mobile', 'qrCode'];
         const paymentMethod = paymentMethods[Math.floor(Math.random() * paymentMethods.length)];
 
         generatedOrders.push({
@@ -155,7 +155,7 @@ const OrdersScreen: React.FC = () => {
       case 'card': return 'credit-card';
       case 'cash': return 'attach-money';
       case 'mobile': return 'phone-iphone';
-      case 'giftCard': return 'card-giftcard';
+      case 'qrCode': return 'qr-code-scanner';
       default: return 'payment';
     }
   };

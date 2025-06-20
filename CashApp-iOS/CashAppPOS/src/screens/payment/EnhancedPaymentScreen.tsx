@@ -163,8 +163,12 @@ const EnhancedPaymentScreen: React.FC = () => {
     // Auto-select payment method if only one is enabled
     if (enabledPaymentMethods.length === 1) {
       setSelectedPaymentMethod(enabledPaymentMethods[0].id);
+    } else if (enabledPaymentMethods.length > 1 && !selectedPaymentMethod) {
+      // Default to QR code if available, otherwise first available method
+      const qrMethod = enabledPaymentMethods.find(m => m.id === 'qrCode');
+      setSelectedPaymentMethod(qrMethod ? qrMethod.id : enabledPaymentMethods[0].id);
     }
-  }, []);
+  }, [enabledPaymentMethods, selectedPaymentMethod]);
 
   const handleTipPreset = (percentage: number) => {
     const subtotal = calculateSubtotal();

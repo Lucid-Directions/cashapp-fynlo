@@ -510,9 +510,9 @@ const POSScreen: React.FC = () => {
                     <Text style={styles.paymentMethodSubtext}>Apple Pay, Google Pay</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={styles.paymentMethod}>
-                    <Icon name="card-giftcard" size={24} color={Colors.warning} />
-                    <Text style={styles.paymentMethodText}>Gift Card</Text>
-                    <Text style={styles.paymentMethodSubtext}>Store credit</Text>
+                    <Icon name="qr-code-scanner" size={24} color={Colors.primary} />
+                    <Text style={styles.paymentMethodText}>QR Payment</Text>
+                    <Text style={styles.paymentMethodSubtext}>Customer mobile app</Text>
                   </TouchableOpacity>
                 </View>
               </View>

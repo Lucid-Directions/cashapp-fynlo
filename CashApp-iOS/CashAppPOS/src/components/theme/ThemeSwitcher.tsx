@@ -10,6 +10,16 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme, ThemeMode } from '../../design-system/ThemeProvider';
 import { Theme } from '../../design-system/theme';
 
+// Color theme option interface
+interface ColorThemeOption {
+  id: string;
+  label: string;
+  primary: string;
+  secondary: string;
+  accent: string;
+  description: string;
+}
+
 // Theme option interface
 interface ThemeOption {
   mode: ThemeMode;
@@ -20,7 +30,7 @@ interface ThemeOption {
 
 // Theme switcher props
 export interface ThemeSwitcherProps {
-  variant?: 'compact' | 'expanded' | 'list';
+  variant?: 'compact' | 'expanded' | 'list' | 'colors';
   showLabels?: boolean;
   style?: ViewStyle;
   testID?: string;
@@ -56,9 +66,150 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
     },
   ];
 
+  const colorThemeOptions: ColorThemeOption[] = [
+    {
+      id: 'default',
+      label: 'Fynlo Green',
+      primary: '#00A651',
+      secondary: '#0066CC',
+      accent: '#22C55E',
+      description: 'Classic Fynlo brand colors',
+    },
+    {
+      id: 'blue',
+      label: 'Ocean Blue',
+      primary: '#0EA5E9',
+      secondary: '#1E40AF',
+      accent: '#3B82F6',
+      description: 'Calming ocean blue theme',
+    },
+    {
+      id: 'purple',
+      label: 'Royal Purple',
+      primary: '#8B5CF6',
+      secondary: '#7C3AED',
+      accent: '#A855F7',
+      description: 'Elegant purple theme',
+    },
+    {
+      id: 'orange',
+      label: 'Sunset Orange',
+      primary: '#F97316',
+      secondary: '#EA580C',
+      accent: '#FB923C',
+      description: 'Vibrant sunset orange',
+    },
+    {
+      id: 'red',
+      label: 'Cherry Red',
+      primary: '#EF4444',
+      secondary: '#DC2626',
+      accent: '#F87171',
+      description: 'Bold cherry red theme',
+    },
+    {
+      id: 'teal',
+      label: 'Emerald Teal',
+      primary: '#14B8A6',
+      secondary: '#0F766E',
+      accent: '#2DD4BF',
+      description: 'Fresh emerald teal',
+    },
+    {
+      id: 'indigo',
+      label: 'Deep Indigo',
+      primary: '#6366F1',
+      secondary: '#4F46E5',
+      accent: '#818CF8',
+      description: 'Deep indigo blue',
+    },
+    {
+      id: 'pink',
+      label: 'Rose Pink',
+      primary: '#EC4899',
+      secondary: '#DB2777',
+      accent: '#F472B6',
+      description: 'Elegant rose pink',
+    },
+    {
+      id: 'lime',
+      label: 'Fresh Lime',
+      primary: '#84CC16',
+      secondary: '#65A30D',
+      accent: '#A3E635',
+      description: 'Fresh lime green',
+    },
+    {
+      id: 'amber',
+      label: 'Golden Amber',
+      primary: '#F59E0B',
+      secondary: '#D97706',
+      accent: '#FBBF24',
+      description: 'Warm golden amber',
+    },
+  ];
+
   const handleThemeChange = (mode: ThemeMode) => {
     setThemeMode(mode);
   };
+
+  const handleColorThemeChange = (colorTheme: ColorThemeOption) => {
+    // For now, we'll just show an alert since full implementation requires theme provider changes
+    // In a full implementation, this would update the theme colors
+    console.log('Color theme selected:', colorTheme.label);
+  };
+
+  // Colors variant - color theme grid
+  if (variant === 'colors') {
+    return (
+      <View style={[styles.colorsContainer, style]} testID={testID}>
+        <View style={styles.colorsGrid}>
+          {colorThemeOptions.map((colorTheme) => (
+            <TouchableOpacity
+              key={colorTheme.id}
+              style={[
+                styles.colorCard,
+                colorTheme.id === 'default' && styles.colorCardActive,
+              ]}
+              onPress={() => handleColorThemeChange(colorTheme)}
+              accessibilityRole="button"
+              accessibilityLabel={colorTheme.label}
+              accessibilityHint={colorTheme.description}
+              accessibilityState={{ selected: colorTheme.id === 'default' }}
+            >
+              <View style={styles.colorPreview}>
+                <View style={[styles.colorSwatch, { backgroundColor: colorTheme.primary }]} />
+                <View style={[styles.colorSwatch, { backgroundColor: colorTheme.secondary }]} />
+                <View style={[styles.colorSwatch, { backgroundColor: colorTheme.accent }]} />
+              </View>
+              {showLabels && (
+                <>
+                  <Text style={[
+                    styles.colorLabel,
+                    colorTheme.id === 'default' && styles.colorLabelActive,
+                  ]}>
+                    {colorTheme.label}
+                  </Text>
+                  <Text style={styles.colorDescription}>
+                    {colorTheme.description}
+                  </Text>
+                </>
+              )}
+              {colorTheme.id === 'default' && (
+                <View style={styles.colorCheckmark}>
+                  <Icon
+                    name="check-circle"
+                    size={16}
+                    color={theme.colors.primary}
+                  />
+                </View>
+              )}
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+    );
+  }
 
   // Compact variant - horizontal buttons
   if (variant === 'compact') {
@@ -405,6 +556,67 @@ const createStyles = (theme: Theme) =>
       fontSize: theme.typography.fontSize.sm,
       fontWeight: theme.typography.fontWeight.medium,
       color: theme.colors.text,
+    },
+
+    // Colors variant styles
+    colorsContainer: {
+      backgroundColor: theme.colors.white,
+      borderRadius: theme.borderRadius.xl,
+      padding: theme.spacing[4],
+    },
+    colorsGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: theme.spacing[3],
+      justifyContent: 'space-between',
+    },
+    colorCard: {
+      width: '48%',
+      backgroundColor: theme.colors.neutral[50],
+      borderRadius: theme.borderRadius.lg,
+      padding: theme.spacing[3],
+      borderWidth: 2,
+      borderColor: theme.colors.neutral[200],
+      alignItems: 'center',
+      position: 'relative',
+      minHeight: 120,
+    },
+    colorCardActive: {
+      borderColor: theme.colors.primary,
+      backgroundColor: theme.colors.primary[50] || theme.colors.neutral[50],
+    },
+    colorPreview: {
+      flexDirection: 'row',
+      marginBottom: theme.spacing[2],
+      gap: theme.spacing[1],
+    },
+    colorSwatch: {
+      width: 16,
+      height: 16,
+      borderRadius: theme.borderRadius.sm,
+      borderWidth: 1,
+      borderColor: theme.colors.neutral[200],
+    },
+    colorLabel: {
+      fontSize: theme.typography.fontSize.sm,
+      fontWeight: theme.typography.fontWeight.semibold,
+      color: theme.colors.text,
+      textAlign: 'center',
+      marginBottom: theme.spacing[1],
+    },
+    colorLabelActive: {
+      color: theme.colors.primary,
+    },
+    colorDescription: {
+      fontSize: theme.typography.fontSize.xs,
+      color: theme.colors.neutral[600],
+      textAlign: 'center',
+      lineHeight: 16,
+    },
+    colorCheckmark: {
+      position: 'absolute',
+      top: theme.spacing[2],
+      right: theme.spacing[2],
     },
   });
 
