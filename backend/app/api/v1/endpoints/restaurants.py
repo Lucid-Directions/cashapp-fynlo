@@ -13,6 +13,13 @@ from app.core.database import get_db, Restaurant, Platform, User, Order, Custome
 from app.api.v1.endpoints.auth import get_current_user
 from app.core.responses import APIResponseHelper
 from app.core.exceptions import FynloException, ErrorCodes
+from app.core.validation import (
+    validate_model_jsonb_fields,
+    validate_email,
+    validate_phone,
+    sanitize_string,
+    ValidationError as ValidationErr
+)
 
 router = APIRouter()
 
@@ -181,15 +188,47 @@ async def create_restaurant(
     if not platform:
         raise HTTPException(status_code=404, detail="Platform not found")
     
+    # Validate and sanitize JSONB fields
+    try:
+        validated_address = validate_model_jsonb_fields('restaurant', 'address', restaurant_data.address)
+        validated_business_hours = validate_model_jsonb_fields('restaurant', 'business_hours', restaurant_data.business_hours)
+        validated_settings = validate_model_jsonb_fields('restaurant', 'settings', restaurant_data.settings)
+    except ValidationErr as e:
+        raise FynloException(
+            error_code=ErrorCodes.VALIDATION_ERROR,
+            detail=f"JSONB validation failed: {str(e)}"
+        )
+    
+    # Validate email and phone if provided
+    if restaurant_data.email and not validate_email(restaurant_data.email):
+        raise FynloException(
+            error_code=ErrorCodes.VALIDATION_ERROR,
+            detail="Invalid email format"
+        )
+    
+    if restaurant_data.phone and not validate_phone(restaurant_data.phone):
+        raise FynloException(
+            error_code=ErrorCodes.VALIDATION_ERROR,
+            detail="Invalid phone number format"
+        )
+    
+    # Sanitize string inputs
+    sanitized_name = sanitize_string(restaurant_data.name, 255)
+    if not sanitized_name:
+        raise FynloException(
+            error_code=ErrorCodes.VALIDATION_ERROR,
+            detail="Restaurant name cannot be empty"
+        )
+    
     new_restaurant = Restaurant(
         platform_id=platform_id,
-        name=restaurant_data.name,
-        address=restaurant_data.address,
+        name=sanitized_name,
+        address=validated_address,
         phone=restaurant_data.phone,
         email=restaurant_data.email,
         timezone=restaurant_data.timezone,
-        business_hours=restaurant_data.business_hours,
-        settings=restaurant_data.settings
+        business_hours=validated_business_hours,
+        settings=validated_settings
     )
     
     db.add(new_restaurant)
@@ -235,8 +274,56 @@ async def update_restaurant(
         str(restaurant.id) != str(current_user.restaurant_id)):
         raise HTTPException(status_code=403, detail="Access denied")
     
-    # Update fields if provided
+    # Validate and sanitize fields if provided
     update_data = restaurant_data.dict(exclude_unset=True)
+    
+    # Validate JSONB fields
+    try:
+        if 'address' in update_data:
+            update_data['address'] = validate_model_jsonb_fields('restaurant', 'address', update_data['address'])
+        
+        if 'business_hours' in update_data:
+            update_data['business_hours'] = validate_model_jsonb_fields('restaurant', 'business_hours', update_data['business_hours'])
+        
+        if 'settings' in update_data:
+            update_data['settings'] = validate_model_jsonb_fields('restaurant', 'settings', update_data['settings'])
+        
+        if 'tax_configuration' in update_data:
+            update_data['tax_configuration'] = validate_model_jsonb_fields('restaurant', 'tax_configuration', update_data['tax_configuration'])
+        
+        if 'payment_methods' in update_data:
+            update_data['payment_methods'] = validate_model_jsonb_fields('restaurant', 'payment_methods', update_data['payment_methods'])
+            
+    except ValidationErr as e:
+        raise FynloException(
+            error_code=ErrorCodes.VALIDATION_ERROR,
+            detail=f"JSONB validation failed: {str(e)}"
+        )
+    
+    # Validate email and phone if provided
+    if 'email' in update_data and update_data['email'] and not validate_email(update_data['email']):
+        raise FynloException(
+            error_code=ErrorCodes.VALIDATION_ERROR,
+            detail="Invalid email format"
+        )
+    
+    if 'phone' in update_data and update_data['phone'] and not validate_phone(update_data['phone']):
+        raise FynloException(
+            error_code=ErrorCodes.VALIDATION_ERROR,
+            detail="Invalid phone number format"
+        )
+    
+    # Sanitize string inputs
+    if 'name' in update_data:
+        sanitized_name = sanitize_string(update_data['name'], 255)
+        if not sanitized_name:
+            raise FynloException(
+                error_code=ErrorCodes.VALIDATION_ERROR,
+                detail="Restaurant name cannot be empty"
+            )
+        update_data['name'] = sanitized_name
+    
+    # Update fields
     for field, value in update_data.items():
         setattr(restaurant, field, value)
     
