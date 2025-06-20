@@ -468,6 +468,130 @@ async def delete_product(
     
     return {"message": "Product deleted successfully"}
 
+# Mobile-optimized endpoints
+class MobileProductResponse(BaseModel):
+    id: int  # Frontend expects integer ID
+    name: str
+    price: float
+    category: str  # Category name, not ID
+    image: Optional[str] = None  # Frontend expects 'image' not 'image_url'
+    barcode: Optional[str] = None
+    available_in_pos: bool = True  # Frontend expects this field
+    active: bool  # Frontend expects 'active' not 'is_active'
+
+@router.get("/mobile")
+async def get_products_mobile(
+    restaurant_id: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    redis: RedisClient = Depends(get_redis)
+):
+    """Get mobile-optimized products list matching frontend expectations"""
+    
+    # Use user's restaurant if not specified
+    if not restaurant_id:
+        restaurant_id = str(current_user.restaurant_id)
+    
+    # Check cache first
+    cache_key = f"products:mobile:{restaurant_id}"
+    cached_products = await redis.get(cache_key)
+    if cached_products:
+        return APIResponseHelper.success(data=cached_products)
+    
+    # Get products with category info
+    products_query = db.query(Product, Category).join(
+        Category, Product.category_id == Category.id
+    ).filter(
+        and_(
+            Product.restaurant_id == restaurant_id,
+            Product.is_active == True,
+            Category.is_active == True
+        )
+    ).order_by(Category.sort_order, Product.name)
+    
+    products_with_categories = products_query.all()
+    
+    result = [
+        {
+            "id": int(str(product.id).replace('-', '')[:9]),  # Convert UUID to int for frontend
+            "name": product.name,
+            "price": product.price,
+            "category": category.name,
+            "image": product.image_url,
+            "barcode": product.barcode,
+            "available_in_pos": True,
+            "active": product.is_active
+        }
+        for product, category in products_with_categories
+    ]
+    
+    # Cache for 5 minutes
+    await redis.set(cache_key, result, expire=300)
+    
+    return APIResponseHelper.success(
+        data=result,
+        message=f"Retrieved {len(result)} mobile products"
+    )
+
+@router.get("/category/{category_id}")
+async def get_products_by_category(
+    category_id: int,
+    restaurant_id: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    redis: RedisClient = Depends(get_redis)
+):
+    """Get products by category ID - mobile compatible"""
+    
+    # Use user's restaurant if not specified
+    if not restaurant_id:
+        restaurant_id = str(current_user.restaurant_id)
+    
+    # Check cache first
+    cache_key = f"products:category:{category_id}:{restaurant_id}"
+    cached_products = await redis.get(cache_key)
+    if cached_products:
+        return APIResponseHelper.success(data=cached_products)
+    
+    # Find category by ID
+    category = db.query(Category).filter(
+        and_(Category.id == str(category_id), Category.restaurant_id == restaurant_id)
+    ).first()
+    
+    if not category:
+        raise HTTPException(status_code=404, detail="Category not found")
+    
+    # Get products in this category
+    products = db.query(Product).filter(
+        and_(
+            Product.category_id == str(category_id),
+            Product.restaurant_id == restaurant_id,
+            Product.is_active == True
+        )
+    ).order_by(Product.name).all()
+    
+    result = [
+        {
+            "id": int(str(product.id).replace('-', '')[:9]),  # Convert UUID to int for frontend
+            "name": product.name,
+            "price": product.price,
+            "category": category.name,
+            "image": product.image_url,
+            "barcode": product.barcode,
+            "available_in_pos": True,
+            "active": product.is_active
+        }
+        for product in products
+    ]
+    
+    # Cache for 5 minutes
+    await redis.set(cache_key, result, expire=300)
+    
+    return APIResponseHelper.success(
+        data=result,
+        message=f"Retrieved {len(result)} products in category '{category.name}'"
+    )
+
 @router.get("/{product_id}", response_model=ProductResponse)
 async def get_product(
     product_id: str,

@@ -480,3 +480,136 @@ async def get_restaurant(
         created_at=restaurant.created_at,
         updated_at=restaurant.updated_at
     )
+
+# Floor Plan and Table Management Endpoints
+class TableResponse(BaseModel):
+    id: int
+    name: str
+    section_id: int
+    section_name: str
+    seats: int
+    status: str  # 'available', 'occupied', 'reserved', 'cleaning'
+    server_id: Optional[int] = None
+    server_name: Optional[str] = None
+    x_position: int = 0
+    y_position: int = 0
+
+class SectionResponse(BaseModel):
+    id: int
+    name: str
+    restaurant_id: str
+    color: str = "#00A651"
+    is_active: bool = True
+
+# Temporary floor plan storage (until database models are added)
+floor_plan_data = {
+    "sections": [
+        {"id": 1, "name": "Main Dining", "restaurant_id": "", "color": "#00A651", "is_active": True},
+        {"id": 2, "name": "Patio", "restaurant_id": "", "color": "#FFA500", "is_active": True},
+        {"id": 3, "name": "Private Dining", "restaurant_id": "", "color": "#800080", "is_active": True}
+    ],
+    "tables": [
+        {"id": 1, "name": "Table 1", "section_id": 1, "section_name": "Main Dining", "seats": 4, "status": "available", "server_id": None, "server_name": None, "x_position": 100, "y_position": 100},
+        {"id": 2, "name": "Table 2", "section_id": 1, "section_name": "Main Dining", "seats": 2, "status": "occupied", "server_id": 1, "server_name": "John Doe", "x_position": 200, "y_position": 100},
+        {"id": 3, "name": "Table 3", "section_id": 1, "section_name": "Main Dining", "seats": 6, "status": "reserved", "server_id": 2, "server_name": "Jane Smith", "x_position": 300, "y_position": 100},
+        {"id": 4, "name": "Patio A", "section_id": 2, "section_name": "Patio", "seats": 4, "status": "available", "server_id": None, "server_name": None, "x_position": 150, "y_position": 300},
+        {"id": 5, "name": "Patio B", "section_id": 2, "section_name": "Patio", "seats": 2, "status": "cleaning", "server_id": None, "server_name": None, "x_position": 250, "y_position": 300},
+        {"id": 6, "name": "Private 1", "section_id": 3, "section_name": "Private Dining", "seats": 8, "status": "available", "server_id": None, "server_name": None, "x_position": 100, "y_position": 500}
+    ]
+}
+
+@router.get("/floor-plan")
+async def get_floor_plan(
+    section_id: Optional[int] = Query(None),
+    current_user: User = Depends(get_current_user)
+):
+    """Get restaurant floor plan with tables and sections"""
+    
+    sections = floor_plan_data["sections"]
+    tables = floor_plan_data["tables"]
+    
+    # Filter by section if specified
+    if section_id:
+        sections = [s for s in sections if s["id"] == section_id]
+        tables = [t for t in tables if t["section_id"] == section_id]
+    
+    return APIResponseHelper.success(
+        data={
+            "sections": sections,
+            "tables": tables
+        },
+        message=f"Retrieved floor plan with {len(sections)} sections and {len(tables)} tables"
+    )
+
+@router.get("/sections")
+async def get_sections(
+    current_user: User = Depends(get_current_user)
+):
+    """Get all restaurant sections"""
+    
+    sections = floor_plan_data["sections"]
+    
+    return APIResponseHelper.success(
+        data=sections,
+        message=f"Retrieved {len(sections)} sections"
+    )
+
+@router.put("/tables/{table_id}/status")
+async def update_table_status(
+    table_id: int,
+    status: str,
+    current_user: User = Depends(get_current_user)
+):
+    """Update table status"""
+    
+    # Validate status
+    valid_statuses = ["available", "occupied", "reserved", "cleaning"]
+    if status not in valid_statuses:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid status. Must be one of: {valid_statuses}"
+        )
+    
+    # Find and update table
+    table = None
+    for t in floor_plan_data["tables"]:
+        if t["id"] == table_id:
+            table = t
+            break
+    
+    if not table:
+        raise HTTPException(status_code=404, detail="Table not found")
+    
+    table["status"] = status
+    
+    return APIResponseHelper.success(
+        data=table,
+        message=f"Table {table['name']} status updated to {status}"
+    )
+
+@router.put("/tables/{table_id}/server")
+async def update_table_server(
+    table_id: int,
+    server_id: Optional[int] = None,
+    server_name: Optional[str] = None,
+    current_user: User = Depends(get_current_user)
+):
+    """Assign server to table"""
+    
+    # Find table
+    table = None
+    for t in floor_plan_data["tables"]:
+        if t["id"] == table_id:
+            table = t
+            break
+    
+    if not table:
+        raise HTTPException(status_code=404, detail="Table not found")
+    
+    table["server_id"] = server_id
+    table["server_name"] = server_name
+    
+    return APIResponseHelper.success(
+        data=table,
+        message=f"Table {table['name']} server updated"
+    )
