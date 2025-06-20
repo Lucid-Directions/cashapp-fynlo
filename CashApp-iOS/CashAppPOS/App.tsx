@@ -23,7 +23,7 @@ const App: React.FC = () => {
   useEffect(() => {
     const initializeApp = async () => {
       try {
-        console.log('🚀 Clover POS App Starting...');
+        console.log('🚀 Fynlo POS App Starting...');
         
         // Add small delay to ensure all modules are loaded
         await new Promise(resolve => setTimeout(resolve, 100));
@@ -52,7 +52,7 @@ const App: React.FC = () => {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#2C3E50" />
-        <Text style={styles.loadingText}>Loading Clover POS...</Text>
+        <Text style={styles.loadingText}>Loading Fynlo POS...</Text>
       </View>
     );
   }

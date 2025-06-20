@@ -10,6 +10,7 @@ import {
   Linking,
   RefreshControl,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import XeroAuthService from '../../services/XeroAuthService';
 import XeroApiClient from '../../services/XeroApiClient';
@@ -29,6 +30,7 @@ interface SyncStatus {
 }
 
 const XeroSettingsScreen: React.FC = () => {
+  const navigation = useNavigation();
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>({
     isConnected: false
   });

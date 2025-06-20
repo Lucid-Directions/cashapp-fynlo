@@ -15,12 +15,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     let jsCodeLocation: URL
 
     #if DEBUG
-      // For debug builds, use Metro bundler
+      // For debug builds, use Metro bundler (now running)
       jsCodeLocation = RCTBundleURLProvider.sharedSettings().jsBundleURL(forBundleRoot: "index")
       print("✅ Using Metro bundler for debug build: \(jsCodeLocation)")
     #else
       // For release builds, use bundled JS
-      jsCodeLocation = Bundle.main.url(forResource: "main", withExtension: "jsbundle")!
+      guard let bundledURL = Bundle.main.url(forResource: "main", withExtension: "jsbundle") else {
+        fatalError("❌ Bundled JavaScript file not found")
+      }
+      jsCodeLocation = bundledURL
       print("✅ Using bundled JavaScript for release build")
     #endif
 

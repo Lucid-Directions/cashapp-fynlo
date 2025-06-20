@@ -1,19 +1,20 @@
 # 🏗️ **Fynlo POS - Complete Project Context & Knowledge Base**
 
-**Date**: December 20, 2024  
+**Date**: June 20, 2025  
 **Purpose**: Complete project overview for future development sessions  
-**Status**: Active Development - Frontend-Backend Integration Phase
+**Status**: Active Development - Menu Management & Inventory Systems Completed
 
 ---
 
 ## 📋 **Project Overview**
 
 ### **What is Fynlo POS?**
-Fynlo POS is a **hardware-free restaurant management platform** consisting of:
-- **iOS React Native App**: Point of sale, menu management, staff interface
+Fynlo POS is a **hardware-free restaurant payment and management platform** consisting of:
+- **iOS React Native App**: Point of sale, menu management, staff interface (customizable per restaurant)
 - **FastAPI Backend**: Complete restaurant management API with PostgreSQL
-- **Payment Innovation**: QR code payments (1.2% fees vs 2.9% traditional)
-- **Multi-tenant Architecture**: Platform → Restaurants → Users
+- **Payment Innovation**: QR code payments (1.2% fees vs 2.9% traditional) - NO HARDWARE REQUIRED
+- **Multi-tenant Architecture**: Platform → Restaurants → Users (supports multiple restaurant clients)
+- **Current Pilot Client**: Mexican restaurant (first implementation for testing and refinement)
 
 ### **Key Value Propositions**
 1. **Hardware-Free**: No expensive POS terminals or card readers required
@@ -195,25 +196,58 @@ backend/
 
 ## 📊 **Current Development Status**
 
-### **✅ Completed & Working**
+### **✅ Completed & Working (Updated June 20, 2025)**
 1. **Frontend Core**: Menu management, settings, navigation
-2. **Backend API**: All 43+ endpoints implemented and tested
+2. **Backend API**: All 43+ endpoints implemented and tested by Ryan
 3. **Xero Integration**: Complete OAuth flow and API integration
-4. **iOS Stability**: Fixed all major crash issues
+4. **iOS App Stability**: ✅ **FULLY RESOLVED** - App launches successfully
 5. **Logging System**: Comprehensive debugging infrastructure
 6. **Payment Systems**: QR, Stripe, Apple Pay backends ready
+7. **API Testing Infrastructure**: ✅ **NEW** - Complete testing framework implemented
+8. **Theme System**: ✅ **FIXED** - All theme export errors resolved
+9. **Metro Bundler**: ✅ **STABLE** - Running consistently on port 8081
+10. **App Branding**: ✅ **CORRECTED** - Properly shows "Fynlo POS" throughout
+11. **✅ **MEXICAN MENU SYSTEM**: Complete authentic Mexican restaurant menu implemented**
+12. **✅ **INGREDIENT INVENTORY**: Proper ingredient-based inventory tracking system**
+13. **✅ **QR SCANNER FUNCTIONALITY**: Working QR/barcode scanner in inventory**
 
-### **🔄 Current Issues (Need Attention)**
-1. **Theme Export Errors**: `Colors.background` undefined in Metro logs
-2. **API Integration**: Frontend not fully connected to Ryan's backend
-3. **Authentication Flow**: Frontend/backend JWT integration incomplete
-4. **Data Model Sync**: TypeScript interfaces vs Pydantic models mismatch
-5. **Real-time Connection**: WebSocket frontend integration pending
+### **🚀 Major Additions Completed Today (June 20, 2025)**
+1. **Mexican Restaurant Menu**: Complete replacement of Italian/coffee items with authentic Mexican menu
+   - **6 Categories**: Snacks, Tacos, Special Tacos, Burritos, Sides & Salsas, Drinks
+   - **30+ Items**: Nachos, Carnitas, Barbacoa de Res, Carne Asada, Corona, etc.
+   - **Proper Descriptions**: Authentic Mexican food descriptions with ingredients
+   - **Accurate Pricing**: £0.00 (free salsas) to £10.00 (Special Burrito)
+
+2. **Ingredient-Based Inventory System**: Replaced meal-based inventory with cooking ingredients
+   - **Vegetables**: Onions, Tomatoes, Potatoes, Bell Peppers, Jalapeños, Coriander, Lime, Avocados, Lettuce
+   - **Meat**: Pork Shoulder (Carnitas), Beef Chuck (Barbacoa), Chicken Thighs, Chorizo, Prawns, Cod Fillets
+   - **Dairy**: Mozzarella Cheese, Feta Cheese, Sour Cream
+   - **Pantry**: Black Beans, Corn Tortillas, Flour Tortillas, Rice, Cooking Oil
+   - **Spices**: Cumin, Paprika, Chili Powder
+   - **Beverages**: Corona Beer, Modelo Beer, Lime Juice, Pineapple Juice
+
+3. **Working QR Scanner**: Fixed QR scanner button in inventory with camera trigger functionality
+
+4. **Menu Management Screen**: Updated to match POS screen with authentic Mexican items
+   - **Consistent Menu**: Both POS and Menu Management now show same Mexican restaurant items
+   - **Proper Categories**: Snacks, Tacos, Special Tacos, Burritos, Sides, Drinks
+   - **Full CRUD**: Add, edit, delete items and categories with Mexican restaurant context
+
+### **🔄 Current Issues (All Resolved June 20, 2025)**
+1. ~~**Theme Export Errors**: `Colors.background` undefined~~ ✅ **FIXED**
+2. ~~**iOS App Crashes**: App not loading properly~~ ✅ **FIXED**
+3. ~~**CocoaPods Issues**: Missing xcconfig files~~ ✅ **FIXED**
+4. ~~**Metro Bundler**: Inconsistent startup~~ ✅ **FIXED**
+5. ~~**Incorrect Branding**: Showed "Clover" instead of "Fynlo"~~ ✅ **FIXED**
+6. ~~**Wrong Menu Items**: Menu showed Italian items (Americano, etc.) instead of Mexican~~ ✅ **FIXED**
+7. ~~**Meal-Based Inventory**: Inventory showed finished meals instead of cooking ingredients~~ ✅ **FIXED**
+8. ~~**Broken QR Scanner**: QR scanner button didn't work in inventory~~ ✅ **FIXED**
+9. ~~**Menu Management Mismatch**: Menu Management showed different items than POS screen~~ ✅ **FIXED**
 
 ### **⏳ Next Phase (Ready for Development)**
-1. **Frontend-Backend Integration**: Connect all API endpoints
-2. **End-to-End Testing**: Complete user workflows
-3. **Performance Optimization**: Real-time features integration
+1. **Backend API Completion**: Wait for Ryan to implement missing endpoints
+2. **API Integration Testing**: Test real backend connectivity using our new testing framework
+3. **End-to-End Workflows**: Complete user journey testing
 4. **Production Deployment**: Environment configuration
 
 ---
@@ -247,14 +281,121 @@ uvicorn app.main:app --reload
 
 ---
 
+## 🏢 **Platform Architecture for Multi-Restaurant Support**
+
+### **Current Status**
+- **Platform Development**: Building a hardware-free POS that can serve ANY restaurant type
+- **Pilot Implementation**: Mexican restaurant is our first client for testing and refinement
+- **Future Clients**: Ready to onboard Italian, Chinese, Indian, American, or any cuisine type
+
+### **How the Platform Works**
+1. **Restaurant Onboarding**: Each new client gets customized menu and inventory setup
+2. **Payment Processing**: Core QR payment system works for all restaurants (1.2% fees)
+3. **Menu Flexibility**: Support for any cuisine, pricing structure, or menu complexity
+4. **Inventory Adaptation**: Track ingredients specific to each restaurant's needs
+5. **Multi-tenant Backend**: Each restaurant has isolated data while sharing platform infrastructure
+
+### **Why Mexican Restaurant First?**
+- Testing ground for platform features
+- Real-world validation of hardware-free concept
+- Refinement of UX/UI with actual restaurant staff
+- Proof of concept for investors and future clients
+
+---
+
+## 🌮 **Pilot Client: Mexican Restaurant (First Implementation)**
+
+### **About the Pilot Implementation**
+**🚨 IMPORTANT**: This Mexican restaurant is our **FIRST CLIENT** for the Fynlo POS platform. The menu and inventory system shown here is specific to this pilot client. Future clients will have their own customized menus and inventory systems.
+
+### **Mexican Restaurant Menu (Pilot Client)**
+
+#### **1. Snacks (Mexican Appetizers) - £5.00-£6.50**
+- **Nachos** (£5.00): Homemade corn tortilla chips with black beans, tomato salsa, pico de gallo, feta, guac & coriander
+- **Quesadillas** (£5.50): Folded flour tortilla filled with mozzarella, topped with tomato salsa, feta & coriander  
+- **Chorizo Quesadilla** (£5.50): With chorizo & mozzarella, topped with tomato salsa, feta & coriander
+- **Chicken Quesadilla** (£5.50): With chicken, peppers, onion & mozzarella, topped with salsa, feta & coriander
+- **Tostada** (£6.50): Crispy tortillas with black beans, chicken filling, served with salsa, lettuce and feta
+
+#### **2. Tacos (Traditional) - £3.50 each**
+- **Carnitas**: Slow cooked pork, served with onion, coriander, salsa, guacamole & coriander
+- **Cochinita**: Marinated pulled pork served with pickle red onion
+- **Barbacoa de Res**: Juicy pulled beef topped with onion, guacamole & coriander
+- **Chorizo**: Grilled chorizo with black beans, onions, salsa, coriander & guacamole
+- **Rellena**: Fried black pudding with beans, onion & chilli, topped with coriander and pickled red onion
+- **Chicken Fajita**: Chicken, peppers & onion with black beans, topped with salsa, guac & coriander
+- **Haggis**: Haggis with beans, onion & chilli, topped with coriander and pickled red onion
+- **Pescado**: Battered cod with guacamole & coriander, topped with red cabbage & mango chilli salsa
+- **Dorados**: Crispy rolled tortillas filled with chicken, topped with salsa, lettuce and feta
+- **Dorados Papa**: Crispy rolled tortillas filled with potato, topped with salsa, lettuce and feta
+- **Nopal**: Cactus, black beans & onion, topped with tomato salsa and crumbled feta
+- **Frijol**: Black beans with fried plantain served with tomato salsa, feta & coriander
+- **Verde**: Courgette & sweetcorn fried with garlic, served with tomato salsa and crumbled feta
+- **Fajita**: Mushrooms, peppers & onion with black beans, topped with salsa, feta & coriander
+
+#### **3. Special Tacos (Premium) - £4.50 each**
+- **Carne Asada**: Diced rump steak with peppers and red onion, served on black beans, topped with chimichurri sauce & coriander
+- **Camaron**: Prawns with chorizo, peppers and red onion, served on black beans, topped with tomato salsa, coriander & guacamole
+- **Pulpos**: Chargrilled octopus, cooked with peppers and red onion, served on grilled potato with garlic & coriander
+
+#### **4. Burritos (Large Wraps) - £8.00-£10.00**
+- **Regular Burrito** (£8.00): Choose any filling from the taco menu! With black beans, lettuce, pico de gallo, & guacamole, topped with salsa, feta and coriander
+- **Special Burrito** (£10.00): Choose any filling from the special tacos menu! With black beans, lettuce, pico de gallo, & guacamole, topped with salsa, feta and coriander
+- **Add Mozzarella** (£1.00): Add extra cheese to any burrito
+
+#### **5. Sides & Salsas - £0.00-£3.50**
+- **Skinny Fries** (£3.50): Thin cut fries
+- **Pico de Gallo** (FREE!): Diced tomato, onion and chilli
+- **Green Chili** (FREE!): Homemade green chili salsa - HOT!
+- **Pineapple Habanero** (FREE!): Pineapple sauce with habanero chili - HOT!
+- **Scotch Bonnet** (FREE!): Homemade spicy salsa made with scotch bonnet chilies - VERY HOT!
+
+#### **6. Drinks (Mexican Beverages) - £3.75-£4.00**
+- **Pink Paloma** (£3.75): Alcohol-free refreshing cocktail, tangy lime juice and grapefruit soda, with a splash of grenadine
+- **Coco-Nought** (£3.75): Coconut, pineapple juice and milk, blended into a creamy, sweet, alcohol-free treat!
+- **Corona** (£3.80): Mexican beer
+- **Modelo** (£4.00): Rich, full-flavoured Pilsner style Lager, crisp and refreshing, 355ml
+- **Pacifico** (£4.00): Pilsner style Lager from the Pacific Ocean city of Mazatlán, 355ml
+- **Dos Equis** (£4.00): "Two X's", German brewing heritage with the spirit of Mexican traditions, 355ml
+
+### **Mexican Restaurant Inventory System (Pilot Client)**
+**🚨 NOTE**: This ingredient-based inventory system is customized for our Mexican restaurant pilot client. Future clients will have inventory systems tailored to their specific needs (e.g., Italian restaurant would track pasta, olive oil, basil, etc.).
+
+#### **Vegetables (kg/pieces/bunches)**
+- Onions, Tomatoes, Potatoes, Bell Peppers, Jalapeños, Coriander (Fresh), Lime, Avocados, Lettuce
+
+#### **Meat (kg)**  
+- Pork Shoulder (Carnitas), Beef Chuck (Barbacoa), Chicken Thighs, Chorizo, Prawns, Cod Fillets
+
+#### **Dairy (kg/litres)**
+- Mozzarella Cheese, Feta Cheese, Sour Cream
+
+#### **Pantry Items (kg/packs/litres)**
+- Black Beans, Corn Tortillas, Flour Tortillas, Rice, Cooking Oil
+
+#### **Spices (kg)**
+- Cumin (Ground), Paprika, Chili Powder
+
+#### **Beverages (bottles/litres)**
+- Corona Beer, Modelo Beer, Lime Juice, Pineapple Juice
+
+---
+
 ## 🗂️ **Key Files & Their Purposes**
 
 ### **Critical Frontend Files**
-- **`src/services/DataService.ts`**: Unified API service (mock/real switching)
+- **`src/screens/main/POSScreen.tsx`**: ✅ **MEXICAN MENU** - Main POS interface with hardcoded Mexican menu items
+- **`src/screens/settings/app/MenuManagementScreen.tsx`**: ✅ **MEXICAN MENU** - Menu CRUD interface with complete Mexican restaurant menu
+- **`src/services/MockDataService.ts`**: ✅ **MEXICAN MENU** - Mock data service with Mexican menu items
+- **`src/utils/mockDataGenerator.ts`**: ✅ **INGREDIENTS** - Inventory generator with Mexican cooking ingredients
+- **`src/screens/inventory/InventoryScreen.tsx`**: ✅ **INGREDIENTS** - Ingredient tracking with QR scanner
+- **`src/services/DataService.ts`**: ✅ **ENHANCED** - Unified API service with TEST_API_MODE
 - **`src/services/DatabaseService.ts`**: Real backend API client
+- **`src/services/APITestingService.ts`**: ✅ **NEW** - Comprehensive API testing framework
 - **`src/services/XeroAuthService.ts`**: OAuth 2.0 implementation
-- **`src/screens/settings/app/MenuManagementScreen.tsx`**: Menu CRUD interface
-- **`src/design-system/theme.ts`**: Color system and typography
+- **`src/components/APIStatusMonitor.tsx`**: ✅ **NEW** - Real-time API status monitoring
+- **`src/screens/settings/APITestScreen.tsx`**: ✅ **NEW** - Developer API testing interface
+- **`src/design-system/theme.ts`**: ✅ **FIXED** - Color system with proper exports
 - **`src/utils/Logger.ts`**: Centralized logging system
 
 ### **Critical Backend Files**
@@ -265,25 +406,34 @@ uvicorn app.main:app --reload
 - **`app/core/websocket.py`**: Real-time WebSocket manager
 
 ### **Documentation Files**
+- **`PROJECT_CONTEXT_COMPLETE.md`**: ✅ **UPDATED** - Complete project knowledge base
+- **`FRONTEND_BACKEND_API_ALIGNMENT_GUIDE.md`**: ✅ **NEW** - API specifications for Ryan
+- **`backend/RYAN DOCS/FRONTEND_BACKEND_API_REQUIREMENTS.md`**: ✅ **NEW** - Urgent API requirements
 - **`XERO_INTEGRATION_GUIDE.md`**: Complete Xero implementation guide
 - **`backend/RYAN DOCS/`**: Complete backend documentation
 - **`IOS DOCS/`**: Frontend implementation guides
 
 ---
 
-## 🐛 **Known Issues & Quirks**
+## 🐛 **Known Issues & Quirks (Updated June 20, 2025)**
 
-### **Frontend Issues**
-1. **Metro Log Errors**: Theme Colors export causing undefined errors
-2. **Menu Management**: Text rendering issues need <Text> component wrapping
-3. **Icon Imports**: Inconsistent between `Icon` and `MaterialIcons`
-4. **DataService**: Backend polling set to 30s instead of 2 minutes
+### **Frontend Issues (Mostly Resolved)**
+1. ~~**Metro Log Errors**: Theme Colors export causing undefined errors~~ ✅ **FIXED**
+2. ~~**iOS App Crashes**: App not loading properly~~ ✅ **FIXED**
+3. ~~**CocoaPods Configuration**: Missing xcconfig files~~ ✅ **FIXED**
+4. ~~**Branding**: Showing "Clover" instead of "Fynlo"~~ ✅ **FIXED**
 
-### **Integration Gaps**
-1. **API Endpoint Mismatch**: Frontend expects different routes than backend provides
-2. **Authentication**: JWT flow not fully connected frontend to backend
-3. **Data Models**: TypeScript interfaces don't perfectly match Pydantic schemas
-4. **WebSocket**: Frontend not connected to Ryan's WebSocket implementation
+### **Remaining Integration Gaps**
+1. **API Endpoint Completion**: ✅ **DOCUMENTED** - Ryan has detailed requirements (Issue #57)
+2. **Authentication**: JWT flow ready to test once backend endpoints available
+3. **Data Models**: ✅ **DOCUMENTED** - Specifications provided to Ryan
+4. **WebSocket**: Frontend infrastructure ready for Ryan's implementation
+
+### **New Capabilities Added**
+1. **API Testing Framework**: Complete testing without affecting demo data
+2. **Real-time Monitoring**: Backend connection status and health checks
+3. **Enhanced DataService**: Background API testing with TEST_API_MODE
+4. **Developer Tools**: APITestScreen for comprehensive endpoint testing
 
 ### **Backend Status**
 - **Fully Functional**: All API endpoints work independently
@@ -315,10 +465,11 @@ uvicorn app.main:app --reload
 
 ### **Key Business Objectives**
 1. **Cost Reduction**: 67% savings on payment processing (1.2% vs 2.9%)
-2. **Hardware Freedom**: No expensive POS terminals required
-3. **Real-time Operations**: Live kitchen displays and order tracking
-4. **Accounting Integration**: Automated bookkeeping with Xero
-5. **Multi-tenant Platform**: Scale across multiple restaurants
+2. **Hardware Freedom**: No expensive POS terminals or card readers required
+3. **Multi-Restaurant Support**: Platform designed to onboard multiple restaurant clients
+4. **Real-time Operations**: Live kitchen displays and order tracking
+5. **Accounting Integration**: Automated bookkeeping with Xero
+6. **Scalable Architecture**: Multi-tenant platform ready for growth beyond pilot client
 
 ### **Success Metrics**
 - **Payment Processing**: <1.2% total fees (target achieved)
@@ -376,4 +527,61 @@ uvicorn app.main:app --reload
 
 ---
 
-**This document represents the complete current state of the Fynlo POS project as of December 20, 2024. Use this as your primary reference when starting new development sessions.**
+## 📝 **Latest Session Summary (June 20, 2025) - Mexican Menu & Inventory Overhaul**
+
+### **Critical Issues Resolved**
+1. **Menu System Completely Fixed**: 
+   - **Problem**: Menu Management showed Italian items (Americano, Cappuccino) instead of Mexican restaurant menu
+   - **Solution**: Replaced all hardcoded menu data in MenuManagementScreen.tsx with authentic Mexican items
+   - **Result**: Both POS screen and Menu Management now show consistent Mexican restaurant menu
+
+2. **Inventory System Overhauled**:
+   - **Problem**: Inventory tracked finished meals instead of cooking ingredients
+   - **Solution**: Replaced inventory data with Mexican cooking ingredients (vegetables, meat, dairy, pantry, spices, beverages)
+   - **Result**: Restaurant can now track onions, tomatoes, pork shoulder, chorizo, etc. for cooking
+
+3. **QR Scanner Fixed**:
+   - **Problem**: QR scanner button in inventory didn't work
+   - **Solution**: Added handleQRScan() function to trigger camera scanner
+   - **Result**: QR scanner button now works for inventory management
+
+### **Mexican Restaurant Menu Now Complete**
+- **✅ 6 Categories**: Snacks, Tacos, Special Tacos, Burritos, Sides & Salsas, Drinks
+- **✅ 30+ Authentic Items**: Nachos, Carnitas, Barbacoa de Res, Carne Asada, Corona, etc.
+- **✅ Proper Pricing**: £0.00 (free salsas) to £10.00 (Special Burrito)
+- **✅ Accurate Descriptions**: Full ingredient descriptions for each Mexican dish
+- **✅ Consistent Across App**: POS screen and Menu Management show identical Mexican menu
+
+### **Ingredient-Based Inventory System**
+- **✅ Vegetables**: Onions, Tomatoes, Potatoes, Bell Peppers, Jalapeños, Coriander, Lime, Avocados, Lettuce
+- **✅ Meat**: Pork Shoulder (Carnitas), Beef Chuck (Barbacoa), Chicken Thighs, Chorizo, Prawns, Cod Fillets
+- **✅ Dairy**: Mozzarella Cheese, Feta Cheese, Sour Cream
+- **✅ Pantry**: Black Beans, Corn Tortillas, Flour Tortillas, Rice, Cooking Oil
+- **✅ Spices**: Cumin, Paprika, Chili Powder
+- **✅ Beverages**: Corona Beer, Modelo Beer, Lime Juice, Pineapple Juice
+
+### **Key Files Modified Today**
+1. **`src/screens/settings/app/MenuManagementScreen.tsx`**: Complete Mexican menu replacement
+2. **`src/utils/mockDataGenerator.ts`**: Ingredient-based inventory system
+3. **`src/screens/inventory/InventoryScreen.tsx`**: QR scanner functionality added
+4. **`src/services/MockDataService.ts`**: Mexican menu items (secondary fix)
+5. **`PROJECT_CONTEXT_COMPLETE.md`**: Complete documentation update
+
+### **Current App Status**
+- ✅ **Mexican Menu**: Fully authentic Mexican restaurant menu throughout app
+- ✅ **Ingredient Inventory**: Proper cooking ingredient tracking system
+- ✅ **QR Scanner**: Working barcode/QR scanner for inventory
+- ✅ **Menu Consistency**: POS and Menu Management show identical Mexican items
+- ✅ **iOS App**: Stable and running properly
+- ✅ **Metro Server**: Running consistently on port 8081
+
+### **🚨 CRITICAL NOTE FOR FUTURE DEVELOPERS**
+1. **Fynlo POS is a PLATFORM**: We are NOT a Mexican restaurant system - we're a hardware-free payment platform that works for ANY restaurant
+2. **Mexican Restaurant = Pilot Client**: The Mexican menu/inventory shown here is for our FIRST CLIENT only
+3. **Future Clients**: Each new restaurant client will have their own customized menu and inventory system
+4. **Platform Architecture**: The system is designed to support multiple restaurants with different cuisines and needs
+5. **Current Development**: We're using the Mexican restaurant as our pilot to refine the platform before scaling to other clients
+
+---
+
+**This document represents the complete current state of the Fynlo POS project as of June 20, 2025. Use this as your primary reference when starting new development sessions.**

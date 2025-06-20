@@ -96,6 +96,30 @@ const InventoryScreen: React.FC = () => {
     setFilteredInventory(filtered);
   };
 
+  const handleQRScan = () => {
+    Alert.alert(
+      'QR Scanner',
+      'Would you like to scan a QR code or barcode to add/update inventory?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Scan QR Code', 
+          onPress: () => {
+            // Simulate QR scanning for now
+            Alert.alert('QR Scanner', 'QR scanning functionality will be available when camera permissions are added.');
+          }
+        },
+        { 
+          text: 'Scan Barcode', 
+          onPress: () => {
+            // Simulate barcode scanning
+            Alert.alert('Barcode Scanner', 'Barcode scanning functionality will be available when camera permissions are added.');
+          }
+        }
+      ]
+    );
+  };
+
   const getStockStatus = (item: InventoryData) => {
     if (item.currentStock === 0) return { status: 'Out of Stock', color: Colors.danger };
     if (item.currentStock <= item.minimumStock) return { status: 'Low Stock', color: Colors.warning };
@@ -187,7 +211,7 @@ const InventoryScreen: React.FC = () => {
     );
   };
 
-  const categories = ['Snacks', 'Tacos', 'Special Tacos', 'Burritos', 'Sides', 'Drinks'];
+  const categories = ['Vegetables', 'Meat', 'Dairy', 'Pantry', 'Spices', 'Beverages'];
   const stats = {
     total: inventory.length,
     lowStock: inventory.filter(item => item.currentStock <= item.minimumStock).length,
@@ -213,7 +237,10 @@ const InventoryScreen: React.FC = () => {
           <Text style={styles.headerSubtitle}>{filteredInventory.length} items</Text>
         </View>
         
-        <TouchableOpacity style={styles.scanButton}>
+        <TouchableOpacity 
+          style={styles.scanButton}
+          onPress={handleQRScan}
+        >
           <Icon name="qr-code-scanner" size={24} color={Colors.white} />
         </TouchableOpacity>
       </View>

@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
+import { useRestaurantDisplayName } from '../../hooks/useRestaurantConfig';
 
 const Colors = {
   primary: '#00A651',      // Clover Green
@@ -45,6 +46,7 @@ interface AlertItem {
 
 const DashboardScreen: React.FC = () => {
   const navigation = useNavigation();
+  const restaurantDisplayName = useRestaurantDisplayName();
 
   // Mock KPI data
   const kpiData: KPICardProps[] = [
@@ -200,7 +202,7 @@ const DashboardScreen: React.FC = () => {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
           <Icon name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Business Dashboard</Text>
+        <Text style={styles.headerTitle}>{restaurantDisplayName} Dashboard</Text>
         <TouchableOpacity style={styles.refreshButton}>
           <Icon name="refresh" size={24} color={Colors.white} />
         </TouchableOpacity>
