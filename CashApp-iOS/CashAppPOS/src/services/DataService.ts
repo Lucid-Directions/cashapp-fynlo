@@ -2,23 +2,26 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DatabaseService from './DatabaseService';
 import MockDataService from './MockDataService';
+import APITestingService from './APITestingService';
 
 // Feature flags for controlling data sources
 export interface FeatureFlags {
   USE_REAL_API: boolean;
+  TEST_API_MODE: boolean; // NEW: Test API connections without switching from mock data
   ENABLE_PAYMENTS: boolean;
   ENABLE_HARDWARE: boolean;
   SHOW_DEV_MENU: boolean;
   MOCK_AUTHENTICATION: boolean;
 }
 
-// Default feature flags - FIXED: Enable real API to connect to working backend
+// Default feature flags - PREPARATION: Keep mock data for demos, enable testing
 const DEFAULT_FLAGS: FeatureFlags = {
-  USE_REAL_API: true,  // Changed from false to true - backend is now functional
+  USE_REAL_API: false,  // Keep false to preserve demo data
+  TEST_API_MODE: true,  // NEW: Enable API testing without affecting demos
   ENABLE_PAYMENTS: false,
   ENABLE_HARDWARE: false,
   SHOW_DEV_MENU: __DEV__,
-  MOCK_AUTHENTICATION: false, // Changed from true to false - use real auth
+  MOCK_AUTHENTICATION: false,
 };
 
 /**
@@ -35,11 +38,13 @@ class DataService {
   private featureFlags: FeatureFlags = DEFAULT_FLAGS;
   private databaseService: DatabaseService;
   private mockDataService: MockDataService;
+  private apiTestingService: APITestingService;
   private isBackendAvailable: boolean = false;
 
   constructor() {
     this.databaseService = DatabaseService.getInstance();
     this.mockDataService = MockDataService.getInstance();
+    this.apiTestingService = APITestingService.getInstance();
     this.loadFeatureFlags();
     this.checkBackendAvailability();
   }
@@ -72,9 +77,36 @@ class DataService {
     return { ...this.featureFlags };
   }
 
-  // Backend availability check - FIXED: Updated to use correct port
+  // API Testing Service access
+  getAPITestingService(): APITestingService {
+    return this.apiTestingService;
+  }
+
+  // Test API endpoint in background without affecting UI
+  private async testAPIEndpoint(endpoint: string, method: string = 'GET', data?: any): Promise<void> {
+    if (this.featureFlags.TEST_API_MODE) {
+      try {
+        await this.apiTestingService.testEndpoint(endpoint, method, data);
+      } catch (error) {
+        console.log(`API test failed for ${endpoint}:`, error);
+      }
+    }
+  }
+
+  // Get backend availability status for UI
+  isBackendConnected(): boolean {
+    return this.isBackendAvailable;
+  }
+
+  // Force check backend availability
+  async forceCheckBackend(): Promise<boolean> {
+    await this.checkBackendAvailability();
+    return this.isBackendAvailable;
+  }
+
+  // Backend availability check - Enhanced with API testing support
   private async checkBackendAvailability(): Promise<void> {
-    if (!this.featureFlags.USE_REAL_API) {
+    if (!this.featureFlags.USE_REAL_API && !this.featureFlags.TEST_API_MODE) {
       return;
     }
 
@@ -89,10 +121,27 @@ class DataService {
       });
       
       clearTimeout(timeoutId);
+      const wasAvailable = this.isBackendAvailable;
       this.isBackendAvailable = response.ok;
-    } catch {
+      
+      // Test health endpoint when in test mode
+      if (this.featureFlags.TEST_API_MODE && this.isBackendAvailable) {
+        await this.testAPIEndpoint('/health');
+      }
+      
+      // Log status changes
+      if (wasAvailable !== this.isBackendAvailable) {
+        console.log(`Backend status changed: ${this.isBackendAvailable ? 'Available' : 'Unavailable'}`);
+      }
+      
+    } catch (error) {
       this.isBackendAvailable = false;
       console.log('Backend not available, using mock data');
+      
+      // Still test the endpoint in test mode to record the failure
+      if (this.featureFlags.TEST_API_MODE) {
+        await this.testAPIEndpoint('/health');
+      }
     }
 
     // Recheck every 30 seconds
@@ -101,6 +150,11 @@ class DataService {
 
   // Authentication methods - can use mock or real
   async login(username: string, password: string): Promise<boolean> {
+    // Test authentication endpoint in background when in test mode
+    if (this.featureFlags.TEST_API_MODE) {
+      await this.testAPIEndpoint('/api/v1/auth/login', 'POST', { email: username, password });
+    }
+
     if (this.featureFlags.MOCK_AUTHENTICATION) {
       return this.mockDataService.login(username, password);
     }
@@ -127,6 +181,11 @@ class DataService {
 
   // Product operations
   async getProducts(): Promise<any[]> {
+    // Test products endpoint in background when in test mode
+    if (this.featureFlags.TEST_API_MODE) {
+      await this.testAPIEndpoint('/api/v1/products/mobile');
+    }
+
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         const products = await this.databaseService.getProducts();
