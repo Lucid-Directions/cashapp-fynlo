@@ -9,7 +9,7 @@ from sqlalchemy import and_, desc, func
 from pydantic import BaseModel, EmailStr
 from datetime import datetime, timedelta
 
-from app.core.database import get_db, Restaurant, Platform, User, Order, Customer
+from app.core.database import get_db, Restaurant, Platform, User, Order, Customer, Section, Table
 from app.api.v1.endpoints.auth import get_current_user
 from app.core.responses import APIResponseHelper
 from app.core.exceptions import FynloException, ErrorCodes
@@ -570,133 +570,360 @@ async def get_restaurant(
 
 # Floor Plan and Table Management Endpoints
 class TableResponse(BaseModel):
-    id: int
+    id: str
     name: str
-    section_id: int
+    section_id: str
     section_name: str
     seats: int
     status: str  # 'available', 'occupied', 'reserved', 'cleaning'
-    server_id: Optional[int] = None
+    server_id: Optional[str] = None
     server_name: Optional[str] = None
     x_position: int = 0
     y_position: int = 0
 
 class SectionResponse(BaseModel):
-    id: int
+    id: str
     name: str
     restaurant_id: str
     color: str = "#00A651"
     is_active: bool = True
 
-# Temporary floor plan storage (until database models are added)
-floor_plan_data = {
-    "sections": [
-        {"id": 1, "name": "Main Dining", "restaurant_id": "", "color": "#00A651", "is_active": True},
-        {"id": 2, "name": "Patio", "restaurant_id": "", "color": "#FFA500", "is_active": True},
-        {"id": 3, "name": "Private Dining", "restaurant_id": "", "color": "#800080", "is_active": True}
-    ],
-    "tables": [
-        {"id": 1, "name": "Table 1", "section_id": 1, "section_name": "Main Dining", "seats": 4, "status": "available", "server_id": None, "server_name": None, "x_position": 100, "y_position": 100},
-        {"id": 2, "name": "Table 2", "section_id": 1, "section_name": "Main Dining", "seats": 2, "status": "occupied", "server_id": 1, "server_name": "John Doe", "x_position": 200, "y_position": 100},
-        {"id": 3, "name": "Table 3", "section_id": 1, "section_name": "Main Dining", "seats": 6, "status": "reserved", "server_id": 2, "server_name": "Jane Smith", "x_position": 300, "y_position": 100},
-        {"id": 4, "name": "Patio A", "section_id": 2, "section_name": "Patio", "seats": 4, "status": "available", "server_id": None, "server_name": None, "x_position": 150, "y_position": 300},
-        {"id": 5, "name": "Patio B", "section_id": 2, "section_name": "Patio", "seats": 2, "status": "cleaning", "server_id": None, "server_name": None, "x_position": 250, "y_position": 300},
-        {"id": 6, "name": "Private 1", "section_id": 3, "section_name": "Private Dining", "seats": 8, "status": "available", "server_id": None, "server_name": None, "x_position": 100, "y_position": 500}
-    ]
-}
+class SectionCreate(BaseModel):
+    name: str
+    color: str = "#00A651"
+    sort_order: int = 0
+
+class TableCreate(BaseModel):
+    section_id: str
+    name: str
+    seats: int = 4
+    x_position: int = 0
+    y_position: int = 0
 
 @router.get("/floor-plan")
 async def get_floor_plan(
-    section_id: Optional[int] = Query(None),
-    current_user: User = Depends(get_current_user)
+    section_id: Optional[str] = Query(None),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
 ):
     """Get restaurant floor plan with tables and sections"""
     
-    sections = floor_plan_data["sections"]
-    tables = floor_plan_data["tables"]
+    restaurant_id = str(current_user.restaurant_id)
     
-    # Filter by section if specified
+    # Get sections
+    sections_query = db.query(Section).filter(
+        and_(
+            Section.restaurant_id == restaurant_id,
+            Section.is_active == True
+        )
+    ).order_by(Section.sort_order, Section.name)
+    
     if section_id:
-        sections = [s for s in sections if s["id"] == section_id]
-        tables = [t for t in tables if t["section_id"] == section_id]
+        sections_query = sections_query.filter(Section.id == section_id)
+    
+    sections = sections_query.all()
+    section_ids = [str(s.id) for s in sections]
+    
+    # Get tables
+    tables_query = db.query(Table, Section).join(
+        Section, Table.section_id == Section.id
+    ).filter(
+        and_(
+            Table.restaurant_id == restaurant_id,
+            Table.is_active == True
+        )
+    )
+    
+    if section_id:
+        tables_query = tables_query.filter(Table.section_id == section_id)
+    
+    tables_data = tables_query.all()
+    
+    # Format sections
+    sections_response = []
+    for section in sections:
+        sections_response.append({
+            "id": str(section.id),
+            "name": section.name,
+            "restaurant_id": str(section.restaurant_id),
+            "color": section.color,
+            "is_active": section.is_active
+        })
+    
+    # Format tables
+    tables_response = []
+    for table, section in tables_data:
+        # Get server name if assigned
+        server_name = None
+        if table.server_id:
+            server = db.query(User).filter(User.id == table.server_id).first()
+            if server:
+                server_name = f"{server.first_name} {server.last_name}"
+        
+        tables_response.append({
+            "id": str(table.id),
+            "name": table.name,
+            "section_id": str(table.section_id),
+            "section_name": section.name,
+            "seats": table.seats,
+            "status": table.status,
+            "server_id": str(table.server_id) if table.server_id else None,
+            "server_name": server_name,
+            "x_position": table.x_position,
+            "y_position": table.y_position
+        })
     
     return APIResponseHelper.success(
         data={
-            "sections": sections,
-            "tables": tables
+            "sections": sections_response,
+            "tables": tables_response
         },
-        message=f"Retrieved floor plan with {len(sections)} sections and {len(tables)} tables"
+        message=f"Retrieved floor plan with {len(sections_response)} sections and {len(tables_response)} tables"
     )
 
 @router.get("/sections")
 async def get_sections(
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
 ):
     """Get all restaurant sections"""
     
-    sections = floor_plan_data["sections"]
+    restaurant_id = str(current_user.restaurant_id)
+    
+    sections = db.query(Section).filter(
+        and_(
+            Section.restaurant_id == restaurant_id,
+            Section.is_active == True
+        )
+    ).order_by(Section.sort_order, Section.name).all()
+    
+    sections_response = []
+    for section in sections:
+        sections_response.append({
+            "id": str(section.id),
+            "name": section.name,
+            "restaurant_id": str(section.restaurant_id),
+            "color": section.color,
+            "is_active": section.is_active
+        })
     
     return APIResponseHelper.success(
-        data=sections,
-        message=f"Retrieved {len(sections)} sections"
+        data=sections_response,
+        message=f"Retrieved {len(sections_response)} sections"
+    )
+
+@router.post("/sections")
+async def create_section(
+    section_data: SectionCreate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Create a new section"""
+    
+    restaurant_id = str(current_user.restaurant_id)
+    
+    new_section = Section(
+        restaurant_id=restaurant_id,
+        name=section_data.name,
+        color=section_data.color,
+        sort_order=section_data.sort_order
+    )
+    
+    db.add(new_section)
+    db.commit()
+    db.refresh(new_section)
+    
+    return APIResponseHelper.success(
+        data={
+            "id": str(new_section.id),
+            "name": new_section.name,
+            "restaurant_id": str(new_section.restaurant_id),
+            "color": new_section.color,
+            "is_active": new_section.is_active
+        },
+        message=f"Section '{new_section.name}' created successfully"
+    )
+
+@router.post("/tables")
+async def create_table(
+    table_data: TableCreate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Create a new table"""
+    
+    restaurant_id = str(current_user.restaurant_id)
+    
+    # Verify section exists and belongs to restaurant
+    section = db.query(Section).filter(
+        and_(
+            Section.id == table_data.section_id,
+            Section.restaurant_id == restaurant_id
+        )
+    ).first()
+    
+    if not section:
+        raise FynloException(
+            error_code=ErrorCodes.RESOURCE_NOT_FOUND,
+            detail="Section not found"
+        )
+    
+    new_table = Table(
+        restaurant_id=restaurant_id,
+        section_id=table_data.section_id,
+        name=table_data.name,
+        seats=table_data.seats,
+        x_position=table_data.x_position,
+        y_position=table_data.y_position
+    )
+    
+    db.add(new_table)
+    db.commit()
+    db.refresh(new_table)
+    
+    return APIResponseHelper.success(
+        data={
+            "id": str(new_table.id),
+            "name": new_table.name,
+            "section_id": str(new_table.section_id),
+            "section_name": section.name,
+            "seats": new_table.seats,
+            "status": new_table.status,
+            "server_id": None,
+            "server_name": None,
+            "x_position": new_table.x_position,
+            "y_position": new_table.y_position
+        },
+        message=f"Table '{new_table.name}' created successfully"
     )
 
 @router.put("/tables/{table_id}/status")
 async def update_table_status(
-    table_id: int,
+    table_id: str,
     status: str,
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
 ):
     """Update table status"""
     
     # Validate status
     valid_statuses = ["available", "occupied", "reserved", "cleaning"]
     if status not in valid_statuses:
-        raise HTTPException(
-            status_code=400,
+        raise FynloException(
+            error_code=ErrorCodes.VALIDATION_ERROR,
             detail=f"Invalid status. Must be one of: {valid_statuses}"
         )
     
-    # Find and update table
-    table = None
-    for t in floor_plan_data["tables"]:
-        if t["id"] == table_id:
-            table = t
-            break
+    # Find table
+    table = db.query(Table).filter(
+        and_(
+            Table.id == table_id,
+            Table.restaurant_id == current_user.restaurant_id
+        )
+    ).first()
     
     if not table:
-        raise HTTPException(status_code=404, detail="Table not found")
+        raise FynloException(
+            error_code=ErrorCodes.RESOURCE_NOT_FOUND,
+            detail="Table not found"
+        )
     
-    table["status"] = status
+    table.status = status
+    table.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(table)
+    
+    # Get section name
+    section = db.query(Section).filter(Section.id == table.section_id).first()
+    
+    # Get server name if assigned
+    server_name = None
+    if table.server_id:
+        server = db.query(User).filter(User.id == table.server_id).first()
+        if server:
+            server_name = f"{server.first_name} {server.last_name}"
+    
+    table_data = {
+        "id": str(table.id),
+        "name": table.name,
+        "section_id": str(table.section_id),
+        "section_name": section.name if section else "",
+        "seats": table.seats,
+        "status": table.status,
+        "server_id": str(table.server_id) if table.server_id else None,
+        "server_name": server_name,
+        "x_position": table.x_position,
+        "y_position": table.y_position
+    }
     
     return APIResponseHelper.success(
-        data=table,
-        message=f"Table {table['name']} status updated to {status}"
+        data=table_data,
+        message=f"Table {table.name} status updated to {status}"
     )
 
 @router.put("/tables/{table_id}/server")
 async def update_table_server(
-    table_id: int,
-    server_id: Optional[int] = None,
-    server_name: Optional[str] = None,
-    current_user: User = Depends(get_current_user)
+    table_id: str,
+    server_id: Optional[str] = None,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
 ):
     """Assign server to table"""
     
     # Find table
-    table = None
-    for t in floor_plan_data["tables"]:
-        if t["id"] == table_id:
-            table = t
-            break
+    table = db.query(Table).filter(
+        and_(
+            Table.id == table_id,
+            Table.restaurant_id == current_user.restaurant_id
+        )
+    ).first()
     
     if not table:
-        raise HTTPException(status_code=404, detail="Table not found")
+        raise FynloException(
+            error_code=ErrorCodes.RESOURCE_NOT_FOUND,
+            detail="Table not found"
+        )
     
-    table["server_id"] = server_id
-    table["server_name"] = server_name
+    # Validate server if provided
+    server_name = None
+    if server_id:
+        server = db.query(User).filter(
+            and_(
+                User.id == server_id,
+                User.restaurant_id == current_user.restaurant_id
+            )
+        ).first()
+        
+        if not server:
+            raise FynloException(
+                error_code=ErrorCodes.RESOURCE_NOT_FOUND,
+                detail="Server not found"
+            )
+        
+        server_name = f"{server.first_name} {server.last_name}"
+    
+    table.server_id = server_id
+    table.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(table)
+    
+    # Get section name
+    section = db.query(Section).filter(Section.id == table.section_id).first()
+    
+    table_data = {
+        "id": str(table.id),
+        "name": table.name,
+        "section_id": str(table.section_id),
+        "section_name": section.name if section else "",
+        "seats": table.seats,
+        "status": table.status,
+        "server_id": str(table.server_id) if table.server_id else None,
+        "server_name": server_name,
+        "x_position": table.x_position,
+        "y_position": table.y_position
+    }
     
     return APIResponseHelper.success(
-        data=table,
-        message=f"Table {table['name']} server updated"
+        data=table_data,
+        message=f"Table {table.name} server updated"
     )

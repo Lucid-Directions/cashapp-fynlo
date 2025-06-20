@@ -3,10 +3,10 @@ Database configuration and models for Fynlo POS
 PostgreSQL implementation matching frontend data requirements
 """
 
-from sqlalchemy import create_engine, Column, String, Integer, Float, DateTime, Boolean, Text, JSON
+from sqlalchemy import create_engine, Column, String, Integer, Float, DateTime, Boolean, Text, JSON, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import sessionmaker, Session, relationship
 from sqlalchemy.sql import func
 import uuid
 from typing import Generator
@@ -188,6 +188,57 @@ class QRPayment(Base):
     fee_amount = Column(Float, default=0.0)
     net_amount = Column(Float, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+class Section(Base):
+    """Restaurant floor plan sections"""
+    __tablename__ = "sections"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    restaurant_id = Column(UUID(as_uuid=True), nullable=False)
+    name = Column(String(255), nullable=False)
+    color = Column(String(7), default="#00A651")  # Hex color
+    sort_order = Column(Integer, default=0)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+class Table(Base):
+    """Restaurant tables"""
+    __tablename__ = "tables"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    restaurant_id = Column(UUID(as_uuid=True), nullable=False)
+    section_id = Column(UUID(as_uuid=True), ForeignKey('sections.id'), nullable=False)
+    name = Column(String(100), nullable=False)
+    seats = Column(Integer, nullable=False, default=4)
+    status = Column(String(20), default="available")  # available, occupied, reserved, cleaning
+    server_id = Column(UUID(as_uuid=True), nullable=True)  # Reference to User
+    x_position = Column(Integer, default=0)
+    y_position = Column(Integer, default=0)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    
+    # Relationship
+    section = relationship("Section")
+
+class PosSession(Base):
+    """POS Session management"""
+    __tablename__ = "pos_sessions"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    restaurant_id = Column(UUID(as_uuid=True), nullable=False)
+    user_id = Column(UUID(as_uuid=True), nullable=False)
+    name = Column(String(255), nullable=False)
+    state = Column(String(50), default="opening_control")  # opening_control, opened, closing_control, closed
+    config_id = Column(Integer, nullable=False)
+    config_name = Column(String(255), nullable=False)
+    start_at = Column(DateTime(timezone=True), server_default=func.now())
+    stop_at = Column(DateTime(timezone=True), nullable=True)
+    session_data = Column(JSONB, default={})  # Additional session configuration
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
 # Database dependency
 def get_db() -> Generator[Session, None, None]:
