@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -9,8 +9,14 @@ import {
   ScrollView,
   Alert,
   TextInput,
+  ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useNavigation } from '@react-navigation/native';
+import { UserManagementService, User, AccessLog } from '../../services/UserManagementService';
+import CreateUserModal from '../../components/modals/CreateUserModal';
+import EditUserModal from '../../components/modals/EditUserModal';
 
 // Clover POS Color Scheme
 const Colors = {
@@ -30,99 +36,185 @@ const Colors = {
 };
 
 const UserManagementScreen: React.FC = () => {
+  const navigation = useNavigation();
   const [selectedTab, setSelectedTab] = useState<'owners' | 'staff' | 'access'>('owners');
   const [searchQuery, setSearchQuery] = useState('');
+  const [users, setUsers] = useState<User[]>([]);
+  const [accessLogs, setAccessLogs] = useState<AccessLog[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [createModalVisible, setCreateModalVisible] = useState(false);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
-  const handleUserAction = (action: string, user?: any) => {
-    Alert.alert('User Management', `${action} functionality will be implemented in Phase 4`);
+  const userManagementService = UserManagementService.getInstance();
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  useEffect(() => {
+    if (searchQuery.trim()) {
+      searchUsers();
+    } else {
+      loadUsers();
+    }
+  }, [searchQuery, selectedTab]);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      await Promise.all([loadUsers(), loadAccessLogs()]);
+    } catch (error) {
+      console.error('Failed to load data:', error);
+      Alert.alert('Error', 'Failed to load user data');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const restaurantOwners = [
-    {
-      id: 1,
-      name: 'John Smith',
-      email: 'john@fynlopos.com',
-      restaurant: 'Fynlo Coffee Shop',
-      role: 'Restaurant Owner',
-      status: 'active',
-      lastLogin: '2 hours ago',
-    },
-    {
-      id: 2,
-      name: 'Emma Wilson',
-      email: 'emma@pizza.fynlopos.com',
-      restaurant: 'Fynlo Pizza Palace',
-      role: 'Restaurant Owner',
-      status: 'active',
-      lastLogin: '1 day ago',
-    },
-    {
-      id: 3,
-      name: 'David Brown',
-      email: 'david@burgers.fynlopos.com',
-      restaurant: 'Fynlo Burger Bar',
-      role: 'Restaurant Owner',
-      status: 'inactive',
-      lastLogin: '1 week ago',
-    },
-  ];
+  const loadUsers = async () => {
+    try {
+      const allUsers = await userManagementService.getAllUsers();
+      setUsers(allUsers);
+    } catch (error) {
+      console.error('Failed to load users:', error);
+    }
+  };
 
-  const staffMembers = [
-    {
-      id: 1,
-      name: 'Sarah Johnson',
-      email: 'sarah@fynlopos.com',
-      restaurant: 'Fynlo Coffee Shop',
-      role: 'Manager',
-      status: 'active',
-      lastLogin: '30 min ago',
-    },
-    {
-      id: 2,
-      name: 'Mike Davis',
-      email: 'mike@fynlopos.com',
-      restaurant: 'Fynlo Coffee Shop',
-      role: 'Employee',
-      status: 'active',
-      lastLogin: '2 hours ago',
-    },
-    {
-      id: 3,
-      name: 'Lisa Chen',
-      email: 'lisa@pizza.fynlopos.com',
-      restaurant: 'Fynlo Pizza Palace',
-      role: 'Manager',
-      status: 'active',
-      lastLogin: '4 hours ago',
-    },
-  ];
+  const loadAccessLogs = async () => {
+    try {
+      const logs = await userManagementService.getAccessLogs(20);
+      setAccessLogs(logs);
+    } catch (error) {
+      console.error('Failed to load access logs:', error);
+    }
+  };
 
-  const accessLogs = [
-    {
-      id: 1,
-      user: 'john@fynlopos.com',
-      action: 'Login',
-      location: 'London, UK',
-      timestamp: '2024-06-17 14:30:25',
-      status: 'success',
-    },
-    {
-      id: 2,
-      user: 'sarah@fynlopos.com',
-      action: 'Failed Login',
-      location: 'Manchester, UK',
-      timestamp: '2024-06-17 13:45:12',
-      status: 'failed',
-    },
-    {
-      id: 3,
-      user: 'mike@fynlopos.com',
-      action: 'Password Reset',
-      location: 'Birmingham, UK',
-      timestamp: '2024-06-17 12:15:33',
-      status: 'success',
-    },
-  ];
+  const searchUsers = async () => {
+    try {
+      const results = await userManagementService.searchUsers(searchQuery);
+      setUsers(results);
+    } catch (error) {
+      console.error('Failed to search users:', error);
+    }
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await loadData();
+    setRefreshing(false);
+  };
+
+  const handleUserAction = async (action: string, user?: User) => {
+    switch (action) {
+      case 'Add Owner':
+      case 'Add User':
+        setCreateModalVisible(true);
+        break;
+      case 'View Details':
+      case 'Edit User':
+        if (user) {
+          setSelectedUser(user);
+          setEditModalVisible(true);
+        }
+        break;
+      case 'Suspend User':
+        if (user) {
+          Alert.alert(
+            'Suspend User',
+            `Are you sure you want to suspend ${user.name}?`,
+            [
+              { text: 'Cancel', style: 'cancel' },
+              {
+                text: 'Suspend',
+                style: 'destructive',
+                onPress: () => suspendUser(user.id),
+              },
+            ]
+          );
+        }
+        break;
+      case 'View Performance':
+        Alert.alert('Performance', 'Performance analytics will be available soon');
+        break;
+      case 'Manage Permissions':
+        if (user) {
+          setSelectedUser(user);
+          setEditModalVisible(true);
+        }
+        break;
+      case 'Export Logs':
+        await exportAccessLogs();
+        break;
+      case 'Bulk Operations':
+        Alert.alert('Bulk Operations', 'Bulk operations feature coming soon');
+        break;
+      case 'Security Settings':
+        Alert.alert('Security Settings', 'Security settings management coming soon');
+        break;
+      case 'Compliance Reports':
+        Alert.alert('Compliance', 'Compliance reporting feature coming soon');
+        break;
+      case 'Audit Trail':
+        Alert.alert('Audit Trail', 'Detailed audit trail feature coming soon');
+        break;
+      default:
+        Alert.alert('User Management', `${action} functionality available`);
+    }
+  };
+
+  const suspendUser = async (userId: string) => {
+    try {
+      await userManagementService.suspendUser(userId, 'Suspended via admin panel');
+      Alert.alert('Success', 'User suspended successfully');
+      loadUsers();
+    } catch (error) {
+      Alert.alert('Error', 'Failed to suspend user');
+    }
+  };
+
+  const exportAccessLogs = async () => {
+    try {
+      Alert.alert('Exporting', 'Generating access logs export...');
+      const result = await userManagementService.exportAccessLogs('csv');
+      Alert.alert('Export Complete', `File exported: ${result.filename}`);
+    } catch (error) {
+      Alert.alert('Export Failed', 'Failed to export access logs');
+    }
+  };
+
+  const getFilteredUsers = () => {
+    let filteredUsers = users;
+    
+    if (selectedTab === 'owners') {
+      filteredUsers = users.filter(user => user.role === 'Restaurant Owner');
+    } else if (selectedTab === 'staff') {
+      filteredUsers = users.filter(user => 
+        user.role !== 'Restaurant Owner' && user.role !== 'Platform Admin'
+      );
+    }
+    
+    return filteredUsers;
+  };
+
+  const formatLastLogin = (lastLogin?: Date) => {
+    if (!lastLogin) return 'Never';
+    
+    const now = new Date();
+    const diffMs = now.getTime() - lastLogin.getTime();
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffHours / 24);
+    
+    if (diffHours < 1) return 'Just now';
+    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+    if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+    return lastLogin.toLocaleDateString();
+  };
+
+  const formatTimestamp = (timestamp: Date) => {
+    return timestamp.toLocaleString();
+  };
 
   const getRoleColor = (role: string) => {
     switch (role.toLowerCase()) {
@@ -150,6 +242,18 @@ const UserManagementScreen: React.FC = () => {
       default: return Colors.mediumGray;
     }
   };
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <StatusBar barStyle="dark-content" backgroundColor={Colors.background} />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={Colors.primary} />
+          <Text style={styles.loadingText}>Loading users...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -201,7 +305,18 @@ const UserManagementScreen: React.FC = () => {
         </View>
       )}
 
-      <ScrollView style={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        style={styles.scrollContent} 
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            colors={[Colors.primary]}
+            tintColor={Colors.primary}
+          />
+        }
+      >
         {selectedTab === 'owners' && (
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
@@ -211,46 +326,49 @@ const UserManagementScreen: React.FC = () => {
               </TouchableOpacity>
             </View>
             
-            {restaurantOwners.map((owner) => (
-              <View key={owner.id} style={styles.userCard}>
+            {getFilteredUsers().map((user) => (
+              <View key={user.id} style={styles.userCard}>
                 <View style={styles.userHeader}>
                   <View style={styles.userInfo}>
-                    <Text style={styles.userName}>{owner.name}</Text>
-                    <Text style={styles.userEmail}>{owner.email}</Text>
-                    <Text style={styles.userRestaurant}>{owner.restaurant}</Text>
+                    <Text style={styles.userName}>{user.name}</Text>
+                    <Text style={styles.userEmail}>{user.email}</Text>
+                    <Text style={styles.userRestaurant}>{user.restaurantName || 'No restaurant assigned'}</Text>
                   </View>
                   <View style={styles.userStatus}>
-                    <View style={[styles.roleBadge, { backgroundColor: getRoleColor(owner.role) }]}>
-                      <Text style={styles.roleText}>{owner.role}</Text>
+                    <View style={[styles.roleBadge, { backgroundColor: getRoleColor(user.role) }]}>
+                      <Text style={styles.roleText}>{user.role}</Text>
                     </View>
-                    <View style={[styles.statusBadge, { backgroundColor: getStatusColor(owner.status) }]}>
-                      <Text style={styles.statusText}>{owner.status.toUpperCase()}</Text>
+                    <View style={[styles.statusBadge, { backgroundColor: getStatusColor(user.status) }]}>
+                      <Text style={styles.statusText}>{user.status.toUpperCase()}</Text>
                     </View>
                   </View>
                 </View>
                 
                 <View style={styles.userDetails}>
-                  <Text style={styles.lastLogin}>Last login: {owner.lastLogin}</Text>
+                  <Text style={styles.lastLogin}>Last login: {formatLastLogin(user.lastLogin)}</Text>
+                  {user.isLocked && (
+                    <Text style={styles.lockedText}>🔒 Account locked</Text>
+                  )}
                 </View>
                 
                 <View style={styles.userActions}>
                   <TouchableOpacity
                     style={styles.actionButton}
-                    onPress={() => handleUserAction('View Details', owner)}
+                    onPress={() => handleUserAction('View Details', user)}
                   >
                     <Icon name="visibility" size={16} color={Colors.secondary} />
                     <Text style={styles.actionButtonText}>View</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.actionButton}
-                    onPress={() => handleUserAction('Edit User', owner)}
+                    onPress={() => handleUserAction('Edit User', user)}
                   >
                     <Icon name="edit" size={16} color={Colors.primary} />
                     <Text style={styles.actionButtonText}>Edit</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.actionButton}
-                    onPress={() => handleUserAction('Suspend User', owner)}
+                    onPress={() => handleUserAction('Suspend User', user)}
                   >
                     <Icon name="block" size={16} color={Colors.danger} />
                     <Text style={styles.actionButtonText}>Suspend</Text>
@@ -263,15 +381,20 @@ const UserManagementScreen: React.FC = () => {
 
         {selectedTab === 'staff' && (
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Staff Members</Text>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Staff Members</Text>
+              <TouchableOpacity onPress={() => handleUserAction('Add User')}>
+                <Icon name="person-add" size={24} color={Colors.primary} />
+              </TouchableOpacity>
+            </View>
             
-            {staffMembers.map((staff) => (
+            {getFilteredUsers().map((staff) => (
               <View key={staff.id} style={styles.userCard}>
                 <View style={styles.userHeader}>
                   <View style={styles.userInfo}>
                     <Text style={styles.userName}>{staff.name}</Text>
                     <Text style={styles.userEmail}>{staff.email}</Text>
-                    <Text style={styles.userRestaurant}>{staff.restaurant}</Text>
+                    <Text style={styles.userRestaurant}>{staff.restaurantName || 'No restaurant assigned'}</Text>
                   </View>
                   <View style={styles.userStatus}>
                     <View style={[styles.roleBadge, { backgroundColor: getRoleColor(staff.role) }]}>
@@ -284,7 +407,10 @@ const UserManagementScreen: React.FC = () => {
                 </View>
                 
                 <View style={styles.userDetails}>
-                  <Text style={styles.lastLogin}>Last login: {staff.lastLogin}</Text>
+                  <Text style={styles.lastLogin}>Last login: {formatLastLogin(staff.lastLogin)}</Text>
+                  {staff.isLocked && (
+                    <Text style={styles.lockedText}>🔒 Account locked</Text>
+                  )}
                 </View>
                 
                 <View style={styles.userActions}>
@@ -316,7 +442,7 @@ const UserManagementScreen: React.FC = () => {
               <View key={log.id} style={styles.logCard}>
                 <View style={styles.logHeader}>
                   <View style={styles.logInfo}>
-                    <Text style={styles.logUser}>{log.user}</Text>
+                    <Text style={styles.logUser}>{log.userEmail}</Text>
                     <Text style={styles.logAction}>{log.action}</Text>
                   </View>
                   <View style={[styles.logStatusBadge, { backgroundColor: getAccessStatusColor(log.status) }]}>
@@ -331,8 +457,18 @@ const UserManagementScreen: React.FC = () => {
                   </View>
                   <View style={styles.logDetailRow}>
                     <Icon name="access-time" size={14} color={Colors.mediumGray} />
-                    <Text style={styles.logDetailText}>{log.timestamp}</Text>
+                    <Text style={styles.logDetailText}>{formatTimestamp(log.timestamp)}</Text>
                   </View>
+                  <View style={styles.logDetailRow}>
+                    <Icon name="computer" size={14} color={Colors.mediumGray} />
+                    <Text style={styles.logDetailText}>{log.ipAddress}</Text>
+                  </View>
+                  {log.details && (
+                    <View style={styles.logDetailRow}>
+                      <Icon name="info" size={14} color={Colors.warning} />
+                      <Text style={[styles.logDetailText, { color: Colors.warning }]}>{log.details}</Text>
+                    </View>
+                  )}
                 </View>
               </View>
             ))}
@@ -385,6 +521,30 @@ const UserManagementScreen: React.FC = () => {
           </View>
         </View>
       </ScrollView>
+
+      {/* Modals */}
+      <CreateUserModal
+        visible={createModalVisible}
+        onClose={() => setCreateModalVisible(false)}
+        onUserCreated={() => {
+          loadUsers();
+          setCreateModalVisible(false);
+        }}
+      />
+
+      <EditUserModal
+        visible={editModalVisible}
+        user={selectedUser}
+        onClose={() => {
+          setEditModalVisible(false);
+          setSelectedUser(null);
+        }}
+        onUserUpdated={() => {
+          loadUsers();
+          setEditModalVisible(false);
+          setSelectedUser(null);
+        }}
+      />
     </SafeAreaView>
   );
 };
@@ -400,6 +560,17 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  headerButton: {
+    padding: 8,
+    marginRight: 12,
   },
   headerTitle: {
     fontSize: 24,
@@ -539,6 +710,22 @@ const styles = StyleSheet.create({
   lastLogin: {
     fontSize: 12,
     color: Colors.lightText,
+  },
+  lockedText: {
+    fontSize: 12,
+    color: Colors.danger,
+    fontWeight: '500',
+    marginTop: 2,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: Colors.text,
   },
   userActions: {
     flexDirection: 'row',

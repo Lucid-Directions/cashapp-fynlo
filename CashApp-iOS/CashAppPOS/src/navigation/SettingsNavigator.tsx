@@ -31,6 +31,8 @@ import BackupRestoreScreen from '../screens/settings/app/BackupRestoreScreen';
 import DataExportScreen from '../screens/settings/app/DataExportScreen';
 import SystemDiagnosticsScreen from '../screens/settings/app/SystemDiagnosticsScreen';
 import DeveloperSettingsScreen from '../screens/settings/DeveloperSettingsScreen';
+import XeroSettingsScreen from '../screens/settings/XeroSettingsScreen';
+import XeroSyncDashboard from '../screens/xero/XeroSyncDashboard';
 
 export type SettingsStackParamList = {
   Settings: undefined;
@@ -67,6 +69,10 @@ export type SettingsStackParamList = {
   DataExport: undefined;
   SystemDiagnostics: undefined;
   DeveloperSettings: undefined;
+  
+  // Integrations
+  XeroSettings: undefined;
+  XeroSyncDashboard: undefined;
 };
 
 const Stack = createStackNavigator<SettingsStackParamList>();
@@ -245,6 +251,16 @@ const SettingsNavigator: React.FC = () => {
       <Stack.Screen 
         name="DeveloperSettings" 
         component={DeveloperSettingsScreen} 
+      />
+      
+      {/* Integrations */}
+      <Stack.Screen 
+        name="XeroSettings" 
+        component={XeroSettingsScreen} 
+      />
+      <Stack.Screen 
+        name="XeroSyncDashboard" 
+        component={XeroSyncDashboard} 
       />
     </Stack.Navigator>
   );

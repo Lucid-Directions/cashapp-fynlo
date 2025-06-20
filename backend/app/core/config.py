@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     # Application
     APP_NAME: str = "Fynlo POS"
     DEBUG: bool = True
+    ENVIRONMENT: str = "development"
     API_V1_STR: str = "/api/v1"
     
     # Database
@@ -45,5 +46,6 @@ class Settings(BaseSettings):
     class Config:
         case_sensitive = True
         env_file = ".env"
+        extra = "ignore"  # Allow extra environment variables
 
 settings = Settings()

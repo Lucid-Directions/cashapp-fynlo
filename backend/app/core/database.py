@@ -68,6 +68,7 @@ class User(Base):
     
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     email = Column(String(255), unique=True, nullable=False)
+    username = Column(String(100), unique=True, nullable=True)  # Optional username field
     password_hash = Column(String(255), nullable=False)
     first_name = Column(String(100), nullable=False)
     last_name = Column(String(100), nullable=False)
@@ -170,7 +171,7 @@ class Payment(Base):
     net_amount = Column(Float, nullable=False)
     status = Column(String(20), default="pending")  # pending, processing, completed, failed, refunded
     external_id = Column(String(255))  # Stripe payment ID, etc.
-    metadata = Column(JSONB, default={})
+    payment_metadata = Column(JSONB, default={})
     processed_at = Column(DateTime(timezone=True))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 

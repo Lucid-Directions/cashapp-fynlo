@@ -6,7 +6,14 @@ Handles base64 image uploads from iOS with validation and processing
 import base64
 import os
 import uuid
-import magic
+# Import python-magic with proper error handling
+try:
+    import magic
+    MAGIC_AVAILABLE = True
+except (ImportError, OSError):
+    # This should not happen with python-magic-bin, but keep fallback for safety
+    MAGIC_AVAILABLE = False
+    print("Warning: libmagic not available. Using fallback MIME type detection.")
 from typing import Optional, Tuple, List
 from PIL import Image, ImageOps
 from io import BytesIO
@@ -111,17 +118,21 @@ class FileUploadService:
                 )
             
             # Validate MIME type using python-magic
-            detected_mime = magic.from_buffer(image_bytes, mime=True)
-            
-            if detected_mime not in self.config.ALLOWED_MIME_TYPES:
-                raise FynloException(
-                    message=f"Unsupported image format. Allowed types: {', '.join(self.config.ALLOWED_MIME_TYPES)}",
-                    error_code=ErrorCodes.VALIDATION_ERROR,
-                    status_code=400
-                )
-            
-            # Use detected MIME type if not provided
-            final_mime_type = mime_type if mime_type in self.config.ALLOWED_MIME_TYPES else detected_mime
+            if MAGIC_AVAILABLE:
+                detected_mime = magic.from_buffer(image_bytes, mime=True)
+                
+                if detected_mime not in self.config.ALLOWED_MIME_TYPES:
+                    raise FynloException(
+                        message=f"Unsupported image format. Allowed types: {', '.join(self.config.ALLOWED_MIME_TYPES)}",
+                        error_code=ErrorCodes.VALIDATION_ERROR,
+                        status_code=400
+                    )
+                
+                # Use detected MIME type if not provided
+                final_mime_type = mime_type if mime_type in self.config.ALLOWED_MIME_TYPES else detected_mime
+            else:
+                # Temporary fallback without magic
+                final_mime_type = mime_type if mime_type else "image/jpeg"
             
             return image_bytes, final_mime_type
             

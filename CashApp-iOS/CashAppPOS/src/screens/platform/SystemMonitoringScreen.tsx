@@ -10,6 +10,7 @@ import {
   Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useNavigation } from '@react-navigation/native';
 
 // Clover POS Color Scheme
 const Colors = {
@@ -29,6 +30,7 @@ const Colors = {
 };
 
 const SystemMonitoringScreen: React.FC = () => {
+  const navigation = useNavigation();
   const [selectedTab, setSelectedTab] = useState<'health' | 'errors' | 'incidents'>('health');
 
   const handleMonitoringAction = (action: string) => {
@@ -86,8 +88,18 @@ const SystemMonitoringScreen: React.FC = () => {
       
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>System Monitoring</Text>
-        <Text style={styles.headerSubtitle}>Real-time platform health</Text>
+        <View style={styles.headerLeft}>
+          <TouchableOpacity 
+            style={styles.headerButton}
+            onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('PlatformDashboard' as never)}
+          >
+            <Icon name="arrow-back" size={24} color={Colors.text} />
+          </TouchableOpacity>
+          <View>
+            <Text style={styles.headerTitle}>System Monitoring</Text>
+            <Text style={styles.headerSubtitle}>Real-time platform health</Text>
+          </View>
+        </View>
       </View>
 
       {/* Tab Selector */}
@@ -290,6 +302,17 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  headerButton: {
+    padding: 8,
+    marginRight: 12,
   },
   headerTitle: {
     fontSize: 24,

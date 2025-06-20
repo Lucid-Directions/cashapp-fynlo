@@ -57,7 +57,7 @@ interface RestaurantStatus {
 
 const PlatformDashboardScreen: React.FC = () => {
   const navigation = useNavigation();
-  const { user, platform, managedRestaurants, loadPlatformData } = useAuth();
+  const { user, platform, managedRestaurants, loadPlatformData, signOut } = useAuth();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedTimeframe, setSelectedTimeframe] = useState<'today' | 'week' | 'month'>('today');
 
@@ -134,6 +134,21 @@ const PlatformDashboardScreen: React.FC = () => {
     Alert.alert('Quick Action', `${action} functionality will be implemented in Phase 2`);
   };
 
+  const handleSignOut = () => {
+    Alert.alert(
+      'Sign Out',
+      'Are you sure you want to sign out?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Sign Out', 
+          style: 'destructive',
+          onPress: () => signOut()
+        }
+      ]
+    );
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'online': return Colors.success;
@@ -173,15 +188,23 @@ const PlatformDashboardScreen: React.FC = () => {
             Welcome back, {user?.firstName} • {platform?.totalRestaurants} restaurants
           </Text>
         </View>
-        <TouchableOpacity
-          style={styles.notificationButton}
-          onPress={() => handleQuickAction('Notifications')}
-        >
-          <Icon name="notifications" size={24} color={Colors.text} />
-          <View style={styles.notificationBadge}>
-            <Text style={styles.notificationBadgeText}>3</Text>
-          </View>
-        </TouchableOpacity>
+        <View style={styles.headerRight}>
+          <TouchableOpacity
+            style={styles.notificationButton}
+            onPress={() => handleQuickAction('Notifications')}
+          >
+            <Icon name="notifications" size={24} color={Colors.text} />
+            <View style={styles.notificationBadge}>
+              <Text style={styles.notificationBadgeText}>3</Text>
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.signOutButton}
+            onPress={handleSignOut}
+          >
+            <Icon name="logout" size={24} color={Colors.danger} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView
@@ -354,6 +377,11 @@ const styles = StyleSheet.create({
   headerLeft: {
     flex: 1,
   },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -383,6 +411,11 @@ const styles = StyleSheet.create({
     color: Colors.white,
     fontSize: 10,
     fontWeight: 'bold',
+  },
+  signOutButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: Colors.lightGray,
   },
   scrollContent: {
     flex: 1,
