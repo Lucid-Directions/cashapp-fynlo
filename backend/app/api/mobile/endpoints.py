@@ -13,23 +13,28 @@ from app.core.database import get_db, User, Restaurant, Product, Category, Order
 from app.api.v1.endpoints.auth import get_current_user
 from app.core.responses import APIResponseHelper
 from app.core.exceptions import FynloException, ErrorCodes
+from app.core.mobile_id_mapping import get_mobile_id_service
+from app.core.redis_client import get_redis, RedisClient
 
 router = APIRouter()
 
 # Mobile-optimized response models
 class MobileProductResponse(BaseModel):
     """Lightweight product response for mobile"""
-    id: str
+    id: int  # Mobile-friendly integer ID
+    uuid_id: str  # Original UUID for reference
     name: str
     price: float
     image_url: Optional[str] = None
-    category_id: str
+    category_id: int  # Mobile-friendly integer ID
+    category_uuid_id: str  # Original category UUID
     is_available: bool = True
     prep_time: int = 0
 
 class MobileCategoryResponse(BaseModel):
     """Lightweight category response for mobile"""
-    id: str
+    id: int  # Mobile-friendly integer ID
+    uuid_id: str  # Original UUID for reference
     name: str
     color: str = "#00A651"
     icon: Optional[str] = None
@@ -134,7 +139,8 @@ async def get_mobile_menu(
     restaurant_id: Optional[str] = Query(None),
     include_unavailable: bool = Query(False),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
+    redis: RedisClient = Depends(get_redis)
 ):
     """
     Mobile-optimized menu endpoint with reduced payload
@@ -171,16 +177,27 @@ async def get_mobile_menu(
         
         products = products_query.all()
         
+        # Initialize mobile ID service
+        mobile_id_service = get_mobile_id_service(db, redis)
+        
+        # Get mobile IDs for all categories and products
+        category_uuids = [str(cat.id) for cat in categories]
+        product_uuids = [str(prod.id) for prod in products]
+        
+        category_mobile_ids = mobile_id_service.get_batch_mappings(category_uuids, "category")
+        product_mobile_ids = mobile_id_service.get_batch_mappings(product_uuids, "product")
+        
         # Count products per category
         category_product_counts = {}
         for product in products:
             cat_id = str(product.category_id)
             category_product_counts[cat_id] = category_product_counts.get(cat_id, 0) + 1
         
-        # Build mobile-optimized response
+        # Build mobile-optimized response with safe integer IDs
         mobile_categories = [
             MobileCategoryResponse(
-                id=str(cat.id),
+                id=category_mobile_ids[str(cat.id)],
+                uuid_id=str(cat.id),
                 name=cat.name,
                 color=cat.color,
                 icon=cat.icon,
@@ -191,11 +208,13 @@ async def get_mobile_menu(
         
         mobile_products = [
             MobileProductResponse(
-                id=str(prod.id),
+                id=product_mobile_ids[str(prod.id)],
+                uuid_id=str(prod.id),
                 name=prod.name,
                 price=float(prod.price),
                 image_url=prod.image_url,
-                category_id=str(prod.category_id),
+                category_id=category_mobile_ids[str(prod.category_id)],
+                category_uuid_id=str(prod.category_id),
                 is_available=prod.is_active and (
                     not prod.stock_tracking or prod.stock_quantity > 0
                 ),
