@@ -348,8 +348,12 @@ async def create_product(
     category = db.query(Category).filter(
         and_(Category.id == product_data.category_id, Category.restaurant_id == restaurant_id)
     ).first()
+    
     if not category:
-        raise HTTPException(status_code=404, detail="Category not found")
+        raise FynloException(
+            error_code=ErrorCodes.RESOURCE_NOT_FOUND,
+            detail="Category not found"
+        )
     
     new_product = Product(
         restaurant_id=restaurant_id,
@@ -372,7 +376,7 @@ async def create_product(
     db.commit()
     db.refresh(new_product)
     
-    # Clear product and menu caches
+    # Clear caches
     await redis.delete(f"products:{restaurant_id}:*")
     await redis.delete(f"menu:{restaurant_id}")
     
@@ -408,12 +412,40 @@ async def update_product(
     
     product = db.query(Product).filter(Product.id == product_id).first()
     if not product:
-        raise HTTPException(status_code=404, detail="Product not found")
+        raise FynloException(
+            error_code=ErrorCodes.RESOURCE_NOT_FOUND,
+            detail="Product not found"
+        )
     
     # Update fields if provided
-    update_data = product_data.dict(exclude_unset=True)
-    for field, value in update_data.items():
-        setattr(product, field, value)
+    if product_data.category_id is not None:
+        product.category_id = product_data.category_id
+    if product_data.name is not None:
+        product.name = product_data.name
+    if product_data.description is not None:
+        product.description = product_data.description
+    if product_data.price is not None:
+        product.price = product_data.price
+    if product_data.cost is not None:
+        product.cost = product_data.cost
+    if product_data.image_url is not None:
+        product.image_url = product_data.image_url
+    if product_data.barcode is not None:
+        product.barcode = product_data.barcode
+    if product_data.sku is not None:
+        product.sku = product_data.sku
+    if product_data.prep_time is not None:
+        product.prep_time = product_data.prep_time
+    if product_data.dietary_info is not None:
+        product.dietary_info = product_data.dietary_info
+    if product_data.modifiers is not None:
+        product.modifiers = product_data.modifiers
+    if product_data.stock_tracking is not None:
+        product.stock_tracking = product_data.stock_tracking
+    if product_data.stock_quantity is not None:
+        product.stock_quantity = product_data.stock_quantity
+    if product_data.is_active is not None:
+        product.is_active = product_data.is_active
     
     product.updated_at = datetime.utcnow()
     db.commit()
@@ -455,7 +487,10 @@ async def delete_product(
     
     product = db.query(Product).filter(Product.id == product_id).first()
     if not product:
-        raise HTTPException(status_code=404, detail="Product not found")
+        raise FynloException(
+            error_code=ErrorCodes.RESOURCE_NOT_FOUND,
+            detail="Product not found"
+        )
     
     product.is_active = False
     product.updated_at = datetime.utcnow()
@@ -466,7 +501,7 @@ async def delete_product(
     await redis.delete(f"products:{restaurant_id}:*")
     await redis.delete(f"menu:{restaurant_id}")
     
-    return {"message": "Product deleted successfully"}
+    return APIResponseHelper.success(message="Product deleted successfully")
 
 # Mobile-optimized endpoints
 class MobileProductResponse(BaseModel):
@@ -559,7 +594,10 @@ async def get_products_by_category(
     ).first()
     
     if not category:
-        raise HTTPException(status_code=404, detail="Category not found")
+        raise FynloException(
+            error_code=ErrorCodes.RESOURCE_NOT_FOUND,
+            detail="Category not found"
+        )
     
     # Get products in this category
     products = db.query(Product).filter(
@@ -602,7 +640,10 @@ async def get_product(
     
     product = db.query(Product).filter(Product.id == product_id).first()
     if not product:
-        raise HTTPException(status_code=404, detail="Product not found")
+        raise FynloException(
+            error_code=ErrorCodes.RESOURCE_NOT_FOUND,
+            detail="Product not found"
+        )
     
     return ProductResponse(
         id=str(product.id),

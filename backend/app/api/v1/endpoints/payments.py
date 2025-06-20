@@ -188,7 +188,10 @@ async def confirm_qr_payment(
     
     logger.info(f"QR payment confirmed: {qr_payment_id}")
     
-    return {"message": "QR payment confirmed successfully", "payment_id": str(payment.id)}
+    return APIResponseHelper.success(
+        message="QR payment confirmed successfully",
+        data={"payment_id": str(payment.id)}
+    )
 
 @router.post("/stripe", response_model=PaymentResponse)
 async def process_stripe_payment(
@@ -320,7 +323,7 @@ async def get_order_payments(
     
     payments = db.query(Payment).filter(Payment.order_id == order_id).all()
     
-    return [
+    payment_data = [
         {
             "payment_id": str(payment.id),
             "payment_method": payment.payment_method,
@@ -333,6 +336,11 @@ async def get_order_payments(
         }
         for payment in payments
     ]
+    
+    return APIResponseHelper.success(
+        data=payment_data,
+        message=f"Retrieved {len(payment_data)} payments for order"
+    )
 
 @router.get("/qr/{qr_payment_id}/status")
 async def check_qr_payment_status(
@@ -345,10 +353,15 @@ async def check_qr_payment_status(
     if not qr_payment:
         raise HTTPException(status_code=404, detail="QR payment not found")
     
-    return {
+    data = {
         "qr_payment_id": str(qr_payment.id),
         "status": qr_payment.status,
         "amount": qr_payment.amount,
         "expires_at": qr_payment.expires_at,
         "expired": qr_payment.expires_at < datetime.utcnow()
     }
+    
+    return APIResponseHelper.success(
+        data=data,
+        message="QR payment status retrieved"
+    )
