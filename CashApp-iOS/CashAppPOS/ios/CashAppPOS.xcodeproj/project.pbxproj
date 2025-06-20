@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
+		5B11316863AF4202B2D28BCE /* main.jsbundle in Resources */ = {isa = PBXBuildFile; fileRef = 806CCF8EE5084FC5AD7B8F2D /* main.jsbundle */; };
 		2F35FBD5920E05EA81AEFAEB /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = D736FE8CE469B82F94153051 /* PrivacyInfo.xcprivacy */; };
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
 		68E0525B93D1D783F833B5C4 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08848095BBC2C152057FAB65 /* ExpoModulesProvider.swift */; };
@@ -29,6 +30,7 @@
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		F11748412D0307B40044C1D9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = CashAppPOS/AppDelegate.swift; sourceTree = "<group>"; };
 		F11748442D0722820044C1D9 /* CashAppPOS-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "CashAppPOS-Bridging-Header.h"; path = "CashAppPOS/CashAppPOS-Bridging-Header.h"; sourceTree = "<group>"; };
+		806CCF8EE5084FC5AD7B8F2D /* main.jsbundle */ = {isa = PBXFileReference; lastKnownFileType = text; name = main.jsbundle; path = CashAppPOS/main.jsbundle; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -48,6 +50,7 @@
 			children = (
 				F11748412D0307B40044C1D9 /* AppDelegate.swift */,
 				F11748442D0722820044C1D9 /* CashAppPOS-Bridging-Header.h */,
+				806CCF8EE5084FC5AD7B8F2D /* main.jsbundle */,
 				BB2F792B24A3F905000567C9 /* Supporting */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
@@ -193,6 +196,7 @@
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
 				2F35FBD5920E05EA81AEFAEB /* PrivacyInfo.xcprivacy in Resources */,
+				5B11316863AF4202B2D28BCE /* main.jsbundle in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

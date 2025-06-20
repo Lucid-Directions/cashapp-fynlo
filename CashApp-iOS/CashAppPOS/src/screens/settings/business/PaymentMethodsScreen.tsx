@@ -76,11 +76,11 @@ const PaymentMethodsScreen: React.FC = () => {
       iconColor: Colors.warning,
     },
     {
-      id: 'giftCard',
-      name: 'Gift Cards',
-      description: 'Accept and issue gift card payments',
-      icon: 'card-giftcard',
-      iconColor: Colors.danger,
+      id: 'qrCode',
+      name: 'QR Code Payment',
+      description: 'Generate QR codes for customer mobile payments (1.2% fees)',
+      icon: 'qr-code-scanner',
+      iconColor: Colors.primary,
     },
     {
       id: 'customerAccount',

@@ -1,4 +1,4 @@
-import React
+import UIKit
 import Foundation
 
 @UIApplicationMain
@@ -16,7 +16,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     #if DEBUG
       // For debug builds, use Metro bundler (now running)
-      jsCodeLocation = RCTBundleURLProvider.sharedSettings().jsBundleURL(forBundleRoot: "index")
+      // Try Metro bundler first, then fall back to bundled JS
+      if let bundleURL = RCTBundleURLProvider.sharedSettings()?.jsBundleURL(forBundleRoot: "index") {
+        jsCodeLocation = bundleURL
+      } else if let bundledURL = Bundle.main.url(forResource: "main", withExtension: "jsbundle") {
+        // Fallback to bundled JavaScript when Metro is unavailable
+        jsCodeLocation = bundledURL
+        print("⚠️ Metro unavailable, using bundled JavaScript")
+      } else {
+        // Final fallback to localhost URL
+        jsCodeLocation = URL(string: "http://localhost:8081/index.bundle?platform=ios")!
+        print("⚠️ No bundled JS found, attempting localhost connection")
+      }
       print("✅ Using Metro bundler for debug build: \(jsCodeLocation)")
     #else
       // For release builds, use bundled JS

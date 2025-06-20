@@ -170,6 +170,7 @@ const AppSettingsScreen: React.FC = () => {
         <TouchableOpacity 
           style={styles.backButton}
           onPress={() => navigation.goBack()}
+          testID="back-button"
         >
           <Icon name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>

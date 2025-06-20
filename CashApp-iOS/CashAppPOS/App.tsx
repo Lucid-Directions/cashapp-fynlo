@@ -7,6 +7,7 @@ import React, { useEffect, useState } from 'react';
 import { LogBox, View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import 'react-native-gesture-handler';
 import { AuthProvider } from './src/contexts/AuthContext';
+import { ThemeProvider } from './src/design-system/ThemeProvider';
 import AppNavigator from './src/navigation/AppNavigator';
 
 // Suppress specific warnings for development
@@ -58,9 +59,11 @@ const App: React.FC = () => {
   }
 
   return (
-    <AuthProvider>
-      <AppNavigator />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <AppNavigator />
+      </AuthProvider>
+    </ThemeProvider>
   );
 };
 

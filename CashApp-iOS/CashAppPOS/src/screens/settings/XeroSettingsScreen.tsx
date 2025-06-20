@@ -279,12 +279,22 @@ const XeroSettingsScreen: React.FC = () => {
   const rateLimitInfo = getRateLimitInfo();
 
   return (
-    <ScrollView
-      style={styles.container}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-    >
+    <View style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Icon name="arrow-back" size={24} color={Colors.white} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Xero Integration</Text>
+        <View style={styles.headerSpacer} />
+      </View>
+
+      <ScrollView
+        style={styles.content}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
       {/* Connection Status Card */}
       <View style={styles.card}>
         <View style={styles.cardHeader}>
@@ -437,6 +447,7 @@ const XeroSettingsScreen: React.FC = () => {
         </View>
       </View>
     </ScrollView>
+    </View>
   );
 };
 
@@ -444,6 +455,29 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: Colors.primary,
+    paddingTop: 50,
+    paddingBottom: 15,
+    paddingHorizontal: 16,
+  },
+  backButton: {
+    padding: 8,
+  },
+  headerTitle: {
+    color: Colors.white,
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  headerSpacer: {
+    width: 40,
+  },
+  content: {
+    flex: 1,
     padding: 16,
   },
   loadingContainer: {

@@ -146,15 +146,15 @@ const RestaurantSetupScreen: React.FC = () => {
       
       Alert.alert(
         'Setup Complete!',
-        'Your restaurant information has been saved successfully.',
+        'Your restaurant information has been saved successfully. Your restaurant name will now appear throughout the app.',
         [
           {
-            text: 'Continue to Menu Setup',
-            onPress: () => navigation.navigate('MenuSetup' as never),
+            text: 'Configure Menu',
+            onPress: () => navigation.navigate('SettingsMenuManagement' as never),
           },
           {
-            text: 'Go to Settings',
-            onPress: () => navigation.navigate('Settings' as never),
+            text: 'Back to Settings',
+            onPress: () => navigation.navigate('SettingsMain' as never),
           },
         ]
       );
@@ -376,6 +376,7 @@ const RestaurantSetupScreen: React.FC = () => {
         <TouchableOpacity 
           style={styles.backButton}
           onPress={() => navigation.goBack()}
+          testID="back-button"
         >
           <Icon name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>

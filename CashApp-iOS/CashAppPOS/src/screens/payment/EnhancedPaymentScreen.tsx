@@ -120,8 +120,8 @@ const EnhancedPaymentScreen: React.FC = () => {
       name: 'QR Payment',
       icon: 'qr-code-scanner',
       color: Colors.primary,
-      enabled: true,
-      requiresAuth: false,
+      enabled: paymentMethods.qrCode.enabled,
+      requiresAuth: paymentMethods.qrCode.requiresAuth,
     },
     {
       id: 'cash',
@@ -155,14 +155,6 @@ const EnhancedPaymentScreen: React.FC = () => {
       enabled: paymentMethods.googlePay.enabled,
       requiresAuth: paymentMethods.googlePay.requiresAuth,
     },
-    {
-      id: 'giftCard',
-      name: 'Gift Card',
-      icon: 'card-giftcard',
-      color: Colors.danger,
-      enabled: paymentMethods.giftCard.enabled,
-      requiresAuth: paymentMethods.giftCard.requiresAuth,
-    },
   ];
 
   const enabledPaymentMethods = availablePaymentMethods.filter(m => m.enabled);
@@ -171,8 +163,12 @@ const EnhancedPaymentScreen: React.FC = () => {
     // Auto-select payment method if only one is enabled
     if (enabledPaymentMethods.length === 1) {
       setSelectedPaymentMethod(enabledPaymentMethods[0].id);
+    } else if (enabledPaymentMethods.length > 1 && !selectedPaymentMethod) {
+      // Default to QR code if available, otherwise first available method
+      const qrMethod = enabledPaymentMethods.find(m => m.id === 'qrCode');
+      setSelectedPaymentMethod(qrMethod ? qrMethod.id : enabledPaymentMethods[0].id);
     }
-  }, []);
+  }, [enabledPaymentMethods, selectedPaymentMethod]);
 
   const handleTipPreset = (percentage: number) => {
     const subtotal = calculateSubtotal();
@@ -212,6 +208,15 @@ const EnhancedPaymentScreen: React.FC = () => {
               setSelectedPaymentMethod(methodId);
               if (methodId === 'cash') {
                 setShowCashModal(true);
+              } else if (methodId === 'qrCode') {
+                setShowQRModal(true);
+                generateQRCode();
+              } else if (methodId === 'card') {
+                Alert.alert('Card Payment', 'Insert or swipe card, or tap for contactless payment.');
+              } else if (methodId === 'applePay') {
+                Alert.alert('Apple Pay', 'Hold near reader and confirm with Touch ID or Face ID.');
+              } else if (methodId === 'googlePay') {
+                Alert.alert('Google Pay', 'Hold near reader and confirm payment.');
               }
             }
           }
@@ -224,6 +229,15 @@ const EnhancedPaymentScreen: React.FC = () => {
       } else if (methodId === 'qrCode') {
         setShowQRModal(true);
         generateQRCode();
+      } else if (methodId === 'card') {
+        // Card payment handling - could show card reader interface
+        Alert.alert('Card Payment', 'Insert or swipe card, or tap for contactless payment.');
+      } else if (methodId === 'applePay') {
+        // Apple Pay handling
+        Alert.alert('Apple Pay', 'Hold near reader and confirm with Touch ID or Face ID.');
+      } else if (methodId === 'googlePay') {
+        // Google Pay handling
+        Alert.alert('Google Pay', 'Hold near reader and confirm payment.');
       }
     }
   };

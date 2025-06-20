@@ -30,7 +30,7 @@ interface PaymentMethodSettings {
   card: { enabled: boolean; requiresAuth: boolean; tipEnabled: boolean };
   applePay: { enabled: boolean; requiresAuth: boolean };
   googlePay: { enabled: boolean; requiresAuth: boolean };
-  giftCard: { enabled: boolean; requiresAuth: boolean };
+  qrCode: { enabled: boolean; requiresAuth: boolean };
   customerAccount: { enabled: boolean; requiresAuth: boolean };
 }
 
@@ -252,7 +252,7 @@ const defaultPaymentMethods: PaymentMethodSettings = {
   card: { enabled: true, requiresAuth: false, tipEnabled: true },
   applePay: { enabled: true, requiresAuth: false },
   googlePay: { enabled: true, requiresAuth: false },
-  giftCard: { enabled: true, requiresAuth: true },
+  qrCode: { enabled: true, requiresAuth: false },
   customerAccount: { enabled: false, requiresAuth: true },
 };
 

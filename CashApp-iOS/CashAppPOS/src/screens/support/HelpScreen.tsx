@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
+import { useRestaurantConfig, useOnboardingStatus } from '../../hooks/useRestaurantConfig';
 
 const Colors = {
   primary: '#00A651',      // Clover Green
@@ -54,14 +55,40 @@ interface ContactMethod {
 
 const HelpScreen: React.FC = () => {
   const navigation = useNavigation();
+  const { config } = useRestaurantConfig();
+  const onboardingStatus = useOnboardingStatus();
 
   const helpSections: HelpSection[] = [
+    {
+      id: 'restaurant-setup',
+      title: 'Restaurant Setup',
+      description: 'Configure your restaurant details and branding',
+      icon: 'store',
+      color: Colors.primary,
+      items: [
+        {
+          id: '1',
+          question: 'How do I set up my restaurant information?',
+          answer: 'Go to Settings → Business Settings → Business Information to enter your restaurant name, address, and contact details. This information will appear throughout your POS system.',
+        },
+        {
+          id: '2', 
+          question: 'How do I customize my restaurant name in headers?',
+          answer: 'Your restaurant name is automatically displayed in headers once you save it in Business Information. The name will replace "Fynlo POS" while maintaining "Powered by Fynlo" branding.',
+        },
+        {
+          id: '3',
+          question: 'Can I restart the setup process?',
+          answer: 'Yes! Use the "Restaurant Setup" button below to go through the guided setup process again or complete any missing steps.',
+        },
+      ],
+    },
     {
       id: 'getting-started',
       title: 'Getting Started',
       description: 'Basic setup and first steps',
       icon: 'play-circle-outline',
-      color: Colors.primary,
+      color: Colors.secondary,
       items: [
         {
           id: '1',
@@ -222,6 +249,59 @@ const HelpScreen: React.FC = () => {
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        {/* Restaurant Setup Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Restaurant Setup</Text>
+          <View style={styles.setupCard}>
+            <View style={styles.setupInfo}>
+              <View style={styles.setupHeader}>
+                <Icon name="store" size={24} color={Colors.primary} />
+                <Text style={styles.setupTitle}>
+                  {config?.restaurantName || 'Complete Your Restaurant Setup'}
+                </Text>
+              </View>
+              <Text style={styles.setupDescription}>
+                {onboardingStatus.completed 
+                  ? 'Your restaurant is set up and ready to go! You can update your information anytime.'
+                  : `Complete your restaurant setup to customize your POS system. ${onboardingStatus.progress}% complete.`
+                }
+              </Text>
+              {!onboardingStatus.completed && (
+                <View style={styles.setupProgress}>
+                  <View style={styles.progressBar}>
+                    <View 
+                      style={[styles.progressFill, { width: `${onboardingStatus.progress}%` }]} 
+                    />
+                  </View>
+                  <Text style={styles.progressText}>{onboardingStatus.progress}% Complete</Text>
+                </View>
+              )}
+            </View>
+            <TouchableOpacity
+              style={[
+                styles.setupButton,
+                onboardingStatus.completed && styles.setupButtonSecondary
+              ]}
+              onPress={() => {
+                // Navigate to Settings first, then to RestaurantSetup
+                navigation.navigate('Settings' as never, {
+                  screen: 'RestaurantSetup'
+                } as never);
+              }}
+              activeOpacity={0.7}
+            >
+              <Icon 
+                name={onboardingStatus.completed ? "edit" : "arrow-forward"} 
+                size={20} 
+                color={Colors.white} 
+              />
+              <Text style={styles.setupButtonText}>
+                {onboardingStatus.completed ? 'Edit Setup' : 'Continue Setup'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
         {/* Quick Contact */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Get Help</Text>
@@ -533,6 +613,76 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.lightText,
     lineHeight: 20,
+  },
+  // Restaurant Setup Styles
+  setupCard: {
+    backgroundColor: Colors.white,
+    borderRadius: 12,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  setupInfo: {
+    flex: 1,
+    marginRight: 16,
+  },
+  setupHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  setupTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.text,
+    marginLeft: 8,
+    flex: 1,
+  },
+  setupDescription: {
+    fontSize: 14,
+    color: Colors.lightText,
+    lineHeight: 20,
+    marginBottom: 12,
+  },
+  setupProgress: {
+    marginTop: 8,
+  },
+  progressBar: {
+    height: 4,
+    backgroundColor: Colors.lightGray,
+    borderRadius: 2,
+    marginBottom: 4,
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: Colors.primary,
+    borderRadius: 2,
+  },
+  progressText: {
+    fontSize: 12,
+    color: Colors.lightText,
+  },
+  setupButton: {
+    backgroundColor: Colors.primary,
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  setupButtonSecondary: {
+    backgroundColor: Colors.secondary,
+  },
+  setupButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.white,
   },
 });
 

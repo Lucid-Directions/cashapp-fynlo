@@ -55,12 +55,12 @@ const UserProfileScreen: React.FC = () => {
   const [editableProfile, setEditableProfile] = useState(user);
 
   const handleSaveProfile = async () => {
-    if (!editableProfile.firstName.trim() || !editableProfile.lastName.trim()) {
+    if (!editableProfile.firstName?.trim() || !editableProfile.lastName?.trim()) {
       Alert.alert('Error', 'First name and last name are required.');
       return;
     }
 
-    if (!editableProfile.email.includes('@')) {
+    if (!editableProfile.email?.includes('@')) {
       Alert.alert('Error', 'Please enter a valid email address.');
       return;
     }
@@ -173,8 +173,8 @@ const UserProfileScreen: React.FC = () => {
               style={styles.photoContainer}
               onPress={isEditing ? handlePhotoChange : undefined}
             >
-              {profile.photo ? (
-                <Image source={{ uri: profile.photo }} style={styles.profilePhoto} />
+              {user.photo ? (
+                <Image source={{ uri: user.photo }} style={styles.profilePhoto} />
               ) : (
                 <View style={styles.defaultPhoto}>
                   <Icon name="person" size={48} color={Colors.mediumGray} />
@@ -189,18 +189,18 @@ const UserProfileScreen: React.FC = () => {
             
             <View style={styles.profileInfo}>
               <Text style={styles.profileName}>
-                {user.firstName} {user.lastName}
+                {user.firstName || 'First'} {user.lastName || 'Last'}
               </Text>
               <View style={styles.roleContainer}>
-                <Icon name={getRoleIcon(user.role)} size={20} color={Colors.primary} />
-                <Text style={styles.roleText}>{getRoleDisplayName(user.role)}</Text>
+                <Icon name={getRoleIcon(user.role || 'employee')} size={20} color={Colors.primary} />
+                <Text style={styles.roleText}>{getRoleDisplayName(user.role || 'employee')}</Text>
               </View>
-              <Text style={styles.employeeId}>ID: {user.employeeId}</Text>
+              <Text style={styles.employeeId}>ID: {user.employeeId || 'N/A'}</Text>
               <Text style={styles.joinDate}>
-                Started: {user.startDate.toLocaleDateString()}
+                Started: {user.startDate ? user.startDate.toLocaleDateString() : 'N/A'}
               </Text>
               <Text style={styles.lastLogin}>
-                Last login: {user.lastLogin.toLocaleDateString()} at {user.lastLogin.toLocaleTimeString()}
+                Last login: {user.lastLogin ? `${user.lastLogin.toLocaleDateString()} at ${user.lastLogin.toLocaleTimeString()}` : 'Never'}
               </Text>
             </View>
           </View>
@@ -215,12 +215,12 @@ const UserProfileScreen: React.FC = () => {
               {isEditing ? (
                 <TextInput
                   style={styles.textInput}
-                  value={editableProfile.firstName}
+                  value={editableProfile.firstName || ''}
                   onChangeText={(text) => setEditableProfile(prev => ({ ...prev, firstName: text }))}
                   placeholder="Enter first name"
                 />
               ) : (
-                <Text style={styles.infoValue}>{user.firstName}</Text>
+                <Text style={styles.infoValue}>{user.firstName || 'N/A'}</Text>
               )}
             </View>
 
@@ -229,12 +229,12 @@ const UserProfileScreen: React.FC = () => {
               {isEditing ? (
                 <TextInput
                   style={styles.textInput}
-                  value={editableProfile.lastName}
+                  value={editableProfile.lastName || ''}
                   onChangeText={(text) => setEditableProfile(prev => ({ ...prev, lastName: text }))}
                   placeholder="Enter last name"
                 />
               ) : (
-                <Text style={styles.infoValue}>{user.lastName}</Text>
+                <Text style={styles.infoValue}>{user.lastName || 'N/A'}</Text>
               )}
             </View>
 
@@ -243,14 +243,14 @@ const UserProfileScreen: React.FC = () => {
               {isEditing ? (
                 <TextInput
                   style={styles.textInput}
-                  value={editableProfile.email}
+                  value={editableProfile.email || ''}
                   onChangeText={(text) => setEditableProfile(prev => ({ ...prev, email: text }))}
                   placeholder="Enter email address"
                   keyboardType="email-address"
                   autoCapitalize="none"
                 />
               ) : (
-                <Text style={styles.infoValue}>{user.email}</Text>
+                <Text style={styles.infoValue}>{user.email || 'N/A'}</Text>
               )}
             </View>
 
@@ -259,13 +259,13 @@ const UserProfileScreen: React.FC = () => {
               {isEditing ? (
                 <TextInput
                   style={styles.textInput}
-                  value={editableProfile.phone}
+                  value={editableProfile.phone || ''}
                   onChangeText={(text) => setEditableProfile(prev => ({ ...prev, phone: text }))}
                   placeholder="Enter phone number"
                   keyboardType="phone-pad"
                 />
               ) : (
-                <Text style={styles.infoValue}>{user.phone}</Text>
+                <Text style={styles.infoValue}>{user.phone || 'N/A'}</Text>
               )}
             </View>
           </View>

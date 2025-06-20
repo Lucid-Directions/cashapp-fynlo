@@ -42,6 +42,14 @@ const BusinessSettingsScreen: React.FC = () => {
 
   const businessSettings: BusinessSettingsItem[] = [
     {
+      id: 'restaurant-profile',
+      title: 'Restaurant Profile',
+      description: 'Complete restaurant details and branding settings',
+      icon: 'store',
+      route: 'RestaurantProfile',
+      status: 'complete',
+    },
+    {
       id: 'business-info',
       title: 'Business Information',
       description: 'Company name, address, and contact details',
@@ -148,6 +156,7 @@ const BusinessSettingsScreen: React.FC = () => {
         <TouchableOpacity 
           style={styles.backButton}
           onPress={() => navigation.goBack()}
+          testID="back-button"
         >
           <Icon name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>

@@ -65,10 +65,24 @@ const ThemeOptionsScreen: React.FC = () => {
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Theme Selection */}
+        {/* Color Theme Selection */}
         <View style={[styles.section, { backgroundColor: theme.colors.white }]}>
           <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
-            Theme Selection
+            Color Theme
+          </Text>
+          <Text style={[styles.sectionDescription, { color: theme.colors.neutral[600] }]}>
+            Choose your preferred color scheme for the app interface.
+          </Text>
+          
+          <View style={styles.themeContainer}>
+            <ThemeSwitcher variant="colors" showLabels={true} />
+          </View>
+        </View>
+
+        {/* Theme Mode Selection */}
+        <View style={[styles.section, { backgroundColor: theme.colors.white }]}>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
+            Brightness Mode
           </Text>
           <Text style={[styles.sectionDescription, { color: theme.colors.neutral[600] }]}>
             Choose how the app appears. Auto mode follows your device settings.
