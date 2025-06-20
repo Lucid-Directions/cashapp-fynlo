@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
+import { useRestaurantDisplayName } from '../../hooks/useRestaurantConfig';
 
 // Clover POS Color Scheme
 const Colors = {
@@ -51,6 +52,7 @@ interface SettingsItem {
 
 const SettingsScreen: React.FC = () => {
   const navigation = useNavigation();
+  const restaurantDisplayName = useRestaurantDisplayName();
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredCategories, setFilteredCategories] = useState<SettingsCategory[]>([]);
 
@@ -203,7 +205,7 @@ const SettingsScreen: React.FC = () => {
           title: 'Menu Management',
           description: 'Categories, items, and modifiers',
           icon: 'restaurant-menu',
-          route: 'MenuManagement',
+          route: 'SettingsMenuManagement',
         },
         {
           id: 'pricing-discounts',
@@ -329,7 +331,7 @@ const SettingsScreen: React.FC = () => {
         </TouchableOpacity>
         
         <View style={styles.headerCenter}>
-          <Text style={styles.headerTitle}>Settings</Text>
+          <Text style={styles.headerTitle}>{restaurantDisplayName} Settings</Text>
           <Text style={styles.headerSubtitle}>Configure your POS system</Text>
         </View>
         

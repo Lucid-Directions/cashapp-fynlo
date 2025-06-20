@@ -21,6 +21,7 @@ import useAppStore from '../../store/useAppStore';
 import useUIStore from '../../store/useUIStore';
 import { MenuItem, OrderItem } from '../../types';
 import DatabaseService from '../../services/DatabaseService';
+import { useRestaurantDisplayName } from '../../hooks/useRestaurantConfig';
 
 // Get screen dimensions
 const { width: screenWidth } = Dimensions.get('window');
@@ -103,6 +104,7 @@ type POSScreenNavigationProp = DrawerNavigationProp<DrawerParamList>;
 
 const POSScreen: React.FC = () => {
   const navigation = useNavigation<POSScreenNavigationProp>();
+  const restaurantDisplayName = useRestaurantDisplayName();
   const [customerName, setCustomerName] = useState('');
   const [showCartModal, setShowCartModal] = useState(false);
   
@@ -256,15 +258,12 @@ const POSScreen: React.FC = () => {
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor={Colors.primary} barStyle="light-content" />
       
-      {/* Fynlo Header */}
+      {/* Restaurant Header */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <View style={styles.logoContainer}>
-            <Image
-              source={require('../../assets/fynlo-logo.png')}
-              style={styles.headerLogo}
-              resizeMode="contain"
-            />
+            <Text style={styles.restaurantName}>{restaurantDisplayName}</Text>
+            <Text style={styles.poweredBy}>Powered by Fynlo</Text>
           </View>
         </View>
         
@@ -621,10 +620,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   logoContainer: {
-    marginLeft: -8,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+    marginLeft: 16,
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+  },
+  restaurantName: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: Colors.white,
+    letterSpacing: -0.5,
+  },
+  poweredBy: {
+    fontSize: 10,
+    fontWeight: '400',
+    color: 'rgba(255, 255, 255, 0.7)',
+    marginTop: 2,
   },
   headerLogo: {
     width: 125,

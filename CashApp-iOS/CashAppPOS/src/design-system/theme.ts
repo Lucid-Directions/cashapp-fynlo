@@ -22,7 +22,7 @@ export const breakpoints = {
   xxl: 1400,
 };
 
-// Color Palette - Clover POS Professional
+// Color Palette - Fynlo POS Professional
 export const colors = {
   // Primary Colors
   primary: {
@@ -31,7 +31,7 @@ export const colors = {
     200: '#A0D5A0',
     300: '#7AC47A',
     400: '#5CB85C',
-    500: '#00A651', // Main Clover Green
+    500: '#00A651', // Main Fynlo Green
     600: '#009547',
     700: '#00823C',
     800: '#006F32',
@@ -45,7 +45,7 @@ export const colors = {
     200: '#80C0FF',
     300: '#4DA7FF',
     400: '#1A8EFF',
-    500: '#0066CC', // Clover Blue
+    500: '#0066CC', // Fynlo Blue
     600: '#0052A3',
     700: '#003D7A',
     800: '#002951',
@@ -102,19 +102,24 @@ export const colors = {
   },
   
   // Legacy color aliases for backward compatibility
-  primary: '#00A651',
-  secondary: '#0066CC',
-  success: '#22C55E',
-  warning: '#F59E0B',
-  danger: '#EF4444',
+  primaryLegacy: '#00A651',
+  secondaryLegacy: '#0066CC',
+  successLegacy: '#22C55E',
+  warningLegacy: '#F59E0B',
+  dangerLegacy: '#EF4444',
   background: '#F5F5F5',
+  surface: '#FFFFFF',
   white: '#FFFFFF',
   lightGray: '#E5E5E5',
   mediumGray: '#A3A3A3',
   darkGray: '#525252',
   text: '#171717',
+  textSecondary: '#737373',
   lightText: '#737373',
   border: '#D4D4D4',
+  error: '#EF4444',
+  success: '#22C55E',
+  primary: '#00A651',
 };
 
 // Typography Scale
@@ -512,5 +517,12 @@ export const presets = {
     },
   },
 };
+
+// Legacy exports for backward compatibility
+export const Colors = colors;
+export const Typography = typography;
+export const Spacing = spacing;
+export const BorderRadius = borderRadius;
+export const Shadows = shadows;
 
 export default lightTheme;

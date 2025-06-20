@@ -90,7 +90,7 @@ const PlatformNavigator: React.FC = () => {
           let iconName: string;
 
           switch (route.name) {
-            case 'Dashboard':
+            case 'PlatformDashboard':
               iconName = 'dashboard';
               break;
             case 'Restaurants':
@@ -131,7 +131,7 @@ const PlatformNavigator: React.FC = () => {
       })}
     >
       <Tab.Screen
-        name="Dashboard"
+        name="PlatformDashboard"
         component={DashboardStack}
         options={{
           tabBarLabel: 'Dashboard',

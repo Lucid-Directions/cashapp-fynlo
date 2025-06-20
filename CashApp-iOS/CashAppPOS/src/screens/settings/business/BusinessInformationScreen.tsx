@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -13,6 +13,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { SettingsHeader, SettingsSection, SettingsCard } from '../../../components/settings';
 import useSettingsStore from '../../../store/useSettingsStore';
+import { useRestaurantConfig } from '../../../hooks/useRestaurantConfig';
 
 // Clover POS Color Scheme
 const Colors = {
@@ -44,11 +45,29 @@ interface FormField {
 
 const BusinessInformationScreen: React.FC = () => {
   const { businessInfo, updateBusinessInfo, isLoading } = useSettingsStore();
+  const { config, updateConfig, completeSetupStep } = useRestaurantConfig();
   const [formData, setFormData] = useState(businessInfo);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [hasChanges, setHasChanges] = useState(false);
   
   const scrollViewRef = useRef<ScrollView>(null);
+
+  // Load restaurant config data when available
+  useEffect(() => {
+    if (config && config.restaurantName) {
+      // Sync restaurant config with form data if restaurant config exists
+      setFormData(prev => ({
+        ...prev,
+        companyName: config.restaurantName,
+        phone: config.phone || prev.phone,
+        email: config.email || prev.email,
+        address: config.address?.street || prev.address,
+        city: config.address?.city || prev.city,
+        postalCode: config.address?.zipCode || prev.postalCode,
+        country: config.address?.country || prev.country,
+      }));
+    }
+  }, [config]);
 
   // Validation functions
   const validateEmail = (email: string): string | null => {
@@ -211,11 +230,31 @@ const BusinessInformationScreen: React.FC = () => {
     }
 
     try {
+      // Save to existing settings store
       updateBusinessInfo(formData);
+      
+      // Also save to restaurant configuration system
+      await updateConfig({
+        restaurantName: formData.companyName,
+        displayName: formData.companyName, // Use company name as display name
+        phone: formData.phone,
+        email: formData.email,
+        address: {
+          street: formData.address,
+          city: formData.city,
+          state: '', // Not in current form
+          zipCode: formData.postalCode,
+          country: formData.country,
+        },
+      });
+
+      // Mark restaurant info setup step as completed
+      await completeSetupStep('restaurantInfo');
+      
       setHasChanges(false);
       Alert.alert(
         'Success',
-        'Business information has been saved successfully.',
+        'Business information has been saved successfully. The restaurant name will now appear in your headers.',
         [{ text: 'OK' }]
       );
     } catch (error) {

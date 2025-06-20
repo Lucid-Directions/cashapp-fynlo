@@ -43,51 +43,67 @@ export class MockDataService {
     this.mockSession = null;
   }
 
-  // Products with beautiful mock data
+  // Authentic Mexican Restaurant Menu Items
   async getProducts(): Promise<any[]> {
     return [
-      // Starters
-      { id: 1, name: 'Truffle Arancini', price: 12.95, category: 'Starters', image: '🍙', description: 'Crispy risotto balls with truffle oil', available_in_pos: true, active: true },
-      { id: 2, name: 'Bruschetta Trio', price: 9.95, category: 'Starters', image: '🥖', description: 'Three varieties of our classic bruschetta', available_in_pos: true, active: true },
-      { id: 3, name: 'Calamari Fritti', price: 14.95, category: 'Starters', image: '🦑', description: 'Golden fried squid with aioli', available_in_pos: true, active: true },
-      
-      // Mains
-      { id: 4, name: 'Wagyu Burger', price: 28.95, category: 'Mains', image: '🍔', description: 'Premium wagyu beef, brioche bun, truffle mayo', available_in_pos: true, active: true },
-      { id: 5, name: 'Pan-Seared Salmon', price: 32.95, category: 'Mains', image: '🐟', description: 'Atlantic salmon with seasonal vegetables', available_in_pos: true, active: true },
-      { id: 6, name: 'Truffle Pasta', price: 24.95, category: 'Mains', image: '🍝', description: 'Fresh pasta with black truffle shavings', available_in_pos: true, active: true },
-      { id: 7, name: 'Ribeye Steak', price: 45.95, category: 'Mains', image: '🥩', description: '12oz aged ribeye with garlic butter', available_in_pos: true, active: true },
-      
-      // Pizzas
-      { id: 8, name: 'Margherita', price: 18.95, category: 'Pizza', image: '🍕', description: 'Classic tomato, mozzarella, basil', available_in_pos: true, active: true },
-      { id: 9, name: 'Quattro Formaggi', price: 22.95, category: 'Pizza', image: '🍕', description: 'Four cheese blend with honey drizzle', available_in_pos: true, active: true },
-      { id: 10, name: 'Prosciutto e Funghi', price: 24.95, category: 'Pizza', image: '🍕', description: 'Prosciutto, mushrooms, truffle oil', available_in_pos: true, active: true },
-      
-      // Salads
-      { id: 11, name: 'Caesar Salad', price: 14.95, category: 'Salads', image: '🥗', description: 'Romaine, parmesan, classic dressing', available_in_pos: true, active: true },
-      { id: 12, name: 'Burrata Caprese', price: 16.95, category: 'Salads', image: '🥗', description: 'Fresh burrata, heirloom tomatoes, basil', available_in_pos: true, active: true },
-      
-      // Desserts
-      { id: 13, name: 'Tiramisu', price: 8.95, category: 'Desserts', image: '🍰', description: 'Classic Italian coffee dessert', available_in_pos: true, active: true },
-      { id: 14, name: 'Panna Cotta', price: 7.95, category: 'Desserts', image: '🍮', description: 'Vanilla bean with berry compote', available_in_pos: true, active: true },
-      { id: 15, name: 'Chocolate Lava Cake', price: 9.95, category: 'Desserts', image: '🍫', description: 'Warm chocolate cake with vanilla gelato', available_in_pos: true, active: true },
-      
-      // Drinks
-      { id: 16, name: 'Espresso', price: 3.50, category: 'Drinks', image: '☕', description: 'Italian espresso', available_in_pos: true, active: true },
-      { id: 17, name: 'Cappuccino', price: 4.50, category: 'Drinks', image: '☕', description: 'Classic cappuccino', available_in_pos: true, active: true },
-      { id: 18, name: 'Fresh Orange Juice', price: 5.95, category: 'Drinks', image: '🥤', description: 'Freshly squeezed', available_in_pos: true, active: true },
-      { id: 19, name: 'Craft Beer', price: 6.95, category: 'Drinks', image: '🍺', description: 'Selection of local craft beers', available_in_pos: true, active: true },
-      { id: 20, name: 'House Wine', price: 8.95, category: 'Drinks', image: '🍷', description: 'Red or white by the glass', available_in_pos: true, active: true },
+      // SNACKS
+      { id: 1, name: 'Nachos', price: 5.00, category: 'Snacks', image: '🧀', description: 'Homemade corn tortilla chips with black beans, tomato salsa, pico de gallo, feta, guac & coriander', available_in_pos: true, active: true },
+      { id: 2, name: 'Quesadillas', price: 5.50, category: 'Snacks', image: '🫓', description: 'Folded flour tortilla filled with mozzarella, topped with tomato salsa, feta & coriander', available_in_pos: true, active: true },
+      { id: 3, name: 'Chorizo Quesadilla', price: 5.50, category: 'Snacks', image: '🌶️', description: 'Folded flour tortilla filled with chorizo & mozzarella. Topped with tomato salsa, feta & coriander', available_in_pos: true, active: true },
+      { id: 4, name: 'Chicken Quesadilla', price: 5.50, category: 'Snacks', image: '🐔', description: 'Folded flour tortilla filled with chicken, peppers, onion & mozzarella. Topped with salsa, feta & coriander', available_in_pos: true, active: true },
+      { id: 5, name: 'Tostada', price: 6.50, category: 'Snacks', image: '🥙', description: 'Crispy tortillas with black beans filled with chicken or any topping, served with salsa, lettuce and feta', available_in_pos: true, active: true },
+
+      // TACOS
+      { id: 6, name: 'Carnitas', price: 3.50, category: 'Tacos', image: '🌮', description: 'Slow cooked pork, served with onion, coriander, salsa, guacamole & coriander', available_in_pos: true, active: true },
+      { id: 7, name: 'Cochinita', price: 3.50, category: 'Tacos', image: '🌮', description: 'Marinated pulled pork served with pickle red onion', available_in_pos: true, active: true },
+      { id: 8, name: 'Barbacoa de Res', price: 3.50, category: 'Tacos', image: '🌮', description: 'Juicy pulled beef topped with onion, guacamole & coriander', available_in_pos: true, active: true },
+      { id: 9, name: 'Chorizo', price: 3.50, category: 'Tacos', image: '🌮', description: 'Grilled chorizo with black beans, onions, salsa, coriander & guacamole', available_in_pos: true, active: true },
+      { id: 10, name: 'Rellena', price: 3.50, category: 'Tacos', image: '🌮', description: 'Fried black pudding with beans, onion & chilli. Topped with coriander and pickled red onion', available_in_pos: true, active: true },
+      { id: 11, name: 'Chicken Fajita', price: 3.50, category: 'Tacos', image: '🌮', description: 'Chicken, peppers & onion with black beans. Topped with salsa, guac & coriander', available_in_pos: true, active: true },
+      { id: 12, name: 'Haggis', price: 3.50, category: 'Tacos', image: '🌮', description: 'Haggis with beans, onion & chilli. Topped with coriander and pickled red onion', available_in_pos: true, active: true },
+      { id: 13, name: 'Pescado', price: 3.50, category: 'Tacos', image: '🌮', description: 'Battered cod with guacamole & coriander. Topped with red cabbage & mango chilli salsa', available_in_pos: true, active: true },
+      { id: 14, name: 'Dorados', price: 3.50, category: 'Tacos', image: '🌮', description: 'Crispy rolled tortillas filled with chicken, topped with salsa, lettuce and feta', available_in_pos: true, active: true },
+      { id: 15, name: 'Dorados Papa', price: 3.50, category: 'Tacos', image: '🌮', description: 'Crispy rolled tortillas filled with potato, topped with salsa, lettuce and feta', available_in_pos: true, active: true },
+      { id: 16, name: 'Nopal', price: 3.50, category: 'Tacos', image: '🌮', description: 'Cactus, black beans & onion, topped with tomato salsa and crumbled feta', available_in_pos: true, active: true },
+      { id: 17, name: 'Frijol', price: 3.50, category: 'Tacos', image: '🌮', description: 'Black beans with fried plantain served with tomato salsa, feta & coriander', available_in_pos: true, active: true },
+      { id: 18, name: 'Verde', price: 3.50, category: 'Tacos', image: '🌮', description: 'Courgette & sweetcorn fried with garlic, served with tomato salsa and crumbled feta', available_in_pos: true, active: true },
+      { id: 19, name: 'Fajita', price: 3.50, category: 'Tacos', image: '🌮', description: 'Mushrooms, peppers & onion with black beans. Topped with salsa, feta & coriander', available_in_pos: true, active: true },
+
+      // SPECIAL TACOS
+      { id: 20, name: 'Carne Asada', price: 4.50, category: 'Special Tacos', image: '⭐', description: 'Diced rump steak with peppers and red onion. Served on black beans, topped with chimichurri sauce & coriander', available_in_pos: true, active: true },
+      { id: 21, name: 'Camaron', price: 4.50, category: 'Special Tacos', image: '🦐', description: 'Prawns with chorizo, peppers and red onion. Served on black beans, topped with tomato salsa, coriander & guacamole', available_in_pos: true, active: true },
+      { id: 22, name: 'Pulpos', price: 4.50, category: 'Special Tacos', image: '🐙', description: 'Chargrilled octopus, cooked with peppers and red onion. Served on grilled potato with garlic & coriander', available_in_pos: true, active: true },
+
+      // BURRITOS
+      { id: 23, name: 'Regular Burrito', price: 8.00, category: 'Burritos', image: '🌯', description: 'Choose any filling from the taco menu! With black beans, lettuce, pico de gallo, & guacamole. Topped with salsa, feta and coriander.', available_in_pos: true, active: true },
+      { id: 24, name: 'Special Burrito', price: 10.00, category: 'Burritos', image: '🌯', description: 'Choose any filling from the special tacos menu! With black beans, lettuce, pico de gallo, & guacamole. Topped with salsa, feta and coriander.', available_in_pos: true, active: true },
+      { id: 25, name: 'Add Mozzarella', price: 1.00, category: 'Burritos', image: '🧀', description: 'Add extra cheese to any burrito', available_in_pos: true, active: true },
+
+      // SIDES & SALSAS
+      { id: 26, name: 'Skinny Fries', price: 3.50, category: 'Sides', image: '🍟', description: 'Thin cut fries', available_in_pos: true, active: true },
+      { id: 27, name: 'Pico de Gallo', price: 0.00, category: 'Sides', image: '🍅', description: 'Diced tomato, onion and chilli - FREE!', available_in_pos: true, active: true },
+      { id: 28, name: 'Green Chili', price: 0.00, category: 'Sides', image: '🌶️', description: 'Homemade green chili salsa - HOT! - FREE!', available_in_pos: true, active: true },
+      { id: 29, name: 'Pineapple Habanero', price: 0.00, category: 'Sides', image: '🍍', description: 'Pineapple sauce with habanero chili - HOT! - FREE!', available_in_pos: true, active: true },
+      { id: 30, name: 'Scotch Bonnet', price: 0.00, category: 'Sides', image: '🔥', description: 'Homemade spicy salsa made with scotch bonnet chilies - VERY HOT! - FREE!', available_in_pos: true, active: true },
+
+      // DRINKS
+      { id: 31, name: 'Pink Paloma', price: 3.75, category: 'Drinks', image: '🍹', description: 'An alcohol-free version of our refreshing cocktail. Tangy lime juice and grapefruit soda, with a splash of grenadine', available_in_pos: true, active: true },
+      { id: 32, name: 'Coco-Nought', price: 3.75, category: 'Drinks', image: '🥥', description: 'Coconut, pineapple juice and milk, blended into a creamy, sweet, alcohol-free treat!', available_in_pos: true, active: true },
+      { id: 33, name: 'Corona', price: 3.80, category: 'Drinks', image: '🍺', description: 'Mexican beer', available_in_pos: true, active: true },
+      { id: 34, name: 'Modelo', price: 4.00, category: 'Drinks', image: '🍺', description: 'Rich, full-flavoured Pilsner style Lager. Crisp and refreshing. 355ml', available_in_pos: true, active: true },
+      { id: 35, name: 'Pacifico', price: 4.00, category: 'Drinks', image: '🍺', description: 'Pilsner style Lager from the Pacific Ocean city of Mazatlán. 355ml', available_in_pos: true, active: true },
+      { id: 36, name: 'Dos Equis', price: 4.00, category: 'Drinks', image: '🍺', description: '"Two X\'s". German brewing heritage with the spirit of Mexican traditions. 355ml', available_in_pos: true, active: true },
     ];
   }
 
   async getProductsByCategory(categoryId: number): Promise<any[]> {
     const products = await this.getProducts();
     const categoryMap: { [key: number]: string } = {
-      1: 'Starters',
-      2: 'Mains',
-      3: 'Pizza',
-      4: 'Salads',
-      5: 'Desserts',
+      1: 'Snacks',
+      2: 'Tacos',
+      3: 'Special Tacos',
+      4: 'Burritos',
+      5: 'Sides',
       6: 'Drinks',
     };
     
@@ -98,12 +114,12 @@ export class MockDataService {
   // Categories
   async getCategories(): Promise<any[]> {
     return [
-      { id: 1, name: 'Starters', active: true, icon: '🥟' },
-      { id: 2, name: 'Mains', active: true, icon: '🍽️' },
-      { id: 3, name: 'Pizza', active: true, icon: '🍕' },
-      { id: 4, name: 'Salads', active: true, icon: '🥗' },
-      { id: 5, name: 'Desserts', active: true, icon: '🍰' },
-      { id: 6, name: 'Drinks', active: true, icon: '🥤' },
+      { id: 1, name: 'Snacks', active: true, icon: '🧀' },
+      { id: 2, name: 'Tacos', active: true, icon: '🌮' },
+      { id: 3, name: 'Special Tacos', active: true, icon: '⭐' },
+      { id: 4, name: 'Burritos', active: true, icon: '🌯' },
+      { id: 5, name: 'Sides', active: true, icon: '🍟' },
+      { id: 6, name: 'Drinks', active: true, icon: '🍺' },
     ];
   }
 

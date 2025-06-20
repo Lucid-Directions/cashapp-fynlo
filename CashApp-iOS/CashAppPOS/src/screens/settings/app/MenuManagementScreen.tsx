@@ -79,71 +79,315 @@ const MenuManagementScreen: React.FC = () => {
   
   const [categories, setCategories] = useState<Category[]>([
     {
-      id: 'drinks',
-      name: 'Beverages',
-      description: 'Hot and cold drinks',
+      id: 'snacks',
+      name: 'Snacks',
+      description: 'Mexican appetizers and light bites',
       order: 1,
       visible: true,
       items: [
         {
-          id: 'coffee1',
-          name: 'Americano',
-          description: 'Classic black coffee',
-          price: 2.50,
-          category: 'drinks',
-          available: true,
-          featured: false,
-          allergens: [],
-          modifiers: [
-            {
-              id: 'size',
-              name: 'Size',
-              price: 0,
-              required: true,
-              options: [
-                { id: 'small', name: 'Small', price: 0, default: true },
-                { id: 'medium', name: 'Medium', price: 0.50, default: false },
-                { id: 'large', name: 'Large', price: 1.00, default: false },
-              ]
-            }
-          ]
-        },
-        {
-          id: 'coffee2',
-          name: 'Cappuccino',
-          description: 'Espresso with steamed milk foam',
-          price: 3.25,
-          category: 'drinks',
+          id: 'nachos',
+          name: 'Nachos',
+          description: 'Homemade corn tortilla chips with black beans, tomato salsa, pico de gallo, feta, guac & coriander',
+          price: 5.00,
+          category: 'snacks',
           available: true,
           featured: true,
           allergens: ['dairy'],
           modifiers: []
-        }
-      ]
-    },
-    {
-      id: 'food',
-      name: 'Food',
-      description: 'Fresh sandwiches and pastries',
-      order: 2,
-      visible: true,
-      items: [
+        },
         {
-          id: 'sandwich1',
-          name: 'Ham & Cheese Sandwich',
-          description: 'Fresh ham with mature cheddar',
-          price: 4.95,
-          category: 'food',
+          id: 'quesadillas',
+          name: 'Quesadillas',
+          description: 'Folded flour tortilla filled with mozzarella, topped with tomato salsa, feta & coriander',
+          price: 5.50,
+          category: 'snacks',
+          available: true,
+          featured: false,
+          allergens: ['gluten', 'dairy'],
+          modifiers: []
+        },
+        {
+          id: 'chorizo_quesadilla',
+          name: 'Chorizo Quesadilla',
+          description: 'Folded flour tortilla filled with chorizo & mozzarella. Topped with tomato salsa, feta & coriander',
+          price: 5.50,
+          category: 'snacks',
+          available: true,
+          featured: false,
+          allergens: ['gluten', 'dairy'],
+          modifiers: []
+        },
+        {
+          id: 'chicken_quesadilla',
+          name: 'Chicken Quesadilla',
+          description: 'Folded flour tortilla filled with chicken, peppers, onion & mozzarella. Topped with salsa, feta & coriander',
+          price: 5.50,
+          category: 'snacks',
+          available: true,
+          featured: false,
+          allergens: ['gluten', 'dairy'],
+          modifiers: []
+        },
+        {
+          id: 'tostada',
+          name: 'Tostada',
+          description: 'Crispy tortillas with black beans filled with chicken or any topping, served with salsa, lettuce and feta',
+          price: 6.50,
+          category: 'snacks',
           available: true,
           featured: false,
           allergens: ['gluten', 'dairy'],
           modifiers: []
         }
       ]
+    },
+    {
+      id: 'tacos',
+      name: 'Tacos',
+      description: 'Traditional Mexican tacos',
+      order: 2,
+      visible: true,
+      items: [
+        {
+          id: 'carnitas',
+          name: 'Carnitas',
+          description: 'Slow cooked pork, served with onion, coriander, salsa, guacamole & coriander',
+          price: 3.50,
+          category: 'tacos',
+          available: true,
+          featured: true,
+          allergens: [],
+          modifiers: []
+        },
+        {
+          id: 'cochinita',
+          name: 'Cochinita',
+          description: 'Marinated pulled pork served with pickle red onion',
+          price: 3.50,
+          category: 'tacos',
+          available: true,
+          featured: false,
+          allergens: [],
+          modifiers: []
+        },
+        {
+          id: 'barbacoa',
+          name: 'Barbacoa de Res',
+          description: 'Juicy pulled beef topped with onion, guacamole & coriander',
+          price: 3.50,
+          category: 'tacos',
+          available: true,
+          featured: true,
+          allergens: [],
+          modifiers: []
+        },
+        {
+          id: 'chorizo_taco',
+          name: 'Chorizo',
+          description: 'Grilled chorizo with black beans, onions, salsa, coriander & guacamole',
+          price: 3.50,
+          category: 'tacos',
+          available: true,
+          featured: false,
+          allergens: [],
+          modifiers: []
+        },
+        {
+          id: 'chicken_fajita',
+          name: 'Chicken Fajita',
+          description: 'Chicken, peppers & onion with black beans. Topped with salsa, guac & coriander',
+          price: 3.50,
+          category: 'tacos',
+          available: true,
+          featured: false,
+          allergens: [],
+          modifiers: []
+        },
+        {
+          id: 'pescado',
+          name: 'Pescado',
+          description: 'Battered cod with guacamole & coriander. Topped with red cabbage & mango chilli salsa',
+          price: 3.50,
+          category: 'tacos',
+          available: true,
+          featured: false,
+          allergens: ['fish'],
+          modifiers: []
+        }
+      ]
+    },
+    {
+      id: 'special_tacos',
+      name: 'Special Tacos',
+      description: 'Premium taco selections',
+      order: 3,
+      visible: true,
+      items: [
+        {
+          id: 'carne_asada',
+          name: 'Carne Asada',
+          description: 'Diced rump steak with peppers and red onion. Served on black beans, topped with chimichurri sauce & coriander',
+          price: 4.50,
+          category: 'special_tacos',
+          available: true,
+          featured: true,
+          allergens: [],
+          modifiers: []
+        },
+        {
+          id: 'camaron',
+          name: 'Camaron',
+          description: 'Prawns with chorizo, peppers and red onion. Served on black beans, topped with tomato salsa, coriander & guacamole',
+          price: 4.50,
+          category: 'special_tacos',
+          available: true,
+          featured: false,
+          allergens: ['seafood'],
+          modifiers: []
+        },
+        {
+          id: 'pulpos',
+          name: 'Pulpos',
+          description: 'Chargrilled octopus, cooked with peppers and red onion. Served on grilled potato with garlic & coriander',
+          price: 4.50,
+          category: 'special_tacos',
+          available: true,
+          featured: false,
+          allergens: ['seafood'],
+          modifiers: []
+        }
+      ]
+    },
+    {
+      id: 'burritos',
+      name: 'Burritos',
+      description: 'Large flour tortilla wraps',
+      order: 4,
+      visible: true,
+      items: [
+        {
+          id: 'regular_burrito',
+          name: 'Regular Burrito',
+          description: 'Choose any filling from the taco menu! With black beans, lettuce, pico de gallo, & guacamole. Topped with salsa, feta and coriander.',
+          price: 8.00,
+          category: 'burritos',
+          available: true,
+          featured: false,
+          allergens: ['gluten', 'dairy'],
+          modifiers: []
+        },
+        {
+          id: 'special_burrito',
+          name: 'Special Burrito',
+          description: 'Choose any filling from the special tacos menu! With black beans, lettuce, pico de gallo, & guacamole. Topped with salsa, feta and coriander.',
+          price: 10.00,
+          category: 'burritos',
+          available: true,
+          featured: true,
+          allergens: ['gluten', 'dairy'],
+          modifiers: []
+        }
+      ]
+    },
+    {
+      id: 'sides',
+      name: 'Sides & Salsas',
+      description: 'Mexican sides and sauces',
+      order: 5,
+      visible: true,
+      items: [
+        {
+          id: 'skinny_fries',
+          name: 'Skinny Fries',
+          description: 'Thin cut fries',
+          price: 3.50,
+          category: 'sides',
+          available: true,
+          featured: false,
+          allergens: [],
+          modifiers: []
+        },
+        {
+          id: 'pico_de_gallo',
+          name: 'Pico de Gallo',
+          description: 'Diced tomato, onion and chilli - FREE!',
+          price: 0.00,
+          category: 'sides',
+          available: true,
+          featured: false,
+          allergens: [],
+          modifiers: []
+        },
+        {
+          id: 'green_chili',
+          name: 'Green Chili',
+          description: 'Homemade green chili salsa - HOT! - FREE!',
+          price: 0.00,
+          category: 'sides',
+          available: true,
+          featured: false,
+          allergens: [],
+          modifiers: []
+        }
+      ]
+    },
+    {
+      id: 'drinks',
+      name: 'Drinks',
+      description: 'Mexican beverages and beers',
+      order: 6,
+      visible: true,
+      items: [
+        {
+          id: 'pink_paloma',
+          name: 'Pink Paloma',
+          description: 'An alcohol-free version of our refreshing cocktail. Tangy lime juice and grapefruit soda, with a splash of grenadine',
+          price: 3.75,
+          category: 'drinks',
+          available: true,
+          featured: false,
+          allergens: [],
+          modifiers: []
+        },
+        {
+          id: 'corona',
+          name: 'Corona',
+          description: 'Mexican beer',
+          price: 3.80,
+          category: 'drinks',
+          available: true,
+          featured: true,
+          allergens: ['alcohol'],
+          modifiers: []
+        },
+        {
+          id: 'modelo',
+          name: 'Modelo',
+          description: 'Rich, full-flavoured Pilsner style Lager. Crisp and refreshing. 355ml',
+          price: 4.00,
+          category: 'drinks',
+          available: true,
+          featured: false,
+          allergens: ['alcohol'],
+          modifiers: []
+        },
+        {
+          id: 'dos_equis',
+          name: 'Dos Equis',
+          description: '"Two X\'s". German brewing heritage with the spirit of Mexican traditions. 355ml',
+          price: 4.00,
+          category: 'drinks',
+          available: true,
+          featured: false,
+          allergens: ['alcohol'],
+          modifiers: []
+        }
+      ]
     }
   ]);
 
-  const [selectedCategory, setSelectedCategory] = useState<string>('drinks');
+  const [selectedCategory, setSelectedCategory] = useState<string>('snacks');
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [showItemModal, setShowItemModal] = useState(false);

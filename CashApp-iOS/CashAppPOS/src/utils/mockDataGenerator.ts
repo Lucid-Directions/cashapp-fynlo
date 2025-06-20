@@ -254,26 +254,68 @@ export const generateEmployees = (): EmployeeData[] => {
 
 // Generate inventory data
 export const generateInventory = (): InventoryData[] => {
-  const suppliers = ['UK Foods Ltd', 'Fresh Produce Co', 'Beverage Direct', 'Mexican Imports UK', 'Local Suppliers'];
-  const categories = ['Snacks', 'Tacos', 'Special Tacos', 'Burritos', 'Sides', 'Drinks'];
+  const suppliers = ['UK Foods Ltd', 'Fresh Produce Co', 'Meat Supply Co', 'Mexican Imports UK', 'Local Suppliers'];
   
-  return menuItems.map((item, index) => {
-    const category = categories[Math.floor(index / 4) % categories.length];
+  // Mexican restaurant ingredients for cooking
+  const ingredients = [
+    // Vegetables & Produce
+    { name: 'Onions', category: 'Vegetables', unit: 'kg', cost: 2.50, min: 10, max: 50 },
+    { name: 'Tomatoes', category: 'Vegetables', unit: 'kg', cost: 3.20, min: 8, max: 40 },
+    { name: 'Potatoes', category: 'Vegetables', unit: 'kg', cost: 1.80, min: 15, max: 60 },
+    { name: 'Bell Peppers', category: 'Vegetables', unit: 'kg', cost: 4.50, min: 5, max: 25 },
+    { name: 'Jalapeños', category: 'Vegetables', unit: 'kg', cost: 6.80, min: 3, max: 15 },
+    { name: 'Coriander (Fresh)', category: 'Vegetables', unit: 'bunches', cost: 1.20, min: 20, max: 80 },
+    { name: 'Lime', category: 'Vegetables', unit: 'kg', cost: 3.80, min: 5, max: 20 },
+    { name: 'Avocados', category: 'Vegetables', unit: 'pieces', cost: 0.80, min: 50, max: 200 },
+    { name: 'Lettuce', category: 'Vegetables', unit: 'heads', cost: 1.50, min: 10, max: 40 },
+    
+    // Meats
+    { name: 'Pork Shoulder (Carnitas)', category: 'Meat', unit: 'kg', cost: 8.50, min: 5, max: 30 },
+    { name: 'Beef Chuck (Barbacoa)', category: 'Meat', unit: 'kg', cost: 12.80, min: 3, max: 20 },
+    { name: 'Chicken Thighs', category: 'Meat', unit: 'kg', cost: 6.20, min: 8, max: 35 },
+    { name: 'Chorizo', category: 'Meat', unit: 'kg', cost: 9.50, min: 3, max: 15 },
+    { name: 'Prawns', category: 'Meat', unit: 'kg', cost: 18.50, min: 2, max: 10 },
+    { name: 'Cod Fillets', category: 'Meat', unit: 'kg', cost: 14.80, min: 3, max: 12 },
+    
+    // Dairy & Cheese
+    { name: 'Mozzarella Cheese', category: 'Dairy', unit: 'kg', cost: 7.20, min: 5, max: 25 },
+    { name: 'Feta Cheese', category: 'Dairy', unit: 'kg', cost: 8.50, min: 3, max: 15 },
+    { name: 'Sour Cream', category: 'Dairy', unit: 'litres', cost: 3.80, min: 5, max: 20 },
+    
+    // Pantry Items
+    { name: 'Black Beans', category: 'Pantry', unit: 'kg', cost: 2.80, min: 10, max: 50 },
+    { name: 'Corn Tortillas', category: 'Pantry', unit: 'packs', cost: 2.20, min: 20, max: 100 },
+    { name: 'Flour Tortillas', category: 'Pantry', unit: 'packs', cost: 2.50, min: 15, max: 80 },
+    { name: 'Rice', category: 'Pantry', unit: 'kg', cost: 1.80, min: 20, max: 100 },
+    { name: 'Cooking Oil', category: 'Pantry', unit: 'litres', cost: 4.20, min: 5, max: 30 },
+    { name: 'Cumin (Ground)', category: 'Spices', unit: 'kg', cost: 12.50, min: 1, max: 5 },
+    { name: 'Paprika', category: 'Spices', unit: 'kg', cost: 8.80, min: 1, max: 5 },
+    { name: 'Chili Powder', category: 'Spices', unit: 'kg', cost: 9.20, min: 1, max: 5 },
+    
+    // Beverages
+    { name: 'Corona Beer', category: 'Beverages', unit: 'bottles', cost: 1.80, min: 50, max: 200 },
+    { name: 'Modelo Beer', category: 'Beverages', unit: 'bottles', cost: 2.00, min: 30, max: 150 },
+    { name: 'Lime Juice', category: 'Beverages', unit: 'litres', cost: 3.50, min: 5, max: 25 },
+    { name: 'Pineapple Juice', category: 'Beverages', unit: 'litres', cost: 2.80, min: 5, max: 20 }
+  ];
+  
+  return ingredients.map((item, index) => {
     const turnoverRate = 2 + Math.random() * 8; // Times per week
-    const currentStock = Math.floor(20 + Math.random() * 80);
+    const currentStock = Math.floor(item.min + Math.random() * (item.max - item.min));
     
     return {
       itemId: index + 1,
-      name: item,
-      category,
+      name: item.name,
+      category: item.category,
       currentStock,
-      minimumStock: 20,
-      maximumStock: 100,
-      unitCost: Math.round((1.5 + Math.random() * 3) * 100) / 100,
+      minimumStock: item.min,
+      maximumStock: item.max,
+      unitCost: item.cost,
       supplier: suppliers[Math.floor(Math.random() * suppliers.length)],
       lastRestocked: new Date(Date.now() - Math.floor(Math.random() * 7) * 24 * 60 * 60 * 1000),
       turnoverRate: Math.round(turnoverRate * 10) / 10,
-      wastage: Math.round(Math.random() * 5 * 10) / 10
+      wastage: Math.round(Math.random() * 5 * 10) / 10,
+      unit: item.unit
     };
   });
 };
