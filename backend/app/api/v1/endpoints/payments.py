@@ -20,6 +20,7 @@ from app.core.config import settings
 from app.api.v1.endpoints.auth import get_current_user, User
 from app.core.responses import APIResponseHelper
 from app.core.exceptions import FynloException, ErrorCodes
+from app.core.transaction_manager import transactional, transaction_manager
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -148,6 +149,7 @@ async def generate_qr_payment(
     )
 
 @router.post("/qr/{qr_payment_id}/confirm")
+@transactional(max_retries=3, retry_delay=0.1)
 async def confirm_qr_payment(
     qr_payment_id: str,
     db: Session = Depends(get_db),
@@ -162,29 +164,48 @@ async def confirm_qr_payment(
     if qr_payment.expires_at < datetime.utcnow():
         raise HTTPException(status_code=400, detail="QR payment expired")
     
-    # Update QR payment status
-    qr_payment.status = "completed"
+    # Validate QR payment hasn't been processed already (prevent double processing)
+    if qr_payment.status == "completed":
+        raise HTTPException(status_code=400, detail="QR payment already processed")
     
-    # Create payment record
-    payment = Payment(
-        order_id=qr_payment.order_id,
-        payment_method="qr_code",
-        amount=qr_payment.amount,
-        fee_amount=qr_payment.fee_amount,
-        net_amount=qr_payment.net_amount,
-        status="completed",
-        processed_at=datetime.utcnow(),
-        metadata={"qr_payment_id": str(qr_payment.id)}
-    )
+    if qr_payment.status != "pending":
+        raise HTTPException(status_code=400, detail=f"Cannot confirm QR payment with status: {qr_payment.status}")
     
-    db.add(payment)
-    
-    # Update order payment status
+    # Get order for validation
     order = db.query(Order).filter(Order.id == qr_payment.order_id).first()
-    if order:
-        order.payment_status = "completed"
+    if not order:
+        raise HTTPException(status_code=404, detail="Associated order not found")
     
-    db.commit()
+    if order.payment_status == "completed":
+        raise HTTPException(status_code=400, detail="Order already paid")
+    
+    try:
+        # Update QR payment status
+        qr_payment.status = "completed"
+        
+        # Create payment record
+        payment = Payment(
+            order_id=qr_payment.order_id,
+            payment_method="qr_code",
+            amount=qr_payment.amount,
+            fee_amount=qr_payment.fee_amount,
+            net_amount=qr_payment.net_amount,
+            status="completed",
+            processed_at=datetime.utcnow(),
+            payment_metadata={"qr_payment_id": str(qr_payment.id)}
+        )
+        
+        db.add(payment)
+        
+        # Update order payment status
+        order.payment_status = "completed"
+        order.status = "confirmed" if order.status == "pending" else order.status
+        
+        # Transaction will auto-commit due to @transactional decorator
+        
+    except Exception as e:
+        logger.error(f"QR payment confirmation failed for {qr_payment_id}: {e}")
+        raise HTTPException(status_code=500, detail="Payment confirmation failed")
     
     logger.info(f"QR payment confirmed: {qr_payment_id}")
     
@@ -194,6 +215,7 @@ async def confirm_qr_payment(
     )
 
 @router.post("/stripe", response_model=PaymentResponse)
+@transactional(max_retries=2, retry_delay=0.2)
 async def process_stripe_payment(
     request: StripePaymentRequest,
     db: Session = Depends(get_db),
@@ -206,44 +228,58 @@ async def process_stripe_payment(
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
     
+    # Validate order payment status
+    if order.payment_status == "completed":
+        raise HTTPException(status_code=400, detail="Order already paid")
+    
+    # Calculate fees
+    fee_amount = calculate_payment_fee(request.amount, "card")
+    net_amount = request.amount - fee_amount
+    
+    # Create payment record first (with pending status)
+    payment = Payment(
+        order_id=request.order_id,
+        payment_method="stripe",
+        amount=request.amount,
+        fee_amount=fee_amount,
+        net_amount=net_amount,
+        status="pending",
+        payment_metadata={"stripe_payment_method_id": request.payment_method_id}
+    )
+    
+    db.add(payment)
+    db.flush()  # Get payment ID before external API call
+    
     try:
-        # Calculate fees
-        fee_amount = calculate_payment_fee(request.amount, "card")
-        net_amount = request.amount - fee_amount
-        
         # Create Stripe PaymentIntent
         payment_intent = stripe.PaymentIntent.create(
             amount=int(request.amount * 100),  # Stripe uses cents
             currency=request.currency,
             payment_method=request.payment_method_id,
+            metadata={
+                "order_id": str(request.order_id),
+                "payment_id": str(payment.id),
+                "restaurant_id": str(order.restaurant_id)
+            },
             confirmation_method='manual',
             confirm=True,
-            metadata={
-                'order_id': request.order_id,
-                'restaurant_id': str(order.restaurant_id)
-            }
         )
         
-        # Create payment record
-        payment = Payment(
-            order_id=request.order_id,
-            payment_method="card",
-            amount=request.amount,
-            fee_amount=fee_amount,
-            net_amount=net_amount,
-            status="completed" if payment_intent.status == "succeeded" else "pending",
-            external_id=payment_intent.id,
-            processed_at=datetime.utcnow() if payment_intent.status == "succeeded" else None,
-            metadata={"stripe_payment_intent": payment_intent.id}
-        )
-        
-        db.add(payment)
+        # Update payment record based on Stripe response
+        payment.status = "completed" if payment_intent.status == "succeeded" else "failed"
+        payment.external_id = payment_intent.id
+        payment.processed_at = datetime.utcnow() if payment_intent.status == "succeeded" else None
+        payment.payment_metadata.update({"stripe_payment_intent": payment_intent.id})
         
         # Update order if payment successful
         if payment_intent.status == "succeeded":
             order.payment_status = "completed"
+            order.status = "confirmed" if order.status == "pending" else order.status
+        else:
+            # Payment failed, don't update order
+            logger.warning(f"Stripe payment failed for order {request.order_id}: {payment_intent.status}")
         
-        db.commit()
+        # Transaction auto-commits on success
         db.refresh(payment)
         
         logger.info(f"Stripe payment processed: {payment.id} for order {request.order_id}")
@@ -258,8 +294,16 @@ async def process_stripe_payment(
         )
         
     except stripe.error.StripeError as e:
+        # Update payment record to failed status
+        payment.status = "failed"
+        payment.payment_metadata.update({"stripe_error": str(e)})
         logger.error(f"Stripe payment failed: {str(e)}")
         raise HTTPException(status_code=400, detail=f"Payment failed: {str(e)}")
+    except Exception as e:
+        logger.error(f"Unexpected error during Stripe payment: {e}")
+        raise HTTPException(status_code=500, detail="Payment processing failed")
+    
+    
 
 @router.post("/cash", response_model=PaymentResponse)
 async def process_cash_payment(
