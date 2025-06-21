@@ -398,9 +398,35 @@ export const darkTheme = {
   shadow: colors.neutral[950],
 };
 
-// Theme Context
+// Theme Context - Updated to support dynamic colors
 export interface Theme {
-  colors: typeof colors;
+  colors: {
+    primary: string;
+    secondary: string;
+    accent: string;
+    neutral: typeof colors.neutral;
+    success: typeof colors.success;
+    warning: typeof colors.warning;
+    danger: typeof colors.danger;
+    info: typeof colors.info;
+    background: string;
+    surface: string;
+    white: string;
+    lightGray: string;
+    mediumGray: string;
+    darkGray: string;
+    text: string;
+    textSecondary: string;
+    lightText: string;
+    border: string;
+    error: string;
+    // Legacy support
+    primaryLegacy?: string;
+    secondaryLegacy?: string;
+    successLegacy?: string;
+    warningLegacy?: string;
+    dangerLegacy?: string;
+  };
   typography: typeof typography;
   spacing: typeof spacing;
   borderRadius: typeof borderRadius;
@@ -414,7 +440,33 @@ export interface Theme {
 }
 
 export const lightTheme: Theme = {
-  colors,
+  colors: {
+    primary: colors.primary[500],
+    secondary: colors.secondary[500],
+    accent: colors.success[500],
+    neutral: colors.neutral,
+    success: colors.success,
+    warning: colors.warning,
+    danger: colors.danger,
+    info: colors.info,
+    background: colors.background,
+    surface: colors.surface,
+    white: colors.white,
+    lightGray: colors.lightGray,
+    mediumGray: colors.mediumGray,
+    darkGray: colors.darkGray,
+    text: colors.text,
+    textSecondary: colors.textSecondary,
+    lightText: colors.lightText,
+    border: colors.border,
+    error: colors.error,
+    // Legacy support
+    primaryLegacy: colors.primaryLegacy,
+    secondaryLegacy: colors.secondaryLegacy,
+    successLegacy: colors.successLegacy,
+    warningLegacy: colors.warningLegacy,
+    dangerLegacy: colors.dangerLegacy,
+  },
   typography,
   spacing,
   borderRadius,
@@ -429,7 +481,27 @@ export const lightTheme: Theme = {
 
 export const darkThemeConfig: Theme = {
   ...lightTheme,
-  colors: darkTheme,
+  colors: {
+    primary: colors.primary[500],
+    secondary: colors.secondary[500],
+    accent: colors.success[500],
+    neutral: colors.neutral,
+    success: darkTheme.success,
+    warning: darkTheme.warning,
+    danger: darkTheme.danger,
+    info: darkTheme.info,
+    background: darkTheme.background,
+    surface: darkTheme.surface,
+    white: darkTheme.white,
+    lightGray: darkTheme.lightGray,
+    mediumGray: darkTheme.mediumGray,
+    darkGray: darkTheme.darkGray,
+    text: darkTheme.text,
+    textSecondary: colors.textSecondary,
+    lightText: darkTheme.lightText,
+    border: darkTheme.border,
+    error: colors.error,
+  },
   isDark: true,
 };
 

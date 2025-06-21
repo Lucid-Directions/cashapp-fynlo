@@ -58,7 +58,11 @@ const Chart: React.FC<ChartProps> = ({
               <View key={index} style={styles.barWrapper}>
                 <View style={styles.barContainer}>
                   {showValues && (
-                    <Text style={styles.barValue}>{item.value}</Text>
+                    <Text style={styles.barValue}>
+                      {typeof item.value === 'number' && item.value > 1000 
+                        ? item.value.toLocaleString() 
+                        : item.value}
+                    </Text>
                   )}
                   <View
                     style={[
@@ -146,7 +150,11 @@ const Chart: React.FC<ChartProps> = ({
                       ]}
                     >
                       {showValues && (
-                        <Text style={styles.pointValue}>{item.value}</Text>
+                        <Text style={styles.pointValue}>
+                          {typeof item.value === 'number' && item.value > 1000 
+                            ? item.value.toLocaleString() 
+                            : item.value}
+                        </Text>
                       )}
                     </View>
                   </View>

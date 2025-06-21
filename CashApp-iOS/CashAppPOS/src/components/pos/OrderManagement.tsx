@@ -12,6 +12,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { OrderItem, Order } from '../../types';
 import useAppStore from '../../store/useAppStore';
+import useSettingsStore from '../../store/useSettingsStore';
 
 // Clover POS Color Scheme
 const Colors = {
@@ -50,6 +51,8 @@ const OrderManagement: React.FC<OrderManagementProps> = ({
     cartItemCount,
   } = useAppStore();
 
+  const { taxConfiguration } = useSettingsStore();
+
   const [editingItem, setEditingItem] = useState<OrderItem | null>(null);
   const [splitMode, setSplitMode] = useState(false);
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
@@ -63,11 +66,13 @@ const OrderManagement: React.FC<OrderManagementProps> = ({
   };
 
   const calculateTax = (subtotal: number) => {
-    return subtotal * 0.20; // 20% VAT
+    if (!taxConfiguration.vatEnabled) return 0;
+    return subtotal * (taxConfiguration.vatRate / 100);
   };
 
   const calculateServiceCharge = (subtotal: number) => {
-    return subtotal * 0.125; // 12.5% service charge
+    if (!taxConfiguration.serviceTaxEnabled) return 0;
+    return subtotal * (taxConfiguration.serviceTaxRate / 100);
   };
 
   const calculateTotal = () => {
