@@ -376,3 +376,326 @@ def validate_customer_or_raise(customer_data: dict):
     result = BusinessValidator.validate_customer_data(customer_data)
     if not result.is_valid:
         raise_validation_exception(result, "Customer validation failed")
+
+"""
+Input validation schemas and helpers for Fynlo POS
+Provides JSON schema validation for all JSONB fields in database models
+"""
+
+import re
+from typing import Any, Dict, List, Optional, Union
+from pydantic import BaseModel, validator, ValidationError
+from jsonschema import validate, ValidationError as JSONSchemaError
+
+
+class AddressSchema(BaseModel):
+    """Validation schema for restaurant address"""
+    street: str
+    city: str
+    state: str
+    postal_code: str
+    country: str = "GB"
+    
+    @validator('postal_code')
+    def validate_postal_code(cls, v):
+        """Validate UK postal code format"""
+        if not re.match(r'^[A-Z]{1,2}[0-9R][0-9A-Z]? [0-9][A-Z]{2}$', v.upper()):
+            raise ValueError('Invalid UK postal code format')
+        return v.upper()
+
+
+class BusinessHoursSchema(BaseModel):
+    """Validation schema for business hours"""
+    monday: Optional[Dict[str, str]] = None
+    tuesday: Optional[Dict[str, str]] = None
+    wednesday: Optional[Dict[str, str]] = None
+    thursday: Optional[Dict[str, str]] = None
+    friday: Optional[Dict[str, str]] = None
+    saturday: Optional[Dict[str, str]] = None
+    sunday: Optional[Dict[str, str]] = None
+    
+    @validator('*', pre=True)
+    def validate_day_hours(cls, v):
+        """Validate day hours format"""
+        if v is None:
+            return None
+        if not isinstance(v, dict):
+            raise ValueError('Day hours must be a dictionary')
+        if 'open' not in v or 'close' not in v:
+            raise ValueError('Day hours must have "open" and "close" times')
+        
+        # Validate time format (HH:MM)
+        time_pattern = r'^([01]?[0-9]|2[0-3]):[0-5][0-9]$'
+        if not re.match(time_pattern, v['open']) or not re.match(time_pattern, v['close']):
+            raise ValueError('Time must be in HH:MM format')
+        
+        return v
+
+
+class TaxConfigurationSchema(BaseModel):
+    """Validation schema for tax configuration"""
+    vatEnabled: bool
+    vatRate: float
+    serviceTaxEnabled: bool
+    serviceTaxRate: float
+    
+    @validator('vatRate', 'serviceTaxRate')
+    def validate_tax_rates(cls, v):
+        """Validate tax rates are reasonable"""
+        if v < 0 or v > 100:
+            raise ValueError('Tax rate must be between 0 and 100')
+        return v
+
+
+class PaymentMethodSchema(BaseModel):
+    """Validation schema for individual payment method"""
+    enabled: bool
+    feePercentage: Optional[float] = 0.0
+    requiresAuth: Optional[bool] = False
+    
+    @validator('feePercentage')
+    def validate_fee_percentage(cls, v):
+        """Validate fee percentage is reasonable"""
+        if v is not None and (v < 0 or v > 10):
+            raise ValueError('Fee percentage must be between 0 and 10')
+        return v
+
+
+class PaymentMethodsSchema(BaseModel):
+    """Validation schema for payment methods configuration"""
+    qrCode: Optional[PaymentMethodSchema] = None
+    cash: Optional[PaymentMethodSchema] = None
+    card: Optional[PaymentMethodSchema] = None
+    applePay: Optional[PaymentMethodSchema] = None
+    giftCard: Optional[PaymentMethodSchema] = None
+
+
+class RestaurantSettingsSchema(BaseModel):
+    """Validation schema for restaurant settings"""
+    currency: str = "GBP"
+    autoAcceptOrders: bool = True
+    orderTimeout: int = 30  # minutes
+    requireTableNumber: bool = True
+    enableLoyaltyProgram: bool = True
+    loyaltyPointsPerPound: float = 1.0
+    
+    @validator('currency')
+    def validate_currency(cls, v):
+        """Validate currency code"""
+        valid_currencies = ['GBP', 'EUR', 'USD']
+        if v not in valid_currencies:
+            raise ValueError(f'Currency must be one of: {valid_currencies}')
+        return v
+    
+    @validator('orderTimeout')
+    def validate_order_timeout(cls, v):
+        """Validate order timeout is reasonable"""
+        if v < 5 or v > 120:
+            raise ValueError('Order timeout must be between 5 and 120 minutes')
+        return v
+
+
+class UserPermissionsSchema(BaseModel):
+    """Validation schema for user permissions"""
+    canManageUsers: bool = False
+    canManageMenu: bool = False
+    canViewReports: bool = False
+    canProcessPayments: bool = False
+    canManageOrders: bool = False
+    canAccessPOS: bool = False
+    canManageSettings: bool = False
+
+
+class CustomerPreferencesSchema(BaseModel):
+    """Validation schema for customer preferences"""
+    dietaryRestrictions: Optional[List[str]] = []
+    favoriteItems: Optional[List[str]] = []
+    preferredTable: Optional[str] = None
+    communicationPreferences: Optional[Dict[str, bool]] = {}
+    
+    @validator('dietaryRestrictions')
+    def validate_dietary_restrictions(cls, v):
+        """Validate dietary restrictions"""
+        valid_restrictions = [
+            'vegetarian', 'vegan', 'gluten-free', 'dairy-free', 
+            'nut-free', 'halal', 'kosher', 'low-sodium'
+        ]
+        if v:
+            for restriction in v:
+                if restriction not in valid_restrictions:
+                    raise ValueError(f'Invalid dietary restriction: {restriction}')
+        return v
+
+
+class ProductModifierSchema(BaseModel):
+    """Validation schema for product modifiers"""
+    name: str
+    type: str  # 'single', 'multiple', 'quantity'
+    required: bool = False
+    options: List[Dict[str, Union[str, float]]]
+    
+    @validator('type')
+    def validate_modifier_type(cls, v):
+        """Validate modifier type"""
+        valid_types = ['single', 'multiple', 'quantity']
+        if v not in valid_types:
+            raise ValueError(f'Modifier type must be one of: {valid_types}')
+        return v
+    
+    @validator('options')
+    def validate_options(cls, v):
+        """Validate modifier options"""
+        for option in v:
+            if 'name' not in option or 'price' not in option:
+                raise ValueError('Each option must have "name" and "price"')
+            if not isinstance(option['price'], (int, float)):
+                raise ValueError('Option price must be a number')
+        return v
+
+
+class OrderItemSchema(BaseModel):
+    """Validation schema for order items"""
+    productId: str
+    name: str
+    price: float
+    quantity: int
+    modifiers: Optional[List[Dict[str, Any]]] = []
+    specialInstructions: Optional[str] = None
+    
+    @validator('price')
+    def validate_price(cls, v):
+        """Validate price is positive"""
+        if v < 0:
+            raise ValueError('Price must be positive')
+        return v
+    
+    @validator('quantity')
+    def validate_quantity(cls, v):
+        """Validate quantity is positive"""
+        if v <= 0:
+            raise ValueError('Quantity must be positive')
+        return v
+
+
+class PaymentMetadataSchema(BaseModel):
+    """Validation schema for payment metadata"""
+    stripePaymentId: Optional[str] = None
+    cashReceived: Optional[float] = None
+    changeGiven: Optional[float] = None
+    cardLast4: Optional[str] = None
+    approvalCode: Optional[str] = None
+    
+    @validator('cardLast4')
+    def validate_card_last4(cls, v):
+        """Validate card last 4 digits"""
+        if v is not None and not re.match(r'^\d{4}$', v):
+            raise ValueError('Card last 4 must be 4 digits')
+        return v
+
+
+# Validation helper functions
+def validate_jsonb_field(data: Any, schema_class: BaseModel) -> Dict[str, Any]:
+    """
+    Validate JSONB field data against a schema
+    
+    Args:
+        data: The data to validate
+        schema_class: The Pydantic schema class
+        
+    Returns:
+        Validated and cleaned data
+        
+    Raises:
+        ValidationError: If validation fails
+    """
+    try:
+        validated = schema_class.parse_obj(data)
+        return validated.dict()
+    except ValidationError as e:
+        raise ValidationError(f"JSONB validation failed: {e}")
+
+
+def validate_email(email: str) -> bool:
+    """Validate email format"""
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return bool(re.match(pattern, email))
+
+
+def validate_phone(phone: str) -> bool:
+    """Validate UK phone number format"""
+    # UK phone number patterns
+    patterns = [
+        r'^(\+44|0)[1-9]\d{8,9}$',  # Standard UK numbers
+        r'^(\+44|0)7\d{9}$',        # Mobile numbers
+    ]
+    return any(re.match(pattern, phone.replace(' ', '').replace('-', '')) for pattern in patterns)
+
+
+def validate_file_size(file_size: int, max_size_mb: int = 5) -> bool:
+    """Validate file size"""
+    max_size_bytes = max_size_mb * 1024 * 1024
+    return file_size <= max_size_bytes
+
+
+def validate_image_format(filename: str) -> bool:
+    """Validate image file format"""
+    valid_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
+    return any(filename.lower().endswith(ext) for ext in valid_extensions)
+
+
+def sanitize_string(text: str, max_length: int = 255) -> str:
+    """Sanitize string input"""
+    if not text:
+        return ""
+    
+    # Remove potentially dangerous characters
+    cleaned = re.sub(r'[<>"\';()&+]', '', text)
+    
+    # Trim whitespace and limit length
+    cleaned = cleaned.strip()[:max_length]
+    
+    return cleaned
+
+
+# Schema mapping for database fields
+VALIDATION_SCHEMAS = {
+    'restaurant.address': AddressSchema,
+    'restaurant.business_hours': BusinessHoursSchema,
+    'restaurant.settings': RestaurantSettingsSchema,
+    'restaurant.tax_configuration': TaxConfigurationSchema,
+    'restaurant.payment_methods': PaymentMethodsSchema,
+    'user.permissions': UserPermissionsSchema,
+    'customer.preferences': CustomerPreferencesSchema,
+    'product.dietary_info': lambda x: x if isinstance(x, list) else [],
+    'product.modifiers': lambda x: [ProductModifierSchema.parse_obj(m).dict() for m in x] if x else [],
+    'order.items': lambda x: [OrderItemSchema.parse_obj(item).dict() for item in x] if x else [],
+    'payment.payment_metadata': PaymentMetadataSchema,
+}
+
+
+def validate_model_jsonb_fields(model_name: str, field_name: str, data: Any) -> Any:
+    """
+    Validate JSONB field for a specific model
+    
+    Args:
+        model_name: Name of the database model (e.g., 'restaurant')
+        field_name: Name of the JSONB field (e.g., 'address')
+        data: Data to validate
+        
+    Returns:
+        Validated data
+    """
+    schema_key = f"{model_name}.{field_name}"
+    
+    if schema_key in VALIDATION_SCHEMAS:
+        schema = VALIDATION_SCHEMAS[schema_key]
+        
+        if callable(schema) and not issubclass(schema, BaseModel):
+            # Custom validation function
+            return schema(data)
+        else:
+            # Pydantic schema class
+            return validate_jsonb_field(data, schema)
+    
+    # No specific validation, return as-is
+    return data

@@ -70,6 +70,22 @@ class RedisClient:
             logger.error(f"Redis DELETE error: {e}")
             return False
     
+    async def delete_pattern(self, pattern: str) -> int:
+        """Delete all keys matching a pattern"""
+        try:
+            # Get all keys matching the pattern
+            keys = await self.redis.keys(pattern)
+            if not keys:
+                return 0
+            
+            # Delete all matching keys
+            result = await self.redis.delete(*keys)
+            logger.info(f"Deleted {result} keys matching pattern: {pattern}")
+            return result
+        except Exception as e:
+            logger.error(f"Redis DELETE PATTERN error for {pattern}: {e}")
+            return 0
+    
     async def exists(self, key: str) -> bool:
         """Check if key exists"""
         try:
@@ -106,6 +122,38 @@ class RedisClient:
     async def get_cached_order(self, order_id: str) -> Optional[dict]:
         """Get cached order"""
         return await self.get(f"order:{order_id}")
+    
+    async def invalidate_restaurant_cache(self, restaurant_id: str) -> int:
+        """Invalidate all cache for a restaurant"""
+        patterns = [
+            f"products:{restaurant_id}:*",
+            f"categories:{restaurant_id}:*", 
+            f"menu:{restaurant_id}:*",
+            f"orders:{restaurant_id}:*"
+        ]
+        
+        total_deleted = 0
+        for pattern in patterns:
+            deleted = await self.delete_pattern(pattern)
+            total_deleted += deleted
+        
+        logger.info(f"Invalidated {total_deleted} cache keys for restaurant {restaurant_id}")
+        return total_deleted
+    
+    async def invalidate_product_cache(self, restaurant_id: str) -> int:
+        """Invalidate product-related cache for a restaurant"""
+        patterns = [
+            f"products:{restaurant_id}:*",
+            f"menu:{restaurant_id}:*"
+        ]
+        
+        total_deleted = 0
+        for pattern in patterns:
+            deleted = await self.delete_pattern(pattern)
+            total_deleted += deleted
+        
+        logger.info(f"Invalidated {total_deleted} product cache keys for restaurant {restaurant_id}")
+        return total_deleted
 
 # Global Redis client instance
 redis_client = RedisClient()

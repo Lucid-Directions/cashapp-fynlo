@@ -163,8 +163,8 @@ async def create_category(
     db.refresh(new_category)
     
     # Clear categories cache
+    await redis.invalidate_product_cache(restaurant_id)
     await redis.delete(f"categories:{restaurant_id}")
-    await redis.delete(f"menu:{restaurant_id}")
     
     category_response = CategoryResponse(
         id=str(new_category.id),
@@ -377,8 +377,7 @@ async def create_product(
     db.refresh(new_product)
     
     # Clear caches
-    await redis.delete(f"products:{restaurant_id}:*")
-    await redis.delete(f"menu:{restaurant_id}")
+    await redis.invalidate_product_cache(restaurant_id)
     
     return ProductResponse(
         id=str(new_product.id),
@@ -453,8 +452,7 @@ async def update_product(
     
     # Clear caches
     restaurant_id = str(product.restaurant_id)
-    await redis.delete(f"products:{restaurant_id}:*")
-    await redis.delete(f"menu:{restaurant_id}")
+    await redis.invalidate_product_cache(restaurant_id)
     
     return ProductResponse(
         id=str(product.id),
@@ -498,8 +496,7 @@ async def delete_product(
     
     # Clear caches
     restaurant_id = str(product.restaurant_id)
-    await redis.delete(f"products:{restaurant_id}:*")
-    await redis.delete(f"menu:{restaurant_id}")
+    await redis.invalidate_product_cache(restaurant_id)
     
     return APIResponseHelper.success(message="Product deleted successfully")
 
