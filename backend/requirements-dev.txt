@@ -1,0 +1,51 @@
+# Fynlo POS Backend Development Dependencies
+# Separate development dependencies for clean environment separation
+
+# Include production dependencies
+-r requirements.txt
+
+# Testing Framework - Latest versions
+pytest==7.4.4
+pytest-asyncio==0.23.2
+pytest-cov==4.1.0
+pytest-xdist==3.5.0
+pytest-mock==3.12.0
+
+# Code Quality & Formatting - Latest stable versions
+black==23.12.1
+flake8==7.0.0
+isort==5.13.2
+mypy==1.8.0
+pre-commit==3.6.0
+
+# Development Tools - Enhanced development experience
+ipython==8.18.1
+rich==13.7.0
+httpx==0.26.0
+
+# Security & Analysis - Latest security tools
+bandit==1.7.5
+safety==2.3.5
+semgrep==1.52.0
+
+# Database Development - Database management tools
+sqlalchemy-stubs==0.4
+alembic-utils==0.8.2
+
+# API Development & Testing - API development tools
+httpie==3.2.2
+factory-boy==3.3.0
+faker==21.0.0
+
+# Performance & Profiling - Performance analysis tools
+py-spy==0.3.14
+memory-profiler==0.61.0
+
+# Documentation - Documentation generation tools
+mkdocs==1.5.3
+mkdocs-material==9.5.3
+mkdocstrings==0.24.0
+
+# Environment Management - Development environment tools
+python-decouple==3.8
+watchdog==3.0.0 
