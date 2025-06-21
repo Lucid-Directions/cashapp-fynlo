@@ -1,16 +1,16 @@
 """Add missing foreign key constraints
 
-Revision ID: 003_add_foreign_key_constraints
-Revises: 002_add_categories_table
-Create Date: 2025-06-20 16:48:00.000000
+Revision ID: 006_add_foreign_key_constraints
+Revises: 005_fix_mobile_id_primary_key
+Create Date: 2025-06-21 10:00:00.000000
 
 """
 from alembic import op
 import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
-revision = '003_add_foreign_key_constraints'
-down_revision = '002_add_categories_table'
+revision = '006_add_foreign_key_constraints'
+down_revision = '005_fix_mobile_id_primary_key'
 branch_labels = None
 depends_on = None
 
