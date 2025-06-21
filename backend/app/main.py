@@ -23,6 +23,7 @@ from app.core.mobile_middleware import (
     MobileCompatibilityMiddleware,
     MobileDataOptimizationMiddleware
 )
+from app.middleware.version_middleware import APIVersionMiddleware
 from datetime import datetime
 
 # Configure logging
@@ -47,6 +48,9 @@ async def lifespan(app: FastAPI):
     # WebSocket manager is ready (no initialization needed)
     logger.info("✅ WebSocket manager ready")
     
+    # Log version middleware configuration
+    logger.info("✅ API version middleware enabled (backward compatibility)")
+    
     yield
     
     # Cleanup on shutdown
@@ -68,6 +72,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Add API version middleware for backward compatibility (FIRST in middleware stack)
+# This must be added before other middleware to ensure path rewriting happens first
+app.add_middleware(APIVersionMiddleware)
 
 # Add mobile compatibility middleware
 app.add_middleware(MobileCompatibilityMiddleware, enable_cors=True, enable_port_redirect=True)
@@ -92,7 +100,9 @@ async def root():
         data={
             "service": "Fynlo POS Backend API",
             "version": "1.0.0",
-            "status": "healthy"
+            "status": "healthy",
+            "api_version": "v1",
+            "backward_compatible": True
         },
         message="Fynlo POS API is running"
     )
@@ -106,9 +116,34 @@ async def health_check():
             "database": "connected",
             "redis": "connected",
             "websocket": "ready",
+            "api_version": "v1",
+            "version_middleware": "enabled",
+            "backward_compatibility": "enabled",
             "timestamp": datetime.utcnow().isoformat()
         },
         message="All systems operational"
+    )
+
+@app.get("/api/version")
+async def api_version_info():
+    """API version information endpoint"""
+    return APIResponseHelper.success(
+        data={
+            "current_version": "v1",
+            "supported_versions": ["v1"],
+            "backward_compatible": True,
+            "version_middleware_enabled": True,
+            "websocket_path_normalization": True,
+            "documentation": {
+                "versioned_endpoints": "/api/v1/{resource}",
+                "unversioned_fallback": "/api/{resource} → /api/v1/{resource}",
+                "websocket_paths": {
+                    "/ws/{id}": "/api/v1/websocket/ws/{id}",
+                    "/websocket/{id}": "/api/v1/websocket/ws/{id}"
+                }
+            }
+        },
+        message="API version information"
     )
 
 if __name__ == "__main__":
