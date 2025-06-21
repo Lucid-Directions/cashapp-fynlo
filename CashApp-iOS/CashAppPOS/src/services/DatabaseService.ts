@@ -307,11 +307,11 @@ class DatabaseService {
   }
 
   // Restaurant-specific operations - FIXED: Convert to REST API endpoints
-  async getRestaurantFloorPlan(sectionId?: string | null): Promise<any> {
+  async getFloorPlan(sectionId?: string): Promise<any> {
     try {
       const endpoint = sectionId 
-        ? `/api/v1/restaurant/floor-plan?section_id=${sectionId}`
-        : '/api/v1/restaurant/floor-plan';
+        ? `/api/v1/restaurants/floor-plan?section_id=${sectionId}`
+        : '/api/v1/restaurants/floor-plan';
       
       const response = await this.apiRequest(endpoint, {
         method: 'GET',
@@ -326,7 +326,7 @@ class DatabaseService {
 
   async updateTableStatus(tableId: string, status: string, additionalData?: any): Promise<any> {
     try {
-      const response = await this.apiRequest(`/api/v1/restaurant/tables/${tableId}/status`, {
+      const response = await this.apiRequest(`/api/v1/restaurants/tables/${tableId}/status`, {
         method: 'PUT',
         body: JSON.stringify({
           status: status,
@@ -341,9 +341,9 @@ class DatabaseService {
     }
   }
 
-  async assignServerToTable(tableId: string, serverId: string): Promise<any> {
+  async assignTableServer(tableId: string, serverId: string): Promise<any> {
     try {
-      const response = await this.apiRequest(`/api/v1/restaurant/tables/${tableId}/server`, {
+      const response = await this.apiRequest(`/api/v1/restaurants/tables/${tableId}/server`, {
         method: 'PUT',
         body: JSON.stringify({
           server_id: serverId,
@@ -357,9 +357,9 @@ class DatabaseService {
     }
   }
 
-  async getRestaurantSections(): Promise<any[]> {
+  async getSections(): Promise<any[]> {
     try {
-      const response = await this.apiRequest('/api/v1/restaurant/sections', {
+      const response = await this.apiRequest('/api/v1/restaurants/sections', {
         method: 'GET',
       });
       
