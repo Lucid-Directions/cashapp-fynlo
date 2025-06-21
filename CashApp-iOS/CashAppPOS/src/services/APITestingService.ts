@@ -203,12 +203,11 @@ class APITestingService {
       timestamp: new Date(),
     };
 
-    // Test floor plan endpoint
-    const floorPlanTest = await this.testEndpoint('/api/v1/restaurant/floor-plan');
+    // Test floor plan and restaurant data
+    const floorPlanTest = await this.testEndpoint('/api/v1/restaurants/floor-plan');
     suite.tests.push(floorPlanTest);
-
-    // Test sections endpoint
-    const sectionsTest = await this.testEndpoint('/api/v1/restaurant/sections');
+    
+    const sectionsTest = await this.testEndpoint('/api/v1/restaurants/sections');
     suite.tests.push(sectionsTest);
 
     suite.overallSuccess = suite.tests.every(test => test.success);

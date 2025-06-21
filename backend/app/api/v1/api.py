@@ -10,10 +10,10 @@ api_router = APIRouter()
 
 # Include all endpoint routers
 api_router.include_router(auth.router, prefix="/auth", tags=["authentication"])
-api_router.include_router(restaurants.router, prefix="/restaurant", tags=["restaurants"])  # Changed to match frontend expectations
+api_router.include_router(restaurants.router, prefix="/restaurants", tags=["restaurants"])  # Fixed: Changed to plural to match RESTful conventions and frontend expectations
 api_router.include_router(products.router, prefix="/products", tags=["products"])
-# Add categories as a separate route to match frontend expectations
-api_router.include_router(products.router, prefix="/categories", tags=["categories"], include_in_schema=False)
+# Removed duplicate products router registration that was causing conflicts
+# Categories are available at /products/categories - no separate router needed
 api_router.include_router(orders.router, prefix="/orders", tags=["orders"])
 api_router.include_router(payments.router, prefix="/payments", tags=["payments"])
 api_router.include_router(customers.router, prefix="/customers", tags=["customers"])
