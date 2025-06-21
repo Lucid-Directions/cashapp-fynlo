@@ -10,7 +10,9 @@
     "lint": "eslint .",
     "build:ios": "react-native bundle --platform ios --dev false --entry-file index.js --bundle-output ios/main.jsbundle",
     "clean": "react-native clean && cd ios && xcodebuild clean && cd ..",
-    "clean:all": "rm -rf node_modules && npm install && cd ios && pod install && cd .."
+    "clean:all": "rm -rf node_modules && npm install && cd ios && pod install && cd ..",
+    "audit:security": "npm audit --audit-level high",
+    "update:dependencies": "npm update && npm audit fix"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^1.24.0",
@@ -24,7 +26,7 @@
     "@react-navigation/stack": "^6.3.0",
     "crypto-js": "^4.2.0",
     "react": "18.2.0",
-    "react-native": "0.72.7",
+    "react-native": "0.72.17",
     "react-native-gesture-handler": "2.13.4",
     "react-native-keychain": "^10.0.0",
     "react-native-reanimated": "3.5.4",
@@ -51,7 +53,9 @@
     "typescript": "^5.0.0"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=18.18.0",
+    "npm": ">=9.0.0"
   },
-  "private": true
+  "private": true,
+  "packageManager": "npm@9.9.3"
 }

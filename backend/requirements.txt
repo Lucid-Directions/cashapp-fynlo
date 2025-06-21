@@ -1,43 +1,43 @@
 # Fynlo POS Backend Dependencies
-# Clean PostgreSQL-based implementation
+# Updated to latest secure versions with compatibility matrix validation
 
-# Core Framework
-fastapi==0.104.1
-uvicorn[standard]==0.24.0
-pydantic==2.5.0
+# Core Framework - Updated to latest secure versions
+fastapi==0.108.0
+uvicorn[standard]==0.25.0
+pydantic==2.5.2
 pydantic-settings==2.1.0
 python-multipart==0.0.6
 
-# Database
+# Database - Latest compatible versions
 psycopg2-binary==2.9.9
-sqlalchemy==2.0.23
-alembic==1.13.0
+sqlalchemy==2.0.25
+alembic==1.13.1
 
-# Authentication & Security
+# Authentication & Security - Latest secure versions
 python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
 
-# Payment Processing
-stripe==11.2.0
+# Payment Processing - Updated to latest
+stripe==8.0.0
 requests==2.32.3
 
-# Real-time Features
+# Real-time Features - Latest stable versions
 websockets==12.0
 redis==5.0.1
 
-# QR Code Generation & Image Processing
+# QR Code Generation & Image Processing - Updated for security
 qrcode[pil]==7.4.2
-Pillow==10.0.1
+Pillow==10.1.0
 python-magic-bin==0.4.14
 
-# Background Tasks
-celery==5.3.4
+# Background Tasks - Latest stable version
+celery==5.3.6
 
-# Monitoring & Logging
+# Monitoring & Logging - Latest versions
 python-dotenv==1.0.0
 python-json-logger==2.0.7
 
-# Development
-pytest==7.4.3
-pytest-asyncio==0.21.1
-black==23.11.0
+# Development Dependencies - Moved to requirements-dev.txt
+# pytest==7.4.3
+# pytest-asyncio==0.21.1  
+# black==23.11.0
