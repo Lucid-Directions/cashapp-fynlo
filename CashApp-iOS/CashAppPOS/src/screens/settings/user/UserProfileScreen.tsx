@@ -13,7 +13,6 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../../contexts/AuthContext';
-import { useTheme } from '../../../contexts/ThemeContext';
 
 // Clover POS Color Scheme
 const Colors = {
@@ -34,7 +33,6 @@ const Colors = {
 
 const UserProfileScreen: React.FC = () => {
   const navigation = useNavigation();
-  const { theme } = useTheme();
   const { user, updateUser, signOut } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);

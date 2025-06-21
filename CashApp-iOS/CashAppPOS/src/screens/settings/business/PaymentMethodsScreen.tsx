@@ -29,7 +29,7 @@ const Colors = {
 };
 
 interface PaymentMethodInfo {
-  id: keyof typeof useSettingsStore.prototype.paymentMethods;
+  id: string;
   name: string;
   description: string;
   icon: string;

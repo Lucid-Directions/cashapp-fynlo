@@ -53,6 +53,8 @@ const OrdersScreen: React.FC = () => {
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [dateRange, setDateRange] = useState('today');
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [showOrderDetails, setShowOrderDetails] = useState(false);
 
   useEffect(() => {
     loadOrders();
@@ -175,8 +177,13 @@ const OrdersScreen: React.FC = () => {
     });
   };
 
+  const handleOrderPress = (order: Order) => {
+    setSelectedOrder(order);
+    setShowOrderDetails(true);
+  };
+
   const renderOrder = ({ item }: { item: Order }) => (
-    <TouchableOpacity style={styles.orderCard}>
+    <TouchableOpacity style={styles.orderCard} onPress={() => handleOrderPress(item)}>
       <View style={styles.orderHeader}>
         <View>
           <Text style={styles.orderId}>{item.id}</Text>
@@ -379,6 +386,61 @@ const OrdersScreen: React.FC = () => {
               ))}
             </View>
           </View>
+        </View>
+      </Modal>
+
+      {/* Order Details Modal */}
+      <Modal
+        visible={showOrderDetails}
+        animationType="slide"
+        presentationStyle="pageSheet"
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <TouchableOpacity onPress={() => setShowOrderDetails(false)}>
+              <Icon name="close" size={24} color={Colors.text} />
+            </TouchableOpacity>
+            <Text style={styles.modalTitle}>Order Details</Text>
+            <View style={{ width: 24 }} />
+          </View>
+          
+          {selectedOrder && (
+            <ScrollView style={styles.orderDetailsContent}>
+              <View style={styles.orderDetailsHeader}>
+                <Text style={styles.orderDetailsId}>{selectedOrder.id}</Text>
+                <View style={[styles.statusBadge, { backgroundColor: getStatusColor(selectedOrder.status) }]}>
+                  <Text style={styles.statusText}>{selectedOrder.status.toUpperCase()}</Text>
+                </View>
+              </View>
+              
+              <View style={styles.orderDetailsSection}>
+                <Text style={styles.sectionTitle}>Customer Information</Text>
+                <Text style={styles.detailText}>Name: {selectedOrder.customerName || 'Walk-in Customer'}</Text>
+                <Text style={styles.detailText}>Date: {formatDate(selectedOrder.date)}</Text>
+                <Text style={styles.detailText}>Served by: {selectedOrder.employee}</Text>
+              </View>
+              
+              <View style={styles.orderDetailsSection}>
+                <Text style={styles.sectionTitle}>Payment Information</Text>
+                <View style={styles.paymentRow}>
+                  <Icon name={getPaymentIcon(selectedOrder.paymentMethod)} size={20} color={Colors.darkGray} />
+                  <Text style={styles.detailText}>{selectedOrder.paymentMethod.toUpperCase()}</Text>
+                </View>
+                <Text style={styles.totalText}>Total: £{selectedOrder.total.toFixed(2)}</Text>
+              </View>
+              
+              <View style={styles.orderDetailsSection}>
+                <Text style={styles.sectionTitle}>Order Items ({selectedOrder.items})</Text>
+                <Text style={styles.detailText}>• Fish & Chips - £12.99</Text>
+                <Text style={styles.detailText}>• Mushy Peas - £3.50</Text>
+                <Text style={styles.detailText}>• Soft Drink - £2.50</Text>
+                <View style={styles.divider} />
+                <Text style={styles.detailText}>Subtotal: £{(selectedOrder.total * 0.8).toFixed(2)}</Text>
+                <Text style={styles.detailText}>VAT (20%): £{(selectedOrder.total * 0.2).toFixed(2)}</Text>
+                <Text style={styles.totalText}>Total: £{selectedOrder.total.toFixed(2)}</Text>
+              </View>
+            </ScrollView>
+          )}
         </View>
       </Modal>
     </SafeAreaView>
@@ -625,6 +687,55 @@ const styles = StyleSheet.create({
   filterOptionTextActive: {
     color: Colors.primary,
     fontWeight: '600',
+  },
+  orderDetailsContent: {
+    flex: 1,
+    padding: 16,
+  },
+  orderDetailsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  orderDetailsId: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: Colors.text,
+  },
+  orderDetailsSection: {
+    marginBottom: 24,
+    backgroundColor: Colors.white,
+    borderRadius: 8,
+    padding: 16,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: Colors.text,
+    marginBottom: 12,
+  },
+  detailText: {
+    fontSize: 16,
+    color: Colors.text,
+    marginBottom: 8,
+  },
+  paymentRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  totalText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: Colors.primary,
+    marginTop: 8,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: Colors.border,
+    marginVertical: 12,
   },
 });
 

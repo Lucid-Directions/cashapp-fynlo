@@ -7,18 +7,10 @@ import {
   ViewStyle,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useTheme, ThemeMode } from '../../design-system/ThemeProvider';
+import { useTheme, ThemeMode, ColorTheme, ColorThemeOption, colorThemeOptions } from '../../design-system/ThemeProvider';
 import { Theme } from '../../design-system/theme';
 
-// Color theme option interface
-interface ColorThemeOption {
-  id: string;
-  label: string;
-  primary: string;
-  secondary: string;
-  accent: string;
-  description: string;
-}
+// Remove duplicate interface since it's imported from ThemeProvider
 
 // Theme option interface
 interface ThemeOption {
@@ -42,7 +34,7 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
   style,
   testID,
 }) => {
-  const { theme, themeMode, setThemeMode, isDark } = useTheme();
+  const { theme, themeMode, colorTheme, setThemeMode, setColorTheme, isDark } = useTheme();
   const [isAnimating, setIsAnimating] = useState(false);
 
   const themeOptions: ThemeOption[] = [
@@ -66,88 +58,7 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
     },
   ];
 
-  const colorThemeOptions: ColorThemeOption[] = [
-    {
-      id: 'default',
-      label: 'Fynlo Green',
-      primary: '#00A651',
-      secondary: '#0066CC',
-      accent: '#22C55E',
-      description: 'Classic Fynlo brand colors',
-    },
-    {
-      id: 'blue',
-      label: 'Ocean Blue',
-      primary: '#0EA5E9',
-      secondary: '#1E40AF',
-      accent: '#3B82F6',
-      description: 'Calming ocean blue theme',
-    },
-    {
-      id: 'purple',
-      label: 'Royal Purple',
-      primary: '#8B5CF6',
-      secondary: '#7C3AED',
-      accent: '#A855F7',
-      description: 'Elegant purple theme',
-    },
-    {
-      id: 'orange',
-      label: 'Sunset Orange',
-      primary: '#F97316',
-      secondary: '#EA580C',
-      accent: '#FB923C',
-      description: 'Vibrant sunset orange',
-    },
-    {
-      id: 'red',
-      label: 'Cherry Red',
-      primary: '#EF4444',
-      secondary: '#DC2626',
-      accent: '#F87171',
-      description: 'Bold cherry red theme',
-    },
-    {
-      id: 'teal',
-      label: 'Emerald Teal',
-      primary: '#14B8A6',
-      secondary: '#0F766E',
-      accent: '#2DD4BF',
-      description: 'Fresh emerald teal',
-    },
-    {
-      id: 'indigo',
-      label: 'Deep Indigo',
-      primary: '#6366F1',
-      secondary: '#4F46E5',
-      accent: '#818CF8',
-      description: 'Deep indigo blue',
-    },
-    {
-      id: 'pink',
-      label: 'Rose Pink',
-      primary: '#EC4899',
-      secondary: '#DB2777',
-      accent: '#F472B6',
-      description: 'Elegant rose pink',
-    },
-    {
-      id: 'lime',
-      label: 'Fresh Lime',
-      primary: '#84CC16',
-      secondary: '#65A30D',
-      accent: '#A3E635',
-      description: 'Fresh lime green',
-    },
-    {
-      id: 'amber',
-      label: 'Golden Amber',
-      primary: '#F59E0B',
-      secondary: '#D97706',
-      accent: '#FBBF24',
-      description: 'Warm golden amber',
-    },
-  ];
+  // colorThemeOptions is now imported from ThemeProvider
 
   // Safe theme switching with error handling
   const handleThemeToggle = useCallback(async () => {
@@ -185,13 +96,24 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
       return {
         colors: {
           primary: '#00A651',
-          background: '#FFFFFF',
-          card: '#FFFFFF',
+          neutral: { 
+            50: '#F9F9F9',
+            100: '#F5F5F5', 
+            200: '#E5E5E5',
+            400: '#A3A3A3',
+            600: '#525252',
+          },
+          white: '#FFFFFF',
           text: '#000000',
-          border: '#E1E1E1',
-          notification: '#FF3B30',
+          background: '#FFFFFF',
         },
-        dark: false,
+        spacing: { 1: 4, 2: 8, 3: 12, 4: 16 },
+        borderRadius: { sm: 4, md: 8, lg: 12, xl: 16 },
+        typography: {
+          fontSize: { xs: 10, sm: 12, base: 14, lg: 16 },
+          fontWeight: { medium: '500', semibold: '600' }
+        },
+        isDark: false,
       };
     }
     return theme;
@@ -199,49 +121,60 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
 
   const styles = createStyles(safeTheme);
 
-  const handleColorThemeChange = (colorTheme: ColorThemeOption) => {
-    // For now, we'll just show an alert since full implementation requires theme provider changes
-    // In a full implementation, this would update the theme colors
-    console.log('Color theme selected:', colorTheme.label);
-  };
+  const handleColorThemeChange = useCallback(async (colorThemeOption: ColorThemeOption) => {
+    if (isAnimating) return;
+    
+    try {
+      setIsAnimating(true);
+      await setColorTheme(colorThemeOption.id);
+      
+      // Add animation delay for smooth transition
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
+    } catch (error) {
+      console.error('Color theme switching error:', error);
+    } finally {
+      setIsAnimating(false);
+    }
+  }, [setColorTheme, isAnimating]);
 
   // Colors variant - color theme grid
   if (variant === 'colors') {
     return (
       <View style={[styles.colorsContainer, style]} testID={testID}>
         <View style={styles.colorsGrid}>
-          {colorThemeOptions.map((colorTheme) => (
+          {colorThemeOptions.map((colorThemeOption) => (
             <TouchableOpacity
-              key={colorTheme.id}
+              key={colorThemeOption.id}
               style={[
                 styles.colorCard,
-                colorTheme.id === 'default' && styles.colorCardActive,
+                colorTheme === colorThemeOption.id && styles.colorCardActive,
               ]}
-              onPress={() => handleColorThemeChange(colorTheme)}
+              onPress={() => handleColorThemeChange(colorThemeOption)}
               accessibilityRole="button"
-              accessibilityLabel={colorTheme.label}
-              accessibilityHint={colorTheme.description}
-              accessibilityState={{ selected: colorTheme.id === 'default' }}
+              accessibilityLabel={colorThemeOption.label}
+              accessibilityHint={colorThemeOption.description}
+              accessibilityState={{ selected: colorTheme === colorThemeOption.id }}
             >
               <View style={styles.colorPreview}>
-                <View style={[styles.colorSwatch, { backgroundColor: colorTheme.primary }]} />
-                <View style={[styles.colorSwatch, { backgroundColor: colorTheme.secondary }]} />
-                <View style={[styles.colorSwatch, { backgroundColor: colorTheme.accent }]} />
+                <View style={[styles.colorSwatch, { backgroundColor: colorThemeOption.primary }]} />
+                <View style={[styles.colorSwatch, { backgroundColor: colorThemeOption.secondary }]} />
+                <View style={[styles.colorSwatch, { backgroundColor: colorThemeOption.accent }]} />
               </View>
               {showLabels && (
                 <>
                   <Text style={[
                     styles.colorLabel,
-                    colorTheme.id === 'default' && styles.colorLabelActive,
+                    colorTheme === colorThemeOption.id && styles.colorLabelActive,
                   ]}>
-                    {colorTheme.label}
+                    {colorThemeOption.label}
                   </Text>
                   <Text style={styles.colorDescription}>
-                    {colorTheme.description}
+                    {colorThemeOption.description}
                   </Text>
                 </>
               )}
-              {colorTheme.id === 'default' && (
+              {colorTheme === colorThemeOption.id && (
                 <View style={styles.colorCheckmark}>
                   <Icon
                     name="check-circle"
