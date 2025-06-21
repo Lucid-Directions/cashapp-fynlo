@@ -3,7 +3,7 @@ Database configuration and models for Fynlo POS
 PostgreSQL implementation matching frontend data requirements
 """
 
-from sqlalchemy import create_engine, Column, String, Integer, Float, DateTime, Boolean, Text, JSON, ForeignKey
+from sqlalchemy import create_engine, Column, String, Integer, Float, DateTime, Boolean, Text, JSON, ForeignKey, DECIMAL
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session, relationship
@@ -93,7 +93,7 @@ class Customer(Base):
     first_name = Column(String(100))
     last_name = Column(String(100))
     loyalty_points = Column(Integer, default=0)
-    total_spent = Column(Float, default=0.0)
+    total_spent = Column(DECIMAL(10, 2), default=0.0)
     visit_count = Column(Integer, default=0)
     preferences = Column(JSONB, default={})
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -122,8 +122,8 @@ class Product(Base):
     category_id = Column(UUID(as_uuid=True), nullable=False)
     name = Column(String(255), nullable=False)
     description = Column(Text)
-    price = Column(Float, nullable=False)
-    cost = Column(Float, default=0.0)
+    price = Column(DECIMAL(10, 2), nullable=False)
+    cost = Column(DECIMAL(10, 2), default=0.0)
     image_url = Column(String(500))
     barcode = Column(String(100))
     sku = Column(String(100))
@@ -148,11 +148,11 @@ class Order(Base):
     order_type = Column(String(20), default="dine_in")  # dine_in, takeaway, delivery
     status = Column(String(20), default="pending")  # pending, confirmed, preparing, ready, completed, cancelled
     items = Column(JSONB, nullable=False)
-    subtotal = Column(Float, nullable=False)
-    tax_amount = Column(Float, default=0.0)
-    service_charge = Column(Float, default=0.0)
-    discount_amount = Column(Float, default=0.0)
-    total_amount = Column(Float, nullable=False)
+    subtotal = Column(DECIMAL(10, 2), nullable=False)
+    tax_amount = Column(DECIMAL(10, 2), default=0.0)
+    service_charge = Column(DECIMAL(10, 2), default=0.0)
+    discount_amount = Column(DECIMAL(10, 2), default=0.0)
+    total_amount = Column(DECIMAL(10, 2), nullable=False)
     payment_status = Column(String(20), default="pending")
     special_instructions = Column(Text)
     created_by = Column(UUID(as_uuid=True), nullable=False)
@@ -166,9 +166,9 @@ class Payment(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     order_id = Column(UUID(as_uuid=True), nullable=False)
     payment_method = Column(String(50), nullable=False)  # qr_code, cash, card, apple_pay
-    amount = Column(Float, nullable=False)
-    fee_amount = Column(Float, default=0.0)
-    net_amount = Column(Float, nullable=False)
+    amount = Column(DECIMAL(10, 2), nullable=False)
+    fee_amount = Column(DECIMAL(10, 2), default=0.0)
+    net_amount = Column(DECIMAL(10, 2), nullable=False)
     status = Column(String(20), default="pending")  # pending, processing, completed, failed, refunded
     external_id = Column(String(255))  # Stripe payment ID, etc.
     payment_metadata = Column(JSONB, default={})
@@ -182,11 +182,11 @@ class QRPayment(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     order_id = Column(UUID(as_uuid=True), nullable=False)
     qr_code_data = Column(Text, nullable=False)
-    amount = Column(Float, nullable=False)
+    amount = Column(DECIMAL(10, 2), nullable=False)
     status = Column(String(50), default="pending")
     expires_at = Column(DateTime(timezone=True), nullable=False)
-    fee_amount = Column(Float, default=0.0)
-    net_amount = Column(Float, nullable=False)
+    fee_amount = Column(DECIMAL(10, 2), default=0.0)
+    net_amount = Column(DECIMAL(10, 2), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 class Section(Base):
