@@ -9,6 +9,9 @@ from sqlalchemy import and_, or_, desc
 from pydantic import BaseModel
 from datetime import datetime, timedelta
 import uuid
+import logging
+
+logger = logging.getLogger(__name__)
 
 from app.core.database import get_db, Order, Product
 from app.api.v1.endpoints.auth import get_current_user, User
@@ -23,6 +26,7 @@ from app.core.websocket import (
     WebSocketMessage,
     EventType
 )
+from app.core.transaction_manager import transactional, transaction_manager
 
 router = APIRouter()
 
@@ -214,6 +218,7 @@ async def get_todays_orders(
     )
 
 @router.post("/", response_model=OrderResponse)
+@transactional(max_retries=3, retry_delay=0.1)
 async def create_order(
     order_data: OrderCreate,
     restaurant_id: Optional[str] = Query(None),
@@ -243,50 +248,84 @@ async def create_order(
     # Calculate totals
     totals = calculate_order_totals(order_data.items)
     
-    # Create order
-    new_order = Order(
-        restaurant_id=restaurant_id,
-        customer_id=order_data.customer_id,
-        order_number=generate_order_number(),
-        table_number=order_data.table_number,
-        order_type=order_data.order_type,
-        status="pending",
-        items=[item.dict() for item in order_data.items],
-        subtotal=totals["subtotal"],
-        tax_amount=totals["tax_amount"],
-        service_charge=totals["service_charge"],
-        discount_amount=0.0,
-        total_amount=totals["total_amount"],
-        payment_status="pending",
-        special_instructions=order_data.special_instructions,
-        created_by=str(current_user.id)
-    )
-    
-    db.add(new_order)
-    db.commit()
-    db.refresh(new_order)
-    
-    # Cache order
-    await redis.cache_order(str(new_order.id), {
-        "id": str(new_order.id),
-        "order_number": new_order.order_number,
-        "status": new_order.status,
-        "total_amount": new_order.total_amount,
-        "items": new_order.items
-    })
-    
-    # Clear today's orders cache
-    await redis.delete(f"orders:today:{restaurant_id}")
-    
-    # Broadcast order creation to WebSocket clients
-    await notify_order_created(str(new_order.id), restaurant_id, {
-        "id": str(new_order.id),
-        "order_number": new_order.order_number,
-        "status": new_order.status,
-        "items": new_order.items,
-        "total_amount": new_order.total_amount,
-        "table_number": new_order.table_number
-    })
+    try:
+        # Check stock availability for tracked products
+        for item in order_data.items:
+            product = next(p for p in products if str(p.id) == item.product_id)
+            if product.stock_tracking and product.stock_quantity < item.quantity:
+                raise HTTPException(
+                    status_code=400, 
+                    detail=f"Insufficient stock for {product.name}. Available: {product.stock_quantity}, Required: {item.quantity}"
+                )
+        
+        # Create order
+        new_order = Order(
+            restaurant_id=restaurant_id,
+            customer_id=order_data.customer_id,
+            order_number=generate_order_number(),
+            table_number=order_data.table_number,
+            order_type=order_data.order_type,
+            status="pending",
+            items=[item.dict() for item in order_data.items],
+            subtotal=totals["subtotal"],
+            tax_amount=totals["tax_amount"],
+            service_charge=totals["service_charge"],
+            discount_amount=0.0,
+            total_amount=totals["total_amount"],
+            payment_status="pending",
+            special_instructions=order_data.special_instructions,
+            created_by=str(current_user.id)
+        )
+        
+        db.add(new_order)
+        
+        # Update stock quantities for tracked products (atomic with order creation)
+        for item in order_data.items:
+            product = next(p for p in products if str(p.id) == item.product_id)
+            if product.stock_tracking:
+                product.stock_quantity -= item.quantity
+                db.add(product)  # Ensure product is tracked for updates
+        
+        # Flush to get the order ID before commit
+        db.flush()
+        db.refresh(new_order)
+        
+        # Cache order (part of transaction)
+        await redis.cache_order(str(new_order.id), {
+            "id": str(new_order.id),
+            "order_number": new_order.order_number,
+            "status": new_order.status,
+            "total_amount": new_order.total_amount,
+            "items": new_order.items
+        })
+        
+        # Clear today's orders cache (part of transaction)
+        await redis.delete(f"orders:today:{restaurant_id}")
+        
+        # Transaction will auto-commit at this point due to @transactional decorator
+        
+        # Post-transaction operations (these can fail without affecting DB consistency)
+        try:
+            # Broadcast order creation to WebSocket clients
+            await notify_order_created(str(new_order.id), restaurant_id, {
+                "id": str(new_order.id),
+                "order_number": new_order.order_number,
+                "status": new_order.status,
+                "items": new_order.items,
+                "total_amount": new_order.total_amount,
+                "table_number": new_order.table_number
+            })
+        except Exception as ws_error:
+            # Log WebSocket errors but don't fail the order creation
+            logger.warning(f"WebSocket notification failed for order {new_order.id}: {ws_error}")
+        
+    except HTTPException:
+        # Re-raise HTTP exceptions (validation errors)
+        raise
+    except Exception as e:
+        # Log unexpected errors
+        logger.error(f"Order creation failed: {e}")
+        raise HTTPException(status_code=500, detail="Failed to create order")
     
     return OrderResponse(
         id=str(new_order.id),
