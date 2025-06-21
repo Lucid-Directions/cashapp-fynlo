@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -13,6 +13,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../../contexts/AuthContext';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 // Clover POS Color Scheme
 const Colors = {
@@ -33,11 +34,108 @@ const Colors = {
 
 const UserProfileScreen: React.FC = () => {
   const navigation = useNavigation();
+  const { theme } = useTheme();
   const { user, updateUser, signOut } = useAuth();
+  const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   
+  // Safe user data with fallbacks
+  const safeUser = useMemo(() => {
+    if (!user) {
+      return {
+        id: '',
+        firstName: '',
+        lastName: '',
+        email: '',
+        role: 'employee',
+        avatar: null,
+        phone: '',
+        lastLogin: null,
+      };
+    }
+    return {
+      id: user.id || '',
+      firstName: user.firstName || '',
+      lastName: user.lastName || '',
+      email: user.email || '',
+      role: user.role || 'employee',
+      photo: user.photo || null,
+      phone: user.phone || '',
+      lastLogin: user.lastLogin || null,
+    };
+  }, [user]);
+
+  const [formData, setFormData] = useState({
+    firstName: safeUser.firstName,
+    lastName: safeUser.lastName,
+    email: safeUser.email,
+    phone: safeUser.phone,
+  });
+
+  // Update form data when user changes
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        firstName: safeUser.firstName,
+        lastName: safeUser.lastName,
+        email: safeUser.email,
+        phone: safeUser.phone,
+      });
+    }
+  }, [user, safeUser]);
+
+  const handleSave = async () => {
+    if (!user) {
+      Alert.alert('Error', 'User data not available');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      await updateUser(formData);
+      setIsEditing(false);
+      Alert.alert('Success', 'Profile updated successfully');
+    } catch (error) {
+      console.error('Profile update error:', error);
+      Alert.alert('Error', 'Failed to update profile. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleLogout = () => {
+    Alert.alert(
+      'Confirm Logout',
+      'Are you sure you want to logout?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Logout', 
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await signOut();
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'Login' }],
+              });
+            } catch (error) {
+              console.error('Logout error:', error);
+              Alert.alert('Error', 'Failed to logout. Please try again.');
+            }
+          }
+        },
+      ]
+    );
+  };
+
+  // Show loading or error state if user is not available
   if (!user) {
-    // This shouldn't happen if authentication is working correctly
-    return null;
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Text style={styles.errorText}>Loading user profile...</Text>
+      </View>
+    );
   }
 
   // Settings
@@ -51,7 +149,6 @@ const UserProfileScreen: React.FC = () => {
     shareAnalytics: false,
   });
 
-  const [isEditing, setIsEditing] = useState(false);
   const [editableProfile, setEditableProfile] = useState(user);
 
   const handleSaveProfile = async () => {
@@ -470,14 +567,7 @@ const UserProfileScreen: React.FC = () => {
 
             <TouchableOpacity 
               style={styles.actionButton}
-              onPress={() => Alert.alert(
-                'Sign Out',
-                'Are you sure you want to sign out?',
-                [
-                  { text: 'Cancel', style: 'cancel' },
-                  { text: 'Sign Out', style: 'destructive', onPress: signOut }
-                ]
-              )}
+              onPress={handleLogout}
             >
               <Icon name="logout" size={24} color={Colors.warning} />
               <Text style={[styles.actionButtonText, { color: Colors.warning }]}>Sign Out</Text>
@@ -764,6 +854,12 @@ const styles = StyleSheet.create({
     color: Colors.text,
     marginLeft: 12,
     flex: 1,
+  },
+  errorText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: Colors.danger,
+    textAlign: 'center',
   },
 });
 

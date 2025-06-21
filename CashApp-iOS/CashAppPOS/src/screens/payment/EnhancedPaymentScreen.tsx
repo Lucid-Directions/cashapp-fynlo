@@ -120,40 +120,40 @@ const EnhancedPaymentScreen: React.FC = () => {
       name: 'QR Payment',
       icon: 'qr-code-scanner',
       color: Colors.primary,
-      enabled: paymentMethods.qrCode.enabled,
-      requiresAuth: paymentMethods.qrCode.requiresAuth,
+      enabled: paymentMethods?.qrCode?.enabled ?? true,
+      requiresAuth: paymentMethods?.qrCode?.requiresAuth ?? false,
     },
     {
       id: 'cash',
       name: 'Cash',
       icon: 'payments',
       color: Colors.success,
-      enabled: paymentMethods.cash.enabled,
-      requiresAuth: paymentMethods.cash.requiresAuth,
+      enabled: paymentMethods?.cash?.enabled ?? true,
+      requiresAuth: paymentMethods?.cash?.requiresAuth ?? false,
     },
     {
       id: 'card',
       name: 'Card',
       icon: 'credit-card',
       color: Colors.secondary,
-      enabled: paymentMethods.card.enabled,
-      requiresAuth: paymentMethods.card.requiresAuth,
+      enabled: paymentMethods?.card?.enabled ?? true,
+      requiresAuth: paymentMethods?.card?.requiresAuth ?? false,
     },
     {
       id: 'applePay',
       name: 'Apple Pay',
       icon: 'contactless-payment',
       color: Colors.text,
-      enabled: paymentMethods.applePay.enabled,
-      requiresAuth: paymentMethods.applePay.requiresAuth,
+      enabled: paymentMethods?.applePay?.enabled ?? true,
+      requiresAuth: paymentMethods?.applePay?.requiresAuth ?? false,
     },
     {
       id: 'googlePay',
       name: 'Google Pay',
       icon: 'contactless-payment',
       color: Colors.warning,
-      enabled: paymentMethods.googlePay.enabled,
-      requiresAuth: paymentMethods.googlePay.requiresAuth,
+      enabled: paymentMethods?.googlePay?.enabled ?? false,
+      requiresAuth: paymentMethods?.googlePay?.requiresAuth ?? false,
     },
   ];
 
@@ -550,7 +550,7 @@ const EnhancedPaymentScreen: React.FC = () => {
         </View>
 
         {/* Tip Selection */}
-        {paymentMethods.card.tipEnabled && selectedPaymentMethod === 'card' && (
+        {paymentMethods?.card?.tipEnabled && selectedPaymentMethod === 'card' && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Add Tip</Text>
             <View style={styles.tipButtons}>

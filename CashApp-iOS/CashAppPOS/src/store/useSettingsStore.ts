@@ -25,13 +25,19 @@ interface TaxConfiguration {
   serviceTaxEnabled: boolean;
 }
 
-interface PaymentMethodSettings {
-  cash: { enabled: boolean; requiresAuth: boolean };
-  card: { enabled: boolean; requiresAuth: boolean; tipEnabled: boolean };
-  applePay: { enabled: boolean; requiresAuth: boolean };
-  googlePay: { enabled: boolean; requiresAuth: boolean };
-  qrCode: { enabled: boolean; requiresAuth: boolean };
-  customerAccount: { enabled: boolean; requiresAuth: boolean };
+interface PaymentMethodConfig {
+  enabled: boolean;
+  feePercentage?: number;
+  requiresAuth?: boolean;
+  tipEnabled?: boolean;
+}
+
+interface PaymentMethods {
+  qrCode: PaymentMethodConfig;
+  cash: PaymentMethodConfig;
+  card: PaymentMethodConfig;
+  applePay: PaymentMethodConfig;
+  googlePay: PaymentMethodConfig;
 }
 
 interface ReceiptSettings {
@@ -175,7 +181,7 @@ interface SettingsState {
   // Business Settings
   businessInfo: BusinessInfo;
   taxConfiguration: TaxConfiguration;
-  paymentMethods: PaymentMethodSettings;
+  paymentMethods: PaymentMethods;
   receiptSettings: ReceiptSettings;
   operatingHours: OperatingHours;
 
@@ -204,7 +210,7 @@ interface SettingsState {
   // Actions
   updateBusinessInfo: (info: Partial<BusinessInfo>) => void;
   updateTaxConfiguration: (config: Partial<TaxConfiguration>) => void;
-  updatePaymentMethods: (methods: Partial<PaymentMethodSettings>) => void;
+  updatePaymentMethods: (methods: Partial<PaymentMethods>) => void;
   updateReceiptSettings: (settings: Partial<ReceiptSettings>) => void;
   updateOperatingHours: (hours: Partial<OperatingHours>) => void;
   updatePrinterSettings: (settings: Partial<PrinterSettings>) => void;
@@ -222,6 +228,8 @@ interface SettingsState {
   resetSettings: () => void;
   loadSettings: () => Promise<void>;
   saveSettings: () => Promise<void>;
+  initializeStore: () => void;
+  updatePaymentMethod: (methodId: keyof PaymentMethods, config: Partial<PaymentMethodConfig>) => void;
 }
 
 // Default settings values
@@ -247,13 +255,37 @@ const defaultTaxConfiguration: TaxConfiguration = {
   serviceTaxEnabled: true,
 };
 
-const defaultPaymentMethods: PaymentMethodSettings = {
-  cash: { enabled: true, requiresAuth: false },
-  card: { enabled: true, requiresAuth: false, tipEnabled: true },
-  applePay: { enabled: true, requiresAuth: false },
-  googlePay: { enabled: true, requiresAuth: false },
-  qrCode: { enabled: true, requiresAuth: false },
-  customerAccount: { enabled: false, requiresAuth: true },
+const defaultPaymentMethods: PaymentMethods = {
+  qrCode: {
+    enabled: true,
+    feePercentage: 1.2,
+    requiresAuth: false,
+    tipEnabled: false,
+  },
+  cash: {
+    enabled: true,
+    feePercentage: 0,
+    requiresAuth: false,
+    tipEnabled: false,
+  },
+  card: {
+    enabled: true,
+    feePercentage: 2.9,
+    requiresAuth: false,
+    tipEnabled: true,
+  },
+  applePay: {
+    enabled: true,
+    feePercentage: 2.9,
+    requiresAuth: false,
+    tipEnabled: true,
+  },
+  googlePay: {
+    enabled: false,
+    feePercentage: 2.9,
+    requiresAuth: false,
+    tipEnabled: true,
+  },
 };
 
 const defaultReceiptSettings: ReceiptSettings = {
@@ -547,6 +579,27 @@ const useSettingsStore = create<SettingsState>()(
             error: error instanceof Error ? error.message : 'Failed to save settings' 
           });
         }
+      },
+
+      // Initialize store with safe defaults
+      initializeStore: () => {
+        const state = get();
+        if (!state.paymentMethods) {
+          set({ paymentMethods: defaultPaymentMethods });
+        }
+      },
+
+      // Update payment method configuration
+      updatePaymentMethod: (methodId: keyof PaymentMethods, config: Partial<PaymentMethodConfig>) => {
+        set((state) => ({
+          paymentMethods: {
+            ...state.paymentMethods,
+            [methodId]: {
+              ...state.paymentMethods[methodId],
+              ...config,
+            },
+          },
+        }));
       },
     }),
     {

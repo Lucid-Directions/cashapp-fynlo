@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
@@ -43,7 +43,7 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
   testID,
 }) => {
   const { theme, themeMode, setThemeMode, isDark } = useTheme();
-  const styles = createStyles(theme);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   const themeOptions: ThemeOption[] = [
     {
@@ -149,9 +149,55 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
     },
   ];
 
-  const handleThemeChange = (mode: ThemeMode) => {
-    setThemeMode(mode);
-  };
+  // Safe theme switching with error handling
+  const handleThemeToggle = useCallback(async () => {
+    if (isAnimating) return;
+    
+    try {
+      setIsAnimating(true);
+      const newTheme = isDark ? 'light' : 'dark';
+      
+      // Add animation delay for smooth transition
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      await setThemeMode(newTheme);
+      
+      // Additional delay to ensure theme is fully applied
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
+    } catch (error) {
+      console.error('Theme switching error:', error);
+      // Fallback to default theme if switching fails
+      try {
+        await setThemeMode('light');
+      } catch (fallbackError) {
+        console.error('Fallback theme setting failed:', fallbackError);
+      }
+    } finally {
+      setIsAnimating(false);
+    }
+  }, [isDark, setThemeMode, isAnimating]);
+
+  // Safe theme access with fallbacks
+  const safeTheme = useMemo(() => {
+    if (!theme || !theme.colors) {
+      // Return default light theme if theme is corrupted
+      return {
+        colors: {
+          primary: '#00A651',
+          background: '#FFFFFF',
+          card: '#FFFFFF',
+          text: '#000000',
+          border: '#E1E1E1',
+          notification: '#FF3B30',
+        },
+        dark: false,
+      };
+    }
+    return theme;
+  }, [theme]);
+
+  const styles = createStyles(safeTheme);
 
   const handleColorThemeChange = (colorTheme: ColorThemeOption) => {
     // For now, we'll just show an alert since full implementation requires theme provider changes
@@ -200,7 +246,7 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
                   <Icon
                     name="check-circle"
                     size={16}
-                    color={theme.colors.primary}
+                    color={safeTheme.colors.primary}
                   />
                 </View>
               )}
@@ -222,7 +268,7 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
               styles.compactButton,
               themeMode === option.mode && styles.compactButtonActive,
             ]}
-            onPress={() => handleThemeChange(option.mode)}
+            onPress={() => handleThemeToggle()}
             accessibilityRole="button"
             accessibilityLabel={option.label}
             accessibilityHint={option.description}
@@ -233,8 +279,8 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
               size={20}
               color={
                 themeMode === option.mode
-                  ? theme.colors.white
-                  : theme.colors.neutral[600]
+                  ? safeTheme.colors.white
+                  : safeTheme.colors.neutral[600]
               }
             />
             {showLabels && (
@@ -264,7 +310,7 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
               styles.expandedCard,
               themeMode === option.mode && styles.expandedCardActive,
             ]}
-            onPress={() => handleThemeChange(option.mode)}
+            onPress={() => handleThemeToggle()}
             accessibilityRole="button"
             accessibilityLabel={option.label}
             accessibilityHint={option.description}
@@ -276,8 +322,8 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
                 size={32}
                 color={
                   themeMode === option.mode
-                    ? theme.colors.primary
-                    : theme.colors.neutral[600]
+                    ? safeTheme.colors.primary
+                    : safeTheme.colors.neutral[600]
                 }
               />
             </View>
@@ -297,7 +343,7 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
                 <Icon
                   name="check-circle"
                   size={20}
-                  color={theme.colors.primary}
+                  color={safeTheme.colors.primary}
                 />
               </View>
             )}
@@ -317,7 +363,7 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
             styles.listItem,
             themeMode === option.mode && styles.listItemActive,
           ]}
-          onPress={() => handleThemeChange(option.mode)}
+          onPress={() => handleThemeToggle()}
           accessibilityRole="button"
           accessibilityLabel={option.label}
           accessibilityHint={option.description}
@@ -329,8 +375,8 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
               size={24}
               color={
                 themeMode === option.mode
-                  ? theme.colors.primary
-                  : theme.colors.neutral[600]
+                  ? safeTheme.colors.primary
+                  : safeTheme.colors.neutral[600]
               }
             />
           </View>
@@ -352,14 +398,14 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
               <Icon
                 name="radio-button-checked"
                 size={20}
-                color={theme.colors.primary}
+                color={safeTheme.colors.primary}
               />
             )}
             {themeMode !== option.mode && (
               <Icon
                 name="radio-button-unchecked"
                 size={20}
-                color={theme.colors.neutral[400]}
+                color={safeTheme.colors.neutral[400]}
               />
             )}
           </View>
