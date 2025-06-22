@@ -6,6 +6,10 @@ import { MainTabParamList, MainStackParamList } from '../types';
 import POSScreen from '../screens/main/POSScreen';
 import OrdersScreen from '../screens/orders/OrdersScreen';
 import ReportsScreen from '../screens/reports/ReportsScreenSimple';
+import SalesReportDetailScreen from '../screens/reports/SalesReportDetailScreen';
+import InventoryReportDetailScreen from '../screens/reports/InventoryReportDetailScreen';
+import StaffReportDetailScreen from '../screens/reports/StaffReportDetailScreen';
+import FinancialReportDetailScreen from '../screens/reports/FinancialReportDetailScreen';
 import MoreScreen from '../screens/more/MoreScreen';
 import EmployeesScreen from '../screens/employees/EmployeesScreen';
 import CustomersScreen from '../screens/customers/CustomersScreen';
@@ -117,6 +121,34 @@ const MainNavigator: React.FC = () => {
       <Stack.Screen
         name="Reports"
         component={ReportsScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="SalesReport"
+        component={SalesReportDetailScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="InventoryReport"
+        component={InventoryReportDetailScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="StaffReport"
+        component={StaffReportDetailScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="FinancialReport"
+        component={FinancialReportDetailScreen}
         options={{
           headerShown: false,
         }}

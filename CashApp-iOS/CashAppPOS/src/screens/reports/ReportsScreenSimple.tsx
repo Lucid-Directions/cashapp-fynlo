@@ -85,7 +85,10 @@ const ReportsScreen = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Available Reports</Text>
           
-          <TouchableOpacity style={styles.reportItem}>
+          <TouchableOpacity 
+            style={styles.reportItem}
+            onPress={() => navigation.navigate('SalesReport')}
+          >
             <Icon name="trending-up" size={24} color={Colors.success} />
             <View style={styles.reportInfo}>
               <Text style={styles.reportTitle}>Sales Report</Text>
@@ -94,7 +97,10 @@ const ReportsScreen = () => {
             <Icon name="chevron-right" size={24} color={Colors.lightText} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.reportItem}>
+          <TouchableOpacity 
+            style={styles.reportItem}
+            onPress={() => navigation.navigate('InventoryReport')}
+          >
             <Icon name="inventory" size={24} color={Colors.warning} />
             <View style={styles.reportInfo}>
               <Text style={styles.reportTitle}>Inventory Report</Text>
@@ -103,7 +109,10 @@ const ReportsScreen = () => {
             <Icon name="chevron-right" size={24} color={Colors.lightText} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.reportItem}>
+          <TouchableOpacity 
+            style={styles.reportItem}
+            onPress={() => navigation.navigate('StaffReport')}
+          >
             <Icon name="people" size={24} color={Colors.secondary} />
             <View style={styles.reportInfo}>
               <Text style={styles.reportTitle}>Staff Report</Text>
@@ -112,7 +121,10 @@ const ReportsScreen = () => {
             <Icon name="chevron-right" size={24} color={Colors.lightText} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.reportItem}>
+          <TouchableOpacity 
+            style={styles.reportItem}
+            onPress={() => navigation.navigate('FinancialReport')}
+          >
             <Icon name="account-balance" size={24} color={Colors.primary} />
             <View style={styles.reportInfo}>
               <Text style={styles.reportTitle}>Financial Report</Text>

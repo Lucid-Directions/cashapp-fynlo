@@ -19,6 +19,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import useAppStore from '../../store/useAppStore';
 import useUIStore from '../../store/useUIStore';
+import useSettingsStore from '../../store/useSettingsStore';
 import { MenuItem, OrderItem } from '../../types';
 import DatabaseService from '../../services/DatabaseService';
 import { useRestaurantDisplayName } from '../../hooks/useRestaurantConfig';
@@ -107,6 +108,7 @@ const POSScreen: React.FC = () => {
   const restaurantDisplayName = useRestaurantDisplayName();
   const [customerName, setCustomerName] = useState('');
   const [showCartModal, setShowCartModal] = useState(false);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('card');
   
   // Zustand stores
   const {
@@ -125,6 +127,26 @@ const POSScreen: React.FC = () => {
     showPaymentModal,
     setShowPaymentModal,
   } = useUIStore();
+
+  const { taxConfiguration } = useSettingsStore();
+
+  // Calculate taxes and fees
+  const calculateVAT = (subtotal: number) => {
+    if (!taxConfiguration.vatEnabled) return 0;
+    return subtotal * (taxConfiguration.vatRate / 100);
+  };
+
+  const calculateServiceFee = (subtotal: number) => {
+    if (!taxConfiguration.serviceTaxEnabled) return 0;
+    return subtotal * (taxConfiguration.serviceTaxRate / 100);
+  };
+
+  const calculateCartTotal = () => {
+    const subtotal = cartTotal();
+    const vat = calculateVAT(subtotal);
+    const serviceFee = calculateServiceFee(subtotal);
+    return subtotal + vat + serviceFee;
+  };
 
   const filteredItems = selectedCategory === 'All'
     ? menuItems
@@ -406,19 +428,23 @@ const POSScreen: React.FC = () => {
                     
                     <View style={styles.summarySection}>
                       <Text style={styles.summarySectionTitle}>Taxes & Fees</Text>
-                      <View style={styles.summaryRow}>
-                        <Text style={styles.summaryLabel}>VAT (20%)</Text>
-                        <Text style={styles.summaryValue}>£{(cartTotal() * 0.2).toFixed(2)}</Text>
-                      </View>
-                      <View style={styles.summaryRow}>
-                        <Text style={styles.summaryLabel}>Service Fee</Text>
-                        <Text style={styles.summaryValue}>£0.00</Text>
-                      </View>
+                      {taxConfiguration.vatEnabled && (
+                        <View style={styles.summaryRow}>
+                          <Text style={styles.summaryLabel}>VAT ({taxConfiguration.vatRate}%)</Text>
+                          <Text style={styles.summaryValue}>£{calculateVAT(cartTotal()).toFixed(2)}</Text>
+                        </View>
+                      )}
+                      {taxConfiguration.serviceTaxEnabled && (
+                        <View style={styles.summaryRow}>
+                          <Text style={styles.summaryLabel}>Service Fee ({taxConfiguration.serviceTaxRate}%)</Text>
+                          <Text style={styles.summaryValue}>£{calculateServiceFee(cartTotal()).toFixed(2)}</Text>
+                        </View>
+                      )}
                     </View>
                     
                     <View style={[styles.summaryRow, styles.totalRow]}>
                       <Text style={styles.totalLabel}>Total</Text>
-                      <Text style={styles.totalAmount}>£{(cartTotal() * 1.2).toFixed(2)}</Text>
+                      <Text style={styles.totalAmount}>£{calculateCartTotal().toFixed(2)}</Text>
                     </View>
                   </View>
                   
@@ -494,22 +520,46 @@ const POSScreen: React.FC = () => {
               <View style={styles.paymentMethodsSection}>
                 <Text style={styles.paymentMethodsTitle}>Payment Method</Text>
                 <View style={styles.paymentMethods}>
-                  <TouchableOpacity style={[styles.paymentMethod, styles.paymentMethodSelected]}>
+                  <TouchableOpacity 
+                    style={[
+                      styles.paymentMethod, 
+                      selectedPaymentMethod === 'card' && styles.paymentMethodSelected
+                    ]}
+                    onPress={() => setSelectedPaymentMethod('card')}
+                  >
                     <Icon name="credit-card" size={24} color={Colors.accent} />
                     <Text style={styles.paymentMethodText}>Card</Text>
                     <Text style={styles.paymentMethodSubtext}>Tap, chip & PIN</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.paymentMethod}>
+                  <TouchableOpacity 
+                    style={[
+                      styles.paymentMethod,
+                      selectedPaymentMethod === 'cash' && styles.paymentMethodSelected
+                    ]}
+                    onPress={() => setSelectedPaymentMethod('cash')}
+                  >
                     <Icon name="attach-money" size={24} color={Colors.success} />
                     <Text style={styles.paymentMethodText}>Cash</Text>
                     <Text style={styles.paymentMethodSubtext}>Exact change</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.paymentMethod}>
+                  <TouchableOpacity 
+                    style={[
+                      styles.paymentMethod,
+                      selectedPaymentMethod === 'mobile' && styles.paymentMethodSelected
+                    ]}
+                    onPress={() => setSelectedPaymentMethod('mobile')}
+                  >
                     <Icon name="phone-iphone" size={24} color={Colors.accent} />
                     <Text style={styles.paymentMethodText}>Mobile</Text>
                     <Text style={styles.paymentMethodSubtext}>Apple Pay, Google Pay</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.paymentMethod}>
+                  <TouchableOpacity 
+                    style={[
+                      styles.paymentMethod,
+                      selectedPaymentMethod === 'qr' && styles.paymentMethodSelected
+                    ]}
+                    onPress={() => setSelectedPaymentMethod('qr')}
+                  >
                     <Icon name="qr-code-scanner" size={24} color={Colors.primary} />
                     <Text style={styles.paymentMethodText}>QR Payment</Text>
                     <Text style={styles.paymentMethodSubtext}>Customer mobile app</Text>
