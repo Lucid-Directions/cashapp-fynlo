@@ -467,12 +467,13 @@ async def process_payment(
         # Get restaurant's monthly volume (mock for now)
         monthly_volume = Decimal("2000")  # Default £2,000/month
         
-        # Select optimal provider
+        # Select optimal provider using smart routing
         provider_instance = await payment_factory.select_optimal_provider(
             amount=Decimal(str(payment_data.amount)),
             restaurant_id=str(order.restaurant_id) if hasattr(order, 'restaurant_id') else "default",
             monthly_volume=monthly_volume,
-            force_provider=provider
+            force_provider=provider,
+            db_session=db
         )
         
         # Process payment
@@ -641,11 +642,28 @@ async def get_available_providers(
     # Sort by recommended first
     provider_info.sort(key=lambda x: not x["recommended"])
     
+    # Get smart routing recommendations if restaurant provided
+    routing_recommendations = []
+    if restaurant_id:
+        try:
+            recommendations = await payment_factory.get_routing_recommendations(
+                restaurant_id=restaurant_id,
+                db_session=db
+            )
+            if recommendations and 'routing_recommendations' in recommendations:
+                routing_recommendations = recommendations['routing_recommendations']
+        except Exception as e:
+            logger.warning(f"Failed to get routing recommendations: {e}")
+    
+    # Sort by recommended first
+    provider_info.sort(key=lambda x: not x["recommended"])
+    
     return APIResponseHelper.success(
         data={
             "providers": provider_info,
             "monthly_volume": float(monthly_volume),
-            "optimal_provider": provider_info[0]["name"] if provider_info else None
+            "optimal_provider": provider_info[0]["name"] if provider_info else None,
+            "smart_recommendations": routing_recommendations
         },
-        message="Retrieved available payment providers"
+        message="Retrieved available payment providers with smart recommendations"
     )

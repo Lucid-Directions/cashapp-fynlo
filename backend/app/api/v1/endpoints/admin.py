@@ -2,11 +2,15 @@
 Admin endpoints for payment provider management and analytics
 """
 
-from fastapi import APIRouter, Depends, HTTPException
-from typing import List, Dict, Any
+from fastapi import APIRouter, Depends, HTTPException, Query
+from typing import List, Dict, Any, Optional
 from decimal import Decimal
+from datetime import datetime, timedelta
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from ...services.payment_factory import payment_factory
+from ...services.payment_analytics import PaymentAnalyticsService
+from ...services.smart_routing import RoutingStrategy
 from ...core.database import get_db
 from ...api.v1.endpoints.auth import get_current_user, User
 from ...crud.payments import get_provider_analytics, create_payment_analytics_report
@@ -139,6 +143,131 @@ async def get_cost_comparison(
         message="Generated cost comparison"
     )
 
+@router.get("/analytics/provider-performance")
+async def get_provider_performance(
+    restaurant_id: Optional[str] = Query(None),
+    start_date: Optional[datetime] = Query(None),
+    end_date: Optional[datetime] = Query(None),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Get comprehensive provider performance analytics"""
+    
+    analytics_service = PaymentAnalyticsService(db)
+    
+    performance_data = await analytics_service.get_provider_performance_summary(
+        restaurant_id=restaurant_id,
+        start_date=start_date,
+        end_date=end_date
+    )
+    
+    return APIResponseHelper.success(
+        data=performance_data,
+        message="Provider performance analytics retrieved successfully"
+    )
+
+@router.get("/analytics/cost-optimization")
+async def get_cost_optimization(
+    restaurant_id: Optional[str] = Query(None),
+    start_date: Optional[datetime] = Query(None),
+    end_date: Optional[datetime] = Query(None),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Get detailed cost optimization report"""
+    
+    analytics_service = PaymentAnalyticsService(db)
+    
+    optimization_report = await analytics_service.get_cost_optimization_report(
+        restaurant_id=restaurant_id,
+        start_date=start_date,
+        end_date=end_date
+    )
+    
+    return APIResponseHelper.success(
+        data=optimization_report,
+        message="Cost optimization report generated successfully"
+    )
+
+@router.get("/analytics/volume-trends")
+async def get_volume_trends(
+    restaurant_id: Optional[str] = Query(None),
+    days: int = Query(30, ge=1, le=365),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Get transaction volume trends over time"""
+    
+    analytics_service = PaymentAnalyticsService(db)
+    
+    trends_data = await analytics_service.get_transaction_volume_trends(
+        restaurant_id=restaurant_id,
+        days=days
+    )
+    
+    return APIResponseHelper.success(
+        data=trends_data,
+        message="Volume trends retrieved successfully"
+    )
+
+@router.get("/analytics/provider-health")
+async def get_provider_health(
+    restaurant_id: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Get provider health scores and status"""
+    
+    analytics_service = PaymentAnalyticsService(db)
+    
+    health_scores = await analytics_service.get_provider_health_scores(
+        restaurant_id=restaurant_id
+    )
+    
+    return APIResponseHelper.success(
+        data=health_scores,
+        message="Provider health scores retrieved successfully"
+    )
+
+@router.get("/routing/recommendations")
+async def get_routing_recommendations(
+    restaurant_id: str = Query(..., description="Restaurant ID"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Get smart routing recommendations for a restaurant"""
+    
+    recommendations = await payment_factory.get_routing_recommendations(
+        restaurant_id=restaurant_id,
+        db_session=db
+    )
+    
+    return APIResponseHelper.success(
+        data=recommendations,
+        message="Routing recommendations retrieved successfully"
+    )
+
+@router.post("/routing/simulate")
+async def simulate_routing_strategy(
+    restaurant_id: str,
+    strategy: RoutingStrategy,
+    simulation_days: int = 30,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Simulate the impact of changing routing strategy"""
+    
+    simulation_result = await payment_factory.simulate_routing_impact(
+        restaurant_id=restaurant_id,
+        strategy=strategy,
+        db_session=db
+    )
+    
+    return APIResponseHelper.success(
+        data=simulation_result,
+        message="Routing strategy simulation completed"
+    )
+
 @router.get("/restaurants/{restaurant_id}/analytics")
 async def get_restaurant_analytics(
     restaurant_id: str,
@@ -183,3 +312,14 @@ def _calculate_annual_savings(
     baseline_cost = _calculate_monthly_cost(baseline_provider, monthly_volume)
     monthly_savings = baseline_cost - provider_cost
     return float(monthly_savings * 12)
+
+class ProviderStatusUpdate(BaseModel):
+    provider: str
+    enabled: bool
+    maintenance_mode: Optional[bool] = False
+    reason: Optional[str] = None
+
+class RoutingStrategyUpdate(BaseModel):
+    restaurant_id: str
+    strategy: RoutingStrategy
+    auto_switch: bool = True
