@@ -1,0 +1,90 @@
+{
+  "providers": {
+    "stripe": {
+      "enabled": true,
+      "environment": "sandbox",
+      "webhook_url": "https://api.fynlo.dev/webhooks/stripe",
+      "timeout_seconds": 30,
+      "retry_attempts": 3,
+      "custom_settings": {
+        "capture_method": "automatic",
+        "confirmation_method": "automatic"
+      }
+    },
+    "square": {
+      "enabled": true,
+      "environment": "sandbox",
+      "webhook_url": "https://api.fynlo.dev/webhooks/square",
+      "timeout_seconds": 30,
+      "retry_attempts": 3,
+      "custom_settings": {
+        "auto_complete": true
+      }
+    },
+    "sumup": {
+      "enabled": true,
+      "environment": "sandbox",
+      "webhook_url": "https://api.fynlo.dev/webhooks/sumup",
+      "timeout_seconds": 30,
+      "retry_attempts": 3,
+      "custom_settings": {
+        "checkout_reference": "FYNLO_DEV"
+      }
+    }
+  },
+  "routing": {
+    "enabled": true,
+    "default_strategy": "balanced",
+    "volume_thresholds": {
+      "sumup_optimal": "2714.00",
+      "volume_discount": "10000.00",
+      "enterprise": "50000.00"
+    },
+    "provider_weights": {
+      "balanced": {
+        "cost": 0.3,
+        "reliability": 0.3,
+        "speed": 0.2,
+        "volume": 0.15,
+        "availability": 0.05
+      },
+      "cost_optimal": {
+        "cost": 0.5,
+        "reliability": 0.2,
+        "speed": 0.1,
+        "volume": 0.15,
+        "availability": 0.05
+      },
+      "reliability_first": {
+        "cost": 0.15,
+        "reliability": 0.5,
+        "speed": 0.15,
+        "volume": 0.15,
+        "availability": 0.05
+      }
+    },
+    "fallback_provider": "stripe"
+  },
+  "features": {
+    "smart_routing_enabled": true,
+    "analytics_enabled": true,
+    "volume_tracking_enabled": true,
+    "qr_payments_enabled": true,
+    "cash_payments_enabled": true,
+    "auto_refunds_enabled": false,
+    "webhook_retries_enabled": true,
+    "cost_optimization_alerts": true
+  },
+  "security": {
+    "encrypt_api_keys": false,
+    "webhook_signature_validation": true,
+    "rate_limiting_enabled": false,
+    "max_requests_per_minute": 1000,
+    "allowed_origins": [
+      "http://localhost:3000",
+      "http://localhost:8081",
+      "https://dev.fynlo.com"
+    ],
+    "ssl_required": false
+  }
+}
