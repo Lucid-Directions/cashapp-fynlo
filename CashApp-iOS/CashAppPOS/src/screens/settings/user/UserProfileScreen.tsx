@@ -147,32 +147,6 @@ const UserProfileScreen: React.FC = () => {
     shareAnalytics: false,
   });
 
-  const [editableProfile, setEditableProfile] = useState(user);
-
-  const handleSaveProfile = async () => {
-    if (!editableProfile.firstName?.trim() || !editableProfile.lastName?.trim()) {
-      Alert.alert('Error', 'First name and last name are required.');
-      return;
-    }
-
-    if (!editableProfile.email?.includes('@')) {
-      Alert.alert('Error', 'Please enter a valid email address.');
-      return;
-    }
-
-    try {
-      await updateUser(editableProfile);
-      setIsEditing(false);
-      Alert.alert('Success', 'Profile updated successfully!');
-    } catch (error) {
-      Alert.alert('Error', 'Failed to update profile. Please try again.');
-    }
-  };
-
-  const handleCancelEdit = () => {
-    setEditableProfile(user);
-    setIsEditing(false);
-  };
 
   const handleChangePassword = () => {
     Alert.alert(
@@ -252,12 +226,7 @@ const UserProfileScreen: React.FC = () => {
           <Icon name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>User Profile</Text>
-        <TouchableOpacity 
-          style={styles.editButton}
-          onPress={isEditing ? handleSaveProfile : () => setIsEditing(true)}
-        >
-          <Icon name={isEditing ? "check" : "edit"} size={24} color={Colors.white} />
-        </TouchableOpacity>
+        <View style={styles.placeholder} />
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
@@ -266,18 +235,13 @@ const UserProfileScreen: React.FC = () => {
           <View style={styles.profileHeader}>
             <TouchableOpacity 
               style={styles.photoContainer}
-              onPress={isEditing ? handlePhotoChange : undefined}
+              onPress={handlePhotoChange}
             >
               {user.photo ? (
                 <Image source={{ uri: user.photo }} style={styles.profilePhoto} />
               ) : (
                 <View style={styles.defaultPhoto}>
                   <Icon name="person" size={48} color={Colors.mediumGray} />
-                </View>
-              )}
-              {isEditing && (
-                <View style={styles.photoEditOverlay}>
-                  <Icon name="camera-alt" size={20} color={Colors.white} />
                 </View>
               )}
             </TouchableOpacity>
@@ -307,77 +271,25 @@ const UserProfileScreen: React.FC = () => {
           <View style={styles.infoCard}>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>First Name</Text>
-              {isEditing ? (
-                <TextInput
-                  style={styles.textInput}
-                  value={editableProfile.firstName || ''}
-                  onChangeText={(text) => setEditableProfile(prev => ({ ...prev, firstName: text }))}
-                  placeholder="Enter first name"
-                />
-              ) : (
-                <Text style={styles.infoValue}>{user.firstName || 'N/A'}</Text>
-              )}
+              <Text style={styles.infoValue}>{user.firstName || 'N/A'}</Text>
             </View>
 
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Last Name</Text>
-              {isEditing ? (
-                <TextInput
-                  style={styles.textInput}
-                  value={editableProfile.lastName || ''}
-                  onChangeText={(text) => setEditableProfile(prev => ({ ...prev, lastName: text }))}
-                  placeholder="Enter last name"
-                />
-              ) : (
-                <Text style={styles.infoValue}>{user.lastName || 'N/A'}</Text>
-              )}
+              <Text style={styles.infoValue}>{user.lastName || 'N/A'}</Text>
             </View>
 
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Email</Text>
-              {isEditing ? (
-                <TextInput
-                  style={styles.textInput}
-                  value={editableProfile.email || ''}
-                  onChangeText={(text) => setEditableProfile(prev => ({ ...prev, email: text }))}
-                  placeholder="Enter email address"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                />
-              ) : (
-                <Text style={styles.infoValue}>{user.email || 'N/A'}</Text>
-              )}
+              <Text style={styles.infoValue}>{user.email || 'N/A'}</Text>
             </View>
 
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Phone</Text>
-              {isEditing ? (
-                <TextInput
-                  style={styles.textInput}
-                  value={editableProfile.phone || ''}
-                  onChangeText={(text) => setEditableProfile(prev => ({ ...prev, phone: text }))}
-                  placeholder="Enter phone number"
-                  keyboardType="phone-pad"
-                />
-              ) : (
-                <Text style={styles.infoValue}>{user.phone || 'N/A'}</Text>
-              )}
+              <Text style={styles.infoValue}>{user.phone || 'N/A'}</Text>
             </View>
           </View>
 
-          {isEditing && (
-            <View style={styles.editActions}>
-              <TouchableOpacity style={styles.cancelButton} onPress={handleCancelEdit}>
-                <Icon name="cancel" size={20} color={Colors.mediumGray} />
-                <Text style={styles.cancelButtonText}>Cancel</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity style={styles.saveButton} onPress={handleSaveProfile}>
-                <Icon name="check" size={20} color={Colors.white} />
-                <Text style={styles.saveButtonText}>Save Changes</Text>
-              </TouchableOpacity>
-            </View>
-          )}
         </View>
 
         {/* Security Settings */}

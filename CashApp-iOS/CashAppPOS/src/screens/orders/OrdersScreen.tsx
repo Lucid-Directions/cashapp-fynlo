@@ -343,6 +343,127 @@ const OrdersScreen: React.FC = () => {
         }
       />
 
+      {/* Order Details Modal */}
+      <Modal
+        visible={showOrderDetails}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowOrderDetails(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.orderDetailsModal}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Order Details</Text>
+              <TouchableOpacity onPress={() => setShowOrderDetails(false)}>
+                <Icon name="close" size={24} color={Colors.text} />
+              </TouchableOpacity>
+            </View>
+            
+            {selectedOrder && (
+              <ScrollView style={styles.orderDetailsContent}>
+                {/* Order Info */}
+                <View style={styles.orderDetailsSection}>
+                  <Text style={styles.orderDetailsTitle}>Order Information</Text>
+                  
+                  <View style={styles.orderDetailRow}>
+                    <Text style={styles.orderDetailLabel}>Order ID:</Text>
+                    <Text style={styles.orderDetailValue}>{selectedOrder.id}</Text>
+                  </View>
+                  
+                  <View style={styles.orderDetailRow}>
+                    <Text style={styles.orderDetailLabel}>Date & Time:</Text>
+                    <Text style={styles.orderDetailValue}>{formatDate(selectedOrder.date)}</Text>
+                  </View>
+                  
+                  <View style={styles.orderDetailRow}>
+                    <Text style={styles.orderDetailLabel}>Status:</Text>
+                    <View style={[styles.statusBadge, { backgroundColor: getStatusColor(selectedOrder.status) }]}>
+                      <Text style={styles.statusText}>{selectedOrder.status}</Text>
+                    </View>
+                  </View>
+                  
+                  <View style={styles.orderDetailRow}>
+                    <Text style={styles.orderDetailLabel}>Customer:</Text>
+                    <Text style={styles.orderDetailValue}>
+                      {selectedOrder.customerName || 'Walk-in Customer'}
+                    </Text>
+                  </View>
+                  
+                  <View style={styles.orderDetailRow}>
+                    <Text style={styles.orderDetailLabel}>Served by:</Text>
+                    <Text style={styles.orderDetailValue}>{selectedOrder.employee}</Text>
+                  </View>
+                </View>
+
+                {/* Payment Info */}
+                <View style={styles.orderDetailsSection}>
+                  <Text style={styles.orderDetailsTitle}>Payment Information</Text>
+                  
+                  <View style={styles.orderDetailRow}>
+                    <Text style={styles.orderDetailLabel}>Payment Method:</Text>
+                    <View style={styles.paymentMethodInfo}>
+                      <Icon name={getPaymentIcon(selectedOrder.paymentMethod)} size={16} color={Colors.primary} />
+                      <Text style={[styles.orderDetailValue, { marginLeft: 8 }]}>
+                        {selectedOrder.paymentMethod.charAt(0).toUpperCase() + selectedOrder.paymentMethod.slice(1)}
+                      </Text>
+                    </View>
+                  </View>
+                  
+                  <View style={styles.orderDetailRow}>
+                    <Text style={styles.orderDetailLabel}>Items:</Text>
+                    <Text style={styles.orderDetailValue}>{selectedOrder.items} items</Text>
+                  </View>
+                  
+                  <View style={styles.orderDetailRow}>
+                    <Text style={styles.orderDetailLabel}>Subtotal:</Text>
+                    <Text style={styles.orderDetailValue}>£{(selectedOrder.total * 0.8).toFixed(2)}</Text>
+                  </View>
+                  
+                  <View style={styles.orderDetailRow}>
+                    <Text style={styles.orderDetailLabel}>VAT (20%):</Text>
+                    <Text style={styles.orderDetailValue}>£{(selectedOrder.total * 0.16).toFixed(2)}</Text>
+                  </View>
+                  
+                  <View style={styles.orderDetailRow}>
+                    <Text style={styles.orderDetailLabel}>Service (12.5%):</Text>
+                    <Text style={styles.orderDetailValue}>£{(selectedOrder.total * 0.04).toFixed(2)}</Text>
+                  </View>
+                  
+                  <View style={[styles.orderDetailRow, styles.totalRow]}>
+                    <Text style={[styles.orderDetailLabel, { fontWeight: 'bold', fontSize: 16 }]}>Total:</Text>
+                    <Text style={[styles.orderDetailValue, { fontWeight: 'bold', fontSize: 16, color: Colors.primary }]}>
+                      £{selectedOrder.total.toFixed(2)}
+                    </Text>
+                  </View>
+                </View>
+
+                {/* Mock Items List */}
+                <View style={styles.orderDetailsSection}>
+                  <Text style={styles.orderDetailsTitle}>Order Items</Text>
+                  
+                  {Array.from({ length: selectedOrder.items }, (_, index) => {
+                    const mockItems = ['Carnitas Tacos', 'Chicken Quesadilla', 'Guacamole & Chips', 'Burrito Bowl', 'Nachos'];
+                    const itemName = mockItems[index % mockItems.length];
+                    const quantity = Math.floor(Math.random() * 3) + 1;
+                    const price = (Math.random() * 15 + 5).toFixed(2);
+                    
+                    return (
+                      <View key={index} style={styles.orderItem}>
+                        <View style={styles.orderItemInfo}>
+                          <Text style={styles.orderItemName}>{itemName}</Text>
+                          <Text style={styles.orderItemDetails}>Qty: {quantity}</Text>
+                        </View>
+                        <Text style={styles.orderItemPrice}>£{price}</Text>
+                      </View>
+                    );
+                  })}
+                </View>
+              </ScrollView>
+            )}
+          </View>
+        </View>
+      </Modal>
+
       {/* Filter Modal */}
       <Modal
         visible={showFilterModal}
@@ -688,6 +809,10 @@ const styles = StyleSheet.create({
     color: Colors.primary,
     fontWeight: '600',
   },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: Colors.white,
+  },
   orderDetailsContent: {
     flex: 1,
     padding: 16,
@@ -705,7 +830,7 @@ const styles = StyleSheet.create({
   },
   orderDetailsSection: {
     marginBottom: 24,
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.background,
     borderRadius: 8,
     padding: 16,
   },
