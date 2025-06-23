@@ -17,6 +17,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
+import Colors from '../../constants/Colors';
 import useAppStore from '../../store/useAppStore';
 import useUIStore from '../../store/useUIStore';
 import useSettingsStore from '../../store/useSettingsStore';
@@ -27,26 +28,6 @@ import { useRestaurantDisplayName } from '../../hooks/useRestaurantConfig';
 // Get screen dimensions
 const { width: screenWidth } = Dimensions.get('window');
 const isTablet = screenWidth > 768;
-
-// Clover POS Color Scheme
-const Colors = {
-  primary: '#00A651',        // Clover Green header
-  secondary: '#ffffff',      // White for contrast
-  accent: '#0066CC',         // Clover Blue accent
-  success: '#00A651',        // Clover Green for success
-  warning: '#FF6B35',        // Orange for warnings
-  background: '#F5F5F5',     // Light gray background
-  cardBg: '#ffffff',         // White cards
-  darkBg: '#2C3E50',         // Dark background
-  white: '#FFFFFF',
-  lightGray: '#E5E5E5',      // Light gray borders
-  mediumGray: '#999999',     // Medium gray text
-  darkGray: '#666666',       // Dark gray secondary text
-  text: '#333333',           // Dark text
-  lightText: '#666666',      // Gray secondary text
-  border: '#DDDDDD',         // Light border color
-  hover: '#F0F0F0',          // Hover state background
-};
 
 // Authentic Mexican Restaurant Menu Items
 const menuItems: MenuItem[] = [
@@ -106,9 +87,13 @@ type POSScreenNavigationProp = DrawerNavigationProp<DrawerParamList>;
 const POSScreen: React.FC = () => {
   const navigation = useNavigation<POSScreenNavigationProp>();
   const restaurantDisplayName = useRestaurantDisplayName();
+  
   const [customerName, setCustomerName] = useState('');
   const [showCartModal, setShowCartModal] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('card');
+
+  // Create themed styles
+  
   
   // Zustand stores
   const {

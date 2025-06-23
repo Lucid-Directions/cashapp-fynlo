@@ -79,7 +79,7 @@ const ReceiptCustomizationScreen: React.FC = () => {
   const handleLogoUpload = () => {
     Alert.alert(
       'Upload Logo',
-      'Logo upload functionality will be implemented with image picker integration.',
+      'Logo upload functionality is coming soon with image picker integration.',
       [{ text: 'OK' }]
     );
   };

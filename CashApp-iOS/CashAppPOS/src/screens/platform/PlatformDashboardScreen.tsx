@@ -67,7 +67,7 @@ const PlatformDashboardScreen: React.FC = () => {
       id: '1',
       title: 'Total Revenue',
       value: '£125.4K',
-      icon: 'attach-money',
+      icon: 'account-balance-wallet',
       color: Colors.success,
       change: '+12.5%',
       changePositive: true,
@@ -130,8 +130,16 @@ const PlatformDashboardScreen: React.FC = () => {
     );
   };
 
-  const handleQuickAction = (action: string) => {
-    Alert.alert('Quick Action', `${action} functionality will be implemented in Phase 2`);
+  const handleSupport = () => {
+    Alert.alert(
+      'Platform Support', 
+      'Contact platform support:\n\nEmail: platform-support@fynlo.com\nPhone: +44 20 1234 5678\nAvailable 24/7',
+      [
+        { text: 'Call Support', onPress: () => console.log('Calling support...') },
+        { text: 'Email Support', onPress: () => console.log('Opening email...') },
+        { text: 'Cancel', style: 'cancel' }
+      ]
+    );
   };
 
   const handleSignOut = () => {
@@ -191,7 +199,7 @@ const PlatformDashboardScreen: React.FC = () => {
         <View style={styles.headerRight}>
           <TouchableOpacity
             style={styles.notificationButton}
-            onPress={() => handleQuickAction('Notifications')}
+            onPress={() => Alert.alert('Notifications', 'You have 3 new notifications', [{ text: 'OK' }])}
           >
             <Icon name="notifications" size={24} color={Colors.text} />
             <View style={styles.notificationBadge}>
@@ -247,7 +255,7 @@ const PlatformDashboardScreen: React.FC = () => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Restaurant Status</Text>
-            <TouchableOpacity onPress={() => handleQuickAction('View All Restaurants')}>
+            <TouchableOpacity onPress={() => navigation.navigate('Restaurants' as never)}>
               <Text style={styles.viewAllText}>View All</Text>
             </TouchableOpacity>
           </View>
@@ -304,7 +312,7 @@ const PlatformDashboardScreen: React.FC = () => {
           <View style={styles.actionsGrid}>
             <TouchableOpacity
               style={styles.actionCard}
-              onPress={() => handleQuickAction('Add Restaurant')}
+              onPress={() => navigation.navigate('Restaurants' as never, { screen: 'RestaurantOnboarding' })}
             >
               <Icon name="add-business" size={32} color={Colors.primary} />
               <Text style={styles.actionText}>Add Restaurant</Text>
@@ -312,7 +320,7 @@ const PlatformDashboardScreen: React.FC = () => {
             
             <TouchableOpacity
               style={styles.actionCard}
-              onPress={() => handleQuickAction('System Health')}
+              onPress={() => navigation.navigate('Monitoring' as never)}
             >
               <Icon name="health-and-safety" size={32} color={Colors.secondary} />
               <Text style={styles.actionText}>System Health</Text>
@@ -320,15 +328,15 @@ const PlatformDashboardScreen: React.FC = () => {
             
             <TouchableOpacity
               style={styles.actionCard}
-              onPress={() => handleQuickAction('Analytics')}
+              onPress={() => navigation.navigate('PlatformSettings' as never)}
             >
-              <Icon name="analytics" size={32} color={Colors.warning} />
-              <Text style={styles.actionText}>Analytics</Text>
+              <Icon name="settings" size={32} color={Colors.warning} />
+              <Text style={styles.actionText}>Platform Settings</Text>
             </TouchableOpacity>
             
             <TouchableOpacity
               style={styles.actionCard}
-              onPress={() => handleQuickAction('Support')}
+              onPress={handleSupport}
             >
               <Icon name="support" size={32} color={Colors.danger} />
               <Text style={styles.actionText}>Support</Text>

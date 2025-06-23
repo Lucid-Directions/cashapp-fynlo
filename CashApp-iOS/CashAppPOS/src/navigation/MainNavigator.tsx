@@ -2,6 +2,7 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useTheme } from '../design-system/ThemeProvider';
 import { MainTabParamList, MainStackParamList } from '../types';
 import POSScreen from '../screens/main/POSScreen';
 import OrdersScreen from '../screens/orders/OrdersScreen';
@@ -24,20 +25,8 @@ import useAppStore from '../store/useAppStore';
 const Tab = createBottomTabNavigator<MainTabParamList>();
 const Stack = createStackNavigator<MainStackParamList>();
 
-// Clover POS Colors
-const Colors = {
-  primary: '#00A651',      // Clover Green
-  secondary: '#0066CC',    // Clover Blue
-  background: '#F5F5F5',
-  white: '#FFFFFF',
-  lightGray: '#E5E5E5',
-  text: '#333333',
-  tabActive: '#00A651',
-  tabInactive: '#666666',
-  border: '#DDDDDD',
-};
-
 const MainTabNavigator: React.FC = () => {
+  const { theme } = useTheme();
   const cartItemCount = useAppStore((state) => state.cartItemCount());
 
   return (
@@ -62,12 +51,12 @@ const MainTabNavigator: React.FC = () => {
 
           return <Icon name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: Colors.tabActive,
-        tabBarInactiveTintColor: Colors.tabInactive,
+        tabBarActiveTintColor: theme.colors.primary,
+        tabBarInactiveTintColor: theme.colors.textSecondary,
         tabBarStyle: {
-          backgroundColor: Colors.white,
+          backgroundColor: theme.colors.background,
           borderTopWidth: 1,
-          borderTopColor: Colors.border,
+          borderTopColor: theme.colors.border,
           paddingTop: 8,
           paddingBottom: 8,
           height: 80,
@@ -107,11 +96,13 @@ const MainTabNavigator: React.FC = () => {
 };
 
 const MainNavigator: React.FC = () => {
+  const { theme } = useTheme();
+  
   return (
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
-        cardStyle: { backgroundColor: Colors.background },
+        cardStyle: { backgroundColor: theme.colors.background },
       }}
     >
       <Stack.Screen

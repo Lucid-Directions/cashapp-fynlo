@@ -13,17 +13,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import useAppStore from '../../store/useAppStore';
 import ErrorBoundary from '../../components/ErrorBoundary';
-
-const Colors = {
-  primary: '#2C3E50',
-  secondary: '#3498DB',
-  success: '#27AE60',
-  background: '#F8F9FA',
-  white: '#FFFFFF',
-  lightGray: '#ECF0F1',
-  text: '#2C3E50',
-  lightText: '#95A5A6',
-};
+import Colors from '../../constants/Colors';
 
 const ProfileScreenContent: React.FC = () => {
   const navigation = useNavigation();
