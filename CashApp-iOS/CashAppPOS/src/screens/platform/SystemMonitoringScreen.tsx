@@ -34,7 +34,7 @@ const SystemMonitoringScreen: React.FC = () => {
   const [selectedTab, setSelectedTab] = useState<'health' | 'errors' | 'incidents'>('health');
 
   const handleMonitoringAction = (action: string) => {
-    Alert.alert('System Monitoring', `${action} functionality will be implemented in Phase 3`);
+    Alert.alert('System Monitoring', `${action} functionality is coming soon. Check back for updates.`);
   };
 
   const systemHealthData = [

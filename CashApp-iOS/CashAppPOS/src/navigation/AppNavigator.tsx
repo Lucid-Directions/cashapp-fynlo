@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../design-system/ThemeProvider';
 import AuthScreen from '../screens/auth/AuthScreen';
 import MainNavigator from './MainNavigator';
 import PlatformNavigator from './PlatformNavigator';
@@ -10,12 +11,15 @@ import PlatformNavigator from './PlatformNavigator';
 const Stack = createStackNavigator();
 
 const AppNavigator: React.FC = () => {
-  const { isAuthenticated, isLoading, isPlatformOwner } = useAuth();
+  const { isAuthenticated, isLoading, isPlatformOwner, user } = useAuth();
+  const { theme } = useTheme();
+  
+  console.log('AppNavigator - User:', user?.email, 'Role:', user?.role, 'isPlatformOwner:', isPlatformOwner);
 
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#00A651" />
+        <ActivityIndicator size="large" color={theme.colors.primary} />
       </View>
     );
   }

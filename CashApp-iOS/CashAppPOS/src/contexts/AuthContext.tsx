@@ -287,10 +287,39 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       ]);
 
       if (storedUser && (rememberMe === 'true')) {
-        const userData = JSON.parse(storedUser);
-        // Convert date strings back to Date objects
-        userData.startDate = new Date(userData.startDate);
-        userData.lastLogin = new Date(userData.lastLogin);
+        let userData;
+        try {
+          userData = JSON.parse(storedUser);
+        } catch (parseError) {
+          console.error('Error parsing stored user data:', parseError);
+          // Clear corrupted data and fall back to demo user
+          await AsyncStorage.removeItem(STORAGE_KEYS.USER);
+          const demoUser = MOCK_USERS.find(u => u.email === 'demo@fynlopos.com');
+          const demoBusiness = MOCK_RESTAURANTS.find(b => b.id === 'restaurant1');
+          
+          if (demoUser && demoBusiness) {
+            setUser({ ...demoUser, lastLogin: new Date() });
+            setBusiness(demoBusiness);
+          }
+          return;
+        }
+        // Convert date strings back to Date objects with error handling
+        try {
+          userData.startDate = userData.startDate ? new Date(userData.startDate) : new Date();
+          userData.lastLogin = userData.lastLogin ? new Date(userData.lastLogin) : new Date();
+          
+          // Validate date objects
+          if (isNaN(userData.startDate.getTime())) {
+            userData.startDate = new Date();
+          }
+          if (isNaN(userData.lastLogin.getTime())) {
+            userData.lastLogin = new Date();
+          }
+        } catch (error) {
+          console.error('Error parsing user dates:', error);
+          userData.startDate = new Date();
+          userData.lastLogin = new Date();
+        }
         
         setUser(userData);
         
