@@ -22,12 +22,18 @@ const PaymentProcessingScreen: React.FC = () => {
 
   // Platform payment configuration state
   const [config, setConfig] = useState({
-    cardPaymentFee: 2.9,
-    cardFixedFee: 0.30,
+    sumupFee: 0.69,
+    sumupHighVolumeFee: 0.69,
+    sumupStandardFee: 1.69,
+    sumupMonthlyFee: 19.00,
+    sumupVolumeThreshold: 2714.00,
+    cardPaymentFee: 1.4,
+    cardFixedFee: 0.20,
     digitalWalletFee: 3.1,
     digitalWalletFixedFee: 0.30,
     qrCodeFee: 1.2,
     qrCodeFixedFee: 0.00,
+    enableSumUp: true,
     enableCardPayments: true,
     enableDigitalWallets: true,
     enableQrPayments: true,
@@ -146,8 +152,25 @@ const PaymentProcessingScreen: React.FC = () => {
             Configure which payment methods are available across all restaurants
           </Text>
           
+          {/* Primary Payment Method - SumUp */}
+          <View style={styles.primaryMethodContainer}>
+            <View style={styles.primaryBadge}>
+              <Icon name="star" size={16} color="#FFF" />
+              <Text style={styles.primaryBadgeText}>PRIMARY METHOD</Text>
+            </View>
+            <PaymentMethodCard
+              title="SumUp Payment Processing"
+              description="0.69% for high volume (£2,714+/month) • 1.69% standard"
+              icon="credit-card"
+              enabled={config.enableSumUp}
+              onToggle={(value: boolean) => setConfig({...config, enableSumUp: value})}
+              fee={config.sumupHighVolumeFee}
+              onFeeChange={(value: number) => setConfig({...config, sumupHighVolumeFee: value})}
+            />
+          </View>
+          
           <PaymentMethodCard
-            title="Card Payments"
+            title="Stripe (Backup)"
             description="Chip & PIN, Contactless cards"
             icon="credit-card"
             enabled={config.enableCardPayments}
@@ -345,6 +368,34 @@ const createStyles = (theme: any) => StyleSheet.create({
     fontSize: 14,
     color: theme.colors.lightText,
     marginBottom: 16,
+  },
+  primaryMethodContainer: {
+    position: 'relative',
+    marginBottom: 24,
+  },
+  primaryBadge: {
+    position: 'absolute',
+    top: -8,
+    left: 16,
+    backgroundColor: '#00D4AA',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+    zIndex: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  primaryBadgeText: {
+    color: '#FFF',
+    fontSize: 12,
+    fontWeight: '700',
+    marginLeft: 4,
+    letterSpacing: 0.5,
   },
   paymentMethodCard: {
     backgroundColor: theme.colors.white,

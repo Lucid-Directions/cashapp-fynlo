@@ -90,7 +90,7 @@ const POSScreen: React.FC = () => {
   
   const [customerName, setCustomerName] = useState('');
   const [showCartModal, setShowCartModal] = useState(false);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('card');
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('sumup');
 
   // Create themed styles
   
@@ -508,35 +508,17 @@ const POSScreen: React.FC = () => {
                   <TouchableOpacity 
                     style={[
                       styles.paymentMethod, 
-                      selectedPaymentMethod === 'card' && styles.paymentMethodSelected
+                      selectedPaymentMethod === 'sumup' && styles.paymentMethodSelected,
+                      styles.recommendedPaymentMethod
                     ]}
-                    onPress={() => setSelectedPaymentMethod('card')}
+                    onPress={() => setSelectedPaymentMethod('sumup')}
                   >
-                    <Icon name="credit-card" size={24} color={Colors.accent} />
-                    <Text style={styles.paymentMethodText}>Card</Text>
-                    <Text style={styles.paymentMethodSubtext}>Tap, chip & PIN</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity 
-                    style={[
-                      styles.paymentMethod,
-                      selectedPaymentMethod === 'cash' && styles.paymentMethodSelected
-                    ]}
-                    onPress={() => setSelectedPaymentMethod('cash')}
-                  >
-                    <Icon name="attach-money" size={24} color={Colors.success} />
-                    <Text style={styles.paymentMethodText}>Cash</Text>
-                    <Text style={styles.paymentMethodSubtext}>Exact change</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity 
-                    style={[
-                      styles.paymentMethod,
-                      selectedPaymentMethod === 'mobile' && styles.paymentMethodSelected
-                    ]}
-                    onPress={() => setSelectedPaymentMethod('mobile')}
-                  >
-                    <Icon name="phone-iphone" size={24} color={Colors.accent} />
-                    <Text style={styles.paymentMethodText}>Mobile</Text>
-                    <Text style={styles.paymentMethodSubtext}>Apple Pay, Google Pay</Text>
+                    <View style={styles.recommendedBadge}>
+                      <Text style={styles.recommendedText}>RECOMMENDED</Text>
+                    </View>
+                    <Icon name="credit-card" size={24} color="#00D4AA" />
+                    <Text style={styles.paymentMethodText}>SumUp</Text>
+                    <Text style={styles.paymentMethodSubtext}>0.69% • Cards & Mobile Pay</Text>
                   </TouchableOpacity>
                   <TouchableOpacity 
                     style={[
@@ -547,7 +529,29 @@ const POSScreen: React.FC = () => {
                   >
                     <Icon name="qr-code-scanner" size={24} color={Colors.primary} />
                     <Text style={styles.paymentMethodText}>QR Payment</Text>
-                    <Text style={styles.paymentMethodSubtext}>Customer mobile app</Text>
+                    <Text style={styles.paymentMethodSubtext}>1.2% • Customer mobile app</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={[
+                      styles.paymentMethod,
+                      selectedPaymentMethod === 'cash' && styles.paymentMethodSelected
+                    ]}
+                    onPress={() => setSelectedPaymentMethod('cash')}
+                  >
+                    <Icon name="attach-money" size={24} color={Colors.success} />
+                    <Text style={styles.paymentMethodText}>Cash</Text>
+                    <Text style={styles.paymentMethodSubtext}>No processing fee</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={[
+                      styles.paymentMethod,
+                      selectedPaymentMethod === 'stripe' && styles.paymentMethodSelected
+                    ]}
+                    onPress={() => setSelectedPaymentMethod('stripe')}
+                  >
+                    <Icon name="credit-card" size={24} color="#635BFF" />
+                    <Text style={styles.paymentMethodText}>Stripe</Text>
+                    <Text style={styles.paymentMethodSubtext}>1.4% + 20p • Backup option</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -1168,10 +1172,31 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
     width: '48%',
     marginBottom: 12,
+    position: 'relative',
   },
   paymentMethodSelected: {
     borderColor: Colors.accent,
     backgroundColor: 'rgba(76, 110, 245, 0.05)',
+  },
+  recommendedPaymentMethod: {
+    borderColor: '#00D4AA',
+    backgroundColor: 'rgba(0, 212, 170, 0.1)',
+  },
+  recommendedBadge: {
+    position: 'absolute',
+    top: -8,
+    left: -8,
+    backgroundColor: '#00D4AA',
+    borderRadius: 8,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    zIndex: 1,
+  },
+  recommendedText: {
+    fontSize: 9,
+    fontWeight: '700',
+    color: Colors.white,
+    letterSpacing: 0.5,
   },
   paymentMethodText: {
     fontSize: 14,

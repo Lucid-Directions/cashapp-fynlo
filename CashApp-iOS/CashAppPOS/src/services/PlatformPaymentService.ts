@@ -113,14 +113,20 @@ class PlatformPaymentService {
       const enabledMethods = methods.filter(m => m.enabled);
       
       if (enabledMethods.length === 0) {
-        return 'cash'; // Default fallback
+        return 'sumup'; // Default to SumUp
       }
 
-      // Return method with lowest effective fee
+      // Prefer SumUp if it's available and enabled
+      const sumupMethod = enabledMethods.find(m => m.id === 'sumup');
+      if (sumupMethod) {
+        return 'sumup';
+      }
+
+      // Return method with lowest effective fee if SumUp not available
       return enabledMethods[0].id;
     } catch (error) {
       console.error('Failed to determine optimal payment method:', error);
-      return 'qr_code'; // Safe default
+      return 'sumup'; // Default to SumUp
     }
   }
 
@@ -316,6 +322,26 @@ class PlatformPaymentService {
   private getFallbackPaymentMethods(): PlatformPaymentMethod[] {
     return [
       {
+        id: 'sumup',
+        name: 'SumUp',
+        icon: 'credit-card',
+        color: '#00D4AA',
+        enabled: true,
+        requiresAuth: true,
+        feeInfo: '0.69% (High volume) • 1.69% (Standard)',
+        platformFee: { percentage: 0.69, currency: 'GBP' },
+      },
+      {
+        id: 'qr_code',
+        name: 'QR Code',
+        icon: 'qr-code-scanner',
+        color: '#0066CC',
+        enabled: true,
+        requiresAuth: false,
+        feeInfo: '1.2%',
+        platformFee: { percentage: 1.2, currency: 'GBP' },
+      },
+      {
         id: 'cash',
         name: 'Cash',
         icon: 'money',
@@ -326,24 +352,24 @@ class PlatformPaymentService {
         platformFee: { percentage: 0, currency: 'GBP' },
       },
       {
-        id: 'qr_code',
-        name: 'QR Code',
-        icon: 'qr-code-scanner',
-        color: '#0066CC',
-        enabled: true,
-        requiresAuth: false,
-        feeInfo: 'Estimated 1.2%',
-        platformFee: { percentage: 1.2, currency: 'GBP' },
-      },
-      {
         id: 'stripe',
         name: 'Card (Stripe)',
         icon: 'credit-card',
         color: '#635BFF',
         enabled: true,
         requiresAuth: true,
-        feeInfo: 'Estimated 1.4% + 20p',
+        feeInfo: '1.4% + 20p',
         platformFee: { percentage: 1.4, fixed_fee: 0.20, currency: 'GBP' },
+      },
+      {
+        id: 'square',
+        name: 'Square',
+        icon: 'crop-square',
+        color: '#3E4348',
+        enabled: true,
+        requiresAuth: true,
+        feeInfo: '1.75%',
+        platformFee: { percentage: 1.75, currency: 'GBP' },
       },
     ];
   }

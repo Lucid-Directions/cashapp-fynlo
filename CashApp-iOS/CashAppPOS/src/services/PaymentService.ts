@@ -68,6 +68,69 @@ class PaymentServiceClass {
   }
 
   /**
+   * Get available payment methods prioritized with SumUp first
+   */
+  async getAvailablePaymentMethods(): Promise<Array<{
+    id: string;
+    name: string;
+    icon: string;
+    color: string;
+    enabled: boolean;
+    requiresAuth: boolean;
+    feeInfo: string;
+    isRecommended?: boolean;
+  }>> {
+    return [
+      {
+        id: 'sumup',
+        name: 'SumUp',
+        icon: 'credit-card',
+        color: '#00D4AA',
+        enabled: true,
+        requiresAuth: true,
+        feeInfo: '0.69% (High volume) • 1.69% (Standard)',
+        isRecommended: true,
+      },
+      {
+        id: 'qr_code',
+        name: 'QR Code',
+        icon: 'qr-code-scanner',
+        color: '#0066CC',
+        enabled: true,
+        requiresAuth: false,
+        feeInfo: '1.2%',
+      },
+      {
+        id: 'cash',
+        name: 'Cash',
+        icon: 'money',
+        color: '#00A651',
+        enabled: true,
+        requiresAuth: false,
+        feeInfo: 'No processing fee',
+      },
+      {
+        id: 'stripe',
+        name: 'Card (Stripe)',
+        icon: 'credit-card',
+        color: '#635BFF',
+        enabled: true,
+        requiresAuth: true,
+        feeInfo: '1.4% + 20p',
+      },
+      {
+        id: 'square',
+        name: 'Square',
+        icon: 'crop-square',
+        color: '#3E4348',
+        enabled: true,
+        requiresAuth: true,
+        feeInfo: '1.75%',
+      },
+    ];
+  }
+
+  /**
    * Get optimal payment provider based on transaction amount and volume
    */
   async getOptimalProvider(amount: number): Promise<string> {
@@ -93,8 +156,8 @@ class PaymentServiceClass {
       return data.provider;
     } catch (error) {
       console.error('Failed to get optimal provider:', error);
-      // Fallback to Stripe if backend call fails
-      return 'stripe';
+      // Fallback to SumUp as primary, then QR code
+      return 'sumup';
     }
   }
 
