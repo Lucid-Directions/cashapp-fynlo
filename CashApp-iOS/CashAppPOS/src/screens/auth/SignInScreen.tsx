@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useAuth } from '../../contexts/AuthContext';
+import Logo from '../../components/Logo';
 
 // Clover POS Color Scheme
 const Colors = {
@@ -174,11 +175,7 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
       >
         {/* Header */}
         <View style={styles.header}>
-          <View style={styles.logoContainer}>
-            <View style={styles.logoPlaceholder}>
-              <Text style={styles.logoText}>FYNLO</Text>
-            </View>
-          </View>
+          <Logo size="large" showText={false} />
           <Text style={styles.subtitle}>Professional Point of Sale System</Text>
         </View>
 
@@ -190,7 +187,7 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
           {/* Email Input */}
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Email Address</Text>
-            <View style={[styles.inputWrapper, errors.email && styles.inputError]}>
+            <View style={[styles.inputWrapper, errors.email ? styles.inputError : null]}>
               <Icon name="email" size={20} color={Colors.mediumGray} />
               <TextInput
                 style={styles.textInput}
@@ -212,7 +209,7 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
           {/* Password Input */}
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Password</Text>
-            <View style={[styles.inputWrapper, errors.password && styles.inputError]}>
+            <View style={[styles.inputWrapper, errors.password ? styles.inputError : undefined]}>
               <Icon name="lock" size={20} color={Colors.mediumGray} />
               <TextInput
                 style={styles.textInput}
@@ -347,33 +344,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 40,
   },
-  logoContainer: {
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  logoPlaceholder: {
-    width: 200,
-    height: 120,
-    backgroundColor: Colors.primary,
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  logoText: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: Colors.white,
-    letterSpacing: 4,
-  },
   subtitle: {
     fontSize: 16,
     color: Colors.lightText,
     textAlign: 'center',
+    marginTop: 16,
   },
   formContainer: {
     backgroundColor: Colors.white,

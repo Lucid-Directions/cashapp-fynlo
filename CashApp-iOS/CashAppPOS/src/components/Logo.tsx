@@ -16,6 +16,9 @@ const Colors = {
   gold: '#F39C12',           // Professional orange
   lightText: '#666666',      // Medium gray
   white: '#FFFFFF',
+  // Fynlo brand colors
+  fynloBlue: '#1E3A8A',      // Deep blue like in the logo
+  fynloOrange: '#F97316',    // Orange for the 'o'
 };
 
 const Logo: React.FC<LogoProps> = ({
@@ -38,7 +41,7 @@ const Logo: React.FC<LogoProps> = ({
         return {
           width: 120,
           height: 120,
-          fontSize: 48,
+          fontSize: 56,
           subFontSize: 16,
         };
       case 'medium':
@@ -54,23 +57,8 @@ const Logo: React.FC<LogoProps> = ({
 
   const sizeStyles = getSizeStyles();
 
-  // Try different approaches to load the logo
-  let logoSource;
-  try {
-    logoSource = require('../assets/fynlo-logo.png');
-  } catch (error) {
-    console.log('Failed to load logo from src/assets folder');
-    try {
-      logoSource = require('../../assets/fynlo-logo.png');
-    } catch (error2) {
-      try {
-        logoSource = require('../../../assets/fynlo-logo.png');
-      } catch (error3) {
-        console.log('Failed to load logo from all locations, using Fynlo text fallback');
-        logoSource = null;
-      }
-    }
-  }
+  // For now, always use the text fallback since image loading is problematic
+  const logoSource = null;
 
   return (
     <View style={[styles.container, style]}>
@@ -91,11 +79,11 @@ const Logo: React.FC<LogoProps> = ({
       ) : (
         <View style={styles.logoTextContainer}>
           <Text style={[styles.logoMainText, { fontSize: sizeStyles.fontSize }]}>
-            Fynl<Text style={[styles.logoMainText, styles.orangeO, { fontSize: sizeStyles.fontSize }]}>o</Text>
+            fynl<Text style={[styles.logoMainText, styles.orangeO, { fontSize: sizeStyles.fontSize }]}>o</Text>
           </Text>
         </View>
       )}
-      {showText && (
+      {showText && logoSource && (
         <View style={styles.textContainer}>
           <Text
             style={[
@@ -129,20 +117,22 @@ const styles = StyleSheet.create({
   },
   logoTextContainer: {
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 4,
   },
   logoMainText: {
-    fontWeight: 'bold',
-    color: Colors.primary,
-    letterSpacing: -0.5,
+    fontWeight: '700',
+    color: Colors.fynloBlue,
+    letterSpacing: -2,
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'Roboto',
   },
   textContainer: {
     alignItems: 'center',
   },
   logoText: {
-    fontWeight: 'bold',
-    color: Colors.primary,
-    letterSpacing: -1,
+    fontWeight: '700',
+    color: Colors.fynloBlue,
+    letterSpacing: -2,
+    fontFamily: Platform.OS === 'ios' ? 'System' : 'Roboto',
   },
   logoSubtext: {
     color: Colors.lightText,
@@ -150,7 +140,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   orangeO: {
-    color: Colors.accent, // Orange color for the "o" in Fynlo
+    color: Colors.fynloOrange, // Orange color for the "o" in fynlo
   },
 });
 

@@ -17,6 +17,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import useAppStore from '../../store/useAppStore';
 import DatabaseService from '../../services/DatabaseService';
+import Logo from '../../components/Logo';
 
 const { width, height } = Dimensions.get('window');
 
@@ -108,11 +109,7 @@ const LoginScreen: React.FC = () => {
         <View style={styles.content}>
           {/* Logo Section */}
           <View style={styles.logoSection}>
-            <View style={styles.logoContainer}>
-              <View style={styles.logoPlaceholder}>
-                <Text style={styles.logoText}>FYNLO</Text>
-              </View>
-            </View>
+            <Logo size="large" showText={false} />
             <Text style={styles.logoTitle}>Professional Point of Sale System</Text>
           </View>
 
@@ -224,35 +221,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 50,
   },
-  logoContainer: {
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  logoPlaceholder: {
-    width: 120,
-    height: 120,
-    backgroundColor: Colors.primary,
-    borderRadius: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  logoText: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: Colors.white,
-    letterSpacing: 2,
-  },
   logoTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: Colors.text,
-    marginTop: 16,
+    fontSize: 16,
+    color: Colors.lightText,
     textAlign: 'center',
+    marginTop: 16,
   },
   formSection: {
     marginBottom: 40,
