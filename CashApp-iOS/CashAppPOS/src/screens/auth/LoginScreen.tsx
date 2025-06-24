@@ -11,12 +11,12 @@ import {
   KeyboardAvoidingView,
   Platform,
   Dimensions,
+  Image,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import useAppStore from '../../store/useAppStore';
 import DatabaseService from '../../services/DatabaseService';
-import Logo from '../../components/Logo';
 
 const { width, height } = Dimensions.get('window');
 
@@ -108,7 +108,12 @@ const LoginScreen: React.FC = () => {
         <View style={styles.content}>
           {/* Logo Section */}
           <View style={styles.logoSection}>
-            <Logo size="large" showText={false} />
+            <Image
+              source={require('../../assets/fynlo-logo.png')}
+              style={styles.logoImage}
+              resizeMode="contain"
+              onError={() => console.log('Logo failed to load, using fallback')}
+            />
             <Text style={styles.logoTitle}>Professional Point of Sale System</Text>
           </View>
 
@@ -219,6 +224,11 @@ const styles = StyleSheet.create({
   logoSection: {
     alignItems: 'center',
     marginBottom: 50,
+  },
+  logoImage: {
+    width: 120,
+    height: 120,
+    marginBottom: 8,
   },
   logoTitle: {
     fontSize: 18,
