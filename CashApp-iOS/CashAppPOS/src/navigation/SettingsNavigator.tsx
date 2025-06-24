@@ -37,6 +37,7 @@ import XeroSettingsScreen from '../screens/settings/XeroSettingsScreen';
 import XeroSyncDashboard from '../screens/xero/XeroSyncDashboard';
 import RestaurantSetupScreen from '../screens/onboarding/RestaurantSetupScreen';
 import RestaurantProfileScreen from '../screens/settings/RestaurantProfileScreen';
+import RestaurantPlatformOverridesScreen from '../screens/settings/RestaurantPlatformOverridesScreen';
 
 export type SettingsStackParamList = {
   SettingsMain: undefined;
@@ -82,6 +83,9 @@ export type SettingsStackParamList = {
   // Onboarding
   RestaurantSetup: undefined;
   RestaurantProfile: undefined;
+  
+  // Platform Settings
+  RestaurantPlatformOverrides: undefined;
 };
 
 const Stack = createStackNavigator<SettingsStackParamList>();
@@ -232,6 +236,18 @@ const SettingsNavigator: React.FC = () => {
       <Stack.Screen 
         name="RestaurantProfile" 
         component={RestaurantProfileScreen} 
+      />
+      
+      {/* Platform Settings */}
+      <Stack.Screen 
+        name="RestaurantPlatformOverrides" 
+        component={RestaurantPlatformOverridesScreen}
+        options={{
+          title: 'Platform Settings',
+          headerStyle: { backgroundColor: '#F8F9FA' },
+          headerTintColor: '#2C3E50',
+          headerTitleStyle: { fontWeight: '600' },
+        }}
       />
     </Stack.Navigator>
   );

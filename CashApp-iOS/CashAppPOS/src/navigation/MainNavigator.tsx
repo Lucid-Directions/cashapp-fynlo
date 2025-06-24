@@ -13,7 +13,7 @@ import StaffReportDetailScreen from '../screens/reports/StaffReportDetailScreen'
 import FinancialReportDetailScreen from '../screens/reports/FinancialReportDetailScreen';
 import MoreScreen from '../screens/more/MoreScreen';
 import EmployeesScreen from '../screens/employees/EmployeesScreen';
-import EmployeeScheduleScreen from '../screens/employees/EmployeeScheduleScreen';
+import EnhancedEmployeeScheduleScreen from '../screens/employees/EnhancedEmployeeScheduleScreen';
 import QRScannerScreen from '../screens/scanner/QRScannerScreen';
 import CustomersScreen from '../screens/customers/CustomersScreen';
 import InventoryScreen from '../screens/inventory/InventoryScreen';
@@ -159,7 +159,7 @@ const MainNavigator: React.FC = () => {
       />
       <Stack.Screen
         name="EmployeeSchedule"
-        component={EmployeeScheduleScreen}
+        component={EnhancedEmployeeScheduleScreen}
         options={{
           headerShown: false,
         }}

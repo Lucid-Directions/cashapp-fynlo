@@ -108,12 +108,11 @@ const LoginScreen: React.FC = () => {
         <View style={styles.content}>
           {/* Logo Section */}
           <View style={styles.logoSection}>
-            <Image
-              source={require('../../assets/fynlo-logo.png')}
-              style={styles.logoImage}
-              resizeMode="contain"
-              onError={() => console.log('Logo failed to load, using fallback')}
-            />
+            <View style={styles.logoContainer}>
+              <View style={styles.logoPlaceholder}>
+                <Text style={styles.logoText}>FYNLO</Text>
+              </View>
+            </View>
             <Text style={styles.logoTitle}>Professional Point of Sale System</Text>
           </View>
 
@@ -225,10 +224,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 50,
   },
-  logoImage: {
+  logoContainer: {
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  logoPlaceholder: {
     width: 120,
     height: 120,
-    marginBottom: 8,
+    backgroundColor: Colors.primary,
+    borderRadius: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  logoText: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: Colors.white,
+    letterSpacing: 2,
   },
   logoTitle: {
     fontSize: 18,

@@ -13,18 +13,14 @@ import {
   RefreshControl,
   Switch,
   TextInput,
+  Text,
+  TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
-
-import { Text } from '../../components/ui/Text';
-import { Card } from '../../components/ui/Card';
-import { Button } from '../../components/ui/Button';
-import SettingsCard from '../../components/settings/SettingsCard';
-import PlatformPaymentFees from '../../components/platform/PlatformPaymentFees';
-import { theme } from '../../design-system/theme';
 import PlatformService from '../../services/PlatformService';
+import { useTheme } from '../../design-system/ThemeProvider';
 
 interface EffectiveSetting {
   key: string;
@@ -46,6 +42,8 @@ interface OverrideRequest {
 
 const RestaurantPlatformOverridesScreen: React.FC = () => {
   const navigation = useNavigation();
+  const { theme } = useTheme();
+  const styles = createStyles(theme);
   
   // Mock restaurant ID - in real app, this would come from auth context
   const restaurantId = 'restaurant-123'; 
@@ -320,20 +318,21 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
         }
       >
         {error && (
-          <Card style={styles.errorCard}>
+          <View style={[styles.errorCard, { backgroundColor: theme.colors.surface }]}>
             <View style={styles.errorContent}>
               <Icon name="error" size={24} color={theme.colors.error} />
               <Text style={styles.errorText}>{error}</Text>
             </View>
-            <Button
-              title="Retry"
+            <TouchableOpacity
               onPress={loadEffectiveSettings}
-              style={styles.retryButton}
-            />
-          </Card>
+              style={[styles.retryButton, { backgroundColor: theme.colors.primary, padding: 8, borderRadius: 4 }]}
+            >
+              <Text style={{ color: theme.colors.white }}>Retry</Text>
+            </TouchableOpacity>
+          </View>
         )}
 
-        <Card style={styles.infoCard}>
+        <View style={[styles.infoCard, { backgroundColor: theme.colors.surface }]}>
           <View style={styles.infoHeader}>
             <Icon name="info" size={24} color={theme.colors.primary} />
             <Text style={styles.infoTitle}>Platform Settings Overview</Text>
@@ -352,22 +351,17 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
               <Text style={styles.statusText}>Restaurant Override</Text>
             </View>
           </View>
-        </Card>
+        </View>
 
         {/* Special section for payment fees */}
         {categorizedSettings.payment_fees && (
           <View style={styles.categorySection}>
             <Text style={styles.sectionTitle}>Payment Processing Fees</Text>
-            <PlatformPaymentFees
-              restaurantId={restaurantId}
-              userRole={userRole as any}
-              showOverrideControls={true}
-              testAmount={100}
-              onFeeUpdate={(method, newFee) => {
-                console.log(`Fee updated for ${method}: ${newFee}%`);
-                loadEffectiveSettings(); // Refresh to show changes
-              }}
-            />
+            <View style={[{ backgroundColor: theme.colors.surface, padding: 16, borderRadius: 8 }]}>
+              <Text style={[{ color: theme.colors.text, fontSize: 14 }]}>
+                Payment fees are controlled by the platform and cannot be modified by restaurants.
+              </Text>
+            </View>
           </View>
         )}
 
@@ -380,7 +374,7 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
           const hasOverrides = settings.some(s => s.source === 'restaurant');
           
           return (
-            <Card key={category} style={styles.categoryCard}>
+            <View key={category} style={[styles.categoryCard, { backgroundColor: theme.colors.surface, borderRadius: 8 }]}>
               <TouchableOpacity
                 style={styles.categoryHeader}
                 onPress={() => toggleCategoryExpansion(category)}
@@ -436,12 +430,25 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
 
                       {setting.can_override && (
                         <View style={styles.actionContainer}>
-                          <Button
-                            title={setting.source === 'restaurant' ? 'Modify Override' : 'Request Override'}
+                          <TouchableOpacity
                             onPress={() => showOverrideDialog(setting)}
-                            size="small"
-                            variant={setting.source === 'restaurant' ? 'secondary' : 'primary'}
-                          />
+                            style={[
+                              { 
+                                backgroundColor: setting.source === 'restaurant' ? theme.colors.border : theme.colors.primary,
+                                padding: 8,
+                                borderRadius: 4,
+                                borderWidth: setting.source === 'restaurant' ? 1 : 0,
+                                borderColor: theme.colors.primary
+                              }
+                            ]}
+                          >
+                            <Text style={{ 
+                              color: setting.source === 'restaurant' ? theme.colors.primary : theme.colors.white,
+                              fontSize: 12
+                            }}>
+                              {setting.source === 'restaurant' ? 'Modify Override' : 'Request Override'}
+                            </Text>
+                          </TouchableOpacity>
                         </View>
                       )}
 
@@ -455,7 +462,7 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
                   ))}
                 </View>
               )}
-            </Card>
+            </View>
           );
         })}
 
@@ -465,7 +472,7 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
@@ -473,14 +480,14 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: theme.spacing.lg,
-    paddingVertical: theme.spacing.md,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     backgroundColor: theme.colors.surface,
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border,
   },
   backButton: {
-    marginRight: theme.spacing.md,
+    marginRight: 12,
   },
   title: {
     fontSize: 20,
@@ -489,30 +496,30 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: theme.spacing.lg,
+    paddingHorizontal: 16,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: theme.spacing.lg,
+    paddingHorizontal: 16,
   },
   loadingText: {
-    marginTop: theme.spacing.md,
+    marginTop: 12,
     fontSize: 16,
     color: theme.colors.textLight,
   },
   errorCard: {
-    marginTop: theme.spacing.lg,
-    padding: theme.spacing.lg,
+    marginTop: 16,
+    padding: 16,
   },
   errorContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: theme.spacing.md,
+    marginBottom: 12,
   },
   errorText: {
-    marginLeft: theme.spacing.sm,
+    marginLeft: 8,
     fontSize: 16,
     color: theme.colors.error,
     flex: 1,
@@ -521,16 +528,16 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   infoCard: {
-    marginTop: theme.spacing.lg,
-    padding: theme.spacing.lg,
+    marginTop: 16,
+    padding: 16,
   },
   infoHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: theme.spacing.sm,
+    marginBottom: 8,
   },
   infoTitle: {
-    marginLeft: theme.spacing.sm,
+    marginLeft: 8,
     fontSize: 16,
     fontWeight: '600',
     color: theme.colors.text,
@@ -539,7 +546,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: theme.colors.textLight,
     lineHeight: 20,
-    marginBottom: theme.spacing.md,
+    marginBottom: 12,
   },
   statusIndicators: {
     flexDirection: 'row',
@@ -553,30 +560,30 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    marginRight: theme.spacing.xs,
+    marginRight: 4,
   },
   statusText: {
     fontSize: 12,
     color: theme.colors.textLight,
   },
   categorySection: {
-    marginTop: theme.spacing.lg,
+    marginTop: 16,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
     color: theme.colors.text,
-    marginBottom: theme.spacing.md,
+    marginBottom: 12,
   },
   categoryCard: {
-    marginTop: theme.spacing.lg,
+    marginTop: 16,
     overflow: 'hidden',
   },
   categoryHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: theme.spacing.lg,
+    padding: 16,
   },
   categoryTitleContainer: {
     flexDirection: 'row',
@@ -584,7 +591,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   categoryTextContainer: {
-    marginLeft: theme.spacing.md,
+    marginLeft: 12,
   },
   categoryTitle: {
     fontSize: 16,
@@ -601,7 +608,7 @@ const styles = StyleSheet.create({
     borderTopColor: theme.colors.border,
   },
   settingItem: {
-    padding: theme.spacing.lg,
+    padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border,
   },
@@ -609,7 +616,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
-    marginBottom: theme.spacing.sm,
+    marginBottom: 8,
   },
   settingInfo: {
     flex: 1,
@@ -634,7 +641,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   settingValue: {
-    marginBottom: theme.spacing.sm,
+    marginBottom: 8,
   },
   valueText: {
     fontSize: 14,
@@ -654,13 +661,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   lockedText: {
-    marginLeft: theme.spacing.xs,
+    marginLeft: 4,
     fontSize: 12,
     color: theme.colors.textLight,
     fontStyle: 'italic',
   },
   bottomPadding: {
-    height: theme.spacing.xl,
+    height: 24,
   },
 });
 

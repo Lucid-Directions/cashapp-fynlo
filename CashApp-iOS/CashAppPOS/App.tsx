@@ -9,6 +9,8 @@ import 'react-native-gesture-handler';
 import { AuthProvider } from './src/contexts/AuthContext';
 import { ThemeProvider } from './src/design-system/ThemeProvider';
 import AppNavigator from './src/navigation/AppNavigator';
+import ErrorTrackingService from './src/services/ErrorTrackingService';
+import ErrorBoundary from './src/components/ErrorBoundary';
 
 // Suppress specific warnings for development
 LogBox.ignoreLogs([
@@ -26,6 +28,10 @@ const App: React.FC = () => {
       try {
         console.log('🚀 Fynlo POS App Starting...');
         
+        // Initialize error tracking service
+        const errorTrackingService = ErrorTrackingService.getInstance();
+        errorTrackingService.initialize();
+        
         // Add small delay to ensure all modules are loaded
         await new Promise(resolve => setTimeout(resolve, 100));
         
@@ -34,6 +40,16 @@ const App: React.FC = () => {
       } catch (err) {
         console.error('❌ App initialization failed:', err);
         setError(err instanceof Error ? err.message : 'Unknown error');
+        
+        // Track initialization error
+        const errorTrackingService = ErrorTrackingService.getInstance();
+        errorTrackingService.captureError(err instanceof Error ? err : new Error(`${err}`), {
+          action: 'app_initialization',
+          additionalData: { 
+            initializationError: true,
+            errorType: 'app_startup_failure'
+          }
+        });
       }
     };
 
@@ -59,11 +75,13 @@ const App: React.FC = () => {
   }
 
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <AppNavigator />
-      </AuthProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <AuthProvider>
+          <AppNavigator />
+        </AuthProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 };
 

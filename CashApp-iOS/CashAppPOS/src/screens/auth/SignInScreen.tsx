@@ -174,11 +174,11 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
       >
         {/* Header */}
         <View style={styles.header}>
-          <Image 
-            source={require('../../assets/fynlo-logo.png')}
-            style={styles.logo}
-            resizeMode="contain"
-          />
+          <View style={styles.logoContainer}>
+            <View style={styles.logoPlaceholder}>
+              <Text style={styles.logoText}>FYNLO</Text>
+            </View>
+          </View>
           <Text style={styles.subtitle}>Professional Point of Sale System</Text>
         </View>
 
@@ -347,10 +347,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 40,
   },
-  logo: {
+  logoContainer: {
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  logoPlaceholder: {
     width: 200,
     height: 120,
-    marginBottom: 16,
+    backgroundColor: Colors.primary,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  logoText: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: Colors.white,
+    letterSpacing: 4,
   },
   subtitle: {
     fontSize: 16,

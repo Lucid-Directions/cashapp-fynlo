@@ -25,6 +25,8 @@ import { MenuItem, OrderItem } from '../../types';
 import DatabaseService from '../../services/DatabaseService';
 import { useRestaurantDisplayName } from '../../hooks/useRestaurantConfig';
 import PlatformService from '../../services/PlatformService';
+import ErrorTrackingService from '../../services/ErrorTrackingService';
+import { validatePrice, calculatePercentageFee, validateCartCalculation, formatPrice } from '../../utils/priceValidation';
 
 // Get screen dimensions
 const { width: screenWidth } = Dimensions.get('window');
@@ -137,22 +139,111 @@ const POSScreen: React.FC = () => {
     loadServiceChargeConfig();
   }, []);
 
-  // Calculate taxes and fees
+  // Calculate taxes and fees with error tracking
   const calculateVAT = (subtotal: number) => {
     if (!taxConfiguration.vatEnabled) return 0;
-    return subtotal * (taxConfiguration.vatRate / 100);
+    
+    const vatCalculation = calculatePercentageFee(
+      subtotal,
+      taxConfiguration.vatRate,
+      {
+        operation: 'vat_calculation',
+        screenName: 'POSScreen',
+        inputValues: {
+          subtotal,
+          vatRate: taxConfiguration.vatRate,
+          vatEnabled: taxConfiguration.vatEnabled
+        }
+      }
+    );
+    
+    if (!vatCalculation.isValid) {
+      const errorTrackingService = ErrorTrackingService.getInstance();
+      errorTrackingService.trackPricingError(
+        new Error(`VAT calculation failed: ${vatCalculation.error}`),
+        { subtotal, vatRate: taxConfiguration.vatRate },
+        { screenName: 'POSScreen', action: 'vat_calculation' }
+      );
+      return 0;
+    }
+    
+    return vatCalculation.value;
   };
 
   const calculateServiceFee = (subtotal: number) => {
     if (!serviceChargeConfig.enabled) return 0;
-    return subtotal * (serviceChargeConfig.rate / 100);
+    
+    const serviceFeeCalculation = calculatePercentageFee(
+      subtotal,
+      serviceChargeConfig.rate,
+      {
+        operation: 'service_fee_calculation',
+        screenName: 'POSScreen',
+        inputValues: {
+          subtotal,
+          serviceChargeRate: serviceChargeConfig.rate,
+          serviceChargeEnabled: serviceChargeConfig.enabled
+        }
+      }
+    );
+    
+    if (!serviceFeeCalculation.isValid) {
+      const errorTrackingService = ErrorTrackingService.getInstance();
+      errorTrackingService.trackPricingError(
+        new Error(`Service fee calculation failed: ${serviceFeeCalculation.error}`),
+        { subtotal, serviceChargeRate: serviceChargeConfig.rate },
+        { screenName: 'POSScreen', action: 'service_fee_calculation' }
+      );
+      return 0;
+    }
+    
+    return serviceFeeCalculation.value;
   };
 
   const calculateCartTotal = () => {
-    const subtotal = cartTotal();
-    const vat = calculateVAT(subtotal);
-    const serviceFee = calculateServiceFee(subtotal);
-    return subtotal + vat + serviceFee;
+    try {
+      const cartCalculation = validateCartCalculation(
+        cart,
+        taxConfiguration.vatEnabled ? taxConfiguration.vatRate : undefined,
+        serviceChargeConfig.enabled ? serviceChargeConfig.rate : undefined,
+        {
+          operation: 'cart_total_calculation',
+          screenName: 'POSScreen',
+          inputValues: {
+            cartItems: cart.length,
+            vatEnabled: taxConfiguration.vatEnabled,
+            vatRate: taxConfiguration.vatRate,
+            serviceChargeEnabled: serviceChargeConfig.enabled,
+            serviceChargeRate: serviceChargeConfig.rate
+          }
+        }
+      );
+
+      if (cartCalculation.hasErrors) {
+        const errorTrackingService = ErrorTrackingService.getInstance();
+        errorTrackingService.trackPricingError(
+          new Error('Cart total calculation has errors'),
+          {
+            subtotalValid: cartCalculation.subtotal.isValid,
+            taxValid: cartCalculation.tax.isValid,
+            serviceChargeValid: cartCalculation.serviceCharge.isValid,
+            totalValid: cartCalculation.total.isValid,
+            cart: cart.map(item => ({ id: item.id, name: item.name, price: item.price, quantity: item.quantity }))
+          },
+          { screenName: 'POSScreen', action: 'cart_total_calculation' }
+        );
+      }
+
+      return cartCalculation.total.value;
+    } catch (error) {
+      const errorTrackingService = ErrorTrackingService.getInstance();
+      errorTrackingService.trackPricingError(
+        error instanceof Error ? error : new Error(`Cart total calculation error: ${error}`),
+        { cart },
+        { screenName: 'POSScreen', action: 'cart_total_calculation' }
+      );
+      return 0;
+    }
   };
 
   const filteredItems = selectedCategory === 'All'
@@ -276,7 +367,7 @@ const POSScreen: React.FC = () => {
     if (result.success) {
       Alert.alert(
         'Payment Successful',
-        `Order for ${customerName || 'Customer'} has been processed successfully!\nPayment Method: ${result.paymentMethod}\nAmount: £${result.amount.toFixed(2)}\n\nThank you for your business!`,
+        `Order for ${customerName || 'Customer'} has been processed successfully!\nPayment Method: ${result.paymentMethod}\nAmount: ${formatPrice(result.amount, '£', { screenName: 'POSScreen', operation: 'payment_success_display' })}\n\nThank you for your business!`,
         [
           {
             text: 'OK',
@@ -318,7 +409,7 @@ const POSScreen: React.FC = () => {
             {item.name}
           </Text>
           <Text style={styles.menuItemPrice}>
-            £{item.price.toFixed(2)}
+{formatPrice(item.price, '£', { screenName: 'POSScreen', operation: 'menu_item_price_display', inputValues: { itemId: item.id, itemName: item.name } })}
           </Text>
         </TouchableOpacity>
         
@@ -353,7 +444,7 @@ const POSScreen: React.FC = () => {
             <Text style={styles.cartItemEmoji}>{item.emoji}</Text>
             <View style={styles.cartItemDetails}>
               <Text style={styles.cartItemName}>{item.name}</Text>
-              <Text style={styles.cartItemPrice}>£{item.price.toFixed(2)} each</Text>
+              <Text style={styles.cartItemPrice}>{formatPrice(item.price, '£', { screenName: 'POSScreen', operation: 'cart_item_price_display', inputValues: { itemId: item.id } })} each</Text>
             </View>
           </View>
           {menuItem?.description && (
@@ -379,7 +470,7 @@ const POSScreen: React.FC = () => {
             </TouchableOpacity>
           </View>
           <Text style={styles.cartItemTotal}>
-            £{(item.price * item.quantity).toFixed(2)}
+{formatPrice(item.price * item.quantity, '£', { screenName: 'POSScreen', operation: 'cart_item_total_display', inputValues: { itemId: item.id, price: item.price, quantity: item.quantity } })}
           </Text>
         </View>
       </View>
@@ -425,7 +516,7 @@ const POSScreen: React.FC = () => {
                           data.includes(item.id.toString())
                         );
                         if (foundItem) {
-                          addToCart(foundItem);
+                          handleAddToCart(foundItem);
                           Alert.alert('Success', `${foundItem.name} added to order!`);
                         } else {
                           Alert.alert('Product Not Found', 'Unable to find this product in the menu.');
@@ -465,7 +556,7 @@ const POSScreen: React.FC = () => {
               <Text style={styles.statLabel}>Items</Text>
             </View>
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>£{cartTotal().toFixed(2)}</Text>
+              <Text style={styles.statValue}>{formatPrice(cartTotal(), '£', { screenName: 'POSScreen', operation: 'cart_total_stats_display' })}</Text>
               <Text style={styles.statLabel}>Subtotal</Text>
             </View>
             <View style={styles.statItem}>
@@ -567,7 +658,7 @@ const POSScreen: React.FC = () => {
                       <Text style={styles.summarySectionTitle}>Order Summary</Text>
                       <View style={styles.summaryRow}>
                         <Text style={styles.summaryLabel}>Items ({cartItemCount()})</Text>
-                        <Text style={styles.summaryValue}>£{cartTotal().toFixed(2)}</Text>
+                        <Text style={styles.summaryValue}>{formatPrice(cartTotal(), '£', { screenName: 'POSScreen', operation: 'cart_modal_subtotal_display' })}</Text>
                       </View>
                     </View>
                     
@@ -576,20 +667,20 @@ const POSScreen: React.FC = () => {
                       {taxConfiguration.vatEnabled && (
                         <View style={styles.summaryRow}>
                           <Text style={styles.summaryLabel}>VAT ({taxConfiguration.vatRate}%)</Text>
-                          <Text style={styles.summaryValue}>£{calculateVAT(cartTotal()).toFixed(2)}</Text>
+                          <Text style={styles.summaryValue}>{formatPrice(calculateVAT(cartTotal()), '£', { screenName: 'POSScreen', operation: 'cart_modal_vat_display' })}</Text>
                         </View>
                       )}
                       {serviceChargeConfig.enabled && (
                         <View style={styles.summaryRow}>
                           <Text style={styles.summaryLabel}>Service Fee ({serviceChargeConfig.rate}%)</Text>
-                          <Text style={styles.summaryValue}>£{calculateServiceFee(cartTotal()).toFixed(2)}</Text>
+                          <Text style={styles.summaryValue}>{formatPrice(calculateServiceFee(cartTotal()), '£', { screenName: 'POSScreen', operation: 'cart_modal_service_fee_display' })}</Text>
                         </View>
                       )}
                     </View>
                     
                     <View style={[styles.summaryRow, styles.totalRow]}>
                       <Text style={styles.totalLabel}>Total</Text>
-                      <Text style={styles.totalAmount}>£{calculateCartTotal().toFixed(2)}</Text>
+                      <Text style={styles.totalAmount}>{formatPrice(calculateCartTotal(), '£', { screenName: 'POSScreen', operation: 'cart_modal_total_display' })}</Text>
                     </View>
                   </View>
                   
@@ -601,7 +692,7 @@ const POSScreen: React.FC = () => {
                     }}
                   >
                     <Text style={styles.chargeButtonText}>
-                      Charge £{calculateCartTotal().toFixed(2)}
+                      Charge {formatPrice(calculateCartTotal(), '£', { screenName: 'POSScreen', operation: 'payment_button_amount_display' })}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -650,7 +741,7 @@ const POSScreen: React.FC = () => {
                         <Text style={styles.orderSummaryEmoji}>{item.emoji}</Text>
                         <Text style={styles.orderSummaryItemName}>{item.name}</Text>
                         <Text style={styles.orderSummaryQuantity}>x{item.quantity}</Text>
-                        <Text style={styles.orderSummaryPrice}>£{(item.price * item.quantity).toFixed(2)}</Text>
+                        <Text style={styles.orderSummaryPrice}>{formatPrice(item.price * item.quantity, '£', { screenName: 'POSScreen', operation: 'order_summary_item_total_display', inputValues: { itemId: item.id } })}</Text>
                       </View>
                       {menuItem?.description && (
                         <Text style={styles.orderSummaryDescription} numberOfLines={1}>
@@ -730,7 +821,7 @@ const POSScreen: React.FC = () => {
               <View style={styles.modalTotal}>
                 <Text style={styles.modalTotalLabel}>Total to Pay</Text>
                 <Text style={styles.modalTotalAmount}>
-                  £{(cartTotal() * 1.2).toFixed(2)}
+{formatPrice(calculateCartTotal(), '£', { screenName: 'POSScreen', operation: 'payment_modal_total_display' })}
                 </Text>
               </View>
               

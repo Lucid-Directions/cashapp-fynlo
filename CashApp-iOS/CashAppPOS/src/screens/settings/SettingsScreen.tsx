@@ -87,6 +87,23 @@ const SettingsScreen: React.FC = () => {
       ],
     },
     {
+      id: 'platform',
+      title: 'Platform Settings',
+      description: 'View platform-controlled settings and request overrides',
+      icon: 'admin-panel-settings',
+      route: 'RestaurantPlatformOverrides',
+      color: '#6B73FF',
+      settings: [
+        {
+          id: 'platform-overrides',
+          title: 'Platform Overrides',
+          description: 'View and request changes to platform settings',
+          icon: 'settings-applications',
+          route: 'RestaurantPlatformOverrides',
+        },
+      ],
+    },
+    {
       id: 'hardware',
       title: 'Hardware Configuration',
       description: 'Printers, cash drawers, and connected devices',
