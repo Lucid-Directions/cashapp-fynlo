@@ -108,7 +108,8 @@ const LoginScreen: React.FC = () => {
         <View style={styles.content}>
           {/* Logo Section */}
           <View style={styles.logoSection}>
-            <Logo size="large" />
+            <Logo size="large" showText={false} />
+            <Text style={styles.logoTitle}>Professional Point of Sale System</Text>
           </View>
 
           {/* Login Form */}
@@ -218,6 +219,13 @@ const styles = StyleSheet.create({
   logoSection: {
     alignItems: 'center',
     marginBottom: 50,
+  },
+  logoTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: Colors.text,
+    marginTop: 16,
+    textAlign: 'center',
   },
   formSection: {
     marginBottom: 40,

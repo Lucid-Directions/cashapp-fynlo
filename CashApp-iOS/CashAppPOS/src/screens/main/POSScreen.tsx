@@ -24,6 +24,7 @@ import useSettingsStore from '../../store/useSettingsStore';
 import { MenuItem, OrderItem } from '../../types';
 import DatabaseService from '../../services/DatabaseService';
 import { useRestaurantDisplayName } from '../../hooks/useRestaurantConfig';
+import PlatformService from '../../services/PlatformService';
 
 // Get screen dimensions
 const { width: screenWidth } = Dimensions.get('window');
@@ -91,6 +92,11 @@ const POSScreen: React.FC = () => {
   const [customerName, setCustomerName] = useState('');
   const [showCartModal, setShowCartModal] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('sumup');
+  const [serviceChargeConfig, setServiceChargeConfig] = useState({
+    enabled: true,
+    rate: 12.5,
+    description: 'Platform service charge',
+  });
 
   // Create themed styles
   
@@ -115,6 +121,22 @@ const POSScreen: React.FC = () => {
 
   const { taxConfiguration } = useSettingsStore();
 
+  // Load platform service charge configuration
+  useEffect(() => {
+    const loadServiceChargeConfig = async () => {
+      try {
+        const platformService = PlatformService.getInstance();
+        const config = await platformService.getServiceChargeConfig();
+        setServiceChargeConfig(config);
+      } catch (error) {
+        console.error('Failed to load service charge config:', error);
+        // Keep default values if loading fails
+      }
+    };
+
+    loadServiceChargeConfig();
+  }, []);
+
   // Calculate taxes and fees
   const calculateVAT = (subtotal: number) => {
     if (!taxConfiguration.vatEnabled) return 0;
@@ -122,8 +144,8 @@ const POSScreen: React.FC = () => {
   };
 
   const calculateServiceFee = (subtotal: number) => {
-    if (!taxConfiguration.serviceTaxEnabled) return 0;
-    return subtotal * (taxConfiguration.serviceTaxRate / 100);
+    if (!serviceChargeConfig.enabled) return 0;
+    return subtotal * (serviceChargeConfig.rate / 100);
   };
 
   const calculateCartTotal = () => {
@@ -157,21 +179,124 @@ const POSScreen: React.FC = () => {
   };
 
   const processPayment = () => {
-    Alert.alert(
-      'Order Confirmed',
-      `Order for ${customerName || 'Customer'} has been processed successfully!\nThank you for your business!`,
-      [
-        {
-          text: 'OK',
-          onPress: () => {
-            clearCart();
-            setCustomerName('');
-            setShowPaymentModal(false);
-            setShowCartModal(false);
+    const totalAmount = calculateCartTotal();
+    
+    // Close payment modal first
+    setShowPaymentModal(false);
+    
+    switch (selectedPaymentMethod) {
+      case 'sumup':
+        // Navigate to SumUp payment screen
+        navigation.navigate('EnhancedPayment', {
+          amount: totalAmount,
+          orderItems: cart,
+          customerName: customerName || 'Customer',
+          onPaymentComplete: handlePaymentComplete,
+        });
+        break;
+        
+      case 'square':
+        // Navigate to Square payment selection screen
+        Alert.alert(
+          'Square Payment',
+          'Choose your Square payment method:',
+          [
+            {
+              text: 'Card Payment',
+              onPress: () => navigation.navigate('SquareCardPayment', {
+                amount: totalAmount,
+                currency: 'GBP',
+                description: `Order for ${customerName || 'Customer'}`,
+                onPaymentComplete: handlePaymentComplete,
+                onPaymentCancelled: () => setShowPaymentModal(true),
+              }),
+            },
+            {
+              text: 'Contactless (Apple/Google Pay)',
+              onPress: () => navigation.navigate('SquareContactlessPayment', {
+                amount: totalAmount,
+                currency: 'GBP',
+                description: `Order for ${customerName || 'Customer'}`,
+                onPaymentComplete: handlePaymentComplete,
+                onPaymentCancelled: () => setShowPaymentModal(true),
+              }),
+            },
+            {
+              text: 'Cancel',
+              style: 'cancel',
+              onPress: () => setShowPaymentModal(true),
+            },
+          ]
+        );
+        break;
+        
+      case 'qr':
+        // Navigate to QR payment screen
+        navigation.navigate('QRCodePayment', {
+          amount: totalAmount,
+          orderItems: cart,
+          customerName: customerName || 'Customer',
+          onPaymentComplete: handlePaymentComplete,
+        });
+        break;
+        
+      case 'cash':
+        // Handle cash payment directly
+        handlePaymentComplete({
+          success: true,
+          paymentMethod: 'cash',
+          amount: totalAmount,
+          currency: 'GBP',
+        });
+        break;
+        
+      case 'stripe':
+        // Handle Stripe payment (fallback option)
+        Alert.alert(
+          'Stripe Payment',
+          'Stripe payment integration coming soon. Please use another payment method.',
+          [
+            { text: 'OK', onPress: () => setShowPaymentModal(true) }
+          ]
+        );
+        break;
+        
+      default:
+        Alert.alert(
+          'Payment Error',
+          'Please select a payment method.',
+          [
+            { text: 'OK', onPress: () => setShowPaymentModal(true) }
+          ]
+        );
+    }
+  };
+  
+  const handlePaymentComplete = (result: any) => {
+    if (result.success) {
+      Alert.alert(
+        'Payment Successful',
+        `Order for ${customerName || 'Customer'} has been processed successfully!\nPayment Method: ${result.paymentMethod}\nAmount: £${result.amount.toFixed(2)}\n\nThank you for your business!`,
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              clearCart();
+              setCustomerName('');
+              setShowCartModal(false);
+            }
           }
-        }
-      ]
-    );
+        ]
+      );
+    } else {
+      Alert.alert(
+        'Payment Failed',
+        result.error || 'Payment could not be processed. Please try again.',
+        [
+          { text: 'OK', onPress: () => setShowPaymentModal(true) }
+        ]
+      );
+    }
   };
 
   const MenuItemCard = ({ item }: { item: MenuItem }) => {
@@ -281,17 +406,52 @@ const POSScreen: React.FC = () => {
           <TouchableOpacity style={styles.headerIconButton}>
             <Icon name="search" size={24} color={Colors.white} />
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.cartButton}
-            onPress={() => setShowCartModal(true)}
-          >
-            <Icon name="shopping-cart" size={24} color={Colors.white} />
-            {cartItemCount() > 0 && (
-              <View style={styles.cartBadge}>
-                <Text style={styles.cartBadgeText}>{cartItemCount()}</Text>
-              </View>
-            )}
-          </TouchableOpacity>
+          <View style={styles.headerActions}>
+            <TouchableOpacity 
+              style={styles.scannerButton}
+              onPress={() => navigation.navigate('QRScanner', {
+                title: 'Product Scanner',
+                subtitle: 'Scan product barcode or QR code',
+                onScanned: (data: string) => {
+                  // Handle scanned product data
+                  Alert.alert(
+                    'Product Scanned',
+                    `Scanned: ${data}`,
+                    [
+                      { text: 'Add to Order', onPress: () => {
+                        // Find product by scanned data and add to cart
+                        const foundItem = menuItems.find(item => 
+                          item.name.toLowerCase().includes(data.toLowerCase()) ||
+                          data.includes(item.id.toString())
+                        );
+                        if (foundItem) {
+                          addToCart(foundItem);
+                          Alert.alert('Success', `${foundItem.name} added to order!`);
+                        } else {
+                          Alert.alert('Product Not Found', 'Unable to find this product in the menu.');
+                        }
+                      }},
+                      { text: 'Cancel', style: 'cancel' }
+                    ]
+                  );
+                }
+              })}
+            >
+              <Icon name="qr-code-scanner" size={24} color={Colors.white} />
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={styles.cartButton}
+              onPress={() => setShowCartModal(true)}
+            >
+              <Icon name="shopping-cart" size={24} color={Colors.white} />
+              {cartItemCount() > 0 && (
+                <View style={styles.cartBadge}>
+                  <Text style={styles.cartBadgeText}>{cartItemCount()}</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
 
@@ -419,9 +579,9 @@ const POSScreen: React.FC = () => {
                           <Text style={styles.summaryValue}>£{calculateVAT(cartTotal()).toFixed(2)}</Text>
                         </View>
                       )}
-                      {taxConfiguration.serviceTaxEnabled && (
+                      {serviceChargeConfig.enabled && (
                         <View style={styles.summaryRow}>
-                          <Text style={styles.summaryLabel}>Service Fee ({taxConfiguration.serviceTaxRate}%)</Text>
+                          <Text style={styles.summaryLabel}>Service Fee ({serviceChargeConfig.rate}%)</Text>
                           <Text style={styles.summaryValue}>£{calculateServiceFee(cartTotal()).toFixed(2)}</Text>
                         </View>
                       )}
@@ -441,7 +601,7 @@ const POSScreen: React.FC = () => {
                     }}
                   >
                     <Text style={styles.chargeButtonText}>
-                      Charge £{(cartTotal() * 1.2).toFixed(2)}
+                      Charge £{calculateCartTotal().toFixed(2)}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -519,6 +679,17 @@ const POSScreen: React.FC = () => {
                     <Icon name="credit-card" size={24} color="#00D4AA" />
                     <Text style={styles.paymentMethodText}>SumUp</Text>
                     <Text style={styles.paymentMethodSubtext}>0.69% • Cards & Mobile Pay</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={[
+                      styles.paymentMethod,
+                      selectedPaymentMethod === 'square' && styles.paymentMethodSelected
+                    ]}
+                    onPress={() => setSelectedPaymentMethod('square')}
+                  >
+                    <Icon name="credit-card" size={24} color="#3E4348" />
+                    <Text style={styles.paymentMethodText}>Square</Text>
+                    <Text style={styles.paymentMethodSubtext}>1.75% • Cards & Digital Wallets</Text>
                   </TouchableOpacity>
                   <TouchableOpacity 
                     style={[
@@ -686,6 +857,16 @@ const styles = StyleSheet.create({
   },
   logoOrange: {
     color: Colors.warning,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  scannerButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
   },
   cartButton: {
     position: 'relative',

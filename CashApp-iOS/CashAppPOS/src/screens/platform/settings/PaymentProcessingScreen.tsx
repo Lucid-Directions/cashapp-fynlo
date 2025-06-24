@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -44,6 +44,68 @@ const PaymentProcessingScreen: React.FC = () => {
     dailyTransactionLimit: 10000.00,
   });
 
+  // Local input states for better UX
+  const [inputValues, setInputValues] = useState<{[key: string]: string}>({});
+  const timeoutRefs = useRef<{[key: string]: NodeJS.Timeout}>({});
+
+  // Improved input validation and formatting
+  const validateDecimalInput = (value: string, maxValue: number = 100, maxDecimals: number = 2): string => {
+    // Remove all non-numeric characters except decimal point
+    let cleaned = value.replace(/[^0-9.]/g, '');
+    
+    // Handle multiple decimal points
+    const decimalParts = cleaned.split('.');
+    if (decimalParts.length > 2) {
+      cleaned = decimalParts[0] + '.' + decimalParts.slice(1).join('');
+    }
+    
+    // Limit decimal places
+    if (decimalParts.length === 2 && decimalParts[1].length > maxDecimals) {
+      cleaned = decimalParts[0] + '.' + decimalParts[1].substring(0, maxDecimals);
+    }
+    
+    // Check max value
+    const numericValue = parseFloat(cleaned);
+    if (!isNaN(numericValue) && numericValue > maxValue) {
+      return maxValue.toFixed(maxDecimals);
+    }
+    
+    return cleaned;
+  };
+
+  const debouncedUpdateConfig = useCallback((key: string, value: number) => {
+    // Clear existing timeout
+    if (timeoutRefs.current[key]) {
+      clearTimeout(timeoutRefs.current[key]);
+    }
+    
+    // Set new timeout
+    timeoutRefs.current[key] = setTimeout(() => {
+      setConfig(prev => ({ ...prev, [key]: value }));
+    }, 500); // 500ms debounce
+  }, []);
+
+  const handleFeeInputChange = (key: string, value: string, maxValue: number = 100) => {
+    const validatedValue = validateDecimalInput(value, maxValue);
+    setInputValues(prev => ({ ...prev, [key]: validatedValue }));
+    
+    const numericValue = parseFloat(validatedValue) || 0;
+    debouncedUpdateConfig(key, numericValue);
+  };
+
+  const getDisplayValue = (key: string, configValue: number): string => {
+    return inputValues[key] !== undefined ? inputValues[key] : configValue.toFixed(2);
+  };
+
+  // Cleanup timeouts on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(timeoutRefs.current).forEach(timeout => {
+        if (timeout) clearTimeout(timeout);
+      });
+    };
+  }, []);
+
   const handleSave = () => {
     // TODO: Save to backend
     Alert.alert(
@@ -53,7 +115,17 @@ const PaymentProcessingScreen: React.FC = () => {
     );
   };
 
-  const PaymentMethodCard = ({ title, description, icon, enabled, onToggle, fee, fixedFee, onFeeChange, onFixedFeeChange }: any) => (
+  const PaymentMethodCard = ({ 
+    title, 
+    description, 
+    icon, 
+    enabled, 
+    onToggle, 
+    fee, 
+    fixedFee, 
+    feeKey, 
+    fixedFeeKey
+  }: any) => (
     <View style={styles.paymentMethodCard}>
       <View style={styles.paymentMethodHeader}>
         <View style={styles.paymentMethodInfo}>
@@ -78,40 +150,36 @@ const PaymentProcessingScreen: React.FC = () => {
             <View style={styles.feeInputContainer}>
               <TextInput
                 style={styles.feeInput}
-                value={fee.toString()}
-                onChangeText={(text) => {
-                  const numericValue = parseFloat(text.replace(/[^0-9.]/g, '')) || 0;
-                  onFeeChange && onFeeChange(numericValue);
-                }}
+                value={getDisplayValue(feeKey, fee)}
+                onChangeText={(text) => handleFeeInputChange(feeKey, text, 50)}
                 keyboardType="decimal-pad"
                 placeholder="0.00"
                 autoCorrect={false}
                 autoCapitalize="none"
                 selectTextOnFocus={true}
-                clearButtonMode="while-editing"
+                maxLength={6}
+                returnKeyType="done"
               />
               <Text style={styles.feeUnit}>%</Text>
             </View>
           </View>
           
-          {fixedFee !== undefined && (
+          {fixedFee !== undefined && fixedFeeKey && (
             <View style={styles.feeRow}>
               <Text style={styles.feeLabel}>Fixed Fee:</Text>
               <View style={styles.feeInputContainer}>
                 <Text style={styles.currencySymbol}>£</Text>
                 <TextInput
                   style={styles.feeInput}
-                  value={fixedFee.toFixed(2)}
-                  onChangeText={(text) => {
-                    const numericValue = parseFloat(text.replace(/[^0-9.]/g, '')) || 0;
-                    onFixedFeeChange && onFixedFeeChange(numericValue);
-                  }}
+                  value={getDisplayValue(fixedFeeKey, fixedFee)}
+                  onChangeText={(text) => handleFeeInputChange(fixedFeeKey, text, 1000)}
                   keyboardType="decimal-pad"
                   placeholder="0.00"
                   autoCorrect={false}
                   autoCapitalize="none"
                   selectTextOnFocus={true}
-                  clearButtonMode="while-editing"
+                  maxLength={8}
+                  returnKeyType="done"
                 />
               </View>
             </View>
@@ -165,7 +233,7 @@ const PaymentProcessingScreen: React.FC = () => {
               enabled={config.enableSumUp}
               onToggle={(value: boolean) => setConfig({...config, enableSumUp: value})}
               fee={config.sumupHighVolumeFee}
-              onFeeChange={(value: number) => setConfig({...config, sumupHighVolumeFee: value})}
+              feeKey="sumupHighVolumeFee"
             />
           </View>
           
@@ -177,8 +245,8 @@ const PaymentProcessingScreen: React.FC = () => {
             onToggle={(value: boolean) => setConfig({...config, enableCardPayments: value})}
             fee={config.cardPaymentFee}
             fixedFee={config.cardFixedFee}
-            onFeeChange={(value: number) => setConfig({...config, cardPaymentFee: value})}
-            onFixedFeeChange={(value: number) => setConfig({...config, cardFixedFee: value})}
+            feeKey="cardPaymentFee"
+            fixedFeeKey="cardFixedFee"
           />
           
           <PaymentMethodCard
@@ -189,8 +257,8 @@ const PaymentProcessingScreen: React.FC = () => {
             onToggle={(value: boolean) => setConfig({...config, enableDigitalWallets: value})}
             fee={config.digitalWalletFee}
             fixedFee={config.digitalWalletFixedFee}
-            onFeeChange={(value: number) => setConfig({...config, digitalWalletFee: value})}
-            onFixedFeeChange={(value: number) => setConfig({...config, digitalWalletFixedFee: value})}
+            feeKey="digitalWalletFee"
+            fixedFeeKey="digitalWalletFixedFee"
           />
           
           <PaymentMethodCard
@@ -201,8 +269,8 @@ const PaymentProcessingScreen: React.FC = () => {
             onToggle={(value: boolean) => setConfig({...config, enableQrPayments: value})}
             fee={config.qrCodeFee}
             fixedFee={config.qrCodeFixedFee}
-            onFeeChange={(value: number) => setConfig({...config, qrCodeFee: value})}
-            onFixedFeeChange={(value: number) => setConfig({...config, qrCodeFixedFee: value})}
+            feeKey="qrCodeFee"
+            fixedFeeKey="qrCodeFixedFee"
           />
           
           <PaymentMethodCard
@@ -212,7 +280,7 @@ const PaymentProcessingScreen: React.FC = () => {
             enabled={config.enableCashPayments}
             onToggle={(value: boolean) => setConfig({...config, enableCashPayments: value})}
             fee={0}
-            onFeeChange={() => {}} // Cash payments don't have fees, but provide empty callback
+            feeKey="cashFee"
           />
         </View>
 
