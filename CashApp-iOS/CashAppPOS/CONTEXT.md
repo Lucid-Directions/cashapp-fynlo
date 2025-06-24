@@ -2,7 +2,7 @@
 
 **Last Updated**: June 24, 2025  
 **Purpose**: Essential context for development sessions  
-**Status**: Active Development - Critical Bug Fixes & Platform Features
+**Status**: Active Development - Employee Management & Advanced Reporting Complete
 
 ---
 
@@ -65,22 +65,27 @@ cp ios/main.jsbundle ios/CashAppPOS/main.jsbundle
 
 ## 🛠️ **Recent Implementations (June 2025)**
 
-### **1. Critical Bug Fixes (15 Issues Resolved)**
-1. ✅ **Employee Management**: Add Employee modal with form validation
+### **1. Critical System Fixes & Features (20+ Issues Resolved)**
+1. ✅ **Employee Management**: Add Employee modal with validation
 2. ✅ **QR Scanner**: Camera permissions for iOS/Android
-3. ✅ **Inventory**: Edit functionality with modal
-4. ✅ **Reports**: Responsive font sizing across devices
-5. ✅ **Employee Scheduling**: Complete rota management system
-6. ✅ **Profile Editing**: Removed "coming soon" placeholder
-7. ✅ **Bank Details**: Restaurant payment setup screen
-8. ✅ **Payment Methods**: Platform-controlled settings
-9. ✅ **Receipt Logo**: Image upload functionality
-10. ✅ **Platform Dashboard**: Real system health metrics
-11. ✅ **Payment Processing**: Input validation and UX
-12. ✅ **Logo Display**: Fixed login screen branding
-13. ✅ **Platform Settings**: Added restaurant override screen
-14. ✅ **Error Tracking**: Comprehensive NaN price detection
-15. ✅ **Bundle Process**: Documented and fixed deployment
+3. ✅ **Inventory Management**: Edit functionality with modal
+4. ✅ **Advanced Employee Scheduling**: Complete rota system with week/day/list views
+5. ✅ **Schedule Management**: Clickable shifts, edit functionality, time pickers
+6. ✅ **Rota Date Selection**: Fixed green highlight navigation between days
+7. ✅ **Enhanced Reporting**: Real-time employee performance & labor cost analytics
+8. ✅ **Labor Cost Tracking**: Weekly hours, efficiency, cost calculations
+9. ✅ **Staff Performance Reports**: Rankings, metrics, real data integration
+10. ✅ **Profile Editing**: Removed "coming soon" placeholder
+11. ✅ **Bank Details**: Restaurant payment setup screen
+12. ✅ **Payment Methods**: Platform-controlled settings
+13. ✅ **Receipt Logo**: Image upload functionality
+14. ✅ **Platform Dashboard**: Real system health metrics
+15. ✅ **Payment Processing**: Input validation and UX
+16. ✅ **Logo Display**: Fixed login screen branding
+17. ✅ **Platform Settings**: Added restaurant override screen
+18. ✅ **Error Tracking**: Comprehensive NaN price detection
+19. ✅ **Bundle Process**: Documented and fixed deployment
+20. ✅ **Theme Consistency**: Migrated screens to use theme context
 
 ### **2. Error Tracking System**
 - **SimpleErrorTrackingService**: Console-based error logging
@@ -94,10 +99,29 @@ cp ios/main.jsbundle ios/CashAppPOS/main.jsbundle
 - **Override System**: Restaurants can request platform overrides
 - **New Screen**: RestaurantPlatformOverridesScreen
 
-### **4. Key Navigation Updates**
+### **4. Employee Scheduling System**
+- **Multi-view Interface**: Week, day, and list views
+- **Interactive Scheduling**: Clickable shifts, drag-and-drop ready
+- **Native Time Pickers**: iOS DateTimePicker integration
+- **Real-time Calculations**: Labor costs, efficiency tracking
+- **Status Management**: Scheduled, confirmed, completed, absent
+- **Role-based Organization**: Color-coded by employee roles
+
+### **5. Enhanced Reporting System**
+- **Real Data Integration**: Live employee and sales data
+- **Labor Analytics**: Weekly costs, hours worked, efficiency metrics
+- **Performance Tracking**: Employee rankings and productivity
+- **Cost Analysis**: Labor vs revenue reporting (in development)
+- **Schedule Reports**: Rota analysis and staffing insights (in development)
+- **Dynamic Dashboards**: Auto-updating metrics and KPIs
+
+### **6. Key Navigation Updates**
 - Added Platform Settings to main settings menu
+- Enhanced Reports section with new analytics screens
 - Connected RestaurantPlatformOverridesScreen to navigation
 - Settings → Platform Settings → Platform Overrides
+- Reports → Schedule & Labor Report (new)
+- Reports → Cost Analysis (new)
 
 ---
 
@@ -111,8 +135,14 @@ CashApp-iOS/CashAppPOS/
 │   │   ├── main/POSScreen.tsx             # Main POS with payment methods
 │   │   ├── auth/LoginScreen.tsx           # Login with Fynlo branding
 │   │   ├── employees/
-│   │   │   ├── EmployeesScreen.tsx        # Staff management
-│   │   │   └── EmployeeScheduleScreen.tsx # New scheduling system
+│   │   │   ├── EmployeesScreen.tsx        # Staff management with add modal
+│   │   │   └── EnhancedEmployeeScheduleScreen.tsx # Advanced rota system
+│   │   ├── reports/
+│   │   │   ├── ReportsScreenSimple.tsx    # Enhanced reports dashboard
+│   │   │   ├── StaffReportDetailScreen.tsx # Employee performance analytics
+│   │   │   ├── SalesReportDetailScreen.tsx # Sales analytics
+│   │   │   ├── InventoryReportDetailScreen.tsx # Inventory tracking
+│   │   │   └── FinancialReportDetailScreen.tsx # Financial reporting
 │   │   ├── settings/
 │   │   │   ├── RestaurantPlatformOverridesScreen.tsx # Platform settings
 │   │   │   └── business/BankDetailsScreen.tsx        # Bank setup
@@ -230,8 +260,10 @@ uvicorn app.main:app --reload
    - Workaround: Use styled placeholders
 2. **Sentry Integration**: Dependency issues
    - Workaround: Using SimpleErrorTrackingService
-3. **Theme Imports**: Some screens use hardcoded colors
-   - Ongoing migration to theme context
+3. **Schedule Report Screen**: Navigation route needs implementation
+   - Temporary: Uses existing StaffReportDetailScreen
+4. **Cost Analysis Screen**: Backend integration pending
+   - Ready for API connection when available
 
 ### **Fixed Issues**
 - ✅ Metro bundler fallback
@@ -239,25 +271,35 @@ uvicorn app.main:app --reload
 - ✅ Navigation missing screens
 - ✅ NaN pricing errors
 - ✅ Bundle deployment process
+- ✅ Rota date selector highlighting
+- ✅ Theme consistency across reports
+- ✅ Employee data integration
+- ✅ Real-time labor cost calculations
 
 ---
 
 ## 📈 **Next Development Priorities**
 
 ### **Immediate**
-1. Complete user security features (2FA, biometrics)
-2. Enhance onboarding flow
-3. Make commission structure modular
+1. Complete Schedule & Labor Report screen implementation
+2. Create Cost Analysis Report with labor vs revenue metrics
+3. Complete user security features (2FA, biometrics)
+4. Enhance onboarding flow
+5. Make commission structure modular
 
 ### **Platform Features**
 1. Multi-restaurant dashboard
-2. Consolidated reporting
-3. Platform-wide settings management
+2. Consolidated reporting across all restaurants
+3. Platform-wide analytics and insights
+4. Advanced scheduling optimization
+5. Cross-restaurant performance comparisons
 
 ### **Technical Debt**
-1. Migrate all screens to theme context
-2. Complete Sentry integration
-3. Optimize bundle size
+1. ✅ Migrate reports screens to theme context (completed)
+2. Complete remaining screens theme migration
+3. Complete Sentry integration
+4. Optimize bundle size
+5. Add automated testing for scheduling system
 
 ---
 
@@ -273,7 +315,10 @@ uvicorn app.main:app --reload
 - Main POS: `src/screens/main/POSScreen.tsx`
 - Settings: `src/screens/settings/SettingsScreen.tsx`
 - Platform: `src/screens/platform/PlatformDashboardScreen.tsx`
-- Employees: `src/screens/employees/EmployeesScreen.tsx`
+- Employee Management: `src/screens/employees/EmployeesScreen.tsx`
+- Advanced Scheduling: `src/screens/employees/EnhancedEmployeeScheduleScreen.tsx`
+- Enhanced Reports: `src/screens/reports/ReportsScreenSimple.tsx`
+- Staff Analytics: `src/screens/reports/StaffReportDetailScreen.tsx`
 
 ### **Services**
 - Error Tracking: `src/services/ErrorTrackingService.ts`
@@ -287,8 +332,12 @@ uvicorn app.main:app --reload
 When starting a new session, remember:
 1. **Check bundle deployment first** if changes aren't showing
 2. **Use simple alternatives** if dependencies fail
-3. **Platform settings** are in Settings → Platform Settings
-4. **Square payment** is integrated and working
-5. **Error tracking** logs to console in development
+3. **Employee scheduling** is fully functional with week/day/list views
+4. **Reports system** uses real employee and sales data
+5. **Platform settings** are in Settings → Platform Settings
+6. **Square payment** is integrated and working
+7. **Error tracking** logs to console in development
+8. **Rota system** supports shift editing, time pickers, and real-time calculations
+9. **Labor analytics** track costs, efficiency, and performance metrics
 
 This file should be your first reference when resuming development!
