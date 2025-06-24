@@ -7,13 +7,13 @@ import {
   SafeAreaView,
   TouchableOpacity,
   ScrollView,
-  TextInput,
   Switch,
   Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme, useThemedStyles } from '../../../design-system/ThemeProvider';
+import FastInput from '../../../components/ui/FastInput';
 
 const CommissionStructureScreen: React.FC = () => {
   const navigation = useNavigation();
@@ -64,7 +64,15 @@ const CommissionStructureScreen: React.FC = () => {
     </View>
   );
 
-  const SettingRow = ({ title, description, value, onChangeText, unit, isSwitch = false, switchValue, onSwitchChange }: any) => (
+  const SettingRow = ({ title, description, value, onChangeText, unit, isSwitch = false, switchValue, onSwitchChange }: any) => {
+    const getInputType = () => {
+      if (unit === '%') return 'percentage';
+      if (unit === '£') return 'currency';
+      if (unit === 'days') return 'number';
+      return 'decimal';
+    };
+
+    return (
     <View style={styles.settingRow}>
       <View style={styles.settingInfo}>
         <Text style={styles.settingTitle}>{title}</Text>
@@ -79,19 +87,21 @@ const CommissionStructureScreen: React.FC = () => {
         />
       ) : (
         <View style={styles.inputContainer}>
-          {unit === '£' && <Text style={styles.currencySymbol}>£</Text>}
-          <TextInput
-            style={styles.input}
+          <FastInput
+            inputType={getInputType()}
             value={value}
             onChangeText={onChangeText}
-            keyboardType="numeric"
             placeholder="0.00"
+            unit={unit}
+            unitPosition={unit === '£' ? 'left' : 'right'}
+            containerStyle={{ marginBottom: 0 }}
+            inputStyle={styles.fastInputStyle}
           />
-          {unit === '%' && <Text style={styles.unitSymbol}>%</Text>}
         </View>
       )}
     </View>
-  );
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -171,7 +181,7 @@ const CommissionStructureScreen: React.FC = () => {
             title="Basic Tier Commission"
             description="Commission rate for basic tier restaurants"
             value={config.baseCommissionRate.toString()}
-            onChangeText={(text: string) => setConfig({...config, baseCommissionRate: parseFloat(text) || 0})}
+            onChangeText={(text: string) => setConfig({...config, baseCommissionRate: text === '' ? 0 : parseFloat(text) || 0})}
             unit="%"
           />
           
@@ -179,7 +189,7 @@ const CommissionStructureScreen: React.FC = () => {
             title="Premium Tier Commission"
             description="Commission rate for premium tier restaurants"
             value={config.premiumCommissionRate.toString()}
-            onChangeText={(text: string) => setConfig({...config, premiumCommissionRate: parseFloat(text) || 0})}
+            onChangeText={(text: string) => setConfig({...config, premiumCommissionRate: text === '' ? 0 : parseFloat(text) || 0})}
             unit="%"
           />
           
@@ -187,7 +197,7 @@ const CommissionStructureScreen: React.FC = () => {
             title="Enterprise Tier Commission"
             description="Commission rate for enterprise tier restaurants"
             value={config.enterpriseCommissionRate.toString()}
-            onChangeText={(text: string) => setConfig({...config, enterpriseCommissionRate: parseFloat(text) || 0})}
+            onChangeText={(text: string) => setConfig({...config, enterpriseCommissionRate: text === '' ? 0 : parseFloat(text) || 0})}
             unit="%"
           />
         </View>
@@ -207,9 +217,9 @@ const CommissionStructureScreen: React.FC = () => {
           {config.serviceChargeEnabled && (
             <SettingRow
               title="Service Charge Rate"
-              description="Platform service charge percentage"
+              description="Platform service charge percentage (e.g., 2.5, 12.5)"
               value={config.serviceChargeRate.toString()}
-              onChangeText={(text: string) => setConfig({...config, serviceChargeRate: parseFloat(text) || 0})}
+              onChangeText={(text: string) => setConfig({...config, serviceChargeRate: text === '' ? 0 : parseFloat(text) || 0})}
               unit="%"
             />
           )}
@@ -223,7 +233,7 @@ const CommissionStructureScreen: React.FC = () => {
             title="Minimum Monthly Fee"
             description="Minimum monthly fee per restaurant"
             value={config.minimumMonthlyFee.toFixed(2)}
-            onChangeText={(text: string) => setConfig({...config, minimumMonthlyFee: parseFloat(text) || 0})}
+            onChangeText={(text: string) => setConfig({...config, minimumMonthlyFee: text === '' ? 0 : parseFloat(text) || 0})}
             unit="£"
           />
           
@@ -231,7 +241,7 @@ const CommissionStructureScreen: React.FC = () => {
             title="Free Trial Period"
             description="Number of free trial days for new restaurants"
             value={config.freeTrialDays.toString()}
-            onChangeText={(text: string) => setConfig({...config, freeTrialDays: parseInt(text) || 0})}
+            onChangeText={(text: string) => setConfig({...config, freeTrialDays: text === '' ? 0 : parseInt(text) || 0})}
             unit="days"
           />
         </View>
@@ -250,9 +260,9 @@ const CommissionStructureScreen: React.FC = () => {
           
           <SettingRow
             title="Early Payment Discount"
-            description="Discount for payments within 7 days"
+            description="Discount for payments within 7 days (e.g., 2.5%)"
             value={config.earlyPaymentDiscount.toString()}
-            onChangeText={(text: string) => setConfig({...config, earlyPaymentDiscount: parseFloat(text) || 0})}
+            onChangeText={(text: string) => setConfig({...config, earlyPaymentDiscount: text === '' ? 0 : parseFloat(text) || 0})}
             unit="%"
           />
           
@@ -260,7 +270,7 @@ const CommissionStructureScreen: React.FC = () => {
             title="Referral Bonus"
             description="Bonus for successful restaurant referrals"
             value={config.referralBonus.toFixed(2)}
-            onChangeText={(text: string) => setConfig({...config, referralBonus: parseFloat(text) || 0})}
+            onChangeText={(text: string) => setConfig({...config, referralBonus: text === '' ? 0 : parseFloat(text) || 0})}
             unit="£"
           />
         </View>
@@ -444,29 +454,13 @@ const createStyles = (theme: any) => StyleSheet.create({
     marginTop: 2,
   },
   inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: theme.colors.background,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    minWidth: 100,
-  },
-  input: {
-    fontSize: 16,
-    color: theme.colors.text,
-    textAlign: 'right',
     flex: 1,
+    marginLeft: 16,
+    maxWidth: 120,
   },
-  currencySymbol: {
+  fastInputStyle: {
     fontSize: 16,
-    color: theme.colors.mediumGray,
-    marginRight: 4,
-  },
-  unitSymbol: {
-    fontSize: 16,
-    color: theme.colors.mediumGray,
-    marginLeft: 4,
+    minHeight: 40,
   },
   revenueCard: {
     backgroundColor: theme.colors.white,

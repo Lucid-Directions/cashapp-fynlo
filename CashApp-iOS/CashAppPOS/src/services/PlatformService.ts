@@ -445,7 +445,12 @@ class PlatformService {
     return {
       qr_code: { percentage: 1.2, currency: 'GBP' },
       stripe: { percentage: 1.4, fixed_fee: 0.20, currency: 'GBP' },
-      square: { percentage: 1.75, currency: 'GBP' },
+      square: { 
+        percentage: 1.75, 
+        currency: 'GBP',
+        // Additional Square fee structures
+        high_volume: { threshold: 0, percentage: 1.75, monthly_fee: 0 } // No monthly fee
+      },
       sumup: {
         percentage: 1.95,
         currency: 'GBP',
@@ -472,6 +477,56 @@ class PlatformService {
       effective_fee: platformFee,
       fee_percentage: (platformFee / amount) * 100,
       currency: feeConfig.currency,
+    };
+  }
+
+  // Service Charge Configuration
+  async getServiceChargeConfig(): Promise<{
+    enabled: boolean;
+    rate: number;
+    description: string;
+  }> {
+    try {
+      // Check DataService feature flags to determine if we should use real API
+      const dataService = await import('./DataService');
+      const flags = dataService.default.getInstance().getFeatureFlags();
+      
+      if (flags.USE_REAL_API) {
+        return await this.makeRequest('/platform-settings/service-charge');
+      } else {
+        console.log('Using mock service charge config (demo mode)');
+        return this.getMockServiceChargeConfig();
+      }
+    } catch (error) {
+      console.log('API not available, using mock service charge config');
+      // Return mock data for development/demo
+      return this.getMockServiceChargeConfig();
+    }
+  }
+
+  async updateServiceChargeConfig(
+    enabled: boolean,
+    rate: number,
+    description?: string
+  ): Promise<boolean> {
+    try {
+      await this.makeRequest('/platform-settings/service-charge', 'PUT', {
+        enabled,
+        rate,
+        description: description || `Platform service charge of ${rate}%`,
+      });
+      return true;
+    } catch (error) {
+      console.error('Failed to update service charge config:', error);
+      return false;
+    }
+  }
+
+  private getMockServiceChargeConfig() {
+    return {
+      enabled: true,
+      rate: 12.5,
+      description: 'Platform service charge',
     };
   }
 

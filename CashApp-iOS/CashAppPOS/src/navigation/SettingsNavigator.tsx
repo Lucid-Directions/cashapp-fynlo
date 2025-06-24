@@ -7,6 +7,7 @@ import BusinessSettingsScreen from '../screens/settings/BusinessSettingsScreen';
 import BusinessInformationScreen from '../screens/settings/business/BusinessInformationScreen';
 import TaxConfigurationScreen from '../screens/settings/business/TaxConfigurationScreen';
 import PaymentMethodsScreen from '../screens/settings/business/PaymentMethodsScreen';
+import PaymentMethodsInfoScreen from '../screens/settings/business/PaymentMethodsInfoScreen';
 import ReceiptCustomizationScreen from '../screens/settings/business/ReceiptCustomizationScreen';
 import OperatingHoursScreen from '../screens/settings/business/OperatingHoursScreen';
 
@@ -45,6 +46,7 @@ export type SettingsStackParamList = {
   BusinessInformation: undefined;
   TaxConfiguration: undefined;
   PaymentMethods: undefined;
+  PaymentMethodsInfo: undefined;
   ReceiptCustomization: undefined;
   OperatingHours: undefined;
   
@@ -116,6 +118,10 @@ const SettingsNavigator: React.FC = () => {
       <Stack.Screen 
         name="PaymentMethods" 
         component={PaymentMethodsScreen} 
+      />
+      <Stack.Screen 
+        name="PaymentMethodsInfo" 
+        component={PaymentMethodsInfoScreen} 
       />
       <Stack.Screen 
         name="ReceiptCustomization" 

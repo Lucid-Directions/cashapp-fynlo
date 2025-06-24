@@ -2,10 +2,12 @@
  * SumUpService - Dedicated service for SumUp payment operations
  * Handles SumUp-specific functionality including checkout creation, payment processing,
  * fee calculations, and integration with SumUp's developer API
+ * Now includes contactless NFC and QR code payment capabilities
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { PaymentRequest, PaymentResult } from './PaymentService';
+import { SumUpPaymentSheet, SumUpPaymentSheetCheckout } from 'sumup-react-native-alpha';
 
 export interface SumUpConfig {
   apiKey: string;
@@ -23,6 +25,27 @@ export interface SumUpCheckout {
   currency: string;
   status: 'created' | 'pending' | 'completed' | 'failed' | 'cancelled';
   expiresAt: string;
+}
+
+export interface SumUpContactlessPayment {
+  id: string;
+  amount: number;
+  currency: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled';
+  paymentMethod: 'nfc' | 'apple_pay' | 'google_pay';
+  deviceDetected?: boolean;
+  errorMessage?: string;
+}
+
+export interface SumUpQRPayment {
+  id: string;
+  qrCode: string;
+  amount: number;
+  currency: string;
+  status: 'created' | 'pending' | 'scanning' | 'completed' | 'expired' | 'failed';
+  expiresAt: string;
+  pollInterval: number;
+  statusUrl: string;
 }
 
 export interface SumUpFeeStructure {
@@ -147,6 +170,137 @@ class SumUpServiceClass {
         fee: 0,
         error: error instanceof Error ? error.message : 'SumUp payment failed',
       };
+    }
+  }
+
+  /**
+   * Process contactless NFC payment using SumUp Payment Sheet
+   */
+  async processContactlessPayment(
+    amount: number,
+    currency: string = 'GBP',
+    description?: string
+  ): Promise<SumUpContactlessPayment> {
+    try {
+      if (!this.config) {
+        throw new Error('SumUp service not initialized');
+      }
+
+      const paymentId = this.generatePaymentId();
+      
+      // Create checkout for contactless payment
+      const checkout: SumUpPaymentSheetCheckout = {
+        amount: amount,
+        currency: currency,
+        description: description || 'Finlow POS Contactless Payment',
+        skipSuccessScreen: false,
+      };
+
+      // Present the SumUp Payment Sheet for contactless payment
+      const result = await SumUpPaymentSheet.present(checkout);
+
+      if (result.success) {
+        return {
+          id: paymentId,
+          amount: amount,
+          currency: currency,
+          status: 'completed',
+          paymentMethod: this.detectPaymentMethod(result),
+        };
+      } else {
+        throw new Error(result.error || 'Contactless payment failed');
+      }
+    } catch (error) {
+      console.error('Contactless payment failed:', error);
+      return {
+        id: this.generatePaymentId(),
+        amount: amount,
+        currency: currency,
+        status: 'failed',
+        paymentMethod: 'nfc',
+        errorMessage: error instanceof Error ? error.message : 'Contactless payment failed',
+      };
+    }
+  }
+
+  /**
+   * Create QR code payment
+   */
+  async createQRPayment(
+    amount: number,
+    currency: string = 'GBP',
+    description?: string
+  ): Promise<SumUpQRPayment> {
+    try {
+      if (!this.config) {
+        throw new Error('SumUp service not initialized');
+      }
+
+      // Create checkout for QR payment
+      const checkout = await this.createCheckout(amount, currency, description);
+      
+      return {
+        id: checkout.checkoutId,
+        qrCode: checkout.checkoutUrl,
+        amount: amount,
+        currency: currency,
+        status: 'created',
+        expiresAt: checkout.expiresAt,
+        pollInterval: 2000, // Poll every 2 seconds
+        statusUrl: `${this.config.baseUrl}/v0.1/checkouts/${checkout.checkoutId}`,
+      };
+    } catch (error) {
+      console.error('QR payment creation failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Poll QR payment status
+   */
+  async pollQRPaymentStatus(qrPayment: SumUpQRPayment): Promise<SumUpQRPayment> {
+    try {
+      if (!this.config) {
+        throw new Error('SumUp service not initialized');
+      }
+
+      const response = await fetch(qrPayment.statusUrl, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${this.config.apiKey}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to check QR payment status');
+      }
+
+      const data = await response.json();
+      
+      return {
+        ...qrPayment,
+        status: this.mapCheckoutStatus(data.status),
+      };
+    } catch (error) {
+      console.error('QR payment status poll failed:', error);
+      return {
+        ...qrPayment,
+        status: 'failed',
+      };
+    }
+  }
+
+  /**
+   * Check if device supports contactless payments
+   */
+  async isContactlessSupported(): Promise<boolean> {
+    try {
+      // Check if NFC is available on the device
+      // This would typically use device capabilities
+      return true; // Assume supported for now
+    } catch (error) {
+      console.error('Failed to check contactless support:', error);
+      return false;
     }
   }
 
@@ -292,6 +446,48 @@ class SumUpServiceClass {
     const timestamp = Date.now();
     const random = Math.random().toString(36).substring(2, 8);
     return `FYNLO_${timestamp}_${random}`.toUpperCase();
+  }
+
+  /**
+   * Generate unique payment ID
+   */
+  private generatePaymentId(): string {
+    const timestamp = Date.now();
+    const random = Math.random().toString(36).substring(2, 8);
+    return `PAY_${timestamp}_${random}`.toUpperCase();
+  }
+
+  /**
+   * Detect payment method from SumUp result
+   */
+  private detectPaymentMethod(result: any): 'nfc' | 'apple_pay' | 'google_pay' {
+    // This would analyze the payment result to determine method
+    // For now, default to NFC
+    if (result.paymentMethod?.includes('apple_pay')) {
+      return 'apple_pay';
+    } else if (result.paymentMethod?.includes('google_pay')) {
+      return 'google_pay';
+    }
+    return 'nfc';
+  }
+
+  /**
+   * Map SumUp checkout status to QR payment status
+   */
+  private mapCheckoutStatus(sumupStatus: string): SumUpQRPayment['status'] {
+    switch (sumupStatus.toLowerCase()) {
+      case 'pending':
+        return 'scanning';
+      case 'paid':
+      case 'completed':
+        return 'completed';
+      case 'failed':
+        return 'failed';
+      case 'expired':
+        return 'expired';
+      default:
+        return 'pending';
+    }
   }
 
   /**

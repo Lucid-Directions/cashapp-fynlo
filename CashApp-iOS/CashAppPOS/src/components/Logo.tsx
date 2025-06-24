@@ -57,14 +57,14 @@ const Logo: React.FC<LogoProps> = ({
   // Try different approaches to load the logo
   let logoSource;
   try {
-    logoSource = require('../../assets/fynlo-logo.png');
+    logoSource = require('../assets/fynlo-logo.png');
   } catch (error) {
-    console.log('Failed to load logo from assets folder');
+    console.log('Failed to load logo from src/assets folder');
     try {
-      logoSource = require('../../../assets/fynlo-logo.png');
+      logoSource = require('../../assets/fynlo-logo.png');
     } catch (error2) {
       try {
-        logoSource = require('../../../../assets/fynlo-logo.png');
+        logoSource = require('../../../assets/fynlo-logo.png');
       } catch (error3) {
         console.log('Failed to load logo from all locations, using Fynlo text fallback');
         logoSource = null;

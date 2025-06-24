@@ -43,9 +43,9 @@
     },
     "provider_priority": [
       "sumup",
+      "square",
       "qr_code", 
-      "stripe",
-      "square"
+      "stripe"
     ],
     "provider_weights": {
       "balanced": {
@@ -70,7 +70,7 @@
         "availability": 0.05
       }
     },
-    "fallback_provider": "qr_code"
+    "fallback_provider": "square"
   },
   "features": {
     "smart_routing_enabled": true,

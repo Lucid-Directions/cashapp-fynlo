@@ -238,12 +238,21 @@ const EmployeesScreen: React.FC = () => {
           <Text style={styles.headerSubtitle}>{filteredEmployees.length} staff members</Text>
         </View>
         
-        <TouchableOpacity 
-          style={styles.addButton}
-          onPress={() => setShowAddModal(true)}
-        >
-          <Icon name="add" size={24} color={Colors.white} />
-        </TouchableOpacity>
+        <View style={styles.headerActions}>
+          <TouchableOpacity 
+            style={styles.scheduleButton}
+            onPress={() => navigation.navigate('EmployeeSchedule')}
+          >
+            <Icon name="schedule" size={20} color={Colors.white} />
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={styles.addButton}
+            onPress={() => setShowAddModal(true)}
+          >
+            <Icon name="add" size={24} color={Colors.white} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Stats Bar */}
@@ -566,6 +575,16 @@ const styles = StyleSheet.create({
   headerSubtitle: {
     fontSize: 12,
     color: 'rgba(255, 255, 255, 0.8)',
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  scheduleButton: {
+    padding: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 6,
   },
   addButton: {
     padding: 8,

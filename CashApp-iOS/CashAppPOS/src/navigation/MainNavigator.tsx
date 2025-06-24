@@ -13,6 +13,8 @@ import StaffReportDetailScreen from '../screens/reports/StaffReportDetailScreen'
 import FinancialReportDetailScreen from '../screens/reports/FinancialReportDetailScreen';
 import MoreScreen from '../screens/more/MoreScreen';
 import EmployeesScreen from '../screens/employees/EmployeesScreen';
+import EmployeeScheduleScreen from '../screens/employees/EmployeeScheduleScreen';
+import QRScannerScreen from '../screens/scanner/QRScannerScreen';
 import CustomersScreen from '../screens/customers/CustomersScreen';
 import InventoryScreen from '../screens/inventory/InventoryScreen';
 import MenuManagementScreen from '../screens/settings/app/MenuManagementScreen';
@@ -21,6 +23,10 @@ import ProfileScreen from '../screens/main/ProfileScreen';
 import HelpScreen from '../screens/support/HelpScreen';
 import SettingsNavigator from './SettingsNavigator';
 import useAppStore from '../store/useAppStore';
+import EnhancedPaymentScreen from '../screens/payment/EnhancedPaymentScreen';
+import QRCodePaymentScreen from '../screens/payments/QRCodePaymentScreen';
+import SquareCardPaymentScreen from '../screens/payments/SquareCardPaymentScreen';
+import SquareContactlessPaymentScreen from '../screens/payments/SquareContactlessPaymentScreen';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 const Stack = createStackNavigator<MainStackParamList>();
@@ -152,6 +158,20 @@ const MainNavigator: React.FC = () => {
         }}
       />
       <Stack.Screen
+        name="EmployeeSchedule"
+        component={EmployeeScheduleScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="QRScanner"
+        component={QRScannerScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
         name="Customers"
         component={CustomersScreen}
         options={{
@@ -196,6 +216,34 @@ const MainNavigator: React.FC = () => {
       <Stack.Screen
         name="Settings"
         component={SettingsNavigator}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="EnhancedPayment"
+        component={EnhancedPaymentScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="QRCodePayment"
+        component={QRCodePaymentScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="SquareCardPayment"
+        component={SquareCardPaymentScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="SquareContactlessPayment"
+        component={SquareContactlessPaymentScreen}
         options={{
           headerShown: false,
         }}
