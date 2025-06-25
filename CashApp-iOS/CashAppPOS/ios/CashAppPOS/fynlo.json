@@ -1,0 +1,13 @@
+{
+  "application_type": "ios",
+  "client_id": "cc_classic_nHDrUtHoMz6dkGKwfHSzVLjXlIuN2",
+  "client_secret": "cc_sk_classic_lDCY8d8r2uGCw3aBczNeSTDPOYYWTk7pL93DERHSj6W1AyX9Wd",
+  "cors_uris": [
+    ""
+  ],
+  "id": "CCCTYQA4X",
+  "name": "Fynlo",
+  "redirect_uris": [
+    "https://fynlo.co.uk"
+  ]
+}

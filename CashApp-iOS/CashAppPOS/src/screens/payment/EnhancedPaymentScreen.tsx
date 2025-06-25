@@ -11,6 +11,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import useAppStore from '../../store/useAppStore';
@@ -46,6 +47,7 @@ interface PaymentMethod {
 const tipPresets = [10, 15, 18, 20, 25];
 
 const EnhancedPaymentScreen: React.FC = () => {
+  const insets = useSafeAreaInsets();
   const navigation = useNavigation();
   const { cart, clearCart, cartTotal } = useAppStore();
   const { paymentMethods, taxConfiguration } = useSettingsStore();
@@ -747,7 +749,7 @@ const EnhancedPaymentScreen: React.FC = () => {
       </ScrollView>
 
       {/* Process Payment Button */}
-      <View style={styles.footer}>
+      <View style={[styles.footer, { paddingBottom: Math.max(32, insets.bottom + 16) }]}>
         <TouchableOpacity
           style={[styles.processButton, processing && styles.processingButton]}
           onPress={handleProcessPayment}
@@ -1084,7 +1086,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
     paddingHorizontal: 16,
     paddingVertical: 16,
-    paddingBottom: 32,
     borderTopWidth: 1,
     borderTopColor: Colors.border,
   },

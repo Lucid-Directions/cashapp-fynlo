@@ -9,6 +9,7 @@ import {
   Alert,
   Modal,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { OrderItem, Order } from '../../types';
 import useAppStore from '../../store/useAppStore';
@@ -42,6 +43,7 @@ const OrderManagement: React.FC<OrderManagementProps> = ({
   onClose,
   onCheckout,
 }) => {
+  const insets = useSafeAreaInsets();
   const {
     cart,
     updateCartItem,
@@ -425,7 +427,7 @@ const OrderManagement: React.FC<OrderManagementProps> = ({
 
         {/* Actions */}
         {cart.length > 0 && (
-          <View style={styles.actions}>
+          <View style={[styles.actions, { paddingBottom: Math.max(32, insets.bottom + 16) }]}>
             <TouchableOpacity
               style={[styles.actionButton, styles.voidButton]}
               onPress={handleVoidOrder}
@@ -688,7 +690,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: 16,
     paddingVertical: 16,
-    paddingBottom: 32,
     gap: 12,
     backgroundColor: Colors.white,
     borderTopWidth: 1,
