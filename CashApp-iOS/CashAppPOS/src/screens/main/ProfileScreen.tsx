@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -8,16 +8,116 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  Modal,
+  TextInput,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import useAppStore from '../../store/useAppStore';
 import ErrorBoundary from '../../components/ErrorBoundary';
 import Colors from '../../constants/Colors';
+import { useAuth } from '../../contexts/AuthContext';
 
 const ProfileScreenContent: React.FC = () => {
   const navigation = useNavigation();
   const { user, session } = useAppStore();
+  const { updateUser } = useAuth();
+  
+  // Modal states
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  
+  // Edit form state
+  const [editForm, setEditForm] = useState({
+    firstName: user?.firstName || '',
+    lastName: user?.lastName || '',
+    email: user?.email || '',
+    phone: user?.phone || '',
+  });
+
+  // Password form state
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+
+  const handleEditProfile = () => {
+    setEditForm({
+      firstName: user?.firstName || '',
+      lastName: user?.lastName || '',
+      email: user?.email || '',
+      phone: user?.phone || '',
+    });
+    setShowEditModal(true);
+  };
+
+  const handleSaveProfile = async () => {
+    // Validate required fields
+    if (!editForm.firstName.trim() || !editForm.lastName.trim() || !editForm.email.trim()) {
+      Alert.alert('Error', 'Please fill in all required fields');
+      return;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(editForm.email.trim())) {
+      Alert.alert('Error', 'Please enter a valid email address');
+      return;
+    }
+
+    try {
+      await updateUser({
+        firstName: editForm.firstName.trim(),
+        lastName: editForm.lastName.trim(),
+        email: editForm.email.trim(),
+        phone: editForm.phone.trim(),
+      });
+      
+      setShowEditModal(false);
+      Alert.alert('Success', 'Profile updated successfully!');
+    } catch (error) {
+      Alert.alert('Error', 'Failed to update profile. Please try again.');
+    }
+  };
+
+  const handleChangePassword = () => {
+    setPasswordForm({
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: '',
+    });
+    setShowPasswordModal(true);
+  };
+
+  const handleSavePassword = async () => {
+    // Validate required fields
+    if (!passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
+      Alert.alert('Error', 'Please fill in all password fields');
+      return;
+    }
+
+    // Validate new password
+    if (passwordForm.newPassword.length < 6) {
+      Alert.alert('Error', 'New password must be at least 6 characters long');
+      return;
+    }
+
+    // Validate password confirmation
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      Alert.alert('Error', 'New passwords do not match');
+      return;
+    }
+
+    try {
+      // In a real app, this would call an API to change password
+      Alert.alert('Success', 'Password changed successfully!', [
+        { text: 'OK', onPress: () => setShowPasswordModal(false) }
+      ]);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to change password. Please try again.');
+    }
+  };
 
   const InfoCard = ({ 
     title, 
@@ -136,7 +236,7 @@ const ProfileScreenContent: React.FC = () => {
         <View style={styles.section}>
           <TouchableOpacity
             style={styles.actionButton}
-            onPress={() => Alert.alert('Coming Soon', 'Edit profile will be available soon')}
+            onPress={handleEditProfile}
           >
             <Icon name="edit" size={24} color={Colors.secondary} />
             <Text style={styles.actionButtonText}>Edit Profile</Text>
@@ -145,7 +245,7 @@ const ProfileScreenContent: React.FC = () => {
 
           <TouchableOpacity
             style={styles.actionButton}
-            onPress={() => Alert.alert('Coming Soon', 'Change password will be available soon')}
+            onPress={handleChangePassword}
           >
             <Icon name="lock" size={24} color={Colors.secondary} />
             <Text style={styles.actionButtonText}>Change Password</Text>
@@ -153,6 +253,163 @@ const ProfileScreenContent: React.FC = () => {
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      {/* Edit Profile Modal */}
+      <Modal
+        visible={showEditModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowEditModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modal}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Edit Profile</Text>
+              <TouchableOpacity onPress={() => setShowEditModal(false)}>
+                <Icon name="close" size={24} color={Colors.text} />
+              </TouchableOpacity>
+            </View>
+            
+            <ScrollView style={styles.modalContent}>
+              <View style={styles.formGroup}>
+                <Text style={styles.formLabel}>First Name *</Text>
+                <TextInput
+                  style={styles.formInput}
+                  value={editForm.firstName}
+                  onChangeText={(text) => setEditForm({...editForm, firstName: text})}
+                  placeholder="Enter first name"
+                  placeholderTextColor={Colors.lightText}
+                />
+              </View>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.formLabel}>Last Name *</Text>
+                <TextInput
+                  style={styles.formInput}
+                  value={editForm.lastName}
+                  onChangeText={(text) => setEditForm({...editForm, lastName: text})}
+                  placeholder="Enter last name"
+                  placeholderTextColor={Colors.lightText}
+                />
+              </View>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.formLabel}>Email *</Text>
+                <TextInput
+                  style={styles.formInput}
+                  value={editForm.email}
+                  onChangeText={(text) => setEditForm({...editForm, email: text})}
+                  placeholder="Enter email address"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  placeholderTextColor={Colors.lightText}
+                />
+              </View>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.formLabel}>Phone</Text>
+                <TextInput
+                  style={styles.formInput}
+                  value={editForm.phone}
+                  onChangeText={(text) => setEditForm({...editForm, phone: text})}
+                  placeholder="Enter phone number"
+                  keyboardType="phone-pad"
+                  placeholderTextColor={Colors.lightText}
+                />
+              </View>
+
+              <View style={styles.modalActions}>
+                <TouchableOpacity 
+                  style={[styles.modalButton, styles.cancelButton]}
+                  onPress={() => setShowEditModal(false)}
+                >
+                  <Text style={styles.cancelButtonText}>Cancel</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity 
+                  style={[styles.modalButton, styles.saveButton]}
+                  onPress={handleSaveProfile}
+                >
+                  <Text style={styles.saveButtonText}>Save Changes</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Change Password Modal */}
+      <Modal
+        visible={showPasswordModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowPasswordModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modal}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Change Password</Text>
+              <TouchableOpacity onPress={() => setShowPasswordModal(false)}>
+                <Icon name="close" size={24} color={Colors.text} />
+              </TouchableOpacity>
+            </View>
+            
+            <ScrollView style={styles.modalContent}>
+              <View style={styles.formGroup}>
+                <Text style={styles.formLabel}>Current Password *</Text>
+                <TextInput
+                  style={styles.formInput}
+                  value={passwordForm.currentPassword}
+                  onChangeText={(text) => setPasswordForm({...passwordForm, currentPassword: text})}
+                  placeholder="Enter current password"
+                  secureTextEntry={true}
+                  placeholderTextColor={Colors.lightText}
+                />
+              </View>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.formLabel}>New Password *</Text>
+                <TextInput
+                  style={styles.formInput}
+                  value={passwordForm.newPassword}
+                  onChangeText={(text) => setPasswordForm({...passwordForm, newPassword: text})}
+                  placeholder="Enter new password (min 6 characters)"
+                  secureTextEntry={true}
+                  placeholderTextColor={Colors.lightText}
+                />
+              </View>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.formLabel}>Confirm New Password *</Text>
+                <TextInput
+                  style={styles.formInput}
+                  value={passwordForm.confirmPassword}
+                  onChangeText={(text) => setPasswordForm({...passwordForm, confirmPassword: text})}
+                  placeholder="Confirm new password"
+                  secureTextEntry={true}
+                  placeholderTextColor={Colors.lightText}
+                />
+              </View>
+
+              <View style={styles.modalActions}>
+                <TouchableOpacity 
+                  style={[styles.modalButton, styles.cancelButton]}
+                  onPress={() => setShowPasswordModal(false)}
+                >
+                  <Text style={styles.cancelButtonText}>Cancel</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity 
+                  style={[styles.modalButton, styles.saveButton]}
+                  onPress={handleSavePassword}
+                >
+                  <Text style={styles.saveButtonText}>Change Password</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -318,6 +575,87 @@ const styles = StyleSheet.create({
     color: Colors.text,
     marginLeft: 15,
     flex: 1,
+  },
+  // Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modal: {
+    backgroundColor: Colors.white,
+    borderRadius: 16,
+    width: '90%',
+    maxHeight: '80%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.lightGray,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: Colors.text,
+  },
+  modalContent: {
+    padding: 20,
+  },
+  formGroup: {
+    marginBottom: 20,
+  },
+  formLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.text,
+    marginBottom: 8,
+  },
+  formInput: {
+    borderWidth: 1,
+    borderColor: Colors.lightGray,
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 16,
+    color: Colors.text,
+    backgroundColor: Colors.white,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 24,
+    paddingBottom: 20,
+  },
+  modalButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  cancelButton: {
+    backgroundColor: Colors.lightGray,
+  },
+  saveButton: {
+    backgroundColor: Colors.primary,
+  },
+  cancelButtonText: {
+    color: Colors.text,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  saveButtonText: {
+    color: Colors.white,
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 

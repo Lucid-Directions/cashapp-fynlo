@@ -6,8 +6,10 @@ import {
   TouchableOpacity,
   ScrollView,
   SafeAreaView,
+  Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import ErrorTrackingService from '../services/ErrorTrackingService';
 
 interface Props {
   children: ReactNode;
@@ -22,6 +24,8 @@ interface State {
 }
 
 class ErrorBoundary extends Component<Props, State> {
+  private errorTrackingService: ErrorTrackingService;
+
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -29,6 +33,7 @@ class ErrorBoundary extends Component<Props, State> {
       error: null,
       errorInfo: null,
     };
+    this.errorTrackingService = ErrorTrackingService.getInstance();
   }
 
   static getDerivedStateFromError(error: Error): State {
@@ -40,10 +45,22 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    console.error('🚨 ErrorBoundary caught an error:', error, errorInfo);
     
     this.setState({
       errorInfo,
+    });
+
+    // Track the error with Sentry
+    this.errorTrackingService.captureError(error, {
+      action: 'react_error_boundary',
+      additionalData: {
+        componentStack: errorInfo.componentStack,
+        errorBoundary: true,
+        errorName: error.name,
+        errorMessage: error.message,
+        errorStack: error.stack,
+      }
     });
 
     // Call the onError callback if provided
@@ -58,6 +75,30 @@ class ErrorBoundary extends Component<Props, State> {
       error: null,
       errorInfo: null,
     });
+    // Track error recovery
+    this.errorTrackingService.trackEvent('error_boundary_reset');
+  };
+
+  handleReportError = () => {
+    this.errorTrackingService.showUserFeedbackDialog();
+  };
+
+  handleRestartApp = () => {
+    Alert.alert(
+      'Restart App',
+      'This will close and restart the app. Any unsaved data will be lost.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Restart', 
+          style: 'destructive',
+          onPress: () => {
+            this.errorTrackingService.trackEvent('app_restart_requested');
+            this.handleReset();
+          }
+        },
+      ]
+    );
   };
 
   render() {

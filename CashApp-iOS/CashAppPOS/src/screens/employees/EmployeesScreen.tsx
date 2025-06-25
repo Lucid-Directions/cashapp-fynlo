@@ -25,6 +25,15 @@ const EmployeesScreen: React.FC = () => {
   const [selectedRole, setSelectedRole] = useState<string>('all');
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<EmployeeData | null>(null);
+  
+  // Add Employee Form State
+  const [newEmployee, setNewEmployee] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    role: 'Cashier',
+    hourlyRate: '12.00',
+  });
 
   useEffect(() => {
     loadEmployees();
@@ -85,6 +94,77 @@ const EmployeesScreen: React.FC = () => {
 
   const handleEmployeePress = (employee: EmployeeData) => {
     setSelectedEmployee(employee);
+  };
+
+  const handleAddEmployee = () => {
+    // Validate required fields
+    if (!newEmployee.name.trim() || !newEmployee.email.trim()) {
+      Alert.alert('Error', 'Please fill in all required fields (Name and Email)');
+      return;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(newEmployee.email.trim())) {
+      Alert.alert('Error', 'Please enter a valid email address');
+      return;
+    }
+
+    // Check if email already exists
+    const emailExists = employees.some(emp => 
+      emp.email.toLowerCase() === newEmployee.email.trim().toLowerCase()
+    );
+    if (emailExists) {
+      Alert.alert('Error', 'An employee with this email already exists');
+      return;
+    }
+
+    // Create new employee data
+    const employeeData: EmployeeData = {
+      id: Date.now(),
+      name: newEmployee.name.trim(),
+      email: newEmployee.email.trim(),
+      phone: newEmployee.phone.trim() || `+44 ${Math.floor(Math.random() * 900000000) + 100000000}`,
+      role: newEmployee.role as 'Manager' | 'Cashier' | 'Server' | 'Cook',
+      hireDate: new Date(),
+      hourlyRate: parseFloat(newEmployee.hourlyRate) || 12.00,
+      totalSales: 0,
+      averageSalesPerDay: 0,
+      performanceScore: 85 + Math.random() * 10, // Initial score between 85-95
+      punctualityScore: 90 + Math.random() * 8, // Initial score between 90-98
+      scheduledHours: 160,
+      actualHours: 160,
+      weeksSinceLastReview: 0,
+    };
+
+    // Add to employees list
+    setEmployees([...employees, employeeData]);
+    
+    // Reset form
+    setNewEmployee({
+      name: '',
+      email: '',
+      phone: '',
+      role: 'Cashier',
+      hourlyRate: '12.00',
+    });
+    
+    // Close modal
+    setShowAddModal(false);
+    
+    // Show success message
+    Alert.alert('Success', `${employeeData.name} has been added to your team!`);
+  };
+
+  const handleCancelAdd = () => {
+    setNewEmployee({
+      name: '',
+      email: '',
+      phone: '',
+      role: 'Cashier',
+      hourlyRate: '12.00',
+    });
+    setShowAddModal(false);
   };
 
   const renderEmployee = ({ item }: { item: EmployeeData }) => (
@@ -158,12 +238,21 @@ const EmployeesScreen: React.FC = () => {
           <Text style={styles.headerSubtitle}>{filteredEmployees.length} staff members</Text>
         </View>
         
-        <TouchableOpacity 
-          style={styles.addButton}
-          onPress={() => setShowAddModal(true)}
-        >
-          <Icon name="add" size={24} color={Colors.white} />
-        </TouchableOpacity>
+        <View style={styles.headerActions}>
+          <TouchableOpacity 
+            style={styles.scheduleButton}
+            onPress={() => navigation.navigate('EmployeeSchedule')}
+          >
+            <Icon name="schedule" size={20} color={Colors.white} />
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={styles.addButton}
+            onPress={() => setShowAddModal(true)}
+          >
+            <Icon name="add" size={24} color={Colors.white} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Stats Bar */}
@@ -341,6 +430,119 @@ const EmployeesScreen: React.FC = () => {
           </View>
         </View>
       </Modal>
+
+      {/* Add Employee Modal */}
+      <Modal
+        visible={showAddModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={handleCancelAdd}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.addEmployeeModal}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Add New Employee</Text>
+              <TouchableOpacity onPress={handleCancelAdd}>
+                <Icon name="close" size={24} color={Colors.text} />
+              </TouchableOpacity>
+            </View>
+            
+            <ScrollView style={styles.addEmployeeForm}>
+              <View style={styles.formGroup}>
+                <Text style={styles.formLabel}>Full Name *</Text>
+                <TextInput
+                  style={styles.formInput}
+                  placeholder="Enter employee's full name"
+                  value={newEmployee.name}
+                  onChangeText={(text) => setNewEmployee({...newEmployee, name: text})}
+                  placeholderTextColor={Colors.darkGray}
+                />
+              </View>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.formLabel}>Email Address *</Text>
+                <TextInput
+                  style={styles.formInput}
+                  placeholder="employee@restaurant.com"
+                  value={newEmployee.email}
+                  onChangeText={(text) => setNewEmployee({...newEmployee, email: text})}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  placeholderTextColor={Colors.darkGray}
+                />
+              </View>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.formLabel}>Phone Number</Text>
+                <TextInput
+                  style={styles.formInput}
+                  placeholder="+44 7700 900123"
+                  value={newEmployee.phone}
+                  onChangeText={(text) => setNewEmployee({...newEmployee, phone: text})}
+                  keyboardType="phone-pad"
+                  placeholderTextColor={Colors.darkGray}
+                />
+              </View>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.formLabel}>Role</Text>
+                <View style={styles.roleSelector}>
+                  {['Manager', 'Cashier', 'Server', 'Cook'].map(role => (
+                    <TouchableOpacity
+                      key={role}
+                      style={[
+                        styles.roleOption,
+                        newEmployee.role === role && styles.roleOptionSelected
+                      ]}
+                      onPress={() => setNewEmployee({...newEmployee, role})}
+                    >
+                      <Text style={[
+                        styles.roleOptionText,
+                        newEmployee.role === role && styles.roleOptionTextSelected
+                      ]}>
+                        {role}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.formLabel}>Hourly Rate (£)</Text>
+                <TextInput
+                  style={styles.formInput}
+                  placeholder="12.00"
+                  value={newEmployee.hourlyRate}
+                  onChangeText={(text) => {
+                    // Only allow numbers and decimal point
+                    const cleanText = text.replace(/[^0-9.]/g, '');
+                    setNewEmployee({...newEmployee, hourlyRate: cleanText});
+                  }}
+                  keyboardType="decimal-pad"
+                  placeholderTextColor={Colors.darkGray}
+                />
+              </View>
+
+              <View style={styles.formActions}>
+                <TouchableOpacity 
+                  style={[styles.formButton, styles.cancelButton]}
+                  onPress={handleCancelAdd}
+                >
+                  <Text style={styles.cancelButtonText}>Cancel</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity 
+                  style={[styles.formButton, styles.addButton]}
+                  onPress={handleAddEmployee}
+                >
+                  <Icon name="person-add" size={20} color={Colors.white} />
+                  <Text style={styles.addButtonText}>Add Employee</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -373,6 +575,16 @@ const styles = StyleSheet.create({
   headerSubtitle: {
     fontSize: 12,
     color: 'rgba(255, 255, 255, 0.8)',
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  scheduleButton: {
+    padding: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 6,
   },
   addButton: {
     padding: 8,
@@ -648,6 +860,98 @@ const styles = StyleSheet.create({
   actionButtonText: {
     color: Colors.white,
     fontSize: 14,
+    fontWeight: '600',
+    marginLeft: 8,
+  },
+  // Add Employee Modal Styles
+  addEmployeeModal: {
+    backgroundColor: Colors.white,
+    borderRadius: 16,
+    width: '90%',
+    maxHeight: '85%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  addEmployeeForm: {
+    padding: 20,
+  },
+  formGroup: {
+    marginBottom: 20,
+  },
+  formLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.text,
+    marginBottom: 8,
+  },
+  formInput: {
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 16,
+    color: Colors.text,
+    backgroundColor: Colors.white,
+  },
+  roleSelector: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  roleOption: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    backgroundColor: Colors.background,
+  },
+  roleOptionSelected: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+  },
+  roleOptionText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: Colors.text,
+  },
+  roleOptionTextSelected: {
+    color: Colors.white,
+  },
+  formActions: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 24,
+    paddingBottom: 20,
+  },
+  formButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    borderRadius: 8,
+  },
+  cancelButton: {
+    backgroundColor: Colors.background,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  addButton: {
+    backgroundColor: Colors.primary,
+  },
+  cancelButtonText: {
+    color: Colors.text,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  addButtonText: {
+    color: Colors.white,
+    fontSize: 16,
     fontWeight: '600',
     marginLeft: 8,
   },

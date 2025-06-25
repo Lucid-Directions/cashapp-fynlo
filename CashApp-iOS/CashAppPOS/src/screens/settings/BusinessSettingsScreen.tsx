@@ -51,6 +51,14 @@ const BusinessSettingsScreen: React.FC = () => {
       status: 'warning',
     },
     {
+      id: 'bank-details',
+      title: 'Bank Details',
+      description: 'Account information for receiving payments',
+      icon: 'account-balance',
+      route: 'BankDetails',
+      status: 'incomplete',
+    },
+    {
       id: 'payment-methods-info',
       title: 'Payment Methods',
       description: 'Payment processing is managed by the platform',

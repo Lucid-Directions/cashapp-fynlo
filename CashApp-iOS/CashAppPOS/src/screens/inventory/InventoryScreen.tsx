@@ -42,6 +42,16 @@ const InventoryScreen: React.FC = () => {
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedItem, setSelectedItem] = useState<InventoryData | null>(null);
   const [showRestockModal, setShowRestockModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    name: '',
+    category: '',
+    currentStock: '',
+    minimumStock: '',
+    maximumStock: '',
+    unitCost: '',
+    supplier: '',
+  });
 
   useEffect(() => {
     loadInventory();
@@ -141,6 +151,68 @@ const InventoryScreen: React.FC = () => {
   const handleRestock = (item: InventoryData) => {
     setSelectedItem(item);
     setShowRestockModal(true);
+  };
+
+  const handleEditItem = (item: InventoryData | null) => {
+    if (item) {
+      setEditFormData({
+        name: item.name,
+        category: item.category,
+        currentStock: item.currentStock.toString(),
+        minimumStock: item.minimumStock.toString(),
+        maximumStock: item.maximumStock.toString(),
+        unitCost: item.unitCost.toFixed(2),
+        supplier: item.supplier,
+      });
+      setShowEditModal(true);
+    }
+  };
+
+  const handleSaveEdit = () => {
+    if (!selectedItem) return;
+
+    // Validate input
+    const currentStock = parseInt(editFormData.currentStock);
+    const minimumStock = parseInt(editFormData.minimumStock);
+    const maximumStock = parseInt(editFormData.maximumStock);
+    const unitCost = parseFloat(editFormData.unitCost);
+
+    if (isNaN(currentStock) || isNaN(minimumStock) || isNaN(maximumStock) || isNaN(unitCost)) {
+      Alert.alert('Error', 'Please enter valid numbers for stock and cost fields.');
+      return;
+    }
+
+    if (minimumStock >= maximumStock) {
+      Alert.alert('Error', 'Maximum stock must be greater than minimum stock.');
+      return;
+    }
+
+    if (!editFormData.name.trim() || !editFormData.supplier.trim()) {
+      Alert.alert('Error', 'Please enter valid name and supplier.');
+      return;
+    }
+
+    // Update the inventory item
+    const updatedInventory = inventory.map(item => 
+      item.itemId === selectedItem.itemId
+        ? {
+            ...item,
+            name: editFormData.name.trim(),
+            category: editFormData.category,
+            currentStock,
+            minimumStock,
+            maximumStock,
+            unitCost,
+            supplier: editFormData.supplier.trim(),
+          }
+        : item
+    );
+
+    setInventory(updatedInventory);
+    setShowEditModal(false);
+    setSelectedItem(null);
+    
+    Alert.alert('Success', 'Inventory item updated successfully!');
   };
 
   const renderInventoryItem = ({ item }: { item: InventoryData }) => {
@@ -434,7 +506,10 @@ const InventoryScreen: React.FC = () => {
                     <Icon name="add" size={20} color={Colors.white} />
                     <Text style={styles.actionButtonText}>Restock</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={[styles.actionButton, styles.editActionButton]}>
+                  <TouchableOpacity 
+                    style={[styles.actionButton, styles.editActionButton]}
+                    onPress={() => handleEditItem(selectedItem)}
+                  >
                     <Icon name="edit" size={20} color={Colors.white} />
                     <Text style={styles.actionButtonText}>Edit</Text>
                   </TouchableOpacity>
@@ -507,6 +582,135 @@ const InventoryScreen: React.FC = () => {
                 </TouchableOpacity>
               </View>
             )}
+          </View>
+        </View>
+      </Modal>
+
+      {/* Edit Item Modal */}
+      <Modal
+        visible={showEditModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowEditModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.editModal}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Edit Inventory Item</Text>
+              <TouchableOpacity onPress={() => setShowEditModal(false)}>
+                <Icon name="close" size={24} color={Colors.text} />
+              </TouchableOpacity>
+            </View>
+            
+            <ScrollView style={styles.editContent} showsVerticalScrollIndicator={false}>
+              <View style={styles.formGroup}>
+                <Text style={styles.formLabel}>Item Name</Text>
+                <TextInput
+                  style={styles.formInput}
+                  value={editFormData.name}
+                  onChangeText={(text) => setEditFormData({...editFormData, name: text})}
+                  placeholder="Enter item name"
+                />
+              </View>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.formLabel}>Category</Text>
+                <View style={styles.categorySelector}>
+                  {['Vegetables', 'Meat', 'Dairy', 'Pantry', 'Spices', 'Beverages'].map(cat => (
+                    <TouchableOpacity
+                      key={cat}
+                      style={[
+                        styles.categoryOption,
+                        editFormData.category === cat && styles.categoryOptionSelected
+                      ]}
+                      onPress={() => setEditFormData({...editFormData, category: cat})}
+                    >
+                      <Text style={[
+                        styles.categoryOptionText,
+                        editFormData.category === cat && styles.categoryOptionTextSelected
+                      ]}>
+                        {cat}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+
+              <View style={styles.formRow}>
+                <View style={[styles.formGroup, styles.halfWidth]}>
+                  <Text style={styles.formLabel}>Current Stock</Text>
+                  <TextInput
+                    style={styles.formInput}
+                    value={editFormData.currentStock}
+                    onChangeText={(text) => setEditFormData({...editFormData, currentStock: text})}
+                    placeholder="0"
+                    keyboardType="numeric"
+                  />
+                </View>
+
+                <View style={[styles.formGroup, styles.halfWidth]}>
+                  <Text style={styles.formLabel}>Unit Cost (£)</Text>
+                  <TextInput
+                    style={styles.formInput}
+                    value={editFormData.unitCost}
+                    onChangeText={(text) => setEditFormData({...editFormData, unitCost: text})}
+                    placeholder="0.00"
+                    keyboardType="decimal-pad"
+                  />
+                </View>
+              </View>
+
+              <View style={styles.formRow}>
+                <View style={[styles.formGroup, styles.halfWidth]}>
+                  <Text style={styles.formLabel}>Minimum Stock</Text>
+                  <TextInput
+                    style={styles.formInput}
+                    value={editFormData.minimumStock}
+                    onChangeText={(text) => setEditFormData({...editFormData, minimumStock: text})}
+                    placeholder="0"
+                    keyboardType="numeric"
+                  />
+                </View>
+
+                <View style={[styles.formGroup, styles.halfWidth]}>
+                  <Text style={styles.formLabel}>Maximum Stock</Text>
+                  <TextInput
+                    style={styles.formInput}
+                    value={editFormData.maximumStock}
+                    onChangeText={(text) => setEditFormData({...editFormData, maximumStock: text})}
+                    placeholder="0"
+                    keyboardType="numeric"
+                  />
+                </View>
+              </View>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.formLabel}>Supplier</Text>
+                <TextInput
+                  style={styles.formInput}
+                  value={editFormData.supplier}
+                  onChangeText={(text) => setEditFormData({...editFormData, supplier: text})}
+                  placeholder="Enter supplier name"
+                />
+              </View>
+
+              <View style={styles.formActions}>
+                <TouchableOpacity 
+                  style={[styles.formButton, styles.cancelButton]}
+                  onPress={() => setShowEditModal(false)}
+                >
+                  <Text style={styles.cancelButtonText}>Cancel</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity 
+                  style={[styles.formButton, styles.saveButton]}
+                  onPress={handleSaveEdit}
+                >
+                  <Icon name="save" size={20} color={Colors.white} />
+                  <Text style={styles.saveButtonText}>Save Changes</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
           </View>
         </View>
       </Modal>
@@ -947,6 +1151,105 @@ const styles = StyleSheet.create({
     color: Colors.white,
     fontSize: 16,
     fontWeight: '600',
+  },
+  // Edit Modal Styles
+  editModal: {
+    backgroundColor: Colors.white,
+    borderRadius: 16,
+    width: '95%',
+    maxHeight: '90%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  editContent: {
+    padding: 20,
+    maxHeight: 600,
+  },
+  formGroup: {
+    marginBottom: 20,
+  },
+  formLabel: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.text,
+    marginBottom: 8,
+  },
+  formInput: {
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 16,
+    color: Colors.text,
+    backgroundColor: Colors.white,
+  },
+  formRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  halfWidth: {
+    flex: 1,
+  },
+  categorySelector: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  categoryOption: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    backgroundColor: Colors.background,
+  },
+  categoryOptionSelected: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+  },
+  categoryOptionText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: Colors.text,
+  },
+  categoryOptionTextSelected: {
+    color: Colors.white,
+  },
+  formActions: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 24,
+  },
+  formButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    borderRadius: 8,
+  },
+  cancelButton: {
+    backgroundColor: Colors.background,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  saveButton: {
+    backgroundColor: Colors.primary,
+  },
+  cancelButtonText: {
+    color: Colors.text,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  saveButtonText: {
+    color: Colors.white,
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8,
   },
 });
 

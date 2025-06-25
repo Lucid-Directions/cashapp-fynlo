@@ -13,7 +13,16 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import { generateSalesHistory } from '../../utils/mockDataGenerator';
 
-const { width } = Dimensions.get('window');
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const isTablet = screenWidth > 768;
+const isSmallDevice = screenWidth < 380;
+
+// Responsive font sizes
+const getFontSize = (base: number) => {
+  if (isTablet) return base * 1.2;
+  if (isSmallDevice) return base * 0.9;
+  return base;
+};
 
 const Colors = {
   primary: '#00A651',
@@ -338,7 +347,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     flex: 1,
     color: Colors.white,
-    fontSize: 20,
+    fontSize: getFontSize(20),
     fontWeight: 'bold',
     textAlign: 'center',
   },
@@ -366,7 +375,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
   },
   periodText: {
-    fontSize: 14,
+    fontSize: getFontSize(14),
     fontWeight: '500',
     color: Colors.text,
   },
@@ -396,13 +405,13 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
   },
   summaryValue: {
-    fontSize: 20,
+    fontSize: getFontSize(20),
     fontWeight: 'bold',
     color: Colors.text,
     marginBottom: 4,
   },
   summaryLabel: {
-    fontSize: 12,
+    fontSize: getFontSize(12),
     color: Colors.lightText,
     marginBottom: 8,
   },
@@ -414,7 +423,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   trendText: {
-    fontSize: 12,
+    fontSize: getFontSize(12),
     color: Colors.white,
     marginLeft: 4,
     fontWeight: '500',
@@ -423,7 +432,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: getFontSize(18),
     fontWeight: 'bold',
     color: Colors.text,
     marginBottom: 12,
@@ -465,13 +474,13 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   chartLabel: {
-    fontSize: 10,
+    fontSize: getFontSize(10),
     color: Colors.lightText,
     textAlign: 'center',
     marginBottom: 4,
   },
   chartValue: {
-    fontSize: 10,
+    fontSize: getFontSize(10),
     color: Colors.text,
     fontWeight: '500',
     textAlign: 'center',
@@ -493,7 +502,7 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   rankText: {
-    fontSize: 14,
+    fontSize: getFontSize(14),
     fontWeight: 'bold',
     color: Colors.white,
   },
@@ -501,12 +510,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   itemName: {
-    fontSize: 16,
+    fontSize: getFontSize(16),
     fontWeight: '600',
     color: Colors.text,
   },
   itemStats: {
-    fontSize: 14,
+    fontSize: getFontSize(14),
     color: Colors.lightText,
     marginTop: 2,
   },
@@ -530,12 +539,12 @@ const styles = StyleSheet.create({
   },
   paymentMethod: {
     flex: 1,
-    fontSize: 16,
+    fontSize: getFontSize(16),
     color: Colors.text,
     marginLeft: 12,
   },
   paymentAmount: {
-    fontSize: 16,
+    fontSize: getFontSize(16),
     fontWeight: '600',
     color: Colors.primary,
   },

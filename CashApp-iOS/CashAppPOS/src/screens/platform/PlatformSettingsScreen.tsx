@@ -39,9 +39,9 @@ const PlatformSettingsScreen: React.FC = () => {
     {
       id: 'payment_fees',
       title: 'Payment Processing',
-      description: 'Configure platform-wide payment fees and processing settings',
+      description: 'SumUp Primary (0.69%) • Configure payment fees and processing',
       icon: 'account-balance-wallet',
-      color: theme.colors.primary,
+      color: '#00D4AA',
       onPress: () => {
         navigation.navigate('PaymentProcessing' as never);
       },

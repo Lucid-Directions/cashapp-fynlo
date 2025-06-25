@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+**IMPORTANT**: Always check `CONTEXT.md` first for project context, common issues, and recent updates!
+
 ## Project Overview
 
 **Fynlo POS** is a hardware-free restaurant point of sale platform built with React Native (iOS) and FastAPI backend. The app serves as a multi-tenant platform where platform owners can onboard multiple restaurant clients. The current implementation features a Mexican restaurant as the pilot client.
@@ -109,12 +111,21 @@ uvicorn app.main:app --reload
 
 ## Critical Development Notes
 
-### Bundle Management
+### Bundle Management (CRITICAL!)
 The app uses pre-built JavaScript bundles for stability. When making TypeScript changes:
 
-1. Always create a new bundle: `npm run build:ios`
-2. Copy to iOS folder: `cp main.jsbundle ios/CashAppPOS/main.jsbundle`
-3. Rebuild and install the iOS app
+```bash
+# Build the bundle (from CashApp-iOS/CashAppPOS directory)
+npx metro build index.js --platform ios --dev false --out ios/main.jsbundle
+
+# Metro adds .js extension, so rename
+mv ios/main.jsbundle.js ios/main.jsbundle  
+
+# Copy to iOS project directory
+cp ios/main.jsbundle ios/CashAppPOS/main.jsbundle
+```
+
+**Note**: Changes will NOT appear in the app unless you build and copy the bundle!
 
 ### Platform vs Restaurant Context
 - Mexican restaurant menu/inventory is the **pilot client**, not the platform default
@@ -182,7 +193,7 @@ When working with settings or business logic:
 
 ## Project Context Files
 
-- `PROJECT_CONTEXT_COMPLETE.md`: Comprehensive project documentation with Mexican restaurant pilot details
+- `CONTEXT.md`: Essential project context and development guide (START HERE!)
 - `ios/APP_RUNTIME_FIXES.md`: iOS-specific fixes and bundle management
 - Backend documentation in `backend/RYAN DOCS/`
 

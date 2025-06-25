@@ -93,6 +93,12 @@ export type MainStackParamList = {
   MainTabs: undefined;
   Reports: undefined;
   Employees: undefined;
+  EmployeeSchedule: undefined;
+  QRScanner: {
+    onScanned: (data: string) => void;
+    title?: string;
+    subtitle?: string;
+  };
   Customers: undefined;
   Inventory: undefined;
   MenuManagement: undefined;
@@ -111,6 +117,32 @@ export type MainStackParamList = {
     orderType?: 'dine_in' | 'takeout' | 'pickup' | 'delivery';
   };
   OrderDetails: { orderId: number };
+  EnhancedPayment: {
+    amount: number;
+    orderItems: OrderItem[];
+    customerName: string;
+    onPaymentComplete: (result: any) => void;
+  };
+  QRCodePayment: {
+    amount: number;
+    orderItems: OrderItem[];
+    customerName: string;
+    onPaymentComplete: (result: any) => void;
+  };
+  SquareCardPayment: {
+    amount: number;
+    currency?: string;
+    description?: string;
+    onPaymentComplete: (result: any) => void;
+    onPaymentCancelled: () => void;
+  };
+  SquareContactlessPayment: {
+    amount: number;
+    currency?: string;
+    description?: string;
+    onPaymentComplete: (result: any) => void;
+    onPaymentCancelled: () => void;
+  };
 };
 
 export type MainTabParamList = {

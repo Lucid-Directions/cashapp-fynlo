@@ -7,9 +7,22 @@ import {
   StatusBar,
   ScrollView,
   TouchableOpacity,
+  Dimensions,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
+
+// Get screen dimensions for responsive design
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const isTablet = screenWidth > 768;
+const isSmallDevice = screenWidth < 380;
+
+// Responsive font sizes
+const getFontSize = (base: number) => {
+  if (isTablet) return base * 1.2;
+  if (isSmallDevice) return base * 0.9;
+  return base;
+};
 
 const Colors = {
   primary: '#00A651',
@@ -163,7 +176,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     flex: 1,
     color: Colors.white,
-    fontSize: 20,
+    fontSize: getFontSize(20),
     fontWeight: 'bold',
     textAlign: 'center',
   },
@@ -178,7 +191,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: getFontSize(18),
     fontWeight: 'bold',
     color: Colors.text,
     marginBottom: 12,
@@ -201,17 +214,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   statValue: {
-    fontSize: 24,
+    fontSize: getFontSize(24),
     fontWeight: 'bold',
     color: Colors.success,
   },
   statLabel: {
-    fontSize: 14,
+    fontSize: getFontSize(14),
     color: Colors.lightText,
     marginTop: 4,
   },
   itemText: {
-    fontSize: 16,
+    fontSize: getFontSize(16),
     color: Colors.text,
     marginBottom: 8,
   },
@@ -233,12 +246,12 @@ const styles = StyleSheet.create({
     marginLeft: 16,
   },
   reportTitle: {
-    fontSize: 16,
+    fontSize: getFontSize(16),
     fontWeight: '600',
     color: Colors.text,
   },
   reportDesc: {
-    fontSize: 14,
+    fontSize: getFontSize(14),
     color: Colors.lightText,
     marginTop: 2,
   },
@@ -250,7 +263,7 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   noticeText: {
-    fontSize: 14,
+    fontSize: getFontSize(14),
     color: Colors.lightText,
     textAlign: 'center',
   },
