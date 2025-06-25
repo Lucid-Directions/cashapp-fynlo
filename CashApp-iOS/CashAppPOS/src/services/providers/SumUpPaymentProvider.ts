@@ -1,31 +1,28 @@
-// Note: This is a placeholder implementation since SumUp SDK for React Native
-// would need to be obtained from SumUp directly.
+import SumUpService, { type SumUpConfig, type SumUpPaymentResult } from '../SumUpService';
 
-export interface SumUpConfig {
-  affiliateKey: string;
+export interface SumUpPaymentProviderConfig {
+  apiKey: string;
   accessToken?: string;
   environment: 'sandbox' | 'production';
 }
 
-export interface SumUpPaymentResult {
-  success: boolean;
-  transactionCode?: string;
-  error?: string;
-}
-
 class SumUpPaymentProviderClass {
   private initialized = false;
-  private config: SumUpConfig | null = null;
+  private config: SumUpPaymentProviderConfig | null = null;
 
-  async initialize(config: SumUpConfig): Promise<void> {
+  async initialize(config: SumUpPaymentProviderConfig): Promise<void> {
     try {
       this.config = config;
       
-      // TODO: Initialize SumUp SDK when available
-      // await SumUpSDK.init(config.affiliateKey);
+      // Initialize the SumUp SDK through our service
+      await SumUpService.initialize({
+        apiKey: config.apiKey,
+        accessToken: config.accessToken,
+        environment: config.environment,
+      });
       
       this.initialized = true;
-      console.log('SumUp payment provider initialized (placeholder)');
+      console.log('SumUp payment provider initialized successfully');
     } catch (error) {
       console.error('Failed to initialize SumUp:', error);
       throw error;
@@ -38,10 +35,15 @@ class SumUpPaymentProviderClass {
         throw new Error('SumUp not initialized');
       }
 
-      // TODO: Implement SumUp login when SDK is available
-      // const result = await SumUpSDK.login();
-      
-      return false; // Placeholder
+      // If we have an access token, use silent login
+      if (this.config?.accessToken) {
+        const result = await SumUpService.loginWithToken(this.config.accessToken);
+        return result.success && result.isLoggedIn;
+      } else {
+        // Present login UI
+        const result = await SumUpService.presentLogin();
+        return result.success && result.isLoggedIn;
+      }
     } catch (error) {
       console.error('SumUp login failed:', error);
       return false;
@@ -51,24 +53,34 @@ class SumUpPaymentProviderClass {
   async processPayment(
     amount: number,
     currency: string = 'GBP',
-    title?: string
+    title?: string,
+    foreignTransactionId?: string
   ): Promise<SumUpPaymentResult> {
     try {
       if (!this.initialized) {
         throw new Error('SumUp not initialized');
       }
 
-      // TODO: Process payment with SumUp SDK
-      // const result = await SumUpSDK.checkout({
-      //   total: amount,
-      //   currency,
-      //   title: title || 'Payment',
-      // });
+      // Ensure merchant is logged in
+      if (!(await SumUpService.isLoggedIn())) {
+        const loginSuccess = await this.login();
+        if (!loginSuccess) {
+          return {
+            success: false,
+            error: 'Failed to login to SumUp',
+          };
+        }
+      }
+
+      // Process payment through SumUp SDK
+      const result = await SumUpService.processPayment({
+        total: amount,
+        currencyCode: currency,
+        title: title || 'Payment',
+        foreignTransactionId,
+      });
       
-      return {
-        success: false,
-        error: 'SumUp SDK not available - placeholder implementation',
-      };
+      return result;
     } catch (error) {
       return {
         success: false,
@@ -83,12 +95,59 @@ class SumUpPaymentProviderClass {
         throw new Error('SumUp not initialized');
       }
 
-      // TODO: Get card reader settings when SDK is available
-      // return await SumUpSDK.getCardReaderSettings();
+      // Present checkout preferences which includes card reader settings
+      await SumUpService.presentCheckoutPreferences();
       
-      return null;
+      // Return current merchant and settings info
+      const merchant = await SumUpService.getCurrentMerchant();
+      const tipOnCardAvailable = await SumUpService.isTipOnCardReaderAvailable();
+      
+      return {
+        merchant,
+        tipOnCardReaderAvailable,
+      };
     } catch (error) {
       console.error('Failed to get SumUp card reader settings:', error);
+      return null;
+    }
+  }
+
+  async logout(): Promise<boolean> {
+    try {
+      if (!this.initialized) {
+        return true; // Already logged out
+      }
+
+      const result = await SumUpService.logout();
+      return result.success;
+    } catch (error) {
+      console.error('SumUp logout failed:', error);
+      return false;
+    }
+  }
+
+  async isLoggedIn(): Promise<boolean> {
+    if (!this.initialized) {
+      return false;
+    }
+
+    try {
+      return await SumUpService.isLoggedIn();
+    } catch (error) {
+      console.error('Failed to check SumUp login status:', error);
+      return false;
+    }
+  }
+
+  async getCurrentMerchant(): Promise<any> {
+    if (!this.initialized) {
+      return null;
+    }
+
+    try {
+      return await SumUpService.getCurrentMerchant();
+    } catch (error) {
+      console.error('Failed to get current merchant:', error);
       return null;
     }
   }
@@ -122,8 +181,7 @@ class SumUpPaymentProviderClass {
    * Check if SumUp is available and configured
    */
   isAvailable(): boolean {
-    // For now, return false since SDK is not available
-    return false;
+    return this.initialized && SumUpService.isAvailable();
   }
 
   /**
@@ -132,11 +190,13 @@ class SumUpPaymentProviderClass {
   getProviderInfo() {
     return {
       name: 'SumUp',
-      feeStructure: '0.69% + £19/month (high volume) or standard rates',
+      feeStructure: '0.69% + £19/month (volume ≥£2,714) or standard rates',
       supportedMethods: ['card', 'contactless', 'chip_and_pin'],
       processingTime: 'Instant',
       volumeThreshold: '£2,714/month for optimal rates',
-      note: 'SDK not available in current implementation',
+      available: this.isAvailable(),
+      initialized: this.initialized,
+      sdkInfo: SumUpService.getProviderInfo(),
     };
   }
 }
