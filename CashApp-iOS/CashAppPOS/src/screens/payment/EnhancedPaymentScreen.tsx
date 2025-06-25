@@ -40,6 +40,7 @@ interface PaymentMethod {
   color: string;
   enabled: boolean;
   requiresAuth: boolean;
+  description?: string;
 }
 
 // Tip percentage presets
@@ -116,44 +117,49 @@ const EnhancedPaymentScreen: React.FC = () => {
   // Payment methods configuration
   const availablePaymentMethods: PaymentMethod[] = [
     {
-      id: 'qrCode',
-      name: 'QR Payment',
-      icon: 'qr-code-scanner',
+      id: 'cardReader',
+      name: 'Card Reader',
+      icon: 'credit-card',
       color: Colors.primary,
-      enabled: paymentMethods?.qrCode?.enabled ?? true,
-      requiresAuth: paymentMethods?.qrCode?.requiresAuth ?? false,
+      enabled: paymentMethods?.cardReader?.enabled ?? true,
+      requiresAuth: paymentMethods?.cardReader?.requiresAuth ?? false,
+      description: 'SumUp Card Terminal',
+    },
+    {
+      id: 'mobilePayments',
+      name: 'Mobile Pay',
+      icon: 'contactless-payment',
+      color: Colors.secondary,
+      enabled: paymentMethods?.mobilePayments?.enabled ?? true,
+      requiresAuth: paymentMethods?.mobilePayments?.requiresAuth ?? false,
+      description: 'Apple Pay, Google Pay',
+    },
+    {
+      id: 'qrPayments',
+      name: 'QR Payments',
+      icon: 'qr-code-scanner',
+      color: Colors.success,
+      enabled: paymentMethods?.qrPayments?.enabled ?? true,
+      requiresAuth: paymentMethods?.qrPayments?.requiresAuth ?? false,
+      description: 'PayPal, Venmo QR',
+    },
+    {
+      id: 'buyNowPayLater',
+      name: 'Buy Now Pay Later',
+      icon: 'schedule',
+      color: Colors.warning,
+      enabled: paymentMethods?.buyNowPayLater?.enabled ?? true,
+      requiresAuth: paymentMethods?.buyNowPayLater?.requiresAuth ?? false,
+      description: 'Klarna, Afterpay',
     },
     {
       id: 'cash',
       name: 'Cash',
       icon: 'payments',
-      color: Colors.success,
+      color: Colors.text,
       enabled: paymentMethods?.cash?.enabled ?? true,
       requiresAuth: paymentMethods?.cash?.requiresAuth ?? false,
-    },
-    {
-      id: 'card',
-      name: 'Card',
-      icon: 'credit-card',
-      color: Colors.secondary,
-      enabled: paymentMethods?.card?.enabled ?? true,
-      requiresAuth: paymentMethods?.card?.requiresAuth ?? false,
-    },
-    {
-      id: 'applePay',
-      name: 'Apple Pay',
-      icon: 'contactless-payment',
-      color: Colors.text,
-      enabled: paymentMethods?.applePay?.enabled ?? true,
-      requiresAuth: paymentMethods?.applePay?.requiresAuth ?? false,
-    },
-    {
-      id: 'googlePay',
-      name: 'Google Pay',
-      icon: 'contactless-payment',
-      color: Colors.warning,
-      enabled: paymentMethods?.googlePay?.enabled ?? false,
-      requiresAuth: paymentMethods?.googlePay?.requiresAuth ?? false,
+      description: 'Traditional cash payment',
     },
   ];
 
@@ -164,9 +170,9 @@ const EnhancedPaymentScreen: React.FC = () => {
     if (enabledPaymentMethods.length === 1) {
       setSelectedPaymentMethod(enabledPaymentMethods[0].id);
     } else if (enabledPaymentMethods.length > 1 && !selectedPaymentMethod) {
-      // Default to QR code if available, otherwise first available method
-      const qrMethod = enabledPaymentMethods.find(m => m.id === 'qrCode');
-      setSelectedPaymentMethod(qrMethod ? qrMethod.id : enabledPaymentMethods[0].id);
+      // Default to card reader if available, otherwise first available method
+      const cardReaderMethod = enabledPaymentMethods.find(m => m.id === 'cardReader');
+      setSelectedPaymentMethod(cardReaderMethod ? cardReaderMethod.id : enabledPaymentMethods[0].id);
     }
   }, [enabledPaymentMethods, selectedPaymentMethod]);
 
@@ -208,15 +214,15 @@ const EnhancedPaymentScreen: React.FC = () => {
               setSelectedPaymentMethod(methodId);
               if (methodId === 'cash') {
                 setShowCashModal(true);
-              } else if (methodId === 'qrCode') {
+              } else if (methodId === 'qrPayments') {
                 setShowQRModal(true);
                 generateQRCode();
-              } else if (methodId === 'card') {
-                Alert.alert('Card Payment', 'Insert or swipe card, or tap for contactless payment.');
-              } else if (methodId === 'applePay') {
-                Alert.alert('Apple Pay', 'Hold near reader and confirm with Touch ID or Face ID.');
-              } else if (methodId === 'googlePay') {
-                Alert.alert('Google Pay', 'Hold near reader and confirm payment.');
+              } else if (methodId === 'cardReader') {
+                Alert.alert('SumUp Card Reader', 'Connect your SumUp card reader and follow the prompts on the device.');
+              } else if (methodId === 'mobilePayments') {
+                Alert.alert('Mobile Payment', 'Hold your device near the reader and confirm with Touch ID, Face ID, or PIN.');
+              } else if (methodId === 'buyNowPayLater') {
+                Alert.alert('Buy Now Pay Later', 'Customer will receive SMS/email to complete payment setup with Klarna or Afterpay.');
               }
             }
           }
@@ -226,18 +232,18 @@ const EnhancedPaymentScreen: React.FC = () => {
       setSelectedPaymentMethod(methodId);
       if (methodId === 'cash') {
         setShowCashModal(true);
-      } else if (methodId === 'qrCode') {
+      } else if (methodId === 'qrPayments') {
         setShowQRModal(true);
         generateQRCode();
-      } else if (methodId === 'card') {
-        // Card payment handling - could show card reader interface
-        Alert.alert('Card Payment', 'Insert or swipe card, or tap for contactless payment.');
-      } else if (methodId === 'applePay') {
-        // Apple Pay handling
-        Alert.alert('Apple Pay', 'Hold near reader and confirm with Touch ID or Face ID.');
-      } else if (methodId === 'googlePay') {
-        // Google Pay handling
-        Alert.alert('Google Pay', 'Hold near reader and confirm payment.');
+      } else if (methodId === 'cardReader') {
+        // SumUp card reader handling
+        Alert.alert('SumUp Card Reader', 'Connect your SumUp card reader and follow the prompts on the device.');
+      } else if (methodId === 'mobilePayments') {
+        // Mobile payments handling
+        Alert.alert('Mobile Payment', 'Hold your device near the reader and confirm with Touch ID, Face ID, or PIN.');
+      } else if (methodId === 'buyNowPayLater') {
+        // Buy Now Pay Later handling
+        Alert.alert('Buy Now Pay Later', 'Customer will receive SMS/email to complete payment setup with Klarna or Afterpay.');
       }
     }
   };
@@ -656,6 +662,14 @@ const EnhancedPaymentScreen: React.FC = () => {
                   ]}>
                     {method.name}
                   </Text>
+                  {method.description && (
+                    <Text style={[
+                      styles.paymentMethodDescription,
+                      selectedPaymentMethod === method.id && styles.paymentMethodDescriptionActive
+                    ]}>
+                      {method.description}
+                    </Text>
+                  )}
                   {method.requiresAuth && (
                     <Icon 
                       name="lock" 
@@ -984,11 +998,14 @@ const styles = StyleSheet.create({
   },
   paymentMethod: {
     flex: 1,
-    minWidth: 100,
+    minWidth: 120,
+    minHeight: 110,
     backgroundColor: Colors.background,
     borderRadius: 12,
-    paddingVertical: 20,
+    paddingVertical: 16,
+    paddingHorizontal: 8,
     alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 2,
     borderColor: Colors.border,
     position: 'relative',
@@ -1005,6 +1022,18 @@ const styles = StyleSheet.create({
   },
   paymentMethodNameActive: {
     color: Colors.white,
+  },
+  paymentMethodDescription: {
+    fontSize: 11,
+    fontWeight: '400',
+    color: Colors.lightText,
+    marginTop: 4,
+    textAlign: 'center',
+    lineHeight: 14,
+  },
+  paymentMethodDescriptionActive: {
+    color: Colors.white,
+    opacity: 0.9,
   },
   authIcon: {
     position: 'absolute',
