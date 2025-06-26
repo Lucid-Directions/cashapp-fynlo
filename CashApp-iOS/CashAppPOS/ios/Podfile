@@ -14,6 +14,9 @@ target 'CashAppPOS' do
     :flipper_configuration => FlipperConfiguration.disabled,
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
+  
+  # SumUp SDK for phone-only payment processing (Tap to Pay on iPhone)
+  pod 'SumUpSDK', '~> 4.2.1'
 
   post_install do |installer|
     react_native_post_install(
