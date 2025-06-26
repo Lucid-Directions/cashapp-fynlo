@@ -1,0 +1,12 @@
+set -e
+
+export NODE_BINARY=${NODE_BINARY:-node}
+export PROJECT_ROOT="$PROJECT_DIR/.."
+
+if [[ "$CONFIGURATION" = *Debug* ]]; then
+  export SKIP_BUNDLING=1
+fi
+
+# Use the React Native bundling script
+"$NODE_BINARY" -e "console.log(require('path').dirname(require.resolve('react-native/package.json')) + '/scripts/react-native-xcode.sh')" | xargs -I {} bash {}
+EOF < /dev/null
