@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -12,6 +12,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { SettingsHeader, SettingsSection, SettingsCard, ToggleSwitch } from '../../../components/settings';
 import useSettingsStore from '../../../store/useSettingsStore';
+import { useEffectiveSettings } from '../../../hooks/useEffectiveSettings';
 
 // Clover POS Color Scheme
 const Colors = {
@@ -37,10 +38,14 @@ interface TaxExemptItem {
 
 const TaxConfigurationScreen: React.FC = () => {
   const { taxConfiguration, updateTaxConfiguration, isLoading } = useSettingsStore();
+  const effectiveSettings = useEffectiveSettings();
   const [formData, setFormData] = useState(taxConfiguration);
   const [hasChanges, setHasChanges] = useState(false);
   const [newExemptItem, setNewExemptItem] = useState('');
   const [showAddExemptItem, setShowAddExemptItem] = useState(false);
+
+  // Get platform service charge rate (default to 12.5 if not available)
+  const platformServiceCharge = effectiveSettings?.serviceTaxRate || 12.5;
 
   // UK VAT rates for reference
   const ukVatRates = [
@@ -247,7 +252,7 @@ const TaxConfigurationScreen: React.FC = () => {
                 Service charges are set and managed by the platform owner. Contact support if you need changes.
               </Text>
               <Text style={styles.platformControlledRate}>
-                Current Rate: 12.5% (Platform Standard)
+                Current Rate: {platformServiceCharge.toFixed(1)}% (Platform Standard)
               </Text>
             </View>
           </View>
@@ -327,16 +332,16 @@ const TaxConfigurationScreen: React.FC = () => {
               </View>
               
               <View style={styles.calculationRow}>
-                <Text style={styles.calculationLabel}>Service (Platform - 12.5%):</Text>
+                <Text style={styles.calculationLabel}>Service (Platform - {platformServiceCharge.toFixed(1)}%):</Text>
                 <Text style={styles.calculationValue}>
-                  £{(exampleCalculation.net * 12.5 / 100).toFixed(2)}
+                  £{(exampleCalculation.net * platformServiceCharge / 100).toFixed(2)}
                 </Text>
               </View>
               
               <View style={[styles.calculationRow, styles.calculationTotal]}>
                 <Text style={styles.calculationTotalLabel}>Total Amount:</Text>
                 <Text style={styles.calculationTotalValue}>
-                  £{(exampleCalculation.gross + (exampleCalculation.net * 12.5 / 100)).toFixed(2)}
+                  £{(exampleCalculation.gross + (exampleCalculation.net * platformServiceCharge / 100)).toFixed(2)}
                 </Text>
               </View>
             </View>
