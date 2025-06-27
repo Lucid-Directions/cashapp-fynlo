@@ -3,28 +3,20 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Platform } from 'react-native';
+import { useTheme } from '../design-system/ThemeProvider';
 
 // Platform Owner Screens
 import PlatformDashboardScreen from '../screens/platform/PlatformDashboardScreen';
+import PlatformSettingsScreen from '../screens/platform/PlatformSettingsScreen';
 import RestaurantsScreen from '../screens/platform/RestaurantsScreen';
-import PlatformAnalyticsScreen from '../screens/platform/PlatformAnalyticsScreen';
+// import PlatformAnalyticsScreen from '../screens/platform/PlatformAnalyticsScreen';
 import SystemMonitoringScreen from '../screens/platform/SystemMonitoringScreen';
 import UserManagementScreen from '../screens/platform/UserManagementScreen';
 import RestaurantOnboardingScreen from '../screens/platform/onboarding/RestaurantOnboardingScreen';
 
-// Clover POS Color Scheme
-const Colors = {
-  primary: '#00A651',      // Clover Green
-  secondary: '#0066CC',    // Clover Blue
-  background: '#F5F5F5',
-  white: '#FFFFFF',
-  lightGray: '#E5E5E5',
-  mediumGray: '#999999',
-  darkGray: '#666666',
-  text: '#333333',
-  lightText: '#666666',
-  border: '#DDDDDD',
-};
+// Platform Settings Screens
+import PaymentProcessingScreen from '../screens/platform/settings/PaymentProcessingScreen';
+import CommissionStructureScreen from '../screens/platform/settings/CommissionStructureScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -37,6 +29,9 @@ const DashboardStack = () => (
     }}
   >
     <Stack.Screen name="PlatformDashboard" component={PlatformDashboardScreen} />
+    <Stack.Screen name="PlatformSettings" component={PlatformSettingsScreen} />
+    <Stack.Screen name="PaymentProcessing" component={PaymentProcessingScreen} />
+    <Stack.Screen name="CommissionStructure" component={CommissionStructureScreen} />
   </Stack.Navigator>
 );
 
@@ -51,15 +46,15 @@ const RestaurantsStack = () => (
   </Stack.Navigator>
 );
 
-const AnalyticsStack = () => (
-  <Stack.Navigator
-    screenOptions={{
-      headerShown: false,
-    }}
-  >
-    <Stack.Screen name="PlatformAnalytics" component={PlatformAnalyticsScreen} />
-  </Stack.Navigator>
-);
+// const AnalyticsStack = () => (
+//   <Stack.Navigator
+//     screenOptions={{
+//       headerShown: false,
+//     }}
+//   >
+//     <Stack.Screen name="PlatformAnalytics" component={PlatformAnalyticsScreen} />
+//   </Stack.Navigator>
+// );
 
 const MonitoringStack = () => (
   <Stack.Navigator
@@ -82,6 +77,8 @@ const ManagementStack = () => (
 );
 
 const PlatformNavigator: React.FC = () => {
+  const { theme } = useTheme();
+  
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -111,11 +108,11 @@ const PlatformNavigator: React.FC = () => {
 
           return <Icon name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: Colors.mediumGray,
+        tabBarActiveTintColor: theme.colors.primary,
+        tabBarInactiveTintColor: theme.colors.mediumGray,
         tabBarStyle: {
-          backgroundColor: Colors.white,
-          borderTopColor: Colors.border,
+          backgroundColor: theme.colors.white,
+          borderTopColor: theme.colors.border,
           borderTopWidth: 1,
           paddingBottom: Platform.OS === 'ios' ? 20 : 5,
           height: Platform.OS === 'ios' ? 85 : 60,
@@ -146,14 +143,14 @@ const PlatformNavigator: React.FC = () => {
           tabBarBadge: undefined,
         }}
       />
-      <Tab.Screen
+      {/* <Tab.Screen
         name="Analytics"
         component={AnalyticsStack}
         options={{
           tabBarLabel: 'Analytics',
           tabBarBadge: undefined,
         }}
-      />
+      /> */}
       <Tab.Screen
         name="Monitoring"
         component={MonitoringStack}

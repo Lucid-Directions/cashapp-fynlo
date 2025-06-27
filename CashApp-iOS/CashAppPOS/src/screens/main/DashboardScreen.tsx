@@ -11,21 +11,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import { useRestaurantDisplayName } from '../../hooks/useRestaurantConfig';
-
-const Colors = {
-  primary: '#00A651',      // Clover Green
-  secondary: '#0066CC',    // Clover Blue
-  success: '#27AE60',
-  warning: '#F39C12',
-  danger: '#E74C3C',
-  background: '#F8F9FA',
-  white: '#FFFFFF',
-  lightGray: '#ECF0F1',
-  darkGray: '#2C3E50',
-  text: '#2C3E50',
-  lightText: '#95A5A6',
-  border: '#BDC3C7',
-};
+import Colors from '../../constants/Colors';
 
 interface KPICardProps {
   title: string;

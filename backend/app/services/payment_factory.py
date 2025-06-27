@@ -4,17 +4,29 @@ from .payment_providers import PaymentProvider
 from .stripe_provider import StripeProvider
 from .square_provider import SquareProvider
 from .sumup_provider import SumUpProvider
+from .smart_routing import SmartRoutingService, RoutingStrategy
+from .payment_analytics import PaymentAnalyticsService
 from ..core.config import settings
+from ..core.database import get_db
 import logging
 
 logger = logging.getLogger(__name__)
 
 class PaymentProviderFactory:
-    """Factory for creating and managing payment providers"""
+    """Factory for creating and managing payment providers with smart routing"""
     
     def __init__(self):
         self.providers: Dict[str, PaymentProvider] = {}
+        self.smart_router = None
+        self.analytics_service = None
         self._initialize_providers()
+    
+    def _initialize_smart_routing(self, db_session):
+        """Initialize smart routing service with database session"""
+        if not self.analytics_service:
+            self.analytics_service = PaymentAnalyticsService(db_session)
+        if not self.smart_router:
+            self.smart_router = SmartRoutingService(self.analytics_service)
     
     def _initialize_providers(self):
         """Initialize all configured payment providers"""
@@ -50,20 +62,59 @@ class PaymentProviderFactory:
         amount: Decimal,
         restaurant_id: str,
         monthly_volume: Optional[Decimal] = None,
-        force_provider: Optional[str] = None
+        force_provider: Optional[str] = None,
+        strategy: RoutingStrategy = RoutingStrategy.BALANCED,
+        db_session = None
     ) -> PaymentProvider:
         """
-        Select the most cost-effective payment provider based on:
-        - Transaction amount
-        - Restaurant's monthly volume
-        - Provider availability
-        - Cost optimization
+        Select the optimal payment provider using smart routing based on:
+        - Transaction amount and restaurant volume
+        - Provider performance and reliability
+        - Cost optimization and routing strategy
+        - Real-time provider health scores
         """
         # If a specific provider is requested and available, use it
         if force_provider:
             provider = self.get_provider(force_provider)
             if provider:
+                logger.info(f"Using forced provider: {force_provider}")
                 return provider
+        
+        # Initialize smart routing if database session is available
+        if db_session and not self.smart_router:
+            self._initialize_smart_routing(db_session)
+        
+        # Use smart routing if available
+        if self.smart_router:
+            try:
+                routing_decision = await self.smart_router.route_payment(
+                    amount=amount,
+                    restaurant_id=restaurant_id,
+                    strategy=strategy,
+                    force_provider=force_provider
+                )
+                
+                provider = self.get_provider(routing_decision.selected_provider)
+                if provider:
+                    logger.info(
+                        f"Smart routing selected {routing_decision.selected_provider} "
+                        f"(confidence: {routing_decision.confidence:.2f}, "
+                        f"reasoning: {', '.join(routing_decision.reasoning)})"
+                    )
+                    return provider
+            except Exception as e:
+                logger.warning(f"Smart routing failed, falling back to simple selection: {e}")
+        
+        # Fallback to simple cost-based selection
+        return await self._select_provider_simple(amount, restaurant_id, monthly_volume)
+    
+    async def _select_provider_simple(
+        self,
+        amount: Decimal,
+        restaurant_id: str,
+        monthly_volume: Optional[Decimal] = None
+    ) -> PaymentProvider:
+        """Simple cost-based provider selection (fallback)"""
         
         # Get restaurant's monthly volume from database if not provided
         if monthly_volume is None:
@@ -132,6 +183,51 @@ class PaymentProviderFactory:
     def get_available_providers(self) -> List[str]:
         """Get list of all available payment providers"""
         return list(self.providers.keys())
+    
+    async def get_routing_recommendations(
+        self,
+        restaurant_id: str,
+        db_session = None
+    ) -> Dict:
+        """Get smart routing recommendations for a restaurant"""
+        if db_session:
+            self._initialize_smart_routing(db_session)
+        
+        if self.smart_router:
+            return await self.smart_router.get_routing_recommendations(restaurant_id)
+        else:
+            return {"error": "Smart routing not available"}
+    
+    async def simulate_routing_impact(
+        self,
+        restaurant_id: str,
+        strategy: RoutingStrategy,
+        db_session = None
+    ) -> Dict:
+        """Simulate the impact of changing routing strategy"""
+        if db_session:
+            self._initialize_smart_routing(db_session)
+        
+        if self.smart_router:
+            return await self.smart_router.simulate_routing_impact(
+                restaurant_id, strategy
+            )
+        else:
+            return {"error": "Smart routing not available"}
+    
+    async def get_provider_analytics(
+        self,
+        restaurant_id: str,
+        db_session = None
+    ) -> Dict:
+        """Get comprehensive provider analytics"""
+        if db_session:
+            self._initialize_smart_routing(db_session)
+        
+        if self.analytics_service:
+            return await self.analytics_service.get_provider_performance_summary(restaurant_id)
+        else:
+            return {"error": "Analytics service not available"}
     
     def calculate_savings(
         self,

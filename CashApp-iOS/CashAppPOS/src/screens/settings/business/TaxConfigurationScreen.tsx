@@ -61,12 +61,6 @@ const TaxConfigurationScreen: React.FC = () => {
     }
   };
 
-  const handleServiceTaxRateChange = (rate: string) => {
-    const numericRate = parseFloat(rate) || 0;
-    if (numericRate >= 0 && numericRate <= 100) {
-      handleFieldChange('serviceTaxRate', numericRate);
-    }
-  };
 
   const addExemptItem = () => {
     if (newExemptItem.trim()) {
@@ -240,42 +234,23 @@ const TaxConfigurationScreen: React.FC = () => {
           </SettingsSection>
         )}
 
-        {/* Service Tax */}
+        {/* Service Tax - Platform Controlled */}
         <SettingsSection
           title="Service Charge"
-          subtitle="Optional service charge for table service"
+          subtitle="Service charges are controlled by the platform"
         >
-          <SettingsCard
-            title="Enable Service Charge"
-            description="Add service charge to bills"
-            icon="room-service"
-            iconColor={Colors.warning}
-          >
-            <ToggleSwitch
-              value={formData.serviceTaxEnabled}
-              onValueChange={(value) => handleFieldChange('serviceTaxEnabled', value)}
-            />
-          </SettingsCard>
-
-          {formData.serviceTaxEnabled && (
-            <SettingsCard
-              title="Service Charge Rate"
-              description="Service charge percentage"
-              icon="percent"
-              iconColor={Colors.secondary}
-            >
-              <View style={styles.rateInputContainer}>
-                <TextInput
-                  style={styles.rateInput}
-                  value={formData.serviceTaxRate.toString()}
-                  onChangeText={handleServiceTaxRateChange}
-                  keyboardType="numeric"
-                  maxLength={5}
-                />
-                <Text style={styles.percentSymbol}>%</Text>
-              </View>
-            </SettingsCard>
-          )}
+          <View style={styles.platformControlledCard}>
+            <Icon name="lock" size={24} color={Colors.mediumGray} />
+            <View style={styles.platformControlledContent}>
+              <Text style={styles.platformControlledTitle}>Platform Controlled</Text>
+              <Text style={styles.platformControlledDescription}>
+                Service charges are set and managed by the platform owner. Contact support if you need changes.
+              </Text>
+              <Text style={styles.platformControlledRate}>
+                Current Rate: 12.5% (Platform Standard)
+              </Text>
+            </View>
+          </View>
         </SettingsSection>
 
         {/* Tax Exempt Items */}
@@ -351,19 +326,17 @@ const TaxConfigurationScreen: React.FC = () => {
                 <Text style={styles.calculationValue}>£{exampleCalculation.vat.toFixed(2)}</Text>
               </View>
               
-              {formData.serviceTaxEnabled && (
-                <View style={styles.calculationRow}>
-                  <Text style={styles.calculationLabel}>Service ({formData.serviceTaxRate}%):</Text>
-                  <Text style={styles.calculationValue}>
-                    £{(exampleCalculation.net * formData.serviceTaxRate / 100).toFixed(2)}
-                  </Text>
-                </View>
-              )}
+              <View style={styles.calculationRow}>
+                <Text style={styles.calculationLabel}>Service (Platform - 12.5%):</Text>
+                <Text style={styles.calculationValue}>
+                  £{(exampleCalculation.net * 12.5 / 100).toFixed(2)}
+                </Text>
+              </View>
               
               <View style={[styles.calculationRow, styles.calculationTotal]}>
                 <Text style={styles.calculationTotalLabel}>Total Amount:</Text>
                 <Text style={styles.calculationTotalValue}>
-                  £{(exampleCalculation.gross + (formData.serviceTaxEnabled ? exampleCalculation.net * formData.serviceTaxRate / 100 : 0)).toFixed(2)}
+                  £{(exampleCalculation.gross + (exampleCalculation.net * 12.5 / 100)).toFixed(2)}
                 </Text>
               </View>
             </View>
@@ -585,6 +558,36 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: Colors.danger,
+  },
+  platformControlledCard: {
+    flexDirection: 'row',
+    backgroundColor: Colors.lightGray,
+    borderRadius: 12,
+    padding: 16,
+    margin: 16,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  platformControlledContent: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  platformControlledTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.text,
+    marginBottom: 4,
+  },
+  platformControlledDescription: {
+    fontSize: 14,
+    color: Colors.lightText,
+    lineHeight: 20,
+    marginBottom: 8,
+  },
+  platformControlledRate: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: Colors.secondary,
   },
 });
 

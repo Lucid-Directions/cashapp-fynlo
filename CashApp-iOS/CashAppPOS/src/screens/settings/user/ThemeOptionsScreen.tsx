@@ -380,7 +380,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGray,
+    borderBottomColor: '#E5E5E5',
   },
   settingInfo: {
     flex: 1,
@@ -418,7 +418,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: '#DDDDDD',
   },
   previewHeader: {
     paddingVertical: 12,
@@ -461,7 +461,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGray,
+    borderBottomColor: '#E5E5E5',
   },
   infoLabel: {
     fontSize: 14,

@@ -62,6 +62,7 @@ export interface EmployeeData {
   performanceScore: number;
   scheduledHours: number;
   actualHours: number;
+  weeksSinceLastReview: number;
   photo?: string;
 }
 
@@ -247,7 +248,8 @@ export const generateEmployees = (): EmployeeData[] => {
       punctualityScore: 85 + Math.random() * 15,
       performanceScore: Math.round(performanceScore * 10) / 10,
       scheduledHours: 160,
-      actualHours: 155 + Math.floor(Math.random() * 10)
+      actualHours: 155 + Math.floor(Math.random() * 10),
+      weeksSinceLastReview: Math.floor(Math.random() * 12) + 1 // 1-12 weeks
     };
   });
 };

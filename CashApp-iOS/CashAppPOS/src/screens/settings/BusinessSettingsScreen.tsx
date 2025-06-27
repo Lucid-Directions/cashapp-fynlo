@@ -7,26 +7,11 @@ import {
   SafeAreaView,
   TouchableOpacity,
   FlatList,
+  Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
-
-// Clover POS Color Scheme
-const Colors = {
-  primary: '#00A651',
-  secondary: '#0066CC',
-  success: '#00A651',
-  warning: '#FF6B35',
-  danger: '#E74C3C',
-  background: '#F5F5F5',
-  white: '#FFFFFF',
-  lightGray: '#E5E5E5',
-  mediumGray: '#999999',
-  darkGray: '#666666',
-  text: '#333333',
-  lightText: '#666666',
-  border: '#DDDDDD',
-};
+import Colors from '../../constants/Colors';
 
 interface BusinessSettingsItem {
   id: string;
@@ -66,11 +51,19 @@ const BusinessSettingsScreen: React.FC = () => {
       status: 'warning',
     },
     {
-      id: 'payment-methods',
+      id: 'bank-details',
+      title: 'Bank Details',
+      description: 'Account information for receiving payments',
+      icon: 'account-balance',
+      route: 'BankDetails',
+      status: 'incomplete',
+    },
+    {
+      id: 'payment-methods-info',
       title: 'Payment Methods',
-      description: 'Enable payment options and processing fees',
-      icon: 'payment',
-      route: 'PaymentMethods',
+      description: 'Payment processing is managed by the platform',
+      icon: 'lock',
+      route: 'PaymentMethodsInfo',
       status: 'complete',
     },
     {
@@ -116,6 +109,15 @@ const BusinessSettingsScreen: React.FC = () => {
   };
 
   const handleSettingPress = (item: BusinessSettingsItem) => {
+    if (item.route === 'PaymentMethodsInfo') {
+      // Show alert instead of navigating
+      Alert.alert(
+        'Payment Methods',
+        'Payment processing is managed by the platform owner. Current supported methods:\n\n• Card payments (Chip & PIN, Contactless)\n• Apple Pay & Google Pay\n• Cash transactions\n• QR Code payments\n\nContact platform support for changes or questions.',
+        [{ text: 'OK' }]
+      );
+      return;
+    }
     navigation.navigate(item.route as never);
   };
 

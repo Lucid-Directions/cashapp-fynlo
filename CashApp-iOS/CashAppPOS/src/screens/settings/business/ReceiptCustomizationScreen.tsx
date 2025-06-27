@@ -34,6 +34,7 @@ const ReceiptCustomizationScreen: React.FC = () => {
   const { receiptSettings, updateReceiptSettings, businessInfo, isLoading } = useSettingsStore();
   const [formData, setFormData] = useState(receiptSettings);
   const [hasChanges, setHasChanges] = useState(false);
+  const [logoUri, setLogoUri] = useState<string | null>(receiptSettings.logoUri || null);
 
   const handleFieldChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -78,9 +79,64 @@ const ReceiptCustomizationScreen: React.FC = () => {
 
   const handleLogoUpload = () => {
     Alert.alert(
-      'Upload Logo',
-      'Logo upload functionality will be implemented with image picker integration.',
-      [{ text: 'OK' }]
+      'Select Logo Source',
+      'Choose how you would like to add your restaurant logo',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Camera', 
+          onPress: () => simulateImageCapture('camera')
+        },
+        { 
+          text: 'Photo Library', 
+          onPress: () => simulateImageCapture('library')
+        },
+      ]
+    );
+  };
+
+  const simulateImageCapture = (source: 'camera' | 'library') => {
+    // Simulate image picker result with a sample logo
+    const sampleLogos = [
+      'https://via.placeholder.com/200x80/00A651/FFFFFF?text=FYNLO+POS',
+      'https://via.placeholder.com/200x80/0066CC/FFFFFF?text=RESTAURANT',
+      'https://via.placeholder.com/200x80/FF6B35/FFFFFF?text=CAFE+LOGO',
+    ];
+    
+    const selectedLogo = sampleLogos[Math.floor(Math.random() * sampleLogos.length)];
+    
+    Alert.alert(
+      'Logo Selected',
+      `Logo selected from ${source}. This is a demo - in production, this would use react-native-image-picker.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Use This Logo',
+          onPress: () => {
+            setLogoUri(selectedLogo);
+            handleFieldChange('logoUri', selectedLogo);
+            Alert.alert('Success', 'Logo has been updated! Don\'t forget to save your changes.');
+          }
+        }
+      ]
+    );
+  };
+
+  const handleRemoveLogo = () => {
+    Alert.alert(
+      'Remove Logo',
+      'Are you sure you want to remove the current logo?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Remove',
+          style: 'destructive',
+          onPress: () => {
+            setLogoUri(null);
+            handleFieldChange('logoUri', null);
+          }
+        }
+      ]
     );
   };
 
@@ -104,8 +160,18 @@ const ReceiptCustomizationScreen: React.FC = () => {
       <View style={styles.receiptHeader}>
         {formData.showLogo && (
           <View style={styles.logoPlaceholder}>
-            <Icon name="business" size={40} color={Colors.primary} />
-            <Text style={styles.logoText}>LOGO</Text>
+            {logoUri ? (
+              <Image 
+                source={{ uri: logoUri }} 
+                style={styles.receiptLogoImage}
+                resizeMode="contain"
+              />
+            ) : (
+              <>
+                <Icon name="business" size={40} color={Colors.primary} />
+                <Text style={styles.logoText}>LOGO</Text>
+              </>
+            )}
           </View>
         )}
         
@@ -249,13 +315,44 @@ const ReceiptCustomizationScreen: React.FC = () => {
           </SettingsCard>
 
           {formData.showLogo && (
-            <SettingsCard
-              title="Upload Logo"
-              description="Select your company logo image"
-              icon="cloud-upload"
-              iconColor={Colors.secondary}
-              onPress={handleLogoUpload}
-            />
+            <View style={styles.logoSection}>
+              {logoUri ? (
+                <View style={styles.logoContainer}>
+                  <Text style={styles.logoSectionTitle}>Current Logo</Text>
+                  <View style={styles.logoPreview}>
+                    <Image 
+                      source={{ uri: logoUri }} 
+                      style={styles.logoImage}
+                      resizeMode="contain"
+                    />
+                  </View>
+                  <View style={styles.logoActions}>
+                    <TouchableOpacity 
+                      style={[styles.logoButton, styles.changeLogo]}
+                      onPress={handleLogoUpload}
+                    >
+                      <Icon name="edit" size={20} color={Colors.white} />
+                      <Text style={styles.logoButtonText}>Change Logo</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                      style={[styles.logoButton, styles.removeLogo]}
+                      onPress={handleRemoveLogo}
+                    >
+                      <Icon name="delete" size={20} color={Colors.white} />
+                      <Text style={styles.logoButtonText}>Remove</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              ) : (
+                <SettingsCard
+                  title="Upload Logo"
+                  description="Select your company logo image"
+                  icon="cloud-upload"
+                  iconColor={Colors.secondary}
+                  onPress={handleLogoUpload}
+                />
+              )}
+            </View>
           )}
         </SettingsSection>
 
@@ -571,6 +668,66 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: Colors.danger,
+  },
+  // Logo Upload Styles
+  logoSection: {
+    marginBottom: 1,
+  },
+  logoContainer: {
+    backgroundColor: Colors.white,
+    borderRadius: 12,
+    padding: 16,
+    marginHorizontal: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  logoSectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.text,
+    marginBottom: 12,
+  },
+  logoPreview: {
+    alignItems: 'center',
+    backgroundColor: Colors.background,
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 16,
+  },
+  logoImage: {
+    width: 200,
+    height: 80,
+  },
+  logoActions: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  logoButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    borderRadius: 8,
+    gap: 8,
+  },
+  changeLogo: {
+    backgroundColor: Colors.secondary,
+  },
+  removeLogo: {
+    backgroundColor: Colors.danger,
+  },
+  logoButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.white,
+  },
+  receiptLogoImage: {
+    width: 60,
+    height: 24,
   },
 });
 

@@ -15,12 +15,44 @@ target 'CashAppPOS' do
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
+  # Square SDK configuration - temporarily disabled to prevent crashes
+  # pod 'SquareInAppPaymentsSDK', :modular_headers => true
+  # pod 'SquareBuyerVerificationSDK', :modular_headers => true
+  
   post_install do |installer|
     react_native_post_install(
       installer,
       config[:reactNativePath],
       :mac_catalyst_enabled => false
     )
+    
+    # Fix Square SDK framework embedding and nested framework paths
+    installer.pods_project.targets.each do |target|
+      if target.name == 'RNSquareInAppPayments'
+        target.build_configurations.each do |config|
+          config.build_settings['BUILD_LIBRARY_FOR_DISTRIBUTION'] = 'YES'
+          config.build_settings['ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES'] = 'YES'
+          
+          # Fix nested CorePaymentCard framework path
+          config.build_settings['LD_RUNPATH_SEARCH_PATHS'] ||= ['$(inherited)']
+          config.build_settings['LD_RUNPATH_SEARCH_PATHS'] << '@executable_path/Frameworks'
+          config.build_settings['LD_RUNPATH_SEARCH_PATHS'] << '@loader_path/Frameworks'
+          config.build_settings['LD_RUNPATH_SEARCH_PATHS'] << '@executable_path/Frameworks/SquareInAppPaymentsSDK.framework/Frameworks'
+          config.build_settings['LD_RUNPATH_SEARCH_PATHS'] << '@executable_path/Frameworks/SquareBuyerVerificationSDK.framework/Frameworks'
+        end
+      end
+      
+      # Configure main app target for Square frameworks
+      if target.name == 'CashAppPOS'
+        target.build_configurations.each do |config|
+          config.build_settings['LD_RUNPATH_SEARCH_PATHS'] ||= ['$(inherited)']
+          config.build_settings['LD_RUNPATH_SEARCH_PATHS'] << '@executable_path/Frameworks'
+          config.build_settings['LD_RUNPATH_SEARCH_PATHS'] << '@loader_path/Frameworks'
+          config.build_settings['LD_RUNPATH_SEARCH_PATHS'] << '@executable_path/Frameworks/SquareInAppPaymentsSDK.framework/Frameworks'
+          config.build_settings['LD_RUNPATH_SEARCH_PATHS'] << '@executable_path/Frameworks/SquareBuyerVerificationSDK.framework/Frameworks'
+        end
+      end
+    end
     
     # Comprehensive fixes for Xcode 16.4 compatibility
     installer.pods_project.targets.each do |target|
@@ -135,13 +167,49 @@ target 'CashAppPOS' do
     
     puts "✅ SocketRocket priority inversion suppression configured!"
     
+    # Fix Square SDK nested framework issue by copying CorePaymentCard to top level
+    puts "🔧 Configuring Square SDK nested framework fix..."
+    
+    # Add custom build phase to copy nested frameworks
+    installer.pods_project.targets.each do |target|
+      if target.name == 'CashAppPOS'
+        # Add build script to copy nested frameworks
+        build_script_phase = target.new_shell_script_build_phase('Copy Square Nested Frameworks')
+        build_script_phase.shell_script = <<-SCRIPT
+# Copy CorePaymentCard framework from nested location to top level
+SQUARE_FRAMEWORKS_DIR="$BUILT_PRODUCTS_DIR/$PRODUCT_NAME.app/Frameworks"
+CORE_PAYMENT_CARD_SOURCE="$SQUARE_FRAMEWORKS_DIR/SquareInAppPaymentsSDK.framework/Frameworks/CorePaymentCard.framework"
+CORE_PAYMENT_CARD_DEST="$SQUARE_FRAMEWORKS_DIR/CorePaymentCard.framework"
+
+if [ -d "$CORE_PAYMENT_CARD_SOURCE" ] && [ ! -d "$CORE_PAYMENT_CARD_DEST" ]; then
+    echo "Copying CorePaymentCard.framework to top level..."
+    cp -R "$CORE_PAYMENT_CARD_SOURCE" "$CORE_PAYMENT_CARD_DEST"
+    echo "✅ CorePaymentCard.framework copied successfully"
+else
+    echo "ℹ️ CorePaymentCard.framework already exists or source not found"
+fi
+SCRIPT
+        # Move the build script to run after "Embed Frameworks"
+        target.build_phases.move(build_script_phase, target.build_phases.count - 1)
+      end
+    end
+    
     # Fix deprecated ld_classic linker warning and category conflicts
     installer.pods_project.targets.each do |target|
       target.build_configurations.each do |config|
-        # Fix deprecated ld_classic warning
+        # Fix duplicate library and linker warnings
         if config.build_settings['OTHER_LDFLAGS']
-          config.build_settings['OTHER_LDFLAGS'] = config.build_settings['OTHER_LDFLAGS'].gsub('-ld_classic', '') if config.build_settings['OTHER_LDFLAGS'].is_a?(String)
-          config.build_settings['OTHER_LDFLAGS'] = config.build_settings['OTHER_LDFLAGS'].reject { |flag| flag == '-ld_classic' } if config.build_settings['OTHER_LDFLAGS'].is_a?(Array)
+          # Remove duplicate -lc++ flags and deprecated linker flags
+          if config.build_settings['OTHER_LDFLAGS'].is_a?(Array)
+            config.build_settings['OTHER_LDFLAGS'] = config.build_settings['OTHER_LDFLAGS'].uniq.reject { |flag| flag == '-ld_classic' }
+          elsif config.build_settings['OTHER_LDFLAGS'].is_a?(String)
+            config.build_settings['OTHER_LDFLAGS'] = config.build_settings['OTHER_LDFLAGS'].gsub('-ld_classic', '').gsub(/(-lc\+\+\s*){2,}/, '-lc++ ')
+          end
+        end
+        
+        # Fix Swift standard libraries embedding warning for static libraries
+        if target.respond_to?(:product_type) && target.product_type == 'com.apple.product-type.library.static'
+          config.build_settings['ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES'] = 'NO'
         end
         
         # Use modern linker settings

@@ -11,6 +11,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Dimensions,
+  Image,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
@@ -108,7 +109,8 @@ const LoginScreen: React.FC = () => {
         <View style={styles.content}>
           {/* Logo Section */}
           <View style={styles.logoSection}>
-            <Logo size="large" />
+            <Logo size="large" showText={false} />
+            <Text style={styles.logoTitle}>Professional Point of Sale System</Text>
           </View>
 
           {/* Login Form */}
@@ -218,6 +220,12 @@ const styles = StyleSheet.create({
   logoSection: {
     alignItems: 'center',
     marginBottom: 50,
+  },
+  logoTitle: {
+    fontSize: 16,
+    color: Colors.lightText,
+    textAlign: 'center',
+    marginTop: 16,
   },
   formSection: {
     marginBottom: 40,

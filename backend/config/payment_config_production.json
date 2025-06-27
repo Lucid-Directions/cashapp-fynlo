@@ -1,0 +1,96 @@
+{
+  "providers": {
+    "stripe": {
+      "enabled": true,
+      "environment": "production",
+      "webhook_url": "https://api.fynlo.com/webhooks/stripe",
+      "timeout_seconds": 30,
+      "retry_attempts": 3,
+      "custom_settings": {
+        "capture_method": "automatic",
+        "confirmation_method": "automatic"
+      }
+    },
+    "square": {
+      "enabled": true,
+      "environment": "production",
+      "webhook_url": "https://api.fynlo.com/webhooks/square",
+      "timeout_seconds": 30,
+      "retry_attempts": 3,
+      "custom_settings": {
+        "auto_complete": true
+      }
+    },
+    "sumup": {
+      "enabled": true,
+      "environment": "production",
+      "webhook_url": "https://api.fynlo.com/webhooks/sumup",
+      "timeout_seconds": 30,
+      "retry_attempts": 3,
+      "custom_settings": {
+        "checkout_reference": "FYNLO_PROD"
+      }
+    }
+  },
+  "routing": {
+    "enabled": true,
+    "default_strategy": "cost_optimal",
+    "primary_provider": "sumup",
+    "volume_thresholds": {
+      "sumup_optimal": "2714.00",
+      "volume_discount": "10000.00",
+      "enterprise": "50000.00"
+    },
+    "provider_priority": [
+      "sumup",
+      "square",
+      "qr_code",
+      "stripe"
+    ],
+    "provider_weights": {
+      "balanced": {
+        "cost": 0.4,
+        "reliability": 0.25,
+        "speed": 0.15,
+        "volume": 0.15,
+        "availability": 0.05
+      },
+      "cost_optimal": {
+        "cost": 0.6,
+        "reliability": 0.15,
+        "speed": 0.1,
+        "volume": 0.1,
+        "availability": 0.05
+      },
+      "reliability_first": {
+        "cost": 0.15,
+        "reliability": 0.5,
+        "speed": 0.15,
+        "volume": 0.15,
+        "availability": 0.05
+      }
+    },
+    "fallback_provider": "qr_code"
+  },
+  "features": {
+    "smart_routing_enabled": true,
+    "analytics_enabled": true,
+    "volume_tracking_enabled": true,
+    "qr_payments_enabled": true,
+    "cash_payments_enabled": true,
+    "auto_refunds_enabled": true,
+    "webhook_retries_enabled": true,
+    "cost_optimization_alerts": true
+  },
+  "security": {
+    "encrypt_api_keys": true,
+    "webhook_signature_validation": true,
+    "rate_limiting_enabled": true,
+    "max_requests_per_minute": 100,
+    "allowed_origins": [
+      "https://fynlo.com",
+      "https://app.fynlo.com"
+    ],
+    "ssl_required": true
+  }
+}

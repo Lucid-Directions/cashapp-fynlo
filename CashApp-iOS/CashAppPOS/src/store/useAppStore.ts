@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppState, User, PosSession, OrderItem, Order } from '../types';
+import { calculateItemTotal, calculateSum } from '../utils/priceValidation';
+import ErrorTrackingService from '../services/ErrorTrackingService';
 
 interface AppStore extends AppState {
   // User actions
@@ -16,6 +18,7 @@ interface AppStore extends AppState {
   removeFromCart: (itemId: number) => void;
   updateCartItem: (itemId: number, updates: Partial<OrderItem>) => void;
   clearCart: () => void;
+  cleanCart: () => void;
   
   // Order actions
   setCurrentOrder: (order: Order | null) => void;
@@ -51,7 +54,7 @@ const useAppStore = create<AppStore>()(
         totalSales: 0,
         ordersCount: 0,
       },
-      cart: [],
+      cart: [], // Will be cleaned on first access if corrupted
       currentOrder: null,
       isOnline: true,
       isLoading: false,
@@ -71,11 +74,22 @@ const useAppStore = create<AppStore>()(
 
       // Cart actions
       addToCart: (newItem) => set((state) => {
-        const existingItem = state.cart.find(item => item.id === newItem.id);
+        // Validate the new item has required properties
+        if (!newItem.id || !newItem.name || typeof newItem.price !== 'number' || typeof newItem.quantity !== 'number') {
+          console.error('Invalid item being added to cart:', newItem);
+          return state;
+        }
+
+        // Clean cart to remove any corrupted items
+        const cleanCart = state.cart.filter(item => 
+          item.id && item.name && typeof item.price === 'number' && typeof item.quantity === 'number' && item.quantity > 0
+        );
+
+        const existingItem = cleanCart.find(item => item.id === newItem.id);
         
         if (existingItem) {
           return {
-            cart: state.cart.map(item =>
+            cart: cleanCart.map(item =>
               item.id === newItem.id
                 ? { ...item, quantity: item.quantity + newItem.quantity }
                 : item
@@ -84,7 +98,7 @@ const useAppStore = create<AppStore>()(
         }
         
         return {
-          cart: [...state.cart, newItem],
+          cart: [...cleanCart, newItem],
         };
       }),
 
@@ -100,6 +114,13 @@ const useAppStore = create<AppStore>()(
 
       clearCart: () => set({ cart: [] }),
 
+      // Clean corrupted cart data
+      cleanCart: () => set((state) => ({
+        cart: state.cart.filter(item => 
+          item.id && item.name && typeof item.price === 'number' && typeof item.quantity === 'number' && item.quantity > 0
+        )
+      })),
+
       // Order actions
       setCurrentOrder: (currentOrder) => set({ currentOrder }),
 
@@ -108,15 +129,106 @@ const useAppStore = create<AppStore>()(
       setLoading: (isLoading) => set({ isLoading }),
       setError: (error) => set({ error }),
 
-      // Computed values
+      // Computed values with error tracking
       cartTotal: () => {
         const { cart } = get();
-        return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+        try {
+          // Clean corrupted items first
+          const cleanCart = cart.filter(item => 
+            item.id && item.name && typeof item.price === 'number' && typeof item.quantity === 'number' && item.quantity > 0
+          );
+
+          // If cart was dirty, clean it in the store
+          if (cleanCart.length !== cart.length) {
+            set({ cart: cleanCart });
+          }
+
+          const itemTotals = cleanCart.map((item, index) => {
+            const itemTotal = calculateItemTotal(item.price, item.quantity, {
+              operation: 'cart_total_calculation',
+              screenName: 'AppStore',
+              inputValues: { itemId: item.id, itemName: item.name, index }
+            });
+            
+            if (!itemTotal.isValid) {
+              const errorTrackingService = ErrorTrackingService.getInstance();
+              errorTrackingService.trackPricingError(
+                new Error(`Invalid item total in cart: ${itemTotal.error}`),
+                { item, index },
+                { screenName: 'AppStore', action: 'cart_total_calculation' }
+              );
+              return 0;
+            }
+            
+            return itemTotal.value;
+          });
+
+          const totalSum = calculateSum(itemTotals, {
+            operation: 'cart_total_sum',
+            screenName: 'AppStore'
+          });
+
+          if (!totalSum.isValid) {
+            const errorTrackingService = ErrorTrackingService.getInstance();
+            errorTrackingService.trackPricingError(
+              new Error(`Cart total calculation failed: ${totalSum.error}`),
+              { cart: cleanCart, itemTotals },
+              { screenName: 'AppStore', action: 'cart_total_calculation' }
+            );
+            return 0;
+          }
+
+          return totalSum.value;
+        } catch (error) {
+          const errorTrackingService = ErrorTrackingService.getInstance();
+          errorTrackingService.trackPricingError(
+            error instanceof Error ? error : new Error(`Cart total error: ${error}`),
+            { cart },
+            { screenName: 'AppStore', action: 'cart_total_calculation' }
+          );
+          return 0;
+        }
       },
 
       cartItemCount: () => {
         const { cart } = get();
-        return cart.reduce((count, item) => count + item.quantity, 0);
+        try {
+          // Clean corrupted items first
+          const cleanCart = cart.filter(item => 
+            item.id && item.name && typeof item.price === 'number' && typeof item.quantity === 'number' && item.quantity > 0
+          );
+
+          // If cart was dirty, clean it in the store
+          if (cleanCart.length !== cart.length) {
+            set({ cart: cleanCart });
+          }
+
+          const quantities = cleanCart.map(item => item.quantity || 0);
+          const quantitySum = calculateSum(quantities, {
+            operation: 'cart_item_count',
+            screenName: 'AppStore'
+          });
+
+          if (!quantitySum.isValid) {
+            const errorTrackingService = ErrorTrackingService.getInstance();
+            errorTrackingService.trackPricingError(
+              new Error(`Cart item count calculation failed: ${quantitySum.error}`),
+              { cart: cleanCart },
+              { screenName: 'AppStore', action: 'cart_item_count' }
+            );
+            return 0;
+          }
+
+          return Math.round(quantitySum.value);
+        } catch (error) {
+          const errorTrackingService = ErrorTrackingService.getInstance();
+          errorTrackingService.trackPricingError(
+            error instanceof Error ? error : new Error(`Cart item count error: ${error}`),
+            { cart },
+            { screenName: 'AppStore', action: 'cart_item_count' }
+          );
+          return 0;
+        }
       },
     }),
     {

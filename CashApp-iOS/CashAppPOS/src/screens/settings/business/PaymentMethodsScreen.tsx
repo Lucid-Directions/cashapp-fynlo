@@ -29,7 +29,7 @@ const Colors = {
 };
 
 interface PaymentMethodInfo {
-  id: keyof typeof useSettingsStore.prototype.paymentMethods;
+  id: string;
   name: string;
   description: string;
   icon: string;
@@ -64,7 +64,7 @@ const PaymentMethodsScreen: React.FC = () => {
       id: 'applePay',
       name: 'Apple Pay',
       description: 'Contactless payments using Apple Pay',
-      icon: 'contactless-payment',
+      icon: 'phone-android',
       iconColor: Colors.text,
       popular: true,
     },
@@ -72,7 +72,7 @@ const PaymentMethodsScreen: React.FC = () => {
       id: 'googlePay',
       name: 'Google Pay',
       description: 'Contactless payments using Google Pay',
-      icon: 'contactless-payment',
+      icon: 'phone-android',
       iconColor: Colors.warning,
     },
     {

@@ -7,6 +7,7 @@ import BusinessSettingsScreen from '../screens/settings/BusinessSettingsScreen';
 import BusinessInformationScreen from '../screens/settings/business/BusinessInformationScreen';
 import TaxConfigurationScreen from '../screens/settings/business/TaxConfigurationScreen';
 import PaymentMethodsScreen from '../screens/settings/business/PaymentMethodsScreen';
+import PaymentMethodsInfoScreen from '../screens/settings/business/PaymentMethodsInfoScreen';
 import ReceiptCustomizationScreen from '../screens/settings/business/ReceiptCustomizationScreen';
 import OperatingHoursScreen from '../screens/settings/business/OperatingHoursScreen';
 
@@ -36,6 +37,7 @@ import XeroSettingsScreen from '../screens/settings/XeroSettingsScreen';
 import XeroSyncDashboard from '../screens/xero/XeroSyncDashboard';
 import RestaurantSetupScreen from '../screens/onboarding/RestaurantSetupScreen';
 import RestaurantProfileScreen from '../screens/settings/RestaurantProfileScreen';
+import RestaurantPlatformOverridesScreen from '../screens/settings/RestaurantPlatformOverridesScreen';
 
 export type SettingsStackParamList = {
   SettingsMain: undefined;
@@ -45,6 +47,7 @@ export type SettingsStackParamList = {
   BusinessInformation: undefined;
   TaxConfiguration: undefined;
   PaymentMethods: undefined;
+  PaymentMethodsInfo: undefined;
   ReceiptCustomization: undefined;
   OperatingHours: undefined;
   
@@ -80,6 +83,9 @@ export type SettingsStackParamList = {
   // Onboarding
   RestaurantSetup: undefined;
   RestaurantProfile: undefined;
+  
+  // Platform Settings
+  RestaurantPlatformOverrides: undefined;
 };
 
 const Stack = createStackNavigator<SettingsStackParamList>();
@@ -116,6 +122,10 @@ const SettingsNavigator: React.FC = () => {
       <Stack.Screen 
         name="PaymentMethods" 
         component={PaymentMethodsScreen} 
+      />
+      <Stack.Screen 
+        name="PaymentMethodsInfo" 
+        component={PaymentMethodsInfoScreen} 
       />
       <Stack.Screen 
         name="ReceiptCustomization" 
@@ -226,6 +236,18 @@ const SettingsNavigator: React.FC = () => {
       <Stack.Screen 
         name="RestaurantProfile" 
         component={RestaurantProfileScreen} 
+      />
+      
+      {/* Platform Settings */}
+      <Stack.Screen 
+        name="RestaurantPlatformOverrides" 
+        component={RestaurantPlatformOverridesScreen}
+        options={{
+          title: 'Platform Settings',
+          headerStyle: { backgroundColor: '#F8F9FA' },
+          headerTintColor: '#2C3E50',
+          headerTitleStyle: { fontWeight: '600' },
+        }}
       />
     </Stack.Navigator>
   );

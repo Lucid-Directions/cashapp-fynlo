@@ -1,12 +1,13 @@
 """
 Payment processing endpoints for Fynlo POS
-Supports QR payments (1.2% fees), Stripe, Apple Pay, and cash
+Supports multi-provider payments (Stripe, Square, SumUp), QR payments, and cash
 """
 
 import uuid
 from datetime import datetime, timedelta
 from typing import Optional, List
-from fastapi import APIRouter, Depends, HTTPException, status
+from decimal import Decimal
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 import qrcode
@@ -21,6 +22,7 @@ from app.api.v1.endpoints.auth import get_current_user, User
 from app.core.responses import APIResponseHelper
 from app.core.exceptions import FynloException, ErrorCodes
 from app.core.transaction_manager import transactional, transaction_manager
+from app.services.payment_factory import payment_factory
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -62,6 +64,28 @@ class CashPaymentRequest(BaseModel):
     amount: float
     received_amount: float
     change_amount: float = 0.0
+
+# New multi-provider payment models
+class PaymentRequest(BaseModel):
+    order_id: str
+    amount: float
+    customer_id: Optional[str] = None
+    payment_method_id: Optional[str] = None
+    currency: str = "GBP"
+    metadata: Optional[dict] = None
+
+class RefundRequest(BaseModel):
+    transaction_id: str
+    amount: Optional[float] = None
+    reason: Optional[str] = None
+
+class ProviderInfo(BaseModel):
+    name: str
+    display_name: str
+    sample_fees: dict
+    rate: str
+    monthly_fee: Optional[str] = None
+    recommended: bool = False
 
 def calculate_payment_fee(amount: float, payment_method: str) -> float:
     """Calculate payment processing fees"""
@@ -408,4 +432,238 @@ async def check_qr_payment_status(
     return APIResponseHelper.success(
         data=data,
         message="QR payment status retrieved"
+    )
+
+# New multi-provider payment endpoints
+
+@router.post("/process")
+async def process_payment(
+    payment_data: PaymentRequest,
+    provider: Optional[str] = Query(None, description="Force specific provider"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Process a payment through the optimal provider
+    
+    Query params:
+    - provider: Force a specific provider (stripe, square, sumup)
+    
+    Body:
+    - order_id: Associated order ID
+    - amount: Payment amount in GBP
+    - payment_method_id: Provider-specific payment method ID
+    - customer_id: Optional customer ID
+    """
+    try:
+        # Verify order exists
+        order = db.query(Order).filter(Order.id == payment_data.order_id).first()
+        if not order:
+            raise HTTPException(status_code=404, detail="Order not found")
+        
+        if order.payment_status == "completed":
+            raise HTTPException(status_code=400, detail="Order already paid")
+        
+        # Get restaurant's monthly volume (mock for now)
+        monthly_volume = Decimal("2000")  # Default £2,000/month
+        
+        # Select optimal provider using smart routing
+        provider_instance = await payment_factory.select_optimal_provider(
+            amount=Decimal(str(payment_data.amount)),
+            restaurant_id=str(order.restaurant_id) if hasattr(order, 'restaurant_id') else "default",
+            monthly_volume=monthly_volume,
+            force_provider=provider,
+            db_session=db
+        )
+        
+        # Process payment
+        result = await provider_instance.process_payment(
+            amount=Decimal(str(payment_data.amount)),
+            customer_id=payment_data.customer_id,
+            payment_method_id=payment_data.payment_method_id,
+            metadata={
+                "order_id": payment_data.order_id,
+                "restaurant_id": str(order.restaurant_id) if hasattr(order, 'restaurant_id') else "default",
+                **(payment_data.metadata or {})
+            }
+        )
+        
+        # Save to database if successful
+        if result["status"] in ["success", "pending"]:
+            payment = Payment(
+                order_id=payment_data.order_id,
+                payment_method=f"{result['provider']}_payment",  # e.g., "stripe_payment"
+                provider=result["provider"],  # New field
+                amount=payment_data.amount,
+                fee_amount=result["fee"] / 100,  # Convert from pence
+                provider_fee=result["fee"] / 100,  # New provider-specific fee field
+                net_amount=result["net_amount"] / 100,
+                status=result["status"],
+                external_id=result["transaction_id"],  # Existing field
+                processed_at=datetime.utcnow() if result["status"] == "success" else None,
+                payment_metadata={
+                    "provider": result["provider"],
+                    "transaction_id": result["transaction_id"],
+                    "raw_response": result.get("raw_response", {}),
+                    **(payment_data.metadata or {})
+                }
+            )
+            
+            db.add(payment)
+            
+            # Update order if payment successful
+            if result["status"] == "success":
+                order.payment_status = "completed"
+                order.status = "confirmed" if order.status == "pending" else order.status
+            
+            db.commit()
+            db.refresh(payment)
+            
+            return APIResponseHelper.success(
+                message=f"Payment processed successfully with {result['provider']}",
+                data={
+                    "payment_id": str(payment.id),
+                    "provider": result["provider"],
+                    "transaction_id": result["transaction_id"],
+                    "amount": payment_data.amount,
+                    "fee": result["fee"] / 100,
+                    "net_amount": result["net_amount"] / 100,
+                    "status": result["status"]
+                }
+            )
+        else:
+            return APIResponseHelper.error(
+                message=result.get("error", "Payment failed"),
+                error_code="PAYMENT_FAILED",
+                data={"provider": result["provider"]}
+            )
+            
+    except Exception as e:
+        logger.error(f"Payment processing error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/refund/{transaction_id}")
+async def refund_payment(
+    transaction_id: str,
+    refund_data: RefundRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Refund a payment"""
+    # Get the original payment
+    payment = db.query(Payment).filter(Payment.external_id == transaction_id).first()
+    if not payment:
+        raise HTTPException(status_code=404, detail="Payment not found")
+    
+    # Get the provider that was used
+    provider_name = payment.payment_metadata.get("provider", payment.payment_method).lower()
+    provider = payment_factory.get_provider(provider_name)
+    if not provider:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Provider {provider_name} not available"
+        )
+    
+    # Process refund
+    result = await provider.refund_payment(
+        transaction_id=payment.external_id,
+        amount=Decimal(str(refund_data.amount)) if refund_data.amount else None,
+        reason=refund_data.reason
+    )
+    
+    if result["status"] == "refunded":
+        # Update payment status
+        payment.status = "refunded"
+        payment.payment_metadata.update({
+            "refund_id": result.get("refund_id"),
+            "refunded_amount": result.get("amount", 0) / 100,
+            "refund_reason": refund_data.reason
+        })
+        
+        db.commit()
+        
+        return APIResponseHelper.success(
+            message="Refund processed successfully",
+            data={
+                "refund_id": result.get("refund_id"),
+                "amount": result.get("amount", 0) / 100,
+                "status": "refunded"
+            }
+        )
+    else:
+        return APIResponseHelper.error(
+            message=result.get("error", "Refund failed"),
+            error_code="REFUND_FAILED"
+        )
+
+@router.get("/providers")
+async def get_available_providers(
+    current_user: User = Depends(get_current_user)
+):
+    """Get list of available payment providers and their costs"""
+    providers = payment_factory.get_available_providers()
+    
+    # Calculate sample costs for common amounts
+    sample_amounts = [Decimal("10"), Decimal("50"), Decimal("100")]
+    monthly_volume = Decimal("2000")  # Default monthly volume
+    
+    provider_info = []
+    for provider_name in providers:
+        provider = payment_factory.get_provider(provider_name)
+        info = {
+            "name": provider_name,
+            "display_name": provider_name.title(),
+            "sample_fees": {},
+            "recommended": False
+        }
+        
+        for amount in sample_amounts:
+            fee = provider.calculate_fee(amount)
+            info["sample_fees"][f"£{amount}"] = f"£{fee:.2f}"
+        
+        # Add provider-specific information
+        if provider_name == "sumup" and monthly_volume >= Decimal("2714"):
+            info["monthly_fee"] = "£19.00"
+            info["rate"] = "0.69%"
+            info["recommended"] = True
+        elif provider_name == "sumup":
+            info["rate"] = "1.69%"
+        elif provider_name == "stripe":
+            info["rate"] = "1.4% + 20p"
+            if monthly_volume < Decimal("2714") and monthly_volume >= Decimal("1000"):
+                info["recommended"] = True
+        elif provider_name == "square":
+            info["rate"] = "1.75%"
+            if monthly_volume < Decimal("1000"):
+                info["recommended"] = True
+        
+        provider_info.append(info)
+    
+    # Sort by recommended first
+    provider_info.sort(key=lambda x: not x["recommended"])
+    
+    # Get smart routing recommendations if restaurant provided
+    routing_recommendations = []
+    if restaurant_id:
+        try:
+            recommendations = await payment_factory.get_routing_recommendations(
+                restaurant_id=restaurant_id,
+                db_session=db
+            )
+            if recommendations and 'routing_recommendations' in recommendations:
+                routing_recommendations = recommendations['routing_recommendations']
+        except Exception as e:
+            logger.warning(f"Failed to get routing recommendations: {e}")
+    
+    # Sort by recommended first
+    provider_info.sort(key=lambda x: not x["recommended"])
+    
+    return APIResponseHelper.success(
+        data={
+            "providers": provider_info,
+            "monthly_volume": float(monthly_volume),
+            "optimal_provider": provider_info[0]["name"] if provider_info else None,
+            "smart_recommendations": routing_recommendations
+        },
+        message="Retrieved available payment providers with smart recommendations"
     )

@@ -13,23 +13,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import { useRestaurantDisplayName } from '../../hooks/useRestaurantConfig';
-
-// Clover POS Color Scheme
-const Colors = {
-  primary: '#00A651',      // Clover Green
-  secondary: '#0066CC',    // Clover Blue
-  success: '#00A651',
-  warning: '#FF6B35',
-  danger: '#E74C3C',
-  background: '#F5F5F5',
-  white: '#FFFFFF',
-  lightGray: '#E5E5E5',
-  mediumGray: '#999999',
-  darkGray: '#666666',
-  text: '#333333',
-  lightText: '#666666',
-  border: '#DDDDDD',
-};
+import Colors from '../../constants/Colors';
 
 interface SettingsCategory {
   id: string;
@@ -99,6 +83,23 @@ const SettingsScreen: React.FC = () => {
           description: 'Business hours, holidays, and special events',
           icon: 'schedule',
           route: 'OperatingHours',
+        },
+      ],
+    },
+    {
+      id: 'platform',
+      title: 'Platform Settings',
+      description: 'View platform-controlled settings and request overrides',
+      icon: 'admin-panel-settings',
+      route: 'RestaurantPlatformOverrides',
+      color: '#6B73FF',
+      settings: [
+        {
+          id: 'platform-overrides',
+          title: 'Platform Overrides',
+          description: 'View and request changes to platform settings',
+          icon: 'settings-applications',
+          route: 'RestaurantPlatformOverrides',
         },
       ],
     },

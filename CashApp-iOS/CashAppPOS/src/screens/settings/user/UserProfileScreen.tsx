@@ -13,29 +13,13 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../../contexts/AuthContext';
-import { useTheme } from '../../../contexts/ThemeContext';
-
-// Clover POS Color Scheme
-const Colors = {
-  primary: '#00A651',
-  secondary: '#0066CC',
-  success: '#00A651',
-  warning: '#FF6B35',
-  danger: '#E74C3C',
-  background: '#F5F5F5',
-  white: '#FFFFFF',
-  lightGray: '#E5E5E5',
-  mediumGray: '#999999',
-  darkGray: '#666666',
-  text: '#333333',
-  lightText: '#666666',
-  border: '#DDDDDD',
-};
+import { useTheme, useThemedStyles } from '../../../design-system/ThemeProvider';
 
 const UserProfileScreen: React.FC = () => {
   const navigation = useNavigation();
-  const { theme } = useTheme();
   const { user, updateUser, signOut } = useAuth();
+  const { theme } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   
@@ -115,10 +99,8 @@ const UserProfileScreen: React.FC = () => {
           onPress: async () => {
             try {
               await signOut();
-              navigation.reset({
-                index: 0,
-                routes: [{ name: 'Login' }],
-              });
+              // Use goBack instead of reset to avoid navigation errors
+              navigation.goBack();
             } catch (error) {
               console.error('Logout error:', error);
               Alert.alert('Error', 'Failed to logout. Please try again.');
@@ -149,32 +131,6 @@ const UserProfileScreen: React.FC = () => {
     shareAnalytics: false,
   });
 
-  const [editableProfile, setEditableProfile] = useState(user);
-
-  const handleSaveProfile = async () => {
-    if (!editableProfile.firstName?.trim() || !editableProfile.lastName?.trim()) {
-      Alert.alert('Error', 'First name and last name are required.');
-      return;
-    }
-
-    if (!editableProfile.email?.includes('@')) {
-      Alert.alert('Error', 'Please enter a valid email address.');
-      return;
-    }
-
-    try {
-      await updateUser(editableProfile);
-      setIsEditing(false);
-      Alert.alert('Success', 'Profile updated successfully!');
-    } catch (error) {
-      Alert.alert('Error', 'Failed to update profile. Please try again.');
-    }
-  };
-
-  const handleCancelEdit = () => {
-    setEditableProfile(user);
-    setIsEditing(false);
-  };
 
   const handleChangePassword = () => {
     Alert.alert(
@@ -251,15 +207,10 @@ const UserProfileScreen: React.FC = () => {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Icon name="arrow-back" size={24} color={Colors.white} />
+          <Icon name="arrow-back" size={24} color={theme.colors.white} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>User Profile</Text>
-        <TouchableOpacity 
-          style={styles.editButton}
-          onPress={isEditing ? handleSaveProfile : () => setIsEditing(true)}
-        >
-          <Icon name={isEditing ? "check" : "edit"} size={24} color={Colors.white} />
-        </TouchableOpacity>
+        <View style={styles.placeholder} />
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
@@ -268,18 +219,13 @@ const UserProfileScreen: React.FC = () => {
           <View style={styles.profileHeader}>
             <TouchableOpacity 
               style={styles.photoContainer}
-              onPress={isEditing ? handlePhotoChange : undefined}
+              onPress={handlePhotoChange}
             >
               {user.photo ? (
                 <Image source={{ uri: user.photo }} style={styles.profilePhoto} />
               ) : (
                 <View style={styles.defaultPhoto}>
-                  <Icon name="person" size={48} color={Colors.mediumGray} />
-                </View>
-              )}
-              {isEditing && (
-                <View style={styles.photoEditOverlay}>
-                  <Icon name="camera-alt" size={20} color={Colors.white} />
+                  <Icon name="person" size={48} color={theme.colors.mediumGray} />
                 </View>
               )}
             </TouchableOpacity>
@@ -289,15 +235,15 @@ const UserProfileScreen: React.FC = () => {
                 {user.firstName || 'First'} {user.lastName || 'Last'}
               </Text>
               <View style={styles.roleContainer}>
-                <Icon name={getRoleIcon(user.role || 'employee')} size={20} color={Colors.primary} />
+                <Icon name={getRoleIcon(user.role || 'employee')} size={20} color={theme.colors.primary} />
                 <Text style={styles.roleText}>{getRoleDisplayName(user.role || 'employee')}</Text>
               </View>
               <Text style={styles.employeeId}>ID: {user.employeeId || 'N/A'}</Text>
               <Text style={styles.joinDate}>
-                Started: {user.startDate ? user.startDate.toLocaleDateString() : 'N/A'}
+                Started: {user.startDate && !isNaN(new Date(user.startDate).getTime()) ? new Date(user.startDate).toLocaleDateString() : 'N/A'}
               </Text>
               <Text style={styles.lastLogin}>
-                Last login: {user.lastLogin ? `${user.lastLogin.toLocaleDateString()} at ${user.lastLogin.toLocaleTimeString()}` : 'Never'}
+                Last login: {user.lastLogin && !isNaN(new Date(user.lastLogin).getTime()) ? `${new Date(user.lastLogin).toLocaleDateString()} at ${new Date(user.lastLogin).toLocaleTimeString()}` : 'Never'}
               </Text>
             </View>
           </View>
@@ -309,77 +255,25 @@ const UserProfileScreen: React.FC = () => {
           <View style={styles.infoCard}>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>First Name</Text>
-              {isEditing ? (
-                <TextInput
-                  style={styles.textInput}
-                  value={editableProfile.firstName || ''}
-                  onChangeText={(text) => setEditableProfile(prev => ({ ...prev, firstName: text }))}
-                  placeholder="Enter first name"
-                />
-              ) : (
-                <Text style={styles.infoValue}>{user.firstName || 'N/A'}</Text>
-              )}
+              <Text style={styles.infoValue}>{user.firstName || 'N/A'}</Text>
             </View>
 
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Last Name</Text>
-              {isEditing ? (
-                <TextInput
-                  style={styles.textInput}
-                  value={editableProfile.lastName || ''}
-                  onChangeText={(text) => setEditableProfile(prev => ({ ...prev, lastName: text }))}
-                  placeholder="Enter last name"
-                />
-              ) : (
-                <Text style={styles.infoValue}>{user.lastName || 'N/A'}</Text>
-              )}
+              <Text style={styles.infoValue}>{user.lastName || 'N/A'}</Text>
             </View>
 
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Email</Text>
-              {isEditing ? (
-                <TextInput
-                  style={styles.textInput}
-                  value={editableProfile.email || ''}
-                  onChangeText={(text) => setEditableProfile(prev => ({ ...prev, email: text }))}
-                  placeholder="Enter email address"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                />
-              ) : (
-                <Text style={styles.infoValue}>{user.email || 'N/A'}</Text>
-              )}
+              <Text style={styles.infoValue}>{user.email || 'N/A'}</Text>
             </View>
 
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Phone</Text>
-              {isEditing ? (
-                <TextInput
-                  style={styles.textInput}
-                  value={editableProfile.phone || ''}
-                  onChangeText={(text) => setEditableProfile(prev => ({ ...prev, phone: text }))}
-                  placeholder="Enter phone number"
-                  keyboardType="phone-pad"
-                />
-              ) : (
-                <Text style={styles.infoValue}>{user.phone || 'N/A'}</Text>
-              )}
+              <Text style={styles.infoValue}>{user.phone || 'N/A'}</Text>
             </View>
           </View>
 
-          {isEditing && (
-            <View style={styles.editActions}>
-              <TouchableOpacity style={styles.cancelButton} onPress={handleCancelEdit}>
-                <Icon name="cancel" size={20} color={Colors.mediumGray} />
-                <Text style={styles.cancelButtonText}>Cancel</Text>
-              </TouchableOpacity>
-              
-              <TouchableOpacity style={styles.saveButton} onPress={handleSaveProfile}>
-                <Icon name="check" size={20} color={Colors.white} />
-                <Text style={styles.saveButtonText}>Save Changes</Text>
-              </TouchableOpacity>
-            </View>
-          )}
         </View>
 
         {/* Security Settings */}
@@ -388,7 +282,7 @@ const UserProfileScreen: React.FC = () => {
           <View style={styles.settingsCard}>
             <TouchableOpacity style={styles.securityItem} onPress={handleChangePassword}>
               <View style={styles.securityItemLeft}>
-                <Icon name="lock" size={24} color={Colors.secondary} />
+                <Icon name="lock" size={24} color={theme.colors.secondary} />
                 <View style={styles.securityItemInfo}>
                   <Text style={styles.securityItemTitle}>Password</Text>
                   <Text style={styles.securityItemDescription}>
@@ -396,12 +290,12 @@ const UserProfileScreen: React.FC = () => {
                   </Text>
                 </View>
               </View>
-              <Icon name="chevron-right" size={24} color={Colors.lightText} />
+              <Icon name="chevron-right" size={24} color={theme.colors.lightText} />
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.securityItem} onPress={handleChangePIN}>
               <View style={styles.securityItemLeft}>
-                <Icon name="pin" size={24} color={Colors.secondary} />
+                <Icon name="pin" size={24} color={theme.colors.secondary} />
                 <View style={styles.securityItemInfo}>
                   <Text style={styles.securityItemTitle}>PIN Code</Text>
                   <Text style={styles.securityItemDescription}>
@@ -409,12 +303,12 @@ const UserProfileScreen: React.FC = () => {
                   </Text>
                 </View>
               </View>
-              <Icon name="chevron-right" size={24} color={Colors.lightText} />
+              <Icon name="chevron-right" size={24} color={theme.colors.lightText} />
             </TouchableOpacity>
 
             <View style={styles.settingRow}>
               <View style={styles.settingInfo}>
-                <Icon name="fingerprint" size={24} color={Colors.secondary} />
+                <Icon name="fingerprint" size={24} color={theme.colors.secondary} />
                 <View style={styles.settingTextInfo}>
                   <Text style={styles.settingLabel}>Biometric Login</Text>
                   <Text style={styles.settingDescription}>
@@ -425,14 +319,14 @@ const UserProfileScreen: React.FC = () => {
               <Switch
                 value={profileSettings.biometricLogin}
                 onValueChange={() => toggleSetting('biometricLogin')}
-                trackColor={{ false: Colors.lightGray, true: Colors.primary }}
-                thumbColor={Colors.white}
+                trackColor={{ false: theme.colors.lightGray, true: theme.colors.primary }}
+                thumbColor={theme.colors.white}
               />
             </View>
 
             <View style={styles.settingRow}>
               <View style={styles.settingInfo}>
-                <Icon name="security" size={24} color={Colors.secondary} />
+                <Icon name="security" size={24} color={theme.colors.secondary} />
                 <View style={styles.settingTextInfo}>
                   <Text style={styles.settingLabel}>Two-Factor Authentication</Text>
                   <Text style={styles.settingDescription}>
@@ -443,14 +337,14 @@ const UserProfileScreen: React.FC = () => {
               <Switch
                 value={profileSettings.twoFactorAuth}
                 onValueChange={() => toggleSetting('twoFactorAuth')}
-                trackColor={{ false: Colors.lightGray, true: Colors.primary }}
-                thumbColor={Colors.white}
+                trackColor={{ false: theme.colors.lightGray, true: theme.colors.primary }}
+                thumbColor={theme.colors.white}
               />
             </View>
 
             <View style={styles.settingRow}>
               <View style={styles.settingInfo}>
-                <Icon name="timer" size={24} color={Colors.secondary} />
+                <Icon name="timer" size={24} color={theme.colors.secondary} />
                 <View style={styles.settingTextInfo}>
                   <Text style={styles.settingLabel}>Auto Logout</Text>
                   <Text style={styles.settingDescription}>
@@ -461,8 +355,8 @@ const UserProfileScreen: React.FC = () => {
               <Switch
                 value={profileSettings.autoLogout}
                 onValueChange={() => toggleSetting('autoLogout')}
-                trackColor={{ false: Colors.lightGray, true: Colors.primary }}
-                thumbColor={Colors.white}
+                trackColor={{ false: theme.colors.lightGray, true: theme.colors.primary }}
+                thumbColor={theme.colors.white}
               />
             </View>
           </View>
@@ -474,7 +368,7 @@ const UserProfileScreen: React.FC = () => {
           <View style={styles.settingsCard}>
             <View style={styles.settingRow}>
               <View style={styles.settingInfo}>
-                <Icon name="email" size={24} color={Colors.secondary} />
+                <Icon name="email" size={24} color={theme.colors.secondary} />
                 <View style={styles.settingTextInfo}>
                   <Text style={styles.settingLabel}>Email Notifications</Text>
                   <Text style={styles.settingDescription}>
@@ -485,14 +379,14 @@ const UserProfileScreen: React.FC = () => {
               <Switch
                 value={profileSettings.emailNotifications}
                 onValueChange={() => toggleSetting('emailNotifications')}
-                trackColor={{ false: Colors.lightGray, true: Colors.primary }}
-                thumbColor={Colors.white}
+                trackColor={{ false: theme.colors.lightGray, true: theme.colors.primary }}
+                thumbColor={theme.colors.white}
               />
             </View>
 
             <View style={styles.settingRow}>
               <View style={styles.settingInfo}>
-                <Icon name="sms" size={24} color={Colors.secondary} />
+                <Icon name="sms" size={24} color={theme.colors.secondary} />
                 <View style={styles.settingTextInfo}>
                   <Text style={styles.settingLabel}>SMS Notifications</Text>
                   <Text style={styles.settingDescription}>
@@ -503,8 +397,8 @@ const UserProfileScreen: React.FC = () => {
               <Switch
                 value={profileSettings.smsNotifications}
                 onValueChange={() => toggleSetting('smsNotifications')}
-                trackColor={{ false: Colors.lightGray, true: Colors.primary }}
-                thumbColor={Colors.white}
+                trackColor={{ false: theme.colors.lightGray, true: theme.colors.primary }}
+                thumbColor={theme.colors.white}
               />
             </View>
           </View>
@@ -516,7 +410,7 @@ const UserProfileScreen: React.FC = () => {
           <View style={styles.settingsCard}>
             <View style={styles.settingRow}>
               <View style={styles.settingInfo}>
-                <Icon name="help" size={24} color={Colors.secondary} />
+                <Icon name="help" size={24} color={theme.colors.secondary} />
                 <View style={styles.settingTextInfo}>
                   <Text style={styles.settingLabel}>Show Tips</Text>
                   <Text style={styles.settingDescription}>
@@ -527,14 +421,14 @@ const UserProfileScreen: React.FC = () => {
               <Switch
                 value={profileSettings.showTips}
                 onValueChange={() => toggleSetting('showTips')}
-                trackColor={{ false: Colors.lightGray, true: Colors.primary }}
-                thumbColor={Colors.white}
+                trackColor={{ false: theme.colors.lightGray, true: theme.colors.primary }}
+                thumbColor={theme.colors.white}
               />
             </View>
 
             <View style={styles.settingRow}>
               <View style={styles.settingInfo}>
-                <Icon name="analytics" size={24} color={Colors.secondary} />
+                <Icon name="analytics" size={24} color={theme.colors.secondary} />
                 <View style={styles.settingTextInfo}>
                   <Text style={styles.settingLabel}>Share Analytics</Text>
                   <Text style={styles.settingDescription}>
@@ -545,8 +439,8 @@ const UserProfileScreen: React.FC = () => {
               <Switch
                 value={profileSettings.shareAnalytics}
                 onValueChange={() => toggleSetting('shareAnalytics')}
-                trackColor={{ false: Colors.lightGray, true: Colors.primary }}
-                thumbColor={Colors.white}
+                trackColor={{ false: theme.colors.lightGray, true: theme.colors.primary }}
+                thumbColor={theme.colors.white}
               />
             </View>
           </View>
@@ -560,18 +454,18 @@ const UserProfileScreen: React.FC = () => {
               style={styles.actionButton}
               onPress={() => Alert.alert('Info', 'Export data functionality would be implemented here')}
             >
-              <Icon name="file-download" size={24} color={Colors.secondary} />
+              <Icon name="file-download" size={24} color={theme.colors.secondary} />
               <Text style={styles.actionButtonText}>Export My Data</Text>
-              <Icon name="chevron-right" size={24} color={Colors.lightText} />
+              <Icon name="chevron-right" size={24} color={theme.colors.lightText} />
             </TouchableOpacity>
 
             <TouchableOpacity 
               style={styles.actionButton}
               onPress={handleLogout}
             >
-              <Icon name="logout" size={24} color={Colors.warning} />
-              <Text style={[styles.actionButtonText, { color: Colors.warning }]}>Sign Out</Text>
-              <Icon name="chevron-right" size={24} color={Colors.lightText} />
+              <Icon name="logout" size={24} color={theme.colors.warning} />
+              <Text style={[styles.actionButtonText, { color: theme.colors.warning }]}>Sign Out</Text>
+              <Icon name="chevron-right" size={24} color={theme.colors.lightText} />
             </TouchableOpacity>
 
             <TouchableOpacity 
@@ -587,9 +481,9 @@ const UserProfileScreen: React.FC = () => {
                 ]
               )}
             >
-              <Icon name="delete-forever" size={24} color={Colors.danger} />
-              <Text style={[styles.actionButtonText, { color: Colors.danger }]}>Delete Account</Text>
-              <Icon name="chevron-right" size={24} color={Colors.lightText} />
+              <Icon name="delete-forever" size={24} color={theme.colors.danger} />
+              <Text style={[styles.actionButtonText, { color: theme.colors.danger }]}>Delete Account</Text>
+              <Icon name="chevron-right" size={24} color={theme.colors.lightText} />
             </TouchableOpacity>
           </View>
         </View>
@@ -598,13 +492,13 @@ const UserProfileScreen: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: theme.colors.background,
   },
   header: {
-    backgroundColor: Colors.primary,
+    backgroundColor: theme.colors.primary,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -618,7 +512,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: Colors.white,
+    color: theme.colors.white,
   },
   editButton: {
     padding: 8,
@@ -627,14 +521,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   section: {
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.white,
     marginVertical: 8,
     paddingVertical: 16,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: Colors.text,
+    color: theme.colors.text,
     paddingHorizontal: 16,
     marginBottom: 16,
   },
@@ -656,7 +550,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: Colors.lightGray,
+    backgroundColor: theme.colors.lightGray,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -667,11 +561,11 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: Colors.primary,
+    backgroundColor: theme.colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: Colors.white,
+    borderColor: theme.colors.white,
   },
   profileInfo: {
     flex: 1,
@@ -679,7 +573,7 @@ const styles = StyleSheet.create({
   profileName: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: Colors.text,
+    color: theme.colors.text,
     marginBottom: 8,
   },
   roleContainer: {
@@ -691,21 +585,21 @@ const styles = StyleSheet.create({
   roleText: {
     fontSize: 16,
     fontWeight: '500',
-    color: Colors.primary,
+    color: theme.colors.primary,
   },
   employeeId: {
     fontSize: 14,
-    color: Colors.lightText,
+    color: theme.colors.lightText,
     marginBottom: 4,
   },
   joinDate: {
     fontSize: 14,
-    color: Colors.lightText,
+    color: theme.colors.lightText,
     marginBottom: 2,
   },
   lastLogin: {
     fontSize: 12,
-    color: Colors.mediumGray,
+    color: theme.colors.mediumGray,
   },
   infoCard: {
     paddingHorizontal: 16,
@@ -716,30 +610,30 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGray,
+    borderBottomColor: theme.colors.lightGray,
   },
   infoLabel: {
     fontSize: 16,
     fontWeight: '500',
-    color: Colors.text,
+    color: theme.colors.text,
     flex: 1,
   },
   infoValue: {
     fontSize: 16,
-    color: Colors.darkGray,
+    color: theme.colors.darkGray,
     flex: 2,
     textAlign: 'right',
   },
   textInput: {
     flex: 2,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: theme.colors.border,
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 8,
     fontSize: 16,
-    color: Colors.text,
-    backgroundColor: Colors.white,
+    color: theme.colors.text,
+    backgroundColor: theme.colors.white,
     textAlign: 'right',
   },
   editActions: {
@@ -754,16 +648,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 12,
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.white,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: Colors.mediumGray,
+    borderColor: theme.colors.mediumGray,
     gap: 8,
   },
   cancelButtonText: {
     fontSize: 16,
     fontWeight: '500',
-    color: Colors.mediumGray,
+    color: theme.colors.mediumGray,
   },
   saveButton: {
     flex: 1,
@@ -771,14 +665,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 12,
-    backgroundColor: Colors.primary,
+    backgroundColor: theme.colors.primary,
     borderRadius: 8,
     gap: 8,
   },
   saveButtonText: {
     fontSize: 16,
     fontWeight: '500',
-    color: Colors.white,
+    color: theme.colors.white,
   },
   settingsCard: {
     paddingHorizontal: 16,
@@ -789,7 +683,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGray,
+    borderBottomColor: theme.colors.lightGray,
   },
   settingInfo: {
     flexDirection: 'row',
@@ -804,12 +698,12 @@ const styles = StyleSheet.create({
   settingLabel: {
     fontSize: 16,
     fontWeight: '500',
-    color: Colors.text,
+    color: theme.colors.text,
     marginBottom: 4,
   },
   settingDescription: {
     fontSize: 14,
-    color: Colors.lightText,
+    color: theme.colors.lightText,
   },
   securityItem: {
     flexDirection: 'row',
@@ -817,7 +711,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGray,
+    borderBottomColor: theme.colors.lightGray,
   },
   securityItemLeft: {
     flexDirection: 'row',
@@ -831,12 +725,12 @@ const styles = StyleSheet.create({
   securityItemTitle: {
     fontSize: 16,
     fontWeight: '500',
-    color: Colors.text,
+    color: theme.colors.text,
     marginBottom: 4,
   },
   securityItemDescription: {
     fontSize: 14,
-    color: Colors.lightText,
+    color: theme.colors.lightText,
   },
   actionCard: {
     paddingHorizontal: 16,
@@ -846,19 +740,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGray,
+    borderBottomColor: theme.colors.lightGray,
   },
   actionButtonText: {
     fontSize: 16,
     fontWeight: '500',
-    color: Colors.text,
+    color: theme.colors.text,
     marginLeft: 12,
     flex: 1,
   },
   errorText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: Colors.danger,
+    color: theme.colors.danger,
     textAlign: 'center',
   },
 });
