@@ -1,5 +1,6 @@
 // APITestingService.ts - Frontend API testing without affecting demo data
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import API_CONFIG from '../config/api';
 
 // API Test Result Interface
 export interface APITestResult {
@@ -32,7 +33,7 @@ export interface APITestSuite {
  */
 class APITestingService {
   private static instance: APITestingService;
-  private baseUrl = 'http://localhost:8000';
+  private baseUrl = API_CONFIG.BASE_URL;
   private testResults: APITestResult[] = [];
   private testSuites: APITestSuite[] = [];
 

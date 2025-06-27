@@ -122,8 +122,9 @@ class SumUpPaymentProviderClass {
    * Check if SumUp is available and configured
    */
   isAvailable(): boolean {
-    // For now, return false since SDK is not available
-    return false;
+    // STAGING: Enable SumUp for payment testing
+    // TODO: Check if SumUp SDK is properly initialized
+    return true;
   }
 
   /**

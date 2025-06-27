@@ -14,29 +14,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     let jsCodeLocation: URL
 
-    #if DEBUG
-      // For debug builds, use Metro bundler (now running)
-      // Try Metro bundler first, then fall back to bundled JS
-      if let bundleURL = RCTBundleURLProvider.sharedSettings()?.jsBundleURL(forBundleRoot: "index") {
-        jsCodeLocation = bundleURL
-      } else if let bundledURL = Bundle.main.url(forResource: "main", withExtension: "jsbundle") {
-        // Fallback to bundled JavaScript when Metro is unavailable
-        jsCodeLocation = bundledURL
-        print("⚠️ Metro unavailable, using bundled JavaScript")
-      } else {
-        // Final fallback to localhost URL
-        jsCodeLocation = URL(string: "http://localhost:8081/index.bundle?platform=ios")!
-        print("⚠️ No bundled JS found, attempting localhost connection")
-      }
-      print("✅ Using Metro bundler for debug build: \(jsCodeLocation)")
-    #else
-      // For release builds, use bundled JS
-      guard let bundledURL = Bundle.main.url(forResource: "main", withExtension: "jsbundle") else {
-        fatalError("❌ Bundled JavaScript file not found")
-      }
+    // TEMPORARY: Force use of bundled JS for debugging payment issue
+    // Use bundled JS instead of Metro to ensure changes are included
+    if let bundledURL = Bundle.main.url(forResource: "main", withExtension: "jsbundle") {
       jsCodeLocation = bundledURL
-      print("✅ Using bundled JavaScript for release build")
-    #endif
+      print("✅ Using bundled JavaScript for debug testing")
+    } else {
+      fatalError("❌ Bundled JavaScript file not found")
+    }
 
     print("JS Code Location: \(jsCodeLocation)")
 

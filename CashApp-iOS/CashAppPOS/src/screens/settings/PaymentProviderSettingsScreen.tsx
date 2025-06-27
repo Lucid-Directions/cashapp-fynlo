@@ -51,7 +51,7 @@ const PaymentProviderSettingsScreen: React.FC = () => {
   const [enabledProviders, setEnabledProviders] = useState({
     stripe: true,
     square: false,
-    sumup: false,
+    sumup: true,  // ENABLED for staging testing
     qrCode: true,
     cash: true,
   });

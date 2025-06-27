@@ -4,6 +4,7 @@
  */
 
 import DataService from './DataService';
+import API_CONFIG from '../config/api';
 
 export interface WebSocketMessage {
   type: string;
@@ -49,7 +50,7 @@ export class WebSocketService {
   private constructor() {
     this.dataService = DataService.getInstance();
     this.config = {
-      baseUrl: 'ws://localhost:8000',
+      baseUrl: API_CONFIG.BASE_URL.replace('http', 'ws'),
       restaurantId: 'default-restaurant',
       connectionType: 'pos',
       autoReconnect: true,

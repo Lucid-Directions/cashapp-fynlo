@@ -18,6 +18,8 @@ import QRCodePayment from '../../components/payment/QRCodePayment';
 import StripePaymentProvider from '../../services/providers/StripePaymentProvider';
 import SquarePaymentProvider from '../../services/providers/SquarePaymentProvider';
 import SumUpPaymentProvider from '../../services/providers/SumUpPaymentProvider';
+import SumUpNativeService from '../../services/SumUpNativeService';
+import SumUpPaymentComponent from '../../components/payment/SumUpPaymentComponent';
 
 // Clover POS Color Scheme
 const Colors = {
@@ -50,12 +52,15 @@ const PaymentScreen: React.FC = () => {
   const navigation = useNavigation();
   const { cart, clearCart } = useAppStore();
   const { paymentMethods, taxConfiguration } = useSettingsStore();
+  const sumUpService = SumUpNativeService.getInstance();
   
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('');
   const [showQRModal, setShowQRModal] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [paymentResult, setPaymentResult] = useState<PaymentResult | null>(null);
   const [optimalProvider, setOptimalProvider] = useState<string>('');
+  const [showSumUpPayment, setShowSumUpPayment] = useState(false);
+  const [currentPaymentRequest, setCurrentPaymentRequest] = useState<PaymentRequest | null>(null);
 
   // Calculate totals
   const calculateSubtotal = () => {
@@ -79,8 +84,35 @@ const PaymentScreen: React.FC = () => {
     return subtotal + tax + service;
   };
 
-  // Payment methods with fee information
+  // Payment methods with fee information - SumUp focused (Stripe/Square hidden as backups)
   const availablePaymentMethods: PaymentMethod[] = [
+    {
+      id: 'tapToPay',
+      name: 'Tap to Pay',
+      icon: 'contactless-payment',
+      color: Colors.success,
+      enabled: true,
+      requiresAuth: false,
+      feeInfo: '0.69% + £19/month',
+    },
+    {
+      id: 'applePaySumUp',
+      name: 'Apple Pay',
+      icon: 'apple',
+      color: Colors.darkGray,
+      enabled: true,
+      requiresAuth: false,
+      feeInfo: '0.69% + £19/month',
+    },
+    {
+      id: 'cardEntry',
+      name: 'Manual Card',
+      icon: 'credit-card',
+      color: Colors.secondary,
+      enabled: true,
+      requiresAuth: false,
+      feeInfo: '0.69% + £19/month',
+    },
     {
       id: 'qrCode',
       name: 'QR Payment',
@@ -88,33 +120,6 @@ const PaymentScreen: React.FC = () => {
       color: Colors.primary,
       enabled: paymentMethods?.qrCode?.enabled ?? true,
       requiresAuth: paymentMethods?.qrCode?.requiresAuth ?? false,
-      feeInfo: '1.2% fee',
-    },
-    {
-      id: 'stripe',
-      name: 'Stripe',
-      icon: 'credit-card',
-      color: Colors.secondary,
-      enabled: paymentMethods?.card?.enabled ?? true,
-      requiresAuth: paymentMethods?.card?.requiresAuth ?? false,
-      feeInfo: '1.4% + 20p',
-    },
-    {
-      id: 'square',
-      name: 'Square',
-      icon: 'contactless-payment',
-      color: Colors.warning,
-      enabled: false, // Disabled as SDK not available
-      requiresAuth: false,
-      feeInfo: '1.75%',
-    },
-    {
-      id: 'sumup',
-      name: 'SumUp',
-      icon: 'point-of-sale',
-      color: Colors.success,
-      enabled: false, // Disabled as SDK not available
-      requiresAuth: false,
       feeInfo: '0.69% + £19/month',
     },
     {
@@ -126,6 +131,25 @@ const PaymentScreen: React.FC = () => {
       requiresAuth: paymentMethods?.cash?.requiresAuth ?? false,
       feeInfo: 'No fees',
     },
+    // Stripe and Square are hidden (backup providers only)
+    // {
+    //   id: 'stripe',
+    //   name: 'Stripe',
+    //   icon: 'credit-card',
+    //   color: Colors.secondary,
+    //   enabled: false, // Hidden from restaurant interface
+    //   requiresAuth: false,
+    //   feeInfo: '1.4% + 20p',
+    // },
+    // {
+    //   id: 'square',
+    //   name: 'Square',
+    //   icon: 'contactless-payment',
+    //   color: Colors.warning,
+    //   enabled: false, // Hidden from restaurant interface
+    //   requiresAuth: false,
+    //   feeInfo: '1.75%',
+    // },
   ];
 
   const enabledPaymentMethods = availablePaymentMethods.filter(m => m.enabled);
@@ -136,18 +160,19 @@ const PaymentScreen: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    // Auto-select optimal payment method
-    if (optimalProvider && enabledPaymentMethods.length > 0) {
-      const optimalMethod = enabledPaymentMethods.find(m => m.id === optimalProvider);
-      if (optimalMethod) {
-        setSelectedPaymentMethod(optimalMethod.id);
+    // Auto-select optimal payment method (prioritize Tap to Pay for best user experience)
+    if (enabledPaymentMethods.length > 0) {
+      const tapToPayMethod = enabledPaymentMethods.find(m => m.id === 'tapToPay');
+      if (tapToPayMethod) {
+        setSelectedPaymentMethod('tapToPay');
+        setOptimalProvider('tapToPay');
       } else {
-        // Fallback to QR code if available
-        const qrMethod = enabledPaymentMethods.find(m => m.id === 'qrCode');
-        setSelectedPaymentMethod(qrMethod ? qrMethod.id : enabledPaymentMethods[0].id);
+        // Fallback to first available SumUp method
+        setSelectedPaymentMethod(enabledPaymentMethods[0].id);
+        setOptimalProvider(enabledPaymentMethods[0].id);
       }
     }
-  }, [optimalProvider, enabledPaymentMethods]);
+  }, [enabledPaymentMethods]);
 
   const initializePaymentService = async () => {
     try {
@@ -215,9 +240,15 @@ const PaymentScreen: React.FC = () => {
       case 'cash':
         processCashPayment();
         break;
+      case 'tapToPay':
+      case 'applePaySumUp':
+      case 'cardEntry':
+        // All SumUp payment methods
+        processSumUpPaymentMethod(methodId);
+        break;
+      // Backup providers (hidden from UI)
       case 'stripe':
       case 'square':
-      case 'sumup':
         processCardPayment(methodId);
         break;
       default:
@@ -276,6 +307,91 @@ const PaymentScreen: React.FC = () => {
     }
   };
 
+  // New SumUp Payment Method Handler
+  const processSumUpPaymentMethod = async (methodId: string) => {
+    setProcessing(true);
+    
+    try {
+      const request: PaymentRequest = {
+        amount: calculateGrandTotal(),
+        currency: 'GBP',
+        orderId: `ORDER-${Date.now()}`,
+        description: `Order with ${cart.length} items`,
+        metadata: { provider: 'sumup', method: methodId },
+      };
+
+      console.log(`🏦 Processing SumUp ${methodId} payment for £${request.amount.toFixed(2)}`);
+      await processSumUpPayment(request, methodId);
+    } catch (error) {
+      console.error(`❌ ${methodId} payment error:`, error);
+      Alert.alert('Payment Error', `Failed to process ${methodId} payment`);
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  // SumUp Payment Function - React Hook Based Integration
+  const processSumUpPayment = async (request: PaymentRequest, paymentMethod: string = 'tapToPay') => {
+    try {
+      console.log('🏦 Starting SumUp payment flow with React hooks...');
+      
+      // Initialize SumUp service (lightweight now)
+      const initSuccess = await sumUpService.initialize('sup_sk_XqquMi732f2WDCqvnkV4xoVxx54oGAQRU');
+      if (!initSuccess) {
+        throw new Error('Failed to initialize SumUp service');
+      }
+      
+      // Set the current payment request and show the SumUp component
+      setCurrentPaymentRequest(request);
+      setShowSumUpPayment(true);
+      
+      console.log('💳 SumUp payment component will handle the payment flow');
+    } catch (error) {
+      console.error('❌ SumUp payment error:', error);
+      Alert.alert('Payment Error', 'Failed to initialize SumUp payment');
+      setProcessing(false);
+    }
+  };
+
+  // Handle SumUp payment completion from the React component
+  const handleSumUpPaymentComplete = (success: boolean, transactionCode?: string, error?: string) => {
+    setShowSumUpPayment(false);
+    setProcessing(false);
+    
+    if (success && transactionCode && currentPaymentRequest) {
+      console.log('🎉 SumUp payment completed successfully!', transactionCode);
+      
+      // Calculate SumUp fee (0.69% for high volume)
+      const fee = currentPaymentRequest.amount * 0.0069;
+      
+      // Create a successful payment result
+      const paymentResult: PaymentResult = {
+        success: true,
+        transactionId: transactionCode,
+        amount: currentPaymentRequest.amount,
+        fee: fee,
+        provider: 'sumup',
+        error: undefined,
+      };
+      
+      setPaymentResult(paymentResult);
+      showPaymentSuccess(paymentResult);
+    } else {
+      console.error('❌ SumUp payment failed:', error);
+      Alert.alert('Payment Failed', error || 'Payment was not completed');
+    }
+    
+    setCurrentPaymentRequest(null);
+  };
+
+  // Handle SumUp payment cancellation
+  const handleSumUpPaymentCancel = () => {
+    setShowSumUpPayment(false);
+    setProcessing(false);
+    setCurrentPaymentRequest(null);
+    console.log('❌ SumUp payment cancelled by user');
+  };
+
   const processCardPayment = async (provider: string) => {
     setProcessing(true);
     
@@ -288,27 +404,22 @@ const PaymentScreen: React.FC = () => {
         metadata: { provider },
       };
 
-      // For now, simulate card payment
-      // In real implementation, this would use the specific provider's SDK
-      Alert.alert(
-        'Card Payment',
-        `Processing ${provider} payment for £${request.amount.toFixed(2)}...\n\nThis is a demo - the actual SDK integration would handle the card processing.`,
-        [
-          { text: 'Cancel', style: 'cancel' },
-          { 
-            text: 'Simulate Success', 
-            onPress: async () => {
-              const result = await PaymentService.processPayment(request);
-              if (result.success) {
-                setPaymentResult(result);
-                showPaymentSuccess(result);
-              } else {
-                Alert.alert('Payment Failed', result.error || 'Card payment failed');
-              }
-            }
-          }
-        ]
-      );
+      // Route to appropriate payment provider
+      console.log(`Processing ${provider} payment for £${request.amount.toFixed(2)}`);
+      
+      if (provider === 'sumup') {
+        // Process SumUp payment with card detection modal
+        await processSumUpPayment(request);
+      } else {
+        // Process other payment providers
+        const result = await PaymentService.processPayment(request);
+        if (result.success) {
+          setPaymentResult(result);
+          showPaymentSuccess(result);
+        } else {
+          Alert.alert('Payment Failed', result.error || 'Card payment failed');
+        }
+      }
     } catch (error) {
       Alert.alert('Payment Error', 'Failed to process card payment');
     } finally {
@@ -463,20 +574,21 @@ const PaymentScreen: React.FC = () => {
               const total = calculateGrandTotal();
               
               switch (method.id) {
+                case 'tapToPay':
+                case 'applePaySumUp':
+                case 'cardEntry':
                 case 'qrCode':
-                  fee = total * 0.012; // 1.2%
+                  fee = total * 0.0069; // 0.69% SumUp high volume rate
                   break;
+                case 'cash':
+                  fee = 0;
+                  break;
+                // Hidden backup providers
                 case 'stripe':
                   fee = (total * 0.014) + 0.20; // 1.4% + 20p
                   break;
                 case 'square':
                   fee = total * 0.0175; // 1.75%
-                  break;
-                case 'sumup':
-                  fee = total * 0.0069; // 0.69% (high volume)
-                  break;
-                case 'cash':
-                  fee = 0;
                   break;
               }
               
@@ -511,6 +623,17 @@ const PaymentScreen: React.FC = () => {
           />
         </View>
       </Modal>
+
+      {/* SumUp Payment Component */}
+      {showSumUpPayment && currentPaymentRequest && (
+        <SumUpPaymentComponent
+          amount={currentPaymentRequest.amount}
+          currency={currentPaymentRequest.currency}
+          title={currentPaymentRequest.description || 'Order Payment'}
+          onPaymentComplete={handleSumUpPaymentComplete}
+          onPaymentCancel={handleSumUpPaymentCancel}
+        />
+      )}
 
       {/* Processing Overlay */}
       {processing && (

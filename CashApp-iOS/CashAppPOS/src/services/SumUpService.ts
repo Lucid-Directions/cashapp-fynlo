@@ -7,7 +7,7 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { PaymentRequest, PaymentResult } from './PaymentService';
-import { SumUpPaymentSheet, SumUpPaymentSheetCheckout } from 'sumup-react-native-alpha';
+import SumUpNativeService from './SumUpNativeService';
 
 export interface SumUpConfig {
   apiKey: string;
@@ -174,7 +174,7 @@ class SumUpServiceClass {
   }
 
   /**
-   * Process contactless NFC payment using SumUp Payment Sheet
+   * Process contactless NFC payment using SumUp Payment Sheet (Thread-Safe)
    */
   async processContactlessPayment(
     amount: number,
@@ -188,16 +188,16 @@ class SumUpServiceClass {
 
       const paymentId = this.generatePaymentId();
       
-      // Create checkout for contactless payment
-      const checkout: SumUpPaymentSheetCheckout = {
+      console.log('🔄 Using Native SumUp SDK for contactless payment');
+      
+      // Use native SumUp SDK for contactless payment
+      const result = await SumUpNativeService.checkout({
         amount: amount,
+        title: description || 'Fynlo POS Contactless Payment',
         currency: currency,
-        description: description || 'Finlow POS Contactless Payment',
-        skipSuccessScreen: false,
-      };
-
-      // Present the SumUp Payment Sheet for contactless payment
-      const result = await SumUpPaymentSheet.present(checkout);
+        foreignTransactionID: paymentId,
+        useTapToPay: true,
+      });
 
       if (result.success) {
         return {
@@ -205,10 +205,10 @@ class SumUpServiceClass {
           amount: amount,
           currency: currency,
           status: 'completed',
-          paymentMethod: this.detectPaymentMethod(result),
+          paymentMethod: result.usedTapToPay ? 'nfc' : 'apple_pay',
         };
       } else {
-        throw new Error(result.error || 'Contactless payment failed');
+        throw new Error(result.message || 'Contactless payment failed');
       }
     } catch (error) {
       console.error('Contactless payment failed:', error);
