@@ -2,6 +2,33 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## 🚨 CRITICAL GIT WORKFLOW WARNING 🚨
+
+**NEVER SWITCH BRANCHES OR CREATE PRs WITHOUT COMMITTING CURRENT WORK FIRST**
+
+**PROBLEM**: Multiple times documentation and code files have been "lost" when creating pull requests because they were only in the working directory, not committed to the base branch.
+
+**MANDATORY WORKFLOW FOR ALL BRANCH OPERATIONS:**
+
+```bash
+# 1. ⚠️ ALWAYS COMMIT EVERYTHING TO BASE BRANCH FIRST
+git add .
+git status  # ← VERIFY what you're committing
+git commit -m "feat: preserve current work state"
+
+# 2. ONLY THEN create feature branches
+git checkout -b feature/specific-change
+
+# 3. Cherry-pick or reset to include only relevant changes for PR
+```
+
+**BEFORE ANY `git checkout` COMMAND:**
+- ✅ Check `git status` - must be clean or everything committed
+- ✅ Verify all documentation files are committed to base branch
+- ✅ Never assume files exist in other branches
+
+**This is NOT optional** - files have been lost 3+ times due to not following this workflow.
+
 ## Project Overview
 
 **Fynlo POS** is a hardware-free restaurant point of sale platform built with React Native (iOS) and FastAPI backend. The app serves as a multi-tenant platform where platform owners can onboard multiple restaurant clients. The current implementation features a Mexican restaurant as the pilot client.
