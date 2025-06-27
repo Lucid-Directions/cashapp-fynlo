@@ -5,8 +5,10 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Base API URL - will use existing pattern from DataService
-const BASE_URL = 'http://localhost:8000/api/v1';
+// Base API URL - FIXED: Uses LAN IP for device testing
+import API_CONFIG from '../config/api';
+
+const BASE_URL = API_CONFIG.FULL_API_URL;
 
 export interface PlatformSetting {
   key: string;

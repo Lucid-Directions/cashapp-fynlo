@@ -31,6 +31,12 @@ class Settings(BaseSettings):
     STRIPE_PUBLISHABLE_KEY: Optional[str] = None
     STRIPE_WEBHOOK_SECRET: Optional[str] = None
     
+    # SumUp Integration (PHASE 3: Added for real payment processing)
+    SUMUP_API_KEY: Optional[str] = None
+    SUMUP_MERCHANT_CODE: Optional[str] = None  
+    SUMUP_AFFILIATE_KEY: Optional[str] = None
+    SUMUP_ENVIRONMENT: str = "sandbox"  # sandbox | production
+    
     # QR Payment Settings
     QR_PAYMENT_FEE_PERCENTAGE: float = 1.2  # Your competitive advantage
     DEFAULT_CARD_FEE_PERCENTAGE: float = 2.9

@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import DatabaseService from './DatabaseService';
 import MockDataService from './MockDataService';
 import APITestingService from './APITestingService';
+import API_CONFIG from '../config/api';
 
 // Feature flags for controlling data sources
 export interface FeatureFlags {
@@ -14,14 +15,14 @@ export interface FeatureFlags {
   MOCK_AUTHENTICATION: boolean;
 }
 
-// Default feature flags - PREPARATION: Keep mock data for demos, enable testing
+// Default feature flags - PHASE 3: Enable real API for production data flow
 const DEFAULT_FLAGS: FeatureFlags = {
-  USE_REAL_API: false,  // Keep false to preserve demo data
-  TEST_API_MODE: true,  // NEW: Enable API testing without affecting demos
-  ENABLE_PAYMENTS: false,
+  USE_REAL_API: true,   // CHANGED: Enable real API to fix payment processing
+  TEST_API_MODE: true,  // Keep API testing enabled
+  ENABLE_PAYMENTS: true, // CHANGED: Enable real payment processing
   ENABLE_HARDWARE: false,
   SHOW_DEV_MENU: __DEV__,
-  MOCK_AUTHENTICATION: false,
+  MOCK_AUTHENTICATION: false, // Use real authentication
 };
 
 /**
@@ -115,9 +116,12 @@ class DataService {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 2000);
       
-      const response = await fetch('http://localhost:8000/health', {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/health`, {
         method: 'GET',
         signal: controller.signal,
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
       
       clearTimeout(timeoutId);
@@ -263,22 +267,44 @@ class DataService {
     return this.mockDataService.getRecentOrders(limit);
   }
 
-  // Payment processing
+  // Payment processing - PHASE 3: Fix SumUp integration
   async processPayment(orderId: number, paymentMethod: string, amount: number): Promise<boolean> {
-    if (!this.featureFlags.ENABLE_PAYMENTS) {
-      // Always succeed in demo mode
-      console.log(`Mock payment processed: ${paymentMethod} for £${amount}`);
-      return true;
+    // Test payment endpoint in background when in test mode
+    if (this.featureFlags.TEST_API_MODE) {
+      await this.testAPIEndpoint('/api/v1/payments/process', 'POST', { 
+        orderId, 
+        paymentMethod, 
+        amount 
+      });
     }
 
-    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
+    if (this.featureFlags.ENABLE_PAYMENTS && this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        return await this.databaseService.processPayment(orderId, paymentMethod, amount);
+        console.log(`Processing real payment: ${paymentMethod} for £${amount} (Order: ${orderId})`);
+        const result = await this.databaseService.processPayment(orderId, paymentMethod, amount);
+        
+        if (result) {
+          console.log('✅ Real payment processed successfully');
+          return true;
+        } else {
+          console.log('❌ Real payment failed - no result returned');
+          throw new Error('Payment processing failed');
+        }
       } catch (error) {
-        console.log('Real payment failed, using mock');
+        console.log('❌ Real payment failed, falling back to mock:', error);
+        // Don't fall back for payment processing - we want to see the real error
+        throw error;
       }
     }
+
+    // If payments disabled or no backend, simulate success for demo
+    if (!this.featureFlags.ENABLE_PAYMENTS) {
+      console.log(`🎭 Demo mode payment: ${paymentMethod} for £${amount}`);
+      return this.mockDataService.processPayment(orderId, paymentMethod, amount);
+    }
     
+    // Fallback to mock if no backend available
+    console.log(`⚠️  No backend available, using mock payment: ${paymentMethod} for £${amount}`);
     return this.mockDataService.processPayment(orderId, paymentMethod, amount);
   }
 

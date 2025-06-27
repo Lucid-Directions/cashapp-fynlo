@@ -19,6 +19,9 @@ target 'CashAppPOS' do
   # pod 'SquareInAppPaymentsSDK', :modular_headers => true
   # pod 'SquareBuyerVerificationSDK', :modular_headers => true
   
+  # Official SumUp iOS SDK for Tap to Pay on iPhone
+  pod 'SumUpSDK', '~> 4.0'
+  
   post_install do |installer|
     react_native_post_install(
       installer,
