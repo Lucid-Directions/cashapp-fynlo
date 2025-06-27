@@ -1,5 +1,28 @@
 # CashApp POS - Complete Project Context
 
+## ⚠️ CRITICAL: Git Workflow Protection
+
+**BEFORE CREATING ANY PULL REQUESTS OR SWITCHING BRANCHES:**
+
+1. **ALWAYS commit ALL current work to the base branch FIRST**
+2. **NEVER switch branches with uncommitted documentation or code files**
+3. **ALWAYS check `git status` before branch operations**
+4. **NEVER assume files exist in other branches - they don't!**
+
+**Common Issue**: Documentation files getting "lost" when creating PRs because they were only in working directory, not committed to base branch. This has happened multiple times and must be prevented.
+
+**Correct Workflow**:
+```bash
+# 1. FIRST: Commit everything to base branch
+git add .
+git commit -m "feat: current work state"
+
+# 2. THEN: Create feature branch
+git checkout -b feature/something
+
+# 3. FINALLY: Cherry-pick specific commits for PR
+```
+
 ## Project Overview
 
 **Fynlo CashApp POS** is a React Native iOS application (v0.80.0) designed as a **phone-only restaurant point-of-sale system**. The app enables restaurant staff to use their iPhone to take orders and accept payments without requiring hardware card readers or terminals.
