@@ -107,5 +107,11 @@
 		<string>Zocial.ttf</string>
 		<string>Fontisto.ttf</string>
 	</array>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>SumUp needs location access to determine your location for payment processing and compliance purposes.</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>SumUp needs Bluetooth access to connect to card readers for payment processing.</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>SumUp needs Bluetooth peripheral access to connect to card readers for payment processing.</string>
 </dict>
 </plist>

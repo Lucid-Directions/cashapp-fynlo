@@ -438,11 +438,16 @@ PODS:
   - RNScreens (3.27.0):
     - RCT-Folly (= 2021.07.22.00)
     - React-Core
+  - RNSentry (6.16.0):
+    - RCT-Folly (= 2021.07.22.00)
+    - React-Core
+    - Sentry/HybridSDK (= 8.52.1)
   - RNSVG (15.12.0):
     - React-Core
   - RNVectorIcons (10.2.0):
     - RCT-Folly (= 2021.07.22.00)
     - React-Core
+  - Sentry/HybridSDK (8.52.1)
   - SocketRocket (0.6.1)
   - Stripe (23.27.6):
     - StripeApplePay (= 23.27.6)
@@ -482,6 +487,7 @@ PODS:
     - StripeCore (= 23.27.6)
   - sumup-react-native (0.1.36):
     - React-Core
+  - SumUpSDK (4.3.5)
   - Yoga (1.14.0)
 
 DEPENDENCIES:
@@ -534,15 +540,18 @@ DEPENDENCIES:
   - RNKeychain (from `../node_modules/react-native-keychain`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
+  - "RNSentry (from `../node_modules/@sentry/react-native`)"
   - RNSVG (from `../node_modules/react-native-svg`)
   - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
   - "stripe-react-native (from `../node_modules/@stripe/stripe-react-native`)"
   - sumup-react-native (from `../node_modules/sumup-react-native-alpha`)
+  - SumUpSDK (~> 4.0)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
   trunk:
     - fmt
+    - Sentry
     - SocketRocket
     - Stripe
     - StripeApplePay
@@ -552,6 +561,7 @@ SPEC REPOS:
     - StripePaymentSheet
     - StripePaymentsUI
     - StripeUICore
+    - SumUpSDK
 
 EXTERNAL SOURCES:
   boost:
@@ -650,6 +660,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-reanimated"
   RNScreens:
     :path: "../node_modules/react-native-screens"
+  RNSentry:
+    :path: "../node_modules/@sentry/react-native"
   RNSVG:
     :path: "../node_modules/react-native-svg"
   RNVectorIcons:
@@ -662,7 +674,7 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
-  boost: d9857fa6515e4f9985f29bf6f2e40cb03f54f859
+  boost: 7dcd2de282d72e344012f7d6564d024930a6a440
   DoubleConversion: 5189b271737e1565bdce30deb4a08d647e3f5f54
   FBLazyVector: 66398fc2381d8fa1eee4c0f80d931587a7b927e8
   FBReactNativeSpec: 0f8cecf999d709dba7626bbf565b1b5f8f46a5c1
@@ -711,8 +723,10 @@ SPEC CHECKSUMS:
   RNKeychain: 21f07e3130a5926b344d236ab51ae45fe55290dd
   RNReanimated: a954cbe1f0967ad8dc07cb7a6399821b87de48a5
   RNScreens: 3290cb437913b054c06ed910e18c07372324eb0a
+  RNSentry: 63704192a6f765e57ec6ebe88e1e2291eb110975
   RNSVG: 38b68c0fa36345e937b5cf49e709a7cd2ac6a625
   RNVectorIcons: 4a5bf25944f3f8157ec86845a967fb10f29bceef
+  Sentry: 2cbbe3592f30050c60e916c63c7f5a2fa584005e
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
   Stripe: 9fec845645e39f371e6898926d096fd9c2feb5a5
   stripe-react-native: 4d22dfe6c98fbafb77b875c7a9bbf47ca227680f
@@ -724,8 +738,9 @@ SPEC CHECKSUMS:
   StripePaymentsUI: 59ccddeacad592b09fa67e8d641340820ddb4751
   StripeUICore: 879bbf5889265db13f52fac8aad7a176ba62481f
   sumup-react-native: 2cc8eb2a1141785cdef09af64a06fc953b0a78dd
+  SumUpSDK: 4ab1160fef9ea5e0778c8ebed3a6f8e2370dbf05
   Yoga: ef534101bb891fb09bae657417f34d399c1efe38
 
-PODFILE CHECKSUM: 1cff56624687b58b73b10a4c31e16cf116dea247
+PODFILE CHECKSUM: 4f254ab91688440f64cbbdee542ec6448d4cd5c5
 
 COCOAPODS: 1.16.2

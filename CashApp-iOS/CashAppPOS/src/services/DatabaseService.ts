@@ -1,15 +1,11 @@
 // DatabaseService.ts - Mobile database API service for CashApp POS
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Database configuration - FIXED: Updated to match FastAPI backend
-const API_BASE_URL = 'http://localhost:8000'; // Updated from 8069 to 8000 to match FastAPI backend
-const DB_CONFIG = {
-  host: 'localhost',
-  port: 5432, // Updated from 6432 to 5432 for direct PostgreSQL connection
-  database: 'fynlo_pos', // Updated from 'cashapp_mobile' to match backend database name
-  user: 'fynlo_user', // Updated from 'cashapp_user' to match backend user
-  password: 'fynlo_password', // Updated to match backend password
-};
+// Database configuration - FIXED: Uses LAN IP for device testing
+import API_CONFIG from '../config/api';
+
+const API_BASE_URL = API_CONFIG.BASE_URL;
+const DB_CONFIG = API_CONFIG.DATABASE;
 
 // Types for our data models
 export interface Product {
@@ -287,27 +283,40 @@ class DatabaseService {
     }
   }
 
-  // Payment processing
+  // Payment processing - PHASE 3: Updated to match backend multi-provider endpoint
   async processPayment(orderId: number, paymentMethod: string, amount: number): Promise<boolean> {
     try {
-      const response = await this.apiRequest('/api/v1/payments', {
+      console.log(`🔄 Processing ${paymentMethod} payment for £${amount} (Order: ${orderId})`);
+      
+      const response = await this.apiRequest('/api/v1/payments/process', {
         method: 'POST',
         body: JSON.stringify({
-          order_id: orderId,
-          payment_method: paymentMethod,
+          order_id: orderId.toString(),
           amount: amount,
+          currency: 'GBP',
+          metadata: {
+            payment_method: paymentMethod,
+            frontend_source: 'mobile_app'
+          }
         }),
       });
       
-      return response.success || false;
+      if (response.success && response.data) {
+        console.log(`✅ Payment processed successfully via ${response.data.provider}`);
+        console.log(`💰 Amount: £${response.data.amount}, Fee: £${response.data.fee}, Net: £${response.data.net_amount}`);
+        return true;
+      } else {
+        console.log(`❌ Payment failed:`, response.message || 'Unknown error');
+        return false;
+      }
     } catch (error) {
-      console.error('Payment processing failed:', error);
+      console.error('❌ Payment processing failed:', error);
       return false;
     }
   }
 
   // Restaurant-specific operations - FIXED: Convert to REST API endpoints
-  async getFloorPlan(sectionId?: string): Promise<any> {
+  async getRestaurantFloorPlan(sectionId?: string): Promise<any> {
     try {
       const endpoint = sectionId 
         ? `/api/v1/restaurants/floor-plan?section_id=${sectionId}`

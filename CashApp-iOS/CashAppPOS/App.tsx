@@ -11,12 +11,16 @@ import { ThemeProvider } from './src/design-system/ThemeProvider';
 import AppNavigator from './src/navigation/AppNavigator';
 import ErrorTrackingService from './src/services/ErrorTrackingService';
 import ErrorBoundary from './src/components/ErrorBoundary';
+import SumUpNativeService from './src/services/SumUpNativeService';
 
 // Suppress specific warnings for development
 LogBox.ignoreLogs([
   'Warning: React has detected a change in the order of Hooks',
   'Warning: Failed prop type',
   'VirtualizedLists should never be nested',
+  'UIViewController invalidate must be used from main thread only',
+  'SumUp',
+  'PassKit',
 ]);
 
 const App: React.FC = () => {
@@ -31,6 +35,17 @@ const App: React.FC = () => {
         // Initialize error tracking service
         const errorTrackingService = ErrorTrackingService.getInstance();
         errorTrackingService.initialize();
+        
+        // Initialize SumUp Native SDK
+        console.log('🔧 Initializing SumUp Native SDK...');
+        const sumUpService = SumUpNativeService.getInstance();
+        const sumUpInitialized = await sumUpService.initialize('sup_sk_XqquMi732f2WDCqvnkV4xoVxx54oGAQRU');
+        
+        if (sumUpInitialized) {
+          console.log('✅ SumUp Native SDK initialized successfully');
+        } else {
+          console.warn('⚠️ SumUp Native SDK initialization failed - continuing without SumUp');
+        }
         
         // Add small delay to ensure all modules are loaded
         await new Promise(resolve => setTimeout(resolve, 100));
