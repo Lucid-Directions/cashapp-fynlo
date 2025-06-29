@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Development entitlements without restricted capabilities -->
+	<!-- Remove Tap to Pay and NFC for now until Apple approvals -->
+	
+	<!-- Basic app capabilities for development -->
+	<key>aps-environment</key>
+	<string>development</string>
+	
+	<!-- Keychain access for secure storage -->
+	<key>keychain-access-groups</key>
+	<array>
+		<string>$(AppIdentifierPrefix)com.anonymous.cashapppos</string>
+	</array>
+</dict>
+</plist>

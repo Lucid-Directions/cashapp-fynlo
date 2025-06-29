@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import RestaurantDataService from '../services/RestaurantDataService';
 
 export interface User {
   id: string;
@@ -176,10 +177,10 @@ const MOCK_PLATFORM: Platform = {
 const MOCK_RESTAURANTS: Business[] = [
   {
     id: 'restaurant1',
-    name: 'Fynlo Coffee Shop',
-    address: '123 High Street, London, SW1A 1AA',
+    name: 'Chucho',
+    address: '123 Camden High Street, London, NW1 7JR',
     phone: '+44 20 7946 0958',
-    email: 'coffee@fynlopos.com',
+    email: 'hola@chucho.com',
     vatNumber: 'GB123456789',
     registrationNumber: '12345678',
     type: 'restaurant',
@@ -376,15 +377,41 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       // Handle platform owner vs restaurant user
       if (updatedUser.role === 'platform_owner') {
-        setPlatform(MOCK_PLATFORM);
-        setManagedRestaurants(MOCK_RESTAURANTS);
-        setBusiness(MOCK_RESTAURANTS[0]); // Default to first restaurant
+        // Load REAL restaurant data from RestaurantDataService
+        const restaurantDataService = RestaurantDataService.getInstance();
+        const realRestaurants = await restaurantDataService.getPlatformRestaurants('platform_owner_1');
+        
+        // Convert to Business type
+        const businesses = realRestaurants.map(r => restaurantDataService.toBusinessType(r));
+        setManagedRestaurants(businesses);
+        
+        // Create REAL platform data based on actual restaurants
+        const totalRevenue = realRestaurants.reduce((sum, r) => sum + (r.monthlyRevenue || 0), 0);
+        const realPlatformData: Platform = {
+          id: 'platform1',
+          name: 'Fynlo POS Platform',
+          ownerId: updatedUser.id,
+          createdDate: new Date(2024, 0, 1),
+          totalRestaurants: realRestaurants.length, // REAL count from data
+          totalRevenue: totalRevenue, // REAL revenue from restaurants
+          isActive: true,
+        };
+        
+        setPlatform(realPlatformData);
+        console.log(`✅ Platform data loaded with REAL data: ${realRestaurants.length} restaurants, £${totalRevenue} total revenue`);
+        
+        // Set first restaurant as default if exists
+        if (businesses.length > 0) {
+          setBusiness(businesses[0]);
+        }
         
         // Store platform data
         await AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(updatedUser));
-        await AsyncStorage.setItem('platform_data', JSON.stringify(MOCK_PLATFORM));
-        await AsyncStorage.setItem('managed_restaurants', JSON.stringify(MOCK_RESTAURANTS));
-        await AsyncStorage.setItem(STORAGE_KEYS.BUSINESS, JSON.stringify(MOCK_RESTAURANTS[0]));
+        await AsyncStorage.setItem('platform_data', JSON.stringify(realPlatformData));
+        await AsyncStorage.setItem('managed_restaurants', JSON.stringify(businesses));
+        if (businesses.length > 0) {
+          await AsyncStorage.setItem(STORAGE_KEYS.BUSINESS, JSON.stringify(businesses[0]));
+        }
       } else {
         // Regular restaurant user
         const businessData = MOCK_RESTAURANTS.find(r => r.id === updatedUser.businessId) || MOCK_RESTAURANTS[0];
@@ -554,9 +581,28 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const loadPlatformData = async (): Promise<void> => {
     try {
       if (user?.role === 'platform_owner') {
-        // Load fresh platform data
-        setPlatform(MOCK_PLATFORM);
-        setManagedRestaurants(MOCK_RESTAURANTS);
+        console.log('🏢 Loading REAL platform data for platform owner');
+        
+        // Load REAL restaurant data first
+        const restaurantDataService = RestaurantDataService.getInstance();
+        const realRestaurants = await restaurantDataService.getPlatformRestaurants('platform_owner_1');
+        const businesses = realRestaurants.map(r => restaurantDataService.toBusinessType(r));
+        setManagedRestaurants(businesses);
+        
+        // Generate REAL platform data based on actual restaurants
+        const totalRevenue = realRestaurants.reduce((sum, r) => sum + (r.monthlyRevenue || 0), 0);
+        const realPlatformData: Platform = {
+          id: 'platform1',
+          name: 'Fynlo POS Platform',
+          ownerId: 'platform_owner_1', 
+          createdDate: new Date(2024, 0, 1),
+          totalRestaurants: realRestaurants.length, // REAL count from backend
+          totalRevenue: totalRevenue, // REAL revenue from backend
+          isActive: true,
+        };
+        
+        setPlatform(realPlatformData);
+        console.log(`✅ Platform data loaded: ${realRestaurants.length} restaurants, £${totalRevenue} total revenue`);
       }
     } catch (error) {
       console.error('Error loading platform data:', error);
@@ -566,16 +612,43 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const switchRestaurant = async (restaurantId: string): Promise<void> => {
     try {
       if (user?.role === 'platform_owner') {
-        const restaurant = MOCK_RESTAURANTS.find(r => r.id === restaurantId);
+        console.log(`🔄 Switching to restaurant: ${restaurantId}`);
+        
+        // Find restaurant in the REAL managed restaurants data
+        const restaurant = managedRestaurants.find(r => r.id === restaurantId);
         if (restaurant) {
           setBusiness(restaurant);
           await AsyncStorage.setItem(STORAGE_KEYS.BUSINESS, JSON.stringify(restaurant));
+          console.log(`✅ Switched to restaurant: ${restaurant.name}`);
+        } else {
+          console.error(`❌ Restaurant ${restaurantId} not found in managed restaurants`);
         }
       }
     } catch (error) {
       console.error('Error switching restaurant:', error);
     }
   };
+
+  // Subscribe to real-time restaurant updates for platform owners
+  useEffect(() => {
+    if (user?.role === 'platform_owner') {
+      const restaurantDataService = RestaurantDataService.getInstance();
+      
+      // Subscribe to platform restaurants changes
+      const unsubscribe = restaurantDataService.subscribeToPlatformRestaurants(
+        'platform_owner_1',
+        (updatedRestaurants) => {
+          console.log('🔄 Platform restaurants updated in real-time:', updatedRestaurants.length);
+          const businesses = updatedRestaurants.map(r => restaurantDataService.toBusinessType(r));
+          setManagedRestaurants(businesses);
+        }
+      );
+      
+      return () => {
+        unsubscribe();
+      };
+    }
+  }, [user?.role]);
 
   const value: AuthContextType = {
     user,

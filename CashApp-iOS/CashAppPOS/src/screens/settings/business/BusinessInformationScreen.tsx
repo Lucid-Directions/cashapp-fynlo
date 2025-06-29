@@ -14,6 +14,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { SettingsHeader, SettingsSection, SettingsCard } from '../../../components/settings';
 import useSettingsStore from '../../../store/useSettingsStore';
 import { useRestaurantConfig } from '../../../hooks/useRestaurantConfig';
+import SimpleTextInput from '../../../components/inputs/SimpleTextInput';
 
 // Clover POS Color Scheme
 const Colors = {
@@ -287,19 +288,19 @@ const BusinessInformationScreen: React.FC = () => {
 
   const renderFormField = (field: FormField) => (
     <View key={field.id} style={styles.fieldContainer}>
-      <Text style={styles.fieldLabel}>{field.label}</Text>
-      <TextInput
+      <SimpleTextInput
+        label={field.label}
+        value={field.value}
+        onValueChange={(value) => handleFieldChange(field.id, value)}
+        placeholder={field.placeholder}
+        keyboardType={field.keyboardType || 'default'}
+        autoCapitalize={field.autoCapitalize || 'sentences'}
+        autoCorrect={false}
         style={[
           styles.textInput,
           errors[field.id] && styles.textInputError,
         ]}
-        value={field.value}
-        onChangeText={(value) => handleFieldChange(field.id, value)}
-        placeholder={field.placeholder}
-        placeholderTextColor={Colors.mediumGray}
-        keyboardType={field.keyboardType || 'default'}
-        autoCapitalize={field.autoCapitalize || 'sentences'}
-        autoCorrect={false}
+        clearButtonMode="while-editing"
       />
       {errors[field.id] && (
         <View style={styles.errorContainer}>

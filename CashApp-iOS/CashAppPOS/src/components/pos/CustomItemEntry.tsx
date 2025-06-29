@@ -13,6 +13,8 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { OrderItem } from '../../types';
 import useAppStore from '../../store/useAppStore';
+import SimpleDecimalInput from '../inputs/SimpleDecimalInput';
+import SimpleTextInput from '../inputs/SimpleTextInput';
 
 // Clover POS Color Scheme
 const Colors = {
@@ -53,7 +55,7 @@ const CustomItemEntry: React.FC<CustomItemEntryProps> = ({ visible, onClose }) =
   const { addToCart } = useAppStore();
   
   const [itemName, setItemName] = useState('');
-  const [price, setPrice] = useState('');
+  const [price, setPrice] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [selectedEmoji, setSelectedEmoji] = useState('🍽️');
   const [notes, setNotes] = useState('');
@@ -68,14 +70,12 @@ const CustomItemEntry: React.FC<CustomItemEntryProps> = ({ visible, onClose }) =
   ];
 
   const handleAddItem = () => {
-    const itemPrice = parseFloat(price) || 0;
-    
     if (!itemName.trim()) {
       alert('Please enter an item name');
       return;
     }
     
-    if (itemPrice <= 0) {
+    if (price <= 0) {
       alert('Please enter a valid price');
       return;
     }
@@ -83,7 +83,7 @@ const CustomItemEntry: React.FC<CustomItemEntryProps> = ({ visible, onClose }) =
     const customItem: OrderItem = {
       id: Date.now(), // Generate unique ID
       name: itemName,
-      price: itemPrice,
+      price: price,
       quantity: quantity,
       emoji: selectedEmoji,
       notes: notes || undefined,
@@ -96,14 +96,14 @@ const CustomItemEntry: React.FC<CustomItemEntryProps> = ({ visible, onClose }) =
 
   const handleReset = () => {
     setItemName('');
-    setPrice('');
+    setPrice(0);
     setQuantity(1);
     setSelectedEmoji('🍽️');
     setNotes('');
   };
 
   const handlePresetAmount = (amount: number) => {
-    setPrice(amount.toFixed(2));
+    setPrice(amount);
   };
 
   const handleCommonItem = (item: { name: string; emoji: string }) => {
@@ -111,23 +111,7 @@ const CustomItemEntry: React.FC<CustomItemEntryProps> = ({ visible, onClose }) =
     setSelectedEmoji(item.emoji);
   };
 
-  const formatPrice = (value: string) => {
-    // Remove non-numeric characters except decimal point
-    const cleaned = value.replace(/[^0-9.]/g, '');
-    
-    // Ensure only one decimal point
-    const parts = cleaned.split('.');
-    if (parts.length > 2) {
-      return parts[0] + '.' + parts[1];
-    }
-    
-    // Limit to 2 decimal places
-    if (parts.length === 2 && parts[1].length > 2) {
-      return parts[0] + '.' + parts[1].substring(0, 2);
-    }
-    
-    return cleaned;
-  };
+  // formatPrice function removed - DecimalInput handles validation internally
 
   return (
     <Modal
@@ -183,12 +167,12 @@ const CustomItemEntry: React.FC<CustomItemEntryProps> = ({ visible, onClose }) =
                   >
                     <Text style={styles.selectedEmoji}>{selectedEmoji}</Text>
                   </TouchableOpacity>
-                  <TextInput
-                    style={styles.nameInput}
+                  <SimpleTextInput
                     value={itemName}
-                    onChangeText={setItemName}
+                    onValueChange={setItemName}
                     placeholder="Enter item name..."
-                    placeholderTextColor={Colors.lightText}
+                    style={styles.nameInput}
+                    clearButtonMode="while-editing"
                   />
                 </View>
               </View>
@@ -212,14 +196,16 @@ const CustomItemEntry: React.FC<CustomItemEntryProps> = ({ visible, onClose }) =
               )}
 
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Price (£)</Text>
-                <TextInput
-                  style={styles.priceInput}
+                <SimpleDecimalInput
+                  label="Price"
                   value={price}
-                  onChangeText={(text) => setPrice(formatPrice(text))}
-                  placeholder="0.00"
-                  placeholderTextColor={Colors.lightText}
-                  keyboardType="decimal-pad"
+                  onValueChange={setPrice}
+                  suffix="£"
+                  maxValue={999.99}
+                  minValue={0.01}
+                  decimalPlaces={2}
+                  placeholder="5.00"
+                  style={{ marginVertical: 8 }}
                 />
               </View>
 
@@ -258,16 +244,15 @@ const CustomItemEntry: React.FC<CustomItemEntryProps> = ({ visible, onClose }) =
 
               {/* Notes */}
               <View style={styles.inputGroup}>
-                <Text style={styles.inputLabel}>Notes (Optional)</Text>
-                <TextInput
-                  style={styles.notesInput}
+                <SimpleTextInput
+                  label="Notes (Optional)"
                   value={notes}
-                  onChangeText={setNotes}
+                  onValueChange={setNotes}
                   placeholder="Add any special notes..."
-                  placeholderTextColor={Colors.lightText}
-                  multiline
+                  multiline={true}
                   numberOfLines={3}
-                  textAlignVertical="top"
+                  style={styles.notesInput}
+                  clearButtonMode="while-editing"
                 />
               </View>
             </View>

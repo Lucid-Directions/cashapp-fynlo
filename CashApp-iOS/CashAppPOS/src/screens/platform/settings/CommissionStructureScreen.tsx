@@ -13,65 +13,80 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme, useThemedStyles } from '../../../design-system/ThemeProvider';
-import FastInput from '../../../components/ui/FastInput';
+import SimpleTextInput from '../../../components/inputs/SimpleTextInput';
+import SimpleDecimalInput from '../../../components/inputs/SimpleDecimalInput';
 
-const CommissionStructureScreen: React.FC = () => {
+const PlansAndPricingScreen: React.FC = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
   const styles = useThemedStyles(createStyles);
 
-  // Commission configuration state
+  // Plans and pricing configuration state
   const [config, setConfig] = useState({
-    baseCommissionRate: 8.0,
-    premiumCommissionRate: 6.0,
-    enterpriseCommissionRate: 4.0,
+    basicPlanName: 'Starter',
+    basicMonthlyFee: 29.99,
+    basicDescription: 'Perfect for new restaurants getting started',
+    
+    premiumPlanName: 'Professional',
+    premiumMonthlyFee: 79.99,
+    premiumDescription: 'Advanced features for growing businesses',
+    
+    enterprisePlanName: 'Enterprise',
+    enterpriseMonthlyFee: 199.99,
+    enterpriseDescription: 'Full-scale solution for large operations',
+    
     serviceChargeRate: 12.5,
     serviceChargeEnabled: true,
-    minimumMonthlyFee: 29.99,
     freeTrialDays: 30,
-    volumeDiscounts: true,
-    earlyPaymentDiscount: 2.0,
-    referralBonus: 50.00,
+    setupFee: 0.00,
+    cancellationFee: 0.00,
+    supportIncluded: true,
   });
 
   const handleSave = () => {
     // TODO: Save to backend
     Alert.alert(
       'Settings Saved',
-      'Commission structure has been updated.',
+      'Plans and pricing structure has been updated successfully.',
       [{ text: 'OK' }]
     );
   };
 
-  const TierCard = ({ title, rate, description, features }: any) => (
-    <View style={styles.tierCard}>
-      <View style={styles.tierHeader}>
-        <Text style={styles.tierTitle}>{title}</Text>
-        <View style={styles.rateContainer}>
-          <Text style={styles.rateValue}>{rate}%</Text>
-          <Text style={styles.rateLabel}>Commission</Text>
+  const PlanCard = ({ planName, monthlyFee, description, nameKey, feeKey, descriptionKey }: any) => (
+    <View style={styles.planCard}>
+      <View style={styles.planHeader}>
+        <SimpleTextInput
+          label="Plan Name"
+          value={planName}
+          onValueChange={(value) => setConfig(prev => ({ ...prev, [nameKey]: value }))}
+          placeholder="Enter plan name"
+          style={styles.planNameInput}
+        />
+        <View style={styles.feeContainer}>
+          <SimpleDecimalInput
+            label="Monthly Fee"
+            value={monthlyFee}
+            onValueChange={(value) => setConfig(prev => ({ ...prev, [feeKey]: value }))}
+            placeholder="0.00"
+            suffix="£"
+            maxValue={9999.99}
+            style={styles.feeInput}
+          />
         </View>
       </View>
-      <Text style={styles.tierDescription}>{description}</Text>
-      <View style={styles.featuresContainer}>
-        {features.map((feature: string, index: number) => (
-          <View key={index} style={styles.featureRow}>
-            <Icon name="check-circle" size={16} color={theme.colors.success} />
-            <Text style={styles.featureText}>{feature}</Text>
-          </View>
-        ))}
-      </View>
+      <SimpleTextInput
+        label="Plan Description"
+        value={description}
+        onValueChange={(value) => setConfig(prev => ({ ...prev, [descriptionKey]: value }))}
+        placeholder="Describe this plan..."
+        multiline={true}
+        numberOfLines={2}
+        style={styles.descriptionInput}
+      />
     </View>
   );
 
   const SettingRow = ({ title, description, value, onChangeText, unit, isSwitch = false, switchValue, onSwitchChange }: any) => {
-    const getInputType = () => {
-      if (unit === '%') return 'percentage';
-      if (unit === '£') return 'currency';
-      if (unit === 'days') return 'number';
-      return 'decimal';
-    };
-
     return (
     <View style={styles.settingRow}>
       <View style={styles.settingInfo}>
@@ -87,15 +102,14 @@ const CommissionStructureScreen: React.FC = () => {
         />
       ) : (
         <View style={styles.inputContainer}>
-          <FastInput
-            inputType={getInputType()}
-            value={value}
-            onChangeText={onChangeText}
+          <SimpleDecimalInput
+            value={typeof value === 'number' ? value : parseFloat(value) || 0}
+            onValueChange={onChangeText}
             placeholder="0.00"
-            unit={unit}
-            unitPosition={unit === '£' ? 'left' : 'right'}
-            containerStyle={{ marginBottom: 0 }}
-            inputStyle={styles.fastInputStyle}
+            suffix={unit}
+            maxValue={unit === '%' ? 100 : unit === 'days' ? 365 : 9999.99}
+            decimalPlaces={unit === '%' ? 1 : unit === 'days' ? 0 : 2}
+            style={{ marginBottom: 0 }}
           />
         </View>
       )}
@@ -116,9 +130,9 @@ const CommissionStructureScreen: React.FC = () => {
           <Icon name="arrow-back" size={24} color={theme.colors.text} />
         </TouchableOpacity>
         <View style={styles.headerContent}>
-          <Text style={styles.headerTitle}>Commission Structure</Text>
+          <Text style={styles.headerTitle}>Plans & Pricing</Text>
           <Text style={styles.headerSubtitle}>
-            Set platform commission rates and fee structures
+            Configure subscription plans and monthly pricing tiers
           </Text>
         </View>
         <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
@@ -127,78 +141,67 @@ const CommissionStructureScreen: React.FC = () => {
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Commission Tiers */}
+        {/* Subscription Plans */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Commission Tiers</Text>
+          <Text style={styles.sectionTitle}>Subscription Plans</Text>
           <Text style={styles.sectionDescription}>
-            Different commission rates based on subscription tier
+            Configure the three main subscription tiers with custom names, pricing, and descriptions
           </Text>
           
-          <TierCard
-            title="Basic Tier"
-            rate={config.baseCommissionRate}
-            description="Standard plan for new restaurants"
-            features={[
-              'Basic POS functionality',
-              'Standard reporting',
-              'Email support',
-              'Payment processing'
-            ]}
+          <PlanCard
+            planName={config.basicPlanName}
+            monthlyFee={config.basicMonthlyFee}
+            description={config.basicDescription}
+            nameKey="basicPlanName"
+            feeKey="basicMonthlyFee"
+            descriptionKey="basicDescription"
           />
           
-          <TierCard
-            title="Premium Tier"
-            rate={config.premiumCommissionRate}
-            description="Enhanced features and lower commission"
-            features={[
-              'Advanced analytics',
-              'Priority support',
-              'Custom branding',
-              'Advanced integrations',
-              'Reduced commission rate'
-            ]}
+          <PlanCard
+            planName={config.premiumPlanName}
+            monthlyFee={config.premiumMonthlyFee}
+            description={config.premiumDescription}
+            nameKey="premiumPlanName"
+            feeKey="premiumMonthlyFee"
+            descriptionKey="premiumDescription"
           />
           
-          <TierCard
-            title="Enterprise Tier"
-            rate={config.enterpriseCommissionRate}
-            description="Lowest commission for high-volume restaurants"
-            features={[
-              'Dedicated account manager',
-              'Custom development',
-              'White-label options',
-              'API access',
-              'Lowest commission rate'
-            ]}
+          <PlanCard
+            planName={config.enterprisePlanName}
+            monthlyFee={config.enterpriseMonthlyFee}
+            description={config.enterpriseDescription}
+            nameKey="enterprisePlanName"
+            feeKey="enterpriseMonthlyFee"
+            descriptionKey="enterpriseDescription"
           />
         </View>
 
-        {/* Commission Settings */}
+        {/* Billing Configuration */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Commission Configuration</Text>
+          <Text style={styles.sectionTitle}>Billing Configuration</Text>
           
           <SettingRow
-            title="Basic Tier Commission"
-            description="Commission rate for basic tier restaurants"
-            value={config.baseCommissionRate.toString()}
-            onChangeText={(text: string) => setConfig({...config, baseCommissionRate: text === '' ? 0 : parseFloat(text) || 0})}
-            unit="%"
+            title="Setup Fee"
+            description="One-time setup fee for new restaurants"
+            value={config.setupFee.toString()}
+            onChangeText={(text: string) => setConfig({...config, setupFee: text === '' ? 0 : parseFloat(text) || 0})}
+            unit="£"
           />
           
           <SettingRow
-            title="Premium Tier Commission"
-            description="Commission rate for premium tier restaurants"
-            value={config.premiumCommissionRate.toString()}
-            onChangeText={(text: string) => setConfig({...config, premiumCommissionRate: text === '' ? 0 : parseFloat(text) || 0})}
-            unit="%"
+            title="Cancellation Fee"
+            description="Fee charged when a restaurant cancels their subscription"
+            value={config.cancellationFee.toString()}
+            onChangeText={(text: string) => setConfig({...config, cancellationFee: text === '' ? 0 : parseFloat(text) || 0})}
+            unit="£"
           />
           
           <SettingRow
-            title="Enterprise Tier Commission"
-            description="Commission rate for enterprise tier restaurants"
-            value={config.enterpriseCommissionRate.toString()}
-            onChangeText={(text: string) => setConfig({...config, enterpriseCommissionRate: text === '' ? 0 : parseFloat(text) || 0})}
-            unit="%"
+            title="Include Support"
+            description="Include customer support in all plans"
+            isSwitch={true}
+            switchValue={config.supportIncluded}
+            onSwitchChange={(value: boolean) => setConfig({...config, supportIncluded: value})}
           />
         </View>
 
@@ -225,17 +228,9 @@ const CommissionStructureScreen: React.FC = () => {
           )}
         </View>
 
-        {/* Additional Fees */}
+        {/* Additional Settings */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Additional Fees</Text>
-          
-          <SettingRow
-            title="Minimum Monthly Fee"
-            description="Minimum monthly fee per restaurant"
-            value={config.minimumMonthlyFee.toFixed(2)}
-            onChangeText={(text: string) => setConfig({...config, minimumMonthlyFee: text === '' ? 0 : parseFloat(text) || 0})}
-            unit="£"
-          />
+          <Text style={styles.sectionTitle}>Additional Settings</Text>
           
           <SettingRow
             title="Free Trial Period"
@@ -246,70 +241,41 @@ const CommissionStructureScreen: React.FC = () => {
           />
         </View>
 
-        {/* Discounts & Incentives */}
+        {/* Pricing Summary */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Discounts & Incentives</Text>
-          
-          <SettingRow
-            title="Volume Discounts"
-            description="Enable automatic volume-based commission discounts"
-            isSwitch={true}
-            switchValue={config.volumeDiscounts}
-            onSwitchChange={(value: boolean) => setConfig({...config, volumeDiscounts: value})}
-          />
-          
-          <SettingRow
-            title="Early Payment Discount"
-            description="Discount for payments within 7 days (e.g., 2.5%)"
-            value={config.earlyPaymentDiscount.toString()}
-            onChangeText={(text: string) => setConfig({...config, earlyPaymentDiscount: text === '' ? 0 : parseFloat(text) || 0})}
-            unit="%"
-          />
-          
-          <SettingRow
-            title="Referral Bonus"
-            description="Bonus for successful restaurant referrals"
-            value={config.referralBonus.toFixed(2)}
-            onChangeText={(text: string) => setConfig({...config, referralBonus: text === '' ? 0 : parseFloat(text) || 0})}
-            unit="£"
-          />
-        </View>
-
-        {/* Revenue Preview */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Revenue Calculation Example</Text>
-          <View style={styles.revenueCard}>
-            <Text style={styles.revenueTitle}>Monthly Revenue Calculation</Text>
-            <Text style={styles.revenueDescription}>
-              Example: Restaurant with £10,000 monthly sales on Premium tier
-            </Text>
+          <Text style={styles.sectionTitle}>Pricing Summary</Text>
+          <View style={styles.pricingSummaryCard}>
+            <Text style={styles.summaryTitle}>Current Plan Configuration</Text>
             
-            <View style={styles.calculationRow}>
-              <Text style={styles.calculationLabel}>Sales Volume:</Text>
-              <Text style={styles.calculationValue}>£10,000.00</Text>
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>{config.basicPlanName}:</Text>
+              <Text style={styles.summaryValue}>£{config.basicMonthlyFee.toFixed(2)}/month</Text>
             </View>
             
-            <View style={styles.calculationRow}>
-              <Text style={styles.calculationLabel}>Commission ({config.premiumCommissionRate}%):</Text>
-              <Text style={styles.calculationValue}>£{(10000 * config.premiumCommissionRate / 100).toFixed(2)}</Text>
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>{config.premiumPlanName}:</Text>
+              <Text style={styles.summaryValue}>£{config.premiumMonthlyFee.toFixed(2)}/month</Text>
             </View>
             
-            {config.serviceChargeEnabled && (
-              <View style={styles.calculationRow}>
-                <Text style={styles.calculationLabel}>Service Charge ({config.serviceChargeRate}%):</Text>
-                <Text style={styles.calculationValue}>£{(10000 * config.serviceChargeRate / 100).toFixed(2)}</Text>
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>{config.enterprisePlanName}:</Text>
+              <Text style={styles.summaryValue}>£{config.enterpriseMonthlyFee.toFixed(2)}/month</Text>
+            </View>
+            
+            {config.setupFee > 0 && (
+              <View style={styles.summaryRow}>
+                <Text style={styles.summaryLabel}>Setup Fee:</Text>
+                <Text style={styles.summaryValue}>£{config.setupFee.toFixed(2)}</Text>
               </View>
             )}
             
-            <View style={[styles.calculationRow, styles.totalRow]}>
-              <Text style={styles.totalLabel}>Total Platform Revenue:</Text>
-              <Text style={styles.totalValue}>
-                £{((10000 * config.premiumCommissionRate / 100) + 
-                   (config.serviceChargeEnabled ? 10000 * config.serviceChargeRate / 100 : 0)).toFixed(2)}
-              </Text>
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>Free Trial:</Text>
+              <Text style={styles.summaryValue}>{config.freeTrialDays} days</Text>
             </View>
           </View>
         </View>
+
       </ScrollView>
     </SafeAreaView>
   );
@@ -375,7 +341,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     color: theme.colors.lightText,
     marginBottom: 16,
   },
-  tierCard: {
+  planCard: {
     backgroundColor: theme.colors.white,
     borderRadius: 12,
     padding: 20,
@@ -386,11 +352,24 @@ const createStyles = (theme: any) => StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-  tierHeader: {
+  planHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
+    alignItems: 'flex-start',
+    marginBottom: 16,
+  },
+  planNameInput: {
+    flex: 1,
+    marginRight: 16,
+  },
+  feeContainer: {
+    minWidth: 120,
+  },
+  feeInput: {
+    minWidth: 100,
+  },
+  descriptionInput: {
+    marginTop: 8,
   },
   tierTitle: {
     fontSize: 18,
@@ -513,6 +492,39 @@ const createStyles = (theme: any) => StyleSheet.create({
     fontWeight: 'bold',
     color: theme.colors.primary,
   },
+  pricingSummaryCard: {
+    backgroundColor: theme.colors.white,
+    borderRadius: 12,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  summaryTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: theme.colors.text,
+    marginBottom: 12,
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.lightGray,
+  },
+  summaryLabel: {
+    fontSize: 14,
+    color: theme.colors.text,
+  },
+  summaryValue: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: theme.colors.primary,
+  },
 });
 
-export default CommissionStructureScreen;
+export default PlansAndPricingScreen;

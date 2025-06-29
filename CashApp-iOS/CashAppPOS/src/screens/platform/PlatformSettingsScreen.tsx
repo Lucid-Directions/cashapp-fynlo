@@ -47,13 +47,13 @@ const PlatformSettingsScreen: React.FC = () => {
       },
     },
     {
-      id: 'commission',
-      title: 'Commission Structure',
-      description: 'Set platform commission rates and fee structures',
-      icon: 'trending-up',
+      id: 'plans_pricing',
+      title: 'Plans & Pricing',
+      description: 'Configure subscription plans and monthly pricing tiers',
+      icon: 'payment',
       color: theme.colors.warning,
       onPress: () => {
-        navigation.navigate('CommissionStructure' as never);
+        navigation.navigate('PlansAndPricing' as never);
       },
     },
     {

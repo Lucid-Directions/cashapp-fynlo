@@ -113,5 +113,17 @@
 	<string>SumUp needs Bluetooth access to connect to card readers for payment processing.</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
 	<string>SumUp needs Bluetooth peripheral access to connect to card readers for payment processing.</string>
+	
+	<!-- NFC Usage Description for Tap to Pay -->
+	<key>NFCReaderUsageDescription</key>
+	<string>Fynlo uses NFC to process contactless payments including Tap to Pay on iPhone.</string>
+	
+	<!-- Camera Usage for QR Code Payments -->
+	<key>NSCameraUsageDescription</key>
+	<string>Fynlo uses the camera to scan QR codes for quick payment processing.</string>
+	
+	<!-- Microphone Access (sometimes required by payment SDKs) -->
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Fynlo may use microphone access for secure payment processing features.</string>
 </dict>
 </plist>

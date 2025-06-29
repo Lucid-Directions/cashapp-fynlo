@@ -14,8 +14,9 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
+import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
 import { generateSalesHistory } from '../../utils/mockDataGenerator';
-import Colors from "../../constants/Colors";
+import SimpleTextInput from '../../components/inputs/SimpleTextInput';
 
 interface Order {
   id: string;
@@ -30,7 +31,8 @@ interface Order {
 
 const OrdersScreen: React.FC = () => {
   const navigation = useNavigation();
-  
+  const { theme } = useTheme();
+  const styles = useThemedStyles(createStyles);
   
   const [orders, setOrders] = useState<Order[]>([]);
   const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
@@ -130,11 +132,11 @@ const OrdersScreen: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return Colors.success;
-      case 'pending': return Colors.warning;
-      case 'refunded': return Colors.secondary;
-      case 'cancelled': return Colors.danger;
-      default: return Colors.darkGray;
+      case 'completed': return theme.colors.success;
+      case 'pending': return theme.colors.warning;
+      case 'refunded': return theme.colors.secondary;
+      case 'cancelled': return theme.colors.danger;
+      default: return theme.colors.darkGray;
     }
   };
 
@@ -182,21 +184,21 @@ const OrdersScreen: React.FC = () => {
       
       <View style={styles.orderBody}>
         <View style={styles.orderInfo}>
-          <Icon name="person" size={16} color={Colors.darkGray} />
+          <Icon name="person" size={16} color={theme.colors.darkGray} />
           <Text style={styles.orderInfoText}>
             {item.customerName || 'Walk-in Customer'}
           </Text>
         </View>
         
         <View style={styles.orderInfo}>
-          <Icon name="badge" size={16} color={Colors.darkGray} />
+          <Icon name="badge" size={16} color={theme.colors.darkGray} />
           <Text style={styles.orderInfoText}>{item.employee}</Text>
         </View>
       </View>
       
       <View style={styles.orderFooter}>
         <View style={styles.orderStats}>
-          <Icon name={getPaymentIcon(item.paymentMethod)} size={20} color={Colors.darkGray} />
+          <Icon name={getPaymentIcon(item.paymentMethod)} size={20} color={theme.colors.darkGray} />
           <Text style={styles.orderItems}>{item.items} items</Text>
         </View>
         <Text style={styles.orderTotal}>£{item.total.toFixed(2)}</Text>
@@ -219,7 +221,7 @@ const OrdersScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor={Colors.primary} barStyle="light-content" />
+      <StatusBar backgroundColor={theme.colors.primary} barStyle="light-content" />
       
       {/* Header */}
       <View style={styles.header}>
@@ -227,7 +229,7 @@ const OrdersScreen: React.FC = () => {
           style={styles.menuButton}
           onPress={() => navigation.goBack()}
         >
-          <Icon name="arrow-back" size={24} color={Colors.white} />
+          <Icon name="arrow-back" size={24} color={theme.colors.white} />
         </TouchableOpacity>
         
         <View style={styles.headerCenter}>
@@ -239,7 +241,7 @@ const OrdersScreen: React.FC = () => {
           style={styles.headerButton}
           onPress={() => setShowFilterModal(true)}
         >
-          <Icon name="filter-list" size={24} color={Colors.white} />
+          <Icon name="filter-list" size={24} color={theme.colors.white} />
         </TouchableOpacity>
       </View>
 
@@ -254,30 +256,26 @@ const OrdersScreen: React.FC = () => {
           <Text style={styles.statLabel}>Revenue</Text>
         </View>
         <View style={styles.statItem}>
-          <Text style={[styles.statValue, { color: Colors.warning }]}>{stats.pending}</Text>
+          <Text style={[styles.statValue, { color: theme.colors.warning }]}>{stats.pending}</Text>
           <Text style={styles.statLabel}>Pending</Text>
         </View>
         <View style={styles.statItem}>
-          <Text style={[styles.statValue, { color: Colors.danger }]}>{stats.refunded}</Text>
+          <Text style={[styles.statValue, { color: theme.colors.danger }]}>{stats.refunded}</Text>
           <Text style={styles.statLabel}>Refunded</Text>
         </View>
       </View>
 
       {/* Search Bar */}
       <View style={styles.searchContainer}>
-        <Icon name="search" size={20} color={Colors.darkGray} style={styles.searchIcon} />
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search orders, customers, or staff..."
+        <Icon name="search" size={20} color={theme.colors.darkGray} style={styles.searchIcon} />
+        <SimpleTextInput
           value={searchQuery}
-          onChangeText={setSearchQuery}
-          placeholderTextColor={Colors.darkGray}
+          onValueChange={setSearchQuery}
+          placeholder="Search orders, customers, or staff..."
+          style={styles.searchInput}
+          clearButtonMode="while-editing"
+          returnKeyType="search"
         />
-        {searchQuery.length > 0 && (
-          <TouchableOpacity onPress={() => setSearchQuery('')}>
-            <Icon name="close" size={20} color={Colors.darkGray} />
-          </TouchableOpacity>
-        )}
       </View>
 
       {/* Date Range Selector */}
@@ -315,12 +313,12 @@ const OrdersScreen: React.FC = () => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={[Colors.primary]}
+            colors={[theme.colors.primary]}
           />
         }
         ListEmptyComponent={
           <View style={styles.emptyState}>
-            <Icon name="receipt" size={64} color={Colors.lightGray} />
+            <Icon name="receipt" size={64} color={theme.colors.lightGray} />
             <Text style={styles.emptyStateText}>No orders found</Text>
             <Text style={styles.emptyStateSubtext}>
               {searchQuery ? 'Try adjusting your search' : 'Pull to refresh'}
@@ -342,7 +340,7 @@ const OrdersScreen: React.FC = () => {
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Filter Orders</Text>
               <TouchableOpacity onPress={() => setShowFilterModal(false)}>
-                <Icon name="close" size={24} color={Colors.text} />
+                <Icon name="close" size={24} color={theme.colors.text} />
               </TouchableOpacity>
             </View>
             
@@ -367,7 +365,7 @@ const OrdersScreen: React.FC = () => {
                     {filter.charAt(0).toUpperCase() + filter.slice(1)}
                   </Text>
                   {selectedFilter === filter && (
-                    <Icon name="check" size={20} color={Colors.primary} />
+                    <Icon name="check" size={20} color={theme.colors.primary} />
                   )}
                 </TouchableOpacity>
               ))}
@@ -385,7 +383,7 @@ const OrdersScreen: React.FC = () => {
         <View style={styles.modalContainer}>
           <View style={styles.modalHeader}>
             <TouchableOpacity onPress={() => setShowOrderDetails(false)}>
-              <Icon name="close" size={24} color={Colors.text} />
+              <Icon name="close" size={24} color={theme.colors.text} />
             </TouchableOpacity>
             <Text style={styles.modalTitle}>Order Details</Text>
             <View style={{ width: 24 }} />
@@ -410,7 +408,7 @@ const OrdersScreen: React.FC = () => {
               <View style={styles.orderDetailsSection}>
                 <Text style={styles.sectionTitle}>Payment Information</Text>
                 <View style={styles.paymentRow}>
-                  <Icon name={getPaymentIcon(selectedOrder.paymentMethod)} size={20} color={Colors.darkGray} />
+                  <Icon name={getPaymentIcon(selectedOrder.paymentMethod)} size={20} color={theme.colors.darkGray} />
                   <Text style={styles.detailText}>{selectedOrder.paymentMethod.toUpperCase()}</Text>
                 </View>
                 <Text style={styles.totalText}>Total: £{selectedOrder.total.toFixed(2)}</Text>
@@ -434,13 +432,13 @@ const OrdersScreen: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: theme.colors.background,
   },
   header: {
-    backgroundColor: Colors.primary,
+    backgroundColor: theme.colors.primary,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
@@ -457,7 +455,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: Colors.white,
+    color: theme.colors.white,
   },
   headerSubtitle: {
     fontSize: 12,
@@ -468,11 +466,11 @@ const styles = StyleSheet.create({
   },
   statsBar: {
     flexDirection: 'row',
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.white,
     paddingVertical: 16,
     paddingHorizontal: 20,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: theme.colors.border,
   },
   statItem: {
     flex: 1,
@@ -481,21 +479,21 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: Colors.primary,
+    color: theme.colors.primary,
   },
   statLabel: {
     fontSize: 12,
-    color: Colors.darkGray,
+    color: theme.colors.darkGray,
     marginTop: 4,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.white,
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: theme.colors.border,
   },
   searchIcon: {
     marginRight: 12,
@@ -503,38 +501,38 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 16,
-    color: Colors.text,
+    color: theme.colors.text,
   },
   dateRangeContainer: {
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.white,
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: theme.colors.border,
   },
   dateRangeButton: {
     paddingHorizontal: 20,
     paddingVertical: 8,
     marginRight: 12,
     borderRadius: 20,
-    backgroundColor: Colors.background,
+    backgroundColor: theme.colors.background,
   },
   dateRangeButtonActive: {
-    backgroundColor: Colors.primary,
+    backgroundColor: theme.colors.primary,
   },
   dateRangeText: {
     fontSize: 14,
     fontWeight: '500',
-    color: Colors.text,
+    color: theme.colors.text,
   },
   dateRangeTextActive: {
-    color: Colors.white,
+    color: theme.colors.white,
   },
   ordersList: {
     padding: 16,
   },
   orderCard: {
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.white,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -553,11 +551,11 @@ const styles = StyleSheet.create({
   orderId: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.text,
+    color: theme.colors.text,
   },
   orderDate: {
     fontSize: 12,
-    color: Colors.darkGray,
+    color: theme.colors.darkGray,
     marginTop: 2,
   },
   statusBadge: {
@@ -568,7 +566,7 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: 12,
     fontWeight: '600',
-    color: Colors.white,
+    color: theme.colors.white,
     textTransform: 'capitalize',
   },
   orderBody: {
@@ -581,7 +579,7 @@ const styles = StyleSheet.create({
   },
   orderInfoText: {
     fontSize: 14,
-    color: Colors.text,
+    color: theme.colors.text,
     marginLeft: 8,
   },
   orderFooter: {
@@ -590,7 +588,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: Colors.border,
+    borderTopColor: theme.colors.border,
   },
   orderStats: {
     flexDirection: 'row',
@@ -598,13 +596,13 @@ const styles = StyleSheet.create({
   },
   orderItems: {
     fontSize: 14,
-    color: Colors.darkGray,
+    color: theme.colors.darkGray,
     marginLeft: 8,
   },
   orderTotal: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: Colors.primary,
+    color: theme.colors.primary,
   },
   emptyState: {
     flex: 1,
@@ -615,12 +613,12 @@ const styles = StyleSheet.create({
   emptyStateText: {
     fontSize: 18,
     fontWeight: '500',
-    color: Colors.text,
+    color: theme.colors.text,
     marginTop: 16,
   },
   emptyStateSubtext: {
     fontSize: 14,
-    color: Colors.darkGray,
+    color: theme.colors.darkGray,
     marginTop: 8,
   },
   modalOverlay: {
@@ -629,7 +627,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   filterModal: {
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.white,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingTop: 20,
@@ -645,7 +643,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: Colors.text,
+    color: theme.colors.text,
   },
   filterOptions: {
     paddingHorizontal: 20,
@@ -653,7 +651,7 @@ const styles = StyleSheet.create({
   filterSectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.text,
+    color: theme.colors.text,
     marginBottom: 16,
   },
   filterOption: {
@@ -662,22 +660,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: theme.colors.border,
   },
   filterOptionActive: {
     backgroundColor: 'rgba(0, 166, 81, 0.05)',
   },
   filterOptionText: {
     fontSize: 16,
-    color: Colors.text,
+    color: theme.colors.text,
   },
   filterOptionTextActive: {
-    color: Colors.primary,
+    color: theme.colors.primary,
     fontWeight: '600',
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.white,
   },
   orderDetailsContent: {
     flex: 1,
@@ -692,23 +690,23 @@ const styles = StyleSheet.create({
   orderDetailsId: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: Colors.text,
+    color: theme.colors.text,
   },
   orderDetailsSection: {
     marginBottom: 24,
-    backgroundColor: Colors.background,
+    backgroundColor: theme.colors.background,
     borderRadius: 8,
     padding: 16,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: Colors.text,
+    color: theme.colors.text,
     marginBottom: 12,
   },
   detailText: {
     fontSize: 16,
-    color: Colors.text,
+    color: theme.colors.text,
     marginBottom: 8,
   },
   paymentRow: {
@@ -720,12 +718,12 @@ const styles = StyleSheet.create({
   totalText: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: Colors.primary,
+    color: theme.colors.primary,
     marginTop: 8,
   },
   divider: {
     height: 1,
-    backgroundColor: Colors.border,
+    backgroundColor: theme.colors.border,
     marginVertical: 12,
   },
 });

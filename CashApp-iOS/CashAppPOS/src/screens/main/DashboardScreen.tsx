@@ -11,7 +11,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import { useRestaurantDisplayName } from '../../hooks/useRestaurantConfig';
-import Colors from '../../constants/Colors';
+import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
 
 interface KPICardProps {
   title: string;
@@ -33,6 +33,8 @@ interface AlertItem {
 const DashboardScreen: React.FC = () => {
   const navigation = useNavigation();
   const restaurantDisplayName = useRestaurantDisplayName();
+  const { theme } = useTheme();
+  const styles = useThemedStyles(createStyles);
 
   // Mock KPI data
   const kpiData: KPICardProps[] = [
@@ -42,7 +44,7 @@ const DashboardScreen: React.FC = () => {
       change: "+12.5%",
       changeType: "positive",
       icon: "attach-money",
-      color: Colors.success,
+      color: theme.colors.success,
     },
     {
       title: "Orders Today",
@@ -50,7 +52,7 @@ const DashboardScreen: React.FC = () => {
       change: "+8.2%",
       changeType: "positive",
       icon: "receipt",
-      color: Colors.secondary,
+      color: theme.colors.secondary,
     },
     {
       title: "Avg Order Value",
@@ -58,7 +60,7 @@ const DashboardScreen: React.FC = () => {
       change: "-2.1%",
       changeType: "negative",
       icon: "trending-up",
-      color: Colors.warning,
+      color: theme.colors.warning,
     },
     {
       title: "Customer Satisfaction",
@@ -66,7 +68,7 @@ const DashboardScreen: React.FC = () => {
       change: "+0.2",
       changeType: "positive",
       icon: "star",
-      color: Colors.primary,
+      color: theme.colors.primary,
     },
   ];
 
@@ -106,7 +108,7 @@ const DashboardScreen: React.FC = () => {
     <View style={styles.kpiCard}>
       <View style={styles.kpiHeader}>
         <View style={[styles.kpiIcon, { backgroundColor: color }]}>
-          <Icon name={icon} size={24} color={Colors.white} />
+          <Icon name={icon} size={24} color={theme.colors.white} />
         </View>
         <View style={styles.kpiContent}>
           <Text style={styles.kpiTitle}>{title}</Text>
@@ -117,11 +119,11 @@ const DashboardScreen: React.FC = () => {
         <Icon 
           name={changeType === 'positive' ? 'trending-up' : changeType === 'negative' ? 'trending-down' : 'trending-flat'} 
           size={16} 
-          color={changeType === 'positive' ? Colors.success : changeType === 'negative' ? Colors.danger : Colors.lightText} 
+          color={changeType === 'positive' ? theme.colors.success : changeType === 'negative' ? theme.colors.danger : theme.colors.lightText} 
         />
         <Text style={[
           styles.kpiChangeText,
-          { color: changeType === 'positive' ? Colors.success : changeType === 'negative' ? Colors.danger : Colors.lightText }
+          { color: changeType === 'positive' ? theme.colors.success : changeType === 'negative' ? theme.colors.danger : theme.colors.lightText }
         ]}>
           {change}
         </Text>
@@ -161,12 +163,12 @@ const DashboardScreen: React.FC = () => {
     <View style={styles.alertCard}>
       <View style={[
         styles.alertIcon,
-        { backgroundColor: alert.type === 'warning' ? Colors.warning : alert.type === 'success' ? Colors.success : Colors.secondary }
+        { backgroundColor: alert.type === 'warning' ? theme.colors.warning : alert.type === 'success' ? theme.colors.success : theme.colors.secondary }
       ]}>
         <Icon 
           name={alert.type === 'warning' ? 'warning' : alert.type === 'success' ? 'check-circle' : 'info'} 
           size={20} 
-          color={Colors.white} 
+          color={theme.colors.white} 
         />
       </View>
       <View style={styles.alertContent}>
@@ -181,16 +183,16 @@ const DashboardScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={Colors.primary} />
+      <StatusBar barStyle="light-content" backgroundColor={theme.colors.primary} />
       
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Icon name="arrow-back" size={24} color={Colors.white} />
+          <Icon name="arrow-back" size={24} color={theme.colors.white} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{restaurantDisplayName} Dashboard</Text>
         <TouchableOpacity style={styles.refreshButton}>
-          <Icon name="refresh" size={24} color={Colors.white} />
+          <Icon name="refresh" size={24} color={theme.colors.white} />
         </TouchableOpacity>
       </View>
 
@@ -220,19 +222,19 @@ const DashboardScreen: React.FC = () => {
           <Text style={styles.sectionTitle}>Quick Actions</Text>
           <View style={styles.quickActions}>
             <TouchableOpacity style={styles.actionButton} onPress={() => navigation.navigate('Reports' as never)}>
-              <Icon name="bar-chart" size={24} color={Colors.secondary} />
+              <Icon name="bar-chart" size={24} color={theme.colors.secondary} />
               <Text style={styles.actionText}>View Reports</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.actionButton} onPress={() => navigation.navigate('Inventory' as never)}>
-              <Icon name="inventory" size={24} color={Colors.warning} />
+              <Icon name="inventory" size={24} color={theme.colors.warning} />
               <Text style={styles.actionText}>Check Inventory</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.actionButton} onPress={() => navigation.navigate('Employees' as never)}>
-              <Icon name="people" size={24} color={Colors.success} />
+              <Icon name="people" size={24} color={theme.colors.success} />
               <Text style={styles.actionText}>Manage Staff</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.actionButton} onPress={() => navigation.navigate('Settings' as never)}>
-              <Icon name="settings" size={24} color={Colors.darkGray} />
+              <Icon name="settings" size={24} color={theme.colors.darkGray} />
               <Text style={styles.actionText}>Settings</Text>
             </TouchableOpacity>
           </View>
@@ -251,7 +253,7 @@ const DashboardScreen: React.FC = () => {
         {/* Backend Status */}
         <View style={styles.section}>
           <View style={styles.backendNotice}>
-            <Icon name="info" size={24} color={Colors.secondary} />
+            <Icon name="info" size={24} color={theme.colors.secondary} />
             <View style={styles.backendNoticeContent}>
               <Text style={styles.backendNoticeTitle}>Development Mode</Text>
               <Text style={styles.backendNoticeText}>
@@ -265,13 +267,13 @@ const DashboardScreen: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: theme.colors.background,
   },
   header: {
-    backgroundColor: Colors.primary,
+    backgroundColor: theme.colors.primary,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -285,7 +287,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: Colors.white,
+    color: theme.colors.white,
   },
   refreshButton: {
     padding: 8,
@@ -300,7 +302,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: Colors.text,
+    color: theme.colors.text,
     marginBottom: 16,
   },
   kpiGrid: {
@@ -309,7 +311,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   kpiCard: {
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.white,
     borderRadius: 12,
     padding: 16,
     width: '48%',
@@ -338,13 +340,13 @@ const styles = StyleSheet.create({
   },
   kpiTitle: {
     fontSize: 12,
-    color: Colors.lightText,
+    color: theme.colors.lightText,
     marginBottom: 2,
   },
   kpiValue: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: Colors.text,
+    color: theme.colors.text,
   },
   kpiChange: {
     flexDirection: 'row',
@@ -357,11 +359,11 @@ const styles = StyleSheet.create({
   },
   kpiChangeLabel: {
     fontSize: 12,
-    color: Colors.lightText,
+    color: theme.colors.lightText,
     marginLeft: 4,
   },
   goalsContainer: {
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.white,
     borderRadius: 12,
     padding: 16,
     elevation: 2,
@@ -382,24 +384,24 @@ const styles = StyleSheet.create({
   goalLabel: {
     fontSize: 14,
     fontWeight: '500',
-    color: Colors.text,
+    color: theme.colors.text,
   },
   goalPercentage: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: Colors.primary,
+    color: theme.colors.primary,
   },
   goalProgress: {
     marginBottom: 8,
   },
   goalProgressTrack: {
     height: 8,
-    backgroundColor: Colors.lightGray,
+    backgroundColor: theme.colors.lightGray,
     borderRadius: 4,
   },
   goalProgressFill: {
     height: 8,
-    backgroundColor: Colors.primary,
+    backgroundColor: theme.colors.primary,
     borderRadius: 4,
   },
   goalValues: {
@@ -409,11 +411,11 @@ const styles = StyleSheet.create({
   goalCurrent: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: Colors.text,
+    color: theme.colors.text,
   },
   goalTarget: {
     fontSize: 14,
-    color: Colors.lightText,
+    color: theme.colors.lightText,
   },
   quickActions: {
     flexDirection: 'row',
@@ -421,7 +423,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   actionButton: {
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.white,
     borderRadius: 12,
     padding: 16,
     width: '48%',
@@ -436,12 +438,12 @@ const styles = StyleSheet.create({
   actionText: {
     fontSize: 14,
     fontWeight: '500',
-    color: Colors.text,
+    color: theme.colors.text,
     marginTop: 8,
     textAlign: 'center',
   },
   alertsContainer: {
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.white,
     borderRadius: 12,
     padding: 16,
     elevation: 2,
@@ -455,7 +457,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGray,
+    borderBottomColor: theme.colors.lightGray,
   },
   alertIcon: {
     width: 32,
@@ -477,19 +479,19 @@ const styles = StyleSheet.create({
   alertTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.text,
+    color: theme.colors.text,
   },
   alertTime: {
     fontSize: 12,
-    color: Colors.lightText,
+    color: theme.colors.lightText,
   },
   alertMessage: {
     fontSize: 13,
-    color: Colors.lightText,
+    color: theme.colors.lightText,
     lineHeight: 18,
   },
   backendNotice: {
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.white,
     borderRadius: 12,
     padding: 16,
     flexDirection: 'row',
@@ -507,12 +509,12 @@ const styles = StyleSheet.create({
   backendNoticeTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.text,
+    color: theme.colors.text,
     marginBottom: 4,
   },
   backendNoticeText: {
     fontSize: 14,
-    color: Colors.lightText,
+    color: theme.colors.lightText,
     lineHeight: 20,
   },
 });

@@ -18,6 +18,7 @@ import { useNavigation } from '@react-navigation/native';
 import useAppStore from '../../store/useAppStore';
 import DatabaseService from '../../services/DatabaseService';
 import Logo from '../../components/Logo';
+import SimpleTextInput from '../../components/inputs/SimpleTextInput';
 
 const { width, height } = Dimensions.get('window');
 
@@ -121,43 +122,31 @@ const LoginScreen: React.FC = () => {
             {/* Username Input */}
             <View style={styles.inputContainer}>
               <Icon name="person" size={20} color={Colors.lightText} style={styles.inputIcon} />
-              <TextInput
-                style={styles.textInput}
-                placeholder="Username"
-                placeholderTextColor={Colors.lightText}
+              <SimpleTextInput
                 value={username}
-                onChangeText={setUsername}
+                onValueChange={setUsername}
+                placeholder="Username"
                 autoCapitalize="none"
                 autoCorrect={false}
                 returnKeyType="next"
+                style={styles.textInput}
               />
             </View>
 
             {/* Password Input */}
             <View style={styles.inputContainer}>
               <Icon name="lock" size={20} color={Colors.lightText} style={styles.inputIcon} />
-              <TextInput
-                style={styles.textInput}
-                placeholder="Password"
-                placeholderTextColor={Colors.lightText}
+              <SimpleTextInput
                 value={password}
-                onChangeText={setPassword}
-                secureTextEntry={!showPassword}
+                onValueChange={setPassword}
+                placeholder="Password"
+                secureTextEntry={true}
                 autoCapitalize="none"
                 autoCorrect={false}
                 returnKeyType="done"
                 onSubmitEditing={handleLogin}
+                style={styles.textInput}
               />
-              <TouchableOpacity
-                style={styles.passwordToggle}
-                onPress={() => setShowPassword(!showPassword)}
-              >
-                <Icon
-                  name={showPassword ? 'visibility-off' : 'visibility'}
-                  size={20}
-                  color={Colors.lightText}
-                />
-              </TouchableOpacity>
             </View>
 
             {/* Forgot Password */}

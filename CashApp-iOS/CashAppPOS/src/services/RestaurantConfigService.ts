@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import RestaurantDataService from './RestaurantDataService';
 
 export interface RestaurantConfig {
   // Restaurant Identity
@@ -58,9 +59,9 @@ export interface RestaurantConfig {
 
 const STORAGE_KEY = 'restaurant_config';
 const DEFAULT_CONFIG: Partial<RestaurantConfig> = {
-  restaurantName: '',
-  displayName: 'Fynlo POS', // Default until configured
-  businessType: 'Restaurant',
+  restaurantName: 'Chucho',
+  displayName: 'Chucho', // Mexican restaurant name
+  businessType: 'Mexican Restaurant',
   currency: 'GBP',
   timezone: 'Europe/London',
   taxRate: 0.20, // 20% VAT for UK
@@ -161,6 +162,62 @@ class RestaurantConfigService {
     };
     
     await this.saveConfig();
+    
+    // Sync with RestaurantDataService for platform visibility
+    try {
+      const restaurantDataService = RestaurantDataService.getInstance();
+      
+      // Check if restaurant exists in platform
+      const existingData = await restaurantDataService.getCurrentRestaurantData();
+      
+      if (!existingData) {
+        // Create new restaurant in platform
+        await restaurantDataService.createRestaurant({
+          name: this.config.restaurantName,
+          displayName: this.config.displayName,
+          businessType: this.config.businessType,
+          address: `${this.config.address?.street || ''}, ${this.config.address?.city || ''}, ${this.config.address?.zipCode || ''}`,
+          phone: this.config.phone,
+          email: this.config.email,
+          website: this.config.website,
+          vatNumber: this.config.taxId || '',
+          registrationNumber: this.config.registrationId || '',
+          platformOwnerId: 'platform_owner_1', // Default platform owner
+          ownerId: this.config.fynloAccountId,
+          subscriptionTier: this.config.subscriptionTier,
+          currency: this.config.currency,
+          timezone: this.config.timezone,
+          theme: this.config.theme,
+          primaryColor: this.config.primaryColor,
+          onboardingCompleted: this.config.onboardingCompleted,
+        });
+      } else {
+        // Update existing restaurant
+        await restaurantDataService.updateCurrentRestaurant({
+          name: this.config.restaurantName,
+          displayName: this.config.displayName,
+          businessType: this.config.businessType,
+          address: `${this.config.address?.street || ''}, ${this.config.address?.city || ''}, ${this.config.address?.zipCode || ''}`,
+          phone: this.config.phone,
+          email: this.config.email,
+          website: this.config.website,
+          vatNumber: this.config.taxId || '',
+          registrationNumber: this.config.registrationId || '',
+          subscriptionTier: this.config.subscriptionTier,
+          currency: this.config.currency,
+          timezone: this.config.timezone,
+          theme: this.config.theme,
+          primaryColor: this.config.primaryColor,
+          onboardingCompleted: this.config.onboardingCompleted,
+        });
+      }
+      
+      console.log('✅ Restaurant config synced to platform');
+    } catch (error) {
+      console.error('❌ Failed to sync restaurant to platform:', error);
+      // Don't fail the update if sync fails
+    }
+    
     return this.config;
   }
 

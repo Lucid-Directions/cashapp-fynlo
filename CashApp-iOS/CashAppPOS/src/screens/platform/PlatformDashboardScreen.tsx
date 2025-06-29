@@ -14,26 +14,10 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
 import LazyLoadingWrapper from '../../components/performance/LazyLoadingWrapper';
 
 const { width: screenWidth } = Dimensions.get('window');
-
-// Clover POS Color Scheme
-const Colors = {
-  primary: '#00A651',      // Clover Green
-  secondary: '#0066CC',    // Clover Blue
-  success: '#00A651',
-  warning: '#FF6B35',
-  danger: '#E74C3C',
-  background: '#F5F5F5',
-  white: '#FFFFFF',
-  lightGray: '#E5E5E5',
-  mediumGray: '#999999',
-  darkGray: '#666666',
-  text: '#333333',
-  lightText: '#666666',
-  border: '#DDDDDD',
-};
 
 interface QuickStatCard {
   id: string;
@@ -58,6 +42,8 @@ interface RestaurantStatus {
 const PlatformDashboardScreen: React.FC = () => {
   const navigation = useNavigation();
   const { user, platform, managedRestaurants, loadPlatformData, signOut } = useAuth();
+  const { theme } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedTimeframe, setSelectedTimeframe] = useState<'today' | 'week' | 'month'>('today');
   const [realTimeData, setRealTimeData] = useState({
@@ -117,7 +103,7 @@ const PlatformDashboardScreen: React.FC = () => {
         ? (realTimeData.totalRevenue / 1000).toFixed(1) + 'K' 
         : realTimeData.totalRevenue.toFixed(0)}`,
       icon: 'account-balance-wallet',
-      color: Colors.success,
+      color: theme.colors.success,
       change: realTimeData.totalRevenue > 50000 ? '+12.5%' : '+8.1%',
       changePositive: true,
     },
@@ -126,7 +112,7 @@ const PlatformDashboardScreen: React.FC = () => {
       title: 'Active Restaurants',
       value: realTimeData.activeRestaurants.toString(),
       icon: 'store',
-      color: Colors.primary,
+      color: theme.colors.primary,
       change: realTimeData.activeRestaurants > 3 ? '+1' : '0',
       changePositive: realTimeData.activeRestaurants > 3,
     },
@@ -135,7 +121,7 @@ const PlatformDashboardScreen: React.FC = () => {
       title: 'Daily Transactions',
       value: realTimeData.dailyTransactions.toLocaleString(),
       icon: 'receipt',
-      color: Colors.secondary,
+      color: theme.colors.secondary,
       change: realTimeData.dailyTransactions > 100 ? '+8.2%' : '+2.1%',
       changePositive: true,
     },
@@ -144,7 +130,7 @@ const PlatformDashboardScreen: React.FC = () => {
       title: 'System Uptime',
       value: `${realTimeData.systemUptime.toFixed(1)}%`,
       icon: 'check-circle',
-      color: realTimeData.systemUptime > 99 ? Colors.success : Colors.warning,
+      color: realTimeData.systemUptime > 99 ? theme.colors.success : theme.colors.warning,
       change: realTimeData.systemUptime > 99 ? 'Excellent' : 'Good',
       changePositive: realTimeData.systemUptime > 99,
     },
@@ -238,10 +224,10 @@ const PlatformDashboardScreen: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'online': return Colors.success;
-      case 'offline': return Colors.mediumGray;
-      case 'error': return Colors.danger;
-      default: return Colors.mediumGray;
+      case 'online': return theme.colors.success;
+      case 'offline': return theme.colors.mediumGray;
+      case 'error': return theme.colors.danger;
+      default: return theme.colors.mediumGray;
     }
   };
 
@@ -256,16 +242,16 @@ const PlatformDashboardScreen: React.FC = () => {
 
   const getTierColor = (tier: string) => {
     switch (tier) {
-      case 'basic': return Colors.mediumGray;
-      case 'premium': return Colors.primary;
-      case 'enterprise': return Colors.secondary;
-      default: return Colors.mediumGray;
+      case 'basic': return theme.colors.mediumGray;
+      case 'premium': return theme.colors.primary;
+      case 'enterprise': return theme.colors.secondary;
+      default: return theme.colors.mediumGray;
     }
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={Colors.background} />
+      <StatusBar barStyle="dark-content" backgroundColor={theme.colors.background} />
       
       {/* Header */}
       <View style={styles.header}>
@@ -280,7 +266,7 @@ const PlatformDashboardScreen: React.FC = () => {
             style={styles.notificationButton}
             onPress={() => Alert.alert('Notifications', 'You have 3 new notifications', [{ text: 'OK' }])}
           >
-            <Icon name="notifications" size={24} color={Colors.text} />
+            <Icon name="notifications" size={24} color={theme.colors.text} />
             <View style={styles.notificationBadge}>
               <Text style={styles.notificationBadgeText}>3</Text>
             </View>
@@ -289,7 +275,7 @@ const PlatformDashboardScreen: React.FC = () => {
             style={styles.signOutButton}
             onPress={handleSignOut}
           >
-            <Icon name="logout" size={24} color={Colors.danger} />
+            <Icon name="logout" size={24} color={theme.colors.danger} />
           </TouchableOpacity>
         </View>
       </View>
@@ -312,12 +298,12 @@ const PlatformDashboardScreen: React.FC = () => {
                   {stat.change && (
                     <View style={[
                       styles.changeContainer,
-                      { backgroundColor: stat.changePositive ? Colors.success : Colors.danger }
+                      { backgroundColor: stat.changePositive ? theme.colors.success : theme.colors.danger }
                     ]}>
                       <Icon 
                         name={stat.changePositive ? 'trending-up' : 'trending-down'} 
                         size={12} 
-                        color={Colors.white} 
+                        color={theme.colors.white} 
                       />
                       <Text style={styles.changeText}>{stat.change}</Text>
                     </View>
@@ -362,7 +348,7 @@ const PlatformDashboardScreen: React.FC = () => {
                     Last active: {restaurant.lastActivity.toLocaleTimeString()}
                   </Text>
                 </View>
-                <Icon name="chevron-right" size={20} color={Colors.mediumGray} />
+                <Icon name="chevron-right" size={20} color={theme.colors.mediumGray} />
               </View>
               
               <View style={styles.restaurantMetrics}>
@@ -393,7 +379,7 @@ const PlatformDashboardScreen: React.FC = () => {
               style={styles.actionCard}
               onPress={() => navigation.navigate('Restaurants' as never, { screen: 'RestaurantOnboarding' })}
             >
-              <Icon name="add-business" size={32} color={Colors.primary} />
+              <Icon name="add-business" size={32} color={theme.colors.primary} />
               <Text style={styles.actionText}>Add Restaurant</Text>
             </TouchableOpacity>
             
@@ -401,7 +387,7 @@ const PlatformDashboardScreen: React.FC = () => {
               style={styles.actionCard}
               onPress={() => navigation.navigate('Monitoring' as never)}
             >
-              <Icon name="health-and-safety" size={32} color={Colors.secondary} />
+              <Icon name="health-and-safety" size={32} color={theme.colors.secondary} />
               <Text style={styles.actionText}>System Health</Text>
             </TouchableOpacity>
             
@@ -409,7 +395,7 @@ const PlatformDashboardScreen: React.FC = () => {
               style={styles.actionCard}
               onPress={() => navigation.navigate('PlatformSettings' as never)}
             >
-              <Icon name="settings" size={32} color={Colors.warning} />
+              <Icon name="settings" size={32} color={theme.colors.warning} />
               <Text style={styles.actionText}>Platform Settings</Text>
             </TouchableOpacity>
             
@@ -417,7 +403,7 @@ const PlatformDashboardScreen: React.FC = () => {
               style={styles.actionCard}
               onPress={handleSupport}
             >
-              <Icon name="support" size={32} color={Colors.danger} />
+              <Icon name="support" size={32} color={theme.colors.danger} />
               <Text style={styles.actionText}>Support</Text>
             </TouchableOpacity>
           </View>
@@ -428,15 +414,15 @@ const PlatformDashboardScreen: React.FC = () => {
           <Text style={styles.sectionTitle}>System Alerts</Text>
           <View style={styles.alertCard}>
             <View style={styles.alertItem}>
-              <Icon name="warning" size={16} color={Colors.warning} />
+              <Icon name="warning" size={16} color={theme.colors.warning} />
               <Text style={styles.alertText}>Payment Issue: Fynlo Fine Dining - Card Reader Down</Text>
             </View>
             <View style={styles.alertItem}>
-              <Icon name="check-circle" size={16} color={Colors.success} />
+              <Icon name="check-circle" size={16} color={theme.colors.success} />
               <Text style={styles.alertText}>System Update: Completed Successfully</Text>
             </View>
             <View style={styles.alertItem}>
-              <Icon name="assessment" size={16} color={Colors.secondary} />
+              <Icon name="assessment" size={16} color={theme.colors.secondary} />
               <Text style={styles.alertText}>Report: Weekly analytics ready for download</Text>
             </View>
           </View>
@@ -446,10 +432,10 @@ const PlatformDashboardScreen: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: theme.colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -457,9 +443,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 16,
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.white,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: theme.colors.border,
   },
   headerLeft: {
     flex: 1,
@@ -472,11 +458,11 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: Colors.text,
+    color: theme.colors.text,
   },
   headerSubtitle: {
     fontSize: 14,
-    color: Colors.lightText,
+    color: theme.colors.lightText,
     marginTop: 2,
   },
   notificationButton: {
@@ -487,7 +473,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 4,
     right: 4,
-    backgroundColor: Colors.danger,
+    backgroundColor: theme.colors.danger,
     borderRadius: 8,
     width: 16,
     height: 16,
@@ -495,14 +481,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   notificationBadgeText: {
-    color: Colors.white,
+    color: theme.colors.white,
     fontSize: 10,
     fontWeight: 'bold',
   },
   signOutButton: {
     padding: 8,
     borderRadius: 8,
-    backgroundColor: Colors.lightGray,
+    backgroundColor: theme.colors.lightGray,
   },
   scrollContent: {
     flex: 1,
@@ -520,12 +506,12 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: Colors.text,
+    color: theme.colors.text,
     marginBottom: 16,
   },
   viewAllText: {
     fontSize: 14,
-    color: Colors.primary,
+    color: theme.colors.primary,
     fontWeight: '500',
   },
   statsGrid: {
@@ -535,7 +521,7 @@ const styles = StyleSheet.create({
   },
   statCard: {
     width: (screenWidth - 60) / 2,
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.white,
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
@@ -559,7 +545,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   changeText: {
-    color: Colors.white,
+    color: theme.colors.white,
     fontSize: 10,
     fontWeight: 'bold',
     marginLeft: 2,
@@ -567,15 +553,15 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: Colors.text,
+    color: theme.colors.text,
     marginBottom: 4,
   },
   statTitle: {
     fontSize: 12,
-    color: Colors.lightText,
+    color: theme.colors.lightText,
   },
   restaurantCard: {
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.white,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -602,7 +588,7 @@ const styles = StyleSheet.create({
   restaurantName: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.text,
+    color: theme.colors.text,
     marginLeft: 8,
     flex: 1,
   },
@@ -612,13 +598,13 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   tierText: {
-    color: Colors.white,
+    color: theme.colors.white,
     fontSize: 10,
     fontWeight: 'bold',
   },
   restaurantSubtitle: {
     fontSize: 12,
-    color: Colors.lightText,
+    color: theme.colors.lightText,
     marginLeft: 24,
   },
   restaurantMetrics: {
@@ -631,11 +617,11 @@ const styles = StyleSheet.create({
   metricValue: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: Colors.text,
+    color: theme.colors.text,
   },
   metricLabel: {
     fontSize: 12,
-    color: Colors.lightText,
+    color: theme.colors.lightText,
     marginTop: 2,
   },
   actionsGrid: {
@@ -645,7 +631,7 @@ const styles = StyleSheet.create({
   },
   actionCard: {
     width: (screenWidth - 60) / 2,
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.white,
     borderRadius: 12,
     padding: 20,
     alignItems: 'center',
@@ -659,12 +645,12 @@ const styles = StyleSheet.create({
   actionText: {
     fontSize: 14,
     fontWeight: '500',
-    color: Colors.text,
+    color: theme.colors.text,
     textAlign: 'center',
     marginTop: 8,
   },
   alertCard: {
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.white,
     borderRadius: 12,
     padding: 16,
     shadowColor: '#000',
@@ -680,7 +666,7 @@ const styles = StyleSheet.create({
   },
   alertText: {
     fontSize: 14,
-    color: Colors.text,
+    color: theme.colors.text,
     marginLeft: 12,
     flex: 1,
   },

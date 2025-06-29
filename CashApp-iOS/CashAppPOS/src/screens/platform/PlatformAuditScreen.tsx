@@ -17,6 +17,7 @@ import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { theme } from '../../design-system/theme';
 import PlatformService, { AuditRecord } from '../../services/PlatformService';
+import SimpleTextInput from '../../components/inputs/SimpleTextInput';
 
 interface FilterOptions {
   configType?: string;
@@ -233,22 +234,24 @@ const PlatformAuditScreen: React.FC = () => {
           </View>
 
           <View style={styles.filterSection}>
-            <Text style={styles.filterLabel}>Configuration Key</Text>
-            <TextInput
-              style={styles.filterInput}
-              placeholder="e.g., payment.fees.stripe"
+            <SimpleTextInput
+              label="Configuration Key"
               value={filters.configKey || ''}
-              onChangeText={(text) => setFilters(prev => ({ ...prev, configKey: text || undefined }))}
+              onValueChange={(text) => setFilters(prev => ({ ...prev, configKey: text || undefined }))}
+              placeholder="e.g., payment.fees.stripe"
+              style={styles.filterInput}
+              clearButtonMode="while-editing"
             />
           </View>
 
           <View style={styles.filterSection}>
-            <Text style={styles.filterLabel}>Changed By</Text>
-            <TextInput
-              style={styles.filterInput}
-              placeholder="User email or system"
+            <SimpleTextInput
+              label="Changed By"
               value={filters.changedBy || ''}
-              onChangeText={(text) => setFilters(prev => ({ ...prev, changedBy: text || undefined }))}
+              onValueChange={(text) => setFilters(prev => ({ ...prev, changedBy: text || undefined }))}
+              placeholder="User email or system"
+              style={styles.filterInput}
+              clearButtonMode="while-editing"
             />
           </View>
         </ScrollView>
