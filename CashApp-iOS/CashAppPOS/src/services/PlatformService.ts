@@ -135,7 +135,7 @@ class PlatformService {
       if (includeSensitive) params.append('include_sensitive', 'true');
       
       const queryString = params.toString();
-      const endpoint = `/platform-settings/settings${queryString ? `?${queryString}` : ''}`;
+      const endpoint = `/platform/settings${queryString ? `?${queryString}` : ''}`;
       
       const settingsData = await this.makeRequest(endpoint);
       
@@ -157,7 +157,7 @@ class PlatformService {
 
   async getPlatformSetting(configKey: string): Promise<PlatformSetting | null> {
     try {
-      const settingData = await this.makeRequest(`/platform-settings/settings/${configKey}`);
+      const settingData = await this.makeRequest(`/platform/settings/${configKey}`);
       return {
         key: settingData.key,
         value: settingData.value,
@@ -178,7 +178,7 @@ class PlatformService {
     changeReason?: string
   ): Promise<boolean> {
     try {
-      await this.makeRequest(`/platform-settings/settings/${configKey}`, 'PUT', {
+      await this.makeRequest(`/platform/settings/${configKey}`, 'PUT', {
         config_value: configValue,
         change_reason: changeReason,
       });
@@ -194,7 +194,7 @@ class PlatformService {
     changeReason?: string
   ): Promise<{ successful: number; failed: number; errors: Record<string, string> }> {
     try {
-      const result = await this.makeRequest('/platform-settings/settings/bulk-update', 'POST', {
+      const result = await this.makeRequest('/platform/settings/bulk-update', 'POST', {
         updates,
         change_reason: changeReason,
       });
@@ -213,7 +213,7 @@ class PlatformService {
   // Payment Fee Management
   async getPaymentFees(): Promise<Record<string, PaymentFee>> {
     try {
-      return await this.makeRequest('/platform-settings/payment-fees');
+      return await this.makeRequest('/platform/payment-fees');
     } catch (error) {
       console.error('Failed to fetch payment fees:', error);
       // Return mock data for demo
@@ -235,7 +235,7 @@ class PlatformService {
       if (monthlyVolume) params.append('monthly_volume', monthlyVolume.toString());
 
       return await this.makeRequest(
-        `/platform-settings/payment-fees/calculate?${params.toString()}`,
+        `/platform/payment-fees/calculate?${params.toString()}`,
         'POST'
       );
     } catch (error) {
@@ -249,7 +249,7 @@ class PlatformService {
   async getFeatureFlags(restaurantId?: string): Promise<Record<string, boolean>> {
     try {
       const params = restaurantId ? `?restaurant_id=${restaurantId}` : '';
-      return await this.makeRequest(`/platform-settings/feature-flags${params}`);
+      return await this.makeRequest(`/platform/feature-flags${params}`);
     } catch (error) {
       console.error('Failed to fetch feature flags:', error);
       return this.getMockFeatureFlags();
@@ -263,7 +263,7 @@ class PlatformService {
     targetRestaurants?: string[]
   ): Promise<boolean> {
     try {
-      await this.makeRequest(`/platform-settings/feature-flags/${featureKey}`, 'PUT', {
+      await this.makeRequest(`/platform/feature-flags/${featureKey}`, 'PUT', {
         is_enabled: isEnabled,
         rollout_percentage: rolloutPercentage,
         target_restaurants: targetRestaurants,
@@ -283,7 +283,7 @@ class PlatformService {
     try {
       const params = category ? `?category=${category}` : '';
       return await this.makeRequest(
-        `/platform-settings/restaurants/${restaurantId}/effective-settings${params}`
+        `/platform/restaurants/${restaurantId}/effective-settings${params}`
       );
     } catch (error) {
       console.error('Failed to fetch restaurant effective settings:', error);
@@ -299,7 +299,7 @@ class PlatformService {
   ): Promise<boolean> {
     try {
       await this.makeRequest(
-        `/platform-settings/restaurants/${restaurantId}/overrides/${configKey}`,
+        `/platform/restaurants/${restaurantId}/overrides/${configKey}`,
         'PUT',
         {
           override_value: overrideValue,
@@ -324,7 +324,7 @@ class PlatformService {
       if (configKey) params.append('config_key', configKey);
       if (entityId) params.append('entity_id', entityId);
 
-      const result = await this.makeRequest(`/platform-settings/audit-trail?${params.toString()}`);
+      const result = await this.makeRequest(`/platform/audit-trail?${params.toString()}`);
       return result.audit_records || [];
     } catch (error) {
       console.error('Failed to fetch audit trail:', error);
@@ -347,7 +347,7 @@ class PlatformService {
       if (restaurantId) params.append('restaurant_id', restaurantId);
       if (categories) params.append('categories', categories.join(','));
 
-      return await this.makeRequest(`/platform-settings/sync/platform-config?${params.toString()}`);
+      return await this.makeRequest(`/platform/sync/platform-config?${params.toString()}`);
     } catch (error) {
       console.error('Failed to sync platform config:', error);
       return {
@@ -362,7 +362,7 @@ class PlatformService {
   // Initialization
   async initializeDefaultSettings(): Promise<boolean> {
     try {
-      await this.makeRequest('/platform-settings/initialize-defaults', 'POST');
+      await this.makeRequest('/platform/initialize-defaults', 'POST');
       return true;
     } catch (error) {
       console.error('Failed to initialize default settings:', error);

@@ -36,9 +36,9 @@ export const API_CONFIG = {
   
   // Platform endpoints
   PLATFORM_ENDPOINTS: {
-    SERVICE_CHARGE: '/platform-settings/service-charge',
-    PAYMENT_METHODS: '/platform-settings/payment-methods',
-    SETTINGS: '/platform-settings',
+    SERVICE_CHARGE: '/platform/service-charge',
+    PAYMENT_METHODS: '/platform/payment-methods',
+    SETTINGS: '/platform/settings',
   },
   
   // Database config for direct PostgreSQL connection (if needed)

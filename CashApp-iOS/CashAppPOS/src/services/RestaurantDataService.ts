@@ -95,8 +95,9 @@ class RestaurantDataService {
           const data = await response.json();
           console.log(`✅ Got ${data.restaurants?.length || 0} restaurants from backend API`);
           console.log('🔗 Data source:', data.source);
+          console.log('🔍 Response data structure:', typeof data, data);
           
-          if (data.restaurants && Array.isArray(data.restaurants)) {
+          if (data && data.restaurants && Array.isArray(data.restaurants)) {
             // Convert backend format to RestaurantData format
             const restaurants: RestaurantData[] = data.restaurants.map((r: any) => ({
               id: r.id,
@@ -129,12 +130,24 @@ class RestaurantDataService {
             }));
             
             return restaurants;
+          } else {
+            console.error('❌ Invalid API response structure - data.restaurants is not an array:', {
+              hasData: !!data,
+              hasRestaurants: !!data?.restaurants,
+              restaurantsType: typeof data?.restaurants,
+              isArray: Array.isArray(data?.restaurants),
+              data: data
+            });
           }
         } else {
           console.log('⚠️ Backend API response not ok:', response.status);
         }
       } catch (apiError) {
-        console.log('⚠️ Backend API unavailable, falling back to local storage:', apiError);
+        console.error('⚠️ Backend API error, falling back to local storage:', {
+          error: apiError,
+          message: apiError instanceof Error ? apiError.message : 'Unknown error',
+          url: `${API_CONFIG.BASE_URL}/api/v1/platform/restaurants/${platformOwnerId}`
+        });
       }
       
       // FALLBACK: Get from shared data store (local storage)
