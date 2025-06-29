@@ -43,13 +43,60 @@ const PlansAndPricingScreen: React.FC = () => {
     supportIncluded: true,
   });
 
-  const handleSave = () => {
-    // TODO: Save to backend
-    Alert.alert(
-      'Settings Saved',
-      'Plans and pricing structure has been updated successfully.',
-      [{ text: 'OK' }]
-    );
+  const handleSave = async () => {
+    try {
+      const PlatformService = require('../../../services/PlatformService').default;
+      const platformService = PlatformService.getInstance();
+      
+      // Prepare platform settings updates
+      const updates = {
+        'plans.basic.name': config.basicPlanName,
+        'plans.basic.monthly_fee': config.basicMonthlyFee,
+        'plans.basic.description': config.basicDescription,
+        'plans.standard.name': config.standardPlanName,
+        'plans.standard.monthly_fee': config.standardMonthlyFee,
+        'plans.standard.description': config.standardDescription,
+        'plans.premium.name': config.premiumPlanName,
+        'plans.premium.monthly_fee': config.premiumMonthlyFee,
+        'plans.premium.description': config.premiumDescription,
+        'platform.commission.rate': config.commissionRate,
+        'platform.service_charge.enabled': config.serviceChargeEnabled,
+        'platform.service_charge.rate': config.serviceChargeRate,
+        'platform.setup_fee': config.setupFee,
+        'platform.cancellation_fee': config.cancellationFee,
+        'platform.free_trial_days': config.freeTrialDays,
+        'platform.support_included': config.supportIncluded,
+      };
+      
+      console.log('💾 Saving plans and pricing configuration:', updates);
+      
+      const result = await platformService.bulkUpdatePlatformSettings(
+        updates,
+        'Plans and pricing configuration update from platform owner'
+      );
+      
+      if (result.successful > 0) {
+        Alert.alert(
+          'Settings Saved',
+          `Successfully updated ${result.successful} of ${result.successful + result.failed} settings.`,
+          [{ text: 'OK' }]
+        );
+      } else {
+        console.error('❌ Save failed:', result.errors);
+        Alert.alert(
+          'Save Failed',
+          'Failed to save settings. Please check your connection and try again.',
+          [{ text: 'OK' }]
+        );
+      }
+    } catch (error) {
+      console.error('❌ Error saving plans and pricing:', error);
+      Alert.alert(
+        'Error',
+        'An error occurred while saving. Please try again.',
+        [{ text: 'OK' }]
+      );
+    }
   };
 
   const PlanCard = ({ planName, monthlyFee, description, nameKey, feeKey, descriptionKey }: any) => (

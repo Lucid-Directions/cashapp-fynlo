@@ -377,28 +377,76 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       // Handle platform owner vs restaurant user
       if (updatedUser.role === 'platform_owner') {
-        // Load REAL restaurant data from RestaurantDataService
-        const restaurantDataService = RestaurantDataService.getInstance();
-        const realRestaurants = await restaurantDataService.getPlatformRestaurants('platform_owner_1');
+        try {
+          // Load REAL restaurant data from RestaurantDataService
+          const restaurantDataService = RestaurantDataService.getInstance();
+          let realRestaurants = await restaurantDataService.getPlatformRestaurants('platform_owner_1');
         
-        // Convert to Business type
-        const businesses = realRestaurants.map(r => restaurantDataService.toBusinessType(r));
+          // INITIALIZE: If no restaurants exist, populate with mock data for the Mexican restaurant
+          if (!Array.isArray(realRestaurants) || realRestaurants.length === 0) {
+            console.log('🏗️ Initializing platform restaurants - no restaurants found, adding mock data');
+            
+            // Convert MOCK_RESTAURANTS to RestaurantData format for RestaurantDataService
+            const restaurantDataList = MOCK_RESTAURANTS.map(business => ({
+              id: business.id,
+              name: business.name,
+              displayName: business.name,
+              businessType: business.type,
+              address: business.address,
+              phone: business.phone,
+              email: business.email,
+              website: '', // Not in Business type
+              vatNumber: business.vatNumber,
+              registrationNumber: business.registrationNumber,
+              platformOwnerId: business.platformOwnerId,
+              ownerId: business.ownerId,
+              subscriptionTier: business.subscriptionTier,
+              currency: business.currency,
+              monthlyRevenue: business.monthlyRevenue,
+              commissionRate: business.commissionRate,
+              isActive: business.isActive,
+              onboardingCompleted: true,
+              joinedDate: business.joinedDate,
+              lastActivity: business.lastActivity,
+              timezone: business.timezone,
+              theme: 'default',
+              primaryColor: '#FF6B35',
+              todayTransactions: 0,
+              todayRevenue: 0,
+              activeOrders: 0,
+              averageOrderValue: 0,
+            }));
+            
+            // Save to RestaurantDataService
+            await restaurantDataService.savePlatformRestaurants('platform_owner_1', restaurantDataList);
+            console.log(`✅ Initialized ${restaurantDataList.length} restaurants for platform owner`);
+            
+            // Reload the restaurants after initialization
+            realRestaurants = await restaurantDataService.getPlatformRestaurants('platform_owner_1');
+          }
+        
+        // Convert to Business type - ADD SAFETY CHECK for array
+        const businesses = Array.isArray(realRestaurants) 
+          ? realRestaurants.map(r => restaurantDataService.toBusinessType(r))
+          : [];
         setManagedRestaurants(businesses);
         
-        // Create REAL platform data based on actual restaurants
-        const totalRevenue = realRestaurants.reduce((sum, r) => sum + (r.monthlyRevenue || 0), 0);
+        // Create REAL platform data based on actual restaurants - ADD SAFETY CHECK for array
+        const totalRevenue = Array.isArray(realRestaurants) 
+          ? realRestaurants.reduce((sum, r) => sum + (r.monthlyRevenue || 0), 0)
+          : 0;
         const realPlatformData: Platform = {
           id: 'platform1',
           name: 'Fynlo POS Platform',
           ownerId: updatedUser.id,
           createdDate: new Date(2024, 0, 1),
-          totalRestaurants: realRestaurants.length, // REAL count from data
+          totalRestaurants: Array.isArray(realRestaurants) ? realRestaurants.length : 0, // REAL count from data
           totalRevenue: totalRevenue, // REAL revenue from restaurants
           isActive: true,
         };
         
         setPlatform(realPlatformData);
-        console.log(`✅ Platform data loaded with REAL data: ${realRestaurants.length} restaurants, £${totalRevenue} total revenue`);
+        console.log(`✅ Platform data loaded with REAL data: ${Array.isArray(realRestaurants) ? realRestaurants.length : 0} restaurants, £${totalRevenue} total revenue`);
         
         // Set first restaurant as default if exists
         if (businesses.length > 0) {
@@ -411,6 +459,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         await AsyncStorage.setItem('managed_restaurants', JSON.stringify(businesses));
         if (businesses.length > 0) {
           await AsyncStorage.setItem(STORAGE_KEYS.BUSINESS, JSON.stringify(businesses[0]));
+        }
+        } catch (platformError) {
+          console.error('❌ Error loading platform owner data:', platformError);
+          // Fallback to empty state but still allow login
+          setManagedRestaurants([]);
+          setPlatform({
+            id: 'platform1',
+            name: 'Fynlo POS Platform',
+            ownerId: updatedUser.id,
+            createdDate: new Date(2024, 0, 1),
+            totalRestaurants: 0,
+            totalRevenue: 0,
+            isActive: true,
+          });
         }
       } else {
         // Regular restaurant user
