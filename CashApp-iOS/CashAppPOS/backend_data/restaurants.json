@@ -1,0 +1,22 @@
+[
+  {
+    "id": "restaurant1",
+    "name": "Chucho",
+    "address": "123 Camden High Street, London, NW1 7JR",
+    "phone": "+44 20 7946 0958",
+    "email": "hola@chucho.com",
+    "vatNumber": "GB123456789",
+    "registrationNumber": "12345678",
+    "type": "restaurant",
+    "currency": "GBP",
+    "timezone": "Europe/London",
+    "ownerId": "user1",
+    "platformOwnerId": "platform_owner_1",
+    "subscriptionTier": "premium",
+    "isActive": true,
+    "joinedDate": "2024-01-15T00:00:00Z",
+    "lastActivity": "2025-06-28T22:52:11.476417",
+    "monthlyRevenue": 45200,
+    "commissionRate": 2.5
+  }
+]

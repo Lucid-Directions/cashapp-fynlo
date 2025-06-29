@@ -14,6 +14,8 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme, useThemedStyles } from '../../../design-system/ThemeProvider';
+import SimpleDecimalInput from '../../../components/inputs/SimpleDecimalInput';
+import PlatformService from '../../../services/PlatformService';
 
 const PaymentProcessingScreen: React.FC = () => {
   const navigation = useNavigation();
@@ -33,6 +35,8 @@ const PaymentProcessingScreen: React.FC = () => {
     digitalWalletFixedFee: 0.30,
     qrCodeFee: 1.2,
     qrCodeFixedFee: 0.00,
+    serviceChargeEnabled: true,
+    serviceChargeRate: 12.5,
     enableSumUp: true,
     enableCardPayments: true,
     enableDigitalWallets: true,
@@ -48,28 +52,37 @@ const PaymentProcessingScreen: React.FC = () => {
   const [inputValues, setInputValues] = useState<{[key: string]: string}>({});
   const timeoutRefs = useRef<{[key: string]: NodeJS.Timeout}>({});
 
-  // Improved input validation and formatting
+  // Simplified input validation and formatting
   const validateDecimalInput = (value: string, maxValue: number = 100, maxDecimals: number = 2): string => {
-    // Remove all non-numeric characters except decimal point
-    let cleaned = value.replace(/[^0-9.]/g, '');
+    console.log('Input received:', value);
     
-    // Handle multiple decimal points
-    const decimalParts = cleaned.split('.');
-    if (decimalParts.length > 2) {
-      cleaned = decimalParts[0] + '.' + decimalParts.slice(1).join('');
+    // Handle empty value
+    if (!value || value === '') {
+      return '';
+    }
+    
+    // Allow only numbers and one decimal point
+    let cleaned = value.replace(/[^0-9.]/g, '');
+    console.log('After cleaning:', cleaned);
+    
+    // Handle multiple decimal points - keep only the first one
+    const parts = cleaned.split('.');
+    if (parts.length > 2) {
+      cleaned = parts[0] + '.' + parts.slice(1).join('');
     }
     
     // Limit decimal places
-    if (decimalParts.length === 2 && decimalParts[1].length > maxDecimals) {
-      cleaned = decimalParts[0] + '.' + decimalParts[1].substring(0, maxDecimals);
+    if (parts.length === 2 && parts[1].length > maxDecimals) {
+      cleaned = parts[0] + '.' + parts[1].substring(0, maxDecimals);
     }
     
     // Check max value
     const numericValue = parseFloat(cleaned);
     if (!isNaN(numericValue) && numericValue > maxValue) {
-      return maxValue.toFixed(maxDecimals);
+      return maxValue.toString();
     }
     
+    console.log('Final validated value:', cleaned);
     return cleaned;
   };
 
@@ -94,8 +107,55 @@ const PaymentProcessingScreen: React.FC = () => {
   };
 
   const getDisplayValue = (key: string, configValue: number): string => {
-    return inputValues[key] !== undefined ? inputValues[key] : configValue.toFixed(2);
+    if (inputValues[key] !== undefined) {
+      return inputValues[key];
+    }
+    // Don't force 2 decimal places if the value is a whole number
+    return configValue % 1 === 0 ? configValue.toString() : configValue.toFixed(2);
   };
+
+  // Load current configuration on component mount
+  useEffect(() => {
+    const loadCurrentConfig = async () => {
+      try {
+        const platformService = PlatformService.getInstance();
+        const serviceChargeConfig = await platformService.getServiceChargeConfig();
+        
+        setConfig(prevConfig => ({
+          ...prevConfig,
+          serviceChargeEnabled: serviceChargeConfig.enabled,
+          serviceChargeRate: serviceChargeConfig.rate,
+        }));
+      } catch (error) {
+        console.error('Failed to load current platform configuration:', error);
+      }
+    };
+
+    loadCurrentConfig();
+  }, []);
+
+  // Debounced service charge update
+  const debouncedUpdateServiceCharge = useCallback((value: number) => {
+    // Clear existing timeout
+    if (timeoutRefs.current['serviceCharge']) {
+      clearTimeout(timeoutRefs.current['serviceCharge']);
+    }
+    
+    // Set new timeout for service charge sync
+    timeoutRefs.current['serviceCharge'] = setTimeout(async () => {
+      try {
+        const platformService = PlatformService.getInstance();
+        await platformService.updateServiceChargeConfig(
+          config.serviceChargeEnabled,
+          value,
+          'Real-time service charge update'
+        );
+        console.log('✅ Service charge updated after debounce:', value);
+      } catch (error) {
+        console.error('❌ Failed to update service charge:', error);
+      }
+    }, 1000); // 1 second debounce
+  }, [config.serviceChargeEnabled]);
 
   // Cleanup timeouts on unmount
   useEffect(() => {
@@ -106,13 +166,67 @@ const PaymentProcessingScreen: React.FC = () => {
     };
   }, []);
 
-  const handleSave = () => {
-    // TODO: Save to backend
-    Alert.alert(
-      'Settings Saved',
-      'Payment processing configuration has been updated.',
-      [{ text: 'OK' }]
-    );
+  const handleSave = async () => {
+    try {
+      const platformService = PlatformService.getInstance();
+      
+      // Save payment fee configurations
+      const feeUpdates = {
+        'payment.fees.sumup.high_volume': config.sumupHighVolumeFee,
+        'payment.fees.sumup.standard': config.sumupStandardFee,
+        'payment.fees.stripe': config.cardPaymentFee,
+        'payment.fees.stripe.fixed': config.cardFixedFee,
+        'payment.fees.digital_wallet': config.digitalWalletFee,
+        'payment.fees.digital_wallet.fixed': config.digitalWalletFixedFee,
+        'payment.fees.qr_code': config.qrCodeFee,
+        'payment.fees.qr_code.fixed': config.qrCodeFixedFee,
+        'platform.service_charge.enabled': config.serviceChargeEnabled,
+        'platform.service_charge.rate': config.serviceChargeRate,
+        'payment.methods.sumup.enabled': config.enableSumUp,
+        'payment.methods.card.enabled': config.enableCardPayments,
+        'payment.methods.digital_wallet.enabled': config.enableDigitalWallets,
+        'payment.methods.qr.enabled': config.enableQrPayments,
+        'payment.methods.cash.enabled': config.enableCashPayments,
+        'security.require_signature': config.requireSignature,
+        'security.require_pin': config.requirePin,
+        'security.contactless_limit': config.contactlessLimit,
+        'security.daily_transaction_limit': config.dailyTransactionLimit,
+      };
+
+      // Also update the service charge configuration using the dedicated service
+      await platformService.updateServiceChargeConfig(
+        config.serviceChargeEnabled,
+        config.serviceChargeRate,
+        'Platform service charge'
+      );
+
+      // Bulk update all platform settings
+      const result = await platformService.bulkUpdatePlatformSettings(
+        feeUpdates,
+        'Platform payment processing configuration update'
+      );
+
+      if (result.successful > 0) {
+        Alert.alert(
+          'Settings Saved',
+          `Payment processing configuration has been updated successfully. ${result.successful} settings updated.`,
+          [{ text: 'OK' }]
+        );
+      } else {
+        Alert.alert(
+          'Save Failed',
+          'Failed to save payment processing configuration. Please try again.',
+          [{ text: 'OK' }]
+        );
+      }
+    } catch (error) {
+      console.error('Failed to save payment processing settings:', error);
+      Alert.alert(
+        'Save Error',
+        'An error occurred while saving settings. Please try again.',
+        [{ text: 'OK' }]
+      );
+    }
   };
 
   const PaymentMethodCard = ({ 
@@ -145,44 +259,30 @@ const PaymentProcessingScreen: React.FC = () => {
       
       {enabled && (
         <View style={styles.feeConfiguration}>
-          <View style={styles.feeRow}>
-            <Text style={styles.feeLabel}>Percentage Fee:</Text>
-            <View style={styles.feeInputContainer}>
-              <TextInput
-                style={styles.feeInput}
-                value={getDisplayValue(feeKey, fee)}
-                onChangeText={(text) => handleFeeInputChange(feeKey, text, 50)}
-                keyboardType="decimal-pad"
-                placeholder="0.00"
-                autoCorrect={false}
-                autoCapitalize="none"
-                selectTextOnFocus={true}
-                maxLength={6}
-                returnKeyType="done"
-              />
-              <Text style={styles.feeUnit}>%</Text>
-            </View>
-          </View>
+          <SimpleDecimalInput
+            label="Percentage Fee"
+            value={config[feeKey] || 0}
+            onValueChange={(value) => setConfig(prev => ({ ...prev, [feeKey]: value }))}
+            suffix="%"
+            maxValue={50}
+            minValue={0}
+            decimalPlaces={2}
+            placeholder="1.50"
+            style={{ marginVertical: 8 }}
+          />
           
           {fixedFee !== undefined && fixedFeeKey && (
-            <View style={styles.feeRow}>
-              <Text style={styles.feeLabel}>Fixed Fee:</Text>
-              <View style={styles.feeInputContainer}>
-                <Text style={styles.currencySymbol}>£</Text>
-                <TextInput
-                  style={styles.feeInput}
-                  value={getDisplayValue(fixedFeeKey, fixedFee)}
-                  onChangeText={(text) => handleFeeInputChange(fixedFeeKey, text, 1000)}
-                  keyboardType="decimal-pad"
-                  placeholder="0.00"
-                  autoCorrect={false}
-                  autoCapitalize="none"
-                  selectTextOnFocus={true}
-                  maxLength={8}
-                  returnKeyType="done"
-                />
-              </View>
-            </View>
+            <SimpleDecimalInput
+              label="Fixed Fee"
+              value={config[fixedFeeKey] || 0}
+              onValueChange={(value) => setConfig(prev => ({ ...prev, [fixedFeeKey]: value }))}
+              suffix="£"
+              maxValue={1000}
+              minValue={0}
+              decimalPlaces={2}
+              placeholder="0.20"
+              style={{ marginVertical: 8 }}
+            />
           )}
         </View>
       )}
@@ -284,6 +384,71 @@ const PaymentProcessingScreen: React.FC = () => {
           />
         </View>
 
+        {/* Platform Service Charge */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Platform Service Charge</Text>
+          <Text style={styles.sectionDescription}>
+            Configure the platform-wide service charge applied to all orders
+          </Text>
+          
+          <View style={styles.paymentMethodCard}>
+            <View style={styles.paymentMethodHeader}>
+              <View style={styles.paymentMethodInfo}>
+                <Icon name="receipt" size={24} color={theme.colors.primary} />
+                <View style={styles.paymentMethodDetails}>
+                  <Text style={styles.paymentMethodTitle}>Service Charge</Text>
+                  <Text style={styles.paymentMethodDescription}>
+                    Applied to all orders across all restaurants
+                  </Text>
+                </View>
+              </View>
+              <Switch
+                value={config.serviceChargeEnabled}
+                onValueChange={async (value) => {
+                  setConfig({...config, serviceChargeEnabled: value});
+                  
+                  // IMMEDIATE SYNC: Update the service charge enabled state in real-time
+                  try {
+                    const platformService = PlatformService.getInstance();
+                    await platformService.updateServiceChargeConfig(
+                      value,
+                      config.serviceChargeRate,
+                      'Real-time service charge toggle'
+                    );
+                    console.log('✅ Service charge enabled updated immediately:', value);
+                  } catch (error) {
+                    console.error('❌ Failed to update service charge enabled immediately:', error);
+                  }
+                }}
+                trackColor={{ false: theme.colors.lightGray, true: theme.colors.primary }}
+                thumbColor={config.serviceChargeEnabled ? theme.colors.white : theme.colors.mediumGray}
+              />
+            </View>
+            
+            {config.serviceChargeEnabled && (
+              <View style={styles.feeConfiguration}>
+                <SimpleDecimalInput
+                  label="Service Charge Rate"
+                  value={config.serviceChargeRate}
+                  onValueChange={(value) => {
+                    console.log('💰 Service charge rate changed to:', value);
+                    setConfig(prev => ({ ...prev, serviceChargeRate: value }));
+                    
+                    // Debounced sync - update after user stops typing
+                    debouncedUpdateServiceCharge(value);
+                  }}
+                  suffix="%"
+                  maxValue={25}
+                  minValue={0}
+                  decimalPlaces={2}
+                  placeholder="12.50"
+                  style={{ marginVertical: 12 }}
+                />
+              </View>
+            )}
+          </View>
+        </View>
+
         {/* Security Settings */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Security Settings</Text>
@@ -319,47 +484,29 @@ const PaymentProcessingScreen: React.FC = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Transaction Limits</Text>
           
-          <View style={styles.limitRow}>
-            <Text style={styles.limitLabel}>Contactless Limit</Text>
-            <View style={styles.limitInputContainer}>
-              <Text style={styles.currencySymbol}>£</Text>
-              <TextInput
-                style={styles.limitInput}
-                value={config.contactlessLimit.toFixed(2)}
-                onChangeText={(text) => {
-                  const numericValue = parseFloat(text.replace(/[^0-9.]/g, '')) || 0;
-                  setConfig({...config, contactlessLimit: numericValue});
-                }}
-                keyboardType="decimal-pad"
-                placeholder="100.00"
-                autoCorrect={false}
-                autoCapitalize="none"
-                selectTextOnFocus={true}
-                clearButtonMode="while-editing"
-              />
-            </View>
-          </View>
+          <SimpleDecimalInput
+            label="Contactless Limit"
+            value={config.contactlessLimit}
+            onValueChange={(value) => setConfig(prev => ({ ...prev, contactlessLimit: value }))}
+            suffix="£"
+            maxValue={1000}
+            minValue={0}
+            decimalPlaces={2}
+            placeholder="100.00"
+            style={{ marginVertical: 12 }}
+          />
           
-          <View style={styles.limitRow}>
-            <Text style={styles.limitLabel}>Daily Transaction Limit</Text>
-            <View style={styles.limitInputContainer}>
-              <Text style={styles.currencySymbol}>£</Text>
-              <TextInput
-                style={styles.limitInput}
-                value={config.dailyTransactionLimit.toFixed(2)}
-                onChangeText={(text) => {
-                  const numericValue = parseFloat(text.replace(/[^0-9.]/g, '')) || 0;
-                  setConfig({...config, dailyTransactionLimit: numericValue});
-                }}
-                keyboardType="decimal-pad"
-                placeholder="10000.00"
-                autoCorrect={false}
-                autoCapitalize="none"
-                selectTextOnFocus={true}
-                clearButtonMode="while-editing"
-              />
-            </View>
-          </View>
+          <SimpleDecimalInput
+            label="Daily Transaction Limit"
+            value={config.dailyTransactionLimit}
+            onValueChange={(value) => setConfig(prev => ({ ...prev, dailyTransactionLimit: value }))}
+            suffix="£"
+            maxValue={100000}
+            minValue={0}
+            decimalPlaces={2}
+            placeholder="10000.00"
+            style={{ marginVertical: 12 }}
+          />
         </View>
 
         {/* Info Section */}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -13,6 +13,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { OrderItem, Order } from '../../types';
 import useAppStore from '../../store/useAppStore';
 import useSettingsStore from '../../store/useSettingsStore';
+import SharedDataStore from '../../services/SharedDataStore';
 
 // Clover POS Color Scheme
 const Colors = {
@@ -59,6 +60,13 @@ const OrderManagement: React.FC<OrderManagementProps> = ({
   const [customerName, setCustomerName] = useState('');
   const [tableNumber, setTableNumber] = useState('');
   const [orderNotes, setOrderNotes] = useState('');
+  
+  // Platform service charge configuration (real-time from platform owner)
+  const [platformServiceCharge, setPlatformServiceCharge] = useState({
+    enabled: false,
+    rate: 0,
+    description: 'Loading platform service charge...',
+  });
 
   // Calculate totals
   const calculateSubtotal = () => {
@@ -71,9 +79,51 @@ const OrderManagement: React.FC<OrderManagementProps> = ({
   };
 
   const calculateServiceCharge = (subtotal: number) => {
-    if (!taxConfiguration.serviceTaxEnabled) return 0;
-    return subtotal * (taxConfiguration.serviceTaxRate / 100);
+    // Use PLATFORM service charge settings, not restaurant settings
+    if (!platformServiceCharge.enabled) return 0;
+    return subtotal * (platformServiceCharge.rate / 100);
   };
+  
+  // Load platform service charge configuration on component mount
+  useEffect(() => {
+    const loadPlatformServiceCharge = async () => {
+      try {
+        console.log('💰 OrderManagement - Loading platform service charge...');
+        const dataStore = SharedDataStore.getInstance();
+        const config = await dataStore.getServiceChargeConfig();
+        
+        if (config) {
+          setPlatformServiceCharge({
+            enabled: config.enabled,
+            rate: config.rate,
+            description: config.description || 'Platform service charge',
+          });
+          console.log('✅ Platform service charge loaded in OrderManagement:', config);
+        } else {
+          console.log('⚠️ No platform service charge config found in OrderManagement');
+        }
+      } catch (error) {
+        console.error('❌ Failed to load platform service charge in OrderManagement:', error);
+      }
+    };
+    
+    loadPlatformServiceCharge();
+    
+    // Subscribe to real-time updates
+    const dataStore = SharedDataStore.getInstance();
+    const unsubscribe = dataStore.subscribe('serviceCharge', (updatedConfig) => {
+      console.log('🔄 Platform service charge updated in OrderManagement:', updatedConfig);
+      setPlatformServiceCharge({
+        enabled: updatedConfig.enabled,
+        rate: updatedConfig.rate,
+        description: updatedConfig.description || 'Platform service charge',
+      });
+    });
+    
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   const calculateTotal = () => {
     const subtotal = calculateSubtotal();

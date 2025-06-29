@@ -15,6 +15,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useAuth } from '../../contexts/AuthContext';
+import SimpleTextInput from '../../components/inputs/SimpleTextInput';
 
 // Clover POS Color Scheme
 const Colors = {
@@ -94,11 +95,13 @@ const RestaurantsScreen: React.FC = () => {
       <View style={styles.searchSection}>
         <View style={styles.searchContainer}>
           <Icon name="search" size={20} color={Colors.mediumGray} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search restaurants..."
+          <SimpleTextInput
             value={searchQuery}
-            onChangeText={setSearchQuery}
+            onValueChange={setSearchQuery}
+            placeholder="Search restaurants..."
+            style={styles.searchInput}
+            clearButtonMode="while-editing"
+            returnKeyType="search"
           />
         </View>
         

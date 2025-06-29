@@ -4,6 +4,7 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import SharedDataStore from './SharedDataStore';
 
 // Base API URL - FIXED: Uses LAN IP for device testing
 import API_CONFIG from '../config/api';
@@ -66,9 +67,11 @@ export interface FeeCalculation {
 class PlatformService {
   private static instance: PlatformService;
   private authToken: string | null = null;
+  private dataStore: SharedDataStore;
 
   private constructor() {
     this.loadAuthToken();
+    this.dataStore = SharedDataStore.getInstance();
   }
 
   static getInstance(): PlatformService {
@@ -489,20 +492,11 @@ class PlatformService {
     description: string;
   }> {
     try {
-      // Check DataService feature flags to determine if we should use real API
-      const dataService = await import('./DataService');
-      const flags = dataService.default.getInstance().getFeatureFlags();
-      
-      if (flags.USE_REAL_API) {
-        return await this.makeRequest('/platform-settings/service-charge');
-      } else {
-        console.log('Using mock service charge config (demo mode)');
-        return this.getMockServiceChargeConfig();
-      }
+      console.log('📊 Getting service charge config from real data store...');
+      return await this.dataStore.getServiceChargeConfig();
     } catch (error) {
-      console.log('API not available, using mock service charge config');
-      // Return mock data for development/demo
-      return this.getMockServiceChargeConfig();
+      console.error('❌ Failed to get service charge config:', error);
+      throw error;
     }
   }
 
@@ -512,25 +506,24 @@ class PlatformService {
     description?: string
   ): Promise<boolean> {
     try {
-      await this.makeRequest('/platform-settings/service-charge', 'PUT', {
+      console.log('💾 Updating service charge config in real data store...', { enabled, rate, description });
+      
+      const config = {
         enabled,
         rate,
         description: description || `Platform service charge of ${rate}%`,
-      });
+        lastUpdated: new Date().toISOString(),
+      };
+
+      await this.dataStore.setServiceChargeConfig(config);
+      console.log('✅ Service charge config updated successfully');
       return true;
     } catch (error) {
-      console.error('Failed to update service charge config:', error);
+      console.error('❌ Failed to update service charge config:', error);
       return false;
     }
   }
 
-  private getMockServiceChargeConfig() {
-    return {
-      enabled: true,
-      rate: 12.5,
-      description: 'Platform service charge',
-    };
-  }
 
   private getMockFeatureFlags(): Record<string, boolean> {
     return {

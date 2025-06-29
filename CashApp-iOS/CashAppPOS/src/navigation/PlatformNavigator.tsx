@@ -16,7 +16,7 @@ import RestaurantOnboardingScreen from '../screens/platform/onboarding/Restauran
 
 // Platform Settings Screens
 import PaymentProcessingScreen from '../screens/platform/settings/PaymentProcessingScreen';
-import CommissionStructureScreen from '../screens/platform/settings/CommissionStructureScreen';
+import PlansAndPricingScreen from '../screens/platform/settings/CommissionStructureScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -31,7 +31,7 @@ const DashboardStack = () => (
     <Stack.Screen name="PlatformDashboard" component={PlatformDashboardScreen} />
     <Stack.Screen name="PlatformSettings" component={PlatformSettingsScreen} />
     <Stack.Screen name="PaymentProcessing" component={PaymentProcessingScreen} />
-    <Stack.Screen name="CommissionStructure" component={CommissionStructureScreen} />
+    <Stack.Screen name="PlansAndPricing" component={PlansAndPricingScreen} />
   </Stack.Navigator>
 );
 

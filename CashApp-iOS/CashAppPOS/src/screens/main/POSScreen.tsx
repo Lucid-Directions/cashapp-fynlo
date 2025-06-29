@@ -17,7 +17,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
-import Colors from '../../constants/Colors';
+import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
 import useAppStore from '../../store/useAppStore';
 import useUIStore from '../../store/useUIStore';
 import useSettingsStore from '../../store/useSettingsStore';
@@ -27,6 +27,11 @@ import { useRestaurantDisplayName } from '../../hooks/useRestaurantConfig';
 import PlatformService from '../../services/PlatformService';
 import ErrorTrackingService from '../../services/ErrorTrackingService';
 import { validatePrice, calculatePercentageFee, validateCartCalculation, formatPrice } from '../../utils/priceValidation';
+import SumUpPaymentComponent from '../../components/payment/SumUpPaymentComponent';
+import SumUpTestComponent from '../../components/payment/SumUpTestComponent';
+import SumUpCompatibilityService from '../../services/SumUpCompatibilityService';
+import SharedDataStore from '../../services/SharedDataStore';
+import SimpleTextInput from '../../components/inputs/SimpleTextInput';
 
 // Get screen dimensions
 const { width: screenWidth } = Dimensions.get('window');
@@ -90,15 +95,25 @@ type POSScreenNavigationProp = DrawerNavigationProp<DrawerParamList>;
 const POSScreen: React.FC = () => {
   const navigation = useNavigation<POSScreenNavigationProp>();
   const restaurantDisplayName = useRestaurantDisplayName();
+  const { theme } = useTheme();
+  const styles = useThemedStyles(createStyles);
   
   const [customerName, setCustomerName] = useState('');
   const [showCartModal, setShowCartModal] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('sumup');
   const [serviceChargeConfig, setServiceChargeConfig] = useState({
-    enabled: true,
-    rate: 12.5,
-    description: 'Platform service charge',
+    enabled: false,
+    rate: 0,
+    description: 'Loading...',
   });
+  const [showSumUpPayment, setShowSumUpPayment] = useState(false);
+  const [showSumUpTest, setShowSumUpTest] = useState(false);
+  const [serviceChargeDebugInfo, setServiceChargeDebugInfo] = useState('');
+
+  // Debug showSumUpPayment state changes
+  useEffect(() => {
+    console.log('🔄 showSumUpPayment state changed to:', showSumUpPayment);
+  }, [showSumUpPayment]);
 
   // Create themed styles
   
@@ -123,20 +138,35 @@ const POSScreen: React.FC = () => {
 
   const { taxConfiguration } = useSettingsStore();
 
-  // Load platform service charge configuration
+  // Load platform service charge configuration with real-time updates
   useEffect(() => {
+    const dataStore = SharedDataStore.getInstance();
+
     const loadServiceChargeConfig = async () => {
       try {
-        const platformService = PlatformService.getInstance();
-        const config = await platformService.getServiceChargeConfig();
+        const config = await dataStore.getServiceChargeConfig();
         setServiceChargeConfig(config);
+        console.log('✅ Service charge config loaded from real data store:', config);
       } catch (error) {
-        console.error('Failed to load service charge config:', error);
-        // Keep default values if loading fails
+        console.error('❌ Failed to load service charge config:', error);
       }
     };
 
+    // Initial load
     loadServiceChargeConfig();
+
+    // Subscribe to real-time updates
+    const unsubscribe = dataStore.subscribe('serviceCharge', (updatedConfig) => {
+      console.log('🔄 Service charge config updated in real-time:', updatedConfig);
+      const debugInfo = `SYNC: ${updatedConfig.enabled ? updatedConfig.rate + '%' : 'OFF'} @ ${new Date().toLocaleTimeString()}`;
+      console.log('📊 Service charge debug:', debugInfo);
+      setServiceChargeConfig(updatedConfig);
+      setServiceChargeDebugInfo(debugInfo);
+    });
+
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   // Calculate taxes and fees with error tracking
@@ -277,13 +307,55 @@ const POSScreen: React.FC = () => {
     
     switch (selectedPaymentMethod) {
       case 'sumup':
-        // Navigate to SumUp payment screen
-        navigation.navigate('EnhancedPayment', {
-          amount: totalAmount,
-          orderItems: cart,
-          customerName: customerName || 'Customer',
-          onPaymentComplete: handlePaymentComplete,
-        });
+        // Check SumUp compatibility before attempting payment
+        console.log('🏦 Starting SumUp payment for amount:', totalAmount);
+        const checkSumUpCompatibility = async () => {
+          const compatibilityService = SumUpCompatibilityService.getInstance();
+          const shouldAttempt = await compatibilityService.shouldAttemptSumUp();
+          
+          if (shouldAttempt) {
+            console.log('🏦 SumUp compatible, showing payment modal');
+            setShowSumUpPayment(true);
+          } else {
+            console.warn('⚠️ SumUp not compatible, showing alternatives');
+            const fallbackMethods = compatibilityService.getFallbackPaymentMethods();
+            
+            Alert.alert(
+              'Tap to Pay Unavailable',
+              'Tap to Pay on iPhone requires Apple approval. Choose an alternative payment method:',
+              [
+                {
+                  text: 'QR Code Payment (1.2%)',
+                  onPress: () => {
+                    navigation.navigate('QRCodePayment', {
+                      amount: totalAmount,
+                      orderItems: cart,
+                      customerName: customerName || 'Customer',
+                      onPaymentComplete: handlePaymentComplete,
+                    });
+                  }
+                },
+                {
+                  text: 'Cash Payment (Free)',
+                  onPress: () => {
+                    handlePaymentComplete({
+                      success: true,
+                      paymentMethod: 'cash',
+                      amount: totalAmount,
+                      currency: 'GBP',
+                    });
+                  }
+                },
+                {
+                  text: 'Cancel',
+                  style: 'cancel',
+                  onPress: () => setShowPaymentModal(true)
+                }
+              ]
+            );
+          }
+        };
+        checkSumUpCompatibility();
         break;
         
       case 'square':
@@ -390,6 +462,51 @@ const POSScreen: React.FC = () => {
     }
   };
 
+  // SumUp payment completion handlers
+  const handleSumUpPaymentComplete = (success: boolean, transactionCode?: string, error?: string) => {
+    setShowSumUpPayment(false);
+    
+    if (success && transactionCode) {
+      console.log('🎉 SumUp payment completed successfully!', transactionCode);
+      Alert.alert(
+        'Payment Successful!',
+        `Your payment has been processed successfully.\n\nTransaction Code: ${transactionCode}\nAmount: ${formatPrice(calculateCartTotal(), '£', { screenName: 'POSScreen', operation: 'payment_success_display' })}`,
+        [
+          {
+            text: 'OK',
+            onPress: () => {
+              clearCart();
+              setCustomerName('');
+            },
+          },
+        ]
+      );
+    } else {
+      console.error('❌ SumUp payment failed:', error);
+      Alert.alert(
+        'Payment Failed',
+        error || 'The payment could not be processed. Please try again.',
+        [
+          {
+            text: 'Retry',
+            onPress: () => setShowPaymentModal(true),
+          },
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+        ]
+      );
+    }
+  };
+
+  const handleSumUpPaymentCancel = () => {
+    setShowSumUpPayment(false);
+    console.log('❌ SumUp payment cancelled by user');
+    // Show the payment modal again for user to try again
+    setShowPaymentModal(true);
+  };
+
   const MenuItemCard = ({ item }: { item: MenuItem }) => {
     const existingItem = cart.find(cartItem => cartItem.id === item.id);
     
@@ -420,14 +537,14 @@ const POSScreen: React.FC = () => {
               style={styles.menuQuantityButton}
               onPress={() => handleUpdateQuantity(item.id, existingItem.quantity - 1)}
             >
-              <Icon name="remove" size={16} color={Colors.white} />
+              <Icon name="remove" size={16} color={theme.colors.white} />
             </TouchableOpacity>
             <Text style={styles.menuQuantityText}>{existingItem.quantity}</Text>
             <TouchableOpacity
               style={styles.menuQuantityButton}
               onPress={() => handleUpdateQuantity(item.id, existingItem.quantity + 1)}
             >
-              <Icon name="add" size={16} color={Colors.white} />
+              <Icon name="add" size={16} color={theme.colors.white} />
             </TouchableOpacity>
           </View>
         )}
@@ -459,14 +576,14 @@ const POSScreen: React.FC = () => {
               style={styles.quantityButton}
               onPress={() => handleUpdateQuantity(item.id, item.quantity - 1)}
             >
-              <Icon name="remove" size={16} color={Colors.text} />
+              <Icon name="remove" size={16} color={theme.colors.text} />
             </TouchableOpacity>
             <Text style={styles.quantityText}>{item.quantity}</Text>
             <TouchableOpacity
               style={styles.quantityButton}
               onPress={() => handleUpdateQuantity(item.id, item.quantity + 1)}
             >
-              <Icon name="add" size={16} color={Colors.text} />
+              <Icon name="add" size={16} color={theme.colors.text} />
             </TouchableOpacity>
           </View>
           <Text style={styles.cartItemTotal}>
@@ -479,7 +596,7 @@ const POSScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor={Colors.primary} barStyle="light-content" />
+      <StatusBar backgroundColor={theme.colors.primary} barStyle="light-content" />
       
       {/* Restaurant Header */}
       <View style={styles.header}>
@@ -495,7 +612,7 @@ const POSScreen: React.FC = () => {
         
         <View style={styles.headerRight}>
           <TouchableOpacity style={styles.headerIconButton}>
-            <Icon name="search" size={24} color={Colors.white} />
+            <Icon name="search" size={24} color={theme.colors.white} />
           </TouchableOpacity>
           <View style={styles.headerActions}>
             <TouchableOpacity 
@@ -528,14 +645,24 @@ const POSScreen: React.FC = () => {
                 }
               })}
             >
-              <Icon name="qr-code-scanner" size={24} color={Colors.white} />
+              <Icon name="qr-code-scanner" size={24} color={theme.colors.white} />
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={[styles.cartButton, { marginRight: 8 }]}
+              onPress={() => {
+                setShowSumUpTest(!showSumUpTest);
+                console.log('🧪 SumUp Test toggled:', !showSumUpTest);
+              }}
+            >
+              <Icon name="bug-report" size={20} color={theme.colors.white} />
             </TouchableOpacity>
             
             <TouchableOpacity
               style={styles.cartButton}
               onPress={() => setShowCartModal(true)}
             >
-              <Icon name="shopping-cart" size={24} color={Colors.white} />
+              <Icon name="shopping-cart" size={24} color={theme.colors.white} />
               {cartItemCount() > 0 && (
                 <View style={styles.cartBadge}>
                   <Text style={styles.cartBadgeText}>{cartItemCount()}</Text>
@@ -562,6 +689,25 @@ const POSScreen: React.FC = () => {
             <View style={styles.statItem}>
               <Text style={styles.statValue}>#{Math.floor(Math.random() * 1000).toString().padStart(3, '0')}</Text>
               <Text style={styles.statLabel}>Order</Text>
+            </View>
+            {/* Service Charge Sync Indicator */}
+            <View style={[styles.statItem, styles.serviceChargeIndicator]}>
+              <Text style={[
+                styles.statValue, 
+                { 
+                  color: serviceChargeConfig.enabled ? '#00D4AA' : '#999',
+                  fontSize: 14,
+                  fontWeight: '600'
+                }
+              ]}>
+                {serviceChargeConfig.enabled ? `${serviceChargeConfig.rate}%` : 'OFF'}
+              </Text>
+              <Text style={styles.statLabel}>Service</Text>
+              {serviceChargeDebugInfo && (
+                <Text style={styles.syncIndicator}>
+                  {serviceChargeDebugInfo}
+                </Text>
+              )}
             </View>
           </View>
 
@@ -633,14 +779,14 @@ const POSScreen: React.FC = () => {
                   style={styles.modalCloseButton}
                   onPress={() => setShowCartModal(false)}
                 >
-                  <Icon name="close" size={24} color={Colors.text} />
+                  <Icon name="close" size={24} color={theme.colors.text} />
                 </TouchableOpacity>
               </View>
             </View>
             
             {cart.length === 0 ? (
               <View style={styles.emptyCart}>
-                <Icon name="shopping-cart" size={64} color={Colors.lightGray} />
+                <Icon name="shopping-cart" size={64} color={theme.colors.lightGray} />
                 <Text style={styles.emptyCartText}>Cart is empty</Text>
                 <Text style={styles.emptyCartSubtext}>Add items to get started</Text>
               </View>
@@ -717,17 +863,18 @@ const POSScreen: React.FC = () => {
                 onPress={() => setShowPaymentModal(false)}
                 style={styles.modalCloseButton}
               >
-                <Icon name="close" size={24} color={Colors.text} />
+                <Icon name="close" size={24} color={theme.colors.text} />
               </TouchableOpacity>
             </View>
             
             <View style={styles.modalContent}>
-              <TextInput
-                style={styles.input}
-                placeholder="Customer name (optional)"
+              <SimpleTextInput
                 value={customerName}
-                onChangeText={setCustomerName}
-                placeholderTextColor={Colors.darkGray}
+                onValueChange={setCustomerName}
+                placeholder="Customer name (optional)"
+                style={styles.input}
+                clearButtonMode="while-editing"
+                autoCapitalize="words"
               />
               
               {/* Order Summary */}
@@ -789,7 +936,7 @@ const POSScreen: React.FC = () => {
                     ]}
                     onPress={() => setSelectedPaymentMethod('qr')}
                   >
-                    <Icon name="qr-code-scanner" size={24} color={Colors.primary} />
+                    <Icon name="qr-code-scanner" size={24} color={theme.colors.primary} />
                     <Text style={styles.paymentMethodText}>QR Payment</Text>
                     <Text style={styles.paymentMethodSubtext}>1.2% • Customer mobile app</Text>
                   </TouchableOpacity>
@@ -800,7 +947,7 @@ const POSScreen: React.FC = () => {
                     ]}
                     onPress={() => setSelectedPaymentMethod('cash')}
                   >
-                    <Icon name="attach-money" size={24} color={Colors.success} />
+                    <Icon name="attach-money" size={24} color={theme.colors.success} />
                     <Text style={styles.paymentMethodText}>Cash</Text>
                     <Text style={styles.paymentMethodSubtext}>No processing fee</Text>
                   </TouchableOpacity>
@@ -835,18 +982,32 @@ const POSScreen: React.FC = () => {
           </View>
         </View>
       </Modal>
+
+      {/* SumUp Payment Component */}
+      {showSumUpPayment && (
+        <>
+          {console.log('🔄 Rendering SumUpPaymentComponent with showSumUpPayment:', showSumUpPayment)}
+          <SumUpPaymentComponent
+            amount={calculateCartTotal()}
+            currency="GBP"
+            title={`Order for ${customerName || 'Customer'}`}
+            onPaymentComplete={handleSumUpPaymentComplete}
+            onPaymentCancel={handleSumUpPaymentCancel}
+          />
+        </>
+      )}
       
     </SafeAreaView>
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: theme.colors.background,
   },
   header: {
-    backgroundColor: Colors.primary,
+    backgroundColor: theme.colors.primary,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -872,7 +1033,7 @@ const styles = StyleSheet.create({
   logoText: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: Colors.white,
+    color: theme.colors.white,
     letterSpacing: -0.5,
   },
   logoOrange: {
@@ -887,7 +1048,7 @@ const styles = StyleSheet.create({
   cloverLogo: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: Colors.white,
+    color: theme.colors.white,
     letterSpacing: -0.5,
   },
   headerSubtitle: {
@@ -898,7 +1059,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: Colors.white,
+    color: theme.colors.white,
   },
   headerRight: {
     flexDirection: 'row',
@@ -928,7 +1089,7 @@ const styles = StyleSheet.create({
   restaurantName: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: Colors.white,
+    color: theme.colors.white,
     letterSpacing: -0.5,
   },
   poweredBy: {
@@ -944,10 +1105,10 @@ const styles = StyleSheet.create({
   logoText: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: Colors.white,
+    color: theme.colors.white,
   },
   logoOrange: {
-    color: Colors.warning,
+    color: theme.colors.warning,
   },
   headerActions: {
     flexDirection: 'row',
@@ -966,7 +1127,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -4,
     right: -4,
-    backgroundColor: Colors.warning,
+    backgroundColor: theme.colors.warning,
     borderRadius: 10,
     minWidth: 20,
     height: 20,
@@ -974,7 +1135,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cartBadgeText: {
-    color: Colors.white,
+    color: theme.colors.white,
     fontSize: 12,
     fontWeight: 'bold',
   },
@@ -983,15 +1144,15 @@ const styles = StyleSheet.create({
   },
   fullWidthPanel: {
     flex: 1,
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.white,
   },
   statsBar: {
     flexDirection: 'row',
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.white,
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: theme.colors.border,
     justifyContent: 'space-around',
   },
   statItem: {
@@ -1000,21 +1161,34 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: Colors.primary,
+    color: theme.colors.primary,
   },
   statLabel: {
     fontSize: 12,
-    color: Colors.darkGray,
+    color: theme.colors.darkGray,
     marginTop: 2,
+  },
+  serviceChargeIndicator: {
+    borderLeftWidth: 1,
+    borderLeftColor: theme.colors.border,
+    paddingLeft: 16,
+    marginLeft: 16,
+  },
+  syncIndicator: {
+    fontSize: 8,
+    color: '#666',
+    textAlign: 'center',
+    marginTop: 2,
+    fontWeight: '500',
   },
   fullPanel: {
     flex: 1,
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.white,
   },
   categoryTabs: {
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.white,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: theme.colors.border,
   },
   categoryTabsContent: {
     paddingHorizontal: 20,
@@ -1025,21 +1199,21 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     marginRight: 12,
     borderRadius: 25,
-    backgroundColor: Colors.background,
+    backgroundColor: theme.colors.background,
     minHeight: 40,
     justifyContent: 'center',
   },
   categoryTabActive: {
-    backgroundColor: Colors.accent,
+    backgroundColor: theme.colors.accent,
   },
   categoryTabText: {
     fontSize: 16,
     fontWeight: '500',
-    color: Colors.text,
+    color: theme.colors.text,
     textAlign: 'center',
   },
   categoryTabTextActive: {
-    color: Colors.white,
+    color: theme.colors.white,
   },
   menuGrid: {
     padding: 16,
@@ -1050,7 +1224,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   menuCard: {
-    backgroundColor: Colors.cardBg,
+    backgroundColor: theme.colors.cardBg,
     borderRadius: 16,
     padding: 18,
     margin: 6,
@@ -1080,7 +1254,7 @@ const styles = StyleSheet.create({
   menuItemName: {
     fontSize: 13,
     fontWeight: '600',
-    color: Colors.text,
+    color: theme.colors.text,
     textAlign: 'center',
     marginBottom: 6,
     lineHeight: 16,
@@ -1090,7 +1264,7 @@ const styles = StyleSheet.create({
   menuItemPrice: {
     fontSize: 15,
     fontWeight: '700',
-    color: Colors.primary,
+    color: theme.colors.primary,
     textAlign: 'center',
     backgroundColor: 'rgba(0, 166, 81, 0.1)',
     paddingHorizontal: 8,
@@ -1103,7 +1277,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 8,
-    backgroundColor: Colors.accent,
+    backgroundColor: theme.colors.accent,
     borderRadius: 15,
     paddingVertical: 4,
     paddingHorizontal: 8,
@@ -1117,7 +1291,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   menuQuantityText: {
-    color: Colors.white,
+    color: theme.colors.white,
     fontSize: 14,
     fontWeight: '600',
     marginHorizontal: 12,
@@ -1129,9 +1303,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 20,
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.white,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: theme.colors.border,
   },
   cartTitleSection: {
     flex: 1,
@@ -1139,18 +1313,18 @@ const styles = StyleSheet.create({
   cartTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: Colors.text,
+    color: theme.colors.text,
   },
   cartSubtitle: {
     fontSize: 12,
-    color: Colors.darkGray,
+    color: theme.colors.darkGray,
     marginTop: 2,
   },
   clearButton: {
     padding: 8,
   },
   clearButtonText: {
-    color: Colors.warning,
+    color: theme.colors.warning,
     fontSize: 14,
     fontWeight: '500',
   },
@@ -1163,12 +1337,12 @@ const styles = StyleSheet.create({
   emptyCartText: {
     fontSize: 18,
     fontWeight: '500',
-    color: Colors.text,
+    color: theme.colors.text,
     marginTop: 16,
   },
   emptyCartSubtext: {
     fontSize: 14,
-    color: Colors.darkGray,
+    color: theme.colors.darkGray,
     marginTop: 8,
     textAlign: 'center',
   },
@@ -1178,7 +1352,7 @@ const styles = StyleSheet.create({
   cartItem: {
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: theme.colors.border,
   },
   cartItemInfo: {
     flex: 1,
@@ -1199,16 +1373,16 @@ const styles = StyleSheet.create({
   cartItemName: {
     fontSize: 16,
     fontWeight: '500',
-    color: Colors.text,
+    color: theme.colors.text,
     marginBottom: 2,
   },
   cartItemPrice: {
     fontSize: 12,
-    color: Colors.darkGray,
+    color: theme.colors.darkGray,
   },
   cartItemDescription: {
     fontSize: 12,
-    color: Colors.lightText,
+    color: theme.colors.lightText,
     lineHeight: 16,
     marginLeft: 36,
   },
@@ -1225,25 +1399,25 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: Colors.background,
+    backgroundColor: theme.colors.background,
     justifyContent: 'center',
     alignItems: 'center',
   },
   quantityText: {
     fontSize: 14,
     fontWeight: '500',
-    color: Colors.text,
+    color: theme.colors.text,
     marginHorizontal: 12,
   },
   cartItemTotal: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.text,
+    color: theme.colors.text,
   },
   cartFooter: {
     borderTopWidth: 1,
-    borderTopColor: Colors.border,
-    backgroundColor: Colors.white,
+    borderTopColor: theme.colors.border,
+    backgroundColor: theme.colors.white,
     padding: 20,
   },
   cartSummary: {
@@ -1255,7 +1429,7 @@ const styles = StyleSheet.create({
   summarySectionTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.text,
+    color: theme.colors.text,
     marginBottom: 8,
   },
   summaryRow: {
@@ -1265,30 +1439,30 @@ const styles = StyleSheet.create({
   },
   summaryLabel: {
     fontSize: 14,
-    color: Colors.darkGray,
+    color: theme.colors.darkGray,
   },
   summaryValue: {
     fontSize: 14,
-    color: Colors.text,
+    color: theme.colors.text,
   },
   totalRow: {
     marginTop: 8,
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: Colors.border,
+    borderTopColor: theme.colors.border,
   },
   totalLabel: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.text,
+    color: theme.colors.text,
   },
   totalAmount: {
     fontSize: 20,
     fontWeight: '700',
-    color: Colors.text,
+    color: theme.colors.text,
   },
   chargeButton: {
-    backgroundColor: Colors.primary,
+    backgroundColor: theme.colors.primary,
     borderRadius: 12,
     paddingVertical: 18,
     flexDirection: 'row',
@@ -1301,7 +1475,7 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   chargeButtonText: {
-    color: Colors.white,
+    color: theme.colors.white,
     fontSize: 17,
     fontWeight: 'bold',
   },
@@ -1312,7 +1486,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cartModal: {
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.white,
     borderRadius: 16,
     width: '90%',
     maxWidth: 500,
@@ -1329,14 +1503,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: theme.colors.border,
   },
   cartModalButtons: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   paymentModal: {
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.white,
     borderRadius: 16,
     width: '90%',
     maxWidth: 400,
@@ -1352,12 +1526,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: theme.colors.border,
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: Colors.text,
+    color: theme.colors.text,
   },
   modalCloseButton: {
     padding: 4,
@@ -1367,24 +1541,24 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: theme.colors.border,
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 16,
-    color: Colors.text,
+    color: theme.colors.text,
     marginBottom: 20,
   },
   orderSummary: {
     marginBottom: 20,
-    backgroundColor: Colors.background,
+    backgroundColor: theme.colors.background,
     borderRadius: 8,
     padding: 16,
   },
   orderSummaryTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.text,
+    color: theme.colors.text,
     marginBottom: 12,
   },
   orderSummaryItem: {
@@ -1402,22 +1576,22 @@ const styles = StyleSheet.create({
   orderSummaryItemName: {
     fontSize: 14,
     fontWeight: '500',
-    color: Colors.text,
+    color: theme.colors.text,
     flex: 1,
   },
   orderSummaryQuantity: {
     fontSize: 14,
-    color: Colors.darkGray,
+    color: theme.colors.darkGray,
     marginRight: 12,
   },
   orderSummaryPrice: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.text,
+    color: theme.colors.text,
   },
   orderSummaryDescription: {
     fontSize: 12,
-    color: Colors.lightText,
+    color: theme.colors.lightText,
     marginLeft: 24,
     fontStyle: 'italic',
   },
@@ -1427,7 +1601,7 @@ const styles = StyleSheet.create({
   paymentMethodsTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.text,
+    color: theme.colors.text,
     marginBottom: 16,
   },
   paymentMethods: {
@@ -1440,14 +1614,14 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: Colors.border,
-    backgroundColor: Colors.white,
+    borderColor: theme.colors.border,
+    backgroundColor: theme.colors.white,
     width: '48%',
     marginBottom: 12,
     position: 'relative',
   },
   paymentMethodSelected: {
-    borderColor: Colors.accent,
+    borderColor: theme.colors.accent,
     backgroundColor: 'rgba(76, 110, 245, 0.05)',
   },
   recommendedPaymentMethod: {
@@ -1467,18 +1641,18 @@ const styles = StyleSheet.create({
   recommendedText: {
     fontSize: 9,
     fontWeight: '700',
-    color: Colors.white,
+    color: theme.colors.white,
     letterSpacing: 0.5,
   },
   paymentMethodText: {
     fontSize: 14,
     fontWeight: '500',
-    color: Colors.text,
+    color: theme.colors.text,
     marginTop: 8,
   },
   paymentMethodSubtext: {
     fontSize: 11,
-    color: Colors.darkGray,
+    color: theme.colors.darkGray,
     marginTop: 2,
     textAlign: 'center',
   },
@@ -1488,22 +1662,22 @@ const styles = StyleSheet.create({
   },
   modalTotalLabel: {
     fontSize: 14,
-    color: Colors.darkGray,
+    color: theme.colors.darkGray,
     marginBottom: 4,
   },
   modalTotalAmount: {
     fontSize: 28,
     fontWeight: '700',
-    color: Colors.text,
+    color: theme.colors.text,
   },
   confirmButton: {
-    backgroundColor: Colors.success,
+    backgroundColor: theme.colors.success,
     borderRadius: 8,
     paddingVertical: 16,
     alignItems: 'center',
   },
   confirmButtonText: {
-    color: Colors.white,
+    color: theme.colors.white,
     fontSize: 16,
     fontWeight: '600',
   },

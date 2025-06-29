@@ -14,40 +14,27 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
-import { UserManagementService, User, AccessLog } from '../../services/UserManagementService';
+import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
+import { RealUserManagementService, UserDisplayData, AccessLog } from '../../services/RealUserManagementService';
 import CreateUserModal from '../../components/modals/CreateUserModal';
 import EditUserModal from '../../components/modals/EditUserModal';
-
-// Clover POS Color Scheme
-const Colors = {
-  primary: '#00A651',
-  secondary: '#0066CC',
-  success: '#00A651',
-  warning: '#FF6B35',
-  danger: '#E74C3C',
-  background: '#F5F5F5',
-  white: '#FFFFFF',
-  lightGray: '#E5E5E5',
-  mediumGray: '#999999',
-  darkGray: '#666666',
-  text: '#333333',
-  lightText: '#666666',
-  border: '#DDDDDD',
-};
+import SimpleTextInput from '../../components/inputs/SimpleTextInput';
 
 const UserManagementScreen: React.FC = () => {
   const navigation = useNavigation();
+  const { theme } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const [selectedTab, setSelectedTab] = useState<'owners' | 'staff' | 'access'>('owners');
   const [searchQuery, setSearchQuery] = useState('');
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<UserDisplayData[]>([]);
   const [accessLogs, setAccessLogs] = useState<AccessLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [createModalVisible, setCreateModalVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedUser, setSelectedUser] = useState<UserDisplayData | null>(null);
 
-  const userManagementService = UserManagementService.getInstance();
+  const userManagementService = RealUserManagementService.getInstance();
 
   useEffect(() => {
     loadData();
@@ -106,7 +93,7 @@ const UserManagementScreen: React.FC = () => {
     setRefreshing(false);
   };
 
-  const handleUserAction = async (action: string, user?: User) => {
+  const handleUserAction = async (action: string, user?: UserDisplayData) => {
     switch (action) {
       case 'Add Owner':
       case 'Add User':
@@ -218,37 +205,37 @@ const UserManagementScreen: React.FC = () => {
 
   const getRoleColor = (role: string) => {
     switch (role.toLowerCase()) {
-      case 'restaurant owner': return Colors.primary;
-      case 'manager': return Colors.secondary;
-      case 'employee': return Colors.warning;
-      default: return Colors.mediumGray;
+      case 'restaurant owner': return theme.colors.primary;
+      case 'manager': return theme.colors.secondary;
+      case 'employee': return theme.colors.warning;
+      default: return theme.colors.mediumGray;
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return Colors.success;
-      case 'inactive': return Colors.mediumGray;
-      case 'suspended': return Colors.danger;
-      default: return Colors.mediumGray;
+      case 'active': return theme.colors.success;
+      case 'inactive': return theme.colors.mediumGray;
+      case 'suspended': return theme.colors.danger;
+      default: return theme.colors.mediumGray;
     }
   };
 
   const getAccessStatusColor = (status: string) => {
     switch (status) {
-      case 'success': return Colors.success;
-      case 'failed': return Colors.danger;
-      case 'warning': return Colors.warning;
-      default: return Colors.mediumGray;
+      case 'success': return theme.colors.success;
+      case 'failed': return theme.colors.danger;
+      case 'warning': return theme.colors.warning;
+      default: return theme.colors.mediumGray;
     }
   };
 
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
-        <StatusBar barStyle="dark-content" backgroundColor={Colors.background} />
+        <StatusBar barStyle="dark-content" backgroundColor={theme.colors.background} />
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={Colors.primary} />
+          <ActivityIndicator size="large" color={theme.colors.primary} />
           <Text style={styles.loadingText}>Loading users...</Text>
         </View>
       </SafeAreaView>
@@ -257,7 +244,7 @@ const UserManagementScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={Colors.background} />
+      <StatusBar barStyle="dark-content" backgroundColor={theme.colors.background} />
       
       {/* Header */}
       <View style={styles.header}>
@@ -294,12 +281,14 @@ const UserManagementScreen: React.FC = () => {
       {(selectedTab === 'owners' || selectedTab === 'staff') && (
         <View style={styles.searchSection}>
           <View style={styles.searchContainer}>
-            <Icon name="search" size={20} color={Colors.mediumGray} />
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search users..."
+            <Icon name="search" size={20} color={theme.colors.mediumGray} />
+            <SimpleTextInput
               value={searchQuery}
-              onChangeText={setSearchQuery}
+              onValueChange={setSearchQuery}
+              placeholder="Search users..."
+              style={styles.searchInput}
+              clearButtonMode="while-editing"
+              returnKeyType="search"
             />
           </View>
         </View>
@@ -312,8 +301,8 @@ const UserManagementScreen: React.FC = () => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={handleRefresh}
-            colors={[Colors.primary]}
-            tintColor={Colors.primary}
+            colors={[theme.colors.primary]}
+            tintColor={theme.colors.primary}
           />
         }
       >
@@ -322,7 +311,7 @@ const UserManagementScreen: React.FC = () => {
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Restaurant Owners</Text>
               <TouchableOpacity onPress={() => handleUserAction('Add Owner')}>
-                <Icon name="person-add" size={24} color={Colors.primary} />
+                <Icon name="person-add" size={24} color={theme.colors.primary} />
               </TouchableOpacity>
             </View>
             
@@ -356,21 +345,21 @@ const UserManagementScreen: React.FC = () => {
                     style={styles.actionButton}
                     onPress={() => handleUserAction('View Details', user)}
                   >
-                    <Icon name="visibility" size={16} color={Colors.secondary} />
+                    <Icon name="visibility" size={16} color={theme.colors.secondary} />
                     <Text style={styles.actionButtonText}>View</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.actionButton}
                     onPress={() => handleUserAction('Edit User', user)}
                   >
-                    <Icon name="edit" size={16} color={Colors.primary} />
+                    <Icon name="edit" size={16} color={theme.colors.primary} />
                     <Text style={styles.actionButtonText}>Edit</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.actionButton}
                     onPress={() => handleUserAction('Suspend User', user)}
                   >
-                    <Icon name="block" size={16} color={Colors.danger} />
+                    <Icon name="block" size={16} color={theme.colors.danger} />
                     <Text style={styles.actionButtonText}>Suspend</Text>
                   </TouchableOpacity>
                 </View>
@@ -384,7 +373,7 @@ const UserManagementScreen: React.FC = () => {
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Staff Members</Text>
               <TouchableOpacity onPress={() => handleUserAction('Add User')}>
-                <Icon name="person-add" size={24} color={Colors.primary} />
+                <Icon name="person-add" size={24} color={theme.colors.primary} />
               </TouchableOpacity>
             </View>
             
@@ -418,14 +407,14 @@ const UserManagementScreen: React.FC = () => {
                     style={styles.actionButton}
                     onPress={() => handleUserAction('View Performance', staff)}
                   >
-                    <Icon name="assessment" size={16} color={Colors.secondary} />
+                    <Icon name="assessment" size={16} color={theme.colors.secondary} />
                     <Text style={styles.actionButtonText}>Performance</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.actionButton}
                     onPress={() => handleUserAction('Manage Permissions', staff)}
                   >
-                    <Icon name="security" size={16} color={Colors.warning} />
+                    <Icon name="security" size={16} color={theme.colors.warning} />
                     <Text style={styles.actionButtonText}>Permissions</Text>
                   </TouchableOpacity>
                 </View>
@@ -452,21 +441,21 @@ const UserManagementScreen: React.FC = () => {
                 
                 <View style={styles.logDetails}>
                   <View style={styles.logDetailRow}>
-                    <Icon name="location-on" size={14} color={Colors.mediumGray} />
+                    <Icon name="location-on" size={14} color={theme.colors.mediumGray} />
                     <Text style={styles.logDetailText}>{log.location}</Text>
                   </View>
                   <View style={styles.logDetailRow}>
-                    <Icon name="access-time" size={14} color={Colors.mediumGray} />
+                    <Icon name="access-time" size={14} color={theme.colors.mediumGray} />
                     <Text style={styles.logDetailText}>{formatTimestamp(log.timestamp)}</Text>
                   </View>
                   <View style={styles.logDetailRow}>
-                    <Icon name="computer" size={14} color={Colors.mediumGray} />
+                    <Icon name="computer" size={14} color={theme.colors.mediumGray} />
                     <Text style={styles.logDetailText}>{log.ipAddress}</Text>
                   </View>
                   {log.details && (
                     <View style={styles.logDetailRow}>
-                      <Icon name="info" size={14} color={Colors.warning} />
-                      <Text style={[styles.logDetailText, { color: Colors.warning }]}>{log.details}</Text>
+                      <Icon name="info" size={14} color={theme.colors.warning} />
+                      <Text style={[styles.logDetailText, { color: theme.colors.warning }]}>{log.details}</Text>
                     </View>
                   )}
                 </View>
@@ -477,7 +466,7 @@ const UserManagementScreen: React.FC = () => {
               style={styles.exportButton}
               onPress={() => handleUserAction('Export Logs')}
             >
-              <Icon name="download" size={20} color={Colors.white} />
+              <Icon name="download" size={20} color={theme.colors.white} />
               <Text style={styles.exportButtonText}>Export Access Logs</Text>
             </TouchableOpacity>
           </View>
@@ -491,7 +480,7 @@ const UserManagementScreen: React.FC = () => {
               style={styles.toolCard}
               onPress={() => handleUserAction('Bulk Operations')}
             >
-              <Icon name="checklist" size={32} color={Colors.primary} />
+              <Icon name="checklist" size={32} color={theme.colors.primary} />
               <Text style={styles.toolText}>Bulk Operations</Text>
             </TouchableOpacity>
             
@@ -499,7 +488,7 @@ const UserManagementScreen: React.FC = () => {
               style={styles.toolCard}
               onPress={() => handleUserAction('Security Settings')}
             >
-              <Icon name="security" size={32} color={Colors.secondary} />
+              <Icon name="security" size={32} color={theme.colors.secondary} />
               <Text style={styles.toolText}>Security Settings</Text>
             </TouchableOpacity>
             
@@ -507,7 +496,7 @@ const UserManagementScreen: React.FC = () => {
               style={styles.toolCard}
               onPress={() => handleUserAction('Compliance Reports')}
             >
-              <Icon name="verified-user" size={32} color={Colors.warning} />
+              <Icon name="verified-user" size={32} color={theme.colors.warning} />
               <Text style={styles.toolText}>Compliance</Text>
             </TouchableOpacity>
             
@@ -515,7 +504,7 @@ const UserManagementScreen: React.FC = () => {
               style={styles.toolCard}
               onPress={() => handleUserAction('Audit Trail')}
             >
-              <Icon name="history" size={32} color={Colors.danger} />
+              <Icon name="history" size={32} color={theme.colors.danger} />
               <Text style={styles.toolText}>Audit Trail</Text>
             </TouchableOpacity>
           </View>
@@ -549,17 +538,17 @@ const UserManagementScreen: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: theme.colors.background,
   },
   header: {
     paddingHorizontal: 20,
     paddingVertical: 16,
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.white,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: theme.colors.border,
     flexDirection: 'row',
     alignItems: 'center',
   },
@@ -575,16 +564,16 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: Colors.text,
+    color: theme.colors.text,
   },
   headerSubtitle: {
     fontSize: 14,
-    color: Colors.lightText,
+    color: theme.colors.lightText,
     marginTop: 2,
   },
   tabSelector: {
     flexDirection: 'row',
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.white,
     paddingHorizontal: 20,
     paddingBottom: 16,
     gap: 8,
@@ -593,30 +582,30 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: Colors.lightGray,
+    backgroundColor: theme.colors.lightGray,
   },
   tabButtonActive: {
-    backgroundColor: Colors.primary,
+    backgroundColor: theme.colors.primary,
   },
   tabButtonText: {
     fontSize: 14,
     fontWeight: '500',
-    color: Colors.text,
+    color: theme.colors.text,
   },
   tabButtonTextActive: {
-    color: Colors.white,
+    color: theme.colors.white,
   },
   searchSection: {
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.white,
     paddingHorizontal: 20,
     paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: theme.colors.border,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.background,
+    backgroundColor: theme.colors.background,
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 8,
@@ -625,7 +614,7 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 8,
     fontSize: 16,
-    color: Colors.text,
+    color: theme.colors.text,
   },
   scrollContent: {
     flex: 1,
@@ -643,11 +632,11 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: Colors.text,
+    color: theme.colors.text,
     marginBottom: 16,
   },
   userCard: {
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.white,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -668,17 +657,17 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.text,
+    color: theme.colors.text,
     marginBottom: 2,
   },
   userEmail: {
     fontSize: 14,
-    color: Colors.lightText,
+    color: theme.colors.lightText,
     marginBottom: 2,
   },
   userRestaurant: {
     fontSize: 12,
-    color: Colors.mediumGray,
+    color: theme.colors.mediumGray,
   },
   userStatus: {
     alignItems: 'flex-end',
@@ -690,7 +679,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   roleText: {
-    color: Colors.white,
+    color: theme.colors.white,
     fontSize: 10,
     fontWeight: 'bold',
   },
@@ -700,7 +689,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   statusText: {
-    color: Colors.white,
+    color: theme.colors.white,
     fontSize: 10,
     fontWeight: 'bold',
   },
@@ -709,11 +698,11 @@ const styles = StyleSheet.create({
   },
   lastLogin: {
     fontSize: 12,
-    color: Colors.lightText,
+    color: theme.colors.lightText,
   },
   lockedText: {
     fontSize: 12,
-    color: Colors.danger,
+    color: theme.colors.danger,
     fontWeight: '500',
     marginTop: 2,
   },
@@ -725,13 +714,13 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 16,
     fontSize: 16,
-    color: Colors.text,
+    color: theme.colors.text,
   },
   userActions: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     borderTopWidth: 1,
-    borderTopColor: Colors.lightGray,
+    borderTopColor: theme.colors.lightGray,
     paddingTop: 12,
   },
   actionButton: {
@@ -740,16 +729,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 6,
-    backgroundColor: Colors.background,
+    backgroundColor: theme.colors.background,
     gap: 4,
   },
   actionButtonText: {
     fontSize: 12,
     fontWeight: '500',
-    color: Colors.text,
+    color: theme.colors.text,
   },
   logCard: {
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.white,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -771,12 +760,12 @@ const styles = StyleSheet.create({
   logUser: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.text,
+    color: theme.colors.text,
     marginBottom: 2,
   },
   logAction: {
     fontSize: 12,
-    color: Colors.lightText,
+    color: theme.colors.lightText,
   },
   logStatusBadge: {
     paddingHorizontal: 8,
@@ -784,7 +773,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   logStatusText: {
-    color: Colors.white,
+    color: theme.colors.white,
     fontSize: 10,
     fontWeight: 'bold',
   },
@@ -798,20 +787,20 @@ const styles = StyleSheet.create({
   },
   logDetailText: {
     fontSize: 12,
-    color: Colors.mediumGray,
+    color: theme.colors.mediumGray,
   },
   exportButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.secondary,
+    backgroundColor: theme.colors.secondary,
     borderRadius: 8,
     paddingVertical: 12,
     marginTop: 16,
     gap: 8,
   },
   exportButtonText: {
-    color: Colors.white,
+    color: theme.colors.white,
     fontSize: 16,
     fontWeight: '500',
   },
@@ -823,7 +812,7 @@ const styles = StyleSheet.create({
   },
   toolCard: {
     width: '48%',
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.white,
     borderRadius: 12,
     padding: 20,
     alignItems: 'center',
@@ -836,7 +825,7 @@ const styles = StyleSheet.create({
   toolText: {
     fontSize: 14,
     fontWeight: '500',
-    color: Colors.text,
+    color: theme.colors.text,
     textAlign: 'center',
     marginTop: 8,
   },

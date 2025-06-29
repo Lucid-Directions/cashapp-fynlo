@@ -15,6 +15,10 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import useAppStore from '../../store/useAppStore';
 import useSettingsStore from '../../store/useSettingsStore';
+import DecimalInput from '../../components/inputs/DecimalInput';
+import SimpleDecimalInput from '../../components/inputs/SimpleDecimalInput';
+import SimpleTextInput from '../../components/inputs/SimpleTextInput';
+import SharedDataStore from '../../services/SharedDataStore';
 
 // Clover POS Color Scheme
 const Colors = {
@@ -53,7 +57,7 @@ const EnhancedPaymentScreen: React.FC = () => {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('');
   const [tipAmount, setTipAmount] = useState(0);
   const [tipPercentage, setTipPercentage] = useState(0);
-  const [customTipInput, setCustomTipInput] = useState('');
+  const [customTipInput, setCustomTipInput] = useState(0);
   const [showCustomTip, setShowCustomTip] = useState(false);
   const [splitPayment, setSplitPayment] = useState(false);
   const [splitAmounts, setSplitAmounts] = useState<{ method: string; amount: number }[]>([]);
@@ -62,6 +66,13 @@ const EnhancedPaymentScreen: React.FC = () => {
   const [emailReceipt, setEmailReceipt] = useState('');
   const [printReceipt, setPrintReceipt] = useState(true);
   const [processing, setProcessing] = useState(false);
+  
+  // Platform service charge configuration (real-time from platform owner)
+  const [platformServiceCharge, setPlatformServiceCharge] = useState({
+    enabled: false,
+    rate: 0,
+    description: 'Loading platform service charge...',
+  });
 
   // Calculate totals
   const calculateSubtotal = () => {
@@ -74,9 +85,51 @@ const EnhancedPaymentScreen: React.FC = () => {
   };
 
   const calculateServiceCharge = (subtotal: number) => {
-    if (!taxConfiguration.serviceTaxEnabled) return 0;
-    return subtotal * (taxConfiguration.serviceTaxRate / 100);
+    // Use PLATFORM service charge settings, not restaurant settings
+    if (!platformServiceCharge.enabled) return 0;
+    return subtotal * (platformServiceCharge.rate / 100);
   };
+  
+  // Load platform service charge configuration on component mount
+  useEffect(() => {
+    const loadPlatformServiceCharge = async () => {
+      try {
+        console.log('💰 EnhancedPaymentScreen - Loading platform service charge...');
+        const dataStore = SharedDataStore.getInstance();
+        const config = await dataStore.getServiceChargeConfig();
+        
+        if (config) {
+          setPlatformServiceCharge({
+            enabled: config.enabled,
+            rate: config.rate,
+            description: config.description || 'Platform service charge',
+          });
+          console.log('✅ Platform service charge loaded:', config);
+        } else {
+          console.log('⚠️ No platform service charge config found');
+        }
+      } catch (error) {
+        console.error('❌ Failed to load platform service charge:', error);
+      }
+    };
+    
+    loadPlatformServiceCharge();
+    
+    // Subscribe to real-time updates
+    const dataStore = SharedDataStore.getInstance();
+    const unsubscribe = dataStore.subscribe('serviceCharge', (updatedConfig) => {
+      console.log('🔄 Platform service charge updated in real-time:', updatedConfig);
+      setPlatformServiceCharge({
+        enabled: updatedConfig.enabled,
+        rate: updatedConfig.rate,
+        description: updatedConfig.description || 'Platform service charge',
+      });
+    });
+    
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   const calculateGrandTotal = () => {
     const subtotal = calculateSubtotal();
@@ -310,14 +363,14 @@ const EnhancedPaymentScreen: React.FC = () => {
             </View>
 
             <View style={styles.cashInputSection}>
-              <Text style={styles.cashInputLabel}>Cash Received</Text>
-              <TextInput
-                style={styles.cashInput}
-                value={cashReceived}
-                onChangeText={setCashReceived}
+              <SimpleDecimalInput
+                label="Cash Received"
+                value={parseFloat(cashReceived) || 0}
+                onValueChange={(value) => setCashReceived(value.toString())}
                 placeholder="0.00"
-                keyboardType="decimal-pad"
-                autoFocus
+                suffix="£"
+                maxValue={9999.99}
+                style={styles.cashInput}
               />
             </View>
 
@@ -598,22 +651,21 @@ const EnhancedPaymentScreen: React.FC = () => {
             
             {showCustomTip && (
               <View style={styles.customTipInput}>
-                <Text style={styles.customTipLabel}>Enter tip amount</Text>
-                <View style={styles.customTipRow}>
-                  <TextInput
-                    style={styles.customTipField}
-                    value={customTipInput}
-                    onChangeText={setCustomTipInput}
-                    placeholder="0.00"
-                    keyboardType="decimal-pad"
-                  />
-                  <TouchableOpacity
-                    style={styles.customTipApply}
-                    onPress={handleCustomTip}
-                  >
-                    <Text style={styles.customTipApplyText}>Apply</Text>
-                  </TouchableOpacity>
-                </View>
+                <DecimalInput
+                  label="Custom Tip Amount"
+                  value={customTipInput}
+                  onValueChange={(value) => {
+                    setCustomTipInput(value);
+                    setTipAmount(value);
+                    setTipPercentage(0); // Clear percentage when using custom amount
+                  }}
+                  suffix="£"
+                  maxValue={1000}
+                  minValue={0}
+                  decimalPlaces={2}
+                  placeholder="5.00"
+                  style={{ marginVertical: 8 }}
+                />
               </View>
             )}
           </View>
@@ -674,18 +726,20 @@ const EnhancedPaymentScreen: React.FC = () => {
               </Text>
               {splitAmounts.map((split, index) => (
                 <View key={index} style={styles.splitAmountRow}>
-                  <Text style={styles.splitMethodName}>
-                    {availablePaymentMethods.find(m => m.id === split.method)?.name}
-                  </Text>
-                  <TextInput
-                    style={styles.splitAmountInput}
-                    value={split.amount.toFixed(2)}
-                    onChangeText={(value) => {
+                  <DecimalInput
+                    label={`${availablePaymentMethods.find(m => m.id === split.method)?.name || 'Payment'} Amount`}
+                    value={split.amount}
+                    onValueChange={(value) => {
                       const newSplits = [...splitAmounts];
-                      newSplits[index].amount = parseFloat(value) || 0;
+                      newSplits[index].amount = value;
                       setSplitAmounts(newSplits);
                     }}
-                    keyboardType="decimal-pad"
+                    suffix="£"
+                    maxValue={10000}
+                    minValue={0}
+                    decimalPlaces={2}
+                    placeholder="0.00"
+                    style={{ marginVertical: 4, flex: 1 }}
                   />
                 </View>
               ))}
@@ -732,13 +786,14 @@ const EnhancedPaymentScreen: React.FC = () => {
               </TouchableOpacity>
               
               {emailReceipt && (
-                <TextInput
-                  style={styles.emailInput}
+                <SimpleTextInput
                   value={emailReceipt}
-                  onChangeText={setEmailReceipt}
+                  onValueChange={setEmailReceipt}
                   placeholder="customer@email.com"
                   keyboardType="email-address"
                   autoCapitalize="none"
+                  style={styles.emailInput}
+                  clearButtonMode="while-editing"
                 />
               )}
             </View>

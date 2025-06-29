@@ -11,8 +11,8 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
 import useAppStore from '../../store/useAppStore';
-import Colors from "../../constants/Colors";
 
 interface MenuOption {
   id: string;
@@ -26,11 +26,11 @@ interface MenuOption {
 
 const MoreScreen: React.FC = () => {
   const navigation = useNavigation();
+  const { theme } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const { user } = useAppStore();
   const { signOut } = useAuth();
   
-  
-
   const menuSections = [
     {
       title: 'Business Management',
@@ -41,7 +41,7 @@ const MoreScreen: React.FC = () => {
           subtitle: 'Manage staff and time clock',
           icon: 'people',
           route: 'Employees',
-          color: Colors.secondary,
+          color: theme.colors.secondary,
         },
         {
           id: 'customers',
@@ -49,7 +49,7 @@ const MoreScreen: React.FC = () => {
           subtitle: 'Customer database and loyalty',
           icon: 'person-pin',
           route: 'Customers',
-          color: Colors.warning,
+          color: theme.colors.warning,
         },
         {
           id: 'inventory',
@@ -57,7 +57,7 @@ const MoreScreen: React.FC = () => {
           subtitle: 'Stock levels and suppliers',
           icon: 'inventory',
           route: 'Inventory',
-          color: Colors.success,
+          color: theme.colors.success,
         },
         {
           id: 'menu',
@@ -65,7 +65,7 @@ const MoreScreen: React.FC = () => {
           subtitle: 'Items, categories, and modifiers',
           icon: 'restaurant-menu',
           route: 'MenuManagement',
-          color: Colors.primary,
+          color: theme.colors.primary,
         },
       ],
     },
@@ -78,7 +78,7 @@ const MoreScreen: React.FC = () => {
           subtitle: 'Sales, financial, and business reports',
           icon: 'bar-chart',
           route: 'Reports',
-          color: Colors.secondary,
+          color: theme.colors.secondary,
           badge: 3,
         },
         {
@@ -87,7 +87,7 @@ const MoreScreen: React.FC = () => {
           subtitle: 'Business overview and KPIs',
           icon: 'dashboard',
           route: 'Dashboard',
-          color: Colors.primary,
+          color: theme.colors.primary,
         },
       ],
     },
@@ -100,7 +100,7 @@ const MoreScreen: React.FC = () => {
           subtitle: 'Business, hardware, and app configuration',
           icon: 'settings',
           route: 'Settings',
-          color: Colors.darkGray,
+          color: theme.colors.darkGray,
         },
       ],
     },
@@ -113,7 +113,7 @@ const MoreScreen: React.FC = () => {
           subtitle: 'Personal information and password',
           icon: 'account-circle',
           route: 'Profile',
-          color: Colors.darkGray,
+          color: theme.colors.darkGray,
         },
         {
           id: 'help',
@@ -121,14 +121,14 @@ const MoreScreen: React.FC = () => {
           subtitle: 'Guides, tutorials, and contact',
           icon: 'help',
           route: 'Help',
-          color: Colors.darkGray,
+          color: theme.colors.darkGray,
         },
         {
           id: 'logout',
           title: 'Sign Out',
           subtitle: 'End current session',
           icon: 'logout',
-          color: Colors.danger,
+          color: theme.colors.danger,
         },
       ],
     },
@@ -150,7 +150,7 @@ const MoreScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor={Colors.primary} barStyle="light-content" />
+      <StatusBar backgroundColor={theme.colors.primary} barStyle="light-content" />
       
       {/* Header */}
       <View style={styles.header}>
@@ -166,7 +166,7 @@ const MoreScreen: React.FC = () => {
         {/* User Info Card */}
         <View style={styles.userCard}>
           <View style={styles.userAvatar}>
-            <Icon name="account-circle" size={60} color={Colors.primary} />
+            <Icon name="account-circle" size={60} color={theme.colors.primary} />
           </View>
           <View style={styles.userInfo}>
             <Text style={styles.userName}>{user?.name || 'Manager'}</Text>
@@ -192,7 +192,7 @@ const MoreScreen: React.FC = () => {
                   activeOpacity={0.7}
                 >
                   <View style={[styles.optionIcon, { backgroundColor: `${option.color}15` }]}>
-                    <Icon name={option.icon} size={24} color={option.color || Colors.primary} />
+                    <Icon name={option.icon} size={24} color={option.color || theme.colors.primary} />
                   </View>
                   
                   <View style={styles.optionContent}>
@@ -206,7 +206,7 @@ const MoreScreen: React.FC = () => {
                         <Text style={styles.badgeText}>{option.badge}</Text>
                       </View>
                     )}
-                    <Icon name="chevron-right" size={24} color={Colors.lightGray} />
+                    <Icon name="chevron-right" size={24} color={theme.colors.lightGray} />
                   </View>
                 </TouchableOpacity>
               ))}
@@ -224,13 +224,13 @@ const MoreScreen: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: theme.colors.background,
   },
   header: {
-    backgroundColor: Colors.primary,
+    backgroundColor: theme.colors.primary,
     paddingHorizontal: 20,
     paddingVertical: 16,
   },
@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: Colors.white,
+    color: theme.colors.white,
   },
   headerSubtitle: {
     fontSize: 14,
@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   userCard: {
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.white,
     flexDirection: 'row',
     alignItems: 'center',
     padding: 20,
@@ -273,16 +273,16 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: 18,
     fontWeight: '600',
-    color: Colors.text,
+    color: theme.colors.text,
   },
   userRole: {
     fontSize: 14,
-    color: Colors.primary,
+    color: theme.colors.primary,
     marginTop: 2,
   },
   userEmail: {
     fontSize: 12,
-    color: Colors.darkGray,
+    color: theme.colors.darkGray,
     marginTop: 4,
   },
   section: {
@@ -291,14 +291,14 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.darkGray,
+    color: theme.colors.darkGray,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginBottom: 12,
     marginHorizontal: 20,
   },
   optionsContainer: {
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.white,
     marginHorizontal: 16,
     borderRadius: 12,
     shadowColor: '#000',
@@ -312,7 +312,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: theme.colors.border,
   },
   lastOptionCard: {
     borderBottomWidth: 0,
@@ -331,11 +331,11 @@ const styles = StyleSheet.create({
   optionTitle: {
     fontSize: 16,
     fontWeight: '500',
-    color: Colors.text,
+    color: theme.colors.text,
   },
   optionSubtitle: {
     fontSize: 13,
-    color: Colors.darkGray,
+    color: theme.colors.darkGray,
     marginTop: 2,
   },
   optionRight: {
@@ -343,7 +343,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   badge: {
-    backgroundColor: Colors.danger,
+    backgroundColor: theme.colors.danger,
     borderRadius: 12,
     paddingHorizontal: 8,
     paddingVertical: 2,
@@ -352,7 +352,7 @@ const styles = StyleSheet.create({
   badgeText: {
     fontSize: 12,
     fontWeight: '600',
-    color: Colors.white,
+    color: theme.colors.white,
   },
   footer: {
     alignItems: 'center',
@@ -360,11 +360,11 @@ const styles = StyleSheet.create({
   },
   versionText: {
     fontSize: 14,
-    color: Colors.darkGray,
+    color: theme.colors.darkGray,
   },
   copyrightText: {
     fontSize: 12,
-    color: Colors.lightText,
+    color: theme.colors.lightText,
     marginTop: 4,
   },
 });

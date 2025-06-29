@@ -1,0 +1,30 @@
+[
+  {
+    "id": "platform_owner_1",
+    "firstName": "Platform",
+    "lastName": "Owner",
+    "email": "owner@fynlopos.com",
+    "phone": "+44 7700 900100",
+    "role": "platform_owner",
+    "pin": "0001",
+    "employeeId": "PLATFORM001",
+    "businessId": "platform1",
+    "isActive": true,
+    "platformId": "platform1",
+    "managedRestaurants": [
+      "restaurant1"
+    ]
+  },
+  {
+    "id": "user1",
+    "firstName": "John",
+    "lastName": "Smith",
+    "email": "john@fynlopos.com",
+    "phone": "+44 7700 900123",
+    "role": "restaurant_owner",
+    "pin": "1234",
+    "employeeId": "EMP001",
+    "businessId": "restaurant1",
+    "isActive": true
+  }
+]

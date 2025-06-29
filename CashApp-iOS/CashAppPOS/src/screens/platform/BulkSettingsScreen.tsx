@@ -18,6 +18,7 @@ import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { theme } from '../../design-system/theme';
 import PlatformService, { PlatformSetting } from '../../services/PlatformService';
+import SimpleTextInput from '../../components/inputs/SimpleTextInput';
 
 interface BulkUpdateItem {
   config_key: string;
@@ -465,14 +466,14 @@ const BulkSettingsScreen: React.FC = () => {
 
             {/* Change Reason */}
             <Card style={styles.reasonCard}>
-              <Text style={styles.reasonLabel}>Change Reason (Required)</Text>
-              <TextInput
-                style={styles.reasonInput}
-                placeholder="Describe the reason for these changes..."
+              <SimpleTextInput
+                label="Change Reason (Required)"
                 value={changeReason}
-                onChangeText={setChangeReason}
-                multiline
+                onValueChange={setChangeReason}
+                placeholder="Describe the reason for these changes..."
+                multiline={true}
                 numberOfLines={3}
+                style={styles.reasonInput}
               />
             </Card>
 
@@ -519,17 +520,17 @@ const BulkSettingsScreen: React.FC = () => {
               <Text style={styles.editConfigKey}>{editingItem.config_key}</Text>
               <Text style={styles.editDescription}>{editingItem.description}</Text>
 
-              <Text style={styles.editLabel}>New Value:</Text>
-              <TextInput
-                style={styles.editInput}
+              <SimpleTextInput
+                label="New Value:"
                 value={formatValue(editingItem.new_value)}
-                onChangeText={(text) => {
+                onValueChange={(text) => {
                   const newValue = parseValue(text, editingItem.current_value);
                   updateBulkUpdateItem(editingItem.config_key, newValue);
                   setEditingItem({ ...editingItem, new_value: newValue });
                 }}
-                multiline
+                multiline={true}
                 placeholder="Enter new value..."
+                style={styles.editInput}
               />
 
               {editingItem.validation_error && (

@@ -11,20 +11,8 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
+import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
 import { Order } from '../../types';
-
-const Colors = {
-  primary: '#2C3E50',
-  secondary: '#3498DB',
-  success: '#27AE60',
-  warning: '#F39C12',
-  danger: '#E74C3C',
-  background: '#F8F9FA',
-  white: '#FFFFFF',
-  lightGray: '#ECF0F1',
-  text: '#2C3E50',
-  lightText: '#95A5A6',
-};
 
 // Mock orders data
 const mockOrders: Order[] = [
@@ -76,17 +64,19 @@ const mockOrders: Order[] = [
 
 const OrdersScreen: React.FC = () => {
   const navigation = useNavigation();
+  const { theme } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const [orders, setOrders] = useState<Order[]>(mockOrders);
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState<'all' | 'preparing' | 'ready' | 'completed'>('all');
 
   const statusColors = {
-    draft: Colors.lightText,
-    confirmed: Colors.warning,
-    preparing: Colors.warning,
-    ready: Colors.success,
-    completed: Colors.lightText,
-    cancelled: Colors.danger,
+    draft: theme.colors.lightText,
+    confirmed: theme.colors.warning,
+    preparing: theme.colors.warning,
+    ready: theme.colors.success,
+    completed: theme.colors.lightText,
+    cancelled: theme.colors.danger,
   };
 
   const statusIcons = {
@@ -149,7 +139,7 @@ const OrdersScreen: React.FC = () => {
           <Icon 
             name={statusIcons[order.status]} 
             size={16} 
-            color={Colors.white} 
+            color={theme.colors.white} 
           />
           <Text style={styles.statusText}>{order.status.toUpperCase()}</Text>
         </View>
@@ -157,13 +147,13 @@ const OrdersScreen: React.FC = () => {
 
       <View style={styles.orderDetails}>
         <View style={styles.customerInfo}>
-          <Icon name="person" size={16} color={Colors.lightText} />
+          <Icon name="person" size={16} color={theme.colors.lightText} />
           <Text style={styles.customerText}>
             {order.customerName || 'Walk-in'}
           </Text>
           {order.tableNumber && (
             <>
-              <Icon name="table-restaurant" size={16} color={Colors.lightText} style={styles.tableIcon} />
+              <Icon name="table-restaurant" size={16} color={theme.colors.lightText} style={styles.tableIcon} />
               <Text style={styles.tableText}>Table {order.tableNumber}</Text>
             </>
           )}
@@ -185,7 +175,7 @@ const OrdersScreen: React.FC = () => {
                     order.paymentMethod === 'card' ? 'credit-card' : 
                     'phone-android'} 
               size={16} 
-              color={Colors.lightText} 
+              color={theme.colors.lightText} 
             />
             <Text style={styles.paymentText}>
               {order.paymentMethod?.replace('_', ' ').toUpperCase()}
@@ -229,13 +219,13 @@ const OrdersScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={Colors.primary} />
+      <StatusBar barStyle="light-content" backgroundColor={theme.colors.primary} />
       
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Orders</Text>
         <TouchableOpacity style={styles.headerButton}>
-          <Icon name="search" size={24} color={Colors.white} />
+          <Icon name="search" size={24} color={theme.colors.white} />
         </TouchableOpacity>
       </View>
 
@@ -275,7 +265,7 @@ const OrdersScreen: React.FC = () => {
         }
         ListEmptyComponent={() => (
           <View style={styles.emptyState}>
-            <Icon name="receipt" size={64} color={Colors.lightText} />
+            <Icon name="receipt" size={64} color={theme.colors.lightText} />
             <Text style={styles.emptyStateText}>No orders found</Text>
             <Text style={styles.emptyStateSubtext}>
               Orders will appear here when customers place them
@@ -287,13 +277,13 @@ const OrdersScreen: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: theme.colors.background,
   },
   header: {
-    backgroundColor: Colors.primary,
+    backgroundColor: theme.colors.primary,
     paddingHorizontal: 20,
     paddingVertical: 15,
     flexDirection: 'row',
@@ -306,7 +296,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   headerTitle: {
-    color: Colors.white,
+    color: theme.colors.white,
     fontSize: 20,
     fontWeight: 'bold',
   },
@@ -317,9 +307,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: 20,
     paddingVertical: 15,
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.white,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGray,
+    borderBottomColor: theme.colors.lightGray,
   },
   filterButton: {
     flexDirection: 'row',
@@ -328,21 +318,21 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 20,
     marginRight: 12,
-    backgroundColor: Colors.lightGray,
+    backgroundColor: theme.colors.lightGray,
   },
   filterButtonActive: {
-    backgroundColor: Colors.secondary,
+    backgroundColor: theme.colors.secondary,
   },
   filterButtonText: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.text,
+    color: theme.colors.text,
   },
   filterButtonTextActive: {
-    color: Colors.white,
+    color: theme.colors.white,
   },
   filterBadge: {
-    backgroundColor: Colors.danger,
+    backgroundColor: theme.colors.danger,
     borderRadius: 10,
     paddingHorizontal: 6,
     paddingVertical: 2,
@@ -353,13 +343,13 @@ const styles = StyleSheet.create({
   filterBadgeText: {
     fontSize: 12,
     fontWeight: 'bold',
-    color: Colors.white,
+    color: theme.colors.white,
   },
   ordersList: {
     padding: 20,
   },
   orderCard: {
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.white,
     borderRadius: 12,
     marginBottom: 15,
     elevation: 2,
@@ -374,7 +364,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGray,
+    borderBottomColor: theme.colors.lightGray,
   },
   orderInfo: {
     flex: 1,
@@ -382,11 +372,11 @@ const styles = StyleSheet.create({
   orderNumber: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: Colors.text,
+    color: theme.colors.text,
   },
   orderTime: {
     fontSize: 14,
-    color: Colors.lightText,
+    color: theme.colors.lightText,
     marginTop: 2,
   },
   statusBadge: {
@@ -399,7 +389,7 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: 12,
     fontWeight: 'bold',
-    color: Colors.white,
+    color: theme.colors.white,
     marginLeft: 4,
   },
   orderDetails: {
@@ -412,7 +402,7 @@ const styles = StyleSheet.create({
   },
   customerText: {
     fontSize: 14,
-    color: Colors.text,
+    color: theme.colors.text,
     marginLeft: 6,
     fontWeight: '600',
   },
@@ -421,7 +411,7 @@ const styles = StyleSheet.create({
   },
   tableText: {
     fontSize: 14,
-    color: Colors.text,
+    color: theme.colors.text,
     marginLeft: 6,
   },
   itemsPreview: {
@@ -430,12 +420,12 @@ const styles = StyleSheet.create({
   itemsText: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.text,
+    color: theme.colors.text,
     marginBottom: 4,
   },
   itemsList: {
     fontSize: 14,
-    color: Colors.lightText,
+    color: theme.colors.lightText,
     lineHeight: 20,
   },
   orderFooter: {
@@ -449,14 +439,14 @@ const styles = StyleSheet.create({
   },
   paymentText: {
     fontSize: 12,
-    color: Colors.lightText,
+    color: theme.colors.lightText,
     marginLeft: 6,
     fontWeight: '600',
   },
   totalAmount: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: Colors.secondary,
+    color: theme.colors.secondary,
   },
   emptyState: {
     alignItems: 'center',
@@ -466,13 +456,13 @@ const styles = StyleSheet.create({
   emptyStateText: {
     fontSize: 18,
     fontWeight: '600',
-    color: Colors.text,
+    color: theme.colors.text,
     marginTop: 16,
     marginBottom: 8,
   },
   emptyStateSubtext: {
     fontSize: 14,
-    color: Colors.lightText,
+    color: theme.colors.lightText,
     textAlign: 'center',
     paddingHorizontal: 40,
   },
