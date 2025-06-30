@@ -49,11 +49,49 @@ A modern, hardware-free restaurant management backend built with FastAPI, Postgr
    ```
 
 4. **Environment Configuration**
-   ```bash
-   # Copy environment template
-   cp .env.example .env
-   # Edit .env with your configuration
-   ```
+
+   The application uses environment-specific configuration files. You'll need to set an `APP_ENV` environment variable to specify which configuration to load (e.g., `development` or `production`).
+
+   - **For Development:**
+     ```bash
+     # Copy the example development environment file
+     cp .env.example .env.development
+
+     # Customize .env.development with your local settings:
+     # - DATABASE_URL (e.g., postgresql://fynlo_user:fynlo_password@localhost:5432/fynlo_pos_dev)
+     # - REDIS_URL
+     # - STRIPE_SECRET_KEY (use test keys)
+     # - etc.
+
+     # Set APP_ENV for your session or run scripts with it:
+     export APP_ENV=development
+     # Or when running directly:
+     # APP_ENV=development uvicorn app.main:app --reload
+     ```
+     The `.env.development` file is pre-configured with sensible defaults for local development, including `DEBUG=true` and `LOG_LEVEL=DEBUG`.
+
+   - **For Production:**
+     A `.env.production` file should be created on the production server. This file is NOT committed to the repository.
+     It should contain production-hardened settings:
+     ```
+     APP_NAME="Fynlo POS"
+     DEBUG=false
+     ENVIRONMENT="production"
+     # Replace with actual production database URL
+     DATABASE_URL="postgresql://<prod_db_user>:<prod_db_password>@<prod_db_host>:<prod_db_port>/<prod_db_name>"
+     # Replace with actual production Redis URL
+     REDIS_URL="redis://<prod_redis_host>:<prod_redis_port>/0"
+     # Generate a strong, unique key for production (e.g., openssl rand -base64 32)
+     SECRET_KEY="your_strong_production_secret_key"
+     # Restrict to your frontend domain(s), NO WILDCARD
+     CORS_ORIGINS="https://app.fynlopos.com,https://admin.fynlopos.com"
+     LOG_LEVEL="INFO"
+     ERROR_DETAIL_ENABLED=false
+     # ... other production specific settings (live payment keys, etc.)
+     ```
+     The application will fail to start if critical production settings are misconfigured (e.g., `DEBUG=true` in production).
+
+   - **`.env.example`**: This file serves as a template for creating new environment files and lists all possible environment variables.
 
 5. **Database Migration**
    ```bash
@@ -178,14 +216,23 @@ alembic downgrade -1
 ```
 
 ### Environment Variables
-Key configuration options in `.env`:
+Configuration is managed via environment-specific `.env` files (e.g., `.env.development`, `.env.production`), loaded based on the `APP_ENV` environment variable.
+Refer to the "Environment Configuration" section under "Manual Setup" for details. Key variables include:
 ```env
-DATABASE_URL=postgresql://fynlo_user:fynlo_password@localhost:5432/fynlo_pos
-REDIS_URL=redis://localhost:6379/0
-SECRET_KEY=your-secret-key
-STRIPE_SECRET_KEY=sk_test_...
-DEBUG=true
+# Defined in .env.development or .env.production
+APP_ENV="development" # or "production" - set this in your shell environment
+DEBUG=true # false in production
+ENVIRONMENT="development" # "production" in production
+DATABASE_URL="postgresql://user:pass@host:port/db"
+REDIS_URL="redis://host:port/0"
+SECRET_KEY="a_very_strong_and_unique_secret_key" # CRITICAL for production
+CORS_ORIGINS="http://localhost:3000,https://your.frontend.domain" # Specific domains in production
+LOG_LEVEL="DEBUG" # INFO or WARNING in production
+ERROR_DETAIL_ENABLED=true # false in production
+STRIPE_SECRET_KEY="sk_test_..." # Live key in production
+# etc.
 ```
+Ensure `.env.production` is securely managed and never committed to version control. `.env.example` provides a template of all available variables.
 
 ## 🚀 Production Deployment
 
