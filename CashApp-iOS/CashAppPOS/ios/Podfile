@@ -29,6 +29,16 @@ target 'CashAppPOS' do
       :mac_catalyst_enabled => false
     )
     
+    # Enable modular headers for Yoga to fix React Native 0.72+ Swift bridging issue
+    installer.pods_project.targets.each do |target|
+      if target.name == 'Yoga'
+        target.build_configurations.each do |config|
+          config.build_settings['DEFINES_MODULE'] = 'YES'
+          config.build_settings['MODULEMAP_FILE'] = '$(PODS_TARGET_SRCROOT)/Yoga.modulemap'
+        end
+      end
+    end
+    
     # Fix Square SDK framework embedding and nested framework paths
     installer.pods_project.targets.each do |target|
       if target.name == 'RNSquareInAppPayments'
@@ -222,6 +232,14 @@ SCRIPT
         if target.name == 'React-CoreModules'
           config.build_settings['OTHER_CFLAGS'] = "$(inherited) -Wno-objc-protocol-method-implementation"
           config.build_settings['GCC_WARN_DUPLICATE_METHOD_MATCH'] = 'NO'
+        end
+        
+        # Fix Yoga module conflict - add header search path for lowercase yoga
+        if target.name == 'Yoga'
+          config.build_settings['HEADER_SEARCH_PATHS'] ||= '$(inherited)'
+          config.build_settings['HEADER_SEARCH_PATHS'] << ' $(PODS_ROOT)/Headers/Public/yoga'
+          # Enable modular headers for Yoga to fix Swift bridging header issue
+          config.build_settings['DEFINES_MODULE'] = 'YES'
         end
       end
     end

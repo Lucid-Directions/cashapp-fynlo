@@ -37,6 +37,12 @@
 	<string>12.0</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NFCReaderUsageDescription</key>
+	<string>Fynlo uses NFC to process contactless payments including Tap to Pay on iPhone.</string>
+	<key>NSAllowsArbitraryLoads</key>
+	<true/>
+	<key>NSAllowsLocalNetworking</key>
+	<true/>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
@@ -52,39 +58,18 @@
 			</dict>
 		</dict>
 	</dict>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>SumUp needs Bluetooth access to connect to card readers for payment processing.</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>SumUp needs Bluetooth peripheral access to connect to card readers for payment processing.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Fynlo uses the camera to scan QR codes for quick payment processing.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>SumUp needs location access to determine your location for payment processing and compliance purposes.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Fynlo may use microphone access for secure payment processing features.</string>
 	<key>RCTNewArchEnabled</key>
 	<true/>
-	<key>UILaunchStoryboardName</key>
-	<string>SplashScreen</string>
-	<key>UIRequiredDeviceCapabilities</key>
-	<array>
-		<string>arm64</string>
-	</array>
-	<key>UIRequiresFullScreen</key>
-	<false/>
-	<key>UIStatusBarStyle</key>
-	<string>UIStatusBarStyleDefault</string>
-	<key>UISupportedInterfaceOrientations</key>
-	<array>
-		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationPortraitUpsideDown</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
-	</array>
-	<key>UIUserInterfaceStyle</key>
-	<string>Light</string>
-	<key>UIViewControllerBasedStatusBarAppearance</key>
-	<false/>
-	<key>NSAllowsArbitraryLoads</key>
-	<true/>
-	<key>NSAllowsLocalNetworking</key>
-	<true/>
-	<key>UIPerformanceLoggingEnabled</key>
-	<false/>
-	<key>UIApplicationSupportsMultipleScenes</key>
-	<false/>
-	<key>UISceneDelegate</key>
-	<false/>
 	<key>UIAppFonts</key>
 	<array>
 		<string>AntDesign.ttf</string>
@@ -107,23 +92,32 @@
 		<string>Zocial.ttf</string>
 		<string>Fontisto.ttf</string>
 	</array>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>SumUp needs location access to determine your location for payment processing and compliance purposes.</string>
-	<key>NSBluetoothAlwaysUsageDescription</key>
-	<string>SumUp needs Bluetooth access to connect to card readers for payment processing.</string>
-	<key>NSBluetoothPeripheralUsageDescription</key>
-	<string>SumUp needs Bluetooth peripheral access to connect to card readers for payment processing.</string>
-	
-	<!-- NFC Usage Description for Tap to Pay -->
-	<key>NFCReaderUsageDescription</key>
-	<string>Fynlo uses NFC to process contactless payments including Tap to Pay on iPhone.</string>
-	
-	<!-- Camera Usage for QR Code Payments -->
-	<key>NSCameraUsageDescription</key>
-	<string>Fynlo uses the camera to scan QR codes for quick payment processing.</string>
-	
-	<!-- Microphone Access (sometimes required by payment SDKs) -->
-	<key>NSMicrophoneUsageDescription</key>
-	<string>Fynlo may use microphone access for secure payment processing features.</string>
+	<key>UIApplicationSupportsMultipleScenes</key>
+	<false/>
+	<key>UILaunchStoryboardName</key>
+	<string>SplashScreen</string>
+	<key>UIPerformanceLoggingEnabled</key>
+	<false/>
+	<key>UIRequiredDeviceCapabilities</key>
+	<array>
+		<string>arm64</string>
+	</array>
+	<key>UIRequiresFullScreen</key>
+	<false/>
+	<key>UISceneDelegate</key>
+	<false/>
+	<key>UIStatusBarStyle</key>
+	<string>UIStatusBarStyleDefault</string>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<key>UIUserInterfaceStyle</key>
+	<string>Light</string>
+	<key>UIViewControllerBasedStatusBarAppearance</key>
+	<false/>
 </dict>
 </plist>
