@@ -87,11 +87,25 @@ class PosOrder(models.Model):
         pos_order = False
         combo_child_uuids_by_parent_uuid = self._prepare_combo_line_uuids(order)
 
+        # Prepare values for the new custom fee fields
+        # Extract them from the 'order' dict if present, otherwise default to None or a sensible default.
+        custom_fee_fields = [
+            'x_platform_fee_amount',
+            'x_processor_fee_amount',
+            'x_customer_pays_processor_fees',
+            'x_service_charge_type',
+            'x_payment_processor_fee_source'
+        ]
+        fee_values = {field: order.get(field) for field in custom_fee_fields if field in order}
+
         if not existing_order:
-            pos_order = self.create({
-                **{key: value for key, value in order.items() if key != 'name'},
-                'pos_reference': order.get('name')
-            })
+            # Ensure all fields from 'order' are passed, excluding 'name' for initial create,
+            # then add our fee_values.
+            creation_vals = {key: value for key, value in order.items() if key != 'name'}
+            creation_vals.update(fee_values)
+            creation_vals['pos_reference'] = order.get('name')
+
+            pos_order = self.create(creation_vals)
             pos_order = pos_order.with_company(pos_order.company_id)
         else:
             pos_order = existing_order
@@ -106,12 +120,15 @@ class PosOrder(models.Model):
                 if order.get(field):
                     existing_record_ids = self.env[pos_order[field]._name].browse([r[1] for r in order[field] if r[1] != 0]).exists().ids
                     existing_records_vals = [r for r in order[field] if r[0] not in [1, 2, 3, 4] or r[1] in existing_record_ids]
-                    pos_order.write({field: existing_records_vals})
-                    order[field] = []
+                    pos_order.write({field: existing_records_vals}) # Write lines/payments separately
+                    order[field] = [] # Clear them from main 'order' dict to avoid re-processing
 
-            del order['uuid']
-            del order['access_token']
-            pos_order.write(order)
+            # Prepare the main payload for write, excluding already processed fields and sensitive data
+            write_payload = {k: v for k, v in order.items() if k not in ['uuid', 'access_token', 'lines', 'payment_ids']}
+            write_payload.update(fee_values) # Add the custom fee values
+
+            if write_payload: # Only write if there's something to update
+                pos_order.write(write_payload)
 
         pos_order._link_combo_items(combo_child_uuids_by_parent_uuid)
         self = self.with_company(pos_order.company_id)
@@ -254,6 +271,58 @@ class PosOrder(models.Model):
                     'display_type': 'line_note',
                 }))
 
+        # Add lines for custom fees (Platform Fee, Processor Fee)
+        # These require corresponding "Service" type products to be defined in Odoo.
+        # Let's assume their XML IDs are known, e.g., 'module_name.product_platform_fee'
+
+        company_id = self.company_id.id
+
+        # Platform Fee Line
+        if self.x_platform_fee_amount and not float_is_zero(self.x_platform_fee_amount, precision_rounding=self.currency_id.rounding):
+            try:
+                # IMPORTANT: Replace 'your_custom_module.product_platform_fee_product' with the actual XML ID of the pre-configured Service product
+                product_platform_fee = self.env.ref('point_of_sale.product_product_consumable', raise_if_not_found=False) # Placeholder, use actual fee product
+                if not product_platform_fee: product_platform_fee = self.env['product.product'].search([('name', '=', 'Platform Fee Service Charge'), ('company_id', 'in', [False, company_id])], limit=1) # Fallback search
+
+                if product_platform_fee:
+                    platform_fee_line_values = {
+                        'product_id': product_platform_fee.id,
+                        'quantity': 1,
+                        'price_unit': self.x_platform_fee_amount,
+                        'name': product_platform_fee.display_name or _('Platform Fee'),
+                        'tax_ids': [(6, 0, [])], # Assuming fees are not taxed, or configure on product
+                        'product_uom_id': product_platform_fee.uom_id.id,
+                    }
+                    invoice_lines.append((0, None, platform_fee_line_values))
+                else:
+                    _logger.warning("Platform Fee product not found. Cannot add to invoice for order %s.", self.name)
+            except Exception as e:
+                 _logger.error("Error referencing platform fee product: %s. Fee not added to invoice for order %s.", e, self.name)
+
+
+        # Processor Fee Line (if applicable and paid directly by customer)
+        if self.x_processor_fee_amount and self.x_payment_processor_fee_source == 'customer_direct' and \
+           not float_is_zero(self.x_processor_fee_amount, precision_rounding=self.currency_id.rounding):
+            try:
+                # IMPORTANT: Replace 'your_custom_module.product_processor_fee_product' with actual XML ID
+                product_processor_fee = self.env.ref('point_of_sale.product_product_delivery', raise_if_not_found=False) # Placeholder, use actual fee product
+                if not product_processor_fee: product_processor_fee = self.env['product.product'].search([('name', '=', 'Payment Processing Fee Service'), ('company_id', 'in', [False, company_id])], limit=1)
+
+                if product_processor_fee:
+                    processor_fee_line_values = {
+                        'product_id': product_processor_fee.id,
+                        'quantity': 1,
+                        'price_unit': self.x_processor_fee_amount,
+                        'name': product_processor_fee.display_name or _('Payment Processing Fee'),
+                        'tax_ids': [(6, 0, [])], # Assuming fees are not taxed, or configure on product
+                        'product_uom_id': product_processor_fee.uom_id.id,
+                    }
+                    invoice_lines.append((0, None, processor_fee_line_values))
+                else:
+                    _logger.warning("Processor Fee product not found. Cannot add to invoice for order %s.", self.name)
+            except Exception as e:
+                _logger.error("Error referencing processor fee product: %s. Fee not added to invoice for order %s.", e, self.name)
+
         return invoice_lines
 
     def _get_pos_anglo_saxon_price_unit(self, product, partner_id, quantity):
@@ -335,6 +404,24 @@ class PosOrder(models.Model):
     has_deleted_line = fields.Boolean(string='Has Deleted Line')
     order_edit_tracking = fields.Boolean(related="config_id.order_edit_tracking", readonly=True)
     available_payment_method_ids = fields.Many2many('pos.payment.method', related='config_id.payment_method_ids', string='Available Payment Methods', readonly=True, store=False)
+
+    # Custom fields for new fee structure
+    x_platform_fee_amount = fields.Monetary(string='Platform Fee', readonly=True, copy=False)
+    x_processor_fee_amount = fields.Monetary(string='Payment Processor Fee', readonly=True, copy=False)
+    x_customer_pays_processor_fees = fields.Boolean(string='Customer Pays Processor Fees', readonly=True, copy=False)
+
+    x_service_charge_type = fields.Selection([
+        ('standard', 'Standard'), # Service charge is purely a percentage of subtotal
+        ('fee_inclusive', 'Fee Inclusive') # Service charge was increased to include processor fee
+    ], string='Service Charge Calculation Type', readonly=True, copy=False, default='standard')
+
+    x_payment_processor_fee_source = fields.Selection([
+        ('not_applicable', 'Not Applicable'), # e.g. for cash sales
+        ('customer_direct', 'Paid Directly by Customer'), # Added on top of everything else
+        ('merchant_absorbs', 'Absorbed by Merchant'), # Merchant pays from their margin
+        ('covered_by_service_charge', 'Covered by Service Charge') # SC was increased to cover this
+    ], string='Processor Fee Source', readonly=True, copy=False, default='not_applicable')
+
 
     def _search_tracking_number(self, operator, value):
         #search is made over the pos_reference field
@@ -452,9 +539,22 @@ class PosOrder(models.Model):
                 company=order.company_id,
                 cash_rounding=cash_rounding,
             )
-            refund_factor = -1 if (order.amount_total < 0.0) else 1
-            order.amount_tax = refund_factor * tax_totals['tax_amount_currency']
-            order.amount_total = refund_factor * tax_totals['total_amount_currency']
+            refund_factor = -1 if (order.amount_total < 0.0) else 1 # This existing line might need re-evaluation as amount_total is being computed.
+                                                                    # Let's assume it's for refund orders where line amounts are negative.
+
+            total_from_lines_and_tax = tax_totals['total_amount_currency']
+
+            # Add new fees to the total amount
+            # These fees are assumed to be non-taxable themselves.
+            current_platform_fee = order.x_platform_fee_amount or 0.0
+            current_processor_fee_paid_by_customer = 0.0
+            if order.x_payment_processor_fee_source == 'customer_direct':
+                current_processor_fee_paid_by_customer = order.x_processor_fee_amount or 0.0
+
+            final_total_amount = total_from_lines_and_tax + current_platform_fee + current_processor_fee_paid_by_customer
+
+            order.amount_tax = refund_factor * tax_totals['tax_amount_currency'] # Tax from lines only
+            order.amount_total = refund_factor * final_total_amount # Total including lines, tax on lines, and new fees
             order.amount_difference = order.amount_paid - order.amount_total
 
     @api.depends('lines.is_edited', 'has_deleted_line')
