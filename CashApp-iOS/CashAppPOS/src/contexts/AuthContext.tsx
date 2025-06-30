@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RestaurantDataService from '../services/RestaurantDataService';
+import PlatformService from '../services/PlatformService';
 
 export interface User {
   id: string;
@@ -453,6 +454,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           setBusiness(businesses[0]);
         }
         
+        // Initialize platform services and configurations
+        try {
+          const platformService = PlatformService.getInstance();
+          // Initialize service charge config with error handling
+          await platformService.getServiceChargeConfig();
+          console.log('✅ Platform services initialized successfully');
+        } catch (serviceError) {
+          console.warn('⚠️ Platform services initialization failed, continuing with defaults:', serviceError);
+          // Don't fail login if platform services fail to initialize
+        }
+
         // Store platform data
         await AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(updatedUser));
         await AsyncStorage.setItem('platform_data', JSON.stringify(realPlatformData));

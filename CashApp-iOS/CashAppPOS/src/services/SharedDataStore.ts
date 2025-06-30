@@ -56,18 +56,38 @@ class SharedDataStore {
 
       if (response.ok) {
         const config = await response.json();
-        this.cache.set('serviceCharge', config);
-        console.log('✅ Service charge config from API:', config);
-        return config;
+        // Validate API response structure
+        if (typeof config === 'object' && config !== null && 
+            typeof config.enabled === 'boolean' && 
+            typeof config.rate === 'number' && 
+            typeof config.description === 'string') {
+          this.cache.set('serviceCharge', config);
+          console.log('✅ Service charge config from API:', config);
+          return config;
+        } else {
+          console.warn('⚠️ Invalid service charge config from API, using fallback');
+        }
       }
 
       // Fallback to AsyncStorage if API fails
       const stored = await AsyncStorage.getItem('platform.serviceCharge');
       if (stored) {
-        const config = JSON.parse(stored);
-        this.cache.set('serviceCharge', config);
-        console.log('✅ Service charge config from local storage (API fallback):', config);
-        return config;
+        try {
+          const config = JSON.parse(stored);
+          // Validate config structure to prevent TypeErrors
+          if (typeof config === 'object' && config !== null && 
+              typeof config.enabled === 'boolean' && 
+              typeof config.rate === 'number' && 
+              typeof config.description === 'string') {
+            this.cache.set('serviceCharge', config);
+            console.log('✅ Service charge config from local storage (API fallback):', config);
+            return config;
+          } else {
+            console.warn('⚠️ Invalid service charge config structure, using defaults');
+          }
+        } catch (parseError) {
+          console.warn('⚠️ Failed to parse service charge config, using defaults:', parseError);
+        }
       }
 
       // Default configuration if everything fails
