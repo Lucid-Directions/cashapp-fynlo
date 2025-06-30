@@ -340,6 +340,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = CashAppPOS/CashAppPOS.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = YL992328JH;
 				ENABLE_BITCODE = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
@@ -358,7 +359,7 @@
 					"-lc++",
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
-				PRODUCT_BUNDLE_IDENTIFIER = com.anonymous.cashapppos;
+				PRODUCT_BUNDLE_IDENTIFIER = com.fynlo.cashapppos;
 				PRODUCT_NAME = CashAppPOS;
 				SWIFT_OBJC_BRIDGING_HEADER = "CashAppPOS/CashAppPOS-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -376,6 +377,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = CashAppPOS/CashAppPOS.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = YL992328JH;
 				INFOPLIST_FILE = CashAppPOS/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -389,7 +391,7 @@
 					"-lc++",
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
-				PRODUCT_BUNDLE_IDENTIFIER = com.anonymous.cashapppos;
+				PRODUCT_BUNDLE_IDENTIFIER = com.fynlo.cashapppos;
 				PRODUCT_NAME = CashAppPOS;
 				SWIFT_OBJC_BRIDGING_HEADER = "CashAppPOS/CashAppPOS-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
