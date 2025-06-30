@@ -12,6 +12,7 @@ import logging
 import traceback
 import uuid
 
+from app.core.config import settings # Import settings
 from app.core.responses import APIResponseHelper, ErrorCodes
 
 
@@ -209,13 +210,14 @@ async def fynlo_exception_handler(request: Request, exc: FynloException) -> JSON
     )
     
     # Add error_id to details for tracking
-    details = exc.details.copy()
-    details["error_id"] = error_id
+    response_details = {"error_id": error_id}
+    if settings.ERROR_DETAIL_ENABLED:
+        response_details.update(exc.details)
     
     return APIResponseHelper.error(
-        message=exc.message,
+        message=exc.message if settings.ERROR_DETAIL_ENABLED else "An application error occurred.",
         error_code=exc.error_code,
-        details=details,
+        details=response_details,
         status_code=exc.status_code
     )
 
@@ -247,10 +249,34 @@ async def http_exception_handler(request: Request, exc: HTTPException) -> JSONRe
     
     error_code = error_code_mapping.get(exc.status_code, ErrorCodes.INTERNAL_ERROR)
     
+    generic_messages = {
+        400: "Bad request.",
+        401: "Unauthorized.",
+        403: "Forbidden.",
+        404: "Resource not found.",
+        422: "Validation error.",
+        500: "Internal server error."
+    }
+
+    response_message = str(exc.detail)
+    response_details = {"error_id": error_id}
+
+    if not settings.ERROR_DETAIL_ENABLED:
+        response_message = generic_messages.get(exc.status_code, "An error occurred.")
+        # For validation (422) or bad request (400) specifically,
+        # we might want a slightly more indicative generic message if details are hidden.
+        if exc.status_code == 422:
+            response_message = "Request validation failed. Please check your input."
+        elif exc.status_code == 400:
+             response_message = "Invalid request format or data."
+    elif isinstance(exc.detail, dict): # If detail is a dict, pass it along in debug mode
+        response_details.update(exc.detail)
+
+
     return APIResponseHelper.error(
-        message=str(exc.detail),
+        message=response_message,
         error_code=error_code,
-        details={"error_id": error_id},
+        details=response_details,
         status_code=exc.status_code
     )
 
@@ -281,10 +307,20 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         }
     )
     
-    return APIResponseHelper.validation_error(
-        message="Request validation failed",
-        errors=validation_errors
-    )
+    if settings.ERROR_DETAIL_ENABLED:
+        return APIResponseHelper.validation_error(
+            message="Request validation failed",
+            errors=validation_errors # Detailed errors
+        )
+    else:
+        # In production (or when ERROR_DETAIL_ENABLED=false), return a generic validation error
+        # The detailed errors are still logged.
+        return APIResponseHelper.error(
+            message="Request validation failed. Please check your input.",
+            error_code=ErrorCodes.VALIDATION_ERROR,
+            details={"error_id": error_id}, # Only error_id, no specific field details
+            status_code=422
+        )
 
 
 async def general_exception_handler(request: Request, exc: Exception) -> JSONResponse:
@@ -304,9 +340,17 @@ async def general_exception_handler(request: Request, exc: Exception) -> JSONRes
         }
     )
     
+    # The message is already generic. Ensure no other details are leaked.
+    # The error_id is important for tracking.
+    response_message = "An unexpected error occurred. Please try again later."
+    if settings.ERROR_DETAIL_ENABLED:
+        # Optionally, provide a bit more context in dev/debug mode, but still avoid full trace in response
+        response_message = f"An unexpected error of type {type(exc).__name__} occurred."
+
     return APIResponseHelper.internal_error(
-        message="An unexpected error occurred",
+        message=response_message,
         error_id=error_id
+        # No other details should be sent to the client for general exceptions
     )
 
 

@@ -27,15 +27,30 @@ from app.middleware.version_middleware import APIVersionMiddleware
 from datetime import datetime
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
+# Logging level will be set by Uvicorn based on settings.LOG_LEVEL
+# logging.basicConfig(level=settings.LOG_LEVEL.upper()) # Not needed if uvicorn handles it
 logger = logging.getLogger(__name__)
+
+# Apply logging filters for production
+# This should be done after basic logging config but before the app starts handling requests.
+# Note: Uvicorn sets up its own handlers. This filter will apply to log records
+# processed by the application's loggers. For Uvicorn's access logs,
+# different configuration might be needed if they also contain sensitive data.
+from app.core.logging_filters import setup_logging_filters
+if settings.ENVIRONMENT == "production" or not settings.ERROR_DETAIL_ENABLED:
+    # We call this early, but it depends on `settings` being initialized.
+    # Logging needs to be configured before this call if it relies on basicConfig.
+    # If Uvicorn manages basicConfig, this should be fine.
+    setup_logging_filters()
+
 
 security = HTTPBearer()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Initialize application on startup"""
-    logger.info("🚀 Fynlo POS Backend starting...")
+    logger.info(f"🚀 Fynlo POS Backend starting in {settings.ENVIRONMENT} mode...")
+    logger.info(f"Debug mode: {settings.DEBUG}")
     
     # Initialize database
     await init_db()
@@ -58,16 +73,18 @@ async def lifespan(app: FastAPI):
     logger.info("✅ Cleanup complete")
 
 app = FastAPI(
-    title="Fynlo POS API",
+    title=settings.APP_NAME,
     description="Hardware-Free Restaurant Management Platform",
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
+    debug=settings.DEBUG  # Set FastAPI debug mode from settings
 )
 
-# CORS middleware for React Native frontend
+# CORS middleware
+# Uses CORS_ORIGINS from settings, which is populated from the .env file
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure for production
+    allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -149,8 +166,8 @@ async def api_version_info():
 if __name__ == "__main__":
     uvicorn.run(
         "app.main:app",
-        host="0.0.0.0",
-        port=8000,
-        reload=True,
-        log_level="info"
+        host="0.0.0.0", # Make sure this is configurable if needed for production
+        port=8000, # Make sure this is configurable if needed for production
+        reload=settings.ENVIRONMENT == "development", # Disable reload in production
+        log_level=settings.LOG_LEVEL.lower() # Use log_level from settings
     )

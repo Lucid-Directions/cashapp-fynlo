@@ -1,0 +1,37 @@
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+*.egg
+dist/
+build/
+*.so
+*.pyc
+
+# Virtual environment
+.venv/
+venv/
+ENV/
+env/
+
+# IDE specific files
+.vscode/
+.idea/
+*.DS_Store
+
+# Local development files
+uploads_dev/
+
+# Coverage reports
+.coverage
+coverage.xml
+htmlcov/
+
+# pytest cache
+.pytest_cache/
