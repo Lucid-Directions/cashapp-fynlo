@@ -44,6 +44,13 @@ class Settings(BaseSettings):
     STRIPE_SECRET_KEY: Optional[str] = None
     STRIPE_PUBLISHABLE_KEY: Optional[str] = None
     STRIPE_WEBHOOK_SECRET: Optional[str] = None
+
+    # Square Configuration
+    SQUARE_APPLICATION_ID: Optional[str] = None
+    SQUARE_ACCESS_TOKEN: Optional[str] = None
+    SQUARE_LOCATION_ID: Optional[str] = None
+    SQUARE_WEBHOOK_SIGNATURE_KEY: Optional[str] = None
+    SQUARE_ENVIRONMENT: str = "sandbox" # "sandbox" or "production"
     
     # SumUp Integration (PHASE 3: Added for real payment processing)
     SUMUP_API_KEY: Optional[str] = None

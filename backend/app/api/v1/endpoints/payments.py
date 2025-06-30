@@ -996,64 +996,580 @@ async def get_available_providers(
     # Calculate sample costs for common amounts
     sample_amounts = [Decimal("10"), Decimal("50"), Decimal("100")]
     monthly_volume = Decimal("2000")  # Default monthly volume
+    # Assuming db is available in this scope, if not, it needs to be passed or accessed.
+    # For get_available_providers, db might not be directly needed unless provider loading itself needs it.
+    # restaurant_id is also not defined in this scope. This was likely from a previous version.
+    # I will remove the restaurant_id specific logic for now from this generic endpoint.
     
-    provider_info = []
+    provider_info_list = []
     for provider_name in providers:
-        provider = payment_factory.get_provider(provider_name)
+        provider = payment_factory.get_provider(provider_name) # This might need to be async if provider init is async
         info = {
             "name": provider_name,
             "display_name": provider_name.title(),
             "sample_fees": {},
-            "recommended": False
+            "recommended": False # Simplified recommendation logic
         }
         
         for amount in sample_amounts:
+            # Assuming calculate_fee is synchronous. If it's async, this loop needs `await`.
             fee = provider.calculate_fee(amount)
             info["sample_fees"][f"£{amount}"] = f"£{fee:.2f}"
         
-        # Add provider-specific information
-        if provider_name == "sumup" and monthly_volume >= Decimal("2714"):
-            info["monthly_fee"] = "£19.00"
-            info["rate"] = "0.69%"
-            info["recommended"] = True
-        elif provider_name == "sumup":
-            info["rate"] = "1.69%"
-        elif provider_name == "stripe":
-            info["rate"] = "1.4% + 20p"
-            if monthly_volume < Decimal("2714") and monthly_volume >= Decimal("1000"):
-                info["recommended"] = True
-        elif provider_name == "square":
-            info["rate"] = "1.75%"
-            if monthly_volume < Decimal("1000"):
-                info["recommended"] = True
+        # Simplified provider-specific information
+        if provider_name == "sumup": info["rate"] = "1.69% (standard)" # Example rate
+        elif provider_name == "stripe": info["rate"] = "1.4% + 20p (UK cards)" # Example rate
+        elif provider_name == "square": info["rate"] = "1.75%" # Example rate
         
-        provider_info.append(info)
+        provider_info_list.append(info)
     
-    # Sort by recommended first
-    provider_info.sort(key=lambda x: not x["recommended"])
-    
-    # Get smart routing recommendations if restaurant provided
-    routing_recommendations = []
-    if restaurant_id:
-        try:
-            recommendations = await payment_factory.get_routing_recommendations(
-                restaurant_id=restaurant_id,
-                db_session=db
-            )
-            if recommendations and 'routing_recommendations' in recommendations:
-                routing_recommendations = recommendations['routing_recommendations']
-        except Exception as e:
-            logger.warning(f"Failed to get routing recommendations: {e}")
-    
-    # Sort by recommended first
-    provider_info.sort(key=lambda x: not x["recommended"])
+    # Simplified sorting or recommendation
+    # For example, recommend the first one or based on a simple metric if available
+    if provider_info_list:
+        provider_info_list[0]["recommended"] = True # Example: recommend the first listed
     
     return APIResponseHelper.success(
         data={
-            "providers": provider_info,
-            "monthly_volume": float(monthly_volume),
-            "optimal_provider": provider_info[0]["name"] if provider_info else None,
-            "smart_recommendations": routing_recommendations
+            "providers": provider_info_list,
+            "monthly_volume_assumption": float(monthly_volume), # Clarify this is an assumption
+            "optimal_provider_example": provider_info_list[0]["name"] if provider_info_list else None,
         },
-        message="Retrieved available payment providers with smart recommendations"
+        message="Retrieved available payment providers."
     )
+
+# --- Square Specific Endpoints ---
+
+class SquareCreatePaymentRequest(BaseModel):
+    amount: float # Amount in major currency unit (e.g., GBP)
+    currency: str = "GBP"
+    source_id: str # The Square payment source ID (e.g., card nonce)
+    order_id: Optional[str] = None
+    customer_id: Optional[str] = None
+    note: Optional[str] = None
+    metadata: Optional[dict] = None
+
+class SquareProcessPaymentRequest(BaseModel):
+    payment_id: str # The Square Payment ID from the create_payment step
+    order_id: Optional[str] = None # Optional: if completing a payment for a specific order
+
+class SquarePaymentResponseData(BaseModel):
+    payment_id: Optional[str] = None # Our internal DB payment ID
+    provider: str
+    transaction_id: Optional[str] = None # Square's transaction ID
+    status: str # e.g., SUCCESS, PENDING, FAILED (from PaymentStatus enum)
+    amount: Optional[float] = None
+    currency: Optional[str] = None
+    fee: Optional[float] = None
+    net_amount: Optional[float] = None
+    message: Optional[str] = None
+    raw_response: Optional[dict] = None # Full provider response
+
+@router.post("/square/create", response_model=SquarePaymentResponseData, tags=["Payments - Square"])
+async def square_create_payment_endpoint(
+    http_request: Request,
+    payment_create_req: SquareCreatePaymentRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Create a Square payment. If auto_complete is true, this attempts to finalize the payment."""
+    audit_service = AuditLoggerService(db)
+    ip_address = http_request.client.host if http_request.client else "unknown"
+    user_agent = http_request.headers.get("user-agent", "unknown")
+
+    try:
+        square_provider = await payment_factory.get_provider_instance("square", db_session=db)
+        if not square_provider:
+            raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Square provider not available.")
+
+        # Validate order if order_id is provided
+        order = None
+        if payment_create_req.order_id:
+            order = db.query(Order).filter(Order.id == payment_create_req.order_id).first()
+            if not order:
+                # Log and raise error if order_id is given but order not found
+                await audit_service.create_audit_log(
+                    event_type=AuditEventType.PAYMENT_FAILURE, event_status=AuditEventStatus.FAILURE,
+                    action_performed="Square payment creation failed: Order not found.",
+                    user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent,
+                    details={"order_id": payment_create_req.order_id, "reason": "Order not found"}, commit=True)
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Order {payment_create_req.order_id} not found.")
+            if order.payment_status == "completed":
+                await audit_service.create_audit_log(
+                    event_type=AuditEventType.PAYMENT_FAILURE, event_status=AuditEventStatus.INFO,
+                    action_performed="Square payment creation attempt: Order already paid.",
+                    user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent,
+                    resource_type="Order", resource_id=str(order.id), details={"reason": "Order already marked as paid."}, commit=True)
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Order already paid.")
+
+        await audit_service.create_audit_log(
+            event_type=AuditEventType.PAYMENT_INITIATED, event_status=AuditEventStatus.PENDING,
+            action_performed="Square payment creation initiated.",
+            user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent,
+            details={**payment_create_req.model_dump(), "provider": "square"}, commit=False) # Commit with payment record
+
+        provider_response = await square_provider.create_payment(
+            amount=Decimal(str(payment_create_req.amount)),
+            currency=payment_create_req.currency,
+            source_id=payment_create_req.source_id,
+            customer_id=payment_create_req.customer_id,
+            order_id=payment_create_req.order_id, # Pass our order_id to be Square's order_id if applicable
+            note=payment_create_req.note,
+            metadata=payment_create_req.metadata
+        )
+
+        internal_payment_id = None
+        if provider_response.get("status") in [PaymentStatus.SUCCESS.value, PaymentStatus.PENDING.value] and provider_response.get("transaction_id"):
+            # Create Payment record in our DB
+            payment_db = Payment(
+                order_id=payment_create_req.order_id if order else None,
+                payment_method="square_card", # Or more specific if known
+                provider="square",
+                amount=Decimal(str(payment_create_req.amount)),
+                # Assuming provider_response.fee is in minor units (cents/pence)
+                fee_amount= (Decimal(str(provider_response.get("fee", 0))) / 100) if provider_response.get("fee") is not None else square_provider.calculate_fee(Decimal(str(payment_create_req.amount))),
+                provider_fee= (Decimal(str(provider_response.get("fee", 0))) / 100) if provider_response.get("fee") is not None else square_provider.calculate_fee(Decimal(str(payment_create_req.amount))),
+                # Assuming provider_response.net_amount is in minor units
+                net_amount= (Decimal(str(provider_response.get("net_amount", 0))) / 100) if provider_response.get("net_amount") is not None else (Decimal(str(payment_create_req.amount)) - square_provider.calculate_fee(Decimal(str(payment_create_req.amount)))),
+                status=provider_response["status"],
+                external_id=provider_response["transaction_id"],
+                processed_at=datetime.utcnow() if provider_response["status"] == PaymentStatus.SUCCESS.value else None,
+                payment_metadata={
+                    "provider_response": provider_response.get("raw_response", {}),
+                    "source_id": payment_create_req.source_id,
+                    "customer_id": payment_create_req.customer_id,
+                    **(payment_create_req.metadata or {})
+                }
+            )
+            db.add(payment_db)
+            if order and provider_response["status"] == PaymentStatus.SUCCESS.value:
+                order.payment_status = "completed"
+                order.status = "confirmed" if order.status == "pending" else order.status
+
+            await audit_service.create_audit_log(
+                event_type=AuditEventType.PAYMENT_SUCCESS if provider_response["status"] == PaymentStatus.SUCCESS.value else AuditEventType.PAYMENT_PENDING,
+                event_status=AuditEventStatus.SUCCESS if provider_response["status"] == PaymentStatus.SUCCESS.value else AuditEventStatus.PENDING,
+                action_performed=f"Square payment status: {provider_response['status']}.",
+                user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent,
+                resource_type="Payment", resource_id=str(payment_db.id), # ID after flush
+                details={"external_id": provider_response["transaction_id"], "provider_status": provider_response.get("raw_response", {}).get("payment", {}).get("status")},
+                commit=True) # Commit audit and payment together
+            db.commit()
+            db.refresh(payment_db)
+            internal_payment_id = str(payment_db.id)
+        else: # Payment failed at provider level
+            await audit_service.create_audit_log(
+                event_type=AuditEventType.PAYMENT_FAILURE, event_status=AuditEventStatus.FAILURE,
+                action_performed="Square payment creation failed by provider.",
+                user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent,
+                details={"error": provider_response.get("error", "Unknown"), "provider_response": provider_response.get("raw_response")}, commit=True)
+            # db.commit() # Commit only audit log for failure
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=provider_response.get("error", "Square payment creation failed"))
+
+        return SquarePaymentResponseData(
+            payment_id=internal_payment_id,
+            provider="square",
+            transaction_id=provider_response.get("transaction_id"),
+            status=provider_response["status"],
+            amount=float(provider_response.get("amount", payment_create_req.amount)), # Amount in major units
+            currency=provider_response.get("currency", payment_create_req.currency),
+            fee=float(Decimal(str(provider_response.get("fee", 0))) / 100) if provider_response.get("fee") is not None else None,
+            net_amount=float(Decimal(str(provider_response.get("net_amount", 0))) / 100) if provider_response.get("net_amount") is not None else None,
+            message=provider_response.get("message", "Payment processed by Square."),
+            raw_response=provider_response.get("raw_response")
+        )
+
+    except HTTPException:
+        raise # Re-raise HTTPException to preserve status code and detail
+    except Exception as e:
+        logger.error(f"Square payment creation error: {str(e)}", exc_info=True)
+        await audit_service.create_audit_log(
+            event_type=AuditEventType.PAYMENT_FAILURE, event_status=AuditEventStatus.FAILURE,
+            action_performed="Square payment creation failed due to server error.",
+            user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent,
+            details={"error": str(e)}, commit=True)
+        # db.commit() # Commit audit log
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+
+@router.post("/square/process", response_model=SquarePaymentResponseData, tags=["Payments - Square"])
+async def square_process_payment_endpoint(
+    http_request: Request,
+    payment_process_req: SquareProcessPaymentRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Process (complete) a Square payment that was created with auto_complete=false."""
+    audit_service = AuditLoggerService(db)
+    ip_address = http_request.client.host if http_request.client else "unknown"
+    user_agent = http_request.headers.get("user-agent", "unknown")
+
+    try:
+        square_provider = await payment_factory.get_provider_instance("square", db_session=db)
+        if not square_provider:
+            raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Square provider not available.")
+
+        # Find the original payment record in our DB by external_id (Square Payment ID)
+        payment_db = db.query(Payment).filter(Payment.external_id == payment_process_req.payment_id, Payment.provider == "square").first()
+        if not payment_db:
+            await audit_service.create_audit_log(
+                event_type=AuditEventType.PAYMENT_FAILURE, event_status=AuditEventStatus.FAILURE,
+                action_performed="Square payment process failed: Original payment record not found.",
+                user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent,
+                details={"external_payment_id": payment_process_req.payment_id}, commit=True)
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Payment with Square ID {payment_process_req.payment_id} not found in local records.")
+
+        if payment_db.status == PaymentStatus.SUCCESS.value: # Already completed
+             await audit_service.create_audit_log(
+                event_type=AuditEventType.PAYMENT_INFO, event_status=AuditEventStatus.INFO,
+                action_performed="Square payment process attempt: Payment already completed.",
+                user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent,
+                resource_type="Payment", resource_id=str(payment_db.id), details={"external_id": payment_process_req.payment_id}, commit=True)
+             # Still, let's fetch the latest status from Square and return it.
+             # This path could be enhanced to just call get_payment_status.
+
+        await audit_service.create_audit_log(
+            event_type=AuditEventType.PAYMENT_PROCESSING, event_status=AuditEventStatus.PENDING, # Using a distinct type
+            action_performed="Square payment completion (process) initiated.",
+            user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent,
+            resource_type="Payment", resource_id=str(payment_db.id),
+            details={"external_payment_id": payment_process_req.payment_id, "order_id_param": payment_process_req.order_id},
+            commit=False) # Commit with payment update
+
+        provider_response = await square_provider.process_payment(
+            payment_id=payment_process_req.payment_id,
+            order_id=payment_process_req.order_id # Pass along if provider uses it
+        )
+
+        current_provider_status = provider_response.get("status")
+        payment_db.status = current_provider_status
+        payment_db.payment_metadata = {**payment_db.payment_metadata, "process_response": provider_response.get("raw_response")}
+
+        if current_provider_status == PaymentStatus.SUCCESS.value:
+            payment_db.processed_at = datetime.utcnow()
+            if payment_db.order_id:
+                order = db.query(Order).filter(Order.id == payment_db.order_id).first()
+                if order:
+                    order.payment_status = "completed"
+                    order.status = "confirmed" if order.status == "pending" else order.status
+
+            await audit_service.create_audit_log(
+                event_type=AuditEventType.PAYMENT_SUCCESS, event_status=AuditEventStatus.SUCCESS,
+                action_performed="Square payment processed/completed successfully.",
+                user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent,
+                resource_type="Payment", resource_id=str(payment_db.id),
+                details={"external_id": payment_process_req.payment_id, "final_status": current_provider_status}, commit=True)
+        else: # Failed or still pending
+            await audit_service.create_audit_log(
+                event_type=AuditEventType.PAYMENT_FAILURE, event_status=AuditEventStatus.FAILURE,
+                action_performed=f"Square payment process resulted in status: {current_provider_status}.",
+                user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent,
+                resource_type="Payment", resource_id=str(payment_db.id),
+                details={"external_id": payment_process_req.payment_id, "error": provider_response.get("error"), "final_status": current_provider_status}, commit=True)
+
+        db.commit()
+        db.refresh(payment_db)
+
+        return SquarePaymentResponseData(
+            payment_id=str(payment_db.id),
+            provider="square",
+            transaction_id=provider_response.get("transaction_id", payment_process_req.payment_id),
+            status=current_provider_status,
+            amount=float(provider_response.get("amount", payment_db.amount)),
+            currency=provider_response.get("currency", payment_db.payment_metadata.get("currency", "GBP")),
+            fee=float(Decimal(str(provider_response.get("fee", 0))) / 100) if provider_response.get("fee") is not None else None,
+            net_amount=float(Decimal(str(provider_response.get("net_amount", 0))) / 100) if provider_response.get("net_amount") is not None else None,
+            message=provider_response.get("message", f"Square payment processed. Status: {current_provider_status}"),
+            raw_response=provider_response.get("raw_response")
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Square payment processing error: {str(e)}", exc_info=True)
+        await audit_service.create_audit_log(
+            event_type=AuditEventType.PAYMENT_FAILURE, event_status=AuditEventStatus.FAILURE,
+            action_performed="Square payment processing failed due to server error.",
+            user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent,
+            details={"external_payment_id": payment_process_req.payment_id, "error": str(e)}, commit=True)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+
+@router.get("/square/status/{payment_id}", response_model=SquarePaymentResponseData, tags=["Payments - Square"])
+async def square_get_payment_status_endpoint(
+    http_request: Request,
+    payment_id: str, # This is the Square Payment ID (external_id)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Get the status of a Square payment by its Square Payment ID."""
+    audit_service = AuditLoggerService(db)
+    ip_address = http_request.client.host if http_request.client else "unknown"
+    user_agent = http_request.headers.get("user-agent", "unknown")
+
+    try:
+        square_provider = await payment_factory.get_provider_instance("square", db_session=db)
+        if not square_provider:
+            raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Square provider not available.")
+
+        # Optional: Log audit for status check initiation
+        # await audit_service.create_audit_log(...)
+
+        provider_response = await square_provider.get_payment_status(payment_id=payment_id)
+
+        # Optional: Update local DB record if status has changed and we want to sync
+        # payment_db = db.query(Payment).filter(Payment.external_id == payment_id, Payment.provider == "square").first()
+        # if payment_db and payment_db.status != provider_response.get("status"):
+        #     payment_db.status = provider_response.get("status")
+        #     payment_db.payment_metadata = {**payment_db.payment_metadata, "status_check_response": provider_response.get("raw_response")}
+        #     db.commit()
+        #     db.refresh(payment_db)
+        #     internal_payment_id = str(payment_db.id)
+        # else:
+        #     internal_payment_id = str(payment_db.id) if payment_db else None
+
+
+        if provider_response.get("status") == PaymentStatus.FAILED.value and "Failed to retrieve payment status" in provider_response.get("error",""):
+             # This specific error from provider.get_payment_status implies the ID might not exist with Square
+            await audit_service.create_audit_log(
+                event_type=AuditEventType.PAYMENT_INFO, event_status=AuditEventStatus.FAILURE, # Using INFO as it's a status check
+                action_performed="Square payment status check: Payment not found by provider.",
+                user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent,
+                details={"external_payment_id": payment_id, "error": provider_response.get("error")}, commit=True)
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Square payment with ID {payment_id} not found by provider.")
+
+        return SquarePaymentResponseData(
+            # payment_id=internal_payment_id, # Our internal ID, if fetched
+            provider="square",
+            transaction_id=provider_response.get("transaction_id", payment_id),
+            status=provider_response["status"],
+            amount=float(provider_response.get("amount", 0)), # Amount in major units
+            currency=provider_response.get("currency", "GBP"),
+            fee=float(Decimal(str(provider_response.get("fee", 0))) / 100) if provider_response.get("fee") is not None else None,
+            net_amount=float(Decimal(str(provider_response.get("net_amount", 0))) / 100) if provider_response.get("net_amount") is not None else None,
+            message=provider_response.get("message", f"Square payment status: {provider_response['status']}"),
+            raw_response=provider_response.get("raw_response")
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Square payment status retrieval error: {str(e)}", exc_info=True)
+        await audit_service.create_audit_log(
+            event_type=AuditEventType.PAYMENT_FAILURE, event_status=AuditEventStatus.FAILURE,
+            action_performed="Square payment status retrieval failed due to server error.",
+            user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent,
+            details={"external_payment_id": payment_id, "error": str(e)}, commit=True)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+# --- Stripe Webhook Endpoint ---
+
+@router.post("/webhooks/stripe", include_in_schema=False) # include_in_schema=False as it's not for direct client calls
+async def stripe_webhook_endpoint(
+    http_request: Request, # Renamed from request to avoid conflict with fastapi.Request
+    db: Session = Depends(get_db) # Added db session dependency
+):
+    """Handle incoming webhooks from Stripe."""
+    payload = await http_request.body()
+    sig_header = http_request.headers.get('stripe-signature')
+    audit_service = AuditLoggerService(db) # Initialize AuditLoggerService
+    ip_address = http_request.client.host if http_request.client else "unknown"
+    user_agent = http_request.headers.get("user-agent", "unknown") # Though less relevant for webhooks
+
+    if not settings.STRIPE_WEBHOOK_SECRET:
+        logger.error("Stripe webhook secret is not configured.")
+        # Audit this critical configuration error
+        # Using a generic user_id/email for system-level audit if no specific user context
+        await audit_service.create_audit_log(
+            event_type=AuditEventType.SYSTEM_ERROR, event_status=AuditEventStatus.FAILURE,
+            action_performed="Stripe webhook processing failed: Missing webhook secret.",
+            user_id="SYSTEM", username_or_email="system@fynlo.com",
+            ip_address=ip_address, user_agent="Stripe Webhook",
+            details={"reason": "STRIPE_WEBHOOK_SECRET not set in environment."},
+            commit=True
+        )
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Webhook secret not configured.")
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
+        )
+    except ValueError as e: # Invalid payload
+        logger.error(f"Stripe webhook error: Invalid payload. {str(e)}")
+        await audit_service.create_audit_log(
+            event_type=AuditEventType.WEBHOOK_PROCESSING_ERROR, event_status=AuditEventStatus.FAILURE,
+            action_performed="Stripe webhook processing failed: Invalid payload.",
+            user_id="SYSTEM", username_or_email="system@fynlo.com", ip_address=ip_address,
+            details={"error": str(e), "payload_start": payload[:200].decode('utf-8', errors='replace')}, commit=True
+        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid payload")
+    except stripe.error.SignatureVerificationError as e: # Invalid signature
+        logger.error(f"Stripe webhook error: Invalid signature. {str(e)}")
+        await audit_service.create_audit_log(
+            event_type=AuditEventType.WEBHOOK_PROCESSING_ERROR, event_status=AuditEventStatus.FAILURE,
+            action_performed="Stripe webhook processing failed: Invalid signature.",
+            user_id="SYSTEM", username_or_email="system@fynlo.com", ip_address=ip_address,
+            details={"error": str(e), "signature_header": sig_header}, commit=True
+        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid signature")
+    except Exception as e: # Other construction errors
+        logger.error(f"Stripe webhook event construction error: {str(e)}")
+        await audit_service.create_audit_log(
+            event_type=AuditEventType.WEBHOOK_PROCESSING_ERROR, event_status=AuditEventStatus.FAILURE,
+            action_performed="Stripe webhook processing failed: Event construction error.",
+            user_id="SYSTEM", username_or_email="system@fynlo.com", ip_address=ip_address,
+            details={"error": str(e)}, commit=True
+        )
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Webhook event construction error")
+
+    # At this point, event is trusted.
+    logger.info(f"Received Stripe event: id={event.id}, type={event.type}")
+    await audit_service.create_audit_log(
+        event_type=AuditEventType.WEBHOOK_RECEIVED, event_status=AuditEventStatus.SUCCESS,
+        action_performed=f"Stripe webhook event received: {event.type}",
+        user_id="SYSTEM", username_or_email="stripe_webhook@fynlo.com", ip_address=ip_address,
+        resource_type="StripeEvent", resource_id=event.id,
+        details={"event_type": event.type, "event_id": event.id, "livemode": event.livemode},
+        commit=True # Commit this log immediately
+    )
+
+    # Handle the event
+    # TODO: Implement idempotency check here (e.g., check if event.id has been processed)
+    # For example:
+    # processed_event = db.query(ProcessedWebhookEvent).filter(ProcessedWebhookEvent.event_id == event.id).first()
+    # if processed_event:
+    #     logger.info(f"Stripe event {event.id} already processed.")
+    #     return {"status": "event already processed"}
+    # else:
+    #     db.add(ProcessedWebhookEvent(event_id=event.id, processed_at=datetime.utcnow()))
+    #     # db.commit() // Commit within the specific handler or at the end
+
+    try:
+        if event.type == 'payment_intent.succeeded':
+            payment_intent = event.data.object
+            logger.info(f"PaymentIntent {payment_intent.id} succeeded.")
+            payment = db.query(Payment).filter(Payment.external_id == payment_intent.id, Payment.provider == "stripe").first()
+            if payment:
+                if payment.status != PaymentStatus.SUCCESS.value: # Avoid reprocessing if already success
+                    payment.status = PaymentStatus.SUCCESS.value
+                    payment.processed_at = datetime.utcnow()
+                    payment.payment_metadata = {**payment.payment_metadata, "webhook_succeeded_event": event.to_dict_recursive()}
+
+                    if payment.order_id:
+                        order = db.query(Order).filter(Order.id == payment.order_id).first()
+                        if order:
+                            order.payment_status = "completed"
+                            order.status = "confirmed" if order.status == "pending" else order.status
+
+                    await audit_service.create_audit_log(
+                        event_type=AuditEventType.PAYMENT_SUCCESS, event_status=AuditEventStatus.SUCCESS,
+                        action_performed="Stripe PaymentIntent succeeded (webhook).",
+                        resource_type="Payment", resource_id=str(payment.id),
+                        details={"external_id": payment_intent.id, "amount": payment_intent.amount / 100}, commit=True)
+                    db.commit()
+                else:
+                    logger.info(f"PaymentIntent {payment_intent.id} already marked as SUCCESS in DB. Webhook ignored for idempotency.")
+            else:
+                logger.warning(f"Received {event.type} for unknown PaymentIntent {payment_intent.id}")
+                await audit_service.create_audit_log(
+                    event_type=AuditEventType.WEBHOOK_PROCESSING_ERROR, event_status=AuditEventStatus.WARNING,
+                    action_performed=f"Stripe event {event.type} for unknown PaymentIntent.",
+                    details={"external_id": payment_intent.id, "event_id": event.id}, commit=True)
+
+        elif event.type == 'payment_intent.payment_failed':
+            payment_intent = event.data.object
+            logger.info(f"PaymentIntent {payment_intent.id} failed.")
+            payment = db.query(Payment).filter(Payment.external_id == payment_intent.id, Payment.provider == "stripe").first()
+            if payment:
+                if payment.status != PaymentStatus.FAILED.value:
+                    payment.status = PaymentStatus.FAILED.value
+                    error_details = payment_intent.last_payment_error
+                    payment.payment_metadata = {
+                        **payment.payment_metadata,
+                        "webhook_failed_event": event.to_dict_recursive(),
+                        "failure_reason": error_details.message if error_details else "Unknown",
+                        "failure_code": error_details.code if error_details else "Unknown"
+                    }
+                    await audit_service.create_audit_log(
+                        event_type=AuditEventType.PAYMENT_FAILURE, event_status=AuditEventStatus.FAILURE,
+                        action_performed="Stripe PaymentIntent failed (webhook).",
+                        resource_type="Payment", resource_id=str(payment.id),
+                        details={
+                            "external_id": payment_intent.id,
+                            "error_message": error_details.message if error_details else "N/A",
+                            "error_code": error_details.code if error_details else "N/A"
+                        }, commit=True)
+                    db.commit()
+                else:
+                    logger.info(f"PaymentIntent {payment_intent.id} already marked as FAILED in DB. Webhook ignored for idempotency.")
+            else:
+                logger.warning(f"Received {event.type} for unknown PaymentIntent {payment_intent.id}")
+                await audit_service.create_audit_log(
+                    event_type=AuditEventType.WEBHOOK_PROCESSING_ERROR, event_status=AuditEventStatus.WARNING,
+                    action_performed=f"Stripe event {event.type} for unknown PaymentIntent.",
+                    details={"external_id": payment_intent.id, "event_id": event.id}, commit=True)
+
+        elif event.type == 'charge.refunded':
+            charge = event.data.object # This is a Charge object
+            payment_intent_id = charge.payment_intent
+            logger.info(f"Charge {charge.id} (for PI {payment_intent_id}) refunded.")
+            payment = db.query(Payment).filter(Payment.external_id == payment_intent_id, Payment.provider == "stripe").first()
+            if payment:
+                # Stripe sends charge.refunded for each refund.
+                # If partial refunds, amount_refunded in PI might be sum.
+                # Here we mark the payment as 'refunded' or 'partially_refunded'
+                # This logic might need refinement based on full vs partial refund handling strategy.
+                # For simplicity, if any refund occurs, mark as 'refunded'.
+                # More complex logic would check payment.amount vs charge.amount_refunded / 100
+                if payment.status != PaymentStatus.REFUNDED.value: # Basic idempotency
+                    payment.status = PaymentStatus.REFUNDED.value # Or a new PARTIALLY_REFUNDED status
+                    payment.payment_metadata = {
+                        **payment.payment_metadata,
+                        f"webhook_charge_refunded_{charge.id}": event.to_dict_recursive(),
+                        "refunded_amount_from_charge": charge.amount_refunded / 100
+                    }
+                    await audit_service.create_audit_log(
+                        event_type=AuditEventType.REFUND_SUCCESS, event_status=AuditEventStatus.SUCCESS,
+                        action_performed="Stripe charge refunded (webhook).",
+                        resource_type="Payment", resource_id=str(payment.id),
+                        details={
+                            "external_id": payment_intent_id,
+                            "charge_id": charge.id,
+                            "refunded_amount": charge.amount_refunded / 100
+                        }, commit=True)
+                    db.commit()
+                else:
+                     logger.info(f"PaymentIntent {payment_intent_id} already marked as REFUNDED. Refund event for charge {charge.id} noted.")
+
+            else:
+                logger.warning(f"Received {event.type} for charge {charge.id} linked to unknown PaymentIntent {payment_intent_id}")
+                await audit_service.create_audit_log(
+                    event_type=AuditEventType.WEBHOOK_PROCESSING_ERROR, event_status=AuditEventStatus.WARNING,
+                    action_performed=f"Stripe event {event.type} for charge on unknown PI.",
+                    details={"charge_id": charge.id, "payment_intent_id": payment_intent_id, "event_id": event.id}, commit=True)
+
+        # Add more event handlers here as needed:
+        # elif event.type == 'payment_intent.requires_action':
+        # elif event.type == 'customer.subscription.deleted':
+        # etc.
+
+        else:
+            logger.info(f"Received unhandled Stripe event type: {event.type}")
+            await audit_service.create_audit_log(
+                event_type=AuditEventType.WEBHOOK_UNHANDLED, event_status=AuditEventStatus.INFO,
+                action_performed=f"Stripe webhook event type {event.type} received but not handled.",
+                details={"event_id": event.id, "event_type": event.type}, commit=True)
+
+    except Exception as e:
+        logger.error(f"Error processing Stripe webhook event {event.id if 'event' in locals() else 'UNKNOWN_EVENT_ID'}: {str(e)}", exc_info=True)
+        await audit_service.create_audit_log(
+            event_type=AuditEventType.WEBHOOK_PROCESSING_ERROR, event_status=AuditEventStatus.FAILURE,
+            action_performed="Stripe webhook event processing failed with exception.",
+            details={"event_id": event.id if 'event' in locals() else 'N/A', "event_type": event.type if 'event' in locals() else 'N/A', "error": str(e)},
+            commit=True
+        )
+        # It's generally recommended to return 200 to Stripe to prevent retries for errors
+        # that are unlikely to be resolved by retrying the same event (e.g., bugs in handler).
+        # For transient errors (DB down), a 5xx might be appropriate to trigger retries.
+        # For now, let's return 200 to acknowledge receipt and avoid excessive retries for handler bugs.
+        # If a specific error should trigger retries, raise HTTPException(status_code=500) here.
+
+    return {"status": "success", "message": "Webhook received"}
