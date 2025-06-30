@@ -14,7 +14,6 @@ module.exports = {
     '<rootDir>/src/__tests__/OnboardingNavigationTests.tsx',
     '<rootDir>/src/screens/main/__tests__/POSScreen.test.tsx',
     '<rootDir>/__tests__/App.test.tsx',
-    '<rootDir>/src/store/__tests__',
     '<rootDir>/__tests__/components',
     '<rootDir>/src/__tests__/performance',
     '<rootDir>/src/__tests__/fixtures',
@@ -27,8 +26,8 @@ module.exports = {
   transformIgnorePatterns: [
     'node_modules/(?!(react-native|@react-native|react-native-vector-icons|react-native-gesture-handler|react-native-reanimated|@react-navigation|react-native-screens|react-native-safe-area-context|react-native-modal|sumup-react-native-alpha)/)',
   ],
-  collectCoverage: true,
-  collectCoverageFrom: ['src/**/*.{ts,tsx,js,jsx}', '!src/**/*.d.ts'],
+  collectCoverage: false,
+  // collectCoverageFrom temporarily disabled until suites are stabilised
   coverageThreshold: {
     global: { branches: 0, functions: 0, lines: 0, statements: 0 },
   },
