@@ -2,7 +2,7 @@
 Admin endpoints for payment provider management and analytics
 """
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from typing import List, Dict, Any, Optional
 from decimal import Decimal
 from datetime import datetime, timedelta
@@ -12,17 +12,55 @@ from ...services.payment_factory import payment_factory
 from ...services.payment_analytics import PaymentAnalyticsService
 from ...services.smart_routing import RoutingStrategy
 from ...core.database import get_db
-from ...api.v1.endpoints.auth import get_current_user, User
+from ...api.v1.endpoints.auth import get_current_user, User # get_current_user already has Request
 from ...crud.payments import get_provider_analytics, create_payment_analytics_report
 from ...core.responses import APIResponseHelper
+from ...services.audit_logger import AuditLoggerService
+from ...models.audit_log import AuditEventType, AuditEventStatus
 
 router = APIRouter()
 
+# Define required admin roles (assuming these roles exist or will be created)
+# TODO: Confirm with user if "admin" and "platform_owner" are the correct privileged roles.
+ADMIN_ROLES = ["admin", "platform_owner"]
+
 @router.get("/providers/status")
 async def get_providers_status(
+    request: Request,
+    db: Session = Depends(get_db), # Added db for AuditLoggerService
     current_user: User = Depends(get_current_user)
 ) -> Dict[str, Any]:
     """Get status of all payment providers"""
+    audit_service = AuditLoggerService(db)
+    ip_address = request.client.host if request.client else "unknown"
+    user_agent = request.headers.get("user-agent", "unknown")
+    action_description = "Get payment providers status"
+
+    if current_user.role not in ADMIN_ROLES:
+        await audit_service.create_audit_log(
+            event_type=AuditEventType.ACCESS_DENIED,
+            event_status=AuditEventStatus.FAILURE,
+            action_performed=action_description,
+            user_id=current_user.id,
+            username_or_email=current_user.email,
+            ip_address=ip_address,
+            user_agent=user_agent,
+            details={"required_roles": ADMIN_ROLES, "reason": f"User role '{current_user.role}' not authorized."},
+            commit=True
+        )
+        raise HTTPException(status_code=403, detail="Forbidden: Insufficient privileges.")
+
+    await audit_service.create_audit_log(
+        event_type=AuditEventType.ACCESS_GRANTED,
+        event_status=AuditEventStatus.SUCCESS,
+        action_performed=action_description,
+        user_id=current_user.id,
+        username_or_email=current_user.email,
+        ip_address=ip_address,
+        user_agent=user_agent,
+        commit=True
+    )
+    # Proceed with endpoint logic
     providers = payment_factory.get_available_providers()
     status = {}
     
@@ -47,12 +85,36 @@ async def get_providers_status(
 
 @router.post("/providers/test/{provider_name}")
 async def test_provider(
+    request: Request,
     provider_name: str,
+    db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ) -> Dict[str, Any]:
     """Test a payment provider configuration"""
+    audit_service = AuditLoggerService(db)
+    ip_address = request.client.host if request.client else "unknown"
+    user_agent = request.headers.get("user-agent", "unknown")
+    action_description = f"Test payment provider: {provider_name}"
+
+    if current_user.role not in ADMIN_ROLES:
+        await audit_service.create_audit_log(
+            event_type=AuditEventType.ACCESS_DENIED, event_status=AuditEventStatus.FAILURE,
+            action_performed=action_description, user_id=current_user.id, username_or_email=current_user.email,
+            ip_address=ip_address, user_agent=user_agent,
+            details={"required_roles": ADMIN_ROLES, "reason": f"User role '{current_user.role}' not authorized."}, commit=True
+        )
+        raise HTTPException(status_code=403, detail="Forbidden: Insufficient privileges.")
+
+    await audit_service.create_audit_log(
+        event_type=AuditEventType.ACCESS_GRANTED, event_status=AuditEventStatus.SUCCESS,
+        action_performed=action_description, user_id=current_user.id, username_or_email=current_user.email,
+        ip_address=ip_address, user_agent=user_agent, commit=True
+    )
+
     provider = payment_factory.get_provider(provider_name)
     if not provider:
+        # Log this attempt to test non-existent provider as a form of admin action failure?
+        # For now, let the HTTP exception suffice.
         raise HTTPException(status_code=404, detail="Provider not found")
     
     try:
@@ -80,12 +142,33 @@ async def test_provider(
 
 @router.get("/providers/analytics")
 async def get_provider_analytics_endpoint(
+    request: Request,
     start_date: str,
     end_date: str,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ) -> Dict[str, Any]:
     """Get payment provider analytics and cost analysis"""
+    audit_service = AuditLoggerService(db)
+    ip_address = request.client.host if request.client else "unknown"
+    user_agent = request.headers.get("user-agent", "unknown")
+    action_description = "Get payment provider analytics"
+
+    if current_user.role not in ADMIN_ROLES:
+        await audit_service.create_audit_log(
+            event_type=AuditEventType.ACCESS_DENIED, event_status=AuditEventStatus.FAILURE,
+            action_performed=action_description, user_id=current_user.id, username_or_email=current_user.email,
+            ip_address=ip_address, user_agent=user_agent,
+            details={"required_roles": ADMIN_ROLES, "reason": f"User role '{current_user.role}' not authorized."}, commit=True
+        )
+        raise HTTPException(status_code=403, detail="Forbidden: Insufficient privileges.")
+
+    await audit_service.create_audit_log(
+        event_type=AuditEventType.ACCESS_GRANTED, event_status=AuditEventStatus.SUCCESS,
+        action_performed=action_description, user_id=current_user.id, username_or_email=current_user.email,
+        ip_address=ip_address, user_agent=user_agent, commit=True
+    )
+
     try:
         analytics = await get_provider_analytics(start_date, end_date, db)
         
@@ -104,11 +187,33 @@ async def get_provider_analytics_endpoint(
 
 @router.get("/providers/cost-comparison")
 async def get_cost_comparison(
+    request: Request,
     amount: float,
     monthly_volume: float = 5000,
+    db: Session = Depends(get_db), # Added for audit
     current_user: User = Depends(get_current_user)
 ) -> Dict[str, Any]:
     """Compare costs across all providers for given amount and volume"""
+    audit_service = AuditLoggerService(db)
+    ip_address = request.client.host if request.client else "unknown"
+    user_agent = request.headers.get("user-agent", "unknown")
+    action_description = "Get provider cost comparison"
+
+    if current_user.role not in ADMIN_ROLES:
+        await audit_service.create_audit_log(
+            event_type=AuditEventType.ACCESS_DENIED, event_status=AuditEventStatus.FAILURE,
+            action_performed=action_description, user_id=current_user.id, username_or_email=current_user.email,
+            ip_address=ip_address, user_agent=user_agent,
+            details={"required_roles": ADMIN_ROLES, "reason": f"User role '{current_user.role}' not authorized."}, commit=True
+        )
+        raise HTTPException(status_code=403, detail="Forbidden: Insufficient privileges.")
+
+    await audit_service.create_audit_log(
+        event_type=AuditEventType.ACCESS_GRANTED, event_status=AuditEventStatus.SUCCESS,
+        action_performed=action_description, user_id=current_user.id, username_or_email=current_user.email,
+        ip_address=ip_address, user_agent=user_agent, commit=True
+    )
+
     amount_decimal = Decimal(str(amount))
     monthly_volume_decimal = Decimal(str(monthly_volume))
     
@@ -145,6 +250,7 @@ async def get_cost_comparison(
 
 @router.get("/analytics/provider-performance")
 async def get_provider_performance(
+    request: Request,
     restaurant_id: Optional[str] = Query(None),
     start_date: Optional[datetime] = Query(None),
     end_date: Optional[datetime] = Query(None),
@@ -152,6 +258,25 @@ async def get_provider_performance(
     current_user: User = Depends(get_current_user)
 ):
     """Get comprehensive provider performance analytics"""
+    audit_service = AuditLoggerService(db)
+    ip_address = request.client.host if request.client else "unknown"
+    user_agent = request.headers.get("user-agent", "unknown")
+    action_description = "Get provider performance analytics"
+
+    if current_user.role not in ADMIN_ROLES:
+        await audit_service.create_audit_log(
+            event_type=AuditEventType.ACCESS_DENIED, event_status=AuditEventStatus.FAILURE,
+            action_performed=action_description, user_id=current_user.id, username_or_email=current_user.email,
+            ip_address=ip_address, user_agent=user_agent,
+            details={"required_roles": ADMIN_ROLES, "reason": f"User role '{current_user.role}' not authorized."}, commit=True
+        )
+        raise HTTPException(status_code=403, detail="Forbidden: Insufficient privileges.")
+
+    await audit_service.create_audit_log(
+        event_type=AuditEventType.ACCESS_GRANTED, event_status=AuditEventStatus.SUCCESS,
+        action_performed=action_description, user_id=current_user.id, username_or_email=current_user.email,
+        ip_address=ip_address, user_agent=user_agent, commit=True
+    )
     
     analytics_service = PaymentAnalyticsService(db)
     
@@ -168,6 +293,7 @@ async def get_provider_performance(
 
 @router.get("/analytics/cost-optimization")
 async def get_cost_optimization(
+    request: Request,
     restaurant_id: Optional[str] = Query(None),
     start_date: Optional[datetime] = Query(None),
     end_date: Optional[datetime] = Query(None),
@@ -175,6 +301,25 @@ async def get_cost_optimization(
     current_user: User = Depends(get_current_user)
 ):
     """Get detailed cost optimization report"""
+    audit_service = AuditLoggerService(db)
+    ip_address = request.client.host if request.client else "unknown"
+    user_agent = request.headers.get("user-agent", "unknown")
+    action_description = "Get cost optimization report"
+
+    if current_user.role not in ADMIN_ROLES:
+        await audit_service.create_audit_log(
+            event_type=AuditEventType.ACCESS_DENIED, event_status=AuditEventStatus.FAILURE,
+            action_performed=action_description, user_id=current_user.id, username_or_email=current_user.email,
+            ip_address=ip_address, user_agent=user_agent,
+            details={"required_roles": ADMIN_ROLES, "reason": f"User role '{current_user.role}' not authorized."}, commit=True
+        )
+        raise HTTPException(status_code=403, detail="Forbidden: Insufficient privileges.")
+
+    await audit_service.create_audit_log(
+        event_type=AuditEventType.ACCESS_GRANTED, event_status=AuditEventStatus.SUCCESS,
+        action_performed=action_description, user_id=current_user.id, username_or_email=current_user.email,
+        ip_address=ip_address, user_agent=user_agent, commit=True
+    )
     
     analytics_service = PaymentAnalyticsService(db)
     

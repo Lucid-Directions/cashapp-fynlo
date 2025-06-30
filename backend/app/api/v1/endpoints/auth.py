@@ -4,7 +4,7 @@ Authentication endpoints for Fynlo POS
 
 from datetime import datetime, timedelta
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from jose import JWTError, jwt
@@ -21,6 +21,9 @@ from app.core.exceptions import (
     ConflictException,
     iOSErrorHelper
 )
+
+from app.services.audit_logger import AuditLoggerService
+from app.models.audit_log import AuditEventType, AuditEventStatus
 
 router = APIRouter()
 security = HTTPBearer()
@@ -98,40 +101,87 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     return encoded_jwt
 
 async def get_current_user(
+    request: Request, # Added Request
     credentials: HTTPAuthorizationCredentials = Depends(security),
     db: Session = Depends(get_db),
     redis: RedisClient = Depends(get_redis)
 ) -> User:
     """Get current authenticated user"""
+    audit_service = AuditLoggerService(db)
+    ip_address = request.client.host if request.client else "unknown"
+    user_agent = request.headers.get("user-agent", "unknown")
+    action_prefix = f"Access to {request.url.path} denied"
+
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
     
+    user_id_from_token: Optional[str] = None
     try:
         payload = jwt.decode(credentials.credentials, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-        user_id: str = payload.get("sub")
-        if user_id is None:
+        user_id_from_token = payload.get("sub")
+        if user_id_from_token is None:
+            await audit_service.create_audit_log(
+                event_type=AuditEventType.ACCESS_DENIED, event_status=AuditEventStatus.FAILURE,
+                action_performed=f"{action_prefix}: Invalid token (no sub).",
+                ip_address=ip_address, user_agent=user_agent,
+                details={"token_prefix": credentials.credentials[:10]+"...", "reason": "Token missing 'sub' field."},
+                commit=True
+            )
             raise credentials_exception
-    except JWTError:
+    except JWTError as e:
+        await audit_service.create_audit_log(
+            event_type=AuditEventType.ACCESS_DENIED, event_status=AuditEventStatus.FAILURE,
+            action_performed=f"{action_prefix}: JWT decoding error.",
+            ip_address=ip_address, user_agent=user_agent,
+            details={"token_prefix": credentials.credentials[:10]+"...", "error": str(e), "reason": "JWTError"},
+            commit=True
+        )
         raise credentials_exception
     
-    # Check if token is blacklisted in Redis
     is_blacklisted = await redis.exists(f"blacklist:{credentials.credentials}")
     if is_blacklisted:
-        raise iOSErrorHelper.token_expired()
+        await audit_service.create_audit_log(
+            event_type=AuditEventType.ACCESS_DENIED, event_status=AuditEventStatus.FAILURE,
+            action_performed=f"{action_prefix}: Token blacklisted.",
+            username_or_email=user_id_from_token, # Attempted user from token
+            ip_address=ip_address, user_agent=user_agent,
+            details={"token_prefix": credentials.credentials[:10]+"...", "reason": "Token is blacklisted (logged out)."},
+            commit=True
+        )
+        raise iOSErrorHelper.token_expired() # This might be better as a generic 401
     
-    user = db.query(User).filter(User.id == user_id).first()
+    user = db.query(User).filter(User.id == user_id_from_token).first()
     if user is None:
-        raise AuthenticationException("User not found")
+        await audit_service.create_audit_log(
+            event_type=AuditEventType.ACCESS_DENIED, event_status=AuditEventStatus.FAILURE,
+            action_performed=f"{action_prefix}: User not found.",
+            username_or_email=user_id_from_token, # Attempted user ID from token
+            ip_address=ip_address, user_agent=user_agent,
+            details={"reason": "User ID from token not found in database."},
+            commit=True
+        )
+        raise AuthenticationException("User not found") # This might be better as a generic 401
     
     if not user.is_active:
-        raise AuthenticationException("Account is inactive")
+        await audit_service.create_audit_log(
+            event_type=AuditEventType.ACCESS_DENIED, event_status=AuditEventStatus.FAILURE,
+            action_performed=f"{action_prefix}: Account inactive.",
+            user_id=user.id, username_or_email=user.email,
+            ip_address=ip_address, user_agent=user_agent,
+            details={"reason": "User account is inactive."},
+            commit=True
+        )
+        raise AuthenticationException("Account is inactive") # This might be better as a generic 401
     
+    # If we reach here, access is implicitly granted for this stage.
+    # Explicit ACCESS_GRANTED could be logged in the endpoint itself if needed for specific sensitive operations.
     return user
 
 async def get_current_user_optional(
+    request: Request, # Added Request
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
     db: Session = Depends(get_db),
     redis: RedisClient = Depends(get_redis)
@@ -165,23 +215,49 @@ async def get_current_user_optional(
 
 @router.post("/login")
 async def login(
+    request: Request,
     user_data: UserLogin,
     db: Session = Depends(get_db),
     redis: RedisClient = Depends(get_redis)
 ):
     """User login with standardized iOS response"""
+    audit_service = AuditLoggerService(db)
+    ip_address = request.client.host if request.client else "unknown"
+    user_agent = request.headers.get("user-agent", "unknown")
+
     user = db.query(User).filter(User.email == user_data.email).first()
     
     if not user or not verify_password(user_data.password, user.password_hash):
+        await audit_service.create_audit_log(
+            event_type=AuditEventType.USER_LOGIN_FAILURE,
+            event_status=AuditEventStatus.FAILURE,
+            action_performed="User login attempt failed: Invalid credentials.",
+            username_or_email=user_data.email,
+            ip_address=ip_address,
+            user_agent=user_agent,
+            details={"reason": "Invalid email or password."},
+            commit=True # Commit immediately as this is a standalone failure event
+        )
         raise iOSErrorHelper.invalid_credentials()
     
     if not user.is_active:
+        await audit_service.create_audit_log(
+            event_type=AuditEventType.USER_LOGIN_FAILURE,
+            event_status=AuditEventStatus.FAILURE,
+            action_performed="User login attempt failed: Account inactive.",
+            user_id=user.id,
+            username_or_email=user.email,
+            ip_address=ip_address,
+            user_agent=user_agent,
+            details={"reason": "User account is inactive."},
+            commit=True # Commit immediately
+        )
         raise AuthenticationException("Account is inactive")
     
     # Update last login
     user.last_login = datetime.utcnow()
-    db.commit()
-    
+    # db.commit() will be called after successful audit logging or by audit_service if commit=True
+
     # Create access token
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
@@ -209,6 +285,20 @@ async def login(
         "is_active": user.is_active,
         "last_login": user.last_login.isoformat() if user.last_login else None
     }
+
+    # Log successful login
+    await audit_service.create_audit_log(
+        event_type=AuditEventType.USER_LOGIN_SUCCESS,
+        event_status=AuditEventStatus.SUCCESS,
+        action_performed="User logged in successfully.",
+        user_id=user.id,
+        username_or_email=user.email,
+        ip_address=ip_address,
+        user_agent=user_agent,
+        commit=False # User last_login update and this log will be committed together
+    )
+    db.commit() # Commit user.last_login and audit log
+    db.refresh(user) # Refresh user to get updated last_login if needed by response
     
     return iOSResponseHelper.login_success(
         access_token=access_token,
@@ -217,13 +307,28 @@ async def login(
 
 @router.post("/register")
 async def register(
+    request: Request,
     user_data: UserRegister,
     db: Session = Depends(get_db)
 ):
     """User registration with standardized response"""
+    audit_service = AuditLoggerService(db)
+    ip_address = request.client.host if request.client else "unknown"
+    user_agent = request.headers.get("user-agent", "unknown")
+
     # Check if user already exists
     existing_user = db.query(User).filter(User.email == user_data.email).first()
     if existing_user:
+        await audit_service.create_audit_log(
+            event_type=AuditEventType.USER_REGISTRATION_FAILURE,
+            event_status=AuditEventStatus.FAILURE,
+            action_performed="User registration failed: Email already registered.",
+            username_or_email=user_data.email,
+            ip_address=ip_address,
+            user_agent=user_agent,
+            details={"reason": "Email already registered.", "conflicting_field": "email"},
+            commit=True # Standalone failure event
+        )
         raise ConflictException(
             message="Email already registered",
             conflicting_field="email"
@@ -242,7 +347,22 @@ async def register(
     )
     
     db.add(new_user)
-    db.commit()
+    # db.commit() will be called after successful audit logging
+
+    await audit_service.create_audit_log(
+        event_type=AuditEventType.USER_REGISTRATION_SUCCESS,
+        event_status=AuditEventStatus.SUCCESS,
+        action_performed="User registered successfully.",
+        user_id=new_user.id, # Will be available after flush if not committed by audit_service
+        username_or_email=new_user.email,
+        ip_address=ip_address,
+        user_agent=user_agent,
+        resource_type="User",
+        resource_id=str(new_user.id), # Will be available after flush
+        commit=False # Commit with user creation
+    )
+
+    db.commit() # Commits new_user and audit_log
     db.refresh(new_user)
     
     user_response = {
@@ -264,16 +384,46 @@ async def register(
 
 @router.post("/logout")
 async def logout(
+    request: Request,
     credentials: HTTPAuthorizationCredentials = Depends(security),
     current_user: User = Depends(get_current_user),
-    redis: RedisClient = Depends(get_redis)
+    redis: RedisClient = Depends(get_redis),
+    db: Session = Depends(get_db)
 ):
     """User logout with standardized response"""
+    audit_service = AuditLoggerService(db)
+    ip_address = request.client.host if request.client else "unknown"
+    user_agent = request.headers.get("user-agent", "unknown")
+
     # Add token to blacklist
     await redis.set(f"blacklist:{credentials.credentials}", "1", expire=86400)  # 24 hours
     
     # Remove session
     await redis.delete_session(str(current_user.id))
+
+    await audit_service.create_audit_log(
+        event_type=AuditEventType.USER_LOGOUT,
+        event_status=AuditEventStatus.SUCCESS,
+        action_performed="User logged out successfully.",
+        user_id=current_user.id,
+        username_or_email=current_user.email,
+        ip_address=ip_address,
+        user_agent=user_agent,
+        commit=True # Standalone action
+    )
+
+    # Log token blacklisting as a separate event for clarity
+    await audit_service.create_audit_log(
+        event_type=AuditEventType.TOKEN_BLACKLISTED,
+        event_status=AuditEventStatus.SUCCESS,
+        action_performed="Access token blacklisted during logout.",
+        user_id=current_user.id,
+        username_or_email=current_user.email,
+        ip_address=ip_address,
+        user_agent=user_agent,
+        details={"token_prefix": credentials.credentials[:10] + "..."}, # Avoid logging full token
+        commit=True # Standalone action
+    )
     
     return iOSResponseHelper.logout_success()
 
