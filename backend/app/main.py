@@ -15,9 +15,13 @@ from app.core.config import settings
 from app.core.database import init_db
 from app.api.v1.api import api_router
 from app.api.mobile.endpoints import router as mobile_router
-from app.core.redis_client import init_redis
+from app.core.redis_client import init_redis, close_redis
 from app.core.websocket import websocket_manager
 from app.core.exceptions import register_exception_handlers
+from app.middleware.rate_limit_middleware import init_fastapi_limiter
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 from app.core.responses import APIResponseHelper
 from app.core.mobile_middleware import (
     MobileCompatibilityMiddleware,
@@ -58,8 +62,12 @@ async def lifespan(app: FastAPI):
     logger.info("✅ Database initialized")
     
     # Initialize Redis
-    await init_redis()
+    await init_redis() # This now connects the redis_client
     logger.info("✅ Redis connected")
+
+    # Initialize FastAPI Limiter (depends on Redis being connected)
+    await init_fastapi_limiter()
+    logger.info("✅ Rate limiter initialized")
     
     # WebSocket manager is ready (no initialization needed)
     logger.info("✅ WebSocket manager ready")
@@ -71,6 +79,8 @@ async def lifespan(app: FastAPI):
     
     # Cleanup on shutdown
     logger.info("🔄 Shutting down Fynlo POS Backend...")
+    await close_redis() # Ensure Redis client is closed
+    logger.info("✅ Redis client closed.")
     logger.info("✅ Cleanup complete")
 
 app = FastAPI(
@@ -109,8 +119,17 @@ app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(MobileCompatibilityMiddleware, enable_cors=True, enable_port_redirect=True)
 app.add_middleware(MobileDataOptimizationMiddleware)
 
+# Add SlowAPI middleware (for rate limiting)
+# This middleware itself doesn't enforce limits but makes the limiter available.
+# Limits are enforced by decorators or dependencies.
+app.add_middleware(SlowAPIMiddleware)
+
 # Register standardized exception handlers
-register_exception_handlers(app)
+register_exception_handlers(app) # General handlers
+
+# Add specific handler for rate limit exceeded
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
 
 # Include API routes
 app.include_router(api_router, prefix="/api/v1")
