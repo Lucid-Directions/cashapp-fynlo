@@ -8,8 +8,8 @@
 // Get the current environment
 const isDevelopment = __DEV__;
 
-// Mac's LAN IP address for device testing
-const MAC_LAN_IP = '192.168.0.109';
+// Mac's LAN IP address for device testing - Updated to current network
+const MAC_LAN_IP = '192.168.68.101';
 
 // API Configuration
 export const API_CONFIG = {
@@ -28,8 +28,12 @@ export const API_CONFIG = {
     return `${this.BASE_URL}${this.API_VERSION}`;
   },
   
-  // Request timeout (2 seconds to prevent app hanging)
-  TIMEOUT: 2000,
+  // Request timeout (10 seconds for reliable network calls)
+  TIMEOUT: 10000,
+  
+  // Retry configuration
+  RETRY_ATTEMPTS: 3,
+  RETRY_DELAY: 1000,
   
   // Health check endpoint
   HEALTH_ENDPOINT: '/health',

@@ -459,14 +459,9 @@ const styles = StyleSheet.create({
   },
   qrCodeWrapper: {
     padding: 16,
-    backgroundColor: Colors.white,
     borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
     marginBottom: 16,
+    ...require('../../utils/ShadowUtils').createOptimizedShadow('medium', Colors.white),
   },
   qrInstructions: {
     fontSize: 16,

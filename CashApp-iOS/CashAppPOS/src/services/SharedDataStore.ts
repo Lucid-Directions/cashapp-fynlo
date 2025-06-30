@@ -5,8 +5,9 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// API Configuration
+// API Configuration and robust networking
 import API_CONFIG from '../config/api';
+import NetworkUtils from '../utils/NetworkUtils';
 const API_BASE_URL = API_CONFIG.FULL_API_URL;
 
 interface ServiceChargeConfig {
@@ -47,27 +48,18 @@ class SharedDataStore {
   // Service Charge Management
   async getServiceChargeConfig(): Promise<ServiceChargeConfig> {
     try {
-      // Get auth token for API requests
-      const authToken = await AsyncStorage.getItem('auth_token');
-      const headers: any = {
-        'Content-Type': 'application/json',
-      };
+      console.log('💰 SharedDataStore - Loading service charge config...');
       
-      if (authToken) {
-        headers['Authorization'] = `Bearer ${authToken}`;
-      }
+      // Try to get from real backend API first using robust networking
+      const networkResult = await NetworkUtils.getServiceChargeConfig();
 
-      // Try to get from real backend API first
-      const response = await fetch(`${API_BASE_URL}/platform/service-charge`, {
-        method: 'GET',
-        headers,
-      });
-
-      if (response.ok) {
-        const result = await response.json();
+      if (networkResult.success && networkResult.data) {
+        console.log('✅ Service charge config received from API:', networkResult.data);
         
         // Handle different API response formats
         let config: ServiceChargeConfig;
+        const result = networkResult.data;
+        
         if (result.data && result.data.service_charge) {
           // API response with wrapped data
           const serviceChargeData = result.data.service_charge;
@@ -95,12 +87,13 @@ class SharedDataStore {
           };
         }
         
+        // Cache the result and save to AsyncStorage for offline use
         this.cache.set('serviceCharge', config);
-        console.log('✅ Service charge config from API:', config);
+        await AsyncStorage.setItem('platform.serviceCharge', JSON.stringify(config));
+        console.log('✅ Service charge config cached locally:', config);
         return config;
       } else {
-        const errorText = await response.text();
-        console.warn('⚠️ API GET failed:', response.status, errorText);
+        console.warn('⚠️ API request failed:', networkResult.error);
       }
 
       // Fallback to AsyncStorage if API fails

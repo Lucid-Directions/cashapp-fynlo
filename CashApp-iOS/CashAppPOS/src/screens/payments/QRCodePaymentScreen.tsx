@@ -336,15 +336,10 @@ const QRCodePaymentScreen: React.FC = () => {
     },
     qrContainer: {
       alignItems: 'center',
-      backgroundColor: 'white',
       padding: 20,
       borderRadius: 16,
       marginBottom: 30,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 8,
-      elevation: 4,
+      ...require('../../utils/ShadowUtils').createOptimizedShadow('medium', 'white'),
     },
     loadingContainer: {
       width: 200,
