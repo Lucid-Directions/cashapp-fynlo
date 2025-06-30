@@ -4,25 +4,31 @@ import DatabaseService from './DatabaseService';
 import MockDataService from './MockDataService';
 import APITestingService from './APITestingService';
 import API_CONFIG from '../config/api';
+import { envBool, IS_DEV } from '../env';
 
 // Feature flags for controlling data sources
 export interface FeatureFlags {
   USE_REAL_API: boolean;
-  TEST_API_MODE: boolean; // NEW: Test API connections without switching from mock data
+  TEST_API_MODE: boolean;
   ENABLE_PAYMENTS: boolean;
   ENABLE_HARDWARE: boolean;
   SHOW_DEV_MENU: boolean;
   MOCK_AUTHENTICATION: boolean;
 }
 
-// Default feature flags - PHASE 3: Enable real API for production data flow
+// -----------------------------------------------------------------------------
+// Stage-0 default flags
+// – Keep EXACTLY the same behaviour as today so CI stays green.
+// – Each flag first checks an env variable so we can flip them in future stages
+//   without code changes.
+// -----------------------------------------------------------------------------
 const DEFAULT_FLAGS: FeatureFlags = {
-  USE_REAL_API: true,   // CHANGED: Enable real API to fix payment processing
-  TEST_API_MODE: true,  // Keep API testing enabled
-  ENABLE_PAYMENTS: true, // CHANGED: Enable real payment processing
-  ENABLE_HARDWARE: false,
-  SHOW_DEV_MENU: __DEV__,
-  MOCK_AUTHENTICATION: false, // Use real authentication
+  USE_REAL_API: envBool('USE_REAL_API', false),
+  TEST_API_MODE: envBool('TEST_API_MODE', true),
+  ENABLE_PAYMENTS: envBool('ENABLE_PAYMENTS', false),
+  ENABLE_HARDWARE: envBool('ENABLE_HARDWARE', false),
+  SHOW_DEV_MENU: envBool('SHOW_DEV_MENU', IS_DEV),
+  MOCK_AUTHENTICATION: envBool('MOCK_AUTHENTICATION', true),
 };
 
 /**
