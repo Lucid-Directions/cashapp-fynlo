@@ -22,7 +22,7 @@ export interface FeatureFlags {
 //   without code changes.
 // -----------------------------------------------------------------------------
 const DEFAULT_FLAGS: FeatureFlags = {
-  USE_REAL_API: envBool('USE_REAL_API', false),
+  USE_REAL_API: envBool('USE_REAL_API', true),
   TEST_API_MODE: envBool('TEST_API_MODE', true),
   ENABLE_PAYMENTS: envBool('ENABLE_PAYMENTS', false),
   ENABLE_HARDWARE: envBool('ENABLE_HARDWARE', false),
