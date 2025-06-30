@@ -24,6 +24,7 @@ from app.core.mobile_middleware import (
     MobileDataOptimizationMiddleware
 )
 from app.middleware.version_middleware import APIVersionMiddleware
+from app.middleware.security_headers_middleware import SecurityHeadersMiddleware # Added import
 from datetime import datetime
 
 # Configure logging
@@ -65,17 +66,27 @@ app = FastAPI(
 )
 
 # CORS middleware for React Native frontend
+if settings.ENVIRONMENT == "production":
+    allowed_origins = settings.PRODUCTION_ALLOWED_ORIGINS
+else:
+    allowed_origins = ["*"] # Permissive for development
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure for production
+    allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["*"], # Can be restricted further if needed e.g. ["GET", "POST", "PUT", "DELETE"]
+    allow_headers=["*"], # Can be restricted further e.g. ["Content-Type", "Authorization"]
 )
 
 # Add API version middleware for backward compatibility (FIRST in middleware stack)
 # This must be added before other middleware to ensure path rewriting happens first
 app.add_middleware(APIVersionMiddleware)
+
+# Add Security Headers Middleware (after CORS and Versioning, before others)
+# Ensure this import is added at the top of the file:
+# from app.middleware.security_headers_middleware import SecurityHeadersMiddleware
+app.add_middleware(SecurityHeadersMiddleware)
 
 # Add mobile compatibility middleware
 app.add_middleware(MobileCompatibilityMiddleware, enable_cors=True, enable_port_redirect=True)
