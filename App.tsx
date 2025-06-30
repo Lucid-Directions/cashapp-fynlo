@@ -21,6 +21,10 @@ import {
   Image,
 } from 'react-native';
 
+// Import default color constants and expose as global for legacy screens
+import DefaultColors from './CashApp-iOS/CashAppPOS/src/constants/Colors';
+(globalThis as any).Colors = DefaultColors;
+
 // Modern Color Palette - Clean and Professional
 const Colors = {
   primary: '#2C3E50',      // Dark Blue-Gray

@@ -13,6 +13,7 @@ export const Colors = {
   text: '#333333',
   lightText: '#666666',
   border: '#DDDDDD',
+  gold: '#FFD700',         // Gold color for special UI elements
 };
 
 export default Colors;
