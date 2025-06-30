@@ -48,6 +48,9 @@ class Settings(BaseSettings):
     # File Upload
     MAX_FILE_SIZE: int = 10 * 1024 * 1024  # 10MB
     UPLOAD_DIR: str = "uploads"
+
+    # CORS
+    PRODUCTION_ALLOWED_ORIGINS: list[str] = ["https://your-production-frontend.com"] # TODO: Update with actual frontend domain
     
     class Config:
         case_sensitive = True
