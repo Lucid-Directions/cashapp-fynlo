@@ -12,66 +12,236 @@ class SquareProvider(PaymentProvider):
         super().__init__(config)
         self.client = squareup.Client(
             access_token=config.get("access_token"),
-            environment=config.get("environment", "production")
+            environment=config.get("environment", "sandbox")  # Default to sandbox
         )
         self.location_id = config.get("location_id")
-        self.fee_percentage = Decimal("0.0175")  # 1.75%
-        self.fee_fixed = Decimal("0.00")  # No fixed fee
-    
-    async def process_payment(
+        # auto_complete should be sourced from config, true by default if not specified
+        self.auto_complete = config.get("custom_settings", {}).get("auto_complete", True)
+        self.fee_percentage = Decimal(config.get("fee_percentage", "0.0175"))  # 1.75%
+        self.fee_fixed = Decimal(config.get("fee_fixed", "0.00"))  # No fixed fee
+        self.provider_name = "square"
+
+    async def create_payment(
         self,
         amount: Decimal,
         currency: str = "GBP",
+        source_id: Optional[str] = None, # e.g., card nonce from Square Web Payments SDK
         customer_id: Optional[str] = None,
-        payment_method_id: Optional[str] = None,
-        metadata: Optional[Dict[str, Any]] = None
+        order_id: Optional[str] = None,
+        note: Optional[str] = None,
+        metadata: Optional[Dict[str, Any]] = None # Additional metadata
     ) -> Dict[str, Any]:
+        """
+        Creates a payment with Square.
+        If self.auto_complete is true (default), this will attempt to complete the payment.
+        If self.auto_complete is false, this creates the payment and it needs to be completed later.
+        """
         try:
-            # Create payment request
-            create_payment_request = {
-                "source_id": payment_method_id,  # Square calls it source_id
+            if not source_id:
+                # TODO: Handle scenarios where source_id might not be immediately available
+                # This might involve returning data for client-side confirmation or alternative flows
+                # For now, assume source_id is required for direct payment creation.
+                # Or, this method could be used to create an order first, then pay for it.
+                # The current implementation focuses on direct payment with a source_id.
+                return {
+                    "provider": self.provider_name,
+                    "status": PaymentStatus.FAILED.value,
+                    "error": "source_id is required to create a Square payment."
+                }
+
+            payment_body = {
+                "source_id": source_id,
                 "idempotency_key": str(uuid.uuid4()),
                 "amount_money": {
-                    "amount": int(amount * 100),
-                    "currency": currency
+                    "amount": int(amount * 100),  # Amount in cents
+                    "currency": currency.upper()
                 },
-                "location_id": self.location_id
+                "location_id": self.location_id,
+                "autocomplete": self.auto_complete
             }
-            
+
             if customer_id:
-                create_payment_request["customer_id"] = customer_id
-            
+                payment_body["customer_id"] = customer_id
+            if order_id:
+                payment_body["order_id"] = order_id # Associate with a Square Order if one exists
+            if note:
+                payment_body["note"] = note
             if metadata:
-                create_payment_request["reference_id"] = metadata.get("order_id", "")
-                create_payment_request["note"] = metadata.get("note", "")
-            
-            result = self.client.payments.create_payment(
-                body=create_payment_request
-            )
-            
+                # Square's CreatePayment `metadata` field is key-value (string:string)
+                # For simplicity, we'll pass it if provided, but may need transformation
+                # if our internal metadata is complex. For now, let's assume it's simple.
+                # payment_body["metadata"] = metadata # This is not directly available in CreatePayment
+                # Using reference_id for simple string metadata, or note.
+                # For richer metadata, one would typically link to an Order.
+                if "reference_id" in metadata: # Example, could be order_id or custom ref
+                    payment_body["reference_id"] = str(metadata["reference_id"])
+
+
+            result = self.client.payments.create_payment(body=payment_body)
+
             if result.is_success():
                 payment = result.body.get('payment', {})
-                status = PaymentStatus.SUCCESS if payment.get('status') == 'COMPLETED' else PaymentStatus.PENDING
+                # Determine status based on Square's payment status and our autocomplete setting
+                square_status = payment.get('status')
+                current_status = PaymentStatus.UNKNOWN
+
+                if square_status == 'COMPLETED':
+                    current_status = PaymentStatus.SUCCESS
+                elif square_status == 'APPROVED': # Payment approved, needs capture if autocomplete=false
+                    current_status = PaymentStatus.PENDING if not self.auto_complete else PaymentStatus.SUCCESS
+                elif square_status == 'PENDING': # Payment is in progress (e.g. awaiting confirmation)
+                    current_status = PaymentStatus.PENDING
+                elif square_status == 'CANCELED':
+                    current_status = PaymentStatus.CANCELLED
+                elif square_status == 'FAILED':
+                    current_status = PaymentStatus.FAILED
                 
                 return self.standardize_response(
                     provider_response=payment,
-                    status=status,
-                    amount=amount,
-                    transaction_id=payment.get('id')
+                    status=current_status,
+                    amount=Decimal(payment['amount_money']['amount']) / 100,
+                    transaction_id=payment.get('id'),
+                    raw_response=result.body # Include full raw response
                 )
             else:
                 return {
                     "provider": self.provider_name,
                     "status": PaymentStatus.FAILED.value,
-                    "error": str(result.errors)
+                    "error": str(result.errors),
+                    "raw_response": result.body if result.body else result.errors
                 }
         except Exception as e:
+            # Log exception e
             return {
                 "provider": self.provider_name,
                 "status": PaymentStatus.FAILED.value,
                 "error": str(e)
             }
-    
+
+    async def process_payment(self, payment_id: str, order_id: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Processes (completes) an existing Square payment that was created with autocomplete=false.
+        If the payment is already completed or cannot be completed, returns its current status.
+        `payment_id` is the Square Payment ID.
+        `order_id` (optional) is the ID of the order to complete, if the payment is part of an order.
+        """
+        try:
+            # First, get the payment to check its status
+            get_payment_result = self.client.payments.get_payment(payment_id=payment_id)
+            if get_payment_result.is_error():
+                return {
+                    "provider": self.provider_name,
+                    "status": PaymentStatus.FAILED.value,
+                    "error": f"Failed to retrieve payment {payment_id}: {get_payment_result.errors}",
+                    "raw_response": get_payment_result.body
+                }
+
+            payment_data = get_payment_result.body.get('payment', {})
+            square_status = payment_data.get('status')
+
+            if square_status == 'COMPLETED':
+                return self.standardize_response(
+                    provider_response=payment_data,
+                    status=PaymentStatus.SUCCESS,
+                    amount=Decimal(payment_data['amount_money']['amount']) / 100,
+                    transaction_id=payment_data.get('id'),
+                    message="Payment is already completed.",
+                    raw_response=get_payment_result.body
+                )
+
+            if square_status != 'APPROVED': # Can only complete 'APPROVED' payments
+                return self.standardize_response(
+                    provider_response=payment_data,
+                    status=PaymentStatus.FAILED, # Or a more specific status based on square_status
+                    amount=Decimal(payment_data['amount_money']['amount']) / 100,
+                    transaction_id=payment_data.get('id'),
+                    error=f"Payment is not in an APPROVED state for completion. Current status: {square_status}",
+                    raw_response=get_payment_result.body
+                )
+
+            # If payment is APPROVED and autocomplete was false, attempt to complete it
+            complete_payment_body = {}
+            if order_id: # If completing a payment for a specific order.
+                # The CompletePayment endpoint does not take order_id.
+                # Completion is for the payment itself.
+                pass
+
+            result = self.client.payments.complete_payment(payment_id=payment_id, body=complete_payment_body)
+
+            if result.is_success():
+                completed_payment = result.body.get('payment', {})
+                return self.standardize_response(
+                    provider_response=completed_payment,
+                    status=PaymentStatus.SUCCESS,
+                    amount=Decimal(completed_payment['amount_money']['amount']) / 100,
+                    transaction_id=completed_payment.get('id'),
+                    raw_response=result.body
+                )
+            else:
+                # Attempt to get updated payment status even if complete failed
+                get_payment_result_after_fail = self.client.payments.get_payment(payment_id=payment_id)
+                payment_after_fail = get_payment_result_after_fail.body.get('payment', {}) if get_payment_result_after_fail.is_success() else payment_data
+
+                return {
+                    "provider": self.provider_name,
+                    "status": PaymentStatus.FAILED.value,
+                    "error": f"Failed to complete payment {payment_id}: {result.errors}",
+                    "current_square_status": payment_after_fail.get('status'),
+                    "transaction_id": payment_id,
+                    "raw_response": result.body if result.body else result.errors
+                }
+        except Exception as e:
+            # Log exception e
+            return {
+                "provider": self.provider_name,
+                "status": PaymentStatus.FAILED.value,
+                "error": str(e),
+                "transaction_id": payment_id
+            }
+
+    async def get_payment_status(self, payment_id: str) -> Dict[str, Any]:
+        """Gets the status of a specific payment by its Square Payment ID."""
+        try:
+            result = self.client.payments.get_payment(payment_id=payment_id)
+            if result.is_success():
+                payment = result.body.get('payment', {})
+                square_status = payment.get('status')
+                current_status = PaymentStatus.UNKNOWN
+
+                if square_status == 'COMPLETED':
+                    current_status = PaymentStatus.SUCCESS
+                elif square_status == 'APPROVED':
+                    current_status = PaymentStatus.PENDING # Needs capture or will auto-void
+                elif square_status == 'PENDING':
+                     current_status = PaymentStatus.PENDING
+                elif square_status == 'CANCELED':
+                    current_status = PaymentStatus.CANCELLED
+                elif square_status == 'FAILED':
+                    current_status = PaymentStatus.FAILED
+
+                return self.standardize_response(
+                    provider_response=payment,
+                    status=current_status,
+                    amount=Decimal(payment['amount_money']['amount']) / 100,
+                    transaction_id=payment.get('id'),
+                    raw_response=result.body
+                )
+            else:
+                return {
+                    "provider": self.provider_name,
+                    "status": PaymentStatus.FAILED.value,
+                    "error": f"Failed to retrieve payment status for {payment_id}: {result.errors}",
+                    "transaction_id": payment_id,
+                    "raw_response": result.body if result.body else result.errors
+                }
+        except Exception as e:
+            return {
+                "provider": self.provider_name,
+                "status": PaymentStatus.FAILED.value,
+                "error": str(e),
+                "transaction_id": payment_id
+            }
+
     async def refund_payment(
         self,
         transaction_id: str,
