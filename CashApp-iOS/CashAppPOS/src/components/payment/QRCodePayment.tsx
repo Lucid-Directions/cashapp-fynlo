@@ -10,6 +10,7 @@ import {
 import QRCode from 'react-native-qrcode-svg';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import PaymentService, { PaymentRequest, QRPaymentData } from '../../services/PaymentService';
+import QRPaymentErrorBoundary from './QRPaymentErrorBoundary';
 
 // Error-safe QR Code Wrapper Component
 const QRCodeWrapper: React.FC<{ qrCodeData: string }> = ({ qrCodeData }) => {
@@ -347,13 +348,20 @@ export const QRCodePayment: React.FC<QRCodePaymentProps> = ({
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>QR Code Payment</Text>
-        <TouchableOpacity onPress={onCancel} style={styles.closeButton}>
-          <Icon name="close" size={24} color={Colors.darkGray} />
-        </TouchableOpacity>
-      </View>
+    <QRPaymentErrorBoundary onReset={() => {
+      // Reset component state and regenerate QR
+      setStatus('generating');
+      setError('');
+      setQrData(null);
+      generateQRPayment();
+    }}>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.title}>QR Code Payment</Text>
+          <TouchableOpacity onPress={onCancel} style={styles.closeButton}>
+            <Icon name="close" size={24} color={Colors.darkGray} />
+          </TouchableOpacity>
+        </View>
 
       <View style={styles.amountContainer}>
         <Text style={styles.amountLabel}>Amount Due</Text>
@@ -384,7 +392,8 @@ export const QRCodePayment: React.FC<QRCodePaymentProps> = ({
           </TouchableOpacity>
         </View>
       )}
-    </View>
+      </View>
+    </QRPaymentErrorBoundary>
   );
 };
 
