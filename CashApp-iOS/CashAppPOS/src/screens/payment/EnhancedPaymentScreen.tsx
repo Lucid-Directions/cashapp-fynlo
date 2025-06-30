@@ -13,29 +13,13 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
+import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
 import useAppStore from '../../store/useAppStore';
 import useSettingsStore from '../../store/useSettingsStore';
 import DecimalInput from '../../components/inputs/DecimalInput';
 import SimpleDecimalInput from '../../components/inputs/SimpleDecimalInput';
 import SimpleTextInput from '../../components/inputs/SimpleTextInput';
 import SharedDataStore from '../../services/SharedDataStore';
-
-// Clover POS Color Scheme
-const Colors = {
-  primary: '#00A651',
-  secondary: '#0066CC',
-  success: '#00A651',
-  warning: '#FF6B35',
-  danger: '#E74C3C',
-  background: '#F5F5F5',
-  white: '#FFFFFF',
-  lightGray: '#E5E5E5',
-  mediumGray: '#999999',
-  darkGray: '#666666',
-  text: '#333333',
-  lightText: '#666666',
-  border: '#DDDDDD',
-};
 
 interface PaymentMethod {
   id: string;
@@ -49,8 +33,26 @@ interface PaymentMethod {
 // Tip percentage presets
 const tipPresets = [10, 15, 18, 20, 25];
 
+// Currency formatting utility
+const formatCurrency = (amount: number, currency: string = 'GBP'): string => {
+  try {
+    return new Intl.NumberFormat('en-GB', {
+      style: 'currency',
+      currency: currency,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(amount);
+  } catch (error) {
+    // Fallback for unsupported currencies
+    const symbol = currency === 'GBP' ? '£' : currency === 'USD' ? '$' : currency === 'EUR' ? '€' : currency;
+    return `${symbol}${amount.toFixed(2)}`;
+  }
+};
+
 const EnhancedPaymentScreen: React.FC = () => {
   const navigation = useNavigation();
+  const { theme } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const { cart, clearCart, cartTotal } = useAppStore();
   const { paymentMethods, taxConfiguration } = useSettingsStore();
   
@@ -172,7 +174,7 @@ const EnhancedPaymentScreen: React.FC = () => {
       id: 'qrCode',
       name: 'QR Payment',
       icon: 'qr-code-scanner',
-      color: Colors.primary,
+      color: theme.colors.primary,
       enabled: paymentMethods?.qrCode?.enabled ?? true,
       requiresAuth: paymentMethods?.qrCode?.requiresAuth ?? false,
     },
@@ -180,7 +182,7 @@ const EnhancedPaymentScreen: React.FC = () => {
       id: 'cash',
       name: 'Cash',
       icon: 'payments',
-      color: Colors.success,
+      color: theme.colors.success,
       enabled: paymentMethods?.cash?.enabled ?? true,
       requiresAuth: paymentMethods?.cash?.requiresAuth ?? false,
     },
@@ -188,7 +190,7 @@ const EnhancedPaymentScreen: React.FC = () => {
       id: 'card',
       name: 'Card',
       icon: 'credit-card',
-      color: Colors.secondary,
+      color: theme.colors.secondary,
       enabled: paymentMethods?.card?.enabled ?? true,
       requiresAuth: paymentMethods?.card?.requiresAuth ?? false,
     },
@@ -196,7 +198,7 @@ const EnhancedPaymentScreen: React.FC = () => {
       id: 'applePay',
       name: 'Apple Pay',
       icon: 'contactless-payment',
-      color: Colors.text,
+      color: theme.colors.text,
       enabled: paymentMethods?.applePay?.enabled ?? true,
       requiresAuth: paymentMethods?.applePay?.requiresAuth ?? false,
     },
@@ -204,7 +206,7 @@ const EnhancedPaymentScreen: React.FC = () => {
       id: 'googlePay',
       name: 'Google Pay',
       icon: 'contactless-payment',
-      color: Colors.warning,
+      color: theme.colors.warning,
       enabled: paymentMethods?.googlePay?.enabled ?? false,
       requiresAuth: paymentMethods?.googlePay?.requiresAuth ?? false,
     },
@@ -247,8 +249,20 @@ const EnhancedPaymentScreen: React.FC = () => {
   };
 
   const handlePaymentMethodSelect = (methodId: string) => {
+    console.log('💳 Payment method selected:', methodId);
+    
     const method = availablePaymentMethods.find(m => m.id === methodId);
-    if (method?.requiresAuth) {
+    if (!method) {
+      console.error('Payment method not found:', methodId);
+      return;
+    }
+
+    if (!method.enabled) {
+      Alert.alert('Payment Method Unavailable', 'This payment method is currently disabled.');
+      return;
+    }
+
+    if (method.requiresAuth) {
       Alert.alert(
         'Authorization Required',
         'Manager authorization is required for this payment method.',
@@ -257,41 +271,58 @@ const EnhancedPaymentScreen: React.FC = () => {
           { 
             text: 'Authorize', 
             onPress: () => {
-              // In a real app, this would prompt for manager PIN
-              setSelectedPaymentMethod(methodId);
-              if (methodId === 'cash') {
-                setShowCashModal(true);
-              } else if (methodId === 'qrCode') {
-                setShowQRModal(true);
-                generateQRCode();
-              } else if (methodId === 'card') {
-                Alert.alert('Card Payment', 'Insert or swipe card, or tap for contactless payment.');
-              } else if (methodId === 'applePay') {
-                Alert.alert('Apple Pay', 'Hold near reader and confirm with Touch ID or Face ID.');
-              } else if (methodId === 'googlePay') {
-                Alert.alert('Google Pay', 'Hold near reader and confirm payment.');
-              }
+              console.log('🔐 Authorizing payment method:', methodId);
+              handlePaymentMethodAction(methodId);
             }
           }
         ]
       );
     } else {
-      setSelectedPaymentMethod(methodId);
-      if (methodId === 'cash') {
+      handlePaymentMethodAction(methodId);
+    }
+  };
+
+  const handlePaymentMethodAction = (methodId: string) => {
+    setSelectedPaymentMethod(methodId);
+    console.log('🎯 Payment method activated:', methodId);
+
+    switch (methodId) {
+      case 'cash':
         setShowCashModal(true);
-      } else if (methodId === 'qrCode') {
-        setShowQRModal(true);
-        generateQRCode();
-      } else if (methodId === 'card') {
-        // Card payment handling - could show card reader interface
-        Alert.alert('Card Payment', 'Insert or swipe card, or tap for contactless payment.');
-      } else if (methodId === 'applePay') {
-        // Apple Pay handling
-        Alert.alert('Apple Pay', 'Hold near reader and confirm with Touch ID or Face ID.');
-      } else if (methodId === 'googlePay') {
-        // Google Pay handling
-        Alert.alert('Google Pay', 'Hold near reader and confirm payment.');
-      }
+        break;
+      case 'qrCode':
+        try {
+          setShowQRModal(true);
+          generateQRCode();
+        } catch (error) {
+          console.error('QR code generation failed:', error);
+          Alert.alert('Error', 'Failed to generate QR code. Please try again.');
+        }
+        break;
+      case 'card':
+        Alert.alert(
+          'Card Payment', 
+          'Please insert or swipe your card, or tap for contactless payment.',
+          [{ text: 'OK', onPress: () => console.log('Card payment initiated') }]
+        );
+        break;
+      case 'applePay':
+        Alert.alert(
+          'Apple Pay', 
+          'Hold your device near the reader and confirm with Touch ID or Face ID.',
+          [{ text: 'OK', onPress: () => console.log('Apple Pay initiated') }]
+        );
+        break;
+      case 'googlePay':
+        Alert.alert(
+          'Google Pay', 
+          'Hold your device near the reader and confirm payment.',
+          [{ text: 'OK', onPress: () => console.log('Google Pay initiated') }]
+        );
+        break;
+      default:
+        console.log('Unknown payment method selected:', methodId);
+        Alert.alert('Payment Method', `${methodId} payment selected.`);
     }
   };
 
@@ -700,7 +731,7 @@ const EnhancedPaymentScreen: React.FC = () => {
                   <Icon 
                     name={method.icon} 
                     size={32} 
-                    color={selectedPaymentMethod === method.id ? Colors.white : method.color} 
+                    color={selectedPaymentMethod === method.id ? theme.colors.white : method.color} 
                   />
                   <Text style={[
                     styles.paymentMethodName,
@@ -712,7 +743,7 @@ const EnhancedPaymentScreen: React.FC = () => {
                     <Icon 
                       name="lock" 
                       size={16} 
-                      color={selectedPaymentMethod === method.id ? Colors.white : Colors.warning} 
+                      color={selectedPaymentMethod === method.id ? theme.colors.white : theme.colors.warning} 
                       style={styles.authIcon}
                     />
                   )}
@@ -722,7 +753,7 @@ const EnhancedPaymentScreen: React.FC = () => {
           ) : (
             <View style={styles.splitPaymentSection}>
               <Text style={styles.splitPaymentInfo}>
-                Split total of £{calculateGrandTotal().toFixed(2)} between methods:
+                Split total of {formatCurrency(calculateGrandTotal())} between methods:
               </Text>
               {splitAmounts.map((split, index) => (
                 <View key={index} style={styles.splitAmountRow}>
@@ -734,7 +765,7 @@ const EnhancedPaymentScreen: React.FC = () => {
                       newSplits[index].amount = value;
                       setSplitAmounts(newSplits);
                     }}
-                    suffix="£"
+                    suffix={formatCurrency(0).charAt(0)}
                     maxValue={10000}
                     minValue={0}
                     decimalPlaces={2}
@@ -767,7 +798,7 @@ const EnhancedPaymentScreen: React.FC = () => {
               <Icon 
                 name={printReceipt ? 'check-box' : 'check-box-outline-blank'} 
                 size={24} 
-                color={printReceipt ? Colors.primary : Colors.darkGray} 
+                color={printReceipt ? theme.colors.primary : theme.colors.textSecondary} 
               />
               <Text style={styles.receiptOptionText}>Print Receipt</Text>
             </TouchableOpacity>
@@ -780,7 +811,7 @@ const EnhancedPaymentScreen: React.FC = () => {
                 <Icon 
                   name={emailReceipt ? 'check-box' : 'check-box-outline-blank'} 
                   size={24} 
-                  color={emailReceipt ? Colors.primary : Colors.darkGray} 
+                  color={emailReceipt ? theme.colors.primary : theme.colors.textSecondary} 
                 />
                 <Text style={styles.receiptOptionText}>Email Receipt</Text>
               </TouchableOpacity>
@@ -1445,6 +1476,95 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: Colors.white,
+  },
+});
+
+// Theme-aware styles function
+const createStyles = (theme: any) => StyleSheet.create({
+  // Core layout
+  container: {
+    flex: 1,
+    backgroundColor: theme.colors.background,
+  },
+  header: {
+    backgroundColor: theme.colors.primary,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    paddingTop: 48,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: theme.colors.white,
+  },
+  section: {
+    backgroundColor: theme.colors.surface,
+    marginVertical: 8,
+    paddingVertical: 16,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: theme.colors.text,
+    paddingHorizontal: 16,
+    marginBottom: 12,
+  },
+  
+  // Payment methods
+  paymentMethods: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    paddingHorizontal: 16,
+    gap: 12,
+  },
+  paymentMethod: {
+    flex: 1,
+    minWidth: 100,
+    backgroundColor: theme.colors.background,
+    borderRadius: 12,
+    paddingVertical: 20,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: theme.colors.border,
+    position: 'relative',
+  },
+  paymentMethodActive: {
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.primary,
+  },
+  paymentMethodName: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: theme.colors.text,
+    marginTop: 8,
+  },
+  paymentMethodNameActive: {
+    color: theme.colors.white,
+  },
+  authIcon: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+  },
+  
+  // Process button
+  processButton: {
+    backgroundColor: theme.colors.primary,
+    margin: 16,
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center',
+  },
+  processButtonDisabled: {
+    backgroundColor: theme.colors.textSecondary,
+  },
+  processButtonText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: theme.colors.white,
   },
 });
 
