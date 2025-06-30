@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -15,6 +15,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useTheme, useThemedStyles } from '../../../design-system/ThemeProvider';
 import SimpleTextInput from '../../../components/inputs/SimpleTextInput';
 import SimpleDecimalInput from '../../../components/inputs/SimpleDecimalInput';
+import PlatformService from '../../../services/PlatformService';
 
 const PlansAndPricingScreen: React.FC = () => {
   const navigation = useNavigation();
@@ -43,13 +44,120 @@ const PlansAndPricingScreen: React.FC = () => {
     supportIncluded: true,
   });
 
-  const handleSave = () => {
-    // TODO: Save to backend
-    Alert.alert(
-      'Settings Saved',
-      'Plans and pricing structure has been updated successfully.',
-      [{ text: 'OK' }]
-    );
+  // Load current configuration on component mount
+  useEffect(() => {
+    const loadCurrentConfig = async () => {
+      try {
+        const platformService = PlatformService.getInstance();
+        
+        // Load current platform settings for pricing
+        const platformSettings = await platformService.getPlatformSettings('pricing');
+        const billingSettings = await platformService.getPlatformSettings('billing');
+        const serviceChargeConfig = await platformService.getServiceChargeConfig();
+        
+        // Update state with loaded values if they exist
+        const settingsMap: any = {};
+        
+        // Process platform settings
+        [...platformSettings, ...billingSettings].forEach(setting => {
+          settingsMap[setting.key] = setting.value;
+        });
+        
+        setConfig(prevConfig => ({
+          ...prevConfig,
+          // Map platform settings to local state
+          basicPlanName: settingsMap['pricing.plans.basic.name'] || prevConfig.basicPlanName,
+          basicMonthlyFee: settingsMap['pricing.plans.basic.monthly_fee'] || prevConfig.basicMonthlyFee,
+          basicDescription: settingsMap['pricing.plans.basic.description'] || prevConfig.basicDescription,
+          
+          premiumPlanName: settingsMap['pricing.plans.premium.name'] || prevConfig.premiumPlanName,
+          premiumMonthlyFee: settingsMap['pricing.plans.premium.monthly_fee'] || prevConfig.premiumMonthlyFee,
+          premiumDescription: settingsMap['pricing.plans.premium.description'] || prevConfig.premiumDescription,
+          
+          enterprisePlanName: settingsMap['pricing.plans.enterprise.name'] || prevConfig.enterprisePlanName,
+          enterpriseMonthlyFee: settingsMap['pricing.plans.enterprise.monthly_fee'] || prevConfig.enterpriseMonthlyFee,
+          enterpriseDescription: settingsMap['pricing.plans.enterprise.description'] || prevConfig.enterpriseDescription,
+          
+          setupFee: settingsMap['billing.setup_fee'] || prevConfig.setupFee,
+          cancellationFee: settingsMap['billing.cancellation_fee'] || prevConfig.cancellationFee,
+          supportIncluded: settingsMap['billing.support_included'] !== undefined ? settingsMap['billing.support_included'] : prevConfig.supportIncluded,
+          freeTrialDays: settingsMap['billing.free_trial_days'] || prevConfig.freeTrialDays,
+          
+          serviceChargeEnabled: serviceChargeConfig.enabled,
+          serviceChargeRate: serviceChargeConfig.rate,
+        }));
+      } catch (error) {
+        console.error('Failed to load current platform pricing configuration:', error);
+      }
+    };
+
+    loadCurrentConfig();
+  }, []);
+
+  const handleSave = async () => {
+    try {
+      const platformService = PlatformService.getInstance();
+      
+      // Map local state to platform settings keys
+      const settingsUpdates = {
+        // Subscription plan configurations
+        'pricing.plans.basic.name': config.basicPlanName,
+        'pricing.plans.basic.monthly_fee': config.basicMonthlyFee,
+        'pricing.plans.basic.description': config.basicDescription,
+        
+        'pricing.plans.premium.name': config.premiumPlanName,
+        'pricing.plans.premium.monthly_fee': config.premiumMonthlyFee,
+        'pricing.plans.premium.description': config.premiumDescription,
+        
+        'pricing.plans.enterprise.name': config.enterprisePlanName,
+        'pricing.plans.enterprise.monthly_fee': config.enterpriseMonthlyFee,
+        'pricing.plans.enterprise.description': config.enterpriseDescription,
+        
+        // Billing configuration
+        'billing.setup_fee': config.setupFee,
+        'billing.cancellation_fee': config.cancellationFee,
+        'billing.support_included': config.supportIncluded,
+        'billing.free_trial_days': config.freeTrialDays,
+        
+        // Service charge configuration
+        'platform.service_charge.enabled': config.serviceChargeEnabled,
+        'platform.service_charge.rate': config.serviceChargeRate,
+      };
+
+      // Update service charge configuration using dedicated service
+      await platformService.updateServiceChargeConfig(
+        config.serviceChargeEnabled,
+        config.serviceChargeRate,
+        'Platform pricing configuration update'
+      );
+
+      // Bulk update all pricing settings
+      const result = await platformService.bulkUpdatePlatformSettings(
+        settingsUpdates,
+        'Platform pricing and subscription plans configuration update'
+      );
+
+      if (result.successful > 0) {
+        Alert.alert(
+          'Settings Saved',
+          `Plans and pricing configuration has been updated successfully. ${result.successful} settings updated.`,
+          [{ text: 'OK' }]
+        );
+      } else {
+        Alert.alert(
+          'Save Failed',
+          'Failed to save plans and pricing configuration. Please try again.',
+          [{ text: 'OK' }]
+        );
+      }
+    } catch (error) {
+      console.error('Failed to save plans and pricing settings:', error);
+      Alert.alert(
+        'Save Error',
+        'An error occurred while saving settings. Please try again.',
+        [{ text: 'OK' }]
+      );
+    }
   };
 
   const PlanCard = ({ planName, monthlyFee, description, nameKey, feeKey, descriptionKey }: any) => (
