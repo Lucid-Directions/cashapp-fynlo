@@ -8,7 +8,7 @@
     "ios": "react-native run-ios",
     "test": "jest",
     "lint": "eslint .",
-    "build:ios": "react-native bundle --platform ios --dev false --entry-file index.js --bundle-output ios/main.jsbundle",
+    "build:ios": "react-native bundle --platform ios --dev false --entry-file index.js --bundle-output ios/CashAppPOS/main.jsbundle",
     "clean": "react-native clean && cd ios && xcodebuild clean && cd ..",
     "clean:all": "rm -rf node_modules && npm install && cd ios && pod install && cd ..",
     "audit:security": "npm audit --audit-level high",
