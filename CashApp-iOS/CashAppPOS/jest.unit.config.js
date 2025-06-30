@@ -16,6 +16,12 @@ module.exports = {
     '<rootDir>/__tests__/App.test.tsx',
     '<rootDir>/src/store/__tests__',
     '<rootDir>/__tests__/components',
+    '<rootDir>/src/__tests__/performance',
+    '<rootDir>/src/__tests__/fixtures',
+    '<rootDir>/__tests__/fixtures',
+    '<rootDir>/src/__tests__/integration',
+    '<rootDir>/src/__tests__/utils',
+    '<rootDir>/__tests__/utils',
   ],
   transformIgnorePatterns: [
     'node_modules/(?!(react-native|@react-native|react-native-vector-icons|react-native-gesture-handler|react-native-reanimated|@react-navigation|react-native-screens|react-native-safe-area-context|react-native-modal|sumup-react-native-alpha)/)',
