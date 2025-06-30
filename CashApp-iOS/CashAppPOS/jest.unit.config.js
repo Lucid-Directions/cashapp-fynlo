@@ -14,6 +14,8 @@ module.exports = {
     '<rootDir>/src/__tests__/OnboardingNavigationTests.tsx',
     '<rootDir>/src/screens/main/__tests__/POSScreen.test.tsx',
     '<rootDir>/__tests__/App.test.tsx',
+    '<rootDir>/src/store/__tests__',
+    '<rootDir>/__tests__/components',
   ],
   transformIgnorePatterns: [
     'node_modules/(?!(react-native|@react-native|react-native-vector-icons|react-native-gesture-handler|react-native-reanimated|@react-navigation|react-native-screens|react-native-safe-area-context|react-native-modal|sumup-react-native-alpha)/)',
