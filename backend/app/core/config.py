@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     DEBUG: bool = True
     ENVIRONMENT: str = "development"
     API_V1_STR: str = "/api/v1"
+    APP_BASE_URL: str = "http://localhost:8000" # Base URL for the application itself
     
     # Database
     DATABASE_URL: str = "postgresql://fynlo_user:fynlo_password@localhost:5432/fynlo_pos"

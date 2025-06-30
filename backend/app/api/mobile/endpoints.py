@@ -274,6 +274,7 @@ async def get_daily_sales_report(
     try:
         from datetime import datetime, timedelta
         from sqlalchemy import func, and_
+        from app.core.database import Payment # Import Payment model
         
         # Use user's restaurant if not specified
         if not restaurant_id:
@@ -289,8 +290,8 @@ async def get_daily_sales_report(
         start_date = datetime.combine(report_date, datetime.min.time())
         end_date = start_date + timedelta(days=1)
         
-        # Get orders for the day
-        orders = db.query(Order).filter(
+        # Get completed order IDs for the day and restaurant
+        completed_order_ids = db.query(Order.id).filter(
             and_(
                 Order.restaurant_id == restaurant_id,
                 Order.created_at >= start_date,
@@ -299,17 +300,45 @@ async def get_daily_sales_report(
             )
         ).all()
         
+        completed_order_ids = [oid[0] for oid in completed_order_ids]
+
+        if not completed_order_ids:
+            # No completed orders, return an empty report
+            report_data = {
+                "date": report_date.isoformat(),
+                "restaurant_id": restaurant_id,
+                "summary": {"total_sales": 0, "total_orders": 0, "average_order_value": 0, "currency": "GBP"},
+                "payment_methods": {},
+                "top_selling_items": [],
+                "hourly_breakdown": [],
+                "generated_at": datetime.now().isoformat()
+            }
+            return APIResponseHelper.success(
+                data=report_data,
+                message=f"No completed sales for {report_date}",
+                meta={"report_type": "daily_sales", "format": "mobile_optimized"}
+            )
+
+        # Get orders for the day
+        orders = db.query(Order).filter(Order.id.in_(completed_order_ids)).all()
+
         # Calculate metrics
         total_sales = sum(order.total_amount for order in orders)
         total_orders = len(orders)
         average_order_value = total_sales / total_orders if total_orders > 0 else 0
         
-        # Payment method breakdown
-        payment_methods = {}
-        for order in orders:
-            # Simplified - in real implementation, would join with payments table
-            method = "qr_code"  # Default
-            payment_methods[method] = payment_methods.get(method, 0) + order.total_amount
+        # Payment method breakdown from Payments table
+        payment_breakdown_query = db.query(
+            Payment.payment_method,
+            func.sum(Payment.amount).label("total_amount")
+        ).filter(
+            Payment.order_id.in_(completed_order_ids),
+            Payment.status == "completed" # Consider only completed payments
+        ).group_by(Payment.payment_method).all()
+
+        payment_methods = {
+            pb.payment_method: float(pb.total_amount) for pb in payment_breakdown_query
+        }
         
         # Top selling items
         item_sales = {}
@@ -427,10 +456,14 @@ async def get_base_url_config():
     try:
         from app.core.config import settings
         
+        # Determine WebSocket protocol based on APP_BASE_URL
+        ws_protocol = "wss" if settings.APP_BASE_URL.startswith("https") else "ws"
+        ws_host_port = settings.APP_BASE_URL.split("://")[-1]
+
         config_data = {
-            "api_base_url": "http://localhost:8000",  # Primary API
-            "odoo_compatible_url": "http://localhost:8069",  # Odoo compatibility
-            "websocket_url": "ws://localhost:8000/ws",
+            "api_base_url": settings.APP_BASE_URL,  # Primary API from settings
+            "odoo_compatible_url": settings.APP_BASE_URL, # Odoo compatibility uses the same base
+            "websocket_url": f"{ws_protocol}://{ws_host_port}{settings.API_V1_STR}/websocket/ws", # Construct full WebSocket URL
             "supported_versions": ["v1"],
             "mobile_optimized": True,
             "features": {

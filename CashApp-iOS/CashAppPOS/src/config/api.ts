@@ -1,24 +1,32 @@
 /**
  * API Configuration - Centralized network settings
  * 
- * IMPORTANT: Uses LAN IP for physical device testing
- * Physical devices cannot access Mac's localhost (127.0.0.1)
+ * Uses environment variables for API and Metro URLs.
+ * Ensure you have a .env file at the root of your CashApp-iOS/CashAppPOS project
+ * with at least API_BASE_URL and METRO_BASE_URL defined.
+ * Example .env:
+ * API_BASE_URL=http://your-backend-ip-or-domain:8000
+ * METRO_BASE_URL=http://your-metro-bundler-ip:8081
  */
+
+import Config from 'react-native-config'; // Assumes react-native-config is installed and set up
 
 // Get the current environment
 const isDevelopment = __DEV__;
 
-// Mac's LAN IP address for device testing
-const MAC_LAN_IP = '192.168.0.109';
+// Default values if environment variables are not set (especially for development)
+const DEFAULT_API_BASE_URL = isDevelopment ? 'http://localhost:8000' : 'https://api.fynlopos.com';
+const DEFAULT_METRO_BASE_URL = isDevelopment ? 'http://localhost:8081' : ''; // Metro URL is dev-only
 
 // API Configuration
 export const API_CONFIG = {
-  // Backend API (FastAPI on port 8000) - ALWAYS use LAN IP for device testing
-  // Physical devices cannot access localhost, and api.fynlopos.com doesn't exist in DNS
-  BASE_URL: `http://${MAC_LAN_IP}:8000`,
+  // Backend API URL (FastAPI)
+  // For physical device testing, ensure API_BASE_URL in .env points to your machine's LAN IP or a reachable domain.
+  BASE_URL: Config.API_BASE_URL || DEFAULT_API_BASE_URL,
   
-  // Metro bundler (React Native dev server on port 8081)
-  METRO_URL: `http://${MAC_LAN_IP}:8081`,
+  // Metro bundler URL (React Native dev server)
+  // For physical device testing, ensure METRO_BASE_URL in .env points to your machine's LAN IP.
+  METRO_URL: Config.METRO_BASE_URL || DEFAULT_METRO_BASE_URL,
   
   // API version prefix
   API_VERSION: '/api/v1',
@@ -28,8 +36,8 @@ export const API_CONFIG = {
     return `${this.BASE_URL}${this.API_VERSION}`;
   },
   
-  // Request timeout (2 seconds to prevent app hanging)
-  TIMEOUT: 2000,
+  // Request timeout (increased to 5 seconds)
+  TIMEOUT: 5000,
   
   // Health check endpoint
   HEALTH_ENDPOINT: '/health',
@@ -41,14 +49,8 @@ export const API_CONFIG = {
     SETTINGS: '/platform-settings',
   },
   
-  // Database config for direct PostgreSQL connection (if needed)
-  DATABASE: {
-    host: MAC_LAN_IP, // Use LAN IP instead of localhost
-    port: 5432,
-    database: 'fynlo_pos',
-    user: 'fynlo_user',
-    password: 'fynlo_password',
-  },
+  // Direct database configuration has been removed for security reasons.
+  // The frontend should not connect directly to the database.
 };
 
 // Health check function
@@ -68,7 +70,8 @@ export const checkAPIHealth = async (): Promise<boolean> => {
     clearTimeout(timeoutId);
     return response.ok;
   } catch (error) {
-    console.warn('API health check failed:', error.message);
+    const typedError = error as Error;
+    console.warn('API health check failed:', typedError.message);
     return false;
   }
 };
