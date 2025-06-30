@@ -6,7 +6,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // API Configuration
-const API_BASE_URL = 'http://192.168.0.109:8000/api/v1';
+import API_CONFIG from '../config/api';
+const API_BASE_URL = API_CONFIG.FULL_API_URL;
 
 interface ServiceChargeConfig {
   enabled: boolean;
@@ -46,19 +47,60 @@ class SharedDataStore {
   // Service Charge Management
   async getServiceChargeConfig(): Promise<ServiceChargeConfig> {
     try {
+      // Get auth token for API requests
+      const authToken = await AsyncStorage.getItem('auth_token');
+      const headers: any = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (authToken) {
+        headers['Authorization'] = `Bearer ${authToken}`;
+      }
+
       // Try to get from real backend API first
       const response = await fetch(`${API_BASE_URL}/platform/service-charge`, {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
       });
 
       if (response.ok) {
-        const config = await response.json();
+        const result = await response.json();
+        
+        // Handle different API response formats
+        let config: ServiceChargeConfig;
+        if (result.data && result.data.service_charge) {
+          // API response with wrapped data
+          const serviceChargeData = result.data.service_charge;
+          config = {
+            enabled: serviceChargeData.enabled,
+            rate: serviceChargeData.rate,
+            description: serviceChargeData.description,
+            lastUpdated: new Date().toISOString(),
+          };
+        } else if (result.service_charge) {
+          // Direct service_charge object
+          config = {
+            enabled: result.service_charge.enabled,
+            rate: result.service_charge.rate,
+            description: result.service_charge.description,
+            lastUpdated: new Date().toISOString(),
+          };
+        } else {
+          // Fallback if structure is different
+          config = {
+            enabled: result.enabled ?? true,
+            rate: result.rate ?? 12.5,
+            description: result.description ?? 'Platform service charge',
+            lastUpdated: new Date().toISOString(),
+          };
+        }
+        
         this.cache.set('serviceCharge', config);
         console.log('✅ Service charge config from API:', config);
         return config;
+      } else {
+        const errorText = await response.text();
+        console.warn('⚠️ API GET failed:', response.status, errorText);
       }
 
       // Fallback to AsyncStorage if API fails
@@ -102,12 +144,28 @@ class SharedDataStore {
 
       // Save to real backend API first
       try {
+        // Get auth token for API requests
+        const authToken = await AsyncStorage.getItem('auth_token');
+        const headers: any = {
+          'Content-Type': 'application/json',
+        };
+        
+        if (authToken) {
+          headers['Authorization'] = `Bearer ${authToken}`;
+        }
+
+        // Prepare the request body to match backend schema
+        const requestBody = {
+          enabled: config.enabled,
+          rate: config.rate,
+          description: config.description,
+          currency: 'GBP' // Default currency
+        };
+
         const response = await fetch(`${API_BASE_URL}/platform/service-charge`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(configWithTimestamp),
+          method: 'PUT', // Changed from POST to PUT to match backend endpoint
+          headers,
+          body: JSON.stringify(requestBody),
         });
 
         if (response.ok) {
@@ -123,6 +181,9 @@ class SharedDataStore {
           // Trigger sync event for real-time updates
           this.notifySubscribers('serviceCharge', configWithTimestamp);
           return;
+        } else {
+          const errorText = await response.text();
+          console.error('❌ API response error:', response.status, errorText);
         }
       } catch (apiError) {
         console.warn('⚠️ API save failed, using local storage:', apiError);

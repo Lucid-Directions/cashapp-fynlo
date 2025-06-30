@@ -6,13 +6,11 @@ module.exports = {
     '<rootDir>/__tests__/**/*.{js,jsx,ts,tsx}',
   ],
   testPathIgnorePatterns: [
-    '<rootDir>/src/screens/main/__tests__',
     '<rootDir>/src/screens/auth/__tests__',
     '<rootDir>/src/services/__tests__',
     '<rootDir>/__tests__/performance',
     '<rootDir>/src/__tests__/ComprehensiveAppTest.tsx',
     '<rootDir>/src/__tests__/OnboardingNavigationTests.tsx',
-    '<rootDir>/src/screens/main/__tests__/POSScreen.test.tsx',
     '<rootDir>/__tests__/App.test.tsx',
     '<rootDir>/__tests__/components',
     '<rootDir>/src/__tests__/performance',

@@ -100,6 +100,9 @@ class PlatformService {
         'Content-Type': 'application/json',
       };
 
+      // Always reload auth token for fresh requests
+      await this.loadAuthToken();
+      
       if (this.authToken) {
         headers['Authorization'] = `Bearer ${this.authToken}`;
       }
@@ -107,22 +110,32 @@ class PlatformService {
       const config: RequestInit = {
         method,
         headers,
+        timeout: 10000, // 10 second timeout for platform operations
       };
 
       if (data && (method === 'POST' || method === 'PUT')) {
         config.body = JSON.stringify(data);
       }
 
+      console.log(`🌐 Making ${method} request to: ${url}`);
+      if (data) {
+        console.log('📦 Request data:', JSON.stringify(data, null, 2));
+      }
+
       const response = await fetch(url, config);
       
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        const errorText = await response.text();
+        console.error(`❌ HTTP ${response.status}: ${response.statusText}`);
+        console.error('❌ Error response:', errorText);
+        throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
       }
 
       const result = await response.json();
+      console.log('✅ API Response:', result);
       return result.data || result;
     } catch (error) {
-      console.error(`API request failed for ${endpoint}:`, error);
+      console.error(`❌ API request failed for ${endpoint}:`, error);
       throw error;
     }
   }
@@ -139,17 +152,28 @@ class PlatformService {
       
       const settingsData = await this.makeRequest(endpoint);
       
+      // Handle different API response formats
+      let settingsObject: Record<string, any>;
+      
+      if (settingsData && typeof settingsData === 'object') {
+        // If it's already an object, use it directly
+        settingsObject = settingsData;
+      } else {
+        // If it's an array or other format, create an empty object
+        settingsObject = {};
+      }
+      
       // Convert object to array format for easier handling
-      return Object.entries(settingsData).map(([key, config]: [string, any]) => ({
+      return Object.entries(settingsObject).map(([key, config]: [string, any]) => ({
         key,
-        value: config.value,
-        category: config.category,
-        description: config.description,
-        is_sensitive: config.is_sensitive,
-        updated_at: config.updated_at,
+        value: config?.value ?? config,
+        category: config?.category ?? 'general',
+        description: config?.description ?? `Setting for ${key}`,
+        is_sensitive: config?.is_sensitive ?? false,
+        updated_at: config?.updated_at ?? null,
       }));
     } catch (error) {
-      console.error('Failed to fetch platform settings:', error);
+      console.error('❌ Failed to fetch platform settings:', error);
       // Return mock data for demo purposes
       return this.getMockPlatformSettings(category);
     }
@@ -200,13 +224,35 @@ class PlatformService {
       });
       
       return {
-        successful: result.successful_updates,
-        failed: result.failed_updates,
+        successful: result.successful_updates || 0,
+        failed: result.failed_updates || 0,
         errors: result.errors || {},
       };
     } catch (error) {
-      console.error('Failed to bulk update settings:', error);
-      return { successful: 0, failed: Object.keys(updates).length, errors: { general: 'API request failed' } };
+      console.error('❌ Failed to bulk update settings:', error);
+      
+      // If the bulk endpoint fails, try individual updates as fallback
+      console.log('🔄 Attempting individual updates as fallback...');
+      let successful = 0;
+      let failed = 0;
+      const errors: Record<string, string> = {};
+      
+      for (const [key, value] of Object.entries(updates)) {
+        try {
+          const success = await this.updatePlatformSetting(key, value, changeReason);
+          if (success) {
+            successful++;
+          } else {
+            failed++;
+            errors[key] = 'Update failed';
+          }
+        } catch (error) {
+          failed++;
+          errors[key] = error.message || 'Unknown error';
+        }
+      }
+      
+      return { successful, failed, errors };
     }
   }
 

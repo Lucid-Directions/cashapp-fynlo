@@ -94,7 +94,7 @@ async def get_service_charge_configuration(
         config = await service.get_service_charge_config()
         return config # FastAPI will wrap this in the response_model
     except Exception as e:
-        logger.error(f"Error retrieving service charge configuration: {e}", exc_info=True)
+        logging.error(f"Error retrieving service charge configuration: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Failed to retrieve service charge configuration")
 
 @router.put(
@@ -128,7 +128,7 @@ async def update_service_charge_configuration(
     except ValueError as e: # Catch validation errors from the service layer
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        logger.error(f"Error updating service charge configuration: {e}", exc_info=True)
+        logging.error(f"Error updating service charge configuration: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Failed to update service charge configuration")
 
 @router.get("/settings/{config_key}")

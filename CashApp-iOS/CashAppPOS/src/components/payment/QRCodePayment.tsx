@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,44 @@ import {
 import QRCode from 'react-native-qrcode-svg';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import PaymentService, { PaymentRequest, QRPaymentData } from '../../services/PaymentService';
+
+// Error-safe QR Code Wrapper Component
+const QRCodeWrapper: React.FC<{ qrCodeData: string }> = ({ qrCodeData }) => {
+  const [hasError, setHasError] = useState(false);
+  
+  try {
+    if (!qrCodeData || qrCodeData.length === 0) {
+      throw new Error('Invalid QR code data');
+    }
+    
+    if (hasError) {
+      return (
+        <View style={{ alignItems: 'center', justifyContent: 'center', width: 180, height: 180 }}>
+          <Icon name="error" size={60} color={Colors.danger} />
+          <Text style={{ color: Colors.danger, fontSize: 12, marginTop: 8 }}>QR Error</Text>
+        </View>
+      );
+    }
+    
+    return (
+      <QRCode
+        value={qrCodeData}
+        size={180}
+        color={Colors.text}
+        backgroundColor={Colors.white}
+        onError={() => setHasError(true)}
+      />
+    );
+  } catch (error) {
+    console.error('QR Code generation error:', error);
+    return (
+      <View style={{ alignItems: 'center', justifyContent: 'center', width: 180, height: 180 }}>
+        <Icon name="qr-code" size={60} color={Colors.lightText} />
+        <Text style={{ color: Colors.lightText, fontSize: 12, marginTop: 8 }}>QR Unavailable</Text>
+      </View>
+    );
+  }
+};
 
 interface QRCodePaymentProps {
   request: PaymentRequest;
@@ -42,72 +80,162 @@ export const QRCodePayment: React.FC<QRCodePaymentProps> = ({
   const [qrData, setQrData] = useState<QRPaymentData | null>(null);
   const [error, setError] = useState<string>('');
   const [remainingTime, setRemainingTime] = useState<number>(0);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const countdownRef = useRef<NodeJS.Timeout | null>(null);
+  const isMountedRef = useRef(true);
 
   useEffect(() => {
     generateQRPayment();
+    
+    return () => {
+      // Mark component as unmounted
+      isMountedRef.current = false;
+      
+      // Clean up all timers
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+      if (countdownRef.current) {
+        clearInterval(countdownRef.current);
+        countdownRef.current = null;
+      }
+    };
   }, []);
 
   useEffect(() => {
-    if (qrData && status === 'waiting') {
+    if (qrData && status === 'waiting' && isMountedRef.current) {
+      // Clean up existing timers
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+      if (countdownRef.current) {
+        clearInterval(countdownRef.current);
+      }
+      
       // Start polling for payment status
-      const interval = setInterval(checkPaymentStatus, 3000);
+      intervalRef.current = setInterval(() => {
+        if (isMountedRef.current) {
+          checkPaymentStatus();
+        } else {
+          if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+          }
+        }
+      }, 3000);
       
       // Setup expiration timer
       const expiryTime = new Date(qrData.expiresAt).getTime();
       const now = Date.now();
       const timeLeft = Math.max(0, expiryTime - now);
       
-      setRemainingTime(Math.floor(timeLeft / 1000));
+      if (isMountedRef.current) {
+        setRemainingTime(Math.floor(timeLeft / 1000));
+      }
       
-      const countdown = setInterval(() => {
+      countdownRef.current = setInterval(() => {
+        if (!isMountedRef.current) {
+          if (countdownRef.current) {
+            clearInterval(countdownRef.current);
+            countdownRef.current = null;
+          }
+          return;
+        }
+        
         setRemainingTime(prev => {
           if (prev <= 1) {
             setStatus('expired');
-            clearInterval(interval);
-            clearInterval(countdown);
+            
+            // Clean up timers
+            if (intervalRef.current) {
+              clearInterval(intervalRef.current);
+              intervalRef.current = null;
+            }
+            if (countdownRef.current) {
+              clearInterval(countdownRef.current);
+              countdownRef.current = null;
+            }
             return 0;
           }
           return prev - 1;
         });
       }, 1000);
-
-      return () => {
-        clearInterval(interval);
-        clearInterval(countdown);
-      };
     }
+    
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+      if (countdownRef.current) {
+        clearInterval(countdownRef.current);
+        countdownRef.current = null;
+      }
+    };
   }, [qrData, status]);
 
   const generateQRPayment = async () => {
     try {
+      if (!isMountedRef.current) return;
+      
       setStatus('generating');
       setError('');
       
       const data = await PaymentService.generateQRPayment(request);
+      
+      if (!isMountedRef.current) return;
+      
       setQrData(data);
       setStatus('waiting');
     } catch (err) {
-      setStatus('error');
-      setError(err instanceof Error ? err.message : 'Failed to generate QR code');
+      console.error('❌ QR Payment generation failed:', err);
+      
+      if (isMountedRef.current) {
+        setStatus('error');
+        setError(err instanceof Error ? err.message : 'Failed to generate QR code');
+      }
     }
   };
 
   const checkPaymentStatus = async () => {
-    if (!qrData) return;
+    if (!qrData || !isMountedRef.current) return;
 
     try {
       const statusResult = await PaymentService.checkQRPaymentStatus(qrData.qrPaymentId);
       
+      if (!isMountedRef.current) return;
+      
       if (statusResult.status === 'completed') {
         setStatus('completed');
+        
+        // Clean up timers
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
+        if (countdownRef.current) {
+          clearInterval(countdownRef.current);
+          countdownRef.current = null;
+        }
+        
         // Confirm the payment
         const result = await PaymentService.confirmQRPayment(qrData.qrPaymentId);
-        onPaymentComplete(result);
+        
+        if (isMountedRef.current) {
+          onPaymentComplete(result);
+        }
       } else if (statusResult.expired) {
-        setStatus('expired');
+        if (isMountedRef.current) {
+          setStatus('expired');
+        }
       }
     } catch (err) {
-      console.error('Failed to check QR payment status:', err);
+      console.error('❌ Failed to check QR payment status:', err);
+      
+      if (isMountedRef.current) {
+        setError('Failed to check payment status');
+      }
     }
   };
 
@@ -131,12 +259,7 @@ export const QRCodePayment: React.FC<QRCodePaymentProps> = ({
         return qrData ? (
           <View style={styles.qrContainer}>
             <View style={styles.qrCodeWrapper}>
-              <QRCode
-                value={qrData.qrCodeData}
-                size={180}
-                color={Colors.text}
-                backgroundColor={Colors.white}
-              />
+              <QRCodeWrapper qrCodeData={qrData.qrCodeData} />
             </View>
             
             <Text style={styles.qrInstructions}>

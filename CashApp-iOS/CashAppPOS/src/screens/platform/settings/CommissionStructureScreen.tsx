@@ -96,6 +96,7 @@ const PlansAndPricingScreen: React.FC = () => {
 
   const handleSave = async () => {
     try {
+      console.log('💾 Starting save operation for Plans & Pricing...');
       const platformService = PlatformService.getInstance();
       
       // Map local state to platform settings keys
@@ -124,40 +125,64 @@ const PlansAndPricingScreen: React.FC = () => {
         'platform.service_charge.rate': config.serviceChargeRate,
       };
 
-      console.log('💾 Saving plans and pricing configuration:', settingsUpdates);
+      console.log('📊 Settings to update:', settingsUpdates);
 
-      // Update service charge configuration using dedicated service
-      await platformService.updateServiceChargeConfig(
-        config.serviceChargeEnabled,
-        config.serviceChargeRate,
-        'Platform pricing configuration update'
-      );
+      // Update service charge configuration using dedicated service first
+      try {
+        console.log('🔄 Updating service charge config...');
+        const serviceChargeSuccess = await platformService.updateServiceChargeConfig(
+          config.serviceChargeEnabled,
+          config.serviceChargeRate,
+          'Platform pricing configuration update'
+        );
+        console.log('✅ Service charge update result:', serviceChargeSuccess);
+      } catch (serviceChargeError) {
+        console.warn('⚠️ Service charge update failed, continuing with other settings:', serviceChargeError);
+      }
 
       // Bulk update all pricing settings
+      console.log('🔄 Updating platform settings...');
       const result = await platformService.bulkUpdatePlatformSettings(
         settingsUpdates,
         'Platform pricing and subscription plans configuration update'
       );
 
+      console.log('📊 Bulk update result:', result);
+
       if (result.successful > 0) {
+        const successMessage = result.failed > 0 
+          ? `${result.successful} settings updated successfully. ${result.failed} failed to update.`
+          : `Plans and pricing configuration updated successfully. ${result.successful} settings updated.`;
+          
         Alert.alert(
           'Settings Saved',
-          `Plans and pricing configuration has been updated successfully. ${result.successful} settings updated.`,
+          successMessage,
           [{ text: 'OK' }]
         );
+        
+        if (result.failed > 0) {
+          console.warn('⚠️ Some updates failed:', result.errors);
+        }
       } else {
-        console.error('❌ Save failed:', result.errors);
+        console.error('❌ All updates failed:', result.errors);
+        
+        let errorMessage = 'Failed to save plans and pricing configuration.';
+        if (Object.keys(result.errors).length > 0) {
+          const firstError = Object.values(result.errors)[0];
+          errorMessage += ` Error: ${firstError}`;
+        }
+        
         Alert.alert(
           'Save Failed',
-          'Failed to save plans and pricing configuration. Please check your connection and try again.',
+          errorMessage + ' Please check your connection and try again.',
           [{ text: 'OK' }]
         );
       }
     } catch (error) {
-      console.error('❌ Error saving plans and pricing:', error);
+      console.error('❌ Critical error saving plans and pricing:', error);
       Alert.alert(
         'Error',
-        'An error occurred while saving. Please try again.',
+        `An error occurred while saving: ${error.message || 'Unknown error'}. Please try again.`,
         [{ text: 'OK' }]
       );
     }
