@@ -8,10 +8,12 @@ from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session, relationship
 from sqlalchemy.sql import func
+from sqlalchemy.sql.elements import quoted_name # For GIN index
 import uuid
 from typing import Generator
 
 from app.core.config import settings
+from app.models.audit_log import AuditLog # Import the AuditLog model
 
 # Database engine
 engine = create_engine(settings.DATABASE_URL, echo=settings.DEBUG)
