@@ -25,6 +25,7 @@ from app.core.transaction_manager import transactional, transaction_manager
 from app.services.payment_factory import payment_factory
 from app.services.audit_logger import AuditLoggerService
 from app.models.audit_log import AuditEventType, AuditEventStatus
+from app.middleware.rate_limit_middleware import limiter, PAYMENT_RATE
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -119,16 +120,17 @@ def generate_qr_code(data: str) -> str:
     return f"data:image/png;base64,{img_str}"
 
 @router.post("/qr/generate", response_model=QRPaymentResponse)
+@limiter.limit(PAYMENT_RATE)
 async def generate_qr_payment(
-    http_request: Request,
     payment_request: QRPaymentRequest, # Renamed from 'request' to avoid conflict
+    request: Request, # Added for rate limiter
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """Generate QR code for payment with 1.2% fee advantage"""
     audit_service = AuditLoggerService(db)
-    ip_address = http_request.client.host if http_request.client else "unknown"
-    user_agent = http_request.headers.get("user-agent", "unknown")
+    ip_address = request.client.host if request.client else "unknown"
+    user_agent = request.headers.get("user-agent", "unknown")
 
     # Verify order exists
     order = db.query(Order).filter(Order.id == payment_request.order_id).first()
@@ -218,15 +220,15 @@ async def generate_qr_payment(
 @router.post("/qr/{qr_payment_id}/confirm")
 @transactional(max_retries=3, retry_delay=0.1)
 async def confirm_qr_payment(
-    http_request: Request,
+    request: Request,
     qr_payment_id: str,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """Confirm QR payment completion"""
     audit_service = AuditLoggerService(db)
-    ip_address = http_request.client.host if http_request.client else "unknown"
-    user_agent = http_request.headers.get("user-agent", "unknown")
+    ip_address = request.client.host if request.client else "unknown"
+    user_agent = request.headers.get("user-agent", "unknown")
     
     qr_payment_db_record = db.query(QRPayment).filter(QRPayment.id == qr_payment_id).first()
     if not qr_payment_db_record:
@@ -379,18 +381,20 @@ async def confirm_qr_payment(
     )
 
 @router.post("/stripe", response_model=PaymentResponse)
+@limiter.limit(PAYMENT_RATE)
 @transactional(max_retries=2, retry_delay=0.2)
 async def process_stripe_payment(
-    http_request: Request,
     payment_request_data: StripePaymentRequest, # Renamed from 'request'
+    request: Request, # Added for rate limiter
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """Process Stripe payment"""
     audit_service = AuditLoggerService(db)
-    ip_address = http_request.client.host if http_request.client else "unknown"
-    user_agent = http_request.headers.get("user-agent", "unknown")
+    ip_address = request.client.host if request.client else "unknown"
+    user_agent = request.headers.get("user-agent", "unknown")
 
+    # Verify order exists
     order = db.query(Order).filter(Order.id == payment_request_data.order_id).first()
     if not order:
         # Log attempt for non-existent order
@@ -416,9 +420,11 @@ async def process_stripe_payment(
         )
         raise HTTPException(status_code=400, detail="Order already paid")
 
+    # Calculate fees
     fee_amount = calculate_payment_fee(payment_request_data.amount, "card")
     net_amount = payment_request_data.amount - fee_amount
 
+    # Create payment record first (with pending status)
     payment_db_record = Payment(
         order_id=payment_request_data.order_id,
         payment_method="stripe",
@@ -448,7 +454,7 @@ async def process_stripe_payment(
 
     try:
         payment_intent = stripe.PaymentIntent.create(
-            amount=int(payment_request_data.amount * 100),
+            amount=int(payment_request_data.amount * 100),  # Stripe uses cents
             currency=payment_request_data.currency,
             payment_method=payment_request_data.payment_method_id,
             metadata={
@@ -502,7 +508,10 @@ async def process_stripe_payment(
                 commit=False
             )
         
+        # Transaction auto-commits on success
         db.refresh(payment_db_record) # Refresh before returning
+        
+        logger.info(f"Stripe payment processed: {payment_db_record.id} for order {payment_request_data.order_id}")
         
         return PaymentResponse(
             payment_id=str(payment_db_record.id),
@@ -545,15 +554,15 @@ async def process_stripe_payment(
 
 @router.post("/cash", response_model=PaymentResponse)
 async def process_cash_payment(
-    http_request: Request,
     payment_request_data: CashPaymentRequest, # Renamed from 'request'
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """Process cash payment"""
     audit_service = AuditLoggerService(db)
-    ip_address = http_request.client.host if http_request.client else "unknown"
-    user_agent = http_request.headers.get("user-agent", "unknown")
+    ip_address = request.client.host if request.client else "unknown"
+    user_agent = request.headers.get("user-agent", "unknown")
 
     order = db.query(Order).filter(Order.id == payment_request_data.order_id).first()
     if not order:
@@ -682,8 +691,8 @@ async def check_qr_payment_status(
 
 @router.post("/process")
 async def process_payment(
-    http_request: Request,
     payment_data_req: PaymentRequest, # Renamed from payment_data to avoid confusion
+    request: Request,
     provider_query: Optional[str] = Query(None, alias="provider", description="Force specific provider"), # Renamed provider
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
@@ -701,8 +710,8 @@ async def process_payment(
     - customer_id: Optional customer ID
     """
     audit_service = AuditLoggerService(db)
-    ip_address = http_request.client.host if http_request.client else "unknown"
-    user_agent = http_request.headers.get("user-agent", "unknown")
+    ip_address = request.client.host if request.client else "unknown"
+    user_agent = request.headers.get("user-agent", "unknown")
     payment_db_record = None # Initialize
 
     try:
@@ -856,16 +865,16 @@ async def process_payment(
 
 @router.post("/refund/{transaction_id}")
 async def refund_payment(
-    http_request: Request,
     transaction_id: str,
     refund_data_req: RefundRequest, # Renamed from refund_data
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """Refund a payment"""
     audit_service = AuditLoggerService(db)
-    ip_address = http_request.client.host if http_request.client else "unknown"
-    user_agent = http_request.headers.get("user-agent", "unknown")
+    ip_address = request.client.host if request.client else "unknown"
+    user_agent = request.headers.get("user-agent", "unknown")
 
     payment_db_record = db.query(Payment).filter(Payment.external_id == transaction_id).first()
     if not payment_db_record:

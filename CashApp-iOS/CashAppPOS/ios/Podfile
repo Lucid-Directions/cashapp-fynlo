@@ -35,6 +35,8 @@ target 'CashAppPOS' do
         target.build_configurations.each do |config|
           config.build_settings['DEFINES_MODULE'] = 'YES'
           config.build_settings['MODULEMAP_FILE'] = '$(PODS_TARGET_SRCROOT)/Yoga.modulemap'
+          config.build_settings['HEADER_SEARCH_PATHS'] ||= '$(inherited)'
+          config.build_settings['HEADER_SEARCH_PATHS'] << ' $(PODS_ROOT)/Headers/Public/yoga'
         end
       end
     end

@@ -15,9 +15,13 @@ from app.core.config import settings
 from app.core.database import init_db
 from app.api.v1.api import api_router
 from app.api.mobile.endpoints import router as mobile_router
-from app.core.redis_client import init_redis
+from app.core.redis_client import init_redis, close_redis
 from app.core.websocket import websocket_manager
 from app.core.exceptions import register_exception_handlers
+from app.middleware.rate_limit_middleware import init_fastapi_limiter
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 from app.core.responses import APIResponseHelper
 from app.core.mobile_middleware import (
     MobileCompatibilityMiddleware,
@@ -28,23 +32,42 @@ from app.middleware.security_headers_middleware import SecurityHeadersMiddleware
 from datetime import datetime
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
+# Logging level will be set by Uvicorn based on settings.LOG_LEVEL
+# logging.basicConfig(level=settings.LOG_LEVEL.upper()) # Not needed if uvicorn handles it
 logger = logging.getLogger(__name__)
+
+# Apply logging filters for production
+# This should be done after basic logging config but before the app starts handling requests.
+# Note: Uvicorn sets up its own handlers. This filter will apply to log records
+# processed by the application's loggers. For Uvicorn's access logs,
+# different configuration might be needed if they also contain sensitive data.
+from app.core.logging_filters import setup_logging_filters
+if settings.ENVIRONMENT == "production" or not settings.ERROR_DETAIL_ENABLED:
+    # We call this early, but it depends on `settings` being initialized.
+    # Logging needs to be configured before this call if it relies on basicConfig.
+    # If Uvicorn manages basicConfig, this should be fine.
+    setup_logging_filters()
+
 
 security = HTTPBearer()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Initialize application on startup"""
-    logger.info("🚀 Fynlo POS Backend starting...")
+    logger.info(f"🚀 Fynlo POS Backend starting in {settings.ENVIRONMENT} mode...")
+    logger.info(f"Debug mode: {settings.DEBUG}")
     
     # Initialize database
     await init_db()
     logger.info("✅ Database initialized")
     
     # Initialize Redis
-    await init_redis()
+    await init_redis() # This now connects the redis_client
     logger.info("✅ Redis connected")
+
+    # Initialize FastAPI Limiter (depends on Redis being connected)
+    await init_fastapi_limiter()
+    logger.info("✅ Rate limiter initialized")
     
     # WebSocket manager is ready (no initialization needed)
     logger.info("✅ WebSocket manager ready")
@@ -56,20 +79,24 @@ async def lifespan(app: FastAPI):
     
     # Cleanup on shutdown
     logger.info("🔄 Shutting down Fynlo POS Backend...")
+    await close_redis() # Ensure Redis client is closed
+    logger.info("✅ Redis client closed.")
     logger.info("✅ Cleanup complete")
 
 app = FastAPI(
-    title="Fynlo POS API",
+    title=settings.APP_NAME,
     description="Hardware-Free Restaurant Management Platform",
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
+    debug=settings.DEBUG  # Set FastAPI debug mode from settings
 )
 
 # CORS middleware for React Native frontend
 if settings.ENVIRONMENT == "production":
     allowed_origins = settings.PRODUCTION_ALLOWED_ORIGINS
 else:
-    allowed_origins = ["*"] # Permissive for development
+    # Use CORS_ORIGINS from settings for development, fallback to permissive
+    allowed_origins = settings.CORS_ORIGINS if settings.CORS_ORIGINS else ["*"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -92,8 +119,17 @@ app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(MobileCompatibilityMiddleware, enable_cors=True, enable_port_redirect=True)
 app.add_middleware(MobileDataOptimizationMiddleware)
 
+# Add SlowAPI middleware (for rate limiting)
+# This middleware itself doesn't enforce limits but makes the limiter available.
+# Limits are enforced by decorators or dependencies.
+app.add_middleware(SlowAPIMiddleware)
+
 # Register standardized exception handlers
-register_exception_handlers(app)
+register_exception_handlers(app) # General handlers
+
+# Add specific handler for rate limit exceeded
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
 
 # Include API routes
 app.include_router(api_router, prefix="/api/v1")
@@ -160,8 +196,8 @@ async def api_version_info():
 if __name__ == "__main__":
     uvicorn.run(
         "app.main:app",
-        host="0.0.0.0",
-        port=8000,
-        reload=True,
-        log_level="info"
+        host="0.0.0.0", # Make sure this is configurable if needed for production
+        port=8000, # Make sure this is configurable if needed for production
+        reload=settings.ENVIRONMENT == "development", # Disable reload in production
+        log_level=settings.LOG_LEVEL.lower() # Use log_level from settings
     )

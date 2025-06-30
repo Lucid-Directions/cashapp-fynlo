@@ -21,6 +21,8 @@ from app.core.exceptions import (
     ConflictException,
     iOSErrorHelper
 )
+from app.middleware.rate_limit_middleware import limiter, AUTH_RATE
+
 
 from app.services.audit_logger import AuditLoggerService
 from app.models.audit_log import AuditEventType, AuditEventStatus
@@ -214,8 +216,9 @@ async def get_current_user_optional(
     return user
 
 @router.post("/login")
+@limiter.limit(AUTH_RATE)
 async def login(
-    request: Request,
+    request: Request, # Added for rate limiter
     user_data: UserLogin,
     db: Session = Depends(get_db),
     redis: RedisClient = Depends(get_redis)
@@ -306,8 +309,9 @@ async def login(
     )
 
 @router.post("/register")
+@limiter.limit(AUTH_RATE)
 async def register(
-    request: Request,
+    request: Request, # Added for rate limiter
     user_data: UserRegister,
     db: Session = Depends(get_db)
 ):
