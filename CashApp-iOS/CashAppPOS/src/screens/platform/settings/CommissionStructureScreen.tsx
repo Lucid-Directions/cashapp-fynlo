@@ -124,6 +124,8 @@ const PlansAndPricingScreen: React.FC = () => {
         'platform.service_charge.rate': config.serviceChargeRate,
       };
 
+      console.log('💾 Saving plans and pricing configuration:', settingsUpdates);
+
       // Update service charge configuration using dedicated service
       await platformService.updateServiceChargeConfig(
         config.serviceChargeEnabled,
@@ -144,17 +146,18 @@ const PlansAndPricingScreen: React.FC = () => {
           [{ text: 'OK' }]
         );
       } else {
+        console.error('❌ Save failed:', result.errors);
         Alert.alert(
           'Save Failed',
-          'Failed to save plans and pricing configuration. Please try again.',
+          'Failed to save plans and pricing configuration. Please check your connection and try again.',
           [{ text: 'OK' }]
         );
       }
     } catch (error) {
-      console.error('Failed to save plans and pricing settings:', error);
+      console.error('❌ Error saving plans and pricing:', error);
       Alert.alert(
-        'Save Error',
-        'An error occurred while saving settings. Please try again.',
+        'Error',
+        'An error occurred while saving. Please try again.',
         [{ text: 'OK' }]
       );
     }
