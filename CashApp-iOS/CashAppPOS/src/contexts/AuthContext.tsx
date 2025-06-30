@@ -648,23 +648,29 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         // Load REAL restaurant data first
         const restaurantDataService = RestaurantDataService.getInstance();
         const realRestaurants = await restaurantDataService.getPlatformRestaurants('platform_owner_1');
-        const businesses = realRestaurants.map(r => restaurantDataService.toBusinessType(r));
+        
+        // Add safety check for array
+        const businesses = Array.isArray(realRestaurants) 
+          ? realRestaurants.map(r => restaurantDataService.toBusinessType(r))
+          : [];
         setManagedRestaurants(businesses);
         
-        // Generate REAL platform data based on actual restaurants
-        const totalRevenue = realRestaurants.reduce((sum, r) => sum + (r.monthlyRevenue || 0), 0);
+        // Generate REAL platform data based on actual restaurants - add safety check
+        const totalRevenue = Array.isArray(realRestaurants) 
+          ? realRestaurants.reduce((sum, r) => sum + (r.monthlyRevenue || 0), 0)
+          : 0;
         const realPlatformData: Platform = {
           id: 'platform1',
           name: 'Fynlo POS Platform',
           ownerId: 'platform_owner_1', 
           createdDate: new Date(2024, 0, 1),
-          totalRestaurants: realRestaurants.length, // REAL count from backend
+          totalRestaurants: Array.isArray(realRestaurants) ? realRestaurants.length : 0, // REAL count from backend
           totalRevenue: totalRevenue, // REAL revenue from backend
           isActive: true,
         };
         
         setPlatform(realPlatformData);
-        console.log(`✅ Platform data loaded: ${realRestaurants.length} restaurants, £${totalRevenue} total revenue`);
+        console.log(`✅ Platform data loaded: ${Array.isArray(realRestaurants) ? realRestaurants.length : 0} restaurants, £${totalRevenue} total revenue`);
       }
     } catch (error) {
       console.error('Error loading platform data:', error);
@@ -700,8 +706,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const unsubscribe = restaurantDataService.subscribeToPlatformRestaurants(
         'platform_owner_1',
         (updatedRestaurants) => {
-          console.log('🔄 Platform restaurants updated in real-time:', updatedRestaurants.length);
-          const businesses = updatedRestaurants.map(r => restaurantDataService.toBusinessType(r));
+          console.log('🔄 Platform restaurants updated in real-time:', Array.isArray(updatedRestaurants) ? updatedRestaurants.length : 0);
+          // Add safety check for array
+          const businesses = Array.isArray(updatedRestaurants) 
+            ? updatedRestaurants.map(r => restaurantDataService.toBusinessType(r))
+            : [];
           setManagedRestaurants(businesses);
         }
       );
