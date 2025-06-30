@@ -7,4 +7,5 @@
 #import <React/RCTBundleURLProvider.h>
 #import <React/RCTRootView.h>
 #import <React/RCTLinkingManager.h>
-#import <SumUpSDK/SumUpSDK.h>
+// TODO: Re-enable SumUp when targeting physical device
+// #import <SumUpSDK/SumUpSDK.h>
