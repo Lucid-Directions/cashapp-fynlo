@@ -26,7 +26,7 @@ jobs:
           git config --global url."https://x-access-token:${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/"
 
           # Add the backup repo as a remote called 'backup'
-          git remote add backup https://github.com/Lucid-Directions/flynlo-backup.git
+          git remote add backup https://github.com/ryand2626/cashapp-fynlo-backup.git
 
           # Push all branches, tags, and refs
           git push --mirror backup
