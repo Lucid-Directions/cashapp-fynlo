@@ -37,48 +37,6 @@ jest.mock('@react-navigation/native', () => {
   };
 });
 
-// Mock Zustand stores
-jest.mock('./src/store/useAppStore', () => ({
-  __esModule: true,
-  default: jest.fn(() => ({
-    user: null,
-    session: null,
-    cart: [],
-    currentOrder: null,
-    isOnline: true,
-    isLoading: false,
-    error: null,
-    setUser: jest.fn(),
-    logout: jest.fn(),
-    setSession: jest.fn(),
-    addToCart: jest.fn(),
-    removeFromCart: jest.fn(),
-    updateCartItem: jest.fn(),
-    clearCart: jest.fn(),
-    setCurrentOrder: jest.fn(),
-    setOnlineStatus: jest.fn(),
-    setLoading: jest.fn(),
-    setError: jest.fn(),
-    cartTotal: jest.fn(() => 0),
-    cartItemCount: jest.fn(() => 0),
-  })),
-}));
-
-jest.mock('./src/store/useUIStore', () => ({
-  __esModule: true,
-  default: jest.fn(() => ({
-    selectedCategory: 'All',
-    showPaymentModal: false,
-    showOfflineIndicator: false,
-    theme: 'light',
-    setSelectedCategory: jest.fn(),
-    setShowPaymentModal: jest.fn(),
-    setShowOfflineIndicator: jest.fn(),
-    setTheme: jest.fn(),
-    toggleTheme: jest.fn(),
-  })),
-}));
-
 // Mock AsyncStorage
 jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock')

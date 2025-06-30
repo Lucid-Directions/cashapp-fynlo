@@ -263,12 +263,6 @@ const EnhancedPOSScreen: React.FC = () => {
     setShowModifierModal(false);
   };
 
-  const handleAddToCart = () => {
-    if (selectedItem) {
-      addItemToCart(selectedItem, quantity, selectedModifiers, specialInstructions);
-    }
-  };
-
   const toggleModifier = (modifier: Modifier) => {
     setSelectedModifiers(prev => {
       const exists = prev.find(m => m.id === modifier.id);
@@ -309,13 +303,6 @@ const EnhancedPOSScreen: React.FC = () => {
       }
     } else {
       Alert.alert('Not Found', `No item found for barcode: ${barcode}`);
-    }
-  };
-
-  const handleAddToCart = () => {
-    if (selectedItem) {
-      addItemToCart(selectedItem, quantity, selectedModifiers, specialInstructions);
-      setShowModifierModal(false);
     }
   };
 
@@ -574,7 +561,11 @@ const EnhancedPOSScreen: React.FC = () => {
                 </View>
                 <TouchableOpacity
                   style={styles.addToCartButton}
-                  onPress={handleAddToCart}
+                  onPress={() => {
+                    if (selectedItem) {
+                      addItemToCart(selectedItem, quantity, selectedModifiers, specialInstructions);
+                    }
+                  }}
                 >
                   <Text style={styles.addToCartButtonText}>
                     Add {quantity} to Cart
