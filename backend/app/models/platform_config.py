@@ -250,6 +250,40 @@ DEFAULT_PLATFORM_CONFIGS = [
         'category': 'business_rules',
         'description': 'Maximum service charge restaurants can apply',
     },
+
+    # Service Charge Configuration
+    {
+        'config_key': 'platform.service_charge.enabled',
+        'config_value': {'value': True}, # Storing as a dict to match other config_value structures
+        'category': 'service_charge',
+        'description': 'Enable or disable platform-wide service charge.',
+        'is_sensitive': False,
+        'validation_schema': {'type': 'object', 'properties': {'value': {'type': 'boolean'}}}
+    },
+    {
+        'config_key': 'platform.service_charge.rate',
+        'config_value': {'value': 12.5}, # Storing as a dict
+        'category': 'service_charge',
+        'description': 'Service charge rate as a percentage (e.g., 12.5 for 12.5%).',
+        'is_sensitive': False,
+        'validation_schema': {'type': 'object', 'properties': {'value': {'type': 'number', 'minimum': 0, 'maximum': 100}}}
+    },
+    {
+        'config_key': 'platform.service_charge.description',
+        'config_value': {'value': 'Platform service charge'}, # Storing as a dict
+        'category': 'service_charge',
+        'description': 'Description for the service charge (e.g., for display on receipts).',
+        'is_sensitive': False,
+        'validation_schema': {'type': 'object', 'properties': {'value': {'type': 'string', 'maxLength': 255}}}
+    },
+    {
+        'config_key': 'platform.service_charge.currency',
+        'config_value': {'value': 'GBP'}, # Storing as a dict
+        'category': 'service_charge',
+        'description': 'Currency for the service charge.',
+        'is_sensitive': False,
+        'validation_schema': {'type': 'object', 'properties': {'value': {'type': 'string', 'enum': ['GBP', 'USD', 'EUR']}}}
+    },
 ]
 
 # Default feature flags

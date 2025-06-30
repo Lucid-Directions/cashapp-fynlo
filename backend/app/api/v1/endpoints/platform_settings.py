@@ -2,9 +2,10 @@
 Platform Settings API Endpoints
 Admin-only endpoints for managing platform-wide configurations
 """
-
+from datetime import datetime # Added missing import
 from typing import Dict, Any, Optional, List
 from fastapi import APIRouter, Depends, HTTPException, status, Query, Request
+import logging # Added for logging in new endpoints
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field
 
@@ -32,6 +33,15 @@ class FeatureFlagRequest(BaseModel):
 class BulkUpdateRequest(BaseModel):
     updates: Dict[str, Any]
     change_reason: Optional[str] = None
+
+class ServiceChargeConfigRequest(BaseModel):
+    enabled: bool
+    rate: float = Field(..., ge=0, le=100)
+    description: str = Field(..., max_length=255)
+    currency: str # Should ideally be an Enum, e.g., Literal['GBP', 'USD', 'EUR']
+
+class ServiceChargeConfigResponse(BaseModel):
+    service_charge: ServiceChargeConfigRequest
 
 def require_admin_user(current_user: User = Depends(get_current_user)) -> User:
     """Ensure user has admin privileges for platform settings"""
@@ -66,6 +76,60 @@ async def get_platform_settings(
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+# Service Charge Specific Endpoints
+@router.get(
+    "/platform/service-charge",
+    response_model=ServiceChargeConfigResponse,
+    summary="Get service charge configuration",
+    tags=["Platform Settings", "Service Charge"]
+)
+async def get_service_charge_configuration(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin_user)
+):
+    """Retrieve the current platform service charge configuration."""
+    try:
+        service = PlatformSettingsService(db)
+        config = await service.get_service_charge_config()
+        return config # FastAPI will wrap this in the response_model
+    except Exception as e:
+        logger.error(f"Error retrieving service charge configuration: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to retrieve service charge configuration")
+
+@router.put(
+    "/platform/service-charge",
+    response_model=ServiceChargeConfigResponse,
+    summary="Update service charge configuration",
+    tags=["Platform Settings", "Service Charge"]
+)
+async def update_service_charge_configuration(
+    request: ServiceChargeConfigRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_admin_user)
+):
+    """Update the platform service charge configuration."""
+    try:
+        service = PlatformSettingsService(db)
+        # The service method expects a dictionary, so we convert the Pydantic model
+        success = await service.update_service_charge_config(
+            config_data=request.dict(),
+            updated_by=str(current_user.id) # Assuming user ID is a UUID or string
+        )
+        if not success:
+            # This case might be tricky if partial updates occurred.
+            # The service method tries to update all and returns True if all succeed.
+            # If it returns False, it implies one or more updates failed but didn't raise an exception (e.g. key not found).
+            raise HTTPException(status_code=500, detail="Failed to update some service charge settings")
+
+        # Fetch the updated configuration to return
+        updated_config = await service.get_service_charge_config()
+        return updated_config
+    except ValueError as e: # Catch validation errors from the service layer
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error updating service charge configuration: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to update service charge configuration")
 
 @router.get("/settings/{config_key}")
 async def get_platform_setting(
