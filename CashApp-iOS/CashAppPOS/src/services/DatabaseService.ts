@@ -593,6 +593,25 @@ class DatabaseService {
       generated_at: new Date().toISOString()
     };
   }
+
+  async scanBarcode(): Promise<string | null> {
+    // Placeholder for real barcode scanner integration (e.g., ML Kit)
+    // Returns the scanned barcode string or null if cancelled
+    console.warn('scanBarcode() not yet implemented in DatabaseService');
+    return null;
+  }
+
+  async printReceipt(order: Order): Promise<boolean> {
+    // TODO: integrate with AirPrint / ESC-POS printers
+    console.warn('printReceipt() not yet implemented in DatabaseService');
+    return true; // pretend success so caller flow continues
+  }
+
+  async openCashDrawer(): Promise<boolean> {
+    // TODO: integrate with connected cash drawer hardware
+    console.warn('openCashDrawer() not yet implemented in DatabaseService');
+    return true;
+  }
 }
 
 export default DatabaseService; 

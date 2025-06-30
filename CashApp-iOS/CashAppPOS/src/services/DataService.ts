@@ -1,7 +1,6 @@
 // DataService.ts - Unified data service with mock/real data switching
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DatabaseService from './DatabaseService';
-import MockDataService from './MockDataService';
 import APITestingService from './APITestingService';
 import API_CONFIG from '../config/api';
 import { envBool, IS_DEV } from '../env';
@@ -44,16 +43,16 @@ class DataService {
   private static instance: DataService;
   private featureFlags: FeatureFlags = DEFAULT_FLAGS;
   private databaseService: DatabaseService;
-  private mockDataService: MockDataService;
   private apiTestingService: APITestingService;
   private isBackendAvailable: boolean = false;
+  private db: ReturnType<typeof DatabaseService.getInstance>;
 
   constructor() {
     this.databaseService = DatabaseService.getInstance();
-    this.mockDataService = MockDataService.getInstance();
     this.apiTestingService = APITestingService.getInstance();
     this.loadFeatureFlags();
     this.checkBackendAvailability();
+    this.db = DatabaseService.getInstance();
   }
 
   static getInstance(): DataService {
@@ -166,24 +165,24 @@ class DataService {
     }
 
     if (this.featureFlags.MOCK_AUTHENTICATION) {
-      return this.mockDataService.login(username, password);
+      return this.db.login(username, password);
     }
 
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        return await this.databaseService.login(username, password);
+        return await this.db.login(username, password);
       } catch (error) {
         console.log('Real login failed, falling back to mock');
-        return this.mockDataService.login(username, password);
+        return this.db.login(username, password);
       }
     }
 
-    return this.mockDataService.login(username, password);
+    return this.db.login(username, password);
   }
 
   async logout(): Promise<void> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
-      await this.databaseService.logout();
+      await this.db.logout();
     }
     // Always clear local state
     await AsyncStorage.multiRemove(['auth_token', 'user_data']);
@@ -198,7 +197,7 @@ class DataService {
 
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        const products = await this.databaseService.getProducts();
+        const products = await this.db.getProducts();
         if (products && products.length > 0) {
           return products;
         }
@@ -206,25 +205,25 @@ class DataService {
         console.log('Failed to fetch products from API, using mock data');
       }
     }
-    return this.mockDataService.getProducts();
+    return this.db.getProducts();
   }
 
   async getProductsByCategory(categoryId: number): Promise<any[]> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        return await this.databaseService.getProductsByCategory(categoryId);
+        return await this.db.getProductsByCategory(categoryId);
       } catch (error) {
         console.log('Failed to fetch products by category, using mock data');
       }
     }
-    return this.mockDataService.getProductsByCategory(categoryId);
+    return this.db.getProductsByCategory(categoryId);
   }
 
   // Category operations
   async getCategories(): Promise<any[]> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        const categories = await this.databaseService.getCategories();
+        const categories = await this.db.getCategories();
         if (categories && categories.length > 0) {
           return categories;
         }
@@ -232,37 +231,37 @@ class DataService {
         console.log('Failed to fetch categories from API, using mock data');
       }
     }
-    return this.mockDataService.getCategories();
+    return this.db.getCategories();
   }
 
   // Order operations
   async createOrder(order: any): Promise<any> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        const result = await this.databaseService.createOrder(order);
+        const result = await this.db.createOrder(order);
         if (result) return result;
       } catch (error) {
         console.log('Failed to create order via API, using mock');
       }
     }
-    return this.mockDataService.createOrder(order);
+    return this.db.createOrder(order);
   }
 
   async updateOrder(orderId: number, updates: any): Promise<any> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        return await this.databaseService.updateOrder(orderId, updates);
+        return await this.db.updateOrder(orderId, updates);
       } catch (error) {
         console.log('Failed to update order via API');
       }
     }
-    return this.mockDataService.updateOrder(orderId, updates);
+    return this.db.updateOrder(orderId, updates);
   }
 
   async getRecentOrders(limit: number = 20): Promise<any[]> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        const orders = await this.databaseService.getRecentOrders(limit);
+        const orders = await this.db.getRecentOrders(limit);
         if (orders && orders.length > 0) {
           return orders;
         }
@@ -270,7 +269,7 @@ class DataService {
         console.log('Failed to fetch orders from API, using mock data');
       }
     }
-    return this.mockDataService.getRecentOrders(limit);
+    return this.db.getRecentOrders(limit);
   }
 
   // Payment processing - PHASE 3: Fix SumUp integration
@@ -287,7 +286,7 @@ class DataService {
     if (this.featureFlags.ENABLE_PAYMENTS && this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         console.log(`Processing real payment: ${paymentMethod} for £${amount} (Order: ${orderId})`);
-        const result = await this.databaseService.processPayment(orderId, paymentMethod, amount);
+        const result = await this.db.processPayment(orderId, paymentMethod, amount);
         
         if (result) {
           console.log('✅ Real payment processed successfully');
@@ -306,19 +305,19 @@ class DataService {
     // If payments disabled or no backend, simulate success for demo
     if (!this.featureFlags.ENABLE_PAYMENTS) {
       console.log(`🎭 Demo mode payment: ${paymentMethod} for £${amount}`);
-      return this.mockDataService.processPayment(orderId, paymentMethod, amount);
+      return this.db.processPayment(orderId, paymentMethod, amount);
     }
     
     // Fallback to mock if no backend available
     console.log(`⚠️  No backend available, using mock payment: ${paymentMethod} for £${amount}`);
-    return this.mockDataService.processPayment(orderId, paymentMethod, amount);
+    return this.db.processPayment(orderId, paymentMethod, amount);
   }
 
   // Restaurant operations
   async getRestaurantFloorPlan(sectionId?: string | null): Promise<any> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        const floorPlan = await this.databaseService.getRestaurantFloorPlan(sectionId);
+        const floorPlan = await this.db.getRestaurantFloorPlan(sectionId ?? undefined);
         if (floorPlan && floorPlan.tables && floorPlan.tables.length > 0) {
           return floorPlan;
         }
@@ -326,25 +325,25 @@ class DataService {
         console.log('Failed to fetch floor plan from API, using mock data');
       }
     }
-    return this.mockDataService.getRestaurantFloorPlan(sectionId);
+    return this.db.getRestaurantFloorPlan(sectionId ?? undefined);
   }
 
   async updateTableStatus(tableId: string, status: string, additionalData?: any): Promise<any> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        return await this.databaseService.updateTableStatus(tableId, status, additionalData);
+        return await this.db.updateTableStatus(tableId, status, additionalData);
       } catch (error) {
         console.log('Failed to update table status via API');
       }
     }
-    return this.mockDataService.updateTableStatus(tableId, status, additionalData);
+    return this.db.updateTableStatus(tableId, status, additionalData);
   }
 
   // Analytics and Reporting
   async getDailySalesReport(date?: string): Promise<any> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        const report = await this.databaseService.getDailySalesReport(date);
+        const report = await this.db.getDailySalesReport(date);
         if (report && report.summary) {
           return report;
         }
@@ -352,13 +351,13 @@ class DataService {
         console.log('Failed to fetch daily report from API, using mock data');
       }
     }
-    return this.mockDataService.getDailySalesReport(date);
+    return this.db.getDailySalesReport(date);
   }
 
   async getSalesSummary(dateFrom?: string, dateTo?: string): Promise<any> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        const summary = await this.databaseService.getSalesSummary(dateFrom, dateTo);
+        const summary = await this.db.getSalesSummary(dateFrom ?? undefined, dateTo ?? undefined);
         if (summary && summary.summary) {
           return summary;
         }
@@ -366,30 +365,30 @@ class DataService {
         console.log('Failed to fetch sales summary from API, using mock data');
       }
     }
-    return this.mockDataService.getSalesSummary(dateFrom, dateTo);
+    return this.db.getSalesSummary(dateFrom ?? undefined, dateTo ?? undefined);
   }
 
   // Session management
   async getCurrentSession(): Promise<any> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        return await this.databaseService.getCurrentSession();
+        return await this.db.getCurrentSession();
       } catch (error) {
         console.log('Failed to get session from API');
       }
     }
-    return this.mockDataService.getCurrentSession();
+    return this.db.getCurrentSession();
   }
 
   async createSession(configId: number): Promise<any> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        return await this.databaseService.createSession(configId);
+        return await this.db.createSession(configId);
       } catch (error) {
         console.log('Failed to create session via API');
       }
     }
-    return this.mockDataService.createSession(configId);
+    return this.db.createSession(configId);
   }
 
   // Hardware operations (always mock for now)
@@ -397,30 +396,30 @@ class DataService {
     if (this.featureFlags.ENABLE_HARDWARE) {
       console.log('Hardware printing not yet implemented');
     }
-    return this.mockDataService.printReceipt(order);
+    return this.db.printReceipt(order);
   }
 
   async openCashDrawer(): Promise<boolean> {
     if (this.featureFlags.ENABLE_HARDWARE) {
       console.log('Hardware cash drawer not yet implemented');
     }
-    return this.mockDataService.openCashDrawer();
+    return this.db.openCashDrawer();
   }
 
   async scanBarcode(): Promise<string | null> {
     if (this.featureFlags.ENABLE_HARDWARE) {
       console.log('Hardware barcode scanning not yet implemented');
     }
-    return this.mockDataService.scanBarcode();
+    return this.db.scanBarcode();
   }
 
   // Sync and offline support
   async syncOfflineData(): Promise<void> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
-      await this.databaseService.syncOfflineData();
+      await this.db.syncOfflineData();
     }
     // Also sync mock data if needed
-    await this.mockDataService.syncOfflineData();
+    await this.db.syncOfflineData();
   }
 
   // Development utilities

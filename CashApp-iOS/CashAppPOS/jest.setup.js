@@ -95,27 +95,6 @@ jest.mock('react-native-reanimated', () => {
   return Reanimated;
 });
 
-// Mock Animated module
-jest.mock('react-native/Libraries/Animated/Animated', () => {
-  const ActualAnimated = require('react-native/Libraries/Animated/Animated');
-  return {
-    ...ActualAnimated,
-    timing: () => ({
-      start: jest.fn(),
-    }),
-    spring: () => ({
-      start: jest.fn(),
-    }),
-    Value: jest.fn(() => ({
-      setValue: jest.fn(),
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-      removeAllListeners: jest.fn(),
-      interpolate: jest.fn(),
-    })),
-  };
-});
-
 // Mock Keychain
 jest.mock('react-native-keychain', () => ({
   setInternetCredentials: jest.fn(),
@@ -162,38 +141,6 @@ jest.mock(
   }),
   { virtual: true }
 );
-
-// Mock DatabaseService with sensible defaults so integration tests pass
-jest.mock('./src/services/DatabaseService', () => {
-  const {
-    mockMenuItems,
-    mockCategories,
-    mockOrders,
-    mockSessions,
-  } = require('./src/__tests__/fixtures/mockData');
-
-  const dbMock = {
-    login: jest.fn().mockResolvedValue(true),
-    logout: jest.fn().mockResolvedValue(true),
-    getProducts: jest.fn().mockResolvedValue(mockMenuItems),
-    getProductsByCategory: jest.fn().mockResolvedValue(mockMenuItems.filter((p) => p.category === 'Appetizers')),
-    getCategories: jest.fn().mockResolvedValue(mockCategories),
-    getCurrentSession: jest.fn().mockResolvedValue(mockSessions[1]),
-    createSession: jest.fn().mockResolvedValue(mockSessions[1]),
-    createOrder: jest.fn().mockResolvedValue(mockOrders[0]),
-    updateOrder: jest.fn().mockResolvedValue({ ...mockOrders[0], state: 'paid' }),
-    getRecentOrders: jest.fn().mockResolvedValue(mockOrders.slice(0, 10)),
-    processPayment: jest.fn().mockResolvedValue(true),
-    syncOfflineData: jest.fn().mockResolvedValue(undefined),
-  };
-
-  return {
-    __esModule: true,
-    default: {
-      getInstance: jest.fn(() => dbMock),
-    },
-  };
-});
 
 // Global test utilities
 global.mockNavigate = jest.fn();
