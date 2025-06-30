@@ -4,6 +4,7 @@
  */
 
 import 'react-native-gesture-handler/jestSetup';
+import fetchMock from 'jest-fetch-mock';
 
 // Mock react-native modules
 jest.mock('react-native/Libraries/EventEmitter/NativeEventEmitter');
@@ -115,13 +116,6 @@ jest.mock('react-native/Libraries/Animated/Animated', () => {
   };
 });
 
-// Mock Haptic Feedback
-jest.mock('react-native-haptic-feedback', () => ({
-  impact: jest.fn(),
-  notification: jest.fn(),
-  selection: jest.fn(),
-}));
-
 // Mock Keychain
 jest.mock('react-native-keychain', () => ({
   setInternetCredentials: jest.fn(),
@@ -131,56 +125,75 @@ jest.mock('react-native-keychain', () => ({
 }));
 
 // Mock Biometrics
-jest.mock('react-native-biometrics', () => ({
-  isSensorAvailable: jest.fn(),
-  simplePrompt: jest.fn(),
-  createKeys: jest.fn(),
-  deleteKeys: jest.fn(),
-}));
+jest.mock(
+  'react-native-biometrics',
+  () => ({
+    isSensorAvailable: jest.fn(),
+    simplePrompt: jest.fn(),
+    createKeys: jest.fn(),
+    deleteKeys: jest.fn(),
+  }),
+  { virtual: true }
+);
 
 // Mock Camera
-jest.mock('@react-native-camera/camera', () => ({
-  Camera: 'Camera',
-  Constants: {
-    BarCodeType: {
-      qr: 'qr',
-      pdf417: 'pdf417',
-      aztec: 'aztec',
-      ean13: 'ean13',
-      ean8: 'ean8',
-      code128: 'code128',
-      code39: 'code39',
-      code93: 'code93',
-      codabar: 'codabar',
-      datamatrix: 'datamatrix',
-      upc_e: 'upc_e',
-      interleaved2of5: 'interleaved2of5',
-      itf14: 'itf14',
-      upc_a: 'upc_a',
+jest.mock(
+  'react-native-camera',
+  () => ({
+    RNCamera: 'Camera',
+    Constants: {
+      BarCodeType: {
+        qr: 'qr',
+        pdf417: 'pdf417',
+        aztec: 'aztec',
+        ean13: 'ean13',
+        ean8: 'ean8',
+        code128: 'code128',
+        code39: 'code39',
+        code93: 'code93',
+        codabar: 'codabar',
+        datamatrix: 'datamatrix',
+        upc_e: 'upc_e',
+        interleaved2of5: 'interleaved2of5',
+        itf14: 'itf14',
+        upc_a: 'upc_a',
+      },
     },
-  },
-}));
+  }),
+  { virtual: true }
+);
 
-// Mock DatabaseService
-jest.mock('./src/services/DatabaseService', () => ({
-  __esModule: true,
-  default: {
-    getInstance: jest.fn(() => ({
-      login: jest.fn(),
-      logout: jest.fn(),
-      getProducts: jest.fn(),
-      getProductsByCategory: jest.fn(),
-      getCategories: jest.fn(),
-      getCurrentSession: jest.fn(),
-      createSession: jest.fn(),
-      createOrder: jest.fn(),
-      updateOrder: jest.fn(),
-      getRecentOrders: jest.fn(),
-      processPayment: jest.fn(),
-      syncOfflineData: jest.fn(),
-    })),
-  },
-}));
+// Mock DatabaseService with sensible defaults so integration tests pass
+jest.mock('./src/services/DatabaseService', () => {
+  const {
+    mockMenuItems,
+    mockCategories,
+    mockOrders,
+    mockSessions,
+  } = require('./src/__tests__/fixtures/mockData');
+
+  const dbMock = {
+    login: jest.fn().mockResolvedValue(true),
+    logout: jest.fn().mockResolvedValue(true),
+    getProducts: jest.fn().mockResolvedValue(mockMenuItems),
+    getProductsByCategory: jest.fn().mockResolvedValue(mockMenuItems.filter((p) => p.category === 'Appetizers')),
+    getCategories: jest.fn().mockResolvedValue(mockCategories),
+    getCurrentSession: jest.fn().mockResolvedValue(mockSessions[1]),
+    createSession: jest.fn().mockResolvedValue(mockSessions[1]),
+    createOrder: jest.fn().mockResolvedValue(mockOrders[0]),
+    updateOrder: jest.fn().mockResolvedValue({ ...mockOrders[0], state: 'paid' }),
+    getRecentOrders: jest.fn().mockResolvedValue(mockOrders.slice(0, 10)),
+    processPayment: jest.fn().mockResolvedValue(true),
+    syncOfflineData: jest.fn().mockResolvedValue(undefined),
+  };
+
+  return {
+    __esModule: true,
+    default: {
+      getInstance: jest.fn(() => dbMock),
+    },
+  };
+});
 
 // Global test utilities
 global.mockNavigate = jest.fn();
@@ -223,3 +236,5 @@ expect.extend({
 
 // Setup fake timers if needed
 // jest.useFakeTimers();
+
+fetchMock.enableMocks();
