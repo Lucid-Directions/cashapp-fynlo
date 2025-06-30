@@ -7,7 +7,7 @@ import uuid
 from datetime import datetime, timedelta
 from typing import Optional, List
 from decimal import Decimal
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Query, Request
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 import qrcode
@@ -23,6 +23,7 @@ from app.core.responses import APIResponseHelper
 from app.core.exceptions import FynloException, ErrorCodes
 from app.core.transaction_manager import transactional, transaction_manager
 from app.services.payment_factory import payment_factory
+from app.middleware.rate_limit_middleware import limiter, PAYMENT_RATE
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -117,36 +118,38 @@ def generate_qr_code(data: str) -> str:
     return f"data:image/png;base64,{img_str}"
 
 @router.post("/qr/generate", response_model=QRPaymentResponse)
+@limiter.limit(PAYMENT_RATE)
 async def generate_qr_payment(
-    request: QRPaymentRequest,
+    qr_request: QRPaymentRequest, # Renamed to avoid clash with FastAPI Request
+    request: Request, # Added for rate limiter
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """Generate QR code for payment with 1.2% fee advantage"""
     
     # Verify order exists
-    order = db.query(Order).filter(Order.id == request.order_id).first()
+    order = db.query(Order).filter(Order.id == qr_request.order_id).first()
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
     
     # Calculate fees
-    fee_amount = calculate_payment_fee(request.amount, "qr_code")
-    net_amount = request.amount - fee_amount
+    fee_amount = calculate_payment_fee(qr_request.amount, "qr_code")
+    net_amount = qr_request.amount - fee_amount
     
     # Generate unique payment data
     payment_data = {
         "payment_id": str(uuid.uuid4()),
-        "order_id": request.order_id,
-        "amount": request.amount,
+        "order_id": qr_request.order_id,
+        "amount": qr_request.amount,
         "merchant": "Fynlo POS",
         "timestamp": datetime.utcnow().isoformat()
     }
     
     # Create QR payment record
     qr_payment = QRPayment(
-        order_id=request.order_id,
+        order_id=qr_request.order_id,
         qr_code_data=str(payment_data),
-        amount=request.amount,
+        amount=qr_request.amount,
         fee_amount=fee_amount,
         net_amount=net_amount,
         expires_at=datetime.utcnow() + timedelta(minutes=15)  # 15-minute expiry
@@ -159,7 +162,7 @@ async def generate_qr_payment(
     # Generate QR code image
     qr_code_image = generate_qr_code(str(payment_data))
     
-    logger.info(f"QR payment generated: {qr_payment.id} for order {request.order_id}")
+    logger.info(f"QR payment generated: {qr_payment.id} for order {qr_request.order_id}")
     
     return QRPaymentResponse(
         qr_payment_id=str(qr_payment.id),
@@ -239,16 +242,18 @@ async def confirm_qr_payment(
     )
 
 @router.post("/stripe", response_model=PaymentResponse)
+@limiter.limit(PAYMENT_RATE)
 @transactional(max_retries=2, retry_delay=0.2)
 async def process_stripe_payment(
-    request: StripePaymentRequest,
+    stripe_request: StripePaymentRequest, # Renamed to avoid clash
+    request: Request, # Added for rate limiter
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """Process Stripe payment"""
     
     # Verify order exists
-    order = db.query(Order).filter(Order.id == request.order_id).first()
+    order = db.query(Order).filter(Order.id == stripe_request.order_id).first()
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
     
@@ -257,18 +262,18 @@ async def process_stripe_payment(
         raise HTTPException(status_code=400, detail="Order already paid")
     
     # Calculate fees
-    fee_amount = calculate_payment_fee(request.amount, "card")
-    net_amount = request.amount - fee_amount
+    fee_amount = calculate_payment_fee(stripe_request.amount, "card")
+    net_amount = stripe_request.amount - fee_amount
     
     # Create payment record first (with pending status)
     payment = Payment(
-        order_id=request.order_id,
+        order_id=stripe_request.order_id,
         payment_method="stripe",
-        amount=request.amount,
+        amount=stripe_request.amount,
         fee_amount=fee_amount,
         net_amount=net_amount,
         status="pending",
-        payment_metadata={"stripe_payment_method_id": request.payment_method_id}
+        payment_metadata={"stripe_payment_method_id": stripe_request.payment_method_id}
     )
     
     db.add(payment)
@@ -277,11 +282,11 @@ async def process_stripe_payment(
     try:
         # Create Stripe PaymentIntent
         payment_intent = stripe.PaymentIntent.create(
-            amount=int(request.amount * 100),  # Stripe uses cents
-            currency=request.currency,
-            payment_method=request.payment_method_id,
+            amount=int(stripe_request.amount * 100),  # Stripe uses cents
+            currency=stripe_request.currency,
+            payment_method=stripe_request.payment_method_id,
             metadata={
-                "order_id": str(request.order_id),
+                "order_id": str(stripe_request.order_id),
                 "payment_id": str(payment.id),
                 "restaurant_id": str(order.restaurant_id)
             },
@@ -301,12 +306,12 @@ async def process_stripe_payment(
             order.status = "confirmed" if order.status == "pending" else order.status
         else:
             # Payment failed, don't update order
-            logger.warning(f"Stripe payment failed for order {request.order_id}: {payment_intent.status}")
+            logger.warning(f"Stripe payment failed for order {stripe_request.order_id}: {payment_intent.status}")
         
         # Transaction auto-commits on success
         db.refresh(payment)
         
-        logger.info(f"Stripe payment processed: {payment.id} for order {request.order_id}")
+        logger.info(f"Stripe payment processed: {payment.id} for order {stripe_request.order_id}")
         
         return PaymentResponse(
             payment_id=str(payment.id),

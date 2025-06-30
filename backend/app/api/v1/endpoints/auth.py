@@ -4,7 +4,7 @@ Authentication endpoints for Fynlo POS
 
 from datetime import datetime, timedelta
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from jose import JWTError, jwt
@@ -21,6 +21,8 @@ from app.core.exceptions import (
     ConflictException,
     iOSErrorHelper
 )
+from app.middleware.rate_limit_middleware import limiter, AUTH_RATE
+
 
 router = APIRouter()
 security = HTTPBearer()
@@ -164,7 +166,9 @@ async def get_current_user_optional(
     return user
 
 @router.post("/login")
+@limiter.limit(AUTH_RATE)
 async def login(
+    request: Request, # Added for rate limiter
     user_data: UserLogin,
     db: Session = Depends(get_db),
     redis: RedisClient = Depends(get_redis)
@@ -216,7 +220,9 @@ async def login(
     )
 
 @router.post("/register")
+@limiter.limit(AUTH_RATE)
 async def register(
+    request: Request, # Added for rate limiter
     user_data: UserRegister,
     db: Session = Depends(get_db)
 ):

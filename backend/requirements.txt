@@ -3,9 +3,9 @@
 
 # Core Framework - Updated to latest secure versions
 fastapi==0.108.0
-uvicorn[standard]==0.25.0
-pydantic==2.5.2
-pydantic-settings==2.1.0
+uvicorn[standard]==0.25.0 # Ensure uvicorn is installed directly
+pydantic[email]==2.5.2 # Added email extra for validation
+pydantic-settings==2.1.0 # Already present, ensuring version consistency
 python-multipart==0.0.6
 
 # Database - Latest compatible versions
@@ -20,15 +20,19 @@ passlib[bcrypt]==1.7.4
 # Payment Processing - Updated to latest
 stripe==8.0.0
 requests==2.32.3
+squareup==34.0.1.20240118 # Corrected version for Square payment provider
 
 # Real-time Features - Latest stable versions
 websockets==12.0
-redis==5.0.1
+redis>=6.0.0,<7.0.0 # Updated for aioredis features, compatible with fastapi-limiter
+fastapi-limiter==0.1.6
+slowapi>=0.1.7 # Explicitly add slowapi dependency
 
 # QR Code Generation & Image Processing - Updated for security
 qrcode[pil]==7.4.2
 Pillow==10.1.0
-python-magic-bin==0.4.14
+# python-magic-bin==0.4.14 # Often problematic, try python-magic if needed
+python-magic==0.4.27 # Common alternative for Linux
 
 # Background Tasks - Latest stable version
 celery==5.3.6

@@ -25,7 +25,7 @@ httpx==0.26.0
 
 # Security & Analysis - Latest security tools
 bandit==1.7.5
-safety==2.3.5
+safety>=3.0.0 # Updated to allow newer packaging
 semgrep==1.52.0
 
 # Database Development - Database management tools

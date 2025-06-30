@@ -2,13 +2,19 @@
 API Router for Fynlo POS Backend
 """
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from app.middleware.rate_limit_middleware import limiter, DEFAULT_RATE
 
 from app.api.v1.endpoints import auth, restaurants, products, orders, payments, customers, analytics, files, platform, websocket, sync, notifications, pos, admin
 
-api_router = APIRouter()
+# Apply a default rate limit to all routes in this router.
+# Specific routes can override this with their own @limiter.limit decorator.
+api_router = APIRouter(dependencies=[Depends(limiter.limit(DEFAULT_RATE))])
+
 
 # Include all endpoint routers
+# Routes that have their own @limiter.limit decorator (e.g., auth, payments)
+# will use their specific limit instead of this default one.
 api_router.include_router(auth.router, prefix="/auth", tags=["authentication"])
 api_router.include_router(restaurants.router, prefix="/restaurants", tags=["restaurants"])  # Fixed: Changed to plural to match RESTful conventions and frontend expectations
 api_router.include_router(products.router, prefix="/products", tags=["products"])
