@@ -14,19 +14,15 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0 # This makes sure you get the full git history
+          token: ${{ secrets.BACKUP_REPO_PAT }}
 
       - name: Mirror push to backup repository
-        env:
-          GITHUB_TOKEN: ${{ secrets.BACKUP_REPO_PAT }}
         run: |
           git config --global user.email "arnaud_decube@hotmail.com"
           git config --global user.name "Lucid-Directions"
 
-          # Configure git to use the token
-          git config --global url."https://x-access-token:${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/"
-
           # Add the backup repo as a remote called 'backup'
-          git remote add backup https://github.com/ryand2626/cashapp-fynlo-backup.git
+          git remote add backup https://x-access-token:${{ secrets.BACKUP_REPO_PAT }}@github.com/ryand2626/cashapp-fynlo-backup.git
 
           # Push all branches, tags, and refs
           git push --mirror backup
