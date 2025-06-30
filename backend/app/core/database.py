@@ -64,6 +64,8 @@ class Restaurant(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
+    employees = relationship("Employee", back_populates="restaurant")
+
 class User(Base):
     """Users with role-based access"""
     __tablename__ = "users"
