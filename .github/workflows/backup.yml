@@ -1,0 +1,27 @@
+name: Backup Repository
+
+on:
+  schedule:
+    - cron: '0 * * * *' # Runs every hour at minute 0
+  workflow_dispatch:     # Allows you to run manually too
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # This makes sure you get the full git history
+
+      - name: Mirror push to backup repository
+        run: |
+          git config --global user.email "arnaud_decube@hotmail.com"
+          git config --global user.name "Lucid-Directions"
+
+          # Add the backup repo as a remote called 'backup'
+          git remote add backup https://x-access-token:${{ secrets.BACKUP_REPO_PAT }}@github.com/Lucid-Directions/flynlo-backup.git
+
+          # Push all branches, tags, and refs
+          git push --mirror backup
