@@ -21,7 +21,7 @@ jobs:
           git config --global user.name "Lucid-Directions"
 
           # Add the backup repo as a remote called 'backup'
-          git remote add backup https://x-access-token:${{ secrets.BACKUP_REPO_PAT }}@github.com/Lucid-Directions/flyno-backup.git
+          git remote add backup https://x-access-token:${{ secrets.BACKUP_REPO_PAT }}@github.com/Lucid-Directions/flynlo-backup.git
 
           # Push all branches, tags, and refs
           git push --mirror backup
