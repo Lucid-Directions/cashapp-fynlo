@@ -168,6 +168,7 @@ const PaymentProcessingScreen: React.FC = () => {
 
   const handleSave = async () => {
     try {
+      console.log('💾 Starting save operation for Payment Processing...');
       const platformService = PlatformService.getInstance();
       
       // Save payment fee configurations
@@ -193,37 +194,64 @@ const PaymentProcessingScreen: React.FC = () => {
         'security.daily_transaction_limit': config.dailyTransactionLimit,
       };
 
-      // Also update the service charge configuration using the dedicated service
-      await platformService.updateServiceChargeConfig(
-        config.serviceChargeEnabled,
-        config.serviceChargeRate,
-        'Platform service charge'
-      );
+      console.log('📊 Payment settings to update:', feeUpdates);
+
+      // Update the service charge configuration using the dedicated service first
+      try {
+        console.log('🔄 Updating service charge config...');
+        const serviceChargeSuccess = await platformService.updateServiceChargeConfig(
+          config.serviceChargeEnabled,
+          config.serviceChargeRate,
+          'Platform payment processing service charge'
+        );
+        console.log('✅ Service charge update result:', serviceChargeSuccess);
+      } catch (serviceChargeError) {
+        console.warn('⚠️ Service charge update failed, continuing with other settings:', serviceChargeError);
+      }
 
       // Bulk update all platform settings
+      console.log('🔄 Updating payment processing settings...');
       const result = await platformService.bulkUpdatePlatformSettings(
         feeUpdates,
         'Platform payment processing configuration update'
       );
 
+      console.log('📊 Bulk update result:', result);
+
       if (result.successful > 0) {
+        const successMessage = result.failed > 0 
+          ? `${result.successful} settings updated successfully. ${result.failed} failed to update.`
+          : `Payment processing configuration updated successfully. ${result.successful} settings updated.`;
+          
         Alert.alert(
           'Settings Saved',
-          `Payment processing configuration has been updated successfully. ${result.successful} settings updated.`,
+          successMessage,
           [{ text: 'OK' }]
         );
+        
+        if (result.failed > 0) {
+          console.warn('⚠️ Some payment settings failed to update:', result.errors);
+        }
       } else {
+        console.error('❌ All payment settings failed to update:', result.errors);
+        
+        let errorMessage = 'Failed to save payment processing configuration.';
+        if (Object.keys(result.errors).length > 0) {
+          const firstError = Object.values(result.errors)[0];
+          errorMessage += ` Error: ${firstError}`;
+        }
+        
         Alert.alert(
           'Save Failed',
-          'Failed to save payment processing configuration. Please try again.',
+          errorMessage + ' Please check your connection and try again.',
           [{ text: 'OK' }]
         );
       }
     } catch (error) {
-      console.error('Failed to save payment processing settings:', error);
+      console.error('❌ Critical error saving payment processing settings:', error);
       Alert.alert(
         'Save Error',
-        'An error occurred while saving settings. Please try again.',
+        `An error occurred while saving settings: ${error.message || 'Unknown error'}. Please try again.`,
         [{ text: 'OK' }]
       );
     }
