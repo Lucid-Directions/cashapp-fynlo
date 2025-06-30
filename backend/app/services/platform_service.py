@@ -273,6 +273,82 @@ class PlatformSettingsService:
         
         return result
     
+    async def get_service_charge_config(self) -> Dict[str, Any]:
+        """Get the consolidated service charge configuration."""
+        config_keys = [
+            "platform.service_charge.enabled",
+            "platform.service_charge.rate",
+            "platform.service_charge.description",
+            "platform.service_charge.currency"
+        ]
+
+        settings = await self.get_platform_settings(category="service_charge")
+
+        # Fallback to default values if a key is missing, to prevent TypeErrors
+        # The default values are defined in DEFAULT_PLATFORM_CONFIGS in platform_config.py
+        # This ensures that even if DB initialization failed or a key was somehow deleted,
+        # we return a well-structured response.
+
+        default_configs_map = {item['config_key']: item['config_value']['value'] for item in DEFAULT_PLATFORM_CONFIGS if item['config_key'] in config_keys}
+
+        enabled = settings.get("platform.service_charge.enabled", {}).get('value', {}).get('value', default_configs_map.get('platform.service_charge.enabled'))
+        rate = settings.get("platform.service_charge.rate", {}).get('value', {}).get('value', default_configs_map.get('platform.service_charge.rate'))
+        description = settings.get("platform.service_charge.description", {}).get('value', {}).get('value', default_configs_map.get('platform.service_charge.description'))
+        currency = settings.get("platform.service_charge.currency", {}).get('value', {}).get('value', default_configs_map.get('platform.service_charge.currency'))
+
+        # Ensure correct types, especially for boolean, as get() can return None
+        if not isinstance(enabled, bool):
+            enabled = default_configs_map.get('platform.service_charge.enabled', False) # Default to False if type is wrong
+
+        return {
+            "service_charge": {
+                "enabled": enabled,
+                "rate": rate,
+                "description": description,
+                "currency": currency
+            }
+        }
+
+    async def update_service_charge_config(
+        self,
+        config_data: Dict[str, Any],
+        updated_by: str,
+        change_reason: Optional[str] = None
+    ) -> bool:
+        """Update service charge configuration settings."""
+        # config_data is expected to be like:
+        # {
+        #   "enabled": true,
+        #   "rate": 12.5,
+        #   "description": "Platform service charge",
+        #   "currency": "GBP"
+        # }
+
+        all_success = True
+        for key, value in config_data.items():
+            config_key = f"platform.service_charge.{key}"
+            try:
+                # Wrap the scalar value in a dictionary as per our storage convention
+                success = await self.update_platform_setting(
+                    config_key=config_key,
+                    config_value={'value': value}, # Ensure value is stored in the {'value': ...} structure
+                    updated_by=updated_by,
+                    change_reason=change_reason or f"Update to service charge {key}",
+                    change_source="service_charge_api"
+                )
+                if not success:
+                    all_success = False
+                    logger.warning(f"Failed to update service charge setting: {config_key}")
+            except ValueError as e: # Catch validation errors from update_platform_setting
+                logger.error(f"Validation error updating {config_key}: {e}")
+                all_success = False # Consider it a failure for this key
+                raise # Re-raise to inform the caller (API endpoint) of the bad request
+            except Exception as e:
+                logger.error(f"Error updating service charge setting {config_key}: {e}")
+                all_success = False
+
+        return all_success
+
     async def update_feature_flag(
         self, 
         feature_key: str,
