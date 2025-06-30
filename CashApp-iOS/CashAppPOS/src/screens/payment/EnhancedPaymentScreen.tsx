@@ -143,27 +143,38 @@ const EnhancedPaymentScreen: React.FC = () => {
   const [qrPaymentStatus, setQRPaymentStatus] = useState<'generating' | 'waiting' | 'completed' | 'expired'>('generating');
   const [qrCode, setQRCode] = useState('');
 
-  // Generate QR Code for payment
+  // Generate QR Code for payment with error handling
   const generateQRCode = () => {
-    const paymentData = {
-      amount: calculateGrandTotal(),
-      currency: 'GBP',
-      merchantId: 'fynlo-pos-001',
-      orderId: `ORDER-${Date.now()}`,
-      timestamp: Date.now(),
-    };
-    
-    // In a real implementation, this would be a proper QR code
-    const qrString = `FYNLO-PAY:${btoa(JSON.stringify(paymentData))}`;
-    setQRCode(qrString);
-    setQRPaymentStatus('waiting');
-    
-    // Simulate QR code expiration after 5 minutes
-    setTimeout(() => {
-      if (qrPaymentStatus === 'waiting') {
-        setQRPaymentStatus('expired');
-      }
-    }, 300000); // 5 minutes
+    try {
+      setQRPaymentStatus('generating');
+      
+      const paymentData = {
+        amount: calculateGrandTotal(),
+        currency: 'GBP',
+        merchantId: 'fynlo-pos-001',
+        orderId: `ORDER-${Date.now()}`,
+        timestamp: Date.now(),
+      };
+      
+      // Create a simple, safe QR string without complex JSON encoding
+      const qrString = `FYNLO-PAY:${paymentData.orderId}:${paymentData.amount}:${paymentData.currency}:${paymentData.timestamp}`;
+      setQRCode(qrString);
+      setQRPaymentStatus('waiting');
+      
+      // Simulate QR code expiration after 5 minutes with safer state checking
+      setTimeout(() => {
+        setQRPaymentStatus(current => {
+          console.log('⏰ QR Code expiration check - current status:', current);
+          return current === 'waiting' ? 'expired' : current;
+        });
+      }, 300000); // 5 minutes
+      
+      console.log('✅ QR Code generated successfully:', qrString.substring(0, 50) + '...');
+    } catch (error) {
+      console.error('❌ Failed to generate QR code:', error);
+      setQRPaymentStatus('expired');
+      Alert.alert('Error', 'Failed to generate QR code. Please try again.');
+    }
   };
 
   // Payment methods configuration
@@ -451,15 +462,22 @@ const EnhancedPaymentScreen: React.FC = () => {
             {qrPaymentStatus === 'waiting' && (
               <View style={styles.qrSection}>
                 <View style={styles.qrCodeContainer}>
-                  {/* QR Code Placeholder - In real app, use a QR library */}
+                  {/* QR Code with Error Boundary */}
                   <View style={styles.qrCodePlaceholder}>
-                    <Icon name="qr-code" size={120} color={Colors.primary} />
+                    {qrCode ? (
+                      <Icon name="qr-code" size={120} color={Colors.primary} />
+                    ) : (
+                      <Icon name="error" size={120} color={Colors.danger} />
+                    )}
                   </View>
                   <Text style={styles.qrCodeText}>
-                    Scan this QR code with your banking app
+                    {qrCode ? 
+                      'Scan this QR code with your banking app' : 
+                      'QR Code generation failed'
+                    }
                   </Text>
                   <Text style={styles.qrOrderId}>
-                    Order ID: {qrCode.slice(-12)}
+                    Order ID: {qrCode ? qrCode.slice(-12) : 'N/A'}
                   </Text>
                 </View>
                 

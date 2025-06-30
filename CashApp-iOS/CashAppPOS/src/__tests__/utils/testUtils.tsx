@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Test Utilities for Fynlo POS
  * Provides common testing helpers, wrappers, and utilities
@@ -37,6 +38,9 @@ const customRender = (
     ...renderOptions,
   });
 };
+
+// Make available to test suites
+export { customRender };
 
 // Mock data generators
 export const createMockMenuItem = (overrides = {}) => ({
@@ -231,4 +235,5 @@ export const createMockFetch = (responses: any[] = []) => {
 
 // Export everything including the custom render
 export * from '@testing-library/react-native';
-export { customRender as render };
+
+export { customRenderWithStores } from './testProviders';

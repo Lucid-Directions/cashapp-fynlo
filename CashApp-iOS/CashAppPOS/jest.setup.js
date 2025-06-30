@@ -143,3 +143,13 @@ expect.extend({
 // jest.useFakeTimers();
 
 fetchMock.enableMocks();
+
+// Mock SumUp native module to avoid ESM issues during tests
+jest.mock('sumup-react-native-alpha', () => ({
+  __esModule: true,
+  SumUpProvider: ({ children }) => children,
+  useSumUp: () => ({
+    initPaymentSheet: jest.fn(),
+    presentPaymentSheet: jest.fn(),
+  }),
+}));

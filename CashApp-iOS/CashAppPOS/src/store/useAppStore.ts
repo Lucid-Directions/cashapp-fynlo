@@ -245,3 +245,6 @@ const useAppStore = create<AppStore>()(
 );
 
 export default useAppStore;
+
+// Provide a named export alias for legacy test suites
+export { useAppStore as useAppStore };

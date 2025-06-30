@@ -3,15 +3,12 @@
  * Testing the main point-of-sale interface
  */
 
+// @ts-nocheck
+
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react-native';
 import POSScreen from '../POSScreen';
-import { customRender } from '../../../__tests__/utils/testUtils';
-import { useAppStore } from '../../../store/useAppStore';
-
-// Mock the store
-jest.mock('../../../store/useAppStore');
-const mockUseAppStore = useAppStore as jest.MockedFunction<typeof useAppStore>;
+import { customRenderWithStores } from '../../../__tests__/utils/testUtils';
 
 // Mock navigation
 const mockNavigation = {
@@ -54,12 +51,11 @@ describe('POSScreen', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseAppStore.mockReturnValue(mockStoreState);
     mockStoreState.getFilteredItems.mockReturnValue(mockStoreState.menuItems);
   });
 
   it('renders correctly', () => {
-    const { getByText, getByTestId } = customRender(
+    const { getByText, getByTestId } = customRenderWithStores(
       <POSScreen />,
       { navigationProps: { navigation: mockNavigation } }
     );
@@ -70,7 +66,7 @@ describe('POSScreen', () => {
   });
 
   it('displays menu items correctly', () => {
-    const { getByText } = customRender(
+    const { getByText } = customRenderWithStores(
       <POSScreen />,
       { navigationProps: { navigation: mockNavigation } }
     );
@@ -82,7 +78,7 @@ describe('POSScreen', () => {
   });
 
   it('adds item to cart when tapped', () => {
-    const { getByText } = customRender(
+    const { getByText } = customRenderWithStores(
       <POSScreen />,
       { navigationProps: { navigation: mockNavigation } }
     );
@@ -100,7 +96,7 @@ describe('POSScreen', () => {
   });
 
   it('displays empty cart message when cart is empty', () => {
-    const { getByText } = customRender(
+    const { getByText } = customRenderWithStores(
       <POSScreen />,
       { navigationProps: { navigation: mockNavigation } }
     );
@@ -118,14 +114,10 @@ describe('POSScreen', () => {
       },
     ];
 
-    mockUseAppStore.mockReturnValue({
-      ...mockStoreState,
-      cart: cartWithItems,
-      cartTotal: jest.fn(() => 25.98),
-      cartItemCount: jest.fn(() => 2),
-    });
+    mockStoreState.cartTotal = jest.fn(() => 25.98);
+    mockStoreState.cartItemCount = jest.fn(() => 2);
 
-    const { getByText } = customRender(
+    const { getByText } = customRenderWithStores(
       <POSScreen />,
       { navigationProps: { navigation: mockNavigation } }
     );
@@ -136,7 +128,7 @@ describe('POSScreen', () => {
   });
 
   it('filters items by category', () => {
-    const { getByText } = customRender(
+    const { getByText } = customRenderWithStores(
       <POSScreen />,
       { navigationProps: { navigation: mockNavigation } }
     );
@@ -157,14 +149,10 @@ describe('POSScreen', () => {
       },
     ];
 
-    mockUseAppStore.mockReturnValue({
-      ...mockStoreState,
-      cart: cartWithItems,
-      cartTotal: jest.fn(() => 12.99),
-      cartItemCount: jest.fn(() => 1),
-    });
+    mockStoreState.cartTotal = jest.fn(() => 12.99);
+    mockStoreState.cartItemCount = jest.fn(() => 1);
 
-    const { getByTestId } = customRender(
+    const { getByTestId } = customRenderWithStores(
       <POSScreen />,
       { navigationProps: { navigation: mockNavigation } }
     );
@@ -185,14 +173,10 @@ describe('POSScreen', () => {
       },
     ];
 
-    mockUseAppStore.mockReturnValue({
-      ...mockStoreState,
-      cart: cartWithItems,
-      cartTotal: jest.fn(() => 12.99),
-      cartItemCount: jest.fn(() => 1),
-    });
+    mockStoreState.cartTotal = jest.fn(() => 12.99);
+    mockStoreState.cartItemCount = jest.fn(() => 1);
 
-    const { getByTestId } = customRender(
+    const { getByTestId } = customRenderWithStores(
       <POSScreen />,
       { navigationProps: { navigation: mockNavigation } }
     );
@@ -213,14 +197,10 @@ describe('POSScreen', () => {
       },
     ];
 
-    mockUseAppStore.mockReturnValue({
-      ...mockStoreState,
-      cart: cartWithItems,
-      cartTotal: jest.fn(() => 25.98),
-      cartItemCount: jest.fn(() => 2),
-    });
+    mockStoreState.cartTotal = jest.fn(() => 25.98);
+    mockStoreState.cartItemCount = jest.fn(() => 2);
 
-    const { getByTestId } = customRender(
+    const { getByTestId } = customRenderWithStores(
       <POSScreen />,
       { navigationProps: { navigation: mockNavigation } }
     );
@@ -241,14 +221,10 @@ describe('POSScreen', () => {
       },
     ];
 
-    mockUseAppStore.mockReturnValue({
-      ...mockStoreState,
-      cart: cartWithItems,
-      cartTotal: jest.fn(() => 12.99),
-      cartItemCount: jest.fn(() => 1),
-    });
+    mockStoreState.cartTotal = jest.fn(() => 12.99);
+    mockStoreState.cartItemCount = jest.fn(() => 1);
 
-    const { getByTestId, getByText } = customRender(
+    const { getByTestId, getByText } = customRenderWithStores(
       <POSScreen />,
       { navigationProps: { navigation: mockNavigation } }
     );
@@ -274,13 +250,10 @@ describe('POSScreen', () => {
       },
     ];
 
-    mockUseAppStore.mockReturnValue({
-      ...mockStoreState,
-      menuItems: itemsWithUnavailable,
-    });
+    mockStoreState.menuItems = itemsWithUnavailable;
     mockStoreState.getFilteredItems.mockReturnValue(itemsWithUnavailable);
 
-    const { getByText } = customRender(
+    const { getByText } = customRenderWithStores(
       <POSScreen />,
       { navigationProps: { navigation: mockNavigation } }
     );
@@ -308,14 +281,10 @@ describe('POSScreen', () => {
       },
     ];
 
-    mockUseAppStore.mockReturnValue({
-      ...mockStoreState,
-      cart: cartWithItems,
-      cartTotal: jest.fn(() => 30.97),
-      cartItemCount: jest.fn(() => 3),
-    });
+    mockStoreState.cartTotal = jest.fn(() => 30.97);
+    mockStoreState.cartItemCount = jest.fn(() => 3);
 
-    const { getByText } = customRender(
+    const { getByText } = customRenderWithStores(
       <POSScreen />,
       { navigationProps: { navigation: mockNavigation } }
     );

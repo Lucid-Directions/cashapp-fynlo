@@ -14,6 +14,7 @@ import QRCode from 'react-native-qrcode-svg';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { useTheme } from '../../design-system/ThemeProvider';
 import SumUpService, { SumUpQRPayment } from '../../services/SumUpService';
+import QRPaymentErrorBoundary from '../../components/payment/QRPaymentErrorBoundary';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -41,26 +42,40 @@ const QRCodePaymentScreen: React.FC = () => {
   
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const isMountedRef = useRef(true);
   
   useEffect(() => {
     initializeQRPayment();
     
     return () => {
+      // Mark component as unmounted to prevent state updates
+      isMountedRef.current = false;
+      
+      // Clean up all timers
       if (pollIntervalRef.current) {
         clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
       }
       if (timerRef.current) {
         clearInterval(timerRef.current);
+        timerRef.current = null;
       }
     };
   }, []);
   
   const initializeQRPayment = async () => {
     try {
+      // Check if component is still mounted
+      if (!isMountedRef.current) return;
+      
       setPaymentStatus('loading');
       setErrorMessage('');
       
       const payment = await SumUpService.createQRPayment(amount, currency, description);
+      
+      // Ensure component is still mounted before updating state
+      if (!isMountedRef.current) return;
+      
       setQrPayment(payment);
       setPaymentStatus('waiting');
       
@@ -77,61 +92,114 @@ const QRCodePaymentScreen: React.FC = () => {
       startStatusPolling(payment);
       
     } catch (error) {
-      setPaymentStatus('failed');
-      setErrorMessage(error instanceof Error ? error.message : 'Failed to create QR payment');
+      console.error('❌ QR Payment initialization failed:', error);
+      
+      // Only update state if component is still mounted
+      if (isMountedRef.current) {
+        setPaymentStatus('failed');
+        setErrorMessage(error instanceof Error ? error.message : 'Failed to create QR payment');
+      }
     }
   };
   
   const startCountdownTimer = (initialTime: number) => {
     let timeLeft = initialTime;
     
+    // Clear any existing timer first
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+    
     timerRef.current = setInterval(() => {
+      // Check if component is still mounted
+      if (!isMountedRef.current) {
+        if (timerRef.current) {
+          clearInterval(timerRef.current);
+          timerRef.current = null;
+        }
+        return;
+      }
+      
       timeLeft -= 1;
       setTimeRemaining(timeLeft);
       
       if (timeLeft <= 0) {
         setPaymentStatus('expired');
+        
+        // Clean up intervals
         if (pollIntervalRef.current) {
           clearInterval(pollIntervalRef.current);
+          pollIntervalRef.current = null;
         }
         if (timerRef.current) {
           clearInterval(timerRef.current);
+          timerRef.current = null;
         }
       }
     }, 1000);
   };
   
   const startStatusPolling = (payment: SumUpQRPayment) => {
+    // Clear any existing polling first
+    if (pollIntervalRef.current) {
+      clearInterval(pollIntervalRef.current);
+    }
+    
     pollIntervalRef.current = setInterval(async () => {
       try {
+        // Check if component is still mounted
+        if (!isMountedRef.current) {
+          if (pollIntervalRef.current) {
+            clearInterval(pollIntervalRef.current);
+            pollIntervalRef.current = null;
+          }
+          return;
+        }
+        
         const updatedPayment = await SumUpService.pollQRPaymentStatus(payment);
+        
+        // Double-check if component is still mounted before state updates
+        if (!isMountedRef.current) return;
+        
         setQrPayment(updatedPayment);
         setPaymentStatus(updatedPayment.status);
         
         if (updatedPayment.status === 'completed') {
-          // Payment successful
+          // Payment successful - clean up intervals
           if (pollIntervalRef.current) {
             clearInterval(pollIntervalRef.current);
+            pollIntervalRef.current = null;
           }
           if (timerRef.current) {
             clearInterval(timerRef.current);
+            timerRef.current = null;
           }
           
           setTimeout(() => {
-            onSuccess(updatedPayment);
-            navigation.goBack();
+            // Final check before calling callbacks
+            if (isMountedRef.current) {
+              onSuccess(updatedPayment);
+              navigation.goBack();
+            }
           }, 2000);
         } else if (updatedPayment.status === 'failed' || updatedPayment.status === 'expired') {
-          // Payment failed or expired
+          // Payment failed or expired - clean up intervals
           if (pollIntervalRef.current) {
             clearInterval(pollIntervalRef.current);
+            pollIntervalRef.current = null;
           }
           if (timerRef.current) {
             clearInterval(timerRef.current);
+            timerRef.current = null;
           }
         }
       } catch (error) {
-        console.error('Failed to poll QR payment status:', error);
+        console.error('❌ Failed to poll QR payment status:', error);
+        
+        // Only update state if mounted
+        if (isMountedRef.current) {
+          setErrorMessage('Failed to check payment status');
+        }
       }
     }, payment.pollInterval || 2000);
   };
@@ -146,12 +214,19 @@ const QRCodePaymentScreen: React.FC = () => {
           text: 'Cancel Payment', 
           style: 'destructive',
           onPress: () => {
+            // Clean up all timers
             if (pollIntervalRef.current) {
               clearInterval(pollIntervalRef.current);
+              pollIntervalRef.current = null;
             }
             if (timerRef.current) {
               clearInterval(timerRef.current);
+              timerRef.current = null;
             }
+            
+            // Mark as unmounted to prevent further state updates
+            isMountedRef.current = false;
+            
             onCancel();
             navigation.goBack();
           }
@@ -161,13 +236,26 @@ const QRCodePaymentScreen: React.FC = () => {
   };
   
   const handleRetry = () => {
-    if (pollIntervalRef.current) {
-      clearInterval(pollIntervalRef.current);
+    try {
+      // Clean up existing timers
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
+      }
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      
+      // Reset error state
+      setErrorMessage('');
+      
+      // Reinitialize payment
+      initializeQRPayment();
+    } catch (error) {
+      console.error('❌ Failed to retry QR payment:', error);
+      setErrorMessage('Failed to retry payment. Please try again.');
     }
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-    }
-    initializeQRPayment();
   };
   
   const getStatusMessage = () => {
