@@ -6,6 +6,12 @@ interface SaveCustomerPayload {
   marketing_opt_in?: boolean;
 }
 
+export interface CustomerSuggestion {
+  id: string;
+  name: string;
+  email: string;
+}
+
 class CustomersService {
   private static instance: CustomersService;
   private baseUrl: string | null = null;
@@ -20,36 +26,25 @@ class CustomersService {
     return CustomersService.instance;
   }
 
-  /**
-   * Load API config from secure storage (shared with PaymentService)
-   */
-  async loadConfig(): Promise<void> {
+  private async ensureConfig() {
+    if (this.baseUrl && this.apiKey) return;
     try {
-      const configRaw = await AsyncStorage.getItem('payment_service_config');
-      if (!configRaw) return;
-      const cfg = JSON.parse(configRaw);
+      const raw = await AsyncStorage.getItem('payment_service_config');
+      if (!raw) return;
+      const cfg = JSON.parse(raw);
       this.baseUrl = cfg?.backend?.baseUrl ?? null;
       this.apiKey = cfg?.backend?.apiKey ?? null;
     } catch (err) {
-      console.warn('CustomersService: failed to load config', err);
+      console.warn('CustomersService: failed loading config', err);
     }
   }
 
-  private async ensureConfigLoaded() {
-    if (!this.baseUrl || !this.apiKey) {
-      await this.loadConfig();
-    }
-  }
-
-  /**
-   * Upsert customer by e-mail (case-insensitive) so we can reuse later.
-   */
   async saveCustomer(payload: SaveCustomerPayload): Promise<void> {
     try {
-      await this.ensureConfigLoaded();
+      await this.ensureConfig();
       if (!this.baseUrl || !this.apiKey) throw new Error('API config missing');
 
-      const res = await fetch(`${this.baseUrl}/api/v1/customers`, {
+      await fetch(`${this.baseUrl}/api/v1/customers`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -57,25 +52,17 @@ class CustomersService {
         },
         body: JSON.stringify(payload),
       });
-      if (!res.ok) {
-        console.warn('saveCustomer non-200', res.status);
-      }
     } catch (err) {
       console.error('CustomersService.saveCustomer error', err);
     }
   }
 
-  /**
-   * Query customers for type-ahead search.
-   */
-  async search(query: string): Promise<Array<{ id: string; name: string; email: string }>> {
+  async search(query: string): Promise<CustomerSuggestion[]> {
     try {
-      await this.ensureConfigLoaded();
+      await this.ensureConfig();
       if (!this.baseUrl || !this.apiKey) return [];
       const res = await fetch(`${this.baseUrl}/api/v1/customers?query=${encodeURIComponent(query)}`, {
-        headers: {
-          Authorization: `Bearer ${this.apiKey}`,
-        },
+        headers: { Authorization: `Bearer ${this.apiKey}` },
       });
       if (!res.ok) return [];
       const json = await res.json();

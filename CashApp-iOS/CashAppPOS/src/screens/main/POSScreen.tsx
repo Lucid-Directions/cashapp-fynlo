@@ -693,39 +693,7 @@ const POSScreen: React.FC = () => {
           <TouchableOpacity style={styles.headerIconButton}>
             <Icon name="search" size={24} color={theme.colors.white} />
           </TouchableOpacity>
-          <View style={styles.headerActions}>
-            <TouchableOpacity 
-              style={styles.scannerButton}
-              onPress={() => navigation.navigate('QRScanner', {
-                title: 'Product Scanner',
-                subtitle: 'Scan product barcode or QR code',
-                onScanned: (data: string) => {
-                  // Handle scanned product data
-                  Alert.alert(
-                    'Product Scanned',
-                    `Scanned: ${data}`,
-                    [
-                      { text: 'Add to Order', onPress: () => {
-                        // Find product by scanned data and add to cart
-                        const foundItem = menuItems.find(item => 
-                          item.name.toLowerCase().includes(data.toLowerCase()) ||
-                          data.includes(item.id.toString())
-                        );
-                        if (foundItem) {
-                          handleAddToCart(foundItem);
-                          Alert.alert('Success', `${foundItem.name} added to order!`);
-                        } else {
-                          Alert.alert('Product Not Found', 'Unable to find this product in the menu.');
-                        }
-                      }},
-                      { text: 'Cancel', style: 'cancel' }
-                    ]
-                  );
-                }
-              })}
-            >
-              <Icon name="qr-code-scanner" size={24} color={theme.colors.white} />
-            </TouchableOpacity>
+          
             
             {IS_DEV && FLAGS.SHOW_DEV_MENU && (
               <TouchableOpacity
@@ -747,9 +715,6 @@ const POSScreen: React.FC = () => {
             />
           </View>
         </View>
-      </View>
-
-      <View style={styles.mainContent}>
         {/* Full Width Menu */}
         <View style={styles.fullWidthPanel}>
           {/* Quick Stats Bar */}
@@ -1774,6 +1739,25 @@ const createStyles = (theme: any) => StyleSheet.create({
     color: theme.colors.white,
     fontSize: 16,
     fontWeight: '600',
+  },
+  cartButton: {
+    position: 'relative',
+  },
+  cartBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    backgroundColor: theme.colors.warning,
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cartBadgeText: {
+    color: theme.colors.white,
+    fontSize: 12,
+    fontWeight: 'bold',
   },
 });
 

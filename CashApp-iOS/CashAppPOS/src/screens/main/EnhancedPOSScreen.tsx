@@ -611,12 +611,7 @@ const EnhancedPOSScreen: React.FC = () => {
                 <Icon name="clear" size={20} color={Colors.lightText} />
               </TouchableOpacity>
             )}
-            <TouchableOpacity 
-              style={styles.barcodeButton}
-              onPress={() => setShowBarcodeScanner(true)}
-            >
-              <Icon name="qr-code-scanner" size={20} color={Colors.lightText} />
-            </TouchableOpacity>
+            
           </View>
         </View>
 
@@ -1172,10 +1167,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: Colors.white,
   },
-  barcodeButton: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-  },
+  
   barcodeModalOverlay: {
     flex: 1,
     backgroundColor: Colors.overlay,
