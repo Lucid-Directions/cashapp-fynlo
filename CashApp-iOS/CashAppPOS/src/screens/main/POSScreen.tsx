@@ -91,6 +91,68 @@ const menuItems: MenuItem[] = [
 
 const categories = ['All', 'Snacks', 'Tacos', 'Special Tacos', 'Burritos', 'Sides', 'Drinks'];
 
+// Define ExportedMenuItemCard outside of POSScreen for export
+const ExportedMenuItemCard = ({
+  item,
+  theme,
+  styles: propStyles,
+  cart,
+  handleAddToCart,
+  handleUpdateQuantity
+}: {
+  item: MenuItem,
+  theme: any,
+  styles: any,
+  cart: OrderItem[],
+  handleAddToCart: (item: MenuItem) => void,
+  handleUpdateQuantity: (id: number, quantity: number) => void
+}) => {
+  const existingItem = cart.find(cartItem => cartItem.id === item.id);
+
+  return (
+    <View style={[
+      propStyles.menuCard,
+      !item.available && propStyles.menuCardDisabled,
+    ]}>
+      <TouchableOpacity
+        style={propStyles.menuCardContent}
+        onPress={() => item.available && handleAddToCart(item)}
+        activeOpacity={0.7}
+        disabled={!item.available}
+      >
+        <Text style={propStyles.menuItemEmoji}>{item.emoji}</Text>
+        <Text style={propStyles.menuItemName} numberOfLines={2}>
+          {item.name}
+        </Text>
+        <Text style={propStyles.menuItemPrice}>
+          {formatPrice(item.price, '£', { screenName: 'POSScreen', operation: 'menu_item_price_display', inputValues: { itemId: item.id, itemName: item.name } })}
+        </Text>
+      </TouchableOpacity>
+
+      {existingItem && (
+        <View style={propStyles.menuItemQuantityControls}>
+          <TouchableOpacity
+            style={propStyles.menuQuantityButton}
+            onPress={() => handleUpdateQuantity(item.id, existingItem.quantity - 1)}
+          >
+            <Icon name="remove" size={16} color={theme.colors.white} />
+          </TouchableOpacity>
+          <Text style={propStyles.menuQuantityText}>{existingItem.quantity}</Text>
+          <TouchableOpacity
+            style={propStyles.menuQuantityButton}
+            onPress={() => handleUpdateQuantity(item.id, existingItem.quantity + 1)}
+          >
+            <Icon name="add" size={16} color={theme.colors.white} />
+          </TouchableOpacity>
+        </View>
+      )}
+    </View>
+  );
+};
+
+// Export for testing
+export { ExportedMenuItemCard };
+
 type POSScreenNavigationProp = DrawerNavigationProp<DrawerParamList>;
 
 const POSScreen: React.FC = () => {
@@ -1288,9 +1350,10 @@ const createStyles = (theme: any) => StyleSheet.create({
     justifyContent: 'center',
     marginTop: 8,
     backgroundColor: theme.colors.accent,
-    borderRadius: 15,
+    borderRadius: 20, // Increased border radius for a more pill-like shape
     paddingVertical: 4,
-    paddingHorizontal: 8,
+    paddingHorizontal: 12, // Increased horizontal padding
+    minWidth: 80, // Added minWidth to prevent clipping
   },
   menuQuantityButton: {
     width: 24,
