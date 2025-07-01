@@ -27,10 +27,16 @@ const ENV = {
   FEATURE_ORDERS_HISTORY: true, // Set to true to enable, false to show ComingSoon
 };
 
+interface CustomerInfo {
+  id: string;
+  name: string;
+  email?: string;
+}
+
 interface Order {
   id: string;
   date: Date;
-  customerName?: string;
+  customer?: CustomerInfo; // Changed from customerName?: string
   total: number;
   items: number;
   status: 'completed' | 'pending' | 'refunded' | 'cancelled';
@@ -99,10 +105,12 @@ const OrdersScreen: React.FC = () => {
 
     // Apply search query
     if (searchQuery) {
+      const lowercasedQuery = searchQuery.toLowerCase();
       filtered = filtered.filter(order => 
-        order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        order.customerName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        order.employee.toLowerCase().includes(searchQuery.toLowerCase())
+        order.id.toLowerCase().includes(lowercasedQuery) ||
+        (order.customer?.name && order.customer.name.toLowerCase().includes(lowercasedQuery)) ||
+        (order.customer?.email && order.customer.email.toLowerCase().includes(lowercasedQuery)) || // Also search by email
+        order.employee.toLowerCase().includes(lowercasedQuery)
       );
     }
 
@@ -171,7 +179,7 @@ const OrdersScreen: React.FC = () => {
         <View style={styles.orderInfo}>
           <Icon name="person" size={16} color={theme.colors.darkGray} />
           <Text style={styles.orderInfoText}>
-            {item.customerName || 'Walk-in Customer'}
+            {item.customer?.name || 'Walk-in Customer'}
           </Text>
         </View>
         

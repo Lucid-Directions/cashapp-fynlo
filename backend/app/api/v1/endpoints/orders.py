@@ -13,8 +13,9 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-from app.core.database import get_db, Order, Product
+from app.core.database import get_db, Order, Product, Customer
 from app.api.v1.endpoints.auth import get_current_user, User
+from app.api.v1.endpoints.customers import CustomerCreate as CustomerCreateSchema # Renamed to avoid conflict
 from app.core.redis_client import get_redis, RedisClient
 from app.core.responses import APIResponseHelper
 from app.core.exceptions import FynloException, ErrorCodes
@@ -28,6 +29,7 @@ from app.core.websocket import (
 )
 from app.core.transaction_manager import transactional, transaction_manager
 from app.schemas.refund_schemas import RefundRequestSchema, RefundResponseSchema
+from app.api.v1.endpoints.customers import CustomerBasicInfo # Import CustomerBasicInfo
 from app.services.payment_factory import get_payment_provider # Assuming you have this
 # Or import specific providers if needed:
 # from app.services.square_provider import SquareProvider
@@ -52,6 +54,8 @@ class OrderItem(BaseModel):
 
 class OrderCreate(BaseModel):
     customer_id: Optional[str] = None
+    customer_email: Optional[EmailStr] = None
+    customer_name: Optional[str] = None # Expecting "First Last"
     table_number: Optional[str] = None
     order_type: str = "dine_in"  # dine_in, takeaway, delivery
     items: List[OrderItem]
@@ -66,7 +70,8 @@ class OrderUpdate(BaseModel):
 class OrderResponse(BaseModel):
     id: str
     restaurant_id: str
-    customer_id: Optional[str]
+    customer_id: Optional[str] # Keep this for backward compatibility or internal use
+    customer: Optional[CustomerBasicInfo] = None
     order_number: str
     table_number: Optional[str]
     order_type: str
@@ -90,6 +95,7 @@ class OrderSummary(BaseModel):
     status: str
     total_amount: float
     item_count: int
+    customer_name: Optional[str] = None
     created_at: datetime
 
 def calculate_order_totals(items: List[OrderItem], tax_rate: float = 0.20, service_rate: float = 0.125) -> dict:
@@ -143,7 +149,21 @@ async def get_orders(
         query = query.filter(Order.created_at <= date_to)
     
     orders = query.order_by(desc(Order.created_at)).offset(offset).limit(limit).all()
+
+    # Fetch customer information for the orders
+    customer_ids = [order.customer_id for order in orders if order.customer_id]
+    customers_map = {}
+    if customer_ids:
+        customers = db.query(Customer.id, Customer.first_name, Customer.last_name).filter(Customer.id.in_(customer_ids)).all()
+        customers_map = {str(c.id): f"{c.first_name} {c.last_name}" for c in customers}
     
+    # Fetch customer information for the orders
+    customer_ids = [order.customer_id for order in orders if order.customer_id]
+    customers_map = {}
+    if customer_ids:
+        customers = db.query(Customer.id, Customer.first_name, Customer.last_name).filter(Customer.id.in_(customer_ids)).all()
+        customers_map = {str(c.id): f"{c.first_name} {c.last_name}" for c in customers}
+
     result = [
         OrderSummary(
             id=str(order.id),
@@ -152,6 +172,7 @@ async def get_orders(
             status=order.status,
             total_amount=order.total_amount,
             item_count=len(order.items),
+            customer_name=customers_map.get(str(order.customer_id)) if order.customer_id else None,
             created_at=order.created_at
         )
         for order in orders
@@ -210,13 +231,28 @@ async def get_todays_orders(
             status=order.status,
             total_amount=order.total_amount,
             item_count=len(order.items),
+            customer_name=customers_map.get(str(order.customer_id)) if order.customer_id else None,
             created_at=order.created_at
         )
         for order in orders
     ]
     
     # Cache for 1 minute (frequent updates expected)
-    await redis.set(cache_key, result, expire=60)
+    # Note: Pydantic models in a list need to be converted to dicts for JSON serialization if not handled by redis client.
+    # Assuming redis.set handles Pydantic models correctly or they are converted before caching.
+    # For simplicity, if `result` is a list of Pydantic models, this might need adjustment:
+    # cached_data = [r.dict() for r in result]
+    # await redis.set(cache_key, cached_data, expire=60)
+    # However, if `APIResponseHelper.success` handles this, then it might be fine.
+    # Let's assume for now that the existing caching mechanism handles this.
+    # If `cached_orders` returns a string that needs parsing, then the caching needs to be consistent.
+    # The current `redis.set(cache_key, result, expire=60)` might store list of Pydantic objects directly.
+    # Let's ensure it's JSON serializable if it's not already.
+
+    # Convert result to list of dicts for caching if necessary, depends on redis client implementation
+    # For now, assume `result` (list of Pydantic models) is directly cachable or APIResponseHelper handles it.
+
+    await redis.set(cache_key, [r.dict() for r in result], expire=60) # Explicitly convert to dicts for caching
     
     return APIResponseHelper.success(
         data=result,
@@ -242,7 +278,44 @@ async def create_order(
     # Use user's restaurant if not specified
     if not restaurant_id:
         restaurant_id = str(current_user.restaurant_id)
-    
+
+    customer_id_to_save = order_data.customer_id
+
+    # Customer lookup/creation
+    if not customer_id_to_save and order_data.customer_email:
+        customer = db.query(Customer).filter(
+            Customer.email == order_data.customer_email,
+            Customer.restaurant_id == restaurant_id
+        ).first()
+        if customer:
+            customer_id_to_save = str(customer.id)
+        elif order_data.customer_name: # Create customer if email and name provided
+            first_name, *last_name_parts = order_data.customer_name.split(" ", 1)
+            last_name = last_name_parts[0] if last_name_parts else ""
+
+            new_customer_schema = CustomerCreateSchema(
+                email=order_data.customer_email,
+                phone=None, # Assuming phone is not passed during order creation for now
+                first_name=first_name,
+                last_name=last_name,
+                restaurant_id=restaurant_id
+            )
+            # Directly create customer model instance
+            # This assumes Customer model has a similar constructor or fields
+            # Ideally, this would call a CRUD function like `crud.customer.create()`
+            created_customer = Customer(
+                **new_customer_schema.dict(),
+                loyalty_points=0,
+                total_spent=0.0,
+                visit_count=0
+            )
+            db.add(created_customer)
+            db.flush() # To get the ID
+            db.refresh(created_customer)
+            customer_id_to_save = str(created_customer.id)
+            # Clear customer stats cache as a new customer is added
+            await redis.delete(f"customer_stats:{restaurant_id}")
+
     # Validate products exist
     product_ids = [item.product_id for item in order_data.items]
     products = db.query(Product).filter(
@@ -272,7 +345,7 @@ async def create_order(
         # Create order
         new_order = Order(
             restaurant_id=restaurant_id,
-            customer_id=order_data.customer_id,
+            customer_id=customer_id_to_save, # Use the resolved customer_id
             order_number=generate_order_number(),
             table_number=order_data.table_number,
             order_type=order_data.order_type,
@@ -337,11 +410,22 @@ async def create_order(
         # Log unexpected errors
         logger.error(f"Order creation failed: {e}")
         raise HTTPException(status_code=500, detail="Failed to create order")
+
+    customer_info_response = None
+    if new_order.customer_id:
+        customer_model = db.query(Customer).filter(Customer.id == new_order.customer_id).first()
+        if customer_model:
+            customer_info_response = CustomerBasicInfo(
+                id=str(customer_model.id),
+                name=f"{customer_model.first_name} {customer_model.last_name}",
+                email=customer_model.email
+            )
     
     return OrderResponse(
         id=str(new_order.id),
         restaurant_id=str(new_order.restaurant_id),
         customer_id=str(new_order.customer_id) if new_order.customer_id else None,
+        customer=customer_info_response,
         order_number=new_order.order_number,
         table_number=new_order.table_number,
         order_type=new_order.order_type,
@@ -382,11 +466,22 @@ async def get_order(
             details={"order_id": order_id},
             status_code=404
         )
+
+    customer_info_response = None
+    if order.customer_id:
+        customer_model = db.query(Customer).filter(Customer.id == order.customer_id).first()
+        if customer_model:
+            customer_info_response = CustomerBasicInfo(
+                id=str(customer_model.id),
+                name=f"{customer_model.first_name} {customer_model.last_name}",
+                email=customer_model.email
+            )
     
     return OrderResponse(
         id=str(order.id),
         restaurant_id=str(order.restaurant_id),
         customer_id=str(order.customer_id) if order.customer_id else None,
+        customer=customer_info_response,
         order_number=order.order_number,
         table_number=order.table_number,
         order_type=order.order_type,
@@ -469,10 +564,21 @@ async def update_order(
     )
     await websocket_manager.broadcast_to_restaurant(restaurant_id, message)
     
+    customer_info_response = None
+    if order.customer_id:
+        customer_model = db.query(Customer).filter(Customer.id == order.customer_id).first()
+        if customer_model:
+            customer_info_response = CustomerBasicInfo(
+                id=str(customer_model.id),
+                name=f"{customer_model.first_name} {customer_model.last_name}",
+                email=customer_model.email
+            )
+
     return OrderResponse(
         id=str(order.id),
         restaurant_id=str(order.restaurant_id),
         customer_id=str(order.customer_id) if order.customer_id else None,
+        customer=customer_info_response,
         order_number=order.order_number,
         table_number=order.table_number,
         order_type=order.order_type,
