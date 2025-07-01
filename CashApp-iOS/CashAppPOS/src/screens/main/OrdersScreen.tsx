@@ -13,62 +13,18 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
 import { Order } from '../../types';
+import OrderService from '../../services/OrderService';
 
-// Mock orders data
-const mockOrders: Order[] = [
-  {
-    id: 1,
-    items: [
-      { id: 1, name: 'Classic Burger', price: 12.99, quantity: 2, emoji: '🍔' },
-      { id: 2, name: 'French Fries', price: 4.99, quantity: 1, emoji: '🍟' },
-    ],
-    subtotal: 30.97,
-    tax: 2.48,
-    total: 33.45,
-    customerName: 'John Doe',
-    tableNumber: 5,
-    createdAt: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
-    status: 'preparing',
-    paymentMethod: 'card',
-  },
-  {
-    id: 2,
-    items: [
-      { id: 3, name: 'Margherita Pizza', price: 15.99, quantity: 1, emoji: '🍕' },
-      { id: 7, name: 'Coca Cola', price: 2.99, quantity: 2, emoji: '🥤' },
-    ],
-    subtotal: 21.97,
-    tax: 1.76,
-    total: 23.73,
-    customerName: 'Jane Smith',
-    tableNumber: 3,
-    createdAt: new Date(Date.now() - 1000 * 60 * 45), // 45 minutes ago
-    status: 'ready',
-    paymentMethod: 'cash',
-  },
-  {
-    id: 3,
-    items: [
-      { id: 2, name: 'Caesar Salad', price: 9.99, quantity: 1, emoji: '🥗' },
-      { id: 6, name: 'Chocolate Cake', price: 6.99, quantity: 1, emoji: '🍰' },
-    ],
-    subtotal: 16.98,
-    tax: 1.36,
-    total: 18.34,
-    tableNumber: 7,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60), // 1 hour ago
-    status: 'completed',
-    paymentMethod: 'apple_pay',
-  },
-];
 
 const OrdersScreen: React.FC = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
   const styles = useThemedStyles(createStyles);
-  const [orders, setOrders] = useState<Order[]>(mockOrders);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'preparing' | 'ready' | 'completed'>('all');
+  const orderService = OrderService.getInstance();
 
   const statusColors = {
     draft: theme.colors.lightText,
@@ -92,12 +48,56 @@ const OrdersScreen: React.FC = () => {
     ? orders 
     : orders.filter(order => order.status === filter);
 
+  const loadOrders = async () => {
+    try {
+      console.log('📋 Loading orders from OrderService...');
+      const fetchedOrders = await orderService.getOrders({
+        limit: 50,
+        offset: 0,
+      });
+      setOrders(fetchedOrders);
+      console.log(`✅ Loaded ${fetchedOrders.length} orders`);
+    } catch (error) {
+      console.error('❌ Failed to load orders:', error);
+      // Keep existing orders on error
+    }
+  };
+  
   const onRefresh = async () => {
     setRefreshing(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await loadOrders();
     setRefreshing(false);
   };
+  
+  // Load orders on component mount
+  useEffect(() => {
+    const initializeOrders = async () => {
+      setLoading(true);
+      await loadOrders();
+      setLoading(false);
+    };
+    
+    initializeOrders();
+    
+    // Subscribe to real-time order updates
+    const unsubscribe = orderService.subscribeToOrderEvents((event, data) => {
+      console.log('🔄 Real-time order event:', event, data);
+      
+      if (event === 'order_created') {
+        setOrders(prevOrders => [data, ...prevOrders]);
+      } else if (event === 'order_updated') {
+        setOrders(prevOrders => 
+          prevOrders.map(order => 
+            order.id === data.id ? { ...order, ...data } : order
+          )
+        );
+      }
+    });
+    
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString('en-US', {
@@ -266,9 +266,14 @@ const OrdersScreen: React.FC = () => {
         ListEmptyComponent={() => (
           <View style={styles.emptyState}>
             <Icon name="receipt" size={64} color={theme.colors.lightText} />
-            <Text style={styles.emptyStateText}>No orders found</Text>
+            <Text style={styles.emptyStateText}>
+              {loading ? 'Loading orders...' : 'No orders found'}
+            </Text>
             <Text style={styles.emptyStateSubtext}>
-              Orders will appear here when customers place them
+              {loading 
+                ? 'Please wait while we fetch your orders' 
+                : 'Orders will appear here when customers place them'
+              }
             </Text>
           </View>
         )}

@@ -39,10 +39,17 @@ export interface Order {
   total: number;
   customerId?: number;
   customerName?: string;
+  customerEmail?: string;
+  customerPhone?: string;
   tableNumber?: number;
   createdAt: Date;
   status: 'draft' | 'confirmed' | 'preparing' | 'ready' | 'completed' | 'cancelled';
   paymentMethod?: 'cash' | 'card' | 'apple_pay' | 'gift_card';
+  paymentTransactionId?: string;
+  paymentProvider?: string;
+  serviceCharge?: number;
+  transactionFee?: number;
+  tipAmount?: number;
   notes?: string;
 }
 
