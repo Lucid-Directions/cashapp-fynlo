@@ -10,11 +10,14 @@ import {
   FlatList,
   TextInput,
   Modal,
+  ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
-import { generateCustomers, CustomerData } from '../../utils/mockDataGenerator';
+// import { generateCustomers, CustomerData } from '../../utils/mockDataGenerator'; // Removed
 import Colors from '../../constants/Colors';
+import DataService from '../../services/DataService'; // Added
+import { CustomerData } from '../../types'; // Updated import path
 
 const CustomersScreen: React.FC = () => {
   const navigation = useNavigation();
@@ -23,6 +26,8 @@ const CustomersScreen: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSegment, setSelectedSegment] = useState('all');
   const [selectedCustomer, setSelectedCustomer] = useState<CustomerData | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true); // Added
+  const [error, setError] = useState<string | null>(null); // Added
 
   useEffect(() => {
     loadCustomers();
@@ -32,9 +37,21 @@ const CustomersScreen: React.FC = () => {
     filterCustomers();
   }, [customers, searchQuery, selectedSegment]);
 
-  const loadCustomers = () => {
-    const customerData = generateCustomers(200);
-    setCustomers(customerData);
+  const loadCustomers = async () => { // Modified
+    setIsLoading(true);
+    setError(null);
+    try {
+      const dataService = DataService.getInstance();
+      // Assuming a getCustomers method will be added to DataService
+      // For now, this will likely fail or return empty if not implemented, demonstrating error state
+      const customerData = await dataService.getCustomers();
+      setCustomers(customerData || []);
+    } catch (e: any) {
+      setError(e.message || 'Failed to load customers.');
+      setCustomers([]); // Clear customers on error
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const filterCustomers = () => {
@@ -146,7 +163,40 @@ const CustomersScreen: React.FC = () => {
       const days = (Date.now() - c.joinedDate.getTime()) / (1000 * 60 * 60 * 24);
       return days <= 30;
     }).length,
-    avgSpent: customers.reduce((sum, c) => sum + c.totalSpent, 0) / customers.length,
+    avgSpent: customers.length > 0 ? customers.reduce((sum, c) => sum + c.totalSpent, 0) / customers.length : 0,
+  };
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={[styles.container, styles.centered]}>
+        <ActivityIndicator size="large" color={Colors.primary} />
+        <Text style={styles.loadingText}>Loading Customers...</Text>
+      </SafeAreaView>
+    );
+  }
+
+  const renderEmptyListComponent = () => {
+    if (error) {
+      return (
+        <View style={styles.emptyState}>
+          <Icon name="error-outline" size={64} color={Colors.danger} />
+          <Text style={styles.emptyStateText}>Error Loading Customers</Text>
+          <Text style={styles.emptyStateSubtext}>{error}</Text>
+          <TouchableOpacity onPress={loadCustomers} style={styles.retryButton}>
+            <Text style={styles.retryButtonText}>Try Again</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+    return (
+      <View style={styles.emptyState}>
+        <Icon name="people" size={64} color={Colors.lightGray} />
+        <Text style={styles.emptyStateText}>No customers found</Text>
+        <Text style={styles.emptyStateSubtext}>
+          {searchQuery ? 'Try adjusting your search' : 'Add your first customer or pull to refresh'}
+        </Text>
+      </View>
+    );
   };
 
   return (
@@ -245,15 +295,9 @@ const CustomersScreen: React.FC = () => {
         keyExtractor={item => item.id.toString()}
         contentContainerStyle={styles.customersList}
         showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
-          <View style={styles.emptyState}>
-            <Icon name="people" size={64} color={Colors.lightGray} />
-            <Text style={styles.emptyStateText}>No customers found</Text>
-            <Text style={styles.emptyStateSubtext}>
-              {searchQuery ? 'Try adjusting your search' : 'Add your first customer'}
-            </Text>
-          </View>
-        }
+        ListEmptyComponent={renderEmptyListComponent}
+        onRefresh={loadCustomers} // Added
+        refreshing={isLoading} // Added
       />
 
       {/* Customer Detail Modal */}
@@ -713,6 +757,28 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     marginLeft: 8,
+  },
+  centered: { // Added
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: { // Added
+    marginTop: 10,
+    fontSize: 16,
+    color: Colors.darkGray,
+  },
+  retryButton: { // Added
+    marginTop: 20,
+    backgroundColor: Colors.primary,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  retryButtonText: { // Added
+    color: Colors.white,
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 

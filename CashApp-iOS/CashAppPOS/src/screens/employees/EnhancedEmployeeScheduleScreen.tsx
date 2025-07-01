@@ -11,11 +11,14 @@ import {
   Alert,
   Dimensions,
   RefreshControl,
+  ActivityIndicator, // Added
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
-import { generateEmployees, EmployeeData } from '../../utils/mockDataGenerator';
+// import { generateEmployees, EmployeeData } from '../../utils/mockDataGenerator'; // Removed
+import DataService from '../../services/DataService'; // Added
+import { EmployeeData } from '../../types'; // Updated import path
 import { useTheme } from '../../design-system/ThemeProvider';
 import Colors from '../../constants/Colors';
 
@@ -79,6 +82,9 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('week');
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [refreshing, setRefreshing] = useState(false);
+  const [isLoadingEmployees, setIsLoadingEmployees] = useState<boolean>(true); // Added
+  const [isLoadingSchedule, setIsLoadingSchedule] = useState<boolean>(true); // Added
+  const [error, setError] = useState<string | null>(null); // Added
   
   // Enhanced Modal States
   const [showAddShiftModal, setShowAddShiftModal] = useState(false);
@@ -113,26 +119,51 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
   });
 
   useEffect(() => {
-    loadEmployees();
-    loadWeekSchedule();
+    loadData();
   }, [currentWeek]);
 
-  const loadEmployees = () => {
-    const employeeData = generateEmployees();
-    setEmployees(employeeData);
+  const loadData = async () => {
+    setIsLoadingEmployees(true);
+    setIsLoadingSchedule(true);
+    setError(null);
+    setRefreshing(true); // Also indicate refreshing state
+    const dataService = DataService.getInstance();
+
+    try {
+      // Fetch employees first
+      const employeeData = await dataService.getEmployees(); // Assuming this method will be added
+      setEmployees(employeeData || []);
+      setIsLoadingEmployees(false);
+
+      // Then fetch schedule
+      const weekStart = getWeekStart(currentWeek);
+      const scheduleData = await dataService.getWeekSchedule(weekStart, employeeData || []);
+      setWeekSchedule(scheduleData || { weekStart, shifts: [] });
+
+    } catch (e: any) {
+      setError(e.message || 'Failed to load schedule data.');
+      setEmployees([]);
+      setWeekSchedule({ weekStart: getWeekStart(currentWeek), shifts: [] });
+    } finally {
+      setIsLoadingEmployees(false);
+      setIsLoadingSchedule(false);
+      setRefreshing(false);
+    }
   };
 
-  const loadWeekSchedule = () => {
-    const weekStart = getWeekStart(currentWeek);
-    const shifts = generateEnhancedMockShifts(weekStart);
-    setWeekSchedule({ weekStart, shifts });
-  };
+  // const loadEmployees = () => { // Replaced by loadData
+  //   const employeeData = generateEmployees();
+  //   setEmployees(employeeData);
+  // };
 
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-    loadWeekSchedule();
-    setRefreshing(false);
+  // const loadWeekSchedule = () => { // Replaced by loadData
+  //   const weekStart = getWeekStart(currentWeek);
+  //   const shifts = generateEnhancedMockShifts(weekStart);
+  //   setWeekSchedule({ weekStart, shifts });
+  // };
+
+  const onRefresh = async () => { // Modified to call loadData
+    loadData();
   };
 
   const getWeekStart = (date: Date): Date => {
@@ -143,145 +174,145 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
     return weekStart;
   };
 
-  const generateEnhancedMockShifts = (weekStart: Date): Shift[] => {
-    const shifts: Shift[] = [];
-    const employeeIds = employees.map(emp => emp.id);
+  // const generateEnhancedMockShifts = (weekStart: Date): Shift[] => { // Removed
+  //   const shifts: Shift[] = [];
+  //   const employeeIds = employees.map(emp => emp.id);
     
-    // Generate more realistic shifts with breaks, costs, and better coverage
-    for (let day = 0; day < 7; day++) {
-      const currentDate = new Date(weekStart);
-      currentDate.setDate(weekStart.getDate() + day);
-      const dateStr = currentDate.toISOString().split('T')[0];
+  //   // Generate more realistic shifts with breaks, costs, and better coverage
+  //   for (let day = 0; day < 7; day++) {
+  //     const currentDate = new Date(weekStart);
+  //     currentDate.setDate(weekStart.getDate() + day);
+  //     const dateStr = currentDate.toISOString().split('T')[0];
       
-      if (day < 6) { // Monday to Saturday - Full service
-        // Morning Manager Shift
-        shifts.push({
-          id: `manager-${day}-morning`,
-          employeeId: employeeIds[0] || 'emp1',
-          employeeName: employees[0]?.name || 'Maria Rodriguez',
-          date: dateStr,
-          startTime: '07:00',
-          endTime: '15:00',
-          role: 'Manager',
-          status: day < 2 ? 'completed' : 'confirmed',
-          duration: 8,
-          laborCost: 8 * (employees[0]?.hourlyRate || 15),
-          breakTime: 30,
-          notes: 'Opening supervisor'
-        });
+  //     if (day < 6) { // Monday to Saturday - Full service
+  //       // Morning Manager Shift
+  //       shifts.push({
+  //         id: `manager-${day}-morning`,
+  //         employeeId: employeeIds[0] || 'emp1',
+  //         employeeName: employees[0]?.name || 'Maria Rodriguez',
+  //         date: dateStr,
+  //         startTime: '07:00',
+  //         endTime: '15:00',
+  //         role: 'Manager',
+  //         status: day < 2 ? 'completed' : 'confirmed',
+  //         duration: 8,
+  //         laborCost: 8 * (employees[0]?.hourlyRate || 15),
+  //         breakTime: 30,
+  //         notes: 'Opening supervisor'
+  //       });
 
-        // Morning Cashier
-        shifts.push({
-          id: `cashier-${day}-morning`,
-          employeeId: employeeIds[1] || 'emp2',
-          employeeName: employees[1]?.name || 'Carlos Martinez',
-          date: dateStr,
-          startTime: '08:00',
-          endTime: '16:00',
-          role: 'Cashier',
-          status: day < 2 ? 'completed' : 'scheduled',
-          duration: 8,
-          laborCost: 8 * (employees[1]?.hourlyRate || 12),
-          breakTime: 45,
-        });
+  //       // Morning Cashier
+  //       shifts.push({
+  //         id: `cashier-${day}-morning`,
+  //         employeeId: employeeIds[1] || 'emp2',
+  //         employeeName: employees[1]?.name || 'Carlos Martinez',
+  //         date: dateStr,
+  //         startTime: '08:00',
+  //         endTime: '16:00',
+  //         role: 'Cashier',
+  //         status: day < 2 ? 'completed' : 'scheduled',
+  //         duration: 8,
+  //         laborCost: 8 * (employees[1]?.hourlyRate || 12),
+  //         breakTime: 45,
+  //       });
 
-        // Lunch Rush Server
-        shifts.push({
-          id: `server-${day}-lunch`,
-          employeeId: employeeIds[2] || 'emp3',
-          employeeName: employees[2]?.name || 'Sofia Hernandez',
-          date: dateStr,
-          startTime: '11:00',
-          endTime: '15:00',
-          role: 'Server',
-          status: day < 2 ? 'completed' : 'confirmed',
-          duration: 4,
-          laborCost: 4 * (employees[2]?.hourlyRate || 10),
-          breakTime: 15,
-          notes: 'Lunch rush coverage'
-        });
+  //       // Lunch Rush Server
+  //       shifts.push({
+  //         id: `server-${day}-lunch`,
+  //         employeeId: employeeIds[2] || 'emp3',
+  //         employeeName: employees[2]?.name || 'Sofia Hernandez',
+  //         date: dateStr,
+  //         startTime: '11:00',
+  //         endTime: '15:00',
+  //         role: 'Server',
+  //         status: day < 2 ? 'completed' : 'confirmed',
+  //         duration: 4,
+  //         laborCost: 4 * (employees[2]?.hourlyRate || 10),
+  //         breakTime: 15,
+  //         notes: 'Lunch rush coverage'
+  //       });
 
-        // Evening Manager
-        shifts.push({
-          id: `manager-${day}-evening`,
-          employeeId: employeeIds[3] || 'emp4',
-          employeeName: employees[3]?.name || 'Ahmed Hassan',
-          date: dateStr,
-          startTime: '15:00',
-          endTime: '23:00',
-          role: 'Manager',
-          status: day < 2 ? 'completed' : 'scheduled',
-          duration: 8,
-          laborCost: 8 * (employees[3]?.hourlyRate || 15),
-          breakTime: 30,
-          notes: 'Closing supervisor'
-        });
+  //       // Evening Manager
+  //       shifts.push({
+  //         id: `manager-${day}-evening`,
+  //         employeeId: employeeIds[3] || 'emp4',
+  //         employeeName: employees[3]?.name || 'Ahmed Hassan',
+  //         date: dateStr,
+  //         startTime: '15:00',
+  //         endTime: '23:00',
+  //         role: 'Manager',
+  //         status: day < 2 ? 'completed' : 'scheduled',
+  //         duration: 8,
+  //         laborCost: 8 * (employees[3]?.hourlyRate || 15),
+  //         breakTime: 30,
+  //         notes: 'Closing supervisor'
+  //       });
 
-        // Evening Server Team
-        shifts.push({
-          id: `server-${day}-evening-1`,
-          employeeId: employeeIds[4] || 'emp5',
-          employeeName: employees[4]?.name || 'Lucy Chen',
-          date: dateStr,
-          startTime: '16:00',
-          endTime: '22:00',
-          role: 'Server',
-          status: day < 2 ? 'completed' : 'confirmed',
-          duration: 6,
-          laborCost: 6 * (employees[4]?.hourlyRate || 10),
-          breakTime: 30,
-        });
+  //       // Evening Server Team
+  //       shifts.push({
+  //         id: `server-${day}-evening-1`,
+  //         employeeId: employeeIds[4] || 'emp5',
+  //         employeeName: employees[4]?.name || 'Lucy Chen',
+  //         date: dateStr,
+  //         startTime: '16:00',
+  //         endTime: '22:00',
+  //         role: 'Server',
+  //         status: day < 2 ? 'completed' : 'confirmed',
+  //         duration: 6,
+  //         laborCost: 6 * (employees[4]?.hourlyRate || 10),
+  //         breakTime: 30,
+  //       });
 
-        // Kitchen Staff
-        shifts.push({
-          id: `kitchen-${day}-1`,
-          employeeId: employeeIds[5] || 'emp6',
-          employeeName: employees[5]?.name || 'Roberto Silva',
-          date: dateStr,
-          startTime: '10:00',
-          endTime: '22:00',
-          role: 'Kitchen',
-          status: day < 2 ? 'completed' : 'scheduled',
-          duration: 12,
-          laborCost: 12 * (employees[5]?.hourlyRate || 13),
-          breakTime: 60,
-          notes: 'Full kitchen coverage'
-        });
+  //       // Kitchen Staff
+  //       shifts.push({
+  //         id: `kitchen-${day}-1`,
+  //         employeeId: employeeIds[5] || 'emp6',
+  //         employeeName: employees[5]?.name || 'Roberto Silva',
+  //         date: dateStr,
+  //         startTime: '10:00',
+  //         endTime: '22:00',
+  //         role: 'Kitchen',
+  //         status: day < 2 ? 'completed' : 'scheduled',
+  //         duration: 12,
+  //         laborCost: 12 * (employees[5]?.hourlyRate || 13),
+  //         breakTime: 60,
+  //         notes: 'Full kitchen coverage'
+  //       });
 
-      } else { // Sunday - Reduced hours
-        shifts.push({
-          id: `sunday-manager-${day}`,
-          employeeId: employeeIds[0] || 'emp1',
-          employeeName: employees[0]?.name || 'Maria Rodriguez',
-          date: dateStr,
-          startTime: '10:00',
-          endTime: '18:00',
-          role: 'Manager',
-          status: 'scheduled',
-          duration: 8,
-          laborCost: 8 * (employees[0]?.hourlyRate || 15),
-          breakTime: 30,
-          notes: 'Sunday operations'
-        });
+  //     } else { // Sunday - Reduced hours
+  //       shifts.push({
+  //         id: `sunday-manager-${day}`,
+  //         employeeId: employeeIds[0] || 'emp1',
+  //         employeeName: employees[0]?.name || 'Maria Rodriguez',
+  //         date: dateStr,
+  //         startTime: '10:00',
+  //         endTime: '18:00',
+  //         role: 'Manager',
+  //         status: 'scheduled',
+  //         duration: 8,
+  //         laborCost: 8 * (employees[0]?.hourlyRate || 15),
+  //         breakTime: 30,
+  //         notes: 'Sunday operations'
+  //       });
 
-        shifts.push({
-          id: `sunday-server-${day}`,
-          employeeId: employeeIds[2] || 'emp3',
-          employeeName: employees[2]?.name || 'Sofia Hernandez',
-          date: dateStr,
-          startTime: '11:00',
-          endTime: '17:00',
-          role: 'Server',
-          status: 'scheduled',
-          duration: 6,
-          laborCost: 6 * (employees[2]?.hourlyRate || 10),
-          breakTime: 30,
-        });
-      }
-    }
+  //       shifts.push({
+  //         id: `sunday-server-${day}`,
+  //         employeeId: employeeIds[2] || 'emp3',
+  //         employeeName: employees[2]?.name || 'Sofia Hernandez',
+  //         date: dateStr,
+  //         startTime: '11:00',
+  //         endTime: '17:00',
+  //         role: 'Server',
+  //         status: 'scheduled',
+  //         duration: 6,
+  //         laborCost: 6 * (employees[2]?.hourlyRate || 10),
+  //         breakTime: 30,
+  //       });
+  //     }
+  //   }
     
-    return shifts;
-  };
+  //   return shifts;
+  // };
 
   const getWeekDays = (): string[] => {
     if (!weekSchedule) return [];
@@ -1250,6 +1281,30 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
     </Modal>
   );
 
+  if (isLoadingEmployees || isLoadingSchedule) {
+    return (
+      <SafeAreaView style={[styles.container, styles.centered, { backgroundColor: theme.colors.background }]}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+        <Text style={[styles.loadingText, {color: theme.colors.text}]}>
+          {isLoadingEmployees ? 'Loading Employees...' : 'Loading Schedule...'}
+        </Text>
+      </SafeAreaView>
+    );
+  }
+
+  if (error) {
+    return (
+      <SafeAreaView style={[styles.container, styles.centered, { backgroundColor: theme.colors.background }]}>
+        <Icon name="error-outline" size={64} color={theme.colors.danger} />
+        <Text style={[styles.errorTextHeader, {color: theme.colors.danger}]}>Error Loading Data</Text>
+        <Text style={[styles.errorText, {color: theme.colors.text}]}>{error}</Text>
+        <TouchableOpacity onPress={loadData} style={[styles.retryButton, {backgroundColor: theme.colors.primary}]}>
+          <Text style={[styles.retryButtonText, {color: theme.colors.white}]}>Try Again</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <StatusBar barStyle="light-content" backgroundColor={theme.colors.primary} />
@@ -1973,6 +2028,42 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: Colors.white,
+  },
+  centered: { // Added
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  loadingText: { // Added
+    marginTop: 10,
+    fontSize: getFontSize(16),
+    // color: Colors.darkGray, // Theme controlled
+  },
+  errorTextHeader: { // Added
+    fontSize: getFontSize(18),
+    fontWeight: 'bold',
+    // color: Colors.danger, // Theme controlled
+    marginTop: 16,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  errorText: { // Added
+    fontSize: getFontSize(14),
+    // color: Colors.text, // Theme controlled
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  retryButton: { // Added
+    // backgroundColor: Colors.primary, // Theme controlled
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    borderRadius: 8,
+  },
+  retryButtonText: { // Added
+    // color: Colors.white, // Theme controlled
+    fontSize: getFontSize(16),
+    fontWeight: '600',
   },
 });
 

@@ -8,12 +8,22 @@ import {
   ScrollView,
   TouchableOpacity,
   Dimensions,
+  ActivityIndicator, // Will be replaced by LoadingView
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
-import { generateEmployees, generateSalesHistory, EmployeeData } from '../../utils/mockDataGenerator';
-import Colors from '../../constants/Colors';
+// import { generateEmployees, generateSalesHistory, EmployeeData } from '../../utils/mockDataGenerator'; // Removed
+import { EmployeeData } from '../../types'; // Updated import path
+import Colors from '../../constants/Colors'; // Keep for now, though theme might override
 import { useTheme } from '../../design-system/ThemeProvider';
+import DataService from '../../services/DataService'; // Added
+import LoadingView from '../../components/feedback/LoadingView'; // Added
+import ComingSoon from '../../components/feedback/ComingSoon'; // Added
+
+// Mock ENV flag (would typically come from an env config file)
+const ENV = {
+  FEATURE_REPORTS: false, // Set to true to enable, false to show ComingSoon
+};
 
 // Get screen dimensions for responsive design
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
@@ -31,73 +41,84 @@ const getFontSize = (base: number) => {
 const ReportsScreen = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
-  const [employees, setEmployees] = useState<EmployeeData[]>([]);
-  const [salesData, setSalesData] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  // const [employees, setEmployees] = useState<EmployeeData[]>([]); // Will come from reportDashboardData
+  // const [salesData, setSalesData] = useState<any[]>([]); // Will come from reportDashboardData
+  const [reportDashboardData, setReportDashboardData] = useState<any | null>(null); // New state for combined data
+  const [isLoading, setIsLoading] = useState<boolean>(true); // Renamed from loading
+  const [error, setError] = useState<string | null>(null); // Added
 
   useEffect(() => {
-    loadReportData();
+    if (ENV.FEATURE_REPORTS) {
+      loadReportData();
+    } else {
+      setIsLoading(false);
+    }
   }, []);
 
   const loadReportData = async () => {
+    setIsLoading(true);
+    setError(null);
     try {
-      // Load employees and sales data
-      const employeeData = generateEmployees();
-      const salesHistory = generateSalesHistory(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)); // Last 30 days
-      
-      setEmployees(employeeData);
-      setSalesData(salesHistory);
-    } catch (error) {
-      console.error('Error loading report data:', error);
+      const dataService = DataService.getInstance();
+      // Assuming getReportsDashboardData returns an object with all necessary pre-calculated metrics and lists
+      const dashboardData = await dataService.getReportsDashboardData();
+      setReportDashboardData(dashboardData);
+    } catch (e: any) {
+      setError(e.message || 'Failed to load report data.');
+      setReportDashboardData(null);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  // Calculate today's performance metrics
-  const getTodayMetrics = () => {
-    const today = new Date();
-    const todayStr = today.toISOString().split('T')[0];
-    const todayData = salesData.find(day => 
-      day.date.toISOString().split('T')[0] === todayStr
+  // Calculations will now use reportDashboardData if it's not null
+  // Or display placeholder/empty if reportDashboardData is null after loading without error.
+
+  // Example of how metrics would be accessed (adjust based on actual structure from DataService)
+  const todayMetrics = reportDashboardData?.todaySummary || {
+    totalSales: 0,
+    transactions: 0,
+    averageOrder: 0,
+  };
+
+  const laborMetrics = reportDashboardData?.weeklyLabor || {
+    totalActualHours: 0,
+    totalLaborCost: 0,
+    efficiency: 0,
+  };
+
+  const topItemsToday = reportDashboardData?.topItemsToday || []; // e.g., [{name: 'Tacos', count: 15}]
+  const topPerformersToday = reportDashboardData?.topPerformersToday || []; // e.g., EmployeeData[]
+
+  if (!ENV.FEATURE_REPORTS) {
+    return <ComingSoon />;
+  }
+
+  if (isLoading) {
+    return <LoadingView message="Loading Reports Dashboard..." />;
+  }
+
+  if (error || !reportDashboardData) {
+    return (
+      <SafeAreaView style={styles.container}>
+         <View style={styles.header}>
+           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+             <Icon name="arrow-back" size={24} color={Colors.white} />
+           </TouchableOpacity>
+           <Text style={styles.headerTitle}>Reports</Text>
+           <View style={styles.placeholder} />
+        </View>
+        <View style={styles.centeredError}>
+          <Icon name="error-outline" size={64} color={Colors.danger} />
+          <Text style={styles.errorTextHeader}>Error Loading Reports</Text>
+          <Text style={styles.errorText}>{error || 'No report data available.'}</Text>
+          <TouchableOpacity onPress={loadReportData} style={styles.retryButton}>
+            <Text style={styles.retryButtonText}>Try Again</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
     );
-    
-    if (!todayData) {
-      return {
-        totalSales: 1247.50,
-        transactions: 23,
-        averageOrder: 54.24,
-        topPerformer: employees[0]?.name || 'Maria Rodriguez',
-        topPerformerSales: 485.20
-      };
-    }
-    
-    return {
-      totalSales: todayData.total,
-      transactions: todayData.transactions,
-      averageOrder: todayData.averageTransaction,
-      topPerformer: todayData.employees[0]?.name || 'No data',
-      topPerformerSales: todayData.employees[0]?.sales || 0
-    };
-  };
-
-  // Calculate weekly employee costs
-  const getWeeklyLaborCosts = () => {
-    const totalScheduledHours = employees.reduce((sum, emp) => sum + (emp.scheduledHours * 0.25), 0); // This week
-    const totalActualHours = employees.reduce((sum, emp) => sum + (emp.actualHours * 0.25), 0);
-    const totalLaborCost = employees.reduce((sum, emp) => sum + (emp.actualHours * 0.25 * emp.hourlyRate), 0);
-    const efficiency = totalScheduledHours > 0 ? (totalActualHours / totalScheduledHours) * 100 : 0;
-    
-    return {
-      totalScheduledHours: Math.round(totalScheduledHours),
-      totalActualHours: Math.round(totalActualHours),
-      totalLaborCost,
-      efficiency
-    };
-  };
-
-  const todayMetrics = getTodayMetrics();
-  const laborMetrics = getWeeklyLaborCosts();
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -162,10 +183,15 @@ const ReportsScreen = () => {
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Top Items Today</Text>
           <View style={[styles.card, { backgroundColor: theme.colors.white }]}>
-            <Text style={[styles.itemText, { color: theme.colors.text }]}>🌮 Carnitas Tacos - 15 sold</Text>
-            <Text style={[styles.itemText, { color: theme.colors.text }]}>🧀 Nachos - 12 sold</Text>
-            <Text style={[styles.itemText, { color: theme.colors.text }]}>🫓 Quesadillas - 10 sold</Text>
-            <Text style={[styles.itemText, { color: theme.colors.text }]}>🌯 Burritos - 8 sold</Text>
+            {topItemsToday.length > 0 ? (
+              topItemsToday.map((item: any, index: number) => (
+                <Text key={index} style={[styles.itemText, { color: theme.colors.text }]}>
+                  {item.emoji || '🍽️'} {item.name} - {item.count} sold
+                </Text>
+              ))
+            ) : (
+              <Text style={[styles.itemText, { color: Colors.darkGray }]}>No top items data for today.</Text>
+            )}
           </View>
         </View>
 
@@ -173,24 +199,30 @@ const ReportsScreen = () => {
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Top Performers Today</Text>
           <View style={[styles.card, { backgroundColor: theme.colors.white }]}>
-            {employees.slice(0, 3).map((employee, index) => {
-              const dailySales = (employee.totalSales / 30); // Approximate daily sales
-              return (
-                <View key={employee.id} style={styles.performerRow}>
-                  <View style={styles.performerRank}>
-                    <Text style={[styles.rankNumber, { color: index === 0 ? Colors.warning : Colors.darkGray }]}>#{index + 1}</Text>
+            {topPerformersToday.length > 0 ? (
+              topPerformersToday.slice(0, 3).map((employee: EmployeeData, index: number) => {
+                // Assuming 'dailySales' and 'dailyHours' are part of the employee object from the service
+                const dailySales = employee.dailySales || (employee.totalSales / 30);
+                const dailyHours = employee.dailyHours || (employee.actualHours / 7);
+                return (
+                  <View key={employee.id} style={styles.performerRow}>
+                    <View style={styles.performerRank}>
+                      <Text style={[styles.rankNumber, { color: index === 0 ? Colors.warning : Colors.darkGray }]}>#{index + 1}</Text>
+                    </View>
+                    <View style={styles.performerInfo}>
+                      <Text style={[styles.performerName, { color: theme.colors.text }]}>{employee.name}</Text>
+                      <Text style={[styles.performerRole, { color: Colors.darkGray }]}>{employee.role}</Text>
+                    </View>
+                    <View style={styles.performerStats}>
+                      <Text style={[styles.performerSales, { color: Colors.success }]}>£{dailySales.toFixed(0)}</Text>
+                      <Text style={[styles.performerHours, { color: Colors.darkGray }]}>{dailyHours.toFixed(1)}h</Text>
+                    </View>
                   </View>
-                  <View style={styles.performerInfo}>
-                    <Text style={[styles.performerName, { color: theme.colors.text }]}>{employee.name}</Text>
-                    <Text style={[styles.performerRole, { color: Colors.darkGray }]}>{employee.role}</Text>
-                  </View>
-                  <View style={styles.performerStats}>
-                    <Text style={[styles.performerSales, { color: Colors.success }]}>£{dailySales.toFixed(0)}</Text>
-                    <Text style={[styles.performerHours, { color: Colors.darkGray }]}>{(employee.actualHours / 7).toFixed(1)}h</Text>
-                  </View>
-                </View>
-              );
-            })}
+                );
+              })
+            ) : (
+              <Text style={[styles.itemText, { color: Colors.darkGray }]}>No top performers data for today.</Text>
+            )}
           </View>
         </View>
 
@@ -430,6 +462,37 @@ const styles = StyleSheet.create({
   performerHours: {
     fontSize: getFontSize(12),
     marginTop: 2,
+  },
+  centeredError: { // Added
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  errorTextHeader: { // Added
+    fontSize: getFontSize(18),
+    fontWeight: 'bold',
+    color: Colors.danger, // Fallback, theme might override if available in error JSX
+    marginTop: 16,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  errorText: { // Added
+    fontSize: getFontSize(14),
+    color: Colors.text, // Fallback
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  retryButton: { // Added
+    backgroundColor: Colors.primary, // Fallback
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  retryButtonText: { // Added
+    color: Colors.white, // Fallback
+    fontSize: getFontSize(16),
+    fontWeight: '600',
   },
 });
 

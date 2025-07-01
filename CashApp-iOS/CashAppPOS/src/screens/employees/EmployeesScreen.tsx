@@ -11,11 +11,14 @@ import {
   TextInput,
   Modal,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
-import { generateEmployees, EmployeeData } from '../../utils/mockDataGenerator';
+// import { generateEmployees, EmployeeData } from '../../utils/mockDataGenerator'; // Removed
 import Colors from '../../constants/Colors';
+import DataService from '../../services/DataService'; // Added
+import { EmployeeData } from '../../types'; // Updated import path
 
 const EmployeesScreen: React.FC = () => {
   const navigation = useNavigation();
@@ -25,6 +28,8 @@ const EmployeesScreen: React.FC = () => {
   const [selectedRole, setSelectedRole] = useState<string>('all');
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<EmployeeData | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true); // Added
+  const [error, setError] = useState<string | null>(null); // Added
   
   // Add Employee Form State
   const [newEmployee, setNewEmployee] = useState({
@@ -40,12 +45,29 @@ const EmployeesScreen: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    filterEmployees();
-  }, [employees, searchQuery, selectedRole]);
+    // Only filter if not loading and no error
+    if (!isLoading && !error) {
+      filterEmployees();
+    } else {
+      // If loading or error, ensure filtered list is empty or reflects state
+      setFilteredEmployees([]);
+    }
+  }, [employees, searchQuery, selectedRole, isLoading, error]);
 
-  const loadEmployees = () => {
-    const employeeData = generateEmployees();
-    setEmployees(employeeData);
+  const loadEmployees = async () => { // Modified
+    setIsLoading(true);
+    setError(null);
+    try {
+      const dataService = DataService.getInstance();
+      // Assuming a getEmployees method will be added to DataService
+      const employeeData = await dataService.getEmployees();
+      setEmployees(employeeData || []);
+    } catch (e: any) {
+      setError(e.message || 'Failed to load employees.');
+      setEmployees([]); // Clear employees on error
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const filterEmployees = () => {
@@ -217,7 +239,40 @@ const EmployeesScreen: React.FC = () => {
     total: employees.length,
     active: employees.filter(e => e.actualHours >= e.scheduledHours * 0.9).length,
     managers: employees.filter(e => e.role === 'Manager').length,
-    avgPerformance: employees.reduce((sum, e) => sum + e.performanceScore, 0) / employees.length,
+    avgPerformance: employees.length > 0 ? employees.reduce((sum, e) => sum + e.performanceScore, 0) / employees.length : 0,
+  };
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={[styles.container, styles.centered]}>
+        <ActivityIndicator size="large" color={Colors.primary} />
+        <Text style={styles.loadingText}>Loading Employees...</Text>
+      </SafeAreaView>
+    );
+  }
+
+  const renderEmptyListComponent = () => {
+    if (error) {
+      return (
+        <View style={styles.emptyState}>
+          <Icon name="error-outline" size={64} color={Colors.danger} />
+          <Text style={styles.emptyStateText}>Error Loading Employees</Text>
+          <Text style={styles.emptyStateSubtext}>{error}</Text>
+          <TouchableOpacity onPress={loadEmployees} style={styles.retryButton}>
+            <Text style={styles.retryButtonText}>Try Again</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+    return (
+      <View style={styles.emptyState}>
+        <Icon name="people" size={64} color={Colors.lightGray} />
+        <Text style={styles.emptyStateText}>No employees found</Text>
+        <Text style={styles.emptyStateSubtext}>
+          {searchQuery ? 'Try adjusting your search' : 'Add your first employee or pull to refresh'}
+        </Text>
+      </View>
+    );
   };
 
   return (
@@ -323,15 +378,9 @@ const EmployeesScreen: React.FC = () => {
         keyExtractor={item => item.id.toString()}
         contentContainerStyle={styles.employeesList}
         showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
-          <View style={styles.emptyState}>
-            <Icon name="people" size={64} color={Colors.lightGray} />
-            <Text style={styles.emptyStateText}>No employees found</Text>
-            <Text style={styles.emptyStateSubtext}>
-              {searchQuery ? 'Try adjusting your search' : 'Add your first employee'}
-            </Text>
-          </View>
-        }
+        ListEmptyComponent={renderEmptyListComponent}
+        onRefresh={loadEmployees} // Added
+        refreshing={isLoading} // Added
       />
 
       {/* Employee Detail Modal */}
@@ -967,6 +1016,28 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     marginLeft: 8,
+  },
+  centered: { // Added
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: { // Added
+    marginTop: 10,
+    fontSize: 16,
+    color: Colors.darkGray,
+  },
+  retryButton: { // Added
+    marginTop: 20,
+    backgroundColor: Colors.primary,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  retryButtonText: { // Added
+    color: Colors.white,
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 

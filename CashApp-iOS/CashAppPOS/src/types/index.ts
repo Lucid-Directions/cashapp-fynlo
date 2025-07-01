@@ -243,3 +243,95 @@ export type DeepPartial<T> = {
 export type Nullable<T> = T | null;
 
 export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+
+// Data types previously in mockDataGenerator.ts
+export interface CustomerData {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  joinedDate: Date;
+  totalSpent: number;
+  orderCount: number;
+  averageOrderValue: number;
+  lastVisit: Date;
+  loyaltyPoints: number;
+  preferredItems: string[];
+  tags: string[];
+}
+
+export interface EmployeeData {
+  id: number; // Or string if UUID from backend
+  name: string;
+  role: 'Manager' | 'Cashier' | 'Server' | 'Cook' | string; // Allow string for future roles
+  email: string;
+  phone: string;
+  hireDate: Date;
+  hourlyRate: number;
+  totalSales: number;
+  averageSalesPerDay: number;
+  punctualityScore: number;
+  performanceScore: number;
+  scheduledHours: number;
+  actualHours: number;
+  weeksSinceLastReview?: number; // Made optional as not all systems might have it
+  photo?: string;
+  // For ReportsScreenSimple, these might be part of a specific report DTO
+  dailySales?: number;
+  dailyHours?: number;
+  // For StaffReportDetailScreen
+  transactionsHandled?: number;
+  efficiency?: number; // e.g., sales per hour
+  customerRating?: number; // e.g., 1-5 stars
+  shiftsCompleted?: number;
+  performance?: 'excellent' | 'good' | 'average' | 'needs_improvement' | string;
+  avatar?: string; // Typically first letter of name, or URL
+}
+
+export interface InventoryData {
+  itemId: number; // Or string (SKU/UUID)
+  name: string;
+  category: string;
+  currentStock: number;
+  minimumStock: number;
+  maximumStock: number;
+  unitCost: number;
+  supplier: string;
+  lastRestocked: Date;
+  turnoverRate: number;
+  wastage: number;
+  unit?: string;
+}
+
+export interface SalesDataReportItem { // Renamed to avoid conflict if SalesData is a more generic term elsewhere
+  date: Date;
+  total: number; // daily total sales
+  transactions: number;
+  items: number;
+  averageTransaction: number;
+  paymentMethods: {
+    card: number;
+    cash: number;
+    mobile: number;
+    giftCard?: number; // Was used as qrCode placeholder in SalesReportDetail
+    qrCode?: number;
+  };
+  hourlyData?: Array<{ // Made optional as not all reports might need it
+    hour: number;
+    sales: number;
+    transactions: number;
+  }>;
+  topItems?: Array<{
+    itemId: number | string;
+    name: string;
+    quantity: number;
+    revenue: number;
+  }>;
+  employees?: Array<{
+    id: number | string;
+    name: string;
+    sales: number;
+    transactions: number;
+    hours: number;
+  }>;
+}
