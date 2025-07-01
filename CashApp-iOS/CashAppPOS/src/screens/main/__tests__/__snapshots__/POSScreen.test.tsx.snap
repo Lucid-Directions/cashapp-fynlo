@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`POSScreen Header Actions Conditional Rendering should not render bug icon if FLAGS.SHOW_DEV_MENU is false in production 1`] = `
+<RNCSafeAreaProvider
+  onInsetsChange={[Function]}
+  style={
+    [
+      {
+        "flex": 1,
+      },
+      undefined,
+    ]
+  }
+/>
+`;
+
+exports[`POSScreen Header Actions Conditional Rendering should not render bug icon if FLAGS.SHOW_DEV_MENU is false, even in development 1`] = `
+<RNCSafeAreaProvider
+  onInsetsChange={[Function]}
+  style={
+    [
+      {
+        "flex": 1,
+      },
+      undefined,
+    ]
+  }
+/>
+`;
+
+exports[`POSScreen Header Actions Conditional Rendering should not render bug icon in production when FLAGS.SHOW_DEV_MENU is true 1`] = `
+<RNCSafeAreaProvider
+  onInsetsChange={[Function]}
+  style={
+    [
+      {
+        "flex": 1,
+      },
+      undefined,
+    ]
+  }
+/>
+`;

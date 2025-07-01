@@ -622,14 +622,14 @@ const POSScreen: React.FC = () => {
               style={styles.menuQuantityButton}
               onPress={() => handleUpdateQuantity(item.id, existingItem.quantity - 1)}
             >
-              <Icon name="remove" size={16} color={theme.colors.white} />
+              <Icon name="remove" size={18} color={theme.colors.white} />
             </TouchableOpacity>
             <Text style={styles.menuQuantityText}>{existingItem.quantity}</Text>
             <TouchableOpacity
               style={styles.menuQuantityButton}
               onPress={() => handleUpdateQuantity(item.id, existingItem.quantity + 1)}
             >
-              <Icon name="add" size={16} color={theme.colors.white} />
+              <Icon name="add" size={18} color={theme.colors.white} />
             </TouchableOpacity>
           </View>
         )}
@@ -1327,15 +1327,15 @@ const createStyles = (theme: any) => StyleSheet.create({
     justifyContent: 'center',
     marginTop: 8,
     backgroundColor: theme.colors.accent,
-    borderRadius: 20, // Increased border radius for a more pill-like shape
-    paddingVertical: 4,
-    paddingHorizontal: 12, // Increased horizontal padding
-    minWidth: 80, // Added minWidth to prevent clipping
+    borderRadius: 20,
+    paddingVertical: 6, // Increased from 4 for better button spacing
+    paddingHorizontal: 16, // Increased from 12 for more breathing room
+    minWidth: 100, // Increased from 80 for larger quantities
   },
   menuQuantityButton: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: 28, // Increased from 24 to prevent edge truncation
+    height: 28, // Increased from 24 to prevent edge truncation
+    borderRadius: 14, // Adjusted for new size
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',
