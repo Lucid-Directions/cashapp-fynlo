@@ -1468,6 +1468,7 @@ const styles = StyleSheet.create({
   },
   enhancedDayContent: {
     padding: 8,
+    paddingBottom: 16,
     maxHeight: 400,
   },
   enhancedEmptyDay: {
