@@ -292,3 +292,69 @@ describe('POSScreen', () => {
     expect(getByText('$30.97')).toBeTruthy();
   });
 });
+
+// New tests for Header Actions conditional rendering
+describe('POSScreen Header Actions Conditional Rendering', () => {
+  // Mock FLAGS, assuming it would be globally available or imported in a real scenario
+  const mockFlagsBase = {
+    SHOW_DEV_MENU: true,
+  };
+
+  // Mock the env module
+  let mockIS_DEV: boolean;
+  jest.mock('../../../../src/env', () => ({
+    get IS_DEV() { return mockIS_DEV; }, // Use a getter to allow dynamic changes
+    envBool: jest.fn((name, fallback) => fallback), // Mock other exports if necessary
+  }));
+
+  beforeEach(() => {
+    // Reset mocks and global FLAGS before each test in this suite
+    jest.clearAllMocks();
+    // @ts-ignore: Assigning to global for test purposes
+    global.FLAGS = { ...mockFlagsBase };
+  });
+
+  it('should not render bug icon in production when FLAGS.SHOW_DEV_MENU is true', () => {
+    mockIS_DEV = false; // Simulate production environment
+    // @ts-ignore: Assigning to global for test purposes
+    global.FLAGS.SHOW_DEV_MENU = true;
+
+    const { queryByTestId, toJSON } = customRenderWithStores(<POSScreen />, { navigationProps: { navigation: mockNavigation } });
+
+    expect(queryByTestId('dev-mode-toggle-button')).toBeNull();
+    expect(toJSON()).toMatchSnapshot(); // Snapshot for overall structure
+  });
+
+  it('should render bug icon in development when FLAGS.SHOW_DEV_MENU is true', () => {
+    mockIS_DEV = true; // Simulate development environment
+    // @ts-ignore: Assigning to global for test purposes
+    global.FLAGS.SHOW_DEV_MENU = true;
+
+    const { getByTestId, toJSON } = customRenderWithStores(<POSScreen />, { navigationProps: { navigation: mockNavigation } });
+
+    expect(getByTestId('dev-mode-toggle-button')).toBeTruthy();
+    expect(toJSON()).toMatchSnapshot(); // Snapshot for overall structure
+  });
+
+  it('should not render bug icon if FLAGS.SHOW_DEV_MENU is false, even in development', () => {
+    mockIS_DEV = true; // Simulate development environment
+    // @ts-ignore: Assigning to global for test purposes
+    global.FLAGS.SHOW_DEV_MENU = false;
+
+    const { queryByTestId, toJSON } = customRenderWithStores(<POSScreen />, { navigationProps: { navigation: mockNavigation } });
+
+    expect(queryByTestId('dev-mode-toggle-button')).toBeNull();
+    expect(toJSON()).toMatchSnapshot(); // Snapshot for overall structure
+  });
+
+  it('should not render bug icon if FLAGS.SHOW_DEV_MENU is false in production', () => {
+    mockIS_DEV = false; // Simulate production environment
+    // @ts-ignore: Assigning to global for test purposes
+    global.FLAGS.SHOW_DEV_MENU = false;
+
+    const { queryByTestId, toJSON } = customRenderWithStores(<POSScreen />, { navigationProps: { navigation: mockNavigation } });
+
+    expect(queryByTestId('dev-mode-toggle-button')).toBeNull();
+    expect(toJSON()).toMatchSnapshot(); // Snapshot for overall structure
+  });
+});
