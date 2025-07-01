@@ -33,6 +33,7 @@ import SumUpTestComponent from '../../components/payment/SumUpTestComponent';
 import SumUpCompatibilityService from '../../services/SumUpCompatibilityService';
 import SharedDataStore from '../../services/SharedDataStore';
 import SimpleTextInput from '../../components/inputs/SimpleTextInput';
+import { QuantityPill } from '../../components/inputs';
 import CartIcon from '../../components/cart/CartIcon';
 import CategorySearchBubble from '../../components/search/CategorySearchBubble'; // Import CategorySearchBubble
 import CustomersService from '../../services/CustomersService';
@@ -133,20 +134,16 @@ const ExportedMenuItemCard = ({
       </TouchableOpacity>
 
       {existingItem && (
-        <View style={propStyles.menuItemQuantityControls}>
-          <TouchableOpacity
-            style={propStyles.menuQuantityButton}
-            onPress={() => handleUpdateQuantity(item.id, existingItem.quantity - 1)}
-          >
-            <Icon name="remove" size={16} color={theme.colors.white} />
-          </TouchableOpacity>
-          <Text style={propStyles.menuQuantityText}>{existingItem.quantity}</Text>
-          <TouchableOpacity
-            style={propStyles.menuQuantityButton}
-            onPress={() => handleUpdateQuantity(item.id, existingItem.quantity + 1)}
-          >
-            <Icon name="add" size={16} color={theme.colors.white} />
-          </TouchableOpacity>
+        <View style={propStyles.quantityPillContainer}>
+          <QuantityPill
+            quantity={existingItem.quantity}
+            onIncrease={() => handleUpdateQuantity(item.id, existingItem.quantity + 1)}
+            onDecrease={() => handleUpdateQuantity(item.id, existingItem.quantity - 1)}
+            size="medium"
+            colorScheme="accent"
+            minValue={0}
+            maxValue={99}
+          />
         </View>
       )}
     </View>
@@ -1321,32 +1318,10 @@ const createStyles = (theme: any) => StyleSheet.create({
     borderRadius: 8,
     overflow: 'hidden',
   },
-  menuItemQuantityControls: {
-    flexDirection: 'row',
+  quantityPillContainer: {
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 8,
-    backgroundColor: theme.colors.accent,
-    borderRadius: 20,
-    paddingVertical: 6, // Increased from 4 for better button spacing
-    paddingHorizontal: 16, // Increased from 12 for more breathing room
-    minWidth: 100, // Increased from 80 for larger quantities
-  },
-  menuQuantityButton: {
-    width: 28, // Increased from 24 to prevent edge truncation
-    height: 28, // Increased from 24 to prevent edge truncation
-    borderRadius: 14, // Adjusted for new size
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  menuQuantityText: {
-    color: theme.colors.white,
-    fontSize: 14,
-    fontWeight: '600',
-    marginHorizontal: 12,
-    minWidth: 20,
-    textAlign: 'center',
   },
   cartHeader: {
     flexDirection: 'row',

@@ -9,6 +9,28 @@ import { StyleSheet } from 'react-native'; // Import StyleSheet
 // Mock useAppStore
 jest.mock('../../../store/useAppStore');
 
+// Mock NetInfo
+jest.mock('@react-native-community/netinfo', () => ({
+  fetch: jest.fn(() => Promise.resolve({ isConnected: true, type: 'wifi' })),
+  addEventListener: jest.fn(),
+  useNetInfo: jest.fn(() => ({ isConnected: true, type: 'wifi' })),
+}));
+
+// Mock QuantityPill component
+jest.mock('../../../components/inputs', () => ({
+  QuantityPill: ({ quantity, onIncrease, onDecrease }: any) => {
+    const React = require('react');
+    const { View, Text, TouchableOpacity } = require('react-native');
+    return React.createElement(View, { testID: 'quantity-pill' }, [
+      React.createElement(TouchableOpacity, { key: 'decrease', onPress: onDecrease, testID: 'quantity-decrease' }, 
+        React.createElement(Text, {}, '-')),
+      React.createElement(Text, { key: 'quantity', testID: 'quantity-text' }, quantity),
+      React.createElement(TouchableOpacity, { key: 'increase', onPress: onIncrease, testID: 'quantity-increase' }, 
+        React.createElement(Text, {}, '+'))
+    ]);
+  }
+}));
+
 // Mock useNavigation
 jest.mock('@react-navigation/native', () => ({
   ...jest.requireActual('@react-navigation/native'),
@@ -25,9 +47,7 @@ const mockCreateStyles = (theme: any) => StyleSheet.create({
   menuItemEmoji: {},
   menuItemName: {},
   menuItemPrice: { overflow: 'hidden' },
-  menuItemQuantityControls: { backgroundColor: 'green', borderRadius: 20, paddingHorizontal: 12, minWidth: 80 },
-  menuQuantityButton: {},
-  menuQuantityText: {},
+  quantityPillContainer: { alignItems: 'center', justifyContent: 'center', marginTop: 8 },
 });
 
 
