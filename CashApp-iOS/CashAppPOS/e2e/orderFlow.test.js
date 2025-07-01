@@ -232,4 +232,55 @@ describe('Order Flow', () => {
     // Badge should update to show total quantity
     await expect(element(by.id('cart-badge-3'))).toBeVisible();
   });
+
+  it('should keep "Charge" button visible for long carts', async () => {
+    // Add 20 items to the cart from the menuItems array in POSScreen.tsx
+    // This assumes items are identifiable by their text on menu cards.
+    const itemNames = [
+      'Nachos', 'Quesadillas', 'Chorizo Quesadilla', 'Chicken Quesadilla', 'Tostada',
+      'Carnitas', 'Cochinita', 'Barbacoa de Res', 'Chorizo', 'Rellena',
+      'Chicken Fajita', 'Haggis', 'Pescado', 'Dorados', 'Dorados Papa',
+      'Nopal', 'Frijol', 'Verde', 'Fajita', 'Carne Asada'
+      // Ensure these names exactly match what's rendered for menu items
+    ];
+
+    for (const itemName of itemNames) {
+      // Scroll to find the item if not visible, then tap
+      // Note: Detox's scrolling behavior might need adjustment based on layout
+      try {
+        await waitFor(element(by.text(itemName))).toBeVisible().whileElement(by.id('menu-flat-list')).scroll(50, 'down');
+        await element(by.text(itemName)).tap();
+      } catch (e) {
+        // Fallback if already visible or scrolling logic needs refinement
+        console.warn(`Could not find or tap ${itemName} with initial scroll, attempting direct tap.`);
+        await element(by.text(itemName)).tap();
+      }
+    }
+
+    // Open the cart modal by tapping the cart icon/button
+    // Assuming the cart icon has a testID 'cart-icon-button' or similar.
+    // From POSScreen.tsx, the cart button is part of headerRight.
+    // <TouchableOpacity style={styles.cartButton} onPress={() => setShowCartModal(true)}>
+    //   <Icon name="shopping-cart" size={24} color={theme.colors.white} />
+    // </TouchableOpacity>
+    // We'll use a more generic approach if a specific testID isn't set, e.g., matching by Icon name if possible,
+    // or by a parent view's testID if the TouchableOpacity itself isn't uniquely identifiable.
+    // For now, let's assume a testID 'shopping-cart-button' is added to the TouchableOpacity.
+    await element(by.id('shopping-cart-button')).tap();
+
+
+    // In the cart modal, check if the "Charge" button is visible
+    // The button text is dynamic: "Charge £XX.XX"
+    // We need to use a matcher that can find part of the text or use a testID.
+    // Let's assume the TouchableOpacity for the charge button has testID 'charge-button'.
+    // From POSScreen.tsx: <TouchableOpacity style={styles.chargeButton} onPress={() => { setShowCartModal(false); setShowPaymentModal(true); }}>
+    await waitFor(element(by.id('charge-button'))).toBeVisible().withTimeout(2000);
+
+    // Also check if it's tappable
+    await element(by.id('charge-button')).tap();
+
+    // After tapping charge, the payment modal should appear.
+    // The payment modal's title is "Payment".
+    await expect(element(by.text('Payment'))).toBeVisible();
+  });
 });
