@@ -5,6 +5,7 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SharedDataStore from './SharedDataStore';
+import NetworkDiagnosticsService from './NetworkDiagnosticsService';
 import { Business } from '../types';
 import API_CONFIG from '../config/api';
 
@@ -68,6 +69,47 @@ class RestaurantDataService {
   }
 
   /**
+   * Retry API call with exponential backoff
+   */
+  private async retryAPICall<T>(
+    apiCall: () => Promise<T>,
+    maxRetries: number = API_CONFIG.RETRY_ATTEMPTS,
+    baseDelay: number = API_CONFIG.RETRY_DELAY
+  ): Promise<T> {
+    let lastError: Error | null = null;
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`🔄 API call attempt ${attempt}/${maxRetries}`);
+        const result = await apiCall();
+        if (attempt > 1) {
+          console.log(`✅ API call succeeded on attempt ${attempt}`);
+        }
+        return result;
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error('Unknown error');
+        console.log(`❌ API call attempt ${attempt} failed:`, lastError.message);
+        
+        // Don't retry on timeout errors - they indicate longer network issues
+        if (lastError.name === 'AbortError') {
+          console.log('⏱️ Timeout error detected, skipping remaining retries');
+          break;
+        }
+        
+        // Don't wait after the last attempt
+        if (attempt < maxRetries) {
+          const delay = baseDelay * Math.pow(2, attempt - 1); // Exponential backoff
+          console.log(`⏳ Waiting ${delay}ms before retry...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
+      }
+    }
+    
+    console.error(`❌ All ${maxRetries} API call attempts failed`);
+    throw lastError || new Error('All retry attempts failed');
+  }
+
+  /**
    * Initialize service with current restaurant ID
    */
   async initialize(restaurantId: string): Promise<void> {
@@ -76,78 +118,116 @@ class RestaurantDataService {
   }
 
   /**
-   * Get all restaurants for a platform owner
+   * Get all restaurants for a platform owner with comprehensive network diagnostics
    */
   async getPlatformRestaurants(platformOwnerId: string): Promise<RestaurantData[]> {
     try {
       console.log('📊 Getting restaurants for platform:', platformOwnerId);
       
-      // FIRST: Try to get from real backend API
-      try {
-        const response = await fetch(`${API_CONFIG.BASE_URL}/api/v1/platform/restaurants/${platformOwnerId}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
-          console.log(`✅ Got ${data.restaurants?.length || 0} restaurants from backend API`);
-          console.log('🔗 Data source:', data.source);
-          console.log('🔍 Response data structure:', typeof data, data);
+      // FIRST: Perform network diagnostics to identify any connectivity issues
+      const networkDiagnostics = NetworkDiagnosticsService.getInstance();
+      const diagnostics = await networkDiagnostics.performFullNetworkDiagnostics();
+      
+      console.log('🔍 Network diagnostics results:', {
+        isConnected: diagnostics.isConnected,
+        connectionType: diagnostics.connectionType,
+        apiServerReachable: diagnostics.apiServerReachable,
+        specificEndpointReachable: diagnostics.specificEndpointReachable,
+        latency: diagnostics.latency,
+        error: diagnostics.error
+      });
+      
+      // If network issues detected, show user-friendly error dialog
+      if (!diagnostics.apiServerReachable || !diagnostics.specificEndpointReachable) {
+        console.log('⚠️ Network connectivity issues detected, showing error dialog...');
+        await networkDiagnostics.showNetworkErrorDialog(diagnostics);
+      }
+      
+      // SECOND: Try to get from real backend API with enhanced error handling and retry logic
+      if (diagnostics.apiServerReachable && diagnostics.specificEndpointReachable) {
+        try {
+          console.log('🌐 Attempting API call with network confirmed available...');
           
-          if (data && data.restaurants && Array.isArray(data.restaurants)) {
-            // Convert backend format to RestaurantData format
-            const restaurants: RestaurantData[] = data.restaurants.map((r: any) => ({
-              id: r.id,
-              name: r.name,
-              displayName: r.displayName || r.name,
-              businessType: r.businessType || 'restaurant',
-              address: r.address,
-              phone: r.phone,
-              email: r.email,
-              website: r.website,
-              vatNumber: r.vatNumber,
-              registrationNumber: r.registrationNumber,
-              platformOwnerId: r.platformOwnerId,
-              ownerId: r.ownerId,
-              subscriptionTier: r.subscriptionTier,
-              currency: r.currency,
-              monthlyRevenue: r.monthlyRevenue || 0,
-              commissionRate: r.commissionRate || 2.5,
-              isActive: r.isActive,
-              onboardingCompleted: r.onboardingCompleted,
-              joinedDate: new Date(r.joinedDate),
-              lastActivity: new Date(r.lastActivity),
-              timezone: r.timezone,
-              theme: r.theme,
-              primaryColor: r.primaryColor,
-              todayTransactions: r.todayTransactions || 0,
-              todayRevenue: r.todayRevenue || 0,
-              activeOrders: r.activeOrders || 0,
-              averageOrderValue: r.averageOrderValue || 0,
-            }));
+          // Use retry mechanism for robust API calls
+          const apiResult = await this.retryAPICall(async () => {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.TIMEOUT);
             
-            return restaurants;
-          } else {
-            console.error('❌ Invalid API response structure - data.restaurants is not an array:', {
-              hasData: !!data,
-              hasRestaurants: !!data?.restaurants,
-              restaurantsType: typeof data?.restaurants,
-              isArray: Array.isArray(data?.restaurants),
-              data: data
+            const response = await fetch(`${API_CONFIG.BASE_URL}/api/v1/platform/restaurants/${platformOwnerId}`, {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              signal: controller.signal,
             });
+            
+            clearTimeout(timeoutId);
+            
+            if (!response.ok) {
+              throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const data = await response.json();
+            
+            if (!data || !data.restaurants || !Array.isArray(data.restaurants)) {
+              throw new Error('Invalid API response structure - data.restaurants is not an array');
+            }
+            
+            return data;
+          });
+          
+          console.log(`✅ Got ${apiResult.restaurants?.length || 0} restaurants from backend API`);
+          console.log('🔗 Data source:', apiResult.source);
+          console.log('🔍 Response data structure:', typeof apiResult, apiResult);
+          
+          // Convert backend format to RestaurantData format
+          const restaurants: RestaurantData[] = apiResult.restaurants.map((r: any) => ({
+            id: r.id,
+            name: r.name,
+            displayName: r.displayName || r.name,
+            businessType: r.businessType || 'restaurant',
+            address: r.address,
+            phone: r.phone,
+            email: r.email,
+            website: r.website,
+            vatNumber: r.vatNumber,
+            registrationNumber: r.registrationNumber,
+            platformOwnerId: r.platformOwnerId,
+            ownerId: r.ownerId,
+            subscriptionTier: r.subscriptionTier,
+            currency: r.currency,
+            monthlyRevenue: r.monthlyRevenue || 0,
+            commissionRate: r.commissionRate || 2.5,
+            isActive: r.isActive,
+            onboardingCompleted: r.onboardingCompleted,
+            joinedDate: new Date(r.joinedDate),
+            lastActivity: new Date(r.lastActivity),
+            timezone: r.timezone,
+            theme: r.theme,
+            primaryColor: r.primaryColor,
+            todayTransactions: r.todayTransactions || 0,
+            todayRevenue: r.todayRevenue || 0,
+            activeOrders: r.activeOrders || 0,
+            averageOrderValue: r.averageOrderValue || 0,
+          }));
+          
+          console.log('✅ Successfully retrieved platform restaurants from API with retry mechanism');
+          return restaurants;
+        } catch (apiError) {
+          console.error('⚠️ Backend API call failed after all retries:', {
+            error: apiError,
+            message: apiError instanceof Error ? apiError.message : 'Unknown error',
+            url: `${API_CONFIG.BASE_URL}/api/v1/platform/restaurants/${platformOwnerId}`,
+            errorName: apiError instanceof Error ? apiError.name : 'Unknown'
+          });
+          
+          // If it's a timeout error, provide specific feedback
+          if (apiError instanceof Error && apiError.name === 'AbortError') {
+            console.log('⏱️ API requests timed out after', API_CONFIG.TIMEOUT, 'ms per attempt');
           }
-        } else {
-          console.log('⚠️ Backend API response not ok:', response.status);
         }
-      } catch (apiError) {
-        console.error('⚠️ Backend API error, falling back to local storage:', {
-          error: apiError,
-          message: apiError instanceof Error ? apiError.message : 'Unknown error',
-          url: `${API_CONFIG.BASE_URL}/api/v1/platform/restaurants/${platformOwnerId}`
-        });
+      } else {
+        console.log('🚫 Skipping API call due to network connectivity issues');
       }
       
       // FALLBACK: Get from shared data store (local storage)
