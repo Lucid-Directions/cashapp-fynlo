@@ -715,7 +715,6 @@ const POSScreen: React.FC = () => {
             />
           </View>
         </View>
-      </View>
 
       {/* Full Width Menu */}
       <View style={styles.fullWidthPanel}>
