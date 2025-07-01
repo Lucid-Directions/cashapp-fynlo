@@ -884,7 +884,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 120, // Add bottom padding to account for fixed footer
+    paddingBottom: 140, // Add bottom padding to account for absolute positioned footer (16+16+32+padding)
   },
   section: {
     backgroundColor: Colors.white,
@@ -1161,6 +1161,10 @@ const styles = StyleSheet.create({
     marginLeft: 36,
   },
   footer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
     backgroundColor: Colors.white,
     paddingHorizontal: 16,
     paddingVertical: 16,
