@@ -8,14 +8,13 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
-  TextInput,
   RefreshControl,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useAuth } from '../../contexts/AuthContext';
-import SimpleTextInput from '../../components/inputs/SimpleTextInput';
+import { SimpleTextInput } from '../../components/inputs';
 
 // Clover POS Color Scheme
 const Colors = {
@@ -97,11 +96,13 @@ const RestaurantsScreen: React.FC = () => {
           <Icon name="search" size={20} color={Colors.mediumGray} />
           <SimpleTextInput
             value={searchQuery}
-            onValueChange={setSearchQuery}
+            onChangeText={setSearchQuery} // Changed from onValueChange
             placeholder="Search restaurants..."
-            style={styles.searchInput}
-            clearButtonMode="while-editing"
-            returnKeyType="search"
+            // style={styles.searchInput} // Removed direct style, flex/marginLeft to containerStyle if needed
+            containerStyle={{ flex: 1, marginLeft: 8 }} // Extracted flex & marginLeft
+            // fontSize & color from styles.searchInput should be handled by SimpleTextInput's theme
+            clearButtonMode="while-editing" // This is a valid TextInput prop
+            returnKeyType="search" // This is a valid TextInput prop
           />
         </View>
         

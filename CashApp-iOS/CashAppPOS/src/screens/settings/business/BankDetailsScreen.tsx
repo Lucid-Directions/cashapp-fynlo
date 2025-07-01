@@ -7,13 +7,13 @@ import {
   SafeAreaView,
   TouchableOpacity,
   ScrollView,
-  TextInput,
   Alert,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
+import { SimpleTextInput } from '../../../components/inputs'; // Assuming SimpleDecimalInput not needed for now
 import { useAuth } from '../../../contexts/AuthContext';
 import Colors from '../../../constants/Colors';
 
@@ -212,22 +212,21 @@ const BankDetailsScreen: React.FC = () => {
 
           {/* Account Holder Name */}
           <View style={styles.formGroup}>
-            <Text style={styles.formLabel}>Account Holder Name *</Text>
-            <TextInput
-              style={styles.formInput}
+            <SimpleTextInput
+              label="Account Holder Name *"
               placeholder="Enter the name on the bank account"
               value={bankDetails.accountHolderName}
               onChangeText={(text) => setBankDetails({...bankDetails, accountHolderName: text})}
               autoCapitalize="words"
               placeholderTextColor={Colors.darkGray}
+              // containerStyle prop can be used for styles.formGroup if needed for spacing only
             />
           </View>
 
           {/* Bank Name */}
           <View style={styles.formGroup}>
-            <Text style={styles.formLabel}>Bank Name *</Text>
-            <TextInput
-              style={styles.formInput}
+            <SimpleTextInput
+              label="Bank Name *"
               placeholder="e.g., Lloyds Bank, Barclays, HSBC"
               value={bankDetails.bankName}
               onChangeText={(text) => setBankDetails({...bankDetails, bankName: text})}
@@ -238,9 +237,8 @@ const BankDetailsScreen: React.FC = () => {
 
           {/* Account Number */}
           <View style={styles.formGroup}>
-            <Text style={styles.formLabel}>Account Number *</Text>
-            <TextInput
-              style={styles.formInput}
+            <SimpleTextInput
+              label="Account Number *"
               placeholder="8-digit account number"
               value={bankDetails.accountNumber}
               onChangeText={handleAccountNumberChange}
@@ -252,9 +250,8 @@ const BankDetailsScreen: React.FC = () => {
 
           {/* Sort Code */}
           <View style={styles.formGroup}>
-            <Text style={styles.formLabel}>Sort Code *</Text>
-            <TextInput
-              style={styles.formInput}
+            <SimpleTextInput
+              label="Sort Code *"
               placeholder="XX-XX-XX"
               value={bankDetails.sortCode}
               onChangeText={handleSortCodeChange}
@@ -266,9 +263,8 @@ const BankDetailsScreen: React.FC = () => {
 
           {/* IBAN (Optional) */}
           <View style={styles.formGroup}>
-            <Text style={styles.formLabel}>IBAN (Optional)</Text>
-            <TextInput
-              style={styles.formInput}
+            <SimpleTextInput
+              label="IBAN (Optional)"
               placeholder="GB29 LOYD 3099 8812 3456 78"
               value={bankDetails.iban}
               onChangeText={(text) => setBankDetails({...bankDetails, iban: text.toUpperCase()})}
@@ -279,9 +275,8 @@ const BankDetailsScreen: React.FC = () => {
 
           {/* SWIFT Code (Optional) */}
           <View style={styles.formGroup}>
-            <Text style={styles.formLabel}>SWIFT/BIC Code (Optional)</Text>
-            <TextInput
-              style={styles.formInput}
+            <SimpleTextInput
+              label="SWIFT/BIC Code (Optional)"
               placeholder="e.g., LOYDGB2L"
               value={bankDetails.swiftCode}
               onChangeText={(text) => setBankDetails({...bankDetails, swiftCode: text.toUpperCase()})}

@@ -3,7 +3,6 @@ import {
   StyleSheet,
   Text,
   View,
-  TextInput,
   TouchableOpacity,
   Alert,
   KeyboardAvoidingView,
@@ -14,6 +13,7 @@ import {
   Image,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { SimpleTextInput } from '../../components/inputs';
 import { useAuth } from '../../contexts/AuthContext';
 import Logo from '../../components/Logo';
 
@@ -186,50 +186,36 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
 
           {/* Email Input */}
           <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>Email Address</Text>
-            <View style={[styles.inputWrapper, errors.email ? styles.inputError : null]}>
-              <Icon name="email" size={20} color={Colors.mediumGray} />
-              <TextInput
-                style={styles.textInput}
-                value={email}
-                onChangeText={(text) => {
-                  setEmail(text);
-                  if (errors.email) setErrors(prev => ({ ...prev, email: undefined }));
-                }}
-                placeholder="Enter your email"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoCorrect={false}
-                autoComplete="email"
-              />
-            </View>
+            <SimpleTextInput
+              label="Email Address"
+              value={email}
+              onChangeText={(text) => {
+                setEmail(text);
+                if (errors.email) setErrors(prev => ({ ...prev, email: undefined }));
+              }}
+              placeholder="Enter your email"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoCorrect={false}
+              autoComplete="email"
+            />
             {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
           </View>
 
           {/* Password Input */}
           <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>Password</Text>
-            <View style={[styles.inputWrapper, errors.password ? styles.inputError : undefined]}>
-              <Icon name="lock" size={20} color={Colors.mediumGray} />
-              <TextInput
-                style={styles.textInput}
-                value={password}
-                onChangeText={(text) => {
-                  setPassword(text);
-                  if (errors.password) setErrors(prev => ({ ...prev, password: undefined }));
-                }}
-                placeholder="Enter your password"
-                secureTextEntry={!showPassword}
-                autoComplete="password"
-              />
-              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                <Icon 
-                  name={showPassword ? "visibility-off" : "visibility"} 
-                  size={20} 
-                  color={Colors.mediumGray} 
-                />
-              </TouchableOpacity>
-            </View>
+            <SimpleTextInput
+              label="Password"
+              value={password}
+              onChangeText={(text) => {
+                setPassword(text);
+                if (errors.password) setErrors(prev => ({ ...prev, password: undefined }));
+              }}
+              placeholder="Enter your password"
+              secure={!showPassword} // Use 'secure' prop
+              autoComplete="password"
+            />
+            {/* Note: Password visibility toggle icon is removed */}
             {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
           </View>
 

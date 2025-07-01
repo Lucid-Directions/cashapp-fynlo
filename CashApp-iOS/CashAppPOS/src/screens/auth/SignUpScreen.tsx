@@ -3,7 +3,6 @@ import {
   StyleSheet,
   Text,
   View,
-  TextInput,
   TouchableOpacity,
   Alert,
   KeyboardAvoidingView,
@@ -12,6 +11,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import { SimpleTextInput } from '../../components/inputs';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -174,147 +174,114 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
 
       <View style={styles.row}>
         <View style={[styles.inputContainer, { flex: 1, marginRight: 8 }]}>
-          <Text style={styles.inputLabel}>First Name *</Text>
-          <View style={[styles.inputWrapper, errors.firstName && styles.inputError]}>
-            <Icon name="person" size={20} color={Colors.mediumGray} />
-            <TextInput
-              style={styles.textInput}
-              value={firstName}
-              onChangeText={(text) => {
-                setFirstName(text);
-                if (errors.firstName) setErrors(prev => ({ ...prev, firstName: '' }));
-              }}
-              placeholder="John"
-              autoCapitalize="words"
-            />
-          </View>
+          {/* The Icon was previously rendered here, SimpleTextInput might handle icons internally or not at all based on new spec */}
+          <SimpleTextInput
+            label="First Name *"
+            value={firstName}
+            onChangeText={(text) => {
+              setFirstName(text);
+              if (errors.firstName) setErrors(prev => ({ ...prev, firstName: '' }));
+            }}
+            placeholder="John"
+            autoCapitalize="words"
+            // Assuming error state is handled internally by SimpleTextInput if errors.firstName is truthy
+            // containerStyle={{ marginBottom: 0 }} // Retained if styles.inputContainer provides necessary spacing
+          />
           {errors.firstName && <Text style={styles.errorText}>{errors.firstName}</Text>}
         </View>
 
         <View style={[styles.inputContainer, { flex: 1, marginLeft: 8 }]}>
-          <Text style={styles.inputLabel}>Last Name *</Text>
-          <View style={[styles.inputWrapper, errors.lastName && styles.inputError]}>
-            <Icon name="person-outline" size={20} color={Colors.mediumGray} />
-            <TextInput
-              style={styles.textInput}
-              value={lastName}
-              onChangeText={(text) => {
-                setLastName(text);
-                if (errors.lastName) setErrors(prev => ({ ...prev, lastName: '' }));
-              }}
-              placeholder="Smith"
-              autoCapitalize="words"
-            />
-          </View>
+          {/* The Icon was previously rendered here */}
+          <SimpleTextInput
+            label="Last Name *"
+            value={lastName}
+            onChangeText={(text) => {
+              setLastName(text);
+              if (errors.lastName) setErrors(prev => ({ ...prev, lastName: '' }));
+            }}
+            placeholder="Smith"
+            autoCapitalize="words"
+            // containerStyle={{ marginBottom: 0 }}
+          />
           {errors.lastName && <Text style={styles.errorText}>{errors.lastName}</Text>}
         </View>
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.inputLabel}>Email Address *</Text>
-        <View style={[styles.inputWrapper, errors.email && styles.inputError]}>
-          <Icon name="email" size={20} color={Colors.mediumGray} />
-          <TextInput
-            style={styles.textInput}
-            value={email}
-            onChangeText={(text) => {
-              setEmail(text);
-              if (errors.email) setErrors(prev => ({ ...prev, email: '' }));
-            }}
-            placeholder="john@example.com"
-            keyboardType="email-address"
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
-        </View>
+        <SimpleTextInput
+          label="Email Address *"
+          value={email}
+          onChangeText={(text) => {
+            setEmail(text);
+            if (errors.email) setErrors(prev => ({ ...prev, email: '' }));
+          }}
+          placeholder="john@example.com"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          autoCorrect={false}
+        />
         {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.inputLabel}>Phone Number *</Text>
-        <View style={[styles.inputWrapper, errors.phone && styles.inputError]}>
-          <Icon name="phone" size={20} color={Colors.mediumGray} />
-          <TextInput
-            style={styles.textInput}
-            value={phone}
-            onChangeText={(text) => {
-              setPhone(text);
-              if (errors.phone) setErrors(prev => ({ ...prev, phone: '' }));
-            }}
-            placeholder="+44 7700 900123"
-            keyboardType="phone-pad"
-          />
-        </View>
+        <SimpleTextInput
+          label="Phone Number *"
+          value={phone}
+          onChangeText={(text) => {
+            setPhone(text);
+            if (errors.phone) setErrors(prev => ({ ...prev, phone: '' }));
+          }}
+          placeholder="+44 7700 900123"
+          keyboardType="phone-pad"
+        />
         {errors.phone && <Text style={styles.errorText}>{errors.phone}</Text>}
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.inputLabel}>Password *</Text>
-        <View style={[styles.inputWrapper, errors.password && styles.inputError]}>
-          <Icon name="lock" size={20} color={Colors.mediumGray} />
-          <TextInput
-            style={styles.textInput}
-            value={password}
-            onChangeText={(text) => {
-              setPassword(text);
-              if (errors.password) setErrors(prev => ({ ...prev, password: '' }));
-            }}
-            placeholder="At least 8 characters"
-            secureTextEntry={!showPassword}
-          />
-          <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-            <Icon 
-              name={showPassword ? "visibility-off" : "visibility"} 
-              size={20} 
-              color={Colors.mediumGray} 
-            />
-          </TouchableOpacity>
-        </View>
+        <SimpleTextInput
+          label="Password *"
+          value={password}
+          onChangeText={(text) => {
+            setPassword(text);
+            if (errors.password) setErrors(prev => ({ ...prev, password: '' }));
+          }}
+          placeholder="At least 8 characters"
+          secure={!showPassword} // Use 'secure' prop
+        />
+        {/* Note: Password visibility toggle icon is removed as SimpleTextInput spec does not include rightIcon */}
+        {/* Consider adding a separate button for visibility if required by UX and not handled by SimpleTextInput */}
         {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.inputLabel}>Confirm Password *</Text>
-        <View style={[styles.inputWrapper, errors.confirmPassword && styles.inputError]}>
-          <Icon name="lock-outline" size={20} color={Colors.mediumGray} />
-          <TextInput
-            style={styles.textInput}
-            value={confirmPassword}
-            onChangeText={(text) => {
-              setConfirmPassword(text);
-              if (errors.confirmPassword) setErrors(prev => ({ ...prev, confirmPassword: '' }));
-            }}
-            placeholder="Repeat your password"
-            secureTextEntry={!showConfirmPassword}
-          />
-          <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
-            <Icon 
-              name={showConfirmPassword ? "visibility-off" : "visibility"} 
-              size={20} 
-              color={Colors.mediumGray} 
-            />
-          </TouchableOpacity>
-        </View>
+        <SimpleTextInput
+          label="Confirm Password *"
+          value={confirmPassword}
+          onChangeText={(text) => {
+            setConfirmPassword(text);
+            if (errors.confirmPassword) setErrors(prev => ({ ...prev, confirmPassword: '' }));
+          }}
+          placeholder="Repeat your password"
+          secure={!showConfirmPassword} // Use 'secure' prop
+        />
+        {/* Note: Password visibility toggle icon is removed */}
         {errors.confirmPassword && <Text style={styles.errorText}>{errors.confirmPassword}</Text>}
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.inputLabel}>4-Digit PIN *</Text>
-        <View style={[styles.inputWrapper, errors.pin && styles.inputError]}>
-          <Icon name="pin" size={20} color={Colors.mediumGray} />
-          <TextInput
-            style={styles.textInput}
-            value={pin}
-            onChangeText={(text) => {
-              setPin(text.replace(/[^0-9]/g, '').slice(0, 4));
-              if (errors.pin) setErrors(prev => ({ ...prev, pin: '' }));
-            }}
-            placeholder="1234"
-            keyboardType="numeric"
-            maxLength={4}
-            secureTextEntry
-          />
-        </View>
+        <SimpleTextInput
+          label="4-Digit PIN *"
+          value={pin}
+          onChangeText={(text) => {
+            setPin(text.replace(/[^0-9]/g, '').slice(0, 4));
+            if (errors.pin) setErrors(prev => ({ ...prev, pin: '' }));
+          }}
+          placeholder="1234"
+          keyboardType="numeric"
+          maxLength={4}
+          secure // Use 'secure' prop
+        />
+        {/* helpText was originally a separate Text component, keeping it that way. */}
         <Text style={styles.helpText}>Used for quick access and secure transactions</Text>
         {errors.pin && <Text style={styles.errorText}>{errors.pin}</Text>}
       </View>
@@ -327,20 +294,16 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
       <Text style={styles.stepDescription}>Set up your business profile</Text>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.inputLabel}>Business Name *</Text>
-        <View style={[styles.inputWrapper, errors.businessName && styles.inputError]}>
-          <Icon name="business" size={20} color={Colors.mediumGray} />
-          <TextInput
-            style={styles.textInput}
-            value={businessName}
-            onChangeText={(text) => {
-              setBusinessName(text);
-              if (errors.businessName) setErrors(prev => ({ ...prev, businessName: '' }));
-            }}
-            placeholder="Your Business Name"
-            autoCapitalize="words"
-          />
-        </View>
+        <SimpleTextInput
+          label="Business Name *"
+          value={businessName}
+          onChangeText={(text) => {
+            setBusinessName(text);
+            if (errors.businessName) setErrors(prev => ({ ...prev, businessName: '' }));
+          }}
+          placeholder="Your Business Name"
+          autoCapitalize="words"
+        />
         {errors.businessName && <Text style={styles.errorText}>{errors.businessName}</Text>}
       </View>
 
@@ -361,70 +324,56 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.inputLabel}>Business Address *</Text>
-        <View style={[styles.inputWrapper, errors.businessAddress && styles.inputError]}>
-          <Icon name="location-on" size={20} color={Colors.mediumGray} />
-          <TextInput
-            style={[styles.textInput, styles.textArea]}
-            value={businessAddress}
-            onChangeText={(text) => {
-              setBusinessAddress(text);
-              if (errors.businessAddress) setErrors(prev => ({ ...prev, businessAddress: '' }));
-            }}
-            placeholder="123 High Street, London, SW1A 1AA"
-            multiline
-            numberOfLines={2}
-          />
-        </View>
+        <SimpleTextInput
+          label="Business Address *"
+          value={businessAddress}
+          onChangeText={(text) => {
+            setBusinessAddress(text);
+            if (errors.businessAddress) setErrors(prev => ({ ...prev, businessAddress: '' }));
+          }}
+          placeholder="123 High Street, London, SW1A 1AA"
+          multiline
+          numberOfLines={2}
+        />
         {errors.businessAddress && <Text style={styles.errorText}>{errors.businessAddress}</Text>}
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.inputLabel}>Business Phone *</Text>
-        <View style={[styles.inputWrapper, errors.businessPhone && styles.inputError]}>
-          <Icon name="phone-in-talk" size={20} color={Colors.mediumGray} />
-          <TextInput
-            style={styles.textInput}
-            value={businessPhone}
-            onChangeText={(text) => {
-              setBusinessPhone(text);
-              if (errors.businessPhone) setErrors(prev => ({ ...prev, businessPhone: '' }));
-            }}
-            placeholder="+44 20 7946 0958"
-            keyboardType="phone-pad"
-          />
-        </View>
+        <SimpleTextInput
+          label="Business Phone *"
+          value={businessPhone}
+          onChangeText={(text) => {
+            setBusinessPhone(text);
+            if (errors.businessPhone) setErrors(prev => ({ ...prev, businessPhone: '' }));
+          }}
+          placeholder="+44 20 7946 0958"
+          keyboardType="phone-pad"
+        />
         {errors.businessPhone && <Text style={styles.errorText}>{errors.businessPhone}</Text>}
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.inputLabel}>Business Email</Text>
-        <View style={styles.inputWrapper}>
-          <Icon name="alternate-email" size={20} color={Colors.mediumGray} />
-          <TextInput
-            style={styles.textInput}
-            value={businessEmail}
-            onChangeText={setBusinessEmail}
-            placeholder="contact@yourbusiness.com (optional)"
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
-        </View>
+        <SimpleTextInput
+          label="Business Email"
+          value={businessEmail}
+          onChangeText={setBusinessEmail}
+          placeholder="contact@yourbusiness.com (optional)"
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+        {/* helpText was originally a separate Text component, keeping it that way. */}
         <Text style={styles.helpText}>Leave blank to use your personal email</Text>
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.inputLabel}>VAT Number</Text>
-        <View style={styles.inputWrapper}>
-          <Icon name="receipt" size={20} color={Colors.mediumGray} />
-          <TextInput
-            style={styles.textInput}
-            value={vatNumber}
-            onChangeText={setVatNumber}
-            placeholder="GB123456789 (optional)"
-            autoCapitalize="characters"
-          />
-        </View>
+        <SimpleTextInput
+          label="VAT Number"
+          value={vatNumber}
+          onChangeText={setVatNumber}
+          placeholder="GB123456789 (optional)"
+          autoCapitalize="characters"
+        />
+        {/* helpText was originally a separate Text component, keeping it that way. */}
         <Text style={styles.helpText}>Required for VAT-registered businesses</Text>
       </View>
 

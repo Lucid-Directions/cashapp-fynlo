@@ -4,13 +4,13 @@ import {
   Text,
   View,
   ScrollView,
-  TextInput,
   TouchableOpacity,
   Alert,
   Switch,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { SettingsHeader, SettingsSection, SettingsCard, ToggleSwitch } from '../../../components/settings';
+import { SimpleTextInput, SimpleDecimalInput } from '../../../components/inputs';
 import useSettingsStore from '../../../store/useSettingsStore';
 
 // Clover POS Color Scheme
@@ -174,12 +174,15 @@ const TaxConfigurationScreen: React.FC = () => {
                 iconColor={Colors.secondary}
               >
                 <View style={styles.rateInputContainer}>
-                  <TextInput
-                    style={styles.rateInput}
-                    value={formData.vatRate.toString()}
-                    onChangeText={handleVatRateChange}
-                    keyboardType="numeric"
-                    maxLength={5}
+                  <SimpleDecimalInput
+                    // label="VAT Rate" // Label is part of SettingsCard title
+                    value={formData.vatRate} // Pass number directly
+                    onValueChange={(value) => handleVatRateChange(value.toString())} // onValueChange expects number, handleVatRateChange expects string
+                    keyboardType="numeric" // Default for SimpleDecimalInput
+                    maxLength={5} // Max length for digits before decimal, or total?
+                    placeholder="0.00" // Added placeholder
+                    // containerStyle={{ flex: 1 }} // To allow input to take space before %
+                    // inputStyle props for text align if supported, e.g. textAlign: 'right'
                   />
                   <Text style={styles.percentSymbol}>%</Text>
                 </View>
@@ -273,12 +276,13 @@ const TaxConfigurationScreen: React.FC = () => {
 
             {showAddExemptItem ? (
               <View style={styles.addExemptItemContainer}>
-                <TextInput
-                  style={styles.addExemptItemInput}
+                <SimpleTextInput
+                  // No label needed here as it's a direct input field
                   value={newExemptItem}
                   onChangeText={setNewExemptItem}
                   placeholder="Enter item name"
                   autoFocus
+                  containerStyle={{ flex: 1 }} // To take available space
                 />
                 <TouchableOpacity onPress={addExemptItem} style={styles.addButton}>
                   <Icon name="add" size={20} color={Colors.primary} />

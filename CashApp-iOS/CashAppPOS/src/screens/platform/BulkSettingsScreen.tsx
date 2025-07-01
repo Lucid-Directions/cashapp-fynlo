@@ -7,7 +7,6 @@ import {
   RefreshControl,
   TouchableOpacity,
   Modal,
-  TextInput,
   Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -18,7 +17,7 @@ import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { theme } from '../../design-system/theme';
 import PlatformService, { PlatformSetting } from '../../services/PlatformService';
-import SimpleTextInput from '../../components/inputs/SimpleTextInput';
+import { SimpleTextInput } from '../../components/inputs';
 
 interface BulkUpdateItem {
   config_key: string;
@@ -469,11 +468,11 @@ const BulkSettingsScreen: React.FC = () => {
               <SimpleTextInput
                 label="Change Reason (Required)"
                 value={changeReason}
-                onValueChange={setChangeReason}
+                onChangeText={setChangeReason} // Changed from onValueChange
                 placeholder="Describe the reason for these changes..."
                 multiline={true}
                 numberOfLines={3}
-                style={styles.reasonInput}
+                // style prop (styles.reasonInput) removed, internal styling will apply
               />
             </Card>
 
@@ -523,14 +522,22 @@ const BulkSettingsScreen: React.FC = () => {
               <SimpleTextInput
                 label="New Value:"
                 value={formatValue(editingItem.new_value)}
-                onValueChange={(text) => {
-                  const newValue = parseValue(text, editingItem.current_value);
-                  updateBulkUpdateItem(editingItem.config_key, newValue);
-                  setEditingItem({ ...editingItem, new_value: newValue });
+                onChangeText={(text) => {
+                  const parsedNewValue = parseValue(text, editingItem.current_value);
+                  // Update the local editingItem state immediately for responsiveness
+                  setEditingItem(prevItem => {
+                    if (prevItem) {
+                      return { ...prevItem, new_value: parsedNewValue };
+                    }
+                    return null;
+                  });
+                  // Then, call the function that also handles validation
+                  updateBulkUpdateItem(editingItem.config_key, parsedNewValue);
                 }}
                 multiline={true}
                 placeholder="Enter new value..."
-                style={styles.editInput}
+                numberOfLines={4} // Approximating minHeight from styles.editInput
+                // style prop (styles.editInput) removed
               />
 
               {editingItem.validation_error && (

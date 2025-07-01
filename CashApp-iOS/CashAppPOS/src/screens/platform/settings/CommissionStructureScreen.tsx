@@ -13,8 +13,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme, useThemedStyles } from '../../../design-system/ThemeProvider';
-import SimpleTextInput from '../../../components/inputs/SimpleTextInput';
-import SimpleDecimalInput from '../../../components/inputs/SimpleDecimalInput';
+import { SimpleTextInput, SimpleDecimalInput } from '../../../components/inputs';
 import PlatformService from '../../../services/PlatformService';
 
 const PlansAndPricingScreen: React.FC = () => {
@@ -194,30 +193,30 @@ const PlansAndPricingScreen: React.FC = () => {
         <SimpleTextInput
           label="Plan Name"
           value={planName}
-          onValueChange={(value) => setConfig(prev => ({ ...prev, [nameKey]: value }))}
+          onChangeText={(value) => setConfig(prev => ({ ...prev, [nameKey]: value }))} // Changed to onChangeText
           placeholder="Enter plan name"
-          style={styles.planNameInput}
+          containerStyle={styles.planNameInput} // Use containerStyle for layout
         />
         <View style={styles.feeContainer}>
           <SimpleDecimalInput
             label="Monthly Fee"
             value={monthlyFee}
-            onValueChange={(value) => setConfig(prev => ({ ...prev, [feeKey]: value }))}
+            onValueChange={(value) => setConfig(prev => ({ ...prev, [feeKey]: value }))} // Correct for SimpleDecimalInput
             placeholder="0.00"
             suffix="£"
             maxValue={9999.99}
-            style={styles.feeInput}
+            containerStyle={styles.feeInput} // Use containerStyle for layout
           />
         </View>
       </View>
       <SimpleTextInput
         label="Plan Description"
         value={description}
-        onValueChange={(value) => setConfig(prev => ({ ...prev, [descriptionKey]: value }))}
+        onChangeText={(value) => setConfig(prev => ({ ...prev, [descriptionKey]: value }))} // Changed to onChangeText
         placeholder="Describe this plan..."
         multiline={true}
         numberOfLines={2}
-        style={styles.descriptionInput}
+        containerStyle={styles.descriptionInput} // Use containerStyle for layout
       />
     </View>
   );
@@ -245,7 +244,7 @@ const PlansAndPricingScreen: React.FC = () => {
             suffix={unit}
             maxValue={unit === '%' ? 100 : unit === 'days' ? 365 : 9999.99}
             decimalPlaces={unit === '%' ? 1 : unit === 'days' ? 0 : 2}
-            style={{ marginBottom: 0 }}
+            containerStyle={{ marginBottom: 0 }} // Changed to containerStyle
           />
         </View>
       )}

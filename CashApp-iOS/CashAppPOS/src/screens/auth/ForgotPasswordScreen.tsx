@@ -6,12 +6,12 @@ import {
   StatusBar,
   SafeAreaView,
   TouchableOpacity,
-  TextInput,
   Alert,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { SimpleTextInput } from '../../components/inputs';
 import { useNavigation } from '@react-navigation/native';
 
 const Colors = {
@@ -90,21 +90,21 @@ const ForgotPasswordScreen: React.FC = () => {
           </Text>
 
           {/* Email Input */}
-          <View style={styles.inputContainer}>
-            <Icon name="email" size={20} color={Colors.lightText} style={styles.inputIcon} />
-            <TextInput
-              style={styles.textInput}
-              placeholder="Email Address"
-              placeholderTextColor={Colors.lightText}
-              value={email}
-              onChangeText={setEmail}
-              autoCapitalize="none"
-              autoCorrect={false}
-              keyboardType="email-address"
-              returnKeyType="done"
-              onSubmitEditing={handleResetPassword}
-            />
-          </View>
+          <SimpleTextInput
+            label="Email Address"
+            placeholder="Enter your email address"
+            placeholderTextColor={Colors.lightText} // placeholderTextColor is a valid TextInput prop
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            autoCorrect={false}
+            keyboardType="email-address"
+            returnKeyType="done"
+            onSubmitEditing={handleResetPassword}
+            containerStyle={styles.inputContainer}
+          />
+          {/* Icon removed, SimpleTextInput does not specify an icon prop */}
+          {/* inputProps removed, styling is internal to SimpleTextInput */}
 
           {/* Reset Button */}
           <TouchableOpacity
