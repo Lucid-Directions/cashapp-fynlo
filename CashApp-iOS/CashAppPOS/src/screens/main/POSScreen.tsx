@@ -33,6 +33,8 @@ import SumUpTestComponent from '../../components/payment/SumUpTestComponent';
 import SumUpCompatibilityService from '../../services/SumUpCompatibilityService';
 import SharedDataStore from '../../services/SharedDataStore';
 import SimpleTextInput from '../../components/inputs/SimpleTextInput';
+import CartIcon from '../../components/cart/CartIcon';
+import CustomersService from '../../services/CustomersService';
 
 // Get screen dimensions
 const { width: screenWidth } = Dimensions.get('window');
@@ -162,6 +164,7 @@ const POSScreen: React.FC = () => {
   const styles = useThemedStyles(createStyles);
   
   const [customerName, setCustomerName] = useState('');
+  const [customerEmail, setCustomerEmail] = useState('');
   const [showCartModal, setShowCartModal] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('sumup');
   const [serviceChargeConfig, setServiceChargeConfig] = useState({
@@ -362,7 +365,20 @@ const POSScreen: React.FC = () => {
     }
   };
 
-  const processPayment = () => {
+  const processPayment = async () => {
+    // Upsert customer before payment if we have both name & valid email
+    const emailRegex = /^\S+@\S+\.[A-Za-z]{2,}$/;
+    if (customerEmail && emailRegex.test(customerEmail)) {
+      try {
+        await CustomersService.saveCustomer({
+          name: customerName?.trim() || undefined,
+          email: customerEmail.trim(),
+        });
+      } catch (err) {
+        console.warn('Could not save customer info', err);
+      }
+    }
+
     const totalAmount = calculateCartTotal();
     
     // Close payment modal first
@@ -714,7 +730,7 @@ const POSScreen: React.FC = () => {
             {IS_DEV && FLAGS.SHOW_DEV_MENU && (
               <TouchableOpacity
                 testID="dev-mode-toggle-button"
-                style={[styles.cartButton, { marginRight: 8 }]}
+                style={[styles.devButton, { marginRight: 8 }]}
                 onPress={() => {
                   setShowSumUpTest(!showSumUpTest);
                   console.log('🧪 SumUp Test toggled:', !showSumUpTest);
@@ -724,18 +740,11 @@ const POSScreen: React.FC = () => {
               </TouchableOpacity>
             )}
             
-            <TouchableOpacity
-              style={styles.cartButton}
+            <CartIcon
+              count={cartItemCount()}
               onPress={() => setShowCartModal(true)}
-              testID="shopping-cart-button" // Added testID
-            >
-              <Icon name="shopping-cart" size={24} color={theme.colors.white} />
-              {cartItemCount() > 0 && (
-                <View style={styles.cartBadge}>
-                  <Text style={styles.cartBadgeText}>{cartItemCount()}</Text>
-                </View>
-              )}
-            </TouchableOpacity>
+              testID="shopping-cart-button"
+            />
           </View>
         </View>
       </View>
@@ -947,6 +956,16 @@ const POSScreen: React.FC = () => {
                 style={styles.input}
                 clearButtonMode="while-editing"
                 autoCapitalize="words"
+              />
+
+              <SimpleTextInput
+                value={customerEmail}
+                onValueChange={setCustomerEmail}
+                placeholder="Customer e-mail (optional)"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                style={styles.input}
+                clearButtonMode="while-editing"
               />
               
               {/* Order Summary */}
@@ -1192,24 +1211,10 @@ const createStyles = (theme: any) => StyleSheet.create({
     borderRadius: 8,
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
   },
-  cartButton: {
-    position: 'relative',
-  },
-  cartBadge: {
-    position: 'absolute',
-    top: -4,
-    right: -4,
-    backgroundColor: theme.colors.warning,
-    borderRadius: 10,
-    minWidth: 20,
-    height: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  cartBadgeText: {
-    color: theme.colors.white,
-    fontSize: 12,
-    fontWeight: 'bold',
+  devButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
   },
   mainContent: {
     flex: 1,
