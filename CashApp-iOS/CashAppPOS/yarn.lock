@@ -1340,7 +1340,7 @@
     prompts "^2.4.0"
     semver "^7.5.2"
 
-"@react-native-community/datetimepicker@^8.4.1":
+"@react-native-community/datetimepicker@^8.4.2":
   version "8.4.2"
   resolved "https://registry.npmjs.org/@react-native-community/datetimepicker/-/datetimepicker-8.4.2.tgz"
   integrity sha512-V/s+foBfjlWGV8MKdMhxugq0SPMtYqUEYlf+sMrKUUm5Gx3pA9Qoum2ZQUqBfI4A8kgaEPIGyG/YsNX7ycnNSA==
@@ -1631,41 +1631,6 @@
   version "2.46.0"
   resolved "https://registry.npmjs.org/@sentry/cli-darwin/-/cli-darwin-2.46.0.tgz"
   integrity sha512-5Ll+e5KAdIk9OYiZO8aifMBRNWmNyPjSqdjaHlBC1Qfh7pE3b1zyzoHlsUazG0bv0sNrSGea8e7kF5wIO1hvyg==
-
-"@sentry/cli-linux-arm@2.46.0":
-  version "2.46.0"
-  resolved "https://registry.npmjs.org/@sentry/cli-linux-arm/-/cli-linux-arm-2.46.0.tgz"
-  integrity sha512-WRrLNq/TEX/TNJkGqq6Ad0tGyapd5dwlxtsPbVBrIdryuL1mA7VCBoaHBr3kcwJLsgBHFH0lmkMee2ubNZZdkg==
-
-"@sentry/cli-linux-arm64@2.46.0":
-  version "2.46.0"
-  resolved "https://registry.npmjs.org/@sentry/cli-linux-arm64/-/cli-linux-arm64-2.46.0.tgz"
-  integrity sha512-OEJN8yAjI9y5B4telyqzu27Hi3+S4T8VxZCqJz1+z2Mp0Q/MZ622AahVPpcrVq/5bxrnlZR16+lKh8L1QwNFPg==
-
-"@sentry/cli-linux-i686@2.46.0":
-  version "2.46.0"
-  resolved "https://registry.npmjs.org/@sentry/cli-linux-i686/-/cli-linux-i686-2.46.0.tgz"
-  integrity sha512-xko3/BVa4LX8EmRxVOCipV+PwfcK5Xs8lP6lgF+7NeuAHMNL4DqF6iV9rrN8gkGUHCUI9RXSve37uuZnFy55+Q==
-
-"@sentry/cli-linux-x64@2.46.0":
-  version "2.46.0"
-  resolved "https://registry.npmjs.org/@sentry/cli-linux-x64/-/cli-linux-x64-2.46.0.tgz"
-  integrity sha512-hJ1g5UEboYcOuRia96LxjJ0jhnmk8EWLDvlGnXLnYHkwy3ree/L7sNgdp/QsY8Z4j2PGO5f22Va+UDhSjhzlfQ==
-
-"@sentry/cli-win32-arm64@2.46.0":
-  version "2.46.0"
-  resolved "https://registry.npmjs.org/@sentry/cli-win32-arm64/-/cli-win32-arm64-2.46.0.tgz"
-  integrity sha512-mN7cpPoCv2VExFRGHt+IoK11yx4pM4ADZQGEso5BAUZ5duViXB2WrAXCLd8DrwMnP0OE978a7N8OtzsFqjkbNA==
-
-"@sentry/cli-win32-i686@2.46.0":
-  version "2.46.0"
-  resolved "https://registry.npmjs.org/@sentry/cli-win32-i686/-/cli-win32-i686-2.46.0.tgz"
-  integrity sha512-6F73AUE3lm71BISUO19OmlnkFD5WVe4/wA1YivtLZTc1RU3eUYJLYxhDfaH3P77+ycDppQ2yCgemLRaA4A8mNQ==
-
-"@sentry/cli-win32-x64@2.46.0":
-  version "2.46.0"
-  resolved "https://registry.npmjs.org/@sentry/cli-win32-x64/-/cli-win32-x64-2.46.0.tgz"
-  integrity sha512-yuGVcfepnNL84LGA0GjHzdMIcOzMe0bjPhq/rwPsPN+zu11N+nPR2wV2Bum4U0eQdqYH3iAlMdL5/BEQfuLJww==
 
 "@sentry/cli@2.46.0":
   version "2.46.0"
@@ -4964,6 +4929,11 @@ lru-cache@^5.1.1:
   dependencies:
     yallist "^3.0.2"
 
+lucide-react-native@^0.525.0:
+  version "0.525.0"
+  resolved "https://registry.npmjs.org/lucide-react-native/-/lucide-react-native-0.525.0.tgz"
+  integrity sha512-f9iIdoZJCDIXhzAMQCNgaiWdiq42ls5ieXvVXwlNHN1q7c5zC1n1U0yOVu6J0oNSF8zvYqY3pK3UPOX+T2YpIQ==
+
 make-dir@^2.0.0:
   version "2.1.0"
   resolved "https://registry.npmjs.org/make-dir/-/make-dir-2.1.0.tgz"
@@ -6308,11 +6278,6 @@ react-native-spacing-system@^2.0.0-rc.0:
   version "2.0.0-rc.0"
   resolved "https://registry.npmjs.org/react-native-spacing-system/-/react-native-spacing-system-2.0.0-rc.0.tgz"
   integrity sha512-mZpFnO0iFzw4rdwE5DGieGDJ0/FWPzKIgVGADoy+JaO7ERAEri9T7X+cpw8mYTX5zrVplTINx411sOKrlere+w==
-
-react-native-square-in-app-payments@^1.7.6:
-  version "1.7.6"
-  resolved "https://registry.npmjs.org/react-native-square-in-app-payments/-/react-native-square-in-app-payments-1.7.6.tgz"
-  integrity sha512-5UPXwbnCtkAJUcpgDl2s68Bwh+Yhm+LGeNgW17Ywzhxla7pGk71mTuSS/Wu+KbPltbIRK8zDtB39PO9ZO3NA6A==
 
 react-native-svg@^15.2.0:
   version "15.12.0"
