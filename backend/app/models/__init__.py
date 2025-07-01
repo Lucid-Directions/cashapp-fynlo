@@ -12,7 +12,10 @@ from app.core.database import (
     QRPayment,
     Section,
     Table,
-    PosSession
+    PosSession,
+    InventoryItem,
+    Recipe,
+    InventoryLedgerEntry
 )
 
 # Import models from audit_log.py
@@ -36,6 +39,9 @@ __all__ = [
     "Section",
     "Table",
     "PosSession",
+    "InventoryItem",
+    "Recipe",
+    "InventoryLedgerEntry",
     "AuditLog",
     "AuditEventType",
     "AuditEventStatus"

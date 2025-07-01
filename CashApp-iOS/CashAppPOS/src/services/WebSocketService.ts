@@ -5,6 +5,8 @@
 
 import DataService from './DataService';
 import API_CONFIG from '../config/api';
+import useInventoryStore from '../store/useInventoryStore'; // Import the inventory store
+import { InventoryItem } from '../types'; // Ensure InventoryItem type is available
 
 export interface WebSocketMessage {
   type: string;
@@ -315,6 +317,19 @@ export class WebSocketService {
         break;
       
       case 'inventory_updated':
+        // Ensure data is an array of InventoryItem or a single InventoryItem
+        // The backend is planned to send an array of updated items.
+        const inventoryData = message.data as InventoryItem[] | InventoryItem; // Type assertion
+        if (Array.isArray(inventoryData)) {
+          useInventoryStore.getState().updateMultipleInventoryItems(inventoryData);
+          console.log('Inventory update received and processed for multiple items:', inventoryData.length);
+        } else if (inventoryData && typeof inventoryData === 'object' && 'sku' in inventoryData) {
+          useInventoryStore.getState().updateInventoryItem(inventoryData as InventoryItem);
+          console.log('Inventory update received and processed for single item:', inventoryData.sku);
+        } else {
+          console.warn('Received inventory_updated event with unexpected data format:', inventoryData);
+        }
+        // Also emit the event for other listeners who might want raw data (e.g. UI components directly)
         this.emit(WebSocketEvent.INVENTORY_UPDATED, message.data);
         break;
       

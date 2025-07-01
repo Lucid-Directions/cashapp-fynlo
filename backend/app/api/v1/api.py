@@ -5,7 +5,11 @@ API Router for Fynlo POS Backend
 from fastapi import APIRouter, Depends
 from app.middleware.rate_limit_middleware import limiter, DEFAULT_RATE
 
-from app.api.v1.endpoints import auth, restaurants, products, orders, payments, customers, analytics, files, platform, websocket, sync, notifications, pos, admin
+from app.api.v1.endpoints import (
+    auth, restaurants, products, orders, payments, customers,
+    analytics, files, platform, websocket, sync, notifications,
+    pos, admin, inventory, recipes # Added inventory and recipes
+)
 
 # Apply a default rate limit to all routes in this router.
 # Specific routes can override this with their own @limiter.limit decorator.
@@ -16,10 +20,8 @@ api_router = APIRouter(dependencies=[Depends(limiter.limit(DEFAULT_RATE))])
 # Routes that have their own @limiter.limit decorator (e.g., auth, payments)
 # will use their specific limit instead of this default one.
 api_router.include_router(auth.router, prefix="/auth", tags=["authentication"])
-api_router.include_router(restaurants.router, prefix="/restaurants", tags=["restaurants"])  # Fixed: Changed to plural to match RESTful conventions and frontend expectations
+api_router.include_router(restaurants.router, prefix="/restaurants", tags=["restaurants"])
 api_router.include_router(products.router, prefix="/products", tags=["products"])
-# Removed duplicate products router registration that was causing conflicts
-# Categories are available at /products/categories - no separate router needed
 api_router.include_router(orders.router, prefix="/orders", tags=["orders"])
 api_router.include_router(payments.router, prefix="/payments", tags=["payments"])
 api_router.include_router(customers.router, prefix="/customers", tags=["customers"])
@@ -31,3 +33,7 @@ api_router.include_router(sync.router, prefix="/sync", tags=["sync"])
 api_router.include_router(notifications.router, prefix="/notifications", tags=["notifications"])
 api_router.include_router(pos.router, prefix="/pos", tags=["pos"])
 api_router.include_router(admin.router, prefix="/admin", tags=["admin"])
+
+# Inventory and Recipe Management
+api_router.include_router(inventory.router, prefix="/inventory", tags=["inventory_management"])
+api_router.include_router(recipes.router, prefix="/recipes", tags=["recipe_management"])

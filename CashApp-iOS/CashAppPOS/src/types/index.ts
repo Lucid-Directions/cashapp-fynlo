@@ -190,6 +190,51 @@ export interface PaginatedResponse<T> {
   hasMore: boolean;
 }
 
+// Inventory & Recipe Types (as per backend schemas)
+export interface InventoryItem {
+  sku: string;
+  name: string;
+  description?: string | null;
+  qty_g: number;
+  par_level_g?: number | null;
+  unit?: string | null;
+  cost_per_unit?: number | null;
+  supplier?: string | null;
+  last_updated: string; // ISO datetime string
+}
+
+export interface RecipeIngredientClient { // Renamed to avoid conflict if RecipeIngredient is used elsewhere
+  ingredient_sku: string;
+  qty_g: number;
+  ingredient_name?: string; // For display purposes on client
+  ingredient_unit?: string; // For display
+}
+
+export interface RecipeClient { // Renamed to avoid conflict
+  item_id: string; // Product UUID
+  item_name?: string; // Product name, joined from Product table
+  ingredients: RecipeIngredientClient[];
+}
+
+export interface InventoryLedgerEntry {
+  id: number;
+  sku: string;
+  delta_g: number;
+  source: string;
+  source_id?: string | null;
+  ts: string; // ISO datetime string
+}
+
+// Store types for Inventory
+export interface InventoryState {
+  inventoryItems: { [sku: string]: InventoryItem }; // Keyed by SKU for easy lookup
+  inventoryLedger: InventoryLedgerEntry[];
+  isLoadingInventory: boolean;
+  inventoryError: string | null;
+  lowStockThreshold: number; // Percentage, e.g., 0.1 for 10%
+}
+
+
 // Utility types
 export type DeepPartial<T> = {
   [P in keyof T]?: DeepPartial<T[P]>;

@@ -486,7 +486,10 @@ async def confirm_order(
     current_user: User = Depends(get_current_user),
     redis: RedisClient = Depends(get_redis)
 ):
-    """Confirm order for kitchen preparation"""
+    """
+    Confirm order for kitchen preparation and apply recipe deductions.
+    """
+    from app.services.inventory_service import apply_recipe_deductions_for_order # Import here to avoid circular deps at module level
     
     order = db.query(Order).filter(Order.id == order_id).first()
     if not order:
@@ -507,8 +510,25 @@ async def confirm_order(
     
     order.status = "confirmed"
     order.updated_at = datetime.utcnow()
-    db.commit()
-    
+    # db.commit() # Will be committed after recipe deductions or by transactional decorator if used
+
+    try:
+        # Apply recipe deductions BEFORE final commit of order status
+        # This assumes apply_recipe_deductions_for_order is synchronous or handled within the same DB transaction.
+        # If it's async and involves external calls that shouldn't be part of this transaction,
+        # this might need to be a background task triggered after successful order confirmation.
+        # For now, direct call for simplicity, assuming it works within the same transaction context.
+
+        deductions_result = await apply_recipe_deductions_for_order(db, order_id=order.id, websocket_manager=websocket_manager)
+
+        logger.info(f"Recipe deductions applied for order {order.id}. {len(deductions_result)} items affected.")
+
+        db.commit() # Commit both order status update and inventory changes
+    except Exception as e:
+        db.rollback() # Rollback order status change if deductions fail
+        logger.error(f"Failed to apply recipe deductions for order {order.id}: {e}. Order status not confirmed.")
+        raise HTTPException(status_code=500, detail=f"Failed to confirm order due to inventory processing error: {str(e)}")
+
     # Update cache
     await redis.cache_order(str(order.id), {
         "id": str(order.id),

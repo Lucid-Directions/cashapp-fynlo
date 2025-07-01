@@ -39,6 +39,10 @@ import RestaurantSetupScreen from '../screens/onboarding/RestaurantSetupScreen';
 import RestaurantProfileScreen from '../screens/settings/RestaurantProfileScreen';
 import RestaurantPlatformOverridesScreen from '../screens/settings/RestaurantPlatformOverridesScreen';
 
+// Recipe Management Screens
+import RecipesScreen from '../screens/settings/RecipesScreen';
+import RecipeFormScreen from '../screens/settings/RecipeFormScreen';
+
 export type SettingsStackParamList = {
   SettingsMain: undefined;
   
@@ -86,6 +90,10 @@ export type SettingsStackParamList = {
   
   // Platform Settings
   RestaurantPlatformOverrides: undefined;
+
+  // Recipe Management
+  RecipesScreen: undefined;
+  RecipeFormScreen: { recipe?: any }; // Using 'any' for recipe type placeholder
 };
 
 const Stack = createStackNavigator<SettingsStackParamList>();
@@ -248,6 +256,20 @@ const SettingsNavigator: React.FC = () => {
           headerTintColor: '#2C3E50',
           headerTitleStyle: { fontWeight: '600' },
         }}
+      />
+
+      {/* Recipe Management */}
+      <Stack.Screen
+        name="RecipesScreen"
+        component={RecipesScreen}
+        options={{ title: 'Manage Recipes' }} // Example options
+      />
+      <Stack.Screen
+        name="RecipeFormScreen"
+        component={RecipeFormScreen}
+        options={({ route }) => ({
+          title: route.params?.recipe ? 'Edit Recipe' : 'Create Recipe'
+        })}
       />
     </Stack.Navigator>
   );
