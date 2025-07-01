@@ -7,14 +7,13 @@ import {
   SafeAreaView,
   TouchableOpacity,
   ScrollView,
-  TextInput,
   Switch,
   Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme, useThemedStyles } from '../../../design-system/ThemeProvider';
-import SimpleDecimalInput from '../../../components/inputs/SimpleDecimalInput';
+import { SimpleDecimalInput } from '../../../components/inputs'; // Updated import
 import PlatformService from '../../../services/PlatformService';
 
 const PaymentProcessingScreen: React.FC = () => {
@@ -296,7 +295,7 @@ const PaymentProcessingScreen: React.FC = () => {
             minValue={0}
             decimalPlaces={2}
             placeholder="1.50"
-            style={{ marginVertical: 8 }}
+            containerStyle={{ marginVertical: 8 }} // Changed to containerStyle
           />
           
           {fixedFee !== undefined && fixedFeeKey && (
@@ -309,7 +308,7 @@ const PaymentProcessingScreen: React.FC = () => {
               minValue={0}
               decimalPlaces={2}
               placeholder="0.20"
-              style={{ marginVertical: 8 }}
+              containerStyle={{ marginVertical: 8 }} // Changed to containerStyle
             />
           )}
         </View>
@@ -470,7 +469,7 @@ const PaymentProcessingScreen: React.FC = () => {
                   minValue={0}
                   decimalPlaces={2}
                   placeholder="12.50"
-                  style={{ marginVertical: 12 }}
+                  containerStyle={{ marginVertical: 12 }} // Changed to containerStyle
                 />
               </View>
             )}
@@ -521,7 +520,7 @@ const PaymentProcessingScreen: React.FC = () => {
             minValue={0}
             decimalPlaces={2}
             placeholder="100.00"
-            style={{ marginVertical: 12 }}
+            containerStyle={{ marginVertical: 12 }} // Changed to containerStyle
           />
           
           <SimpleDecimalInput
@@ -533,7 +532,7 @@ const PaymentProcessingScreen: React.FC = () => {
             minValue={0}
             decimalPlaces={2}
             placeholder="10000.00"
-            style={{ marginVertical: 12 }}
+            containerStyle={{ marginVertical: 12 }} // Changed to containerStyle
           />
         </View>
 

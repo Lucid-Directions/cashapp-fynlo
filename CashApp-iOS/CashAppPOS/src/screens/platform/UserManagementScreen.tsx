@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
-  TextInput,
   ActivityIndicator,
   RefreshControl,
 } from 'react-native';
@@ -18,7 +17,7 @@ import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
 import { RealUserManagementService, UserDisplayData, AccessLog } from '../../services/RealUserManagementService';
 import CreateUserModal from '../../components/modals/CreateUserModal';
 import EditUserModal from '../../components/modals/EditUserModal';
-import SimpleTextInput from '../../components/inputs/SimpleTextInput';
+import { SimpleTextInput } from '../../components/inputs';
 
 const UserManagementScreen: React.FC = () => {
   const navigation = useNavigation();
@@ -284,11 +283,12 @@ const UserManagementScreen: React.FC = () => {
             <Icon name="search" size={20} color={theme.colors.mediumGray} />
             <SimpleTextInput
               value={searchQuery}
-              onValueChange={setSearchQuery}
+              onChangeText={setSearchQuery} // Changed from onValueChange
               placeholder="Search users..."
-              style={styles.searchInput}
-              clearButtonMode="while-editing"
-              returnKeyType="search"
+              containerStyle={{ flex: 1, marginLeft: 8 }} // Extracted flex & marginLeft
+              // fontSize & color from styles.searchInput should be handled by SimpleTextInput's theme
+              clearButtonMode="while-editing" // Valid TextInput prop
+              returnKeyType="search" // Valid TextInput prop
             />
           </View>
         </View>

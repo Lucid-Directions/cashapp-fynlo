@@ -7,11 +7,11 @@ import {
   SafeAreaView,
   TouchableOpacity,
   ScrollView,
-  TextInput,
   Alert,
   ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { SimpleTextInput } from '../inputs'; // Corrected import
 import { UserManagementService, CreateUserRequest, UserRole, Permission, PermissionTemplate } from '../../services/UserManagementService';
 
 // Fynlo POS Color Scheme
@@ -212,9 +212,8 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
             <Text style={styles.sectionTitle}>Basic Information</Text>
             
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Full Name *</Text>
-              <TextInput
-                style={styles.textInput}
+              <SimpleTextInput
+                label="Full Name *"
                 value={formData.name}
                 onChangeText={(text) => setFormData(prev => ({ ...prev, name: text }))}
                 placeholder="Enter full name"
@@ -223,9 +222,8 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Email Address *</Text>
-              <TextInput
-                style={styles.textInput}
+              <SimpleTextInput
+                label="Email Address *"
                 value={formData.email}
                 onChangeText={(text) => setFormData(prev => ({ ...prev, email: text }))}
                 placeholder="Enter email address"
@@ -235,9 +233,8 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Phone Number</Text>
-              <TextInput
-                style={styles.textInput}
+              <SimpleTextInput
+                label="Phone Number"
                 value={formData.phoneNumber || ''}
                 onChangeText={(text) => setFormData(prev => ({ ...prev, phoneNumber: text }))}
                 placeholder="Enter phone number"
