@@ -23,7 +23,7 @@ import ComingSoon from '../../components/feedback/ComingSoon'; // Added
 
 // Mock ENV flag (would typically come from an env config file)
 const ENV = {
-  FEATURE_INVENTORY: false, // Set to true to enable the screen, false to show ComingSoon
+  FEATURE_INVENTORY: true, // Set to true to enable the screen, false to show ComingSoon
 };
 
 // Clover POS Color Scheme
