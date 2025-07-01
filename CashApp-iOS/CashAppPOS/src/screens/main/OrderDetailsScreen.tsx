@@ -8,6 +8,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  Linking, // Added Linking
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -35,7 +36,11 @@ const mockOrder = {
   subtotal: 30.97,
   tax: 2.48,
   total: 33.45,
-  customerName: 'John Doe',
+  customer: { // Updated to use customer object
+    id: 'cust_123',
+    name: 'John Doe',
+    email: 'john.doe@example.com',
+  },
   tableNumber: 5,
   createdAt: new Date(Date.now() - 1000 * 60 * 30),
   status: 'preparing',
@@ -127,9 +132,19 @@ const OrderDetailsScreen: React.FC = () => {
             <View style={styles.customerRow}>
               <Icon name="person" size={20} color={Colors.secondary} />
               <Text style={styles.customerText}>
-                {mockOrder.customerName || 'Walk-in Customer'}
+                {mockOrder.customer?.name || 'Walk-in Customer'}
               </Text>
             </View>
+            {mockOrder.customer?.email && (
+              <TouchableOpacity onPress={() => Linking.openURL(`mailto:${mockOrder.customer?.email}`)}>
+                <View style={styles.customerRow}>
+                  <Icon name="email" size={20} color={Colors.secondary} />
+                  <Text style={[styles.customerText, styles.emailLink]}>
+                    {mockOrder.customer.email}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            )}
             {mockOrder.tableNumber && (
               <View style={styles.customerRow}>
                 <Icon name="table-restaurant" size={20} color={Colors.secondary} />
@@ -319,6 +334,10 @@ const styles = StyleSheet.create({
     color: Colors.text,
     marginLeft: 12,
     fontWeight: '600',
+  },
+  emailLink: {
+    color: Colors.secondary,
+    textDecorationLine: 'underline',
   },
   itemsContainer: {
     backgroundColor: Colors.white,

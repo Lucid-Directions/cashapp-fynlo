@@ -46,6 +46,11 @@ class CustomerResponse(BaseModel):
     updated_at: Optional[datetime]
     last_visit: Optional[datetime]
 
+class CustomerBasicInfo(BaseModel):
+    id: str
+    name: str
+    email: Optional[EmailStr] = None
+
 class CustomerStats(BaseModel):
     total_customers: int
     new_this_month: int
