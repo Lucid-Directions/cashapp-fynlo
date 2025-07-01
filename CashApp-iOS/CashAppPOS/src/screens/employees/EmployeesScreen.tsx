@@ -239,14 +239,15 @@ const EmployeesScreen: React.FC = () => {
         </View>
         
         <View style={styles.headerActions}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.scheduleButton}
             onPress={() => navigation.navigate('EmployeeSchedule')}
           >
-            <Icon name="schedule" size={20} color={Colors.white} />
+            <Icon name="event_available" size={28} color={Colors.white} />
+            <Text style={styles.scheduleButtonText}>Schedule</Text>
           </TouchableOpacity>
-          
-          <TouchableOpacity 
+
+          <TouchableOpacity
             style={styles.addButton}
             onPress={() => setShowAddModal(true)}
           >
@@ -582,9 +583,21 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   scheduleButton: {
-    padding: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12, // Increased padding
+    paddingVertical: 8,    // Increased padding
+    minHeight: 44,         // Ensure min tap target height
+    minWidth: 44,          // Ensure min tap target width
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    borderRadius: 6,
+    borderRadius: 8, // Slightly larger radius
+  },
+  scheduleButtonText: {
+    color: Colors.white,
+    fontSize: 14,
+    fontWeight: '600', // Semibold
+    marginLeft: 8,     // Space between icon and text
+    numberOfLines: 1,  // Ensure text ellipsizes if too long
   },
   addButton: {
     padding: 8,
