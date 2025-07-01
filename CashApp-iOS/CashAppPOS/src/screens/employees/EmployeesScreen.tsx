@@ -14,6 +14,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { CalendarClock } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 // import { generateEmployees, EmployeeData } from '../../utils/mockDataGenerator'; // Removed
 import Colors from '../../constants/Colors';
@@ -298,8 +299,8 @@ const EmployeesScreen: React.FC = () => {
             style={styles.scheduleButton}
             onPress={() => navigation.navigate('EmployeeSchedule')}
           >
-            <Icon name="event_available" size={28} color={Colors.white} />
-            <Text style={styles.scheduleButtonText}>Schedule</Text>
+  <CalendarClock size={28} color={theme.colors.action} />
+  <Text style={styles.scheduleLabel}>Schedule</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -640,6 +641,13 @@ const styles = StyleSheet.create({
     minWidth: 44,          // Ensure min tap target width
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     borderRadius: 8, // Slightly larger radius
+  },
+  scheduleLabel: {
+    marginLeft: 6,
+    color: Colors.white, // Assuming theme.colors.action is white, adjust if needed
+    // ...theme.typography.button, // This needs to be translated to React Native styles
+    fontSize: 14, // Example, adjust as per theme.typography.button
+    fontWeight: '600', // Example, adjust as per theme.typography.button
   },
   scheduleButtonText: {
     color: Colors.white,
