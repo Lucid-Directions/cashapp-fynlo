@@ -245,5 +245,22 @@ SCRIPT
         end
       end
     end
+    
+    # Fix RNDateTimePicker Yoga compatibility
+    puts "🔧 Fixing RNDateTimePicker Yoga compatibility..."
+    picker_file = File.join(__dir__, 'Pods/RNDateTimePicker/ios/RNDateTimePickerShadowView.m')
+    if File.exist?(picker_file)
+      content = File.read(picker_file)
+      # Replace YGNodeConstRef with YGNodeRef in the measure function
+      if content.include?('YGNodeConstRef node')
+        content.gsub!('YGNodeConstRef node', 'YGNodeRef node')
+        File.write(picker_file, content)
+        puts "✅ RNDateTimePicker Yoga compatibility fixed!"
+      else
+        puts "✅ RNDateTimePicker already compatible with Yoga"
+      end
+    else
+      puts "⚠️ RNDateTimePicker file not found, skipping patch"
+    end
   end
 end
