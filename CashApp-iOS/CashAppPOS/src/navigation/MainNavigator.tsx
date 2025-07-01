@@ -24,6 +24,7 @@ import HelpScreen from '../screens/support/HelpScreen';
 import SettingsNavigator from './SettingsNavigator';
 import useAppStore from '../store/useAppStore';
 import EnhancedPaymentScreen from '../screens/payment/EnhancedPaymentScreen';
+import ServiceChargeSelectionScreen from '../screens/payment/ServiceChargeSelectionScreen';
 import QRCodePaymentScreen from '../screens/payments/QRCodePaymentScreen';
 import SquareCardPaymentScreen from '../screens/payments/SquareCardPaymentScreen';
 import SquareContactlessPaymentScreen from '../screens/payments/SquareContactlessPaymentScreen';
@@ -216,6 +217,13 @@ const MainNavigator: React.FC = () => {
       <Stack.Screen
         name="Settings"
         component={SettingsNavigator}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="ServiceChargeSelection"
+        component={ServiceChargeSelectionScreen}
         options={{
           headerShown: false,
         }}

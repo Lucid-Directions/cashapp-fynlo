@@ -117,6 +117,7 @@ export type MainStackParamList = {
     orderType?: 'dine_in' | 'takeout' | 'pickup' | 'delivery';
   };
   OrderDetails: { orderId: number };
+  ServiceChargeSelection: undefined;
   EnhancedPayment: {
     amount: number;
     orderItems: OrderItem[];

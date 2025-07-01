@@ -23,6 +23,12 @@ interface AppStore extends AppState {
   // Order actions
   setCurrentOrder: (order: Order | null) => void;
   
+  // Service charge and fee actions
+  serviceChargePercentage: number;
+  addTransactionFee: boolean;
+  setServiceChargePercentage: (percentage: number) => void;
+  setAddTransactionFee: (add: boolean) => void;
+  
   // App state actions
   setOnlineStatus: (isOnline: boolean) => void;
   setLoading: (isLoading: boolean) => void;
@@ -31,6 +37,9 @@ interface AppStore extends AppState {
   // Computed values
   cartTotal: () => number;
   cartItemCount: () => number;
+  calculateServiceCharge: () => number;
+  calculateTransactionFee: () => number;
+  calculateOrderTotal: () => number;
 }
 
 const useAppStore = create<AppStore>()(
@@ -56,6 +65,8 @@ const useAppStore = create<AppStore>()(
       },
       cart: [], // Will be cleaned on first access if corrupted
       currentOrder: null,
+      serviceChargePercentage: 10, // Default 10% service charge (recommended)
+      addTransactionFee: false,
       isOnline: true,
       isLoading: false,
       error: null,
@@ -123,6 +134,10 @@ const useAppStore = create<AppStore>()(
 
       // Order actions
       setCurrentOrder: (currentOrder) => set({ currentOrder }),
+
+      // Service charge and fee actions
+      setServiceChargePercentage: (percentage) => set({ serviceChargePercentage: percentage }),
+      setAddTransactionFee: (add) => set({ addTransactionFee: add }),
 
       // App state actions
       setOnlineStatus: (isOnline) => set({ isOnline }),
@@ -230,6 +245,61 @@ const useAppStore = create<AppStore>()(
           return 0;
         }
       },
+
+      // Service charge calculation
+      calculateServiceCharge: () => {
+        const { serviceChargePercentage } = get();
+        const cartSubtotal = get().cartTotal();
+        try {
+          return cartSubtotal * (serviceChargePercentage / 100);
+        } catch (error) {
+          const errorTrackingService = ErrorTrackingService.getInstance();
+          errorTrackingService.trackPricingError(
+            error instanceof Error ? error : new Error(`Service charge calculation error: ${error}`),
+            { serviceChargePercentage, cartSubtotal },
+            { screenName: 'AppStore', action: 'service_charge_calculation' }
+          );
+          return 0;
+        }
+      },
+
+      // Transaction fee calculation (2.9% processing fee)
+      calculateTransactionFee: () => {
+        const { addTransactionFee } = get();
+        if (!addTransactionFee) return 0;
+        
+        const cartSubtotal = get().cartTotal();
+        try {
+          return cartSubtotal * 0.029; // 2.9% transaction fee
+        } catch (error) {
+          const errorTrackingService = ErrorTrackingService.getInstance();
+          errorTrackingService.trackPricingError(
+            error instanceof Error ? error : new Error(`Transaction fee calculation error: ${error}`),
+            { addTransactionFee, cartSubtotal },
+            { screenName: 'AppStore', action: 'transaction_fee_calculation' }
+          );
+          return 0;
+        }
+      },
+
+      // Total order calculation including service charge and transaction fee
+      calculateOrderTotal: () => {
+        try {
+          const cartSubtotal = get().cartTotal();
+          const serviceCharge = get().calculateServiceCharge();
+          const transactionFee = get().calculateTransactionFee();
+          
+          return cartSubtotal + serviceCharge + transactionFee;
+        } catch (error) {
+          const errorTrackingService = ErrorTrackingService.getInstance();
+          errorTrackingService.trackPricingError(
+            error instanceof Error ? error : new Error(`Order total calculation error: ${error}`),
+            {},
+            { screenName: 'AppStore', action: 'order_total_calculation' }
+          );
+          return get().cartTotal(); // Fallback to cart total only
+        }
+      },
     }),
     {
       name: 'cashapp-pos-storage',
@@ -239,6 +309,8 @@ const useAppStore = create<AppStore>()(
         user: state.user,
         session: state.session,
         cart: state.cart,
+        serviceChargePercentage: state.serviceChargePercentage,
+        addTransactionFee: state.addTransactionFee,
       }),
     }
   )

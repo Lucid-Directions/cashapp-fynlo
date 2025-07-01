@@ -155,7 +155,7 @@ const ExportedMenuItemCard = ({
 // Export for testing
 export { ExportedMenuItemCard };
 
-type POSScreenNavigationProp = DrawerNavigationProp<DrawerParamList>;
+type POSScreenNavigationProp = any; // TODO: restore original DrawerNavigationProp typing
 
 const POSScreen: React.FC = () => {
   const navigation = useNavigation<POSScreenNavigationProp>();
@@ -879,7 +879,8 @@ const POSScreen: React.FC = () => {
                     style={styles.chargeButton}
                     onPress={() => {
                       setShowCartModal(false);
-                      setShowPaymentModal(true);
+                      // @ts-ignore
+                      navigation.navigate('ServiceChargeSelection');
                     }}
                     testID="charge-button" // Added testID
                   >
