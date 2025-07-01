@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 // import { Icon } from 'react-native-elements'; // Or your preferred icon library
 
 // import { Product, InventoryItem, Recipe, RecipeIngredient } from '../../types'; // Assuming these types exist
-import { fetchProducts, fetchInventoryItems, createRecipe, updateRecipe } from '../../services/ApiService'; // Assuming ApiService will be updated
+import DatabaseService from '../../services/DatabaseService'; // Using DatabaseService instead
 
 // Placeholder types (replace with actual types from '../../types')
 interface Product {
@@ -119,8 +119,8 @@ const RecipeFormScreen = () => {
       setIsLoading(true);
       try {
         const [fetchedProducts, fetchedInventoryItems] = await Promise.all([
-          fetchProducts(), // Assuming this fetches all products suitable for recipes
-          fetchInventoryItems() // Assuming this fetches all available ingredients
+          DatabaseService.getProducts(), // Fetch products from DatabaseService
+          DatabaseService.getInventoryItems() // Fetch inventory items from DatabaseService
         ]);
         setProducts(fetchedProducts);
         setInventoryItems(fetchedInventoryItems);
@@ -220,10 +220,10 @@ const RecipeFormScreen = () => {
       if (existingRecipe) {
         // The API for create_or_update_recipe_for_item_api handles both cases.
         // No separate updateRecipe function is strictly needed if using that endpoint.
-        await createRecipe(recipeData); // Or a dedicated updateRecipe(existingRecipe.item_id, recipeData)
+        await DatabaseService.updateRecipe(existingRecipe.item_id, recipeData);
         Alert.alert("Success", "Recipe updated successfully!");
       } else {
-        await createRecipe(recipeData);
+        await DatabaseService.createRecipe(recipeData);
         Alert.alert("Success", "Recipe created successfully!");
       }
       navigation.goBack();

@@ -695,7 +695,7 @@ const POSScreen: React.FC = () => {
           </TouchableOpacity>
           
             
-            {IS_DEV && FLAGS.SHOW_DEV_MENU && (
+            {IS_DEV && (
               <TouchableOpacity
                 testID="dev-mode-toggle-button"
                 style={[styles.devButton, { marginRight: 8 }]}
@@ -715,8 +715,10 @@ const POSScreen: React.FC = () => {
             />
           </View>
         </View>
-        {/* Full Width Menu */}
-        <View style={styles.fullWidthPanel}>
+      </View>
+
+      {/* Full Width Menu */}
+      <View style={styles.fullWidthPanel}>
           {/* Quick Stats Bar */}
           <View style={styles.statsBar}>
             <View style={styles.statItem}>
