@@ -209,6 +209,13 @@ const SettingsScreen: React.FC = () => {
           route: 'SettingsMenuManagement',
         },
         {
+          id: 'recipes-management', // New ID for recipe settings
+          title: 'Recipe Management',
+          description: 'Create and manage recipes for menu items',
+          icon: 'menu-book', // Or a more suitable icon like 'blender', 'restaurant'
+          route: 'RecipesScreen', // Route to the new RecipesScreen
+        },
+        {
           id: 'pricing-discounts',
           title: 'Pricing & Discounts',
           description: 'Price rules and promotional codes',

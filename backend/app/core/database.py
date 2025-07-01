@@ -201,8 +201,64 @@ class Section(Base):
     color = Column(String(7), default="#00A651")  # Hex color
     sort_order = Column(Integer, default=0)
     is_active = Column(Boolean, default=True)
+    stock_tracking = Column(Boolean, default=False)
+    stock_quantity = Column(Integer, default=0)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    # Relationship to recipes
+    recipes = relationship("Recipe", back_populates="product_item")
+
+class InventoryItem(Base):
+    """Inventory items (raw ingredients/supplies)"""
+    __tablename__ = "inventory"
+
+    sku = Column(String(100), primary_key=True, index=True)
+    name = Column(String(255), nullable=False)
+    description = Column(Text, nullable=True)
+    qty_g = Column(Integer, nullable=False, default=0) # Current quantity in grams (or ml or units)
+    par_level_g = Column(Integer, nullable=True, default=0) # Desired stock level
+    unit = Column(String(50), default="grams") # e.g., grams, ml, units
+    cost_per_unit = Column(DECIMAL(10, 2), nullable=True) # Cost per unit (e.g., cost per gram)
+    supplier = Column(String(255), nullable=True)
+    last_updated = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    # Relationship to recipes where this item is an ingredient
+    recipe_ingredients = relationship("Recipe", back_populates="ingredient")
+    # Relationship to ledger entries
+    ledger_entries = relationship("InventoryLedgerEntry", back_populates="inventory_item")
+
+
+class Recipe(Base):
+    """Recipes linking products to inventory items"""
+    __tablename__ = "recipe"
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    item_id = Column(UUID(as_uuid=True), ForeignKey("products.id"), nullable=False) # FK to Product.id
+    ingredient_sku = Column(String(100), ForeignKey("inventory.sku"), nullable=False) # FK to InventoryItem.sku
+    qty_g = Column(Integer, nullable=False) # Quantity of ingredient in grams (or ml or units)
+
+    # Relationships
+    product_item = relationship("Product", back_populates="recipes")
+    ingredient = relationship("InventoryItem", back_populates="recipe_ingredients")
+
+    __table_args__ = (sa.UniqueConstraint('item_id', 'ingredient_sku', name='uq_recipe_item_ingredient'),)
+
+
+class InventoryLedgerEntry(Base):
+    """Audit trail for inventory changes"""
+    __tablename__ = "inventory_ledger"
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    sku = Column(String(100), ForeignKey("inventory.sku"), nullable=False, index=True)
+    delta_g = Column(Integer, nullable=False) # Change in quantity (positive for additions, negative for deductions)
+    source = Column(String(50), nullable=False) # E.g., "order_fulfillment", "manual_stock_add", "initial_import", "spoilage"
+    source_id = Column(String(255), nullable=True) # E.g., order_id, user_id (for manual entry), import_batch_id
+    ts = Column(DateTime(timezone=True), server_default=func.now(), nullable=False, index=True)
+
+    # Relationship
+    inventory_item = relationship("InventoryItem", back_populates="ledger_entries")
+
 
 class Table(Base):
     """Restaurant tables"""
