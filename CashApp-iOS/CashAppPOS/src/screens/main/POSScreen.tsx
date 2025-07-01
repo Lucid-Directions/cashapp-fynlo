@@ -34,6 +34,7 @@ import SumUpCompatibilityService from '../../services/SumUpCompatibilityService'
 import SharedDataStore from '../../services/SharedDataStore';
 import SimpleTextInput from '../../components/inputs/SimpleTextInput';
 import CartIcon from '../../components/cart/CartIcon';
+import CategorySearchBubble from '../../components/search/CategorySearchBubble'; // Import CategorySearchBubble
 import CustomersService from '../../services/CustomersService';
 
 // Get screen dimensions
@@ -175,6 +176,7 @@ const POSScreen: React.FC = () => {
   const [showSumUpPayment, setShowSumUpPayment] = useState(false);
   const [showSumUpTest, setShowSumUpTest] = useState(false);
   const [serviceChargeDebugInfo, setServiceChargeDebugInfo] = useState('');
+  const [searchQuery, setSearchQuery] = useState(''); // State for search query
 
   // Debug showSumUpPayment state changes
   useEffect(() => {
@@ -342,9 +344,13 @@ const POSScreen: React.FC = () => {
     }
   };
 
-  const filteredItems = selectedCategory === 'All'
-    ? menuItems
-    : menuItems.filter(item => item.category === selectedCategory);
+  const filteredItems = menuItems
+    .filter(item => selectedCategory === 'All' || item.category === selectedCategory)
+    .filter(item =>
+      searchQuery
+      ? item.name.toLowerCase().includes(searchQuery.toLowerCase())
+      : true
+    );
 
   const handleAddToCart = (item: MenuItem) => {
     const orderItem: OrderItem = {
@@ -690,10 +696,6 @@ const POSScreen: React.FC = () => {
         </View>
         
         <View style={styles.headerRight}>
-          <TouchableOpacity style={styles.headerIconButton}>
-            <Icon name="search" size={24} color={theme.colors.white} />
-          </TouchableOpacity>
-          
             
             {IS_DEV && (
               <TouchableOpacity
@@ -760,6 +762,10 @@ const POSScreen: React.FC = () => {
             style={styles.categoryTabs}
             contentContainerStyle={styles.categoryTabsContent}
           >
+            <CategorySearchBubble
+              onSearchChange={setSearchQuery}
+              style={styles.searchBubbleStyle} // Added style for potential adjustments
+            />
             {categories.map((category) => (
               <TouchableOpacity
                 key={category}
@@ -1758,6 +1764,10 @@ const createStyles = (theme: any) => StyleSheet.create({
     color: theme.colors.white,
     fontSize: 12,
     fontWeight: 'bold',
+  },
+  searchBubbleStyle: {
+    // Potential custom styles for the search bubble container if needed
+    // e.g., marginRight: 10,
   },
 });
 

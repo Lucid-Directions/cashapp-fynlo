@@ -1,6 +1,5 @@
 module.exports = {
   preset: 'react-native',
-  
   // Test file patterns
   testMatch: [
     '<rootDir>/src/**/__tests__/**/*.{js,jsx,ts,tsx}',
