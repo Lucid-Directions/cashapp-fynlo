@@ -63,11 +63,11 @@ const colorThemeOptions: ColorThemeOption[] = [
   },
   {
     id: 'orange',
-    label: 'Sunset Orange',
-    primary: '#F97316',
-    secondary: '#EA580C',
-    accent: '#FB923C',
-    description: 'Vibrant sunset orange',
+    label: 'Fynlo Orange',
+    primary: '#FF6D00',
+    secondary: '#121212',
+    accent: '#FF8F00',
+    description: 'Official Fynlo brand colours',
   },
   {
     id: 'red',
@@ -183,7 +183,13 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
         }
         
         if (savedColorTheme && colorThemeOptions.find(option => option.id === savedColorTheme)) {
-          setColorThemeState(savedColorTheme as ColorTheme);
+          // If orange theme is stored, reset to default green theme
+          if (savedColorTheme === 'orange') {
+            setColorThemeState('default');
+            await AsyncStorage.setItem(COLOR_THEME_STORAGE_KEY, 'default');
+          } else {
+            setColorThemeState(savedColorTheme as ColorTheme);
+          }
         }
       } catch (error) {
         console.warn('Failed to load theme preferences:', error);

@@ -574,7 +574,11 @@ const EnhancedPaymentScreen: React.FC = () => {
         <View style={styles.headerSpacer} />
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        style={styles.content} 
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Order Summary */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Order Summary</Text>
@@ -879,6 +883,9 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
   },
+  scrollContent: {
+    paddingBottom: 140, // Add bottom padding to account for absolute positioned footer (16+16+32+padding)
+  },
   section: {
     backgroundColor: Colors.white,
     marginVertical: 8,
@@ -1154,6 +1161,10 @@ const styles = StyleSheet.create({
     marginLeft: 36,
   },
   footer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
     backgroundColor: Colors.white,
     paddingHorizontal: 16,
     paddingVertical: 16,
