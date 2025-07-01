@@ -27,8 +27,19 @@ from app.core.websocket import (
     EventType
 )
 from app.core.transaction_manager import transactional, transaction_manager
+from app.schemas.refund_schemas import RefundRequestSchema, RefundResponseSchema
+from app.services.payment_factory import get_payment_provider # Assuming you have this
+# Or import specific providers if needed:
+# from app.services.square_provider import SquareProvider
+# from app.services.stripe_provider import StripeProvider
+# from app.services.sumup_provider import SumUpProvider
+from app.models.refund import Refund, RefundLedger # SQLAlchemy models
+from app.models.user import User as UserModel # Assuming your User model is named UserModel # Make sure this path is correct
+from app.services.email_service import EmailService # Import the new EmailService
+from decimal import Decimal # Ensure Decimal is imported if used for amounts
 
 router = APIRouter()
+email_service = EmailService() # Instantiate EmailService globally or per request
 
 # Pydantic models
 class OrderItem(BaseModel):
@@ -611,4 +622,239 @@ async def cancel_order(
     return APIResponseHelper.success(
         data={"order_id": str(order.id), "status": order.status, "reason": reason},
         message=f"Order {order.order_number} cancelled successfully"
+    )
+
+@router.post("/{order_id}/refund", response_model=RefundResponseSchema)
+async def refund_order(
+    order_id: str,
+    refund_data: RefundRequestSchema,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user) # Ensure this User is the Pydantic model from auth
+):
+    """
+    Process a full or partial refund for an order.
+    Requires Manager role or above.
+    """
+    # Permission Check (FR-7)
+    # Assuming current_user has a 'role' attribute. Adjust as per your User model.
+    # It's better to use a dependency for role checks, e.g., Depends(RoleChecker(["Manager", "Admin"]))
+    db_user = db.query(UserModel).filter(UserModel.id == current_user.id).first()
+    if not db_user or db_user.role not in ["Manager", "Admin"]: # TODO: Confirm role names
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to perform refunds."
+        )
+
+    order = db.query(Order).filter(Order.id == order_id).first()
+    if not order:
+        raise FynloException(
+            message="Order not found",
+            error_code=ErrorCodes.NOT_FOUND,
+            details={"order_id": order_id},
+            status_code=status.HTTP_404_NOT_FOUND
+        )
+
+    if order.status != "completed": # (FR-1) - Or other statuses that allow refunds
+        raise FynloException(
+            message=f"Order status '{order.status}' does not allow refunds.",
+            error_code=ErrorCodes.VALIDATION_ERROR,
+            details={"current_status": order.status, "required_status": "completed"},
+            status_code=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Determine refund amount and type
+    is_full_refund = not refund_data.items or len(refund_data.items) == 0
+    refund_amount: Decimal
+
+    if is_full_refund:
+        refund_amount = refund_data.amount if refund_data.amount is not None else Decimal(str(order.total_amount))
+        if refund_amount != Decimal(str(order.total_amount)):
+            # Potentially allow if less, but for now, full means full.
+             raise FynloException(
+                message="Full refund amount must match order total if items are not specified.",
+                error_code=ErrorCodes.VALIDATION_ERROR,
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+    else: # Partial refund
+        calculated_partial_amount = Decimal(0)
+        # Validate items and calculate amount (simplified, needs actual product price lookup)
+        for item_to_refund in refund_data.items:
+            found_item = next((oi for oi in order.items if oi.get("product_id") == item_to_refund.line_id), None) # Assuming line_id is product_id
+            if not found_item:
+                raise FynloException(
+                    message=f"Item with line_id {item_to_refund.line_id} not found in order.",
+                    error_code=ErrorCodes.VALIDATION_ERROR,
+                    status_code=status.HTTP_400_BAD_REQUEST
+                )
+            # This is a simplification. In reality, you'd use the item's price at the time of order.
+            # And ensure you're not refunding more than ordered quantity.
+            calculated_partial_amount += Decimal(str(found_item.get("unit_price", 0))) * item_to_refund.qty
+
+        if refund_data.amount is not None and refund_data.amount != calculated_partial_amount:
+            # If amount is provided for partial, it should match calculated or handle discrepancy
+            logger.warning(f"Provided partial refund amount {refund_data.amount} differs from calculated {calculated_partial_amount}. Using provided amount.")
+            refund_amount = refund_data.amount
+        else:
+            refund_amount = calculated_partial_amount
+
+    if refund_amount <= 0:
+        raise FynloException(
+            message="Refund amount must be positive.",
+            error_code=ErrorCodes.VALIDATION_ERROR,
+            status_code=status.HTTP_400_BAD_REQUEST
+        )
+
+    # (FR-4) Backend routes to gateway adapter
+    # Assuming order.payment_transaction_id and order.payment_provider exist
+    payment_transaction_id = getattr(order, 'payment_transaction_id', None)
+    payment_provider_code = getattr(order, 'payment_provider_code', None) # e.g., 'sumup', 'square', 'cash'
+
+    if not payment_transaction_id or not payment_provider_code:
+        # For cash, we might not have a transaction_id in the same way.
+        if payment_provider_code == 'cash':
+            logger.info(f"Processing cash refund for order {order_id} of amount {refund_amount}")
+            gateway_refund_id = f"CASH_REFUND_{uuid.uuid4()}"
+            refund_status_message = "Cash refund processed internally."
+        else:
+            raise FynloException(
+                message="Order payment details not found or provider not supported for direct refund.",
+                error_code=ErrorCodes.PAYMENT_ERROR,
+                status_code=status.HTTP_501_NOT_IMPLEMENTED # Or 400 if it's a data issue
+            )
+    else:
+        try:
+            payment_provider_service = get_payment_provider(payment_provider_code)
+            # The refund method in provider service should handle actual API call
+            # It might need more parameters like refund_data.items for partial refunds
+            refund_result = await payment_provider_service.refund_payment(
+                transaction_id=payment_transaction_id,
+                amount_to_refund=float(refund_amount), # Provider might expect float
+                reason=refund_data.reason,
+                # Pass item details if provider supports itemized refunds
+                items_to_refund=[{"line_id": i.line_id, "quantity": i.qty} for i in refund_data.items or []]
+            )
+            gateway_refund_id = refund_result.get("refund_id") or refund_result.get("id")
+            refund_status_message = refund_result.get("status", "processed")
+            if not refund_result.get("success", True): # Assuming provider returns a success flag
+                 raise FynloException(
+                    message=f"Gateway refund failed: {refund_result.get('error', 'Unknown error')}",
+                    error_code=ErrorCodes.PAYMENT_GATEWAY_ERROR,
+                    status_code=status.HTTP_502_BAD_GATEWAY
+                )
+        except Exception as e:
+            logger.error(f"Error processing refund with gateway {payment_provider_code} for order {order_id}: {e}")
+            raise FynloException(
+                message=f"Gateway refund processing error: {str(e)}",
+                error_code=ErrorCodes.PAYMENT_GATEWAY_ERROR,
+                status_code=status.HTTP_502_BAD_GATEWAY
+            )
+
+    # (FR-5) Create Refund record and Ledger entry (FR-8)
+    # This should be in a transaction
+    try:
+        with transaction_manager(db_session=db): # Using the new transaction manager
+            new_refund = Refund(
+                order_id=str(order.id), # Assuming order.id is UUID, convert to string if schema expects string
+                amount=refund_amount,
+                reason=refund_data.reason,
+                # gateway_refund_id=gateway_refund_id, # Add this field to Refund model if needed
+                # status=refund_status_message # Add this field to Refund model
+            )
+            db.add(new_refund)
+            db.flush() # To get new_refund.id
+
+            new_ledger_entry = RefundLedger(
+                refund_id=new_refund.id,
+                user_id=str(db_user.id), # Assuming db_user.id is UUID
+                device_id= "server_initiated", # TODO: Get actual deviceId if available from request headers or context
+                action="refund_processed",
+                # timestamp is server_default
+            )
+            db.add(new_ledger_entry)
+
+            # (FR-5) Update order status or refunds array
+            if is_full_refund:
+                order.status = "refunded" # Or a specific "fully_refunded" status
+                # Disable further refunds (FR-X, implied from "disables further refunds")
+                # This could be a flag on the order, or logic checking existing refunds
+            else:
+                # If your Order model has a JSONB 'refunds' field or similar:
+                current_refunds = getattr(order, 'refund_details', []) # Assuming 'refund_details' is JSONB field
+                if not isinstance(current_refunds, list): current_refunds = []
+                current_refunds.append({
+                    "refund_id": str(new_refund.id),
+                    "amount": float(refund_amount), # Store as float in JSON
+                    "reason": refund_data.reason,
+                    "items": [{"line_id": i.line_id, "qty": i.qty} for i in refund_data.items or []],
+                    "timestamp": datetime.utcnow().isoformat()
+                })
+                setattr(order, 'refund_details', current_refunds)
+                order.status = "partially_refunded" # Or keep 'completed' and rely on refund_details
+
+            order.updated_at = datetime.utcnow()
+            db.add(order)
+            # db.commit() # Handled by transaction_manager
+            db.refresh(new_refund) # To get all fields like created_at
+
+    except Exception as e:
+        # db.rollback() # Handled by transaction_manager
+        logger.error(f"Database error during refund processing for order {order_id}: {e}")
+        raise FynloException(
+            message="Failed to save refund details.",
+            error_code=ErrorCodes.DATABASE_ERROR,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+    # (FR-5) Emit orders.updated via WebSocket
+    try:
+        message_data = {
+            "order_id": str(order.id),
+            "new_status": order.status,
+            "refund_details": {
+                "refund_id": str(new_refund.id),
+                "amount": float(refund_amount),
+                "is_full": is_full_refund
+            }
+        }
+        event_type = EventType.ORDER_REFUNDED # Define this in your EventType enum
+        ws_message = WebSocketMessage(event_type=event_type, data=message_data, target_restaurant=str(order.restaurant_id))
+        await websocket_manager.broadcast_to_restaurant(str(order.restaurant_id), ws_message)
+    except Exception as ws_error:
+        logger.warning(f"WebSocket notification for refund failed for order {order.id}: {ws_error}")
+
+
+    # (FR-6) Customer receives e-mail receipt "Refund processed – £X.XX".
+    customer_email = getattr(order, 'customer_email', None) # Assuming Order model has customer_email
+    if not customer_email and order.customer_id:
+        # Attempt to fetch customer email if not directly on order
+        customer = db.query(UserModel).filter(UserModel.id == order.customer_id).first() # Or Customer model
+        if customer:
+            customer_email = customer.email
+
+    if customer_email:
+        try:
+            # Prepare a simple order-like object for the email template if needed
+            # The EmailService expects an 'order' object with 'customer_email', 'order_number' (or 'number'), 'items', 'total_amount'
+            # We have `order` (SQLAlchemy Order model) and `new_refund` (SQLAlchemy Refund model)
+            # We need to ensure the `order` object passed to `send_receipt` has the fields the template expects.
+            # The template uses: order.order_number, order.items, order.total_amount, order.subtotal, order.tax_amount, order.service_charge
+            # The `order` object from `db.query(Order)` should have these.
+
+            # The `amount` for the email service is the refund_amount
+            email_service.send_receipt(order=order, type_='refund', amount=float(refund_amount))
+            logger.info(f"Refund receipt email initiated for order {order.id} to {customer_email}")
+        except Exception as email_exc:
+            logger.error(f"Failed to send refund receipt email for order {order.id}: {email_exc}")
+            # Do not fail the refund if email sending fails, but log it.
+    else:
+        logger.info(f"No customer email found for order {order.id}, skipping refund receipt email.")
+
+    return RefundResponseSchema(
+        id=new_refund.id,
+        order_id=str(order.id),
+        amount=new_refund.amount,
+        reason=new_refund.reason,
+        status=refund_status_message, # This should reflect the actual outcome
+        gateway_refund_id=gateway_refund_id,
+        created_at=new_refund.created_at.isoformat()
     )

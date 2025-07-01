@@ -46,3 +46,4 @@ from . import res_currency
 from . import ir_ui_view
 from . import mail_compose_message
 from . import product_tag
+from . import pos_order_refund
