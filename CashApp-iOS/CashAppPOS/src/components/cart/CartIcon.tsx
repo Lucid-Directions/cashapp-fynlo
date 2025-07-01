@@ -7,15 +7,19 @@ interface Props {
   count: number;
   onPress?: () => void;
   testID?: string;
-  size?: number; // New size prop
+  size?: number;
+  fill?: string; // Added fill prop for consistency, though color logic is internal
 }
 
 const CartIcon: React.FC<Props> = ({ count, onPress, testID, size = 28 }) => {
   const { theme } = useTheme();
   const styles = createStyles(theme);
 
-  // Determine icon color based on count and theme
-  const iconColor = count > 0 ? '#FF3B30' : theme.colors.primary; // Fynlo orange from theme
+  // Fynlo Orange for empty cart, Red for cart with items
+  const fynloOrange = '#FF6D00';
+  const fynloRed = '#FF3B30';
+
+  const iconColor = count > 0 ? fynloRed : fynloOrange;
 
   return (
     <TouchableOpacity style={styles.container} onPress={onPress} accessibilityRole="button" testID={testID}>
