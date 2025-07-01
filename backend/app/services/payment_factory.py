@@ -1,9 +1,10 @@
 from typing import Dict, Any, Optional, List
 from decimal import Decimal
-from .payment_providers import PaymentProvider
+from .payment_providers.base_provider import BasePaymentProvider, IGatewayRefund
 from .stripe_provider import StripeProvider
 from .square_provider import SquareProvider
 from .sumup_provider import SumUpProvider
+from .payment_providers.cash_provider import CashProvider # Import CashProvider
 from .smart_routing import SmartRoutingService, RoutingStrategy
 from .payment_analytics import PaymentAnalyticsService
 from ..core.config import settings
@@ -16,11 +17,11 @@ class PaymentProviderFactory:
     """Factory for creating and managing payment providers with smart routing"""
     
     def __init__(self):
-        self.providers: Dict[str, PaymentProvider] = {}
+        self.providers: Dict[str, BasePaymentProvider] = {} # Changed type hint
         self.smart_router = None
         self.analytics_service = None
         self._initialize_providers()
-    
+
     def _initialize_smart_routing(self, db_session):
         """Initialize smart routing service with database session"""
         if not self.analytics_service:
@@ -52,11 +53,26 @@ class PaymentProviderFactory:
                 "api_key": settings.SUMUP_API_KEY,
                 "merchant_code": settings.SUMUP_MERCHANT_CODE
             })
-    
-    def get_provider(self, provider_name: str) -> Optional[PaymentProvider]:
+
+        # Initialize CashProvider (does not require settings typically)
+        self.providers["cash"] = CashProvider()
+        logger.info("Cash provider initialized.")
+
+    def get_provider(self, provider_name: str) -> Optional[BasePaymentProvider]: # Changed return type hint
         """Get a specific payment provider by name"""
-        return self.providers.get(provider_name.lower())
-    
+        provider = self.providers.get(provider_name.lower())
+        if not provider:
+            logger.warning(f"Payment provider '{provider_name}' not found or not configured.")
+        return provider
+
+    def get_refund_provider(self, provider_name: str) -> Optional[IGatewayRefund]:
+        """Get a specific payment provider that implements IGatewayRefund."""
+        provider = self.get_provider(provider_name)
+        if isinstance(provider, IGatewayRefund):
+            return provider
+        logger.warning(f"Provider '{provider_name}' does not support refunds or is not correctly configured.")
+        return None
+
     async def select_optimal_provider(
         self,
         amount: Decimal,
@@ -65,7 +81,7 @@ class PaymentProviderFactory:
         force_provider: Optional[str] = None,
         strategy: RoutingStrategy = RoutingStrategy.BALANCED,
         db_session = None
-    ) -> PaymentProvider:
+    ) -> BasePaymentProvider: # Changed return type hint
         """
         Select the optimal payment provider using smart routing based on:
         - Transaction amount and restaurant volume

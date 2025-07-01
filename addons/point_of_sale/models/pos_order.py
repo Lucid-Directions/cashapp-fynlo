@@ -366,8 +366,13 @@ class PosOrder(models.Model):
         help='The rate of the currency to the currency of rate applicable at the date of the order')
 
     state = fields.Selection(
-        [('draft', 'New'), ('cancel', 'Cancelled'), ('paid', 'Paid'), ('done', 'Posted'), ('invoiced', 'Invoiced')],
+        [('draft', 'New'), ('cancel', 'Cancelled'), ('paid', 'Paid'), ('done', 'Posted'), ('invoiced', 'Invoiced'),
+         ('refunded', 'Refunded'), ('partially_refunded', 'Partially Refunded')], # Added new states
         'Status', readonly=True, copy=False, default='draft', index=True)
+
+    refund_ids = fields.One2many('pos.order.refund', 'order_id', string='Refunds') # Updated to correct model name
+    # refund_details = fields.Json(string="Refund Details", help="Stores details of partial refunds if not using separate model") # Kept commented out
+
 
     account_move = fields.Many2one('account.move', string='Invoice', readonly=True, copy=False, index="btree_not_null")
     picking_ids = fields.One2many('stock.picking', 'pos_order_id')

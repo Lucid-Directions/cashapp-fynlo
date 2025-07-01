@@ -3,25 +3,34 @@ from decimal import Decimal
 from typing import Dict, Any, Optional
 import uuid
 from datetime import datetime
-from .payment_providers import PaymentProvider, PaymentStatus
+from .payment_providers import PaymentProvider, PaymentStatus # This might need to be BasePaymentProvider now
+from .payment_providers.base_provider import BasePaymentProvider, RefundItemDetail # Import new base and interface
+import logging
 
-class SquareProvider(PaymentProvider):
+logger = logging.getLogger(__name__)
+
+class SquareProvider(BasePaymentProvider): # Inherit from BasePaymentProvider
     """Square payment provider implementation"""
-    
+
     def __init__(self, config: Dict[str, Any]):
-        super().__init__(config)
+        # Assuming BasePaymentProvider's __init__ takes api_key, api_secret, config
+        # We need to map Square's config to these.
+        # Square uses access_token primarily.
+        super().__init__(
+            api_key=config.get("access_token"), # Use access_token as api_key
+            config=config
+        )
         self.client = squareup.Client(
-            access_token=config.get("access_token"),
-            environment=config.get("environment", "sandbox")  # Default to sandbox
+            access_token=self.api_key, # Use the stored api_key
+            environment=config.get("environment", "sandbox")
         )
         self.location_id = config.get("location_id")
-        # auto_complete should be sourced from config, true by default if not specified
         self.auto_complete = config.get("custom_settings", {}).get("auto_complete", True)
-        self.fee_percentage = Decimal(config.get("fee_percentage", "0.0175"))  # 1.75%
-        self.fee_fixed = Decimal(config.get("fee_fixed", "0.00"))  # No fixed fee
+        self.fee_percentage = Decimal(config.get("fee_percentage", "0.0175"))
+        self.fee_fixed = Decimal(config.get("fee_fixed", "0.00"))
         self.provider_name = "square"
 
-    async def create_payment(
+    async def process_payment( # Renamed from create_payment to match BasePaymentProvider
         self,
         amount: Decimal,
         currency: str = "GBP",
@@ -244,61 +253,106 @@ class SquareProvider(PaymentProvider):
 
     async def refund_payment(
         self,
-        transaction_id: str,
-        amount: Optional[Decimal] = None,
-        reason: Optional[str] = None
+        transaction_id: str, # This is Square's payment_id
+        amount_to_refund: Decimal,
+        reason: Optional[str] = None,
+        items_to_refund: Optional[List[RefundItemDetail]] = None, # Square API supports line item refunds on an Order
+        order_id: Optional[str] = None, # Fynlo's order ID, for logging/reference
+        **kwargs: Any
     ) -> Dict[str, Any]:
+        """
+        Processes a refund with Square.
+        If items_to_refund are provided and a Square order_id (from original payment) is available,
+        it can attempt an itemized refund. Otherwise, it's an general amount-based refund against the payment.
+        """
         try:
-            # Get the original payment to determine amount
-            payment_result = self.client.payments.get_payment(payment_id=transaction_id)
-            
-            if not payment_result.is_success():
+            # Square's refund API primarily works on a payment_id.
+            # For itemized refunds, it's more complex and usually tied to a Square Order object.
+            # We'll focus on refunding a payment by its ID and amount.
+            # If `items_to_refund` is provided, it's mostly for our internal logging or if a
+            # more advanced Square Order refund is implemented later.
+
+            # Ensure amount is positive for the request
+            if amount_to_refund <= 0:
+                logger.error(f"Square refund_payment error: Refund amount must be positive. Received: {amount_to_refund}")
+                return {"success": False, "error": "Refund amount must be positive.", "status": "failed"}
+
+            # Get the original payment to confirm currency and check total amount if not partial
+            # This is also good for verifying the payment_id exists before attempting refund.
+            original_payment_response = self.client.payments.get_payment(payment_id=transaction_id)
+            if original_payment_response.is_error():
+                logger.error(f"Square: Failed to retrieve original payment {transaction_id} for refund: {original_payment_response.errors}")
                 return {
-                    "provider": self.provider_name,
-                    "status": PaymentStatus.FAILED.value,
-                    "error": "Payment not found"
+                    "success": False,
+                    "error": f"Original payment {transaction_id} not found or error fetching it.",
+                    "status": "failed",
+                    "raw_response": original_payment_response.body if hasattr(original_payment_response, 'body') else original_payment_response.errors
                 }
             
-            payment = payment_result.body.get('payment', {})
-            refund_amount = int(amount * 100) if amount else payment['amount_money']['amount']
-            
-            refund_request = {
+            original_payment = original_payment_response.body.get('payment', {})
+            original_amount_money = original_payment.get('amount_money', {})
+            currency = original_amount_money.get('currency', 'GBP') # Default to GBP if not found
+
+            refund_amount_cents = int(amount_to_refund * 100)
+
+            refund_body: Dict[str, Any] = {
                 "idempotency_key": str(uuid.uuid4()),
-                "payment_id": transaction_id,
+                "payment_id": transaction_id, # This is the Square payment ID to refund
                 "amount_money": {
-                    "amount": refund_amount,
-                    "currency": payment['amount_money']['currency']
+                    "amount": refund_amount_cents,
+                    "currency": currency
                 }
             }
-            
+
             if reason:
-                refund_request["reason"] = reason
+                refund_body["reason"] = reason
             
-            result = self.client.refunds.refund_payment(body=refund_request)
-            
+            # If a Square order_id was associated with the original payment, it might be useful for context
+            # or more advanced refund types (e.g., itemized against a Square Order).
+            square_order_id_from_payment = original_payment.get('order_id')
+            if square_order_id_from_payment and items_to_refund:
+              # This would require using client.refunds.create_refund() and potentially different body structure
+              # For now, we use client.payments.refund_payment() which is amount-based on a payment_id.
+              # Square's CreateRefund endpoint on the RefundsApi is more flexible for itemized.
+              # Let's stick to refunding the payment for now as per existing structure.
+              logger.info(f"Square: Itemized refund info provided for Fynlo order {order_id}, but applying amount-based refund to payment {transaction_id}. Square Order ID was {square_order_id_from_payment}.")
+
+
+            logger.info(f"Attempting Square refund for payment_id: {transaction_id}, amount: {amount_to_refund} {currency}")
+            # Using the PaymentRefundsApi's refund_payment method
+            result = self.client.refunds.refund_payment(body=refund_body)
+
+
             if result.is_success():
                 refund = result.body.get('refund', {})
+                logger.info(f"Square refund successful: {refund.get('id')} for payment {transaction_id}")
                 return {
-                    "provider": self.provider_name,
+                    "success": True,
                     "refund_id": refund.get('id'),
-                    "transaction_id": transaction_id,
-                    "status": PaymentStatus.REFUNDED.value,
-                    "amount": refund['amount_money']['amount'],
-                    "created_at": refund.get('created_at')
+                    "gateway_transaction_id": transaction_id, # Original payment ID
+                    "status": refund.get('status', 'COMPLETED').lower(), # Square status: PENDING, COMPLETED, REJECTED, FAILED
+                    "amount_refunded": Decimal(str(refund.get('amount_money', {}).get('amount', 0))) / 100,
+                    "currency": refund.get('amount_money', {}).get('currency'),
+                    "reason": refund.get('reason'),
+                    "created_at": refund.get('created_at'),
+                    "raw_response": result.body
                 }
             else:
+                logger.error(f"Square refund failed for payment {transaction_id}: {result.errors}")
                 return {
-                    "provider": self.provider_name,
-                    "status": PaymentStatus.FAILED.value,
-                    "error": str(result.errors)
+                    "success": False,
+                    "error": str(result.errors),
+                    "status": "failed",
+                    "raw_response": result.body if result.body else result.errors
                 }
         except Exception as e:
+            logger.exception(f"Square refund_payment unexpected error for transaction {transaction_id}: {e}")
             return {
-                "provider": self.provider_name,
-                "status": PaymentStatus.FAILED.value,
-                "error": str(e)
+                "success": False,
+                "error": str(e),
+                "status": "failed"
             }
-    
+
     async def create_checkout(
         self,
         amount: Decimal,

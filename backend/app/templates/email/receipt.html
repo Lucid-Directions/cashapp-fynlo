@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fynlo Receipt</title>
+    <style>
+        body {
+            font-family: Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        p {
+            margin-bottom: 10px;
+        }
+        strong {
+            color: #3498db;
+        }
+        .refund-message {
+            color: #E74C3C;
+            background-color: #fcebea;
+            border: 1px solid #f8c4c4;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            text-align: left;
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #ecf0f1;
+        }
+        .total-row td {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        hr {
+            border: 0;
+            border-top: 1px solid #eee;
+            margin: 20px 0;
+        }
+        .footer {
+            text-align: center;
+            font-size: 0.9em;
+            color: #7f8c8d;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Thank you for your {{ 'business' if type=='sale' else 'patience with this process' }}!</h2>
+
+        <p>This email confirms details regarding order <strong>#{{ order.order_number if order.order_number else order.number }}</strong>.</p>
+
+        {% if type == 'refund' %}
+            <div class="refund-message">
+                A refund of <strong>£{{ '%.2f'|format(amount) }}</strong> has been processed for this order.
+            </div>
+        {% endif %}
+
+        <h3>Order Summary:</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th style="text-align:right;">Qty</th>
+                    <th style="text-align:right;">Unit Price</th>
+                    <th style="text-align:right;">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if order.items %}
+                    {% for line in order.items %}  {# Assuming order.items is the correct list of line items #}
+                        <tr>
+                            <td>{{ line.name if line.name else (line.product_name if line.product_name else 'N/A') }}</td>
+                            <td align="right">{{ line.quantity if line.quantity else (line.qty if line.qty else 'N/A') }}</td>
+                            <td align="right">£{{ '%.2f'|format(line.unit_price if line.unit_price else 0) }}</td>
+                            <td align="right">£{{ '%.2f'|format(line.total_price if line.total_price else (line.total if line.total else 0)) }}</td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr><td colspan="4">No item details available for this order.</td></tr>
+                {% endif %}
+            </tbody>
+        </table>
+
+        <hr>
+
+        {# Display original totals for context, especially for refunds #}
+        <p>Original Order Subtotal: £{{ '%.2f'|format(order.subtotal if order.subtotal else 0) }}</p>
+        <p>Original Order Tax: £{{ '%.2f'|format(order.tax_amount if order.tax_amount else 0) }}</p>
+        <p>Original Order Service Charge: £{{ '%.2f'|format(order.service_charge if order.service_charge else 0) }}</p>
+        <p><strong>Original Order Total: £{{ '%.2f'|format(order.total_amount if order.total_amount else order.total) }}</strong></p>
+
+        {% if type == 'refund' %}
+            <hr>
+            <p style="font-weight:bold; font-size: 1.2em;">Refund Amount: <span style="color:#E74C3C;">£{{ '%.2f'|format(amount) }}</span></p>
+            {% if order.reason_for_refund %} {# Assuming reason might be passed via order object for context #}
+                 <p>Reason for refund: {{ order.reason_for_refund }}</p>
+            {% endif %}
+        {% endif %}
+
+        <div class="footer">
+            <p>If you have any questions, please contact us.</p>
+            <p>Fynlo POS</p>
+        </div>
+    </div>
+</body>
+</html>
