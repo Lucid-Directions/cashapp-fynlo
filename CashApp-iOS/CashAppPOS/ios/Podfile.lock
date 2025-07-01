@@ -455,6 +455,10 @@ PODS:
     - RCT-Folly (= 2021.07.22.00)
     - React-Core
     - Sentry/HybridSDK (= 8.52.1)
+  - RNSquareInAppPayments (1.6.3):
+    - React
+    - SquareBuyerVerificationSDK (= 1.6.3)
+    - SquareInAppPaymentsSDK (= 1.6.3)
   - RNSVG (15.12.0):
     - React-Core
   - RNVectorIcons (10.2.0):
@@ -462,6 +466,8 @@ PODS:
     - React-Core
   - Sentry/HybridSDK (8.52.1)
   - SocketRocket (0.6.1)
+  - SquareBuyerVerificationSDK (1.6.3)
+  - SquareInAppPaymentsSDK (1.6.3)
   - Stripe (23.27.6):
     - StripeApplePay (= 23.27.6)
     - StripeCore (= 23.27.6)
@@ -557,8 +563,11 @@ DEPENDENCIES:
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - "RNSentry (from `../node_modules/@sentry/react-native`)"
+  - RNSquareInAppPayments (from `../node_modules/react-native-square-in-app-payments`)
   - RNSVG (from `../node_modules/react-native-svg`)
   - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
+  - SquareBuyerVerificationSDK
+  - SquareInAppPaymentsSDK
   - "stripe-react-native (from `../node_modules/@stripe/stripe-react-native`)"
   - sumup-react-native (from `../node_modules/sumup-react-native-alpha`)
   - SumUpSDK (~> 4.0)
@@ -569,6 +578,8 @@ SPEC REPOS:
     - fmt
     - Sentry
     - SocketRocket
+    - SquareBuyerVerificationSDK
+    - SquareInAppPaymentsSDK
     - Stripe
     - StripeApplePay
     - StripeCore
@@ -684,6 +695,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-screens"
   RNSentry:
     :path: "../node_modules/@sentry/react-native"
+  RNSquareInAppPayments:
+    :path: "../node_modules/react-native-square-in-app-payments"
   RNSVG:
     :path: "../node_modules/react-native-svg"
   RNVectorIcons:
@@ -749,10 +762,13 @@ SPEC CHECKSUMS:
   RNReanimated: a954cbe1f0967ad8dc07cb7a6399821b87de48a5
   RNScreens: 3290cb437913b054c06ed910e18c07372324eb0a
   RNSentry: 63704192a6f765e57ec6ebe88e1e2291eb110975
+  RNSquareInAppPayments: 4f88784516fec07b025feb6c132baf317afc6096
   RNSVG: 38b68c0fa36345e937b5cf49e709a7cd2ac6a625
   RNVectorIcons: 4a5bf25944f3f8157ec86845a967fb10f29bceef
   Sentry: 2cbbe3592f30050c60e916c63c7f5a2fa584005e
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
+  SquareBuyerVerificationSDK: d325f473a724cfa5684a837296a307152ca52854
+  SquareInAppPaymentsSDK: 4d7f1e984fee5d8d7dbd44a67661ca1aedee7f76
   Stripe: 9fec845645e39f371e6898926d096fd9c2feb5a5
   stripe-react-native: 4d22dfe6c98fbafb77b875c7a9bbf47ca227680f
   StripeApplePay: 5f017e8dfe259fafbab70137776189deef754bb2
@@ -766,6 +782,6 @@ SPEC CHECKSUMS:
   SumUpSDK: 4ab1160fef9ea5e0778c8ebed3a6f8e2370dbf05
   Yoga: ef534101bb891fb09bae657417f34d399c1efe38
 
-PODFILE CHECKSUM: ab37516a6a10e9546decdd805a8d67fc1eee381d
+PODFILE CHECKSUM: 5cfce377ce41fe128d1f9c5226e08eec88cf4ab2
 
 COCOAPODS: 1.16.2

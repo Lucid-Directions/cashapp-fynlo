@@ -336,15 +336,10 @@ const QRCodePaymentScreen: React.FC = () => {
     },
     qrContainer: {
       alignItems: 'center',
-      backgroundColor: 'white',
       padding: 20,
       borderRadius: 16,
       marginBottom: 30,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 8,
-      elevation: 4,
+      ...require('../../utils/ShadowUtils').createOptimizedShadow('medium', 'white'),
     },
     loadingContainer: {
       width: 200,
@@ -421,15 +416,22 @@ const QRCodePaymentScreen: React.FC = () => {
   });
   
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={handleCancel}>
-          <Icon name="close" size={24} color={theme.colors.text} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>QR Code Payment</Text>
-        <View style={{ width: 24 }} />
-      </View>
+    <QRPaymentErrorBoundary onReset={() => {
+      // Reset component state and retry QR generation
+      setPaymentStatus('loading');
+      setErrorMessage('');
+      setQrPayment(null);
+      initializeQRPayment();
+    }}>
+      <SafeAreaView style={styles.container}>
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={handleCancel}>
+            <Icon name="close" size={24} color={theme.colors.text} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>QR Code Payment</Text>
+          <View style={{ width: 24 }} />
+        </View>
       
       {/* Content */}
       <View style={styles.content}>
@@ -512,6 +514,7 @@ const QRCodePaymentScreen: React.FC = () => {
         )}
       </View>
     </SafeAreaView>
+    </QRPaymentErrorBoundary>
   );
 };
 

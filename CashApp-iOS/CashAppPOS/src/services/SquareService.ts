@@ -6,6 +6,7 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 import { PaymentRequest, PaymentResult } from './PaymentService';
 
 // Square SDK imports - conditionally loaded to prevent crashes
@@ -21,7 +22,7 @@ try {
   SQIPApplePay = SquareSDK.SQIPApplePay;
   SQIPGooglePay = SquareSDK.SQIPGooglePay;
 } catch (error) {
-  console.warn('Square SDK not available. Square payments will be disabled.');
+  console.warn('Square SDK not available. Square payments will be disabled. Please install dependencies with: npm install && cd ios && pod install');
 }
 
 export interface SquareConfig {
@@ -105,7 +106,7 @@ class SquareServiceClass {
       if (SQIPCore) {
         await SQIPCore.setSquareApplicationId(config.applicationId);
       } else {
-        throw new Error('Square SDK not available. Please rebuild the app.');
+        throw new Error(this.getSDKUnavailableMessage());
       }
       
       this.initialized = true;
@@ -139,7 +140,7 @@ class SquareServiceClass {
           amount: amount,
           currency: currency,
           status: 'failed',
-          errorMessage: 'Square SDK not available. Please rebuild the app.',
+          errorMessage: this.getSDKUnavailableMessage(),
         };
       }
       
@@ -242,7 +243,7 @@ class SquareServiceClass {
             status: 'failed',
             paymentMethod: paymentMethod,
             deviceSupported: false,
-            errorMessage: 'Square SDK not available. Please rebuild the app.',
+            errorMessage: this.getSDKUnavailableMessage(),
           };
         }
         await SQIPApplePay.initializeApplePay(this.config.applicationId);
@@ -275,7 +276,7 @@ class SquareServiceClass {
             status: 'failed',
             paymentMethod: paymentMethod,
             deviceSupported: false,
-            errorMessage: 'Square SDK not available. Please rebuild the app.',
+            errorMessage: this.getSDKUnavailableMessage(),
           };
         }
         await SQIPGooglePay.initializeGooglePay(
@@ -626,6 +627,20 @@ class SquareServiceClass {
       return typeof SQIPCore !== 'undefined' && SQIPCore !== null;
     } catch (error) {
       return false;
+    }
+  }
+
+  /**
+   * Get platform-specific error message for SDK unavailability
+   */
+  private getSDKUnavailableMessage(): string {
+    const isSimulator = Platform.OS === 'ios' && __DEV__;
+    const baseMessage = 'Square SDK not available.';
+    
+    if (isSimulator) {
+      return `${baseMessage} Run: npm install && cd ios && pod install && npm run build:ios`;
+    } else {
+      return `${baseMessage} Please contact support or reinstall the app.`;
     }
   }
 
