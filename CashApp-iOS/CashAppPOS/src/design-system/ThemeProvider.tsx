@@ -129,7 +129,7 @@ interface ThemeProviderProps {
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   children,
   defaultTheme = 'light',
-  defaultColorTheme = 'orange'
+  defaultColorTheme = 'default'
 }) => {
   const [themeMode, setThemeModeState] = useState<ThemeMode>(defaultTheme);
   const [colorTheme, setColorThemeState] = useState<ColorTheme>(defaultColorTheme);
@@ -183,7 +183,13 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
         }
         
         if (savedColorTheme && colorThemeOptions.find(option => option.id === savedColorTheme)) {
-          setColorThemeState(savedColorTheme as ColorTheme);
+          // If orange theme is stored, reset to default green theme
+          if (savedColorTheme === 'orange') {
+            setColorThemeState('default');
+            await AsyncStorage.setItem(COLOR_THEME_STORAGE_KEY, 'default');
+          } else {
+            setColorThemeState(savedColorTheme as ColorTheme);
+          }
         }
       } catch (error) {
         console.warn('Failed to load theme preferences:', error);
