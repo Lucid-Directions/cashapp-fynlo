@@ -63,11 +63,11 @@ const colorThemeOptions: ColorThemeOption[] = [
   },
   {
     id: 'orange',
-    label: 'Sunset Orange',
-    primary: '#F97316',
-    secondary: '#EA580C',
-    accent: '#FB923C',
-    description: 'Vibrant sunset orange',
+    label: 'Fynlo Orange',
+    primary: '#FF6D00',
+    secondary: '#121212',
+    accent: '#FF8F00',
+    description: 'Official Fynlo brand colours',
   },
   {
     id: 'red',
@@ -129,7 +129,7 @@ interface ThemeProviderProps {
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   children,
   defaultTheme = 'light',
-  defaultColorTheme = 'default'
+  defaultColorTheme = 'orange'
 }) => {
   const [themeMode, setThemeModeState] = useState<ThemeMode>(defaultTheme);
   const [colorTheme, setColorThemeState] = useState<ColorTheme>(defaultColorTheme);
