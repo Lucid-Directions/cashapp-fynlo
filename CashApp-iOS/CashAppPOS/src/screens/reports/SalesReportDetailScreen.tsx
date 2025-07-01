@@ -8,10 +8,19 @@ import {
   ScrollView,
   TouchableOpacity,
   Dimensions,
+  ActivityIndicator, // Will be replaced by LoadingView
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
-import { generateSalesHistory } from '../../utils/mockDataGenerator';
+// import { generateSalesHistory } from '../../utils/mockDataGenerator'; // Removed
+import DataService from '../../services/DataService'; // Added
+import LoadingView from '../../components/feedback/LoadingView'; // Added
+import ComingSoon from '../../components/feedback/ComingSoon'; // Added
+
+// Mock ENV flag
+const ENV = {
+  FEATURE_REPORTS: false, // Set to true to enable, false to show ComingSoon
+};
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 const isTablet = screenWidth > 768;
@@ -59,59 +68,50 @@ interface SalesData {
 const SalesReportDetailScreen = () => {
   const navigation = useNavigation();
   const [salesData, setSalesData] = useState<SalesData[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true); // Added
+  const [error, setError] = useState<string | null>(null); // Added
   const [selectedPeriod, setSelectedPeriod] = useState('today');
-  const [totalSales, setTotalSales] = useState(0);
-  const [totalTransactions, setTotalTransactions] = useState(0);
+  const [totalSales, setTotalSales] = useState(0); // Will be derived from salesData or returned by service
+  const [totalTransactions, setTotalTransactions] = useState(0); // Will be derived or returned by service
 
   useEffect(() => {
-    loadSalesData();
+    if (ENV.FEATURE_REPORTS) {
+      loadSalesData();
+    } else {
+      setIsLoading(false);
+    }
   }, [selectedPeriod]);
 
-  const loadSalesData = () => {
-    const endDate = new Date();
-    let startDate = new Date();
-    
-    switch (selectedPeriod) {
-      case 'today':
-        startDate.setHours(0, 0, 0, 0);
-        break;
-      case 'week':
-        startDate.setDate(startDate.getDate() - 7);
-        break;
-      case 'month':
-        startDate.setMonth(startDate.getMonth() - 1);
-        break;
-      case 'year':
-        startDate.setFullYear(startDate.getFullYear() - 1);
-        break;
+  const loadSalesData = async () => { // Modified
+    setIsLoading(true);
+    setError(null);
+    try {
+      const dataService = DataService.getInstance();
+      // Assuming getSalesReportDetail returns data in SalesData[] shape for the selectedPeriod
+      // Or an object containing SalesData[] and pre-calculated totals.
+      // For now, assume it returns SalesData[] and we recalculate totals.
+      const data = await dataService.getSalesReportDetail(selectedPeriod);
+      setSalesData(data || []);
+
+      // Recalculate totals if service returns raw data
+      if (data) {
+        const total = data.reduce((sum, day) => sum + day.dailySales, 0);
+        const totalTrans = data.reduce((sum, day) => sum + day.transactions, 0);
+        setTotalSales(total);
+        setTotalTransactions(totalTrans);
+      } else {
+        setTotalSales(0);
+        setTotalTransactions(0);
+      }
+
+    } catch (e: any) {
+      setError(e.message || 'Failed to load sales report.');
+      setSalesData([]);
+      setTotalSales(0);
+      setTotalTransactions(0);
+    } finally {
+      setIsLoading(false);
     }
-
-    const history = generateSalesHistory(startDate);
-    const processedData: SalesData[] = history.map(day => ({
-      date: day.date,
-      dailySales: day.total,
-      transactions: day.transactions,
-      averageOrder: day.total / Math.max(day.transactions, 1),
-      topItems: day.topItems.map(item => ({
-        name: item.name,
-        sold: item.quantity,
-        revenue: item.revenue,
-      })),
-      paymentMethods: {
-        card: day.paymentMethods.card,
-        cash: day.paymentMethods.cash,
-        mobile: day.paymentMethods.mobile,
-        qrCode: day.paymentMethods.giftCard, // Use giftCard as qrCode placeholder
-      },
-    }));
-
-    setSalesData(processedData);
-    
-    const total = processedData.reduce((sum, day) => sum + day.dailySales, 0);
-    const totalTrans = processedData.reduce((sum, day) => sum + day.transactions, 0);
-    
-    setTotalSales(total);
-    setTotalTransactions(totalTrans);
   };
 
   const formatCurrency = (amount: number) => {
@@ -159,8 +159,73 @@ const SalesReportDetailScreen = () => {
     return totals;
   };
 
-  const topItems = getTopSellingItems();
-  const paymentTotals = getPaymentMethodTotals();
+  const topItems = salesData.length > 0 ? getTopSellingItems() : [];
+  const paymentTotals = salesData.length > 0 ? getPaymentMethodTotals() : { card: 0, cash: 0, mobile: 0, qrCode: 0 };
+
+  if (!ENV.FEATURE_REPORTS) {
+    return <ComingSoon />;
+  }
+
+  if (isLoading) {
+    return <LoadingView message="Loading Sales Report..." />;
+  }
+
+  if (error) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+             <Icon name="arrow-back" size={24} color={Colors.white} />
+           </TouchableOpacity>
+           <Text style={styles.headerTitle}>Sales Report</Text>
+           <View style={{width: 24}} />{/* Placeholder for balance */}
+        </View>
+        <View style={styles.centeredError}>
+          <Icon name="error-outline" size={64} color={Colors.danger} />
+          <Text style={styles.errorTextHeader}>Error Loading Report</Text>
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity onPress={loadSalesData} style={styles.retryButton}>
+            <Text style={styles.retryButtonText}>Try Again</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // Handling for when salesData is empty after loading (no error)
+  if (salesData.length === 0) {
+     return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+             <Icon name="arrow-back" size={24} color={Colors.white} />
+           </TouchableOpacity>
+           <Text style={styles.headerTitle}>Sales Report</Text>
+            <TouchableOpacity style={styles.headerAction} onPress={() => {/* Share action */}}>
+              <Icon name="share" size={24} color={Colors.white} />
+            </TouchableOpacity>
+        </View>
+         <View style={styles.periodSelector}>
+          {['today', 'week', 'month', 'year'].map(period => (
+            <TouchableOpacity
+              key={period}
+              style={[styles.periodButton, selectedPeriod === period && styles.periodButtonActive]}
+              onPress={() => setSelectedPeriod(period)}
+            >
+              <Text style={[styles.periodText, selectedPeriod === period && styles.periodTextActive]}>
+                {period.charAt(0).toUpperCase() + period.slice(1)}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+        <View style={styles.centeredError}>
+          <Icon name="receipt-long" size={64} color={Colors.mediumGray} />
+          <Text style={styles.errorTextHeader}>No Sales Data</Text>
+          <Text style={styles.errorText}>There is no sales data available for the selected period.</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -550,6 +615,38 @@ const styles = StyleSheet.create({
   },
   spacer: {
     height: 40,
+  },
+  centeredError: { // Added
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: Colors.background, // Ensure background color
+  },
+  errorTextHeader: { // Added
+    fontSize: getFontSize(18),
+    fontWeight: 'bold',
+    color: Colors.danger,
+    marginTop: 16,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  errorText: { // Added
+    fontSize: getFontSize(14),
+    color: Colors.text,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  retryButton: { // Added
+    backgroundColor: Colors.primary,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  retryButtonText: { // Added
+    color: Colors.white,
+    fontSize: getFontSize(16),
+    fontWeight: '600',
   },
 });
 

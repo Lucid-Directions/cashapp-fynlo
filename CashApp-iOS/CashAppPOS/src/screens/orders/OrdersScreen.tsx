@@ -11,12 +11,21 @@ import {
   TextInput,
   Modal,
   RefreshControl,
+  ActivityIndicator, // Will be replaced by LoadingView
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
-import { generateSalesHistory } from '../../utils/mockDataGenerator';
+// import { generateSalesHistory } from '../../utils/mockDataGenerator'; // Removed
+import DataService from '../../services/DataService'; // Added
+import LoadingView from '../../components/feedback/LoadingView'; // Added
+import ComingSoon from '../../components/feedback/ComingSoon'; // Added
 import SimpleTextInput from '../../components/inputs/SimpleTextInput';
+
+// Mock ENV flag
+const ENV = {
+  FEATURE_ORDERS_HISTORY: true, // Set to true to enable, false to show ComingSoon
+};
 
 interface Order {
   id: string;
@@ -39,69 +48,45 @@ const OrdersScreen: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [showFilterModal, setShowFilterModal] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
+  const [refreshing, setRefreshing] = useState(false); // Keep for pull-to-refresh
+  const [isLoading, setIsLoading] = useState<boolean>(true); // Added
+  const [error, setError] = useState<string | null>(null); // Added
   const [dateRange, setDateRange] = useState('today');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showOrderDetails, setShowOrderDetails] = useState(false);
 
   useEffect(() => {
-    loadOrders();
+    if (ENV.FEATURE_ORDERS_HISTORY) {
+      loadOrders();
+    } else {
+      setIsLoading(false);
+    }
   }, [dateRange]);
 
   useEffect(() => {
-    filterOrders();
-  }, [orders, searchQuery, selectedFilter]);
-
-  const loadOrders = () => {
-    // Generate mock orders from sales history
-    const endDate = new Date();
-    let startDate = new Date();
-    
-    switch (dateRange) {
-      case 'today':
-        startDate.setHours(0, 0, 0, 0);
-        break;
-      case 'week':
-        startDate.setDate(startDate.getDate() - 7);
-        break;
-      case 'month':
-        startDate.setMonth(startDate.getMonth() - 1);
-        break;
-      case 'year':
-        startDate.setFullYear(startDate.getFullYear() - 1);
-        break;
+    if (ENV.FEATURE_ORDERS_HISTORY && !isLoading && !error) {
+      filterOrders();
+    } else {
+      setFilteredOrders([]);
     }
+  }, [orders, searchQuery, selectedFilter, isLoading, error]);
 
-    const salesHistory = generateSalesHistory(startDate);
-    const generatedOrders: Order[] = [];
-
-    salesHistory.forEach(day => {
-      const ordersPerDay = day.transactions;
-      for (let i = 0; i < ordersPerDay; i++) {
-        const orderTime = new Date(day.date);
-        orderTime.setHours(10 + Math.floor(Math.random() * 12));
-        orderTime.setMinutes(Math.floor(Math.random() * 60));
-
-        const status = Math.random() > 0.95 ? 'refunded' : 
-                      Math.random() > 0.98 ? 'cancelled' : 'completed';
-
-        const paymentMethods: Array<'card' | 'cash' | 'mobile' | 'qrCode'> = ['card', 'cash', 'mobile', 'qrCode'];
-        const paymentMethod = paymentMethods[Math.floor(Math.random() * paymentMethods.length)];
-
-        generatedOrders.push({
-          id: `ORD-${orderTime.getTime()}-${i}`,
-          date: orderTime,
-          customerName: Math.random() > 0.3 ? `Customer ${Math.floor(Math.random() * 1000)}` : undefined,
-          total: Math.round((15 + Math.random() * 85) * 100) / 100,
-          items: Math.floor(1 + Math.random() * 6),
-          status,
-          paymentMethod,
-          employee: day.employees[Math.floor(Math.random() * day.employees.length)].name
-        });
-      }
-    });
-
-    setOrders(generatedOrders.sort((a, b) => b.date.getTime() - a.date.getTime()));
+  const loadOrders = async () => { // Modified
+    setIsLoading(true);
+    setError(null);
+    setRefreshing(true);
+    try {
+      const dataService = DataService.getInstance();
+      // Assuming a getOrders method will be added to DataService, taking dateRange
+      const fetchedOrders = await dataService.getOrders(dateRange);
+      setOrders(fetchedOrders || []);
+    } catch (e: any) {
+      setError(e.message || 'Failed to load orders.');
+      setOrders([]);
+    } finally {
+      setIsLoading(false);
+      setRefreshing(false);
+    }
   };
 
   const filterOrders = () => {
@@ -219,6 +204,38 @@ const OrdersScreen: React.FC = () => {
 
   const stats = getOrderStats();
 
+  if (!ENV.FEATURE_ORDERS_HISTORY) {
+    return <ComingSoon />;
+  }
+
+  if (isLoading) {
+    return <LoadingView message="Loading Orders..." />;
+  }
+
+  const renderEmptyListComponent = () => {
+    if (error) {
+      return (
+        <View style={styles.emptyState}>
+          <Icon name="error-outline" size={64} color={theme.colors.danger} />
+          <Text style={[styles.emptyStateText, {color: theme.colors.text}]}>Error Loading Orders</Text>
+          <Text style={[styles.emptyStateSubtext, {color: theme.colors.text}]}>{error}</Text>
+          <TouchableOpacity onPress={loadOrders} style={[styles.retryButton, {backgroundColor: theme.colors.primary}]}>
+            <Text style={[styles.retryButtonText, {color: theme.colors.white}]}>Try Again</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+    return (
+      <View style={styles.emptyState}>
+        <Icon name="receipt" size={64} color={theme.colors.lightGray} />
+        <Text style={[styles.emptyStateText, {color: theme.colors.text}]}>No orders found</Text>
+        <Text style={[styles.emptyStateSubtext, {color: theme.colors.text}]}>
+          {searchQuery ? 'Try adjusting your search' : `No orders for selected period. Pull to refresh.`}
+        </Text>
+      </View>
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor={theme.colors.primary} barStyle="light-content" />
@@ -314,17 +331,10 @@ const OrdersScreen: React.FC = () => {
             refreshing={refreshing}
             onRefresh={onRefresh}
             colors={[theme.colors.primary]}
+            tintColor={theme.colors.primary} // For iOS
           />
         }
-        ListEmptyComponent={
-          <View style={styles.emptyState}>
-            <Icon name="receipt" size={64} color={theme.colors.lightGray} />
-            <Text style={styles.emptyStateText}>No orders found</Text>
-            <Text style={styles.emptyStateSubtext}>
-              {searchQuery ? 'Try adjusting your search' : 'Pull to refresh'}
-            </Text>
-          </View>
-        }
+        ListEmptyComponent={renderEmptyListComponent} // Updated
       />
 
 
@@ -725,6 +735,27 @@ const createStyles = (theme: any) => StyleSheet.create({
     height: 1,
     backgroundColor: theme.colors.border,
     marginVertical: 12,
+  },
+  // Styles for LoadingView and Error/Retry will be implicitly handled by LoadingView component
+  // but ensure emptyState styles are robust.
+  // Centered style for the LoadingView/ErrorView wrapper if not using Fullscreen component
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  // Specific retry button style if not part of a generic ErrorDisplayComponent
+  retryButton: {
+    marginTop: 20,
+    // backgroundColor: theme.colors.primary, // Applied inline
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    // color: theme.colors.white, // Applied inline
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 

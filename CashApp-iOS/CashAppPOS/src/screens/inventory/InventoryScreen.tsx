@@ -11,10 +11,20 @@ import {
   TextInput,
   Modal,
   Alert,
+  ActivityIndicator, // Will be replaced by LoadingView
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
-import { generateInventory, InventoryData } from '../../utils/mockDataGenerator';
+// import { generateInventory, InventoryData } from '../../utils/mockDataGenerator'; // Removed
+import DataService from '../../services/DataService'; // Added
+import { InventoryData } from '../../types'; // Updated import path
+import LoadingView from '../../components/feedback/LoadingView'; // Added
+import ComingSoon from '../../components/feedback/ComingSoon'; // Added
+
+// Mock ENV flag (would typically come from an env config file)
+const ENV = {
+  FEATURE_INVENTORY: false, // Set to true to enable the screen, false to show ComingSoon
+};
 
 // Clover POS Color Scheme
 const Colors = {
@@ -41,6 +51,8 @@ const InventoryScreen: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedItem, setSelectedItem] = useState<InventoryData | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true); // Added
+  const [error, setError] = useState<string | null>(null); // Added
   const [showRestockModal, setShowRestockModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editFormData, setEditFormData] = useState({
@@ -54,16 +66,35 @@ const InventoryScreen: React.FC = () => {
   });
 
   useEffect(() => {
-    loadInventory();
+    if (ENV.FEATURE_INVENTORY) {
+      loadInventory();
+    } else {
+      setIsLoading(false); // Not loading if feature is off
+    }
   }, []);
 
   useEffect(() => {
-    filterInventory();
-  }, [inventory, searchQuery, selectedCategory, selectedStatus]);
+    if (ENV.FEATURE_INVENTORY && !isLoading && !error) {
+      filterInventory();
+    } else {
+      setFilteredInventory([]);
+    }
+  }, [inventory, searchQuery, selectedCategory, selectedStatus, isLoading, error]);
 
-  const loadInventory = () => {
-    const inventoryData = generateInventory();
-    setInventory(inventoryData);
+  const loadInventory = async () => { // Modified
+    setIsLoading(true);
+    setError(null);
+    try {
+      const dataService = DataService.getInstance();
+      // Assuming a getInventory method will be added to DataService
+      const inventoryData = await dataService.getInventory();
+      setInventory(inventoryData || []);
+    } catch (e: any) {
+      setError(e.message || 'Failed to load inventory.');
+      setInventory([]); // Clear inventory on error
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const filterInventory = () => {
@@ -288,7 +319,39 @@ const InventoryScreen: React.FC = () => {
     total: inventory.length,
     lowStock: inventory.filter(item => item.currentStock <= item.minimumStock).length,
     outOfStock: inventory.filter(item => item.currentStock === 0).length,
-    totalValue: inventory.reduce((sum, item) => sum + (item.currentStock * item.unitCost), 0),
+    totalValue: inventory.length > 0 ? inventory.reduce((sum, item) => sum + (item.currentStock * item.unitCost), 0) : 0,
+  };
+
+  if (!ENV.FEATURE_INVENTORY) {
+    return <ComingSoon />;
+  }
+
+  if (isLoading) {
+    return <LoadingView message="Loading Inventory..." />;
+  }
+
+  const renderEmptyListComponent = () => {
+    if (error) {
+      return (
+        <View style={styles.emptyState}>
+          <Icon name="error-outline" size={64} color={Colors.danger} />
+          <Text style={styles.emptyStateText}>Error Loading Inventory</Text>
+          <Text style={styles.emptyStateSubtext}>{error}</Text>
+          <TouchableOpacity onPress={loadInventory} style={styles.retryButton}>
+            <Text style={styles.retryButtonText}>Try Again</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+    return (
+      <View style={styles.emptyState}>
+        <Icon name="inventory" size={64} color={Colors.lightGray} />
+        <Text style={styles.emptyStateText}>No items found</Text>
+        <Text style={styles.emptyStateSubtext}>
+          {searchQuery ? 'Try adjusting your search' : 'Add your first inventory item or pull to refresh'}
+        </Text>
+      </View>
+    );
   };
 
   return (
@@ -419,15 +482,9 @@ const InventoryScreen: React.FC = () => {
         keyExtractor={item => item.itemId.toString()}
         contentContainerStyle={styles.inventoryList}
         showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
-          <View style={styles.emptyState}>
-            <Icon name="inventory" size={64} color={Colors.lightGray} />
-            <Text style={styles.emptyStateText}>No items found</Text>
-            <Text style={styles.emptyStateSubtext}>
-              {searchQuery ? 'Try adjusting your search' : 'Add your first inventory item'}
-            </Text>
-          </View>
-        }
+        ListEmptyComponent={renderEmptyListComponent}
+        onRefresh={loadInventory} // Added
+        refreshing={isLoading} // Added
       />
 
       {/* Item Detail Modal */}
@@ -1250,6 +1307,27 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     marginLeft: 8,
+  },
+  // Styles for LoadingView and Error/Retry will be implicitly handled by LoadingView component
+  // but ensure emptyState styles are robust.
+  // Centered style for the LoadingView/ErrorView wrapper if not using Fullscreen component
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  // Specific retry button style if not part of a generic ErrorDisplayComponent
+  retryButton: {
+    marginTop: 20,
+    backgroundColor: Colors.primary,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: Colors.white,
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 

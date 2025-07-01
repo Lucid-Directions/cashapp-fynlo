@@ -8,12 +8,22 @@ import {
   ScrollView,
   TouchableOpacity,
   Dimensions,
+  ActivityIndicator, // Will be replaced by LoadingView
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
-import { generateSalesHistory } from '../../utils/mockDataGenerator';
+// import { generateSalesHistory } from '../../utils/mockDataGenerator'; // Removed
+import DataService from '../../services/DataService'; // Added
+import LoadingView from '../../components/feedback/LoadingView'; // Added
+import ComingSoon from '../../components/feedback/ComingSoon'; // Added
+
 
 const { width } = Dimensions.get('window');
+
+// Mock ENV flag
+const ENV = {
+  FEATURE_REPORTS: false, // Set to true to enable, false to show ComingSoon
+};
 
 const Colors = {
   primary: '#00A651',
@@ -58,90 +68,41 @@ interface FinancialData {
 
 const FinancialReportDetailScreen = () => {
   const navigation = useNavigation();
-  const [financialData, setFinancialData] = useState<FinancialData | null>(null);
+  const [reportData, setReportData] = useState<FinancialData | null>(null); // Renamed
+  const [isLoading, setIsLoading] = useState<boolean>(true); // Added
+  const [error, setError] = useState<string | null>(null); // Added
   const [selectedPeriod, setSelectedPeriod] = useState('month');
-  const [selectedView, setSelectedView] = useState('overview');
+  // const [selectedView, setSelectedView] = useState('overview'); // This state appears unused
 
   useEffect(() => {
-    loadFinancialData();
+    if (ENV.FEATURE_REPORTS) {
+      loadReportData();
+    } else {
+      setIsLoading(false); // Not loading if feature is off
+    }
   }, [selectedPeriod]);
 
-  const loadFinancialData = () => {
-    const endDate = new Date();
-    let startDate = new Date();
-    
-    switch (selectedPeriod) {
-      case 'week':
-        startDate.setDate(startDate.getDate() - 7);
-        break;
-      case 'month':
-        startDate.setMonth(startDate.getMonth() - 1);
-        break;
-      case 'quarter':
-        startDate.setMonth(startDate.getMonth() - 3);
-        break;
-      case 'year':
-        startDate.setFullYear(startDate.getFullYear() - 1);
-        break;
+  const loadReportData = async () => { // Renamed and made async
+    setIsLoading(true);
+    setError(null);
+    try {
+      const dataService = DataService.getInstance();
+      // Assuming getFinancialReportDetail returns data in FinancialData shape for the selectedPeriod
+      const data = await dataService.getFinancialReportDetail(selectedPeriod);
+      setReportData(data);
+    } catch (e: any) {
+      setError(e.message || 'Failed to load financial report.');
+      setReportData(null);
+    } finally {
+      setIsLoading(false);
     }
-
-    const salesHistory = generateSalesHistory(startDate);
-    const grossRevenue = salesHistory.reduce((sum, day) => sum + day.sales, 0);
-    
-    // Calculate expenses (realistic percentages for restaurant business)
-    const staffCosts = grossRevenue * 0.35; // 35% of revenue
-    const inventory = grossRevenue * 0.28; // 28% of revenue (food costs)
-    const rent = grossRevenue * 0.08; // 8% of revenue
-    const utilities = grossRevenue * 0.05; // 5% of revenue
-    const marketing = grossRevenue * 0.03; // 3% of revenue
-    const other = grossRevenue * 0.04; // 4% of revenue
-
-    const totalExpenses = staffCosts + inventory + rent + utilities + marketing + other;
-    
-    // Calculate taxes
-    const vatCollected = grossRevenue * 0.20; // 20% VAT
-    const serviceTax = grossRevenue * 0.125; // 12.5% service charge
-    const totalTaxes = vatCollected + serviceTax;
-    
-    const netRevenue = grossRevenue - totalTaxes;
-    const profit = netRevenue - totalExpenses;
-    const profitMargin = (profit / grossRevenue) * 100;
-
-    // Revenue breakdown
-    const dineIn = grossRevenue * 0.45;
-    const takeaway = grossRevenue * 0.30;
-    const delivery = grossRevenue * 0.20;
-    const catering = grossRevenue * 0.05;
-
-    const data: FinancialData = {
-      grossRevenue,
-      netRevenue,
-      totalExpenses,
-      profit,
-      profitMargin,
-      expenses: {
-        staffCosts,
-        inventory,
-        utilities,
-        rent,
-        marketing,
-        other,
-      },
-      revenueBySource: {
-        dineIn,
-        takeaway,
-        delivery,
-        catering,
-      },
-      taxData: {
-        vatCollected,
-        serviceTax,
-        totalTaxes,
-      },
-    };
-
-    setFinancialData(data);
   };
+
+  // The complex data transformation logic previously in loadFinancialData (calculating expenses, revenue sources from salesHistory)
+  // is now assumed to be handled by the backend or DataService.getFinancialReportDetail.
+  // If DataService.getFinancialReportDetail were to return raw sales history, this screen
+  // would need to retain that transformation logic, but it would operate on API data, not mock generated data.
+  // For this refactor's scope, we assume the service provides the necessary FinancialData structure.
 
   const formatCurrency = (amount: number) => {
     return `£${amount.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -173,16 +134,37 @@ const FinancialReportDetailScreen = () => {
     return colors[source as keyof typeof colors] || Colors.lightText;
   };
 
-  if (!financialData) {
+  if (!ENV.FEATURE_REPORTS) {
+    return <ComingSoon />;
+  }
+
+  if (isLoading) {
+    return <LoadingView message="Loading Financial Report..." />;
+  }
+
+  if (error || !reportData) {
     return (
       <SafeAreaView style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <Text>Loading financial data...</Text>
+        <View style={styles.header}>
+           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+             <Icon name="arrow-back" size={24} color={Colors.white} />
+           </TouchableOpacity>
+           <Text style={styles.headerTitle}>Financial Report</Text>
+           <View style={{width: 24}} />{/* Placeholder for balance */}
+        </View>
+        <View style={styles.centeredError}>
+          <Icon name="error-outline" size={64} color={Colors.danger} />
+          <Text style={styles.errorTextHeader}>Error Loading Report</Text>
+          <Text style={styles.errorText}>{error || 'No data available for the selected period.'}</Text>
+          <TouchableOpacity onPress={loadReportData} style={styles.retryButton}>
+            <Text style={styles.retryButtonText}>Try Again</Text>
+          </TouchableOpacity>
         </View>
       </SafeAreaView>
     );
   }
 
+  // If reportData is available, render the report:
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={Colors.primary} />
@@ -226,44 +208,44 @@ const FinancialReportDetailScreen = () => {
         {/* Key Metrics */}
         <View style={styles.summaryContainer}>
           <View style={[styles.summaryCard, { borderLeftColor: Colors.primary }]}>
-            <Text style={styles.summaryValue}>{formatCurrency(financialData.grossRevenue)}</Text>
+            <Text style={styles.summaryValue}>{formatCurrency(reportData.grossRevenue)}</Text>
             <Text style={styles.summaryLabel}>Gross Revenue</Text>
             <View style={[styles.trendIndicator, { backgroundColor: Colors.success }]}>
               <Icon name="trending-up" size={12} color={Colors.white} />
-              <Text style={styles.trendText}>+15.2%</Text>
+              <Text style={styles.trendText}>+15.2%</Text>{/* Placeholder trend */}
             </View>
           </View>
 
           <View style={[styles.summaryCard, { borderLeftColor: Colors.success }]}>
             <Text style={[styles.summaryValue, { color: Colors.success }]}>
-              {formatCurrency(financialData.profit)}
+              {formatCurrency(reportData.profit)}
             </Text>
             <Text style={styles.summaryLabel}>Net Profit</Text>
             <View style={[styles.trendIndicator, { backgroundColor: Colors.success }]}>
               <Icon name="trending-up" size={12} color={Colors.white} />
-              <Text style={styles.trendText}>+8.5%</Text>
+              <Text style={styles.trendText}>+8.5%</Text>{/* Placeholder trend */}
             </View>
           </View>
 
           <View style={[styles.summaryCard, { borderLeftColor: Colors.warning }]}>
             <Text style={[styles.summaryValue, { color: Colors.warning }]}>
-              {formatPercentage(financialData.profitMargin)}
+              {formatPercentage(reportData.profitMargin)}
             </Text>
             <Text style={styles.summaryLabel}>Profit Margin</Text>
             <View style={[styles.trendIndicator, { backgroundColor: Colors.warning }]}>
               <Icon name="trending-flat" size={12} color={Colors.white} />
-              <Text style={styles.trendText}>-1.2%</Text>
+              <Text style={styles.trendText}>-1.2%</Text>{/* Placeholder trend */}
             </View>
           </View>
 
           <View style={[styles.summaryCard, { borderLeftColor: Colors.danger }]}>
             <Text style={[styles.summaryValue, { color: Colors.danger }]}>
-              {formatCurrency(financialData.totalExpenses)}
+              {formatCurrency(reportData.totalExpenses)}
             </Text>
             <Text style={styles.summaryLabel}>Total Expenses</Text>
             <View style={[styles.trendIndicator, { backgroundColor: Colors.danger }]}>
               <Icon name="trending-up" size={12} color={Colors.white} />
-              <Text style={styles.trendText}>+12.1%</Text>
+              <Text style={styles.trendText}>+12.1%</Text>{/* Placeholder trend */}
             </View>
           </View>
         </View>
@@ -275,35 +257,35 @@ const FinancialReportDetailScreen = () => {
             <View style={styles.plRow}>
               <Text style={styles.plLabel}>Gross Revenue</Text>
               <Text style={[styles.plValue, { color: Colors.success }]}>
-                {formatCurrency(financialData.grossRevenue)}
+                {formatCurrency(reportData.grossRevenue)}
               </Text>
             </View>
             
             <View style={styles.plRow}>
               <Text style={styles.plLabel}>Less: VAT ({formatPercentage(20)})</Text>
               <Text style={[styles.plValue, { color: Colors.danger }]}>
-                -{formatCurrency(financialData.taxData.vatCollected)}
+                -{formatCurrency(reportData.taxData.vatCollected)}
               </Text>
             </View>
             
             <View style={styles.plRow}>
               <Text style={styles.plLabel}>Less: Service Tax ({formatPercentage(12.5)})</Text>
               <Text style={[styles.plValue, { color: Colors.danger }]}>
-                -{formatCurrency(financialData.taxData.serviceTax)}
+                -{formatCurrency(reportData.taxData.serviceTax)}
               </Text>
             </View>
             
             <View style={[styles.plRow, styles.plRowDivider]}>
               <Text style={[styles.plLabel, { fontWeight: 'bold' }]}>Net Revenue</Text>
               <Text style={[styles.plValue, { fontWeight: 'bold', color: Colors.primary }]}>
-                {formatCurrency(financialData.netRevenue)}
+                {formatCurrency(reportData.netRevenue)}
               </Text>
             </View>
             
             <View style={styles.plRow}>
               <Text style={styles.plLabel}>Total Expenses</Text>
               <Text style={[styles.plValue, { color: Colors.danger }]}>
-                -{formatCurrency(financialData.totalExpenses)}
+                -{formatCurrency(reportData.totalExpenses)}
               </Text>
             </View>
             
@@ -314,10 +296,10 @@ const FinancialReportDetailScreen = () => {
                 { 
                   fontWeight: 'bold', 
                   fontSize: 16,
-                  color: financialData.profit >= 0 ? Colors.success : Colors.danger 
+                  color: reportData.profit >= 0 ? Colors.success : Colors.danger
                 }
               ]}>
-                {formatCurrency(financialData.profit)}
+                {formatCurrency(reportData.profit)}
               </Text>
             </View>
           </View>
@@ -327,8 +309,8 @@ const FinancialReportDetailScreen = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Expense Breakdown</Text>
           <View style={styles.card}>
-            {Object.entries(financialData.expenses).map(([key, value]) => {
-              const percentage = (value / financialData.totalExpenses) * 100;
+            {Object.entries(reportData.expenses).map(([key, value]) => {
+              const percentage = (value / reportData.totalExpenses) * 100;
               return (
                 <View key={key} style={styles.expenseRow}>
                   <View style={styles.expenseInfo}>
@@ -369,8 +351,8 @@ const FinancialReportDetailScreen = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Revenue by Source</Text>
           <View style={styles.card}>
-            {Object.entries(financialData.revenueBySource).map(([key, value]) => {
-              const percentage = (value / financialData.grossRevenue) * 100;
+            {Object.entries(reportData.revenueBySource).map(([key, value]) => {
+              const percentage = (value / reportData.grossRevenue) * 100;
               return (
                 <View key={key} style={styles.revenueRow}>
                   <View style={styles.revenueInfo}>
@@ -413,18 +395,18 @@ const FinancialReportDetailScreen = () => {
           <View style={styles.card}>
             <View style={styles.taxRow}>
               <Text style={styles.taxLabel}>VAT Collected (20%)</Text>
-              <Text style={styles.taxValue}>{formatCurrency(financialData.taxData.vatCollected)}</Text>
+              <Text style={styles.taxValue}>{formatCurrency(reportData.taxData.vatCollected)}</Text>
             </View>
             
             <View style={styles.taxRow}>
               <Text style={styles.taxLabel}>Service Tax (12.5%)</Text>
-              <Text style={styles.taxValue}>{formatCurrency(financialData.taxData.serviceTax)}</Text>
+              <Text style={styles.taxValue}>{formatCurrency(reportData.taxData.serviceTax)}</Text>
             </View>
             
             <View style={[styles.taxRow, styles.taxRowTotal]}>
               <Text style={[styles.taxLabel, { fontWeight: 'bold' }]}>Total Taxes</Text>
               <Text style={[styles.taxValue, { fontWeight: 'bold', color: Colors.primary }]}>
-                {formatCurrency(financialData.taxData.totalTaxes)}
+                {formatCurrency(reportData.taxData.totalTaxes)}
               </Text>
             </View>
             
@@ -719,6 +701,37 @@ const styles = StyleSheet.create({
   },
   spacer: {
     height: 40,
+  },
+  centeredError: { // Added
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  errorTextHeader: { // Added
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: Colors.danger,
+    marginTop: 16,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  errorText: { // Added
+    fontSize: 14,
+    color: Colors.text,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  retryButton: { // Added
+    backgroundColor: Colors.primary,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  retryButtonText: { // Added
+    color: Colors.white,
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 

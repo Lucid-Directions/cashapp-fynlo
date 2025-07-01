@@ -23,11 +23,11 @@ export interface FeatureFlags {
 // -----------------------------------------------------------------------------
 const DEFAULT_FLAGS: FeatureFlags = {
   USE_REAL_API: envBool('USE_REAL_API', true),
-  TEST_API_MODE: envBool('TEST_API_MODE', true),
+  TEST_API_MODE: envBool('TEST_API_MODE', false), // Default to false for production
   ENABLE_PAYMENTS: envBool('ENABLE_PAYMENTS', false),
   ENABLE_HARDWARE: envBool('ENABLE_HARDWARE', false),
   SHOW_DEV_MENU: envBool('SHOW_DEV_MENU', IS_DEV),
-  MOCK_AUTHENTICATION: envBool('MOCK_AUTHENTICATION', true),
+  MOCK_AUTHENTICATION: envBool('MOCK_AUTHENTICATION', false), // Default to false for production
 };
 
 /**
@@ -442,6 +442,99 @@ class DataService {
       backend: this.isBackendAvailable,
       flags: this.getFeatureFlags(),
     };
+  }
+
+  // --- Stubs for new methods ---
+  // TODO(real API): Implement actual API calls for these methods
+
+  async getCustomers(): Promise<any[]> {
+    console.warn('DataService.getCustomers is a stub and not implemented.');
+    // In a real scenario, this would call this.db.getCustomers() or similar
+    // which in turn makes an API call.
+    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
+      // return this.db.getCustomers();
+      throw new Error('DataService.getCustomers not implemented yet');
+    }
+    return Promise.resolve([]); // Return empty array for now
+  }
+
+  async getInventory(): Promise<any[]> {
+    console.warn('DataService.getInventory is a stub and not implemented.');
+    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
+      throw new Error('DataService.getInventory not implemented yet');
+    }
+    return Promise.resolve([]);
+  }
+
+  async getEmployees(): Promise<any[]> {
+    console.warn('DataService.getEmployees is a stub and not implemented.');
+     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
+      throw new Error('DataService.getEmployees not implemented yet');
+    }
+    return Promise.resolve([]);
+  }
+
+  async getWeekSchedule(weekStart: Date, employees: any[]): Promise<any | null> {
+    console.warn('DataService.getWeekSchedule is a stub and not implemented.');
+    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
+      throw new Error('DataService.getWeekSchedule not implemented yet');
+    }
+    return Promise.resolve({ weekStart, shifts: [] });
+  }
+
+  async getOrders(dateRange: string): Promise<any[]> {
+    console.warn('DataService.getOrders is a stub and not implemented.');
+    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
+      // Example: return this.db.getOrdersByDateRange(dateRange);
+      throw new Error('DataService.getOrders not implemented yet');
+    }
+    return Promise.resolve([]);
+  }
+
+  async getFinancialReportDetail(period: string): Promise<any | null> {
+    console.warn('DataService.getFinancialReportDetail is a stub and not implemented.');
+    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
+      throw new Error('DataService.getFinancialReportDetail not implemented yet');
+    }
+    return Promise.resolve(null); // Or a default structure
+  }
+
+  async getSalesReportDetail(period: string): Promise<any[]> { // Should return SalesData[]
+    console.warn('DataService.getSalesReportDetail is a stub and not implemented.');
+    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
+      throw new Error('DataService.getSalesReportDetail not implemented yet');
+    }
+    return Promise.resolve([]);
+  }
+
+  async getStaffReportDetail(period: string): Promise<any[]> { // Should return StaffMember[]
+    console.warn('DataService.getStaffReportDetail is a stub and not implemented.');
+    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
+      throw new Error('DataService.getStaffReportDetail not implemented yet');
+    }
+    return Promise.resolve([]);
+  }
+
+  async getReportsDashboardData(): Promise<any | null> {
+    console.warn('DataService.getReportsDashboardData is a stub and not implemented.');
+    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
+      throw new Error('DataService.getReportsDashboardData not implemented yet');
+    }
+    return Promise.resolve({
+      todaySummary: { totalSales: 0, transactions: 0, averageOrder: 0 },
+      weeklyLabor: { totalActualHours: 0, totalLaborCost: 0, efficiency: 0 },
+      topItemsToday: [],
+      topPerformersToday: [],
+    });
+  }
+
+  async getUserProfile(): Promise<any | null> {
+    console.warn('DataService.getUserProfile is a stub and not implemented.');
+    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
+      // return this.db.getUserProfile();
+      throw new Error('DataService.getUserProfile not implemented yet');
+    }
+    return Promise.resolve({ id: 1, name: 'Default User', email: 'user@example.com', role: 'admin' });
   }
 }
 

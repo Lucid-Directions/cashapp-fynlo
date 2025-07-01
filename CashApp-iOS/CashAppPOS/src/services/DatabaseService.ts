@@ -170,8 +170,7 @@ class DatabaseService {
       return response.data || [];
     } catch (error) {
       console.error('Failed to fetch products:', error);
-      // Return mock data for development
-      return this.getMockProducts();
+      throw error; // Re-throw the error
     }
   }
 
@@ -184,7 +183,7 @@ class DatabaseService {
       return response.data || [];
     } catch (error) {
       console.error('Failed to fetch products by category:', error);
-      return [];
+      throw error; // Re-throw the error
     }
   }
 
@@ -198,7 +197,7 @@ class DatabaseService {
       return response.data || [];
     } catch (error) {
       console.error('Failed to fetch categories:', error);
-      return this.getMockCategories();
+      throw error; // Re-throw the error
     }
   }
 
@@ -326,10 +325,10 @@ class DatabaseService {
         method: 'GET',
       });
       
-      return response.data || this.getMockFloorPlan();
+      return response.data || null;
     } catch (error) {
       console.error('Failed to fetch floor plan:', error);
-      return this.getMockFloorPlan();
+      throw error;
     }
   }
 
@@ -386,10 +385,10 @@ class DatabaseService {
         method: 'GET',
       });
       
-      return response.data || this.getMockDailyReport();
+      return response.data || null;
     } catch (error) {
       console.error('Failed to fetch daily sales report:', error);
-      return this.getMockDailyReport();
+      throw error;
     }
   }
 
@@ -407,10 +406,10 @@ class DatabaseService {
         method: 'GET',
       });
       
-      return response.data || this.getMockSalesSummary();
+      return response.data || null;
     } catch (error) {
       console.error('Failed to fetch sales summary:', error);
-      return this.getMockSalesSummary();
+      throw error;
     }
   }
 
@@ -432,167 +431,6 @@ class DatabaseService {
   }
 
   // Mock data for development (will be removed when backend is connected)
-  private getMockProducts(): Product[] {
-    return [
-      { id: 1, name: 'Classic Burger', price: 12.99, category: 'Main', image: '🍔', available_in_pos: true, active: true },
-      { id: 2, name: 'Caesar Salad', price: 9.99, category: 'Salads', image: '🥗', available_in_pos: true, active: true },
-      { id: 3, name: 'Margherita Pizza', price: 15.99, category: 'Main', image: '🍕', available_in_pos: true, active: true },
-      { id: 4, name: 'Chicken Wings', price: 11.99, category: 'Appetizers', image: '🍗', available_in_pos: true, active: true },
-      { id: 5, name: 'Fish & Chips', price: 14.99, category: 'Main', image: '🐟', available_in_pos: true, active: true },
-      { id: 6, name: 'Chocolate Cake', price: 6.99, category: 'Desserts', image: '🍰', available_in_pos: true, active: true },
-      { id: 7, name: 'Coca Cola', price: 2.99, category: 'Drinks', image: '🥤', available_in_pos: true, active: true },
-      { id: 8, name: 'French Fries', price: 4.99, category: 'Sides', image: '🍟', available_in_pos: true, active: true },
-    ];
-  }
-
-  private getMockCategories(): Category[] {
-    return [
-      { id: 1, name: 'Main', active: true },
-      { id: 2, name: 'Appetizers', active: true },
-      { id: 3, name: 'Salads', active: true },
-      { id: 4, name: 'Sides', active: true },
-      { id: 5, name: 'Desserts', active: true },
-      { id: 6, name: 'Drinks', active: true },
-    ];
-  }
-
-  private getMockFloorPlan(): any {
-    return {
-      tables: [
-        {
-          id: '1',
-          name: 'T1',
-          display_name: 'Main Floor - Table T1',
-          capacity: 4,
-          status: 'available',
-          section: { id: '1', name: 'Main Floor', color: '#3498db' },
-          stats: { orders_today: 3, revenue_today: 125.50 }
-        },
-        {
-          id: '2',
-          name: 'T2',
-          display_name: 'Main Floor - Table T2',
-          capacity: 2,
-          status: 'occupied',
-          section: { id: '1', name: 'Main Floor', color: '#3498db' },
-          current_order: { id: '101', name: 'Order 101', amount: 45.99 },
-          server: { id: '1', name: 'John Doe' },
-          occupied_since: new Date().toISOString(),
-          stats: { orders_today: 5, revenue_today: 225.00 }
-        },
-        {
-          id: '3',
-          name: 'T3',
-          display_name: 'Main Floor - Table T3',
-          capacity: 6,
-          status: 'reserved',
-          section: { id: '1', name: 'Main Floor', color: '#3498db' },
-          stats: { orders_today: 2, revenue_today: 180.00 }
-        },
-        {
-          id: '4',
-          name: 'P1',
-          display_name: 'Patio - Table P1',
-          capacity: 4,
-          status: 'available',
-          section: { id: '2', name: 'Patio', color: '#27ae60' },
-          stats: { orders_today: 1, revenue_today: 65.00 }
-        },
-        {
-          id: '5',
-          name: 'P2',
-          display_name: 'Patio - Table P2',
-          capacity: 4,
-          status: 'cleaning',
-          section: { id: '2', name: 'Patio', color: '#27ae60' },
-          stats: { orders_today: 4, revenue_today: 195.00 }
-        },
-        {
-          id: '6',
-          name: 'B1',
-          display_name: 'Bar - Table B1',
-          capacity: 2,
-          status: 'available',
-          section: { id: '3', name: 'Bar', color: '#e74c3c' },
-          stats: { orders_today: 6, revenue_today: 145.00 }
-        },
-      ],
-      sections: [
-        { id: '1', name: 'Main Floor', color: '#3498db', table_count: 3, total_capacity: 12 },
-        { id: '2', name: 'Patio', color: '#27ae60', table_count: 2, total_capacity: 8 },
-        { id: '3', name: 'Bar', color: '#e74c3c', table_count: 1, total_capacity: 2 },
-      ]
-    };
-  }
-
-  private getMockDailyReport(): any {
-    const today = new Date().toISOString().split('T')[0];
-    return {
-      report_info: {
-        type: 'daily',
-        date: today,
-        generated_at: new Date().toISOString(),
-        total_orders: 47
-      },
-      summary: {
-        total_sales: 1847.50,
-        net_sales: 1685.00,
-        total_tax: 162.50,
-        total_orders: 47,
-        average_ticket: 39.31,
-        total_items: 124,
-        average_items_per_order: 2.64,
-        refund_amount: 25.99,
-        refund_count: 1,
-        discount_amount: 89.75
-      },
-      hourly_breakdown: [
-        { hour: '09:00', sales: 45.50, orders: 2, items: 3 },
-        { hour: '10:00', sales: 128.75, orders: 4, items: 8 },
-        { hour: '11:00', sales: 234.20, orders: 7, items: 15 },
-        { hour: '12:00', sales: 387.90, orders: 12, items: 28 },
-        { hour: '13:00', sales: 445.60, orders: 11, items: 31 },
-        { hour: '14:00', sales: 198.30, orders: 5, items: 14 },
-        { hour: '15:00', sales: 156.75, orders: 3, items: 9 },
-        { hour: '16:00', sales: 89.25, orders: 2, items: 5 },
-        { hour: '17:00', sales: 161.25, orders: 1, items: 11 }
-      ],
-      payment_methods: [
-        { method: 'Card', amount: 1234.50, count: 35, orders: 35, percentage: 66.8 },
-        { method: 'Cash', amount: 455.75, count: 11, orders: 11, percentage: 24.7 },
-        { method: 'Apple Pay', amount: 157.25, count: 1, orders: 1, percentage: 8.5 }
-      ],
-      top_products: [
-        { name: 'Classic Burger', qty: 18, amount: 233.82, orders: 15, category: 'Main' },
-        { name: 'Margherita Pizza', qty: 12, amount: 191.88, orders: 11, category: 'Main' },
-        { name: 'Caesar Salad', qty: 8, amount: 79.92, orders: 8, category: 'Salads' },
-        { name: 'Chicken Wings', qty: 14, amount: 167.86, orders: 7, category: 'Appetizers' },
-        { name: 'French Fries', qty: 22, amount: 109.78, orders: 18, category: 'Sides' }
-      ]
-    };
-  }
-
-  private getMockSalesSummary(): any {
-    return {
-      period: {
-        from: new Date().toISOString().split('T')[0],
-        to: new Date().toISOString().split('T')[0]
-      },
-      summary: {
-        total_sales: 1847.50,
-        net_sales: 1685.00,
-        total_tax: 162.50,
-        total_orders: 47,
-        average_ticket: 39.31
-      },
-      order_types: {
-        dine_in: 32,
-        takeout: 12,
-        delivery: 3
-      },
-      generated_at: new Date().toISOString()
-    };
-  }
 
   async scanBarcode(): Promise<string | null> {
     // Placeholder for real barcode scanner integration (e.g., ML Kit)
@@ -611,6 +449,62 @@ class DatabaseService {
     // TODO: integrate with connected cash drawer hardware
     console.warn('openCashDrawer() not yet implemented in DatabaseService');
     return true;
+  }
+
+  // --- Stubs for new methods called by DataService ---
+  // TODO(real API): Implement actual API calls for these methods in DatabaseService
+
+  async getCustomers(): Promise<any[]> {
+    // Example: return this.apiRequest('/api/v1/customers');
+    console.warn('DatabaseService.getCustomers is a stub and not implemented.');
+    throw new Error('DatabaseService.getCustomers not implemented yet');
+    // return Promise.resolve([]); // Or throw error if DataService should handle the stubbing
+  }
+
+  async getInventory(): Promise<any[]> {
+    console.warn('DatabaseService.getInventory is a stub and not implemented.');
+    throw new Error('DatabaseService.getInventory not implemented yet');
+  }
+
+  async getEmployees(): Promise<any[]> {
+    console.warn('DatabaseService.getEmployees is a stub and not implemented.');
+    throw new Error('DatabaseService.getEmployees not implemented yet');
+  }
+
+  async getWeekSchedule(weekStart: Date, employees: any[]): Promise<any | null> {
+    console.warn('DatabaseService.getWeekSchedule is a stub and not implemented.');
+    throw new Error('DatabaseService.getWeekSchedule not implemented yet');
+  }
+
+  async getOrdersByDateRange(dateRange: string): Promise<any[]> { // Renamed to match DataService call intent
+    console.warn('DatabaseService.getOrdersByDateRange is a stub and not implemented.');
+    throw new Error('DatabaseService.getOrdersByDateRange not implemented yet');
+  }
+
+  async getFinancialReportDetail(period: string): Promise<any | null> {
+    console.warn('DatabaseService.getFinancialReportDetail is a stub and not implemented.');
+    throw new Error('DatabaseService.getFinancialReportDetail not implemented yet');
+  }
+
+  async getSalesReportDetail(period: string): Promise<any[]> {
+    console.warn('DatabaseService.getSalesReportDetail is a stub and not implemented.');
+    throw new Error('DatabaseService.getSalesReportDetail not implemented yet');
+  }
+
+  async getStaffReportDetail(period: string): Promise<any[]> {
+    console.warn('DatabaseService.getStaffReportDetail is a stub and not implemented.');
+    throw new Error('DatabaseService.getStaffReportDetail not implemented yet');
+  }
+
+  async getReportsDashboardData(): Promise<any | null> {
+    console.warn('DatabaseService.getReportsDashboardData is a stub and not implemented.');
+    throw new Error('DatabaseService.getReportsDashboardData not implemented yet');
+  }
+
+  async getUserProfile(): Promise<any | null> {
+    console.warn('DatabaseService.getUserProfile is a stub and not implemented.');
+    // Example: return this.apiRequest('/api/v1/users/profile');
+    throw new Error('DatabaseService.getUserProfile not implemented yet');
   }
 }
 

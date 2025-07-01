@@ -11,10 +11,13 @@ import {
   TextInput,
   Alert,
   Dimensions,
+  ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
-import { generateEmployees, EmployeeData } from '../../utils/mockDataGenerator';
+// import { generateEmployees, EmployeeData } from '../../utils/mockDataGenerator'; // Removed
+import DataService from '../../services/DataService'; // Added
+import { EmployeeData } from '../../types'; // Updated import path
 
 // Get screen dimensions for responsive design
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
@@ -69,8 +72,11 @@ const EmployeeScheduleScreen: React.FC = () => {
   const [weekSchedule, setWeekSchedule] = useState<WeekSchedule | null>(null);
   const [showAddShiftModal, setShowAddShiftModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string>('');
-  const [selectedEmployee, setSelectedEmployee] = useState<EmployeeData | null>(null);
+  // const [selectedEmployee, setSelectedEmployee] = useState<EmployeeData | null>(null); // Likely managed by newShift.employeeId
   const [viewMode, setViewMode] = useState<'week' | 'month'>('week');
+  const [isLoadingEmployees, setIsLoadingEmployees] = useState<boolean>(true);
+  const [isLoadingSchedule, setIsLoadingSchedule] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   
   // Add Shift Form State
   const [newShift, setNewShift] = useState({
@@ -83,21 +89,48 @@ const EmployeeScheduleScreen: React.FC = () => {
   });
 
   useEffect(() => {
-    loadEmployees();
-    loadWeekSchedule();
+    loadData();
   }, [currentWeek]);
 
-  const loadEmployees = () => {
-    const employeeData = generateEmployees();
-    setEmployees(employeeData);
+  const loadData = async () => {
+    setIsLoadingEmployees(true);
+    setIsLoadingSchedule(true);
+    setError(null);
+    const dataService = DataService.getInstance();
+
+    try {
+      // Fetch employees first
+      const employeeData = await dataService.getEmployees(); // Assuming this method will be added
+      setEmployees(employeeData || []);
+      setIsLoadingEmployees(false);
+
+      // Then fetch schedule (which might depend on employees or be standalone)
+      const weekStart = getWeekStart(currentWeek);
+      // Assuming getWeekSchedule takes weekStart and possibly employee list or fetches all
+      const scheduleData = await dataService.getWeekSchedule(weekStart, employeeData || []);
+      setWeekSchedule(scheduleData || { weekStart, shifts: [] });
+
+    } catch (e: any) {
+      setError(e.message || 'Failed to load schedule data.');
+      setEmployees([]);
+      setWeekSchedule({ weekStart: getWeekStart(currentWeek), shifts: [] });
+    } finally {
+      setIsLoadingEmployees(false);
+      setIsLoadingSchedule(false);
+    }
   };
 
-  const loadWeekSchedule = () => {
-    // Generate mock schedule data
-    const weekStart = getWeekStart(currentWeek);
-    const shifts = generateMockShifts(weekStart);
-    setWeekSchedule({ weekStart, shifts });
-  };
+  // const loadEmployees = () => { // Replaced by loadData
+  //   const employeeData = generateEmployees();
+  //   setEmployees(employeeData);
+  // };
+
+  // const loadWeekSchedule = () => { // Replaced by loadData
+  //   // Generate mock schedule data
+  //   const weekStart = getWeekStart(currentWeek);
+  //   const shifts = generateMockShifts(weekStart);
+  //   setWeekSchedule({ weekStart, shifts });
+  // };
 
   const getWeekStart = (date: Date): Date => {
     const weekStart = new Date(date);
@@ -108,74 +141,74 @@ const EmployeeScheduleScreen: React.FC = () => {
     return weekStart;
   };
 
-  const generateMockShifts = (weekStart: Date): Shift[] => {
-    const shifts: Shift[] = [];
-    const employeeIds = employees.map(emp => emp.id);
+  // const generateMockShifts = (weekStart: Date): Shift[] => { // Removed
+  //   const shifts: Shift[] = [];
+  //   const employeeIds = employees.map(emp => emp.id);
     
-    // Generate shifts for each day of the week
-    for (let day = 0; day < 7; day++) {
-      const currentDate = new Date(weekStart);
-      currentDate.setDate(weekStart.getDate() + day);
-      const dateStr = currentDate.toISOString().split('T')[0];
+  //   // Generate shifts for each day of the week
+  //   for (let day = 0; day < 7; day++) {
+  //     const currentDate = new Date(weekStart);
+  //     currentDate.setDate(weekStart.getDate() + day);
+  //     const dateStr = currentDate.toISOString().split('T')[0];
       
-      // Add morning shifts
-      if (day < 6) { // Monday to Saturday
-        shifts.push({
-          id: `morning-${day}-1`,
-          employeeId: employeeIds[0] || 'emp1',
-          employeeName: employees[0]?.name || 'Maria Rodriguez',
-          date: dateStr,
-          startTime: '08:00',
-          endTime: '16:00',
-          role: 'Manager',
-          status: day < 2 ? 'completed' : 'scheduled',
-          duration: 8,
-          notes: 'Opening shift'
-        });
+  //     // Add morning shifts
+  //     if (day < 6) { // Monday to Saturday
+  //       shifts.push({
+  //         id: `morning-${day}-1`,
+  //         employeeId: employeeIds[0] || 'emp1',
+  //         employeeName: employees[0]?.name || 'Maria Rodriguez',
+  //         date: dateStr,
+  //         startTime: '08:00',
+  //         endTime: '16:00',
+  //         role: 'Manager',
+  //         status: day < 2 ? 'completed' : 'scheduled',
+  //         duration: 8,
+  //         notes: 'Opening shift'
+  //       });
 
-        shifts.push({
-          id: `morning-${day}-2`,
-          employeeId: employeeIds[1] || 'emp2',
-          employeeName: employees[1]?.name || 'Carlos Martinez',
-          date: dateStr,
-          startTime: '09:00',
-          endTime: '17:00',
-          role: 'Cashier',
-          status: day < 2 ? 'completed' : 'confirmed',
-          duration: 8,
-        });
+  //       shifts.push({
+  //         id: `morning-${day}-2`,
+  //         employeeId: employeeIds[1] || 'emp2',
+  //         employeeName: employees[1]?.name || 'Carlos Martinez',
+  //         date: dateStr,
+  //         startTime: '09:00',
+  //         endTime: '17:00',
+  //         role: 'Cashier',
+  //         status: day < 2 ? 'completed' : 'confirmed',
+  //         duration: 8,
+  //       });
 
-        // Evening shifts
-        shifts.push({
-          id: `evening-${day}-1`,
-          employeeId: employeeIds[2] || 'emp3',
-          employeeName: employees[2]?.name || 'Sofia Hernandez',
-          date: dateStr,
-          startTime: '14:00',
-          endTime: '22:00',
-          role: 'Server',
-          status: day < 2 ? 'completed' : 'scheduled',
-          duration: 8,
-          notes: 'Closing shift'
-        });
-      } else if (day === 6) { // Sunday - reduced hours
-        shifts.push({
-          id: `sunday-${day}-1`,
-          employeeId: employeeIds[0] || 'emp1',
-          employeeName: employees[0]?.name || 'Maria Rodriguez',
-          date: dateStr,
-          startTime: '10:00',
-          endTime: '18:00',
-          role: 'Manager',
-          status: 'scheduled',
-          duration: 8,
-          notes: 'Sunday shift'
-        });
-      }
-    }
+  //       // Evening shifts
+  //       shifts.push({
+  //         id: `evening-${day}-1`,
+  //         employeeId: employeeIds[2] || 'emp3',
+  //         employeeName: employees[2]?.name || 'Sofia Hernandez',
+  //         date: dateStr,
+  //         startTime: '14:00',
+  //         endTime: '22:00',
+  //         role: 'Server',
+  //         status: day < 2 ? 'completed' : 'scheduled',
+  //         duration: 8,
+  //         notes: 'Closing shift'
+  //       });
+  //     } else if (day === 6) { // Sunday - reduced hours
+  //       shifts.push({
+  //         id: `sunday-${day}-1`,
+  //         employeeId: employeeIds[0] || 'emp1',
+  //         employeeName: employees[0]?.name || 'Maria Rodriguez',
+  //         date: dateStr,
+  //         startTime: '10:00',
+  //         endTime: '18:00',
+  //         role: 'Manager',
+  //         status: 'scheduled',
+  //         duration: 8,
+  //         notes: 'Sunday shift'
+  //       });
+  //     }
+  //   }
     
-    return shifts;
-  };
+  //   return shifts;
+  // };
 
   const getWeekDays = (): string[] => {
     if (!weekSchedule) return [];
@@ -312,6 +345,30 @@ const EmployeeScheduleScreen: React.FC = () => {
       .filter(shift => shift.employeeId === employeeId)
       .reduce((total, shift) => total + shift.duration, 0);
   };
+
+  if (isLoadingEmployees || isLoadingSchedule) {
+    return (
+      <SafeAreaView style={[styles.container, styles.centered]}>
+        <ActivityIndicator size="large" color={Colors.primary} />
+        <Text style={styles.loadingText}>
+          {isLoadingEmployees ? 'Loading Employees...' : 'Loading Schedule...'}
+        </Text>
+      </SafeAreaView>
+    );
+  }
+
+  if (error) {
+    return (
+      <SafeAreaView style={[styles.container, styles.centered]}>
+        <Icon name="error-outline" size={64} color={Colors.danger} />
+        <Text style={styles.errorTextHeader}>Error Loading Data</Text>
+        <Text style={styles.errorText}>{error}</Text>
+        <TouchableOpacity onPress={loadData} style={styles.retryButton}>
+          <Text style={styles.retryButtonText}>Try Again</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -961,6 +1018,42 @@ const styles = StyleSheet.create({
     color: Colors.text,
     minHeight: 80,
     textAlignVertical: 'top',
+  },
+  centered: { // Added
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  loadingText: { // Added
+    marginTop: 10,
+    fontSize: getFontSize(16),
+    color: Colors.darkGray,
+  },
+  errorTextHeader: { // Added
+    fontSize: getFontSize(18),
+    fontWeight: 'bold',
+    color: Colors.danger,
+    marginTop: 16,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  errorText: { // Added
+    fontSize: getFontSize(14),
+    color: Colors.text,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  retryButton: { // Added
+    backgroundColor: Colors.primary,
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    borderRadius: 8,
+  },
+  retryButtonText: { // Added
+    color: Colors.white,
+    fontSize: getFontSize(16),
+    fontWeight: '600',
   },
 });
 

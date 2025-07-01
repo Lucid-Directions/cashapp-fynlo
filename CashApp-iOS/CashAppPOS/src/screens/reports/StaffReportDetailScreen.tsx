@@ -8,10 +8,19 @@ import {
   ScrollView,
   TouchableOpacity,
   Dimensions,
+  ActivityIndicator, // Will be replaced by LoadingView
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
-import { generateSalesHistory } from '../../utils/mockDataGenerator';
+// import { generateSalesHistory } from '../../utils/mockDataGenerator'; // Removed
+import DataService from '../../services/DataService'; // Added
+import LoadingView from '../../components/feedback/LoadingView'; // Added
+import ComingSoon from '../../components/feedback/ComingSoon'; // Added
+
+// Mock ENV flag
+const ENV = {
+  FEATURE_REPORTS: false, // Set to true to enable, false to show ComingSoon
+};
 
 const { width } = Dimensions.get('window');
 
@@ -47,92 +56,39 @@ interface StaffMember {
 const StaffReportDetailScreen = () => {
   const navigation = useNavigation();
   const [staffData, setStaffData] = useState<StaffMember[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true); // Added
+  const [error, setError] = useState<string | null>(null); // Added
   const [selectedPeriod, setSelectedPeriod] = useState('today');
   const [selectedMetric, setSelectedMetric] = useState('sales');
 
   useEffect(() => {
-    loadStaffData();
+    if (ENV.FEATURE_REPORTS) {
+      loadStaffData();
+    } else {
+      setIsLoading(false);
+    }
   }, [selectedPeriod]);
 
-  const loadStaffData = () => {
-    const endDate = new Date();
-    let startDate = new Date();
-    
-    switch (selectedPeriod) {
-      case 'today':
-        startDate.setHours(0, 0, 0, 0);
-        break;
-      case 'week':
-        startDate.setDate(startDate.getDate() - 7);
-        break;
-      case 'month':
-        startDate.setMonth(startDate.getMonth() - 1);
-        break;
+  const loadStaffData = async () => { // Modified
+    setIsLoading(true);
+    setError(null);
+    try {
+      const dataService = DataService.getInstance();
+      // Assuming getStaffReportDetail returns data in StaffMember[] shape for the selectedPeriod
+      // and that this data is already processed (e.g., sorted, metrics calculated).
+      const data = await dataService.getStaffReportDetail(selectedPeriod);
+      setStaffData(data || []);
+    } catch (e: any) {
+      setError(e.message || 'Failed to load staff report.');
+      setStaffData([]);
+    } finally {
+      setIsLoading(false);
     }
-
-    const salesHistory = generateSalesHistory(startDate);
-    
-    // Extract staff data from sales history
-    const staffMap: { [key: string]: any } = {};
-    
-    salesHistory.forEach(day => {
-      day.employees.forEach(emp => {
-        if (!staffMap[emp.name]) {
-          // Determine role based on name or performance
-          const roles = ['Manager', 'Cashier', 'Server', 'Cook'];
-          const roleIndex = Math.abs(emp.name.charCodeAt(0) + emp.name.charCodeAt(1)) % roles.length;
-          
-          staffMap[emp.name] = {
-            id: emp.name.replace(/\s+/g, '').toLowerCase(),
-            name: emp.name,
-            role: roles[roleIndex],
-            avatar: emp.name.charAt(0).toUpperCase(),
-            totalSales: 0,
-            transactionsHandled: 0,
-            hoursWorked: 0,
-            shiftsCompleted: 0,
-          };
-        }
-        
-        staffMap[emp.name].totalSales += emp.sales;
-        staffMap[emp.name].transactionsHandled += emp.transactions;
-        staffMap[emp.name].hoursWorked += emp.hours; // Use 'hours' not 'hoursWorked'
-        staffMap[emp.name].shiftsCompleted += 1;
-      });
-    });
-
-    // Calculate derived metrics
-    const processedStaff: StaffMember[] = Object.values(staffMap).map((staff: any) => {
-      const averageOrderValue = staff.transactionsHandled > 0 
-        ? staff.totalSales / staff.transactionsHandled 
-        : 0;
-      
-      const efficiency = staff.hoursWorked > 0 
-        ? staff.totalSales / staff.hoursWorked 
-        : 0;
-      
-      const customerRating = 3.5 + Math.random() * 1.5; // Mock rating between 3.5-5.0
-      
-      let performance: 'excellent' | 'good' | 'average' | 'needs_improvement' = 'average';
-      if (efficiency > 100) performance = 'excellent';
-      else if (efficiency > 75) performance = 'good';
-      else if (efficiency > 50) performance = 'average';
-      else performance = 'needs_improvement';
-
-      return {
-        ...staff,
-        averageOrderValue,
-        efficiency,
-        customerRating,
-        performance,
-      };
-    });
-
-    // Sort by total sales descending
-    processedStaff.sort((a, b) => b.totalSales - a.totalSales);
-    
-    setStaffData(processedStaff);
   };
+
+  // The complex data transformation logic previously here (extracting staff from sales history, calculating metrics)
+  // is now assumed to be handled by the backend or DataService.getStaffReportDetail.
+  // For this refactor, we assume the service provides the necessary StaffMember[] structure with pre-calculated metrics.
 
   const formatCurrency = (amount: number) => {
     return `£${amount.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -200,8 +156,226 @@ const StaffReportDetailScreen = () => {
     return { totalSales, totalTransactions, totalHours, averageRating };
   };
 
-  const topPerformer = getTopPerformer();
-  const stats = getStaffStats();
+  const topPerformer = staffData.length > 0 ? getTopPerformer() : null;
+  const stats = getStaffStats(); // This will use staffData, which might be empty
+
+  if (!ENV.FEATURE_REPORTS) {
+    return <ComingSoon />;
+  }
+
+  if (isLoading) {
+    return <LoadingView message="Loading Staff Report..." />;
+  }
+
+  if (error) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+             <Icon name="arrow-back" size={24} color={Colors.white} />
+           </TouchableOpacity>
+           <Text style={styles.headerTitle}>Staff Report</Text>
+           <View style={{width: 24}} />{/* Placeholder for balance */}
+        </View>
+        <View style={styles.centeredError}>
+          <Icon name="error-outline" size={64} color={Colors.danger} />
+          <Text style={styles.errorTextHeader}>Error Loading Report</Text>
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity onPress={loadStaffData} style={styles.retryButton}>
+            <Text style={styles.retryButtonText}>Try Again</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // Handling for when staffData is empty after loading (no error)
+  // but still want to show the period selector etc.
+  const renderContent = () => {
+    if (staffData.length === 0) {
+      return (
+        <View style={styles.centeredError}>
+          <Icon name="people-outline" size={64} color={Colors.mediumGray} />
+          <Text style={styles.errorTextHeader}>No Staff Data</Text>
+          <Text style={styles.errorText}>There is no staff data available for the selected period.</Text>
+        </View>
+      );
+    }
+    return (
+      <>
+        {/* Top Performer */}
+        {topPerformer && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>
+              Top Performer ({selectedMetric})
+            </Text>
+            <View style={styles.topPerformerCard}>
+              <View style={styles.avatarContainer}>
+                <View style={[styles.avatar, { backgroundColor: Colors.primary }]}>
+                  <Text style={styles.avatarText}>{topPerformer.avatar}</Text>
+                </View>
+                <View style={styles.crownIcon}>
+                  <Icon name="emoji-events" size={20} color={Colors.warning} />
+                </View>
+              </View>
+
+              <View style={styles.performerInfo}>
+                <Text style={styles.performerName}>{topPerformer.name}</Text>
+                <Text style={styles.performerRole}>{topPerformer.role}</Text>
+
+                <View style={styles.performerStats}>
+                  <View style={styles.performerStat}>
+                    <Text style={styles.performerStatValue}>
+                      {formatCurrency(topPerformer.totalSales)}
+                    </Text>
+                    <Text style={styles.performerStatLabel}>Sales</Text>
+                  </View>
+                  <View style={styles.performerStat}>
+                    <Text style={styles.performerStatValue}>
+                      {topPerformer.transactionsHandled}
+                    </Text>
+                    <Text style={styles.performerStatLabel}>Orders</Text>
+                  </View>
+                  <View style={styles.performerStat}>
+                    <Text style={styles.performerStatValue}>
+                      {topPerformer.efficiency.toFixed(1)}/h
+                    </Text>
+                    <Text style={styles.performerStatLabel}>Efficiency</Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+          </View>
+        )}
+
+        {/* Metric Selector */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Sort by Performance</Text>
+          <View style={styles.metricSelector}>
+            {['sales', 'transactions', 'efficiency'].map(metric => (
+              <TouchableOpacity
+                key={metric}
+                style={[
+                  styles.metricButton,
+                  selectedMetric === metric && styles.metricButtonActive
+                ]}
+                onPress={() => setSelectedMetric(metric)}
+              >
+                <Text style={[
+                  styles.metricText,
+                  selectedMetric === metric && styles.metricTextActive
+                ]}>
+                  {metric.charAt(0).toUpperCase() + metric.slice(1)}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        {/* Staff List */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Staff Performance</Text>
+
+          {staffData
+            .sort((a, b) => {
+              switch (selectedMetric) {
+                case 'sales': return b.totalSales - a.totalSales;
+                case 'transactions': return b.transactionsHandled - a.transactionsHandled;
+                case 'efficiency': return b.efficiency - a.efficiency;
+                default: return 0;
+              }
+            })
+            .map((staff, index) => (
+            <View key={staff.id} style={styles.staffCard}>
+              <View style={styles.staffHeader}>
+                <View style={styles.staffBasicInfo}>
+                  <View style={[styles.avatar, { backgroundColor: Colors.secondary }]}>
+                    <Text style={styles.avatarText}>{staff.avatar}</Text>
+                  </View>
+
+                  <View style={styles.staffDetails}>
+                    <View style={styles.staffNameRow}>
+                      <Text style={styles.staffName}>{staff.name}</Text>
+                      <View style={styles.rankBadge}>
+                        <Text style={styles.rankText}>#{index + 1}</Text>
+                      </View>
+                    </View>
+
+                    <View style={styles.staffRoleRow}>
+                      <Icon name={getRoleIcon(staff.role)} size={16} color={Colors.lightText} />
+                      <Text style={styles.staffRole}>{staff.role}</Text>
+                    </View>
+                  </View>
+                </View>
+
+                <View style={styles.performanceIndicator}>
+                  <Icon
+                    name={getPerformanceIcon(staff.performance)}
+                    size={20}
+                    color={getPerformanceColor(staff.performance)}
+                  />
+                  <Text style={[
+                    styles.performanceText,
+                    { color: getPerformanceColor(staff.performance) }
+                  ]}>
+                    {staff.performance.replace('_', ' ').toUpperCase()}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.staffMetrics}>
+                <View style={styles.metricItem}>
+                  <Text style={styles.metricLabel}>Sales</Text>
+                  <Text style={styles.metricValue}>{formatCurrency(staff.totalSales)}</Text>
+                </View>
+
+                <View style={styles.metricItem}>
+                  <Text style={styles.metricLabel}>Orders</Text>
+                  <Text style={styles.metricValue}>{staff.transactionsHandled}</Text>
+                </View>
+
+                <View style={styles.metricItem}>
+                  <Text style={styles.metricLabel}>Avg Order</Text>
+                  <Text style={styles.metricValue}>{formatCurrency(staff.averageOrderValue)}</Text>
+                </View>
+
+                <View style={styles.metricItem}>
+                  <Text style={styles.metricLabel}>Hours</Text>
+                  <Text style={styles.metricValue}>{staff.hoursWorked.toFixed(1)}h</Text>
+                </View>
+
+                <View style={styles.metricItem}>
+                  <Text style={styles.metricLabel}>Efficiency</Text>
+                  <Text style={styles.metricValue}>{formatCurrency(staff.efficiency)}/h</Text>
+                </View>
+
+                <View style={styles.metricItem}>
+                  <Text style={styles.metricLabel}>Rating</Text>
+                  <Text style={styles.metricValue}>{staff.customerRating.toFixed(1)}★</Text>
+                </View>
+              </View>
+
+              {/* Performance Bar */}
+              <View style={styles.performanceBarContainer}>
+                <Text style={styles.performanceBarLabel}>Performance Score</Text>
+                <View style={styles.performanceBar}>
+                  <View
+                    style={[
+                      styles.performanceBarFill,
+                      {
+                        width: `${Math.min((staff.efficiency / 150) * 100, 100)}%`, // Example logic
+                        backgroundColor: getPerformanceColor(staff.performance)
+                      }
+                    ]}
+                  />
+                </View>
+              </View>
+            </View>
+          ))}
+        </View>
+      </>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -739,6 +913,38 @@ const styles = StyleSheet.create({
   },
   spacer: {
     height: 40,
+  },
+  centeredError: { // Added
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: Colors.background,
+  },
+  errorTextHeader: { // Added
+    fontSize: 18, // Using fixed size as getFontSize might not be defined in this scope
+    fontWeight: 'bold',
+    color: Colors.danger,
+    marginTop: 16,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  errorText: { // Added
+    fontSize: 14, // Using fixed size
+    color: Colors.text,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  retryButton: { // Added
+    backgroundColor: Colors.primary,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  retryButtonText: { // Added
+    color: Colors.white,
+    fontSize: 16, // Using fixed size
+    fontWeight: '600',
   },
 });
 
