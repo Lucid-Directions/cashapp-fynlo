@@ -661,6 +661,7 @@ const POSScreen: React.FC = () => {
             <TouchableOpacity
               style={styles.cartButton}
               onPress={() => setShowCartModal(true)}
+              testID="shopping-cart-button" // Added testID
             >
               <Icon name="shopping-cart" size={24} color={theme.colors.white} />
               {cartItemCount() > 0 && (
@@ -746,6 +747,7 @@ const POSScreen: React.FC = () => {
             columnWrapperStyle={styles.menuRow}
             contentContainerStyle={styles.menuGrid}
             showsVerticalScrollIndicator={false}
+            testID="menu-flat-list" // Added testID
           />
         </View>
       </View>
@@ -792,13 +794,16 @@ const POSScreen: React.FC = () => {
               </View>
             ) : (
               <>
-                <ScrollView style={styles.cartList}>
-                  {cart.map((item) => (
-                    <CartItem key={item.id} item={item} />
-                  ))}
-                </ScrollView>
+                <FlatList
+                  style={styles.cartList}
+                  data={cart}
+                  renderItem={({ item }) => <CartItem item={item} />}
+                  keyExtractor={(item) => item.id.toString()}
+                  contentContainerStyle={{ paddingBottom: 120 }} // Added padding for fixed footer
+                />
                 
-                <View style={styles.cartFooter}>
+                {/* Fixed Footer */}
+                <View style={styles.cartFooterFixed}>
                   <View style={styles.cartSummary}>
                     <View style={styles.summarySection}>
                       <Text style={styles.summarySectionTitle}>Order Summary</Text>
@@ -836,6 +841,7 @@ const POSScreen: React.FC = () => {
                       setShowCartModal(false);
                       setShowPaymentModal(true);
                     }}
+                    testID="charge-button" // Added testID
                   >
                     <Text style={styles.chargeButtonText}>
                       Charge {formatPrice(calculateCartTotal(), '£', { screenName: 'POSScreen', operation: 'payment_button_amount_display' })}
@@ -1419,6 +1425,22 @@ const createStyles = (theme: any) => StyleSheet.create({
     borderTopColor: theme.colors.border,
     backgroundColor: theme.colors.white,
     padding: 20,
+  },
+  cartFooterFixed: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.border,
+    backgroundColor: theme.colors.white,
+    padding: 20,
+    paddingBottom: Platform.OS === 'ios' ? 30 : 20, // Adjust padding for safe area on iOS
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 8,
   },
   cartSummary: {
     marginBottom: 20,
