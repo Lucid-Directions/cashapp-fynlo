@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { IS_DEV } from '../../env'; // Import IS_DEV
 import {
   StyleSheet,
   Text,
@@ -648,15 +649,18 @@ const POSScreen: React.FC = () => {
               <Icon name="qr-code-scanner" size={24} color={theme.colors.white} />
             </TouchableOpacity>
             
-            <TouchableOpacity
-              style={[styles.cartButton, { marginRight: 8 }]}
-              onPress={() => {
-                setShowSumUpTest(!showSumUpTest);
-                console.log('🧪 SumUp Test toggled:', !showSumUpTest);
-              }}
-            >
-              <Icon name="bug-report" size={20} color={theme.colors.white} />
-            </TouchableOpacity>
+            {IS_DEV && FLAGS.SHOW_DEV_MENU && (
+              <TouchableOpacity
+                testID="dev-mode-toggle-button"
+                style={[styles.cartButton, { marginRight: 8 }]}
+                onPress={() => {
+                  setShowSumUpTest(!showSumUpTest);
+                  console.log('🧪 SumUp Test toggled:', !showSumUpTest);
+                }}
+              >
+                <Icon name="bug-report" size={20} color={theme.colors.white} />
+              </TouchableOpacity>
+            )}
             
             <TouchableOpacity
               style={styles.cartButton}
