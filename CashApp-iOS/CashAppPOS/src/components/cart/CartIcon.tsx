@@ -7,14 +7,19 @@ interface Props {
   count: number;
   onPress?: () => void;
   testID?: string;
+  size?: number; // New size prop
 }
 
-const CartIcon: React.FC<Props> = ({ count, onPress, testID }) => {
+const CartIcon: React.FC<Props> = ({ count, onPress, testID, size = 28 }) => {
   const { theme } = useTheme();
   const styles = createStyles(theme);
+
+  // Determine icon color based on count and theme
+  const iconColor = count > 0 ? '#FF3B30' : theme.colors.primary; // Fynlo orange from theme
+
   return (
     <TouchableOpacity style={styles.container} onPress={onPress} accessibilityRole="button" testID={testID}>
-      <Icon name="shopping-cart" size={28} color={count > 0 ? '#FF3B30' : theme.colors.white} />
+      <Icon name="shopping-cart" size={size} color={iconColor} />
       {count > 0 && (
         <View style={styles.badge}>
           <Text style={styles.badgeTxt}>{count > 99 ? '99+' : count}</Text>
@@ -33,7 +38,7 @@ const createStyles = (theme: any) =>
       position: 'absolute',
       top: 2,
       right: 2,
-      backgroundColor: '#FF3B30',
+      backgroundColor: '#FF3B30', // Badge color remains red
       borderRadius: 9,
       minWidth: 18,
       height: 18,
@@ -42,7 +47,7 @@ const createStyles = (theme: any) =>
       paddingHorizontal: 2,
     },
     badgeTxt: {
-      color: theme.colors.white,
+      color: theme.colors.white, // Text color for badge
       fontSize: 11,
       fontWeight: '600',
     },
