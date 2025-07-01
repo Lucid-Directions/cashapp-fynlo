@@ -792,7 +792,6 @@ const POSScreen: React.FC = () => {
             testID="menu-flat-list" // Added testID
           />
         </View>
-      </View>
 
       {/* Cart Modal */}
       <Modal
