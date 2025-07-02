@@ -22,7 +22,6 @@ import DashboardScreen from '../screens/main/DashboardScreen';
 import ProfileScreen from '../screens/main/ProfileScreen';
 import HelpScreen from '../screens/support/HelpScreen';
 import SettingsNavigator from './SettingsNavigator';
-import useAppStore from '../store/useAppStore';
 import EnhancedPaymentScreen from '../screens/payment/EnhancedPaymentScreen';
 import ServiceChargeSelectionScreen from '../screens/payment/ServiceChargeSelectionScreen';
 import QRCodePaymentScreen from '../screens/payments/QRCodePaymentScreen';
@@ -34,7 +33,6 @@ const Stack = createStackNavigator<MainStackParamList>();
 
 const MainTabNavigator: React.FC = () => {
   const { theme } = useTheme();
-  const cartItemCount = useAppStore((state) => state.cartItemCount());
 
   return (
     <Tab.Navigator
@@ -81,7 +79,6 @@ const MainTabNavigator: React.FC = () => {
         component={POSScreen}
         options={{
           tabBarLabel: 'POS',
-          tabBarBadge: cartItemCount > 0 ? cartItemCount : undefined,
         }}
       />
       <Tab.Screen

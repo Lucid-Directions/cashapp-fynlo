@@ -619,14 +619,14 @@ const POSScreen: React.FC = () => {
               style={styles.menuQuantityButton}
               onPress={() => handleUpdateQuantity(item.id, existingItem.quantity - 1)}
             >
-              <Icon name="remove" size={18} color={theme.colors.white} />
+              <Icon name="remove" size={20} color={theme.colors.white} />
             </TouchableOpacity>
             <Text style={styles.menuQuantityText}>{existingItem.quantity}</Text>
             <TouchableOpacity
               style={styles.menuQuantityButton}
               onPress={() => handleUpdateQuantity(item.id, existingItem.quantity + 1)}
             >
-              <Icon name="add" size={18} color={theme.colors.white} />
+              <Icon name="add" size={20} color={theme.colors.white} />
             </TouchableOpacity>
           </View>
         )}
@@ -658,14 +658,14 @@ const POSScreen: React.FC = () => {
               style={styles.quantityButton}
               onPress={() => handleUpdateQuantity(item.id, item.quantity - 1)}
             >
-              <Icon name="remove" size={16} color={theme.colors.text} />
+              <Icon name="remove" size={20} color={theme.colors.text} />
             </TouchableOpacity>
             <Text style={styles.quantityText}>{item.quantity}</Text>
             <TouchableOpacity
               style={styles.quantityButton}
               onPress={() => handleUpdateQuantity(item.id, item.quantity + 1)}
             >
-              <Icon name="add" size={16} color={theme.colors.text} />
+              <Icon name="add" size={20} color={theme.colors.text} />
             </TouchableOpacity>
           </View>
           <Text style={styles.cartItemTotal}>
@@ -1237,17 +1237,19 @@ const createStyles = (theme: any) => StyleSheet.create({
     borderBottomColor: theme.colors.border,
   },
   categoryTabsContent: {
-    paddingHorizontal: 20,
-    paddingVertical: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    alignItems: 'center',
   },
   categoryTab: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     paddingVertical: 12,
-    marginRight: 12,
-    borderRadius: 25,
-    backgroundColor: theme.colors.background,
-    minHeight: 40,
+    marginRight: 8,
+    borderRadius: 24,
+    backgroundColor: theme.colors.surface,
+    minHeight: 44,
     justifyContent: 'center',
+    alignItems: 'center',
   },
   categoryTabActive: {
     backgroundColor: theme.colors.accent,
@@ -1262,28 +1264,30 @@ const createStyles = (theme: any) => StyleSheet.create({
     color: theme.colors.white,
   },
   menuGrid: {
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
     paddingBottom: 120,
   },
   menuRow: {
-    justifyContent: 'space-around',
-    paddingHorizontal: 10,
+    justifyContent: 'space-between',
+    paddingHorizontal: 0,
   },
   menuCard: {
     backgroundColor: theme.colors.cardBg,
     borderRadius: 16,
-    padding: 18,
-    margin: 6,
+    padding: 16,
+    marginHorizontal: 4,
+    marginVertical: 8,
     flex: 1,
     minHeight: 140,
-    width: (screenWidth - 80) / 3,
+    maxWidth: (screenWidth - 56) / 3, // 16*2 (outer padding) + 8*2 (inner margins) + 8*2 (card margins)
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowRadius: 4,
+    elevation: 3,
     borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.04)',
+    borderColor: theme.colors.border,
   },
   menuCardDisabled: {
     opacity: 0.6,
@@ -1322,6 +1326,29 @@ const createStyles = (theme: any) => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 8,
+  },
+  menuItemQuantityControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 8,
+  },
+  menuQuantityButton: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: theme.colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginHorizontal: 4,
+  },
+  menuQuantityText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: theme.colors.text,
+    marginHorizontal: 8,
+    minWidth: 20,
+    textAlign: 'center',
   },
   cartHeader: {
     flexDirection: 'row',
@@ -1421,12 +1448,14 @@ const createStyles = (theme: any) => StyleSheet.create({
     alignItems: 'center',
   },
   quantityButton: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: theme.colors.background,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: theme.colors.border,
   },
   quantityText: {
     fontSize: 14,
@@ -1742,8 +1771,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     fontWeight: 'bold',
   },
   searchBubbleStyle: {
-    // Potential custom styles for the search bubble container if needed
-    // e.g., marginRight: 10,
+    marginRight: 8,
   },
 });
 

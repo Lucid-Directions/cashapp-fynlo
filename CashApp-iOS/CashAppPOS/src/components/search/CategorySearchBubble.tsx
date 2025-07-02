@@ -91,10 +91,10 @@ const createStyles = (theme: any) =>
       flexDirection: 'row',
       alignItems: 'center',
       backgroundColor: theme.colors.surface, // Matches category pill background
-      borderRadius: 25, // Matches category pill border radius
-      paddingVertical: 10, // Adjusted for better visual balance
+      borderRadius: 24, // Matches category pill border radius
+      paddingVertical: 12, // Matches category tab padding
       paddingHorizontal: 16,
-      marginRight: 12, // Spacing from other category pills
+      marginRight: 8, // Consistent with category tab spacing
       height: 44, // Consistent height with category pills
       borderWidth: 1,
       borderColor: theme.colors.border,
@@ -103,10 +103,10 @@ const createStyles = (theme: any) =>
       flexDirection: 'row',
       alignItems: 'center',
       backgroundColor: theme.colors.surface,
-      borderRadius: 25,
+      borderRadius: 24,
       paddingVertical: 0, // Input handles its own padding
       paddingHorizontal: 16,
-      marginRight: 12,
+      marginRight: 8,
       height: 44, // Consistent height
       borderWidth: 1,
       borderColor: theme.colors.primary, // Highlight when active
