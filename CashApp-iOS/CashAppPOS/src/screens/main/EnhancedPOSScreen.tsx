@@ -26,6 +26,7 @@ import LazyLoadingWrapper from '../../components/performance/LazyLoadingWrapper'
 import { MenuItemSkeleton } from '../../components/performance/SkeletonLoader';
 import { usePerformanceMonitor, performanceUtils } from '../../hooks/usePerformanceMonitor';
 import { OptimizedGrid } from '../../components/performance/OptimizedFlatList';
+import CartIcon from '../../components/cart/CartIcon';
 
 // Get screen dimensions
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
@@ -615,17 +616,11 @@ const EnhancedPOSScreen: React.FC = () => {
           </View>
         </View>
 
-        <TouchableOpacity
-          style={styles.cartButton}
+        <CartIcon
+          count={cartItemCount()}
           onPress={() => setShowCartModal(true)}
-        >
-          <Icon name="shopping-cart" size={24} color={Colors.white} />
-          {cartItemCount() > 0 && (
-            <View style={styles.cartBadge}>
-              <Text style={styles.cartBadgeText}>{cartItemCount()}</Text>
-            </View>
-          )}
-        </TouchableOpacity>
+          testID="shopping-cart-button"
+        />
       </View>
 
       {/* Categories */}
@@ -801,27 +796,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.white,
     marginLeft: 8,
-  },
-  cartButton: {
-    padding: 8,
-    marginLeft: 12,
-  },
-  cartBadge: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    backgroundColor: Colors.danger,
-    borderRadius: 10,
-    minWidth: 20,
-    height: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 4,
-  },
-  cartBadgeText: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: Colors.white,
   },
   categoriesContainer: {
     backgroundColor: Colors.white,
