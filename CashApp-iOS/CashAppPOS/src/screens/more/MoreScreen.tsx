@@ -162,6 +162,23 @@ const MoreScreen: React.FC = () => {
         </View>
       </View>
 
+      {/* Deprecation Notice */}
+      <View style={styles.deprecationNotice}>
+        <Icon name="info" size={20} color={theme.colors.warning[500]} />
+        <View style={styles.deprecationContent}>
+          <Text style={styles.deprecationTitle}>New Hub Available!</Text>
+          <Text style={styles.deprecationText}>
+            This page will be replaced soon. Find all features in the new Hub on the home tab.
+          </Text>
+        </View>
+        <TouchableOpacity
+          style={styles.goToHubButton}
+          onPress={() => navigation.navigate('Home' as never)}
+        >
+          <Text style={styles.goToHubText}>Go to Hub</Text>
+        </TouchableOpacity>
+      </View>
+
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* User Info Card */}
         <View style={styles.userCard}>
@@ -249,6 +266,44 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   content: {
     flex: 1,
+  },
+  deprecationNotice: {
+    backgroundColor: theme.colors.warning[50],
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    marginHorizontal: 16,
+    marginTop: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: theme.colors.warning[200],
+  },
+  deprecationContent: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  deprecationTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: theme.colors.warning[700],
+    marginBottom: 2,
+  },
+  deprecationText: {
+    fontSize: 12,
+    color: theme.colors.warning[600],
+    lineHeight: 16,
+  },
+  goToHubButton: {
+    backgroundColor: theme.colors.warning[500],
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    marginLeft: 8,
+  },
+  goToHubText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: theme.colors.white,
   },
   userCard: {
     backgroundColor: theme.colors.white,
