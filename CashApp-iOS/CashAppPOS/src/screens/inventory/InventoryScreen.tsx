@@ -17,9 +17,11 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 // import { generateInventory, InventoryData } from '../../utils/mockDataGenerator'; // Removed
 import DataService from '../../services/DataService'; // Added
-import { InventoryData } from '../../types'; // Updated import path
+import * as InventoryApiService from '../../services/InventoryApiService'; // Added
+import { InventoryData, ReceiptItem as ScannedReceiptItem } from '../../types'; // Updated import path, added ReceiptItem
 import LoadingView from '../../components/feedback/LoadingView'; // Added
 import ComingSoon from '../../components/feedback/ComingSoon'; // Added
+import ReceiptScanModal from '../../components/modals/ReceiptScanModal'; // Added
 
 // Mock ENV flag (would typically come from an env config file)
 const ENV = {
@@ -55,6 +57,7 @@ const InventoryScreen: React.FC = () => {
   const [error, setError] = useState<string | null>(null); // Added
   const [showRestockModal, setShowRestockModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showReceiptScanModal, setShowReceiptScanModal] = useState(false); // Added
   const [editFormData, setEditFormData] = useState({
     name: '',
     category: '',
@@ -138,27 +141,79 @@ const InventoryScreen: React.FC = () => {
   };
 
   const handleQRScan = () => {
-    Alert.alert(
-      'QR Scanner',
-      'Would you like to scan a QR code or barcode to add/update inventory?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Scan QR Code', 
-          onPress: () => {
-            // Simulate QR scanning for now
-            Alert.alert('QR Scanner', 'QR scanning functionality will be available when camera permissions are added.');
-          }
-        },
-        { 
-          text: 'Scan Barcode', 
-          onPress: () => {
-            // Simulate barcode scanning
-            Alert.alert('Barcode Scanner', 'Barcode scanning functionality will be available when camera permissions are added.');
-          }
+    // This function will be updated later to open the new ReceiptScanModal.
+    // For now, let's update the alert text as per UI-1.
+    // Now opens the new modal directly for scanning receipts.
+    // Barcode scanning can be a separate option or integrated into ReceiptScanModal if needed.
+    setShowReceiptScanModal(true);
+  };
+
+  const handleReceiptSubmit = async (items: ScannedReceiptItem[]) => {
+    console.log('Receipt items submitted to InventoryScreen:', items);
+    // Here, you would typically call an API service to process these items.
+    // For example, update inventory based on these items.
+    // This is a placeholder for the actual logic (INT-1).
+
+    // Example: Add to current inventory (very simplified)
+    // This is NOT production logic, just for demonstration.
+    // Actual logic will involve matching by SKU, creating new items, etc. via backend.
+
+    // Simulating a delay for processing
+    // await new Promise(resolve => setTimeout(resolve, 500));
+
+    let successCount = 0;
+    let errorCount = 0;
+    const newItemsToCreate = [];
+
+    for (const item of items) {
+      const quantity = parseFloat(item.quantity);
+      if (isNaN(quantity) || quantity <= 0) {
+        console.warn(`Invalid quantity for item ${item.name}, skipping.`);
+        errorCount++;
+        continue;
+      }
+
+      if (item.sku) { // SKU matched by backend
+        try {
+          // Assuming item.quantity is the change in quantity.
+          // The backend's adjustStock takes change_qty_g.
+          // This assumes the 'quantity' from receipt is the amount to add.
+          // And for now, we pass it directly as change_qty_g, hoping backend handles units or it's a general field.
+          await InventoryApiService.adjustStock(item.sku, quantity, 'receipt_scan_import');
+          console.log(`Stock adjusted for SKU ${item.sku} by ${quantity}`);
+          successCount++;
+        } catch (apiError) {
+          console.error(`Failed to adjust stock for SKU ${item.sku}:`, apiError);
+          Alert.alert('API Error', `Could not adjust stock for ${item.name} (SKU: ${item.sku}).`);
+          errorCount++;
         }
-      ]
-    );
+      } else {
+        // No SKU match, pre-populate New Item form (placeholder)
+        console.log(`Item "${item.name}" (Qty: ${quantity}, Price: ${item.price}) has no SKU. Would pre-populate new item form.`);
+        // In a real app, you'd navigate to a "Create New Item" screen/modal here,
+        // passing item.name, item.quantity, item.price etc.
+        // e.g., navigation.navigate('CreateItemScreen', { initialData: item });
+        newItemsToCreate.push(item);
+      }
+    }
+
+    // Potentially refresh inventory list after submission
+    loadInventory();
+    setShowReceiptScanModal(false); // Close modal after submission
+
+    let summaryMessage = `${successCount} item(s) processed successfully.`;
+    if (errorCount > 0) {
+      summaryMessage += ` ${errorCount} item(s) had errors.`;
+    }
+    if (newItemsToCreate.length > 0) {
+      summaryMessage += ` ${newItemsToCreate.length} item(s) need to be created.`;
+      // Optionally, trigger the first new item creation flow here
+      // if (newItemsToCreate.length > 0) {
+      //   Alert.alert("New Items", `You have ${newItemsToCreate.length} new items to create. Starting with "${newItemsToCreate[0].name}".`);
+      //   // Pseudocode: openCreateItemModal(newItemsToCreate[0]);
+      // }
+    }
+    Alert.alert('Processing Complete', summaryMessage);
   };
 
   const getStockStatus = (item: InventoryData) => {
@@ -375,8 +430,11 @@ const InventoryScreen: React.FC = () => {
         <TouchableOpacity 
           style={styles.scanButton}
           onPress={handleQRScan}
+          // TODO: Add a proper tooltip component if available, or implement one.
+          // For now, relying on the text itself or accessibilityLabel if set.
+          accessibilityLabel="Scan Receipt or Barcode"
         >
-          <Icon name="qr-code-scanner" size={24} color={Colors.white} />
+          <Icon name="camera" size={24} color={Colors.white} />
         </TouchableOpacity>
       </View>
 
@@ -771,6 +829,13 @@ const InventoryScreen: React.FC = () => {
           </View>
         </View>
       </Modal>
+
+      {/* Receipt Scan Modal */}
+      <ReceiptScanModal
+        visible={showReceiptScanModal}
+        onClose={() => setShowReceiptScanModal(false)}
+        onSubmit={handleReceiptSubmit}
+      />
     </SafeAreaView>
   );
 };

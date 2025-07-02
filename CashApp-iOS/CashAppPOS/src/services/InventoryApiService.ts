@@ -199,3 +199,30 @@ interface Product {
     id: string; // UUID
     name: string;
 }
+
+// --- Receipt Scanning API Call ---
+
+export interface ScannedItemAPIResponse {
+    name: string;
+    quantity: number;
+    price: number;
+    sku_match?: string | null;
+    raw_text_name?: string | null;
+    raw_text_quantity?: string | null;
+    raw_text_price?: string | null;
+}
+
+export const scanReceipt = async (imageBase64: string): Promise<ScannedItemAPIResponse[]> => {
+  try {
+    const response = await apiClient.post<ScannedItemAPIResponse[]>('/inventory/scan', { image_base64: imageBase64 });
+    return response.data;
+  } catch (error) {
+    console.error("Error scanning receipt:", error.response?.data || error.message);
+    // It's good practice to throw a custom error or the error data from the API
+    // This allows the caller to handle specific error messages or types
+    if (error.response && error.response.data) {
+        throw error.response.data;
+    }
+    throw new Error("Failed to scan receipt. Please try again.");
+  }
+};
