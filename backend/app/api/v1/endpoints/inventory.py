@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Body
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import datetime
+import base64 # Added for base64 decoding
 from uuid import UUID
 
 from app.core.database import get_db
@@ -171,3 +172,97 @@ async def get_low_stock_items_api(
 #     # return current_user
 #     print(f"Auth check for permissions: {required_permissions}") # Placeholder log
 #     pass # Allow all for now for easier testing without setting up full auth
+
+# --- Receipt Scanning Endpoint ---
+
+class ScanReceiptRequest(schemas.BaseModel): # Use a base model from schemas if available, or pydantic.BaseModel
+    image_base64: str
+
+class ScannedItemResponse(schemas.BaseModel): # Use a base model from schemas
+    name: str
+    quantity: float
+    price: float
+    sku_match: Optional[str] = None
+    raw_text_name: Optional[str] = None # To show what was parsed vs matched
+    raw_text_quantity: Optional[str] = None
+    raw_text_price: Optional[str] = None
+
+
+@router.post("/scan", response_model=List[ScannedItemResponse], status_code=200)
+async def scan_receipt_api(
+    scan_request: ScanReceiptRequest,
+    db: Session = Depends(get_db)
+    # current_user: User = Depends(get_current_active_user_with_permissions(["inventory:scan"])) # Example auth
+):
+    """
+    Accepts a base64 encoded image of a receipt, processes it (simulated for now),
+    and returns a list of parsed items.
+    """
+    # In a real scenario, this is where you'd call the OCR service.
+    # For now, we'll return a mock response.
+    # image_bytes = base64.b64decode(scan_request.image_base64) # Example decoding
+
+    # Mock OCR and fuzzy matching logic
+    # This would eventually be moved to a service in backend/app/services/ocr_service.py
+    # and called here.
+
+    # Example: if image_base64 contains "milk"
+    if "milk" in scan_request.image_base64.lower(): # Highly simplified mock
+        mock_items = [
+            ScannedItemResponse(name="Milk, 1L", quantity=2, price=1.50, sku_match="MILK001", raw_text_name="Milk", raw_text_quantity="2", raw_text_price="1.50"),
+            ScannedItemResponse(name="Bread Loaf", quantity=1, price=2.20, sku_match="BREAD001", raw_text_name="Bread Lf", raw_text_quantity="1", raw_text_price="2.20"),
+        ]
+    else:
+        mock_items = [
+            ScannedItemResponse(name="Placeholder Item 1", quantity=1, price=10.99, sku_match=None, raw_text_name="Item One", raw_text_quantity="1x", raw_text_price="10.99"),
+            ScannedItemResponse(name="Placeholder Item 2", quantity=3, price=5.49, sku_match="ITEM002", raw_text_name="Item Two", raw_text_quantity="3", raw_text_price="5.49ea"),
+        ]
+
+    # Simulate a delay as OCR would take time
+    # await asyncio.sleep(1.5) # If using asyncio, otherwise time.sleep for synchronous mock
+
+    # --- Integration with OCRService (mocked) ---
+    # from app.services.ocr_service import get_ocr_service, OCRService # Add to imports
+    # ocr_service: OCRService = Depends(get_ocr_service) # Add as a dependency to the endpoint
+
+    # Placeholder: In a real app, OCRService would be injected.
+    # For now, direct instantiation or a simple getter.
+    from app.services.ocr_service import OCRService # Assuming direct import for now
+    ocr_service = OCRService() # Mock initialization
+
+    try:
+        image_bytes = base64.b64decode(scan_request.image_base64)
+        # Parsed items from OCR service (still mock data from the service)
+        parsed_ocr_items = await ocr_service.parse_receipt_image(image_bytes)
+    except Exception as e:
+        # Handle base64 decoding errors or other issues
+        raise HTTPException(status_code=400, detail=f"Invalid image data or OCR processing error: {str(e)}")
+
+    # Convert OCR service output to ScannedItemResponse
+    # This is where fuzzy matching against DB products would also happen.
+    # For now, direct mapping from mock OCR output.
+    response_items: List[ScannedItemResponse] = []
+    for ocr_item in parsed_ocr_items:
+        # Simulate fuzzy matching or direct use if OCR provides SKU
+        # sku_match_result = await fuzzy_match_item_name_to_sku(ocr_item.get("raw_text_name"), db)
+        sku_match_result = f"SKU_FOR_{ocr_item.get('raw_text_name', '').split(' ')[0]}" if ocr_item.get('raw_text_name') else None
+
+        response_items.append(
+            ScannedItemResponse(
+                name=ocr_item.get("raw_text_name", "Unknown Item"), # Prefer matched name if available later
+                quantity=ocr_item.get("parsed_quantity", 0.0) or 0.0,
+                price=ocr_item.get("parsed_price", 0.0) or 0.0,
+                sku_match=sku_match_result, # Placeholder
+                raw_text_name=ocr_item.get("raw_text_name"),
+                raw_text_quantity=ocr_item.get("raw_text_quantity"),
+                raw_text_price=ocr_item.get("raw_text_price")
+            )
+        )
+
+    # This part replaces the old mock_items logic
+    if not response_items: # If OCR returned nothing, provide some default
+        return [
+            ScannedItemResponse(name="Default Scanned Item", quantity=1, price=0.99, sku_match="DEFAULT001", raw_text_name="Default Item", raw_text_quantity="1", raw_text_price="0.99")
+        ]
+
+    return response_items
