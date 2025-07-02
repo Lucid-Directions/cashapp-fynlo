@@ -198,17 +198,87 @@ export interface PaginatedResponse<T> {
   hasMore: boolean;
 }
 
-// Inventory & Recipe Types (as per backend schemas)
+// Inventory & Recipe Types (Enhanced for modular system)
 export interface InventoryItem {
   sku: string;
   name: string;
   description?: string | null;
   qty_g: number;
   par_level_g?: number | null;
-  unit?: string | null;
+  unit: 'g' | 'kg' | 'units' | string;
   cost_per_unit?: number | null;
   supplier?: string | null;
+  waste_pct: number; // Waste percentage (0-100)
+  category: string; // Category for organization
   last_updated: string; // ISO datetime string
+  active?: boolean; // For soft deletes
+  created_at?: string; // Creation timestamp
+}
+
+// Enhanced types for receipt parsing
+export interface ReceiptItem {
+  id: string; // Client-side ID for list management
+  name: string;
+  quantity: string; // Editable as string
+  price: string; // Editable as string
+  sku?: string | null; // Store SKU match from API
+  originalName?: string; // Store original parsed name from API
+}
+
+export interface ScannedReceiptItem {
+  name: string;
+  quantity: number;
+  price: number;
+  sku_match?: string | null;
+  confidence?: number;
+  raw_text_name?: string | null;
+  raw_text_quantity?: string | null;
+  raw_text_price?: string | null;
+}
+
+// Cost analysis types
+export interface CostAnalysis {
+  total_inventory_value: number;
+  total_waste_cost: number;
+  waste_percentage: number;
+  monthly_cogs: number;
+  items_analysis: ItemCostAnalysis[];
+}
+
+export interface ItemCostAnalysis {
+  sku: string;
+  name: string;
+  inventory_value: number;
+  waste_cost: number;
+  waste_percentage: number;
+  monthly_usage_cost: number;
+}
+
+// Stock movement types
+export interface StockMovement {
+  id: number;
+  sku: string;
+  delta_g: number;
+  source: string;
+  source_id?: string | null;
+  reason: string;
+  ts: string; // ISO datetime string
+  user_id: string;
+  movement_id?: string;
+}
+
+// Recipe types for menu integration
+export interface Recipe {
+  item_id: string; // Product UUID
+  item_name?: string; // Product name, joined from Product table
+  ingredients: RecipeIngredient[];
+}
+
+export interface RecipeIngredient {
+  ingredient_sku: string;
+  ingredient_name?: string; // For display purposes
+  qty_g: number;
+  ingredient_unit?: string; // For display
 }
 
 export interface RecipeIngredientClient { // Renamed to avoid conflict if RecipeIngredient is used elsewhere

@@ -9,10 +9,14 @@ import {
   ScrollView,
   TextInput,
   Alert,
+  Platform,
+  PermissionsAndroid,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Colors from '../../constants/Colors'; // Assuming Colors.ts exists in constants
-import { scanReceipt, ScannedItemAPIResponse } from '../../services/InventoryApiService'; // Added
+import { ocrService, ProcessedReceipt } from '../../services/OCRService';
+import { inventoryMatchingService, MatchingResult } from '../../services/InventoryMatchingService';
+import useInventoryStore from '../../store/useInventoryStore';
 
 interface ReceiptItem {
   id: string; // Client-side ID for list management
@@ -21,6 +25,8 @@ interface ReceiptItem {
   price: string;    // Editable as string
   sku?: string | null; // Store SKU match from API
   originalName?: string; // Store original parsed name from API
+  matchingResult?: MatchingResult; // Store matching details
+  matchConfidence?: number; // Confidence score for UI display
 }
 
 interface ReceiptScanModalProps {
@@ -31,38 +37,154 @@ interface ReceiptScanModalProps {
 
 const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, onSubmit }) => {
   const [step, setStep] = useState<'capture' | 'spinning' | 'review' | 'submitting'>('capture');
-  const [capturedImage, setCapturedImage] = useState<any>(null); // Placeholder for image data
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [parsedItems, setParsedItems] = useState<ReceiptItem[]>([]);
+  const [processedReceipt, setProcessedReceipt] = useState<ProcessedReceipt | null>(null);
+  const [permissionGranted, setPermissionGranted] = useState<boolean>(false);
+  
+  const { getItemBySku, inventoryItems } = useInventoryStore();
+
+  // Check camera permissions
+  const requestCameraPermission = async (): Promise<boolean> => {
+    if (Platform.OS === 'android') {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.CAMERA,
+          {
+            title: 'Camera Permission',
+            message: 'This app needs access to camera to scan receipts',
+            buttonNeutral: 'Ask Me Later',
+            buttonNegative: 'Cancel',
+            buttonPositive: 'OK',
+          },
+        );
+        return granted === PermissionsAndroid.RESULTS.GRANTED;
+      } catch (err) {
+        console.warn(err);
+        return false;
+      }
+    }
+    return true; // iOS handles permissions automatically
+  };
 
   const handleCaptureImage = async () => {
-    // Simulate image capture - in a real app, this would use react-native-image-picker or similar
-    const mockBase64Image = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoHBwYIDAoMDAsKCwsNDhIQDQ4RDgsLEBYQERMUFRUVDA8XGBYUGBIUFRT/2wBDAQMEBAUEBQkFBQkUDQsNFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBT/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAn/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFAEBAAAAAAAAAAAAAAAAAAAAAP/EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhEDEQA/AL+AAf/Z"; // Tiny valid JPEG
-    setCapturedImage({ uri: 'simulated_receipt_image.jpg' }); // Keep UI placeholder
-    setStep('spinning');
-
     try {
-      // Use a standard base64 string for testing.
-      // The backend mock is sensitive to "milk" in the string.
-      const testBase64 = "milk_receipt_image_base64_data_string"; // Contains "milk"
-      // const testBase64 = "other_receipt_image_base64_data_string"; // Does not contain "milk"
+      // Check permissions first
+      const hasPermission = await requestCameraPermission();
+      if (!hasPermission) {
+        Alert.alert('Permission Required', 'Camera permission is required to scan receipts.');
+        return;
+      }
 
-      const apiResponseItems = await scanReceipt(testBase64);
+      setStep('spinning');
+      
+      // Capture image using OCRService
+      const imageBase64 = await ocrService.captureReceiptImage();
+      
+      if (!imageBase64) {
+        setStep('capture');
+        return; // User cancelled
+      }
 
-      const clientReceiptItems: ReceiptItem[] = apiResponseItems.map((item, index) => ({
-        id: `api-${index}-${Date.now()}`, // Generate a unique ID for local list management
-        name: item.name,
-        quantity: item.quantity.toString(),
-        price: item.price.toFixed(2),
-        sku: item.sku_match,
-        originalName: item.raw_text_name || item.name,
-      }));
+      setCapturedImage(imageBase64);
+      
+      // Process the receipt using OCRService
+      const processedReceipt = await ocrService.processReceiptImage(imageBase64);
+      setProcessedReceipt(processedReceipt);
+
+      // Convert to client receipt items with enhanced inventory matching
+      const inventoryItemsArray = Object.values(inventoryItems);
+      const clientReceiptItems: ReceiptItem[] = processedReceipt.items.map((item, index) => {
+        // First try API-provided SKU match
+        let inventoryMatch = item.sku_match ? getItemBySku(item.sku_match) : null;
+        let matchingResult: MatchingResult | undefined;
+
+        // If no API match, use our intelligent matching service
+        if (!inventoryMatch) {
+          matchingResult = inventoryMatchingService.getBestMatch(item.name, inventoryItemsArray);
+          if (matchingResult) {
+            inventoryMatch = matchingResult.inventoryItem;
+          }
+        }
+        
+        return {
+          id: `ocr-${index}-${Date.now()}`,
+          name: inventoryMatch?.name || item.name,
+          quantity: item.quantity.toString(),
+          price: item.price.toFixed(2),
+          sku: inventoryMatch?.sku || item.sku_match,
+          originalName: item.raw_text_name || item.name,
+          matchingResult,
+          matchConfidence: matchingResult?.confidence || (item.sku_match ? 0.9 : 0),
+        };
+      });
 
       setParsedItems(clientReceiptItems);
       setStep('review');
     } catch (error) {
-      console.error('Error scanning receipt via API:', error);
-      Alert.alert('Error Processing Receipt', error.message || 'Could not process the receipt. Please try again.');
-      setStep('capture'); // Go back to capture step on error
+      console.error('Error capturing/processing receipt:', error);
+      Alert.alert(
+        'Processing Error', 
+        error instanceof Error ? error.message : 'Could not process the receipt. Please try again.'
+      );
+      setStep('capture');
+    }
+  };
+
+  const handleSelectFromGallery = async () => {
+    try {
+      setStep('spinning');
+      
+      // Select image from gallery using OCRService
+      const imageBase64 = await ocrService.selectReceiptImage();
+      
+      if (!imageBase64) {
+        setStep('capture');
+        return; // User cancelled
+      }
+
+      setCapturedImage(imageBase64);
+      
+      // Process the receipt using OCRService
+      const processedReceipt = await ocrService.processReceiptImage(imageBase64);
+      setProcessedReceipt(processedReceipt);
+
+      // Convert to client receipt items with enhanced inventory matching
+      const inventoryItemsArray = Object.values(inventoryItems);
+      const clientReceiptItems: ReceiptItem[] = processedReceipt.items.map((item, index) => {
+        // First try API-provided SKU match
+        let inventoryMatch = item.sku_match ? getItemBySku(item.sku_match) : null;
+        let matchingResult: MatchingResult | undefined;
+
+        // If no API match, use our intelligent matching service
+        if (!inventoryMatch) {
+          matchingResult = inventoryMatchingService.getBestMatch(item.name, inventoryItemsArray);
+          if (matchingResult) {
+            inventoryMatch = matchingResult.inventoryItem;
+          }
+        }
+        
+        return {
+          id: `gallery-${index}-${Date.now()}`,
+          name: inventoryMatch?.name || item.name,
+          quantity: item.quantity.toString(),
+          price: item.price.toFixed(2),
+          sku: inventoryMatch?.sku || item.sku_match,
+          originalName: item.raw_text_name || item.name,
+          matchingResult,
+          matchConfidence: matchingResult?.confidence || (item.sku_match ? 0.9 : 0),
+        };
+      });
+
+      setParsedItems(clientReceiptItems);
+      setStep('review');
+    } catch (error) {
+      console.error('Error selecting/processing receipt:', error);
+      Alert.alert(
+        'Processing Error', 
+        error instanceof Error ? error.message : 'Could not process the receipt. Please try again.'
+      );
+      setStep('capture');
     }
   };
 
@@ -120,14 +242,36 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
   const renderCaptureStep = () => (
     <View style={styles.stepContainer}>
       <Text style={styles.modalTitle}>Scan Receipt</Text>
+      <Text style={styles.subtitle}>Choose how to add your receipt</Text>
+      
       <View style={styles.cameraPreviewPlaceholder}>
-        <Icon name="camera-alt" size={80} color={Colors.lightGray} />
-        <Text style={styles.placeholderText}>Camera Preview Area</Text>
+        <Icon name="receipt" size={80} color={Colors.lightGray} />
+        <Text style={styles.placeholderText}>Receipt Processing</Text>
+        <Text style={styles.helperText}>Take a photo or select from gallery</Text>
       </View>
-      <TouchableOpacity style={styles.captureButton} onPress={handleCaptureImage}>
-        <Icon name="camera" size={24} color={Colors.white} />
-        <Text style={styles.buttonText}>Capture Receipt</Text>
-      </TouchableOpacity>
+      
+      <View style={styles.actionButtons}>
+        <TouchableOpacity style={styles.captureButton} onPress={handleCaptureImage}>
+          <Icon name="camera-alt" size={24} color={Colors.white} />
+          <Text style={styles.buttonText}>Take Photo</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity style={styles.galleryButton} onPress={handleSelectFromGallery}>
+          <Icon name="photo-library" size={24} color={Colors.primary} />
+          <Text style={styles.galleryButtonText}>Choose from Gallery</Text>
+        </TouchableOpacity>
+      </View>
+      
+      {processedReceipt && (
+        <View style={styles.ocrInfo}>
+          <Text style={styles.ocrInfoText}>
+            Confidence: {Math.round((processedReceipt.confidence || 0) * 100)}%
+          </Text>
+          {processedReceipt.vendor && (
+            <Text style={styles.ocrInfoText}>Vendor: {processedReceipt.vendor}</Text>
+          )}
+        </View>
+      )}
     </View>
   );
 
@@ -142,41 +286,116 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
   const renderReviewStep = () => (
     <View style={styles.stepContainer}>
       <Text style={styles.modalTitle}>Review Items</Text>
+      {processedReceipt && (
+        <View style={styles.receiptSummary}>
+          <Text style={styles.summaryText}>
+            Detected {parsedItems.length} items • Confidence: {Math.round(processedReceipt.confidence * 100)}%
+          </Text>
+          {processedReceipt.totalAmount && (
+            <Text style={styles.summaryText}>
+              Total: ${processedReceipt.totalAmount.toFixed(2)}
+            </Text>
+          )}
+        </View>
+      )}
+      
       <ScrollView style={styles.itemList}>
         {parsedItems.map((item, index) => (
           <View key={item.id} style={styles.itemRow}>
-            <View style={styles.itemInputs}>
-              <TextInput
-                style={[styles.input, styles.nameInput]}
-                placeholder="Item Name"
-                value={item.name}
-                onChangeText={text => handleItemChange(item.id, 'name', text)}
-              />
-              <TextInput
-                style={[styles.input, styles.quantityInput]}
-                placeholder="Qty"
-                value={item.quantity}
-                onChangeText={text => handleItemChange(item.id, 'quantity', text)}
-                keyboardType="numeric"
-              />
-              <TextInput
-                style={[styles.input, styles.priceInput]}
-                placeholder="Price"
-                value={item.price}
-                onChangeText={text => handleItemChange(item.id, 'price', text)}
-                keyboardType="decimal-pad"
-              />
+            <View style={styles.itemHeader}>
+              <View style={styles.itemInputs}>
+                <TextInput
+                  style={[styles.input, styles.nameInput]}
+                  placeholder="Item Name"
+                  value={item.name}
+                  onChangeText={text => handleItemChange(item.id, 'name', text)}
+                />
+                <TextInput
+                  style={[styles.input, styles.quantityInput]}
+                  placeholder="Qty"
+                  value={item.quantity}
+                  onChangeText={text => handleItemChange(item.id, 'quantity', text)}
+                  keyboardType="numeric"
+                />
+                <TextInput
+                  style={[styles.input, styles.priceInput]}
+                  placeholder="Price"
+                  value={item.price}
+                  onChangeText={text => handleItemChange(item.id, 'price', text)}
+                  keyboardType="decimal-pad"
+                />
+              </View>
+              <TouchableOpacity onPress={() => handleRemoveItem(item.id)} style={styles.deleteButton}>
+                <Icon name="delete" size={24} color={Colors.danger} />
+              </TouchableOpacity>
             </View>
-            <TouchableOpacity onPress={() => handleRemoveItem(item.id)} style={styles.deleteButton}>
-              <Icon name="delete" size={24} color={Colors.danger} />
-            </TouchableOpacity>
+            
+            {/* Enhanced inventory matching indicator */}
+            <View style={styles.itemFooter}>
+              <View style={styles.matchingInfo}>
+                {item.sku ? (
+                  <View style={[
+                    styles.matchedIndicator,
+                    item.matchConfidence && item.matchConfidence < 0.8 && styles.lowConfidenceMatch
+                  ]}>
+                    <Icon 
+                      name={item.matchConfidence && item.matchConfidence >= 0.8 ? "check-circle" : "help-outline"} 
+                      size={16} 
+                      color={item.matchConfidence && item.matchConfidence >= 0.8 ? Colors.success : Colors.warning} 
+                    />
+                    <Text style={[
+                      styles.matchedText,
+                      item.matchConfidence && item.matchConfidence < 0.8 && styles.lowConfidenceText
+                    ]}>
+                      {item.sku} • {item.matchConfidence ? `${Math.round(item.matchConfidence * 100)}%` : 'API Match'}
+                    </Text>
+                    {item.matchingResult && (
+                      <Text style={styles.matchTypeText}>
+                        ({item.matchingResult.matchType})
+                      </Text>
+                    )}
+                  </View>
+                ) : (
+                  <View style={styles.unmatchedIndicator}>
+                    <Icon name="warning" size={16} color={Colors.danger} />
+                    <Text style={styles.unmatchedText}>No inventory match</Text>
+                  </View>
+                )}
+              </View>
+              
+              {item.originalName && item.originalName !== item.name && (
+                <Text style={styles.originalText}>Original: "{item.originalName}"</Text>
+              )}
+              
+              {/* Show validation warnings if any */}
+              {item.matchingResult && (
+                (() => {
+                  const validation = inventoryMatchingService.validateMatch(
+                    item.originalName || item.name,
+                    item.matchingResult,
+                    parseFloat(item.quantity),
+                    parseFloat(item.price)
+                  );
+                  
+                  return validation.warnings.length > 0 && (
+                    <View style={styles.warningsContainer}>
+                      {validation.warnings.map((warning, idx) => (
+                        <Text key={idx} style={styles.warningText}>⚠️ {warning}</Text>
+                      ))}
+                    </View>
+                  );
+                })()
+              )}
+            </View>
           </View>
         ))}
       </ScrollView>
+      
       <TouchableOpacity style={styles.addItemButton} onPress={handleAddItem}>
         <Icon name="add-circle-outline" size={22} color={Colors.primary} />
         <Text style={styles.addItemButtonText}>Add Item</Text>
       </TouchableOpacity>
+      
       <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
         <Text style={styles.buttonText}>Confirm and Import Items</Text>
       </TouchableOpacity>
@@ -239,12 +458,18 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: 'bold',
     color: Colors.text,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 16,
+    color: Colors.darkGray,
     marginBottom: 20,
     textAlign: 'center',
   },
   cameraPreviewPlaceholder: {
     width: '100%',
-    height: 200, // Adjust as needed
+    height: 150,
     backgroundColor: Colors.lightGray,
     justifyContent: 'center',
     alignItems: 'center',
@@ -254,17 +479,41 @@ const styles = StyleSheet.create({
   placeholderText: {
     color: Colors.darkGray,
     marginTop: 10,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  helperText: {
+    color: Colors.darkGray,
+    marginTop: 5,
+    fontSize: 14,
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    gap: 15,
+    marginBottom: 15,
   },
   captureButton: {
     flexDirection: 'row',
     backgroundColor: Colors.primary,
     paddingVertical: 12,
-    paddingHorizontal: 30,
+    paddingHorizontal: 20,
     borderRadius: 8,
     alignItems: 'center',
+    flex: 1,
+  },
+  galleryButton: {
+    flexDirection: 'row',
+    backgroundColor: Colors.white,
+    borderWidth: 2,
+    borderColor: Colors.primary,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignItems: 'center',
+    flex: 1,
   },
   submitButton: {
-    backgroundColor: Colors.success, // Or primary
+    backgroundColor: Colors.success,
     paddingVertical: 12,
     paddingHorizontal: 30,
     borderRadius: 8,
@@ -277,6 +526,36 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     marginLeft: 8,
+  },
+  galleryButtonText: {
+    color: Colors.primary,
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8,
+  },
+  ocrInfo: {
+    backgroundColor: Colors.lightGray,
+    padding: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  ocrInfoText: {
+    fontSize: 14,
+    color: Colors.text,
+    marginBottom: 2,
+  },
+  receiptSummary: {
+    backgroundColor: Colors.lightGray,
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 15,
+    width: '100%',
+  },
+  summaryText: {
+    fontSize: 14,
+    color: Colors.text,
+    textAlign: 'center',
+    marginBottom: 2,
   },
   loadingText: {
     fontSize: 18,
@@ -292,16 +571,19 @@ const styles = StyleSheet.create({
   },
   itemList: {
     width: '100%',
-    maxHeight: 350, // Adjust based on screen
+    maxHeight: 300,
     marginBottom: 10,
   },
   itemRow: {
+    marginBottom: 15,
+    padding: 12,
+    backgroundColor: Colors.lightGray,
+    borderRadius: 8,
+  },
+  itemHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    marginBottom: 8,
   },
   itemInputs: {
     flex: 1,
@@ -315,22 +597,86 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 8,
     fontSize: 14,
-    backgroundColor: Colors.white, // Ensure input background is white
+    backgroundColor: Colors.white,
   },
   nameInput: {
-    flex: 0.5, // Takes 50% of space in itemInputs
+    flex: 0.5,
   },
   quantityInput: {
-    flex: 0.2, // Takes 20%
+    flex: 0.2,
     textAlign: 'center',
   },
   priceInput: {
-    flex: 0.3, // Takes 30%
+    flex: 0.3,
     textAlign: 'right',
   },
   deleteButton: {
     padding: 5,
     marginLeft: 10,
+  },
+  itemFooter: {
+    marginTop: 8,
+  },
+  matchingInfo: {
+    marginBottom: 6,
+  },
+  matchedIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.success + '20',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    flexWrap: 'wrap',
+  },
+  lowConfidenceMatch: {
+    backgroundColor: Colors.warning + '20',
+  },
+  unmatchedIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.danger + '20',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  matchedText: {
+    fontSize: 12,
+    color: Colors.success,
+    fontWeight: '600',
+    marginLeft: 4,
+  },
+  lowConfidenceText: {
+    color: Colors.warning,
+  },
+  matchTypeText: {
+    fontSize: 10,
+    color: Colors.darkGray,
+    marginLeft: 4,
+    fontStyle: 'italic',
+  },
+  unmatchedText: {
+    fontSize: 12,
+    color: Colors.danger,
+    fontWeight: '600',
+    marginLeft: 4,
+  },
+  originalText: {
+    fontSize: 12,
+    color: Colors.darkGray,
+    fontStyle: 'italic',
+    marginTop: 4,
+  },
+  warningsContainer: {
+    marginTop: 4,
+    paddingTop: 4,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+  },
+  warningText: {
+    fontSize: 11,
+    color: Colors.warning,
+    marginBottom: 2,
   },
   addItemButton: {
     flexDirection: 'row',

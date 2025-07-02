@@ -22,6 +22,10 @@ import { InventoryData, ReceiptItem as ScannedReceiptItem } from '../../types'; 
 import LoadingView from '../../components/feedback/LoadingView'; // Added
 import ComingSoon from '../../components/feedback/ComingSoon'; // Added
 import ReceiptScanModal from '../../components/modals/ReceiptScanModal'; // Added
+import WasteTracker from '../../components/inventory/WasteTracker'; // Added
+import CostAnalysisDashboard from '../../components/inventory/CostAnalysisDashboard'; // Added
+import RecipeManager from '../../components/menu/RecipeManager'; // Added
+import SyncStatusIndicator from '../../components/inventory/SyncStatusIndicator'; // Added
 
 // Mock ENV flag (would typically come from an env config file)
 const ENV = {
@@ -58,6 +62,9 @@ const InventoryScreen: React.FC = () => {
   const [showRestockModal, setShowRestockModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showReceiptScanModal, setShowReceiptScanModal] = useState(false); // Added
+  const [showWasteTracker, setShowWasteTracker] = useState(false); // Added
+  const [showCostAnalysis, setShowCostAnalysis] = useState(false); // Added
+  const [showRecipeManager, setShowRecipeManager] = useState(false); // Added
   const [editFormData, setEditFormData] = useState({
     name: '',
     category: '',
@@ -424,7 +431,10 @@ const InventoryScreen: React.FC = () => {
         
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle}>Inventory</Text>
-          <Text style={styles.headerSubtitle}>{filteredInventory.length} items</Text>
+          <View style={styles.headerSubtitleRow}>
+            <Text style={styles.headerSubtitle}>{filteredInventory.length} items</Text>
+            <SyncStatusIndicator style={styles.syncIndicator} showDetails={true} />
+          </View>
         </View>
         
         <TouchableOpacity 
@@ -458,6 +468,58 @@ const InventoryScreen: React.FC = () => {
           </Text>
           <Text style={styles.statLabel}>Total Value</Text>
         </View>
+      </View>
+
+      {/* Quick Actions Bar */}
+      <View style={styles.quickActionsBar}>
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.quickActionsContainer}
+        >
+          <TouchableOpacity 
+            style={styles.quickActionButton}
+            onPress={() => setShowReceiptScanModal(true)}
+          >
+            <Icon name="camera-alt" size={20} color={Colors.primary} />
+            <Text style={styles.quickActionText}>Scan Receipt</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={styles.quickActionButton}
+            onPress={() => setShowWasteTracker(true)}
+          >
+            <Icon name="delete-outline" size={20} color={Colors.warning} />
+            <Text style={styles.quickActionText}>Manage Waste</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={styles.quickActionButton}
+            onPress={() => setShowCostAnalysis(true)}
+          >
+            <Icon name="analytics" size={20} color={Colors.success} />
+            <Text style={styles.quickActionText}>Cost Analysis</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={styles.quickActionButton}
+            onPress={() => setShowRecipeManager(true)}
+          >
+            <Icon name="restaurant-menu" size={20} color={Colors.secondary} />
+            <Text style={styles.quickActionText}>Recipe Manager</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={styles.quickActionButton}
+            onPress={() => {
+              // TODO: Add inventory item functionality
+              Alert.alert('Coming Soon', 'Manual item addition will be available soon');
+            }}
+          >
+            <Icon name="add-circle-outline" size={20} color={Colors.primary} />
+            <Text style={styles.quickActionText}>Add Item</Text>
+          </TouchableOpacity>
+        </ScrollView>
       </View>
 
       {/* Search and Filters */}
@@ -836,6 +898,24 @@ const InventoryScreen: React.FC = () => {
         onClose={() => setShowReceiptScanModal(false)}
         onSubmit={handleReceiptSubmit}
       />
+
+      {/* Waste Tracker Modal */}
+      <WasteTracker
+        visible={showWasteTracker}
+        onClose={() => setShowWasteTracker(false)}
+      />
+
+      {/* Cost Analysis Dashboard */}
+      <CostAnalysisDashboard
+        visible={showCostAnalysis}
+        onClose={() => setShowCostAnalysis(false)}
+      />
+
+      {/* Recipe Manager */}
+      <RecipeManager
+        visible={showRecipeManager}
+        onClose={() => setShowRecipeManager(false)}
+      />
     </SafeAreaView>
   );
 };
@@ -865,9 +945,17 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: Colors.white,
   },
+  headerSubtitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   headerSubtitle: {
     fontSize: 12,
     color: 'rgba(255, 255, 255, 0.8)',
+  },
+  syncIndicator: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
   },
   scanButton: {
     padding: 8,
@@ -893,6 +981,30 @@ const styles = StyleSheet.create({
   statLabel: {
     fontSize: 12,
     color: Colors.darkGray,
+  },
+  quickActionsBar: {
+    backgroundColor: Colors.white,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+    paddingVertical: 12,
+  },
+  quickActionsContainer: {
+    paddingHorizontal: 16,
+    gap: 12,
+  },
+  quickActionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.background,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    gap: 8,
+  },
+  quickActionText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.text,
     marginTop: 4,
   },
   searchSection: {
