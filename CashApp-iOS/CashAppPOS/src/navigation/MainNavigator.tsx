@@ -5,6 +5,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../design-system/ThemeProvider';
 import { MainTabParamList, MainStackParamList } from '../types';
 import POSScreen from '../screens/main/POSScreen';
+import HomeHubScreen from '../screens/main/HomeHubScreen';
 import OrdersScreen from '../screens/orders/OrdersScreen';
 import ReportsScreen from '../screens/reports/ReportsScreenSimple';
 import SalesReportDetailScreen from '../screens/reports/SalesReportDetailScreen';
@@ -42,7 +43,7 @@ const MainTabNavigator: React.FC = () => {
 
           switch (route.name) {
             case 'Home':
-              iconName = 'home';
+              iconName = 'dashboard';
               break;
             case 'Orders':
               iconName = 'receipt';
@@ -51,7 +52,7 @@ const MainTabNavigator: React.FC = () => {
               iconName = 'more-horiz';
               break;
             default:
-              iconName = 'home';
+              iconName = 'dashboard';
           }
 
           return <Icon name={iconName} size={size} color={color} />;
@@ -76,9 +77,9 @@ const MainTabNavigator: React.FC = () => {
     >
       <Tab.Screen
         name="Home"
-        component={POSScreen}
+        component={HomeHubScreen}
         options={{
-          tabBarLabel: 'POS',
+          tabBarLabel: 'Hub',
         }}
       />
       <Tab.Screen
@@ -112,6 +113,13 @@ const MainNavigator: React.FC = () => {
       <Stack.Screen
         name="MainTabs"
         component={MainTabNavigator}
+      />
+      <Stack.Screen
+        name="POS"
+        component={POSScreen}
+        options={{
+          headerShown: false,
+        }}
       />
       <Stack.Screen
         name="Reports"
