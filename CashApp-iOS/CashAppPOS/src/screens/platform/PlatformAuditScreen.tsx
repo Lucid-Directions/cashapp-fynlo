@@ -15,7 +15,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Text } from '../../components/ui/Text';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
-import { theme } from '../../design-system/theme';
+import { useTheme } from '../../design-system/ThemeProvider';
 import PlatformService, { AuditRecord } from '../../services/PlatformService';
 import SimpleTextInput from '../../components/inputs/SimpleTextInput';
 
@@ -37,6 +37,7 @@ interface AuditSummary {
 }
 
 const PlatformAuditScreen: React.FC = () => {
+  const { theme } = useTheme();
   const [auditRecords, setAuditRecords] = useState<AuditRecord[]>([]);
   const [summary, setSummary] = useState<AuditSummary | null>(null);
   const [loading, setLoading] = useState(true);

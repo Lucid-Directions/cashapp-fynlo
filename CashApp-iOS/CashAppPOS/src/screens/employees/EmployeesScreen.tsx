@@ -20,9 +20,11 @@ import { useNavigation } from '@react-navigation/native';
 import Colors from '../../constants/Colors';
 import DataService from '../../services/DataService'; // Added
 import { EmployeeData } from '../../types'; // Updated import path
+import { useTheme } from '../../design-system/ThemeProvider';
 
 const EmployeesScreen: React.FC = () => {
   const navigation = useNavigation();
+  const { theme } = useTheme();
   const [employees, setEmployees] = useState<EmployeeData[]>([]);
   const [filteredEmployees, setFilteredEmployees] = useState<EmployeeData[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -299,7 +301,7 @@ const EmployeesScreen: React.FC = () => {
             style={styles.scheduleButton}
             onPress={() => navigation.navigate('EmployeeSchedule')}
           >
-  <CalendarClock size={28} color={theme.colors.action} />
+  <CalendarClock size={28} color={Colors.primary} />
   <Text style={styles.scheduleLabel}>Schedule</Text>
           </TouchableOpacity>
 

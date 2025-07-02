@@ -15,7 +15,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { Text } from '../../components/ui/Text';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
-import { theme } from '../../design-system/theme';
+import { useTheme } from '../../design-system/ThemeProvider';
 import PlatformService, { PlatformSetting } from '../../services/PlatformService';
 import { SimpleTextInput } from '../../components/inputs';
 
@@ -36,6 +36,7 @@ interface BulkUpdateTemplate {
 }
 
 const BulkSettingsScreen: React.FC = () => {
+  const { theme } = useTheme();
   const [settings, setSettings] = useState<PlatformSetting[]>([]);
   const [bulkUpdates, setBulkUpdates] = useState<BulkUpdateItem[]>([]);
   const [loading, setLoading] = useState(true);

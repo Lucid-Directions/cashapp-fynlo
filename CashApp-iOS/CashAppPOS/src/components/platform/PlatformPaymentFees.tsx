@@ -18,7 +18,7 @@ import { Text } from '../ui/Text';
 import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import SettingsCard from '../settings/SettingsCard';
-import { theme } from '../../design-system/theme';
+import { useTheme } from '../../design-system/ThemeProvider';
 import PlatformPaymentService, { PlatformPaymentMethod, PaymentFeeDisplayInfo } from '../../services/PlatformPaymentService';
 
 interface PlatformPaymentFeesProps {
@@ -36,6 +36,7 @@ const PlatformPaymentFees: React.FC<PlatformPaymentFeesProps> = ({
   showOverrideControls = false,
   testAmount = 100,
 }) => {
+  const { theme } = useTheme();
   const [paymentMethods, setPaymentMethods] = useState<PlatformPaymentMethod[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
