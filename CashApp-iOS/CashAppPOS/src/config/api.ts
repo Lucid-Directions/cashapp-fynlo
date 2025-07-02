@@ -11,11 +11,30 @@ const isDevelopment = __DEV__;
 // Mac's LAN IP address for device testing - Updated to current network
 const MAC_LAN_IP = '192.168.68.101';
 
+// Determine if running on simulator or device
+const isSimulator = __DEV__ && (
+  // iOS Simulator detection
+  (global as any).navigator?.userAgent?.includes('iPhone Simulator') ||
+  (global as any).navigator?.userAgent?.includes('iPad Simulator') ||
+  // React Native development mode detection
+  typeof __DEV__ !== 'undefined'
+);
+
+// Dynamic API URL based on environment
+const getBaseURL = () => {
+  if (isSimulator) {
+    // Simulator can access localhost
+    return 'http://localhost:8000';
+  } else {
+    // Physical device needs LAN IP
+    return `http://${MAC_LAN_IP}:8000`;
+  }
+};
+
 // API Configuration
 export const API_CONFIG = {
-  // Backend API (FastAPI on port 8000) - ALWAYS use LAN IP for device testing
-  // Physical devices cannot access localhost, and api.fynlopos.com doesn't exist in DNS
-  BASE_URL: `http://${MAC_LAN_IP}:8000`,
+  // Backend API (FastAPI on port 8000) - Dynamic URL based on environment
+  BASE_URL: getBaseURL(),
   
   // Metro bundler (React Native dev server on port 8081)
   METRO_URL: `http://${MAC_LAN_IP}:8081`,
