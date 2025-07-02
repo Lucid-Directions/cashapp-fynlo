@@ -3,9 +3,8 @@
  * Provides WebSocket-based real-time inventory tracking, stock alerts, and multi-user sync
  */
 
-import { EventEmitter } from 'events';
-import { InventoryItem, StockMovement, InventoryAlert } from '../types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { InventoryItem, StockMovement, InventoryAlert } from '../types';
 
 export interface InventoryWebSocketEvent {
   type: 'STOCK_UPDATE' | 'STOCK_ALERT' | 'RECIPE_CHANGE' | 'COST_UPDATE' | 'SYNC_STATUS';
@@ -41,7 +40,39 @@ export interface SyncStatusEvent {
   message?: string;
 }
 
-class InventoryWebSocketService extends EventEmitter {
+// Simple event emitter for React Native
+class SimpleEventEmitter {
+  private listeners: { [event: string]: Function[] } = {};
+
+  on(event: string, listener: Function) {
+    if (!this.listeners[event]) {
+      this.listeners[event] = [];
+    }
+    this.listeners[event].push(listener);
+  }
+
+  emit(event: string, ...args: any[]) {
+    if (this.listeners[event]) {
+      this.listeners[event].forEach(listener => {
+        try {
+          listener(...args);
+        } catch (error) {
+          console.error(`Error in event listener for ${event}:`, error);
+        }
+      });
+    }
+  }
+
+  removeAllListeners(event?: string) {
+    if (event) {
+      delete this.listeners[event];
+    } else {
+      this.listeners = {};
+    }
+  }
+}
+
+class InventoryWebSocketService extends SimpleEventEmitter {
   private ws: WebSocket | null = null;
   private reconnectAttempts: number = 0;
   private maxReconnectAttempts: number = 5;
