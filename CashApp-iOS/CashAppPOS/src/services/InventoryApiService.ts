@@ -1,9 +1,9 @@
 import axios from 'axios';
-import Config from 'react-native-config'; // Or your config import
+import API_CONFIG from '../config/api';
 import { InventoryItem, RecipeClient, RecipeIngredientClient, InventoryLedgerEntry, Recipe } from '../types'; // Assuming Recipe is the backend type for creation
 import useAppStore from '../store/useAppStore'; // For token
 
-const API_URL = Config.API_URL || 'http://localhost:8000/api/v1'; // Fallback for local dev
+const API_URL = API_CONFIG.BASE_URL + '/api/v1';
 
 const apiClient = axios.create({
   baseURL: API_URL,

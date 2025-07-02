@@ -19,6 +19,7 @@ import DecimalInput from '../../components/inputs/DecimalInput';
 import SimpleDecimalInput from '../../components/inputs/SimpleDecimalInput';
 import SimpleTextInput from '../../components/inputs/SimpleTextInput';
 import SharedDataStore from '../../services/SharedDataStore';
+import OrderService from '../../services/OrderService';
 
 // Clover POS Color Scheme
 const Colors = {
@@ -72,9 +73,17 @@ const EnhancedPaymentScreen: React.FC = () => {
   const [splitAmounts, setSplitAmounts] = useState<{ method: string; amount: number }[]>([]);
   const [cashReceived, setCashReceived] = useState('');
   const [showCashModal, setShowCashModal] = useState(false);
-  const [emailReceipt, setEmailReceipt] = useState('');
-  const [printReceipt, setPrintReceipt] = useState(true);
+  const [customerName, setCustomerName] = useState('');
+  const [customerEmail, setCustomerEmail] = useState('');
   const [processing, setProcessing] = useState(false);
+  
+  // Email validation regex
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  
+  // Validation state
+  const isNameValid = customerName.trim().length > 0 && customerName.length <= 60;
+  const isEmailValid = emailRegex.test(customerEmail);
+  const isFormValid = isNameValid && isEmailValid;
   
   // Platform service charge configuration (real-time from platform owner)
   const [platformServiceCharge, setPlatformServiceCharge] = useState({
@@ -329,16 +338,51 @@ const EnhancedPaymentScreen: React.FC = () => {
       Alert.alert('Select Payment Method', 'Please select a payment method to continue.');
       return;
     }
+    
+    if (!isFormValid) {
+      Alert.alert('Required Information', 'Please enter valid customer name and email address.');
+      return;
+    }
 
     setProcessing(true);
 
-    // Simulate payment processing
-    setTimeout(() => {
+    try {
+      const orderService = OrderService.getInstance();
+      const subtotal = calculateSubtotal();
+      const tax = calculateTax(subtotal);
+      const serviceCharge = calculateServiceCharge();
+      const transactionFee = calculateTransactionFee();
+      const total = calculateGrandTotal();
+      
+      const orderData = {
+        items: cart,
+        subtotal,
+        tax,
+        total,
+        serviceCharge,
+        transactionFee,
+        tipAmount,
+        customerMetadata: {
+          name: customerName.trim(),
+          email: customerEmail.trim().toLowerCase(),
+        },
+        paymentMethod: selectedPaymentMethod,
+        notes: undefined,
+      };
+      
+      console.log('💳 Processing payment and saving order...', {
+        total,
+        customer: customerEmail,
+        method: selectedPaymentMethod
+      });
+      
+      const savedOrder = await orderService.saveOrder(orderData);
+      
       setProcessing(false);
       
       Alert.alert(
         'Payment Successful',
-        `Payment of £${calculateGrandTotal().toFixed(2)} processed successfully!`,
+        `Payment of £${total.toFixed(2)} processed successfully!\n\nReceipt will be sent to ${customerEmail}`,
         [
           {
             text: 'OK',
@@ -349,7 +393,16 @@ const EnhancedPaymentScreen: React.FC = () => {
           }
         ]
       );
-    }, 2000);
+    } catch (error) {
+      setProcessing(false);
+      console.error('❌ Payment processing failed:', error);
+      
+      Alert.alert(
+        'Payment Failed', 
+        'Unable to process payment. Please try again or contact support.',
+        [{ text: 'OK' }]
+      );
+    }
   };
 
   const calculateChange = () => {
@@ -799,46 +852,56 @@ const EnhancedPaymentScreen: React.FC = () => {
           )}
         </View>
 
-        {/* Receipt Options */}
+        {/* Customer Information - Required for Email Receipt */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Receipt Options</Text>
-          <View style={styles.receiptOptions}>
-            <TouchableOpacity
-              style={[styles.receiptOption, printReceipt && styles.receiptOptionActive]}
-              onPress={() => setPrintReceipt(!printReceipt)}
-            >
-              <Icon 
-                name={printReceipt ? 'check-box' : 'check-box-outline-blank'} 
-                size={24} 
-                color={printReceipt ? Colors.primary : Colors.darkGray} 
+          <Text style={styles.sectionTitle}>Customer Information</Text>
+          <View style={styles.customerForm}>
+            <View style={styles.customerField}>
+              <SimpleTextInput
+                value={customerName}
+                onValueChange={setCustomerName}
+                placeholder="Customer Name (required)"
+                maxLength={60}
+                style={[
+                  styles.customerInput,
+                  customerName.length > 0 && !isNameValid && styles.inputError
+                ]}
+                clearButtonMode="while-editing"
+                autoCapitalize="words"
               />
-              <Text style={styles.receiptOptionText}>Print Receipt</Text>
-            </TouchableOpacity>
-            
-            <View style={styles.emailReceiptSection}>
-              <TouchableOpacity
-                style={[styles.receiptOption, emailReceipt && styles.receiptOptionActive]}
-                onPress={() => setEmailReceipt(emailReceipt ? '' : 'placeholder')}
-              >
-                <Icon 
-                  name={emailReceipt ? 'check-box' : 'check-box-outline-blank'} 
-                  size={24} 
-                  color={emailReceipt ? Colors.primary : Colors.darkGray} 
-                />
-                <Text style={styles.receiptOptionText}>Email Receipt</Text>
-              </TouchableOpacity>
-              
-              {emailReceipt && (
-                <SimpleTextInput
-                  value={emailReceipt}
-                  onValueChange={setEmailReceipt}
-                  placeholder="customer@email.com"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  style={styles.emailInput}
-                  clearButtonMode="while-editing"
-                />
+              {customerName.length > 0 && !isNameValid && (
+                <Text style={styles.validationError}>
+                  {customerName.length > 60 ? 'Name too long (max 60 characters)' : 'Name is required'}
+                </Text>
               )}
+            </View>
+            
+            <View style={styles.customerField}>
+              <SimpleTextInput
+                value={customerEmail}
+                onValueChange={setCustomerEmail}
+                placeholder="Email Address (required for receipt)"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoComplete="email"
+                style={[
+                  styles.customerInput,
+                  customerEmail.length > 0 && !isEmailValid && styles.inputError
+                ]}
+                clearButtonMode="while-editing"
+              />
+              {customerEmail.length > 0 && !isEmailValid && (
+                <Text style={styles.validationError}>
+                  Please enter a valid email address
+                </Text>
+              )}
+            </View>
+            
+            <View style={styles.receiptNote}>
+              <Icon name="mail" size={16} color={Colors.lightText} />
+              <Text style={styles.receiptNoteText}>
+                Receipt will be sent via email only
+              </Text>
             </View>
           </View>
         </View>
@@ -849,7 +912,7 @@ const EnhancedPaymentScreen: React.FC = () => {
         <TouchableOpacity
           style={[styles.processButton, processing && styles.processingButton]}
           onPress={handleProcessPayment}
-          disabled={processing || (!selectedPaymentMethod && !splitPayment)}
+          disabled={processing || (!selectedPaymentMethod && !splitPayment) || !isFormValid}
         >
           {processing ? (
             <>
@@ -1495,6 +1558,46 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: Colors.white,
+  },
+  // Customer form styles
+  customerForm: {
+    paddingHorizontal: 16,
+  },
+  customerField: {
+    marginBottom: 16,
+  },
+  customerInput: {
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    backgroundColor: Colors.white,
+  },
+  inputError: {
+    borderColor: Colors.danger,
+    borderWidth: 2,
+  },
+  validationError: {
+    fontSize: 12,
+    color: Colors.danger,
+    marginTop: 4,
+    marginLeft: 4,
+  },
+  receiptNote: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.background,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginTop: 8,
+  },
+  receiptNoteText: {
+    fontSize: 14,
+    color: Colors.lightText,
+    marginLeft: 8,
   },
 });
 

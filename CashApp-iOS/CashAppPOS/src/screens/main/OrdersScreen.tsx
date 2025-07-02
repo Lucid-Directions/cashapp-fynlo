@@ -13,6 +13,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
 import { Order } from '../../types';
+import OrderService from '../../services/OrderService';
 
 // Mock orders data
 const mockOrders: Order[] = [
@@ -66,9 +67,11 @@ const OrdersScreen: React.FC = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
   const styles = useThemedStyles(createStyles);
-  const [orders, setOrders] = useState<Order[]>(mockOrders);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'preparing' | 'ready' | 'completed'>('all');
+  const orderService = OrderService.getInstance();
 
   const statusColors = {
     draft: theme.colors.lightText,
@@ -92,12 +95,56 @@ const OrdersScreen: React.FC = () => {
     ? orders 
     : orders.filter(order => order.status === filter);
 
+  const loadOrders = async () => {
+    try {
+      console.log('📋 Loading orders from OrderService...');
+      const fetchedOrders = await orderService.getOrders({
+        limit: 50,
+        offset: 0,
+      });
+      setOrders(fetchedOrders);
+      console.log(`✅ Loaded ${fetchedOrders.length} orders`);
+    } catch (error) {
+      console.error('❌ Failed to load orders:', error);
+      // Keep existing orders on error
+    }
+  };
+  
   const onRefresh = async () => {
     setRefreshing(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await loadOrders();
     setRefreshing(false);
   };
+  
+  // Load orders on component mount
+  useEffect(() => {
+    const initializeOrders = async () => {
+      setLoading(true);
+      await loadOrders();
+      setLoading(false);
+    };
+    
+    initializeOrders();
+    
+    // Subscribe to real-time order updates
+    const unsubscribe = orderService.subscribeToOrderEvents((event, data) => {
+      console.log('🔄 Real-time order event:', event, data);
+      
+      if (event === 'order_created') {
+        setOrders(prevOrders => [data, ...prevOrders]);
+      } else if (event === 'order_updated') {
+        setOrders(prevOrders => 
+          prevOrders.map(order => 
+            order.id === data.id ? { ...order, ...data } : order
+          )
+        );
+      }
+    });
+    
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString('en-US', {
@@ -266,9 +313,14 @@ const OrdersScreen: React.FC = () => {
         ListEmptyComponent={() => (
           <View style={styles.emptyState}>
             <Icon name="receipt" size={64} color={theme.colors.lightText} />
-            <Text style={styles.emptyStateText}>No orders found</Text>
+            <Text style={styles.emptyStateText}>
+              {loading ? 'Loading orders...' : 'No orders found'}
+            </Text>
             <Text style={styles.emptyStateSubtext}>
-              Orders will appear here when customers place them
+              {loading 
+                ? 'Please wait while we fetch your orders' 
+                : 'Orders will appear here when customers place them'
+              }
             </Text>
           </View>
         )}
