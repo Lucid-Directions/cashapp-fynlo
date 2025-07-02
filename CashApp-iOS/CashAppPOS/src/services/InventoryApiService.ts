@@ -1,6 +1,7 @@
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import API_CONFIG from '../config/api';
-import { InventoryItem, RecipeClient, RecipeIngredientClient, InventoryLedgerEntry, Recipe, CostAnalysis } from '../types'; // Assuming Recipe is the backend type for creation
+import { InventoryItem, RecipeClient, RecipeIngredientClient, InventoryLedgerEntry, Recipe, CostAnalysis, AuditEvent } from '../types'; // Assuming Recipe is the backend type for creation
 import useAppStore from '../store/useAppStore'; // For token
 
 const API_URL = API_CONFIG.BASE_URL + '/api/v1';
@@ -15,11 +16,18 @@ const apiClient = axios.create({
 // Add a request interceptor to include the auth token
 apiClient.interceptors.request.use(
   async (config) => {
-    // const token = useAppStore.getState().user?.token; // Adjust based on how token is stored
-    // Simulating token for now
-    const token = "fake-jwt-token";
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    try {
+      // Try to get token from app store first, then fall back to AsyncStorage
+      const token = useAppStore.getState().user?.token || 
+                   await AsyncStorage.getItem('auth_token') || 
+                   'demo-jwt-token';
+      
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    } catch (error) {
+      console.error('Failed to get auth token:', error);
+      config.headers.Authorization = 'Bearer demo-jwt-token';
     }
     return config;
   },
@@ -285,5 +293,19 @@ export const updateWastePercentage = async (sku: string, wastePercent: number): 
   } catch (error) {
     console.error(`Error updating waste percentage for ${sku}:`, error.response?.data || error.message);
     throw error.response?.data || new Error(`Failed to update waste percentage for ${sku}`);
+  }
+};
+
+// --- Audit Trail API Calls ---
+
+export const submitAuditEvents = async (events: AuditEvent[]): Promise<void> => {
+  try {
+    const response = await apiClient.post('/inventory/audit/events', { events });
+    if (!response.data.success) {
+      throw new Error(response.data.message || 'Failed to submit audit events');
+    }
+  } catch (error) {
+    console.error('Error submitting audit events:', error.response?.data || error.message);
+    throw error.response?.data || new Error('Failed to submit audit events');
   }
 };

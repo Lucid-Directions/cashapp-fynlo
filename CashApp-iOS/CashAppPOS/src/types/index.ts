@@ -312,6 +312,37 @@ export interface InventoryState {
   lowStockThreshold: number; // Percentage, e.g., 0.1 for 10%
 }
 
+// Audit and compliance types
+export interface AuditEvent {
+  id: string;
+  timestamp: number;
+  eventType: string;
+  entityType: 'inventory' | 'recipe' | 'order' | 'user' | 'system';
+  entityId: string;
+  userId: string;
+  deviceId: string;
+  action: string;
+  previousValue?: any;
+  newValue?: any;
+  metadata: {
+    reason?: string;
+    orderId?: number;
+    batchId?: string;
+    automaticAction?: boolean;
+    complianceFlags?: string[];
+    riskLevel?: 'low' | 'medium' | 'high' | 'critical';
+    financialImpact?: number;
+    supplierInfo?: {
+      supplierId: string;
+      supplierName: string;
+      poNumber?: string;
+    };
+  };
+  ipAddress?: string;
+  userAgent?: string;
+  sessionId: string;
+}
+
 
 // Utility types
 export type DeepPartial<T> = {
