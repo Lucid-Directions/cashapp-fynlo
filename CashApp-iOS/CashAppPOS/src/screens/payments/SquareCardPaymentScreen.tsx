@@ -20,11 +20,6 @@ import SquareService from '../../services/SquareService';
 
 // Square SDK imports - conditionally loaded
 let SQIPCardEntry: any;
-try {
-  SQIPCardEntry = require('react-native-square-in-app-payments').SQIPCardEntry;
-} catch (error) {
-  console.warn('Square SDK not available in SquareCardPaymentScreen');
-}
 
 interface SquareCardPaymentScreenProps {
   navigation: any;
@@ -78,6 +73,19 @@ const SquareCardPaymentScreen: React.FC<SquareCardPaymentScreenProps> = ({
   const initializeSquare = async () => {
     try {
       setPaymentState(prev => ({ ...prev, loading: true }));
+
+      // Check if Square SDK is available (skip for now to allow bundle building)
+      // Dynamically load Square SDK
+      // try {
+      //   const squareSDK = require('react-native-square-in-app-payments');
+      //   SQIPCardEntry = squareSDK.SQIPCardEntry;
+      // } catch (error) {
+      //   console.warn('Square SDK not available in SquareCardPaymentScreen');
+      //   throw new Error('Square SDK not available - please ensure it is properly installed');
+      // }
+
+      // For now, throw error since Square SDK is not installed
+      throw new Error('Square SDK not available - please ensure it is properly installed');
 
       // Check if Square is properly initialized
       const status = await SquareService.getIntegrationStatus();

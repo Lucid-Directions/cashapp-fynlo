@@ -15,16 +15,6 @@ let SQIPCardEntry: any;
 let SQIPApplePay: any;
 let SQIPGooglePay: any;
 
-try {
-  const SquareSDK = require('react-native-square-in-app-payments');
-  SQIPCore = SquareSDK.SQIPCore;
-  SQIPCardEntry = SquareSDK.SQIPCardEntry;
-  SQIPApplePay = SquareSDK.SQIPApplePay;
-  SQIPGooglePay = SquareSDK.SQIPGooglePay;
-} catch (error) {
-  console.warn('Square SDK not available. Square payments will be disabled. Please install dependencies with: npm install && cd ios && pod install');
-}
-
 export interface SquareConfig {
   applicationId: string;
   locationId: string;
@@ -101,6 +91,22 @@ class SquareServiceClass {
   async initialize(config: SquareConfig): Promise<void> {
     try {
       this.config = config;
+      
+      // Check if Square SDK is available (skip for now to allow bundle building)
+      // Dynamically load Square SDK
+      // try {
+      //   const SquareSDK = require('react-native-square-in-app-payments');
+      //   SQIPCore = SquareSDK.SQIPCore;
+      //   SQIPCardEntry = SquareSDK.SQIPCardEntry;
+      //   SQIPApplePay = SquareSDK.SQIPApplePay;
+      //   SQIPGooglePay = SquareSDK.SQIPGooglePay;
+      // } catch (error) {
+      //   console.warn('Square SDK not available. Square payments will be disabled.');
+      //   throw new Error(this.getSDKUnavailableMessage());
+      // }
+
+      // For now, throw error since Square SDK is not installed
+      throw new Error(this.getSDKUnavailableMessage());
       
       // Initialize Square SDK if available
       if (SQIPCore) {

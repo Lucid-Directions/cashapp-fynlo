@@ -21,13 +21,6 @@ import SquareService from '../../services/SquareService';
 // Square SDK imports - conditionally loaded
 let SQIPApplePay: any;
 let SQIPGooglePay: any;
-try {
-  const SquareSDK = require('react-native-square-in-app-payments');
-  SQIPApplePay = SquareSDK.SQIPApplePay;
-  SQIPGooglePay = SquareSDK.SQIPGooglePay;
-} catch (error) {
-  console.warn('Square SDK not available in SquareContactlessPaymentScreen');
-}
 
 interface SquareContactlessPaymentScreenProps {
   navigation: any;
@@ -79,6 +72,20 @@ const SquareContactlessPaymentScreen: React.FC<SquareContactlessPaymentScreenPro
   const initializeContactlessSupport = async () => {
     try {
       setContactlessState(prev => ({ ...prev, loading: true }));
+
+      // Check if Square SDK is available (skip for now to allow bundle building)
+      // Dynamically load Square SDK
+      // try {
+      //   const SquareSDK = require('react-native-square-in-app-payments');
+      //   SQIPApplePay = SquareSDK.SQIPApplePay;
+      //   SQIPGooglePay = SquareSDK.SQIPGooglePay;
+      // } catch (error) {
+      //   console.warn('Square SDK not available in SquareContactlessPaymentScreen');
+      //   throw new Error('Square SDK not available - please ensure it is properly installed');
+      // }
+
+      // For now, throw error since Square SDK is not installed
+      throw new Error('Square SDK not available - please ensure it is properly installed');
 
       // Check Square service status
       const status = await SquareService.getIntegrationStatus();

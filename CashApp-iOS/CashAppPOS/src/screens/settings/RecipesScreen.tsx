@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import useAppStore from '../../store/useAppStore'; // For user/auth state if needed
 // import { Recipe, RecipeIngredient } from '../../types'; // Assuming these types exist or will be created
-import { fetchRecipes, deleteRecipe } from '../../services/ApiService'; // Assuming ApiService will be updated
+import DataService from '../../services/DataService'; // Use existing DataService
 
 // Placeholder types, replace with actual types from '../../types'
 interface RecipeIngredient {
@@ -38,8 +38,9 @@ const RecipesScreen = () => {
       //   setIsLoading(false);
       //   return;
       // }
-      // const fetchedRecipes = await fetchRecipes(restaurantId);
-      const fetchedRecipes: Recipe[] = await fetchRecipes(); // Using simplified fetch for now
+      // For now, use placeholder data since recipes API isn't implemented yet
+      // const fetchedRecipes = await DataService.getInstance().getRecipes();
+      const fetchedRecipes: Recipe[] = []; // Placeholder until recipes API is implemented
       setRecipes(fetchedRecipes);
     } catch (error) {
       console.error("Failed to load recipes:", error);
@@ -81,9 +82,11 @@ const RecipesScreen = () => {
           onPress: async () => {
             try {
               setIsLoading(true);
-              await deleteRecipe(itemId);
+              // For now, just remove from local state since recipes API isn't implemented yet
+              // await DataService.getInstance().deleteRecipe(itemId);
+              setRecipes(prev => prev.filter(recipe => recipe.recipe_id !== itemId));
               Alert.alert("Success", "Recipe deleted successfully.");
-              loadRecipes(); // Refresh list
+              // loadRecipes(); // Refresh list - not needed for local state update
             } catch (error) {
               console.error("Failed to delete recipe:", error);
               Alert.alert("Error", "Failed to delete recipe.");
