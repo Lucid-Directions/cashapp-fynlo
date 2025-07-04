@@ -20,6 +20,7 @@ import CustomersScreen from '../screens/customers/CustomersScreen';
 import InventoryScreen from '../screens/inventory/InventoryScreen';
 import MenuManagementScreen from '../screens/settings/app/MenuManagementScreen';
 import TableManagementScreen from '../screens/table/TableManagementScreen';
+import { TableSelectionScreen } from '../screens/main/TableSelectionScreen';
 import DashboardScreen from '../screens/main/DashboardScreen';
 import ProfileScreen from '../screens/main/ProfileScreen';
 import HelpScreen from '../screens/support/HelpScreen';
@@ -114,6 +115,13 @@ const MainNavigator: React.FC = () => {
       <Stack.Screen
         name="MainTabs"
         component={MainTabNavigator}
+      />
+      <Stack.Screen
+        name="TableSelection"
+        component={TableSelectionScreen}
+        options={{
+          headerShown: false,
+        }}
       />
       <Stack.Screen
         name="POS"

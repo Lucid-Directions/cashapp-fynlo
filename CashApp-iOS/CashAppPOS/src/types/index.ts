@@ -98,6 +98,12 @@ export type RootStackParamList = {
 
 export type MainStackParamList = {
   MainTabs: undefined;
+  POS: {
+    tableId?: string;
+    tableName?: string;
+    orderType?: 'dine_in' | 'takeout' | 'pickup' | 'delivery';
+  };
+  TableSelection: undefined;
   Reports: undefined;
   Employees: undefined;
   EmployeeSchedule: undefined;
@@ -109,6 +115,7 @@ export type MainStackParamList = {
   Customers: undefined;
   Inventory: undefined;
   MenuManagement: undefined;
+  TableManagement: undefined;
   Dashboard: undefined;
   Settings: undefined;
   BusinessSettings: undefined;
