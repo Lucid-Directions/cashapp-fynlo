@@ -11,32 +11,18 @@ import {
   Dimensions,
   PanGestureHandler,
   State,
+  GestureEvent,
+  PanGestureHandlerGestureEvent,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import LazyLoadingWrapper from '../../components/performance/LazyLoadingWrapper';
 import { TableSkeleton } from '../../components/performance/SkeletonLoader';
 import { usePerformanceMonitor, performanceUtils } from '../../hooks/usePerformanceMonitor';
+import { useTheme } from '../../design-system/ThemeProvider';
 
 // Get screen dimensions
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
-
-// Clover POS Color Scheme
-const Colors = {
-  primary: '#00A651',
-  secondary: '#0066CC',
-  success: '#00A651',
-  warning: '#FF6B35',
-  danger: '#E74C3C',
-  background: '#F5F5F5',
-  white: '#FFFFFF',
-  lightGray: '#E5E5E5',
-  mediumGray: '#999999',
-  darkGray: '#666666',
-  text: '#333333',
-  lightText: '#666666',
-  border: '#DDDDDD',
-};
 
 interface TablePosition {
   x: number;
@@ -52,6 +38,9 @@ interface Table {
   shape: 'round' | 'square' | 'rectangle';
   section: string;
   server?: string;
+  width?: number;
+  height?: number;
+  rotation?: number;
   currentOrder?: {
     id: string;
     customerName: string;
@@ -72,8 +61,16 @@ interface Section {
   tables: string[];
 }
 
+interface FloorPlanLayout {
+  canvasWidth: number;
+  canvasHeight: number;
+  gridSize: number;
+  zoom: number;
+}
+
 const TableManagementScreen: React.FC = () => {
   const navigation = useNavigation();
+  const { theme } = useTheme();
   
   const [tables, setTables] = useState<Table[]>([]);
   const [sections, setSections] = useState<Section[]>([]);
@@ -82,13 +79,20 @@ const TableManagementScreen: React.FC = () => {
   const [showAddTableModal, setShowAddTableModal] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [selectedSection, setSelectedSection] = useState<string>('all');
+  const [draggedTable, setDraggedTable] = useState<Table | null>(null);
+  const [layout, setLayout] = useState<FloorPlanLayout>({
+    canvasWidth: screenWidth * 1.5,
+    canvasHeight: screenHeight * 1.2,
+    gridSize: 30,
+    zoom: 1,
+  });
 
   // Sample data
   const sampleSections: Section[] = [
-    { id: 'main', name: 'Main Dining', color: Colors.primary, tables: [] },
-    { id: 'patio', name: 'Patio', color: Colors.secondary, tables: [] },
-    { id: 'bar', name: 'Bar Area', color: Colors.warning, tables: [] },
-    { id: 'private', name: 'Private Room', color: Colors.danger, tables: [] },
+    { id: 'main', name: 'Main Dining', color: theme.colors.primary, tables: [] },
+    { id: 'patio', name: 'Patio', color: theme.colors.secondary, tables: [] },
+    { id: 'bar', name: 'Bar Area', color: theme.colors.warning, tables: [] },
+    { id: 'private', name: 'Private Room', color: theme.colors.danger, tables: [] },
   ];
 
   const sampleTables: Table[] = [
@@ -101,6 +105,9 @@ const TableManagementScreen: React.FC = () => {
       shape: 'round',
       section: 'main',
       server: 'Sarah M.',
+      width: 60,
+      height: 60,
+      rotation: 0,
       currentOrder: {
         id: 'order1',
         customerName: 'Johnson Family',
@@ -116,6 +123,9 @@ const TableManagementScreen: React.FC = () => {
       position: { x: 200, y: 100 },
       shape: 'square',
       section: 'main',
+      width: 50,
+      height: 50,
+      rotation: 0,
     },
     {
       id: 'table3',
@@ -125,6 +135,9 @@ const TableManagementScreen: React.FC = () => {
       position: { x: 350, y: 100 },
       shape: 'rectangle',
       section: 'main',
+      width: 90,
+      height: 60,
+      rotation: 0,
       reservations: [{
         time: new Date(Date.now() + 30 * 60 * 1000), // 30 minutes from now
         customerName: 'Smith Party',
@@ -140,6 +153,9 @@ const TableManagementScreen: React.FC = () => {
       shape: 'rectangle',
       section: 'main',
       server: 'Mike R.',
+      width: 120,
+      height: 60,
+      rotation: 0,
       currentOrder: {
         id: 'order2',
         customerName: 'Corporate Lunch',
@@ -155,6 +171,9 @@ const TableManagementScreen: React.FC = () => {
       position: { x: 100, y: 400 },
       shape: 'round',
       section: 'patio',
+      width: 60,
+      height: 60,
+      rotation: 0,
     },
     {
       id: 'table6',
@@ -164,6 +183,9 @@ const TableManagementScreen: React.FC = () => {
       position: { x: 300, y: 450 },
       shape: 'square',
       section: 'bar',
+      width: 50,
+      height: 50,
+      rotation: 0,
     },
   ];
 
@@ -175,26 +197,31 @@ const TableManagementScreen: React.FC = () => {
   const getTableStatusColor = (status: string) => {
     switch (status) {
       case 'available':
-        return Colors.success;
+        return theme.colors.success;
       case 'occupied':
-        return Colors.danger;
+        return theme.colors.danger;
       case 'reserved':
-        return Colors.warning;
+        return theme.colors.warning;
       case 'cleaning':
-        return Colors.secondary;
+        return theme.colors.secondary;
       case 'out_of_order':
-        return Colors.mediumGray;
+        return theme.colors.mediumGray;
       default:
-        return Colors.lightGray;
+        return theme.colors.lightGray;
     }
   };
 
   const getSectionColor = (sectionId: string) => {
     const section = sections.find(s => s.id === sectionId);
-    return section?.color || Colors.primary;
+    return section?.color || theme.colors.primary;
   };
 
   const getTableDimensions = (table: Table) => {
+    // Use the table's stored dimensions if available, otherwise calculate
+    if (table.width && table.height) {
+      return { width: table.width, height: table.height };
+    }
+    
     const baseSize = 60;
     const seatMultiplier = Math.sqrt(table.seats / 4); // Scale based on seats
     
@@ -232,6 +259,48 @@ const TableManagementScreen: React.FC = () => {
     setTables(prev => prev.map(table => 
       table.id === tableId ? { ...table, position: newPosition } : table
     ));
+    
+    // In a real app, save to backend
+    // saveTablePosition(tableId, newPosition);
+  };
+
+  const handleTableDrag = useCallback((tableId: string, gestureState: any) => {
+    if (!editMode) return;
+    
+    // Snap to grid
+    const gridSize = layout.gridSize;
+    const snappedX = Math.round(gestureState.x / gridSize) * gridSize;
+    const snappedY = Math.round(gestureState.y / gridSize) * gridSize;
+    
+    // Ensure within bounds
+    const maxX = layout.canvasWidth - 100;
+    const maxY = layout.canvasHeight - 100;
+    
+    const newPosition = {
+      x: Math.max(0, Math.min(snappedX, maxX)),
+      y: Math.max(0, Math.min(snappedY, maxY)),
+    };
+    
+    moveTable(tableId, newPosition);
+  }, [editMode, layout]);
+
+  const saveLayout = () => {
+    // Save the current layout to backend
+    const layoutData = {
+      tables: tables.map(table => ({
+        id: table.id,
+        position: table.position,
+        width: table.width,
+        height: table.height,
+        rotation: table.rotation,
+      })),
+      layout: layout,
+    };
+    
+    console.log('Saving layout:', layoutData);
+    // In real app: await saveFloorPlanLayout(layoutData);
+    
+    Alert.alert('Layout Saved', 'Floor plan layout has been saved successfully.');
   };
 
   const addNewTable = (tableData: Partial<Table>) => {
@@ -243,10 +312,53 @@ const TableManagementScreen: React.FC = () => {
       position: tableData.position || { x: 100, y: 100 },
       shape: tableData.shape || 'round',
       section: tableData.section || 'main',
+      width: tableData.width || 60,
+      height: tableData.height || 60,
+      rotation: tableData.rotation || 0,
     };
     
     setTables(prev => [...prev, newTable]);
     setShowAddTableModal(false);
+  };
+
+  const mergeSelectedTables = () => {
+    // For demo purposes, merge tables within the same section
+    const tablesToMerge = tables.filter(t => t.status === 'available' && t.section === selectedSection);
+    
+    if (tablesToMerge.length < 2) {
+      Alert.alert('Merge Tables', 'Select at least 2 available tables in the same section to merge.');
+      return;
+    }
+    
+    Alert.alert(
+      'Merge Tables',
+      `Merge ${tablesToMerge.length} tables into one?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Merge', onPress: () => performTableMerge(tablesToMerge) }
+      ]
+    );
+  };
+
+  const performTableMerge = (tablesToMerge: Table[]) => {
+    const primaryTable = tablesToMerge[0];
+    const totalSeats = tablesToMerge.reduce((sum, table) => sum + table.seats, 0);
+    
+    // Create merged table
+    const mergedTable: Table = {
+      ...primaryTable,
+      name: `${primaryTable.name} (Merged)`,
+      seats: totalSeats,
+      status: 'reserved', // Mark as reserved during merge
+      width: Math.max(...tablesToMerge.map(t => t.width || 60)) + 20,
+      height: Math.max(...tablesToMerge.map(t => t.height || 60)) + 10,
+    };
+    
+    // Remove old tables and add merged table
+    const remainingTables = tables.filter(t => !tablesToMerge.includes(t));
+    setTables([...remainingTables, mergedTable]);
+    
+    Alert.alert('Success', `Tables merged successfully. New capacity: ${totalSeats} seats`);
   };
 
   const deleteTable = (tableId: string) => {
@@ -275,8 +387,20 @@ const TableManagementScreen: React.FC = () => {
     const statusColor = getTableStatusColor(table.status);
     const sectionColor = getSectionColor(table.section);
     
-    return (
-      <TouchableOpacity
+    const handleGestureEvent = (event: GestureEvent<PanGestureHandlerGestureEvent>) => {
+      if (!editMode) return;
+      
+      const { translationX, translationY } = event.nativeEvent;
+      const newPosition = {
+        x: table.position.x + translationX,
+        y: table.position.y + translationY,
+      };
+      
+      handleTableDrag(table.id, newPosition);
+    };
+    
+    const tableContent = (
+      <View
         style={[
           styles.table,
           {
@@ -287,66 +411,115 @@ const TableManagementScreen: React.FC = () => {
             backgroundColor: statusColor,
             borderColor: sectionColor,
             borderRadius: table.shape === 'round' ? dimensions.width / 2 : 8,
+            transform: [{ rotate: `${table.rotation || 0}deg` }],
+            opacity: editMode && draggedTable?.id === table.id ? 0.7 : 1,
           }
         ]}
+      >
+        <Text style={[styles.tableName, { color: theme.colors.white }]}>{table.name}</Text>
+        <Text style={[styles.tableSeats, { color: theme.colors.white }]}>{table.seats}</Text>
+        {table.currentOrder && (
+          <View style={[styles.orderIndicator, { backgroundColor: theme.colors.warning }]}>
+            <Icon name="restaurant" size={12} color={theme.colors.white} />
+          </View>
+        )}
+        {table.reservations && table.reservations.length > 0 && (
+          <View style={[styles.reservationIndicator, { backgroundColor: theme.colors.secondary }]}>
+            <Icon name="schedule" size={12} color={theme.colors.white} />
+          </View>
+        )}
+        {editMode && (
+          <View style={[styles.editIndicator, { backgroundColor: theme.colors.primary }]}>
+            <Icon name="drag-indicator" size={16} color={theme.colors.white} />
+          </View>
+        )}
+      </View>
+    );
+    
+    if (editMode) {
+      return (
+        <PanGestureHandler
+          onGestureEvent={handleGestureEvent}
+          onHandlerStateChange={(event) => {
+            if (event.nativeEvent.state === State.BEGAN) {
+              setDraggedTable(table);
+            } else if (event.nativeEvent.state === State.END) {
+              setDraggedTable(null);
+            }
+          }}
+        >
+          {tableContent}
+        </PanGestureHandler>
+      );
+    }
+    
+    return (
+      <TouchableOpacity
         onPress={() => {
           setSelectedTable(table);
           setShowTableModal(true);
         }}
       >
-        <Text style={styles.tableName}>{table.name}</Text>
-        <Text style={styles.tableSeats}>{table.seats}</Text>
-        {table.currentOrder && (
-          <View style={styles.orderIndicator}>
-            <Icon name="restaurant" size={12} color={Colors.white} />
-          </View>
-        )}
-        {table.reservations && table.reservations.length > 0 && (
-          <View style={styles.reservationIndicator}>
-            <Icon name="schedule" size={12} color={Colors.white} />
-          </View>
-        )}
+        {tableContent}
       </TouchableOpacity>
     );
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: theme.colors.primary }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Icon name="arrow-back" size={24} color={Colors.white} />
+          <Icon name="arrow-back" size={24} color={theme.colors.white} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Table Management</Text>
+        <Text style={[styles.headerTitle, { color: theme.colors.white }]}>Dining Room</Text>
         <View style={styles.headerActions}>
+          {editMode && (
+            <TouchableOpacity 
+              style={styles.headerButton}
+              onPress={saveLayout}
+            >
+              <Icon name="save" size={24} color={theme.colors.white} />
+            </TouchableOpacity>
+          )}
+          {editMode && (
+            <TouchableOpacity 
+              style={styles.headerButton}
+              onPress={mergeSelectedTables}
+            >
+              <Icon name="merge-type" size={24} color={theme.colors.white} />
+            </TouchableOpacity>
+          )}
           <TouchableOpacity 
             style={styles.headerButton}
             onPress={() => setEditMode(!editMode)}
           >
-            <Icon name={editMode ? "check" : "edit"} size={24} color={Colors.white} />
+            <Icon name={editMode ? "check" : "edit"} size={24} color={theme.colors.white} />
           </TouchableOpacity>
           <TouchableOpacity 
             style={styles.headerButton}
             onPress={() => setShowAddTableModal(true)}
           >
-            <Icon name="add" size={24} color={Colors.white} />
+            <Icon name="add" size={24} color={theme.colors.white} />
           </TouchableOpacity>
         </View>
       </View>
 
       {/* Section Filter */}
-      <View style={styles.sectionFilter}>
+      <View style={[styles.sectionFilter, { backgroundColor: theme.colors.white, borderBottomColor: theme.colors.border }]}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <TouchableOpacity
             style={[
               styles.sectionButton,
-              selectedSection === 'all' && styles.sectionButtonActive
+              { borderColor: theme.colors.primary, backgroundColor: theme.colors.white },
+              selectedSection === 'all' && { backgroundColor: theme.colors.primary }
             ]}
             onPress={() => setSelectedSection('all')}
           >
             <Text style={[
               styles.sectionButtonText,
-              selectedSection === 'all' && styles.sectionButtonTextActive
+              { color: theme.colors.primary },
+              selectedSection === 'all' && { color: theme.colors.white }
             ]}>
               All Sections
             </Text>
@@ -357,14 +530,15 @@ const TableManagementScreen: React.FC = () => {
               key={section.id}
               style={[
                 styles.sectionButton,
-                { borderColor: section.color },
+                { borderColor: section.color, backgroundColor: theme.colors.white },
                 selectedSection === section.id && { backgroundColor: section.color }
               ]}
               onPress={() => setSelectedSection(section.id)}
             >
               <Text style={[
                 styles.sectionButtonText,
-                selectedSection === section.id && styles.sectionButtonTextActive
+                { color: section.color },
+                selectedSection === section.id && { color: theme.colors.white }
               ]}>
                 {section.name}
               </Text>
@@ -376,18 +550,27 @@ const TableManagementScreen: React.FC = () => {
       {/* Floor Plan */}
       <ScrollView 
         style={styles.floorPlan}
-        contentContainerStyle={styles.floorPlanContent}
+        contentContainerStyle={[styles.floorPlanContent, { backgroundColor: theme.colors.white }]}
         showsVerticalScrollIndicator={false}
         showsHorizontalScrollIndicator={false}
         scrollEnabled={!editMode}
+        pinchGestureEnabled={true}
+        maximumZoomScale={2}
+        minimumZoomScale={0.5}
       >
         {/* Background Grid */}
         <View style={styles.gridBackground}>
           {[...Array(20)].map((_, i) => (
-            <View key={`h-${i}`} style={[styles.gridLine, { top: i * 30 }]} />
+            <View key={`h-${i}`} style={[
+              styles.gridLine, 
+              { top: i * layout.gridSize, backgroundColor: theme.colors.lightGray }
+            ]} />
           ))}
           {[...Array(15)].map((_, i) => (
-            <View key={`v-${i}`} style={[styles.gridLineVertical, { left: i * 30 }]} />
+            <View key={`v-${i}`} style={[
+              styles.gridLineVertical, 
+              { left: i * layout.gridSize, backgroundColor: theme.colors.lightGray }
+            ]} />
           ))}
         </View>
 
@@ -397,8 +580,8 @@ const TableManagementScreen: React.FC = () => {
         ))}
 
         {/* Legend */}
-        <View style={styles.legend}>
-          <Text style={styles.legendTitle}>Status Legend</Text>
+        <View style={[styles.legend, { backgroundColor: theme.colors.white, borderColor: theme.colors.border }]}>
+          <Text style={[styles.legendTitle, { color: theme.colors.text }]}>Status Legend</Text>
           <View style={styles.legendItems}>
             {[
               { status: 'available', label: 'Available' },
@@ -412,10 +595,17 @@ const TableManagementScreen: React.FC = () => {
                   styles.legendColor,
                   { backgroundColor: getTableStatusColor(item.status) }
                 ]} />
-                <Text style={styles.legendLabel}>{item.label}</Text>
+                <Text style={[styles.legendLabel, { color: theme.colors.text }]}>{item.label}</Text>
               </View>
             ))}
           </View>
+          {editMode && (
+            <View style={{ marginTop: 8 }}>
+              <Text style={[styles.legendLabel, { color: theme.colors.textSecondary, fontStyle: 'italic' }]}>
+                Drag tables to move • Pinch to zoom
+              </Text>
+            </View>
+          )}
         </View>
       </ScrollView>
 
@@ -627,10 +817,8 @@ const TableManagementScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
   },
   header: {
-    backgroundColor: Colors.primary,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -644,7 +832,6 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: Colors.white,
     flex: 1,
     textAlign: 'center',
   },
@@ -656,10 +843,8 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   sectionFilter: {
-    backgroundColor: Colors.white,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
   },
   sectionButton: {
     paddingHorizontal: 16,
@@ -667,19 +852,16 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: Colors.primary,
-    backgroundColor: Colors.white,
   },
   sectionButtonActive: {
-    backgroundColor: Colors.primary,
+    // Dynamic styling applied inline
   },
   sectionButtonText: {
     fontSize: 14,
     fontWeight: '500',
-    color: Colors.primary,
   },
   sectionButtonTextActive: {
-    color: Colors.white,
+    // Dynamic styling applied inline
   },
   floorPlan: {
     flex: 1,
@@ -687,7 +869,6 @@ const styles = StyleSheet.create({
   floorPlanContent: {
     width: screenWidth * 1.5,
     height: screenHeight * 1.2,
-    backgroundColor: Colors.white,
     position: 'relative',
   },
   gridBackground: {
@@ -702,7 +883,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 1,
-    backgroundColor: Colors.lightGray,
     opacity: 0.3,
   },
   gridLineVertical: {
@@ -710,7 +890,6 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     width: 1,
-    backgroundColor: Colors.lightGray,
     opacity: 0.3,
   },
   table: {
@@ -727,11 +906,9 @@ const styles = StyleSheet.create({
   tableName: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: Colors.white,
   },
   tableSeats: {
     fontSize: 12,
-    color: Colors.white,
     opacity: 0.9,
   },
   orderIndicator: {
@@ -741,7 +918,6 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: Colors.warning,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -752,7 +928,16 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: Colors.secondary,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  editIndicator: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -760,11 +945,9 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 20,
     left: 20,
-    backgroundColor: Colors.white,
     padding: 16,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: Colors.border,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -774,7 +957,6 @@ const styles = StyleSheet.create({
   legendTitle: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: Colors.text,
     marginBottom: 8,
   },
   legendItems: {
@@ -792,7 +974,6 @@ const styles = StyleSheet.create({
   },
   legendLabel: {
     fontSize: 12,
-    color: Colors.text,
   },
   modalOverlay: {
     flex: 1,
@@ -801,7 +982,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: Colors.white,
     borderRadius: 12,
     width: '90%',
     maxHeight: '80%',
@@ -812,12 +992,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: Colors.text,
   },
   modalBody: {
     padding: 16,
@@ -829,23 +1007,19 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.text,
     marginBottom: 8,
   },
   infoText: {
     fontSize: 14,
-    color: Colors.darkGray,
     marginBottom: 4,
   },
   infoSubtext: {
     fontSize: 12,
-    color: Colors.lightText,
   },
   reservationItem: {
     marginBottom: 8,
     paddingBottom: 8,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGray,
   },
   statusActions: {
     marginTop: 16,
@@ -864,19 +1038,16 @@ const styles = StyleSheet.create({
   },
   statusButtonActive: {
     borderWidth: 2,
-    borderColor: Colors.text,
   },
   statusButtonText: {
     fontSize: 12,
     fontWeight: '500',
-    color: Colors.white,
     textTransform: 'capitalize',
   },
   modalActions: {
     flexDirection: 'row',
     padding: 16,
     borderTopWidth: 1,
-    borderTopColor: Colors.border,
     gap: 12,
   },
   modalButton: {
@@ -889,31 +1060,27 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   deleteButton: {
-    backgroundColor: Colors.danger,
+    // Dynamic styling applied inline
   },
   editButton: {
-    backgroundColor: Colors.secondary,
+    // Dynamic styling applied inline
   },
   modalButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.white,
   },
   inputLabel: {
     fontSize: 14,
     fontWeight: '500',
-    color: Colors.text,
     marginBottom: 8,
     marginTop: 16,
   },
   textInput: {
     borderWidth: 1,
-    borderColor: Colors.border,
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 8,
     fontSize: 16,
-    color: Colors.text,
   },
   shapeSelector: {
     flexDirection: 'row',
@@ -923,16 +1090,13 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 12,
     paddingHorizontal: 16,
-    backgroundColor: Colors.background,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: Colors.border,
     alignItems: 'center',
   },
   shapeOptionText: {
     fontSize: 14,
     fontWeight: '500',
-    color: Colors.text,
     textTransform: 'capitalize',
   },
   sectionSelector: {
@@ -943,32 +1107,26 @@ const styles = StyleSheet.create({
   sectionOption: {
     paddingVertical: 8,
     paddingHorizontal: 12,
-    backgroundColor: Colors.background,
     borderRadius: 16,
     borderWidth: 1,
   },
   sectionOptionText: {
     fontSize: 14,
     fontWeight: '500',
-    color: Colors.text,
   },
   cancelButton: {
-    backgroundColor: Colors.background,
     borderWidth: 1,
-    borderColor: Colors.border,
   },
   cancelButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.text,
   },
   saveButton: {
-    backgroundColor: Colors.primary,
+    // Dynamic styling applied inline
   },
   saveButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.white,
   },
 });
 
