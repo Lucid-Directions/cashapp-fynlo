@@ -60,6 +60,7 @@ class Restaurant(Base):
         "applePay": {"enabled": True, "feePercentage": 2.9},
         "giftCard": {"enabled": True, "requiresAuth": True}
     })
+    floor_plan_layout = Column(JSONB)  # New field for layout storage
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
@@ -146,7 +147,8 @@ class Order(Base):
     restaurant_id = Column(UUID(as_uuid=True), nullable=False)
     customer_id = Column(UUID(as_uuid=True), nullable=True)
     order_number = Column(String(50), nullable=False)
-    table_number = Column(String(20))
+    table_number = Column(String(20))  # Legacy field - kept for backward compatibility
+    table_id = Column(UUID(as_uuid=True), ForeignKey('tables.id'), nullable=True)  # New FK to tables
     order_type = Column(String(20), default="dine_in")  # dine_in, takeaway, delivery
     status = Column(String(20), default="pending")  # pending, confirmed, preparing, ready, completed, cancelled
     items = Column(JSONB, nullable=False)
@@ -160,6 +162,9 @@ class Order(Base):
     created_by = Column(UUID(as_uuid=True), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    
+    # Relationship
+    table = relationship("Table", back_populates="orders")
 
 class Payment(Base):
     """Payment transactions"""
@@ -273,12 +278,17 @@ class Table(Base):
     server_id = Column(UUID(as_uuid=True), nullable=True)  # Reference to User
     x_position = Column(Integer, default=0)
     y_position = Column(Integer, default=0)
+    width = Column(Integer, default=60)  # Table width for layout
+    height = Column(Integer, default=60)  # Table height for layout
+    rotation = Column(Integer, default=0)  # Rotation angle in degrees
+    shape = Column(String(20), default="round")  # round, square, rectangle
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     
-    # Relationship
+    # Relationships
     section = relationship("Section")
+    orders = relationship("Order", back_populates="table")
 
 class PosSession(Base):
     """POS Session management"""

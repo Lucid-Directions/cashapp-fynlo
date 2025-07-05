@@ -16,7 +16,8 @@ Before and after every change, please check through all the code you just wrote 
 - **CRITICAL**: Project context is in `cashapp-fynlo/CashApp-iOS/CashAppPOS/CONTEXT.md` (renamed from PROJECT_CONTEXT_COMPLETE.md)
 - **Always check CONTEXT.md first** for common issues, bundle deployment fixes, and recent updates
 - Contains solutions to recurring problems like "changes not showing in app"
-<<<<<<< HEAD
+**IMPORTANT**: Always check `CONTEXT.md` first for project context, common issues, and recent updates!
+
 ## 🚨 CRITICAL GIT WORKFLOW WARNING 🚨
 
 **NEVER SWITCH BRANCHES OR CREATE PRs WITHOUT COMMITTING CURRENT WORK FIRST**
@@ -43,9 +44,6 @@ git checkout -b feature/specific-change
 - ✅ Never assume files exist in other branches
 
 **This is NOT optional** - files have been lost 3+ times due to not following this workflow.
-=======
-**IMPORTANT**: Always check `CONTEXT.md` first for project context, common issues, and recent updates!
->>>>>>> origin/main
 
 ## Project Overview
 
