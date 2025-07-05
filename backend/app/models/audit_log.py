@@ -1,6 +1,7 @@
 from sqlalchemy import Column, String, DateTime, JSON, ForeignKey, Enum as SQLAlchemyEnum, Integer, Index
 from sqlalchemy.dialects.postgresql import UUID, INET, JSONB
 from sqlalchemy.sql import func
+from sqlalchemy.sql.elements import quoted_name
 from sqlalchemy.orm import relationship # Added for potential future use
 import uuid
 import enum

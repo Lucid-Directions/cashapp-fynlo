@@ -8,12 +8,13 @@ from app.middleware.rate_limit_middleware import limiter, DEFAULT_RATE
 from app.api.v1.endpoints import (
     auth, restaurants, products, orders, payments, customers,
     analytics, files, platform, websocket, sync, notifications,
-    pos, admin, inventory, recipes # Added inventory and recipes
+    pos, admin, inventory, recipes, employees # Added inventory, recipes, and employees
 )
 
-# Apply a default rate limit to all routes in this router.
+# Apply a default rate limit to all routes in this router - TEMPORARILY DISABLED.
 # Specific routes can override this with their own @limiter.limit decorator.
-api_router = APIRouter(dependencies=[Depends(limiter.limit(DEFAULT_RATE))])
+# api_router = APIRouter(dependencies=[Depends(limiter.limit(DEFAULT_RATE))])
+api_router = APIRouter()
 
 
 # Include all endpoint routers
@@ -37,3 +38,6 @@ api_router.include_router(admin.router, prefix="/admin", tags=["admin"])
 # Inventory and Recipe Management
 api_router.include_router(inventory.router, prefix="/inventory", tags=["inventory_management"])
 api_router.include_router(recipes.router, prefix="/recipes", tags=["recipe_management"])
+
+# Employee Management
+api_router.include_router(employees.router, prefix="/employees", tags=["employee_management"])

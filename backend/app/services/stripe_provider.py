@@ -2,9 +2,9 @@ import stripe
 from decimal import Decimal
 from typing import Dict, Any, Optional
 from datetime import datetime
-from .payment_providers import PaymentProvider, PaymentStatus
+from .payment_providers.base_provider import BasePaymentProvider, PaymentStatus
 
-class StripeProvider(PaymentProvider):
+class StripeProvider(BasePaymentProvider):
     """Stripe payment provider implementation"""
     
     def __init__(self, config: Dict[str, Any]):

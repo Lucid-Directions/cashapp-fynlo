@@ -12,6 +12,8 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import useAppStore from '../../store/useAppStore';
 import Logo from '../../components/Logo';
+import HeaderWithBackButton from '../../components/navigation/HeaderWithBackButton';
+import { useTheme } from '../../design-system/ThemeProvider';
 
 const Colors = {
   primary: '#2C3E50',
@@ -27,6 +29,7 @@ const Colors = {
 
 const SettingsScreen: React.FC = () => {
   const { logout } = useAppStore();
+  const { theme } = useTheme();
 
   const handleLogout = () => {
     Alert.alert(
@@ -73,12 +76,14 @@ const SettingsScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={Colors.primary} />
+      <StatusBar barStyle="light-content" backgroundColor={theme.colors.primary} />
       
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Settings</Text>
-      </View>
+      {/* Header with Back Button */}
+      <HeaderWithBackButton
+        title="Settings"
+        backgroundColor={theme.colors.primary}
+        textColor={theme.colors.white}
+      />
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* General Settings */}

@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   Dimensions,
   ActivityIndicator, // Will be replaced by LoadingView
+  Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
@@ -22,7 +23,7 @@ import ComingSoon from '../../components/feedback/ComingSoon'; // Added
 
 // Mock ENV flag (would typically come from an env config file)
 const ENV = {
-  FEATURE_REPORTS: false, // Set to true to enable, false to show ComingSoon
+  FEATURE_REPORTS: true, // Set to true to enable, false to show ComingSoon
 };
 
 // Get screen dimensions for responsive design
@@ -129,6 +130,7 @@ const ReportsScreen = () => {
         <TouchableOpacity 
           style={styles.backButton}
           onPress={() => navigation.goBack()}
+          activeOpacity={0.7}
         >
           <Icon name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>
@@ -186,7 +188,7 @@ const ReportsScreen = () => {
             {topItemsToday.length > 0 ? (
               topItemsToday.map((item: any, index: number) => (
                 <Text key={index} style={[styles.itemText, { color: theme.colors.text }]}>
-                  {item.emoji || '🍽️'} {item.name} - {item.count} sold
+                  🍽️ {item.name} - {item.quantity} sold (£{item.revenue.toFixed(2)})
                 </Text>
               ))
             ) : (
@@ -200,12 +202,9 @@ const ReportsScreen = () => {
           <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Top Performers Today</Text>
           <View style={[styles.card, { backgroundColor: theme.colors.white }]}>
             {topPerformersToday.length > 0 ? (
-              topPerformersToday.slice(0, 3).map((employee: EmployeeData, index: number) => {
-                // Assuming 'dailySales' and 'dailyHours' are part of the employee object from the service
-                const dailySales = employee.dailySales || (employee.totalSales / 30);
-                const dailyHours = employee.dailyHours || (employee.actualHours / 7);
+              topPerformersToday.slice(0, 3).map((employee: any, index: number) => {
                 return (
-                  <View key={employee.id} style={styles.performerRow}>
+                  <View key={index} style={styles.performerRow}>
                     <View style={styles.performerRank}>
                       <Text style={[styles.rankNumber, { color: index === 0 ? Colors.warning : Colors.darkGray }]}>#{index + 1}</Text>
                     </View>
@@ -214,8 +213,8 @@ const ReportsScreen = () => {
                       <Text style={[styles.performerRole, { color: Colors.darkGray }]}>{employee.role}</Text>
                     </View>
                     <View style={styles.performerStats}>
-                      <Text style={[styles.performerSales, { color: Colors.success }]}>£{dailySales.toFixed(0)}</Text>
-                      <Text style={[styles.performerHours, { color: Colors.darkGray }]}>{dailyHours.toFixed(1)}h</Text>
+                      <Text style={[styles.performerSales, { color: Colors.success }]}>£{employee.sales.toFixed(0)}</Text>
+                      <Text style={[styles.performerHours, { color: Colors.darkGray }]}>{employee.orders} orders</Text>
                     </View>
                   </View>
                 );
@@ -268,7 +267,7 @@ const ReportsScreen = () => {
 
           <TouchableOpacity 
             style={[styles.reportItem, { backgroundColor: theme.colors.white }]}
-            onPress={() => navigation.navigate('ScheduleReport')}
+            onPress={() => navigation.navigate('LaborReport')}
           >
             <Icon name="schedule" size={24} color={Colors.primary} />
             <View style={styles.reportInfo}>
@@ -305,7 +304,7 @@ const ReportsScreen = () => {
 
         <View style={[styles.notice, { backgroundColor: theme.colors.white }]}>
           <Text style={[styles.noticeText, { color: Colors.darkGray }]}>
-            Reports use real employee and sales data. {employees.length} employees tracked.
+            Reports use real employee and sales data. {topPerformersToday.length} employees tracked.
           </Text>
         </View>
       </ScrollView>
@@ -327,7 +326,14 @@ const styles = StyleSheet.create({
     height: 60,
   },
   backButton: {
-    padding: 8,
+    padding: 12,
+    marginRight: 8,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   headerTitle: {
     flex: 1,

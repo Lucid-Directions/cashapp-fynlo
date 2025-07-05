@@ -1,5 +1,5 @@
 import os
-from typing import Literal # Python 3.8+
+from typing import Literal, Any # Python 3.8+
 # For older Python, from typing_extensions import Literal
 from pathlib import Path
 

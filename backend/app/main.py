@@ -119,10 +119,10 @@ app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(MobileCompatibilityMiddleware, enable_cors=True, enable_port_redirect=True)
 app.add_middleware(MobileDataOptimizationMiddleware)
 
-# Add SlowAPI middleware (for rate limiting)
+# Add SlowAPI middleware (for rate limiting) - TEMPORARILY DISABLED
 # This middleware itself doesn't enforce limits but makes the limiter available.
 # Limits are enforced by decorators or dependencies.
-app.add_middleware(SlowAPIMiddleware)
+# app.add_middleware(SlowAPIMiddleware)
 
 # Register standardized exception handlers
 register_exception_handlers(app) # General handlers

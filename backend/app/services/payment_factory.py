@@ -37,14 +37,14 @@ class PaymentProviderFactory:
                 "api_key": settings.STRIPE_API_KEY
             })
         
-        # Initialize Square
-        if (hasattr(settings, 'SQUARE_ACCESS_TOKEN') and settings.SQUARE_ACCESS_TOKEN and
-            hasattr(settings, 'SQUARE_LOCATION_ID') and settings.SQUARE_LOCATION_ID):
-            self.providers["square"] = SquareProvider({
-                "access_token": settings.SQUARE_ACCESS_TOKEN,
-                "location_id": settings.SQUARE_LOCATION_ID,
-                "environment": getattr(settings, 'SQUARE_ENVIRONMENT', 'production')
-            })
+        # Initialize Square (temporarily disabled for testing)
+        # if (hasattr(settings, 'SQUARE_ACCESS_TOKEN') and settings.SQUARE_ACCESS_TOKEN and
+        #     hasattr(settings, 'SQUARE_LOCATION_ID') and settings.SQUARE_LOCATION_ID):
+        #     self.providers["square"] = SquareProvider({
+        #         "access_token": settings.SQUARE_ACCESS_TOKEN,
+        #         "location_id": settings.SQUARE_LOCATION_ID,
+        #         "environment": getattr(settings, 'SQUARE_ENVIRONMENT', 'production')
+        #     })
         
         # Initialize SumUp
         if (hasattr(settings, 'SUMUP_API_KEY') and settings.SUMUP_API_KEY and
@@ -129,7 +129,7 @@ class PaymentProviderFactory:
         amount: Decimal,
         restaurant_id: str,
         monthly_volume: Optional[Decimal] = None
-    ) -> PaymentProvider:
+    ) -> BasePaymentProvider:
         """Simple cost-based provider selection (fallback)"""
         
         # Get restaurant's monthly volume from database if not provided
@@ -260,3 +260,8 @@ class PaymentProviderFactory:
 
 # Global factory instance
 payment_factory = PaymentProviderFactory()
+
+# Convenience function for backwards compatibility
+def get_payment_provider(provider_name: str):
+    """Get payment provider by name"""
+    return payment_factory.get_provider(provider_name)

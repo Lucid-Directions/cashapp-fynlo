@@ -28,6 +28,36 @@ from .audit_log import (
 # Import models from refund.py
 from .refund import Refund, RefundLedger
 
+# Import models from employee.py
+from .employee import (
+    EmployeeProfile,
+    Schedule,
+    Shift,
+    TimeEntry,
+    PerformanceMetric
+)
+
+# Import models from reports.py
+from .reports import (
+    DailyReport,
+    HourlyMetric,
+    ProductPerformance,
+    EmployeePerformance,
+    FinancialSummary
+)
+
+# Import models from stock_movement.py
+from .stock_movement import (
+    MovementType,
+    Supplier,
+    PurchaseOrder,
+    PurchaseOrderItem,
+    StockMovement,
+    StockAlert,
+    InventoryCount,
+    InventoryCountItem
+)
+
 __all__ = [
     "Base",
     "Platform",
@@ -49,5 +79,26 @@ __all__ = [
     "AuditEventType",
     "AuditEventStatus",
     "Refund",
-    "RefundLedger"
+    "RefundLedger",
+    # Employee models
+    "EmployeeProfile",
+    "Schedule",
+    "Shift",
+    "TimeEntry",
+    "PerformanceMetric",
+    # Reports models
+    "DailyReport",
+    "HourlyMetric",
+    "ProductPerformance",
+    "EmployeePerformance",
+    "FinancialSummary",
+    # Stock movement models
+    "MovementType",
+    "Supplier",
+    "PurchaseOrder",
+    "PurchaseOrderItem",
+    "StockMovement",
+    "StockAlert",
+    "InventoryCount",
+    "InventoryCountItem"
 ]

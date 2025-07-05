@@ -9,7 +9,7 @@
 const isDevelopment = __DEV__;
 
 // Mac's LAN IP address for device testing - Updated to current network
-const MAC_LAN_IP = '192.168.68.101';
+const MAC_LAN_IP = '192.168.0.109';
 
 // Determine if running on simulator or device
 const isSimulator = __DEV__ && (
@@ -59,8 +59,8 @@ export const API_CONFIG = {
   
   // Platform endpoints
   PLATFORM_ENDPOINTS: {
-    SERVICE_CHARGE: '/platform/service-charge',
-    PAYMENT_METHODS: '/platform/payment-methods',
+    SERVICE_CHARGE: '/platform/settings/platform/service-charge',
+    PAYMENT_METHODS: '/platform/settings/payment-methods',
     SETTINGS: '/platform/settings',
   },
   

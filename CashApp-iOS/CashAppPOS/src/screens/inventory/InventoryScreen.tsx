@@ -247,7 +247,7 @@ const InventoryScreen: React.FC = () => {
         currentStock: item.currentStock.toString(),
         minimumStock: item.minimumStock.toString(),
         maximumStock: item.maximumStock.toString(),
-        unitCost: item.unitCost.toFixed(2),
+        unitCost: item.unitCost ? item.unitCost.toFixed(2) : '0.00',
         supplier: item.supplier,
       });
       setShowEditModal(true);
@@ -354,7 +354,7 @@ const InventoryScreen: React.FC = () => {
         <View style={styles.itemMetrics}>
           <View style={styles.metric}>
             <Icon name="attach-money" size={16} color={Colors.darkGray} />
-            <Text style={styles.metricText}>£{item.unitCost.toFixed(2)}</Text>
+            <Text style={styles.metricText}>£{item.unitCost ? item.unitCost.toFixed(2) : '0.00'}</Text>
           </View>
           <View style={styles.metric}>
             <Icon name="trending-up" size={16} color={Colors.darkGray} />
@@ -374,7 +374,7 @@ const InventoryScreen: React.FC = () => {
     total: inventory.length,
     lowStock: inventory.filter(item => item.currentStock <= item.minimumStock).length,
     outOfStock: inventory.filter(item => item.currentStock === 0).length,
-    totalValue: inventory.length > 0 ? inventory.reduce((sum, item) => sum + (item.currentStock * item.unitCost), 0) : 0,
+    totalValue: inventory.length > 0 ? inventory.reduce((sum, item) => sum + (item.currentStock * (item.unitCost || 0)), 0) : 0,
   };
 
   if (!ENV.FEATURE_INVENTORY) {
@@ -418,6 +418,7 @@ const InventoryScreen: React.FC = () => {
         <TouchableOpacity 
           style={styles.backButton}
           onPress={() => navigation.goBack()}
+          activeOpacity={0.7}
         >
           <Icon name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>
@@ -854,7 +855,14 @@ const styles = StyleSheet.create({
     height: 60,
   },
   backButton: {
-    padding: 8,
+    padding: 12,
+    marginRight: 8,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   headerCenter: {
     flex: 1,

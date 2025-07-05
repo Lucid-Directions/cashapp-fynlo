@@ -109,8 +109,9 @@ const EmployeesScreen: React.FC = () => {
     return Colors.danger;
   };
 
-  const formatHireDate = (date: Date) => {
-    const months = Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24 * 30));
+  const formatHireDate = (date: Date | string) => {
+    const dateObj = date instanceof Date ? date : new Date(date);
+    const months = Math.floor((Date.now() - dateObj.getTime()) / (1000 * 60 * 60 * 24 * 30));
     if (months < 1) return 'New hire';
     if (months < 12) return `${months} months`;
     const years = Math.floor(months / 12);
@@ -287,6 +288,7 @@ const EmployeesScreen: React.FC = () => {
         <TouchableOpacity 
           style={styles.backButton}
           onPress={() => navigation.goBack()}
+          activeOpacity={0.7}
         >
           <Icon name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>
@@ -614,7 +616,14 @@ const styles = StyleSheet.create({
     height: 60,
   },
   backButton: {
-    padding: 8,
+    padding: 12,
+    marginRight: 8,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   headerCenter: {
     flex: 1,

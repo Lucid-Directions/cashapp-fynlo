@@ -8,21 +8,21 @@ import {
   ScrollView,
   TouchableOpacity,
   Dimensions,
-  ActivityIndicator, // Will be replaced by LoadingView
+  Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
-// import { generateSalesHistory } from '../../utils/mockDataGenerator'; // Removed
-import DataService from '../../services/DataService'; // Added
-import LoadingView from '../../components/feedback/LoadingView'; // Added
-import ComingSoon from '../../components/feedback/ComingSoon'; // Added
+import { useTheme } from '../../design-system/ThemeProvider';
+import DataService from '../../services/DataService';
+import LoadingView from '../../components/feedback/LoadingView';
+import ComingSoon from '../../components/feedback/ComingSoon';
 
 
 const { width } = Dimensions.get('window');
 
 // Mock ENV flag
 const ENV = {
-  FEATURE_REPORTS: false, // Set to true to enable, false to show ComingSoon
+  FEATURE_REPORTS: true, // Set to true to enable, false to show ComingSoon
 };
 
 const Colors = {
@@ -68,11 +68,24 @@ interface FinancialData {
 
 const FinancialReportDetailScreen = () => {
   const navigation = useNavigation();
-  const [reportData, setReportData] = useState<FinancialData | null>(null); // Renamed
-  const [isLoading, setIsLoading] = useState<boolean>(true); // Added
-  const [error, setError] = useState<string | null>(null); // Added
+  const { theme } = useTheme();
+  const [reportData, setReportData] = useState<FinancialData | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedPeriod, setSelectedPeriod] = useState('month');
-  // const [selectedView, setSelectedView] = useState('overview'); // This state appears unused
+
+  const handleExportReport = () => {
+    Alert.alert(
+      'Export Financial Report',
+      'Choose export format',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'PDF P&L Statement', onPress: () => Alert.alert('PDF Export', 'P&L PDF coming soon') },
+        { text: 'Excel Spreadsheet', onPress: () => Alert.alert('Excel Export', 'Excel export coming soon') },
+        { text: 'Email to Accountant', onPress: () => Alert.alert('Email Report', 'Email functionality coming soon') }
+      ]
+    );
+  };
 
   useEffect(() => {
     if (ENV.FEATURE_REPORTS) {
@@ -178,8 +191,8 @@ const FinancialReportDetailScreen = () => {
           <Icon name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Financial Report</Text>
-        <TouchableOpacity style={styles.headerAction}>
-          <Icon name="download" size={24} color={Colors.white} />
+        <TouchableOpacity style={styles.headerAction} onPress={handleExportReport}>
+          <Icon name="file-download" size={24} color={Colors.white} />
         </TouchableOpacity>
       </View>
 

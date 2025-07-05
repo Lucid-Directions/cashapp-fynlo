@@ -14,6 +14,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
 import { Order } from '../../types';
 import OrderService from '../../services/OrderService';
+import HeaderWithBackButton from '../../components/navigation/HeaderWithBackButton';
 
 // Mock orders data
 const mockOrders: Order[] = [
@@ -268,13 +269,17 @@ const OrdersScreen: React.FC = () => {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={theme.colors.primary} />
       
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Orders</Text>
-        <TouchableOpacity style={styles.headerButton}>
-          <Icon name="search" size={24} color={theme.colors.white} />
-        </TouchableOpacity>
-      </View>
+      {/* Header with Back Button */}
+      <HeaderWithBackButton
+        title="Orders"
+        backgroundColor={theme.colors.primary}
+        textColor={theme.colors.white}
+        rightComponent={
+          <TouchableOpacity style={styles.searchButton}>
+            <Icon name="search" size={24} color={theme.colors.white} />
+          </TouchableOpacity>
+        }
+      />
 
       {/* Filters */}
       <View style={styles.filtersContainer}>
@@ -352,7 +357,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
   },
-  headerButton: {
+  searchButton: {
     padding: 8,
   },
   filtersContainer: {

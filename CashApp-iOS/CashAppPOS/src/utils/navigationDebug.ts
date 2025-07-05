@@ -11,7 +11,6 @@ export const VALID_ROUTES = {
   MAIN: {
     HOME: 'Home',
     ORDERS: 'Orders',
-    MORE: 'More',
     MAIN_TABS: 'MainTabs',
     REPORTS: 'Reports',
     EMPLOYEES: 'Employees',

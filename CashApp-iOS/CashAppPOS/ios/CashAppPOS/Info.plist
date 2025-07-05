@@ -63,7 +63,7 @@
 	<key>NSBluetoothPeripheralUsageDescription</key>
 	<string>SumUp needs Bluetooth peripheral access to connect to card readers for payment processing.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>Fynlo uses the camera to scan QR codes for quick payment processing.</string>
+	<string>Fynlo uses the camera to scan QR codes for payment processing and receipts for inventory management.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>SumUp needs location access to determine your location for payment processing and compliance purposes.</string>
 	<key>NSMicrophoneUsageDescription</key>

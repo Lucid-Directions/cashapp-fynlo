@@ -1,10 +1,13 @@
-import squareup
+try:
+    import squareup
+except ImportError:
+    squareup = None
+    
 from decimal import Decimal
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 import uuid
 from datetime import datetime
-from .payment_providers import PaymentProvider, PaymentStatus # This might need to be BasePaymentProvider now
-from .payment_providers.base_provider import BasePaymentProvider, RefundItemDetail # Import new base and interface
+from .payment_providers.base_provider import BasePaymentProvider, PaymentStatus, RefundItemDetail
 import logging
 
 logger = logging.getLogger(__name__)

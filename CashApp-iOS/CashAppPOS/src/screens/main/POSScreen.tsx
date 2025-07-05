@@ -19,6 +19,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
+import HeaderWithBackButton from '../../components/navigation/HeaderWithBackButton';
 import useAppStore from '../../store/useAppStore';
 import useUIStore from '../../store/useUIStore';
 import useSettingsStore from '../../store/useSettingsStore';
@@ -680,20 +681,13 @@ const POSScreen: React.FC = () => {
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor={theme.colors.primary} barStyle="light-content" />
       
-      {/* Restaurant Header */}
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <View style={styles.logoContainer}>
-            <Text style={styles.restaurantName}>{restaurantDisplayName}</Text>
-            <Text style={styles.poweredBy}>Powered by Fynlo</Text>
-          </View>
-        </View>
-        
-        <View style={styles.headerCenter}>
-        </View>
-        
-        <View style={styles.headerRight}>
-            
+      {/* Header with Back Button */}
+      <HeaderWithBackButton
+        title={restaurantDisplayName}
+        backgroundColor={theme.colors.primary}
+        textColor={theme.colors.white}
+        rightComponent={
+          <View style={styles.headerActions}>
             {IS_DEV && (
               <TouchableOpacity
                 testID="dev-mode-toggle-button"
@@ -713,7 +707,8 @@ const POSScreen: React.FC = () => {
               testID="shopping-cart-button"
             />
           </View>
-        </View>
+        }
+      />
 
       {/* Full Width Menu */}
       <View style={styles.fullWidthPanel}>
@@ -1122,6 +1117,10 @@ const createStyles = (theme: any) => StyleSheet.create({
     color: theme.colors.white,
   },
   headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  headerActions: {
     flexDirection: 'row',
     alignItems: 'center',
   },

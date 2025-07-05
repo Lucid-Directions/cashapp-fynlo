@@ -1,10 +1,9 @@
 import aiohttp
 from decimal import Decimal
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 import uuid
 from datetime import datetime
-from .payment_providers import PaymentStatus # Keep PaymentStatus if it's a shared enum
-from .payment_providers.base_provider import BasePaymentProvider, RefundItemDetail # Import new base
+from .payment_providers.base_provider import BasePaymentProvider, PaymentStatus, RefundItemDetail
 import logging
 
 logger = logging.getLogger(__name__)

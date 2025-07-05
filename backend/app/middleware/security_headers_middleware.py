@@ -1,9 +1,10 @@
 from fastapi import Request, Response
-from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseCallNext
+from starlette.middleware.base import BaseHTTPMiddleware
+from typing import Callable
 from app.core.config import settings
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request: Request, call_next: RequestResponseCallNext) -> Response:
+    async def dispatch(self, request: Request, call_next: Callable) -> Response:
         response = await call_next(request)
 
         # Common headers for all environments
