@@ -20,6 +20,7 @@ from app.core.validation import (
     sanitize_string,
     ValidationError as ValidationErr
 )
+from app.core.websocket import websocket_manager
 
 router = APIRouter()
 
@@ -926,4 +927,364 @@ async def update_table_server(
     return APIResponseHelper.success(
         data=table_data,
         message=f"Table {table.name} server updated"
+    )
+
+# Layout Management Endpoints
+class FloorPlanLayoutUpdate(BaseModel):
+    layout: dict
+
+@router.get("/floor-plan/layout")
+async def get_floor_plan_layout(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get restaurant floor plan layout"""
+    
+    restaurant_id = str(current_user.restaurant_id)
+    restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
+    
+    if not restaurant:
+        raise FynloException(
+            error_code=ErrorCodes.RESOURCE_NOT_FOUND,
+            detail="Restaurant not found"
+        )
+    
+    return APIResponseHelper.success(
+        data={
+            "layout": restaurant.floor_plan_layout or {},
+            "restaurant_id": str(restaurant.id)
+        },
+        message="Floor plan layout retrieved successfully"
+    )
+
+@router.put("/floor-plan/layout")
+async def update_floor_plan_layout(
+    layout_data: FloorPlanLayoutUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Update restaurant floor plan layout"""
+    
+    restaurant_id = str(current_user.restaurant_id)
+    restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
+    
+    if not restaurant:
+        raise FynloException(
+            error_code=ErrorCodes.RESOURCE_NOT_FOUND,
+            detail="Restaurant not found"
+        )
+    
+    # Validate layout JSON
+    try:
+        validated_layout = validate_model_jsonb_fields('restaurant', 'floor_plan_layout', layout_data.layout)
+    except ValidationErr as e:
+        raise FynloException(
+            error_code=ErrorCodes.VALIDATION_ERROR,
+            detail=f"Layout validation failed: {str(e)}"
+        )
+    
+    restaurant.floor_plan_layout = validated_layout
+    restaurant.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(restaurant)
+    
+    return APIResponseHelper.success(
+        data={
+            "layout": restaurant.floor_plan_layout,
+            "restaurant_id": str(restaurant.id)
+        },
+        message="Floor plan layout updated successfully"
+    )
+
+# Table Position Updates
+class TablePositionUpdate(BaseModel):
+    x_position: int
+    y_position: int
+    width: Optional[int] = None
+    height: Optional[int] = None
+    rotation: Optional[int] = None
+
+@router.put("/tables/{table_id}/position")
+async def update_table_position(
+    table_id: str,
+    position_data: TablePositionUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Update table position and dimensions"""
+    
+    # Find table
+    table = db.query(Table).filter(
+        and_(
+            Table.id == table_id,
+            Table.restaurant_id == current_user.restaurant_id
+        )
+    ).first()
+    
+    if not table:
+        raise FynloException(
+            error_code=ErrorCodes.RESOURCE_NOT_FOUND,
+            detail="Table not found"
+        )
+    
+    # Update position and dimensions
+    table.x_position = position_data.x_position
+    table.y_position = position_data.y_position
+    
+    if position_data.width is not None:
+        table.width = position_data.width
+    if position_data.height is not None:
+        table.height = position_data.height
+    if position_data.rotation is not None:
+        table.rotation = position_data.rotation
+    
+    table.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(table)
+    
+    # Get section name for response
+    section = db.query(Section).filter(Section.id == table.section_id).first()
+    
+    # Broadcast table update via WebSocket
+    try:
+        await websocket_manager.broadcast_to_restaurant(
+            str(current_user.restaurant_id),
+            {
+                "type": "table_updated",
+                "table_id": str(table.id),
+                "position": {
+                    "x": table.x_position,
+                    "y": table.y_position,
+                    "width": table.width,
+                    "height": table.height,
+                    "rotation": table.rotation
+                }
+            }
+        )
+    except Exception as e:
+        # Don't fail the request if WebSocket fails
+        pass
+    
+    table_data = {
+        "id": str(table.id),
+        "name": table.name,
+        "section_id": str(table.section_id),
+        "section_name": section.name if section else "",
+        "seats": table.seats,
+        "status": table.status,
+        "x_position": table.x_position,
+        "y_position": table.y_position,
+        "width": table.width,
+        "height": table.height,
+        "rotation": table.rotation,
+        "shape": table.shape
+    }
+    
+    return APIResponseHelper.success(
+        data=table_data,
+        message=f"Table {table.name} position updated"
+    )
+
+# Table Merge/Split Operations
+class TableMergeRequest(BaseModel):
+    primary_table_id: str
+    tables_to_merge: List[str]
+    merged_name: Optional[str] = None
+
+@router.post("/tables/merge")
+async def merge_tables(
+    merge_data: TableMergeRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Merge multiple tables into one"""
+    
+    restaurant_id = str(current_user.restaurant_id)
+    
+    # Validate primary table
+    primary_table = db.query(Table).filter(
+        and_(
+            Table.id == merge_data.primary_table_id,
+            Table.restaurant_id == restaurant_id
+        )
+    ).first()
+    
+    if not primary_table:
+        raise FynloException(
+            error_code=ErrorCodes.RESOURCE_NOT_FOUND,
+            detail="Primary table not found"
+        )
+    
+    # Validate merge tables
+    merge_tables = db.query(Table).filter(
+        and_(
+            Table.id.in_(merge_data.tables_to_merge),
+            Table.restaurant_id == restaurant_id
+        )
+    ).all()
+    
+    if len(merge_tables) != len(merge_data.tables_to_merge):
+        raise FynloException(
+            error_code=ErrorCodes.VALIDATION_ERROR,
+            detail="Some tables to merge were not found"
+        )
+    
+    # Check if any tables are occupied
+    occupied_tables = [t for t in [primary_table] + merge_tables if t.status == 'occupied']
+    if occupied_tables:
+        table_names = [t.name for t in occupied_tables]
+        raise FynloException(
+            error_code=ErrorCodes.VALIDATION_ERROR,
+            detail=f"Cannot merge occupied tables: {', '.join(table_names)}"
+        )
+    
+    # Calculate merged capacity
+    total_seats = primary_table.seats + sum(t.seats for t in merge_tables)
+    
+    # Update primary table
+    primary_table.seats = total_seats
+    primary_table.name = merge_data.merged_name or f"{primary_table.name} (Merged)"
+    primary_table.status = "reserved"  # Mark as reserved during merge
+    primary_table.updated_at = datetime.utcnow()
+    
+    # Mark merge tables as inactive (soft delete)
+    for table in merge_tables:
+        table.is_active = False
+        table.updated_at = datetime.utcnow()
+    
+    db.commit()
+    db.refresh(primary_table)
+    
+    # Broadcast merge via WebSocket
+    try:
+        await websocket_manager.broadcast_to_restaurant(
+            restaurant_id,
+            {
+                "type": "tables_merged",
+                "primary_table_id": str(primary_table.id),
+                "merged_table_ids": [str(t.id) for t in merge_tables],
+                "new_capacity": total_seats
+            }
+        )
+    except Exception as e:
+        pass
+    
+    return APIResponseHelper.success(
+        data={
+            "merged_table": {
+                "id": str(primary_table.id),
+                "name": primary_table.name,
+                "seats": primary_table.seats,
+                "status": primary_table.status
+            },
+            "merged_table_ids": [str(t.id) for t in merge_tables]
+        },
+        message=f"Tables merged successfully. New capacity: {total_seats} seats"
+    )
+
+# Revenue Analytics
+@router.get("/analytics/revenue-by-table")
+async def get_revenue_by_table(
+    start_date: Optional[str] = Query(None),
+    end_date: Optional[str] = Query(None),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get revenue breakdown by table"""
+    
+    restaurant_id = str(current_user.restaurant_id)
+    
+    # Set default date range (today if not specified)
+    if not start_date:
+        start_date = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    else:
+        start_date = datetime.fromisoformat(start_date.replace('Z', '+00:00'))
+    
+    if not end_date:
+        end_date = datetime.now().replace(hour=23, minute=59, second=59, microsecond=999999)
+    else:
+        end_date = datetime.fromisoformat(end_date.replace('Z', '+00:00'))
+    
+    # Get orders with table information
+    orders_query = db.query(Order, Table).join(
+        Table, Order.table_id == Table.id, isouter=True
+    ).filter(
+        and_(
+            Order.restaurant_id == restaurant_id,
+            Order.created_at >= start_date,
+            Order.created_at <= end_date,
+            Order.status == "completed"
+        )
+    )
+    
+    orders_data = orders_query.all()
+    
+    # Group by table
+    table_revenue = {}
+    total_revenue = 0
+    orders_without_table = []
+    
+    for order, table in orders_data:
+        total_revenue += float(order.total_amount)
+        
+        if table:
+            table_key = str(table.id)
+            if table_key not in table_revenue:
+                table_revenue[table_key] = {
+                    "table_id": str(table.id),
+                    "table_name": table.name,
+                    "section_name": "",  # Will be filled below
+                    "total_revenue": 0,
+                    "order_count": 0,
+                    "average_order_value": 0
+                }
+            
+            table_revenue[table_key]["total_revenue"] += float(order.total_amount)
+            table_revenue[table_key]["order_count"] += 1
+        else:
+            orders_without_table.append({
+                "order_id": str(order.id),
+                "order_number": order.order_number,
+                "amount": float(order.total_amount),
+                "order_type": order.order_type
+            })
+    
+    # Get section names
+    if table_revenue:
+        table_ids = list(table_revenue.keys())
+        tables_with_sections = db.query(Table, Section).join(
+            Section, Table.section_id == Section.id
+        ).filter(Table.id.in_(table_ids)).all()
+        
+        for table, section in tables_with_sections:
+            table_key = str(table.id)
+            if table_key in table_revenue:
+                table_revenue[table_key]["section_name"] = section.name
+    
+    # Calculate averages
+    for table_data in table_revenue.values():
+        if table_data["order_count"] > 0:
+            table_data["average_order_value"] = round(
+                table_data["total_revenue"] / table_data["order_count"], 2
+            )
+    
+    # Sort by revenue
+    table_revenue_list = list(table_revenue.values())
+    table_revenue_list.sort(key=lambda x: x["total_revenue"], reverse=True)
+    
+    return APIResponseHelper.success(
+        data={
+            "date_range": {
+                "start_date": start_date.isoformat(),
+                "end_date": end_date.isoformat()
+            },
+            "total_revenue": round(total_revenue, 2),
+            "table_revenue": table_revenue_list,
+            "orders_without_table": orders_without_table,
+            "summary": {
+                "tables_with_revenue": len(table_revenue_list),
+                "orders_without_table_count": len(orders_without_table)
+            }
+        },
+        message=f"Revenue analysis for {len(table_revenue_list)} tables"
     )
