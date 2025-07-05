@@ -146,6 +146,121 @@ async def get_enhanced_dashboard_overview(
             status_code=500
         )
 
+@router.get("/dashboard/mobile")
+async def get_mobile_reports_dashboard(
+    restaurant_id: Optional[str] = Query(None, description="Specific restaurant ID (platform owners)"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Get mobile-optimized reports dashboard data
+    Matches exactly the data structure expected by ReportsScreenSimple.tsx
+    """
+    try:
+        # Determine restaurant scope
+        if current_user.role == "platform_owner":
+            target_restaurant_id = restaurant_id or str(current_user.restaurant_id)
+        else:
+            target_restaurant_id = str(current_user.restaurant_id)
+
+        # Get today's date range
+        today_start = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        today_end = today_start + timedelta(days=1)
+        week_start = today_start - timedelta(days=7)
+
+        # Today's Summary
+        today_orders = db.query(Order).filter(
+            and_(
+                Order.restaurant_id == target_restaurant_id,
+                Order.status == "completed",
+                Order.created_at >= today_start,
+                Order.created_at < today_end
+            )
+        ).all()
+
+        total_sales = sum(order.total_amount for order in today_orders)
+        total_transactions = len(today_orders)
+        avg_order = total_sales / total_transactions if total_transactions > 0 else 0
+
+        # Weekly Labor (mock calculation for now - would connect to actual labor tracking)
+        weekly_labor = {
+            "totalActualHours": 248,
+            "totalLaborCost": 3720.00,
+            "efficiency": 87.5
+        }
+
+        # Top Items Today (from order items)
+        item_sales = {}
+        for order in today_orders:
+            for item in order.items:
+                if item.product_name in item_sales:
+                    item_sales[item.product_name]["quantity"] += item.quantity
+                    item_sales[item.product_name]["revenue"] += item.subtotal
+                else:
+                    item_sales[item.product_name] = {
+                        "name": item.product_name,
+                        "quantity": item.quantity,
+                        "revenue": item.subtotal
+                    }
+
+        top_items = sorted(item_sales.values(), key=lambda x: x["revenue"], reverse=True)[:5]
+
+        # Top Performers (mock data for now - would connect to actual employee tracking)
+        top_performers = [
+            {"name": "Maria Garcia", "role": "Server", "orders": 18, "sales": 425.50},
+            {"name": "Jose Rodriguez", "role": "Server", "orders": 16, "sales": 398.25},
+            {"name": "Ana Martinez", "role": "Bartender", "orders": 12, "sales": 286.75}
+        ]
+
+        # Sales Trend (last 7 days)
+        sales_trend = []
+        for i in range(7):
+            day_start = today_start - timedelta(days=i)
+            day_end = day_start + timedelta(days=1)
+            day_orders = db.query(func.sum(Order.total_amount)).filter(
+                and_(
+                    Order.restaurant_id == target_restaurant_id,
+                    Order.status == "completed",
+                    Order.created_at >= day_start,
+                    Order.created_at < day_end
+                )
+            ).scalar() or 0
+
+            sales_trend.append({
+                "period": day_start.strftime("%a"),
+                "sales": float(day_orders)
+            })
+
+        # Structure response to match frontend expectations
+        response_data = {
+            "todaySummary": {
+                "totalSales": float(total_sales),
+                "transactions": total_transactions,
+                "averageOrder": float(avg_order),
+                "totalRevenue": float(total_sales),
+                "totalOrders": total_transactions,
+                "averageOrderValue": float(avg_order)
+            },
+            "weeklyLabor": weekly_labor,
+            "topItemsToday": top_items,
+            "topPerformersToday": top_performers,
+            "salesTrend": list(reversed(sales_trend))  # Reverse to show oldest first
+        }
+
+        return APIResponseHelper.success(
+            data=response_data,
+            message="Mobile dashboard data retrieved successfully"
+        )
+
+    except FynloException:
+        raise
+    except Exception as e:
+        raise FynloException(
+            message=f"Failed to get mobile dashboard data: {str(e)}",
+            error_code=ErrorCodes.INTERNAL_ERROR,
+            status_code=500
+        )
+
 @router.get("/dashboard", response_model=AnalyticsDashboard)
 async def get_legacy_analytics_dashboard(
     restaurant_id: Optional[str] = Query(None),
@@ -727,6 +842,98 @@ async def get_real_time_metrics(
     except Exception as e:
         raise FynloException(
             message=f"Failed to get real-time metrics: {str(e)}",
+            error_code=ErrorCodes.INTERNAL_ERROR,
+            status_code=500
+        )
+
+@router.get("/financial")
+async def get_financial_analytics(
+    period: str = Query("today", description="Period: today, week, month, quarter, year"),
+    restaurant_id: Optional[str] = Query(None, description="Specific restaurant ID (platform owners)"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Get comprehensive financial analytics including P&L, revenue breakdowns, and cost analysis
+    Optimized for mobile financial reporting and decision making
+    """
+    try:
+        # Determine restaurant scope
+        if current_user.role == "platform_owner":
+            target_restaurant_id = restaurant_id or str(current_user.restaurant_id)
+        else:
+            target_restaurant_id = str(current_user.restaurant_id)
+
+        # Get analytics engine
+        analytics_engine = get_analytics_engine()
+        
+        # Map period to timeframe
+        timeframe_map = {
+            "today": AnalyticsTimeframe.TODAY,
+            "week": AnalyticsTimeframe.WEEK,
+            "month": AnalyticsTimeframe.MONTH,
+            "quarter": AnalyticsTimeframe.QUARTER,
+            "year": AnalyticsTimeframe.YEAR
+        }
+        
+        timeframe = timeframe_map.get(period, AnalyticsTimeframe.TODAY)
+        
+        # Get financial analytics from the engine
+        financial_data = analytics_engine.get_financial_analytics(
+            restaurant_id=target_restaurant_id,
+            timeframe=timeframe,
+            db=db
+        )
+        
+        # Structure response for mobile consumption
+        response_data = {
+            "period": period,
+            "restaurant_id": target_restaurant_id,
+            "summary": {
+                "total_revenue": float(financial_data.get("total_revenue", 0)),
+                "total_costs": float(financial_data.get("total_costs", 0)),
+                "gross_profit": float(financial_data.get("gross_profit", 0)),
+                "net_profit": float(financial_data.get("net_profit", 0)),
+                "profit_margin": float(financial_data.get("profit_margin", 0))
+            },
+            "revenue": {
+                "food_sales": float(financial_data.get("food_sales", 0)),
+                "beverage_sales": float(financial_data.get("beverage_sales", 0)),
+                "service_fees": float(financial_data.get("service_fees", 0)),
+                "total_revenue": float(financial_data.get("total_revenue", 0))
+            },
+            "costs": {
+                "cost_of_goods_sold": float(financial_data.get("cogs", 0)),
+                "labor_costs": float(financial_data.get("labor_costs", 0)),
+                "operating_expenses": float(financial_data.get("operating_expenses", 0)),
+                "total_costs": float(financial_data.get("total_costs", 0))
+            },
+            "payment_breakdown": {
+                "cash_payments": float(financial_data.get("cash_payments", 0)),
+                "card_payments": float(financial_data.get("card_payments", 0)),
+                "qr_payments": float(financial_data.get("qr_payments", 0)),
+                "total_payments": float(financial_data.get("total_payments", 0))
+            },
+            "taxes": {
+                "vat_collected": float(financial_data.get("vat_collected", 0)),
+                "service_charge_collected": float(financial_data.get("service_charge_collected", 0)),
+                "total_taxes": float(financial_data.get("total_taxes", 0))
+            },
+            "trends": financial_data.get("trends", []),
+            "generated_at": datetime.now().isoformat(),
+            "currency": "GBP"
+        }
+
+        return APIResponseHelper.success(
+            data=response_data,
+            message=f"Financial analytics retrieved successfully for {period}"
+        )
+        
+    except FynloException:
+        raise
+    except Exception as e:
+        raise FynloException(
+            message=f"Failed to get financial analytics: {str(e)}",
             error_code=ErrorCodes.INTERNAL_ERROR,
             status_code=500
         )

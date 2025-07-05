@@ -168,7 +168,9 @@ const HomeHubScreen: React.FC = () => {
   // Calculate grid dimensions
   const numColumns = isTablet ? 4 : 2;
   const iconSize = isTablet ? 48 : 64;
-  const cardWidth = (screenWidth - 48 - (numColumns - 1) * 16) / numColumns;
+  const horizontalSpacing = 16;
+  const cardMargin = 4; // Reduced margin on each side of card
+  const cardWidth = (screenWidth - (horizontalSpacing * 2) - (cardMargin * 2 * numColumns)) / numColumns;
 
   const handleIconPress = (icon: HubIcon) => {
     // Analytics tracking for icon tap
@@ -416,17 +418,18 @@ const createStyles = (theme: any) => StyleSheet.create({
   iconGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
     paddingHorizontal: 16,
+    justifyContent: 'space-between',
   },
   iconCard: {
     backgroundColor: theme.colors.white,
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 16,
+    borderRadius: 12,
+    padding: 16,
+    marginHorizontal: 4,
+    marginBottom: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 140,
+    minHeight: 120,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,

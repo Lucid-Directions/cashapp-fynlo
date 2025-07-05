@@ -9,10 +9,13 @@ import {
   ScrollView,
   TextInput,
   Alert,
+  PermissionsAndroid,
+  Platform,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Colors from '../../constants/Colors'; // Assuming Colors.ts exists in constants
 import { scanReceipt, ScannedItemAPIResponse } from '../../services/InventoryApiService'; // Added
+import { launchCamera, ImagePickerResponse, MediaType } from 'react-native-image-picker';
 
 interface ReceiptItem {
   id: string; // Client-side ID for list management
@@ -34,19 +37,64 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
   const [capturedImage, setCapturedImage] = useState<any>(null); // Placeholder for image data
   const [parsedItems, setParsedItems] = useState<ReceiptItem[]>([]);
 
+  const requestCameraPermission = async () => {
+    if (Platform.OS === 'android') {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.CAMERA,
+          {
+            title: 'Camera Permission',
+            message: 'This app needs access to camera to scan receipts',
+            buttonNeutral: 'Ask Me Later',
+            buttonNegative: 'Cancel',
+            buttonPositive: 'OK',
+          },
+        );
+        return granted === PermissionsAndroid.RESULTS.GRANTED;
+      } catch (err) {
+        console.warn(err);
+        return false;
+      }
+    }
+    return true; // iOS permissions are handled automatically
+  };
+
   const handleCaptureImage = async () => {
-    // Simulate image capture - in a real app, this would use react-native-image-picker or similar
-    const mockBase64Image = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoHBwYIDAoMDAsKCwsNDhIQDQ4RDgsLEBYQERMUFRUVDA8XGBYUGBIUFRT/2wBDAQMEBAUEBQkFBQkUDQsNFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBT/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAn/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFAEBAAAAAAAAAAAAAAAAAAAAAP/EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhEDEQA/AL+AAf/Z"; // Tiny valid JPEG
-    setCapturedImage({ uri: 'simulated_receipt_image.jpg' }); // Keep UI placeholder
-    setStep('spinning');
+    // Request camera permission
+    const hasPermission = await requestCameraPermission();
+    if (!hasPermission) {
+      Alert.alert('Permission Required', 'Camera permission is required to scan receipts');
+      return;
+    }
 
+    const options = {
+      mediaType: 'photo' as MediaType,
+      quality: 0.8,
+      includeBase64: true,
+      maxWidth: 1024,
+      maxHeight: 1024,
+    };
+
+    launchCamera(options, (response: ImagePickerResponse) => {
+      if (response.didCancel || response.errorMessage) {
+        console.log('Camera cancelled or error:', response.errorMessage);
+        return;
+      }
+
+      if (response.assets && response.assets[0]) {
+        const asset = response.assets[0];
+        setCapturedImage({ uri: asset.uri });
+        setStep('spinning');
+
+        // Process the captured image
+        processReceiptImage(asset.base64 || '');
+      }
+    });
+  };
+
+  const processReceiptImage = async (base64Image: string) => {
     try {
-      // Use a standard base64 string for testing.
-      // The backend mock is sensitive to "milk" in the string.
-      const testBase64 = "milk_receipt_image_base64_data_string"; // Contains "milk"
-      // const testBase64 = "other_receipt_image_base64_data_string"; // Does not contain "milk"
-
-      const apiResponseItems = await scanReceipt(testBase64);
+      const apiResponseItems = await scanReceipt(base64Image);
 
       const clientReceiptItems: ReceiptItem[] = apiResponseItems.map((item, index) => ({
         id: `api-${index}-${Date.now()}`, // Generate a unique ID for local list management

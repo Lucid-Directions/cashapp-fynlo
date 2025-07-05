@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
     borderBottomColor: 'rgba(0, 0, 0, 0.1)',
   },
   leftSection: {
-    width: 40,
+    width: 50,
     alignItems: 'flex-start',
   },
   centerSection: {
@@ -91,8 +91,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   rightSection: {
-    width: 40,
+    minWidth: 60,
     alignItems: 'flex-end',
+    justifyContent: 'center',
   },
   backButton: {
     padding: 8,

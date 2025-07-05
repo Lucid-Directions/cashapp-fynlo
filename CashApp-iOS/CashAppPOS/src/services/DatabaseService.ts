@@ -481,8 +481,10 @@ class DatabaseService {
         maxThreshold: 50,
         unitCost: 8.50,
         supplier: 'Premium Meats Ltd',
-        lastRestocked: '2025-07-01',
-        status: 'in_stock'
+        lastRestocked: new Date('2025-07-01'),
+        status: 'in_stock',
+        turnoverRate: 2.5,
+        wastage: 0.05
       },
       {
         id: 2,
@@ -496,8 +498,10 @@ class DatabaseService {
         maxThreshold: 40,
         unitCost: 6.75,
         supplier: 'Premium Meats Ltd',
-        lastRestocked: '2025-06-30',
-        status: 'in_stock'
+        lastRestocked: new Date('2025-06-30'),
+        status: 'in_stock',
+        turnoverRate: 3.0,
+        wastage: 0.03
       },
       {
         id: 3,
@@ -511,8 +515,10 @@ class DatabaseService {
         maxThreshold: 200,
         unitCost: 0.25,
         supplier: 'Mexican Foods Co',
-        lastRestocked: '2025-07-02',
-        status: 'in_stock'
+        lastRestocked: new Date('2025-07-02'),
+        status: 'in_stock',
+        turnoverRate: 4.5,
+        wastage: 0.02
       },
       {
         id: 4,
@@ -526,8 +532,10 @@ class DatabaseService {
         maxThreshold: 25,
         unitCost: 12.00,
         supplier: 'Dairy Fresh Ltd',
-        lastRestocked: '2025-06-28',
-        status: 'low_stock'
+        lastRestocked: new Date('2025-06-28'),
+        status: 'low_stock',
+        turnoverRate: 2.8,
+        wastage: 0.04
       },
       {
         id: 5,
@@ -541,8 +549,10 @@ class DatabaseService {
         maxThreshold: 30,
         unitCost: 3.20,
         supplier: 'Garden Fresh Produce',
-        lastRestocked: '2025-07-01',
-        status: 'in_stock'
+        lastRestocked: new Date('2025-07-01'),
+        status: 'in_stock',
+        turnoverRate: 5.0,
+        wastage: 0.08
       },
       {
         id: 6,
@@ -556,8 +566,10 @@ class DatabaseService {
         maxThreshold: 25,
         unitCost: 1.80,
         supplier: 'Garden Fresh Produce',
-        lastRestocked: '2025-06-30',
-        status: 'in_stock'
+        lastRestocked: new Date('2025-06-30'),
+        status: 'in_stock',
+        turnoverRate: 3.5,
+        wastage: 0.06
       },
       {
         id: 7,
@@ -571,8 +583,10 @@ class DatabaseService {
         maxThreshold: 15,
         unitCost: 4.50,
         supplier: 'Garden Fresh Produce',
-        lastRestocked: '2025-06-29',
-        status: 'low_stock'
+        lastRestocked: new Date('2025-06-29'),
+        status: 'low_stock',
+        turnoverRate: 4.2,
+        wastage: 0.1
       },
       {
         id: 8,
@@ -586,8 +600,10 @@ class DatabaseService {
         maxThreshold: 120,
         unitCost: 2.50,
         supplier: 'Beverages Direct',
-        lastRestocked: '2025-07-01',
-        status: 'in_stock'
+        lastRestocked: new Date('2025-07-01'),
+        status: 'in_stock',
+        turnoverRate: 6.0,
+        wastage: 0.01
       },
       {
         id: 9,
@@ -601,8 +617,10 @@ class DatabaseService {
         maxThreshold: 12,
         unitCost: 35.00,
         supplier: 'Spirits & More',
-        lastRestocked: '2025-06-25',
-        status: 'in_stock'
+        lastRestocked: new Date('2025-06-25'),
+        status: 'in_stock',
+        turnoverRate: 1.5,
+        wastage: 0.02
       },
       {
         id: 10,
@@ -616,8 +634,10 @@ class DatabaseService {
         maxThreshold: 10,
         unitCost: 8.75,
         supplier: 'Mexican Foods Co',
-        lastRestocked: '2025-06-20',
-        status: 'low_stock'
+        lastRestocked: new Date('2025-06-20'),
+        status: 'low_stock',
+        turnoverRate: 2.2,
+        wastage: 0.05
       }
     ]);
   }
@@ -637,7 +657,8 @@ class DatabaseService {
         hoursWorked: 38,
         totalSales: 2450.75,
         isActive: true,
-        hireDate: '2023-01-15'
+        hireDate: '2023-01-15',
+        performanceScore: 4.7
       },
       {
         id: 2,
@@ -651,7 +672,8 @@ class DatabaseService {
         hoursWorked: 42,
         totalSales: 0, // Chefs don't directly handle sales
         isActive: true,
-        hireDate: '2022-08-20'
+        hireDate: '2022-08-20',
+        performanceScore: 4.9
       },
       {
         id: 3,
@@ -665,7 +687,8 @@ class DatabaseService {
         hoursWorked: 35,
         totalSales: 1875.30,
         isActive: true,
-        hireDate: '2023-03-10'
+        hireDate: '2023-03-10',
+        performanceScore: 4.5
       },
       {
         id: 4,
@@ -679,7 +702,8 @@ class DatabaseService {
         hoursWorked: 32,
         totalSales: 1920.50,
         isActive: true,
-        hireDate: '2023-06-01'
+        hireDate: '2023-06-01',
+        performanceScore: 4.3
       },
       {
         id: 5,
@@ -693,7 +717,8 @@ class DatabaseService {
         hoursWorked: 40,
         totalSales: 3150.25,
         isActive: true,
-        hireDate: '2023-04-15'
+        hireDate: '2023-04-15',
+        performanceScore: 4.8
       }
     ]);
   }

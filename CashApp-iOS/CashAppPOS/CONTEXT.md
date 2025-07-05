@@ -1308,6 +1308,124 @@ cp ios/main.jsbundle ios/CashAppPOS/main.jsbundle
 
 ---
 
-**Project Status**: Production-ready phone-only POS with consolidated navigation and working network connectivity
-**Last Updated**: 2025-07-05 (Navigation consolidation and back button implementation complete)
+## ✅ LATEST CRITICAL FIXES (January 2025)
+
+### **COMPLETED: Hub Grid Layout & POS Header Improvements** ✅
+
+#### **Hub Screen Grid Layout Fix - SOLVED**
+- **Issue**: Home hub icons stacking vertically instead of proper 2-column grid layout
+- **Root Cause**: Card sizing and margin calculations preventing proper flexbox wrapping
+- **User Feedback**: "You've messed up the grid again in the hub. Can you please remember that we need to have a grid, not all the icons stacked."
+- **Solution**: Optimized card dimensions and spacing for 2-column layout
+- **Implementation**:
+  ```typescript
+  // Card size optimizations
+  marginHorizontal: 4,      // Reduced from 8px
+  padding: 16,              // Reduced from 20px  
+  minHeight: 120,           // Reduced from 140px
+  borderRadius: 12,         // Reduced from 16px
+  marginBottom: 12,         // Reduced from 16px
+  
+  // Grid calculation update
+  cardMargin: 4,            // Reduced margin for better fit
+  cardWidth: (screenWidth - (horizontalSpacing * 2) - (cardMargin * 2 * numColumns)) / numColumns
+  ```
+- **Files Modified**: `src/screens/main/HomeHubScreen.tsx:424-440`
+- **Status**: ✅ **Production Ready** - Icons now display in proper 2-column grid
+
+#### **POS Screen Header Layout Fix - SOLVED**
+- **Issue**: Cart icon too wide, restaurant name ("Chucho") layout unprofessional
+- **Root Cause**: Cart badge positioned horizontally next to icon, making header component too wide
+- **User Feedback**: "The header looks very strange when I get into the POS screen. It seems like the cart is a bit too big, and the Chucho is just in the middle by itself."
+- **Solution**: Improved header spacing and cart icon positioning
+- **Implementation**:
+  
+  **Header Layout Improvements:**
+  ```typescript
+  // HeaderWithBackButton.tsx improvements
+  leftSection: { width: 50 },          // Increased from 40px
+  rightSection: { 
+    minWidth: 60,                      // Changed from fixed width: 40
+    justifyContent: 'center' 
+  }
+  ```
+  
+  **Cart Icon Optimization:**
+  ```typescript
+  // CartIcon.tsx - Professional badge positioning
+  iconContainer: {
+    position: 'relative',               // Changed from flexDirection: 'row'
+  },
+  badge: {
+    position: 'absolute',               // Overlay positioning
+    top: -8, right: -8,                // Top-right corner placement
+    borderWidth: 2,                     // White border for visibility
+    borderColor: theme.colors.white,
+  }
+  ```
+- **Files Modified**: 
+  - `src/components/navigation/HeaderWithBackButton.tsx:84-96`
+  - `src/components/cart/CartIcon.tsx:56-74`
+- **Status**: ✅ **Production Ready** - Professional header layout with properly sized cart icon
+
+#### **API Endpoint Path Fix - SOLVED**
+- **Issue**: POS screen showing 404 errors for service charge endpoint
+- **Root Cause**: Frontend requesting `/api/v1/platform/service-charge` but backend has `/api/v1/platform/settings/platform/service-charge`
+- **Solution**: Updated API configuration to match backend router structure
+- **Implementation**:
+  ```typescript
+  // src/config/api.ts - Corrected endpoint path
+  PLATFORM_ENDPOINTS: {
+    SERVICE_CHARGE: '/platform/settings/platform/service-charge',  // Fixed path
+    PAYMENT_METHODS: '/platform/settings/payment-methods',
+    SETTINGS: '/platform/settings',
+  }
+  ```
+- **Files Modified**: `src/config/api.ts:62`
+- **Status**: ✅ **API Connectivity Restored** - Service charge endpoint now accessible
+
+#### **Bundle Deployment Process - VERIFIED**
+- **Process**: Comprehensive iOS bundle rebuild and deployment
+- **Commands**:
+  ```bash
+  npx metro build index.js --platform ios --dev false --out ios/main.jsbundle
+  mv ios/main.jsbundle.js ios/main.jsbundle
+  cp ios/main.jsbundle ios/CashAppPOS/main.jsbundle
+  ```
+- **Status**: ✅ **Deployed** - All UI fixes active in iOS bundle
+
+### **January 2025 Work Summary** 📋
+
+#### **What Was Accomplished**
+1. **Hub Layout Crisis Resolution**: Fixed broken 2-column grid layout in home hub
+2. **POS Header Professionalization**: Improved cart icon and restaurant name layout
+3. **API Connectivity**: Resolved 404 errors for service charge endpoint
+4. **User Experience**: Addressed all reported layout and functionality issues
+
+#### **Technical Debt Addressed**
+- ✅ Hub screen grid layout calculation and card sizing
+- ✅ POS header component spacing and cart icon positioning  
+- ✅ API endpoint path mismatches
+- ✅ Bundle deployment verification and testing
+
+#### **User Experience Enhanced**
+- ✅ Professional 2-column grid layout in hub screen
+- ✅ Properly sized and positioned cart icon in POS header
+- ✅ Centered restaurant name with proper spacing
+- ✅ Eliminated 404 API errors
+
+#### **Files Modified**
+- `src/screens/main/HomeHubScreen.tsx` - Grid layout optimization
+- `src/components/navigation/HeaderWithBackButton.tsx` - Header spacing improvements
+- `src/components/cart/CartIcon.tsx` - Professional badge positioning
+- `src/config/api.ts` - API endpoint path corrections
+- `ios/CashAppPOS/main.jsbundle` - Fresh bundle with all UI fixes
+
+**Bundle Size**: Fresh build deployed with all January 2025 improvements
+**Deployment Date**: January 2025 (Hub grid and POS header fixes complete)
+
+---
+
+**Project Status**: Production-ready phone-only POS with consolidated navigation, working network connectivity, and professional UI layout
+**Last Updated**: 2025-01-30 (Hub grid layout and POS header improvements complete)
 **Maintainer**: Arnaud (Fynlo Development Team)

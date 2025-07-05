@@ -54,10 +54,14 @@ const createStyles = (theme: any) =>
       justifyContent: 'center',
     },
     iconContainer: {
-      flexDirection: 'row',
+      position: 'relative',
       alignItems: 'center',
+      justifyContent: 'center',
     },
     badge: {
+      position: 'absolute',
+      top: -8,
+      right: -8,
       backgroundColor: theme.colors.danger[500],
       borderRadius: 10,
       minWidth: 20,
@@ -65,7 +69,8 @@ const createStyles = (theme: any) =>
       alignItems: 'center',
       justifyContent: 'center',
       paddingHorizontal: 4,
-      marginLeft: 8,
+      borderWidth: 2,
+      borderColor: theme.colors.white,
     },
     badgeTxt: {
       color: theme.colors.white,

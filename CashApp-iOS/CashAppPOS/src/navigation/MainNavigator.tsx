@@ -12,6 +12,8 @@ import SalesReportDetailScreen from '../screens/reports/SalesReportDetailScreen'
 import InventoryReportDetailScreen from '../screens/reports/InventoryReportDetailScreen';
 import StaffReportDetailScreen from '../screens/reports/StaffReportDetailScreen';
 import FinancialReportDetailScreen from '../screens/reports/FinancialReportDetailScreen';
+import LaborReportDetailScreen from '../screens/reports/LaborReportDetailScreen';
+import CostAnalysisReportDetailScreen from '../screens/reports/CostAnalysisReportDetailScreen';
 import EmployeesScreen from '../screens/employees/EmployeesScreen';
 import EnhancedEmployeeScheduleScreen from '../screens/employees/EnhancedEmployeeScheduleScreen';
 import QRScannerScreen from '../screens/scanner/QRScannerScreen';
@@ -141,6 +143,20 @@ const MainNavigator: React.FC = () => {
       <Stack.Screen
         name="FinancialReport"
         component={FinancialReportDetailScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="LaborReport"
+        component={LaborReportDetailScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="CostAnalysisReport"
+        component={CostAnalysisReportDetailScreen}
         options={{
           headerShown: false,
         }}

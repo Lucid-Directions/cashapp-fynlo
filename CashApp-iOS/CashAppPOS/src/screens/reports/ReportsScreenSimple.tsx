@@ -267,26 +267,26 @@ const ReportsScreen = () => {
 
           <TouchableOpacity 
             style={[styles.reportItem, { backgroundColor: theme.colors.white }]}
-            onPress={() => Alert.alert('Coming Soon', 'Schedule & Labor Report is under development')}
+            onPress={() => navigation.navigate('LaborReport')}
           >
             <Icon name="schedule" size={24} color={Colors.primary} />
             <View style={styles.reportInfo}>
               <Text style={[styles.reportTitle, { color: theme.colors.text }]}>Schedule & Labor Report</Text>
-              <Text style={[styles.reportDesc, { color: Colors.darkGray }]}>Rota analysis & labor costs (Coming Soon)</Text>
+              <Text style={[styles.reportDesc, { color: Colors.darkGray }]}>Rota analysis & labor costs</Text>
             </View>
-            <Icon name="info" size={20} color={Colors.darkGray} />
+            <Icon name="chevron-right" size={24} color={Colors.darkGray} />
           </TouchableOpacity>
 
           <TouchableOpacity 
             style={[styles.reportItem, { backgroundColor: theme.colors.white }]}
-            onPress={() => Alert.alert('Coming Soon', 'Cost Analysis Report is under development')}
+            onPress={() => navigation.navigate('CostAnalysisReport')}
           >
             <Icon name="analytics" size={24} color={Colors.warning} />
             <View style={styles.reportInfo}>
               <Text style={[styles.reportTitle, { color: theme.colors.text }]}>Cost Analysis</Text>
-              <Text style={[styles.reportDesc, { color: Colors.darkGray }]}>Labor vs revenue analysis (Coming Soon)</Text>
+              <Text style={[styles.reportDesc, { color: Colors.darkGray }]}>Labor vs revenue analysis</Text>
             </View>
-            <Icon name="info" size={20} color={Colors.darkGray} />
+            <Icon name="chevron-right" size={24} color={Colors.darkGray} />
           </TouchableOpacity>
 
           <TouchableOpacity 

@@ -8,18 +8,18 @@ import {
   ScrollView,
   TouchableOpacity,
   Dimensions,
-  ActivityIndicator, // Will be replaced by LoadingView
+  Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
-// import { generateSalesHistory } from '../../utils/mockDataGenerator'; // Removed
-import DataService from '../../services/DataService'; // Added
-import LoadingView from '../../components/feedback/LoadingView'; // Added
-import ComingSoon from '../../components/feedback/ComingSoon'; // Added
+import { useTheme } from '../../design-system/ThemeProvider';
+import DataService from '../../services/DataService';
+import LoadingView from '../../components/feedback/LoadingView';
+import ComingSoon from '../../components/feedback/ComingSoon';
 
 // Mock ENV flag
 const ENV = {
-  FEATURE_REPORTS: false, // Set to true to enable, false to show ComingSoon
+  FEATURE_REPORTS: true, // Set to true to enable, false to show ComingSoon
 };
 
 const { width } = Dimensions.get('window');
@@ -55,11 +55,25 @@ interface StaffMember {
 
 const StaffReportDetailScreen = () => {
   const navigation = useNavigation();
+  const { theme } = useTheme();
   const [staffData, setStaffData] = useState<StaffMember[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true); // Added
-  const [error, setError] = useState<string | null>(null); // Added
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedPeriod, setSelectedPeriod] = useState('today');
   const [selectedMetric, setSelectedMetric] = useState('sales');
+
+  const handleExportReport = () => {
+    Alert.alert(
+      'Export Staff Report',
+      'Choose export format',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'PDF Report', onPress: () => Alert.alert('PDF Export', 'Staff performance PDF coming soon') },
+        { text: 'CSV Data', onPress: () => Alert.alert('CSV Export', 'Staff data CSV coming soon') },
+        { text: 'Email Summary', onPress: () => Alert.alert('Email Report', 'Email functionality coming soon') }
+      ]
+    );
+  };
 
   useEffect(() => {
     if (ENV.FEATURE_REPORTS) {
@@ -390,8 +404,8 @@ const StaffReportDetailScreen = () => {
           <Icon name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Staff Report</Text>
-        <TouchableOpacity style={styles.headerAction}>
-          <Icon name="people" size={24} color={Colors.white} />
+        <TouchableOpacity style={styles.headerAction} onPress={handleExportReport}>
+          <Icon name="file-download" size={24} color={Colors.white} />
         </TouchableOpacity>
       </View>
 

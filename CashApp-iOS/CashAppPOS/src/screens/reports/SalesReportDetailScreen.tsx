@@ -8,14 +8,14 @@ import {
   ScrollView,
   TouchableOpacity,
   Dimensions,
-  ActivityIndicator, // Will be replaced by LoadingView
+  Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
-// import { generateSalesHistory } from '../../utils/mockDataGenerator'; // Removed
-import DataService from '../../services/DataService'; // Added
-import LoadingView from '../../components/feedback/LoadingView'; // Added
-import ComingSoon from '../../components/feedback/ComingSoon'; // Added
+import { useTheme } from '../../design-system/ThemeProvider';
+import DataService from '../../services/DataService';
+import LoadingView from '../../components/feedback/LoadingView';
+import ComingSoon from '../../components/feedback/ComingSoon';
 
 // Mock ENV flag
 const ENV = {
@@ -43,6 +43,7 @@ const Colors = {
   white: '#FFFFFF',
   lightGray: '#ECF0F1',
   mediumGray: '#BDC3C7',
+  darkGray: '#7F8C8D',
   text: '#2C3E50',
   lightText: '#95A5A6',
 };
@@ -67,12 +68,20 @@ interface SalesData {
 
 const SalesReportDetailScreen = () => {
   const navigation = useNavigation();
+  const { theme } = useTheme();
   const [salesData, setSalesData] = useState<SalesData[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true); // Added
-  const [error, setError] = useState<string | null>(null); // Added
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedPeriod, setSelectedPeriod] = useState('today');
-  const [totalSales, setTotalSales] = useState(0); // Will be derived from salesData or returned by service
-  const [totalTransactions, setTotalTransactions] = useState(0); // Will be derived or returned by service
+  const [totalSales, setTotalSales] = useState(0);
+  const [totalTransactions, setTotalTransactions] = useState(0);
+
+  const periods = [
+    { id: 'today', label: 'Today', icon: 'today' },
+    { id: 'week', label: 'This Week', icon: 'date-range' },
+    { id: 'month', label: 'This Month', icon: 'calendar-today' },
+    { id: 'quarter', label: 'Quarter', icon: 'event' }
+  ];
 
   useEffect(() => {
     if (ENV.FEATURE_REPORTS) {
@@ -144,6 +153,19 @@ const SalesReportDetailScreen = () => {
       .map(([name, data]) => ({ name, ...data }))
       .sort((a, b) => b.sold - a.sold)
       .slice(0, 5);
+  };
+
+  const handleExportReport = () => {
+    Alert.alert(
+      'Export Sales Report',
+      'Choose export format',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'PDF', onPress: () => Alert.alert('PDF Export', 'PDF export functionality coming soon') },
+        { text: 'CSV', onPress: () => Alert.alert('CSV Export', 'CSV export functionality coming soon') },
+        { text: 'Email', onPress: () => Alert.alert('Email Report', 'Email functionality coming soon') }
+      ]
+    );
   };
 
   const getPaymentMethodTotals = () => {
@@ -240,27 +262,35 @@ const SalesReportDetailScreen = () => {
           <Icon name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Sales Report</Text>
-        <TouchableOpacity style={styles.headerAction}>
-          <Icon name="share" size={24} color={Colors.white} />
+        <TouchableOpacity style={styles.headerAction} onPress={handleExportReport}>
+          <Icon name="file-download" size={24} color={Colors.white} />
         </TouchableOpacity>
       </View>
 
-      {/* Period Selector */}
-      <View style={styles.periodSelector}>
-        {['today', 'week', 'month', 'year'].map(period => (
+      {/* Enhanced Period Selector */}
+      <View style={[styles.periodSelector, { backgroundColor: theme.colors.white }]}>
+        {periods.map(period => (
           <TouchableOpacity
-            key={period}
+            key={period.id}
             style={[
               styles.periodButton,
-              selectedPeriod === period && styles.periodButtonActive
+              selectedPeriod === period.id && styles.periodButtonActive,
+              { backgroundColor: selectedPeriod === period.id ? Colors.primary : 'transparent' }
             ]}
-            onPress={() => setSelectedPeriod(period)}
+            onPress={() => setSelectedPeriod(period.id)}
           >
+            <Icon 
+              name={period.icon} 
+              size={16} 
+              color={selectedPeriod === period.id ? Colors.white : Colors.darkGray}
+              style={styles.periodIcon}
+            />
             <Text style={[
               styles.periodText,
-              selectedPeriod === period && styles.periodTextActive
+              selectedPeriod === period.id && styles.periodTextActive,
+              { color: selectedPeriod === period.id ? Colors.white : theme.colors.text }
             ]}>
-              {period.charAt(0).toUpperCase() + period.slice(1)}
+              {period.label}
             </Text>
           </TouchableOpacity>
         ))}
@@ -429,18 +459,23 @@ const styles = StyleSheet.create({
   },
   periodButton: {
     flex: 1,
-    paddingVertical: 8,
+    paddingVertical: 10,
     paddingHorizontal: 12,
     marginHorizontal: 4,
     borderRadius: 20,
     backgroundColor: Colors.lightGray,
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   periodButtonActive: {
     backgroundColor: Colors.primary,
   },
+  periodIcon: {
+    marginRight: 6,
+  },
   periodText: {
-    fontSize: getFontSize(14),
+    fontSize: getFontSize(12),
     fontWeight: '500',
     color: Colors.text,
   },
