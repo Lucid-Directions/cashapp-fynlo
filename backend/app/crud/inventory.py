@@ -6,6 +6,7 @@ from sqlalchemy import func, case
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from typing import List, Optional, Tuple
 from uuid import UUID
+from datetime import datetime
 
 from app.models import InventoryItem, Recipe, InventoryLedgerEntry, Product
 from app.schemas import inventory_schemas as schemas

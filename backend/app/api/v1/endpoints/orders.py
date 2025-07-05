@@ -6,7 +6,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_, desc
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from datetime import datetime, timedelta
 import uuid
 import logging
@@ -36,7 +36,7 @@ from app.services.payment_factory import get_payment_provider # Assuming you hav
 # from app.services.stripe_provider import StripeProvider
 # from app.services.sumup_provider import SumUpProvider
 from app.models.refund import Refund, RefundLedger # SQLAlchemy models
-from app.models.user import User as UserModel # Assuming your User model is named UserModel # Make sure this path is correct
+from app.core.database import User as UserModel
 from app.services.email_service import EmailService # Import the new EmailService
 from decimal import Decimal # Ensure Decimal is imported if used for amounts
 

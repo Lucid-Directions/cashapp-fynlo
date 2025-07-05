@@ -1,6 +1,14 @@
 from abc import ABC, abstractmethod
 from decimal import Decimal
 from typing import List, Dict, Any, Optional
+from enum import Enum
+
+class PaymentStatus(Enum):
+    SUCCESS = "success"
+    PENDING = "pending"
+    FAILED = "failed"
+    CANCELLED = "cancelled"
+    REFUNDED = "refunded"
 
 class RefundItemDetail(Dict[str, Any]):
     line_id: str

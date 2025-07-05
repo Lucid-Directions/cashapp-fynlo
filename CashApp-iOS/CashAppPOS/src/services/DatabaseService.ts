@@ -471,6 +471,7 @@ class DatabaseService {
     return Promise.resolve([
       {
         id: 1,
+        itemId: 1,
         sku: 'BEEF-001',
         name: 'Ground Beef',
         category: 'Meat',
@@ -478,13 +479,14 @@ class DatabaseService {
         unit: 'kg',
         minThreshold: 10,
         maxThreshold: 50,
-        costPerUnit: 8.50,
+        unitCost: 8.50,
         supplier: 'Premium Meats Ltd',
         lastRestocked: '2025-07-01',
         status: 'in_stock'
       },
       {
         id: 2,
+        itemId: 2,
         sku: 'CHICK-001',
         name: 'Chicken Breast',
         category: 'Meat',
@@ -492,13 +494,14 @@ class DatabaseService {
         unit: 'kg',
         minThreshold: 15,
         maxThreshold: 40,
-        costPerUnit: 6.75,
+        unitCost: 6.75,
         supplier: 'Premium Meats Ltd',
         lastRestocked: '2025-06-30',
         status: 'in_stock'
       },
       {
         id: 3,
+        itemId: 3,
         sku: 'TORT-001',
         name: 'Flour Tortillas',
         category: 'Bread',
@@ -506,13 +509,14 @@ class DatabaseService {
         unit: 'pieces',
         minThreshold: 50,
         maxThreshold: 200,
-        costPerUnit: 0.25,
+        unitCost: 0.25,
         supplier: 'Mexican Foods Co',
         lastRestocked: '2025-07-02',
         status: 'in_stock'
       },
       {
         id: 4,
+        itemId: 4,
         sku: 'CHES-001',
         name: 'Cheddar Cheese',
         category: 'Dairy',
@@ -520,13 +524,14 @@ class DatabaseService {
         unit: 'kg',
         minThreshold: 10,
         maxThreshold: 25,
-        costPerUnit: 12.00,
+        unitCost: 12.00,
         supplier: 'Dairy Fresh Ltd',
         lastRestocked: '2025-06-28',
         status: 'low_stock'
       },
       {
         id: 5,
+        itemId: 5,
         sku: 'TOM-001',
         name: 'Fresh Tomatoes',
         category: 'Vegetables',
@@ -534,13 +539,14 @@ class DatabaseService {
         unit: 'kg',
         minThreshold: 8,
         maxThreshold: 30,
-        costPerUnit: 3.20,
+        unitCost: 3.20,
         supplier: 'Garden Fresh Produce',
         lastRestocked: '2025-07-01',
         status: 'in_stock'
       },
       {
         id: 6,
+        itemId: 6,
         sku: 'ONI-001',
         name: 'Yellow Onions',
         category: 'Vegetables',
@@ -548,13 +554,14 @@ class DatabaseService {
         unit: 'kg',
         minThreshold: 10,
         maxThreshold: 25,
-        costPerUnit: 1.80,
+        unitCost: 1.80,
         supplier: 'Garden Fresh Produce',
         lastRestocked: '2025-06-30',
         status: 'in_stock'
       },
       {
         id: 7,
+        itemId: 7,
         sku: 'AVD-001',
         name: 'Avocados',
         category: 'Vegetables',
@@ -562,13 +569,14 @@ class DatabaseService {
         unit: 'kg',
         minThreshold: 5,
         maxThreshold: 15,
-        costPerUnit: 4.50,
+        unitCost: 4.50,
         supplier: 'Garden Fresh Produce',
         lastRestocked: '2025-06-29',
         status: 'low_stock'
       },
       {
         id: 8,
+        itemId: 8,
         sku: 'BEE-001',
         name: 'Corona Beer',
         category: 'Beverages',
@@ -576,13 +584,14 @@ class DatabaseService {
         unit: 'bottles',
         minThreshold: 24,
         maxThreshold: 120,
-        costPerUnit: 2.50,
+        unitCost: 2.50,
         supplier: 'Beverages Direct',
         lastRestocked: '2025-07-01',
         status: 'in_stock'
       },
       {
         id: 9,
+        itemId: 9,
         sku: 'TEQ-001',
         name: 'Tequila Blanco',
         category: 'Spirits',
@@ -590,13 +599,14 @@ class DatabaseService {
         unit: 'bottles',
         minThreshold: 4,
         maxThreshold: 12,
-        costPerUnit: 35.00,
+        unitCost: 35.00,
         supplier: 'Spirits & More',
         lastRestocked: '2025-06-25',
         status: 'in_stock'
       },
       {
         id: 10,
+        itemId: 10,
         sku: 'CHU-001',
         name: 'Churro Mix',
         category: 'Desserts',
@@ -604,7 +614,7 @@ class DatabaseService {
         unit: 'kg',
         minThreshold: 3,
         maxThreshold: 10,
-        costPerUnit: 8.75,
+        unitCost: 8.75,
         supplier: 'Mexican Foods Co',
         lastRestocked: '2025-06-20',
         status: 'low_stock'
@@ -625,6 +635,7 @@ class DatabaseService {
         phone: '+44 7700 900001',
         hourlyRate: 12.50,
         hoursWorked: 38,
+        totalSales: 2450.75,
         isActive: true,
         hireDate: '2023-01-15'
       },
@@ -638,6 +649,7 @@ class DatabaseService {
         phone: '+44 7700 900002',
         hourlyRate: 18.00,
         hoursWorked: 42,
+        totalSales: 0, // Chefs don't directly handle sales
         isActive: true,
         hireDate: '2022-08-20'
       },
@@ -651,6 +663,7 @@ class DatabaseService {
         phone: '+44 7700 900003',
         hourlyRate: 14.00,
         hoursWorked: 35,
+        totalSales: 1875.30,
         isActive: true,
         hireDate: '2023-03-10'
       },
@@ -664,6 +677,7 @@ class DatabaseService {
         phone: '+44 7700 900004',
         hourlyRate: 12.50,
         hoursWorked: 32,
+        totalSales: 1920.50,
         isActive: true,
         hireDate: '2023-06-01'
       },
@@ -677,6 +691,7 @@ class DatabaseService {
         phone: '+44 7700 900005',
         hourlyRate: 11.50,
         hoursWorked: 40,
+        totalSales: 3150.25,
         isActive: true,
         hireDate: '2023-04-15'
       }

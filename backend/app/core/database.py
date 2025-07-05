@@ -3,7 +3,7 @@ Database configuration and models for Fynlo POS
 PostgreSQL implementation matching frontend data requirements
 """
 
-from sqlalchemy import create_engine, Column, String, Integer, Float, DateTime, Boolean, Text, JSON, ForeignKey, DECIMAL
+from sqlalchemy import create_engine, Column, String, Integer, Float, DateTime, Boolean, Text, JSON, ForeignKey, DECIMAL, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session, relationship
@@ -13,7 +13,6 @@ import uuid
 from typing import Generator
 
 from app.core.config import settings
-from app.models.audit_log import AuditLog # Import the AuditLog model
 
 # Database engine
 engine = create_engine(settings.DATABASE_URL, echo=settings.DEBUG)
@@ -137,6 +136,9 @@ class Product(Base):
     stock_quantity = Column(Integer, default=0)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    
+    # Relationship to recipes
+    recipes = relationship("Recipe", back_populates="product_item")
 
 class Order(Base):
     """Customer orders"""
@@ -198,16 +200,11 @@ class Section(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     restaurant_id = Column(UUID(as_uuid=True), nullable=False)
     name = Column(String(255), nullable=False)
-    color = Column(String(7), default="#00A651")  # Hex color
-    sort_order = Column(Integer, default=0)
+    description = Column(Text, nullable=True)
+    capacity = Column(Integer, default=50)
     is_active = Column(Boolean, default=True)
-    stock_tracking = Column(Boolean, default=False)
-    stock_quantity = Column(Integer, default=0)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
-
-    # Relationship to recipes
-    recipes = relationship("Recipe", back_populates="product_item")
 
 class InventoryItem(Base):
     """Inventory items (raw ingredients/supplies)"""
@@ -242,7 +239,7 @@ class Recipe(Base):
     product_item = relationship("Product", back_populates="recipes")
     ingredient = relationship("InventoryItem", back_populates="recipe_ingredients")
 
-    __table_args__ = (sa.UniqueConstraint('item_id', 'ingredient_sku', name='uq_recipe_item_ingredient'),)
+    __table_args__ = (UniqueConstraint('item_id', 'ingredient_sku', name='uq_recipe_item_ingredient'),)
 
 
 class InventoryLedgerEntry(Base):

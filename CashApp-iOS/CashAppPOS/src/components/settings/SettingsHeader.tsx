@@ -64,7 +64,11 @@ const SettingsHeader: React.FC<SettingsHeaderProps> = ({
       <View style={[styles.container, { backgroundColor }]}>
         {/* Left section with back button */}
         {showBackButton && (
-          <TouchableOpacity style={styles.backButton} onPress={handleBackPress}>
+          <TouchableOpacity 
+            style={styles.backButton} 
+            onPress={handleBackPress}
+            activeOpacity={0.7}
+          >
             <Icon name="arrow-back" size={24} color={Colors.white} />
           </TouchableOpacity>
         )}
@@ -106,8 +110,14 @@ const styles = StyleSheet.create({
     height: 70,
   },
   backButton: {
-    padding: 8,
+    padding: 12,
     marginRight: 8,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   centerSection: {
     flex: 1,
