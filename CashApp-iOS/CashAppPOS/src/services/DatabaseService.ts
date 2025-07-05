@@ -462,18 +462,275 @@ class DatabaseService {
   }
 
   async getInventory(): Promise<any[]> {
-    console.warn('DatabaseService.getInventory is a stub and not implemented.');
-    throw new Error('DatabaseService.getInventory not implemented yet');
+    // Alias for getInventoryItems
+    return this.getInventoryItems();
+  }
+
+  async getInventoryItems(): Promise<any[]> {
+    // Return mock inventory data for Casa Estrella Mexican Cuisine
+    return Promise.resolve([
+      {
+        id: 1,
+        sku: 'BEEF-001',
+        name: 'Ground Beef',
+        category: 'Meat',
+        currentStock: 25.5,
+        unit: 'kg',
+        minThreshold: 10,
+        maxThreshold: 50,
+        costPerUnit: 8.50,
+        supplier: 'Premium Meats Ltd',
+        lastRestocked: '2025-07-01',
+        status: 'in_stock'
+      },
+      {
+        id: 2,
+        sku: 'CHICK-001',
+        name: 'Chicken Breast',
+        category: 'Meat',
+        currentStock: 18.2,
+        unit: 'kg',
+        minThreshold: 15,
+        maxThreshold: 40,
+        costPerUnit: 6.75,
+        supplier: 'Premium Meats Ltd',
+        lastRestocked: '2025-06-30',
+        status: 'in_stock'
+      },
+      {
+        id: 3,
+        sku: 'TORT-001',
+        name: 'Flour Tortillas',
+        category: 'Bread',
+        currentStock: 120,
+        unit: 'pieces',
+        minThreshold: 50,
+        maxThreshold: 200,
+        costPerUnit: 0.25,
+        supplier: 'Mexican Foods Co',
+        lastRestocked: '2025-07-02',
+        status: 'in_stock'
+      },
+      {
+        id: 4,
+        sku: 'CHES-001',
+        name: 'Cheddar Cheese',
+        category: 'Dairy',
+        currentStock: 8.5,
+        unit: 'kg',
+        minThreshold: 10,
+        maxThreshold: 25,
+        costPerUnit: 12.00,
+        supplier: 'Dairy Fresh Ltd',
+        lastRestocked: '2025-06-28',
+        status: 'low_stock'
+      },
+      {
+        id: 5,
+        sku: 'TOM-001',
+        name: 'Fresh Tomatoes',
+        category: 'Vegetables',
+        currentStock: 12.8,
+        unit: 'kg',
+        minThreshold: 8,
+        maxThreshold: 30,
+        costPerUnit: 3.20,
+        supplier: 'Garden Fresh Produce',
+        lastRestocked: '2025-07-01',
+        status: 'in_stock'
+      },
+      {
+        id: 6,
+        sku: 'ONI-001',
+        name: 'Yellow Onions',
+        category: 'Vegetables',
+        currentStock: 15.5,
+        unit: 'kg',
+        minThreshold: 10,
+        maxThreshold: 25,
+        costPerUnit: 1.80,
+        supplier: 'Garden Fresh Produce',
+        lastRestocked: '2025-06-30',
+        status: 'in_stock'
+      },
+      {
+        id: 7,
+        sku: 'AVD-001',
+        name: 'Avocados',
+        category: 'Vegetables',
+        currentStock: 4.2,
+        unit: 'kg',
+        minThreshold: 5,
+        maxThreshold: 15,
+        costPerUnit: 4.50,
+        supplier: 'Garden Fresh Produce',
+        lastRestocked: '2025-06-29',
+        status: 'low_stock'
+      },
+      {
+        id: 8,
+        sku: 'BEE-001',
+        name: 'Corona Beer',
+        category: 'Beverages',
+        currentStock: 48,
+        unit: 'bottles',
+        minThreshold: 24,
+        maxThreshold: 120,
+        costPerUnit: 2.50,
+        supplier: 'Beverages Direct',
+        lastRestocked: '2025-07-01',
+        status: 'in_stock'
+      },
+      {
+        id: 9,
+        sku: 'TEQ-001',
+        name: 'Tequila Blanco',
+        category: 'Spirits',
+        currentStock: 6,
+        unit: 'bottles',
+        minThreshold: 4,
+        maxThreshold: 12,
+        costPerUnit: 35.00,
+        supplier: 'Spirits & More',
+        lastRestocked: '2025-06-25',
+        status: 'in_stock'
+      },
+      {
+        id: 10,
+        sku: 'CHU-001',
+        name: 'Churro Mix',
+        category: 'Desserts',
+        currentStock: 2.5,
+        unit: 'kg',
+        minThreshold: 3,
+        maxThreshold: 10,
+        costPerUnit: 8.75,
+        supplier: 'Mexican Foods Co',
+        lastRestocked: '2025-06-20',
+        status: 'low_stock'
+      }
+    ]);
   }
 
   async getEmployees(): Promise<any[]> {
-    console.warn('DatabaseService.getEmployees is a stub and not implemented.');
-    throw new Error('DatabaseService.getEmployees not implemented yet');
+    // Return mock employee data for Casa Estrella Mexican Cuisine
+    return Promise.resolve([
+      {
+        id: 1,
+        name: 'Maria Garcia',
+        firstName: 'Maria',
+        lastName: 'Garcia',
+        role: 'server',
+        email: 'maria.garcia@casaestrella.com',
+        phone: '+44 7700 900001',
+        hourlyRate: 12.50,
+        hoursWorked: 38,
+        isActive: true,
+        hireDate: '2023-01-15'
+      },
+      {
+        id: 2,
+        name: 'Jose Rodriguez',
+        firstName: 'Jose',
+        lastName: 'Rodriguez',
+        role: 'chef',
+        email: 'jose.rodriguez@casaestrella.com',
+        phone: '+44 7700 900002',
+        hourlyRate: 18.00,
+        hoursWorked: 42,
+        isActive: true,
+        hireDate: '2022-08-20'
+      },
+      {
+        id: 3,
+        name: 'Ana Martinez',
+        firstName: 'Ana',
+        lastName: 'Martinez',
+        role: 'bartender',
+        email: 'ana.martinez@casaestrella.com',
+        phone: '+44 7700 900003',
+        hourlyRate: 14.00,
+        hoursWorked: 35,
+        isActive: true,
+        hireDate: '2023-03-10'
+      },
+      {
+        id: 4,
+        name: 'Carlos Lopez',
+        firstName: 'Carlos',
+        lastName: 'Lopez',
+        role: 'server',
+        email: 'carlos.lopez@casaestrella.com',
+        phone: '+44 7700 900004',
+        hourlyRate: 12.50,
+        hoursWorked: 32,
+        isActive: true,
+        hireDate: '2023-06-01'
+      },
+      {
+        id: 5,
+        name: 'Sofia Hernandez',
+        firstName: 'Sofia',
+        lastName: 'Hernandez',
+        role: 'cashier',
+        email: 'sofia.hernandez@casaestrella.com',
+        phone: '+44 7700 900005',
+        hourlyRate: 11.50,
+        hoursWorked: 40,
+        isActive: true,
+        hireDate: '2023-04-15'
+      }
+    ]);
   }
 
   async getWeekSchedule(weekStart: Date, employees: any[]): Promise<any | null> {
-    console.warn('DatabaseService.getWeekSchedule is a stub and not implemented.');
-    throw new Error('DatabaseService.getWeekSchedule not implemented yet');
+    // Return mock weekly schedule data
+    const mockSchedule = {
+      weekStart: weekStart,
+      shifts: [
+        // Monday
+        { employeeId: 1, employeeName: 'Maria Garcia', day: 'Monday', startTime: '09:00', endTime: '17:00', role: 'server' },
+        { employeeId: 2, employeeName: 'Jose Rodriguez', day: 'Monday', startTime: '08:00', endTime: '16:00', role: 'chef' },
+        { employeeId: 3, employeeName: 'Ana Martinez', day: 'Monday', startTime: '15:00', endTime: '23:00', role: 'bartender' },
+        
+        // Tuesday
+        { employeeId: 1, employeeName: 'Maria Garcia', day: 'Tuesday', startTime: '09:00', endTime: '17:00', role: 'server' },
+        { employeeId: 4, employeeName: 'Carlos Lopez', day: 'Tuesday', startTime: '11:00', endTime: '19:00', role: 'server' },
+        { employeeId: 2, employeeName: 'Jose Rodriguez', day: 'Tuesday', startTime: '08:00', endTime: '16:00', role: 'chef' },
+        
+        // Wednesday
+        { employeeId: 5, employeeName: 'Sofia Hernandez', day: 'Wednesday', startTime: '10:00', endTime: '18:00', role: 'cashier' },
+        { employeeId: 2, employeeName: 'Jose Rodriguez', day: 'Wednesday', startTime: '08:00', endTime: '16:00', role: 'chef' },
+        { employeeId: 3, employeeName: 'Ana Martinez', day: 'Wednesday', startTime: '15:00', endTime: '23:00', role: 'bartender' },
+        
+        // Thursday
+        { employeeId: 1, employeeName: 'Maria Garcia', day: 'Thursday', startTime: '09:00', endTime: '17:00', role: 'server' },
+        { employeeId: 4, employeeName: 'Carlos Lopez', day: 'Thursday', startTime: '11:00', endTime: '19:00', role: 'server' },
+        { employeeId: 2, employeeName: 'Jose Rodriguez', day: 'Thursday', startTime: '08:00', endTime: '16:00', role: 'chef' },
+        { employeeId: 3, employeeName: 'Ana Martinez', day: 'Thursday', startTime: '15:00', endTime: '23:00', role: 'bartender' },
+        
+        // Friday (Busy day - more staff)
+        { employeeId: 1, employeeName: 'Maria Garcia', day: 'Friday', startTime: '09:00', endTime: '17:00', role: 'server' },
+        { employeeId: 4, employeeName: 'Carlos Lopez', day: 'Friday', startTime: '11:00', endTime: '19:00', role: 'server' },
+        { employeeId: 2, employeeName: 'Jose Rodriguez', day: 'Friday', startTime: '08:00', endTime: '16:00', role: 'chef' },
+        { employeeId: 3, employeeName: 'Ana Martinez', day: 'Friday', startTime: '15:00', endTime: '23:00', role: 'bartender' },
+        { employeeId: 5, employeeName: 'Sofia Hernandez', day: 'Friday', startTime: '10:00', endTime: '18:00', role: 'cashier' },
+        
+        // Saturday (Busiest day - full staff)
+        { employeeId: 1, employeeName: 'Maria Garcia', day: 'Saturday', startTime: '10:00', endTime: '18:00', role: 'server' },
+        { employeeId: 4, employeeName: 'Carlos Lopez', day: 'Saturday', startTime: '10:00', endTime: '18:00', role: 'server' },
+        { employeeId: 2, employeeName: 'Jose Rodriguez', day: 'Saturday', startTime: '08:00', endTime: '16:00', role: 'chef' },
+        { employeeId: 3, employeeName: 'Ana Martinez', day: 'Saturday', startTime: '14:00', endTime: '22:00', role: 'bartender' },
+        { employeeId: 5, employeeName: 'Sofia Hernandez', day: 'Saturday', startTime: '09:00', endTime: '17:00', role: 'cashier' },
+        
+        // Sunday (Moderate day)
+        { employeeId: 1, employeeName: 'Maria Garcia', day: 'Sunday', startTime: '11:00', endTime: '19:00', role: 'server' },
+        { employeeId: 2, employeeName: 'Jose Rodriguez', day: 'Sunday', startTime: '10:00', endTime: '18:00', role: 'chef' },
+        { employeeId: 3, employeeName: 'Ana Martinez', day: 'Sunday', startTime: '16:00', endTime: '22:00', role: 'bartender' }
+      ]
+    };
+    
+    return Promise.resolve(mockSchedule);
   }
 
   async getOrdersByDateRange(dateRange: string): Promise<any[]> { // Renamed to match DataService call intent
@@ -497,8 +754,52 @@ class DatabaseService {
   }
 
   async getReportsDashboardData(): Promise<any | null> {
-    console.warn('DatabaseService.getReportsDashboardData is a stub and not implemented.');
-    throw new Error('DatabaseService.getReportsDashboardData not implemented yet');
+    // Alias for getAnalyticsDashboard
+    return this.getAnalyticsDashboard();
+  }
+
+  async getAnalyticsDashboard(): Promise<any | null> {
+    // Return comprehensive analytics dashboard data
+    return Promise.resolve({
+      todaySummary: { 
+        totalSales: 2847.50, 
+        transactions: 127, 
+        averageOrder: 22.42,
+        totalRevenue: 2847.50,
+        totalOrders: 127,
+        averageOrderValue: 22.42
+      },
+      weeklyLabor: { 
+        totalActualHours: 248, 
+        totalLaborCost: 3720.00, 
+        efficiency: 87.5,
+        scheduledHours: 280,
+        overtimeHours: 8
+      },
+      topItemsToday: [
+        { name: 'Chicken Tacos', quantity: 45, revenue: 675.00 },
+        { name: 'Beef Burrito', quantity: 38, revenue: 570.00 },
+        { name: 'Churros', quantity: 32, revenue: 192.00 },
+        { name: 'Margarita', quantity: 28, revenue: 336.00 },
+        { name: 'Quesadilla', quantity: 25, revenue: 375.00 }
+      ],
+      topPerformersToday: [
+        { name: 'Maria Garcia', role: 'Server', orders: 18, sales: 425.50 },
+        { name: 'Jose Rodriguez', role: 'Server', orders: 16, sales: 398.25 },
+        { name: 'Ana Martinez', role: 'Bartender', orders: 12, sales: 286.75 },
+        { name: 'Carlos Lopez', role: 'Server', orders: 14, sales: 315.80 },
+        { name: 'Sofia Hernandez', role: 'Server', orders: 11, sales: 267.90 }
+      ],
+      salesTrend: [
+        { period: 'Mon', sales: 1850.25 },
+        { period: 'Tue', sales: 2124.50 },
+        { period: 'Wed', sales: 1976.75 },
+        { period: 'Thu', sales: 2398.00 },
+        { period: 'Fri', sales: 3247.50 },
+        { period: 'Sat', sales: 3856.25 },
+        { period: 'Sun', sales: 2847.50 }
+      ]
+    });
   }
 
   async getUserProfile(): Promise<any | null> {

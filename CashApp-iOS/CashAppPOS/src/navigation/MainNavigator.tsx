@@ -12,7 +12,6 @@ import SalesReportDetailScreen from '../screens/reports/SalesReportDetailScreen'
 import InventoryReportDetailScreen from '../screens/reports/InventoryReportDetailScreen';
 import StaffReportDetailScreen from '../screens/reports/StaffReportDetailScreen';
 import FinancialReportDetailScreen from '../screens/reports/FinancialReportDetailScreen';
-import MoreScreen from '../screens/more/MoreScreen';
 import EmployeesScreen from '../screens/employees/EmployeesScreen';
 import EnhancedEmployeeScheduleScreen from '../screens/employees/EnhancedEmployeeScheduleScreen';
 import QRScannerScreen from '../screens/scanner/QRScannerScreen';
@@ -47,9 +46,6 @@ const MainTabNavigator: React.FC = () => {
               break;
             case 'Orders':
               iconName = 'receipt';
-              break;
-            case 'More':
-              iconName = 'more-horiz';
               break;
             default:
               iconName = 'dashboard';
@@ -87,13 +83,6 @@ const MainTabNavigator: React.FC = () => {
         component={OrdersScreen}
         options={{
           tabBarLabel: 'Orders',
-        }}
-      />
-      <Tab.Screen
-        name="More"
-        component={MoreScreen}
-        options={{
-          tabBarLabel: 'More',
         }}
       />
     </Tab.Navigator>

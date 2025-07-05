@@ -418,6 +418,7 @@ const InventoryScreen: React.FC = () => {
         <TouchableOpacity 
           style={styles.backButton}
           onPress={() => navigation.goBack()}
+          activeOpacity={0.7}
         >
           <Icon name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>
@@ -854,7 +855,14 @@ const styles = StyleSheet.create({
     height: 60,
   },
   backButton: {
-    padding: 8,
+    padding: 12,
+    marginRight: 8,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   headerCenter: {
     flex: 1,

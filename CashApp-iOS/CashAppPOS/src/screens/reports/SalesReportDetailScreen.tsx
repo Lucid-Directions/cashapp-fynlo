@@ -19,7 +19,7 @@ import ComingSoon from '../../components/feedback/ComingSoon'; // Added
 
 // Mock ENV flag
 const ENV = {
-  FEATURE_REPORTS: false, // Set to true to enable, false to show ComingSoon
+  FEATURE_REPORTS: true, // Set to true to enable, false to show ComingSoon
 };
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');

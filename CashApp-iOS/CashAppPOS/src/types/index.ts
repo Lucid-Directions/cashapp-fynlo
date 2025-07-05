@@ -156,7 +156,6 @@ export type MainStackParamList = {
 export type MainTabParamList = {
   Home: undefined;
   Orders: undefined;
-  More: undefined;
 };
 
 export type AuthStackParamList = {
