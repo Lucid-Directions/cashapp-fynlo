@@ -170,7 +170,8 @@ const HomeHubScreen: React.FC = () => {
   const iconSize = isTablet ? 48 : 64;
   const horizontalSpacing = 16;
   const cardMargin = 8; // Proper margin for 2-column layout
-  const cardWidth = (screenWidth - (horizontalSpacing * 2) - (cardMargin * numColumns * 2)) / numColumns;
+  // Fixed width calculation for exact 2-column layout
+  const cardWidth = (screenWidth - (horizontalSpacing * 2) - (cardMargin * 4)) / numColumns;
 
   const handleIconPress = (icon: HubIcon) => {
     // Analytics tracking for icon tap
