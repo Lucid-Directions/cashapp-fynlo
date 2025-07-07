@@ -157,18 +157,44 @@ async def root():
 @app.get("/health")
 async def health_check():
     """Detailed health check with standardized response"""
+    
+    # Check database connection
+    database_status = "disconnected"
+    try:
+        from app.core.database import get_db_session
+        db = next(get_db_session())
+        # Simple query to test connection
+        db.execute("SELECT 1")
+        database_status = "connected"
+        db.close()
+    except Exception:
+        database_status = "disconnected"
+    
+    # Check Redis connection  
+    redis_status = "disconnected"
+    try:
+        from app.core.redis_client import get_redis
+        redis = get_redis()
+        if redis and redis.ping():
+            redis_status = "connected"
+    except Exception:
+        redis_status = "disconnected"
+    
+    # Overall health status
+    overall_status = "healthy" if database_status == "connected" else "degraded"
+    
     return APIResponseHelper.success(
         data={
-            "status": "healthy",
-            "database": "connected",
-            "redis": "connected",
+            "status": overall_status,
+            "database": database_status,
+            "redis": redis_status,
             "websocket": "ready",
             "api_version": "v1",
             "version_middleware": "enabled",
             "backward_compatibility": "enabled",
             "timestamp": datetime.utcnow().isoformat()
         },
-        message="All systems operational"
+        message="Health check completed" if overall_status == "healthy" else "Service degraded - database not available"
     )
 
 @app.get("/api/version")
