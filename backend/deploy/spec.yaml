@@ -5,13 +5,12 @@ region: lon # London region, as specified for the database
 # Define the services
 services:
   - name: api
-    # Build from Dockerfile
+    # Use Docker for consistent build environment
     dockerfile_path: backend/Dockerfile
     source_dir: ./
     github:
-      # Replace with your actual repo and branch
       repo: Lucid-Directions/cashapp-fynlo
-      branch: main # Or your deployment branch
+      branch: main
     # Environment variables
     envs:
       - key: API_HOST
@@ -54,13 +53,12 @@ services:
 jobs:
   - name: migrate
     kind: PRE_DEPLOY # Run before deploying the 'api' service
-    # Build from Dockerfile (same as api service)
+    # Use same Docker setup as main service
     dockerfile_path: backend/Dockerfile
     source_dir: ./
     github:
-      # Replace with your actual repo and branch
       repo: Lucid-Directions/cashapp-fynlo
-      branch: main # Or your deployment branch
+      branch: main
     # Command to run for migrations
     run_command: alembic upgrade head
     # Environment variables for the job (needs database access)
