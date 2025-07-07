@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RestaurantDataService from './RestaurantDataService';
+import API_CONFIG from '../config/api';
 
 export interface RestaurantConfig {
   // Restaurant Identity
@@ -161,6 +162,58 @@ class RestaurantConfigService {
       updatedAt: new Date(),
     };
     
+    // Try to save to API first
+    try {
+      const authToken = await AsyncStorage.getItem('auth_token');
+      const userStr = await AsyncStorage.getItem('@auth_user');
+      const user = userStr ? JSON.parse(userStr) : null;
+      const restaurantId = user?.businessId || user?.restaurant_id;
+      
+      if (authToken && restaurantId) {
+        // Prepare API payload
+        const apiPayload = {
+          name: this.config.restaurantName,
+          display_name: this.config.displayName,
+          business_type: this.config.businessType,
+          address: `${this.config.address?.street || ''}, ${this.config.address?.city || ''}, ${this.config.address?.state || ''} ${this.config.address?.zipCode || ''}`.trim(),
+          phone: this.config.phone,
+          email: this.config.email,
+          website: this.config.website,
+          currency: this.config.currency,
+          timezone: this.config.timezone,
+          vat_number: this.config.taxId || '',
+          registration_number: this.config.registrationId || '',
+          config: {
+            tax_rate: this.config.taxRate,
+            theme: this.config.theme,
+            primary_color: this.config.primaryColor,
+            operating_hours: this.config.operatingHours,
+          },
+        };
+        
+        const response = await fetch(`${API_CONFIG.FULL_API_URL}/restaurants/${restaurantId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`,
+          },
+          body: JSON.stringify(apiPayload),
+        });
+        
+        if (response.ok) {
+          console.log('✅ Restaurant config saved to API');
+        } else {
+          const errorData = await response.json();
+          console.error('❌ API save failed:', errorData);
+          throw new Error(errorData.detail || 'Failed to save to API');
+        }
+      }
+    } catch (apiError) {
+      console.error('❌ Failed to save to API, saving locally:', apiError);
+      // Continue with local save
+    }
+    
+    // Always save locally as backup
     await this.saveConfig();
     
     // Sync with RestaurantDataService for platform visibility

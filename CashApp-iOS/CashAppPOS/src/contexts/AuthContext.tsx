@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RestaurantDataService from '../services/RestaurantDataService';
+import API_CONFIG from '../config/api';
 
 export interface User {
   id: string;
@@ -159,6 +160,68 @@ const MOCK_USERS: User[] = [
     lastLogin: new Date(Date.now() - 1800000),
     permissions: ['manage_staff', 'view_reports', 'process_returns', 'process_sales'],
     isActive: true,
+  },
+  // Quick sign-in test users
+  {
+    id: 'test_restaurant_owner',
+    firstName: 'Maria',
+    lastName: 'Rodriguez',
+    email: 'restaurant_owner',
+    phone: '+44 7700 900200',
+    role: 'restaurant_owner',
+    pin: '1111',
+    employeeId: 'OWNER001',
+    businessId: 'restaurant1',
+    startDate: new Date(2024, 0, 1),
+    lastLogin: new Date(),
+    permissions: ['manage_menu', 'view_reports', 'manage_employees', 'manage_settings', 'process_orders', 'handle_payments'],
+    isActive: true,
+  },
+  {
+    id: 'test_platform_owner',
+    firstName: 'Alex',
+    lastName: 'Thompson',
+    email: 'platform_owner',
+    phone: '+44 7700 900201',
+    role: 'platform_owner',
+    pin: '2222',
+    employeeId: 'PLAT001',
+    businessId: 'platform1',
+    startDate: new Date(2024, 0, 1),
+    lastLogin: new Date(),
+    permissions: ['*'],
+    isActive: true,
+    platformId: 'platform1',
+  },
+  {
+    id: 'test_manager',
+    firstName: 'Sofia',
+    lastName: 'Hernandez',
+    email: 'manager',
+    phone: '+44 7700 900202',
+    role: 'manager',
+    pin: '3333',
+    employeeId: 'MGR001',
+    businessId: 'restaurant1',
+    startDate: new Date(2024, 0, 1),
+    lastLogin: new Date(),
+    permissions: ['process_orders', 'handle_payments', 'view_reports', 'manage_employees', 'view_menu', 'access_pos'],
+    isActive: true,
+  },
+  {
+    id: 'test_cashier',
+    firstName: 'Carlos',
+    lastName: 'Garcia',
+    email: 'cashier',
+    phone: '+44 7700 900203',
+    role: 'employee',
+    pin: '4444',
+    employeeId: 'CASH001',
+    businessId: 'restaurant1',
+    startDate: new Date(2024, 0, 1),
+    lastLogin: new Date(),
+    permissions: ['process_orders', 'handle_payments', 'view_menu', 'access_pos'],
+    isActive: true,
   }
 ];
 
@@ -264,6 +327,11 @@ const MOCK_CREDENTIALS = [
   { email: 'sarah@fynlopos.com', password: 'password123' },
   { email: 'mike@fynlopos.com', password: 'password123' },
   { email: 'demo@fynlopos.com', password: 'demo' }, // Demo account
+  // Quick sign-in test users
+  { email: 'restaurant_owner', password: 'owner123' },
+  { email: 'platform_owner', password: 'platform123' },
+  { email: 'manager', password: 'manager123' },
+  { email: 'cashier', password: 'cashier123' },
 ];
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -348,10 +416,114 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       setIsLoading(true);
 
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Try real API authentication first
+      try {
+        console.log('🔐 Attempting API authentication for:', email);
+        console.log('🌐 API URL:', `${API_CONFIG.FULL_API_URL}/auth/login`);
+        
+        const authToken = await AsyncStorage.getItem('auth_token');
+        const response = await fetch(`${API_CONFIG.FULL_API_URL}/auth/login`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: email.trim(),
+            password: password,
+          }),
+        });
 
-      // Check credentials
+        console.log('📡 Response status:', response.status);
+        const responseText = await response.text();
+        console.log('📄 Response:', responseText.substring(0, 200));
+
+        if (response.ok) {
+          const data = JSON.parse(responseText);
+          
+          // Store JWT token
+          if (data.access_token) {
+            await AsyncStorage.setItem('auth_token', data.access_token);
+          }
+
+          // Convert API user data to our User interface
+          const apiUser = data.user;
+          if (!apiUser) {
+            throw new Error('User data not found in API response');
+          }
+          
+          const updatedUser: User = {
+            id: apiUser.id || apiUser.user_id,
+            firstName: apiUser.first_name || apiUser.firstName || 'User',
+            lastName: apiUser.last_name || apiUser.lastName || '',
+            email: apiUser.email,
+            phone: apiUser.phone || '',
+            role: apiUser.role || 'employee',
+            pin: apiUser.pin || '0000',
+            employeeId: apiUser.employee_id || `EMP${apiUser.id}`,
+            businessId: apiUser.restaurant_id || apiUser.business_id || 'restaurant1',
+            startDate: apiUser.created_at ? new Date(apiUser.created_at) : new Date(),
+            lastLogin: new Date(),
+            permissions: apiUser.permissions || ['*'],
+            isActive: apiUser.is_active !== false,
+            platformId: apiUser.platform_id,
+            managedRestaurants: apiUser.managed_restaurants,
+          };
+
+          setUser(updatedUser);
+
+          // Handle platform owner vs restaurant user
+          if (updatedUser.role === 'platform_owner') {
+            // Continue with platform owner logic...
+          } else {
+            // Load restaurant data from API
+            try {
+              const restaurantResponse = await fetch(`${API_CONFIG.FULL_API_URL}/restaurants/${updatedUser.businessId}`, {
+                headers: {
+                  'Authorization': `Bearer ${data.access_token}`,
+                },
+              });
+
+              if (restaurantResponse.ok) {
+                const restaurantData = await restaurantResponse.json();
+                const businessData: Business = {
+                  id: restaurantData.id,
+                  name: restaurantData.name,
+                  address: restaurantData.address || '',
+                  phone: restaurantData.phone || '',
+                  email: restaurantData.email || '',
+                  vatNumber: restaurantData.vat_number || '',
+                  registrationNumber: restaurantData.registration_number || '',
+                  type: 'restaurant',
+                  currency: restaurantData.currency || 'GBP',
+                  timezone: restaurantData.timezone || 'Europe/London',
+                  ownerId: restaurantData.owner_id || updatedUser.id,
+                };
+                setBusiness(businessData);
+                await AsyncStorage.setItem(STORAGE_KEYS.BUSINESS, JSON.stringify(businessData));
+              }
+            } catch (restaurantError) {
+              console.log('Failed to load restaurant data, using defaults');
+            }
+          }
+
+          await AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(updatedUser));
+          await AsyncStorage.setItem(STORAGE_KEYS.REMEMBER_ME, rememberMe.toString());
+
+          return true;
+        } else {
+          // Parse error response
+          try {
+            const errorData = JSON.parse(responseText);
+            console.log('❌ API error:', errorData.error?.message || errorData.message || 'Unknown error');
+          } catch {
+            console.log('❌ API error: Could not parse response');
+          }
+        }
+      } catch (apiError) {
+        console.log('API authentication failed, falling back to mock for demo accounts:', apiError);
+      }
+
+      // Fallback to mock authentication for demo accounts only
       const credentials = MOCK_CREDENTIALS.find(
         cred => cred.email.toLowerCase() === email.toLowerCase() && cred.password === password
       );
@@ -567,11 +739,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       setIsLoading(true);
       
-      // Clear stored data
+      // Clear stored data including JWT token
       await Promise.all([
         AsyncStorage.removeItem(STORAGE_KEYS.USER),
         AsyncStorage.removeItem(STORAGE_KEYS.BUSINESS),
         AsyncStorage.removeItem(STORAGE_KEYS.REMEMBER_ME),
+        AsyncStorage.removeItem('auth_token'), // Clear JWT token for API calls
       ]);
 
       setUser(null);

@@ -46,7 +46,7 @@ const RestaurantsScreen: React.FC = () => {
     setTimeout(() => setIsRefreshing(false), 1000);
   }, []);
 
-  const filteredRestaurants = managedRestaurants.filter(restaurant => {
+  const filteredRestaurants = (managedRestaurants || []).filter(restaurant => {
     const matchesSearch = restaurant.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesFilter = selectedFilter === 'all' || 
       (selectedFilter === 'active' && restaurant.isActive) ||

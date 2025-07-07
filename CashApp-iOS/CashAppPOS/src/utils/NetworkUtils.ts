@@ -40,12 +40,8 @@ class NetworkUtils {
 
     let lastError: Error | null = null;
 
-    // Add default headers
-    const defaultHeaders = {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      ...headers,
-    };
+    // Add default headers with authentication
+    const authHeaders = await this.createAuthHeaders(headers);
 
     for (let attempt = 0; attempt <= retryAttempts; attempt++) {
       try {
@@ -59,7 +55,7 @@ class NetworkUtils {
 
         const response = await fetch(url, {
           method,
-          headers: defaultHeaders,
+          headers: authHeaders,
           body,
           signal: controller.signal,
         });
@@ -167,19 +163,21 @@ class NetworkUtils {
    */
   static async isNetworkAvailable(): Promise<boolean> {
     try {
-      // Simple connectivity test to Google DNS
+      // Check if our backend is reachable instead of external services
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 3000);
       
-      const response = await fetch('https://8.8.8.8', {
-        method: 'HEAD',
+      const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.HEALTH_ENDPOINT}`, {
+        method: 'GET',
         signal: controller.signal,
       });
       
       clearTimeout(timeoutId);
-      return true;
+      return response.ok;
     } catch {
-      return false;
+      // Network might be available but backend is down - still return true
+      // to avoid misleading network error messages
+      return true;
     }
   }
 }

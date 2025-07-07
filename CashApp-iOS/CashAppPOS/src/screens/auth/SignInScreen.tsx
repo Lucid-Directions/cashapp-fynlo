@@ -132,32 +132,26 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
 
   const showDemoCredentials = () => {
     Alert.alert(
-      'Demo Credentials',
-      'Use these credentials to test the app:\n\n' +
+      'Quick Sign In',
+      'Select an account to sign in:\n\n' +
       '🏢 Platform Owner (Full Control):\n' +
-      'Email: owner@fynlopos.com\n' +
-      'Password: platformowner123\n\n' +
-      '👨‍💼 Restaurant Owner:\n' +
-      'Email: john@fynlopos.com\n' +
-      'Password: password123\n\n' +
-      '👩‍💼 Manager:\n' +
-      'Email: sarah@fynlopos.com\n' +
-      'Password: password123\n\n' +
-      '👨‍💻 Employee:\n' +
-      'Email: mike@fynlopos.com\n' +
-      'Password: password123\n\n' +
-      '🎯 Quick Demo:\n' +
-      'Email: demo@fynlopos.com\n' +
-      'Password: demo',
+      'See all restaurants, platform analytics, and settings\n\n' +
+      '🍴 Restaurant Owner (Carlos):\n' +
+      'Manage Casa Estrella Mexican Restaurant\n' +
+      'Full restaurant control and analytics\n\n' +
+      '👩‍💼 Restaurant Manager (Sarah):\n' +
+      'Day-to-day operations and staff management\n\n' +
+      '🎯 Demo Account:\n' +
+      'General manager access for testing',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Use Platform Owner', onPress: () => {
+        { text: 'Platform Owner', onPress: () => {
           setEmail('owner@fynlopos.com');
           setPassword('platformowner123');
         }},
-        { text: 'Use Demo Account', onPress: () => {
-          setEmail('demo@fynlopos.com');
-          setPassword('demo');
+        { text: 'Restaurant Owner', onPress: () => {
+          setEmail('carlos@casaestrella.co.uk');
+          setPassword('password123');
         }}
       ]
     );
@@ -256,14 +250,14 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
             )}
           </TouchableOpacity>
 
-          {/* Demo Credentials Button */}
+          {/* Quick Sign In Button */}
           <TouchableOpacity 
             style={styles.demoButton}
             onPress={showDemoCredentials}
             disabled={isLoading}
           >
-            <Icon name="info-outline" size={20} color={Colors.secondary} />
-            <Text style={styles.demoButtonText}>Show Demo Credentials</Text>
+            <Icon name="flash-on" size={20} color={Colors.secondary} />
+            <Text style={styles.demoButtonText}>Quick Sign In</Text>
           </TouchableOpacity>
 
           {/* Divider */}

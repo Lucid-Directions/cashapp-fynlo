@@ -376,7 +376,7 @@ const CustomersScreen: React.FC = () => {
                 <View style={styles.detailsSection}>
                   <Text style={styles.sectionTitle}>Preferred Items</Text>
                   <View style={styles.preferredItems}>
-                    {selectedCustomer.preferredItems.map((item, index) => (
+                    {selectedCustomer.preferredItems?.map((item, index) => (
                       <View key={index} style={styles.preferredItem}>
                         <Text style={styles.preferredItemText}>{item}</Text>
                       </View>
@@ -384,11 +384,11 @@ const CustomersScreen: React.FC = () => {
                   </View>
                 </View>
 
-                {selectedCustomer.tags.length > 0 && (
+                {selectedCustomer.tags?.length > 0 && (
                   <View style={styles.detailsSection}>
                     <Text style={styles.sectionTitle}>Tags</Text>
                     <View style={styles.customerTags}>
-                      {selectedCustomer.tags.map((tag, index) => (
+                      {selectedCustomer.tags?.map((tag, index) => (
                         <View key={index} style={styles.customerTag}>
                           <Text style={styles.customerTagText}>{tag}</Text>
                         </View>

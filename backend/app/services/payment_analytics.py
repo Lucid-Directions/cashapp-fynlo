@@ -12,7 +12,7 @@ from sqlalchemy import func, text
 from collections import defaultdict
 
 from app.core.database import Payment, Order, Restaurant
-from app.services.payment_providers import BasePaymentProvider
+from app.services.payment_providers import PaymentProvider
 
 logger = logging.getLogger(__name__)
 

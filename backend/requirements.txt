@@ -16,11 +16,13 @@ alembic==1.13.1
 # Authentication & Security - Latest secure versions
 python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
+cryptography==41.0.7 # For Fernet encryption of payment credentials
 
 # Payment Processing - Updated to latest
 stripe==8.0.0
 requests==2.32.3
 squareup==34.0.1.20240118 # Corrected version for Square payment provider
+httpx==0.26.0 # For async HTTP requests (SumUp provider)
 
 # Real-time Features - Latest stable versions
 websockets==12.0

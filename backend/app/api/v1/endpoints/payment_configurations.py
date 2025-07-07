@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Body, Path
 from sqlalchemy.orm import Session
 from typing import List, Optional, Dict, Any
+from pydantic import BaseModel
 
 from app.core.database import get_db
 from app.schemas.fee_schemas import PaymentMethodEnum, PaymentMethodFeeSettingSchema

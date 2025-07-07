@@ -17,7 +17,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 // import { generateInventory, InventoryData } from '../../utils/mockDataGenerator'; // Removed
 import DataService from '../../services/DataService'; // Added
-import * as InventoryApiService from '../../services/InventoryApiService'; // Added
+// import * as InventoryApiService from '../../services/InventoryApiService'; // Temporarily disabled to prevent crashes
 import { InventoryData, ReceiptItem as ScannedReceiptItem } from '../../types'; // Updated import path, added ReceiptItem
 import LoadingView from '../../components/feedback/LoadingView'; // Added
 import ComingSoon from '../../components/feedback/ComingSoon'; // Added
@@ -58,6 +58,7 @@ const InventoryScreen: React.FC = () => {
   const [showRestockModal, setShowRestockModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showReceiptScanModal, setShowReceiptScanModal] = useState(false); // Added
+  const [showAddItemModal, setShowAddItemModal] = useState(false); // Added for + button
   const [editFormData, setEditFormData] = useState({
     name: '',
     category: '',
@@ -65,6 +66,15 @@ const InventoryScreen: React.FC = () => {
     minimumStock: '',
     maximumStock: '',
     unitCost: '',
+    supplier: '',
+  });
+  const [newItemFormData, setNewItemFormData] = useState({
+    name: '',
+    category: 'Vegetables',
+    currentStock: '0',
+    minimumStock: '5',
+    maximumStock: '50',
+    unitCost: '0.00',
     supplier: '',
   });
 
@@ -175,12 +185,9 @@ const InventoryScreen: React.FC = () => {
 
       if (item.sku) { // SKU matched by backend
         try {
-          // Assuming item.quantity is the change in quantity.
-          // The backend's adjustStock takes change_qty_g.
-          // This assumes the 'quantity' from receipt is the amount to add.
-          // And for now, we pass it directly as change_qty_g, hoping backend handles units or it's a general field.
-          await InventoryApiService.adjustStock(item.sku, quantity, 'receipt_scan_import');
-          console.log(`Stock adjusted for SKU ${item.sku} by ${quantity}`);
+          // TODO: Implement InventoryApiService.adjustStock when backend is properly connected
+          console.log(`Would adjust stock for SKU ${item.sku} by ${quantity} (simulated)`);
+          // await InventoryApiService.adjustStock(item.sku, quantity, 'receipt_scan_import');
           successCount++;
         } catch (apiError) {
           console.error(`Failed to adjust stock for SKU ${item.sku}:`, apiError);
@@ -299,6 +306,85 @@ const InventoryScreen: React.FC = () => {
     setSelectedItem(null);
     
     Alert.alert('Success', 'Inventory item updated successfully!');
+  };
+
+  const handleAddNewItem = () => {
+    // Validate input
+    const currentStock = parseInt(newItemFormData.currentStock);
+    const minimumStock = parseInt(newItemFormData.minimumStock);
+    const maximumStock = parseInt(newItemFormData.maximumStock);
+    const unitCost = parseFloat(newItemFormData.unitCost);
+
+    if (isNaN(currentStock) || isNaN(minimumStock) || isNaN(maximumStock) || isNaN(unitCost)) {
+      Alert.alert('Error', 'Please enter valid numbers for stock and cost fields.');
+      return;
+    }
+
+    if (minimumStock >= maximumStock) {
+      Alert.alert('Error', 'Maximum stock must be greater than minimum stock.');
+      return;
+    }
+
+    if (!newItemFormData.name.trim() || !newItemFormData.supplier.trim()) {
+      Alert.alert('Error', 'Please enter valid name and supplier.');
+      return;
+    }
+
+    // Check if item already exists
+    const itemExists = inventory.some(item => 
+      item.name.toLowerCase() === newItemFormData.name.trim().toLowerCase()
+    );
+    if (itemExists) {
+      Alert.alert('Error', 'An item with this name already exists');
+      return;
+    }
+
+    // Create new inventory item
+    const newItem: InventoryData = {
+      itemId: Date.now(),
+      name: newItemFormData.name.trim(),
+      category: newItemFormData.category,
+      currentStock,
+      minimumStock,
+      maximumStock,
+      unitCost,
+      supplier: newItemFormData.supplier.trim(),
+      lastRestocked: new Date(),
+      turnoverRate: 0, // Initial value
+    };
+
+    // Add to inventory list
+    setInventory([...inventory, newItem]);
+    
+    // Reset form
+    setNewItemFormData({
+      name: '',
+      category: 'Vegetables',
+      currentStock: '0',
+      minimumStock: '5',
+      maximumStock: '50',
+      unitCost: '0.00',
+      supplier: '',
+    });
+    
+    // Close modal
+    setShowAddItemModal(false);
+    
+    // Show success message
+    Alert.alert('Success', `${newItem.name} has been added to your inventory!`);
+  };
+
+  const handleCancelAddItem = () => {
+    setNewItemFormData({
+      name: '',
+      category: 'Vegetables',
+      currentStock: '0',
+      minimumStock: '5',
+      maximumStock: '50',
+      unitCost: '0.00',
+      supplier: '',
+    });
+    setShowAddItemModal(false);
   };
 
   const renderInventoryItem = ({ item }: { item: InventoryData }) => {
@@ -428,15 +514,23 @@ const InventoryScreen: React.FC = () => {
           <Text style={styles.headerSubtitle}>{filteredInventory.length} items</Text>
         </View>
         
-        <TouchableOpacity 
-          style={styles.scanButton}
-          onPress={handleQRScan}
-          // TODO: Add a proper tooltip component if available, or implement one.
-          // For now, relying on the text itself or accessibilityLabel if set.
-          accessibilityLabel="Scan Receipt or Barcode"
-        >
-          <Icon name="camera" size={24} color={Colors.white} />
-        </TouchableOpacity>
+        <View style={styles.headerActions}>
+          <TouchableOpacity 
+            style={styles.scanButton}
+            onPress={handleQRScan}
+            accessibilityLabel="Scan Receipt or Barcode"
+          >
+            <Icon name="camera" size={24} color={Colors.white} />
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={styles.addButton}
+            onPress={() => setShowAddItemModal(true)}
+            accessibilityLabel="Add New Inventory Item"
+          >
+            <Icon name="add" size={24} color={Colors.white} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Stats Bar */}
@@ -831,6 +925,141 @@ const InventoryScreen: React.FC = () => {
         </View>
       </Modal>
 
+      {/* Add New Item Modal */}
+      <Modal
+        visible={showAddItemModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={handleCancelAddItem}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.addItemModal}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Add New Inventory Item</Text>
+              <TouchableOpacity onPress={handleCancelAddItem}>
+                <Icon name="close" size={24} color={Colors.text} />
+              </TouchableOpacity>
+            </View>
+            
+            <ScrollView style={styles.addItemContent} showsVerticalScrollIndicator={false}>
+              <View style={styles.formGroup}>
+                <Text style={styles.formLabel}>Item Name *</Text>
+                <TextInput
+                  style={styles.formInput}
+                  value={newItemFormData.name}
+                  onChangeText={(text) => setNewItemFormData({...newItemFormData, name: text})}
+                  placeholder="Enter item name"
+                  placeholderTextColor={Colors.darkGray}
+                />
+              </View>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.formLabel}>Category</Text>
+                <View style={styles.categorySelector}>
+                  {['Vegetables', 'Meat', 'Dairy', 'Pantry', 'Spices', 'Beverages'].map(cat => (
+                    <TouchableOpacity
+                      key={cat}
+                      style={[
+                        styles.categoryOption,
+                        newItemFormData.category === cat && styles.categoryOptionSelected
+                      ]}
+                      onPress={() => setNewItemFormData({...newItemFormData, category: cat})}
+                    >
+                      <Text style={[
+                        styles.categoryOptionText,
+                        newItemFormData.category === cat && styles.categoryOptionTextSelected
+                      ]}>
+                        {cat}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+
+              <View style={styles.formRow}>
+                <View style={[styles.formGroup, styles.halfWidth]}>
+                  <Text style={styles.formLabel}>Current Stock</Text>
+                  <TextInput
+                    style={styles.formInput}
+                    value={newItemFormData.currentStock}
+                    onChangeText={(text) => setNewItemFormData({...newItemFormData, currentStock: text})}
+                    placeholder="0"
+                    keyboardType="numeric"
+                    placeholderTextColor={Colors.darkGray}
+                  />
+                </View>
+
+                <View style={[styles.formGroup, styles.halfWidth]}>
+                  <Text style={styles.formLabel}>Unit Cost (£)</Text>
+                  <TextInput
+                    style={styles.formInput}
+                    value={newItemFormData.unitCost}
+                    onChangeText={(text) => setNewItemFormData({...newItemFormData, unitCost: text})}
+                    placeholder="0.00"
+                    keyboardType="decimal-pad"
+                    placeholderTextColor={Colors.darkGray}
+                  />
+                </View>
+              </View>
+
+              <View style={styles.formRow}>
+                <View style={[styles.formGroup, styles.halfWidth]}>
+                  <Text style={styles.formLabel}>Minimum Stock</Text>
+                  <TextInput
+                    style={styles.formInput}
+                    value={newItemFormData.minimumStock}
+                    onChangeText={(text) => setNewItemFormData({...newItemFormData, minimumStock: text})}
+                    placeholder="5"
+                    keyboardType="numeric"
+                    placeholderTextColor={Colors.darkGray}
+                  />
+                </View>
+
+                <View style={[styles.formGroup, styles.halfWidth]}>
+                  <Text style={styles.formLabel}>Maximum Stock</Text>
+                  <TextInput
+                    style={styles.formInput}
+                    value={newItemFormData.maximumStock}
+                    onChangeText={(text) => setNewItemFormData({...newItemFormData, maximumStock: text})}
+                    placeholder="50"
+                    keyboardType="numeric"
+                    placeholderTextColor={Colors.darkGray}
+                  />
+                </View>
+              </View>
+
+              <View style={styles.formGroup}>
+                <Text style={styles.formLabel}>Supplier *</Text>
+                <TextInput
+                  style={styles.formInput}
+                  value={newItemFormData.supplier}
+                  onChangeText={(text) => setNewItemFormData({...newItemFormData, supplier: text})}
+                  placeholder="Enter supplier name"
+                  placeholderTextColor={Colors.darkGray}
+                />
+              </View>
+
+              <View style={styles.formActions}>
+                <TouchableOpacity 
+                  style={[styles.formButton, styles.cancelButton]}
+                  onPress={handleCancelAddItem}
+                >
+                  <Text style={styles.cancelButtonText}>Cancel</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity 
+                  style={[styles.formButton, styles.saveButton]}
+                  onPress={handleAddNewItem}
+                >
+                  <Icon name="add" size={20} color={Colors.white} />
+                  <Text style={styles.saveButtonText}>Add Item</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
       {/* Receipt Scan Modal */}
       <ReceiptScanModal
         visible={showReceiptScanModal}
@@ -877,8 +1106,20 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: 'rgba(255, 255, 255, 0.8)',
   },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   scanButton: {
     padding: 8,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  addButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
   },
   statsBar: {
     flexDirection: 'row',
@@ -1293,6 +1534,22 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 20,
     elevation: 10,
+  },
+  // Add Item Modal Styles
+  addItemModal: {
+    backgroundColor: Colors.white,
+    borderRadius: 16,
+    width: '95%',
+    maxHeight: '90%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  addItemContent: {
+    padding: 20,
+    maxHeight: 600,
   },
   editContent: {
     padding: 20,

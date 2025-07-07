@@ -38,63 +38,14 @@ import { QuantityPill } from '../../components/inputs';
 import CartIcon from '../../components/cart/CartIcon';
 import CategorySearchBubble from '../../components/search/CategorySearchBubble'; // Import CategorySearchBubble
 import CustomersService from '../../services/CustomersService';
+import DataService from '../../services/DataService';
 
 // Get screen dimensions
 const { width: screenWidth } = Dimensions.get('window');
 const isTablet = screenWidth > 768;
 
-// Authentic Mexican Restaurant Menu Items
-const menuItems: MenuItem[] = [
-  // SNACKS
-  { id: 1, name: 'Nachos', price: 5.00, category: 'Snacks', emoji: '🧀', available: true, description: 'Homemade corn tortilla chips with black beans, tomato salsa, pico de gallo, feta, guac & coriander' },
-  { id: 2, name: 'Quesadillas', price: 5.50, category: 'Snacks', emoji: '🫓', available: true, description: 'Folded flour tortilla filled with mozzarella, topped with tomato salsa, feta & coriander' },
-  { id: 3, name: 'Chorizo Quesadilla', price: 5.50, category: 'Snacks', emoji: '🌶️', available: true, description: 'Folded flour tortilla filled with chorizo & mozzarella. Topped with tomato salsa, feta & coriander' },
-  { id: 4, name: 'Chicken Quesadilla', price: 5.50, category: 'Snacks', emoji: '🐔', available: true, description: 'Folded flour tortilla filled with chicken, peppers, onion & mozzarella. Topped with salsa, feta & coriander' },
-  { id: 5, name: 'Tostada', price: 6.50, category: 'Snacks', emoji: '🥙', available: true, description: 'Crispy tortillas with black beans filled with chicken or any topping, served with salsa, lettuce and feta' },
-
-  // TACOS
-  { id: 6, name: 'Carnitas', price: 3.50, category: 'Tacos', emoji: '🌮', available: true, description: 'Slow cooked pork, served with onion, coriander, salsa, guacamole & coriander' },
-  { id: 7, name: 'Cochinita', price: 3.50, category: 'Tacos', emoji: '🌮', available: true, description: 'Marinated pulled pork served with pickle red onion' },
-  { id: 8, name: 'Barbacoa de Res', price: 3.50, category: 'Tacos', emoji: '🌮', available: true, description: 'Juicy pulled beef topped with onion, guacamole & coriander' },
-  { id: 9, name: 'Chorizo', price: 3.50, category: 'Tacos', emoji: '🌮', available: true, description: 'Grilled chorizo with black beans, onions, salsa, coriander & guacamole' },
-  { id: 10, name: 'Rellena', price: 3.50, category: 'Tacos', emoji: '🌮', available: true, description: 'Fried black pudding with beans, onion & chilli. Topped with coriander and pickled red onion' },
-  { id: 11, name: 'Chicken Fajita', price: 3.50, category: 'Tacos', emoji: '🌮', available: true, description: 'Chicken, peppers & onion with black beans. Topped with salsa, guac & coriander' },
-  { id: 12, name: 'Haggis', price: 3.50, category: 'Tacos', emoji: '🌮', available: true, description: 'Haggis with beans, onion & chilli. Topped with coriander and pickled red onion' },
-  { id: 13, name: 'Pescado', price: 3.50, category: 'Tacos', emoji: '🌮', available: true, description: 'Battered cod with guacamole & coriander. Topped with red cabbage & mango chilli salsa' },
-  { id: 14, name: 'Dorados', price: 3.50, category: 'Tacos', emoji: '🌮', available: true, description: 'Crispy rolled tortillas filled with chicken, topped with salsa, lettuce and feta' },
-  { id: 15, name: 'Dorados Papa', price: 3.50, category: 'Tacos', emoji: '🌮', available: true, description: 'Crispy rolled tortillas filled with potato, topped with salsa, lettuce and feta' },
-  { id: 16, name: 'Nopal', price: 3.50, category: 'Tacos', emoji: '🌮', available: true, description: 'Cactus, black beans & onion, topped with tomato salsa and crumbled feta' },
-  { id: 17, name: 'Frijol', price: 3.50, category: 'Tacos', emoji: '🌮', available: true, description: 'Black beans with fried plantain served with tomato salsa, feta & coriander' },
-  { id: 18, name: 'Verde', price: 3.50, category: 'Tacos', emoji: '🌮', available: true, description: 'Courgette & sweetcorn fried with garlic, served with tomato salsa and crumbled feta' },
-  { id: 19, name: 'Fajita', price: 3.50, category: 'Tacos', emoji: '🌮', available: true, description: 'Mushrooms, peppers & onion with black beans. Topped with salsa, feta & coriander' },
-
-  // SPECIAL TACOS
-  { id: 20, name: 'Carne Asada', price: 4.50, category: 'Special Tacos', emoji: '⭐', available: true, description: 'Diced rump steak with peppers and red onion. Served on black beans, topped with chimichurri sauce & coriander' },
-  { id: 21, name: 'Camaron', price: 4.50, category: 'Special Tacos', emoji: '🦐', available: true, description: 'Prawns with chorizo, peppers and red onion. Served on black beans, topped with tomato salsa, coriander & guacamole' },
-  { id: 22, name: 'Pulpos', price: 4.50, category: 'Special Tacos', emoji: '🐙', available: true, description: 'Chargrilled octopus, cooked with peppers and red onion. Served on grilled potato with garlic & coriander' },
-
-  // BURRITOS
-  { id: 23, name: 'Regular Burrito', price: 8.00, category: 'Burritos', emoji: '🌯', available: true, description: 'Choose any filling from the taco menu! With black beans, lettuce, pico de gallo, & guacamole. Topped with salsa, feta and coriander.' },
-  { id: 24, name: 'Special Burrito', price: 10.00, category: 'Burritos', emoji: '🌯', available: true, description: 'Choose any filling from the special tacos menu! With black beans, lettuce, pico de gallo, & guacamole. Topped with salsa, feta and coriander.' },
-  { id: 25, name: 'Add Mozzarella', price: 1.00, category: 'Burritos', emoji: '🧀', available: true, description: 'Add extra cheese to any burrito' },
-
-  // SIDES & SALSAS
-  { id: 26, name: 'Skinny Fries', price: 3.50, category: 'Sides', emoji: '🍟', available: true, description: 'Thin cut fries' },
-  { id: 27, name: 'Pico de Gallo', price: 0.00, category: 'Sides', emoji: '🍅', available: true, description: 'Diced tomato, onion and chilli - FREE!' },
-  { id: 28, name: 'Green Chili', price: 0.00, category: 'Sides', emoji: '🌶️', available: true, description: 'Homemade green chili salsa - HOT! - FREE!' },
-  { id: 29, name: 'Pineapple Habanero', price: 0.00, category: 'Sides', emoji: '🍍', available: true, description: 'Pineapple sauce with habanero chili - HOT! - FREE!' },
-  { id: 30, name: 'Scotch Bonnet', price: 0.00, category: 'Sides', emoji: '🔥', available: true, description: 'Homemade spicy salsa made with scotch bonnet chilies - VERY HOT! - FREE!' },
-
-  // DRINKS
-  { id: 31, name: 'Pink Paloma', price: 3.75, category: 'Drinks', emoji: '🍹', available: true, description: 'An alcohol-free version of our refreshing cocktail. Tangy lime juice and grapefruit soda, with a splash of grenadine' },
-  { id: 32, name: 'Coco-Nought', price: 3.75, category: 'Drinks', emoji: '🥥', available: true, description: 'Coconut, pineapple juice and milk, blended into a creamy, sweet, alcohol-free treat!' },
-  { id: 33, name: 'Corona', price: 3.80, category: 'Drinks', emoji: '🍺', available: true, description: 'Mexican beer' },
-  { id: 34, name: 'Modelo', price: 4.00, category: 'Drinks', emoji: '🍺', available: true, description: 'Rich, full-flavoured Pilsner style Lager. Crisp and refreshing. 355ml' },
-  { id: 35, name: 'Pacifico', price: 4.00, category: 'Drinks', emoji: '🍺', available: true, description: 'Pilsner style Lager from the Pacific Ocean city of Mazatlán. 355ml' },
-  { id: 36, name: 'Dos Equis', price: 4.00, category: 'Drinks', emoji: '🍺', available: true, description: '"Two X\'s". German brewing heritage with the spirit of Mexican traditions. 355ml' },
-];
-
-const categories = ['All', 'Snacks', 'Tacos', 'Special Tacos', 'Burritos', 'Sides', 'Drinks'];
+// NOTE: Mexican menu items are now loaded dynamically from backend
+// See DatabaseService.getMexicanMenuFallback() for the data structure
 
 // Define ExportedMenuItemCard outside of POSScreen for export
 const ExportedMenuItemCard = ({
@@ -175,6 +126,11 @@ const POSScreen: React.FC = () => {
   const [showSumUpTest, setShowSumUpTest] = useState(false);
   const [serviceChargeDebugInfo, setServiceChargeDebugInfo] = useState('');
   const [searchQuery, setSearchQuery] = useState(''); // State for search query
+  
+  // Dynamic menu state
+  const [dynamicMenuItems, setDynamicMenuItems] = useState<MenuItem[]>([]);
+  const [dynamicCategories, setDynamicCategories] = useState<string[]>([]);
+  const [menuLoading, setMenuLoading] = useState(true);
 
   // Debug showSumUpPayment state changes
   useEffect(() => {
@@ -233,6 +189,45 @@ const POSScreen: React.FC = () => {
     return () => {
       unsubscribe();
     };
+  }, []);
+
+  // Load dynamic menu data
+  useEffect(() => {
+    const loadMenuData = async () => {
+      try {
+        setMenuLoading(true);
+        const dataService = DataService.getInstance();
+        
+        // Load menu items and categories in parallel
+        const [menuItems, categories] = await Promise.all([
+          dataService.getMenuItems(),
+          dataService.getMenuCategories()
+        ]);
+        
+        setDynamicMenuItems(menuItems);
+        
+        // Extract category names for the UI
+        const categoryNames = ['All', ...categories.map(cat => cat.name).filter(name => name !== 'All')];
+        setDynamicCategories(categoryNames);
+        
+        console.log('✅ Dynamic menu loaded:', { 
+          itemCount: menuItems.length, 
+          categories: categoryNames 
+        });
+        
+      } catch (error) {
+        console.error('❌ Failed to load dynamic menu:', error);
+        
+        // Fallback to hardcoded menu to prevent app breaking
+        setDynamicMenuItems(menuItems);
+        setDynamicCategories(categories);
+        
+      } finally {
+        setMenuLoading(false);
+      }
+    };
+
+    loadMenuData();
   }, []);
 
   // Calculate taxes and fees with error tracking
@@ -342,7 +337,7 @@ const POSScreen: React.FC = () => {
     }
   };
 
-  const filteredItems = menuItems
+  const filteredItems = dynamicMenuItems
     .filter(item => selectedCategory === 'All' || item.category === selectedCategory)
     .filter(item =>
       searchQuery
@@ -636,7 +631,7 @@ const POSScreen: React.FC = () => {
   };
 
   const CartItem = ({ item }: { item: OrderItem }) => {
-    const menuItem = menuItems.find(mi => mi.id === item.id);
+    const menuItem = dynamicMenuItems.find(mi => mi.id === item.id);
     return (
       <View style={styles.cartItem}>
         <View style={styles.cartItemInfo}>
@@ -758,7 +753,7 @@ const POSScreen: React.FC = () => {
               onSearchChange={setSearchQuery}
               style={styles.searchBubbleStyle} // Added style for potential adjustments
             />
-            {categories.map((category) => (
+            {dynamicCategories.map((category) => (
               <TouchableOpacity
                 key={category}
                 style={[
@@ -778,16 +773,22 @@ const POSScreen: React.FC = () => {
           </ScrollView>
 
           {/* Menu Grid */}
-          <FlatList
-            data={filteredItems}
-            renderItem={({ item }) => <MenuItemCard item={item} />}
-            keyExtractor={(item) => item.id.toString()}
-            numColumns={isTablet ? 4 : 3}
-            columnWrapperStyle={styles.menuRow}
-            contentContainerStyle={styles.menuGrid}
-            showsVerticalScrollIndicator={false}
-            testID="menu-flat-list" // Added testID
-          />
+          {menuLoading ? (
+            <View style={styles.loadingContainer}>
+              <Text style={styles.loadingText}>Loading menu...</Text>
+            </View>
+          ) : (
+            <FlatList
+              data={filteredItems}
+              renderItem={({ item }) => <MenuItemCard item={item} />}
+              keyExtractor={(item) => item.id.toString()}
+              numColumns={isTablet ? 4 : 3}
+              columnWrapperStyle={styles.menuRow}
+              contentContainerStyle={styles.menuGrid}
+              showsVerticalScrollIndicator={false}
+              testID="menu-flat-list" // Added testID
+            />
+          )}
         </View>
 
       {/* Cart Modal */}
@@ -936,7 +937,7 @@ const POSScreen: React.FC = () => {
               <View style={styles.orderSummary}>
                 <Text style={styles.orderSummaryTitle}>Order Summary</Text>
                 {cart.map((item) => {
-                  const menuItem = menuItems.find(mi => mi.id === item.id);
+                  const menuItem = dynamicMenuItems.find(mi => mi.id === item.id);
                   return (
                     <View key={item.id} style={styles.orderSummaryItem}>
                       <View style={styles.orderSummaryItemHeader}>
@@ -1771,6 +1772,17 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   searchBubbleStyle: {
     marginRight: 8,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  loadingText: {
+    fontSize: 16,
+    color: theme.colors.lightGray,
+    textAlign: 'center',
   },
 });
 

@@ -68,6 +68,15 @@ echo "🗄️ Running database migrations..."
 $DOCKER_COMPOSE exec backend alembic revision --autogenerate -m "Initial migration"
 $DOCKER_COMPOSE exec backend alembic upgrade head
 
+# Seed database with production-like data
+echo "🌱 Seeding database with production-like data..."
+$DOCKER_COMPOSE exec backend python scripts/seed_database.py --force
+if [ $? -eq 0 ]; then
+    echo "✅ Database seeded successfully"
+else
+    echo "⚠️  Database seeding failed (non-critical)"
+fi
+
 # Test backend API
 echo "🌐 Testing backend API..."
 sleep 5
