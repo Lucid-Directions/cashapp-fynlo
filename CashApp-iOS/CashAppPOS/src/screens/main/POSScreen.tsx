@@ -218,9 +218,9 @@ const POSScreen: React.FC = () => {
       } catch (error) {
         console.error('❌ Failed to load dynamic menu:', error);
         
-        // Fallback to hardcoded menu to prevent app breaking
-        setDynamicMenuItems(menuItems);
-        setDynamicCategories(categories);
+        // Set empty arrays to prevent crashes - no fallback data in production
+        setDynamicMenuItems([]);
+        setDynamicCategories(['All']);
         
       } finally {
         setMenuLoading(false);

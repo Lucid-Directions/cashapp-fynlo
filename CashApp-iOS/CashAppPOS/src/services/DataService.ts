@@ -663,7 +663,7 @@ class DataService {
         // Transform API data to match frontend SalesData[] interface
         if (salesData && !Array.isArray(salesData)) {
           // Convert API format to SalesData array format
-          const transformedData = this.transformApiToSalesData(salesData, period);
+          const transformedData = this.transformApiDataToArray(salesData, period);
           console.log('✅ API sales data transformed for frontend');
           return transformedData;
         } else if (Array.isArray(salesData)) {
@@ -679,6 +679,37 @@ class DataService {
     } catch (error) {
       console.error('❌ Failed to fetch sales data from API:', error);
       throw error; // No fallback - API must work for production readiness
+    }
+  }
+
+  /**
+   * Transform API response data to SalesData array format
+   * Handles various API response formats and converts to frontend interface
+   */
+  private transformApiDataToArray(apiData: any, period: string): any[] {
+    try {
+      // If API returns object with sales data, extract it
+      if (apiData && typeof apiData === 'object') {
+        // Check for common API response patterns
+        if (apiData.sales_data && Array.isArray(apiData.sales_data)) {
+          return apiData.sales_data;
+        }
+        if (apiData.sales && Array.isArray(apiData.sales)) {
+          return apiData.sales;
+        }
+        if (apiData.data && Array.isArray(apiData.data)) {
+          return apiData.data;
+        }
+        
+        // Convert single object to array format
+        return [apiData];
+      }
+      
+      // Return empty array if no valid data
+      return [];
+    } catch (error) {
+      console.error('❌ Error transforming API data:', error);
+      return [];
     }
   }
 

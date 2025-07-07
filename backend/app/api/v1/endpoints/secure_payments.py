@@ -2,6 +2,7 @@
 Secure Payment API Endpoints
 Handles payment processing with comprehensive security measures
 """
+import uuid
 from typing import Dict, Any, Optional, List
 from decimal import Decimal
 from datetime import datetime

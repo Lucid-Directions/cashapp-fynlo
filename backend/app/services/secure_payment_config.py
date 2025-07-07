@@ -51,16 +51,31 @@ class SecurePaymentConfigService:
         # Get encryption key from environment
         encryption_key = os.environ.get('PAYMENT_CONFIG_ENCRYPTION_KEY')
         if not encryption_key:
-            # In development, generate a key (should be stored securely in production)
+            # Use a fixed development key to prevent data loss
             if os.environ.get('ENVIRONMENT', 'development') == 'development':
-                encryption_key = Fernet.generate_key().decode()
-                print(f"WARNING: Generated development encryption key. Set PAYMENT_CONFIG_ENCRYPTION_KEY in production!")
+                # Fixed development key - prevents losing encrypted data on restart
+                encryption_key = "8J5AOuMMykQkzj6EU5Z8QgPYLE1Aye4OuIjUER2b8w0="
+                print(f"WARNING: Using fixed development encryption key. Set PAYMENT_CONFIG_ENCRYPTION_KEY in production!")
             else:
                 raise ValueError("PAYMENT_CONFIG_ENCRYPTION_KEY environment variable not set")
         
-        # Ensure key is bytes
+        # Handle both string and bytes format
         if isinstance(encryption_key, str):
-            encryption_key = encryption_key.encode()
+            try:
+                # Try to decode as base64 first (Fernet key format)
+                import base64
+                base64.b64decode(encryption_key)
+                encryption_key = encryption_key.encode()
+            except Exception:
+                # If not base64, assume it's already a raw string that needs encoding
+                encryption_key = encryption_key.encode()
+        elif isinstance(encryption_key, bytes):
+            # Already bytes, check if it's a valid Fernet key
+            try:
+                Fernet(encryption_key)
+            except Exception:
+                # Invalid key, try to decode as string first
+                encryption_key = encryption_key.decode().encode()
             
         self.cipher = Fernet(encryption_key)
     

@@ -19,16 +19,14 @@ services:
         value: "8000" # App Platform will map this to 80/443 externally
       - key: API_RELOAD
         value: "false"
-      # VPC SECURE DATABASE CONNECTION (Private Network)
+      # VPC SECURE DATABASE CONNECTION (Configure in App Platform UI)
       - key: DATABASE_URL
-        value: "postgresql://doadmin:AVNS_DKOJkLvWZuR3j-QO1zW@private-fynlo-pos-db-do-user-23457625-0.i.db.ondigitalocean.com:25060/defaultdb?sslmode=require"
         scope: RUN_AND_BUILD_TIME
-        type: SECRET # Mark as secret for security
-      # VPC SECURE REDIS CONNECTION (Private Network)
+        type: SECRET # Set value in DigitalOcean App Platform dashboard
+      # VPC SECURE REDIS CONNECTION (Configure in App Platform UI)
       - key: REDIS_URL
-        value: "rediss://default:AVNS_ZSfCiU1eo6lTVbr410O@private-fynlo-pos-cache-do-user-23457625-0.i.db.ondigitalocean.com:25061"
         scope: RUN_AND_BUILD_TIME
-        type: SECRET # Mark as secret for security
+        type: SECRET # Set value in DigitalOcean App Platform dashboard
       # Add any other non-secret environment variables from your .env file here
       # For example:
       # - key: SOME_OTHER_CONFIG
@@ -63,11 +61,10 @@ jobs:
     run_command: alembic upgrade head
     # Environment variables for the job (needs database access)
     envs:
-      # VPC SECURE DATABASE CONNECTION for migrations
+      # VPC SECURE DATABASE CONNECTION for migrations (Configure in App Platform UI)
       - key: DATABASE_URL
-        value: "postgresql://doadmin:AVNS_DKOJkLvWZuR3j-QO1zW@private-fynlo-pos-db-do-user-23457625-0.i.db.ondigitalocean.com:25060/defaultdb?sslmode=require"
         scope: RUN_TIME
-        type: SECRET
+        type: SECRET # Set value in DigitalOcean App Platform dashboard
     instance_size_slug: basic-xxs # Migrations usually don't need large instances
 
 # Optional: Define databases, static sites, etc.
