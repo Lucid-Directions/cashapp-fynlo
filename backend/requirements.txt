@@ -46,6 +46,12 @@ python-json-logger==2.0.7
 # Validation Dependencies - Required for core validation
 jsonschema==4.21.1
 
+# HTTP Client Dependencies - Required for payment providers
+aiohttp==3.9.1
+
+# Template Engine & Email - Required for email service
+jinja2==3.1.4
+aiosmtplib==3.0.2
 # Development Dependencies - Moved to requirements-dev.txt
 # pytest==7.4.3
 # pytest-asyncio==0.21.1  
