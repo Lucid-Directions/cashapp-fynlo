@@ -5,7 +5,7 @@ region: lon # London region, as specified for the database
 # Define the services
 services:
   - name: api
-    # Use Docker for consistent build environment
+    # Force Docker build by specifying dockerfile_path
     dockerfile_path: Dockerfile
     source_dir: backend
     github:
