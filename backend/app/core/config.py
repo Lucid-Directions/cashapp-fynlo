@@ -4,7 +4,8 @@ Configuration settings for Fynlo POS Backend
 
 import os
 from pydantic_settings import BaseSettings
-from typing import Optional, List
+from pydantic import field_validator
+from typing import Optional, List, Any
 from dotenv import load_dotenv
 
 # Determine the environment and load the appropriate .env file
@@ -76,6 +77,23 @@ class Settings(BaseSettings):
     
     # CORS
     PRODUCTION_ALLOWED_ORIGINS: list[str] = ["https://your-production-frontend.com"] # TODO: Update with actual frontend domain
+    
+    @field_validator('DEBUG', 'ERROR_DETAIL_ENABLED', mode='before')
+    @classmethod
+    def parse_boolean(cls, v: Any) -> bool:
+        """Parse boolean values from environment variables that might be strings"""
+        if isinstance(v, bool):
+            return v
+        if isinstance(v, str):
+            # Remove quotes if present and normalize
+            v = v.strip().strip('"').strip("'").lower()
+            if v in ('true', '1', 'yes', 'on'):
+                return True
+            elif v in ('false', '0', 'no', 'off', ''):
+                return False
+            else:
+                raise ValueError(f"Invalid boolean value: {v}")
+        return bool(v)
     
     class Config:
         case_sensitive = True
