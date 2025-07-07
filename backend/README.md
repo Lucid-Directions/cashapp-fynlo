@@ -105,7 +105,36 @@ A modern, hardware-free restaurant management backend built with FastAPI, Postgr
    alembic upgrade head
    ```
 
-6. **Start the Server**
+6. **Seed Database (Recommended for Development)**
+   ```bash
+   # For development and testing, seed with production-like data
+   ./scripts/run_seed.sh
+   
+   # Or run the master seed script directly:
+   python scripts/seed_database.py
+   
+   # Force reseed (clears existing data):
+   python scripts/seed_database.py --force
+   ```
+   
+   This creates realistic production-like data:
+   - **Platform**: Fynlo POS Platform with admin account
+   - **Restaurant**: Casa Estrella Mexican Cuisine
+   - **Staff**: 8 employees (manager, chefs, servers, cashier, bartender)
+   - **Customers**: 10 regular customer profiles
+   - **Menu**: 30+ authentic Mexican dishes across 7 categories
+   - **Orders**: 90 days of realistic transaction history
+   - **Payments**: Mix of card (60%), cash (25%), QR (15%)
+   - **Inventory**: Stock items and suppliers
+   - **Schedules**: 2 weeks of employee schedules
+   - **Reports**: Daily analytics data
+   
+   Default login credentials:
+   - Platform Admin: `admin@fynlo.com` / `FynloPlatform2025!`
+   - Restaurant Owner: `carlos@casaestrella.co.uk` / `CasaEstrella2025!`
+   - Manager: `maria@casaestrella.co.uk` / `Manager2025!`
+
+7. **Start the Server**
    ```bash
    uvicorn app.main:app --reload
    ```

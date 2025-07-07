@@ -48,9 +48,6 @@ const MainTabNavigator: React.FC = () => {
             case 'Home':
               iconName = 'dashboard';
               break;
-            case 'Orders':
-              iconName = 'receipt';
-              break;
             default:
               iconName = 'dashboard';
           }
@@ -80,13 +77,6 @@ const MainTabNavigator: React.FC = () => {
         component={HomeHubScreen}
         options={{
           tabBarLabel: 'Hub',
-        }}
-      />
-      <Tab.Screen
-        name="Orders"
-        component={OrdersScreen}
-        options={{
-          tabBarLabel: 'Orders',
         }}
       />
     </Tab.Navigator>

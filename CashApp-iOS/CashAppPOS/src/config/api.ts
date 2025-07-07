@@ -1,14 +1,17 @@
 /**
  * API Configuration - Centralized network settings
  * 
- * IMPORTANT: Uses LAN IP for physical device testing
- * Physical devices cannot access Mac's localhost (127.0.0.1)
+ * PRODUCTION: Uses DigitalOcean App Platform backend
+ * DEVELOPMENT: Uses LAN IP for physical device testing
  */
 
 // Get the current environment
 const isDevelopment = __DEV__;
 
-// Mac's LAN IP address for device testing - Updated to current network
+// DigitalOcean App Platform backend URL (Production)
+const PRODUCTION_API_URL = 'https://fynlo-pos-backend-d9x7p.ondigitalocean.app';
+
+// Mac's LAN IP address for device testing (Development only)
 const MAC_LAN_IP = '192.168.0.109';
 
 // Determine if running on simulator or device
@@ -22,13 +25,16 @@ const isSimulator = __DEV__ && (
 
 // Dynamic API URL based on environment
 const getBaseURL = () => {
-  if (isSimulator) {
-    // Simulator can access localhost
-    return 'http://localhost:8000';
-  } else {
-    // Physical device needs LAN IP
-    return `http://${MAC_LAN_IP}:8000`;
-  }
+  // FORCE PRODUCTION MODE: Always use DigitalOcean App Platform for production readiness testing
+  // This ensures we test the real production backend instead of localhost
+  return PRODUCTION_API_URL;
+  
+  // Development fallback (commented out for production testing)
+  // if (isSimulator) {
+  //   return 'http://localhost:8000';
+  // } else {
+  //   return `http://${MAC_LAN_IP}:8000`;
+  // }
 };
 
 // API Configuration
@@ -59,7 +65,7 @@ export const API_CONFIG = {
   
   // Platform endpoints
   PLATFORM_ENDPOINTS: {
-    SERVICE_CHARGE: '/platform/settings/platform/service-charge',
+    SERVICE_CHARGE: '/platform/settings/service-charge',
     PAYMENT_METHODS: '/platform/settings/payment-methods',
     SETTINGS: '/platform/settings',
   },

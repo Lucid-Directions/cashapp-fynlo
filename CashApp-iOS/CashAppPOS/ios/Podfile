@@ -1,3 +1,4 @@
+
 require File.join(File.dirname(`node --print "require.resolve('react-native/package.json')"`), "scripts/react_native_pods")
 require File.join(File.dirname(`node --print "require.resolve('@react-native-community/cli-platform-ios/package.json')"`), "native_modules")
 
@@ -216,14 +217,54 @@ SCRIPT
         if config.build_settings['OTHER_LDFLAGS']
           # Remove duplicate -lc++ flags and deprecated linker flags
           if config.build_settings['OTHER_LDFLAGS'].is_a?(Array)
-            config.build_settings['OTHER_LDFLAGS'] = config.build_settings['OTHER_LDFLAGS'].uniq.reject { |flag| flag == '-ld_classic' }
+            # Remove duplicates and ensure only one -lc++ flag
+            flags = config.build_settings['OTHER_LDFLAGS'].uniq.reject { |flag| flag == '-ld_classic' }
+            # Remove all -lc++ flags first, then add one back
+            flags = flags.reject { |flag| flag == '-lc++' }
+            flags << '-lc++' unless flags.include?('-lc++')
+            config.build_settings['OTHER_LDFLAGS'] = flags
           elsif config.build_settings['OTHER_LDFLAGS'].is_a?(String)
-            config.build_settings['OTHER_LDFLAGS'] = config.build_settings['OTHER_LDFLAGS'].gsub('-ld_classic', '').gsub(/(-lc\+\+\s*){2,}/, '-lc++ ')
+            # Clean up string format
+            ldflags = config.build_settings['OTHER_LDFLAGS']
+            ldflags = ldflags.gsub('-ld_classic', '').strip
+            # Remove duplicate -lc++ flags
+            ldflags = ldflags.gsub(/(-lc\+\+\s*){2,}/, '-lc++ ')
+            # Ensure there's exactly one -lc++ flag
+            unless ldflags.include?('-lc++')
+              ldflags += ' -lc++'
+            end
+            config.build_settings['OTHER_LDFLAGS'] = ldflags.strip
           end
+        else
+          # Initialize OTHER_LDFLAGS if it doesn't exist
+          config.build_settings['OTHER_LDFLAGS'] = ['-lc++']
         end
+        
+        # Additional check to remove system-level duplicate flags
+        config.build_settings.delete('LD_CLASSIC')
+        config.build_settings['LD_DYLIB_INSTALL_NAME'] = nil if config.build_settings['LD_DYLIB_INSTALL_NAME'] == ''
         
         # Fix Swift standard libraries embedding warning for static libraries
         if target.respond_to?(:product_type) && target.product_type == 'com.apple.product-type.library.static'
+          config.build_settings['ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES'] = 'NO'
+        end
+        
+        # Also fix for Pod targets that are static libraries
+        if target.name.start_with?('Pods-') || target.name.include?('Pod')
+          config.build_settings['ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES'] = 'NO'
+        end
+        
+        # Specific fix for Pods-CashAppPOS target
+        if target.name == 'Pods-CashAppPOS'
+          config.build_settings['ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES'] = 'NO'
+        end
+        
+        # Comprehensive fix for Swift standard libraries warning
+        # Only app targets should embed Swift standard libraries
+        if target.respond_to?(:product_type) && target.product_type != 'com.apple.product-type.application'
+          config.build_settings['ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES'] = 'NO'
+        elsif !target.respond_to?(:product_type)
+          # For targets without product_type (like aggregate targets), disable embedding
           config.build_settings['ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES'] = 'NO'
         end
         

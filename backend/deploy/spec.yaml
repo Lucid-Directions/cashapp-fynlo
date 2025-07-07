@@ -5,13 +5,12 @@ region: lon # London region, as specified for the database
 # Define the services
 services:
   - name: api
-    # Build from Dockerfile
+    # Use Docker for consistent build environment
     dockerfile_path: backend/Dockerfile
     source_dir: ./
     github:
-      # Replace with your actual repo and branch
-      repo: <YOUR_GITHUB_USERNAME_OR_ORG>/<YOUR_REPO_NAME>
-      branch: main # Or your deployment branch
+      repo: Lucid-Directions/cashapp-fynlo
+      branch: main
     # Environment variables
     envs:
       - key: API_HOST
@@ -20,12 +19,16 @@ services:
         value: "8000" # App Platform will map this to 80/443 externally
       - key: API_RELOAD
         value: "false"
+      # VPC SECURE DATABASE CONNECTION (Private Network)
       - key: DATABASE_URL
+        value: "postgresql://doadmin:AVNS_DKOJkLvWZuR3j-QO1zW@private-fynlo-pos-db-do-user-23457625-0.i.db.ondigitalocean.com:25060/defaultdb?sslmode=require"
         scope: RUN_AND_BUILD_TIME
-        type: SECRET # Mark as secret, value to be set in App Platform UI
+        type: SECRET # Mark as secret for security
+      # VPC SECURE REDIS CONNECTION (Private Network)
       - key: REDIS_URL
+        value: "rediss://default:AVNS_ZSfCiU1eo6lTVbr410O@private-fynlo-pos-cache-do-user-23457625-0.i.db.ondigitalocean.com:25061"
         scope: RUN_AND_BUILD_TIME
-        type: SECRET # Mark as secret, value to be set in App Platform UI
+        type: SECRET # Mark as secret for security
       # Add any other non-secret environment variables from your .env file here
       # For example:
       # - key: SOME_OTHER_CONFIG
@@ -50,21 +53,21 @@ services:
 jobs:
   - name: migrate
     kind: PRE_DEPLOY # Run before deploying the 'api' service
-    # Build from Dockerfile (same as api service)
+    # Use same Docker setup as main service
     dockerfile_path: backend/Dockerfile
     source_dir: ./
     github:
-      # Replace with your actual repo and branch
-      repo: <YOUR_GITHUB_USERNAME_OR_ORG>/<YOUR_REPO_NAME>
-      branch: main # Or your deployment branch
+      repo: Lucid-Directions/cashapp-fynlo
+      branch: main
     # Command to run for migrations
     run_command: alembic upgrade head
     # Environment variables for the job (needs database access)
     envs:
+      # VPC SECURE DATABASE CONNECTION for migrations
       - key: DATABASE_URL
+        value: "postgresql://doadmin:AVNS_DKOJkLvWZuR3j-QO1zW@private-fynlo-pos-db-do-user-23457625-0.i.db.ondigitalocean.com:25060/defaultdb?sslmode=require"
         scope: RUN_TIME
         type: SECRET
-      # Add any other envs required by alembic, if they are different from the main service
     instance_size_slug: basic-xxs # Migrations usually don't need large instances
 
 # Optional: Define databases, static sites, etc.

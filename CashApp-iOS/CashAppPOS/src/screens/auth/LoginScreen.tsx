@@ -15,8 +15,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
-import useAppStore from '../../store/useAppStore';
-import DatabaseService from '../../services/DatabaseService';
+import { useAuth } from '../../contexts/AuthContext';
 import Logo from '../../components/Logo';
 import SimpleTextInput from '../../components/inputs/SimpleTextInput';
 
@@ -37,52 +36,31 @@ const Colors = {
 
 const LoginScreen: React.FC = () => {
   const navigation = useNavigation();
-  const { setUser, setSession, setLoading } = useAppStore();
+  const { signIn, isLoading: authLoading } = useAuth();
   
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = async () => {
-    if (!username.trim() || !password.trim()) {
+  const handleLogin = async (quickUsername?: string, quickPassword?: string) => {
+    const loginUsername = quickUsername || username;
+    const loginPassword = quickPassword || password;
+    
+    if (!loginUsername.trim() || !loginPassword.trim()) {
       Alert.alert('Error', 'Please enter both username and password');
       return;
     }
 
     setIsLoading(true);
-    setLoading(true);
 
     try {
-      const dbService = DatabaseService.getInstance();
-      const loginSuccess = await dbService.login(username.trim(), password);
-
-      if (loginSuccess) {
-        // Mock user data - replace with actual user data from API
-        const userData = {
-          id: 1,
-          name: username,
-          email: `${username}@fynlo.com`,
-          role: 'cashier' as const,
-          isActive: true,
-        };
-
-        // Mock session data - replace with actual session data from API
-        const sessionData = {
-          id: 1,
-          userId: userData.id,
-          userName: userData.name,
-          startTime: new Date(),
-          isActive: true,
-          startingCash: 0,
-          totalSales: 0,
-          ordersCount: 0,
-        };
-
-        setUser(userData);
-        setSession(sessionData);
-        
-        // Navigation will happen automatically due to AppNavigator logic
+      console.log('🚀 Attempting login with:', loginUsername);
+      const success = await signIn(loginUsername.trim(), loginPassword);
+      
+      if (success) {
+        console.log('✅ Login successful, navigation will happen automatically');
+        // Navigation happens automatically via AppNavigator
       } else {
         Alert.alert('Login Failed', 'Invalid username or password');
       }
@@ -91,12 +69,22 @@ const LoginScreen: React.FC = () => {
       Alert.alert('Error', 'An error occurred during login. Please try again.');
     } finally {
       setIsLoading(false);
-      setLoading(false);
     }
   };
 
   const handleForgotPassword = () => {
     navigation.navigate('ForgotPassword' as never);
+  };
+
+  const handleQuickSignIn = async (username: string, password: string) => {
+    if (isLoading) return;
+    
+    console.log('🚀 Quick sign-in attempt:', username);
+    setUsername(username);
+    setPassword(password);
+    
+    // Use the same login logic as manual login
+    await handleLogin(username, password);
   };
 
   return (
@@ -163,7 +151,7 @@ const LoginScreen: React.FC = () => {
               onPress={handleLogin}
               disabled={isLoading}
             >
-              {isLoading ? (
+              {(isLoading || authLoading) ? (
                 <Text style={styles.loginButtonText}>Signing In...</Text>
               ) : (
                 <>
@@ -178,6 +166,44 @@ const LoginScreen: React.FC = () => {
               <Text style={styles.demoTitle}>Demo Credentials:</Text>
               <Text style={styles.demoText}>Username: demo</Text>
               <Text style={styles.demoText}>Password: demo123</Text>
+            </View>
+
+            {/* Quick Sign-In Buttons (Development Only) */}
+            <View style={styles.quickSignInSection}>
+              <Text style={styles.quickSignInTitle}>Quick Sign-In (Testing)</Text>
+              <View style={styles.quickButtonsGrid}>
+                <TouchableOpacity
+                  style={[styles.quickButton, { backgroundColor: '#00A651' }]}
+                  onPress={() => handleQuickSignIn('restaurant_owner', 'owner123')}
+                >
+                  <Text style={styles.quickButtonTitle}>Restaurant Owner</Text>
+                  <Text style={styles.quickButtonSubtitle}>Maria Rodriguez</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity
+                  style={[styles.quickButton, { backgroundColor: '#0066CC' }]}
+                  onPress={() => handleQuickSignIn('platform_owner', 'platform123')}
+                >
+                  <Text style={styles.quickButtonTitle}>Platform Owner</Text>
+                  <Text style={styles.quickButtonSubtitle}>Alex Thompson</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity
+                  style={[styles.quickButton, { backgroundColor: '#FF6B35' }]}
+                  onPress={() => handleQuickSignIn('manager', 'manager123')}
+                >
+                  <Text style={styles.quickButtonTitle}>Manager</Text>
+                  <Text style={styles.quickButtonSubtitle}>Sofia Hernandez</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity
+                  style={[styles.quickButton, { backgroundColor: '#8E44AD' }]}
+                  onPress={() => handleQuickSignIn('cashier', 'cashier123')}
+                >
+                  <Text style={styles.quickButtonTitle}>Cashier</Text>
+                  <Text style={styles.quickButtonSubtitle}>Carlos Garcia</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
 
@@ -314,6 +340,50 @@ const styles = StyleSheet.create({
   footerText: {
     fontSize: 14,
     color: Colors.lightText,
+    textAlign: 'center',
+  },
+  quickSignInSection: {
+    marginTop: 20,
+    paddingTop: 20,
+    borderTopWidth: 1,
+    borderTopColor: Colors.lightGray,
+  },
+  quickSignInTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.text,
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  quickButtonsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  quickButton: {
+    width: '48%',
+    backgroundColor: Colors.primary,
+    borderRadius: 8,
+    padding: 12,
+    alignItems: 'center',
+    marginBottom: 8,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+  },
+  quickButtonTitle: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: Colors.white,
+    textAlign: 'center',
+    marginBottom: 2,
+  },
+  quickButtonSubtitle: {
+    fontSize: 10,
+    color: 'rgba(255, 255, 255, 0.8)',
     textAlign: 'center',
   },
 });

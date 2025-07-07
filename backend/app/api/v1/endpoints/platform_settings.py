@@ -79,7 +79,7 @@ async def get_platform_settings(
 
 # Service Charge Specific Endpoints
 @router.get(
-    "/platform/service-charge",
+    "/service-charge",
     response_model=ServiceChargeConfigResponse,
     summary="Get service charge configuration",
     tags=["Platform Settings", "Service Charge"]
@@ -98,7 +98,7 @@ async def get_service_charge_configuration(
         raise HTTPException(status_code=500, detail="Failed to retrieve service charge configuration")
 
 @router.put(
-    "/platform/service-charge",
+    "/service-charge",
     response_model=ServiceChargeConfigResponse,
     summary="Update service charge configuration",
     tags=["Platform Settings", "Service Charge"]

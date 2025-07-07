@@ -144,18 +144,112 @@ class DatabaseService {
       }
       return false;
     } catch (error) {
-      console.error('Login failed:', error);
-      return false;
+      console.error('Login failed, trying test users:', error);
+      
+      // Fallback to test users for development/testing
+      return await this.authenticateTestUser(username, password);
     }
+  }
+
+  // Test user authentication - will be removed before production
+  private async authenticateTestUser(username: string, password: string): Promise<boolean> {
+    const testUsers = this.getTestUsers();
+    const user = testUsers.find(u => 
+      (u.username === username || u.email === username) && u.password === password
+    );
+
+    if (user) {
+      // Generate a mock JWT token for the session
+      const mockToken = `mock_jwt_${user.id}_${Date.now()}`;
+      await this.saveAuthToken(mockToken);
+      
+      // Store user data for the session
+      await AsyncStorage.setItem('user_data', JSON.stringify({
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        permissions: user.permissions,
+        restaurant: user.restaurant,
+        platform: user.platform
+      }));
+
+      console.log('✅ Test user authenticated:', user.name, `(${user.role})`);
+      return true;
+    }
+
+    console.log('❌ Invalid test user credentials');
+    return false;
+  }
+
+  // Get current authenticated user data
+  async getCurrentUser(): Promise<any> {
+    try {
+      const userData = await AsyncStorage.getItem('user_data');
+      return userData ? JSON.parse(userData) : null;
+    } catch (error) {
+      console.error('Failed to get current user:', error);
+      return null;
+    }
+  }
+
+  // Test users data - will be replaced with real backend users
+  private getTestUsers() {
+    return [
+      {
+        id: 1,
+        username: "restaurant_owner",
+        email: "owner@mexicanrestaurant.com",
+        password: "owner123",
+        role: "restaurant_owner",
+        name: "Maria Rodriguez",
+        restaurant: { id: 1, name: "Authentic Mexican Cuisine", slug: "mexican-pilot-001" },
+        permissions: ["manage_menu", "view_reports", "manage_employees", "manage_settings", "process_orders", "handle_payments"]
+      },
+      {
+        id: 2,
+        username: "platform_owner",
+        email: "admin@fynlo.com",
+        password: "platform123",
+        role: "platform_owner", 
+        name: "Alex Thompson",
+        platform: { id: 1, name: "Fynlo POS Platform" },
+        permissions: ["manage_all_restaurants", "view_all_analytics", "manage_platform_settings", "configure_payment_fees", "manage_service_charges", "access_admin_panel"]
+      },
+      {
+        id: 3,
+        username: "manager",
+        email: "sofia@mexicanrestaurant.com",
+        password: "manager123",
+        role: "manager",
+        name: "Sofia Hernandez",
+        restaurant: { id: 1, name: "Authentic Mexican Cuisine", slug: "mexican-pilot-001" },
+        permissions: ["process_orders", "handle_payments", "view_reports", "manage_employees", "view_menu", "access_pos"]
+      },
+      {
+        id: 4,
+        username: "cashier",
+        email: "carlos@mexicanrestaurant.com", 
+        password: "cashier123",
+        role: "employee",
+        name: "Carlos Garcia",
+        restaurant: { id: 1, name: "Authentic Mexican Cuisine", slug: "mexican-pilot-001" },
+        permissions: ["process_orders", "handle_payments", "view_menu", "access_pos"]
+      }
+    ];
   }
 
   async logout(): Promise<void> {
     try {
       await this.apiRequest('/api/v1/auth/logout', { method: 'POST' });
-      this.authToken = null;
-      await AsyncStorage.removeItem('auth_token');
     } catch (error) {
-      console.error('Logout failed:', error);
+      console.log('API logout failed (expected for test users):', error);
+    } finally {
+      // Always clear local session data
+      this.authToken = null;
+      await AsyncStorage.multiRemove(['auth_token', 'user_data']);
+      console.log('✅ User session cleared');
     }
   }
 
@@ -199,6 +293,100 @@ class DatabaseService {
       console.error('Failed to fetch categories:', error);
       throw error; // Re-throw the error
     }
+  }
+
+  // Menu operations - Get menu items formatted for POS screen
+  async getMenuItems(): Promise<any[]> {
+    try {
+      const response = await this.apiRequest('/api/v1/menu/items', {
+        method: 'GET',
+      });
+      
+      return response.data || this.getMexicanMenuFallback();
+    } catch (error) {
+      console.error('Failed to fetch menu items:', error);
+      // Return Mexican menu as fallback to preserve functionality
+      return this.getMexicanMenuFallback();
+    }
+  }
+
+  async getMenuCategories(): Promise<any[]> {
+    try {
+      const response = await this.apiRequest('/api/v1/menu/categories', {
+        method: 'GET',
+      });
+      
+      return response.data || this.getMexicanCategoriesFallback();
+    } catch (error) {
+      console.error('Failed to fetch menu categories:', error);
+      // Return Mexican categories as fallback
+      return this.getMexicanCategoriesFallback();
+    }
+  }
+
+  // Fallback Mexican menu data - preserves existing functionality
+  private getMexicanMenuFallback(): any[] {
+    return [
+      // SNACKS
+      { id: 1, name: 'Nachos', price: 5.00, category: 'Snacks', emoji: '🧀', available: true, description: 'Homemade corn tortilla chips with black beans, tomato salsa, pico de gallo, feta, guac & coriander' },
+      { id: 2, name: 'Quesadillas', price: 5.50, category: 'Snacks', emoji: '🫓', available: true, description: 'Folded flour tortilla filled with mozzarella, topped with tomato salsa, feta & coriander' },
+      { id: 3, name: 'Chorizo Quesadilla', price: 5.50, category: 'Snacks', emoji: '🌶️', available: true, description: 'Folded flour tortilla filled with chorizo & mozzarella. Topped with tomato salsa, feta & coriander' },
+      { id: 4, name: 'Chicken Quesadilla', price: 5.50, category: 'Snacks', emoji: '🐔', available: true, description: 'Folded flour tortilla filled with chicken, peppers, onion & mozzarella. Topped with salsa, feta & coriander' },
+      { id: 5, name: 'Tostada', price: 6.50, category: 'Snacks', emoji: '🥙', available: true, description: 'Crispy tortillas with black beans filled with chicken or any topping, served with salsa, lettuce and feta' },
+      
+      // TACOS
+      { id: 6, name: 'Carnitas', price: 3.50, category: 'Tacos', emoji: '🌮', available: true, description: 'Slow cooked pork, served with onion, coriander, salsa, guacamole & coriander' },
+      { id: 7, name: 'Cochinita', price: 3.50, category: 'Tacos', emoji: '🌮', available: true, description: 'Marinated pulled pork served with pickle red onion' },
+      { id: 8, name: 'Barbacoa de Res', price: 3.50, category: 'Tacos', emoji: '🌮', available: true, description: 'Juicy pulled beef topped with onion, guacamole & coriander' },
+      { id: 9, name: 'Chorizo', price: 3.50, category: 'Tacos', emoji: '🌮', available: true, description: 'Grilled chorizo with black beans, onions, salsa, coriander & guacamole' },
+      { id: 10, name: 'Rellena', price: 3.50, category: 'Tacos', emoji: '🌮', available: true, description: 'Fried black pudding with beans, onion & chilli. Topped with coriander and pickled red onion' },
+      { id: 11, name: 'Chicken Fajita', price: 3.50, category: 'Tacos', emoji: '🌮', available: true, description: 'Chicken, peppers & onion with black beans. Topped with salsa, guac & coriander' },
+      { id: 12, name: 'Haggis', price: 3.50, category: 'Tacos', emoji: '🌮', available: true, description: 'Haggis with beans, onion & chilli. Topped with coriander and pickled red onion' },
+      { id: 13, name: 'Pescado', price: 3.50, category: 'Tacos', emoji: '🌮', available: true, description: 'Battered cod with guacamole & coriander. Topped with red cabbage & mango chilli salsa' },
+      { id: 14, name: 'Dorados', price: 3.50, category: 'Tacos', emoji: '🌮', available: true, description: 'Crispy rolled tortillas filled with chicken, topped with salsa, lettuce and feta' },
+      { id: 15, name: 'Dorados Papa', price: 3.50, category: 'Tacos', emoji: '🌮', available: true, description: 'Crispy rolled tortillas filled with potato, topped with salsa, lettuce and feta' },
+      { id: 16, name: 'Nopal', price: 3.50, category: 'Tacos', emoji: '🌮', available: true, description: 'Cactus, black beans & onion, topped with tomato salsa and crumbled feta' },
+      { id: 17, name: 'Frijol', price: 3.50, category: 'Tacos', emoji: '🌮', available: true, description: 'Black beans with fried plantain served with tomato salsa, feta & coriander' },
+      { id: 18, name: 'Verde', price: 3.50, category: 'Tacos', emoji: '🌮', available: true, description: 'Courgette & sweetcorn fried with garlic, served with tomato salsa and crumbled feta' },
+      { id: 19, name: 'Fajita', price: 3.50, category: 'Tacos', emoji: '🌮', available: true, description: 'Mushrooms, peppers & onion with black beans. Topped with salsa, feta & coriander' },
+      
+      // SPECIAL TACOS
+      { id: 20, name: 'Carne Asada', price: 4.50, category: 'Special Tacos', emoji: '⭐', available: true, description: 'Diced rump steak with peppers and red onion. Served on black beans, topped with chimichurri sauce & coriander' },
+      { id: 21, name: 'Camaron', price: 4.50, category: 'Special Tacos', emoji: '🦐', available: true, description: 'Prawns with chorizo, peppers and red onion. Served on black beans, topped with tomato salsa, coriander & guacamole' },
+      { id: 22, name: 'Pulpos', price: 4.50, category: 'Special Tacos', emoji: '🐙', available: true, description: 'Chargrilled octopus, cooked with peppers and red onion. Served on grilled potato with garlic & coriander' },
+      
+      // BURRITOS
+      { id: 23, name: 'Regular Burrito', price: 8.00, category: 'Burritos', emoji: '🌯', available: true, description: 'Choose any filling from the taco menu! With black beans, lettuce, pico de gallo, & guacamole. Topped with salsa, feta and coriander.' },
+      { id: 24, name: 'Special Burrito', price: 10.00, category: 'Burritos', emoji: '🌯', available: true, description: 'Choose any filling from the special tacos menu! With black beans, lettuce, pico de gallo, & guacamole. Topped with salsa, feta and coriander.' },
+      { id: 25, name: 'Add Mozzarella', price: 1.00, category: 'Burritos', emoji: '🧀', available: true, description: 'Add extra cheese to any burrito' },
+      
+      // SIDES & SALSAS
+      { id: 26, name: 'Skinny Fries', price: 3.50, category: 'Sides', emoji: '🍟', available: true, description: 'Thin cut fries' },
+      { id: 27, name: 'Pico de Gallo', price: 0.00, category: 'Sides', emoji: '🍅', available: true, description: 'Diced tomato, onion and chilli - FREE!' },
+      { id: 28, name: 'Green Chili', price: 0.00, category: 'Sides', emoji: '🌶️', available: true, description: 'Homemade green chili salsa - HOT! - FREE!' },
+      { id: 29, name: 'Pineapple Habanero', price: 0.00, category: 'Sides', emoji: '🍍', available: true, description: 'Pineapple sauce with habanero chili - HOT! - FREE!' },
+      { id: 30, name: 'Scotch Bonnet', price: 0.00, category: 'Sides', emoji: '🔥', available: true, description: 'Homemade spicy salsa made with scotch bonnet chilies - VERY HOT! - FREE!' },
+      
+      // DRINKS
+      { id: 31, name: 'Pink Paloma', price: 3.75, category: 'Drinks', emoji: '🍹', available: true, description: 'An alcohol-free version of our refreshing cocktail. Tangy lime juice and grapefruit soda, with a splash of grenadine' },
+      { id: 32, name: 'Coco-Nought', price: 3.75, category: 'Drinks', emoji: '🥥', available: true, description: 'Coconut, pineapple juice and milk, blended into a creamy, sweet, alcohol-free treat!' },
+      { id: 33, name: 'Corona', price: 3.80, category: 'Drinks', emoji: '🍺', available: true, description: 'Mexican beer' },
+      { id: 34, name: 'Modelo', price: 4.00, category: 'Drinks', emoji: '🍺', available: true, description: 'Rich, full-flavoured Pilsner style Lager. Crisp and refreshing. 355ml' },
+      { id: 35, name: 'Pacifico', price: 4.00, category: 'Drinks', emoji: '🍺', available: true, description: 'Pilsner style Lager from the Pacific Ocean city of Mazatlán. 355ml' },
+      { id: 36, name: 'Dos Equis', price: 4.00, category: 'Drinks', emoji: '🍺', available: true, description: '"Two X\'s". German brewing heritage with the spirit of Mexican traditions. 355ml' },
+    ];
+  }
+
+  private getMexicanCategoriesFallback(): any[] {
+    return [
+      { id: 1, name: 'All', active: true },
+      { id: 2, name: 'Snacks', active: true },
+      { id: 3, name: 'Tacos', active: true },
+      { id: 4, name: 'Special Tacos', active: true },
+      { id: 5, name: 'Burritos', active: true },
+      { id: 6, name: 'Sides', active: true },
+      { id: 7, name: 'Drinks', active: true },
+    ];
   }
 
   // POS Session operations
@@ -455,10 +643,17 @@ class DatabaseService {
   // TODO(real API): Implement actual API calls for these methods in DatabaseService
 
   async getCustomers(): Promise<any[]> {
-    // Example: return this.apiRequest('/api/v1/customers');
-    console.warn('DatabaseService.getCustomers is a stub and not implemented.');
-    throw new Error('DatabaseService.getCustomers not implemented yet');
-    // return Promise.resolve([]); // Or throw error if DataService should handle the stubbing
+    try {
+      const response = await this.apiRequest('/api/v1/customers', {
+        method: 'GET',
+      });
+      
+      return response.data || [];
+    } catch (error) {
+      console.error('Failed to fetch customers:', error);
+      // Return empty array instead of throwing to prevent app crashes
+      return [];
+    }
   }
 
   async getInventory(): Promise<any[]> {
@@ -467,310 +662,59 @@ class DatabaseService {
   }
 
   async getInventoryItems(): Promise<any[]> {
-    // Return mock inventory data for Casa Estrella Mexican Cuisine
-    return Promise.resolve([
-      {
-        id: 1,
-        itemId: 1,
-        sku: 'BEEF-001',
-        name: 'Ground Beef',
-        category: 'Meat',
-        currentStock: 25.5,
-        unit: 'kg',
-        minThreshold: 10,
-        maxThreshold: 50,
-        unitCost: 8.50,
-        supplier: 'Premium Meats Ltd',
-        lastRestocked: new Date('2025-07-01'),
-        status: 'in_stock',
-        turnoverRate: 2.5,
-        wastage: 0.05
-      },
-      {
-        id: 2,
-        itemId: 2,
-        sku: 'CHICK-001',
-        name: 'Chicken Breast',
-        category: 'Meat',
-        currentStock: 18.2,
-        unit: 'kg',
-        minThreshold: 15,
-        maxThreshold: 40,
-        unitCost: 6.75,
-        supplier: 'Premium Meats Ltd',
-        lastRestocked: new Date('2025-06-30'),
-        status: 'in_stock',
-        turnoverRate: 3.0,
-        wastage: 0.03
-      },
-      {
-        id: 3,
-        itemId: 3,
-        sku: 'TORT-001',
-        name: 'Flour Tortillas',
-        category: 'Bread',
-        currentStock: 120,
-        unit: 'pieces',
-        minThreshold: 50,
-        maxThreshold: 200,
-        unitCost: 0.25,
-        supplier: 'Mexican Foods Co',
-        lastRestocked: new Date('2025-07-02'),
-        status: 'in_stock',
-        turnoverRate: 4.5,
-        wastage: 0.02
-      },
-      {
-        id: 4,
-        itemId: 4,
-        sku: 'CHES-001',
-        name: 'Cheddar Cheese',
-        category: 'Dairy',
-        currentStock: 8.5,
-        unit: 'kg',
-        minThreshold: 10,
-        maxThreshold: 25,
-        unitCost: 12.00,
-        supplier: 'Dairy Fresh Ltd',
-        lastRestocked: new Date('2025-06-28'),
-        status: 'low_stock',
-        turnoverRate: 2.8,
-        wastage: 0.04
-      },
-      {
-        id: 5,
-        itemId: 5,
-        sku: 'TOM-001',
-        name: 'Fresh Tomatoes',
-        category: 'Vegetables',
-        currentStock: 12.8,
-        unit: 'kg',
-        minThreshold: 8,
-        maxThreshold: 30,
-        unitCost: 3.20,
-        supplier: 'Garden Fresh Produce',
-        lastRestocked: new Date('2025-07-01'),
-        status: 'in_stock',
-        turnoverRate: 5.0,
-        wastage: 0.08
-      },
-      {
-        id: 6,
-        itemId: 6,
-        sku: 'ONI-001',
-        name: 'Yellow Onions',
-        category: 'Vegetables',
-        currentStock: 15.5,
-        unit: 'kg',
-        minThreshold: 10,
-        maxThreshold: 25,
-        unitCost: 1.80,
-        supplier: 'Garden Fresh Produce',
-        lastRestocked: new Date('2025-06-30'),
-        status: 'in_stock',
-        turnoverRate: 3.5,
-        wastage: 0.06
-      },
-      {
-        id: 7,
-        itemId: 7,
-        sku: 'AVD-001',
-        name: 'Avocados',
-        category: 'Vegetables',
-        currentStock: 4.2,
-        unit: 'kg',
-        minThreshold: 5,
-        maxThreshold: 15,
-        unitCost: 4.50,
-        supplier: 'Garden Fresh Produce',
-        lastRestocked: new Date('2025-06-29'),
-        status: 'low_stock',
-        turnoverRate: 4.2,
-        wastage: 0.1
-      },
-      {
-        id: 8,
-        itemId: 8,
-        sku: 'BEE-001',
-        name: 'Corona Beer',
-        category: 'Beverages',
-        currentStock: 48,
-        unit: 'bottles',
-        minThreshold: 24,
-        maxThreshold: 120,
-        unitCost: 2.50,
-        supplier: 'Beverages Direct',
-        lastRestocked: new Date('2025-07-01'),
-        status: 'in_stock',
-        turnoverRate: 6.0,
-        wastage: 0.01
-      },
-      {
-        id: 9,
-        itemId: 9,
-        sku: 'TEQ-001',
-        name: 'Tequila Blanco',
-        category: 'Spirits',
-        currentStock: 6,
-        unit: 'bottles',
-        minThreshold: 4,
-        maxThreshold: 12,
-        unitCost: 35.00,
-        supplier: 'Spirits & More',
-        lastRestocked: new Date('2025-06-25'),
-        status: 'in_stock',
-        turnoverRate: 1.5,
-        wastage: 0.02
-      },
-      {
-        id: 10,
-        itemId: 10,
-        sku: 'CHU-001',
-        name: 'Churro Mix',
-        category: 'Desserts',
-        currentStock: 2.5,
-        unit: 'kg',
-        minThreshold: 3,
-        maxThreshold: 10,
-        unitCost: 8.75,
-        supplier: 'Mexican Foods Co',
-        lastRestocked: new Date('2025-06-20'),
-        status: 'low_stock',
-        turnoverRate: 2.2,
-        wastage: 0.05
-      }
-    ]);
+    try {
+      const response = await this.apiRequest('/api/v1/inventory', {
+        method: 'GET',
+      });
+      
+      return response.data || [];
+    } catch (error) {
+      console.error('Failed to fetch inventory items:', error);
+      throw new Error('Backend connection required for inventory data');
+    }
   }
 
   async getEmployees(): Promise<any[]> {
-    // Return mock employee data for Casa Estrella Mexican Cuisine
-    return Promise.resolve([
-      {
-        id: 1,
-        name: 'Maria Garcia',
-        firstName: 'Maria',
-        lastName: 'Garcia',
-        role: 'server',
-        email: 'maria.garcia@casaestrella.com',
-        phone: '+44 7700 900001',
-        hourlyRate: 12.50,
-        hoursWorked: 38,
-        totalSales: 2450.75,
-        isActive: true,
-        hireDate: '2023-01-15',
-        performanceScore: 4.7
-      },
-      {
-        id: 2,
-        name: 'Jose Rodriguez',
-        firstName: 'Jose',
-        lastName: 'Rodriguez',
-        role: 'chef',
-        email: 'jose.rodriguez@casaestrella.com',
-        phone: '+44 7700 900002',
-        hourlyRate: 18.00,
-        hoursWorked: 42,
-        totalSales: 0, // Chefs don't directly handle sales
-        isActive: true,
-        hireDate: '2022-08-20',
-        performanceScore: 4.9
-      },
-      {
-        id: 3,
-        name: 'Ana Martinez',
-        firstName: 'Ana',
-        lastName: 'Martinez',
-        role: 'bartender',
-        email: 'ana.martinez@casaestrella.com',
-        phone: '+44 7700 900003',
-        hourlyRate: 14.00,
-        hoursWorked: 35,
-        totalSales: 1875.30,
-        isActive: true,
-        hireDate: '2023-03-10',
-        performanceScore: 4.5
-      },
-      {
-        id: 4,
-        name: 'Carlos Lopez',
-        firstName: 'Carlos',
-        lastName: 'Lopez',
-        role: 'server',
-        email: 'carlos.lopez@casaestrella.com',
-        phone: '+44 7700 900004',
-        hourlyRate: 12.50,
-        hoursWorked: 32,
-        totalSales: 1920.50,
-        isActive: true,
-        hireDate: '2023-06-01',
-        performanceScore: 4.3
-      },
-      {
-        id: 5,
-        name: 'Sofia Hernandez',
-        firstName: 'Sofia',
-        lastName: 'Hernandez',
-        role: 'cashier',
-        email: 'sofia.hernandez@casaestrella.com',
-        phone: '+44 7700 900005',
-        hourlyRate: 11.50,
-        hoursWorked: 40,
-        totalSales: 3150.25,
-        isActive: true,
-        hireDate: '2023-04-15',
-        performanceScore: 4.8
-      }
-    ]);
+    try {
+      const response = await this.apiRequest('/api/v1/employees', {
+        method: 'GET',
+      });
+      
+      return response.data || [];
+    } catch (error) {
+      console.error('Failed to fetch employees from API:', error);
+      throw new Error('Backend connection required for employee data');
+    }
   }
 
   async getWeekSchedule(weekStart: Date, employees: any[]): Promise<any | null> {
-    // Return mock weekly schedule data
-    const mockSchedule = {
-      weekStart: weekStart,
-      shifts: [
-        // Monday
-        { employeeId: 1, employeeName: 'Maria Garcia', day: 'Monday', startTime: '09:00', endTime: '17:00', role: 'server' },
-        { employeeId: 2, employeeName: 'Jose Rodriguez', day: 'Monday', startTime: '08:00', endTime: '16:00', role: 'chef' },
-        { employeeId: 3, employeeName: 'Ana Martinez', day: 'Monday', startTime: '15:00', endTime: '23:00', role: 'bartender' },
-        
-        // Tuesday
-        { employeeId: 1, employeeName: 'Maria Garcia', day: 'Tuesday', startTime: '09:00', endTime: '17:00', role: 'server' },
-        { employeeId: 4, employeeName: 'Carlos Lopez', day: 'Tuesday', startTime: '11:00', endTime: '19:00', role: 'server' },
-        { employeeId: 2, employeeName: 'Jose Rodriguez', day: 'Tuesday', startTime: '08:00', endTime: '16:00', role: 'chef' },
-        
-        // Wednesday
-        { employeeId: 5, employeeName: 'Sofia Hernandez', day: 'Wednesday', startTime: '10:00', endTime: '18:00', role: 'cashier' },
-        { employeeId: 2, employeeName: 'Jose Rodriguez', day: 'Wednesday', startTime: '08:00', endTime: '16:00', role: 'chef' },
-        { employeeId: 3, employeeName: 'Ana Martinez', day: 'Wednesday', startTime: '15:00', endTime: '23:00', role: 'bartender' },
-        
-        // Thursday
-        { employeeId: 1, employeeName: 'Maria Garcia', day: 'Thursday', startTime: '09:00', endTime: '17:00', role: 'server' },
-        { employeeId: 4, employeeName: 'Carlos Lopez', day: 'Thursday', startTime: '11:00', endTime: '19:00', role: 'server' },
-        { employeeId: 2, employeeName: 'Jose Rodriguez', day: 'Thursday', startTime: '08:00', endTime: '16:00', role: 'chef' },
-        { employeeId: 3, employeeName: 'Ana Martinez', day: 'Thursday', startTime: '15:00', endTime: '23:00', role: 'bartender' },
-        
-        // Friday (Busy day - more staff)
-        { employeeId: 1, employeeName: 'Maria Garcia', day: 'Friday', startTime: '09:00', endTime: '17:00', role: 'server' },
-        { employeeId: 4, employeeName: 'Carlos Lopez', day: 'Friday', startTime: '11:00', endTime: '19:00', role: 'server' },
-        { employeeId: 2, employeeName: 'Jose Rodriguez', day: 'Friday', startTime: '08:00', endTime: '16:00', role: 'chef' },
-        { employeeId: 3, employeeName: 'Ana Martinez', day: 'Friday', startTime: '15:00', endTime: '23:00', role: 'bartender' },
-        { employeeId: 5, employeeName: 'Sofia Hernandez', day: 'Friday', startTime: '10:00', endTime: '18:00', role: 'cashier' },
-        
-        // Saturday (Busiest day - full staff)
-        { employeeId: 1, employeeName: 'Maria Garcia', day: 'Saturday', startTime: '10:00', endTime: '18:00', role: 'server' },
-        { employeeId: 4, employeeName: 'Carlos Lopez', day: 'Saturday', startTime: '10:00', endTime: '18:00', role: 'server' },
-        { employeeId: 2, employeeName: 'Jose Rodriguez', day: 'Saturday', startTime: '08:00', endTime: '16:00', role: 'chef' },
-        { employeeId: 3, employeeName: 'Ana Martinez', day: 'Saturday', startTime: '14:00', endTime: '22:00', role: 'bartender' },
-        { employeeId: 5, employeeName: 'Sofia Hernandez', day: 'Saturday', startTime: '09:00', endTime: '17:00', role: 'cashier' },
-        
-        // Sunday (Moderate day)
-        { employeeId: 1, employeeName: 'Maria Garcia', day: 'Sunday', startTime: '11:00', endTime: '19:00', role: 'server' },
-        { employeeId: 2, employeeName: 'Jose Rodriguez', day: 'Sunday', startTime: '10:00', endTime: '18:00', role: 'chef' },
-        { employeeId: 3, employeeName: 'Ana Martinez', day: 'Sunday', startTime: '16:00', endTime: '22:00', role: 'bartender' }
-      ]
-    };
-    
-    return Promise.resolve(mockSchedule);
+    try {
+      const response = await this.apiRequest('/api/v1/schedule/week', {
+        method: 'POST',
+        body: JSON.stringify({
+          week_start: weekStart.toISOString(),
+          employee_ids: employees.map(emp => emp.id)
+        }),
+      });
+      
+      return response.data || null;
+    } catch (error) {
+      console.error('Failed to fetch week schedule:', error);
+      throw new Error('Backend connection required for schedule data');
+    }
+  }
+
+  async getOrders(limit: number = 100): Promise<any[]> {
+    try {
+      const response = await this.apiRequest(`/api/v1/orders?limit=${limit}`, {
+        method: 'GET',
+      });
+      
+      return response.data || [];
+    } catch (error) {
+      console.error('Failed to fetch orders:', error);
+      return [];
+    }
   }
 
   async getOrdersByDateRange(dateRange: string): Promise<any[]> { // Renamed to match DataService call intent
@@ -799,47 +743,16 @@ class DatabaseService {
   }
 
   async getAnalyticsDashboard(): Promise<any | null> {
-    // Return comprehensive analytics dashboard data
-    return Promise.resolve({
-      todaySummary: { 
-        totalSales: 2847.50, 
-        transactions: 127, 
-        averageOrder: 22.42,
-        totalRevenue: 2847.50,
-        totalOrders: 127,
-        averageOrderValue: 22.42
-      },
-      weeklyLabor: { 
-        totalActualHours: 248, 
-        totalLaborCost: 3720.00, 
-        efficiency: 87.5,
-        scheduledHours: 280,
-        overtimeHours: 8
-      },
-      topItemsToday: [
-        { name: 'Chicken Tacos', quantity: 45, revenue: 675.00 },
-        { name: 'Beef Burrito', quantity: 38, revenue: 570.00 },
-        { name: 'Churros', quantity: 32, revenue: 192.00 },
-        { name: 'Margarita', quantity: 28, revenue: 336.00 },
-        { name: 'Quesadilla', quantity: 25, revenue: 375.00 }
-      ],
-      topPerformersToday: [
-        { name: 'Maria Garcia', role: 'Server', orders: 18, sales: 425.50 },
-        { name: 'Jose Rodriguez', role: 'Server', orders: 16, sales: 398.25 },
-        { name: 'Ana Martinez', role: 'Bartender', orders: 12, sales: 286.75 },
-        { name: 'Carlos Lopez', role: 'Server', orders: 14, sales: 315.80 },
-        { name: 'Sofia Hernandez', role: 'Server', orders: 11, sales: 267.90 }
-      ],
-      salesTrend: [
-        { period: 'Mon', sales: 1850.25 },
-        { period: 'Tue', sales: 2124.50 },
-        { period: 'Wed', sales: 1976.75 },
-        { period: 'Thu', sales: 2398.00 },
-        { period: 'Fri', sales: 3247.50 },
-        { period: 'Sat', sales: 3856.25 },
-        { period: 'Sun', sales: 2847.50 }
-      ]
-    });
+    try {
+      const response = await this.apiRequest('/api/v1/analytics/dashboard', {
+        method: 'GET',
+      });
+      
+      return response.data || null;
+    } catch (error) {
+      console.error('Failed to fetch analytics dashboard:', error);
+      throw new Error('Backend connection required for analytics dashboard data');
+    }
   }
 
   async getUserProfile(): Promise<any | null> {

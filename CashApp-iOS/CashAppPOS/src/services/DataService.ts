@@ -234,6 +234,45 @@ class DataService {
     return this.db.getCategories();
   }
 
+  // Menu operations - Get complete menu with items and categories
+  async getMenuItems(): Promise<any[]> {
+    // Test menu endpoint in background when in test mode
+    if (this.featureFlags.TEST_API_MODE) {
+      await this.testAPIEndpoint('/api/v1/menu/items');
+    }
+
+    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
+      try {
+        const menuItems = await this.db.getMenuItems();
+        if (menuItems && menuItems.length > 0) {
+          return menuItems;
+        }
+      } catch (error) {
+        console.log('Failed to fetch menu items from API, using mock data');
+      }
+    }
+    return this.db.getMenuItems();
+  }
+
+  async getMenuCategories(): Promise<any[]> {
+    // Test menu categories endpoint in background when in test mode
+    if (this.featureFlags.TEST_API_MODE) {
+      await this.testAPIEndpoint('/api/v1/menu/categories');
+    }
+
+    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
+      try {
+        const categories = await this.db.getMenuCategories();
+        if (categories && categories.length > 0) {
+          return categories;
+        }
+      } catch (error) {
+        console.log('Failed to fetch menu categories from API, using mock data');
+      }
+    }
+    return this.db.getMenuCategories();
+  }
+
   // Order operations
   async createOrder(order: any): Promise<any> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
@@ -448,99 +487,124 @@ class DataService {
   // TODO(real API): Implement actual API calls for these methods
 
   async getCustomers(): Promise<any[]> {
-    console.warn('DataService.getCustomers is a stub and not implemented.');
-    // In a real scenario, this would call this.db.getCustomers() or similar
-    // which in turn makes an API call.
-    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
-      // return this.db.getCustomers();
-      throw new Error('DataService.getCustomers not implemented yet');
+    console.log('🌐 DataService.getCustomers - fetching from API');
+    
+    try {
+      const authToken = await AsyncStorage.getItem('auth_token');
+      const response = await fetch(`${API_CONFIG.FULL_API_URL}/customers`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
+        },
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        const customers = result.data || result;
+        console.log('✅ API customers received:', Array.isArray(customers) ? customers.length : 'not an array');
+        return Array.isArray(customers) ? customers : [];
+      } else {
+        console.error('❌ API error:', response.status, response.statusText);
+        throw new Error(`API error: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('❌ Failed to fetch customers from API:', error);
+      throw error; // No fallback - API must work for production readiness
     }
-    return Promise.resolve([]); // Return empty array for now
   }
 
   async getInventory(): Promise<any[]> {
-    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
-      try {
-        const inventoryItems = await this.db.getInventoryItems();
-        if (inventoryItems && inventoryItems.length > 0) {
-          return inventoryItems;
-        }
-      } catch (error) {
-        console.log('Failed to fetch inventory from API, using mock data');
+    console.log('🌐 DataService.getInventory - fetching from API');
+    
+    try {
+      const inventoryItems = await this.db.getInventoryItems();
+      if (inventoryItems && inventoryItems.length >= 0) { // Allow empty arrays
+        console.log('✅ API inventory received:', inventoryItems.length, 'items');
+        return inventoryItems;
+      } else {
+        throw new Error('Invalid inventory data received from API');
       }
+    } catch (error) {
+      console.error('❌ Failed to fetch inventory from API:', error);
+      throw error; // No fallback - API must work for production readiness
     }
-    // Return mock inventory data
-    return this.db.getInventoryItems();
   }
 
   async getEmployees(): Promise<any[]> {
-    console.log('🔍 DataService.getEmployees called', {
+    console.log('🌐 DataService.getEmployees - fetching from API');
+    
+    try {
+      const authToken = await AsyncStorage.getItem('auth_token');
+      const response = await fetch(`${API_CONFIG.FULL_API_URL}/employees`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
+        },
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        const employees = result.data || result;
+        console.log('✅ API employees received:', Array.isArray(employees) ? employees.length : 'not an array');
+        return Array.isArray(employees) ? employees : [];
+      } else {
+        console.error('❌ API error:', response.status, response.statusText);
+        throw new Error(`API error: ${response.status} - ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error('❌ Failed to fetch employees from API:', error);
+      throw new Error(`Failed to connect to backend: ${error.message}`);
+    }
+  }
+
+  async getWeekSchedule(weekStart: Date, employees: any[]): Promise<any | null> {
+    console.log('🌐 DataService.getWeekSchedule - fetching from API', { weekStart });
+    
+    try {
+      const schedule = await this.db.getWeekSchedule(weekStart, employees);
+      console.log('✅ API schedule received:', schedule?.shifts?.length || 0, 'shifts');
+      return schedule;
+    } catch (error) {
+      console.error('❌ Failed to fetch schedule from API:', error);
+      throw error; // No fallback - API must work for production readiness
+    }
+  }
+
+  async getOrders(dateRange: string): Promise<any[]> {
+    console.log('DataService.getOrders called', {
+      dateRange,
       USE_REAL_API: this.featureFlags.USE_REAL_API,
       isBackendAvailable: this.isBackendAvailable
     });
     
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        console.log('🌐 Attempting to fetch employees from API...');
-        const response = await fetch(`${API_CONFIG.FULL_API_URL}/employees`, {
+        console.log('🌐 Attempting to fetch orders from API...');
+        const authToken = await AsyncStorage.getItem('auth_token');
+        const response = await fetch(`${API_CONFIG.FULL_API_URL}/orders?date_range=${dateRange}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
+            ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
           },
         });
         
         if (response.ok) {
           const result = await response.json();
-          const employees = result.data || result; // Handle both wrapped and unwrapped responses
-          console.log('✅ API employees received:', employees.length);
-          return employees;
+          const orders = result.data || result;
+          console.log('✅ API orders received:', Array.isArray(orders) ? orders.length : 'not an array');
+          return Array.isArray(orders) ? orders : [];
+        } else {
+          console.error('❌ API error:', response.status, response.statusText);
+          throw new Error(`API error: ${response.status}`);
         }
       } catch (error) {
-        console.log('❌ Failed to fetch employees from API, using mock data', error);
+        console.error('❌ Failed to fetch orders from API:', error);
+        throw error; // No fallback - API must work for production readiness
       }
     }
-    
-    // Return mock employee data
-    console.log('🎭 Using mock employee data...');
-    const mockEmployees = await this.db.getEmployees();
-    console.log('📋 Mock employees returned:', mockEmployees?.length || 0);
-    return mockEmployees || [];
-  }
-
-  async getWeekSchedule(weekStart: Date, employees: any[]): Promise<any | null> {
-    console.log('DataService.getWeekSchedule called', {
-      weekStart,
-      USE_REAL_API: this.featureFlags.USE_REAL_API,
-      isBackendAvailable: this.isBackendAvailable
-    });
-    
-    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
-      try {
-        console.log('Attempting to fetch schedule from API...');
-        const schedule = await this.db.getWeekSchedule(weekStart, employees);
-        if (schedule) {
-          console.log('API schedule received');
-          return schedule;
-        }
-      } catch (error) {
-        console.log('Failed to fetch schedule from API, using mock data', error);
-      }
-    }
-    
-    // Return mock schedule data
-    console.log('Using mock schedule data...');
-    const mockSchedule = await this.db.getWeekSchedule(weekStart, employees);
-    console.log('Mock schedule returned:', mockSchedule?.shifts?.length || 0, 'shifts');
-    return mockSchedule;
-  }
-
-  async getOrders(dateRange: string): Promise<any[]> {
-    console.warn('DataService.getOrders is a stub and not implemented.');
-    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
-      // Example: return this.db.getOrdersByDateRange(dateRange);
-      throw new Error('DataService.getOrders not implemented yet');
-    }
-    return Promise.resolve([]);
   }
 
   async getFinancialReportDetail(period: string): Promise<any | null> {
@@ -553,10 +617,12 @@ class DataService {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         console.log('🌐 Attempting to fetch financial data from API...');
+        const authToken = await AsyncStorage.getItem('auth_token');
         const response = await fetch(`${API_CONFIG.FULL_API_URL}/analytics/financial?period=${period}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
+            ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
           },
         });
         
@@ -565,118 +631,55 @@ class DataService {
           const financialData = result.data || result; // Handle both wrapped and unwrapped responses
           console.log('✅ API financial data received');
           return financialData;
+        } else {
+          console.error('❌ API error:', response.status, response.statusText);
+          throw new Error(`API error: ${response.status}`);
         }
       } catch (error) {
-        console.log('❌ Failed to fetch financial data from API, using mock data', error);
+        console.error('❌ Failed to fetch financial data from API:', error);
+        throw error; // No fallback - API must work for production readiness
       }
     }
     
-    // Return comprehensive mock financial data
-    console.log('Using mock financial data for period:', period);
-    const mockFinancialData = {
-      summary: {
-        totalRevenue: 15847.50,
-        totalCosts: 8956.25,
-        grossProfit: 6891.25,
-        netProfit: 4234.75,
-        profitMargin: 26.7
-      },
-      revenue: {
-        foodSales: 12456.75,
-        beverageSales: 2890.50,
-        serviceFees: 500.25,
-        totalRevenue: 15847.50
-      },
-      costs: {
-        costOfGoodsSold: 4782.25,
-        laborCosts: 3456.80,
-        operatingExpenses: 717.20,
-        totalCosts: 8956.25
-      },
-      paymentBreakdown: {
-        cashPayments: 2377.13,
-        cardPayments: 10577.88,
-        qrPayments: 2892.49,
-        totalPayments: 15847.50
-      },
-      taxes: {
-        vatCollected: 2641.25,
-        serviceChargeCollected: 1979.44,
-        totalTaxes: 4620.69
-      },
-      trends: [
-        { date: '2025-01-01', revenue: 2847.50, costs: 1623.45, profit: 1224.05 },
-        { date: '2025-01-02', revenue: 3156.75, costs: 1798.85, profit: 1357.90 },
-        { date: '2025-01-03', revenue: 2734.25, costs: 1556.95, profit: 1177.30 },
-        { date: '2025-01-04', revenue: 3234.80, costs: 1842.34, profit: 1392.46 },
-        { date: '2025-01-05', revenue: 3874.20, costs: 2134.66, profit: 1739.54 }
-      ]
-    };
-    
-    return Promise.resolve(mockFinancialData);
   }
 
-  async getSalesReportDetail(period: string): Promise<any[]> { // Should return SalesData[]
-    console.log('DataService.getSalesReportDetail called', {
-      period,
-      USE_REAL_API: this.featureFlags.USE_REAL_API,
-      isBackendAvailable: this.isBackendAvailable
-    });
+  async getSalesReportDetail(period: string): Promise<any[]> {
+    console.log('🌐 DataService.getSalesReportDetail - fetching from API', { period });
     
-    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
-      try {
-        console.log('🌐 Attempting to fetch sales data from API...');
-        const response = await fetch(`${API_CONFIG.FULL_API_URL}/analytics/sales?period=${period}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
+    try {
+      const authToken = await AsyncStorage.getItem('auth_token');
+      const response = await fetch(`${API_CONFIG.FULL_API_URL}/analytics/sales?timeframe=${period}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
+        },
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        let salesData = result.data || result;
         
-        if (response.ok) {
-          const result = await response.json();
-          const salesData = result.data || result; // Handle both wrapped and unwrapped responses
-          console.log('✅ API sales data received');
+        // Transform API data to match frontend SalesData[] interface
+        if (salesData && !Array.isArray(salesData)) {
+          // Convert API format to SalesData array format
+          const transformedData = this.transformApiToSalesData(salesData, period);
+          console.log('✅ API sales data transformed for frontend');
+          return transformedData;
+        } else if (Array.isArray(salesData)) {
+          console.log('✅ API sales data received in array format');
           return salesData;
+        } else {
+          throw new Error('Invalid sales data format received from API');
         }
-      } catch (error) {
-        console.log('❌ Failed to fetch sales data from API, using mock data', error);
+      } else {
+        console.error('❌ API error:', response.status, response.statusText);
+        throw new Error(`API error: ${response.status}`);
       }
+    } catch (error) {
+      console.error('❌ Failed to fetch sales data from API:', error);
+      throw error; // No fallback - API must work for production readiness
     }
-    
-    // Return mock sales data for the period
-    console.log('Using mock sales data for period:', period);
-    const mockSalesData = [
-      { 
-        date: '2025-01-01', 
-        dailySales: 2847.50, 
-        transactions: 127, 
-        averageOrder: 22.42,
-        cashSales: 450.00,
-        cardSales: 1897.50,
-        qrSales: 500.00
-      },
-      { 
-        date: '2025-01-02', 
-        dailySales: 3156.75, 
-        transactions: 142, 
-        averageOrder: 22.23,
-        cashSales: 520.00,
-        cardSales: 2136.75,
-        qrSales: 500.00
-      },
-      { 
-        date: '2025-01-03', 
-        dailySales: 2734.25, 
-        transactions: 119, 
-        averageOrder: 22.97,
-        cashSales: 380.00,
-        cardSales: 1854.25,
-        qrSales: 500.00
-      }
-    ];
-    
-    return Promise.resolve(mockSalesData);
   }
 
   async getStaffReportDetail(period: string): Promise<any[]> { // Should return StaffMember[]
@@ -689,10 +692,12 @@ class DataService {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         console.log('🌐 Attempting to fetch staff data from API...');
-        const response = await fetch(`${API_CONFIG.FULL_API_URL}/analytics/employees?period=${period}`, {
+        const authToken = await AsyncStorage.getItem('auth_token');
+        const response = await fetch(`${API_CONFIG.FULL_API_URL}/analytics/employees?timeframe=${period}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
+            ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
           },
         });
         
@@ -701,74 +706,16 @@ class DataService {
           const staffData = result.data || result; // Handle both wrapped and unwrapped responses
           console.log('✅ API staff data received');
           return staffData;
+        } else {
+          console.error('❌ API error:', response.status, response.statusText);
+          throw new Error(`API error: ${response.status}`);
         }
       } catch (error) {
-        console.log('❌ Failed to fetch staff data from API, using mock data', error);
+        console.error('❌ Failed to fetch staff data from API:', error);
+        throw error; // No fallback - API must work for production readiness
       }
     }
     
-    // Return mock staff data for the period
-    console.log('Using mock staff data for period:', period);
-    const mockStaffData = [
-      {
-        id: '1',
-        name: 'Maria Garcia',
-        role: 'Server',
-        avatar: '👩‍🍳',
-        totalSales: 2456.75,
-        transactionsHandled: 89,
-        averageOrderValue: 27.60,
-        hoursWorked: 32.5,
-        efficiency: 92,
-        customerRating: 4.8,
-        shiftsCompleted: 6,
-        performance: 'excellent'
-      },
-      {
-        id: '2',
-        name: 'Jose Rodriguez',
-        role: 'Server',
-        avatar: '👨‍🍳',
-        totalSales: 2134.50,
-        transactionsHandled: 76,
-        averageOrderValue: 28.09,
-        hoursWorked: 30.0,
-        efficiency: 88,
-        customerRating: 4.6,
-        shiftsCompleted: 5,
-        performance: 'good'
-      },
-      {
-        id: '3',
-        name: 'Ana Martinez',
-        role: 'Bartender',
-        avatar: '👩‍🍳',
-        totalSales: 1876.25,
-        transactionsHandled: 65,
-        averageOrderValue: 28.86,
-        hoursWorked: 28.0,
-        efficiency: 85,
-        customerRating: 4.7,
-        shiftsCompleted: 5,
-        performance: 'good'
-      },
-      {
-        id: '4',
-        name: 'Carlos Lopez',
-        role: 'Server',
-        avatar: '👨‍🍳',
-        totalSales: 1654.80,
-        transactionsHandled: 58,
-        averageOrderValue: 28.53,
-        hoursWorked: 26.5,
-        efficiency: 82,
-        customerRating: 4.5,
-        shiftsCompleted: 4,
-        performance: 'average'
-      }
-    ];
-    
-    return Promise.resolve(mockStaffData);
   }
 
   async getReportsDashboardData(): Promise<any | null> {
@@ -780,10 +727,12 @@ class DataService {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         console.log('🌐 Attempting to fetch reports from API...');
+        const authToken = await AsyncStorage.getItem('auth_token');
         const response = await fetch(`${API_CONFIG.FULL_API_URL}/analytics/dashboard/mobile`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
+            ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
           },
         });
         
@@ -792,57 +741,15 @@ class DataService {
           const dashboardData = result.data || result; // Handle both wrapped and unwrapped responses
           console.log('✅ API reports received');
           return dashboardData;
+        } else {
+          console.error('❌ API error:', response.status, response.statusText);
+          throw new Error(`API error: ${response.status}`);
         }
       } catch (error) {
-        console.log('❌ Failed to fetch reports dashboard from API, using mock data', error);
+        console.error('❌ Failed to fetch reports dashboard from API:', error);
+        throw error; // No fallback - API must work for production readiness
       }
     }
-    
-    // Return comprehensive mock data for reports dashboard
-    console.log('Using mock reports data...');
-    const mockData = {
-      todaySummary: { 
-        totalSales: 2847.50, 
-        transactions: 127, 
-        averageOrder: 22.42,
-        totalRevenue: 2847.50,
-        totalOrders: 127,
-        averageOrderValue: 22.42
-      },
-      weeklyLabor: { 
-        totalActualHours: 248, 
-        totalLaborCost: 3720.00, 
-        efficiency: 87.5,
-        scheduledHours: 280,
-        overtimeHours: 8
-      },
-      topItemsToday: [
-        { name: 'Chicken Tacos', quantity: 45, revenue: 675.00 },
-        { name: 'Beef Burrito', quantity: 38, revenue: 570.00 },
-        { name: 'Churros', quantity: 32, revenue: 192.00 },
-        { name: 'Margarita', quantity: 28, revenue: 336.00 },
-        { name: 'Quesadilla', quantity: 25, revenue: 375.00 }
-      ],
-      topPerformersToday: [
-        { name: 'Maria Garcia', role: 'Server', orders: 18, sales: 425.50 },
-        { name: 'Jose Rodriguez', role: 'Server', orders: 16, sales: 398.25 },
-        { name: 'Ana Martinez', role: 'Bartender', orders: 12, sales: 286.75 },
-        { name: 'Carlos Lopez', role: 'Server', orders: 14, sales: 315.80 },
-        { name: 'Sofia Hernandez', role: 'Server', orders: 11, sales: 267.90 }
-      ],
-      salesTrend: [
-        { period: 'Mon', sales: 1850.25 },
-        { period: 'Tue', sales: 2124.50 },
-        { period: 'Wed', sales: 1976.75 },
-        { period: 'Thu', sales: 2398.00 },
-        { period: 'Fri', sales: 3247.50 },
-        { period: 'Sat', sales: 3856.25 },
-        { period: 'Sun', sales: 2847.50 }
-      ]
-    };
-    
-    console.log('Returning mock reports data:', Object.keys(mockData));
-    return Promise.resolve(mockData);
   }
 
   async getUserProfile(): Promise<any | null> {
@@ -852,6 +759,63 @@ class DataService {
       throw new Error('DataService.getUserProfile not implemented yet');
     }
     return Promise.resolve({ id: 1, name: 'Default User', email: 'user@example.com', role: 'admin' });
+  }
+
+  /**
+   * Create a new employee (like a real restaurant would do)
+   * This tests the complete flow from frontend → API → database
+   */
+  async createEmployee(employeeData: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone?: string;
+    role: string;
+    hourlyRate?: number;
+    startDate?: string;
+    permissions?: string[];
+  }): Promise<any> {
+    console.log('🌐 DataService.createEmployee - creating employee via API', employeeData);
+    
+    try {
+      const authToken = await AsyncStorage.getItem('auth_token');
+      if (!authToken) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await fetch(`${API_CONFIG.FULL_API_URL}/employees`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({
+          first_name: employeeData.firstName,
+          last_name: employeeData.lastName,
+          email: employeeData.email,
+          phone: employeeData.phone,
+          role: employeeData.role,
+          hourly_rate: employeeData.hourlyRate,
+          start_date: employeeData.startDate,
+          permissions: employeeData.permissions || [],
+          is_active: true,
+        }),
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        const newEmployee = result.data || result;
+        console.log('✅ Employee created successfully:', newEmployee.id);
+        return newEmployee;
+      } else {
+        const errorText = await response.text();
+        console.error('❌ Failed to create employee:', response.status, errorText);
+        throw new Error(`Failed to create employee: ${response.status} - ${errorText}`);
+      }
+    } catch (error) {
+      console.error('❌ Employee creation failed:', error);
+      throw new Error(`Employee creation failed: ${error.message}`);
+    }
   }
 }
 

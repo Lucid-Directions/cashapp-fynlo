@@ -14,8 +14,17 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Colors from '../../constants/Colors'; // Assuming Colors.ts exists in constants
-import { scanReceipt, ScannedItemAPIResponse } from '../../services/InventoryApiService'; // Added
-import { launchCamera, ImagePickerResponse, MediaType } from 'react-native-image-picker';
+// import { scanReceipt, ScannedItemAPIResponse } from '../../services/InventoryApiService'; // Temporarily disabled
+// import { launchCamera, ImagePickerResponse, MediaType } from 'react-native-image-picker'; // Temporarily disabled
+
+// Temporary interfaces to prevent crashes
+interface ScannedItemAPIResponse {
+  name: string;
+  quantity: number;
+  price: number;
+  sku_match?: string | null;
+  raw_text_name?: string | null;
+}
 
 interface ReceiptItem {
   id: string; // Client-side ID for list management
@@ -60,39 +69,98 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
   };
 
   const handleCaptureImage = async () => {
-    // Request camera permission
-    const hasPermission = await requestCameraPermission();
-    if (!hasPermission) {
-      Alert.alert('Permission Required', 'Camera permission is required to scan receipts');
-      return;
-    }
-
-    const options = {
-      mediaType: 'photo' as MediaType,
-      quality: 0.8,
-      includeBase64: true,
-      maxWidth: 1024,
-      maxHeight: 1024,
-    };
-
-    launchCamera(options, (response: ImagePickerResponse) => {
-      if (response.didCancel || response.errorMessage) {
-        console.log('Camera cancelled or error:', response.errorMessage);
+    // For now, show an alert that camera scanning is temporarily disabled
+    // This prevents crashes while the feature is being properly integrated
+    Alert.alert(
+      'Camera Scanning', 
+      'Receipt scanning via camera is currently being integrated. For now, you can manually add items using the + button.',
+      [
+        {
+          text: 'Add Sample Items',
+          onPress: () => {
+            // Add some sample items for testing
+            setParsedItems([
+              { id: '1', name: 'Tomatoes', quantity: '2', price: '3.50', sku: null },
+              { id: '2', name: 'Bread', quantity: '1', price: '2.20', sku: null },
+            ]);
+            setStep('review');
+          }
+        },
+        { text: 'Cancel', style: 'cancel' }
+      ]
+    );
+    
+    // TODO: Implement proper camera integration when react-native-image-picker is configured
+    /*
+    try {
+      // Request camera permission
+      const hasPermission = await requestCameraPermission();
+      if (!hasPermission) {
+        Alert.alert('Permission Required', 'Camera permission is required to scan receipts');
         return;
       }
 
-      if (response.assets && response.assets[0]) {
-        const asset = response.assets[0];
-        setCapturedImage({ uri: asset.uri });
-        setStep('spinning');
+      const options = {
+        mediaType: 'photo' as MediaType,
+        quality: 0.8,
+        includeBase64: true,
+        maxWidth: 1024,
+        maxHeight: 1024,
+      };
 
-        // Process the captured image
-        processReceiptImage(asset.base64 || '');
-      }
-    });
+      launchCamera(options, (response: ImagePickerResponse) => {
+        if (response.didCancel || response.errorMessage) {
+          console.log('Camera cancelled or error:', response.errorMessage);
+          return;
+        }
+
+        if (response.assets && response.assets[0]) {
+          const asset = response.assets[0];
+          setCapturedImage({ uri: asset.uri });
+          setStep('spinning');
+
+          // Process the captured image
+          processReceiptImage(asset.base64 || '');
+        }
+      });
+    } catch (error) {
+      console.error('Camera error:', error);
+      Alert.alert('Camera Error', 'Unable to access camera. Please try again.');
+    }
+    */
   };
 
   const processReceiptImage = async (base64Image: string) => {
+    // Temporarily disabled API call to prevent crashes
+    try {
+      // Simulate processing delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Mock response for testing
+      const mockApiResponse: ScannedItemAPIResponse[] = [
+        { name: 'Scanned Item 1', quantity: 2, price: 5.99, sku_match: null, raw_text_name: 'Item 1' },
+        { name: 'Scanned Item 2', quantity: 1, price: 12.50, sku_match: 'SKU123', raw_text_name: 'Item 2' },
+      ];
+
+      const clientReceiptItems: ReceiptItem[] = mockApiResponse.map((item, index) => ({
+        id: `api-${index}-${Date.now()}`, // Generate a unique ID for local list management
+        name: item.name,
+        quantity: item.quantity.toString(),
+        price: item.price.toFixed(2),
+        sku: item.sku_match,
+        originalName: item.raw_text_name || item.name,
+      }));
+
+      setParsedItems(clientReceiptItems);
+      setStep('review');
+    } catch (error) {
+      console.error('Error scanning receipt via API:', error);
+      Alert.alert('Error Processing Receipt', 'Could not process the receipt. Please try again.');
+      setStep('capture'); // Go back to capture step on error
+    }
+    
+    // TODO: Implement real API call when backend is properly connected
+    /*
     try {
       const apiResponseItems = await scanReceipt(base64Image);
 
@@ -112,6 +180,7 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
       Alert.alert('Error Processing Receipt', error.message || 'Could not process the receipt. Please try again.');
       setStep('capture'); // Go back to capture step on error
     }
+    */
   };
 
   const handleItemChange = (id: string, field: 'name' | 'quantity' | 'price', value: string) => {

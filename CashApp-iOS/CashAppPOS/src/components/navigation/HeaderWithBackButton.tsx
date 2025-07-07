@@ -76,8 +76,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    paddingTop: 60, // Account for status bar
-    minHeight: 100,
+    paddingTop: 48, // Account for status bar
+    minHeight: 56,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: 'rgba(0, 0, 0, 0.1)',
   },
