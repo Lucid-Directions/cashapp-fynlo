@@ -6,8 +6,8 @@ region: lon # London region, as specified for the database
 services:
   - name: api
     # Use Docker for consistent build environment
-    dockerfile_path: backend/Dockerfile
-    source_dir: ./
+    dockerfile_path: Dockerfile
+    source_dir: backend
     github:
       repo: Lucid-Directions/cashapp-fynlo
       branch: main
@@ -52,8 +52,8 @@ jobs:
   - name: migrate
     kind: PRE_DEPLOY # Run before deploying the 'api' service
     # Use same Docker setup as main service
-    dockerfile_path: backend/Dockerfile
-    source_dir: ./
+    dockerfile_path: Dockerfile
+    source_dir: backend
     github:
       repo: Lucid-Directions/cashapp-fynlo
       branch: main
