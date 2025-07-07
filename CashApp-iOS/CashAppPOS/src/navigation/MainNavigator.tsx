@@ -112,6 +112,13 @@ const MainNavigator: React.FC = () => {
         }}
       />
       <Stack.Screen
+        name="Orders"
+        component={OrdersScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
         name="Reports"
         component={ReportsScreen}
         options={{
