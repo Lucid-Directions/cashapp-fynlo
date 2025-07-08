@@ -53,34 +53,43 @@ security = HTTPBearer()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Initialize application on startup"""
+    """Initialize application on startup - SIMPLIFIED FOR DEPLOYMENT"""
     logger.info(f"🚀 Fynlo POS Backend starting in {settings.ENVIRONMENT} mode...")
     logger.info(f"Debug mode: {settings.DEBUG}")
     
-    # Initialize database
-    await init_db()
-    logger.info("✅ Database initialized")
+    # TEMPORARY: Skip database and Redis initialization during deployment
+    # TODO: Add back once DigitalOcean databases are configured
+    try:
+        # Initialize database
+        await init_db()
+        logger.info("✅ Database initialized")
+    except Exception as e:
+        logger.warning(f"⚠️ Database initialization skipped: {e}")
     
-    # Initialize Redis
-    await init_redis() # This now connects the redis_client
-    logger.info("✅ Redis connected")
-
-    # Initialize FastAPI Limiter (depends on Redis being connected)
-    await init_fastapi_limiter()
-    logger.info("✅ Rate limiter initialized")
+    try:
+        # Initialize Redis
+        await init_redis()
+        logger.info("✅ Redis connected")
+        
+        # Initialize FastAPI Limiter (depends on Redis being connected)
+        await init_fastapi_limiter()
+        logger.info("✅ Rate limiter initialized")
+    except Exception as e:
+        logger.warning(f"⚠️ Redis initialization skipped: {e}")
     
-    # WebSocket manager is ready (no initialization needed)
     logger.info("✅ WebSocket manager ready")
-    
-    # Log version middleware configuration
     logger.info("✅ API version middleware enabled (backward compatibility)")
+    logger.info("🎯 Backend startup complete - ready for health checks")
     
     yield
     
     # Cleanup on shutdown
     logger.info("🔄 Shutting down Fynlo POS Backend...")
-    await close_redis() # Ensure Redis client is closed
-    logger.info("✅ Redis client closed.")
+    try:
+        await close_redis()
+        logger.info("✅ Redis client closed.")
+    except:
+        pass
     logger.info("✅ Cleanup complete")
 
 app = FastAPI(
@@ -220,10 +229,12 @@ async def api_version_info():
     )
 
 if __name__ == "__main__":
+    import os
+    port = int(os.environ.get("PORT", 8000))  # Use DigitalOcean's PORT env var
     uvicorn.run(
         "app.main:app",
-        host="0.0.0.0", # Make sure this is configurable if needed for production
-        port=8000, # Make sure this is configurable if needed for production
-        reload=settings.ENVIRONMENT == "development", # Disable reload in production
-        log_level=settings.LOG_LEVEL.lower() # Use log_level from settings
+        host="0.0.0.0",
+        port=port,
+        reload=settings.ENVIRONMENT == "development",
+        log_level=settings.LOG_LEVEL.lower()
     )

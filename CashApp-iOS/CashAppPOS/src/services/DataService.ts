@@ -554,9 +554,10 @@ class DataService {
         throw new Error(`API error: ${response.status} - ${response.statusText}`);
       }
     } catch (error) {
-      console.error('❌ Failed to fetch employees from API, falling back to mock data:', error);
+      console.error('❌ EMPLOYEES API FAILED: Backend unavailable', error);
+      throw new Error('Employee data requires working backend API');
       
-      // Fallback to mock employee data with complete schema
+      // PRODUCTION MODE: No mock fallbacks allowed
       const mockEmployees = [
         {
           id: 1,
@@ -572,6 +573,7 @@ class DataService {
           totalOrders: 185,
           avgOrderValue: 83.35,
           performanceRating: 9.2,
+          performanceScore: 9.2,
           hoursWorked: 160,
         },
         {
@@ -588,6 +590,7 @@ class DataService {
           totalOrders: 142,
           avgOrderValue: 61.62,
           performanceRating: 8.8,
+          performanceScore: 8.8,
           hoursWorked: 155,
         },
         {
@@ -604,6 +607,7 @@ class DataService {
           totalOrders: 167,
           avgOrderValue: 72.46,
           performanceRating: 9.0,
+          performanceScore: 9.0,
           hoursWorked: 162,
         },
         {
@@ -620,6 +624,7 @@ class DataService {
           totalOrders: 98,
           avgOrderValue: 70.31,
           performanceRating: 7.5,
+          performanceScore: 7.5,
           hoursWorked: 120,
         },
       ];
