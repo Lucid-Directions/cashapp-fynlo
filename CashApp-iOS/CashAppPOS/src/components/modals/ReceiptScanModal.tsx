@@ -13,7 +13,7 @@ import {
   Platform,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import Colors from '../../constants/Colors'; // Assuming Colors.ts exists in constants
+import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
 // import { scanReceipt, ScannedItemAPIResponse } from '../../services/InventoryApiService'; // Temporarily disabled
 // import { launchCamera, ImagePickerResponse, MediaType } from 'react-native-image-picker'; // Temporarily disabled
 
@@ -42,6 +42,8 @@ interface ReceiptScanModalProps {
 }
 
 const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, onSubmit }) => {
+  const { theme } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const [step, setStep] = useState<'capture' | 'spinning' | 'review' | 'submitting'>('capture');
   const [capturedImage, setCapturedImage] = useState<any>(null); // Placeholder for image data
   const [parsedItems, setParsedItems] = useState<ReceiptItem[]>([]);
@@ -238,11 +240,11 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
     <View style={styles.stepContainer}>
       <Text style={styles.modalTitle}>Scan Receipt</Text>
       <View style={styles.cameraPreviewPlaceholder}>
-        <Icon name="camera-alt" size={80} color={Colors.lightGray} />
+        <Icon name="camera-alt" size={80} color={theme.colors.lightGray} />
         <Text style={styles.placeholderText}>Camera Preview Area</Text>
       </View>
       <TouchableOpacity style={styles.captureButton} onPress={handleCaptureImage}>
-        <Icon name="camera" size={24} color={Colors.white} />
+        <Icon name="camera" size={24} color={theme.colors.white} />
         <Text style={styles.buttonText}>Capture Receipt</Text>
       </TouchableOpacity>
     </View>
@@ -250,7 +252,7 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
 
   const renderSpinningStep = () => (
     <View style={styles.stepContainer}>
-      <ActivityIndicator size="large" color={Colors.primary} />
+      <ActivityIndicator size="large" color={theme.colors.primary} />
       <Text style={styles.loadingText}>Processing Receipt...</Text>
       <Text style={styles.loadingSubtitle}>Extracting items, please wait.</Text>
     </View>
@@ -285,13 +287,13 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
               />
             </View>
             <TouchableOpacity onPress={() => handleRemoveItem(item.id)} style={styles.deleteButton}>
-              <Icon name="delete" size={24} color={Colors.danger} />
+              <Icon name="delete" size={24} color={theme.colors.danger[500]} />
             </TouchableOpacity>
           </View>
         ))}
       </ScrollView>
       <TouchableOpacity style={styles.addItemButton} onPress={handleAddItem}>
-        <Icon name="add-circle-outline" size={22} color={Colors.primary} />
+        <Icon name="add-circle-outline" size={22} color={theme.colors.primary} />
         <Text style={styles.addItemButtonText}>Add Item</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
@@ -302,7 +304,7 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
 
   const renderSubmittingStep = () => (
     <View style={styles.stepContainer}>
-      <ActivityIndicator size="large" color={Colors.primary} />
+      <ActivityIndicator size="large" color={theme.colors.primary} />
       <Text style={styles.loadingText}>Submitting Items...</Text>
     </View>
   );
@@ -313,7 +315,7 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
       <View style={styles.modalOverlay}>
         <View style={styles.modalContainer}>
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-            <Icon name="close" size={24} color={Colors.text} />
+            <Icon name="close" size={24} color={theme.colors.text} />
           </TouchableOpacity>
           {step === 'capture' && renderCaptureStep()}
           {step === 'spinning' && renderSpinningStep()}
@@ -325,7 +327,7 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
@@ -335,7 +337,7 @@ const styles = StyleSheet.create({
   modalContainer: {
     width: '90%',
     maxHeight: '85%',
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.white,
     borderRadius: 16,
     padding: 20,
     shadowColor: '#000',
@@ -355,33 +357,33 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: Colors.text,
+    color: theme.colors.text,
     marginBottom: 20,
     textAlign: 'center',
   },
   cameraPreviewPlaceholder: {
     width: '100%',
     height: 200, // Adjust as needed
-    backgroundColor: Colors.lightGray,
+    backgroundColor: theme.colors.lightGray,
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 8,
     marginBottom: 20,
   },
   placeholderText: {
-    color: Colors.darkGray,
+    color: theme.colors.darkGray,
     marginTop: 10,
   },
   captureButton: {
     flexDirection: 'row',
-    backgroundColor: Colors.primary,
+    backgroundColor: theme.colors.primary,
     paddingVertical: 12,
     paddingHorizontal: 30,
     borderRadius: 8,
     alignItems: 'center',
   },
   submitButton: {
-    backgroundColor: Colors.success, // Or primary
+    backgroundColor: theme.colors.success[500], // Or primary
     paddingVertical: 12,
     paddingHorizontal: 30,
     borderRadius: 8,
@@ -390,7 +392,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   buttonText: {
-    color: Colors.white,
+    color: theme.colors.white,
     fontSize: 16,
     fontWeight: '600',
     marginLeft: 8,
@@ -398,13 +400,13 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: 18,
     fontWeight: '600',
-    color: Colors.text,
+    color: theme.colors.text,
     marginTop: 15,
     marginBottom: 5,
   },
   loadingSubtitle: {
     fontSize: 14,
-    color: Colors.darkGray,
+    color: theme.colors.darkGray,
     marginBottom: 20,
   },
   itemList: {
@@ -418,7 +420,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: theme.colors.border,
   },
   itemInputs: {
     flex: 1,
@@ -427,12 +429,12 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: theme.colors.border,
     borderRadius: 6,
     paddingHorizontal: 10,
     paddingVertical: 8,
     fontSize: 14,
-    backgroundColor: Colors.white, // Ensure input background is white
+    backgroundColor: theme.colors.white, // Ensure input background is white
   },
   nameInput: {
     flex: 0.5, // Takes 50% of space in itemInputs
@@ -456,12 +458,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: Colors.primary,
+    borderColor: theme.colors.primary,
     alignSelf: 'flex-start',
     marginBottom: 15,
   },
   addItemButtonText: {
-    color: Colors.primary,
+    color: theme.colors.primary,
     fontSize: 14,
     fontWeight: '600',
     marginLeft: 6,

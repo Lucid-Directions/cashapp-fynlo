@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, SafeAreaView } from 'react-native';
-import Colors from '../../constants/Colors'; // Assuming Colors are centralized
-import { useTheme } from '../../design-system/ThemeProvider'; // Assuming theme provider
+import { useTheme } from '../../design-system/ThemeProvider';
 
 interface LoadingViewProps {
   message?: string;

@@ -15,11 +15,13 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import useAppStore from '../../store/useAppStore';
 import ErrorBoundary from '../../components/ErrorBoundary';
-import Colors from '../../constants/Colors';
+import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
 import { useAuth } from '../../contexts/AuthContext';
 
 const ProfileScreenContent: React.FC = () => {
   const navigation = useNavigation();
+  const { theme } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const { user, session } = useAppStore();
   const { updateUser } = useAuth();
   
@@ -130,7 +132,7 @@ const ProfileScreenContent: React.FC = () => {
   }) => (
     <View style={styles.infoCard}>
       <View style={styles.infoIcon}>
-        <Icon name={icon} size={24} color={Colors.secondary} />
+        <Icon name={icon} size={24} color={theme.colors.secondary} />
       </View>
       <View style={styles.infoContent}>
         <Text style={styles.infoTitle}>{title}</Text>
@@ -141,7 +143,7 @@ const ProfileScreenContent: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={Colors.primary} />
+      <StatusBar barStyle="light-content" backgroundColor={theme.colors.primary} />
       
       {/* Header */}
       <View style={styles.header}>
@@ -150,7 +152,7 @@ const ProfileScreenContent: React.FC = () => {
             style={styles.headerButton}
             onPress={() => navigation.goBack()}
           >
-            <Icon name="arrow-back" size={24} color={Colors.white} />
+            <Icon name="arrow-back" size={24} color={theme.colors.white} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Profile</Text>
         </View>
@@ -158,7 +160,7 @@ const ProfileScreenContent: React.FC = () => {
           style={styles.headerButton}
           onPress={() => navigation.navigate('POS' as never)}
         >
-          <Icon name="home" size={24} color={Colors.white} />
+          <Icon name="home" size={24} color={theme.colors.white} />
         </TouchableOpacity>
       </View>
 
@@ -166,7 +168,7 @@ const ProfileScreenContent: React.FC = () => {
         {/* Profile Header */}
         <View style={styles.profileHeader}>
           <View style={styles.avatar}>
-            <Icon name="person" size={48} color={Colors.white} />
+            <Icon name="person" size={48} color={theme.colors.white} />
           </View>
           <Text style={styles.userName}>{user?.name || 'User'}</Text>
           <Text style={styles.userRole}>{user?.role?.toUpperCase() || 'STAFF'}</Text>
@@ -205,7 +207,7 @@ const ProfileScreenContent: React.FC = () => {
             <Text style={styles.sectionTitle}>Current Session</Text>
             <View style={styles.sessionCard}>
               <View style={styles.sessionHeader}>
-                <Icon name="access-time" size={24} color={Colors.success} />
+                <Icon name="access-time" size={24} color={theme.colors.success[500]} />
                 <Text style={styles.sessionTitle}>Active Session</Text>
               </View>
               <View style={styles.sessionInfo}>
@@ -238,18 +240,18 @@ const ProfileScreenContent: React.FC = () => {
             style={styles.actionButton}
             onPress={handleEditProfile}
           >
-            <Icon name="edit" size={24} color={Colors.secondary} />
+            <Icon name="edit" size={24} color={theme.colors.secondary} />
             <Text style={styles.actionButtonText}>Edit Profile</Text>
-            <Icon name="chevron-right" size={24} color={Colors.lightText} />
+            <Icon name="chevron-right" size={24} color={theme.colors.lightText} />
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.actionButton}
             onPress={handleChangePassword}
           >
-            <Icon name="lock" size={24} color={Colors.secondary} />
+            <Icon name="lock" size={24} color={theme.colors.secondary} />
             <Text style={styles.actionButtonText}>Change Password</Text>
-            <Icon name="chevron-right" size={24} color={Colors.lightText} />
+            <Icon name="chevron-right" size={24} color={theme.colors.lightText} />
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -266,7 +268,7 @@ const ProfileScreenContent: React.FC = () => {
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Edit Profile</Text>
               <TouchableOpacity onPress={() => setShowEditModal(false)}>
-                <Icon name="close" size={24} color={Colors.text} />
+                <Icon name="close" size={24} color={theme.colors.text} />
               </TouchableOpacity>
             </View>
             
@@ -278,7 +280,7 @@ const ProfileScreenContent: React.FC = () => {
                   value={editForm.firstName}
                   onChangeText={(text) => setEditForm({...editForm, firstName: text})}
                   placeholder="Enter first name"
-                  placeholderTextColor={Colors.lightText}
+                  placeholderTextColor={theme.colors.lightText}
                 />
               </View>
 
@@ -289,7 +291,7 @@ const ProfileScreenContent: React.FC = () => {
                   value={editForm.lastName}
                   onChangeText={(text) => setEditForm({...editForm, lastName: text})}
                   placeholder="Enter last name"
-                  placeholderTextColor={Colors.lightText}
+                  placeholderTextColor={theme.colors.lightText}
                 />
               </View>
 
@@ -302,7 +304,7 @@ const ProfileScreenContent: React.FC = () => {
                   placeholder="Enter email address"
                   keyboardType="email-address"
                   autoCapitalize="none"
-                  placeholderTextColor={Colors.lightText}
+                  placeholderTextColor={theme.colors.lightText}
                 />
               </View>
 
@@ -314,7 +316,7 @@ const ProfileScreenContent: React.FC = () => {
                   onChangeText={(text) => setEditForm({...editForm, phone: text})}
                   placeholder="Enter phone number"
                   keyboardType="phone-pad"
-                  placeholderTextColor={Colors.lightText}
+                  placeholderTextColor={theme.colors.lightText}
                 />
               </View>
 
@@ -350,7 +352,7 @@ const ProfileScreenContent: React.FC = () => {
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Change Password</Text>
               <TouchableOpacity onPress={() => setShowPasswordModal(false)}>
-                <Icon name="close" size={24} color={Colors.text} />
+                <Icon name="close" size={24} color={theme.colors.text} />
               </TouchableOpacity>
             </View>
             
@@ -363,7 +365,7 @@ const ProfileScreenContent: React.FC = () => {
                   onChangeText={(text) => setPasswordForm({...passwordForm, currentPassword: text})}
                   placeholder="Enter current password"
                   secureTextEntry={true}
-                  placeholderTextColor={Colors.lightText}
+                  placeholderTextColor={theme.colors.lightText}
                 />
               </View>
 
@@ -375,7 +377,7 @@ const ProfileScreenContent: React.FC = () => {
                   onChangeText={(text) => setPasswordForm({...passwordForm, newPassword: text})}
                   placeholder="Enter new password (min 6 characters)"
                   secureTextEntry={true}
-                  placeholderTextColor={Colors.lightText}
+                  placeholderTextColor={theme.colors.lightText}
                 />
               </View>
 
@@ -387,7 +389,7 @@ const ProfileScreenContent: React.FC = () => {
                   onChangeText={(text) => setPasswordForm({...passwordForm, confirmPassword: text})}
                   placeholder="Confirm new password"
                   secureTextEntry={true}
-                  placeholderTextColor={Colors.lightText}
+                  placeholderTextColor={theme.colors.lightText}
                 />
               </View>
 
@@ -414,13 +416,13 @@ const ProfileScreenContent: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: theme.colors.background,
   },
   header: {
-    backgroundColor: Colors.primary,
+    backgroundColor: theme.colors.primary,
     paddingHorizontal: 20,
     paddingVertical: 15,
     elevation: 4,
@@ -442,7 +444,7 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   headerTitle: {
-    color: Colors.white,
+    color: theme.colors.white,
     fontSize: 20,
     fontWeight: 'bold',
   },
@@ -461,7 +463,7 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: Colors.secondary,
+    backgroundColor: theme.colors.secondary,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 15,
@@ -469,12 +471,12 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: Colors.text,
+    color: theme.colors.text,
     marginBottom: 5,
   },
   userRole: {
     fontSize: 14,
-    color: Colors.lightText,
+    color: theme.colors.lightText,
     fontWeight: '600',
   },
   section: {
@@ -483,11 +485,11 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: Colors.text,
+    color: theme.colors.text,
     marginBottom: 15,
   },
   infoContainer: {
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.white,
     borderRadius: 12,
     elevation: 2,
     shadowColor: '#000',
@@ -500,7 +502,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGray,
+    borderBottomColor: theme.colors.lightGray,
   },
   infoIcon: {
     marginRight: 15,
@@ -510,16 +512,16 @@ const styles = StyleSheet.create({
   },
   infoTitle: {
     fontSize: 14,
-    color: Colors.lightText,
+    color: theme.colors.lightText,
     marginBottom: 4,
   },
   infoValue: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.text,
+    color: theme.colors.text,
   },
   sessionCard: {
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.white,
     borderRadius: 12,
     padding: 20,
     elevation: 2,
@@ -536,7 +538,7 @@ const styles = StyleSheet.create({
   sessionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: Colors.text,
+    color: theme.colors.text,
     marginLeft: 10,
   },
   sessionInfo: {
@@ -548,18 +550,18 @@ const styles = StyleSheet.create({
   },
   sessionLabel: {
     fontSize: 14,
-    color: Colors.lightText,
+    color: theme.colors.lightText,
     marginBottom: 4,
   },
   sessionValue: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: Colors.text,
+    color: theme.colors.text,
   },
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.white,
     borderRadius: 12,
     padding: 20,
     marginBottom: 15,
@@ -572,7 +574,7 @@ const styles = StyleSheet.create({
   actionButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.text,
+    color: theme.colors.text,
     marginLeft: 15,
     flex: 1,
   },
@@ -584,7 +586,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modal: {
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.white,
     borderRadius: 16,
     width: '90%',
     maxHeight: '80%',
@@ -600,12 +602,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGray,
+    borderBottomColor: theme.colors.lightGray,
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: Colors.text,
+    color: theme.colors.text,
   },
   modalContent: {
     padding: 20,
@@ -616,18 +618,18 @@ const styles = StyleSheet.create({
   formLabel: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.text,
+    color: theme.colors.text,
     marginBottom: 8,
   },
   formInput: {
     borderWidth: 1,
-    borderColor: Colors.lightGray,
+    borderColor: theme.colors.lightGray,
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 16,
-    color: Colors.text,
-    backgroundColor: Colors.white,
+    color: theme.colors.text,
+    backgroundColor: theme.colors.white,
   },
   modalActions: {
     flexDirection: 'row',
@@ -642,18 +644,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cancelButton: {
-    backgroundColor: Colors.lightGray,
+    backgroundColor: theme.colors.lightGray,
   },
   saveButton: {
-    backgroundColor: Colors.primary,
+    backgroundColor: theme.colors.primary,
   },
   cancelButtonText: {
-    color: Colors.text,
+    color: theme.colors.text,
     fontSize: 16,
     fontWeight: '600',
   },
   saveButtonText: {
-    color: Colors.white,
+    color: theme.colors.white,
     fontSize: 16,
     fontWeight: '600',
   },
