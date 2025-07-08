@@ -556,7 +556,7 @@ class DataService {
     } catch (error) {
       console.error('❌ Failed to fetch employees from API, falling back to mock data:', error);
       
-      // Fallback to mock employee data
+      // Fallback to mock employee data with complete schema
       const mockEmployees = [
         {
           id: 1,
@@ -568,6 +568,11 @@ class DataService {
           avatar: null,
           phone: '+44 7700 900001',
           startDate: '2024-01-01',
+          totalSales: 15420.50,
+          totalOrders: 185,
+          avgOrderValue: 83.35,
+          performanceRating: 9.2,
+          hoursWorked: 160,
         },
         {
           id: 2,
@@ -579,6 +584,11 @@ class DataService {
           avatar: null,
           phone: '+44 7700 900002',
           startDate: '2024-01-15',
+          totalSales: 8750.25,
+          totalOrders: 142,
+          avgOrderValue: 61.62,
+          performanceRating: 8.8,
+          hoursWorked: 155,
         },
         {
           id: 3,
@@ -590,6 +600,11 @@ class DataService {
           avatar: null,
           phone: '+44 7700 900003',
           startDate: '2024-02-01',
+          totalSales: 12100.75,
+          totalOrders: 167,
+          avgOrderValue: 72.46,
+          performanceRating: 9.0,
+          hoursWorked: 162,
         },
         {
           id: 4,
@@ -601,6 +616,11 @@ class DataService {
           avatar: null,
           phone: '+44 7700 900004',
           startDate: '2023-12-01',
+          totalSales: 6890.00,
+          totalOrders: 98,
+          avgOrderValue: 70.31,
+          performanceRating: 7.5,
+          hoursWorked: 120,
         },
       ];
       
