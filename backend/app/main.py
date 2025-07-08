@@ -188,6 +188,112 @@ async def api_version_info():
         message="API version information"
     )
 
+# TEMPORARY: Add essential endpoints for iOS app
+@app.post("/api/v1/auth/login")
+async def login(request: dict):
+    """Authentication endpoint with mock data"""
+    email = request.get("email", "").lower()
+    password = request.get("password", "")
+    
+    # Mock credentials for quick testing
+    mock_credentials = {
+        "owner@fynlopos.com": "platformowner123",
+        "restaurant_owner": "owner123",
+        "platform_owner": "platform123", 
+        "manager": "manager123",
+        "cashier": "cashier123",
+        "john@fynlopos.com": "password123",
+        "demo@fynlopos.com": "demo"
+    }
+    
+    if email in mock_credentials and mock_credentials[email] == password:
+        # Return successful authentication
+        return APIResponseHelper.success(
+            data={
+                "access_token": "mock_token_12345",
+                "token_type": "bearer",
+                "user": {
+                    "id": "user_123",
+                    "email": email,
+                    "role": "platform_owner" if "platform" in email else "restaurant_owner",
+                    "firstName": "Test",
+                    "lastName": "User"
+                }
+            },
+            message="Authentication successful"
+        )
+    else:
+        return APIResponseHelper.error(
+            message="Invalid credentials",
+            status_code=401
+        )
+
+@app.get("/api/v1/menu/items")
+async def get_menu_items():
+    """Get menu items"""
+    return APIResponseHelper.success(
+        data=[
+            {"id": 1, "name": "Tacos", "price": 8.99, "category": "Main"},
+            {"id": 2, "name": "Burrito", "price": 12.99, "category": "Main"},
+            {"id": 3, "name": "Nachos", "price": 9.99, "category": "Appetizer"}
+        ],
+        message="Menu items retrieved"
+    )
+
+@app.get("/api/v1/menu/categories")
+async def get_menu_categories():
+    """Get menu categories"""
+    return APIResponseHelper.success(
+        data=[
+            {"id": 1, "name": "Main", "description": "Main courses"},
+            {"id": 2, "name": "Appetizer", "description": "Appetizers"},
+            {"id": 3, "name": "Beverage", "description": "Drinks"}
+        ],
+        message="Menu categories retrieved"
+    )
+
+@app.get("/api/v1/employees")
+async def get_employees():
+    """Get employees"""
+    return APIResponseHelper.success(
+        data=[
+            {
+                "id": 1,
+                "name": "John Manager",
+                "email": "john@restaurant.com",
+                "role": "manager",
+                "hourlyRate": 25.00,
+                "totalSales": 15420.50,
+                "performanceScore": 9.2,
+                "isActive": True
+            },
+            {
+                "id": 2,
+                "name": "Sarah Cashier", 
+                "email": "sarah@restaurant.com",
+                "role": "cashier",
+                "hourlyRate": 15.50,
+                "totalSales": 8750.25,
+                "performanceScore": 8.8,
+                "isActive": True
+            }
+        ],
+        message="Employees retrieved"
+    )
+
+@app.get("/api/v1/platform/settings/service-charge")
+async def get_service_charge():
+    """Get platform service charge settings"""
+    return APIResponseHelper.success(
+        data={
+            "enabled": True,
+            "rate": 0.125,  # 12.5%
+            "description": "Platform service charge",
+            "lastUpdated": "2025-01-08T16:30:00Z"
+        },
+        message="Service charge settings retrieved"
+    )
+
 if __name__ == "__main__":
     import os
     port = int(os.environ.get("PORT", 8000))  # Use DigitalOcean's PORT env var
