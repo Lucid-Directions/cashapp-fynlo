@@ -689,14 +689,12 @@ class DatabaseService {
 
   async getWeekSchedule(weekStart: Date, employees: any[]): Promise<any | null> {
     try {
+      // FIXED: Use GET request instead of POST to match backend
       const response = await this.apiRequest('/api/v1/schedule/week', {
-        method: 'POST',
-        body: JSON.stringify({
-          week_start: weekStart.toISOString(),
-          employee_ids: employees.map(emp => emp.id)
-        }),
+        method: 'GET',
       });
       
+      console.log('✅ Schedule API response received:', response);
       return response.data || null;
     } catch (error) {
       console.error('Failed to fetch week schedule:', error);
