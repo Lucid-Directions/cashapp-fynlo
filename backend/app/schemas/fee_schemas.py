@@ -45,7 +45,7 @@ class PaymentMethodFeeSettingSchema(TypedDict):
     include_processor_fee_in_service_charge: bool # If this payment method's fee contributes to SC
 
     class Config:
-        orm_mode = True # If using Pydantic models with SQLAlchemy
+        from_attributes = True # If using Pydantic models with SQLAlchemy
 
 # For platform_fees table later
 class PlatformFeeRecordSchema(TypedDict):
@@ -58,7 +58,7 @@ class PlatformFeeRecordSchema(TypedDict):
     transaction_timestamp: str # ISO format
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # For staff_tip_distributions table later
 class StaffTipDistributionRecordSchema(TypedDict):
@@ -72,4 +72,4 @@ class StaffTipDistributionRecordSchema(TypedDict):
     distribution_timestamp: str # ISO format
 
     class Config:
-        orm_mode = True
+        from_attributes = True
