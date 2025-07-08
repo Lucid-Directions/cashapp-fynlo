@@ -195,15 +195,9 @@ async def login(request: dict):
     email = request.get("email", "").lower()
     password = request.get("password", "")
     
-    # Mock credentials for quick testing
+    # SIMPLIFIED: One working restaurant owner credential
     mock_credentials = {
-        "owner@fynlopos.com": "platformowner123",
-        "restaurant_owner": "owner123",
-        "platform_owner": "platform123", 
-        "manager": "manager123",
-        "cashier": "cashier123",
-        "john@fynlopos.com": "password123",
-        "demo@fynlopos.com": "demo"
+        "restaurant@fynlopos.com": "restaurant123"
     }
     
     if email in mock_credentials and mock_credentials[email] == password:

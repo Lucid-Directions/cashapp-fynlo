@@ -174,34 +174,10 @@ const LoginScreen: React.FC = () => {
               <View style={styles.quickButtonsGrid}>
                 <TouchableOpacity
                   style={[styles.quickButton, { backgroundColor: '#00A651' }]}
-                  onPress={() => handleQuickSignIn('restaurant_owner', 'owner123')}
+                  onPress={() => handleQuickSignIn('restaurant@fynlopos.com', 'restaurant123')}
                 >
                   <Text style={styles.quickButtonTitle}>Restaurant Owner</Text>
-                  <Text style={styles.quickButtonSubtitle}>Maria Rodriguez</Text>
-                </TouchableOpacity>
-                
-                <TouchableOpacity
-                  style={[styles.quickButton, { backgroundColor: '#0066CC' }]}
-                  onPress={() => handleQuickSignIn('platform_owner', 'platform123')}
-                >
-                  <Text style={styles.quickButtonTitle}>Platform Owner</Text>
-                  <Text style={styles.quickButtonSubtitle}>Alex Thompson</Text>
-                </TouchableOpacity>
-                
-                <TouchableOpacity
-                  style={[styles.quickButton, { backgroundColor: '#FF6B35' }]}
-                  onPress={() => handleQuickSignIn('manager', 'manager123')}
-                >
-                  <Text style={styles.quickButtonTitle}>Manager</Text>
-                  <Text style={styles.quickButtonSubtitle}>Sofia Hernandez</Text>
-                </TouchableOpacity>
-                
-                <TouchableOpacity
-                  style={[styles.quickButton, { backgroundColor: '#8E44AD' }]}
-                  onPress={() => handleQuickSignIn('cashier', 'cashier123')}
-                >
-                  <Text style={styles.quickButtonTitle}>Cashier</Text>
-                  <Text style={styles.quickButtonSubtitle}>Carlos Garcia</Text>
+                  <Text style={styles.quickButtonSubtitle}>Test Restaurant</Text>
                 </TouchableOpacity>
               </View>
             </View>
