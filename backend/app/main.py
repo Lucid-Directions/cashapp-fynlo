@@ -51,52 +51,19 @@ if settings.ENVIRONMENT == "production" or not settings.ERROR_DETAIL_ENABLED:
 
 security = HTTPBearer()
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    """Initialize application on startup - SIMPLIFIED FOR DEPLOYMENT"""
-    logger.info(f"🚀 Fynlo POS Backend starting in {settings.ENVIRONMENT} mode...")
-    logger.info(f"Debug mode: {settings.DEBUG}")
-    
-    # TEMPORARY: Skip database and Redis initialization during deployment
-    # TODO: Add back once DigitalOcean databases are configured
-    try:
-        # Initialize database
-        await init_db()
-        logger.info("✅ Database initialized")
-    except Exception as e:
-        logger.warning(f"⚠️ Database initialization skipped: {e}")
-    
-    try:
-        # Initialize Redis
-        await init_redis()
-        logger.info("✅ Redis connected")
-        
-        # Initialize FastAPI Limiter (depends on Redis being connected)
-        await init_fastapi_limiter()
-        logger.info("✅ Rate limiter initialized")
-    except Exception as e:
-        logger.warning(f"⚠️ Redis initialization skipped: {e}")
-    
-    logger.info("✅ WebSocket manager ready")
-    logger.info("✅ API version middleware enabled (backward compatibility)")
-    logger.info("🎯 Backend startup complete - ready for health checks")
-    
-    yield
-    
-    # Cleanup on shutdown
-    logger.info("🔄 Shutting down Fynlo POS Backend...")
-    try:
-        await close_redis()
-        logger.info("✅ Redis client closed.")
-    except:
-        pass
-    logger.info("✅ Cleanup complete")
+# TEMPORARY: Remove lifespan function for deployment
+# @asynccontextmanager
+# async def lifespan(app: FastAPI):
+#     """Initialize application on startup - DISABLED FOR DEPLOYMENT"""
+#     logger.info(f"🚀 Fynlo POS Backend starting in {settings.ENVIRONMENT} mode...")
+#     yield
+#     logger.info("✅ Cleanup complete")
 
 app = FastAPI(
     title=settings.APP_NAME,
     description="Hardware-Free Restaurant Management Platform",
     version="1.0.0",
-    lifespan=lifespan,
+    # lifespan=lifespan,  # DISABLED FOR DEPLOYMENT
     debug=settings.DEBUG  # Set FastAPI debug mode from settings
 )
 
@@ -115,37 +82,34 @@ app.add_middleware(
     allow_headers=["*"], # Can be restricted further e.g. ["Content-Type", "Authorization"]
 )
 
+# TEMPORARY: Disable complex middleware for deployment
 # Add API version middleware for backward compatibility (FIRST in middleware stack)
-# This must be added before other middleware to ensure path rewriting happens first
-app.add_middleware(APIVersionMiddleware)
+# app.add_middleware(APIVersionMiddleware)
 
 # Add Security Headers Middleware (after CORS and Versioning, before others)
-# Ensure this import is added at the top of the file:
-# from app.middleware.security_headers_middleware import SecurityHeadersMiddleware
-app.add_middleware(SecurityHeadersMiddleware)
+# app.add_middleware(SecurityHeadersMiddleware)
 
 # Add mobile compatibility middleware
-app.add_middleware(MobileCompatibilityMiddleware, enable_cors=True, enable_port_redirect=True)
-app.add_middleware(MobileDataOptimizationMiddleware)
+# app.add_middleware(MobileCompatibilityMiddleware, enable_cors=True, enable_port_redirect=True)
+# app.add_middleware(MobileDataOptimizationMiddleware)
 
 # Add SlowAPI middleware (for rate limiting) - TEMPORARILY DISABLED
-# This middleware itself doesn't enforce limits but makes the limiter available.
-# Limits are enforced by decorators or dependencies.
 # app.add_middleware(SlowAPIMiddleware)
 
 # Register standardized exception handlers
-register_exception_handlers(app) # General handlers
+# register_exception_handlers(app) # General handlers
 
 # Add specific handler for rate limit exceeded
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+# app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
+# TEMPORARY: Disable complex routes for deployment
 # Include API routes
-app.include_router(api_router, prefix="/api/v1")
+# app.include_router(api_router, prefix="/api/v1")
 
 # Include mobile-optimized routes (both prefixed and Odoo-style)
-app.include_router(mobile_router, prefix="/api/mobile", tags=["mobile"])
-app.include_router(mobile_router, prefix="", tags=["mobile-compatibility"])  # For Odoo-style endpoints
+# app.include_router(mobile_router, prefix="/api/mobile", tags=["mobile"])
+# app.include_router(mobile_router, prefix="", tags=["mobile-compatibility"])  # For Odoo-style endpoints
 
 # WebSocket routes are handled through the websocket router in api.py
 

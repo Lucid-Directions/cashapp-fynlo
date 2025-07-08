@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 """
-Simplified startup script for DigitalOcean deployment
-Ensures the app starts on the correct port with proper configuration
+Minimal startup script for DigitalOcean deployment
+Uses minimal app without external dependencies
 """
 
 import os
 import uvicorn
-from app.main import app
 
 if __name__ == "__main__":
     # DigitalOcean provides PORT environment variable
@@ -14,11 +13,19 @@ if __name__ == "__main__":
     host = "0.0.0.0"
     
     print(f"🚀 Starting Fynlo POS Backend on {host}:{port}")
-    print(f"Environment: {os.environ.get('ENVIRONMENT', 'development')}")
-    print(f"Debug mode: {os.environ.get('DEBUG', 'true')}")
+    print(f"Environment: {os.environ.get('ENVIRONMENT', 'production')}")
+    print(f"Debug mode: {os.environ.get('DEBUG', 'false')}")
+    
+    # Use minimal app to avoid startup issues
+    try:
+        from app.main_minimal import app
+        print("✅ Using minimal app (no external dependencies)")
+    except ImportError:
+        from app.main import app
+        print("⚠️ Using full app (may require external dependencies)")
     
     uvicorn.run(
-        app,  # Use the app instance directly
+        app,
         host=host,
         port=port,
         log_level="info",
