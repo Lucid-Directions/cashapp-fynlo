@@ -110,30 +110,30 @@ const LoginScreen: React.FC = () => {
             {/* Username Input */}
             <View style={styles.inputContainer}>
               <Icon name="person" size={20} color={Colors.lightText} style={styles.inputIcon} />
-              <SimpleTextInput
+              <TextInput
                 value={username}
-                onValueChange={setUsername}
+                onChangeText={setUsername}
                 placeholder="Username"
                 autoCapitalize="none"
                 autoCorrect={false}
                 returnKeyType="next"
-                style={styles.textInput}
+                style={[styles.textInput, { flex: 1, padding: 12, fontSize: 16 }]}
               />
             </View>
 
             {/* Password Input */}
             <View style={styles.inputContainer}>
               <Icon name="lock" size={20} color={Colors.lightText} style={styles.inputIcon} />
-              <SimpleTextInput
+              <TextInput
                 value={password}
-                onValueChange={setPassword}
+                onChangeText={setPassword}
                 placeholder="Password"
                 secureTextEntry={true}
                 autoCapitalize="none"
                 autoCorrect={false}
                 returnKeyType="done"
                 onSubmitEditing={handleLogin}
-                style={styles.textInput}
+                style={[styles.textInput, { flex: 1, padding: 12, fontSize: 16 }]}
               />
             </View>
 
