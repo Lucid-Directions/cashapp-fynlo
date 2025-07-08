@@ -57,13 +57,108 @@ async def api_health():
         "timestamp": datetime.now().isoformat()
     }
 
-# Basic auth endpoint for testing
+# Authentication endpoints
 @app.post("/api/v1/auth/login")
-async def login():
-    """Basic login endpoint"""
+async def login(request: dict):
+    """Authentication endpoint with mock data"""
+    email = request.get("email", "").lower()
+    password = request.get("password", "")
+    
+    # Mock credentials for quick testing
+    mock_credentials = {
+        "owner@fynlopos.com": "platformowner123",
+        "restaurant_owner": "owner123",
+        "platform_owner": "platform123", 
+        "manager": "manager123",
+        "cashier": "cashier123",
+        "john@fynlopos.com": "password123",
+        "demo@fynlopos.com": "demo"
+    }
+    
+    if email in mock_credentials and mock_credentials[email] == password:
+        # Return successful authentication
+        return {
+            "success": True,
+            "data": {
+                "access_token": "mock_token_12345",
+                "token_type": "bearer",
+                "user": {
+                    "id": "user_123",
+                    "email": email,
+                    "role": "platform_owner" if "platform" in email else "restaurant_owner",
+                    "firstName": "Test",
+                    "lastName": "User"
+                }
+            },
+            "message": "Authentication successful",
+            "timestamp": datetime.now().isoformat()
+        }
+    else:
+        return {
+            "success": False,
+            "error": "Invalid credentials",
+            "message": "Authentication failed",
+            "timestamp": datetime.now().isoformat()
+        }
+
+# Menu endpoints
+@app.get("/api/v1/menu/items")
+async def get_menu_items():
+    """Get menu items"""
     return {
-        "message": "Authentication endpoint available",
-        "status": "ready",
+        "success": True,
+        "data": [
+            {"id": 1, "name": "Tacos", "price": 8.99, "category": "Main"},
+            {"id": 2, "name": "Burrito", "price": 12.99, "category": "Main"},
+            {"id": 3, "name": "Nachos", "price": 9.99, "category": "Appetizer"}
+        ],
+        "message": "Menu items retrieved",
+        "timestamp": datetime.now().isoformat()
+    }
+
+@app.get("/api/v1/menu/categories")
+async def get_menu_categories():
+    """Get menu categories"""
+    return {
+        "success": True,
+        "data": [
+            {"id": 1, "name": "Main", "description": "Main courses"},
+            {"id": 2, "name": "Appetizer", "description": "Appetizers"},
+            {"id": 3, "name": "Beverage", "description": "Drinks"}
+        ],
+        "message": "Menu categories retrieved",
+        "timestamp": datetime.now().isoformat()
+    }
+
+# Employee endpoints
+@app.get("/api/v1/employees")
+async def get_employees():
+    """Get employees"""
+    return {
+        "success": True,
+        "data": [
+            {
+                "id": 1,
+                "name": "John Manager",
+                "email": "john@restaurant.com",
+                "role": "manager",
+                "hourlyRate": 25.00,
+                "totalSales": 15420.50,
+                "performanceScore": 9.2,
+                "isActive": True
+            },
+            {
+                "id": 2,
+                "name": "Sarah Cashier", 
+                "email": "sarah@restaurant.com",
+                "role": "cashier",
+                "hourlyRate": 15.50,
+                "totalSales": 8750.25,
+                "performanceScore": 8.8,
+                "isActive": True
+            }
+        ],
+        "message": "Employees retrieved",
         "timestamp": datetime.now().isoformat()
     }
 
