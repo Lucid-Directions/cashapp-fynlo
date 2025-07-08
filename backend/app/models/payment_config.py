@@ -35,10 +35,14 @@ class PaymentMethodSetting(Base):
     # Defines if the processor fee (when paid by customer) should be part of the service charge amount.
     include_processor_fee_in_service_charge = Column(Boolean, default=True, nullable=False)
 
-    # Unique constraint for platform-level settings (restaurant_id is NULL)
+    # Unique constraints and indexes
     __table_args__ = (
-        UniqueConstraint('payment_method', name='uq_platform_payment_method_setting', postgresql_where=restaurant_id.is_(None)),
+        # Unique constraint for restaurant-specific settings
         UniqueConstraint('restaurant_id', 'payment_method', name='uq_restaurant_payment_method_setting'),
+        # Partial unique index for platform-level settings (restaurant_id is NULL)
+        Index('idx_platform_payment_method_unique', 'payment_method', 
+              unique=True, postgresql_where=restaurant_id.is_(None)),
+        # Regular index for performance
         Index('idx_payment_method_settings_restaurant_method', 'restaurant_id', 'payment_method'),
     )
 
