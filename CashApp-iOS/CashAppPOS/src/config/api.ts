@@ -8,8 +8,9 @@
 // Get the current environment
 const isDevelopment = __DEV__;
 
-// DigitalOcean App Platform backend URL (Production)
-const PRODUCTION_API_URL = 'https://fynlo-pos-backend-d9x7p.ondigitalocean.app';
+// DigitalOcean App Platform backend URL (Production) - NEEDS UPDATE
+// TODO: Replace with actual working DigitalOcean URL once confirmed
+const PRODUCTION_API_URL = 'https://YOUR-ACTUAL-DIGITALOCEAN-URL.ondigitalocean.app';
 
 // Mac's LAN IP address for device testing (Development only)
 const MAC_LAN_IP = '192.168.0.109';
@@ -25,16 +26,16 @@ const isSimulator = __DEV__ && (
 
 // Dynamic API URL based on environment
 const getBaseURL = () => {
-  // FORCE PRODUCTION MODE: Always use DigitalOcean App Platform for production readiness testing
-  // This ensures we test the real production backend instead of localhost
-  return PRODUCTION_API_URL;
+  // TEMPORARY FIX: Use localhost for development until production URL is confirmed
+  // The previous DigitalOcean URL was invalid and causing authentication failures
+  if (isSimulator) {
+    return 'http://localhost:8000';
+  } else {
+    return `http://${MAC_LAN_IP}:8000`;
+  }
   
-  // Development fallback (commented out for production testing)
-  // if (isSimulator) {
-  //   return 'http://localhost:8000';
-  // } else {
-  //   return `http://${MAC_LAN_IP}:8000`;
-  // }
+  // Production URL (disabled until we confirm the correct DigitalOcean URL)
+  // return PRODUCTION_API_URL;
 };
 
 // API Configuration
