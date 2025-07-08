@@ -15,12 +15,14 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 // import { generateCustomers, CustomerData } from '../../utils/mockDataGenerator'; // Removed
-import Colors from '../../constants/Colors';
+import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
 import DataService from '../../services/DataService'; // Added
 import { CustomerData } from '../../types'; // Updated import path
 
 const CustomersScreen: React.FC = () => {
   const navigation = useNavigation();
+  const { theme } = useTheme();
+  const styles = useThemedStyles(createStyles);
   const [customers, setCustomers] = useState<CustomerData[]>([]);
   const [filteredCustomers, setFilteredCustomers] = useState<CustomerData[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -91,10 +93,10 @@ const CustomersScreen: React.FC = () => {
   };
 
   const getCustomerLevel = (customer: CustomerData) => {
-    if (customer.totalSpent > 1000) return { level: 'VIP', color: Colors.gold };
-    if (customer.totalSpent > 500) return { level: 'Premium', color: Colors.secondary };
-    if (customer.orderCount >= 10) return { level: 'Regular', color: Colors.primary };
-    return { level: 'New', color: Colors.darkGray };
+    if (customer.totalSpent > 1000) return { level: 'VIP', color: theme.colors.warning[500] };
+    if (customer.totalSpent > 500) return { level: 'Premium', color: theme.colors.secondary };
+    if (customer.orderCount >= 10) return { level: 'Regular', color: theme.colors.primary };
+    return { level: 'New', color: theme.colors.darkGray };
   };
 
   const formatDate = (date: Date) => {
@@ -118,7 +120,7 @@ const CustomersScreen: React.FC = () => {
       >
         <View style={styles.customerHeader}>
           <View style={styles.customerAvatar}>
-            <Icon name="account-circle" size={50} color={Colors.primary} />
+            <Icon name="account-circle" size={50} color={theme.colors.primary} />
           </View>
           <View style={styles.customerInfo}>
             <View style={styles.customerNameRow}>
@@ -140,15 +142,15 @@ const CustomersScreen: React.FC = () => {
 
         <View style={styles.customerMetrics}>
           <View style={styles.metricItem}>
-            <Icon name="shopping-cart" size={16} color={Colors.darkGray} />
+            <Icon name="shopping-cart" size={16} color={theme.colors.darkGray} />
             <Text style={styles.metricText}>{item.orderCount} orders</Text>
           </View>
           <View style={styles.metricItem}>
-            <Icon name="star" size={16} color={Colors.warning} />
+            <Icon name="star" size={16} color={theme.colors.warning[500]} />
             <Text style={styles.metricText}>{item.loyaltyPoints} points</Text>
           </View>
           <View style={styles.metricItem}>
-            <Icon name="schedule" size={16} color={Colors.darkGray} />
+            <Icon name="schedule" size={16} color={theme.colors.darkGray} />
             <Text style={styles.metricText}>Last visit {formatDate(item.lastVisit)}</Text>
           </View>
         </View>
@@ -169,7 +171,7 @@ const CustomersScreen: React.FC = () => {
   if (isLoading) {
     return (
       <SafeAreaView style={[styles.container, styles.centered]}>
-        <ActivityIndicator size="large" color={Colors.primary} />
+        <ActivityIndicator size="large" color={theme.colors.primary} />
         <Text style={styles.loadingText}>Loading Customers...</Text>
       </SafeAreaView>
     );
@@ -179,7 +181,7 @@ const CustomersScreen: React.FC = () => {
     if (error) {
       return (
         <View style={styles.emptyState}>
-          <Icon name="error-outline" size={64} color={Colors.danger} />
+          <Icon name="error-outline" size={64} color={theme.colors.danger[500]} />
           <Text style={styles.emptyStateText}>Error Loading Customers</Text>
           <Text style={styles.emptyStateSubtext}>{error}</Text>
           <TouchableOpacity onPress={loadCustomers} style={styles.retryButton}>
@@ -190,7 +192,7 @@ const CustomersScreen: React.FC = () => {
     }
     return (
       <View style={styles.emptyState}>
-        <Icon name="people" size={64} color={Colors.lightGray} />
+        <Icon name="people" size={64} color={theme.colors.lightGray} />
         <Text style={styles.emptyStateText}>No customers found</Text>
         <Text style={styles.emptyStateSubtext}>
           {searchQuery ? 'Try adjusting your search' : 'Add your first customer or pull to refresh'}
@@ -201,7 +203,7 @@ const CustomersScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor={Colors.primary} barStyle="light-content" />
+      <StatusBar backgroundColor={theme.colors.primary} barStyle="light-content" />
       
       {/* Header */}
       <View style={styles.header}>
@@ -210,7 +212,7 @@ const CustomersScreen: React.FC = () => {
           onPress={() => navigation.goBack()}
           activeOpacity={0.7}
         >
-          <Icon name="arrow-back" size={24} color={Colors.white} />
+          <Icon name="arrow-back" size={24} color={theme.colors.white} />
         </TouchableOpacity>
         
         <View style={styles.headerCenter}>
@@ -219,7 +221,7 @@ const CustomersScreen: React.FC = () => {
         </View>
         
         <TouchableOpacity style={styles.addButton}>
-          <Icon name="add" size={24} color={Colors.white} />
+          <Icon name="add" size={24} color={theme.colors.white} />
         </TouchableOpacity>
       </View>
 
@@ -230,15 +232,15 @@ const CustomersScreen: React.FC = () => {
           <Text style={styles.statLabel}>Total</Text>
         </View>
         <View style={styles.statCard}>
-          <Text style={[styles.statValue, { color: Colors.gold }]}>{stats.vip}</Text>
+          <Text style={[styles.statValue, { color: theme.colors.warning[500] }]}>{stats.vip}</Text>
           <Text style={styles.statLabel}>VIP</Text>
         </View>
         <View style={styles.statCard}>
-          <Text style={[styles.statValue, { color: Colors.success }]}>{stats.new}</Text>
+          <Text style={[styles.statValue, { color: theme.colors.success[500] }]}>{stats.new}</Text>
           <Text style={styles.statLabel}>New (30d)</Text>
         </View>
         <View style={styles.statCard}>
-          <Text style={[styles.statValue, { color: Colors.secondary }]}>
+          <Text style={[styles.statValue, { color: theme.colors.secondary }]}>
             £{stats.avgSpent.toFixed(0)}
           </Text>
           <Text style={styles.statLabel}>Avg Spent</Text>
@@ -248,13 +250,13 @@ const CustomersScreen: React.FC = () => {
       {/* Search and Filter */}
       <View style={styles.searchSection}>
         <View style={styles.searchContainer}>
-          <Icon name="search" size={20} color={Colors.darkGray} />
+          <Icon name="search" size={20} color={theme.colors.darkGray} />
           <TextInput
             style={styles.searchInput}
             placeholder="Search customers..."
             value={searchQuery}
             onChangeText={setSearchQuery}
-            placeholderTextColor={Colors.darkGray}
+            placeholderTextColor={theme.colors.darkGray}
           />
         </View>
 
@@ -313,7 +315,7 @@ const CustomersScreen: React.FC = () => {
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Customer Details</Text>
               <TouchableOpacity onPress={() => setSelectedCustomer(null)}>
-                <Icon name="close" size={24} color={Colors.text} />
+                <Icon name="close" size={24} color={theme.colors.text} />
               </TouchableOpacity>
             </View>
             
@@ -321,7 +323,7 @@ const CustomersScreen: React.FC = () => {
               <ScrollView style={styles.modalContent}>
                 <View style={styles.customerProfile}>
                   <View style={styles.profileAvatar}>
-                    <Icon name="account-circle" size={80} color={Colors.primary} />
+                    <Icon name="account-circle" size={80} color={theme.colors.primary} />
                   </View>
                   <Text style={styles.profileName}>{selectedCustomer.name}</Text>
                   <View style={[styles.profileLevel, { backgroundColor: `${getCustomerLevel(selectedCustomer).color}20` }]}>
@@ -334,15 +336,15 @@ const CustomersScreen: React.FC = () => {
                 <View style={styles.detailsSection}>
                   <Text style={styles.sectionTitle}>Contact Information</Text>
                   <View style={styles.detailRow}>
-                    <Icon name="email" size={20} color={Colors.darkGray} />
+                    <Icon name="email" size={20} color={theme.colors.darkGray} />
                     <Text style={styles.detailText}>{selectedCustomer.email}</Text>
                   </View>
                   <View style={styles.detailRow}>
-                    <Icon name="phone" size={20} color={Colors.darkGray} />
+                    <Icon name="phone" size={20} color={theme.colors.darkGray} />
                     <Text style={styles.detailText}>{selectedCustomer.phone}</Text>
                   </View>
                   <View style={styles.detailRow}>
-                    <Icon name="calendar-today" size={20} color={Colors.darkGray} />
+                    <Icon name="calendar-today" size={20} color={theme.colors.darkGray} />
                     <Text style={styles.detailText}>
                       Customer since {selectedCustomer.joinedDate.toLocaleDateString('en-GB')}
                     </Text>
@@ -365,7 +367,7 @@ const CustomersScreen: React.FC = () => {
                       <Text style={styles.purchaseLabel}>Avg Order</Text>
                     </View>
                     <View style={styles.purchaseCard}>
-                      <Text style={[styles.purchaseValue, { color: Colors.warning }]}>
+                      <Text style={[styles.purchaseValue, { color: theme.colors.warning[500] }]}>
                         {selectedCustomer.loyaltyPoints}
                       </Text>
                       <Text style={styles.purchaseLabel}>Loyalty Points</Text>
@@ -399,11 +401,11 @@ const CustomersScreen: React.FC = () => {
 
                 <View style={styles.actionButtons}>
                   <TouchableOpacity style={[styles.actionButton, styles.editButton]}>
-                    <Icon name="edit" size={20} color={Colors.white} />
+                    <Icon name="edit" size={20} color={theme.colors.white} />
                     <Text style={styles.actionButtonText}>Edit</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={[styles.actionButton, styles.orderButton]}>
-                    <Icon name="add-shopping-cart" size={20} color={Colors.white} />
+                    <Icon name="add-shopping-cart" size={20} color={theme.colors.white} />
                     <Text style={styles.actionButtonText}>New Order</Text>
                   </TouchableOpacity>
                 </View>
@@ -416,13 +418,13 @@ const CustomersScreen: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: theme.colors.background,
   },
   header: {
-    backgroundColor: Colors.primary,
+    backgroundColor: theme.colors.primary,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
@@ -446,7 +448,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: Colors.white,
+    color: theme.colors.white,
   },
   headerSubtitle: {
     fontSize: 12,
@@ -457,11 +459,11 @@ const styles = StyleSheet.create({
   },
   statsBar: {
     flexDirection: 'row',
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.white,
     paddingVertical: 16,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: theme.colors.border,
     gap: 12,
   },
   statCard: {
@@ -471,23 +473,23 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: Colors.primary,
+    color: theme.colors.primary,
   },
   statLabel: {
     fontSize: 12,
-    color: Colors.darkGray,
+    color: theme.colors.darkGray,
     marginTop: 4,
   },
   searchSection: {
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.white,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: theme.colors.border,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.background,
+    backgroundColor: theme.colors.background,
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
@@ -497,7 +499,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 16,
-    color: Colors.text,
+    color: theme.colors.text,
     marginLeft: 12,
   },
   segmentFilters: {
@@ -508,24 +510,24 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     marginRight: 8,
     borderRadius: 20,
-    backgroundColor: Colors.background,
+    backgroundColor: theme.colors.background,
   },
   segmentFilterActive: {
-    backgroundColor: Colors.primary,
+    backgroundColor: theme.colors.primary,
   },
   segmentFilterText: {
     fontSize: 14,
     fontWeight: '500',
-    color: Colors.text,
+    color: theme.colors.text,
   },
   segmentFilterTextActive: {
-    color: Colors.white,
+    color: theme.colors.white,
   },
   customersList: {
     padding: 16,
   },
   customerCard: {
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.white,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -554,7 +556,7 @@ const styles = StyleSheet.create({
   customerName: {
     fontSize: 16,
     fontWeight: '600',
-    color: Colors.text,
+    color: theme.colors.text,
     marginRight: 8,
   },
   levelBadge: {
@@ -568,12 +570,12 @@ const styles = StyleSheet.create({
   },
   customerEmail: {
     fontSize: 12,
-    color: Colors.darkGray,
+    color: theme.colors.darkGray,
     marginBottom: 2,
   },
   customerPhone: {
     fontSize: 12,
-    color: Colors.darkGray,
+    color: theme.colors.darkGray,
   },
   customerStats: {
     alignItems: 'flex-end',
@@ -583,7 +585,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: Colors.border,
+    borderTopColor: theme.colors.border,
   },
   metricItem: {
     flexDirection: 'row',
@@ -591,7 +593,7 @@ const styles = StyleSheet.create({
   },
   metricText: {
     fontSize: 12,
-    color: Colors.darkGray,
+    color: theme.colors.darkGray,
     marginLeft: 4,
   },
   emptyState: {
@@ -603,12 +605,12 @@ const styles = StyleSheet.create({
   emptyStateText: {
     fontSize: 18,
     fontWeight: '500',
-    color: Colors.text,
+    color: theme.colors.text,
     marginTop: 16,
   },
   emptyStateSubtext: {
     fontSize: 14,
-    color: Colors.darkGray,
+    color: theme.colors.darkGray,
     marginTop: 8,
   },
   modalOverlay: {
@@ -618,7 +620,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   customerModal: {
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.white,
     borderRadius: 16,
     width: '90%',
     maxHeight: '80%',
@@ -634,12 +636,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: theme.colors.border,
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: Colors.text,
+    color: theme.colors.text,
   },
   modalContent: {
     padding: 20,
@@ -654,7 +656,7 @@ const styles = StyleSheet.create({
   profileName: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: Colors.text,
+    color: theme.colors.text,
     marginBottom: 8,
   },
   profileLevel: {
@@ -672,7 +674,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: Colors.text,
+    color: theme.colors.text,
     marginBottom: 12,
   },
   detailRow: {
@@ -682,7 +684,7 @@ const styles = StyleSheet.create({
   },
   detailText: {
     fontSize: 14,
-    color: Colors.text,
+    color: theme.colors.text,
     marginLeft: 12,
   },
   purchaseGrid: {
@@ -693,7 +695,7 @@ const styles = StyleSheet.create({
   purchaseCard: {
     flex: 1,
     minWidth: '45%',
-    backgroundColor: Colors.background,
+    backgroundColor: theme.colors.background,
     borderRadius: 12,
     padding: 16,
     alignItems: 'center',
@@ -701,11 +703,11 @@ const styles = StyleSheet.create({
   purchaseValue: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: Colors.primary,
+    color: theme.colors.primary,
   },
   purchaseLabel: {
     fontSize: 12,
-    color: Colors.darkGray,
+    color: theme.colors.darkGray,
     marginTop: 4,
     textAlign: 'center',
   },
@@ -715,14 +717,14 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   preferredItem: {
-    backgroundColor: Colors.primary + '20',
+    backgroundColor: theme.colors.primary + '20',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
   },
   preferredItemText: {
     fontSize: 12,
-    color: Colors.primary,
+    color: theme.colors.primary,
     fontWeight: '500',
   },
   customerTags: {
@@ -731,7 +733,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   customerTag: {
-    backgroundColor: Colors.secondary + '20',
+    backgroundColor: theme.colors.secondary + '20',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
@@ -755,13 +757,13 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   editButton: {
-    backgroundColor: Colors.secondary,
+    backgroundColor: theme.colors.secondary,
   },
   orderButton: {
-    backgroundColor: Colors.success,
+    backgroundColor: theme.colors.success[500],
   },
   actionButtonText: {
-    color: Colors.white,
+    color: theme.colors.white,
     fontSize: 14,
     fontWeight: '600',
     marginLeft: 8,
@@ -774,17 +776,17 @@ const styles = StyleSheet.create({
   loadingText: { // Added
     marginTop: 10,
     fontSize: 16,
-    color: Colors.darkGray,
+    color: theme.colors.darkGray,
   },
   retryButton: { // Added
     marginTop: 20,
-    backgroundColor: Colors.primary,
+    backgroundColor: theme.colors.primary,
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
   },
   retryButtonText: { // Added
-    color: Colors.white,
+    color: theme.colors.white,
     fontSize: 16,
     fontWeight: '600',
   },
