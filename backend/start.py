@@ -16,13 +16,9 @@ if __name__ == "__main__":
     print(f"Environment: {os.environ.get('ENVIRONMENT', 'production')}")
     print(f"Debug mode: {os.environ.get('DEBUG', 'false')}")
     
-    # Use minimal app to avoid startup issues
-    try:
-        from app.main_minimal import app
-        print("✅ Using minimal app (no external dependencies)")
-    except ImportError:
-        from app.main import app
-        print("⚠️ Using full app (may require external dependencies)")
+    # Force minimal app for deployment stability
+    from app.main_minimal import app
+    print("✅ Using minimal app (no external dependencies)")
     
     uvicorn.run(
         app,

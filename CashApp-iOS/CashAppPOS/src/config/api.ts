@@ -9,7 +9,7 @@
 const isDevelopment = __DEV__;
 
 // DigitalOcean App Platform backend URL (Production) - VERIFIED WORKING
-const PRODUCTION_API_URL = 'https://fynlopos-9eq2c.ondigitalocean.app';
+const PRODUCTION_API_URL = 'https://fynlopos-9eg2c.ondigitalocean.app';
 
 // Mac's LAN IP address for device testing (Development only)
 const MAC_LAN_IP = '192.168.0.109';
