@@ -1,25 +1,42 @@
-import os
-from typing import Literal, Any # Python 3.8+
-# For older Python, from typing_extensions import Literal
-from pathlib import Path
+"""
+Email Service using Resend API for Fynlo POS
+Handles transactional emails including receipt delivery
+"""
 
-from jinja2 import Environment, FileSystemLoader, select_autoescape
-from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail, Content, Email # Corrected import for Content and Email
+import os
 import logging
+from typing import Literal, Optional, Dict, Any
+from pathlib import Path
+from jinja2 import Environment, FileSystemLoader, select_autoescape
+import resend
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
-# Define TYPES, ensure Literal is correctly imported based on Python version
-# For this environment, assume Python 3.8+ for direct typing.Literal
+# Define TYPES for backward compatibility
 TYPES = Literal["sale", "refund"]
 
 class EmailService:
+    """Email service using Resend API for transactional emails"""
+    
     def __init__(self):
-        # Determine the correct path to the templates directory
-        # Assuming this service file is in backend/app/services/email_service.py
-        # Then root should be backend/app/templates/email/
+        """Initialize Resend email service"""
         try:
+            # Get configuration from settings
+            self.api_key = settings.RESEND_API_KEY
+            self.from_addr = settings.RESEND_FROM_EMAIL
+            self.from_name = settings.RESEND_FROM_NAME
+            
+            if not self.api_key:
+                logger.error("RESEND_API_KEY not configured")
+                self.sg = None  # Keep for backward compatibility
+                self.env = None
+                return
+            
+            # Configure Resend
+            resend.api_key = self.api_key
+            
+            # Setup Jinja2 for email templates - same path structure as before
             templates_dir = Path(__file__).resolve().parent.parent / "templates" / "email"
             if not templates_dir.exists():
                 logger.info(f"Templates directory {templates_dir} does not exist. Creating it.")
@@ -29,86 +46,148 @@ class EmailService:
                 loader=FileSystemLoader(str(templates_dir)),
                 autoescape=select_autoescape(["html", "xml"])
             )
-
-            sendgrid_api_key = os.environ.get("SENDGRID_API_KEY")
-            if not sendgrid_api_key:
-                logger.error("SENDGRID_API_KEY environment variable not set. Email service will not be functional.")
-                # Raise an error or handle this gracefully depending on requirements
-                # For now, allow initialization but sending will fail.
-                self.sg = None
-            else:
-                self.sg = SendGridAPIClient(sendgrid_api_key)
-
-            self.from_addr = os.environ.get("EMAIL_FROM", "no-reply@fynlo.com")
-            logger.info(f"EmailService initialized. From address: {self.from_addr}. Templates dir: {templates_dir}")
-
+            
+            # Set sg to True for backward compatibility checks
+            self.sg = True
+            
+            logger.info(f"EmailService initialized with Resend - From: {self.from_addr}")
+            
         except Exception as e:
             logger.exception(f"Error initializing EmailService: {e}")
-            self.sg = None # Ensure sg is None if init fails
+            self.sg = None
             self.env = None
-
-
+    
     def send_receipt(self, *, order: Any, type_: TYPES, amount: float) -> bool:
+        """
+        Send receipt email for sale or refund
+        
+        Args:
+            order: Order object with order details
+            type_: Email type ("sale" or "refund")
+            amount: Transaction amount
+            
+        Returns:
+            bool: True if email sent successfully, False otherwise
+        """
         if not self.sg or not self.env:
-            logger.error("EmailService not properly initialized (SendGrid client or Jinja env missing). Cannot send email.")
+            logger.error("EmailService not properly initialized (Resend client or Jinja env missing). Cannot send email.")
             return False
 
         if not hasattr(order, 'customer_email') or not order.customer_email:
-            logger.info(f"Order #{getattr(order, 'number', 'N/A')} has no customer_email. Skipping receipt sending.")
+            logger.info(f"Order #{getattr(order, 'order_number', getattr(order, 'number', 'N/A'))} has no customer_email. Skipping receipt sending.")
             return False
 
         try:
-            template_name = "receipt.html" # Using one template with conditional logic
+            # Generate email content from template
+            template_name = "receipt.html"
             tmpl = self.env.get_template(template_name)
-
-            # Ensure order object has necessary attributes (order.number, order.lines, order.total)
-            # These might need to be mapped from the actual order object passed.
-            # For example, if order is an SQLAlchemy model:
-            # order_data = {
-            #     "number": order.order_number,
-            #     "customer_email": order.customer_email_column, # map to actual column
-            #     "lines": [{"qty": li.quantity, "name": li.product_name, "total": li.price} for li in order.items_relationship],
-            #     "total": order.total_amount
-            # }
-            # For now, assuming 'order' object directly has .number, .lines, .total, .customer_email
-
             html_content = tmpl.render(order=order, type=type_, amount=amount)
-
-            subject = f"Fynlo – {'Refund' if type_=='refund' else 'Receipt'} for #{getattr(order, 'order_number', getattr(order, 'number', 'N/A'))}"
-
-            message = Mail(
-                from_email=Email(self.from_addr, "Fynlo POS"), # Using Email helper for from_email
-                to_emails=order.customer_email,
-                subject=subject,
-                html_content=Content("text/html", html_content) # Using Content helper
-            )
-
-            response = self.sg.send(message)
-
-            logger.info(f"Receipt email sent for order #{getattr(order, 'order_number', 'N/A')} to {order.customer_email}. Type: {type_}. Status Code: {response.status_code}")
-            return 200 <= response.status_code < 300
+            
+            # Determine email subject
+            order_number = getattr(order, 'order_number', getattr(order, 'number', 'N/A'))
+            subject = f"Fynlo – {'Refund' if type_=='refund' else 'Receipt'} for #{order_number}"
+            
+            # Send email using Resend
+            params = {
+                "from": f"{self.from_name} <{self.from_addr}>",
+                "to": [order.customer_email],
+                "subject": subject,
+                "html": html_content,
+                "tags": [
+                    {"name": "category", "value": "receipt"},
+                    {"name": "type", "value": type_},
+                    {"name": "order_id", "value": str(getattr(order, 'id', 'unknown'))}
+                ]
+            }
+            
+            response = resend.Emails.send(params)
+            
+            # Check response
+            if response and hasattr(response, 'get') and response.get('id'):
+                logger.info(f"Receipt email sent for order #{order_number} to {order.customer_email}. Type: {type_}. Resend ID: {response['id']}")
+                return True
+            else:
+                logger.error(f"Failed to send receipt email - Invalid response: {response}")
+                return False
+                
         except Exception as e:
             logger.exception(f"Error sending receipt email for order #{getattr(order, 'order_number', 'N/A')}: {e}")
+            return False
+    
+    def send_custom_email(
+        self, 
+        to_email: str, 
+        subject: str, 
+        html_content: str,
+        tags: Optional[Dict[str, str]] = None
+    ) -> bool:
+        """
+        Send custom email with HTML content
+        
+        Args:
+            to_email: Recipient email address
+            subject: Email subject
+            html_content: HTML email content
+            tags: Optional tags for email tracking
+            
+        Returns:
+            bool: True if sent successfully, False otherwise
+        """
+        if not self.sg:
+            logger.error("EmailService not properly initialized. Cannot send email.")
+            return False
+            
+        try:
+            params = {
+                "from": f"{self.from_name} <{self.from_addr}>",
+                "to": [to_email],
+                "subject": subject,
+                "html": html_content
+            }
+            
+            # Add tags if provided
+            if tags:
+                params["tags"] = [{"name": k, "value": v} for k, v in tags.items()]
+            
+            response = resend.Emails.send(params)
+            
+            if response and hasattr(response, 'get') and response.get('id'):
+                logger.info(f"Custom email sent successfully to {to_email} - ID: {response['id']}")
+                return True
+            else:
+                logger.error(f"Failed to send custom email - Invalid response: {response}")
+                return False
+                
+        except Exception as e:
+            logger.error(f"Error sending custom email: {str(e)}")
+            return False
+    
+    def test_connection(self) -> bool:
+        """Test Resend API connection"""
+        try:
+            if not self.sg:
+                logger.error("Resend not properly initialized")
+                return False
+                
+            # Send a test email to verify configuration
+            response = resend.Emails.send({
+                "from": f"{self.from_name} <{self.from_addr}>",
+                "to": [self.from_addr],  # Send to ourselves
+                "subject": "Resend Configuration Test",
+                "html": "<p>This is a test email to verify Resend configuration.</p>"
+            })
+            
+            if response and hasattr(response, 'get') and response.get('id'):
+                logger.info("Resend connection test successful")
+                return True
+            else:
+                logger.error("Resend connection test failed")
+                return False
+                
+        except Exception as e:
+            logger.error(f"Resend connection test error: {str(e)}")
             return False
 
 # Example Usage (for testing or if run directly, though typically not)
 if __name__ == '__main__':
-    # This part would require mocking os.environ and the order object for a real test
-    # For demonstration purposes only
-    logger.info("EmailService module loaded. Not for direct execution in production.")
-    # Example:
-    # os.environ['SENDGRID_API_KEY'] = 'YOUR_SG_KEY'
-    # os.environ['EMAIL_FROM'] = 'test@example.com'
-    # class MockOrder:
-    #     def __init__(self):
-    #         self.order_number = "12345"
-    #         self.customer_email = "customer@example.com"
-    #         self.lines = [{"qty": 1, "name": "Test Item", "total": 10.00}]
-    #         self.total = 10.00
-    # mock_order = MockOrder()
-    # email_service = EmailService()
-    # if email_service.sg:
-    #    email_service.send_receipt(order=mock_order, type_='sale', amount=10.00)
-    #    email_service.send_receipt(order=mock_order, type_='refund', amount=5.00)
-    # else:
-    #    print("EmailService could not be initialized (likely missing SENDGRID_API_KEY).")
+    logger.info("EmailService module loaded. Now using Resend instead of SendGrid.")

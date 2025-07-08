@@ -71,6 +71,11 @@ class Settings(BaseSettings):
     MAX_FILE_SIZE: int = 10 * 1024 * 1024  # 10MB
     UPLOAD_DIR: str = "uploads"
 
+    # Email Service Configuration - Resend
+    RESEND_API_KEY: Optional[str] = None
+    RESEND_FROM_EMAIL: str = "noreply@fynlo.co.uk"
+    RESEND_FROM_NAME: str = "Fynlo POS"
+
     # Logging and Error Handling
     LOG_LEVEL: str = "DEBUG"
     ERROR_DETAIL_ENABLED: bool = True
