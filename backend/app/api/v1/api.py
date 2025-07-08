@@ -8,7 +8,7 @@ from app.middleware.rate_limit_middleware import limiter, DEFAULT_RATE
 from app.api.v1.endpoints import (
     auth, restaurants, products, orders, payments, customers,
     analytics, files, platform, platform_settings, payment_configurations,
-    websocket, sync, notifications,
+    websocket, sync, notifications, menu,
     pos, admin, inventory, recipes, employees # Added inventory, recipes, and employees
 )
 
@@ -44,3 +44,6 @@ api_router.include_router(recipes.router, prefix="/recipes", tags=["recipe_manag
 
 # Employee Management
 api_router.include_router(employees.router, prefix="/employees", tags=["employee_management"])
+
+# Menu Management (Frontend compatibility endpoints)
+api_router.include_router(menu.router, prefix="/menu", tags=["menu"])
