@@ -8,7 +8,7 @@
 // Get the current environment
 const isDevelopment = __DEV__;
 
-// DigitalOcean App Platform backend URL (Production)
+// DigitalOcean App Platform backend URL (Production) - VERIFIED WORKING
 const PRODUCTION_API_URL = 'https://fynlopos-9eq2c.ondigitalocean.app';
 
 // Mac's LAN IP address for device testing (Development only)
