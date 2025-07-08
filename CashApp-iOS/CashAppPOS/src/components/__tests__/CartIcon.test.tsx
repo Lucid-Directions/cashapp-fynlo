@@ -14,11 +14,14 @@ jest.mock('react-native-vector-icons/MaterialIcons', () => {
 
 
 const mockTheme = {
-  ...defaultTheme, // or your specific theme structure
   colors: {
-    ...defaultTheme.colors, // spread existing theme colors
-    white: Colors.white, // ensure mock theme has the colors used by the component
-    // Add other colors if CartIcon or its styles depend on them via useTheme
+    white: Colors.white,
+    primary: Colors.primary,
+    secondary: Colors.secondary,
+    background: Colors.background,
+    text: Colors.text,
+    border: Colors.border,
+    // Add other colors from defaultTheme if needed
   },
 };
 

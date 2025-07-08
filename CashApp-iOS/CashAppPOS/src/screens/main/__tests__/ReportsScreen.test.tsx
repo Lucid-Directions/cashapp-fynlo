@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react-native';
-import ReportsScreen from '../ReportsScreen';
+import ReportsScreen from '../../reports/ReportsScreenSimple';
 import { customRender } from '../../../__tests__/utils/testUtils';
 import { useAppStore } from '../../../store/useAppStore';
 

@@ -8,7 +8,7 @@ import logging
 from datetime import datetime
 import uuid
 try:
-    from square import Client
+    from square import client as Client
     from square.models import CreatePaymentRequest, Money, UpdatePaymentRequest, RefundPaymentRequest
 except ImportError:
     # For testing - mock the Square imports
