@@ -364,26 +364,26 @@ const createStyles = (theme: any) => StyleSheet.create({
   cameraPreviewPlaceholder: {
     width: '100%',
     height: 200, // Adjust as needed
-    backgroundColor: Colors.lightGray,
+    backgroundColor: theme.colors.lightGray,
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 8,
     marginBottom: 20,
   },
   placeholderText: {
-    color: Colors.darkGray,
+    color: theme.colors.darkGray,
     marginTop: 10,
   },
   captureButton: {
     flexDirection: 'row',
-    backgroundColor: Colors.primary,
+    backgroundColor: theme.colors.primary,
     paddingVertical: 12,
     paddingHorizontal: 30,
     borderRadius: 8,
     alignItems: 'center',
   },
   submitButton: {
-    backgroundColor: Colors.success, // Or primary
+    backgroundColor: theme.colors.success[500], // Or primary
     paddingVertical: 12,
     paddingHorizontal: 30,
     borderRadius: 8,
@@ -392,7 +392,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     width: '100%',
   },
   buttonText: {
-    color: Colors.white,
+    color: theme.colors.white,
     fontSize: 16,
     fontWeight: '600',
     marginLeft: 8,
@@ -406,7 +406,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   loadingSubtitle: {
     fontSize: 14,
-    color: Colors.darkGray,
+    color: theme.colors.darkGray,
     marginBottom: 20,
   },
   itemList: {
@@ -420,7 +420,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     marginBottom: 10,
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    borderBottomColor: theme.colors.border,
   },
   itemInputs: {
     flex: 1,
@@ -429,7 +429,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: theme.colors.border,
     borderRadius: 6,
     paddingHorizontal: 10,
     paddingVertical: 8,
@@ -458,12 +458,12 @@ const createStyles = (theme: any) => StyleSheet.create({
     paddingHorizontal: 15,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: Colors.primary,
+    borderColor: theme.colors.primary,
     alignSelf: 'flex-start',
     marginBottom: 15,
   },
   addItemButtonText: {
-    color: Colors.primary,
+    color: theme.colors.primary,
     fontSize: 14,
     fontWeight: '600',
     marginLeft: 6,

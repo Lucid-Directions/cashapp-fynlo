@@ -207,7 +207,7 @@ const ProfileScreenContent: React.FC = () => {
             <Text style={styles.sectionTitle}>Current Session</Text>
             <View style={styles.sessionCard}>
               <View style={styles.sessionHeader}>
-                <Icon name="access-time" size={24} color={theme.colors.success} />
+                <Icon name="access-time" size={24} color={theme.colors.success[500]} />
                 <Text style={styles.sessionTitle}>Active Session</Text>
               </View>
               <View style={styles.sessionInfo}>

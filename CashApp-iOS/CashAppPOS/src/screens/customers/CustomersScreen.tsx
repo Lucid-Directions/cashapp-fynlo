@@ -740,7 +740,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   customerTagText: {
     fontSize: 12,
-    color: Colors.secondary,
+    color: theme.colors.secondary,
     fontWeight: '500',
   },
   actionButtons: {
