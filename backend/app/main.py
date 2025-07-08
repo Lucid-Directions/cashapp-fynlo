@@ -233,9 +233,61 @@ async def get_menu_items():
     """Get menu items"""
     return APIResponseHelper.success(
         data=[
-            {"id": 1, "name": "Tacos", "price": 8.99, "category": "Main"},
-            {"id": 2, "name": "Burrito", "price": 12.99, "category": "Main"},
-            {"id": 3, "name": "Nachos", "price": 9.99, "category": "Appetizer"}
+            # Tacos
+            {"id": 1, "name": "Carne Asada Tacos", "price": 3.50, "category": "Tacos", "description": "Grilled beef with onions and cilantro", "image": "🌮"},
+            {"id": 2, "name": "Al Pastor Tacos", "price": 3.25, "category": "Tacos", "description": "Marinated pork with pineapple", "image": "🌮"},
+            {"id": 3, "name": "Carnitas Tacos", "price": 3.50, "category": "Tacos", "description": "Slow-cooked pork shoulder", "image": "🌮"},
+            {"id": 4, "name": "Pollo Tacos", "price": 3.00, "category": "Tacos", "description": "Grilled chicken with salsa verde", "image": "🌮"},
+            {"id": 5, "name": "Fish Tacos", "price": 4.00, "category": "Tacos", "description": "Grilled fish with cabbage slaw", "image": "🌮"},
+            
+            # Special Tacos
+            {"id": 6, "name": "Lobster Tacos", "price": 8.50, "category": "Special Tacos", "description": "Fresh lobster with avocado", "image": "🦞"},
+            {"id": 7, "name": "Steak Fajita Tacos", "price": 4.50, "category": "Special Tacos", "description": "Sizzling steak with peppers", "image": "🥩"},
+            {"id": 8, "name": "Shrimp Tacos", "price": 4.25, "category": "Special Tacos", "description": "Grilled shrimp with chipotle sauce", "image": "🍤"},
+            
+            # Burritos
+            {"id": 9, "name": "Carne Asada Burrito", "price": 12.99, "category": "Burritos", "description": "Large flour tortilla with rice and beans", "image": "🌯"},
+            {"id": 10, "name": "Chicken Burrito", "price": 11.99, "category": "Burritos", "description": "Grilled chicken with fresh salsa", "image": "🌯"},
+            {"id": 11, "name": "Bean & Rice Burrito", "price": 9.99, "category": "Burritos", "description": "Vegetarian with black beans", "image": "🌯"},
+            {"id": 12, "name": "California Burrito", "price": 13.99, "category": "Burritos", "description": "Carne asada with french fries", "image": "🌯"},
+            
+            # Quesadillas
+            {"id": 13, "name": "Cheese Quesadilla", "price": 8.99, "category": "Quesadillas", "description": "Melted cheese in flour tortilla", "image": "🧀"},
+            {"id": 14, "name": "Chicken Quesadilla", "price": 10.99, "category": "Quesadillas", "description": "Grilled chicken and cheese", "image": "🧀"},
+            {"id": 15, "name": "Steak Quesadilla", "price": 12.99, "category": "Quesadillas", "description": "Carne asada and cheese", "image": "🧀"},
+            
+            # Appetizers
+            {"id": 16, "name": "Nachos Supreme", "price": 11.99, "category": "Appetizers", "description": "Loaded with cheese, beans, and salsa", "image": "🧀"},
+            {"id": 17, "name": "Guacamole & Chips", "price": 7.99, "category": "Appetizers", "description": "Fresh made guacamole", "image": "🥑"},
+            {"id": 18, "name": "Queso Dip", "price": 6.99, "category": "Appetizers", "description": "Melted cheese dip with chips", "image": "🧀"},
+            {"id": 19, "name": "Jalapeño Poppers", "price": 8.99, "category": "Appetizers", "description": "Stuffed with cream cheese", "image": "🌶️"},
+            
+            # Sides
+            {"id": 20, "name": "Mexican Rice", "price": 3.99, "category": "Sides", "description": "Seasoned rice with tomatoes", "image": "🍚"},
+            {"id": 21, "name": "Refried Beans", "price": 3.99, "category": "Sides", "description": "Traditional Mexican beans", "image": "🫘"},
+            {"id": 22, "name": "Black Beans", "price": 3.99, "category": "Sides", "description": "Whole black beans", "image": "🫘"},
+            {"id": 23, "name": "Elote (Street Corn)", "price": 4.99, "category": "Sides", "description": "Grilled corn with mayo and chili", "image": "🌽"},
+            
+            # Drinks
+            {"id": 24, "name": "Horchata", "price": 3.50, "category": "Drinks", "description": "Sweet rice cinnamon drink", "image": "🥛"},
+            {"id": 25, "name": "Jamaica Water", "price": 2.99, "category": "Drinks", "description": "Hibiscus flower water", "image": "🌺"},
+            {"id": 26, "name": "Coca-Cola", "price": 2.50, "category": "Drinks", "description": "Classic soda", "image": "🥤"},
+            {"id": 27, "name": "Sprite", "price": 2.50, "category": "Drinks", "description": "Lemon-lime soda", "image": "🥤"},
+            {"id": 28, "name": "Orange Juice", "price": 3.25, "category": "Drinks", "description": "Fresh squeezed", "image": "🍊"},
+            
+            # Desserts
+            {"id": 29, "name": "Churros", "price": 5.99, "category": "Desserts", "description": "Fried dough with cinnamon sugar", "image": "🍩"},
+            {"id": 30, "name": "Flan", "price": 4.99, "category": "Desserts", "description": "Caramel custard", "image": "🍮"},
+            {"id": 31, "name": "Tres Leches Cake", "price": 5.99, "category": "Desserts", "description": "Three milk cake", "image": "🍰"},
+            
+            # Breakfast
+            {"id": 32, "name": "Breakfast Burrito", "price": 9.99, "category": "Breakfast", "description": "Eggs, cheese, and potatoes", "image": "🌯"},
+            {"id": 33, "name": "Huevos Rancheros", "price": 11.99, "category": "Breakfast", "description": "Eggs with salsa on tortillas", "image": "🍳"},
+            {"id": 34, "name": "Chilaquiles", "price": 10.99, "category": "Breakfast", "description": "Fried tortillas with salsa", "image": "🍳"},
+            
+            # Soups
+            {"id": 35, "name": "Pozole", "price": 12.99, "category": "Soups", "description": "Traditional hominy soup", "image": "🍲"},
+            {"id": 36, "name": "Tortilla Soup", "price": 8.99, "category": "Soups", "description": "Tomato-based soup with tortilla strips", "image": "🍲"}
         ],
         message="Menu items retrieved"
     )
@@ -245,9 +297,16 @@ async def get_menu_categories():
     """Get menu categories"""
     return APIResponseHelper.success(
         data=[
-            {"id": 1, "name": "Main", "description": "Main courses"},
-            {"id": 2, "name": "Appetizer", "description": "Appetizers"},
-            {"id": 3, "name": "Beverage", "description": "Drinks"}
+            {"id": 1, "name": "Tacos", "description": "Traditional Mexican tacos", "icon": "🌮"},
+            {"id": 2, "name": "Special Tacos", "description": "Premium taco selections", "icon": "⭐"},
+            {"id": 3, "name": "Burritos", "description": "Large flour tortilla wraps", "icon": "🌯"},
+            {"id": 4, "name": "Quesadillas", "description": "Grilled cheese-filled tortillas", "icon": "🧀"},
+            {"id": 5, "name": "Appetizers", "description": "Starters and snacks", "icon": "🥑"},
+            {"id": 6, "name": "Sides", "description": "Side dishes and extras", "icon": "🍚"},
+            {"id": 7, "name": "Drinks", "description": "Beverages and refreshments", "icon": "🥤"},
+            {"id": 8, "name": "Desserts", "description": "Sweet treats", "icon": "🍰"},
+            {"id": 9, "name": "Breakfast", "description": "Morning specialties", "icon": "🍳"},
+            {"id": 10, "name": "Soups", "description": "Traditional Mexican soups", "icon": "🍲"}
         ],
         message="Menu categories retrieved"
     )
@@ -292,6 +351,46 @@ async def get_service_charge():
             "lastUpdated": "2025-01-08T16:30:00Z"
         },
         message="Service charge settings retrieved"
+    )
+
+@app.get("/api/v1/schedule/week")
+async def get_week_schedule():
+    """Get weekly schedule"""
+    from datetime import datetime, timedelta
+    
+    # Generate a mock weekly schedule
+    today = datetime.now()
+    week_start = today - timedelta(days=today.weekday())
+    
+    schedule_data = []
+    days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+    
+    for i, day in enumerate(days):
+        date = week_start + timedelta(days=i)
+        schedule_data.append({
+            "date": date.strftime("%Y-%m-%d"),
+            "day": day,
+            "shifts": [
+                {
+                    "employeeId": 1,
+                    "employeeName": "John Manager",
+                    "startTime": "09:00",
+                    "endTime": "17:00",
+                    "role": "manager"
+                },
+                {
+                    "employeeId": 2,
+                    "employeeName": "Sarah Cashier",
+                    "startTime": "10:00",
+                    "endTime": "18:00",
+                    "role": "cashier"
+                }
+            ]
+        })
+    
+    return APIResponseHelper.success(
+        data=schedule_data,
+        message="Weekly schedule retrieved"
     )
 
 if __name__ == "__main__":

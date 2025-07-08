@@ -52,8 +52,9 @@ const SimpleTextInput: React.FC<SimpleTextInputProps> = ({
   const inputRef = useRef<TextInput>(null);
 
   const handleTextChange = (text: string) => {
-    // CRITICAL: Don't call onValueChange during typing - only update internal state
+    // FIXED: Update both internal state AND parent immediately
     setInternalValue(text);
+    onValueChange(text);
   };
 
   const handleFocus = () => {
@@ -64,13 +65,12 @@ const SimpleTextInput: React.FC<SimpleTextInputProps> = ({
 
   const handleBlur = () => {
     setIsFocused(false);
-    
-    // ONLY call onValueChange on blur - this prevents keyboard dismissal
-    onValueChange(internalValue);
+    // No need to call onValueChange here since it's already called during typing
   };
 
   const handleClear = () => {
     setInternalValue('');
+    onValueChange('');
     inputRef.current?.focus();
   };
 
