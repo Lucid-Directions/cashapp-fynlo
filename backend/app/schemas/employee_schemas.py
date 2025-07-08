@@ -6,7 +6,7 @@ Defines request/response models for employee operations
 from typing import Optional, List, Dict, Any
 from datetime import datetime, date, time
 from decimal import Decimal
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 from enum import Enum
 
 # Enums for employee roles and statuses
@@ -43,7 +43,7 @@ class EmployeeBase(BaseModel):
     phone: Optional[str] = Field(None, pattern=r'^\+?[\d\s\-\(\)]+$')
     role: EmployeeRole
     employment_status: EmploymentStatus
-    hourly_rate: Optional[Decimal] = Field(None, ge=0, decimal_places=2)
+    hourly_rate: Optional[Decimal] = Field(None, ge=0)
     weekly_hours: Optional[int] = Field(None, ge=0, le=80)
     is_active: bool = True
 
@@ -54,7 +54,8 @@ class EmployeeCreateRequest(EmployeeBase):
     emergency_contact_phone: Optional[str] = Field(None, pattern=r'^\+?[\d\s\-\(\)]+$')
     notes: Optional[str] = Field(None, max_length=500)
 
-    @validator('hire_date', always=True)
+    @field_validator('hire_date')
+    @classmethod
     def validate_hire_date(cls, v):
         if v is None:
             return date.today()
@@ -69,7 +70,7 @@ class EmployeeUpdateRequest(BaseModel):
     phone: Optional[str] = Field(None, pattern=r'^\+?[\d\s\-\(\)]+$')
     role: Optional[EmployeeRole] = None
     employment_status: Optional[EmploymentStatus] = None
-    hourly_rate: Optional[Decimal] = Field(None, ge=0, decimal_places=2)
+    hourly_rate: Optional[Decimal] = Field(None, ge=0)
     weekly_hours: Optional[int] = Field(None, ge=0, le=80)
     is_active: Optional[bool] = None
     emergency_contact_name: Optional[str] = Field(None, max_length=100)
@@ -106,9 +107,10 @@ class ScheduleBase(BaseModel):
     end_time: time
     is_recurring: bool = True
 
-    @validator('end_time')
-    def validate_end_time(cls, v, values):
-        if 'start_time' in values and v <= values['start_time']:
+    @field_validator('end_time')
+    @classmethod
+    def validate_end_time(cls, v, info):
+        if info.data and 'start_time' in info.data and v <= info.data['start_time']:
             raise ValueError('End time must be after start time')
         return v
 
@@ -116,7 +118,8 @@ class ScheduleCreateRequest(ScheduleBase):
     effective_date: date = Field(default_factory=date.today)
     notes: Optional[str] = Field(None, max_length=200)
 
-    @validator('effective_date')
+    @field_validator('effective_date')
+    @classmethod
     def validate_effective_date(cls, v):
         if v < date.today():
             raise ValueError('Effective date cannot be in the past')
@@ -130,9 +133,10 @@ class ScheduleUpdateRequest(BaseModel):
     effective_date: Optional[date] = None
     notes: Optional[str] = Field(None, max_length=200)
 
-    @validator('end_time')
-    def validate_end_time(cls, v, values):
-        if v and 'start_time' in values and values['start_time'] and v <= values['start_time']:
+    @field_validator('end_time')
+    @classmethod
+    def validate_end_time(cls, v, info):
+        if v and info.data and 'start_time' in info.data and info.data['start_time'] and v <= info.data['start_time']:
             raise ValueError('End time must be after start time')
         return v
 
@@ -205,10 +209,10 @@ class PerformanceMetricResponse(BaseModel):
     employee_id: int
     metric_date: date
     orders_served: Optional[int] = 0
-    sales_total: Optional[Decimal] = Field(None, decimal_places=2)
-    customer_rating: Optional[Decimal] = Field(None, ge=0, le=5, decimal_places=1)
-    punctuality_score: Optional[Decimal] = Field(None, ge=0, le=100, decimal_places=1)
-    efficiency_score: Optional[Decimal] = Field(None, ge=0, le=100, decimal_places=1)
+    sales_total: Optional[Decimal] = Field(None)
+    customer_rating: Optional[Decimal] = Field(None, ge=0, le=5)
+    punctuality_score: Optional[Decimal] = Field(None, ge=0, le=100)
+    efficiency_score: Optional[Decimal] = Field(None, ge=0, le=100)
     notes: Optional[str]
     created_at: datetime
     updated_at: Optional[datetime]
@@ -244,7 +248,7 @@ class WeeklyScheduleResponse(BaseModel):
     restaurant_id: int
     days: List[WeeklyScheduleDay]
     total_week_hours: float
-    total_labor_cost: Optional[Decimal] = Field(None, decimal_places=2)
+    total_labor_cost: Optional[Decimal] = Field(None)
     coverage_summary: Dict[str, Any] = Field(
         default_factory=dict,
         description="Summary of coverage adequacy across the week"
@@ -282,16 +286,16 @@ class EmployeeHoursReport(BaseModel):
     scheduled_hours: float
     actual_hours: float
     overtime_hours: float
-    attendance_rate: Decimal = Field(..., decimal_places=1, description="Percentage")
-    average_rating: Optional[Decimal] = Field(None, decimal_places=1)
+    attendance_rate: Decimal = Field(..., description="Percentage")
+    average_rating: Optional[Decimal] = Field(None)
 
 class RestaurantLaborReport(BaseModel):
     period_start: date
     period_end: date
     total_scheduled_hours: float
     total_actual_hours: float
-    total_labor_cost: Decimal = Field(..., decimal_places=2)
-    average_hourly_rate: Decimal = Field(..., decimal_places=2)
+    total_labor_cost: Decimal = Field(...)
+    average_hourly_rate: Decimal = Field(...)
     employees: List[EmployeeHoursReport]
     busiest_days: List[str]
     peak_hours: List[str]

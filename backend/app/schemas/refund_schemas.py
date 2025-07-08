@@ -22,7 +22,7 @@ class RefundResponseSchema(BaseModel):
     created_at: str # ISO format datetime string
 
     class Config:
-        orm_mode = True # Pydantic V1 style, or from_attributes = True for V2
+        from_attributes = True # Pydantic V1 style, or from_attributes = True for V2
         # For Pydantic V2, ensure orm_mode is correctly handled.
         # If using Pydantic V2, it would be:
         # model_config = {"from_attributes": True}
@@ -36,5 +36,5 @@ class RefundLedgerEntrySchema(BaseModel):
     timestamp: str # ISO format datetime string
 
     class Config:
-        orm_mode = True
+        from_attributes = True
         # model_config = {"from_attributes": True} # For Pydantic V2

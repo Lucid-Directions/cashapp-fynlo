@@ -1,7 +1,7 @@
 """
 Pydantic Schemas for Inventory, Recipes, and Ledger
 """
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 from typing import List, Optional
 from uuid import UUID
 from datetime import datetime
@@ -33,7 +33,7 @@ class InventoryItemInDBBase(InventoryItemBase):
     last_updated: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class InventoryItem(InventoryItemInDBBase):
     pass
@@ -75,7 +75,7 @@ class RecipeInDBBase(BaseModel):
     # Alternatively, a more complex schema can be defined here if needed.
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class Recipe(RecipeInDBBase):
     # This schema is for individual recipe ingredient entries as stored in DB
@@ -108,7 +108,7 @@ class InventoryLedgerEntryInDBBase(InventoryLedgerEntryBase):
     ts: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class InventoryLedgerEntry(InventoryLedgerEntryInDBBase):
     pass
