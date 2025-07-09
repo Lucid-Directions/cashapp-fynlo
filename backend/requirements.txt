@@ -26,7 +26,7 @@ gotrue==2.0.0
 stripe==8.0.0
 requests==2.31.0
 squareup==34.0.1.20240118 # Corrected version for Square payment provider
-httpx==0.26.0 # For async HTTP requests (SumUp provider)
+httpx==0.24.1 # For async HTTP requests (SumUp provider) - Compatible with supabase 2.3.0
 
 # Real-time Features - Latest stable versions
 websockets==12.0
