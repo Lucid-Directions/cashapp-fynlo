@@ -243,8 +243,51 @@ async def login(request: dict):
 @app.get("/api/v1/menu/items")
 async def get_menu_items():
     """Get menu items - Returns Chucho restaurant menu"""
-    # Import Chucho menu data
-    from seed_chucho_menu import CHUCHO_MENU_ITEMS
+    # Chucho menu data embedded to avoid import issues
+    CHUCHO_MENU_ITEMS = [
+        # SNACKS
+        {"name": "Nachos", "price": 5.00, "category": "Snacks", "description": "Homemade corn tortilla chips with black beans, tomato salsa, pico de gallo, feta, guac & coriander", "available": True},
+        {"name": "Quesadillas", "price": 5.50, "category": "Snacks", "description": "Folded flour tortilla filled with mozzarella, topped with tomato salsa, feta & coriander", "available": True},
+        {"name": "Chorizo Quesadilla", "price": 5.50, "category": "Snacks", "description": "Folded flour tortilla filled with chorizo & mozzarella. Topped with tomato salsa, feta & coriander", "available": True},
+        {"name": "Chicken Quesadilla", "price": 5.50, "category": "Snacks", "description": "Folded flour tortilla filled with chicken, peppers, onion & mozzarella. Topped with salsa, feta & coriander", "available": True},
+        {"name": "Tostada", "price": 6.50, "category": "Snacks", "description": "Crispy tortillas with black beans filled with chicken or any topping, served with salsa, lettuce and feta", "available": True},
+        # TACOS
+        {"name": "Carnitas", "price": 3.50, "category": "Tacos", "description": "Slow cooked pork, served with onion, coriander, salsa, guacamole & coriander", "available": True},
+        {"name": "Cochinita", "price": 3.50, "category": "Tacos", "description": "Marinated pulled pork served with pickle red onion", "available": True},
+        {"name": "Barbacoa de Res", "price": 3.50, "category": "Tacos", "description": "Juicy pulled beef topped with onion, guacamole & coriander", "available": True},
+        {"name": "Chorizo", "price": 3.50, "category": "Tacos", "description": "Grilled chorizo with black beans, onions, salsa, coriander & guacamole", "available": True},
+        {"name": "Rellena", "price": 3.50, "category": "Tacos", "description": "Fried black pudding with beans, onion & chilli. Topped with coriander and pickled red onion", "available": True},
+        {"name": "Chicken Fajita", "price": 3.50, "category": "Tacos", "description": "Chicken, peppers & onion with black beans. Topped with salsa, guac & coriander", "available": True},
+        {"name": "Haggis", "price": 3.50, "category": "Tacos", "description": "Haggis with beans, onion & chilli. Topped with coriander and pickled red onion", "available": True},
+        {"name": "Pescado", "price": 3.50, "category": "Tacos", "description": "Battered cod with guacamole & coriander. Topped with red cabbage & mango chilli salsa", "available": True},
+        {"name": "Dorados", "price": 3.50, "category": "Tacos", "description": "Crispy rolled tortillas filled with chicken, topped with salsa, lettuce and feta", "available": True},
+        {"name": "Dorados Papa", "price": 3.50, "category": "Tacos", "description": "Crispy rolled tortillas filled with potato, topped with salsa, lettuce and feta", "available": True},
+        {"name": "Nopal", "price": 3.50, "category": "Tacos", "description": "Cactus, black beans & onion, topped with tomato salsa and crumbled feta", "available": True},
+        {"name": "Frijol", "price": 3.50, "category": "Tacos", "description": "Black beans with fried plantain served with tomato salsa, feta & coriander", "available": True},
+        {"name": "Verde", "price": 3.50, "category": "Tacos", "description": "Courgette & sweetcorn fried with garlic, served with tomato salsa and crumbled feta", "available": True},
+        {"name": "Fajita", "price": 3.50, "category": "Tacos", "description": "Mushrooms, peppers & onion with black beans. Topped with salsa, feta & coriander", "available": True},
+        # SPECIAL TACOS
+        {"name": "Carne Asada", "price": 4.50, "category": "Special Tacos", "description": "Diced rump steak with peppers and red onion. Served on black beans, topped with chimichurri sauce & coriander", "available": True},
+        {"name": "Camaron", "price": 4.50, "category": "Special Tacos", "description": "Prawns with chorizo, peppers and red onion. Served on black beans, topped with tomato salsa, coriander & guacamole", "available": True},
+        {"name": "Pulpos", "price": 4.50, "category": "Special Tacos", "description": "Chargrilled octopus, cooked with peppers and red onion. Served on grilled potato with garlic & coriander", "available": True},
+        # BURRITOS
+        {"name": "Regular Burrito", "price": 8.00, "category": "Burritos", "description": "Choose any filling from the taco menu! With black beans, lettuce, pico de gallo, & guacamole. Topped with salsa, feta and coriander", "available": True},
+        {"name": "Special Burrito", "price": 10.00, "category": "Burritos", "description": "Choose any filling from the special tacos menu! With black beans, lettuce, pico de gallo, & guacamole. Topped with salsa, feta and coriander", "available": True},
+        {"name": "Add Mozzarella", "price": 1.00, "category": "Burritos", "description": "Add extra cheese to any burrito", "available": True},
+        # SIDES
+        {"name": "Skinny Fries", "price": 3.50, "category": "Sides", "description": "Thin cut fries", "available": True},
+        {"name": "Pico de gallo", "price": 0.00, "category": "Sides", "description": "Diced tomato, onion and chilli - FREE", "available": True},
+        {"name": "Green Chili", "price": 0.00, "category": "Sides", "description": "Homemade green chili salsa - HOT! - FREE", "available": True},
+        {"name": "Pineapple Habanero", "price": 0.00, "category": "Sides", "description": "Pineapple sauce with habanero chili - HOT! - FREE", "available": True},
+        {"name": "Scotch Bonnet", "price": 0.00, "category": "Sides", "description": "Homemade spicy salsa made with scotch bonnet chilies - VERY HOT! - FREE", "available": True},
+        # DRINKS
+        {"name": "Pink Paloma", "price": 3.75, "category": "Drinks", "description": "An alcohol-free version of our refreshing cocktail. Tangy lime juice and grapefruit soda, with a splash of grenadine", "available": True},
+        {"name": "Coco-Nought", "price": 3.75, "category": "Drinks", "description": "Coconut, pineapple juice and milk, blended into a creamy, sweet, alcohol-free treat!", "available": True},
+        {"name": "Corona", "price": 3.80, "category": "Drinks", "description": "Mexican beer", "available": True},
+        {"name": "Modelo", "price": 4.00, "category": "Drinks", "description": "Rich, full-flavoured Pilsner style Lager. Crisp and refreshing. 355ml", "available": True},
+        {"name": "Pacifico", "price": 4.00, "category": "Drinks", "description": "Pilsner style Lager from the Pacific Ocean city of Mazatlán. 355ml", "available": True},
+        {"name": "Dos Equis", "price": 4.00, "category": "Drinks", "description": "Two X's. German brewing heritage with the spirit of Mexican traditions. 355ml", "available": True}
+    ]
     
     # Transform to match frontend format
     menu_items = []
@@ -267,8 +310,15 @@ async def get_menu_items():
 @app.get("/api/v1/menu/categories")
 async def get_menu_categories():
     """Get menu categories - Returns Chucho restaurant categories"""
-    # Import Chucho categories
-    from seed_chucho_menu import CHUCHO_CATEGORIES
+    # Chucho categories embedded to avoid import issues
+    CHUCHO_CATEGORIES = [
+        {"name": "Snacks", "color": "#FF6B6B", "icon": "restaurant", "sort_order": 1},
+        {"name": "Tacos", "color": "#4ECDC4", "icon": "restaurant", "sort_order": 2},
+        {"name": "Special Tacos", "color": "#45B7D1", "icon": "star", "sort_order": 3},
+        {"name": "Burritos", "color": "#96CEB4", "icon": "restaurant-menu", "sort_order": 4},
+        {"name": "Sides", "color": "#FECA57", "icon": "restaurant", "sort_order": 5},
+        {"name": "Drinks", "color": "#FF9FF3", "icon": "local-drink", "sort_order": 6}
+    ]
     
     # Transform to match frontend format
     categories = []
