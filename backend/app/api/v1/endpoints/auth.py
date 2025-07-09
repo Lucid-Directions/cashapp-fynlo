@@ -8,7 +8,7 @@ from typing import Optional
 from datetime import datetime
 import uuid
 
-from app.db.session import get_db
+from app.core.database import get_db
 from app.core.supabase import supabase_admin
 from app.core.config import settings
 from app.core.database import User, Restaurant

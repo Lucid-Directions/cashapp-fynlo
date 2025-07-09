@@ -8,7 +8,7 @@ from typing import Optional
 import uuid
 
 from app.core.supabase import supabase_admin
-from app.db.session import get_db
+from app.core.database import get_db
 from app.core.database import User
 from app.services.audit_logger import AuditLoggerService
 from app.models.audit_log import AuditEventType, AuditEventStatus
