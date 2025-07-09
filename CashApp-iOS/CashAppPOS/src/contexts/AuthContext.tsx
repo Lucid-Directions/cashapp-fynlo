@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuthStore } from '../store/useAuthStore';
+import useAppStore from '../store/useAppStore';
 
 export interface User {
   id: string;
@@ -116,6 +117,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       };
       setUser(legacyUser);
       
+      // Sync with AppStore
+      const appStore = useAppStore.getState();
+      appStore.setUser(legacyUser);
+      
       // Set business if available
       if (authStoreUser.restaurant_id && authStoreUser.restaurant_name) {
         setBusiness({
@@ -210,6 +215,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setBusiness(null);
       setPlatform(null);
       setManagedRestaurants([]);
+      
+      // Clear AppStore user
+      const appStore = useAppStore.getState();
+      appStore.logout();
     } catch (error) {
       console.error('Sign out error:', error);
     }
@@ -220,6 +229,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const updatedUser = { ...user, ...userData };
       setUser(updatedUser);
       await AsyncStorage.setItem('@auth_user', JSON.stringify(updatedUser));
+      
+      // Sync with AppStore
+      const appStore = useAppStore.getState();
+      appStore.setUser(updatedUser);
     }
   };
 

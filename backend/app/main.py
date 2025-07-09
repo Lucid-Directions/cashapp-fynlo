@@ -242,84 +242,48 @@ async def login(request: dict):
 
 @app.get("/api/v1/menu/items")
 async def get_menu_items():
-    """Get menu items"""
+    """Get menu items - Returns Chucho restaurant menu"""
+    # Import Chucho menu data
+    from seed_chucho_menu import CHUCHO_MENU_ITEMS
+    
+    # Transform to match frontend format
+    menu_items = []
+    for idx, item in enumerate(CHUCHO_MENU_ITEMS):
+        menu_items.append({
+            "id": idx + 1,
+            "name": item["name"],
+            "price": item["price"],
+            "category": item["category"],
+            "description": item["description"],
+            "icon": "restaurant",  # Default icon
+            "available": item["available"]
+        })
+    
     return APIResponseHelper.success(
-        data=[
-            # Tacos
-            {"id": 1, "name": "Carne Asada Tacos", "price": 3.50, "category": "Tacos", "description": "Grilled beef with onions and cilantro", "icon": "restaurant"},
-            {"id": 2, "name": "Al Pastor Tacos", "price": 3.25, "category": "Tacos", "description": "Marinated pork with pineapple", "icon": "restaurant"},
-            {"id": 3, "name": "Carnitas Tacos", "price": 3.50, "category": "Tacos", "description": "Slow-cooked pork shoulder", "icon": "restaurant"},
-            {"id": 4, "name": "Pollo Tacos", "price": 3.00, "category": "Tacos", "description": "Grilled chicken with salsa verde", "icon": "restaurant"},
-            {"id": 5, "name": "Fish Tacos", "price": 4.00, "category": "Tacos", "description": "Grilled fish with cabbage slaw", "icon": "restaurant"},
-            
-            # Special Tacos
-            {"id": 6, "name": "Lobster Tacos", "price": 8.50, "category": "Special Tacos", "description": "Fresh lobster with avocado", "icon": "star"},
-            {"id": 7, "name": "Steak Fajita Tacos", "price": 4.50, "category": "Special Tacos", "description": "Sizzling steak with peppers", "icon": "star"},
-            {"id": 8, "name": "Shrimp Tacos", "price": 4.25, "category": "Special Tacos", "description": "Grilled shrimp with chipotle sauce", "icon": "star"},
-            
-            # Burritos
-            {"id": 9, "name": "Carne Asada Burrito", "price": 12.99, "category": "Burritos", "description": "Large flour tortilla with rice and beans", "icon": "restaurant-menu"},
-            {"id": 10, "name": "Chicken Burrito", "price": 11.99, "category": "Burritos", "description": "Grilled chicken with fresh salsa", "icon": "restaurant-menu"},
-            {"id": 11, "name": "Bean & Rice Burrito", "price": 9.99, "category": "Burritos", "description": "Vegetarian with black beans", "icon": "restaurant-menu"},
-            {"id": 12, "name": "California Burrito", "price": 13.99, "category": "Burritos", "description": "Carne asada with french fries", "icon": "restaurant-menu"},
-            
-            # Quesadillas
-            {"id": 13, "name": "Cheese Quesadilla", "price": 8.99, "category": "Quesadillas", "description": "Melted cheese in flour tortilla", "icon": "fastfood"},
-            {"id": 14, "name": "Chicken Quesadilla", "price": 10.99, "category": "Quesadillas", "description": "Grilled chicken and cheese", "icon": "fastfood"},
-            {"id": 15, "name": "Steak Quesadilla", "price": 12.99, "category": "Quesadillas", "description": "Carne asada and cheese", "icon": "fastfood"},
-            
-            # Appetizers
-            {"id": 16, "name": "Nachos Supreme", "price": 11.99, "category": "Appetizers", "description": "Loaded with cheese, beans, and salsa", "icon": "local-dining"},
-            {"id": 17, "name": "Guacamole & Chips", "price": 7.99, "category": "Appetizers", "description": "Fresh made guacamole", "icon": "local-dining"},
-            {"id": 18, "name": "Queso Dip", "price": 6.99, "category": "Appetizers", "description": "Melted cheese dip with chips", "icon": "local-dining"},
-            {"id": 19, "name": "Jalapeño Poppers", "price": 8.99, "category": "Appetizers", "description": "Stuffed with cream cheese", "icon": "local-dining"},
-            
-            # Sides
-            {"id": 20, "name": "Mexican Rice", "price": 3.99, "category": "Sides", "description": "Seasoned rice with tomatoes", "icon": "rice-bowl"},
-            {"id": 21, "name": "Refried Beans", "price": 3.99, "category": "Sides", "description": "Traditional Mexican beans", "icon": "rice-bowl"},
-            {"id": 22, "name": "Black Beans", "price": 3.99, "category": "Sides", "description": "Whole black beans", "icon": "rice-bowl"},
-            {"id": 23, "name": "Elote (Street Corn)", "price": 4.99, "category": "Sides", "description": "Grilled corn with mayo and chili", "icon": "rice-bowl"},
-            
-            # Drinks
-            {"id": 24, "name": "Horchata", "price": 3.50, "category": "Drinks", "description": "Sweet rice cinnamon drink", "icon": "local-drink"},
-            {"id": 25, "name": "Jamaica Water", "price": 2.99, "category": "Drinks", "description": "Hibiscus flower water", "icon": "local-drink"},
-            {"id": 26, "name": "Coca-Cola", "price": 2.50, "category": "Drinks", "description": "Classic soda", "icon": "local-drink"},
-            {"id": 27, "name": "Sprite", "price": 2.50, "category": "Drinks", "description": "Lemon-lime soda", "icon": "local-drink"},
-            {"id": 28, "name": "Orange Juice", "price": 3.25, "category": "Drinks", "description": "Fresh squeezed", "icon": "local-drink"},
-            
-            # Desserts
-            {"id": 29, "name": "Churros", "price": 5.99, "category": "Desserts", "description": "Fried dough with cinnamon sugar", "icon": "cake"},
-            {"id": 30, "name": "Flan", "price": 4.99, "category": "Desserts", "description": "Caramel custard", "icon": "cake"},
-            {"id": 31, "name": "Tres Leches Cake", "price": 5.99, "category": "Desserts", "description": "Three milk cake", "icon": "cake"},
-            
-            # Breakfast
-            {"id": 32, "name": "Breakfast Burrito", "price": 9.99, "category": "Breakfast", "description": "Eggs, cheese, and potatoes", "icon": "breakfast-dining"},
-            {"id": 33, "name": "Huevos Rancheros", "price": 11.99, "category": "Breakfast", "description": "Eggs with salsa on tortillas", "icon": "breakfast-dining"},
-            {"id": 34, "name": "Chilaquiles", "price": 10.99, "category": "Breakfast", "description": "Fried tortillas with salsa", "icon": "breakfast-dining"},
-            
-            # Soups
-            {"id": 35, "name": "Pozole", "price": 12.99, "category": "Soups", "description": "Traditional hominy soup", "icon": "ramen-dining"},
-            {"id": 36, "name": "Tortilla Soup", "price": 8.99, "category": "Soups", "description": "Tomato-based soup with tortilla strips", "icon": "ramen-dining"}
-        ],
+        data=menu_items,
         message="Menu items retrieved"
     )
 
 @app.get("/api/v1/menu/categories")
 async def get_menu_categories():
-    """Get menu categories"""
+    """Get menu categories - Returns Chucho restaurant categories"""
+    # Import Chucho categories
+    from seed_chucho_menu import CHUCHO_CATEGORIES
+    
+    # Transform to match frontend format
+    categories = []
+    for cat in CHUCHO_CATEGORIES:
+        categories.append({
+            "id": cat["sort_order"],
+            "name": cat["name"],
+            "description": f"{cat['name']} items",
+            "icon": cat["icon"],
+            "color": cat["color"],
+            "active": True
+        })
+    
     return APIResponseHelper.success(
-        data=[
-            {"id": 1, "name": "Tacos", "description": "Traditional Mexican tacos", "icon": "restaurant"},
-            {"id": 2, "name": "Special Tacos", "description": "Premium taco selections", "icon": "star"},
-            {"id": 3, "name": "Burritos", "description": "Large flour tortilla wraps", "icon": "restaurant-menu"},
-            {"id": 4, "name": "Quesadillas", "description": "Grilled cheese-filled tortillas", "icon": "fastfood"},
-            {"id": 5, "name": "Appetizers", "description": "Starters and snacks", "icon": "local-dining"},
-            {"id": 6, "name": "Sides", "description": "Side dishes and extras", "icon": "rice-bowl"},
-            {"id": 7, "name": "Drinks", "description": "Beverages and refreshments", "icon": "local-drink"},
-            {"id": 8, "name": "Desserts", "description": "Sweet treats", "icon": "cake"},
-            {"id": 9, "name": "Breakfast", "description": "Morning specialties", "icon": "breakfast-dining"},
-            {"id": 10, "name": "Soups", "description": "Traditional Mexican soups", "icon": "ramen-dining"}
-        ],
+        data=categories,
         message="Menu categories retrieved"
     )
 
@@ -363,6 +327,134 @@ async def get_service_charge():
             "lastUpdated": "2025-01-08T16:30:00Z"
         },
         message="Service charge settings retrieved"
+    )
+
+@app.get("/api/v1/orders")
+async def get_orders():
+    """Get recent orders"""
+    from datetime import datetime, timedelta
+    import random
+    
+    # Generate mock orders
+    orders = []
+    statuses = ["completed", "in_progress", "pending"]
+    
+    for i in range(20):
+        order_time = datetime.now() - timedelta(minutes=random.randint(0, 1440))
+        orders.append({
+            "id": f"ORD{1000 + i}",
+            "orderNumber": 1000 + i,
+            "customerName": f"Customer {i + 1}",
+            "items": [
+                {"name": "Nachos", "quantity": 1, "price": 5.00},
+                {"name": "Tacos", "quantity": 2, "price": 3.50}
+            ],
+            "total": 12.00 + (i * 2.5),
+            "status": random.choice(statuses),
+            "createdAt": order_time.isoformat(),
+            "completedAt": (order_time + timedelta(minutes=15)).isoformat() if random.choice(statuses) == "completed" else None
+        })
+    
+    return APIResponseHelper.success(
+        data=orders,
+        message="Orders retrieved"
+    )
+
+@app.get("/api/v1/customers")
+async def get_customers():
+    """Get customers"""
+    customers = [
+        {
+            "id": "CUST001",
+            "name": "John Smith",
+            "email": "john@example.com",
+            "phone": "+44 7700 900001",
+            "totalOrders": 25,
+            "totalSpent": 312.50,
+            "lastVisit": "2025-01-08"
+        },
+        {
+            "id": "CUST002",
+            "name": "Sarah Johnson",
+            "email": "sarah@example.com",
+            "phone": "+44 7700 900002",
+            "totalOrders": 18,
+            "totalSpent": 245.00,
+            "lastVisit": "2025-01-07"
+        }
+    ]
+    
+    return APIResponseHelper.success(
+        data=customers,
+        message="Customers retrieved"
+    )
+
+@app.get("/api/v1/inventory")
+async def get_inventory():
+    """Get inventory items"""
+    inventory = [
+        {
+            "id": "INV001",
+            "name": "Tortilla Chips",
+            "category": "Dry Goods",
+            "currentStock": 50,
+            "unit": "bags",
+            "reorderLevel": 20,
+            "lastRestocked": "2025-01-05"
+        },
+        {
+            "id": "INV002",
+            "name": "Black Beans",
+            "category": "Canned Goods",
+            "currentStock": 30,
+            "unit": "cans",
+            "reorderLevel": 15,
+            "lastRestocked": "2025-01-03"
+        }
+    ]
+    
+    return APIResponseHelper.success(
+        data=inventory,
+        message="Inventory retrieved"
+    )
+
+@app.get("/api/v1/analytics/dashboard/mobile")
+async def get_analytics_dashboard():
+    """Get analytics dashboard for mobile"""
+    return APIResponseHelper.success(
+        data={
+            "revenue": {
+                "today": 2847.50,
+                "yesterday": 3156.80,
+                "thisWeek": 18432.75,
+                "lastWeek": 19875.20,
+                "thisMonth": 67890.50,
+                "lastMonth": 71234.80
+            },
+            "orders": {
+                "today": 42,
+                "yesterday": 48,
+                "thisWeek": 287,
+                "lastWeek": 312,
+                "averageOrderValue": 67.80
+            },
+            "topItems": [
+                {"name": "Nachos", "quantity": 156, "revenue": 780.00},
+                {"name": "Carnitas Tacos", "quantity": 134, "revenue": 469.00},
+                {"name": "Quesadillas", "quantity": 98, "revenue": 539.00}
+            ],
+            "hourlyBreakdown": [],
+            "paymentMethods": {
+                "card": {"count": 178, "percentage": 62},
+                "cash": {"count": 65, "percentage": 23},
+                "applePay": {"count": 44, "percentage": 15}
+            },
+            "staffPerformance": [
+                {"name": "John Manager", "orders": 89, "revenue": 5234.50},
+                {"name": "Sarah Cashier", "orders": 76, "revenue": 4567.80}
+            ]
+        },
+        message="Analytics dashboard data retrieved"
     )
 
 @app.get("/api/v1/schedule/week")
