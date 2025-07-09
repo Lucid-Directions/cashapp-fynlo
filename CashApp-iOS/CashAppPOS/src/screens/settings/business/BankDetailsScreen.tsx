@@ -216,7 +216,7 @@ const BankDetailsScreen: React.FC = () => {
               label="Account Holder Name *"
               placeholder="Enter the name on the bank account"
               value={bankDetails.accountHolderName}
-              onChangeText={(text) => setBankDetails({...bankDetails, accountHolderName: text})}
+              onValueChange={(text) => setBankDetails({...bankDetails, accountHolderName: text})}
               autoCapitalize="words"
               placeholderTextColor={Colors.darkGray}
               // containerStyle prop can be used for styles.formGroup if needed for spacing only
@@ -229,7 +229,7 @@ const BankDetailsScreen: React.FC = () => {
               label="Bank Name *"
               placeholder="e.g., Lloyds Bank, Barclays, HSBC"
               value={bankDetails.bankName}
-              onChangeText={(text) => setBankDetails({...bankDetails, bankName: text})}
+              onValueChange={(text) => setBankDetails({...bankDetails, bankName: text})}
               autoCapitalize="words"
               placeholderTextColor={Colors.darkGray}
             />
@@ -241,7 +241,7 @@ const BankDetailsScreen: React.FC = () => {
               label="Account Number *"
               placeholder="8-digit account number"
               value={bankDetails.accountNumber}
-              onChangeText={handleAccountNumberChange}
+              onValueChange={handleAccountNumberChange}
               keyboardType="number-pad"
               maxLength={8}
               placeholderTextColor={Colors.darkGray}
@@ -254,7 +254,7 @@ const BankDetailsScreen: React.FC = () => {
               label="Sort Code *"
               placeholder="XX-XX-XX"
               value={bankDetails.sortCode}
-              onChangeText={handleSortCodeChange}
+              onValueChange={handleSortCodeChange}
               keyboardType="number-pad"
               maxLength={8}
               placeholderTextColor={Colors.darkGray}
@@ -267,7 +267,7 @@ const BankDetailsScreen: React.FC = () => {
               label="IBAN (Optional)"
               placeholder="GB29 LOYD 3099 8812 3456 78"
               value={bankDetails.iban}
-              onChangeText={(text) => setBankDetails({...bankDetails, iban: text.toUpperCase()})}
+              onValueChange={(text) => setBankDetails({...bankDetails, iban: text.toUpperCase()})}
               autoCapitalize="characters"
               placeholderTextColor={Colors.darkGray}
             />
@@ -279,7 +279,7 @@ const BankDetailsScreen: React.FC = () => {
               label="SWIFT/BIC Code (Optional)"
               placeholder="e.g., LOYDGB2L"
               value={bankDetails.swiftCode}
-              onChangeText={(text) => setBankDetails({...bankDetails, swiftCode: text.toUpperCase()})}
+              onValueChange={(text) => setBankDetails({...bankDetails, swiftCode: text.toUpperCase()})}
               autoCapitalize="characters"
               placeholderTextColor={Colors.darkGray}
             />

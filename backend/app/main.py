@@ -67,12 +67,31 @@ app = FastAPI(
     debug=settings.DEBUG  # Set FastAPI debug mode from settings
 )
 
-# CORS middleware for React Native frontend
+# CORS middleware for React Native frontend and Supabase
 if settings.ENVIRONMENT == "production":
     allowed_origins = settings.PRODUCTION_ALLOWED_ORIGINS
 else:
     # Use CORS_ORIGINS from settings for development, fallback to permissive
     allowed_origins = settings.CORS_ORIGINS if settings.CORS_ORIGINS else ["*"]
+
+# Add Supabase domains to allowed origins
+supabase_origins = [
+    "https://*.supabase.co",
+    "https://*.supabase.io"
+]
+
+# Add specific Supabase URL if configured
+if settings.SUPABASE_URL:
+    supabase_origins.append(settings.SUPABASE_URL)
+
+# Combine all allowed origins
+if isinstance(allowed_origins, list):
+    allowed_origins = allowed_origins + supabase_origins
+else:
+    allowed_origins = [allowed_origins] + supabase_origins
+
+# Ensure unique origins
+allowed_origins = list(set(allowed_origins))
 
 app.add_middleware(
     CORSMiddleware,
@@ -228,60 +247,60 @@ async def get_menu_items():
     return APIResponseHelper.success(
         data=[
             # Tacos
-            {"id": 1, "name": "Carne Asada Tacos", "price": 3.50, "category": "Tacos", "description": "Grilled beef with onions and cilantro", "image": "🌮"},
-            {"id": 2, "name": "Al Pastor Tacos", "price": 3.25, "category": "Tacos", "description": "Marinated pork with pineapple", "image": "🌮"},
-            {"id": 3, "name": "Carnitas Tacos", "price": 3.50, "category": "Tacos", "description": "Slow-cooked pork shoulder", "image": "🌮"},
-            {"id": 4, "name": "Pollo Tacos", "price": 3.00, "category": "Tacos", "description": "Grilled chicken with salsa verde", "image": "🌮"},
-            {"id": 5, "name": "Fish Tacos", "price": 4.00, "category": "Tacos", "description": "Grilled fish with cabbage slaw", "image": "🌮"},
+            {"id": 1, "name": "Carne Asada Tacos", "price": 3.50, "category": "Tacos", "description": "Grilled beef with onions and cilantro", "icon": "restaurant"},
+            {"id": 2, "name": "Al Pastor Tacos", "price": 3.25, "category": "Tacos", "description": "Marinated pork with pineapple", "icon": "restaurant"},
+            {"id": 3, "name": "Carnitas Tacos", "price": 3.50, "category": "Tacos", "description": "Slow-cooked pork shoulder", "icon": "restaurant"},
+            {"id": 4, "name": "Pollo Tacos", "price": 3.00, "category": "Tacos", "description": "Grilled chicken with salsa verde", "icon": "restaurant"},
+            {"id": 5, "name": "Fish Tacos", "price": 4.00, "category": "Tacos", "description": "Grilled fish with cabbage slaw", "icon": "restaurant"},
             
             # Special Tacos
-            {"id": 6, "name": "Lobster Tacos", "price": 8.50, "category": "Special Tacos", "description": "Fresh lobster with avocado", "image": "🦞"},
-            {"id": 7, "name": "Steak Fajita Tacos", "price": 4.50, "category": "Special Tacos", "description": "Sizzling steak with peppers", "image": "🥩"},
-            {"id": 8, "name": "Shrimp Tacos", "price": 4.25, "category": "Special Tacos", "description": "Grilled shrimp with chipotle sauce", "image": "🍤"},
+            {"id": 6, "name": "Lobster Tacos", "price": 8.50, "category": "Special Tacos", "description": "Fresh lobster with avocado", "icon": "star"},
+            {"id": 7, "name": "Steak Fajita Tacos", "price": 4.50, "category": "Special Tacos", "description": "Sizzling steak with peppers", "icon": "star"},
+            {"id": 8, "name": "Shrimp Tacos", "price": 4.25, "category": "Special Tacos", "description": "Grilled shrimp with chipotle sauce", "icon": "star"},
             
             # Burritos
-            {"id": 9, "name": "Carne Asada Burrito", "price": 12.99, "category": "Burritos", "description": "Large flour tortilla with rice and beans", "image": "🌯"},
-            {"id": 10, "name": "Chicken Burrito", "price": 11.99, "category": "Burritos", "description": "Grilled chicken with fresh salsa", "image": "🌯"},
-            {"id": 11, "name": "Bean & Rice Burrito", "price": 9.99, "category": "Burritos", "description": "Vegetarian with black beans", "image": "🌯"},
-            {"id": 12, "name": "California Burrito", "price": 13.99, "category": "Burritos", "description": "Carne asada with french fries", "image": "🌯"},
+            {"id": 9, "name": "Carne Asada Burrito", "price": 12.99, "category": "Burritos", "description": "Large flour tortilla with rice and beans", "icon": "restaurant-menu"},
+            {"id": 10, "name": "Chicken Burrito", "price": 11.99, "category": "Burritos", "description": "Grilled chicken with fresh salsa", "icon": "restaurant-menu"},
+            {"id": 11, "name": "Bean & Rice Burrito", "price": 9.99, "category": "Burritos", "description": "Vegetarian with black beans", "icon": "restaurant-menu"},
+            {"id": 12, "name": "California Burrito", "price": 13.99, "category": "Burritos", "description": "Carne asada with french fries", "icon": "restaurant-menu"},
             
             # Quesadillas
-            {"id": 13, "name": "Cheese Quesadilla", "price": 8.99, "category": "Quesadillas", "description": "Melted cheese in flour tortilla", "image": "🧀"},
-            {"id": 14, "name": "Chicken Quesadilla", "price": 10.99, "category": "Quesadillas", "description": "Grilled chicken and cheese", "image": "🧀"},
-            {"id": 15, "name": "Steak Quesadilla", "price": 12.99, "category": "Quesadillas", "description": "Carne asada and cheese", "image": "🧀"},
+            {"id": 13, "name": "Cheese Quesadilla", "price": 8.99, "category": "Quesadillas", "description": "Melted cheese in flour tortilla", "icon": "fastfood"},
+            {"id": 14, "name": "Chicken Quesadilla", "price": 10.99, "category": "Quesadillas", "description": "Grilled chicken and cheese", "icon": "fastfood"},
+            {"id": 15, "name": "Steak Quesadilla", "price": 12.99, "category": "Quesadillas", "description": "Carne asada and cheese", "icon": "fastfood"},
             
             # Appetizers
-            {"id": 16, "name": "Nachos Supreme", "price": 11.99, "category": "Appetizers", "description": "Loaded with cheese, beans, and salsa", "image": "🧀"},
-            {"id": 17, "name": "Guacamole & Chips", "price": 7.99, "category": "Appetizers", "description": "Fresh made guacamole", "image": "🥑"},
-            {"id": 18, "name": "Queso Dip", "price": 6.99, "category": "Appetizers", "description": "Melted cheese dip with chips", "image": "🧀"},
-            {"id": 19, "name": "Jalapeño Poppers", "price": 8.99, "category": "Appetizers", "description": "Stuffed with cream cheese", "image": "🌶️"},
+            {"id": 16, "name": "Nachos Supreme", "price": 11.99, "category": "Appetizers", "description": "Loaded with cheese, beans, and salsa", "icon": "local-dining"},
+            {"id": 17, "name": "Guacamole & Chips", "price": 7.99, "category": "Appetizers", "description": "Fresh made guacamole", "icon": "local-dining"},
+            {"id": 18, "name": "Queso Dip", "price": 6.99, "category": "Appetizers", "description": "Melted cheese dip with chips", "icon": "local-dining"},
+            {"id": 19, "name": "Jalapeño Poppers", "price": 8.99, "category": "Appetizers", "description": "Stuffed with cream cheese", "icon": "local-dining"},
             
             # Sides
-            {"id": 20, "name": "Mexican Rice", "price": 3.99, "category": "Sides", "description": "Seasoned rice with tomatoes", "image": "🍚"},
-            {"id": 21, "name": "Refried Beans", "price": 3.99, "category": "Sides", "description": "Traditional Mexican beans", "image": "🫘"},
-            {"id": 22, "name": "Black Beans", "price": 3.99, "category": "Sides", "description": "Whole black beans", "image": "🫘"},
-            {"id": 23, "name": "Elote (Street Corn)", "price": 4.99, "category": "Sides", "description": "Grilled corn with mayo and chili", "image": "🌽"},
+            {"id": 20, "name": "Mexican Rice", "price": 3.99, "category": "Sides", "description": "Seasoned rice with tomatoes", "icon": "rice-bowl"},
+            {"id": 21, "name": "Refried Beans", "price": 3.99, "category": "Sides", "description": "Traditional Mexican beans", "icon": "rice-bowl"},
+            {"id": 22, "name": "Black Beans", "price": 3.99, "category": "Sides", "description": "Whole black beans", "icon": "rice-bowl"},
+            {"id": 23, "name": "Elote (Street Corn)", "price": 4.99, "category": "Sides", "description": "Grilled corn with mayo and chili", "icon": "rice-bowl"},
             
             # Drinks
-            {"id": 24, "name": "Horchata", "price": 3.50, "category": "Drinks", "description": "Sweet rice cinnamon drink", "image": "🥛"},
-            {"id": 25, "name": "Jamaica Water", "price": 2.99, "category": "Drinks", "description": "Hibiscus flower water", "image": "🌺"},
-            {"id": 26, "name": "Coca-Cola", "price": 2.50, "category": "Drinks", "description": "Classic soda", "image": "🥤"},
-            {"id": 27, "name": "Sprite", "price": 2.50, "category": "Drinks", "description": "Lemon-lime soda", "image": "🥤"},
-            {"id": 28, "name": "Orange Juice", "price": 3.25, "category": "Drinks", "description": "Fresh squeezed", "image": "🍊"},
+            {"id": 24, "name": "Horchata", "price": 3.50, "category": "Drinks", "description": "Sweet rice cinnamon drink", "icon": "local-drink"},
+            {"id": 25, "name": "Jamaica Water", "price": 2.99, "category": "Drinks", "description": "Hibiscus flower water", "icon": "local-drink"},
+            {"id": 26, "name": "Coca-Cola", "price": 2.50, "category": "Drinks", "description": "Classic soda", "icon": "local-drink"},
+            {"id": 27, "name": "Sprite", "price": 2.50, "category": "Drinks", "description": "Lemon-lime soda", "icon": "local-drink"},
+            {"id": 28, "name": "Orange Juice", "price": 3.25, "category": "Drinks", "description": "Fresh squeezed", "icon": "local-drink"},
             
             # Desserts
-            {"id": 29, "name": "Churros", "price": 5.99, "category": "Desserts", "description": "Fried dough with cinnamon sugar", "image": "🍩"},
-            {"id": 30, "name": "Flan", "price": 4.99, "category": "Desserts", "description": "Caramel custard", "image": "🍮"},
-            {"id": 31, "name": "Tres Leches Cake", "price": 5.99, "category": "Desserts", "description": "Three milk cake", "image": "🍰"},
+            {"id": 29, "name": "Churros", "price": 5.99, "category": "Desserts", "description": "Fried dough with cinnamon sugar", "icon": "cake"},
+            {"id": 30, "name": "Flan", "price": 4.99, "category": "Desserts", "description": "Caramel custard", "icon": "cake"},
+            {"id": 31, "name": "Tres Leches Cake", "price": 5.99, "category": "Desserts", "description": "Three milk cake", "icon": "cake"},
             
             # Breakfast
-            {"id": 32, "name": "Breakfast Burrito", "price": 9.99, "category": "Breakfast", "description": "Eggs, cheese, and potatoes", "image": "🌯"},
-            {"id": 33, "name": "Huevos Rancheros", "price": 11.99, "category": "Breakfast", "description": "Eggs with salsa on tortillas", "image": "🍳"},
-            {"id": 34, "name": "Chilaquiles", "price": 10.99, "category": "Breakfast", "description": "Fried tortillas with salsa", "image": "🍳"},
+            {"id": 32, "name": "Breakfast Burrito", "price": 9.99, "category": "Breakfast", "description": "Eggs, cheese, and potatoes", "icon": "breakfast-dining"},
+            {"id": 33, "name": "Huevos Rancheros", "price": 11.99, "category": "Breakfast", "description": "Eggs with salsa on tortillas", "icon": "breakfast-dining"},
+            {"id": 34, "name": "Chilaquiles", "price": 10.99, "category": "Breakfast", "description": "Fried tortillas with salsa", "icon": "breakfast-dining"},
             
             # Soups
-            {"id": 35, "name": "Pozole", "price": 12.99, "category": "Soups", "description": "Traditional hominy soup", "image": "🍲"},
-            {"id": 36, "name": "Tortilla Soup", "price": 8.99, "category": "Soups", "description": "Tomato-based soup with tortilla strips", "image": "🍲"}
+            {"id": 35, "name": "Pozole", "price": 12.99, "category": "Soups", "description": "Traditional hominy soup", "icon": "ramen-dining"},
+            {"id": 36, "name": "Tortilla Soup", "price": 8.99, "category": "Soups", "description": "Tomato-based soup with tortilla strips", "icon": "ramen-dining"}
         ],
         message="Menu items retrieved"
     )
@@ -291,16 +310,16 @@ async def get_menu_categories():
     """Get menu categories"""
     return APIResponseHelper.success(
         data=[
-            {"id": 1, "name": "Tacos", "description": "Traditional Mexican tacos", "icon": "🌮"},
-            {"id": 2, "name": "Special Tacos", "description": "Premium taco selections", "icon": "⭐"},
-            {"id": 3, "name": "Burritos", "description": "Large flour tortilla wraps", "icon": "🌯"},
-            {"id": 4, "name": "Quesadillas", "description": "Grilled cheese-filled tortillas", "icon": "🧀"},
-            {"id": 5, "name": "Appetizers", "description": "Starters and snacks", "icon": "🥑"},
-            {"id": 6, "name": "Sides", "description": "Side dishes and extras", "icon": "🍚"},
-            {"id": 7, "name": "Drinks", "description": "Beverages and refreshments", "icon": "🥤"},
-            {"id": 8, "name": "Desserts", "description": "Sweet treats", "icon": "🍰"},
-            {"id": 9, "name": "Breakfast", "description": "Morning specialties", "icon": "🍳"},
-            {"id": 10, "name": "Soups", "description": "Traditional Mexican soups", "icon": "🍲"}
+            {"id": 1, "name": "Tacos", "description": "Traditional Mexican tacos", "icon": "restaurant"},
+            {"id": 2, "name": "Special Tacos", "description": "Premium taco selections", "icon": "star"},
+            {"id": 3, "name": "Burritos", "description": "Large flour tortilla wraps", "icon": "restaurant-menu"},
+            {"id": 4, "name": "Quesadillas", "description": "Grilled cheese-filled tortillas", "icon": "fastfood"},
+            {"id": 5, "name": "Appetizers", "description": "Starters and snacks", "icon": "local-dining"},
+            {"id": 6, "name": "Sides", "description": "Side dishes and extras", "icon": "rice-bowl"},
+            {"id": 7, "name": "Drinks", "description": "Beverages and refreshments", "icon": "local-drink"},
+            {"id": 8, "name": "Desserts", "description": "Sweet treats", "icon": "cake"},
+            {"id": 9, "name": "Breakfast", "description": "Morning specialties", "icon": "breakfast-dining"},
+            {"id": 10, "name": "Soups", "description": "Traditional Mexican soups", "icon": "ramen-dining"}
         ],
         message="Menu categories retrieved"
     )

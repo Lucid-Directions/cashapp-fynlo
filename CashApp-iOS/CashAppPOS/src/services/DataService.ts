@@ -4,6 +4,7 @@ import DatabaseService from './DatabaseService';
 import APITestingService from './APITestingService';
 import API_CONFIG from '../config/api';
 import { envBool, IS_DEV } from '../env';
+import { useAuthStore } from '../store/useAuthStore';
 
 // Feature flags for controlling data sources
 export interface FeatureFlags {
@@ -157,34 +158,27 @@ class DataService {
     setTimeout(() => this.checkBackendAvailability(), 30000);
   }
 
-  // Authentication methods - can use mock or real
+  // Authentication methods - Updated to use Supabase
   async login(username: string, password: string): Promise<boolean> {
-    // Test authentication endpoint in background when in test mode
-    if (this.featureFlags.TEST_API_MODE) {
-      await this.testAPIEndpoint('/api/v1/auth/login', 'POST', { email: username, password });
+    // Always use Supabase authentication now
+    try {
+      const authStore = useAuthStore.getState();
+      await authStore.signIn(username, password);
+      return true;
+    } catch (error) {
+      console.error('Supabase login failed:', error);
+      return false;
     }
-
-    if (this.featureFlags.MOCK_AUTHENTICATION) {
-      return this.db.login(username, password);
-    }
-
-    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
-      try {
-        return await this.db.login(username, password);
-      } catch (error) {
-        console.log('Real login failed, falling back to mock');
-        return this.db.login(username, password);
-      }
-    }
-
-    return this.db.login(username, password);
   }
 
   async logout(): Promise<void> {
-    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
-      await this.db.logout();
+    try {
+      const authStore = useAuthStore.getState();
+      await authStore.signOut();
+    } catch (error) {
+      console.error('Logout failed:', error);
     }
-    // Always clear local state
+    // Clear any legacy tokens
     await AsyncStorage.multiRemove(['auth_token', 'user_data']);
   }
 

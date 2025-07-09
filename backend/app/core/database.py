@@ -60,6 +60,11 @@ class Restaurant(Base):
         "giftCard": {"enabled": True, "requiresAuth": True}
     })
     floor_plan_layout = Column(JSONB)  # New field for layout storage
+    # Subscription fields for Supabase integration
+    subscription_plan = Column(String(50), default='alpha')  # alpha, beta, omega
+    subscription_status = Column(String(50), default='trial')  # trial, active, cancelled, expired
+    subscription_started_at = Column(DateTime(timezone=True), nullable=True)
+    subscription_expires_at = Column(DateTime(timezone=True), nullable=True)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
@@ -71,7 +76,9 @@ class User(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     email = Column(String(255), unique=True, nullable=False)
     username = Column(String(100), unique=True, nullable=True)  # Optional username field
-    password_hash = Column(String(255), nullable=False)
+    password_hash = Column(String(255), nullable=True)  # Now nullable for Supabase auth
+    supabase_id = Column(UUID(as_uuid=True), unique=True, nullable=True)  # Supabase user ID
+    auth_provider = Column(String(50), default='supabase')  # Track auth method
     first_name = Column(String(100), nullable=False)
     last_name = Column(String(100), nullable=False)
     role = Column(String(50), nullable=False)  # platform_owner, restaurant_owner, manager, employee

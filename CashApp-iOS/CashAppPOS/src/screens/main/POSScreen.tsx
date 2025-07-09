@@ -76,7 +76,12 @@ const ExportedMenuItemCard = ({
         activeOpacity={0.7}
         disabled={!item.available}
       >
-        <Text style={propStyles.menuItemEmoji}>{item.emoji}</Text>
+        <Icon 
+          name={item.icon || "restaurant"} 
+          size={32} 
+          color={theme.colors.primary} 
+          style={propStyles.menuItemIcon}
+        />
         <Text style={propStyles.menuItemName} numberOfLines={2}>
           {item.name}
         </Text>
@@ -599,7 +604,12 @@ const POSScreen: React.FC = () => {
           activeOpacity={0.7}
           disabled={!item.available}
         >
-          <Text style={styles.menuItemEmoji}>{item.emoji}</Text>
+          <Icon 
+            name={item.icon || "restaurant"} 
+            size={32} 
+            color={theme.colors.primary} 
+            style={styles.menuItemIcon}
+          />
           <Text style={styles.menuItemName} numberOfLines={2}>
             {item.name}
           </Text>
@@ -1297,7 +1307,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     justifyContent: 'space-between',
     flex: 1,
   },
-  menuItemEmoji: {
+  menuItemIcon: {
     fontSize: 32,
     marginBottom: 8,
   },

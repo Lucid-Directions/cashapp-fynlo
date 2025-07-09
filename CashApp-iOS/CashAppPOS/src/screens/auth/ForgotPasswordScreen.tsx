@@ -95,7 +95,7 @@ const ForgotPasswordScreen: React.FC = () => {
             placeholder="Enter your email address"
             placeholderTextColor={Colors.lightText} // placeholderTextColor is a valid TextInput prop
             value={email}
-            onChangeText={setEmail}
+            onValueChange={setEmail}
             autoCapitalize="none"
             autoCorrect={false}
             keyboardType="email-address"

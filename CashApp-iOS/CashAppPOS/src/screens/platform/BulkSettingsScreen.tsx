@@ -469,7 +469,7 @@ const BulkSettingsScreen: React.FC = () => {
               <SimpleTextInput
                 label="Change Reason (Required)"
                 value={changeReason}
-                onChangeText={setChangeReason} // Changed from onValueChange
+                onValueChange={setChangeReason}
                 placeholder="Describe the reason for these changes..."
                 multiline={true}
                 numberOfLines={3}
@@ -523,7 +523,7 @@ const BulkSettingsScreen: React.FC = () => {
               <SimpleTextInput
                 label="New Value:"
                 value={formatValue(editingItem.new_value)}
-                onChangeText={(text) => {
+                onValueChange={(text) => {
                   const parsedNewValue = parseValue(text, editingItem.current_value);
                   // Update the local editingItem state immediately for responsiveness
                   setEditingItem(prevItem => {

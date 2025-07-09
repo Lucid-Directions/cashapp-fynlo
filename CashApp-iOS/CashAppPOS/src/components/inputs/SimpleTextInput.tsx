@@ -54,7 +54,9 @@ const SimpleTextInput: React.FC<SimpleTextInputProps> = ({
   const handleTextChange = (text: string) => {
     // FIXED: Update both internal state AND parent immediately
     setInternalValue(text);
-    onValueChange(text);
+    if (onValueChange) {
+      onValueChange(text);
+    }
   };
 
   const handleFocus = () => {
@@ -70,7 +72,9 @@ const SimpleTextInput: React.FC<SimpleTextInputProps> = ({
 
   const handleClear = () => {
     setInternalValue('');
-    onValueChange('');
+    if (onValueChange) {
+      onValueChange('');
+    }
     inputRef.current?.focus();
   };
 

@@ -183,7 +183,7 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
             <SimpleTextInput
               label="Email Address"
               value={email}
-              onChangeText={(text) => {
+              onValueChange={(text) => {
                 setEmail(text);
                 if (errors.email) setErrors(prev => ({ ...prev, email: undefined }));
               }}
@@ -201,12 +201,12 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
             <SimpleTextInput
               label="Password"
               value={password}
-              onChangeText={(text) => {
+              onValueChange={(text) => {
                 setPassword(text);
                 if (errors.password) setErrors(prev => ({ ...prev, password: undefined }));
               }}
               placeholder="Enter your password"
-              secure={!showPassword} // Use 'secure' prop
+              secureTextEntry={true} // Fixed prop name
               autoComplete="password"
             />
             {/* Note: Password visibility toggle icon is removed */}

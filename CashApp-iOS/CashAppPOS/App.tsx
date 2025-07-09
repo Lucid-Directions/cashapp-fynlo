@@ -12,6 +12,8 @@ import AppNavigator from './src/navigation/AppNavigator';
 import ErrorTrackingService from './src/services/ErrorTrackingService';
 import ErrorBoundary from './src/components/ErrorBoundary';
 import SumUpNativeService from './src/services/SumUpNativeService';
+import { supabase } from './src/lib/supabase';
+import { useAuthStore } from './src/store/useAuthStore';
 
 // Suppress specific warnings for development
 LogBox.ignoreLogs([
@@ -31,6 +33,7 @@ const App: React.FC = () => {
     const initializeApp = async () => {
       try {
         console.log('🚀 Fynlo POS App Starting...');
+        console.log('📱 BUNDLE VERSION: 2025-01-08-v7 - MINIMAL INPUTS');
         
         // Initialize error tracking service
         const errorTrackingService = ErrorTrackingService.getInstance();
@@ -47,11 +50,32 @@ const App: React.FC = () => {
           console.warn('⚠️ SumUp Native SDK initialization failed - continuing without SumUp');
         }
         
+        // Check Supabase auth state
+        console.log('🔐 Checking authentication state...');
+        const authStore = useAuthStore.getState();
+        await authStore.checkAuth();
+        
+        // Listen for auth state changes
+        const { data: authListener } = supabase.auth.onAuthStateChange(
+          async (event, session) => {
+            console.log('🔐 Auth state changed:', event);
+            if (event === 'SIGNED_OUT') {
+              // Clear any stored data
+              authStore.clearError();
+            }
+          }
+        );
+        
         // Add small delay to ensure all modules are loaded
         await new Promise(resolve => setTimeout(resolve, 100));
         
         console.log('✅ App initialization complete');
         setIsAppReady(true);
+        
+        // Cleanup function
+        return () => {
+          authListener?.subscription.unsubscribe();
+        };
       } catch (err) {
         console.error('❌ App initialization failed:', err);
         setError(err instanceof Error ? err.message : 'Unknown error');

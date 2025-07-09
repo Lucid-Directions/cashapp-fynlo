@@ -327,7 +327,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
                   <SimpleTextInput
                     label="Full Name *"
                     value={formData.name || ''}
-                    onChangeText={(text) => setFormData(prev => ({ ...prev, name: text }))}
+                    onValueChange={(text) => setFormData(prev => ({ ...prev, name: text }))}
                     placeholder="Enter full name"
                     autoCapitalize="words"
                   />
@@ -337,7 +337,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
                   <SimpleTextInput
                     label="Email Address *"
                     value={formData.email || ''}
-                    onChangeText={(text) => setFormData(prev => ({ ...prev, email: text }))}
+                    onValueChange={(text) => setFormData(prev => ({ ...prev, email: text }))}
                     placeholder="Enter email address"
                     keyboardType="email-address"
                     autoCapitalize="none"
@@ -348,7 +348,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
                   <SimpleTextInput
                     label="Phone Number"
                     value={formData.phoneNumber || ''}
-                    onChangeText={(text) => setFormData(prev => ({ ...prev, phoneNumber: text }))}
+                    onValueChange={(text) => setFormData(prev => ({ ...prev, phoneNumber: text }))}
                     placeholder="Enter phone number"
                     keyboardType="phone-pad"
                   />
@@ -358,7 +358,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
                   <SimpleTextInput
                     label="Address"
                     value={formData.address || ''}
-                    onChangeText={(text) => setFormData(prev => ({ ...prev, address: text }))}
+                    onValueChange={(text) => setFormData(prev => ({ ...prev, address: text }))}
                     placeholder="Enter address"
                     multiline
                     numberOfLines={3} // This is a valid TextInput prop

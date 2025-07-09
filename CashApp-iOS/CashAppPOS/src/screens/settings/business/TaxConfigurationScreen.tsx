@@ -279,7 +279,7 @@ const TaxConfigurationScreen: React.FC = () => {
                 <SimpleTextInput
                   // No label needed here as it's a direct input field
                   value={newExemptItem}
-                  onChangeText={setNewExemptItem}
+                  onValueChange={setNewExemptItem}
                   placeholder="Enter item name"
                   autoFocus
                   containerStyle={{ flex: 1 }} // To take available space

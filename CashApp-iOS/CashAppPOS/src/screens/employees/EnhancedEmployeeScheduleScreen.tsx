@@ -138,7 +138,21 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
       // Then fetch schedule
       const weekStart = getWeekStart(currentWeek);
       const scheduleData = await dataService.getWeekSchedule(weekStart, employeeData || []);
-      setWeekSchedule(scheduleData || { weekStart, shifts: [] });
+      
+      // Ensure weekStart is properly formatted as a Date object
+      if (scheduleData && scheduleData.weekStart) {
+        // Convert string date to Date object if needed
+        const weekStartDate = scheduleData.weekStart instanceof Date 
+          ? scheduleData.weekStart 
+          : new Date(scheduleData.weekStart);
+        
+        setWeekSchedule({
+          weekStart: weekStartDate,
+          shifts: scheduleData.shifts || []
+        });
+      } else {
+        setWeekSchedule({ weekStart, shifts: [] });
+      }
 
     } catch (e: any) {
       setError(e.message || 'Failed to load schedule data.');
@@ -167,9 +181,16 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
   };
 
   const getWeekStart = (date: Date): Date => {
+    // Ensure date is valid
+    if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
+      console.error('Invalid date passed to getWeekStart:', date);
+      return new Date(); // Return current date as fallback
+    }
+    
     const weekStart = new Date(date);
     const day = weekStart.getDay();
     const diff = weekStart.getDate() - day + (day === 0 ? -6 : 1); // Monday start
+    weekStart.setDate(diff);
     weekStart.setHours(0, 0, 0, 0);
     return weekStart;
   };
@@ -315,12 +336,22 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
   // };
 
   const getWeekDays = (): string[] => {
-    if (!weekSchedule) return [];
+    if (!weekSchedule || !weekSchedule.weekStart) return [];
     
     const days = [];
+    // Ensure weekStart is a valid Date object
+    const startDate = weekSchedule.weekStart instanceof Date 
+      ? weekSchedule.weekStart 
+      : new Date(weekSchedule.weekStart);
+    
+    if (isNaN(startDate.getTime())) {
+      console.error('Invalid weekStart date:', weekSchedule.weekStart);
+      return [];
+    }
+    
     for (let i = 0; i < 7; i++) {
-      const day = new Date(weekSchedule.weekStart);
-      day.setDate(weekSchedule.weekStart.getDate() + i);
+      const day = new Date(startDate);
+      day.setDate(startDate.getDate() + i);
       days.push(day.toISOString().split('T')[0]);
     }
     return days;
@@ -350,12 +381,22 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
   };
 
   const formatWeekRange = (): string => {
-    if (!weekSchedule) return '';
+    if (!weekSchedule || !weekSchedule.weekStart) return '';
     
-    const weekEnd = new Date(weekSchedule.weekStart);
-    weekEnd.setDate(weekSchedule.weekStart.getDate() + 6);
+    // Ensure weekStart is a valid Date object
+    const startDate = weekSchedule.weekStart instanceof Date 
+      ? weekSchedule.weekStart 
+      : new Date(weekSchedule.weekStart);
     
-    const start = weekSchedule.weekStart.toLocaleDateString('en-US', { 
+    if (isNaN(startDate.getTime())) {
+      console.error('Invalid weekStart date in formatWeekRange:', weekSchedule.weekStart);
+      return 'Invalid Date';
+    }
+    
+    const weekEnd = new Date(startDate);
+    weekEnd.setDate(startDate.getDate() + 6);
+    
+    const start = startDate.toLocaleDateString('en-US', { 
       month: 'short', 
       day: 'numeric' 
     });

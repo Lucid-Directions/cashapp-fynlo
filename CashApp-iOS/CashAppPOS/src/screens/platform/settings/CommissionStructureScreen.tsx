@@ -193,7 +193,7 @@ const PlansAndPricingScreen: React.FC = () => {
         <SimpleTextInput
           label="Plan Name"
           value={planName}
-          onChangeText={(value) => setConfig(prev => ({ ...prev, [nameKey]: value }))} // Changed to onChangeText
+          onValueChange={(value) => setConfig(prev => ({ ...prev, [nameKey]: value }))}
           placeholder="Enter plan name"
           containerStyle={styles.planNameInput} // Use containerStyle for layout
         />
@@ -212,7 +212,7 @@ const PlansAndPricingScreen: React.FC = () => {
       <SimpleTextInput
         label="Plan Description"
         value={description}
-        onChangeText={(value) => setConfig(prev => ({ ...prev, [descriptionKey]: value }))} // Changed to onChangeText
+        onValueChange={(value) => setConfig(prev => ({ ...prev, [descriptionKey]: value }))}
         placeholder="Describe this plan..."
         multiline={true}
         numberOfLines={2}
@@ -320,7 +320,7 @@ const PlansAndPricingScreen: React.FC = () => {
             title="Setup Fee"
             description="One-time setup fee for new restaurants"
             value={config.setupFee.toString()}
-            onChangeText={(text: string) => setConfig({...config, setupFee: text === '' ? 0 : parseFloat(text) || 0})}
+            onValueChange={(text: string) => setConfig({...config, setupFee: text === '' ? 0 : parseFloat(text) || 0})}
             unit="£"
           />
           
@@ -328,7 +328,7 @@ const PlansAndPricingScreen: React.FC = () => {
             title="Cancellation Fee"
             description="Fee charged when a restaurant cancels their subscription"
             value={config.cancellationFee.toString()}
-            onChangeText={(text: string) => setConfig({...config, cancellationFee: text === '' ? 0 : parseFloat(text) || 0})}
+            onValueChange={(text: string) => setConfig({...config, cancellationFee: text === '' ? 0 : parseFloat(text) || 0})}
             unit="£"
           />
           
@@ -358,7 +358,7 @@ const PlansAndPricingScreen: React.FC = () => {
               title="Service Charge Rate"
               description="Platform service charge percentage (e.g., 2.5, 12.5)"
               value={config.serviceChargeRate.toString()}
-              onChangeText={(text: string) => setConfig({...config, serviceChargeRate: text === '' ? 0 : parseFloat(text) || 0})}
+              onValueChange={(text: string) => setConfig({...config, serviceChargeRate: text === '' ? 0 : parseFloat(text) || 0})}
               unit="%"
             />
           )}
@@ -372,7 +372,7 @@ const PlansAndPricingScreen: React.FC = () => {
             title="Free Trial Period"
             description="Number of free trial days for new restaurants"
             value={config.freeTrialDays.toString()}
-            onChangeText={(text: string) => setConfig({...config, freeTrialDays: text === '' ? 0 : parseInt(text) || 0})}
+            onValueChange={(text: string) => setConfig({...config, freeTrialDays: text === '' ? 0 : parseInt(text) || 0})}
             unit="days"
           />
         </View>

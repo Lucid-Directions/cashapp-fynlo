@@ -1,5 +1,6 @@
 // DatabaseService.ts - Mobile database API service for CashApp POS
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { supabase } from '../lib/supabase';
 
 // Database configuration - FIXED: Uses LAN IP for device testing
 import API_CONFIG from '../config/api';
@@ -75,10 +76,17 @@ class DatabaseService {
     return DatabaseService.instance;
   }
 
-  // Authentication methods
+  // Authentication methods - Updated for Supabase
   private async loadAuthToken(): Promise<void> {
     try {
-      this.authToken = await AsyncStorage.getItem('auth_token');
+      // Get the current Supabase session
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        this.authToken = session.access_token;
+      } else {
+        // Fallback to stored token (legacy support)
+        this.authToken = await AsyncStorage.getItem('auth_token');
+      }
     } catch (error) {
       console.error('Error loading auth token:', error);
     }
@@ -87,20 +95,34 @@ class DatabaseService {
   private async saveAuthToken(token: string): Promise<void> {
     try {
       this.authToken = token;
+      // Still save to AsyncStorage for backward compatibility
       await AsyncStorage.setItem('auth_token', token);
     } catch (error) {
       console.error('Error saving auth token:', error);
     }
   }
 
+  private async getAuthToken(): Promise<string | null> {
+    // First try to get fresh token from Supabase
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      return session.access_token;
+    }
+    // Fallback to stored token
+    return this.authToken;
+  }
+
   // API request helper - FIXED: Handle REST API responses properly
   private async apiRequest(endpoint: string, options: RequestInit = {}): Promise<any> {
     const url = `${API_BASE_URL}${endpoint}`;
     
+    // Get fresh auth token from Supabase
+    const authToken = await this.getAuthToken();
+    
     const headers = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
-      ...(this.authToken && { 'Authorization': `Bearer ${this.authToken}` }),
+      ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
       ...options.headers,
     };
 
@@ -111,6 +133,36 @@ class DatabaseService {
       });
 
       const data = await response.json();
+      
+      // Handle 401 Unauthorized - token might be expired
+      if (response.status === 401) {
+        console.log('Token expired, attempting to refresh...');
+        
+        // Try to refresh the session
+        const { data: { session }, error } = await supabase.auth.refreshSession();
+        
+        if (session && !error) {
+          // Retry the request with new token
+          const newHeaders = {
+            ...headers,
+            'Authorization': `Bearer ${session.access_token}`
+          };
+          
+          const retryResponse = await fetch(url, {
+            ...options,
+            headers: newHeaders,
+          });
+          
+          const retryData = await retryResponse.json();
+          
+          if (!retryResponse.ok) {
+            const errorMessage = retryData.message || retryData.detail || `HTTP error! status: ${retryResponse.status}`;
+            throw new Error(errorMessage);
+          }
+          
+          return retryData;
+        }
+      }
       
       // Handle both successful and error responses from FastAPI backend
       if (!response.ok) {

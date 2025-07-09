@@ -283,7 +283,7 @@ const UserManagementScreen: React.FC = () => {
             <Icon name="search" size={20} color={theme.colors.mediumGray} />
             <SimpleTextInput
               value={searchQuery}
-              onChangeText={setSearchQuery} // Changed from onValueChange
+              onValueChange={setSearchQuery}
               placeholder="Search users..."
               containerStyle={{ flex: 1, marginLeft: 8 }} // Extracted flex & marginLeft
               // fontSize & color from styles.searchInput should be handled by SimpleTextInput's theme

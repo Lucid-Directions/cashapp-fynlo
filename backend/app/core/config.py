@@ -41,6 +41,12 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     CORS_ORIGINS: List[str] = ["http://localhost:3000"] # Default, will be overridden
     
+    # Supabase Authentication
+    SUPABASE_URL: Optional[str] = None
+    SUPABASE_ANON_KEY: Optional[str] = None
+    SUPABASE_SERVICE_ROLE_KEY: Optional[str] = None
+    PLATFORM_OWNER_EMAIL: str = "admin@fynlo.co.uk"
+    
     # Payment Processing
     STRIPE_SECRET_KEY: Optional[str] = None
     STRIPE_PUBLISHABLE_KEY: Optional[str] = None

@@ -215,7 +215,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
               <SimpleTextInput
                 label="Full Name *"
                 value={formData.name}
-                onChangeText={(text) => setFormData(prev => ({ ...prev, name: text }))}
+                onValueChange={(text) => setFormData(prev => ({ ...prev, name: text }))}
                 placeholder="Enter full name"
                 autoCapitalize="words"
               />
@@ -225,7 +225,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
               <SimpleTextInput
                 label="Email Address *"
                 value={formData.email}
-                onChangeText={(text) => setFormData(prev => ({ ...prev, email: text }))}
+                onValueChange={(text) => setFormData(prev => ({ ...prev, email: text }))}
                 placeholder="Enter email address"
                 keyboardType="email-address"
                 autoCapitalize="none"
@@ -236,7 +236,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
               <SimpleTextInput
                 label="Phone Number"
                 value={formData.phoneNumber || ''}
-                onChangeText={(text) => setFormData(prev => ({ ...prev, phoneNumber: text }))}
+                onValueChange={(text) => setFormData(prev => ({ ...prev, phoneNumber: text }))}
                 placeholder="Enter phone number"
                 keyboardType="phone-pad"
               />

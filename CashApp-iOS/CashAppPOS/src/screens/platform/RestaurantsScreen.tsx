@@ -96,7 +96,7 @@ const RestaurantsScreen: React.FC = () => {
           <Icon name="search" size={20} color={Colors.mediumGray} />
           <SimpleTextInput
             value={searchQuery}
-            onChangeText={setSearchQuery} // Changed from onValueChange
+            onValueChange={setSearchQuery}
             placeholder="Search restaurants..."
             // style={styles.searchInput} // Removed direct style, flex/marginLeft to containerStyle if needed
             containerStyle={{ flex: 1, marginLeft: 8 }} // Extracted flex & marginLeft

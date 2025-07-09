@@ -15,9 +15,8 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuthStore } from '../../store/useAuthStore';
 import Logo from '../../components/Logo';
-import SimpleTextInput from '../../components/inputs/SimpleTextInput';
 
 const { width, height } = Dimensions.get('window');
 
@@ -36,7 +35,8 @@ const Colors = {
 
 const LoginScreen: React.FC = () => {
   const navigation = useNavigation();
-  const { signIn, isLoading: authLoading } = useAuth();
+  const signIn = useAuthStore(state => state.signIn);
+  const authLoading = useAuthStore(state => state.isLoading);
   
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -56,17 +56,12 @@ const LoginScreen: React.FC = () => {
 
     try {
       console.log('🚀 Attempting login with:', loginUsername);
-      const success = await signIn(loginUsername.trim(), loginPassword);
-      
-      if (success) {
-        console.log('✅ Login successful, navigation will happen automatically');
-        // Navigation happens automatically via AppNavigator
-      } else {
-        Alert.alert('Login Failed', 'Invalid username or password');
-      }
-    } catch (error) {
+      await signIn(loginUsername.trim(), loginPassword);
+      console.log('✅ Login successful, navigation will happen automatically');
+      // Navigation happens automatically via AppNavigator
+    } catch (error: any) {
       console.error('Login error:', error);
-      Alert.alert('Error', 'An error occurred during login. Please try again.');
+      Alert.alert('Login Failed', error.message || 'Invalid username or password');
     } finally {
       setIsLoading(false);
     }
@@ -74,17 +69,6 @@ const LoginScreen: React.FC = () => {
 
   const handleForgotPassword = () => {
     navigation.navigate('ForgotPassword' as never);
-  };
-
-  const handleQuickSignIn = async (username: string, password: string) => {
-    if (isLoading) return;
-    
-    console.log('🚀 Quick sign-in attempt:', username);
-    setUsername(username);
-    setPassword(password);
-    
-    // Use the same login logic as manual login
-    await handleLogin(username, password);
   };
 
   return (
@@ -109,15 +93,16 @@ const LoginScreen: React.FC = () => {
 
             {/* Username Input */}
             <View style={styles.inputContainer}>
-              <Icon name="person" size={20} color={Colors.lightText} style={styles.inputIcon} />
+              <Icon name="email" size={20} color={Colors.lightText} style={styles.inputIcon} />
               <TextInput
                 value={username}
                 onChangeText={setUsername}
-                placeholder="Username"
+                style={styles.input}
+                placeholder="Email"
+                placeholderTextColor={Colors.lightText}
                 autoCapitalize="none"
-                autoCorrect={false}
-                returnKeyType="next"
-                style={[styles.textInput, { flex: 1, padding: 12, fontSize: 16 }]}
+                keyboardType="email-address"
+                editable={!isLoading && !authLoading}
               />
             </View>
 
@@ -127,14 +112,22 @@ const LoginScreen: React.FC = () => {
               <TextInput
                 value={password}
                 onChangeText={setPassword}
+                style={styles.input}
                 placeholder="Password"
-                secureTextEntry={true}
-                autoCapitalize="none"
-                autoCorrect={false}
-                returnKeyType="done"
-                onSubmitEditing={handleLogin}
-                style={[styles.textInput, { flex: 1, padding: 12, fontSize: 16 }]}
+                placeholderTextColor={Colors.lightText}
+                secureTextEntry={!showPassword}
+                editable={!isLoading && !authLoading}
               />
+              <TouchableOpacity
+                style={styles.passwordToggle}
+                onPress={() => setShowPassword(!showPassword)}
+              >
+                <Icon 
+                  name={showPassword ? "visibility-off" : "visibility"} 
+                  size={20} 
+                  color={Colors.lightText} 
+                />
+              </TouchableOpacity>
             </View>
 
             {/* Forgot Password */}
@@ -147,9 +140,9 @@ const LoginScreen: React.FC = () => {
 
             {/* Login Button */}
             <TouchableOpacity
-              style={[styles.loginButton, isLoading && styles.loginButtonDisabled]}
-              onPress={handleLogin}
-              disabled={isLoading}
+              style={[styles.loginButton, (isLoading || authLoading) && styles.loginButtonDisabled]}
+              onPress={() => handleLogin()}
+              disabled={isLoading || authLoading}
             >
               {(isLoading || authLoading) ? (
                 <Text style={styles.loginButtonText}>Signing In...</Text>
@@ -160,27 +153,6 @@ const LoginScreen: React.FC = () => {
                 </>
               )}
             </TouchableOpacity>
-
-            {/* Demo Credentials */}
-            <View style={styles.demoSection}>
-              <Text style={styles.demoTitle}>Demo Credentials:</Text>
-              <Text style={styles.demoText}>Username: demo</Text>
-              <Text style={styles.demoText}>Password: demo123</Text>
-            </View>
-
-            {/* Quick Sign-In Buttons (Development Only) */}
-            <View style={styles.quickSignInSection}>
-              <Text style={styles.quickSignInTitle}>Quick Sign-In (Testing)</Text>
-              <View style={styles.quickButtonsGrid}>
-                <TouchableOpacity
-                  style={[styles.quickButton, { backgroundColor: '#00A651' }]}
-                  onPress={() => handleQuickSignIn('restaurant@fynlopos.com', 'restaurant123')}
-                >
-                  <Text style={styles.quickButtonTitle}>Restaurant Owner</Text>
-                  <Text style={styles.quickButtonSubtitle}>Test Restaurant</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
           </View>
 
           {/* Footer */}
@@ -250,6 +222,12 @@ const styles = StyleSheet.create({
   },
   inputIcon: {
     marginRight: 12,
+  },
+  input: {
+    flex: 1,
+    fontSize: 16,
+    color: Colors.text,
+    paddingVertical: 16,
   },
   textInput: {
     flex: 1,
@@ -361,6 +339,16 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: 'rgba(255, 255, 255, 0.8)',
     textAlign: 'center',
+  },
+  simpleInput: {
+    flex: 1,
+    padding: 16,
+    fontSize: 16,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E1E1E1',
+    color: '#333333',
   },
 });
 
