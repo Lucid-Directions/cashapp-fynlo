@@ -1,6 +1,7 @@
 // DatabaseService.ts - Mobile database API service for CashApp POS
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../lib/supabase';
+import { CHUCHO_MENU_ITEMS, CHUCHO_CATEGORIES } from '../data/chuchoMenu';
 
 // Database configuration - FIXED: Uses LAN IP for device testing
 import API_CONFIG from '../config/api';
@@ -376,8 +377,24 @@ class DatabaseService {
     }
   }
 
-  // Fallback Mexican menu data - preserves existing functionality
+  // Import Chucho menu data
+  private getChuchoMenuData(): any[] {
+    // Transform menu items to match expected format
+    return CHUCHO_MENU_ITEMS.map(item => ({
+      ...item,
+      emoji: item.image, // Map image to emoji field for compatibility
+    }));
+  }
+
+  // Fallback Mexican menu data - preserves existing functionality (DEPRECATED - use getChuchoMenuData instead)
   private getMexicanMenuFallback(): any[] {
+    // This function is deprecated. We now use Chucho's actual menu.
+    // Redirecting to Chucho menu to ensure consistency
+    return this.getChuchoMenuData();
+  }
+
+  // Original Mexican menu data (kept for reference but not used)
+  private getOriginalMexicanMenuFallback(): any[] {
     return [
       // SNACKS
       { id: 1, name: 'Nachos', price: 5.00, category: 'Snacks', emoji: '🧀', available: true, description: 'Homemade corn tortilla chips with black beans, tomato salsa, pico de gallo, feta, guac & coriander' },
@@ -429,16 +446,18 @@ class DatabaseService {
     ];
   }
 
+  private getChuchoCategoriesData(): any[] {
+    // Transform categories to match expected format
+    return CHUCHO_CATEGORIES.map(cat => ({
+      ...cat,
+      active: true, // All categories are active
+    }));
+  }
+
   private getMexicanCategoriesFallback(): any[] {
-    return [
-      { id: 1, name: 'All', active: true },
-      { id: 2, name: 'Snacks', active: true },
-      { id: 3, name: 'Tacos', active: true },
-      { id: 4, name: 'Special Tacos', active: true },
-      { id: 5, name: 'Burritos', active: true },
-      { id: 6, name: 'Sides', active: true },
-      { id: 7, name: 'Drinks', active: true },
-    ];
+    // This function is deprecated. We now use Chucho's actual categories.
+    // Redirecting to Chucho categories to ensure consistency
+    return this.getChuchoCategoriesData();
   }
 
   // POS Session operations
