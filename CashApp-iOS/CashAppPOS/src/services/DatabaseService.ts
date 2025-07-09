@@ -2,6 +2,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../lib/supabase';
 import { CHUCHO_MENU_ITEMS, CHUCHO_CATEGORIES } from '../data/chuchoMenu';
+import BackendCompatibilityService from './BackendCompatibilityService';
 
 // Database configuration - FIXED: Uses LAN IP for device testing
 import API_CONFIG from '../config/api';
@@ -355,7 +356,16 @@ class DatabaseService {
         method: 'GET',
       });
       
-      return response.data || this.getMexicanMenuFallback();
+      if (response.data) {
+        // Apply compatibility transformation if needed
+        if (BackendCompatibilityService.needsMenuTransformation(response.data)) {
+          console.log('🔄 Applying menu compatibility transformation in DatabaseService');
+          return BackendCompatibilityService.transformMenuItems(response.data);
+        }
+        return response.data;
+      }
+      
+      return this.getMexicanMenuFallback();
     } catch (error) {
       console.error('Failed to fetch menu items:', error);
       // Return Mexican menu as fallback to preserve functionality

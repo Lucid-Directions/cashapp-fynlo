@@ -5,6 +5,7 @@ import APITestingService from './APITestingService';
 import API_CONFIG from '../config/api';
 import { envBool, IS_DEV } from '../env';
 import { useAuthStore } from '../store/useAuthStore';
+import BackendCompatibilityService from './BackendCompatibilityService';
 
 // Feature flags for controlling data sources
 export interface FeatureFlags {
@@ -239,6 +240,11 @@ class DataService {
       try {
         const menuItems = await this.db.getMenuItems();
         if (menuItems && menuItems.length > 0) {
+          // Apply compatibility transformation if needed
+          if (BackendCompatibilityService.needsMenuTransformation(menuItems)) {
+            console.log('🔄 Applying menu compatibility transformation');
+            return BackendCompatibilityService.transformMenuItems(menuItems);
+          }
           return menuItems;
         }
       } catch (error) {
@@ -542,6 +548,13 @@ class DataService {
         const result = await response.json();
         const employees = result.data || result;
         console.log('✅ API employees received:', Array.isArray(employees) ? employees.length : 'not an array');
+        
+        // Apply compatibility transformation if needed
+        if (Array.isArray(employees) && BackendCompatibilityService.needsEmployeeTransformation(employees)) {
+          console.log('🔄 Applying employee compatibility transformation');
+          return BackendCompatibilityService.transformEmployees(employees);
+        }
+        
         return Array.isArray(employees) ? employees : [];
       } else {
         console.error('❌ API error:', response.status, response.statusText);
@@ -562,6 +575,7 @@ class DataService {
           avatar: null,
           phone: '+44 7700 900001',
           startDate: '2024-01-01',
+          hireDate: '2024-01-01',
           totalSales: 15420.50,
           totalOrders: 185,
           avgOrderValue: 83.35,
@@ -579,6 +593,7 @@ class DataService {
           avatar: null,
           phone: '+44 7700 900002',
           startDate: '2024-01-15',
+          hireDate: '2024-01-15',
           totalSales: 8750.25,
           totalOrders: 142,
           avgOrderValue: 61.62,
@@ -596,6 +611,7 @@ class DataService {
           avatar: null,
           phone: '+44 7700 900003',
           startDate: '2024-02-01',
+          hireDate: '2024-02-01',
           totalSales: 12100.75,
           totalOrders: 167,
           avgOrderValue: 72.46,
@@ -613,6 +629,7 @@ class DataService {
           avatar: null,
           phone: '+44 7700 900004',
           startDate: '2023-12-01',
+          hireDate: '2023-12-01',
           totalSales: 6890.00,
           totalOrders: 98,
           avgOrderValue: 70.31,
