@@ -122,13 +122,12 @@ app.add_middleware(
 # app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
-# TEMPORARY: Disable complex routes for deployment
 # Include API routes
-# app.include_router(api_router, prefix="/api/v1")
+app.include_router(api_router, prefix="/api/v1")
 
 # Include mobile-optimized routes (both prefixed and Odoo-style)
-# app.include_router(mobile_router, prefix="/api/mobile", tags=["mobile"])
-# app.include_router(mobile_router, prefix="", tags=["mobile-compatibility"])  # For Odoo-style endpoints
+app.include_router(mobile_router, prefix="/api/mobile", tags=["mobile"])
+app.include_router(mobile_router, prefix="", tags=["mobile-compatibility"])  # For Odoo-style endpoints
 
 # WebSocket routes are handled through the websocket router in api.py
 
@@ -161,8 +160,8 @@ async def health_check():
     
     # Optional: Check database connection if available
     try:
-        from app.core.database import get_db_session
-        db = next(get_db_session())
+        from app.core.database import get_db
+        db = next(get_db())
         db.execute("SELECT 1")
         health_data["database"] = "connected"
         db.close()
@@ -172,8 +171,8 @@ async def health_check():
     # Optional: Check Redis connection if available
     try:
         from app.core.redis_client import get_redis
-        redis = get_redis()
-        if redis and redis.ping():
+        redis = await get_redis()
+        if redis and await redis.ping():
             health_data["redis"] = "connected"
         else:
             health_data["redis"] = "unavailable"
