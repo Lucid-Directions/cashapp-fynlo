@@ -125,25 +125,28 @@ export const useAuthStore = create<AuthState>()(
           const session = await authService.getSession();
           
           if (session) {
-            // Verify with backend to get user info
-            const response = await fetch(`${process.env.API_URL || 'https://fynlopos-9eg2c.ondigitalocean.app'}/api/v1/auth/verify`, {
-              method: 'POST',
-              headers: {
-                'Authorization': `Bearer ${session.access_token}`
-              }
-            });
+            // Try to get stored user info first
+            const storedUser = await authService.getStoredUser();
             
-            if (response.ok) {
-              const data = await response.json();
+            if (storedUser) {
+              // Use stored user info if available
               set({
-                user: data.user,
+                user: storedUser,
                 session,
                 isAuthenticated: true,
                 isLoading: false
               });
-            } else {
-              throw new Error('Failed to verify session');
+              return;
             }
+            
+            // If no stored user, session is invalid
+            await authService.signOut();
+            set({ 
+              isAuthenticated: false,
+              user: null,
+              session: null,
+              isLoading: false
+            });
           } else {
             set({ 
               isAuthenticated: false,
@@ -153,7 +156,7 @@ export const useAuthStore = create<AuthState>()(
             });
           }
         } catch (error: any) {
-          console.error('Auth check failed:', error);
+          // Don't log error for missing session - this is normal on first launch
           set({ 
             isAuthenticated: false,
             user: null,

@@ -155,6 +155,22 @@ class SupabaseAuthService {
   }
   
   /**
+   * Get stored user info from AsyncStorage
+   */
+  async getStoredUser() {
+    try {
+      const userInfo = await AsyncStorage.getItem('userInfo');
+      if (userInfo) {
+        return JSON.parse(userInfo);
+      }
+      return null;
+    } catch (error) {
+      console.error('Error getting stored user:', error);
+      return null;
+    }
+  }
+  
+  /**
    * Refresh session
    */
   async refreshSession() {
