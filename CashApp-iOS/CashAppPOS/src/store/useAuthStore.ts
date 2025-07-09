@@ -200,7 +200,18 @@ export const useAuthStore = create<AuthState>()(
       partialize: (state) => ({
         user: state.user,
         isAuthenticated: state.isAuthenticated
-      })
+      }),
+      version: 1,
+      migrate: (persistedState: any, version: number) => {
+        if (version === 0) {
+          // Clear old user data that might have wrong structure
+          return {
+            user: null,
+            isAuthenticated: false
+          };
+        }
+        return persistedState;
+      }
     }
   )
 );

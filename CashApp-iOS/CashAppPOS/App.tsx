@@ -14,6 +14,7 @@ import ErrorBoundary from './src/components/ErrorBoundary';
 import SumUpNativeService from './src/services/SumUpNativeService';
 import { supabase } from './src/lib/supabase';
 import { useAuthStore } from './src/store/useAuthStore';
+import { clearAuthStorage } from './src/utils/clearAuthStorage';
 
 // Suppress specific warnings for development
 LogBox.ignoreLogs([
@@ -33,7 +34,7 @@ const App: React.FC = () => {
     const initializeApp = async () => {
       try {
         console.log('🚀 Fynlo POS App Starting...');
-        console.log('📱 BUNDLE VERSION: 2025-01-08-v7 - MINIMAL INPUTS');
+        console.log('📱 BUNDLE VERSION: 2025-01-08-v9 - STABLE');
         
         // Initialize error tracking service
         const errorTrackingService = ErrorTrackingService.getInstance();

@@ -93,11 +93,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // Sync auth store user with legacy user format
   useEffect(() => {
     if (authStoreUser) {
-      const nameParts = authStoreUser.name.split(' ');
-      const legacyUser: User = {
-        id: authStoreUser.id,
-        firstName: nameParts[0] || 'User',
-        lastName: nameParts.slice(1).join(' ') || '',
+      try {
+        // Use full_name if available, otherwise use name or default
+        const fullName = (authStoreUser as any).full_name || (authStoreUser as any).name || authStoreUser.email || 'User';
+        const nameParts = typeof fullName === 'string' ? fullName.split(' ') : ['User'];
+        const legacyUser: User = {
+          id: authStoreUser.id,
+          firstName: nameParts[0] || 'User',
+          lastName: nameParts.slice(1).join(' ') || '',
         email: authStoreUser.email,
         phone: '',
         role: authStoreUser.role as any,
@@ -143,6 +146,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           totalRevenue: 0,
           isActive: true,
         });
+      }
+      } catch (error) {
+        console.error('Error syncing auth user:', error);
+        // Reset to safe state on error
+        setUser(null);
+        setBusiness(null);
+        setPlatform(null);
       }
     } else {
       setUser(null);

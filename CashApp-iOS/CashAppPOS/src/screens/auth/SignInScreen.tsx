@@ -136,8 +136,8 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
       'Select an account to sign in:\n\n' +
       '🏢 Platform Owner (Full Control):\n' +
       'See all restaurants, platform analytics, and settings\n\n' +
-      '🍴 Restaurant Owner (Carlos):\n' +
-      'Manage Casa Estrella Mexican Restaurant\n' +
+      '🍴 Restaurant Owner:\n' +
+      'Manage your restaurant\n' +
       'Full restaurant control and analytics\n\n' +
       '👩‍💼 Restaurant Manager (Sarah):\n' +
       'Day-to-day operations and staff management\n\n' +

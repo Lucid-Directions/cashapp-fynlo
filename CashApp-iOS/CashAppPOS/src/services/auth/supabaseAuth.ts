@@ -58,12 +58,19 @@ class SupabaseAuthService {
       // 2. Verify with our backend and get user details
       const verifyResponse = await this.verifyWithBackend(data.session.access_token, email);
       
-      // 3. Store enhanced user info
-      await AsyncStorage.setItem('userInfo', JSON.stringify(verifyResponse.user));
+      // 3. Ensure user has required fields
+      const normalizedUser = {
+        ...verifyResponse.user,
+        name: verifyResponse.user.name || verifyResponse.user.full_name || verifyResponse.user.email || 'User',
+        is_platform_owner: verifyResponse.user.is_platform_owner || false
+      };
+      
+      // Store enhanced user info
+      await AsyncStorage.setItem('userInfo', JSON.stringify(normalizedUser));
       await AsyncStorage.setItem('supabase_session', JSON.stringify(data.session));
       
       return {
-        user: verifyResponse.user,
+        user: normalizedUser,
         session: data.session
       };
     } catch (error: any) {
@@ -181,40 +188,31 @@ class SupabaseAuthService {
       const error = await response.text();
       console.error('❌ Backend verification failed:', error);
       
-      // For now, use the Mexican restaurant data since backend endpoint is not ready
-      console.log('⚠️ Using Casa Estrella Mexican Restaurant data');
+      // Fallback data for when backend is not available
+      // In production, this would come from the backend based on the user's actual restaurant
+      console.log('⚠️ Using fallback authentication data');
       
-      // Map email to appropriate user
-      let userData;
-      if (email === 'carlos@casaestrella.co.uk' || email === 'sleepyarno@gmail.com') {
-        // Restaurant owner
-        userData = {
-          id: 'carlos-001',
-          email: email,
-          full_name: 'Carlos Rodriguez',
-          role: 'restaurant_owner',
-          restaurant_id: 'casa-estrella',
-          restaurant_name: 'Casa Estrella Mexican Restaurant',
-          subscription_plan: 'beta',
-          enabled_features: ['pos', 'orders', 'inventory', 'analytics', 'table_management', 'online_ordering'],
-          created_at: '2023-01-15T10:00:00Z'
-        };
-      } else {
-        // Default to employee
-        userData = {
-          id: 'emp-001',
-          email: email,
-          full_name: 'Restaurant Employee',
-          role: 'employee',
-          restaurant_id: 'casa-estrella',
-          restaurant_name: 'Casa Estrella Mexican Restaurant',
-          subscription_plan: 'beta',
-          enabled_features: ['pos', 'orders'],
-          created_at: new Date().toISOString()
-        };
-      }
+      // Create a generic user profile that will work for any restaurant
+      const userData = {
+        id: `user-${Date.now()}`,
+        email: email,
+        full_name: 'Restaurant User',
+        role: 'restaurant_owner', // Default role for testing
+        restaurant_id: 'default-restaurant',
+        restaurant_name: 'Restaurant', // Generic name - should be fetched from backend
+        subscription_plan: 'beta',
+        enabled_features: ['pos', 'orders', 'inventory', 'analytics', 'table_management', 'online_ordering'],
+        created_at: new Date().toISOString()
+      };
       
-      return { user: userData };
+      // Map full_name to name for compatibility with auth store
+      return { 
+        user: {
+          ...userData,
+          name: userData.full_name,
+          is_platform_owner: userData.role === 'platform_owner'
+        }
+      };
     }
     
     const data = await response.json();

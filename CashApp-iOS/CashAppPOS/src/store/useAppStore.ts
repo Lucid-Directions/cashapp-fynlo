@@ -45,24 +45,9 @@ interface AppStore extends AppState {
 const useAppStore = create<AppStore>()(
   persist(
     (set, get) => ({
-      // Initial state - DEVELOPMENT MODE: Auto-login for testing
-      user: {
-        id: 1,
-        name: 'Demo User',
-        email: 'demo@fynlo.com',
-        role: 'cashier' as const,
-        isActive: true,
-      },
-      session: {
-        id: 1,
-        userId: 1,
-        userName: 'Demo User',
-        startTime: new Date(),
-        isActive: true,
-        startingCash: 0,
-        totalSales: 0,
-        ordersCount: 0,
-      },
+      // Initial state - No demo user, use actual auth
+      user: null,
+      session: null,
       cart: [], // Will be cleaned on first access if corrupted
       currentOrder: null,
       serviceChargePercentage: 10, // Default 10% service charge (recommended)
