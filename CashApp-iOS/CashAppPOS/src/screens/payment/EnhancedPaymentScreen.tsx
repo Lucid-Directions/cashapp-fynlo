@@ -20,6 +20,7 @@ import SimpleDecimalInput from '../../components/inputs/SimpleDecimalInput';
 import SimpleTextInput from '../../components/inputs/SimpleTextInput';
 import SharedDataStore from '../../services/SharedDataStore';
 import OrderService from '../../services/OrderService';
+import { useAuth } from '../../contexts/AuthContext';
 
 // Clover POS Color Scheme
 const Colors = {
@@ -52,6 +53,7 @@ const tipPresets = [10, 15, 18, 20, 25];
 
 const EnhancedPaymentScreen: React.FC = () => {
   const navigation = useNavigation();
+  const { user } = useAuth();
   const { 
     cart, 
     clearCart, 
@@ -326,6 +328,14 @@ const EnhancedPaymentScreen: React.FC = () => {
   };
 
   const handleSplitPayment = () => {
+    if (user?.subscription_plan === 'alpha') {
+      Alert.alert(
+        'Upgrade Required',
+        'Split payment is available with Beta and Omega plans. Upgrade your subscription to unlock this feature.',
+        [{ text: 'OK' }]
+      );
+      return;
+    }
     setSplitPayment(true);
     setSplitAmounts([
       { method: 'card', amount: calculateGrandTotal() / 2 },
@@ -406,9 +416,10 @@ const EnhancedPaymentScreen: React.FC = () => {
   };
 
   const calculateChange = () => {
-    const received = parseFloat(cashReceived) || 0;
+    const received = cashReceived === '' ? 0 : (parseFloat(cashReceived) || 0);
     const total = calculateGrandTotal();
-    return Math.max(0, received - total);
+    const change = received - total;
+    return Math.max(0, isNaN(change) ? 0 : change);
   };
 
   const CashPaymentModal = () => (
@@ -771,7 +782,7 @@ const EnhancedPaymentScreen: React.FC = () => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Payment Method</Text>
-            {enabledPaymentMethods.length > 1 && (
+            {enabledPaymentMethods.length > 1 && user?.subscription_plan !== 'alpha' && (
               <TouchableOpacity
                 style={styles.splitPaymentButton}
                 onPress={handleSplitPayment}

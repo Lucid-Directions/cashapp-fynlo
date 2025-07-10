@@ -104,6 +104,7 @@ export type MainStackParamList = {
     orderType?: 'dine_in' | 'takeout' | 'pickup' | 'delivery';
   };
   TableSelection: undefined;
+  Orders: undefined;
   Reports: undefined;
   Employees: undefined;
   EmployeeSchedule: undefined;
