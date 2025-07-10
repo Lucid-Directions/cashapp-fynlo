@@ -1,5 +1,6 @@
 # app/models/subscriptions.py
-from sqlalchemy import Column, Integer, String, DECIMAL, Boolean, JSONB, ForeignKey, TIMESTAMP
+from sqlalchemy import Column, Integer, String, DECIMAL, Boolean, ForeignKey, TIMESTAMP
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.sql import func
 from app.core.database import Base
 
