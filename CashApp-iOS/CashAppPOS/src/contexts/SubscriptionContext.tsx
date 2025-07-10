@@ -130,7 +130,7 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
     setError(null);
     
     try {
-      const response = await DataService.getCurrentSubscription(id);
+      const response = await DataService.getInstance().getCurrentSubscription(id);
       if (response.success) {
         setSubscription(response.data.subscription);
         setUsage(response.data.usage);
@@ -147,7 +147,7 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
 
   const loadAvailablePlans = async () => {
     try {
-      const response = await DataService.getSubscriptionPlans();
+      const response = await DataService.getInstance().getSubscriptionPlans();
       if (response.success) {
         setAvailablePlans(response.data);
       }
@@ -246,7 +246,7 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
     setError(null);
 
     try {
-      const response = await DataService.createSubscription({
+      const response = await DataService.getInstance().createSubscription({
         restaurant_id: restaurantId,
         plan_id: planId,
         start_trial: startTrial
@@ -274,7 +274,7 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
     setError(null);
 
     try {
-      const response = await DataService.changeSubscriptionPlan({
+      const response = await DataService.getInstance().changeSubscriptionPlan({
         restaurant_id: restaurantId,
         new_plan_id: newPlanId,
         immediate
@@ -302,7 +302,7 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
     setError(null);
 
     try {
-      const response = await DataService.cancelSubscription(restaurantId);
+      const response = await DataService.getInstance().cancelSubscription(restaurantId);
 
       if (response.success) {
         await loadSubscription(restaurantId);
@@ -323,7 +323,7 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
     if (!restaurantId) return false;
 
     try {
-      const response = await DataService.incrementUsage(restaurantId, usageType, amount);
+      const response = await DataService.getInstance().incrementUsage(restaurantId, usageType, amount);
       
       if (response.success) {
         // Update local usage state
@@ -360,9 +360,9 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
   };
 
   const formatPrice = (price: number): string => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-GB', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'GBP'
     }).format(price);
   };
 

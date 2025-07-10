@@ -69,6 +69,12 @@ async def get_current_subscription(
     and usage statistics.
     """
     try:
+        # Verify user has access to this restaurant
+        if hasattr(current_user, 'restaurant_id') and current_user.restaurant_id != restaurant_id:
+            return APIResponseHelper.error(
+                message="Access denied: You don't have permission to access this restaurant's subscription data",
+                status_code=403
+            )
         subscription = db.query(RestaurantSubscription).filter(
             RestaurantSubscription.restaurant_id == restaurant_id,
             RestaurantSubscription.status.in_(['active', 'trial'])
@@ -117,6 +123,12 @@ async def create_subscription(
     Creates a new subscription for the restaurant with the specified plan.
     """
     try:
+        # Verify user has access to this restaurant
+        if hasattr(current_user, 'restaurant_id') and current_user.restaurant_id != subscription_data.restaurant_id:
+            return APIResponseHelper.error(
+                message="Access denied: You don't have permission to manage this restaurant's subscription",
+                status_code=403
+            )
         # Check if restaurant already has an active subscription
         existing_subscription = db.query(RestaurantSubscription).filter(
             RestaurantSubscription.restaurant_id == subscription_data.restaurant_id,
@@ -204,6 +216,12 @@ async def change_subscription_plan(
     Updates the restaurant's subscription to a different plan.
     """
     try:
+        # Verify user has access to this restaurant
+        if hasattr(current_user, 'restaurant_id') and current_user.restaurant_id != change_data.restaurant_id:
+            return APIResponseHelper.error(
+                message="Access denied: You don't have permission to manage this restaurant's subscription",
+                status_code=403
+            )
         # Get current subscription
         subscription = db.query(RestaurantSubscription).filter(
             RestaurantSubscription.restaurant_id == change_data.restaurant_id,
@@ -269,6 +287,12 @@ async def cancel_subscription(
     Cancels the restaurant's active subscription.
     """
     try:
+        # Verify user has access to this restaurant
+        if hasattr(current_user, 'restaurant_id') and current_user.restaurant_id != restaurant_id:
+            return APIResponseHelper.error(
+                message="Access denied: You don't have permission to manage this restaurant's subscription",
+                status_code=403
+            )
         subscription = db.query(RestaurantSubscription).filter(
             RestaurantSubscription.restaurant_id == restaurant_id,
             RestaurantSubscription.status.in_(['active', 'trial'])
@@ -312,6 +336,12 @@ async def get_usage_statistics(
     Returns usage data for the specified month or current month.
     """
     try:
+        # Verify user has access to this restaurant
+        if hasattr(current_user, 'restaurant_id') and current_user.restaurant_id != restaurant_id:
+            return APIResponseHelper.error(
+                message="Access denied: You don't have permission to access this restaurant's usage data",
+                status_code=403
+            )
         if not month_year:
             month_year = SubscriptionUsage.get_current_month_key()
         
@@ -363,7 +393,8 @@ async def increment_usage(
     restaurant_id: int = Query(..., description="Restaurant ID"),
     usage_type: str = Query(..., description="Type of usage (orders, staff, menu_items)"),
     amount: int = Query(1, description="Amount to increment"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user)
 ):
     """
     Increment usage counter
@@ -372,6 +403,12 @@ async def increment_usage(
     that count towards their subscription limits.
     """
     try:
+        # Verify user has access to this restaurant
+        if hasattr(current_user, 'restaurant_id') and current_user.restaurant_id != restaurant_id:
+            return APIResponseHelper.error(
+                message="Access denied: You don't have permission to modify this restaurant's usage data",
+                status_code=403
+            )
         if usage_type not in ['orders', 'staff', 'menu_items']:
             return APIResponseHelper.error(
                 message="Invalid usage type",
