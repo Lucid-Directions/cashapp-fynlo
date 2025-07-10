@@ -12,7 +12,7 @@ from typing import Callable, Optional, List, Tuple
 
 from app.core.database import get_db
 from app.models.subscription import RestaurantSubscription, SubscriptionUsage
-from app.core.security import get_current_user
+from app.core.auth import get_current_user
 
 
 class FeatureGateError(HTTPException):
