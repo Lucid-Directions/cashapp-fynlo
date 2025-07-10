@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import datetime, timedelta
 
-from app.database import get_db
+from app.core.database import get_db
 from app.models.subscription import SubscriptionPlan, RestaurantSubscription, SubscriptionUsage
 from app.core.response_helper import APIResponseHelper
 from app.schemas.subscription import (
@@ -70,7 +70,7 @@ async def get_current_subscription(
     """
     try:
         # Verify user has access to this restaurant
-        if not hasattr(current_user, 'restaurant_id'):
+        if not hasattr(current_user, 'restaurant_id') or current_user.restaurant_id is None:
             return APIResponseHelper.error(
                 message="Access denied: User not associated with any restaurant",
                 status_code=403
@@ -130,7 +130,7 @@ async def create_subscription(
     """
     try:
         # Verify user has access to this restaurant
-        if not hasattr(current_user, 'restaurant_id'):
+        if not hasattr(current_user, 'restaurant_id') or current_user.restaurant_id is None:
             return APIResponseHelper.error(
                 message="Access denied: User not associated with any restaurant",
                 status_code=403
@@ -229,7 +229,7 @@ async def change_subscription_plan(
     """
     try:
         # Verify user has access to this restaurant
-        if not hasattr(current_user, 'restaurant_id'):
+        if not hasattr(current_user, 'restaurant_id') or current_user.restaurant_id is None:
             return APIResponseHelper.error(
                 message="Access denied: User not associated with any restaurant",
                 status_code=403
@@ -306,7 +306,7 @@ async def cancel_subscription(
     """
     try:
         # Verify user has access to this restaurant
-        if not hasattr(current_user, 'restaurant_id'):
+        if not hasattr(current_user, 'restaurant_id') or current_user.restaurant_id is None:
             return APIResponseHelper.error(
                 message="Access denied: User not associated with any restaurant",
                 status_code=403
@@ -361,7 +361,7 @@ async def get_usage_statistics(
     """
     try:
         # Verify user has access to this restaurant
-        if not hasattr(current_user, 'restaurant_id'):
+        if not hasattr(current_user, 'restaurant_id') or current_user.restaurant_id is None:
             return APIResponseHelper.error(
                 message="Access denied: User not associated with any restaurant",
                 status_code=403
@@ -434,7 +434,7 @@ async def increment_usage(
     """
     try:
         # Verify user has access to this restaurant
-        if not hasattr(current_user, 'restaurant_id'):
+        if not hasattr(current_user, 'restaurant_id') or current_user.restaurant_id is None:
             return APIResponseHelper.error(
                 message="Access denied: User not associated with any restaurant",
                 status_code=403

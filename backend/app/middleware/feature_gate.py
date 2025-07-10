@@ -8,9 +8,9 @@ to features based on subscription plans.
 from functools import wraps
 from fastapi import HTTPException, Request, Depends
 from sqlalchemy.orm import Session
-from typing import Callable, Optional, List
+from typing import Callable, Optional, List, Tuple
 
-from app.database import get_db
+from app.core.database import get_db
 from app.models.subscription import RestaurantSubscription, SubscriptionUsage
 from app.core.security import get_current_user
 
@@ -127,19 +127,21 @@ def require_feature(feature_name: str):
         ):
             pass
     """
+    from fastapi import Query
+    
     def feature_dependency(
-        restaurant_id: int,
-        db: Session
+        restaurant_id: int = Query(..., description="Restaurant ID"),
+        db: Session = Depends(get_db)
     ):
         """Dependency that checks feature access"""
         if not check_feature_access(restaurant_id, feature_name, db):
             subscription = get_restaurant_subscription(restaurant_id, db)
-            current_plan = subscription.plan.name if subscription else "none"
+            current_plan = subscription.plan.name if subscription and subscription.plan else "none"
             
             raise FeatureGateError(
                 feature_name=feature_name,
                 current_plan=current_plan,
-                required_plans=["professional", "enterprise"]  # Default required plans
+                required_plans=["beta", "gamma"]  # Updated to correct plan names
             )
         return True  # Return something to indicate success
     
@@ -161,9 +163,11 @@ def require_usage_limit(limit_type: str, increment: int = 1):
         ):
             pass
     """
+    from fastapi import Query
+    
     def usage_dependency(
-        restaurant_id: int,
-        db: Session
+        restaurant_id: int = Query(..., description="Restaurant ID"),
+        db: Session = Depends(get_db)
     ):
         """Dependency that checks usage limits"""
         # Check usage limit
@@ -171,7 +175,7 @@ def require_usage_limit(limit_type: str, increment: int = 1):
         
         if at_limit:
             subscription = get_restaurant_subscription(restaurant_id, db)
-            current_plan = subscription.plan.name if subscription else "none"
+            current_plan = subscription.plan.name if subscription and subscription.plan else "none"
             
             raise UsageLimitError(
                 limit_type=limit_type,
@@ -183,7 +187,7 @@ def require_usage_limit(limit_type: str, increment: int = 1):
         # If we would exceed the limit with this action, also block
         if limit is not None and (current_usage + increment) > limit:
             subscription = get_restaurant_subscription(restaurant_id, db)
-            current_plan = subscription.plan.name if subscription else "none"
+            current_plan = subscription.plan.name if subscription and subscription.plan else "none"
             
             raise UsageLimitError(
                 limit_type=limit_type,
