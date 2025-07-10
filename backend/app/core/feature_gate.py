@@ -1,8 +1,8 @@
 # app/core/feature_gate.py
+from typing import Callable
 from fastapi import Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from app.core.database import get_db, Restaurant
-from app.core.cache import get_cached_data, cache_data
 
 FEATURE_KEYS = {
     # Basic POS Features (Alpha - all plans)
@@ -27,43 +27,52 @@ FEATURE_KEYS = {
     'unlimited_staff': 'Unlimited staff accounts',
 }
 
+def get_plan_features(plan: str) -> list[str]:
+    """Get list of features available for a subscription plan"""
+    plan_features = {
+        'alpha': ['pos_basic', 'order_management', 'basic_payments', 'daily_reports'],
+        'beta': ['pos_basic', 'order_management', 'basic_payments', 'daily_reports',
+                'inventory_management', 'staff_management', 'advanced_reports',
+                'table_management', 'customer_database'],
+        'omega': list(FEATURE_KEYS.keys())  # All features
+    }
+    return plan_features.get(plan, plan_features['alpha'])
+
 def check_feature_access(restaurant_id: str, feature_key: str, db: Session) -> bool:
     """Check if a restaurant has access to a specific feature"""
     restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
     if not restaurant:
         return False
     
-    # Get plan features from cache or database
-    cache_key = f"plan:features:{restaurant.subscription_plan}"
-    features = get_cached_data(cache_key)
-    
-    if not features:
-        # Define features per plan
-        plan_features = {
-            'alpha': ['pos_basic', 'order_management', 'basic_payments', 'daily_reports'],
-            'beta': ['pos_basic', 'order_management', 'basic_payments', 'daily_reports',
-                    'inventory_management', 'staff_management', 'advanced_reports',
-                    'table_management', 'customer_database'],
-            'omega': list(FEATURE_KEYS.keys())  # All features
-        }
-        
-        features = plan_features.get(restaurant.subscription_plan, plan_features['alpha'])
-        cache_data(cache_key, features, ttl=3600)
-    
+    # Get plan with fallback to alpha
+    subscription_plan = getattr(restaurant, 'subscription_plan', 'alpha') or 'alpha'
+    features = get_plan_features(subscription_plan)
     return feature_key in features
 
-class FeatureGateMiddleware:
-    """Middleware to check feature access"""
-    def __init__(self, feature_key: str):
-        self.feature_key = feature_key
+# Simple utility function for use within routes
+async def check_user_has_feature(
+    feature_key: str,
+    current_user,  # User object from route
+    db: Session
+) -> bool:
+    """
+    Check if the current user has access to a feature.
+    Use this in your route handlers after getting current_user.
     
-    def __call__(self, request: Request, call_next):
-        from app.api.v1.endpoints.auth import get_current_user
-        user = get_current_user(request)
-        
-        if not check_feature_access(user.restaurant_id, self.feature_key, get_db()):
-            raise HTTPException(
-                status_code=403,
-                detail=f"This feature requires a higher subscription plan"
-            )
-        return call_next(request)
+    Example:
+        @router.get("/inventory")
+        async def get_inventory(
+            current_user: User = Depends(get_current_user),
+            db: Session = Depends(get_db)
+        ):
+            if not await check_user_has_feature("inventory_management", current_user, db):
+                raise HTTPException(status_code=403, detail="Feature not available in your plan")
+            # ... rest of endpoint logic
+    """
+    if not hasattr(current_user, 'restaurant_id') or not current_user.restaurant_id:
+        return False
+    
+    return check_feature_access(str(current_user.restaurant_id), feature_key, db)
+
+# For backward compatibility with auth.py which imports get_plan_features
+__all__ = ['FEATURE_KEYS', 'get_plan_features', 'check_feature_access', 'check_user_has_feature']
