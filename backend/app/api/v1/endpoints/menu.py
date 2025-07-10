@@ -15,6 +15,38 @@ from app.api.v1.endpoints.products import CategoryResponse, ProductResponse
 
 router = APIRouter()
 
+def format_menu_item(product, category_name=None):
+    """Format product as menu item with required fields"""
+    # Map category names to emojis
+    emoji_map = {
+        'Tacos': '🌮',
+        'Appetizers': '🥗',
+        'Beverages': '🥤',
+        'Desserts': '🍰',
+        'Main Courses': '🍽️',
+        'Sides': '🍟',
+        'Breakfast': '🍳',
+        'Salads': '🥗',
+        'Soups': '🍲',
+        'Drinks': '🥤',
+        'Alcohol': '🍺',
+        'Coffee': '☕',
+        'Tea': '🍵',
+    }
+    
+    # Get emoji based on category or use default
+    emoji = emoji_map.get(category_name, '🍽️')
+    
+    return {
+        'id': str(product.id),
+        'name': product.name,
+        'price': float(product.price),
+        'emoji': emoji,
+        'available': product.is_active if hasattr(product, 'is_active') else True,
+        'category': category_name or 'Uncategorized',
+        'description': product.description or ''
+    }
+
 @router.get("/items")
 async def get_menu_items(
     restaurant_id: Optional[str] = Query(None),
@@ -54,18 +86,10 @@ async def get_menu_items(
     menu_items = []
     for product in products:
         # Get category name
-        category_name = db.query(Category).filter(Category.id == product.category_id).first()
-        category_name = category_name.name if category_name else 'Uncategorized'
+        category_obj = db.query(Category).filter(Category.id == product.category_id).first()
+        category_name = category_obj.name if category_obj else 'Uncategorized'
         
-        menu_items.append({
-            'id': int(str(product.id).replace('-', '')[:8], 16) % 100000,  # Convert UUID to int for frontend compatibility
-            'name': product.name,
-            'price': float(product.price),
-            'category': category_name,
-            'emoji': '🍽️',  # Default emoji, can be enhanced
-            'available': product.is_active,
-            'description': product.description or '',
-        })
+        menu_items.append(format_menu_item(product, category_name))
     
     # Cache for 5 minutes
     await redis.set(cache_key, menu_items, expire=300)
