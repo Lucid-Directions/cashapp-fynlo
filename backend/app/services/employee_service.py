@@ -18,7 +18,7 @@ from app.schemas.employee_schemas import (
     WeeklyScheduleResponse, WeeklyScheduleDay
 )
 from app.core.exceptions import FynloException
-from app.api.v1.endpoints.auth import get_password_hash
+from app.core.security import get_password_hash
 import logging
 
 logger = logging.getLogger(__name__)
