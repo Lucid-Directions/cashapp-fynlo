@@ -1,4 +1,5 @@
 # app/core/feature_gate.py
+from typing import Callable
 from fastapi import Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from app.core.database import get_db, Restaurant
@@ -34,7 +35,7 @@ def check_feature_access(restaurant_id: str, feature_key: str, db: Session) -> b
         return False
     
     # Get plan features from cache or database
-    cache_key = f"plan:features:{restaurant.subscription_plan}"
+    cache_key = f"plan:features:{getattr(restaurant, 'subscription_plan', 'alpha')}"
     features = get_cached_data(cache_key)
     
     if not features:
@@ -47,23 +48,49 @@ def check_feature_access(restaurant_id: str, feature_key: str, db: Session) -> b
             'omega': list(FEATURE_KEYS.keys())  # All features
         }
         
-        features = plan_features.get(restaurant.subscription_plan, plan_features['alpha'])
+        # Get plan with fallback to alpha
+        subscription_plan = getattr(restaurant, 'subscription_plan', 'alpha') or 'alpha'
+        features = plan_features.get(subscription_plan, plan_features['alpha'])
         cache_data(cache_key, features, ttl=3600)
     
     return feature_key in features
 
-class FeatureGateMiddleware:
-    """Middleware to check feature access"""
-    def __init__(self, feature_key: str):
-        self.feature_key = feature_key
+def require_feature(feature_key: str) -> Callable:
+    """
+    Create a FastAPI dependency that checks if the current user has access to a feature.
     
-    def __call__(self, request: Request, call_next):
+    Usage:
+        @router.get("/inventory", dependencies=[Depends(require_feature("inventory_management"))])
+        async def get_inventory(...):
+            ...
+    """
+    async def feature_dependency(
+        current_user = None,  # This will be injected by including get_current_user in the route
+        db: Session = Depends(get_db)
+    ):
+        # Import here to avoid circular imports
         from app.api.v1.endpoints.auth import get_current_user
-        user = get_current_user(request)
         
-        if not check_feature_access(user.restaurant_id, self.feature_key, get_db()):
+        # If current_user is not injected, this means the route doesn't have get_current_user
+        # In that case, we can't check features
+        if current_user is None:
+            raise HTTPException(
+                status_code=500,
+                detail="Feature check requires authenticated user. Add get_current_user to your route dependencies."
+            )
+        
+        if not hasattr(current_user, 'restaurant_id') or not current_user.restaurant_id:
             raise HTTPException(
                 status_code=403,
-                detail=f"This feature requires a higher subscription plan"
+                detail="No restaurant associated with user"
             )
-        return call_next(request)
+        
+        if not check_feature_access(str(current_user.restaurant_id), feature_key, db):
+            raise HTTPException(
+                status_code=403,
+                detail=f"This feature '{feature_key}' requires a higher subscription plan"
+            )
+        
+        return True
+    
+    return feature_dependency
