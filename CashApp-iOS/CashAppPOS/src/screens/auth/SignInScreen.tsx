@@ -15,6 +15,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { SimpleTextInput } from '../../components/inputs';
 import { useAuth } from '../../contexts/AuthContext';
+import { isFeatureEnabled } from '../../config/featureFlags';
 import Logo from '../../components/Logo';
 
 // Clover POS Color Scheme
@@ -251,14 +252,16 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
           </TouchableOpacity>
 
           {/* Quick Sign In Button */}
-          <TouchableOpacity 
-            style={styles.demoButton}
-            onPress={showDemoCredentials}
-            disabled={isLoading}
-          >
-            <Icon name="flash-on" size={20} color={Colors.secondary} />
-            <Text style={styles.demoButtonText}>Quick Sign In</Text>
-          </TouchableOpacity>
+          {isFeatureEnabled('QUICK_SIGNIN_ENABLED') && (
+            <TouchableOpacity 
+              style={styles.demoButton}
+              onPress={showDemoCredentials}
+              disabled={isLoading}
+            >
+              <Icon name="flash-on" size={20} color={Colors.secondary} />
+              <Text style={styles.demoButtonText}>Quick Sign In</Text>
+            </TouchableOpacity>
+          )}
 
           {/* Divider */}
           <View style={styles.divider}>
