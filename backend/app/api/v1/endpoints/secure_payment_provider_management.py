@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.dependencies import get_current_user
 from app.core.response_helper import APIResponseHelper
-from app.models.user import User
+from app.core.database import User
 from app.services.secure_payment_config import SecurePaymentConfigService
 from app.services.payment_providers import PaymentProviderFactory
 

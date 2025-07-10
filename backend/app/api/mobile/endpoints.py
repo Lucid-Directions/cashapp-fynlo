@@ -83,46 +83,16 @@ async def odoo_style_authenticate(
                 status_code=400
             )
         
-        # Use existing authentication logic
-        from app.api.v1.endpoints.auth import authenticate_user, create_access_token
-        
-        user = authenticate_user(db, login, password)
-        if not user:
-            raise FynloException(
-                message="Invalid credentials",
-                error_code=ErrorCodes.AUTHENTICATION_ERROR,
-                status_code=401
-            )
-        
-        # Create access token
-        access_token = create_access_token(data={"sub": str(user.id)})
-        
-        # Odoo-style response format
-        response_data = {
-            "session_id": access_token,  # Use JWT as session ID
-            "uid": str(user.id),
-            "user_context": {
-                "lang": "en_US",
-                "tz": "UTC",
-                "uid": str(user.id)
-            },
-            "username": user.username,
-            "company_id": str(user.restaurant_id) if user.restaurant_id else None,
-            "user_companies": {
-                "current_company": str(user.restaurant_id) if user.restaurant_id else None,
-                "allowed_companies": {
-                    str(user.restaurant_id): {
-                        "id": str(user.restaurant_id),
-                        "name": "Restaurant"  # Would be fetched from DB
-                    }
-                } if user.restaurant_id else {}
-            }
-        }
-        
-        return APIResponseHelper.success(
-            data=response_data,
-            message="Authentication successful"
+        # Since we're using Supabase auth, we need to authenticate through Supabase
+        # For backwards compatibility with mobile app expecting username/password auth,
+        # we'll need to handle this differently. For now, return an error message
+        # indicating that Supabase authentication should be used
+        raise FynloException(
+            message="Please use Supabase authentication. Legacy username/password authentication is not supported.",
+            error_code=ErrorCodes.AUTHENTICATION_ERROR,
+            status_code=401
         )
+        
         
     except FynloException:
         raise

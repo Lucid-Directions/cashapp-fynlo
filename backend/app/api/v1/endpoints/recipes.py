@@ -7,7 +7,7 @@ from typing import List, Optional
 from uuid import UUID
 
 from app.core.database import get_db, Product # Import Product model
-from app.models import User # Assuming User model for authentication/authorization
+from app.core.database import User # Assuming User model for authentication/authorization
 from app.crud import inventory as crud_inventory # Using the same CRUD module
 from app.schemas import inventory_schemas as schemas # Using the same schemas module
 # from app.api.v1.dependencies import get_current_active_user_with_role # Example dependency for role check

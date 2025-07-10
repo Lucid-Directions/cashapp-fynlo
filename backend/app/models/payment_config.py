@@ -1,5 +1,5 @@
 from sqlalchemy import Column, String, Boolean, Integer, ForeignKey, UniqueConstraint, Index
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, Session
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
 

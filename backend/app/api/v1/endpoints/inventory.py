@@ -9,7 +9,7 @@ import base64 # Added for base64 decoding
 from uuid import UUID
 
 from app.core.database import get_db
-from app.models import User # Assuming User model for authentication/authorization
+from app.core.database import User # Assuming User model for authentication/authorization
 from app.crud import inventory as crud_inventory
 from app.schemas import inventory_schemas as schemas
 # from app.api.v1.dependencies import get_current_active_user_with_permissions # Example dependency

@@ -2,7 +2,7 @@
 from typing import Callable
 from fastapi import Depends, HTTPException, Request
 from sqlalchemy.orm import Session
-from app.core.database import get_db, Restaurant
+from app.core.database import get_db, Restaurant, User
 
 FEATURE_KEYS = {
     # Basic POS Features (Alpha - all plans)
