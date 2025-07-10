@@ -129,13 +129,23 @@ async def verify_supabase_user(
             ).first()
             
             if restaurant:
+                # Sync subscription data from Supabase if available
+                supabase_plan = supabase_user.user_metadata.get('subscription_plan')
+                supabase_status = supabase_user.user_metadata.get('subscription_status')
+                
+                if supabase_plan and supabase_plan != restaurant.subscription_plan:
+                    restaurant.subscription_plan = supabase_plan
+                    db.commit()
+                
+                if supabase_status and supabase_status != restaurant.subscription_status:
+                    restaurant.subscription_status = supabase_status
+                    db.commit()
+                
                 response_data["user"]["restaurant_id"] = str(restaurant.id)
                 response_data["user"]["restaurant_name"] = restaurant.name
-                response_data["user"]["subscription_plan"] = getattr(restaurant, 'subscription_plan', 'alpha')
-                response_data["user"]["subscription_status"] = getattr(restaurant, 'subscription_status', 'trial')
-                response_data["user"]["enabled_features"] = get_plan_features(
-                    getattr(restaurant, 'subscription_plan', 'alpha')
-                )
+                response_data["user"]["subscription_plan"] = restaurant.subscription_plan
+                response_data["user"]["subscription_status"] = restaurant.subscription_status
+                response_data["user"]["enabled_features"] = get_plan_features(restaurant.subscription_plan)
         
         return response_data
         
@@ -177,6 +187,10 @@ async def register_restaurant(
         if db_user.restaurant_id:
             raise HTTPException(status_code=400, detail="User already has a restaurant")
         
+        # Get subscription info from Supabase user metadata or default to alpha
+        subscription_plan = supabase_user.user_metadata.get('subscription_plan', 'alpha')
+        subscription_status = supabase_user.user_metadata.get('subscription_status', 'trial')
+        
         # Create restaurant
         restaurant = Restaurant(
             id=uuid.uuid4(),
@@ -184,8 +198,8 @@ async def register_restaurant(
             email=supabase_user.email,
             phone=data.phone,
             address={"street": data.address} if data.address else {},
-            subscription_plan="alpha",  # Start with Alpha plan
-            subscription_status="trial",
+            subscription_plan=subscription_plan,
+            subscription_status=subscription_status,
             subscription_started_at=datetime.utcnow(),
             is_active=True
         )
@@ -202,7 +216,8 @@ async def register_restaurant(
         return {
             "success": True,
             "restaurant_id": str(restaurant.id),
-            "subscription_plan": "alpha",
+            "subscription_plan": subscription_plan,
+            "subscription_status": subscription_status,
             "message": "Restaurant registered successfully"
         }
         

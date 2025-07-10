@@ -58,6 +58,13 @@ from .stock_movement import (
     InventoryCountItem
 )
 
+# Import models from subscriptions.py
+from .subscriptions import (
+    SubscriptionPlan,
+    PlanFeature,
+    PlanFeatureMapping
+)
+
 __all__ = [
     "Base",
     "Platform",
@@ -100,5 +107,9 @@ __all__ = [
     "StockMovement",
     "StockAlert",
     "InventoryCount",
-    "InventoryCountItem"
+    "InventoryCountItem",
+    # Subscription models
+    "SubscriptionPlan",
+    "PlanFeature",
+    "PlanFeatureMapping"
 ]

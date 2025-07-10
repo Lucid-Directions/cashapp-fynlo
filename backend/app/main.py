@@ -338,12 +338,51 @@ async def get_menu_categories():
         message="Menu categories retrieved"
     )
 
+def format_employee_response(employee):
+    """Format employee with all required fields"""
+    from datetime import datetime
+    
+    return {
+        "id": employee.id,
+        "name": f"{getattr(employee, 'first_name', '')} {getattr(employee, 'last_name', '')}".strip() or employee.email,
+        "email": employee.email,
+        "role": employee.role,
+        "hourlyRate": float(getattr(employee, 'hourly_rate', 0) or 0),
+        "totalSales": float(getattr(employee, 'total_sales', 0) or 0),
+        "performanceScore": float(getattr(employee, 'performance_score', 0) or 0),
+        "isActive": getattr(employee, 'is_active', True),
+        "hireDate": employee.hire_date.isoformat() if hasattr(employee, 'hire_date') and employee.hire_date else datetime.now().isoformat(),
+        "startDate": employee.start_date.isoformat() if hasattr(employee, 'start_date') and employee.start_date else datetime.now().isoformat(),
+        "phone": getattr(employee, 'phone', '') or '',
+        "totalOrders": int(getattr(employee, 'total_orders', 0) or 0),
+        "avgOrderValue": float(getattr(employee, 'avg_order_value', 0) or 0),
+        "hoursWorked": float(getattr(employee, 'hours_worked', 0) or 0)
+    }
+
 @app.get("/api/v1/employees")
-async def get_employees():
+async def get_employees(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     """Get employees"""
     from datetime import datetime, timedelta
     
-    # Generate mock employee data with all required fields
+    # Try to get real employees from database
+    try:
+        employees = db.query(User).filter(
+            User.restaurant_id == current_user.restaurant_id,
+            User.is_active == True
+        ).all()
+        
+        if employees:
+            return APIResponseHelper.success(
+                data=[format_employee_response(emp) for emp in employees],
+                message=f"Retrieved {len(employees)} employees"
+            )
+    except Exception as e:
+        print(f"Error fetching employees: {str(e)}")
+    
+    # Fallback to mock data if no real data
     base_date = datetime.now() - timedelta(days=365)
     
     return APIResponseHelper.success(
