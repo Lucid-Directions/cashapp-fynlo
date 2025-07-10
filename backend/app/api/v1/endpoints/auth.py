@@ -133,19 +133,33 @@ async def verify_supabase_user(
                 supabase_plan = supabase_user.user_metadata.get('subscription_plan')
                 supabase_status = supabase_user.user_metadata.get('subscription_status')
                 
-                if supabase_plan and supabase_plan != restaurant.subscription_plan:
+                # Get current values with defaults
+                current_plan = getattr(restaurant, 'subscription_plan', None)
+                current_status = getattr(restaurant, 'subscription_status', None)
+                
+                if supabase_plan and supabase_plan != current_plan:
                     restaurant.subscription_plan = supabase_plan
                     db.commit()
+                elif not current_plan:
+                    # Set default if null
+                    restaurant.subscription_plan = 'alpha'
+                    db.commit()
                 
-                if supabase_status and supabase_status != restaurant.subscription_status:
+                if supabase_status and supabase_status != current_status:
                     restaurant.subscription_status = supabase_status
+                    db.commit()
+                elif not current_status:
+                    # Set default if null
+                    restaurant.subscription_status = 'trial'
                     db.commit()
                 
                 response_data["user"]["restaurant_id"] = str(restaurant.id)
                 response_data["user"]["restaurant_name"] = restaurant.name
-                response_data["user"]["subscription_plan"] = restaurant.subscription_plan
-                response_data["user"]["subscription_status"] = restaurant.subscription_status
-                response_data["user"]["enabled_features"] = get_plan_features(restaurant.subscription_plan)
+                response_data["user"]["subscription_plan"] = getattr(restaurant, 'subscription_plan', 'alpha') or 'alpha'
+                response_data["user"]["subscription_status"] = getattr(restaurant, 'subscription_status', 'trial') or 'trial'
+                response_data["user"]["enabled_features"] = get_plan_features(
+                    getattr(restaurant, 'subscription_plan', 'alpha') or 'alpha'
+                )
         
         return response_data
         
