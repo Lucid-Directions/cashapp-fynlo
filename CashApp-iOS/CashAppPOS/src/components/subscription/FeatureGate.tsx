@@ -11,17 +11,37 @@ import { useSubscription, FeatureGateResult } from '../../contexts/SubscriptionC
 import { useTheme } from '../../contexts/ThemeContext';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-// Helper function to convert hex color to RGB values
-const hexToRgb = (hex: string): string => {
-  // Remove # if present
-  const cleanHex = hex.replace('#', '');
+// Helper function to safely add transparency to any color format
+const addColorTransparency = (color: string, opacity: number): string => {
+  // If it's already a hex color, convert to rgba
+  if (color.startsWith('#')) {
+    const cleanHex = color.replace('#', '');
+    
+    // Handle both 3 and 6 character hex codes
+    const r = parseInt(cleanHex.length === 3 ? cleanHex[0] + cleanHex[0] : cleanHex.substring(0, 2), 16);
+    const g = parseInt(cleanHex.length === 3 ? cleanHex[1] + cleanHex[1] : cleanHex.substring(2, 4), 16);
+    const b = parseInt(cleanHex.length === 3 ? cleanHex[2] + cleanHex[2] : cleanHex.substring(4, 6), 16);
+    
+    // Check for invalid values
+    if (isNaN(r) || isNaN(g) || isNaN(b)) {
+      return `rgba(255, 193, 7, ${opacity})`; // Fallback warning color
+    }
+    
+    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+  }
   
-  // Handle both 3 and 6 character hex codes
-  const r = parseInt(cleanHex.length === 3 ? cleanHex[0] + cleanHex[0] : cleanHex.substring(0, 2), 16);
-  const g = parseInt(cleanHex.length === 3 ? cleanHex[1] + cleanHex[1] : cleanHex.substring(2, 4), 16);
-  const b = parseInt(cleanHex.length === 3 ? cleanHex[2] + cleanHex[2] : cleanHex.substring(4, 6), 16);
+  // If it's already an rgb() format, convert to rgba
+  if (color.startsWith('rgb(')) {
+    return color.replace('rgb(', 'rgba(').replace(')', `, ${opacity})`);
+  }
   
-  return `${r}, ${g}, ${b}`;
+  // If it's already rgba, just return as is
+  if (color.startsWith('rgba(')) {
+    return color;
+  }
+  
+  // For any other format (named colors, hsl, etc.), use a safe fallback
+  return `rgba(255, 193, 7, ${opacity})`; // Default warning color with transparency
 };
 
 interface FeatureGateProps {
@@ -275,7 +295,7 @@ export const UsageLimitGate: React.FC<UsageLimitGateProps> = ({
   if (shouldShowWarning && !silentMode) {
     return (
       <View>
-        <View style={[styles.warningContainer, { backgroundColor: `rgba(${hexToRgb(theme.colors.warning)}, 0.12)`, borderColor: theme.colors.warning }]}>
+        <View style={[styles.warningContainer, { backgroundColor: addColorTransparency(theme.colors.warning, 0.12), borderColor: theme.colors.warning }]}>
           <Icon 
             name="alert" 
             size={16} 
