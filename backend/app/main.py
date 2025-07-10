@@ -6,6 +6,7 @@ Clean FastAPI implementation for hardware-free restaurant management
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer
+from sqlalchemy.orm import Session
 import uvicorn
 import logging
 from contextlib import asynccontextmanager
