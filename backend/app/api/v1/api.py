@@ -11,6 +11,7 @@ from app.api.v1.endpoints import (
     websocket, sync, notifications, menu,
     pos, admin, inventory, recipes, employees # Added inventory, recipes, and employees
 )
+from app.api.v1 import subscriptions
 
 # Apply a default rate limit to all routes in this router - TEMPORARILY DISABLED.
 # Specific routes can override this with their own @limiter.limit decorator.
@@ -47,3 +48,6 @@ api_router.include_router(employees.router, prefix="/employees", tags=["employee
 
 # Menu Management (Frontend compatibility endpoints)
 api_router.include_router(menu.router, prefix="/menu", tags=["menu"])
+
+# Subscription Management
+api_router.include_router(subscriptions.router, prefix="/subscriptions", tags=["subscriptions"])
