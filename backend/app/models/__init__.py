@@ -58,11 +58,11 @@ from .stock_movement import (
     InventoryCountItem
 )
 
-# Import models from subscriptions.py
-from .subscriptions import (
+# Import models from subscription.py (singular)
+from .subscription import (
     SubscriptionPlan,
-    PlanFeature,
-    PlanFeatureMapping
+    RestaurantSubscription,
+    SubscriptionUsage
 )
 
 __all__ = [
@@ -110,6 +110,6 @@ __all__ = [
     "InventoryCountItem",
     # Subscription models
     "SubscriptionPlan",
-    "PlanFeature",
-    "PlanFeatureMapping"
+    "RestaurantSubscription",
+    "SubscriptionUsage"
 ]
