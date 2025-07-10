@@ -1,6 +1,113 @@
-# Fynlo POS Frontend-Backend Integration Fixes
+# Phase 3: Fix POS Screen UI Issues - Implementation Plan
+
+## Overview
+This phase focuses on fixing critical UI/UX issues in the POS screen that affect daily operations. According to the implementation document, Phase 1 and 2 are completed, and we're ready to start Phase 3.
+
+## Key Issues to Fix
+1. **Orders button navigation** - Currently does nothing when clicked
+2. **Split payment option** - Should be removed for Alpha tier users (subscription-based feature)
+3. **Cash change calculation** - Shows NaN instead of proper change amount
+4. **Cart item deletion** - No swipe gesture for easy deletion
+5. **Quantity adjustment** - Missing increment/decrement buttons for cart items
+
+## Git Workflow Requirements
+- **NEVER work on main branch directly**
+- Create feature branch: `feature/phase-3-fix-pos-ui`
+- Small commits (5-10 files max)
+- Test locally before pushing
+- Create PR with detailed description
 
 ## TODO Items
+
+### Setup & Analysis
+- [ ] Create feature branch from main
+- [ ] Pull latest changes from main
+- [ ] Locate POSScreen.tsx file and analyze current implementation
+- [ ] Review subscription tier logic for feature gating
+
+### Fix Orders Button Navigation
+- [ ] Find Orders button in POSScreen
+- [ ] Check navigation configuration
+- [ ] Implement proper navigation to Orders screen
+- [ ] Test navigation flow
+
+### Remove Split Payment for Alpha Users
+- [ ] Locate split payment UI in payment flow
+- [ ] Check user subscription tier from AuthContext
+- [ ] Add conditional rendering based on subscription plan
+- [ ] Display message for Alpha users about upgrade requirement
+
+### Fix Cash Change Calculation
+- [ ] Find cash payment handling logic
+- [ ] Debug NaN issue in change calculation
+- [ ] Ensure proper number parsing and arithmetic
+- [ ] Add validation for cash amount input
+
+### Add Swipe to Delete for Cart Items
+- [ ] Install/verify react-native-gesture-handler
+- [ ] Implement Swipeable component for cart items
+- [ ] Add delete animation
+- [ ] Update cart state on deletion
+
+### Add Quantity Adjustment Buttons
+- [ ] Design +/- buttons for cart items
+- [ ] Implement increment/decrement logic
+- [ ] Update cart totals dynamically
+- [ ] Ensure minimum quantity of 1
+
+### Testing & Deployment
+- [ ] Test all fixes on iOS simulator
+- [ ] Build production bundle
+- [ ] Deploy bundle to iOS app
+- [ ] Test on physical device if possible
+
+### PR & Merge
+- [ ] Create PR with detailed description
+- [ ] List all fixes and testing done
+- [ ] Wait for review/approval
+- [ ] Merge to main
+- [ ] Monitor deployment
+
+## File Locations
+- Main file: `src/screens/pos/POSScreen.tsx`
+- Related files:
+  - Cart components
+  - Payment flow screens
+  - Navigation configuration
+  - AuthContext for user subscription info
+
+## Bundle Deployment Commands
+```bash
+cd CashApp-iOS/CashAppPOS
+npx metro build index.js --platform ios --dev false --out ios/main.jsbundle
+mv ios/main.jsbundle.js ios/main.jsbundle
+cp ios/main.jsbundle ios/CashAppPOS/main.jsbundle
+```
+
+## Success Criteria
+- Orders button navigates correctly
+- Alpha users cannot access split payment
+- Cash change calculates correctly (no NaN)
+- Cart items can be swiped to delete
+- Quantities can be adjusted with +/- buttons
+- All changes tested and working in production
+
+## Timeline
+Target: 1 day (as specified in implementation document)
+
+## Notes
+- Ensure we follow the existing UI patterns and theme
+- Keep changes minimal and focused on fixing issues
+- Don't add new features beyond what's specified
+- Test thoroughly before deployment
+
+---
+
+# Previous Work (Completed)
+
+## Fynlo POS Frontend-Backend Integration Fixes
+
+### TODO Items (All Completed)
 
 - [x] Replace hardcoded Mexican menu with Chucho menu
 - [x] Fix backend API routes returning 404 errors
@@ -14,7 +121,7 @@
 - [x] Remove all hardcoded restaurant references for multi-tenant support
 - [x] Commit all changes to git
 
-## Review
+### Review
 
 ### Summary of Changes
 
