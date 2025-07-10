@@ -7,9 +7,12 @@ import {
   StatusBar,
   ScrollView,
   TouchableOpacity,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
+import DataService from '../../services/DataService';
 
 const Colors = {
   primary: '#00A651',
@@ -42,114 +45,58 @@ const InventoryReportDetailScreen = () => {
   const navigation = useNavigation();
   const [inventoryData, setInventoryData] = useState<InventoryItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadInventoryData();
   }, []);
 
-  const loadInventoryData = () => {
-    // Mock inventory data with realistic restaurant items
-    const mockData: InventoryItem[] = [
-      {
-        id: 'INV001',
-        name: 'Beef Mince',
-        category: 'Meat',
-        currentStock: 45,
-        reorderLevel: 10,
-        unitCost: 8.50,
-        totalValue: 382.50,
-        supplier: 'Premium Meats Ltd',
-        lastUpdated: new Date(),
-        status: 'in_stock',
-      },
-      {
-        id: 'INV002', 
-        name: 'Chicken Breast',
-        category: 'Meat',
-        currentStock: 8,
-        reorderLevel: 15,
-        unitCost: 12.00,
-        totalValue: 96.00,
-        supplier: 'Premium Meats Ltd',
-        lastUpdated: new Date(),
-        status: 'low_stock',
-      },
-      {
-        id: 'INV003',
-        name: 'Tortilla Wraps',
-        category: 'Breads',
-        currentStock: 120,
-        reorderLevel: 25,
-        unitCost: 0.45,
-        totalValue: 54.00,
-        supplier: 'Fresh Bakery Co',
-        lastUpdated: new Date(),
-        status: 'in_stock',
-      },
-      {
-        id: 'INV004',
-        name: 'Cheddar Cheese',
-        category: 'Dairy',
-        currentStock: 0,
-        reorderLevel: 5,
-        unitCost: 15.00,
-        totalValue: 0.00,
-        supplier: 'Dairy Direct',
-        lastUpdated: new Date(),
-        status: 'out_of_stock',
-      },
-      {
-        id: 'INV005',
-        name: 'Tomatoes',
-        category: 'Vegetables',
-        currentStock: 35,
-        reorderLevel: 20,
-        unitCost: 2.80,
-        totalValue: 98.00,
-        supplier: 'Fresh Produce Ltd',
-        lastUpdated: new Date(),
-        status: 'in_stock',
-      },
-      {
-        id: 'INV006',
-        name: 'Onions',
-        category: 'Vegetables',
-        currentStock: 12,
-        reorderLevel: 15,
-        unitCost: 1.50,
-        totalValue: 18.00,
-        supplier: 'Fresh Produce Ltd',
-        lastUpdated: new Date(),
-        status: 'low_stock',
-      },
-      {
-        id: 'INV007',
-        name: 'Rice',
-        category: 'Grains',
-        currentStock: 85,
-        reorderLevel: 30,
-        unitCost: 3.20,
-        totalValue: 272.00,
-        supplier: 'Wholesale Foods',
-        lastUpdated: new Date(),
-        status: 'in_stock',
-      },
-      {
-        id: 'INV008',
-        name: 'Black Beans',
-        category: 'Legumes',
-        currentStock: 22,
-        reorderLevel: 10,
-        unitCost: 4.50,
-        totalValue: 99.00,
-        supplier: 'Wholesale Foods',
-        lastUpdated: new Date(),
-        status: 'in_stock',
-      },
-    ];
-
-    setInventoryData(mockData);
+  const loadInventoryData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const dataService = DataService.getInstance();
+      const inventory = await dataService.getInventoryReport();
+      
+      // Transform API data to match InventoryItem interface if needed
+      const transformedData: InventoryItem[] = inventory.map((item: any) => ({
+        id: item.id || item.sku,
+        name: item.name || item.product_name,
+        category: item.category || 'Other',
+        currentStock: item.current_stock || item.quantity || 0,
+        reorderLevel: item.reorder_level || item.minimum_stock || 10,
+        unitCost: item.unit_cost || item.cost || 0,
+        totalValue: (item.current_stock || item.quantity || 0) * (item.unit_cost || item.cost || 0),
+        supplier: item.supplier || item.supplier_name || 'Unknown Supplier',
+        lastUpdated: item.last_updated ? new Date(item.last_updated) : new Date(),
+        status: determineStockStatus(
+          item.current_stock || item.quantity || 0,
+          item.reorder_level || item.minimum_stock || 10
+        ),
+      }));
+      
+      setInventoryData(transformedData);
+    } catch (error) {
+      console.error('Failed to load inventory data:', error);
+      setError('Failed to load inventory data. Please try again.');
+      Alert.alert(
+        'Error',
+        'Unable to load inventory data. Please check your connection and try again.',
+        [{ text: 'OK' }]
+      );
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const determineStockStatus = (currentStock: number, reorderLevel: number): 'in_stock' | 'low_stock' | 'out_of_stock' => {
+    if (currentStock === 0) return 'out_of_stock';
+    if (currentStock <= reorderLevel) return 'low_stock';
+    return 'in_stock';
+  };
+
 
   const getFilteredData = () => {
     if (selectedCategory === 'all') return inventoryData;
@@ -218,12 +165,30 @@ const InventoryReportDetailScreen = () => {
           <Icon name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Inventory Report</Text>
-        <TouchableOpacity style={styles.headerAction}>
+        <TouchableOpacity 
+          style={styles.headerAction}
+          onPress={loadInventoryData}
+          disabled={loading}
+        >
           <Icon name="refresh" size={24} color={Colors.white} />
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.content}>
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={Colors.primary} />
+          <Text style={styles.loadingText}>Loading inventory data...</Text>
+        </View>
+      ) : error ? (
+        <View style={styles.errorContainer}>
+          <Icon name="error-outline" size={48} color={Colors.danger} />
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity style={styles.retryButton} onPress={loadInventoryData}>
+            <Text style={styles.retryButtonText}>Retry</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <ScrollView style={styles.content}>
         {/* Summary Cards */}
         <View style={styles.summaryContainer}>
           <View style={styles.summaryCard}>
@@ -372,6 +337,7 @@ const InventoryReportDetailScreen = () => {
 
         <View style={styles.spacer} />
       </ScrollView>
+      )}
     </SafeAreaView>
   );
 };
@@ -565,6 +531,41 @@ const styles = StyleSheet.create({
   },
   spacer: {
     height: 40,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: Colors.lightText,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  errorText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: Colors.danger,
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  retryButton: {
+    backgroundColor: Colors.primary,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: Colors.white,
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 

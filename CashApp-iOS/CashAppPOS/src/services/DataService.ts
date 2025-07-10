@@ -834,6 +834,44 @@ class DataService {
     
   }
 
+  async getLaborReport(period: string): Promise<any> {
+    console.log('DataService.getLaborReport called', {
+      period,
+      USE_REAL_API: this.featureFlags.USE_REAL_API,
+      isBackendAvailable: this.isBackendAvailable
+    });
+    
+    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
+      try {
+        console.log('🌐 Attempting to fetch labor data from API...');
+        const authToken = await AsyncStorage.getItem('auth_token');
+        const response = await fetch(`${API_CONFIG.FULL_API_URL}/analytics/labor?period=${period}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
+          },
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          const laborData = result.data || result; // Handle both wrapped and unwrapped responses
+          console.log('✅ API labor data received');
+          return laborData;
+        } else {
+          console.error('❌ API error:', response.status, response.statusText);
+          throw new Error(`API error: ${response.status}`);
+        }
+      } catch (error) {
+        console.error('❌ Failed to fetch labor data from API:', error);
+        throw error; // No fallback - API must work for production readiness
+      }
+    }
+    
+    // This should never be reached in production
+    throw new Error('Labor report requires backend API connection');
+  }
+
   async getReportsDashboardData(): Promise<any | null> {
     console.log('DataService.getReportsDashboardData called', {
       USE_REAL_API: this.featureFlags.USE_REAL_API,
@@ -863,57 +901,12 @@ class DataService {
         }
       } catch (error) {
         console.error('❌ Failed to fetch reports dashboard from API:', error);
-        // Return generic mock data for any restaurant
-        return this.getGenericRestaurantReports();
+        throw error; // No fallback - API must work for production readiness
       }
     }
     
-    // Return mock data if not using real API
-    return this.getGenericRestaurantReports();
-  }
-  
-  private getGenericRestaurantReports() {
-    const today = new Date();
-    return {
-      revenue: {
-        today: 2847.50,
-        yesterday: 3156.80,
-        thisWeek: 18432.75,
-        lastWeek: 19875.20,
-        thisMonth: 67890.50,
-        lastMonth: 71234.80
-      },
-      orders: {
-        today: 42,
-        yesterday: 48,
-        thisWeek: 287,
-        lastWeek: 312,
-        averageOrderValue: 67.80
-      },
-      topItems: [
-        { name: 'Main Dish #1', quantity: 156, revenue: 1872.00 },
-        { name: 'Main Dish #2', quantity: 134, revenue: 1474.00 },
-        { name: 'Main Dish #3', quantity: 98, revenue: 1323.00 },
-        { name: 'Appetizer #1', quantity: 89, revenue: 712.00 },
-        { name: 'Beverage #1', quantity: 78, revenue: 624.00 }
-      ],
-      hourlyBreakdown: Array.from({ length: 24 }, (_, hour) => ({
-        hour,
-        orders: hour >= 11 && hour <= 22 ? Math.floor(Math.random() * 15) + 5 : 0,
-        revenue: hour >= 11 && hour <= 22 ? Math.floor(Math.random() * 500) + 100 : 0
-      })),
-      paymentMethods: {
-        card: { count: 178, percentage: 62 },
-        cash: { count: 65, percentage: 23 },
-        applePay: { count: 44, percentage: 15 }
-      },
-      staffPerformance: [
-        { name: 'Staff Member #1', orders: 89, revenue: 5234.50 },
-        { name: 'Staff Member #2', orders: 76, revenue: 4567.80 },
-        { name: 'Staff Member #3', orders: 68, revenue: 4123.40 },
-        { name: 'Staff Member #4', orders: 54, revenue: 3456.80 }
-      ]
-    };
+    // This should never be reached in production
+    throw new Error('Reports dashboard requires backend API connection');
   }
 
   async getUserProfile(): Promise<any | null> {
@@ -980,6 +973,43 @@ class DataService {
       console.error('❌ Employee creation failed:', error);
       throw new Error(`Employee creation failed: ${error.message}`);
     }
+  }
+
+  async getInventoryReport(): Promise<any[]> {
+    console.log('DataService.getInventoryReport called', {
+      USE_REAL_API: this.featureFlags.USE_REAL_API,
+      isBackendAvailable: this.isBackendAvailable
+    });
+    
+    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
+      try {
+        console.log('🌐 Attempting to fetch inventory data from API...');
+        const authToken = await AsyncStorage.getItem('auth_token');
+        const response = await fetch(`${API_CONFIG.FULL_API_URL}/inventory`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
+          },
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          const inventoryData = result.data || result;
+          console.log('✅ API inventory data received');
+          return Array.isArray(inventoryData) ? inventoryData : [];
+        } else {
+          console.error('❌ API error:', response.status, response.statusText);
+          throw new Error(`API error: ${response.status}`);
+        }
+      } catch (error) {
+        console.error('❌ Failed to fetch inventory data from API:', error);
+        throw error; // No fallback - API must work for production readiness
+      }
+    }
+    
+    // Throw error if not using real API
+    throw new Error('Inventory data requires API connection');
   }
 }
 
