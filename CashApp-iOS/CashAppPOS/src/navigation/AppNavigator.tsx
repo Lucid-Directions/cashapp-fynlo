@@ -7,7 +7,6 @@ import { useTheme } from '../design-system/ThemeProvider';
 import { isFeatureEnabled } from '../config/featureFlags';
 import AuthScreen from '../screens/auth/AuthScreen';
 import MainNavigator from './MainNavigator';
-import PlatformNavigator from './PlatformNavigator';
 
 const Stack = createStackNavigator();
 
@@ -33,23 +32,13 @@ const AppNavigator: React.FC = () => {
         }}
       >
         {isAuthenticated ? (
-          isFeatureEnabled('PLATFORM_OWNER_ENABLED') && isPlatformOwner ? (
-            <Stack.Screen
-              name="Platform"
-              component={PlatformNavigator}
-              options={{
-                animationTypeForReplace: 'push',
-              }}
-            />
-          ) : (
-            <Stack.Screen
-              name="Main"
-              component={MainNavigator}
-              options={{
-                animationTypeForReplace: 'push',
-              }}
-            />
-          )
+          <Stack.Screen
+            name="Main"
+            component={MainNavigator}
+            options={{
+              animationTypeForReplace: 'push',
+            }}
+          />
         ) : (
           <Stack.Screen
             name="Auth"
