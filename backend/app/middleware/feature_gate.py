@@ -10,7 +10,7 @@ from fastapi import HTTPException, Request, Depends
 from sqlalchemy.orm import Session
 from typing import Callable, Optional, List
 
-from app.database import get_db
+from app.core.database import get_db
 from app.models.subscription import RestaurantSubscription, SubscriptionUsage
 from app.core.security import get_current_user
 

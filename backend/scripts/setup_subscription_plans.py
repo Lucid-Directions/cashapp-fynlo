@@ -91,7 +91,7 @@ def create_subscription_plans():
     """Create the default subscription plans in the database"""
     
     # Get database session synchronously
-    from app.database import SessionLocal
+    from app.core.database import SessionLocal
     db = SessionLocal()
     
     try:

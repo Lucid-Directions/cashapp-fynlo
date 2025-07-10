@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import datetime, timedelta
 
-from app.database import get_db
+from app.core.database import get_db
 from app.models.subscription import SubscriptionPlan, RestaurantSubscription, SubscriptionUsage
 from app.core.response_helper import APIResponseHelper
 from app.schemas.subscription import (
