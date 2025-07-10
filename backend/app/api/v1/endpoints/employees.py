@@ -7,10 +7,9 @@ from typing import List, Optional
 from datetime import datetime, date
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
-from app.core.database import get_db
+from app.core.database import get_db, User
 from app.core.responses import APIResponseHelper
-from app.api.v1.endpoints.auth import get_current_user
-from app.core.database import User
+from app.core.auth import get_current_user
 from app.models.employee import EmployeeProfile, Schedule, Shift, TimeEntry, PerformanceMetric
 from app.schemas.employee_schemas import (
     EmployeeCreateRequest, EmployeeUpdateRequest, EmployeeResponse,

@@ -10,8 +10,8 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 import os
 
-from app.core.database import get_db, Product, Restaurant
-from app.api.v1.endpoints.auth import get_current_user, User
+from app.core.database import get_db, Product, Restaurant, User
+from app.core.auth import get_current_user
 from app.core.file_upload import file_upload_service, ImageUploadRequest, ImageUploadResponse
 from app.core.responses import APIResponseHelper
 from app.core.exceptions import FynloException, ErrorCodes

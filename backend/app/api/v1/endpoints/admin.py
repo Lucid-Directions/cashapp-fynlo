@@ -11,8 +11,8 @@ from sqlalchemy.orm import Session
 from app.services.payment_factory import payment_factory
 from app.services.payment_analytics import PaymentAnalyticsService
 from app.services.smart_routing import RoutingStrategy
-from app.core.database import get_db
-from app.api.v1.endpoints.auth import get_current_user, User # get_current_user already has Request
+from app.core.database import get_db, User
+from app.core.auth import get_current_user # get_current_user already has Request
 from app.crud.payments import get_provider_analytics, create_payment_analytics_report
 from app.core.responses import APIResponseHelper
 from app.services.audit_logger import AuditLoggerService

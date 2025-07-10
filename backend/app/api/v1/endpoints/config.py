@@ -8,8 +8,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 
-from app.core.database import get_db
-from app.api.v1.endpoints.auth import get_current_user, User
+from app.core.database import get_db, User
+from app.core.auth import get_current_user
 from app.core.responses import APIResponseHelper
 from app.services.config_manager import config_manager, ProviderConfig, RoutingConfig, FeatureFlags
 from app.services.payment_factory import payment_factory

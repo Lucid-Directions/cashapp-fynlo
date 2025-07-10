@@ -7,8 +7,8 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 
-from app.core.database import get_db, Product, Category
-from app.api.v1.endpoints.auth import get_current_user, User
+from app.core.database import get_db, Product, Category, User
+from app.core.auth import get_current_user
 from app.core.redis_client import get_redis, RedisClient
 from app.core.responses import APIResponseHelper
 from app.api.v1.endpoints.products import CategoryResponse, ProductResponse
