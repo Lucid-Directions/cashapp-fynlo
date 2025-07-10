@@ -937,6 +937,252 @@ class DataService {
     // Throw error if not using real API
     throw new Error('Inventory data requires API connection');
   }
+
+  // ===========================================================================
+  // SUBSCRIPTION MANAGEMENT METHODS
+  // ===========================================================================
+
+  async getSubscriptionPlans(): Promise<any> {
+    console.log('DataService.getSubscriptionPlans called');
+    
+    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
+      try {
+        const authToken = await AsyncStorage.getItem('auth_token');
+        const response = await fetch(`${API_CONFIG.FULL_API_URL}/subscriptions/plans`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
+          },
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          return {
+            success: true,
+            data: result.data || result,
+            message: 'Plans retrieved successfully'
+          };
+        } else {
+          throw new Error(`API error: ${response.status}`);
+        }
+      } catch (error) {
+        console.error('❌ Failed to fetch subscription plans:', error);
+        throw error;
+      }
+    }
+    
+    throw new Error('Subscription plans require API connection');
+  }
+
+  async getCurrentSubscription(restaurantId: number): Promise<any> {
+    console.log('DataService.getCurrentSubscription called', { restaurantId });
+    
+    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
+      try {
+        const authToken = await AsyncStorage.getItem('auth_token');
+        const response = await fetch(`${API_CONFIG.FULL_API_URL}/subscriptions/current?restaurant_id=${restaurantId}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
+          },
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          return {
+            success: true,
+            data: result.data || result,
+            message: 'Subscription retrieved successfully'
+          };
+        } else if (response.status === 404) {
+          return {
+            success: false,
+            data: null,
+            message: 'No active subscription found'
+          };
+        } else {
+          throw new Error(`API error: ${response.status}`);
+        }
+      } catch (error) {
+        console.error('❌ Failed to fetch current subscription:', error);
+        throw error;
+      }
+    }
+    
+    throw new Error('Subscription data requires API connection');
+  }
+
+  async createSubscription(subscriptionData: any): Promise<any> {
+    console.log('DataService.createSubscription called', subscriptionData);
+    
+    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
+      try {
+        const authToken = await AsyncStorage.getItem('auth_token');
+        const response = await fetch(`${API_CONFIG.FULL_API_URL}/subscriptions/subscribe`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
+          },
+          body: JSON.stringify(subscriptionData),
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          return {
+            success: true,
+            data: result.data || result,
+            message: result.message || 'Subscription created successfully'
+          };
+        } else {
+          const errorData = await response.json();
+          return {
+            success: false,
+            data: null,
+            message: errorData.message || `Failed to create subscription: ${response.status}`
+          };
+        }
+      } catch (error) {
+        console.error('❌ Failed to create subscription:', error);
+        return {
+          success: false,
+          data: null,
+          message: error.message || 'Failed to create subscription'
+        };
+      }
+    }
+    
+    throw new Error('Subscription creation requires API connection');
+  }
+
+  async changeSubscriptionPlan(changeData: any): Promise<any> {
+    console.log('DataService.changeSubscriptionPlan called', changeData);
+    
+    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
+      try {
+        const authToken = await AsyncStorage.getItem('auth_token');
+        const response = await fetch(`${API_CONFIG.FULL_API_URL}/subscriptions/change-plan`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
+          },
+          body: JSON.stringify(changeData),
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          return {
+            success: true,
+            data: result.data || result,
+            message: result.message || 'Plan changed successfully'
+          };
+        } else {
+          const errorData = await response.json();
+          return {
+            success: false,
+            data: null,
+            message: errorData.message || `Failed to change plan: ${response.status}`
+          };
+        }
+      } catch (error) {
+        console.error('❌ Failed to change subscription plan:', error);
+        return {
+          success: false,
+          data: null,
+          message: error.message || 'Failed to change subscription plan'
+        };
+      }
+    }
+    
+    throw new Error('Plan change requires API connection');
+  }
+
+  async cancelSubscription(restaurantId: number): Promise<any> {
+    console.log('DataService.cancelSubscription called', { restaurantId });
+    
+    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
+      try {
+        const authToken = await AsyncStorage.getItem('auth_token');
+        const response = await fetch(`${API_CONFIG.FULL_API_URL}/subscriptions/cancel?restaurant_id=${restaurantId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
+          },
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          return {
+            success: true,
+            data: result.data || result,
+            message: result.message || 'Subscription cancelled successfully'
+          };
+        } else {
+          const errorData = await response.json();
+          return {
+            success: false,
+            data: null,
+            message: errorData.message || `Failed to cancel subscription: ${response.status}`
+          };
+        }
+      } catch (error) {
+        console.error('❌ Failed to cancel subscription:', error);
+        return {
+          success: false,
+          data: null,
+          message: error.message || 'Failed to cancel subscription'
+        };
+      }
+    }
+    
+    throw new Error('Subscription cancellation requires API connection');
+  }
+
+  async incrementUsage(restaurantId: number, usageType: string, amount: number = 1): Promise<any> {
+    console.log('DataService.incrementUsage called', { restaurantId, usageType, amount });
+    
+    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
+      try {
+        const authToken = await AsyncStorage.getItem('auth_token');
+        const response = await fetch(`${API_CONFIG.FULL_API_URL}/subscriptions/usage/increment?restaurant_id=${restaurantId}&usage_type=${usageType}&amount=${amount}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
+          },
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          return {
+            success: true,
+            data: result.data || result,
+            message: result.message || 'Usage incremented successfully'
+          };
+        } else {
+          const errorData = await response.json();
+          return {
+            success: false,
+            data: null,
+            message: errorData.message || `Failed to increment usage: ${response.status}`
+          };
+        }
+      } catch (error) {
+        console.error('❌ Failed to increment usage:', error);
+        return {
+          success: false,
+          data: null,
+          message: error.message || 'Failed to increment usage'
+        };
+      }
+    }
+    
+    throw new Error('Usage tracking requires API connection');
+  }
 }
 
 export default DataService;
