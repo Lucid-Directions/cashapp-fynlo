@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 
 from app.core.database import get_db
 from app.models.subscription import SubscriptionPlan, RestaurantSubscription, SubscriptionUsage
-from app.core.response_helper import APIResponseHelper
+from app.core.responses import APIResponseHelper
 from app.schemas.subscription import (
     SubscriptionPlanResponse,
     RestaurantSubscriptionResponse,
