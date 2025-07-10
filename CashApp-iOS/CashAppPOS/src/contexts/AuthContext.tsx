@@ -20,6 +20,12 @@ export interface User {
   isActive: boolean;
   platformId?: string;
   managedRestaurants?: string[];
+  // Add subscription fields
+  subscription_plan?: 'alpha' | 'beta' | 'omega';
+  subscription_status?: 'trial' | 'active' | 'cancelled' | 'expired';
+  enabled_features?: string[];
+  // Make platform owner optional
+  is_platform_owner?: boolean;
 }
 
 export interface Business {
