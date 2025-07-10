@@ -70,7 +70,13 @@ async def get_current_subscription(
     """
     try:
         # Verify user has access to this restaurant
-        if hasattr(current_user, 'restaurant_id') and current_user.restaurant_id != restaurant_id:
+        if not hasattr(current_user, 'restaurant_id'):
+            return APIResponseHelper.error(
+                message="Access denied: User not associated with any restaurant",
+                status_code=403
+            )
+        
+        if current_user.restaurant_id != restaurant_id:
             return APIResponseHelper.error(
                 message="Access denied: You don't have permission to access this restaurant's subscription data",
                 status_code=403
@@ -124,7 +130,13 @@ async def create_subscription(
     """
     try:
         # Verify user has access to this restaurant
-        if hasattr(current_user, 'restaurant_id') and current_user.restaurant_id != subscription_data.restaurant_id:
+        if not hasattr(current_user, 'restaurant_id'):
+            return APIResponseHelper.error(
+                message="Access denied: User not associated with any restaurant",
+                status_code=403
+            )
+        
+        if current_user.restaurant_id != subscription_data.restaurant_id:
             return APIResponseHelper.error(
                 message="Access denied: You don't have permission to manage this restaurant's subscription",
                 status_code=403
@@ -217,7 +229,13 @@ async def change_subscription_plan(
     """
     try:
         # Verify user has access to this restaurant
-        if hasattr(current_user, 'restaurant_id') and current_user.restaurant_id != change_data.restaurant_id:
+        if not hasattr(current_user, 'restaurant_id'):
+            return APIResponseHelper.error(
+                message="Access denied: User not associated with any restaurant",
+                status_code=403
+            )
+        
+        if current_user.restaurant_id != change_data.restaurant_id:
             return APIResponseHelper.error(
                 message="Access denied: You don't have permission to manage this restaurant's subscription",
                 status_code=403
@@ -288,7 +306,13 @@ async def cancel_subscription(
     """
     try:
         # Verify user has access to this restaurant
-        if hasattr(current_user, 'restaurant_id') and current_user.restaurant_id != restaurant_id:
+        if not hasattr(current_user, 'restaurant_id'):
+            return APIResponseHelper.error(
+                message="Access denied: User not associated with any restaurant",
+                status_code=403
+            )
+        
+        if current_user.restaurant_id != restaurant_id:
             return APIResponseHelper.error(
                 message="Access denied: You don't have permission to manage this restaurant's subscription",
                 status_code=403
@@ -337,7 +361,13 @@ async def get_usage_statistics(
     """
     try:
         # Verify user has access to this restaurant
-        if hasattr(current_user, 'restaurant_id') and current_user.restaurant_id != restaurant_id:
+        if not hasattr(current_user, 'restaurant_id'):
+            return APIResponseHelper.error(
+                message="Access denied: User not associated with any restaurant",
+                status_code=403
+            )
+        
+        if current_user.restaurant_id != restaurant_id:
             return APIResponseHelper.error(
                 message="Access denied: You don't have permission to access this restaurant's usage data",
                 status_code=403
@@ -404,7 +434,13 @@ async def increment_usage(
     """
     try:
         # Verify user has access to this restaurant
-        if hasattr(current_user, 'restaurant_id') and current_user.restaurant_id != restaurant_id:
+        if not hasattr(current_user, 'restaurant_id'):
+            return APIResponseHelper.error(
+                message="Access denied: User not associated with any restaurant",
+                status_code=403
+            )
+        
+        if current_user.restaurant_id != restaurant_id:
             return APIResponseHelper.error(
                 message="Access denied: You don't have permission to modify this restaurant's usage data",
                 status_code=403

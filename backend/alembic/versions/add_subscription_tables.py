@@ -11,7 +11,7 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = 'add_subscription_tables'
-down_revision = '001_initial_schema'  # Update this based on latest migration
+down_revision = '009_add_supabase_auth_support'
 branch_labels = None
 depends_on = None
 
