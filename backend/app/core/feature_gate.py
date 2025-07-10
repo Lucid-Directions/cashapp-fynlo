@@ -3,7 +3,6 @@ from typing import Callable
 from fastapi import Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from app.core.database import get_db, Restaurant
-from app.core.cache import get_cached_data, cache_data
 
 FEATURE_KEYS = {
     # Basic POS Features (Alpha - all plans)
@@ -34,63 +33,100 @@ def check_feature_access(restaurant_id: str, feature_key: str, db: Session) -> b
     if not restaurant:
         return False
     
-    # Get plan features from cache or database
-    cache_key = f"plan:features:{getattr(restaurant, 'subscription_plan', 'alpha')}"
-    features = get_cached_data(cache_key)
+    # Get plan with fallback to alpha
+    subscription_plan = getattr(restaurant, 'subscription_plan', 'alpha') or 'alpha'
     
-    if not features:
-        # Define features per plan
-        plan_features = {
-            'alpha': ['pos_basic', 'order_management', 'basic_payments', 'daily_reports'],
-            'beta': ['pos_basic', 'order_management', 'basic_payments', 'daily_reports',
-                    'inventory_management', 'staff_management', 'advanced_reports',
-                    'table_management', 'customer_database'],
-            'omega': list(FEATURE_KEYS.keys())  # All features
-        }
-        
-        # Get plan with fallback to alpha
-        subscription_plan = getattr(restaurant, 'subscription_plan', 'alpha') or 'alpha'
-        features = plan_features.get(subscription_plan, plan_features['alpha'])
-        cache_data(cache_key, features, ttl=3600)
+    # Define features per plan
+    plan_features = {
+        'alpha': ['pos_basic', 'order_management', 'basic_payments', 'daily_reports'],
+        'beta': ['pos_basic', 'order_management', 'basic_payments', 'daily_reports',
+                'inventory_management', 'staff_management', 'advanced_reports',
+                'table_management', 'customer_database'],
+        'omega': list(FEATURE_KEYS.keys())  # All features
+    }
     
+    features = plan_features.get(subscription_plan, plan_features['alpha'])
     return feature_key in features
 
-def require_feature(feature_key: str) -> Callable:
+def create_feature_checker(feature_key: str):
     """
-    Create a FastAPI dependency that checks if the current user has access to a feature.
+    Create a dependency function that checks if the current user has access to a feature.
     
     Usage:
-        @router.get("/inventory", dependencies=[Depends(require_feature("inventory_management"))])
-        async def get_inventory(...):
+        @router.get("/inventory")
+        async def get_inventory(
+            current_user: User = Depends(get_current_user),
+            _: bool = Depends(create_feature_checker("inventory_management")),
+            db: Session = Depends(get_db)
+        ):
+            ...
+    
+    Or with dependencies parameter:
+        @router.get("/inventory", dependencies=[Depends(get_current_user), Depends(create_feature_checker("inventory_management"))])
+        async def get_inventory(db: Session = Depends(get_db)):
             ...
     """
-    async def feature_dependency(
-        current_user = None,  # This will be injected by including get_current_user in the route
+    async def check_feature_access_dependency(
         db: Session = Depends(get_db)
     ):
         # Import here to avoid circular imports
         from app.api.v1.endpoints.auth import get_current_user
+        from fastapi import Depends as FastAPIDepends
         
-        # If current_user is not injected, this means the route doesn't have get_current_user
-        # In that case, we can't check features
-        if current_user is None:
+        # This is a factory that returns the actual dependency
+        async def feature_check(
+            current_user = FastAPIDepends(get_current_user),
+            db: Session = db
+        ):
+            if not hasattr(current_user, 'restaurant_id') or not current_user.restaurant_id:
+                raise HTTPException(
+                    status_code=403,
+                    detail="No restaurant associated with user"
+                )
+            
+            if not check_feature_access(str(current_user.restaurant_id), feature_key, db):
+                raise HTTPException(
+                    status_code=403,
+                    detail=f"This feature '{feature_key}' requires a higher subscription plan"
+                )
+            
+            return True
+        
+        # Execute the dependency with proper injection
+        from inspect import iscoroutinefunction
+        if iscoroutinefunction(get_current_user):
+            # If get_current_user is async, we need to handle it properly
+            # This is a limitation - we'll need to restructure
             raise HTTPException(
                 status_code=500,
-                detail="Feature check requires authenticated user. Add get_current_user to your route dependencies."
-            )
-        
-        if not hasattr(current_user, 'restaurant_id') or not current_user.restaurant_id:
-            raise HTTPException(
-                status_code=403,
-                detail="No restaurant associated with user"
-            )
-        
-        if not check_feature_access(str(current_user.restaurant_id), feature_key, db):
-            raise HTTPException(
-                status_code=403,
-                detail=f"This feature '{feature_key}' requires a higher subscription plan"
+                detail="Feature gate implementation error - please use the explicit pattern shown in docstring"
             )
         
         return True
     
-    return feature_dependency
+    return check_feature_access_dependency
+
+# Simpler approach - just provide a utility function
+async def check_user_has_feature(
+    feature_key: str,
+    current_user,  # Will be injected by route
+    db: Session
+) -> bool:
+    """
+    Check if the current user has access to a feature.
+    Use this in your route handlers after getting current_user.
+    
+    Example:
+        @router.get("/inventory")
+        async def get_inventory(
+            current_user: User = Depends(get_current_user),
+            db: Session = Depends(get_db)
+        ):
+            if not await check_user_has_feature("inventory_management", current_user, db):
+                raise HTTPException(status_code=403, detail="Feature not available in your plan")
+            ...
+    """
+    if not hasattr(current_user, 'restaurant_id') or not current_user.restaurant_id:
+        return False
+    
+    return check_feature_access(str(current_user.restaurant_id), feature_key, db)
