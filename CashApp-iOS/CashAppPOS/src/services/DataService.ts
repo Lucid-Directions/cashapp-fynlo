@@ -834,6 +834,44 @@ class DataService {
     
   }
 
+  async getLaborReport(period: string): Promise<any> {
+    console.log('DataService.getLaborReport called', {
+      period,
+      USE_REAL_API: this.featureFlags.USE_REAL_API,
+      isBackendAvailable: this.isBackendAvailable
+    });
+    
+    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
+      try {
+        console.log('🌐 Attempting to fetch labor data from API...');
+        const authToken = await AsyncStorage.getItem('auth_token');
+        const response = await fetch(`${API_CONFIG.FULL_API_URL}/analytics/labor?period=${period}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
+          },
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          const laborData = result.data || result; // Handle both wrapped and unwrapped responses
+          console.log('✅ API labor data received');
+          return laborData;
+        } else {
+          console.error('❌ API error:', response.status, response.statusText);
+          throw new Error(`API error: ${response.status}`);
+        }
+      } catch (error) {
+        console.error('❌ Failed to fetch labor data from API:', error);
+        throw error; // No fallback - API must work for production readiness
+      }
+    }
+    
+    // This should never be reached in production
+    throw new Error('Labor report requires backend API connection');
+  }
+
   async getReportsDashboardData(): Promise<any | null> {
     console.log('DataService.getReportsDashboardData called', {
       USE_REAL_API: this.featureFlags.USE_REAL_API,
@@ -980,6 +1018,43 @@ class DataService {
       console.error('❌ Employee creation failed:', error);
       throw new Error(`Employee creation failed: ${error.message}`);
     }
+  }
+
+  async getInventoryReport(): Promise<any[]> {
+    console.log('DataService.getInventoryReport called', {
+      USE_REAL_API: this.featureFlags.USE_REAL_API,
+      isBackendAvailable: this.isBackendAvailable
+    });
+    
+    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
+      try {
+        console.log('🌐 Attempting to fetch inventory data from API...');
+        const authToken = await AsyncStorage.getItem('auth_token');
+        const response = await fetch(`${API_CONFIG.FULL_API_URL}/inventory`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
+          },
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          const inventoryData = result.data || result;
+          console.log('✅ API inventory data received');
+          return Array.isArray(inventoryData) ? inventoryData : [];
+        } else {
+          console.error('❌ API error:', response.status, response.statusText);
+          throw new Error(`API error: ${response.status}`);
+        }
+      } catch (error) {
+        console.error('❌ Failed to fetch inventory data from API:', error);
+        throw error; // No fallback - API must work for production readiness
+      }
+    }
+    
+    // Throw error if not using real API
+    throw new Error('Inventory data requires API connection');
   }
 }
 
