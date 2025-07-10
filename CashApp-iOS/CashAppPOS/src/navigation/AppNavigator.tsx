@@ -4,6 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../design-system/ThemeProvider';
+import { isFeatureEnabled } from '../config/featureFlags';
 import AuthScreen from '../screens/auth/AuthScreen';
 import MainNavigator from './MainNavigator';
 import PlatformNavigator from './PlatformNavigator';
@@ -32,7 +33,7 @@ const AppNavigator: React.FC = () => {
         }}
       >
         {isAuthenticated ? (
-          isPlatformOwner ? (
+          isFeatureEnabled('PLATFORM_OWNER_ENABLED') && isPlatformOwner ? (
             <Stack.Screen
               name="Platform"
               component={PlatformNavigator}
