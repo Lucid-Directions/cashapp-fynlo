@@ -114,132 +114,87 @@ def check_usage_limit(restaurant_id: int, limit_type: str, db: Session) -> tuple
 
 def require_feature(feature_name: str):
     """
-    Decorator to gate features behind subscription plans
+    FastAPI-compatible dependency factory for feature gating.
+    
+    Returns a dependency function that can be used with Depends().
     
     Usage:
-        @require_feature('advanced_analytics')
-        async def get_advanced_report():
+        @router.get("/advanced-report")
+        async def get_advanced_report(
+            restaurant_id: int = Query(...),
+            db: Session = Depends(get_db),
+            _feature_check = Depends(require_feature('advanced_analytics'))
+        ):
             pass
     """
-    def decorator(func: Callable):
-        @wraps(func)
-        async def wrapper(*args, **kwargs):
-            # Extract restaurant_id from request or kwargs
-            restaurant_id = None
-            db = None
+    def feature_dependency(
+        restaurant_id: int,
+        db: Session
+    ):
+        """Dependency that checks feature access"""
+        if not check_feature_access(restaurant_id, feature_name, db):
+            subscription = get_restaurant_subscription(restaurant_id, db)
+            current_plan = subscription.plan.name if subscription else "none"
             
-            # Try to get from kwargs first
-            if 'restaurant_id' in kwargs:
-                restaurant_id = kwargs['restaurant_id']
-            
-            # Try to get db from dependency injection
-            for arg in args:
-                if isinstance(arg, Session):
-                    db = arg
-                    break
-            
-            if not db:
-                # Try to get from dependency
-                db = kwargs.get('db')
-            
-            if not restaurant_id or not db:
-                # Try to extract from request if it's a FastAPI endpoint
-                request = kwargs.get('request')
-                if request and hasattr(request, 'path_params'):
-                    restaurant_id = request.path_params.get('restaurant_id')
-                
-                if not restaurant_id:
-                    # Try query params
-                    if hasattr(request, 'query_params'):
-                        restaurant_id = request.query_params.get('restaurant_id')
-            
-            if not restaurant_id:
-                raise HTTPException(
-                    status_code=400,
-                    detail="Restaurant ID required for feature access check"
-                )
-            
-            if not db:
-                raise HTTPException(
-                    status_code=500,
-                    detail="Database session not available"
-                )
-            
-            # Check feature access
-            if not check_feature_access(restaurant_id, feature_name, db):
-                subscription = get_restaurant_subscription(restaurant_id, db)
-                current_plan = subscription.plan.name if subscription else "none"
-                
-                raise FeatureGateError(
-                    feature_name=feature_name,
-                    current_plan=current_plan,
-                    required_plans=["professional", "enterprise"]  # Default required plans
-                )
-            
-            return await func(*args, **kwargs)
-        return wrapper
-    return decorator
+            raise FeatureGateError(
+                feature_name=feature_name,
+                current_plan=current_plan,
+                required_plans=["professional", "enterprise"]  # Default required plans
+            )
+        return True  # Return something to indicate success
+    
+    return feature_dependency
 
 
 def require_usage_limit(limit_type: str, increment: int = 1):
     """
-    Decorator to check usage limits before allowing an action
+    FastAPI-compatible dependency factory for usage limit checking.
+    
+    Returns a dependency function that can be used with Depends().
     
     Usage:
-        @require_usage_limit('orders', increment=1)
-        async def create_order():
+        @router.post("/create-order")
+        async def create_order(
+            restaurant_id: int = Query(...),
+            db: Session = Depends(get_db),
+            _usage_check = Depends(require_usage_limit('orders', increment=1))
+        ):
             pass
     """
-    def decorator(func: Callable):
-        @wraps(func)
-        async def wrapper(*args, **kwargs):
-            # Extract restaurant_id and db similar to require_feature
-            restaurant_id = kwargs.get('restaurant_id')
-            db = None
+    def usage_dependency(
+        restaurant_id: int,
+        db: Session
+    ):
+        """Dependency that checks usage limits"""
+        # Check usage limit
+        at_limit, current_usage, limit = check_usage_limit(restaurant_id, limit_type, db)
+        
+        if at_limit:
+            subscription = get_restaurant_subscription(restaurant_id, db)
+            current_plan = subscription.plan.name if subscription else "none"
             
-            for arg in args:
-                if isinstance(arg, Session):
-                    db = arg
-                    break
+            raise UsageLimitError(
+                limit_type=limit_type,
+                current_usage=current_usage,
+                limit=limit or 0,
+                current_plan=current_plan
+            )
+        
+        # If we would exceed the limit with this action, also block
+        if limit is not None and (current_usage + increment) > limit:
+            subscription = get_restaurant_subscription(restaurant_id, db)
+            current_plan = subscription.plan.name if subscription else "none"
             
-            if not db:
-                db = kwargs.get('db')
-            
-            if not restaurant_id or not db:
-                raise HTTPException(
-                    status_code=400,
-                    detail="Restaurant ID and database session required for usage check"
-                )
-            
-            # Check usage limit
-            at_limit, current_usage, limit = check_usage_limit(restaurant_id, limit_type, db)
-            
-            if at_limit:
-                subscription = get_restaurant_subscription(restaurant_id, db)
-                current_plan = subscription.plan.name if subscription else "none"
-                
-                raise UsageLimitError(
-                    limit_type=limit_type,
-                    current_usage=current_usage,
-                    limit=limit or 0,
-                    current_plan=current_plan
-                )
-            
-            # If we would exceed the limit with this action, also block
-            if limit is not None and (current_usage + increment) > limit:
-                subscription = get_restaurant_subscription(restaurant_id, db)
-                current_plan = subscription.plan.name if subscription else "none"
-                
-                raise UsageLimitError(
-                    limit_type=limit_type,
-                    current_usage=current_usage,
-                    limit=limit,
-                    current_plan=current_plan
-                )
-            
-            return await func(*args, **kwargs)
-        return wrapper
-    return decorator
+            raise UsageLimitError(
+                limit_type=limit_type,
+                current_usage=current_usage,
+                limit=limit,
+                current_plan=current_plan
+            )
+        
+        return True  # Return something to indicate success
+    
+    return usage_dependency
 
 
 # Convenience decorators for common features

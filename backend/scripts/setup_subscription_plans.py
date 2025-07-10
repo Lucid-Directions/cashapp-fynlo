@@ -9,7 +9,6 @@ Run this script after running the database migration:
 python backend/scripts/setup_subscription_plans.py
 """
 
-import asyncio
 import sys
 import os
 from datetime import datetime
@@ -17,7 +16,6 @@ from datetime import datetime
 # Add the backend directory to the Python path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from app.database import get_db_session
 from app.models.subscription import SubscriptionPlan
 from sqlalchemy.orm import Session
 
@@ -137,7 +135,7 @@ def create_subscription_plans():
             if plan_data['price_monthly'] == 0:
                 print(f"  • {plan_data['display_name']}: Free{fee_info}")
             else:
-                print(f"  • {plan_data['display_name']}: ${plan_data['price_monthly']}/month{fee_info}")
+                print(f"  • {plan_data['display_name']}: £{plan_data['price_monthly']}/month{fee_info}")
         
     except Exception as e:
         print(f"❌ Error creating subscription plans: {e}")
