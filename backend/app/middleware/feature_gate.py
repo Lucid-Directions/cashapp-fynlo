@@ -75,7 +75,7 @@ def check_feature_access(restaurant_id: int, feature_name: str, db: Session) -> 
     return subscription.has_feature(feature_name)
 
 
-def check_usage_limit(restaurant_id: int, limit_type: str, db: Session) -> tuple[bool, int, Optional[int]]:
+def check_usage_limit(restaurant_id: int, limit_type: str, db: Session) -> Tuple[bool, int, Optional[int]]:
     """
     Check if restaurant is at usage limit
     
