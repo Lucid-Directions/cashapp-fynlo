@@ -15,10 +15,12 @@ import {
   Dimensions,
   Platform,
   Image,
+  Animated,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
+import { Swipeable } from 'react-native-gesture-handler';
 import HeaderWithBackButton from '../../components/navigation/HeaderWithBackButton';
 import useAppStore from '../../store/useAppStore';
 import useUIStore from '../../store/useUIStore';
@@ -642,43 +644,70 @@ const POSScreen: React.FC = () => {
 
   const CartItem = ({ item }: { item: OrderItem }) => {
     const menuItem = dynamicMenuItems.find(mi => mi.id === item.id);
+    
+    const renderRightActions = (progress: Animated.AnimatedInterpolation<number>, dragX: Animated.AnimatedValue) => {
+      const scale = dragX.interpolate({
+        inputRange: [-100, 0],
+        outputRange: [1, 0],
+        extrapolate: 'clamp',
+      });
+
+      return (
+        <TouchableOpacity 
+          style={styles.deleteButton}
+          onPress={() => removeFromCart(item.id)}
+        >
+          <Animated.View style={{ transform: [{ scale }] }}>
+            <Icon name="delete" size={24} color={theme.colors.white} />
+            <Text style={styles.deleteButtonText}>Delete</Text>
+          </Animated.View>
+        </TouchableOpacity>
+      );
+    };
+
     return (
-      <View style={styles.cartItem}>
-        <View style={styles.cartItemInfo}>
-          <View style={styles.cartItemHeader}>
-            <Text style={styles.cartItemEmoji}>{item.emoji}</Text>
-            <View style={styles.cartItemDetails}>
-              <Text style={styles.cartItemName}>{item.name}</Text>
-              <Text style={styles.cartItemPrice}>{formatPrice(item.price, '£', { screenName: 'POSScreen', operation: 'cart_item_price_display', inputValues: { itemId: item.id } })} each</Text>
+      <Swipeable
+        renderRightActions={renderRightActions}
+        overshootRight={false}
+        friction={2}
+      >
+        <View style={styles.cartItem}>
+          <View style={styles.cartItemInfo}>
+            <View style={styles.cartItemHeader}>
+              <Text style={styles.cartItemEmoji}>{item.emoji}</Text>
+              <View style={styles.cartItemDetails}>
+                <Text style={styles.cartItemName}>{item.name}</Text>
+                <Text style={styles.cartItemPrice}>{formatPrice(item.price, '£', { screenName: 'POSScreen', operation: 'cart_item_price_display', inputValues: { itemId: item.id } })} each</Text>
+              </View>
             </View>
+            {menuItem?.description && (
+              <Text style={styles.cartItemDescription} numberOfLines={2}>
+                {menuItem.description}
+              </Text>
+            )}
           </View>
-          {menuItem?.description && (
-            <Text style={styles.cartItemDescription} numberOfLines={2}>
-              {menuItem.description}
-            </Text>
-          )}
-        </View>
-        <View style={styles.cartItemActions}>
-          <View style={styles.cartItemQuantity}>
-            <TouchableOpacity
-              style={styles.quantityButton}
-              onPress={() => handleUpdateQuantity(item.id, item.quantity - 1)}
-            >
-              <Icon name="remove" size={20} color={theme.colors.text} />
-            </TouchableOpacity>
-            <Text style={styles.quantityText}>{item.quantity}</Text>
-            <TouchableOpacity
-              style={styles.quantityButton}
-              onPress={() => handleUpdateQuantity(item.id, item.quantity + 1)}
-            >
-              <Icon name="add" size={20} color={theme.colors.text} />
-            </TouchableOpacity>
-          </View>
-          <Text style={styles.cartItemTotal}>
+          <View style={styles.cartItemActions}>
+            <View style={styles.cartItemQuantity}>
+              <TouchableOpacity
+                style={styles.quantityButton}
+                onPress={() => handleUpdateQuantity(item.id, item.quantity - 1)}
+              >
+                <Icon name="remove" size={20} color={theme.colors.text} />
+              </TouchableOpacity>
+              <Text style={styles.quantityText}>{item.quantity}</Text>
+              <TouchableOpacity
+                style={styles.quantityButton}
+                onPress={() => handleUpdateQuantity(item.id, item.quantity + 1)}
+              >
+                <Icon name="add" size={20} color={theme.colors.text} />
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.cartItemTotal}>
 {formatPrice(item.price * item.quantity, '£', { screenName: 'POSScreen', operation: 'cart_item_total_display', inputValues: { itemId: item.id, price: item.price, quantity: item.quantity } })}
-          </Text>
+            </Text>
+          </View>
         </View>
-      </View>
+      </Swipeable>
     );
   };
 
@@ -1477,6 +1506,19 @@ const createStyles = (theme: any) => StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: theme.colors.text,
+  },
+  deleteButton: {
+    backgroundColor: theme.colors.danger,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 80,
+    height: '100%',
+  },
+  deleteButtonText: {
+    color: theme.colors.white,
+    fontSize: 12,
+    fontWeight: '600',
+    marginTop: 4,
   },
   cartFooter: {
     borderTopWidth: 1,
