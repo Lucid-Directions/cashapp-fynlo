@@ -257,7 +257,7 @@ const LaborReportDetailScreen = () => {
                   {summary.laborCostPercentage.toFixed(1)}%
                 </Text>
                 <Text style={styles.costPercentageTarget}>
-                  Target: &lt; 30%
+                  Target: {'<'} 30%
                 </Text>
               </View>
             </View>
