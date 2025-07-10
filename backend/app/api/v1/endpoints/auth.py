@@ -13,49 +13,9 @@ from app.core.supabase import supabase_admin
 from app.core.config import settings
 from app.core.database import User, Restaurant
 from app.schemas.auth import AuthVerifyResponse, RegisterRestaurantRequest
+from app.core.feature_gate import get_plan_features
 
 router = APIRouter()
-
-
-def get_plan_features(plan: str) -> list[str]:
-    """Get enabled features for a subscription plan"""
-    features = {
-        'alpha': [
-            'pos_basic',
-            'order_management',
-            'basic_payments',
-            'daily_reports'
-        ],
-        'beta': [
-            'pos_basic',
-            'order_management',
-            'basic_payments',
-            'daily_reports',
-            'inventory_management',
-            'staff_management',
-            'advanced_reports',
-            'table_management',
-            'customer_database'
-        ],
-        'omega': [
-            'pos_basic',
-            'order_management',
-            'basic_payments',
-            'daily_reports',
-            'inventory_management',
-            'staff_management',
-            'advanced_reports',
-            'table_management',
-            'customer_database',
-            'multi_location',
-            'api_access',
-            'custom_branding',
-            'priority_support',
-            'advanced_analytics',
-            'unlimited_staff'
-        ]
-    }
-    return features.get(plan, features['alpha'])
 
 
 @router.post("/verify", response_model=AuthVerifyResponse)

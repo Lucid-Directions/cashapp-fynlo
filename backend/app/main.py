@@ -4,7 +4,6 @@ Clean FastAPI implementation for hardware-free restaurant management
 """
 
 from fastapi import FastAPI, Depends, HTTPException, status
-from datetime import datetime
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer
 import uvicorn
@@ -12,7 +11,7 @@ import logging
 from contextlib import asynccontextmanager
 
 from app.core.config import settings
-from app.core.database import init_db
+from app.core.database import init_db, get_db, User
 from app.api.v1.api import api_router
 from app.api.mobile.endpoints import router as mobile_router
 from app.core.redis_client import init_redis, close_redis
@@ -29,6 +28,7 @@ from app.core.mobile_middleware import (
 )
 from app.middleware.version_middleware import APIVersionMiddleware
 from app.middleware.security_headers_middleware import SecurityHeadersMiddleware # Added import
+from app.core.auth import get_current_user
 from datetime import datetime
 
 # Configure logging
