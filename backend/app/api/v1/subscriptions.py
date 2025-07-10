@@ -26,7 +26,7 @@ from app.core.security import get_current_user
 router = APIRouter(prefix="/subscriptions", tags=["subscriptions"])
 
 
-@router.get("/plans", response_model=List[SubscriptionPlanResponse])
+@router.get("/plans")
 async def get_subscription_plans(
     db: Session = Depends(get_db),
     include_inactive: bool = Query(False, description="Include inactive plans")
@@ -56,7 +56,7 @@ async def get_subscription_plans(
         )
 
 
-@router.get("/current", response_model=RestaurantSubscriptionResponse)
+@router.get("/current")
 async def get_current_subscription(
     restaurant_id: int = Query(..., description="Restaurant ID"),
     db: Session = Depends(get_db),
@@ -299,7 +299,7 @@ async def cancel_subscription(
         )
 
 
-@router.get("/usage", response_model=SubscriptionUsageResponse)
+@router.get("/usage")
 async def get_usage_statistics(
     restaurant_id: int = Query(..., description="Restaurant ID"),
     month_year: Optional[str] = Query(None, description="Month in YYYY-MM format"),

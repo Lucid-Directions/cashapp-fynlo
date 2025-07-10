@@ -360,9 +360,9 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
   };
 
   const formatPrice = (price: number): string => {
-    return new Intl.NumberFormat('en-GB', {
+    return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'GBP'
+      currency: 'USD'
     }).format(price);
   };
 

@@ -942,11 +942,10 @@ class DataService {
   // SUBSCRIPTION MANAGEMENT METHODS
   // ===========================================================================
 
-  static async getSubscriptionPlans(): Promise<any> {
-    const instance = DataService.getInstance();
+  async getSubscriptionPlans(): Promise<any> {
     console.log('DataService.getSubscriptionPlans called');
     
-    if (instance.featureFlags.USE_REAL_API && instance.isBackendAvailable) {
+    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         const authToken = await AsyncStorage.getItem('auth_token');
         const response = await fetch(`${API_CONFIG.FULL_API_URL}/subscriptions/plans`, {
@@ -976,11 +975,10 @@ class DataService {
     throw new Error('Subscription plans require API connection');
   }
 
-  static async getCurrentSubscription(restaurantId: number): Promise<any> {
-    const instance = DataService.getInstance();
+  async getCurrentSubscription(restaurantId: number): Promise<any> {
     console.log('DataService.getCurrentSubscription called', { restaurantId });
     
-    if (instance.featureFlags.USE_REAL_API && instance.isBackendAvailable) {
+    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         const authToken = await AsyncStorage.getItem('auth_token');
         const response = await fetch(`${API_CONFIG.FULL_API_URL}/subscriptions/current?restaurant_id=${restaurantId}`, {
@@ -1016,11 +1014,10 @@ class DataService {
     throw new Error('Subscription data requires API connection');
   }
 
-  static async createSubscription(subscriptionData: any): Promise<any> {
-    const instance = DataService.getInstance();
+  async createSubscription(subscriptionData: any): Promise<any> {
     console.log('DataService.createSubscription called', subscriptionData);
     
-    if (instance.featureFlags.USE_REAL_API && instance.isBackendAvailable) {
+    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         const authToken = await AsyncStorage.getItem('auth_token');
         const response = await fetch(`${API_CONFIG.FULL_API_URL}/subscriptions/subscribe`, {
@@ -1060,11 +1057,10 @@ class DataService {
     throw new Error('Subscription creation requires API connection');
   }
 
-  static async changeSubscriptionPlan(changeData: any): Promise<any> {
-    const instance = DataService.getInstance();
+  async changeSubscriptionPlan(changeData: any): Promise<any> {
     console.log('DataService.changeSubscriptionPlan called', changeData);
     
-    if (instance.featureFlags.USE_REAL_API && instance.isBackendAvailable) {
+    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         const authToken = await AsyncStorage.getItem('auth_token');
         const response = await fetch(`${API_CONFIG.FULL_API_URL}/subscriptions/change-plan`, {
@@ -1104,11 +1100,10 @@ class DataService {
     throw new Error('Plan change requires API connection');
   }
 
-  static async cancelSubscription(restaurantId: number): Promise<any> {
-    const instance = DataService.getInstance();
+  async cancelSubscription(restaurantId: number): Promise<any> {
     console.log('DataService.cancelSubscription called', { restaurantId });
     
-    if (instance.featureFlags.USE_REAL_API && instance.isBackendAvailable) {
+    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         const authToken = await AsyncStorage.getItem('auth_token');
         const response = await fetch(`${API_CONFIG.FULL_API_URL}/subscriptions/cancel?restaurant_id=${restaurantId}`, {
@@ -1147,11 +1142,10 @@ class DataService {
     throw new Error('Subscription cancellation requires API connection');
   }
 
-  static async incrementUsage(restaurantId: number, usageType: string, amount: number = 1): Promise<any> {
-    const instance = DataService.getInstance();
+  async incrementUsage(restaurantId: number, usageType: string, amount: number = 1): Promise<any> {
     console.log('DataService.incrementUsage called', { restaurantId, usageType, amount });
     
-    if (instance.featureFlags.USE_REAL_API && instance.isBackendAvailable) {
+    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         const authToken = await AsyncStorage.getItem('auth_token');
         const response = await fetch(`${API_CONFIG.FULL_API_URL}/subscriptions/usage/increment?restaurant_id=${restaurantId}&usage_type=${usageType}&amount=${amount}`, {
