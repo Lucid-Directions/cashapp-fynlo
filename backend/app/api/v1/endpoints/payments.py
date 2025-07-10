@@ -16,9 +16,9 @@ import base64
 import stripe
 import logging
 
-from app.core.database import get_db, Payment, QRPayment, Order
+from app.core.database import get_db, Payment, QRPayment, Order, User
 from app.core.config import settings
-from app.api.v1.endpoints.auth import get_current_user, User
+from app.core.auth import get_current_user
 from app.core.responses import APIResponseHelper
 from app.core.exceptions import FynloException, ErrorCodes
 from app.core.transaction_manager import transactional, transaction_manager

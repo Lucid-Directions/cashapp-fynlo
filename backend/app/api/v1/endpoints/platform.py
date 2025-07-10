@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 import uuid
 
 from app.core.database import get_db, Platform, Restaurant, User, Order, Customer
-from app.api.v1.endpoints.auth import get_current_user
+from app.core.auth import get_current_user
 from app.core.responses import APIResponseHelper
 from app.core.exceptions import FynloException, ErrorCodes
 from app.core.validation import BusinessValidator, validate_customer_or_raise

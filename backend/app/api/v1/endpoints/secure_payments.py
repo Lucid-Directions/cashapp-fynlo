@@ -13,7 +13,7 @@ from pydantic import BaseModel, Field, validator
 import logging
 
 from app.core.database import get_db, User
-from app.api.v1.endpoints.auth import get_current_user
+from app.core.auth import get_current_user
 from app.core.responses import APIResponseHelper
 from app.core.exceptions import FynloException
 from app.services.secure_payment_processor import SecurePaymentProcessor, PaymentProcessingError

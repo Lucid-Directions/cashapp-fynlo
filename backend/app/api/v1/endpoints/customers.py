@@ -9,8 +9,8 @@ from sqlalchemy import and_, or_, desc, func
 from pydantic import BaseModel, EmailStr
 from datetime import datetime, timedelta
 
-from app.core.database import get_db, Customer, Order
-from app.api.v1.endpoints.auth import get_current_user, User
+from app.core.database import get_db, Customer, Order, User
+from app.core.auth import get_current_user
 from app.core.redis_client import get_redis, RedisClient
 from app.core.responses import APIResponseHelper
 from app.core.exceptions import FynloException, ErrorCodes
