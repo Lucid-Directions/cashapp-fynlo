@@ -17,6 +17,7 @@ class SubscriptionPlanBase(BaseModel):
     display_name: str
     price_monthly: Decimal
     price_yearly: Decimal
+    transaction_fee_percentage: Decimal
     max_orders_per_month: Optional[int] = None
     max_staff_accounts: Optional[int] = None
     max_menu_items: Optional[int] = None

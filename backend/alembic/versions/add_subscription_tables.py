@@ -11,7 +11,7 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = 'add_subscription_tables'
-down_revision = None  # Update this based on latest migration
+down_revision = '001_initial_schema'  # Update this based on latest migration
 branch_labels = None
 depends_on = None
 
@@ -24,6 +24,7 @@ def upgrade() -> None:
         sa.Column('display_name', sa.String(100), nullable=False),
         sa.Column('price_monthly', sa.DECIMAL(10, 2), nullable=False),
         sa.Column('price_yearly', sa.DECIMAL(10, 2), nullable=False),
+        sa.Column('transaction_fee_percentage', sa.DECIMAL(5, 2), nullable=False, default=1.0),
         sa.Column('max_orders_per_month', sa.Integer(), nullable=True),
         sa.Column('max_staff_accounts', sa.Integer(), nullable=True),
         sa.Column('max_menu_items', sa.Integer(), nullable=True),

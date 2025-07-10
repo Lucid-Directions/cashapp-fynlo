@@ -27,6 +27,7 @@ class SubscriptionPlan(Base):
     display_name = Column(String(100), nullable=False)
     price_monthly = Column(DECIMAL(10, 2), nullable=False)
     price_yearly = Column(DECIMAL(10, 2), nullable=False)
+    transaction_fee_percentage = Column(DECIMAL(5, 2), nullable=False, default=1.0)  # Transaction fee %
     max_orders_per_month = Column(Integer, nullable=True)  # None = unlimited
     max_staff_accounts = Column(Integer, nullable=True)    # None = unlimited
     max_menu_items = Column(Integer, nullable=True)        # None = unlimited
