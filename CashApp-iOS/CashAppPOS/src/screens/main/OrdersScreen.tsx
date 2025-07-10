@@ -15,54 +15,7 @@ import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
 import { Order } from '../../types';
 import OrderService from '../../services/OrderService';
 import HeaderWithBackButton from '../../components/navigation/HeaderWithBackButton';
-
-// Mock orders data
-const mockOrders: Order[] = [
-  {
-    id: 1,
-    items: [
-      { id: 1, name: 'Classic Burger', price: 12.99, quantity: 2, emoji: '🍔' },
-      { id: 2, name: 'French Fries', price: 4.99, quantity: 1, emoji: '🍟' },
-    ],
-    subtotal: 30.97,
-    tax: 2.48,
-    total: 33.45,
-    customerName: 'John Doe',
-    tableNumber: 5,
-    createdAt: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
-    status: 'preparing',
-    paymentMethod: 'card',
-  },
-  {
-    id: 2,
-    items: [
-      { id: 3, name: 'Margherita Pizza', price: 15.99, quantity: 1, emoji: '🍕' },
-      { id: 7, name: 'Coca Cola', price: 2.99, quantity: 2, emoji: '🥤' },
-    ],
-    subtotal: 21.97,
-    tax: 1.76,
-    total: 23.73,
-    customerName: 'Jane Smith',
-    tableNumber: 3,
-    createdAt: new Date(Date.now() - 1000 * 60 * 45), // 45 minutes ago
-    status: 'ready',
-    paymentMethod: 'cash',
-  },
-  {
-    id: 3,
-    items: [
-      { id: 2, name: 'Caesar Salad', price: 9.99, quantity: 1, emoji: '🥗' },
-      { id: 6, name: 'Chocolate Cake', price: 6.99, quantity: 1, emoji: '🍰' },
-    ],
-    subtotal: 16.98,
-    tax: 1.36,
-    total: 18.34,
-    tableNumber: 7,
-    createdAt: new Date(Date.now() - 1000 * 60 * 60), // 1 hour ago
-    status: 'completed',
-    paymentMethod: 'apple_pay',
-  },
-];
+import EmptyState from '../../components/common/EmptyState';
 
 const OrdersScreen: React.FC = () => {
   const navigation = useNavigation();
@@ -316,18 +269,14 @@ const OrdersScreen: React.FC = () => {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
         ListEmptyComponent={() => (
-          <View style={styles.emptyState}>
-            <Icon name="receipt" size={64} color={theme.colors.lightText} />
-            <Text style={styles.emptyStateText}>
-              {loading ? 'Loading orders...' : 'No orders found'}
-            </Text>
-            <Text style={styles.emptyStateSubtext}>
-              {loading 
-                ? 'Please wait while we fetch your orders' 
-                : 'Orders will appear here when customers place them'
-              }
-            </Text>
-          </View>
+          <EmptyState
+            icon="📋"
+            title={loading ? 'Loading orders...' : 'No orders found'}
+            message={loading 
+              ? 'Please wait while we fetch your orders' 
+              : 'Orders will appear here when customers place them'}
+            testID="orders-empty-state"
+          />
         )}
       />
     </SafeAreaView>
@@ -504,24 +453,6 @@ const createStyles = (theme: any) => StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: theme.colors.secondary,
-  },
-  emptyState: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 60,
-  },
-  emptyStateText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: theme.colors.text,
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  emptyStateSubtext: {
-    fontSize: 14,
-    color: theme.colors.lightText,
-    textAlign: 'center',
-    paddingHorizontal: 40,
   },
 });
 
