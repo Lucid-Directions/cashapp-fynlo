@@ -561,86 +561,12 @@ class DataService {
         throw new Error(`API error: ${response.status} - ${response.statusText}`);
       }
     } catch (error) {
-      console.error('❌ Failed to fetch employees from API, falling back to mock data:', error);
+      console.error('❌ Failed to fetch employees from API:', error);
+      console.warn('🚨 Production Mode: Returning empty employee list instead of mock data');
       
-      // Fallback to mock employee data with complete schema
-      const mockEmployees = [
-        {
-          id: 1,
-          name: 'John Manager',
-          email: 'john@restaurant.com',
-          role: 'manager',
-          hourlyRate: 25.00,
-          isActive: true,
-          avatar: null,
-          phone: '+44 7700 900001',
-          startDate: '2024-01-01',
-          hireDate: '2024-01-01',
-          totalSales: 15420.50,
-          totalOrders: 185,
-          avgOrderValue: 83.35,
-          performanceRating: 9.2,
-          performanceScore: 9.2,
-          hoursWorked: 160,
-        },
-        {
-          id: 2,
-          name: 'Sarah Cashier',
-          email: 'sarah@restaurant.com',
-          role: 'cashier',
-          hourlyRate: 15.50,
-          isActive: true,
-          avatar: null,
-          phone: '+44 7700 900002',
-          startDate: '2024-01-15',
-          hireDate: '2024-01-15',
-          totalSales: 8750.25,
-          totalOrders: 142,
-          avgOrderValue: 61.62,
-          performanceRating: 8.8,
-          performanceScore: 8.8,
-          hoursWorked: 155,
-        },
-        {
-          id: 3,
-          name: 'Mike Kitchen',
-          email: 'mike@restaurant.com',
-          role: 'kitchen',
-          hourlyRate: 18.00,
-          isActive: true,
-          avatar: null,
-          phone: '+44 7700 900003',
-          startDate: '2024-02-01',
-          hireDate: '2024-02-01',
-          totalSales: 12100.75,
-          totalOrders: 167,
-          avgOrderValue: 72.46,
-          performanceRating: 9.0,
-          performanceScore: 9.0,
-          hoursWorked: 162,
-        },
-        {
-          id: 4,
-          name: 'Lisa Server',
-          email: 'lisa@restaurant.com',
-          role: 'server',
-          hourlyRate: 12.50,
-          isActive: false,
-          avatar: null,
-          phone: '+44 7700 900004',
-          startDate: '2023-12-01',
-          hireDate: '2023-12-01',
-          totalSales: 6890.00,
-          totalOrders: 98,
-          avgOrderValue: 70.31,
-          performanceRating: 7.5,
-          performanceScore: 7.5,
-          hoursWorked: 120,
-        },
-      ];
-      
-      console.log('📋 Using mock employee data:', mockEmployees.length, 'employees');
-      return mockEmployees;
+      // PRODUCTION READY: Return empty array instead of mock data
+      // Screens should handle empty state gracefully with EmptyState component
+      return [];
     }
   }
 
