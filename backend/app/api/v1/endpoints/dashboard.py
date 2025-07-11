@@ -4,7 +4,7 @@ Dashboard API endpoints for Fynlo POS - Portal dashboard aggregation
 
 from typing import Optional, List
 from datetime import datetime, date, timedelta
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Depends, Query, HTTPException, Request
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, func, case
 from collections import defaultdict
@@ -22,6 +22,7 @@ router = APIRouter()
 @router.get("/analytics/dashboard/{restaurant_id}")
 @limiter.limit(PORTAL_DASHBOARD_RATE)
 async def get_dashboard_metrics(
+    request: Request,
     restaurant_id: str,
     period: str = Query("today", regex="^(today|week|month|year)$"),
     db: Session = Depends(get_db),
