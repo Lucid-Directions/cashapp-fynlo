@@ -15,6 +15,8 @@ import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
 import useAppStore from '../../store/useAppStore';
+import { SubscriptionStatusBadge } from '../../components/subscription/SubscriptionStatusBadge';
+import { useWebSocket } from '../../hooks/useWebSocket';
 
 const { width: screenWidth } = Dimensions.get('window');
 const isTablet = screenWidth > 768;
@@ -37,6 +39,7 @@ const HomeHubScreen: React.FC = () => {
   const styles = useThemedStyles(createStyles);
   const { user, signOut } = useAuth();
   const { cartItemCount } = useAppStore();
+  const { connected: wsConnected } = useWebSocket({ autoConnect: true });
 
   // Hub icons configuration with role-based visibility
   const hubIcons: HubIcon[] = [
@@ -288,14 +291,20 @@ const HomeHubScreen: React.FC = () => {
             {user?.firstName || 'User'} • {user?.role?.replace('_', ' ') || 'Staff'}
           </Text>
         </View>
-        <TouchableOpacity
-          style={styles.signOutButton}
-          onPress={handleSignOut}
-          accessibilityRole="button"
-          accessibilityLabel="Sign out"
-        >
-          <Icon name="logout" size={24} color={theme.colors.white} />
-        </TouchableOpacity>
+        <View style={styles.headerActions}>
+          <SubscriptionStatusBadge />
+          {wsConnected && (
+            <View style={styles.connectionDot} />
+          )}
+          <TouchableOpacity
+            style={styles.signOutButton}
+            onPress={handleSignOut}
+            accessibilityRole="button"
+            accessibilityLabel="Sign out"
+          >
+            <Icon name="logout" size={24} color={theme.colors.white} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
@@ -369,10 +378,23 @@ const createStyles = (theme: any) => StyleSheet.create({
     color: 'rgba(255, 255, 255, 0.8)',
     marginTop: 4,
   },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  connectionDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#4CAF50',
+    marginLeft: -4,
+  },
   signOutButton: {
     padding: 8,
     borderRadius: 8,
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    marginLeft: 8,
   },
   content: {
     flex: 1,

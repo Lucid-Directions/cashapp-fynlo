@@ -46,9 +46,24 @@ async def get_current_user_id(
 # It prioritizes user ID if available, otherwise falls back to IP address.
 async def identify_client(request: Request) -> str:
     user_id = await get_current_user_id(request)
+    client_type = request.headers.get("X-Client-Type", "unknown")
+    
     if user_id:
-        return f"user:{user_id}"
-    return f"ip:{get_remote_address(request)}"
+        return f"user:{user_id}:{client_type}"
+    return f"ip:{get_remote_address(request)}:{client_type}"
+
+# Specialized key functions for different client types
+async def identify_mobile_client(request: Request) -> str:
+    user_id = await get_current_user_id(request)
+    if user_id:
+        return f"mobile:user:{user_id}"
+    return f"mobile:ip:{get_remote_address(request)}"
+
+async def identify_portal_client(request: Request) -> str:
+    user_id = await get_current_user_id(request)
+    if user_id:
+        return f"portal:user:{user_id}"
+    return f"portal:ip:{get_remote_address(request)}"
 
 # Initialize the Limiter with our identifier function
 # The redis_client.get_client() will provide the actual aioredis.Redis instance
@@ -135,6 +150,16 @@ DEFAULT_RATE = "60/minute"
 # Define specific limits for endpoint categories
 AUTH_RATE = "5/minute"
 PAYMENT_RATE = "15/minute" # As per requirement "10-20", using 15
+
+# Portal vs Mobile specific limits
+MOBILE_APP_RATE = "100/minute"
+PORTAL_DASHBOARD_RATE = "300/minute"  # Higher for analytics
+PORTAL_EXPORT_RATE = "10/minute"     # Lower for resource-intensive operations
+
+# API-specific limits
+ANALYTICS_RATE = "200/minute"        # High for dashboard queries
+WEBSOCKET_RATE = "500/minute"        # Very high for real-time updates
+SYNC_RATE = "200/minute"             # High for synchronization
 
 logger.info(f"Rate Limiter Configured: DEFAULT_RATE={DEFAULT_RATE}, AUTH_RATE={AUTH_RATE}, PAYMENT_RATE={PAYMENT_RATE}")
 logger.info("Rate limiting strategy: User ID if authenticated, otherwise IP address.")
