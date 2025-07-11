@@ -96,7 +96,7 @@ async def get_platform_overview(
         }
         
         # Cache for 15 minutes
-        cache_data(cache_key, overview, ttl=900)
+        await cache_data(cache_key, overview, ttl=900)
         
         return APIResponseHelper.success(data=overview)
         
@@ -144,7 +144,7 @@ async def get_revenue_trends(
             })
         
         # Cache for 1 hour
-        cache_data(cache_key, trends, ttl=3600)
+        await cache_data(cache_key, trends, ttl=3600)
         
         return APIResponseHelper.success(data=trends)
         
@@ -225,7 +225,7 @@ async def get_top_restaurants(
             })
         
         # Cache for 1 hour
-        cache_data(cache_key, top_restaurants, ttl=3600)
+        await cache_data(cache_key, top_restaurants, ttl=3600)
         
         return APIResponseHelper.success(data=top_restaurants)
         

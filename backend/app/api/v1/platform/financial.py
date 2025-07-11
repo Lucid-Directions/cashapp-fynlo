@@ -124,7 +124,7 @@ async def get_revenue_report(
         }
         
         # Cache for 1 hour
-        cache_data(cache_key, summary, ttl=3600)
+        await cache_data(cache_key, summary, ttl=3600)
         
         return APIResponseHelper.success(data=summary)
         
