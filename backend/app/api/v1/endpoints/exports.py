@@ -11,11 +11,17 @@ from sqlalchemy import and_, func
 import io
 import csv
 import json
-from reportlab.lib import colors
-from reportlab.lib.pagesizes import letter, A4
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import inch
+
+# Try to import reportlab, but don't fail if it's not available
+try:
+    from reportlab.lib import colors
+    from reportlab.lib.pagesizes import letter, A4
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab.lib.units import inch
+    REPORTLAB_AVAILABLE = True
+except ImportError:
+    REPORTLAB_AVAILABLE = False
 
 from app.core.database import get_db, Product, Category, Order, OrderItem, Restaurant, User, Customer, Inventory, Employee
 from app.core.auth import get_current_user
@@ -129,6 +135,13 @@ async def export_menu(
         )
     
     else:  # PDF
+        # Check if reportlab is available
+        if not REPORTLAB_AVAILABLE:
+            return APIResponseHelper.error(
+                message="PDF export is temporarily unavailable. Please use JSON or CSV format.",
+                status_code=503
+            )
+        
         # PDF export
         buffer = io.BytesIO()
         doc = SimpleDocTemplate(buffer, pagesize=A4, topMargin=0.5*inch, bottomMargin=0.5*inch)
