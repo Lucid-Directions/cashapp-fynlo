@@ -10,7 +10,7 @@ from sqlalchemy import or_
 
 from app.core.database import get_db, Restaurant, User
 from app.core.auth import get_current_platform_owner
-from app.core.response_helper import APIResponseHelper
+from app.core.responses import APIResponseHelper
 from app.schemas.restaurant import RestaurantCreate, RestaurantUpdate
 
 router = APIRouter(prefix="/restaurants", tags=["platform-restaurants"])
