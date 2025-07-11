@@ -14,6 +14,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import { useRestaurantDisplayName } from '../../hooks/useRestaurantConfig';
 import Colors from '../../constants/Colors';
+import { SubscriptionStatusCard } from '../../components/subscription/SubscriptionStatusBadge';
 
 interface SettingsCategory {
   id: string;
@@ -376,6 +377,11 @@ const SettingsScreen: React.FC = () => {
         contentContainerStyle={styles.categoriesList}
         showsVerticalScrollIndicator={false}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
+        ListHeaderComponent={() => (
+          <View style={styles.subscriptionSection}>
+            <SubscriptionStatusCard />
+          </View>
+        )}
         ListEmptyComponent={
           <View style={styles.emptyState}>
             <Icon name="search-off" size={64} color={Colors.lightGray} />
@@ -526,6 +532,9 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: 12,
+  },
+  subscriptionSection: {
+    paddingBottom: 20,
   },
   emptyState: {
     alignItems: 'center',
