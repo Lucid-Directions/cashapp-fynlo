@@ -10,7 +10,7 @@ from sqlalchemy import func, and_
 
 from app.core.database import get_db, Restaurant
 from app.core.auth import get_current_platform_owner, User
-from app.core.response_helper import APIResponseHelper
+from app.core.responses import APIResponseHelper
 from app.models.subscriptions import SubscriptionPlan
 
 router = APIRouter(prefix="/subscriptions", tags=["platform-subscriptions"])
