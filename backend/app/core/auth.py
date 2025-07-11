@@ -179,3 +179,7 @@ async def get_current_user_optional(
         return await get_current_user(request, authorization, db)
     except HTTPException:
         return None
+
+
+# Alias for consistency with platform API
+get_current_platform_owner = get_platform_owner

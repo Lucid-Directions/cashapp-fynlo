@@ -12,6 +12,7 @@ from app.api.v1.endpoints import (
     pos, admin, inventory, recipes, employees # Added inventory, recipes, and employees
 )
 from app.api.v1 import subscriptions
+from app.api.v1.platform import platform_router
 
 # Apply a default rate limit to all routes in this router - TEMPORARILY DISABLED.
 # Specific routes can override this with their own @limiter.limit decorator.
@@ -51,3 +52,7 @@ api_router.include_router(menu.router, prefix="/menu", tags=["menu"])
 
 # Subscription Management
 api_router.include_router(subscriptions.router, prefix="/subscriptions", tags=["subscriptions"])
+
+# New Platform API for web dashboard (not used by mobile app)
+# This contains comprehensive platform management endpoints
+api_router.include_router(platform_router)
