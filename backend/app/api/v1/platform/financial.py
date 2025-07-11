@@ -11,7 +11,7 @@ from sqlalchemy import func, and_, case
 from app.core.database import get_db, Restaurant, Order, Payment, User
 from app.core.auth import get_current_platform_owner
 from app.core.response_helper import APIResponseHelper
-from app.core.cache import get_cached_data, cache_data
+from app.core.cache import get_cached_data_async, cache_data
 
 router = APIRouter(prefix="/financial", tags=["platform-financial"])
 
@@ -33,7 +33,7 @@ async def get_revenue_report(
             start_date = end_date - timedelta(days=30)
         
         cache_key = f"platform:financial:revenue:{start_date}:{end_date}:{group_by}"
-        cached_data = get_cached_data(cache_key)
+        cached_data = await get_cached_data_async(cache_key)
         if cached_data:
             return APIResponseHelper.success(data=cached_data)
         

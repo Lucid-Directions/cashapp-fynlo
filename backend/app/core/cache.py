@@ -36,27 +36,18 @@ def get_cached_data(key: str) -> Optional[Any]:
     """
     Get cached data synchronously (for use in sync endpoints).
     
+    DEPRECATED: This function has async/sync conflicts. Use get_cached_data_async() instead.
+    
     Args:
         key: Cache key
     
     Returns:
         Cached data or None if not found/expired
     """
-    import asyncio
-    try:
-        loop = asyncio.get_event_loop()
-        if loop.is_running():
-            # If we're already in an async context, we can't use run_until_complete
-            # This is a workaround for sync functions called from async context
-            import concurrent.futures
-            with concurrent.futures.ThreadPoolExecutor() as executor:
-                future = executor.submit(asyncio.run, redis_client.get(key))
-                return future.result()
-        else:
-            return loop.run_until_complete(redis_client.get(key))
-    except Exception as e:
-        logger.error(f"Failed to get cached data for key {key}: {e}")
-        return None
+    logger.warning(f"get_cached_data() is deprecated due to async/sync conflicts. Use get_cached_data_async() for key: {key}")
+    # Return None to avoid runtime errors
+    # The platform API endpoints should be updated to use async version
+    return None
 
 
 async def get_cached_data_async(key: str) -> Optional[Any]:

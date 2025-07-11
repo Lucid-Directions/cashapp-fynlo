@@ -182,7 +182,7 @@ async def toggle_user_status(
             )
         
         # Don't allow disabling platform owners
-        if user.is_platform_owner and not is_active:
+        if user.role == 'platform_owner' and not is_active:
             return APIResponseHelper.error(
                 message="Cannot disable platform owner accounts",
                 status_code=403
@@ -237,7 +237,7 @@ async def delete_user(
             )
         
         # Don't allow deleting platform owners
-        if user.is_platform_owner:
+        if user.role == 'platform_owner':
             return APIResponseHelper.error(
                 message="Cannot delete platform owner accounts",
                 status_code=403

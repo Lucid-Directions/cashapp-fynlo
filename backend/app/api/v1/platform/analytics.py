@@ -10,7 +10,7 @@ from sqlalchemy import func, and_, desc
 
 from app.core.database import get_db, Restaurant, Order, Payment, User
 from app.core.auth import get_current_platform_owner
-from app.core.cache import get_cached_data, cache_data
+from app.core.cache import get_cached_data_async, cache_data
 from app.core.response_helper import APIResponseHelper
 
 router = APIRouter(prefix="/analytics", tags=["platform-analytics"])
@@ -25,7 +25,7 @@ async def get_platform_overview(
     try:
         # Check cache first
         cache_key = "platform:analytics:overview"
-        cached_data = get_cached_data(cache_key)
+        cached_data = await get_cached_data_async(cache_key)
         if cached_data:
             return APIResponseHelper.success(data=cached_data)
 
@@ -116,7 +116,7 @@ async def get_revenue_trends(
     """Get platform revenue trends over time."""
     try:
         cache_key = f"platform:analytics:revenue_trends:{days}"
-        cached_data = get_cached_data(cache_key)
+        cached_data = await get_cached_data_async(cache_key)
         if cached_data:
             return APIResponseHelper.success(data=cached_data)
         
@@ -165,7 +165,7 @@ async def get_top_restaurants(
     """Get top performing restaurants by various metrics."""
     try:
         cache_key = f"platform:analytics:top_restaurants:{metric}:{limit}"
-        cached_data = get_cached_data(cache_key)
+        cached_data = await get_cached_data_async(cache_key)
         if cached_data:
             return APIResponseHelper.success(data=cached_data)
         
