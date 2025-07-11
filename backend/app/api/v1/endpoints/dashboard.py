@@ -10,7 +10,7 @@ from sqlalchemy import and_, func, case
 from collections import defaultdict
 import json
 
-from app.core.database import get_db, Restaurant, Order, Product, User, Employee, Customer, Inventory
+from app.core.database import get_db, Restaurant, Order, Product, User, Customer, InventoryItem
 from app.core.auth import get_current_user
 from app.core.redis_client import get_redis, RedisClient
 from app.core.responses import APIResponseHelper
@@ -100,10 +100,11 @@ async def get_dashboard_metrics(
     #     func.sum(OrderItem.quantity).desc()
     # ).limit(5).all()
     
-    # Get staff metrics
-    active_staff = db.query(func.count(Employee.id)).filter(
-        Employee.restaurant_id == restaurant_id,
-        Employee.is_active == True
+    # Get staff metrics - using User model for employees
+    active_staff = db.query(func.count(User.id)).filter(
+        User.restaurant_id == restaurant_id,
+        User.is_active == True,
+        User.role.in_(['employee', 'manager', 'cashier', 'server'])  # Filter for staff roles
     ).scalar()
     
     # Get customer metrics
@@ -113,10 +114,10 @@ async def get_dashboard_metrics(
         Order.created_at <= end_date
     ).scalar()
     
-    # Get inventory alerts
-    low_stock_items = db.query(func.count(Inventory.id)).filter(
-        Inventory.restaurant_id == restaurant_id,
-        Inventory.current_quantity <= Inventory.reorder_level
+    # Get inventory alerts - using InventoryItem model
+    low_stock_items = db.query(func.count(InventoryItem.id)).filter(
+        InventoryItem.restaurant_id == restaurant_id,
+        InventoryItem.current_quantity <= InventoryItem.reorder_level
     ).scalar()
     
     # Calculate hourly distribution for today
