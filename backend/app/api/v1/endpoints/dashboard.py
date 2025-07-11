@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, func, case
 from collections import defaultdict
+import json
 
 from app.core.database import get_db, Restaurant, Order, OrderItem, Product, User, Employee, Customer, Inventory
 from app.core.auth import get_current_user
@@ -37,10 +38,13 @@ async def get_dashboard_metrics(
     cache_key = f"dashboard:{restaurant_id}:{period}"
     cached_data = await redis.get(cache_key)
     if cached_data:
+        # Deserialize the cached JSON string
+        if isinstance(cached_data, str):
+            cached_data = json.loads(cached_data)
         return APIResponseHelper.success(data=cached_data)
     
     # Log dashboard view
-    await ActivityLogger.log_dashboard_view(
+    ActivityLogger.log_dashboard_view(
         db=db,
         user_id=str(current_user.id),
         restaurant_id=restaurant_id,
@@ -197,6 +201,9 @@ async def get_platform_dashboard(
     cache_key = f"platform_dashboard:{period}"
     cached_data = await redis.get(cache_key)
     if cached_data:
+        # Deserialize the cached JSON string
+        if isinstance(cached_data, str):
+            cached_data = json.loads(cached_data)
         return APIResponseHelper.success(data=cached_data)
     
     # Calculate date range

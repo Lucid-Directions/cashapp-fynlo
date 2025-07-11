@@ -54,7 +54,7 @@ async def export_menu(
     ).order_by(Category.sort_order, Category.name, Product.name).all()
     
     # Log the export activity
-    await ActivityLogger.log_export(
+    ActivityLogger.log_export(
         db=db,
         user_id=str(current_user.id),
         restaurant_id=restaurant_id,
@@ -231,7 +231,7 @@ async def export_report(
         raise HTTPException(status_code=404, detail="Restaurant not found")
     
     # Log the export activity
-    await ActivityLogger.log_export(
+    ActivityLogger.log_export(
         db=db,
         user_id=str(current_user.id),
         restaurant_id=restaurant_id,

@@ -33,7 +33,7 @@ class ActivityLogger:
     API_CALL = "api_call"
     
     @staticmethod
-    async def log_activity(
+    def log_activity(
         db: Session,
         user_id: str,
         restaurant_id: Optional[str],
@@ -41,7 +41,7 @@ class ActivityLogger:
         details: Optional[Dict[str, Any]] = None,
         ip_address: Optional[str] = None,
         user_agent: Optional[str] = None
-    ) -> PortalActivityLog:
+    ) -> Optional[PortalActivityLog]:
         """
         Log a portal activity
         
@@ -81,7 +81,7 @@ class ActivityLogger:
             return None
     
     @staticmethod
-    async def log_export(
+    def log_export(
         db: Session,
         user_id: str,
         restaurant_id: str,
@@ -90,7 +90,7 @@ class ActivityLogger:
         record_count: int = 0
     ):
         """Log export activity"""
-        await ActivityLogger.log_activity(
+        ActivityLogger.log_activity(
             db=db,
             user_id=user_id,
             restaurant_id=restaurant_id,
@@ -104,7 +104,7 @@ class ActivityLogger:
         )
     
     @staticmethod
-    async def log_dashboard_view(
+    def log_dashboard_view(
         db: Session,
         user_id: str,
         restaurant_id: Optional[str],
@@ -112,7 +112,7 @@ class ActivityLogger:
         period: str
     ):
         """Log dashboard viewing activity"""
-        await ActivityLogger.log_activity(
+        ActivityLogger.log_activity(
             db=db,
             user_id=user_id,
             restaurant_id=restaurant_id,
@@ -125,7 +125,7 @@ class ActivityLogger:
         )
     
     @staticmethod
-    async def log_settings_change(
+    def log_settings_change(
         db: Session,
         user_id: str,
         restaurant_id: str,
@@ -134,7 +134,7 @@ class ActivityLogger:
         new_value: Any
     ):
         """Log settings change activity"""
-        await ActivityLogger.log_activity(
+        ActivityLogger.log_activity(
             db=db,
             user_id=user_id,
             restaurant_id=restaurant_id,
@@ -148,7 +148,7 @@ class ActivityLogger:
         )
     
     @staticmethod
-    async def log_user_management(
+    def log_user_management(
         db: Session,
         user_id: str,
         restaurant_id: str,
@@ -163,7 +163,7 @@ class ActivityLogger:
             "delete": ActivityLogger.DELETE_USER
         }
         
-        await ActivityLogger.log_activity(
+        ActivityLogger.log_activity(
             db=db,
             user_id=user_id,
             restaurant_id=restaurant_id,
@@ -176,7 +176,7 @@ class ActivityLogger:
         )
     
     @staticmethod
-    async def log_restaurant_management(
+    def log_restaurant_management(
         db: Session,
         user_id: str,
         restaurant_id: str,
@@ -191,7 +191,7 @@ class ActivityLogger:
             "subscription": ActivityLogger.CHANGE_SUBSCRIPTION
         }
         
-        await ActivityLogger.log_activity(
+        ActivityLogger.log_activity(
             db=db,
             user_id=user_id,
             restaurant_id=restaurant_id,
@@ -203,7 +203,7 @@ class ActivityLogger:
         )
     
     @staticmethod
-    async def get_activity_logs(
+    def get_activity_logs(
         db: Session,
         restaurant_id: Optional[str] = None,
         user_id: Optional[str] = None,
