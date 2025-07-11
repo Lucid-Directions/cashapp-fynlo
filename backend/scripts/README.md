@@ -80,3 +80,5 @@ python scripts/seed_menu.py
 - All timestamps use UTC
 - Prices are stored as DECIMAL for accuracy
 - The scripts use proper SQL parameterization for security
+- Emoji data is defined in seed_menu.py for future use when the products table supports it
+- The script accurately tracks skipped products (both existing and those with missing categories)

@@ -32,6 +32,10 @@ CHUCHO_CATEGORIES = [
 ]
 
 CHUCHO_MENU_ITEMS = [
+    # NOTE: The 'emoji' field in each item is provided for future use when the products table
+    # is updated to include an emoji column. Currently, the products table does not have an
+    # emoji column, so this data is defined but not inserted into the database.
+    
     # SNACKS
     {'name': 'Nachos', 'price': 5.00, 'category': 'Snacks', 'emoji': '🍲', 'description': 'Homemade corn tortilla chips with black beans, tomato salsa, pico de gallo, feta, guac & coriander'},
     {'name': 'Quesadillas', 'price': 5.50, 'category': 'Snacks', 'emoji': '🧀', 'description': 'Folded flour tortilla filled with mozzarella, topped with tomato salsa, feta & coriander'},
@@ -157,6 +161,7 @@ def seed_menu(restaurant_name: str = "Chucho Restaurant"):
                 
                 if not category_id:
                     print(f"⚠️  Category '{item['category']}' not found for product '{item['name']}'")
+                    skipped_count += 1  # Count skipped products due to missing category
                     continue
                 
                 db.execute(
@@ -187,7 +192,8 @@ def seed_menu(restaurant_name: str = "Chucho Restaurant"):
         
         print(f"\n🎉 Successfully seeded menu for {restaurant_name}!")
         print(f"   Created: {created_count} products")
-        print(f"   Skipped: {skipped_count} existing products")
+        print(f"   Skipped: {skipped_count} products (existing or missing category)")
+        print(f"   Total processed: {len(CHUCHO_MENU_ITEMS)}")
         
     except Exception as e:
         db.rollback()

@@ -273,6 +273,124 @@ class DataService {
     return this.db.getMenuCategories();
   }
 
+  // Category CRUD operations
+  async createCategory(categoryData: {
+    name: string;
+    description?: string;
+    color?: string;
+    icon?: string;
+    sort_order?: number;
+  }): Promise<any> {
+    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
+      try {
+        return await this.db.createCategory(categoryData);
+      } catch (error) {
+        console.error('Failed to create category:', error);
+        throw error;
+      }
+    }
+    throw new Error('Backend not available for category creation');
+  }
+
+  async updateCategory(categoryId: string, categoryData: Partial<{
+    name: string;
+    description?: string;
+    color?: string;
+    icon?: string;
+    sort_order?: number;
+    is_active?: boolean;
+  }>): Promise<any> {
+    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
+      try {
+        return await this.db.updateCategory(categoryId, categoryData);
+      } catch (error) {
+        console.error('Failed to update category:', error);
+        throw error;
+      }
+    }
+    throw new Error('Backend not available for category update');
+  }
+
+  async deleteCategory(categoryId: string): Promise<void> {
+    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
+      try {
+        await this.db.deleteCategory(categoryId);
+      } catch (error) {
+        console.error('Failed to delete category:', error);
+        throw error;
+      }
+    } else {
+      throw new Error('Backend not available for category deletion');
+    }
+  }
+
+  // Product CRUD operations
+  async createProduct(productData: {
+    category_id: string;
+    name: string;
+    description?: string;
+    price: number;
+    cost?: number;
+    image_url?: string;
+    barcode?: string;
+    sku?: string;
+    prep_time?: number;
+    dietary_info?: string[];
+    modifiers?: any[];
+    stock_tracking?: boolean;
+    stock_quantity?: number;
+  }): Promise<any> {
+    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
+      try {
+        return await this.db.createProduct(productData);
+      } catch (error) {
+        console.error('Failed to create product:', error);
+        throw error;
+      }
+    }
+    throw new Error('Backend not available for product creation');
+  }
+
+  async updateProduct(productId: string, productData: Partial<{
+    category_id?: string;
+    name?: string;
+    description?: string;
+    price?: number;
+    cost?: number;
+    image_url?: string;
+    barcode?: string;
+    sku?: string;
+    prep_time?: number;
+    dietary_info?: string[];
+    modifiers?: any[];
+    stock_tracking?: boolean;
+    stock_quantity?: number;
+    is_active?: boolean;
+  }>): Promise<any> {
+    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
+      try {
+        return await this.db.updateProduct(productId, productData);
+      } catch (error) {
+        console.error('Failed to update product:', error);
+        throw error;
+      }
+    }
+    throw new Error('Backend not available for product update');
+  }
+
+  async deleteProduct(productId: string): Promise<void> {
+    if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
+      try {
+        await this.db.deleteProduct(productId);
+      } catch (error) {
+        console.error('Failed to delete product:', error);
+        throw error;
+      }
+    } else {
+      throw new Error('Backend not available for product deletion');
+    }
+  }
+
   // Order operations
   async createOrder(order: any): Promise<any> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {

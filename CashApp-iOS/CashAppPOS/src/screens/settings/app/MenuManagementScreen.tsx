@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -10,9 +10,11 @@ import {
   TextInput,
   FlatList,
   Modal,
+  ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
+import DataService from '../../../services/DataService';
 
 // Clover POS Color Scheme
 const Colors = {
@@ -76,318 +78,12 @@ interface Category {
 
 const MenuManagementScreen: React.FC = () => {
   const navigation = useNavigation();
+  const dataService = DataService.getInstance();
   
-  const [categories, setCategories] = useState<Category[]>([
-    {
-      id: 'snacks',
-      name: 'Snacks',
-      description: 'Mexican appetizers and light bites',
-      order: 1,
-      visible: true,
-      items: [
-        {
-          id: 'nachos',
-          name: 'Nachos',
-          description: 'Homemade corn tortilla chips with black beans, tomato salsa, pico de gallo, feta, guac & coriander',
-          price: 5.00,
-          category: 'snacks',
-          available: true,
-          featured: true,
-          allergens: ['dairy'],
-          modifiers: []
-        },
-        {
-          id: 'quesadillas',
-          name: 'Quesadillas',
-          description: 'Folded flour tortilla filled with mozzarella, topped with tomato salsa, feta & coriander',
-          price: 5.50,
-          category: 'snacks',
-          available: true,
-          featured: false,
-          allergens: ['gluten', 'dairy'],
-          modifiers: []
-        },
-        {
-          id: 'chorizo_quesadilla',
-          name: 'Chorizo Quesadilla',
-          description: 'Folded flour tortilla filled with chorizo & mozzarella. Topped with tomato salsa, feta & coriander',
-          price: 5.50,
-          category: 'snacks',
-          available: true,
-          featured: false,
-          allergens: ['gluten', 'dairy'],
-          modifiers: []
-        },
-        {
-          id: 'chicken_quesadilla',
-          name: 'Chicken Quesadilla',
-          description: 'Folded flour tortilla filled with chicken, peppers, onion & mozzarella. Topped with salsa, feta & coriander',
-          price: 5.50,
-          category: 'snacks',
-          available: true,
-          featured: false,
-          allergens: ['gluten', 'dairy'],
-          modifiers: []
-        },
-        {
-          id: 'tostada',
-          name: 'Tostada',
-          description: 'Crispy tortillas with black beans filled with chicken or any topping, served with salsa, lettuce and feta',
-          price: 6.50,
-          category: 'snacks',
-          available: true,
-          featured: false,
-          allergens: ['gluten', 'dairy'],
-          modifiers: []
-        }
-      ]
-    },
-    {
-      id: 'tacos',
-      name: 'Tacos',
-      description: 'Traditional Mexican tacos',
-      order: 2,
-      visible: true,
-      items: [
-        {
-          id: 'carnitas',
-          name: 'Carnitas',
-          description: 'Slow cooked pork, served with onion, coriander, salsa, guacamole & coriander',
-          price: 3.50,
-          category: 'tacos',
-          available: true,
-          featured: true,
-          allergens: [],
-          modifiers: []
-        },
-        {
-          id: 'cochinita',
-          name: 'Cochinita',
-          description: 'Marinated pulled pork served with pickle red onion',
-          price: 3.50,
-          category: 'tacos',
-          available: true,
-          featured: false,
-          allergens: [],
-          modifiers: []
-        },
-        {
-          id: 'barbacoa',
-          name: 'Barbacoa de Res',
-          description: 'Juicy pulled beef topped with onion, guacamole & coriander',
-          price: 3.50,
-          category: 'tacos',
-          available: true,
-          featured: true,
-          allergens: [],
-          modifiers: []
-        },
-        {
-          id: 'chorizo_taco',
-          name: 'Chorizo',
-          description: 'Grilled chorizo with black beans, onions, salsa, coriander & guacamole',
-          price: 3.50,
-          category: 'tacos',
-          available: true,
-          featured: false,
-          allergens: [],
-          modifiers: []
-        },
-        {
-          id: 'chicken_fajita',
-          name: 'Chicken Fajita',
-          description: 'Chicken, peppers & onion with black beans. Topped with salsa, guac & coriander',
-          price: 3.50,
-          category: 'tacos',
-          available: true,
-          featured: false,
-          allergens: [],
-          modifiers: []
-        },
-        {
-          id: 'pescado',
-          name: 'Pescado',
-          description: 'Battered cod with guacamole & coriander. Topped with red cabbage & mango chilli salsa',
-          price: 3.50,
-          category: 'tacos',
-          available: true,
-          featured: false,
-          allergens: ['fish'],
-          modifiers: []
-        }
-      ]
-    },
-    {
-      id: 'special_tacos',
-      name: 'Special Tacos',
-      description: 'Premium taco selections',
-      order: 3,
-      visible: true,
-      items: [
-        {
-          id: 'carne_asada',
-          name: 'Carne Asada',
-          description: 'Diced rump steak with peppers and red onion. Served on black beans, topped with chimichurri sauce & coriander',
-          price: 4.50,
-          category: 'special_tacos',
-          available: true,
-          featured: true,
-          allergens: [],
-          modifiers: []
-        },
-        {
-          id: 'camaron',
-          name: 'Camaron',
-          description: 'Prawns with chorizo, peppers and red onion. Served on black beans, topped with tomato salsa, coriander & guacamole',
-          price: 4.50,
-          category: 'special_tacos',
-          available: true,
-          featured: false,
-          allergens: ['seafood'],
-          modifiers: []
-        },
-        {
-          id: 'pulpos',
-          name: 'Pulpos',
-          description: 'Chargrilled octopus, cooked with peppers and red onion. Served on grilled potato with garlic & coriander',
-          price: 4.50,
-          category: 'special_tacos',
-          available: true,
-          featured: false,
-          allergens: ['seafood'],
-          modifiers: []
-        }
-      ]
-    },
-    {
-      id: 'burritos',
-      name: 'Burritos',
-      description: 'Large flour tortilla wraps',
-      order: 4,
-      visible: true,
-      items: [
-        {
-          id: 'regular_burrito',
-          name: 'Regular Burrito',
-          description: 'Choose any filling from the taco menu! With black beans, lettuce, pico de gallo, & guacamole. Topped with salsa, feta and coriander.',
-          price: 8.00,
-          category: 'burritos',
-          available: true,
-          featured: false,
-          allergens: ['gluten', 'dairy'],
-          modifiers: []
-        },
-        {
-          id: 'special_burrito',
-          name: 'Special Burrito',
-          description: 'Choose any filling from the special tacos menu! With black beans, lettuce, pico de gallo, & guacamole. Topped with salsa, feta and coriander.',
-          price: 10.00,
-          category: 'burritos',
-          available: true,
-          featured: true,
-          allergens: ['gluten', 'dairy'],
-          modifiers: []
-        }
-      ]
-    },
-    {
-      id: 'sides',
-      name: 'Sides & Salsas',
-      description: 'Mexican sides and sauces',
-      order: 5,
-      visible: true,
-      items: [
-        {
-          id: 'skinny_fries',
-          name: 'Skinny Fries',
-          description: 'Thin cut fries',
-          price: 3.50,
-          category: 'sides',
-          available: true,
-          featured: false,
-          allergens: [],
-          modifiers: []
-        },
-        {
-          id: 'pico_de_gallo',
-          name: 'Pico de Gallo',
-          description: 'Diced tomato, onion and chilli - FREE!',
-          price: 0.00,
-          category: 'sides',
-          available: true,
-          featured: false,
-          allergens: [],
-          modifiers: []
-        },
-        {
-          id: 'green_chili',
-          name: 'Green Chili',
-          description: 'Homemade green chili salsa - HOT! - FREE!',
-          price: 0.00,
-          category: 'sides',
-          available: true,
-          featured: false,
-          allergens: [],
-          modifiers: []
-        }
-      ]
-    },
-    {
-      id: 'drinks',
-      name: 'Drinks',
-      description: 'Mexican beverages and beers',
-      order: 6,
-      visible: true,
-      items: [
-        {
-          id: 'pink_paloma',
-          name: 'Pink Paloma',
-          description: 'An alcohol-free version of our refreshing cocktail. Tangy lime juice and grapefruit soda, with a splash of grenadine',
-          price: 3.75,
-          category: 'drinks',
-          available: true,
-          featured: false,
-          allergens: [],
-          modifiers: []
-        },
-        {
-          id: 'corona',
-          name: 'Corona',
-          description: 'Mexican beer',
-          price: 3.80,
-          category: 'drinks',
-          available: true,
-          featured: true,
-          allergens: ['alcohol'],
-          modifiers: []
-        },
-        {
-          id: 'modelo',
-          name: 'Modelo',
-          description: 'Rich, full-flavoured Pilsner style Lager. Crisp and refreshing. 355ml',
-          price: 4.00,
-          category: 'drinks',
-          available: true,
-          featured: false,
-          allergens: ['alcohol'],
-          modifiers: []
-        },
-        {
-          id: 'dos_equis',
-          name: 'Dos Equis',
-          description: '"Two X\'s". German brewing heritage with the spirit of Mexican traditions. 355ml',
-          price: 4.00,
-          category: 'drinks',
-          available: true,
-          featured: false,
-          allergens: ['alcohol'],
-          modifiers: []
-        }
-      ]
-    }
-  ]);
-
-  const [selectedCategory, setSelectedCategory] = useState<string>('snacks');
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [showItemModal, setShowItemModal] = useState(false);
@@ -406,6 +102,57 @@ const MenuManagementScreen: React.FC = () => {
     autoSort: true,
   });
 
+  // Fetch categories and products on mount
+  useEffect(() => {
+    loadMenuData();
+  }, []);
+
+  const loadMenuData = async () => {
+    try {
+      setLoading(true);
+      
+      // Fetch categories and products from API
+      const [categoriesData, productsData] = await Promise.all([
+        dataService.getCategories(),
+        dataService.getProducts()
+      ]);
+
+      // Transform data to match our interface
+      const transformedCategories: Category[] = categoriesData.map((cat: any) => ({
+        id: cat.id,
+        name: cat.name,
+        description: cat.description || '',
+        order: cat.sort_order || 0,
+        visible: cat.is_active !== false,
+        items: productsData
+          .filter((product: any) => product.category_id === cat.id)
+          .map((product: any) => ({
+            id: product.id,
+            name: product.name,
+            description: product.description || '',
+            price: product.price,
+            category: cat.id,
+            available: product.is_active !== false,
+            featured: false, // We'll need to add this to backend
+            allergens: product.dietary_info || [],
+            modifiers: product.modifiers || []
+          }))
+      }));
+
+      setCategories(transformedCategories);
+      
+      // Set first category as selected if available
+      if (transformedCategories.length > 0 && !selectedCategory) {
+        setSelectedCategory(transformedCategories[0].id);
+      }
+    } catch (error) {
+      console.error('Failed to load menu data:', error);
+      Alert.alert('Error', 'Failed to load menu data. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleAddCategory = () => {
     setEditingCategory({
       id: '',
@@ -423,28 +170,46 @@ const MenuManagementScreen: React.FC = () => {
     setShowCategoryModal(true);
   };
 
-  const handleSaveCategory = () => {
+  const handleSaveCategory = async () => {
     if (!editingCategory?.name.trim()) {
       Alert.alert('Error', 'Category name is required.');
       return;
     }
 
-    if (editingCategory.id) {
-      // Update existing category
-      setCategories(prev => prev.map(cat => 
-        cat.id === editingCategory.id ? editingCategory : cat
-      ));
-    } else {
-      // Add new category
-      const newCategory = {
-        ...editingCategory,
-        id: Date.now().toString()
-      };
-      setCategories(prev => [...prev, newCategory]);
-    }
+    try {
+      setLoading(true);
+      
+      if (editingCategory.id) {
+        // Update existing category
+        await dataService.updateCategory(editingCategory.id, {
+          name: editingCategory.name,
+          description: editingCategory.description,
+          sort_order: editingCategory.order,
+          is_active: editingCategory.visible
+        });
+      } else {
+        // Add new category
+        await dataService.createCategory({
+          name: editingCategory.name,
+          description: editingCategory.description,
+          sort_order: editingCategory.order || categories.length + 1,
+          color: '#00A651', // Default color
+          icon: '🍽️' // Default icon
+        });
+      }
 
-    setShowCategoryModal(false);
-    setEditingCategory(null);
+      // Reload data to get the updated list
+      await loadMenuData();
+      
+      setShowCategoryModal(false);
+      setEditingCategory(null);
+      Alert.alert('Success', `Category ${editingCategory.id ? 'updated' : 'created'} successfully!`);
+    } catch (error) {
+      console.error('Failed to save category:', error);
+      Alert.alert('Error', 'Failed to save category. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDeleteCategory = (categoryId: string) => {
@@ -454,10 +219,26 @@ const MenuManagementScreen: React.FC = () => {
       `Delete "${category?.name}" and all ${category?.items.length} items in it?`,
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', style: 'destructive', onPress: () => {
-          setCategories(prev => prev.filter(c => c.id !== categoryId));
-          if (selectedCategory === categoryId) {
-            setSelectedCategory(categories[0]?.id || '');
+        { text: 'Delete', style: 'destructive', onPress: async () => {
+          try {
+            setLoading(true);
+            await dataService.deleteCategory(categoryId);
+            
+            // Reload data
+            await loadMenuData();
+            
+            // Update selected category if needed
+            if (selectedCategory === categoryId && categories.length > 1) {
+              const remainingCategories = categories.filter(c => c.id !== categoryId);
+              setSelectedCategory(remainingCategories[0]?.id || '');
+            }
+            
+            Alert.alert('Success', 'Category deleted successfully!');
+          } catch (error) {
+            console.error('Failed to delete category:', error);
+            Alert.alert('Error', 'Failed to delete category. Please try again.');
+          } finally {
+            setLoading(false);
           }
         }}
       ]
@@ -484,7 +265,7 @@ const MenuManagementScreen: React.FC = () => {
     setShowItemModal(true);
   };
 
-  const handleSaveItem = () => {
+  const handleSaveItem = async () => {
     if (!editingItem?.name.trim()) {
       Alert.alert('Error', 'Item name is required.');
       return;
@@ -495,29 +276,44 @@ const MenuManagementScreen: React.FC = () => {
       return;
     }
 
-    if (editingItem.id) {
-      // Update existing item
-      setCategories(prev => prev.map(cat => ({
-        ...cat,
-        items: cat.items.map(item => 
-          item.id === editingItem.id ? editingItem : item
-        )
-      })));
-    } else {
-      // Add new item
-      const newItem = {
-        ...editingItem,
-        id: Date.now().toString()
-      };
-      setCategories(prev => prev.map(cat => 
-        cat.id === selectedCategory 
-          ? { ...cat, items: [...cat.items, newItem] }
-          : cat
-      ));
-    }
+    try {
+      setLoading(true);
+      
+      if (editingItem.id) {
+        // Update existing item
+        await dataService.updateProduct(editingItem.id, {
+          name: editingItem.name,
+          description: editingItem.description,
+          price: editingItem.price,
+          category_id: editingItem.category,
+          is_active: editingItem.available,
+          dietary_info: editingItem.allergens,
+          modifiers: editingItem.modifiers
+        });
+      } else {
+        // Add new item
+        await dataService.createProduct({
+          category_id: selectedCategory,
+          name: editingItem.name,
+          description: editingItem.description || '',
+          price: editingItem.price,
+          dietary_info: editingItem.allergens,
+          modifiers: editingItem.modifiers
+        });
+      }
 
-    setShowItemModal(false);
-    setEditingItem(null);
+      // Reload data to get the updated list
+      await loadMenuData();
+      
+      setShowItemModal(false);
+      setEditingItem(null);
+      Alert.alert('Success', `Item ${editingItem.id ? 'updated' : 'created'} successfully!`);
+    } catch (error) {
+      console.error('Failed to save item:', error);
+      Alert.alert('Error', 'Failed to save item. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDeleteItem = (itemId: string) => {
@@ -530,28 +326,55 @@ const MenuManagementScreen: React.FC = () => {
       `Delete "${item?.name}"?`,
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', style: 'destructive', onPress: () => {
-          setCategories(prev => prev.map(cat => ({
-            ...cat,
-            items: cat.items.filter(item => item.id !== itemId)
-          })));
+        { text: 'Delete', style: 'destructive', onPress: async () => {
+          try {
+            setLoading(true);
+            await dataService.deleteProduct(itemId);
+            
+            // Reload data
+            await loadMenuData();
+            
+            Alert.alert('Success', 'Item deleted successfully!');
+          } catch (error) {
+            console.error('Failed to delete item:', error);
+            Alert.alert('Error', 'Failed to delete item. Please try again.');
+          } finally {
+            setLoading(false);
+          }
         }}
       ]
     );
   };
 
-  const toggleItemAvailability = (itemId: string) => {
-    setCategories(prev => prev.map(cat => ({
-      ...cat,
-      items: cat.items.map(item => 
-        item.id === itemId 
-          ? { ...item, available: !item.available }
-          : item
-      )
-    })));
+  const toggleItemAvailability = async (itemId: string) => {
+    const item = categories
+      .flatMap(c => c.items)
+      .find(i => i.id === itemId);
+      
+    if (!item) return;
+    
+    try {
+      await dataService.updateProduct(itemId, {
+        is_active: !item.available
+      });
+      
+      // Update local state for immediate feedback
+      setCategories(prev => prev.map(cat => ({
+        ...cat,
+        items: cat.items.map(i => 
+          i.id === itemId 
+            ? { ...i, available: !i.available }
+            : i
+        )
+      })));
+    } catch (error) {
+      console.error('Failed to toggle item availability:', error);
+      Alert.alert('Error', 'Failed to update item availability.');
+    }
   };
 
   const toggleItemFeatured = (itemId: string) => {
+    // Featured is not implemented in backend yet, just update local state
     setCategories(prev => prev.map(cat => ({
       ...cat,
       items: cat.items.map(item => 
@@ -562,12 +385,26 @@ const MenuManagementScreen: React.FC = () => {
     })));
   };
 
-  const toggleCategoryVisibility = (categoryId: string) => {
-    setCategories(prev => prev.map(cat => 
-      cat.id === categoryId 
-        ? { ...cat, visible: !cat.visible }
-        : cat
-    ));
+  const toggleCategoryVisibility = async (categoryId: string) => {
+    const category = categories.find(c => c.id === categoryId);
+    
+    if (!category) return;
+    
+    try {
+      await dataService.updateCategory(categoryId, {
+        is_active: !category.visible
+      });
+      
+      // Update local state for immediate feedback
+      setCategories(prev => prev.map(cat => 
+        cat.id === categoryId 
+          ? { ...cat, visible: !cat.visible }
+          : cat
+      ));
+    } catch (error) {
+      console.error('Failed to toggle category visibility:', error);
+      Alert.alert('Error', 'Failed to update category visibility.');
+    }
   };
 
   const toggleMenuSetting = (setting: keyof typeof menuSettings) => {
@@ -756,6 +593,17 @@ const MenuManagementScreen: React.FC = () => {
           <Icon name="add" size={24} color={Colors.white} />
         </TouchableOpacity>
       </View>
+
+      {/* Loading Indicator */}
+      {loading && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={Colors.primary} />
+          <Text style={styles.loadingText}>Loading menu data...</Text>
+        </View>
+      )}
+
+      {!loading && (
+        <>
 
       {/* Stats Summary */}
       <View style={styles.statsSection}>
@@ -1069,6 +917,8 @@ const MenuManagementScreen: React.FC = () => {
           </View>
         </View>
       </Modal>
+        </>
+      )}
     </View>
   );
 };
@@ -1506,6 +1356,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
     color: Colors.white,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: Colors.lightText,
   },
 });
 

@@ -1108,7 +1108,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 12,
-    height: 70,
+    height: 60,  // Changed from 70 for consistency with other screens
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -1163,6 +1163,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   headerActions: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 12,
   },
   headerIconButton: {
     padding: 8,
