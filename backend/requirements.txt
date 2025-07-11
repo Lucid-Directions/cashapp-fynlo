@@ -1,4 +1,4 @@
-THIS SHOULD BE A LINTER ERROR# Fynlo POS Backend Dependencies
+# Fynlo POS Backend Dependencies
 # Updated to latest secure versions with compatibility matrix validation
 
 # Core Framework - Updated to latest secure versions
@@ -40,8 +40,8 @@ Pillow==10.1.0
 # python-magic-bin==0.4.14 # Often problematic, try python-magic if needed
 python-magic==0.4.27 # Common alternative for Linux
 
-# PDF Generation - Required for export functionality
-reportlab==4.0.8
+# PDF Generation - Temporarily disabled due to deployment issues
+# reportlab==4.0.8
 
 # Background Tasks - Latest stable version
 celery==5.3.6
