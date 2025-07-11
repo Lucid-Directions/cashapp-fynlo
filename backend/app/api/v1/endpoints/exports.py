@@ -5,7 +5,7 @@ TEMPORARILY DISABLED DUE TO MISSING DEPENDENCIES
 
 from typing import Optional
 from datetime import date
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Depends, Query, HTTPException, Request
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db, User
@@ -18,6 +18,7 @@ router = APIRouter()
 @router.get("/menu/{restaurant_id}/export")
 @limiter.limit(PORTAL_EXPORT_RATE)
 async def export_menu_disabled(
+    request: Request,
     restaurant_id: str,
     format: str = Query("json", regex="^(json|csv|pdf)$"),
     db: Session = Depends(get_db),
@@ -32,6 +33,7 @@ async def export_menu_disabled(
 @router.get("/reports/{restaurant_id}/export")
 @limiter.limit(PORTAL_EXPORT_RATE)
 async def export_report_disabled(
+    request: Request,
     restaurant_id: str,
     report_type: str = Query(..., regex="^(sales|inventory|staff|customers|financial)$"),
     format: str = Query("json", regex="^(json|csv|pdf)$"),
@@ -49,6 +51,7 @@ async def export_report_disabled(
 @router.post("/menu/{restaurant_id}/import")
 @limiter.limit(PORTAL_EXPORT_RATE)
 async def import_menu_disabled(
+    request: Request,
     restaurant_id: str,
     file_content: dict,  # JSON content from request body
     db: Session = Depends(get_db),
