@@ -10,6 +10,7 @@ export interface MenuItem {
   description?: string;
   available: boolean;
   barcode?: string;
+  icon?: string;  // Added to match usage in POSScreen
 }
 
 export interface Category {

@@ -389,6 +389,140 @@ class DatabaseService {
     }
   }
 
+  // Create operations for categories
+  async createCategory(categoryData: {
+    name: string;
+    description?: string;
+    color?: string;
+    icon?: string;
+    sort_order?: number;
+  }): Promise<any> {
+    try {
+      const response = await this.apiRequest('/api/v1/products/categories', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(categoryData),
+      });
+      
+      return response.data;
+    } catch (error) {
+      console.error('Failed to create category:', error);
+      throw error;
+    }
+  }
+
+  async updateCategory(categoryId: string, categoryData: Partial<{
+    name: string;
+    description?: string;
+    color?: string;
+    icon?: string;
+    sort_order?: number;
+    is_active?: boolean;
+  }>): Promise<any> {
+    try {
+      const response = await this.apiRequest(`/api/v1/products/categories/${categoryId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(categoryData),
+      });
+      
+      return response.data;
+    } catch (error) {
+      console.error('Failed to update category:', error);
+      throw error;
+    }
+  }
+
+  async deleteCategory(categoryId: string): Promise<void> {
+    try {
+      await this.apiRequest(`/api/v1/products/categories/${categoryId}`, {
+        method: 'DELETE',
+      });
+    } catch (error) {
+      console.error('Failed to delete category:', error);
+      throw error;
+    }
+  }
+
+  // Create operations for products
+  async createProduct(productData: {
+    category_id: string;
+    name: string;
+    description?: string;
+    price: number;
+    cost?: number;
+    image_url?: string;
+    barcode?: string;
+    sku?: string;
+    prep_time?: number;
+    dietary_info?: string[];
+    modifiers?: any[];
+    stock_tracking?: boolean;
+    stock_quantity?: number;
+  }): Promise<any> {
+    try {
+      const response = await this.apiRequest('/api/v1/products/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(productData),
+      });
+      
+      return response.data;
+    } catch (error) {
+      console.error('Failed to create product:', error);
+      throw error;
+    }
+  }
+
+  async updateProduct(productId: string, productData: Partial<{
+    category_id?: string;
+    name?: string;
+    description?: string;
+    price?: number;
+    cost?: number;
+    image_url?: string;
+    barcode?: string;
+    sku?: string;
+    prep_time?: number;
+    dietary_info?: string[];
+    modifiers?: any[];
+    stock_tracking?: boolean;
+    stock_quantity?: number;
+    is_active?: boolean;
+  }>): Promise<any> {
+    try {
+      const response = await this.apiRequest(`/api/v1/products/${productId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(productData),
+      });
+      
+      return response.data;
+    } catch (error) {
+      console.error('Failed to update product:', error);
+      throw error;
+    }
+  }
+
+  async deleteProduct(productId: string): Promise<void> {
+    try {
+      await this.apiRequest(`/api/v1/products/${productId}`, {
+        method: 'DELETE',
+      });
+    } catch (error) {
+      console.error('Failed to delete product:', error);
+      throw error;
+    }
+  }
+
   // Import Chucho menu data
   private getChuchoMenuData(): any[] {
     // Transform menu items to match expected format

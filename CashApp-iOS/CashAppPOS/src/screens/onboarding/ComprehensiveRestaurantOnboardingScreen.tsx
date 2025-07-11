@@ -109,7 +109,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
     accessLevel: 'pos_only',
   });
 
-  const totalSteps = 7;
+  const totalSteps = 8;
   const businessTypes = [
     'Restaurant', 'Fast Food', 'Cafe', 'Bar & Pub', 'Food Truck',
     'Bakery', 'Pizzeria', 'Bistro', 'Fine Dining', 'Other'
@@ -191,7 +191,9 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         return true; // Optional
       case 6: // Employees
         return true; // Optional
-      case 7: // Review
+      case 7: // Menu Setup
+        return true; // Optional but recommended
+      case 8: // Review
         return true;
       default:
         return true;
@@ -684,6 +686,72 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
     </View>
   );
 
+  const renderMenuSetup = () => (
+    <View style={styles.stepContent}>
+      <Text style={styles.stepTitle}>Menu Setup</Text>
+      <Text style={styles.stepDescription}>
+        Set up your restaurant menu. You can add categories and items now or do it later.
+      </Text>
+
+      <View style={styles.menuSetupContainer}>
+        <Icon name="restaurant-menu" size={64} color={theme.colors.primary} />
+        <Text style={styles.menuSetupText}>
+          Your menu is essential for taking orders. You can:
+        </Text>
+        
+        <View style={styles.menuOptions}>
+          <View style={styles.menuOption}>
+            <Icon name="check-circle" size={24} color={theme.colors.success} />
+            <Text style={styles.menuOptionText}>
+              Add menu categories (e.g., Appetizers, Main Courses, Drinks)
+            </Text>
+          </View>
+          
+          <View style={styles.menuOption}>
+            <Icon name="check-circle" size={24} color={theme.colors.success} />
+            <Text style={styles.menuOptionText}>
+              Add items with prices and descriptions
+            </Text>
+          </View>
+          
+          <View style={styles.menuOption}>
+            <Icon name="check-circle" size={24} color={theme.colors.success} />
+            <Text style={styles.menuOptionText}>
+              Set item availability and featured items
+            </Text>
+          </View>
+        </View>
+
+        <TouchableOpacity
+          style={styles.setupMenuButton}
+          onPress={() => {
+            // Navigate to menu management screen
+            navigation.navigate('MenuManagement' as never);
+          }}
+        >
+          <Icon name="restaurant-menu" size={20} color={theme.colors.white} />
+          <Text style={styles.setupMenuButtonText}>Set Up Menu Now</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.skipButton}
+          onPress={() => {
+            Alert.alert(
+              'Skip Menu Setup?',
+              'You can always add your menu later from the Settings menu.',
+              [
+                { text: 'Cancel', style: 'cancel' },
+                { text: 'Skip', onPress: () => nextStep() }
+              ]
+            );
+          }}
+        >
+          <Text style={styles.skipButtonText}>Skip for Now</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+
   const renderStep7 = () => (
     <View style={styles.stepContent}>
       <Text style={styles.stepTitle}>Review & Complete</Text>
@@ -741,7 +809,8 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
       case 4: return renderStep4();
       case 5: return renderStep5();
       case 6: return renderStep6();
-      case 7: return renderStep7();
+      case 7: return renderMenuSetup();
+      case 8: return renderStep7();
       default: return renderStep1();
     }
   };
@@ -1136,6 +1205,57 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
       fontWeight: '600',
       color: theme.colors.white,
       marginRight: 8,
+    },
+    menuSetupContainer: {
+      alignItems: 'center',
+      paddingVertical: 24,
+    },
+    menuSetupText: {
+      fontSize: 16,
+      color: theme.colors.text,
+      marginTop: 16,
+      marginBottom: 24,
+      textAlign: 'center',
+    },
+    menuOptions: {
+      width: '100%',
+      marginBottom: 32,
+    },
+    menuOption: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 16,
+      paddingHorizontal: 16,
+    },
+    menuOptionText: {
+      fontSize: 14,
+      color: theme.colors.text,
+      marginLeft: 12,
+      flex: 1,
+    },
+    setupMenuButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: theme.colors.primary,
+      paddingVertical: 16,
+      paddingHorizontal: 32,
+      borderRadius: 12,
+      marginBottom: 16,
+    },
+    setupMenuButtonText: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: theme.colors.white,
+      marginLeft: 8,
+    },
+    skipButton: {
+      paddingVertical: 12,
+      paddingHorizontal: 24,
+    },
+    skipButtonText: {
+      fontSize: 14,
+      color: theme.colors.textSecondary,
+      textDecorationLine: 'underline',
     },
   });
 
