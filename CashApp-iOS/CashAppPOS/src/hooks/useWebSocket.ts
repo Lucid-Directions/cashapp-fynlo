@@ -130,11 +130,13 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
     
     // Disconnect on unmount
     return () => {
-      if (state.connected) {
+      // Use webSocketService.isConnected() to get current connection state
+      // instead of potentially stale state.connected
+      if (webSocketService.isConnected()) {
         disconnect();
       }
     };
-  }, [options.autoConnect, user?.restaurant_id]);
+  }, [options.autoConnect, user?.restaurant_id, state.connected, state.connecting, connect, disconnect]);
   
   return {
     ...state,

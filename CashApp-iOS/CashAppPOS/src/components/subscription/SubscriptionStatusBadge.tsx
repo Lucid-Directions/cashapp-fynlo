@@ -118,32 +118,32 @@ export const SubscriptionStatusCard: React.FC = () => {
   const plan = SUBSCRIPTION_PLANS[subscriptionPlan] || SUBSCRIPTION_PLANS.alpha;
   
   return (
-    <View style={[styles.card, { backgroundColor: theme.colors.surface }]}>
-      <View style={[styles.planHeader, { backgroundColor: plan.color }]}>
+    <View style={[cardStyles.card, { backgroundColor: theme.colors.surface }]}>
+      <View style={[cardStyles.planHeader, { backgroundColor: plan.color }]}>
         <Icon name={plan.icon} size={24} color="#fff" />
-        <Text style={styles.planTitle}>{plan.displayName} Plan</Text>
+        <Text style={cardStyles.planTitle}>{plan.displayName} Plan</Text>
         {subscriptionStatus === 'trial' && (
-          <View style={styles.trialBadge}>
-            <Text style={styles.trialBadgeText}>TRIAL</Text>
+          <View style={cardStyles.trialBadge}>
+            <Text style={cardStyles.trialBadgeText}>TRIAL</Text>
           </View>
         )}
       </View>
       
-      <View style={styles.cardContent}>
-        <Text style={[styles.statusLabel, { color: theme.colors.text }]}>
-          Status: <Text style={styles.statusValue}>
+      <View style={cardStyles.cardContent}>
+        <Text style={[cardStyles.statusLabel, { color: theme.colors.text }]}>
+          Status: <Text style={cardStyles.statusValue}>
             {subscriptionStatus.charAt(0).toUpperCase() + subscriptionStatus.slice(1)}
           </Text>
         </Text>
         
-        <View style={styles.featuresSection}>
-          <Text style={[styles.featuresTitle, { color: theme.colors.text }]}>
+        <View style={cardStyles.featuresSection}>
+          <Text style={[cardStyles.featuresTitle, { color: theme.colors.text }]}>
             Included Features:
           </Text>
           {plan.features.map((feature, index) => (
-            <View key={index} style={styles.featureRow}>
+            <View key={index} style={cardStyles.featureRow}>
               <Icon name="checkmark-circle" size={16} color={plan.color} />
-              <Text style={[styles.featureText, { color: theme.colors.textSecondary }]}>
+              <Text style={[cardStyles.featureText, { color: theme.colors.textSecondary }]}>
                 {feature}
               </Text>
             </View>
@@ -151,7 +151,7 @@ export const SubscriptionStatusCard: React.FC = () => {
         </View>
         
         <TouchableOpacity 
-          style={[styles.upgradeButton, { borderColor: plan.color }]}
+          style={[cardStyles.upgradeButton, { borderColor: plan.color }]}
           onPress={() => {
             Alert.alert(
               'Manage Subscription',
@@ -160,7 +160,7 @@ export const SubscriptionStatusCard: React.FC = () => {
             );
           }}
         >
-          <Text style={[styles.upgradeButtonText, { color: plan.color }]}>
+          <Text style={[cardStyles.upgradeButtonText, { color: plan.color }]}>
             Manage Subscription
           </Text>
           <Icon name="open-outline" size={16} color={plan.color} />
