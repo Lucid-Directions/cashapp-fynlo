@@ -136,7 +136,7 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
         disconnect();
       }
     };
-  }, [options.autoConnect, user?.restaurant_id, state.connected, state.connecting, connect, disconnect]);
+  }, [options.autoConnect, user?.restaurant_id, connect, disconnect]);
   
   return {
     ...state,

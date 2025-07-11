@@ -39,9 +39,13 @@ async def get_dashboard_metrics(
     cached_data = await redis.get(cache_key)
     if cached_data:
         # Deserialize the cached JSON string
-        if isinstance(cached_data, str):
-            cached_data = json.loads(cached_data)
-        return APIResponseHelper.success(data=cached_data)
+        try:
+            if isinstance(cached_data, str):
+                cached_data = json.loads(cached_data)
+            return APIResponseHelper.success(data=cached_data)
+        except json.JSONDecodeError:
+            # If cached data is invalid, continue to generate fresh data
+            await redis.delete(cache_key)
     
     # Log dashboard view
     ActivityLogger.log_dashboard_view(
@@ -202,9 +206,13 @@ async def get_platform_dashboard(
     cached_data = await redis.get(cache_key)
     if cached_data:
         # Deserialize the cached JSON string
-        if isinstance(cached_data, str):
-            cached_data = json.loads(cached_data)
-        return APIResponseHelper.success(data=cached_data)
+        try:
+            if isinstance(cached_data, str):
+                cached_data = json.loads(cached_data)
+            return APIResponseHelper.success(data=cached_data)
+        except json.JSONDecodeError:
+            # If cached data is invalid, continue to generate fresh data
+            await redis.delete(cache_key)
     
     # Calculate date range
     end_date = datetime.utcnow()
