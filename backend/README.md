@@ -2,6 +2,8 @@
 
 A modern, hardware-free restaurant management backend built with FastAPI, PostgreSQL, and Redis.
 
+Last deployment trigger: 2025-01-11 09:55 UTC
+
 ## 🚀 Quick Start
 
 ### Prerequisites
