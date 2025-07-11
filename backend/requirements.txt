@@ -1,4 +1,4 @@
-# Fynlo POS Backend Dependencies
+THIS SHOULD BE A LINTER ERROR# Fynlo POS Backend Dependencies
 # Updated to latest secure versions with compatibility matrix validation
 
 # Core Framework - Updated to latest secure versions
