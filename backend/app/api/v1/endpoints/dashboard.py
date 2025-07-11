@@ -10,7 +10,7 @@ from sqlalchemy import and_, func, case
 from collections import defaultdict
 import json
 
-from app.core.database import get_db, Restaurant, Order, OrderItem, Product, User, Employee, Customer, Inventory
+from app.core.database import get_db, Restaurant, Order, Product, User, Employee, Customer, Inventory
 from app.core.auth import get_current_user
 from app.core.redis_client import get_redis, RedisClient
 from app.core.responses import APIResponseHelper
@@ -80,23 +80,25 @@ async def get_dashboard_metrics(
     total_orders = len(orders)
     avg_order_value = total_revenue / total_orders if total_orders > 0 else 0
     
-    # Get top products
-    top_products_query = db.query(
-        Product.name,
-        func.sum(OrderItem.quantity).label('total_quantity'),
-        func.sum(OrderItem.subtotal).label('total_revenue')
-    ).join(
-        OrderItem, Product.id == OrderItem.product_id
-    ).join(
-        Order, OrderItem.order_id == Order.id
-    ).filter(
-        Order.restaurant_id == restaurant_id,
-        Order.created_at >= start_date,
-        Order.created_at <= end_date,
-        Order.status.in_(['completed', 'paid'])
-    ).group_by(Product.id, Product.name).order_by(
-        func.sum(OrderItem.quantity).desc()
-    ).limit(5).all()
+    # Get top products - TEMPORARILY DISABLED (OrderItem model not available)
+    # TODO: Implement when OrderItem model is added to database
+    top_products_query = []
+    # top_products_query = db.query(
+    #     Product.name,
+    #     func.sum(OrderItem.quantity).label('total_quantity'),
+    #     func.sum(OrderItem.subtotal).label('total_revenue')
+    # ).join(
+    #     OrderItem, Product.id == OrderItem.product_id
+    # ).join(
+    #     Order, OrderItem.order_id == Order.id
+    # ).filter(
+    #     Order.restaurant_id == restaurant_id,
+    #     Order.created_at >= start_date,
+    #     Order.created_at <= end_date,
+    #     Order.status.in_(['completed', 'paid'])
+    # ).group_by(Product.id, Product.name).order_by(
+    #     func.sum(OrderItem.quantity).desc()
+    # ).limit(5).all()
     
     # Get staff metrics
     active_staff = db.query(func.count(Employee.id)).filter(
