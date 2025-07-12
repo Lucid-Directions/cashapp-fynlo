@@ -225,9 +225,27 @@ const POSScreen: React.FC = () => {
       } catch (error) {
         console.error('❌ Failed to load dynamic menu:', error);
         
-        // Set empty arrays to prevent crashes - no fallback data in production
-        setDynamicMenuItems([]);
-        setDynamicCategories(['All']);
+        // Try to get fallback data from DataService before showing empty
+        try {
+          const fallbackItems = await dataService.getMenuItems();
+          const fallbackCategories = await dataService.getMenuCategories();
+          
+          if (fallbackItems && fallbackItems.length > 0) {
+            console.log('🔄 Using fallback menu data:', fallbackItems.length, 'items');
+            setDynamicMenuItems(fallbackItems);
+            
+            const categoryNames = ['All', ...fallbackCategories.map(cat => cat.name).filter(name => name !== 'All')];
+            setDynamicCategories(categoryNames);
+          } else {
+            console.warn('⚠️ No fallback data available, showing empty state');
+            setDynamicMenuItems([]);
+            setDynamicCategories(['All']);
+          }
+        } catch (fallbackError) {
+          console.error('❌ Fallback data also failed:', fallbackError);
+          setDynamicMenuItems([]);
+          setDynamicCategories(['All']);
+        }
         
       } finally {
         setMenuLoading(false);

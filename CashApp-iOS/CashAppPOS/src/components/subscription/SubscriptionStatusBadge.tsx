@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-import { useTheme } from '../../theme/useTheme';
+import { useTheme } from '../../design-system/ThemeProvider';
 import { useAuthStore } from '../../store/useAuthStore';
 import Icon from 'react-native-vector-icons/Ionicons';
 
