@@ -9,6 +9,7 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from app.core.database import SessionLocal, User
 from app.core.supabase import get_supabase_client
 from datetime import datetime
@@ -43,13 +44,19 @@ def link_supabase_users():
             if not email:
                 print(f"\nSkipping user without email (ID: {getattr(su_user, 'id', 'unknown')})")
                 continue
+            
+            # Safely get user ID
+            user_id = getattr(su_user, 'id', None)
+            if not user_id:
+                print(f"\nSkipping user without ID (Email: {email})")
+                continue
                 
-            supabase_id = str(su_user.id)
+            supabase_id = str(user_id)
             
             print(f"\nProcessing user: {email}")
             
-            # Check if user exists in database
-            db_user = db.query(User).filter(User.email == email).first()
+            # Check if user exists in database (case-insensitive)
+            db_user = db.query(User).filter(func.lower(User.email) == func.lower(email)).first()
             
             if db_user:
                 # Update existing user with Supabase ID
