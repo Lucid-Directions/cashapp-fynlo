@@ -106,6 +106,31 @@ class Settings(BaseSettings):
                 raise ValueError(f"Invalid boolean value: {v}")
         return bool(v)
     
+    @field_validator('CORS_ORIGINS', mode='before')
+    @classmethod
+    def parse_cors_origins(cls, v: Any) -> List[str]:
+        """Parse CORS origins from comma-separated string or JSON array"""
+        if isinstance(v, list):
+            # Ensure all elements are strings
+            return [str(item) for item in v if item]
+        if isinstance(v, str):
+            # Try to parse as JSON first
+            try:
+                import json
+                parsed = json.loads(v)
+                if isinstance(parsed, list):
+                    # Ensure all elements are strings
+                    return [str(item) for item in parsed if item]
+            except:
+                pass
+            # Fall back to comma-separated parsing
+            # Remove any brackets and quotes, then split by comma
+            v = v.strip().strip('[]').strip('"').strip("'")
+            origins = [origin.strip().strip('"').strip("'") for origin in v.split(',')]
+            return [origin for origin in origins if origin]  # Remove empty strings
+        # For any other type (None, int, etc.), return empty list
+        return []
+    
     class Config:
         case_sensitive = True
         # env_file is now handled by load_dotenv above to allow dynamic selection
