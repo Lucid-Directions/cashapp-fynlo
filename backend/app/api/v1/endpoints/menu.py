@@ -80,15 +80,20 @@ async def get_menu_items(
         if category_obj:
             query = query.filter(Product.category_id == category_obj.id)
     
-    products = query.order_by(Product.name).all()
+    # Join with categories to avoid N+1 queries
+    products = query.join(Category, Product.category_id == Category.id, isouter=True).order_by(Product.name).all()
+    
+    # Get all categories for this restaurant in one query (for lookup)
+    categories_dict = {
+        cat.id: cat.name 
+        for cat in db.query(Category).filter(Category.restaurant_id == restaurant_id).all()
+    }
     
     # Transform to match frontend expectations
     menu_items = []
     for product in products:
-        # Get category name
-        category_obj = db.query(Category).filter(Category.id == product.category_id).first()
-        category_name = category_obj.name if category_obj else 'Uncategorized'
-        
+        # Use pre-fetched category name
+        category_name = categories_dict.get(product.category_id, 'Uncategorized')
         menu_items.append(format_menu_item(product, category_name))
     
     # Cache for 5 minutes

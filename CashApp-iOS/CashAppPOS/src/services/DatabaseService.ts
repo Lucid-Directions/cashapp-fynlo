@@ -369,9 +369,9 @@ class DatabaseService {
       return [];
     } catch (error) {
       console.error('❌ Failed to fetch menu items from API:', error);
-      console.warn('🚨 Production Mode: Returning empty menu instead of mock data');
-      // PRODUCTION READY: Return empty array instead of fallback menu
-      return [];
+      console.warn('🍮 TEMPORARY: Using Chucho menu data while API is being fixed');
+      // TEMPORARY: Return Chucho menu while we fix the API timeout issue
+      return this.getChuchoMenuData();
     }
   }
 
