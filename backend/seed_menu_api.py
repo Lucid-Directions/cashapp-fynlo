@@ -2,6 +2,18 @@
 """
 Seed Chucho menu data via API
 This script connects to the production API to seed menu data
+
+Usage:
+    AUTH_EMAIL=your@email.com AUTH_PASSWORD=yourpassword python seed_menu_api.py
+    
+Or:
+    export AUTH_EMAIL=your@email.com
+    python seed_menu_api.py yourpassword
+    
+Environment Variables:
+    API_BASE_URL - API endpoint (defaults to production)
+    AUTH_EMAIL - User email for authentication (required)
+    AUTH_PASSWORD - User password for authentication (required)
 """
 
 import requests
@@ -12,8 +24,8 @@ from decimal import Decimal
 
 # Configuration
 API_BASE_URL = os.environ.get('API_BASE_URL', 'https://fynlopos-9eg2c.ondigitalocean.app')
-AUTH_EMAIL = os.environ.get('AUTH_EMAIL', 'arnaud_decube@hotmail.com')
-AUTH_PASSWORD = os.environ.get('AUTH_PASSWORD', 'your_password')
+AUTH_EMAIL = os.environ.get('AUTH_EMAIL')
+AUTH_PASSWORD = os.environ.get('AUTH_PASSWORD')
 
 # Chucho Restaurant Menu Data
 CHUCHO_CATEGORIES = [
@@ -47,6 +59,9 @@ CHUCHO_MENU_ITEMS = [
 
 def login():
     """Login to get authentication token"""
+    if not AUTH_EMAIL or not AUTH_PASSWORD:
+        raise ValueError("AUTH_EMAIL and AUTH_PASSWORD must be set")
+    
     print(f"🔐 Logging in as {AUTH_EMAIL}...")
     
     response = requests.post(
@@ -189,9 +204,16 @@ def main():
     print(f"   🔗 Menu should now be visible in the POS screen")
 
 if __name__ == "__main__":
+    # Check for required credentials
+    if not AUTH_EMAIL:
+        print("Error: AUTH_EMAIL environment variable is required")
+        print("Usage: AUTH_EMAIL=<email> AUTH_PASSWORD=<password> python seed_menu_api.py")
+        sys.exit(1)
+    
     if len(sys.argv) > 1:
         AUTH_PASSWORD = sys.argv[1]
-    elif not AUTH_PASSWORD or AUTH_PASSWORD == 'your_password':
+    elif not AUTH_PASSWORD:
+        print("Error: AUTH_PASSWORD is required")
         print("Usage: python seed_menu_api.py <password>")
         print("Or set AUTH_PASSWORD environment variable")
         sys.exit(1)
