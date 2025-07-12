@@ -442,3 +442,198 @@ GROUP BY payment_method;
 - See `13_BACKEND_REQUIREMENTS.md` for full API specification
 - See `14_IMMEDIATE_FIXES_REQUIRED.md` for prioritized action items
 - See `06_MENU_MANAGEMENT_ANALYSIS.md` for menu configuration details
+
+## 10. Production-Ready Fix Implementation Plan
+
+### Recent Console Log Analysis
+From the app runtime logs, we can see:
+1. **API Timeout Issues**:
+   ```
+   ⏰ Request timeout after 10000ms: https://fynlopos-9eg2c.ondigitalocean.app/api/v1/platform/settings/service-charge
+   ```
+2. **Authentication Token Refresh**: Token expired and refreshed multiple times
+3. **Backend Availability**: "Backend not available, using mock data"
+4. **Empty Menu Display**: POS screen shows no items despite UI being ready
+
+### Root Cause Analysis
+- Backend API is timing out (10-second timeout) due to N+1 query issues
+- Frontend falls back to empty arrays when API fails
+- No proper error states or retry mechanisms
+- Menu Management exists but no data has been added through proper user flow
+
+### Production-Ready User Flow
+
+```
+┌─────────────────────┐     ┌──────────────────┐     ┌─────────────────┐
+│ Restaurant Signup   │────►│    Onboarding    │────►│ Menu Management │
+│                     │     │                  │     │                 │
+│ • Create account    │     │ • Business info  │     │ • Add categories│
+│ • Verify email      │     │ • Location setup │     │ • Add items     │
+│ • Set password      │     │ • Tax config     │     │ • Set prices    │
+└─────────────────────┘     └──────────────────┘     └────────┬────────┘
+                                                               │
+                                                               ▼
+┌─────────────────────┐     ┌──────────────────┐     ┌─────────────────┐
+│   Import Option     │◄────│  Menu Complete   │────►│   POS Screen    │
+│                     │     │                  │     │                 │
+│ • CSV/JSON upload   │     │ • Items saved    │     │ • Items display │
+│ • Validate data     │     │ • Categories set │     │ • Take orders   │
+│ • Bulk add items    │     │ • Ready to sell  │     │ • Process pay   │
+└─────────────────────┘     └──────────────────┘     └─────────────────┘
+```
+
+### Implementation Phases
+
+#### Phase 1: Verify Current State (5 minutes)
+1. Run `check_menu_data.py` to see database state
+2. Document restaurant ID and existing data
+3. Verify API endpoints are accessible
+
+#### Phase 2: Test Manual Menu Creation (20 minutes)
+**Navigate to**: Settings → App Settings → Menu Management
+
+1. **Add Categories**:
+   - Create "Tacos" category
+   - Create "Beverages" category  
+   - Create "Sides" category
+   - Verify categories save to database
+
+2. **Add Menu Items**:
+   - Add 2-3 items per category
+   - Set proper prices (e.g., £8.50 for taco)
+   - Add descriptions
+   - Set availability status
+   - Verify items save successfully
+
+3. **Verify in POS**:
+   - Navigate to POS screen
+   - Check if items appear
+   - Test category filtering
+   - Test search functionality
+
+#### Phase 3: Implement Import Functionality (30 minutes)
+Since import currently shows alerts only:
+
+1. **Create Import Format**:
+   ```json
+   {
+     "categories": [
+       {"name": "Tacos", "icon": "🌮", "order": 1}
+     ],
+     "items": [
+       {
+         "name": "Chicken Taco",
+         "category": "Tacos",
+         "price": 8.50,
+         "description": "Grilled chicken with fresh salsa",
+         "available": true
+       }
+     ]
+   }
+   ```
+
+2. **Implement File Picker**:
+   - Add actual file selection
+   - Parse JSON/CSV data
+   - Validate structure
+   - Show preview before import
+
+3. **Test Import Flow**:
+   - Import sample menu
+   - Verify data appears correctly
+   - Check for duplicates
+
+#### Phase 4: Fix UI Consistency (10 minutes)
+1. Compare header in POS vs Orders screen
+2. Update HeaderWithBackButton usage
+3. Ensure consistent height (60px)
+4. Test on different devices
+
+#### Phase 5: Add Error Handling (15 minutes)
+1. **API Failure States**:
+   ```typescript
+   if (error.code === 'TIMEOUT') {
+     return <RetryView onRetry={loadMenuData} />;
+   }
+   ```
+
+2. **Empty State**:
+   ```typescript
+   if (items.length === 0) {
+     return <EmptyMenuState 
+       onAddItems={() => navigation.navigate('MenuManagement')}
+     />;
+   }
+   ```
+
+3. **Loading States**:
+   - Show skeleton loaders
+   - Progress indicators
+   - Cancel/retry options
+
+### Testing Checklist
+
+#### Restaurant Manager Flow
+- [ ] Sign up as new restaurant owner
+- [ ] Complete onboarding wizard
+- [ ] Navigate to Menu Management
+- [ ] Add at least 3 categories
+- [ ] Add at least 10 menu items
+- [ ] Verify items appear in POS screen
+- [ ] Test taking an order
+- [ ] Process a test payment
+
+#### Technical Validation
+- [ ] No console errors during menu load
+- [ ] API responds within 2 seconds
+- [ ] Menu data persists after app restart
+- [ ] Category filtering works correctly
+- [ ] Search finds items by partial match
+- [ ] Cart calculations are accurate
+- [ ] No mock data dependencies
+
+#### Error Handling
+- [ ] API timeout shows retry option
+- [ ] Network offline shows cached data
+- [ ] Invalid data shows validation errors
+- [ ] Empty menu shows add items CTA
+
+### Success Criteria
+
+✅ **Production Ready When**:
+1. Restaurant can add menu through UI (no scripts)
+2. Menu displays immediately in POS
+3. Import/export fully functional
+4. Consistent UI across all screens
+5. Proper error states and recovery
+6. No hardcoded/mock data
+7. Performance < 2s load time
+8. Works offline with cached data
+
+❌ **Not Ready If**:
+1. Requires backend scripts to add menu
+2. Shows empty screen on API failure
+3. Import/export not implemented
+4. Inconsistent headers/UI
+5. No error handling
+6. Depends on mock data
+7. Takes > 5s to load
+8. Breaks without internet
+
+### Common Issues & Solutions
+
+| Issue | Solution |
+|-------|----------|
+| Menu not showing | Check restaurant ID matches, verify API auth |
+| Timeout errors | Increase timeout, add retry logic |
+| Import fails | Validate JSON structure, check field mapping |
+| Items don't save | Verify API permissions, check request payload |
+| Categories missing | Ensure categories created before items |
+
+### Notes for Development Team
+- Always test as a real restaurant owner would
+- Never use backend scripts for production data
+- Import functionality is critical for existing restaurants
+- Error handling must be user-friendly
+- Performance is key - optimize API queries
+- Consider offline-first approach for reliability
