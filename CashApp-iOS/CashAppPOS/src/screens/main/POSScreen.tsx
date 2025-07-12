@@ -814,7 +814,55 @@ const POSScreen: React.FC = () => {
           {/* Menu Grid */}
           {menuLoading ? (
             <View style={styles.loadingContainer}>
+              <Icon name="restaurant-menu" size={48} color={theme.colors.primary} style={{ marginBottom: 16 }} />
               <Text style={styles.loadingText}>Loading menu...</Text>
+              <Text style={[styles.loadingText, { fontSize: 14, opacity: 0.7, marginTop: 8 }]}>
+                Connecting to backend...
+              </Text>
+            </View>
+          ) : dynamicMenuItems.length === 0 ? (
+            <View style={styles.loadingContainer}>
+              <Icon name="restaurant-menu" size={48} color={theme.colors.textSecondary} style={{ marginBottom: 16 }} />
+              <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>
+                No menu items available
+              </Text>
+              <Text style={[styles.loadingText, { fontSize: 14, opacity: 0.7, marginTop: 8, color: theme.colors.textSecondary }]}>
+                Please contact support to set up your menu
+              </Text>
+              <TouchableOpacity 
+                style={[styles.retryButton, { backgroundColor: theme.colors.primary }]}
+                onPress={async () => {
+                  setMenuLoading(true);
+                  // Reload menu data
+                  try {
+                    const dataService = DataService.getInstance();
+                    const [menuItems, categories] = await Promise.all([
+                      dataService.getMenuItems(),
+                      dataService.getMenuCategories()
+                    ]);
+                    
+                    setDynamicMenuItems(menuItems);
+                    const categoryNames = ['All', ...categories.map(cat => cat.name).filter(name => name !== 'All')];
+                    setDynamicCategories(categoryNames);
+                  } catch (error) {
+                    console.error('Failed to reload menu:', error);
+                  } finally {
+                    setMenuLoading(false);
+                  }
+                }}
+              >
+                <Text style={{ color: theme.colors.buttonText, fontWeight: '600' }}>Retry</Text>
+              </TouchableOpacity>
+            </View>
+          ) : filteredItems.length === 0 ? (
+            <View style={styles.loadingContainer}>
+              <Icon name="search-off" size={48} color={theme.colors.textSecondary} style={{ marginBottom: 16 }} />
+              <Text style={[styles.loadingText, { color: theme.colors.textSecondary }]}>
+                No items found
+              </Text>
+              <Text style={[styles.loadingText, { fontSize: 14, opacity: 0.7, marginTop: 8, color: theme.colors.textSecondary }]}>
+                Try a different search or category
+              </Text>
             </View>
           ) : (
             <FlatList
@@ -1836,6 +1884,14 @@ const createStyles = (theme: any) => StyleSheet.create({
     fontSize: 16,
     color: theme.colors.lightGray,
     textAlign: 'center',
+  },
+  retryButton: {
+    marginTop: 20,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 
