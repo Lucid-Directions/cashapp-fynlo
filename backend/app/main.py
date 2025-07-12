@@ -149,42 +149,16 @@ async def root():
 
 @app.get("/health")
 async def health_check():
-    """Simplified health check for DigitalOcean deployment"""
+    """Ultra-fast health check for DigitalOcean deployment - NO EXTERNAL CHECKS"""
     
-    # Basic health check without external dependencies
-    health_data = {
+    # CRITICAL FIX: Return immediately without any DB/Redis checks to avoid Error 524 timeouts
+    # This endpoint is called every 10 seconds by DigitalOcean - it MUST be instant
+    return {
         "status": "healthy",
         "service": "fynlo-pos-backend",
         "version": "1.0.0",
-        "environment": settings.ENVIRONMENT,
         "timestamp": datetime.now().isoformat()
     }
-    
-    # Optional: Check database connection if available
-    try:
-        from app.core.database import get_db
-        db = next(get_db())
-        db.execute("SELECT 1")
-        health_data["database"] = "connected"
-        db.close()
-    except Exception as e:
-        health_data["database"] = f"unavailable: {str(e)[:50]}"
-    
-    # Optional: Check Redis connection if available
-    try:
-        from app.core.redis_client import get_redis
-        redis = await get_redis()
-        if redis and await redis.ping():
-            health_data["redis"] = "connected"
-        else:
-            health_data["redis"] = "unavailable"
-    except Exception as e:
-        health_data["redis"] = f"unavailable: {str(e)[:50]}"
-    
-    return APIResponseHelper.success(
-        data=health_data,
-        message="Fynlo POS Backend health check"
-    )
 
 @app.get("/api/version")
 async def api_version_info():
