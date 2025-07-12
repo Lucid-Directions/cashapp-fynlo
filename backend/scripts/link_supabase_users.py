@@ -26,7 +26,10 @@ def link_supabase_users():
         
         # Get all users from Supabase
         print("Fetching users from Supabase...")
-        supabase_users = supabase.auth.admin.list_users()
+        response = supabase.auth.admin.list_users()
+        
+        # Extract users from response object
+        supabase_users = response.users if hasattr(response, 'users') else []
         
         if not supabase_users:
             print("No users found in Supabase")
@@ -35,7 +38,12 @@ def link_supabase_users():
         print(f"Found {len(supabase_users)} users in Supabase")
         
         for su_user in supabase_users:
-            email = su_user.email
+            # Skip users without email (e.g., phone-only auth)
+            email = getattr(su_user, 'email', None)
+            if not email:
+                print(f"\nSkipping user without email (ID: {getattr(su_user, 'id', 'unknown')})")
+                continue
+                
             supabase_id = str(su_user.id)
             
             print(f"\nProcessing user: {email}")
@@ -54,16 +62,33 @@ def link_supabase_users():
                     print(f"  - User already linked to Supabase")
             else:
                 # Create new user record for Supabase user
-                # Extract name from email if no metadata available
-                email_parts = email.split('@')[0].split('.')
-                first_name = email_parts[0].capitalize() if email_parts else 'User'
-                last_name = email_parts[1].capitalize() if len(email_parts) > 1 else 'User'
+                # Safe extraction of name from email
+                first_name = 'User'
+                last_name = 'User'
+                
+                try:
+                    # Only try to extract from email if it's valid
+                    if '@' in email:
+                        username_part = email.split('@')[0]
+                        if username_part:  # Ensure we have something before @
+                            # Split by common separators
+                            parts = username_part.replace('_', '.').replace('-', '.').split('.')
+                            # Filter out empty parts
+                            parts = [p for p in parts if p]
+                            
+                            if parts:
+                                first_name = parts[0].capitalize()
+                                if len(parts) > 1:
+                                    last_name = parts[1].capitalize()
+                except Exception:
+                    # If any error occurs, keep default names
+                    pass
                 
                 # Check user metadata for actual name
-                user_metadata = su_user.user_metadata or {}
-                if 'first_name' in user_metadata:
+                user_metadata = getattr(su_user, 'user_metadata', {}) or {}
+                if 'first_name' in user_metadata and user_metadata['first_name']:
                     first_name = user_metadata['first_name']
-                if 'last_name' in user_metadata:
+                if 'last_name' in user_metadata and user_metadata['last_name']:
                     last_name = user_metadata['last_name']
                 
                 # Determine role based on email or metadata
