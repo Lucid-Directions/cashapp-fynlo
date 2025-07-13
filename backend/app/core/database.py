@@ -38,6 +38,17 @@ if "postgresql" in database_url:
         "connect_timeout": 10,  # PostgreSQL connection timeout
         "options": "-c statement_timeout=30000"  # 30 second statement timeout
     }
+    
+    # For DigitalOcean managed databases, we need to provide the CA certificate
+    if ":25060" in database_url or ":25061" in database_url:
+        cert_path = os.path.join(os.path.dirname(__file__), "..", "..", "certs", "ca-certificate.crt")
+        if os.path.exists(cert_path):
+            # Use the CA certificate for SSL verification
+            connect_args["sslmode"] = "require"
+            connect_args["sslrootcert"] = cert_path
+            print(f"Using CA certificate for SSL: {cert_path}")
+        else:
+            print(f"Warning: CA certificate not found at {cert_path}")
 
 engine = create_engine(
     database_url,
