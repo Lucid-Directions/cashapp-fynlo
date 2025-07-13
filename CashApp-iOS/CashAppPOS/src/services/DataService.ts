@@ -6,6 +6,8 @@ import API_CONFIG from '../config/api';
 import { envBool, IS_DEV } from '../env';
 import { useAuthStore } from '../store/useAuthStore';
 import BackendCompatibilityService from './BackendCompatibilityService';
+import { supabase } from '../lib/supabase';
+import { AUTH_CONFIG } from '../config/auth.config';
 
 // Feature flags for controlling data sources
 export interface FeatureFlags {
@@ -79,6 +81,24 @@ class DataService {
   async updateFeatureFlag(flag: keyof FeatureFlags, value: boolean): Promise<void> {
     this.featureFlags[flag] = value;
     await AsyncStorage.setItem('feature_flags', JSON.stringify(this.featureFlags));
+  }
+
+  // Helper method to get auth token from Supabase session
+  private async getAuthToken(): Promise<string | null> {
+    try {
+      // Check if using mock authentication
+      if (AUTH_CONFIG.USE_MOCK_AUTH) {
+        // Get token from AsyncStorage for mock auth
+        return await AsyncStorage.getItem('auth_token');
+      }
+      
+      // Get token from Supabase session for real auth
+      const { data: { session } } = await supabase.auth.getSession();
+      return session?.access_token || null;
+    } catch (error) {
+      console.error('Error getting auth token from Supabase:', error);
+      return null;
+    }
   }
 
   getFeatureFlags(): FeatureFlags {
@@ -646,7 +666,7 @@ class DataService {
     console.log('🌐 DataService.getCustomers - fetching from API');
     
     try {
-      const authToken = await AsyncStorage.getItem('auth_token');
+      const authToken = await this.getAuthToken();
       const response = await fetch(`${API_CONFIG.FULL_API_URL}/customers`, {
         method: 'GET',
         headers: {
@@ -691,7 +711,7 @@ class DataService {
     console.log('🌐 DataService.getEmployees - fetching from API');
     
     try {
-      const authToken = await AsyncStorage.getItem('auth_token');
+      const authToken = await this.getAuthToken();
       const response = await fetch(`${API_CONFIG.FULL_API_URL}/employees`, {
         method: 'GET',
         headers: {
@@ -749,7 +769,7 @@ class DataService {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         console.log('🌐 Attempting to fetch orders from API...');
-        const authToken = await AsyncStorage.getItem('auth_token');
+        const authToken = await this.getAuthToken();
         const response = await fetch(`${API_CONFIG.FULL_API_URL}/orders?date_range=${dateRange}`, {
           method: 'GET',
           headers: {
@@ -784,7 +804,7 @@ class DataService {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         console.log('🌐 Attempting to fetch financial data from API...');
-        const authToken = await AsyncStorage.getItem('auth_token');
+        const authToken = await this.getAuthToken();
         const response = await fetch(`${API_CONFIG.FULL_API_URL}/analytics/financial?period=${period}`, {
           method: 'GET',
           headers: {
@@ -814,7 +834,7 @@ class DataService {
     console.log('🌐 DataService.getSalesReportDetail - fetching from API', { period });
     
     try {
-      const authToken = await AsyncStorage.getItem('auth_token');
+      const authToken = await this.getAuthToken();
       const response = await fetch(`${API_CONFIG.FULL_API_URL}/analytics/sales?timeframe=${period}`, {
         method: 'GET',
         headers: {
@@ -890,7 +910,7 @@ class DataService {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         console.log('🌐 Attempting to fetch staff data from API...');
-        const authToken = await AsyncStorage.getItem('auth_token');
+        const authToken = await this.getAuthToken();
         const response = await fetch(`${API_CONFIG.FULL_API_URL}/analytics/employees?timeframe=${period}`, {
           method: 'GET',
           headers: {
@@ -926,7 +946,7 @@ class DataService {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         console.log('🌐 Attempting to fetch labor data from API...');
-        const authToken = await AsyncStorage.getItem('auth_token');
+        const authToken = await this.getAuthToken();
         const response = await fetch(`${API_CONFIG.FULL_API_URL}/analytics/labor?period=${period}`, {
           method: 'GET',
           headers: {
@@ -963,7 +983,7 @@ class DataService {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         console.log('🌐 Attempting to fetch reports from API...');
-        const authToken = await AsyncStorage.getItem('auth_token');
+        const authToken = await this.getAuthToken();
         const response = await fetch(`${API_CONFIG.FULL_API_URL}/analytics/dashboard/mobile`, {
           method: 'GET',
           headers: {
@@ -1017,7 +1037,7 @@ class DataService {
     console.log('🌐 DataService.createEmployee - creating employee via API', employeeData);
     
     try {
-      const authToken = await AsyncStorage.getItem('auth_token');
+      const authToken = await this.getAuthToken();
       if (!authToken) {
         throw new Error('No authentication token found');
       }
@@ -1066,7 +1086,7 @@ class DataService {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         console.log('🌐 Attempting to fetch inventory data from API...');
-        const authToken = await AsyncStorage.getItem('auth_token');
+        const authToken = await this.getAuthToken();
         const response = await fetch(`${API_CONFIG.FULL_API_URL}/inventory`, {
           method: 'GET',
           headers: {
@@ -1103,7 +1123,7 @@ class DataService {
     
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        const authToken = await AsyncStorage.getItem('auth_token');
+        const authToken = await this.getAuthToken();
         const response = await fetch(`${API_CONFIG.FULL_API_URL}/subscriptions/plans`, {
           method: 'GET',
           headers: {
@@ -1136,7 +1156,7 @@ class DataService {
     
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        const authToken = await AsyncStorage.getItem('auth_token');
+        const authToken = await this.getAuthToken();
         const response = await fetch(`${API_CONFIG.FULL_API_URL}/subscriptions/current?restaurant_id=${restaurantId}`, {
           method: 'GET',
           headers: {
@@ -1175,7 +1195,7 @@ class DataService {
     
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        const authToken = await AsyncStorage.getItem('auth_token');
+        const authToken = await this.getAuthToken();
         const response = await fetch(`${API_CONFIG.FULL_API_URL}/subscriptions/subscribe`, {
           method: 'POST',
           headers: {
@@ -1218,7 +1238,7 @@ class DataService {
     
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        const authToken = await AsyncStorage.getItem('auth_token');
+        const authToken = await this.getAuthToken();
         const response = await fetch(`${API_CONFIG.FULL_API_URL}/subscriptions/change-plan`, {
           method: 'PUT',
           headers: {
@@ -1261,7 +1281,7 @@ class DataService {
     
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        const authToken = await AsyncStorage.getItem('auth_token');
+        const authToken = await this.getAuthToken();
         const response = await fetch(`${API_CONFIG.FULL_API_URL}/subscriptions/cancel?restaurant_id=${restaurantId}`, {
           method: 'POST',
           headers: {
@@ -1303,7 +1323,7 @@ class DataService {
     
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        const authToken = await AsyncStorage.getItem('auth_token');
+        const authToken = await this.getAuthToken();
         const response = await fetch(`${API_CONFIG.FULL_API_URL}/subscriptions/usage/increment?restaurant_id=${restaurantId}&usage_type=${usageType}&amount=${amount}`, {
           method: 'POST',
           headers: {
