@@ -20,36 +20,8 @@ interface MockUser {
 
 class MockAuthService {
   private mockUsers = [
-    {
-      email: 'arnaud@luciddirections.co.uk',
-      password: 'test123',
-      user: {
-        id: 'user-1752334636773',
-        email: 'arnaud@luciddirections.co.uk',
-        name: 'Arnaud Decube',
-        is_platform_owner: false,
-        role: 'restaurant_owner',
-        restaurant_id: 'default-restaurant',
-        restaurant_name: 'Authentic Mexican Cuisine',
-        subscription_plan: 'omega' as const,
-        subscription_status: 'active',
-        enabled_features: ['*']
-      }
-    },
-    {
-      email: 'admin@fynlo.com',
-      password: 'platform123',
-      user: {
-        id: 'platform-admin-001',
-        email: 'admin@fynlo.com',
-        name: 'Platform Admin',
-        is_platform_owner: true,
-        role: 'platform_owner',
-        subscription_plan: 'omega' as const,
-        subscription_status: 'active',
-        enabled_features: ['*']
-      }
-    }
+    // Mock users removed - app should use real authentication
+    // Users should sign in with their actual Supabase credentials
   ];
 
   async signIn({ email, password }: { email: string; password: string }) {
