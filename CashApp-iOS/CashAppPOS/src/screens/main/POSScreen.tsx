@@ -205,9 +205,9 @@ const POSScreen: React.FC = () => {
         setMenuLoading(true);
         const dataService = DataService.getInstance();
         
-        // Set a timeout for the primary service
+        // Increase timeout to 10 seconds to allow for slower API responses
         const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Timeout')), 3000)
+          setTimeout(() => reject(new Error('API Timeout')), 10000)
         );
         
         // Load menu items and categories with timeout
@@ -217,7 +217,7 @@ const POSScreen: React.FC = () => {
             dataService.getMenuCategories()
           ]),
           timeoutPromise
-        ]);
+        ]) as [any[], any[]];
         
         setDynamicMenuItems(menuItems);
         
@@ -233,31 +233,31 @@ const POSScreen: React.FC = () => {
       } catch (error) {
         console.error('❌ Failed to load dynamic menu:', error);
         
-        // Quick fallback to cached/local data
+        // Use local Chucho menu data as fallback
         try {
-          const databaseService = DatabaseService.getInstance();
-          const [fallbackItems, fallbackCategories] = await Promise.all([
-            databaseService.getMenuItems(),
-            databaseService.getMenuCategories()
-          ]);
+          // Import the local menu data directly to avoid API calls
+          const { CHUCHO_MENU_ITEMS, CHUCHO_CATEGORIES } = await import('../../data/chuchoMenu');
           
-          if (Array.isArray(fallbackItems) && fallbackItems.length > 0) {
-            console.log('✅ Using cached menu:', fallbackItems.length, 'items');
-            setDynamicMenuItems(fallbackItems);
-            
-            const safeCategories = Array.isArray(fallbackCategories) ? fallbackCategories : [];
-            const categoryNames = ['All', ...safeCategories
-              .filter(cat => cat && typeof cat === 'object' && cat.name)
-              .map(cat => cat.name)
-              .filter(name => name !== 'All')];
-            setDynamicCategories(categoryNames);
-          } else {
-            // Empty state
-            setDynamicMenuItems([]);
-            setDynamicCategories(['All']);
-          }
+          console.log('🍮 Using local Chucho menu data as fallback');
+          
+          // Transform menu items to match expected format
+          const fallbackItems = CHUCHO_MENU_ITEMS.map(item => ({
+            ...item,
+            emoji: item.image, // Map image to emoji field for compatibility
+          }));
+          
+          setDynamicMenuItems(fallbackItems);
+          
+          // Set categories
+          const categoryNames = ['All', ...CHUCHO_CATEGORIES.map(cat => cat.name).filter(name => name !== 'All')];
+          setDynamicCategories(categoryNames);
+          
+          console.log('✅ Loaded fallback menu:', { 
+            itemCount: fallbackItems.length, 
+            categories: categoryNames 
+          });
         } catch (fallbackError) {
-          console.error('❌ Fallback failed:', fallbackError);
+          console.error('❌ Fallback import failed:', fallbackError);
           setDynamicMenuItems([]);
           setDynamicCategories(['All']);
         }
