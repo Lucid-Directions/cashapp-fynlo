@@ -18,23 +18,6 @@ import DataService from '../../../services/DataService';
 import HeaderWithBackButton from '../../../components/navigation/HeaderWithBackButton';
 import { useTheme } from '../../../design-system/ThemeProvider';
 
-// Clover POS Color Scheme
-const Colors = {
-  primary: '#00A651',
-  secondary: '#0066CC',
-  success: '#00A651',
-  warning: '#FF6B35',
-  danger: '#E74C3C',
-  background: '#F5F5F5',
-  white: '#FFFFFF',
-  lightGray: '#E5E5E5',
-  mediumGray: '#999999',
-  darkGray: '#666666',
-  text: '#333333',
-  lightText: '#666666',
-  border: '#DDDDDD',
-};
-
 interface MenuItem {
   id: string;
   name: string;
@@ -572,7 +555,7 @@ const MenuManagementScreen: React.FC = () => {
       
       {item.allergens.length > 0 && (
         <View style={styles.allergenContainer}>
-          <Icon name="warning" size={16} color={Colors.warning} />
+          <Icon name="warning" size={16} color={theme.colors.warning} />
           <Text style={styles.allergenText}>
             Contains: {item.allergens.join(', ')}
           </Text>
@@ -595,7 +578,7 @@ const MenuManagementScreen: React.FC = () => {
           <Icon 
             name={item.featured ? "star" : "star-border"} 
             size={16} 
-            color={item.featured ? Colors.warning : theme.colors.textSecondary} 
+            color={item.featured ? theme.colors.warning : theme.colors.textSecondary} 
           />
           <Text style={styles.featuredButtonText}>
             {item.featured ? 'Featured' : 'Feature'}
@@ -1142,7 +1125,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   featuredBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.warning,
+    backgroundColor: theme.colors.warning,
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 10,
@@ -1172,7 +1155,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   allergenText: {
     fontSize: 12,
-    color: Colors.warning,
+    color: theme.colors.warning,
     flex: 1,
   },
   itemActions: {
@@ -1202,12 +1185,12 @@ const createStyles = (theme: any) => StyleSheet.create({
   featuredButton: {
     backgroundColor: theme.colors.surface,
     borderWidth: 1,
-    borderColor: Colors.warning,
+    borderColor: theme.colors.warning,
   },
   featuredButtonText: {
     fontSize: 12,
     fontWeight: '500',
-    color: Colors.warning,
+    color: theme.colors.warning,
   },
   availabilityButton: {
     backgroundColor: theme.colors.surface,
