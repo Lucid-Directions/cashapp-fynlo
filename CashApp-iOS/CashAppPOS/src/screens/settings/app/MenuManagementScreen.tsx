@@ -11,6 +11,7 @@ import {
   FlatList,
   Modal,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
@@ -401,21 +402,146 @@ const MenuManagementScreen: React.FC = () => {
     }));
   };
 
-  const handleImportMenu = () => {
-    Alert.alert(
-      'Import Menu',
-      'This feature allows importing menu data from JSON format.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Learn More', onPress: () => {
-          Alert.alert(
-            'Import Format',
-            'Import functionality requires a JSON file with categories and products. Contact support for the proper format specification.',
-            [{ text: 'OK' }]
-          );
-        }}
-      ]
-    );
+  const handleImportMenu = async () => {
+    try {
+      // For now, show a simple CSV format example and allow manual paste
+      Alert.alert(
+        'Import Menu from CSV',
+        'Paste your CSV data in the following format:\n\nCategory,Name,Description,Price\nTacos,Beef Taco,Seasoned beef with fresh toppings,8.99\nTacos,Chicken Taco,Grilled chicken with salsa,7.99\nBurritos,Bean Burrito,Refried beans and cheese,6.99',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { 
+            text: 'Import', 
+            onPress: () => {
+              // Show input modal for CSV data
+              Alert.prompt(
+                'Paste CSV Data',
+                'Paste your menu data in CSV format:',
+                async (csvData) => {
+                  if (csvData) {
+                    await processCSVImport(csvData);
+                  }
+                },
+                'plain-text',
+                '',
+                'default'
+              );
+            }
+          },
+          {
+            text: 'Download Template',
+            onPress: async () => {
+              // Generate and share CSV template
+              const template = 'Category,Name,Description,Price\nExample Category,Example Item,Item description,9.99\n';
+              Alert.alert('CSV Template', template, [
+                { text: 'Copy', onPress: () => console.log('Template copied') },
+                { text: 'OK' }
+              ]);
+            }
+          }
+        ]
+      );
+    } catch (error) {
+      console.error('Import menu error:', error);
+      Alert.alert('Error', 'Failed to import menu');
+    }
+  };
+
+  const processCSVImport = async (csvData: string) => {
+    try {
+      setLoading(true);
+      
+      // Simple CSV parsing
+      const lines = csvData.trim().split('\n');
+      if (lines.length < 2) {
+        throw new Error('CSV must have headers and at least one data row');
+      }
+      
+      const headers = lines[0].toLowerCase().split(',').map(h => h.trim());
+      const categoryIndex = headers.indexOf('category');
+      const nameIndex = headers.indexOf('name');
+      const descriptionIndex = headers.indexOf('description');
+      const priceIndex = headers.indexOf('price');
+      
+      if (categoryIndex === -1 || nameIndex === -1 || priceIndex === -1) {
+        throw new Error('CSV must have Category, Name, and Price columns');
+      }
+      
+      // Group items by category
+      const itemsByCategory = new Map<string, any[]>();
+      
+      for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].split(',').map(v => v.trim());
+        if (values.length < headers.length) continue;
+        
+        const categoryName = values[categoryIndex];
+        const item = {
+          name: values[nameIndex],
+          description: values[descriptionIndex] || '',
+          price: parseFloat(values[priceIndex]) || 0,
+        };
+        
+        if (!itemsByCategory.has(categoryName)) {
+          itemsByCategory.set(categoryName, []);
+        }
+        itemsByCategory.get(categoryName)!.push(item);
+      }
+      
+      // Create categories and products
+      let successCount = 0;
+      let errorCount = 0;
+      
+      for (const [categoryName, items] of itemsByCategory) {
+        try {
+          // Find or create category
+          let category = categories.find(c => c.name.toLowerCase() === categoryName.toLowerCase());
+          
+          if (!category) {
+            // Create new category
+            const newCategory = await dataService.createCategory({
+              name: categoryName,
+              description: `Imported ${categoryName} category`,
+              is_active: true,
+            });
+            category = { id: newCategory.id, name: categoryName } as Category;
+          }
+          
+          // Create products in this category
+          for (const item of items) {
+            try {
+              await dataService.createProduct({
+                category_id: category.id,
+                name: item.name,
+                description: item.description,
+                price: item.price,
+                dietary_info: [],
+                modifiers: [],
+              });
+              successCount++;
+            } catch (error) {
+              console.error(`Failed to create item ${item.name}:`, error);
+              errorCount++;
+            }
+          }
+        } catch (error) {
+          console.error(`Failed to process category ${categoryName}:`, error);
+          errorCount += items.length;
+        }
+      }
+      
+      // Reload menu data
+      await loadMenuData();
+      
+      Alert.alert(
+        'Import Complete',
+        `Successfully imported ${successCount} items.${errorCount > 0 ? `\n${errorCount} items failed.` : ''}`,
+        [{ text: 'OK' }]
+      );
+    } catch (error: any) {
+      Alert.alert('Import Error', error.message || 'Failed to process CSV data');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleExportMenu = async () => {
