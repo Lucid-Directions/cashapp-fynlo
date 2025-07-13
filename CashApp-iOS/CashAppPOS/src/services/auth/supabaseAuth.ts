@@ -210,6 +210,11 @@ class SupabaseAuthService {
    * Listen to auth state changes
    */
   onAuthStateChange(callback: (event: string, session: any) => void) {
+    // Use mock auth if configured
+    if (AUTH_CONFIG.USE_MOCK_AUTH) {
+      return mockAuthService.onAuthStateChange(callback);
+    }
+    
     return supabase.auth.onAuthStateChange(callback);
   }
   

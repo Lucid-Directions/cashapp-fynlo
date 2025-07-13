@@ -7,6 +7,7 @@ import { envBool, IS_DEV } from '../env';
 import { useAuthStore } from '../store/useAuthStore';
 import BackendCompatibilityService from './BackendCompatibilityService';
 import { supabase } from '../lib/supabase';
+import { AUTH_CONFIG } from '../config/auth.config';
 
 // Feature flags for controlling data sources
 export interface FeatureFlags {
@@ -85,6 +86,13 @@ class DataService {
   // Helper method to get auth token from Supabase session
   private async getAuthToken(): Promise<string | null> {
     try {
+      // Check if using mock authentication
+      if (AUTH_CONFIG.USE_MOCK_AUTH) {
+        // Get token from AsyncStorage for mock auth
+        return await AsyncStorage.getItem('auth_token');
+      }
+      
+      // Get token from Supabase session for real auth
       const { data: { session } } = await supabase.auth.getSession();
       return session?.access_token || null;
     } catch (error) {
