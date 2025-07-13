@@ -21,16 +21,8 @@ from sqlalchemy.pool import QueuePool
 # Configure engine with proper connection pooling
 import os
 
-# Parse DATABASE_URL to handle SSL requirements
+# Use the original DATABASE_URL from settings
 database_url = settings.DATABASE_URL
-
-# Check if we need to add SSL parameters
-if "postgresql" in database_url and "sslmode" not in database_url:
-    # For DigitalOcean managed databases, we need SSL
-    if ":25060" in database_url or ":25061" in database_url:
-        # Add sslmode=require to the connection string
-        separator = "&" if "?" in database_url else "?"
-        database_url = f"{database_url}{separator}sslmode=require"
 
 connect_args = {}
 if "postgresql" in database_url:
@@ -40,11 +32,11 @@ if "postgresql" in database_url:
     }
     
     # For DigitalOcean managed databases, we need to provide the CA certificate
+    # The sslmode should already be in the connection string from environment variable
     if ":25060" in database_url or ":25061" in database_url:
         cert_path = os.path.join(os.path.dirname(__file__), "..", "..", "certs", "ca-certificate.crt")
         if os.path.exists(cert_path):
-            # Use the CA certificate for SSL verification
-            connect_args["sslmode"] = "require"
+            # Only provide the CA certificate path, not sslmode (already in URL)
             connect_args["sslrootcert"] = cert_path
             print(f"Using CA certificate for SSL: {cert_path}")
         else:
