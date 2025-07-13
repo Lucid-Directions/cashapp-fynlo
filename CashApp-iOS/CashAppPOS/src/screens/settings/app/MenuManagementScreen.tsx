@@ -407,7 +407,7 @@ const MenuManagementScreen: React.FC = () => {
       // For now, show a simple CSV format example and allow manual paste
       Alert.alert(
         'Import Menu from CSV',
-        'Paste your CSV data in the following format:\n\nCategory,Name,Description,Price\nTacos,Beef Taco,Seasoned beef with fresh toppings,8.99\nTacos,Chicken Taco,Grilled chicken with salsa,7.99\nBurritos,Bean Burrito,Refried beans and cheese,6.99',
+        'CSV Format Requirements:\n\n• Required columns: Category, Name, Price\n• Optional: Description\n• Use quotes for values with commas\n• Price must be a positive number\n\nExample:\nCategory,Name,Description,Price\nTacos,"Beef Taco, Supreme","Seasoned beef, fresh toppings",8.99\nBurritos,Bean Burrito,Refried beans and cheese,6.99',
         [
           { text: 'Cancel', style: 'cancel' },
           { 
@@ -429,14 +429,23 @@ const MenuManagementScreen: React.FC = () => {
             }
           },
           {
-            text: 'Download Template',
+            text: 'Show Template',
             onPress: async () => {
-              // Generate and share CSV template
-              const template = 'Category,Name,Description,Price\nExample Category,Example Item,Item description,9.99\n';
-              Alert.alert('CSV Template', template, [
-                { text: 'Copy', onPress: () => console.log('Template copied') },
-                { text: 'OK' }
-              ]);
+              // Generate and share CSV template with examples
+              const template = `Category,Name,Description,Price
+Starters,"Nachos, Loaded","Tortilla chips with cheese, jalapeños, and salsa",7.99
+Starters,Guacamole & Chips,Fresh avocado dip with crispy tortilla chips,6.50
+Mains,"Chicken Fajitas, Sizzling","Grilled chicken with peppers, onions, tortillas",14.99
+Mains,Vegetarian Burrito,"Black beans, rice, cheese, lettuce, salsa",9.99
+Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
+              Alert.alert(
+                'CSV Template',
+                'Copy this template and modify with your menu items:\n\n' + template,
+                [
+                  { text: 'OK' },
+                  { text: 'Copy Example', onPress: () => console.log('Template:', template) }
+                ]
+              );
             }
           }
         ]
@@ -447,17 +456,55 @@ const MenuManagementScreen: React.FC = () => {
     }
   };
 
+  // Robust CSV parser that handles quoted fields
+  const parseCSVLine = (line: string): string[] => {
+    const result: string[] = [];
+    let current = '';
+    let inQuotes = false;
+    let i = 0;
+    
+    while (i < line.length) {
+      const char = line[i];
+      const nextChar = line[i + 1];
+      
+      if (char === '"') {
+        if (inQuotes && nextChar === '"') {
+          // Escaped quote
+          current += '"';
+          i += 2;
+        } else {
+          // Toggle quote state
+          inQuotes = !inQuotes;
+          i++;
+        }
+      } else if (char === ',' && !inQuotes) {
+        // End of field
+        result.push(current.trim());
+        current = '';
+        i++;
+      } else {
+        current += char;
+        i++;
+      }
+    }
+    
+    // Don't forget the last field
+    result.push(current.trim());
+    return result;
+  };
+
   const processCSVImport = async (csvData: string) => {
     try {
       setLoading(true);
       
-      // Simple CSV parsing
-      const lines = csvData.trim().split('\n');
+      // Parse CSV with proper handling of quoted fields
+      const lines = csvData.trim().split(/\r?\n/);
       if (lines.length < 2) {
         throw new Error('CSV must have headers and at least one data row');
       }
       
-      const headers = lines[0].toLowerCase().split(',').map(h => h.trim());
+      // Parse headers
+      const headers = parseCSVLine(lines[0]).map(h => h.toLowerCase().trim());
       const categoryIndex = headers.indexOf('category');
       const nameIndex = headers.indexOf('name');
       const descriptionIndex = headers.indexOf('description');
@@ -467,18 +514,45 @@ const MenuManagementScreen: React.FC = () => {
         throw new Error('CSV must have Category, Name, and Price columns');
       }
       
-      // Group items by category
+      // Parse and validate data rows
       const itemsByCategory = new Map<string, any[]>();
+      const errors: string[] = [];
       
       for (let i = 1; i < lines.length; i++) {
-        const values = lines[i].split(',').map(v => v.trim());
-        if (values.length < headers.length) continue;
+        if (!lines[i].trim()) continue; // Skip empty lines
         
-        const categoryName = values[categoryIndex];
+        const values = parseCSVLine(lines[i]);
+        
+        // Validate required fields
+        const categoryName = values[categoryIndex]?.trim();
+        const itemName = values[nameIndex]?.trim();
+        const priceStr = values[priceIndex]?.trim();
+        
+        if (!categoryName) {
+          errors.push(`Row ${i + 1}: Missing category name`);
+          continue;
+        }
+        
+        if (!itemName) {
+          errors.push(`Row ${i + 1}: Missing item name`);
+          continue;
+        }
+        
+        if (!priceStr || isNaN(parseFloat(priceStr))) {
+          errors.push(`Row ${i + 1}: Invalid price value`);
+          continue;
+        }
+        
+        const price = parseFloat(priceStr);
+        if (price < 0) {
+          errors.push(`Row ${i + 1}: Price cannot be negative`);
+          continue;
+        }
+        
         const item = {
-          name: values[nameIndex],
-          description: values[descriptionIndex] || '',
-          price: parseFloat(values[priceIndex]) || 0,
+          name: itemName,
+          description: values[descriptionIndex]?.trim() || '',
+          price: price,
         };
         
         if (!itemsByCategory.has(categoryName)) {
@@ -487,9 +561,29 @@ const MenuManagementScreen: React.FC = () => {
         itemsByCategory.get(categoryName)!.push(item);
       }
       
+      // Show validation errors if any
+      if (errors.length > 0) {
+        const errorMessage = errors.slice(0, 5).join('\n');
+        const moreErrors = errors.length > 5 ? `\n...and ${errors.length - 5} more errors` : '';
+        Alert.alert(
+          'CSV Validation Errors',
+          `Found ${errors.length} validation errors:\n\n${errorMessage}${moreErrors}`,
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Continue Anyway', onPress: () => {} },
+          ]
+        );
+      }
+      
+      // Check if we have any valid items to import
+      if (itemsByCategory.size === 0) {
+        throw new Error('No valid items found to import');
+      }
+      
       // Create categories and products
       let successCount = 0;
       let errorCount = 0;
+      const failedItems: string[] = [];
       
       for (const [categoryName, items] of itemsByCategory) {
         try {
@@ -498,17 +592,37 @@ const MenuManagementScreen: React.FC = () => {
           
           if (!category) {
             // Create new category
-            const newCategory = await dataService.createCategory({
-              name: categoryName,
-              description: `Imported ${categoryName} category`,
-              is_active: true,
-            });
-            category = { id: newCategory.id, name: categoryName } as Category;
+            try {
+              const newCategory = await dataService.createCategory({
+                name: categoryName,
+                description: `Imported ${categoryName} category`,
+                is_active: true,
+              });
+              category = { id: newCategory.id, name: categoryName } as Category;
+            } catch (catError) {
+              console.error(`Failed to create category ${categoryName}:`, catError);
+              failedItems.push(`Category '${categoryName}': ${catError.message || 'Unknown error'}`);
+              errorCount += items.length;
+              continue;
+            }
           }
           
           // Create products in this category
           for (const item of items) {
             try {
+              // Additional validation before API call
+              if (!item.name || item.name.length === 0) {
+                throw new Error('Item name is required');
+              }
+              
+              if (item.name.length > 200) {
+                throw new Error('Item name is too long (max 200 characters)');
+              }
+              
+              if (item.price === null || item.price === undefined || item.price < 0) {
+                throw new Error('Invalid price');
+              }
+              
               await dataService.createProduct({
                 category_id: category.id,
                 name: item.name,
@@ -518,13 +632,15 @@ const MenuManagementScreen: React.FC = () => {
                 modifiers: [],
               });
               successCount++;
-            } catch (error) {
+            } catch (error: any) {
               console.error(`Failed to create item ${item.name}:`, error);
+              failedItems.push(`Item '${item.name}': ${error.message || 'Unknown error'}`);
               errorCount++;
             }
           }
-        } catch (error) {
+        } catch (error: any) {
           console.error(`Failed to process category ${categoryName}:`, error);
+          failedItems.push(`Category '${categoryName}': ${error.message || 'Unknown error'}`);
           errorCount += items.length;
         }
       }
@@ -532,9 +648,22 @@ const MenuManagementScreen: React.FC = () => {
       // Reload menu data
       await loadMenuData();
       
+      // Provide detailed feedback
+      let message = `Successfully imported ${successCount} items.`;
+      
+      if (errorCount > 0) {
+        message += `\n\n${errorCount} items failed to import.`;
+        
+        if (failedItems.length > 0) {
+          const failedDetails = failedItems.slice(0, 3).join('\n');
+          const moreFailures = failedItems.length > 3 ? `\n...and ${failedItems.length - 3} more` : '';
+          message += `\n\nFailed items:\n${failedDetails}${moreFailures}`;
+        }
+      }
+      
       Alert.alert(
-        'Import Complete',
-        `Successfully imported ${successCount} items.${errorCount > 0 ? `\n${errorCount} items failed.` : ''}`,
+        errorCount > 0 ? 'Import Partially Complete' : 'Import Complete',
+        message,
         [{ text: 'OK' }]
       );
     } catch (error: any) {
