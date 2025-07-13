@@ -219,14 +219,23 @@ class DataService {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         const categories = await this.db.getCategories();
-        if (categories && categories.length > 0) {
-          return categories;
+        if (!categories) {
+          console.warn('⚠️ API returned null/undefined categories');
+          return [];
         }
+        console.log('✅ Loaded categories from API:', categories.length);
+        return categories;
       } catch (error) {
-        console.log('Failed to fetch categories from API, using mock data');
+        console.error('❌ Failed to fetch categories from API:', error);
+        throw error;
       }
     }
-    return this.db.getCategories();
+    
+    if (!this.featureFlags.USE_REAL_API) {
+      throw new Error('Real API is disabled. Enable USE_REAL_API flag to access category data.');
+    } else {
+      throw new Error('Backend service unavailable. Please check your connection and try again.');
+    }
   }
 
   // Menu operations - Get complete menu with items and categories
@@ -283,13 +292,19 @@ class DataService {
   }): Promise<any> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        return await this.db.createCategory(categoryData);
+        const result = await this.db.createCategory(categoryData);
+        console.log('✅ Category created via API:', result);
+        return result;
       } catch (error) {
-        console.error('Failed to create category:', error);
+        console.error('❌ API category creation failed:', error);
         throw error;
       }
     }
-    throw new Error('Backend not available for category creation');
+    if (!this.featureFlags.USE_REAL_API) {
+      throw new Error('Real API is disabled. Enable USE_REAL_API flag to create categories.');
+    } else {
+      throw new Error('Backend service unavailable. Please check your connection and try again.');
+    }
   }
 
   async updateCategory(categoryId: string, categoryData: Partial<{
@@ -302,25 +317,36 @@ class DataService {
   }>): Promise<any> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        return await this.db.updateCategory(categoryId, categoryData);
+        const result = await this.db.updateCategory(categoryId, categoryData);
+        console.log('✅ Category updated via API:', result);
+        return result;
       } catch (error) {
-        console.error('Failed to update category:', error);
+        console.error('❌ API category update failed:', error);
         throw error;
       }
     }
-    throw new Error('Backend not available for category update');
+    if (!this.featureFlags.USE_REAL_API) {
+      throw new Error('Real API is disabled. Enable USE_REAL_API flag to update categories.');
+    } else {
+      throw new Error('Backend service unavailable. Please check your connection and try again.');
+    }
   }
 
   async deleteCategory(categoryId: string): Promise<void> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         await this.db.deleteCategory(categoryId);
+        console.log('✅ Category deleted via API:', categoryId);
+        return;
       } catch (error) {
-        console.error('Failed to delete category:', error);
+        console.error('❌ API category deletion failed:', error);
         throw error;
       }
+    }
+    if (!this.featureFlags.USE_REAL_API) {
+      throw new Error('Real API is disabled. Enable USE_REAL_API flag to delete categories.');
     } else {
-      throw new Error('Backend not available for category deletion');
+      throw new Error('Backend service unavailable. Please check your connection and try again.');
     }
   }
 
@@ -348,7 +374,11 @@ class DataService {
         throw error;
       }
     }
-    throw new Error('Backend not available for product creation');
+    if (!this.featureFlags.USE_REAL_API) {
+      throw new Error('Real API is disabled. Enable USE_REAL_API flag to create products.');
+    } else {
+      throw new Error('Backend service unavailable. Please check your connection and try again.');
+    }
   }
 
   async updateProduct(productId: string, productData: Partial<{
@@ -375,7 +405,11 @@ class DataService {
         throw error;
       }
     }
-    throw new Error('Backend not available for product update');
+    if (!this.featureFlags.USE_REAL_API) {
+      throw new Error('Real API is disabled. Enable USE_REAL_API flag to update products.');
+    } else {
+      throw new Error('Backend service unavailable. Please check your connection and try again.');
+    }
   }
 
   async deleteProduct(productId: string): Promise<void> {
@@ -387,7 +421,11 @@ class DataService {
         throw error;
       }
     } else {
-      throw new Error('Backend not available for product deletion');
+      if (!this.featureFlags.USE_REAL_API) {
+        throw new Error('Real API is disabled. Enable USE_REAL_API flag to delete products.');
+      } else {
+        throw new Error('Backend service unavailable. Please check your connection and try again.');
+      }
     }
   }
 

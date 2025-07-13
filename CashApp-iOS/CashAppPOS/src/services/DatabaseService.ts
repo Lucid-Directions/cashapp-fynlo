@@ -338,7 +338,7 @@ class DatabaseService {
   // Category operations
   async getCategories(): Promise<Category[]> {
     try {
-      const response = await this.apiRequest('/api/v1/categories', {
+      const response = await this.apiRequest('/api/v1/products/categories', {
         method: 'GET',
       });
       
@@ -421,31 +421,13 @@ class DatabaseService {
     sort_order?: number;
     is_active?: boolean;
   }>): Promise<any> {
-    try {
-      const response = await this.apiRequest(`/api/v1/products/categories/${categoryId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(categoryData),
-      });
-      
-      return response.data;
-    } catch (error) {
-      console.error('Failed to update category:', error);
-      throw error;
-    }
+    // TODO: Backend needs to implement PUT /api/v1/products/categories/{categoryId}
+    throw new Error('Category update endpoint not yet implemented in backend. Please contact system administrator.');
   }
 
   async deleteCategory(categoryId: string): Promise<void> {
-    try {
-      await this.apiRequest(`/api/v1/products/categories/${categoryId}`, {
-        method: 'DELETE',
-      });
-    } catch (error) {
-      console.error('Failed to delete category:', error);
-      throw error;
-    }
+    // TODO: Backend needs to implement DELETE /api/v1/products/categories/{categoryId}
+    throw new Error('Category deletion endpoint not yet implemented in backend. Please contact system administrator.');
   }
 
   // Create operations for products
