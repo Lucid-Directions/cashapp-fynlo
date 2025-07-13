@@ -20,17 +20,20 @@ from sqlalchemy.pool import QueuePool
 
 # Configure engine with proper connection pooling
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Parse DATABASE_URL to handle SSL requirements
 database_url = settings.DATABASE_URL
 
-# Check if we need to add SSL parameters
-if "postgresql" in database_url and "sslmode" not in database_url:
-    # For DigitalOcean managed databases, we need SSL
-    if ":25060" in database_url or ":25061" in database_url:
-        # Add sslmode=require to the connection string
+# For DigitalOcean managed databases, ensure SSL mode is set
+if "postgresql" in database_url and (":25060" in database_url or ":25061" in database_url):
+    if "sslmode" not in database_url:
+        # Add sslmode=require to the connection string if not present
         separator = "&" if "?" in database_url else "?"
         database_url = f"{database_url}{separator}sslmode=require"
+        logger.info("Added sslmode=require to DigitalOcean database connection")
 
 connect_args = {}
 if "postgresql" in database_url:
@@ -38,6 +41,16 @@ if "postgresql" in database_url:
         "connect_timeout": 10,  # PostgreSQL connection timeout
         "options": "-c statement_timeout=30000"  # 30 second statement timeout
     }
+    
+    # For DigitalOcean managed databases, provide the CA certificate
+    if ":25060" in database_url or ":25061" in database_url:
+        cert_path = os.path.join(os.path.dirname(__file__), "..", "..", "certs", "ca-certificate.crt")
+        if os.path.exists(cert_path):
+            # Provide the CA certificate path for SSL verification
+            connect_args["sslrootcert"] = cert_path
+            logger.info(f"Using CA certificate for SSL: {cert_path}")
+        else:
+            logger.warning(f"CA certificate not found at {cert_path}")
 
 engine = create_engine(
     database_url,
