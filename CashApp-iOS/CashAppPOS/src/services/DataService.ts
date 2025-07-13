@@ -216,42 +216,17 @@ class DataService {
 
   // Category operations
   async getCategories(): Promise<any[]> {
-    let apiCategories: any[] = [];
-    
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        apiCategories = await this.db.getCategories();
-        console.log('✅ Loaded categories from API:', apiCategories.length);
+        const categories = await this.db.getCategories();
+        console.log('✅ Loaded categories from API:', categories.length);
+        return categories;
       } catch (error) {
-        console.log('⚠️ Failed to fetch categories from API, using fallback data');
+        console.error('❌ Failed to fetch categories from API:', error);
+        throw error;
       }
     }
-    
-    // Get locally created categories from AsyncStorage
-    let localCategories: any[] = [];
-    try {
-      const existingCategoriesJson = await AsyncStorage.getItem('local_categories');
-      localCategories = existingCategoriesJson ? JSON.parse(existingCategoriesJson) : [];
-      console.log('📱 Loaded local categories:', localCategories.length);
-    } catch (error) {
-      console.log('⚠️ Failed to load local categories:', error);
-    }
-    
-    // If no API categories, use database fallback
-    if (apiCategories.length === 0) {
-      try {
-        apiCategories = await this.db.getCategories();
-        console.log('🔄 Using database fallback categories:', apiCategories.length);
-      } catch (error) {
-        console.log('⚠️ Database fallback also failed:', error);
-      }
-    }
-    
-    // Combine API and local categories
-    const allCategories = [...apiCategories, ...localCategories];
-    console.log('📋 Total categories available:', allCategories.length);
-    
-    return allCategories;
+    throw new Error('Backend not available for category retrieval - check connection and try again');
   }
 
   // Menu operations - Get complete menu with items and categories
@@ -312,54 +287,11 @@ class DataService {
         console.log('✅ Category created via API:', result);
         return result;
       } catch (error) {
-        console.error('❌ API category creation failed, trying fallback:', error);
-        // Fall through to fallback mechanism
+        console.error('❌ API category creation failed:', error);
+        throw error;
       }
     }
-    
-    // Fallback: Create category in AsyncStorage for demo/offline mode
-    console.log('🔄 Creating category using fallback mechanism');
-    return await this.createCategoryFallback(categoryData);
-  }
-
-  // Fallback category creation for demo/offline mode
-  private async createCategoryFallback(categoryData: {
-    name: string;
-    description?: string;
-    color?: string;
-    icon?: string;
-    sort_order?: number;
-  }): Promise<any> {
-    try {
-      // Get existing categories from AsyncStorage
-      const existingCategoriesJson = await AsyncStorage.getItem('local_categories');
-      const existingCategories = existingCategoriesJson ? JSON.parse(existingCategoriesJson) : [];
-      
-      // Create new category with unique ID
-      const newCategory = {
-        id: `local_${Date.now()}`, // Unique ID for local categories
-        name: categoryData.name,
-        description: categoryData.description || '',
-        color: categoryData.color || '#00A651',
-        icon: categoryData.icon || '🍽️',
-        sort_order: categoryData.sort_order || existingCategories.length + 1,
-        is_active: true,
-        created_at: new Date().toISOString(),
-        is_local: true // Flag to identify locally created categories
-      };
-      
-      // Add to existing categories
-      const updatedCategories = [...existingCategories, newCategory];
-      
-      // Save back to AsyncStorage
-      await AsyncStorage.setItem('local_categories', JSON.stringify(updatedCategories));
-      
-      console.log('✅ Category created locally:', newCategory);
-      return newCategory;
-    } catch (error) {
-      console.error('❌ Fallback category creation failed:', error);
-      throw new Error('Failed to create category in offline mode');
-    }
+    throw new Error('Backend not available for category creation - check connection and try again');
   }
 
   async updateCategory(categoryId: string, categoryData: Partial<{
@@ -376,53 +308,11 @@ class DataService {
         console.log('✅ Category updated via API:', result);
         return result;
       } catch (error) {
-        console.error('❌ API category update failed, trying fallback:', error);
-        // Fall through to fallback mechanism
+        console.error('❌ API category update failed:', error);
+        throw error;
       }
     }
-    
-    // Fallback: Update category in AsyncStorage for demo/offline mode
-    console.log('🔄 Updating category using fallback mechanism');
-    return await this.updateCategoryFallback(categoryId, categoryData);
-  }
-
-  // Fallback category update for demo/offline mode
-  private async updateCategoryFallback(categoryId: string, categoryData: Partial<{
-    name: string;
-    description?: string;
-    color?: string;
-    icon?: string;
-    sort_order?: number;
-    is_active?: boolean;
-  }>): Promise<any> {
-    try {
-      // Get existing categories from AsyncStorage
-      const existingCategoriesJson = await AsyncStorage.getItem('local_categories');
-      const existingCategories = existingCategoriesJson ? JSON.parse(existingCategoriesJson) : [];
-      
-      // Find and update the category
-      const categoryIndex = existingCategories.findIndex((cat: any) => cat.id === categoryId);
-      
-      if (categoryIndex === -1) {
-        throw new Error(`Category with ID ${categoryId} not found in local storage`);
-      }
-      
-      // Update the category
-      existingCategories[categoryIndex] = {
-        ...existingCategories[categoryIndex],
-        ...categoryData,
-        updated_at: new Date().toISOString()
-      };
-      
-      // Save back to AsyncStorage
-      await AsyncStorage.setItem('local_categories', JSON.stringify(existingCategories));
-      
-      console.log('✅ Category updated locally:', existingCategories[categoryIndex]);
-      return existingCategories[categoryIndex];
-    } catch (error) {
-      console.error('❌ Fallback category update failed:', error);
-      throw new Error('Failed to update category in offline mode');
-    }
+    throw new Error('Backend not available for category update - check connection and try again');
   }
 
   async deleteCategory(categoryId: string): Promise<void> {
@@ -432,42 +322,11 @@ class DataService {
         console.log('✅ Category deleted via API:', categoryId);
         return;
       } catch (error) {
-        console.error('❌ API category deletion failed, trying fallback:', error);
-        // Fall through to fallback mechanism
+        console.error('❌ API category deletion failed:', error);
+        throw error;
       }
     }
-    
-    // Fallback: Delete category from AsyncStorage for demo/offline mode
-    console.log('🔄 Deleting category using fallback mechanism');
-    await this.deleteCategoryFallback(categoryId);
-  }
-
-  // Fallback category deletion for demo/offline mode
-  private async deleteCategoryFallback(categoryId: string): Promise<void> {
-    try {
-      // Get existing categories from AsyncStorage
-      const existingCategoriesJson = await AsyncStorage.getItem('local_categories');
-      const existingCategories = existingCategoriesJson ? JSON.parse(existingCategoriesJson) : [];
-      
-      // Find the category to delete
-      const categoryIndex = existingCategories.findIndex((cat: any) => cat.id === categoryId);
-      
-      if (categoryIndex === -1) {
-        console.warn(`⚠️ Category with ID ${categoryId} not found in local storage`);
-        return; // Don't throw error, just warn
-      }
-      
-      // Remove the category
-      const deletedCategory = existingCategories.splice(categoryIndex, 1)[0];
-      
-      // Save back to AsyncStorage
-      await AsyncStorage.setItem('local_categories', JSON.stringify(existingCategories));
-      
-      console.log('✅ Category deleted locally:', deletedCategory.name);
-    } catch (error) {
-      console.error('❌ Fallback category deletion failed:', error);
-      throw new Error('Failed to delete category in offline mode');
-    }
+    throw new Error('Backend not available for category deletion - check connection and try again');
   }
 
   // Product CRUD operations
