@@ -1048,7 +1048,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     color: theme.colors.text,
   },
   selectedCategoryTabText: {
-    color: theme.colors.surface,
+    color: theme.colors.white,
   },
   hiddenCategoryText: {
     color: theme.colors.textSecondary,
@@ -1416,7 +1416,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   saveButtonText: {
     fontSize: 16,
     fontWeight: '500',
-    color: theme.colors.surface,
+    color: theme.colors.white,
   },
   loadingContainer: {
     flex: 1,
