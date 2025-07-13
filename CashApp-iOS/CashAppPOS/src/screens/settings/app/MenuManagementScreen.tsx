@@ -598,7 +598,19 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
                 description: `Imported ${categoryName} category`,
                 is_active: true,
               });
-              category = { id: newCategory.id, name: categoryName } as Category;
+              
+              // Properly initialize the Category object with all required fields
+              category = {
+                id: newCategory.id,
+                name: categoryName,
+                description: newCategory.description || `Imported ${categoryName} category`,
+                order: newCategory.sort_order || categories.length,
+                visible: newCategory.is_active !== false,
+                items: [] // Will be populated as we import items
+              };
+              
+              // Add the new category to our local state
+              setCategories(prev => [...prev, category!]);
             } catch (catError) {
               console.error(`Failed to create category ${categoryName}:`, catError);
               failedItems.push(`Category '${categoryName}': ${catError.message || 'Unknown error'}`);
@@ -645,7 +657,8 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
         }
       }
       
-      // Reload menu data
+      // Reload menu data from backend to get properly structured categories with items
+      // This ensures all Category objects have complete data including the items array
       await loadMenuData();
       
       // Provide detailed feedback
