@@ -5,6 +5,8 @@
 import { supabase } from '../../lib/supabase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import API_CONFIG from '../../config/api';
+import { AUTH_CONFIG } from '../../config/auth.config';
+import { mockAuthService } from './mockAuth';
 
 interface SignInParams {
   email: string;
@@ -35,6 +37,11 @@ class SupabaseAuthService {
    * Sign in with email and password
    */
   async signIn({ email, password }: SignInParams) {
+    // Use mock auth if configured
+    if (AUTH_CONFIG.USE_MOCK_AUTH) {
+      return mockAuthService.signIn({ email, password });
+    }
+    
     try {
       console.log('🔐 Attempting Supabase sign in for:', email);
       
@@ -122,6 +129,11 @@ class SupabaseAuthService {
    * Sign out current user
    */
   async signOut() {
+    // Use mock auth if configured
+    if (AUTH_CONFIG.USE_MOCK_AUTH) {
+      return mockAuthService.signOut();
+    }
+    
     try {
       console.log('👋 Signing out...');
       
@@ -150,6 +162,11 @@ class SupabaseAuthService {
    * Get current session
    */
   async getSession() {
+    // Use mock auth if configured
+    if (AUTH_CONFIG.USE_MOCK_AUTH) {
+      return mockAuthService.getSession();
+    }
+    
     const { data: { session } } = await supabase.auth.getSession();
     return session;
   }
@@ -158,6 +175,11 @@ class SupabaseAuthService {
    * Get stored user info from AsyncStorage
    */
   async getStoredUser() {
+    // Use mock auth if configured
+    if (AUTH_CONFIG.USE_MOCK_AUTH) {
+      return mockAuthService.getStoredUser();
+    }
+    
     try {
       const userInfo = await AsyncStorage.getItem('userInfo');
       if (userInfo) {
@@ -174,6 +196,11 @@ class SupabaseAuthService {
    * Refresh session
    */
   async refreshSession() {
+    // Use mock auth if configured
+    if (AUTH_CONFIG.USE_MOCK_AUTH) {
+      return mockAuthService.refreshSession();
+    }
+    
     const { data: { session }, error } = await supabase.auth.refreshSession();
     if (error) throw error;
     return session;

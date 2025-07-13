@@ -107,7 +107,8 @@ class WebSocketService extends SimpleEventEmitter {
       // Build WebSocket URL
       const wsProtocol = API_CONFIG.BASE_URL.startsWith('https') ? 'wss' : 'ws';
       const wsHost = API_CONFIG.BASE_URL.replace(/^https?:\/\//, '');
-      this.connectionUrl = `${wsProtocol}://${wsHost}/api/v1/ws/pos/${restaurantId}?user_id=${userId}`;
+      // Remove /api/v1 prefix as backend expects /ws/pos directly
+      this.connectionUrl = `${wsProtocol}://${wsHost}/ws/pos/${restaurantId}?user_id=${userId}`;
       
       console.log('🔌 Connecting to WebSocket:', this.connectionUrl);
       
