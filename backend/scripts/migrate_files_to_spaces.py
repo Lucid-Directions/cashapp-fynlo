@@ -10,6 +10,7 @@ import asyncio
 import logging
 from pathlib import Path
 from typing import List, Dict, Any
+from datetime import datetime
 
 # Add backend to Python path
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -163,7 +164,7 @@ class FileMigrator:
         """Create a backup list of all files before migration"""
         
         backup_info = {
-            'created_at': str(asyncio.get_event_loop().time()),
+            'created_at': datetime.now().isoformat(),
             'directories': {},
             'total_files': 0,
             'total_size': 0
@@ -204,7 +205,6 @@ class FileMigrator:
         """Save migration report to file"""
         
         import json
-        from datetime import datetime
         
         # Calculate statistics
         successful = [r for r in results if r['status'] == 'success']

@@ -353,23 +353,22 @@ class FileUploadService:
                 status_code=500
             )
 
-    def upload_base64_image(self, 
-                           base64_data: str, 
-                           upload_type: str,
-                           filename: str = None,
-                           generate_variants: bool = True,
-                           user_id: int = None) -> ImageUploadResponse:
+    async def upload_base64_image(self, 
+                                 base64_data: str, 
+                                 upload_type: str,
+                                 filename: str = None,
+                                 generate_variants: bool = True,
+                                 user_id: int = None) -> ImageUploadResponse:
         """
         Complete base64 image upload workflow - uses Spaces if enabled, local storage as fallback
         """
         # Try Spaces first if enabled
         if self.spaces_service and self.spaces_service.enabled:
             try:
-                import asyncio
-                # Run async Spaces upload
-                return asyncio.run(self.upload_base64_image_to_spaces(
+                # Await async Spaces upload
+                return await self.upload_base64_image_to_spaces(
                     base64_data, upload_type, filename, user_id
-                ))
+                )
             except Exception as e:
                 logger.warning(f"Spaces upload failed, falling back to local: {str(e)}")
                 # Continue to local storage fallback

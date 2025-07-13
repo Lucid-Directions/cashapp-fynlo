@@ -72,7 +72,11 @@ async def get_file_count(
     try:
         # Restrict prefix for non-platform owners
         if current_user.role != "platform_owner":
-            if current_user.restaurant_id:
+            if hasattr(current_user, 'restaurant_id') and current_user.restaurant_id:
+                # Restaurant owners see their restaurant's files
+                prefix = f"uploads/restaurant_{current_user.restaurant_id}/"
+            else:
+                # Other users see only their own files
                 prefix = f"uploads/user_{current_user.id}/"
         
         # List files with limit to get count

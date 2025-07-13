@@ -73,7 +73,7 @@ async def upload_product_image(
                 )
         
         # Upload image
-        upload_result = file_upload_service.upload_base64_image(
+        upload_result = await file_upload_service.upload_base64_image(
             base64_data=upload_data.image_data,
             upload_type="product",
             filename=upload_data.filename or f"product_{product.name}",
@@ -246,7 +246,7 @@ async def upload_restaurant_logo(
                 )
         
         # Upload logo
-        upload_result = file_upload_service.upload_base64_image(
+        upload_result = await file_upload_service.upload_base64_image(
             base64_data=upload_data.image_data,
             upload_type="restaurant",
             filename=upload_data.filename or f"logo_{restaurant.name}",
@@ -407,7 +407,7 @@ async def batch_upload_images(
         results = []
         for i, upload_request in enumerate(upload_requests):
             try:
-                upload_result = file_upload_service.upload_base64_image(
+                upload_result = await file_upload_service.upload_base64_image(
                     base64_data=upload_request.image_data,
                     upload_type=upload_type,
                     filename=upload_request.filename or f"batch_{i}",
