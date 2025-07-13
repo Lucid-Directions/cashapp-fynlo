@@ -105,7 +105,17 @@ class DatabaseService {
   }
 
   private async getAuthToken(): Promise<string | null> {
-    // First try to get fresh token from Supabase
+    // Import AUTH_CONFIG to check if we're using mock auth
+    const { AUTH_CONFIG } = await import('../config/auth.config');
+    
+    // Check if using mock authentication
+    if (AUTH_CONFIG.USE_MOCK_AUTH) {
+      // Get token from AsyncStorage for mock auth
+      const storedToken = await AsyncStorage.getItem('auth_token');
+      return storedToken || this.authToken;
+    }
+    
+    // For real auth, get fresh token from Supabase
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {
       return session.access_token;
