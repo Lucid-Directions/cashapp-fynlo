@@ -76,6 +76,16 @@ class Settings(BaseSettings):
     # File Upload
     MAX_FILE_SIZE: int = 10 * 1024 * 1024  # 10MB
     UPLOAD_DIR: str = "uploads"
+    ALLOWED_FILE_TYPES: str = "jpg,jpeg,png,gif,pdf,docx,xlsx"
+    
+    # DigitalOcean Spaces Configuration
+    SPACES_ACCESS_KEY_ID: Optional[str] = None
+    SPACES_SECRET_ACCESS_KEY: Optional[str] = None
+    SPACES_BUCKET: str = "fynlo-pos-storage"
+    SPACES_REGION: str = "lon1"
+    SPACES_ENDPOINT: str = "https://lon1.digitaloceanspaces.com"
+    CDN_ENDPOINT: Optional[str] = None
+    ENABLE_SPACES_STORAGE: bool = False  # Feature flag for gradual rollout
 
     # Email Service Configuration - Resend
     RESEND_API_KEY: Optional[str] = None
