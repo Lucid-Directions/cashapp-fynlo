@@ -15,6 +15,8 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import DataService from '../../../services/DataService';
+import HeaderWithBackButton from '../../../components/navigation/HeaderWithBackButton';
+import { useTheme } from '../../../design-system/ThemeProvider';
 
 // Clover POS Color Scheme
 const Colors = {
@@ -78,6 +80,8 @@ interface Category {
 
 const MenuManagementScreen: React.FC = () => {
   const navigation = useNavigation();
+  const { theme } = useTheme();
+  const styles = createStyles(theme);
   const dataService = DataService.getInstance();
   
   const [categories, setCategories] = useState<Category[]>([]);
@@ -417,30 +421,72 @@ const MenuManagementScreen: React.FC = () => {
   const handleImportMenu = () => {
     Alert.alert(
       'Import Menu',
-      'Import menu from file or another source?',
+      'This feature allows importing menu data from JSON format.',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'From File', onPress: () => {
-          Alert.alert('Info', 'File picker would open here');
-        }},
-        { text: 'From Template', onPress: () => {
-          Alert.alert('Info', 'Template selector would open here');
+        { text: 'Learn More', onPress: () => {
+          Alert.alert(
+            'Import Format',
+            'Import functionality requires a JSON file with categories and products. Contact support for the proper format specification.',
+            [{ text: 'OK' }]
+          );
         }}
       ]
     );
   };
 
-  const handleExportMenu = () => {
-    Alert.alert(
-      'Export Menu',
-      'Export current menu configuration?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Export', onPress: () => {
-          Alert.alert('Success', 'Menu exported successfully!');
-        }}
-      ]
-    );
+  const handleExportMenu = async () => {
+    try {
+      setLoading(true);
+      
+      // Get current menu data
+      const [categoriesData, productsData] = await Promise.all([
+        dataService.getCategories(),
+        dataService.getProducts()
+      ]);
+
+      // Create export data structure
+      const exportData = {
+        version: '1.0',
+        restaurant: 'Current Restaurant',
+        exported_at: new Date().toISOString(),
+        categories: categoriesData.map(cat => ({
+          id: cat.id,
+          name: cat.name,
+          description: cat.description,
+          sort_order: cat.sort_order
+        })),
+        products: productsData.map(prod => ({
+          id: prod.id,
+          name: prod.name,
+          description: prod.description,
+          price: prod.price,
+          category_id: prod.category_id,
+          is_active: prod.is_active
+        })),
+        summary: {
+          total_categories: categoriesData.length,
+          total_products: productsData.length
+        }
+      };
+
+      Alert.alert(
+        'Export Ready',
+        `Menu exported with ${categoriesData.length} categories and ${productsData.length} products. Export data is prepared for download.`,
+        [
+          { text: 'OK' },
+          { text: 'View Data', onPress: () => {
+            console.log('📋 Export Data:', JSON.stringify(exportData, null, 2));
+            Alert.alert('Export Data', 'Export data logged to console for debugging. In production, this would download a file.');
+          }}
+        ]
+      );
+    } catch (error) {
+      console.error('Export failed:', error);
+      Alert.alert('Export Failed', 'Unable to export menu data. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const getSelectedCategoryItems = () => {
@@ -494,7 +540,7 @@ const MenuManagementScreen: React.FC = () => {
         {category.items.length}
       </Text>
       {!category.visible && (
-        <Icon name="visibility-off" size={16} color={Colors.mediumGray} />
+        <Icon name="visibility-off" size={16} color={theme.colors.textSecondary} />
       )}
     </TouchableOpacity>
   );
@@ -508,7 +554,7 @@ const MenuManagementScreen: React.FC = () => {
           </Text>
           {item.featured && (
             <View style={styles.featuredBadge}>
-              <Icon name="star" size={12} color={Colors.white} />
+              <Icon name="star" size={12} color={theme.colors.surface} />
               <Text style={styles.featuredText}>Featured</Text>
             </View>
           )}
@@ -538,7 +584,7 @@ const MenuManagementScreen: React.FC = () => {
           style={[styles.itemActionButton, styles.editButton]}
           onPress={() => handleEditItem(item)}
         >
-          <Icon name="edit" size={16} color={Colors.secondary} />
+          <Icon name="edit" size={16} color={theme.colors.secondary} />
           <Text style={styles.editButtonText}>Edit</Text>
         </TouchableOpacity>
         
@@ -549,7 +595,7 @@ const MenuManagementScreen: React.FC = () => {
           <Icon 
             name={item.featured ? "star" : "star-border"} 
             size={16} 
-            color={item.featured ? Colors.warning : Colors.mediumGray} 
+            color={item.featured ? Colors.warning : theme.colors.textSecondary} 
           />
           <Text style={styles.featuredButtonText}>
             {item.featured ? 'Featured' : 'Feature'}
@@ -563,7 +609,7 @@ const MenuManagementScreen: React.FC = () => {
           <Icon 
             name={item.available ? "visibility" : "visibility-off"} 
             size={16} 
-            color={item.available ? Colors.success : Colors.mediumGray} 
+            color={item.available ? theme.colors.success : theme.colors.textSecondary} 
           />
           <Text style={styles.availabilityButtonText}>
             {item.available ? 'Available' : 'Hidden'}
@@ -574,7 +620,7 @@ const MenuManagementScreen: React.FC = () => {
           style={[styles.itemActionButton, styles.deleteButton]}
           onPress={() => handleDeleteItem(item.id)}
         >
-          <Icon name="delete" size={16} color={Colors.danger} />
+          <Icon name="delete" size={16} color={theme.colors.error} />
           <Text style={styles.deleteButtonText}>Delete</Text>
         </TouchableOpacity>
       </View>
@@ -584,20 +630,21 @@ const MenuManagementScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Icon name="arrow-back" size={24} color={Colors.white} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Menu Management</Text>
-        <TouchableOpacity style={styles.addButton} onPress={handleAddItem}>
-          <Icon name="add" size={24} color={Colors.white} />
-        </TouchableOpacity>
-      </View>
+      <HeaderWithBackButton
+        title="Menu Management"
+        backgroundColor={theme.colors.primary}
+        textColor={theme.colors.white}
+        rightComponent={
+          <TouchableOpacity onPress={handleAddItem} style={styles.addButton}>
+            <Icon name="add" size={24} color={theme.colors.white} />
+          </TouchableOpacity>
+        }
+      />
 
       {/* Loading Indicator */}
       {loading && (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={Colors.primary} />
+          <ActivityIndicator size="large" color={theme.colors.primary} />
           <Text style={styles.loadingText}>Loading menu data...</Text>
         </View>
       )}
@@ -624,7 +671,7 @@ const MenuManagementScreen: React.FC = () => {
       {/* Search */}
       <View style={styles.searchSection}>
         <View style={styles.searchContainer}>
-          <Icon name="search" size={20} color={Colors.mediumGray} />
+          <Icon name="search" size={20} color={theme.colors.textSecondary} />
           <TextInput
             style={styles.searchInput}
             placeholder="Search menu items..."
@@ -633,7 +680,7 @@ const MenuManagementScreen: React.FC = () => {
           />
           {searchTerm.length > 0 && (
             <TouchableOpacity onPress={() => setSearchTerm('')}>
-              <Icon name="clear" size={20} color={Colors.mediumGray} />
+              <Icon name="clear" size={20} color={theme.colors.textSecondary} />
             </TouchableOpacity>
           )}
         </View>
@@ -641,19 +688,33 @@ const MenuManagementScreen: React.FC = () => {
 
       {/* Category Tabs */}
       <View style={styles.categorySection}>
-        <ScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false}
-          style={styles.categoryTabs}
-        >
-          {categories.map(category => (
-            <CategoryTab key={category.id} category={category} />
-          ))}
-          <TouchableOpacity style={styles.addCategoryTab} onPress={handleAddCategory}>
-            <Icon name="add" size={20} color={Colors.primary} />
-            <Text style={styles.addCategoryText}>Add Category</Text>
-          </TouchableOpacity>
-        </ScrollView>
+        {categories.length === 0 && !loading ? (
+          <View style={styles.emptyCategoriesState}>
+            <Icon name="category" size={48} color={theme.colors.border} />
+            <Text style={styles.emptyCategoriesTitle}>No Categories Yet</Text>
+            <Text style={styles.emptyCategoriesText}>
+              Create your first category to start organizing your menu
+            </Text>
+            <TouchableOpacity style={styles.createCategoryButton} onPress={handleAddCategory}>
+              <Icon name="add" size={20} color={theme.colors.surface} />
+              <Text style={styles.createCategoryButtonText}>Create Category</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false}
+            style={styles.categoryTabs}
+          >
+            {categories.map(category => (
+              <CategoryTab key={category.id} category={category} />
+            ))}
+            <TouchableOpacity style={styles.addCategoryTab} onPress={handleAddCategory}>
+              <Icon name="add" size={20} color={theme.colors.primary} />
+              <Text style={styles.addCategoryText}>Add Category</Text>
+            </TouchableOpacity>
+          </ScrollView>
+        )}
       </View>
 
       {/* Items List */}
@@ -665,7 +726,7 @@ const MenuManagementScreen: React.FC = () => {
           
           {getSelectedCategoryItems().length === 0 && (
             <View style={styles.emptyState}>
-              <Icon name="restaurant-menu" size={64} color={Colors.lightGray} />
+              <Icon name="restaurant-menu" size={64} color={theme.colors.border} />
               <Text style={styles.emptyStateTitle}>No Items Found</Text>
               <Text style={styles.emptyStateText}>
                 {searchTerm 
@@ -674,7 +735,7 @@ const MenuManagementScreen: React.FC = () => {
                 }
               </Text>
               <TouchableOpacity style={styles.addItemButton} onPress={handleAddItem}>
-                <Icon name="add" size={20} color={Colors.white} />
+                <Icon name="add" size={20} color={theme.colors.surface} />
                 <Text style={styles.addItemButtonText}>Add Item</Text>
               </TouchableOpacity>
             </View>
@@ -690,8 +751,8 @@ const MenuManagementScreen: React.FC = () => {
               <Switch
                 value={menuSettings.showDescriptions}
                 onValueChange={() => toggleMenuSetting('showDescriptions')}
-                trackColor={{ false: Colors.lightGray, true: Colors.primary }}
-                thumbColor={Colors.white}
+                trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+                thumbColor={theme.colors.surface}
               />
             </View>
 
@@ -700,8 +761,8 @@ const MenuManagementScreen: React.FC = () => {
               <Switch
                 value={menuSettings.showPrices}
                 onValueChange={() => toggleMenuSetting('showPrices')}
-                trackColor={{ false: Colors.lightGray, true: Colors.primary }}
-                thumbColor={Colors.white}
+                trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+                thumbColor={theme.colors.surface}
               />
             </View>
 
@@ -710,8 +771,8 @@ const MenuManagementScreen: React.FC = () => {
               <Switch
                 value={menuSettings.showAllergens}
                 onValueChange={() => toggleMenuSetting('showAllergens')}
-                trackColor={{ false: Colors.lightGray, true: Colors.primary }}
-                thumbColor={Colors.white}
+                trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+                thumbColor={theme.colors.surface}
               />
             </View>
 
@@ -720,8 +781,8 @@ const MenuManagementScreen: React.FC = () => {
               <Switch
                 value={menuSettings.enableModifiers}
                 onValueChange={() => toggleMenuSetting('enableModifiers')}
-                trackColor={{ false: Colors.lightGray, true: Colors.primary }}
-                thumbColor={Colors.white}
+                trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+                thumbColor={theme.colors.surface}
               />
             </View>
 
@@ -730,8 +791,8 @@ const MenuManagementScreen: React.FC = () => {
               <Switch
                 value={menuSettings.showUnavailableItems}
                 onValueChange={() => toggleMenuSetting('showUnavailableItems')}
-                trackColor={{ false: Colors.lightGray, true: Colors.primary }}
-                thumbColor={Colors.white}
+                trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+                thumbColor={theme.colors.surface}
               />
             </View>
           </View>
@@ -742,24 +803,24 @@ const MenuManagementScreen: React.FC = () => {
           <Text style={styles.sectionTitle}>Menu Actions</Text>
           <View style={styles.actionCard}>
             <TouchableOpacity style={styles.actionButton} onPress={handleImportMenu}>
-              <Icon name="file-upload" size={24} color={Colors.secondary} />
+              <Icon name="file-upload" size={24} color={theme.colors.secondary} />
               <Text style={styles.actionButtonText}>Import Menu</Text>
-              <Icon name="chevron-right" size={24} color={Colors.lightText} />
+              <Icon name="chevron-right" size={24} color={theme.colors.textSecondary} />
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.actionButton} onPress={handleExportMenu}>
-              <Icon name="file-download" size={24} color={Colors.secondary} />
+              <Icon name="file-download" size={24} color={theme.colors.secondary} />
               <Text style={styles.actionButtonText}>Export Menu</Text>
-              <Icon name="chevron-right" size={24} color={Colors.lightText} />
+              <Icon name="chevron-right" size={24} color={theme.colors.textSecondary} />
             </TouchableOpacity>
 
             <TouchableOpacity 
               style={styles.actionButton}
               onPress={() => Alert.alert('Info', 'Menu templates would be available here')}
             >
-              <Icon name="library-books" size={24} color={Colors.success} />
+              <Icon name="library-books" size={24} color={theme.colors.success} />
               <Text style={styles.actionButtonText}>Browse Templates</Text>
-              <Icon name="chevron-right" size={24} color={Colors.lightText} />
+              <Icon name="chevron-right" size={24} color={theme.colors.textSecondary} />
             </TouchableOpacity>
           </View>
         </View>
@@ -779,7 +840,7 @@ const MenuManagementScreen: React.FC = () => {
                 {editingItem?.id ? 'Edit Item' : 'Add New Item'}
               </Text>
               <TouchableOpacity onPress={() => setShowItemModal(false)}>
-                <Icon name="close" size={24} color={Colors.text} />
+                <Icon name="close" size={24} color={theme.colors.text} />
               </TouchableOpacity>
             </View>
 
@@ -819,7 +880,7 @@ const MenuManagementScreen: React.FC = () => {
                   <Icon 
                     name={editingItem?.available ? "check-box" : "check-box-outline-blank"} 
                     size={24} 
-                    color={Colors.primary} 
+                    color={theme.colors.primary} 
                   />
                   <Text style={styles.checkboxLabel}>Available</Text>
                 </TouchableOpacity>
@@ -831,7 +892,7 @@ const MenuManagementScreen: React.FC = () => {
                   <Icon 
                     name={editingItem?.featured ? "check-box" : "check-box-outline-blank"} 
                     size={24} 
-                    color={Colors.primary} 
+                    color={theme.colors.primary} 
                   />
                   <Text style={styles.checkboxLabel}>Featured</Text>
                 </TouchableOpacity>
@@ -867,7 +928,7 @@ const MenuManagementScreen: React.FC = () => {
                 {editingCategory?.id ? 'Edit Category' : 'Add New Category'}
               </Text>
               <TouchableOpacity onPress={() => setShowCategoryModal(false)}>
-                <Icon name="close" size={24} color={Colors.text} />
+                <Icon name="close" size={24} color={theme.colors.text} />
               </TouchableOpacity>
             </View>
 
@@ -896,7 +957,7 @@ const MenuManagementScreen: React.FC = () => {
                   <Icon 
                     name={editingCategory?.visible ? "check-box" : "check-box-outline-blank"} 
                     size={24} 
-                    color={Colors.primary} 
+                    color={theme.colors.primary} 
                   />
                   <Text style={styles.checkboxLabel}>Visible in menu</Text>
                 </TouchableOpacity>
@@ -923,34 +984,18 @@ const MenuManagementScreen: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
-  },
-  header: {
-    backgroundColor: Colors.primary,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    paddingTop: 48,
-  },
-  backButton: {
-    padding: 8,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: Colors.white,
+    backgroundColor: theme.colors.background,
   },
   addButton: {
     padding: 8,
+    marginRight: 8,
   },
   statsSection: {
     flexDirection: 'row',
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.surface,
     paddingVertical: 16,
     paddingHorizontal: 16,
     gap: 16,
@@ -959,28 +1004,28 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     paddingVertical: 12,
-    backgroundColor: Colors.background,
+    backgroundColor: theme.colors.background,
     borderRadius: 8,
   },
   statValue: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: Colors.primary,
+    color: theme.colors.primary,
     marginBottom: 4,
   },
   statLabel: {
     fontSize: 12,
-    color: Colors.lightText,
+    color: theme.colors.textSecondary,
   },
   searchSection: {
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.surface,
     paddingHorizontal: 16,
     paddingBottom: 16,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.background,
+    backgroundColor: theme.colors.background,
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 8,
@@ -989,10 +1034,10 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 16,
-    color: Colors.text,
+    color: theme.colors.text,
   },
   categorySection: {
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.surface,
     paddingBottom: 8,
   },
   categoryTabs: {
@@ -1002,14 +1047,14 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 16,
     marginRight: 8,
-    backgroundColor: Colors.background,
+    backgroundColor: theme.colors.background,
     borderRadius: 20,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
   },
   selectedCategoryTab: {
-    backgroundColor: Colors.primary,
+    backgroundColor: theme.colors.primary,
   },
   hiddenCategoryTab: {
     opacity: 0.6,
@@ -1017,18 +1062,18 @@ const styles = StyleSheet.create({
   categoryTabText: {
     fontSize: 14,
     fontWeight: '500',
-    color: Colors.text,
+    color: theme.colors.text,
   },
   selectedCategoryTabText: {
-    color: Colors.white,
+    color: theme.colors.surface,
   },
   hiddenCategoryText: {
-    color: Colors.mediumGray,
+    color: theme.colors.textSecondary,
   },
   categoryItemCount: {
     fontSize: 12,
-    color: Colors.lightText,
-    backgroundColor: Colors.lightGray,
+    color: theme.colors.textSecondary,
+    backgroundColor: theme.colors.border,
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 10,
@@ -1039,36 +1084,36 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 16,
     marginRight: 8,
-    backgroundColor: Colors.background,
+    backgroundColor: theme.colors.background,
     borderRadius: 20,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
     borderWidth: 1,
-    borderColor: Colors.primary,
+    borderColor: theme.colors.primary,
     borderStyle: 'dashed',
   },
   addCategoryText: {
     fontSize: 14,
     fontWeight: '500',
-    color: Colors.primary,
+    color: theme.colors.primary,
   },
   content: {
     flex: 1,
   },
   itemsSection: {
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.surface,
     marginVertical: 8,
     paddingVertical: 16,
   },
   itemCard: {
-    backgroundColor: Colors.background,
+    backgroundColor: theme.colors.background,
     marginHorizontal: 16,
     marginBottom: 12,
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: theme.colors.border,
   },
   unavailableItem: {
     opacity: 0.6,
@@ -1088,11 +1133,11 @@ const styles = StyleSheet.create({
   itemName: {
     fontSize: 18,
     fontWeight: '600',
-    color: Colors.text,
+    color: theme.colors.text,
     flex: 1,
   },
   unavailableText: {
-    color: Colors.mediumGray,
+    color: theme.colors.textSecondary,
   },
   featuredBadge: {
     flexDirection: 'row',
@@ -1106,16 +1151,16 @@ const styles = StyleSheet.create({
   featuredText: {
     fontSize: 10,
     fontWeight: '500',
-    color: Colors.white,
+    color: theme.colors.surface,
   },
   itemPrice: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: Colors.primary,
+    color: theme.colors.primary,
   },
   itemDescription: {
     fontSize: 14,
-    color: Colors.lightText,
+    color: theme.colors.textSecondary,
     marginBottom: 8,
     lineHeight: 20,
   },
@@ -1145,17 +1190,17 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   editButton: {
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.surface,
     borderWidth: 1,
-    borderColor: Colors.secondary,
+    borderColor: theme.colors.secondary,
   },
   editButtonText: {
     fontSize: 12,
     fontWeight: '500',
-    color: Colors.secondary,
+    color: theme.colors.secondary,
   },
   featuredButton: {
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.surface,
     borderWidth: 1,
     borderColor: Colors.warning,
   },
@@ -1165,24 +1210,57 @@ const styles = StyleSheet.create({
     color: Colors.warning,
   },
   availabilityButton: {
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.surface,
     borderWidth: 1,
-    borderColor: Colors.success,
+    borderColor: theme.colors.success,
   },
   availabilityButtonText: {
     fontSize: 12,
     fontWeight: '500',
-    color: Colors.success,
+    color: theme.colors.success,
   },
   deleteButton: {
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.surface,
     borderWidth: 1,
-    borderColor: Colors.danger,
+    borderColor: theme.colors.error,
   },
   deleteButtonText: {
     fontSize: 12,
     fontWeight: '500',
-    color: Colors.danger,
+    color: theme.colors.error,
+  },
+  emptyCategoriesState: {
+    alignItems: 'center',
+    paddingVertical: 40,
+    paddingHorizontal: 32,
+  },
+  emptyCategoriesTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: theme.colors.text,
+    marginBottom: 8,
+    marginTop: 12,
+  },
+  emptyCategoriesText: {
+    fontSize: 14,
+    color: theme.colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 20,
+  },
+  createCategoryButton: {
+    backgroundColor: theme.colors.primary,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  createCategoryButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: theme.colors.surface,
   },
   emptyState: {
     alignItems: 'center',
@@ -1192,13 +1270,13 @@ const styles = StyleSheet.create({
   emptyStateTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: Colors.text,
+    color: theme.colors.text,
     marginTop: 16,
     marginBottom: 8,
   },
   emptyStateText: {
     fontSize: 16,
-    color: Colors.lightText,
+    color: theme.colors.textSecondary,
     textAlign: 'center',
     lineHeight: 22,
     marginBottom: 24,
@@ -1206,7 +1284,7 @@ const styles = StyleSheet.create({
   addItemButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.primary,
+    backgroundColor: theme.colors.primary,
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 8,
@@ -1215,17 +1293,17 @@ const styles = StyleSheet.create({
   addItemButtonText: {
     fontSize: 16,
     fontWeight: '500',
-    color: Colors.white,
+    color: theme.colors.surface,
   },
   section: {
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.surface,
     marginVertical: 8,
     paddingVertical: 16,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: Colors.text,
+    color: theme.colors.text,
     paddingHorizontal: 16,
     marginBottom: 16,
   },
@@ -1238,12 +1316,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGray,
+    borderBottomColor: theme.colors.border,
   },
   settingLabel: {
     fontSize: 16,
     fontWeight: '500',
-    color: Colors.text,
+    color: theme.colors.text,
   },
   actionCard: {
     paddingHorizontal: 16,
@@ -1253,12 +1331,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGray,
+    borderBottomColor: theme.colors.border,
   },
   actionButtonText: {
     fontSize: 16,
     fontWeight: '500',
-    color: Colors.text,
+    color: theme.colors.text,
     marginLeft: 12,
     flex: 1,
   },
@@ -1269,7 +1347,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: Colors.white,
+    backgroundColor: theme.colors.surface,
     borderRadius: 12,
     width: '90%',
     maxHeight: '80%',
@@ -1280,12 +1358,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.lightGray,
+    borderBottomColor: theme.colors.border,
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: Colors.text,
+    color: theme.colors.text,
   },
   modalBody: {
     padding: 16,
@@ -1294,19 +1372,19 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 16,
     fontWeight: '500',
-    color: Colors.text,
+    color: theme.colors.text,
     marginBottom: 8,
     marginTop: 16,
   },
   textInput: {
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: theme.colors.border,
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 8,
     fontSize: 16,
-    color: Colors.text,
-    backgroundColor: Colors.white,
+    color: theme.colors.text,
+    backgroundColor: theme.colors.surface,
   },
   textArea: {
     minHeight: 80,
@@ -1324,38 +1402,38 @@ const styles = StyleSheet.create({
   },
   checkboxLabel: {
     fontSize: 16,
-    color: Colors.text,
+    color: theme.colors.text,
   },
   modalActions: {
     flexDirection: 'row',
     padding: 16,
     borderTopWidth: 1,
-    borderTopColor: Colors.lightGray,
+    borderTopColor: theme.colors.border,
     gap: 12,
   },
   cancelButton: {
     flex: 1,
     paddingVertical: 12,
-    backgroundColor: Colors.background,
+    backgroundColor: theme.colors.background,
     borderRadius: 8,
     alignItems: 'center',
   },
   cancelButtonText: {
     fontSize: 16,
     fontWeight: '500',
-    color: Colors.text,
+    color: theme.colors.text,
   },
   saveButton: {
     flex: 1,
     paddingVertical: 12,
-    backgroundColor: Colors.primary,
+    backgroundColor: theme.colors.primary,
     borderRadius: 8,
     alignItems: 'center',
   },
   saveButtonText: {
     fontSize: 16,
     fontWeight: '500',
-    color: Colors.white,
+    color: theme.colors.surface,
   },
   loadingContainer: {
     flex: 1,
@@ -1365,7 +1443,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 16,
     fontSize: 16,
-    color: Colors.lightText,
+    color: theme.colors.textSecondary,
   },
 });
 
