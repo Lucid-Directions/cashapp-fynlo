@@ -122,6 +122,20 @@ export const useAuthStore = create<AuthState>()(
         try {
           set({ isLoading: true });
           
+          // TEMPORARY: Clear any stored mock authentication
+          // This ensures users start at the login screen
+          const hasMockAuth = await AsyncStorage.getItem('mock_session');
+          if (hasMockAuth) {
+            console.log('Clearing stored mock authentication...');
+            await AsyncStorage.multiRemove([
+              'userInfo',
+              'mock_session',
+              'auth_token',
+              '@auth_user',
+              '@auth_business'
+            ]);
+          }
+          
           const session = await authService.getSession();
           
           if (session) {
