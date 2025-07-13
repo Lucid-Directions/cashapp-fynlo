@@ -19,8 +19,28 @@ from app.core.config import settings
 from sqlalchemy.pool import QueuePool
 
 # Configure engine with proper connection pooling
+import os
+
+# Parse DATABASE_URL to handle SSL requirements
+database_url = settings.DATABASE_URL
+
+# Check if we need to add SSL parameters
+if "postgresql" in database_url and "sslmode" not in database_url:
+    # For DigitalOcean managed databases, we need SSL
+    if ":25060" in database_url or ":25061" in database_url:
+        # Add sslmode=require to the connection string
+        separator = "&" if "?" in database_url else "?"
+        database_url = f"{database_url}{separator}sslmode=require"
+
+connect_args = {}
+if "postgresql" in database_url:
+    connect_args = {
+        "connect_timeout": 10,  # PostgreSQL connection timeout
+        "options": "-c statement_timeout=30000"  # 30 second statement timeout
+    }
+
 engine = create_engine(
-    settings.DATABASE_URL,
+    database_url,
     echo=settings.DEBUG,
     poolclass=QueuePool,
     pool_size=20,          # Number of persistent connections
@@ -28,10 +48,7 @@ engine = create_engine(
     pool_recycle=3600,     # Recycle connections after 1 hour (avoid stale connections)
     pool_pre_ping=True,    # Test connections before using (handles network issues)
     pool_timeout=30,       # Timeout for getting connection from pool
-    connect_args={
-        "connect_timeout": 10,  # PostgreSQL connection timeout
-        "options": "-c statement_timeout=30000"  # 30 second statement timeout
-    } if "postgresql" in settings.DATABASE_URL else {}
+    connect_args=connect_args
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
