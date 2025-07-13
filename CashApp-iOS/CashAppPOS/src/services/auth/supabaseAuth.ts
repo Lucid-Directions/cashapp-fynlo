@@ -5,6 +5,8 @@
 import { supabase } from '../../lib/supabase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import API_CONFIG from '../../config/api';
+import { AUTH_CONFIG } from '../../config/auth.config';
+import MockAuthService from './mockAuth';
 
 interface SignInParams {
   email: string;
@@ -183,6 +185,13 @@ class SupabaseAuthService {
    * Listen to auth state changes
    */
   onAuthStateChange(callback: (event: string, session: any) => void) {
+    // Check if we're using mock auth
+    if (AUTH_CONFIG.USE_MOCK_AUTH) {
+      // Return mock auth state listener
+      return MockAuthService.onAuthStateChange(callback);
+    }
+    
+    // Use real Supabase auth
     return supabase.auth.onAuthStateChange(callback);
   }
   
