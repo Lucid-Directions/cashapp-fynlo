@@ -6,6 +6,7 @@ Handles base64 image uploads from iOS with validation and processing
 import base64
 import os
 import uuid
+import logging
 # Import python-magic with proper error handling
 try:
     import magic
@@ -22,6 +23,9 @@ from pydantic import BaseModel
 
 from app.core.exceptions import FynloException, ErrorCodes
 from app.core.responses import APIResponseHelper
+from app.core.config import settings
+
+logger = logging.getLogger(__name__)
 
 class FileUploadConfig:
     """Configuration for file uploads"""
@@ -78,6 +82,19 @@ class FileUploadService:
     def __init__(self):
         self.config = FileUploadConfig()
         self._ensure_directories()
+        
+        # Initialize Spaces storage if enabled
+        self.spaces_service = None
+        if settings.ENABLE_SPACES_STORAGE:
+            try:
+                from app.services.storage_service import storage_service
+                self.spaces_service = storage_service
+                if self.spaces_service.enabled:
+                    logger.info("Spaces storage integration enabled")
+                else:
+                    logger.warning("Spaces storage configured but not available")
+            except ImportError:
+                logger.warning("Spaces storage service not available")
     
     def _ensure_directories(self):
         """Create upload directories if they don't exist"""
@@ -275,14 +292,88 @@ class FileUploadService:
                 status_code=500
             )
     
-    def upload_base64_image(self, 
-                           base64_data: str, 
-                           upload_type: str,
-                           filename: str = None,
-                           generate_variants: bool = True) -> ImageUploadResponse:
+    async def upload_base64_image_to_spaces(self, 
+                                       base64_data: str, 
+                                       upload_type: str,
+                                       filename: str = None,
+                                       user_id: int = None) -> ImageUploadResponse:
         """
-        Complete base64 image upload workflow
+        Upload base64 image to DigitalOcean Spaces
         """
+        try:
+            # Validate and decode
+            image_bytes, mime_type = self.validate_base64_image(base64_data)
+            
+            # Convert to file-like object for Spaces service
+            image_file = BytesIO(image_bytes)
+            
+            # Map upload types to folder names
+            folder_map = {
+                'product': 'uploads/products',
+                'restaurant': 'uploads/restaurants',
+                'receipt': 'uploads/receipts',
+                'profile': 'uploads/profiles'
+            }
+            
+            folder = folder_map.get(upload_type, 'uploads')
+            
+            # Upload to Spaces
+            upload_result = await self.spaces_service.upload_file(
+                file=image_file,
+                filename=filename or f"{upload_type}_image.jpg",
+                folder=folder,
+                user_id=user_id,
+                optimize_image=True
+            )
+            
+            return ImageUploadResponse(
+                success=True,
+                file_id=upload_result['file_path'].split('/')[-1].split('.')[0],  # Extract ID from path
+                original_url=upload_result['cdn_url'],
+                thumbnail_url=upload_result['cdn_url'],  # CDN handles optimization
+                variants={
+                    'cdn': {'url': upload_result['cdn_url']},
+                    'spaces': {'url': upload_result['spaces_url']}
+                },
+                metadata={
+                    'file_size': upload_result['file_size'],
+                    'content_type': upload_result['content_type'],
+                    'upload_type': upload_type,
+                    'storage_type': 'spaces',
+                    'created_at': datetime.utcnow().isoformat(),
+                    'file_path': upload_result['file_path']
+                }
+            )
+            
+        except Exception as e:
+            logger.error(f"Spaces upload failed: {str(e)}")
+            raise FynloException(
+                message=f"Spaces upload failed: {str(e)}",
+                error_code=ErrorCodes.INTERNAL_ERROR,
+                status_code=500
+            )
+
+    async def upload_base64_image(self, 
+                                 base64_data: str, 
+                                 upload_type: str,
+                                 filename: str = None,
+                                 generate_variants: bool = True,
+                                 user_id: int = None) -> ImageUploadResponse:
+        """
+        Complete base64 image upload workflow - uses Spaces if enabled, local storage as fallback
+        """
+        # Try Spaces first if enabled
+        if self.spaces_service and self.spaces_service.enabled:
+            try:
+                # Await async Spaces upload
+                return await self.upload_base64_image_to_spaces(
+                    base64_data, upload_type, filename, user_id
+                )
+            except Exception as e:
+                logger.warning(f"Spaces upload failed, falling back to local: {str(e)}")
+                # Continue to local storage fallback
+        
+        # Local storage implementation (existing code)
         try:
             # Validate and decode
             image_bytes, mime_type = self.validate_base64_image(base64_data)
@@ -324,6 +415,7 @@ class FileUploadService:
                     **metadata,
                     'file_size': len(image_bytes),
                     'upload_type': upload_type,
+                    'storage_type': 'local',
                     'created_at': datetime.utcnow().isoformat(),
                     'processed_size': image.size
                 }
