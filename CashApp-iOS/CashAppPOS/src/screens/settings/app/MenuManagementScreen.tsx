@@ -11,6 +11,7 @@ import {
   FlatList,
   Modal,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
@@ -401,21 +402,288 @@ const MenuManagementScreen: React.FC = () => {
     }));
   };
 
-  const handleImportMenu = () => {
-    Alert.alert(
-      'Import Menu',
-      'This feature allows importing menu data from JSON format.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Learn More', onPress: () => {
-          Alert.alert(
-            'Import Format',
-            'Import functionality requires a JSON file with categories and products. Contact support for the proper format specification.',
-            [{ text: 'OK' }]
-          );
-        }}
-      ]
-    );
+  const handleImportMenu = async () => {
+    try {
+      // For now, show a simple CSV format example and allow manual paste
+      Alert.alert(
+        'Import Menu from CSV',
+        'CSV Format Requirements:\n\n• Required columns: Category, Name, Price\n• Optional: Description\n• Use quotes for values with commas\n• Price must be a positive number\n\nExample:\nCategory,Name,Description,Price\nTacos,"Beef Taco, Supreme","Seasoned beef, fresh toppings",8.99\nBurritos,Bean Burrito,Refried beans and cheese,6.99',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { 
+            text: 'Import', 
+            onPress: () => {
+              // Show input modal for CSV data
+              Alert.prompt(
+                'Paste CSV Data',
+                'Paste your menu data in CSV format:',
+                async (csvData) => {
+                  if (csvData) {
+                    await processCSVImport(csvData);
+                  }
+                },
+                'plain-text',
+                '',
+                'default'
+              );
+            }
+          },
+          {
+            text: 'Show Template',
+            onPress: async () => {
+              // Generate and share CSV template with examples
+              const template = `Category,Name,Description,Price
+Starters,"Nachos, Loaded","Tortilla chips with cheese, jalapeños, and salsa",7.99
+Starters,Guacamole & Chips,Fresh avocado dip with crispy tortilla chips,6.50
+Mains,"Chicken Fajitas, Sizzling","Grilled chicken with peppers, onions, tortillas",14.99
+Mains,Vegetarian Burrito,"Black beans, rice, cheese, lettuce, salsa",9.99
+Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
+              Alert.alert(
+                'CSV Template',
+                'Copy this template and modify with your menu items:\n\n' + template,
+                [
+                  { text: 'OK' },
+                  { text: 'Copy Example', onPress: () => console.log('Template:', template) }
+                ]
+              );
+            }
+          }
+        ]
+      );
+    } catch (error) {
+      console.error('Import menu error:', error);
+      Alert.alert('Error', 'Failed to import menu');
+    }
+  };
+
+  // Robust CSV parser that handles quoted fields
+  const parseCSVLine = (line: string): string[] => {
+    const result: string[] = [];
+    let current = '';
+    let inQuotes = false;
+    let i = 0;
+    
+    while (i < line.length) {
+      const char = line[i];
+      const nextChar = line[i + 1];
+      
+      if (char === '"') {
+        if (inQuotes && nextChar === '"') {
+          // Escaped quote
+          current += '"';
+          i += 2;
+        } else {
+          // Toggle quote state
+          inQuotes = !inQuotes;
+          i++;
+        }
+      } else if (char === ',' && !inQuotes) {
+        // End of field
+        result.push(current.trim());
+        current = '';
+        i++;
+      } else {
+        current += char;
+        i++;
+      }
+    }
+    
+    // Don't forget the last field
+    result.push(current.trim());
+    return result;
+  };
+
+  const processCSVImport = async (csvData: string) => {
+    try {
+      setLoading(true);
+      
+      // Parse CSV with proper handling of quoted fields
+      const lines = csvData.trim().split(/\r?\n/);
+      if (lines.length < 2) {
+        throw new Error('CSV must have headers and at least one data row');
+      }
+      
+      // Parse headers
+      const headers = parseCSVLine(lines[0]).map(h => h.toLowerCase().trim());
+      const categoryIndex = headers.indexOf('category');
+      const nameIndex = headers.indexOf('name');
+      const descriptionIndex = headers.indexOf('description');
+      const priceIndex = headers.indexOf('price');
+      
+      if (categoryIndex === -1 || nameIndex === -1 || priceIndex === -1) {
+        throw new Error('CSV must have Category, Name, and Price columns');
+      }
+      
+      // Parse and validate data rows
+      const itemsByCategory = new Map<string, any[]>();
+      const errors: string[] = [];
+      
+      for (let i = 1; i < lines.length; i++) {
+        if (!lines[i].trim()) continue; // Skip empty lines
+        
+        const values = parseCSVLine(lines[i]);
+        
+        // Validate required fields
+        const categoryName = values[categoryIndex]?.trim();
+        const itemName = values[nameIndex]?.trim();
+        const priceStr = values[priceIndex]?.trim();
+        
+        if (!categoryName) {
+          errors.push(`Row ${i + 1}: Missing category name`);
+          continue;
+        }
+        
+        if (!itemName) {
+          errors.push(`Row ${i + 1}: Missing item name`);
+          continue;
+        }
+        
+        if (!priceStr || isNaN(parseFloat(priceStr))) {
+          errors.push(`Row ${i + 1}: Invalid price value`);
+          continue;
+        }
+        
+        const price = parseFloat(priceStr);
+        if (price < 0) {
+          errors.push(`Row ${i + 1}: Price cannot be negative`);
+          continue;
+        }
+        
+        const item = {
+          name: itemName,
+          description: values[descriptionIndex]?.trim() || '',
+          price: price,
+        };
+        
+        if (!itemsByCategory.has(categoryName)) {
+          itemsByCategory.set(categoryName, []);
+        }
+        itemsByCategory.get(categoryName)!.push(item);
+      }
+      
+      // Show validation errors if any
+      if (errors.length > 0) {
+        const errorMessage = errors.slice(0, 5).join('\n');
+        const moreErrors = errors.length > 5 ? `\n...and ${errors.length - 5} more errors` : '';
+        Alert.alert(
+          'CSV Validation Errors',
+          `Found ${errors.length} validation errors:\n\n${errorMessage}${moreErrors}`,
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Continue Anyway', onPress: () => {} },
+          ]
+        );
+      }
+      
+      // Check if we have any valid items to import
+      if (itemsByCategory.size === 0) {
+        throw new Error('No valid items found to import');
+      }
+      
+      // Create categories and products
+      let successCount = 0;
+      let errorCount = 0;
+      const failedItems: string[] = [];
+      
+      for (const [categoryName, items] of itemsByCategory) {
+        try {
+          // Find or create category
+          let category = categories.find(c => c.name.toLowerCase() === categoryName.toLowerCase());
+          
+          if (!category) {
+            // Create new category
+            try {
+              const newCategory = await dataService.createCategory({
+                name: categoryName,
+                description: `Imported ${categoryName} category`,
+                is_active: true,
+              });
+              
+              // Properly initialize the Category object with all required fields
+              category = {
+                id: newCategory.id,
+                name: categoryName,
+                description: newCategory.description || `Imported ${categoryName} category`,
+                order: newCategory.sort_order || categories.length,
+                visible: newCategory.is_active !== false,
+                items: [] // Will be populated as we import items
+              };
+              
+              // Add the new category to our local state
+              setCategories(prev => [...prev, category!]);
+            } catch (catError) {
+              console.error(`Failed to create category ${categoryName}:`, catError);
+              failedItems.push(`Category '${categoryName}': ${catError.message || 'Unknown error'}`);
+              errorCount += items.length;
+              continue;
+            }
+          }
+          
+          // Create products in this category
+          for (const item of items) {
+            try {
+              // Additional validation before API call
+              if (!item.name || item.name.length === 0) {
+                throw new Error('Item name is required');
+              }
+              
+              if (item.name.length > 200) {
+                throw new Error('Item name is too long (max 200 characters)');
+              }
+              
+              if (item.price === null || item.price === undefined || item.price < 0) {
+                throw new Error('Invalid price');
+              }
+              
+              await dataService.createProduct({
+                category_id: category.id,
+                name: item.name,
+                description: item.description,
+                price: item.price,
+                dietary_info: [],
+                modifiers: [],
+              });
+              successCount++;
+            } catch (error: any) {
+              console.error(`Failed to create item ${item.name}:`, error);
+              failedItems.push(`Item '${item.name}': ${error.message || 'Unknown error'}`);
+              errorCount++;
+            }
+          }
+        } catch (error: any) {
+          console.error(`Failed to process category ${categoryName}:`, error);
+          failedItems.push(`Category '${categoryName}': ${error.message || 'Unknown error'}`);
+          errorCount += items.length;
+        }
+      }
+      
+      // Reload menu data from backend to get properly structured categories with items
+      // This ensures all Category objects have complete data including the items array
+      await loadMenuData();
+      
+      // Provide detailed feedback
+      let message = `Successfully imported ${successCount} items.`;
+      
+      if (errorCount > 0) {
+        message += `\n\n${errorCount} items failed to import.`;
+        
+        if (failedItems.length > 0) {
+          const failedDetails = failedItems.slice(0, 3).join('\n');
+          const moreFailures = failedItems.length > 3 ? `\n...and ${failedItems.length - 3} more` : '';
+          message += `\n\nFailed items:\n${failedDetails}${moreFailures}`;
+        }
+      }
+      
+      Alert.alert(
+        errorCount > 0 ? 'Import Partially Complete' : 'Import Complete',
+        message,
+        [{ text: 'OK' }]
+      );
+    } catch (error: any) {
+      Alert.alert('Import Error', error.message || 'Failed to process CSV data');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleExportMenu = async () => {

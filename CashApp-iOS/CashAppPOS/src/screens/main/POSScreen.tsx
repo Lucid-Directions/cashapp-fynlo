@@ -198,17 +198,25 @@ const POSScreen: React.FC = () => {
     };
   }, []);
 
-  // Load dynamic menu data
+  // Load dynamic menu data with optimized performance
   useEffect(() => {
     const loadMenuData = async () => {
       try {
         setMenuLoading(true);
         const dataService = DataService.getInstance();
         
-        // Load menu items and categories in parallel
-        const [menuItems, categories] = await Promise.all([
-          dataService.getMenuItems(),
-          dataService.getMenuCategories()
+        // Set a timeout for the primary service
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Timeout')), 3000)
+        );
+        
+        // Load menu items and categories with timeout
+        const [menuItems, categories] = await Promise.race([
+          Promise.all([
+            dataService.getMenuItems(),
+            dataService.getMenuCategories()
+          ]),
+          timeoutPromise
         ]);
         
         setDynamicMenuItems(menuItems);
@@ -225,73 +233,34 @@ const POSScreen: React.FC = () => {
       } catch (error) {
         console.error('❌ Failed to load dynamic menu:', error);
         
-        // Implement tiered fallback system with different data sources
+        // Quick fallback to cached/local data
         try {
-          // Tier 1: Try DatabaseService direct call (different from dataService)
-          console.log('🔄 Attempting Tier 1 fallback: DatabaseService direct call');
           const databaseService = DatabaseService.getInstance();
-          let fallbackItems = await databaseService.getMenuItems();
-          let fallbackCategories = await databaseService.getMenuCategories();
+          const [fallbackItems, fallbackCategories] = await Promise.all([
+            databaseService.getMenuItems(),
+            databaseService.getMenuCategories()
+          ]);
           
-          // Validate and use Tier 1 data if available
           if (Array.isArray(fallbackItems) && fallbackItems.length > 0) {
-            console.log('✅ Tier 1 successful:', fallbackItems.length, 'items');
+            console.log('✅ Using cached menu:', fallbackItems.length, 'items');
             setDynamicMenuItems(fallbackItems);
             
-            // Safe category processing with null checks
             const safeCategories = Array.isArray(fallbackCategories) ? fallbackCategories : [];
             const categoryNames = ['All', ...safeCategories
               .filter(cat => cat && typeof cat === 'object' && cat.name)
               .map(cat => cat.name)
               .filter(name => name !== 'All')];
             setDynamicCategories(categoryNames);
-            
           } else {
-            throw new Error('Tier 1 fallback returned empty or invalid data');
-          }
-          
-        } catch (tier1Error) {
-          console.warn('⚠️ Tier 1 fallback failed:', tier1Error);
-          
-          try {
-            // Tier 2: Use hardcoded Chucho menu data as last resort
-            console.log('🔄 Attempting Tier 2 fallback: Hardcoded Chucho menu');
-            const { CHUCHO_MENU_ITEMS, CHUCHO_CATEGORIES } = await import('../../data/chuchoMenu');
-            
-            if (Array.isArray(CHUCHO_MENU_ITEMS) && CHUCHO_MENU_ITEMS.length > 0) {
-              console.log('✅ Tier 2 successful: Using Chucho menu with', CHUCHO_MENU_ITEMS.length, 'items');
-              
-              // Transform Chucho data to match expected format
-              const transformedItems = CHUCHO_MENU_ITEMS.map(item => ({
-                ...item,
-                icon: item.image || 'restaurant', // Map image to icon field
-                emoji: item.image, // Preserve emoji field
-              }));
-              
-              setDynamicMenuItems(transformedItems);
-              
-              // Safe category processing
-              const safeCategories = Array.isArray(CHUCHO_CATEGORIES) ? CHUCHO_CATEGORIES : [];
-              const categoryNames = ['All', ...safeCategories
-                .filter(cat => cat && typeof cat === 'object' && cat.name)
-                .map(cat => cat.name)
-                .filter(name => name !== 'All')];
-              setDynamicCategories(categoryNames);
-              
-            } else {
-              throw new Error('Chucho menu data is invalid or empty');
-            }
-            
-          } catch (tier2Error) {
-            console.error('❌ All fallback tiers failed:', tier2Error);
-            
-            // Final safety net: Ensure we always have valid empty state
-            console.warn('⚠️ Showing empty state as final fallback');
+            // Empty state
             setDynamicMenuItems([]);
             setDynamicCategories(['All']);
           }
+        } catch (fallbackError) {
+          console.error('❌ Fallback failed:', fallbackError);
+          setDynamicMenuItems([]);
+          setDynamicCategories(['All']);
         }
-        
       } finally {
         setMenuLoading(false);
       }
@@ -983,7 +952,7 @@ const POSScreen: React.FC = () => {
                   style={styles.modalCloseButton}
                   onPress={() => setShowCartModal(false)}
                 >
-                  <Icon name="close" size={24} color={theme.colors.text} />
+                  <Icon name="close" size={30} color={theme.colors.error || '#FF0000'} />
                 </TouchableOpacity>
               </View>
             </View>
@@ -1231,8 +1200,8 @@ const createStyles = (theme: any) => StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingVertical: 12,
-    height: 60,  // Changed from 70 for consistency with other screens
+    paddingVertical: 8,
+    height: 48,  // Reduced for more professional look
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -1781,7 +1750,13 @@ const createStyles = (theme: any) => StyleSheet.create({
     color: theme.colors.text,
   },
   modalCloseButton: {
-    padding: 4,
+    padding: 10,
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: theme.colors.surface,
+    borderRadius: 20,
+    zIndex: 1,
   },
   modalContent: {
     padding: 20,

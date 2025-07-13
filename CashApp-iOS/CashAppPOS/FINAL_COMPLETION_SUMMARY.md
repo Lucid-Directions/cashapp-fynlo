@@ -149,11 +149,28 @@ Staff POS Screen (Customer Orders)
 ## 🛠️ **Post-PR Fixes Applied**
 
 ### **✅ Cursor Bot Feedback Addressed**:
+
+**1. Theme System Completion**:
 - **Issue**: Inconsistent color theming with remaining `Colors.warning` references
 - **Fix**: Removed final 6 instances of hardcoded `Colors.warning` in MenuManagementScreen
 - **Result**: 100% theme system completion - ALL colors now use dynamic theming
 - **Affected Elements**: featuredBadge, allergenText, featuredButton, star icons
 - **Verification**: Removed unused Colors constant definition entirely
+
+**2. Text Contrast Issues (Accessibility)**:
+- **Issue**: `selectedCategoryTabText` and `saveButtonText` using `theme.colors.surface` on primary backgrounds
+- **Fix**: Changed to `theme.colors.white` for proper contrast on dark primary backgrounds
+- **Result**: Improved readability and accessibility compliance
+- **Impact**: Better user experience for users with visual impairments
+
+**3. Error Handling and Null Safety**:
+- **Issue**: Potential null pointer exceptions and misleading error messages
+- **Fix**: Added null safety checks and improved error message clarity
+- **Changes**: 
+  - Null check in `getCategories()` returns empty array instead of crashing
+  - Distinguish between "API disabled" vs "backend unavailable" scenarios
+  - Remove misleading "check connection" messages when API is disabled
+- **Result**: More robust error handling and clearer user feedback
 
 ---
 
