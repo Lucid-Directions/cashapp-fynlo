@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 import asyncio
 import json
 from datetime import datetime, timedelta
+from asyncio import Lock
 
 from app.core.database import get_db
 from app.core.responses import APIResponseHelper
@@ -17,8 +18,9 @@ import logging
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
-# In-memory cache with TTL
+# Thread-safe in-memory cache with TTL
 _memory_cache: Dict[str, Dict[str, Any]] = {}
+_cache_lock = Lock()
 _cache_ttl = timedelta(minutes=5)
 
 # Default configurations
@@ -56,22 +58,25 @@ DEFAULT_PAYMENT_METHODS = {
     }
 }
 
-def get_from_memory_cache(key: str) -> Optional[Dict[str, Any]]:
-    """Get value from memory cache if not expired"""
-    if key in _memory_cache:
-        cached = _memory_cache[key]
-        if datetime.utcnow() < cached["expires_at"]:
-            return cached["data"]
-        else:
-            del _memory_cache[key]
+async def get_from_memory_cache(key: str) -> Optional[Dict[str, Any]]:
+    """Get value from memory cache if not expired (thread-safe)"""
+    async with _cache_lock:
+        if key in _memory_cache:
+            cached = _memory_cache[key]
+            if datetime.utcnow() < cached["expires_at"]:
+                return cached["data"]
+            else:
+                # Clean up expired entry
+                _memory_cache.pop(key, None)
     return None
 
-def set_memory_cache(key: str, data: Dict[str, Any]):
-    """Set value in memory cache with TTL"""
-    _memory_cache[key] = {
-        "data": data,
-        "expires_at": datetime.utcnow() + _cache_ttl
-    }
+async def set_memory_cache(key: str, data: Dict[str, Any]):
+    """Set value in memory cache with TTL (thread-safe)"""
+    async with _cache_lock:
+        _memory_cache[key] = {
+            "data": data,
+            "expires_at": datetime.utcnow() + _cache_ttl
+        }
 
 @router.get("/service-charge/fast")
 async def get_service_charge_fast(response: Response):
@@ -81,7 +86,7 @@ async def get_service_charge_fast(response: Response):
     """
     try:
         # Check memory cache first
-        cached = get_from_memory_cache("service_charge")
+        cached = await get_from_memory_cache("service_charge")
         if cached:
             response.headers["X-Cache"] = "HIT"
             return APIResponseHelper.success(
@@ -93,7 +98,7 @@ async def get_service_charge_fast(response: Response):
         response.headers["X-Cache"] = "MISS"
         
         # Set memory cache
-        set_memory_cache("service_charge", DEFAULT_SERVICE_CHARGE)
+        await set_memory_cache("service_charge", DEFAULT_SERVICE_CHARGE)
         
         # Schedule background cache update
         asyncio.create_task(update_service_charge_cache())
@@ -117,7 +122,7 @@ async def get_payment_methods_fast(response: Response):
     """
     try:
         # Check memory cache first
-        cached = get_from_memory_cache("payment_methods")
+        cached = await get_from_memory_cache("payment_methods")
         if cached:
             response.headers["X-Cache"] = "HIT"
             return APIResponseHelper.success(
@@ -129,7 +134,7 @@ async def get_payment_methods_fast(response: Response):
         response.headers["X-Cache"] = "MISS"
         
         # Set memory cache
-        set_memory_cache("payment_methods", DEFAULT_PAYMENT_METHODS)
+        await set_memory_cache("payment_methods", DEFAULT_PAYMENT_METHODS)
         
         return APIResponseHelper.success(
             data={"payment_methods": DEFAULT_PAYMENT_METHODS},
@@ -151,8 +156,8 @@ async def get_all_settings_fast(response: Response):
     """
     try:
         # Check if we have all settings cached
-        service_charge = get_from_memory_cache("service_charge") or DEFAULT_SERVICE_CHARGE
-        payment_methods = get_from_memory_cache("payment_methods") or DEFAULT_PAYMENT_METHODS
+        service_charge = await get_from_memory_cache("service_charge") or DEFAULT_SERVICE_CHARGE
+        payment_methods = await get_from_memory_cache("payment_methods") or DEFAULT_PAYMENT_METHODS
         
         all_settings = {
             "service_charge": service_charge,
@@ -192,7 +197,7 @@ async def update_service_charge_cache():
         # Try to get from Redis first
         cached_config = await PlatformCacheService.get_service_charge_config()
         if cached_config:
-            set_memory_cache("service_charge", cached_config)
+            await set_memory_cache("service_charge", cached_config)
             return
         
         # If not in Redis, we'll just keep using defaults
