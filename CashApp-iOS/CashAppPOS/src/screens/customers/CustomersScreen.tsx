@@ -47,7 +47,15 @@ const CustomersScreen: React.FC = () => {
       // Assuming a getCustomers method will be added to DataService
       // For now, this will likely fail or return empty if not implemented, demonstrating error state
       const customerData = await dataService.getCustomers();
-      setCustomers(customerData || []);
+      
+      // Parse date strings to Date objects
+      const parsedCustomers = (customerData || []).map(customer => ({
+        ...customer,
+        joinedDate: customer.joinedDate ? new Date(customer.joinedDate) : null,
+        lastVisit: customer.lastVisit ? new Date(customer.lastVisit) : null,
+      }));
+      
+      setCustomers(parsedCustomers);
     } catch (e: any) {
       setError(e.message || 'Failed to load customers.');
       setCustomers([]); // Clear customers on error
@@ -70,7 +78,9 @@ const CustomersScreen: React.FC = () => {
           break;
         case 'new':
           filtered = filtered.filter(customer => {
-            const daysSinceJoined = (Date.now() - customer.joinedDate.getTime()) / (1000 * 60 * 60 * 24);
+            if (!customer.joinedDate) return false;
+            const joinedDate = customer.joinedDate instanceof Date ? customer.joinedDate : new Date(customer.joinedDate);
+            const daysSinceJoined = (Date.now() - joinedDate.getTime()) / (1000 * 60 * 60 * 24);
             return daysSinceJoined <= 30;
           });
           break;
@@ -99,8 +109,12 @@ const CustomersScreen: React.FC = () => {
     return { level: 'New', color: theme.colors.darkGray };
   };
 
-  const formatDate = (date: Date) => {
-    const days = Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24));
+  const formatDate = (date: Date | string | undefined) => {
+    if (!date) return 'Never';
+    const dateObj = date instanceof Date ? date : new Date(date);
+    if (isNaN(dateObj.getTime())) return 'Never';
+    
+    const days = Math.floor((Date.now() - dateObj.getTime()) / (1000 * 60 * 60 * 24));
     if (days === 0) return 'Today';
     if (days === 1) return 'Yesterday';
     if (days < 7) return `${days} days ago`;
@@ -162,7 +176,9 @@ const CustomersScreen: React.FC = () => {
     total: customers.length,
     vip: customers.filter(c => c.totalSpent > 1000).length,
     new: customers.filter(c => {
-      const days = (Date.now() - c.joinedDate.getTime()) / (1000 * 60 * 60 * 24);
+      if (!c.joinedDate) return false;
+      const joinedDate = c.joinedDate instanceof Date ? c.joinedDate : new Date(c.joinedDate);
+      const days = (Date.now() - joinedDate.getTime()) / (1000 * 60 * 60 * 24);
       return days <= 30;
     }).length,
     avgSpent: customers.length > 0 ? customers.reduce((sum, c) => sum + c.totalSpent, 0) / customers.length : 0,
