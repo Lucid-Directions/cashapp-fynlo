@@ -40,32 +40,35 @@ async def verify_websocket_access(
         
         # Verify user authentication if user_id provided
         if user_id:
-            # First check if user exists
-            user = db.query(User).filter(User.id == user_id).first()
-            if not user:
+            # Token is REQUIRED for authenticated connections
+            if not token:
                 return False
             
-            # If token provided, validate it
-            if token:
-                try:
-                    # Decode the JWT token
-                    payload = jwt.decode(
-                        token, 
-                        settings.SECRET_KEY, 
-                        algorithms=[settings.ALGORITHM]
-                    )
-                    
-                    # Check if token is expired
-                    if payload.get("exp") and datetime.utcnow().timestamp() > payload["exp"]:
-                        return False
-                    
-                    # Verify the user ID matches
-                    token_user_id = payload.get("sub")
-                    if str(token_user_id) != str(user_id):
-                        return False
-                        
-                except JWTError:
+            # Validate the JWT token
+            try:
+                # Decode the JWT token
+                payload = jwt.decode(
+                    token, 
+                    settings.SECRET_KEY, 
+                    algorithms=[settings.ALGORITHM]
+                )
+                
+                # Check if token is expired
+                if payload.get("exp") and datetime.utcnow().timestamp() > payload["exp"]:
                     return False
+                
+                # Verify the user ID matches
+                token_user_id = payload.get("sub")
+                if str(token_user_id) != str(user_id):
+                    return False
+                    
+            except JWTError:
+                return False
+            
+            # Now verify the user exists and has access
+            user = db.query(User).filter(User.id == user_id).first()
+            if not user or not user.is_active:
+                return False
             
             # Check if user has access to this restaurant
             if user.role == "restaurant_owner" and str(user.restaurant_id) != restaurant_id:
