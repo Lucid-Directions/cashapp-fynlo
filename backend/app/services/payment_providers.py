@@ -4,6 +4,12 @@ from enum import Enum
 from datetime import datetime
 from decimal import Decimal
 
+# Import all provider implementations to make them available
+from .payment_providers.stripe_provider import StripeProvider
+from .payment_providers.square_provider import SquareProvider
+from .payment_providers.sumup_provider import SumUpProvider
+# Note: PaymentProviderFactory should be imported directly from payment_factory to avoid circular imports
+
 class PaymentStatus(Enum):
     SUCCESS = "success"
     PENDING = "pending"
@@ -93,3 +99,12 @@ class PaymentProvider(ABC):
             "raw_response": provider_response,
             "metadata": provider_response.get("metadata", {})
         }
+
+# Export all classes for backwards compatibility
+__all__ = [
+    'PaymentStatus',
+    'PaymentProvider',
+    'StripeProvider',
+    'SquareProvider',
+    'SumUpProvider'
+]

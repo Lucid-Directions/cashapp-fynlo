@@ -15,7 +15,8 @@ from enum import Enum
 from app.core.database import Base
 from app.core.exceptions import FynloException
 from app.services.secure_payment_config import SecurePaymentConfigService
-from app.services.payment_providers import PaymentProviderFactory, PaymentStatus
+from app.services.payment_providers import PaymentStatus
+from app.services.payment_factory import PaymentProviderFactory
 
 
 class PaymentProcessingError(FynloException):
