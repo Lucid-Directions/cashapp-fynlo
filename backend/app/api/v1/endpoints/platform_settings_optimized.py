@@ -130,11 +130,14 @@ async def get_payment_methods_fast(response: Response):
                 message="Payment methods (cached)"
             )
         
-        # Return defaults immediately
+        # Return defaults immediately, update cache in background
         response.headers["X-Cache"] = "MISS"
         
         # Set memory cache
         await set_memory_cache("payment_methods", DEFAULT_PAYMENT_METHODS)
+        
+        # Schedule background cache update (same as service charge)
+        asyncio.create_task(update_payment_methods_cache())
         
         return APIResponseHelper.success(
             data={"payment_methods": DEFAULT_PAYMENT_METHODS},
@@ -156,12 +159,23 @@ async def get_all_settings_fast(response: Response):
     """
     try:
         # Check if we have all settings cached
-        service_charge = await get_from_memory_cache("service_charge") or DEFAULT_SERVICE_CHARGE
-        payment_methods = await get_from_memory_cache("payment_methods") or DEFAULT_PAYMENT_METHODS
+        service_charge_cached = await get_from_memory_cache("service_charge")
+        payment_methods_cached = await get_from_memory_cache("payment_methods")
+        
+        # Populate cache for any missing values
+        if not service_charge_cached:
+            await set_memory_cache("service_charge", DEFAULT_SERVICE_CHARGE)
+            asyncio.create_task(update_service_charge_cache())
+            service_charge_cached = DEFAULT_SERVICE_CHARGE
+            
+        if not payment_methods_cached:
+            await set_memory_cache("payment_methods", DEFAULT_PAYMENT_METHODS)
+            asyncio.create_task(update_payment_methods_cache())
+            payment_methods_cached = DEFAULT_PAYMENT_METHODS
         
         all_settings = {
-            "service_charge": service_charge,
-            "payment_methods": payment_methods,
+            "service_charge": service_charge_cached,
+            "payment_methods": payment_methods_cached,
             "platform_info": {
                 "name": "Fynlo POS",
                 "version": "1.0.0",
@@ -169,7 +183,11 @@ async def get_all_settings_fast(response: Response):
             }
         }
         
-        response.headers["X-Cache"] = "PARTIAL"
+        # Set cache header based on what was cached
+        if service_charge_cached and payment_methods_cached:
+            response.headers["X-Cache"] = "HIT"
+        else:
+            response.headers["X-Cache"] = "PARTIAL"
         
         return APIResponseHelper.success(
             data=all_settings,
@@ -204,4 +222,22 @@ async def update_service_charge_cache():
         # Database queries can be added here if needed in future
         
     except Exception as e:
-        logger.warning(f"Background cache update failed: {e}")
+        logger.warning(f"Background service charge cache update failed: {e}")
+
+async def update_payment_methods_cache():
+    """Background task to update payment methods cache from database"""
+    try:
+        # For now, payment methods are static configuration
+        # In future, this could fetch from database or Redis
+        # This ensures consistency with service charge pattern
+        
+        # Could add database query here when payment methods become configurable
+        # Example:
+        # payment_config = await fetch_payment_methods_from_db()
+        # if payment_config:
+        #     await set_memory_cache("payment_methods", payment_config)
+        
+        logger.debug("Payment methods cache update completed (using defaults)")
+        
+    except Exception as e:
+        logger.warning(f"Background payment methods cache update failed: {e}")
