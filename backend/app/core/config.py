@@ -28,6 +28,7 @@ class Settings(BaseSettings):
     DEBUG: bool = True
     ENVIRONMENT: str = "development"  # This will be overridden by .env file
     API_V1_STR: str = "/api/v1"
+    BASE_URL: str = "https://fynlopos-9eg2c.ondigitalocean.app"  # Production URL, override in dev
     
     # Database
     DATABASE_URL: str = "postgresql://fynlo_user:fynlo_password@localhost:5432/fynlo_pos"

@@ -48,6 +48,7 @@ async def get_service_charge_public(
         result = DEFAULT_SERVICE_CHARGE.copy()
         
         # Try a quick database query with statement timeout
+        db_success = False
         try:
             # Set a statement timeout at the database level
             db.execute("SET LOCAL statement_timeout = '500ms'")
@@ -70,17 +71,24 @@ async def get_service_charge_public(
                 elif config.config_key == "platform.service_charge.currency":
                     result["currency"] = config.config_value.get("value", "GBP")
             
-            # Cache the result for future requests
-            await PlatformCacheService.set_service_charge_config(result)
+            db_success = True
                     
         except Exception as e:
             # If database query fails or times out, use defaults
             logger.warning(f"Database query failed, using defaults: {e}")
-            # Reset the timeout for the connection
+        finally:
+            # Always reset the timeout for the connection
             try:
                 db.execute("RESET statement_timeout")
-            except:
-                pass
+            except Exception as reset_error:
+                logger.warning(f"Failed to reset statement timeout: {reset_error}")
+        
+        # Cache the result if database query was successful
+        if db_success:
+            try:
+                await PlatformCacheService.set_service_charge_config(result)
+            except Exception as cache_error:
+                logger.warning(f"Failed to cache configuration: {cache_error}")
         
         return APIResponseHelper.success(
             data={"service_charge": result},

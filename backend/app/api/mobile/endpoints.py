@@ -397,10 +397,14 @@ async def get_base_url_config():
     try:
         from app.core.config import settings
         
+        # Get the actual host from request or settings
+        base_url = getattr(settings, 'BASE_URL', 'https://fynlopos-9eg2c.ondigitalocean.app')
+        ws_protocol = 'wss' if base_url.startswith('https') else 'ws'
+        
         config_data = {
-            "api_base_url": "http://localhost:8000",  # Primary API
-            "odoo_compatible_url": "http://localhost:8069",  # Odoo compatibility
-            "websocket_url": "ws://localhost:8000/ws",
+            "api_base_url": base_url,  # Use production URL from settings
+            "odoo_compatible_url": base_url,  # Same as API base in production
+            "websocket_url": f"{ws_protocol}://{base_url.replace('https://', '').replace('http://', '')}/ws",
             "supported_versions": ["v1"],
             "mobile_optimized": True,
             "features": {
