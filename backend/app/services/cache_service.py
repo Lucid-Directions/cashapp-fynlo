@@ -7,7 +7,7 @@ import logging
 from typing import Dict, Any, Optional
 from datetime import timedelta
 
-from app.core.redis_client import get_redis_client
+from app.core.redis_client import get_redis
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
@@ -27,12 +27,12 @@ class PlatformCacheService:
     async def get_service_charge_config() -> Optional[Dict[str, Any]]:
         """Get service charge configuration from cache"""
         try:
-            redis = get_redis_client()
+            redis = await get_redis()
             if not redis:
                 return None
                 
             cache_key = PlatformCacheService.get_cache_key("service_charge")
-            cached_data = redis.get(cache_key)
+            cached_data = await redis.get(cache_key)
             
             if cached_data:
                 return json.loads(cached_data)
@@ -47,12 +47,12 @@ class PlatformCacheService:
     async def set_service_charge_config(config: Dict[str, Any], ttl: int = DEFAULT_TTL) -> bool:
         """Set service charge configuration in cache"""
         try:
-            redis = get_redis_client()
+            redis = await get_redis()
             if not redis:
                 return False
                 
             cache_key = PlatformCacheService.get_cache_key("service_charge")
-            redis.setex(
+            await redis.setex(
                 cache_key,
                 ttl,
                 json.dumps(config)
@@ -67,12 +67,12 @@ class PlatformCacheService:
     async def invalidate_service_charge_config() -> bool:
         """Invalidate service charge configuration cache"""
         try:
-            redis = get_redis_client()
+            redis = await get_redis()
             if not redis:
                 return False
                 
             cache_key = PlatformCacheService.get_cache_key("service_charge")
-            redis.delete(cache_key)
+            await redis.delete(cache_key)
             return True
             
         except Exception as e:
