@@ -10,7 +10,8 @@ from app.api.v1.endpoints import (
     analytics, files, platform, platform_settings, platform_settings_public, payment_configurations,
     websocket, sync, notifications, menu,
     pos, admin, inventory, recipes, employees, # Added inventory, recipes, and employees
-    exports, dashboard, websocket_portal, storage_health  # Portal-specific endpoints + storage health
+    exports, dashboard, websocket_portal, storage_health,  # Portal-specific endpoints + storage health
+    platform_settings_optimized  # Optimized endpoints for mobile app
 )
 from app.api.v1 import subscriptions
 from app.api.v1.platform import platform_router
@@ -66,3 +67,6 @@ api_router.include_router(websocket_portal.router, tags=["websocket_portal"])
 
 # Storage management endpoints
 api_router.include_router(storage_health.router, prefix="/storage", tags=["storage"])
+
+# Optimized platform endpoints for mobile app performance
+api_router.include_router(platform_settings_optimized.router, prefix="/platform/optimized", tags=["platform_optimized"])
