@@ -10,6 +10,7 @@ from concurrent.futures import TimeoutError as FuturesTimeoutError
 
 from app.core.database import get_db
 from app.core.responses import APIResponseHelper
+from app.services.cache_service import PlatformCacheService
 import logging
 
 router = APIRouter()
@@ -32,42 +33,54 @@ async def get_service_charge_public(
     This endpoint doesn't require admin authentication
     """
     try:
-        # Use asyncio timeout to prevent long-running queries
-        async def get_config_with_timeout():
-            try:
-                # Simple direct query without complex service logic
-                from app.models.platform_config import PlatformConfiguration
-                
-                configs = db.query(PlatformConfiguration).filter(
-                    PlatformConfiguration.category == "service_charge",
-                    PlatformConfiguration.is_active == True
-                ).limit(10).all()
-                
-                result = DEFAULT_SERVICE_CHARGE.copy()
-                
-                # Parse configurations
-                for config in configs:
-                    if config.config_key == "platform.service_charge.enabled":
-                        result["enabled"] = config.config_value.get("value", True)
-                    elif config.config_key == "platform.service_charge.rate":
-                        result["rate"] = config.config_value.get("value", 12.5)
-                    elif config.config_key == "platform.service_charge.description":
-                        result["description"] = config.config_value.get("value", "Platform service charge")
-                    elif config.config_key == "platform.service_charge.currency":
-                        result["currency"] = config.config_value.get("value", "GBP")
-                
-                return result
-                
-            except Exception as e:
-                logger.warning(f"Error fetching service charge config: {e}")
-                return DEFAULT_SERVICE_CHARGE
+        # First, try to get from cache
+        cached_config = await PlatformCacheService.get_service_charge_config()
+        if cached_config:
+            logger.info("Returning cached service charge configuration")
+            return APIResponseHelper.success(
+                data={"service_charge": cached_config},
+                message="Service charge configuration retrieved (cached)"
+            )
         
-        # Set a 2-second timeout for the database query
+        logger.info("Cache miss - querying database")
+        
+        # Use defaults as starting point
+        result = DEFAULT_SERVICE_CHARGE.copy()
+        
+        # Try a quick database query with statement timeout
         try:
-            result = await asyncio.wait_for(get_config_with_timeout(), timeout=2.0)
-        except asyncio.TimeoutError:
-            logger.warning("Service charge query timed out, using defaults")
-            result = DEFAULT_SERVICE_CHARGE
+            # Set a statement timeout at the database level
+            db.execute("SET LOCAL statement_timeout = '500ms'")
+            
+            from app.models.platform_config import PlatformConfiguration
+            
+            configs = db.query(PlatformConfiguration).filter(
+                PlatformConfiguration.category == "service_charge",
+                PlatformConfiguration.is_active == True
+            ).limit(4).all()
+            
+            # Parse configurations if query succeeds
+            for config in configs:
+                if config.config_key == "platform.service_charge.enabled":
+                    result["enabled"] = config.config_value.get("value", True)
+                elif config.config_key == "platform.service_charge.rate":
+                    result["rate"] = config.config_value.get("value", 12.5)
+                elif config.config_key == "platform.service_charge.description":
+                    result["description"] = config.config_value.get("value", "Platform service charge")
+                elif config.config_key == "platform.service_charge.currency":
+                    result["currency"] = config.config_value.get("value", "GBP")
+            
+            # Cache the result for future requests
+            await PlatformCacheService.set_service_charge_config(result)
+                    
+        except Exception as e:
+            # If database query fails or times out, use defaults
+            logger.warning(f"Database query failed, using defaults: {e}")
+            # Reset the timeout for the connection
+            try:
+                db.execute("RESET statement_timeout")
+            except:
+                pass
         
         return APIResponseHelper.success(
             data={"service_charge": result},
