@@ -26,8 +26,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Database connection
-DATABASE_URL = "postgresql://fynlo_user:fynlo_password@localhost/fynlo_pos"
+# Database connection - Use environment variable or fallback to localhost for development
+import os
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://fynlo_user:fynlo_password@localhost/fynlo_pos")
 
 def get_db_connection():
     """Get database connection"""

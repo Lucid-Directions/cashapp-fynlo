@@ -30,11 +30,11 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     BASE_URL: str = "https://fynlopos-9eg2c.ondigitalocean.app"  # Production URL, override in dev
     
-    # Database
-    DATABASE_URL: str = "postgresql://fynlo_user:fynlo_password@localhost:5432/fynlo_pos"
+    # Database - Must be set via environment variable in production
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "postgresql://fynlo_user:fynlo_password@localhost:5432/fynlo_pos")
     
-    # Redis
-    REDIS_URL: str = "redis://localhost:6379/0"
+    # Redis - Must be set via environment variable in production
+    REDIS_URL: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")
     
     # Security
     SECRET_KEY: str = "your-super-secret-key-change-in-production"

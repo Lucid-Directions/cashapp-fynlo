@@ -403,7 +403,7 @@ async def get_base_url_config():
         
         config_data = {
             "api_base_url": base_url,  # Use production URL from settings
-            "odoo_compatible_url": base_url,  # Same as API base in production
+            "odoo_compatible_url": base_url,  # Legacy compatibility - consider removal
             "websocket_url": f"{ws_protocol}://{base_url.replace('https://', '').replace('http://', '')}/ws",
             "supported_versions": ["v1"],
             "mobile_optimized": True,
