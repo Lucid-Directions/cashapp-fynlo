@@ -8,6 +8,7 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, Query, P
 from sqlalchemy.orm import Session
 import json
 from datetime import datetime
+from jose import jwt, JWTError
 
 from app.core.database import get_db, User, Restaurant
 from app.core.websocket import (
@@ -19,27 +20,52 @@ from app.core.websocket import (
 from app.core.exceptions import FynloException, ErrorCodes
 from app.core.responses import APIResponseHelper
 from app.core.auth import get_current_user
+from app.core.config import settings
 
 router = APIRouter()
 
 async def verify_websocket_access(
     restaurant_id: str,
     user_id: Optional[str] = None,
+    token: Optional[str] = None,
     connection_type: str = "pos",
     db: Session = None
 ) -> bool:
-    """Verify WebSocket access permissions"""
+    """Verify WebSocket access permissions with token validation"""
     try:
         # Verify restaurant exists
         restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
         if not restaurant or not restaurant.is_active:
             return False
         
-        # Verify user permissions if user_id provided
+        # Verify user authentication if user_id provided
         if user_id:
+            # First check if user exists
             user = db.query(User).filter(User.id == user_id).first()
             if not user:
                 return False
+            
+            # If token provided, validate it
+            if token:
+                try:
+                    # Decode the JWT token
+                    payload = jwt.decode(
+                        token, 
+                        settings.SECRET_KEY, 
+                        algorithms=[settings.ALGORITHM]
+                    )
+                    
+                    # Check if token is expired
+                    if payload.get("exp") and datetime.utcnow().timestamp() > payload["exp"]:
+                        return False
+                    
+                    # Verify the user ID matches
+                    token_user_id = payload.get("sub")
+                    if str(token_user_id) != str(user_id):
+                        return False
+                        
+                except JWTError:
+                    return False
             
             # Check if user has access to this restaurant
             if user.role == "restaurant_owner" and str(user.restaurant_id) != restaurant_id:
@@ -67,8 +93,11 @@ async def websocket_endpoint_general(
     connection_id = None
     
     try:
-        # Verify access
-        has_access = await verify_websocket_access(restaurant_id, user_id, connection_type, db)
+        # Get token from query parameters
+        token = websocket.query_params.get("token")
+        
+        # Verify access with token validation
+        has_access = await verify_websocket_access(restaurant_id, user_id, token, connection_type, db)
         if not has_access:
             await websocket.close(code=4003, reason="Access denied")
             return
@@ -167,8 +196,11 @@ async def websocket_kitchen_endpoint(
     connection_id = None
     
     try:
-        # Verify access
-        has_access = await verify_websocket_access(restaurant_id, user_id, "kitchen", db)
+        # Get token from query parameters
+        token = websocket.query_params.get("token")
+        
+        # Verify access with token validation
+        has_access = await verify_websocket_access(restaurant_id, user_id, token, "kitchen", db)
         if not has_access:
             await websocket.close(code=4003, reason="Access denied")
             return
@@ -257,8 +289,11 @@ async def websocket_pos_endpoint(
     connection_id = None
     
     try:
-        # Verify access
-        has_access = await verify_websocket_access(restaurant_id, user_id, "pos", db)
+        # Get token from query parameters
+        token = websocket.query_params.get("token")
+        
+        # Verify access with token validation
+        has_access = await verify_websocket_access(restaurant_id, user_id, token, "pos", db)
         if not has_access:
             await websocket.close(code=4003, reason="Access denied")
             return
@@ -347,8 +382,11 @@ async def websocket_management_endpoint(
     connection_id = None
     
     try:
-        # Verify management access
-        has_access = await verify_websocket_access(restaurant_id, user_id, "management", db)
+        # Get token from query parameters
+        token = websocket.query_params.get("token")
+        
+        # Verify management access with token validation
+        has_access = await verify_websocket_access(restaurant_id, user_id, token, "management", db)
         if not has_access:
             await websocket.close(code=4003, reason="Access denied")
             return
