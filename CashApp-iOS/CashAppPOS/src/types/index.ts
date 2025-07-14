@@ -266,11 +266,11 @@ export interface CustomerData {
   name: string;
   email: string;
   phone: string;
-  joinedDate: Date;
+  joinedDate: Date | null;
   totalSpent: number;
   orderCount: number;
   averageOrderValue: number;
-  lastVisit: Date;
+  lastVisit: Date | null;
   loyaltyPoints: number;
   preferredItems: string[];
   tags: string[];

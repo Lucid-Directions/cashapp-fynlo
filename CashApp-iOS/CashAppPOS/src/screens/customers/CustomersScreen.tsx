@@ -51,8 +51,8 @@ const CustomersScreen: React.FC = () => {
       // Parse date strings to Date objects
       const parsedCustomers = (customerData || []).map(customer => ({
         ...customer,
-        joinedDate: customer.joinedDate ? new Date(customer.joinedDate) : new Date(),
-        lastVisit: customer.lastVisit ? new Date(customer.lastVisit) : new Date(),
+        joinedDate: customer.joinedDate ? new Date(customer.joinedDate) : null,
+        lastVisit: customer.lastVisit ? new Date(customer.lastVisit) : null,
       }));
       
       setCustomers(parsedCustomers);
