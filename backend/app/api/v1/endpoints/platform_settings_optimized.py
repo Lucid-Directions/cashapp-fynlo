@@ -162,6 +162,10 @@ async def get_all_settings_fast(response: Response):
         service_charge_cached = await get_from_memory_cache("service_charge")
         payment_methods_cached = await get_from_memory_cache("payment_methods")
         
+        # Track original cache state for header
+        service_charge_was_cached = service_charge_cached is not None
+        payment_methods_was_cached = payment_methods_cached is not None
+        
         # Populate cache for any missing values
         if not service_charge_cached:
             await set_memory_cache("service_charge", DEFAULT_SERVICE_CHARGE)
@@ -183,11 +187,13 @@ async def get_all_settings_fast(response: Response):
             }
         }
         
-        # Set cache header based on what was cached
-        if service_charge_cached and payment_methods_cached:
+        # Set cache header based on original cache state
+        if service_charge_was_cached and payment_methods_was_cached:
             response.headers["X-Cache"] = "HIT"
-        else:
+        elif service_charge_was_cached or payment_methods_was_cached:
             response.headers["X-Cache"] = "PARTIAL"
+        else:
+            response.headers["X-Cache"] = "MISS"
         
         return APIResponseHelper.success(
             data=all_settings,
