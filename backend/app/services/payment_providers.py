@@ -8,7 +8,7 @@ from decimal import Decimal
 from .payment_providers.stripe_provider import StripeProvider
 from .payment_providers.square_provider import SquareProvider
 from .payment_providers.sumup_provider import SumUpProvider
-from .payment_providers.payment_factory import PaymentProviderFactory
+from .payment_factory import PaymentProviderFactory
 
 class PaymentStatus(Enum):
     SUCCESS = "success"
