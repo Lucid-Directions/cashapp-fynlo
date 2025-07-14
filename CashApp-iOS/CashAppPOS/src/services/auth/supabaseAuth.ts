@@ -219,6 +219,19 @@ class SupabaseAuthService {
   }
   
   /**
+   * Get current session user ID
+   */
+  private async getCurrentSessionUserId(): Promise<string | null> {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      return session?.user?.id || null;
+    } catch (error) {
+      console.error('Error getting session user ID:', error);
+      return null;
+    }
+  }
+  
+  /**
    * Verify token with backend and get user info
    */
   private async verifyWithBackend(accessToken: string, email?: string): Promise<{ user: UserInfo }> {
@@ -240,9 +253,10 @@ class SupabaseAuthService {
       // In production, this would come from the backend based on the user's actual restaurant
       console.log('⚠️ Using fallback authentication data');
       
-      // Create a generic user profile that will work for any restaurant
+      // Use Supabase user ID if available, otherwise create a UUID
+      const supabaseUserId = await this.getCurrentSessionUserId();
       const userData = {
-        id: `user-${Date.now()}`,
+        id: supabaseUserId || `user-${Date.now()}`,
         email: email,
         full_name: 'Restaurant User',
         role: 'restaurant_owner', // Default role for testing
