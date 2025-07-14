@@ -113,11 +113,16 @@ class WebSocketService extends SimpleEventEmitter {
       // Build WebSocket URL with authentication token
       const wsProtocol = API_CONFIG.BASE_URL.startsWith('https') ? 'wss' : 'ws';
       const wsHost = API_CONFIG.BASE_URL.replace(/^https?:\/\//, '');
-      // Remove /api/v1 prefix as backend expects /ws/pos directly
-      // Include auth token in query parameters for WebSocket authentication
-      this.connectionUrl = `${wsProtocol}://${wsHost}/ws/pos/${restaurantId}?user_id=${userId}&token=${authToken}`;
       
-      console.log('🔌 Connecting to WebSocket:', this.connectionUrl);
+      // URL encode parameters to handle special characters safely
+      const encodedUserId = encodeURIComponent(userId);
+      const encodedToken = encodeURIComponent(authToken);
+      
+      // Build connection URL with encoded parameters
+      this.connectionUrl = `${wsProtocol}://${wsHost}/ws/pos/${restaurantId}?user_id=${encodedUserId}&token=${encodedToken}`;
+      
+      // Log connection attempt without exposing the token
+      console.log('🔌 Connecting to WebSocket:', `${wsProtocol}://${wsHost}/ws/pos/${restaurantId}?user_id=${encodedUserId}&token=***`);
       
       // Create WebSocket connection
       this.ws = new WebSocket(this.connectionUrl);
