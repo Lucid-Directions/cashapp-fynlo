@@ -95,6 +95,12 @@ class WebSocketService extends SimpleEventEmitter {
       const restaurantId = user.restaurant_id;
       const userId = user.id;
       
+      // Get the auth token from AsyncStorage
+      const authToken = await AsyncStorage.getItem('auth_token');
+      if (!authToken) {
+        throw new Error('No authentication token found');
+      }
+      
       if (!restaurantId) {
         throw new Error('No restaurant associated with user');
       }
@@ -104,13 +110,19 @@ class WebSocketService extends SimpleEventEmitter {
       this.reconnectInterval = options.reconnectInterval || 5000;
       this.maxReconnectAttempts = options.maxReconnectAttempts || 10;
       
-      // Build WebSocket URL
+      // Build WebSocket URL with authentication token
       const wsProtocol = API_CONFIG.BASE_URL.startsWith('https') ? 'wss' : 'ws';
       const wsHost = API_CONFIG.BASE_URL.replace(/^https?:\/\//, '');
-      // Remove /api/v1 prefix as backend expects /ws/pos directly
-      this.connectionUrl = `${wsProtocol}://${wsHost}/ws/pos/${restaurantId}?user_id=${userId}`;
       
-      console.log('🔌 Connecting to WebSocket:', this.connectionUrl);
+      // URL encode parameters to handle special characters safely
+      const encodedUserId = encodeURIComponent(userId);
+      const encodedToken = encodeURIComponent(authToken);
+      
+      // Build connection URL with encoded parameters
+      this.connectionUrl = `${wsProtocol}://${wsHost}/ws/pos/${restaurantId}?user_id=${encodedUserId}&token=${encodedToken}`;
+      
+      // Log connection attempt without exposing the token
+      console.log('🔌 Connecting to WebSocket:', `${wsProtocol}://${wsHost}/ws/pos/${restaurantId}?user_id=${encodedUserId}&token=***`);
       
       // Create WebSocket connection
       this.ws = new WebSocket(this.connectionUrl);
