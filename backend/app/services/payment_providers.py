@@ -8,7 +8,7 @@ from decimal import Decimal
 from .payment_providers.stripe_provider import StripeProvider
 from .payment_providers.square_provider import SquareProvider
 from .payment_providers.sumup_provider import SumUpProvider
-from .payment_factory import PaymentProviderFactory
+# Note: PaymentProviderFactory should be imported directly from payment_factory to avoid circular imports
 
 class PaymentStatus(Enum):
     SUCCESS = "success"
@@ -106,6 +106,5 @@ __all__ = [
     'PaymentProvider',
     'StripeProvider',
     'SquareProvider',
-    'SumUpProvider',
-    'PaymentProviderFactory'
+    'SumUpProvider'
 ]
