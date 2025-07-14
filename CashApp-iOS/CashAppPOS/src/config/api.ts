@@ -65,8 +65,8 @@ export const API_CONFIG = {
   
   // Platform endpoints
   PLATFORM_ENDPOINTS: {
-    SERVICE_CHARGE: '/platform/settings/service-charge',
-    PAYMENT_METHODS: '/platform/settings/payment-methods',
+    SERVICE_CHARGE: '/platform/public/service-charge',
+    PAYMENT_METHODS: '/platform/public/payment-methods',
     SETTINGS: '/platform/settings',
   },
   
