@@ -8,10 +8,7 @@ from decimal import Decimal
 from unittest.mock import Mock, patch, AsyncMock
 from datetime import datetime, timedelta
 
-from app.services.payment_providers import PaymentProvider
-from app.services.stripe_provider import StripeProvider
-from app.services.square_provider import SquareProvider
-from app.services.sumup_provider import SumUpProvider
+from app.services.payment_providers import PaymentProvider, StripeProvider, SquareProvider, SumUpProvider
 from app.services.payment_factory import PaymentProviderFactory
 from app.services.smart_routing import SmartRoutingService, RoutingStrategy
 from app.services.payment_analytics import PaymentAnalyticsService
