@@ -92,7 +92,9 @@ class DatabaseService {
   private async saveAuthToken(token: string): Promise<void> {
     try {
       this.authToken = token;
-      // Token storage is handled by tokenManager
+      // CRITICAL: Must persist token for tokenManager to access it
+      await AsyncStorage.setItem('auth_token', token);
+      console.log('✅ Auth token saved to storage');
     } catch (error) {
       console.error('Error saving auth token:', error);
     }
