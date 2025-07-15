@@ -88,7 +88,8 @@ class WebSocketService extends SimpleEventEmitter {
       // Get authentication details
       const userInfo = await AsyncStorage.getItem('userInfo');
       if (!userInfo) {
-        throw new Error('No user authentication found');
+        console.warn('❌ WebSocket: No user authentication found, skipping connection');
+        return; // Don't throw, just skip connection
       }
       
       const user = JSON.parse(userInfo);
@@ -98,7 +99,8 @@ class WebSocketService extends SimpleEventEmitter {
       // Get the auth token from AsyncStorage
       const authToken = await AsyncStorage.getItem('auth_token');
       if (!authToken) {
-        throw new Error('No authentication token found');
+        console.warn('❌ WebSocket: No authentication token found, skipping connection');
+        return; // Don't throw, just skip connection
       }
       
       if (!restaurantId) {
