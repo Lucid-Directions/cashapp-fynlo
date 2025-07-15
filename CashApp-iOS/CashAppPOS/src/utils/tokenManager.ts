@@ -94,12 +94,22 @@ class TokenManager {
 
   private async performRefresh(): Promise<string | null> {
     try {
+      // First check if we have a session to refresh
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      
+      if (!currentSession) {
+        // No session to refresh - user is logged out
+        console.log('⚠️ No session to refresh - user may be logged out');
+        return null;
+      }
+      
       console.log('🔄 Refreshing authentication token...');
       
       const { data: { session }, error } = await supabase.auth.refreshSession();
       
       if (error) {
         console.error('❌ Token refresh failed:', error);
+        // Don't clear stored tokens on refresh failure - they might still work
         return null;
       }
       
@@ -144,14 +154,35 @@ class TokenManager {
    * This is the recommended method for services to use
    */
   async getTokenWithRefresh(): Promise<string | null> {
-    let token = await this.getAuthToken();
-    
-    if (!token) {
-      // Try to refresh if no token
-      token = await this.refreshAuthToken();
+    try {
+      // First check if we have a valid Supabase session
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        // No session means user is logged out - don't attempt refresh
+        console.log('⚠️ No active session - user may be logged out');
+        return null;
+      }
+      
+      // Check if the token is expired
+      const now = Math.floor(Date.now() / 1000);
+      const expiresAt = session.expires_at;
+      
+      if (expiresAt && now >= expiresAt - 60) {
+        // Token is expired or will expire within 60 seconds
+        console.log('🔄 Token expired or expiring soon, refreshing...');
+        const newToken = await this.refreshAuthToken();
+        return newToken;
+      }
+      
+      // Token is still valid
+      return session.access_token;
+      
+    } catch (error) {
+      console.error('❌ Error in getTokenWithRefresh:', error);
+      // Fall back to stored token if available
+      return await AsyncStorage.getItem('auth_token');
     }
-    
-    return token;
   }
 }
 
