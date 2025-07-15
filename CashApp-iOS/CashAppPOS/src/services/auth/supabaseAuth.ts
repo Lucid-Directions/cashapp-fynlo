@@ -75,6 +75,10 @@ class SupabaseAuthService {
       // Store enhanced user info
       await AsyncStorage.setItem('userInfo', JSON.stringify(normalizedUser));
       await AsyncStorage.setItem('supabase_session', JSON.stringify(data.session));
+      // CRITICAL: Store auth token for WebSocket and API services
+      await AsyncStorage.setItem('auth_token', data.session.access_token);
+      
+      console.log('✅ Stored auth token for services');
       
       return {
         user: normalizedUser,
@@ -203,6 +207,14 @@ class SupabaseAuthService {
     
     const { data: { session }, error } = await supabase.auth.refreshSession();
     if (error) throw error;
+    
+    // CRITICAL: Update stored auth token when refreshed
+    if (session) {
+      await AsyncStorage.setItem('auth_token', session.access_token);
+      await AsyncStorage.setItem('supabase_session', JSON.stringify(session));
+      console.log('✅ Updated auth token after refresh');
+    }
+    
     return session;
   }
   
