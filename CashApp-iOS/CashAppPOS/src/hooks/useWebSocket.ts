@@ -52,8 +52,8 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
   }, [user?.restaurant_id, options.reconnect]);
   
   // Handle disconnection
-  const disconnect = useCallback(() => {
-    webSocketService.disconnect();
+  const disconnect = useCallback(async () => {
+    await webSocketService.disconnect();
   }, []);
   
   // Subscribe to events

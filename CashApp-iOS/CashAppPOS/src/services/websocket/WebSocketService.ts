@@ -171,9 +171,6 @@ class WebSocketService extends SimpleEventEmitter {
       // Reset auth error flag
       this.isAuthError = false;
       
-      // Wait a moment to ensure clean disconnect
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
       // Reconnect with new token
       try {
         await this.connect({
@@ -190,7 +187,7 @@ class WebSocketService extends SimpleEventEmitter {
   /**
    * Cleanup method to remove event listeners
    */
-  destroy(): void {
+  async destroy(): Promise<void> {
     // Remove token refresh listener
     if (this.tokenRefreshListener) {
       tokenManager.off('token:refreshed', this.tokenRefreshListener);
@@ -198,7 +195,7 @@ class WebSocketService extends SimpleEventEmitter {
     }
     
     // Disconnect WebSocket
-    this.disconnect();
+    await this.disconnect();
     
     // Remove all event listeners
     this.removeAllListeners();
@@ -207,7 +204,7 @@ class WebSocketService extends SimpleEventEmitter {
   /**
    * Disconnect from WebSocket server
    */
-  disconnect(): void {
+  async disconnect(): Promise<void> {
     console.log('🔌 Disconnecting WebSocket...');
     
     this.shouldReconnect = false;
@@ -220,7 +217,27 @@ class WebSocketService extends SimpleEventEmitter {
     }
     
     if (this.ws) {
+      // Create a promise that resolves when the WebSocket actually closes
+      const closePromise = new Promise<void>((resolve) => {
+        const originalOnClose = this.ws!.onclose;
+        this.ws!.onclose = (event) => {
+          // Call the original onclose handler if it exists
+          if (originalOnClose) {
+            originalOnClose.call(this.ws, event);
+          }
+          resolve();
+        };
+      });
+      
+      // Initiate the close
       this.ws.close(1000, 'Client disconnect');
+      
+      // Wait for the WebSocket to actually close (with a timeout to prevent hanging)
+      await Promise.race([
+        closePromise,
+        new Promise<void>(resolve => setTimeout(resolve, 5000)) // 5 second timeout
+      ]);
+      
       this.ws = null;
     }
     
