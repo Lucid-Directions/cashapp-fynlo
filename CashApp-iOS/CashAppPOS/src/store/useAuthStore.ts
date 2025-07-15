@@ -304,12 +304,16 @@ export const useAuthStore = create<AuthState>()(
         return persistedState;
       },
       onRehydrateStorage: () => (state) => {
-        // Reset listener setup flag and re-setup listeners after store is rehydrated
+        // After rehydration, set up token listeners
         // This ensures listeners are always set up after module reload
         if (state) {
-          console.log('🔄 Store rehydrated, resetting token listener flag...');
-          state.tokenRefreshListenerSetup = false;
-          state.setupTokenListeners();
+          console.log('🔄 Store rehydrated, setting up token listeners...');
+          // Use setTimeout to ensure store is fully initialized
+          setTimeout(() => {
+            const store = useAuthStore.getState();
+            // Reset the flag and setup listeners using store actions
+            store.setupTokenListeners();
+          }, 0);
         }
       }
     }
