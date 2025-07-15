@@ -73,6 +73,7 @@ class TokenManager extends SimpleEventEmitter {
   private requestQueue: QueuedRequest[] = [];
   private lastRefreshAttempt = 0;
   private minRefreshInterval = 5000; // Don't refresh more than once per 5 seconds
+  private lastRefreshSuccessful = true; // Track if last refresh was successful
 
   private constructor() {
     super();
@@ -130,6 +131,22 @@ class TokenManager extends SimpleEventEmitter {
   }
 
   /**
+   * Check if the current token is expired
+   * 
+   * @returns true if token is expired or will expire within 30 seconds
+   */
+  private isTokenExpired(): boolean {
+    if (!this.tokenExpiryTime) {
+      // If we don't know expiry time, assume it might be expired
+      return true;
+    }
+    
+    // Check if token expires within 30 seconds (buffer for network delays)
+    const expiryBuffer = 30 * 1000; // 30 seconds
+    return Date.now() >= (this.tokenExpiryTime * 1000 - expiryBuffer);
+  }
+
+  /**
    * Refresh the authentication token with enhanced race condition prevention
    * 
    * This method ensures only one refresh happens at a time to prevent
@@ -144,15 +161,25 @@ class TokenManager extends SimpleEventEmitter {
     // Check if we're refreshing too frequently
     const now = Date.now();
     if (now - this.lastRefreshAttempt < this.minRefreshInterval) {
-      console.log('⏳ Refresh attempt too soon, waiting for existing refresh...');
+      console.log('⏳ Refresh attempt too soon, checking conditions...');
       
       // If there's an ongoing refresh, wait for it
       if (this.refreshPromise) {
         return this.refreshPromise;
       }
       
-      // Otherwise, just return the current token
-      return this.getAuthToken();
+      // Check if we need to force a refresh despite the interval
+      const tokenExpired = this.isTokenExpired();
+      const lastRefreshFailed = !this.lastRefreshSuccessful;
+      
+      if (tokenExpired || lastRefreshFailed) {
+        console.log(`⚠️ Forcing refresh despite interval - Token expired: ${tokenExpired}, Last refresh failed: ${lastRefreshFailed}`);
+        // Must refresh regardless of interval
+      } else {
+        // Token is still valid and last refresh was successful
+        console.log('✅ Token still valid and last refresh successful, returning existing token');
+        return this.getAuthToken();
+      }
     }
 
     // If already refreshing, add to queue
@@ -173,11 +200,17 @@ class TokenManager extends SimpleEventEmitter {
     try {
       const result = await this.refreshPromise;
       
+      // Mark refresh as successful
+      this.lastRefreshSuccessful = true;
+      
       // Process queued requests with success
       this.processQueue(null, result);
       
       return result;
     } catch (error) {
+      // Mark refresh as failed
+      this.lastRefreshSuccessful = false;
+      
       // Process queued requests with error
       this.processQueue(error as Error, null);
       
@@ -301,9 +334,10 @@ class TokenManager extends SimpleEventEmitter {
    * Clear all stored tokens (used on logout)
    */
   async clearTokens(): Promise<void> {
-    // Clear cached expiry
+    // Clear cached expiry and refresh state
     this.tokenExpiryTime = null;
     this.consecutiveRefreshFailures = 0;
+    this.lastRefreshSuccessful = true;
     
     await AsyncStorage.multiRemove([
       'auth_token',
