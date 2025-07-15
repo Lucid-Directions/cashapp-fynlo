@@ -1,28 +1,36 @@
 # CashApp POS - Complete Project Context
 
-## 🚀 PRODUCTION STATUS UPDATE (January 12, 2025 - 22:00)
+## 🚀 PRODUCTION STATUS UPDATE (January 15, 2025 - Latest Session)
 
-**CURRENT STATUS: 🔴 CRITICAL POS SCREEN ISSUE IDENTIFIED - PRODUCTION BLOCKER**
+**CURRENT STATUS: 🟡 CRITICAL BUGS FIXED - PENDING REBUILD & FURTHER TESTING**
 
-### 🚨 Critical Discovery
-- **❌ POS Screen Empty**: Menu items not displaying despite API being available
-- **❌ API Timeout Issues**: 10-second timeout errors on menu API calls
-- **❌ Missing Production Flow**: No proper restaurant onboarding for menu setup
-- **✅ Repository Cleaned**: 136 outdated documentation files archived
-- **✅ Analysis Complete**: Comprehensive POS screen analysis documented
+### 🔧 Today's Critical Fixes Applied
+- **✅ Inventory Screen Crash Fixed**: Resolved TypeError with defensive mapping for missing `itemId` fields
+- **✅ WebSocket Auth Errors Fixed**: Restored proper error handling to maintain API contract
+- **✅ Backend Connectivity Verified**: DigitalOcean backend is working (health check returns 200)
+- **✅ iOS Bundle Rebuilt**: New bundle deployed with all fixes (PR #268 created)
+- **✅ Build Warnings Documented**: Created guides for dSYM, UIScene, Square SDK, and Metro issues
+
+### 🚨 Known Remaining Issues
+- **⚠️ API Timeout Issues**: Service charge endpoint times out after 10 seconds
+- **⚠️ Backend Performance**: Slow response times causing timeouts (not connectivity)
+- **⚠️ Menu Loading**: Still falls back to local Chucho menu data
+- **⚠️ Auth Token Refresh**: "Could not validate credentials" errors after token expiry
+- **🟡 Square SDK**: Optional dependency - payments disabled but app functions
+- **🟡 Metro Bundler**: Connection refused errors (cosmetic, doesn't affect functionality)
 
 ### ⚠️ Production Readiness Status
-- **Previous Status**: 89% ready
-- **Current Status**: 65% ready (POS screen is core functionality)
-- **Blocker**: Restaurant managers cannot add menu items through proper UI flow
-- **Impact**: App unusable for actual restaurant operations
+- **Previous Status**: 65% ready (POS screen issues)
+- **Current Status**: 70% ready (critical crashes fixed, but performance issues remain)
+- **Next Blocker**: Backend API performance and menu data persistence
+- **Impact**: App stable but still relying on fallback data
 
-### 🔍 Root Cause Analysis
-1. **Menu Management UI exists** but hasn't been tested with real workflow
-2. **Import/Export functionality** shows placeholder alerts only
-3. **API timeout issues** preventing menu data retrieval
-4. **No fallback UX** when API fails (shows completely empty screen)
-5. **Header inconsistencies** between POS and other screens
+### 🔍 Today's Bug Analysis & Fixes
+1. **Inventory Crash**: Used logical OR (||) instead of nullish coalescing (??) for ID fallback
+2. **WebSocket Errors**: Was silently returning instead of throwing errors, breaking API contract
+3. **Backend Timeouts**: DigitalOcean backend responding but very slow (10+ seconds)
+4. **Fallback Data**: App gracefully falls back to local data when API fails
+5. **Build Warnings**: Non-critical issues documented for future cleanup
 
 ### 📋 Implementation Progress
 **Completed Phases:**
@@ -66,18 +74,34 @@
    - ✅ Successfully deployed to DigitalOcean
    - ✅ Platform API endpoints ready for web dashboard
 
-**Current Critical Phase:**
-9. **🔴 URGENT**: Fix POS Screen Menu Display & Production User Flow
-   - ❌ Test menu management through actual restaurant owner workflow
-   - ❌ Implement proper import/export functionality
-   - ❌ Fix API timeout issues and error handling
-   - ❌ Add empty state UX and retry mechanisms
-   - ❌ Ensure menu setup works in restaurant onboarding
+**Current Session Work:**
+9. **🟡 January 15 Session**: Critical Bug Fixes & Stability
+   - ✅ Fixed inventory screen crash (TypeError on missing itemId)
+   - ✅ Fixed WebSocket authentication error handling
+   - ✅ Created PR #268 with all fixes
+   - ✅ Rebuilt iOS bundle with fixes
+   - ⏳ Awaiting Xcode rebuild and testing
+   - ❌ Backend performance issues need investigation
+
+**Next Critical Phase:**
+10. **🔴 URGENT**: Fix Backend Performance & Menu Persistence
+   - ❌ Investigate why service-charge endpoint times out
+   - ❌ Fix "Could not validate credentials" after token refresh
+   - ❌ Ensure menu data persists in backend
+   - ❌ Optimize API response times
+   - ❌ Test complete restaurant onboarding flow
 
 **Future Phase:**
-10. **⏳ Phase 10**: Final Production Deployment & Go-Live
+11. **⏳ Phase 11**: Final Production Deployment & Go-Live
 
-### 🔧 Key Fixes Applied
+### 🔧 Key Fixes Applied Today (January 15)
+- **Inventory itemId Fix**: Changed `||` to `??` to handle `itemId: 0` correctly
+- **Deterministic IDs**: Use `generated_${index}` instead of `Date.now() + Math.random()`
+- **WebSocket Contract**: Restored error throwing instead of silent returns
+- **Error Logging**: Added console warnings before throwing for debugging
+- **Bundle Deployment**: Built and deployed new iOS bundle with all fixes
+
+### 🔧 Previous Fixes Applied
 - **Import Errors Fixed**: JSONB, get_current_user, Session, password hashing
 - **Feature Gates**: Simplified implementation for subscription tiers
 - **Null Safety**: Added defaults for subscription data
