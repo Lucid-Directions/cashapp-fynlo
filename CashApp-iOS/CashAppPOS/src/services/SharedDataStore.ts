@@ -4,6 +4,7 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import tokenManager from '../utils/tokenManager';
 
 // API Configuration and robust networking
 import API_CONFIG from '../config/api';
@@ -138,7 +139,7 @@ class SharedDataStore {
       // Save to real backend API first
       try {
         // Get auth token for API requests
-        const authToken = await AsyncStorage.getItem('auth_token');
+        const authToken = await tokenManager.getTokenWithRefresh();
         const headers: any = {
           'Content-Type': 'application/json',
         };

@@ -5,6 +5,7 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SharedDataStore from './SharedDataStore';
+import tokenManager from '../utils/tokenManager';
 
 // Base API URL - FIXED: Uses LAN IP for device testing
 import API_CONFIG from '../config/api';
@@ -83,7 +84,7 @@ class PlatformService {
 
   private async loadAuthToken(): Promise<void> {
     try {
-      this.authToken = await AsyncStorage.getItem('auth_token');
+      this.authToken = await tokenManager.getTokenWithRefresh();
     } catch (error) {
       console.log('No auth token found');
     }

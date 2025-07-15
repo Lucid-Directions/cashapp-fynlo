@@ -7,6 +7,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authService } from '../services/auth/unifiedAuthService';
+import tokenManager from '../utils/tokenManager';
 
 interface User {
   id: string;
@@ -27,6 +28,7 @@ interface AuthState {
   isLoading: boolean;
   session: any | null;
   error: string | null;
+  tokenRefreshListenerSetup: boolean;
   
   // Actions
   signIn: (email: string, password: string) => Promise<void>;
@@ -36,7 +38,12 @@ interface AuthState {
   clearError: () => void;
   hasFeature: (feature: string) => boolean;
   requiresPlan: (plan: 'alpha' | 'beta' | 'omega') => boolean;
+  setupTokenListeners: () => void;
+  handleTokenRefresh: () => Promise<void>;
 }
+
+// Setup token event listeners once
+let tokenListenersSetup = false;
 
 export const useAuthStore = create<AuthState>()(
   persist(
@@ -46,6 +53,7 @@ export const useAuthStore = create<AuthState>()(
       isLoading: false,
       session: null,
       error: null,
+      tokenRefreshListenerSetup: false,
       
       signIn: async (email: string, password: string) => {
         try {
@@ -209,6 +217,54 @@ export const useAuthStore = create<AuthState>()(
         const requiredLevel = planHierarchy[plan];
         
         return userPlanLevel >= requiredLevel;
+      },
+      
+      setupTokenListeners: () => {
+        if (tokenListenersSetup || get().tokenRefreshListenerSetup) return;
+        
+        // Listen for token refresh events
+        tokenManager.on('token:refreshed', async () => {
+          console.log('🔄 Token refreshed, updating auth state...');
+          await get().handleTokenRefresh();
+        });
+        
+        // Listen for token cleared events (logout)
+        tokenManager.on('token:cleared', () => {
+          console.log('🔒 Tokens cleared, updating auth state...');
+          set({
+            user: null,
+            session: null,
+            isAuthenticated: false,
+            error: null
+          });
+        });
+        
+        tokenListenersSetup = true;
+        set({ tokenRefreshListenerSetup: true });
+      },
+      
+      handleTokenRefresh: async () => {
+        try {
+          // Get the current session after token refresh
+          const session = await authService.getSession();
+          
+          if (session) {
+            // Update session in store
+            set({ session });
+            console.log('✅ Auth store session updated after token refresh');
+          } else {
+            // No valid session after refresh - user needs to log in again
+            console.log('⚠️ No valid session after token refresh');
+            set({
+              user: null,
+              session: null,
+              isAuthenticated: false,
+              error: 'Session expired - please log in again'
+            });
+          }
+        } catch (error) {
+          console.error('❌ Error handling token refresh in auth store:', error);
+        }
       }
     }),
     {
@@ -228,6 +284,12 @@ export const useAuthStore = create<AuthState>()(
           };
         }
         return persistedState;
+      },
+      onRehydrateStorage: () => (state) => {
+        // Set up token listeners after store is rehydrated
+        if (state) {
+          state.setupTokenListeners();
+        }
       }
     }
   )

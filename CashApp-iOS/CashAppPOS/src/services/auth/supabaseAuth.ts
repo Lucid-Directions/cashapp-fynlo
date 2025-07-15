@@ -7,6 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import API_CONFIG from '../../config/api';
 import { AUTH_CONFIG } from '../../config/auth.config';
 import { mockAuthService } from './mockAuth';
+import { authMonitor } from './AuthMonitor';
 
 interface SignInParams {
   email: string;
@@ -80,12 +81,25 @@ class SupabaseAuthService {
       
       console.log('✅ Stored auth token for services');
       
+      // Log successful login
+      authMonitor.logEvent('login', `User ${email} logged in successfully`, {
+        userId: normalizedUser.id,
+        email: normalizedUser.email,
+        role: normalizedUser.role
+      });
+      
       return {
         user: normalizedUser,
         session: data.session
       };
     } catch (error: any) {
       console.error('Sign in error:', error);
+      
+      // Log failed login
+      authMonitor.logEvent('auth_error', `Login failed for ${email}`, {
+        error: error.message || 'Unknown error'
+      });
+      
       throw new Error(error.message || 'Failed to sign in');
     }
   }
@@ -157,8 +171,16 @@ class SupabaseAuthService {
       ]);
       
       console.log('✅ Sign out successful');
+      
+      // Log successful logout
+      authMonitor.logEvent('logout', 'User logged out successfully');
     } catch (error) {
       console.error('Sign out error:', error);
+      
+      // Log logout error
+      authMonitor.logEvent('auth_error', 'Logout error', {
+        error: error.message || 'Unknown error'
+      });
     }
   }
   

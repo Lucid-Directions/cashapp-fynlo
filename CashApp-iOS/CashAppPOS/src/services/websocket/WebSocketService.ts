@@ -76,9 +76,19 @@ class WebSocketService extends SimpleEventEmitter {
   private shouldReconnect: boolean = true;
   private pingInterval: NodeJS.Timeout | null = null;
   private connectionUrl: string | null = null;
+  private isAuthError: boolean = false;
+  private tokenRefreshListener: (() => void) | null = null;
   
   constructor() {
     super();
+    
+    // Listen to token refresh events
+    this.tokenRefreshListener = () => {
+      console.log('🔄 Token refreshed, reconnecting WebSocket...');
+      this.handleTokenRefresh();
+    };
+    
+    tokenManager.on('token:refreshed', this.tokenRefreshListener);
   }
   
   /**
@@ -143,6 +153,53 @@ class WebSocketService extends SimpleEventEmitter {
       this.emit(WebSocketEventType.ERROR, error);
       throw error;
     }
+  }
+  
+  /**
+   * Handle token refresh by reconnecting with new token
+   */
+  private async handleTokenRefresh(): Promise<void> {
+    // If we're currently connected or had an auth error, reconnect with new token
+    if (this.isConnected() || this.isAuthError) {
+      console.log('🔄 Reconnecting WebSocket with refreshed token...');
+      
+      // Disconnect current connection
+      await this.disconnect();
+      
+      // Reset auth error flag
+      this.isAuthError = false;
+      
+      // Wait a moment to ensure clean disconnect
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Reconnect with new token
+      try {
+        await this.connect({
+          reconnect: true,
+          reconnectInterval: this.reconnectInterval,
+          maxReconnectAttempts: this.maxReconnectAttempts
+        });
+      } catch (error) {
+        console.error('❌ Failed to reconnect after token refresh:', error);
+      }
+    }
+  }
+  
+  /**
+   * Cleanup method to remove event listeners
+   */
+  destroy(): void {
+    // Remove token refresh listener
+    if (this.tokenRefreshListener) {
+      tokenManager.off('token:refreshed', this.tokenRefreshListener);
+      this.tokenRefreshListener = null;
+    }
+    
+    // Disconnect WebSocket
+    this.disconnect();
+    
+    // Remove all event listeners
+    this.removeAllListeners();
   }
   
   /**
@@ -285,6 +342,15 @@ class WebSocketService extends SimpleEventEmitter {
       }
       
       this.emit(WebSocketEventType.DISCONNECTED);
+      
+      // Check if it's an authentication error (403)
+      if (event.code === 1006 && event.reason?.includes('403')) {
+        console.log('🔐 Authentication error detected, will retry after token refresh');
+        this.isAuthError = true;
+        // Don't attempt immediate reconnect for auth errors
+        // Wait for token refresh event instead
+        return;
+      }
       
       // Attempt reconnection if enabled
       if (this.shouldReconnect && !this.isReconnecting) {
