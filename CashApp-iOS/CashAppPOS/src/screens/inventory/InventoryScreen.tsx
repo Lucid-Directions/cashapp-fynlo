@@ -45,6 +45,17 @@ const Colors = {
   border: '#DDDDDD',
 };
 
+// Simple hash function to generate deterministic IDs from strings
+const hashString = (str: string): number => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+  return Math.abs(hash);
+};
+
 const InventoryScreen: React.FC = () => {
   const navigation = useNavigation();
   const [inventory, setInventory] = useState<InventoryData[]>([]);
@@ -101,7 +112,20 @@ const InventoryScreen: React.FC = () => {
       const dataService = DataService.getInstance();
       // Assuming a getInventory method will be added to DataService
       const inventoryData = await dataService.getInventory();
-      setInventory(inventoryData || []);
+      
+      // Fix itemId fallback logic to properly handle itemId: 0
+      const processedInventory = (inventoryData || []).map((item, index) => {
+        // Check if itemId is undefined or null (but not 0)
+        if (item.itemId === undefined || item.itemId === null) {
+          // Use a deterministic ID based on item properties and index
+          // This ensures consistent IDs across re-renders
+          const deterministicId = hashString(`${item.name}_${item.category}_${index}`);
+          return { ...item, itemId: deterministicId };
+        }
+        return item;
+      });
+      
+      setInventory(processedInventory);
     } catch (e: any) {
       setError(e.message || 'Failed to load inventory.');
       setInventory([]); // Clear inventory on error
