@@ -94,6 +94,11 @@ class TokenManager {
 
   private async performRefresh(): Promise<string | null> {
     try {
+      // For mock auth, no refresh is needed - just return stored token
+      if (AUTH_CONFIG.USE_MOCK_AUTH) {
+        return await AsyncStorage.getItem('auth_token');
+      }
+
       // First check if we have a session to refresh
       const { data: { session: currentSession } } = await supabase.auth.getSession();
       
@@ -155,6 +160,11 @@ class TokenManager {
    */
   async getTokenWithRefresh(): Promise<string | null> {
     try {
+      // For mock auth, return token from AsyncStorage directly
+      if (AUTH_CONFIG.USE_MOCK_AUTH) {
+        return await AsyncStorage.getItem('auth_token');
+      }
+
       // First check if we have a valid Supabase session
       const { data: { session } } = await supabase.auth.getSession();
       

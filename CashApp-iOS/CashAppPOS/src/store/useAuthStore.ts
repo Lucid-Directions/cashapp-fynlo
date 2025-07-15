@@ -6,7 +6,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { authService } from '../services/auth/supabaseAuth';
+import { authService } from '../services/auth/unifiedAuthService';
 
 interface User {
   id: string;
