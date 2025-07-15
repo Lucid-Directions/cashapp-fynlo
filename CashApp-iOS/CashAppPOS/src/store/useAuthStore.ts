@@ -42,8 +42,9 @@ interface AuthState {
   handleTokenRefresh: () => Promise<void>;
 }
 
-// Setup token event listeners once
-let tokenListenersSetup = false;
+// Store handler functions at module level to maintain consistent references
+let tokenRefreshedHandler: (() => Promise<void>) | null = null;
+let tokenClearedHandler: (() => void) | null = null;
 
 export const useAuthStore = create<AuthState>()(
   persist(
@@ -68,6 +69,9 @@ export const useAuthStore = create<AuthState>()(
             isLoading: false,
             error: null
           });
+          
+          // Ensure token listeners are set up after successful sign-in
+          get().setupTokenListeners();
         } catch (error: any) {
           set({ 
             isLoading: false, 
@@ -220,16 +224,25 @@ export const useAuthStore = create<AuthState>()(
       },
       
       setupTokenListeners: () => {
-        if (tokenListenersSetup || get().tokenRefreshListenerSetup) return;
+        console.log('🎧 Setting up token event listeners...');
         
-        // Listen for token refresh events
-        tokenManager.on('token:refreshed', async () => {
+        // Remove any existing listeners first to prevent duplicates
+        if (tokenRefreshedHandler) {
+          tokenManager.off('token:refreshed', tokenRefreshedHandler);
+          tokenRefreshedHandler = null;
+        }
+        if (tokenClearedHandler) {
+          tokenManager.off('token:cleared', tokenClearedHandler);
+          tokenClearedHandler = null;
+        }
+        
+        // Create new handler functions with current store references
+        tokenRefreshedHandler = async () => {
           console.log('🔄 Token refreshed, updating auth state...');
           await get().handleTokenRefresh();
-        });
+        };
         
-        // Listen for token cleared events (logout)
-        tokenManager.on('token:cleared', () => {
+        tokenClearedHandler = () => {
           console.log('🔒 Tokens cleared, updating auth state...');
           set({
             user: null,
@@ -237,10 +250,15 @@ export const useAuthStore = create<AuthState>()(
             isAuthenticated: false,
             error: null
           });
-        });
+        };
         
-        tokenListenersSetup = true;
+        // Add fresh listeners
+        tokenManager.on('token:refreshed', tokenRefreshedHandler);
+        tokenManager.on('token:cleared', tokenClearedHandler);
+        
+        // Mark listeners as set up
         set({ tokenRefreshListenerSetup: true });
+        console.log('✅ Token listeners successfully set up');
       },
       
       handleTokenRefresh: async () => {
@@ -286,8 +304,11 @@ export const useAuthStore = create<AuthState>()(
         return persistedState;
       },
       onRehydrateStorage: () => (state) => {
-        // Set up token listeners after store is rehydrated
+        // Reset listener setup flag and re-setup listeners after store is rehydrated
+        // This ensures listeners are always set up after module reload
         if (state) {
+          console.log('🔄 Store rehydrated, resetting token listener flag...');
+          state.tokenRefreshListenerSetup = false;
           state.setupTokenListeners();
         }
       }
