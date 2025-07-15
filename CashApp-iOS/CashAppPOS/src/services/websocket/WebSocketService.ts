@@ -4,6 +4,7 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import API_CONFIG from '../../config/api';
+import tokenManager from '../../utils/tokenManager';
 
 // Simple EventEmitter replacement for React Native
 class SimpleEventEmitter {
@@ -97,8 +98,8 @@ class WebSocketService extends SimpleEventEmitter {
       const restaurantId = user.restaurant_id;
       const userId = user.id;
       
-      // Get the auth token from AsyncStorage
-      const authToken = await AsyncStorage.getItem('auth_token');
+      // Get the auth token using unified token manager
+      const authToken = await tokenManager.getTokenWithRefresh();
       if (!authToken) {
         const error = new Error('No authentication token found');
         console.warn('❌ WebSocket:', error.message);
