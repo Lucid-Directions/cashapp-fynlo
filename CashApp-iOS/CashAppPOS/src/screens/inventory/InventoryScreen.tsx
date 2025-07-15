@@ -101,7 +101,23 @@ const InventoryScreen: React.FC = () => {
       const dataService = DataService.getInstance();
       // Assuming a getInventory method will be added to DataService
       const inventoryData = await dataService.getInventory();
-      setInventory(inventoryData || []);
+      
+      // Map the API response to ensure all required fields exist
+      const mappedInventory = (inventoryData || []).map((item: any, index: number) => ({
+        // Use nullish coalescing to properly handle 0 as a valid ID
+        itemId: item.itemId ?? item.id ?? `generated_${index}`, // Use deterministic fallback based on index
+        name: item.name || 'Unknown Item',
+        category: item.category || 'Uncategorized',
+        currentStock: item.currentStock ?? item.current_stock ?? 0,
+        minimumStock: item.minimumStock ?? item.minimum_stock ?? 0,
+        maximumStock: item.maximumStock ?? item.maximum_stock ?? 100,
+        unitCost: item.unitCost ?? item.unit_cost ?? 0,
+        supplier: item.supplier || 'Unknown Supplier',
+        lastRestocked: item.lastRestocked ? new Date(item.lastRestocked) : new Date(),
+        turnoverRate: item.turnoverRate ?? item.turnover_rate ?? 0,
+      }));
+      
+      setInventory(mappedInventory);
     } catch (e: any) {
       setError(e.message || 'Failed to load inventory.');
       setInventory([]); // Clear inventory on error
@@ -632,7 +648,7 @@ const InventoryScreen: React.FC = () => {
       <FlatList
         data={filteredInventory}
         renderItem={renderInventoryItem}
-        keyExtractor={item => item.itemId.toString()}
+        keyExtractor={item => String(item?.itemId ?? 'unknown')}
         contentContainerStyle={styles.inventoryList}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={renderEmptyListComponent}
