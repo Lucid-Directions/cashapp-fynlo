@@ -78,6 +78,7 @@ class WebSocketService extends SimpleEventEmitter {
   private connectionUrl: string | null = null;
   private isAuthError: boolean = false;
   private tokenRefreshListener: (() => void) | null = null;
+  private connectionStartTime: number = 0;
   
   constructor() {
     super();
@@ -143,6 +144,7 @@ class WebSocketService extends SimpleEventEmitter {
       console.log('🔌 Connecting to WebSocket:', `${wsProtocol}://${wsHost}/ws/pos/${encodedRestaurantId}?user_id=${encodedUserId}&token=***`);
       
       // Create WebSocket connection
+      this.connectionStartTime = Date.now();
       this.ws = new WebSocket(this.connectionUrl);
       
       // Set up event handlers
@@ -296,6 +298,7 @@ class WebSocketService extends SimpleEventEmitter {
       console.log('✅ WebSocket connected');
       this.reconnectAttempts = 0;
       this.isReconnecting = false;
+      this.isAuthError = false; // Clear auth error on successful connection
       
       this.emit(WebSocketEventType.CONNECTED);
       
@@ -330,6 +333,9 @@ class WebSocketService extends SimpleEventEmitter {
     
     this.ws.onerror = (error) => {
       console.error('❌ WebSocket error:', error);
+      
+      // Check if the error message indicates authentication failure
+      // The error event doesn't provide much detail, but we can infer from the close event
       this.emit(WebSocketEventType.ERROR, error);
     };
     
@@ -343,10 +349,40 @@ class WebSocketService extends SimpleEventEmitter {
       
       this.emit(WebSocketEventType.DISCONNECTED);
       
-      // Check if it's an authentication error (403)
-      if (event.code === 1006 && event.reason?.includes('403')) {
+      // Detect authentication errors based on various indicators:
+      // 1. Code 1008 (Policy Violation) - often used for auth failures
+      // 2. Code 4000-4999 - Application-specific error codes
+      // 3. Specific reason text indicating auth failure
+      // 4. Quick failure (connection closed within 2 seconds of opening)
+      const connectionDuration = Date.now() - this.connectionStartTime;
+      const isQuickFailure = connectionDuration < 2000; // Failed within 2 seconds
+      const isPolicyViolation = event.code === 1008;
+      const isAppSpecificError = event.code >= 4000 && event.code <= 4999;
+      const hasAuthKeywords = event.reason && (
+        event.reason.toLowerCase().includes('auth') ||
+        event.reason.toLowerCase().includes('unauthorized') ||
+        event.reason.toLowerCase().includes('forbidden') ||
+        event.reason.toLowerCase().includes('401') ||
+        event.reason.toLowerCase().includes('403') ||
+        event.reason.toLowerCase().includes('invalid token') ||
+        event.reason.toLowerCase().includes('token expired')
+      );
+      
+      // For debugging, log all close events with timing
+      console.log(`🔌 WebSocket connection closed after ${connectionDuration}ms`);
+      
+      // Consider it an auth error if:
+      // - It's a policy violation (1008) or app-specific error (4000-4999)
+      // - The reason contains auth-related keywords
+      // - It's a 1006 (abnormal closure) that happened very quickly (likely rejected on connect)
+      if (isPolicyViolation || isAppSpecificError || hasAuthKeywords || 
+          (event.code === 1006 && isQuickFailure && !event.reason)) {
         console.log('🔐 Authentication error detected, will retry after token refresh');
+        console.log('  Close code:', event.code);
+        console.log('  Close reason:', event.reason || '(empty)');
+        console.log('  Connection duration:', connectionDuration, 'ms');
         this.isAuthError = true;
+        
         // Don't attempt immediate reconnect for auth errors
         // Wait for token refresh event instead
         return;
