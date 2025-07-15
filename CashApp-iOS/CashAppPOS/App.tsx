@@ -15,6 +15,7 @@ import SumUpNativeService from './src/services/SumUpNativeService';
 import { supabase } from './src/lib/supabase';
 import { useAuthStore } from './src/store/useAuthStore';
 import { clearAuthStorage } from './src/utils/clearAuthStorage';
+import tokenManager from './src/utils/tokenManager';
 
 // Suppress specific warnings for development
 LogBox.ignoreLogs([
@@ -60,9 +61,24 @@ const App: React.FC = () => {
         const { data: authListener } = supabase.auth.onAuthStateChange(
           async (event, session) => {
             console.log('🔐 Auth state changed:', event);
+            
+            // Handle token refresh events
+            if (event === 'TOKEN_REFRESHED' && session) {
+              console.log('🔄 Token refreshed, updating stored token...');
+              // The token manager will handle storing the new token
+              // But we ensure it happens by calling getAuthToken which syncs storage
+              await tokenManager.getAuthToken();
+            }
+            
             if (event === 'SIGNED_OUT') {
               // Clear any stored data
               authStore.clearError();
+              await tokenManager.clearTokens();
+            }
+            
+            if (event === 'SIGNED_IN' && session) {
+              // Ensure token is stored for other services
+              await tokenManager.getAuthToken();
             }
           }
         );

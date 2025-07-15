@@ -8,6 +8,7 @@ import { useAuthStore } from '../store/useAuthStore';
 import BackendCompatibilityService from './BackendCompatibilityService';
 import { supabase } from '../lib/supabase';
 import { AUTH_CONFIG } from '../config/auth.config';
+import tokenManager from '../utils/tokenManager';
 
 // Feature flags for controlling data sources
 export interface FeatureFlags {
@@ -83,22 +84,9 @@ class DataService {
     await AsyncStorage.setItem('feature_flags', JSON.stringify(this.featureFlags));
   }
 
-  // Helper method to get auth token from Supabase session
+  // Helper method to get auth token using unified token manager
   private async getAuthToken(): Promise<string | null> {
-    try {
-      // Check if using mock authentication
-      if (AUTH_CONFIG.USE_MOCK_AUTH) {
-        // Get token from AsyncStorage for mock auth
-        return await AsyncStorage.getItem('auth_token');
-      }
-      
-      // Get token from Supabase session for real auth
-      const { data: { session } } = await supabase.auth.getSession();
-      return session?.access_token || null;
-    } catch (error) {
-      console.error('Error getting auth token from Supabase:', error);
-      return null;
-    }
+    return await tokenManager.getTokenWithRefresh();
   }
 
   getFeatureFlags(): FeatureFlags {
