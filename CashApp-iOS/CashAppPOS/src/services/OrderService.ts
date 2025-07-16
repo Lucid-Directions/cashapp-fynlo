@@ -126,7 +126,7 @@ class OrderService {
       };
 
       // Emit WebSocket event for real-time updates
-      webSocketService.send('order_created', order);
+      webSocketService.send({ type: 'order_created', data: order });
 
       // Save to local storage for offline access
       await this.cacheOrder(order);
@@ -293,7 +293,7 @@ class OrderService {
       const updatedOrder = await response.json();
       
       // Emit WebSocket event
-      webSocketService.send('order_updated', updatedOrder);
+      webSocketService.send({ type: 'order_updated', data: updatedOrder });
 
       return updatedOrder;
     } catch (error) {
