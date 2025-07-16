@@ -44,7 +44,7 @@ async def verify_supabase_user(
     
     # Check if Supabase is configured
     if not supabase_admin:
-        print("ERROR: Supabase admin client not initialized")
+        logger.error("Supabase admin client not initialized")
         raise HTTPException(
             status_code=503,
             detail="Authentication service temporarily unavailable"
@@ -149,7 +149,7 @@ async def verify_supabase_user(
             # User has no restaurant yet - check if we should create a default one
             if db_user.role == 'restaurant_owner':
                 # Create a default restaurant for the user
-                print(f"Creating default restaurant for user: {db_user.email}")
+                logger.info(f"Creating default restaurant for user with ID: {db_user.id}")
                 default_restaurant = Restaurant(
                     id=uuid.uuid4(),
                     name=f"{db_user.first_name or 'My'} Restaurant",
@@ -272,6 +272,6 @@ async def register_restaurant(
     except HTTPException:
         raise
     except Exception as e:
-        print(f"Restaurant registration error: {str(e)}")
+        logger.error(f"Restaurant registration error: {str(e)}")
         db.rollback()
         raise HTTPException(status_code=500, detail="Failed to register restaurant")

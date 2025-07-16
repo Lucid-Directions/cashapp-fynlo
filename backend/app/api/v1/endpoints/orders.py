@@ -118,11 +118,17 @@ def generate_order_number() -> str:
 
 def verify_order_access(order, current_user):
     """Verify user has access to the order's restaurant"""
-    if current_user.role != 'platform_owner' and str(order.restaurant_id) != str(current_user.restaurant_id):
-        raise HTTPException(
-            status_code=403,
-            detail="Access denied: You can only access orders from your own restaurant"
-        )
+    if current_user.role != 'platform_owner':
+        if current_user.restaurant_id is None:
+            raise HTTPException(
+                status_code=403,
+                detail="Access denied: No restaurant assigned to user"
+            )
+        if str(order.restaurant_id) != str(current_user.restaurant_id):
+            raise HTTPException(
+                status_code=403,
+                detail="Access denied: You can only access orders from your own restaurant"
+            )
 
 @router.get("/", response_model=List[OrderSummary])
 async def get_orders(
@@ -148,6 +154,11 @@ async def get_orders(
             query = db.query(Order).filter(Order.restaurant_id == restaurant_id)
     else:
         # Restaurant owners, managers, and employees can only access their own restaurant
+        if current_user.restaurant_id is None:
+            raise HTTPException(
+                status_code=403,
+                detail="Access denied: No restaurant assigned to user"
+            )
         if restaurant_id and str(restaurant_id) != str(current_user.restaurant_id):
             raise HTTPException(
                 status_code=403,
@@ -232,6 +243,11 @@ async def get_todays_orders(
             )
     else:
         # Restaurant owners, managers, and employees can only access their own restaurant
+        if current_user.restaurant_id is None:
+            raise HTTPException(
+                status_code=403,
+                detail="Access denied: No restaurant assigned to user"
+            )
         if restaurant_id and str(restaurant_id) != str(current_user.restaurant_id):
             raise HTTPException(
                 status_code=403,
@@ -319,6 +335,11 @@ async def create_order(
             )
     else:
         # Restaurant owners, managers, and employees can only create orders for their own restaurant
+        if current_user.restaurant_id is None:
+            raise HTTPException(
+                status_code=403,
+                detail="Access denied: No restaurant assigned to user"
+            )
         if restaurant_id and str(restaurant_id) != str(current_user.restaurant_id):
             raise HTTPException(
                 status_code=403,
