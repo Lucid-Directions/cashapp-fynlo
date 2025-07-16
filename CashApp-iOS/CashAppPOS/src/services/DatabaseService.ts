@@ -173,26 +173,39 @@ class DatabaseService {
         const newToken = await tokenManager.refreshAuthToken();
         
         if (newToken) {
-          // Retry the request with new token - reuse the same timeout controller
-          const newHeaders = {
-            ...headers,
-            'Authorization': `Bearer ${newToken}`
-          };
+          // Create a new timeout for the retry request
+          const retryElapsedTime = Date.now() - startTime;
+          const retryRemainingTimeout = Math.max(1000, totalTimeout - retryElapsedTime); // At least 1 second
           
-          const retryResponse = await fetch(url, {
-            ...options,
-            headers: newHeaders,
-            signal: controller.signal,
-          });
+          const retryController = new AbortController();
+          const retryTimeoutId = setTimeout(() => retryController.abort(), retryRemainingTimeout);
           
-          const retryData = await retryResponse.json();
+          try {
+            // Retry the request with new token and new timeout
+            const newHeaders = {
+              ...headers,
+              'Authorization': `Bearer ${newToken}`
+            };
+            
+            const retryResponse = await fetch(url, {
+              ...options,
+              headers: newHeaders,
+              signal: retryController.signal,
+            });
+            
+            clearTimeout(retryTimeoutId);
+            const retryData = await retryResponse.json();
           
-          if (!retryResponse.ok) {
-            const errorMessage = retryData.message || retryData.detail || `HTTP error! status: ${retryResponse.status}`;
-            throw new Error(errorMessage);
+            if (!retryResponse.ok) {
+              const errorMessage = retryData.message || retryData.detail || `HTTP error! status: ${retryResponse.status}`;
+              throw new Error(errorMessage);
+            }
+            
+            return retryData;
+          } catch (retryError) {
+            clearTimeout(retryTimeoutId);
+            throw retryError;
           }
-          
-          return retryData;
         }
       }
       
