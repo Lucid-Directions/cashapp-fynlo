@@ -6,6 +6,7 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import tokenManager from '../utils/tokenManager';
 import { API_CONFIG } from '../config/api';
 import SecurePaymentConfig from './SecurePaymentConfig';
 import { Alert } from 'react-native';
@@ -272,7 +273,7 @@ class SecurePaymentOrchestratorService {
   async getPaymentStatus(paymentId: string): Promise<PaymentStatus | null> {
     try {
       // Get auth token
-      const token = await AsyncStorage.getItem('auth_token');
+      const token = await tokenManager.getTokenWithRefresh();
       if (!token) {
         throw new Error('Authentication required');
       }

@@ -11,7 +11,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Order, OrderItem } from '../types';
 import API_CONFIG from '../config/api';
-import WebSocketService from './WebSocketService';
+import { webSocketService } from './websocket/WebSocketService';
 
 export interface CustomerMetadata {
   name: string;
@@ -47,10 +47,9 @@ export interface OrderFilters {
 
 class OrderService {
   private static instance: OrderService;
-  private webSocketService: WebSocketService;
 
   private constructor() {
-    this.webSocketService = WebSocketService.getInstance();
+    // WebSocket service is accessed as a singleton export
   }
 
   static getInstance(): OrderService {
@@ -127,7 +126,7 @@ class OrderService {
       };
 
       // Emit WebSocket event for real-time updates
-      this.webSocketService.send('order_created', order);
+      webSocketService.send({ type: 'order_created', data: order });
 
       // Save to local storage for offline access
       await this.cacheOrder(order);
@@ -294,7 +293,7 @@ class OrderService {
       const updatedOrder = await response.json();
       
       // Emit WebSocket event
-      this.webSocketService.send('order_updated', updatedOrder);
+      webSocketService.send({ type: 'order_updated', data: updatedOrder });
 
       return updatedOrder;
     } catch (error) {
@@ -412,11 +411,11 @@ class OrderService {
    * Subscribe to order events
    */
   subscribeToOrderEvents(callback: (event: string, data: any) => void): () => void {
-    const unsubscribeCreated = this.webSocketService.subscribe('order_created', (data) => {
+    const unsubscribeCreated = webSocketService.subscribe('order_created', (data) => {
       callback('order_created', data);
     });
 
-    const unsubscribeUpdated = this.webSocketService.subscribe('order_updated', (data) => {
+    const unsubscribeUpdated = webSocketService.subscribe('order_updated', (data) => {
       callback('order_updated', data);
     });
 

@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../lib/supabase';
 import { CHUCHO_MENU_ITEMS, CHUCHO_CATEGORIES } from '../data/chuchoMenu';
 import BackendCompatibilityService from './BackendCompatibilityService';
+import tokenManager from '../utils/tokenManager';
 import errorLogger from '../utils/ErrorLogger';
 
 // Database configuration - FIXED: Uses LAN IP for device testing
@@ -88,14 +89,8 @@ class DatabaseService {
   // Authentication methods - Updated for Supabase
   private async loadAuthToken(): Promise<void> {
     try {
-      // Get the current Supabase session
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        this.authToken = session.access_token;
-      } else {
-        // Fallback to stored token (legacy support)
-        this.authToken = await AsyncStorage.getItem('auth_token');
-      }
+      // Use tokenManager for consistent token retrieval
+      this.authToken = await tokenManager.getTokenWithRefresh();
     } catch (error) {
       console.error('Error loading auth token:', error);
     }
@@ -104,31 +99,24 @@ class DatabaseService {
   private async saveAuthToken(token: string): Promise<void> {
     try {
       this.authToken = token;
-      // Still save to AsyncStorage for backward compatibility
+      // CRITICAL: Must persist token for tokenManager to access it
       await AsyncStorage.setItem('auth_token', token);
+      console.log('✅ Auth token saved to storage');
     } catch (error) {
       console.error('Error saving auth token:', error);
     }
   }
 
   private async getAuthToken(): Promise<string | null> {
-    // Import AUTH_CONFIG to check if we're using mock auth
-    const { AUTH_CONFIG } = await import('../config/auth.config');
+    // Use unified token manager for consistent token retrieval
+    const token = await tokenManager.getTokenWithRefresh();
     
-    // Check if using mock authentication
-    if (AUTH_CONFIG.USE_MOCK_AUTH) {
-      // Get token from AsyncStorage for mock auth
-      const storedToken = await AsyncStorage.getItem('auth_token');
-      return storedToken || this.authToken;
+    // Update internal reference if we got a token
+    if (token) {
+      this.authToken = token;
     }
     
-    // For real auth, get fresh token from Supabase
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) {
-      return session.access_token;
-    }
-    // Fallback to stored token
-    return this.authToken;
+    return token || this.authToken;
   }
 
   // API request helper - FIXED: Handle REST API responses properly with timeout and retry
@@ -171,14 +159,14 @@ class DatabaseService {
       if (response.status === 401) {
         console.log('Token expired, attempting to refresh...');
         
-        // Try to refresh the session
-        const { data: { session }, error } = await supabase.auth.refreshSession();
+        // Try to refresh the token using token manager
+        const newToken = await tokenManager.refreshAuthToken();
         
-        if (session && !error) {
+        if (newToken) {
           // Retry the request with new token
           const newHeaders = {
             ...headers,
-            'Authorization': `Bearer ${session.access_token}`
+            'Authorization': `Bearer ${newToken}`
           };
           
           const retryResponse = await fetch(url, {

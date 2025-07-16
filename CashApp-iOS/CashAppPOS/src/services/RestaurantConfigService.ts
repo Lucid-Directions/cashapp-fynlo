@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import tokenManager from '../utils/tokenManager';
 import RestaurantDataService from './RestaurantDataService';
 import API_CONFIG from '../config/api';
 
@@ -164,7 +165,7 @@ class RestaurantConfigService {
     
     // Try to save to API first
     try {
-      const authToken = await AsyncStorage.getItem('auth_token');
+      const authToken = await tokenManager.getTokenWithRefresh();
       const userStr = await AsyncStorage.getItem('@auth_user');
       const user = userStr ? JSON.parse(userStr) : null;
       const restaurantId = user?.businessId || user?.restaurant_id;

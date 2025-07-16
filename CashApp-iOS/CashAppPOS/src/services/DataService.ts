@@ -8,6 +8,8 @@ import { useAuthStore } from '../store/useAuthStore';
 import BackendCompatibilityService from './BackendCompatibilityService';
 import { supabase } from '../lib/supabase';
 import { AUTH_CONFIG } from '../config/auth.config';
+import tokenManager from '../utils/tokenManager';
+import authInterceptor from './auth/AuthInterceptor';
 
 // Feature flags for controlling data sources
 export interface FeatureFlags {
@@ -57,6 +59,12 @@ class DataService {
     this.loadFeatureFlags();
     this.checkBackendAvailability();
     this.db = DatabaseService.getInstance();
+    
+    // Configure authInterceptor with base URL
+    authInterceptor.configure({
+      baseURL: API_CONFIG.FULL_API_URL,
+      excludePaths: ['/auth/login', '/auth/register', '/health'], // Public endpoints
+    });
   }
 
   static getInstance(): DataService {
@@ -83,22 +91,9 @@ class DataService {
     await AsyncStorage.setItem('feature_flags', JSON.stringify(this.featureFlags));
   }
 
-  // Helper method to get auth token from Supabase session
+  // Helper method to get auth token using unified token manager
   private async getAuthToken(): Promise<string | null> {
-    try {
-      // Check if using mock authentication
-      if (AUTH_CONFIG.USE_MOCK_AUTH) {
-        // Get token from AsyncStorage for mock auth
-        return await AsyncStorage.getItem('auth_token');
-      }
-      
-      // Get token from Supabase session for real auth
-      const { data: { session } } = await supabase.auth.getSession();
-      return session?.access_token || null;
-    } catch (error) {
-      console.error('Error getting auth token from Supabase:', error);
-      return null;
-    }
+    return await tokenManager.getTokenWithRefresh();
   }
 
   getFeatureFlags(): FeatureFlags {
@@ -666,14 +661,7 @@ class DataService {
     console.log('🌐 DataService.getCustomers - fetching from API');
     
     try {
-      const authToken = await this.getAuthToken();
-      const response = await fetch(`${API_CONFIG.FULL_API_URL}/customers`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
-        },
-      });
+      const response = await authInterceptor.get(`${API_CONFIG.FULL_API_URL}/customers`);
       
       if (response.ok) {
         const result = await response.json();
@@ -711,14 +699,7 @@ class DataService {
     console.log('🌐 DataService.getEmployees - fetching from API');
     
     try {
-      const authToken = await this.getAuthToken();
-      const response = await fetch(`${API_CONFIG.FULL_API_URL}/employees`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
-        },
-      });
+      const response = await authInterceptor.get(`${API_CONFIG.FULL_API_URL}/employees`);
       
       if (response.ok) {
         const result = await response.json();
@@ -1037,18 +1018,9 @@ class DataService {
     console.log('🌐 DataService.createEmployee - creating employee via API', employeeData);
     
     try {
-      const authToken = await this.getAuthToken();
-      if (!authToken) {
-        throw new Error('No authentication token found');
-      }
-
-      const response = await fetch(`${API_CONFIG.FULL_API_URL}/employees`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`,
-        },
-        body: JSON.stringify({
+      const response = await authInterceptor.post(
+        `${API_CONFIG.FULL_API_URL}/employees`,
+        {
           first_name: employeeData.firstName,
           last_name: employeeData.lastName,
           email: employeeData.email,
@@ -1058,8 +1030,8 @@ class DataService {
           start_date: employeeData.startDate,
           permissions: employeeData.permissions || [],
           is_active: true,
-        }),
-      });
+        }
+      );
       
       if (response.ok) {
         const result = await response.json();
