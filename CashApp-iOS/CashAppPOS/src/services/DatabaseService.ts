@@ -648,7 +648,8 @@ class DatabaseService {
     this.menuCache = {
       items: null,
       categories: null,
-      timestamp: 0
+      itemsTimestamp: 0,
+      categoriesTimestamp: 0
     };
     console.log('🧹 Menu cache cleared');
   }
