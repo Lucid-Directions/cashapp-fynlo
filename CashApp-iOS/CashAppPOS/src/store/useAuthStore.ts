@@ -7,6 +7,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authService } from '../services/auth/unifiedAuthService';
+import tokenManager from '../utils/tokenManager';
 
 interface User {
   id: string;
@@ -27,6 +28,7 @@ interface AuthState {
   isLoading: boolean;
   session: any | null;
   error: string | null;
+  tokenRefreshListenerSetup: boolean;
   
   // Actions
   signIn: (email: string, password: string) => Promise<void>;
@@ -36,7 +38,13 @@ interface AuthState {
   clearError: () => void;
   hasFeature: (feature: string) => boolean;
   requiresPlan: (plan: 'alpha' | 'beta' | 'omega') => boolean;
+  setupTokenListeners: () => void;
+  handleTokenRefresh: () => Promise<void>;
 }
+
+// Store handler functions at module level to maintain consistent references
+let tokenRefreshedHandler: (() => Promise<void>) | null = null;
+let tokenClearedHandler: (() => void) | null = null;
 
 export const useAuthStore = create<AuthState>()(
   persist(
@@ -46,6 +54,7 @@ export const useAuthStore = create<AuthState>()(
       isLoading: false,
       session: null,
       error: null,
+      tokenRefreshListenerSetup: false,
       
       signIn: async (email: string, password: string) => {
         try {
@@ -60,6 +69,9 @@ export const useAuthStore = create<AuthState>()(
             isLoading: false,
             error: null
           });
+          
+          // Ensure token listeners are set up after successful sign-in
+          get().setupTokenListeners();
         } catch (error: any) {
           set({ 
             isLoading: false, 
@@ -209,6 +221,68 @@ export const useAuthStore = create<AuthState>()(
         const requiredLevel = planHierarchy[plan];
         
         return userPlanLevel >= requiredLevel;
+      },
+      
+      setupTokenListeners: () => {
+        console.log('🎧 Setting up token event listeners...');
+        
+        // Remove any existing listeners first to prevent duplicates
+        if (tokenRefreshedHandler) {
+          tokenManager.off('token:refreshed', tokenRefreshedHandler);
+          tokenRefreshedHandler = null;
+        }
+        if (tokenClearedHandler) {
+          tokenManager.off('token:cleared', tokenClearedHandler);
+          tokenClearedHandler = null;
+        }
+        
+        // Create new handler functions with current store references
+        tokenRefreshedHandler = async () => {
+          console.log('🔄 Token refreshed, updating auth state...');
+          await get().handleTokenRefresh();
+        };
+        
+        tokenClearedHandler = () => {
+          console.log('🔒 Tokens cleared, updating auth state...');
+          set({
+            user: null,
+            session: null,
+            isAuthenticated: false,
+            error: null
+          });
+        };
+        
+        // Add fresh listeners
+        tokenManager.on('token:refreshed', tokenRefreshedHandler);
+        tokenManager.on('token:cleared', tokenClearedHandler);
+        
+        // Mark listeners as set up
+        set({ tokenRefreshListenerSetup: true });
+        console.log('✅ Token listeners successfully set up');
+      },
+      
+      handleTokenRefresh: async () => {
+        try {
+          // Get the current session after token refresh
+          const session = await authService.getSession();
+          
+          if (session) {
+            // Update session in store
+            set({ session });
+            console.log('✅ Auth store session updated after token refresh');
+          } else {
+            // No valid session after refresh - user needs to log in again
+            console.log('⚠️ No valid session after token refresh');
+            set({
+              user: null,
+              session: null,
+              isAuthenticated: false,
+              error: 'Session expired - please log in again'
+            });
+          }
+        } catch (error) {
+          console.error('❌ Error handling token refresh in auth store:', error);
+        }
       }
     }),
     {
@@ -228,6 +302,19 @@ export const useAuthStore = create<AuthState>()(
           };
         }
         return persistedState;
+      },
+      onRehydrateStorage: () => (state) => {
+        // After rehydration, set up token listeners
+        // This ensures listeners are always set up after module reload
+        if (state) {
+          console.log('🔄 Store rehydrated, setting up token listeners...');
+          // Use setTimeout to ensure store is fully initialized
+          setTimeout(() => {
+            const store = useAuthStore.getState();
+            // Reset the flag and setup listeners using store actions
+            store.setupTokenListeners();
+          }, 0);
+        }
       }
     }
   )

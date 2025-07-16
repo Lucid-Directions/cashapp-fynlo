@@ -82,14 +82,8 @@ class DatabaseService {
   // Authentication methods - Updated for Supabase
   private async loadAuthToken(): Promise<void> {
     try {
-      // Get the current Supabase session
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        this.authToken = session.access_token;
-      } else {
-        // Fallback to stored token (legacy support)
-        this.authToken = await AsyncStorage.getItem('auth_token');
-      }
+      // Use tokenManager for consistent token retrieval
+      this.authToken = await tokenManager.getTokenWithRefresh();
     } catch (error) {
       console.error('Error loading auth token:', error);
     }
@@ -98,8 +92,9 @@ class DatabaseService {
   private async saveAuthToken(token: string): Promise<void> {
     try {
       this.authToken = token;
-      // Still save to AsyncStorage for backward compatibility
+      // CRITICAL: Must persist token for tokenManager to access it
       await AsyncStorage.setItem('auth_token', token);
+      console.log('✅ Auth token saved to storage');
     } catch (error) {
       console.error('Error saving auth token:', error);
     }

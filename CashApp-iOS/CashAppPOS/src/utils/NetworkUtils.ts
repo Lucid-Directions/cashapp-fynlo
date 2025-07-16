@@ -4,6 +4,7 @@
  */
 
 import API_CONFIG from '../config/api';
+import tokenManager from './tokenManager';
 
 interface NetworkRequestOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
@@ -144,9 +145,8 @@ class NetworkUtils {
     };
 
     try {
-      // Try to get auth token from AsyncStorage
-      const AsyncStorage = require('@react-native-async-storage/async-storage').default;
-      const authToken = await AsyncStorage.getItem('auth_token');
+      // Get auth token using tokenManager
+      const authToken = await tokenManager.getTokenWithRefresh();
       
       if (authToken) {
         headers['Authorization'] = `Bearer ${authToken}`;

@@ -1,25 +1,83 @@
 /**
- * Unified Token Management Utility
+ * Enhanced Token Management Utility with Race Condition Prevention
  * 
  * This utility provides a single source of truth for authentication tokens
  * across all services (WebSocket, DataService, DatabaseService).
  * 
- * It handles:
- * - Getting the current valid token from Supabase or AsyncStorage
- * - Refreshing expired tokens
- * - Updating stored tokens after refresh
- * - Providing a consistent interface for all services
+ * Features:
+ * - Single token refresh at a time (mutex with timeout)
+ * - Event-based token refresh notifications
+ * - Exponential backoff for failed refreshes
+ * - Request queuing during refresh
+ * - Token expiry caching to prevent unnecessary checks
+ * 
+ * Events emitted:
+ * - 'token:refreshed' - When token is successfully refreshed
+ * - 'token:refresh:failed' - When token refresh fails
+ * - 'token:cleared' - When tokens are cleared (logout)
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../lib/supabase';
 import { AUTH_CONFIG } from '../config/auth.config';
 
-class TokenManager {
+// Simple EventEmitter for React Native (similar to WebSocketService)
+class SimpleEventEmitter {
+  private listeners: { [key: string]: Function[] } = {};
+
+  on(event: string, listener: Function) {
+    if (!this.listeners[event]) {
+      this.listeners[event] = [];
+    }
+    this.listeners[event].push(listener);
+  }
+
+  off(event: string, listener: Function) {
+    if (!this.listeners[event]) return;
+    this.listeners[event] = this.listeners[event].filter(l => l !== listener);
+  }
+
+  emit(event: string, ...args: any[]) {
+    if (!this.listeners[event]) return;
+    this.listeners[event].forEach(listener => {
+      try {
+        listener(...args);
+      } catch (error) {
+        console.error(`Error in event listener for ${event}:`, error);
+      }
+    });
+  }
+
+  removeAllListeners(event?: string) {
+    if (event) {
+      delete this.listeners[event];
+    } else {
+      this.listeners = {};
+    }
+  }
+}
+
+interface QueuedRequest {
+  resolve: (token: string | null) => void;
+  reject: (error: Error) => void;
+}
+
+class TokenManager extends SimpleEventEmitter {
   private static instance: TokenManager;
   private refreshPromise: Promise<string | null> | null = null;
+  private tokenExpiryTime: number | null = null;
+  private refreshTimeout: NodeJS.Timeout | null = null;
+  private refreshBackoffMs = 1000; // Start with 1 second
+  private maxBackoffMs = 60000; // Max 60 seconds
+  private consecutiveRefreshFailures = 0;
+  private requestQueue: QueuedRequest[] = [];
+  private lastRefreshAttempt = 0;
+  private minRefreshInterval = 5000; // Don't refresh more than once per 5 seconds
+  private lastRefreshSuccessful = true; // Track if last refresh was successful
 
-  private constructor() {}
+  private constructor() {
+    super();
+  }
 
   static getInstance(): TokenManager {
     if (!TokenManager.instance) {
@@ -48,6 +106,11 @@ class TokenManager {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (session?.access_token) {
+        // Cache the expiry time
+        if (session.expires_at) {
+          this.tokenExpiryTime = session.expires_at;
+        }
+        
         // Ensure AsyncStorage is in sync
         await AsyncStorage.setItem('auth_token', session.access_token);
         return session.access_token;
@@ -68,35 +131,123 @@ class TokenManager {
   }
 
   /**
-   * Refresh the authentication token
+   * Check if the current token is expired
+   * 
+   * @returns true if token is expired or will expire within 30 seconds
+   */
+  private isTokenExpired(): boolean {
+    if (!this.tokenExpiryTime) {
+      // If we don't know expiry time, assume it might be expired
+      return true;
+    }
+    
+    // Check if token expires within 30 seconds (buffer for network delays)
+    const expiryBuffer = 30 * 1000; // 30 seconds
+    return Date.now() >= (this.tokenExpiryTime * 1000 - expiryBuffer);
+  }
+
+  /**
+   * Refresh the authentication token with enhanced race condition prevention
    * 
    * This method ensures only one refresh happens at a time to prevent
-   * multiple simultaneous refresh requests.
+   * multiple simultaneous refresh requests. It also implements:
+   * - Request queuing
+   * - Exponential backoff
+   * - Minimum refresh interval
    * 
    * @returns The new authentication token or null
    */
   async refreshAuthToken(): Promise<string | null> {
-    // If already refreshing, wait for that to complete
-    if (this.refreshPromise) {
-      return this.refreshPromise;
+    // Check if we're refreshing too frequently
+    const now = Date.now();
+    if (now - this.lastRefreshAttempt < this.minRefreshInterval) {
+      console.log('⏳ Refresh attempt too soon, checking conditions...');
+      
+      // If there's an ongoing refresh, wait for it
+      if (this.refreshPromise) {
+        return this.refreshPromise;
+      }
+      
+      // Check if we need to force a refresh despite the interval
+      const tokenExpired = this.isTokenExpired();
+      const lastRefreshFailed = !this.lastRefreshSuccessful;
+      
+      if (tokenExpired || lastRefreshFailed) {
+        console.log(`⚠️ Forcing refresh despite interval - Token expired: ${tokenExpired}, Last refresh failed: ${lastRefreshFailed}`);
+        // Must refresh regardless of interval
+      } else {
+        // Token is still valid and last refresh was successful
+        console.log('✅ Token still valid and last refresh successful, returning existing token');
+        return this.getAuthToken();
+      }
     }
 
-    // Start new refresh
-    this.refreshPromise = this.performRefresh();
+    // If already refreshing, add to queue
+    if (this.refreshPromise) {
+      console.log('🔄 Token refresh already in progress, adding to queue...');
+      
+      return new Promise<string | null>((resolve, reject) => {
+        this.requestQueue.push({ resolve, reject });
+      });
+    }
+
+    // Record refresh attempt time
+    this.lastRefreshAttempt = now;
+
+    // Start new refresh with timeout
+    this.refreshPromise = this.performRefreshWithTimeout();
     
     try {
       const result = await this.refreshPromise;
+      
+      // Mark refresh as successful
+      this.lastRefreshSuccessful = true;
+      
+      // Process queued requests with success
+      this.processQueue(null, result);
+      
       return result;
+    } catch (error) {
+      // Mark refresh as failed
+      this.lastRefreshSuccessful = false;
+      
+      // Process queued requests with error
+      this.processQueue(error as Error, null);
+      
+      throw error;
     } finally {
       this.refreshPromise = null;
     }
+  }
+
+  /**
+   * Perform refresh with timeout to prevent hanging
+   */
+  private async performRefreshWithTimeout(): Promise<string | null> {
+    const timeoutMs = 30000; // 30 second timeout
+    
+    return Promise.race([
+      this.performRefresh(),
+      new Promise<string | null>((_, reject) => {
+        this.refreshTimeout = setTimeout(() => {
+          reject(new Error('Token refresh timeout'));
+        }, timeoutMs);
+      })
+    ]).finally(() => {
+      if (this.refreshTimeout) {
+        clearTimeout(this.refreshTimeout);
+        this.refreshTimeout = null;
+      }
+    });
   }
 
   private async performRefresh(): Promise<string | null> {
     try {
       // For mock auth, no refresh is needed - just return stored token
       if (AUTH_CONFIG.USE_MOCK_AUTH) {
-        return await AsyncStorage.getItem('auth_token');
+        const token = await AsyncStorage.getItem('auth_token');
+        this.emit('token:refreshed', token);
+        return token;
       }
 
       // First check if we have a session to refresh
@@ -105,44 +256,97 @@ class TokenManager {
       if (!currentSession) {
         // No session to refresh - user is logged out
         console.log('⚠️ No session to refresh - user may be logged out');
+        this.consecutiveRefreshFailures++;
+        this.emit('token:refresh:failed', new Error('No active session'));
         return null;
       }
       
       console.log('🔄 Refreshing authentication token...');
       
+      // Apply exponential backoff if we've had failures
+      if (this.consecutiveRefreshFailures > 0) {
+        const backoffTime = Math.min(
+          this.refreshBackoffMs * Math.pow(2, this.consecutiveRefreshFailures - 1),
+          this.maxBackoffMs
+        );
+        console.log(`⏳ Waiting ${backoffTime}ms before refresh (backoff)...`);
+        await new Promise(resolve => setTimeout(resolve, backoffTime));
+      }
+      
       const { data: { session }, error } = await supabase.auth.refreshSession();
       
       if (error) {
         console.error('❌ Token refresh failed:', error);
+        this.consecutiveRefreshFailures++;
+        this.emit('token:refresh:failed', error);
+        
         // Don't clear stored tokens on refresh failure - they might still work
         return null;
       }
       
       if (session?.access_token) {
+        // Reset failure count on success
+        this.consecutiveRefreshFailures = 0;
+        
+        // Update cached expiry time
+        if (session.expires_at) {
+          this.tokenExpiryTime = session.expires_at;
+        }
+        
         // Update stored tokens
         await AsyncStorage.setItem('auth_token', session.access_token);
         await AsyncStorage.setItem('supabase_session', JSON.stringify(session));
         
         console.log('✅ Token refreshed successfully');
+        
+        // Emit success event
+        this.emit('token:refreshed', session.access_token);
+        
         return session.access_token;
       }
       
       return null;
     } catch (error) {
       console.error('❌ Error refreshing token:', error);
-      return null;
+      this.consecutiveRefreshFailures++;
+      this.emit('token:refresh:failed', error);
+      throw error;
     }
+  }
+
+  /**
+   * Process queued requests after refresh completes
+   */
+  private processQueue(error: Error | null, token: string | null = null) {
+    const queue = [...this.requestQueue];
+    this.requestQueue = [];
+    
+    queue.forEach(({ resolve, reject }) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(token);
+      }
+    });
   }
 
   /**
    * Clear all stored tokens (used on logout)
    */
   async clearTokens(): Promise<void> {
+    // Clear cached expiry and refresh state
+    this.tokenExpiryTime = null;
+    this.consecutiveRefreshFailures = 0;
+    this.lastRefreshSuccessful = true;
+    
     await AsyncStorage.multiRemove([
       'auth_token',
       'supabase_session',
       'userInfo'
     ]);
+    
+    // Emit cleared event
+    this.emit('token:cleared');
   }
 
   /**
@@ -156,7 +360,8 @@ class TokenManager {
   /**
    * Get token with automatic refresh if expired
    * 
-   * This is the recommended method for services to use
+   * This is the recommended method for services to use.
+   * It checks token expiry and refreshes if needed.
    */
   async getTokenWithRefresh(): Promise<string | null> {
     try {
@@ -174,9 +379,9 @@ class TokenManager {
         return null;
       }
       
-      // Check if the token is expired
+      // Check if the token is expired or will expire soon
       const now = Math.floor(Date.now() / 1000);
-      const expiresAt = session.expires_at;
+      const expiresAt = session.expires_at || this.tokenExpiryTime;
       
       if (expiresAt && now >= expiresAt - 60) {
         // Token is expired or will expire within 60 seconds
@@ -193,6 +398,16 @@ class TokenManager {
       // Fall back to stored token if available
       return await AsyncStorage.getItem('auth_token');
     }
+  }
+
+  /**
+   * Force a token refresh (useful for testing or manual refresh)
+   */
+  async forceRefresh(): Promise<string | null> {
+    console.log('🔄 Forcing token refresh...');
+    // Clear cached expiry to force refresh
+    this.tokenExpiryTime = null;
+    return this.refreshAuthToken();
   }
 }
 
