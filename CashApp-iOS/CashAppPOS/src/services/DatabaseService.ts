@@ -467,8 +467,9 @@ class DatabaseService {
       });
       
       if (response.data && response.data.length > 0) {
-        // Cache the categories
+        // Cache the categories and update timestamp
         this.menuCache.categories = response.data;
+        this.menuCache.timestamp = now;
         console.log(`✅ Menu categories loaded and cached (${response.data.length} categories)`);
         return response.data;
       }
@@ -476,6 +477,7 @@ class DatabaseService {
       // If no data, fall back to Mexican categories
       const fallback = this.getMexicanCategoriesFallback();
       this.menuCache.categories = fallback;
+      this.menuCache.timestamp = now;
       return fallback;
     } catch (error) {
       console.error('❌ Failed to fetch menu categories:', error.message || error);
@@ -489,6 +491,7 @@ class DatabaseService {
       // Return Mexican categories as fallback
       const fallback = this.getMexicanCategoriesFallback();
       this.menuCache.categories = fallback;
+      this.menuCache.timestamp = now;
       return fallback;
     }
   }
