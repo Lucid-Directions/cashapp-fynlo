@@ -120,9 +120,18 @@ class DatabaseService {
   }
 
   // API request helper - FIXED: Handle REST API responses properly with timeout and retry
-  private async apiRequest(endpoint: string, options: RequestInit = {}, retryCount: number = 0): Promise<any> {
+  private async apiRequest(endpoint: string, options: RequestInit = {}, retryCount: number = 0, initialStartTime?: number): Promise<any> {
     const url = `${API_BASE_URL}${endpoint}`;
-    const startTime = Date.now();
+    const startTime = initialStartTime || Date.now();
+    const elapsedTime = Date.now() - startTime;
+    
+    // Check if we've exceeded total timeout across all retries
+    const timeout = API_CONFIG.TIMEOUT || 10000;
+    const retryAttempts = API_CONFIG.RETRY_ATTEMPTS || 3;
+    const totalTimeout = timeout * retryAttempts;
+    if (elapsedTime > totalTimeout) {
+      throw new Error(`API Timeout: Total request time exceeded ${totalTimeout}ms`);
+    }
     
     // Get fresh auth token from Supabase
     const authToken = await this.getAuthToken();
@@ -137,9 +146,10 @@ class DatabaseService {
     // Log the request
     errorLogger.logAPIRequest(options.method || 'GET', url, { headers, body: options.body });
 
-    // Create AbortController for timeout
+    // Create AbortController for timeout - adjust for elapsed time
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.TIMEOUT);
+    const remainingTimeout = Math.min(timeout, totalTimeout - elapsedTime);
+    const timeoutId = setTimeout(() => controller.abort(), remainingTimeout);
 
     try {
       const response = await fetch(url, {
@@ -163,7 +173,7 @@ class DatabaseService {
         const newToken = await tokenManager.refreshAuthToken();
         
         if (newToken) {
-          // Retry the request with new token
+          // Retry the request with new token - reuse the same timeout controller
           const newHeaders = {
             ...headers,
             'Authorization': `Bearer ${newToken}`
@@ -172,6 +182,7 @@ class DatabaseService {
           const retryResponse = await fetch(url, {
             ...options,
             headers: newHeaders,
+            signal: controller.signal,
           });
           
           const retryData = await retryResponse.json();
@@ -211,17 +222,18 @@ class DatabaseService {
       
       // Check if it's a timeout error
       if (error.name === 'AbortError') {
-        console.warn(`⏰ API request timeout for ${endpoint} (attempt ${retryCount + 1}/${API_CONFIG.RETRY_ATTEMPTS})`);
+        console.warn(`⏰ API request timeout for ${endpoint} (attempt ${retryCount + 1}/${retryAttempts})`);
         
         // Retry logic with exponential backoff
-        if (retryCount < API_CONFIG.RETRY_ATTEMPTS - 1) {
-          const delay = API_CONFIG.RETRY_DELAY * Math.pow(2, retryCount);
+        if (retryCount < retryAttempts - 1) {
+          const retryDelay = API_CONFIG.RETRY_DELAY || 1000;
+          const delay = retryDelay * Math.pow(2, retryCount);
           console.log(`🔄 Retrying after ${delay}ms...`);
           await new Promise(resolve => setTimeout(resolve, delay));
-          return this.apiRequest(endpoint, options, retryCount + 1);
+          return this.apiRequest(endpoint, options, retryCount + 1, startTime);
         }
         
-        throw new Error(`API Timeout: Request failed after ${API_CONFIG.RETRY_ATTEMPTS} attempts`);
+        throw new Error(`API Timeout: Request failed after ${retryAttempts} attempts`);
       }
       
       throw error;

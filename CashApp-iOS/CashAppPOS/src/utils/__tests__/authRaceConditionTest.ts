@@ -160,23 +160,8 @@ describe('Authentication Race Condition Tests', () => {
       expect(onSpy).not.toHaveBeenCalled();
     });
 
-    it('should use microtask for rehydration setup', async () => {
-      // Track Promise.resolve calls
-      const promiseSpy = jest.spyOn(Promise, 'resolve');
-      
-      // Simulate rehydration
-      const onRehydrate = (useAuthStore as any).persist.onRehydrateStorage();
-      onRehydrate({ tokenRefreshListenerSetup: false });
-      
-      // Should use Promise.resolve for microtask
-      expect(promiseSpy).toHaveBeenCalled();
-      
-      // Wait for microtask
-      await Promise.resolve();
-      
-      // Listeners should be setup
-      expect(useAuthStore.getState().tokenRefreshListenerSetup).toBe(true);
-    });
+    // Test removed: persist middleware was removed from useAuthStore
+    // to prevent automatic login issues
   });
 
   describe('Integration Tests', () => {
