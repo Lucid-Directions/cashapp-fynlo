@@ -8,7 +8,6 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, Query, P
 from sqlalchemy.orm import Session
 import json
 from datetime import datetime
-from jose import jwt, JWTError
 
 from app.core.database import get_db, User, Restaurant
 from app.core.websocket import (
@@ -21,6 +20,7 @@ from app.core.exceptions import FynloException, ErrorCodes
 from app.core.responses import APIResponseHelper
 from app.core.auth import get_current_user
 from app.core.config import settings
+from app.core.supabase import supabase_admin
 
 router = APIRouter()
 
@@ -31,7 +31,7 @@ async def verify_websocket_access(
     connection_type: str = "pos",
     db: Session = None
 ) -> bool:
-    """Verify WebSocket access permissions with token validation"""
+    """Verify WebSocket access permissions with Supabase token validation"""
     try:
         # Verify restaurant exists
         restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
@@ -44,41 +44,58 @@ async def verify_websocket_access(
             if not token:
                 return False
             
-            # Validate the JWT token
+            # Validate the token with Supabase
             try:
-                # Decode the JWT token
-                payload = jwt.decode(
-                    token, 
-                    settings.SECRET_KEY, 
-                    algorithms=[settings.ALGORITHM]
-                )
-                
-                # Check if token is expired
-                if payload.get("exp") and datetime.utcnow().timestamp() > payload["exp"]:
+                # Verify token with Supabase Admin API
+                if not supabase_admin:
+                    print("Supabase admin client not initialized")
                     return False
                 
-                # Verify the user ID matches
-                token_user_id = payload.get("sub")
-                if str(token_user_id) != str(user_id):
+                user_response = supabase_admin.auth.get_user(token)
+                supabase_user = user_response.user
+                
+                if not supabase_user:
+                    print("Invalid Supabase token - no user found")
+                    return False
+                
+                # Find user in our database by Supabase ID
+                user = db.query(User).filter(User.supabase_id == str(supabase_user.id)).first()
+                if not user:
+                    # Try to find by user_id as fallback (for existing users)
+                    user = db.query(User).filter(User.id == user_id).first()
+                    if not user:
+                        print(f"User not found in database: {supabase_user.id}")
+                        return False
+                
+                # Verify the user is active
+                if not user.is_active:
+                    print(f"User is not active: {user.id}")
+                    return False
+                
+                # Verify user_id matches
+                if str(user.id) != str(user_id):
+                    print(f"User ID mismatch: {user.id} != {user_id}")
                     return False
                     
-            except JWTError:
-                return False
-            
-            # Now verify the user exists and has access
-            user = db.query(User).filter(User.id == user_id).first()
-            if not user or not user.is_active:
+            except Exception as e:
+                print(f"Supabase token validation error: {str(e)}")
                 return False
             
             # Check if user has access to this restaurant
             if user.role == "restaurant_owner" and str(user.restaurant_id) != restaurant_id:
+                print(f"Restaurant owner access denied: {user.restaurant_id} != {restaurant_id}")
                 return False
-            elif user.role == "platform_owner" and str(user.platform_id) != str(restaurant.platform_id):
+            elif user.role == "platform_owner":
+                # Platform owners have access to all restaurants
+                pass
+            elif user.role in ["manager", "employee"] and str(user.restaurant_id) != restaurant_id:
+                print(f"Staff access denied: {user.restaurant_id} != {restaurant_id}")
                 return False
         
         return True
         
-    except Exception:
+    except Exception as e:
+        print(f"WebSocket access verification error: {str(e)}")
         return False
 
 @router.websocket("/ws/{restaurant_id}")
