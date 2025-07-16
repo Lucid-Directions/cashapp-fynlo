@@ -6,6 +6,7 @@
 import React, { useEffect, useState } from 'react';
 import { LogBox, View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import 'react-native-gesture-handler';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthProvider } from './src/contexts/AuthContext';
 import { ThemeProvider } from './src/design-system/ThemeProvider';
 import AppNavigator from './src/navigation/AppNavigator';
@@ -35,6 +36,18 @@ const App: React.FC = () => {
       try {
         console.log('🚀 Fynlo POS App Starting...');
         console.log('📱 BUNDLE VERSION: 2025-01-08-v9 - STABLE');
+        
+        // Clear any stored authentication on app startup
+        console.log('🧹 Clearing stored authentication...');
+        await AsyncStorage.multiRemove([
+          'auth-storage',
+          'auth_token',
+          'userInfo',
+          'supabase_session',
+          'mock_session',
+          '@auth_user',
+          '@auth_business'
+        ]);
         
         // Initialize error tracking service
         const errorTrackingService = ErrorTrackingService.getInstance();

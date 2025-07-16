@@ -205,9 +205,9 @@ const POSScreen: React.FC = () => {
         setMenuLoading(true);
         const dataService = DataService.getInstance();
         
-        // Increase timeout to 10 seconds to allow for slower API responses
+        // Increase timeout to 15 seconds to allow for slower API responses and retries
         const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('API Timeout')), 10000)
+          setTimeout(() => reject(new Error('Menu loading timeout')), 15000)
         );
         
         // Load menu items and categories with timeout
@@ -232,6 +232,39 @@ const POSScreen: React.FC = () => {
         
       } catch (error) {
         console.error('❌ Failed to load dynamic menu:', error);
+        
+        // Log detailed error information
+        console.log(`
+📱 ======== MENU LOADING ERROR ========
+🕐 Time: ${new Date().toISOString()}
+📍 Component: POSScreen
+🔍 Error Type: ${error.constructor.name}
+💬 Message: ${error.message}
+📊 Error Details: ${JSON.stringify(error, null, 2)}
+=====================================
+        `);
+        
+        // Determine the type of error for better user feedback
+        let errorMessage = 'Failed to load menu';
+        if (error.message === 'Menu loading timeout') {
+          errorMessage = 'Menu loading timed out. The server might be slow.';
+          console.warn('⏱️ Menu loading timeout - server may be experiencing high load');
+        } else if (error.message?.includes('API Timeout')) {
+          errorMessage = 'Unable to connect to server after multiple attempts.';
+          console.warn('🔄 Multiple retry attempts failed');
+        } else if (error.message?.includes('Network request failed')) {
+          errorMessage = 'No internet connection. Using offline menu.';
+          console.warn('📡 Network connection issue detected');
+        }
+        
+        // Show user-friendly error message
+        if (Platform.OS === 'ios' || Platform.OS === 'android') {
+          Alert.alert(
+            'Menu Loading Issue',
+            `${errorMessage}\n\nUsing cached menu data.`,
+            [{ text: 'OK' }]
+          );
+        }
         
         // Use local Chucho menu data as fallback
         try {

@@ -4,7 +4,6 @@
  */
 
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authService } from '../services/auth/supabaseAuth';
 
@@ -38,9 +37,7 @@ interface AuthState {
   requiresPlan: (plan: 'alpha' | 'beta' | 'omega') => boolean;
 }
 
-export const useAuthStore = create<AuthState>()(
-  persist(
-    (set, get) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
       user: null,
       isAuthenticated: false,
       isLoading: false,
@@ -210,25 +207,4 @@ export const useAuthStore = create<AuthState>()(
         
         return userPlanLevel >= requiredLevel;
       }
-    }),
-    {
-      name: 'auth-storage',
-      storage: createJSONStorage(() => AsyncStorage),
-      partialize: (state) => ({
-        user: state.user,
-        isAuthenticated: state.isAuthenticated
-      }),
-      version: 1,
-      migrate: (persistedState: any, version: number) => {
-        if (version === 0) {
-          // Clear old user data that might have wrong structure
-          return {
-            user: null,
-            isAuthenticated: false
-          };
-        }
-        return persistedState;
-      }
-    }
-  )
-);
+}));

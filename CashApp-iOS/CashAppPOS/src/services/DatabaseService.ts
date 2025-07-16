@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../lib/supabase';
 import { CHUCHO_MENU_ITEMS, CHUCHO_CATEGORIES } from '../data/chuchoMenu';
 import BackendCompatibilityService from './BackendCompatibilityService';
+import errorLogger from '../utils/ErrorLogger';
 
 // Database configuration - FIXED: Uses LAN IP for device testing
 import API_CONFIG from '../config/api';
@@ -66,6 +67,12 @@ class DatabaseService {
   private static instance: DatabaseService;
   private authToken: string | null = null;
   private currentSession: PosSession | null = null;
+  private menuCache: { items: any[] | null; categories: any[] | null; timestamp: number } = {
+    items: null,
+    categories: null,
+    timestamp: 0
+  };
+  private readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes cache
 
   constructor() {
     this.loadAuthToken();
@@ -124,9 +131,10 @@ class DatabaseService {
     return this.authToken;
   }
 
-  // API request helper - FIXED: Handle REST API responses properly
-  private async apiRequest(endpoint: string, options: RequestInit = {}): Promise<any> {
+  // API request helper - FIXED: Handle REST API responses properly with timeout and retry
+  private async apiRequest(endpoint: string, options: RequestInit = {}, retryCount: number = 0): Promise<any> {
     const url = `${API_BASE_URL}${endpoint}`;
+    const startTime = Date.now();
     
     // Get fresh auth token from Supabase
     const authToken = await this.getAuthToken();
@@ -138,13 +146,26 @@ class DatabaseService {
       ...options.headers,
     };
 
+    // Log the request
+    errorLogger.logAPIRequest(options.method || 'GET', url, { headers, body: options.body });
+
+    // Create AbortController for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.TIMEOUT);
+
     try {
       const response = await fetch(url, {
         ...options,
         headers,
+        signal: controller.signal,
       });
 
+      clearTimeout(timeoutId);
+      const duration = Date.now() - startTime;
       const data = await response.json();
+      
+      // Log the response
+      errorLogger.logAPIResponse(url, response.status, duration, data);
       
       // Handle 401 Unauthorized - token might be expired
       if (response.status === 401) {
@@ -185,7 +206,36 @@ class DatabaseService {
 
       return data;
     } catch (error) {
-      console.error(`API request failed for ${endpoint}:`, error);
+      clearTimeout(timeoutId);
+      const duration = Date.now() - startTime;
+      
+      // Enhanced error logging with context
+      errorLogger.logError(error, {
+        operation: `API Request: ${options.method || 'GET'} ${endpoint}`,
+        component: 'DatabaseService',
+        metadata: {
+          url,
+          retryCount,
+          duration: `${duration}ms`,
+          hasAuthToken: !!authToken
+        }
+      });
+      
+      // Check if it's a timeout error
+      if (error.name === 'AbortError') {
+        console.warn(`⏰ API request timeout for ${endpoint} (attempt ${retryCount + 1}/${API_CONFIG.RETRY_ATTEMPTS})`);
+        
+        // Retry logic with exponential backoff
+        if (retryCount < API_CONFIG.RETRY_ATTEMPTS - 1) {
+          const delay = API_CONFIG.RETRY_DELAY * Math.pow(2, retryCount);
+          console.log(`🔄 Retrying after ${delay}ms...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          return this.apiRequest(endpoint, options, retryCount + 1);
+        }
+        
+        throw new Error(`API Timeout: Request failed after ${API_CONFIG.RETRY_ATTEMPTS} attempts`);
+      }
+      
       throw error;
     }
   }
@@ -359,10 +409,19 @@ class DatabaseService {
     }
   }
 
-  // Menu operations - Get menu items formatted for POS screen
+  // Menu operations - Get menu items formatted for POS screen with caching
   async getMenuItems(): Promise<any[]> {
+    // Check cache first
+    const now = Date.now();
+    if (this.menuCache.items && (now - this.menuCache.timestamp) < this.CACHE_DURATION) {
+      console.log('✅ Returning cached menu items');
+      return this.menuCache.items;
+    }
+
     try {
-      const response = await this.apiRequest('/api/v1/menu/items', {
+      console.log('🔄 Fetching menu items from API...');
+      // Use public endpoint that doesn't require authentication
+      const response = await this.apiRequest('/api/v1/public/menu/items', {
         method: 'GET',
       });
       
@@ -370,32 +429,79 @@ class DatabaseService {
         // Apply compatibility transformation if needed
         if (BackendCompatibilityService.needsMenuTransformation(response.data)) {
           console.log('🔄 Applying menu compatibility transformation in DatabaseService');
-          return BackendCompatibilityService.transformMenuItems(response.data);
+          const transformedData = BackendCompatibilityService.transformMenuItems(response.data);
+          // Cache the transformed data
+          this.menuCache.items = transformedData;
+          this.menuCache.timestamp = now;
+          return transformedData;
         }
+        // Cache the data
+        this.menuCache.items = response.data;
+        this.menuCache.timestamp = now;
+        console.log(`✅ Menu items loaded and cached (${response.data.length} items)`);
         return response.data;
       }
       
       console.warn('🚨 Production Mode: API returned no menu data');
       return [];
     } catch (error) {
-      console.error('❌ Failed to fetch menu items from API:', error);
+      console.error('❌ Failed to fetch menu items from API:', error.message || error);
+      
+      // If we have cached data that's expired, use it as fallback
+      if (this.menuCache.items) {
+        console.warn('⚠️ Using expired cache data due to API failure');
+        return this.menuCache.items;
+      }
+      
       console.warn('🍮 TEMPORARY: Using Chucho menu data while API is being fixed');
       // TEMPORARY: Return Chucho menu while we fix the API timeout issue
-      return this.getChuchoMenuData();
+      const fallbackData = this.getChuchoMenuData();
+      // Cache the fallback data too
+      this.menuCache.items = fallbackData;
+      this.menuCache.timestamp = now;
+      return fallbackData;
     }
   }
 
   async getMenuCategories(): Promise<any[]> {
+    // Check cache first
+    const now = Date.now();
+    if (this.menuCache.categories && (now - this.menuCache.timestamp) < this.CACHE_DURATION) {
+      console.log('✅ Returning cached menu categories');
+      return this.menuCache.categories;
+    }
+
     try {
-      const response = await this.apiRequest('/api/v1/menu/categories', {
+      console.log('🔄 Fetching menu categories from API...');
+      // Use public endpoint that doesn't require authentication
+      const response = await this.apiRequest('/api/v1/public/menu/categories', {
         method: 'GET',
       });
       
-      return response.data || this.getMexicanCategoriesFallback();
+      if (response.data && response.data.length > 0) {
+        // Cache the categories
+        this.menuCache.categories = response.data;
+        console.log(`✅ Menu categories loaded and cached (${response.data.length} categories)`);
+        return response.data;
+      }
+      
+      // If no data, fall back to Mexican categories
+      const fallback = this.getMexicanCategoriesFallback();
+      this.menuCache.categories = fallback;
+      return fallback;
     } catch (error) {
-      console.error('Failed to fetch menu categories:', error);
+      console.error('❌ Failed to fetch menu categories:', error.message || error);
+      
+      // If we have cached data that's expired, use it as fallback
+      if (this.menuCache.categories) {
+        console.warn('⚠️ Using expired cache data for categories due to API failure');
+        return this.menuCache.categories;
+      }
+      
       // Return Mexican categories as fallback
-      return this.getMexicanCategoriesFallback();
+      const fallback = this.getMexicanCategoriesFallback();
+      this.menuCache.categories = fallback;
+      return fallback;
     }
   }
 
@@ -513,6 +619,16 @@ class DatabaseService {
       console.error('Failed to delete product:', error);
       throw error;
     }
+  }
+
+  // Clear menu cache - useful when data is updated
+  clearMenuCache(): void {
+    this.menuCache = {
+      items: null,
+      categories: null,
+      timestamp: 0
+    };
+    console.log('🧹 Menu cache cleared');
   }
 
   // Import Chucho menu data
