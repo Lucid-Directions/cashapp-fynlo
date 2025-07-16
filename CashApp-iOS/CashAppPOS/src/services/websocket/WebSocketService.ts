@@ -138,10 +138,10 @@ class WebSocketService extends SimpleEventEmitter {
       const encodedToken = encodeURIComponent(authToken);
       
       // Build connection URL with encoded parameters
-      this.connectionUrl = `${wsProtocol}://${wsHost}/ws/pos/${encodedRestaurantId}?user_id=${encodedUserId}&token=${encodedToken}`;
+      this.connectionUrl = `${wsProtocol}://${wsHost}/api/v1/websocket/ws/pos/${encodedRestaurantId}?user_id=${encodedUserId}&token=${encodedToken}`;
       
       // Log connection attempt without exposing the token
-      console.log('🔌 Connecting to WebSocket:', `${wsProtocol}://${wsHost}/ws/pos/${encodedRestaurantId}?user_id=${encodedUserId}&token=***`);
+      console.log('🔌 Connecting to WebSocket:', `${wsProtocol}://${wsHost}/api/v1/websocket/ws/pos/${encodedRestaurantId}?user_id=${encodedUserId}&token=***`);
       
       // Create WebSocket connection
       this.connectionStartTime = Date.now();

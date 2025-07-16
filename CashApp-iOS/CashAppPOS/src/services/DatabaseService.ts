@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import { CHUCHO_MENU_ITEMS, CHUCHO_CATEGORIES } from '../data/chuchoMenu';
 import BackendCompatibilityService from './BackendCompatibilityService';
 import tokenManager from '../utils/tokenManager';
+import errorLogger from '../utils/ErrorLogger';
 
 // Database configuration - FIXED: Uses LAN IP for device testing
 import API_CONFIG from '../config/api';
@@ -67,6 +68,18 @@ class DatabaseService {
   private static instance: DatabaseService;
   private authToken: string | null = null;
   private currentSession: PosSession | null = null;
+  private menuCache: { 
+    items: any[] | null; 
+    categories: any[] | null; 
+    itemsTimestamp: number;
+    categoriesTimestamp: number;
+  } = {
+    items: null,
+    categories: null,
+    itemsTimestamp: 0,
+    categoriesTimestamp: 0
+  };
+  private readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes cache
 
   constructor() {
     this.loadAuthToken();
@@ -112,9 +125,19 @@ class DatabaseService {
     return token || this.authToken;
   }
 
-  // API request helper - FIXED: Handle REST API responses properly
-  private async apiRequest(endpoint: string, options: RequestInit = {}): Promise<any> {
+  // API request helper - FIXED: Handle REST API responses properly with timeout and retry
+  private async apiRequest(endpoint: string, options: RequestInit = {}, retryCount: number = 0, initialStartTime?: number): Promise<any> {
     const url = `${API_BASE_URL}${endpoint}`;
+    const startTime = initialStartTime || Date.now();
+    const elapsedTime = Date.now() - startTime;
+    
+    // Check if we've exceeded total timeout across all retries
+    const timeout = API_CONFIG.TIMEOUT || 10000;
+    const retryAttempts = API_CONFIG.RETRY_ATTEMPTS || 3;
+    const totalTimeout = timeout * retryAttempts;
+    if (elapsedTime > totalTimeout) {
+      throw new Error(`API Timeout: Total request time exceeded ${totalTimeout}ms`);
+    }
     
     // Get fresh auth token from Supabase
     const authToken = await this.getAuthToken();
@@ -126,13 +149,27 @@ class DatabaseService {
       ...options.headers,
     };
 
+    // Log the request
+    errorLogger.logAPIRequest(options.method || 'GET', url, { headers, body: options.body });
+
+    // Create AbortController for timeout - adjust for elapsed time
+    const controller = new AbortController();
+    const remainingTimeout = Math.min(timeout, totalTimeout - elapsedTime);
+    const timeoutId = setTimeout(() => controller.abort(), remainingTimeout);
+
     try {
       const response = await fetch(url, {
         ...options,
         headers,
+        signal: controller.signal,
       });
 
+      clearTimeout(timeoutId);
+      const duration = Date.now() - startTime;
       const data = await response.json();
+      
+      // Log the response
+      errorLogger.logAPIResponse(url, response.status, duration, data);
       
       // Handle 401 Unauthorized - token might be expired
       if (response.status === 401) {
@@ -142,25 +179,39 @@ class DatabaseService {
         const newToken = await tokenManager.refreshAuthToken();
         
         if (newToken) {
-          // Retry the request with new token
-          const newHeaders = {
-            ...headers,
-            'Authorization': `Bearer ${newToken}`
-          };
+          // Create a new timeout for the retry request
+          const retryElapsedTime = Date.now() - startTime;
+          const retryRemainingTimeout = Math.max(1000, totalTimeout - retryElapsedTime); // At least 1 second
           
-          const retryResponse = await fetch(url, {
-            ...options,
-            headers: newHeaders,
-          });
+          const retryController = new AbortController();
+          const retryTimeoutId = setTimeout(() => retryController.abort(), retryRemainingTimeout);
           
-          const retryData = await retryResponse.json();
+          try {
+            // Retry the request with new token and new timeout
+            const newHeaders = {
+              ...headers,
+              'Authorization': `Bearer ${newToken}`
+            };
+            
+            const retryResponse = await fetch(url, {
+              ...options,
+              headers: newHeaders,
+              signal: retryController.signal,
+            });
+            
+            clearTimeout(retryTimeoutId);
+            const retryData = await retryResponse.json();
           
-          if (!retryResponse.ok) {
-            const errorMessage = retryData.message || retryData.detail || `HTTP error! status: ${retryResponse.status}`;
-            throw new Error(errorMessage);
+            if (!retryResponse.ok) {
+              const errorMessage = retryData.message || retryData.detail || `HTTP error! status: ${retryResponse.status}`;
+              throw new Error(errorMessage);
+            }
+            
+            return retryData;
+          } catch (retryError) {
+            clearTimeout(retryTimeoutId);
+            throw retryError;
           }
-          
-          return retryData;
         }
       }
       
@@ -173,7 +224,37 @@ class DatabaseService {
 
       return data;
     } catch (error) {
-      console.error(`API request failed for ${endpoint}:`, error);
+      clearTimeout(timeoutId);
+      const duration = Date.now() - startTime;
+      
+      // Enhanced error logging with context
+      errorLogger.logError(error, {
+        operation: `API Request: ${options.method || 'GET'} ${endpoint}`,
+        component: 'DatabaseService',
+        metadata: {
+          url,
+          retryCount,
+          duration: `${duration}ms`,
+          hasAuthToken: !!authToken
+        }
+      });
+      
+      // Check if it's a timeout error
+      if (error.name === 'AbortError') {
+        console.warn(`⏰ API request timeout for ${endpoint} (attempt ${retryCount + 1}/${retryAttempts})`);
+        
+        // Retry logic with exponential backoff
+        if (retryCount < retryAttempts - 1) {
+          const retryDelay = API_CONFIG.RETRY_DELAY || 1000;
+          const delay = retryDelay * Math.pow(2, retryCount);
+          console.log(`🔄 Retrying after ${delay}ms...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          return this.apiRequest(endpoint, options, retryCount + 1, startTime);
+        }
+        
+        throw new Error(`API Timeout: Request failed after ${retryAttempts} attempts`);
+      }
+      
       throw error;
     }
   }
@@ -347,10 +428,19 @@ class DatabaseService {
     }
   }
 
-  // Menu operations - Get menu items formatted for POS screen
+  // Menu operations - Get menu items formatted for POS screen with caching
   async getMenuItems(): Promise<any[]> {
+    // Check cache first
+    const now = Date.now();
+    if (this.menuCache.items && (now - this.menuCache.itemsTimestamp) < this.CACHE_DURATION) {
+      console.log('✅ Returning cached menu items');
+      return this.menuCache.items;
+    }
+
     try {
-      const response = await this.apiRequest('/api/v1/menu/items', {
+      console.log('🔄 Fetching menu items from API...');
+      // Use public endpoint that doesn't require authentication
+      const response = await this.apiRequest('/api/v1/public/menu/items', {
         method: 'GET',
       });
       
@@ -358,32 +448,82 @@ class DatabaseService {
         // Apply compatibility transformation if needed
         if (BackendCompatibilityService.needsMenuTransformation(response.data)) {
           console.log('🔄 Applying menu compatibility transformation in DatabaseService');
-          return BackendCompatibilityService.transformMenuItems(response.data);
+          const transformedData = BackendCompatibilityService.transformMenuItems(response.data);
+          // Cache the transformed data with current timestamp
+          this.menuCache.items = transformedData;
+          this.menuCache.itemsTimestamp = Date.now();
+          return transformedData;
         }
+        // Cache the data with current timestamp
+        this.menuCache.items = response.data;
+        this.menuCache.itemsTimestamp = Date.now();
+        console.log(`✅ Menu items loaded and cached (${response.data.length} items)`);
         return response.data;
       }
       
       console.warn('🚨 Production Mode: API returned no menu data');
       return [];
     } catch (error) {
-      console.error('❌ Failed to fetch menu items from API:', error);
+      console.error('❌ Failed to fetch menu items from API:', error.message || error);
+      
+      // If we have cached data that's expired, use it as fallback
+      if (this.menuCache.items) {
+        console.warn('⚠️ Using expired cache data due to API failure');
+        return this.menuCache.items;
+      }
+      
       console.warn('🍮 TEMPORARY: Using Chucho menu data while API is being fixed');
       // TEMPORARY: Return Chucho menu while we fix the API timeout issue
-      return this.getChuchoMenuData();
+      const fallbackData = this.getChuchoMenuData();
+      // Cache the fallback data too with current timestamp
+      this.menuCache.items = fallbackData;
+      this.menuCache.itemsTimestamp = Date.now();
+      return fallbackData;
     }
   }
 
   async getMenuCategories(): Promise<any[]> {
+    // Check cache first
+    const now = Date.now();
+    if (this.menuCache.categories && (now - this.menuCache.categoriesTimestamp) < this.CACHE_DURATION) {
+      console.log('✅ Returning cached menu categories');
+      return this.menuCache.categories;
+    }
+
     try {
-      const response = await this.apiRequest('/api/v1/menu/categories', {
+      console.log('🔄 Fetching menu categories from API...');
+      // Use public endpoint that doesn't require authentication
+      const response = await this.apiRequest('/api/v1/public/menu/categories', {
         method: 'GET',
       });
       
-      return response.data || this.getMexicanCategoriesFallback();
+      if (response.data && response.data.length > 0) {
+        // Cache the categories with current timestamp
+        this.menuCache.categories = response.data;
+        this.menuCache.categoriesTimestamp = Date.now();
+        console.log(`✅ Menu categories loaded and cached (${response.data.length} categories)`);
+        return response.data;
+      }
+      
+      // If no data, fall back to Mexican categories
+      const fallback = this.getMexicanCategoriesFallback();
+      this.menuCache.categories = fallback;
+      this.menuCache.categoriesTimestamp = Date.now();
+      return fallback;
     } catch (error) {
-      console.error('Failed to fetch menu categories:', error);
+      console.error('❌ Failed to fetch menu categories:', error.message || error);
+      
+      // If we have cached data that's expired, use it as fallback
+      if (this.menuCache.categories) {
+        console.warn('⚠️ Using expired cache data for categories due to API failure');
+        return this.menuCache.categories;
+      }
+      
       // Return Mexican categories as fallback
-      return this.getMexicanCategoriesFallback();
+      const fallback = this.getMexicanCategoriesFallback();
+      this.menuCache.categories = fallback;
+      this.menuCache.categoriesTimestamp = Date.now();
+      return fallback;
     }
   }
 
@@ -501,6 +641,17 @@ class DatabaseService {
       console.error('Failed to delete product:', error);
       throw error;
     }
+  }
+
+  // Clear menu cache - useful when data is updated
+  clearMenuCache(): void {
+    this.menuCache = {
+      items: null,
+      categories: null,
+      itemsTimestamp: 0,
+      categoriesTimestamp: 0
+    };
+    console.log('🧹 Menu cache cleared');
   }
 
   // Import Chucho menu data

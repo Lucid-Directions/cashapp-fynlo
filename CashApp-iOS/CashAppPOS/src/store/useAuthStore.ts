@@ -4,7 +4,6 @@
  */
 
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authService } from '../services/auth/unifiedAuthService';
 import tokenManager from '../utils/tokenManager';
@@ -46,9 +45,7 @@ interface AuthState {
 let tokenRefreshedHandler: (() => Promise<void>) | null = null;
 let tokenClearedHandler: (() => void) | null = null;
 
-export const useAuthStore = create<AuthState>()(
-  persist(
-    (set, get) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
       user: null,
       isAuthenticated: false,
       isLoading: false,
@@ -284,38 +281,4 @@ export const useAuthStore = create<AuthState>()(
           console.error('❌ Error handling token refresh in auth store:', error);
         }
       }
-    }),
-    {
-      name: 'auth-storage',
-      storage: createJSONStorage(() => AsyncStorage),
-      partialize: (state) => ({
-        user: state.user,
-        isAuthenticated: state.isAuthenticated
-      }),
-      version: 1,
-      migrate: (persistedState: any, version: number) => {
-        if (version === 0) {
-          // Clear old user data that might have wrong structure
-          return {
-            user: null,
-            isAuthenticated: false
-          };
-        }
-        return persistedState;
-      },
-      onRehydrateStorage: () => (state) => {
-        // After rehydration, set up token listeners
-        // This ensures listeners are always set up after module reload
-        if (state) {
-          console.log('🔄 Store rehydrated, setting up token listeners...');
-          // Use setTimeout to ensure store is fully initialized
-          setTimeout(() => {
-            const store = useAuthStore.getState();
-            // Reset the flag and setup listeners using store actions
-            store.setupTokenListeners();
-          }, 0);
-        }
-      }
-    }
-  )
-);
+}));
