@@ -68,10 +68,16 @@ class DatabaseService {
   private static instance: DatabaseService;
   private authToken: string | null = null;
   private currentSession: PosSession | null = null;
-  private menuCache: { items: any[] | null; categories: any[] | null; timestamp: number } = {
+  private menuCache: { 
+    items: any[] | null; 
+    categories: any[] | null; 
+    itemsTimestamp: number;
+    categoriesTimestamp: number;
+  } = {
     items: null,
     categories: null,
-    timestamp: 0
+    itemsTimestamp: 0,
+    categoriesTimestamp: 0
   };
   private readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes cache
 
@@ -426,7 +432,7 @@ class DatabaseService {
   async getMenuItems(): Promise<any[]> {
     // Check cache first
     const now = Date.now();
-    if (this.menuCache.items && (now - this.menuCache.timestamp) < this.CACHE_DURATION) {
+    if (this.menuCache.items && (now - this.menuCache.itemsTimestamp) < this.CACHE_DURATION) {
       console.log('✅ Returning cached menu items');
       return this.menuCache.items;
     }
@@ -443,14 +449,14 @@ class DatabaseService {
         if (BackendCompatibilityService.needsMenuTransformation(response.data)) {
           console.log('🔄 Applying menu compatibility transformation in DatabaseService');
           const transformedData = BackendCompatibilityService.transformMenuItems(response.data);
-          // Cache the transformed data
+          // Cache the transformed data with current timestamp
           this.menuCache.items = transformedData;
-          this.menuCache.timestamp = now;
+          this.menuCache.itemsTimestamp = Date.now();
           return transformedData;
         }
-        // Cache the data
+        // Cache the data with current timestamp
         this.menuCache.items = response.data;
-        this.menuCache.timestamp = now;
+        this.menuCache.itemsTimestamp = Date.now();
         console.log(`✅ Menu items loaded and cached (${response.data.length} items)`);
         return response.data;
       }
@@ -469,9 +475,9 @@ class DatabaseService {
       console.warn('🍮 TEMPORARY: Using Chucho menu data while API is being fixed');
       // TEMPORARY: Return Chucho menu while we fix the API timeout issue
       const fallbackData = this.getChuchoMenuData();
-      // Cache the fallback data too
+      // Cache the fallback data too with current timestamp
       this.menuCache.items = fallbackData;
-      this.menuCache.timestamp = now;
+      this.menuCache.itemsTimestamp = Date.now();
       return fallbackData;
     }
   }
@@ -479,7 +485,7 @@ class DatabaseService {
   async getMenuCategories(): Promise<any[]> {
     // Check cache first
     const now = Date.now();
-    if (this.menuCache.categories && (now - this.menuCache.timestamp) < this.CACHE_DURATION) {
+    if (this.menuCache.categories && (now - this.menuCache.categoriesTimestamp) < this.CACHE_DURATION) {
       console.log('✅ Returning cached menu categories');
       return this.menuCache.categories;
     }
@@ -492,9 +498,9 @@ class DatabaseService {
       });
       
       if (response.data && response.data.length > 0) {
-        // Cache the categories and update timestamp
+        // Cache the categories with current timestamp
         this.menuCache.categories = response.data;
-        this.menuCache.timestamp = now;
+        this.menuCache.categoriesTimestamp = Date.now();
         console.log(`✅ Menu categories loaded and cached (${response.data.length} categories)`);
         return response.data;
       }
@@ -502,7 +508,7 @@ class DatabaseService {
       // If no data, fall back to Mexican categories
       const fallback = this.getMexicanCategoriesFallback();
       this.menuCache.categories = fallback;
-      this.menuCache.timestamp = now;
+      this.menuCache.categoriesTimestamp = Date.now();
       return fallback;
     } catch (error) {
       console.error('❌ Failed to fetch menu categories:', error.message || error);
@@ -516,7 +522,7 @@ class DatabaseService {
       // Return Mexican categories as fallback
       const fallback = this.getMexicanCategoriesFallback();
       this.menuCache.categories = fallback;
-      this.menuCache.timestamp = now;
+      this.menuCache.categoriesTimestamp = Date.now();
       return fallback;
     }
   }
