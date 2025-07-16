@@ -11,7 +11,83 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 6. Make every task and code change you do as simple as possible. We want to avoid making any massive or complex changes. Every change should impact as little code as possible. Everything is about simplicity.
 7. Finally, add a review section to the [todo.md](http://todo.md/) file with a summary of the changes you made and any other relevant information.
 
-Before and after every change, please check through all the code you just wrote and make sure it follows security best practices. make sure there are no sensitive information in the front and and there are no vulnerabilities that can be exploited 
+## 🔒 MANDATORY SECURITY CHECKLIST - MUST COMPLETE FOR EVERY CODE CHANGE
+
+### CRITICAL: This checklist MUST be completed BEFORE and AFTER every code change. Security vulnerabilities have been repeatedly introduced in pull requests.
+
+### 1. Authentication & Authorization Checks
+- [ ] **No authentication bypass**: Verify tokens cannot be used to access other users' data
+- [ ] **No fallback lookups**: NEVER lookup users by ID after token validation fails
+- [ ] **Role validation**: Ensure users can only access resources for their role
+- [ ] **Restaurant isolation**: Verify users cannot access other restaurants' data
+- [ ] **Token expiration**: Check that expired tokens are rejected
+
+### 2. Variable & Error Handling
+- [ ] **All variables defined**: No undefined variable references (check all code paths)
+- [ ] **Null checks**: Verify all objects exist before accessing properties
+- [ ] **Error handling**: No stack traces or sensitive info in production errors
+- [ ] **Redis fallbacks**: Handle Redis connection failures gracefully
+- [ ] **Try-catch blocks**: Wrap external service calls appropriately
+
+### 3. Input Validation & Sanitization
+- [ ] **SQL injection protection**: Use parameterized queries only (no string concatenation)
+- [ ] **Input sanitization**: Remove ALL dangerous characters: `< > " ' ( ) ; & + \` | \ *`
+- [ ] **Path traversal**: Validate file paths don't contain `..` or absolute paths
+- [ ] **Command injection**: Never pass user input to shell commands
+- [ ] **Size limits**: Enforce limits on all user inputs and file uploads
+
+### 4. Access Control
+- [ ] **RBAC enforcement**: Check user role before EVERY data access
+- [ ] **Resource ownership**: Verify user owns/has access to requested resource
+- [ ] **Platform vs Restaurant**: Ensure platform-only settings cannot be modified
+- [ ] **Multi-tenant isolation**: Data queries MUST filter by restaurant_id
+- [ ] **Default deny**: Explicitly allow access, don't assume permission
+
+### 5. Data Security
+- [ ] **No secrets in code**: No API keys, passwords, or tokens in source
+- [ ] **Sensitive data logging**: Never log passwords, tokens, or PII
+- [ ] **HTTPS only**: All external API calls use HTTPS
+- [ ] **Encryption**: Sensitive data encrypted at rest and in transit
+- [ ] **PII handling**: Follow GDPR/privacy requirements for user data
+
+### 6. API Security
+- [ ] **Rate limiting**: Implement rate limits on all endpoints
+- [ ] **CORS configuration**: Restrict origins appropriately
+- [ ] **API versioning**: Maintain backward compatibility
+- [ ] **Response standardization**: Use APIResponseHelper consistently
+- [ ] **Error messages**: Don't leak system information in errors
+
+### 7. Frontend Security
+- [ ] **No hardcoded credentials**: Remove ALL mock users and demo passwords
+- [ ] **XSS prevention**: Sanitize all user-generated content display
+- [ ] **Secure storage**: Use secure storage for tokens (not localStorage)
+- [ ] **Deep linking**: Validate all deep link parameters
+- [ ] **API key exposure**: Never expose backend API keys in frontend
+
+### 8. Testing Requirements
+- [ ] **Security tests written**: Add tests for authentication/authorization
+- [ ] **Edge cases tested**: Test with invalid, missing, and malicious inputs
+- [ ] **Multi-tenant tests**: Verify cross-tenant access is blocked
+- [ ] **Integration tests**: Test full request flow including auth
+- [ ] **Penetration mindset**: Try to break your own code
+
+### Common Vulnerabilities Found in This Codebase:
+1. **WebSocket access bypass through user_id fallback**
+2. **Undefined variable references (is_platform_owner)**
+3. **Restaurant access control bypass in orders endpoint**
+4. **Redis null reference crashes**
+5. **Stack traces exposed in production**
+6. **Insufficient input sanitization**
+7. **Platform owner role determined by email only**
+
+### Security Review Process:
+1. Run security scan: `python security_scan.py` (if available)
+2. Review auth flows: Trace every authentication path
+3. Check access control: Verify every database query filters by permission
+4. Validate inputs: Test with malicious payloads
+5. Error handling: Ensure no sensitive data in error responses
+
+Remember: It's better to be overly cautious with security than to introduce vulnerabilities that could compromise user data or system integrity. 
 
 - **CRITICAL**: Project context is in `cashapp-fynlo/CashApp-iOS/CashAppPOS/CONTEXT.md` (renamed from PROJECT_CONTEXT_COMPLETE.md)
 - **Always check CONTEXT.md first** for common issues, bundle deployment fixes, and recent updates

@@ -8,8 +8,11 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, Query, P
 from sqlalchemy.orm import Session
 import json
 from datetime import datetime
+import logging
 
 from app.core.database import get_db, User, Restaurant
+
+logger = logging.getLogger(__name__)
 from app.core.websocket import (
     websocket_manager, 
     ConnectionType, 
@@ -61,24 +64,21 @@ async def verify_websocket_access(
                 # Find user in our database by Supabase ID
                 user = db.query(User).filter(User.supabase_id == str(supabase_user.id)).first()
                 if not user:
-                    # Try to find by user_id as fallback (for existing users)
-                    user = db.query(User).filter(User.id == user_id).first()
-                    if not user:
-                        print(f"User not found in database: {supabase_user.id}")
-                        return False
+                    print(f"User not found in database for Supabase ID: {supabase_user.id}")
+                    return False
                 
                 # Verify the user is active
                 if not user.is_active:
                     print(f"User is not active: {user.id}")
                     return False
                 
-                # Verify user_id matches
+                # Verify user_id matches (critical security check)
                 if str(user.id) != str(user_id):
-                    print(f"User ID mismatch: {user.id} != {user_id}")
+                    print(f"User ID mismatch - potential security violation: {user.id} != {user_id}")
                     return False
                     
             except Exception as e:
-                print(f"Supabase token validation error: {str(e)}")
+                logger.error(f"Supabase token validation error: {str(e)}")
                 return False
             
             # Check if user has access to this restaurant
@@ -95,7 +95,7 @@ async def verify_websocket_access(
         return True
         
     except Exception as e:
-        print(f"WebSocket access verification error: {str(e)}")
+        logger.error(f"WebSocket access verification error: {str(e)}")
         return False
 
 @router.websocket("/ws/{restaurant_id}")
@@ -496,7 +496,7 @@ async def handle_subscription(connection_id: str, message_data: dict):
         pass
         
     except Exception as e:
-        print(f"Subscription error: {str(e)}")
+        logger.error(f"Subscription error: {str(e)}")
 
 async def handle_unsubscription(connection_id: str, message_data: dict):
     """Handle event unsubscription requests"""
@@ -507,7 +507,7 @@ async def handle_unsubscription(connection_id: str, message_data: dict):
         pass
         
     except Exception as e:
-        print(f"Unsubscription error: {str(e)}")
+        logger.error(f"Unsubscription error: {str(e)}")
 
 async def handle_kitchen_status_update(connection_id: str, restaurant_id: str, message_data: dict, db: Session):
     """Handle kitchen status updates"""
@@ -538,7 +538,7 @@ async def handle_kitchen_status_update(connection_id: str, restaurant_id: str, m
         )
         
     except Exception as e:
-        print(f"Kitchen status update error: {str(e)}")
+        logger.error(f"Kitchen status update error: {str(e)}")
 
 async def handle_preparation_time_update(connection_id: str, restaurant_id: str, message_data: dict, db: Session):
     """Handle preparation time updates"""
@@ -569,7 +569,7 @@ async def handle_preparation_time_update(connection_id: str, restaurant_id: str,
         )
         
     except Exception as e:
-        print(f"Preparation time update error: {str(e)}")
+        logger.error(f"Preparation time update error: {str(e)}")
 
 async def handle_pos_order_created(connection_id: str, restaurant_id: str, message_data: dict, db: Session):
     """Handle new order from POS"""

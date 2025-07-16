@@ -20,31 +20,56 @@ logger = logging.getLogger(__name__)
 
 def format_menu_item(product, category_name=None):
     """Format product as menu item with required fields"""
-    # Map category names to emojis
+    # Map category names to professional icons (Material Design Icons)
+    icon_map = {
+        'Tacos': 'restaurant',
+        'Special Tacos': 'star',
+        'Appetizers': 'restaurant-menu',
+        'Snacks': 'restaurant-menu',
+        'Beverages': 'local-drink', 
+        'Drinks': 'local-drink',
+        'Desserts': 'cake',
+        'Main Courses': 'restaurant',
+        'Sides': 'restaurant-menu',
+        'Breakfast': 'restaurant',
+        'Salads': 'eco',
+        'Soups': 'soup',
+        'Burritos': 'restaurant-menu',
+        'Alcohol': 'local-bar',
+        'Coffee': 'local-cafe',
+        'Tea': 'local-cafe',
+    }
+    
+    # Legacy emoji mapping for backward compatibility (will be phased out)
     emoji_map = {
         'Tacos': '🌮',
+        'Special Tacos': '⭐',
         'Appetizers': '🥗',
+        'Snacks': '🍿',
         'Beverages': '🥤',
+        'Drinks': '🥤',
         'Desserts': '🍰',
         'Main Courses': '🍽️',
         'Sides': '🍟',
         'Breakfast': '🍳',
         'Salads': '🥗',
         'Soups': '🍲',
-        'Drinks': '🥤',
+        'Burritos': '🌯',
         'Alcohol': '🍺',
         'Coffee': '☕',
         'Tea': '🍵',
     }
     
-    # Get emoji based on category or use default
+    # Get icon and emoji based on category or use defaults
+    icon = icon_map.get(category_name, 'restaurant')
     emoji = emoji_map.get(category_name, '🍽️')
     
     return {
         'id': str(product.id),
         'name': product.name,
         'price': float(product.price),
-        'emoji': emoji,
+        'icon': icon,  # Professional icon for UI
+        'emoji': emoji,  # Legacy support (will be removed later)
         'available': product.is_active if hasattr(product, 'is_active') else True,
         'category': category_name or 'Uncategorized',
         'description': product.description or ''

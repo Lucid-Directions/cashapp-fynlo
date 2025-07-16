@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from typing import Optional
 from datetime import datetime
 import uuid
+import logging
 
 from app.core.database import get_db
 from app.core.supabase import supabase_admin
@@ -15,6 +16,7 @@ from app.core.database import User, Restaurant
 from app.schemas.auth import AuthVerifyResponse, RegisterRestaurantRequest
 from app.core.feature_gate import get_plan_features
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
@@ -67,10 +69,13 @@ async def verify_supabase_user(
         if not db_user:
             # First time login - create user
             # Check if this should be platform owner
-            is_platform_owner = (supabase_user.email == settings.PLATFORM_OWNER_EMAIL)
+            # For new users, platform owner role requires pre-configuration in the database
+            # This prevents automatic platform owner creation from email alone
+            is_platform_owner = False
             
-            # Determine role based on email or default to restaurant_owner
-            role = 'platform_owner' if is_platform_owner else 'restaurant_owner'
+            # New users default to restaurant_owner role
+            # Platform owners must be manually configured by system administrators
+            role = 'restaurant_owner'
             
             db_user = User(
                 id=uuid.uuid4(),
@@ -142,7 +147,7 @@ async def verify_supabase_user(
                 )
         else:
             # User has no restaurant yet - check if we should create a default one
-            if db_user.role == 'restaurant_owner' and not is_platform_owner:
+            if db_user.role == 'restaurant_owner':
                 # Create a default restaurant for the user
                 print(f"Creating default restaurant for user: {db_user.email}")
                 default_restaurant = Restaurant(
@@ -171,10 +176,13 @@ async def verify_supabase_user(
         # Re-raise HTTP exceptions without modification
         raise
     except Exception as e:
-        print(f"Auth verification error: {str(e)}")
-        print(f"Error type: {type(e).__name__}")
-        import traceback
-        traceback.print_exc()
+        # Log error details securely (not to console in production)
+        logger.error(f"Auth verification error: {type(e).__name__}: {str(e)}")
+        
+        # In development/testing, provide more details
+        if settings.ENVIRONMENT in ["development", "testing", "local"]:
+            import traceback
+            logger.debug(f"Traceback: {traceback.format_exc()}")
         
         # Check for specific Supabase errors
         if "invalid_grant" in str(e).lower():

@@ -8,10 +8,13 @@ from datetime import datetime
 import json
 import asyncio
 from enum import Enum
+import logging
 
 from app.core.redis_client import get_redis, RedisClient
 from app.core.websocket import websocket_manager, EventType, WebSocketMessage, ConnectionType
 from app.core.database import get_db
+
+logger = logging.getLogger(__name__)
 
 class SyncEventType(Enum):
     """Types of sync events"""
@@ -102,7 +105,11 @@ class SyncService:
         
         # Publish to Redis channel
         channel = f"restaurant:{restaurant_id}:sync"
-        await self.redis_client.publish(channel, json.dumps(event_payload))
+        if self.redis_client:
+            try:
+                await self.redis_client.publish(channel, json.dumps(event_payload))
+            except Exception as e:
+                logger.error(f"Failed to publish to Redis channel {channel}: {str(e)}")
         
         # Also broadcast via WebSocket
         websocket_message = WebSocketMessage(
@@ -157,17 +164,25 @@ class SyncService:
                 await callback(event_data)
                 
             except Exception as e:
-                print(f"Error handling sync message: {str(e)}")
+                logger.error(f"Error handling sync message: {str(e)}")
         
         # Subscribe to Redis channel
-        subscription = await self.redis_client.subscribe(channel, message_handler)
-        
-        # Track subscription
-        if restaurant_id not in self._subscribers:
-            self._subscribers[restaurant_id] = []
-        self._subscribers[restaurant_id].append(subscription)
-        
-        return f"sync_{restaurant_id}_{len(self._subscribers[restaurant_id])}"
+        if not self.redis_client:
+            logger.error("Redis client not available for subscription")
+            return None
+            
+        try:
+            subscription = await self.redis_client.subscribe(channel, message_handler)
+            
+            # Track subscription
+            if restaurant_id not in self._subscribers:
+                self._subscribers[restaurant_id] = []
+            self._subscribers[restaurant_id].append(subscription)
+            
+            return f"sync_{restaurant_id}_{len(self._subscribers[restaurant_id])}"
+        except Exception as e:
+            logger.error(f"Failed to subscribe to Redis channel {channel}: {str(e)}")
+            return None
     
     async def unsubscribe(self, subscription_id: str):
         """Unsubscribe from sync events"""

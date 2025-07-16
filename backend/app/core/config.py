@@ -47,6 +47,9 @@ class Settings(BaseSettings):
     SUPABASE_ANON_KEY: Optional[str] = None
     SUPABASE_SERVICE_ROLE_KEY: Optional[str] = None
     PLATFORM_OWNER_EMAIL: str = "admin@fynlo.co.uk"
+    # Platform owner verification - requires both email AND secret key
+    PLATFORM_OWNER_SECRET_KEY: Optional[str] = None  # Set via environment variable
+    PLATFORM_OWNER_REQUIRE_2FA: bool = True  # Require 2FA for platform owners
     
     # Payment Processing
     STRIPE_SECRET_KEY: Optional[str] = None
