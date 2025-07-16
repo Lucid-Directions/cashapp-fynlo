@@ -16,9 +16,14 @@ async function testMenuLoading() {
   // Test 1: Health check
   console.log('1️⃣ Testing health endpoint...');
   try {
+    const healthController = new AbortController();
+    const healthTimeoutId = setTimeout(() => healthController.abort(), 5000);
+    
     const healthResponse = await fetch(`${API_BASE_URL}/health`, {
-      timeout: 5000
+      signal: healthController.signal
     });
+    
+    clearTimeout(healthTimeoutId);
     if (healthResponse.ok) {
       console.log('✅ Health check passed\n');
     } else {
@@ -105,14 +110,19 @@ async function testMenuLoading() {
   console.log('\n4️⃣ Testing OLD (authenticated) menu endpoint for comparison...');
   const authStartTime = Date.now();
   try {
+    const authController = new AbortController();
+    const authTimeoutId = setTimeout(() => authController.abort(), 3000);
+    
     const response = await fetch(`${API_BASE_URL}/api/v1/menu/items`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       },
-      timeout: 3000
+      signal: authController.signal
     });
+    
+    clearTimeout(authTimeoutId);
     const authElapsed = Date.now() - authStartTime;
     console.log(`❌ OLD endpoint returned ${response.status} in ${authElapsed}ms`);
     if (response.status === 401) {
