@@ -1,7 +1,50 @@
 // Global types for the CashApp POS application
 
+// Import shared types from the shared package
+export {
+  // API types
+  APIResponse,
+  PaginatedResponse,
+  APIError,
+  HTTPMethod,
+  RequestConfig,
+  
+  // Auth types
+  User,
+  UserRole,
+  AuthTokens,
+  LoginRequest,
+  LoginResponse,
+  AuthState,
+  
+  // Business types
+  Restaurant,
+  RestaurantSettings,
+  Order,
+  OrderStatus,
+  PaymentStatus,
+  OrderItem,
+  Product,
+  ProductCategory,
+  
+  // Constants
+  API_ENDPOINTS,
+  WebSocketEvent,
+  ERROR_CODES,
+  ERROR_MESSAGES,
+  
+  // Utils
+  formatCurrency,
+  formatDate,
+  formatTime,
+  isValidEmail,
+  isValidUKPhone,
+} from '@fynlo/shared';
+
+// Legacy type mappings for backward compatibility
+// TODO: Update components to use Product instead of MenuItem
 export interface MenuItem {
-  id: number;
+  id: string;  // Changed from number to match Product
   name: string;
   price: number;
   category: string;
@@ -10,62 +53,21 @@ export interface MenuItem {
   description?: string;
   available: boolean;
   barcode?: string;
-  icon?: string;  // Added to match usage in POSScreen
+  icon?: string;
 }
 
+// TODO: Update components to use ProductCategory
 export interface Category {
-  id: number;
+  id: string;  // Changed from number to match ProductCategory
   name: string;
   active: boolean;
   color?: string;
   icon?: string;
 }
 
-export interface OrderItem {
-  id: number;
-  name: string;
-  price: number;
-  quantity: number;
-  image?: string;
-  emoji?: string;
-  modifications?: string[];
-  notes?: string;
-}
-
-export interface Order {
-  id?: number;
-  items: OrderItem[];
-  subtotal: number;
-  tax: number;
-  total: number;
-  customerId?: number;
-  customerName?: string;
-  customerEmail?: string;
-  customerPhone?: string;
-  tableNumber?: number;
-  createdAt: Date;
-  status: 'draft' | 'confirmed' | 'preparing' | 'ready' | 'completed' | 'cancelled';
-  paymentMethod?: 'cash' | 'card' | 'apple_pay' | 'gift_card';
-  paymentTransactionId?: string;
-  paymentProvider?: string;
-  serviceCharge?: number;
-  transactionFee?: number;
-  tipAmount?: number;
-  notes?: string;
-}
-
-export interface User {
-  id: number;
-  name: string;
-  email: string;
-  role: 'cashier' | 'manager' | 'admin';
-  avatar?: string;
-  isActive: boolean;
-}
-
 export interface PosSession {
-  id: number;
-  userId: number;
+  id: string;  // Changed from number for consistency
+  userId: string;  // Changed from number to match User.id
   userName: string;
   startTime: Date;
   endTime?: Date;
@@ -93,7 +95,7 @@ export type RootStackParamList = {
   POS: undefined;
   Orders: undefined;
   Reports: undefined;
-  OrderDetails: { orderId: number };
+  OrderDetails: { orderId: string };
   TableSelection: undefined;
 };
 
@@ -132,7 +134,7 @@ export type MainStackParamList = {
     tableName?: string; 
     orderType?: 'dine_in' | 'takeout' | 'pickup' | 'delivery';
   };
-  OrderDetails: { orderId: number };
+  OrderDetails: { orderId: string };
   ServiceChargeSelection: undefined;
   EnhancedPayment: {
     amount: number;
@@ -190,21 +192,8 @@ export interface UIState {
   theme: 'light' | 'dark';
 }
 
-// API Response types
-export interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  message?: string;
-}
-
-export interface PaginatedResponse<T> {
-  data: T[];
-  total: number;
-  page: number;
-  limit: number;
-  hasMore: boolean;
-}
+// API Response types are now imported from @fynlo/shared
+// Use APIResponse instead of ApiResponse (note the capital API)
 
 // Inventory & Recipe Types (as per backend schemas)
 export interface InventoryItem {
@@ -262,7 +251,7 @@ export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
 // Data types previously in mockDataGenerator.ts
 export interface CustomerData {
-  id: number;
+  id: string;  // Changed from number to match backend UUID
   name: string;
   email: string;
   phone: string;
@@ -277,7 +266,7 @@ export interface CustomerData {
 }
 
 export interface EmployeeData {
-  id: number; // Or string if UUID from backend
+  id: string; // Changed from number to match User.id
   name: string;
   role: 'Manager' | 'Cashier' | 'Server' | 'Cook' | string; // Allow string for future roles
   email: string;
@@ -305,7 +294,7 @@ export interface EmployeeData {
 }
 
 export interface InventoryData {
-  itemId: number; // Or string (SKU/UUID)
+  itemId: string; // Changed from number to match backend UUID/SKU
   name: string;
   category: string;
   currentStock: number;
