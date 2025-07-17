@@ -16,6 +16,7 @@ from app.core.auth import verify_websocket_token
 from app.core.database import get_db
 from app.models.user import User
 from app.schemas.websocket import WebSocketMessage, WebSocketEventType
+from app.services.sync_service import sync_service
 
 logger = logging.getLogger(__name__)
 
@@ -23,10 +24,12 @@ router = APIRouter()
 
 
 class ConnectionInfo:
-    def __init__(self, websocket: WebSocket, user_id: str, restaurant_id: str):
+    def __init__(self, websocket: WebSocket, user_id: str, restaurant_id: str, client_type: str = "mobile_pos"):
+        self.id = f"{user_id}:{datetime.utcnow().timestamp()}"
         self.websocket = websocket
         self.user_id = user_id
         self.restaurant_id = restaurant_id
+        self.client_type = client_type
         self.connected_at = datetime.utcnow()
         self.last_ping = datetime.utcnow()
         self.authenticated = False
@@ -112,7 +115,8 @@ class EnhancedWebSocketManager:
                 return None
             
             # Create connection info
-            conn_info = ConnectionInfo(websocket, user_id, restaurant_id)
+            client_type = "platform_dashboard" if connection_type == "platform" else "mobile_pos"
+            conn_info = ConnectionInfo(websocket, user_id, restaurant_id, client_type)
             conn_info.authenticated = True
             
             # Store connection
@@ -295,6 +299,29 @@ class EnhancedWebSocketManager:
                 return conn_id
         return ""
     
+    def get_restaurant_connections(self, restaurant_id: str) -> list[ConnectionInfo]:
+        """Get all active connections for a restaurant"""
+        return list(self.active_connections.get(restaurant_id, set()))
+    
+    def get_platform_connections(self) -> list[ConnectionInfo]:
+        """Get all active platform dashboard connections"""
+        platform_connections = []
+        for conn_info in self.connection_map.values():
+            if hasattr(conn_info, 'client_type') and conn_info.client_type == 'platform_dashboard':
+                platform_connections.append(conn_info)
+        return platform_connections
+    
+    async def send_to_connection(self, connection_id: str, data: dict):
+        """Send message to specific connection by ID"""
+        conn_info = self.connection_map.get(connection_id)
+        if conn_info:
+            await self.send_message(
+                conn_info.websocket,
+                data.get('type', WebSocketEventType.DATA_UPDATED),
+                data.get('data', {}),
+                conn_info.restaurant_id
+            )
+    
     async def monitor_connection_health(self):
         """Monitor connection health and handle heartbeats"""
         while True:
@@ -322,10 +349,17 @@ class EnhancedWebSocketManager:
 # Global manager instance
 manager = EnhancedWebSocketManager()
 
+# Initialize sync service on startup
+async def init_websocket_services():
+    """Initialize WebSocket-related services"""
+    await sync_service.initialize(manager)
+    logger.info("WebSocket services initialized")
 
-@router.websocket("/ws/pos/{restaurant_id}")
+
+@router.websocket("/ws/{connection_type}/{restaurant_id}")
 async def websocket_endpoint(
     websocket: WebSocket,
+    connection_type: str,  # 'pos' or 'platform'
     restaurant_id: str,
     db: Session = Depends(get_db)
 ):

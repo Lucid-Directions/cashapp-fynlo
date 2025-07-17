@@ -1,335 +1,328 @@
 """
-Real-time data synchronization service for Fynlo POS
-Handles bidirectional sync between mobile app and portal
+Bidirectional Sync Service
+Handles data synchronization between platform dashboard and restaurant mobile apps
 """
-
-from typing import Dict, Any, Optional, List
-from datetime import datetime
-import json
+from typing import Dict, List, Optional, Any
+from datetime import datetime, timedelta
 import asyncio
-from enum import Enum
-import logging
+import json
+from sqlalchemy.orm import Session
+from sqlalchemy import and_, or_
+from redis import Redis
 
-from app.core.redis_client import get_redis, RedisClient
-from app.core.websocket import websocket_manager, EventType, WebSocketMessage, ConnectionType
 from app.core.database import get_db
-
-logger = logging.getLogger(__name__)
-
-class SyncEventType(Enum):
-    """Types of sync events"""
-    # Order events
-    ORDER_CREATED = "order.created"
-    ORDER_UPDATED = "order.updated"
-    ORDER_STATUS_CHANGED = "order.status_changed"
-    ORDER_CANCELLED = "order.cancelled"
-    
-    # Payment events
-    PAYMENT_PROCESSED = "payment.processed"
-    PAYMENT_REFUNDED = "payment.refunded"
-    
-    # Inventory events
-    INVENTORY_UPDATED = "inventory.updated"
-    INVENTORY_LOW_STOCK = "inventory.low_stock"
-    INVENTORY_RESTOCK = "inventory.restock"
-    
-    # Staff events
-    STAFF_CLOCKED_IN = "staff.clocked_in"
-    STAFF_CLOCKED_OUT = "staff.clocked_out"
-    STAFF_BREAK_START = "staff.break_start"
-    STAFF_BREAK_END = "staff.break_end"
-    
-    # Menu events
-    MENU_ITEM_ADDED = "menu.item_added"
-    MENU_ITEM_UPDATED = "menu.item_updated"
-    MENU_ITEM_REMOVED = "menu.item_removed"
-    MENU_CATEGORY_CHANGED = "menu.category_changed"
-    
-    # Customer events
-    CUSTOMER_CREATED = "customer.created"
-    CUSTOMER_UPDATED = "customer.updated"
-    CUSTOMER_ORDER_PLACED = "customer.order_placed"
-    
-    # Settings events
-    SETTINGS_UPDATED = "settings.updated"
-    BUSINESS_HOURS_CHANGED = "settings.business_hours"
-    TAX_RATES_CHANGED = "settings.tax_rates"
-    
-    # System events
-    SYSTEM_NOTIFICATION = "system.notification"
-    SYSTEM_ALERT = "system.alert"
-    CONNECTION_ESTABLISHED = "system.connection_established"
-    CONNECTION_LOST = "system.connection_lost"
+from app.core.redis_client import get_redis_client
+from app.models.restaurant import Restaurant
+from app.models.product import Product, ProductCategory
+from app.models.order import Order
+from app.models.user import User
+from app.api.v1.endpoints.websocket_enhanced import ConnectionManager
+from app.core.exceptions import FynloException
+from app.core.logger import logger
 
 class SyncService:
-    """Service for managing real-time data synchronization"""
+    """
+    Manages bidirectional data synchronization between platform and restaurants
+    """
     
     def __init__(self):
-        self.redis_client: Optional[RedisClient] = None
-        self._subscribers: Dict[str, List[asyncio.Task]] = {}
-    
-    async def initialize(self):
-        """Initialize the sync service"""
-        self.redis_client = await get_redis()
-    
-    async def emit_update(
+        self.redis_client: Optional[Redis] = None
+        self.ws_manager: Optional[ConnectionManager] = None
+        self._sync_queue: asyncio.Queue = asyncio.Queue()
+        self._processing = False
+        
+    async def initialize(self, ws_manager: ConnectionManager):
+        """Initialize sync service with dependencies"""
+        self.redis_client = await get_redis_client()
+        self.ws_manager = ws_manager
+        self._processing = True
+        
+        # Start background sync processor
+        asyncio.create_task(self._process_sync_queue())
+        
+    async def shutdown(self):
+        """Gracefully shutdown sync service"""
+        self._processing = False
+        
+    async def sync_restaurant_update(
         self, 
-        event_type: SyncEventType, 
-        restaurant_id: str,
+        restaurant_id: str, 
+        update_type: str,
         data: Dict[str, Any],
-        user_id: Optional[str] = None,
-        source: str = "backend"
+        source: str,  # 'platform' or 'mobile'
+        db: Session
     ):
         """
-        Emit an update event to all connected clients
-        
-        Args:
-            event_type: Type of sync event
-            restaurant_id: Restaurant ID for scoping
-            data: Event data payload
-            user_id: Optional user ID who triggered the event
-            source: Source of the event (backend, mobile, portal)
+        Sync restaurant updates between platform and mobile
         """
-        if not self.redis_client:
-            await self.initialize()
-        
-        # Create event payload
-        event_payload = {
-            "event_type": event_type.value,
-            "restaurant_id": restaurant_id,
-            "user_id": user_id,
-            "source": source,
-            "data": data,
-            "timestamp": datetime.utcnow().isoformat()
-        }
-        
-        # Publish to Redis channel
-        channel = f"restaurant:{restaurant_id}:sync"
-        if self.redis_client:
-            try:
-                await self.redis_client.publish(channel, json.dumps(event_payload))
-            except Exception as e:
-                logger.error(f"Failed to publish to Redis channel {channel}: {str(e)}")
-        
-        # Also broadcast via WebSocket
-        websocket_message = WebSocketMessage(
-            event_type=self._map_to_websocket_event(event_type),
-            data=event_payload,
-            restaurant_id=restaurant_id,
-            user_id=user_id
-        )
-        
-        # Send to appropriate connection types based on event
-        connection_types = self._get_target_connections(event_type)
-        await websocket_manager.broadcast_to_restaurant(
-            restaurant_id,
-            websocket_message,
-            connection_types=connection_types
-        )
+        try:
+            # Add to sync queue
+            sync_event = {
+                'id': f"sync_{datetime.utcnow().timestamp()}",
+                'restaurant_id': restaurant_id,
+                'type': update_type,
+                'data': data,
+                'source': source,
+                'timestamp': datetime.utcnow().isoformat()
+            }
+            
+            await self._sync_queue.put(sync_event)
+            
+            # Cache the update for conflict resolution
+            cache_key = f"sync:restaurant:{restaurant_id}:{update_type}"
+            await self.redis_client.setex(
+                cache_key,
+                300,  # 5 minute TTL
+                json.dumps(sync_event)
+            )
+            
+            logger.info(f"Queued sync event: {update_type} for restaurant {restaurant_id}")
+            
+        except Exception as e:
+            logger.error(f"Error queuing sync event: {str(e)}")
+            raise FynloException(f"Sync failed: {str(e)}", status_code=500)
     
-    async def subscribe_to_restaurant(
+    async def _process_sync_queue(self):
+        """Background task to process sync events"""
+        while self._processing:
+            try:
+                # Get sync event from queue
+                sync_event = await asyncio.wait_for(
+                    self._sync_queue.get(), 
+                    timeout=1.0
+                )
+                
+                await self._handle_sync_event(sync_event)
+                
+            except asyncio.TimeoutError:
+                continue
+            except Exception as e:
+                logger.error(f"Error processing sync queue: {str(e)}")
+                
+    async def _handle_sync_event(self, event: Dict[str, Any]):
+        """Process individual sync event"""
+        try:
+            restaurant_id = event['restaurant_id']
+            event_type = event['type']
+            source = event['source']
+            
+            # Determine targets based on source
+            if source == 'platform':
+                # Sync to mobile apps
+                await self._sync_to_mobile(restaurant_id, event)
+            elif source == 'mobile':
+                # Sync to platform dashboard  
+                await self._sync_to_platform(restaurant_id, event)
+            else:
+                # Sync to both
+                await self._sync_to_mobile(restaurant_id, event)
+                await self._sync_to_platform(restaurant_id, event)
+                
+            logger.info(f"Processed sync event: {event_type} for restaurant {restaurant_id}")
+            
+        except Exception as e:
+            logger.error(f"Error handling sync event: {str(e)}")
+            
+    async def _sync_to_mobile(self, restaurant_id: str, event: Dict[str, Any]):
+        """Send sync event to mobile apps"""
+        if not self.ws_manager:
+            return
+            
+        # Get connected mobile clients for restaurant
+        connections = self.ws_manager.get_restaurant_connections(restaurant_id)
+        mobile_connections = [
+            conn for conn in connections 
+            if conn.client_type == 'mobile_pos'
+        ]
+        
+        if mobile_connections:
+            message = {
+                'type': f"sync.{event['type']}",
+                'data': event['data'],
+                'source': 'platform',
+                'timestamp': event['timestamp']
+            }
+            
+            # Broadcast to all mobile clients
+            for connection in mobile_connections:
+                await self.ws_manager.send_to_connection(
+                    connection.id,
+                    message
+                )
+                
+    async def _sync_to_platform(self, restaurant_id: str, event: Dict[str, Any]):
+        """Send sync event to platform dashboard"""
+        if not self.ws_manager:
+            return
+            
+        # Get platform connections
+        platform_connections = self.ws_manager.get_platform_connections()
+        
+        if platform_connections:
+            message = {
+                'type': f"sync.{event['type']}",
+                'data': event['data'],
+                'restaurant_id': restaurant_id,
+                'source': 'mobile',
+                'timestamp': event['timestamp']
+            }
+            
+            # Broadcast to all platform dashboards
+            for connection in platform_connections:
+                await self.ws_manager.send_to_connection(
+                    connection.id,
+                    message
+                )
+    
+    async def sync_menu_changes(
         self,
         restaurant_id: str,
-        callback: callable,
-        event_types: Optional[List[SyncEventType]] = None
-    ) -> str:
+        products: List[Dict[str, Any]],
+        categories: List[Dict[str, Any]],
+        source: str,
+        db: Session
+    ):
+        """Sync menu changes between platform and mobile"""
+        sync_data = {
+            'products': products,
+            'categories': categories,
+            'updated_at': datetime.utcnow().isoformat()
+        }
+        
+        await self.sync_restaurant_update(
+            restaurant_id=restaurant_id,
+            update_type='menu_update',
+            data=sync_data,
+            source=source,
+            db=db
+        )
+        
+    async def sync_order_update(
+        self,
+        restaurant_id: str,
+        order: Dict[str, Any],
+        source: str,
+        db: Session
+    ):
+        """Sync order updates in real-time"""
+        await self.sync_restaurant_update(
+            restaurant_id=restaurant_id,
+            update_type='order_update', 
+            data=order,
+            source=source,
+            db=db
+        )
+        
+    async def sync_settings_change(
+        self,
+        restaurant_id: str,
+        settings: Dict[str, Any],
+        source: str,
+        db: Session
+    ):
+        """Sync restaurant settings changes"""
+        # Filter out platform-controlled settings
+        allowed_settings = {
+            k: v for k, v in settings.items()
+            if k not in ['service_charge', 'payment_methods', 'commission_rate']
+        }
+        
+        if allowed_settings:
+            await self.sync_restaurant_update(
+                restaurant_id=restaurant_id,
+                update_type='settings_update',
+                data=allowed_settings,
+                source=source,
+                db=db
+            )
+    
+    async def handle_sync_conflict(
+        self,
+        restaurant_id: str,
+        conflict_type: str,
+        platform_data: Dict[str, Any],
+        mobile_data: Dict[str, Any],
+        db: Session
+    ) -> Dict[str, Any]:
         """
-        Subscribe to sync events for a restaurant
-        
-        Args:
-            restaurant_id: Restaurant to subscribe to
-            callback: Async function to call when events occur
-            event_types: Optional list of specific event types to subscribe to
-        
-        Returns:
-            Subscription ID
+        Handle sync conflicts between platform and mobile
+        Default strategy: Last write wins with notification
         """
-        if not self.redis_client:
-            await self.initialize()
+        platform_timestamp = platform_data.get('updated_at', '')
+        mobile_timestamp = mobile_data.get('updated_at', '')
         
-        channel = f"restaurant:{restaurant_id}:sync"
-        
-        async def message_handler(message):
-            try:
-                event_data = json.loads(message)
-                event_type_str = event_data.get("event_type")
-                
-                # Filter by event types if specified
-                if event_types:
-                    event_type = SyncEventType(event_type_str)
-                    if event_type not in event_types:
-                        return
-                
-                # Call the callback
-                await callback(event_data)
-                
-            except Exception as e:
-                logger.error(f"Error handling sync message: {str(e)}")
-        
-        # Subscribe to Redis channel
-        if not self.redis_client:
-            logger.error("Redis client not available for subscription")
-            return None
+        # Compare timestamps
+        if platform_timestamp > mobile_timestamp:
+            winner = 'platform'
+            resolved_data = platform_data
+        else:
+            winner = 'mobile' 
+            resolved_data = mobile_data
             
+        # Log conflict resolution
+        logger.warning(
+            f"Sync conflict resolved for restaurant {restaurant_id}: "
+            f"{conflict_type} - {winner} data wins"
+        )
+        
+        # Notify both sides of conflict resolution
+        conflict_message = {
+            'type': 'sync.conflict_resolved',
+            'data': {
+                'conflict_type': conflict_type,
+                'winner': winner,
+                'resolved_data': resolved_data
+            },
+            'restaurant_id': restaurant_id,
+            'timestamp': datetime.utcnow().isoformat()
+        }
+        
+        # Send to both platform and mobile
+        await self._sync_to_mobile(restaurant_id, conflict_message)
+        await self._sync_to_platform(restaurant_id, conflict_message)
+        
+        return resolved_data
+    
+    async def get_sync_status(
+        self, 
+        restaurant_id: str
+    ) -> Dict[str, Any]:
+        """Get current sync status for a restaurant"""
         try:
-            subscription = await self.redis_client.subscribe(channel, message_handler)
+            # Check pending sync events
+            pending_count = self._sync_queue.qsize()
             
-            # Track subscription
-            if restaurant_id not in self._subscribers:
-                self._subscribers[restaurant_id] = []
-            self._subscribers[restaurant_id].append(subscription)
+            # Check last sync times from cache
+            menu_sync_key = f"sync:restaurant:{restaurant_id}:menu_update"
+            order_sync_key = f"sync:restaurant:{restaurant_id}:order_update" 
+            settings_sync_key = f"sync:restaurant:{restaurant_id}:settings_update"
             
-            return f"sync_{restaurant_id}_{len(self._subscribers[restaurant_id])}"
+            last_menu_sync = await self.redis_client.get(menu_sync_key)
+            last_order_sync = await self.redis_client.get(order_sync_key)
+            last_settings_sync = await self.redis_client.get(settings_sync_key)
+            
+            return {
+                'restaurant_id': restaurant_id,
+                'pending_syncs': pending_count,
+                'last_sync_times': {
+                    'menu': json.loads(last_menu_sync).get('timestamp') if last_menu_sync else None,
+                    'orders': json.loads(last_order_sync).get('timestamp') if last_order_sync else None,
+                    'settings': json.loads(last_settings_sync).get('timestamp') if last_settings_sync else None
+                },
+                'sync_healthy': pending_count < 100  # Threshold for healthy sync
+            }
+            
         except Exception as e:
-            logger.error(f"Failed to subscribe to Redis channel {channel}: {str(e)}")
-            return None
-    
-    async def unsubscribe(self, subscription_id: str):
-        """Unsubscribe from sync events"""
-        # Implementation would track and cancel specific subscriptions
-        pass
-    
-    # Helper methods for specific event types
-    
-    async def sync_order_created(self, restaurant_id: str, order_data: Dict[str, Any], user_id: str):
-        """Sync new order creation"""
-        await self.emit_update(
-            event_type=SyncEventType.ORDER_CREATED,
-            restaurant_id=restaurant_id,
-            data=order_data,
-            user_id=user_id,
-            source="mobile"
-        )
-    
-    async def sync_order_status(self, restaurant_id: str, order_id: str, new_status: str, user_id: str):
-        """Sync order status change"""
-        await self.emit_update(
-            event_type=SyncEventType.ORDER_STATUS_CHANGED,
-            restaurant_id=restaurant_id,
-            data={
-                "order_id": order_id,
-                "new_status": new_status,
-                "previous_status": None  # Would be fetched from current state
-            },
-            user_id=user_id
-        )
-    
-    async def sync_payment_completed(self, restaurant_id: str, payment_data: Dict[str, Any], user_id: str):
-        """Sync payment completion"""
-        await self.emit_update(
-            event_type=SyncEventType.PAYMENT_PROCESSED,
-            restaurant_id=restaurant_id,
-            data=payment_data,
-            user_id=user_id
-        )
-    
-    async def sync_inventory_update(self, restaurant_id: str, inventory_changes: Dict[str, Any], user_id: str):
-        """Sync inventory changes"""
-        await self.emit_update(
-            event_type=SyncEventType.INVENTORY_UPDATED,
-            restaurant_id=restaurant_id,
-            data=inventory_changes,
-            user_id=user_id
-        )
-    
-    async def sync_menu_change(self, restaurant_id: str, menu_data: Dict[str, Any], change_type: str, user_id: str):
-        """Sync menu changes"""
-        event_map = {
-            "add": SyncEventType.MENU_ITEM_ADDED,
-            "update": SyncEventType.MENU_ITEM_UPDATED,
-            "remove": SyncEventType.MENU_ITEM_REMOVED
-        }
-        
-        await self.emit_update(
-            event_type=event_map.get(change_type, SyncEventType.MENU_ITEM_UPDATED),
-            restaurant_id=restaurant_id,
-            data=menu_data,
-            user_id=user_id,
-            source="portal"
-        )
-    
-    async def sync_staff_activity(self, restaurant_id: str, staff_id: str, activity: str, user_id: str):
-        """Sync staff clock in/out activities"""
-        event_map = {
-            "clock_in": SyncEventType.STAFF_CLOCKED_IN,
-            "clock_out": SyncEventType.STAFF_CLOCKED_OUT,
-            "break_start": SyncEventType.STAFF_BREAK_START,
-            "break_end": SyncEventType.STAFF_BREAK_END
-        }
-        
-        await self.emit_update(
-            event_type=event_map.get(activity, SyncEventType.STAFF_CLOCKED_IN),
-            restaurant_id=restaurant_id,
-            data={
-                "staff_id": staff_id,
-                "activity": activity,
-                "timestamp": datetime.utcnow().isoformat()
-            },
-            user_id=user_id
-        )
-    
-    async def sync_settings_change(self, restaurant_id: str, setting_type: str, changes: Dict[str, Any], user_id: str):
-        """Sync settings changes"""
-        event_map = {
-            "business_hours": SyncEventType.BUSINESS_HOURS_CHANGED,
-            "tax_rates": SyncEventType.TAX_RATES_CHANGED
-        }
-        
-        await self.emit_update(
-            event_type=event_map.get(setting_type, SyncEventType.SETTINGS_UPDATED),
-            restaurant_id=restaurant_id,
-            data={
-                "setting_type": setting_type,
-                "changes": changes
-            },
-            user_id=user_id,
-            source="portal"
-        )
-    
-    def _map_to_websocket_event(self, sync_event: SyncEventType) -> EventType:
-        """Map sync event types to WebSocket event types"""
-        mapping = {
-            SyncEventType.ORDER_CREATED: EventType.ORDER_CREATED,
-            SyncEventType.ORDER_STATUS_CHANGED: EventType.ORDER_STATUS_CHANGED,
-            SyncEventType.PAYMENT_PROCESSED: EventType.PAYMENT_COMPLETED,
-            SyncEventType.INVENTORY_UPDATED: EventType.INVENTORY_UPDATE,
-            SyncEventType.STAFF_CLOCKED_IN: EventType.STAFF_UPDATE,
-            SyncEventType.STAFF_CLOCKED_OUT: EventType.STAFF_UPDATE,
-            SyncEventType.MENU_ITEM_UPDATED: EventType.MENU_UPDATE,
-            SyncEventType.SYSTEM_NOTIFICATION: EventType.SYSTEM_NOTIFICATION
-        }
-        
-        return mapping.get(sync_event, EventType.SYSTEM_NOTIFICATION)
-    
-    def _get_target_connections(self, event_type: SyncEventType) -> List[ConnectionType]:
-        """Determine which connection types should receive the event"""
-        # Orders and payments go to all
-        if event_type in [
-            SyncEventType.ORDER_CREATED,
-            SyncEventType.ORDER_UPDATED,
-            SyncEventType.ORDER_STATUS_CHANGED,
-            SyncEventType.PAYMENT_PROCESSED
-        ]:
-            return [ConnectionType.POS, ConnectionType.KITCHEN, ConnectionType.MANAGEMENT]
-        
-        # Kitchen-specific events
-        if event_type in [
-            SyncEventType.ORDER_STATUS_CHANGED
-        ]:
-            return [ConnectionType.KITCHEN, ConnectionType.MANAGEMENT]
-        
-        # Management events
-        if event_type in [
-            SyncEventType.STAFF_CLOCKED_IN,
-            SyncEventType.STAFF_CLOCKED_OUT,
-            SyncEventType.INVENTORY_LOW_STOCK,
-            SyncEventType.SETTINGS_UPDATED
-        ]:
-            return [ConnectionType.MANAGEMENT]
-        
-        # Default to all POS and management
-        return [ConnectionType.POS, ConnectionType.MANAGEMENT]
-
+            logger.error(f"Error getting sync status: {str(e)}")
+            return {
+                'restaurant_id': restaurant_id,
+                'error': str(e),
+                'sync_healthy': False
+            }
 
 # Global sync service instance
 sync_service = SyncService()
+
+async def get_sync_service() -> SyncService:
+    """Get sync service instance"""
+    return sync_service
