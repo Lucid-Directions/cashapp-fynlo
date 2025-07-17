@@ -2,6 +2,29 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## 🎯 CRITICAL IMPLEMENTATION PLAN - JANUARY 2025
+
+**Current Status**: 85% Production Ready → 100% Target
+**Implementation Duration**: 12 Working Days
+**Approach**: Architecture-First with Clean Code Focus
+
+### 📚 Master Plan Documents Created
+- ✅ **[FINAL_MASTER_PLAN.md](/Users/arnauddecube/Documents/Fynlo/FINAL_MASTER_PLAN.md)** - Complete strategy and overview
+- ✅ **[PHASE_0_ARCHITECTURE_SETUP.md](/Users/arnauddecube/Documents/Fynlo/PHASE_0_ARCHITECTURE_SETUP.md)** - Shared types package (Days 1-2)
+- ✅ **[PHASE_1_CRITICAL_FIXES.md](/Users/arnauddecube/Documents/Fynlo/PHASE_1_CRITICAL_FIXES.md)** - WebSocket, Token, API fixes (Days 3-5)
+- ✅ **[PHASE_2_PLATFORM_INTEGRATION.md](/Users/arnauddecube/Documents/Fynlo/PHASE_2_PLATFORM_INTEGRATION.md)** - Dashboard integration (Days 6-9)
+- ✅ **[PHASE_3_MONITORING_DEPLOYMENT.md](/Users/arnauddecube/Documents/Fynlo/PHASE_3_MONITORING_DEPLOYMENT.md)** - Production ready (Days 10-12)
+- ✅ **[CODE_CLEANUP_GUIDE.md](/Users/arnauddecube/Documents/Fynlo/CODE_CLEANUP_GUIDE.md)** - Systematic cleanup procedures
+
+### 🚨 Critical Issues to Fix
+1. **WebSocket Instability** - No heartbeat, no reconnection
+2. **API Performance** - 10+ second timeouts, N+1 queries
+3. **Token Race Conditions** - Multiple refresh attempts
+4. **Code Duplication** - 200+ duplicate type definitions
+
+## Current Implementation Phase
+**START WITH**: Read FINAL_MASTER_PLAN.md, then begin Phase 0 (Architecture Setup)
+
 7 Claude rules
 1. First think through the problem, read the codebase for relevant files, and write a plan to tasks/todo.md.
 2. The plan should have a list of todo items that you can check off as you complete them
@@ -312,7 +335,7 @@ When working with settings or business logic:
 
 - `CONTEXT.md`: Essential project context and development guide (START HERE!)
 - `ios/APP_RUNTIME_FIXES.md`: iOS-specific fixes and bundle management
-- Backend documentation in `backend/RYAN DOCS/`
+- Backend documentation in `ARCHIVED DOCS/` (RYAN_BACKEND_HANDOVER.md, RYAN_HANDOVER_SUMMARY.md)
 
 ## Service Charge & Payment Settings Migration
 
@@ -326,14 +349,34 @@ Recent changes moved service charges and payment methods from restaurant control
 - **Always check CONTEXT.md first** for common issues, bundle deployment fixes, and recent updates
 - Contains solutions to recurring problems like "changes not showing in app"
 
-## Quick Bundle Deployment Fix (Most Common Issue)
+## 🚀 Quick Reference Commands
 
+### Bundle Deployment Fix (Most Common Issue)
 When changes don't appear in the iOS app:
 ```bash
 cd cashapp-fynlo/CashApp-iOS/CashAppPOS
 npx metro build index.js --platform ios --dev false --out ios/main.jsbundle
 mv ios/main.jsbundle.js ios/main.jsbundle
 cp ios/main.jsbundle ios/CashAppPOS/main.jsbundle
+```
+
+### Start Backend Server
+```bash
+cd backend
+source venv/bin/activate
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+### Run Database Seeds
+```bash
+cd backend
+python seed_chucho_menu.py  # Populate Chucho menu
+python scripts/seed_database.py  # General seed data
+```
+
+### Check Current Git Branch
+```bash
+git branch --show-current  # Shows: fix/critical-auth-websocket-menu-issues
 ```
 
 ## Git & Development Guidelines
@@ -637,66 +680,62 @@ dangerous_chars = ['<', '>', '"', "'", '(', ')', ';', '&', '+']
 - JSONB field validation for restaurant configurations
 - Business logic validation for orders and payments
 
-## 🚀 PRODUCTION READINESS STATUS (UPDATED JANUARY 2025)
+## 🚀 PRODUCTION READINESS IMPLEMENTATION
 
-**CRITICAL STATUS: 35% Production Ready → 100% Target**
+### Implementation Timeline (12 Days)
 
-The system requires transformation from demo-ready to fully production-ready. While UI/UX and backend infrastructure are professionally built, **the critical gap is frontend-backend integration and removal of ALL mock data dependencies**.
+**Phase 0 (Days 1-2)**: Architecture Setup ⚡
+- Create @fynlo/shared types package
+- Define all TypeScript interfaces  
+- Remove 200+ duplicate type definitions
+- Establish clean foundation
 
-### **🚨 CRITICAL MOCK DATA ISSUES IDENTIFIED**
+**Phase 1 (Days 3-5)**: Critical Fixes 🔧
+- Implement WebSocket heartbeat (15-second intervals)
+- Fix token refresh with mutex synchronization
+- Optimize API with caching and eager loading
+- Add database indexes for performance
 
-#### **1. Hardcoded Menu System (BLOCKER)**
-- **File**: `src/screens/pos/POSScreen.tsx` lines 47-95
-- **Issue**: 35 hardcoded Mexican restaurant menu items
-- **Impact**: Cannot support multiple restaurants
-- **Priority**: **MUST FIX FIRST**
+**Phase 2 (Days 6-9)**: Platform Integration 🏢
+- Migrate platform dashboard to shared types
+- Implement role-based access control
+- Create bidirectional sync service
+- Add real-time monitoring
 
-#### **2. Mock Authentication (CRITICAL)**
-- **File**: `src/screens/auth/LoginScreen.tsx` lines 61-80
-- **Issue**: Creates mock user even with real auth
-- **Impact**: No real user management
+**Phase 3 (Days 10-12)**: Production Ready 🚀
+- Health check endpoints
+- Metrics collection service
+- Deployment scripts
+- Load testing & verification
 
-#### **3. Mock Data Fallbacks (HIGH)**
-- **File**: `src/services/DataService.ts` lines 480-928
-- **Issue**: All reports return mock data
-- **Impact**: No real business insights
+### Key Technical Solutions
 
-#### **4. Hardcoded Database Service (HIGH)**
-- **File**: `src/services/DatabaseService.ts` lines 477-872
-- **Issue**: Mock inventory, employees, analytics
-- **Impact**: No real data persistence
+```typescript
+// WebSocket Heartbeat
+private startHeartbeat(): void {
+  this.heartbeatInterval = setInterval(() => {
+    if (this.ws?.readyState === WebSocket.OPEN) {
+      this.send({ type: 'ping' });
+    }
+  }, 15000);
+}
 
-### **📋 PRODUCTION READINESS IMPLEMENTATION PLANS**
+// Token Synchronization
+private refreshMutex = new Mutex();
+async refreshToken(): Promise<boolean> {
+  return this.refreshMutex.runExclusive(async () => {
+    // Prevents race conditions
+  });
+}
+```
 
-**Documents Created:**
-- `PRODUCTION_READINESS_MASTER_PLAN.md` - 4-week timeline and strategy
-- `PHASE_1_MENU_DYNAMIC_IMPLEMENTATION.md` - Remove hardcoded menu (**CRITICAL - 5 days**)
-- `PHASE_2_AUTHENTICATION_INTEGRATION.md` - Fix mock user creation (**CRITICAL - 3 days**)
-- `PHASE_3_DATA_PERSISTENCE_IMPLEMENTATION.md` - Remove ALL mock data (**HIGH - 5 days**)
-- `PHASE_4_REPORTS_ANALYTICS_INTEGRATION.md` - Real analytics (**MEDIUM - 3 days**)
-- `PHASE_5_TESTING_DEPLOYMENT_CHECKLIST.md` - Go-live procedures (**CRITICAL - 4 days**)
-
-### **✅ WHAT'S ALREADY PRODUCTION-READY**
-- ✅ UI/UX and navigation architecture (100%)
-- ✅ Backend infrastructure with DigitalOcean (100%)
-- ✅ Payment system architecture (95%)
-- ✅ Security framework (90%)
-- ✅ Multi-tenant support structure (85%)
-
-### **❌ WHAT NEEDS IMMEDIATE ATTENTION**
-- ❌ Dynamic menu system (replace hardcoded items)
-- ❌ Real authentication flow (remove mock users)
-- ❌ Data persistence (connect all screens to backend)
-- ❌ Real reports and analytics
-- ❌ Multi-restaurant testing
-
-### **🎯 SUCCESS CRITERIA FOR PRODUCTION**
-- ✅ 0 mock data references in codebase
-- ✅ 100% API endpoint coverage
-- ✅ All user actions persist to database
-- ✅ Support for unlimited restaurants
-- ✅ Real-time inventory tracking
-- ✅ Accurate financial reporting
+### Success Metrics
+- WebSocket uptime > 99.5%
+- API response time < 500ms  
+- Zero authentication failures
+- 0 duplicate types
+- 0 console.log statements
+- 30% code reduction target
 
 ## Development Environment Requirements
 
@@ -741,8 +780,10 @@ The system requires transformation from demo-ready to fully production-ready. Wh
 4. **Real-time Updates**: WebSocket connections → Order status changes → UI synchronization
 
 This system emphasizes reliability, security, and user experience for restaurant operations with enterprise-grade features and mobile-first design.
-Put it in claude.md
-And# 🤝 **Best Practices for Collaboration - Fynlo POS Project**
+
+---
+
+# 🤝 **Best Practices for Collaboration - Fynlo POS Project**
 
 ## **Git, GitHub & Team Coordination Guide**
 
@@ -796,27 +837,34 @@ git log --oneline -10
 
 ### **Domain Separation**
 ```
-Fynlo/
-├── backend/                     # 👨‍💻 Ryan's Domain
-│   ├── RYAN DOCS/              # Backend documentation
+cashapp-fynlo/
+├── backend/                     # 👨‍💻 Backend Domain
 │   ├── app/                    # FastAPI application
-│   ├── requirements.txt        # Python dependencies
+│   ├── requirements.txt        # Python dependencies (includes websockets)
 │   └── README.md              # Backend setup guide
 │
-├── CashApp-iOS/CashAppPOS/     # 👤 Your Domain  
+├── CashApp-iOS/CashAppPOS/     # 👤 Frontend Domain  
 │   ├── src/                    # React Native source
 │   ├── ios/                    # iOS-specific files
 │   ├── IOS DOCS/              # iOS documentation
 │   └── package.json           # Node dependencies
 │
-├── ARCHIVED DOCS/              # 📚 Shared Historical Docs
+├── ARCHIVED DOCS/              # 📚 All Historical Documentation
+│   ├── RYAN_BACKEND_HANDOVER.md  # Backend handover docs
+│   ├── RYAN_HANDOVER_SUMMARY.md  # Backend summary
+│   └── [Many other docs]         # Migration, setup, testing docs
+│
+├── SCREEN_ANALYSIS_DOCS/       # 📱 Screen-by-screen analysis
 ├── config/                     # 🔧 Shared Configuration
+├── addons/                     # 🏢 Odoo modules (accounting, POS, etc.)
+├── cashapp/                    # 🏢 Odoo core system
+├── tasks/todo.md              # 📋 Current development tasks
 └── *.md                       # 📝 Project-level docs
 ```
 
 ### **Ownership Guidelines**
-- **Backend Developer (Ryan)**: Full ownership of `/backend/` directory
-- **Frontend Developer (You)**: Full ownership of `/CashApp-iOS/` directory  
+- **Backend**: `/backend/` directory - FastAPI, PostgreSQL, WebSockets
+- **Frontend**: `/CashApp-iOS/` directory - React Native, iOS app
 - **Shared Ownership**: Root-level documentation, configuration files
 - **Coordination Required**: API integration, data formats, WebSocket events
 

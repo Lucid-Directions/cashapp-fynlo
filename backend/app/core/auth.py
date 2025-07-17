@@ -6,12 +6,15 @@ from fastapi import Depends, HTTPException, Header, Request
 from sqlalchemy.orm import Session
 from typing import Optional
 import uuid
+import logging
 
 from app.core.supabase import supabase_admin
 from app.core.database import get_db
 from app.core.database import User
 from app.services.audit_logger import AuditLoggerService
 from app.models.audit_log import AuditEventType, AuditEventStatus
+
+logger = logging.getLogger(__name__)
 
 
 async def get_current_user(
@@ -183,3 +186,49 @@ async def get_current_user_optional(
 
 # Alias for consistency with platform API
 get_current_platform_owner = get_platform_owner
+
+
+async def verify_websocket_token(
+    token: str,
+    user_id: str,
+    db: Session
+) -> Optional[User]:
+    """
+    Verify WebSocket authentication token
+    Returns User if valid, None otherwise
+    """
+    try:
+        # Verify with Supabase
+        if not supabase_admin:
+            logger.error("Supabase admin client not initialized")
+            return None
+            
+        user_response = supabase_admin.auth.get_user(token)
+        supabase_user = user_response.user
+        
+        if not supabase_user:
+            logger.warning("Invalid token - no user returned from Supabase")
+            return None
+        
+        # Find user in our database by Supabase ID
+        db_user = db.query(User).filter(User.supabase_id == str(supabase_user.id)).first()
+        
+        if not db_user:
+            logger.warning(f"User not found in database for Supabase ID: {supabase_user.id}")
+            return None
+        
+        # Verify the user is active
+        if not db_user.is_active:
+            logger.warning(f"User is not active: {db_user.id}")
+            return None
+        
+        # Verify user_id matches (critical security check)
+        if str(db_user.id) != str(user_id):
+            logger.error(f"User ID mismatch - potential security violation: {db_user.id} != {user_id}")
+            return None
+        
+        return db_user
+        
+    except Exception as e:
+        logger.error(f"WebSocket token verification error: {str(e)}")
+        return None

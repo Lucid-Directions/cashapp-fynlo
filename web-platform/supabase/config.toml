@@ -1,0 +1,10 @@
+project_id = "c816eade-8ae5-4f42-b1b2-23a7114f4009"
+
+[functions.payment-analytics]
+verify_jwt = false
+
+[functions.platform-metrics]
+verify_jwt = false
+
+[functions.sumup-payments]
+verify_jwt = true
