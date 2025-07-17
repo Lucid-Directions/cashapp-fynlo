@@ -37,27 +37,53 @@ export const formatDateTime = (date: string | Date): string => {
   }).format(d);
 };
 
-// Phone number formatting
+// Phone number formatting with input validation
 export const formatUKPhone = (phone: string): string => {
   const cleaned = phone.replace(/\D/g, '');
+  
+  // Handle international format (+44)
   if (cleaned.startsWith('44')) {
     const number = cleaned.substring(2);
-    return `+44 ${number.substring(0, 4)} ${number.substring(4, 7)} ${number.substring(7)}`;
+    // UK phone numbers should be 10 digits after country code
+    if (number.length < 10) return phone;
+    
+    // Format as +44 XXXX XXX XXX (common UK mobile format)
+    const part1 = number.substring(0, 4);
+    const part2 = number.substring(4, 7);
+    const part3 = number.substring(7, 10);
+    
+    return `+44 ${part1} ${part2} ${part3}`;
   }
+  
+  // Handle national format (0)
   if (cleaned.startsWith('0')) {
-    return `${cleaned.substring(0, 5)} ${cleaned.substring(5, 8)} ${cleaned.substring(8)}`;
+    // UK phone numbers should be 11 digits including leading 0
+    if (cleaned.length < 11) return phone;
+    
+    // Format as 0XXXX XXX XXX
+    const part1 = cleaned.substring(0, 5);
+    const part2 = cleaned.substring(5, 8);
+    const part3 = cleaned.substring(8, 11);
+    
+    return `${part1} ${part2} ${part3}`;
   }
+  
+  // Return original if not a valid UK format
   return phone;
 };
 
-// Order number generation
+// Order number generation with collision-resistant implementation
 export const generateOrderNumber = (): string => {
   const date = new Date();
   const year = date.getFullYear().toString().slice(-2);
   const month = (date.getMonth() + 1).toString().padStart(2, '0');
   const day = date.getDate().toString().padStart(2, '0');
-  const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-  return `ORD-${year}${month}-${day}${random}`;
+  // Use timestamp milliseconds for better uniqueness
+  const timestamp = date.getTime();
+  const lastSixDigits = (timestamp % 1000000).toString().padStart(6, '0');
+  // Add additional random component for extra safety
+  const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+  return `ORD-${year}${month}${day}-${lastSixDigits}${random}`;
 };
 
 // Percentage formatting

@@ -44,7 +44,7 @@ export {
 // Legacy type mappings for backward compatibility
 // TODO: Update components to use Product instead of MenuItem
 export interface MenuItem {
-  id: number;
+  id: string;  // Changed from number to match Product
   name: string;
   price: number;
   category: string;
@@ -58,7 +58,7 @@ export interface MenuItem {
 
 // TODO: Update components to use ProductCategory
 export interface Category {
-  id: number;
+  id: string;  // Changed from number to match ProductCategory
   name: string;
   active: boolean;
   color?: string;
@@ -66,8 +66,8 @@ export interface Category {
 }
 
 export interface PosSession {
-  id: number;
-  userId: number;
+  id: string;  // Changed from number for consistency
+  userId: string;  // Changed from number to match User.id
   userName: string;
   startTime: Date;
   endTime?: Date;
@@ -95,7 +95,7 @@ export type RootStackParamList = {
   POS: undefined;
   Orders: undefined;
   Reports: undefined;
-  OrderDetails: { orderId: number };
+  OrderDetails: { orderId: string };
   TableSelection: undefined;
 };
 
@@ -134,7 +134,7 @@ export type MainStackParamList = {
     tableName?: string; 
     orderType?: 'dine_in' | 'takeout' | 'pickup' | 'delivery';
   };
-  OrderDetails: { orderId: number };
+  OrderDetails: { orderId: string };
   ServiceChargeSelection: undefined;
   EnhancedPayment: {
     amount: number;
@@ -251,7 +251,7 @@ export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
 // Data types previously in mockDataGenerator.ts
 export interface CustomerData {
-  id: number;
+  id: string;  // Changed from number to match backend UUID
   name: string;
   email: string;
   phone: string;
@@ -266,7 +266,7 @@ export interface CustomerData {
 }
 
 export interface EmployeeData {
-  id: number; // Or string if UUID from backend
+  id: string; // Changed from number to match User.id
   name: string;
   role: 'Manager' | 'Cashier' | 'Server' | 'Cook' | string; // Allow string for future roles
   email: string;
@@ -294,7 +294,7 @@ export interface EmployeeData {
 }
 
 export interface InventoryData {
-  itemId: number; // Or string (SKU/UUID)
+  itemId: string; // Changed from number to match backend UUID/SKU
   name: string;
   category: string;
   currentStock: number;
