@@ -1,8 +1,11 @@
 export interface WebSocketMessage<T = any> {
-  event: string;
+  id: string;
+  type: string;
   data?: T;
+  restaurant_id: string;
   timestamp: string;
-  request_id?: string;
+  user_id?: string;
+  token?: string;  // For authentication messages
 }
 
 export interface WebSocketConnectionState {
@@ -35,4 +38,13 @@ export interface WebSocketError {
   code: string;
   message: string;
   reconnectable: boolean;
+}
+
+export interface WebSocketConfig {
+  heartbeatInterval?: number;
+  pongTimeout?: number;
+  maxReconnectAttempts?: number;
+  authTimeout?: number;
+  reconnectBackoff?: number[];
+  maxMessageQueueSize?: number;
 }
