@@ -27,12 +27,23 @@ export const isValidUKPostcode = (postcode: string): boolean => {
 
 // Amount validation (positive number with up to 2 decimal places)
 export const isValidAmount = (amount: number): boolean => {
-  return amount >= 0 && Number(amount.toFixed(2)) === amount;
+  if (amount < 0) return false;
+  
+  // Check decimal places by converting to string to avoid floating-point precision issues
+  const amountStr = amount.toString();
+  const decimalIndex = amountStr.indexOf('.');
+  
+  // If no decimal point, it's valid
+  if (decimalIndex === -1) return true;
+  
+  // Check if there are more than 2 decimal places
+  const decimalPlaces = amountStr.length - decimalIndex - 1;
+  return decimalPlaces <= 2;
 };
 
-// Order number validation
+// Order number validation - matches format: ORD-YYMMDD-XXXXXXXXX
 export const isValidOrderNumber = (orderNumber: string): boolean => {
-  const orderRegex = /^ORD-\d{4}-\d{6}$/;
+  const orderRegex = /^ORD-\d{6}-\d{9}$/;
   return orderRegex.test(orderNumber);
 };
 
