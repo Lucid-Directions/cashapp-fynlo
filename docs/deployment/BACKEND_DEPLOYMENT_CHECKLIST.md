@@ -1,5 +1,13 @@
 # Backend Deployment Readiness Checklist for Vercel Integration
 
+## 🏗️ Architecture Overview
+
+```
+[Vercel Frontend]           [Your Domain]              [DigitalOcean Backend]
+app.fynlo.co.uk    →    api.fynlo.co.uk    →    fynlopos-9eg2c.ondigitalocean.app
+(Platform Dashboard)     (API Gateway)              (FastAPI + PostgreSQL)
+```
+
 ## ✅ Current Status
 
 ### 🟢 Already Configured
@@ -93,11 +101,13 @@ fetch('https://fynlopos-9eg2c.ondigitalocean.app/api/v1/health')
 In your Vercel project settings, add:
 
 ```
-VITE_API_URL=https://fynlopos-9eg2c.ondigitalocean.app/api/v1
-VITE_WEBSOCKET_URL=wss://fynlopos-9eg2c.ondigitalocean.app/ws
+VITE_API_URL=https://api.fynlo.co.uk/api/v1
+VITE_WEBSOCKET_URL=wss://api.fynlo.co.uk/ws
 VITE_SUPABASE_URL=<your-supabase-url>
 VITE_SUPABASE_ANON_KEY=<your-supabase-anon-key>
 ```
+
+**Note**: The domain `api.fynlo.co.uk` should be configured to point to your DigitalOcean backend deployment.
 
 ## 📊 Monitoring
 

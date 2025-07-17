@@ -102,10 +102,12 @@ class Settings(BaseSettings):
     
     # CORS
     PRODUCTION_ALLOWED_ORIGINS: list[str] = [
-        "https://fynlo.vercel.app",  # Main production domain
-        "https://fynlo-*.vercel.app",  # Preview deployments
+        "https://app.fynlo.co.uk",  # Main production domain (platform dashboard)
+        "https://fynlo.co.uk",  # Main website
+        "https://api.fynlo.co.uk",  # API domain (for Swagger UI)
+        "https://fynlo.vercel.app",  # Vercel production deployment
+        "https://fynlo-*.vercel.app",  # Vercel preview deployments
         "https://*.vercel.app",  # All Vercel deployments during development
-        "https://app.fynlo.co.uk",  # Future custom domain
         "http://localhost:3000",  # Local development
         "http://localhost:8080",  # Vite development server
     ]

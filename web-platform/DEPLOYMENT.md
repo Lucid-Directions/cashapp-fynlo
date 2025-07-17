@@ -10,8 +10,8 @@
 2. **Configure Environment Variables**
    Add these in Vercel's project settings:
    ```
-   VITE_API_URL=https://fynlopos-9eg2c.ondigitalocean.app/api/v1
-   VITE_WEBSOCKET_URL=wss://fynlopos-9eg2c.ondigitalocean.app/ws
+   VITE_API_URL=https://api.fynlo.co.uk/api/v1
+   VITE_WEBSOCKET_URL=wss://api.fynlo.co.uk/ws
    VITE_SUPABASE_URL=https://your-project.supabase.co
    VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
    ```
