@@ -68,7 +68,8 @@ class EnhancedWebSocketManager:
         connection_id: str,
         websocket: WebSocket,
         auth_data: dict,
-        db: Session
+        db: Session,
+        connection_type: str = "pos"
     ) -> Optional[ConnectionInfo]:
         """Authenticate WebSocket connection"""
         try:
@@ -413,7 +414,8 @@ async def websocket_endpoint(
             connection_id,
             websocket,
             auth_data.get("data", {}),
-            db
+            db,
+            connection_type
         )
         
         if not conn_info:

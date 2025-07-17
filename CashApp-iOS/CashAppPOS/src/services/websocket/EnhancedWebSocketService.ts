@@ -127,6 +127,7 @@ export class EnhancedWebSocketService {
         id: this.generateMessageId(),
         type: WebSocketEvent.AUTHENTICATE,
         data: {
+          token: token,
           user_id: user.id,
           restaurant_id: user.restaurant_id,
           client_type: 'mobile_pos',
@@ -136,11 +137,8 @@ export class EnhancedWebSocketService {
         timestamp: new Date().toISOString()
       };
       
-      // Send auth with token in header format
-      this.ws?.send(JSON.stringify({
-        ...authMessage,
-        token // Token sent in message, not URL
-      }));
+      // Send auth message
+      this.ws?.send(JSON.stringify(authMessage));
       
       // Set authentication timeout
       const authTimeout = setTimeout(() => {

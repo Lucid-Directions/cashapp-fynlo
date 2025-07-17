@@ -81,6 +81,8 @@ class CategoryResponse:
         self.sort_order = category.sort_order
         self.icon = category.icon
         self.product_count = product_count
+        self.created_at = category.created_at.isoformat() if hasattr(category, 'created_at') else datetime.now().isoformat()
+        self.updated_at = category.updated_at.isoformat() if hasattr(category, 'updated_at') else datetime.now().isoformat()
     
     def dict(self):
         return {
@@ -89,7 +91,9 @@ class CategoryResponse:
             "description": self.description,
             "sort_order": self.sort_order,
             "icon": self.icon,
-            "product_count": self.product_count
+            "product_count": self.product_count,
+            "created_at": self.created_at,
+            "updated_at": self.updated_at
         }
 
 
