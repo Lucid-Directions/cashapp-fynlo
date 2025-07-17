@@ -111,8 +111,8 @@ class Settings(BaseSettings):
         "http://localhost:8081",  # Alternative local port
     ]
     
-    # Note: For Vercel preview deployments, we'll need to implement dynamic CORS validation
-    # in the middleware to handle the varying preview URLs
+    # Note: For Vercel preview deployments, we use regex pattern in CORSMiddleware
+    # to dynamically handle preview URLs like https://fynlo-pr-123.vercel.app
     
     @field_validator('DEBUG', 'ERROR_DETAIL_ENABLED', mode='before')
     @classmethod
