@@ -1,0 +1,17 @@
+{
+  "name": "@fynlo/shared",
+  "version": "1.0.0",
+  "description": "Shared types and utilities for Fynlo POS",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "clean": "rm -rf dist",
+    "prepare": "npm run build"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.2",
+    "@types/node": "^20.0.0"
+  }
+}
