@@ -94,7 +94,7 @@ class CategoryResponse:
 
 
 @router.get("/menu", response_model=List[dict])
-async def get_menu_items_optimized(
+def get_menu_items_optimized(
     restaurant_id: str = Query(..., description="Restaurant ID"),
     category: Optional[str] = Query(None, description="Category ID filter"),
     page: int = Query(1, ge=1),
@@ -118,7 +118,7 @@ async def get_menu_items_optimized(
         # Try cache first
         if redis_client:
             try:
-                cached_data = await redis_client.get(cache_key)
+                cached_data = redis_client.get(cache_key)
                 if cached_data:
                     logger.info(f"Menu cache hit for restaurant {restaurant_id}")
                     return APIResponseHelper.success(
@@ -165,7 +165,7 @@ async def get_menu_items_optimized(
         # Cache for 5 minutes
         if redis_client and response_data:
             try:
-                await redis_client.setex(
+                redis_client.setex(
                     cache_key,
                     300,  # 5 minutes TTL
                     json.dumps(response_data)
@@ -193,7 +193,7 @@ async def get_menu_items_optimized(
 
 
 @router.get("/menu/categories", response_model=List[dict])
-async def get_menu_categories(
+def get_menu_categories(
     restaurant_id: str = Query(...),
     db: Session = Depends(get_db),
     redis_client: RedisClient = Depends(get_redis),
@@ -206,7 +206,7 @@ async def get_menu_categories(
         # Try cache
         if redis_client:
             try:
-                cached_data = await redis_client.get(cache_key)
+                cached_data = redis_client.get(cache_key)
                 if cached_data:
                     return APIResponseHelper.success(
                         data=json.loads(cached_data),
@@ -242,7 +242,7 @@ async def get_menu_categories(
         # Cache for 10 minutes
         if redis_client and response_data:
             try:
-                await redis_client.setex(
+                redis_client.setex(
                     cache_key,
                     600,  # 10 minutes TTL
                     json.dumps(response_data)
@@ -265,7 +265,7 @@ async def get_menu_categories(
 
 
 @router.post("/menu/cache/invalidate")
-async def invalidate_menu_cache(
+def invalidate_menu_cache(
     restaurant_id: str = Query(...),
     current_user: User = Depends(get_current_user),
     redis_client: RedisClient = Depends(get_redis)
@@ -291,9 +291,9 @@ async def invalidate_menu_cache(
         deleted_count = 0
         for pattern in patterns:
             try:
-                keys = await redis_client.keys(pattern)
+                keys = redis_client.keys(pattern)
                 if keys:
-                    deleted_count += await redis_client.delete(*keys)
+                    deleted_count += redis_client.delete(*keys)
             except Exception as e:
                 logger.error(f"Cache invalidation error: {e}")
         

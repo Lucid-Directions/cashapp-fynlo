@@ -93,13 +93,14 @@ class EnhancedWebSocketManager:
                 return None
             
             # Verify user has access to restaurant
-            if user.restaurant_id != restaurant_id and user.role != 'platform_owner':
-                await self.send_error(
-                    websocket,
-                    WebSocketEventType.AUTH_ERROR,
-                    "Access denied to this restaurant"
-                )
-                return None
+            if user.role != 'platform_owner':
+                if not user.restaurant_id or str(user.restaurant_id) != restaurant_id:
+                    await self.send_error(
+                        websocket,
+                        WebSocketEventType.AUTH_ERROR,
+                        "Access denied to this restaurant"
+                    )
+                    return None
             
             # Check connection limits
             if not self._check_connection_limits(restaurant_id, user_id):
