@@ -11,12 +11,12 @@ from sqlalchemy import and_, or_
 from redis import Redis
 
 from app.core.database import get_db
-from app.core.redis_client import get_redis_client
+from app.core.redis_client import redis_client as global_redis_client
 from app.models.restaurant import Restaurant
 from app.models.product import Product, ProductCategory
 from app.models.order import Order
 from app.models.user import User
-from app.api.v1.endpoints.websocket_enhanced import ConnectionManager
+from app.api.v1.endpoints.websocket_enhanced import EnhancedWebSocketManager
 from app.core.exceptions import FynloException
 from app.core.logger import logger
 
@@ -27,13 +27,13 @@ class SyncService:
     
     def __init__(self):
         self.redis_client: Optional[Redis] = None
-        self.ws_manager: Optional[ConnectionManager] = None
+        self.ws_manager: Optional[EnhancedWebSocketManager] = None
         self._sync_queue: asyncio.Queue = asyncio.Queue()
         self._processing = False
         
-    async def initialize(self, ws_manager: ConnectionManager):
+    async def initialize(self, ws_manager: EnhancedWebSocketManager):
         """Initialize sync service with dependencies"""
-        self.redis_client = await get_redis_client()
+        self.redis_client = global_redis_client
         self.ws_manager = ws_manager
         self._processing = True
         
@@ -70,10 +70,10 @@ class SyncService:
             
             # Cache the update for conflict resolution
             cache_key = f"sync:restaurant:{restaurant_id}:{update_type}"
-            await self.redis_client.setex(
+            await self.redis_client.set(
                 cache_key,
-                300,  # 5 minute TTL
-                json.dumps(sync_event)
+                json.dumps(sync_event),
+                expire=300  # 5 minute TTL
             )
             
             logger.info(f"Queued sync event: {update_type} for restaurant {restaurant_id}")
@@ -305,9 +305,9 @@ class SyncService:
                 'restaurant_id': restaurant_id,
                 'pending_syncs': pending_count,
                 'last_sync_times': {
-                    'menu': json.loads(last_menu_sync).get('timestamp') if last_menu_sync else None,
-                    'orders': json.loads(last_order_sync).get('timestamp') if last_order_sync else None,
-                    'settings': json.loads(last_settings_sync).get('timestamp') if last_settings_sync else None
+                    'menu': last_menu_sync.get('timestamp') if last_menu_sync else None,
+                    'orders': last_order_sync.get('timestamp') if last_order_sync else None,
+                    'settings': last_settings_sync.get('timestamp') if last_settings_sync else None
                 },
                 'sync_healthy': pending_count < 100  # Threshold for healthy sync
             }

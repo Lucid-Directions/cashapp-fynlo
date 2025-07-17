@@ -9,7 +9,7 @@ import logging # For logging stock_overdrawn events
 
 from app.models import Order as OrderModel, Product as ProductModel, Recipe as RecipeModel, InventoryItem as InventoryItemModel, InventoryLedgerEntry as InventoryLedgerModel
 from app.crud import inventory as crud_inventory
-from app.core.websocket import ConnectionManager # Assuming a WebSocket manager exists
+from app.core.websocket import WebSocketManager
 # from app.services.audit_logger import AuditLoggerService # Assuming an audit logger service
 
 logger = logging.getLogger(__name__)
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 async def apply_recipe_deductions_for_order(
     db: Session,
     order_id: UUID,
-    websocket_manager: Optional[ConnectionManager] = None # Optional: for real-time updates
+    websocket_manager: Optional[WebSocketManager] = None  # Optional: for real-time updates
 ) -> List[Tuple[InventoryItemModel, InventoryLedgerModel]]:
     """
     Applies recipe deductions for all items in a confirmed order.
@@ -180,7 +180,7 @@ async def apply_recipe_deductions_for_order(
 
 
 # Example of how this service might be called (e.g., from an order processing endpoint or task)
-# async def process_confirmed_order(order_id: UUID, db: Session, ws_manager: ConnectionManager):
+# async def process_confirmed_order(order_id: UUID, db: Session, ws_manager: WebSocketManager):
 #     try:
 #         # ... other order confirmation logic ...
 #         await apply_recipe_deductions_for_order(db, order_id, ws_manager)
