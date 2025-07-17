@@ -101,7 +101,14 @@ class Settings(BaseSettings):
     ERROR_DETAIL_ENABLED: bool = True
     
     # CORS
-    PRODUCTION_ALLOWED_ORIGINS: list[str] = ["https://your-production-frontend.com"] # TODO: Update with actual frontend domain
+    PRODUCTION_ALLOWED_ORIGINS: list[str] = [
+        "https://fynlo.vercel.app",  # Main production domain
+        "https://fynlo-*.vercel.app",  # Preview deployments
+        "https://*.vercel.app",  # All Vercel deployments during development
+        "https://app.fynlo.co.uk",  # Future custom domain
+        "http://localhost:3000",  # Local development
+        "http://localhost:8080",  # Vite development server
+    ]
     
     @field_validator('DEBUG', 'ERROR_DETAIL_ENABLED', mode='before')
     @classmethod
