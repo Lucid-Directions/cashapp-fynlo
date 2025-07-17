@@ -106,11 +106,13 @@ class Settings(BaseSettings):
         "https://fynlo.co.uk",  # Main website
         "https://api.fynlo.co.uk",  # API domain (for Swagger UI)
         "https://fynlo.vercel.app",  # Vercel production deployment
-        "https://fynlo-*.vercel.app",  # Vercel preview deployments
-        "https://*.vercel.app",  # All Vercel deployments during development
         "http://localhost:3000",  # Local development
         "http://localhost:8080",  # Vite development server
+        "http://localhost:8081",  # Alternative local port
     ]
+    
+    # Note: For Vercel preview deployments, we'll need to implement dynamic CORS validation
+    # in the middleware to handle the varying preview URLs
     
     @field_validator('DEBUG', 'ERROR_DETAIL_ENABLED', mode='before')
     @classmethod

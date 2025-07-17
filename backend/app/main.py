@@ -101,6 +101,8 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"], # Can be restricted further if needed e.g. ["GET", "POST", "PUT", "DELETE"]
     allow_headers=["*"], # Can be restricted further e.g. ["Content-Type", "Authorization"]
+    # Allow Vercel preview deployments with regex pattern
+    allow_origin_regex=r"https://fynlo-.*\.vercel\.app" if settings.ENVIRONMENT != "production" else None
 )
 
 # TEMPORARY: Disable complex middleware for deployment

@@ -8,13 +8,17 @@
    - Select the `web-platform` directory as the root directory
 
 2. **Configure Environment Variables**
-   Add these in Vercel's project settings:
+   Add these in Vercel's project settings (Settings → Environment Variables):
+   
+   **Important**: Add these as plain environment variables, NOT as secrets:
    ```
    VITE_API_URL=https://api.fynlo.co.uk/api/v1
    VITE_WEBSOCKET_URL=wss://api.fynlo.co.uk/ws
    VITE_SUPABASE_URL=https://your-project.supabase.co
    VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
    ```
+   
+   Note: The `vercel.json` file no longer references these variables. Vercel will automatically inject them during build.
 
 3. **Deploy**
    - Click "Deploy"
