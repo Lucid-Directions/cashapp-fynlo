@@ -219,6 +219,25 @@ class SupabaseAuthService {
   }
   
   /**
+   * Clear stored tokens without signing out from Supabase
+   */
+  async clearStoredTokens() {
+    try {
+      console.log('🔄 Clearing stored tokens...');
+      await AsyncStorage.multiRemove([
+        'userInfo',
+        'supabase_session',
+        'auth_token',
+        '@auth_user',
+        '@auth_business'
+      ]);
+      console.log('✅ Stored tokens cleared');
+    } catch (error) {
+      console.error('Error clearing stored tokens:', error);
+    }
+  }
+  
+  /**
    * Refresh session
    */
   async refreshSession() {
@@ -280,35 +299,23 @@ class SupabaseAuthService {
     });
     
     if (!response.ok) {
-      const error = await response.text();
-      console.error('❌ Backend verification failed:', error);
+      const errorText = await response.text();
+      console.error('❌ Backend verification failed:', errorText);
       
-      // Fallback data for when backend is not available
-      // In production, this would come from the backend based on the user's actual restaurant
-      console.log('⚠️ Using fallback authentication data');
+      // Parse error details if available
+      let errorDetail = 'Backend verification failed';
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorDetail = errorJson.detail || errorJson.message || errorDetail;
+      } catch {
+        // Use raw error text if not JSON
+        errorDetail = errorText || errorDetail;
+      }
       
-      // Use Supabase user ID if available, otherwise create a UUID
-      const supabaseUserId = await this.getCurrentSessionUserId();
-      const userData = {
-        id: supabaseUserId || `user-${Date.now()}`,
-        email: email,
-        full_name: 'Restaurant User',
-        role: 'restaurant_owner', // Default role for testing
-        restaurant_id: 'default-restaurant',
-        restaurant_name: 'Restaurant', // Generic name - should be fetched from backend
-        subscription_plan: 'beta',
-        enabled_features: ['pos', 'orders', 'inventory', 'analytics', 'table_management', 'online_ordering'],
-        created_at: new Date().toISOString()
-      };
+      // Clear any stored tokens on backend verification failure
+      await this.clearStoredTokens();
       
-      // Map full_name to name for compatibility with auth store
-      return { 
-        user: {
-          ...userData,
-          name: userData.full_name,
-          is_platform_owner: userData.role === 'platform_owner'
-        }
-      };
+      throw new Error(errorDetail);
     }
     
     const data = await response.json();

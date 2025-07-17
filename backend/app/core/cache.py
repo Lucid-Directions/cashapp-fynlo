@@ -25,6 +25,9 @@ async def cache_data(key: str, data: Any, ttl: int = 300) -> bool:
     Returns:
         bool: True if successful, False otherwise
     """
+    if not redis_client:
+        logger.warning("Redis client not available for caching")
+        return False
     try:
         return await redis_client.set(key, data, expire=ttl)
     except Exception as e:
@@ -60,6 +63,9 @@ async def get_cached_data_async(key: str) -> Optional[Any]:
     Returns:
         Cached data or None if not found/expired
     """
+    if not redis_client:
+        logger.warning("Redis client not available for cache retrieval")
+        return None
     try:
         return await redis_client.get(key)
     except Exception as e:
@@ -77,6 +83,9 @@ async def delete_cache(key: str) -> bool:
     Returns:
         bool: True if successful, False otherwise
     """
+    if not redis_client:
+        logger.warning("Redis client not available for cache deletion")
+        return False
     try:
         return await redis_client.delete(key)
     except Exception as e:
@@ -94,6 +103,9 @@ async def delete_cache_pattern(pattern: str) -> int:
     Returns:
         int: Number of keys deleted
     """
+    if not redis_client:
+        logger.warning("Redis client not available for pattern deletion")
+        return 0
     try:
         return await redis_client.delete_pattern(pattern)
     except Exception as e:

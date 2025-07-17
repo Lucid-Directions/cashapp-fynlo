@@ -648,8 +648,17 @@ def sanitize_string(text: str, max_length: int = 255) -> str:
     if not text:
         return ""
     
-    # Remove potentially dangerous characters
-    cleaned = re.sub(r'[<>"\';()&+]', '', text)
+    # Remove potentially dangerous characters - comprehensive list
+    # Includes: HTML/XML tags, quotes, parentheses, semicolons, ampersands, 
+    # plus signs, backticks, pipes, backslashes, asterisks, equals, dollar signs
+    cleaned = re.sub(r'[<>"\';()&+`|\\*=$]', '', text)
+    
+    # Remove SQL keywords (case insensitive)
+    sql_keywords = ['SELECT', 'INSERT', 'UPDATE', 'DELETE', 'DROP', 'CREATE', 
+                    'ALTER', 'EXEC', 'EXECUTE', 'UNION', 'FROM', 'WHERE',
+                    'JOIN', 'SCRIPT', 'JAVASCRIPT', 'VBSCRIPT']
+    for keyword in sql_keywords:
+        cleaned = re.sub(rf'\b{keyword}\b', '', cleaned, flags=re.IGNORECASE)
     
     # Trim whitespace and limit length
     cleaned = cleaned.strip()[:max_length]

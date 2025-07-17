@@ -116,6 +116,20 @@ def generate_order_number() -> str:
     """Generate unique order number"""
     return f"ORD-{datetime.now().strftime('%Y%m%d')}-{str(uuid.uuid4())[:8].upper()}"
 
+def verify_order_access(order, current_user):
+    """Verify user has access to the order's restaurant"""
+    if current_user.role != 'platform_owner':
+        if current_user.restaurant_id is None:
+            raise HTTPException(
+                status_code=403,
+                detail="Access denied: No restaurant assigned to user"
+            )
+        if str(order.restaurant_id) != str(current_user.restaurant_id):
+            raise HTTPException(
+                status_code=403,
+                detail="Access denied: You can only access orders from your own restaurant"
+            )
+
 @router.get("/", response_model=List[OrderSummary])
 async def get_orders(
     restaurant_id: Optional[str] = Query(None),
@@ -130,11 +144,28 @@ async def get_orders(
 ):
     """Get orders with filtering options"""
     
-    # Use user's restaurant if not specified
-    if not restaurant_id:
+    # Access control: Check user's role and restaurant access
+    if current_user.role == 'platform_owner':
+        # Platform owners can access any restaurant
+        if not restaurant_id:
+            # If no restaurant specified, show all orders
+            query = db.query(Order)
+        else:
+            query = db.query(Order).filter(Order.restaurant_id == restaurant_id)
+    else:
+        # Restaurant owners, managers, and employees can only access their own restaurant
+        if current_user.restaurant_id is None:
+            raise HTTPException(
+                status_code=403,
+                detail="Access denied: No restaurant assigned to user"
+            )
+        if restaurant_id and str(restaurant_id) != str(current_user.restaurant_id):
+            raise HTTPException(
+                status_code=403,
+                detail="Access denied: You can only view orders from your own restaurant"
+            )
         restaurant_id = str(current_user.restaurant_id)
-    
-    query = db.query(Order).filter(Order.restaurant_id == restaurant_id)
+        query = db.query(Order).filter(Order.restaurant_id == restaurant_id)
     
     if status:
         query = query.filter(Order.status == status)
@@ -201,8 +232,27 @@ async def get_todays_orders(
 ):
     """Get today's orders for kitchen display and POS"""
     
-    # Use user's restaurant if not specified
-    if not restaurant_id:
+    # Access control: Check user's role and restaurant access
+    if current_user.role == 'platform_owner':
+        # Platform owners can access any restaurant
+        if not restaurant_id:
+            # Platform owner must specify which restaurant to view
+            raise HTTPException(
+                status_code=400,
+                detail="Restaurant ID is required for platform owners"
+            )
+    else:
+        # Restaurant owners, managers, and employees can only access their own restaurant
+        if current_user.restaurant_id is None:
+            raise HTTPException(
+                status_code=403,
+                detail="Access denied: No restaurant assigned to user"
+            )
+        if restaurant_id and str(restaurant_id) != str(current_user.restaurant_id):
+            raise HTTPException(
+                status_code=403,
+                detail="Access denied: You can only view orders from your own restaurant"
+            )
         restaurant_id = str(current_user.restaurant_id)
     
     # Check cache first
@@ -275,8 +325,26 @@ async def create_order(
 ):
     """Create a new order"""
     
-    # Use user's restaurant if not specified
-    if not restaurant_id:
+    # Access control: Check user's role and restaurant access
+    if current_user.role == 'platform_owner':
+        # Platform owners must specify which restaurant
+        if not restaurant_id:
+            raise HTTPException(
+                status_code=400,
+                detail="Restaurant ID is required for platform owners"
+            )
+    else:
+        # Restaurant owners, managers, and employees can only create orders for their own restaurant
+        if current_user.restaurant_id is None:
+            raise HTTPException(
+                status_code=403,
+                detail="Access denied: No restaurant assigned to user"
+            )
+        if restaurant_id and str(restaurant_id) != str(current_user.restaurant_id):
+            raise HTTPException(
+                status_code=403,
+                detail="Access denied: You can only create orders for your own restaurant"
+            )
         restaurant_id = str(current_user.restaurant_id)
 
     customer_id_to_save = order_data.customer_id
@@ -466,6 +534,9 @@ async def get_order(
             details={"order_id": order_id},
             status_code=404
         )
+    
+    # Access control: Verify user has access to this order's restaurant
+    verify_order_access(order, current_user)
 
     customer_info_response = None
     if order.customer_id:
@@ -517,6 +588,9 @@ async def update_order(
             details={"order_id": order_id},
             status_code=404
         )
+    
+    # Access control: Verify user has access to this order's restaurant
+    verify_order_access(order, current_user)
     
     # Update fields if provided
     update_data = order_data.dict(exclude_unset=True)
@@ -617,6 +691,9 @@ async def confirm_order(
             status_code=404
         )
     
+    # Access control: Verify user has access to this order's restaurant
+    verify_order_access(order, current_user)
+    
     if order.status != "pending":
         raise FynloException(
             message=f"Order cannot be confirmed - current status: {order.status}",
@@ -693,6 +770,9 @@ async def cancel_order(
             status_code=404
         )
     
+    # Access control: Verify user has access to this order's restaurant
+    verify_order_access(order, current_user)
+    
     if order.status in ["completed", "cancelled"]:
         raise FynloException(
             message=f"Order cannot be cancelled - current status: {order.status}",
@@ -759,6 +839,9 @@ async def refund_order(
             details={"order_id": order_id},
             status_code=status.HTTP_404_NOT_FOUND
         )
+    
+    # Access control: Verify user has access to this order's restaurant
+    verify_order_access(order, current_user)
 
     if order.status != "completed": # (FR-1) - Or other statuses that allow refunds
         raise FynloException(

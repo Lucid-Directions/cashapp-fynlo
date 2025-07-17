@@ -8,9 +8,11 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, Query, P
 from sqlalchemy.orm import Session
 import json
 from datetime import datetime
-from jose import jwt, JWTError
+import logging
 
 from app.core.database import get_db, User, Restaurant
+
+logger = logging.getLogger(__name__)
 from app.core.websocket import (
     websocket_manager, 
     ConnectionType, 
@@ -21,6 +23,7 @@ from app.core.exceptions import FynloException, ErrorCodes
 from app.core.responses import APIResponseHelper
 from app.core.auth import get_current_user
 from app.core.config import settings
+from app.core.supabase import supabase_admin
 
 router = APIRouter()
 
@@ -31,7 +34,7 @@ async def verify_websocket_access(
     connection_type: str = "pos",
     db: Session = None
 ) -> bool:
-    """Verify WebSocket access permissions with token validation"""
+    """Verify WebSocket access permissions with Supabase token validation"""
     try:
         # Verify restaurant exists
         restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
@@ -44,41 +47,55 @@ async def verify_websocket_access(
             if not token:
                 return False
             
-            # Validate the JWT token
+            # Validate the token with Supabase
             try:
-                # Decode the JWT token
-                payload = jwt.decode(
-                    token, 
-                    settings.SECRET_KEY, 
-                    algorithms=[settings.ALGORITHM]
-                )
-                
-                # Check if token is expired
-                if payload.get("exp") and datetime.utcnow().timestamp() > payload["exp"]:
+                # Verify token with Supabase Admin API
+                if not supabase_admin:
+                    logger.error("Supabase admin client not initialized")
                     return False
                 
-                # Verify the user ID matches
-                token_user_id = payload.get("sub")
-                if str(token_user_id) != str(user_id):
+                user_response = supabase_admin.auth.get_user(token)
+                supabase_user = user_response.user
+                
+                if not supabase_user:
+                    logger.error("Invalid Supabase token - no user found")
+                    return False
+                
+                # Find user in our database by Supabase ID
+                user = db.query(User).filter(User.supabase_id == str(supabase_user.id)).first()
+                if not user:
+                    logger.error(f"User not found in database for Supabase ID: {supabase_user.id}")
+                    return False
+                
+                # Verify the user is active
+                if not user.is_active:
+                    logger.warning(f"User is not active: {user.id}")
+                    return False
+                
+                # Verify user_id matches (critical security check)
+                if str(user.id) != str(user_id):
+                    logger.error(f"User ID mismatch - potential security violation: {user.id} != {user_id}")
                     return False
                     
-            except JWTError:
-                return False
-            
-            # Now verify the user exists and has access
-            user = db.query(User).filter(User.id == user_id).first()
-            if not user or not user.is_active:
+            except Exception as e:
+                logger.error(f"Supabase token validation error: {str(e)}")
                 return False
             
             # Check if user has access to this restaurant
             if user.role == "restaurant_owner" and str(user.restaurant_id) != restaurant_id:
+                logger.warning(f"Restaurant owner access denied: {user.restaurant_id} != {restaurant_id}")
                 return False
-            elif user.role == "platform_owner" and str(user.platform_id) != str(restaurant.platform_id):
+            elif user.role == "platform_owner":
+                # Platform owners have access to all restaurants
+                pass
+            elif user.role in ["manager", "employee"] and str(user.restaurant_id) != restaurant_id:
+                logger.warning(f"Staff access denied: {user.restaurant_id} != {restaurant_id}")
                 return False
         
         return True
         
-    except Exception:
+    except Exception as e:
+        logger.error(f"WebSocket access verification error: {str(e)}")
         return False
 
 @router.websocket("/ws/{restaurant_id}")
@@ -479,7 +496,7 @@ async def handle_subscription(connection_id: str, message_data: dict):
         pass
         
     except Exception as e:
-        print(f"Subscription error: {str(e)}")
+        logger.error(f"Subscription error: {str(e)}")
 
 async def handle_unsubscription(connection_id: str, message_data: dict):
     """Handle event unsubscription requests"""
@@ -490,7 +507,7 @@ async def handle_unsubscription(connection_id: str, message_data: dict):
         pass
         
     except Exception as e:
-        print(f"Unsubscription error: {str(e)}")
+        logger.error(f"Unsubscription error: {str(e)}")
 
 async def handle_kitchen_status_update(connection_id: str, restaurant_id: str, message_data: dict, db: Session):
     """Handle kitchen status updates"""
@@ -521,7 +538,7 @@ async def handle_kitchen_status_update(connection_id: str, restaurant_id: str, m
         )
         
     except Exception as e:
-        print(f"Kitchen status update error: {str(e)}")
+        logger.error(f"Kitchen status update error: {str(e)}")
 
 async def handle_preparation_time_update(connection_id: str, restaurant_id: str, message_data: dict, db: Session):
     """Handle preparation time updates"""
@@ -552,7 +569,7 @@ async def handle_preparation_time_update(connection_id: str, restaurant_id: str,
         )
         
     except Exception as e:
-        print(f"Preparation time update error: {str(e)}")
+        logger.error(f"Preparation time update error: {str(e)}")
 
 async def handle_pos_order_created(connection_id: str, restaurant_id: str, message_data: dict, db: Session):
     """Handle new order from POS"""
@@ -574,7 +591,7 @@ async def handle_pos_order_created(connection_id: str, restaurant_id: str, messa
         )
         
     except Exception as e:
-        print(f"POS order created error: {str(e)}")
+        logger.error(f"POS order created error: {str(e)}")
 
 async def handle_pos_payment_processed(connection_id: str, restaurant_id: str, message_data: dict, db: Session):
     """Handle payment processing from POS"""
@@ -596,7 +613,7 @@ async def handle_pos_payment_processed(connection_id: str, restaurant_id: str, m
         )
         
     except Exception as e:
-        print(f"POS payment processed error: {str(e)}")
+        logger.error(f"POS payment processed error: {str(e)}")
 
 async def handle_analytics_request(connection_id: str, restaurant_id: str, message_data: dict, db: Session):
     """Handle real-time analytics requests"""
@@ -618,7 +635,7 @@ async def handle_analytics_request(connection_id: str, restaurant_id: str, messa
         # Implementation would depend on specific analytics requirements
         
     except Exception as e:
-        print(f"Analytics request error: {str(e)}")
+        logger.error(f"Analytics request error: {str(e)}")
 
 # REST endpoints for WebSocket management
 @router.get("/stats")

@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from typing import Optional
 from datetime import datetime
 import uuid
+import logging
 
 from app.core.database import get_db
 from app.core.supabase import supabase_admin
@@ -15,6 +16,7 @@ from app.core.database import User, Restaurant
 from app.schemas.auth import AuthVerifyResponse, RegisterRestaurantRequest
 from app.core.feature_gate import get_plan_features
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
@@ -26,10 +28,27 @@ async def verify_supabase_user(
     """Verify Supabase token and return user info with subscription details"""
     
     if not authorization:
-        raise HTTPException(status_code=401, detail="No authorization header")
+        raise HTTPException(
+            status_code=401, 
+            detail="No authorization header provided"
+        )
     
     # Extract token from "Bearer <token>" format
     token = authorization.replace("Bearer ", "")
+    
+    if not token or token == authorization:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid authorization format. Expected: Bearer <token>"
+        )
+    
+    # Check if Supabase is configured
+    if not supabase_admin:
+        logger.error("Supabase admin client not initialized")
+        raise HTTPException(
+            status_code=503,
+            detail="Authentication service temporarily unavailable"
+        )
     
     try:
         # Verify token with Supabase Admin API
@@ -37,7 +56,10 @@ async def verify_supabase_user(
         supabase_user = user_response.user
         
         if not supabase_user:
-            raise HTTPException(status_code=401, detail="Invalid token")
+            raise HTTPException(
+                status_code=401, 
+                detail="Invalid or expired token"
+            )
         
         # Find or create user in our database
         db_user = db.query(User).filter(
@@ -47,10 +69,13 @@ async def verify_supabase_user(
         if not db_user:
             # First time login - create user
             # Check if this should be platform owner
-            is_platform_owner = (supabase_user.email == settings.PLATFORM_OWNER_EMAIL)
+            # For new users, platform owner role requires pre-configuration in the database
+            # This prevents automatic platform owner creation from email alone
+            is_platform_owner = False
             
-            # Determine role based on email or default to restaurant_owner
-            role = 'platform_owner' if is_platform_owner else 'restaurant_owner'
+            # New users default to restaurant_owner role
+            # Platform owners must be manually configured by system administrators
+            role = 'restaurant_owner'
             
             db_user = User(
                 id=uuid.uuid4(),
@@ -120,12 +145,61 @@ async def verify_supabase_user(
                 response_data["user"]["enabled_features"] = get_plan_features(
                     getattr(restaurant, 'subscription_plan', 'alpha') or 'alpha'
                 )
+        else:
+            # User has no restaurant yet - check if we should create a default one
+            if db_user.role == 'restaurant_owner':
+                # Create a default restaurant for the user
+                logger.info(f"Creating default restaurant for user with ID: {db_user.id}")
+                default_restaurant = Restaurant(
+                    id=uuid.uuid4(),
+                    name=f"{db_user.first_name or 'My'} Restaurant",
+                    email=db_user.email,
+                    subscription_plan='alpha',
+                    subscription_status='trial',
+                    subscription_started_at=datetime.utcnow(),
+                    is_active=True
+                )
+                db.add(default_restaurant)
+                db_user.restaurant_id = default_restaurant.id
+                db.commit()
+                db.refresh(default_restaurant)
+                
+                response_data["user"]["restaurant_id"] = str(default_restaurant.id)
+                response_data["user"]["restaurant_name"] = default_restaurant.name
+                response_data["user"]["subscription_plan"] = 'alpha'
+                response_data["user"]["subscription_status"] = 'trial'
+                response_data["user"]["enabled_features"] = get_plan_features('alpha')
         
         return response_data
         
+    except HTTPException:
+        # Re-raise HTTP exceptions without modification
+        raise
     except Exception as e:
-        print(f"Auth verification error: {str(e)}")
-        raise HTTPException(status_code=401, detail="Invalid token")
+        # Log error details securely (not to console in production)
+        logger.error(f"Auth verification error: {type(e).__name__}: {str(e)}")
+        
+        # In development/testing, provide more details
+        if settings.ENVIRONMENT in ["development", "testing", "local"]:
+            import traceback
+            logger.debug(f"Traceback: {traceback.format_exc()}")
+        
+        # Check for specific Supabase errors
+        if "invalid_grant" in str(e).lower():
+            raise HTTPException(
+                status_code=401,
+                detail="Token has expired. Please sign in again."
+            )
+        elif "not found" in str(e).lower():
+            raise HTTPException(
+                status_code=401,
+                detail="User not found. Please sign up first."
+            )
+        else:
+            raise HTTPException(
+                status_code=500,
+                detail="Authentication service error. Please try again later."
+            )
 
 
 @router.post("/register-restaurant")
@@ -198,6 +272,6 @@ async def register_restaurant(
     except HTTPException:
         raise
     except Exception as e:
-        print(f"Restaurant registration error: {str(e)}")
+        logger.error(f"Restaurant registration error: {str(e)}")
         db.rollback()
         raise HTTPException(status_code=500, detail="Failed to register restaurant")
