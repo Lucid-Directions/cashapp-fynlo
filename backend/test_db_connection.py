@@ -75,8 +75,8 @@ def test_connection():
         
         if "timeout" in str(e):
             print("\n⚠️  Timeout suggests firewall/network issue")
-            print("   Your IP (82.35.184.198) may not match App Platform's IP")
-            print("   App Platform apps need to be added by name, not IP")
+            print("   If running locally, your IP may not be in Trusted Sources")
+            print("   For App Platform: Apps must be added by name, not IP")
     
     except Exception as e:
         print(f"\n❌ Unexpected error: {e}")
