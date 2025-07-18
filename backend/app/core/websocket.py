@@ -13,6 +13,8 @@ from enum import Enum
 
 from app.core.exceptions import FynloException, ErrorCodes
 from app.core.responses import APIResponseHelper
+from app.core.redis_client import redis_client
+from app.core.logger import logger
 
 class EventType(str, Enum):
     """WebSocket event types"""
@@ -159,6 +161,9 @@ class WebSocketManager:
             self.stats["total_connections"] += 1
             self.stats["active_connections"] = len(self.active_connections)
             
+            # Update Redis stats for monitoring
+            await self._update_redis_stats()
+            
             # Send connection confirmation
             await self.send_to_connection(
                 connection_id,
@@ -221,6 +226,9 @@ class WebSocketManager:
             
             # Update stats
             self.stats["active_connections"] = len(self.active_connections)
+            
+            # Update Redis stats for monitoring
+            await self._update_redis_stats()
             
         except Exception as e:
             # Log error but don't raise to prevent cascade failures
@@ -377,6 +385,47 @@ class WebSocketManager:
             },
             "queued_messages": sum(len(messages) for messages in self.message_queue.values())
         }
+    
+    async def _update_redis_stats(self):
+        """Update connection stats in Redis for monitoring"""
+        try:
+            # Update total active connections
+            await redis_client.set(
+                "websocket:connections:active",
+                len(self.active_connections),
+                expire=300  # 5 minutes
+            )
+            
+            # Update connections by restaurant
+            for restaurant_id, connections in self.restaurant_connections.items():
+                await redis_client.set(
+                    f"websocket:connections:restaurant:{restaurant_id}",
+                    len(connections),
+                    expire=300
+                )
+            
+            # Update connections by type
+            for conn_type, connections in self.type_connections.items():
+                await redis_client.set(
+                    f"websocket:connections:type:{conn_type}",
+                    len(connections),
+                    expire=300
+                )
+            
+            # Update total stats
+            await redis_client.hset(
+                "websocket:stats",
+                mapping={
+                    "total_connections": self.stats.get("total_connections", 0),
+                    "total_messages": self.stats.get("total_messages", 0),
+                    "active_connections": len(self.active_connections),
+                    "restaurants_connected": len(self.restaurant_connections),
+                    "last_updated": datetime.now().isoformat()
+                }
+            )
+            
+        except Exception as e:
+            logger.error(f"Failed to update WebSocket stats in Redis: {str(e)}")
 
 # Global WebSocket manager instance
 websocket_manager = WebSocketManager()
