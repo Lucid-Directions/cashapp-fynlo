@@ -53,19 +53,40 @@ if settings.ENVIRONMENT == "production" or not settings.ERROR_DETAIL_ENABLED:
 
 security = HTTPBearer()
 
-# TEMPORARY: Remove lifespan function for deployment
-# @asynccontextmanager
-# async def lifespan(app: FastAPI):
-#     """Initialize application on startup - DISABLED FOR DEPLOYMENT"""
-#     logger.info(f"🚀 Fynlo POS Backend starting in {settings.ENVIRONMENT} mode...")
-#     yield
-#     logger.info("✅ Cleanup complete")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Initialize application on startup"""
+    logger.info(f"🚀 Fynlo POS Backend starting in {settings.ENVIRONMENT} mode...")
+    
+    # Start metrics background tasks
+    import asyncio
+    from app.services.metrics_collector import metrics_flush_task, metrics_cleanup_task
+    
+    # Create background tasks
+    flush_task = asyncio.create_task(metrics_flush_task())
+    cleanup_task = asyncio.create_task(metrics_cleanup_task())
+    
+    logger.info("✅ Metrics collection started")
+    
+    yield
+    
+    # Cancel background tasks on shutdown
+    flush_task.cancel()
+    cleanup_task.cancel()
+    
+    try:
+        await flush_task
+        await cleanup_task
+    except asyncio.CancelledError:
+        pass
+    
+    logger.info("✅ Cleanup complete")
 
 app = FastAPI(
     title=settings.APP_NAME,
     description="Hardware-Free Restaurant Management Platform",
     version="1.0.0",
-    # lifespan=lifespan,  # DISABLED FOR DEPLOYMENT
+    lifespan=lifespan,
     debug=settings.DEBUG  # Set FastAPI debug mode from settings
 )
 
@@ -103,6 +124,11 @@ app.add_middleware(
     allow_headers=["*"],
     allow_origin_regex=r"^https://fynlo-[a-zA-Z0-9\-]+\.vercel\.app$" if settings.ENVIRONMENT != "production" else None
 )
+
+# Add monitoring middleware for metrics collection
+from app.middleware.monitoring import MonitoringMiddleware, RequestIDMiddleware
+app.add_middleware(RequestIDMiddleware)
+app.add_middleware(MonitoringMiddleware)
 
 # TEMPORARY: Disable complex middleware for deployment
 # Add API version middleware for backward compatibility (FIRST in middleware stack)
