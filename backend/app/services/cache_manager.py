@@ -231,46 +231,93 @@ class CacheManager:
     
     async def _warm_menu_cache(self, restaurant_id: str):
         """Pre-warm menu cache"""
-        from app.api.v1.endpoints.menu import get_menu_data
-        from app.models import Restaurant
+        from app.models import Product, Category
         from app.core.database import get_db
         
+        db = None
         try:
-            async for db in get_db():
-                restaurant = db.query(Restaurant).filter(
-                    Restaurant.id == restaurant_id
-                ).first()
+            db = next(get_db())
+            
+            # Get categories
+            categories = db.query(Category).filter(
+                Category.restaurant_id == restaurant_id,
+                Category.is_active == True
+            ).order_by(Category.sort_order).all()
+            
+            # Get products
+            products = db.query(Product).filter(
+                Product.restaurant_id == restaurant_id,
+                Product.is_active == True
+            ).all()
+            
+            if categories or products:
+                # Build menu data structure
+                menu_data = {
+                    "categories": [
+                        {
+                            "id": str(cat.id),
+                            "name": cat.name,
+                            "description": cat.description,
+                            "color": cat.color,
+                            "sort_order": cat.sort_order
+                        } for cat in categories
+                    ],
+                    "items": [
+                        {
+                            "id": str(prod.id),
+                            "category_id": str(prod.category_id),
+                            "name": prod.name,
+                            "description": prod.description,
+                            "price": float(prod.price),
+                            "image_url": prod.image_url
+                        } for prod in products
+                    ]
+                }
                 
-                if restaurant:
-                    menu_data = await get_menu_data(restaurant.id, db)
-                    await self.cache_menu_data(restaurant_id, menu_data)
-                    logger.info(f"Menu cache warmed for restaurant {restaurant_id}")
+                await self.cache_menu_data(restaurant_id, menu_data)
+                logger.info(f"Menu cache warmed for restaurant {restaurant_id}")
         except Exception as e:
             logger.error(f"Menu cache warming error: {e}")
             raise
+        finally:
+            if db:
+                db.close()
     
     async def _warm_settings_cache(self, restaurant_id: str):
         """Pre-warm settings cache"""
-        from app.models import RestaurantSettings
+        from app.models import Restaurant
         from app.core.database import get_db
         
+        db = None
         try:
-            async for db in get_db():
-                settings = db.query(RestaurantSettings).filter(
-                    RestaurantSettings.restaurant_id == restaurant_id
-                ).first()
-                
-                if settings:
-                    cache_key = f"settings:{restaurant_id}"
-                    await redis_client.set(
-                        f"{self.cache_prefix}{cache_key}",
-                        settings.to_dict(),
-                        expire=3600
-                    )
-                    logger.info(f"Settings cache warmed for restaurant {restaurant_id}")
+            db = next(get_db())
+            restaurant = db.query(Restaurant).filter(
+                Restaurant.id == restaurant_id
+            ).first()
+            
+            if restaurant and restaurant.settings:
+                cache_key = f"settings:{restaurant_id}"
+                # Cache the restaurant settings JSONB field
+                settings_data = {
+                    "id": str(restaurant.id),
+                    "name": restaurant.name,
+                    "settings": restaurant.settings,
+                    "tax_configuration": restaurant.tax_configuration,
+                    "payment_methods": restaurant.payment_methods,
+                    "business_hours": restaurant.business_hours
+                }
+                await redis_client.set(
+                    f"{self.cache_prefix}{cache_key}",
+                    settings_data,
+                    expire=3600
+                )
+                logger.info(f"Settings cache warmed for restaurant {restaurant_id}")
         except Exception as e:
             logger.error(f"Settings cache warming error: {e}")
             raise
+        finally:
+            if db:
+                db.close()
     
     async def _warm_stats_cache(self, restaurant_id: str):
         """Pre-warm stats cache"""
