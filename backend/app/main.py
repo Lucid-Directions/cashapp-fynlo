@@ -141,9 +141,13 @@ app.add_middleware(
 )
 
 # Add monitoring middleware for metrics collection
+# IMPORTANT: RequestIDMiddleware must be added AFTER MonitoringMiddleware
+# because middleware executes in reverse order of addition.
+# This ensures RequestIDMiddleware runs first and sets the request ID
+# that MonitoringMiddleware will use.
 from app.middleware.monitoring import MonitoringMiddleware, RequestIDMiddleware
-app.add_middleware(RequestIDMiddleware)
-app.add_middleware(MonitoringMiddleware)
+app.add_middleware(MonitoringMiddleware)  # Runs second, uses request ID
+app.add_middleware(RequestIDMiddleware)   # Runs first, sets request ID
 
 # TEMPORARY: Disable complex middleware for deployment
 # Add API version middleware for backward compatibility (FIRST in middleware stack)

@@ -32,9 +32,13 @@ class MonitoringMiddleware(BaseHTTPMiddleware):
         if request.url.path in self.exclude_paths:
             return await call_next(request)
         
-        # Generate request ID if not present
-        request_id = request.headers.get("X-Request-ID", str(uuid.uuid4()))
-        request.state.request_id = request_id
+        # Get request ID from state (set by RequestIDMiddleware)
+        request_id = getattr(request.state, "request_id", None)
+        if not request_id:
+            # Fallback: This shouldn't happen if RequestIDMiddleware runs first
+            request_id = str(uuid.uuid4())
+            request.state.request_id = request_id
+            logger.warning(f"MonitoringMiddleware: No request ID found, generated: {request_id}")
         
         # Start timing
         start_time = time.time()
@@ -139,20 +143,26 @@ class MonitoringMiddleware(BaseHTTPMiddleware):
         return response
 
 class RequestIDMiddleware(BaseHTTPMiddleware):
-    """Middleware to ensure all requests have a unique ID"""
+    """Middleware to ensure all requests have a unique ID for tracing"""
     
     async def dispatch(self, request: Request, call_next):
-        # Add request ID if not present
+        # Check for existing request ID in header
         request_id = request.headers.get("X-Request-ID")
+        
+        # Generate new ID if not present
         if not request_id:
             request_id = str(uuid.uuid4())
+            logger.debug(f"Generated new request ID: {request_id}")
+        else:
+            logger.debug(f"Using existing request ID from header: {request_id}")
         
+        # Store in request state for other middleware/handlers to use
         request.state.request_id = request_id
         
         # Process request
         response = await call_next(request)
         
-        # Add request ID to response
+        # Always add request ID to response header for client correlation
         response.headers["X-Request-ID"] = request_id
         
         return response
