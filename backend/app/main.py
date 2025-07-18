@@ -58,27 +58,42 @@ async def lifespan(app: FastAPI):
     """Initialize application on startup"""
     logger.info(f"🚀 Fynlo POS Backend starting in {settings.ENVIRONMENT} mode...")
     
-    # Start metrics background tasks
-    import asyncio
-    from app.services.metrics_collector import metrics_flush_task, metrics_cleanup_task
+    # Initialize background tasks with proper error handling
+    flush_task = None
+    cleanup_task = None
     
-    # Create background tasks
-    flush_task = asyncio.create_task(metrics_flush_task())
-    cleanup_task = asyncio.create_task(metrics_cleanup_task())
-    
-    logger.info("✅ Metrics collection started")
+    try:
+        # Import metrics background tasks
+        import asyncio
+        from app.services.metrics_collector import metrics_flush_task, metrics_cleanup_task
+        
+        # Create background tasks
+        flush_task = asyncio.create_task(metrics_flush_task())
+        cleanup_task = asyncio.create_task(metrics_cleanup_task())
+        
+        logger.info("✅ Metrics collection started")
+    except ImportError as e:
+        logger.warning(f"⚠️ Metrics collection disabled - module not available: {str(e)}")
+    except Exception as e:
+        logger.error(f"❌ Failed to start metrics collection: {str(e)}")
     
     yield
     
-    # Cancel background tasks on shutdown
-    flush_task.cancel()
-    cleanup_task.cancel()
+    # Cancel background tasks on shutdown if they were created
+    if flush_task:
+        flush_task.cancel()
+    if cleanup_task:
+        cleanup_task.cancel()
     
     try:
-        await flush_task
-        await cleanup_task
+        if flush_task:
+            await flush_task
+        if cleanup_task:
+            await cleanup_task
     except asyncio.CancelledError:
         pass
+    except Exception as e:
+        logger.error(f"Error during cleanup: {str(e)}")
     
     logger.info("✅ Cleanup complete")
 
