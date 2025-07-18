@@ -58,6 +58,15 @@ async def lifespan(app: FastAPI):
     """Initialize application on startup"""
     logger.info(f"🚀 Fynlo POS Backend starting in {settings.ENVIRONMENT} mode...")
     
+    # Initialize all services
+    from app.core.startup_handler import startup_handler, shutdown_handler
+    
+    try:
+        await startup_handler()
+    except Exception as e:
+        logger.error(f"❌ Failed to start application: {e}")
+        raise
+    
     # Initialize background tasks with proper error handling
     flush_task = None
     cleanup_task = None
@@ -94,6 +103,9 @@ async def lifespan(app: FastAPI):
         pass
     except Exception as e:
         logger.error(f"Error during cleanup: {str(e)}")
+    
+    # Run shutdown handler
+    await shutdown_handler()
     
     logger.info("✅ Cleanup complete")
 

@@ -193,6 +193,38 @@ class MetricsCollector:
         except Exception as e:
             logger.error(f"Failed to record error metrics: {str(e)}")
     
+    async def record_query_performance(
+        self,
+        query_pattern: str,
+        execution_time_ms: float,
+        table_name: Optional[str] = None
+    ):
+        """Record database query performance metrics"""
+        metric = {
+            "query_pattern": query_pattern,
+            "execution_time_ms": execution_time_ms,
+            "table_name": table_name,
+            "timestamp": datetime.utcnow().isoformat(),
+            "instance_id": self._instance_id
+        }
+        
+        self.metrics_buffer["query_performance"].append(metric)
+        
+        # Track slow queries
+        if execution_time_ms > 100:  # Queries slower than 100ms
+            hour_key = datetime.utcnow().strftime("%Y%m%d%H")
+            try:
+                await redis_client.incr(f"metrics:queries:slow:{hour_key}")
+                await redis_client.zadd(
+                    f"metrics:queries:slow_list:{hour_key}",
+                    {f"{query_pattern}:{time.time()}": execution_time_ms}
+                )
+                # Set expiry
+                await redis_client.expire(f"metrics:queries:slow:{hour_key}", 604800)
+                await redis_client.expire(f"metrics:queries:slow_list:{hour_key}", 604800)
+            except Exception as e:
+                logger.error(f"Failed to record slow query metric: {str(e)}")
+    
     async def get_current_metrics(self) -> Dict[str, Any]:
         """Get current metrics summary"""
         hour_key = datetime.utcnow().strftime("%Y%m%d%H")

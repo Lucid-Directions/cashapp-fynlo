@@ -372,3 +372,8 @@ def get_db() -> Generator[Session, None, None]:
 async def init_db():
     """Initialize database tables"""
     Base.metadata.create_all(bind=engine)
+    
+    # Setup query performance monitoring
+    from app.services.query_optimizer import query_analyzer
+    query_analyzer.setup(engine)
+    logger.info("Query performance analyzer initialized")
