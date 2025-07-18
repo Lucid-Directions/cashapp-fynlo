@@ -20,4 +20,7 @@ export default defineConfig(({ mode }) => ({
     },
     extensions: ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json'],
   },
+  optimizeDeps: {
+    exclude: ['lucide-react'],
+  },
 }));
