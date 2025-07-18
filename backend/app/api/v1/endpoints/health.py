@@ -255,3 +255,67 @@ async def get_metrics(current_user: User = Depends(get_current_user)):
             message=f"Failed to get metrics: {str(e)}",
             status_code=500
         )
+
+@router.get("/performance")
+async def get_performance_metrics(current_user: User = Depends(get_current_user)):
+    """Get database query performance metrics - requires authentication"""
+    
+    # Only allow platform owners and managers to view performance metrics
+    if current_user.role not in ["platform_owner", "restaurant_owner", "manager"]:
+        return APIResponseHelper.error(
+            message="Access denied",
+            status_code=403
+        )
+    
+    try:
+        # Import query analyzer and cache manager
+        from app.services.query_optimizer import query_analyzer
+        from app.services.cache_manager import cache_manager
+        
+        # Get query performance stats
+        query_stats = query_analyzer.get_query_stats()
+        slow_query_count = query_analyzer.get_slow_query_count()
+        optimization_suggestions = query_analyzer.get_optimization_suggestions()
+        
+        # Get cache performance stats
+        cache_stats = cache_manager.get_cache_stats()
+        
+        performance_data = {
+            "timestamp": datetime.utcnow().isoformat(),
+            "database": {
+                "query_patterns": query_stats,
+                "slow_query_count": slow_query_count,
+                "optimization_suggestions": optimization_suggestions,
+                "slow_query_threshold_ms": query_analyzer.slow_query_threshold_ms
+            },
+            "cache": cache_stats,
+            "recommendations": {
+                "critical": [],
+                "warnings": [],
+                "info": []
+            }
+        }
+        
+        # Add recommendations based on stats
+        if slow_query_count > 10:
+            performance_data["recommendations"]["critical"].append(
+                f"High number of slow queries detected ({slow_query_count}). Review query patterns and add indexes."
+            )
+        
+        if cache_stats["hit_rate_percentage"] < 50 and cache_stats["total_requests"] > 100:
+            performance_data["recommendations"]["warnings"].append(
+                f"Low cache hit rate ({cache_stats['hit_rate_percentage']}%). Consider reviewing cache strategy."
+            )
+        
+        if any(stat["avg_time_ms"] > 500 for stat in query_stats):
+            performance_data["recommendations"]["warnings"].append(
+                "Some queries have very high average execution time (>500ms)."
+            )
+        
+        return APIResponseHelper.success(data=performance_data)
+        
+    except Exception as e:
+        return APIResponseHelper.error(
+            message=f"Failed to get performance metrics: {str(e)}",
+            status_code=500
+        )
