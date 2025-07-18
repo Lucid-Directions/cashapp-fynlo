@@ -3,7 +3,7 @@ Database configuration and models for Fynlo POS
 PostgreSQL implementation matching frontend data requirements
 """
 
-from sqlalchemy import create_engine, Column, String, Integer, Float, DateTime, Boolean, Text, JSON, ForeignKey, DECIMAL, UniqueConstraint
+from sqlalchemy import create_engine, Column, String, Integer, Float, DateTime, Boolean, Text, JSON, ForeignKey, DECIMAL, UniqueConstraint, text
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session, relationship
@@ -406,7 +406,7 @@ async def init_db():
         try:
             # Test database connection first
             with engine.connect() as conn:
-                result = conn.execute("SELECT 1")
+                result = conn.execute(text("SELECT 1"))
                 logger.info("Database connection successful")
             
             # Create tables if they don't exist
