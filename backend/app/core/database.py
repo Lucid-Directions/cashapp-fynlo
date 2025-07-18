@@ -45,18 +45,30 @@ pool_args = {}
 if "postgresql" in database_url:
     connect_args = {
         "connect_timeout": 30,  # Increased timeout for DigitalOcean
-        "options": "-c statement_timeout=30000"  # 30 second statement timeout
     }
+    
+    # PgBouncer (port 25061) doesn't support statement_timeout in options
+    if ":25061" not in database_url:
+        connect_args["options"] = "-c statement_timeout=30000"  # 30 second statement timeout
     
     # For DigitalOcean managed databases
     if "digitalocean.com" in database_url or ":25060" in database_url or ":25061" in database_url:
         # Use specific pool settings for DigitalOcean
-        pool_args = {
-            "pool_size": 5,  # Reduced pool size for connection pooler
-            "max_overflow": 10,
-            "pool_pre_ping": True,  # Test connections before use
-            "pool_recycle": 300,  # Recycle connections after 5 minutes
-        }
+        # Port 25061 uses PgBouncer which has its own pooling
+        if ":25061" in database_url:
+            pool_args = {
+                "pool_size": 2,  # Very small pool for PgBouncer
+                "max_overflow": 3,
+                "pool_pre_ping": True,  # Test connections before use
+                "pool_recycle": 300,  # Recycle connections after 5 minutes
+            }
+        else:
+            pool_args = {
+                "pool_size": 5,  # Regular pool for direct connections
+                "max_overflow": 10,
+                "pool_pre_ping": True,  # Test connections before use
+                "pool_recycle": 300,  # Recycle connections after 5 minutes
+            }
         
         # Check for CA certificate
         cert_path = os.path.join(os.path.dirname(__file__), "..", "..", "certs", "ca-certificate.crt")
@@ -435,11 +447,17 @@ async def init_db():
                 if "digitalocean.com" in database_url:
                     logger.error("\n" + "="*60)
                     logger.error("DigitalOcean Database Connection Troubleshooting:")
-                    logger.error("1. Check Trusted Sources in DO database settings")
-                    logger.error("   - Add your app's IP or use 0.0.0.0/0 for testing")
-                    logger.error("2. Verify DATABASE_URL includes port (25060 or 25061)")
-                    logger.error("3. Ensure SSL is enabled (sslmode=require)")
-                    logger.error("4. For App Platform: Enable 'Trusted Sources' for apps")
+                    logger.error("1. In DO Database Settings > Trusted Sources:")
+                    logger.error("   - DO NOT add IP addresses for App Platform")
+                    logger.error("   - Click 'Add Trusted Source'")
+                    logger.error("   - Select 'App Platform App' (not IP)")
+                    logger.error("   - Choose your app from the dropdown")
+                    logger.error("2. Alternative: Try port 25060 instead of 25061")
+                    logger.error("3. Ensure both app and database are in same region")
+                    logger.error("4. DATABASE_URL must include ?sslmode=require")
+                    logger.error("\nCurrent connection details:")
+                    logger.error(f"  Port: {':25061' if ':25061' in database_url else ':25060' if ':25060' in database_url else 'unknown'}")
+                    logger.error(f"  SSL: {'Yes' if 'sslmode=require' in database_url else 'No'}")
                     logger.error("="*60 + "\n")
                 
                 raise
