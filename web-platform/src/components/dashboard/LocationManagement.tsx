@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MapPin, Store, Users, TrendingUp, Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Restaurant {
   id: string;
@@ -29,7 +30,8 @@ interface LocationStats {
 }
 
 export const LocationManagement = () => {
-  const { hasFeature } = useFeatureAccess();
+  const { hasFeature, isPlatformOwner } = useFeatureAccess();
+  const { user } = useAuth();
   const { toast } = useToast();
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [locationStats, setLocationStats] = useState<Record<string, LocationStats>>({});
@@ -43,19 +45,27 @@ export const LocationManagement = () => {
     try {
       setLoading(true);
 
-      // Fetch restaurants
-      const { data: restaurantsData, error: restaurantsError } = await supabase
+      // Determine which restaurants to fetch based on user role
+      let restaurantQuery = supabase
         .from('restaurants')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (restaurantsError) throw restaurantsError;
-      setRestaurants(restaurantsData || []);
+      // If not a platform owner, only fetch owned restaurants
+      if (!isPlatformOwner() && user) {
+        restaurantQuery = restaurantQuery.eq('owner_id', user.id);
+      }
 
-      // Fetch stats for each location
+      const { data: restaurantsData, error: restaurantsError } = await restaurantQuery;
+      if (restaurantsError) throw restaurantsError;
+      
+      const userRestaurants = restaurantsData || [];
+      setRestaurants(userRestaurants);
+
+      // Fetch stats for each location user has access to
       const stats: Record<string, LocationStats> = {};
       
-      for (const restaurant of restaurantsData || []) {
+      for (const restaurant of userRestaurants) {
         // Get orders count and revenue
         const { data: ordersData } = await supabase
           .from('orders')
