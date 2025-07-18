@@ -101,7 +101,18 @@ class Settings(BaseSettings):
     ERROR_DETAIL_ENABLED: bool = True
     
     # CORS
-    PRODUCTION_ALLOWED_ORIGINS: list[str] = ["https://your-production-frontend.com"] # TODO: Update with actual frontend domain
+    PRODUCTION_ALLOWED_ORIGINS: list[str] = [
+        "https://app.fynlo.co.uk",  # Main production domain (platform dashboard)
+        "https://fynlo.co.uk",  # Main website
+        "https://api.fynlo.co.uk",  # API domain (for Swagger UI)
+        "https://fynlo.vercel.app",  # Vercel production deployment
+        "http://localhost:3000",  # Local development
+        "http://localhost:8080",  # Vite development server
+        "http://localhost:8081",  # Alternative local port
+    ]
+    
+    # Note: For Vercel preview deployments, we use regex pattern in CORSMiddleware
+    # to dynamically handle preview URLs like https://fynlo-pr-123.vercel.app
     
     @field_validator('DEBUG', 'ERROR_DETAIL_ENABLED', mode='before')
     @classmethod
