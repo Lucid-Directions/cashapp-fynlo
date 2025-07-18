@@ -396,7 +396,7 @@ def get_db() -> Generator[Session, None, None]:
 
 async def init_db():
     """Initialize database tables with retry logic"""
-    import time
+    import asyncio
     from sqlalchemy.exc import OperationalError
     
     max_retries = 3
@@ -423,7 +423,7 @@ async def init_db():
             if attempt < max_retries - 1:
                 logger.warning(f"Database connection attempt {attempt + 1}/{max_retries} failed: {str(e)}")
                 logger.info(f"Retrying in {retry_delay} seconds...")
-                time.sleep(retry_delay)
+                await asyncio.sleep(retry_delay)
             else:
                 logger.error(f"Failed to connect to database after {max_retries} attempts")
                 # Log connection details for debugging (without password)
