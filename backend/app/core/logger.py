@@ -54,9 +54,26 @@ def setup_logger(name: str = "fynlo", level: Optional[str] = None) -> logging.Lo
     # Clear existing handlers
     logger.handlers = []
     
-    # Set log level
-    log_level = level or getattr(settings, 'LOG_LEVEL', 'INFO')
-    logger.setLevel(getattr(logging, log_level.upper()))
+    # Valid log levels
+    VALID_LOG_LEVELS = {
+        'DEBUG': logging.DEBUG,
+        'INFO': logging.INFO,
+        'WARNING': logging.WARNING,
+        'ERROR': logging.ERROR,
+        'CRITICAL': logging.CRITICAL
+    }
+    
+    # Set log level with validation and fallback
+    log_level_name = (level or getattr(settings, 'LOG_LEVEL', 'INFO')).upper()
+    
+    if log_level_name in VALID_LOG_LEVELS:
+        log_level = VALID_LOG_LEVELS[log_level_name]
+    else:
+        # Log warning and fall back to INFO
+        print(f"Warning: Invalid log level '{log_level_name}'. Valid levels are: {', '.join(VALID_LOG_LEVELS.keys())}. Falling back to INFO.")
+        log_level = logging.INFO
+    
+    logger.setLevel(log_level)
     
     # Create handler
     handler = logging.StreamHandler(sys.stdout)
