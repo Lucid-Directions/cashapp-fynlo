@@ -16,7 +16,8 @@ import {
   Phone,
   Mail,
   Globe,
-  Settings
+  Settings,
+  Lock
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -31,7 +32,7 @@ export const RestaurantSettings: React.FC<RestaurantSettingsProps> = ({ restaura
   const [restaurantData, setRestaurantData] = useState<Restaurant>(restaurant);
   const [settings, setSettings] = useState<RestaurantSettingsData>({
     tax_rate: 0.20,
-    service_charge: 0.00,
+    service_charge: 0.125, // Platform-controlled 12.5%
     opening_hours: {},
     business_days: [],
     auto_accept_orders: false,
@@ -75,7 +76,7 @@ export const RestaurantSettings: React.FC<RestaurantSettingsProps> = ({ restaura
       if (data) {
         setSettings({
           tax_rate: parseFloat(data.tax_rate.toString()) || 0.20,
-          service_charge: parseFloat(data.service_charge.toString()) || 0.00,
+          service_charge: 0.125, // Always use platform rate, ignore DB value
           opening_hours: (data.opening_hours as Record<string, any>) || {},
           business_days: (data.business_days as string[]) || [],
           auto_accept_orders: data.auto_accept_orders || false,
@@ -83,7 +84,6 @@ export const RestaurantSettings: React.FC<RestaurantSettingsProps> = ({ restaura
         });
       }
     } catch (error) {
-      console.error('Error fetching settings:', error);
       toast({
         title: "Error",
         description: "Failed to load settings",
@@ -119,7 +119,6 @@ export const RestaurantSettings: React.FC<RestaurantSettingsProps> = ({ restaura
         description: "Restaurant information updated",
       });
     } catch (error) {
-      console.error('Error saving restaurant info:', error);
       toast({
         title: "Error",
         description: "Failed to save restaurant information",
@@ -138,7 +137,7 @@ export const RestaurantSettings: React.FC<RestaurantSettingsProps> = ({ restaura
         .upsert({
           restaurant_id: restaurant.id,
           tax_rate: settings.tax_rate,
-          service_charge: settings.service_charge,
+          // service_charge is platform-controlled and should not be updated by restaurants
           opening_hours: settings.opening_hours,
           business_days: settings.business_days,
           auto_accept_orders: settings.auto_accept_orders,
@@ -154,7 +153,6 @@ export const RestaurantSettings: React.FC<RestaurantSettingsProps> = ({ restaura
         description: "Settings saved successfully",
       });
     } catch (error) {
-      console.error('Error saving settings:', error);
       toast({
         title: "Error",
         description: "Failed to save settings",
@@ -331,17 +329,15 @@ export const RestaurantSettings: React.FC<RestaurantSettingsProps> = ({ restaura
 
             <div>
               <Label htmlFor="service_charge">Service Charge (%)</Label>
-              <Input
-                id="service_charge"
-                type="number"
-                step="0.01"
-                min="0"
-                max="1"
-                value={settings.service_charge}
-                onChange={(e) => setSettings(prev => ({ ...prev, service_charge: parseFloat(e.target.value) || 0 }))}
-              />
-              <p className="text-sm text-gray-500 mt-1">
-                Current: {(settings.service_charge * 100).toFixed(2)}%
+              <div className="bg-gray-100 rounded-md p-3 flex items-center justify-between">
+                <div>
+                  <p className="font-medium">12.5%</p>
+                  <p className="text-sm text-gray-500">Platform-controlled rate</p>
+                </div>
+                <Lock className="w-5 h-5 text-gray-400" />
+              </div>
+              <p className="text-sm text-amber-600 mt-2">
+                Service charges are managed by the platform to ensure consistent pricing across all restaurants.
               </p>
             </div>
 

@@ -17,6 +17,7 @@ import {
   Phone
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface Restaurant {
   id: string;
@@ -34,6 +35,7 @@ interface Restaurant {
 
 export const BusinessManagement = () => {
   const { isPlatformOwner } = useFeatureAccess();
+  const { toast } = useToast();
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
@@ -52,6 +54,11 @@ export const BusinessManagement = () => {
   const fetchRestaurants = async () => {
     setLoading(true);
     try {
+      // SECURITY: Only platform owners should see all restaurants
+      if (!isPlatformOwner()) {
+        throw new Error('Unauthorized: Only platform owners can view all restaurants');
+      }
+
       const { data: restaurantData, error } = await supabase
         .from('restaurants')
         .select('*')
@@ -61,9 +68,12 @@ export const BusinessManagement = () => {
 
       setRestaurants(restaurantData || []);
       setLastUpdated(new Date());
-      console.log(`Loaded ${restaurantData?.length || 0} restaurants`);
     } catch (error) {
-      console.error('Error fetching restaurants:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to load restaurants",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }

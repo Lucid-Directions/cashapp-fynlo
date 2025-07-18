@@ -107,7 +107,6 @@ export const SumUpPaymentModal: React.FC<SumUpPaymentModalProps> = ({
       }, 1000);
 
     } catch (error) {
-      console.error('Error creating checkout:', error);
       setPaymentStatus('error');
       toast({
         title: "Error",
@@ -146,7 +145,6 @@ export const SumUpPaymentModal: React.FC<SumUpPaymentModalProps> = ({
 
       onSuccess();
     } catch (error) {
-      console.error('Error updating subscription:', error);
       toast({
         title: "Warning",
         description: "Payment successful but subscription update failed. Please contact support.",

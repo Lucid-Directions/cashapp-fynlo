@@ -77,7 +77,6 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({ restau
       if (error) throw error;
       setItems(data || []);
     } catch (error) {
-      console.error('Error fetching inventory:', error);
       toast({
         title: "Error",
         description: "Failed to load inventory items",
@@ -118,7 +117,6 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({ restau
         description: "Inventory item added successfully"
       });
     } catch (error) {
-      console.error('Error adding item:', error);
       toast({
         title: "Error",
         description: "Failed to add inventory item",
@@ -145,7 +143,6 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({ restau
         description: "Stock updated successfully"
       });
     } catch (error) {
-      console.error('Error updating stock:', error);
       toast({
         title: "Error",
         description: "Failed to update stock",
@@ -169,7 +166,6 @@ export const InventoryManagement: React.FC<InventoryManagementProps> = ({ restau
         description: "Item deleted successfully"
       });
     } catch (error) {
-      console.error('Error deleting item:', error);
       toast({
         title: "Error",
         description: "Failed to delete item",

@@ -68,7 +68,6 @@ export const RestaurantDashboard = () => {
         setRestaurant(null);
       }
     } catch (error) {
-      console.error('Error fetching restaurant:', error);
       toast({
         title: "Error",
         description: "Failed to load restaurant information",

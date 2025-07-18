@@ -104,7 +104,6 @@ export const PaymentProcessing: React.FC<PaymentProcessingProps> = ({ restaurant
 
       setStats(stats);
     } catch (error) {
-      console.error('Error fetching payments:', error);
       toast({
         title: "Error",
         description: "Failed to load payments",

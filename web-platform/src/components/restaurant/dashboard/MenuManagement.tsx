@@ -74,7 +74,6 @@ export const MenuManagement: React.FC<MenuManagementProps> = ({ restaurant }) =>
 
       setMenuItems(data || []);
     } catch (error) {
-      console.error('Error fetching menu items:', error);
       toast({
         title: "Error",
         description: "Failed to load menu items",
@@ -99,8 +98,7 @@ export const MenuManagement: React.FC<MenuManagementProps> = ({ restaurant }) =>
 
       setCategories(data || []);
     } catch (error) {
-      console.error('Error fetching categories:', error);
-    }
+      }
   };
 
   const toggleItemAvailability = async (itemId: string, currentAvailability: boolean) => {
@@ -120,7 +118,6 @@ export const MenuManagement: React.FC<MenuManagementProps> = ({ restaurant }) =>
         description: `Item ${!currentAvailability ? 'enabled' : 'disabled'}`,
       });
     } catch (error) {
-      console.error('Error updating item availability:', error);
       toast({
         title: "Error",
         description: "Failed to update item availability",
@@ -146,7 +143,6 @@ export const MenuManagement: React.FC<MenuManagementProps> = ({ restaurant }) =>
         description: `Item ${!currentFeatured ? 'featured' : 'unfeatured'}`,
       });
     } catch (error) {
-      console.error('Error updating featured status:', error);
       toast({
         title: "Error",
         description: "Failed to update featured status",
@@ -182,7 +178,6 @@ export const MenuManagement: React.FC<MenuManagementProps> = ({ restaurant }) =>
         description: "Menu item deleted successfully",
       });
     } catch (error) {
-      console.error('Error deleting item:', error);
       toast({
         title: "Error",
         description: "Failed to delete menu item",

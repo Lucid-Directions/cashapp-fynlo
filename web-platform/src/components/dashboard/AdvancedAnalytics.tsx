@@ -67,7 +67,6 @@ export const AdvancedAnalytics: React.FC<AdvancedAnalyticsProps> = ({
         .limit(30);
 
       if (error) {
-        console.error('Analytics fetch error:', error);
         setAnalyticsData(getMockData());
         return;
       }
@@ -82,7 +81,6 @@ export const AdvancedAnalytics: React.FC<AdvancedAnalyticsProps> = ({
       const processedData = processAnalyticsData(analytics || [], orders || []);
       setAnalyticsData(processedData);
     } catch (error) {
-      console.error('Error fetching analytics:', error);
       setAnalyticsData(getMockData());
     } finally {
       setLoading(false);

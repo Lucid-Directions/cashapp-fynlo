@@ -43,8 +43,7 @@ const PlatformOwnerOverview = () => {
         if (error) throw error;
         setMetrics(data);
       } catch (error) {
-        console.error('Error fetching platform metrics:', error);
-      } finally {
+        } finally {
         setLoading(false);
       }
     };
@@ -288,8 +287,7 @@ const CustomerPortalOverview: React.FC<CustomerPortalOverviewProps> = ({ subscri
         }
 
       } catch (error) {
-        console.error('Error fetching restaurant data:', error);
-      } finally {
+        } finally {
         setLoading(false);
       }
     };

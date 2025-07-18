@@ -125,7 +125,6 @@ export const DashboardSettings = () => {
 
       setLoading(false);
     } catch (error) {
-      console.error('Error loading platform data:', error);
       setLoading(false);
     }
   };
@@ -169,8 +168,7 @@ export const DashboardSettings = () => {
 
       setSettingsSaved(true);
     } catch (error) {
-      console.error('Error loading platform settings:', error);
-    }
+      }
   };
 
   const savePlatformSettings = async () => {
@@ -210,7 +208,6 @@ export const DashboardSettings = () => {
         description: "Platform settings have been saved to database successfully.",
       });
     } catch (error) {
-      console.error('Error saving platform settings:', error);
       toast({
         title: "Save Failed",
         description: "Failed to save platform settings to database.",

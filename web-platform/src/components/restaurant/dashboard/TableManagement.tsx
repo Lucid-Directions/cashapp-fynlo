@@ -58,7 +58,6 @@ export const TableManagement: React.FC<TableManagementProps> = ({ restaurant }) 
 
       setTables(data || []);
     } catch (error) {
-      console.error('Error fetching tables:', error);
       toast({
         title: "Error",
         description: "Failed to load tables",
@@ -86,7 +85,6 @@ export const TableManagement: React.FC<TableManagementProps> = ({ restaurant }) 
         description: `Table ${!currentStatus ? 'activated' : 'deactivated'}`,
       });
     } catch (error) {
-      console.error('Error updating table status:', error);
       toast({
         title: "Error",
         description: "Failed to update table status",
@@ -117,7 +115,6 @@ export const TableManagement: React.FC<TableManagementProps> = ({ restaurant }) 
         description: "QR code generated successfully",
       });
     } catch (error) {
-      console.error('Error generating QR code:', error);
       toast({
         title: "Error",
         description: "Failed to generate QR code",

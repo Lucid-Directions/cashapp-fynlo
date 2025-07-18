@@ -34,9 +34,7 @@ export const usePaymentAnalytics = (restaurantId?: string) => {
       if (functionError) throw functionError;
 
       setAnalytics(data);
-      console.log('Payment analytics loaded:', data);
-    } catch (err) {
-      console.error('Error fetching payment analytics:', err);
+      } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch analytics');
     } finally {
       setLoading(false);

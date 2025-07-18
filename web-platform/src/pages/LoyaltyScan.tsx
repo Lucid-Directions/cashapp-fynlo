@@ -41,7 +41,6 @@ export default function LoyaltyScan() {
         setScanData(decoded);
         loadCampaignData(decoded.campaignId);
       } catch (error) {
-        console.error('Error parsing scan data:', error);
         toast({
           title: "Invalid QR Code",
           description: "This QR code is not valid or has expired",
@@ -81,7 +80,6 @@ export default function LoyaltyScan() {
       setRestaurant(restaurantData);
 
     } catch (error) {
-      console.error('Error loading campaign:', error);
       toast({
         title: "Campaign Not Found",
         description: "This campaign is no longer available",
@@ -118,7 +116,6 @@ export default function LoyaltyScan() {
       });
 
     } catch (error) {
-      console.error('Error claiming reward:', error);
       toast({
         title: "Error",
         description: "Failed to claim reward. Please try again.",

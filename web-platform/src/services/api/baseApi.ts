@@ -23,7 +23,6 @@ class BaseApiService {
       const { data: { session } } = await supabase.auth.getSession();
       return session?.access_token || null;
     } catch (error) {
-      console.error('Failed to get auth token:', error);
       return null;
     }
   }
@@ -116,12 +115,6 @@ class BaseApiService {
           variant: "destructive",
         });
       }
-      
-      console.error('API Request failed:', {
-        url,
-        method: options.method || 'GET',
-        error,
-      });
       
       throw error;
     }

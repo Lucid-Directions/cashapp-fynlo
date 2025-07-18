@@ -75,7 +75,6 @@ export const LoyaltyProgram: React.FC<LoyaltyProgramProps> = ({ restaurant }) =>
       if (error) throw error;
       setPrograms((data || []) as LoyaltyProgram[]);
     } catch (error) {
-      console.error('Error fetching loyalty programs:', error);
       toast({
         title: "Error",
         description: "Failed to load loyalty programs",
@@ -109,7 +108,6 @@ export const LoyaltyProgram: React.FC<LoyaltyProgramProps> = ({ restaurant }) =>
         description: "Loyalty program created successfully",
       });
     } catch (error) {
-      console.error('Error creating program:', error);
       toast({
         title: "Error",
         description: "Failed to create loyalty program",

@@ -110,7 +110,6 @@ export const ReportsPage = () => {
         topPerformingRestaurants,
       });
     } catch (error) {
-      console.error('Error fetching report data:', error);
       toast({
         title: "Error",
         description: "Failed to load report data. Please try again.",

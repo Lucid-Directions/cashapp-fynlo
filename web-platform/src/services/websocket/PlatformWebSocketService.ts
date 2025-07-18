@@ -40,7 +40,6 @@ export class PlatformWebSocketService {
 
   async connect(): Promise<void> {
     if (this.status !== 'disconnected' && this.status !== 'reconnecting') {
-      console.log(`⚠️ WebSocket already ${this.status}`);
       return;
     }
 
@@ -64,15 +63,12 @@ export class PlatformWebSocketService {
       const wsHost = API_CONFIG.BASE_URL.replace(/^https?:\/\//, '');
       const wsUrl = `${wsProtocol}://${wsHost}/api/v1/websocket/ws/platform`;
       
-      console.log('🔌 Connecting to Platform WebSocket:', wsUrl);
-      
       this.ws = new WebSocket(wsUrl);
       this.setupEventHandlers();
       
       // Connection timeout
       const connectionTimeout = setTimeout(() => {
         if (this.status === 'connecting') {
-          console.error('❌ WebSocket connection timeout');
           this.ws?.close();
           this.scheduleReconnect();
         }
@@ -80,12 +76,10 @@ export class PlatformWebSocketService {
       
       this.ws.onopen = () => {
         clearTimeout(connectionTimeout);
-        console.log('✅ WebSocket connected, authenticating...');
         this.authenticate(session.access_token, user);
       };
       
     } catch (error) {
-      console.error('❌ WebSocket connection failed:', error);
       this.setStatus('disconnected');
       this.scheduleReconnect();
     }
@@ -112,7 +106,6 @@ export class PlatformWebSocketService {
     // Set authentication timeout
     const authTimeout = setTimeout(() => {
       if (this.status === 'authenticated') {
-        console.error('❌ WebSocket authentication timeout');
         this.handleDisconnect(4002, 'Authentication timeout');
       }
     }, this.config.authTimeout);
@@ -132,17 +125,14 @@ export class PlatformWebSocketService {
         const message: WebSocketMessage = JSON.parse(event.data);
         this.handleMessage(message);
       } catch (error) {
-        console.error('❌ Failed to parse WebSocket message:', error);
-      }
+        }
     };
     
     this.ws.onclose = (event) => {
-      console.log(`🔌 WebSocket disconnected: ${event.code} - ${event.reason}`);
       this.handleDisconnect(event.code, event.reason);
     };
     
     this.ws.onerror = (error) => {
-      console.error('❌ WebSocket error:', error);
       this.emit(WebSocketEvent.ERROR, error);
     };
   }
@@ -168,7 +158,6 @@ export class PlatformWebSocketService {
         break;
         
       case WebSocketEvent.AUTH_ERROR:
-        console.error('❌ WebSocket auth error:', message.data);
         this.handleAuthError(message);
         break;
         
@@ -192,7 +181,6 @@ export class PlatformWebSocketService {
   }
 
   private handleAuthenticated(): void {
-    console.log('✅ Platform WebSocket authenticated successfully');
     this.setStatus('connected');
     this.reconnectAttempts = 0;
     
@@ -207,7 +195,6 @@ export class PlatformWebSocketService {
   }
 
   private handleAuthError(message: WebSocketMessage): void {
-    console.error('❌ Authentication error:', message.data);
     this.emit(WebSocketEvent.AUTH_ERROR, message.data);
     this.setStatus('disconnected');
   }
@@ -229,7 +216,6 @@ export class PlatformWebSocketService {
         
         // Set pong timeout
         this.pongTimer = setTimeout(() => {
-          console.warn('⚠️ Missed pong, reconnecting...');
           this.handleDisconnect(4004, 'Heartbeat timeout');
         }, this.config.pongTimeout);
       }
@@ -280,7 +266,6 @@ export class PlatformWebSocketService {
     }
     
     if (this.reconnectAttempts >= this.config.maxReconnectAttempts!) {
-      console.error('❌ Max reconnection attempts reached');
       this.emit('max_reconnect_attempts', {
         attempts: this.reconnectAttempts
       });
@@ -293,7 +278,7 @@ export class PlatformWebSocketService {
     );
     const delay = this.config.reconnectBackoff?.[backoffIndex] || 30000;
     
-    console.log(`🔄 Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts + 1})`);
+    `);
     this.setStatus('reconnecting');
     
     this.reconnectTimer = setTimeout(() => {
@@ -317,17 +302,14 @@ export class PlatformWebSocketService {
       // Queue message for later
       if (this.messageQueue.length < (this.config.maxMessageQueueSize || 100)) {
         this.messageQueue.push(fullMessage);
-        console.log(`📦 Message queued (${this.messageQueue.length} in queue)`);
+        `);
       } else {
-        console.warn('⚠️ Message queue full, dropping message');
-      }
+        }
     }
   }
 
   private processMessageQueue(): void {
     if (this.messageQueue.length === 0) return;
-    
-    console.log(`📤 Processing ${this.messageQueue.length} queued messages`);
     
     while (this.messageQueue.length > 0) {
       const message = this.messageQueue.shift()!;
@@ -336,8 +318,6 @@ export class PlatformWebSocketService {
   }
 
   disconnect(): void {
-    console.log('👋 Disconnecting Platform WebSocket...');
-    
     this.stopHeartbeat();
     
     if (this.reconnectTimer) {
@@ -378,8 +358,7 @@ export class PlatformWebSocketService {
       try {
         listener(...args);
       } catch (error) {
-        console.error(`Error in WebSocket listener for ${event}:`, error);
-      }
+        }
     });
   }
 
@@ -390,7 +369,6 @@ export class PlatformWebSocketService {
   // Utilities
   private setStatus(newStatus: ConnectionStatus): void {
     if (this.status !== newStatus) {
-      console.log(`🔄 Platform WebSocket status: ${this.status} → ${newStatus}`);
       this.status = newStatus;
     }
   }

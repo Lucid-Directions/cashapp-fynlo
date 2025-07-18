@@ -385,14 +385,12 @@ export function QRCampaignManager({ restaurants, programs }: QRCampaignManagerPr
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching campaigns:', error);
         return;
       }
 
       setCampaigns(data || []);
     } catch (error) {
-      console.error('Error fetching campaigns:', error);
-    } finally {
+      } finally {
       setLoading(false);
     }
   };
@@ -443,7 +441,6 @@ export function QRCampaignManager({ restaurants, programs }: QRCampaignManagerPr
         .single();
 
       if (error) {
-        console.error('Error creating campaign:', error);
         toast({
           title: "Error",
           description: "Failed to create campaign",
@@ -476,7 +473,6 @@ export function QRCampaignManager({ restaurants, programs }: QRCampaignManagerPr
         description: "QR campaign created successfully"
       });
     } catch (error) {
-      console.error('Error creating campaign:', error);
       toast({
         title: "Error",
         description: "Failed to create campaign",
@@ -496,7 +492,6 @@ export function QRCampaignManager({ restaurants, programs }: QRCampaignManagerPr
         .eq('id', campaignId);
 
       if (error) {
-        console.error('Error updating campaign status:', error);
         toast({
           title: "Error",
           description: "Failed to update campaign status",
@@ -512,7 +507,6 @@ export function QRCampaignManager({ restaurants, programs }: QRCampaignManagerPr
         description: "Campaign status updated"
       });
     } catch (error) {
-      console.error('Error updating campaign status:', error);
       toast({
         title: "Error",
         description: "Failed to update campaign status",

@@ -61,7 +61,6 @@ export const RestaurantManagement: React.FC = () => {
         fetchRestaurantStats(data.map(r => r.id));
       }
     } catch (error) {
-      console.error('Error fetching restaurants:', error);
       toast({
         title: "Error",
         description: "Failed to load restaurants",
@@ -105,8 +104,7 @@ export const RestaurantManagement: React.FC = () => {
 
       setRestaurantStats(statsMap);
     } catch (error) {
-      console.error('Error fetching restaurant stats:', error);
-    }
+      }
   };
 
   const toggleRestaurantStatus = async (restaurantId: string, currentStatus: boolean) => {
@@ -124,7 +122,6 @@ export const RestaurantManagement: React.FC = () => {
         description: `Restaurant ${!currentStatus ? 'activated' : 'deactivated'}`,
       });
     } catch (error) {
-      console.error('Error updating restaurant status:', error);
       toast({
         title: "Error",
         description: "Failed to update restaurant status",

@@ -51,7 +51,6 @@ export const InventoryManagement = () => {
         setItems(data || []);
       }
     } catch (error) {
-      console.error('Error fetching inventory:', error);
       toast({
         title: "Error",
         description: "Failed to load inventory items",

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 import { UpgradePrompt } from './UpgradePrompt';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -32,7 +33,8 @@ interface Restaurant {
 }
 
 export const StaffManagement = () => {
-  const { hasFeature } = useFeatureAccess();
+  const { hasFeature, isPlatformOwner } = useFeatureAccess();
+  const { user } = useAuth();
   const { toast } = useToast();
   const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
@@ -53,28 +55,42 @@ export const StaffManagement = () => {
     try {
       setLoading(true);
 
-      // Fetch restaurants
-      const { data: restaurantsData, error: restaurantsError } = await supabase
+      // Determine which restaurants to fetch based on user role
+      let restaurantQuery = supabase
         .from('restaurants')
         .select('id, name, is_active')
         .order('name');
 
+      // If not a platform owner, only fetch owned restaurants
+      if (!isPlatformOwner() && user) {
+        restaurantQuery = restaurantQuery.eq('owner_id', user.id);
+      }
+
+      const { data: restaurantsData, error: restaurantsError } = await restaurantQuery;
       if (restaurantsError) throw restaurantsError;
-      setRestaurants(restaurantsData || []);
+      
+      const userRestaurants = restaurantsData || [];
+      setRestaurants(userRestaurants);
 
-      // Fetch staff members
-      const { data: staffData, error: staffError } = await supabase
-        .from('staff_members')
-        .select('*')
-        .order('created_at', { ascending: false });
+      // Only fetch staff for restaurants the user has access to
+      if (userRestaurants.length > 0) {
+        const restaurantIds = userRestaurants.map(r => r.id);
+        
+        const { data: staffData, error: staffError } = await supabase
+          .from('staff_members')
+          .select('*, profiles(full_name)')
+          .in('restaurant_id', restaurantIds)
+          .order('created_at', { ascending: false });
 
-      if (staffError) throw staffError;
-      setStaffMembers(staffData || []);
+        if (staffError) throw staffError;
+        setStaffMembers(staffData || []);
+      } else {
+        setStaffMembers([]);
+      }
     } catch (error) {
-      console.error('Error fetching data:', error);
       toast({
         title: "Error",
-        description: "Failed to load staff data. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to load staff data.",
         variant: "destructive",
       });
     } finally {
@@ -97,7 +113,6 @@ export const StaffManagement = () => {
         description: `Staff member ${!currentStatus ? 'activated' : 'deactivated'} successfully.`,
       });
     } catch (error) {
-      console.error('Error updating staff status:', error);
       toast({
         title: "Error",
         description: "Failed to update staff status. Please try again.",
@@ -174,7 +189,6 @@ export const StaffManagement = () => {
       
       await fetchData();
     } catch (error) {
-      console.error('Error adding staff:', error);
       toast({
         title: "Error",
         description: "Failed to add staff member. Please try again.",

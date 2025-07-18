@@ -98,7 +98,6 @@ export const CategoryDialog: React.FC<CategoryDialogProps> = ({
       onSave();
       onOpenChange(false);
     } catch (error) {
-      console.error('Error saving category:', error);
       toast({
         title: "Error",
         description: "Failed to save category",

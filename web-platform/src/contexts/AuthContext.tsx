@@ -53,13 +53,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (!error && data) {
         role = data.role;
       } else if (error) {
-        console.error('Error fetching user role:', error);
-      }
+        }
       
       setUserRole(role);
       await setDefaultFynloUserData(role, userId);
     } catch (error) {
-      console.error('Error fetching user role:', error);
       setUserRole('customer');
       await setDefaultFynloUserData('customer', userId);
     }
@@ -91,8 +89,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           restaurantId = data;
         }
       } catch (error) {
-        console.error('Error fetching restaurant data:', error);
-      }
+        }
     }
     
     // Restaurant owners get Omega plan, platform owners get Omega, others get Beta

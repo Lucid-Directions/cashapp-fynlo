@@ -51,7 +51,6 @@ export const CustomerDatabase = () => {
         setCustomers(data || []);
       }
     } catch (error) {
-      console.error('Error fetching customers:', error);
       toast({
         title: "Error",
         description: "Failed to load customer data",

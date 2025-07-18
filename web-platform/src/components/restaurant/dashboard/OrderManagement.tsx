@@ -66,7 +66,6 @@ export const OrderManagement: React.FC<OrderManagementProps> = ({ restaurant }) 
           filter: `restaurant_id=eq.${restaurant.id}`
         },
         (payload) => {
-          console.log('Real-time order update:', payload);
           fetchOrders();
           fetchOrderStats();
           
@@ -80,7 +79,6 @@ export const OrderManagement: React.FC<OrderManagementProps> = ({ restaurant }) 
         }
       )
       .subscribe((status) => {
-        console.log('Subscription status:', status);
         setConnectionStatus(status === 'SUBSCRIBED' ? 'connected' : 'disconnected');
       });
 
@@ -115,8 +113,7 @@ export const OrderManagement: React.FC<OrderManagementProps> = ({ restaurant }) 
         todayRevenue: todayData?.reduce((sum, o) => sum + (o.total_amount || 0), 0) || 0
       });
     } catch (error) {
-      console.error('Error fetching order stats:', error);
-    }
+      }
   };
 
   useEffect(() => {
@@ -158,7 +155,6 @@ export const OrderManagement: React.FC<OrderManagementProps> = ({ restaurant }) 
 
       setOrders(data || []);
     } catch (error) {
-      console.error('Error fetching orders:', error);
       toast({
         title: "Error",
         description: "Failed to load orders",
@@ -190,7 +186,6 @@ export const OrderManagement: React.FC<OrderManagementProps> = ({ restaurant }) 
         description: `Order status updated to ${newStatus}`,
       });
     } catch (error) {
-      console.error('Error updating order status:', error);
       toast({
         title: "Error",
         description: "Failed to update order status",

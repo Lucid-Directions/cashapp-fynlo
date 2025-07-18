@@ -134,7 +134,6 @@ export const IntegrationManager: React.FC = () => {
       setIntegrations(integrationsData || []);
       setPrograms(programsData || []);
     } catch (error) {
-      console.error('Error fetching data:', error);
       toast({
         title: "Error",
         description: "Failed to load integrations",
@@ -212,7 +211,6 @@ export const IntegrationManager: React.FC = () => {
         description: "SumUp integration created successfully",
       });
     } catch (error) {
-      console.error('Error creating integration:', error);
       toast({
         title: "Error",
         description: "Failed to create integration",
@@ -236,7 +234,6 @@ export const IntegrationManager: React.FC = () => {
         description: `Integration ${!isActive ? 'enabled' : 'disabled'}`,
       });
     } catch (error) {
-      console.error('Error toggling integration:', error);
       toast({
         title: "Error",
         description: "Failed to update integration",
@@ -277,7 +274,6 @@ export const IntegrationManager: React.FC = () => {
         await fetchData();
       }
     } catch (error) {
-      console.error('Integration test failed:', error);
       toast({
         title: "Test Failed",
         description: "Failed to connect to SumUp. Please check your credentials.",
