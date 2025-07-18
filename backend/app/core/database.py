@@ -45,8 +45,11 @@ pool_args = {}
 if "postgresql" in database_url:
     connect_args = {
         "connect_timeout": 30,  # Increased timeout for DigitalOcean
-        "options": "-c statement_timeout=30000"  # 30 second statement timeout
     }
+    
+    # PgBouncer (port 25061) doesn't support statement_timeout in options
+    if ":25061" not in database_url:
+        connect_args["options"] = "-c statement_timeout=30000"  # 30 second statement timeout
     
     # For DigitalOcean managed databases
     if "digitalocean.com" in database_url or ":25060" in database_url or ":25061" in database_url:
