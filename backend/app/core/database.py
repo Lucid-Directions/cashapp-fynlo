@@ -3,7 +3,7 @@ Database configuration and models for Fynlo POS
 PostgreSQL implementation matching frontend data requirements
 """
 
-from sqlalchemy import create_engine, Column, String, Integer, Float, DateTime, Boolean, Text, JSON, ForeignKey, DECIMAL, UniqueConstraint
+from sqlalchemy import create_engine, Column, String, Integer, Float, DateTime, Boolean, Text, JSON, ForeignKey, DECIMAL, UniqueConstraint, text
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session, relationship
@@ -28,7 +28,11 @@ logger = logging.getLogger(__name__)
 database_url = settings.DATABASE_URL
 
 # For DigitalOcean managed databases, ensure SSL mode is set
-if "postgresql" in database_url and (":25060" in database_url or ":25061" in database_url):
+if "postgresql" in database_url and ("digitalocean.com" in database_url or ":25060" in database_url or ":25061" in database_url):
+    # Port 25061 is for connection pooling (PgBouncer), 25060 is direct
+    is_pooled = ":25061" in database_url
+    logger.info(f"Detected DigitalOcean managed database (pooled: {is_pooled})")
+    
     if "sslmode" not in database_url:
         # Add sslmode=require to the connection string if not present
         separator = "&" if "?" in database_url else "?"
@@ -36,33 +40,54 @@ if "postgresql" in database_url and (":25060" in database_url or ":25061" in dat
         logger.info("Added sslmode=require to DigitalOcean database connection")
 
 connect_args = {}
+pool_args = {}
+
 if "postgresql" in database_url:
     connect_args = {
-        "connect_timeout": 10,  # PostgreSQL connection timeout
+        "connect_timeout": 30,  # Increased timeout for DigitalOcean
         "options": "-c statement_timeout=30000"  # 30 second statement timeout
     }
     
-    # For DigitalOcean managed databases, provide the CA certificate
-    if ":25060" in database_url or ":25061" in database_url:
+    # For DigitalOcean managed databases
+    if "digitalocean.com" in database_url or ":25060" in database_url or ":25061" in database_url:
+        # Use specific pool settings for DigitalOcean
+        pool_args = {
+            "pool_size": 5,  # Reduced pool size for connection pooler
+            "max_overflow": 10,
+            "pool_pre_ping": True,  # Test connections before use
+            "pool_recycle": 300,  # Recycle connections after 5 minutes
+        }
+        
+        # Check for CA certificate
         cert_path = os.path.join(os.path.dirname(__file__), "..", "..", "certs", "ca-certificate.crt")
         if os.path.exists(cert_path):
-            # Provide the CA certificate path for SSL verification
             connect_args["sslrootcert"] = cert_path
-            logger.info(f"Using CA certificate for SSL: {cert_path}")
+            logger.info(f"Using CA certificate: {cert_path}")
         else:
-            logger.warning(f"CA certificate not found at {cert_path}")
+            logger.warning(f"CA certificate not found at {cert_path}, relying on sslmode=require")
 
-engine = create_engine(
-    database_url,
-    echo=settings.DEBUG,
-    poolclass=QueuePool,
-    pool_size=20,          # Number of persistent connections
-    max_overflow=10,       # Maximum overflow connections above pool_size
-    pool_recycle=3600,     # Recycle connections after 1 hour (avoid stale connections)
-    pool_pre_ping=True,    # Test connections before using (handles network issues)
-    pool_timeout=30,       # Timeout for getting connection from pool
-    connect_args=connect_args
-)
+# Use custom pool settings for DigitalOcean, default settings for others
+if pool_args:
+    engine = create_engine(
+        database_url,
+        echo=settings.DEBUG,
+        poolclass=QueuePool,
+        pool_timeout=30,       # Timeout for getting connection from pool
+        connect_args=connect_args,
+        **pool_args  # Use DigitalOcean-specific pool settings
+    )
+else:
+    engine = create_engine(
+        database_url,
+        echo=settings.DEBUG,
+        poolclass=QueuePool,
+        pool_size=20,          # Number of persistent connections
+        max_overflow=10,       # Maximum overflow connections above pool_size
+        pool_recycle=3600,     # Recycle connections after 1 hour (avoid stale connections)
+        pool_pre_ping=True,    # Test connections before using (handles network issues)
+        pool_timeout=30,       # Timeout for getting connection from pool
+        connect_args=connect_args
+    )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
@@ -370,10 +395,51 @@ def get_db() -> Generator[Session, None, None]:
         db.close()
 
 async def init_db():
-    """Initialize database tables"""
-    Base.metadata.create_all(bind=engine)
+    """Initialize database tables with retry logic"""
+    import asyncio
+    from sqlalchemy.exc import OperationalError
     
-    # Setup query performance monitoring
-    from app.services.query_optimizer import query_analyzer
-    query_analyzer.setup(engine)
-    logger.info("Query performance analyzer initialized")
+    max_retries = 3
+    retry_delay = 5  # seconds
+    
+    for attempt in range(max_retries):
+        try:
+            # Test database connection first
+            with engine.connect() as conn:
+                result = conn.execute(text("SELECT 1"))
+                logger.info("Database connection successful")
+            
+            # Create tables if they don't exist
+            Base.metadata.create_all(bind=engine)
+            
+            # Setup query performance monitoring
+            from app.services.query_optimizer import query_analyzer
+            query_analyzer.setup(engine)
+            logger.info("Query performance analyzer initialized")
+            
+            return  # Success
+            
+        except OperationalError as e:
+            if attempt < max_retries - 1:
+                logger.warning(f"Database connection attempt {attempt + 1}/{max_retries} failed: {str(e)}")
+                logger.info(f"Retrying in {retry_delay} seconds...")
+                await asyncio.sleep(retry_delay)
+            else:
+                logger.error(f"Failed to connect to database after {max_retries} attempts")
+                # Log connection details for debugging (without password)
+                db_host = database_url.split('@')[1].split('/')[0] if '@' in database_url else 'unknown'
+                logger.error(f"Database host: {db_host}")
+                logger.error(f"SSL mode: {'require' if 'sslmode=require' in database_url else 'not set'}")
+                
+                # Provide helpful guidance for DigitalOcean
+                if "digitalocean.com" in database_url:
+                    logger.error("\n" + "="*60)
+                    logger.error("DigitalOcean Database Connection Troubleshooting:")
+                    logger.error("1. Check Trusted Sources in DO database settings")
+                    logger.error("   - Add your app's IP or use 0.0.0.0/0 for testing")
+                    logger.error("2. Verify DATABASE_URL includes port (25060 or 25061)")
+                    logger.error("3. Ensure SSL is enabled (sslmode=require)")
+                    logger.error("4. For App Platform: Enable 'Trusted Sources' for apps")
+                    logger.error("="*60 + "\n")
+                
+                raise
