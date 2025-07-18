@@ -93,7 +93,6 @@ export const LoyaltyAnalyticsDashboard: React.FC = () => {
       if (error) throw error;
       setPrograms(data || []);
     } catch (error) {
-      console.error('Error fetching programs:', error);
       toast({
         title: "Error",
         description: "Failed to load loyalty programs",
@@ -141,7 +140,6 @@ export const LoyaltyAnalyticsDashboard: React.FC = () => {
 
       setAnalyticsData(mockData);
     } catch (error) {
-      console.error('Error fetching analytics:', error);
       toast({
         title: "Error",
         description: "Failed to load analytics data",

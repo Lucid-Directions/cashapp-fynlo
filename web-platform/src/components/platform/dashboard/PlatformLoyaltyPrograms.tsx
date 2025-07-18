@@ -113,7 +113,6 @@ export const PlatformLoyaltyPrograms: React.FC = () => {
       setPrograms(programsData || []);
       setRestaurants(restaurantsData || []);
     } catch (error) {
-      console.error('Error fetching data:', error);
       toast({
         title: "Error",
         description: "Failed to load data",
@@ -200,7 +199,6 @@ export const PlatformLoyaltyPrograms: React.FC = () => {
         description: `Professional loyalty program created for ${selectedRestaurants.length} restaurant(s)`,
       });
     } catch (error) {
-      console.error('Error creating loyalty program:', error);
       toast({
         title: "Error",
         description: "Failed to create loyalty program",
@@ -224,7 +222,6 @@ export const PlatformLoyaltyPrograms: React.FC = () => {
         description: `Program ${!currentStatus ? 'activated' : 'deactivated'}`,
       });
     } catch (error) {
-      console.error('Error updating program status:', error);
       toast({
         title: "Error",
         description: "Failed to update program status",

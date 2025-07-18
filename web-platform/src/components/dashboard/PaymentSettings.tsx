@@ -50,10 +50,8 @@ export const PaymentSettings = () => {
       
       setAnalytics(data);
       setLastUpdated(new Date());
-      console.log('Payment analytics loaded:', data);
-    } catch (error) {
-      console.error('Error fetching payment analytics:', error);
-    } finally {
+      } catch (error) {
+      } finally {
       setLoading(false);
     }
   };

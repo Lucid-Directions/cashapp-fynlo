@@ -124,7 +124,6 @@ export const useQueryOptimization = () => {
             const result = await searchFn(searchTerm);
             resolve(result);
           } catch (error) {
-            console.error('Search error:', error);
             resolve([]);
           }
         }, delay);

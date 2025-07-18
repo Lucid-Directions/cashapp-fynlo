@@ -138,7 +138,6 @@ export const ABTestManager: React.FC = () => {
       setTestResults(mockResults);
 
     } catch (error) {
-      console.error('Error fetching data:', error);
       toast({
         title: "Error",
         description: "Failed to load A/B tests",
@@ -186,7 +185,6 @@ export const ABTestManager: React.FC = () => {
         description: "A/B test created successfully",
       });
     } catch (error) {
-      console.error('Error creating A/B test:', error);
       toast({
         title: "Error",
         description: "Failed to create A/B test",
@@ -220,7 +218,6 @@ export const ABTestManager: React.FC = () => {
         description: `Test ${status === 'active' ? 'started' : status === 'paused' ? 'paused' : 'completed'}`,
       });
     } catch (error) {
-      console.error('Error updating test status:', error);
       toast({
         title: "Error",
         description: "Failed to update test status",

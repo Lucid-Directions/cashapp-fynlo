@@ -78,9 +78,7 @@ export const SystemHealth = () => {
       
       setMetrics(systemHealthData);
       setLastUpdated(new Date());
-      console.log('Platform metrics loaded:', systemHealthData);
-    } catch (error) {
-      console.error('Error fetching platform metrics:', error);
+      } catch (error) {
       // Set error state for system health
       setMetrics({
         activeBusinesses: 0,

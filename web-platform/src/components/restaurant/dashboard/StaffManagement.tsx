@@ -100,7 +100,6 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ restaurant }) 
       if (error) throw error;
       setStaffMembers((data || []) as StaffMember[]);
     } catch (error) {
-      console.error('Error fetching staff:', error);
       toast({
         title: "Error",
         description: "Failed to load staff members",
@@ -122,7 +121,6 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ restaurant }) 
       if (error) throw error;
       setSchedules((data || []) as StaffSchedule[]);
     } catch (error) {
-      console.error('Error fetching schedules:', error);
       toast({
         title: "Error",
         description: "Failed to load staff schedules",
@@ -171,7 +169,6 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ restaurant }) 
         description: `Invitation sent to ${newStaff.email}`,
       });
     } catch (error) {
-      console.error('Error sending staff invitation:', error);
       toast({
         title: "Error",
         description: "Failed to send staff invitation",
@@ -220,7 +217,6 @@ export const StaffManagement: React.FC<StaffManagementProps> = ({ restaurant }) 
         description: "Schedule created successfully",
       });
     } catch (error) {
-      console.error('Error creating schedule:', error);
       toast({
         title: "Error",
         description: "Failed to create schedule",

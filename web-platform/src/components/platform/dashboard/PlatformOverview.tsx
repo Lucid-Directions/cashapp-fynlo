@@ -68,7 +68,6 @@ export const PlatformOverview = () => {
           table: 'restaurants'
         },
         (payload) => {
-          console.log('Platform restaurant update:', payload);
           fetchPlatformMetrics();
           fetchRecentActivity();
           
@@ -88,13 +87,11 @@ export const PlatformOverview = () => {
           table: 'orders'
         },
         (payload) => {
-          console.log('Platform order update:', payload);
           fetchPlatformMetrics();
           fetchRecentActivity();
         }
       )
       .subscribe((status) => {
-        console.log('Platform subscription status:', status);
         setConnectionStatus(status === 'SUBSCRIBED' ? 'connected' : 'disconnected');
       });
 
@@ -148,7 +145,6 @@ export const PlatformOverview = () => {
       });
 
     } catch (error) {
-      console.error('Error fetching platform metrics:', error);
       toast({
         title: "Error",
         description: "Failed to load platform metrics",
@@ -197,8 +193,7 @@ export const PlatformOverview = () => {
 
       setRecentActivity(activity);
     } catch (error) {
-      console.error('Error fetching recent activity:', error);
-    }
+      }
   };
 
   const formatCurrency = (amount: number) => `£${amount.toLocaleString()}`;

@@ -81,7 +81,6 @@ export const CustomerDatabase: React.FC<CustomerDatabaseProps> = ({ restaurant }
       if (error) throw error;
       setCustomers(data || []);
     } catch (error) {
-      console.error('Error fetching customers:', error);
       toast({
         title: "Error",
         description: "Failed to load customers",
@@ -122,7 +121,6 @@ export const CustomerDatabase: React.FC<CustomerDatabaseProps> = ({ restaurant }
         description: "Customer added successfully"
       });
     } catch (error) {
-      console.error('Error adding customer:', error);
       toast({
         title: "Error",
         description: "Failed to add customer",
@@ -149,7 +147,6 @@ export const CustomerDatabase: React.FC<CustomerDatabaseProps> = ({ restaurant }
         description: "Loyalty points updated"
       });
     } catch (error) {
-      console.error('Error updating points:', error);
       toast({
         title: "Error",
         description: "Failed to update loyalty points",
@@ -173,7 +170,6 @@ export const CustomerDatabase: React.FC<CustomerDatabaseProps> = ({ restaurant }
         description: "Customer deleted successfully"
       });
     } catch (error) {
-      console.error('Error deleting customer:', error);
       toast({
         title: "Error",
         description: "Failed to delete customer",

@@ -126,7 +126,6 @@ export const OrderStatusDialog: React.FC<OrderStatusDialogProps> = ({
       onOrderUpdated();
       onOpenChange(false);
     } catch (error) {
-      console.error('Error updating order:', error);
       toast({
         title: "Error",
         description: "Failed to update order",

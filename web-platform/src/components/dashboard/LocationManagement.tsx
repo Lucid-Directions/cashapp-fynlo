@@ -86,7 +86,6 @@ export const LocationManagement = () => {
 
       setLocationStats(stats);
     } catch (error) {
-      console.error('Error fetching data:', error);
       toast({
         title: "Error",
         description: "Failed to load location data. Please try again.",
@@ -112,7 +111,6 @@ export const LocationManagement = () => {
         description: `Location ${!currentStatus ? 'activated' : 'deactivated'} successfully.`,
       });
     } catch (error) {
-      console.error('Error updating location status:', error);
       toast({
         title: "Error",
         description: "Failed to update location status. Please try again.",

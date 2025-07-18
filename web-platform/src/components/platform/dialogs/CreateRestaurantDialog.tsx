@@ -91,7 +91,7 @@ export const CreateRestaurantDialog: React.FC<CreateRestaurantDialogProps> = ({
         .insert({
           restaurant_id: data.id,
           tax_rate: 0.20,
-          service_charge: 0.00,
+          service_charge: 0.125, // Platform-controlled 12.5%
           auto_accept_orders: false,
           opening_hours: {},
           business_days: [],
@@ -107,7 +107,6 @@ export const CreateRestaurantDialog: React.FC<CreateRestaurantDialogProps> = ({
       onOpenChange(false);
       onRestaurantCreated();
     } catch (error: any) {
-      console.error('Error creating restaurant:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to create restaurant",

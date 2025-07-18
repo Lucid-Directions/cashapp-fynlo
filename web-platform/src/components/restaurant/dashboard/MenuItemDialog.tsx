@@ -157,7 +157,6 @@ export const MenuItemDialog: React.FC<MenuItemDialogProps> = ({
       onSave();
       onOpenChange(false);
     } catch (error) {
-      console.error('Error saving menu item:', error);
       toast({
         title: "Error",
         description: "Failed to save menu item",

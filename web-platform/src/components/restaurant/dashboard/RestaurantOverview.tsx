@@ -107,8 +107,7 @@ export const RestaurantOverview: React.FC<RestaurantOverviewProps> = ({ restaura
         setRecentOrders(recent);
       }
     } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-    } finally {
+      } finally {
       setLoading(false);
     }
   };

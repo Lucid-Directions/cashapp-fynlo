@@ -128,7 +128,6 @@ export const PlatformAnalytics: React.FC = () => {
       });
 
     } catch (error) {
-      console.error('Error fetching platform metrics:', error);
       toast({
         title: "Error",
         description: "Failed to load platform metrics",
@@ -169,8 +168,7 @@ export const PlatformAnalytics: React.FC = () => {
 
       setRevenueData(chartData);
     } catch (error) {
-      console.error('Error fetching revenue data:', error);
-    }
+      }
   };
 
   const fetchRestaurantPerformance = async () => {
@@ -210,8 +208,7 @@ export const PlatformAnalytics: React.FC = () => {
       setRestaurantPerformance(performanceData);
 
     } catch (error) {
-      console.error('Error fetching restaurant performance:', error);
-    } finally {
+      } finally {
       setLoading(false);
     }
   };

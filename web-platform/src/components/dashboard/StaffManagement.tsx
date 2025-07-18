@@ -71,7 +71,6 @@ export const StaffManagement = () => {
       if (staffError) throw staffError;
       setStaffMembers(staffData || []);
     } catch (error) {
-      console.error('Error fetching data:', error);
       toast({
         title: "Error",
         description: "Failed to load staff data. Please try again.",
@@ -97,7 +96,6 @@ export const StaffManagement = () => {
         description: `Staff member ${!currentStatus ? 'activated' : 'deactivated'} successfully.`,
       });
     } catch (error) {
-      console.error('Error updating staff status:', error);
       toast({
         title: "Error",
         description: "Failed to update staff status. Please try again.",
@@ -174,7 +172,6 @@ export const StaffManagement = () => {
       
       await fetchData();
     } catch (error) {
-      console.error('Error adding staff:', error);
       toast({
         title: "Error",
         description: "Failed to add staff member. Please try again.",

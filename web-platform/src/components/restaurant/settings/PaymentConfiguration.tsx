@@ -82,7 +82,6 @@ export const PaymentConfiguration: React.FC<PaymentConfigurationProps> = ({ rest
         });
       }
     } catch (error) {
-      console.error('Error loading payment settings:', error);
       toast({
         title: "Error",
         description: "Failed to load payment settings",
@@ -115,7 +114,6 @@ export const PaymentConfiguration: React.FC<PaymentConfigurationProps> = ({ rest
         description: "Bank details saved securely to database",
       });
     } catch (error) {
-      console.error('Error saving bank details:', error);
       toast({
         title: "Error",
         description: "Failed to save bank details to database",
@@ -155,7 +153,6 @@ export const PaymentConfiguration: React.FC<PaymentConfigurationProps> = ({ rest
         description: "SumUp payment method enabled",
       });
     } catch (error) {
-      console.error('Error connecting SumUp:', error);
       toast({
         title: "Error",
         description: "Failed to enable SumUp",

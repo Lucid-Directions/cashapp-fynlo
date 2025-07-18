@@ -39,8 +39,7 @@ export const AnalyticsDashboard = () => {
       setMetrics(data);
       setLastUpdated(new Date());
     } catch (error) {
-      console.error('Error fetching analytics:', error);
-    } finally {
+      } finally {
       setLoading(false);
     }
   };

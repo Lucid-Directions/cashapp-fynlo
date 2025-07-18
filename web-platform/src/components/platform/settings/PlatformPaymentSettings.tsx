@@ -90,7 +90,6 @@ export const PlatformPaymentSettings: React.FC = () => {
         setSumupConnected(!!loadedConfig.sumup_app_id && !!loadedConfig.sumup_app_secret);
       }
     } catch (error) {
-      console.error('Error loading platform settings:', error);
       toast({
         title: "Error",
         description: "Failed to load platform settings",
@@ -104,8 +103,6 @@ export const PlatformPaymentSettings: React.FC = () => {
   const saveConfiguration = async () => {
     setSaving(true);
     try {
-      console.log('Saving configuration:', config);
-      
       const { data, error } = await supabase
         .from('platform_settings')
         .upsert({
@@ -117,11 +114,8 @@ export const PlatformPaymentSettings: React.FC = () => {
         .select();
 
       if (error) {
-        console.error('Database error:', error);
         throw error;
       }
-      
-      console.log('Save successful:', data);
       
       toast({
         title: "Success",
@@ -131,7 +125,6 @@ export const PlatformPaymentSettings: React.FC = () => {
       // Reload to confirm the save
       await loadPlatformSettings();
     } catch (error) {
-      console.error('Error saving configuration:', error);
       toast({
         title: "Error",
         description: `Failed to save configuration: ${error instanceof Error ? error.message : 'Unknown error'}`,
