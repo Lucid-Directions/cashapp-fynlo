@@ -32,13 +32,35 @@ class RedisClient:
                         raise ValueError("REDIS_URL must be configured in production")
                     return
                     
-                logger.info(f"Attempting to connect to Redis at {settings.REDIS_URL}")
+                # Mask password in logs
+                redis_url_masked = settings.REDIS_URL
+                if '@' in redis_url_masked and ':' in redis_url_masked:
+                    # Extract and mask password
+                    protocol_end = redis_url_masked.find('://') + 3
+                    at_sign = redis_url_masked.find('@')
+                    if protocol_end < at_sign:
+                        user_pass = redis_url_masked[protocol_end:at_sign]
+                        if ':' in user_pass:
+                            user, _ = user_pass.split(':', 1)
+                            redis_url_masked = f"{redis_url_masked[:protocol_end]}{user}:****{redis_url_masked[at_sign:]}"
+                
+                logger.info(f"Attempting to connect to Redis at {redis_url_masked}")
+                
+                # For DigitalOcean Redis with SSL (rediss://), we need to handle SSL properly
+                connection_kwargs = {
+                    'decode_responses': True,
+                    'max_connections': 20,
+                    'socket_connect_timeout': 5,
+                    'socket_timeout': 5,
+                }
+                
+                # If using rediss:// (SSL), ensure SSL is properly configured
+                if settings.REDIS_URL.startswith('rediss://'):
+                    connection_kwargs['ssl_cert_reqs'] = 'none'  # DigitalOcean uses self-signed certs
+                
                 self.pool = ConnectionPool.from_url(
                     settings.REDIS_URL, 
-                    decode_responses=True, 
-                    max_connections=20,
-                    socket_connect_timeout=5,  # 5 second connection timeout
-                    socket_timeout=5  # 5 second operation timeout
+                    **connection_kwargs
                 )
                 self.redis = aioredis.Redis(connection_pool=self.pool)
                 # Add timeout to ping operation
