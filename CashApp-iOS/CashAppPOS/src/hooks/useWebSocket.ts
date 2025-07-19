@@ -3,7 +3,9 @@
  */
 
 import { useEffect, useCallback, useState } from 'react';
-import { webSocketService, WebSocketEventType } from '../services/websocket/WebSocketService';
+import { EnhancedWebSocketService, WebSocketEventType } from '../services/websocket/EnhancedWebSocketService';
+
+const webSocketService = EnhancedWebSocketService.getInstance();
 import { useAuthStore } from '../store/useAuthStore';
 
 interface WebSocketState {
