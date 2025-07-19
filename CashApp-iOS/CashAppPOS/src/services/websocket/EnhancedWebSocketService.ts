@@ -89,7 +89,9 @@ export class EnhancedWebSocketService {
       // Build WebSocket URL (no token in URL for security)
       const wsProtocol = API_CONFIG.BASE_URL.startsWith('https') ? 'wss' : 'ws';
       const wsHost = API_CONFIG.BASE_URL.replace(/^https?:\/\//, '');
-      const wsUrl = `${wsProtocol}://${wsHost}/api/v1/websocket/ws/pos/${user.restaurant_id}`;
+      // Encode restaurant ID to handle special characters
+      const encodedRestaurantId = encodeURIComponent(user.restaurant_id);
+      const wsUrl = `${wsProtocol}://${wsHost}/api/v1/websocket/ws/pos/${encodedRestaurantId}`;
       
       console.log('🔌 Connecting to WebSocket:', wsUrl);
       
