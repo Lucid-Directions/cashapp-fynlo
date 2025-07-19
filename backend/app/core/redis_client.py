@@ -167,6 +167,64 @@ class RedisClient:
         except Exception as e:
             logger.error(f"Error checking existence of key {key} in Redis: {e}")
             return False
+    
+    async def zadd(self, key: str, mapping: dict, **kwargs) -> int:
+        """Add members to a sorted set"""
+        if not self.redis: # Mock fallback
+            if key not in self._mock_storage:
+                self._mock_storage[key] = {}
+            self._mock_storage[key].update(mapping)
+            return len(mapping)
+        try:
+            return await self.redis.zadd(key, mapping, **kwargs)
+        except Exception as e:
+            logger.error(f"Error adding to sorted set {key}: {e}")
+            return 0
+    
+    async def zrange(self, key: str, start: int, end: int, withscores: bool = False) -> list:
+        """Get range of members from sorted set"""
+        if not self.redis: # Mock fallback
+            if key not in self._mock_storage:
+                return []
+            # Simple mock - return all items
+            items = list(self._mock_storage[key].items())
+            if withscores:
+                return items[:end+1] if end != -1 else items
+            return [k for k, v in items[:end+1] if end != -1 else items]
+        try:
+            return await self.redis.zrange(key, start, end, withscores=withscores)
+        except Exception as e:
+            logger.error(f"Error getting range from sorted set {key}: {e}")
+            return []
+    
+    async def incrbyfloat(self, key: str, amount: float) -> float:
+        """Increment value by float amount"""
+        if not self.redis: # Mock fallback
+            current = float(self._mock_storage.get(key, 0))
+            new_value = current + amount
+            self._mock_storage[key] = str(new_value)
+            return new_value
+        try:
+            return await self.redis.incrbyfloat(key, amount)
+        except Exception as e:
+            logger.error(f"Error incrementing float key {key}: {e}")
+            return 0.0
+    
+    async def scan(self, cursor: int = 0, match: Optional[str] = None, count: int = 100):
+        """Scan keys matching pattern"""
+        if not self.redis: # Mock fallback
+            import fnmatch
+            if match:
+                keys = [k.encode() for k in self._mock_storage.keys() if fnmatch.fnmatch(k, match)]
+            else:
+                keys = [k.encode() for k in self._mock_storage.keys()]
+            # Simple mock - return all matching keys at once
+            return (0, keys[:count])
+        try:
+            return await self.redis.scan(cursor, match=match, count=count)
+        except Exception as e:
+            logger.error(f"Error scanning keys with pattern {match}: {e}")
+            return (0, [])
 
     # --- Methods for specific application logic ---
     async def set_session(self, session_id: str, data: dict, expire: int = 3600):
