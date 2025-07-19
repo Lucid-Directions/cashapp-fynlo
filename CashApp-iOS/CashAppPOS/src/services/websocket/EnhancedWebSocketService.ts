@@ -1,5 +1,4 @@
-import { WebSocketMessage, WebSocketConfig } from '@fynlo/shared';
-import { WebSocketEvent } from '@fynlo/shared';
+import { WebSocketMessage, WebSocketConfig, WebSocketEvent, WebSocketEventType } from './types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
 import tokenManager from '../../utils/enhancedTokenManager';
@@ -8,9 +7,17 @@ import API_CONFIG from '../../config/api';
 type ConnectionState = 'DISCONNECTED' | 'CONNECTING' | 'AUTHENTICATING' | 'CONNECTED' | 'RECONNECTING';
 
 export class EnhancedWebSocketService {
+  private static instance: EnhancedWebSocketService;
   private ws: WebSocket | null = null;
   private state: ConnectionState = 'DISCONNECTED';
   private config: WebSocketConfig;
+  
+  static getInstance(): EnhancedWebSocketService {
+    if (!EnhancedWebSocketService.instance) {
+      EnhancedWebSocketService.instance = new EnhancedWebSocketService();
+    }
+    return EnhancedWebSocketService.instance;
+  }
   
   // Heartbeat mechanism
   private heartbeatTimer: NodeJS.Timeout | null = null;
@@ -450,3 +457,6 @@ export class EnhancedWebSocketService {
 // Export singleton instance
 export const webSocketService = new EnhancedWebSocketService();
 export default webSocketService;
+
+// Re-export types for convenience
+export { WebSocketEventType } from './types';
