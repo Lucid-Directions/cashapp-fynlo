@@ -40,6 +40,8 @@ class Settings(BaseSettings):
     SECRET_KEY: str = "your-super-secret-key-change-in-production"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    # Note: We use Union[List[str], str] to prevent pydantic_settings from auto-parsing as JSON
+    # The validator will always return List[str], but this type prevents parsing errors
     CORS_ORIGINS: Union[List[str], str] = Field(default=["http://localhost:3000"], description="CORS allowed origins")
     
     # Supabase Authentication
@@ -133,8 +135,13 @@ class Settings(BaseSettings):
     
     @field_validator('CORS_ORIGINS', mode='before')
     @classmethod
-    def parse_cors_origins(cls, v: Any) -> Union[List[str], str]:
-        """Parse CORS origins from various formats"""
+    def parse_cors_origins(cls, v: Any) -> List[str]:
+        """Parse CORS origins from various formats
+        
+        Note: Despite the field type being Union[List[str], str], this validator
+        always returns List[str]. The Union type is needed to prevent pydantic_settings
+        from attempting to parse the value as JSON before this validator runs.
+        """
         # If it's already a list, return it
         if isinstance(v, list):
             return [str(item).strip() for item in v if item]
