@@ -66,9 +66,10 @@ class SecureStorageService {
     // - Possibly biometric authentication
     const baseKey = 'FynloPOS_2025_SecureStorage';
     
-    // Add some entropy based on installation
-    const installTime = Date.now().toString();
-    return CryptoJS.SHA256(baseKey + installTime).toString();
+    // Use a stable key that doesn't change on app restart
+    // In production, this should be stored in Keychain/Keystore
+    const stableDeviceId = 'stable_device_key_v1';
+    return CryptoJS.SHA256(baseKey + stableDeviceId).toString();
   }
 
   private shouldEncrypt(key: string, options?: StorageOptions): boolean {
@@ -85,7 +86,7 @@ class SecureStorageService {
     try {
       return CryptoJS.AES.encrypt(data, this.encryptionKey).toString();
     } catch (err) {
-      error('Encryption failed', err, 'SecureStorage');
+      error('Encryption failed', err as Error, { context: { source: 'SecureStorage' } });
       throw new Error('Failed to encrypt data');
     }
   }
@@ -95,7 +96,7 @@ class SecureStorageService {
       const bytes = CryptoJS.AES.decrypt(encryptedData, this.encryptionKey);
       return bytes.toString(CryptoJS.enc.Utf8);
     } catch (err) {
-      error('Decryption failed', err, 'SecureStorage');
+      error('Decryption failed', err as Error, { context: { source: 'SecureStorage' } });
       throw new Error('Failed to decrypt data');
     }
   }
@@ -128,9 +129,9 @@ class SecureStorageService {
       
       await AsyncStorage.setItem(storageKey, serializedData);
       
-      info(`Stored ${shouldEncrypt ? 'encrypted' : 'plain'} data for key: ${key}`, undefined, 'SecureStorage');
+      info(`Stored ${shouldEncrypt ? 'encrypted' : 'plain'} data for key: ${key}`, { context: { source: 'SecureStorage', key, encrypted: shouldEncrypt } });
     } catch (err) {
-      error(`Failed to store item: ${key}`, err, 'SecureStorage');
+      error(`Failed to store item: ${key}`, err as Error, { context: { source: 'SecureStorage', key } });
       throw err;
     }
   }
@@ -158,7 +159,7 @@ class SecureStorageService {
           const decrypted = this.decrypt(rawData);
           data = JSON.parse(decrypted);
         } catch (err) {
-          warn(`Failed to decrypt data for key: ${key}, attempting plain parse`, undefined, 'SecureStorage');
+          warn(`Failed to decrypt data for key: ${key}, attempting plain parse`, { context: { source: 'SecureStorage', key } });
           data = JSON.parse(rawData);
         }
       } else {
@@ -173,7 +174,7 @@ class SecureStorageService {
       
       return data.value;
     } catch (err) {
-      error(`Failed to get item: ${key}`, err, 'SecureStorage');
+      error(`Failed to get item: ${key}`, err as Error, { context: { source: 'SecureStorage', key } });
       return null;
     }
   }
@@ -186,9 +187,9 @@ class SecureStorageService {
       
       await AsyncStorage.multiRemove([encryptedKey, plainKey]);
       
-      info(`Removed item: ${key}`, undefined, 'SecureStorage');
+      info(`Removed item: ${key}`, { context: { source: 'SecureStorage', key } });
     } catch (err) {
-      error(`Failed to remove item: ${key}`, err, 'SecureStorage');
+      error(`Failed to remove item: ${key}`, err as Error, { context: { source: 'SecureStorage', key } });
       throw err;
     }
   }
@@ -202,10 +203,10 @@ class SecureStorageService {
       
       if (fynloKeys.length > 0) {
         await AsyncStorage.multiRemove(fynloKeys);
-        info(`Cleared ${fynloKeys.length} items from secure storage`, undefined, 'SecureStorage');
+        info(`Cleared ${fynloKeys.length} items from secure storage`, { context: { source: 'SecureStorage', count: fynloKeys.length } });
       }
     } catch (err) {
-      error('Failed to clear storage', err, 'SecureStorage');
+      error('Failed to clear storage', err as Error, { context: { source: 'SecureStorage' } });
       throw err;
     }
   }
@@ -217,7 +218,7 @@ class SecureStorageService {
         .filter(key => key.startsWith(STORAGE_PREFIX) || key.startsWith(SENSITIVE_PREFIX))
         .map(key => key.replace(STORAGE_PREFIX, '').replace(SENSITIVE_PREFIX, ''));
     } catch (err) {
-      error('Failed to get all keys', err, 'SecureStorage');
+      error('Failed to get all keys', err as Error, { context: { source: 'SecureStorage' } });
       return [];
     }
   }
@@ -230,7 +231,7 @@ class SecureStorageService {
       );
       await Promise.all(promises);
     } catch (err) {
-      error('Failed to set multiple items', err, 'SecureStorage');
+      error('Failed to set multiple items', err as Error, { context: { source: 'SecureStorage' } });
       throw err;
     }
   }
@@ -243,7 +244,7 @@ class SecureStorageService {
       });
       return Promise.all(promises);
     } catch (err) {
-      error('Failed to get multiple items', err, 'SecureStorage');
+      error('Failed to get multiple items', err as Error, { context: { source: 'SecureStorage' } });
       throw err;
     }
   }
@@ -256,10 +257,10 @@ class SecureStorageService {
         const parsedValue = JSON.parse(existingValue);
         await this.setItem(key, parsedValue, options);
         await AsyncStorage.removeItem(key);
-        info(`Migrated key to secure storage: ${key}`, undefined, 'SecureStorage');
+        info(`Migrated key to secure storage: ${key}`, { context: { source: 'SecureStorage', key } });
       }
     } catch (err) {
-      warn(`Failed to migrate key: ${key}`, err, 'SecureStorage');
+      warn(`Failed to migrate key: ${key}`, err as Error, { context: { source: 'SecureStorage', key } });
     }
   }
 
@@ -295,7 +296,7 @@ class SecureStorageService {
         approximateSize: totalSize
       };
     } catch (err) {
-      error('Failed to get storage info', err, 'SecureStorage');
+      error('Failed to get storage info', err as Error, { context: { source: 'SecureStorage' } });
       return {
         totalKeys: 0,
         encryptedKeys: 0,

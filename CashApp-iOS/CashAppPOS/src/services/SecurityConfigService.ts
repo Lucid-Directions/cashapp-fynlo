@@ -76,46 +76,61 @@ class SecurityConfigService {
 
       if (!forceRefresh && cached && (Date.now() - cached.timestamp < this.configExpiryMs)) {
         this.config = cached.config;
-        info('Loaded security config from cache', undefined, 'SecurityConfig');
+        info('Loaded security config from cache', { context: { source: 'SecurityConfig' } });
         return this.config;
       }
 
       // Fetch from backend
       const token = await tokenManager.getValidToken();
       if (!token) {
-        warn('No valid token for loading security config', undefined, 'SecurityConfig');
+        warn('No valid token for loading security config', { context: { source: 'SecurityConfig' } });
         return this.defaultConfig;
       }
 
-      const response = await fetch(`${API_CONFIG.BASE_URL}/api/v1/config/security`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        timeout: 10000
-      });
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      
+      try {
+        const response = await fetch(`${API_CONFIG.BASE_URL}/api/v1/config/security`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
 
-      if (!response.ok) {
-        throw new Error(`Failed to load security config: ${response.status}`);
+        if (!response.ok) {
+          throw new Error(`Failed to load security config: ${response.status}`);
+        }
+
+        const data = await response.json();
+        this.config = {
+          ...this.defaultConfig,
+          ...data.config
+        };
+
+        // Cache the configuration
+        await secureStorage.setItem(this.configCacheKey, {
+          config: this.config,
+          timestamp: Date.now()
+        }, { encrypt: true });
+
+        info('Security config loaded successfully', { context: { source: 'SecurityConfig' } });
+        return this.config;
+      } catch (err: any) {
+        clearTimeout(timeoutId);
+        if (err.name === 'AbortError') {
+          logError('Security config request timed out', new Error('Request timeout'), { context: { source: 'SecurityConfig' } });
+        } else {
+          throw err;
+        }
+        return this.defaultConfig;
       }
-
-      const data = await response.json();
-      this.config = {
-        ...this.defaultConfig,
-        ...data.config
-      };
-
-      // Cache the configuration
-      await secureStorage.setItem(this.configCacheKey, {
-        config: this.config,
-        timestamp: Date.now()
-      }, { encrypt: true });
-
-      info('Security config loaded successfully', undefined, 'SecurityConfig');
-      return this.config;
     } catch (err) {
-      logError('Failed to load security config', err, 'SecurityConfig');
+      logError('Failed to load security config', err as Error, { context: { source: 'SecurityConfig' } });
       return this.defaultConfig;
     }
   }
@@ -219,9 +234,9 @@ class SecurityConfigService {
       await secureStorage.removeItem(this.configCacheKey);
       await tokenManager.clearTokens();
       this.config = null;
-      info('Security data cleared', undefined, 'SecurityConfig');
+      info('Security data cleared', { context: { source: 'SecurityConfig' } });
     } catch (err) {
-      logError('Failed to clear security data', err, 'SecurityConfig');
+      logError('Failed to clear security data', err as Error, { context: { source: 'SecurityConfig' } });
     }
   }
 
@@ -258,13 +273,13 @@ class SecurityConfigService {
 
     for (const header of securityHeaders) {
       if (!response.headers.get(header)) {
-        warn(`Missing security header: ${header}`, undefined, 'SecurityConfig');
+        warn(`Missing security header: ${header}`, { context: { source: 'SecurityConfig', header } });
       }
     }
 
     // Validate response status
     if (response.status === 401) {
-      warn('Unauthorized response received', undefined, 'SecurityConfig');
+      warn('Unauthorized response received', { context: { source: 'SecurityConfig' } });
       tokenManager.clearTokens();
       return false;
     }
