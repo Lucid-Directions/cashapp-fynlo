@@ -454,8 +454,8 @@ export class EnhancedWebSocketService {
   }
 }
 
-// Export singleton instance
-export const webSocketService = new EnhancedWebSocketService();
+// Export singleton instance using getInstance
+export const webSocketService = EnhancedWebSocketService.getInstance();
 export default webSocketService;
 
 // Re-export types for convenience

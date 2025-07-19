@@ -18,35 +18,53 @@ export const safeConsole = {
     try {
       originalConsole.log(...args);
     } catch (e) {
-      // Fallback to original console
+      // If console.log fails, try to at least output to stderr
+      if (originalConsole.error) {
+        originalConsole.error('[Console Polyfill] Failed to log:', e);
+      }
+      // Re-throw to help with debugging
+      throw e;
     }
   },
   warn: (...args: any[]) => {
     try {
       originalConsole.warn(...args);
     } catch (e) {
-      // Fallback
+      // Fallback to error if warn fails
+      if (originalConsole.error) {
+        originalConsole.error('[Console Polyfill] Failed to warn:', e);
+      }
+      throw e;
     }
   },
   error: (...args: any[]) => {
     try {
       originalConsole.error(...args);
     } catch (e) {
-      // Fallback
+      // Error is critical - always re-throw
+      throw e;
     }
   },
   info: (...args: any[]) => {
     try {
       originalConsole.info(...args);
     } catch (e) {
-      // Fallback
+      // Fallback to log if info fails
+      if (originalConsole.log) {
+        originalConsole.log('[Console Polyfill] Failed to info:', e);
+      }
+      throw e;
     }
   },
   debug: (...args: any[]) => {
     try {
       originalConsole.debug(...args);
     } catch (e) {
-      // Fallback
+      // Debug is least critical, but still throw for debugging
+      if (originalConsole.log) {
+        originalConsole.log('[Console Polyfill] Failed to debug:', e);
+      }
+      throw e;
     }
   },
 };
