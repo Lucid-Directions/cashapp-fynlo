@@ -115,6 +115,9 @@ class WebSocketManager:
             "messages_failed": 0,
             "total_messages": 0
         }
+        
+        # Heartbeat task reference
+        self._heartbeat_task = None
     
     async def connect(
         self,
@@ -393,8 +396,8 @@ class WebSocketManager:
         # Initialize any required resources
         logger.info("WebSocket manager initialized")
         
-        # Start heartbeat task
-        asyncio.create_task(self._heartbeat_loop())
+        # Start heartbeat task and store reference
+        self._heartbeat_task = asyncio.create_task(self._heartbeat_loop())
     
     async def _heartbeat_loop(self):
         """Periodic heartbeat to check connection health"""
@@ -407,6 +410,15 @@ class WebSocketManager:
     
     async def close_all_connections(self):
         """Close all active WebSocket connections"""
+        # Cancel heartbeat task if it exists
+        if hasattr(self, '_heartbeat_task') and self._heartbeat_task:
+            self._heartbeat_task.cancel()
+            try:
+                await self._heartbeat_task
+            except asyncio.CancelledError:
+                pass
+            logger.info("Heartbeat task cancelled")
+        
         connection_ids = list(self.active_connections.keys())
         for connection_id in connection_ids:
             try:

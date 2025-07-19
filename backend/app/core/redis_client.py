@@ -215,9 +215,10 @@ class RedisClient:
         if not self.redis: # Mock fallback
             import fnmatch
             if match:
-                keys = [k.encode() for k in self._mock_storage.keys() if fnmatch.fnmatch(k, match)]
+                # Return strings, not bytes, to match decode_responses=True behavior
+                keys = [k for k in self._mock_storage.keys() if fnmatch.fnmatch(k, match)]
             else:
-                keys = [k.encode() for k in self._mock_storage.keys()]
+                keys = list(self._mock_storage.keys())
             # Simple mock - return all matching keys at once
             return (0, keys[:count])
         try:
