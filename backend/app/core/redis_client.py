@@ -232,6 +232,28 @@ class RedisClient:
             await self.redis.expire(key, timeout)
         except Exception as e:
             logger.error(f"Error setting expire for key {key} in Redis: {e}")
+    
+    async def hset(self, key: str, mapping: dict) -> bool:
+        """Set multiple fields in a hash"""
+        if not self.redis:  # Mock fallback
+            if key not in self._mock_storage:
+                self._mock_storage[key] = {}
+            # Convert dict values to strings for consistency
+            str_mapping = {k: str(v) for k, v in mapping.items()}
+            if isinstance(self._mock_storage.get(key), dict):
+                self._mock_storage[key].update(str_mapping)
+            else:
+                self._mock_storage[key] = str_mapping
+            return True
+        
+        try:
+            # Convert all values to strings for Redis
+            str_mapping = {k: str(v) for k, v in mapping.items()}
+            await self.redis.hset(key, mapping=str_mapping)
+            return True
+        except Exception as e:
+            logger.error(f"Error setting hash {key} in Redis: {e}")
+            return False
 
     def get_client(self) -> Optional[aioredis.Redis]:
         """

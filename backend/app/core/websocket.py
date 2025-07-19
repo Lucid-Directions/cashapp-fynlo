@@ -112,7 +112,8 @@ class WebSocketManager:
             "total_connections": 0,
             "active_connections": 0,
             "messages_sent": 0,
-            "messages_failed": 0
+            "messages_failed": 0,
+            "total_messages": 0
         }
     
     async def connect(
@@ -249,6 +250,7 @@ class WebSocketManager:
             await connection.websocket.send_text(json.dumps(message_data))
             
             self.stats["messages_sent"] += 1
+            self.stats["total_messages"] += 1
             return True
             
         except WebSocketDisconnect:
@@ -385,6 +387,37 @@ class WebSocketManager:
             },
             "queued_messages": sum(len(messages) for messages in self.message_queue.values())
         }
+    
+    async def setup(self):
+        """Initialize WebSocket manager"""
+        # Initialize any required resources
+        logger.info("WebSocket manager initialized")
+        
+        # Start heartbeat task
+        asyncio.create_task(self._heartbeat_loop())
+    
+    async def _heartbeat_loop(self):
+        """Periodic heartbeat to check connection health"""
+        while True:
+            try:
+                await asyncio.sleep(30)  # Heartbeat every 30 seconds
+                await self.ping_connections()
+            except Exception as e:
+                logger.error(f"Error in heartbeat loop: {e}")
+    
+    async def close_all_connections(self):
+        """Close all active WebSocket connections"""
+        connection_ids = list(self.active_connections.keys())
+        for connection_id in connection_ids:
+            try:
+                connection = self.active_connections.get(connection_id)
+                if connection and connection.websocket:
+                    await connection.websocket.close()
+            except Exception as e:
+                logger.error(f"Error closing connection {connection_id}: {e}")
+            finally:
+                await self.disconnect(connection_id)
+        logger.info(f"Closed {len(connection_ids)} WebSocket connections")
     
     async def _update_redis_stats(self):
         """Update connection stats in Redis for monitoring"""
