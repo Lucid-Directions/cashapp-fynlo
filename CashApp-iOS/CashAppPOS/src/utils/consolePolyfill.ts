@@ -12,59 +12,59 @@ const originalConsole = {
   debug: console.debug,
 };
 
+// Track if we've already warned about console issues to avoid spam
+let hasWarnedAboutConsoleIssue = false;
+
 // Export for use in other files
 export const safeConsole = {
   log: (...args: any[]) => {
     try {
       originalConsole.log(...args);
     } catch (e) {
-      // If console.log fails, try to at least output to stderr
-      if (originalConsole.error) {
-        originalConsole.error('[Console Polyfill] Failed to log:', e);
+      // Silently fail - the polyfill's job is to prevent crashes
+      // Store error info for debugging if needed
+      if (!hasWarnedAboutConsoleIssue && __DEV__) {
+        hasWarnedAboutConsoleIssue = true;
+        // Try to notify about the issue in a safe way
+        try {
+          originalConsole.error('[Console Polyfill] Console.log is failing. Suppressing further warnings.');
+        } catch {}
       }
-      // Re-throw to help with debugging
-      throw e;
     }
   },
   warn: (...args: any[]) => {
     try {
       originalConsole.warn(...args);
     } catch (e) {
-      // Fallback to error if warn fails
-      if (originalConsole.error) {
-        originalConsole.error('[Console Polyfill] Failed to warn:', e);
+      // Silently fail for safety
+      if (!hasWarnedAboutConsoleIssue && __DEV__) {
+        hasWarnedAboutConsoleIssue = true;
+        try {
+          originalConsole.error('[Console Polyfill] Console methods are failing. Suppressing further warnings.');
+        } catch {}
       }
-      throw e;
     }
   },
   error: (...args: any[]) => {
     try {
       originalConsole.error(...args);
     } catch (e) {
-      // Error is critical - always re-throw
-      throw e;
+      // Even error must fail safely to prevent app crashes
+      // In production, we absolutely cannot let logging crash the app
     }
   },
   info: (...args: any[]) => {
     try {
       originalConsole.info(...args);
     } catch (e) {
-      // Fallback to log if info fails
-      if (originalConsole.log) {
-        originalConsole.log('[Console Polyfill] Failed to info:', e);
-      }
-      throw e;
+      // Silently fail
     }
   },
   debug: (...args: any[]) => {
     try {
       originalConsole.debug(...args);
     } catch (e) {
-      // Debug is least critical, but still throw for debugging
-      if (originalConsole.log) {
-        originalConsole.log('[Console Polyfill] Failed to debug:', e);
-      }
-      throw e;
+      // Silently fail - debug is lowest priority
     }
   },
 };
