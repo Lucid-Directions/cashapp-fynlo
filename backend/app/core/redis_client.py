@@ -190,7 +190,10 @@ class RedisClient:
             items = list(self._mock_storage[key].items())
             if withscores:
                 return items[:end+1] if end != -1 else items
-            return [k for k, v in items[:end+1] if end != -1 else items]
+            else:
+                # Extract just the keys from the items
+                selected_items = items[:end+1] if end != -1 else items
+                return [k for k, v in selected_items]
         try:
             return await self.redis.zrange(key, start, end, withscores=withscores)
         except Exception as e:
