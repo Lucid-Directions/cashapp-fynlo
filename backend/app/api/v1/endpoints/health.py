@@ -68,11 +68,20 @@ async def detailed_health_check(db: Session = Depends(get_db)):
         redis_ping = await redis_client.ping()
         redis_response_time = (time.time() - start_time) * 1000
         
+        # Check if using mock storage
+        is_mock = redis_client.redis is None and redis_client._mock_storage is not None
+        
         health_status["components"]["redis"] = {
             "status": "healthy" if redis_ping else "unhealthy",
             "response_time_ms": round(redis_response_time, 2),
-            "type": "redis"
+            "type": "redis",
+            "mode": "mock" if is_mock else "real",
+            "connection_url": settings.REDIS_URL if not is_mock else "in-memory"
         }
+        
+        if is_mock and settings.ENVIRONMENT == "production":
+            health_status["status"] = "degraded"
+            health_status["components"]["redis"]["warning"] = "Using in-memory storage in production"
     except Exception as e:
         health_status["status"] = "degraded"
         health_status["components"]["redis"] = {

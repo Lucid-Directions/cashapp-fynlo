@@ -48,16 +48,22 @@ class RedisClient:
                 # Clear mock storage if real connection is successful
                 self._mock_storage = {}
             except Exception as e:
-                logger.error(f"❌ Failed to connect to Redis: {e}")
-                if settings.ENVIRONMENT in ["development", "testing", "local"]: # Broader fallback for local dev
+                # Log the full error details
+                error_msg = str(e) if str(e) else type(e).__name__
+                logger.error(f"❌ Failed to connect to Redis: {error_msg}")
+                
+                # In production, allow fallback to mock storage with warning
+                # This prevents complete application failure if Redis is temporarily unavailable
+                if settings.ENVIRONMENT == "production":
+                    logger.warning("⚠️ Redis unavailable in production - using in-memory fallback. This may impact performance and data persistence.")
+                    self.redis = None
+                    # Continue with mock storage
+                elif settings.ENVIRONMENT in ["development", "testing", "local"]:
                     logger.warning("⚠️ Redis connection failed. Falling back to mock storage.")
-                    self.redis = None # Ensure redis is None if connection failed
-                    # _mock_storage is already initialized
+                    self.redis = None
                 else:
-                    # In production, a failed Redis connection should be a critical error.
-                    # Depending on policy, either raise the error or have a more robust fallback.
-                    # For now, let's re-raise to make it visible.
-                    raise ConnectionError(f"Critical: Failed to connect to Redis in production environment - {e}")
+                    # For any other environment, raise the error
+                    raise ConnectionError(f"Failed to connect to Redis: {error_msg}")
 
 
     async def disconnect(self):
@@ -158,6 +164,18 @@ class RedisClient:
         logger.info(f"Deleted {keys_deleted_count} keys matching pattern: {pattern}")
         return keys_deleted_count
 
+    async def ping(self) -> bool:
+        """Ping Redis to check if connection is alive"""
+        if not self.redis:  # Mock fallback
+            # Mock is always "alive"
+            return True
+        try:
+            response = await self.redis.ping()
+            return response is True or str(response).upper() == 'PONG'
+        except Exception as e:
+            logger.error(f"Error pinging Redis: {str(e)}")
+            return False
+    
     async def exists(self, key: str) -> bool:
         """Check if key exists"""
         if not self.redis: # Mock fallback
