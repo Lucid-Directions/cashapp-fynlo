@@ -25,10 +25,25 @@ class RedisClient:
         """Connect to Redis"""
         if not self.redis:
             try:
+                # Check if REDIS_URL is configured
+                if not hasattr(settings, 'REDIS_URL') or not settings.REDIS_URL:
+                    logger.warning("⚠️ REDIS_URL not configured. Using mock storage.")
+                    if settings.ENVIRONMENT == "production":
+                        raise ValueError("REDIS_URL must be configured in production")
+                    return
+                    
                 logger.info(f"Attempting to connect to Redis at {settings.REDIS_URL}")
-                self.pool = ConnectionPool.from_url(settings.REDIS_URL, decode_responses=True, max_connections=20)
+                self.pool = ConnectionPool.from_url(
+                    settings.REDIS_URL, 
+                    decode_responses=True, 
+                    max_connections=20,
+                    socket_connect_timeout=5,  # 5 second connection timeout
+                    socket_timeout=5  # 5 second operation timeout
+                )
                 self.redis = aioredis.Redis(connection_pool=self.pool)
-                await self.redis.ping()
+                # Add timeout to ping operation
+                import asyncio
+                await asyncio.wait_for(self.redis.ping(), timeout=5.0)
                 logger.info("✅ Redis connected successfully.")
                 # Clear mock storage if real connection is successful
                 self._mock_storage = {}
