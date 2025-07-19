@@ -440,22 +440,40 @@ async def init_db():
                 logger.error(f"Failed to connect to database after {max_retries} attempts")
                 # Log connection details for debugging (without password)
                 db_host = database_url.split('@')[1].split('/')[0] if '@' in database_url else 'unknown'
+                # Extract database name from URL
+                db_name = database_url.split('/')[-1].split('?')[0] if '/' in database_url else 'unknown'
                 logger.error(f"Database host: {db_host}")
+                logger.error(f"Database name: {db_name}")
                 logger.error(f"SSL mode: {'require' if 'sslmode=require' in database_url else 'not set'}")
                 
                 # Provide helpful guidance for DigitalOcean
                 if "digitalocean.com" in database_url:
                     logger.error("\n" + "="*60)
                     logger.error("DigitalOcean Database Connection Troubleshooting:")
-                    logger.error("1. In DO Database Settings > Trusted Sources:")
-                    logger.error("   - DO NOT add IP addresses for App Platform")
-                    logger.error("   - Click 'Add Trusted Source'")
-                    logger.error("   - Select 'App Platform App' (not IP)")
-                    logger.error("   - Choose your app from the dropdown")
-                    logger.error("2. Alternative: Try port 25060 instead of 25061")
-                    logger.error("3. Ensure both app and database are in same region")
-                    logger.error("4. DATABASE_URL must include ?sslmode=require")
+                    
+                    # Check for "no such database" error
+                    if "no such database" in str(e).lower():
+                        logger.error("❌ DATABASE NAME MISMATCH!")
+                        logger.error(f"   Your DATABASE_URL specifies database: '{db_name}'")
+                        logger.error("   But this database doesn't exist on the server")
+                        logger.error("\nTo fix:")
+                        logger.error("1. Check your DigitalOcean database dashboard")
+                        logger.error("2. Find the actual database name (often 'defaultdb')")
+                        logger.error("3. Update DATABASE_URL in App Platform settings")
+                        logger.error(f"4. Change '/{db_name}' to '/actual-database-name'")
+                    else:
+                        logger.error("1. In DO Database Settings > Trusted Sources:")
+                        logger.error("   - DO NOT add IP addresses for App Platform")
+                        logger.error("   - Click 'Add Trusted Source'")
+                        logger.error("   - Select 'App Platform App' (not IP)")
+                        logger.error("   - Choose your app from the dropdown")
+                        logger.error("2. Alternative: Try port 25060 instead of 25061")
+                        logger.error("3. Ensure both app and database are in same region")
+                        logger.error("4. DATABASE_URL must include ?sslmode=require")
+                    
                     logger.error("\nCurrent connection details:")
+                    logger.error(f"  Host: {db_host}")
+                    logger.error(f"  Database: {db_name}")
                     logger.error(f"  Port: {':25061' if ':25061' in database_url else ':25060' if ':25060' in database_url else 'unknown'}")
                     logger.error(f"  SSL: {'Yes' if 'sslmode=require' in database_url else 'No'}")
                     logger.error("="*60 + "\n")
