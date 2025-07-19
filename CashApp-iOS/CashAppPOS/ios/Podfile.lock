@@ -292,6 +292,10 @@ PODS:
     - React-Core
   - react-native-camera/RN (4.2.1):
     - React-Core
+  - react-native-config (1.5.5):
+    - react-native-config/App (= 1.5.5)
+  - react-native-config/App (1.5.5):
+    - React-Core
   - react-native-image-picker (8.2.1):
     - RCT-Folly (= 2021.07.22.00)
     - React-Core
@@ -530,6 +534,7 @@ DEPENDENCIES:
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
   - react-native-biometrics (from `../node_modules/react-native-biometrics`)
   - react-native-camera (from `../node_modules/react-native-camera`)
+  - react-native-config (from `../node_modules/react-native-config`)
   - react-native-image-picker (from `../node_modules/react-native-image-picker`)
   - "react-native-netinfo (from `../node_modules/@react-native-community/netinfo`)"
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
@@ -628,6 +633,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-biometrics"
   react-native-camera:
     :path: "../node_modules/react-native-camera"
+  react-native-config:
+    :path: "../node_modules/react-native-config"
   react-native-image-picker:
     :path: "../node_modules/react-native-image-picker"
   react-native-netinfo:
@@ -725,6 +732,7 @@ SPEC CHECKSUMS:
   React-logger: afa402da502a35728c9073804b1802861783a996
   react-native-biometrics: 43ed5b828646a7862dbc7945556446be00798e7d
   react-native-camera: 079d80421f0572d6b4e836908114d614d0adb553
+  react-native-config: 644074ab88db883fcfaa584f03520ec29589d7df
   react-native-image-picker: 9828970e0681068ad2417963cfe8c5ea3b233215
   react-native-netinfo: cec9c4e86083cb5b6aba0e0711f563e2fbbff187
   react-native-safe-area-context: 758e894ca5a9bd1868d2a9cfbca7326a2b6bf9dc

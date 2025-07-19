@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import ErrorTrackingService from '../services/ErrorTrackingService';
+import { error as logError } from '../services/LoggingService';
 
 interface Props {
   children: ReactNode;
@@ -45,7 +46,12 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('🚨 ErrorBoundary caught an error:', error, errorInfo);
+    logError('ErrorBoundary caught an error', error, {
+      context: {
+        source: 'ErrorBoundary',
+        componentStack: errorInfo.componentStack,
+      }
+    });
     
     this.setState({
       errorInfo,
