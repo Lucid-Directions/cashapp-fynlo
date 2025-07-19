@@ -68,11 +68,19 @@ async def detailed_health_check(db: Session = Depends(get_db)):
         redis_ping = await redis_client.ping()
         redis_response_time = (time.time() - start_time) * 1000
         
+        # Check if using mock storage
+        is_mock = redis_client.redis is None and redis_client._mock_storage is not None
+        
         health_status["components"]["redis"] = {
             "status": "healthy" if redis_ping else "unhealthy",
             "response_time_ms": round(redis_response_time, 2),
-            "type": "redis"
+            "type": "redis",
+            "mode": "mock" if is_mock else "real"
         }
+        
+        if is_mock and settings.ENVIRONMENT == "production":
+            health_status["status"] = "degraded"
+            health_status["components"]["redis"]["warning"] = "Using in-memory storage in production"
     except Exception as e:
         health_status["status"] = "degraded"
         health_status["components"]["redis"] = {
@@ -128,45 +136,39 @@ async def check_dependencies(current_user: User = Depends(get_current_user)):
         )
     
     dependencies = {
-        "supabase": {"status": "unknown", "endpoint": settings.SUPABASE_URL if hasattr(settings, 'SUPABASE_URL') else "not_configured"},
-        "stripe": {"status": "unknown", "endpoint": "api.stripe.com"},
-        "sumup": {"status": "unknown", "endpoint": "api.sumup.com"},
-        "storage": {"status": "unknown", "endpoint": "digitalocean_spaces"}
+        "supabase": {"status": "unknown", "configured": hasattr(settings, 'SUPABASE_URL') and bool(settings.SUPABASE_URL)},
+        "stripe": {"status": "unknown", "configured": hasattr(settings, 'STRIPE_SECRET_KEY') and bool(settings.STRIPE_SECRET_KEY)},
+        "sumup": {"status": "unknown", "configured": hasattr(settings, 'SUMUP_API_KEY') and bool(settings.SUMUP_API_KEY)},
+        "storage": {"status": "unknown", "type": "spaces" if hasattr(settings, 'ENABLE_SPACES_STORAGE') and settings.ENABLE_SPACES_STORAGE else "local"}
     }
     
     # Check Supabase
     try:
-        if hasattr(settings, 'SUPABASE_URL') and settings.SUPABASE_URL:
+        if dependencies["supabase"]["configured"]:
             # TODO: Implement actual Supabase health check
             dependencies["supabase"]["status"] = "healthy"
-            dependencies["supabase"]["configured"] = True
         else:
             dependencies["supabase"]["status"] = "not_configured"
-            dependencies["supabase"]["configured"] = False
     except Exception as e:
         dependencies["supabase"]["status"] = "unhealthy"
         dependencies["supabase"]["error"] = str(e)
     
     # Check payment providers
     try:
-        if hasattr(settings, 'STRIPE_SECRET_KEY') and settings.STRIPE_SECRET_KEY:
+        if dependencies["stripe"]["configured"]:
             dependencies["stripe"]["status"] = "configured"
-            dependencies["stripe"]["configured"] = True
         else:
             dependencies["stripe"]["status"] = "not_configured"
-            dependencies["stripe"]["configured"] = False
     except Exception as e:
         dependencies["stripe"]["status"] = "error"
         dependencies["stripe"]["error"] = str(e)
     
     # Check storage
     try:
-        if hasattr(settings, 'ENABLE_SPACES_STORAGE') and settings.ENABLE_SPACES_STORAGE:
+        if dependencies["storage"]["type"] == "spaces":
             dependencies["storage"]["status"] = "configured"
-            dependencies["storage"]["type"] = "spaces"
         else:
             dependencies["storage"]["status"] = "local"
-            dependencies["storage"]["type"] = "local"
     except Exception as e:
         dependencies["storage"]["status"] = "error"
         dependencies["storage"]["error"] = str(e)

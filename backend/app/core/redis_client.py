@@ -32,13 +32,35 @@ class RedisClient:
                         raise ValueError("REDIS_URL must be configured in production")
                     return
                     
-                logger.info(f"Attempting to connect to Redis at {settings.REDIS_URL}")
+                # Mask password in logs
+                redis_url_masked = settings.REDIS_URL
+                if '@' in redis_url_masked and ':' in redis_url_masked:
+                    # Extract and mask password
+                    protocol_end = redis_url_masked.find('://') + 3
+                    at_sign = redis_url_masked.find('@')
+                    if protocol_end < at_sign:
+                        user_pass = redis_url_masked[protocol_end:at_sign]
+                        if ':' in user_pass:
+                            user, _ = user_pass.split(':', 1)
+                            redis_url_masked = f"{redis_url_masked[:protocol_end]}{user}:****{redis_url_masked[at_sign:]}"
+                
+                logger.info(f"Attempting to connect to Redis at {redis_url_masked}")
+                
+                # For DigitalOcean Redis with SSL (rediss://), we need to handle SSL properly
+                connection_kwargs = {
+                    'decode_responses': True,
+                    'max_connections': 20,
+                    'socket_connect_timeout': 5,
+                    'socket_timeout': 5,
+                }
+                
+                # If using rediss:// (SSL), ensure SSL is properly configured
+                if settings.REDIS_URL.startswith('rediss://'):
+                    connection_kwargs['ssl_cert_reqs'] = 'none'  # DigitalOcean uses self-signed certs
+                
                 self.pool = ConnectionPool.from_url(
                     settings.REDIS_URL, 
-                    decode_responses=True, 
-                    max_connections=20,
-                    socket_connect_timeout=5,  # 5 second connection timeout
-                    socket_timeout=5  # 5 second operation timeout
+                    **connection_kwargs
                 )
                 self.redis = aioredis.Redis(connection_pool=self.pool)
                 # Add timeout to ping operation
@@ -48,16 +70,22 @@ class RedisClient:
                 # Clear mock storage if real connection is successful
                 self._mock_storage = {}
             except Exception as e:
-                logger.error(f"❌ Failed to connect to Redis: {e}")
-                if settings.ENVIRONMENT in ["development", "testing", "local"]: # Broader fallback for local dev
+                # Log the full error details
+                error_msg = str(e) if str(e) else type(e).__name__
+                logger.error(f"❌ Failed to connect to Redis: {error_msg}")
+                
+                # In production, allow fallback to mock storage with warning
+                # This prevents complete application failure if Redis is temporarily unavailable
+                if settings.ENVIRONMENT == "production":
+                    logger.warning("⚠️ Redis unavailable in production - using in-memory fallback. This may impact performance and data persistence.")
+                    self.redis = None
+                    # Continue with mock storage
+                elif settings.ENVIRONMENT in ["development", "testing", "local"]:
                     logger.warning("⚠️ Redis connection failed. Falling back to mock storage.")
-                    self.redis = None # Ensure redis is None if connection failed
-                    # _mock_storage is already initialized
+                    self.redis = None
                 else:
-                    # In production, a failed Redis connection should be a critical error.
-                    # Depending on policy, either raise the error or have a more robust fallback.
-                    # For now, let's re-raise to make it visible.
-                    raise ConnectionError(f"Critical: Failed to connect to Redis in production environment - {e}")
+                    # For any other environment, raise the error
+                    raise ConnectionError(f"Failed to connect to Redis: {error_msg}")
 
 
     async def disconnect(self):
@@ -158,6 +186,18 @@ class RedisClient:
         logger.info(f"Deleted {keys_deleted_count} keys matching pattern: {pattern}")
         return keys_deleted_count
 
+    async def ping(self) -> bool:
+        """Ping Redis to check if connection is alive"""
+        if not self.redis:  # Mock fallback
+            # Mock is always "alive"
+            return True
+        try:
+            response = await self.redis.ping()
+            return response is True or str(response).upper() == 'PONG'
+        except Exception as e:
+            logger.error(f"Error pinging Redis: {str(e)}")
+            return False
+    
     async def exists(self, key: str) -> bool:
         """Check if key exists"""
         if not self.redis: # Mock fallback

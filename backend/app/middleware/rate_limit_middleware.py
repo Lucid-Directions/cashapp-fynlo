@@ -87,41 +87,40 @@ async def init_fastapi_limiter():
     Initializes the fastapi-limiter with the Redis client.
     This should be called during application startup after Redis is connected.
     """
-    if not redis_client or not await redis_client.exists("ping_test_key"): # Check if redis_client is connected
-         # This check relies on redis_client.exists() using the actual redis connection
-         # or its mock fallback.
-        if settings.ENVIRONMENT not in ["development", "testing", "local"] or not redis_client._mock_storage:
-            logger.error("Rate limiter cannot be initialized: Redis is not available and not in mock mode.")
-            # In production, this is a critical failure.
-            # Depending on policy, might raise an error or disable rate limiting with a warning.
-            # For now, log error and limiter might operate in a no-op or error state.
+    try:
+        # Check if Redis is available
+        redis_available = False
+        if redis_client and redis_client.redis:
+            # Test the connection
+            try:
+                await redis_client.redis.ping()
+                redis_available = True
+            except:
+                pass
+        
+        # Check if we're in mock mode
+        mock_mode = redis_client and redis_client._mock_storage is not None and not redis_client.redis
+        
+        if not redis_available and not mock_mode:
+            # No Redis and no mock mode - rate limiting cannot work
+            error_msg = "Rate limiter cannot be initialized: Redis is not available and not in mock mode."
+            logger.error(error_msg)
+            
+            if settings.ENVIRONMENT == "production":
+                # In production, log warning but continue (rate limiting will be disabled)
+                logger.warning("⚠️ Rate limiting disabled in production due to Redis unavailability")
             return
-
-    # The `limiter` object we created earlier will be used by route decorators.
-    # We need to ensure that the `RateLimiter` state is configured with our Redis client.
-    # This is a bit of a workaround for how `fastapi-limiter` handles its global state
-    # when not using `FastAPILimiter.init()`.
-
-    # The `limiter` instance itself should use the `redis_client` through its `key_func`
-    # and how it stores data.
-    # `fastapi-limiter` uses a global `_DEFAULT_LIMITER` if you don't pass one
-    # to `FastAPILimiter.init()`. Since we are using decorators with our `limiter` instance,
-    # it should pick up our Redis client automatically.
-
-    # The key part is that `redis_client.get_client()` must return a valid
-    # `redis.asyncio.Redis` instance or a compatible object.
-    # Our `RedisClient.get_client()` is designed to do this.
-
-    # No explicit global state init for `fastapi-limiter` is needed here if decorators
-    # are used with our `limiter` instance, as it will use the `storage_uri` implicitly
-    # from the `redis_client` if it were set up that way, or use the client directly.
-    # The `fastapi-limiter` documentation is a bit sparse on custom client injection
-    # without the global init.
-
-    # However, if we were to use `app.state.limiter = limiter` and then use
-    # `request.state.limiter` in dependencies, this would be cleaner.
-    # For now, the global `limiter` instance should work with decorators.
-    logger.info("✅ Rate limiter configured to use Redis client (or mock).")
+        
+        # Rate limiter can work with either real Redis or mock storage
+        if redis_available:
+            logger.info("✅ Rate limiter initialized with Redis backend")
+        else:
+            logger.info("✅ Rate limiter initialized with mock storage backend")
+            
+    except Exception as e:
+        logger.error(f"❌ Error initializing rate limiter: {str(e)}")
+        if settings.ENVIRONMENT == "production":
+            logger.warning("⚠️ Rate limiting disabled due to initialization error")
 
 
 # Custom exception handler for RateLimitExceeded to provide a standard API response.
