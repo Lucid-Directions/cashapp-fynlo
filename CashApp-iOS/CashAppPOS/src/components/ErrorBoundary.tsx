@@ -46,7 +46,12 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    logError('ErrorBoundary caught an error', error, 'ErrorBoundary');
+    logError('ErrorBoundary caught an error', error, {
+      context: {
+        source: 'ErrorBoundary',
+        componentStack: errorInfo.componentStack,
+      }
+    });
     
     this.setState({
       errorInfo,
