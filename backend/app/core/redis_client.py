@@ -74,31 +74,41 @@ class RedisClient:
                     await asyncio.wait_for(self.redis.ping(), timeout=20.0)
                     logger.info("✅ Redis connected successfully with default SSL handling")
                     
-                except asyncio.TimeoutError:
-                    logger.warning("First connection attempt timed out, trying with explicit SSL settings...")
+                except (asyncio.TimeoutError, aioredis.TimeoutError, aioredis.ConnectionError) as e:
+                    logger.warning(f"First connection attempt failed ({type(e).__name__}), trying with explicit SSL settings...")
                     
-                    # Clean up previous connection attempt
+                    # Clean up previous connection attempt with proper error handling
                     if self.redis:
-                        await self.redis.close()
+                        try:
+                            await self.redis.close()
+                        except Exception as cleanup_error:
+                            logger.debug(f"Error during Redis client cleanup: {cleanup_error}")
                         self.redis = None
                     if self.pool:
-                        await self.pool.disconnect()
+                        try:
+                            await self.pool.disconnect()
+                        except Exception as cleanup_error:
+                            logger.debug(f"Error during pool cleanup: {cleanup_error}")
                         self.pool = None
                     
-                    # If rediss:// URL and timeout, try with explicit SSL settings
+                    # If rediss:// URL and connection failed, try with explicit SSL settings
                     if settings.REDIS_URL.startswith('rediss://'):
                         connection_kwargs.update({
                             'ssl_cert_reqs': 'none',  # DigitalOcean uses self-signed certs
                             'ssl_check_hostname': False,
                         })
                         
-                        self.pool = ConnectionPool.from_url(
-                            settings.REDIS_URL, 
-                            **connection_kwargs
-                        )
-                        self.redis = aioredis.Redis(connection_pool=self.pool)
-                        await asyncio.wait_for(self.redis.ping(), timeout=20.0)
-                        logger.info("✅ Redis connected successfully with explicit SSL settings")
+                        try:
+                            self.pool = ConnectionPool.from_url(
+                                settings.REDIS_URL, 
+                                **connection_kwargs
+                            )
+                            self.redis = aioredis.Redis(connection_pool=self.pool)
+                            await asyncio.wait_for(self.redis.ping(), timeout=20.0)
+                            logger.info("✅ Redis connected successfully with explicit SSL settings")
+                        except (asyncio.TimeoutError, aioredis.TimeoutError, aioredis.ConnectionError) as retry_error:
+                            logger.error(f"Second connection attempt also failed: {type(retry_error).__name__}: {retry_error}")
+                            raise
                     else:
                         raise
                 
