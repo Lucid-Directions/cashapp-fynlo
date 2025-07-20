@@ -151,9 +151,11 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
 };
 
 // Export specific event hooks for common use cases
+// Note: These hooks do not auto-connect. You must ensure WebSocket is connected
+// by either using useWebSocket with autoConnect: true or manually calling connect()
 
 export const useOrderUpdates = (onOrderUpdate: (data: any) => void) => {
-  const { subscribe, connect, connected } = useWebSocket();
+  const { subscribe } = useWebSocket();
   
   useEffect(() => {
     const unsubscribeCreated = subscribe(WebSocketEventType.ORDER_CREATED, onOrderUpdate);
@@ -166,67 +168,31 @@ export const useOrderUpdates = (onOrderUpdate: (data: any) => void) => {
       unsubscribeStatus();
     };
   }, [subscribe, onOrderUpdate]);
-  
-  // Ensure connection when using this hook
-  useEffect(() => {
-    if (!connected) {
-      connect();
-    }
-  }, [connected, connect]);
-  
-  return { connected, connect };
 };
 
 export const useInventoryUpdates = (onInventoryUpdate: (data: any) => void) => {
-  const { subscribe, connect, connected } = useWebSocket();
+  const { subscribe } = useWebSocket();
   
   useEffect(() => {
     const unsubscribe = subscribe(WebSocketEventType.INVENTORY_UPDATED, onInventoryUpdate);
     return unsubscribe;
   }, [subscribe, onInventoryUpdate]);
-  
-  // Ensure connection when using this hook
-  useEffect(() => {
-    if (!connected) {
-      connect();
-    }
-  }, [connected, connect]);
-  
-  return { connected, connect };
 };
 
 export const useMenuUpdates = (onMenuUpdate: (data: any) => void) => {
-  const { subscribe, connect, connected } = useWebSocket();
+  const { subscribe } = useWebSocket();
   
   useEffect(() => {
     const unsubscribe = subscribe(WebSocketEventType.MENU_UPDATED, onMenuUpdate);
     return unsubscribe;
   }, [subscribe, onMenuUpdate]);
-  
-  // Ensure connection when using this hook
-  useEffect(() => {
-    if (!connected) {
-      connect();
-    }
-  }, [connected, connect]);
-  
-  return { connected, connect };
 };
 
 export const useSystemNotifications = (onNotification: (data: any) => void) => {
-  const { subscribe, connect, connected } = useWebSocket();
+  const { subscribe } = useWebSocket();
   
   useEffect(() => {
     const unsubscribe = subscribe(WebSocketEventType.SYSTEM_NOTIFICATION, onNotification);
     return unsubscribe;
   }, [subscribe, onNotification]);
-  
-  // Ensure connection when using this hook
-  useEffect(() => {
-    if (!connected) {
-      connect();
-    }
-  }, [connected, connect]);
-  
-  return { connected, connect };
 };
