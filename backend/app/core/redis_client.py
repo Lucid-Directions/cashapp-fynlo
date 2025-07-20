@@ -46,37 +46,54 @@ class RedisClient:
                 
                 logger.info(f"Attempting to connect to Redis at {redis_url_masked}")
                 
-                # For DigitalOcean Redis with SSL (rediss://), we need to handle SSL properly
+                # For DigitalOcean Valkey, try different connection approaches
+                
+                # First, try simple approach - let redis-py handle SSL from rediss:// URL
+                logger.info("Attempting Redis connection...")
+                
+                # Basic connection parameters with increased timeouts
                 connection_kwargs = {
                     'decode_responses': True,
                     'max_connections': 20,
-                    'socket_connect_timeout': 15,  # Increased for DigitalOcean
-                    'socket_timeout': 15,  # Increased for DigitalOcean
+                    'socket_connect_timeout': 30,  # Increased from 15 to 30
+                    'socket_timeout': 30,  # Increased from 15 to 30
                     'retry_on_timeout': True,
                     'health_check_interval': 30,
                 }
                 
-                # If using rediss:// (SSL), ensure SSL is properly configured for DigitalOcean Valkey
-                if settings.REDIS_URL.startswith('rediss://'):
-                    # For redis-py library, SSL parameters are handled differently
-                    # ConnectionPool.from_url doesn't accept 'ssl' parameter
-                    connection_kwargs.update({
-                        'ssl_cert_reqs': 'none',  # String 'none', not None
-                        'ssl_check_hostname': False,
-                        'ssl_ca_certs': None,
-                        'ssl_certfile': None,
-                        'ssl_keyfile': None,
-                    })
+                # For rediss:// URLs, try without explicit SSL params first
+                # redis-py should handle SSL automatically from the URL scheme
+                try:
+                    self.pool = ConnectionPool.from_url(
+                        settings.REDIS_URL, 
+                        **connection_kwargs
+                    )
+                    self.redis = aioredis.Redis(connection_pool=self.pool)
+                    # Test connection with longer timeout
+                    import asyncio
+                    await asyncio.wait_for(self.redis.ping(), timeout=20.0)
+                    logger.info("✅ Redis connected successfully with default SSL handling")
+                    
+                except asyncio.TimeoutError:
+                    logger.warning("First connection attempt timed out, trying with explicit SSL settings...")
+                    
+                    # If rediss:// URL and timeout, try with explicit SSL settings
+                    if settings.REDIS_URL.startswith('rediss://'):
+                        connection_kwargs.update({
+                            'ssl_cert_reqs': 'none',  # DigitalOcean uses self-signed certs
+                            'ssl_check_hostname': False,
+                        })
+                        
+                        self.pool = ConnectionPool.from_url(
+                            settings.REDIS_URL, 
+                            **connection_kwargs
+                        )
+                        self.redis = aioredis.Redis(connection_pool=self.pool)
+                        await asyncio.wait_for(self.redis.ping(), timeout=20.0)
+                        logger.info("✅ Redis connected successfully with explicit SSL settings")
+                    else:
+                        raise
                 
-                self.pool = ConnectionPool.from_url(
-                    settings.REDIS_URL, 
-                    **connection_kwargs
-                )
-                self.redis = aioredis.Redis(connection_pool=self.pool)
-                # Add timeout to ping operation
-                import asyncio
-                await asyncio.wait_for(self.redis.ping(), timeout=10.0)
-                logger.info("✅ Redis connected successfully.")
                 # Clear mock storage if real connection is successful
                 self._mock_storage = {}
             except Exception as e:
