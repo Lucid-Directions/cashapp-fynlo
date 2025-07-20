@@ -69,7 +69,7 @@ async def detailed_health_check(db: Session = Depends(get_db)):
         redis_response_time = (time.time() - start_time) * 1000
         
         # Check if using mock storage
-        is_mock = redis_client.redis is None and redis_client._mock_storage is not None
+        is_mock = redis_client.redis is None
         
         health_status["components"]["redis"] = {
             "status": "healthy" if redis_ping else "unhealthy",

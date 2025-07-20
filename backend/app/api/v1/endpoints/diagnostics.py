@@ -128,7 +128,7 @@ async def check_environment(
         redis_ping = await redis_client.ping()
         env_status["redis_status"] = {
             "connected": redis_ping,
-            "mode": "mock" if redis_client._mock_storage is not None else "real",
+            "mode": "mock" if redis_client.redis is None else "real",
             "error": None
         }
     except Exception as e:
@@ -177,7 +177,7 @@ async def test_redis_connection(
         results["tests"].append({
             "test": "ping",
             "success": ping_result,
-            "mode": "mock" if redis_client._mock_storage is not None else "real"
+            "mode": "mock" if redis_client.redis is None else "real"
         })
     except Exception as e:
         results["tests"].append({
