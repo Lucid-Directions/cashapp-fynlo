@@ -50,13 +50,25 @@ class RedisClient:
                 connection_kwargs = {
                     'decode_responses': True,
                     'max_connections': 20,
-                    'socket_connect_timeout': 5,
-                    'socket_timeout': 5,
+                    'socket_connect_timeout': 15,  # Increased for DigitalOcean
+                    'socket_timeout': 15,  # Increased for DigitalOcean
+                    'retry_on_timeout': True,
+                    'health_check_interval': 30,
                 }
                 
-                # If using rediss:// (SSL), ensure SSL is properly configured
+                # If using rediss:// (SSL), ensure SSL is properly configured for DigitalOcean Valkey
                 if settings.REDIS_URL.startswith('rediss://'):
-                    connection_kwargs['ssl_cert_reqs'] = 'none'  # DigitalOcean uses self-signed certs
+                    import ssl
+                    # Create SSL context that works with DigitalOcean Valkey
+                    ssl_context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
+                    ssl_context.check_hostname = False
+                    ssl_context.verify_mode = ssl.CERT_NONE
+                    
+                    connection_kwargs.update({
+                        'ssl': ssl_context,
+                        'ssl_cert_reqs': None,
+                        'ssl_check_hostname': False,
+                    })
                 
                 self.pool = ConnectionPool.from_url(
                     settings.REDIS_URL, 
@@ -65,7 +77,7 @@ class RedisClient:
                 self.redis = aioredis.Redis(connection_pool=self.pool)
                 # Add timeout to ping operation
                 import asyncio
-                await asyncio.wait_for(self.redis.ping(), timeout=5.0)
+                await asyncio.wait_for(self.redis.ping(), timeout=10.0)
                 logger.info("✅ Redis connected successfully.")
                 # Clear mock storage if real connection is successful
                 self._mock_storage = {}
