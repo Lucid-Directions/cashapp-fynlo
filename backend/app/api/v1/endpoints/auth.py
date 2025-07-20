@@ -166,14 +166,20 @@ async def verify_supabase_user(
                 if needs_update:
                     db.query(Restaurant).filter(Restaurant.id == db_user.restaurant_id).update(update_data)
                     db.commit()
+                    
+                    # Re-query to get updated data
+                    result = db.execute(stmt).first()
+                    restaurant = result._mapping if result else restaurant
+                
+                # Use potentially updated restaurant data
+                final_plan = restaurant.get('subscription_plan', 'alpha') or 'alpha'
+                final_status = restaurant.get('subscription_status', 'trial') or 'trial'
                 
                 response_data["user"]["restaurant_id"] = str(restaurant['id'])
                 response_data["user"]["restaurant_name"] = restaurant['name']
-                response_data["user"]["subscription_plan"] = restaurant.get('subscription_plan', 'alpha') or 'alpha'
-                response_data["user"]["subscription_status"] = restaurant.get('subscription_status', 'trial') or 'trial'
-                response_data["user"]["enabled_features"] = get_plan_features(
-                    restaurant.get('subscription_plan', 'alpha') or 'alpha'
-                )
+                response_data["user"]["subscription_plan"] = final_plan
+                response_data["user"]["subscription_status"] = final_status
+                response_data["user"]["enabled_features"] = get_plan_features(final_plan)
         else:
             # User has no restaurant yet - check if we should create a default one
             if db_user.role == 'restaurant_owner':
