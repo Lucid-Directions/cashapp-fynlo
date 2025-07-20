@@ -4,14 +4,15 @@ Only accessible to platform owners or with special diagnostic key
 """
 
 import os
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Header
+from sqlalchemy.orm import Session
 from typing import Dict, Any, Optional
 from datetime import datetime
 import logging
 
 from app.core.config import settings
 from app.core.redis_client import redis_client
-from app.core.auth import get_current_user
+from app.core.database import get_db
 from app.core.responses import APIResponseHelper
 from app.models import User
 
@@ -19,17 +20,63 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
+async def get_current_user_optional(
+    authorization: Optional[str] = Header(None),
+    db: Session = Depends(get_db)
+) -> Optional[User]:
+    """Get current user if authenticated, otherwise return None"""
+    if not authorization:
+        return None
+    
+    try:
+        # Import here to avoid circular dependency
+        from app.core.auth import get_current_user
+        from fastapi import Request
+        
+        # Create a mock request for the auth function
+        class MockRequest:
+            client = type('obj', (object,), {'host': 'diagnostic'})
+            headers = {"user-agent": "diagnostic-endpoint"}
+            url = type('obj', (object,), {'path': '/diagnostics'})
+        
+        # Try to get the user
+        return await get_current_user(MockRequest(), authorization, db)
+    except Exception:
+        # If auth fails, return None instead of raising
+        return None
+
+
+def verify_diagnostic_access(
+    diagnostic_key: Optional[str] = None,
+    current_user: Optional[User] = None
+) -> bool:
+    """Verify access via diagnostic key or platform owner role"""
+    # Check if diagnostic key is provided and valid
+    if diagnostic_key:
+        expected_key = os.getenv("DIAGNOSTIC_KEY")
+        if not expected_key:
+            # No diagnostic key configured - deny access
+            logger.warning("Diagnostic key authentication attempted but DIAGNOSTIC_KEY not configured")
+            return False
+        return diagnostic_key == expected_key
+    
+    # Check if user is platform owner
+    if current_user and current_user.role == "platform_owner":
+        return True
+    
+    return False
+
+
 @router.get("/environment")
 async def check_environment(
     diagnostic_key: Optional[str] = Query(None, description="Diagnostic access key"),
-    current_user: Optional[User] = Depends(get_current_user)
+    current_user: Optional[User] = Depends(get_current_user_optional)
 ):
     """Check environment variables and configuration status"""
     
-    # Allow access with diagnostic key or platform owner
-    if diagnostic_key != os.getenv("DIAGNOSTIC_KEY", "fynlo-debug-2025"):
-        if not current_user or current_user.role != "platform_owner":
-            raise HTTPException(status_code=403, detail="Access denied")
+    # Verify access
+    if not verify_diagnostic_access(diagnostic_key, current_user):
+        raise HTTPException(status_code=403, detail="Access denied")
     
     # Check critical environment variables
     env_status = {
@@ -99,14 +146,13 @@ async def check_environment(
 @router.get("/redis-test")
 async def test_redis_connection(
     diagnostic_key: Optional[str] = Query(None, description="Diagnostic access key"),
-    current_user: Optional[User] = Depends(get_current_user)
+    current_user: Optional[User] = Depends(get_current_user_optional)
 ):
     """Test Redis connection with detailed diagnostics"""
     
-    # Allow access with diagnostic key or platform owner
-    if diagnostic_key != os.getenv("DIAGNOSTIC_KEY", "fynlo-debug-2025"):
-        if not current_user or current_user.role != "platform_owner":
-            raise HTTPException(status_code=403, detail="Access denied")
+    # Verify access
+    if not verify_diagnostic_access(diagnostic_key, current_user):
+        raise HTTPException(status_code=403, detail="Access denied")
     
     results = {
         "timestamp": datetime.utcnow().isoformat(),
@@ -174,14 +220,13 @@ async def test_redis_connection(
 @router.get("/supabase-test")
 async def test_supabase_connection(
     diagnostic_key: Optional[str] = Query(None, description="Diagnostic access key"),
-    current_user: Optional[User] = Depends(get_current_user)
+    current_user: Optional[User] = Depends(get_current_user_optional)
 ):
     """Test Supabase connection and configuration"""
     
-    # Allow access with diagnostic key or platform owner
-    if diagnostic_key != os.getenv("DIAGNOSTIC_KEY", "fynlo-debug-2025"):
-        if not current_user or current_user.role != "platform_owner":
-            raise HTTPException(status_code=403, detail="Access denied")
+    # Verify access
+    if not verify_diagnostic_access(diagnostic_key, current_user):
+        raise HTTPException(status_code=403, detail="Access denied")
     
     results = {
         "timestamp": datetime.utcnow().isoformat(),
