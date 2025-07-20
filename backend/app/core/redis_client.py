@@ -58,16 +58,14 @@ class RedisClient:
                 
                 # If using rediss:// (SSL), ensure SSL is properly configured for DigitalOcean Valkey
                 if settings.REDIS_URL.startswith('rediss://'):
-                    import ssl
-                    # Create SSL context that works with DigitalOcean Valkey
-                    ssl_context = ssl.create_default_context(ssl.Purpose.SERVER_AUTH)
-                    ssl_context.check_hostname = False
-                    ssl_context.verify_mode = ssl.CERT_NONE
-                    
+                    # For redis-py library, SSL parameters are handled differently
+                    # ConnectionPool.from_url doesn't accept 'ssl' parameter
                     connection_kwargs.update({
-                        'ssl': ssl_context,
-                        'ssl_cert_reqs': None,
+                        'ssl_cert_reqs': 'none',  # String 'none', not None
                         'ssl_check_hostname': False,
+                        'ssl_ca_certs': None,
+                        'ssl_certfile': None,
+                        'ssl_keyfile': None,
                     })
                 
                 self.pool = ConnectionPool.from_url(
