@@ -109,41 +109,70 @@ async def verify_supabase_user(
         
         # Add restaurant info if user has one
         if db_user.restaurant_id:
-            restaurant = db.query(Restaurant).filter(
-                Restaurant.id == db_user.restaurant_id
-            ).first()
+            # Temporary fix: Query specific columns to avoid missing floor_plan_layout column
+            # TODO: Remove this workaround after migration 008_add_table_order_linkage.py is applied
+            from sqlalchemy import select
+            stmt = select(
+                Restaurant.id,
+                Restaurant.platform_id,
+                Restaurant.name,
+                Restaurant.address,
+                Restaurant.phone,
+                Restaurant.email,
+                Restaurant.timezone,
+                Restaurant.business_hours,
+                Restaurant.settings,
+                Restaurant.tax_configuration,
+                Restaurant.payment_methods,
+                Restaurant.subscription_plan,
+                Restaurant.subscription_status,
+                Restaurant.subscription_started_at,
+                Restaurant.subscription_expires_at,
+                Restaurant.is_active,
+                Restaurant.created_at,
+                Restaurant.updated_at
+            ).where(Restaurant.id == db_user.restaurant_id)
+            
+            result = db.execute(stmt).first()
+            restaurant = result._mapping if result else None
             
             if restaurant:
                 # Sync subscription data from Supabase if available
                 supabase_plan = supabase_user.user_metadata.get('subscription_plan')
                 supabase_status = supabase_user.user_metadata.get('subscription_status')
                 
-                # Get current values with defaults
-                current_plan = getattr(restaurant, 'subscription_plan', None)
-                current_status = getattr(restaurant, 'subscription_status', None)
+                # Get current values with defaults from mapping
+                current_plan = restaurant.get('subscription_plan')
+                current_status = restaurant.get('subscription_status')
+                
+                # Update subscription data if needed
+                needs_update = False
+                update_data = {}
                 
                 if supabase_plan and supabase_plan != current_plan:
-                    restaurant.subscription_plan = supabase_plan
-                    db.commit()
+                    update_data['subscription_plan'] = supabase_plan
+                    needs_update = True
                 elif not current_plan:
-                    # Set default if null
-                    restaurant.subscription_plan = 'alpha'
-                    db.commit()
+                    update_data['subscription_plan'] = 'alpha'
+                    needs_update = True
                 
                 if supabase_status and supabase_status != current_status:
-                    restaurant.subscription_status = supabase_status
-                    db.commit()
+                    update_data['subscription_status'] = supabase_status
+                    needs_update = True
                 elif not current_status:
-                    # Set default if null
-                    restaurant.subscription_status = 'trial'
+                    update_data['subscription_status'] = 'trial'
+                    needs_update = True
+                
+                if needs_update:
+                    db.query(Restaurant).filter(Restaurant.id == db_user.restaurant_id).update(update_data)
                     db.commit()
                 
-                response_data["user"]["restaurant_id"] = str(restaurant.id)
-                response_data["user"]["restaurant_name"] = restaurant.name
-                response_data["user"]["subscription_plan"] = getattr(restaurant, 'subscription_plan', 'alpha') or 'alpha'
-                response_data["user"]["subscription_status"] = getattr(restaurant, 'subscription_status', 'trial') or 'trial'
+                response_data["user"]["restaurant_id"] = str(restaurant['id'])
+                response_data["user"]["restaurant_name"] = restaurant['name']
+                response_data["user"]["subscription_plan"] = restaurant.get('subscription_plan', 'alpha') or 'alpha'
+                response_data["user"]["subscription_status"] = restaurant.get('subscription_status', 'trial') or 'trial'
                 response_data["user"]["enabled_features"] = get_plan_features(
-                    getattr(restaurant, 'subscription_plan', 'alpha') or 'alpha'
+                    restaurant.get('subscription_plan', 'alpha') or 'alpha'
                 )
         else:
             # User has no restaurant yet - check if we should create a default one

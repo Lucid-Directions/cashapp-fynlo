@@ -53,11 +53,17 @@ export class EnhancedWebSocketService {
   }
   
   private setupNetworkMonitoring(): void {
-    this.networkUnsubscribe = NetInfo.addEventListener(state => {
+    this.networkUnsubscribe = NetInfo.addEventListener(async state => {
       if (state.isConnected && state.isInternetReachable) {
         if (this.state === 'DISCONNECTED') {
-          console.log('📱 Network restored, reconnecting WebSocket...');
-          this.connect();
+          // Check if user is authenticated before attempting to reconnect
+          const userInfo = await AsyncStorage.getItem('userInfo');
+          if (userInfo) {
+            console.log('📱 Network restored, reconnecting WebSocket...');
+            this.connect();
+          } else {
+            console.log('📱 Network restored but user not authenticated, skipping WebSocket connection');
+          }
         }
       } else if (this.state === 'CONNECTED') {
         console.log('📱 Network lost, WebSocket will reconnect when available');
