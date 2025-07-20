@@ -77,6 +77,14 @@ class RedisClient:
                 except asyncio.TimeoutError:
                     logger.warning("First connection attempt timed out, trying with explicit SSL settings...")
                     
+                    # Clean up previous connection attempt
+                    if self.redis:
+                        await self.redis.close()
+                        self.redis = None
+                    if self.pool:
+                        await self.pool.disconnect()
+                        self.pool = None
+                    
                     # If rediss:// URL and timeout, try with explicit SSL settings
                     if settings.REDIS_URL.startswith('rediss://'):
                         connection_kwargs.update({
@@ -97,6 +105,20 @@ class RedisClient:
                 # Clear mock storage if real connection is successful
                 self._mock_storage = {}
             except Exception as e:
+                # Clean up any partially created connections
+                if self.redis:
+                    try:
+                        await self.redis.close()
+                    except:
+                        pass
+                    self.redis = None
+                if self.pool:
+                    try:
+                        await self.pool.disconnect()
+                    except:
+                        pass
+                    self.pool = None
+                
                 # Log the full error details
                 error_msg = str(e) if str(e) else type(e).__name__
                 logger.error(f"❌ Failed to connect to Redis: {error_msg}")
@@ -105,11 +127,9 @@ class RedisClient:
                 # This prevents complete application failure if Redis is temporarily unavailable
                 if settings.ENVIRONMENT == "production":
                     logger.warning("⚠️ Redis unavailable in production - using in-memory fallback. This may impact performance and data persistence.")
-                    self.redis = None
                     # Continue with mock storage
                 elif settings.ENVIRONMENT in ["development", "testing", "local"]:
                     logger.warning("⚠️ Redis connection failed. Falling back to mock storage.")
-                    self.redis = None
                 else:
                     # For any other environment, raise the error
                     raise ConnectionError(f"Failed to connect to Redis: {error_msg}")
