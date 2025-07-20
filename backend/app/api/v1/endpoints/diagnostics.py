@@ -32,17 +32,28 @@ async def get_current_user_optional(
         # Import here to avoid circular dependency
         from app.core.auth import get_current_user
         from fastapi import Request
+        from starlette.datastructures import Headers
         
-        # Create a mock request for the auth function
+        # Create a proper mock request for the auth function
+        class MockClient:
+            def __init__(self):
+                self.host = "diagnostic"
+        
+        class MockURL:
+            def __init__(self):
+                self.path = "/diagnostics"
+        
         class MockRequest:
-            client = type('obj', (object,), {'host': 'diagnostic'})
-            headers = {"user-agent": "diagnostic-endpoint"}
-            url = type('obj', (object,), {'path': '/diagnostics'})
+            def __init__(self):
+                self.client = MockClient()
+                self.headers = Headers({"user-agent": "diagnostic-endpoint"})
+                self.url = MockURL()
         
         # Try to get the user
         return await get_current_user(MockRequest(), authorization, db)
-    except Exception:
+    except Exception as e:
         # If auth fails, return None instead of raising
+        logger.debug(f"Optional auth failed: {type(e).__name__}: {e}")
         return None
 
 
