@@ -14,6 +14,13 @@ async def startup_handler():
     """Initialize all services on application startup"""
     logger.info("🚀 Starting application initialization...")
     
+    # Run startup diagnostics first
+    try:
+        from app.core.startup_diagnostics import log_startup_diagnostics
+        log_startup_diagnostics()
+    except Exception as e:
+        logger.warning(f"Failed to run startup diagnostics: {e}")
+    
     try:
         # Initialize database
         logger.info("📊 Initializing database...")

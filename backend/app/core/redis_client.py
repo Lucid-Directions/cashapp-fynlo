@@ -46,55 +46,63 @@ class RedisClient:
                 
                 logger.info(f"Attempting to connect to Redis at {redis_url_masked}")
                 
-                # For DigitalOcean Valkey, try different connection approaches
+                # For DigitalOcean Valkey, handle SSL carefully
+                import asyncio
                 
-                # First, try simple approach - let redis-py handle SSL from rediss:// URL
-                logger.info("Attempting Redis connection...")
+                # First, check if this is a rediss:// URL
+                is_ssl = settings.REDIS_URL.startswith('rediss://')
+                logger.info(f"Redis URL uses SSL: {is_ssl}")
                 
                 # Basic connection parameters with increased timeouts
                 connection_kwargs = {
                     'decode_responses': True,
                     'max_connections': 20,
-                    'socket_connect_timeout': 30,  # Increased from 15 to 30
-                    'socket_timeout': 30,  # Increased from 15 to 30
+                    'socket_connect_timeout': 45,  # Increased to 45s for DigitalOcean
+                    'socket_timeout': 45,  # Increased to 45s for DigitalOcean
                     'retry_on_timeout': True,
-                    'health_check_interval': 30,
+                    'retry_on_error': [aioredis.ConnectionError, aioredis.TimeoutError],
+                    'health_check_interval': 60,  # Less frequent health checks
                 }
                 
-                # For rediss:// URLs, try without explicit SSL params first
-                # redis-py should handle SSL automatically from the URL scheme
+                # For DigitalOcean Valkey with SSL, add specific SSL settings
+                if is_ssl:
+                    import ssl
+                    # Create SSL context that accepts self-signed certificates
+                    ssl_context = ssl.create_default_context()
+                    ssl_context.check_hostname = False
+                    ssl_context.verify_mode = ssl.CERT_NONE
+                    
+                    connection_kwargs['ssl'] = ssl_context
+                    logger.info("Using custom SSL context for DigitalOcean Valkey")
+                
+                # Try to connect
                 try:
+                    logger.info("Creating Redis connection pool...")
                     self.pool = ConnectionPool.from_url(
                         settings.REDIS_URL, 
                         **connection_kwargs
                     )
                     self.redis = aioredis.Redis(connection_pool=self.pool)
-                    # Test connection with longer timeout
-                    import asyncio
-                    await asyncio.wait_for(self.redis.ping(), timeout=20.0)
-                    logger.info("✅ Redis connected successfully with default SSL handling")
+                    
+                    # Test connection with extended timeout
+                    logger.info("Testing Redis connection with ping...")
+                    await asyncio.wait_for(self.redis.ping(), timeout=30.0)
+                    logger.info("✅ Redis connected successfully")
                     
                 except (asyncio.TimeoutError, aioredis.TimeoutError, aioredis.ConnectionError) as e:
-                    logger.warning(f"First connection attempt failed ({type(e).__name__}), trying with explicit SSL settings...")
+                    logger.error(f"Redis connection failed: {type(e).__name__}: {str(e)}")
                     
-                    # Clean up previous connection attempt with proper error handling
-                    if self.redis:
-                        try:
-                            await self.redis.close()
-                        except Exception as cleanup_error:
-                            logger.debug(f"Error during Redis client cleanup: {cleanup_error}")
-                        self.redis = None
-                    if self.pool:
-                        try:
-                            await self.pool.disconnect()
-                        except Exception as cleanup_error:
-                            logger.debug(f"Error during pool cleanup: {cleanup_error}")
-                        self.pool = None
+                    # Clean up failed connection
+                    await self._cleanup_connection()
                     
-                    # If rediss:// URL and connection failed, try with explicit SSL settings
-                    if settings.REDIS_URL.startswith('rediss://'):
+                    # For SSL connections, try alternative approach
+                    if is_ssl and 'ssl' in connection_kwargs:
+                        logger.warning("Retrying with different SSL configuration...")
+                        
+                        # Remove SSL context and use string parameters
+                        del connection_kwargs['ssl']
                         connection_kwargs.update({
-                            'ssl_cert_reqs': 'none',  # DigitalOcean uses self-signed certs
+                            'ssl_cert_reqs': 'none',
                             'ssl_check_hostname': False,
                         })
                         
@@ -104,10 +112,11 @@ class RedisClient:
                                 **connection_kwargs
                             )
                             self.redis = aioredis.Redis(connection_pool=self.pool)
-                            await asyncio.wait_for(self.redis.ping(), timeout=20.0)
-                            logger.info("✅ Redis connected successfully with explicit SSL settings")
-                        except (asyncio.TimeoutError, aioredis.TimeoutError, aioredis.ConnectionError) as retry_error:
-                            logger.error(f"Second connection attempt also failed: {type(retry_error).__name__}: {retry_error}")
+                            await asyncio.wait_for(self.redis.ping(), timeout=30.0)
+                            logger.info("✅ Redis connected with alternative SSL settings")
+                        except Exception as retry_error:
+                            logger.error(f"Retry also failed: {type(retry_error).__name__}: {retry_error}")
+                            await self._cleanup_connection()
                             raise
                     else:
                         raise
@@ -147,6 +156,10 @@ class RedisClient:
 
     async def disconnect(self):
         """Disconnect from Redis"""
+        await self._cleanup_connection()
+    
+    async def _cleanup_connection(self):
+        """Clean up Redis connection and pool"""
         if self.redis and hasattr(self.redis, 'close'):
             try:
                 await self.redis.close()
