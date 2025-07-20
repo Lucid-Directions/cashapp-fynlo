@@ -172,6 +172,7 @@ class RedisClient:
                 logger.info("Redis connection pool disconnected.")
             except Exception as e:
                 logger.error(f"Error disconnecting Redis connection pool: {e}")
+        # CRITICAL: Set to None to ensure proper fallback to mock storage
         self.redis = None
         self.pool = None
 
