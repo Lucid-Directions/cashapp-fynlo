@@ -124,9 +124,9 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
     };
   }, []);
   
-  // Auto-connect on mount if enabled
+  // Auto-connect on mount if explicitly enabled
   useEffect(() => {
-    if (options.autoConnect !== false && user?.restaurant_id && !state.connected && !state.connecting) {
+    if (options.autoConnect === true && user?.restaurant_id && !state.connected && !state.connecting) {
       connect();
     }
     
@@ -153,7 +153,7 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
 // Export specific event hooks for common use cases
 
 export const useOrderUpdates = (onOrderUpdate: (data: any) => void) => {
-  const { subscribe } = useWebSocket();
+  const { subscribe } = useWebSocket({ autoConnect: false });
   
   useEffect(() => {
     const unsubscribeCreated = subscribe(WebSocketEventType.ORDER_CREATED, onOrderUpdate);
@@ -169,7 +169,7 @@ export const useOrderUpdates = (onOrderUpdate: (data: any) => void) => {
 };
 
 export const useInventoryUpdates = (onInventoryUpdate: (data: any) => void) => {
-  const { subscribe } = useWebSocket();
+  const { subscribe } = useWebSocket({ autoConnect: false });
   
   useEffect(() => {
     const unsubscribe = subscribe(WebSocketEventType.INVENTORY_UPDATED, onInventoryUpdate);
@@ -178,7 +178,7 @@ export const useInventoryUpdates = (onInventoryUpdate: (data: any) => void) => {
 };
 
 export const useMenuUpdates = (onMenuUpdate: (data: any) => void) => {
-  const { subscribe } = useWebSocket();
+  const { subscribe } = useWebSocket({ autoConnect: false });
   
   useEffect(() => {
     const unsubscribe = subscribe(WebSocketEventType.MENU_UPDATED, onMenuUpdate);
@@ -187,7 +187,7 @@ export const useMenuUpdates = (onMenuUpdate: (data: any) => void) => {
 };
 
 export const useSystemNotifications = (onNotification: (data: any) => void) => {
-  const { subscribe } = useWebSocket();
+  const { subscribe } = useWebSocket({ autoConnect: false });
   
   useEffect(() => {
     const unsubscribe = subscribe(WebSocketEventType.SYSTEM_NOTIFICATION, onNotification);
