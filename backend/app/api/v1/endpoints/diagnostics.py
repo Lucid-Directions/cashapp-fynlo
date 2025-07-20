@@ -28,29 +28,35 @@ async def get_current_user_optional(
     if not authorization:
         return None
     
+    # Extract token from "Bearer <token>" format
+    token = authorization.replace("Bearer ", "")
+    
+    if not token or token == authorization:
+        # Invalid format
+        return None
+    
     try:
-        # Import here to avoid circular dependency
-        from app.core.auth import get_current_user
-        from fastapi import Request
-        from starlette.datastructures import Headers
+        # Check if Supabase is configured
+        from app.core.supabase import supabase_admin
         
-        # Create a proper mock request for the auth function
-        class MockClient:
-            def __init__(self):
-                self.host = "diagnostic"
+        if not supabase_admin:
+            logger.debug("Supabase admin client not initialized")
+            return None
         
-        class MockURL:
-            def __init__(self):
-                self.path = "/diagnostics"
+        # Verify token with Supabase
+        user_response = supabase_admin.auth.get_user(token)
+        supabase_user = user_response.user
         
-        class MockRequest:
-            def __init__(self):
-                self.client = MockClient()
-                self.headers = Headers({"user-agent": "diagnostic-endpoint"})
-                self.url = MockURL()
+        if not supabase_user:
+            return None
         
-        # Try to get the user
-        return await get_current_user(MockRequest(), authorization, db)
+        # Find user in our database
+        db_user = db.query(User).filter(
+            User.supabase_id == str(supabase_user.id)
+        ).first()
+        
+        return db_user
+        
     except Exception as e:
         # If auth fails, return None instead of raising
         logger.debug(f"Optional auth failed: {type(e).__name__}: {e}")
