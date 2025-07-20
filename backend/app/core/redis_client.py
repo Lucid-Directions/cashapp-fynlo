@@ -46,40 +46,89 @@ class RedisClient:
                 
                 logger.info(f"Attempting to connect to Redis at {redis_url_masked}")
                 
-                # For DigitalOcean Redis with SSL (rediss://), we need to handle SSL properly
+                # For DigitalOcean Valkey, try different connection approaches
+                
+                # First, try simple approach - let redis-py handle SSL from rediss:// URL
+                logger.info("Attempting Redis connection...")
+                
+                # Basic connection parameters with increased timeouts
                 connection_kwargs = {
                     'decode_responses': True,
                     'max_connections': 20,
-                    'socket_connect_timeout': 15,  # Increased for DigitalOcean
-                    'socket_timeout': 15,  # Increased for DigitalOcean
+                    'socket_connect_timeout': 30,  # Increased from 15 to 30
+                    'socket_timeout': 30,  # Increased from 15 to 30
                     'retry_on_timeout': True,
                     'health_check_interval': 30,
                 }
                 
-                # If using rediss:// (SSL), ensure SSL is properly configured for DigitalOcean Valkey
-                if settings.REDIS_URL.startswith('rediss://'):
-                    # For redis-py library, SSL parameters are handled differently
-                    # ConnectionPool.from_url doesn't accept 'ssl' parameter
-                    connection_kwargs.update({
-                        'ssl_cert_reqs': 'none',  # String 'none', not None
-                        'ssl_check_hostname': False,
-                        'ssl_ca_certs': None,
-                        'ssl_certfile': None,
-                        'ssl_keyfile': None,
-                    })
+                # For rediss:// URLs, try without explicit SSL params first
+                # redis-py should handle SSL automatically from the URL scheme
+                try:
+                    self.pool = ConnectionPool.from_url(
+                        settings.REDIS_URL, 
+                        **connection_kwargs
+                    )
+                    self.redis = aioredis.Redis(connection_pool=self.pool)
+                    # Test connection with longer timeout
+                    import asyncio
+                    await asyncio.wait_for(self.redis.ping(), timeout=20.0)
+                    logger.info("✅ Redis connected successfully with default SSL handling")
+                    
+                except (asyncio.TimeoutError, aioredis.TimeoutError, aioredis.ConnectionError) as e:
+                    logger.warning(f"First connection attempt failed ({type(e).__name__}), trying with explicit SSL settings...")
+                    
+                    # Clean up previous connection attempt with proper error handling
+                    if self.redis:
+                        try:
+                            await self.redis.close()
+                        except Exception as cleanup_error:
+                            logger.debug(f"Error during Redis client cleanup: {cleanup_error}")
+                        self.redis = None
+                    if self.pool:
+                        try:
+                            await self.pool.disconnect()
+                        except Exception as cleanup_error:
+                            logger.debug(f"Error during pool cleanup: {cleanup_error}")
+                        self.pool = None
+                    
+                    # If rediss:// URL and connection failed, try with explicit SSL settings
+                    if settings.REDIS_URL.startswith('rediss://'):
+                        connection_kwargs.update({
+                            'ssl_cert_reqs': 'none',  # DigitalOcean uses self-signed certs
+                            'ssl_check_hostname': False,
+                        })
+                        
+                        try:
+                            self.pool = ConnectionPool.from_url(
+                                settings.REDIS_URL, 
+                                **connection_kwargs
+                            )
+                            self.redis = aioredis.Redis(connection_pool=self.pool)
+                            await asyncio.wait_for(self.redis.ping(), timeout=20.0)
+                            logger.info("✅ Redis connected successfully with explicit SSL settings")
+                        except (asyncio.TimeoutError, aioredis.TimeoutError, aioredis.ConnectionError) as retry_error:
+                            logger.error(f"Second connection attempt also failed: {type(retry_error).__name__}: {retry_error}")
+                            raise
+                    else:
+                        raise
                 
-                self.pool = ConnectionPool.from_url(
-                    settings.REDIS_URL, 
-                    **connection_kwargs
-                )
-                self.redis = aioredis.Redis(connection_pool=self.pool)
-                # Add timeout to ping operation
-                import asyncio
-                await asyncio.wait_for(self.redis.ping(), timeout=10.0)
-                logger.info("✅ Redis connected successfully.")
                 # Clear mock storage if real connection is successful
                 self._mock_storage = {}
             except Exception as e:
+                # Clean up any partially created connections
+                if self.redis:
+                    try:
+                        await self.redis.close()
+                    except:
+                        pass
+                    self.redis = None
+                if self.pool:
+                    try:
+                        await self.pool.disconnect()
+                    except:
+                        pass
+                    self.pool = None
+                
                 # Log the full error details
                 error_msg = str(e) if str(e) else type(e).__name__
                 logger.error(f"❌ Failed to connect to Redis: {error_msg}")
@@ -88,11 +137,9 @@ class RedisClient:
                 # This prevents complete application failure if Redis is temporarily unavailable
                 if settings.ENVIRONMENT == "production":
                     logger.warning("⚠️ Redis unavailable in production - using in-memory fallback. This may impact performance and data persistence.")
-                    self.redis = None
                     # Continue with mock storage
                 elif settings.ENVIRONMENT in ["development", "testing", "local"]:
                     logger.warning("⚠️ Redis connection failed. Falling back to mock storage.")
-                    self.redis = None
                 else:
                     # For any other environment, raise the error
                     raise ConnectionError(f"Failed to connect to Redis: {error_msg}")
