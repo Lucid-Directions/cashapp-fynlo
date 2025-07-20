@@ -61,7 +61,9 @@ def check_floor_plan_column():
                 AND column_name = 'floor_plan_layout'
             """))
             
-            if result.rowcount > 0:
+            # Use fetchone() to check if any row was returned
+            row = result.fetchone()
+            if row is not None:
                 logger.info("✅ floor_plan_layout column exists")
                 return True
             else:
