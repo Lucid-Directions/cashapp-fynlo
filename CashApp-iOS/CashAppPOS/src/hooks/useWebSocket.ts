@@ -124,9 +124,9 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
     };
   }, []);
   
-  // Auto-connect on mount if enabled
+  // Auto-connect on mount if explicitly enabled
   useEffect(() => {
-    if (options.autoConnect !== false && user?.restaurant_id && !state.connected && !state.connecting) {
+    if (options.autoConnect === true && user?.restaurant_id && !state.connected && !state.connecting) {
       connect();
     }
     
@@ -151,6 +151,8 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
 };
 
 // Export specific event hooks for common use cases
+// Note: These hooks do not auto-connect. You must ensure WebSocket is connected
+// by either using useWebSocket with autoConnect: true or manually calling connect()
 
 export const useOrderUpdates = (onOrderUpdate: (data: any) => void) => {
   const { subscribe } = useWebSocket();
