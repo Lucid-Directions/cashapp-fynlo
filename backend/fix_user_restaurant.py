@@ -1,9 +1,37 @@
 #!/usr/bin/env python3
-"""Create user and assign restaurant"""
+"""
+Fix User-Restaurant Association Tool
+
+SECURITY WARNING: This is a development/debugging tool only.
+Do NOT use in production. Platform owner roles should be assigned
+through proper administrative procedures, not this script.
+
+Usage:
+    python fix_user_restaurant.py <email> [--supabase-id <id>] [--role <role>]
+
+Arguments:
+    email             User's email address
+    --supabase-id     Optional: Supabase ID (will be looked up if not provided)
+    --role            Optional: User role (restaurant_owner/platform_owner/manager/employee)
+                      Default: restaurant_owner
+
+Examples:
+    python fix_user_restaurant.py user@example.com
+    python fix_user_restaurant.py user@example.com --role manager
+    python fix_user_restaurant.py user@example.com --supabase-id abc-123 --role restaurant_owner
+
+This script fixes missing user-restaurant associations and can optionally
+set or update user roles. It will:
+1. Look up the user by email or Supabase ID
+2. Create the user if they don't exist
+3. Assign a restaurant if they don't have one
+4. Skip platform owners (they don't need restaurant assignments)
+"""
 
 import os
 import sys
 import uuid
+import argparse
 from sqlalchemy import create_engine, text
 from dotenv import load_dotenv
 from datetime import datetime
@@ -16,9 +44,18 @@ if not DATABASE_URL:
     print("DATABASE_URL not found in environment variables")
     sys.exit(1)
 
-# User details from Supabase
-SUPABASE_ID = "d2b96734-18db-43f8-a30e-bf936c7b8bc8"
-EMAIL = "arnaud_decube@hotmail.com"
+# Parse command line arguments
+parser = argparse.ArgumentParser(description='Fix user-restaurant associations')
+parser.add_argument('email', help='User email address')
+parser.add_argument('--supabase-id', help='Supabase ID (optional)')
+parser.add_argument('--role', default='restaurant_owner', 
+                    choices=['restaurant_owner', 'platform_owner', 'manager', 'employee'],
+                    help='User role (default: restaurant_owner)')
+args = parser.parse_args()
+
+EMAIL = args.email
+SUPABASE_ID = args.supabase_id
+DEFAULT_ROLE = args.role
 
 try:
     engine = create_engine(DATABASE_URL)
@@ -27,12 +64,35 @@ try:
         trans = conn.begin()
         
         try:
+            # If no Supabase ID provided, try to find it
+            if not SUPABASE_ID:
+                print(f"Looking up Supabase ID for {EMAIL}...")
+                # Try Supabase first
+                from app.core.supabase import supabase_admin
+                if supabase_admin:
+                    try:
+                        users = supabase_admin.auth.admin.list_users()
+                        for user in users:
+                            if user.email == EMAIL:
+                                SUPABASE_ID = str(user.id)
+                                print(f"Found Supabase ID: {SUPABASE_ID}")
+                                break
+                    except Exception as e:
+                        print(f"Could not lookup in Supabase: {e}")
+            
             # First check if user already exists
-            result = conn.execute(text("""
-                SELECT id, email, role, restaurant_id 
-                FROM users 
-                WHERE supabase_id = :supabase_id OR email = :email
-            """), {"supabase_id": SUPABASE_ID, "email": EMAIL})
+            if SUPABASE_ID:
+                result = conn.execute(text("""
+                    SELECT id, email, role, restaurant_id, supabase_id
+                    FROM users 
+                    WHERE supabase_id = :supabase_id OR email = :email
+                """), {"supabase_id": SUPABASE_ID, "email": EMAIL})
+            else:
+                result = conn.execute(text("""
+                    SELECT id, email, role, restaurant_id, supabase_id
+                    FROM users 
+                    WHERE email = :email
+                """), {"email": EMAIL})
             
             existing_user = result.fetchone()
             
@@ -40,6 +100,11 @@ try:
                 print(f"User already exists: {existing_user}")
                 user_id = existing_user[0]
                 role = existing_user[2]  # Get role from database
+                
+                # If we found a Supabase ID in the database, use it
+                if existing_user[4] and not SUPABASE_ID:
+                    SUPABASE_ID = existing_user[4]
+                    print(f"Using Supabase ID from database: {SUPABASE_ID}")
                 
                 if not existing_user[3]:  # No restaurant_id
                     print(f"User exists but has no restaurant. Will assign one. Role: {role}")
@@ -52,8 +117,12 @@ try:
                 print("Creating new user...")
                 user_id = str(uuid.uuid4())
                 
-                # Determine role - checking if this is a platform owner
-                role = 'platform_owner' if EMAIL == 'arnaud_decube@hotmail.com' else 'restaurant_owner'
+                # Use the role specified in command line arguments
+                role = DEFAULT_ROLE
+                
+                if not SUPABASE_ID:
+                    print("Warning: No Supabase ID found. User will need to be linked to Supabase later.")
+                    SUPABASE_ID = None
                 
                 conn.execute(text("""
                     INSERT INTO users (
@@ -69,8 +138,8 @@ try:
                     "id": user_id,
                     "email": EMAIL,
                     "supabase_id": SUPABASE_ID,
-                    "first_name": "Arnaud",
-                    "last_name": "Decube",
+                    "first_name": EMAIL.split('@')[0].split('_')[0].capitalize() if '_' in EMAIL.split('@')[0] else EMAIL.split('@')[0].capitalize(),
+                    "last_name": EMAIL.split('@')[0].split('_')[1].capitalize() if '_' in EMAIL.split('@')[0] else "",
                     "role": role,
                     "created_at": datetime.utcnow(),
                     "last_login": datetime.utcnow()
