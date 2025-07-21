@@ -66,14 +66,12 @@ class RedisClient:
                 
                 # For DigitalOcean Valkey with SSL, add specific SSL settings
                 if is_ssl:
-                    import ssl
-                    # Create SSL context that accepts self-signed certificates
-                    ssl_context = ssl.create_default_context()
-                    ssl_context.check_hostname = False
-                    ssl_context.verify_mode = ssl.CERT_NONE
-                    
-                    connection_kwargs['ssl'] = ssl_context
-                    logger.info("Using custom SSL context for DigitalOcean Valkey")
+                    # Use string parameters for SSL configuration
+                    connection_kwargs.update({
+                        'ssl_cert_reqs': 'none',  # Disable certificate verification
+                        'ssl_check_hostname': False,  # Don't check hostname
+                    })
+                    logger.info("Using SSL parameters for DigitalOcean Valkey")
                 
                 # Try to connect
                 try:
@@ -94,32 +92,7 @@ class RedisClient:
                     
                     # Clean up failed connection
                     await self._cleanup_connection()
-                    
-                    # For SSL connections, try alternative approach
-                    if is_ssl and 'ssl' in connection_kwargs:
-                        logger.warning("Retrying with different SSL configuration...")
-                        
-                        # Remove SSL context and use string parameters
-                        del connection_kwargs['ssl']
-                        connection_kwargs.update({
-                            'ssl_cert_reqs': 'none',
-                            'ssl_check_hostname': False,
-                        })
-                        
-                        try:
-                            self.pool = ConnectionPool.from_url(
-                                settings.REDIS_URL, 
-                                **connection_kwargs
-                            )
-                            self.redis = aioredis.Redis(connection_pool=self.pool)
-                            await asyncio.wait_for(self.redis.ping(), timeout=30.0)
-                            logger.info("✅ Redis connected with alternative SSL settings")
-                        except Exception as retry_error:
-                            logger.error(f"Retry also failed: {type(retry_error).__name__}: {retry_error}")
-                            await self._cleanup_connection()
-                            raise
-                    else:
-                        raise
+                    raise
                 
                 # Clear mock storage if real connection is successful
                 self._mock_storage = {}
