@@ -262,9 +262,9 @@ DEFAULT_PLATFORM_CONFIGS = [
     },
     {
         'config_key': 'platform.service_charge.rate',
-        'config_value': {'value': 12.5}, # Storing as a dict
+        'config_value': {'value': 10.0}, # Storing as a dict
         'category': 'service_charge',
-        'description': 'Service charge rate as a percentage (e.g., 12.5 for 12.5%).',
+        'description': 'Service charge rate as a percentage (e.g., 10.0 for 10%).',
         'is_sensitive': False,
         'validation_schema': {'type': 'object', 'properties': {'value': {'type': 'number', 'minimum': 0, 'maximum': 100}}}
     },
