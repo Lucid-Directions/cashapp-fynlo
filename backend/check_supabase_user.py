@@ -82,7 +82,10 @@ try:
         
         user = result.fetchone()
         if user:
-            print(f"User found by Supabase ID:")
+            if is_uuid:
+                print(f"User found by Supabase ID:")
+            else:
+                print(f"User found by email:")
             print(f"  ID: {user[0]}")
             print(f"  Email: {user[1]}")
             print(f"  Role: {user[2]}")

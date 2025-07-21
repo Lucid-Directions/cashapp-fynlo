@@ -129,12 +129,12 @@ def setup_test_user(email, plan='omega'):
             else:
                 print(f"\n🏢 User already has restaurant: {restaurant_id}")
                 
-                # Update restaurant to Omega plan
-                print("📝 Updating restaurant to Omega subscription plan...")
+                # Update restaurant to specified plan
+                print(f"📝 Updating restaurant to {plan.title()} subscription plan...")
                 conn.execute(text("""
                     UPDATE restaurants 
                     SET 
-                        subscription_plan = 'omega',
+                        subscription_plan = :plan,
                         subscription_status = 'active',
                         subscription_started_at = :started_at,
                         subscription_expires_at = :expires_at,
@@ -142,6 +142,7 @@ def setup_test_user(email, plan='omega'):
                     WHERE id = :restaurant_id
                 """), {
                     "restaurant_id": restaurant_id,
+                    "plan": plan,
                     "started_at": datetime.utcnow(),
                     "expires_at": datetime.utcnow() + timedelta(days=365),
                     "updated_at": datetime.utcnow()
