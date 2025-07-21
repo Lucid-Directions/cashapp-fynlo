@@ -27,6 +27,23 @@ logger = logging.getLogger(__name__)
 # Parse DATABASE_URL to handle SSL requirements
 database_url = settings.DATABASE_URL
 
+# Validate DATABASE_URL is a PostgreSQL URL
+if not database_url:
+    raise ValueError("DATABASE_URL environment variable is not set")
+
+if database_url.startswith(("redis://", "rediss://")):
+    raise ValueError(
+        "DATABASE_URL is set to a Redis URL instead of PostgreSQL. "
+        "Please check your environment variables. "
+        "DATABASE_URL should be postgresql://... and REDIS_URL should be redis(s)://..."
+    )
+
+if not database_url.startswith(("postgresql://", "postgres://")):
+    raise ValueError(
+        f"DATABASE_URL must be a PostgreSQL URL (postgresql:// or postgres://), "
+        f"but got: {database_url.split('://')[0]}://"
+    )
+
 # For DigitalOcean managed databases, ensure SSL mode is set
 if "postgresql" in database_url and ("digitalocean.com" in database_url or ":25060" in database_url or ":25061" in database_url):
     # Port 25061 is for connection pooling (PgBouncer), 25060 is direct
