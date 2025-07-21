@@ -101,9 +101,20 @@ export class EnhancedWebSocketService {
       // Build WebSocket URL (no token in URL for security)
       const wsProtocol = API_CONFIG.BASE_URL.startsWith('https') ? 'wss' : 'ws';
       const wsHost = API_CONFIG.BASE_URL.replace(/^https?:\/\//, '');
-      // Encode restaurant ID to handle special characters
-      const encodedRestaurantId = encodeURIComponent(restaurantId);
-      const wsUrl = `${wsProtocol}://${wsHost}/api/v1/websocket/ws/pos/${encodedRestaurantId}`;
+      
+      // Build appropriate WebSocket URL based on user type
+      let wsUrl: string;
+      if (user.role === 'platform_owner' && !restaurantId) {
+        // Platform owners without a specific restaurant use a different endpoint
+        wsUrl = `${wsProtocol}://${wsHost}/api/v1/websocket/ws/platform`;
+      } else if (restaurantId) {
+        // Regular users and platform owners with a restaurant
+        const encodedRestaurantId = encodeURIComponent(restaurantId);
+        wsUrl = `${wsProtocol}://${wsHost}/api/v1/websocket/ws/pos/${encodedRestaurantId}`;
+      } else {
+        // This shouldn't happen due to the check above, but handle it gracefully
+        throw new Error('Unable to determine WebSocket endpoint');
+      }
       
       console.log('🔌 Connecting to WebSocket:', wsUrl);
       
