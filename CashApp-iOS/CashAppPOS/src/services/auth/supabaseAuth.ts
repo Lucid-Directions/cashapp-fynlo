@@ -71,8 +71,8 @@ class SupabaseAuthService {
         ...verifyResponse.user,
         name: verifyResponse.user.name || verifyResponse.user.full_name || verifyResponse.user.email || 'User',
         is_platform_owner: verifyResponse.user.is_platform_owner || false,
-        // Ensure restaurant_id is preserved
-        restaurant_id: verifyResponse.user.restaurant_id || verifyResponse.user.restaurantId
+        // Ensure restaurant_id is preserved (use nullish coalescing to handle ID 0)
+        restaurant_id: verifyResponse.user.restaurant_id ?? verifyResponse.user.restaurantId
       };
       
       // Store enhanced user info
