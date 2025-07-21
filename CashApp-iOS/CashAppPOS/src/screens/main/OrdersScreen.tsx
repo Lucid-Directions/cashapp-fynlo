@@ -100,18 +100,28 @@ const OrdersScreen: React.FC = () => {
     };
   }, []);
 
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('en-US', {
+  const formatTime = (date: Date | string) => {
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    if (isNaN(dateObj.getTime())) {
+      return '--:--';
+    }
+    return dateObj.toLocaleTimeString('en-US', {
       hour: '2-digit',
       minute: '2-digit',
     });
   };
 
-  const getTimeSince = (date: Date) => {
+  const getTimeSince = (date: Date | string) => {
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    if (isNaN(dateObj.getTime())) {
+      return 'Unknown';
+    }
     const now = new Date();
-    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+    const diffInMinutes = Math.floor((now.getTime() - dateObj.getTime()) / (1000 * 60));
     
-    if (diffInMinutes < 60) {
+    if (diffInMinutes < 0) {
+      return 'Just now';
+    } else if (diffInMinutes < 60) {
       return `${diffInMinutes}m ago`;
     } else {
       const hours = Math.floor(diffInMinutes / 60);
