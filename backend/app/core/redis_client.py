@@ -25,19 +25,29 @@ class RedisClient:
         self._last_connection_attempt = 0  # Track last connection attempt time
         self._connection_retry_interval = 30  # Minimum seconds between connection attempts
         self._connection_failures = 0  # Track consecutive failures
-        self._max_connection_failures = 3  # After this many failures, skip Redis entirely
+        self._max_connection_failures = 3  # After this many failures, skip Redis temporarily
+        self._failure_backoff_time = 300  # Wait 5 minutes after max failures before retrying
+        self._last_failure_time = 0  # Track when we hit max failures
 
     async def connect(self):
         """Connect to Redis"""
         import time
         
-        # Skip Redis entirely after too many failures
+        current_time = time.time()
+        
+        # Check if we're in backoff period after max failures
         if self._connection_failures >= self._max_connection_failures:
-            logger.debug(f"Skipping Redis - {self._connection_failures} consecutive failures")
-            return
+            time_since_failure = current_time - self._last_failure_time
+            if time_since_failure < self._failure_backoff_time:
+                remaining = self._failure_backoff_time - time_since_failure
+                logger.debug(f"Redis in backoff period - {remaining:.0f}s remaining")
+                return
+            else:
+                # Backoff period expired, allow retry
+                logger.info("Redis backoff period expired - allowing retry")
+                self._connection_failures = 0  # Reset counter for new attempt
         
         # Rate limit connection attempts
-        current_time = time.time()
         if current_time - self._last_connection_attempt < self._connection_retry_interval:
             logger.debug(f"Skipping Redis connection attempt - last attempt was {current_time - self._last_connection_attempt:.1f}s ago")
             return
@@ -145,7 +155,8 @@ class RedisClient:
                     # Don't raise - allow fallback to mock storage
                     self.is_available = False
                     if self._connection_failures >= self._max_connection_failures:
-                        logger.warning(f"⚠️ Redis disabled after {self._connection_failures} failures - using in-memory storage only")
+                        self._last_failure_time = time.time()  # Record when we hit max failures
+                        logger.warning(f"⚠️ Redis disabled after {self._connection_failures} failures - will retry in {self._failure_backoff_time}s")
                     else:
                         logger.warning("⚠️ Continuing without Redis - using in-memory fallback")
                     # Keep existing mock storage data on connection failure
