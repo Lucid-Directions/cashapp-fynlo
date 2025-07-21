@@ -5,6 +5,7 @@ Connects to DigitalOcean Valkey (Redis compatible).
 
 import json
 import logging
+import sys
 from typing import Any, Optional
 import redis.asyncio as aioredis
 from redis.asyncio.connection import ConnectionPool
@@ -20,6 +21,7 @@ class RedisClient:
         self.pool: Optional[ConnectionPool] = None
         self.redis: Optional[aioredis.Redis] = None
         self._mock_storage = {} # For fallback
+        self.is_available = False  # Track if Redis is actually available
 
     async def connect(self):
         """Connect to Redis"""
@@ -56,19 +58,26 @@ class RedisClient:
                 # Basic connection parameters with increased timeouts
                 connection_kwargs = {
                     'decode_responses': True,
-                    'max_connections': 20,
-                    'socket_connect_timeout': 45,  # Increased to 45s for DigitalOcean
-                    'socket_timeout': 45,  # Increased to 45s for DigitalOcean
+                    'max_connections': 10,  # Reduced for DigitalOcean Valkey
+                    'socket_connect_timeout': 60,  # Increased to 60s for DigitalOcean
+                    'socket_timeout': 60,  # Increased to 60s for DigitalOcean
                     'retry_on_timeout': True,
                     'retry_on_error': [aioredis.ConnectionError, aioredis.TimeoutError],
-                    'health_check_interval': 60,  # Less frequent health checks
+                    'health_check_interval': 120,  # Less frequent health checks
+                    'socket_keepalive': True,  # Enable TCP keepalive
+                    'socket_keepalive_options': (
+                        1,  # TCP_KEEPIDLE
+                        3,  # TCP_KEEPINTVL  
+                        5,  # TCP_KEEPCNT
+                    ) if sys.platform != 'win32' else None,
                 }
                 
                 # For DigitalOcean Valkey with SSL, add specific SSL settings
                 if is_ssl:
-                    # Use string parameters for SSL configuration
+                    import ssl
+                    # Use proper SSL module constants, not strings
                     connection_kwargs.update({
-                        'ssl_cert_reqs': 'none',  # Disable certificate verification
+                        'ssl_cert_reqs': ssl.CERT_NONE,  # Use SSL constant
                         'ssl_check_hostname': False,  # Don't check hostname
                     })
                     logger.info("Using SSL parameters for DigitalOcean Valkey")
@@ -86,13 +95,27 @@ class RedisClient:
                     logger.info("Testing Redis connection with ping...")
                     await asyncio.wait_for(self.redis.ping(), timeout=30.0)
                     logger.info("✅ Redis connected successfully")
+                    self.is_available = True
                     
                 except (asyncio.TimeoutError, aioredis.TimeoutError, aioredis.ConnectionError) as e:
                     logger.error(f"Redis connection failed: {type(e).__name__}: {str(e)}")
                     
                     # Clean up failed connection
                     await self._cleanup_connection()
-                    raise
+                    
+                    # For DigitalOcean, provide helpful error message
+                    if "digitalocean.com" in settings.REDIS_URL:
+                        logger.error("\n" + "="*60)
+                        logger.error("DigitalOcean Valkey Connection Troubleshooting:")
+                        logger.error("1. Check Trusted Sources in DO Database Settings")
+                        logger.error("2. Ensure your app is added as trusted source")
+                        logger.error("3. Verify both app and database are in same region")
+                        logger.error("4. Try using rediss:// URL for SSL connection")
+                        logger.error("="*60 + "\n")
+                    
+                    # Don't raise - allow fallback to mock storage
+                    self.is_available = False
+                    logger.warning("⚠️ Continuing without Redis - using in-memory fallback")
                 
                 # Clear mock storage if real connection is successful
                 self._mock_storage = {}
@@ -419,8 +442,13 @@ redis_client = RedisClient()
 
 async def init_redis():
     """Initialize Redis connection and prepare for fastapi-limiter."""
-    await redis_client.connect()
-    # No explicit init for fastapi-limiter here; it will call redis_client.get_client()
+    try:
+        await redis_client.connect()
+        # No explicit init for fastapi-limiter here; it will call redis_client.get_client()
+    except Exception as e:
+        logger.warning(f"Redis initialization failed: {str(e)}")
+        logger.warning("App will continue with in-memory fallback for caching/sessions")
+        # Don't re-raise - allow app to start without Redis
 
 async def close_redis():
     """Close Redis connection."""

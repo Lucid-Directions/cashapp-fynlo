@@ -127,41 +127,99 @@ async def verify_supabase_user(
         
         # Add restaurant info if user has one
         if db_user.restaurant_id:
-            # Temporary fix: Query specific columns to avoid missing floor_plan_layout column
-            # TODO: Remove this workaround after migration 008_add_table_order_linkage.py is applied
-            from sqlalchemy import select
-            stmt = select(
-                Restaurant.id,
-                Restaurant.platform_id,
-                Restaurant.name,
-                Restaurant.address,
-                Restaurant.phone,
-                Restaurant.email,
-                Restaurant.timezone,
-                Restaurant.business_hours,
-                Restaurant.settings,
-                Restaurant.tax_configuration,
-                Restaurant.payment_methods,
-                Restaurant.subscription_plan,
-                Restaurant.subscription_status,
-                Restaurant.subscription_started_at,
-                Restaurant.subscription_expires_at,
-                Restaurant.is_active,
-                Restaurant.created_at,
-                Restaurant.updated_at
-            ).where(Restaurant.id == db_user.restaurant_id)
-            
-            result = db.execute(stmt).first()
-            restaurant = result._mapping if result else None
+            # Query restaurant with error handling for missing columns
+            try:
+                # Try to query all columns first
+                restaurant = db.query(Restaurant).filter(
+                    Restaurant.id == db_user.restaurant_id
+                ).first()
+                
+                if restaurant:
+                    # Convert to dict for consistent access
+                    restaurant_dict = {
+                        'id': restaurant.id,
+                        'name': restaurant.name,
+                        'platform_id': getattr(restaurant, 'platform_id', None),
+                        'address': getattr(restaurant, 'address', {}),
+                        'phone': getattr(restaurant, 'phone', None),
+                        'email': getattr(restaurant, 'email', None),
+                        'timezone': getattr(restaurant, 'timezone', 'UTC'),
+                        'business_hours': getattr(restaurant, 'business_hours', {}),
+                        'settings': getattr(restaurant, 'settings', {}),
+                        'tax_configuration': getattr(restaurant, 'tax_configuration', {}),
+                        'payment_methods': getattr(restaurant, 'payment_methods', {}),
+                        'is_active': getattr(restaurant, 'is_active', True),
+                        'created_at': getattr(restaurant, 'created_at', None),
+                        'updated_at': getattr(restaurant, 'updated_at', None),
+                        # Subscription fields with safe defaults
+                        'subscription_plan': getattr(restaurant, 'subscription_plan', 'alpha'),
+                        'subscription_status': getattr(restaurant, 'subscription_status', 'trial'),
+                        'subscription_started_at': getattr(restaurant, 'subscription_started_at', None),
+                        'subscription_expires_at': getattr(restaurant, 'subscription_expires_at', None),
+                    }
+                    restaurant = restaurant_dict
+                else:
+                    restaurant = None
+                    
+            except Exception as e:
+                # If query fails due to missing columns, try minimal query
+                logger.warning(f"Restaurant query failed, trying minimal query: {str(e)}")
+                try:
+                    from sqlalchemy import text
+                    result = db.execute(text("""
+                        SELECT id, name, is_active
+                        FROM restaurants 
+                        WHERE id = :restaurant_id
+                    """), {"restaurant_id": str(db_user.restaurant_id)}).first()
+                    
+                    if result:
+                        # Build minimal restaurant dict with defaults
+                        restaurant = {
+                            'id': result[0],
+                            'name': result[1],
+                            'is_active': result[2],
+                            # Default values for missing fields
+                            'subscription_plan': 'alpha',
+                            'subscription_status': 'trial',
+                            'subscription_started_at': None,
+                            'subscription_expires_at': None,
+                            'platform_id': None,
+                            'address': {},
+                            'phone': None,
+                            'email': db_user.email,
+                            'timezone': 'UTC',
+                            'business_hours': {},
+                            'settings': {},
+                            'tax_configuration': {
+                                "vatEnabled": True,
+                                "vatRate": 20,
+                                "serviceTaxEnabled": True,
+                                "serviceTaxRate": 12.5
+                            },
+                            'payment_methods': {
+                                "qrCode": {"enabled": True, "feePercentage": 1.2},
+                                "cash": {"enabled": True, "requiresAuth": False},
+                                "card": {"enabled": True, "feePercentage": 2.9},
+                                "applePay": {"enabled": True, "feePercentage": 2.9},
+                                "giftCard": {"enabled": True, "requiresAuth": True}
+                            },
+                            'created_at': None,
+                            'updated_at': None
+                        }
+                    else:
+                        restaurant = None
+                except Exception as e2:
+                    logger.error(f"Minimal restaurant query also failed: {str(e2)}")
+                    restaurant = None
             
             if restaurant:
                 # Sync subscription data from Supabase if available
                 supabase_plan = supabase_user.user_metadata.get('subscription_plan')
                 supabase_status = supabase_user.user_metadata.get('subscription_status')
                 
-                # Get current values with defaults from mapping
-                current_plan = restaurant.get('subscription_plan')
-                current_status = restaurant.get('subscription_status')
+                # Get current values with defaults from dict
+                current_plan = restaurant.get('subscription_plan') if isinstance(restaurant, dict) else getattr(restaurant, 'subscription_plan', None)
+                current_status = restaurant.get('subscription_status') if isinstance(restaurant, dict) else getattr(restaurant, 'subscription_status', None)
                 
                 # Update subscription data if needed
                 needs_update = False
@@ -182,19 +240,31 @@ async def verify_supabase_user(
                     needs_update = True
                 
                 if needs_update:
-                    db.query(Restaurant).filter(Restaurant.id == db_user.restaurant_id).update(update_data)
-                    db.commit()
-                    
-                    # Re-query to get updated data
-                    result = db.execute(stmt).first()
-                    restaurant = result._mapping if result else restaurant
+                    try:
+                        db.query(Restaurant).filter(Restaurant.id == db_user.restaurant_id).update(update_data)
+                        db.commit()
+                        
+                        # Update the local dict with new values
+                        if isinstance(restaurant, dict):
+                            restaurant.update(update_data)
+                    except Exception as e:
+                        logger.warning(f"Could not update subscription data: {str(e)}")
+                        # Continue with existing data
                 
                 # Use potentially updated restaurant data
-                final_plan = restaurant.get('subscription_plan', 'alpha') or 'alpha'
-                final_status = restaurant.get('subscription_status', 'trial') or 'trial'
+                if isinstance(restaurant, dict):
+                    final_plan = restaurant.get('subscription_plan', 'alpha') or 'alpha'
+                    final_status = restaurant.get('subscription_status', 'trial') or 'trial'
+                    restaurant_id = restaurant['id']
+                    restaurant_name = restaurant['name']
+                else:
+                    final_plan = getattr(restaurant, 'subscription_plan', 'alpha') or 'alpha'
+                    final_status = getattr(restaurant, 'subscription_status', 'trial') or 'trial'
+                    restaurant_id = restaurant.id
+                    restaurant_name = restaurant.name
                 
-                response_data["user"]["restaurant_id"] = str(restaurant['id'])
-                response_data["user"]["restaurant_name"] = restaurant['name']
+                response_data["user"]["restaurant_id"] = str(restaurant_id)
+                response_data["user"]["restaurant_name"] = restaurant_name
                 response_data["user"]["subscription_plan"] = final_plan
                 response_data["user"]["subscription_status"] = final_status
                 response_data["user"]["enabled_features"] = get_plan_features(final_plan)
