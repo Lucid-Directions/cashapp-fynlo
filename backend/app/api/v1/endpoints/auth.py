@@ -247,8 +247,13 @@ async def verify_supabase_user(
                         # Update the local dict with new values
                         if isinstance(restaurant, dict):
                             restaurant.update(update_data)
+                        else:
+                            # Refresh ORM instance to get updated values
+                            db.refresh(restaurant)
                     except Exception as e:
                         logger.warning(f"Could not update subscription data: {str(e)}")
+                        # CRITICAL: Roll back failed transaction to avoid PendingRollbackError
+                        db.rollback()
                         # Continue with existing data
                 
                 # Use potentially updated restaurant data
@@ -258,10 +263,27 @@ async def verify_supabase_user(
                     restaurant_id = restaurant['id']
                     restaurant_name = restaurant['name']
                 else:
-                    final_plan = getattr(restaurant, 'subscription_plan', 'alpha') or 'alpha'
-                    final_status = getattr(restaurant, 'subscription_status', 'trial') or 'trial'
-                    restaurant_id = restaurant.id
-                    restaurant_name = restaurant.name
+                    # For ORM instances, safely extract values to avoid re-queries
+                    try:
+                        # Extract all needed values at once to avoid multiple attribute accesses
+                        restaurant_id = restaurant.id
+                        restaurant_name = restaurant.name
+                        # Use safe attribute access to avoid column-not-exist errors
+                        final_plan = 'alpha'  # Default
+                        final_status = 'trial'  # Default
+                        
+                        # Try to get actual values if columns exist
+                        if hasattr(restaurant, 'subscription_plan'):
+                            final_plan = restaurant.subscription_plan or 'alpha'
+                        if hasattr(restaurant, 'subscription_status'):
+                            final_status = restaurant.subscription_status or 'trial'
+                    except Exception as e:
+                        logger.warning(f"Error accessing restaurant attributes: {str(e)}")
+                        # Fall back to safe defaults
+                        restaurant_id = db_user.restaurant_id
+                        restaurant_name = "Restaurant"
+                        final_plan = 'alpha'
+                        final_status = 'trial'
                 
                 response_data["user"]["restaurant_id"] = str(restaurant_id)
                 response_data["user"]["restaurant_name"] = restaurant_name

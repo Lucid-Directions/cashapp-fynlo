@@ -101,6 +101,10 @@ class RedisClient:
                     logger.info("✅ Redis connected successfully")
                     self.is_available = True
                     
+                    # Clear mock storage only on successful connection
+                    self._mock_storage = {}
+                    logger.info("🧹 Cleared mock storage after successful Redis connection")
+                    
                 except (asyncio.TimeoutError, aioredis.TimeoutError, aioredis.ConnectionError) as e:
                     logger.error(f"Redis connection failed: {type(e).__name__}: {str(e)}")
                     
@@ -120,9 +124,8 @@ class RedisClient:
                     # Don't raise - allow fallback to mock storage
                     self.is_available = False
                     logger.warning("⚠️ Continuing without Redis - using in-memory fallback")
-                
-                # Clear mock storage if real connection is successful
-                self._mock_storage = {}
+                    # Keep existing mock storage data on connection failure
+                    return
             except Exception as e:
                 # Clean up any partially created connections
                 if self.redis:
@@ -460,8 +463,9 @@ async def close_redis():
 
 async def get_redis() -> RedisClient:
     """Get Redis client instance, ensuring it's connected."""
-    # If redis is not connected and not in a mock state (due to initial connection failure)
-    if not redis_client.redis and not redis_client._mock_storage :
-        logger.info("Redis client accessed before initial connect or after disconnect, attempting to connect.")
+    # Only attempt connection if we haven't tried yet (no redis and not using fallback)
+    if not redis_client.redis and not redis_client.is_available and not hasattr(redis_client, '_connection_attempted'):
+        logger.info("Redis client accessed before initial connect, attempting to connect.")
+        redis_client._connection_attempted = True
         await redis_client.connect()
     return redis_client
