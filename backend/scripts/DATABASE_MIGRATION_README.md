@@ -117,6 +117,7 @@ DATABASE_URL=postgresql://username:password@host:port/database
 Make the script executable:
 ```bash
 chmod +x scripts/migrate_database_columns.py
+chmod +x scripts/digitalocean_migration.sh
 ```
 
 ### "Database connection failed"
@@ -124,6 +125,18 @@ Check your DATABASE_URL is correct and the database is accessible.
 
 ### "Column still missing after migration"
 The application may need a full restart to clear SQLAlchemy's cache.
+
+### "Cannot create virtual environment" (DigitalOcean)
+The DigitalOcean App Platform has a read-only filesystem. The updated script handles this by:
+- Skipping virtual environment creation
+- Using pre-installed dependencies
+- Using `python3` explicitly to avoid Python 2.x issues
+
+### "Module not found" errors
+Ensure dependencies are installed during the build phase in your app spec:
+```yaml
+build_command: pip install -r requirements.txt
+```
 
 ## Related Files
 

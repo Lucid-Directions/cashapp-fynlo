@@ -30,21 +30,31 @@ if [ -z "$DATABASE_URL" ]; then
     exit 1
 fi
 
-# Install Python dependencies if needed
-if [ ! -d "venv" ]; then
-    echo "📦 Setting up Python environment..."
-    python -m venv venv
-    source venv/bin/activate
-    pip install -r requirements.txt
-else
-    source venv/bin/activate
+# Note: On DigitalOcean App Platform, dependencies are pre-installed
+# and the filesystem may be read-only, so we skip virtual environment setup
+
+# Check if we can import required modules
+echo "🔍 Checking Python environment..."
+if ! python3 -c "import sqlalchemy, dotenv" 2>/dev/null; then
+    echo "⚠️  Warning: Required Python modules not found"
+    echo "   Attempting to install dependencies..."
+    
+    # Try to install dependencies (may fail on read-only systems)
+    if ! pip install sqlalchemy python-dotenv 2>/dev/null; then
+        echo "❌ Error: Cannot install dependencies"
+        echo "   This environment may have a read-only filesystem"
+        echo "   Please ensure dependencies are pre-installed in the build phase"
+        exit 1
+    fi
 fi
+
+echo "✅ Python environment ready"
 
 # Run the migration
 echo "🔄 Running database migration..."
 echo ""
 
-python scripts/migrate_database_columns.py --force
+python3 scripts/migrate_database_columns.py --force
 
 echo ""
 echo "✅ Migration completed!"
