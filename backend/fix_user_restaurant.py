@@ -38,9 +38,11 @@ try:
             
             if existing_user:
                 print(f"User already exists: {existing_user}")
+                user_id = existing_user[0]
+                role = existing_user[2]  # Get role from database
+                
                 if not existing_user[3]:  # No restaurant_id
-                    print("User exists but has no restaurant. Will assign one.")
-                    user_id = existing_user[0]
+                    print(f"User exists but has no restaurant. Will assign one. Role: {role}")
                 else:
                     print("User already has a restaurant. Nothing to do.")
                     trans.rollback()
