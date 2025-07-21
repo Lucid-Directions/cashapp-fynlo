@@ -215,13 +215,13 @@ try:
             trans.commit()
             print("\n✅ User setup complete!")
             
-            # Verify the setup
+            # Verify the setup - use user_id which we know exists
             result = conn.execute(text("""
-                SELECT u.id, u.email, u.role, u.restaurant_id, r.name
+                SELECT u.id, u.email, u.role, u.restaurant_id, r.name, u.supabase_id
                 FROM users u
                 LEFT JOIN restaurants r ON u.restaurant_id = r.id
-                WHERE u.supabase_id = :supabase_id
-            """), {"supabase_id": SUPABASE_ID})
+                WHERE u.id = :user_id
+            """), {"user_id": user_id})
             
             user = result.fetchone()
             if user:
@@ -231,6 +231,7 @@ try:
                 print(f"  Role: {user[2]}")
                 print(f"  Restaurant ID: {user[3]}")
                 print(f"  Restaurant Name: {user[4]}")
+                print(f"  Supabase ID: {user[5] if user[5] else '⚠️  Not set - authentication will fail!'}")
                 
         except Exception as e:
             trans.rollback()

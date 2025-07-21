@@ -150,14 +150,16 @@ if __name__ == "__main__":
     print("🔧 Supabase User Subscription Update")
     print("="*60)
     
-    # Default to updating arnaud@luciddirections.co.uk with Omega plan
-    email = "arnaud@luciddirections.co.uk"
-    plan = "omega"
+    # Parse command line arguments
+    if len(sys.argv) < 2:
+        print("Usage: python update_user_subscription.py <email> [plan]")
+        print("  email: User's email address")
+        print("  plan: Subscription plan (alpha/beta/omega) - default: omega")
+        print("\nExample: python update_user_subscription.py user@example.com omega")
+        sys.exit(1)
     
-    if len(sys.argv) > 1:
-        email = sys.argv[1]
-    if len(sys.argv) > 2:
-        plan = sys.argv[2]
+    email = sys.argv[1]
+    plan = sys.argv[2] if len(sys.argv) > 2 else "omega"
     
     print(f"Updating {email} to {plan.upper()} subscription plan...")
     print()

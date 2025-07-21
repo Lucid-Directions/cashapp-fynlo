@@ -1,11 +1,23 @@
 #!/usr/bin/env python3
 """
 Setup Test User Script
-Creates a test restaurant owner with Omega subscription for full feature access
+Creates a test restaurant owner with specified subscription plan
+
+Usage:
+    python setup_test_user.py <email> [plan]
+    
+Arguments:
+    email    User's email address
+    plan     Subscription plan (alpha/beta/omega) - default: omega
+
+Examples:
+    python setup_test_user.py user@example.com
+    python setup_test_user.py user@example.com beta
 """
 import os
 import sys
 import uuid
+import argparse
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, text
@@ -16,8 +28,8 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 # Load environment variables
 load_dotenv()
 
-def setup_test_user():
-    """Setup arnaud@luciddirections.co.uk as restaurant owner with Omega plan"""
+def setup_test_user(email, plan='omega'):
+    """Setup test user as restaurant owner with specified plan"""
     
     database_url = os.getenv('DATABASE_URL')
     if not database_url:
@@ -36,7 +48,7 @@ def setup_test_user():
                 SELECT id, email, restaurant_id, role, supabase_id 
                 FROM users 
                 WHERE email = :email
-            """), {"email": "arnaud@luciddirections.co.uk"})
+            """), {"email": email})
             
             user = result.fetchone()
             
@@ -57,7 +69,7 @@ def setup_test_user():
             else:
                 print("❌ User not found in database")
                 print("⚠️  User needs to sign in first via the app to be created automatically")
-                print("📱 Please sign in with arnaud@luciddirections.co.uk through the mobile app")
+                print(f"📱 Please sign in with {email} through the mobile app")
                 return False
             
             # Check if user has a restaurant
@@ -86,11 +98,11 @@ def setup_test_user():
                     )
                 """), {
                     "id": restaurant_id,
-                    "name": "Test Restaurant - Omega Tier",
-                    "email": "arnaud@luciddirections.co.uk",
+                    "name": f"Test Restaurant - {plan.title()} Tier",
+                    "email": email,
                     "phone": "+44 20 1234 5678",
                     "address": '{"street": "123 Test Street", "city": "London", "postcode": "SW1A 1AA", "country": "UK"}',
-                    "plan": "omega",
+                    "plan": plan,
                     "status": "active",
                     "started_at": datetime.utcnow(),
                     "expires_at": datetime.utcnow() + timedelta(days=365),  # 1 year subscription
@@ -147,7 +159,7 @@ def setup_test_user():
                 FROM users u
                 JOIN restaurants r ON u.restaurant_id = r.id
                 WHERE u.email = :email
-            """), {"email": "arnaud@luciddirections.co.uk"})
+            """), {"email": email})
             
             final_data = result.fetchone()
             
@@ -166,15 +178,30 @@ def setup_test_user():
                 print("3. All premium features will be available")
                 
                 # Show available features for Omega plan
-                print("\n🌟 Omega Plan Features:")
-                print("- ✅ Unlimited transactions at 1% fee")
-                print("- ✅ Unlimited everything")
-                print("- ✅ Everything in Beta PLUS:")
-                print("- ✅ Unlimited staff accounts")
-                print("- ✅ Unlimited locations")
-                print("- ✅ White-label options")
-                print("- ✅ Advanced analytics & forecasting")
-                print("- ✅ Custom integrations")
+                # Show plan features
+                if plan == 'omega':
+                    print("\n🌟 Omega Plan Features:")
+                    print("- ✅ Unlimited transactions at 1% fee")
+                    print("- ✅ Unlimited everything")
+                    print("- ✅ Everything in Beta PLUS:")
+                    print("- ✅ Unlimited staff accounts")
+                    print("- ✅ Unlimited locations")
+                    print("- ✅ White-label options")
+                    print("- ✅ Advanced analytics & forecasting")
+                    print("- ✅ Custom integrations")
+                elif plan == 'beta':
+                    print("\n🎆 Beta Plan Features:")
+                    print("- ✅ Up to 1000 transactions/month at 1.5% fee")
+                    print("- ✅ Up to 10 staff accounts")
+                    print("- ✅ Advanced reporting")
+                    print("- ✅ Multi-location support")
+                    print("- ✅ Priority support")
+                else:  # alpha
+                    print("\n🆓 Alpha Plan Features:")
+                    print("- ✅ Up to 100 transactions/month at 2% fee")
+                    print("- ✅ Up to 3 staff accounts")
+                    print("- ✅ Basic reporting")
+                    print("- ✅ Single location")
                 
                 return True
             else:
@@ -188,14 +215,22 @@ def setup_test_user():
         return False
 
 if __name__ == "__main__":
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(description='Setup test user with subscription')
+    parser.add_argument('email', help='User email address')
+    parser.add_argument('plan', nargs='?', default='omega', 
+                        choices=['alpha', 'beta', 'omega'],
+                        help='Subscription plan (default: omega)')
+    args = parser.parse_args()
+    
     print("="*60)
     print("🔧 Fynlo Test User Setup")
     print("="*60)
-    print("Setting up arnaud@luciddirections.co.uk as restaurant owner")
-    print("with Omega subscription plan for full feature testing...")
+    print(f"Setting up {args.email} as restaurant owner")
+    print(f"with {args.plan.title()} subscription plan...")
     print()
     
-    success = setup_test_user()
+    success = setup_test_user(args.email, args.plan)
     
     if not success:
         sys.exit(1)
