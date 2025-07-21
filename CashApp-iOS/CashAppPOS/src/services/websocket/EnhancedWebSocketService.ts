@@ -40,6 +40,9 @@ export class EnhancedWebSocketService {
   // Refresh timer
   private refreshTimer: NodeJS.Timeout | null = null;
   
+  // Resolved restaurant ID for consistent use
+  private resolvedRestaurantId: string | number | null | undefined = null;
+  
   constructor(config: Partial<WebSocketConfig> = {}) {
     this.config = {
       heartbeatInterval: 15000, // 15 seconds
@@ -90,12 +93,18 @@ export class EnhancedWebSocketService {
       const user = JSON.parse(userInfo);
       
       // Try to get restaurant_id from multiple possible locations
-      const restaurantId = user.restaurant_id || user.restaurantId || user.business?.id;
+      const restaurantId = user.restaurant_id ?? user.restaurantId ?? user.business?.id;
       
-      if (!restaurantId && user.role !== 'platform_owner') {
-        // For non-platform owners, restaurant is required
-        console.warn('⚠️ No restaurant_id found in user info, user role:', user.role);
-        throw new Error('No restaurant associated with user');
+      // Store the resolved restaurant ID for consistent use in authentication
+      this.resolvedRestaurantId = restaurantId;
+      
+      // Check explicitly for null/undefined (not falsy, as 0 might be valid)
+      if (restaurantId === null || restaurantId === undefined) {
+        if (user.role !== 'platform_owner') {
+          // For non-platform owners, restaurant is required
+          console.warn('⚠️ No restaurant_id found in user info, user role:', user.role);
+          throw new Error('No restaurant associated with user');
+        }
       }
       
       // Build WebSocket URL (no token in URL for security)
@@ -104,12 +113,12 @@ export class EnhancedWebSocketService {
       
       // Build appropriate WebSocket URL based on user type
       let wsUrl: string;
-      if (user.role === 'platform_owner' && !restaurantId) {
+      if (user.role === 'platform_owner' && (restaurantId === null || restaurantId === undefined)) {
         // Platform owners without a specific restaurant use a different endpoint
         wsUrl = `${wsProtocol}://${wsHost}/api/v1/websocket/ws/platform`;
-      } else if (restaurantId) {
-        // Regular users and platform owners with a restaurant
-        const encodedRestaurantId = encodeURIComponent(restaurantId);
+      } else if (restaurantId !== null && restaurantId !== undefined) {
+        // Regular users and platform owners with a restaurant (including ID 0)
+        const encodedRestaurantId = encodeURIComponent(String(restaurantId));
         wsUrl = `${wsProtocol}://${wsHost}/api/v1/websocket/ws/pos/${encodedRestaurantId}`;
       } else {
         // This shouldn't happen due to the check above, but handle it gracefully
@@ -161,11 +170,11 @@ export class EnhancedWebSocketService {
         data: {
           token: token,
           user_id: user.id,
-          restaurant_id: user.restaurant_id,
+          restaurant_id: this.resolvedRestaurantId,
           client_type: 'mobile_pos',
           client_version: '1.0.0'
         },
-        restaurant_id: user.restaurant_id,
+        restaurant_id: this.resolvedRestaurantId,
         timestamp: new Date().toISOString()
       };
       
@@ -405,6 +414,9 @@ export class EnhancedWebSocketService {
     console.log('👋 Disconnecting WebSocket...');
     
     this.stopHeartbeat();
+    
+    // Clear resolved restaurant ID
+    this.resolvedRestaurantId = null;
     
     if (this.reconnectTimer) {
       clearTimeout(this.reconnectTimer);
