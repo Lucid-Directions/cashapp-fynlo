@@ -50,6 +50,7 @@ class RedisClient:
                 
                 # For DigitalOcean Valkey, handle SSL carefully
                 import asyncio
+                import socket
                 
                 # First, check if this is a rediss:// URL
                 is_ssl = settings.REDIS_URL.startswith('rediss://')
@@ -65,12 +66,15 @@ class RedisClient:
                     'retry_on_error': [aioredis.ConnectionError, aioredis.TimeoutError],
                     'health_check_interval': 120,  # Less frequent health checks
                     'socket_keepalive': True,  # Enable TCP keepalive
-                    'socket_keepalive_options': (
-                        1,  # TCP_KEEPIDLE
-                        3,  # TCP_KEEPINTVL  
-                        5,  # TCP_KEEPCNT
-                    ) if sys.platform != 'win32' else None,
                 }
+                
+                # Add socket keepalive options for non-Windows platforms
+                if sys.platform != 'win32' and hasattr(socket, 'TCP_KEEPIDLE'):
+                    connection_kwargs['socket_keepalive_options'] = {
+                        socket.TCP_KEEPIDLE: 1,    # Start keepalives after 1 second of idle
+                        socket.TCP_KEEPINTVL: 3,   # Send keepalive every 3 seconds
+                        socket.TCP_KEEPCNT: 5,     # Send 5 keepalive probes before declaring dead
+                    }
                 
                 # For DigitalOcean Valkey with SSL, add specific SSL settings
                 if is_ssl:
