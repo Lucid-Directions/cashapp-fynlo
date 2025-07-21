@@ -22,9 +22,21 @@ class RedisClient:
         self.redis: Optional[aioredis.Redis] = None
         self._mock_storage = {} # For fallback
         self.is_available = False  # Track if Redis is actually available
+        self._last_connection_attempt = 0  # Track last connection attempt time
+        self._connection_retry_interval = 30  # Minimum seconds between connection attempts
 
     async def connect(self):
         """Connect to Redis"""
+        import time
+        
+        # Rate limit connection attempts
+        current_time = time.time()
+        if current_time - self._last_connection_attempt < self._connection_retry_interval:
+            logger.debug(f"Skipping Redis connection attempt - last attempt was {current_time - self._last_connection_attempt:.1f}s ago")
+            return
+        
+        self._last_connection_attempt = current_time
+        
         if not self.redis:
             try:
                 # Check if REDIS_URL is configured
@@ -177,6 +189,8 @@ class RedisClient:
                 logger.error(f"Error disconnecting Redis connection pool: {e}")
         self.redis = None
         self.pool = None
+        # CRITICAL: Reset availability flag to allow reconnection attempts
+        self.is_available = False
 
     async def set(self, key: str, value: Any, expire: Optional[int] = None) -> bool:
         """Set a value in Redis"""
@@ -463,9 +477,9 @@ async def close_redis():
 
 async def get_redis() -> RedisClient:
     """Get Redis client instance, ensuring it's connected."""
-    # Only attempt connection if we haven't tried yet (no redis and not using fallback)
-    if not redis_client.redis and not redis_client.is_available and not hasattr(redis_client, '_connection_attempted'):
-        logger.info("Redis client accessed before initial connect, attempting to connect.")
-        redis_client._connection_attempted = True
+    # Attempt connection if Redis is not connected and not marked as available
+    # This allows reconnection attempts after failures
+    if not redis_client.redis and not redis_client.is_available:
+        logger.info("Redis not connected, attempting to connect...")
         await redis_client.connect()
     return redis_client
