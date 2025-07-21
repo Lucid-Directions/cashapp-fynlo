@@ -88,7 +88,13 @@ export class EnhancedWebSocketService {
       }
       
       const user = JSON.parse(userInfo);
-      if (!user.restaurant_id) {
+      
+      // Try to get restaurant_id from multiple possible locations
+      const restaurantId = user.restaurant_id || user.restaurantId || user.business?.id;
+      
+      if (!restaurantId && user.role !== 'platform_owner') {
+        // For non-platform owners, restaurant is required
+        console.warn('⚠️ No restaurant_id found in user info, user role:', user.role);
         throw new Error('No restaurant associated with user');
       }
       
@@ -96,7 +102,7 @@ export class EnhancedWebSocketService {
       const wsProtocol = API_CONFIG.BASE_URL.startsWith('https') ? 'wss' : 'ws';
       const wsHost = API_CONFIG.BASE_URL.replace(/^https?:\/\//, '');
       // Encode restaurant ID to handle special characters
-      const encodedRestaurantId = encodeURIComponent(user.restaurant_id);
+      const encodedRestaurantId = encodeURIComponent(restaurantId);
       const wsUrl = `${wsProtocol}://${wsHost}/api/v1/websocket/ws/pos/${encodedRestaurantId}`;
       
       console.log('🔌 Connecting to WebSocket:', wsUrl);
