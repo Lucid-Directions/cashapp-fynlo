@@ -13,6 +13,7 @@ import logging
 from contextlib import asynccontextmanager
 
 from app.core.config import settings
+from app.core.env_check import check_environment_variables
 from app.core.database import init_db, get_db, User
 from app.api.v1.api import api_router
 from app.api.mobile.endpoints import router as mobile_router
@@ -57,6 +58,9 @@ security = HTTPBearer()
 async def lifespan(app: FastAPI):
     """Initialize application on startup"""
     logger.info(f"🚀 Fynlo POS Backend starting in {settings.ENVIRONMENT} mode...")
+    
+    # Check environment variables for common issues
+    check_environment_variables()
     
     # Initialize all services
     from app.core.startup_handler import startup_handler, shutdown_handler
