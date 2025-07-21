@@ -26,25 +26,25 @@ BEGIN
     -- Add subscription_plan if it doesn't exist
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
                   WHERE table_name='restaurants' AND column_name='subscription_plan') THEN
-        ALTER TABLE restaurants ADD COLUMN subscription_plan VARCHAR(50) DEFAULT 'beta';
+        ALTER TABLE restaurants ADD COLUMN subscription_plan VARCHAR(50) DEFAULT 'alpha';
     END IF;
     
     -- Add subscription_status if it doesn't exist
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
                   WHERE table_name='restaurants' AND column_name='subscription_status') THEN
-        ALTER TABLE restaurants ADD COLUMN subscription_status VARCHAR(50) DEFAULT 'active';
+        ALTER TABLE restaurants ADD COLUMN subscription_status VARCHAR(50) DEFAULT 'trial';
     END IF;
     
     -- Add subscription_started_at if it doesn't exist
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
                   WHERE table_name='restaurants' AND column_name='subscription_started_at') THEN
-        ALTER TABLE restaurants ADD COLUMN subscription_started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+        ALTER TABLE restaurants ADD COLUMN subscription_started_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP;
     END IF;
     
     -- Add subscription_expires_at if it doesn't exist
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
                   WHERE table_name='restaurants' AND column_name='subscription_expires_at') THEN
-        ALTER TABLE restaurants ADD COLUMN subscription_expires_at TIMESTAMP;
+        ALTER TABLE restaurants ADD COLUMN subscription_expires_at TIMESTAMP WITH TIME ZONE;
     END IF;
 END $$;
 """
