@@ -24,10 +24,17 @@ class RedisClient:
         self.is_available = False  # Track if Redis is actually available
         self._last_connection_attempt = 0  # Track last connection attempt time
         self._connection_retry_interval = 30  # Minimum seconds between connection attempts
+        self._connection_failures = 0  # Track consecutive failures
+        self._max_connection_failures = 3  # After this many failures, skip Redis entirely
 
     async def connect(self):
         """Connect to Redis"""
         import time
+        
+        # Skip Redis entirely after too many failures
+        if self._connection_failures >= self._max_connection_failures:
+            logger.debug(f"Skipping Redis - {self._connection_failures} consecutive failures")
+            return
         
         # Rate limit connection attempts
         current_time = time.time()
@@ -68,12 +75,12 @@ class RedisClient:
                 is_ssl = settings.REDIS_URL.startswith('rediss://')
                 logger.info(f"Redis URL uses SSL: {is_ssl}")
                 
-                # Basic connection parameters with increased timeouts
+                # Basic connection parameters with reasonable timeouts
                 connection_kwargs = {
                     'decode_responses': True,
                     'max_connections': 10,  # Reduced for DigitalOcean Valkey
-                    'socket_connect_timeout': 60,  # Increased to 60s for DigitalOcean
-                    'socket_timeout': 60,  # Increased to 60s for DigitalOcean
+                    'socket_connect_timeout': 5,  # 5 seconds is reasonable for cloud services
+                    'socket_timeout': 5,  # 5 seconds for operations
                     'retry_on_timeout': True,
                     'retry_on_error': [aioredis.ConnectionError, aioredis.TimeoutError],
                     'health_check_interval': 120,  # Less frequent health checks
@@ -107,11 +114,12 @@ class RedisClient:
                     )
                     self.redis = aioredis.Redis(connection_pool=self.pool)
                     
-                    # Test connection with extended timeout
+                    # Test connection with reasonable timeout
                     logger.info("Testing Redis connection with ping...")
-                    await asyncio.wait_for(self.redis.ping(), timeout=30.0)
+                    await asyncio.wait_for(self.redis.ping(), timeout=5.0)
                     logger.info("✅ Redis connected successfully")
                     self.is_available = True
+                    self._connection_failures = 0  # Reset failure counter on success
                     
                     # Clear mock storage only on successful connection
                     self._mock_storage = {}
@@ -119,6 +127,7 @@ class RedisClient:
                     
                 except (asyncio.TimeoutError, aioredis.TimeoutError, aioredis.ConnectionError) as e:
                     logger.error(f"Redis connection failed: {type(e).__name__}: {str(e)}")
+                    self._connection_failures += 1  # Increment failure counter
                     
                     # Clean up failed connection
                     await self._cleanup_connection()
@@ -135,7 +144,10 @@ class RedisClient:
                     
                     # Don't raise - allow fallback to mock storage
                     self.is_available = False
-                    logger.warning("⚠️ Continuing without Redis - using in-memory fallback")
+                    if self._connection_failures >= self._max_connection_failures:
+                        logger.warning(f"⚠️ Redis disabled after {self._connection_failures} failures - using in-memory storage only")
+                    else:
+                        logger.warning("⚠️ Continuing without Redis - using in-memory fallback")
                     # Keep existing mock storage data on connection failure
                     return
             except Exception as e:
