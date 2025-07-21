@@ -29,11 +29,26 @@ database_url = settings.DATABASE_URL
 
 # Log the DATABASE_URL for debugging (without password)
 if database_url:
-    url_parts = database_url.split('@')
-    if len(url_parts) > 1:
-        safe_url = f"{url_parts[0].split('://')[0]}://***@{url_parts[1]}"
+    # Parse the URL safely to mask credentials
+    if '://' in database_url and '@' in database_url:
+        # Split into protocol and rest
+        protocol, rest = database_url.split('://', 1)
+        # Find the last @ which separates credentials from host
+        # This handles passwords containing @ symbols
+        at_index = rest.rfind('@')
+        if at_index > 0:
+            host_part = rest[at_index+1:]
+            safe_url = f"{protocol}://***@{host_part}"
+        else:
+            # No @ found after protocol, shouldn't happen but be safe
+            safe_url = f"{protocol}://***"
     else:
-        safe_url = database_url[:50] + "..."
+        # No credentials in URL or malformed URL - just show protocol
+        if '://' in database_url:
+            protocol = database_url.split('://')[0]
+            safe_url = f"{protocol}://***"
+        else:
+            safe_url = "***"
     logger.info(f"DATABASE_URL detected: {safe_url}")
 else:
     logger.error("DATABASE_URL is not set!")
