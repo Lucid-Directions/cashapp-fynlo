@@ -44,11 +44,29 @@ async def verify_supabase_user(
     
     # Check if Supabase is configured
     if not supabase_admin:
-        logger.error("Supabase admin client not initialized")
-        raise HTTPException(
-            status_code=503,
-            detail="Authentication service temporarily unavailable"
-        )
+        logger.error("Supabase admin client not initialized - checking environment")
+        # Try to provide more specific error information
+        import os
+        has_url = bool(os.getenv("SUPABASE_URL"))
+        has_key = bool(os.getenv("SUPABASE_SERVICE_ROLE_KEY"))
+        
+        if not has_url or not has_key:
+            missing = []
+            if not has_url:
+                missing.append("SUPABASE_URL")
+            if not has_key:
+                missing.append("SUPABASE_SERVICE_ROLE_KEY")
+            logger.error(f"Missing environment variables: {', '.join(missing)}")
+            raise HTTPException(
+                status_code=503,
+                detail="Authentication service not configured. Please contact support."
+            )
+        else:
+            logger.error("Environment variables present but Supabase initialization failed")
+            raise HTTPException(
+                status_code=503,
+                detail="Authentication service initialization error. Please try again later."
+            )
     
     try:
         # Verify token with Supabase Admin API

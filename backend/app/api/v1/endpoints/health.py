@@ -69,7 +69,7 @@ async def detailed_health_check(db: Session = Depends(get_db)):
         redis_response_time = (time.time() - start_time) * 1000
         
         # Check if using mock storage
-        is_mock = redis_client.redis is None and redis_client._mock_storage is not None
+        is_mock = redis_client.redis is None
         
         health_status["components"]["redis"] = {
             "status": "healthy" if redis_ping else "unhealthy",
@@ -145,8 +145,22 @@ async def check_dependencies(current_user: User = Depends(get_current_user)):
     # Check Supabase
     try:
         if dependencies["supabase"]["configured"]:
-            # TODO: Implement actual Supabase health check
-            dependencies["supabase"]["status"] = "healthy"
+            from app.core.supabase import supabase_admin
+            if supabase_admin is not None:
+                # Try a simple operation to verify it works
+                try:
+                    # This should work even with no users
+                    result = supabase_admin.auth.admin.list_users(page=1, per_page=1)
+                    dependencies["supabase"]["status"] = "healthy"
+                    dependencies["supabase"]["initialized"] = True
+                except Exception as api_error:
+                    dependencies["supabase"]["status"] = "unhealthy"
+                    dependencies["supabase"]["error"] = f"API error: {str(api_error)}"
+                    dependencies["supabase"]["initialized"] = True
+            else:
+                dependencies["supabase"]["status"] = "not_initialized"
+                dependencies["supabase"]["error"] = "supabase_admin is None"
+                dependencies["supabase"]["initialized"] = False
         else:
             dependencies["supabase"]["status"] = "not_configured"
     except Exception as e:
