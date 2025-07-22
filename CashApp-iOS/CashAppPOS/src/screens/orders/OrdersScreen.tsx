@@ -33,15 +33,23 @@ interface CustomerInfo {
   email?: string;
 }
 
+interface OrderItem {
+  name: string;
+  quantity: number;
+  price: number;
+}
+
 interface Order {
   id: string;
-  date: Date;
+  date: Date | string;
   customer?: CustomerInfo; // Changed from customerName?: string
   total: number;
-  items: number;
+  items: number | OrderItem[]; // Can be number or array depending on context
   status: 'completed' | 'pending' | 'refunded' | 'cancelled';
   paymentMethod: 'card' | 'cash' | 'mobile' | 'qrCode';
   employee: string;
+  // For detailed view
+  itemsDetail?: OrderItem[];
 }
 
 const OrdersScreen: React.FC = () => {
@@ -193,7 +201,7 @@ const OrdersScreen: React.FC = () => {
       <View style={styles.orderFooter}>
         <View style={styles.orderStats}>
           <Icon name={getPaymentIcon(item.paymentMethod)} size={20} color={theme.colors.darkGray} />
-          <Text style={styles.orderItems}>{item.items} items</Text>
+          <Text style={styles.orderItems}>{typeof item.items === 'number' ? item.items : item.items?.length || 0} items</Text>
         </View>
         <Text style={styles.orderTotal}>£{item.total.toFixed(2)}</Text>
       </View>
@@ -419,7 +427,7 @@ const OrdersScreen: React.FC = () => {
               
               <View style={styles.orderDetailsSection}>
                 <Text style={styles.sectionTitle}>Customer Information</Text>
-                <Text style={styles.detailText}>Name: {selectedOrder.customerName || 'Walk-in Customer'}</Text>
+                <Text style={styles.detailText}>Name: {selectedOrder.customer?.name || 'Walk-in Customer'}</Text>
                 <Text style={styles.detailText}>Date: {formatDate(selectedOrder.date)}</Text>
                 <Text style={styles.detailText}>Served by: {selectedOrder.employee}</Text>
               </View>
@@ -434,10 +442,24 @@ const OrdersScreen: React.FC = () => {
               </View>
               
               <View style={styles.orderDetailsSection}>
-                <Text style={styles.sectionTitle}>Order Items ({selectedOrder.items})</Text>
-                <Text style={styles.detailText}>• Fish & Chips - £12.99</Text>
-                <Text style={styles.detailText}>• Mushy Peas - £3.50</Text>
-                <Text style={styles.detailText}>• Soft Drink - £2.50</Text>
+                <Text style={styles.sectionTitle}>Order Items ({typeof selectedOrder.items === 'number' ? selectedOrder.items : selectedOrder.items?.length || 0})</Text>
+                {Array.isArray(selectedOrder.itemsDetail) ? (
+                  selectedOrder.itemsDetail.map((item, index) => (
+                    <Text key={index} style={styles.detailText}>
+                      • {item.name} x{item.quantity} - £{(item.price * item.quantity).toFixed(2)}
+                    </Text>
+                  ))
+                ) : Array.isArray(selectedOrder.items) ? (
+                  selectedOrder.items.map((item, index) => (
+                    <Text key={index} style={styles.detailText}>
+                      • {item.name} x{item.quantity} - £{(item.price * item.quantity).toFixed(2)}
+                    </Text>
+                  ))
+                ) : (
+                  <>
+                    <Text style={styles.detailText}>• Loading item details...</Text>
+                  </>
+                )}
                 <View style={styles.divider} />
                 <Text style={styles.detailText}>Subtotal: £{(selectedOrder.total * 0.8).toFixed(2)}</Text>
                 <Text style={styles.detailText}>VAT (20%): £{(selectedOrder.total * 0.2).toFixed(2)}</Text>
