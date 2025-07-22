@@ -51,7 +51,8 @@ async def get_service_charge_public(
         db_success = False
         try:
             # Set a statement timeout at the database level
-            db.execute("SET LOCAL statement_timeout = '500ms'")
+            from sqlalchemy import text
+            db.execute(text("SET LOCAL statement_timeout = '500ms'"))
             
             from app.models.platform_config import PlatformConfiguration
             
@@ -79,7 +80,7 @@ async def get_service_charge_public(
         finally:
             # Always reset the timeout for the connection
             try:
-                db.execute("RESET statement_timeout")
+                db.execute(text("RESET statement_timeout"))
             except Exception as reset_error:
                 logger.warning(f"Failed to reset statement timeout: {reset_error}")
         

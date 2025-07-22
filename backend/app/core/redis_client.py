@@ -11,6 +11,7 @@ import redis.asyncio as aioredis
 from redis.asyncio.connection import ConnectionPool
 
 from app.core.config import settings
+from app.core.json_encoder import safe_json_dumps, safe_json_loads
 
 logger = logging.getLogger(__name__)
 
@@ -219,7 +220,7 @@ class RedisClient:
         """Set a value in Redis"""
         if not self.redis: # Mock fallback
             if isinstance(value, (dict, list, tuple)): # Handle tuples as well
-                value = json.dumps(value)
+                value = safe_json_dumps(value)
             self._mock_storage[key] = str(value) # Store as string for consistency
             # Mock doesn't handle expire well, but log it
             if expire:
@@ -227,7 +228,7 @@ class RedisClient:
             return True
 
         if isinstance(value, (dict, list, tuple)):
-            value_to_set = json.dumps(value)
+            value_to_set = safe_json_dumps(value)
         else:
             value_to_set = str(value) # Ensure value is string if not complex type
 
@@ -245,7 +246,7 @@ class RedisClient:
             if value is None:
                 return None
             try:
-                return json.loads(value) # Try to parse as JSON
+                return safe_json_loads(value) # Try to parse as JSON
             except (json.JSONDecodeError, TypeError):
                 return value # Return as is if not JSON or if already primitive
 
@@ -255,7 +256,7 @@ class RedisClient:
                 return None
             try:
                 # decode_responses=True means value is already a string
-                return json.loads(value)
+                return safe_json_loads(value)
             except (json.JSONDecodeError, TypeError):
                 return value
         except Exception as e:

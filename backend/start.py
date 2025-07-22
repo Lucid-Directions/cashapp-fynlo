@@ -1,29 +1,22 @@
 #!/usr/bin/env python3
 """
-Minimal startup script for DigitalOcean deployment
-Uses minimal app without external dependencies
+Simple startup script for DigitalOcean deployment
+This helps resolve module import issues when the app is run from different directories
 """
-
+import sys
 import os
-import uvicorn
 
+# Add the current directory to Python path
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+# Import and run the app
 if __name__ == "__main__":
-    # DigitalOcean provides PORT environment variable
-    port = int(os.environ.get("PORT", 8000))
-    host = "0.0.0.0"
-    
-    print(f"🚀 Starting Fynlo POS Backend on {host}:{port}")
-    print(f"Environment: {os.environ.get('ENVIRONMENT', 'production')}")
-    print(f"Debug mode: {os.environ.get('DEBUG', 'false')}")
-    
-    # Force minimal app for deployment stability
-    from app.main_minimal import app
-    print("✅ Using minimal app (no external dependencies)")
-    
+    import uvicorn
     uvicorn.run(
-        app,
-        host=host,
-        port=port,
-        log_level="info",
-        access_log=True
+        "app.main:app",
+        host=os.getenv("API_HOST", "0.0.0.0"),
+        port=int(os.getenv("PORT", os.getenv("API_PORT", "8080"))),
+        workers=int(os.getenv("WEB_CONCURRENCY", "1")),
+        log_level=os.getenv("LOG_LEVEL", "info"),
+        loop="uvloop"
     )
