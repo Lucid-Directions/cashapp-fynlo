@@ -41,7 +41,7 @@ BEGIN
         'Europe/London',
         '{"monday": {"open": "11:00", "close": "23:00"}, "tuesday": {"open": "11:00", "close": "23:00"}, "wednesday": {"open": "11:00", "close": "23:00"}, "thursday": {"open": "11:00", "close": "23:00"}, "friday": {"open": "11:00", "close": "24:00"}, "saturday": {"open": "11:00", "close": "24:00"}, "sunday": {"open": "12:00", "close": "22:00"}}'::jsonb,
         '{"currency": "GBP", "language": "en", "receipt_footer": "¡Gracias por visitarnos!"}'::jsonb,
-        '{"vat_rate": 20.0, "service_charge_rate": 12.5, "tax_inclusive": false}'::jsonb,
+        '{"vat_rate": 20.0, "service_charge_rate": 10.0, "tax_inclusive": false}'::jsonb,
         '{"cash": true, "card": true, "qr_code": true, "mobile_payment": true}'::jsonb,
         true,
         NOW(),

@@ -82,7 +82,7 @@ class SharedDataStore {
           // Fallback if structure is different
           config = {
             enabled: result.enabled ?? true,
-            rate: result.rate ?? 12.5,
+            rate: result.rate ?? 10,
             description: result.description ?? 'Platform service charge',
             lastUpdated: new Date().toISOString(),
           };
@@ -109,7 +109,7 @@ class SharedDataStore {
       // Default configuration if everything fails
       const defaultConfig: ServiceChargeConfig = {
         enabled: true,
-        rate: 12.5,
+        rate: 10,
         description: 'Platform service charge',
         lastUpdated: new Date().toISOString(),
       };
@@ -122,7 +122,7 @@ class SharedDataStore {
       // Emergency fallback to default
       return {
         enabled: true,
-        rate: 12.5,
+        rate: 10,
         description: 'Platform service charge',
         lastUpdated: new Date().toISOString(),
       };

@@ -251,7 +251,7 @@ const defaultTaxConfiguration: TaxConfiguration = {
   vatRate: 20,
   vatInclusive: true,
   taxExemptItems: [],
-  serviceTaxRate: 12.5,
+  serviceTaxRate: 10,
   serviceTaxEnabled: true,
 };
 

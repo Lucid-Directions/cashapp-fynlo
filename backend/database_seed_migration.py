@@ -79,7 +79,7 @@ class FynloSeedMigration:
                 value = EXCLUDED.value,
                 updated_at = NOW()
         """,
-        'service_charge_rate', '12.5', 'Platform-wide service charge percentage', platform_user_id,
+        'service_charge_rate', '10.0', 'Platform-wide service charge percentage', platform_user_id,
         'qr_payment_fee_percentage', '1.2', 'QR payment processing fee', platform_user_id,
         'card_payment_fee_percentage', '2.9', 'Card payment processing fee', platform_user_id,
         'platform_fee_percentage', '0.5', 'Platform commission fee', platform_user_id
