@@ -41,7 +41,7 @@ def format_menu_item(product, category_name=None):
     emoji = emoji_map.get(category_name, '🍽️')
     
     return {
-        'id': product.id,
+        'id': str(product.id),  # Convert UUID to string
         'name': product.name,
         'price': float(product.price),
         'emoji': emoji,
@@ -49,7 +49,7 @@ def format_menu_item(product, category_name=None):
         'category': category_name or 'Uncategorized',
         'description': product.description or '',
         'icon': 'restaurant',  # Default icon for compatibility
-        'category_id': product.category_id if hasattr(product, 'category_id') else None
+        'category_id': str(product.category_id) if product.category_id else None  # Convert UUID to string
     }
 
 @router.get("/items")
@@ -173,7 +173,7 @@ async def get_public_menu_categories(
             ).count()
             
             category_list.append({
-                'id': cat.id,
+                'id': str(cat.id),  # Convert UUID to string
                 'name': cat.name,
                 'description': cat.description,
                 'active': cat.is_active,
