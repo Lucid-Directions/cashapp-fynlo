@@ -1,0 +1,2 @@
+web: cd backend && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8080} --workers ${WEB_CONCURRENCY:-1} --log-level info --loop uvloop
+release: cd backend && alembic upgrade head && python seed_chucho_menu.py
