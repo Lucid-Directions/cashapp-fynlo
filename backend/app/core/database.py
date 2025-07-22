@@ -79,9 +79,6 @@ if not any(database_url.startswith(prefix) for prefix in valid_prefixes):
 
 logger.info("Database URL validation passed")
 
-# Ensure database_url is set before proceeding
-if not database_url:
-    raise ValueError("DATABASE_URL environment variable is not set!")
 
 # For DigitalOcean managed databases, ensure SSL mode is set
 if "postgresql" in database_url and ("digitalocean.com" in database_url or ":25060" in database_url or ":25061" in database_url):
