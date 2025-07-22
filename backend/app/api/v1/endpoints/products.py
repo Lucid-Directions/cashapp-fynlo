@@ -237,8 +237,8 @@ async def get_products(
         for product in products
     ]
     
-    # Cache for 5 minutes - convert Pydantic models to dicts
-    await redis.set(cache_key, [prod.dict() for prod in result], expire=300)
+    # Cache for 5 minutes - result is already a list of dicts
+    await redis.set(cache_key, result, expire=300)
     
     return APIResponseHelper.success(
         data=result,
@@ -557,8 +557,8 @@ async def get_products_mobile(
         for product, category in products_with_categories
     ]
     
-    # Cache for 5 minutes - convert Pydantic models to dicts
-    await redis.set(cache_key, [prod.dict() for prod in result], expire=300)
+    # Cache for 5 minutes - result is already a list of dicts
+    await redis.set(cache_key, result, expire=300)
     
     return APIResponseHelper.success(
         data=result,
@@ -619,8 +619,8 @@ async def get_products_by_category(
         for product in products
     ]
     
-    # Cache for 5 minutes - convert Pydantic models to dicts
-    await redis.set(cache_key, [prod.dict() for prod in result], expire=300)
+    # Cache for 5 minutes - result is already a list of dicts
+    await redis.set(cache_key, result, expire=300)
     
     return APIResponseHelper.success(
         data=result,
