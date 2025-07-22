@@ -134,7 +134,7 @@ async def get_categories(
     await redis.set(f"categories:{restaurant_id}", [cat.dict() for cat in result], expire=300)
     
     return APIResponseHelper.success(
-        data=result,
+        data=[cat.dict() for cat in result],
         message=f"Retrieved {len(result)} categories"
     )
 
@@ -211,7 +211,9 @@ async def get_products(
             meta={
                 "restaurant_id": restaurant_id,
                 "category_id": category_id,
-                "active_only": active_only
+                "active_only": active_only,
+                "total_count": len(cached_products),
+                "cached": True
             }
         )
     
@@ -252,7 +254,7 @@ async def get_products(
     await redis.set(cache_key, [prod.dict() for prod in result], expire=300)
     
     return APIResponseHelper.success(
-        data=result,
+        data=[prod.dict() for prod in result],
         message=f"Retrieved {len(result)} products",
         meta={
             "restaurant_id": restaurant_id,
