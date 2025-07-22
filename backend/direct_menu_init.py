@@ -85,19 +85,35 @@ def init_chucho_menu():
         print("🌮 Direct Database Menu Initialization")
         print("=" * 50)
         
-        # Get the first restaurant (should be Chucho if created)
+        # Find Chucho restaurant specifically
         result = db.execute(
-            text("SELECT id, name FROM restaurants ORDER BY created_at DESC LIMIT 1")
+            text("SELECT id, name FROM restaurants WHERE LOWER(name) LIKE '%chucho%' ORDER BY created_at ASC LIMIT 1")
         ).fetchone()
         
         if not result:
-            print("❌ No restaurant found in database!")
-            print("   Please ensure a restaurant exists first.")
-            return False
-        
-        restaurant_id = str(result[0])
-        restaurant_name = result[1]
-        print(f"✅ Found restaurant: {restaurant_name} (ID: {restaurant_id})")
+            # If Chucho doesn't exist, create it
+            print("⚠️  Chucho restaurant not found. Creating it...")
+            restaurant_id = str(uuid.uuid4())
+            restaurant_name = "Chucho"
+            
+            db.execute(
+                text("""
+                    INSERT INTO restaurants (id, name, is_active, created_at, updated_at)
+                    VALUES (:id, :name, true, :created_at, :updated_at)
+                """),
+                {
+                    "id": restaurant_id,
+                    "name": restaurant_name,
+                    "created_at": datetime.utcnow(),
+                    "updated_at": datetime.utcnow()
+                }
+            )
+            db.commit()
+            print(f"✅ Created Chucho restaurant (ID: {restaurant_id})")
+        else:
+            restaurant_id = str(result[0])
+            restaurant_name = result[1]
+            print(f"✅ Found restaurant: {restaurant_name} (ID: {restaurant_id})")
         
         # Clear existing menu
         print("\n🧹 Clearing existing menu...")
