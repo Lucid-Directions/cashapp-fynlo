@@ -12,8 +12,16 @@ class FynloJSONEncoder(json.JSONEncoder):
     """Custom JSON encoder that handles UUIDs, dates, and decimals"""
     
     def __init__(self, *args, **kwargs):
+        # Extract seen set from kwargs or create new one
+        self._seen = kwargs.pop('_seen', set())
         super().__init__(*args, **kwargs)
-        self._seen = set()  # Track objects to prevent circular references
+    
+    def encode(self, obj: Any) -> str:
+        """Override encode to maintain seen set across the entire encoding process"""
+        # Clear seen set at the start of a new top-level encoding
+        if not self._seen:
+            self._seen = set()
+        return super().encode(obj)
     
     def default(self, obj: Any) -> Any:
         # Check for circular references
@@ -34,12 +42,11 @@ class FynloJSONEncoder(json.JSONEncoder):
                 self._seen.add(obj_id)
                 try:
                     # Handle SQLAlchemy models or other objects
-                    # Recursively encode nested objects
                     result = {}
                     for k, v in obj.__dict__.items():
                         if not k.startswith('_'):
-                            # Recursively apply encoding to nested values
-                            result[k] = json.loads(json.dumps(v, cls=FynloJSONEncoder))
+                            # Recursively process nested values
+                            result[k] = self._encode_value(v)
                     return result
                 finally:
                     # Remove from seen set after processing
@@ -48,6 +55,29 @@ class FynloJSONEncoder(json.JSONEncoder):
         except Exception:
             # If all else fails, return string representation
             return str(obj)
+    
+    def _encode_value(self, value: Any) -> Any:
+        """Recursively encode a value using the same encoder instance"""
+        if value is None:
+            return None
+        elif isinstance(value, (str, int, float, bool)):
+            return value
+        elif isinstance(value, uuid.UUID):
+            return str(value)
+        elif isinstance(value, (datetime, date)):
+            return value.isoformat()
+        elif isinstance(value, Decimal):
+            return float(value)
+        elif isinstance(value, dict):
+            return {k: self._encode_value(v) for k, v in value.items()}
+        elif isinstance(value, (list, tuple)):
+            return [self._encode_value(item) for item in value]
+        elif hasattr(value, '__dict__'):
+            # Delegate to default method for complex objects
+            return self.default(value)
+        else:
+            # For any other type, try to convert to string
+            return str(value)
 
 
 def safe_json_dumps(obj: Any) -> str:
