@@ -53,27 +53,31 @@ if database_url:
 else:
     logger.error("DATABASE_URL is not set!")
 
-# Temporarily disable validation to allow app to start
-# TODO: Investigate why validation fails even with correct PostgreSQL URL
-logger.warning("Database URL validation temporarily disabled")
+# Validate DATABASE_URL is a PostgreSQL URL
+if not database_url:
+    raise ValueError("DATABASE_URL environment variable is not set")
 
-# Keep original URL validation commented out for now
-# # Validate DATABASE_URL is a PostgreSQL URL
-# if not database_url:
-#     raise ValueError("DATABASE_URL environment variable is not set")
+# Check for common mistake: using Redis URL for DATABASE_URL
+if database_url.startswith(("redis://", "rediss://")):
+    raise ValueError(
+        "DATABASE_URL is set to a Redis URL instead of PostgreSQL. "
+        "Please check your environment variables. "
+        "DATABASE_URL should be postgresql://... and REDIS_URL should be redis(s)://..."
+    )
 
-# if database_url.startswith(("redis://", "rediss://")):
-#     raise ValueError(
-#         "DATABASE_URL is set to a Redis URL instead of PostgreSQL. "
-#         "Please check your environment variables. "
-#         "DATABASE_URL should be postgresql://... and REDIS_URL should be redis(s)://..."
-#     )
+# Validate it's a PostgreSQL URL (handle various formats)
+# DigitalOcean uses postgresql:// but some providers might use postgres://
+# Also handle connection pooling URLs that might have different formats
+valid_prefixes = ("postgresql://", "postgres://", "postgresql+psycopg2://", "postgresql+asyncpg://")
+if not any(database_url.startswith(prefix) for prefix in valid_prefixes):
+    # Extract the protocol for better error message
+    protocol = database_url.split('://')[0] if '://' in database_url else 'unknown'
+    raise ValueError(
+        f"DATABASE_URL must be a PostgreSQL URL (postgresql:// or postgres://), "
+        f"but got: {protocol}://"
+    )
 
-# if not database_url.startswith(("postgresql://", "postgres://")):
-#     raise ValueError(
-#         f"DATABASE_URL must be a PostgreSQL URL (postgresql:// or postgres://), "
-#         f"but got: {database_url.split('://')[0]}://"
-#     )
+logger.info("Database URL validation passed")
 
 # Ensure database_url is set before proceeding
 if not database_url:
