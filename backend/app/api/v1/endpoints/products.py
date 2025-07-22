@@ -107,7 +107,10 @@ async def get_categories(
     # Check cache first
     cached_categories = await redis.get(f"categories:{restaurant_id}")
     if cached_categories:
-        return cached_categories
+        return APIResponseHelper.success(
+            data=cached_categories,
+            message=f"Retrieved {len(cached_categories)} categories (cached)"
+        )
     
     categories = db.query(Category).filter(
         and_(Category.restaurant_id == restaurant_id, Category.is_active == True)
@@ -127,8 +130,8 @@ async def get_categories(
         for cat in categories
     ]
     
-    # Cache for 5 minutes
-    await redis.set(f"categories:{restaurant_id}", result, expire=300)
+    # Cache for 5 minutes - convert Pydantic models to dicts
+    await redis.set(f"categories:{restaurant_id}", [cat.dict() for cat in result], expire=300)
     
     return APIResponseHelper.success(
         data=result,
@@ -202,7 +205,15 @@ async def get_products(
     cache_key = f"products:{restaurant_id}:{category_id or 'all'}:{active_only}"
     cached_products = await redis.get(cache_key)
     if cached_products:
-        return cached_products
+        return APIResponseHelper.success(
+            data=cached_products,
+            message=f"Retrieved {len(cached_products)} products (cached)",
+            meta={
+                "restaurant_id": restaurant_id,
+                "category_id": category_id,
+                "active_only": active_only
+            }
+        )
     
     query = db.query(Product).filter(Product.restaurant_id == restaurant_id)
     
@@ -237,8 +248,8 @@ async def get_products(
         for product in products
     ]
     
-    # Cache for 5 minutes
-    await redis.set(cache_key, result, expire=300)
+    # Cache for 5 minutes - convert Pydantic models to dicts
+    await redis.set(cache_key, [prod.dict() for prod in result], expire=300)
     
     return APIResponseHelper.success(
         data=result,
