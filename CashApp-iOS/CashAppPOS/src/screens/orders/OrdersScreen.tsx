@@ -143,14 +143,15 @@ const OrdersScreen: React.FC = () => {
     }
   };
 
-  const formatDate = (date: Date) => {
+  const formatDate = (date: Date | string) => {
+    const dateObj = date instanceof Date ? date : new Date(date);
     const today = new Date();
-    const isToday = date.toDateString() === today.toDateString();
+    const isToday = dateObj.toDateString() === today.toDateString();
     
     if (isToday) {
-      return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+      return dateObj.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
     }
-    return date.toLocaleDateString('en-GB', { 
+    return dateObj.toLocaleDateString('en-GB', { 
       day: '2-digit', 
       month: 'short',
       hour: '2-digit', 
