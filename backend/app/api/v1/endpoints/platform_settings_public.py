@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 # Default service charge configuration
 DEFAULT_SERVICE_CHARGE = {
     "enabled": True,
-    "rate": 12.5,
+    "rate": 10.0,
     "description": "Platform service charge",
     "currency": "GBP"
 }
