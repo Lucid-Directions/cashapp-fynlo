@@ -1,0 +1,39 @@
+name: fynlo-backend
+region: lon
+services:
+- name: api
+  environment_slug: python
+  github:
+    branch: main
+    deploy_on_push: true
+    repo: Lucid-Directions/cashapp-fynlo
+  http_port: 8080
+  instance_count: 1
+  instance_size_slug: basic-xxs
+  source_dir: /
+  envs:
+  - key: PYTHONPATH
+    value: /workspace
+  - key: DATABASE_URL
+    scope: RUN_TIME
+    type: SECRET
+  - key: JWT_SECRET
+    scope: RUN_TIME
+    type: SECRET
+  - key: REDIS_URL
+    scope: RUN_TIME
+    type: SECRET
+  - key: ENCRYPTION_KEY
+    scope: RUN_TIME
+    type: SECRET
+  - key: LOG_LEVEL
+    value: info
+  run_command: python start_server.py
+  build_command: |
+    cd backend
+    pip install -r requirements.txt
+databases:
+- name: fynlo-db
+  engine: PG
+  production: true
+  version: "16"
