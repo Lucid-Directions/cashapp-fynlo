@@ -144,21 +144,48 @@ def clear_all_menu_data(db: Session):
     db.commit()
     print(f"   ✅ Deleted {product_count} products and {category_count} categories")
 
-def remove_other_restaurants(db: Session):
-    """Remove all restaurants except Chucho"""
+def remove_other_restaurants(db: Session, chucho_restaurant_id: str):
+    """Remove all restaurants except the specified Chucho restaurant"""
     print("🧹 Removing all non-Chucho restaurants...")
     
     from sqlalchemy import text
     
-    # Delete all restaurants that are not Chucho
-    result = db.execute(
-        text("DELETE FROM restaurants WHERE LOWER(name) != LOWER(:name)"),
-        {"name": "Chucho"}
-    )
-    restaurant_count = result.rowcount
+    # First, clear dependent data from other restaurants
+    # Get list of restaurants to delete
+    other_restaurants = db.execute(
+        text("SELECT id FROM restaurants WHERE id != :restaurant_id"),
+        {"restaurant_id": chucho_restaurant_id}
+    ).fetchall()
+    
+    if other_restaurants:
+        other_ids = [str(r[0]) for r in other_restaurants]
+        print(f"   Found {len(other_ids)} other restaurants to remove")
+        
+        # Clear dependent data first to avoid foreign key violations
+        # 1. Clear products from other restaurants
+        result = db.execute(
+            text("DELETE FROM products WHERE restaurant_id = ANY(:restaurant_ids)"),
+            {"restaurant_ids": other_ids}
+        )
+        print(f"   ✅ Deleted {result.rowcount} products from other restaurants")
+        
+        # 2. Clear categories from other restaurants
+        result = db.execute(
+            text("DELETE FROM categories WHERE restaurant_id = ANY(:restaurant_ids)"),
+            {"restaurant_ids": other_ids}
+        )
+        print(f"   ✅ Deleted {result.rowcount} categories from other restaurants")
+        
+        # 3. Now safe to delete the restaurants
+        result = db.execute(
+            text("DELETE FROM restaurants WHERE id = ANY(:restaurant_ids)"),
+            {"restaurant_ids": other_ids}
+        )
+        print(f"   ✅ Deleted {result.rowcount} other restaurants")
+    else:
+        print("   ✅ No other restaurants found - only Chucho exists")
     
     db.commit()
-    print(f"   ✅ Deleted {restaurant_count} other restaurants")
 
 def ensure_restaurant_owner(db: Session, restaurant_id: str):
     """Ensure Chucho restaurant is owned by arnaud@luciddirections.co.uk"""
@@ -270,14 +297,14 @@ def main():
     db = SessionLocal()
     
     try:
-        # Step 1: Remove all other restaurants (Casa Estrella, Fynlo Mexican, etc.)
-        remove_other_restaurants(db)
-        
-        # Step 2: Find Chucho restaurant
+        # Step 1: Find Chucho restaurant FIRST (before any deletions)
         restaurant = find_chucho_restaurant(db)
         restaurant_id = str(restaurant.id)
         
         print(f"🏪 Found restaurant: {restaurant.name} (ID: {restaurant_id})")
+        
+        # Step 2: Remove all OTHER restaurants (now that we have Chucho's ID)
+        remove_other_restaurants(db, restaurant_id)
         
         # Step 3: Ensure restaurant is owned by arnaud@luciddirections.co.uk
         ensure_restaurant_owner(db, restaurant_id)
