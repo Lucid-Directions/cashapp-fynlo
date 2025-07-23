@@ -13,7 +13,6 @@ import logging
 from contextlib import asynccontextmanager
 
 from app.core.config import settings
-from app.core.env_check import check_environment_variables
 from app.core.database import init_db, get_db, User
 from app.api.v1.api import api_router
 from app.api.mobile.endpoints import router as mobile_router
@@ -54,70 +53,19 @@ if settings.ENVIRONMENT == "production" or not settings.ERROR_DETAIL_ENABLED:
 
 security = HTTPBearer()
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    """Initialize application on startup"""
-    logger.info(f"🚀 Fynlo POS Backend starting in {settings.ENVIRONMENT} mode...")
-    
-    # Check environment variables for common issues
-    check_environment_variables()
-    
-    # Initialize all services
-    from app.core.startup_handler import startup_handler, shutdown_handler
-    
-    try:
-        await startup_handler()
-    except Exception as e:
-        logger.error(f"❌ Failed to start application: {e}")
-        raise
-    
-    # Initialize background tasks with proper error handling
-    flush_task = None
-    cleanup_task = None
-    
-    try:
-        # Import metrics background tasks
-        import asyncio
-        from app.services.metrics_collector import metrics_flush_task, metrics_cleanup_task
-        
-        # Create background tasks
-        flush_task = asyncio.create_task(metrics_flush_task())
-        cleanup_task = asyncio.create_task(metrics_cleanup_task())
-        
-        logger.info("✅ Metrics collection started")
-    except ImportError as e:
-        logger.warning(f"⚠️ Metrics collection disabled - module not available: {str(e)}")
-    except Exception as e:
-        logger.error(f"❌ Failed to start metrics collection: {str(e)}")
-    
-    yield
-    
-    # Cancel background tasks on shutdown if they were created
-    if flush_task:
-        flush_task.cancel()
-    if cleanup_task:
-        cleanup_task.cancel()
-    
-    try:
-        if flush_task:
-            await flush_task
-        if cleanup_task:
-            await cleanup_task
-    except asyncio.CancelledError:
-        pass
-    except Exception as e:
-        logger.error(f"Error during cleanup: {str(e)}")
-    
-    # Run shutdown handler
-    await shutdown_handler()
-    
-    logger.info("✅ Cleanup complete")
+# TEMPORARY: Remove lifespan function for deployment
+# @asynccontextmanager
+# async def lifespan(app: FastAPI):
+#     """Initialize application on startup - DISABLED FOR DEPLOYMENT"""
+#     logger.info(f"🚀 Fynlo POS Backend starting in {settings.ENVIRONMENT} mode...")
+#     yield
+#     logger.info("✅ Cleanup complete")
 
 app = FastAPI(
     title=settings.APP_NAME,
     description="Hardware-Free Restaurant Management Platform",
     version="1.0.0",
-    lifespan=lifespan,
+    # lifespan=lifespan,  # DISABLED FOR DEPLOYMENT
     debug=settings.DEBUG  # Set FastAPI debug mode from settings
 )
 
@@ -155,15 +103,6 @@ app.add_middleware(
     allow_headers=["*"],
     allow_origin_regex=r"^https://fynlo-[a-zA-Z0-9\-]+\.vercel\.app$" if settings.ENVIRONMENT != "production" else None
 )
-
-# Add monitoring middleware for metrics collection
-# IMPORTANT: RequestIDMiddleware must be added AFTER MonitoringMiddleware
-# because middleware executes in reverse order of addition.
-# This ensures RequestIDMiddleware runs first and sets the request ID
-# that MonitoringMiddleware will use.
-from app.middleware.monitoring import MonitoringMiddleware, RequestIDMiddleware
-app.add_middleware(MonitoringMiddleware)  # Runs second, uses request ID
-app.add_middleware(RequestIDMiddleware)   # Runs first, sets request ID
 
 # TEMPORARY: Disable complex middleware for deployment
 # Add API version middleware for backward compatibility (FIRST in middleware stack)

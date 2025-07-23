@@ -1,3 +1,0 @@
-# This file exists to help DigitalOcean buildpack detection
-# The actual requirements are in backend/requirements.txt
--r backend/requirements.txt

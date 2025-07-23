@@ -13,8 +13,6 @@ from enum import Enum
 
 from app.core.exceptions import FynloException, ErrorCodes
 from app.core.responses import APIResponseHelper
-from app.core.redis_client import redis_client
-from app.core.logger import logger
 
 class EventType(str, Enum):
     """WebSocket event types"""
@@ -112,12 +110,8 @@ class WebSocketManager:
             "total_connections": 0,
             "active_connections": 0,
             "messages_sent": 0,
-            "messages_failed": 0,
-            "total_messages": 0
+            "messages_failed": 0
         }
-        
-        # Heartbeat task reference
-        self._heartbeat_task = None
     
     async def connect(
         self,
@@ -164,9 +158,6 @@ class WebSocketManager:
             # Update stats
             self.stats["total_connections"] += 1
             self.stats["active_connections"] = len(self.active_connections)
-            
-            # Update Redis stats for monitoring
-            await self._update_redis_stats()
             
             # Send connection confirmation
             await self.send_to_connection(
@@ -231,9 +222,6 @@ class WebSocketManager:
             # Update stats
             self.stats["active_connections"] = len(self.active_connections)
             
-            # Update Redis stats for monitoring
-            await self._update_redis_stats()
-            
         except Exception as e:
             # Log error but don't raise to prevent cascade failures
             print(f"Error disconnecting WebSocket {connection_id}: {str(e)}")
@@ -253,7 +241,6 @@ class WebSocketManager:
             await connection.websocket.send_text(json.dumps(message_data))
             
             self.stats["messages_sent"] += 1
-            self.stats["total_messages"] += 1
             return True
             
         except WebSocketDisconnect:
@@ -390,87 +377,6 @@ class WebSocketManager:
             },
             "queued_messages": sum(len(messages) for messages in self.message_queue.values())
         }
-    
-    async def setup(self):
-        """Initialize WebSocket manager"""
-        # Initialize any required resources
-        logger.info("WebSocket manager initialized")
-        
-        # Start heartbeat task and store reference
-        self._heartbeat_task = asyncio.create_task(self._heartbeat_loop())
-    
-    async def _heartbeat_loop(self):
-        """Periodic heartbeat to check connection health"""
-        while True:
-            try:
-                await asyncio.sleep(30)  # Heartbeat every 30 seconds
-                await self.ping_connections()
-            except Exception as e:
-                logger.error(f"Error in heartbeat loop: {e}")
-    
-    async def close_all_connections(self):
-        """Close all active WebSocket connections"""
-        # Cancel heartbeat task if it exists
-        if hasattr(self, '_heartbeat_task') and self._heartbeat_task:
-            self._heartbeat_task.cancel()
-            try:
-                await self._heartbeat_task
-            except asyncio.CancelledError:
-                pass
-            logger.info("Heartbeat task cancelled")
-        
-        connection_ids = list(self.active_connections.keys())
-        for connection_id in connection_ids:
-            try:
-                connection = self.active_connections.get(connection_id)
-                if connection and connection.websocket:
-                    await connection.websocket.close()
-            except Exception as e:
-                logger.error(f"Error closing connection {connection_id}: {e}")
-            finally:
-                await self.disconnect(connection_id)
-        logger.info(f"Closed {len(connection_ids)} WebSocket connections")
-    
-    async def _update_redis_stats(self):
-        """Update connection stats in Redis for monitoring"""
-        try:
-            # Update total active connections
-            await redis_client.set(
-                "websocket:connections:active",
-                len(self.active_connections),
-                expire=300  # 5 minutes
-            )
-            
-            # Update connections by restaurant
-            for restaurant_id, connections in self.restaurant_connections.items():
-                await redis_client.set(
-                    f"websocket:connections:restaurant:{restaurant_id}",
-                    len(connections),
-                    expire=300
-                )
-            
-            # Update connections by type
-            for conn_type, connections in self.type_connections.items():
-                await redis_client.set(
-                    f"websocket:connections:type:{conn_type}",
-                    len(connections),
-                    expire=300
-                )
-            
-            # Update total stats
-            await redis_client.hset(
-                "websocket:stats",
-                mapping={
-                    "total_connections": self.stats.get("total_connections", 0),
-                    "total_messages": self.stats.get("total_messages", 0),
-                    "active_connections": len(self.active_connections),
-                    "restaurants_connected": len(self.restaurant_connections),
-                    "last_updated": datetime.now().isoformat()
-                }
-            )
-            
-        except Exception as e:
-            logger.error(f"Failed to update WebSocket stats in Redis: {str(e)}")
 
 # Global WebSocket manager instance
 websocket_manager = WebSocketManager()

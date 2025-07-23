@@ -2,8 +2,7 @@
 
 **Date Discovered**: January 2025
 **Severity**: CRITICAL - Data Breach Risk
-**Status**: ALL CRITICAL ISSUES FIXED ✅
-**Fix Applied**: January 2025
+**Status**: PARTIALLY FIXED
 
 ## Summary
 
@@ -16,15 +15,19 @@ Multiple components in the web platform are fetching ALL restaurants and sensiti
 - **Issue**: Restaurants could modify platform-controlled service_charge rate
 - **Fix Applied**: Changed to read-only display with lock icon, hardcoded to 12.5%
 
-### 2. ✅ FIXED: BusinessManagement Component
+### 2. ❌ CRITICAL: BusinessManagement Component
 - **File**: `src/components/dashboard/BusinessManagement.tsx`
 - **Issue**: Fetches ALL restaurants without access control
-- **Fix Applied**: Component already had proper access control:
-  - UI-level check: Returns "Access Denied" if not platform owner
-  - API-level check: Throws error if not platform owner before fetching
-- **Impact**: RESOLVED - Only platform owners can view all restaurants
+- **Code**:
+  ```typescript
+  const { data: restaurantData, error } = await supabase
+    .from('restaurants')
+    .select('*')  // NO FILTERING - EXPOSES ALL RESTAURANTS
+    .order('created_at', { ascending: false });
+  ```
+- **Impact**: Any user can see all restaurants, owners, addresses, phone numbers
 
-### 3. ✅ FIXED: StaffManagement Component  
+### 3. ❌ CRITICAL: StaffManagement Component  
 - **File**: `src/components/dashboard/StaffManagement.tsx`
 - **Issue**: Fetches ALL restaurants and ALL staff members
 - **Code**:
@@ -43,7 +46,7 @@ Multiple components in the web platform are fetching ALL restaurants and sensiti
   ```
 - **Impact**: Exposes employee data, roles, and restaurant associations
 
-### 4. ✅ FIXED: LocationManagement Component
+### 4. ❌ CRITICAL: LocationManagement Component
 - **File**: `src/components/dashboard/LocationManagement.tsx`
 - **Issue**: Fetches ALL restaurants and their statistics
 - **Code**:

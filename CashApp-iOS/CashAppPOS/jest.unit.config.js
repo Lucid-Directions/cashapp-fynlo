@@ -22,7 +22,7 @@ module.exports = {
     '<rootDir>/__tests__/testSetup.ts',
   ],
   transformIgnorePatterns: [
-    'node_modules/(?!(react-native|@react-native|react-native-vector-icons|react-native-gesture-handler|react-native-reanimated|@react-navigation|react-native-screens|react-native-safe-area-context|react-native-modal|sumup-react-native-alpha|react-native-config|@sentry/react-native)/)',
+    'node_modules/(?!(react-native|@react-native|react-native-vector-icons|react-native-gesture-handler|react-native-reanimated|@react-navigation|react-native-screens|react-native-safe-area-context|react-native-modal|sumup-react-native-alpha)/)',
   ],
   collectCoverage: false,
   // collectCoverageFrom temporarily disabled until suites are stabilised

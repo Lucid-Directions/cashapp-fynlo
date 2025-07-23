@@ -39,7 +39,7 @@ const HomeHubScreen: React.FC = () => {
   const styles = useThemedStyles(createStyles);
   const { user, signOut } = useAuth();
   const { cartItemCount } = useAppStore();
-  const { connected: wsConnected } = useWebSocket({ autoConnect: false });
+  const { connected: wsConnected } = useWebSocket({ autoConnect: true });
 
   // Hub icons configuration with role-based visibility
   const hubIcons: HubIcon[] = [

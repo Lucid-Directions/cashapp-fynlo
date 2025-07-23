@@ -122,7 +122,7 @@ const EmployeesScreen: React.FC = () => {
     setSelectedEmployee(employee);
   };
 
-  const handleAddEmployee = () => {
+  const handleAddEmployee = async () => {
     // Validate required fields
     if (!newEmployee.name.trim() || !newEmployee.email.trim()) {
       Alert.alert('Error', 'Please fill in all required fields (Name and Email)');
@@ -145,41 +145,73 @@ const EmployeesScreen: React.FC = () => {
       return;
     }
 
-    // Create new employee data
-    const employeeData: EmployeeData = {
-      id: Date.now(),
-      name: newEmployee.name.trim(),
-      email: newEmployee.email.trim(),
-      phone: newEmployee.phone.trim() || `+44 ${Math.floor(Math.random() * 900000000) + 100000000}`,
-      role: newEmployee.role as 'Manager' | 'Cashier' | 'Server' | 'Cook',
-      hireDate: new Date(),
-      hourlyRate: parseFloat(newEmployee.hourlyRate) || 12.00,
-      totalSales: 0,
-      averageSalesPerDay: 0,
-      performanceScore: 85 + Math.random() * 10, // Initial score between 85-95
-      punctualityScore: 90 + Math.random() * 8, // Initial score between 90-98
-      scheduledHours: 160,
-      actualHours: 160,
-      weeksSinceLastReview: 0,
-    };
+    try {
+      // Show loading indicator
+      setShowAddModal(false);
+      setIsLoading(true);
 
-    // Add to employees list
-    setEmployees([...employees, employeeData]);
-    
-    // Reset form
-    setNewEmployee({
-      name: '',
-      email: '',
-      phone: '',
-      role: 'Cashier',
-      hourlyRate: '12.00',
-    });
-    
-    // Close modal
-    setShowAddModal(false);
-    
-    // Show success message
-    Alert.alert('Success', `${employeeData.name} has been added to your team!`);
+      // Parse name into first and last name
+      const nameParts = newEmployee.name.trim().split(' ');
+      const firstName = nameParts[0];
+      const lastName = nameParts.slice(1).join(' ') || nameParts[0]; // Use first name as last name if only one name provided
+
+      // Create employee via API
+      const dataService = DataService.getInstance();
+      const createdEmployee = await dataService.createEmployee({
+        firstName,
+        lastName,
+        email: newEmployee.email.trim(),
+        phone: newEmployee.phone.trim() || undefined,
+        role: newEmployee.role.toLowerCase(), // API expects lowercase roles
+        hourlyRate: parseFloat(newEmployee.hourlyRate) || 12.00,
+        startDate: new Date().toISOString(),
+      });
+
+      // Transform API response to match EmployeeData interface
+      const employeeData: EmployeeData = {
+        id: createdEmployee.id || Date.now(),
+        name: `${createdEmployee.first_name} ${createdEmployee.last_name}`,
+        email: createdEmployee.email,
+        phone: createdEmployee.phone || `+44 ${Math.floor(Math.random() * 900000000) + 100000000}`,
+        role: (createdEmployee.role.charAt(0).toUpperCase() + createdEmployee.role.slice(1)) as 'Manager' | 'Cashier' | 'Server' | 'Cook',
+        hireDate: new Date(createdEmployee.start_date || createdEmployee.created_at),
+        hourlyRate: createdEmployee.hourly_rate || 12.00,
+        totalSales: 0,
+        averageSalesPerDay: 0,
+        performanceScore: 85 + Math.random() * 10, // Initial score between 85-95
+        punctualityScore: 90 + Math.random() * 8, // Initial score between 90-98
+        scheduledHours: 160,
+        actualHours: 160,
+        weeksSinceLastReview: 0,
+      };
+
+      // Add to local state
+      setEmployees([...employees, employeeData]);
+      
+      // Reset form
+      setNewEmployee({
+        name: '',
+        email: '',
+        phone: '',
+        role: 'Cashier',
+        hourlyRate: '12.00',
+      });
+      
+      // Show success message
+      Alert.alert('Success', `${employeeData.name} has been added to your team and saved to the system!`);
+      
+    } catch (error: any) {
+      console.error('Failed to create employee:', error);
+      Alert.alert(
+        'Error', 
+        error.message || 'Failed to add employee. Please check your connection and try again.'
+      );
+      
+      // Reopen modal on error
+      setShowAddModal(true);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleCancelAdd = () => {
@@ -191,6 +223,52 @@ const EmployeesScreen: React.FC = () => {
       hourlyRate: '12.00',
     });
     setShowAddModal(false);
+  };
+
+  const handleDeleteEmployee = async (employee: EmployeeData) => {
+    Alert.alert(
+      'Delete Employee',
+      `Are you sure you want to remove ${employee.name} from your team?`,
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              // Close modal first
+              setSelectedEmployee(null);
+              setIsLoading(true);
+              
+              // Delete from backend
+              const dataService = DataService.getInstance();
+              await dataService.deleteEmployee(employee.id);
+              
+              // Remove from local state
+              setEmployees(employees.filter(emp => emp.id !== employee.id));
+              
+              // Show success message
+              Alert.alert('Success', `${employee.name} has been removed from your team.`);
+              
+            } catch (error: any) {
+              console.error('Failed to delete employee:', error);
+              Alert.alert(
+                'Error',
+                error.message || 'Failed to delete employee. Please try again.'
+              );
+              // Reopen modal on error
+              setSelectedEmployee(employee);
+            } finally {
+              setIsLoading(false);
+            }
+          },
+        },
+      ],
+      { cancelable: true }
+    );
   };
 
   const renderEmployee = ({ item }: { item: EmployeeData }) => (
@@ -478,6 +556,13 @@ const EmployeesScreen: React.FC = () => {
                   <TouchableOpacity style={[styles.actionButton, styles.scheduleButton]}>
                     <Icon name="schedule" size={20} color={Colors.white} />
                     <Text style={styles.actionButtonText}>Schedule</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={[styles.actionButton, styles.deleteButton]}
+                    onPress={() => handleDeleteEmployee(selectedEmployee)}
+                  >
+                    <Icon name="delete" size={20} color={Colors.white} />
+                    <Text style={styles.actionButtonText}>Delete</Text>
                   </TouchableOpacity>
                 </View>
               </ScrollView>
@@ -937,6 +1022,9 @@ const styles = StyleSheet.create({
   },
   scheduleButton: {
     backgroundColor: Colors.warning,
+  },
+  deleteButton: {
+    backgroundColor: Colors.danger,
   },
   actionButtonText: {
     color: Colors.white,
