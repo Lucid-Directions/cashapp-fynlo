@@ -127,6 +127,23 @@ def clear_existing_menu(db: Session, restaurant_id: str):
     db.commit()
     print("   ✅ Existing menu data cleared")
 
+def clear_all_menu_data(db: Session):
+    """Clear ALL menu data from all restaurants"""
+    print("🧹 Clearing ALL menu data from database...")
+    
+    from sqlalchemy import text
+    
+    # Delete all products
+    result = db.execute(text("DELETE FROM products"))
+    product_count = result.rowcount
+    
+    # Delete all categories
+    result = db.execute(text("DELETE FROM categories"))
+    category_count = result.rowcount
+    
+    db.commit()
+    print(f"   ✅ Deleted {product_count} products and {category_count} categories")
+
 def seed_categories(db: Session, restaurant_id: str) -> dict:
     """Seed menu categories and return mapping"""
     category_mapping = {}
@@ -219,8 +236,8 @@ def main():
         
         print(f"🏪 Found restaurant: {restaurant.name} (ID: {restaurant_id})")
         
-        # Clear existing menu data (optional - comment out if you want to preserve existing data)
-        # clear_existing_menu(db, restaurant_id)
+        # Clear ALL menu data from database to ensure only Chucho menu exists
+        clear_all_menu_data(db)
         
         # Seed categories
         category_mapping = seed_categories(db, restaurant_id)
