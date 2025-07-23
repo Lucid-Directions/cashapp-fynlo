@@ -246,8 +246,8 @@ async def close_redis():
 
 async def get_redis() -> RedisClient:
     """Get Redis client instance, ensuring it's connected."""
-    # If redis is not connected and not in a mock state (due to initial connection failure)
-    if not redis_client.redis and not redis_client._mock_storage :
-        logger.info("Redis client accessed before initial connect or after disconnect, attempting to connect.")
+    # If redis is not connected and we haven't tried to connect yet
+    if redis_client.redis is None and redis_client._mock_storage == {}:
+        logger.info("Redis client accessed before initial connect, attempting to connect.")
         await redis_client.connect()
     return redis_client

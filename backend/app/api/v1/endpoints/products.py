@@ -130,8 +130,9 @@ async def get_categories(
         for cat in categories
     ]
     
-    # Cache for 5 minutes
-    await redis.set(f"categories:{restaurant_id}", result, expire=300)
+    # Cache for 5 minutes - convert Pydantic models to dicts
+    cache_data = [cat.model_dump() for cat in result]
+    await redis.set(f"categories:{restaurant_id}", cache_data, expire=300)
     
     return APIResponseHelper.success(
         data=result,
@@ -343,8 +344,9 @@ async def get_products(
         for product in products
     ]
     
-    # Cache for 5 minutes
-    await redis.set(cache_key, result, expire=300)
+    # Cache for 5 minutes - convert Pydantic models to dicts
+    cache_data = [prod.model_dump() for prod in result]
+    await redis.set(cache_key, cache_data, expire=300)
     
     return APIResponseHelper.success(
         data=result,
@@ -656,7 +658,7 @@ async def get_products_mobile(
         {
             "id": str(product.id),  # Keep UUID as string for consistency
             "name": product.name,
-            "price": float(product.price),  # Ensure price is float
+            "price": str(product.price),  # Keep as string to preserve precision
             "category": category.name,
             "image": product.image_url,
             "barcode": product.barcode,
@@ -718,7 +720,7 @@ async def get_products_by_category(
         {
             "id": str(product.id),  # Keep UUID as string for consistency
             "name": product.name,
-            "price": float(product.price),  # Ensure price is float
+            "price": str(product.price),  # Keep as string to preserve precision
             "category": category.name,
             "image": product.image_url,
             "barcode": product.barcode,
