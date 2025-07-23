@@ -107,7 +107,10 @@ async def get_categories(
     # Check cache first
     cached_categories = await redis.get(f"categories:{restaurant_id}")
     if cached_categories:
-        return cached_categories
+        return APIResponseHelper.success(
+            data=cached_categories,
+            message=f"Retrieved {len(cached_categories)} categories"
+        )
     
     categories = db.query(Category).filter(
         and_(Category.restaurant_id == restaurant_id, Category.is_active == True)
@@ -302,7 +305,10 @@ async def get_products(
     cache_key = f"products:{restaurant_id}:{category_id or 'all'}:{active_only}"
     cached_products = await redis.get(cache_key)
     if cached_products:
-        return cached_products
+        return APIResponseHelper.success(
+            data=cached_products,
+            message=f"Retrieved {len(cached_products)} products"
+        )
     
     query = db.query(Product).filter(Product.restaurant_id == restaurant_id)
     
@@ -367,7 +373,10 @@ async def get_full_menu(
     # Check cache first
     cached_menu = await redis.get_cached_menu(restaurant_id)
     if cached_menu:
-        return cached_menu
+        return APIResponseHelper.success(
+            data=cached_menu,
+            message="Menu retrieved from cache"
+        )
     
     # Get categories
     categories = db.query(Category).filter(
