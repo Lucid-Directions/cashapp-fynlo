@@ -11,9 +11,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Order, OrderItem } from '../types';
 import API_CONFIG from '../config/api';
-import { EnhancedWebSocketService } from './websocket/EnhancedWebSocketService';
-
-const webSocketService = EnhancedWebSocketService.getInstance();
+import { webSocketService } from './websocket/WebSocketService';
 
 export interface CustomerMetadata {
   name: string;

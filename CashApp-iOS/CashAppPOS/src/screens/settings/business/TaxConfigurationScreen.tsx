@@ -250,7 +250,7 @@ const TaxConfigurationScreen: React.FC = () => {
                 Service charges are set and managed by the platform owner. Contact support if you need changes.
               </Text>
               <Text style={styles.platformControlledRate}>
-                Current Rate: 10% (Platform Standard)
+                Current Rate: 12.5% (Platform Standard)
               </Text>
             </View>
           </View>
@@ -331,16 +331,16 @@ const TaxConfigurationScreen: React.FC = () => {
               </View>
               
               <View style={styles.calculationRow}>
-                <Text style={styles.calculationLabel}>Service (Platform - 10%):</Text>
+                <Text style={styles.calculationLabel}>Service (Platform - 12.5%):</Text>
                 <Text style={styles.calculationValue}>
-                  £{(exampleCalculation.net * 10 / 100).toFixed(2)}
+                  £{(exampleCalculation.net * 12.5 / 100).toFixed(2)}
                 </Text>
               </View>
               
               <View style={[styles.calculationRow, styles.calculationTotal]}>
                 <Text style={styles.calculationTotalLabel}>Total Amount:</Text>
                 <Text style={styles.calculationTotalValue}>
-                  £{(exampleCalculation.gross + (exampleCalculation.net * 10 / 100)).toFixed(2)}
+                  £{(exampleCalculation.gross + (exampleCalculation.net * 12.5 / 100)).toFixed(2)}
                 </Text>
               </View>
             </View>

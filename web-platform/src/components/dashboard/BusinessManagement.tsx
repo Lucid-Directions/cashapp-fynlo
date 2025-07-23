@@ -17,7 +17,6 @@ import {
   Phone
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 
 interface Restaurant {
   id: string;
@@ -35,7 +34,6 @@ interface Restaurant {
 
 export const BusinessManagement = () => {
   const { isPlatformOwner } = useFeatureAccess();
-  const { toast } = useToast();
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());

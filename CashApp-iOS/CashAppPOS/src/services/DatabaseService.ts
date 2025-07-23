@@ -559,13 +559,54 @@ class DatabaseService {
     sort_order?: number;
     is_active?: boolean;
   }>): Promise<any> {
-    // TODO: Backend needs to implement PUT /api/v1/products/categories/{categoryId}
-    throw new Error('Category update endpoint not yet implemented in backend. Please contact system administrator.');
+    try {
+      const response = await this.authRequest(
+        `${this.baseUrl}/api/v1/products/categories/${categoryId}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(categoryData),
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`Failed to update category: ${error}`);
+      }
+
+      const result = await response.json();
+      console.log('✅ Category updated successfully:', result);
+      return result.data || result;
+    } catch (error) {
+      console.error('❌ Error updating category:', error);
+      throw error;
+    }
   }
 
   async deleteCategory(categoryId: string): Promise<void> {
-    // TODO: Backend needs to implement DELETE /api/v1/products/categories/{categoryId}
-    throw new Error('Category deletion endpoint not yet implemented in backend. Please contact system administrator.');
+    try {
+      const response = await this.authRequest(
+        `${this.baseUrl}/api/v1/products/categories/${categoryId}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`Failed to delete category: ${error}`);
+      }
+
+      console.log('✅ Category deleted successfully');
+    } catch (error) {
+      console.error('❌ Error deleting category:', error);
+      throw error;
+    }
   }
 
   // Create operations for products

@@ -153,37 +153,3 @@ jest.mock('sumup-react-native-alpha', () => ({
     presentPaymentSheet: jest.fn(),
   }),
 }));
-
-// Mock react-native-config
-jest.mock('react-native-config', () => ({
-  API_URL: 'http://localhost:8000',
-  SENTRY_DSN: 'mock-sentry-dsn',
-}));
-
-// Mock Sentry
-jest.mock('@sentry/react-native', () => ({
-  init: jest.fn(),
-  captureException: jest.fn(),
-  captureMessage: jest.fn(),
-  setUser: jest.fn(),
-  setContext: jest.fn(),
-  addBreadcrumb: jest.fn(),
-}));
-
-// Mock crypto-js
-jest.mock('crypto-js', () => ({
-  AES: {
-    encrypt: jest.fn().mockReturnValue({
-      toString: jest.fn().mockReturnValue('U2FsdGVkX1+encrypted+data=='),
-    }),
-    decrypt: jest.fn().mockReturnValue({
-      toString: jest.fn().mockReturnValue('{"decrypted":"data"}'),
-    }),
-  },
-  enc: {
-    Utf8: {},
-  },
-  SHA256: jest.fn().mockReturnValue({
-    toString: jest.fn().mockReturnValue('mock-device-key-hash'),
-  }),
-}));

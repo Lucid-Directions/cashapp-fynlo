@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 import { UpgradePrompt } from './UpgradePrompt';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -33,8 +32,7 @@ interface Restaurant {
 }
 
 export const StaffManagement = () => {
-  const { hasFeature, isPlatformOwner } = useFeatureAccess();
-  const { user } = useAuth();
+  const { hasFeature, isPlatformOwner, getRestaurantId, user } = useFeatureAccess();
   const { toast } = useToast();
   const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
@@ -55,30 +53,32 @@ export const StaffManagement = () => {
     try {
       setLoading(true);
 
-      // Determine which restaurants to fetch based on user role
+      // Fetch restaurants - apply access control
       let restaurantQuery = supabase
         .from('restaurants')
-        .select('id, name, is_active')
+        .select('id, name, is_active, owner_id')
         .order('name');
 
-      // If not a platform owner, only fetch owned restaurants
-      if (!isPlatformOwner() && user) {
-        restaurantQuery = restaurantQuery.eq('owner_id', user.id);
+      // Non-platform owners can only see their own restaurants
+      if (!isPlatformOwner()) {
+        const { data: { user: authUser } } = await supabase.auth.getUser();
+        if (authUser) {
+          restaurantQuery = restaurantQuery.eq('owner_id', authUser.id);
+        }
       }
 
       const { data: restaurantsData, error: restaurantsError } = await restaurantQuery;
-      if (restaurantsError) throw restaurantsError;
-      
-      const userRestaurants = restaurantsData || [];
-      setRestaurants(userRestaurants);
 
-      // Only fetch staff for restaurants the user has access to
-      if (userRestaurants.length > 0) {
-        const restaurantIds = userRestaurants.map(r => r.id);
-        
+      if (restaurantsError) throw restaurantsError;
+      const accessibleRestaurants = restaurantsData || [];
+      setRestaurants(accessibleRestaurants);
+
+      // Fetch staff members only for accessible restaurants
+      if (accessibleRestaurants.length > 0) {
+        const restaurantIds = accessibleRestaurants.map(r => r.id);
         const { data: staffData, error: staffError } = await supabase
           .from('staff_members')
-          .select('*, profiles(full_name)')
+          .select('*')
           .in('restaurant_id', restaurantIds)
           .order('created_at', { ascending: false });
 
@@ -90,7 +90,7 @@ export const StaffManagement = () => {
     } catch (error) {
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to load staff data.",
+        description: "Failed to load staff data. Please try again.",
         variant: "destructive",
       });
     } finally {

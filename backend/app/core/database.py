@@ -3,7 +3,7 @@ Database configuration and models for Fynlo POS
 PostgreSQL implementation matching frontend data requirements
 """
 
-from sqlalchemy import create_engine, Column, String, Integer, Float, DateTime, Boolean, Text, JSON, ForeignKey, DECIMAL, UniqueConstraint, text
+from sqlalchemy import create_engine, Column, String, Integer, Float, DateTime, Boolean, Text, JSON, ForeignKey, DECIMAL, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session, relationship
@@ -27,65 +27,8 @@ logger = logging.getLogger(__name__)
 # Parse DATABASE_URL to handle SSL requirements
 database_url = settings.DATABASE_URL
 
-# Log the DATABASE_URL for debugging (without password)
-if database_url:
-    # Parse the URL safely to mask credentials
-    if '://' in database_url and '@' in database_url:
-        # Split into protocol and rest
-        protocol, rest = database_url.split('://', 1)
-        # Find the last @ which separates credentials from host
-        # This handles passwords containing @ symbols
-        at_index = rest.rfind('@')
-        if at_index > 0:
-            host_part = rest[at_index+1:]
-            safe_url = f"{protocol}://***@{host_part}"
-        else:
-            # No @ found after protocol, shouldn't happen but be safe
-            safe_url = f"{protocol}://***"
-    else:
-        # No credentials in URL or malformed URL - just show protocol
-        if '://' in database_url:
-            protocol = database_url.split('://')[0]
-            safe_url = f"{protocol}://***"
-        else:
-            safe_url = "***"
-    logger.info(f"DATABASE_URL detected: {safe_url}")
-else:
-    logger.error("DATABASE_URL is not set!")
-
-# Validate DATABASE_URL is a PostgreSQL URL
-if not database_url:
-    raise ValueError("DATABASE_URL environment variable is not set")
-
-# Check for common mistake: using Redis URL for DATABASE_URL
-if database_url.startswith(("redis://", "rediss://")):
-    raise ValueError(
-        "DATABASE_URL is set to a Redis URL instead of PostgreSQL. "
-        "Please check your environment variables. "
-        "DATABASE_URL should be postgresql://... and REDIS_URL should be redis(s)://..."
-    )
-
-# Validate it's a PostgreSQL URL (handle various formats)
-# DigitalOcean uses postgresql:// but some providers might use postgres://
-# Also handle connection pooling URLs that might have different formats
-valid_prefixes = ("postgresql://", "postgres://", "postgresql+psycopg2://", "postgresql+asyncpg://")
-if not any(database_url.startswith(prefix) for prefix in valid_prefixes):
-    # Extract the protocol for better error message
-    protocol = database_url.split('://')[0] if '://' in database_url else 'unknown'
-    raise ValueError(
-        f"DATABASE_URL must be a PostgreSQL URL (postgresql:// or postgres://), "
-        f"but got: {protocol}://"
-    )
-
-logger.info("Database URL validation passed")
-
-
 # For DigitalOcean managed databases, ensure SSL mode is set
-if "postgresql" in database_url and ("digitalocean.com" in database_url or ":25060" in database_url or ":25061" in database_url):
-    # Port 25061 is for connection pooling (PgBouncer), 25060 is direct
-    is_pooled = ":25061" in database_url
-    logger.info(f"Detected DigitalOcean managed database (pooled: {is_pooled})")
-    
+if "postgresql" in database_url and (":25060" in database_url or ":25061" in database_url):
     if "sslmode" not in database_url:
         # Add sslmode=require to the connection string if not present
         separator = "&" if "?" in database_url else "?"
@@ -93,66 +36,41 @@ if "postgresql" in database_url and ("digitalocean.com" in database_url or ":250
         logger.info("Added sslmode=require to DigitalOcean database connection")
 
 connect_args = {}
-pool_args = {}
-
 if "postgresql" in database_url:
     connect_args = {
-        "connect_timeout": 30,  # Increased timeout for DigitalOcean
+        "connect_timeout": 10  # PostgreSQL connection timeout
     }
     
-    # PgBouncer (port 25061) doesn't support statement_timeout in options
-    if ":25061" not in database_url:
-        connect_args["options"] = "-c statement_timeout=30000"  # 30 second statement timeout
-    
     # For DigitalOcean managed databases
-    if "digitalocean.com" in database_url or ":25060" in database_url or ":25061" in database_url:
-        # Use specific pool settings for DigitalOcean
-        # Port 25061 uses PgBouncer which has its own pooling
-        if ":25061" in database_url:
-            pool_args = {
-                "pool_size": 2,  # Very small pool for PgBouncer
-                "max_overflow": 3,
-                "pool_pre_ping": True,  # Test connections before use
-                "pool_recycle": 300,  # Recycle connections after 5 minutes
-            }
-        else:
-            pool_args = {
-                "pool_size": 5,  # Regular pool for direct connections
-                "max_overflow": 10,
-                "pool_pre_ping": True,  # Test connections before use
-                "pool_recycle": 300,  # Recycle connections after 5 minutes
-            }
-        
-        # Check for CA certificate
+    if ":25060" in database_url or ":25061" in database_url:
+        # PgBouncer (port 25061) doesn't support statement_timeout in connection options
+        # Only add it for direct connections (port 25060)
+        if ":25060" in database_url:
+            connect_args["options"] = "-c statement_timeout=30000"  # 30 second statement timeout
+            
+        # Provide the CA certificate
         cert_path = os.path.join(os.path.dirname(__file__), "..", "..", "certs", "ca-certificate.crt")
         if os.path.exists(cert_path):
+            # Provide the CA certificate path for SSL verification
             connect_args["sslrootcert"] = cert_path
-            logger.info(f"Using CA certificate: {cert_path}")
+            logger.info(f"Using CA certificate for SSL: {cert_path}")
         else:
-            logger.warning(f"CA certificate not found at {cert_path}, relying on sslmode=require")
+            logger.warning(f"CA certificate not found at {cert_path}")
+    else:
+        # For non-DigitalOcean databases, add statement timeout
+        connect_args["options"] = "-c statement_timeout=30000"  # 30 second statement timeout
 
-# Use custom pool settings for DigitalOcean, default settings for others
-if pool_args:
-    engine = create_engine(
-        database_url,
-        echo=settings.DEBUG,
-        poolclass=QueuePool,
-        pool_timeout=30,       # Timeout for getting connection from pool
-        connect_args=connect_args,
-        **pool_args  # Use DigitalOcean-specific pool settings
-    )
-else:
-    engine = create_engine(
-        database_url,
-        echo=settings.DEBUG,
-        poolclass=QueuePool,
-        pool_size=20,          # Number of persistent connections
-        max_overflow=10,       # Maximum overflow connections above pool_size
-        pool_recycle=3600,     # Recycle connections after 1 hour (avoid stale connections)
-        pool_pre_ping=True,    # Test connections before using (handles network issues)
-        pool_timeout=30,       # Timeout for getting connection from pool
-        connect_args=connect_args
-    )
+engine = create_engine(
+    database_url,
+    echo=settings.DEBUG,
+    poolclass=QueuePool,
+    pool_size=20,          # Number of persistent connections
+    max_overflow=10,       # Maximum overflow connections above pool_size
+    pool_recycle=3600,     # Recycle connections after 1 hour (avoid stale connections)
+    pool_pre_ping=True,    # Test connections before using (handles network issues)
+    pool_timeout=30,       # Timeout for getting connection from pool
+    connect_args=connect_args
+)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
@@ -197,8 +115,8 @@ class Restaurant(Base):
         "applePay": {"enabled": True, "feePercentage": 2.9},
         "giftCard": {"enabled": True, "requiresAuth": True}
     })
-    # NOTE: floor_plan_layout removed - not implemented in mobile app
-    # Subscription fields for displaying plan info (managed via web platform)
+    floor_plan_layout = Column(JSONB)  # New field for layout storage
+    # Subscription fields for Supabase integration
     subscription_plan = Column(String(50), default='alpha')  # alpha, beta, omega
     subscription_status = Column(String(50), default='trial')  # trial, active, cancelled, expired
     subscription_started_at = Column(DateTime(timezone=True), nullable=True)
@@ -460,75 +378,5 @@ def get_db() -> Generator[Session, None, None]:
         db.close()
 
 async def init_db():
-    """Initialize database tables with retry logic"""
-    import asyncio
-    from sqlalchemy.exc import OperationalError
-    
-    max_retries = 3
-    retry_delay = 5  # seconds
-    
-    for attempt in range(max_retries):
-        try:
-            # Test database connection first
-            with engine.connect() as conn:
-                result = conn.execute(text("SELECT 1"))
-                logger.info("Database connection successful")
-            
-            # Create tables if they don't exist
-            Base.metadata.create_all(bind=engine)
-            
-            # Setup query performance monitoring
-            from app.services.query_optimizer import query_analyzer
-            query_analyzer.setup(engine)
-            logger.info("Query performance analyzer initialized")
-            
-            return  # Success
-            
-        except OperationalError as e:
-            if attempt < max_retries - 1:
-                logger.warning(f"Database connection attempt {attempt + 1}/{max_retries} failed: {str(e)}")
-                logger.info(f"Retrying in {retry_delay} seconds...")
-                await asyncio.sleep(retry_delay)
-            else:
-                logger.error(f"Failed to connect to database after {max_retries} attempts")
-                # Log connection details for debugging (without password)
-                db_host = database_url.split('@')[1].split('/')[0] if '@' in database_url else 'unknown'
-                # Extract database name from URL
-                db_name = database_url.split('/')[-1].split('?')[0] if '/' in database_url else 'unknown'
-                logger.error(f"Database host: {db_host}")
-                logger.error(f"Database name: {db_name}")
-                logger.error(f"SSL mode: {'require' if 'sslmode=require' in database_url else 'not set'}")
-                
-                # Provide helpful guidance for DigitalOcean
-                if "digitalocean.com" in database_url:
-                    logger.error("\n" + "="*60)
-                    logger.error("DigitalOcean Database Connection Troubleshooting:")
-                    
-                    # Check for "no such database" error
-                    if "no such database" in str(e).lower():
-                        logger.error("❌ DATABASE NAME MISMATCH!")
-                        logger.error(f"   Your DATABASE_URL specifies database: '{db_name}'")
-                        logger.error("   But this database doesn't exist on the server")
-                        logger.error("\nTo fix:")
-                        logger.error("1. Check your DigitalOcean database dashboard")
-                        logger.error("2. Find the actual database name (often 'defaultdb')")
-                        logger.error("3. Update DATABASE_URL in App Platform settings")
-                        logger.error(f"4. Change '/{db_name}' to '/actual-database-name'")
-                    else:
-                        logger.error("1. In DO Database Settings > Trusted Sources:")
-                        logger.error("   - DO NOT add IP addresses for App Platform")
-                        logger.error("   - Click 'Add Trusted Source'")
-                        logger.error("   - Select 'App Platform App' (not IP)")
-                        logger.error("   - Choose your app from the dropdown")
-                        logger.error("2. Alternative: Try port 25060 instead of 25061")
-                        logger.error("3. Ensure both app and database are in same region")
-                        logger.error("4. DATABASE_URL must include ?sslmode=require")
-                    
-                    logger.error("\nCurrent connection details:")
-                    logger.error(f"  Host: {db_host}")
-                    logger.error(f"  Database: {db_name}")
-                    logger.error(f"  Port: {':25061' if ':25061' in database_url else ':25060' if ':25060' in database_url else 'unknown'}")
-                    logger.error(f"  SSL: {'Yes' if 'sslmode=require' in database_url else 'No'}")
-                    logger.error("="*60 + "\n")
-                
-                raise
+    """Initialize database tables"""
+    Base.metadata.create_all(bind=engine)

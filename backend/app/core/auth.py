@@ -104,9 +104,9 @@ async def get_current_user(
             action_performed=f"{action_prefix} granted",
             user_id=db_user.id,
             username_or_email=db_user.email,
+            restaurant_id=db_user.restaurant_id,
             ip_address=ip_address,
             user_agent=user_agent,
-            details={"restaurant_id": str(db_user.restaurant_id) if db_user.restaurant_id else None},
             commit=True
         )
         

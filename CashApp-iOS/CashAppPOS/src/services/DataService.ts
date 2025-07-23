@@ -740,7 +740,7 @@ class DataService {
     }
   }
 
-  async getOrders(dateRange: string = 'today'): Promise<any[]> {
+  async getOrders(dateRange: string): Promise<any[]> {
     console.log('DataService.getOrders called', {
       dateRange,
       USE_REAL_API: this.featureFlags.USE_REAL_API,
@@ -761,20 +761,9 @@ class DataService {
         
         if (response.ok) {
           const result = await response.json();
-          const orders = result.data || result || [];
-          console.log('✅ API orders received:', orders.length);
-          
-          // Transform orders to ensure items is a number count, not an array
-          return orders.map(order => ({
-            ...order,
-            date: order.created_at || order.date,
-            items: Array.isArray(order.items) ? order.items.length : order.items || 0,
-            itemsDetail: Array.isArray(order.items) ? order.items : null, // Store original items for detail view
-            customer: order.customer || { name: order.customer_name },
-            employee: order.employee?.name || order.employee || 'Staff',
-            paymentMethod: order.payment_method || order.paymentMethod || 'cash',
-            status: order.status || 'completed'
-          }));
+          const orders = result.data || result;
+          console.log('✅ API orders received:', Array.isArray(orders) ? orders.length : 'not an array');
+          return Array.isArray(orders) ? orders : [];
         } else {
           console.error('❌ API error:', response.status, response.statusText);
           throw new Error(`API error: ${response.status}`);
@@ -784,9 +773,6 @@ class DataService {
         throw error; // No fallback - API must work for production readiness
       }
     }
-    
-    // For development when API is not available
-    throw new Error('Orders require API connection');
   }
 
   async getFinancialReportDetail(period: string): Promise<any | null> {
@@ -1060,6 +1046,31 @@ class DataService {
     } catch (error) {
       console.error('❌ Employee creation failed:', error);
       throw new Error(`Employee creation failed: ${error.message}`);
+    }
+  }
+
+  /**
+   * Delete an employee from the system
+   */
+  async deleteEmployee(employeeId: number | string): Promise<void> {
+    console.log('🌐 DataService.deleteEmployee - deleting employee via API', { employeeId });
+    
+    try {
+      const response = await authInterceptor.delete(
+        `${API_CONFIG.FULL_API_URL}/employees/${employeeId}`
+      );
+      
+      if (response.ok) {
+        console.log('✅ Employee deleted successfully');
+        return;
+      } else {
+        const errorText = await response.text();
+        console.error('❌ Failed to delete employee:', response.status, errorText);
+        throw new Error(`Failed to delete employee: ${response.status} - ${errorText}`);
+      }
+    } catch (error) {
+      console.error('❌ Employee deletion failed:', error);
+      throw new Error(`Employee deletion failed: ${error.message}`);
     }
   }
 

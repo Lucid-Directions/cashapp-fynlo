@@ -109,7 +109,7 @@ async def get_categories(
     if cached_categories:
         return APIResponseHelper.success(
             data=cached_categories,
-            message=f"Retrieved {len(cached_categories)} categories (cached)"
+            message=f"Retrieved {len(cached_categories)} categories"
         )
     
     categories = db.query(Category).filter(
@@ -130,12 +130,15 @@ async def get_categories(
         for cat in categories
     ]
     
-    # Cache for 5 minutes - convert Pydantic models to dicts
-    await redis.set(f"categories:{restaurant_id}", [cat.dict() for cat in result], expire=300)
+    # Convert to dicts for consistent API response
+    response_data = [cat.model_dump() for cat in result]
+    
+    # Cache for 5 minutes
+    await redis.set(f"categories:{restaurant_id}", response_data, expire=300)
     
     return APIResponseHelper.success(
-        data=[cat.dict() for cat in result],
-        message=f"Retrieved {len(result)} categories"
+        data=response_data,
+        message=f"Retrieved {len(response_data)} categories"
     )
 
 @router.post("/categories", response_model=CategoryResponse)
@@ -185,6 +188,106 @@ async def create_category(
         message=f"Category '{new_category.name}' created successfully"
     )
 
+@router.put("/categories/{category_id}", response_model=CategoryResponse)
+async def update_category(
+    category_id: str,
+    category_data: CategoryCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    redis: RedisClient = Depends(get_redis)
+):
+    """Update a category"""
+    
+    # Find the category
+    category = db.query(Category).filter(
+        Category.id == category_id,
+        Category.restaurant_id == current_user.restaurant_id
+    ).first()
+    
+    if not category:
+        raise FynloException(
+            error_code=ErrorCodes.RESOURCE_NOT_FOUND,
+            detail="Category not found"
+        )
+    
+    # Update fields
+    category.name = category_data.name
+    category.description = category_data.description
+    category.color = category_data.color
+    category.icon = category_data.icon
+    category.sort_order = category_data.sort_order
+    category.updated_at = datetime.utcnow()
+    
+    db.commit()
+    db.refresh(category)
+    
+    # Clear categories cache
+    await redis.invalidate_product_cache(str(category.restaurant_id))
+    await redis.delete(f"categories:{category.restaurant_id}")
+    
+    category_response = CategoryResponse(
+        id=str(category.id),
+        name=category.name,
+        description=category.description,
+        color=category.color,
+        icon=category.icon,
+        sort_order=category.sort_order,
+        is_active=category.is_active,
+        created_at=category.created_at
+    )
+    
+    return APIResponseHelper.success(
+        data=category_response.dict(),
+        message=f"Category '{category.name}' updated successfully"
+    )
+
+@router.delete("/categories/{category_id}")
+async def delete_category(
+    category_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    redis: RedisClient = Depends(get_redis)
+):
+    """Delete a category (soft delete)"""
+    
+    # Find the category
+    category = db.query(Category).filter(
+        Category.id == category_id,
+        Category.restaurant_id == current_user.restaurant_id
+    ).first()
+    
+    if not category:
+        raise FynloException(
+            error_code=ErrorCodes.RESOURCE_NOT_FOUND,
+            detail="Category not found"
+        )
+    
+    # Check if category has products
+    product_count = db.query(Product).filter(
+        Product.category_id == category_id,
+        Product.is_active == True
+    ).count()
+    
+    if product_count > 0:
+        raise FynloException(
+            error_code=ErrorCodes.VALIDATION_ERROR,
+            detail=f"Cannot delete category with {product_count} active products"
+        )
+    
+    # Soft delete
+    category.is_active = False
+    category.updated_at = datetime.utcnow()
+    
+    db.commit()
+    
+    # Clear categories cache
+    await redis.invalidate_product_cache(str(category.restaurant_id))
+    await redis.delete(f"categories:{category.restaurant_id}")
+    
+    return APIResponseHelper.success(
+        message=f"Category '{category.name}' deleted successfully"
+    )
+
 # Product endpoints
 @router.get("/", response_model=List[ProductResponse])
 async def get_products(
@@ -207,14 +310,7 @@ async def get_products(
     if cached_products:
         return APIResponseHelper.success(
             data=cached_products,
-            message=f"Retrieved {len(cached_products)} products (cached)",
-            meta={
-                "restaurant_id": restaurant_id,
-                "category_id": category_id,
-                "active_only": active_only,
-                "total_count": len(cached_products),
-                "cached": True
-            }
+            message=f"Retrieved {len(cached_products)} products"
         )
     
     query = db.query(Product).filter(Product.restaurant_id == restaurant_id)
@@ -250,12 +346,15 @@ async def get_products(
         for product in products
     ]
     
-    # Cache for 5 minutes - convert Pydantic models to dicts
-    await redis.set(cache_key, [prod.dict() for prod in result], expire=300)
+    # Convert to dicts for consistent API response
+    response_data = [prod.model_dump() for prod in result]
+    
+    # Cache for 5 minutes
+    await redis.set(cache_key, response_data, expire=300)
     
     return APIResponseHelper.success(
-        data=[prod.dict() for prod in result],
-        message=f"Retrieved {len(result)} products",
+        data=response_data,
+        message=f"Retrieved {len(response_data)} products",
         meta={
             "restaurant_id": restaurant_id,
             "category_id": category_id,
@@ -282,13 +381,7 @@ async def get_full_menu(
     if cached_menu:
         return APIResponseHelper.success(
             data=cached_menu,
-            message=f"Retrieved complete menu (cached)",
-            meta={
-                "restaurant_id": restaurant_id,
-                "categories_count": len(cached_menu.get('categories', [])),
-                "products_count": len(cached_menu.get('products', [])),
-                "cached": True
-            }
+            message="Menu retrieved from cache"
         )
     
     # Get categories
@@ -567,9 +660,9 @@ async def get_products_mobile(
     
     result = [
         {
-            "id": int(str(product.id).replace('-', '')[:9]),  # Convert UUID to int for frontend
+            "id": str(product.id),  # Keep UUID as string for consistency
             "name": product.name,
-            "price": product.price,
+            "price": str(product.price),  # Keep as string to preserve precision
             "category": category.name,
             "image": product.image_url,
             "barcode": product.barcode,
@@ -579,7 +672,7 @@ async def get_products_mobile(
         for product, category in products_with_categories
     ]
     
-    # Cache for 5 minutes - result is already a list of dicts
+    # Cache for 5 minutes
     await redis.set(cache_key, result, expire=300)
     
     return APIResponseHelper.success(
@@ -629,9 +722,9 @@ async def get_products_by_category(
     
     result = [
         {
-            "id": int(str(product.id).replace('-', '')[:9]),  # Convert UUID to int for frontend
+            "id": str(product.id),  # Keep UUID as string for consistency
             "name": product.name,
-            "price": product.price,
+            "price": str(product.price),  # Keep as string to preserve precision
             "category": category.name,
             "image": product.image_url,
             "barcode": product.barcode,
@@ -641,7 +734,7 @@ async def get_products_by_category(
         for product in products
     ]
     
-    # Cache for 5 minutes - result is already a list of dicts
+    # Cache for 5 minutes
     await redis.set(cache_key, result, expire=300)
     
     return APIResponseHelper.success(

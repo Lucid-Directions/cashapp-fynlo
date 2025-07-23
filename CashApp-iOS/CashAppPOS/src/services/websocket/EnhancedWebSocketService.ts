@@ -1,4 +1,5 @@
-import { WebSocketMessage, WebSocketConfig, WebSocketEvent, WebSocketEventType } from './types';
+import { WebSocketMessage, WebSocketConfig } from '@fynlo/shared';
+import { WebSocketEvent } from '@fynlo/shared';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
 import tokenManager from '../../utils/enhancedTokenManager';
@@ -7,17 +8,9 @@ import API_CONFIG from '../../config/api';
 type ConnectionState = 'DISCONNECTED' | 'CONNECTING' | 'AUTHENTICATING' | 'CONNECTED' | 'RECONNECTING';
 
 export class EnhancedWebSocketService {
-  private static instance: EnhancedWebSocketService;
   private ws: WebSocket | null = null;
   private state: ConnectionState = 'DISCONNECTED';
   private config: WebSocketConfig;
-  
-  static getInstance(): EnhancedWebSocketService {
-    if (!EnhancedWebSocketService.instance) {
-      EnhancedWebSocketService.instance = new EnhancedWebSocketService();
-    }
-    return EnhancedWebSocketService.instance;
-  }
   
   // Heartbeat mechanism
   private heartbeatTimer: NodeJS.Timeout | null = null;
@@ -40,9 +33,6 @@ export class EnhancedWebSocketService {
   // Refresh timer
   private refreshTimer: NodeJS.Timeout | null = null;
   
-  // Resolved restaurant ID for consistent use
-  private resolvedRestaurantId: string | number | null | undefined = null;
-  
   constructor(config: Partial<WebSocketConfig> = {}) {
     this.config = {
       heartbeatInterval: 15000, // 15 seconds
@@ -56,17 +46,11 @@ export class EnhancedWebSocketService {
   }
   
   private setupNetworkMonitoring(): void {
-    this.networkUnsubscribe = NetInfo.addEventListener(async state => {
+    this.networkUnsubscribe = NetInfo.addEventListener(state => {
       if (state.isConnected && state.isInternetReachable) {
         if (this.state === 'DISCONNECTED') {
-          // Check if user is authenticated before attempting to reconnect
-          const userInfo = await AsyncStorage.getItem('userInfo');
-          if (userInfo) {
-            console.log('📱 Network restored, reconnecting WebSocket...');
-            this.connect();
-          } else {
-            console.log('📱 Network restored but user not authenticated, skipping WebSocket connection');
-          }
+          console.log('📱 Network restored, reconnecting WebSocket...');
+          this.connect();
         }
       } else if (this.state === 'CONNECTED') {
         console.log('📱 Network lost, WebSocket will reconnect when available');
@@ -91,39 +75,14 @@ export class EnhancedWebSocketService {
       }
       
       const user = JSON.parse(userInfo);
-      
-      // Try to get restaurant_id from multiple possible locations
-      const restaurantId = user.restaurant_id ?? user.restaurantId ?? user.business?.id;
-      
-      // Store the resolved restaurant ID for consistent use in authentication
-      this.resolvedRestaurantId = restaurantId;
-      
-      // Check explicitly for null/undefined (not falsy, as 0 might be valid)
-      if (restaurantId === null || restaurantId === undefined) {
-        if (user.role !== 'platform_owner') {
-          // For non-platform owners, restaurant is required
-          console.warn('⚠️ No restaurant_id found in user info, user role:', user.role);
-          throw new Error('No restaurant associated with user');
-        }
+      if (!user.restaurant_id) {
+        throw new Error('No restaurant associated with user');
       }
       
       // Build WebSocket URL (no token in URL for security)
       const wsProtocol = API_CONFIG.BASE_URL.startsWith('https') ? 'wss' : 'ws';
       const wsHost = API_CONFIG.BASE_URL.replace(/^https?:\/\//, '');
-      
-      // Build appropriate WebSocket URL based on user type
-      let wsUrl: string;
-      if (user.role === 'platform_owner' && (restaurantId === null || restaurantId === undefined)) {
-        // Platform owners without a specific restaurant use a different endpoint
-        wsUrl = `${wsProtocol}://${wsHost}/api/v1/websocket/ws/platform`;
-      } else if (restaurantId !== null && restaurantId !== undefined) {
-        // Regular users and platform owners with a restaurant (including ID 0)
-        const encodedRestaurantId = encodeURIComponent(String(restaurantId));
-        wsUrl = `${wsProtocol}://${wsHost}/api/v1/websocket/ws/pos/${encodedRestaurantId}`;
-      } else {
-        // This shouldn't happen due to the check above, but handle it gracefully
-        throw new Error('Unable to determine WebSocket endpoint');
-      }
+      const wsUrl = `${wsProtocol}://${wsHost}/api/v1/websocket/ws/pos/${user.restaurant_id}`;
       
       console.log('🔌 Connecting to WebSocket:', wsUrl);
       
@@ -170,11 +129,11 @@ export class EnhancedWebSocketService {
         data: {
           token: token,
           user_id: user.id,
-          restaurant_id: this.resolvedRestaurantId,
+          restaurant_id: user.restaurant_id,
           client_type: 'mobile_pos',
           client_version: '1.0.0'
         },
-        restaurant_id: this.resolvedRestaurantId,
+        restaurant_id: user.restaurant_id,
         timestamp: new Date().toISOString()
       };
       
@@ -415,9 +374,6 @@ export class EnhancedWebSocketService {
     
     this.stopHeartbeat();
     
-    // Clear resolved restaurant ID
-    this.resolvedRestaurantId = null;
-    
     if (this.reconnectTimer) {
       clearTimeout(this.reconnectTimer);
       this.reconnectTimer = null;
@@ -491,9 +447,6 @@ export class EnhancedWebSocketService {
   }
 }
 
-// Export singleton instance using getInstance
-export const webSocketService = EnhancedWebSocketService.getInstance();
+// Export singleton instance
+export const webSocketService = new EnhancedWebSocketService();
 export default webSocketService;
-
-// Re-export types for convenience
-export { WebSocketEventType } from './types';

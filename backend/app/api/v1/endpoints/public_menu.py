@@ -43,13 +43,13 @@ def format_menu_item(product, category_name=None):
     return {
         'id': str(product.id),  # Convert UUID to string
         'name': product.name,
-        'price': float(product.price),
+        'price': str(product.price),  # Convert to string for precision
         'emoji': emoji,
         'available': product.is_active if hasattr(product, 'is_active') else True,
         'category': category_name or 'Uncategorized',
         'description': product.description or '',
         'icon': 'restaurant',  # Default icon for compatibility
-        'category_id': str(product.category_id) if product.category_id else None  # Convert UUID to string
+        'category_id': str(product.category_id) if hasattr(product, 'category_id') and product.category_id else None  # Convert UUID to string
     }
 
 @router.get("/items")

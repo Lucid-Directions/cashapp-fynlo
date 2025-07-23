@@ -5,13 +5,11 @@ Connects to DigitalOcean Valkey (Redis compatible).
 
 import json
 import logging
-import sys
 from typing import Any, Optional
 import redis.asyncio as aioredis
 from redis.asyncio.connection import ConnectionPool
 
 from app.core.config import settings
-from app.core.json_encoder import safe_json_dumps, safe_json_loads
 
 logger = logging.getLogger(__name__)
 
@@ -22,183 +20,29 @@ class RedisClient:
         self.pool: Optional[ConnectionPool] = None
         self.redis: Optional[aioredis.Redis] = None
         self._mock_storage = {} # For fallback
-        self.is_available = False  # Track if Redis is actually available
-        self._last_connection_attempt = 0  # Track last connection attempt time
-        self._connection_retry_interval = 30  # Minimum seconds between connection attempts
-        self._connection_failures = 0  # Track consecutive failures
-        self._max_connection_failures = 3  # After this many failures, skip Redis temporarily
-        self._failure_backoff_time = 300  # Wait 5 minutes after max failures before retrying
-        self._last_failure_time = 0  # Track when we hit max failures
+        self._is_connected = False  # Track if we've attempted connection
 
     async def connect(self):
         """Connect to Redis"""
-        import time
-        
-        current_time = time.time()
-        
-        # Check if we're in backoff period after max failures
-        if self._connection_failures >= self._max_connection_failures:
-            time_since_failure = current_time - self._last_failure_time
-            if time_since_failure < self._failure_backoff_time:
-                remaining = self._failure_backoff_time - time_since_failure
-                logger.debug(f"Redis in backoff period - {remaining:.0f}s remaining")
-                return
-            else:
-                # Backoff period expired, allow retry
-                logger.info("Redis backoff period expired - allowing retry")
-                self._connection_failures = 0  # Reset counter for new attempt
-        
-        # Rate limit connection attempts
-        if current_time - self._last_connection_attempt < self._connection_retry_interval:
-            logger.debug(f"Skipping Redis connection attempt - last attempt was {current_time - self._last_connection_attempt:.1f}s ago")
-            return
-        
-        self._last_connection_attempt = current_time
-        
-        if not self.redis:
+        if not self.redis and not self._is_connected:
+            self._is_connected = True  # Mark that we've attempted connection
             try:
-                # Check if REDIS_URL is configured
-                if not hasattr(settings, 'REDIS_URL') or not settings.REDIS_URL:
-                    logger.warning("⚠️ REDIS_URL not configured. Using mock storage.")
-                    if settings.ENVIRONMENT == "production":
-                        raise ValueError("REDIS_URL must be configured in production")
-                    return
-                    
-                # Mask password in logs
-                redis_url_masked = settings.REDIS_URL
-                if '@' in redis_url_masked and ':' in redis_url_masked:
-                    # Extract and mask password
-                    protocol_end = redis_url_masked.find('://') + 3
-                    at_sign = redis_url_masked.find('@')
-                    if protocol_end < at_sign:
-                        user_pass = redis_url_masked[protocol_end:at_sign]
-                        if ':' in user_pass:
-                            user, _ = user_pass.split(':', 1)
-                            redis_url_masked = f"{redis_url_masked[:protocol_end]}{user}:****{redis_url_masked[at_sign:]}"
-                
-                logger.info(f"Attempting to connect to Redis at {redis_url_masked}")
-                
-                # For DigitalOcean Valkey, handle SSL carefully
-                import asyncio
-                import socket
-                
-                # First, check if this is a rediss:// URL
-                is_ssl = settings.REDIS_URL.startswith('rediss://')
-                logger.info(f"Redis URL uses SSL: {is_ssl}")
-                
-                # Basic connection parameters with reasonable timeouts
-                connection_kwargs = {
-                    'decode_responses': True,
-                    'max_connections': 10,  # Reduced for DigitalOcean Valkey
-                    'socket_connect_timeout': 5,  # 5 seconds is reasonable for cloud services
-                    'socket_timeout': 5,  # 5 seconds for operations
-                    'retry_on_timeout': True,
-                    'retry_on_error': [aioredis.ConnectionError, aioredis.TimeoutError],
-                    'health_check_interval': 120,  # Less frequent health checks
-                    'socket_keepalive': True,  # Enable TCP keepalive
-                }
-                
-                # Add socket keepalive options for non-Windows platforms
-                if sys.platform != 'win32' and hasattr(socket, 'TCP_KEEPIDLE'):
-                    connection_kwargs['socket_keepalive_options'] = {
-                        socket.TCP_KEEPIDLE: 1,    # Start keepalives after 1 second of idle
-                        socket.TCP_KEEPINTVL: 3,   # Send keepalive every 3 seconds
-                        socket.TCP_KEEPCNT: 5,     # Send 5 keepalive probes before declaring dead
-                    }
-                
-                # For DigitalOcean Valkey with SSL, add specific SSL settings
-                if is_ssl:
-                    import ssl
-                    # Use proper SSL module constants, not strings
-                    connection_kwargs.update({
-                        'ssl_cert_reqs': ssl.CERT_NONE,  # Use SSL constant
-                        'ssl_check_hostname': False,  # Don't check hostname
-                    })
-                    logger.info("Using SSL parameters for DigitalOcean Valkey")
-                
-                # Try to connect
-                try:
-                    logger.info("Creating Redis connection pool...")
-                    self.pool = ConnectionPool.from_url(
-                        settings.REDIS_URL, 
-                        **connection_kwargs
-                    )
-                    self.redis = aioredis.Redis(connection_pool=self.pool)
-                    
-                    # Test connection with reasonable timeout
-                    logger.info("Testing Redis connection with ping...")
-                    await asyncio.wait_for(self.redis.ping(), timeout=5.0)
-                    logger.info("✅ Redis connected successfully")
-                    self.is_available = True
-                    self._connection_failures = 0  # Reset failure counter on success
-                    
-                    # Clear mock storage only on successful connection
-                    self._mock_storage = {}
-                    logger.info("🧹 Cleared mock storage after successful Redis connection")
-                    
-                except (asyncio.TimeoutError, aioredis.TimeoutError, aioredis.ConnectionError) as e:
-                    logger.error(f"Redis connection failed: {type(e).__name__}: {str(e)}")
-                    self._connection_failures += 1  # Increment failure counter
-                    
-                    # Clean up failed connection
-                    await self._cleanup_connection()
-                    
-                    # For DigitalOcean, provide helpful error message
-                    if "digitalocean.com" in settings.REDIS_URL:
-                        logger.error("\n" + "="*60)
-                        logger.error("DigitalOcean Valkey Connection Troubleshooting:")
-                        logger.error("1. Check Trusted Sources in DO Database Settings")
-                        logger.error("2. Ensure your app is added as trusted source")
-                        logger.error("3. Verify both app and database are in same region")
-                        logger.error("4. Try using rediss:// URL for SSL connection")
-                        logger.error("="*60 + "\n")
-                    
-                    # Don't raise - allow fallback to mock storage
-                    self.is_available = False
-                    if self._connection_failures >= self._max_connection_failures:
-                        self._last_failure_time = time.time()  # Record when we hit max failures
-                        logger.warning(f"⚠️ Redis disabled after {self._connection_failures} failures - will retry in {self._failure_backoff_time}s")
-                    else:
-                        logger.warning("⚠️ Continuing without Redis - using in-memory fallback")
-                    # Keep existing mock storage data on connection failure
-                    return
+                logger.info(f"Attempting to connect to Redis at {settings.REDIS_URL}")
+                self.pool = ConnectionPool.from_url(settings.REDIS_URL, decode_responses=True, max_connections=20)
+                self.redis = aioredis.Redis(connection_pool=self.pool)
+                await self.redis.ping()
+                logger.info("✅ Redis connected successfully.")
+                # Clear mock storage if real connection is successful
+                self._mock_storage = {}
             except Exception as e:
-                # Clean up any partially created connections
-                if self.redis:
-                    try:
-                        await self.redis.close()
-                    except:
-                        pass
-                    self.redis = None
-                if self.pool:
-                    try:
-                        await self.pool.disconnect()
-                    except:
-                        pass
-                    self.pool = None
-                
-                # Log the full error details
-                error_msg = str(e) if str(e) else type(e).__name__
-                logger.error(f"❌ Failed to connect to Redis: {error_msg}")
-                
-                # In production, allow fallback to mock storage with warning
-                # This prevents complete application failure if Redis is temporarily unavailable
-                if settings.ENVIRONMENT == "production":
-                    logger.warning("⚠️ Redis unavailable in production - using in-memory fallback. This may impact performance and data persistence.")
-                    # Continue with mock storage
-                elif settings.ENVIRONMENT in ["development", "testing", "local"]:
-                    logger.warning("⚠️ Redis connection failed. Falling back to mock storage.")
-                else:
-                    # For any other environment, raise the error
-                    raise ConnectionError(f"Failed to connect to Redis: {error_msg}")
+                logger.error(f"❌ Failed to connect to Redis: {e}")
+                logger.warning("⚠️ Redis connection failed. Falling back to mock storage.")
+                self.redis = None  # Ensure redis is None if connection failed
+                # _mock_storage is already initialized as {} which indicates mock mode is active
 
 
     async def disconnect(self):
         """Disconnect from Redis"""
-        await self._cleanup_connection()
-    
-    async def _cleanup_connection(self):
-        """Clean up Redis connection and pool"""
         if self.redis and hasattr(self.redis, 'close'):
             try:
                 await self.redis.close()
@@ -213,14 +57,12 @@ class RedisClient:
                 logger.error(f"Error disconnecting Redis connection pool: {e}")
         self.redis = None
         self.pool = None
-        # CRITICAL: Reset availability flag to allow reconnection attempts
-        self.is_available = False
 
     async def set(self, key: str, value: Any, expire: Optional[int] = None) -> bool:
         """Set a value in Redis"""
         if not self.redis: # Mock fallback
             if isinstance(value, (dict, list, tuple)): # Handle tuples as well
-                value = safe_json_dumps(value)
+                value = json.dumps(value)
             self._mock_storage[key] = str(value) # Store as string for consistency
             # Mock doesn't handle expire well, but log it
             if expire:
@@ -228,7 +70,7 @@ class RedisClient:
             return True
 
         if isinstance(value, (dict, list, tuple)):
-            value_to_set = safe_json_dumps(value)
+            value_to_set = json.dumps(value)
         else:
             value_to_set = str(value) # Ensure value is string if not complex type
 
@@ -246,7 +88,7 @@ class RedisClient:
             if value is None:
                 return None
             try:
-                return safe_json_loads(value) # Try to parse as JSON
+                return json.loads(value) # Try to parse as JSON
             except (json.JSONDecodeError, TypeError):
                 return value # Return as is if not JSON or if already primitive
 
@@ -256,7 +98,7 @@ class RedisClient:
                 return None
             try:
                 # decode_responses=True means value is already a string
-                return safe_json_loads(value)
+                return json.loads(value)
             except (json.JSONDecodeError, TypeError):
                 return value
         except Exception as e:
@@ -297,18 +139,6 @@ class RedisClient:
         logger.info(f"Deleted {keys_deleted_count} keys matching pattern: {pattern}")
         return keys_deleted_count
 
-    async def ping(self) -> bool:
-        """Ping Redis to check if connection is alive"""
-        if not self.redis:  # Mock fallback
-            # Mock is always "alive"
-            return True
-        try:
-            response = await self.redis.ping()
-            return response is True or str(response).upper() == 'PONG'
-        except Exception as e:
-            logger.error(f"Error pinging Redis: {str(e)}")
-            return False
-    
     async def exists(self, key: str) -> bool:
         """Check if key exists"""
         if not self.redis: # Mock fallback
@@ -318,68 +148,6 @@ class RedisClient:
         except Exception as e:
             logger.error(f"Error checking existence of key {key} in Redis: {e}")
             return False
-    
-    async def zadd(self, key: str, mapping: dict, **kwargs) -> int:
-        """Add members to a sorted set"""
-        if not self.redis: # Mock fallback
-            if key not in self._mock_storage:
-                self._mock_storage[key] = {}
-            self._mock_storage[key].update(mapping)
-            return len(mapping)
-        try:
-            return await self.redis.zadd(key, mapping, **kwargs)
-        except Exception as e:
-            logger.error(f"Error adding to sorted set {key}: {e}")
-            return 0
-    
-    async def zrange(self, key: str, start: int, end: int, withscores: bool = False) -> list:
-        """Get range of members from sorted set"""
-        if not self.redis: # Mock fallback
-            if key not in self._mock_storage:
-                return []
-            # Simple mock - return all items
-            items = list(self._mock_storage[key].items())
-            if withscores:
-                return items[:end+1] if end != -1 else items
-            else:
-                # Extract just the keys from the items
-                selected_items = items[:end+1] if end != -1 else items
-                return [k for k, v in selected_items]
-        try:
-            return await self.redis.zrange(key, start, end, withscores=withscores)
-        except Exception as e:
-            logger.error(f"Error getting range from sorted set {key}: {e}")
-            return []
-    
-    async def incrbyfloat(self, key: str, amount: float) -> float:
-        """Increment value by float amount"""
-        if not self.redis: # Mock fallback
-            current = float(self._mock_storage.get(key, 0))
-            new_value = current + amount
-            self._mock_storage[key] = str(new_value)
-            return new_value
-        try:
-            return await self.redis.incrbyfloat(key, amount)
-        except Exception as e:
-            logger.error(f"Error incrementing float key {key}: {e}")
-            return 0.0
-    
-    async def scan(self, cursor: int = 0, match: Optional[str] = None, count: int = 100):
-        """Scan keys matching pattern"""
-        if not self.redis: # Mock fallback
-            import fnmatch
-            if match:
-                # Return strings, not bytes, to match decode_responses=True behavior
-                keys = [k for k in self._mock_storage.keys() if fnmatch.fnmatch(k, match)]
-            else:
-                keys = list(self._mock_storage.keys())
-            # Simple mock - return all matching keys at once
-            return (0, keys[:count])
-        try:
-            return await self.redis.scan(cursor, match=match, count=count)
-        except Exception as e:
-            logger.error(f"Error scanning keys with pattern {match}: {e}")
-            return (0, [])
 
     # --- Methods for specific application logic ---
     async def set_session(self, session_id: str, data: dict, expire: int = 3600):
@@ -445,28 +213,6 @@ class RedisClient:
             await self.redis.expire(key, timeout)
         except Exception as e:
             logger.error(f"Error setting expire for key {key} in Redis: {e}")
-    
-    async def hset(self, key: str, mapping: dict) -> bool:
-        """Set multiple fields in a hash"""
-        if not self.redis:  # Mock fallback
-            if key not in self._mock_storage:
-                self._mock_storage[key] = {}
-            # Convert dict values to strings for consistency
-            str_mapping = {k: str(v) for k, v in mapping.items()}
-            if isinstance(self._mock_storage.get(key), dict):
-                self._mock_storage[key].update(str_mapping)
-            else:
-                self._mock_storage[key] = str_mapping
-            return True
-        
-        try:
-            # Convert all values to strings for Redis
-            str_mapping = {k: str(v) for k, v in mapping.items()}
-            await self.redis.hset(key, mapping=str_mapping)
-            return True
-        except Exception as e:
-            logger.error(f"Error setting hash {key} in Redis: {e}")
-            return False
 
     def get_client(self) -> Optional[aioredis.Redis]:
         """
@@ -487,13 +233,8 @@ redis_client = RedisClient()
 
 async def init_redis():
     """Initialize Redis connection and prepare for fastapi-limiter."""
-    try:
-        await redis_client.connect()
-        # No explicit init for fastapi-limiter here; it will call redis_client.get_client()
-    except Exception as e:
-        logger.warning(f"Redis initialization failed: {str(e)}")
-        logger.warning("App will continue with in-memory fallback for caching/sessions")
-        # Don't re-raise - allow app to start without Redis
+    await redis_client.connect()
+    # No explicit init for fastapi-limiter here; it will call redis_client.get_client()
 
 async def close_redis():
     """Close Redis connection."""
@@ -501,9 +242,8 @@ async def close_redis():
 
 async def get_redis() -> RedisClient:
     """Get Redis client instance, ensuring it's connected."""
-    # Attempt connection if Redis is not connected and not marked as available
-    # This allows reconnection attempts after failures
-    if not redis_client.redis and not redis_client.is_available:
-        logger.info("Redis not connected, attempting to connect...")
+    # If we haven't attempted connection yet
+    if not redis_client._is_connected:
+        logger.info("Redis client accessed before initial connect, attempting to connect.")
         await redis_client.connect()
     return redis_client

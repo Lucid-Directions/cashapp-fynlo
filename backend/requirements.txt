@@ -18,9 +18,6 @@ python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
 cryptography==41.0.7 # For Fernet encryption of payment credentials
 
-# System Monitoring - For health checks and metrics
-psutil==5.9.6 # System resource monitoring (CPU, memory, disk)
-
 # Supabase Authentication - For migration from JWT to Supabase
 supabase==2.3.0
 gotrue==2.0.0

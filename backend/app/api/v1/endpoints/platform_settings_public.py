@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 # Default service charge configuration
 DEFAULT_SERVICE_CHARGE = {
     "enabled": True,
-    "rate": 10.0,
+    "rate": 12.5,
     "description": "Platform service charge",
     "currency": "GBP"
 }
@@ -51,8 +51,7 @@ async def get_service_charge_public(
         db_success = False
         try:
             # Set a statement timeout at the database level
-            from sqlalchemy import text
-            db.execute(text("SET LOCAL statement_timeout = '500ms'"))
+            db.execute("SET LOCAL statement_timeout = '500ms'")
             
             from app.models.platform_config import PlatformConfiguration
             
@@ -80,7 +79,7 @@ async def get_service_charge_public(
         finally:
             # Always reset the timeout for the connection
             try:
-                db.execute(text("RESET statement_timeout"))
+                db.execute("RESET statement_timeout")
             except Exception as reset_error:
                 logger.warning(f"Failed to reset statement timeout: {reset_error}")
         
