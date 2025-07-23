@@ -130,13 +130,15 @@ async def get_categories(
         for cat in categories
     ]
     
-    # Cache for 5 minutes - convert Pydantic models to dicts
-    cache_data = [cat.model_dump() for cat in result]
-    await redis.set(f"categories:{restaurant_id}", cache_data, expire=300)
+    # Convert to dicts for consistent API response
+    response_data = [cat.model_dump() for cat in result]
+    
+    # Cache for 5 minutes
+    await redis.set(f"categories:{restaurant_id}", response_data, expire=300)
     
     return APIResponseHelper.success(
-        data=result,
-        message=f"Retrieved {len(result)} categories"
+        data=response_data,
+        message=f"Retrieved {len(response_data)} categories"
     )
 
 @router.post("/categories", response_model=CategoryResponse)
@@ -344,13 +346,15 @@ async def get_products(
         for product in products
     ]
     
-    # Cache for 5 minutes - convert Pydantic models to dicts
-    cache_data = [prod.model_dump() for prod in result]
-    await redis.set(cache_key, cache_data, expire=300)
+    # Convert to dicts for consistent API response
+    response_data = [prod.model_dump() for prod in result]
+    
+    # Cache for 5 minutes
+    await redis.set(cache_key, response_data, expire=300)
     
     return APIResponseHelper.success(
-        data=result,
-        message=f"Retrieved {len(result)} products",
+        data=response_data,
+        message=f"Retrieved {len(response_data)} products",
         meta={
             "restaurant_id": restaurant_id,
             "category_id": category_id,

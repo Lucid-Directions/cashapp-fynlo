@@ -20,10 +20,12 @@ class RedisClient:
         self.pool: Optional[ConnectionPool] = None
         self.redis: Optional[aioredis.Redis] = None
         self._mock_storage = {} # For fallback
+        self._is_connected = False  # Track if we've attempted connection
 
     async def connect(self):
         """Connect to Redis"""
-        if not self.redis:
+        if not self.redis and not self._is_connected:
+            self._is_connected = True  # Mark that we've attempted connection
             try:
                 logger.info(f"Attempting to connect to Redis at {settings.REDIS_URL}")
                 self.pool = ConnectionPool.from_url(settings.REDIS_URL, decode_responses=True, max_connections=20)
@@ -34,15 +36,9 @@ class RedisClient:
                 self._mock_storage = {}
             except Exception as e:
                 logger.error(f"❌ Failed to connect to Redis: {e}")
-                if settings.ENVIRONMENT in ["development", "testing", "local"]: # Broader fallback for local dev
-                    logger.warning("⚠️ Redis connection failed. Falling back to mock storage.")
-                    self.redis = None # Ensure redis is None if connection failed
-                    # _mock_storage is already initialized
-                else:
-                    # In production, a failed Redis connection should be a critical error.
-                    # Depending on policy, either raise the error or have a more robust fallback.
-                    # For now, let's re-raise to make it visible.
-                    raise ConnectionError(f"Critical: Failed to connect to Redis in production environment - {e}")
+                logger.warning("⚠️ Redis connection failed. Falling back to mock storage.")
+                self.redis = None  # Ensure redis is None if connection failed
+                # _mock_storage is already initialized as {} which indicates mock mode is active
 
 
     async def disconnect(self):
@@ -246,8 +242,8 @@ async def close_redis():
 
 async def get_redis() -> RedisClient:
     """Get Redis client instance, ensuring it's connected."""
-    # If redis is not connected and we haven't tried to connect yet
-    if redis_client.redis is None and redis_client._mock_storage == {}:
+    # If we haven't attempted connection yet
+    if not redis_client._is_connected:
         logger.info("Redis client accessed before initial connect, attempting to connect.")
         await redis_client.connect()
     return redis_client

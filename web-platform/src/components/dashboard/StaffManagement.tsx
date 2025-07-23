@@ -32,7 +32,7 @@ interface Restaurant {
 }
 
 export const StaffManagement = () => {
-  const { hasFeature } = useFeatureAccess();
+  const { hasFeature, isPlatformOwner, getRestaurantId, user } = useFeatureAccess();
   const { toast } = useToast();
   const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
@@ -53,23 +53,40 @@ export const StaffManagement = () => {
     try {
       setLoading(true);
 
-      // Fetch restaurants
-      const { data: restaurantsData, error: restaurantsError } = await supabase
+      // Fetch restaurants - apply access control
+      let restaurantQuery = supabase
         .from('restaurants')
-        .select('id, name, is_active')
+        .select('id, name, is_active, owner_id')
         .order('name');
 
+      // Non-platform owners can only see their own restaurants
+      if (!isPlatformOwner()) {
+        const { data: { user: authUser } } = await supabase.auth.getUser();
+        if (authUser) {
+          restaurantQuery = restaurantQuery.eq('owner_id', authUser.id);
+        }
+      }
+
+      const { data: restaurantsData, error: restaurantsError } = await restaurantQuery;
+
       if (restaurantsError) throw restaurantsError;
-      setRestaurants(restaurantsData || []);
+      const accessibleRestaurants = restaurantsData || [];
+      setRestaurants(accessibleRestaurants);
 
-      // Fetch staff members
-      const { data: staffData, error: staffError } = await supabase
-        .from('staff_members')
-        .select('*')
-        .order('created_at', { ascending: false });
+      // Fetch staff members only for accessible restaurants
+      if (accessibleRestaurants.length > 0) {
+        const restaurantIds = accessibleRestaurants.map(r => r.id);
+        const { data: staffData, error: staffError } = await supabase
+          .from('staff_members')
+          .select('*')
+          .in('restaurant_id', restaurantIds)
+          .order('created_at', { ascending: false });
 
-      if (staffError) throw staffError;
-      setStaffMembers(staffData || []);
+        if (staffError) throw staffError;
+        setStaffMembers(staffData || []);
+      } else {
+        setStaffMembers([]);
+      }
     } catch (error) {
       toast({
         title: "Error",
