@@ -88,6 +88,15 @@ yarn-error.log
 # Expo legacy (not needed)
 Expo.plist
 
+# Environment variables
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.env.*
+!.env.example
+
 # Node.js build artifacts
 node_modules/**/build/
 
