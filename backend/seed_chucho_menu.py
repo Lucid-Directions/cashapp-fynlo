@@ -144,6 +144,46 @@ def clear_all_menu_data(db: Session):
     db.commit()
     print(f"   ✅ Deleted {product_count} products and {category_count} categories")
 
+def remove_other_restaurants(db: Session):
+    """Remove all restaurants except Chucho"""
+    print("🧹 Removing all non-Chucho restaurants...")
+    
+    from sqlalchemy import text
+    
+    # Delete all restaurants that are not Chucho
+    result = db.execute(
+        text("DELETE FROM restaurants WHERE LOWER(name) != LOWER(:name)"),
+        {"name": "Chucho"}
+    )
+    restaurant_count = result.rowcount
+    
+    db.commit()
+    print(f"   ✅ Deleted {restaurant_count} other restaurants")
+
+def ensure_restaurant_owner(db: Session, restaurant_id: str):
+    """Ensure Chucho restaurant is owned by arnaud@luciddirections.co.uk"""
+    print("🔧 Setting restaurant owner...")
+    
+    from sqlalchemy import text
+    
+    # First check if user exists
+    user = db.execute(
+        text("SELECT id FROM users WHERE email = :email"),
+        {"email": "arnaud@luciddirections.co.uk"}
+    ).fetchone()
+    
+    if user:
+        # Update user's restaurant_id
+        db.execute(
+            text("UPDATE users SET restaurant_id = :restaurant_id WHERE id = :user_id"),
+            {"restaurant_id": restaurant_id, "user_id": user[0]}
+        )
+        print(f"   ✅ Updated arnaud@luciddirections.co.uk to own Chucho restaurant")
+    else:
+        print(f"   ⚠️  User arnaud@luciddirections.co.uk not found - please ensure user exists in Supabase")
+    
+    db.commit()
+
 def seed_categories(db: Session, restaurant_id: str) -> dict:
     """Seed menu categories and return mapping"""
     category_mapping = {}
@@ -230,19 +270,25 @@ def main():
     db = SessionLocal()
     
     try:
-        # Find Chucho restaurant
+        # Step 1: Remove all other restaurants
+        remove_other_restaurants(db)
+        
+        # Step 2: Find Chucho restaurant
         restaurant = find_chucho_restaurant(db)
         restaurant_id = str(restaurant.id)
         
         print(f"🏪 Found restaurant: {restaurant.name} (ID: {restaurant_id})")
         
-        # Clear ALL menu data from database to ensure only Chucho menu exists
+        # Step 3: Ensure restaurant is owned by arnaud@luciddirections.co.uk
+        ensure_restaurant_owner(db, restaurant_id)
+        
+        # Step 4: Clear ALL menu data from database
         clear_all_menu_data(db)
         
-        # Seed categories
+        # Step 5: Seed categories
         category_mapping = seed_categories(db, restaurant_id)
         
-        # Seed products
+        # Step 6: Seed products
         seed_products(db, restaurant_id, category_mapping)
         
         # Commit all changes
