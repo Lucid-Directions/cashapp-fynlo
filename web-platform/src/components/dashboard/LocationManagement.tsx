@@ -29,7 +29,7 @@ interface LocationStats {
 }
 
 export const LocationManagement = () => {
-  const { hasFeature } = useFeatureAccess();
+  const { hasFeature, isPlatformOwner, getRestaurantId } = useFeatureAccess();
   const { toast } = useToast();
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [locationStats, setLocationStats] = useState<Record<string, LocationStats>>({});
@@ -43,11 +43,25 @@ export const LocationManagement = () => {
     try {
       setLoading(true);
 
-      // Fetch restaurants
-      const { data: restaurantsData, error: restaurantsError } = await supabase
+      // Fetch restaurants - Apply access control
+      let query = supabase
         .from('restaurants')
         .select('*')
         .order('created_at', { ascending: false });
+
+      // Non-platform owners can only see their own restaurant
+      if (!isPlatformOwner()) {
+        const restaurantId = getRestaurantId();
+        if (restaurantId) {
+          query = query.eq('id', restaurantId);
+        } else {
+          // No restaurant ID means no access
+          setRestaurants([]);
+          return;
+        }
+      }
+
+      const { data: restaurantsData, error: restaurantsError } = await query;
 
       if (restaurantsError) throw restaurantsError;
       setRestaurants(restaurantsData || []);

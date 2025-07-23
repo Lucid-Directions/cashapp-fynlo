@@ -53,7 +53,7 @@ export const BusinessManagement = () => {
     setLoading(true);
     try {
       // SECURITY: Only platform owners should see all restaurants
-      if (!isPlatformOwner) {
+      if (!isPlatformOwner()) {
         throw new Error('Unauthorized: Only platform owners can view all restaurants');
       }
 

@@ -1,0 +1,12 @@
+{
+  "installCommand": "cd web-platform && npm install",
+  "buildCommand": "cd web-platform && npm run build",
+  "outputDirectory": "web-platform/dist",
+  "framework": "vite",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

@@ -38,12 +38,17 @@ if "postgresql" in database_url and (":25060" in database_url or ":25061" in dat
 connect_args = {}
 if "postgresql" in database_url:
     connect_args = {
-        "connect_timeout": 10,  # PostgreSQL connection timeout
-        "options": "-c statement_timeout=30000"  # 30 second statement timeout
+        "connect_timeout": 10  # PostgreSQL connection timeout
     }
     
-    # For DigitalOcean managed databases, provide the CA certificate
+    # For DigitalOcean managed databases
     if ":25060" in database_url or ":25061" in database_url:
+        # PgBouncer (port 25061) doesn't support statement_timeout in connection options
+        # Only add it for direct connections (port 25060)
+        if ":25060" in database_url:
+            connect_args["options"] = "-c statement_timeout=30000"  # 30 second statement timeout
+            
+        # Provide the CA certificate
         cert_path = os.path.join(os.path.dirname(__file__), "..", "..", "certs", "ca-certificate.crt")
         if os.path.exists(cert_path):
             # Provide the CA certificate path for SSL verification
@@ -51,6 +56,9 @@ if "postgresql" in database_url:
             logger.info(f"Using CA certificate for SSL: {cert_path}")
         else:
             logger.warning(f"CA certificate not found at {cert_path}")
+    else:
+        # For non-DigitalOcean databases, add statement timeout
+        connect_args["options"] = "-c statement_timeout=30000"  # 30 second statement timeout
 
 engine = create_engine(
     database_url,
