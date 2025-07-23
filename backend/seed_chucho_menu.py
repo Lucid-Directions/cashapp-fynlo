@@ -164,22 +164,22 @@ def remove_other_restaurants(db: Session, chucho_restaurant_id: str):
         # Clear dependent data first to avoid foreign key violations
         # 1. Clear products from other restaurants
         result = db.execute(
-            text("DELETE FROM products WHERE restaurant_id = ANY(:restaurant_ids)"),
-            {"restaurant_ids": other_ids}
+            text("DELETE FROM products WHERE restaurant_id IN :restaurant_ids"),
+            {"restaurant_ids": tuple(other_ids)}  # Convert to tuple for IN operator
         )
         print(f"   ✅ Deleted {result.rowcount} products from other restaurants")
         
         # 2. Clear categories from other restaurants
         result = db.execute(
-            text("DELETE FROM categories WHERE restaurant_id = ANY(:restaurant_ids)"),
-            {"restaurant_ids": other_ids}
+            text("DELETE FROM categories WHERE restaurant_id IN :restaurant_ids"),
+            {"restaurant_ids": tuple(other_ids)}  # Convert to tuple for IN operator
         )
         print(f"   ✅ Deleted {result.rowcount} categories from other restaurants")
         
         # 3. Now safe to delete the restaurants
         result = db.execute(
-            text("DELETE FROM restaurants WHERE id = ANY(:restaurant_ids)"),
-            {"restaurant_ids": other_ids}
+            text("DELETE FROM restaurants WHERE id IN :restaurant_ids"),
+            {"restaurant_ids": tuple(other_ids)}  # Convert to tuple for IN operator
         )
         print(f"   ✅ Deleted {result.rowcount} other restaurants")
     else:
