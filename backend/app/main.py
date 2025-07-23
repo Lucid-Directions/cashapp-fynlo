@@ -53,19 +53,37 @@ if settings.ENVIRONMENT == "production" or not settings.ERROR_DETAIL_ENABLED:
 
 security = HTTPBearer()
 
-# TEMPORARY: Remove lifespan function for deployment
-# @asynccontextmanager
-# async def lifespan(app: FastAPI):
-#     """Initialize application on startup - DISABLED FOR DEPLOYMENT"""
-#     logger.info(f"🚀 Fynlo POS Backend starting in {settings.ENVIRONMENT} mode...")
-#     yield
-#     logger.info("✅ Cleanup complete")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Initialize application on startup"""
+    logger.info(f"🚀 Fynlo POS Backend starting in {settings.ENVIRONMENT} mode...")
+    
+    # Check required environment variables
+    try:
+        from app.core.config import check_required_env_vars
+        check_required_env_vars()
+    except Exception as e:
+        logger.error(f"Environment check failed: {e}")
+        # Continue startup even if check fails
+    
+    # Initialize core services
+    try:
+        from app.core.startup import startup_handler
+        await startup_handler()
+    except Exception as e:
+        logger.error(f"Startup handler failed: {e}")
+        # Continue startup even if handler fails
+    
+    yield
+    
+    # Cleanup
+    logger.info("✅ Cleanup complete")
 
 app = FastAPI(
     title=settings.APP_NAME,
     description="Hardware-Free Restaurant Management Platform",
     version="1.0.0",
-    # lifespan=lifespan,  # DISABLED FOR DEPLOYMENT
+    lifespan=lifespan,
     debug=settings.DEBUG  # Set FastAPI debug mode from settings
 )
 
