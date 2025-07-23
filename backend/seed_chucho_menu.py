@@ -161,25 +161,29 @@ def remove_other_restaurants(db: Session, chucho_restaurant_id: str):
         other_ids = [str(r[0]) for r in other_restaurants]
         print(f"   Found {len(other_ids)} other restaurants to remove")
         
+        # Build IN clause with proper parameter binding
+        placeholders = ', '.join([f':id_{i}' for i in range(len(other_ids))])
+        params = {f'id_{i}': id_val for i, id_val in enumerate(other_ids)}
+        
         # Clear dependent data first to avoid foreign key violations
         # 1. Clear products from other restaurants
         result = db.execute(
-            text("DELETE FROM products WHERE restaurant_id IN :restaurant_ids"),
-            {"restaurant_ids": tuple(other_ids)}  # Convert to tuple for IN operator
+            text(f"DELETE FROM products WHERE restaurant_id IN ({placeholders})"),
+            params
         )
         print(f"   ✅ Deleted {result.rowcount} products from other restaurants")
         
         # 2. Clear categories from other restaurants
         result = db.execute(
-            text("DELETE FROM categories WHERE restaurant_id IN :restaurant_ids"),
-            {"restaurant_ids": tuple(other_ids)}  # Convert to tuple for IN operator
+            text(f"DELETE FROM categories WHERE restaurant_id IN ({placeholders})"),
+            params
         )
         print(f"   ✅ Deleted {result.rowcount} categories from other restaurants")
         
         # 3. Now safe to delete the restaurants
         result = db.execute(
-            text("DELETE FROM restaurants WHERE id IN :restaurant_ids"),
-            {"restaurant_ids": tuple(other_ids)}  # Convert to tuple for IN operator
+            text(f"DELETE FROM restaurants WHERE id IN ({placeholders})"),
+            params
         )
         print(f"   ✅ Deleted {result.rowcount} other restaurants")
     else:
