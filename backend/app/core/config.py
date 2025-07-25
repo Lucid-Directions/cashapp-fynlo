@@ -40,7 +40,7 @@ class Settings(BaseSettings):
     SECRET_KEY: str = "your-super-secret-key-change-in-production"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
-    CORS_ORIGINS: List[str] = ["http://localhost:3000"] # Default, will be overridden
+    CORS_ORIGINS: Optional[str] = None  # Will be parsed as list in validator
     
     # Supabase Authentication
     SUPABASE_URL: Optional[str] = None
@@ -133,28 +133,37 @@ class Settings(BaseSettings):
     
     @field_validator('CORS_ORIGINS', mode='before')
     @classmethod
-    def parse_cors_origins(cls, v: Any) -> List[str]:
-        """Parse CORS origins from comma-separated string or JSON array"""
-        if isinstance(v, list):
-            # Ensure all elements are strings
-            return [str(item) for item in v if item]
-        if isinstance(v, str):
-            # Try to parse as JSON first
-            try:
-                import json
-                parsed = json.loads(v)
-                if isinstance(parsed, list):
-                    # Ensure all elements are strings
-                    return [str(item) for item in parsed if item]
-            except:
-                pass
-            # Fall back to comma-separated parsing
-            # Remove any brackets and quotes, then split by comma
-            v = v.strip().strip('[]').strip('"').strip("'")
-            origins = [origin.strip().strip('"').strip("'") for origin in v.split(',')]
-            return [origin for origin in origins if origin]  # Remove empty strings
-        # For any other type (None, int, etc.), return empty list
-        return []
+    def parse_cors_origins(cls, v: Any) -> Optional[str]:
+        """Just return the string value, parsing will happen in __init__"""
+        return v
+    
+    @property
+    def cors_origins_list(self) -> List[str]:
+        """Get CORS origins as a list"""
+        if not self.CORS_ORIGINS:
+            return []
+        
+        if isinstance(self.CORS_ORIGINS, list):
+            return self.CORS_ORIGINS
+            
+        # Parse string value
+        v = self.CORS_ORIGINS
+        
+        # Try to parse as JSON first
+        try:
+            import json
+            parsed = json.loads(v)
+            if isinstance(parsed, list):
+                return [str(item) for item in parsed if item]
+        except:
+            pass
+        
+        # Fall back to comma-separated
+        if ',' in v:
+            return [origin.strip() for origin in v.split(',') if origin.strip()]
+        
+        # Single value
+        return [v.strip()] if v.strip() else []
     
     class Config:
         case_sensitive = True
@@ -196,11 +205,7 @@ if settings.ENVIRONMENT != APP_ENV:
     if settings.ENVIRONMENT != APP_ENV:
         settings.ENVIRONMENT = APP_ENV
 
-# Ensure CORS_ORIGINS is parsed as a list if it's a comma-separated string in the .env file
-if isinstance(settings.CORS_ORIGINS, str):
-    settings.CORS_ORIGINS = [origin.strip() for origin in settings.CORS_ORIGINS.split(',')]
-elif settings.CORS_ORIGINS is None: # Handle case where CORS_ORIGINS might not be set
-    settings.CORS_ORIGINS = []
+# No need to parse CORS_ORIGINS here anymore, use settings.cors_origins_list property instead
 
 # --- Configuration Validation ---
 def validate_production_settings(s: Settings):
@@ -216,9 +221,10 @@ def validate_production_settings(s: Settings):
             errors.append("ERROR_DETAIL_ENABLED must be false in production.")
 
         # Check CORS origins: must not be empty, contain '*', or overly permissive localhost entries
-        if not s.CORS_ORIGINS:
+        cors_list = s.cors_origins_list
+        if not cors_list:
             errors.append("CORS_ORIGINS must be set in production and not be empty.")
-        elif "*" in s.CORS_ORIGINS:
+        elif "*" in cors_list:
             errors.append("CORS_ORIGINS must not contain '*' (wildcard) in production.")
         # Further checks for localhost might be too strict if there's a legitimate local admin interface on the server.
         # However, for typical web app frontends, localhost would be insecure.
