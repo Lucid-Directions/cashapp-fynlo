@@ -58,21 +58,21 @@ async def lifespan(app: FastAPI):
     """Initialize application on startup"""
     logger.info(f"🚀 Fynlo POS Backend starting in {settings.ENVIRONMENT} mode...")
     
-    # Check required environment variables
+    # Initialize database and Redis
     try:
-        from app.core.config import check_required_env_vars
-        check_required_env_vars()
+        from app.core.database import init_db
+        from app.core.redis_client import init_redis
+        
+        logger.info("Initializing database...")
+        init_db()
+        
+        logger.info("Initializing Redis...")
+        await init_redis()
+        
+        logger.info("✅ Core services initialized successfully")
     except Exception as e:
-        logger.error(f"Environment check failed: {e}")
-        # Continue startup even if check fails
-    
-    # Initialize core services
-    try:
-        from app.core.startup import startup_handler
-        await startup_handler()
-    except Exception as e:
-        logger.error(f"Startup handler failed: {e}")
-        # Continue startup even if handler fails
+        logger.error(f"Core services initialization failed: {e}")
+        # Continue startup even if initialization fails
     
     yield
     
@@ -440,6 +440,50 @@ async def get_inventory():
         data=inventory,
         message="Inventory retrieved"
     )
+
+@app.get("/api/v1/test/supabase-config")
+async def test_supabase_config():
+    """Test endpoint to verify Supabase configuration"""
+    import os
+    
+    # Check all possible sources
+    env_checks = {
+        "settings_url": bool(getattr(settings, 'SUPABASE_URL', None)),
+        "settings_key": bool(getattr(settings, 'SUPABASE_SERVICE_ROLE_KEY', None)),
+        "env_url": bool(os.getenv("SUPABASE_URL")),
+        "env_key": bool(os.getenv("SUPABASE_SERVICE_ROLE_KEY")),
+        "env_alt_key": bool(os.getenv("supabase_secret_key")),
+    }
+    
+    # List all env vars containing SUPA or SECRET (names only)
+    all_env_vars = list(os.environ.keys())
+    relevant_vars = [var for var in all_env_vars if 'SUPA' in var.upper() or ('SECRET' in var.upper() and 'KEY' in var.upper())]
+    
+    try:
+        from app.core.supabase import get_admin_client
+        client = get_admin_client()
+        
+        return APIResponseHelper.success(
+            data={
+                "status": "success",
+                "checks": env_checks,
+                "client_initialized": client is not None,
+                "environment": settings.ENVIRONMENT,
+                "relevant_env_vars": relevant_vars
+            },
+            message="Supabase configuration verified"
+        )
+    except Exception as e:
+        return APIResponseHelper.success(
+            data={
+                "status": "error",
+                "error": str(e),
+                "checks": env_checks,
+                "environment": settings.ENVIRONMENT,
+                "relevant_env_vars": relevant_vars
+            },
+            message="Supabase configuration check failed"
+        )
 
 @app.get("/api/v1/analytics/dashboard/mobile")
 async def get_analytics_dashboard():

@@ -51,6 +51,8 @@ async def verify_supabase_user(
     client = supabase_admin or get_admin_client()
     if not client:
         logger.error("Supabase admin client not available")
+        logger.error(f"SUPABASE_URL set: {bool(settings.SUPABASE_URL)}")
+        logger.error(f"SUPABASE_SERVICE_ROLE_KEY set: {bool(settings.SUPABASE_SERVICE_ROLE_KEY)}")
         raise HTTPException(
             status_code=503,
             detail="Authentication service temporarily unavailable. Please check backend configuration."
@@ -225,6 +227,8 @@ async def register_restaurant(
     client = supabase_admin or get_admin_client()
     if not client:
         logger.error("Supabase admin client not available")
+        logger.error(f"SUPABASE_URL set: {bool(settings.SUPABASE_URL)}")
+        logger.error(f"SUPABASE_SERVICE_ROLE_KEY set: {bool(settings.SUPABASE_SERVICE_ROLE_KEY)}")
         raise HTTPException(
             status_code=503,
             detail="Authentication service temporarily unavailable. Please check backend configuration."
