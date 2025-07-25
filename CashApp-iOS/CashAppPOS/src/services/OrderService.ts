@@ -11,7 +11,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Order, OrderItem } from '../types';
 import API_CONFIG from '../config/api';
-import { webSocketService } from './websocket/WebSocketService';
+// TEMPORARY: WebSocketService import commented out until file is created
+// import { webSocketService } from './websocket/WebSocketService';
 
 export interface CustomerMetadata {
   name: string;
@@ -126,7 +127,8 @@ class OrderService {
       };
 
       // Emit WebSocket event for real-time updates
-      webSocketService.send({ type: 'order_created', data: order });
+      // TEMPORARY: WebSocket disabled until service is created
+      // webSocketService.send({ type: 'order_created', data: order });
 
       // Save to local storage for offline access
       await this.cacheOrder(order);
@@ -293,7 +295,8 @@ class OrderService {
       const updatedOrder = await response.json();
       
       // Emit WebSocket event
-      webSocketService.send({ type: 'order_updated', data: updatedOrder });
+      // TEMPORARY: WebSocket disabled until service is created
+      // webSocketService.send({ type: 'order_updated', data: updatedOrder });
 
       return updatedOrder;
     } catch (error) {
@@ -411,17 +414,18 @@ class OrderService {
    * Subscribe to order events
    */
   subscribeToOrderEvents(callback: (event: string, data: any) => void): () => void {
-    const unsubscribeCreated = webSocketService.subscribe('order_created', (data) => {
-      callback('order_created', data);
-    });
+    // TEMPORARY: WebSocket disabled until service is created
+    // const unsubscribeCreated = webSocketService.subscribe('order_created', (data) => {
+    //   callback('order_created', data);
+    // });
 
-    const unsubscribeUpdated = webSocketService.subscribe('order_updated', (data) => {
-      callback('order_updated', data);
-    });
+    // const unsubscribeUpdated = webSocketService.subscribe('order_updated', (data) => {
+    //   callback('order_updated', data);
+    // });
 
     return () => {
-      unsubscribeCreated();
-      unsubscribeUpdated();
+      // unsubscribeCreated();
+      // unsubscribeUpdated();
     };
   }
 }

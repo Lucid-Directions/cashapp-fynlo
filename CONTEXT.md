@@ -37,6 +37,53 @@ cashapp-fynlo/
 - **Platform Integration**: 95% ✅ (Dashboard live, WebSocket complete)
 - **Overall**: 95% Production Ready
 
+### 🛠️ MCP SERVERS (Model Context Protocol Tools)
+
+**Claude Code has 7 FREE MCP servers installed for enhanced capabilities:**
+
+### 1. Desktop Commander (`mcp__desktop-commander__`)
+- **Use for**: File system operations, terminal commands, system interactions
+- **Examples**: "List all files in project", "Run npm install", "Create new folders"
+- **When to use**: Any file/folder operations or command execution needs
+
+### 2. Sequential Thinking (`mcp__sequential-thinking__`)
+- **Use for**: Breaking down complex problems into logical steps
+- **Examples**: "Plan architecture for new feature", "Break down implementation steps"
+- **When to use**: Complex tasks requiring systematic planning
+
+### 3. File System (`mcp__filesystem__`) 
+- **Use for**: Direct file read/write in current project (project-scoped)
+- **Examples**: "Read package.json", "Create new component file"
+- **When to use**: Project-specific file operations (prefer over Desktop Commander for project files)
+
+### 4. Memory Bank (`mcp__memory-bank__`)
+- **Use for**: Storing context across conversations
+- **Examples**: "Remember project structure", "Store coding preferences"
+- **When to use**: Long-term context retention needs
+
+### 5. Playwright (`mcp__playwright__`)
+- **Use for**: Browser automation, web testing, screenshots
+- **Examples**: "Take screenshot of webpage", "Fill out web forms", "Test UI flows"
+- **When to use**: Browser-based testing or automation
+
+### 6. Puppeteer (`mcp__puppeteer__`)
+- **Use for**: Web scraping, PDF generation, browser automation
+- **Examples**: "Scrape website data", "Generate PDF from webpage"  
+- **When to use**: Data extraction or document generation from web
+
+### 7. Semgrep (`mcp__semgrep__`)
+- **Use for**: Code security analysis, vulnerability scanning
+- **Examples**: "Scan for security issues", "Check code quality"
+- **When to use**: Security audits, code quality checks
+
+### 8. DigitalOcean (`mcp__digitalocean-mcp-local__`)
+- **Use for**: Infrastructure management, monitoring, deployment
+- **Examples**: "Check backend service status", "View API logs", "Restart services", "Deploy changes"
+- **When to use**: Infrastructure debugging, deployment, monitoring production services
+- **Capabilities**: Apps, databases, droplets, monitoring, log access
+
+**Note**: These tools are automatically available. Use `/mcp` command to see current status.
+
 ### ✅ Critical Issues RESOLVED
 1. **WebSocket Stability** ✅ FIXED
    - Heartbeat mechanism implemented (15-second intervals)

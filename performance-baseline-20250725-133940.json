@@ -1,0 +1,75 @@
+{
+  "timestamp": "2025-07-25T13:39:12.957944",
+  "base_url": "https://fynlopos-9eg2c.ondigitalocean.app",
+  "endpoint_tests": [
+    {
+      "endpoint": "health",
+      "url": "https://fynlopos-9eg2c.ondigitalocean.app/health",
+      "requests": 10,
+      "successful": 10,
+      "errors": 0,
+      "avg_response_time": 123.18031787872314,
+      "min_response_time": 109.16304588317871,
+      "max_response_time": 171.54717445373535,
+      "median_response_time": 118.33739280700684,
+      "std_deviation": 17.853735010668224
+    },
+    {
+      "endpoint": "api_root",
+      "url": "https://fynlopos-9eg2c.ondigitalocean.app/api/v1",
+      "requests": 10,
+      "successful": 10,
+      "errors": 10,
+      "avg_response_time": 126.77485942840576,
+      "min_response_time": 111.17315292358398,
+      "max_response_time": 154.82687950134277,
+      "median_response_time": 125.1760721206665,
+      "std_deviation": 12.342765145827912
+    },
+    {
+      "endpoint": "restaurants",
+      "url": "https://fynlopos-9eg2c.ondigitalocean.app/api/v1/restaurants",
+      "requests": 10,
+      "successful": 10,
+      "errors": 10,
+      "avg_response_time": 259.8222255706787,
+      "min_response_time": 226.10926628112793,
+      "max_response_time": 442.2259330749512,
+      "median_response_time": 235.98647117614746,
+      "std_deviation": 65.53980684983155
+    },
+    {
+      "endpoint": "menu_categories",
+      "url": "https://fynlopos-9eg2c.ondigitalocean.app/api/v1/menu/categories",
+      "requests": 10,
+      "successful": 10,
+      "errors": 10,
+      "avg_response_time": 150.48978328704834,
+      "min_response_time": 136.51490211486816,
+      "max_response_time": 172.69611358642578,
+      "median_response_time": 150.14445781707764,
+      "std_deviation": 10.40093168075767
+    }
+  ],
+  "load_test": {
+    "test_type": "concurrent_load",
+    "endpoint": "/health",
+    "concurrent_requests": 5,
+    "total_requests": 20,
+    "successful": 20,
+    "errors": 0,
+    "avg_response_time": 127.27780342102051,
+    "min_response_time": 111.96589469909668,
+    "max_response_time": 166.3229465484619,
+    "median_response_time": 122.02596664428711,
+    "p95_response_time": 166.3229465484619
+  },
+  "summary": {
+    "total_endpoints_tested": 4,
+    "successful_endpoints": 4,
+    "overall_avg_response_time": 165.066796541214,
+    "fastest_endpoint": "health",
+    "slowest_endpoint": "restaurants",
+    "recommendation": "BASELINE ESTABLISHED"
+  }
+}

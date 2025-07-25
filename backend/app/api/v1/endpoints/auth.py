@@ -10,7 +10,7 @@ import uuid
 import logging
 
 from app.core.database import get_db
-from app.core.supabase import supabase_admin
+from app.core.supabase import supabase_admin, get_admin_client
 from app.core.config import settings
 from app.core.database import User, Restaurant
 from app.schemas.auth import AuthVerifyResponse, RegisterRestaurantRequest
@@ -18,6 +18,11 @@ from app.core.feature_gate import get_plan_features
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
+
+# Ensure Supabase client is properly initialized
+if not supabase_admin:
+    logger.warning("Supabase admin client not initialized at module load time")
+    # The client will be initialized on first request if needed
 
 
 @router.post("/verify", response_model=AuthVerifyResponse)
@@ -42,17 +47,18 @@ async def verify_supabase_user(
             detail="Invalid authorization format. Expected: Bearer <token>"
         )
     
-    # Check if Supabase is configured
-    if not supabase_admin:
-        logger.error("Supabase admin client not initialized")
+    # Get Supabase client (will initialize if needed)
+    client = supabase_admin or get_admin_client()
+    if not client:
+        logger.error("Supabase admin client not available")
         raise HTTPException(
             status_code=503,
-            detail="Authentication service temporarily unavailable"
+            detail="Authentication service temporarily unavailable. Please check backend configuration."
         )
     
     try:
         # Verify token with Supabase Admin API
-        user_response = supabase_admin.auth.get_user(token)
+        user_response = client.auth.get_user(token)
         supabase_user = user_response.user
         
         if not supabase_user:
@@ -215,9 +221,18 @@ async def register_restaurant(
     
     token = authorization.replace("Bearer ", "")
     
+    # Get Supabase client (will initialize if needed)
+    client = supabase_admin or get_admin_client()
+    if not client:
+        logger.error("Supabase admin client not available")
+        raise HTTPException(
+            status_code=503,
+            detail="Authentication service temporarily unavailable. Please check backend configuration."
+        )
+    
     try:
         # Verify token
-        user_response = supabase_admin.auth.get_user(token)
+        user_response = client.auth.get_user(token)
         supabase_user = user_response.user
         
         if not supabase_user:
