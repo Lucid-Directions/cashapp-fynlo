@@ -58,21 +58,21 @@ async def lifespan(app: FastAPI):
     """Initialize application on startup"""
     logger.info(f"🚀 Fynlo POS Backend starting in {settings.ENVIRONMENT} mode...")
     
-    # Check required environment variables
+    # Initialize database and Redis
     try:
-        from app.core.config import check_required_env_vars
-        check_required_env_vars()
+        from app.core.database import init_db
+        from app.core.redis_client import init_redis
+        
+        logger.info("Initializing database...")
+        init_db()
+        
+        logger.info("Initializing Redis...")
+        await init_redis()
+        
+        logger.info("✅ Core services initialized successfully")
     except Exception as e:
-        logger.error(f"Environment check failed: {e}")
-        # Continue startup even if check fails
-    
-    # Initialize core services
-    try:
-        from app.core.startup import startup_handler
-        await startup_handler()
-    except Exception as e:
-        logger.error(f"Startup handler failed: {e}")
-        # Continue startup even if handler fails
+        logger.error(f"Core services initialization failed: {e}")
+        # Continue startup even if initialization fails
     
     yield
     
@@ -439,6 +439,32 @@ async def get_inventory():
     return APIResponseHelper.success(
         data=inventory,
         message="Inventory retrieved"
+    )
+
+@app.get("/api/v1/test/supabase-config")
+async def test_supabase_config():
+    """Test endpoint to check Supabase configuration"""
+    from app.core.supabase import supabase_admin, get_admin_client
+    
+    config_status = {
+        "supabase_url_set": bool(settings.SUPABASE_URL),
+        "supabase_anon_key_set": bool(settings.SUPABASE_ANON_KEY),
+        "supabase_service_role_key_set": bool(settings.SUPABASE_SERVICE_ROLE_KEY),
+        "supabase_admin_initialized": supabase_admin is not None,
+        "environment": settings.ENVIRONMENT
+    }
+    
+    # Try to get admin client
+    try:
+        client = get_admin_client()
+        config_status["admin_client_available"] = client is not None
+    except Exception as e:
+        config_status["admin_client_available"] = False
+        config_status["admin_client_error"] = str(e)
+    
+    return APIResponseHelper.success(
+        data=config_status,
+        message="Supabase configuration status"
     )
 
 @app.get("/api/v1/analytics/dashboard/mobile")
