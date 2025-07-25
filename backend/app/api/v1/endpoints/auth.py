@@ -8,6 +8,7 @@ from typing import Optional
 from datetime import datetime
 import uuid
 import logging
+from gotrue.errors import AuthApiError
 
 from app.core.database import get_db
 from app.core.supabase import supabase_admin, get_admin_client
@@ -183,8 +184,35 @@ async def verify_supabase_user(
     except HTTPException:
         # Re-raise HTTP exceptions without modification
         raise
+    except AuthApiError as e:
+        # Handle Supabase authentication errors
+        error_msg = str(e).lower()
+        logger.warning(f"Supabase auth error: {error_msg}")
+        
+        if "invalid jwt" in error_msg or "malformed" in error_msg:
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid authentication token"
+            )
+        elif "expired" in error_msg:
+            raise HTTPException(
+                status_code=401,
+                detail="Token has expired. Please sign in again."
+            )
+        elif "not found" in error_msg:
+            raise HTTPException(
+                status_code=401,
+                detail="User not found. Please sign up first."
+            )
+        else:
+            # Log unexpected auth errors
+            logger.error(f"Unexpected auth error: {type(e).__name__}: {str(e)}")
+            raise HTTPException(
+                status_code=401,
+                detail="Authentication failed. Please sign in again."
+            )
     except Exception as e:
-        # Log error details securely (not to console in production)
+        # Log unexpected errors
         logger.error(f"Auth verification error: {type(e).__name__}: {str(e)}")
         
         # In development/testing, provide more details
@@ -192,22 +220,10 @@ async def verify_supabase_user(
             import traceback
             logger.debug(f"Traceback: {traceback.format_exc()}")
         
-        # Check for specific Supabase errors
-        if "invalid_grant" in str(e).lower():
-            raise HTTPException(
-                status_code=401,
-                detail="Token has expired. Please sign in again."
-            )
-        elif "not found" in str(e).lower():
-            raise HTTPException(
-                status_code=401,
-                detail="User not found. Please sign up first."
-            )
-        else:
-            raise HTTPException(
-                status_code=500,
-                detail="Authentication service error. Please try again later."
-            )
+        raise HTTPException(
+            status_code=500,
+            detail="Authentication service error. Please try again later."
+        )
 
 
 @router.post("/register-restaurant")
