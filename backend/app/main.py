@@ -443,29 +443,47 @@ async def get_inventory():
 
 @app.get("/api/v1/test/supabase-config")
 async def test_supabase_config():
-    """Test endpoint to check Supabase configuration"""
-    from app.core.supabase import supabase_admin, get_admin_client
+    """Test endpoint to verify Supabase configuration"""
+    import os
     
-    config_status = {
-        "supabase_url_set": bool(settings.SUPABASE_URL),
-        "supabase_anon_key_set": bool(settings.SUPABASE_ANON_KEY),
-        "supabase_service_role_key_set": bool(settings.SUPABASE_SERVICE_ROLE_KEY),
-        "supabase_admin_initialized": supabase_admin is not None,
-        "environment": settings.ENVIRONMENT
+    # Check all possible sources
+    env_checks = {
+        "settings_url": bool(getattr(settings, 'SUPABASE_URL', None)),
+        "settings_key": bool(getattr(settings, 'SUPABASE_SERVICE_ROLE_KEY', None)),
+        "env_url": bool(os.getenv("SUPABASE_URL")),
+        "env_key": bool(os.getenv("SUPABASE_SERVICE_ROLE_KEY")),
+        "env_alt_key": bool(os.getenv("supabase_secret_key")),
     }
     
-    # Try to get admin client
-    try:
-        client = get_admin_client()
-        config_status["admin_client_available"] = client is not None
-    except Exception as e:
-        config_status["admin_client_available"] = False
-        config_status["admin_client_error"] = str(e)
+    # List all env vars containing SUPA or SECRET (names only)
+    all_env_vars = list(os.environ.keys())
+    relevant_vars = [var for var in all_env_vars if 'SUPA' in var.upper() or ('SECRET' in var.upper() and 'KEY' in var.upper())]
     
-    return APIResponseHelper.success(
-        data=config_status,
-        message="Supabase configuration status"
-    )
+    try:
+        from app.core.supabase import get_admin_client
+        client = get_admin_client()
+        
+        return APIResponseHelper.success(
+            data={
+                "status": "success",
+                "checks": env_checks,
+                "client_initialized": client is not None,
+                "environment": settings.ENVIRONMENT,
+                "relevant_env_vars": relevant_vars
+            },
+            message="Supabase configuration verified"
+        )
+    except Exception as e:
+        return APIResponseHelper.success(
+            data={
+                "status": "error",
+                "error": str(e),
+                "checks": env_checks,
+                "environment": settings.ENVIRONMENT,
+                "relevant_env_vars": relevant_vars
+            },
+            message="Supabase configuration check failed"
+        )
 
 @app.get("/api/v1/analytics/dashboard/mobile")
 async def get_analytics_dashboard():

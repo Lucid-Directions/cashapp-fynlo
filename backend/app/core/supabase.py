@@ -16,13 +16,31 @@ _supabase_admin: Optional[Client] = None
 
 def get_supabase_client() -> Client:
     """Get Supabase client with service role key for admin operations"""
-    # Check both settings and direct environment variables
-    supabase_url = settings.SUPABASE_URL or os.getenv("SUPABASE_URL")
-    supabase_key = settings.SUPABASE_SERVICE_ROLE_KEY or os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+    # Try multiple sources for environment variables
+    # 1. First try settings (pydantic-settings loads from env)
+    # 2. Then try direct os.getenv
+    # 3. Finally try alternate variable names
     
-    # Additional fallback check for secret key variable name
+    supabase_url = None
+    supabase_key = None
+    
+    # Try to get URL
+    if hasattr(settings, 'SUPABASE_URL') and settings.SUPABASE_URL:
+        supabase_url = settings.SUPABASE_URL
+    if not supabase_url:
+        supabase_url = os.getenv("SUPABASE_URL")
+    
+    # Try to get service role key
+    if hasattr(settings, 'SUPABASE_SERVICE_ROLE_KEY') and settings.SUPABASE_SERVICE_ROLE_KEY:
+        supabase_key = settings.SUPABASE_SERVICE_ROLE_KEY
+    if not supabase_key:
+        supabase_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
     if not supabase_key:
         supabase_key = os.getenv("supabase_secret_key")  # Check alternate env var name
+    
+    # Log what we found (without exposing sensitive data)
+    logger.info(f"Environment check - SUPABASE_URL: {'Found' if supabase_url else 'Missing'}")
+    logger.info(f"Environment check - Service Key: {'Found' if supabase_key else 'Missing'}")
     
     if not supabase_url or not supabase_key:
         # Log which variables are missing for debugging
@@ -30,10 +48,16 @@ def get_supabase_client() -> Client:
         if not supabase_url:
             missing.append("SUPABASE_URL")
         if not supabase_key:
-            missing.append("SUPABASE_SERVICE_ROLE_KEY")
+            missing.append("SUPABASE_SERVICE_ROLE_KEY or supabase_secret_key")
         
         error_msg = f"Missing required environment variables: {', '.join(missing)}"
         logger.error(error_msg)
+        
+        # Log all available environment variable names (not values) for debugging
+        env_vars = list(os.environ.keys())
+        supabase_related = [var for var in env_vars if 'SUPA' in var.upper() or 'SECRET' in var.upper()]
+        logger.info(f"Available Supabase-related env vars: {supabase_related}")
+        
         raise ValueError(error_msg)
     
     logger.info(f"Initializing Supabase client with URL: {supabase_url[:30]}...")
