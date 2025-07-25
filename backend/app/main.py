@@ -92,7 +92,7 @@ if settings.ENVIRONMENT == "production":
     allowed_origins = settings.PRODUCTION_ALLOWED_ORIGINS
 else:
     # Use CORS_ORIGINS from settings for development, fallback to permissive
-    allowed_origins = settings.CORS_ORIGINS if settings.CORS_ORIGINS else ["*"]
+    allowed_origins = settings.cors_origins_list if settings.cors_origins_list else ["*"]
 
 # Add Supabase domains to allowed origins
 supabase_origins = [
