@@ -3,7 +3,7 @@
  */
 
 import { useEffect, useCallback, useState } from 'react';
-import { webSocketService, WebSocketEventType } from '../services/websocket/WebSocketService';
+import { webSocketService, WebSocketEventType } from '../services/websocket/EnhancedWebSocketService';
 import { useAuthStore } from '../store/useAuthStore';
 
 interface WebSocketState {

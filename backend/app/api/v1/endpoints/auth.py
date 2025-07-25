@@ -44,11 +44,19 @@ async def verify_supabase_user(
     
     # Check if Supabase is configured
     if not supabase_admin:
-        logger.error("Supabase admin client not initialized")
-        raise HTTPException(
-            status_code=503,
-            detail="Authentication service temporarily unavailable"
-        )
+        logger.error("Supabase admin client not initialized - attempting to reinitialize")
+        # Try to reinitialize
+        try:
+            from app.core.supabase import get_supabase_client
+            global supabase_admin
+            supabase_admin = get_supabase_client()
+            logger.info("✅ Supabase client reinitialized successfully")
+        except Exception as e:
+            logger.error(f"Failed to reinitialize Supabase client: {e}")
+            raise HTTPException(
+                status_code=503,
+                detail="Authentication service temporarily unavailable. Please check backend configuration."
+            )
     
     try:
         # Verify token with Supabase Admin API
