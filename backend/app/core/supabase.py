@@ -20,6 +20,10 @@ def get_supabase_client() -> Client:
     supabase_url = settings.SUPABASE_URL or os.getenv("SUPABASE_URL")
     supabase_key = settings.SUPABASE_SERVICE_ROLE_KEY or os.getenv("SUPABASE_SERVICE_ROLE_KEY")
     
+    # Additional fallback check for secret key variable name
+    if not supabase_key:
+        supabase_key = os.getenv("supabase_secret_key")  # Check alternate env var name
+    
     if not supabase_url or not supabase_key:
         # Log which variables are missing for debugging
         missing = []
@@ -61,8 +65,6 @@ try:
     logger.info("✅ Supabase client initialized successfully at module load")
 except Exception as e:
     # Log the error but don't crash the app
-    logger.error(f"❌ Failed to initialize Supabase client at module load: {e}")
+    logger.warning(f"⚠️  Failed to initialize Supabase client at module load: {e}")
+    logger.warning("Supabase client will be initialized on first use")
     supabase_admin = None
-    
-    # Try to get it from the getter function as a fallback
-    supabase_admin = get_admin_client()
