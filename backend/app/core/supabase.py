@@ -4,10 +4,14 @@ Supabase client configuration for authentication
 
 import os
 import logging
+from typing import Optional
 from supabase import create_client, Client
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
+
+# Module-level client instance
+_supabase_admin: Optional[Client] = None
 
 
 def get_supabase_client() -> Client:
@@ -36,11 +40,29 @@ def get_supabase_client() -> Client:
     )
 
 
-# Initialize the Supabase admin client
+def get_admin_client() -> Optional[Client]:
+    """Get or create the Supabase admin client instance"""
+    global _supabase_admin
+    
+    if _supabase_admin is None:
+        try:
+            _supabase_admin = get_supabase_client()
+            logger.info("✅ Supabase admin client initialized successfully")
+        except Exception as e:
+            logger.error(f"❌ Failed to initialize Supabase admin client: {e}")
+            return None
+    
+    return _supabase_admin
+
+
+# Initialize the Supabase admin client at module load
 try:
     supabase_admin = get_supabase_client()
-    logger.info("✅ Supabase client initialized successfully")
+    logger.info("✅ Supabase client initialized successfully at module load")
 except Exception as e:
     # Log the error but don't crash the app
-    logger.error(f"❌ Failed to initialize Supabase client: {e}")
+    logger.error(f"❌ Failed to initialize Supabase client at module load: {e}")
     supabase_admin = None
+    
+    # Try to get it from the getter function as a fallback
+    supabase_admin = get_admin_client()
