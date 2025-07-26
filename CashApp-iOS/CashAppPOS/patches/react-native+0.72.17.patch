@@ -1,8 +1,8 @@
 diff --git a/node_modules/react-native/React/CxxBridge/RCTCxxBridge.mm b/node_modules/react-native/React/CxxBridge/RCTCxxBridge.mm
-index 0e14093..87ef724 100644
+index 0e14093..1964907 100644
 --- a/node_modules/react-native/React/CxxBridge/RCTCxxBridge.mm
 +++ b/node_modules/react-native/React/CxxBridge/RCTCxxBridge.mm
-@@ -1290,8 +1290,16 @@ - (void)invalidate
+@@ -1290,8 +1290,21 @@ - (void)invalidate
          dispatch_group_enter(moduleInvalidation);
          [self
              dispatchBlock:^{
@@ -10,10 +10,15 @@ index 0e14093..87ef724 100644
 -              dispatch_group_leave(moduleInvalidation);
 +              // Check if this is a UIViewController and needs main thread
 +              if ([moduleData.instance isKindOfClass:[UIViewController class]]) {
-+                dispatch_async(dispatch_get_main_queue(), ^{
++                if ([NSThread isMainThread]) {
 +                  [(id<RCTInvalidating>)moduleData.instance invalidate];
 +                  dispatch_group_leave(moduleInvalidation);
-+                });
++                } else {
++                  dispatch_async(dispatch_get_main_queue(), ^{
++                    [(id<RCTInvalidating>)moduleData.instance invalidate];
++                    dispatch_group_leave(moduleInvalidation);
++                  });
++                }
 +              } else {
 +                [(id<RCTInvalidating>)moduleData.instance invalidate];
 +                dispatch_group_leave(moduleInvalidation);
