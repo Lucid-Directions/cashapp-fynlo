@@ -1,0 +1,17 @@
+diff --git a/node_modules/react-native/React/CxxBridge/RCTCxxBridge.mm b/node_modules/react-native/React/CxxBridge/RCTCxxBridge.mm
+index 1234567..7890123 100644
+--- a/node_modules/react-native/React/CxxBridge/RCTCxxBridge.mm
++++ b/node_modules/react-native/React/CxxBridge/RCTCxxBridge.mm
+@@ -1290,7 +1290,11 @@ - (void)invalidate
+     }
+   }
+ 
+-  [_uiManager invalidate];
++  dispatch_async(dispatch_get_main_queue(), ^{
++    if (self->_uiManager) {
++      [self->_uiManager invalidate];
++    }
++  });
+ 
+   if (_jsMessageThread) {
+     _jsMessageThread->quitSynchronous();
