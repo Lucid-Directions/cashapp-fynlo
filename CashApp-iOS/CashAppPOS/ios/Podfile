@@ -108,6 +108,13 @@ target 'CashAppPOS' do
           config.build_settings['CLANG_WARN_STRICT_PROTOTYPES'] = "NO"
         end
         
+        # Fix react-native-screens threading issue
+        if target.name == "RNScreens"
+          config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)']
+          config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'RCT_NEW_ARCH_ENABLED=0'
+          config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'RN_DISABLE_FORCED_MAIN_QUEUE_INIT=1'
+        end
+        
         # Fix SocketRocket priority inversion warnings
         if target.name == "SocketRocket"
           config.build_settings['GCC_WARN_ABOUT_MISSING_PROTOTYPES'] = "NO"
