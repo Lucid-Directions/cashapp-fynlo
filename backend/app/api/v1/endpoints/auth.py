@@ -9,6 +9,7 @@ from datetime import datetime
 import uuid
 import logging
 from gotrue.errors import AuthApiError
+from postgrest.exceptions import APIError as PostgrestAPIError
 
 from app.core.database import get_db
 from app.core.supabase import supabase_admin, get_admin_client
@@ -61,10 +62,21 @@ async def verify_supabase_user(
     
     try:
         # Verify token with Supabase Admin API
+        logger.info(f"Verifying token with Supabase (token length: {len(token)})")
         user_response = client.auth.get_user(token)
+        
+        # Check if we got a valid response
+        if not user_response:
+            logger.error("Supabase returned None response for get_user")
+            raise HTTPException(
+                status_code=503,
+                detail="Authentication service returned invalid response"
+            )
+        
         supabase_user = user_response.user
         
         if not supabase_user:
+            logger.warning("Supabase returned no user for the provided token")
             raise HTTPException(
                 status_code=401, 
                 detail="Invalid or expired token"
@@ -184,41 +196,63 @@ async def verify_supabase_user(
     except HTTPException:
         # Re-raise HTTP exceptions without modification
         raise
-    except AuthApiError as e:
+    except (AuthApiError, PostgrestAPIError) as e:
         # Handle Supabase authentication errors
-        error_msg = str(e).lower()
-        logger.warning(f"Supabase auth error: {error_msg}")
+        error_msg = str(e)
+        logger.warning(f"Supabase AuthApiError: {error_msg}")
         
-        if "invalid jwt" in error_msg or "malformed" in error_msg:
+        error_msg_lower = error_msg.lower()
+        if "invalid jwt" in error_msg_lower or "malformed" in error_msg_lower:
             raise HTTPException(
                 status_code=401,
                 detail="Invalid authentication token"
             )
-        elif "expired" in error_msg:
+        elif "expired" in error_msg_lower:
             raise HTTPException(
                 status_code=401,
                 detail="Token has expired. Please sign in again."
             )
-        elif "not found" in error_msg:
+        elif "not found" in error_msg_lower:
             raise HTTPException(
                 status_code=401,
                 detail="User not found. Please sign up first."
             )
         else:
-            # Log unexpected auth errors
-            logger.error(f"Unexpected auth error: {type(e).__name__}: {str(e)}")
+            # Log unexpected auth errors with full details
+            logger.error(f"Unexpected Supabase auth error: {type(e).__name__}: {str(e)}")
             raise HTTPException(
                 status_code=401,
                 detail="Authentication failed. Please sign in again."
             )
     except Exception as e:
-        # Log unexpected errors
-        logger.error(f"Auth verification error: {type(e).__name__}: {str(e)}")
+        # Check if this is actually an AuthApiError wrapped in another exception
+        error_str = str(e)
+        logger.error(f"Auth verification error - Type: {type(e).__name__}, Message: {error_str}")
         
-        # In development/testing, provide more details
-        if settings.ENVIRONMENT in ["development", "testing", "local"]:
-            import traceback
-            logger.debug(f"Traceback: {traceback.format_exc()}")
+        # Check for common Supabase error patterns in the exception message
+        if "invalid jwt" in error_str.lower() or "jwt" in error_str.lower():
+            logger.warning("Detected JWT error in generic exception, treating as auth error")
+            raise HTTPException(
+                status_code=401,
+                detail="Invalid authentication token"
+            )
+        elif "user not found" in error_str.lower():
+            logger.warning("Detected user not found error in generic exception")
+            raise HTTPException(
+                status_code=401,
+                detail="User not found. Please sign up first."
+            )
+        
+        # Log the full exception type chain for debugging
+        import traceback
+        logger.error(f"Full exception details: {traceback.format_exc()}")
+        
+        # Check if it's a Supabase initialization error
+        if "supabase" in error_str.lower() and ("missing" in error_str.lower() or "environment" in error_str.lower()):
+            raise HTTPException(
+                status_code=503,
+                detail="Authentication service configuration error. Please contact support."
+            )
         
         raise HTTPException(
             status_code=500,
