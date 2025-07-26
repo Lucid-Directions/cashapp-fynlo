@@ -7,6 +7,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import Config from 'react-native-config';
+import 'react-native-url-polyfill/auto'; // Add URL polyfill for React Native
 
 // Get configuration from environment variables
 // Try both with and without REACT_APP_ prefix for compatibility
@@ -18,6 +19,11 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
   const missingVars = [];
   if (!SUPABASE_URL) missingVars.push('SUPABASE_URL');
   if (!SUPABASE_ANON_KEY) missingVars.push('SUPABASE_ANON_KEY');
+  
+  console.error('Environment variables missing:', {
+    SUPABASE_URL: SUPABASE_URL ? '[SET]' : '[MISSING]',
+    SUPABASE_ANON_KEY: SUPABASE_ANON_KEY ? '[SET]' : '[MISSING]',
+  });
   
   throw new Error(
     `Missing required environment variables: ${missingVars.join(', ')}. ` +
@@ -31,13 +37,22 @@ const finalSupabaseUrl = SUPABASE_URL;
 const finalSupabaseAnonKey = SUPABASE_ANON_KEY;
 
 // Create Supabase client with proper configuration
-export const supabase = createClient(finalSupabaseUrl, finalSupabaseAnonKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: false,
-  },
-});
+// Wrap in try-catch to handle initialization errors
+let supabase;
+try {
+  supabase = createClient(finalSupabaseUrl, finalSupabaseAnonKey, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: false,
+    },
+  });
+} catch (error) {
+  console.error('Failed to initialize Supabase client:', error);
+  throw error;
+}
+
+export { supabase };
 
 // Export configuration for debugging (without exposing keys)
 export const SUPABASE_CONFIG = {

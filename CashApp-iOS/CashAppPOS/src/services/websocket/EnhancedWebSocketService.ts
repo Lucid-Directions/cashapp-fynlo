@@ -1,5 +1,4 @@
-import { WebSocketMessage, WebSocketConfig } from '@fynlo/shared';
-import { WebSocketEvent } from '@fynlo/shared';
+import { WebSocketMessage, WebSocketConfig, WebSocketEvent } from '../../types/websocket';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
 import tokenManager from '../../utils/enhancedTokenManager';

@@ -1,0 +1,29 @@
+{
+  "envs": [
+    {
+      "key": "ENVIRONMENT",
+      "value": "production",
+      "scope": "RUN_AND_BUILD_TIME",
+      "type": "GENERAL"
+    },
+    {
+      "key": "LOG_LEVEL",
+      "value": "INFO",
+      "scope": "RUN_AND_BUILD_TIME",
+      "type": "GENERAL"
+    },
+    {
+      "key": "ERROR_DETAIL_ENABLED",
+      "value": "false",
+      "scope": "RUN_AND_BUILD_TIME",
+      "type": "GENERAL"
+    },
+    {
+      "key": "CORS_ORIGINS",
+      "value": "https://fynlopos-9eg2c.ondigitalocean.app,http://localhost:3000,http://localhost:19006,http://localhost:8081",
+      "scope": "RUN_AND_BUILD_TIME",
+      "type": "GENERAL"
+    }
+  ]
+}
+EOF < /dev/null
