@@ -1,31 +1,37 @@
 diff --git a/node_modules/react-native/React/CxxBridge/RCTCxxBridge.mm b/node_modules/react-native/React/CxxBridge/RCTCxxBridge.mm
-index 0e14093..1964907 100644
+index 0e14093..bbb65f7 100644
 --- a/node_modules/react-native/React/CxxBridge/RCTCxxBridge.mm
 +++ b/node_modules/react-native/React/CxxBridge/RCTCxxBridge.mm
-@@ -1290,8 +1290,21 @@ - (void)invalidate
+@@ -1288,12 +1288,23 @@ - (void)invalidate
+ 
+       if ([moduleData.instance respondsToSelector:@selector(invalidate)]) {
          dispatch_group_enter(moduleInvalidation);
-         [self
-             dispatchBlock:^{
+-        [self
+-            dispatchBlock:^{
 -              [(id<RCTInvalidating>)moduleData.instance invalidate];
 -              dispatch_group_leave(moduleInvalidation);
-+              // Check if this is a UIViewController and needs main thread
-+              if ([moduleData.instance isKindOfClass:[UIViewController class]]) {
-+                if ([NSThread isMainThread]) {
-+                  [(id<RCTInvalidating>)moduleData.instance invalidate];
-+                  dispatch_group_leave(moduleInvalidation);
-+                } else {
-+                  dispatch_async(dispatch_get_main_queue(), ^{
-+                    [(id<RCTInvalidating>)moduleData.instance invalidate];
-+                    dispatch_group_leave(moduleInvalidation);
-+                  });
-+                }
-+              } else {
+-            }
+-                    queue:moduleData.methodQueue];
++        
++        // Check if this is a UIViewController and needs main thread
++        if ([moduleData.instance isKindOfClass:[UIViewController class]]) {
++          // UIViewController must be invalidated on main thread
++          dispatch_async(dispatch_get_main_queue(), ^{
++            [(id<RCTInvalidating>)moduleData.instance invalidate];
++            dispatch_group_leave(moduleInvalidation);
++          });
++        } else {
++          // Other modules can be invalidated on their method queue
++          [self
++              dispatchBlock:^{
 +                [(id<RCTInvalidating>)moduleData.instance invalidate];
 +                dispatch_group_leave(moduleInvalidation);
 +              }
-             }
-                     queue:moduleData.methodQueue];
++                      queue:moduleData.methodQueue];
++        }
        }
+       [moduleData invalidate];
+     }
 diff --git a/node_modules/react-native/ReactCommon/react/renderer/components/rncore/ComponentDescriptors.h b/node_modules/react-native/ReactCommon/react/renderer/components/rncore/ComponentDescriptors.h
 new file mode 100644
 index 0000000..37b7d8d
