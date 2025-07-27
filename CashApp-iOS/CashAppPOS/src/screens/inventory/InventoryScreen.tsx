@@ -247,6 +247,9 @@ const InventoryScreen: React.FC = () => {
   };
 
   const getStockPercentage = (item: InventoryData) => {
+    if (!item.maximumStock || item.maximumStock === 0) {
+      return 0;
+    }
     return Math.min((item.currentStock / item.maximumStock) * 100, 100);
   };
 

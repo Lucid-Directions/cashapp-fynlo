@@ -70,7 +70,10 @@ class SupabaseAuthService {
       const normalizedUser = {
         ...verifyResponse.user,
         name: verifyResponse.user.name || verifyResponse.user.full_name || verifyResponse.user.email || 'User',
-        is_platform_owner: verifyResponse.user.is_platform_owner || false
+        is_platform_owner: verifyResponse.user.is_platform_owner || false,
+        subscription_plan: verifyResponse.user.subscription_plan,
+        subscription_status: verifyResponse.user.subscription_status,
+        enabled_features: verifyResponse.user.enabled_features
       };
       
       // Store enhanced user info

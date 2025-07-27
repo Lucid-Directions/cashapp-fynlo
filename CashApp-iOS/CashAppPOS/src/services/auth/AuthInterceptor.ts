@@ -182,30 +182,60 @@ class AuthInterceptor {
   /**
    * Convenience method for GET requests
    */
-  async get(url: string, headers: Record<string, string> = {}): Promise<Response> {
-    return this.request({
-      url,
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...headers
+  async get(url: string, headers: Record<string, string> = {}, timeoutMs: number = 10000): Promise<Response> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    
+    try {
+      const response = await this.request({
+        url,
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...headers
+        },
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      return response;
+    } catch (error: any) {
+      clearTimeout(timeoutId);
+      if (error.name === 'AbortError') {
+        throw new Error('Request timeout');
       }
-    });
+      throw error;
+    }
   }
   
   /**
    * Convenience method for POST requests
    */
-  async post(url: string, body: any, headers: Record<string, string> = {}): Promise<Response> {
-    return this.request({
-      url,
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...headers
-      },
-      body: typeof body === 'string' ? body : JSON.stringify(body)
-    });
+  async post(url: string, body: any, headers: Record<string, string> = {}, timeoutMs: number = 10000): Promise<Response> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    
+    try {
+      const response = await this.request({
+        url,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...headers
+        },
+        body: typeof body === 'string' ? body : JSON.stringify(body),
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      return response;
+    } catch (error: any) {
+      clearTimeout(timeoutId);
+      if (error.name === 'AbortError') {
+        throw new Error('Request timeout');
+      }
+      throw error;
+    }
   }
   
   /**
