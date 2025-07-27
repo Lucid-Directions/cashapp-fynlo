@@ -1,4 +1,5 @@
-from typing import TypedDict, Optional, List
+from typing import Optional, List
+from typing_extensions import TypedDict
 from enum import Enum
 
 class PaymentMethodEnum(str, Enum):
