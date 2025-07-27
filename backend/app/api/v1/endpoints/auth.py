@@ -152,7 +152,7 @@ async def verify_supabase_user(
                 # Try to fetch the user again in case of race condition
                 try:
                     db_user = db.query(User).filter(
-                        User.supabase_id == supabase_user_id
+                        User.username == f"temp_{temp_user_id}"
                     ).first()
                     if not db_user:
                         raise HTTPException(
