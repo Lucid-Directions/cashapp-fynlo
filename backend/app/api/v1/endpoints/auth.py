@@ -5,10 +5,12 @@ Supabase Authentication endpoints for Fynlo POS
 from fastapi import APIRouter, Depends, HTTPException, Header
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+from sqlalchemy import and_
 from typing import Optional
 from datetime import datetime
 import uuid
 import logging
+import hashlib
 from gotrue.errors import AuthApiError
 from postgrest.exceptions import APIError as PostgrestAPIError
 
@@ -26,6 +28,15 @@ router = APIRouter()
 if not supabase_admin:
     logger.warning("Supabase admin client not initialized at module load time")
     # The client will be initialized on first request if needed
+
+
+def generate_temp_user_id(supabase_id: str, email: str) -> str:
+    """Generate a deterministic temporary user ID based on Supabase ID and email"""
+    # Create a hash that combines both values to ensure uniqueness
+    combined = f"{supabase_id}:{email}"
+    hash_value = hashlib.sha256(combined.encode()).hexdigest()
+    # Use first 32 chars to fit in UUID format
+    return f"{hash_value[:8]}-{hash_value[8:12]}-{hash_value[12:16]}-{hash_value[16:20]}-{hash_value[20:32]}"
 
 
 @router.post("/verify", response_model=AuthVerifyResponse)
@@ -90,15 +101,45 @@ async def verify_supabase_user(
         
         # Convert Supabase user ID to string once
         supabase_user_id = str(supabase_user.id)
-        logger.info(f"Successfully verified Supabase user: {supabase_user.email}")
+        supabase_email = supabase_user.email.lower()  # Normalize email to lowercase
+        logger.info(f"Successfully verified Supabase user: {supabase_email}")
         
-        # Find or create user in our database with proper error handling
+        # Generate deterministic temporary user ID
+        temp_user_id = generate_temp_user_id(supabase_user_id, supabase_email)
+        
+        # Find user in our database using the deterministic ID
         db_user = None
         try:
-            # Use email for lookup since supabase_id column doesn't exist yet
+            # First, try to find by the temporary deterministic ID
             db_user = db.query(User).filter(
-                User.email == supabase_user.email
+                User.username == f"temp_{temp_user_id}"
             ).first()
+            
+            # If not found, check if this is an existing user by email (migration case)
+            if not db_user:
+                # Count users with this email
+                email_count = db.query(User).filter(
+                    User.email == supabase_email
+                ).count()
+                
+                if email_count > 1:
+                    # Multiple users with same email - security issue
+                    logger.error(f"Multiple users found with email {supabase_email}")
+                    raise HTTPException(
+                        status_code=409,
+                        detail="Multiple accounts found with this email. Please contact support."
+                    )
+                elif email_count == 1:
+                    # Single user - safe to use for migration
+                    db_user = db.query(User).filter(
+                        User.email == supabase_email
+                    ).first()
+                    
+                    # Update username to include temp ID for future lookups
+                    if db_user and not db_user.username.startswith("temp_"):
+                        db_user.username = f"temp_{temp_user_id}"
+                        db.commit()
+                        logger.info(f"Migrated existing user to temp ID system: {db_user.id}")
         except SQLAlchemyError as e:
             logger.error(f"Database query error when finding user: {str(e)}")
             db.rollback()
@@ -109,14 +150,14 @@ async def verify_supabase_user(
         
         if not db_user:
             # First time login - create user with proper transaction handling
-            logger.info(f"First time login for user: {supabase_user.email}")
+            logger.info(f"First time login for user: {supabase_email}")
             
             try:
-                # Create new user with proper defaults
+                # Create new user with deterministic username
                 db_user = User(
                     id=uuid.uuid4(),
-                    email=supabase_user.email,
-                    username=supabase_user.email,  # Use email as username
+                    email=supabase_email,
+                    username=f"temp_{temp_user_id}",  # Use temp ID as username
                     first_name=supabase_user.user_metadata.get('first_name', ''),
                     last_name=supabase_user.user_metadata.get('last_name', ''),
                     role='restaurant_owner',  # Default role for new users
@@ -130,16 +171,17 @@ async def verify_supabase_user(
             except IntegrityError as e:
                 logger.error(f"Integrity error creating user: {str(e)}")
                 db.rollback()
-                # Try to fetch the user again in case of race condition
-                try:
-                    db_user = db.query(User).filter(
-                        User.email == supabase_user.email
-                    ).first()
-                    if not db_user:
-                        raise HTTPException(
-                            status_code=500,
-                            detail="Failed to create user account. Please try again."
-                        )
+                # Check if it's an email uniqueness violation
+                if "email" in str(e):
+                    raise HTTPException(
+                        status_code=409,
+                        detail="An account with this email already exists"
+                    )
+                else:
+                    raise HTTPException(
+                        status_code=500,
+                        detail="Failed to create user account. Please try again."
+                    )
                 except SQLAlchemyError as retry_error:
                     logger.error(f"Failed to fetch user after IntegrityError: {str(retry_error)}")
                     db.rollback()
@@ -367,12 +409,16 @@ async def register_restaurant(
         if not supabase_user:
             raise HTTPException(status_code=401, detail="Invalid token")
         
-        # Convert Supabase user ID to string once
+        # Convert Supabase user ID to string and normalize email
         supabase_user_id = str(supabase_user.id)
+        supabase_email = supabase_user.email.lower()
         
-        # Get user from database
+        # Generate deterministic temporary user ID
+        temp_user_id = generate_temp_user_id(supabase_user_id, supabase_email)
+        
+        # Get user from database using temp ID
         db_user = db.query(User).filter(
-            User.email == supabase_user.email
+            User.username == f"temp_{temp_user_id}"
         ).first()
         
         if not db_user:

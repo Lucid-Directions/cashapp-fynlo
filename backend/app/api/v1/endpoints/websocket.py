@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 import json
 from datetime import datetime
 import logging
+import hashlib
 
 from app.core.database import get_db, User, Restaurant
 
@@ -26,6 +27,15 @@ from app.core.config import settings
 from app.core.supabase import supabase_admin
 
 router = APIRouter()
+
+
+def generate_temp_user_id(supabase_id: str, email: str) -> str:
+    """Generate a deterministic temporary user ID based on Supabase ID and email"""
+    # Create a hash that combines both values to ensure uniqueness
+    combined = f"{supabase_id}:{email}"
+    hash_value = hashlib.sha256(combined.encode()).hexdigest()
+    # Use first 32 chars to fit in UUID format
+    return f"{hash_value[:8]}-{hash_value[8:12]}-{hash_value[12:16]}-{hash_value[16:20]}-{hash_value[20:32]}"
 
 async def verify_websocket_access(
     restaurant_id: str,
@@ -61,11 +71,27 @@ async def verify_websocket_access(
                     logger.error("Invalid Supabase token - no user found")
                     return False
                 
-                # Find user in our database by email (supabase_id column not available yet)
-                user = db.query(User).filter(User.email == supabase_user.email).first()
+                # Generate deterministic temp user ID
+                supabase_user_id = str(supabase_user.id)
+                supabase_email = supabase_user.email.lower()
+                temp_user_id = generate_temp_user_id(supabase_user_id, supabase_email)
+                
+                # Find user in our database by temp username
+                user = db.query(User).filter(User.username == f"temp_{temp_user_id}").first()
                 if not user:
-                    logger.error(f"User not found in database for email: {supabase_user.email}")
-                    return False
+                    # Try migration lookup for existing users
+                    email_count = db.query(User).filter(User.email == supabase_email).count()
+                    if email_count == 1:
+                        user = db.query(User).filter(User.email == supabase_email).first()
+                        if user and not user.username.startswith("temp_"):
+                            user.username = f"temp_{temp_user_id}"
+                            db.commit()
+                    elif email_count > 1:
+                        logger.error(f"Multiple users found with email {supabase_email}")
+                        return False
+                    else:
+                        logger.error(f"User not found in database for email: {supabase_email}")
+                        return False
                 
                 # Verify the user is active
                 if not user.is_active:
