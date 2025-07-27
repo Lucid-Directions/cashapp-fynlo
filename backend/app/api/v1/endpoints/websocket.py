@@ -61,10 +61,10 @@ async def verify_websocket_access(
                     logger.error("Invalid Supabase token - no user found")
                     return False
                 
-                # Find user in our database by email (supabase_id column not available yet)
-                user = db.query(User).filter(User.email == supabase_user.email).first()
+                # Find user in our database by supabase_id
+                user = db.query(User).filter(User.supabase_id == supabase_user.id).first()
                 if not user:
-                    logger.error(f"User not found in database for email: {supabase_user.email}")
+                    logger.error(f"User not found in database for supabase_id: {supabase_user.id}")
                     return False
                 
                 # Verify the user is active
