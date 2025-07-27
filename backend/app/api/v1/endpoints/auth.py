@@ -68,7 +68,6 @@ async def verify_supabase_user(
         
         # Log Supabase client state
         logger.info(f"Supabase client URL: {client.supabase_url}")
-        logger.info(f"Supabase client headers: {list(client._headers.keys())}")
         
         user_response = client.auth.get_user(token)
         
