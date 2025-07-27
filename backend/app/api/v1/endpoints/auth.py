@@ -264,38 +264,16 @@ async def verify_supabase_user(
                 db.rollback()
                 # Continue without restaurant info rather than failing
         else:
-            # User has no restaurant yet - check if we should create a default one
-            if db_user.role == 'restaurant_owner':
-                # Create a default restaurant for the user with proper error handling
-                logger.info(f"Creating default restaurant for user: {db_user.id}")
-                try:
-                    default_restaurant = Restaurant(
-                        id=uuid.uuid4(),
-                        name=f"{db_user.first_name or 'My'} Restaurant",
-                        email=db_user.email,
-                        address={},  # Empty JSONB field
-                        subscription_plan='alpha',
-                        subscription_status='trial',
-                        subscription_started_at=datetime.utcnow(),
-                        is_active=True
-                    )
-                    db.add(default_restaurant)
-                    db_user.restaurant_id = default_restaurant.id
-                    db.commit()
-                    db.refresh(default_restaurant)
-                    
-                    # Add to response with proper string conversion
-                    response_data["user"]["restaurant_id"] = str(default_restaurant.id)
-                    response_data["user"]["restaurant_name"] = default_restaurant.name
-                    response_data["user"]["subscription_plan"] = 'alpha'
-                    response_data["user"]["subscription_status"] = 'trial'
-                    response_data["user"]["enabled_features"] = get_plan_features('alpha')
-                    
-                    logger.info(f"Successfully created default restaurant with ID: {default_restaurant.id}")
-                except SQLAlchemyError as e:
-                    logger.error(f"Error creating default restaurant: {str(e)}")
-                    db.rollback()
-                    # Continue without restaurant rather than failing
+            # User has no restaurant yet - they need to complete onboarding
+            logger.info(f"User {db_user.id} has no restaurant - needs onboarding")
+            # Return minimal features for onboarding
+            response_data["user"]["needs_onboarding"] = True
+            response_data["user"]["enabled_features"] = {
+                "onboarding": True,
+                "basic_pos": False,
+                "inventory": False,
+                "reports": False
+            }
         
         return response_data
         
