@@ -61,22 +61,24 @@ async def verify_websocket_access(
                     logger.error("Invalid Supabase token - no user found")
                     return False
                 
-                # Generate deterministic temporary user ID
-                supabase_user_id = str(supabase_user.id)
-                
-                # Find user in our database by Supabase ID
-                user = db.query(User).filter(User.supabase_id == supabase_user_id).first()
+                # Find user in our database by supabase_id
+                user = db.query(User).filter(User.supabase_id == supabase_user.id).first()
                 if not user:
                     # Check by email for backward compatibility
                     user = db.query(User).filter(User.email == supabase_user.email).first()
                     if user and not user.supabase_id:
-                        # Update the supabase_id if missing
-                        user.supabase_id = supabase_user_id
-                        db.commit()
-                        logger.info(f"Updated user {user.id} with Supabase ID during WebSocket auth")
-                    
+                        # Update the supabase_id if missing with proper error handling
+                        try:
+                            user.supabase_id = supabase_user.id
+                            db.commit()
+                            logger.info(f"Updated user {user.id} with Supabase ID during WebSocket auth")
+                        except Exception as e:
+                            logger.error(f"Failed to update user supabase_id: {str(e)}")
+                            db.rollback()
+                            # Continue with authentication even if update fails
+                
                 if not user:
-                    logger.error(f"User not found in database for Supabase ID: {supabase_user_id}")
+                    logger.error(f"User not found in database for supabase_id: {supabase_user.id}")
                     return False
                 
                 # Verify the user is active

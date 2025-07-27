@@ -97,9 +97,9 @@ async def verify_supabase_user(
         # Find or create user in our database with proper error handling
         db_user = None
         try:
-            # Find user by Supabase ID (the correct approach)
+            # Use supabase_id for secure lookup
             db_user = db.query(User).filter(
-                User.supabase_id == supabase_user_id
+                User.supabase_id == supabase_user.id
             ).first()
             
             if not db_user:
@@ -129,9 +129,9 @@ async def verify_supabase_user(
                 # Create new user with proper defaults
                 db_user = User(
                     id=uuid.uuid4(),
-                    supabase_id=supabase_user_id,  # Set Supabase ID properly
                     email=supabase_user.email,
-                    username=supabase_user.email,  # Use email as username for now
+                    username=supabase_user.email,  # Use email as username
+                    supabase_id=supabase_user.id,  # Store the Supabase ID for secure lookups
                     first_name=supabase_user.user_metadata.get('first_name', ''),
                     last_name=supabase_user.user_metadata.get('last_name', ''),
                     role='restaurant_owner',  # Default role for new users
@@ -149,7 +149,7 @@ async def verify_supabase_user(
                 # Try to fetch the user again in case of race condition
                 try:
                     db_user = db.query(User).filter(
-                        User.supabase_id == supabase_user_id
+                        User.supabase_id == supabase_user.id
                     ).first()
                     if not db_user:
                         # Also check by email
@@ -397,7 +397,7 @@ async def register_restaurant(
         
         # Get user from database by Supabase ID
         db_user = db.query(User).filter(
-            User.supabase_id == supabase_user_id
+            User.supabase_id == supabase_user.id
         ).first()
         
         if not db_user:
