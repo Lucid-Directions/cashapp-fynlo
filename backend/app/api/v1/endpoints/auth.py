@@ -77,7 +77,7 @@ async def verify_supabase_user(
     try:
         # Verify token with Supabase Admin API
         logger.info(f"Verifying token with Supabase (token length: {len(token)})")
-        logger.info(f"Token preview: {token[:20]}...{token[-20:]}")
+        # Never log token content for security reasons
         
         # Log Supabase client state
         logger.info(f"Supabase client URL: {client.supabase_url}")

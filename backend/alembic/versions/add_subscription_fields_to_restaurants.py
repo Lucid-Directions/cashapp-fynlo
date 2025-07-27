@@ -8,10 +8,11 @@ Create Date: 2025-01-27 22:30:00.000000
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
+from sqlalchemy import text
 
 # revision identifiers, used by Alembic.
 revision = 'add_subscription_fields'
-down_revision = None
+down_revision = 'performance_indexes_20250117'
 branch_labels = None
 depends_on = None
 
@@ -38,13 +39,17 @@ def upgrade():
     """)
     
     # Special case: Update Chucho to Omega if it exists
-    op.execute("""
-        UPDATE restaurants 
-        SET subscription_plan = 'omega',
-            subscription_status = 'active',
-            subscription_started_at = NOW()
-        WHERE LOWER(name) LIKE '%chucho%'
-    """)
+    # Using parameterized query to prevent SQL injection
+    op.execute(
+        text("""
+            UPDATE restaurants 
+            SET subscription_plan = :plan,
+                subscription_status = :status,
+                subscription_started_at = NOW()
+            WHERE LOWER(name) LIKE :pattern
+        """),
+        {"plan": "omega", "status": "active", "pattern": "%chucho%"}
+    )
 
 
 def downgrade():
