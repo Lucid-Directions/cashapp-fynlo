@@ -95,8 +95,9 @@ async def verify_supabase_user(
         # Find or create user in our database with proper error handling
         db_user = None
         try:
+            # Use email for lookup since supabase_id column doesn't exist yet
             db_user = db.query(User).filter(
-                User.supabase_id == supabase_user_id
+                User.email == supabase_user.email
             ).first()
         except SQLAlchemyError as e:
             logger.error(f"Database query error when finding user: {str(e)}")
@@ -114,12 +115,11 @@ async def verify_supabase_user(
                 # Create new user with proper defaults
                 db_user = User(
                     id=uuid.uuid4(),
-                    supabase_id=supabase_user_id,
                     email=supabase_user.email,
+                    username=supabase_user.email,  # Use email as username
                     first_name=supabase_user.user_metadata.get('first_name', ''),
                     last_name=supabase_user.user_metadata.get('last_name', ''),
                     role='restaurant_owner',  # Default role for new users
-                    auth_provider='supabase',
                     is_active=True,
                     last_login=datetime.utcnow()
                 )
@@ -133,7 +133,7 @@ async def verify_supabase_user(
                 # Try to fetch the user again in case of race condition
                 try:
                     db_user = db.query(User).filter(
-                        User.supabase_id == supabase_user_id
+                        User.email == supabase_user.email
                     ).first()
                     if not db_user:
                         raise HTTPException(
@@ -372,7 +372,7 @@ async def register_restaurant(
         
         # Get user from database
         db_user = db.query(User).filter(
-            User.supabase_id == supabase_user_id
+            User.email == supabase_user.email
         ).first()
         
         if not db_user:
