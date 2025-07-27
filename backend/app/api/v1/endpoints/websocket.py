@@ -9,7 +9,6 @@ from sqlalchemy.orm import Session
 import json
 from datetime import datetime
 import logging
-import hashlib
 
 from app.core.database import get_db, User, Restaurant
 
@@ -63,19 +62,20 @@ async def verify_websocket_access(
                     return False
                 
                 # Generate deterministic temporary user ID
-                def generate_temp_user_id(supabase_id: str, email: str) -> str:
-                    """Generate a deterministic temporary user ID based on Supabase ID and email"""
-                    combined = f"{supabase_id}:{email.lower()}"
-                    hash_value = hashlib.sha256(combined.encode()).hexdigest()
-                    return f"{hash_value[:8]}-{hash_value[8:12]}-{hash_value[12:16]}-{hash_value[16:20]}-{hash_value[20:32]}"
-                
                 supabase_user_id = str(supabase_user.id)
-                temp_user_id = generate_temp_user_id(supabase_user_id, supabase_user.email)
                 
-                # Find user in our database by temp username
-                user = db.query(User).filter(User.username == f"temp_{temp_user_id}").first()
+                # Find user in our database by Supabase ID
+                user = db.query(User).filter(User.supabase_id == supabase_user_id).first()
                 if not user:
-                    # User not found - no email-based lookups to avoid security vulnerabilities
+                    # Check by email for backward compatibility
+                    user = db.query(User).filter(User.email == supabase_user.email).first()
+                    if user and not user.supabase_id:
+                        # Update the supabase_id if missing
+                        user.supabase_id = supabase_user_id
+                        db.commit()
+                        logger.info(f"Updated user {user.id} with Supabase ID during WebSocket auth")
+                    
+                if not user:
                     logger.error(f"User not found in database for Supabase ID: {supabase_user_id}")
                     return False
                 

@@ -9,7 +9,6 @@ from typing import Optional
 from datetime import datetime
 import uuid
 import logging
-import hashlib
 from gotrue.errors import AuthApiError
 from postgrest.exceptions import APIError as PostgrestAPIError
 
@@ -29,13 +28,6 @@ if not supabase_admin:
     # The client will be initialized on first request if needed
 
 
-def generate_temp_user_id(supabase_id: str, email: str) -> str:
-    """Generate a deterministic temporary user ID based on Supabase ID and email"""
-    # Use email.lower() to ensure case-insensitive consistency
-    combined = f"{supabase_id}:{email.lower()}"
-    hash_value = hashlib.sha256(combined.encode()).hexdigest()
-    # Format as a UUID-like string for consistency
-    return f"{hash_value[:8]}-{hash_value[8:12]}-{hash_value[12:16]}-{hash_value[16:20]}-{hash_value[20:32]}"
 
 
 @router.post("/verify", response_model=AuthVerifyResponse)
@@ -102,20 +94,25 @@ async def verify_supabase_user(
         supabase_user_id = str(supabase_user.id)
         logger.info(f"Successfully verified Supabase user: {supabase_user.email}")
         
-        # Generate deterministic temporary user ID based on Supabase ID and email
-        temp_user_id = generate_temp_user_id(supabase_user_id, supabase_user.email)
-        logger.info(f"Generated temp user ID: {temp_user_id} for Supabase user: {supabase_user.email}")
-        
         # Find or create user in our database with proper error handling
         db_user = None
         try:
-            # First, try to find by the temporary deterministic ID
+            # Find user by Supabase ID (the correct approach)
             db_user = db.query(User).filter(
-                User.username == f"temp_{temp_user_id}"
+                User.supabase_id == supabase_user_id
             ).first()
             
-            # If not found by temp ID, user doesn't exist yet
-            # No email-based lookups to avoid security vulnerabilities
+            if not db_user:
+                # Check if user exists by email (for backward compatibility)
+                db_user = db.query(User).filter(
+                    User.email == supabase_user.email
+                ).first()
+                
+                # If found by email but missing supabase_id, update it
+                if db_user and not db_user.supabase_id:
+                    db_user.supabase_id = supabase_user_id
+                    db.commit()
+                    logger.info(f"Updated user {db_user.id} with Supabase ID: {supabase_user_id}")
         except SQLAlchemyError as e:
             logger.error(f"Database query error when finding user: {str(e)}")
             db.rollback()
@@ -132,9 +129,9 @@ async def verify_supabase_user(
                 # Create new user with proper defaults
                 db_user = User(
                     id=uuid.uuid4(),
-                    # Use temporary deterministic username instead of supabase_id
-                    username=f"temp_{temp_user_id}",  # Unique constraint ensures no duplicates
+                    supabase_id=supabase_user_id,  # Set Supabase ID properly
                     email=supabase_user.email,
+                    username=supabase_user.email,  # Use email as username for now
                     first_name=supabase_user.user_metadata.get('first_name', ''),
                     last_name=supabase_user.user_metadata.get('last_name', ''),
                     role='restaurant_owner',  # Default role for new users
@@ -145,15 +142,24 @@ async def verify_supabase_user(
                 db.add(db_user)
                 db.commit()
                 db.refresh(db_user)
-                logger.info(f"Successfully created new user with ID: {db_user.id} and temp username: {db_user.username}")
+                logger.info(f"Successfully created new user with ID: {db_user.id} and Supabase ID: {supabase_user_id}")
             except IntegrityError as e:
                 logger.error(f"Integrity error creating user: {str(e)}")
                 db.rollback()
                 # Try to fetch the user again in case of race condition
                 try:
                     db_user = db.query(User).filter(
-                        User.username == f"temp_{temp_user_id}"
+                        User.supabase_id == supabase_user_id
                     ).first()
+                    if not db_user:
+                        # Also check by email
+                        db_user = db.query(User).filter(
+                            User.email == supabase_user.email
+                        ).first()
+                        if db_user and not db_user.supabase_id:
+                            # Update the supabase_id if missing
+                            db_user.supabase_id = supabase_user_id
+                            db.commit()
                     if not db_user:
                         raise HTTPException(
                             status_code=500,
@@ -389,13 +395,20 @@ async def register_restaurant(
         # Convert Supabase user ID to string once
         supabase_user_id = str(supabase_user.id)
         
-        # Generate temp user ID
-        temp_user_id = generate_temp_user_id(supabase_user_id, supabase_user.email)
-        
-        # Get user from database by temp username
+        # Get user from database by Supabase ID
         db_user = db.query(User).filter(
-            User.username == f"temp_{temp_user_id}"
+            User.supabase_id == supabase_user_id
         ).first()
+        
+        if not db_user:
+            # Check by email for backward compatibility
+            db_user = db.query(User).filter(
+                User.email == supabase_user.email
+            ).first()
+            if db_user and not db_user.supabase_id:
+                # Update the supabase_id if missing
+                db_user.supabase_id = supabase_user_id
+                db.commit()
         
         if not db_user:
             raise HTTPException(status_code=404, detail="User not found")
