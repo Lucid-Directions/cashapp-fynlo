@@ -3,6 +3,8 @@
  * Replaces mock UserManagementService with real data
  */
 
+import API_CONFIG from '../config/api';
+
 export interface RealUser {
   id: string;
   firstName: string;
@@ -52,7 +54,7 @@ export interface AccessLog {
 
 class RealUserManagementService {
   private static instance: RealUserManagementService;
-  private baseUrl = 'http://192.168.0.109:8000/api/v1';
+  private baseUrl = API_CONFIG.FULL_API_URL;
 
   static getInstance(): RealUserManagementService {
     if (!RealUserManagementService.instance) {

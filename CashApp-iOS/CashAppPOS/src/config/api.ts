@@ -25,16 +25,16 @@ const isSimulator = __DEV__ && (
 
 // Dynamic API URL based on environment
 const getBaseURL = () => {
-  // PRODUCTION: Always try DigitalOcean backend first
-  // During deployment phase, app will use mock data fallbacks if backend is unavailable
-  // return PRODUCTION_API_URL;
+  // PRODUCTION: Always use DigitalOcean backend
+  // The backend is running and healthy on DigitalOcean
+  return PRODUCTION_API_URL;
   
-  // Development fallback (temporarily enabled for local testing)
-  if (isSimulator) {
-    return 'http://localhost:8000';
-  } else {
-    return `http://${MAC_LAN_IP}:8000`;
-  }
+  // Development fallback (commented out - uncomment only when running backend locally)
+  // if (isSimulator) {
+  //   return 'http://localhost:8000';
+  // } else {
+  //   return `http://${MAC_LAN_IP}:8000`;
+  // }
 };
 
 // API Configuration
