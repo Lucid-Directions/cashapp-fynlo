@@ -132,13 +132,21 @@ async def verify_supabase_user(
                 logger.error(f"Integrity error creating user: {str(e)}")
                 db.rollback()
                 # Try to fetch the user again in case of race condition
-                db_user = db.query(User).filter(
-                    User.supabase_id == supabase_user_id
-                ).first()
-                if not db_user:
+                try:
+                    db_user = db.query(User).filter(
+                        User.supabase_id == supabase_user_id
+                    ).first()
+                    if not db_user:
+                        raise HTTPException(
+                            status_code=500,
+                            detail="Failed to create user account. Please try again."
+                        )
+                except SQLAlchemyError as retry_error:
+                    logger.error(f"Failed to fetch user after IntegrityError: {str(retry_error)}")
+                    db.rollback()
                     raise HTTPException(
                         status_code=500,
-                        detail="Failed to create user account. Please try again."
+                        detail="Database error while creating user account"
                     )
             except SQLAlchemyError as e:
                 logger.error(f"Database error creating user: {str(e)}")
