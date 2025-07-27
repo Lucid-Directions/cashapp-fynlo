@@ -28,6 +28,19 @@ if not supabase_admin:
     # The client will be initialized on first request if needed
 
 
+def ensure_uuid(value) -> uuid.UUID:
+    """Convert string or UUID to UUID object, handling both types safely"""
+    if isinstance(value, uuid.UUID):
+        return value
+    try:
+        return uuid.UUID(str(value))
+    except (ValueError, TypeError) as e:
+        logger.error(f"Invalid UUID format: {value}")
+        raise ValueError(f"Invalid UUID format: {value}")
+
+
+
+
 @router.post("/verify", response_model=AuthVerifyResponse)
 async def verify_supabase_user(
     authorization: Optional[str] = Header(None),
@@ -88,8 +101,6 @@ async def verify_supabase_user(
                 detail="Invalid or expired token"
             )
         
-        # Convert Supabase user ID to string once
-        supabase_user_id = str(supabase_user.id)
         logger.info(f"Successfully verified Supabase user: {supabase_user.email}")
         
         # Find or create user in our database with proper error handling
@@ -99,6 +110,18 @@ async def verify_supabase_user(
             db_user = db.query(User).filter(
                 User.supabase_id == supabase_user.id
             ).first()
+            
+            if not db_user:
+                # Check if user exists by email (for backward compatibility)
+                db_user = db.query(User).filter(
+                    User.email == supabase_user.email
+                ).first()
+                
+                # If found by email but missing supabase_id, update it
+                if db_user and not db_user.supabase_id:
+                    db_user.supabase_id = supabase_user.id  # Use UUID object, not string
+                    db.commit()
+                    logger.info(f"Updated user {db_user.id} with Supabase ID: {supabase_user.id}")
         except SQLAlchemyError as e:
             logger.error(f"Database query error when finding user: {str(e)}")
             db.rollback()
@@ -121,13 +144,14 @@ async def verify_supabase_user(
                     first_name=supabase_user.user_metadata.get('first_name', ''),
                     last_name=supabase_user.user_metadata.get('last_name', ''),
                     role='restaurant_owner',  # Default role for new users
+                    auth_provider='supabase',
                     is_active=True,
                     last_login=datetime.utcnow()
                 )
                 db.add(db_user)
                 db.commit()
                 db.refresh(db_user)
-                logger.info(f"Successfully created new user with ID: {db_user.id}")
+                logger.info(f"Successfully created new user with ID: {db_user.id} and Supabase ID: {supabase_user.id}")
             except IntegrityError as e:
                 logger.error(f"Integrity error creating user: {str(e)}")
                 db.rollback()
@@ -136,6 +160,21 @@ async def verify_supabase_user(
                     db_user = db.query(User).filter(
                         User.supabase_id == supabase_user.id
                     ).first()
+                    if not db_user:
+                        # Also check by email
+                        db_user = db.query(User).filter(
+                            User.email == supabase_user.email
+                        ).first()
+                        if db_user and not db_user.supabase_id:
+                            # Update the supabase_id if missing
+                            try:
+                                db_user.supabase_id = supabase_user.id  # Use UUID object, not string
+                                db.commit()
+                                logger.info(f"Updated user {db_user.id} with Supabase ID in retry path")
+                            except SQLAlchemyError as update_error:
+                                logger.error(f"Failed to update supabase_id in retry path: {str(update_error)}")
+                                db.rollback()
+                                # Continue with the user even if update fails
                     if not db_user:
                         raise HTTPException(
                             status_code=500,
@@ -368,13 +407,26 @@ async def register_restaurant(
         if not supabase_user:
             raise HTTPException(status_code=401, detail="Invalid token")
         
-        # Convert Supabase user ID to string once
-        supabase_user_id = str(supabase_user.id)
-        
-        # Get user from database
+        # Get user from database by Supabase ID
         db_user = db.query(User).filter(
             User.supabase_id == supabase_user.id
         ).first()
+        
+        if not db_user:
+            # Check by email for backward compatibility
+            db_user = db.query(User).filter(
+                User.email == supabase_user.email
+            ).first()
+            if db_user and not db_user.supabase_id:
+                # Update the supabase_id if missing
+                try:
+                    db_user.supabase_id = supabase_user.id  # Use UUID object, not string
+                    db.commit()
+                    logger.info(f"Updated user {db_user.id} with Supabase ID during registration")
+                except SQLAlchemyError as e:
+                    logger.error(f"Failed to update user supabase_id during registration: {str(e)}")
+                    db.rollback()
+                    # Continue with registration even if update fails
         
         if not db_user:
             raise HTTPException(status_code=404, detail="User not found")

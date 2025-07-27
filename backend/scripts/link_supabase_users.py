@@ -51,8 +51,6 @@ def link_supabase_users():
                 print(f"\nSkipping user without ID (Email: {email})")
                 continue
                 
-            supabase_id = str(user_id)
-            
             print(f"\nProcessing user: {email}")
             
             # Check if user exists in database (case-insensitive)
@@ -61,7 +59,7 @@ def link_supabase_users():
             if db_user:
                 # Update existing user with Supabase ID
                 if not db_user.supabase_id:
-                    db_user.supabase_id = supabase_id
+                    db_user.supabase_id = user_id
                     db_user.auth_provider = 'supabase'
                     db_user.updated_at = datetime.utcnow()
                     print(f"  ✓ Updated existing user with Supabase ID")
@@ -105,7 +103,7 @@ def link_supabase_users():
                 new_user = User(
                     id=uuid.uuid4(),
                     email=email,
-                    supabase_id=supabase_id,
+                    supabase_id=user_id,
                     auth_provider='supabase',
                     first_name=first_name,
                     last_name=last_name,
