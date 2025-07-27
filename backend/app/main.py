@@ -64,7 +64,7 @@ async def lifespan(app: FastAPI):
         from app.core.redis_client import init_redis
         
         logger.info("Initializing database...")
-        init_db()
+        await init_db()
         
         logger.info("Initializing Redis...")
         await init_redis()
