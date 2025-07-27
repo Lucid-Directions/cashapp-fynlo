@@ -136,13 +136,16 @@ async def verify_supabase_user(
             
             try:
                 # Create new user with proper defaults
+                # Safely access user_metadata with null check
+                user_metadata = supabase_user.user_metadata or {}
+                
                 db_user = User(
                     id=uuid.uuid4(),
                     email=supabase_user.email,
                     username=supabase_user.email,  # Use email as username
                     supabase_id=supabase_user.id,  # Store the Supabase ID for secure lookups
-                    first_name=supabase_user.user_metadata.get('first_name', ''),
-                    last_name=supabase_user.user_metadata.get('last_name', ''),
+                    first_name=user_metadata.get('first_name', ''),
+                    last_name=user_metadata.get('last_name', ''),
                     role='restaurant_owner',  # Default role for new users
                     auth_provider='supabase',
                     is_active=True,
@@ -224,8 +227,10 @@ async def verify_supabase_user(
                 
                 if restaurant:
                     # Sync subscription data from Supabase if available
-                    supabase_plan = supabase_user.user_metadata.get('subscription_plan')
-                    supabase_status = supabase_user.user_metadata.get('subscription_status')
+                    # Safely access user_metadata with null check
+                    user_metadata = supabase_user.user_metadata or {}
+                    supabase_plan = user_metadata.get('subscription_plan')
+                    supabase_status = user_metadata.get('subscription_status')
                     
                     # Update restaurant subscription info if needed
                     update_needed = False
@@ -268,8 +273,10 @@ async def verify_supabase_user(
             logger.info(f"User {db_user.id} has no restaurant - needs onboarding")
             
             # Get subscription plan from Supabase user metadata
-            subscription_plan = supabase_user.user_metadata.get('subscription_plan', 'alpha')
-            subscription_status = supabase_user.user_metadata.get('subscription_status', 'trial')
+            # Safely access user_metadata with null check
+            user_metadata = supabase_user.user_metadata or {}
+            subscription_plan = user_metadata.get('subscription_plan', 'alpha')
+            subscription_status = user_metadata.get('subscription_status', 'trial')
             
             logger.info(f"User {db_user.id} has subscription plan: {subscription_plan} (status: {subscription_status})")
             
@@ -418,8 +425,10 @@ async def register_restaurant(
             raise HTTPException(status_code=400, detail="User already has a restaurant")
         
         # Get subscription info from Supabase user metadata or default to alpha
-        subscription_plan = supabase_user.user_metadata.get('subscription_plan', 'alpha')
-        subscription_status = supabase_user.user_metadata.get('subscription_status', 'trial')
+        # Safely access user_metadata with null check
+        user_metadata = supabase_user.user_metadata or {}
+        subscription_plan = user_metadata.get('subscription_plan', 'alpha')
+        subscription_status = user_metadata.get('subscription_status', 'trial')
         
         # Create restaurant with proper error handling
         try:
