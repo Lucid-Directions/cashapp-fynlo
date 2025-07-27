@@ -266,14 +266,18 @@ async def verify_supabase_user(
         else:
             # User has no restaurant yet - they need to complete onboarding
             logger.info(f"User {db_user.id} has no restaurant - needs onboarding")
-            # Return minimal features for onboarding
+            
+            # Get subscription plan from Supabase user metadata
+            subscription_plan = supabase_user.user_metadata.get('subscription_plan', 'alpha')
+            subscription_status = supabase_user.user_metadata.get('subscription_status', 'trial')
+            
+            logger.info(f"User {db_user.id} has subscription plan: {subscription_plan} (status: {subscription_status})")
+            
+            # Return subscription info and features based on plan even without restaurant
             response_data["user"]["needs_onboarding"] = True
-            response_data["user"]["enabled_features"] = {
-                "onboarding": True,
-                "basic_pos": False,
-                "inventory": False,
-                "reports": False
-            }
+            response_data["user"]["subscription_plan"] = subscription_plan
+            response_data["user"]["subscription_status"] = subscription_status
+            response_data["user"]["enabled_features"] = get_plan_features(subscription_plan)
         
         return response_data
         

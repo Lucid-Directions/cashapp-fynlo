@@ -173,6 +173,12 @@ interface StoreState {
 **Browser**: `mcp__playwright__`, `mcp__puppeteer__` (automation, testing)  
 **Security**: `mcp__semgrep__` (code analysis, vulnerability scanning)  
 **Infrastructure**: `mcp__digitalocean-mcp-local__` (deployment, monitoring, logs)
+**Documentation**: `mcp__Ref__` (search docs, GitHub, private resources)
+
+**CLI Tools Available**:
+- **Supabase CLI**: `/opt/homebrew/bin/supabase` - For managing Supabase projects
+- **DigitalOcean CLI**: `doctl` - For infrastructure management
+- **GitHub CLI**: `gh` - For repository management
 
 Use `/mcp` to check status. These tools are automatically available.
 
