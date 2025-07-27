@@ -90,8 +90,6 @@ async def verify_supabase_user(
                 detail="Invalid or expired token"
             )
         
-        # Convert Supabase user ID to string once
-        supabase_user_id = str(supabase_user.id)
         logger.info(f"Successfully verified Supabase user: {supabase_user.email}")
         
         # Find or create user in our database with proper error handling
@@ -110,9 +108,9 @@ async def verify_supabase_user(
                 
                 # If found by email but missing supabase_id, update it
                 if db_user and not db_user.supabase_id:
-                    db_user.supabase_id = supabase_user_id
+                    db_user.supabase_id = supabase_user.id  # Use UUID object, not string
                     db.commit()
-                    logger.info(f"Updated user {db_user.id} with Supabase ID: {supabase_user_id}")
+                    logger.info(f"Updated user {db_user.id} with Supabase ID: {supabase_user.id}")
         except SQLAlchemyError as e:
             logger.error(f"Database query error when finding user: {str(e)}")
             db.rollback()
@@ -142,7 +140,7 @@ async def verify_supabase_user(
                 db.add(db_user)
                 db.commit()
                 db.refresh(db_user)
-                logger.info(f"Successfully created new user with ID: {db_user.id} and Supabase ID: {supabase_user_id}")
+                logger.info(f"Successfully created new user with ID: {db_user.id} and Supabase ID: {supabase_user.id}")
             except IntegrityError as e:
                 logger.error(f"Integrity error creating user: {str(e)}")
                 db.rollback()
@@ -158,7 +156,7 @@ async def verify_supabase_user(
                         ).first()
                         if db_user and not db_user.supabase_id:
                             # Update the supabase_id if missing
-                            db_user.supabase_id = supabase_user_id
+                            db_user.supabase_id = supabase_user.id  # Use UUID object, not string
                             db.commit()
                     if not db_user:
                         raise HTTPException(
@@ -392,9 +390,6 @@ async def register_restaurant(
         if not supabase_user:
             raise HTTPException(status_code=401, detail="Invalid token")
         
-        # Convert Supabase user ID to string once
-        supabase_user_id = str(supabase_user.id)
-        
         # Get user from database by Supabase ID
         db_user = db.query(User).filter(
             User.supabase_id == supabase_user.id
@@ -407,7 +402,7 @@ async def register_restaurant(
             ).first()
             if db_user and not db_user.supabase_id:
                 # Update the supabase_id if missing
-                db_user.supabase_id = supabase_user_id
+                db_user.supabase_id = supabase_user.id  # Use UUID object, not string
                 db.commit()
         
         if not db_user:
