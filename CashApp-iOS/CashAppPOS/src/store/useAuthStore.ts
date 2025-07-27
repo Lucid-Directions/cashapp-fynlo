@@ -19,6 +19,13 @@ interface User {
   subscription_plan?: 'alpha' | 'beta' | 'omega';
   subscription_status?: string;
   enabled_features?: string[];
+  needs_onboarding?: boolean;
+  onboarding_progress?: {
+    current_step: number;
+    completed_steps: number[];
+    total_steps: number;
+    resume_at_step: number;
+  };
 }
 
 interface AuthState {

@@ -19,6 +19,7 @@ from app.api.v1.endpoints.customers import CustomerCreate as CustomerCreateSchem
 from app.core.redis_client import get_redis, RedisClient
 from app.core.responses import APIResponseHelper
 from app.core.exceptions import FynloException, ErrorCodes
+from app.core.onboarding_helper import OnboardingHelper
 from app.core.websocket import (
     websocket_manager, 
     notify_order_created, 
@@ -144,6 +145,15 @@ async def get_orders(
 ):
     """Get orders with filtering options"""
     
+    # Check if user needs onboarding (no restaurant)
+    onboarding_response = OnboardingHelper.handle_onboarding_response(
+        user=current_user,
+        resource_type="orders",
+        endpoint_requires_restaurant=True
+    )
+    if onboarding_response:
+        return onboarding_response
+    
     # Access control: Check user's role and restaurant access
     if current_user.role == 'platform_owner':
         # Platform owners can access any restaurant
@@ -231,6 +241,15 @@ async def get_todays_orders(
     redis: RedisClient = Depends(get_redis)
 ):
     """Get today's orders for kitchen display and POS"""
+    
+    # Check if user needs onboarding (no restaurant)
+    onboarding_response = OnboardingHelper.handle_onboarding_response(
+        user=current_user,
+        resource_type="orders",
+        endpoint_requires_restaurant=True
+    )
+    if onboarding_response:
+        return onboarding_response
     
     # Access control: Check user's role and restaurant access
     if current_user.role == 'platform_owner':

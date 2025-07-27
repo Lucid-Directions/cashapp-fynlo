@@ -285,6 +285,14 @@ async def verify_supabase_user(
             response_data["user"]["subscription_plan"] = subscription_plan
             response_data["user"]["subscription_status"] = subscription_status
             response_data["user"]["enabled_features"] = get_plan_features(subscription_plan)
+            
+            # Add onboarding progress tracking
+            response_data["user"]["onboarding_progress"] = {
+                "current_step": 0,
+                "completed_steps": [],
+                "total_steps": 9,
+                "resume_at_step": 1
+            }
         
         return response_data
         
