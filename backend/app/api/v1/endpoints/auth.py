@@ -28,6 +28,17 @@ if not supabase_admin:
     # The client will be initialized on first request if needed
 
 
+def ensure_uuid(value) -> uuid.UUID:
+    """Convert string or UUID to UUID object, handling both types safely"""
+    if isinstance(value, uuid.UUID):
+        return value
+    try:
+        return uuid.UUID(str(value))
+    except (ValueError, TypeError) as e:
+        logger.error(f"Invalid UUID format: {value}")
+        raise ValueError(f"Invalid UUID format: {value}")
+
+
 
 
 @router.post("/verify", response_model=AuthVerifyResponse)
@@ -156,8 +167,14 @@ async def verify_supabase_user(
                         ).first()
                         if db_user and not db_user.supabase_id:
                             # Update the supabase_id if missing
-                            db_user.supabase_id = supabase_user.id  # Use UUID object, not string
-                            db.commit()
+                            try:
+                                db_user.supabase_id = supabase_user.id  # Use UUID object, not string
+                                db.commit()
+                                logger.info(f"Updated user {db_user.id} with Supabase ID in retry path")
+                            except SQLAlchemyError as update_error:
+                                logger.error(f"Failed to update supabase_id in retry path: {str(update_error)}")
+                                db.rollback()
+                                # Continue with the user even if update fails
                     if not db_user:
                         raise HTTPException(
                             status_code=500,
@@ -402,8 +419,14 @@ async def register_restaurant(
             ).first()
             if db_user and not db_user.supabase_id:
                 # Update the supabase_id if missing
-                db_user.supabase_id = supabase_user.id  # Use UUID object, not string
-                db.commit()
+                try:
+                    db_user.supabase_id = supabase_user.id  # Use UUID object, not string
+                    db.commit()
+                    logger.info(f"Updated user {db_user.id} with Supabase ID during registration")
+                except SQLAlchemyError as e:
+                    logger.error(f"Failed to update user supabase_id during registration: {str(e)}")
+                    db.rollback()
+                    # Continue with registration even if update fails
         
         if not db_user:
             raise HTTPException(status_code=404, detail="User not found")
