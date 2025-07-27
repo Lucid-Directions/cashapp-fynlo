@@ -36,10 +36,17 @@ async def verify_websocket_access(
 ) -> bool:
     """Verify WebSocket access permissions with Supabase token validation"""
     try:
-        # Verify restaurant exists
-        restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
-        if not restaurant or not restaurant.is_active:
-            return False
+        # Special case for onboarding users without restaurants
+        if restaurant_id == "onboarding":
+            # For onboarding, we only need valid user authentication
+            if not user_id or not token:
+                return False
+            # Skip restaurant verification for onboarding
+        else:
+            # Verify restaurant exists for normal connections
+            restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
+            if not restaurant or not restaurant.is_active:
+                return False
         
         # Verify user authentication if user_id provided
         if user_id:
@@ -96,7 +103,11 @@ async def verify_websocket_access(
                 return False
             
             # Check if user has access to this restaurant
-            if user.role == "restaurant_owner" and str(user.restaurant_id) != restaurant_id:
+            if restaurant_id == "onboarding":
+                # For onboarding connections, allow any authenticated user
+                logger.info(f"Onboarding connection for user: {user.id}")
+                pass
+            elif user.role == "restaurant_owner" and str(user.restaurant_id) != restaurant_id:
                 logger.warning(f"Restaurant owner access denied: {user.restaurant_id} != {restaurant_id}")
                 return False
             elif user.role == "platform_owner":

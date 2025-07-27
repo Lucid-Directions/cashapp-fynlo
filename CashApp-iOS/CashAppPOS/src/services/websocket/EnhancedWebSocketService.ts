@@ -74,14 +74,13 @@ export class EnhancedWebSocketService {
       }
       
       const user = JSON.parse(userInfo);
-      if (!user.restaurant_id) {
-        throw new Error('No restaurant associated with user');
-      }
+      // Allow users without restaurants to connect (for onboarding)
+      const restaurantId = user.restaurant_id || 'onboarding';
       
       // Build WebSocket URL (no token in URL for security)
       const wsProtocol = API_CONFIG.BASE_URL.startsWith('https') ? 'wss' : 'ws';
       const wsHost = API_CONFIG.BASE_URL.replace(/^https?:\/\//, '');
-      const wsUrl = `${wsProtocol}://${wsHost}/api/v1/websocket/ws/pos/${user.restaurant_id}`;
+      const wsUrl = `${wsProtocol}://${wsHost}/api/v1/websocket/ws/pos/${restaurantId}`;
       
       console.log('🔌 Connecting to WebSocket:', wsUrl);
       
@@ -128,11 +127,11 @@ export class EnhancedWebSocketService {
         data: {
           token: token,
           user_id: user.id,
-          restaurant_id: user.restaurant_id,
+          restaurant_id: user.restaurant_id || 'onboarding',
           client_type: 'mobile_pos',
           client_version: '1.0.0'
         },
-        restaurant_id: user.restaurant_id,
+        restaurant_id: user.restaurant_id || 'onboarding',
         timestamp: new Date().toISOString()
       };
       
