@@ -63,6 +63,12 @@ async def verify_supabase_user(
     try:
         # Verify token with Supabase Admin API
         logger.info(f"Verifying token with Supabase (token length: {len(token)})")
+        logger.info(f"Token preview: {token[:20]}...{token[-20:]}")
+        
+        # Log Supabase client state
+        logger.info(f"Supabase client URL: {client.supabase_url}")
+        logger.info(f"Supabase client headers: {list(client._headers.keys())}")
+        
         user_response = client.auth.get_user(token)
         
         # Check if we got a valid response
@@ -200,6 +206,16 @@ async def verify_supabase_user(
         # Handle Supabase authentication errors
         error_msg = str(e)
         logger.warning(f"Supabase AuthApiError: {error_msg}")
+        logger.warning(f"Error type: {type(e).__name__}")
+        logger.warning(f"Error attributes: {dir(e)}")
+        
+        # Try to get more details from the error
+        if hasattr(e, 'code'):
+            logger.warning(f"Error code: {e.code}")
+        if hasattr(e, 'message'):
+            logger.warning(f"Error message: {e.message}")
+        if hasattr(e, 'response'):
+            logger.warning(f"Error response: {e.response}")
         
         error_msg_lower = error_msg.lower()
         if "invalid jwt" in error_msg_lower or "malformed" in error_msg_lower:
