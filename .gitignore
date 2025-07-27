@@ -147,4 +147,13 @@ node_modules/
 .expo/
 .expo-shared/
 metro.config.js
+
+# Temporary debug scripts - NEVER commit these
+backend/check_user_api.py
+backend/fix_restaurant_via_api.py
+backend/fix_user_restaurant.py
+backend/manual_fix_instructions.md
+backend/debug_*.py
+backend/test_*.py
+backend/fix_*.py
 EOF < /dev/null
