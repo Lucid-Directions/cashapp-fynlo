@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db, User
 from app.core.responses import APIResponseHelper
 from app.core.auth import get_current_user
+from app.core.onboarding_helper import OnboardingHelper
 from app.models.employee import EmployeeProfile, Schedule, Shift, TimeEntry, PerformanceMetric
 from app.schemas.employee_schemas import (
     EmployeeCreateRequest, EmployeeUpdateRequest, EmployeeResponse,
@@ -33,6 +34,16 @@ async def get_employees(
     current_user: User = Depends(get_current_user)
 ):
     """Get all employees with optional filtering"""
+    
+    # Check if user needs onboarding (no restaurant)
+    onboarding_response = OnboardingHelper.handle_onboarding_response(
+        user=current_user,
+        resource_type="employees",
+        endpoint_requires_restaurant=True
+    )
+    if onboarding_response:
+        return onboarding_response
+    
     try:
         employees = employee_service.get_employees(
             db=db,

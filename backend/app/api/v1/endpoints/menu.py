@@ -14,6 +14,7 @@ from app.core.auth import get_current_user
 from app.core.redis_client import get_redis, RedisClient
 from app.core.responses import APIResponseHelper
 from app.api.v1.endpoints.products import CategoryResponse, ProductResponse
+from app.core.onboarding_helper import OnboardingHelper
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -85,6 +86,15 @@ async def get_menu_items(
 ):
     """Get menu items (products) for frontend compatibility"""
     start_time = time.time()
+    
+    # Check if user needs onboarding (no restaurant)
+    onboarding_response = OnboardingHelper.handle_onboarding_response(
+        user=current_user,
+        resource_type="menu_items",
+        endpoint_requires_restaurant=True
+    )
+    if onboarding_response:
+        return onboarding_response
     
     # Use user's restaurant if not specified
     if not restaurant_id:
@@ -168,6 +178,15 @@ async def get_menu_categories(
     redis: RedisClient = Depends(get_redis)
 ):
     """Get menu categories for frontend compatibility"""
+    
+    # Check if user needs onboarding (no restaurant)
+    onboarding_response = OnboardingHelper.handle_onboarding_response(
+        user=current_user,
+        resource_type="menu_items",  # Use same type as it's categories for menu
+        endpoint_requires_restaurant=True
+    )
+    if onboarding_response:
+        return onboarding_response
     
     # Use user's restaurant if not specified
     if not restaurant_id:
