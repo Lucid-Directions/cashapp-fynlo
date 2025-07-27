@@ -12,7 +12,8 @@ from app.api.v1.endpoints import (
     pos, admin, inventory, recipes, employees, # Added inventory, recipes, and employees
     exports, dashboard, websocket_portal, storage_health,  # Portal-specific endpoints + storage health
     platform_settings_optimized,  # Optimized endpoints for mobile app
-    platform_admin  # Secure platform administration
+    platform_admin,  # Secure platform administration
+    debug_user  # DEBUG endpoint - remove in production
 )
 from app.api.v1 import subscriptions
 from app.api.v1.platform import platform_router
@@ -76,3 +77,6 @@ api_router.include_router(platform_settings_optimized.router, prefix="/platform/
 
 # Secure platform administration endpoints
 api_router.include_router(platform_admin.router, prefix="/platform/admin", tags=["platform_admin"])
+
+# DEBUG endpoint - REMOVE IN PRODUCTION
+api_router.include_router(debug_user.router, tags=["debug"])
