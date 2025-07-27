@@ -36,6 +36,41 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 6. Make every task and code change you do as simple as possible. We want to avoid making any massive or complex changes. Every change should impact as little code as possible. Everything is about simplicity.
 7. Finally, add a review section to the [todo.md](http://todo.md/) file with a summary of the changes you made and any other relevant information.
 
+## 🔐 USER SIGNUP & AUTHENTICATION FLOW
+
+### Critical User Journey (Website → App)
+1. **Website Signup** (fynlo.com)
+   - Users sign up on the website (NOT in the mobile app)
+   - Choose subscription plan: Alpha ($29.99), Beta ($59.99), or Omega ($129.99)
+   - Supabase creates account with plan metadata
+   - User receives verification email
+
+2. **Plan-Based Access Levels**
+   - **Alpha**: Basic POS, 500 orders/month, 5 staff, 50 menu items
+   - **Beta**: + Inventory, reports, 2000 orders/month, 15 staff, 200 menu items
+   - **Omega**: Enterprise, unlimited everything, API access, multi-location
+
+3. **Authentication Architecture**
+   ```
+   Website Signup → Supabase Auth → Plan Selection
+                          ↓
+   Mobile App Login → Supabase Token → Backend Verify
+                          ↓
+   PostgreSQL User Record → Feature Access
+   ```
+
+4. **Mobile App Login**
+   - Users log in with website credentials
+   - App calls `/api/v1/auth/verify` with Supabase token
+   - Backend creates/updates user with subscription info
+   - Returns enabled features based on plan
+
+5. **Access Control**
+   - Features gated by subscription plan
+   - Backend validates plan before API access
+   - Mobile app uses `hasFeature()` checks
+   - No plan changes in mobile app (website only)
+
 ## 🛠️ MCP SERVERS (Model Context Protocol Tools)
 
 **Claude Code has 7 FREE MCP servers installed for enhanced capabilities:**
