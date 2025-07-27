@@ -3,7 +3,8 @@
  */
 
 import { useEffect, useCallback, useState } from 'react';
-import { webSocketService, WebSocketEventType } from '../services/websocket/EnhancedWebSocketService';
+import { webSocketService } from '../services/websocket/EnhancedWebSocketService';
+import { WebSocketEvent } from '../types/websocket';
 import { useAuthStore } from '../store/useAuthStore';
 
 interface WebSocketState {
@@ -57,7 +58,7 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
   }, []);
   
   // Subscribe to events
-  const subscribe = useCallback((eventType: WebSocketEventType, handler: (data: any) => void) => {
+  const subscribe = useCallback((eventType: string, handler: (data: any) => void) => {
     webSocketService.on(eventType, handler);
     
     // Return unsubscribe function
@@ -108,17 +109,17 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
     };
     
     // Subscribe to connection events
-    webSocketService.on(WebSocketEventType.CONNECTED, handleConnected);
-    webSocketService.on(WebSocketEventType.DISCONNECTED, handleDisconnected);
-    webSocketService.on(WebSocketEventType.ERROR, handleError);
-    webSocketService.on(WebSocketEventType.RECONNECTING, handleReconnecting);
+    webSocketService.on(WebSocketEvent.CONNECT, handleConnected);
+    webSocketService.on(WebSocketEvent.DISCONNECT, handleDisconnected);
+    webSocketService.on(WebSocketEvent.ERROR, handleError);
+    // Note: EnhancedWebSocketService doesn't emit a 'reconnecting' event
+    // It only emits 'max_reconnect_attempts' when max attempts are reached
     
     // Cleanup
     return () => {
-      webSocketService.off(WebSocketEventType.CONNECTED, handleConnected);
-      webSocketService.off(WebSocketEventType.DISCONNECTED, handleDisconnected);
-      webSocketService.off(WebSocketEventType.ERROR, handleError);
-      webSocketService.off(WebSocketEventType.RECONNECTING, handleReconnecting);
+      webSocketService.off(WebSocketEvent.CONNECT, handleConnected);
+      webSocketService.off(WebSocketEvent.DISCONNECT, handleDisconnected);
+      webSocketService.off(WebSocketEvent.ERROR, handleError);
     };
   }, []);
   
@@ -154,9 +155,9 @@ export const useOrderUpdates = (onOrderUpdate: (data: any) => void) => {
   const { subscribe } = useWebSocket();
   
   useEffect(() => {
-    const unsubscribeCreated = subscribe(WebSocketEventType.ORDER_CREATED, onOrderUpdate);
-    const unsubscribeUpdated = subscribe(WebSocketEventType.ORDER_UPDATED, onOrderUpdate);
-    const unsubscribeStatus = subscribe(WebSocketEventType.ORDER_STATUS_CHANGED, onOrderUpdate);
+    const unsubscribeCreated = subscribe(WebSocketEvent.ORDER_CREATED, onOrderUpdate);
+    const unsubscribeUpdated = subscribe(WebSocketEvent.ORDER_UPDATED, onOrderUpdate);
+    const unsubscribeStatus = subscribe(WebSocketEvent.ORDER_STATUS_CHANGED, onOrderUpdate);
     
     return () => {
       unsubscribeCreated();
@@ -170,7 +171,7 @@ export const useInventoryUpdates = (onInventoryUpdate: (data: any) => void) => {
   const { subscribe } = useWebSocket();
   
   useEffect(() => {
-    const unsubscribe = subscribe(WebSocketEventType.INVENTORY_UPDATED, onInventoryUpdate);
+    const unsubscribe = subscribe(WebSocketEvent.INVENTORY_UPDATED, onInventoryUpdate);
     return unsubscribe;
   }, [subscribe, onInventoryUpdate]);
 };
@@ -179,7 +180,7 @@ export const useMenuUpdates = (onMenuUpdate: (data: any) => void) => {
   const { subscribe } = useWebSocket();
   
   useEffect(() => {
-    const unsubscribe = subscribe(WebSocketEventType.MENU_UPDATED, onMenuUpdate);
+    const unsubscribe = subscribe(WebSocketEvent.MENU_UPDATED, onMenuUpdate);
     return unsubscribe;
   }, [subscribe, onMenuUpdate]);
 };
@@ -188,7 +189,7 @@ export const useSystemNotifications = (onNotification: (data: any) => void) => {
   const { subscribe } = useWebSocket();
   
   useEffect(() => {
-    const unsubscribe = subscribe(WebSocketEventType.SYSTEM_NOTIFICATION, onNotification);
+    const unsubscribe = subscribe(WebSocketEvent.SYSTEM_NOTIFICATION, onNotification);
     return unsubscribe;
   }, [subscribe, onNotification]);
 };
