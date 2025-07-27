@@ -241,30 +241,60 @@ class AuthInterceptor {
   /**
    * Convenience method for PUT requests
    */
-  async put(url: string, body: any, headers: Record<string, string> = {}): Promise<Response> {
-    return this.request({
-      url,
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        ...headers
-      },
-      body: typeof body === 'string' ? body : JSON.stringify(body)
-    });
+  async put(url: string, body: any, headers: Record<string, string> = {}, timeoutMs: number = 10000): Promise<Response> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    
+    try {
+      const response = await this.request({
+        url,
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...headers
+        },
+        body: typeof body === 'string' ? body : JSON.stringify(body),
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      return response;
+    } catch (error: any) {
+      clearTimeout(timeoutId);
+      if (error.name === 'AbortError') {
+        throw new Error('Request timeout');
+      }
+      throw error;
+    }
   }
   
   /**
    * Convenience method for DELETE requests
    */
-  async delete(url: string, headers: Record<string, string> = {}): Promise<Response> {
-    return this.request({
-      url,
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        ...headers
+  async delete(url: string, headers: Record<string, string> = {}, timeoutMs: number = 10000): Promise<Response> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    
+    try {
+      const response = await this.request({
+        url,
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          ...headers
+        },
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      return response;
+    } catch (error: any) {
+      clearTimeout(timeoutId);
+      if (error.name === 'AbortError') {
+        throw new Error('Request timeout');
       }
-    });
+      throw error;
+    }
   }
   
   /**

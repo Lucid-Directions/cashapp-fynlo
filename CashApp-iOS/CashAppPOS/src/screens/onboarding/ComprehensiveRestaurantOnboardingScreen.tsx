@@ -50,6 +50,15 @@ interface RestaurantFormData {
   ownerName: string;
   ownerEmail: string;
   ownerPhone: string;
+  
+  // Bank Details
+  bankDetails?: {
+    sortCode: string;
+    accountNumber: string;
+    accountName: string;
+    iban?: string;
+    swiftBic?: string;
+  };
 }
 
 interface Employee {
@@ -96,6 +105,13 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
     ownerName: '',
     ownerEmail: '',
     ownerPhone: '',
+    bankDetails: {
+      sortCode: '',
+      accountNumber: '',
+      accountName: '',
+      iban: '',
+      swiftBic: ''
+    }
   });
 
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -109,7 +125,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
     accessLevel: 'pos_only',
   });
 
-  const totalSteps = 8;
+  const totalSteps = 9;
   const businessTypes = [
     'Restaurant', 'Fast Food', 'Cafe', 'Bar & Pub', 'Food Truck',
     'Bakery', 'Pizzeria', 'Bistro', 'Fine Dining', 'Other'
@@ -193,7 +209,15 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         return true; // Optional
       case 7: // Menu Setup
         return true; // Optional but recommended
-      case 8: // Review
+      case 8: // Bank Details
+        return !!(
+          formData.bankDetails?.sortCode && 
+          formData.bankDetails?.accountNumber && 
+          formData.bankDetails?.accountName &&
+          formData.bankDetails.sortCode.replace(/-/g, '').length === 6 &&
+          formData.bankDetails.accountNumber.length === 8
+        );
+      case 9: // Review
         return true;
       default:
         return true;
@@ -752,6 +776,114 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
     </View>
   );
 
+  const renderBankDetails = () => (
+    <View style={styles.stepContent}>
+      <Text style={styles.stepTitle}>Bank Details</Text>
+      <Text style={styles.stepDescription}>
+        Add your bank account details to receive payments
+      </Text>
+      
+      <Text style={styles.inputLabel}>Sort Code</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="00-00-00"
+        value={formData.bankDetails?.sortCode || ''}
+        onChangeText={(text) => {
+          const formattedSortCode = text.replace(/[^0-9]/g, '').slice(0, 6);
+          const displaySortCode = formattedSortCode.replace(/(\d{2})(\d{2})?(\d{2})?/, (match, p1, p2, p3) => {
+            return [p1, p2, p3].filter(Boolean).join('-');
+          });
+          setFormData(prev => ({
+            ...prev,
+            bankDetails: {
+              ...prev.bankDetails,
+              sortCode: displaySortCode
+            }
+          }));
+        }}
+        keyboardType="numeric"
+        maxLength={8}
+      />
+      
+      <Text style={styles.inputLabel}>Account Number</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="12345678"
+        value={formData.bankDetails?.accountNumber || ''}
+        onChangeText={(text) => {
+          const cleanedText = text.replace(/[^0-9]/g, '').slice(0, 8);
+          setFormData(prev => ({
+            ...prev,
+            bankDetails: {
+              ...prev.bankDetails,
+              accountNumber: cleanedText
+            }
+          }));
+        }}
+        keyboardType="numeric"
+        maxLength={8}
+      />
+      
+      <Text style={styles.inputLabel}>Account Name</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Your Restaurant Ltd"
+        value={formData.bankDetails?.accountName || ''}
+        onChangeText={(text) => 
+          setFormData(prev => ({
+            ...prev,
+            bankDetails: {
+              ...prev.bankDetails,
+              accountName: text
+            }
+          }))
+        }
+      />
+      
+      <Text style={styles.inputLabel}>IBAN (Optional)</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="GB00XXXX00000000000000"
+        value={formData.bankDetails?.iban || ''}
+        onChangeText={(text) => 
+          setFormData(prev => ({
+            ...prev,
+            bankDetails: {
+              ...prev.bankDetails,
+              iban: text.toUpperCase()
+            }
+          }))
+        }
+        autoCapitalize="characters"
+      />
+      
+      <Text style={styles.inputLabel}>SWIFT/BIC Code (Optional)</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="XXXXXXXX"
+        value={formData.bankDetails?.swiftBic || ''}
+        onChangeText={(text) => 
+          setFormData(prev => ({
+            ...prev,
+            bankDetails: {
+              ...prev.bankDetails,
+              swiftBic: text.toUpperCase()
+            }
+          }))
+        }
+        autoCapitalize="characters"
+        maxLength={11}
+      />
+      
+      <View style={styles.infoBox}>
+        <Icon name="info" size={20} color={theme.colors.primary} />
+        <Text style={styles.infoText}>
+          Your bank details are encrypted and securely stored. Payments are processed weekly on Fridays.
+        </Text>
+      </View>
+    </View>
+  );
+  
   const renderStep7 = () => (
     <View style={styles.stepContent}>
       <Text style={styles.stepTitle}>Review & Complete</Text>
@@ -810,7 +942,8 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
       case 5: return renderStep5();
       case 6: return renderStep6();
       case 7: return renderMenuSetup();
-      case 8: return renderStep7();
+      case 8: return renderBankDetails();
+      case 9: return renderStep7();
       default: return renderStep1();
     }
   };
@@ -1256,6 +1389,21 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
       fontSize: 14,
       color: theme.colors.textSecondary,
       textDecorationLine: 'underline',
+    },
+    infoBox: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: theme.colors.background,
+      padding: 16,
+      borderRadius: 8,
+      marginTop: 16,
+    },
+    infoText: {
+      fontSize: 14,
+      color: theme.colors.textSecondary,
+      marginLeft: 12,
+      flex: 1,
+      lineHeight: 20,
     },
   });
 
