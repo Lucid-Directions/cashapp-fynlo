@@ -6,7 +6,6 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "build:prod": "npm install && tsc",
     "watch": "tsc --watch",
     "clean": "rm -rf dist",
     "prepare": "npm run build"
