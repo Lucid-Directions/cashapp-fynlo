@@ -12,6 +12,8 @@ import {
   Platform,
   Switch,
   TextInput,
+  Keyboard,
+  Dimensions,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
@@ -86,12 +88,18 @@ interface Employee {
   accessLevel: 'full' | 'pos_only' | 'reports_only';
 }
 
+// Fix for iOS keyboard handling to prevent NaN errors
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+const KEYBOARD_VERTICAL_OFFSET = Platform.OS === 'ios' ? 90 : 0;
+
 const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
   const { updateConfig, completeSetupStep } = useRestaurantConfig();
 
   const [currentStep, setCurrentStep] = useState(1);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   
   const [formData, setFormData] = useState<RestaurantFormData>({
@@ -145,6 +153,32 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
   // This fixes the "ReferenceError: Can't find variable: TextInput" error
   // that occurs during onboarding at the bank details step
   const _TextInputRef = TextInput;
+  
+  // Fix keyboard handling to prevent NaN errors
+  useEffect(() => {
+    const keyboardWillShowListener = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      (e) => {
+        const height = e.endCoordinates?.height || 0;
+        // Ensure we don't get NaN values
+        setKeyboardHeight(isNaN(height) ? 0 : height);
+        setIsKeyboardVisible(true);
+      }
+    );
+
+    const keyboardWillHideListener = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      () => {
+        setKeyboardHeight(0);
+        setIsKeyboardVisible(false);
+      }
+    );
+
+    return () => {
+      keyboardWillShowListener.remove();
+      keyboardWillHideListener.remove();
+    };
+  }, []);
   const businessTypes = [
     'Restaurant', 'Fast Food', 'Cafe', 'Bar & Pub', 'Food Truck',
     'Bakery', 'Pizzeria', 'Bistro', 'Fine Dining', 'Other'
@@ -407,7 +441,13 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
 
   const renderStepIndicator = () => (
     <View style={styles.stepIndicator}>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.stepIndicatorContent}>
+      <ScrollView 
+        horizontal 
+        showsHorizontalScrollIndicator={false} 
+        contentContainerStyle={styles.stepIndicatorContent}
+        scrollIndicatorInsets={{ top: 0, left: 0, bottom: 0, right: 0 }}
+        contentInset={{ left: 0, right: 0, top: 0, bottom: 0 }}
+      >
         {Array.from({ length: totalSteps }, (_, index) => {
           const step = index + 1;
           return (
@@ -468,7 +508,13 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
 
       <View style={styles.inputGroup}>
         <Text style={styles.inputLabel}>Business Type *</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.businessTypeScroll}>
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false} 
+          style={styles.businessTypeScroll}
+          contentInset={{ left: 0, right: 0, top: 0, bottom: 0 }}
+          scrollIndicatorInsets={{ top: 0, left: 0, bottom: 0, right: 0 }}
+        >
           {businessTypes.map((type) => (
             <TouchableOpacity
               key={type}
@@ -716,7 +762,12 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
           <View style={{ flex: 1, marginLeft: 12 }}>
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Role</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <ScrollView 
+                horizontal 
+                showsHorizontalScrollIndicator={false}
+                contentInset={{ left: 0, right: 0, top: 0, bottom: 0 }}
+                scrollIndicatorInsets={{ top: 0, left: 0, bottom: 0, right: 0 }}
+              >
                 {employeeRoles.map((role) => (
                   <TouchableOpacity
                     key={role.value}
@@ -1538,16 +1589,18 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         <View style={styles.headerSpacer} />
       </View>
 
-      <KeyboardAvoidingView 
-        style={styles.content}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
+      <View style={styles.content}>
         {renderStepIndicator()}
 
         <ScrollView 
           style={styles.scrollContainer}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{
+            paddingBottom: isKeyboardVisible && Platform.OS === 'ios' 
+              ? Math.max(0, keyboardHeight - KEYBOARD_VERTICAL_OFFSET) + 100
+              : 100
+          }}
         >
           {renderCurrentStep()}
         </ScrollView>
@@ -1586,7 +1639,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
             )}
           </TouchableOpacity>
         </View>
-      </KeyboardAvoidingView>
+      </View>
     </SafeAreaView>
   );
 };
