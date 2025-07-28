@@ -33,40 +33,44 @@ async def verify_websocket_access(
     token: Optional[str] = None,
     connection_type: str = "pos",
     db: Session = None
-) -> bool:
-    """Verify WebSocket access permissions with Supabase token validation"""
+) -> tuple[bool, Optional[User]]:
+    """Verify WebSocket access permissions with Supabase token validation
+    
+    Returns:
+        tuple[bool, Optional[User]]: (has_access, verified_user)
+    """
     try:
         # Special case for onboarding users without restaurants
         if restaurant_id == "onboarding":
             # For onboarding, we only need valid user authentication
             if not user_id or not token:
-                return False
+                return False, None
             # Skip restaurant verification for onboarding
         else:
             # Verify restaurant exists for normal connections
             restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
             if not restaurant or not restaurant.is_active:
-                return False
+                return False, None
         
         # Verify user authentication if user_id provided
         if user_id:
             # Token is REQUIRED for authenticated connections
             if not token:
-                return False
+                return False, None
             
             # Validate the token with Supabase
             try:
                 # Verify token with Supabase Admin API
                 if not supabase_admin:
                     logger.error("Supabase admin client not initialized")
-                    return False
+                    return False, None
                 
                 user_response = supabase_admin.auth.get_user(token)
                 supabase_user = user_response.user
                 
                 if not supabase_user:
                     logger.error("Invalid Supabase token - no user found")
-                    return False
+                    return False, None
                 
                 # Find user in our database by supabase_id
                 user = db.query(User).filter(User.supabase_id == supabase_user.id).first()
@@ -86,21 +90,21 @@ async def verify_websocket_access(
                 
                 if not user:
                     logger.error(f"User not found in database for supabase_id: {supabase_user.id}")
-                    return False
+                    return False, None
                 
                 # Verify the user is active
                 if not user.is_active:
                     logger.warning(f"User is not active: {user.id}")
-                    return False
+                    return False, None
                 
                 # Verify user_id matches (critical security check)
                 if str(user.id) != str(user_id):
                     logger.error(f"User ID mismatch - potential security violation: {user.id} != {user_id}")
-                    return False
+                    return False, None
                     
             except Exception as e:
                 logger.error(f"Supabase token validation error: {str(e)}")
-                return False
+                return False, None
             
             # Check if user has access to this restaurant
             if restaurant_id == "onboarding":
@@ -113,27 +117,31 @@ async def verify_websocket_access(
                     # Restaurant owner without a restaurant - they're in onboarding
                     if restaurant_id != "onboarding":
                         logger.warning(f"Restaurant owner without restaurant trying to access: {restaurant_id}")
-                        return False
+                        return False, None
                     logger.info(f"Restaurant owner {user.id} in onboarding phase (no restaurant yet)")
                 elif str(user.restaurant_id) != restaurant_id and restaurant_id != "onboarding":
                     logger.warning(f"Restaurant owner access denied: {user.restaurant_id} != {restaurant_id}")
-                    return False
+                    return False, None
             elif user.role == "platform_owner":
                 # Platform owners have access to all restaurants
                 pass
             elif user.role in ["manager", "employee"]:
                 if not user.restaurant_id:
                     logger.warning(f"Staff member without restaurant assignment: {user.id}")
-                    return False
+                    return False, None
                 if str(user.restaurant_id) != restaurant_id:
                     logger.warning(f"Staff access denied: {user.restaurant_id} != {restaurant_id}")
-                    return False
+                    return False, None
+            
+            # Return both access status and verified user
+            return True, user
         
-        return True
+        # No user authentication required for this connection type
+        return True, None
         
     except Exception as e:
         logger.error(f"WebSocket access verification error: {str(e)}")
-        return False
+        return False, None
 
 @router.websocket("/ws/{restaurant_id}")
 async def websocket_endpoint_general(
@@ -154,7 +162,7 @@ async def websocket_endpoint_general(
         token = websocket.query_params.get("token")
         
         # Verify access with token validation
-        has_access = await verify_websocket_access(restaurant_id, user_id, token, connection_type, db)
+        has_access, verified_user = await verify_websocket_access(restaurant_id, user_id, token, connection_type, db)
         if not has_access:
             await websocket.close(code=4003, reason="Access denied")
             return
@@ -168,12 +176,10 @@ async def websocket_endpoint_general(
         elif connection_type == "customer":
             conn_type = ConnectionType.CUSTOMER
         
-        # Get user roles if user_id provided
+        # Get user roles from verified user
         roles = []
-        if user_id:
-            user = db.query(User).filter(User.id == user_id).first()
-            if user:
-                roles = [user.role]
+        if verified_user:
+            roles = [verified_user.role]
         
         # Connect to WebSocket manager
         connection_id = await websocket_manager.connect(
@@ -257,17 +263,15 @@ async def websocket_kitchen_endpoint(
         token = websocket.query_params.get("token")
         
         # Verify access with token validation
-        has_access = await verify_websocket_access(restaurant_id, user_id, token, "kitchen", db)
+        has_access, verified_user = await verify_websocket_access(restaurant_id, user_id, token, "kitchen", db)
         if not has_access:
             await websocket.close(code=4003, reason="Access denied")
             return
         
-        # Get user roles
+        # Get user roles from verified user
         roles = []
-        if user_id:
-            user = db.query(User).filter(User.id == user_id).first()
-            if user:
-                roles = [user.role]
+        if verified_user:
+            roles = [verified_user.role]
         
         # Connect with kitchen-specific type
         connection_id = await websocket_manager.connect(
@@ -350,17 +354,15 @@ async def websocket_pos_endpoint(
         token = websocket.query_params.get("token")
         
         # Verify access with token validation
-        has_access = await verify_websocket_access(restaurant_id, user_id, token, "pos", db)
+        has_access, verified_user = await verify_websocket_access(restaurant_id, user_id, token, "pos", db)
         if not has_access:
             await websocket.close(code=4003, reason="Access denied")
             return
         
-        # Get user roles
+        # Get user roles from verified user
         roles = []
-        if user_id:
-            user = db.query(User).filter(User.id == user_id).first()
-            if user:
-                roles = [user.role]
+        if verified_user:
+            roles = [verified_user.role]
         
         # Connect with POS-specific type
         connection_id = await websocket_manager.connect(
@@ -443,17 +445,15 @@ async def websocket_management_endpoint(
         token = websocket.query_params.get("token")
         
         # Verify management access with token validation
-        has_access = await verify_websocket_access(restaurant_id, user_id, token, "management", db)
+        has_access, verified_user = await verify_websocket_access(restaurant_id, user_id, token, "management", db)
         if not has_access:
             await websocket.close(code=4003, reason="Access denied")
             return
         
         # Verify user has management permissions
-        if user_id:
-            user = db.query(User).filter(User.id == user_id).first()
-            if not user or user.role not in ["restaurant_owner", "platform_owner", "manager"]:
-                await websocket.close(code=4003, reason="Management access required")
-                return
+        if not verified_user or verified_user.role not in ["restaurant_owner", "platform_owner", "manager"]:
+            await websocket.close(code=4003, reason="Management access required")
+            return
         
         # Connect with management-specific type
         connection_id = await websocket_manager.connect(
@@ -461,7 +461,7 @@ async def websocket_management_endpoint(
             restaurant_id=restaurant_id,
             user_id=user_id,
             connection_type=ConnectionType.MANAGEMENT,
-            roles=[user.role] if user_id else []
+            roles=[verified_user.role] if verified_user else []
         )
         
         # Send management dashboard data
