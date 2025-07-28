@@ -313,7 +313,8 @@ async def verify_websocket_access(
                     # Restaurant owner without a restaurant - they're in onboarding
                     if restaurant_id != "onboarding":
                         logger.warning(
-                            "Restaurant owner without restaurant trying to access non-onboarding endpoint"
+                            "Restaurant owner without restaurant trying to access "
+                            "non-onboarding endpoint"
                         )
                         return False, None
                     logger.info(
@@ -460,7 +461,8 @@ async def websocket_endpoint_general(
                 else:
                     # Log unknown message type
                     logger.warning(
-                        f"Unknown message type received: {sanitize_string(str(message_type), max_length=50)}"
+                        "Unknown message type received: %s",
+                        sanitize_string(str(message_type), max_length=50)
                     )
                     await websocket.send_text(
                         json.dumps({"type": "error", "message": "Unknown message type"})
@@ -939,9 +941,9 @@ async def websocket_management_endpoint(
 async def handle_subscription(connection_id: str, message_data: dict) -> None:
     """Handle event subscription requests"""
     try:
-        events = message_data.get("events", [])
         # Store subscription preferences for this connection
         # This would be implemented based on specific requirements
+        # events = message_data.get("events", [])
         # response = {
         #     "type": "subscription_confirmed",
         #     "events": events,
@@ -1121,10 +1123,9 @@ async def handle_analytics_request(
 ) -> None:
     """Handle real-time analytics requests"""
     try:
-        analytics_type = message_data.get("analytics_type", "dashboard")
-
         # This would fetch real-time analytics data
         # For now, send a placeholder response
+        # analytics_type = message_data.get("analytics_type", "dashboard")
         # analytics_data = {
         #     "type": "analytics_data",
         #     "analytics_type": analytics_type,
@@ -1136,6 +1137,7 @@ async def handle_analytics_request(
 
         # Send analytics data to requesting connection
         # Implementation would depend on specific analytics requirements
+        pass
 
     except Exception as e:
         logger.error(f"Analytics request error: {str(e)}")
