@@ -2,14 +2,48 @@
 
 ## Current Status
 
-While Pieces doesn't have a direct MCP (Model Context Protocol) server for Claude Code, we can use several approaches to leverage Pieces for context management:
+✅ **Pieces MCP is now configured and ready to use with Claude Desktop!**
 
-## Integration Options
+PiecesOS acts as an MCP server and is now integrated with Claude Desktop via the Model Context Protocol.
 
-### 1. Manual Context Export/Import
-- Export snippets from Pieces as markdown files
-- Store them in `.claude/context/` directory
-- Claude Code will automatically pick them up
+## How It Works
+
+### Prerequisites
+1. **PiecesOS** must be running (✅ Already running on port 39300)
+2. **Long-Term Memory (LTM)** must be enabled in PiecesOS
+
+### Configuration
+The Pieces MCP server is configured in:
+```
+~/Library/Application Support/Claude/claude_desktop_config.json
+```
+
+With the following settings:
+```json
+{
+  "mcpServers": {
+    "Pieces": {
+      "url": "http://localhost:39300/model_context_protocol/2024-11-05/sse"
+    }
+  }
+}
+```
+
+### Using Pieces with Claude
+
+**IMPORTANT**: You need to restart Claude Desktop for the MCP configuration to take effect!
+
+Once restarted, Claude will have access to the `ask_pieces_ltm` tool, which allows me to:
+- Query your workflow history stored in Pieces
+- Access code snippets you've saved
+- Retrieve context from your development activities
+- Find previous solutions to similar problems
+
+### Example Queries
+- "What was I working on yesterday?"
+- "Show me previous implementations of authentication"
+- "Have I encountered this error before?"
+- "What fixes have I applied for WebSocket issues?"
 
 ### 2. Pieces CLI Workflow
 The Pieces CLI is installed but requires interactive setup:
