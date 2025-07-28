@@ -383,13 +383,11 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         break;
         
       case 6: // Employee/Staff
-        if (formData.employees && formData.employees.length > 0) {
-          const employee = formData.employees[0];
-          if (!employee.email) {
-            setFieldErrors(prev => ({ ...prev, employeeEmail: 'Employee email is required' }));
-          } else if (!validateEmail(employee.email)) {
-            setFieldErrors(prev => ({ ...prev, employeeEmail: 'Please enter a valid email address' }));
-          }
+        // Check the newEmployee state for current employee being added
+        if (!newEmployee.email) {
+          setFieldErrors(prev => ({ ...prev, employeeEmail: 'Employee email is required' }));
+        } else if (!validateEmail(newEmployee.email)) {
+          setFieldErrors(prev => ({ ...prev, employeeEmail: 'Please enter a valid email address' }));
         }
         break;
         
