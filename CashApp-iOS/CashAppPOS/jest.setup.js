@@ -154,13 +154,14 @@ jest.mock('sumup-react-native-alpha', () => ({
   }),
 }));
 
-// Mock Supabase
+// Mock Supabase to avoid ESM issues
 jest.mock('@supabase/supabase-js', () => ({
   createClient: jest.fn(() => ({
     auth: {
       getSession: jest.fn().mockResolvedValue({ data: { session: null }, error: null }),
       signInWithPassword: jest.fn().mockResolvedValue({ data: { user: null }, error: null }),
       signOut: jest.fn().mockResolvedValue({ error: null }),
+      signIn: jest.fn(),
       onAuthStateChange: jest.fn(() => ({ data: { subscription: { unsubscribe: jest.fn() } } })),
     },
     from: jest.fn(() => ({
@@ -176,8 +177,9 @@ jest.mock('@supabase/supabase-js', () => ({
 
 // Mock react-native-config
 jest.mock('react-native-config', () => ({
-  SUPABASE_URL: 'https://test.supabase.co',
+  SUPABASE_URL: 'http://localhost:54321',
   SUPABASE_ANON_KEY: 'test-anon-key',
+  API_URL: 'http://localhost:8000',
 }));
 
 // Mock isows module that's causing ESM issues

@@ -1,4 +1,3 @@
-import { StripeProvider } from '@stripe/stripe-react-native';
 import QRCode from 'react-native-qrcode-svg';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 

@@ -15,7 +15,6 @@ import useAppStore from '../../store/useAppStore';
 import useSettingsStore from '../../store/useSettingsStore';
 import PaymentService, { PaymentRequest, PaymentResult } from '../../services/PaymentService';
 import QRCodePayment from '../../components/payment/QRCodePayment';
-import StripePaymentProvider from '../../services/providers/StripePaymentProvider';
 import SquarePaymentProvider from '../../services/providers/SquarePaymentProvider';
 import SumUpPaymentProvider from '../../services/providers/SumUpPaymentProvider';
 import SumUpNativeService from '../../services/SumUpNativeService';
@@ -181,10 +180,6 @@ const PaymentScreen: React.FC = () => {
       if (!config) {
         // Initialize with default config
         const defaultConfig = {
-          stripe: {
-            publishableKey: 'pk_test_...', // Would come from settings
-            merchantId: 'merchant.fynlo.pos',
-          },
           square: {
             applicationId: 'sandbox-sq0idb-...', // Would come from settings
             locationId: 'location-id',
@@ -247,7 +242,6 @@ const PaymentScreen: React.FC = () => {
         processSumUpPaymentMethod(methodId);
         break;
       // Backup providers (hidden from UI)
-      case 'stripe':
       case 'square':
         processCardPayment(methodId);
         break;
@@ -582,10 +576,6 @@ const PaymentScreen: React.FC = () => {
                   break;
                 case 'cash':
                   fee = 0;
-                  break;
-                // Hidden backup providers
-                case 'stripe':
-                  fee = (total * 0.014) + 0.20; // 1.4% + 20p
                   break;
                 case 'square':
                   fee = total * 0.0175; // 1.75%
