@@ -606,6 +606,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         value={formData.restaurantName}
         onChangeText={(value) => updateField('restaurantName', value)}
         placeholder="e.g., Maria's Mexican Kitchen"
+        testID="restaurant-name"
       />
 
       <FastInput
@@ -1817,6 +1818,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         <TouchableOpacity 
           style={styles.backButton}
           onPress={() => navigation.goBack()}
+          testID="header-back-button"
         >
           <Icon name="arrow-back" size={24} color={theme.colors.white} />
         </TouchableOpacity>
@@ -1851,6 +1853,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
             <TouchableOpacity
               style={styles.prevButton}
               onPress={prevStep}
+              testID="back-button"
             >
               <Icon name="arrow-back" size={20} color={theme.colors.text} />
               <Text style={styles.prevButtonText}>Previous</Text>
@@ -1866,6 +1869,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
             ]}
             onPress={nextStep}
             disabled={loading || !validateStep(currentStep)}
+            testID={currentStep === totalSteps ? "complete-setup-button" : "next-step-button"}
           >
             <Text style={styles.nextButtonText}>
               {loading ? 'Saving...' : currentStep === totalSteps ? 'Complete Setup' : 'Next'}
