@@ -52,6 +52,7 @@ python-json-logger==2.0.7
 
 # Validation Dependencies - Required for core validation
 jsonschema==4.21.1
+bleach==6.1.0  # HTML sanitization for security
 
 # HTTP Client Dependencies - Required for payment providers
 aiohttp==3.9.1
@@ -66,5 +67,5 @@ resend==0.7.0
 
 # Development Dependencies - Moved to requirements-dev.txt
 # pytest==7.4.3
-# pytest-asyncio==0.21.1  
+# pytest-asyncio==0.21.1
 # black==23.11.0

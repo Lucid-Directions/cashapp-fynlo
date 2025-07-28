@@ -1,0 +1,22 @@
+{
+  "extends": [
+    "@react-native",
+    "plugin:react-hooks/recommended",
+    "plugin:testing-library/react",
+    "prettier"
+  ],
+  "rules": {
+    "no-console": "error",
+    "no-unused-vars": "error",
+    "react-hooks/exhaustive-deps": "warn",
+    "@typescript-eslint/no-unused-vars": "error"
+  },
+  "overrides": [
+    {
+      "files": ["*.ts", "*.tsx"],
+      "rules": {
+        "@typescript-eslint/no-unused-vars": ["error"]
+      }
+    }
+  ]
+}
