@@ -62,9 +62,16 @@ async def cleanup_connection_tracking():
             logger.error(f"Connection tracking cleanup error: {str(e)}")
             await asyncio.sleep(300)
 
-# Start cleanup task on first import
-if cleanup_task is None:
-    cleanup_task = asyncio.create_task(cleanup_connection_tracking())
+async def get_or_create_cleanup_task():
+    """Lazy initialization of cleanup task"""
+    global cleanup_task
+    if cleanup_task is None:
+        try:
+            cleanup_task = asyncio.create_task(cleanup_connection_tracking())
+        except RuntimeError:
+            # Event loop not running yet
+            pass
+    return cleanup_task
 
 # CORS configuration
 ALLOWED_ORIGINS = [
@@ -94,15 +101,15 @@ def validate_origin(origin: Optional[str]) -> bool:
     if not origin:
         return True  # Allow mobile apps without origin
     
-    for allowed in ALLOWED_ORIGINS:
-        if origin.startswith(allowed):
-            return True
-    
-    if settings.ENVIRONMENT in ["development", "testing"] and (
-        origin.startswith("http://localhost") or 
-        origin.startswith("http://127.0.0.1")
-    ):
+    # Exact match for production origins
+    if origin in ALLOWED_ORIGINS:
         return True
+    
+    # For development, check more carefully
+    if settings.ENVIRONMENT in ["development", "testing"]:
+        # Parse the origin to ensure it's not a subdomain attack
+        if origin.startswith("http://localhost:") or origin.startswith("http://127.0.0.1:"):
+            return True
     
     return False
 
@@ -170,6 +177,10 @@ async def verify_websocket_access(
     Returns (has_access, user_object)
     """
     try:
+        # Validate database session
+        if not db:
+            logger.error("Database session not provided to verify_websocket_access")
+            return False, None
         # Validate restaurant_id format
         if not validate_uuid(restaurant_id):
             logger.error(f"Invalid restaurant_id format: {sanitize_string(str(restaurant_id), max_length=50)}")
@@ -290,6 +301,9 @@ async def websocket_endpoint_general(
     connection_id = None
     verified_user = None
     
+    # Ensure cleanup task is running
+    await get_or_create_cleanup_task()
+    
     try:
         # Check origin validation
         origin = websocket.headers.get("origin")
@@ -342,8 +356,10 @@ async def websocket_endpoint_general(
             roles=roles
         )
         
-        # Track user connection
-        if verified_user:
+        # Track user connection (use original user_id if provided)
+        if user_id:
+            user_connections[user_id].add(connection_id)
+        elif verified_user:
             user_connections[str(verified_user.id)].add(connection_id)
         
         # Handle incoming messages
@@ -406,7 +422,10 @@ async def websocket_endpoint_general(
     finally:
         if connection_id:
             await websocket_manager.disconnect(connection_id)
-        if verified_user:
+        # Clean up user connection tracking
+        if user_id and connection_id:
+            user_connections[user_id].discard(connection_id)
+        if verified_user and connection_id:
             user_connections[str(verified_user.id)].discard(connection_id)
 
 @router.websocket("/ws/kitchen/{restaurant_id}")
@@ -427,7 +446,7 @@ async def websocket_kitchen_endpoint(
         token = websocket.query_params.get("token")
         
         # Verify access with token validation
-        has_access = await verify_websocket_access(restaurant_id, user_id, token, "kitchen", db)
+        has_access, verified_user = await verify_websocket_access(restaurant_id, user_id, token, "kitchen", db)
         if not has_access:
             await websocket.close(code=4003, reason="Access denied")
             return
@@ -486,16 +505,18 @@ async def websocket_kitchen_endpoint(
                     "message": "Invalid JSON format in kitchen message"
                 }))
             except Exception as e:
+                logger.error(f"Kitchen message processing error: {str(e)}")
                 await websocket.send_text(json.dumps({
                     "type": "error",
-                    "message": f"Kitchen message processing error: {str(e)}"
+                    "message": "Message processing failed"
                 }))
                 
     except WebSocketDisconnect:
         pass
     except Exception as e:
+        logger.error(f"Kitchen connection error: {str(e)}")
         try:
-            await websocket.close(code=4000, reason=f"Kitchen connection error: {str(e)}")
+            await websocket.close(code=4000, reason="Connection error")
         except:
             pass
     finally:
@@ -520,7 +541,7 @@ async def websocket_pos_endpoint(
         token = websocket.query_params.get("token")
         
         # Verify access with token validation
-        has_access = await verify_websocket_access(restaurant_id, user_id, token, "pos", db)
+        has_access, verified_user = await verify_websocket_access(restaurant_id, user_id, token, "pos", db)
         if not has_access:
             await websocket.close(code=4003, reason="Access denied")
             return
@@ -579,16 +600,18 @@ async def websocket_pos_endpoint(
                     "message": "Invalid JSON format in POS message"
                 }))
             except Exception as e:
+                logger.error(f"POS message processing error: {str(e)}")
                 await websocket.send_text(json.dumps({
                     "type": "error",
-                    "message": f"POS message processing error: {str(e)}"
+                    "message": "Message processing failed"
                 }))
                 
     except WebSocketDisconnect:
         pass
     except Exception as e:
+        logger.error(f"POS connection error: {str(e)}")
         try:
-            await websocket.close(code=4000, reason=f"POS connection error: {str(e)}")
+            await websocket.close(code=4000, reason="Connection error")
         except:
             pass
     finally:
@@ -613,17 +636,22 @@ async def websocket_management_endpoint(
         token = websocket.query_params.get("token")
         
         # Verify management access with token validation
-        has_access = await verify_websocket_access(restaurant_id, user_id, token, "management", db)
+        has_access, verified_user = await verify_websocket_access(restaurant_id, user_id, token, "management", db)
         if not has_access:
             await websocket.close(code=4003, reason="Access denied")
             return
         
         # Verify user has management permissions
+        user = None
         if user_id:
             user = db.query(User).filter(User.id == user_id).first()
             if not user or user.role not in ["restaurant_owner", "platform_owner", "manager"]:
                 await websocket.close(code=4003, reason="Management access required")
                 return
+        else:
+            # Management endpoint requires authentication
+            await websocket.close(code=4003, reason="Authentication required")
+            return
         
         # Connect with management-specific type
         connection_id = await websocket_manager.connect(
@@ -670,16 +698,18 @@ async def websocket_management_endpoint(
                     "message": "Invalid JSON format in management message"
                 }))
             except Exception as e:
+                logger.error(f"Management message processing error: {str(e)}")
                 await websocket.send_text(json.dumps({
                     "type": "error",
-                    "message": f"Management message processing error: {str(e)}"
+                    "message": "Message processing failed"
                 }))
                 
     except WebSocketDisconnect:
         pass
     except Exception as e:
+        logger.error(f"Management connection error: {str(e)}")
         try:
-            await websocket.close(code=4000, reason=f"Management connection error: {str(e)}")
+            await websocket.close(code=4000, reason="Connection error")
         except:
             pass
     finally:
