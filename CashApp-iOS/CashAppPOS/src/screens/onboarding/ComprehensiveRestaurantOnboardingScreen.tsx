@@ -18,6 +18,19 @@ import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../../design-system/ThemeProvider';
 import FastInput from '../../components/ui/FastInput';
 import { useRestaurantConfig } from '../../hooks/useRestaurantConfig';
+import {
+  parseNumericInput,
+  parseCurrencyInput,
+  sanitizeInput,
+  validateUKPhone,
+  validateEmail,
+  validatePostcode,
+  validateSortCode,
+  formatSortCode,
+  validateAccountNumber,
+  validateIBAN,
+  validateSWIFT,
+} from '../../utils/inputValidation';
 
 interface RestaurantFormData {
   // Basic Information
@@ -167,13 +180,22 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
       return;
     }
 
+    // Validate email
+    if (!validateEmail(newEmployee.email!)) {
+      Alert.alert('Invalid Email', 'Please enter a valid email address.');
+      return;
+    }
+
+    // Parse and validate hourly rate
+    const hourlyRateNumber = parseCurrencyInput(newEmployee.hourlyRate);
+    
     const employee: Employee = {
       id: Date.now().toString(),
-      name: newEmployee.name!,
-      email: newEmployee.email!,
+      name: sanitizeInput(newEmployee.name!),
+      email: newEmployee.email!.toLowerCase().trim(),
       phone: newEmployee.phone || '',
       role: newEmployee.role as Employee['role'],
-      hourlyRate: newEmployee.hourlyRate || '0',
+      hourlyRate: hourlyRateNumber.toFixed(2),
       startDate: newEmployee.startDate!,
       accessLevel: newEmployee.accessLevel as Employee['accessLevel'],
     };
@@ -199,11 +221,30 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
       case 1: // Basic Info
         return !!(formData.restaurantName && formData.displayName && formData.businessType);
       case 2: // Contact
-        return !!(formData.phone && formData.email);
+        if (!formData.phone || !formData.email) return false;
+        if (!validateUKPhone(formData.phone)) {
+          Alert.alert('Invalid Phone', 'Please enter a valid UK phone number.');
+          return false;
+        }
+        if (!validateEmail(formData.email)) {
+          Alert.alert('Invalid Email', 'Please enter a valid email address.');
+          return false;
+        }
+        return true;
       case 3: // Location
-        return !!(formData.street && formData.city && formData.zipCode);
+        if (!formData.street || !formData.city || !formData.zipCode) return false;
+        if (!validatePostcode(formData.zipCode)) {
+          Alert.alert('Invalid Postcode', 'Please enter a valid UK postcode.');
+          return false;
+        }
+        return true;
       case 4: // Owner Info
-        return !!(formData.ownerName && formData.ownerEmail);
+        if (!formData.ownerName || !formData.ownerEmail) return false;
+        if (!validateEmail(formData.ownerEmail)) {
+          Alert.alert('Invalid Email', 'Please enter a valid owner email address.');
+          return false;
+        }
+        return true;
       case 5: // Business Hours
         return true; // Optional
       case 6: // Employees
@@ -211,13 +252,28 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
       case 7: // Menu Setup
         return true; // Optional but recommended
       case 8: // Bank Details
-        return !!(
-          formData.bankDetails?.sortCode && 
-          formData.bankDetails?.accountNumber && 
-          formData.bankDetails?.accountName &&
-          formData.bankDetails.sortCode.replace(/-/g, '').length === 6 &&
-          formData.bankDetails.accountNumber.length === 8
-        );
+        if (!formData.bankDetails?.sortCode || !formData.bankDetails?.accountNumber || !formData.bankDetails?.accountName) {
+          return false;
+        }
+        if (!validateSortCode(formData.bankDetails.sortCode)) {
+          Alert.alert('Invalid Sort Code', 'Please enter a valid 6-digit sort code.');
+          return false;
+        }
+        if (!validateAccountNumber(formData.bankDetails.accountNumber)) {
+          Alert.alert('Invalid Account Number', 'Please enter a valid 8-digit account number.');
+          return false;
+        }
+        // Validate IBAN if provided
+        if (formData.bankDetails.iban && !validateIBAN(formData.bankDetails.iban)) {
+          Alert.alert('Invalid IBAN', 'Please enter a valid IBAN.');
+          return false;
+        }
+        // Validate SWIFT if provided
+        if (formData.bankDetails.swiftBic && !validateSWIFT(formData.bankDetails.swiftBic)) {
+          Alert.alert('Invalid SWIFT/BIC', 'Please enter a valid SWIFT/BIC code.');
+          return false;
+        }
+        return true;
       case 9: // Review
         return true;
       default:
@@ -248,36 +304,80 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
     try {
       setLoading(true);
       
-      // Save restaurant information
-      await updateConfig({
-        restaurantName: formData.restaurantName,
-        displayName: formData.displayName,
-        businessType: formData.businessType,
-        description: formData.description,
+      // Get auth token from AsyncStorage
+      const AsyncStorage = require('@react-native-async-storage/async-storage').default;
+      const token = await AsyncStorage.getItem('supabase.auth.token');
+      
+      if (!token) {
+        Alert.alert('Authentication Error', 'Please log in again.');
+        navigation.navigate('Auth' as never);
+        return;
+      }
+
+      // Prepare data for API
+      const restaurantData = {
+        name: sanitizeInput(formData.restaurantName),
+        display_name: sanitizeInput(formData.displayName),
+        business_type: formData.businessType,
+        description: sanitizeInput(formData.description || ''),
         phone: formData.phone,
-        email: formData.email,
-        website: formData.website,
+        email: formData.email.toLowerCase().trim(),
+        website: formData.website || '',
         address: {
-          street: formData.street,
-          city: formData.city,
-          state: formData.state,
-          zipCode: formData.zipCode,
+          street: sanitizeInput(formData.street),
+          city: sanitizeInput(formData.city),
+          state: sanitizeInput(formData.state || ''),
+          zipCode: formData.zipCode.toUpperCase(),
           country: formData.country,
         },
-        operatingHours: formData.operatingHours,
-        owner: {
-          name: formData.ownerName,
-          email: formData.ownerEmail,
-          phone: formData.ownerPhone,
+        business_hours: formData.operatingHours,
+        owner_info: {
+          name: sanitizeInput(formData.ownerName),
+          email: formData.ownerEmail.toLowerCase().trim(),
+          phone: formData.ownerPhone || '',
         },
-        employees: employees,
+        employees: employees.map(emp => ({
+          name: emp.name,
+          email: emp.email,
+          phone: emp.phone,
+          role: emp.role,
+          hourly_rate: parseFloat(emp.hourlyRate),
+          start_date: emp.startDate,
+          access_level: emp.accessLevel,
+        })),
+        bank_details: formData.bankDetails ? {
+          sort_code: formData.bankDetails.sortCode.replace(/-/g, ''),
+          account_number: formData.bankDetails.accountNumber,
+          account_name: sanitizeInput(formData.bankDetails.accountName),
+          iban: formData.bankDetails.iban || null,
+          swift_bic: formData.bankDetails.swiftBic || null,
+        } : null,
+      };
+
+      // Call the new onboarding endpoint
+      const response = await fetch('https://api.cashapp-fynlo.com/api/v1/restaurants/onboarding/create', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(restaurantData),
       });
 
-      await completeSetupStep('restaurantOnboarding');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      // Update local state with the new restaurant ID
+      await AsyncStorage.setItem('restaurant_id', result.restaurant_id);
+      await AsyncStorage.setItem('needs_onboarding', 'false');
       
       Alert.alert(
         'Onboarding Complete! 🎉',
-        `Welcome to Finlow, ${formData.restaurantName}! Your restaurant is now fully set up and ready to start taking orders.`,
+        `Welcome to Fynlo, ${formData.restaurantName}! Your restaurant is now fully set up and ready to start taking orders.`,
         [
           {
             text: 'Start Using POS',
@@ -290,7 +390,11 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         ]
       );
     } catch (error) {
-      Alert.alert('Error', 'Failed to complete onboarding. Please try again.');
+      console.error('Onboarding error:', error);
+      Alert.alert(
+        'Error', 
+        error instanceof Error ? error.message : 'Failed to complete onboarding. Please try again.'
+      );
     } finally {
       setLoading(false);
     }
@@ -784,94 +888,94 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         Add your bank account details to receive payments
       </Text>
       
-      <Text style={styles.inputLabel}>Sort Code</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="00-00-00"
+      <FastInput
+        label="Sort Code *"
+        inputType="text"
         value={formData.bankDetails?.sortCode || ''}
         onChangeText={(text) => {
-          const formattedSortCode = text.replace(/[^0-9]/g, '').slice(0, 6);
-          const displaySortCode = formattedSortCode.replace(/(\d{2})(\d{2})?(\d{2})?/, (match, p1, p2, p3) => {
-            return [p1, p2, p3].filter(Boolean).join('-');
-          });
+          const formattedSortCode = formatSortCode(text);
           setFormData(prev => ({
             ...prev,
             bankDetails: {
-              ...prev.bankDetails,
-              sortCode: displaySortCode
+              ...prev.bankDetails!,
+              sortCode: formattedSortCode
             }
           }));
         }}
+        placeholder="00-00-00"
         keyboardType="numeric"
         maxLength={8}
       />
       
-      <Text style={styles.inputLabel}>Account Number</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="12345678"
+      <FastInput
+        label="Account Number *"
+        inputType="text"
         value={formData.bankDetails?.accountNumber || ''}
         onChangeText={(text) => {
           const cleanedText = text.replace(/[^0-9]/g, '').slice(0, 8);
           setFormData(prev => ({
             ...prev,
             bankDetails: {
-              ...prev.bankDetails,
+              ...prev.bankDetails!,
               accountNumber: cleanedText
             }
           }));
         }}
+        placeholder="12345678"
         keyboardType="numeric"
         maxLength={8}
       />
       
-      <Text style={styles.inputLabel}>Account Name</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Your Restaurant Ltd"
+      <FastInput
+        label="Account Name *"
+        inputType="text"
         value={formData.bankDetails?.accountName || ''}
-        onChangeText={(text) => 
+        onChangeText={(text) => {
+          const sanitized = sanitizeInput(text, 100);
           setFormData(prev => ({
             ...prev,
             bankDetails: {
-              ...prev.bankDetails,
-              accountName: text
+              ...prev.bankDetails!,
+              accountName: sanitized
             }
-          }))
-        }
+          }));
+        }}
+        placeholder="Your Restaurant Ltd"
       />
       
-      <Text style={styles.inputLabel}>IBAN (Optional)</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="GB00XXXX00000000000000"
+      <FastInput
+        label="IBAN (Optional)"
+        inputType="text"
         value={formData.bankDetails?.iban || ''}
-        onChangeText={(text) => 
+        onChangeText={(text) => {
+          const upperCase = text.toUpperCase().replace(/[^A-Z0-9]/g, '');
           setFormData(prev => ({
             ...prev,
             bankDetails: {
-              ...prev.bankDetails,
-              iban: text.toUpperCase()
+              ...prev.bankDetails!,
+              iban: upperCase
             }
-          }))
-        }
+          }));
+        }}
+        placeholder="GB00XXXX00000000000000"
         autoCapitalize="characters"
       />
       
-      <Text style={styles.inputLabel}>SWIFT/BIC Code (Optional)</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="XXXXXXXX"
+      <FastInput
+        label="SWIFT/BIC Code (Optional)"
+        inputType="text"
         value={formData.bankDetails?.swiftBic || ''}
-        onChangeText={(text) => 
+        onChangeText={(text) => {
+          const upperCase = text.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 11);
           setFormData(prev => ({
             ...prev,
             bankDetails: {
-              ...prev.bankDetails,
-              swiftBic: text.toUpperCase()
+              ...prev.bankDetails!,
+              swiftBic: upperCase
             }
-          }))
-        }
+          }));
+        }}
+        placeholder="XXXXXXXX"
         autoCapitalize="characters"
         maxLength={11}
       />
