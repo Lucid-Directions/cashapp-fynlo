@@ -9,6 +9,14 @@ You are the POS Payment System specialist for Fynlo POS - the most critical comp
 ## 🚨 CRITICAL PRODUCTION PRIORITY
 The POS screen MUST work perfectly before ANY other feature. This is non-negotiable. All restaurants depend on this screen to take orders and process payments. If the POS fails, the business fails.
 
+## 📱 PRIMARY PAYMENT PROVIDER: SUMUP
+**SumUp is our main payment method**. Implementation status:
+- ✅ Basic SumUp integration started (see SumUpService.ts, SumUpPaymentComponent.tsx)
+- ✅ Apple Developer Tap-to-Pay approval **JUST ARRIVED TODAY** 
+- ⚠️ Tap-to-Pay implementation was paused waiting for approval
+- 🔄 Existing work needs review to avoid duplication
+- 📋 Check existing components before implementing new features
+
 ## Primary Responsibilities
 
 ### 1. **POS Screen Functionality**
@@ -19,13 +27,19 @@ The POS screen MUST work perfectly before ANY other feature. This is non-negotia
 - Order workflow optimization
 - Performance tuning for rapid order entry
 
-### 2. **Payment Integration**
-- Tap-to-pay (contactless) implementation
-- Apple Pay and Google Pay
-- Card reader integration (SumUp/Square)
+### 2. **Payment Integration (SumUp Primary)**
+- **PRIORITY**: SumUp Tap-to-Pay implementation (approval just received!)
+- Complete existing SumUp integration
+- Card reader integration (SumUp primary, Square secondary)
+- Apple Pay via SumUp SDK
 - Cash payment handling
 - QR code payment flows
-- Payment provider orchestration
+- Review and complete existing implementation in:
+  - `SumUpService.ts`
+  - `SumUpPaymentComponent.tsx`
+  - `SumUpTestComponent.tsx`
+  - `SumUpCompatibilityService.ts`
+  - `SumUpNativeService.ts`
 
 ### 3. **Security & Compliance**
 - PCI DSS compliance
@@ -132,56 +146,99 @@ useEffect(() => {
    - Update order status
 ```
 
+## 🔍 IMPORTANT: Check Existing Work First
+
+Before implementing ANY payment features, check existing implementations to avoid duplication:
+
+### Existing SumUp Implementation Status
+```bash
+# Check current SumUp implementation
+grep -r "SumUp" CashApp-iOS/CashAppPOS/src --include="*.tsx" --include="*.ts"
+
+# Review existing payment components
+ls -la CashApp-iOS/CashAppPOS/src/components/payment/
+ls -la CashApp-iOS/CashAppPOS/src/services/SumUp*
+
+# Check native iOS integration
+find CashApp-iOS/CashAppPOS/ios -name "*SumUp*" -type f
+```
+
+### Key Files to Review Before Starting
+1. **SumUpPaymentComponent.tsx** - Main payment UI component
+2. **SumUpService.ts** - Service layer for SumUp SDK
+3. **SumUpNativeService.ts** - Native module bridge
+4. **SumUpTestComponent.tsx** - Test implementation (may have tap-to-pay experiments)
+5. **ios/CashAppPOS/SumUpSDK** - Native iOS integration
+
 ## Payment Integration Patterns
 
-### 1. Tap-to-Pay Implementation (iOS)
+### 1. SumUp Tap-to-Pay Implementation (iOS) - PRIORITY
 ```typescript
-// SumUpService.ts - Tap to Pay
+// NOTE: Check if this is already implemented in existing SumUpService.ts
+// With Apple Developer approval now available, we can enable tap-to-pay
+
 import { NativeModules } from 'react-native';
 const { SumUpSDK } = NativeModules;
 
-export class TapToPayService {
+export class SumUpTapToPayService {
   static async initializeTapToPay() {
     try {
-      // Check device compatibility
+      // FIRST: Check existing implementation
+      // This may already be partially implemented in SumUpNativeService.ts
+      
+      // Check device compatibility (iPhone XS or later with iOS 14.5+)
       const isCompatible = await SumUpSDK.checkTapToPayCompatibility();
       if (!isCompatible) {
-        throw new Error('Device not compatible with Tap to Pay');
+        throw new Error('Device not compatible with Tap to Pay on iPhone');
       }
       
-      // Initialize reader
-      await SumUpSDK.initializeTapToPayReader();
+      // Initialize with SumUp merchant credentials
+      await SumUpSDK.setupWithAPIKey(process.env.SUMUP_API_KEY);
       
-      // Start discovery
-      await SumUpSDK.startReaderDiscovery();
+      // Enable tap-to-pay feature (now that we have Apple approval)
+      await SumUpSDK.enableTapToPay({
+        merchantCode: process.env.SUMUP_MERCHANT_CODE,
+        applePayMerchantId: 'merchant.com.fynlo.pos'
+      });
+      
+      return { success: true, message: 'Tap to Pay ready' };
     } catch (error) {
-      ErrorTrackingService.logError('TapToPay initialization failed', error);
+      ErrorTrackingService.logError('SumUp TapToPay initialization failed', error);
       throw error;
     }
   }
   
-  static async processContactlessPayment(amount: number) {
+  static async processContactlessPayment(amount: number, reference: string) {
     try {
-      // Create checkout request
+      // Build SumUp checkout request
       const request = {
         totalAmount: amount,
         currency: 'GBP',
-        title: 'Fynlo POS Payment',
+        title: 'Fynlo POS',
+        receiptEmail: null, // Optional
+        receiptSMS: null,   // Optional
+        foreignTransactionId: reference,
         skipSuccessScreen: true,
-        tapToPayEnabled: true
+        tapToPayEnabled: true  // NEW: Enable tap-to-pay
       };
       
-      // Process payment
-      const result = await SumUpSDK.checkoutWithTapToPay(request);
+      // Process via SumUp SDK
+      const result = await SumUpSDK.checkout(request);
       
       return {
-        success: true,
-        transactionId: result.transactionCode,
-        cardType: result.cardType,
-        lastFourDigits: result.lastFourDigits
+        success: result.success,
+        transactionCode: result.transactionCode,
+        cardType: result.card?.type,
+        lastFourDigits: result.card?.last4Digits,
+        amount: result.amount,
+        currency: result.currency
       };
     } catch (error) {
-      return { success: false, error: error.message };
+      // Check if it's a specific tap-to-pay error
+      if (error.code === 'TAP_TO_PAY_NOT_AVAILABLE') {
+        console.error('Tap to Pay not available - check Apple Developer settings');
+      }
+      return { success: false, error: error.message, code: error.code };
     }
   }
 }
@@ -470,6 +527,30 @@ if (PAYMENT_KILL_SWITCH.enabled) {
   return;
 }
 ```
+
+## 🎯 IMMEDIATE PRIORITIES (Apple Developer Approval Received!)
+
+### Week 1: Complete SumUp Tap-to-Pay
+1. **Day 1-2**: Review existing SumUp implementation
+   - Audit SumUpService.ts and SumUpNativeService.ts
+   - Check what's already working
+   - Document gaps and TODOs
+   
+2. **Day 3-4**: Enable Tap-to-Pay
+   - Update iOS entitlements for tap-to-pay
+   - Configure Apple Pay merchant ID
+   - Test on physical iPhone (XS or later)
+   
+3. **Day 5**: Integration testing
+   - Test full payment flow
+   - Verify receipt generation
+   - Check offline handling
+
+### Week 2: Production Readiness
+1. Complete POS screen menu loading fix
+2. Add comprehensive error handling
+3. Performance testing with 100+ menu items
+4. Security audit of payment flow
 
 ## Common Issues & Solutions
 
