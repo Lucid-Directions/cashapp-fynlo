@@ -442,7 +442,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
             text: 'Configure Menu',
             onPress: () => {
               navigation.reset({
-                index: 0,
+                index: 1,
                 routes: [
                   { name: 'Main' as never },
                   { name: 'SettingsMenuManagement' as never },
