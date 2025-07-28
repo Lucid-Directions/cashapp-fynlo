@@ -39,6 +39,33 @@ CONNECTION_WINDOW = timedelta(minutes=1)
 MAX_CONNECTIONS_PER_IP = 500  # per minute
 MAX_CONNECTIONS_PER_USER = 5
 
+# Background task for cleanup
+cleanup_task = None
+
+async def cleanup_connection_tracking():
+    """Periodic cleanup of connection tracking data"""
+    while True:
+        try:
+            current_time = datetime.now()
+            # Clean up old rate limit entries
+            for identifier in list(connection_tracker.keys()):
+                if current_time - connection_tracker[identifier]["last_reset"] > CONNECTION_WINDOW * 2:
+                    del connection_tracker[identifier]
+            
+            # Clean up empty user connection sets
+            for user_id in list(user_connections.keys()):
+                if not user_connections[user_id]:
+                    del user_connections[user_id]
+            
+            await asyncio.sleep(300)  # Clean up every 5 minutes
+        except Exception as e:
+            logger.error(f"Connection tracking cleanup error: {str(e)}")
+            await asyncio.sleep(300)
+
+# Start cleanup task on first import
+if cleanup_task is None:
+    cleanup_task = asyncio.create_task(cleanup_connection_tracking())
+
 # CORS configuration
 ALLOWED_ORIGINS = [
     "http://localhost:3000",
@@ -110,6 +137,27 @@ def sanitize_message_data(data: Dict[str, Any]) -> Dict[str, Any]:
         return sanitize_string(data, max_length=1000)
     else:
         return data
+
+async def perform_security_checks(
+    websocket: WebSocket,
+    user_id: Optional[str] = None
+) -> bool:
+    """Perform standard security checks for WebSocket connections"""
+    # Check origin validation
+    origin = websocket.headers.get("origin")
+    if not validate_origin(origin):
+        logger.warning(f"Invalid origin: {sanitize_string(str(origin), max_length=100)}")
+        await websocket.close(code=4001, reason="Unauthorized")
+        return False
+    
+    # Rate limiting
+    client_host = websocket.client.host if websocket.client else "unknown"
+    rate_limit_identifier = f"ws:{user_id or client_host}"
+    if not await check_rate_limit(rate_limit_identifier):
+        await websocket.close(code=4008, reason="Too many requests")
+        return False
+    
+    return True
 
 async def verify_websocket_access(
     restaurant_id: str,
@@ -677,6 +725,17 @@ async def handle_kitchen_status_update(connection_id: str, restaurant_id: str, m
         if not order_id or not new_status:
             return
         
+        # Validate order_id is UUID
+        if not validate_uuid(str(order_id)):
+            logger.warning(f"Invalid order_id format in kitchen status update")
+            return
+        
+        # Validate status value
+        valid_statuses = ["pending", "confirmed", "preparing", "ready", "completed", "cancelled"]
+        if new_status not in valid_statuses:
+            logger.warning(f"Invalid status value in kitchen status update")
+            return
+        
         # Broadcast status update to all relevant connections
         update_message = WebSocketMessage(
             event_type=EventType.ORDER_STATUS_CHANGED,
@@ -706,6 +765,21 @@ async def handle_preparation_time_update(connection_id: str, restaurant_id: str,
         estimated_time = message_data.get("estimated_time")
         
         if not order_id or not estimated_time:
+            return
+        
+        # Validate order_id is UUID
+        if not validate_uuid(str(order_id)):
+            logger.warning(f"Invalid order_id format in preparation time update")
+            return
+        
+        # Validate estimated_time is reasonable (1-300 minutes)
+        try:
+            time_int = int(estimated_time)
+            if time_int < 1 or time_int > 300:
+                logger.warning(f"Invalid estimated time value: {time_int}")
+                return
+        except (ValueError, TypeError):
+            logger.warning(f"Invalid estimated time format")
             return
         
         # Broadcast preparation time update
