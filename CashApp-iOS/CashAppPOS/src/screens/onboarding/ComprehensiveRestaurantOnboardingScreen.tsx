@@ -18,6 +18,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../../design-system/ThemeProvider';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import FastInput from '../../components/ui/FastInput';
 import { useRestaurantConfig } from '../../hooks/useRestaurantConfig';
 import {
@@ -291,9 +292,9 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         const emailValid = validateEmail(formData.email);
         
         // Also check if there are existing errors from onBlur
-        const noExistingErrors = !fieldErrors.phone && !fieldErrors.restaurantEmail;
+        const noContactErrors = !fieldErrors.phone && !fieldErrors.restaurantEmail;
         
-        return phoneValid && emailValid && noExistingErrors;
+        return phoneValid && emailValid && noContactErrors;
         
       case 3: // Location
         if (!formData.street || !formData.city || !formData.zipCode) return false;
@@ -438,7 +439,6 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
       setLoading(true);
       
       // Get auth token from AsyncStorage
-      const AsyncStorage = require('@react-native-async-storage/async-storage').default;
       const token = await AsyncStorage.getItem('auth_token');
       
       if (!token) {
@@ -616,6 +616,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         onChangeText={(value) => updateField('displayName', value)}
         placeholder="e.g., Maria's Kitchen"
         containerStyle={styles.inputHint}
+        testID="restaurant-display-name"
       />
       <Text style={styles.hintText}>This is what appears in your POS headers</Text>
 
@@ -687,6 +688,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         }}
         placeholder="+44 20 1234 5678"
         error={fieldErrors.phone}
+        testID="restaurant-phone"
       />
 
       <FastInput
@@ -709,6 +711,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         }}
         placeholder="owner@mariaskitchen.co.uk"
         error={fieldErrors.restaurantEmail}
+        testID="restaurant-email"
       />
 
       <FastInput
@@ -734,6 +737,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         value={formData.street}
         onChangeText={(value) => updateField('street', value)}
         placeholder="123 High Street"
+        testID="address-street"
       />
 
       <View style={styles.inputRow}>
@@ -744,6 +748,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
             value={formData.city}
             onChangeText={(value) => updateField('city', value)}
             placeholder="London"
+            testID="address-city"
           />
         </View>
 
@@ -768,6 +773,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
             }}
             placeholder="SW1A 1AA"
             error={fieldErrors.postcode}
+            testID="address-postcode"
           />
         </View>
       </View>
@@ -810,6 +816,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         value={formData.ownerName}
         onChangeText={(value) => updateField('ownerName', value)}
         placeholder="Maria Rodriguez"
+        testID="owner-name"
       />
 
       <FastInput
@@ -830,8 +837,9 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
             setFieldErrors(prev => ({ ...prev, ownerEmail: '' }));
           }
         }}
-        placeholder="maria@mariaskitchen.co.uk"
+        placeholder="owner@restaurant.com"
         error={fieldErrors.ownerEmail}
+        testID="owner-email"
       />
 
       <FastInput
@@ -1096,6 +1104,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
             // Navigate to menu management screen
             navigation.navigate('MenuManagement' as never);
           }}
+          testID="setup-menu-button"
         >
           <Icon name="restaurant-menu" size={20} color={theme.colors.white} />
           <Text style={styles.setupMenuButtonText}>Set Up Menu Now</Text>

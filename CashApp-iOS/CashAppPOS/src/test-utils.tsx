@@ -7,6 +7,8 @@ import React, { ReactElement } from 'react';
 import { render, RenderOptions } from '@testing-library/react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { ThemeProvider } from './design-system/ThemeProvider';
+import { AuthProvider } from './contexts/AuthContext';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 // Mock navigation
 export const createMockNavigation = () => ({
@@ -74,14 +76,21 @@ const AllTheProviders = ({ children, navigationProps = {} }: any) => {
   const navigationRef = React.createRef<any>();
   
   return (
-    <ThemeProvider>
-      <NavigationContainer ref={navigationRef}>
-        {React.cloneElement(children, {
-          navigation: mockNavigation,
-          route: mockRoute,
-        })}
-      </NavigationContainer>
-    </ThemeProvider>
+    <SafeAreaProvider initialMetrics={{
+      frame: { x: 0, y: 0, width: 375, height: 812 },
+      insets: { top: 44, left: 0, right: 0, bottom: 34 },
+    }}>
+      <ThemeProvider>
+        <AuthProvider>
+          <NavigationContainer ref={navigationRef}>
+            {React.cloneElement(children, {
+              navigation: mockNavigation,
+              route: mockRoute,
+            })}
+          </NavigationContainer>
+        </AuthProvider>
+      </ThemeProvider>
+    </SafeAreaProvider>
   );
 };
 
