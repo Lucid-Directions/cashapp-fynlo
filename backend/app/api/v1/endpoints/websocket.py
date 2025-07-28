@@ -107,15 +107,27 @@ async def verify_websocket_access(
                 # For onboarding connections, allow any authenticated user
                 logger.info(f"Onboarding connection for user: {user.id}")
                 pass
-            elif user.role == "restaurant_owner" and str(user.restaurant_id) != restaurant_id:
-                logger.warning(f"Restaurant owner access denied: {user.restaurant_id} != {restaurant_id}")
-                return False
+            elif user.role == "restaurant_owner":
+                # Handle restaurant owners
+                if not user.restaurant_id:
+                    # Restaurant owner without a restaurant - they're in onboarding
+                    if restaurant_id != "onboarding":
+                        logger.warning(f"Restaurant owner without restaurant trying to access: {restaurant_id}")
+                        return False
+                    logger.info(f"Restaurant owner {user.id} in onboarding phase (no restaurant yet)")
+                elif str(user.restaurant_id) != restaurant_id and restaurant_id != "onboarding":
+                    logger.warning(f"Restaurant owner access denied: {user.restaurant_id} != {restaurant_id}")
+                    return False
             elif user.role == "platform_owner":
                 # Platform owners have access to all restaurants
                 pass
-            elif user.role in ["manager", "employee"] and str(user.restaurant_id) != restaurant_id:
-                logger.warning(f"Staff access denied: {user.restaurant_id} != {restaurant_id}")
-                return False
+            elif user.role in ["manager", "employee"]:
+                if not user.restaurant_id:
+                    logger.warning(f"Staff member without restaurant assignment: {user.id}")
+                    return False
+                if str(user.restaurant_id) != restaurant_id:
+                    logger.warning(f"Staff access denied: {user.restaurant_id} != {restaurant_id}")
+                    return False
         
         return True
         
