@@ -10,10 +10,8 @@
     "clean": "rm -rf dist",
     "prepare": "npm run build"
   },
-  "dependencies": {
-    "typescript": "^5.2.2"
-  },
   "devDependencies": {
-    "@types/node": "^20.0.0"
+    "@types/node": "^20.0.0",
+    "typescript": "^5.2.2"
   }
 }
