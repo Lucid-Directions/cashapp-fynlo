@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { LogBox, View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { LogBox, View, Text, StyleSheet, ActivityIndicator, TextInput } from 'react-native';
 import 'react-native-gesture-handler';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthProvider } from './src/contexts/AuthContext';
@@ -17,6 +17,7 @@ import { supabase } from './src/lib/supabase';
 import { useAuthStore } from './src/store/useAuthStore';
 import { clearAuthStorage } from './src/utils/clearAuthStorage';
 import tokenManager from './src/utils/tokenManager';
+import { ensureComponentsLoaded } from './src/utils/componentRegistry';
 
 // Suppress specific warnings for development
 LogBox.ignoreLogs([
@@ -36,7 +37,11 @@ const App: React.FC = () => {
     const initializeApp = async () => {
       try {
         console.log('🚀 Fynlo POS App Starting...');
-        console.log('📱 BUNDLE VERSION: 2025-01-08-v9 - STABLE');
+        console.log('📱 BUNDLE VERSION: 2025-01-08-v10 - FIXED TextInput');
+        
+        // Ensure critical React Native components are not tree-shaken
+        // This prevents ReferenceError in production iOS builds
+        ensureComponentsLoaded();
         
         // Clear any stored authentication on app startup
         console.log('🧹 Clearing stored authentication...');
