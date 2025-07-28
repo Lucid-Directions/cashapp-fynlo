@@ -300,18 +300,18 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         
         // Check postcode validity
         const postcodeValid = validatePostcode(formData.zipCode);
-        const noExistingError = !fieldErrors.postcode;
+        const noPostcodeError = !fieldErrors.postcode;
         
-        return postcodeValid && noExistingError;
+        return postcodeValid && noPostcodeError;
         
       case 4: // Owner Info
         if (!formData.ownerName || !formData.ownerEmail) return false;
         
         // Check email validity and existing errors
         const ownerEmailValid = validateEmail(formData.ownerEmail);
-        const noExistingError = !fieldErrors.ownerEmail;
+        const noOwnerEmailError = !fieldErrors.ownerEmail;
         
-        return ownerEmailValid && noExistingError;
+        return ownerEmailValid && noOwnerEmailError;
         
       case 5: // Business Hours
         return true; // Optional
@@ -336,10 +336,10 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         const swiftValid = !formData.bankDetails.swiftBic || validateSWIFT(formData.bankDetails.swiftBic);
         
         // Check for existing errors
-        const noExistingErrors = !fieldErrors.accountName && !fieldErrors.sortCode && 
+        const noBankingErrors = !fieldErrors.accountName && !fieldErrors.sortCode && 
                                  !fieldErrors.accountNumber && !fieldErrors.iban && !fieldErrors.swiftBic;
         
-        return sortCodeValid && accountNumberValid && ibanValid && swiftValid && noExistingErrors;
+        return sortCodeValid && accountNumberValid && ibanValid && swiftValid && noBankingErrors;
         
       case 9: // Review
         return true;
