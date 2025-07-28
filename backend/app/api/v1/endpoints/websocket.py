@@ -3,14 +3,19 @@ WebSocket API endpoints for Fynlo POS
 Real-time communication endpoints
 """
 
-from typing import Optional, List
+from typing import Optional, List, Tuple, Dict, Any
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, Query, Path, HTTPException
 from sqlalchemy.orm import Session
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
+import uuid
+import asyncio
+from collections import defaultdict
 
 from app.core.database import get_db, User, Restaurant
+from app.core.validation import sanitize_string
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 from app.core.websocket import (
@@ -27,46 +32,133 @@ from app.core.supabase import supabase_admin
 
 router = APIRouter()
 
+# Rate limiting configuration
+connection_tracker = defaultdict(lambda: {"count": 0, "last_reset": datetime.now()})
+user_connections = defaultdict(set)
+CONNECTION_WINDOW = timedelta(minutes=1)
+MAX_CONNECTIONS_PER_IP = 500  # per minute
+MAX_CONNECTIONS_PER_USER = 5
+
+# CORS configuration
+ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://localhost:8081",
+    "https://fynlo.com",
+    "https://www.fynlo.com",
+    "https://api.fynlo.com",
+    "https://fynlo.co.uk",
+    "https://www.fynlo.co.uk",
+    "https://api.fynlo.co.uk",
+    "fynlo://",  # Mobile app scheme
+]
+
+def validate_uuid(value: str) -> bool:
+    """Validate UUID format or special values"""
+    if value == "onboarding":
+        return True
+    try:
+        uuid.UUID(value)
+        return True
+    except ValueError:
+        return False
+
+def validate_origin(origin: Optional[str]) -> bool:
+    """Validate WebSocket origin"""
+    if not origin:
+        return True  # Allow mobile apps without origin
+    
+    for allowed in ALLOWED_ORIGINS:
+        if origin.startswith(allowed):
+            return True
+    
+    if settings.ENVIRONMENT in ["development", "testing"] and (
+        origin.startswith("http://localhost") or 
+        origin.startswith("http://127.0.0.1")
+    ):
+        return True
+    
+    return False
+
+async def check_rate_limit(identifier: str) -> bool:
+    """Check WebSocket connection rate limit"""
+    current_time = datetime.now()
+    
+    if current_time - connection_tracker[identifier]["last_reset"] > CONNECTION_WINDOW:
+        connection_tracker[identifier] = {"count": 0, "last_reset": current_time}
+    
+    if connection_tracker[identifier]["count"] >= MAX_CONNECTIONS_PER_IP:
+        logger.warning(f"Rate limit exceeded for {identifier}")
+        return False
+    
+    connection_tracker[identifier]["count"] += 1
+    return True
+
+async def check_connection_limit(user_id: str) -> bool:
+    """Check if user has reached connection limit"""
+    if len(user_connections[user_id]) >= MAX_CONNECTIONS_PER_USER:
+        logger.warning(f"Connection limit exceeded for user {user_id}")
+        return False
+    return True
+
+def sanitize_message_data(data: Dict[str, Any]) -> Dict[str, Any]:
+    """Sanitize all string values in message data"""
+    if isinstance(data, dict):
+        return {sanitize_string(str(k), max_length=50): sanitize_message_data(v) for k, v in data.items()}
+    elif isinstance(data, list):
+        return [sanitize_message_data(item) for item in data]
+    elif isinstance(data, str):
+        return sanitize_string(data, max_length=1000)
+    else:
+        return data
+
 async def verify_websocket_access(
     restaurant_id: str,
     user_id: Optional[str] = None,
     token: Optional[str] = None,
     connection_type: str = "pos",
     db: Session = None
-) -> bool:
-    """Verify WebSocket access permissions with Supabase token validation"""
+) -> Tuple[bool, Optional[User]]:
+    """Verify WebSocket access permissions with Supabase token validation
+    Returns (has_access, user_object)
+    """
     try:
+        # Validate restaurant_id format
+        if not validate_uuid(restaurant_id):
+            logger.error(f"Invalid restaurant_id format: {sanitize_string(str(restaurant_id), max_length=50)}")
+            return False, None
+        
         # Special case for onboarding users without restaurants
         if restaurant_id == "onboarding":
             # For onboarding, we only need valid user authentication
             if not user_id or not token:
-                return False
+                return False, None
             # Skip restaurant verification for onboarding
         else:
             # Verify restaurant exists for normal connections
             restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
             if not restaurant or not restaurant.is_active:
-                return False
+                logger.warning(f"Restaurant not found or inactive: {sanitize_string(str(restaurant_id), max_length=50)}")
+                return False, None
         
         # Verify user authentication if user_id provided
         if user_id:
             # Token is REQUIRED for authenticated connections
             if not token:
-                return False
+                return False, None
             
             # Validate the token with Supabase
             try:
                 # Verify token with Supabase Admin API
                 if not supabase_admin:
                     logger.error("Supabase admin client not initialized")
-                    return False
+                    return False, None
                 
                 user_response = supabase_admin.auth.get_user(token)
                 supabase_user = user_response.user
                 
                 if not supabase_user:
                     logger.error("Invalid Supabase token - no user found")
-                    return False
+                    return False, None
                 
                 # Find user in our database by supabase_id
                 user = db.query(User).filter(User.supabase_id == supabase_user.id).first()
@@ -85,22 +177,22 @@ async def verify_websocket_access(
                             # Continue with authentication even if update fails
                 
                 if not user:
-                    logger.error(f"User not found in database for supabase_id: {supabase_user.id}")
-                    return False
+                    logger.error("User not found in database for supabase_id")
+                    return False, None
                 
                 # Verify the user is active
                 if not user.is_active:
-                    logger.warning(f"User is not active: {user.id}")
-                    return False
+                    logger.warning(f"User is not active: {sanitize_string(str(user.id), max_length=50)}")
+                    return False, None
                 
                 # Verify user_id matches (critical security check)
                 if str(user.id) != str(user_id):
-                    logger.error(f"User ID mismatch - potential security violation: {user.id} != {user_id}")
-                    return False
+                    logger.error("User ID mismatch - potential security violation")
+                    return False, None
                     
             except Exception as e:
                 logger.error(f"Supabase token validation error: {str(e)}")
-                return False
+                return False, None
             
             # Check if user has access to this restaurant
             if restaurant_id == "onboarding":
@@ -112,28 +204,28 @@ async def verify_websocket_access(
                 if not user.restaurant_id:
                     # Restaurant owner without a restaurant - they're in onboarding
                     if restaurant_id != "onboarding":
-                        logger.warning(f"Restaurant owner without restaurant trying to access: {restaurant_id}")
-                        return False
-                    logger.info(f"Restaurant owner {user.id} in onboarding phase (no restaurant yet)")
+                        logger.warning("Restaurant owner without restaurant trying to access non-onboarding endpoint")
+                        return False, None
+                    logger.info("Restaurant owner in onboarding phase (no restaurant yet)")
                 elif str(user.restaurant_id) != restaurant_id and restaurant_id != "onboarding":
-                    logger.warning(f"Restaurant owner access denied: {user.restaurant_id} != {restaurant_id}")
-                    return False
+                    logger.warning("Restaurant owner access denied - restaurant mismatch")
+                    return False, None
             elif user.role == "platform_owner":
                 # Platform owners have access to all restaurants
                 pass
             elif user.role in ["manager", "employee"]:
                 if not user.restaurant_id:
-                    logger.warning(f"Staff member without restaurant assignment: {user.id}")
-                    return False
+                    logger.warning("Staff member without restaurant assignment")
+                    return False, None
                 if str(user.restaurant_id) != restaurant_id:
-                    logger.warning(f"Staff access denied: {user.restaurant_id} != {restaurant_id}")
-                    return False
+                    logger.warning("Staff access denied - restaurant mismatch")
+                    return False, None
         
-        return True
+        return True, user if user_id else None
         
     except Exception as e:
         logger.error(f"WebSocket access verification error: {str(e)}")
-        return False
+        return False, None
 
 @router.websocket("/ws/{restaurant_id}")
 async def websocket_endpoint_general(
@@ -148,15 +240,35 @@ async def websocket_endpoint_general(
     Supports POS terminals, management dashboards, and customer displays
     """
     connection_id = None
+    verified_user = None
     
     try:
+        # Check origin validation
+        origin = websocket.headers.get("origin")
+        if not validate_origin(origin):
+            logger.warning(f"Invalid origin: {sanitize_string(str(origin), max_length=100)}")
+            await websocket.close(code=4001, reason="Unauthorized")
+            return
+        
+        # Rate limiting
+        client_host = websocket.client.host if websocket.client else "unknown"
+        rate_limit_identifier = f"ws:{user_id or client_host}"
+        if not await check_rate_limit(rate_limit_identifier):
+            await websocket.close(code=4008, reason="Too many requests")
+            return
+        
         # Get token from query parameters
         token = websocket.query_params.get("token")
         
         # Verify access with token validation
-        has_access = await verify_websocket_access(restaurant_id, user_id, token, connection_type, db)
+        has_access, verified_user = await verify_websocket_access(restaurant_id, user_id, token, connection_type, db)
         if not has_access:
             await websocket.close(code=4003, reason="Access denied")
+            return
+        
+        # Check connection limits for authenticated users
+        if verified_user and not await check_connection_limit(str(verified_user.id)):
+            await websocket.close(code=4009, reason="Connection limit exceeded")
             return
         
         # Determine connection type
@@ -168,21 +280,23 @@ async def websocket_endpoint_general(
         elif connection_type == "customer":
             conn_type = ConnectionType.CUSTOMER
         
-        # Get user roles if user_id provided
+        # Get user roles from verified user
         roles = []
-        if user_id:
-            user = db.query(User).filter(User.id == user_id).first()
-            if user:
-                roles = [user.role]
+        if verified_user:
+            roles = [verified_user.role]
         
         # Connect to WebSocket manager
         connection_id = await websocket_manager.connect(
             websocket=websocket,
             restaurant_id=restaurant_id,
-            user_id=user_id,
+            user_id=str(verified_user.id) if verified_user else user_id,
             connection_type=conn_type,
             roles=roles
         )
+        
+        # Track user connection
+        if verified_user:
+            user_connections[str(verified_user.id)].add(connection_id)
         
         # Handle incoming messages
         while True:
@@ -190,6 +304,9 @@ async def websocket_endpoint_general(
                 # Receive message from client
                 data = await websocket.receive_text()
                 message_data = json.loads(data)
+                
+                # Sanitize message data
+                message_data = sanitize_message_data(message_data)
                 
                 # Handle different message types
                 message_type = message_data.get("type")
@@ -210,34 +327,39 @@ async def websocket_endpoint_general(
                         "timestamp": datetime.now().isoformat()
                     }))
                 else:
-                    # Echo unknown message types for debugging
+                    # Log unknown message type
+                    logger.warning(f"Unknown message type received: {sanitize_string(str(message_type), max_length=50)}")
                     await websocket.send_text(json.dumps({
                         "type": "error",
-                        "message": f"Unknown message type: {message_type}",
-                        "original_message": message_data
+                        "message": "Unknown message type"
                     }))
                     
-            except json.JSONDecodeError:
+            except json.JSONDecodeError as e:
+                logger.error(f"JSON decode error: {str(e)}")
                 await websocket.send_text(json.dumps({
                     "type": "error",
-                    "message": "Invalid JSON format"
+                    "message": "Invalid message format"
                 }))
             except Exception as e:
+                logger.error(f"WebSocket message processing error: {str(e)}")
                 await websocket.send_text(json.dumps({
                     "type": "error",
-                    "message": f"Message processing error: {str(e)}"
+                    "message": "Message processing failed"
                 }))
                 
     except WebSocketDisconnect:
         pass
     except Exception as e:
+        logger.error(f"WebSocket connection error: {str(e)}")
         try:
-            await websocket.close(code=4000, reason=f"Connection error: {str(e)}")
+            await websocket.close(code=4000, reason="Connection error")
         except:
             pass
     finally:
         if connection_id:
             await websocket_manager.disconnect(connection_id)
+        if verified_user:
+            user_connections[str(verified_user.id)].discard(connection_id)
 
 @router.websocket("/ws/kitchen/{restaurant_id}")
 async def websocket_kitchen_endpoint(
