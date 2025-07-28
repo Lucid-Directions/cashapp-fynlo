@@ -278,8 +278,6 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
   };
 
   const validateStep = (step: number): boolean => {
-    let hasErrors = false;
-    
     switch (step) {
       case 1: // Basic Info
         return !!(formData.restaurantName && formData.displayName && formData.businessType);
@@ -287,34 +285,32 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
       case 2: // Contact
         if (!formData.phone || !formData.email) return false;
         
-        // Validate phone
-        if (!validateUKPhone(formData.phone)) {
-          setFieldErrors(prev => ({ ...prev, phone: 'Please enter a valid UK phone number' }));
-          hasErrors = true;
-        }
+        // Check data validity without setting state
+        const phoneValid = validateUKPhone(formData.phone);
+        const emailValid = validateEmail(formData.email);
         
-        // Check for existing errors
-        if (fieldErrors.phone || fieldErrors.restaurantEmail) hasErrors = true;
+        // Also check if there are existing errors from onBlur
+        const noExistingErrors = !fieldErrors.phone && !fieldErrors.restaurantEmail;
         
-        // Validate email format
-        if (!validateEmail(formData.email)) hasErrors = true;
-        
-        return !hasErrors;
+        return phoneValid && emailValid && noExistingErrors;
         
       case 3: // Location
         if (!formData.street || !formData.city || !formData.zipCode) return false;
         
-        // Validate postcode
-        if (!validatePostcode(formData.zipCode)) {
-          setFieldErrors(prev => ({ ...prev, postcode: 'Please enter a valid UK postcode' }));
-          hasErrors = true;
-        }
+        // Check postcode validity
+        const postcodeValid = validatePostcode(formData.zipCode);
+        const noExistingError = !fieldErrors.postcode;
         
-        return !hasErrors && !fieldErrors.postcode;
+        return postcodeValid && noExistingError;
         
       case 4: // Owner Info
         if (!formData.ownerName || !formData.ownerEmail) return false;
-        return !fieldErrors.ownerEmail && validateEmail(formData.ownerEmail);
+        
+        // Check email validity and existing errors
+        const ownerEmailValid = validateEmail(formData.ownerEmail);
+        const noExistingError = !fieldErrors.ownerEmail;
+        
+        return ownerEmailValid && noExistingError;
         
       case 5: // Business Hours
         return true; // Optional
@@ -330,29 +326,19 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
           return false;
         }
         
-        // Validate all bank fields
-        if (!validateSortCode(formData.bankDetails.sortCode)) {
-          setFieldErrors(prev => ({ ...prev, sortCode: 'Please enter a valid 6-digit sort code' }));
-          hasErrors = true;
-        }
+        // Check validity of all bank fields
+        const sortCodeValid = validateSortCode(formData.bankDetails.sortCode);
+        const accountNumberValid = validateAccountNumber(formData.bankDetails.accountNumber);
         
-        if (!validateAccountNumber(formData.bankDetails.accountNumber)) {
-          setFieldErrors(prev => ({ ...prev, accountNumber: 'Please enter a valid 8-digit account number' }));
-          hasErrors = true;
-        }
+        // Optional fields - only validate if provided
+        const ibanValid = !formData.bankDetails.iban || validateIBAN(formData.bankDetails.iban);
+        const swiftValid = !formData.bankDetails.swiftBic || validateSWIFT(formData.bankDetails.swiftBic);
         
-        // Optional fields
-        if (formData.bankDetails.iban && !validateIBAN(formData.bankDetails.iban)) {
-          setFieldErrors(prev => ({ ...prev, iban: 'Please enter a valid IBAN' }));
-          hasErrors = true;
-        }
+        // Check for existing errors
+        const noExistingErrors = !fieldErrors.sortCode && !fieldErrors.accountNumber && 
+                                 !fieldErrors.iban && !fieldErrors.swiftBic;
         
-        if (formData.bankDetails.swiftBic && !validateSWIFT(formData.bankDetails.swiftBic)) {
-          setFieldErrors(prev => ({ ...prev, swiftBic: 'Please enter a valid SWIFT/BIC code' }));
-          hasErrors = true;
-        }
-        
-        return !hasErrors && !fieldErrors.sortCode && !fieldErrors.accountNumber && !fieldErrors.iban && !fieldErrors.swiftBic;
+        return sortCodeValid && accountNumberValid && ibanValid && swiftValid && noExistingErrors;
         
       case 9: // Review
         return true;
@@ -362,9 +348,51 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
     }
   };
 
+  const triggerValidationErrors = (step: number) => {
+    // This function sets error messages when Next is clicked with invalid data
+    switch (step) {
+      case 2: // Contact
+        if (formData.phone && !validateUKPhone(formData.phone)) {
+          setFieldErrors(prev => ({ ...prev, phone: 'Please enter a valid UK phone number' }));
+        }
+        if (formData.email && !validateEmail(formData.email)) {
+          setFieldErrors(prev => ({ ...prev, restaurantEmail: 'Please enter a valid email address' }));
+        }
+        break;
+        
+      case 3: // Location
+        if (formData.zipCode && !validatePostcode(formData.zipCode)) {
+          setFieldErrors(prev => ({ ...prev, postcode: 'Please enter a valid UK postcode' }));
+        }
+        break;
+        
+      case 4: // Owner Info
+        if (formData.ownerEmail && !validateEmail(formData.ownerEmail)) {
+          setFieldErrors(prev => ({ ...prev, ownerEmail: 'Please enter a valid email address' }));
+        }
+        break;
+        
+      case 8: // Bank Details
+        if (formData.bankDetails?.sortCode && !validateSortCode(formData.bankDetails.sortCode)) {
+          setFieldErrors(prev => ({ ...prev, sortCode: 'Please enter a valid 6-digit sort code' }));
+        }
+        if (formData.bankDetails?.accountNumber && !validateAccountNumber(formData.bankDetails.accountNumber)) {
+          setFieldErrors(prev => ({ ...prev, accountNumber: 'Please enter a valid 8-digit account number' }));
+        }
+        if (formData.bankDetails?.iban && !validateIBAN(formData.bankDetails.iban)) {
+          setFieldErrors(prev => ({ ...prev, iban: 'Please enter a valid IBAN' }));
+        }
+        if (formData.bankDetails?.swiftBic && !validateSWIFT(formData.bankDetails.swiftBic)) {
+          setFieldErrors(prev => ({ ...prev, swiftBic: 'Please enter a valid SWIFT/BIC code' }));
+        }
+        break;
+    }
+  };
+
   const nextStep = () => {
     if (!validateStep(currentStep)) {
-      // Validation errors are now shown inline - just prevent progression
+      // Trigger validation errors to show feedback
+      triggerValidationErrors(currentStep);
       return;
     }
     
