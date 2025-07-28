@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import and_, desc, func
 from pydantic import BaseModel, EmailStr
 from datetime import datetime, timedelta
+import logging
 
 from app.core.database import get_db, Restaurant, Platform, User, Order, Customer, Section, Table
 from app.core.auth import get_current_user
@@ -21,8 +22,10 @@ from app.core.validation import (
     ValidationError as ValidationErr
 )
 from app.core.websocket import websocket_manager
+from app.schemas.restaurant import RestaurantOnboardingCreate
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 # Pydantic models
 class RestaurantCreate(BaseModel):
@@ -255,7 +258,7 @@ async def create_restaurant(
 
 @router.post("/onboarding/create", response_model=RestaurantResponse)
 async def create_restaurant_onboarding(
-    restaurant_data: RestaurantCreate,
+    restaurant_data: RestaurantOnboardingCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -281,7 +284,23 @@ async def create_restaurant_onboarding(
     try:
         validated_address = validate_model_jsonb_fields('restaurant', 'address', restaurant_data.address)
         validated_business_hours = validate_model_jsonb_fields('restaurant', 'business_hours', restaurant_data.business_hours)
-        validated_settings = validate_model_jsonb_fields('restaurant', 'settings', restaurant_data.settings)
+        
+        # Create settings from the additional fields
+        settings = {
+            "display_name": restaurant_data.display_name,
+            "business_type": restaurant_data.business_type,
+            "description": restaurant_data.description or "",
+            "website": restaurant_data.website or "",
+            "owner_info": restaurant_data.owner_info,
+            "bank_details": restaurant_data.bank_details,
+            "currency": "GBP",
+            "date_format": "DD/MM/YYYY",
+            "time_format": "24h",
+            "allow_tips": True,
+            "auto_gratuity_percentage": 12.5,
+            "print_receipt_default": True
+        }
+        validated_settings = validate_model_jsonb_fields('restaurant', 'settings', settings)
     except ValidationErr as e:
         raise FynloException(
             error_code=ErrorCodes.VALIDATION_ERROR,
@@ -309,9 +328,25 @@ async def create_restaurant_onboarding(
             detail="Restaurant name cannot be empty"
         )
     
-    # Get subscription info from user
-    subscription_plan = current_user.subscription_plan or "alpha"
-    subscription_status = current_user.subscription_status or "active"
+    # Get subscription info from Supabase metadata
+    # We need to fetch from Supabase since User model doesn't have subscription fields
+    from app.core.supabase_client import get_supabase_client
+    supabase = get_supabase_client()
+    
+    # Get the Supabase user to access metadata
+    supabase_user = None
+    if current_user.supabase_id:
+        try:
+            response = supabase.auth.admin.get_user_by_id(str(current_user.supabase_id))
+            if response and response.user:
+                supabase_user = response.user
+        except Exception as e:
+            logger.warning(f"Failed to fetch Supabase user: {e}")
+    
+    # Extract subscription info from Supabase metadata or use defaults
+    user_metadata = supabase_user.user_metadata if supabase_user else {}
+    subscription_plan = user_metadata.get('subscription_plan', 'alpha')
+    subscription_status = user_metadata.get('subscription_status', 'active')
     
     # Create restaurant with proper defaults
     new_restaurant = Restaurant(
@@ -320,7 +355,7 @@ async def create_restaurant_onboarding(
         address=validated_address,
         phone=restaurant_data.phone,
         email=restaurant_data.email or current_user.email,
-        timezone=restaurant_data.timezone,
+        timezone="Europe/London",  # Default to UK timezone
         business_hours=validated_business_hours,
         settings=validated_settings,
         subscription_plan=subscription_plan,
@@ -343,6 +378,28 @@ async def create_restaurant_onboarding(
     # Set user role to restaurant_owner if not already set
     if current_user.role not in ["platform_owner", "restaurant_owner"]:
         current_user.role = "restaurant_owner"
+    
+    # Create employees if provided
+    if restaurant_data.employees:
+        for emp_data in restaurant_data.employees:
+            try:
+                # Create user for each employee
+                employee_user = User(
+                    email=emp_data['email'],
+                    first_name=emp_data['name'].split()[0] if ' ' in emp_data['name'] else emp_data['name'],
+                    last_name=' '.join(emp_data['name'].split()[1:]) if ' ' in emp_data['name'] else '',
+                    role=emp_data.get('role', 'employee'),
+                    restaurant_id=new_restaurant.id,
+                    platform_id=platform_id,
+                    permissions={"access_level": emp_data.get('access_level', 'pos_only')},
+                    is_active=True,
+                    created_at=datetime.utcnow()
+                )
+                db.add(employee_user)
+                logger.info(f"Created employee user: {employee_user.email}")
+            except Exception as e:
+                logger.warning(f"Failed to create employee {emp_data.get('email', 'unknown')}: {e}")
+                # Continue with other employees even if one fails
     
     db.commit()
     db.refresh(new_restaurant)

@@ -447,6 +447,12 @@ async def register_restaurant(
                 default_platform = db.query(Platform).filter(Platform.name == "Fynlo").first()
                 if default_platform:
                     platform_id = str(default_platform.id)
+                else:
+                    # No platform found - this is a critical error
+                    raise HTTPException(
+                        status_code=500, 
+                        detail="No platform found. Please contact support."
+                    )
             
             # Create properly structured address
             address_data = {

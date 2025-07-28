@@ -23,6 +23,22 @@ class RestaurantCreate(RestaurantBase):
     pass
 
 
+class RestaurantOnboardingCreate(BaseModel):
+    """Extended schema for restaurant onboarding with additional fields"""
+    name: str
+    display_name: str
+    business_type: str
+    description: Optional[str] = None
+    phone: str
+    email: EmailStr
+    website: Optional[str] = None
+    address: dict
+    business_hours: dict
+    owner_info: dict
+    employees: Optional[List[dict]] = []
+    bank_details: Optional[dict] = None
+
+
 class RestaurantUpdate(BaseModel):
     """Schema for updating a restaurant"""
     name: Optional[str] = None

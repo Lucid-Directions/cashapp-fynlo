@@ -306,7 +306,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
       
       // Get auth token from AsyncStorage
       const AsyncStorage = require('@react-native-async-storage/async-storage').default;
-      const token = await AsyncStorage.getItem('supabase.auth.token');
+      const token = await AsyncStorage.getItem('auth_token');
       
       if (!token) {
         Alert.alert('Authentication Error', 'Please log in again.');
@@ -337,11 +337,11 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
           phone: formData.ownerPhone || '',
         },
         employees: employees.map(emp => ({
-          name: emp.name,
-          email: emp.email,
-          phone: emp.phone,
+          name: sanitizeInput(emp.name),
+          email: emp.email.toLowerCase().trim(),
+          phone: emp.phone || '',
           role: emp.role,
-          hourly_rate: parseFloat(emp.hourlyRate),
+          hourly_rate: parseNumericInput(emp.hourlyRate),
           start_date: emp.startDate,
           access_level: emp.accessLevel,
         })),
