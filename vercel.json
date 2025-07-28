@@ -1,0 +1,11 @@
+{
+  "framework": "vite",
+  "installCommand": "cd shared && npm install && cd ../web-platform && npm install",
+  "buildCommand": "cd shared && npm install && npm run build && cd ../web-platform && npm run build",
+  "outputDirectory": "web-platform/dist",
+  "functions": {
+    "web-platform/api/*.js": {
+      "includeFiles": "shared/**"
+    }
+  }
+}
