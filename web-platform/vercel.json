@@ -1,8 +1,8 @@
 {
   "framework": "vite",
-  "buildCommand": "cd .. && npm run build",
-  "installCommand": "cd .. && npm install",
-  "outputDirectory": "web-platform/dist",
+  "buildCommand": "cd .. && npm install && cd web-platform && npm run build",
+  "outputDirectory": "dist",
+  "installCommand": "echo 'Skipping install'",
   "rewrites": [
     {
       "source": "/(.*)",

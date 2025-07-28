@@ -159,3 +159,4 @@ backend/manual_fix_instructions.md
 backend/debug_*.py
 backend/test_*.py
 backend/fix_*.py
+.vercel

@@ -1,0 +1,51 @@
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Backend
+backend/
+*.py
+*.pyc
+__pycache__/
+venv/
+
+# Mobile apps
+CashApp-iOS/
+cashapp/
+
+# Development files
+*.log
+*.db
+.env*
+!web-platform/.env.example
+
+# Build caches
+.turbo/
+dist/
+build/
+.next/
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+
+# Documentation
+*.md
+!README.md
+
+# Tests
+**/*.test.*
+**/*.spec.*
+__tests__/
+coverage/
+
+# Only include what's needed for web-platform
+!shared/
+!web-platform/
+!package.json
+!package-lock.json
+!turbo.json
