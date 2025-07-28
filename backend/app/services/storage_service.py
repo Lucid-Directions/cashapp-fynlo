@@ -3,19 +3,26 @@ DigitalOcean Spaces Storage Service
 Handles file uploads, downloads, and management with CDN delivery
 """
 
-import boto3
 import hashlib
 import os
 import logging
-from typing import Optional, Dict, BinaryIO, List
+from typing import Optional, Dict, BinaryIO, List, TYPE_CHECKING
 from datetime import datetime
-from PIL import Image
 from io import BytesIO
-from botocore.exceptions import ClientError, NoCredentialsError
 
 from app.core.config import settings
 from app.core.exceptions import FynloException, ErrorCodes
 
+# Lazy imports to prevent deployment failures when boto3 is not available
+if TYPE_CHECKING:
+    import boto3
+    from botocore.exceptions import ClientError, NoCredentialsError
+    from PIL import Image
+else:
+    boto3 = None
+    ClientError = None
+    NoCredentialsError = None
+    Image = None
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +33,19 @@ class StorageService:
     def __init__(self):
         """Initialize the storage service"""
         self.enabled = settings.ENABLE_SPACES_STORAGE
+        self.client = None
+        
+        # Lazy load boto3 to prevent deployment failures
+        if self.enabled:
+            global boto3, ClientError, NoCredentialsError
+            if boto3 is None:
+                try:
+                    import boto3
+                    from botocore.exceptions import ClientError, NoCredentialsError
+                except ImportError:
+                    logger.warning("boto3 not available - storage service disabled")
+                    self.enabled = False
+                    return
         
         if self.enabled and self._validate_credentials():
             try:
@@ -45,7 +65,7 @@ class StorageService:
                 
                 logger.info(f"Storage service initialized for bucket: {self.bucket}")
                 
-            except (NoCredentialsError, Exception) as e:
+            except Exception as e:
                 logger.error(f"Failed to initialize Spaces client: {e}")
                 self.enabled = False
                 self.client = None
@@ -138,21 +158,23 @@ class StorageService:
                 'content_type': self._get_content_type(filename)
             }
             
-        except ClientError as e:
-            error_code = e.response['Error']['Code']
-            logger.error(f"Spaces client error ({error_code}): {str(e)}")
-            raise FynloException(
-                message=f"Upload failed: {error_code}",
-                error_code=ErrorCodes.EXTERNAL_SERVICE_ERROR,
-                status_code=503
-            )
         except Exception as e:
-            logger.error(f"File upload failed: {str(e)}")
-            raise FynloException(
-                message=f"Upload failed: {str(e)}",
-                error_code=ErrorCodes.INTERNAL_ERROR,
-                status_code=500
-            )
+            # Handle ClientError specifically if boto3 is available
+            if ClientError and isinstance(e, ClientError):
+                error_code = e.response['Error']['Code']
+                logger.error(f"Spaces client error ({error_code}): {str(e)}")
+                raise FynloException(
+                    message=f"Upload failed: {error_code}",
+                    error_code=ErrorCodes.EXTERNAL_SERVICE_ERROR,
+                    status_code=503
+                )
+            else:
+                logger.error(f"File upload failed: {str(e)}")
+                raise FynloException(
+                    message=f"Upload failed: {str(e)}",
+                    error_code=ErrorCodes.INTERNAL_ERROR,
+                    status_code=500
+                )
     
     def _validate_file(self, file_content: bytes, filename: str) -> None:
         """Validate file size and type"""
@@ -176,6 +198,14 @@ class StorageService:
         
         # Basic content validation for images
         if file_ext in ['jpg', 'jpeg', 'png', 'gif']:
+            global Image
+            if Image is None:
+                try:
+                    from PIL import Image
+                except ImportError:
+                    logger.warning("PIL not available - skipping image validation")
+                    return
+            
             try:
                 Image.open(BytesIO(file_content))
             except Exception:
@@ -187,6 +217,14 @@ class StorageService:
     
     def _optimize_image(self, image_content: bytes, file_ext: str) -> bytes:
         """Optimize image for web delivery"""
+        
+        global Image
+        if Image is None:
+            try:
+                from PIL import Image
+            except ImportError:
+                logger.warning("PIL not available - returning original image")
+                return image_content
         
         try:
             # Open image
@@ -255,16 +293,18 @@ class StorageService:
             logger.info(f"File deleted: {file_path}")
             return True
             
-        except ClientError as e:
-            error_code = e.response['Error']['Code']
-            if error_code == 'NoSuchKey':
-                logger.warning(f"File not found for deletion: {file_path}")
-                return False
-            logger.error(f"Spaces deletion error ({error_code}): {str(e)}")
-            return False
         except Exception as e:
-            logger.error(f"File deletion failed: {str(e)}")
-            return False
+            # Handle ClientError specifically if boto3 is available
+            if ClientError and isinstance(e, ClientError):
+                error_code = e.response['Error']['Code']
+                if error_code == 'NoSuchKey':
+                    logger.warning(f"File not found for deletion: {file_path}")
+                    return False
+                logger.error(f"Spaces deletion error ({error_code}): {str(e)}")
+                return False
+            else:
+                logger.error(f"File deletion failed: {str(e)}")
+                return False
     
     async def get_presigned_url(
         self,
