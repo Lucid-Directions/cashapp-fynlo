@@ -98,6 +98,9 @@ jspm_packages/
 .nuxt
 dist
 
+# Turborepo
+.turbo
+
 # Storybook build outputs
 .out
 .storybook-out
