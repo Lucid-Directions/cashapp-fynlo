@@ -208,7 +208,7 @@ class TestWebSocketSecurity:
             with patch("app.core.config.settings.WEBSOCKET_SESSION_TIMEOUT", 1):  # 1 second timeout
                 with test_client.websocket_connect("/api/v1/ws?token=token") as websocket:
                     # Wait for timeout
-                    asyncio.sleep(2)
+                    await asyncio.sleep(2)
                     
                     # Try to send message after timeout
                     websocket.send_json({"type": "ping"})
