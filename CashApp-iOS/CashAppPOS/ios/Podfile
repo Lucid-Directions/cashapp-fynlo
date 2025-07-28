@@ -1,0 +1,297 @@
+
+require File.join(File.dirname(`node --print "require.resolve('react-native/package.json')"`), "scripts/react_native_pods")
+require File.join(File.dirname(`node --print "require.resolve('@react-native-community/cli-platform-ios/package.json')"`), "native_modules")
+
+platform :ios, '13.4'
+install! 'cocoapods', :deterministic_uuids => false
+
+target 'CashAppPOS' do
+  config = use_native_modules!
+
+  use_react_native!(
+    :path => config[:reactNativePath],
+    :hermes_enabled => false,
+    :fabric_enabled => false,
+    :flipper_configuration => FlipperConfiguration.disabled,
+    :app_path => "#{Pod::Config.instance.installation_root}/.."
+  )
+
+  # Square SDK configuration - temporarily disabled to fix CorePaymentCard framework issue
+  # pod 'SquareInAppPaymentsSDK', :modular_headers => true
+  # pod 'SquareBuyerVerificationSDK', :modular_headers => true
+  
+  # Official SumUp iOS SDK for Tap to Pay on iPhone
+  pod 'SumUpSDK', '~> 4.0'
+  
+  post_install do |installer|
+    react_native_post_install(
+      installer,
+      config[:reactNativePath],
+      :mac_catalyst_enabled => false
+    )
+    
+    # Enable modular headers for Yoga to fix React Native 0.72+ Swift bridging issue
+    installer.pods_project.targets.each do |target|
+      if target.name == 'Yoga'
+        target.build_configurations.each do |config|
+          config.build_settings['DEFINES_MODULE'] = 'YES'
+          config.build_settings['MODULEMAP_FILE'] = '$(PODS_TARGET_SRCROOT)/Yoga.modulemap'
+          config.build_settings['HEADER_SEARCH_PATHS'] ||= '$(inherited)'
+          config.build_settings['HEADER_SEARCH_PATHS'] << ' $(PODS_ROOT)/Headers/Public/yoga'
+        end
+      end
+    end
+    
+    # Fix Square SDK framework embedding and nested framework paths
+    installer.pods_project.targets.each do |target|
+      if target.name == 'RNSquareInAppPayments'
+        target.build_configurations.each do |config|
+          config.build_settings['BUILD_LIBRARY_FOR_DISTRIBUTION'] = 'YES'
+          config.build_settings['ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES'] = 'YES'
+          
+          # Fix nested CorePaymentCard framework path
+          config.build_settings['LD_RUNPATH_SEARCH_PATHS'] ||= ['$(inherited)']
+          config.build_settings['LD_RUNPATH_SEARCH_PATHS'] << '@executable_path/Frameworks'
+          config.build_settings['LD_RUNPATH_SEARCH_PATHS'] << '@loader_path/Frameworks'
+          config.build_settings['LD_RUNPATH_SEARCH_PATHS'] << '@executable_path/Frameworks/SquareInAppPaymentsSDK.framework/Frameworks'
+          config.build_settings['LD_RUNPATH_SEARCH_PATHS'] << '@executable_path/Frameworks/SquareBuyerVerificationSDK.framework/Frameworks'
+        end
+      end
+      
+      # Configure main app target for Square frameworks
+      if target.name == 'CashAppPOS'
+        target.build_configurations.each do |config|
+          config.build_settings['LD_RUNPATH_SEARCH_PATHS'] ||= ['$(inherited)']
+          config.build_settings['LD_RUNPATH_SEARCH_PATHS'] << '@executable_path/Frameworks'
+          config.build_settings['LD_RUNPATH_SEARCH_PATHS'] << '@loader_path/Frameworks'
+          config.build_settings['LD_RUNPATH_SEARCH_PATHS'] << '@executable_path/Frameworks/SquareInAppPaymentsSDK.framework/Frameworks'
+          config.build_settings['LD_RUNPATH_SEARCH_PATHS'] << '@executable_path/Frameworks/SquareBuyerVerificationSDK.framework/Frameworks'
+        end
+      end
+    end
+    
+    # Comprehensive fixes for Xcode 16.4 compatibility
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |config|
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.4'
+        
+        # Suppress non-critical warnings to prevent build hangs
+        config.build_settings['GCC_WARN_INHIBIT_ALL_WARNINGS'] = "YES"
+        config.build_settings['SWIFT_SUPPRESS_WARNINGS'] = "YES"
+        config.build_settings['WARNING_CFLAGS'] = ['-Wno-everything']
+        config.build_settings['CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER'] = "NO"
+        
+        # C++ standard library compatibility for Xcode 16.4
+        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)']
+        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << '_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION=1'
+        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << '_LIBCPP_ENABLE_CXX20_REMOVED_TYPE_TRAITS=1'
+        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << '_LIBCPP_DISABLE_DEPRECATION_WARNINGS=1'
+        
+        # Fix specific library issues
+        if target.name.start_with?("React")
+          config.build_settings['CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS'] = "NO"
+          config.build_settings['CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF'] = "NO"
+        end
+        
+        if target.name == "RCT-Folly"
+          config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'FOLLY_HAVE_CLOCK_GETTIME=1'
+        end
+        
+        # Fix boost and fmt warnings
+        if target.name == "boost" || target.name == "fmt"
+          config.build_settings['CLANG_WARN_EVERYTHING'] = "NO"
+        end
+        
+        # Suppress RNReanimated/RNScreens warnings
+        if target.name.start_with?("RN")
+          config.build_settings['GCC_WARN_PEDANTIC'] = "NO"
+          config.build_settings['CLANG_WARN_STRICT_PROTOTYPES'] = "NO"
+        end
+        
+        # Fix react-native-screens threading issue
+        if target.name == "RNScreens"
+          config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)']
+          config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'RCT_NEW_ARCH_ENABLED=0'
+          config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'RN_DISABLE_FORCED_MAIN_QUEUE_INIT=1'
+        end
+        
+        # Fix SocketRocket priority inversion warnings
+        if target.name == "SocketRocket"
+          config.build_settings['GCC_WARN_ABOUT_MISSING_PROTOTYPES'] = "NO"
+          config.build_settings['CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF'] = "NO"
+          config.build_settings['CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS'] = "NO"
+          config.build_settings['CLANG_ANALYZER_NONNULL'] = "NO"
+          config.build_settings['WARNING_CFLAGS'] = ['-Wno-everything']
+        end
+        
+        # Xcode 16.4 performance optimizations
+        config.build_settings['COMPILER_INDEX_STORE_ENABLE'] = "NO"
+        config.build_settings['ONLY_ACTIVE_ARCH'] = "YES" if config.name == 'Debug'
+        config.build_settings['GCC_OPTIMIZATION_LEVEL'] = "0" if config.name == 'Debug'
+        config.build_settings['SWIFT_OPTIMIZATION_LEVEL'] = "-Onone" if config.name == 'Debug'
+        config.build_settings['SWIFT_COMPILATION_MODE'] = "singlefile"
+        config.build_settings['ENABLE_TESTABILITY'] = "NO" if config.name == 'Release'
+        
+        # Memory management for large projects
+        config.build_settings['SWIFT_COMPILATION_MODE'] = "singlefile"
+        config.build_settings['DEBUG_INFORMATION_FORMAT'] = "dwarf-with-dsym" if config.name == 'Debug'
+        config.build_settings['ENABLE_BITCODE'] = "NO"
+        config.build_settings['GCC_GENERATE_DEBUGGING_SYMBOLS'] = "YES"
+        config.build_settings['STRIP_INSTALLED_PRODUCT'] = "NO" if config.name == 'Debug'
+        
+        # Reduce parallelism to prevent hanging
+        config.build_settings['SWIFT_DISABLE_SAFETY_CHECKS'] = "YES" if config.name == 'Debug'
+        
+        # Disable explicit modules to prevent ccache conflicts
+        config.build_settings['CLANG_ENABLE_EXPLICIT_MODULES'] = 'NO'
+        config.build_settings['CLANG_ENABLE_EXPLICIT_MODULES_WITH_COMPILER_LAUNCHER'] = 'YES'
+        
+        # Enable ccache for faster builds (safer approach)
+        config.build_settings['CC'] = '$(DT_TOOLCHAIN_DIR)/usr/bin/clang'
+        config.build_settings['CXX'] = '$(DT_TOOLCHAIN_DIR)/usr/bin/clang++'
+        config.build_settings['COMPILER_INDEX_STORE_ENABLE'] = 'NO'
+      end
+    end
+    
+    # Additional SocketRocket optimization - suppress priority inversion at runtime
+    puts "🔧 Configuring SocketRocket priority inversion suppression..."
+    
+    # Apply the enhanced SocketRocket patch to fix priority inversion
+    socketrocket_enhanced_patch = File.join(__dir__, 'socketrocket-enhanced-fix.patch')
+    socketrocket_original_patch = File.join(__dir__, 'socketrocket-priority-fix.patch')
+    socketrocket_file_path = File.join(__dir__, 'Pods/SocketRocket/SocketRocket/Internal/RunLoop/SRRunLoopThread.m')
+    
+    if File.exist?(socketrocket_file_path)
+      puts "📝 Applying enhanced SocketRocket priority inversion fix..."
+      # First, revert any previous patches
+      system("cd '#{File.join(__dir__, 'Pods/SocketRocket')}' && git checkout . 2>/dev/null || true")
+      
+      # Apply the enhanced patch
+      if File.exist?(socketrocket_enhanced_patch)
+        system("patch -p1 < '#{socketrocket_enhanced_patch}' -d '#{File.join(__dir__, 'Pods/SocketRocket')}'") || puts("⚠️  Enhanced patch may have already been applied")
+      elsif File.exist?(socketrocket_original_patch)
+        system("patch -p1 < '#{socketrocket_original_patch}' -d '#{File.join(__dir__, 'Pods/SocketRocket')}'") || puts("⚠️  Original patch may have already been applied")
+      end
+    end
+    
+    # Add preprocessor definitions to suppress the warning at compile time
+    installer.pods_project.targets.each do |target|
+      if target.name == "SocketRocket"
+        target.build_configurations.each do |config|
+          # Suppress priority inversion warnings specifically
+          config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)']
+          config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'SR_SUPPRESS_PRIORITY_WARNINGS=1'
+          config.build_settings['CLANG_WARN_UNREACHABLE_CODE'] = "NO"
+          config.build_settings['GCC_WARN_ABOUT_RETURN_TYPE'] = "NO"
+          config.build_settings['CLANG_ANALYZER_PERFORMANCE'] = "NO"
+        end
+      end
+    end
+    
+    puts "✅ SocketRocket priority inversion suppression configured!"
+    
+    # Fix Square SDK nested framework issue by copying CorePaymentCard to top level
+    puts "🔧 Configuring Square SDK nested framework fix..."
+    
+    # Add custom build phase to copy nested frameworks
+    installer.pods_project.targets.each do |target|
+      if target.name == 'CashAppPOS'
+        # Add build script to copy nested frameworks
+        build_script_phase = target.new_shell_script_build_phase('Copy Square Nested Frameworks')
+        build_script_phase.shell_script = <<-SCRIPT
+# Copy CorePaymentCard framework from nested location to top level
+SQUARE_FRAMEWORKS_DIR="$BUILT_PRODUCTS_DIR/$PRODUCT_NAME.app/Frameworks"
+CORE_PAYMENT_CARD_SOURCE="$SQUARE_FRAMEWORKS_DIR/SquareInAppPaymentsSDK.framework/Frameworks/CorePaymentCard.framework"
+CORE_PAYMENT_CARD_DEST="$SQUARE_FRAMEWORKS_DIR/CorePaymentCard.framework"
+
+if [ -d "$CORE_PAYMENT_CARD_SOURCE" ] && [ ! -d "$CORE_PAYMENT_CARD_DEST" ]; then
+    echo "Copying CorePaymentCard.framework to top level..."
+    cp -R "$CORE_PAYMENT_CARD_SOURCE" "$CORE_PAYMENT_CARD_DEST"
+    echo "✅ CorePaymentCard.framework copied successfully"
+else
+    echo "ℹ️ CorePaymentCard.framework already exists or source not found"
+fi
+SCRIPT
+        # Move the build script to run after "Embed Frameworks"
+        target.build_phases.move(build_script_phase, target.build_phases.count - 1)
+      end
+    end
+    
+    # Fix deprecated ld_classic linker warning and category conflicts
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |config|
+        # Fix duplicate library and linker warnings
+        if config.build_settings['OTHER_LDFLAGS']
+          # Remove duplicate -lc++ flags and deprecated linker flags
+          if config.build_settings['OTHER_LDFLAGS'].is_a?(Array)
+            # Remove duplicates and ensure only one -lc++ flag
+            flags = config.build_settings['OTHER_LDFLAGS'].uniq.reject { |flag| flag == '-ld_classic' }
+            # Remove all -lc++ flags first, then add one back
+            flags = flags.reject { |flag| flag == '-lc++' }
+            flags << '-lc++' unless flags.include?('-lc++')
+            config.build_settings['OTHER_LDFLAGS'] = flags
+          elsif config.build_settings['OTHER_LDFLAGS'].is_a?(String)
+            # Clean up string format
+            ldflags = config.build_settings['OTHER_LDFLAGS']
+            ldflags = ldflags.gsub('-ld_classic', '').strip
+            # Remove duplicate -lc++ flags
+            ldflags = ldflags.gsub(/(-lc\+\+\s*){2,}/, '-lc++ ')
+            # Ensure there's exactly one -lc++ flag
+            unless ldflags.include?('-lc++')
+              ldflags += ' -lc++'
+            end
+            config.build_settings['OTHER_LDFLAGS'] = ldflags.strip
+          end
+        else
+          # Initialize OTHER_LDFLAGS if it doesn't exist
+          config.build_settings['OTHER_LDFLAGS'] = ['-lc++']
+        end
+        
+        # Additional check to remove system-level duplicate flags
+        config.build_settings.delete('LD_CLASSIC')
+        config.build_settings['LD_DYLIB_INSTALL_NAME'] = nil if config.build_settings['LD_DYLIB_INSTALL_NAME'] == ''
+        
+        # Fix Swift standard libraries embedding warning for static libraries
+        if target.respond_to?(:product_type) && target.product_type == 'com.apple.product-type.library.static'
+          config.build_settings['ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES'] = 'NO'
+        end
+        
+        # Also fix for Pod targets that are static libraries
+        if target.name.start_with?('Pods-') || target.name.include?('Pod')
+          config.build_settings['ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES'] = 'NO'
+        end
+        
+        # Specific fix for Pods-CashAppPOS target
+        if target.name == 'Pods-CashAppPOS'
+          config.build_settings['ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES'] = 'NO'
+        end
+        
+        # Comprehensive fix for Swift standard libraries warning
+        # Only app targets should embed Swift standard libraries
+        if target.respond_to?(:product_type) && target.product_type != 'com.apple.product-type.application'
+          config.build_settings['ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES'] = 'NO'
+        elsif !target.respond_to?(:product_type)
+          # For targets without product_type (like aggregate targets), disable embedding
+          config.build_settings['ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES'] = 'NO'
+        end
+        
+        # Use modern linker settings
+        config.build_settings['LD_RUNPATH_SEARCH_PATHS'] = ['$(inherited)', '@executable_path/Frameworks']
+        
+        # Fix React-CoreModules category conflict
+        if target.name == 'React-CoreModules'
+          config.build_settings['OTHER_CFLAGS'] = "$(inherited) -Wno-objc-protocol-method-implementation"
+          config.build_settings['GCC_WARN_DUPLICATE_METHOD_MATCH'] = 'NO'
+        end
+        
+        # Fix Yoga module conflict - add header search path for lowercase yoga
+        if target.name == 'Yoga'
+          config.build_settings['HEADER_SEARCH_PATHS'] ||= '$(inherited)'
+          config.build_settings['HEADER_SEARCH_PATHS'] << ' $(PODS_ROOT)/Headers/Public/yoga'
+          # Enable modular headers for Yoga to fix Swift bridging header issue
+          config.build_settings['DEFINES_MODULE'] = 'YES'
+        end
+      end
+    end
+  end
+end

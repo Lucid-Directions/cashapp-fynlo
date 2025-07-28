@@ -1,0 +1,75 @@
+{
+  "timestamp": "2025-06-21T13:27:07.182Z",
+  "summary": {
+    "passed": 11,
+    "failed": 2,
+    "warnings": 0
+  },
+  "details": [
+    {
+      "test": "Payment method onPress handler",
+      "status": "PASS",
+      "message": "Found handlePaymentMethodSelect"
+    },
+    {
+      "test": "useEffect dependencies",
+      "status": "FAIL",
+      "message": "Missing proper dependencies in useEffect"
+    },
+    {
+      "test": "Payment state management",
+      "status": "PASS",
+      "message": "State hooks properly defined"
+    },
+    {
+      "test": "Currency symbols",
+      "status": "PASS",
+      "message": "Using £ correctly (found 26 instances)"
+    },
+    {
+      "test": "Gift card removal",
+      "status": "PASS",
+      "message": "Gift card removed, QR Code present"
+    },
+    {
+      "test": "QR Code fees",
+      "status": "PASS",
+      "message": "Correct fee percentage mentioned"
+    },
+    {
+      "test": "Theme color count",
+      "status": "PASS",
+      "message": "All 10 color themes present"
+    },
+    {
+      "test": "Colors variant",
+      "status": "PASS",
+      "message": "Colors variant properly implemented"
+    },
+    {
+      "test": "Colors display",
+      "status": "PASS",
+      "message": "Color themes shown in Theme Options"
+    },
+    {
+      "test": "User null check",
+      "status": "PASS",
+      "message": "Safety check implemented"
+    },
+    {
+      "test": "Safe trim operations",
+      "status": "PASS",
+      "message": "Safety check implemented"
+    },
+    {
+      "test": "Safe includes checks",
+      "status": "PASS",
+      "message": "Safety check implemented"
+    },
+    {
+      "test": "Photo access safety",
+      "status": "FAIL",
+      "message": "Unsafe profile.photo access found"
+    }
+  ]
+}

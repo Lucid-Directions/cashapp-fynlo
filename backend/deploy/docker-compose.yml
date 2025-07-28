@@ -1,0 +1,177 @@
+version: '3.8'
+
+services:
+  # Main Fynlo POS API
+  fynlo-api:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    container_name: fynlo-pos-api
+    ports:
+      - "8000:8000"
+    environment:
+      - FYNLO_ENV=production
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+      - STRIPE_API_KEY=${STRIPE_API_KEY}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - SQUARE_ACCESS_TOKEN=${SQUARE_ACCESS_TOKEN}
+      - SQUARE_LOCATION_ID=${SQUARE_LOCATION_ID}
+      - SUMUP_API_KEY=${SUMUP_API_KEY}
+      - SUMUP_MERCHANT_CODE=${SUMUP_MERCHANT_CODE}
+      - FYNLO_SMART_ROUTING=true
+      - FYNLO_ANALYTICS=true
+      - FYNLO_COST_OPTIMIZATION_ALERTS=true
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - fynlo-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: fynlo-postgres
+    environment:
+      - POSTGRES_DB=fynlo_pos
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - fynlo-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d fynlo_pos"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis for caching and session management
+  redis:
+    image: redis:7-alpine
+    container_name: fynlo-redis
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - fynlo-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # Nginx reverse proxy
+  nginx:
+    image: nginx:alpine
+    container_name: fynlo-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl
+      - nginx_logs:/var/log/nginx
+    depends_on:
+      - fynlo-api
+    networks:
+      - fynlo-network
+    restart: unless-stopped
+
+  # Payment Analytics Service
+  analytics-worker:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.worker
+    container_name: fynlo-analytics-worker
+    environment:
+      - FYNLO_ENV=production
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+      - WORKER_TYPE=analytics
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - fynlo-network
+    restart: unless-stopped
+    command: python -m app.workers.analytics_worker
+
+  # Volume Tracking Service
+  volume-tracker:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.worker
+    container_name: fynlo-volume-tracker
+    environment:
+      - FYNLO_ENV=production
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+      - WORKER_TYPE=volume_tracking
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - fynlo-network
+    restart: unless-stopped
+    command: python -m app.workers.volume_worker
+
+  # Monitoring and Metrics
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: fynlo-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - fynlo-network
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: fynlo-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    networks:
+      - fynlo-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+  nginx_logs:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  fynlo-network:
+    driver: bridge

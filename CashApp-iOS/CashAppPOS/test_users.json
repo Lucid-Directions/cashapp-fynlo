@@ -1,0 +1,123 @@
+{
+  "test_users": [
+    {
+      "id": 1,
+      "username": "restaurant_owner",
+      "email": "owner@mexicanrestaurant.com",
+      "password": "owner123",
+      "role": "restaurant_owner",
+      "name": "Maria Rodriguez",
+      "restaurant": {
+        "id": 1,
+        "name": "Authentic Mexican Cuisine",
+        "slug": "mexican-pilot-001"
+      },
+      "permissions": [
+        "manage_menu",
+        "view_reports",
+        "manage_employees",
+        "manage_settings",
+        "process_orders",
+        "handle_payments"
+      ],
+      "isActive": true,
+      "created_at": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": 2,
+      "username": "platform_owner",
+      "email": "admin@fynlo.com",
+      "password": "platform123",
+      "role": "platform_owner",
+      "name": "Alex Thompson",
+      "platform": {
+        "id": 1,
+        "name": "Fynlo POS Platform"
+      },
+      "permissions": [
+        "manage_all_restaurants",
+        "view_all_analytics",
+        "manage_platform_settings",
+        "configure_payment_fees",
+        "manage_service_charges",
+        "access_admin_panel"
+      ],
+      "isActive": true,
+      "created_at": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": 3,
+      "username": "cashier",
+      "email": "carlos@mexicanrestaurant.com",
+      "password": "cashier123",
+      "role": "employee",
+      "name": "Carlos Garcia",
+      "restaurant": {
+        "id": 1,
+        "name": "Authentic Mexican Cuisine",
+        "slug": "mexican-pilot-001"
+      },
+      "permissions": [
+        "process_orders",
+        "handle_payments",
+        "view_menu",
+        "access_pos"
+      ],
+      "isActive": true,
+      "created_at": "2025-01-01T00:00:00Z"
+    },
+    {
+      "id": 4,
+      "username": "manager",
+      "email": "sofia@mexicanrestaurant.com",
+      "password": "manager123",
+      "role": "manager",
+      "name": "Sofia Hernandez",
+      "restaurant": {
+        "id": 1,
+        "name": "Authentic Mexican Cuisine",
+        "slug": "mexican-pilot-001"
+      },
+      "permissions": [
+        "process_orders",
+        "handle_payments",
+        "view_reports",
+        "manage_employees",
+        "view_menu",
+        "access_pos"
+      ],
+      "isActive": true,
+      "created_at": "2025-01-01T00:00:00Z"
+    }
+  ],
+  "quick_signin_config": {
+    "enabled": true,
+    "show_in_production": false,
+    "buttons": [
+      {
+        "label": "Restaurant Owner",
+        "username": "restaurant_owner",
+        "description": "Full restaurant management access",
+        "color": "#00A651"
+      },
+      {
+        "label": "Platform Owner", 
+        "username": "platform_owner",
+        "description": "Platform-wide administration",
+        "color": "#0066CC"
+      },
+      {
+        "label": "Manager",
+        "username": "manager", 
+        "description": "Restaurant operations management",
+        "color": "#FF6B35"
+      },
+      {
+        "label": "Cashier",
+        "username": "cashier",
+        "description": "POS and order processing",
+        "color": "#8E44AD"
+      }
+    ]
+  }
+}

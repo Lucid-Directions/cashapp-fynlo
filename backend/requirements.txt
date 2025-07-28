@@ -1,0 +1,70 @@
+# Fynlo POS Backend Dependencies
+# Updated to latest secure versions with compatibility matrix validation
+
+# Core Framework - Updated to latest secure versions
+fastapi==0.108.0
+uvicorn[standard]==0.25.0 # Ensure uvicorn is installed directly
+pydantic[email]==2.5.2 # Added email extra for validation
+pydantic-settings==2.1.0 # Already present, ensuring version consistency
+python-multipart==0.0.6
+
+# Database - Latest compatible versions
+psycopg2-binary==2.9.9
+sqlalchemy==2.0.25
+alembic==1.13.1
+
+# Authentication & Security - Latest secure versions
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+cryptography==41.0.7 # For Fernet encryption of payment credentials
+
+# Supabase Authentication - For migration from JWT to Supabase
+supabase==2.3.0
+gotrue==2.0.0
+
+# Payment Processing - Updated to latest
+stripe==8.0.0
+requests==2.31.0
+squareup==34.0.1.20240118 # Corrected version for Square payment provider
+httpx==0.24.1 # For async HTTP requests (SumUp provider) - Compatible with supabase 2.3.0
+
+# Real-time Features - Latest stable versions
+websockets==12.0
+redis>=6.0.0,<7.0.0 # Updated for aioredis features, compatible with fastapi-limiter
+fastapi-limiter==0.1.6
+slowapi>=0.1.7 # Explicitly add slowapi dependency
+
+# QR Code Generation & Image Processing - Updated for security
+qrcode[pil]==7.4.2
+Pillow==10.1.0
+# python-magic-bin==0.4.14 # Often problematic, try python-magic if needed
+python-magic==0.4.27 # Common alternative for Linux
+
+# PDF Generation - Temporarily disabled due to deployment issues
+# reportlab==4.0.8
+
+# Background Tasks - Latest stable version
+celery==5.3.6
+
+# Monitoring & Logging - Latest versions
+python-dotenv==1.0.0
+python-json-logger==2.0.7
+
+# Validation Dependencies - Required for core validation
+jsonschema==4.21.1
+
+# HTTP Client Dependencies - Required for payment providers
+aiohttp==3.9.1
+
+# DigitalOcean Spaces & File Storage - Added for cloud storage
+boto3==1.34.34
+botocore==1.34.34
+
+# Template Engine & Email - Required for email service
+jinja2==3.1.4
+resend==0.7.0
+
+# Development Dependencies - Moved to requirements-dev.txt
+# pytest==7.4.3
+# pytest-asyncio==0.21.1  
+# black==23.11.0

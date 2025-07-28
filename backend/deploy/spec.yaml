@@ -1,0 +1,94 @@
+# DigitalOcean App Spec for Fynlo POS Backend - FIXED VERSION
+name: fynlo-pos-backend
+region: lon # London region, as specified for the database
+
+# Define the services
+services:
+  - name: api
+    # Use Docker build - must specify full path from repo root
+    dockerfile_path: backend/Dockerfile
+    source_dir: backend  # FIXED: Added source directory
+    github:
+      repo: Lucid-Directions/cashapp-fynlo
+      branch: main
+      deploy_on_push: true
+    # Environment variables
+    envs:
+      - key: API_HOST
+        value: "0.0.0.0"
+      - key: API_PORT
+        value: "8080" # DigitalOcean expects 8080
+      - key: API_RELOAD
+        value: "false"
+      - key: ENVIRONMENT
+        value: "production"
+      # VPC SECURE DATABASE CONNECTION (Configure in App Platform UI)
+      - key: DATABASE_URL
+        scope: RUN_AND_BUILD_TIME
+        type: SECRET # Set value in DigitalOcean App Platform dashboard
+      # VPC SECURE REDIS CONNECTION (Configure in App Platform UI)  
+      - key: REDIS_URL
+        scope: RUN_AND_BUILD_TIME
+        type: SECRET # Set value in DigitalOcean App Platform dashboard
+      # SUPABASE CONFIGURATION (Configure in App Platform UI)
+      - key: SUPABASE_URL
+        scope: RUN_TIME
+        type: SECRET # Set value in DigitalOcean App Platform dashboard
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        scope: RUN_TIME
+        type: SECRET # Set value in DigitalOcean App Platform dashboard
+      # SUMUP CONFIGURATION (if needed)
+      - key: SUMUP_API_KEY
+        scope: RUN_TIME
+        type: SECRET # Set value in DigitalOcean App Platform dashboard
+      - key: SUMUP_MERCHANT_CODE
+        scope: RUN_TIME
+        type: SECRET # Set value in DigitalOcean App Platform dashboard
+    instance_size_slug: basic-s # Sufficient memory for production
+    instance_count: 1
+    # HTTP routes
+    routes:
+      - path: / # Route all traffic to this service
+    # Health check - FIXED: Re-enabled with optimized settings
+    health_check:
+      http_path: /health # Now returns instantly without DB checks
+      initial_delay_seconds: 30  # Reduced from 60 - app starts faster now
+      period_seconds: 30         # Check every 30 seconds
+      timeout_seconds: 10        # Should respond in <1 second now
+      failure_threshold: 3       # Reduced from 5 - fail faster
+      success_threshold: 1       # One success is enough
+    # Port for the service to listen on internally
+    http_port: 8080
+
+# Define jobs that run during deployment
+# NOTE: Migration job should be enabled once database is properly connected
+# jobs:
+#   - name: migrate
+#     kind: PRE_DEPLOY # Run before deploying the 'api' service
+#     dockerfile_path: backend/Dockerfile
+#     source_dir: backend  # FIXED: Added source directory
+#     github:
+#       repo: Lucid-Directions/cashapp-fynlo
+#       branch: main
+#     # Command to run for migrations
+#     run_command: alembic upgrade head
+#     # Environment variables for the job (needs database access)
+#     envs:
+#       # VPC SECURE DATABASE CONNECTION for migrations (Configure in App Platform UI)
+#       - key: DATABASE_URL
+#         scope: RUN_TIME
+#         type: SECRET # Set value in DigitalOcean App Platform dashboard
+#     instance_size_slug: basic-xxs # Migrations usually don't need large instances
+
+# Alerting - RECOMMENDED: Enable these for deployment monitoring
+alerts:
+  - rule: DEPLOYMENT_FAILED
+  - rule: DOMAIN_FAILED
+  - rule: DEPLOYMENT_LIVE
+
+# Optional: Custom domain configuration
+# domains:
+#   - domain: api.fynlopos.com
+#     type: PRIMARY
+#     zone: fynlopos.com # if using DigitalOcean DNS
+#     minimum_tls_version: "1.3"

@@ -1,0 +1,1 @@
+# Integration package for Fynlo POS

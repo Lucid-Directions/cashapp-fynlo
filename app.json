@@ -1,0 +1,53 @@
+{
+  "expo": {
+    "name": "Fynlo POS",
+    "slug": "fynlo-pos",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/fynlo-logo.png",
+    "userInterfaceStyle": "light",
+    "scheme": "fynlo-pos",
+    "platforms": ["ios", "android", "web"],
+    "splash": {
+      "image": "./assets/fynlo-logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#2C3E50"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.fynlo.pos",
+      "buildNumber": "1",
+      "infoPlist": {
+        "UILaunchStoryboardName": "SplashScreen",
+        "UIRequiredDeviceCapabilities": ["armv7"],
+        "NSCameraUsageDescription": "This app uses the camera to scan QR codes for payments.",
+        "NSMicrophoneUsageDescription": "This app uses the microphone for voice commands."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/fynlo-logo.png",
+        "backgroundColor": "#2C3E50"
+      },
+      "package": "com.fynlo.pos",
+      "versionCode": 1
+    },
+    "web": {
+      "favicon": "./assets/fynlo-logo.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "deploymentTarget": "13.0"
+          }
+        }
+      ]
+    ]
+  }
+} 

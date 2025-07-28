@@ -1,0 +1,24 @@
+{
+  "summary": {
+    "start_time": "2025-06-17T12:52:19.676069",
+    "end_time": "2025-06-17T12:52:20.088048",
+    "total_duration": 0.411979,
+    "total_tests": 0,
+    "total_passed": 0,
+    "total_failed": 0,
+    "overall_success_rate": 0,
+    "production_ready": false
+  },
+  "unit_tests": {},
+  "integration_tests": {
+    "total_tests": 0,
+    "passed": 0,
+    "failed": 0,
+    "duration": 0.4109320640563965,
+    "success_rate": 0
+  },
+  "performance_tests": {},
+  "security_tests": {},
+  "load_tests": {},
+  "coverage": {}
+}

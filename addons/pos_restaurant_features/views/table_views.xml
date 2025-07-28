@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Restaurant Section Views -->
+    <record id="view_restaurant_section_form" model="ir.ui.view">
+        <field name="name">restaurant.section.form</field>
+        <field name="model">restaurant.section</field>
+        <field name="arch" type="xml">
+            <form string="Restaurant Section">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Section Name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="description"/>
+                            <field name="color" widget="color"/>
+                            <field name="active"/>
+                        </group>
+                        <group>
+                            <field name="manager_id"/>
+                            <field name="table_count" readonly="1"/>
+                            <field name="total_capacity" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Servers">
+                            <field name="server_ids" widget="many2many_tags"/>
+                        </page>
+                        <page string="Tables">
+                            <field name="table_ids" readonly="1">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="capacity"/>
+                                    <field name="status" widget="badge"/>
+                                    <field name="server_id"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_restaurant_section_tree" model="ir.ui.view">
+        <field name="name">restaurant.section.tree</field>
+        <field name="model">restaurant.section</field>
+        <field name="arch" type="xml">
+            <tree string="Restaurant Sections">
+                <field name="name"/>
+                <field name="manager_id"/>
+                <field name="table_count"/>
+                <field name="total_capacity"/>
+                <field name="active"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Restaurant Table Views -->
+    <record id="view_restaurant_table_form" model="ir.ui.view">
+        <field name="name">restaurant.table.form</field>
+        <field name="model">restaurant.table</field>
+        <field name="arch" type="xml">
+            <form string="Restaurant Table">
+                <header>
+                    <button name="action_set_available" type="object" string="Set Available" 
+                            class="btn-success" attrs="{'invisible': [('status', '=', 'available')]}"/>
+                    <button name="action_set_occupied" type="object" string="Set Occupied" 
+                            class="btn-warning" attrs="{'invisible': [('status', '=', 'occupied')]}"/>
+                    <button name="action_set_cleaning" type="object" string="Set Cleaning" 
+                            class="btn-info" attrs="{'invisible': [('status', '=', 'cleaning')]}"/>
+                    <field name="status" widget="statusbar" statusbar_visible="available,occupied,reserved,cleaning"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Table Number"/>
+                        </h1>
+                        <h2>
+                            <field name="display_name" readonly="1"/>
+                        </h2>
+                    </div>
+                    
+                    <group>
+                        <group string="Basic Information">
+                            <field name="section_id" required="1"/>
+                            <field name="capacity"/>
+                            <field name="shape"/>
+                            <field name="active"/>
+                        </group>
+                        <group string="Current Status">
+                            <field name="server_id"/>
+                            <field name="current_order_id" readonly="1"/>
+                            <field name="occupied_since" readonly="1"/>
+                            <field name="estimated_duration"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Position &amp; Layout">
+                            <group>
+                                <group string="Position">
+                                    <field name="pos_x"/>
+                                    <field name="pos_y"/>
+                                    <field name="rotation"/>
+                                </group>
+                                <group string="Dimensions">
+                                    <field name="width"/>
+                                    <field name="height"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Reservation">
+                            <group>
+                                <field name="reserved_by"/>
+                                <field name="reservation_time"/>
+                            </group>
+                        </page>
+                        <page string="Features">
+                            <group>
+                                <field name="smoking_allowed"/>
+                                <field name="outdoor"/>
+                                <field name="wheelchair_accessible"/>
+                                <field name="has_power_outlet"/>
+                            </group>
+                        </page>
+                        <page string="Statistics">
+                            <group>
+                                <field name="total_orders_today" readonly="1"/>
+                                <field name="revenue_today" readonly="1" widget="monetary"/>
+                                <field name="avg_turnover_time" readonly="1"/>
+                            </group>
+                        </page>
+                        <page string="Notes">
+                            <field name="notes" placeholder="General notes about this table..."/>
+                            <field name="special_requirements" placeholder="Special requirements or restrictions..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_restaurant_table_tree" model="ir.ui.view">
+        <field name="name">restaurant.table.tree</field>
+        <field name="model">restaurant.table</field>
+        <field name="arch" type="xml">
+            <tree string="Restaurant Tables" decoration-success="status == 'available'" 
+                  decoration-danger="status == 'occupied'" decoration-warning="status == 'reserved'"
+                  decoration-info="status == 'cleaning'" decoration-muted="status == 'blocked'">
+                <field name="name"/>
+                <field name="section_id"/>
+                <field name="capacity"/>
+                <field name="status" widget="badge"/>
+                <field name="server_id"/>
+                <field name="current_order_id"/>
+                <field name="occupied_since"/>
+                <field name="total_orders_today"/>
+                <field name="revenue_today" widget="monetary"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_restaurant_table_kanban" model="ir.ui.view">
+        <field name="name">restaurant.table.kanban</field>
+        <field name="model">restaurant.table</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="section_id" class="o_kanban_small_column">
+                <field name="name"/>
+                <field name="capacity"/>
+                <field name="status"/>
+                <field name="server_id"/>
+                <field name="current_order_id"/>
+                <field name="section_id"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_card oe_kanban_global_click">
+                            <div class="o_kanban_record_top">
+                                <div class="o_kanban_record_headings">
+                                    <strong class="o_kanban_record_title">
+                                        <field name="name"/>
+                                    </strong>
+                                </div>
+                                <div class="o_kanban_record_body">
+                                    <div>Capacity: <field name="capacity"/> people</div>
+                                    <div>Status: <field name="status" widget="badge"/></div>
+                                    <div t-if="record.server_id.raw_value">
+                                        Server: <field name="server_id"/>
+                                    </div>
+                                    <div t-if="record.current_order_id.raw_value">
+                                        Order: <field name="current_order_id"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Actions -->
+    <record id="action_restaurant_section" model="ir.actions.act_window">
+        <field name="name">Restaurant Sections</field>
+        <field name="res_model">restaurant.section</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first restaurant section!
+            </p>
+            <p>
+                Organize your restaurant into sections for better management.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_restaurant_table" model="ir.actions.act_window">
+        <field name="name">Restaurant Tables</field>
+        <field name="res_model">restaurant.table</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first restaurant table!
+            </p>
+            <p>
+                Set up your restaurant tables for efficient service management.
+            </p>
+        </field>
+    </record>
+
+    <!-- Table Management Client Action -->
+    <record id="action_table_management" model="ir.actions.client">
+        <field name="name">Table Management</field>
+        <field name="tag">table_management</field>
+    </record>
+
+    <!-- Menu Items -->
+    <menuitem id="restaurant_features_menu_root" 
+              name="Restaurant" 
+              parent="point_of_sale.menu_point_root" 
+              sequence="25"/>
+
+    <menuitem id="table_management_menu" 
+              name="Table Management" 
+              parent="restaurant_features_menu_root" 
+              action="action_table_management" 
+              sequence="1"/>
+
+    <menuitem id="restaurant_tables_menu" 
+              name="Tables" 
+              parent="restaurant_features_menu_root" 
+              action="action_restaurant_table" 
+              sequence="2"/>
+
+    <menuitem id="restaurant_sections_menu" 
+              name="Sections" 
+              parent="restaurant_features_menu_root" 
+              action="action_restaurant_section" 
+              sequence="3"/>
+
+</odoo> 

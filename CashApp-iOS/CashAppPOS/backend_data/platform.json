@@ -1,0 +1,9 @@
+{
+  "id": "platform1",
+  "name": "Fynlo POS Platform",
+  "ownerId": "platform_owner_1",
+  "createdDate": "2024-01-01T00:00:00Z",
+  "totalRestaurants": 1,
+  "totalRevenue": 45200,
+  "isActive": true
+}

@@ -1,0 +1,63 @@
+--- a/node_modules/sumup-react-native-alpha/ios/SumupReactNative.swift
++++ b/node_modules/sumup-react-native-alpha/ios/SumupReactNative.swift
+@@ -3,6 +3,18 @@ import PassKit
+ @objc(SumupReactNative)
+ class SumupReactNative: UIViewController {
+ 
++    // MARK: - Proper UIViewController Initialization
++    
++    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
++        super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
++        setupInitialState()
++    }
++    
++    required init?(coder: NSCoder) {
++        super.init(coder: coder)
++        setupInitialState()
++    }
++    
+     private var request: PKPaymentRequest = PKPaymentRequest()
+     private var resolve: RCTPromiseResolveBlock?
+     private var paymentNetworks: [PKPaymentNetwork]?
+@@ -44,6 +56,11 @@ class SumupReactNative: UIViewController {
+         
+         self.resolve = resolve
+         
++        // Ensure all UI operations happen on main thread
++        self.ensureMainThread {
++            self.presentPaymentController()
++        }
++    }
++    
++    private func presentPaymentController() {
+         if let controller = PKPaymentAuthorizationViewController(paymentRequest: request) {
+             controller.delegate = self
+ 
+@@ -72,6 +89,22 @@ class SumupReactNative: UIViewController {
+             resolve(false)
+         }
+     }
++    
++    // MARK: - Private Helper Methods
++    
++    private func setupInitialState() {
++        // Initialize with proper trait collection
++        if #available(iOS 13.0, *) {
++            self.traitCollection.performAsCurrent {
++                // Ensure proper trait collection setup
++            }
++        }
++    }
++    
++    private func ensureMainThread(completion: @escaping () -> Void) {
++        if Thread.isMainThread {
++            completion()
++        } else {
++            DispatchQueue.main.async {
++                completion()
++            }
++        }
++    }
+ }
+ 
+ extension SumupReactNative: PKPaymentAuthorizationViewControllerDelegate {

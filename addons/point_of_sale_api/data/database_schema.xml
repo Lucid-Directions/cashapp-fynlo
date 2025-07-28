@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        
+        <!-- Database Schema Updates for Phase 1 -->
+        
+        <!-- Execute SQL for new table creation and indexes -->
+        <function model="ir.model" name="_execute_sql_script">
+            <value>CREATE TABLE IF NOT EXISTS pos_websocket_connections (
+                id SERIAL PRIMARY KEY,
+                connection_id VARCHAR(255) UNIQUE NOT NULL,
+                session_id INTEGER REFERENCES pos_session(id) ON DELETE CASCADE,
+                user_id INTEGER REFERENCES res_users(id) ON DELETE CASCADE,
+                created_at TIMESTAMP DEFAULT NOW(),
+                last_ping TIMESTAMP DEFAULT NOW(),
+                is_active BOOLEAN DEFAULT TRUE,
+                device_info TEXT
+            );</value>
+        </function>
+        
+        <!-- Enhanced order state tracking -->
+        <function model="ir.model" name="_execute_sql_script">
+            <value>ALTER TABLE pos_order ADD COLUMN IF NOT EXISTS state_history JSONB;</value>
+        </function>
+        
+        <function model="ir.model" name="_execute_sql_script">
+            <value>CREATE INDEX IF NOT EXISTS idx_pos_order_state_history ON pos_order USING gin(state_history);</value>
+        </function>
+        
+        <function model="ir.model" name="_execute_sql_script">
+            <value>ALTER TABLE pos_order ADD COLUMN IF NOT EXISTS validation_status VARCHAR(20) DEFAULT 'pending';</value>
+        </function>
+        
+        <function model="ir.model" name="_execute_sql_script">
+            <value>ALTER TABLE pos_order ADD COLUMN IF NOT EXISTS inventory_checked BOOLEAN DEFAULT FALSE;</value>
+        </function>
+        
+        <function model="ir.model" name="_execute_sql_script">
+            <value>ALTER TABLE pos_order ADD COLUMN IF NOT EXISTS prices_calculated BOOLEAN DEFAULT FALSE;</value>
+        </function>
+        
+        <function model="ir.model" name="_execute_sql_script">
+            <value>ALTER TABLE pos_order ADD COLUMN IF NOT EXISTS kitchen_status VARCHAR(20) DEFAULT 'not_sent';</value>
+        </function>
+        
+        <function model="ir.model" name="_execute_sql_script">
+            <value>ALTER TABLE pos_order ADD COLUMN IF NOT EXISTS kitchen_sent_at TIMESTAMP;</value>
+        </function>
+        
+        <function model="ir.model" name="_execute_sql_script">
+            <value>ALTER TABLE pos_order ADD COLUMN IF NOT EXISTS kitchen_ready_at TIMESTAMP;</value>
+        </function>
+        
+        <function model="ir.model" name="_execute_sql_script">
+            <value>ALTER TABLE pos_order ADD COLUMN IF NOT EXISTS estimated_ready_time TIMESTAMP;</value>
+        </function>
+        
+        <!-- Payment transaction audit -->
+        <function model="ir.model" name="_execute_sql_script">
+            <value>CREATE TABLE IF NOT EXISTS pos_payment_audit (
+                id SERIAL PRIMARY KEY,
+                payment_id INTEGER REFERENCES pos_payment(id) ON DELETE CASCADE,
+                action VARCHAR(50) NOT NULL,
+                details JSONB,
+                created_at TIMESTAMP DEFAULT NOW(),
+                created_by INTEGER REFERENCES res_users(id)
+            );</value>
+        </function>
+        
+        <!-- Sync tracking -->
+        <function model="ir.model" name="_execute_sql_script">
+            <value>CREATE TABLE IF NOT EXISTS pos_sync_log (
+                id SERIAL PRIMARY KEY,
+                entity_type VARCHAR(100) NOT NULL,
+                entity_id INTEGER NOT NULL,
+                action VARCHAR(20) NOT NULL,
+                data_hash VARCHAR(255),
+                created_at TIMESTAMP DEFAULT NOW(),
+                synced_at TIMESTAMP,
+                session_id INTEGER REFERENCES pos_session(id)
+            );</value>
+        </function>
+        
+        <!-- Performance indexes for mobile queries -->
+        <function model="ir.model" name="_execute_sql_script">
+            <value>CREATE INDEX IF NOT EXISTS idx_product_pos_active ON product_product(available_in_pos, active) WHERE available_in_pos = TRUE;</value>
+        </function>
+        
+        <function model="ir.model" name="_execute_sql_script">
+            <value>CREATE INDEX IF NOT EXISTS idx_product_category ON product_product(pos_categ_id) WHERE pos_categ_id IS NOT NULL;</value>
+        </function>
+        
+        <function model="ir.model" name="_execute_sql_script">
+            <value>CREATE INDEX IF NOT EXISTS idx_product_barcode ON product_product(barcode) WHERE barcode IS NOT NULL;</value>
+        </function>
+        
+        <function model="ir.model" name="_execute_sql_script">
+            <value>CREATE INDEX IF NOT EXISTS idx_pos_order_session_state ON pos_order(session_id, state);</value>
+        </function>
+        
+        <function model="ir.model" name="_execute_sql_script">
+            <value>CREATE INDEX IF NOT EXISTS idx_pos_order_kitchen_status ON pos_order(kitchen_status) WHERE kitchen_status != 'not_sent';</value>
+        </function>
+        
+        <function model="ir.model" name="_execute_sql_script">
+            <value>CREATE INDEX IF NOT EXISTS idx_pos_payment_session ON pos_payment(session_id, state);</value>
+        </function>
+        
+        <function model="ir.model" name="_execute_sql_script">
+            <value>CREATE INDEX IF NOT EXISTS idx_pos_session_state ON pos_session(state, start_at);</value>
+        </function>
+        
+        <!-- Add trigram extension for fuzzy product search -->
+        <function model="ir.model" name="_execute_sql_script">
+            <value>CREATE EXTENSION IF NOT EXISTS pg_trgm;</value>
+        </function>
+        
+        <function model="ir.model" name="_execute_sql_script">
+            <value>CREATE INDEX IF NOT EXISTS idx_product_name_trgm ON product_product USING gin(name gin_trgm_ops);</value>
+        </function>
+        
+        <!-- WebSocket connection cleanup function -->
+        <function model="ir.model" name="_execute_sql_script">
+            <value>CREATE OR REPLACE FUNCTION cleanup_stale_websocket_connections() 
+            RETURNS INTEGER AS $$
+            DECLARE
+                cleanup_count INTEGER;
+            BEGIN
+                UPDATE pos_websocket_connections 
+                SET is_active = FALSE 
+                WHERE last_ping < NOW() - INTERVAL '5 minutes' 
+                AND is_active = TRUE;
+                
+                GET DIAGNOSTICS cleanup_count = ROW_COUNT;
+                RETURN cleanup_count;
+            END;
+            $$ LANGUAGE plpgsql;</value>
+        </function>
+        
+        <!-- Order state validation function -->
+        <function model="ir.model" name="_execute_sql_script">
+            <value>CREATE OR REPLACE FUNCTION validate_order_state_transition(
+                order_id INTEGER,
+                old_state VARCHAR,
+                new_state VARCHAR
+            ) RETURNS BOOLEAN AS $$
+            DECLARE
+                allowed_transitions JSONB DEFAULT '{
+                    "draft": ["validated", "cancel"],
+                    "validated": ["paid", "cancel"],
+                    "paid": ["preparing", "done", "cancel"],
+                    "preparing": ["ready", "cancel"],
+                    "ready": ["completed", "cancel"],
+                    "done": ["invoiced"],
+                    "cancel": [],
+                    "invoiced": []
+                }'::jsonb;
+                allowed_states JSONB;
+            BEGIN
+                allowed_states := allowed_transitions->old_state;
+                
+                IF allowed_states IS NULL THEN
+                    RETURN FALSE;
+                END IF;
+                
+                RETURN allowed_states ? new_state;
+            END;
+            $$ LANGUAGE plpgsql;</value>
+        </function>
+        
+        <!-- Performance tracking views -->
+        <function model="ir.model" name="_execute_sql_script">
+            <value>CREATE OR REPLACE VIEW pos_order_performance_summary AS
+            SELECT 
+                o.session_id,
+                COUNT(*) as total_orders,
+                AVG(EXTRACT(EPOCH FROM (o.date_order - o.create_date))) as avg_processing_time,
+                COUNT(*) FILTER (WHERE o.state = 'done') as completed_orders,
+                COUNT(*) FILTER (WHERE o.state = 'cancel') as cancelled_orders,
+                AVG(o.amount_total) as avg_order_value,
+                SUM(o.amount_total) FILTER (WHERE o.state = 'done') as total_revenue
+            FROM pos_order o
+            WHERE o.create_date >= CURRENT_DATE
+            GROUP BY o.session_id;</value>
+        </function>
+        
+    </data>
+</odoo> 

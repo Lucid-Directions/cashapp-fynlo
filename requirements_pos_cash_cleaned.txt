@@ -1,0 +1,178 @@
+# POS Cash Restaurant System Requirements - CLEANED VERSION
+# Only real, installable Python packages
+
+# Core CashApp requirements (from existing requirements.txt)
+babel>=2.6.0
+chardet
+cryptography
+decorator
+docutils
+feedparser
+freezegun
+geoip2
+gevent
+greenlet ; python_version < '3.12'
+idna
+Jinja2
+libsass
+lxml ; sys_platform != 'win32'
+lxml==4.9.2 ; sys_platform == 'win32'
+MarkupSafe
+num2words
+ofxparse
+passlib
+Pillow
+polib
+psutil
+psycopg2
+pyopenssl
+PyPDF2
+pyserial
+python-dateutil
+python-ldap ; sys_platform != 'win32'
+python-stdnum
+pytz
+pyusb
+qrcode
+reportlab
+requests
+urllib3
+vobject
+werkzeug
+xlrd
+XlsxWriter
+xlwt
+zeep
+
+# Payment Processing (REAL packages only)
+stripe>=5.0.0                    # Stripe payment integration
+paypal-checkout-serversdk>=1.0.1 # PayPal payment processing
+braintree>=4.0.0                # Additional payment gateway
+
+# Communication & Notifications
+twilio>=8.0.0                   # SMS notifications
+sendgrid>=6.0.0                 # Email notifications
+pyfcm>=1.5.0                    # Firebase Cloud Messaging for mobile notifications
+websockets>=11.0.0              # Real-time communication for kitchen displays
+
+# Mobile & NFC Support (LIMITED - many NFC libraries are system-specific)
+# Note: Most NFC libraries require system-level drivers
+
+# Phone & Location Services
+phonenumbers>=8.13.0            # International phone number parsing
+geopy>=2.3.0                    # Geocoding for delivery addresses
+googlemaps>=4.10.0              # Google Maps API integration
+
+# QR Code & Barcode
+qrcode[pil]>=7.4.0              # QR code generation with PIL support
+python-barcode>=0.14.0          # Barcode generation
+pyzbar>=0.1.9                   # Barcode reading
+
+# Data Processing & Analytics
+pandas>=1.5.0                   # Data analysis for reporting
+numpy>=1.24.0                   # Numerical computing
+scipy>=1.10.0                   # Scientific computing for analytics
+
+# Image Processing
+Pillow>=9.0.0                   # Image processing (already included above)
+opencv-python>=4.7.0            # Computer vision for image optimization
+
+# API Integrations (REAL packages only)
+facebook-business>=16.0.0       # Facebook/Instagram integration
+google-api-python-client>=2.0.0 # Google services integration
+
+# Database & Caching
+redis>=4.5.0                    # Caching for improved performance
+pymongo>=4.3.0                  # MongoDB for analytics data
+elasticsearch>=8.6.0            # Search and analytics
+
+# Security & Encryption
+cryptography>=39.0.0            # Enhanced encryption (already included above)
+PyJWT>=2.6.0                    # JWT token handling
+bcrypt>=4.0.0                   # Password hashing
+
+# Background Tasks
+celery>=5.2.0                   # Async task processing
+kombu>=5.2.0                    # Message queue
+redis>=4.5.0                    # Redis backend for Celery (already included)
+
+# Monitoring & Logging
+sentry-sdk>=1.15.0              # Error tracking
+structlog>=23.1.0               # Structured logging
+
+# Testing & Development
+pytest>=7.2.0                   # Testing framework
+pytest-django>=4.5.0            # Django testing support
+pytest-cov>=4.0.0               # Coverage testing
+factory-boy>=3.2.0              # Test data factories
+faker>=18.0.0                   # Fake data generation
+
+# Documentation
+sphinx>=6.0.0                   # Documentation generation
+sphinx-rtd-theme>=1.2.0         # Documentation theme
+
+# Restaurant Specific (REAL packages only)
+recipe-scrapers>=14.0.0         # Recipe parsing for menu import
+# Note: Removed fictional nutrition and allergen parsers
+
+# Delivery & Logistics
+googlemaps>=4.10.0              # Route optimization (already included)
+shippo>=4.0.0                   # Shipping integration
+
+# Accounting Integration (REAL packages only)
+xero-python>=2.0.0              # Xero accounting integration
+
+# Mobile App Development
+kivy>=2.1.0                     # Mobile app framework - OPTIONAL
+kivymd>=1.1.0                   # Material Design for Kivy - OPTIONAL
+plyer>=2.1.0                    # Platform-specific features - OPTIONAL
+
+# Machine Learning (OPTIONAL - heavy dependencies)
+scikit-learn>=1.2.0             # Machine learning
+# Note: Removed TensorFlow and PyTorch - too heavy for basic POS
+
+# Web Scraping (OPTIONAL)
+beautifulsoup4>=4.11.0          # Web scraping
+scrapy>=2.8.0                   # Advanced web scraping
+selenium>=4.8.0                 # Browser automation
+
+# Configuration Management
+python-decouple>=3.7            # Environment configuration
+# Note: Removed django-environ - not needed for CashApp
+
+# Performance Monitoring
+psutil>=5.9.0                   # System monitoring (already included)
+memory-profiler>=0.60.0         # Memory usage profiling
+
+# File Processing
+openpyxl>=3.1.0                 # Excel file processing (similar to XlsxWriter above)
+python-docx>=0.8.11             # Word document processing
+
+# Weather API
+pyowm>=3.3.0                    # OpenWeatherMap API
+
+# Social Media Integration (REAL packages only)
+tweepy>=4.12.0                  # Twitter API
+facebook-sdk>=3.1.0             # Facebook API (alternative to facebook-business)
+
+# Additional Utilities
+python-magic>=0.4.27            # File type detection
+humanize>=4.6.0                 # Human-readable data
+arrow>=1.2.0                    # Better datetime handling
+click>=8.1.0                    # Command line interface
+rich>=13.3.0                    # Rich terminal output
+typer>=0.7.0                    # CLI framework
+
+# Network & HTTP
+httpx>=0.23.0                   # Async HTTP client
+aiofiles>=23.1.0                # Async file operations
+
+# Validation
+marshmallow>=3.19.0             # Data serialization/validation
+
+# NOTES:
+# - Removed all fictional APIs (deliveroo-api, ubereats-api, etc.)
+# - Removed UK-specific fictional packages
+# - Many NFC libraries are system-specific and may not install via pip
+# - Some ML packages are optional due to size and complexity
+# - For production, test installation in clean environment first 
