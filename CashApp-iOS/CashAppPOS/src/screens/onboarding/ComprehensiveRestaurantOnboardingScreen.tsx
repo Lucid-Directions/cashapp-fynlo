@@ -114,6 +114,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
     // Step 6 - Employee
     employeeEmail: '',
     // Step 8 - Bank Details
+    accountName: '',
     sortCode: '',
     accountNumber: '',
     iban: '',
@@ -335,8 +336,8 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         const swiftValid = !formData.bankDetails.swiftBic || validateSWIFT(formData.bankDetails.swiftBic);
         
         // Check for existing errors
-        const noExistingErrors = !fieldErrors.sortCode && !fieldErrors.accountNumber && 
-                                 !fieldErrors.iban && !fieldErrors.swiftBic;
+        const noExistingErrors = !fieldErrors.accountName && !fieldErrors.sortCode && 
+                                 !fieldErrors.accountNumber && !fieldErrors.iban && !fieldErrors.swiftBic;
         
         return sortCodeValid && accountNumberValid && ibanValid && swiftValid && noExistingErrors;
         
@@ -382,16 +383,13 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         }
         break;
         
-      case 6: // Employee/Staff
-        // Check the newEmployee state for current employee being added
-        if (!newEmployee.email) {
-          setFieldErrors(prev => ({ ...prev, employeeEmail: 'Employee email is required' }));
-        } else if (!validateEmail(newEmployee.email)) {
-          setFieldErrors(prev => ({ ...prev, employeeEmail: 'Please enter a valid email address' }));
-        }
-        break;
+      // Note: Case 6 (Employee) removed - employees are optional and validated when adding
         
       case 8: // Bank Details
+        if (!formData.bankDetails?.accountName) {
+          setFieldErrors(prev => ({ ...prev, accountName: 'Account name is required' }));
+        }
+        
         if (!formData.bankDetails?.sortCode) {
           setFieldErrors(prev => ({ ...prev, sortCode: 'Sort code is required' }));
         } else if (!validateSortCode(formData.bankDetails.sortCode)) {
@@ -1203,7 +1201,17 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
               accountName: sanitized
             }
           }));
+          // Clear error when user starts typing
+          if (fieldErrors.accountName) {
+            setFieldErrors(prev => ({ ...prev, accountName: '' }));
+          }
         }}
+        onBlur={() => {
+          if (!formData.bankDetails?.accountName) {
+            setFieldErrors(prev => ({ ...prev, accountName: 'Account name is required' }));
+          }
+        }}
+        error={fieldErrors.accountName}
         placeholder="Your Restaurant Ltd"
       />
       
