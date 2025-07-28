@@ -103,10 +103,21 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [emailErrors, setEmailErrors] = useState({
+  const [fieldErrors, setFieldErrors] = useState({
+    // Step 2 - Contact
+    phone: '',
     restaurantEmail: '',
+    // Step 3 - Location
+    postcode: '',
+    // Step 4 - Owner
     ownerEmail: '',
+    // Step 6 - Employee
     employeeEmail: '',
+    // Step 8 - Bank Details
+    sortCode: '',
+    accountNumber: '',
+    iban: '',
+    swiftBic: '',
   });
   
   const [formData, setFormData] = useState<RestaurantFormData>({
@@ -222,14 +233,14 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
 
   const addEmployee = () => {
     if (!newEmployee.name || !newEmployee.email) {
-      Alert.alert('Missing Information', 'Please enter at least name and email for the employee.');
+      // Don't block with alert - validation is handled inline
       return;
     }
 
     // Validate email if not already validated via onBlur
     if (!validateEmail(newEmployee.email!)) {
       // Set the error state instead of showing alert
-      setEmailErrors(prev => ({ ...prev, employeeEmail: 'Please enter a valid email address' }));
+      setFieldErrors(prev => ({ ...prev, employeeEmail: 'Please enter a valid email address' }));
       // Focus on the email field to trigger the error display
       return;
     }
@@ -250,7 +261,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
 
     setEmployees(prev => [...prev, employee]);
     // Clear the email error when successfully adding
-    setEmailErrors(prev => ({ ...prev, employeeEmail: '' }));
+    setFieldErrors(prev => ({ ...prev, employeeEmail: '' }));
     setNewEmployee({
       name: '',
       email: '',
@@ -267,59 +278,85 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
   };
 
   const validateStep = (step: number): boolean => {
+    let hasErrors = false;
+    
     switch (step) {
       case 1: // Basic Info
         return !!(formData.restaurantName && formData.displayName && formData.businessType);
+        
       case 2: // Contact
         if (!formData.phone || !formData.email) return false;
+        
+        // Validate phone
         if (!validateUKPhone(formData.phone)) {
-          Alert.alert('Invalid Phone', 'Please enter a valid UK phone number.');
-          return false;
+          setFieldErrors(prev => ({ ...prev, phone: 'Please enter a valid UK phone number' }));
+          hasErrors = true;
         }
-        // Email validation happens on blur - just check if there's no error
-        return !emailErrors.restaurantEmail && validateEmail(formData.email);
+        
+        // Check for existing errors
+        if (fieldErrors.phone || fieldErrors.restaurantEmail) hasErrors = true;
+        
+        // Validate email format
+        if (!validateEmail(formData.email)) hasErrors = true;
+        
+        return !hasErrors;
+        
       case 3: // Location
         if (!formData.street || !formData.city || !formData.zipCode) return false;
+        
+        // Validate postcode
         if (!validatePostcode(formData.zipCode)) {
-          Alert.alert('Invalid Postcode', 'Please enter a valid UK postcode.');
-          return false;
+          setFieldErrors(prev => ({ ...prev, postcode: 'Please enter a valid UK postcode' }));
+          hasErrors = true;
         }
-        return true;
+        
+        return !hasErrors && !fieldErrors.postcode;
+        
       case 4: // Owner Info
         if (!formData.ownerName || !formData.ownerEmail) return false;
-        // Email validation happens on blur - just check if there's no error
-        return !emailErrors.ownerEmail && validateEmail(formData.ownerEmail);
+        return !fieldErrors.ownerEmail && validateEmail(formData.ownerEmail);
+        
       case 5: // Business Hours
         return true; // Optional
+        
       case 6: // Employees
         return true; // Optional
+        
       case 7: // Menu Setup
         return true; // Optional but recommended
+        
       case 8: // Bank Details
         if (!formData.bankDetails?.sortCode || !formData.bankDetails?.accountNumber || !formData.bankDetails?.accountName) {
           return false;
         }
+        
+        // Validate all bank fields
         if (!validateSortCode(formData.bankDetails.sortCode)) {
-          Alert.alert('Invalid Sort Code', 'Please enter a valid 6-digit sort code.');
-          return false;
+          setFieldErrors(prev => ({ ...prev, sortCode: 'Please enter a valid 6-digit sort code' }));
+          hasErrors = true;
         }
+        
         if (!validateAccountNumber(formData.bankDetails.accountNumber)) {
-          Alert.alert('Invalid Account Number', 'Please enter a valid 8-digit account number.');
-          return false;
+          setFieldErrors(prev => ({ ...prev, accountNumber: 'Please enter a valid 8-digit account number' }));
+          hasErrors = true;
         }
-        // Validate IBAN if provided
+        
+        // Optional fields
         if (formData.bankDetails.iban && !validateIBAN(formData.bankDetails.iban)) {
-          Alert.alert('Invalid IBAN', 'Please enter a valid IBAN.');
-          return false;
+          setFieldErrors(prev => ({ ...prev, iban: 'Please enter a valid IBAN' }));
+          hasErrors = true;
         }
-        // Validate SWIFT if provided
+        
         if (formData.bankDetails.swiftBic && !validateSWIFT(formData.bankDetails.swiftBic)) {
-          Alert.alert('Invalid SWIFT/BIC', 'Please enter a valid SWIFT/BIC code.');
-          return false;
+          setFieldErrors(prev => ({ ...prev, swiftBic: 'Please enter a valid SWIFT/BIC code' }));
+          hasErrors = true;
         }
-        return true;
+        
+        return !hasErrors && !fieldErrors.sortCode && !fieldErrors.accountNumber && !fieldErrors.iban && !fieldErrors.swiftBic;
+        
       case 9: // Review
         return true;
+        
       default:
         return true;
     }
@@ -327,7 +364,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
 
   const nextStep = () => {
     if (!validateStep(currentStep)) {
-      Alert.alert('Missing Information', 'Please fill in all required fields before continuing.');
+      // Validation errors are now shown inline - just prevent progression
       return;
     }
     
@@ -581,8 +618,22 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         label="Phone Number *"
         inputType="phone"
         value={formData.phone}
-        onChangeText={(value) => updateField('phone', value)}
+        onChangeText={(value) => {
+          updateField('phone', value);
+          // Clear error when user starts typing
+          if (fieldErrors.phone) {
+            setFieldErrors(prev => ({ ...prev, phone: '' }));
+          }
+        }}
+        onBlur={() => {
+          if (formData.phone && !validateUKPhone(formData.phone)) {
+            setFieldErrors(prev => ({ ...prev, phone: 'Please enter a valid UK phone number' }));
+          } else {
+            setFieldErrors(prev => ({ ...prev, phone: '' }));
+          }
+        }}
         placeholder="+44 20 1234 5678"
+        error={fieldErrors.phone}
       />
 
       <FastInput
@@ -592,19 +643,19 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         onChangeText={(value) => {
           updateField('email', value);
           // Clear error when user starts typing
-          if (emailErrors.restaurantEmail) {
-            setEmailErrors(prev => ({ ...prev, restaurantEmail: '' }));
+          if (fieldErrors.restaurantEmail) {
+            setFieldErrors(prev => ({ ...prev, restaurantEmail: '' }));
           }
         }}
         onBlur={() => {
           if (formData.email && !validateEmail(formData.email)) {
-            setEmailErrors(prev => ({ ...prev, restaurantEmail: 'Please enter a valid email address' }));
+            setFieldErrors(prev => ({ ...prev, restaurantEmail: 'Please enter a valid email address' }));
           } else {
-            setEmailErrors(prev => ({ ...prev, restaurantEmail: '' }));
+            setFieldErrors(prev => ({ ...prev, restaurantEmail: '' }));
           }
         }}
         placeholder="owner@mariaskitchen.co.uk"
-        error={emailErrors.restaurantEmail}
+        error={fieldErrors.restaurantEmail}
       />
 
       <FastInput
@@ -648,8 +699,22 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
             label="Postcode *"
             inputType="text"
             value={formData.zipCode}
-            onChangeText={(value) => updateField('zipCode', value)}
+            onChangeText={(value) => {
+              updateField('zipCode', value);
+              // Clear error when user starts typing
+              if (fieldErrors.postcode) {
+                setFieldErrors(prev => ({ ...prev, postcode: '' }));
+              }
+            }}
+            onBlur={() => {
+              if (formData.zipCode && !validatePostcode(formData.zipCode)) {
+                setFieldErrors(prev => ({ ...prev, postcode: 'Please enter a valid UK postcode' }));
+              } else {
+                setFieldErrors(prev => ({ ...prev, postcode: '' }));
+              }
+            }}
             placeholder="SW1A 1AA"
+            error={fieldErrors.postcode}
           />
         </View>
       </View>
@@ -701,19 +766,19 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         onChangeText={(value) => {
           updateField('ownerEmail', value);
           // Clear error when user starts typing
-          if (emailErrors.ownerEmail) {
-            setEmailErrors(prev => ({ ...prev, ownerEmail: '' }));
+          if (fieldErrors.ownerEmail) {
+            setFieldErrors(prev => ({ ...prev, ownerEmail: '' }));
           }
         }}
         onBlur={() => {
           if (formData.ownerEmail && !validateEmail(formData.ownerEmail)) {
-            setEmailErrors(prev => ({ ...prev, ownerEmail: 'Please enter a valid email address' }));
+            setFieldErrors(prev => ({ ...prev, ownerEmail: 'Please enter a valid email address' }));
           } else {
-            setEmailErrors(prev => ({ ...prev, ownerEmail: '' }));
+            setFieldErrors(prev => ({ ...prev, ownerEmail: '' }));
           }
         }}
         placeholder="maria@mariaskitchen.co.uk"
-        error={emailErrors.ownerEmail}
+        error={fieldErrors.ownerEmail}
       />
 
       <FastInput
@@ -851,19 +916,19 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
               onChangeText={(value) => {
                 setNewEmployee(prev => ({ ...prev, email: value }));
                 // Clear error when user starts typing
-                if (emailErrors.employeeEmail) {
-                  setEmailErrors(prev => ({ ...prev, employeeEmail: '' }));
+                if (fieldErrors.employeeEmail) {
+                  setFieldErrors(prev => ({ ...prev, employeeEmail: '' }));
                 }
               }}
               onBlur={() => {
                 if (newEmployee.email && !validateEmail(newEmployee.email)) {
-                  setEmailErrors(prev => ({ ...prev, employeeEmail: 'Please enter a valid email address' }));
+                  setFieldErrors(prev => ({ ...prev, employeeEmail: 'Please enter a valid email address' }));
                 } else {
-                  setEmailErrors(prev => ({ ...prev, employeeEmail: '' }));
+                  setFieldErrors(prev => ({ ...prev, employeeEmail: '' }));
                 }
               }}
               placeholder="john@mariaskitchen.co.uk"
-              error={emailErrors.employeeEmail}
+              error={fieldErrors.employeeEmail}
             />
           </View>
           <View style={{ flex: 1, marginLeft: 12 }}>
@@ -1022,10 +1087,22 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
               sortCode: formattedSortCode
             }
           }));
+          // Clear error when user starts typing
+          if (fieldErrors.sortCode) {
+            setFieldErrors(prev => ({ ...prev, sortCode: '' }));
+          }
+        }}
+        onBlur={() => {
+          if (formData.bankDetails?.sortCode && !validateSortCode(formData.bankDetails.sortCode)) {
+            setFieldErrors(prev => ({ ...prev, sortCode: 'Please enter a valid 6-digit sort code' }));
+          } else {
+            setFieldErrors(prev => ({ ...prev, sortCode: '' }));
+          }
         }}
         placeholder="00-00-00"
         keyboardType="numeric"
         maxLength={8}
+        error={fieldErrors.sortCode}
       />
       
       <FastInput
@@ -1041,10 +1118,22 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
               accountNumber: cleanedText
             }
           }));
+          // Clear error when user starts typing
+          if (fieldErrors.accountNumber) {
+            setFieldErrors(prev => ({ ...prev, accountNumber: '' }));
+          }
+        }}
+        onBlur={() => {
+          if (formData.bankDetails?.accountNumber && !validateAccountNumber(formData.bankDetails.accountNumber)) {
+            setFieldErrors(prev => ({ ...prev, accountNumber: 'Please enter a valid 8-digit account number' }));
+          } else {
+            setFieldErrors(prev => ({ ...prev, accountNumber: '' }));
+          }
         }}
         placeholder="12345678"
         keyboardType="numeric"
         maxLength={8}
+        error={fieldErrors.accountNumber}
       />
       
       <FastInput
