@@ -352,33 +352,61 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
     // This function sets error messages when Next is clicked with invalid data
     switch (step) {
       case 2: // Contact
-        if (formData.phone && !validateUKPhone(formData.phone)) {
+        // Check for empty required fields first
+        if (!formData.phone) {
+          setFieldErrors(prev => ({ ...prev, phone: 'Phone number is required' }));
+        } else if (!validateUKPhone(formData.phone)) {
           setFieldErrors(prev => ({ ...prev, phone: 'Please enter a valid UK phone number' }));
         }
-        if (formData.email && !validateEmail(formData.email)) {
+        
+        if (!formData.email) {
+          setFieldErrors(prev => ({ ...prev, restaurantEmail: 'Email is required' }));
+        } else if (!validateEmail(formData.email)) {
           setFieldErrors(prev => ({ ...prev, restaurantEmail: 'Please enter a valid email address' }));
         }
         break;
         
       case 3: // Location
-        if (formData.zipCode && !validatePostcode(formData.zipCode)) {
+        if (!formData.zipCode) {
+          setFieldErrors(prev => ({ ...prev, postcode: 'Postcode is required' }));
+        } else if (!validatePostcode(formData.zipCode)) {
           setFieldErrors(prev => ({ ...prev, postcode: 'Please enter a valid UK postcode' }));
         }
         break;
         
       case 4: // Owner Info
-        if (formData.ownerEmail && !validateEmail(formData.ownerEmail)) {
+        if (!formData.ownerEmail) {
+          setFieldErrors(prev => ({ ...prev, ownerEmail: 'Owner email is required' }));
+        } else if (!validateEmail(formData.ownerEmail)) {
           setFieldErrors(prev => ({ ...prev, ownerEmail: 'Please enter a valid email address' }));
         }
         break;
         
+      case 6: // Employee/Staff
+        if (formData.employees && formData.employees.length > 0) {
+          const employee = formData.employees[0];
+          if (!employee.email) {
+            setFieldErrors(prev => ({ ...prev, employeeEmail: 'Employee email is required' }));
+          } else if (!validateEmail(employee.email)) {
+            setFieldErrors(prev => ({ ...prev, employeeEmail: 'Please enter a valid email address' }));
+          }
+        }
+        break;
+        
       case 8: // Bank Details
-        if (formData.bankDetails?.sortCode && !validateSortCode(formData.bankDetails.sortCode)) {
+        if (!formData.bankDetails?.sortCode) {
+          setFieldErrors(prev => ({ ...prev, sortCode: 'Sort code is required' }));
+        } else if (!validateSortCode(formData.bankDetails.sortCode)) {
           setFieldErrors(prev => ({ ...prev, sortCode: 'Please enter a valid 6-digit sort code' }));
         }
-        if (formData.bankDetails?.accountNumber && !validateAccountNumber(formData.bankDetails.accountNumber)) {
+        
+        if (!formData.bankDetails?.accountNumber) {
+          setFieldErrors(prev => ({ ...prev, accountNumber: 'Account number is required' }));
+        } else if (!validateAccountNumber(formData.bankDetails.accountNumber)) {
           setFieldErrors(prev => ({ ...prev, accountNumber: 'Please enter a valid 8-digit account number' }));
         }
+        
+        // IBAN and SWIFT are optional, only validate if provided
         if (formData.bankDetails?.iban && !validateIBAN(formData.bankDetails.iban)) {
           setFieldErrors(prev => ({ ...prev, iban: 'Please enter a valid IBAN' }));
         }
@@ -1194,7 +1222,19 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
               iban: upperCase
             }
           }));
+          // Clear error if field becomes empty
+          if (!upperCase && fieldErrors.iban) {
+            setFieldErrors(prev => ({ ...prev, iban: '' }));
+          }
         }}
+        onBlur={() => {
+          if (formData.bankDetails?.iban && !validateIBAN(formData.bankDetails.iban)) {
+            setFieldErrors(prev => ({ ...prev, iban: 'Please enter a valid IBAN' }));
+          } else {
+            setFieldErrors(prev => ({ ...prev, iban: '' }));
+          }
+        }}
+        error={fieldErrors.iban}
         placeholder="GB00XXXX00000000000000"
         autoCapitalize="characters"
       />
@@ -1212,7 +1252,19 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
               swiftBic: upperCase
             }
           }));
+          // Clear error if field becomes empty
+          if (!upperCase && fieldErrors.swiftBic) {
+            setFieldErrors(prev => ({ ...prev, swiftBic: '' }));
+          }
         }}
+        onBlur={() => {
+          if (formData.bankDetails?.swiftBic && !validateSWIFT(formData.bankDetails.swiftBic)) {
+            setFieldErrors(prev => ({ ...prev, swiftBic: 'Please enter a valid SWIFT/BIC code' }));
+          } else {
+            setFieldErrors(prev => ({ ...prev, swiftBic: '' }));
+          }
+        }}
+        error={fieldErrors.swiftBic}
         placeholder="XXXXXXXX"
         autoCapitalize="characters"
         maxLength={11}
