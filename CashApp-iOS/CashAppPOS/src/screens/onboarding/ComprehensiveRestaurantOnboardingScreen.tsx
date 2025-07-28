@@ -420,7 +420,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         [
           {
             text: 'Start Using POS',
-            onPress: () => navigation.navigate('MainPOS' as never),
+            onPress: () => navigation.navigate('Main' as never),
           },
           {
             text: 'Configure Menu',
