@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "npm run build:shared && vite build",
-    "build:shared": "cd ../shared && npm install && npm run build",
+    "build:shared": "cd ../shared && npm install --include=dev && npm run build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview"
