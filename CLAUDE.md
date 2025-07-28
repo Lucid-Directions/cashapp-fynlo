@@ -17,7 +17,7 @@
 - **Supabase**: `/opt/homebrew/bin/supabase` - Auth & database management
 - **GitHub**: `gh` - Repository & PR management
 - **DigitalOcean**: `doctl` - Infrastructure control
-- **Vercel**: `vercel --token "MNwROvPD3Lx6o9ebRouN8FBo"` - Deployment
+- **Vercel**: `vercel` - Deployment (requires VERCEL_TOKEN env var)
 
 ### Specialized Sub-Agents (via Task tool)
 - **fynlo-test-runner** - Run tests, fix failures, improve coverage
@@ -253,23 +253,26 @@ npm run audit:security
 
 ### Vercel Deployment
 ```bash
+# First, set the token in your environment
+export VERCEL_TOKEN="your-vercel-token-here"
+
 # Deploy to preview environment
-vercel --token "MNwROvPD3Lx6o9ebRouN8FBo"
+vercel
 
 # Deploy to production
-vercel --token "MNwROvPD3Lx6o9ebRouN8FBo" --prod
+vercel --prod
 
 # Pull environment variables
-vercel --token "MNwROvPD3Lx6o9ebRouN8FBo" env pull
+vercel env pull
 
 # View deployment logs
-vercel --token "MNwROvPD3Lx6o9ebRouN8FBo" logs
+vercel logs
 
 # List all deployments
-vercel --token "MNwROvPD3Lx6o9ebRouN8FBo" list
+vercel list
 
 # Rollback to previous deployment
-vercel --token "MNwROvPD3Lx6o9ebRouN8FBo" rollback
+vercel rollback
 ```
 
 **Remember**: Always commit before switching branches. Keep changes simple. Check logs for common issues.
