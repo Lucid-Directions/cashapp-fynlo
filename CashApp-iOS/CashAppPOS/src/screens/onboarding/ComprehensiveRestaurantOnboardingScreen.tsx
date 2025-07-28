@@ -33,6 +33,8 @@ import {
   validateIBAN,
   validateSWIFT,
 } from '../../utils/inputValidation';
+import { API_CONFIG } from '../../config/api';
+import { useAuthStore } from '../../store/useAuthStore';
 
 interface RestaurantFormData {
   // Basic Information
@@ -101,6 +103,11 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [emailErrors, setEmailErrors] = useState({
+    restaurantEmail: '',
+    ownerEmail: '',
+    employeeEmail: '',
+  });
   
   const [formData, setFormData] = useState<RestaurantFormData>({
     restaurantName: '',
@@ -219,9 +226,14 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
       return;
     }
 
+    // Check if there's an email error
+    if (emailErrors.employeeEmail) {
+      return;
+    }
+    
     // Validate email
     if (!validateEmail(newEmployee.email!)) {
-      Alert.alert('Invalid Email', 'Please enter a valid email address.');
+      setEmailErrors(prev => ({ ...prev, employeeEmail: 'Please enter a valid email address' }));
       return;
     }
 
@@ -265,11 +277,8 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
           Alert.alert('Invalid Phone', 'Please enter a valid UK phone number.');
           return false;
         }
-        if (!validateEmail(formData.email)) {
-          Alert.alert('Invalid Email', 'Please enter a valid email address.');
-          return false;
-        }
-        return true;
+        // Email validation happens on blur - just check if there's no error
+        return !emailErrors.restaurantEmail && validateEmail(formData.email);
       case 3: // Location
         if (!formData.street || !formData.city || !formData.zipCode) return false;
         if (!validatePostcode(formData.zipCode)) {
@@ -279,11 +288,8 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         return true;
       case 4: // Owner Info
         if (!formData.ownerName || !formData.ownerEmail) return false;
-        if (!validateEmail(formData.ownerEmail)) {
-          Alert.alert('Invalid Email', 'Please enter a valid owner email address.');
-          return false;
-        }
-        return true;
+        // Email validation happens on blur - just check if there's no error
+        return !emailErrors.ownerEmail && validateEmail(formData.ownerEmail);
       case 5: // Business Hours
         return true; // Optional
       case 6: // Employees
@@ -394,7 +400,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
       };
 
       // Call the new onboarding endpoint
-      const response = await fetch('https://api.cashapp-fynlo.com/api/v1/restaurants/onboarding/create', {
+      const response = await fetch(`${API_CONFIG.FULL_API_URL}/api/v1/restaurants/onboarding/create`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -414,17 +420,35 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
       await AsyncStorage.setItem('restaurant_id', result.restaurant_id);
       await AsyncStorage.setItem('needs_onboarding', 'false');
       
+      // Refresh auth state to update user data
+      const { checkAuth } = useAuthStore.getState();
+      await checkAuth();
+      
       Alert.alert(
         'Onboarding Complete! 🎉',
         `Welcome to Fynlo, ${formData.restaurantName}! Your restaurant is now fully set up and ready to start taking orders.`,
         [
           {
             text: 'Start Using POS',
-            onPress: () => navigation.navigate('Main' as never),
+            onPress: () => {
+              // Use reset to force navigation state refresh
+              navigation.reset({
+                index: 0,
+                routes: [{ name: 'Main' as never }],
+              });
+            },
           },
           {
             text: 'Configure Menu',
-            onPress: () => navigation.navigate('SettingsMenuManagement' as never),
+            onPress: () => {
+              navigation.reset({
+                index: 0,
+                routes: [
+                  { name: 'Main' as never },
+                  { name: 'SettingsMenuManagement' as never },
+                ],
+              });
+            },
           },
         ]
       );
@@ -566,8 +590,22 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         label="Email Address *"
         inputType="email"
         value={formData.email}
-        onChangeText={(value) => updateField('email', value)}
+        onChangeText={(value) => {
+          updateField('email', value);
+          // Clear error when user starts typing
+          if (emailErrors.restaurantEmail) {
+            setEmailErrors(prev => ({ ...prev, restaurantEmail: '' }));
+          }
+        }}
+        onBlur={() => {
+          if (formData.email && !validateEmail(formData.email)) {
+            setEmailErrors(prev => ({ ...prev, restaurantEmail: 'Please enter a valid email address' }));
+          } else {
+            setEmailErrors(prev => ({ ...prev, restaurantEmail: '' }));
+          }
+        }}
         placeholder="owner@mariaskitchen.co.uk"
+        error={emailErrors.restaurantEmail}
       />
 
       <FastInput
@@ -661,8 +699,22 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         label="Owner Email *"
         inputType="email"
         value={formData.ownerEmail}
-        onChangeText={(value) => updateField('ownerEmail', value)}
+        onChangeText={(value) => {
+          updateField('ownerEmail', value);
+          // Clear error when user starts typing
+          if (emailErrors.ownerEmail) {
+            setEmailErrors(prev => ({ ...prev, ownerEmail: '' }));
+          }
+        }}
+        onBlur={() => {
+          if (formData.ownerEmail && !validateEmail(formData.ownerEmail)) {
+            setEmailErrors(prev => ({ ...prev, ownerEmail: 'Please enter a valid email address' }));
+          } else {
+            setEmailErrors(prev => ({ ...prev, ownerEmail: '' }));
+          }
+        }}
         placeholder="maria@mariaskitchen.co.uk"
+        error={emailErrors.ownerEmail}
       />
 
       <FastInput
@@ -797,8 +849,22 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
               label="Email"
               inputType="email"
               value={newEmployee.email || ''}
-              onChangeText={(value) => setNewEmployee(prev => ({ ...prev, email: value }))}
+              onChangeText={(value) => {
+                setNewEmployee(prev => ({ ...prev, email: value }));
+                // Clear error when user starts typing
+                if (emailErrors.employeeEmail) {
+                  setEmailErrors(prev => ({ ...prev, employeeEmail: '' }));
+                }
+              }}
+              onBlur={() => {
+                if (newEmployee.email && !validateEmail(newEmployee.email)) {
+                  setEmailErrors(prev => ({ ...prev, employeeEmail: 'Please enter a valid email address' }));
+                } else {
+                  setEmailErrors(prev => ({ ...prev, employeeEmail: '' }));
+                }
+              }}
               placeholder="john@mariaskitchen.co.uk"
+              error={emailErrors.employeeEmail}
             />
           </View>
           <View style={{ flex: 1, marginLeft: 12 }}>
