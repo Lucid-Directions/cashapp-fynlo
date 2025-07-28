@@ -226,14 +226,11 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
       return;
     }
 
-    // Check if there's an email error
-    if (emailErrors.employeeEmail) {
-      return;
-    }
-    
-    // Validate email
+    // Validate email if not already validated via onBlur
     if (!validateEmail(newEmployee.email!)) {
+      // Set the error state instead of showing alert
       setEmailErrors(prev => ({ ...prev, employeeEmail: 'Please enter a valid email address' }));
+      // Focus on the email field to trigger the error display
       return;
     }
 
@@ -252,6 +249,8 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
     };
 
     setEmployees(prev => [...prev, employee]);
+    // Clear the email error when successfully adding
+    setEmailErrors(prev => ({ ...prev, employeeEmail: '' }));
     setNewEmployee({
       name: '',
       email: '',
