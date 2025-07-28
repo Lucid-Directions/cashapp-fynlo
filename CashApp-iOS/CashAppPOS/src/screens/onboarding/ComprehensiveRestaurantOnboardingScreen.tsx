@@ -140,6 +140,11 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
   });
 
   const totalSteps = 9;
+  
+  // Keep TextInput reference to prevent tree-shaking
+  // This fixes the "ReferenceError: Can't find variable: TextInput" error
+  // that occurs during onboarding at the bank details step
+  const _TextInputRef = TextInput;
   const businessTypes = [
     'Restaurant', 'Fast Food', 'Cafe', 'Bar & Pub', 'Food Truck',
     'Bakery', 'Pizzeria', 'Bistro', 'Fine Dining', 'Other'
