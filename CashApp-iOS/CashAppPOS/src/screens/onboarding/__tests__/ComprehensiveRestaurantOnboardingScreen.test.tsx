@@ -25,13 +25,30 @@ jest.mock('../../../services/DataService', () => ({
   },
 }));
 
-jest.mock('../../../store/useAuthStore', () => ({
-  __esModule: true,
-  default: jest.fn(() => ({
+jest.mock('../../../store/useAuthStore', () => {
+  const mockState = {
     user: { id: 'test-user' },
+    isAuthenticated: false,
+    isLoading: false,
     updateUser: jest.fn(),
-  })),
-}));
+    checkAuth: jest.fn().mockResolvedValue(true),
+    signIn: jest.fn(),
+    signOut: jest.fn(),
+  };
+  
+  const useAuthStore = jest.fn((selector) => {
+    return selector ? selector(mockState) : mockState;
+  });
+  
+  // Add getState method
+  useAuthStore.getState = () => mockState;
+  
+  return {
+    __esModule: true,
+    useAuthStore,
+    default: useAuthStore,
+  };
+});
 
 // Mock Alert
 jest.spyOn(Alert, 'alert');
@@ -69,7 +86,7 @@ describe('ComprehensiveRestaurantOnboardingScreen', () => {
       fireEvent.press(getByText('Next'));
       
       // Start typing email
-      const emailInput = getByPlaceholderText('restaurant@example.com');
+      const emailInput = getByPlaceholderText('owner@mariaskitchen.co.uk');
       
       // Type partial email
       fireEvent.changeText(emailInput, 'test@');
@@ -206,7 +223,7 @@ describe('ComprehensiveRestaurantOnboardingScreen', () => {
       // Fill contact info
       const phoneInput = getByPlaceholderText('+44 20 1234 5678');
       fireEvent.changeText(phoneInput, '+44 20 1234 5678');
-      const emailInput = getByPlaceholderText('restaurant@example.com');
+      const emailInput = getByPlaceholderText('owner@mariaskitchen.co.uk');
       fireEvent.changeText(emailInput, 'test@restaurant.com');
       
       // Navigate to step 3 - Address
