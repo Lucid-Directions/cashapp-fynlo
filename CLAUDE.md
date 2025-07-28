@@ -1,5 +1,34 @@
 # CLAUDE.md - Fynlo POS Development Guide
 
+## 🛠️ AVAILABLE TOOLS & AGENTS
+
+### MCP Tools
+- **Desktop Commander** (`mcp__desktop-commander__`) - System file operations, process management
+- **File System** (`mcp__filesystem__`) - Project file operations
+- **Sequential Thinking** (`mcp__sequential-thinking__`) - Break down complex problems
+- **Memory Bank** (`mcp__memory-bank__`) - Persist context across conversations
+- **Playwright/Puppeteer** (`mcp__playwright__`, `mcp__puppeteer__`) - Browser automation
+- **SemGrep** (`mcp__semgrep__`) - Security scanning, code analysis
+- **Ref** (`mcp__Ref__`) - Search documentation, GitHub, private resources
+- **DigitalOcean** (`mcp__digitalocean-mcp-local__`) - Infrastructure management
+
+### CLI Tools
+- **Pieces**: `pieces` - Context management (`pieces search`, `pieces ask`, `pieces create`)
+- **Supabase**: `/opt/homebrew/bin/supabase` - Auth & database management
+- **GitHub**: `gh` - Repository & PR management
+- **DigitalOcean**: `doctl` - Infrastructure control
+- **Vercel**: `vercel` - Deployment (requires VERCEL_TOKEN env var)
+
+### Specialized Sub-Agents (via Task tool)
+- **fynlo-test-runner** - Run tests, fix failures, improve coverage
+- **fynlo-bundle-deployer** - iOS bundle building & deployment fixes
+- **fynlo-security-auditor** - Security vulnerability scanning
+- **fynlo-api-optimizer** - Backend performance optimization
+- **fynlo-websocket-debugger** - Real-time connection debugging
+- **fynlo-platform-integrator** - Multi-tenant features
+- **fynlo-infrastructure-manager** - DigitalOcean ops
+- **general-purpose** - Complex research & multi-step tasks
+
 ## 7 Working Rules
 1. Read problem → Find files → Write plan to tasks/todo.md
 2. Create checklist of todos
@@ -166,24 +195,25 @@ interface StoreState {
 - Frontend: Jest + React Native Testing Library
 - Security: Auth flows, input validation, multi-tenant isolation
 
-## 🛠️ MCP SERVERS (Available Tools)
+## 💾 CONTEXT PERSISTENCE WITH PIECES
 
-**File Operations**: `mcp__desktop-commander__` (system files), `mcp__filesystem__` (project files)  
-**Problem Solving**: `mcp__sequential-thinking__` (break down complex tasks)  
-**Memory**: `mcp__memory-bank__` (persist context across conversations)  
-**Browser**: `mcp__playwright__`, `mcp__puppeteer__` (automation, testing)  
-**Security**: `mcp__semgrep__` (code analysis, vulnerability scanning)  
-**Infrastructure**: `mcp__digitalocean-mcp-local__` (deployment, monitoring, logs)
-**Documentation**: `mcp__Ref__` (search docs, GitHub, private resources)
+When you clear Claude conversation or restart, use Pieces CLI to maintain context:
 
-**CLI Tools Available**:
-- **Supabase CLI**: `/opt/homebrew/bin/supabase` - For managing Supabase projects
-- **DigitalOcean CLI**: `doctl` - For infrastructure management
-- **GitHub CLI**: `gh` - For repository management
+```bash
+# Search your saved snippets
+pieces search "websocket fix"
 
-Use `/mcp` to check status. These tools are automatically available.
+# Ask Pieces about recent work
+pieces ask "What have I been working on?"
+
+# Save important fixes
+pieces create -n "fix-name"
+```
+
+See `PIECES_WORKFLOW.md` for full workflow.
 
 ## 📚 Key Business Workflows
+
 1. **Orders**: Product → Cart → Payment → Kitchen
 2. **Payments**: Method → Validation → Provider → Confirmation
 3. **Real-time**: WebSocket → Order updates → UI sync
@@ -191,6 +221,7 @@ Use `/mcp` to check status. These tools are automatically available.
 ## Development Commands
 
 ### iOS Development
+
 ```bash
 # Initial setup (first time only)
 cd ios && pod install && cd ..
@@ -219,6 +250,30 @@ npm run lint
 
 # Security audit
 npm run audit:security
+```
+
+### Vercel Deployment
+```bash
+# First, set the token in your environment
+export VERCEL_TOKEN="your-vercel-token-here"
+
+# Deploy to preview environment
+vercel
+
+# Deploy to production
+vercel --prod
+
+# Pull environment variables
+vercel env pull
+
+# View deployment logs
+vercel logs
+
+# List all deployments
+vercel list
+
+# Rollback to previous deployment
+vercel rollback
 ```
 
 **Remember**: Always commit before switching branches. Keep changes simple. Check logs for common issues.

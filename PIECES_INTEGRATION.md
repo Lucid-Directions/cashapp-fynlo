@@ -2,48 +2,50 @@
 
 ## Current Status
 
-✅ **Pieces MCP is now configured and ready to use with Claude Desktop!**
+✅ **PiecesOS is running and tracking your terminal activity!**
 
-PiecesOS acts as an MCP server and is now integrated with Claude Desktop via the Model Context Protocol.
+Pieces automatically captures:
+- Terminal commands and their outputs
+- Code snippets you work with
+- Error messages and their solutions
+- Your development workflow context
 
-## How It Works
+## Workflow for Context Persistence
 
-### Prerequisites
-1. **PiecesOS** must be running (✅ Already running on port 39300)
-2. **Long-Term Memory (LTM)** must be enabled in PiecesOS
+### The Problem
+When you clear a Claude Code conversation or restart, all context is lost. But Pieces is recording everything!
 
-### Configuration
-The Pieces MCP server is configured in:
+### The Solution: Context Export Workflow
+
+1. **Before Clearing/Restarting Claude Code**:
+   ```bash
+   # Run the sync script to export Pieces context
+   python scripts/pieces-claude-sync.py
+   ```
+
+2. **After Starting New Claude Session**:
+   Claude Code will automatically read from:
+   - `.claude/context/pieces-context.md` - Your recent activity
+   - `CLAUDE.md` - Project-specific instructions
+   - Recent terminal history captured by Pieces
+
+### What Pieces Tracks (Automatically!)
+- ✅ All terminal commands you run
+- ✅ Error messages and stack traces
+- ✅ File edits and code changes
+- ✅ API responses and debugging sessions
+- ✅ Git commits and branch switches
+
+### Pieces CLI Setup (One-time)
+```bash
+# Complete the onboarding
+pieces onboarding
+
+# Then you can use:
+pieces list          # Show saved snippets
+pieces search <term> # Search your history
+pieces activity      # Show recent activity
 ```
-~/Library/Application Support/Claude/claude_desktop_config.json
-```
-
-With the following settings:
-```json
-{
-  "mcpServers": {
-    "Pieces": {
-      "url": "http://localhost:39300/model_context_protocol/2024-11-05/sse"
-    }
-  }
-}
-```
-
-### Using Pieces with Claude
-
-**IMPORTANT**: You need to restart Claude Desktop for the MCP configuration to take effect!
-
-Once restarted, Claude will have access to the `ask_pieces_ltm` tool, which allows me to:
-- Query your workflow history stored in Pieces
-- Access code snippets you've saved
-- Retrieve context from your development activities
-- Find previous solutions to similar problems
-
-### Example Queries
-- "What was I working on yesterday?"
-- "Show me previous implementations of authentication"
-- "Have I encountered this error before?"
-- "What fixes have I applied for WebSocket issues?"
 
 ### 2. Pieces CLI Workflow
 The Pieces CLI is installed but requires interactive setup:

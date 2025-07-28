@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import and_, desc, func
 from pydantic import BaseModel, EmailStr
 from datetime import datetime, timedelta
+import logging
 
 from app.core.database import get_db, Restaurant, Platform, User, Order, Customer, Section, Table
 from app.core.auth import get_current_user
@@ -21,8 +22,10 @@ from app.core.validation import (
     ValidationError as ValidationErr
 )
 from app.core.websocket import websocket_manager
+from app.schemas.restaurant import RestaurantOnboardingCreate
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 # Pydantic models
 class RestaurantCreate(BaseModel):
@@ -235,6 +238,186 @@ async def create_restaurant(
     db.add(new_restaurant)
     db.commit()
     db.refresh(new_restaurant)
+    
+    return RestaurantResponse(
+        id=str(new_restaurant.id),
+        platform_id=str(new_restaurant.platform_id),
+        name=new_restaurant.name,
+        address=new_restaurant.address,
+        phone=new_restaurant.phone,
+        email=new_restaurant.email,
+        timezone=new_restaurant.timezone,
+        business_hours=new_restaurant.business_hours,
+        settings=new_restaurant.settings,
+        tax_configuration=new_restaurant.tax_configuration,
+        payment_methods=new_restaurant.payment_methods,
+        is_active=new_restaurant.is_active,
+        created_at=new_restaurant.created_at,
+        updated_at=new_restaurant.updated_at
+    )
+
+@router.post("/onboarding/create", response_model=RestaurantResponse)
+async def create_restaurant_onboarding(
+    restaurant_data: RestaurantOnboardingCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Create a restaurant during onboarding for users without restaurants"""
+    
+    # Check if user already has a restaurant
+    if current_user.restaurant_id:
+        raise HTTPException(
+            status_code=400, 
+            detail="User already has a restaurant associated"
+        )
+    
+    # Get user's platform (should be set during auth)
+    platform_id = str(current_user.platform_id) if current_user.platform_id else None
+    if not platform_id:
+        # If no platform, use default platform
+        default_platform = db.query(Platform).filter(Platform.name == "Fynlo").first()
+        if not default_platform:
+            raise HTTPException(status_code=500, detail="No default platform found")
+        platform_id = str(default_platform.id)
+    
+    # Validate and sanitize JSONB fields
+    try:
+        validated_address = validate_model_jsonb_fields('restaurant', 'address', restaurant_data.address)
+        validated_business_hours = validate_model_jsonb_fields('restaurant', 'business_hours', restaurant_data.business_hours)
+        
+        # Create settings from the additional fields
+        settings = {
+            "display_name": restaurant_data.display_name,
+            "business_type": restaurant_data.business_type,
+            "description": restaurant_data.description or "",
+            "website": restaurant_data.website or "",
+            "owner_info": restaurant_data.owner_info,
+            "bank_details": restaurant_data.bank_details,
+            "currency": "GBP",
+            "date_format": "DD/MM/YYYY",
+            "time_format": "24h",
+            "allow_tips": True,
+            "auto_gratuity_percentage": 12.5,
+            "print_receipt_default": True
+        }
+        validated_settings = validate_model_jsonb_fields('restaurant', 'settings', settings)
+    except ValidationErr as e:
+        raise FynloException(
+            error_code=ErrorCodes.VALIDATION_ERROR,
+            detail=f"JSONB validation failed: {str(e)}"
+        )
+    
+    # Validate email and phone if provided
+    if restaurant_data.email and not validate_email(restaurant_data.email):
+        raise FynloException(
+            error_code=ErrorCodes.VALIDATION_ERROR,
+            detail="Invalid email format"
+        )
+    
+    if restaurant_data.phone and not validate_phone(restaurant_data.phone):
+        raise FynloException(
+            error_code=ErrorCodes.VALIDATION_ERROR,
+            detail="Invalid phone number format"
+        )
+    
+    # Sanitize string inputs
+    sanitized_name = sanitize_string(restaurant_data.name, 255)
+    if not sanitized_name:
+        raise FynloException(
+            error_code=ErrorCodes.VALIDATION_ERROR,
+            detail="Restaurant name cannot be empty"
+        )
+    
+    # Get subscription info from Supabase metadata
+    # We need to fetch from Supabase since User model doesn't have subscription fields
+    from app.core.supabase_client import get_supabase_client
+    supabase = get_supabase_client()
+    
+    # Get the Supabase user to access metadata
+    supabase_user = None
+    if current_user.supabase_id:
+        try:
+            response = supabase.auth.admin.get_user_by_id(str(current_user.supabase_id))
+            if response and response.user:
+                supabase_user = response.user
+        except Exception as e:
+            logger.warning(f"Failed to fetch Supabase user: {e}")
+    
+    # Extract subscription info from Supabase metadata or use defaults
+    user_metadata = supabase_user.user_metadata if supabase_user else {}
+    subscription_plan = user_metadata.get('subscription_plan', 'alpha')
+    subscription_status = user_metadata.get('subscription_status', 'active')
+    
+    # Create restaurant with proper defaults
+    new_restaurant = Restaurant(
+        platform_id=platform_id,
+        name=sanitized_name,
+        address=validated_address,
+        phone=restaurant_data.phone,
+        email=restaurant_data.email or current_user.email,
+        timezone="Europe/London",  # Default to UK timezone
+        business_hours=validated_business_hours,
+        settings=validated_settings,
+        subscription_plan=subscription_plan,
+        subscription_status=subscription_status,
+        subscription_started_at=datetime.utcnow(),
+        # Set default configurations
+        tax_configuration={"vat_rate": 0.20, "included_in_price": True},
+        payment_methods={"cash": True, "card": True, "qr_code": True},
+        is_active=True
+    )
+    
+    db.add(new_restaurant)
+    db.flush()  # Get the ID before updating user
+    
+    # Update user with restaurant_id and mark onboarding complete
+    current_user.restaurant_id = new_restaurant.id
+    current_user.needs_onboarding = False
+    current_user.updated_at = datetime.utcnow()
+    
+    # Set user role to restaurant_owner if not already set
+    if current_user.role not in ["platform_owner", "restaurant_owner"]:
+        current_user.role = "restaurant_owner"
+    
+    # Create employees if provided
+    if restaurant_data.employees:
+        for emp_data in restaurant_data.employees:
+            try:
+                # Create user for each employee
+                employee_user = User(
+                    email=emp_data['email'],
+                    first_name=emp_data['name'].split()[0] if ' ' in emp_data['name'] else emp_data['name'],
+                    last_name=' '.join(emp_data['name'].split()[1:]) if ' ' in emp_data['name'] else '',
+                    role=emp_data.get('role', 'employee'),
+                    restaurant_id=new_restaurant.id,
+                    platform_id=platform_id,
+                    permissions={"access_level": emp_data.get('access_level', 'pos_only')},
+                    is_active=True,
+                    created_at=datetime.utcnow()
+                )
+                db.add(employee_user)
+                logger.info(f"Created employee user: {employee_user.email}")
+            except Exception as e:
+                logger.warning(f"Failed to create employee {emp_data.get('email', 'unknown')}: {e}")
+                # Continue with other employees even if one fails
+    
+    db.commit()
+    db.refresh(new_restaurant)
+    db.refresh(current_user)
+    
+    # Notify via WebSocket that onboarding is complete
+    try:
+        await websocket_manager.broadcast_to_restaurant(
+            str(new_restaurant.id),
+            {
+                "type": "onboarding_complete",
+                "restaurant_id": str(new_restaurant.id),
+                "user_id": str(current_user.id)
+            }
+        )
+    except Exception as e:
+        # Don't fail if WebSocket fails
+        pass
     
     return RestaurantResponse(
         id=str(new_restaurant.id),

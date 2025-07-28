@@ -440,32 +440,130 @@ async def register_restaurant(
         
         # Create restaurant with proper error handling
         try:
+            # Get default platform if user doesn't have one
+            platform_id = str(db_user.platform_id) if db_user.platform_id else None
+            if not platform_id:
+                from app.core.database import Platform
+                default_platform = db.query(Platform).filter(Platform.name == "Fynlo").first()
+                if default_platform:
+                    platform_id = str(default_platform.id)
+                else:
+                    # No platform found - this is a critical error
+                    raise HTTPException(
+                        status_code=500, 
+                        detail="No platform found. Please contact support."
+                    )
+            
+            # Create properly structured address
+            address_data = {
+                "street": data.address or "",
+                "city": "",
+                "state": "",
+                "zipCode": "",
+                "country": "UK"  # Default to UK
+            }
+            
+            # Validate inputs
+            from app.core.validation import (
+                validate_model_jsonb_fields,
+                validate_email,
+                validate_phone,
+                sanitize_string,
+                ValidationError as ValidationErr
+            )
+            
+            # Sanitize restaurant name
+            sanitized_name = sanitize_string(data.restaurant_name, 255)
+            if not sanitized_name:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Restaurant name cannot be empty"
+                )
+            
+            # Validate phone if provided
+            if data.phone and not validate_phone(data.phone):
+                raise HTTPException(
+                    status_code=400,
+                    detail="Invalid phone number format"
+                )
+            
+            # Validate address structure
+            try:
+                validated_address = validate_model_jsonb_fields('restaurant', 'address', address_data)
+            except ValidationErr as e:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Address validation failed: {str(e)}"
+                )
+            
             restaurant = Restaurant(
                 id=uuid.uuid4(),
-                name=data.restaurant_name,
+                platform_id=platform_id,
+                name=sanitized_name,
                 email=supabase_user.email,
                 phone=data.phone,
-                address={"street": data.address} if data.address else {},
+                address=validated_address,
+                timezone="Europe/London",  # Default timezone
+                business_hours={
+                    "monday": {"open": "09:00", "close": "22:00"},
+                    "tuesday": {"open": "09:00", "close": "22:00"},
+                    "wednesday": {"open": "09:00", "close": "22:00"},
+                    "thursday": {"open": "09:00", "close": "22:00"},
+                    "friday": {"open": "09:00", "close": "23:00"},
+                    "saturday": {"open": "09:00", "close": "23:00"},
+                    "sunday": {"open": "10:00", "close": "21:00"}
+                },
+                settings={
+                    "currency": "GBP",
+                    "date_format": "DD/MM/YYYY",
+                    "time_format": "24h",
+                    "allow_tips": True,
+                    "auto_gratuity_percentage": 12.5,
+                    "print_receipt_default": True
+                },
                 subscription_plan=subscription_plan,
                 subscription_status=subscription_status,
                 subscription_started_at=datetime.utcnow(),
+                # Set default configurations
+                tax_configuration={
+                    "vat_rate": 0.20,
+                    "included_in_price": True,
+                    "tax_number": ""
+                },
+                payment_methods={
+                    "cash": True,
+                    "card": True,
+                    "qr_code": True,
+                    "apple_pay": True,
+                    "google_pay": True
+                },
                 is_active=True
             )
             db.add(restaurant)
             
-            # Link user to restaurant
+            # Link user to restaurant and update user state
             db_user.restaurant_id = restaurant.id
+            db_user.needs_onboarding = False  # Mark onboarding as complete
+            db_user.updated_at = datetime.utcnow()
+            
             if db_user.role not in ['platform_owner', 'restaurant_owner']:
                 db_user.role = 'restaurant_owner'
             
             db.commit()
             db.refresh(restaurant)
+            db.refresh(db_user)
+            
+            # Import feature gates
+            from app.core.feature_gate import get_plan_features
             
             return {
                 "success": True,
                 "restaurant_id": str(restaurant.id),
+                "restaurant_name": restaurant.name,
                 "subscription_plan": subscription_plan,
                 "subscription_status": subscription_status,
+                "enabled_features": get_plan_features(subscription_plan),
+                "needs_onboarding": False,
                 "message": "Restaurant registered successfully"
             }
         except SQLAlchemyError as e:
