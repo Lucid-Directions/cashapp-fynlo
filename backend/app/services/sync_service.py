@@ -10,8 +10,9 @@ from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_
 from redis import Redis
 
-from app.core.database import get_db, Restaurant, Product, Category, Order, User
+from app.core.database import get_db
 from app.core.redis_client import redis_client as global_redis_client
+from app.models import Restaurant, Product, Category, Order, User
 from app.core.exceptions import FynloException
 import logging
 
