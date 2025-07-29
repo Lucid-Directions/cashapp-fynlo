@@ -1,19 +1,28 @@
 """
 Comprehensive monitoring endpoints for instance and deployment tracking.
 Provides real-time visibility into replica counts and system health.
+Enhanced with strict input validation and security measures.
 """
 
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Query, Body, Request
 from datetime import datetime, timezone
 from typing import Dict, Any, List
 import logging
 
 from app.core.response_helper import APIResponseHelper
 from app.core.redis_client import get_redis, RedisClient
-from app.api.v1.dependencies.auth import get_current_user
-from app.models.user import User
+from app.core.auth import get_current_user
+from app.core.database import User
 from app.services.instance_tracker import instance_tracker
 from app.services.digitalocean_monitor import get_do_monitor, DigitalOceanMonitor
+from app.core.security import (
+    ReplicaQueryParams,
+    DeploymentQueryParams,
+    DeploymentTriggerRequest,
+    MetricsQueryParams,
+    RefreshReplicasRequest
+)
+from app.middleware.rate_limit_middleware import limiter, DEFAULT_RATE
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +30,10 @@ router = APIRouter()
 
 
 @router.get("/replicas")
+@limiter.limit(DEFAULT_RATE)
 async def get_replica_status(
+    request: Request,
+    query_params: ReplicaQueryParams = Depends(),
     current_user: User = Depends(get_current_user),
     redis: RedisClient = Depends(get_redis),
     do_monitor: DigitalOceanMonitor = Depends(get_do_monitor)
@@ -48,9 +60,12 @@ async def get_replica_status(
         active_instances = await instance_tracker.get_active_instances()
         instance_counts = await instance_tracker.get_instance_count()
     
-    # Get DigitalOcean status
-    do_status = await do_monitor.get_actual_replicas()
-    do_configured = "error" not in do_status
+    # Get DigitalOcean status if requested
+    do_status = None
+    do_configured = False
+    if query_params.include_do_status:
+        do_status = await do_monitor.get_actual_replicas()
+        do_configured = "error" not in do_status
     
     # Calculate discrepancies
     configured_replicas = do_status.get("desired_replicas", 2) if do_configured else 2
@@ -85,7 +100,7 @@ async def get_replica_status(
                 _sanitize_instance_data(inst, is_platform_owner) 
                 for inst in active_instances 
                 if not _is_instance_active(inst)
-            ]
+            ] if query_params.include_stale else []
         },
         "digitalocean": do_status if is_platform_owner else {
             "configured": do_configured,
@@ -116,7 +131,10 @@ async def get_replica_status(
 
 
 @router.get("/metrics")
+@limiter.limit(DEFAULT_RATE)
 async def get_monitoring_metrics(
+    request: Request,
+    query_params: MetricsQueryParams = Depends(),
     current_user: User = Depends(get_current_user),
     do_monitor: DigitalOceanMonitor = Depends(get_do_monitor)
 ) -> Dict[str, Any]:
@@ -140,8 +158,11 @@ async def get_monitoring_metrics(
 
 
 @router.post("/replicas/refresh")
+@limiter.limit("10/minute")  # Stricter limit for refresh operations
 async def refresh_replica_count(
+    request: Request,
     background_tasks: BackgroundTasks,
+    request_body: RefreshReplicasRequest = Body(...),
     current_user: User = Depends(get_current_user),
     do_monitor: DigitalOceanMonitor = Depends(get_do_monitor)
 ) -> Dict[str, Any]:
@@ -161,11 +182,12 @@ async def refresh_replica_count(
             detail="Only platform owners can refresh replica status"
         )
     
-    # Clear DO cache and get fresh data
-    fresh_status = await do_monitor.get_app_info(force_refresh=True)
+    # Clear DO cache and get fresh data if requested
+    if request_body.clear_cache:
+        fresh_status = await do_monitor.get_app_info(force_refresh=True)
     
-    # Schedule stale instance cleanup in background
-    if instance_tracker:
+    # Schedule stale instance cleanup in background if requested
+    if request_body.force_cleanup and instance_tracker:
         background_tasks.add_task(instance_tracker.cleanup_stale_instances)
     
     # Get updated replica status
@@ -182,7 +204,10 @@ async def refresh_replica_count(
 
 
 @router.get("/deployments")
+@limiter.limit(DEFAULT_RATE)
 async def get_recent_deployments(
+    request: Request,
+    query_params: DeploymentQueryParams = Depends(),
     current_user: User = Depends(get_current_user),
     do_monitor: DigitalOceanMonitor = Depends(get_do_monitor)
 ) -> Dict[str, Any]:
@@ -198,7 +223,7 @@ async def get_recent_deployments(
             detail="Only platform owners can view deployment history"
         )
     
-    deployments = await do_monitor.get_deployments(limit=10)
+    deployments = await do_monitor.get_deployments(limit=query_params.limit)
     
     # Process deployment data
     processed_deployments = []
@@ -223,7 +248,10 @@ async def get_recent_deployments(
 
 
 @router.post("/deployments/trigger")
+@limiter.limit("2/hour")  # Very strict limit for deployment triggers
 async def trigger_deployment(
+    request: Request,
+    request_body: DeploymentTriggerRequest = Body(...),
     current_user: User = Depends(get_current_user),
     do_monitor: DigitalOceanMonitor = Depends(get_do_monitor)
 ) -> Dict[str, Any]:
@@ -241,10 +269,11 @@ async def trigger_deployment(
             detail="Only platform owners can trigger deployments"
         )
     
-    # Extra safety check - could add a confirmation token requirement
-    logger.warning(f"Deployment triggered by {current_user.email}")
+    # Log deployment trigger with reason
+    logger.warning(f"Deployment triggered by {current_user.email}. Reason: {request_body.reason}")
     
-    result = await do_monitor.force_deployment_refresh()
+    # Pass force_rebuild parameter to the monitor
+    result = await do_monitor.force_deployment_refresh(force_rebuild=request_body.force_rebuild)
     
     if "error" in result:
         return APIResponseHelper.error(
