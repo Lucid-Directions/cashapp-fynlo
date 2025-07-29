@@ -20,6 +20,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 
 interface PlatformMetrics {
   totalRevenue: number;
@@ -44,11 +45,17 @@ interface RestaurantFinancials {
 const FinancialManagement = () => {
   const [selectedRestaurant, setSelectedRestaurant] = useState<string>('all');
   const [reportType, setReportType] = useState<string>('summary');
+  const { isPlatformOwner } = useFeatureAccess();
 
   // Fetch platform financial metrics
   const { data: platformMetrics, isLoading: metricsLoading } = useQuery({
     queryKey: ['platform-metrics'],
     queryFn: async (): Promise<PlatformMetrics> => {
+      // SECURITY: Only platform owners should access this data
+      if (!isPlatformOwner()) {
+        throw new Error('Unauthorized: Only platform owners can view financial data');
+      }
+
       // Get all restaurants
       const { data: restaurants, error: restaurantsError } = await supabase
         .from('restaurants')
@@ -99,6 +106,11 @@ const FinancialManagement = () => {
   const { data: restaurantFinancials, isLoading: financialsLoading } = useQuery({
     queryKey: ['restaurant-financials'],
     queryFn: async (): Promise<RestaurantFinancials[]> => {
+      // SECURITY: Only platform owners should access this data
+      if (!isPlatformOwner()) {
+        throw new Error('Unauthorized: Only platform owners can view restaurant financials');
+      }
+
       const { data: restaurants, error: restaurantsError } = await supabase
         .from('restaurants')
         .select(`

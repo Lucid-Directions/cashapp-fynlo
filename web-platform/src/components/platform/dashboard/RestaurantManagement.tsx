@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 import { CreateRestaurantDialog } from '../dialogs/CreateRestaurantDialog';
 import { Restaurant } from '../../types';
 
@@ -40,6 +41,7 @@ export const RestaurantManagement: React.FC = () => {
   const [restaurantStats, setRestaurantStats] = useState<Record<string, RestaurantStats>>({});
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const { toast } = useToast();
+  const { isPlatformOwner } = useFeatureAccess();
 
   useEffect(() => {
     fetchRestaurants();
@@ -47,6 +49,11 @@ export const RestaurantManagement: React.FC = () => {
 
   const fetchRestaurants = async () => {
     try {
+      // SECURITY: Only platform owners should access this component
+      if (!isPlatformOwner()) {
+        throw new Error('Unauthorized: Only platform owners can view all restaurants');
+      }
+
       const { data, error } = await supabase
         .from('restaurants')
         .select('*')

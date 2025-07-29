@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 import { AdvancedAnalytics } from '../../dashboard/AdvancedAnalytics';
 
 interface PlatformMetrics {
@@ -52,6 +53,7 @@ export const PlatformOverview = () => {
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
   const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected' | 'connecting'>('connecting');
   const { toast } = useToast();
+  const { isPlatformOwner } = useFeatureAccess();
 
   useEffect(() => {
     fetchPlatformMetrics();
@@ -102,6 +104,11 @@ export const PlatformOverview = () => {
 
   const fetchPlatformMetrics = async () => {
     try {
+      // SECURITY: Only platform owners should access this data
+      if (!isPlatformOwner()) {
+        throw new Error('Unauthorized: Only platform owners can view platform metrics');
+      }
+
       // Get restaurant metrics
       const { data: restaurants } = await supabase
         .from('restaurants')
@@ -157,6 +164,11 @@ export const PlatformOverview = () => {
 
   const fetchRecentActivity = async () => {
     try {
+      // SECURITY: Only platform owners should access this data
+      if (!isPlatformOwner()) {
+        throw new Error('Unauthorized: Only platform owners can view platform activity');
+      }
+
       // Get recent restaurant signups
       const { data: recentRestaurants } = await supabase
         .from('restaurants')

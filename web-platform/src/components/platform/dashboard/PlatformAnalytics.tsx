@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 
 interface PlatformMetrics {
   totalRestaurants: number;
@@ -60,6 +61,7 @@ export const PlatformAnalytics: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [selectedPeriod, setSelectedPeriod] = useState<'7d' | '30d' | '90d'>('30d');
   const { toast } = useToast();
+  const { isPlatformOwner } = useFeatureAccess();
 
   useEffect(() => {
     fetchPlatformMetrics();
@@ -69,6 +71,11 @@ export const PlatformAnalytics: React.FC = () => {
 
   const fetchPlatformMetrics = async () => {
     try {
+      // SECURITY: Only platform owners should access this data
+      if (!isPlatformOwner()) {
+        throw new Error('Unauthorized: Only platform owners can view platform analytics');
+      }
+
       const today = new Date();
       const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
       const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
@@ -138,6 +145,11 @@ export const PlatformAnalytics: React.FC = () => {
 
   const fetchRevenueData = async () => {
     try {
+      // SECURITY: Only platform owners should access this data
+      if (!isPlatformOwner()) {
+        throw new Error('Unauthorized: Only platform owners can view platform revenue data');
+      }
+
       const days = selectedPeriod === '7d' ? 7 : selectedPeriod === '30d' ? 30 : 90;
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - days);
@@ -173,6 +185,11 @@ export const PlatformAnalytics: React.FC = () => {
 
   const fetchRestaurantPerformance = async () => {
     try {
+      // SECURITY: Only platform owners should access this data
+      if (!isPlatformOwner()) {
+        throw new Error('Unauthorized: Only platform owners can view restaurant performance');
+      }
+
       const { data: restaurants } = await supabase
         .from('restaurants')
         .select('id, name')
