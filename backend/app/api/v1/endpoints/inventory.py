@@ -198,41 +198,18 @@ async def scan_receipt_api(
     Accepts a base64 encoded image of a receipt, processes it (simulated for now),
     and returns a list of parsed items.
     """
-    # In a real scenario, this is where you'd call the OCR service.
-    # For now, we'll return a mock response.
-    # image_bytes = base64.b64decode(scan_request.image_base64) # Example decoding
-
-    # Mock OCR and fuzzy matching logic
-    # This would eventually be moved to a service in backend/app/services/ocr_service.py
-    # and called here.
-
-    # Example: if image_base64 contains "milk"
-    if "milk" in scan_request.image_base64.lower(): # Highly simplified mock
-        mock_items = [
-            ScannedItemResponse(name="Milk, 1L", quantity=2, price=1.50, sku_match="MILK001", raw_text_name="Milk", raw_text_quantity="2", raw_text_price="1.50"),
-            ScannedItemResponse(name="Bread Loaf", quantity=1, price=2.20, sku_match="BREAD001", raw_text_name="Bread Lf", raw_text_quantity="1", raw_text_price="2.20"),
-        ]
-    else:
-        mock_items = [
-            ScannedItemResponse(name="Placeholder Item 1", quantity=1, price=10.99, sku_match=None, raw_text_name="Item One", raw_text_quantity="1x", raw_text_price="10.99"),
-            ScannedItemResponse(name="Placeholder Item 2", quantity=3, price=5.49, sku_match="ITEM002", raw_text_name="Item Two", raw_text_quantity="3", raw_text_price="5.49ea"),
-        ]
-
-    # Simulate a delay as OCR would take time
-    # await asyncio.sleep(1.5) # If using asyncio, otherwise time.sleep for synchronous mock
-
-    # --- Integration with OCRService (mocked) ---
+    # Integration with OCRService
     # from app.services.ocr_service import get_ocr_service, OCRService # Add to imports
     # ocr_service: OCRService = Depends(get_ocr_service) # Add as a dependency to the endpoint
 
     # Placeholder: In a real app, OCRService would be injected.
     # For now, direct instantiation or a simple getter.
-    from app.services.ocr_service import OCRService # Assuming direct import for now
-    ocr_service = OCRService() # Mock initialization
+    from app.services.ocr_service import OCRService
+    ocr_service = OCRService()
 
     try:
         image_bytes = base64.b64decode(scan_request.image_base64)
-        # Parsed items from OCR service (still mock data from the service)
+        # Parse items from OCR service
         parsed_ocr_items = await ocr_service.parse_receipt_image(image_bytes)
     except Exception as e:
         # Handle base64 decoding errors or other issues
@@ -240,7 +217,6 @@ async def scan_receipt_api(
 
     # Convert OCR service output to ScannedItemResponse
     # This is where fuzzy matching against DB products would also happen.
-    # For now, direct mapping from mock OCR output.
     response_items: List[ScannedItemResponse] = []
     for ocr_item in parsed_ocr_items:
         # Simulate fuzzy matching or direct use if OCR provides SKU
@@ -259,10 +235,11 @@ async def scan_receipt_api(
             )
         )
 
-    # This part replaces the old mock_items logic
-    if not response_items: # If OCR returned nothing, provide some default
-        return [
-            ScannedItemResponse(name="Default Scanned Item", quantity=1, price=0.99, sku_match="DEFAULT001", raw_text_name="Default Item", raw_text_quantity="1", raw_text_price="0.99")
-        ]
+    # Return empty list if no items were parsed
+    if not response_items:
+        raise HTTPException(
+            status_code=422, 
+            detail="No items could be parsed from the receipt image. Please ensure the image is clear and contains readable text."
+        )
 
     return response_items

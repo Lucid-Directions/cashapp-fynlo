@@ -182,11 +182,12 @@ async def get_mobile_reports_dashboard(
         total_transactions = len(today_orders)
         avg_order = total_sales / total_transactions if total_transactions > 0 else 0
 
-        # Weekly Labor (mock calculation for now - would connect to actual labor tracking)
+        # Weekly Labor - Feature not yet implemented
         weekly_labor = {
-            "totalActualHours": 248,
-            "totalLaborCost": 3720.00,
-            "efficiency": 87.5
+            "totalActualHours": 0,
+            "totalLaborCost": 0.00,
+            "efficiency": 0.0,
+            "message": "Labor tracking feature coming soon"
         }
 
         # Top Items Today (from order items)
@@ -205,12 +206,8 @@ async def get_mobile_reports_dashboard(
 
         top_items = sorted(item_sales.values(), key=lambda x: x["revenue"], reverse=True)[:5]
 
-        # Top Performers (mock data for now - would connect to actual employee tracking)
-        top_performers = [
-            {"name": "Maria Garcia", "role": "Server", "orders": 18, "sales": 425.50},
-            {"name": "Jose Rodriguez", "role": "Server", "orders": 16, "sales": 398.25},
-            {"name": "Ana Martinez", "role": "Bartender", "orders": 12, "sales": 286.75}
-        ]
+        # Top Performers - Feature not yet implemented
+        top_performers = []  # Will be populated when employee tracking is implemented
 
         # Sales Trend (last 7 days)
         sales_trend = []
@@ -381,36 +378,26 @@ async def get_legacy_analytics_dashboard(
         )
     ).count()
     
-    # Mock data for complex calculations
-    revenue_growth = 15.2  # Would be calculated from previous period
-    order_growth = 8.7
-    customer_retention_rate = 73.5
-    returning_customers = int(total_customers * 0.65)
+    # Calculate growth metrics - proper implementation needed
+    revenue_growth = 0.0  # TODO: Calculate from previous period
+    order_growth = 0.0  # TODO: Calculate from previous period
+    customer_retention_rate = 0.0  # TODO: Implement customer tracking
+    returning_customers = 0  # TODO: Implement customer tracking
     
-    # Payment method breakdown (mock - would require payment table join)
+    # Payment method breakdown - TODO: Implement with actual payment data
     payment_breakdown = PaymentMethodBreakdown(
-        qr_payments=45.0,
-        card_payments=25.0,
-        cash_payments=20.0,
-        apple_pay=8.0,
-        other_payments=2.0
+        qr_payments=0.0,
+        card_payments=0.0,
+        cash_payments=0.0,
+        apple_pay=0.0,
+        other_payments=0.0
     )
     
-    # Peak hours (mock data)
-    peak_hours = [
-        {"hour": 12, "orders": 45, "revenue": 890.50},
-        {"hour": 13, "orders": 52, "revenue": 1024.75},
-        {"hour": 19, "orders": 38, "revenue": 756.25},
-        {"hour": 20, "orders": 41, "revenue": 812.00}
-    ]
+    # Peak hours - TODO: Calculate from actual order data
+    peak_hours = []  # Will be populated with real hourly analytics
     
-    # Top products (mock data)
-    top_products = [
-        {"name": "Classic Burger", "orders": 156, "revenue": 2340.00},
-        {"name": "Fish & Chips", "orders": 134, "revenue": 2010.00},
-        {"name": "Caesar Salad", "orders": 89, "revenue": 1068.00},
-        {"name": "Chicken Wings", "orders": 76, "revenue": 912.00}
-    ]
+    # Top products - TODO: Calculate from actual order items
+    top_products = []  # Will be populated with real product analytics
     
     return AnalyticsDashboard(
         revenue_metrics=RevenueMetrics(

@@ -89,7 +89,7 @@ app = FastAPI(
     description="Hardware-Free Restaurant Management Platform",
     version="1.0.0",
     lifespan=lifespan,
-    debug=settings.DEBUG  # Set FastAPI debug mode from settings
+    debug=settings.DEBUG and settings.ENVIRONMENT != "production"  # Ensure debug is disabled in production
 )
 
 # CORS middleware for React Native frontend and Supabase
