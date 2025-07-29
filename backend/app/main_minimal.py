@@ -57,49 +57,8 @@ async def api_health():
         "timestamp": datetime.now().isoformat()
     }
 
-# Authentication endpoints
-@app.post("/api/v1/auth/login")
-async def login(request: dict):
-    """Authentication endpoint with mock data"""
-    email = request.get("email", "").lower()
-    password = request.get("password", "")
-    
-    # Mock credentials for quick testing
-    mock_credentials = {
-        "owner@fynlopos.com": "platformowner123",
-        "restaurant_owner": "owner123",
-        "platform_owner": "platform123", 
-        "manager": "manager123",
-        "cashier": "cashier123",
-        "john@fynlopos.com": "password123",
-        "demo@fynlopos.com": "demo"
-    }
-    
-    if email in mock_credentials and mock_credentials[email] == password:
-        # Return successful authentication
-        return {
-            "success": True,
-            "data": {
-                "access_token": "mock_token_12345",
-                "token_type": "bearer",
-                "user": {
-                    "id": "user_123",
-                    "email": email,
-                    "role": "platform_owner" if "platform" in email else "restaurant_owner",
-                    "firstName": "Test",
-                    "lastName": "User"
-                }
-            },
-            "message": "Authentication successful",
-            "timestamp": datetime.now().isoformat()
-        }
-    else:
-        return {
-            "success": False,
-            "error": "Invalid credentials",
-            "message": "Authentication failed",
-            "timestamp": datetime.now().isoformat()
-        }
+# Authentication removed - use Supabase auth at /api/v1/auth/verify instead
+# See BREAKING_CHANGES.md for migration guide
 
 # Menu endpoints
 @app.get("/api/v1/menu/items")
