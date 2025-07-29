@@ -96,11 +96,6 @@ class Settings(BaseSettings):
     RESEND_FROM_EMAIL: str = "noreply@fynlo.co.uk"
     RESEND_FROM_NAME: str = "Fynlo POS"
 
-    # DigitalOcean Monitoring Configuration
-    DO_API_TOKEN: Optional[str] = None  # DigitalOcean personal access token
-    DO_APP_ID: Optional[str] = None  # DigitalOcean app ID
-    DESIRED_REPLICAS: int = 2  # Desired number of backend replicas
-
     # Logging and Error Handling
     LOG_LEVEL: str = "DEBUG"
     ERROR_DETAIL_ENABLED: bool = True

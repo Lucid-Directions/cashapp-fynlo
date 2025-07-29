@@ -69,18 +69,10 @@ async def lifespan(app: FastAPI):
         logger.info("Initializing Redis...")
         await init_redis()
         
-        logger.info("Initializing rate limiter...")
-        await init_fastapi_limiter()
-        
         logger.info("Initializing WebSocket services...")
         from app.api.v1.endpoints.websocket_enhanced import init_websocket_services, start_health_monitor
         await init_websocket_services()
         await start_health_monitor()
-        
-        logger.info("Initializing instance tracker...")
-        from app.services.instance_tracker import init_instance_tracker
-        from app.core.redis_client import redis_client
-        await init_instance_tracker(redis_client)
         
         logger.info("✅ Core services initialized successfully")
     except Exception as e:
@@ -90,13 +82,6 @@ async def lifespan(app: FastAPI):
     yield
     
     # Cleanup
-    logger.info("Stopping instance tracker...")
-    from app.services.instance_tracker import stop_instance_tracker
-    await stop_instance_tracker()
-    
-    logger.info("Closing Redis connection...")
-    await close_redis()
-    
     logger.info("✅ Cleanup complete")
 
 app = FastAPI(
@@ -157,14 +142,14 @@ app.add_middleware(RLSMiddleware)
 # app.add_middleware(MobileCompatibilityMiddleware, enable_cors=True, enable_port_redirect=True)
 # app.add_middleware(MobileDataOptimizationMiddleware)
 
-# Add SlowAPI middleware (for rate limiting)
-app.add_middleware(SlowAPIMiddleware)
+# Add SlowAPI middleware (for rate limiting) - TEMPORARILY DISABLED
+# app.add_middleware(SlowAPIMiddleware)
 
 # Register standardized exception handlers
 # register_exception_handlers(app) # General handlers
 
 # Add specific handler for rate limit exceeded
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+# app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
 # Include API routes

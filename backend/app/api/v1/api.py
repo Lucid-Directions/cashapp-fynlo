@@ -13,8 +13,7 @@ from app.api.v1.endpoints import (
     exports, dashboard, websocket_portal, storage_health,  # Portal-specific endpoints + storage health
     platform_settings_optimized,  # Optimized endpoints for mobile app
     platform_admin,  # Secure platform administration
-    sumup,  # SumUp payment provider initialization
-    health, monitoring  # Instance health and monitoring endpoints
+    sumup  # SumUp payment provider initialization
 )
 from app.api.v1 import subscriptions
 from app.api.v1.platform import platform_router
@@ -81,7 +80,3 @@ api_router.include_router(platform_admin.router, prefix="/platform/admin", tags=
 
 # SumUp payment provider endpoints
 api_router.include_router(sumup.router, prefix="/sumup", tags=["sumup"])
-
-# Health and monitoring endpoints
-api_router.include_router(health.router, prefix="/health", tags=["health"])
-api_router.include_router(monitoring.router, prefix="/monitoring", tags=["monitoring"])
