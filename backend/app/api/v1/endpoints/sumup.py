@@ -3,7 +3,7 @@ SumUp Payment Provider Initialization Endpoint
 Provides secure configuration for mobile app without exposing API keys
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from typing import Dict, Any, Optional
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field
@@ -62,7 +62,8 @@ class MerchantValidationRequest(BaseModel):
 @router.post("/initialize", response_model=SumUpConfigResponse)
 @limiter.limit("10/minute")
 async def initialize_sumup(
-    request: SumUpInitRequest,
+    request: Request,
+    init_request: SumUpInitRequest,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -131,8 +132,8 @@ async def initialize_sumup(
         }
         
         # Override with requested mode if valid
-        if request.mode in ["sandbox", "production"]:
-            environment = request.mode
+        if init_request.mode in ["sandbox", "production"]:
+            environment = init_request.mode
         else:
             environment = sumup_environment
         
@@ -173,6 +174,7 @@ async def initialize_sumup(
 @router.get("/status")
 @limiter.limit("30/minute")
 async def get_sumup_status(
+    request: Request,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -225,7 +227,8 @@ async def get_sumup_status(
 @router.post("/validate-merchant")
 @limiter.limit("5/minute")
 async def validate_merchant_code(
-    request: MerchantValidationRequest,
+    request: Request,
+    validation_request: MerchantValidationRequest,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -245,7 +248,7 @@ async def validate_merchant_code(
             )
         
         # Basic validation
-        if not request.merchant_code or len(request.merchant_code) < 6:
+        if not validation_request.merchant_code or len(validation_request.merchant_code) < 6:
             return APIResponseHelper.validation_error(
                 message="Invalid merchant code format",
                 errors=[{
@@ -259,7 +262,7 @@ async def validate_merchant_code(
         
         return APIResponseHelper.success(
             data={
-                "merchantCode": request.merchant_code,
+                "merchantCode": validation_request.merchant_code,
                 "valid": True,
                 "message": "Merchant code format is valid"
             },
