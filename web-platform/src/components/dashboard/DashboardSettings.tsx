@@ -51,16 +51,16 @@ export const DashboardSettings = () => {
     systemHealth: 'healthy'
   });
 
-  // Platform admin settings state - now persistent and auto-populated
-  const [sumupPlatformApiKey, setSumupPlatformApiKey] = useState('sup_sk_Eeh3NQTbrGWjwXCe3Xmz8AgI8MiVA65N7');
+  // Platform admin settings state - NEVER store credentials in code!
+  const [sumupPlatformApiKey, setSumupPlatformApiKey] = useState('');
   const [sumupRestaurantApiKey, setSumupRestaurantApiKey] = useState('');
-  const [stripeSecretKey, setStripeSecretKey] = useState('sk_test_development_key_placeholder');
-  const [squareAccessToken, setSquareAccessToken] = useState('EAAAlw3Uvq6PutIC6j87XYtwYe3zeSbHuPbmHy7-D0S1rI7s3ORmKg-JUFbtdgMD');
-  const [databaseUrl, setDatabaseUrl] = useState('postgresql://doadmin:AVNS_DKOJkLvWZuR3j-QO1zW@fynlo-pos-db-do-user-23457625-0.i.db.ondigitalocean.com:25060/defaultdb?sslmode=require');
-  const [redisUrl, setRedisUrl] = useState('rediss://default:AVNS_ZSfCiU1eo6lTVbr410O@fynlo-pos-cache-do-user-23457625-0.i.db.ondigitalocean.com:25061');
-  const [spacesAccessKey, setSpacesAccessKey] = useState('DO00UFYJDGXBQ7WJ8MZX');
-  const [spacesSecretKey, setSpacesSecretKey] = useState('15ElFvalC1hmLXjQExmbmnQIWE09FU1eMhxbyjq9ULo');
-  const [supabaseServiceRole, setSupabaseServiceRole] = useState('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV3ZWdnenB2dXFjenJycndzenl5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDc4MjIxNywiZXhwIjoyMDY2MzU4MjE3fQ.3MZGwVJXzzeI4pRgN2amPnBrL6LuAKJLiAPmUBucFZE');
+  const [stripeSecretKey, setStripeSecretKey] = useState('');
+  const [squareAccessToken, setSquareAccessToken] = useState('');
+  const [databaseUrl, setDatabaseUrl] = useState('');
+  const [redisUrl, setRedisUrl] = useState('');
+  const [spacesAccessKey, setSpacesAccessKey] = useState('');
+  const [spacesSecretKey, setSpacesSecretKey] = useState('');
+  const [supabaseServiceRole, setSupabaseServiceRole] = useState('');
   const [paymentMethods, setPaymentMethods] = useState({
     sumup: true,
     stripe: true,
