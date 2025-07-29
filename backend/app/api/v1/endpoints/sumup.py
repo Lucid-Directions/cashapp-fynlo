@@ -1,6 +1,8 @@
 """
 SumUp Payment Provider Initialization Endpoint
 Provides secure configuration for mobile app without exposing API keys
+
+Last updated: 2025-07-29 - Force rebuild after rate limiter fix
 """
 
 from fastapi import APIRouter, Depends, HTTPException, status, Request
