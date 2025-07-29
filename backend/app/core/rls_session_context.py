@@ -179,7 +179,7 @@ class RLSSessionContext:
         
         async def rls_context_dependency(
             request: Request,
-            db: Session = Depends(lambda: next(get_db())),
+            db: Session = Depends(get_db),
             user: Optional[User] = None
         ):
             """

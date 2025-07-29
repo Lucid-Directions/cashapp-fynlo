@@ -552,7 +552,9 @@ async def websocket_endpoint_general(
             # Unregister from rate limiter
             try:
                 limiter = await get_rate_limiter()
-                await limiter.unregister_connection(connection_id)
+                # Use verified_user.id if available, otherwise user_id
+                final_user_id = str(verified_user.id) if verified_user else user_id
+                await limiter.unregister_connection(connection_id, final_user_id)
             except Exception as e:
                 logger.error(f"Error unregistering connection from rate limiter: {e}")
 
@@ -702,7 +704,9 @@ async def websocket_kitchen_endpoint(
             # Unregister from rate limiter
             try:
                 limiter = await get_rate_limiter()
-                await limiter.unregister_connection(connection_id)
+                # Use verified_user.id if available, otherwise user_id
+                final_user_id = str(verified_user.id) if verified_user else user_id
+                await limiter.unregister_connection(connection_id, final_user_id)
             except Exception as e:
                 logger.error(f"Error unregistering connection from rate limiter: {e}")
 
@@ -852,7 +856,9 @@ async def websocket_pos_endpoint(
             # Unregister from rate limiter
             try:
                 limiter = await get_rate_limiter()
-                await limiter.unregister_connection(connection_id)
+                # Use verified_user.id if available, otherwise user_id
+                final_user_id = str(verified_user.id) if verified_user else user_id
+                await limiter.unregister_connection(connection_id, final_user_id)
             except Exception as e:
                 logger.error(f"Error unregistering connection from rate limiter: {e}")
 
@@ -1003,7 +1009,9 @@ async def websocket_management_endpoint(
             # Unregister from rate limiter
             try:
                 limiter = await get_rate_limiter()
-                await limiter.unregister_connection(connection_id)
+                # Use verified_user.id if available, otherwise user_id
+                final_user_id = str(verified_user.id) if verified_user else user_id
+                await limiter.unregister_connection(connection_id, final_user_id)
             except Exception as e:
                 logger.error(f"Error unregistering connection from rate limiter: {e}")
 

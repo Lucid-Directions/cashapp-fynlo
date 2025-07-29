@@ -29,29 +29,35 @@ class RLSContext:
         try:
             # Set session variables for RLS
             if user:
-                # Set user context
-                db.execute(text("SET LOCAL app.user_id = :user_id"), {"user_id": str(user.id)})
-                db.execute(text("SET LOCAL app.user_email = :email"), {"email": user.email})
-                db.execute(text("SET LOCAL app.user_role = :role"), {"role": user.role})
+                # Set user context with correct variable names
+                db.execute(text("SET LOCAL app.current_user_id = :user_id"), {"user_id": str(user.id)})
+                db.execute(text("SET LOCAL app.current_user_email = :email"), {"email": user.email})
+                db.execute(text("SET LOCAL app.current_user_role = :role"), {"role": user.role})
                 
                 # Set restaurant context if user has one
                 if user.restaurant_id:
-                    db.execute(text("SET LOCAL app.restaurant_id = :restaurant_id"), 
+                    db.execute(text("SET LOCAL app.current_restaurant_id = :restaurant_id"), 
                              {"restaurant_id": str(user.restaurant_id)})
                 else:
                     # For platform owners without restaurant_id
-                    db.execute(text("SET LOCAL app.restaurant_id = ''"))
+                    db.execute(text("SET LOCAL app.current_restaurant_id TO DEFAULT"))
+                
+                # Set platform owner flag
+                is_platform_owner = TenantSecurity.is_platform_owner(user)
+                db.execute(text("SET LOCAL app.is_platform_owner = :is_owner"), 
+                          {"is_owner": str(is_platform_owner).lower()})
                 
                 logger.debug(
                     f"RLS context set for user {user.email} "
                     f"(role: {user.role}, restaurant: {user.restaurant_id})"
                 )
             else:
-                # No user context - set empty values
-                db.execute(text("SET LOCAL app.user_id = ''"))
-                db.execute(text("SET LOCAL app.user_email = ''"))
-                db.execute(text("SET LOCAL app.user_role = ''"))
-                db.execute(text("SET LOCAL app.restaurant_id = ''"))
+                # No user context - set empty values with correct names
+                db.execute(text("SET LOCAL app.current_user_id = ''"))
+                db.execute(text("SET LOCAL app.current_user_email = ''"))
+                db.execute(text("SET LOCAL app.current_user_role = ''"))
+                db.execute(text("SET LOCAL app.current_restaurant_id = ''"))
+                db.execute(text("SET LOCAL app.is_platform_owner = 'false'"))
             
             yield db
             
@@ -99,14 +105,19 @@ class RLSContext:
             Database session with RLS context
         """
         if user:
-            db.execute(text("SET app.user_id = :user_id"), {"user_id": str(user.id)})
-            db.execute(text("SET app.user_email = :email"), {"email": user.email})
-            db.execute(text("SET app.user_role = :role"), {"role": user.role})
+            db.execute(text("SET LOCAL app.current_user_id = :user_id"), {"user_id": str(user.id)})
+            db.execute(text("SET LOCAL app.current_user_email = :email"), {"email": user.email})
+            db.execute(text("SET LOCAL app.current_user_role = :role"), {"role": user.role})
             
             if user.restaurant_id:
-                db.execute(text("SET app.restaurant_id = :restaurant_id"), 
+                db.execute(text("SET LOCAL app.current_restaurant_id = :restaurant_id"), 
                          {"restaurant_id": str(user.restaurant_id)})
             else:
-                db.execute(text("SET app.restaurant_id = ''"))
+                db.execute(text("SET LOCAL app.current_restaurant_id TO DEFAULT"))
+            
+            # Set platform owner flag
+            is_platform_owner = TenantSecurity.is_platform_owner(user)
+            db.execute(text("SET LOCAL app.is_platform_owner = :is_owner"), 
+                      {"is_owner": str(is_platform_owner).lower()})
         
         return db

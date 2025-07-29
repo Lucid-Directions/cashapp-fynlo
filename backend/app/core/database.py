@@ -371,34 +371,38 @@ class PosSession(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
 # RLS context for session variables
+import contextvars
+from typing import Optional, Dict, Any
+
+# Use contextvars for proper async context management
+_rls_context_var: contextvars.ContextVar[Optional[Dict[str, Any]]] = contextvars.ContextVar(
+    'rls_context',
+    default=None
+)
+
 class RLSContext:
-    """Thread-local storage for RLS context"""
-    _context = {}
+    """Context-aware storage for RLS context using contextvars"""
     
     @classmethod
     def set(cls, user_id: Optional[str] = None, restaurant_id: Optional[str] = None, role: Optional[str] = None):
-        """Set RLS context for current request"""
-        import threading
-        thread_id = threading.current_thread().ident
-        cls._context[thread_id] = {
+        """Set RLS context for current async context"""
+        context = {
             'user_id': user_id,
             'restaurant_id': restaurant_id,
             'role': role
         }
+        _rls_context_var.set(context)
     
     @classmethod
     def get(cls) -> dict:
-        """Get RLS context for current request"""
-        import threading
-        thread_id = threading.current_thread().ident
-        return cls._context.get(thread_id, {})
+        """Get RLS context for current async context"""
+        context = _rls_context_var.get()
+        return context if context is not None else {}
     
     @classmethod
     def clear(cls):
-        """Clear RLS context for current request"""
-        import threading
-        thread_id = threading.current_thread().ident
-        cls._context.pop(thread_id, None)
+        """Clear RLS context for current async context"""
+        _rls_context_var.set(None)
 
 
 # Event listener to set session variables on connection checkout
@@ -418,21 +422,33 @@ def receive_checkout(dbapi_connection, connection_record, connection_proxy):
     if context:
         cursor = dbapi_connection.cursor()
         try:
-            # Reset any previous session variables
-            cursor.execute("RESET ALL")
+            # Reset only RLS-specific session variables (not ALL)
+            cursor.execute("RESET app.current_user_id")
+            cursor.execute("RESET app.current_user_email")
+            cursor.execute("RESET app.current_user_role")
+            cursor.execute("RESET app.current_restaurant_id")
+            cursor.execute("RESET app.is_platform_owner")
             
-            # Set session variables for RLS
+            # Set session variables for RLS with correct names
             if context.get('user_id'):
-                cursor.execute("SET LOCAL app.user_id = %s", (context['user_id'],))
-                logger.debug(f"Set RLS user_id: {context['user_id']}")
+                cursor.execute("SET LOCAL app.current_user_id = %s", (context['user_id'],))
+                logger.debug(f"Set RLS current_user_id: {context['user_id']}")
+                
+                # Also set user email if available
+                if hasattr(context, 'email'):
+                    cursor.execute("SET LOCAL app.current_user_email = %s", (context.get('email', ''),))
             
             if context.get('restaurant_id'):
-                cursor.execute("SET LOCAL app.restaurant_id = %s", (context['restaurant_id'],))
-                logger.debug(f"Set RLS restaurant_id: {context['restaurant_id']}")
+                cursor.execute("SET LOCAL app.current_restaurant_id = %s", (context['restaurant_id'],))
+                logger.debug(f"Set RLS current_restaurant_id: {context['restaurant_id']}")
             
             if context.get('role'):
-                cursor.execute("SET LOCAL app.user_role = %s", (context['role'],))
-                logger.debug(f"Set RLS role: {context['role']}")
+                cursor.execute("SET LOCAL app.current_user_role = %s", (context['role'],))
+                logger.debug(f"Set RLS current_user_role: {context['role']}")
+                
+                # Set platform owner flag
+                is_platform_owner = context.get('role') == 'platform_owner'
+                cursor.execute("SET LOCAL app.is_platform_owner = %s", (str(is_platform_owner).lower(),))
             
             dbapi_connection.commit()
         except Exception as e:
@@ -447,8 +463,12 @@ def receive_checkin(dbapi_connection, connection_record):
     """Reset session when connection is returned to pool"""
     cursor = dbapi_connection.cursor()
     try:
-        # Reset all session variables to ensure clean state
-        cursor.execute("RESET ALL")
+        # Reset only RLS session variables to ensure clean state
+        cursor.execute("RESET app.current_user_id")
+        cursor.execute("RESET app.current_user_email")
+        cursor.execute("RESET app.current_user_role")
+        cursor.execute("RESET app.current_restaurant_id")
+        cursor.execute("RESET app.is_platform_owner")
         dbapi_connection.commit()
         logger.debug("Reset session variables on connection checkin")
     except Exception as e:
