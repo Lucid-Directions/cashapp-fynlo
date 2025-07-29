@@ -48,15 +48,7 @@ class MerchantValidationRequest(BaseModel):
     class Config:
         schema_extra = {
             "example": {
-                "merchant_code": "MC123456",
-                "environment": "production",
-                "app_id": "com.fynlo.pos",
-                "enabled": True,
-                "features": {
-                    "card_reader": True,
-                    "tap_to_pay": True,
-                    "refunds": True
-                }
+                "merchant_code": "MC123456"
             }
         }
 

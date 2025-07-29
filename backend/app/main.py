@@ -69,6 +69,11 @@ async def lifespan(app: FastAPI):
         logger.info("Initializing Redis...")
         await init_redis()
         
+        logger.info("Initializing WebSocket services...")
+        from app.api.v1.endpoints.websocket_enhanced import init_websocket_services, start_health_monitor
+        await init_websocket_services()
+        await start_health_monitor()
+        
         logger.info("✅ Core services initialized successfully")
     except Exception as e:
         logger.error(f"Core services initialization failed: {e}")
