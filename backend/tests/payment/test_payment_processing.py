@@ -1,105 +1,140 @@
 """
-Payment Processing Tests
+Payment Processing Tests - Real Integration
+No mocks - uses actual payment services in test mode
 """
 import pytest
 from httpx import AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession
 from decimal import Decimal
 import uuid
-from unittest.mock import Mock, patch
-from app.main import app
-from tests.fixtures.database import test_db, test_restaurant, test_order
-from tests.fixtures.auth import auth_headers
-from app.services.payment_providers import PaymentStatus
+import os
+from datetime import datetime
+
+from app.models import Order, Payment
 
 
 @pytest.mark.asyncio
 class TestPaymentProcessing:
-    """Test payment processing flows"""
+    """Test payment processing flows with real services"""
     
-    async def test_payment_amount_validation(self, test_db, test_order, auth_headers):
+    async def test_payment_amount_validation(
+        self, 
+        client: AsyncClient,
+        db_session: AsyncSession,
+        test_order,
+        auth_headers
+    ):
         """Test that payment amounts cannot be tampered with"""
-        async with AsyncClient(app=app, base_url="http://test") as client:
-            # Try to pay with incorrect amount
-            response = await client.post(
-                f"/api/v1/orders/{test_order.id}/payment",
-                json={
-                    "payment_method": "card",
-                    "amount": 0.01,  # Much less than order total
-                },
-                headers=auth_headers
-            )
-            
-            # Should reject incorrect amount
-            assert response.status_code == 400
-            assert "amount" in response.json().get("detail", "").lower()
+        # Try to pay with incorrect amount
+        response = await client.post(
+            f"/api/v1/orders/{test_order.id}/payment",
+            json={
+                "payment_method": "card",
+                "amount": 0.01,  # Much less than order total
+                "provider": "stripe",
+                "test_mode": True
+            },
+            headers=auth_headers
+        )
+        
+        # Should reject incorrect amount
+        assert response.status_code == 400
+        assert "amount" in response.json().get("detail", "").lower()
     
-    async def test_payment_idempotency(self, test_db, test_order, auth_headers):
-        """Test that payments are idempotent"""
+    async def test_payment_idempotency(
+        self,
+        client: AsyncClient,
+        db_session: AsyncSession,
+        test_order,
+        auth_headers,
+        redis_client
+    ):
+        """Test that payments are idempotent using Redis"""
         idempotency_key = str(uuid.uuid4())
         
-        async with AsyncClient(app=app, base_url="http://test") as client:
-            # First payment attempt
-            response1 = await client.post(
-                f"/api/v1/orders/{test_order.id}/payment",
-                json={
-                    "payment_method": "cash",
-                    "amount": float(test_order.total_amount),
-                },
-                headers={**auth_headers, "Idempotency-Key": idempotency_key}
-            )
-            
-            assert response1.status_code == 200
-            payment1 = response1.json()
-            
-            # Second payment with same idempotency key
-            response2 = await client.post(
-                f"/api/v1/orders/{test_order.id}/payment",
-                json={
-                    "payment_method": "cash",
-                    "amount": float(test_order.total_amount),
-                },
-                headers={**auth_headers, "Idempotency-Key": idempotency_key}
-            )
-            
-            assert response2.status_code == 200
-            payment2 = response2.json()
-            
-            # Should return same payment
-            assert payment1["id"] == payment2["id"]
+        # First payment attempt
+        response1 = await client.post(
+            f"/api/v1/orders/{test_order.id}/payment",
+            json={
+                "payment_method": "cash",
+                "amount": float(test_order.total_amount),
+            },
+            headers={**auth_headers, "Idempotency-Key": idempotency_key}
+        )
+        
+        assert response1.status_code == 200
+        payment1 = response1.json()
+        
+        # Verify idempotency key stored in Redis
+        cached_result = await redis_client.get(f"idempotency:{idempotency_key}")
+        assert cached_result is not None
+        
+        # Second payment with same idempotency key
+        response2 = await client.post(
+            f"/api/v1/orders/{test_order.id}/payment",
+            json={
+                "payment_method": "cash",
+                "amount": float(test_order.total_amount),
+            },
+            headers={**auth_headers, "Idempotency-Key": idempotency_key}
+        )
+        
+        assert response2.status_code == 200
+        payment2 = response2.json()
+        
+        # Should return same payment
+        assert payment1["id"] == payment2["id"]
+        
+        # Verify only one payment in database
+        payments = await db_session.execute(
+            "SELECT COUNT(*) FROM payments WHERE order_id = :order_id",
+            {"order_id": test_order.id}
+        )
+        assert payments.scalar() == 1
     
-    @patch('app.services.payment_factory.PaymentProviderFactory.get_provider')
-    async def test_payment_provider_fallback(self, mock_get_provider, test_db, test_order, auth_headers):
-        """Test payment provider fallback mechanism"""
-        # Mock primary provider failure
-        primary_provider = Mock()
-        primary_provider.process_payment.side_effect = Exception("Provider unavailable")
-        
-        # Mock fallback provider success
-        fallback_provider = Mock()
-        fallback_provider.process_payment.return_value = {
-            "status": PaymentStatus.COMPLETED,
-            "transaction_id": "fallback_tx_123",
-            "amount": test_order.total_amount
-        }
-        
-        mock_get_provider.side_effect = [primary_provider, fallback_provider]
-        
-        async with AsyncClient(app=app, base_url="http://test") as client:
-            response = await client.post(
-                f"/api/v1/orders/{test_order.id}/payment",
-                json={
-                    "payment_method": "card",
-                    "amount": float(test_order.total_amount),
+    @pytest.mark.skipif(
+        not all([os.getenv("STRIPE_TEST_SECRET_KEY"), os.getenv("SQUARE_SANDBOX_ACCESS_TOKEN")]),
+        reason="Multiple payment providers not configured"
+    )
+    async def test_real_payment_provider_fallback(
+        self,
+        client: AsyncClient,
+        db_session: AsyncSession,
+        test_order,
+        auth_headers
+    ):
+        """Test real payment provider fallback mechanism"""
+        # Configure to use Square first, then Stripe as fallback
+        response = await client.post(
+            f"/api/v1/orders/{test_order.id}/payment",
+            json={
+                "payment_method": "card",
+                "amount": float(test_order.total_amount),
+                "providers": ["square", "stripe"],  # Order of preference
+                "card_details": {
+                    "number": "4000000000000069",  # Card that fails on Square
+                    "exp_month": 12,
+                    "exp_year": 2025,
+                    "cvc": "123"
                 },
-                headers=auth_headers
-            )
-            
-            # Should succeed with fallback
-            assert response.status_code == 200
-            assert mock_get_provider.call_count >= 2  # Called for fallback
+                "enable_fallback": True
+            },
+            headers=auth_headers
+        )
+        
+        # Should succeed with fallback to Stripe
+        assert response.status_code == 200
+        result = response.json()
+        assert result["provider_used"] == "stripe"  # Fallback provider
+        assert result["status"] == "completed"
     
-    async def test_fee_calculation(self, test_db, test_order, auth_headers):
-        """Test payment fee calculation"""
+    async def test_fee_calculation(
+        self,
+        client: AsyncClient,
+        test_restaurant,
+        auth_headers
+    ):
+        """Test payment fee calculation with real configuration"""
         test_cases = [
             ("cash", 0.0),  # No fee for cash
             ("qr_code", 0.012),  # 1.2% for QR
@@ -107,123 +142,215 @@ class TestPaymentProcessing:
             ("apple_pay", 0.029),  # 2.9% for Apple Pay
         ]
         
-        async with AsyncClient(app=app, base_url="http://test") as client:
-            for payment_method, expected_fee_rate in test_cases:
-                response = await client.post(
-                    "/api/v1/orders/calculate-fees",
-                    json={
-                        "amount": 100.00,
-                        "payment_method": payment_method,
-                    },
-                    headers=auth_headers
-                )
-                
-                assert response.status_code == 200
-                result = response.json()
-                
-                expected_fee = 100.00 * expected_fee_rate
-                assert abs(result["fee_amount"] - expected_fee) < 0.01
-                assert result["net_amount"] == 100.00 - expected_fee
-    
-    async def test_refund_authorization(self, test_db, test_order, auth_headers, employee_headers):
-        """Test refund authorization"""
-        # First, mark order as paid
-        test_order.payment_status = "completed"
-        test_db.commit()
-        
-        async with AsyncClient(app=app, base_url="http://test") as client:
-            # Employee should not be able to refund
+        for payment_method, expected_fee_rate in test_cases:
             response = await client.post(
-                f"/api/v1/orders/{test_order.id}/refund",
+                "/api/v1/orders/calculate-fees",
                 json={
-                    "amount": float(test_order.total_amount),
-                    "reason": "Customer request"
-                },
-                headers=employee_headers
-            )
-            
-            assert response.status_code == 403
-            
-            # Manager should be able to refund
-            response = await client.post(
-                f"/api/v1/orders/{test_order.id}/refund",
-                json={
-                    "amount": float(test_order.total_amount),
-                    "reason": "Customer request"
-                },
-                headers=auth_headers  # Manager headers
-            )
-            
-            assert response.status_code in [200, 201]
-    
-    async def test_partial_refund(self, test_db, test_order, auth_headers):
-        """Test partial refund functionality"""
-        # Mark order as paid
-        test_order.payment_status = "completed"
-        test_db.commit()
-        
-        async with AsyncClient(app=app, base_url="http://test") as client:
-            # Request partial refund
-            refund_amount = float(test_order.total_amount) / 2
-            response = await client.post(
-                f"/api/v1/orders/{test_order.id}/refund",
-                json={
-                    "amount": refund_amount,
-                    "reason": "Partial refund - item returned"
+                    "amount": 100.00,
+                    "payment_method": payment_method,
+                    "restaurant_id": test_restaurant.id
                 },
                 headers=auth_headers
             )
             
-            assert response.status_code in [200, 201]
-            refund = response.json()
+            assert response.status_code == 200
+            result = response.json()
             
-            assert refund["amount"] == refund_amount
-            assert refund["type"] == "partial"
+            expected_fee = 100.00 * expected_fee_rate
+            assert abs(result["fee_amount"] - expected_fee) < 0.01
+            assert result["net_amount"] == 100.00 - expected_fee
     
-    async def test_webhook_validation(self, test_db, auth_headers):
-        """Test payment webhook validation"""
-        webhook_data = {
-            "event_type": "payment.completed",
-            "payment_id": "test_payment_123",
-            "amount": 100.00,
-            "timestamp": "2024-01-01T00:00:00Z"
+    async def test_refund_authorization(
+        self,
+        client: AsyncClient,
+        db_session: AsyncSession,
+        test_order,
+        test_user,
+        test_restaurant,
+        auth_headers
+    ):
+        """Test refund authorization with real role checks"""
+        # Create payment record
+        payment = Payment(
+            id=str(uuid.uuid4()),
+            order_id=test_order.id,
+            amount=test_order.total_amount,
+            payment_method="cash",
+            status="completed",
+            created_at=datetime.utcnow()
+        )
+        db_session.add(payment)
+        
+        # Update order status
+        test_order.payment_status = "paid"
+        await db_session.commit()
+        
+        # Create employee user
+        from app.models import User
+        employee = User(
+            id=str(uuid.uuid4()),
+            email="employee@test.com",
+            full_name="Test Employee",
+            role="employee",  # Lower privilege
+            restaurant_id=test_restaurant.id,
+            is_active=True
+        )
+        db_session.add(employee)
+        await db_session.commit()
+        
+        # Create employee auth headers
+        from app.core.auth import create_access_token
+        from datetime import timedelta
+        employee_token = create_access_token(
+            data={
+                "sub": employee.email,
+                "user_id": employee.id,
+                "restaurant_id": employee.restaurant_id,
+                "role": employee.role
+            },
+            expires_delta=timedelta(minutes=30)
+        )
+        employee_headers = {"Authorization": f"Bearer {employee_token}"}
+        
+        # Employee should not be able to refund
+        response = await client.post(
+            f"/api/v1/orders/{test_order.id}/refund",
+            json={
+                "amount": float(test_order.total_amount),
+                "reason": "Customer request"
+            },
+            headers=employee_headers
+        )
+        
+        assert response.status_code == 403
+        
+        # Manager should be able to refund
+        response = await client.post(
+            f"/api/v1/orders/{test_order.id}/refund",
+            json={
+                "amount": float(test_order.total_amount),
+                "reason": "Customer request"
+            },
+            headers=auth_headers  # Manager headers
+        )
+        
+        assert response.status_code in [200, 201]
+    
+    async def test_partial_refund(
+        self,
+        client: AsyncClient,
+        db_session: AsyncSession,
+        test_order,
+        auth_headers
+    ):
+        """Test partial refund functionality with real payment records"""
+        # Create payment
+        payment = Payment(
+            id=str(uuid.uuid4()),
+            order_id=test_order.id,
+            amount=test_order.total_amount,
+            payment_method="card",
+            provider="stripe",
+            status="completed",
+            provider_payment_id="pi_test_123"
+        )
+        db_session.add(payment)
+        test_order.payment_status = "paid"
+        await db_session.commit()
+        
+        # Request partial refund
+        refund_amount = float(test_order.total_amount) / 2
+        response = await client.post(
+            f"/api/v1/orders/{test_order.id}/refund",
+            json={
+                "amount": refund_amount,
+                "reason": "Partial refund - item returned"
+            },
+            headers=auth_headers
+        )
+        
+        assert response.status_code in [200, 201]
+        refund = response.json()
+        
+        assert refund["amount"] == refund_amount
+        assert refund["type"] == "partial"
+        
+        # Verify refund in database
+        refunds = await db_session.execute(
+            "SELECT * FROM refunds WHERE order_id = :order_id",
+            {"order_id": test_order.id}
+        )
+        refund_record = refunds.first()
+        assert refund_record is not None
+        assert float(refund_record.amount) == refund_amount
+    
+    @pytest.mark.skipif(
+        not os.getenv("STRIPE_TEST_WEBHOOK_SECRET"),
+        reason="Stripe webhook secret not configured"
+    )
+    async def test_real_webhook_validation(
+        self,
+        client: AsyncClient,
+        db_session: AsyncSession
+    ):
+        """Test real Stripe webhook validation"""
+        import stripe
+        import time
+        
+        # Create real Stripe webhook event
+        timestamp = int(time.time())
+        payload = {
+            "id": "evt_test_webhook",
+            "object": "event",
+            "type": "payment_intent.succeeded",
+            "data": {
+                "object": {
+                    "id": "pi_test_123",
+                    "amount": 10000,  # $100.00
+                    "currency": "usd",
+                    "status": "succeeded"
+                }
+            }
         }
         
-        # Test with valid signature
+        # Generate real Stripe signature
+        import json
+        payload_string = json.dumps(payload)
+        secret = os.getenv("STRIPE_TEST_WEBHOOK_SECRET")
+        
+        signature_payload = f"{timestamp}.{payload_string}"
         import hmac
         import hashlib
-        import json
-        
-        webhook_secret = "test_webhook_secret"
-        payload = json.dumps(webhook_data, sort_keys=True)
-        signature = hmac.new(
-            webhook_secret.encode(),
-            payload.encode(),
+        expected_sig = hmac.new(
+            secret.encode('utf-8'),
+            signature_payload.encode('utf-8'),
             hashlib.sha256
         ).hexdigest()
         
-        async with AsyncClient(app=app, base_url="http://test") as client:
-            response = await client.post(
-                "/api/v1/webhooks/payment",
-                json=webhook_data,
-                headers={
-                    "X-Webhook-Signature": signature,
-                    "Content-Type": "application/json"
-                }
-            )
-            
-            # Should accept valid webhook
-            assert response.status_code == 200
-            
-            # Test with invalid signature
-            response = await client.post(
-                "/api/v1/webhooks/payment",
-                json=webhook_data,
-                headers={
-                    "X-Webhook-Signature": "invalid_signature",
-                    "Content-Type": "application/json"
-                }
-            )
-            
-            # Should reject invalid signature
-            assert response.status_code in [401, 403]
+        signature = f"t={timestamp},v1={expected_sig}"
+        
+        # Test webhook endpoint
+        response = await client.post(
+            "/api/v1/webhooks/stripe",
+            content=payload_string,
+            headers={
+                "Stripe-Signature": signature,
+                "Content-Type": "application/json"
+            }
+        )
+        
+        # Should accept valid webhook
+        assert response.status_code == 200
+        
+        # Test with invalid signature
+        response = await client.post(
+            "/api/v1/webhooks/stripe",
+            json=payload,
+            headers={
+                "Stripe-Signature": "invalid_signature",
+                "Content-Type": "application/json"
+            }
+        )
+        
+        # Should reject invalid signature
+        assert response.status_code in [400, 401, 403]
