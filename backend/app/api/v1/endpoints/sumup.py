@@ -39,6 +39,11 @@ class SumUpConfigResponse(BaseModel):
     app_id: Optional[str] = Field(None, description="SumUp app ID for mobile SDK")
     enabled: bool = Field(..., description="Whether SumUp is enabled for this restaurant")
     features: Dict[str, bool] = Field(..., description="Enabled SumUp features")
+
+
+class MerchantValidationRequest(BaseModel):
+    """Request model for merchant code validation"""
+    merchant_code: str = Field(..., description="SumUp merchant code to validate")
     
     class Config:
         schema_extra = {
@@ -139,17 +144,21 @@ async def initialize_sumup(
             f"for restaurant {current_user.restaurant_id} in {environment} mode"
         )
         
-        # Build response
-        config_data = SumUpConfigResponse(
-            merchant_code=merchant_code,
-            environment=environment,
-            app_id=sumup_app_id,
-            enabled=True,
-            features=features
-        )
+        # Build response in the format expected by frontend
+        response_data = {
+            "config": {
+                "appId": sumup_app_id,
+                "environment": environment,
+                "merchantCode": merchant_code,
+                "currency": "EUR"  # Default currency, can be made configurable
+            },
+            "sdkInitialized": True,
+            "enabled": True,
+            "features": features
+        }
         
         return APIResponseHelper.success(
-            data=config_data.dict(),
+            data=response_data,
             message="SumUp configuration retrieved successfully"
         )
         
@@ -216,7 +225,7 @@ async def get_sumup_status(
 @router.post("/validate-merchant")
 @limiter.limit("5/minute")
 async def validate_merchant_code(
-    merchant_code: str,
+    request: MerchantValidationRequest,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -236,7 +245,7 @@ async def validate_merchant_code(
             )
         
         # Basic validation
-        if not merchant_code or len(merchant_code) < 6:
+        if not request.merchant_code or len(request.merchant_code) < 6:
             return APIResponseHelper.validation_error(
                 message="Invalid merchant code format",
                 errors=[{
@@ -250,7 +259,7 @@ async def validate_merchant_code(
         
         return APIResponseHelper.success(
             data={
-                "merchant_code": merchant_code,
+                "merchantCode": request.merchant_code,
                 "valid": True,
                 "message": "Merchant code format is valid"
             },

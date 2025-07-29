@@ -54,11 +54,12 @@ class SumUpConfigService {
       // Fetch from backend
       console.log('🔄 Fetching SumUp configuration from backend...');
       const response = await fetch(`${API_CONFIG.FULL_API_URL}/sumup/initialize`, {
-        method: 'GET',
+        method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify({ mode: 'production' }),
       });
 
       if (!response.ok) {

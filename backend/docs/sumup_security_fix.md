@@ -15,7 +15,7 @@ The SumUp API key was hardcoded in the mobile application, exposing it to potent
 
 2. **Environment Configuration**
    - Added SumUp API key to `.env` file (already in .gitignore)
-   - Key is now stored as: `SUMUP_API_KEY="sup_sk_XqquMi732f2WDCqvnkV4xoVxx54oGAQRU"`
+   - Key is now stored as: `SUMUP_API_KEY="<YOUR_SUMUP_API_KEY_HERE>"`
    - Environment: `SUMUP_ENVIRONMENT="production"`
    - App ID: `SUMUP_APP_ID="com.anonymous.cashapppos"`
 
