@@ -32,11 +32,17 @@ class SumUpInitRequest(BaseModel):
         }
 
 
-class SumUpConfigResponse(BaseModel):
-    """Response model for SumUp configuration"""
-    merchant_code: Optional[str] = Field(None, description="SumUp merchant code if available")
+class SumUpConfigData(BaseModel):
+    """SumUp SDK configuration data"""
+    appId: str = Field(..., description="SumUp app ID for mobile SDK")
     environment: str = Field(..., description="Environment: sandbox or production")
-    app_id: Optional[str] = Field(None, description="SumUp app ID for mobile SDK")
+    merchantCode: Optional[str] = Field(None, description="SumUp merchant code if available")
+    currency: str = Field(default="GBP", description="Currency code")
+
+class SumUpConfigResponse(BaseModel):
+    """Response model for SumUp configuration matching frontend expectations"""
+    config: SumUpConfigData = Field(..., description="SumUp SDK configuration")
+    sdkInitialized: bool = Field(..., description="Whether SDK is initialized")
     enabled: bool = Field(..., description="Whether SumUp is enabled for this restaurant")
     features: Dict[str, bool] = Field(..., description="Enabled SumUp features")
 
@@ -136,21 +142,23 @@ async def initialize_sumup(
             f"for restaurant {current_user.restaurant_id} in {environment} mode"
         )
         
-        # Build response in the format expected by frontend
-        response_data = {
-            "config": {
-                "appId": sumup_app_id,
-                "environment": environment,
-                "merchantCode": merchant_code,
-                "currency": "EUR"  # Default currency, can be made configurable
-            },
-            "sdkInitialized": True,
-            "enabled": True,
-            "features": features
-        }
+        # Build response using the proper model
+        config_data = SumUpConfigData(
+            appId=sumup_app_id,
+            environment=environment,
+            merchantCode=merchant_code,
+            currency="GBP"  # Using GBP to match application standard
+        )
+        
+        response = SumUpConfigResponse(
+            config=config_data,
+            sdkInitialized=True,
+            enabled=True,
+            features=features
+        )
         
         return APIResponseHelper.success(
-            data=response_data,
+            data=response.dict(),
             message="SumUp configuration retrieved successfully"
         )
         

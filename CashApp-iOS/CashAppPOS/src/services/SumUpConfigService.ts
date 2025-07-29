@@ -10,12 +10,15 @@ export interface SumUpConfig {
 }
 
 export interface SumUpInitResponse {
-  status: string;
+  success: boolean;
   data: {
     config: SumUpConfig;
     sdkInitialized: boolean;
+    enabled: boolean;
+    features: Record<string, boolean>;
   };
   message?: string;
+  timestamp?: string;
 }
 
 class SumUpConfigService {
@@ -69,7 +72,8 @@ class SumUpConfigService {
 
       const result: SumUpInitResponse = await response.json();
       
-      if (result.status === 'success' && result.data?.config) {
+      // Check for success using the actual API response format
+      if (result.success && result.data?.config) {
         const config = result.data.config;
         
         // Cache the configuration
