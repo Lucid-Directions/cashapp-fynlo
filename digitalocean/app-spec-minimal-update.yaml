@@ -1,0 +1,28 @@
+# Minimal DigitalOcean App Spec Update for Production Validation
+# Issue #394 - Only add the missing ENVIRONMENT variable
+# 
+# Apply with: doctl apps update 04073e70-e799-4d27-873a-dadea0503858 --spec-file digitalocean/app-spec-minimal-update.yaml
+
+envs:
+  # This is the ONLY missing piece - add ENVIRONMENT=production
+  - key: ENVIRONMENT
+    value: production
+    scope: RUN_AND_BUILD_TIME
+    
+  # The following variables should already be properly set:
+  # - DEBUG (already set as secret - verify it's "false")
+  # - SECRET_KEY (already set as secret - should be strong)
+  # - SUMUP_ENVIRONMENT (already set as secret - verify it's "production")
+  
+  # Variables that are missing but recommended:
+  - key: ERROR_DETAIL_ENABLED
+    value: "false"
+    scope: RUN_AND_BUILD_TIME
+    
+  - key: LOG_LEVEL
+    value: INFO
+    scope: RUN_AND_BUILD_TIME
+    
+  - key: CORS_ORIGINS
+    value: "https://app.fynlo.co.uk,https://fynlo.co.uk,https://api.fynlo.co.uk,https://fynlo.vercel.app"
+    scope: RUN_AND_BUILD_TIME
