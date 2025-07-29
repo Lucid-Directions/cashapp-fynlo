@@ -33,6 +33,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useFeatureAccess } from '@/hooks/useFeatureAccess';
 import { TemplateSelector } from '../loyalty/TemplateSelector';
 import { RuleBuilder } from '../loyalty/RuleBuilder';
 import { LoyaltyTemplate, LoyaltyRule, RewardTier } from '../loyalty/LoyaltyTemplates';
@@ -58,6 +59,7 @@ export const PlatformLoyaltyPrograms: React.FC = () => {
   const [selectedRestaurants, setSelectedRestaurants] = useState<string[]>([]);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const { toast } = useToast();
+  const { isPlatformOwner } = useFeatureAccess();
 
   // Enhanced form state
   const [currentStep, setCurrentStep] = useState<'template' | 'configure' | 'rules' | 'rewards'>('template');
@@ -94,6 +96,11 @@ export const PlatformLoyaltyPrograms: React.FC = () => {
 
   const fetchData = async () => {
     try {
+      // SECURITY: Only platform owners should access this data
+      if (!isPlatformOwner()) {
+        throw new Error('Unauthorized: Only platform owners can view loyalty programs');
+      }
+
       // Fetch loyalty programs
       const { data: programsData, error: programsError } = await supabase
         .from('loyalty_programs')
