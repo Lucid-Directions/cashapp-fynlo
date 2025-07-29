@@ -126,6 +126,9 @@ class Restaurant(Base):
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    
+    # Relationships
+    inventory_items = relationship("InventoryItem", back_populates="restaurant")
 
 class User(Base):
     """Users with role-based access"""
@@ -140,14 +143,43 @@ class User(Base):
     first_name = Column(String(100), nullable=False)
     last_name = Column(String(100), nullable=False)
     role = Column(String(50), nullable=False)  # platform_owner, restaurant_owner, manager, employee
-    restaurant_id = Column(UUID(as_uuid=True), nullable=True)
+    restaurant_id = Column(UUID(as_uuid=True), nullable=True)  # Legacy single restaurant
     platform_id = Column(UUID(as_uuid=True), nullable=True)
     permissions = Column(JSONB, default={})
     pin_code = Column(String(6))  # For employee time clock
     is_active = Column(Boolean, default=True)
     last_login = Column(DateTime(timezone=True))
+    current_restaurant_id = Column(UUID(as_uuid=True), ForeignKey('restaurants.id'), nullable=True)
+    last_restaurant_switch = Column(DateTime(timezone=True), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    
+    # Relationships
+    restaurants = relationship("UserRestaurant", back_populates="user")
+    current_restaurant = relationship("Restaurant", foreign_keys=[current_restaurant_id])
+
+class UserRestaurant(Base):
+    """Many-to-many relationship between users and restaurants for multi-restaurant support"""
+    __tablename__ = "user_restaurants"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    restaurant_id = Column(UUID(as_uuid=True), ForeignKey('restaurants.id', ondelete='CASCADE'), nullable=False)
+    role = Column(String(50), nullable=False, default='owner')  # owner, manager, employee
+    is_primary = Column(Boolean, default=False)
+    permissions = Column(JSONB, default={})
+    assigned_by = Column(UUID(as_uuid=True), ForeignKey('users.id', ondelete='SET NULL'), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    
+    # Relationships
+    user = relationship("User", foreign_keys=[user_id], back_populates="restaurants")
+    restaurant = relationship("Restaurant")
+    assigned_by_user = relationship("User", foreign_keys=[assigned_by])
+    
+    __table_args__ = (
+        UniqueConstraint('user_id', 'restaurant_id', name='unique_user_restaurant'),
+    )
 
 class Customer(Base):
     """Customer management with loyalty tracking"""
@@ -281,6 +313,7 @@ class InventoryItem(Base):
     __tablename__ = "inventory"
 
     sku = Column(String(100), primary_key=True, index=True)
+    restaurant_id = Column(UUID(as_uuid=True), ForeignKey('restaurants.id', ondelete='CASCADE'), nullable=False)
     name = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
     qty_g = Column(Integer, nullable=False, default=0) # Current quantity in grams (or ml or units)
@@ -290,7 +323,8 @@ class InventoryItem(Base):
     supplier = Column(String(255), nullable=True)
     last_updated = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
-    # Relationship to recipes where this item is an ingredient
+    # Relationships
+    restaurant = relationship("Restaurant", back_populates="inventory_items")
     recipe_ingredients = relationship("Recipe", back_populates="ingredient")
     # Relationship to ledger entries
     ledger_entries = relationship("InventoryLedgerEntry", back_populates="inventory_item")
@@ -318,12 +352,14 @@ class InventoryLedgerEntry(Base):
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     sku = Column(String(100), ForeignKey("inventory.sku"), nullable=False, index=True)
+    restaurant_id = Column(UUID(as_uuid=True), ForeignKey('restaurants.id', ondelete='CASCADE'), nullable=False)
     delta_g = Column(Integer, nullable=False) # Change in quantity (positive for additions, negative for deductions)
     source = Column(String(50), nullable=False) # E.g., "order_fulfillment", "manual_stock_add", "initial_import", "spoilage"
     source_id = Column(String(255), nullable=True) # E.g., order_id, user_id (for manual entry), import_batch_id
     ts = Column(DateTime(timezone=True), server_default=func.now(), nullable=False, index=True)
 
-    # Relationship
+    # Relationships
+    restaurant = relationship("Restaurant")
     inventory_item = relationship("InventoryItem", back_populates="ledger_entries")
 
 

@@ -9,6 +9,7 @@ from datetime import datetime
 # Schema for InventoryItem
 class InventoryItemBase(BaseModel):
     sku: str = Field(..., description="Stock Keeping Unit - unique identifier for the inventory item")
+    restaurant_id: Optional[UUID] = Field(None, description="Restaurant ID - will be set automatically from user context")
     name: str = Field(..., description="Name of the inventory item")
     description: Optional[str] = None
     qty_g: int = Field(default=0, description="Current quantity in grams (or ml or units)")

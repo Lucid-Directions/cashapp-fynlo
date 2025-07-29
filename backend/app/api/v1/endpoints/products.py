@@ -15,6 +15,7 @@ from app.core.auth import get_current_user
 from app.core.redis_client import get_redis, RedisClient
 from app.core.responses import APIResponseHelper
 from app.core.exceptions import FynloException, ErrorCodes
+from app.core.tenant_security import TenantSecurity
 
 router = APIRouter()
 
@@ -531,6 +532,16 @@ async def update_product(
             detail="Product not found"
         )
     
+    # Verify user has access to the product's restaurant
+    await TenantSecurity.validate_restaurant_access(
+        user=current_user,
+        restaurant_id=str(product.restaurant_id),
+        operation="modify",
+        resource_type="product",
+        resource_id=product_id,
+        db=db
+    )
+    
     # Update fields if provided
     if product_data.category_id is not None:
         product.category_id = product_data.category_id
@@ -604,6 +615,16 @@ async def delete_product(
             error_code=ErrorCodes.RESOURCE_NOT_FOUND,
             detail="Product not found"
         )
+    
+    # Verify user has access to the product's restaurant
+    await TenantSecurity.validate_restaurant_access(
+        user=current_user,
+        restaurant_id=str(product.restaurant_id),
+        operation="delete",
+        resource_type="product",
+        resource_id=product_id,
+        db=db
+    )
     
     product.is_active = False
     product.updated_at = datetime.utcnow()
@@ -756,6 +777,16 @@ async def get_product(
             error_code=ErrorCodes.RESOURCE_NOT_FOUND,
             detail="Product not found"
         )
+    
+    # Verify user has access to the product's restaurant
+    await TenantSecurity.validate_restaurant_access(
+        user=current_user,
+        restaurant_id=str(product.restaurant_id),
+        operation="access",
+        resource_type="product",
+        resource_id=product_id,
+        db=db
+    )
     
     return ProductResponse(
         id=str(product.id),

@@ -13,21 +13,26 @@ from app.schemas import inventory_schemas as schemas
 
 # --- InventoryItem CRUD ---
 
-def get_inventory_item(db: Session, sku: str) -> Optional[InventoryItem]:
-    return db.query(InventoryItem).filter(InventoryItem.sku == sku).first()
+def get_inventory_item(db: Session, sku: str, restaurant_id: UUID) -> Optional[InventoryItem]:
+    return db.query(InventoryItem).filter(
+        InventoryItem.sku == sku,
+        InventoryItem.restaurant_id == restaurant_id
+    ).first()
 
-def get_inventory_items(db: Session, skip: int = 0, limit: int = 100) -> List[InventoryItem]:
-    return db.query(InventoryItem).offset(skip).limit(limit).all()
+def get_inventory_items(db: Session, restaurant_id: UUID, skip: int = 0, limit: int = 100) -> List[InventoryItem]:
+    return db.query(InventoryItem).filter(
+        InventoryItem.restaurant_id == restaurant_id
+    ).offset(skip).limit(limit).all()
 
-def create_inventory_item(db: Session, item: schemas.InventoryItemCreate) -> InventoryItem:
-    db_item = InventoryItem(**item.dict())
+def create_inventory_item(db: Session, item: schemas.InventoryItemCreate, restaurant_id: UUID) -> InventoryItem:
+    db_item = InventoryItem(**item.dict(exclude={'restaurant_id'}), restaurant_id=restaurant_id)
     db.add(db_item)
     db.commit()
     db.refresh(db_item)
     return db_item
 
-def update_inventory_item(db: Session, sku: str, item_update: schemas.InventoryItemUpdate) -> Optional[InventoryItem]:
-    db_item = get_inventory_item(db, sku)
+def update_inventory_item(db: Session, sku: str, item_update: schemas.InventoryItemUpdate, restaurant_id: UUID) -> Optional[InventoryItem]:
+    db_item = get_inventory_item(db, sku, restaurant_id)
     if db_item:
         update_data = item_update.dict(exclude_unset=True)
         for key, value in update_data.items():
@@ -37,8 +42,8 @@ def update_inventory_item(db: Session, sku: str, item_update: schemas.InventoryI
         db.refresh(db_item)
     return db_item
 
-def delete_inventory_item(db: Session, sku: str) -> Optional[InventoryItem]:
-    db_item = get_inventory_item(db, sku)
+def delete_inventory_item(db: Session, sku: str, restaurant_id: UUID) -> Optional[InventoryItem]:
+    db_item = get_inventory_item(db, sku, restaurant_id)
     if db_item:
         # Consider safety: prevent deletion if item is in recipes or has ledger entries?
         # For now, allowing deletion. Add checks if business logic requires.
@@ -46,13 +51,13 @@ def delete_inventory_item(db: Session, sku: str) -> Optional[InventoryItem]:
         db.commit()
     return db_item
 
-def adjust_inventory_item_quantity(db: Session, sku: str, change_qty_g: int, source: str, source_id: Optional[str] = None) -> Tuple[Optional[InventoryItem], Optional[InventoryLedgerEntry]]:
+def adjust_inventory_item_quantity(db: Session, sku: str, change_qty_g: int, source: str, restaurant_id: UUID, source_id: Optional[str] = None) -> Tuple[Optional[InventoryItem], Optional[InventoryLedgerEntry]]:
     """
     Adjusts the quantity of an inventory item and logs the change.
     Ensures quantity does not drop below zero.
     Returns the updated inventory item and the created ledger entry.
     """
-    db_item = get_inventory_item(db, sku)
+    db_item = get_inventory_item(db, sku, restaurant_id)
     if not db_item:
         return None, None
 
@@ -71,6 +76,7 @@ def adjust_inventory_item_quantity(db: Session, sku: str, change_qty_g: int, sou
     # Create ledger entry for the actual change
     ledger_entry = InventoryLedgerEntry(
         sku=sku,
+        restaurant_id=restaurant_id,
         delta_g=actual_change_qty_g, # Log the actual change that happened
         source=source,
         source_id=source_id
@@ -196,23 +202,28 @@ def delete_specific_ingredient_from_recipe(db: Session, item_id: UUID, ingredien
 
 # --- InventoryLedgerEntry CRUD ---
 
-def create_inventory_ledger_entry(db: Session, entry: schemas.InventoryLedgerEntryCreate) -> InventoryLedgerEntry:
-    db_entry = InventoryLedgerEntry(**entry.dict())
+def create_inventory_ledger_entry(db: Session, entry: schemas.InventoryLedgerEntryCreate, restaurant_id: UUID) -> InventoryLedgerEntry:
+    db_entry = InventoryLedgerEntry(**entry.dict(), restaurant_id=restaurant_id)
     db.add(db_entry)
     db.commit()
     db.refresh(db_entry)
     return db_entry
 
-def get_ledger_entries_for_sku(db: Session, sku: str, skip: int = 0, limit: int = 100, start_date: Optional[datetime] = None, end_date: Optional[datetime] = None) -> List[InventoryLedgerEntry]:
-    query = db.query(InventoryLedgerEntry).filter(InventoryLedgerEntry.sku == sku)
+def get_ledger_entries_for_sku(db: Session, sku: str, restaurant_id: UUID, skip: int = 0, limit: int = 100, start_date: Optional[datetime] = None, end_date: Optional[datetime] = None) -> List[InventoryLedgerEntry]:
+    query = db.query(InventoryLedgerEntry).filter(
+        InventoryLedgerEntry.sku == sku,
+        InventoryLedgerEntry.restaurant_id == restaurant_id
+    )
     if start_date:
         query = query.filter(InventoryLedgerEntry.ts >= start_date)
     if end_date:
         query = query.filter(InventoryLedgerEntry.ts <= end_date)
     return query.order_by(InventoryLedgerEntry.ts.desc()).offset(skip).limit(limit).all()
 
-def get_all_ledger_entries(db: Session, skip: int = 0, limit: int = 100, start_date: Optional[datetime] = None, end_date: Optional[datetime] = None) -> List[InventoryLedgerEntry]:
-    query = db.query(InventoryLedgerEntry)
+def get_all_ledger_entries(db: Session, restaurant_id: UUID, skip: int = 0, limit: int = 100, start_date: Optional[datetime] = None, end_date: Optional[datetime] = None) -> List[InventoryLedgerEntry]:
+    query = db.query(InventoryLedgerEntry).filter(
+        InventoryLedgerEntry.restaurant_id == restaurant_id
+    )
     if start_date:
         query = query.filter(InventoryLedgerEntry.ts >= start_date)
     if end_date:
@@ -222,7 +233,7 @@ def get_all_ledger_entries(db: Session, skip: int = 0, limit: int = 100, start_d
 
 # --- Helper / Service level CRUD-like functions ---
 
-def get_inventory_status_summary(db: Session) -> List[schemas.InventoryStatusResponse]:
+def get_inventory_status_summary(db: Session, restaurant_id: UUID) -> List[schemas.InventoryStatusResponse]:
     """
     Provides a summary of all inventory items including their stock status
     (e.g., "In Stock", "Low Stock", "Out of Stock").
@@ -249,6 +260,8 @@ def get_inventory_status_summary(db: Session) -> List[schemas.InventoryStatusRes
         InventoryItem.par_level_g,
         InventoryItem.unit,
         status_expression
+    ).filter(
+        InventoryItem.restaurant_id == restaurant_id
     ).all()
 
     return [
@@ -262,7 +275,7 @@ def get_inventory_status_summary(db: Session) -> List[schemas.InventoryStatusRes
         ) for r in results
     ]
 
-def get_low_stock_items(db: Session, threshold_percentage: float = 0.1) -> List[schemas.LowStockItem]:
+def get_low_stock_items(db: Session, restaurant_id: UUID, threshold_percentage: float = 0.1) -> List[schemas.LowStockItem]:
     """
     Retrieves items that are at or below a certain percentage of their par level.
     Only considers items where par_level_g is defined and greater than 0.
@@ -283,7 +296,10 @@ def get_low_stock_items(db: Session, threshold_percentage: float = 0.1) -> List[
         InventoryItem.qty_g,
         InventoryItem.par_level_g,
         InventoryItem.unit
-    ).filter(low_stock_condition).all()
+    ).filter(
+        low_stock_condition,
+        InventoryItem.restaurant_id == restaurant_id
+    ).all()
 
     response_items = []
     for r in results:
