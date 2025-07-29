@@ -74,6 +74,11 @@ async def lifespan(app: FastAPI):
         await init_websocket_services()
         await start_health_monitor()
         
+        logger.info("Initializing instance tracker...")
+        from app.services.instance_tracker import init_instance_tracker
+        from app.core.redis_client import redis_client
+        await init_instance_tracker(redis_client)
+        
         logger.info("✅ Core services initialized successfully")
     except Exception as e:
         logger.error(f"Core services initialization failed: {e}")
@@ -82,6 +87,13 @@ async def lifespan(app: FastAPI):
     yield
     
     # Cleanup
+    logger.info("Stopping instance tracker...")
+    from app.services.instance_tracker import stop_instance_tracker
+    await stop_instance_tracker()
+    
+    logger.info("Closing Redis connection...")
+    await close_redis()
+    
     logger.info("✅ Cleanup complete")
 
 app = FastAPI(
