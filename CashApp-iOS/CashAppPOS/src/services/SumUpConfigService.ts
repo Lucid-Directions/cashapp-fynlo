@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_CONFIG } from '../config/api';
-import tokenManager from './TokenManager';
+import tokenManager from '../utils/tokenManager';
 
 export interface SumUpConfig {
   appId: string;

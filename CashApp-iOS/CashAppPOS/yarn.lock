@@ -1627,11 +1627,6 @@
     "@sentry-internal/replay-canvas" "8.54.0"
     "@sentry/core" "8.54.0"
 
-"@sentry/cli-linux-arm64@2.46.0":
-  version "2.46.0"
-  resolved "https://registry.npmjs.org/@sentry/cli-linux-arm64/-/cli-linux-arm64-2.46.0.tgz"
-  integrity sha512-OEJN8yAjI9y5B4telyqzu27Hi3+S4T8VxZCqJz1+z2Mp0Q/MZ622AahVPpcrVq/5bxrnlZR16+lKh8L1QwNFPg==
-
 "@sentry/cli@2.46.0":
   version "2.46.0"
   resolved "https://registry.npmjs.org/@sentry/cli/-/cli-2.46.0.tgz"
