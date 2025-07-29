@@ -216,7 +216,7 @@ async def test_product(db_session: AsyncSession, test_restaurant: Restaurant, te
 
 # Authentication fixtures
 @pytest.fixture
-def auth_headers(test_user: User) -> dict:
+async def auth_headers(test_user: User) -> dict:
     """Create authentication headers for test user"""
     access_token = create_access_token(
         data={
@@ -230,7 +230,7 @@ def auth_headers(test_user: User) -> dict:
     return {"Authorization": f"Bearer {access_token}"}
 
 @pytest.fixture
-def platform_owner_headers(test_platform_owner: User) -> dict:
+async def platform_owner_headers(test_platform_owner: User) -> dict:
     """Create authentication headers for platform owner"""
     access_token = create_access_token(
         data={

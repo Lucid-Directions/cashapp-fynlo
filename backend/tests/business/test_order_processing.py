@@ -170,11 +170,11 @@ class TestOrderProcessing:
             for amount, tax_rate in test_amounts:
                 # Update restaurant tax rate
                 test_restaurant.tax_rate = float(tax_rate)
-                test_db.commit()
+                await test_db.commit()
                 
                 # Update product price
                 test_product.price = amount
-                test_db.commit()
+                await test_db.commit()
                 
                 # Create order
                 response = await client.post(
@@ -208,7 +208,7 @@ class TestOrderProcessing:
         initial_stock = 10
         test_product.stock_quantity = initial_stock
         test_product.track_inventory = True
-        test_db.commit()
+        await test_db.commit()
         
         async with AsyncClient(app=app, base_url="http://test") as client:
             # Create order for 3 items
@@ -229,7 +229,7 @@ class TestOrderProcessing:
             assert response.status_code == 201
             
             # Check inventory was deducted
-            test_db.refresh(test_product)
+            await test_db.refresh(test_product)
             assert test_product.stock_quantity == initial_stock - 3
             
             # Try to order more than available

@@ -73,9 +73,11 @@ class TestStripeIntegration:
         assert response.status_code == 200
         
         # Verify payment recorded
-        payment = await db_session.query(Payment).filter_by(
-            order_id=test_order.id
-        ).first()
+        from sqlalchemy import select
+        result = await db_session.execute(
+            select(Payment).where(Payment.order_id == test_order.id)
+        )
+        payment = result.scalar_one_or_none()
         assert payment is not None
         assert payment.status == "completed"
         assert payment.provider == "stripe"

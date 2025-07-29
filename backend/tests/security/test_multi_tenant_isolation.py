@@ -27,8 +27,8 @@ class TestMultiTenantIsolation:
             subscription_plan="beta"
         )
         test_db.add(restaurant)
-        test_db.commit()
-        test_db.refresh(restaurant)
+        await test_db.commit()
+        await test_db.refresh(restaurant)
         return restaurant
     
     @pytest.fixture
@@ -64,7 +64,7 @@ class TestMultiTenantIsolation:
             total_amount=100.00
         )
         test_db.add(order)
-        test_db.commit()
+        await test_db.commit()
         
         async with AsyncClient(app=app, base_url="http://test") as client:
             # Try to access with second restaurant's token
@@ -98,7 +98,7 @@ class TestMultiTenantIsolation:
                 total_amount=75.00
             )
             test_db.add_all([order1, order2])
-        test_db.commit()
+            await test_db.commit()
         
         async with AsyncClient(app=app, base_url="http://test") as client:
             # Get orders for first restaurant
@@ -147,7 +147,7 @@ class TestMultiTenantIsolation:
             price=20.00
         )
         test_db.add(product)
-        test_db.commit()
+        await test_db.commit()
         
         async with AsyncClient(app=app, base_url="http://test") as client:
             # Try to update with first restaurant's token
@@ -161,7 +161,7 @@ class TestMultiTenantIsolation:
             assert response.status_code in [403, 404]
             
             # Verify price unchanged
-            test_db.refresh(product)
+            await test_db.refresh(product)
             assert product.price == 20.00
     
     async def test_platform_owner_can_access_all(
@@ -183,7 +183,7 @@ class TestMultiTenantIsolation:
             total_amount=200.00
         )
         test_db.add_all([order1, order2])
-        test_db.commit()
+        await test_db.commit()
         
         async with AsyncClient(app=app, base_url="http://test") as client:
             # Platform owner should see all orders

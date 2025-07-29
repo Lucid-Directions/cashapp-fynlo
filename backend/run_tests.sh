@@ -16,13 +16,21 @@ if [[ "$VIRTUAL_ENV" == "" ]]; then
     }
 fi
 
+# Check if test database exists
+echo "🗄️ Checking test database..."
+if ! psql -U postgres -lqt | cut -d \| -f 1 | grep -qw fynlo_pos_test; then
+    echo "⚠️  Test database not found. Creating it now..."
+    ./setup_test_db.sh
+fi
+
 # Install test dependencies if needed
 echo "📦 Checking test dependencies..."
 pip install -q pytest pytest-asyncio pytest-cov pytest-mock httpx factory-boy
 
 # Set test environment variables
+export APP_ENV=test
 export ENVIRONMENT=test
-export DATABASE_URL=sqlite:///:memory:
+export DATABASE_URL=postgresql://fynlo_test:fynlo_test_password@localhost:5432/fynlo_pos_test
 export JWT_SECRET=test_secret_key
 export REDIS_URL=redis://localhost:6379/15
 
