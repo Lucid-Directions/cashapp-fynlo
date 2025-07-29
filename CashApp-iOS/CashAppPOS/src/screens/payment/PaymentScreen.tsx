@@ -329,8 +329,8 @@ const PaymentScreen: React.FC = () => {
     try {
       console.log('🏦 Starting SumUp payment flow with React hooks...');
       
-      // Initialize SumUp service (lightweight now)
-      const initSuccess = await sumUpService.initialize('sup_sk_XqquMi732f2WDCqvnkV4xoVxx54oGAQRU');
+      // Initialize SumUp service (configuration will be fetched from backend)
+      const initSuccess = await sumUpService.initialize();
       if (!initSuccess) {
         throw new Error('Failed to initialize SumUp service');
       }
