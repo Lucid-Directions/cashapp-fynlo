@@ -488,7 +488,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
       };
 
       // Call the new onboarding endpoint
-      const response = await fetch(`${API_CONFIG.FULL_API_URL}/api/v1/restaurants/onboarding/create`, {
+      const response = await fetch(`${API_CONFIG.FULL_API_URL}/restaurants/onboarding/create`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
