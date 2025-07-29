@@ -9,6 +9,7 @@ import os
 import platform
 import socket
 import psutil
+import secrets
 from typing import Dict, Any, Optional
 import logging
 
@@ -37,33 +38,38 @@ INSTANCE_START_TIME = datetime.now(timezone.utc)
 
 
 def get_instance_id() -> str:
-    """Generate a unique instance ID based on hostname and environment."""
+    """Generate a unique instance ID based on hostname and environment with random suffix."""
     hostname = socket.gethostname()
     # In container environments, hostname might be the container ID
     # Also check for DigitalOcean specific environment variables
     pod_name = os.environ.get("POD_NAME", "")
     do_app_id = os.environ.get("DO_APP_ID", "")
     
+    # Generate 8-character random suffix for security
+    random_suffix = secrets.token_hex(4)
+    
     if pod_name:
-        # Validate pod name
+        # Validate pod name with random suffix
+        instance_id = f"{pod_name}-{random_suffix}"
         try:
-            return InputValidator.validate_instance_id(pod_name)
+            return InputValidator.validate_instance_id(instance_id)
         except ValueError:
             logger.warning(f"Invalid pod name format: {pod_name}, falling back to hostname")
     
     if do_app_id and hostname:
-        instance_id = f"{do_app_id}-{hostname}"
+        instance_id = f"{do_app_id}-{hostname}-{random_suffix}"
         try:
             return InputValidator.validate_instance_id(instance_id)
         except ValueError:
             logger.warning(f"Invalid instance ID format: {instance_id}, using hostname only")
     
-    # Validate hostname
+    # Validate hostname with random suffix
+    instance_id = f"{hostname}-{random_suffix}"
     try:
-        return InputValidator.validate_instance_id(hostname)
+        return InputValidator.validate_instance_id(instance_id)
     except ValueError:
-        # If hostname is invalid, generate a safe default
-        return "instance-unknown"
+        # If hostname is invalid, generate a safe default with random suffix
+        return f"instance-unknown-{random_suffix}"
 
 
 @router.get("/")
@@ -226,7 +232,7 @@ async def health_detailed(
 async def health_instances(
     request: Request,
     redis: RedisClient = Depends(get_redis),
-    current_user: Optional[User] = Depends(get_current_user_optional)  # Optional auth for backward compatibility
+    current_user: User = Depends(get_current_user)  # Now requires authentication
 ) -> Dict[str, Any]:
     """
     List all active instances registered in the system.
@@ -305,17 +311,8 @@ async def health_instances(
         reverse=True
     )
     
-    # Filter sensitive data for non-authenticated users
-    if not current_user:
-        # Remove potentially sensitive fields
-        filtered_instances = []
-        for inst in registered_instances:
-            filtered_instances.append({
-                "instance_id": inst.get("instance_id", "unknown"),
-                "is_stale": inst.get("is_stale", False),
-                "seconds_since_heartbeat": inst.get("seconds_since_heartbeat", -1)
-            })
-        registered_instances = filtered_instances
+    # Since authentication is now required, we can show full instance details
+    # No need to filter sensitive data anymore
     
     # Analyze discrepancies
     active_count = len([i for i in registered_instances if not i.get('is_stale', False)])

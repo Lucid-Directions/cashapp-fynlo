@@ -88,12 +88,8 @@ class DigitalOceanMonitor:
                 logger.error(f"Failed to decrypt DO API token: {type(e).__name__}")
                 return None
         
-        # Fallback to plain token (for development/migration)
-        plain_token = os.environ.get("DO_API_TOKEN")
-        if plain_token and settings.ENVIRONMENT != "production":
-            logger.warning("Using unencrypted DO_API_TOKEN - encrypt for production!")
-            return plain_token
-        
+        # No fallback to plain token - must use encrypted token
+        logger.error("DO_API_TOKEN_ENCRYPTED not configured - token encryption is required")
         return None
     
     def _load_app_id(self) -> Optional[str]:

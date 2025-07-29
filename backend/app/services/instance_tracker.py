@@ -7,6 +7,7 @@ import asyncio
 from datetime import datetime, timezone, timedelta
 import os
 import socket
+import secrets
 import logging
 from typing import Dict, List, Optional, Any
 import json
@@ -36,20 +37,23 @@ class InstanceTracker:
         self._running = False
         
     def _generate_instance_id(self) -> str:
-        """Generate a unique instance ID."""
+        """Generate a unique instance ID with random suffix for security."""
         hostname = socket.gethostname()
         pod_name = os.environ.get("POD_NAME", "")
         do_app_id = os.environ.get("DO_APP_ID", "")
         
+        # Generate 8-character random suffix for security
+        random_suffix = secrets.token_hex(4)
+        
         # Use pod name if available (Kubernetes/DigitalOcean)
         if pod_name:
-            return pod_name
+            return f"{pod_name}-{random_suffix}"
         # Otherwise use app ID + hostname
         elif do_app_id and hostname:
-            return f"{do_app_id}-{hostname}"
+            return f"{do_app_id}-{hostname}-{random_suffix}"
         # Fallback to just hostname
         else:
-            return hostname
+            return f"{hostname}-{random_suffix}"
     
     async def start(self):
         """Start instance tracking - register and begin heartbeat."""
