@@ -1,5 +1,13 @@
 # CLAUDE.md - Fynlo POS Development Guide
 
+## 🚨 CRITICAL RULE: NO ASSUMPTIONS
+**NEVER make assumptions about code structure, imports, or functionality.**
+- ALWAYS analyze the actual codebase first before writing any code
+- ALWAYS verify module locations, function names, and class definitions exist
+- ALWAYS check import paths and dependencies before using them
+- ALWAYS understand the real implementation before writing tests
+- Making assumptions wastes time and creates technical debt
+
 ## 🛠️ AVAILABLE TOOLS & AGENTS
 
 ### MCP Tools

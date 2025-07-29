@@ -2,7 +2,7 @@
 Supabase Authentication endpoints for Fynlo POS
 """
 
-from fastapi import APIRouter, Depends, HTTPException, Header
+from fastapi import APIRouter, Depends, HTTPException, Header, Request
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from typing import Optional
@@ -18,6 +18,8 @@ from app.core.config import settings
 from app.core.database import User, Restaurant
 from app.schemas.auth import AuthVerifyResponse, RegisterRestaurantRequest
 from app.core.feature_gate import get_plan_features
+from app.services.audit_logger import AuditLoggerService
+from app.models.audit_log import AuditEventType, AuditEventStatus
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -43,6 +45,7 @@ def ensure_uuid(value) -> uuid.UUID:
 
 @router.post("/verify", response_model=AuthVerifyResponse)
 async def verify_supabase_user(
+    request: Request,
     authorization: Optional[str] = Header(None),
     db: Session = Depends(get_db)
 ):
@@ -305,6 +308,13 @@ async def verify_supabase_user(
         logger.warning(f"Supabase AuthApiError: {error_msg}")
         logger.warning(f"Error type: {type(e).__name__}")
         
+        # Create audit logger
+        audit_logger = AuditLoggerService(db)
+        
+        # Get client info for audit
+        client_ip = request.client.host if request.client else "unknown"
+        user_agent = request.headers.get("user-agent", "unknown")
+        
         # Try to get more details from the error
         if hasattr(e, 'code'):
             logger.warning(f"Error code: {e.code}")
@@ -315,16 +325,46 @@ async def verify_supabase_user(
         
         error_msg_lower = error_msg.lower()
         if "invalid jwt" in error_msg_lower or "malformed" in error_msg_lower:
+            # Log failed authentication attempt
+            await audit_logger.create_audit_log(
+                event_type=AuditEventType.AUTHENTICATION,
+                event_status=AuditEventStatus.FAILURE,
+                action_performed="Invalid JWT token presented",
+                ip_address=client_ip,
+                user_agent=user_agent,
+                details={"error": "invalid_jwt", "token_prefix": authorization[:20] + "..." if authorization else None},
+                risk_score=70  # High risk - invalid token
+            )
             raise HTTPException(
                 status_code=401,
                 detail="Invalid authentication token"
             )
         elif "expired" in error_msg_lower:
+            # Log expired token attempt
+            await audit_logger.create_audit_log(
+                event_type=AuditEventType.AUTHENTICATION,
+                event_status=AuditEventStatus.FAILURE,
+                action_performed="Expired JWT token presented",
+                ip_address=client_ip,
+                user_agent=user_agent,
+                details={"error": "expired_token"},
+                risk_score=30  # Low risk - just expired
+            )
             raise HTTPException(
                 status_code=401,
                 detail="Token has expired. Please sign in again."
             )
         elif "not found" in error_msg_lower:
+            # Log user not found attempt
+            await audit_logger.create_audit_log(
+                event_type=AuditEventType.AUTHENTICATION,
+                event_status=AuditEventStatus.FAILURE,
+                action_performed="Authentication attempt for non-existent user",
+                ip_address=client_ip,
+                user_agent=user_agent,
+                details={"error": "user_not_found"},
+                risk_score=50  # Medium risk
+            )
             raise HTTPException(
                 status_code=401,
                 detail="User not found. Please sign up first."
@@ -332,6 +372,15 @@ async def verify_supabase_user(
         else:
             # Log unexpected auth errors with full details
             logger.error(f"Unexpected Supabase auth error: {type(e).__name__}: {str(e)}")
+            await audit_logger.create_audit_log(
+                event_type=AuditEventType.AUTHENTICATION,
+                event_status=AuditEventStatus.FAILURE,
+                action_performed="Authentication failed with unexpected error",
+                ip_address=client_ip,
+                user_agent=user_agent,
+                details={"error": "unexpected_auth_error", "error_type": type(e).__name__},
+                risk_score=80  # High risk - unexpected error
+            )
             raise HTTPException(
                 status_code=401,
                 detail="Authentication failed. Please sign in again."
@@ -341,15 +390,38 @@ async def verify_supabase_user(
         error_str = str(e)
         logger.error(f"Auth verification error - Type: {type(e).__name__}, Message: {error_str}")
         
+        # Create audit logger for generic exceptions
+        audit_logger = AuditLoggerService(db)
+        client_ip = request.client.host if request.client else "unknown"
+        user_agent = request.headers.get("user-agent", "unknown")
+        
         # Check for common Supabase error patterns in the exception message
         if "invalid jwt" in error_str.lower() or "jwt" in error_str.lower():
             logger.warning("Detected JWT error in generic exception, treating as auth error")
+            await audit_logger.create_audit_log(
+                event_type=AuditEventType.AUTHENTICATION,
+                event_status=AuditEventStatus.FAILURE,
+                action_performed="JWT error detected in generic exception",
+                ip_address=client_ip,
+                user_agent=user_agent,
+                details={"error": "jwt_error_wrapped", "exception_type": type(e).__name__},
+                risk_score=70
+            )
             raise HTTPException(
                 status_code=401,
                 detail="Invalid authentication token"
             )
         elif "user not found" in error_str.lower():
             logger.warning("Detected user not found error in generic exception")
+            await audit_logger.create_audit_log(
+                event_type=AuditEventType.AUTHENTICATION,
+                event_status=AuditEventStatus.FAILURE,
+                action_performed="User not found error in generic exception",
+                ip_address=client_ip,
+                user_agent=user_agent,
+                details={"error": "user_not_found_wrapped", "exception_type": type(e).__name__},
+                risk_score=50
+            )
             raise HTTPException(
                 status_code=401,
                 detail="User not found. Please sign up first."
@@ -361,10 +433,30 @@ async def verify_supabase_user(
         
         # Check if it's a Supabase initialization error
         if "supabase" in error_str.lower() and ("missing" in error_str.lower() or "environment" in error_str.lower()):
+            await audit_logger.create_audit_log(
+                event_type=AuditEventType.SYSTEM_EVENT,
+                event_status=AuditEventStatus.FAILURE,
+                action_performed="Authentication service configuration error",
+                ip_address=client_ip,
+                user_agent=user_agent,
+                details={"error": "service_config_error", "exception_type": type(e).__name__},
+                risk_score=90  # Very high risk - config error
+            )
             raise HTTPException(
                 status_code=503,
                 detail="Authentication service configuration error. Please contact support."
             )
+        
+        # Log generic authentication service error
+        await audit_logger.create_audit_log(
+            event_type=AuditEventType.AUTHENTICATION,
+            event_status=AuditEventStatus.FAILURE,
+            action_performed="Authentication service error",
+            ip_address=client_ip,
+            user_agent=user_agent,
+            details={"error": "service_error", "exception_type": type(e).__name__, "message": error_str[:200]},
+            risk_score=60
+        )
         
         raise HTTPException(
             status_code=500,

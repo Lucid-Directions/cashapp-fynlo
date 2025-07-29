@@ -1,0 +1,66 @@
+[run]
+source = app
+branch = True
+parallel = True
+omit = 
+    */tests/*
+    */test_*
+    */__pycache__/*
+    */migrations/*
+    */__init__.py
+    */config.py
+    */venv/*
+    */virtualenv/*
+    */.venv/*
+    */site-packages/*
+    */dist-packages/*
+    app/main.py  # FastAPI app initialization
+    app/core/config.py  # Configuration files
+
+[report]
+precision = 2
+show_missing = True
+skip_covered = False
+skip_empty = True
+sort = Cover
+exclude_lines =
+    # Standard patterns
+    pragma: no cover
+    def __repr__
+    if self\.debug
+    raise AssertionError
+    raise NotImplementedError
+    if 0:
+    if False:
+    if __name__ == .__main__.:
+    
+    # Type checking
+    if TYPE_CHECKING:
+    @typing.overload
+    @overload
+    
+    # Defensive programming
+    ^\s*\.\.\.$
+    ^\s*pass$
+    
+    # Abstract methods
+    @abstractmethod
+    @abc.abstractmethod
+
+[html]
+directory = htmlcov
+title = Fynlo Backend Coverage Report
+show_contexts = True
+
+[xml]
+output = coverage.xml
+
+[json]
+output = coverage.json
+pretty_print = True
+show_contexts = True
+
+[paths]
+source =
+    app/
+    */site-packages/app
