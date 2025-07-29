@@ -210,39 +210,6 @@ async def api_version_info():
         message="API version information"
     )
 
-# TEMPORARY: Add essential endpoints for iOS app
-@app.post("/api/v1/auth/login")
-async def login(request: dict):
-    """Authentication endpoint with mock data"""
-    email = request.get("email", "").lower()
-    password = request.get("password", "")
-    
-    # SIMPLIFIED: One working restaurant owner credential
-    mock_credentials = {
-        "restaurant@fynlopos.com": "restaurant123"
-    }
-    
-    if email in mock_credentials and mock_credentials[email] == password:
-        # Return successful authentication
-        return APIResponseHelper.success(
-            data={
-                "access_token": "mock_token_12345",
-                "token_type": "bearer",
-                "user": {
-                    "id": "user_123",
-                    "email": email,
-                    "role": "platform_owner" if "platform" in email else "restaurant_owner",
-                    "firstName": "Test",
-                    "lastName": "User"
-                }
-            },
-            message="Authentication successful"
-        )
-    else:
-        return APIResponseHelper.error(
-            message="Invalid credentials",
-            status_code=401
-        )
 
 # Hardcoded menu endpoints removed - now using proper router at /api/v1/menu/
 # See app/api/v1/endpoints/menu.py for database-driven menu endpoints

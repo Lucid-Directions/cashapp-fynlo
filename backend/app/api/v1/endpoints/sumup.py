@@ -32,26 +32,29 @@ class SumUpInitRequest(BaseModel):
         }
 
 
-class SumUpConfigResponse(BaseModel):
-    """Response model for SumUp configuration"""
-    merchant_code: Optional[str] = Field(None, description="SumUp merchant code if available")
+class SumUpConfigData(BaseModel):
+    """SumUp SDK configuration data"""
+    appId: str = Field(..., description="SumUp app ID for mobile SDK")
     environment: str = Field(..., description="Environment: sandbox or production")
-    app_id: Optional[str] = Field(None, description="SumUp app ID for mobile SDK")
+    merchantCode: Optional[str] = Field(None, description="SumUp merchant code if available")
+    currency: str = Field(default="GBP", description="Currency code")
+
+class SumUpConfigResponse(BaseModel):
+    """Response model for SumUp configuration matching frontend expectations"""
+    config: SumUpConfigData = Field(..., description="SumUp SDK configuration")
+    sdkInitialized: bool = Field(..., description="Whether SDK is initialized")
     enabled: bool = Field(..., description="Whether SumUp is enabled for this restaurant")
     features: Dict[str, bool] = Field(..., description="Enabled SumUp features")
+
+
+class MerchantValidationRequest(BaseModel):
+    """Request model for merchant code validation"""
+    merchant_code: str = Field(..., description="SumUp merchant code to validate")
     
     class Config:
         schema_extra = {
             "example": {
-                "merchant_code": "MC123456",
-                "environment": "production",
-                "app_id": "com.fynlo.pos",
-                "enabled": True,
-                "features": {
-                    "card_reader": True,
-                    "tap_to_pay": True,
-                    "refunds": True
-                }
+                "merchant_code": "MC123456"
             }
         }
 
@@ -139,17 +142,23 @@ async def initialize_sumup(
             f"for restaurant {current_user.restaurant_id} in {environment} mode"
         )
         
-        # Build response
-        config_data = SumUpConfigResponse(
-            merchant_code=merchant_code,
+        # Build response using the proper model
+        config_data = SumUpConfigData(
+            appId=sumup_app_id,
             environment=environment,
-            app_id=sumup_app_id,
+            merchantCode=merchant_code,
+            currency="GBP"  # Using GBP to match application standard
+        )
+        
+        response = SumUpConfigResponse(
+            config=config_data,
+            sdkInitialized=True,
             enabled=True,
             features=features
         )
         
         return APIResponseHelper.success(
-            data=config_data.dict(),
+            data=response.dict(),
             message="SumUp configuration retrieved successfully"
         )
         
@@ -216,7 +225,7 @@ async def get_sumup_status(
 @router.post("/validate-merchant")
 @limiter.limit("5/minute")
 async def validate_merchant_code(
-    merchant_code: str,
+    request: MerchantValidationRequest,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -236,7 +245,7 @@ async def validate_merchant_code(
             )
         
         # Basic validation
-        if not merchant_code or len(merchant_code) < 6:
+        if not request.merchant_code or len(request.merchant_code) < 6:
             return APIResponseHelper.validation_error(
                 message="Invalid merchant code format",
                 errors=[{
@@ -250,7 +259,7 @@ async def validate_merchant_code(
         
         return APIResponseHelper.success(
             data={
-                "merchant_code": merchant_code,
+                "merchantCode": request.merchant_code,
                 "valid": True,
                 "message": "Merchant code format is valid"
             },

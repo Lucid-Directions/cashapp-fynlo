@@ -10,12 +10,15 @@ export interface SumUpConfig {
 }
 
 export interface SumUpInitResponse {
-  status: string;
+  success: boolean;
   data: {
     config: SumUpConfig;
     sdkInitialized: boolean;
+    enabled: boolean;
+    features: Record<string, boolean>;
   };
   message?: string;
+  timestamp?: string;
 }
 
 class SumUpConfigService {
@@ -54,11 +57,12 @@ class SumUpConfigService {
       // Fetch from backend
       console.log('🔄 Fetching SumUp configuration from backend...');
       const response = await fetch(`${API_CONFIG.FULL_API_URL}/sumup/initialize`, {
-        method: 'GET',
+        method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify({ mode: 'production' }),
       });
 
       if (!response.ok) {
@@ -68,7 +72,8 @@ class SumUpConfigService {
 
       const result: SumUpInitResponse = await response.json();
       
-      if (result.status === 'success' && result.data?.config) {
+      // Check for success using the actual API response format
+      if (result.success && result.data?.config) {
         const config = result.data.config;
         
         // Cache the configuration

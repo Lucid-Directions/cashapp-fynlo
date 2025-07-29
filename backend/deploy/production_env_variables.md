@@ -21,10 +21,10 @@ SUPABASE_ANON_KEY=<YOUR_ANON_KEY>
 
 ### 4. SumUp Configuration (NEW - REQUIRED)
 ```
-SUMUP_API_KEY=sup_sk_XqquMi732f2WDCqvnkV4xoVxx54oGAQRU
+SUMUP_API_KEY=<YOUR_SUMUP_API_KEY_HERE>  # Get from SumUp dashboard
 SUMUP_ENVIRONMENT=production
 SUMUP_APP_ID=com.anonymous.cashapppos
-SUMUP_MERCHANT_CODE=<YOUR_MERCHANT_CODE>
+SUMUP_MERCHANT_CODE=<YOUR_MERCHANT_CODE>  # Get from SumUp dashboard
 ```
 
 ### 5. Security Keys

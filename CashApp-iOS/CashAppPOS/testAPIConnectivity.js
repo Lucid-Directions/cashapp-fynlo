@@ -1,4 +1,9 @@
-// Test API connectivity and endpoints
+/**
+ * Test API connectivity and endpoints
+ * 
+ * IMPORTANT: Mock authentication endpoint has been removed for security.
+ * See BREAKING_CHANGES.md for how to update authentication tests.
+ */
 const API_BASE_URL = 'http://localhost:8000';
 
 // Test all our API endpoints
@@ -9,7 +14,7 @@ const endpoints = [
   { path: '/api/v1/categories', method: 'GET', description: 'Get categories' },
   { path: '/api/v1/orders', method: 'GET', description: 'Get orders' },
   { path: '/api/v1/restaurants/current', method: 'GET', description: 'Current restaurant' },
-  { path: '/api/v1/auth/login', method: 'POST', description: 'Login endpoint' },
+  // Authentication endpoint removed - use Supabase auth instead (see BREAKING_CHANGES.md)
 ];
 
 async function testAPIConnectivity() {
@@ -104,7 +109,8 @@ async function testDatabaseServiceConfig() {
     { name: 'Products API', endpoint: '/api/v1/products', method: 'GET' },
     { name: 'Categories API', endpoint: '/api/v1/categories', method: 'GET' },
     { name: 'Orders API', endpoint: '/api/v1/orders', method: 'GET' },
-    { name: 'Auth API', endpoint: '/api/v1/auth/login', method: 'POST', body: JSON.stringify({ email: 'test', password: 'test' }) },
+    // Auth API removed - use Supabase auth instead (see BREAKING_CHANGES.md)
+    // To test auth: Use Supabase SDK with test credentials from environment variables
   ];
   
   for (const test of tests) {

@@ -2,6 +2,9 @@
 /**
  * Integration Test Suite for Fynlo POS Critical Fixes
  * Tests all fixes applied in separate branches
+ * 
+ * IMPORTANT: Mock authentication endpoint has been removed for security.
+ * See BREAKING_CHANGES.md for how to update authentication tests.
  */
 
 const fetch = require('node-fetch');
@@ -60,7 +63,7 @@ async function testAPIEndpointCompatibility() {
     { name: 'API Docs', url: '/docs', method: 'GET' },
     { name: 'Products API', url: '/api/v1/products', method: 'GET' },
     { name: 'Categories API', url: '/api/v1/categories', method: 'GET' },
-    { name: 'Authentication', url: '/api/v1/auth/login', method: 'POST' },
+    // Authentication endpoint removed - use Supabase auth instead (see BREAKING_CHANGES.md)
     { name: 'Mobile Config', url: '/api/config/base_url', method: 'GET' }
   ];
   
