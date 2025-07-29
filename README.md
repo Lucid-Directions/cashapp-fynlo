@@ -88,7 +88,7 @@ Each restaurant is completely isolated with role-based access control (RBAC).
 - **Key Features**:
   - Landing pages and product information
   - User registration and subscription selection
-  - Payment processing for subscriptions (Stripe integration)
+  - Payment processing for subscriptions (Sumup integration)
   - Account management and billing
   - NO direct POS functionality (all POS features in mobile app)
 
@@ -112,7 +112,7 @@ Each restaurant is completely isolated with role-based access control (RBAC).
 
 ### Payment Methods & Fees
 - **QR Code Payments**: 1.2% transaction fee (Fynlo's competitive advantage)
-- **Card/Apple Pay**: 2.9% transaction fee (industry standard)
+- **Card/Apple Pay**: 2.9% transaction fee (industry standard) but Sum up Offer 0.99% per transaction fee if we sign up for the SumUp Plus Which we will do
 - **Cash**: 0% fee
 
 ### Fee Structure
@@ -351,4 +351,4 @@ The system uses multiple `.env` files across different components:
 - DigitalOcean SSL certificates needed for production database
 - Metro bundler port conflicts common
 
-This README reflects the current state of the Fynlo POS system as of January 2025. The platform is functional but requires significant improvements in reliability, testing, and operational tooling before it's ready for large-scale production use. The codebase shows signs of rapid development with technical debt that needs addressing before scaling.
+This README reflects the current state of the Fynlo POS system as of July 2025. The platform is functional but requires significant improvements in reliability, testing, and operational tooling before it's ready for large-scale production use. The codebase shows signs of rapid development with technical debt that needs addressing before scaling.

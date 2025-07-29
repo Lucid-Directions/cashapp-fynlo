@@ -2,7 +2,7 @@
 Bidirectional Sync Service
 Handles data synchronization between platform dashboard and restaurant mobile apps
 """
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, TYPE_CHECKING
 from datetime import datetime, timedelta
 import asyncio
 import json
@@ -10,15 +10,15 @@ from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_
 from redis import Redis
 
-from app.core.database import get_db
+from app.core.database import get_db, Restaurant, Product, Category, Order, User
 from app.core.redis_client import redis_client as global_redis_client
-from app.models.restaurant import Restaurant
-from app.models.product import Product, ProductCategory
-from app.models.order import Order
-from app.models.user import User
-from app.api.v1.endpoints.websocket_enhanced import EnhancedWebSocketManager
 from app.core.exceptions import FynloException
-from app.core.logger import logger
+import logging
+
+logger = logging.getLogger(__name__)
+
+if TYPE_CHECKING:
+    from app.api.v1.endpoints.websocket_enhanced import EnhancedWebSocketManager
 
 class SyncService:
     """
@@ -27,11 +27,11 @@ class SyncService:
     
     def __init__(self):
         self.redis_client: Optional[Redis] = None
-        self.ws_manager: Optional[EnhancedWebSocketManager] = None
+        self.ws_manager: Optional['EnhancedWebSocketManager'] = None
         self._sync_queue: asyncio.Queue = asyncio.Queue()
         self._processing = False
         
-    async def initialize(self, ws_manager: EnhancedWebSocketManager):
+    async def initialize(self, ws_manager: 'EnhancedWebSocketManager'):
         """Initialize sync service with dependencies"""
         self.redis_client = global_redis_client
         self.ws_manager = ws_manager
