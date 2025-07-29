@@ -20,10 +20,11 @@ export class EnhancedWebSocketService {
   // Reconnection logic
   private reconnectAttempts: number = 0;
   private reconnectTimer: NodeJS.Timeout | null = null;
-  private reconnectBackoff: number[] = [1000, 2000, 4000, 8000, 16000, 30000];
+  private maxBackoffDelay: number = 64000; // 64 seconds max
   
   // Message queue for offline/reconnecting
   private messageQueue: WebSocketMessage[] = [];
+  private maxQueueSize: number = 100; // Prevent unbounded growth
   private listeners: Map<string, Set<Function>> = new Map();
   
   // Network monitoring
@@ -309,6 +310,13 @@ export class EnhancedWebSocketService {
     }
   }
   
+  private calculateBackoff(attempt: number): number {
+    // Exponential backoff with jitter
+    const base = Math.min(1000 * Math.pow(2, attempt), this.maxBackoffDelay);
+    const jitter = Math.random() * 0.3 * base; // 30% jitter
+    return Math.floor(base + jitter);
+  }
+  
   private scheduleReconnect(): void {
     if (this.reconnectTimer) {
       clearTimeout(this.reconnectTimer);
@@ -322,11 +330,7 @@ export class EnhancedWebSocketService {
       return;
     }
     
-    const backoffIndex = Math.min(
-      this.reconnectAttempts,
-      this.reconnectBackoff.length - 1
-    );
-    const delay = this.reconnectBackoff[backoffIndex];
+    const delay = this.calculateBackoff(this.reconnectAttempts);
     
     console.log(`🔄 Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts + 1})`);
     this.setState('RECONNECTING');
@@ -350,9 +354,15 @@ export class EnhancedWebSocketService {
     if (this.state === 'CONNECTED' && this.ws?.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(fullMessage));
     } else {
-      // Queue message for later
-      this.messageQueue.push(fullMessage);
-      console.log(`📦 Message queued (${this.messageQueue.length} in queue)`);
+      // Queue message for later (with size limit)
+      if (this.messageQueue.length < this.maxQueueSize) {
+        this.messageQueue.push(fullMessage);
+        console.log(`📦 Message queued (${this.messageQueue.length} in queue)`);
+      } else {
+        console.warn(`⚠️ Message queue full (${this.maxQueueSize} messages), dropping oldest`);
+        this.messageQueue.shift(); // Remove oldest
+        this.messageQueue.push(fullMessage);
+      }
     }
   }
   
@@ -426,7 +436,21 @@ export class EnhancedWebSocketService {
   
   // Utilities
   private setState(newState: ConnectionState): void {
+    // Validate state transitions
+    const validTransitions: Record<ConnectionState, ConnectionState[]> = {
+      'DISCONNECTED': ['CONNECTING', 'RECONNECTING'],
+      'CONNECTING': ['AUTHENTICATING', 'DISCONNECTED', 'RECONNECTING'],
+      'AUTHENTICATING': ['CONNECTED', 'DISCONNECTED', 'RECONNECTING'],
+      'CONNECTED': ['DISCONNECTED', 'RECONNECTING'],
+      'RECONNECTING': ['CONNECTING', 'DISCONNECTED']
+    };
+    
     if (this.state !== newState) {
+      if (!validTransitions[this.state]?.includes(newState)) {
+        console.warn(`⚠️ Invalid state transition: ${this.state} → ${newState}`);
+        return;
+      }
+      
       console.log(`🔄 WebSocket state: ${this.state} → ${newState}`);
       this.state = newState;
     }
