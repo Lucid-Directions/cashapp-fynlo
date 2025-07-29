@@ -36,7 +36,7 @@ from app.core.websocket import (
 )
 from app.core.websocket_rate_limiter import WebSocketRateLimiter
 from app.core.security_monitor import security_monitor
-from app.core.redis_client import get_redis_client
+from app.core.redis_client import get_redis
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +49,7 @@ async def get_rate_limiter() -> WebSocketRateLimiter:
     """Get or create rate limiter instance"""
     global rate_limiter
     if rate_limiter is None:
-        redis_client = await get_redis_client()
+        redis_client = await get_redis()
         rate_limiter = WebSocketRateLimiter(redis_client=redis_client)
     return rate_limiter
 
