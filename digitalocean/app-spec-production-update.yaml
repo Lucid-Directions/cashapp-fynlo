@@ -1,0 +1,29 @@
+# DigitalOcean App Spec Update for Production Validation
+# Issue #394 - Enable production configuration validation
+# 
+# This partial spec only includes the environment variables that need to be added/updated
+# Apply with: doctl apps update 04073e70-e799-4d27-873a-dadea0503858 --spec-file digitalocean/app-spec-production-update.yaml
+
+envs:
+  # CRITICAL: Enable production validation
+  - key: ENVIRONMENT
+    value: production
+    scope: RUN_AND_BUILD_TIME
+    
+  # Required for production validation to pass
+  - key: ERROR_DETAIL_ENABLED
+    value: "false"
+    scope: RUN_AND_BUILD_TIME
+    
+  - key: LOG_LEVEL
+    value: INFO
+    scope: RUN_AND_BUILD_TIME
+    
+  - key: CORS_ORIGINS
+    value: "https://app.fynlo.co.uk,https://fynlo.co.uk,https://api.fynlo.co.uk,https://fynlo.vercel.app"
+    scope: RUN_AND_BUILD_TIME
+
+  # Note: The following should already be set correctly, but listing for reference:
+  # - DEBUG: Must be "false" (already set as secret)
+  # - SECRET_KEY: Must be strong and >32 chars (already set as secret)
+  # - SUMUP_ENVIRONMENT: Should be "production" not "sandbox" (currently set as secret)
