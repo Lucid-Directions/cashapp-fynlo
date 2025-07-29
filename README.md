@@ -8,16 +8,18 @@ Fynlo POS is a comprehensive, multi-tenant restaurant management system designed
 
 ### Tech Stack
 - **Mobile App**: React Native + TypeScript (iOS primary, Android planned)
-- **Backend API**: FastAPI (Python) with async/await patterns
-- **Database**: PostgreSQL (hosted on DigitalOcean)
-- **Cache/Session Store**: Valkey (Redis-compatible, hosted on DigitalOcean)
-- **Authentication**: Supabase Auth
-- **Real-time Communication**: WebSockets
-- **Web Platform**: Next.js (hosted on Vercel)
+- **Backend API**: FastAPI (Python 3.11+) with async/await patterns
+- **Database**: PostgreSQL 15 (DigitalOcean Managed Database)
+- **Cache/Session Store**: Valkey (Redis-compatible fork, DigitalOcean Managed)
+- **Authentication**: Supabase Auth (JWT-based)
+- **Real-time Communication**: WebSockets (Socket.IO)
+- **Web Platform**: Next.js 14 with TypeScript (Vercel)
 - **Infrastructure**: DigitalOcean App Platform
+- **File Storage**: DigitalOcean Spaces (S3-compatible)
+- **Email Service**: Resend (migrated from SendGrid)
 
 ### Hosting & Deployment
-- **Website (fynlo.com)**: Vercel deployment with automatic CI/CD from GitHub
+- **Website (fynlo.co.uk)**: Vercel deployment with automatic CI/CD from GitHub
 - **Backend API**: DigitalOcean App Platform with automatic deployments
 - **Database & Cache**: DigitalOcean Managed Databases (PostgreSQL + Valkey)
 - **Mobile App**: Manual deployment to TestFlight (iOS)
@@ -28,12 +30,21 @@ Fynlo POS is a comprehensive, multi-tenant restaurant management system designed
 The system uses a unique hybrid approach combining Supabase for authentication with DigitalOcean PostgreSQL for business data:
 
 1. **User Registration** (Website Only)
-   - Users MUST sign up through the website (fynlo.com)
+   - Users MUST sign up through the website (fynlo.co.uk)
    - Mobile app has NO registration capability by design
    - During signup, users select a subscription plan:
-     - **Alpha** (£29.99/month): Basic POS, 500 orders, 5 staff, 50 menu items
-     - **Beta** (£59.99/month): + Inventory, reports, 2000 orders, 15 staff, 200 items
-     - **Omega** (£129.99/month): Enterprise, unlimited everything, API access
+     - **Alpha** (£0/month + 1%): Perfect for new restaurants & food trucks
+       - Up to 500 transactions/month
+       - Basic POS functions, QR ordering, digital receipts
+       - Single location, single user account
+     - **Beta** (£49/month + 1%): For growing restaurants  
+       - Unlimited transactions, full kitchen display
+       - Up to 5 staff accounts, 2 locations
+       - Inventory management, Xero integration, priority support
+     - **Omega** (£119/month + 1%): For restaurant groups & franchises
+       - Unlimited everything, white-label options
+       - Custom integrations, dedicated account manager
+       - 24/7 phone support, advanced analytics
    - Supabase creates the authentication account with plan metadata
    - Verification email sent to confirm account
 
@@ -71,7 +82,7 @@ Each restaurant is completely isolated with role-based access control (RBAC).
 
 ## Web Platform & Dashboard Connection
 
-### Website (fynlo.com)
+### Website (fynlo.co.uk)
 - **Purpose**: Marketing, user registration, subscription management
 - **Stack**: Next.js deployed on Vercel
 - **Key Features**:
@@ -100,15 +111,15 @@ Each restaurant is completely isolated with role-based access control (RBAC).
 ## Payment Processing
 
 ### Payment Methods & Fees
-- **QR Code Payments**: 1.2% transaction fee
-- **Card/Apple Pay**: 2.9% transaction fee
+- **QR Code Payments**: 1.2% transaction fee (Fynlo's competitive advantage)
+- **Card/Apple Pay**: 2.9% transaction fee (industry standard)
 - **Cash**: 0% fee
 
 ### Fee Structure
-- **Transaction Fees**: Set by platform, non-negotiable by restaurants
-- **Service Charge**: Default 10%, restaurants can adjust
-- **Platform Commission**: 1% on all transactions
-- **VAT**: Restaurant-configurable
+- **Transaction Fees**: Platform-level, paid by customer on all plans
+- **Service Charge**: Default 10%, configurable by restaurant
+- **Platform Commission**: 1% on all transactions (included in subscription pricing)
+- **VAT**: Restaurant-configurable based on location
 
 ## Current Issues & Challenges
 
@@ -161,17 +172,41 @@ Each restaurant is completely isolated with role-based access control (RBAC).
 - Memory leaks in long-running sessions
 
 ### 7. Testing Coverage
-**Current State**: ~60% backend, ~40% frontend
+**Current State**: Limited test coverage across the stack
 **Missing**:
 - Integration tests for critical workflows
 - End-to-end payment flow tests
 - Multi-tenant isolation tests
 - Performance/load testing
+- Security vulnerability testing
 
 ### 8. Deployment Challenges
-**iOS**: Manual process, no CI/CD pipeline
-**Backend**: Works but no staging environment
-**Database**: No automated backup testing
+**iOS**: 
+- Manual process, no CI/CD pipeline
+- Frequent bundle building issues requiring manual intervention
+- No automated testing before deployment
+
+**Backend**: 
+- DigitalOcean App Platform deployment works but lacks staging environment
+- Environment variable management complex across environments
+- No blue-green deployment strategy
+
+**Database**: 
+- No automated backup testing
+- Manual migration process
+- Missing disaster recovery procedures
+
+### 9. Real-time Features
+**WebSocket Issues**:
+- 15-second heartbeat pattern not consistently implemented
+- Missing exponential backoff on reconnection
+- No message queuing for offline periods
+- Connection drops on network changes
+
+### 10. Platform Settings Migration
+**Current State**: Settings scattered across database tables
+**Planned**: Centralized platform_settings table but not yet implemented
+**Impact**: Difficult to manage platform-wide configurations
 
 ## Development Workflow
 
@@ -242,4 +277,78 @@ Each restaurant is completely isolated with role-based access control (RBAC).
 - Customer support ticket system
 - Status page for service health
 
-This README reflects the current state of the Fynlo POS system as of January 2025. The platform is functional but requires significant improvements in reliability, testing, and operational tooling before it's ready for large-scale production use.
+## Repository Structure
+
+```
+cashapp-fynlo/
+├── CashApp-iOS/          # React Native mobile app
+│   ├── CashAppPOS/       # Main app directory
+│   ├── ios/              # iOS specific code
+│   └── android/          # Android specific code (planned)
+├── backend/              # FastAPI backend
+│   ├── app/              # Application code
+│   ├── alembic/          # Database migrations
+│   └── scripts/          # Utility scripts
+├── web-platform/         # Next.js website & dashboard
+│   ├── src/              # Source code
+│   └── supabase/         # Supabase configuration
+├── shared/               # Shared TypeScript types
+└── docs/                 # Documentation
+
+```
+
+## Critical Configuration Notes
+
+### Environment Variables
+The system uses multiple `.env` files across different components:
+- Backend requires ~30+ environment variables
+- Supabase credentials must match between backend and mobile app
+- DigitalOcean database URLs require SSL certificates
+- Valkey connection requires Redis-compatible client
+
+### Database Architecture
+- Uses UUID primary keys throughout
+- Multi-tenant isolation via restaurant_id foreign keys
+- Monetary values stored as DECIMAL(10,2)
+- Timezone handling assumes UTC
+
+### Payment Provider Integration
+- **SumUp**: Primary card payment provider (UK market)
+- **Stripe**: Secondary provider (planned)
+- **QR Payments**: Custom implementation with 1.2% fee
+- All payment processing happens server-side for security
+
+## Getting Started
+
+### Prerequisites
+- Node.js 18+
+- Python 3.11+
+- PostgreSQL 15+
+- Redis/Valkey
+- Xcode 14+ (for iOS development)
+- Cocoapods
+
+### Quick Start
+1. Clone the repository
+2. Set up environment variables (see `.env.example` files)
+3. Install dependencies:
+   ```bash
+   # Backend
+   cd backend && python -m venv venv && source venv/bin/activate
+   pip install -r requirements.txt
+
+   # Mobile app
+   cd CashApp-iOS/CashAppPOS && npm install
+   cd ios && pod install
+
+   # Web platform
+   cd web-platform && npm install
+   ```
+
+### Known Setup Issues
+- iOS bundle must be built manually first time
+- Supabase local development requires Docker
+- DigitalOcean SSL certificates needed for production database
+- Metro bundler port conflicts common
+
+This README reflects the current state of the Fynlo POS system as of January 2025. The platform is functional but requires significant improvements in reliability, testing, and operational tooling before it's ready for large-scale production use. The codebase shows signs of rapid development with technical debt that needs addressing before scaling.

@@ -107,31 +107,24 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
 
   describe('Complete 9-Step Onboarding Process', () => {
     it('should complete the entire onboarding flow as a new user would - testing all 9 steps', async () => {
-      // Mock successful API responses
-      (fetch as jest.Mock)
-        .mockImplementation((url) => {
-          if (url.includes('/api/v1/auth/validate-email')) {
-            return Promise.resolve({
-              ok: true,
-              json: async () => ({ is_valid: true }),
-            });
-          }
-          if (url.includes('/api/v1/restaurants/onboarding/create')) {
-            return Promise.resolve({
-              ok: true,
-              json: async () => ({ 
-                restaurant_id: 'rest-123',
-                success: true,
-                data: {
-                  id: 'rest-123',
-                  name: "Maria's Mexican Kitchen",
-                  status: 'active'
-                }
-              }),
-            });
-          }
-          return Promise.reject(new Error('Unknown API endpoint'));
-        });
+      // Mock successful API response for onboarding completion
+      (fetch as jest.Mock).mockImplementation((url) => {
+        if (url.includes('/api/v1/restaurants/onboarding/create')) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => ({ 
+              restaurant_id: 'rest-123',
+              success: true,
+              data: {
+                id: 'rest-123',
+                name: "Maria's Mexican Kitchen",
+                status: 'active'
+              }
+            }),
+          });
+        }
+        return Promise.reject(new Error('Unknown API endpoint'));
+      });
 
       const { getByTestId, getByText, getByPlaceholderText, queryByText } = renderWithProviders(
         <ComprehensiveRestaurantOnboardingScreen />
@@ -174,19 +167,7 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
       // Trigger blur to validate email (mimicking real user behavior)
       fireEvent(emailInput, 'blur');
       
-      // Wait for email validation API call
-      await waitFor(() => {
-        expect(fetch).toHaveBeenCalledWith(
-          expect.stringContaining('/api/v1/auth/validate-email'),
-          expect.objectContaining({
-            method: 'POST',
-            headers: expect.objectContaining({
-              'Content-Type': 'application/json',
-            }),
-            body: JSON.stringify({ email: 'owner@mariaskitchen.co.uk' }),
-          })
-        );
-      });
+      // Email validation is done locally, no API call
       
       fireEvent.press(getByTestId('next-step-button'));
       
@@ -376,7 +357,7 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
     it('should handle "Not Found" error during onboarding completion', async () => {
       // Mock 404 Not Found error response
       (fetch as jest.Mock).mockImplementation((url) => {
-        if (url.includes('/api/v1/restaurants/onboarding/complete')) {
+        if (url.includes('/api/v1/restaurants/onboarding/create')) {
           return Promise.resolve({
             ok: false,
             status: 404,
