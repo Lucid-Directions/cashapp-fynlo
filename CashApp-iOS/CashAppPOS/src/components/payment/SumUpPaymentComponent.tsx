@@ -3,6 +3,7 @@ import { View, StyleSheet, Alert } from 'react-native';
 import { SumUpProvider, useSumUp } from 'sumup-react-native-alpha';
 import type { InitPaymentSheetProps, InitPaymentSheetResult } from 'sumup-react-native-alpha';
 import SumUpCompatibilityService from '../../services/SumUpCompatibilityService';
+import sumUpConfigService from '../../services/SumUpConfigService';
 
 // Helper function to ensure operations run on main thread
 const runOnMainThread = (callback: () => void) => {
@@ -209,22 +210,58 @@ const SumUpPaymentComponent: React.FC<SumUpPaymentComponentProps> = (props) => {
     title: props.title
   });
   
-  // SumUp provider configuration - using test/sandbox credentials
-  // Note: The affiliate key might need to be updated for production
-  const affiliateKey = "sup_sk_XqquMi732f2WDCqvnkV4xoVxx54oGAQRU";
-  const appId = "com.anonymous.cashapppos";
+  // SumUp provider configuration - will be fetched from backend
+  const [sumUpConfig, setSumUpConfig] = useState<{ appId: string; environment: string } | null>(null);
+  const [configError, setConfigError] = useState<string | null>(null);
+  const [isLoadingConfig, setIsLoadingConfig] = useState(true);
   
-  console.log('🔧 SumUp Provider configuration:', {
-    affiliateKey: affiliateKey?.substring(0, 10) + '...', // Don't log full key
-    appId: appId
-  });
+  // Fetch SumUp configuration from backend
+  useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        console.log('🔄 Fetching SumUp configuration from backend...');
+        const config = await sumUpConfigService.fetchConfiguration();
+        
+        setSumUpConfig({
+          appId: config.appId,
+          environment: config.environment
+        });
+        setIsLoadingConfig(false);
+        console.log('✅ SumUp configuration loaded successfully');
+      } catch (error) {
+        console.error('❌ Failed to fetch SumUp configuration:', error);
+        setConfigError(error?.message || 'Failed to load payment configuration');
+        setIsLoadingConfig(false);
+        
+        // Call the error callback
+        runOnMainThread(() => {
+          props.onPaymentComplete(false, undefined, 'Failed to load payment configuration');
+        });
+      }
+    };
+    
+    fetchConfig();
+  }, []);
+  
+  // Show loading or error states
+  if (isLoadingConfig) {
+    console.log('⏳ Waiting for SumUp configuration...');
+    return <View style={styles.hidden} />;
+  }
+  
+  if (configError || !sumUpConfig) {
+    console.error('❌ Cannot proceed without SumUp configuration:', configError);
+    return <View style={styles.hidden} />;
+  }
   
   // Wrap in error boundary for safer initialization
   try {
+    // Note: The affiliateKey is now securely stored on the backend
+    // and not exposed to the mobile app
     return (
       <SumUpProvider
-        affiliateKey={affiliateKey}
-        sumUpAppId={appId}
+        affiliateKey=""  // Empty string as the SDK requires this prop but we don't use it
+        sumUpAppId={sumUpConfig.appId}
       >
         <SumUpPaymentSheet {...props} />
       </SumUpProvider>

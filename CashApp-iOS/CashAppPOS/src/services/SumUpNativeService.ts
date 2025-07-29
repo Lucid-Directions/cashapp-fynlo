@@ -39,17 +39,17 @@ export class SumUpNativeService {
   }
   
   /**
-   * Initialize the SumUp SDK with API key
+   * Initialize the SumUp SDK - configuration will be fetched from backend when needed
    * Note: Actual initialization happens in React components using SumUpProvider
    */
-  async initialize(apiKey: string): Promise<boolean> {
+  async initialize(): Promise<boolean> {
     try {
       if (Platform.OS !== 'ios') {
         console.warn('SumUp Tap to Pay is only available on iOS');
         return false;
       }
       
-      console.log('🔧 SumUp service initialized (hooks-based)');
+      console.log('🔧 SumUp service initialized (configuration will be fetched from backend)');
       this.isInitialized = true;
       
       console.log('✅ SumUp service ready - will use React hooks integration');

@@ -59,10 +59,10 @@ const App: React.FC = () => {
         const errorTrackingService = ErrorTrackingService.getInstance();
         errorTrackingService.initialize();
         
-        // Initialize SumUp Native SDK
+        // Initialize SumUp Native SDK (configuration will be fetched from backend when needed)
         console.log('🔧 Initializing SumUp Native SDK...');
         const sumUpService = SumUpNativeService.getInstance();
-        const sumUpInitialized = await sumUpService.initialize('sup_sk_XqquMi732f2WDCqvnkV4xoVxx54oGAQRU');
+        const sumUpInitialized = await sumUpService.initialize();
         
         if (sumUpInitialized) {
           console.log('✅ SumUp Native SDK initialized successfully');

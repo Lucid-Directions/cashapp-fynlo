@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { SumUpProvider, useSumUp } from 'sumup-react-native-alpha';
+import sumUpConfigService from '../../services/SumUpConfigService';
 
 interface SumUpTestProps {
   onResult: (message: string) => void;
@@ -72,10 +73,53 @@ const SumUpTestInner: React.FC<SumUpTestProps> = ({ onResult }) => {
 };
 
 const SumUpTestComponent: React.FC<SumUpTestProps> = (props) => {
+  const [sumUpConfig, setSumUpConfig] = useState<{ appId: string; environment: string } | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        console.log('🔄 Fetching SumUp configuration for test component...');
+        const config = await sumUpConfigService.fetchConfiguration();
+        setSumUpConfig({
+          appId: config.appId,
+          environment: config.environment
+        });
+        setIsLoading(false);
+      } catch (err) {
+        console.error('❌ Failed to fetch SumUp configuration:', err);
+        setError(err?.message || 'Failed to load configuration');
+        setIsLoading(false);
+        props.onResult('❌ Failed to load SumUp configuration');
+      }
+    };
+
+    fetchConfig();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#007AFF" />
+        <Text style={styles.info}>Loading SumUp configuration...</Text>
+      </View>
+    );
+  }
+
+  if (error || !sumUpConfig) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>SumUp Configuration Error</Text>
+        <Text style={styles.info}>{error || 'Configuration not available'}</Text>
+      </View>
+    );
+  }
+
   return (
     <SumUpProvider
-      affiliateKey="sup_sk_XqquMi732f2WDCqvnkV4xoVxx54oGAQRU"
-      sumUpAppId="com.anonymous.cashapppos"
+      affiliateKey=""  // Empty string as the SDK requires this prop but we don't use it
+      sumUpAppId={sumUpConfig.appId}
     >
       <SumUpTestInner {...props} />
     </SumUpProvider>
