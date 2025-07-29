@@ -91,7 +91,9 @@ class TestPlatformOwnerAccess:
         # Cannot access other restaurants
         with pytest.raises(Exception) as exc_info:
             TenantSecurity.validate_restaurant_access(regular_user, "coffee_shop_id")
-        assert "Access denied" in str(exc_info.value)
+        # Check the detail attribute of HTTPException
+        assert hasattr(exc_info.value, 'detail')
+        assert "Access denied" in exc_info.value.detail
         
     def test_platform_owners_see_all_data_in_queries(self):
         """Verify platform owners bypass query filters"""
@@ -146,4 +148,6 @@ class TestPlatformOwnerAccess:
             TenantSecurity.validate_cross_restaurant_operation(
                 regular_user, "restaurant_a", "restaurant_b", "transfer"
             )
-        assert "Only platform owners" in str(exc_info.value)
+        # Check the detail attribute of HTTPException
+        assert hasattr(exc_info.value, 'detail')
+        assert "Only platform owners" in exc_info.value.detail
