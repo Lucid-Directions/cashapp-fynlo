@@ -61,6 +61,9 @@ class EnhancedWebSocketManager:
             ip_window_seconds=60
         )
         
+        # Synchronization
+        self._disconnect_lock = asyncio.Lock()
+        
     async def connect(
         self, 
         websocket: WebSocket, 
@@ -185,7 +188,7 @@ class EnhancedWebSocketManager:
     async def disconnect(self, connection_id: str):
         """Remove connection and cleanup"""
         # Use lock to prevent race conditions
-        async with asyncio.Lock():
+        async with self._disconnect_lock:
             conn_info = self.connection_map.get(connection_id)
             if not conn_info:
                 return
