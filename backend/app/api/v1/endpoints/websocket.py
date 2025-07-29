@@ -34,12 +34,26 @@ from app.core.websocket import (
     WebSocketMessage,
     websocket_manager,
 )
+from app.core.websocket_rate_limiter import WebSocketRateLimiter
+from app.core.security_monitor import security_monitor
+from app.core.redis_client import get_redis_client
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-# Rate limiting configuration
+# Initialize rate limiter
+rate_limiter: Optional[WebSocketRateLimiter] = None
+
+async def get_rate_limiter() -> WebSocketRateLimiter:
+    """Get or create rate limiter instance"""
+    global rate_limiter
+    if rate_limiter is None:
+        redis_client = await get_redis_client()
+        rate_limiter = WebSocketRateLimiter(redis_client=redis_client)
+    return rate_limiter
+
+# Legacy rate limiting configuration (kept for backward compatibility)
 connection_tracker: Dict[str, Dict[str, Any]] = defaultdict(
     lambda: {"count": 0, "last_reset": datetime.now()}
 )
@@ -188,11 +202,23 @@ async def perform_security_checks(
         await websocket.close(code=4001, reason="Unauthorized")
         return False
 
-    # Rate limiting
+    # Get client IP
     client_host = websocket.client.host if websocket.client else "unknown"
-    rate_limit_identifier = f"ws:{user_id or client_host}"
-    if not await check_rate_limit(rate_limit_identifier):
-        await websocket.close(code=4008, reason="Too many requests")
+    
+    # Use new rate limiter
+    limiter = await get_rate_limiter()
+    
+    # Check connection rate limit
+    allowed, error_msg = await limiter.check_connection_limit(client_host, user_id)
+    if not allowed:
+        # Log rate limit violation
+        await security_monitor.log_rate_limit_violation(
+            ip_address=client_host,
+            user_id=user_id,
+            limit_type="websocket_connection",
+            details={"error": error_msg}
+        )
+        await websocket.close(code=4008, reason=error_msg)
         return False
 
     return True
@@ -423,6 +449,15 @@ async def websocket_endpoint_general(
             roles=roles,
         )
 
+        # Register connection with rate limiter
+        limiter = await get_rate_limiter()
+        final_user_id = str(verified_user.id) if verified_user else user_id
+        await limiter.register_connection(
+            connection_id, 
+            final_user_id, 
+            client_host
+        )
+
         # Track user connection (use original user_id if provided)
         if user_id:
             user_connections[user_id].add(connection_id)
@@ -434,6 +469,23 @@ async def websocket_endpoint_general(
             try:
                 # Receive message from client
                 data = await websocket.receive_text()
+                
+                # Check message rate limit
+                message_size = len(data.encode('utf-8'))
+                allowed, error_msg = await limiter.check_message_rate(connection_id, message_size)
+                if not allowed:
+                    # Log rate limit violation
+                    await security_monitor.log_rate_limit_violation(
+                        ip_address=client_host,
+                        user_id=final_user_id,
+                        limit_type="websocket_messages",
+                        details={"error": error_msg, "message_size": message_size}
+                    )
+                    await websocket.send_text(
+                        json.dumps({"type": "error", "message": error_msg})
+                    )
+                    continue
+                
                 message_data = json.loads(data)
 
                 # Sanitize message data
@@ -496,6 +548,13 @@ async def websocket_endpoint_general(
                 user_connections[user_id].discard(connection_id)
             if verified_user:
                 user_connections[str(verified_user.id)].discard(connection_id)
+            
+            # Unregister from rate limiter
+            try:
+                limiter = await get_rate_limiter()
+                await limiter.unregister_connection(connection_id)
+            except Exception as e:
+                logger.error(f"Error unregistering connection from rate limiter: {e}")
 
         # Then disconnect from websocket manager (async operation that might fail)
         if connection_id:
@@ -639,6 +698,13 @@ async def websocket_kitchen_endpoint(
                 user_connections[user_id].discard(connection_id)
             if verified_user:
                 user_connections[str(verified_user.id)].discard(connection_id)
+            
+            # Unregister from rate limiter
+            try:
+                limiter = await get_rate_limiter()
+                await limiter.unregister_connection(connection_id)
+            except Exception as e:
+                logger.error(f"Error unregistering connection from rate limiter: {e}")
 
         # Then disconnect from websocket manager (async operation that might fail)
         if connection_id:
@@ -782,6 +848,13 @@ async def websocket_pos_endpoint(
                 user_connections[user_id].discard(connection_id)
             if verified_user:
                 user_connections[str(verified_user.id)].discard(connection_id)
+            
+            # Unregister from rate limiter
+            try:
+                limiter = await get_rate_limiter()
+                await limiter.unregister_connection(connection_id)
+            except Exception as e:
+                logger.error(f"Error unregistering connection from rate limiter: {e}")
 
         # Then disconnect from websocket manager (async operation that might fail)
         if connection_id:
@@ -926,6 +999,13 @@ async def websocket_management_endpoint(
                 user_connections[user_id].discard(connection_id)
             if verified_user:
                 user_connections[str(verified_user.id)].discard(connection_id)
+            
+            # Unregister from rate limiter
+            try:
+                limiter = await get_rate_limiter()
+                await limiter.unregister_connection(connection_id)
+            except Exception as e:
+                logger.error(f"Error unregistering connection from rate limiter: {e}")
 
         # Then disconnect from websocket manager (async operation that might fail)
         if connection_id:

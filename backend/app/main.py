@@ -129,6 +129,10 @@ app.add_middleware(
 # Add Security Headers Middleware (after CORS and Versioning, before others)
 # app.add_middleware(SecurityHeadersMiddleware)
 
+# Add RLS middleware for session variable isolation
+from app.middleware.rls_middleware import RLSMiddleware
+app.add_middleware(RLSMiddleware)
+
 # Add mobile compatibility middleware
 # app.add_middleware(MobileCompatibilityMiddleware, enable_cors=True, enable_port_redirect=True)
 # app.add_middleware(MobileDataOptimizationMiddleware)

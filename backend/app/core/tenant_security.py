@@ -7,9 +7,10 @@ All other users are restricted to their own restaurant's data.
 """
 
 from typing import Optional, Union
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, Request
 from sqlalchemy.orm import Session, Query
 from app.models import User, Restaurant
+from app.core.security_monitor import security_monitor, SecurityEventType
 
 # Platform owner emails - ONLY these users have full access
 PLATFORM_OWNER_EMAILS = [
@@ -40,10 +41,13 @@ class TenantSecurity:
         return is_owner_role and is_owner_email
     
     @staticmethod
-    def validate_restaurant_access(
+    async def validate_restaurant_access(
         user: User,
         restaurant_id: str,
-        operation: str = "access"
+        operation: str = "access",
+        resource_type: Optional[str] = None,
+        resource_id: Optional[str] = None,
+        request: Optional[Request] = None
     ) -> None:
         """
         Validate if user can access a specific restaurant's data
@@ -56,18 +60,51 @@ class TenantSecurity:
         Raises:
             HTTPException: If access is denied
         """
+        # Get client IP for logging
+        client_ip = None
+        if request:
+            client_ip = request.client.host if request.client else "unknown"
+        
         # Platform owners (Ryan and Arnaud) can access everything
         if TenantSecurity.is_platform_owner(user):
+            # Log platform owner access for audit trail
+            await security_monitor.log_platform_owner_access(
+                user=user,
+                target_restaurant_id=restaurant_id,
+                action=operation,
+                resource_type=resource_type,
+                details={"resource_id": resource_id} if resource_id else None
+            )
             return  # Full access granted
         
         # All other users can only access their own restaurant
         if not user.restaurant_id:
+            # Log access denial
+            await security_monitor.log_access_attempt(
+                user=user,
+                resource_type=resource_type or "restaurant",
+                resource_id=restaurant_id,
+                action=operation,
+                granted=False,
+                ip_address=client_ip or "unknown",
+                reason="User has no restaurant assigned"
+            )
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail=f"Access denied: User has no restaurant assigned"
             )
         
         if str(user.restaurant_id) != str(restaurant_id):
+            # Log cross-tenant access attempt
+            await security_monitor.log_access_attempt(
+                user=user,
+                resource_type=resource_type or "restaurant",
+                resource_id=restaurant_id,
+                action=operation,
+                granted=False,
+                ip_address=client_ip or "unknown",
+                reason=f"Cross-tenant access attempt from restaurant {user.restaurant_id} to {restaurant_id}"
+            )
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail=f"Access denied: You can only {operation} data from your own restaurant"
