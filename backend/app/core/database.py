@@ -3,14 +3,15 @@ Database configuration and models for Fynlo POS
 PostgreSQL implementation matching frontend data requirements
 """
 
-from sqlalchemy import create_engine, Column, String, Integer, Float, DateTime, Boolean, Text, JSON, ForeignKey, DECIMAL, UniqueConstraint
+from sqlalchemy import create_engine, Column, String, Integer, Float, DateTime, Boolean, Text, JSON, ForeignKey, DECIMAL, UniqueConstraint, event
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session, relationship
 from sqlalchemy.sql import func
 from sqlalchemy.sql.elements import quoted_name # For GIN index
 import uuid
-from typing import Generator
+from typing import Generator, Optional
+from contextlib import contextmanager
 
 from app.core.config import settings
 
@@ -69,6 +70,7 @@ engine = create_engine(
     pool_recycle=3600,     # Recycle connections after 1 hour (avoid stale connections)
     pool_pre_ping=True,    # Test connections before using (handles network issues)
     pool_timeout=30,       # Timeout for getting connection from pool
+    pool_reset_on_return='rollback',  # Reset session on return to pool
     connect_args=connect_args
 )
 
@@ -368,13 +370,138 @@ class PosSession(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
-# Database dependency
-def get_db() -> Generator[Session, None, None]:
-    """Get database session"""
+# RLS context for session variables
+import contextvars
+from typing import Optional, Dict, Any
+
+# Use contextvars for proper async context management
+_rls_context_var: contextvars.ContextVar[Optional[Dict[str, Any]]] = contextvars.ContextVar(
+    'rls_context',
+    default=None
+)
+
+class RLSContext:
+    """Context-aware storage for RLS context using contextvars"""
+    
+    @classmethod
+    def set(cls, user_id: Optional[str] = None, restaurant_id: Optional[str] = None, role: Optional[str] = None):
+        """Set RLS context for current async context"""
+        context = {
+            'user_id': user_id,
+            'restaurant_id': restaurant_id,
+            'role': role
+        }
+        _rls_context_var.set(context)
+    
+    @classmethod
+    def get(cls) -> dict:
+        """Get RLS context for current async context"""
+        context = _rls_context_var.get()
+        return context if context is not None else {}
+    
+    @classmethod
+    def clear(cls):
+        """Clear RLS context for current async context"""
+        _rls_context_var.set(None)
+
+
+# Event listener to set session variables on connection checkout
+@event.listens_for(engine, "connect")
+def set_sqlite_pragma(dbapi_connection, connection_record):
+    """Ensure fresh connection state"""
+    # This runs when a physical connection is first created
+    logger.debug("New database connection established")
+
+
+@event.listens_for(engine, "checkout")
+def receive_checkout(dbapi_connection, connection_record, connection_proxy):
+    """Set session variables when connection is checked out from pool"""
+    # Get RLS context if available
+    context = RLSContext.get()
+    
+    if context:
+        cursor = dbapi_connection.cursor()
+        try:
+            # Reset only RLS-specific session variables (not ALL)
+            cursor.execute("RESET app.current_user_id")
+            cursor.execute("RESET app.current_user_email")
+            cursor.execute("RESET app.current_user_role")
+            cursor.execute("RESET app.current_restaurant_id")
+            cursor.execute("RESET app.is_platform_owner")
+            
+            # Set session variables for RLS with correct names
+            if context.get('user_id'):
+                cursor.execute("SET LOCAL app.current_user_id = %s", (context['user_id'],))
+                logger.debug(f"Set RLS current_user_id: {context['user_id']}")
+                
+                # Also set user email if available
+                if hasattr(context, 'email'):
+                    cursor.execute("SET LOCAL app.current_user_email = %s", (context.get('email', ''),))
+            
+            if context.get('restaurant_id'):
+                cursor.execute("SET LOCAL app.current_restaurant_id = %s", (context['restaurant_id'],))
+                logger.debug(f"Set RLS current_restaurant_id: {context['restaurant_id']}")
+            
+            if context.get('role'):
+                cursor.execute("SET LOCAL app.current_user_role = %s", (context['role'],))
+                logger.debug(f"Set RLS current_user_role: {context['role']}")
+                
+                # Set platform owner flag
+                is_platform_owner = context.get('role') == 'platform_owner'
+                cursor.execute("SET LOCAL app.is_platform_owner = %s", (str(is_platform_owner).lower(),))
+            
+            dbapi_connection.commit()
+        except Exception as e:
+            logger.error(f"Error setting RLS session variables: {e}")
+            dbapi_connection.rollback()
+        finally:
+            cursor.close()
+
+
+@event.listens_for(engine, "checkin")
+def receive_checkin(dbapi_connection, connection_record):
+    """Reset session when connection is returned to pool"""
+    cursor = dbapi_connection.cursor()
     try:
-        db = SessionLocal()
+        # Reset only RLS session variables to ensure clean state
+        cursor.execute("RESET app.current_user_id")
+        cursor.execute("RESET app.current_user_email")
+        cursor.execute("RESET app.current_user_role")
+        cursor.execute("RESET app.current_restaurant_id")
+        cursor.execute("RESET app.is_platform_owner")
+        dbapi_connection.commit()
+        logger.debug("Reset session variables on connection checkin")
+    except Exception as e:
+        logger.error(f"Error resetting session variables: {e}")
+        dbapi_connection.rollback()
+    finally:
+        cursor.close()
+
+
+# Database dependency with RLS support
+def get_db() -> Generator[Session, None, None]:
+    """Get database session with RLS context"""
+    db = SessionLocal()
+    try:
         yield db
     finally:
+        # Clear RLS context when request completes
+        RLSContext.clear()
+        db.close()
+
+
+@contextmanager
+def get_db_with_rls(user_id: Optional[str] = None, restaurant_id: Optional[str] = None, role: Optional[str] = None):
+    """Get database session with specific RLS context"""
+    # Set RLS context
+    RLSContext.set(user_id=user_id, restaurant_id=restaurant_id, role=role)
+    
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        # Clear RLS context
+        RLSContext.clear()
         db.close()
 
 async def init_db():
