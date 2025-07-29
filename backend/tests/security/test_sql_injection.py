@@ -3,6 +3,7 @@ SQL Injection Protection Tests
 """
 import pytest
 from httpx import AsyncClient
+from sqlalchemy import text
 from app.main import app
 from tests.fixtures.database import test_db, test_restaurant, test_user
 from tests.fixtures.auth import auth_headers
@@ -37,8 +38,8 @@ class TestSQLInjectionProtection:
                     assert response.status_code in [200, 404]
                     
                     # Verify tables still exist
-                    assert test_db.execute("SELECT COUNT(*) FROM orders").scalar() >= 0
-                    assert test_db.execute("SELECT COUNT(*) FROM restaurants").scalar() >= 0
+                    assert test_db.execute(text("SELECT COUNT(*) FROM orders")).scalar() >= 0
+                    assert test_db.execute(text("SELECT COUNT(*) FROM restaurants")).scalar() >= 0
     
     async def test_id_parameter_injection(self, test_db, auth_headers):
         """Test SQL injection in ID parameters"""
@@ -77,7 +78,7 @@ class TestSQLInjectionProtection:
             assert response.status_code in [200, 201]
             
             # Verify no damage done
-            assert test_db.execute("SELECT COUNT(*) FROM orders").scalar() >= 0
+            assert test_db.execute(text("SELECT COUNT(*) FROM orders")).scalar() >= 0
     
     async def test_filter_parameter_injection(self, test_db, auth_headers):
         """Test SQL injection in filter parameters"""
@@ -99,4 +100,4 @@ class TestSQLInjectionProtection:
                 assert response.status_code in [200, 400]
                 
                 # Verify database integrity
-                assert test_db.execute("SELECT COUNT(*) FROM orders").scalar() >= 0
+                assert test_db.execute(text("SELECT COUNT(*) FROM orders")).scalar() >= 0
