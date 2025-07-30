@@ -184,7 +184,7 @@ async def get_provider_analytics_endpoint(
             message="Retrieved provider analytics"
         )
     except Exception as e:
-        raise FynloException(detail=f"Analytics error: {str(e)}")
+        raise FynloException(message=f"Analytics error: {str(e)}")
 
 @router.get("/providers/cost-comparison")
 async def get_cost_comparison(
@@ -429,7 +429,7 @@ async def get_restaurant_analytics(
             message="Generated restaurant payment analytics"
         )
     except Exception as e:
-        raise FynloException(detail=f"Analytics error: {str(e)}")
+        raise FynloException(message=f"Analytics error: {str(e)}")
 
 def _calculate_monthly_cost(provider_name: str, monthly_volume: Decimal) -> float:
     """Calculate total monthly cost for a provider"""

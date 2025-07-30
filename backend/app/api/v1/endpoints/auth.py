@@ -481,7 +481,7 @@ async def register_restaurant(
         
         # Check if user already has a restaurant
         if db_user.restaurant_id:
-            raise ValidationException(detail="User already has a restaurant")
+            raise ValidationException(message="User already has a restaurant")
         
         # Get subscription info from Supabase user metadata or default to alpha
         # Safely access user_metadata with null check
@@ -524,19 +524,22 @@ async def register_restaurant(
             # Sanitize restaurant name
             sanitized_name = sanitize_string(data.restaurant_name, 255)
             if not sanitized_name:
-                raise ValidationException(detail="Restaurant name cannot be empty"
+                raise ValidationException(
+                    message="Restaurant name cannot be empty"
                 )
             
             # Validate phone if provided
             if data.phone and not validate_phone(data.phone):
-                raise ValidationException(detail="Invalid phone number format"
+                raise ValidationException(
+                    message="Invalid phone number format"
                 )
             
             # Validate address structure
             try:
                 validated_address = validate_model_jsonb_fields('restaurant', 'address', address_data)
             except ValidationErr as e:
-                raise ValidationException(detail=f"Address validation failed: {str(e)}"
+                raise ValidationException(
+                    message=f"Address validation failed: {str(e)}"
                 )
             
             restaurant = Restaurant(

@@ -294,7 +294,7 @@ async def get_low_stock_items_api(
         )
         return low_stock_items
     except ValueError as e:
-        raise ValidationException(detail=str(e))
+        raise ValidationException(message=str(e))
 
 # Placeholder for authentication dependency - replace with actual implementation
 # async def get_current_active_user_with_permissions(required_permissions: List[str]):
@@ -358,7 +358,7 @@ async def scan_receipt_api(
         parsed_ocr_items = await ocr_service.parse_receipt_image(image_bytes)
     except Exception as e:
         # Handle base64 decoding errors or other issues
-        raise ValidationException(detail=f"Invalid image data or OCR processing error: {str(e)}")
+        raise ValidationException(message=f"Invalid image data or OCR processing error: {str(e)}")
 
     # Convert OCR service output to ScannedItemResponse
     # This is where fuzzy matching against DB products would also happen.

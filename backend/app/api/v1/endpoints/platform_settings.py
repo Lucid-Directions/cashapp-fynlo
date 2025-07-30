@@ -144,7 +144,9 @@ async def get_platform_setting(
         setting = await service.get_platform_setting(config_key)
         
         if not setting:
-            raise ResourceNotFoundException(detail=f"Platform setting '{config_key}' not found"
+            raise ResourceNotFoundException(
+                resource="Platform setting",
+                message=f"Platform setting '{config_key}' not found"
             )
         
         return APIResponseHelper.success(
@@ -178,7 +180,9 @@ async def update_platform_setting(
         )
         
         if not success:
-            raise ResourceNotFoundException(detail=f"Platform setting '{config_key}' not found"
+            raise ResourceNotFoundException(
+                resource="Platform setting",
+                message=f"Platform setting '{config_key}' not found"
             )
         
         # Log the change for audit
@@ -334,7 +338,9 @@ async def update_feature_flag(
         )
         
         if not success:
-            raise ResourceNotFoundException(detail=f"Feature flag '{feature_key}' not found"
+            raise ResourceNotFoundException(
+                resource="Feature flag",
+                message=f"Feature flag '{feature_key}' not found"
             )
         
         return APIResponseHelper.success(

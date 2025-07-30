@@ -220,13 +220,15 @@ async def update_routing_configuration(
                 RoutingStrategy(config_update.default_strategy)
                 routing_config.default_strategy = config_update.default_strategy
             except ValueError:
-                raise ValidationException(detail=f"Invalid routing strategy: {config_update.default_strategy}"
+                raise ValidationException(
+                    message=f"Invalid routing strategy: {config_update.default_strategy}"
                 )
         
         if config_update.fallback_provider is not None:
             # Validate provider exists
             if config_update.fallback_provider not in config_manager.providers:
-                raise ValidationException(detail=f"Fallback provider '{config_update.fallback_provider}' not configured"
+                raise ValidationException(
+                    message=f"Fallback provider '{config_update.fallback_provider}' not configured"
                 )
             routing_config.fallback_provider = config_update.fallback_provider
         

@@ -286,7 +286,7 @@ async def confirm_qr_payment(
             details={"order_id": str(qr_payment_db_record.order_id), "amount": qr_payment_db_record.amount, "reason": "QR payment already processed."},
             commit=True
         )
-        raise ValidationException(detail="QR payment already processed")
+        raise ValidationException(message="QR payment already processed")
     
     if qr_payment_db_record.status != "pending":
         await audit_service.create_audit_log(
@@ -299,7 +299,7 @@ async def confirm_qr_payment(
             details={"order_id": str(qr_payment_db_record.order_id), "amount": qr_payment_db_record.amount, "reason": f"Cannot confirm QR payment with status: {qr_payment_db_record.status}"},
             commit=True
         )
-        raise ValidationException(detail=f"Cannot confirm QR payment with status: {qr_payment_db_record.status}")
+        raise ValidationException(message=f"Cannot confirm QR payment with status: {qr_payment_db_record.status}")
     
     # Get order for validation and ensure it belongs to the restaurant
     order = db.query(Order).filter(
@@ -330,7 +330,7 @@ async def confirm_qr_payment(
             details={"qr_payment_id": qr_payment_id, "reason": "Order already marked as paid."},
             commit=True
         )
-        raise ValidationException(detail="Order already paid")
+        raise ValidationException(message="Order already paid")
     
     payment_record = None # To store the created Payment object
     try:
@@ -388,7 +388,7 @@ async def confirm_qr_payment(
             commit=False # Will be rolled back by @transactional
         )
         logger.error(f"QR payment confirmation failed for {qr_payment_id}: {e}")
-        raise FynloException(detail="Payment confirmation failed")
+        raise FynloException(message="Payment confirmation failed")
     
     logger.info(f"QR payment confirmed: {qr_payment_id}")
     
@@ -448,7 +448,7 @@ async def process_stripe_payment(
             details={"reason": "Order already marked as paid."},
             commit=True
         )
-        raise ValidationException(detail="Order already paid")
+        raise ValidationException(message="Order already paid")
 
     # Calculate fees
     fee_amount = calculate_payment_fee(payment_request_data.amount, "card")
@@ -565,7 +565,7 @@ async def process_stripe_payment(
             commit=False
         )
         logger.error(f"Stripe payment failed: {str(e)}")
-        raise ValidationException(detail=f"Payment failed: {str(e)}")
+        raise ValidationException(message=f"Payment failed: {str(e)}")
     except Exception as e:
         payment_db_record.status = "failed" # Ensure status is marked failed
         await audit_service.create_audit_log(
@@ -579,7 +579,7 @@ async def process_stripe_payment(
             commit=False
         )
         logger.error(f"Unexpected error during Stripe payment: {e}")
-        raise FynloException(detail="Payment processing failed")
+        raise FynloException(message="Payment processing failed")
 
 @router.post("/cash", response_model=PaymentResponse)
 async def process_cash_payment(
@@ -618,12 +618,12 @@ async def process_cash_payment(
             details={"reason": "Order already marked as paid."},
             commit=True
         )
-         raise ValidationException(detail="Order already paid")
+         raise ValidationException(message="Order already paid")
 
     if payment_request_data.received_amount < payment_request_data.amount:
         # Log this specific failure if desired, though it's a validation error.
         # For now, let the HTTP exception handle it.
-        raise ValidationException(detail="Insufficient cash received")
+        raise ValidationException(message="Insufficient cash received")
     
     change_amount = payment_request_data.received_amount - payment_request_data.amount
     
@@ -797,7 +797,7 @@ async def process_payment(
                 resource_type="Order", resource_id=str(order.id), details={"reason": "Order already marked as paid."},
                 commit=True
             )
-            raise ValidationException(detail="Order already paid")
+            raise ValidationException(message="Order already paid")
 
         monthly_volume = Decimal("2000")
         provider_instance = await payment_factory.select_optimal_provider(
@@ -924,7 +924,7 @@ async def process_payment(
             details=details_for_error_log,
             commit=True # Attempt to commit this log even if outer transaction (if any) rolls back
         )
-        raise FynloException(detail=str(e))
+        raise FynloException(message=str(e))
 
 @router.post("/refund/{transaction_id}")
 async def refund_payment(
@@ -975,7 +975,7 @@ async def refund_payment(
             details={"external_transaction_id": transaction_id, "provider_name_attempted": provider_name},
             commit=True
         )
-        raise ValidationException(detail=f"Provider {provider_name} not available for refund")
+        raise ValidationException(message=f"Provider {provider_name} not available for refund")
 
     await audit_service.create_audit_log(
         event_type=AuditEventType.REFUND_INITIATED,
@@ -1007,7 +1007,7 @@ async def refund_payment(
             details={"external_transaction_id": transaction_id, "error": str(e)},
             commit=True # Commit this failure log
         )
-        raise FynloException(detail=f"Refund processing error: {str(e)}")
+        raise FynloException(message=f"Refund processing error: {str(e)}")
 
 
     if result["status"] == "refunded":
