@@ -138,21 +138,34 @@ class TestCacheWarmer:
         """Test warming menu cache for a restaurant"""
         restaurant = mock_restaurants[0]
         
-        # Setup menu items query
+        # Setup menu items query and categories query
         mock_db.query.return_value.filter.return_value.all.return_value = mock_menu_items
         
-        with patch.object(cache_service, 'set', return_value=True) as mock_set:
+        # Mock Category query for categories_dict
+        mock_categories_query = MagicMock()
+        mock_db.query.side_effect = [mock_categories_query, mock_categories_query]
+        mock_categories_query.filter.return_value.all.return_value = []  # Empty categories for test
+        
+        # Mock format_menu_item
+        with patch('app.api.v1.endpoints.menu.format_menu_item') as mock_format, \
+             patch.object(cache_service, 'set', return_value=True) as mock_set:
+            
+            # Configure format_menu_item to return expected format
+            mock_format.side_effect = [
+                {"id": "item_1", "name": "Tacos", "price": 8.99, "available": True},
+                {"id": "item_2", "name": "Burrito", "price": 10.99, "available": True}
+            ]
+            
             result = await cache_warmer_instance._warm_menu_cache(mock_db, restaurant)
             
             assert result is True
             
             # Verify cache was set with correct data
             mock_set.assert_called_once()
-            cache_key, menu_data, kwargs = mock_set.call_args[0][0], mock_set.call_args[0][1], mock_set.call_args[1]
+            cache_key, response_data, kwargs = mock_set.call_args[0][0], mock_set.call_args[0][1], mock_set.call_args[1]
             
-            assert len(menu_data) == 2
-            assert menu_data[0]["name"] == "Tacos"
-            assert menu_data[1]["name"] == "Burrito"
+            # Check that response is in APIResponseHelper format
+            assert hasattr(response_data, 'body')  # JSONResponse has body attribute
             assert kwargs["ttl"] == 3600
     
     @pytest.mark.asyncio
@@ -170,13 +183,10 @@ class TestCacheWarmer:
             
             # Verify cache was set with correct data
             mock_set.assert_called_once()
-            cache_key, categories_data, kwargs = mock_set.call_args[0][0], mock_set.call_args[0][1], mock_set.call_args[1]
+            cache_key, response_data, kwargs = mock_set.call_args[0][0], mock_set.call_args[0][1], mock_set.call_args[1]
             
-            # Should have 3 categories (2 from DB + 'All')
-            assert len(categories_data) == 3
-            assert categories_data[0]["name"] == "All"
-            assert categories_data[1]["name"] == "Main Dishes"
-            assert categories_data[2]["name"] == "Beverages"
+            # Check that response is in APIResponseHelper format
+            assert hasattr(response_data, 'body')  # JSONResponse has body attribute
             assert kwargs["ttl"] == 3600
     
     

@@ -125,8 +125,10 @@ class TestCacheService:
         
         # Should call delete_pattern for each cache type
         expected_patterns = [
-            "menu:restaurant_id=restaurant_123*",
-            "menu:hash:*",
+            "menu_items:restaurant_id=restaurant_123*",
+            "menu_items:hash:*",
+            "menu_categories:restaurant_id=restaurant_123*",
+            "menu_categories:hash:*",
             "products:restaurant_id=restaurant_123*",
             "categories:restaurant_id=restaurant_123*",
             "settings:restaurant_id=restaurant_123*",

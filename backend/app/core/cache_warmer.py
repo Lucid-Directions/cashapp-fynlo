@@ -105,23 +105,35 @@ class CacheWarmer:
                 )
             ).all()
             
-            # Transform to cache format
-            menu_data = [
-                {
-                    "id": str(item.id),
-                    "name": item.name,
-                    "description": item.description,
-                    "price": float(item.price),
-                    "category_id": str(item.category_id) if item.category_id else None,
-                    "image_url": item.image_url,
-                    "is_active": item.is_active,
+            # Get categories for menu items
+            categories_dict = {
+                cat.id: cat.name 
+                for cat in db.query(Category).filter(Category.restaurant_id == restaurant.id).all()
+            }
+            
+            # Transform to match endpoint format
+            from app.api.v1.endpoints.menu import format_menu_item
+            menu_data = []
+            for item in menu_items:
+                category_name = categories_dict.get(item.category_id, 'Uncategorized')
+                menu_data.append(format_menu_item(item, category_name))
+            
+            # Wrap in APIResponseHelper format to match endpoint
+            from app.core.responses import APIResponseHelper
+            response_data = APIResponseHelper.success(
+                data=menu_data,
+                message=f"Retrieved {len(menu_data)} menu items",
+                meta={
+                    "restaurant_id": str(restaurant.id),
+                    "category_filter": None,
+                    "total_count": len(menu_data),
+                    "execution_time_ms": 0
                 }
-                for item in menu_items
-            ]
+            )
             
             # Cache with appropriate key
             cache_key = cache_service.cache_key("menu_items", restaurant_id=str(restaurant.id), category=None)
-            success = await cache_service.set(cache_key, menu_data, ttl=3600)
+            success = await cache_service.set(cache_key, response_data, ttl=3600)
             
             if success:
                 logger.debug(f"Warmed menu cache for restaurant {restaurant.id} with {len(menu_items)} items")
@@ -163,9 +175,20 @@ class CacheWarmer:
             if not any(cat['name'] == 'All' for cat in menu_categories):
                 menu_categories.insert(0, {'id': 1, 'name': 'All', 'active': True})
             
+            # Wrap in APIResponseHelper format to match endpoint
+            from app.core.responses import APIResponseHelper
+            response_data = APIResponseHelper.success(
+                data=menu_categories,
+                message=f"Retrieved {len(menu_categories)} menu categories",
+                meta={
+                    "restaurant_id": str(restaurant.id),
+                    "total_count": len(menu_categories)
+                }
+            )
+            
             # Cache with appropriate key
             cache_key = cache_service.cache_key("menu_categories", restaurant_id=str(restaurant.id))
-            success = await cache_service.set(cache_key, menu_categories, ttl=3600)
+            success = await cache_service.set(cache_key, response_data, ttl=3600)
             
             if success:
                 logger.debug(f"Warmed categories cache for restaurant {restaurant.id} with {len(categories)} categories")

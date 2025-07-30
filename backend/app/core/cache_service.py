@@ -139,8 +139,10 @@ class CacheService:
             int: Number of keys deleted
         """
         patterns = [
-            f"menu:restaurant_id={restaurant_id}*",
-            f"menu:hash:*",  # Hash-based keys that might contain this restaurant
+            f"menu_items:restaurant_id={restaurant_id}*",
+            f"menu_items:hash:*",  # Hash-based keys that might contain this restaurant
+            f"menu_categories:restaurant_id={restaurant_id}*",
+            f"menu_categories:hash:*",  # Hash-based keys for categories
             f"products:restaurant_id={restaurant_id}*",
             f"categories:restaurant_id={restaurant_id}*",
             f"settings:restaurant_id={restaurant_id}*",
@@ -324,10 +326,11 @@ async def warm_menu_cache(db):
         
         warmed_count = 0
         for restaurant in restaurants:
-            # Generate cache key
+            # Generate cache key - using menu_items prefix to match endpoints
             cache_key = cache_service.cache_key(
-                "menu",
-                restaurant_id=str(restaurant.id)
+                "menu_items",
+                restaurant_id=str(restaurant.id),
+                category=None  # Match the key params used by the endpoint
             )
             
             # Get menu data
