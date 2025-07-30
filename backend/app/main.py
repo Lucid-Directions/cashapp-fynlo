@@ -72,6 +72,11 @@ async def lifespan(app: FastAPI):
         logger.info("Initializing rate limiter...")
         await init_fastapi_limiter()
         
+        # Set the limiter on app.state for SlowAPI middleware
+        from app.middleware.rate_limit_middleware import limiter
+        app.state.limiter = limiter
+        logger.info("✅ SlowAPI limiter attached to app.state")
+        
         logger.info("Initializing WebSocket services...")
         from app.api.v1.endpoints.websocket_enhanced import init_websocket_services, start_health_monitor
         await init_websocket_services()
