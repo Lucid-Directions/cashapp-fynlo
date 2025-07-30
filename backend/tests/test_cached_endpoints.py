@@ -44,7 +44,7 @@ class TestCachedMenuEndpoints:
             item.category_id = "cat_1"
             item.image_url = f"http://example.com/item_{i}.jpg"
             item.is_active = True
-            item.is_available = True
+            item.is_active = True
             items.append(item)
         return items
     

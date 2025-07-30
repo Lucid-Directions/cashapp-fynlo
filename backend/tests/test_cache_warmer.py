@@ -46,7 +46,7 @@ class TestCacheWarmer:
                 price=8.99,
                 category_id="cat_1",
                 image_url="http://example.com/tacos.jpg",
-                is_available=True,
+                is_active=True,
                 is_active=True
             ),
             MagicMock(
@@ -56,7 +56,7 @@ class TestCacheWarmer:
                 price=10.99,
                 category_id="cat_1",
                 image_url="http://example.com/burrito.jpg",
-                is_available=True,
+                is_active=True,
                 is_active=True
             )
         ]

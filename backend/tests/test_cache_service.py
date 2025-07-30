@@ -310,7 +310,7 @@ class TestCacheWarming:
             price=10.99,
             category_id="cat_123",
             image_url="http://example.com/image.jpg",
-            is_available=True
+            is_active=True
         )
         
         # Setup query chain

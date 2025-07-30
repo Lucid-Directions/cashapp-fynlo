@@ -12,7 +12,7 @@ from sqlalchemy import and_
 
 from app.core.cache_service import cache_service
 from app.core.database import get_db
-from app.models import Restaurant, MenuItem, Category, RestaurantSettings
+from app.models import Restaurant, Product, Category, RestaurantSettings
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
@@ -98,10 +98,10 @@ class CacheWarmer:
         """Warm menu cache for a restaurant"""
         try:
             # Get menu items
-            menu_items = db.query(MenuItem).filter(
+            menu_items = db.query(Product).filter(
                 and_(
-                    MenuItem.restaurant_id == restaurant.id,
-                    MenuItem.is_active == True
+                    Product.restaurant_id == restaurant.id,
+                    Product.is_active == True
                 )
             ).all()
             
@@ -114,7 +114,7 @@ class CacheWarmer:
                     "price": float(item.price),
                     "category_id": str(item.category_id) if item.category_id else None,
                     "image_url": item.image_url,
-                    "is_available": item.is_available,
+                    "is_active": item.is_active,
                 }
                 for item in menu_items
             ]
