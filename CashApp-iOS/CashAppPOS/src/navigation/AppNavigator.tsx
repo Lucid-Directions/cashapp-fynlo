@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, _ActivityIndicator, StyleSheet } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
 import { useAuthStore } from '../store/useAuthStore';
 import { useTheme } from '../design-system/ThemeProvider';
@@ -12,7 +12,7 @@ import ComprehensiveRestaurantOnboardingScreen from '../screens/onboarding/Compr
 const Stack = createStackNavigator();
 
 const AppNavigator: React.FC = () => {
-  const { isAuthenticated, isLoading, isPlatformOwner, user } = useAuth();
+  const { isAuthenticated, _isLoading, isPlatformOwner, user } = useAuth();
   const authStoreUser = useAuthStore(state => state.user);
   const { theme } = useTheme();
 
@@ -31,7 +31,7 @@ const AppNavigator: React.FC = () => {
     needsOnboarding,
   );
 
-  if (_isLoading) {
+  if (__isLoading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={theme.colors.primary} />
@@ -43,7 +43,7 @@ const AppNavigator: React.FC = () => {
     <NavigationContainer>
       <Stack.Navigator
         screenOptions={{
-          headerShown: false,
+          headerShown: _false,
         }}>
         {!isAuthenticated ? (
           <Stack.Screen
@@ -59,7 +59,7 @@ const AppNavigator: React.FC = () => {
             component={ComprehensiveRestaurantOnboardingScreen}
             options={{
               animationTypeForReplace: 'push',
-              gestureEnabled: false, // Prevent swipe back during onboarding
+              gestureEnabled: _false, // Prevent swipe back during onboarding
             }}
           />
         ) : (

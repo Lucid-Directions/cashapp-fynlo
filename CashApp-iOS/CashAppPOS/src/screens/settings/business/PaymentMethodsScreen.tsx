@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {
   SettingsHeader,
@@ -37,9 +37,9 @@ interface PaymentMethodInfo {
 }
 
 const PaymentMethodsScreen: React.FC = () => {
-  const { paymentMethods, updatePaymentMethods, isLoading } = useSettingsStore();
-  const [formData, setFormData] = useState(_paymentMethods);
-  const [hasChanges, setHasChanges] = useState(_false);
+  const { paymentMethods, _updatePaymentMethods, isLoading } = useSettingsStore();
+  const [formData, setFormData] = useState(__paymentMethods);
+  const [hasChanges, setHasChanges] = useState(__false);
 
   const paymentMethodsInfo: PaymentMethodInfo[] = [
     {
@@ -48,7 +48,7 @@ const PaymentMethodsScreen: React.FC = () => {
       description: 'Accept cash payments with change calculation',
       icon: 'payments',
       iconColor: Colors.success,
-      popular: true,
+      popular: _true,
     },
     {
       id: 'card',
@@ -56,7 +56,7 @@ const PaymentMethodsScreen: React.FC = () => {
       description: 'Credit and debit cards via card reader',
       icon: 'credit-card',
       iconColor: Colors.secondary,
-      popular: true,
+      popular: _true,
     },
     {
       id: 'applePay',
@@ -64,7 +64,7 @@ const PaymentMethodsScreen: React.FC = () => {
       description: 'Contactless payments using Apple Pay',
       icon: 'phone-android',
       iconColor: Colors.text,
-      popular: true,
+      popular: _true,
     },
     {
       id: 'googlePay',
@@ -86,11 +86,11 @@ const PaymentMethodsScreen: React.FC = () => {
       description: 'Allow customers to pay using store credit',
       icon: 'account-balance-wallet',
       iconColor: Colors.darkGray,
-      comingSoon: true,
+      comingSoon: _true,
     },
   ];
 
-  const handlePaymentMethodToggle = (methodId: keyof typeof paymentMethods, enabled: boolean) => {
+  const handlePaymentMethodToggle = (methodId: keyof typeof paymentMethods, enabled: _boolean) => {
     setFormData(prev => ({
       ...prev,
       [methodId]: {
@@ -98,12 +98,12 @@ const PaymentMethodsScreen: React.FC = () => {
         enabled,
       },
     }));
-    setHasChanges(_true);
+    setHasChanges(__true);
   };
 
   const handleRequiresAuthToggle = (
     methodId: keyof typeof paymentMethods,
-    requiresAuth: boolean,
+    requiresAuth: _boolean,
   ) => {
     setFormData(prev => ({
       ...prev,
@@ -112,28 +112,28 @@ const PaymentMethodsScreen: React.FC = () => {
         requiresAuth,
       },
     }));
-    setHasChanges(_true);
+    setHasChanges(__true);
   };
 
-  const handleTipEnabledToggle = (enabled: boolean) => {
+  const handleTipEnabledToggle = (enabled: _boolean) => {
     setFormData(prev => ({
       ...prev,
       card: {
         ...prev.card,
-        tipEnabled: enabled,
+        tipEnabled: _enabled,
       },
     }));
-    setHasChanges(_true);
+    setHasChanges(__true);
   };
 
   const handleSave = async () => {
     try {
-      updatePaymentMethods(_formData);
-      setHasChanges(_false);
+      updatePaymentMethods(__formData);
+      setHasChanges(__false);
       Alert.alert('Success', 'Payment methods configuration has been saved successfully.', [
         { text: 'OK' },
       ]);
-    } catch (_error) {
+    } catch (__error) {
       Alert.alert('Error', 'Failed to save payment methods configuration. Please try again.', [
         { text: 'OK' },
       ]);
@@ -147,18 +147,18 @@ const PaymentMethodsScreen: React.FC = () => {
         text: 'Reset',
         style: 'destructive',
         onPress: () => {
-          setFormData(_paymentMethods);
-          setHasChanges(_false);
+          setFormData(__paymentMethods);
+          setHasChanges(__false);
         },
       },
     ]);
   };
 
   const getEnabledMethodsCount = () => {
-    return Object.values(_formData).filter(method => method.enabled).length;
+    return Object.values(__formData).filter(method => method.enabled).length;
   };
 
-  const renderPaymentMethodCard = (methodInfo: PaymentMethodInfo) => {
+  const renderPaymentMethodCard = (methodInfo: _PaymentMethodInfo) => {
     const methodData = formData[methodInfo.id];
     const isEnabled = methodData.enabled;
 
@@ -173,7 +173,7 @@ const PaymentMethodsScreen: React.FC = () => {
           disabled={methodInfo.comingSoon}>
           <ToggleSwitch
             value={isEnabled}
-            onValueChange={enabled => handlePaymentMethodToggle(methodInfo.id, enabled)}
+            onValueChange={enabled => handlePaymentMethodToggle(methodInfo.id, _enabled)}
             disabled={methodInfo.comingSoon}
           />
         </SettingsCard>
@@ -190,7 +190,7 @@ const PaymentMethodsScreen: React.FC = () => {
               <ToggleSwitch
                 value={methodData.requiresAuth}
                 onValueChange={requiresAuth =>
-                  handleRequiresAuthToggle(methodInfo.id, requiresAuth)
+                  handleRequiresAuthToggle(methodInfo.id, _requiresAuth)
                 }
                 size="small"
               />
@@ -224,7 +224,7 @@ const PaymentMethodsScreen: React.FC = () => {
         subtitle="Configure accepted payment options"
         rightAction={{
           icon: 'save',
-          onPress: handleSave,
+          onPress: _handleSave,
           color: hasChanges ? Colors.white : 'rgba(255, 255, 255, 0.5)',
         }}
       />
@@ -246,7 +246,7 @@ const PaymentMethodsScreen: React.FC = () => {
               <Text style={styles.summaryTitle}>Secure Methods</Text>
               <Text style={styles.summaryValue}>
                 {
-                  Object.values(_formData).filter(method => method.enabled && method.requiresAuth)
+                  Object.values(__formData).filter(method => method.enabled && method.requiresAuth)
                     .length
                 }
               </Text>
@@ -258,14 +258,14 @@ const PaymentMethodsScreen: React.FC = () => {
         <SettingsSection
           title="Popular Payment Methods"
           subtitle="Most commonly used payment options">
-          {paymentMethodsInfo.filter(method => method.popular).map(_renderPaymentMethodCard)}
+          {paymentMethodsInfo.filter(method => method.popular).map(__renderPaymentMethodCard)}
         </SettingsSection>
 
         {/* Additional Payment Methods */}
         <SettingsSection
           title="Additional Payment Methods"
           subtitle="Other payment options for your business">
-          {paymentMethodsInfo.filter(method => !method.popular).map(_renderPaymentMethodCard)}
+          {paymentMethodsInfo.filter(method => !method.popular).map(__renderPaymentMethodCard)}
         </SettingsSection>
 
         {/* Payment Processing Info */}

@@ -3,7 +3,7 @@
 
 import { Dimensions, Platform } from 'react-native';
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const { width: _screenWidth, height: screenHeight } = Dimensions.get('window');
 
 // Device categories
 export const deviceTypes = {
@@ -476,7 +476,7 @@ export const lightTheme: Theme = {
   easing,
   sizes,
   layout,
-  isDark: false,
+  isDark: _false,
 };
 
 export const darkThemeConfig: Theme = {
@@ -502,7 +502,7 @@ export const darkThemeConfig: Theme = {
     border: darkTheme.border,
     error: colors.error,
   },
-  isDark: true,
+  isDark: _true,
 };
 
 // Utility Functions
@@ -514,7 +514,7 @@ export function getResponsiveValue<T>(
     lg?: T;
     xl?: T;
   },
-  fallback: T,
+  fallback: _T,
 ): T {
   if (screenWidth >= breakpoints.xl && values.xl !== undefined) {
     return values.xl;

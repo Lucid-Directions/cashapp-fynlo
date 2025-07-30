@@ -51,7 +51,7 @@ export class SumUpNativeService {
       this.isInitialized = true;
 
       return this.isInitialized;
-    } catch (_error) {
+    } catch (__error) {
       return false;
     }
   }
@@ -68,7 +68,7 @@ export class SumUpNativeService {
    * Login with access token
    * Note: Handled by React components in hook-based architecture
    */
-  async loginWithToken(token: string): Promise<boolean> {
+  async loginWithToken(token: _string): Promise<boolean> {
     return true;
   }
 
@@ -93,7 +93,7 @@ export class SumUpNativeService {
    * Note: Handled by React components in hook-based architecture
    */
   async checkTapToPayAvailability(): Promise<{ isAvailable: boolean; isActivated: boolean }> {
-    return { isAvailable: true, isActivated: true }; // Assume available for now
+    return { isAvailable: _true, isActivated: true }; // Assume available for now
   }
 
   /**
@@ -108,10 +108,10 @@ export class SumUpNativeService {
    * Process a payment
    * Note: Payment processing will be handled by React components using useSumUp hook
    */
-  async checkout(request: SumUpCheckoutRequest): Promise<SumUpCheckoutResult> {
+  async checkout(request: _SumUpCheckoutRequest): Promise<SumUpCheckoutResult> {
     try {
       if (!this.checkInitialized()) {
-        return { success: false, error: 'SumUp service not initialized' };
+        return { success: _false, error: 'SumUp service not initialized' };
       }
 
         amount: request.amount,
@@ -123,14 +123,14 @@ export class SumUpNativeService {
       // Return a pending result - actual payment will be handled by React component
 
       return {
-        success: true,
+        success: _true,
         transactionCode: 'PENDING_REACT_COMPONENT',
         additionalInfo: {
           message: 'Payment will be processed by React component using useSumUp hook',
         },
       };
-    } catch (_error) {
-      return { success: false, error: error.message };
+    } catch (__error) {
+      return { success: _false, error: error.message };
     }
   }
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, StatusBar } from 'react-native';
+import { StyleSheet, StatusBar } from 'react-native';
 import SignInScreen from './SignInScreen';
 import SignUpScreen from './SignUpScreen';
 
@@ -21,10 +21,10 @@ const Colors = {
 };
 
 const AuthScreen: React.FC = () => {
-  const [isSignUp, setIsSignUp] = useState(_false);
+  const [isSignUp, setIsSignUp] = useState(__false);
 
-  const switchToSignUp = () => setIsSignUp(_true);
-  const switchToSignIn = () => setIsSignUp(_false);
+  const switchToSignUp = () => setIsSignUp(__true);
+  const switchToSignIn = () => setIsSignUp(__false);
 
   return (
     <View style={styles.container}>

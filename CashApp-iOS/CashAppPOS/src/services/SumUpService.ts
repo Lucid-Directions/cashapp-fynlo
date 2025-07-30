@@ -6,7 +6,7 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { PaymentRequest, PaymentResult } from './PaymentService';
+import { PaymentResult } from './PaymentService';
 import SumUpNativeService from './SumUpNativeService';
 
 export interface SumUpConfig {
@@ -79,19 +79,19 @@ class SumUpServiceClass {
   /**
    * Initialize SumUp service with configuration
    */
-  async initialize(config: SumUpConfig): Promise<void> {
+  async initialize(config: _SumUpConfig): Promise<void> {
     this.config = config;
-    await this.saveConfig(_config);
+    await this.saveConfig(__config);
   }
 
   /**
    * Create SumUp checkout for payment processing
    */
   async createCheckout(
-    amount: number,
+    amount: _number,
     currency = 'GBP',
-    description?: string,
-    returnUrl?: string,
+    description?: _string,
+    returnUrl?: _string,
   ): Promise<SumUpCheckout> {
     try {
       if (!this.config) {
@@ -100,11 +100,11 @@ class SumUpServiceClass {
 
       const checkoutData = {
         checkout_reference: this.generateCheckoutReference(),
-        amount: amount,
-        currency: currency,
+        amount: _amount,
+        currency: _currency,
         merchant_code: this.config.merchantCode,
         description: description || 'Fynlo POS Payment',
-        return_url: returnUrl,
+        return_url: _returnUrl,
       };
 
       const response = await fetch(`${this.config.baseUrl}/v0.1/checkouts`, {
@@ -113,7 +113,7 @@ class SumUpServiceClass {
           Authorization: `Bearer ${this.config.apiKey}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(_checkoutData),
+        body: JSON.stringify(__checkoutData),
       });
 
       if (!response.ok) {
@@ -132,7 +132,7 @@ class SumUpServiceClass {
         status: 'created',
         expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30 minutes
       };
-    } catch (_error) {
+    } catch (__error) {
       throw error;
     }
   }
@@ -140,7 +140,7 @@ class SumUpServiceClass {
   /**
    * Process SumUp payment
    */
-  async processPayment(request: PaymentRequest): Promise<PaymentResult> {
+  async processPayment(request: _PaymentRequest): Promise<PaymentResult> {
     try {
       // For SumUp, we typically create a checkout and redirect
       const checkout = await this.createCheckout(
@@ -154,15 +154,15 @@ class SumUpServiceClass {
       const fee = this.calculateFee(request.amount);
 
       return {
-        success: true,
+        success: _true,
         transactionId: checkout.checkoutId,
         provider: 'sumup',
         amount: request.amount,
-        fee: fee,
+        fee: _fee,
       };
-    } catch (_error) {
+    } catch (__error) {
       return {
-        success: false,
+        success: _false,
         provider: 'sumup',
         amount: request.amount,
         fee: 0,
@@ -175,9 +175,9 @@ class SumUpServiceClass {
    * Process contactless NFC payment using SumUp Payment Sheet (Thread-Safe)
    */
   async processContactlessPayment(
-    amount: number,
+    amount: _number,
     currency = 'GBP',
-    description?: string,
+    description?: _string,
   ): Promise<SumUpContactlessPayment> {
     try {
       if (!this.config) {
@@ -188,29 +188,29 @@ class SumUpServiceClass {
 
       // Use native SumUp SDK for contactless payment
       const result = await SumUpNativeService.checkout({
-        amount: amount,
+        amount: _amount,
         title: description || 'Fynlo POS Contactless Payment',
-        currency: currency,
-        foreignTransactionID: paymentId,
-        useTapToPay: true,
+        currency: _currency,
+        foreignTransactionID: _paymentId,
+        useTapToPay: _true,
       });
 
       if (result.success) {
         return {
-          id: paymentId,
-          amount: amount,
-          currency: currency,
+          id: _paymentId,
+          amount: _amount,
+          currency: _currency,
           status: 'completed',
           paymentMethod: result.usedTapToPay ? 'nfc' : 'apple_pay',
         };
       } else {
         throw new Error(result.message || 'Contactless payment failed');
       }
-    } catch (_error) {
+    } catch (__error) {
       return {
         id: this.generatePaymentId(),
-        amount: amount,
-        currency: currency,
+        amount: _amount,
+        currency: _currency,
         status: 'failed',
         paymentMethod: 'nfc',
         errorMessage: error instanceof Error ? error.message : 'Contactless payment failed',
@@ -222,9 +222,9 @@ class SumUpServiceClass {
    * Create QR code payment
    */
   async createQRPayment(
-    amount: number,
+    amount: _number,
     currency = 'GBP',
-    description?: string,
+    description?: _string,
   ): Promise<SumUpQRPayment> {
     try {
       if (!this.config) {
@@ -232,19 +232,19 @@ class SumUpServiceClass {
       }
 
       // Create checkout for QR payment
-      const checkout = await this.createCheckout(_amount, currency, description);
+      const checkout = await this.createCheckout(__amount, _currency, description);
 
       return {
         id: checkout.checkoutId,
         qrCode: checkout.checkoutUrl,
-        amount: amount,
-        currency: currency,
+        amount: _amount,
+        currency: _currency,
         status: 'created',
         expiresAt: checkout.expiresAt,
         pollInterval: 2000, // Poll every 2 seconds
         statusUrl: `${this.config.baseUrl}/v0.1/checkouts/${checkout.checkoutId}`,
       };
-    } catch (_error) {
+    } catch (__error) {
       throw error;
     }
   }
@@ -252,7 +252,7 @@ class SumUpServiceClass {
   /**
    * Poll QR payment status
    */
-  async pollQRPaymentStatus(qrPayment: SumUpQRPayment): Promise<SumUpQRPayment> {
+  async pollQRPaymentStatus(qrPayment: _SumUpQRPayment): Promise<SumUpQRPayment> {
     try {
       if (!this.config) {
         throw new Error('SumUp service not initialized');
@@ -275,7 +275,7 @@ class SumUpServiceClass {
         ...qrPayment,
         status: this.mapCheckoutStatus(data.status),
       };
-    } catch (_error) {
+    } catch (__error) {
       return {
         ...qrPayment,
         status: 'failed',
@@ -291,7 +291,7 @@ class SumUpServiceClass {
       // Check if NFC is available on the device
       // This would typically use device capabilities
       return true; // Assume supported for now
-    } catch (_error) {
+    } catch (__error) {
       return false;
     }
   }
@@ -299,7 +299,7 @@ class SumUpServiceClass {
   /**
    * Calculate SumUp processing fee
    */
-  calculateFee(amount: number, monthlyVolume?: number): number {
+  calculateFee(amount: _number, monthlyVolume?: _number): number {
     const amountDecimal = amount;
     const volumeDecimal = monthlyVolume || 0;
 
@@ -326,7 +326,7 @@ class SumUpServiceClass {
   /**
    * Calculate monthly cost projection
    */
-  calculateMonthlyCost(monthlyVolume: number): {
+  calculateMonthlyCost(monthlyVolume: _number): {
     totalCost: number;
     effectiveRate: number;
     structure: 'standard' | 'high_volume';
@@ -366,12 +366,15 @@ class SumUpServiceClass {
   /**
    * Check if SumUp is the optimal provider for given volume
    */
-  isOptimalForVolume(monthlyVolume: number, compareRates: { [provider: string]: number }): boolean {
-    const sumupCost = this.calculateMonthlyCost(_monthlyVolume);
+  isOptimalForVolume(
+    monthlyVolume: _number,
+    compareRates: { [provider: string]: number },
+  ): boolean {
+    const sumupCost = this.calculateMonthlyCost(__monthlyVolume);
     const sumupRate = sumupCost.effectiveRate;
 
     // Compare with other providers
-    const lowestCompetitorRate = Math.min(...Object.values(_compareRates));
+    const lowestCompetitorRate = Math.min(...Object.values(__compareRates));
 
     return sumupRate <= lowestCompetitorRate;
   }
@@ -424,7 +427,7 @@ class SumUpServiceClass {
       });
 
       return response.ok;
-    } catch (_error) {
+    } catch (__error) {
       return false;
     }
   }
@@ -450,7 +453,7 @@ class SumUpServiceClass {
   /**
    * Detect payment method from SumUp result
    */
-  private detectPaymentMethod(result: unknown): 'nfc' | 'apple_pay' | 'google_pay' {
+  private detectPaymentMethod(result: _unknown): 'nfc' | 'apple_pay' | 'google_pay' {
     // This would analyze the payment result to determine method
     // For now, default to NFC
     if (result.paymentMethod?.includes('apple_pay')) {
@@ -464,7 +467,7 @@ class SumUpServiceClass {
   /**
    * Map SumUp checkout status to QR payment status
    */
-  private mapCheckoutStatus(sumupStatus: string): SumUpQRPayment['status'] {
+  private mapCheckoutStatus(sumupStatus: _string): SumUpQRPayment['status'] {
     switch (sumupStatus.toLowerCase()) {
       case 'pending':
         return 'scanning';
@@ -483,10 +486,10 @@ class SumUpServiceClass {
   /**
    * Save SumUp configuration
    */
-  private async saveConfig(config: SumUpConfig): Promise<void> {
+  private async saveConfig(config: _SumUpConfig): Promise<void> {
     try {
-      await AsyncStorage.setItem('sumup_config', JSON.stringify(_config));
-    } catch (_error) {
+      await AsyncStorage.setItem('sumup_config', JSON.stringify(__config));
+    } catch (__error) {
       throw error;
     }
   }
@@ -497,13 +500,13 @@ class SumUpServiceClass {
   async loadConfig(): Promise<SumUpConfig | null> {
     try {
       const configString = await AsyncStorage.getItem('sumup_config');
-      if (_configString) {
-        const config = JSON.parse(_configString);
+      if (__configString) {
+        const config = JSON.parse(__configString);
         this.config = config;
         return config;
       }
       return null;
-    } catch (_error) {
+    } catch (__error) {
       return null;
     }
   }
@@ -515,7 +518,7 @@ class SumUpServiceClass {
     try {
       await AsyncStorage.removeItem('sumup_config');
       this.config = null;
-    } catch (_error) {
+    } catch (__error) {
       throw error;
     }
   }

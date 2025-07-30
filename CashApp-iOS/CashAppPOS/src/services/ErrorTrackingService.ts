@@ -35,32 +35,32 @@ class ErrorTrackingService {
     this.simpleTracker.initialize();
   }
 
-  setUser(userId: string, email?: string, role?: string): void {
-    this.simpleTracker.setUser(_userId, email, role);
+  setUser(userId: _string, email?: _string, role?: _string): void {
+    this.simpleTracker.setUser(__userId, _email, role);
   }
 
-  captureError(error: Error, context?: ErrorContext): void {
-    this.simpleTracker.captureError(_error, context);
+  captureError(error: _Error, context?: _ErrorContext): void {
+    this.simpleTracker.captureError(__error, _context);
   }
 
   captureMessage(
-    message: string,
+    message: _string,
     level: 'info' | 'warning' | 'error' = 'info',
-    context?: ErrorContext,
+    context?: _ErrorContext,
   ): void {
-    this.simpleTracker.captureMessage(_message, level, context);
+    this.simpleTracker.captureMessage(__message, _level, context);
   }
 
-  trackEvent(event: string, data?: Record<string, any>): void {
-    this.simpleTracker.trackEvent(_event, data);
+  trackEvent(event: _string, data?: Record<string, any>): void {
+    this.simpleTracker.trackEvent(__event, _data);
   }
 
-  startTransaction(context: PerformanceContext): any {
+  startTransaction(context: _PerformanceContext): any {
     return { operation: context.operation, startTime: Date.now() };
   }
 
-  finishTransaction(transaction: unknown, success = true): void {
-    if (_transaction) {
+  finishTransaction(transaction: _unknown, success = true): void {
+    if (__transaction) {
       const duration = Date.now() - transaction.startTime;
         `📊 Transaction finished: ${transaction.operation} (${duration}ms) - ${
           success ? 'success' : 'failed'
@@ -70,24 +70,24 @@ class ErrorTrackingService {
   }
 
   // Specific tracking methods for common issues
-  trackPricingError(error: Error, itemData?: unknown, calculationContext?: unknown): void {
-    this.simpleTracker.trackPricingError(_error, itemData, calculationContext);
+  trackPricingError(error: _Error, itemData?: _unknown, calculationContext?: _unknown): void {
+    this.simpleTracker.trackPricingError(__error, _itemData, calculationContext);
   }
 
-  trackNetworkError(error: Error, endpoint?: string, method?: string): void {
-    this.simpleTracker.trackNetworkError(_error, endpoint, method);
+  trackNetworkError(error: _Error, endpoint?: _string, method?: _string): void {
+    this.simpleTracker.trackNetworkError(__error, _endpoint, method);
   }
 
-  trackUIError(error: Error, component?: string, props?: unknown): void {
-    this.simpleTracker.trackUIError(_error, component, props);
+  trackUIError(error: _Error, component?: _string, props?: _unknown): void {
+    this.simpleTracker.trackUIError(__error, _component, props);
   }
 
-  trackBusinessLogicError(error: Error, operation?: string, data?: unknown): void {
-    this.simpleTracker.trackBusinessLogicError(_error, operation, data);
+  trackBusinessLogicError(error: _Error, operation?: _string, data?: _unknown): void {
+    this.simpleTracker.trackBusinessLogicError(__error, _operation, data);
   }
 
   // Performance monitoring
-  trackScreenLoad(screenName: string): any {
+  trackScreenLoad(screenName: _string): any {
     return this.startTransaction({
       operation: 'screen_load',
       description: `Loading ${screenName}`,
@@ -95,7 +95,7 @@ class ErrorTrackingService {
     });
   }
 
-  trackApiCall(endpoint: string, method: string): any {
+  trackApiCall(endpoint: _string, method: _string): any {
     return this.startTransaction({
       operation: 'api_call',
       description: `${method} ${endpoint}`,
@@ -109,21 +109,21 @@ class ErrorTrackingService {
   }
 
   // Debug helpers
-  addBreadcrumb(message: string, category = 'debug', data?: Record<string, any>): void {
-    this.simpleTracker.addBreadcrumb(_message, category, data);
+  addBreadcrumb(message: _string, category = 'debug', data?: Record<string, any>): void {
+    this.simpleTracker.addBreadcrumb(__message, _category, data);
   }
 
-  setTag(key: string, value: string): void {
-    this.simpleTracker.setTag(_key, value);
+  setTag(key: _string, value: _string): void {
+    this.simpleTracker.setTag(__key, _value);
   }
 
-  setContext(key: string, context: Record<string, any>): void {
-    this.simpleTracker.setContext(_key, context);
+  setContext(key: _string, context: Record<string, any>): void {
+    this.simpleTracker.setContext(__key, _context);
   }
 
   // Flush pending events
   flush(timeout = 2000): Promise<boolean> {
-    return this.simpleTracker.flush(_timeout);
+    return this.simpleTracker.flush(__timeout);
   }
 }
 

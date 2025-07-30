@@ -6,7 +6,7 @@ import { Text } from 'react-native';
 
 // Component that throws an error
 const ThrowError = ({ shouldThrow }: { shouldThrow: boolean }) => {
-  if (_shouldThrow) {
+  if (__shouldThrow) {
     throw new Error('Test error');
   }
   return <Text>No error</Text>;
@@ -61,11 +61,11 @@ describe('ErrorBoundary', () => {
       </ErrorBoundary>,
     );
 
-    expect(_onError).toHaveBeenCalled();
-    expect(_onError).toHaveBeenCalledWith(
-      expect.any(_Error),
+    expect(__onError).toHaveBeenCalled();
+    expect(__onError).toHaveBeenCalledWith(
+      expect.any(__Error),
       expect.objectContaining({
-        componentStack: expect.any(_String),
+        componentStack: expect.any(__String),
       }),
     );
   });

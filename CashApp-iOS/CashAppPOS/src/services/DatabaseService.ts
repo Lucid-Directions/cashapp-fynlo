@@ -73,8 +73,8 @@ class DatabaseService {
     itemsTimestamp: number;
     categoriesTimestamp: number;
   } = {
-    items: null,
-    categories: null,
+    items: _null,
+    categories: _null,
     itemsTimestamp: 0,
     categoriesTimestamp: 0,
   };
@@ -96,16 +96,16 @@ class DatabaseService {
     try {
       // Use tokenManager for consistent token retrieval
       this.authToken = await tokenManager.getTokenWithRefresh();
-    } catch (_error) {
+    } catch (__error) {
     }
   }
 
-  private async saveAuthToken(token: string): Promise<void> {
+  private async saveAuthToken(token: _string): Promise<void> {
     try {
       this.authToken = token;
       // CRITICAL: Must persist token for tokenManager to access it
-      await AsyncStorage.setItem('auth_token', token);
-    } catch (_error) {
+      await AsyncStorage.setItem('auth_token', _token);
+    } catch (__error) {
     }
   }
 
@@ -114,7 +114,7 @@ class DatabaseService {
     const token = await tokenManager.getTokenWithRefresh();
 
     // Update internal reference if we got a token
-    if (_token) {
+    if (__token) {
       this.authToken = token;
     }
 
@@ -123,10 +123,10 @@ class DatabaseService {
 
   // API request helper - FIXED: Handle REST API responses properly with timeout and retry
   private async apiRequest(
-    endpoint: string,
+    endpoint: _string,
     options: RequestInit = {},
     retryCount = 0,
-    initialStartTime?: number,
+    initialStartTime?: _number,
   ): Promise<unknown> {
     const url = `${API_BASE_URL}${endpoint}`;
     const startTime = initialStartTime || Date.now();
@@ -151,26 +151,26 @@ class DatabaseService {
     };
 
     // Log the request
-    errorLogger.logAPIRequest(options.method || 'GET', url, { headers, body: options.body });
+    errorLogger.logAPIRequest(options.method || 'GET', _url, { headers, body: options.body });
 
     // Create AbortController for timeout - adjust for elapsed time
     const controller = new AbortController();
-    const remainingTimeout = Math.min(_timeout, totalTimeout - elapsedTime);
-    const timeoutId = setTimeout(() => controller.abort(), remainingTimeout);
+    const remainingTimeout = Math.min(__timeout, totalTimeout - elapsedTime);
+    const timeoutId = setTimeout(() => controller.abort(), _remainingTimeout);
 
     try {
-      const response = await fetch(_url, {
+      const response = await fetch(__url, {
         ...options,
         headers,
         signal: controller.signal,
       });
 
-      clearTimeout(_timeoutId);
+      clearTimeout(__timeoutId);
       const duration = Date.now() - startTime;
       const data = await response.json();
 
       // Log the response
-      errorLogger.logAPIResponse(_url, response.status, duration, data);
+      errorLogger.logAPIResponse(__url, response.status, _duration, data);
 
       // Handle 401 Unauthorized - token might be expired
       if (response.status === 401) {
@@ -178,13 +178,13 @@ class DatabaseService {
         // Try to refresh the token using token manager
         const newToken = await tokenManager.refreshAuthToken();
 
-        if (_newToken) {
+        if (__newToken) {
           // Create a new timeout for the retry request
           const retryElapsedTime = Date.now() - startTime;
           const retryRemainingTimeout = Math.max(1000, totalTimeout - retryElapsedTime); // At least 1 second
 
           const retryController = new AbortController();
-          const retryTimeoutId = setTimeout(() => retryController.abort(), retryRemainingTimeout);
+          const retryTimeoutId = setTimeout(() => retryController.abort(), _retryRemainingTimeout);
 
           try {
             // Retry the request with new token and new timeout
@@ -193,13 +193,13 @@ class DatabaseService {
               Authorization: `Bearer ${newToken}`,
             };
 
-            const retryResponse = await fetch(_url, {
+            const retryResponse = await fetch(__url, {
               ...options,
-              headers: newHeaders,
+              headers: _newHeaders,
               signal: retryController.signal,
             });
 
-            clearTimeout(_retryTimeoutId);
+            clearTimeout(__retryTimeoutId);
             const retryData = await retryResponse.json();
 
             if (!retryResponse.ok) {
@@ -207,12 +207,12 @@ class DatabaseService {
                 retryData.message ||
                 retryData.detail ||
                 `HTTP error! status: ${retryResponse.status}`;
-              throw new Error(_errorMessage);
+              throw new Error(__errorMessage);
             }
 
             return retryData;
-          } catch (_retryError) {
-            clearTimeout(_retryTimeoutId);
+          } catch (__retryError) {
+            clearTimeout(__retryTimeoutId);
             throw retryError;
           }
         }
@@ -223,16 +223,16 @@ class DatabaseService {
         // Backend returns error in standardized format
         const errorMessage =
           data.message || data.detail || `HTTP error! status: ${response.status}`;
-        throw new Error(_errorMessage);
+        throw new Error(__errorMessage);
       }
 
       return data;
-    } catch (_error) {
-      clearTimeout(_timeoutId);
+    } catch (__error) {
+      clearTimeout(__timeoutId);
       const duration = Date.now() - startTime;
 
       // Enhanced error logging with context
-      errorLogger.logError(_error, {
+      errorLogger.logError(__error, {
         operation: `API Request: ${options.method || 'GET'} ${endpoint}`,
         component: 'DatabaseService',
         metadata: {
@@ -251,9 +251,9 @@ class DatabaseService {
         // Retry logic with exponential backoff
         if (retryCount < retryAttempts - 1) {
           const retryDelay = API_CONFIG.RETRY_DELAY || 1000;
-          const delay = retryDelay * Math.pow(2, retryCount);
-          await new Promise(resolve => setTimeout(_resolve, delay));
-          return this.apiRequest(_endpoint, options, retryCount + 1, startTime);
+          const delay = retryDelay * Math.pow(2, _retryCount);
+          await new Promise(resolve => setTimeout(__resolve, _delay));
+          return this.apiRequest(__endpoint, _options, retryCount + 1, _startTime);
         }
 
         throw new Error(`API Timeout: Request failed after ${retryAttempts} attempts`);
@@ -264,13 +264,13 @@ class DatabaseService {
   }
 
   // Authentication - FIXED: Convert from JSONRPC to REST API format
-  async login(username: string, password: string): Promise<boolean> {
+  async login(username: _string, password: _string): Promise<boolean> {
     try {
       const response = await this.apiRequest('/api/v1/auth/login', {
         method: 'POST',
         body: JSON.stringify({
-          email: username, // Backend expects email field
-          password: password,
+          email: _username, // Backend expects email field
+          password: _password,
         }),
       });
 
@@ -280,24 +280,24 @@ class DatabaseService {
         return true;
       }
       return false;
-    } catch (_error) {
+    } catch (__error) {
 
       // Fallback to test users for development/testing
-      return await this.authenticateTestUser(_username, password);
+      return await this.authenticateTestUser(__username, _password);
     }
   }
 
   // Test user authentication - will be removed before production
-  private async authenticateTestUser(username: string, password: string): Promise<boolean> {
+  private async authenticateTestUser(username: _string, password: _string): Promise<boolean> {
     const testUsers = this.getTestUsers();
     const user = testUsers.find(
       u => (u.username === username || u.email === username) && u.password === password,
     );
 
-    if (_user) {
+    if (__user) {
       // Generate a mock JWT token for the session
       const mockToken = `mock_jwt_${user.id}_${Date.now()}`;
-      await this.saveAuthToken(_mockToken);
+      await this.saveAuthToken(__mockToken);
 
       // Store user data for the session
       await AsyncStorage.setItem(
@@ -324,8 +324,8 @@ class DatabaseService {
   async getCurrentUser(): Promise<unknown> {
     try {
       const userData = await AsyncStorage.getItem('user_data');
-      return userData ? JSON.parse(_userData) : null;
-    } catch (_error) {
+      return userData ? JSON.parse(__userData) : null;
+    } catch (__error) {
       return null;
     }
   }
@@ -400,7 +400,7 @@ class DatabaseService {
   async logout(): Promise<void> {
     try {
       await this.apiRequest('/api/v1/auth/logout', { method: 'POST' });
-    } catch (_error) {
+    } catch (__error) {
     } finally {
       // Always clear local session data
       this.authToken = null;
@@ -417,19 +417,19 @@ class DatabaseService {
       });
 
       return response.data || [];
-    } catch (_error) {
+    } catch (__error) {
       throw error; // Re-throw the error
     }
   }
 
-  async getProductsByCategory(categoryId: number): Promise<Product[]> {
+  async getProductsByCategory(categoryId: _number): Promise<Product[]> {
     try {
       const response = await this.apiRequest(`/api/v1/products/category/${categoryId}`, {
         method: 'GET',
       });
 
       return response.data || [];
-    } catch (_error) {
+    } catch (__error) {
       throw error; // Re-throw the error
     }
   }
@@ -442,7 +442,7 @@ class DatabaseService {
       });
 
       return response.data || [];
-    } catch (_error) {
+    } catch (__error) {
       throw error; // Re-throw the error
     }
   }
@@ -477,7 +477,7 @@ class DatabaseService {
       }
 
       return [];
-    } catch (_error) {
+    } catch (__error) {
 
       // If we have cached data that's expired, use it as fallback
       if (this.menuCache.items) {
@@ -521,7 +521,7 @@ class DatabaseService {
       this.menuCache.categories = fallback;
       this.menuCache.categoriesTimestamp = Date.now();
       return fallback;
-    } catch (_error) {
+    } catch (__error) {
 
       // If we have cached data that's expired, use it as fallback
       if (this.menuCache.categories) {
@@ -550,17 +550,17 @@ class DatabaseService {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(_categoryData),
+        body: JSON.stringify(__categoryData),
       });
 
       return response.data;
-    } catch (_error) {
+    } catch (__error) {
       throw error;
     }
   }
 
   async updateCategory(
-    categoryId: string,
+    categoryId: _string,
     categoryData: Partial<{
       name: string;
       description?: string;
@@ -578,7 +578,7 @@ class DatabaseService {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(_categoryData),
+          body: JSON.stringify(__categoryData),
         },
       );
 
@@ -589,12 +589,12 @@ class DatabaseService {
 
       const result = await response.json();
       return result.data || result;
-    } catch (_error) {
+    } catch (__error) {
       throw error;
     }
   }
 
-  async deleteCategory(categoryId: string): Promise<void> {
+  async deleteCategory(categoryId: _string): Promise<void> {
     try {
       const response = await this.authRequest(
         `${this.baseUrl}/api/v1/products/categories/${categoryId}`,
@@ -611,7 +611,7 @@ class DatabaseService {
         throw new Error(`Failed to delete category: ${error}`);
       }
 
-    } catch (_error) {
+    } catch (__error) {
       throw error;
     }
   }
@@ -638,17 +638,17 @@ class DatabaseService {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(_productData),
+        body: JSON.stringify(__productData),
       });
 
       return response.data;
-    } catch (_error) {
+    } catch (__error) {
       throw error;
     }
   }
 
   async updateProduct(
-    productId: string,
+    productId: _string,
     productData: Partial<{
       category_id?: string;
       name?: string;
@@ -672,21 +672,21 @@ class DatabaseService {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(_productData),
+        body: JSON.stringify(__productData),
       });
 
       return response.data;
-    } catch (_error) {
+    } catch (__error) {
       throw error;
     }
   }
 
-  async deleteProduct(productId: string): Promise<void> {
+  async deleteProduct(productId: _string): Promise<void> {
     try {
       await this.apiRequest(`/api/v1/products/${productId}`, {
         method: 'DELETE',
       });
-    } catch (_error) {
+    } catch (__error) {
       throw error;
     }
   }
@@ -694,8 +694,8 @@ class DatabaseService {
   // Clear menu cache - useful when data is updated
   clearMenuCache(): void {
     this.menuCache = {
-      items: null,
-      categories: null,
+      items: _null,
+      categories: _null,
       itemsTimestamp: 0,
       categoriesTimestamp: 0,
     };
@@ -718,7 +718,7 @@ class DatabaseService {
     // Transform categories to match expected format
     return CHUCHO_CATEGORIES.map(cat => ({
       ...cat,
-      active: true, // All categories are active
+      active: _true, // All categories are active
     }));
   }
 
@@ -737,23 +737,23 @@ class DatabaseService {
 
       this.currentSession = response.data;
       return this.currentSession;
-    } catch (_error) {
+    } catch (__error) {
       return null;
     }
   }
 
-  async createSession(configId: number): Promise<PosSession | null> {
+  async createSession(configId: _number): Promise<PosSession | null> {
     try {
       const response = await this.apiRequest('/api/v1/pos/sessions', {
         method: 'POST',
         body: JSON.stringify({
-          config_id: configId,
+          config_id: _configId,
         }),
       });
 
       this.currentSession = response.data;
       return this.currentSession;
-    } catch (_error) {
+    } catch (__error) {
       return null;
     }
   }
@@ -770,24 +770,24 @@ class DatabaseService {
 
       const response = await this.apiRequest('/api/v1/orders', {
         method: 'POST',
-        body: JSON.stringify(_orderData),
+        body: JSON.stringify(__orderData),
       });
 
       return response.data;
-    } catch (_error) {
+    } catch (__error) {
       return null;
     }
   }
 
-  async updateOrder(orderId: number, updates: Partial<Order>): Promise<Order | null> {
+  async updateOrder(orderId: _number, updates: Partial<Order>): Promise<Order | null> {
     try {
       const response = await this.apiRequest(`/api/v1/orders/${orderId}`, {
         method: 'PUT',
-        body: JSON.stringify(_updates),
+        body: JSON.stringify(__updates),
       });
 
       return response.data;
-    } catch (_error) {
+    } catch (__error) {
       return null;
     }
   }
@@ -799,23 +799,23 @@ class DatabaseService {
       });
 
       return response.data || [];
-    } catch (_error) {
+    } catch (__error) {
       return [];
     }
   }
 
   // Payment processing - PHASE 3: Updated to match backend multi-provider endpoint
-  async processPayment(orderId: number, paymentMethod: string, amount: number): Promise<boolean> {
+  async processPayment(orderId: _number, paymentMethod: _string, amount: _number): Promise<boolean> {
     try {
 
       const response = await this.apiRequest('/api/v1/payments/process', {
         method: 'POST',
         body: JSON.stringify({
           order_id: orderId.toString(),
-          amount: amount,
+          amount: _amount,
           currency: 'GBP',
           metadata: {
-            payment_method: paymentMethod,
+            payment_method: _paymentMethod,
             frontend_source: 'mobile_app',
           },
         }),
@@ -828,55 +828,55 @@ class DatabaseService {
       } else {
         return false;
       }
-    } catch (_error) {
+    } catch (__error) {
       return false;
     }
   }
 
   // Restaurant-specific operations - FIXED: Convert to REST API endpoints
-  async getRestaurantFloorPlan(sectionId?: string): Promise<unknown> {
+  async getRestaurantFloorPlan(sectionId?: _string): Promise<unknown> {
     try {
       const endpoint = sectionId
         ? `/api/v1/restaurants/floor-plan?section_id=${sectionId}`
         : '/api/v1/restaurants/floor-plan';
 
-      const response = await this.apiRequest(_endpoint, {
+      const response = await this.apiRequest(__endpoint, {
         method: 'GET',
       });
 
       return response.data || null;
-    } catch (_error) {
+    } catch (__error) {
       throw error;
     }
   }
 
-  async updateTableStatus(tableId: string, status: string, additionalData?: unknown): Promise<unknown> {
+  async updateTableStatus(tableId: _string, status: _string, additionalData?: _unknown): Promise<unknown> {
     try {
       const response = await this.apiRequest(`/api/v1/restaurants/tables/${tableId}/status`, {
         method: 'PUT',
         body: JSON.stringify({
-          status: status,
+          status: _status,
           ...additionalData,
         }),
       });
 
       return response.data;
-    } catch (_error) {
+    } catch (__error) {
       return null;
     }
   }
 
-  async assignTableServer(tableId: string, serverId: string): Promise<unknown> {
+  async assignTableServer(tableId: _string, serverId: _string): Promise<unknown> {
     try {
       const response = await this.apiRequest(`/api/v1/restaurants/tables/${tableId}/server`, {
         method: 'PUT',
         body: JSON.stringify({
-          server_id: serverId,
+          server_id: _serverId,
         }),
       });
 
       return response.data;
-    } catch (_error) {
+    } catch (__error) {
       return null;
     }
   }
@@ -888,12 +888,12 @@ class DatabaseService {
       });
 
       return response.data || [];
-    } catch (_error) {
+    } catch (__error) {
       return [];
     }
   }
 
-  async getDailySalesReport(date?: string): Promise<unknown> {
+  async getDailySalesReport(date?: _string): Promise<unknown> {
     try {
       const queryParam = date ? `?date=${date}` : '';
       const response = await this.apiRequest(`/api/v1/reports/daily-sales${queryParam}`, {
@@ -901,21 +901,21 @@ class DatabaseService {
       });
 
       return response.data || null;
-    } catch (_error) {
+    } catch (__error) {
       throw error;
     }
   }
 
-  async getSalesSummary(dateFrom?: string, dateTo?: string): Promise<unknown> {
+  async getSalesSummary(dateFrom?: _string, dateTo?: _string): Promise<unknown> {
     try {
       let queryParams = '';
       if (dateFrom || dateTo) {
         const params = new URLSearchParams();
-        if (_dateFrom) {
-          params.append('date_from', dateFrom);
+        if (__dateFrom) {
+          params.append('date_from', _dateFrom);
         }
-        if (_dateTo) {
-          params.append('date_to', dateTo);
+        if (__dateTo) {
+          params.append('date_to', _dateTo);
         }
         queryParams = `?${params.toString()}`;
       }
@@ -925,7 +925,7 @@ class DatabaseService {
       });
 
       return response.data || null;
-    } catch (_error) {
+    } catch (__error) {
       throw error;
     }
   }
@@ -933,16 +933,16 @@ class DatabaseService {
   // Cache management
   async syncOfflineData(): Promise<void> {
     try {
-      // Sync any offline orders, products, etc.
+      // Sync any offline orders, _products, etc.
       const offlineOrders = await AsyncStorage.getItem('offline_orders');
-      if (_offlineOrders) {
-        const orders = JSON.parse(_offlineOrders);
+      if (__offlineOrders) {
+        const orders = JSON.parse(__offlineOrders);
         for (const order of orders) {
-          await this.createOrder(_order);
+          await this.createOrder(__order);
         }
         await AsyncStorage.removeItem('offline_orders');
       }
-    } catch (_error) {
+    } catch (__error) {
     }
   }
 
@@ -954,7 +954,7 @@ class DatabaseService {
     return null;
   }
 
-  async printReceipt(order: Order): Promise<boolean> {
+  async printReceipt(order: _Order): Promise<boolean> {
     // TODO: integrate with AirPrint / ESC-POS printers
     return true; // pretend success so caller flow continues
   }
@@ -974,7 +974,7 @@ class DatabaseService {
       });
 
       return response.data || [];
-    } catch (_error) {
+    } catch (__error) {
       // Return empty array instead of throwing to prevent app crashes
       return [];
     }
@@ -992,7 +992,7 @@ class DatabaseService {
       });
 
       return response.data || [];
-    } catch (_error) {
+    } catch (__error) {
       throw new Error('Backend connection required for inventory data');
     }
   }
@@ -1004,12 +1004,12 @@ class DatabaseService {
       });
 
       return response.data || [];
-    } catch (_error) {
+    } catch (__error) {
       throw new Error('Backend connection required for employee data');
     }
   }
 
-  async getWeekSchedule(weekStart: Date, employees: unknown[]): Promise<any | null> {
+  async getWeekSchedule(weekStart: _Date, employees: unknown[]): Promise<any | null> {
     try {
       // FIXED: Use GET request instead of POST to match backend
       const response = await this.apiRequest('/api/v1/schedule/week', {
@@ -1017,7 +1017,7 @@ class DatabaseService {
       });
 
       return response.data || null;
-    } catch (_error) {
+    } catch (__error) {
       throw new Error('Backend connection required for schedule data');
     }
   }
@@ -1029,25 +1029,25 @@ class DatabaseService {
       });
 
       return response.data || [];
-    } catch (_error) {
+    } catch (__error) {
       return [];
     }
   }
 
-  async getOrdersByDateRange(dateRange: string): Promise<any[]> {
+  async getOrdersByDateRange(dateRange: _string): Promise<any[]> {
     // Renamed to match DataService call intent
     throw new Error('DatabaseService.getOrdersByDateRange not implemented yet');
   }
 
-  async getFinancialReportDetail(period: string): Promise<any | null> {
+  async getFinancialReportDetail(period: _string): Promise<any | null> {
     throw new Error('DatabaseService.getFinancialReportDetail not implemented yet');
   }
 
-  async getSalesReportDetail(period: string): Promise<any[]> {
+  async getSalesReportDetail(period: _string): Promise<any[]> {
     throw new Error('DatabaseService.getSalesReportDetail not implemented yet');
   }
 
-  async getStaffReportDetail(period: string): Promise<any[]> {
+  async getStaffReportDetail(period: _string): Promise<any[]> {
     throw new Error('DatabaseService.getStaffReportDetail not implemented yet');
   }
 
@@ -1063,7 +1063,7 @@ class DatabaseService {
       });
 
       return response.data || null;
-    } catch (_error) {
+    } catch (__error) {
       throw new Error('Backend connection required for analytics dashboard data');
     }
   }

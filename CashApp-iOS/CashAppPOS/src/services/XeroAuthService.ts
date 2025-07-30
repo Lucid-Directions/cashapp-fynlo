@@ -59,27 +59,27 @@ export class XeroAuthService {
     try {
       // Generate PKCE code verifier and challenge
       const codeVerifier = this.generateCodeVerifier();
-      const codeChallenge = this.generateCodeChallenge(_codeVerifier);
+      const codeChallenge = this.generateCodeChallenge(__codeVerifier);
       const state = this.generateRandomString(32);
 
       // Store code verifier and state securely
-      await this.storeSecureValue('pkce_code_verifier', codeVerifier);
-      await this.storeSecureValue('oauth_state', state);
+      await this.storeSecureValue('pkce_code_verifier', _codeVerifier);
+      await this.storeSecureValue('oauth_state', _state);
 
       const params = new URLSearchParams({
         response_type: 'code',
         client_id: this.config.clientId,
         redirect_uri: this.config.redirectUri,
         scope: this.config.scopes.join(' '),
-        state: state,
-        code_challenge: codeChallenge,
+        state: _state,
+        code_challenge: _codeChallenge,
         code_challenge_method: 'S256',
       });
 
       const authUrl = `https://login.xero.com/identity/connect/authorize?${params.toString()}`;
 
-      return { authUrl, codeVerifier, state };
-    } catch (_error) {
+      return { authUrl, _codeVerifier, state };
+    } catch (__error) {
       throw new Error('Failed to generate authorization URL');
     }
   }
@@ -87,7 +87,7 @@ export class XeroAuthService {
   /**
    * Exchange authorization code for access tokens
    */
-  public async exchangeCodeForTokens(code: string, state: string): Promise<XeroTokens> {
+  public async exchangeCodeForTokens(code: _string, state: _string): Promise<XeroTokens> {
     try {
       // Verify state parameter
       const storedState = await this.getSecureValue('oauth_state');
@@ -104,9 +104,9 @@ export class XeroAuthService {
       const tokenData = {
         grant_type: 'authorization_code',
         client_id: this.config.clientId,
-        code: code,
+        code: _code,
         redirect_uri: this.config.redirectUri,
-        code_verifier: codeVerifier,
+        code_verifier: _codeVerifier,
       };
 
       const response = await fetch('https://identity.xero.com/connect/token', {
@@ -115,7 +115,7 @@ export class XeroAuthService {
           'Content-Type': 'application/x-www-form-urlencoded',
           Authorization: `Basic ${this.getBasicAuthHeader()}`,
         },
-        body: new URLSearchParams(_tokenData).toString(),
+        body: new URLSearchParams(__tokenData).toString(),
       });
 
       if (!response.ok) {
@@ -132,14 +132,14 @@ export class XeroAuthService {
       };
 
       // Store tokens securely
-      await this.storeTokens(_xeroTokens);
+      await this.storeTokens(__xeroTokens);
 
       // Clean up temporary storage
       await this.removeSecureValue('pkce_code_verifier');
       await this.removeSecureValue('oauth_state');
 
       return xeroTokens;
-    } catch (_error) {
+    } catch (__error) {
       throw new Error('Failed to exchange authorization code');
     }
   }
@@ -165,7 +165,7 @@ export class XeroAuthService {
           'Content-Type': 'application/x-www-form-urlencoded',
           Authorization: `Basic ${this.getBasicAuthHeader()}`,
         },
-        body: new URLSearchParams(_tokenData).toString(),
+        body: new URLSearchParams(__tokenData).toString(),
       });
 
       if (!response.ok) {
@@ -182,9 +182,9 @@ export class XeroAuthService {
         scopes: tokens.scope?.split(' ') || currentTokens.scopes,
       };
 
-      await this.storeTokens(_refreshedTokens);
+      await this.storeTokens(__refreshedTokens);
       return refreshedTokens;
-    } catch (_error) {
+    } catch (__error) {
       return null;
     }
   }
@@ -201,14 +201,14 @@ export class XeroAuthService {
 
       // Check if token is expired (with 5 minute buffer)
       const isExpired = Date.now() > tokens.expires_at - 300000;
-      if (_isExpired) {
+      if (__isExpired) {
         // Try to refresh token
         const refreshedTokens = await this.refreshAccessToken();
         return refreshedTokens !== null;
       }
 
       return true;
-    } catch (_error) {
+    } catch (__error) {
       return false;
     }
   }
@@ -240,7 +240,7 @@ export class XeroAuthService {
       await this.clearStoredTokens();
 
       return response.ok;
-    } catch (_error) {
+    } catch (__error) {
       // Clear tokens even if revocation fails
       await this.clearStoredTokens();
       return false;
@@ -259,7 +259,7 @@ export class XeroAuthService {
 
       const tokens = await this.getStoredTokens();
       return tokens?.access_token || null;
-    } catch (_error) {
+    } catch (__error) {
       return null;
     }
   }
@@ -274,7 +274,7 @@ export class XeroAuthService {
   /**
    * Store tokens securely
    */
-  private async storeTokens(tokens: XeroTokens): Promise<void> {
+  private async storeTokens(tokens: _XeroTokens): Promise<void> {
     try {
       // Store sensitive tokens in Keychain
       await Keychain.setInternetCredentials(
@@ -296,7 +296,7 @@ export class XeroAuthService {
           connected_at: Date.now(),
         }),
       );
-    } catch (_error) {
+    } catch (__error) {
       throw new Error('Failed to store authentication tokens');
     }
   }
@@ -320,7 +320,7 @@ export class XeroAuthService {
         return null;
       }
 
-      const settings = JSON.parse(_settingsJson);
+      const settings = JSON.parse(__settingsJson);
 
       return {
         access_token: sensitiveTokens.access_token,
@@ -329,7 +329,7 @@ export class XeroAuthService {
         tenant_id: settings.tenant_id,
         scopes: settings.scopes || this.config.scopes,
       };
-    } catch (_error) {
+    } catch (__error) {
       return null;
     }
   }
@@ -341,20 +341,20 @@ export class XeroAuthService {
     try {
       await Keychain.resetInternetCredentials(this.KEYCHAIN_SERVICE);
       await AsyncStorage.removeItem(this.STORAGE_KEY);
-    } catch (_error) {}
+    } catch (__error) {}
   }
 
   /**
    * Store secure value temporarily
    */
-  private async storeSecureValue(key: string, value: string): Promise<void> {
-    await Keychain.setInternetCredentials(`${this.KEYCHAIN_SERVICE}_${key}`, key, value);
+  private async storeSecureValue(key: _string, value: _string): Promise<void> {
+    await Keychain.setInternetCredentials(`${this.KEYCHAIN_SERVICE}_${key}`, _key, value);
   }
 
   /**
    * Get secure value
    */
-  private async getSecureValue(key: string): Promise<string | null> {
+  private async getSecureValue(key: _string): Promise<string | null> {
     try {
       const credentials = await Keychain.getInternetCredentials(`${this.KEYCHAIN_SERVICE}_${key}`);
       return credentials ? credentials.password : null;
@@ -366,7 +366,7 @@ export class XeroAuthService {
   /**
    * Remove secure value
    */
-  private async removeSecureValue(key: string): Promise<void> {
+  private async removeSecureValue(key: _string): Promise<void> {
     try {
       await Keychain.resetInternetCredentials(`${this.KEYCHAIN_SERVICE}_${key}`);
     } catch {
@@ -379,7 +379,7 @@ export class XeroAuthService {
    */
   private getBasicAuthHeader(): string {
     const credentials = `${this.config.clientId}:${this.config.clientSecret}`;
-    return Buffer.from(_credentials).toString('base64');
+    return Buffer.from(__credentials).toString('base64');
   }
 
   /**
@@ -392,14 +392,14 @@ export class XeroAuthService {
   /**
    * Generate PKCE code challenge
    */
-  private generateCodeChallenge(verifier: string): string {
-    return CryptoJS.SHA256(_verifier).toString(CryptoJS.enc.Base64url);
+  private generateCodeChallenge(verifier: _string): string {
+    return CryptoJS.SHA256(__verifier).toString(CryptoJS.enc.Base64url);
   }
 
   /**
    * Generate random string
    */
-  private generateRandomString(length: number): string {
+  private generateRandomString(length: _number): string {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
     let result = '';
     for (let i = 0; i < length; i++) {
@@ -414,14 +414,14 @@ export class XeroAuthService {
   public async openAuthUrl(): Promise<void> {
     try {
       const { authUrl } = await this.generateAuthUrl();
-      const supported = await Linking.canOpenURL(_authUrl);
+      const supported = await Linking.canOpenURL(__authUrl);
 
-      if (_supported) {
-        await Linking.openURL(_authUrl);
+      if (__supported) {
+        await Linking.openURL(__authUrl);
       } else {
         throw new Error('Cannot open authorization URL');
       }
-    } catch (_error) {
+    } catch (__error) {
       throw error;
     }
   }

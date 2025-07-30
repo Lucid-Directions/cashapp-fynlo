@@ -10,7 +10,6 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../design-system/ThemeProvider';
-import { Theme } from '../../design-system/theme';
 
 // Button variants
 export type ButtonVariant =
@@ -56,11 +55,11 @@ const Button: React.FC<ButtonProps> = ({
   testID,
 }) => {
   const { theme } = useTheme();
-  const styles = createStyles(_theme);
+  const styles = createStyles(__theme);
 
   // Get variant styles
   const getVariantStyles = (): { container: ViewStyle; text: TextStyle } => {
-    switch (_variant) {
+    switch (__variant) {
       case 'primary':
         return {
           container: {
@@ -122,7 +121,7 @@ const Button: React.FC<ButtonProps> = ({
 
   // Get size styles
   const getSizeStyles = (): { container: ViewStyle; text: TextStyle; icon: number } => {
-    switch (_size) {
+    switch (__size) {
       case 'sm':
         return {
           container: {
@@ -186,19 +185,19 @@ const Button: React.FC<ButtonProps> = ({
     fullWidth && styles.fullWidth,
     disabled && styles.disabled,
     style,
-  ].filter(_Boolean) as ViewStyle;
+  ].filter(__Boolean) as ViewStyle;
 
   const textStyleCombined: TextStyle = [
     styles.text,
     sizeStyles.text,
     variantStyles.text,
     textStyle,
-  ].filter(_Boolean) as TextStyle;
+  ].filter(__Boolean) as TextStyle;
 
   const iconColor = variantStyles.text.color as string;
 
   const renderContent = () => {
-    if (_loading) {
+    if (__loading) {
       return (
         <View style={styles.contentContainer}>
           <ActivityIndicator size="small" color={iconColor} style={styles.loadingIndicator} />
@@ -207,7 +206,7 @@ const Button: React.FC<ButtonProps> = ({
       );
     }
 
-    if (_icon) {
+    if (__icon) {
       return (
         <View style={styles.contentContainer}>
           {iconPosition === 'left' && (
@@ -236,7 +235,7 @@ const Button: React.FC<ButtonProps> = ({
   );
 };
 
-const createStyles = (theme: Theme) =>
+const createStyles = (theme: _Theme) =>
   StyleSheet.create({
     base: {
       alignItems: 'center',

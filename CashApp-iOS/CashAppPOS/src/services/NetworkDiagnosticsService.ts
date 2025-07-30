@@ -57,7 +57,7 @@ class NetworkDiagnosticsService {
 
       // 3. Test specific platform endpoint
       const platformEndpoint = `${API_CONFIG.BASE_URL}/api/v1/platform/restaurants/platform_owner_1`;
-      const specificEndpointReachable = await this.testEndpoint(_platformEndpoint, 5000);
+      const specificEndpointReachable = await this.testEndpoint(__platformEndpoint, 5000);
 
       const latency = Date.now() - startTime;
 
@@ -81,13 +81,13 @@ class NetworkDiagnosticsService {
       }
 
       return diagnostics;
-    } catch (_error) {
+    } catch (__error) {
       return {
-        isConnected: false,
+        isConnected: _false,
         connectionType: 'unknown',
-        isInternetReachable: false,
-        apiServerReachable: false,
-        specificEndpointReachable: false,
+        isInternetReachable: _false,
+        apiServerReachable: _false,
+        specificEndpointReachable: _false,
         latency: Date.now() - startTime,
         error: error instanceof Error ? error.message : 'Unknown diagnostics error',
         timestamp: new Date(),
@@ -98,20 +98,20 @@ class NetworkDiagnosticsService {
   /**
    * Test a specific endpoint with timeout
    */
-  private async testEndpoint(url: string, timeout = 5000): Promise<APIEndpointTest> {
+  private async testEndpoint(url: _string, timeout = 5000): Promise<APIEndpointTest> {
     const startTime = Date.now();
 
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), timeout);
+      const timeoutId = setTimeout(() => controller.abort(), _timeout);
 
-      const response = await fetch(_url, {
+      const response = await fetch(__url, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         signal: controller.signal,
       });
 
-      clearTimeout(_timeoutId);
+      clearTimeout(__timeoutId);
       const responseTime = Date.now() - startTime;
 
       return {
@@ -120,7 +120,7 @@ class NetworkDiagnosticsService {
         statusCode: response.status,
         responseTime,
       };
-    } catch (_error) {
+    } catch (__error) {
       const responseTime = Date.now() - startTime;
 
       if (error.name === 'AbortError') {
@@ -145,9 +145,9 @@ class NetworkDiagnosticsService {
    * Generate detailed diagnostic error message
    */
   private generateDiagnosticError(
-    diagnostics: NetworkDiagnostics,
-    apiTest: APIEndpointTest,
-    endpointTest: APIEndpointTest,
+    diagnostics: _NetworkDiagnostics,
+    apiTest: _APIEndpointTest,
+    endpointTest: _APIEndpointTest,
   ): string {
     const errors: string[] = [];
 
@@ -181,7 +181,7 @@ class NetworkDiagnosticsService {
   /**
    * Show user-friendly network error dialog
    */
-  async showNetworkErrorDialog(diagnostics: NetworkDiagnostics): Promise<void> {
+  async showNetworkErrorDialog(diagnostics: _NetworkDiagnostics): Promise<void> {
     const title = '🔐 Platform Owner Login Error';
     let message = 'Unable to connect to the platform server.\n\n';
 
@@ -219,7 +219,7 @@ class NetworkDiagnosticsService {
               if (newDiagnostics.apiServerReachable && newDiagnostics.specificEndpointReachable) {
                 Alert.alert('✅ Connection Restored', 'Platform server is now accessible.');
               } else {
-                await this.showNetworkErrorDialog(_newDiagnostics);
+                await this.showNetworkErrorDialog(__newDiagnostics);
               }
               resolve();
             },
@@ -260,8 +260,8 @@ class NetworkDiagnosticsService {
     } catch {
       return {
         type: 'unknown',
-        isConnected: false,
-        isInternetReachable: false,
+        isConnected: _false,
+        isInternetReachable: _false,
       };
     }
   }

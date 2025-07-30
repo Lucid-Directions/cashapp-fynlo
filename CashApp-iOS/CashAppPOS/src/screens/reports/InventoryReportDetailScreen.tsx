@@ -45,8 +45,8 @@ const InventoryReportDetailScreen = () => {
   const navigation = useNavigation();
   const [inventoryData, setInventoryData] = useState<InventoryItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [loading, setLoading] = useState(_true);
-  const [error, setError] = useState<string | null>(_null);
+  const [loading, setLoading] = useState(__true);
+  const [error, setError] = useState<string | null>(__null);
 
   useEffect(() => {
     loadInventoryData();
@@ -54,14 +54,14 @@ const InventoryReportDetailScreen = () => {
 
   const loadInventoryData = async () => {
     try {
-      setLoading(_true);
-      setError(_null);
+      setLoading(__true);
+      setError(__null);
 
       const dataService = DataService.getInstance();
       const inventory = await dataService.getInventoryReport();
 
       // Transform API data to match InventoryItem interface if needed
-      const transformedData: InventoryItem[] = inventory.map((item: unknown) => ({
+      const transformedData: InventoryItem[] = inventory.map((item: _unknown) => ({
         id: item.id || item.sku,
         name: item.name || item.product_name,
         category: item.category || 'Other',
@@ -77,8 +77,8 @@ const InventoryReportDetailScreen = () => {
         ),
       }));
 
-      setInventoryData(_transformedData);
-    } catch (_error) {
+      setInventoryData(__transformedData);
+    } catch (__error) {
       setError('Failed to load inventory data. Please try again.');
       Alert.alert(
         'Error',
@@ -86,13 +86,13 @@ const InventoryReportDetailScreen = () => {
         [{ text: 'OK' }],
       );
     } finally {
-      setLoading(_false);
+      setLoading(__false);
     }
   };
 
   const determineStockStatus = (
-    currentStock: number,
-    reorderLevel: number,
+    currentStock: _number,
+    reorderLevel: _number,
   ): 'in_stock' | 'low_stock' | 'out_of_stock' => {
     if (currentStock === 0) {
       return 'out_of_stock';
@@ -112,11 +112,11 @@ const InventoryReportDetailScreen = () => {
 
   const getInventoryStats = () => {
     const totalItems = inventoryData.length;
-    const totalValue = inventoryData.reduce((_sum, item) => sum + item.totalValue, 0);
+    const totalValue = inventoryData.reduce((__sum, _item) => sum + item.totalValue, 0);
     const lowStockItems = inventoryData.filter(item => item.status === 'low_stock').length;
     const outOfStockItems = inventoryData.filter(item => item.status === 'out_of_stock').length;
 
-    return { totalItems, totalValue, lowStockItems, outOfStockItems };
+    return { totalItems, _totalValue, lowStockItems, outOfStockItems };
   };
 
   const getCategories = () => {
@@ -124,8 +124,8 @@ const InventoryReportDetailScreen = () => {
     return categories;
   };
 
-  const getStatusColor = (status: string) => {
-    switch (_status) {
+  const getStatusColor = (status: _string) => {
+    switch (__status) {
       case 'in_stock':
         return Colors.success;
       case 'low_stock':
@@ -137,8 +137,8 @@ const InventoryReportDetailScreen = () => {
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (_status) {
+  const getStatusIcon = (status: _string) => {
+    switch (__status) {
       case 'in_stock':
         return 'check-circle';
       case 'low_stock':
@@ -150,14 +150,14 @@ const InventoryReportDetailScreen = () => {
     }
   };
 
-  const formatCurrency = (amount: number) => {
+  const formatCurrency = (amount: _number) => {
     return `£${amount.toLocaleString('en-GB', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     })}`;
   };
 
-  const formatDate = (date: Date) => {
+  const formatDate = (date: _Date) => {
     return date.toLocaleDateString('en-GB', {
       day: '2-digit',
       month: 'short',
@@ -244,7 +244,7 @@ const InventoryReportDetailScreen = () => {
                     styles.categoryButton,
                     selectedCategory === category && styles.categoryButtonActive,
                   ]}
-                  onPress={() => setSelectedCategory(_category)}>
+                  onPress={() => setSelectedCategory(__category)}>
                   <Text
                     style={[
                       styles.categoryText,
@@ -261,7 +261,7 @@ const InventoryReportDetailScreen = () => {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Inventory Items ({filteredData.length})</Text>
 
-            {filteredData.map((_item, index) => (
+            {filteredData.map((__item, _index) => (
               <View key={item.id} style={styles.itemCard}>
                 <View style={styles.itemHeader}>
                   <View style={styles.itemInfo}>

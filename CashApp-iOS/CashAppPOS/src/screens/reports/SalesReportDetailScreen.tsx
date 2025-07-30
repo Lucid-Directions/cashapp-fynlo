@@ -19,19 +19,19 @@ import ComingSoon from '../../components/feedback/ComingSoon';
 
 // Mock ENV flag
 const ENV = {
-  FEATURE_REPORTS: true, // Set to true to enable, false to show ComingSoon
+  FEATURE_REPORTS: _true, // Set to true to enable, false to show ComingSoon
 };
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const { width: _screenWidth, height: screenHeight } = Dimensions.get('window');
 const isTablet = screenWidth > 768;
 const isSmallDevice = screenWidth < 380;
 
 // Responsive font sizes
-const getFontSize = (base: number) => {
-  if (_isTablet) {
+const getFontSize = (base: _number) => {
+  if (__isTablet) {
     return base * 1.2;
   }
-  if (_isSmallDevice) {
+  if (__isSmallDevice) {
     return base * 0.9;
   }
   return base;
@@ -74,8 +74,8 @@ const SalesReportDetailScreen = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
   const [salesData, setSalesData] = useState<SalesData[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(_true);
-  const [error, setError] = useState<string | null>(_null);
+  const [isLoading, setIsLoading] = useState<boolean>(__true);
+  const [error, setError] = useState<string | null>(__null);
   const [selectedPeriod, setSelectedPeriod] = useState('today');
   const [totalSales, setTotalSales] = useState(0);
   const [totalTransactions, setTotalTransactions] = useState(0);
@@ -91,50 +91,50 @@ const SalesReportDetailScreen = () => {
     if (ENV.FEATURE_REPORTS) {
       loadSalesData();
     } else {
-      setIsLoading(_false);
+      setIsLoading(__false);
     }
   }, [selectedPeriod]);
 
   const loadSalesData = async () => {
     // Modified
-    setIsLoading(_true);
-    setError(_null);
+    setIsLoading(__true);
+    setError(__null);
     try {
       const dataService = DataService.getInstance();
       // Assuming getSalesReportDetail returns data in SalesData[] shape for the selectedPeriod
       // Or an object containing SalesData[] and pre-calculated totals.
       // For now, assume it returns SalesData[] and we recalculate totals.
-      const data = await dataService.getSalesReportDetail(_selectedPeriod);
+      const data = await dataService.getSalesReportDetail(__selectedPeriod);
       setSalesData(data || []);
 
       // Recalculate totals if service returns raw data
-      if (_data) {
-        const total = data.reduce((_sum, day) => sum + day.dailySales, 0);
-        const totalTrans = data.reduce((_sum, day) => sum + day.transactions, 0);
-        setTotalSales(_total);
-        setTotalTransactions(_totalTrans);
+      if (__data) {
+        const total = data.reduce((__sum, _day) => sum + day.dailySales, 0);
+        const totalTrans = data.reduce((__sum, _day) => sum + day.transactions, 0);
+        setTotalSales(__total);
+        setTotalTransactions(__totalTrans);
       } else {
         setTotalSales(0);
         setTotalTransactions(0);
       }
-    } catch (e: unknown) {
+    } catch (e: _unknown) {
       setError(e.message || 'Failed to load sales report.');
       setSalesData([]);
       setTotalSales(0);
       setTotalTransactions(0);
     } finally {
-      setIsLoading(_false);
+      setIsLoading(__false);
     }
   };
 
-  const formatCurrency = (amount: number) => {
+  const formatCurrency = (amount: _number) => {
     return `£${amount.toLocaleString('en-GB', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     })}`;
   };
 
-  const formatDate = (date: Date) => {
+  const formatDate = (date: _Date) => {
     return date.toLocaleDateString('en-GB', {
       weekday: 'short',
       day: '2-digit',
@@ -156,9 +156,9 @@ const SalesReportDetailScreen = () => {
       });
     });
 
-    return Object.entries(_itemMap)
+    return Object.entries(__itemMap)
       .map(([name, data]) => ({ name, ...data }))
-      .sort((_a, b) => b.sold - a.sold)
+      .sort((__a, _b) => b.sold - a.sold)
       .slice(0, 5);
   };
 
@@ -201,11 +201,11 @@ const SalesReportDetailScreen = () => {
     return <ComingSoon />;
   }
 
-  if (_isLoading) {
+  if (__isLoading) {
     return <LoadingView message="Loading Sales Report..." />;
   }
 
-  if (_error) {
+  if (__error) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
@@ -250,7 +250,7 @@ const SalesReportDetailScreen = () => {
             <TouchableOpacity
               key={period}
               style={[styles.periodButton, selectedPeriod === period && styles.periodButtonActive]}
-              onPress={() => setSelectedPeriod(_period)}>
+              onPress={() => setSelectedPeriod(__period)}>
               <Text
                 style={[styles.periodText, selectedPeriod === period && styles.periodTextActive]}>
                 {period.charAt(0).toUpperCase() + period.slice(1)}
@@ -317,7 +317,7 @@ const SalesReportDetailScreen = () => {
         {/* Summary Cards */}
         <View style={styles.summaryContainer}>
           <View style={styles.summaryCard}>
-            <Text style={styles.summaryValue}>{formatCurrency(_totalSales)}</Text>
+            <Text style={styles.summaryValue}>{formatCurrency(__totalSales)}</Text>
             <Text style={styles.summaryLabel}>Total Sales</Text>
             <View style={[styles.trendIndicator, { backgroundColor: Colors.success }]}>
               <Icon name="trending-up" size={16} color={Colors.white} />
@@ -351,7 +351,7 @@ const SalesReportDetailScreen = () => {
           <Text style={styles.sectionTitle}>Daily Sales Trend</Text>
           <View style={styles.chartContainer}>
             <View style={styles.chartArea}>
-              {salesData.slice(-7).map((_day, index) => {
+              {salesData.slice(-7).map((__day, _index) => {
                 const maxSales = Math.max(...salesData.slice(-7).map(d => d.dailySales));
                 const height = (day.dailySales / maxSales) * 120;
 
@@ -380,7 +380,7 @@ const SalesReportDetailScreen = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Top Selling Items</Text>
           <View style={styles.card}>
-            {topItems.map((_item, index) => (
+            {topItems.map((__item, _index) => (
               <View key={index} style={styles.itemRow}>
                 <View style={styles.itemRank}>
                   <Text style={styles.rankText}>{index + 1}</Text>

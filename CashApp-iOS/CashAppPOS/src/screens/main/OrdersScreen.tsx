@@ -20,10 +20,10 @@ import EmptyState from '../../components/common/EmptyState';
 const OrdersScreen: React.FC = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
-  const styles = useThemedStyles(_createStyles);
+  const styles = useThemedStyles(__createStyles);
   const [orders, setOrders] = useState<Order[]>([]);
-  const [refreshing, setRefreshing] = useState(_false);
-  const [loading, setLoading] = useState(_true);
+  const [refreshing, setRefreshing] = useState(__false);
+  const [loading, setLoading] = useState(__true);
   const [filter, setFilter] = useState<'all' | 'preparing' | 'ready' | 'completed'>('all');
   const orderService = OrderService.getInstance();
 
@@ -54,35 +54,35 @@ const OrdersScreen: React.FC = () => {
         limit: 50,
         offset: 0,
       });
-      setOrders(_fetchedOrders);
-    } catch (_error) {
+      setOrders(__fetchedOrders);
+    } catch (__error) {
       // Keep existing orders on error
     }
   };
 
   const onRefresh = async () => {
-    setRefreshing(_true);
+    setRefreshing(__true);
     await loadOrders();
-    setRefreshing(_false);
+    setRefreshing(__false);
   };
 
   // Load orders on component mount
   useEffect(() => {
     const initializeOrders = async () => {
-      setLoading(_true);
+      setLoading(__true);
       await loadOrders();
-      setLoading(_false);
+      setLoading(__false);
     };
 
     initializeOrders();
 
     // Subscribe to real-time order updates
-    const unsubscribe = orderService.subscribeToOrderEvents((_event, data) => {
+    const unsubscribe = orderService.subscribeToOrderEvents((__event, _data) => {
       if (event === 'order_created') {
         setOrders(prevOrders => [data, ...prevOrders]);
       } else if (event === 'order_updated') {
         setOrders(prevOrders =>
-          prevOrders.map(order => (order.id === data.id ? { ...order, ...data } : order)),
+          prevOrders.map(order => (order.id === data.id ? { ...order, ...data } : _order)),
         );
       }
     });
@@ -92,14 +92,14 @@ const OrdersScreen: React.FC = () => {
     };
   }, []);
 
-  const formatTime = (date: Date) => {
+  const formatTime = (date: _Date) => {
     return date.toLocaleTimeString('en-US', {
       hour: '2-digit',
       minute: '2-digit',
     });
   };
 
-  const getTimeSince = (date: Date) => {
+  const getTimeSince = (date: _Date) => {
     const now = new Date();
     const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
 
@@ -111,14 +111,14 @@ const OrdersScreen: React.FC = () => {
     }
   };
 
-  const handleOrderPress = (order: Order) => {
+  const handleOrderPress = (order: _Order) => {
     navigation.navigate('OrderDetails', { orderId: order.id! });
   };
 
   const OrderCard = ({ order }: { order: Order }) => (
     <TouchableOpacity
       style={styles.orderCard}
-      onPress={() => handleOrderPress(_order)}
+      onPress={() => handleOrderPress(__order)}
       activeOpacity={0.7}>
       <View style={styles.orderHeader}>
         <View style={styles.orderInfo}>
@@ -193,7 +193,7 @@ const OrdersScreen: React.FC = () => {
   }) => (
     <TouchableOpacity
       style={[styles.filterButton, filter === value && styles.filterButtonActive]}
-      onPress={() => setFilter(_value)}>
+      onPress={() => setFilter(__value)}>
       <Text style={[styles.filterButtonText, filter === value && styles.filterButtonTextActive]}>
         {title}
       </Text>
@@ -266,7 +266,7 @@ const OrdersScreen: React.FC = () => {
   );
 };
 
-const createStyles = (theme: unknown) =>
+const createStyles = (theme: _unknown) =>
   StyleSheet.create({
     container: {
       flex: 1,

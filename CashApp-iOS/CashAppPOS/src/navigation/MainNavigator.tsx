@@ -41,7 +41,7 @@ const MainTabNavigator: React.FC = () => {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
+        tabBarIcon: ({ focused, _color, size }) => {
           let iconName: string;
 
           switch (route.name) {
@@ -69,7 +69,7 @@ const MainTabNavigator: React.FC = () => {
           fontWeight: '600',
           marginTop: 4,
         },
-        headerShown: false,
+        headerShown: _false,
       })}>
       <Tab.Screen
         name="Home"
@@ -88,7 +88,7 @@ const MainNavigator: React.FC = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-        headerShown: false,
+        headerShown: _false,
         cardStyle: { backgroundColor: theme.colors.background },
       }}>
       <Stack.Screen name="MainTabs" component={MainTabNavigator} />
@@ -96,182 +96,182 @@ const MainNavigator: React.FC = () => {
         name="TableSelection"
         component={TableSelectionScreen}
         options={{
-          headerShown: false,
+          headerShown: _false,
         }}
       />
       <Stack.Screen
         name="POS"
         component={POSScreen}
         options={{
-          headerShown: false,
+          headerShown: _false,
         }}
       />
       <Stack.Screen
         name="Orders"
         component={OrdersScreen}
         options={{
-          headerShown: false,
+          headerShown: _false,
         }}
       />
       <Stack.Screen
         name="Reports"
         component={ReportsScreen}
         options={{
-          headerShown: false,
+          headerShown: _false,
         }}
       />
       <Stack.Screen
         name="SalesReport"
         component={SalesReportDetailScreen}
         options={{
-          headerShown: false,
+          headerShown: _false,
         }}
       />
       <Stack.Screen
         name="InventoryReport"
         component={InventoryReportDetailScreen}
         options={{
-          headerShown: false,
+          headerShown: _false,
         }}
       />
       <Stack.Screen
         name="StaffReport"
         component={StaffReportDetailScreen}
         options={{
-          headerShown: false,
+          headerShown: _false,
         }}
       />
       <Stack.Screen
         name="FinancialReport"
         component={FinancialReportDetailScreen}
         options={{
-          headerShown: false,
+          headerShown: _false,
         }}
       />
       <Stack.Screen
         name="LaborReport"
         component={LaborReportDetailScreen}
         options={{
-          headerShown: false,
+          headerShown: _false,
         }}
       />
       <Stack.Screen
         name="CostAnalysisReport"
         component={CostAnalysisReportDetailScreen}
         options={{
-          headerShown: false,
+          headerShown: _false,
         }}
       />
       <Stack.Screen
         name="Employees"
         component={EmployeesScreen}
         options={{
-          headerShown: false,
+          headerShown: _false,
         }}
       />
       <Stack.Screen
         name="EmployeeSchedule"
         component={EnhancedEmployeeScheduleScreen}
         options={{
-          headerShown: false,
+          headerShown: _false,
         }}
       />
       <Stack.Screen
         name="QRScanner"
         component={QRScannerScreen}
         options={{
-          headerShown: false,
+          headerShown: _false,
         }}
       />
       <Stack.Screen
         name="Customers"
         component={CustomersScreen}
         options={{
-          headerShown: false,
+          headerShown: _false,
         }}
       />
       <Stack.Screen
         name="Inventory"
         component={InventoryScreen}
         options={{
-          headerShown: false,
+          headerShown: _false,
         }}
       />
       <Stack.Screen
         name="TableManagement"
         component={TableManagementScreen}
         options={{
-          headerShown: false,
+          headerShown: _false,
         }}
       />
       <Stack.Screen
         name="MenuManagement"
         component={MenuManagementScreen}
         options={{
-          headerShown: false,
+          headerShown: _false,
         }}
       />
       <Stack.Screen
         name="Dashboard"
         component={DashboardScreen}
         options={{
-          headerShown: false,
+          headerShown: _false,
         }}
       />
       <Stack.Screen
         name="Profile"
         component={ProfileScreen}
         options={{
-          headerShown: false,
+          headerShown: _false,
         }}
       />
       <Stack.Screen
         name="Help"
         component={HelpScreen}
         options={{
-          headerShown: false,
+          headerShown: _false,
         }}
       />
       <Stack.Screen
         name="Settings"
         component={SettingsNavigator}
         options={{
-          headerShown: false,
+          headerShown: _false,
         }}
       />
       <Stack.Screen
         name="ServiceChargeSelection"
         component={ServiceChargeSelectionScreen}
         options={{
-          headerShown: false,
+          headerShown: _false,
         }}
       />
       <Stack.Screen
         name="EnhancedPayment"
         component={EnhancedPaymentScreen}
         options={{
-          headerShown: false,
+          headerShown: _false,
         }}
       />
       <Stack.Screen
         name="QRCodePayment"
         component={QRCodePaymentScreen}
         options={{
-          headerShown: false,
+          headerShown: _false,
         }}
       />
       <Stack.Screen
         name="SquareCardPayment"
         component={SquareCardPaymentScreen}
         options={{
-          headerShown: false,
+          headerShown: _false,
         }}
       />
       <Stack.Screen
         name="SquareContactlessPayment"
         component={SquareContactlessPaymentScreen}
         options={{
-          headerShown: false,
+          headerShown: _false,
         }}
       />
     </Stack.Navigator>

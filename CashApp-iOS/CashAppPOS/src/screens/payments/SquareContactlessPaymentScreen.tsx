@@ -4,7 +4,7 @@
  * Part of the Square secondary payment method integration
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -25,7 +25,7 @@ try {
   const SquareSDK = require('react-native-square-in-app-payments');
   SQIPApplePay = SquareSDK.SQIPApplePay;
   SQIPGooglePay = SquareSDK.SQIPGooglePay;
-} catch (_error) {}
+} catch (__error) {}
 
 interface SquareContactlessPaymentScreenProps {
   navigation: unknown;
@@ -34,7 +34,7 @@ interface SquareContactlessPaymentScreenProps {
       amount: number;
       currency?: string;
       description?: string;
-      onPaymentComplete: (result: unknown) => void;
+      onPaymentComplete: (result: _unknown) => void;
       onPaymentCancelled: () => void;
     };
   };
@@ -62,11 +62,11 @@ const SquareContactlessPaymentScreen: React.FC<SquareContactlessPaymentScreenPro
   } = route.params;
 
   const [contactlessState, setContactlessState] = useState<ContactlessState>({
-    loading: true,
-    processing: false,
-    applePaySupported: false,
-    googlePaySupported: false,
-    errorMessage: null,
+    loading: _true,
+    processing: _false,
+    applePaySupported: _false,
+    googlePaySupported: _false,
+    errorMessage: _null,
   });
 
   // Initialize contactless payment support
@@ -76,7 +76,7 @@ const SquareContactlessPaymentScreen: React.FC<SquareContactlessPaymentScreenPro
 
   // Handle hardware back button
   useEffect(() => {
-    const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackPress);
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', _handleBackPress);
     return () => backHandler.remove();
   }, []);
 
@@ -102,15 +102,15 @@ const SquareContactlessPaymentScreen: React.FC<SquareContactlessPaymentScreenPro
 
       setContactlessState(prev => ({
         ...prev,
-        loading: false,
+        loading: _false,
         applePaySupported,
         googlePaySupported,
-        errorMessage: null,
+        errorMessage: _null,
       }));
-    } catch (_error) {
+    } catch (__error) {
       setContactlessState(prev => ({
         ...prev,
-        loading: false,
+        loading: _false,
         errorMessage:
           error instanceof Error ? error.message : 'Failed to initialize contactless payments',
       }));
@@ -146,14 +146,14 @@ const SquareContactlessPaymentScreen: React.FC<SquareContactlessPaymentScreenPro
 
   const processApplePayPayment = async () => {
     try {
-      setContactlessState(prev => ({ ...prev, processing: true, errorMessage: null }));
+      setContactlessState(prev => ({ ...prev, processing: _true, errorMessage: null }));
 
       // TODO: Implement Apple Pay when SDK is available
       // const applePayResult = await SQIPApplePay.requestApplePayNonce({
       //   price: amount.toString(),
       //   summaryLabel: description || 'Fynlo POS Payment',
       //   countryCode: 'GB',
-      //   currencyCode: currency,
+      //   currencyCode: _currency,
       // });
 
       // Process payment with Square service
@@ -166,24 +166,24 @@ const SquareContactlessPaymentScreen: React.FC<SquareContactlessPaymentScreenPro
 
       if (paymentResult.status === 'completed') {
         onPaymentComplete({
-          success: true,
+          success: _true,
           paymentMethod: 'square_apple_pay',
           transactionId: paymentResult.id,
-          amount: amount,
-          currency: currency,
+          amount: _amount,
+          currency: _currency,
         });
         navigation.goBack();
       } else {
         setContactlessState(prev => ({
           ...prev,
-          processing: false,
+          processing: _false,
           errorMessage: paymentResult.errorMessage || 'Apple Pay payment failed',
         }));
       }
-    } catch (_error) {
+    } catch (__error) {
       setContactlessState(prev => ({
         ...prev,
-        processing: false,
+        processing: _false,
         errorMessage: error instanceof Error ? error.message : 'Apple Pay payment failed',
       }));
     }
@@ -191,12 +191,12 @@ const SquareContactlessPaymentScreen: React.FC<SquareContactlessPaymentScreenPro
 
   const processGooglePayPayment = async () => {
     try {
-      setContactlessState(prev => ({ ...prev, processing: true, errorMessage: null }));
+      setContactlessState(prev => ({ ...prev, processing: _true, errorMessage: null }));
 
       // TODO: Implement Google Pay when SDK is available
       // const googlePayResult = await SQIPGooglePay.requestGooglePayNonce({
       //   price: amount.toString(),
-      //   currencyCode: currency,
+      //   currencyCode: _currency,
       //   priceStatus: 'FINAL',
       // });
 
@@ -210,24 +210,24 @@ const SquareContactlessPaymentScreen: React.FC<SquareContactlessPaymentScreenPro
 
       if (paymentResult.status === 'completed') {
         onPaymentComplete({
-          success: true,
+          success: _true,
           paymentMethod: 'square_google_pay',
           transactionId: paymentResult.id,
-          amount: amount,
-          currency: currency,
+          amount: _amount,
+          currency: _currency,
         });
         navigation.goBack();
       } else {
         setContactlessState(prev => ({
           ...prev,
-          processing: false,
+          processing: _false,
           errorMessage: paymentResult.errorMessage || 'Google Pay payment failed',
         }));
       }
-    } catch (_error) {
+    } catch (__error) {
       setContactlessState(prev => ({
         ...prev,
-        processing: false,
+        processing: _false,
         errorMessage: error instanceof Error ? error.message : 'Google Pay payment failed',
       }));
     }

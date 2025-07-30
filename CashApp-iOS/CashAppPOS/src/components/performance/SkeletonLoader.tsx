@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { View, StyleSheet, Animated, Dimensions } from 'react-native';
+import { View, Animated, Dimensions } from 'react-native';
 
 // Clover POS Color Scheme
 const Colors = {
@@ -29,15 +29,15 @@ const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({
   useEffect(() => {
     const shimmerAnimation = Animated.loop(
       Animated.sequence([
-        Animated.timing(_animatedValue, {
+        Animated.timing(__animatedValue, {
           toValue: 1,
           duration: 1000,
-          useNativeDriver: false,
+          useNativeDriver: _false,
         }),
-        Animated.timing(_animatedValue, {
+        Animated.timing(__animatedValue, {
           toValue: 0,
           duration: 1000,
-          useNativeDriver: false,
+          useNativeDriver: _false,
         }),
       ]),
     );

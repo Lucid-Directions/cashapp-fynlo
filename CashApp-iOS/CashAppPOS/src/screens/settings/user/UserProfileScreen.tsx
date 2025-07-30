@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -16,11 +16,11 @@ import { useTheme, useThemedStyles } from '../../../design-system/ThemeProvider'
 
 const UserProfileScreen: React.FC = () => {
   const navigation = useNavigation();
-  const { user, updateUser, signOut } = useAuth();
+  const { user, _updateUser, signOut } = useAuth();
   const { theme } = useTheme();
-  const styles = useThemedStyles(_createStyles);
-  const [isEditing, setIsEditing] = useState(_false);
-  const [isLoading, setIsLoading] = useState(_false);
+  const styles = useThemedStyles(__createStyles);
+  const [isEditing, setIsEditing] = useState(__false);
+  const [isLoading, setIsLoading] = useState(__false);
 
   // Safe user data with fallbacks
   const safeUser = useMemo(() => {
@@ -31,9 +31,9 @@ const UserProfileScreen: React.FC = () => {
         lastName: '',
         email: '',
         role: 'employee',
-        avatar: null,
+        avatar: _null,
         phone: '',
-        lastLogin: null,
+        lastLogin: _null,
       };
     }
     return {
@@ -57,7 +57,7 @@ const UserProfileScreen: React.FC = () => {
 
   // Update form data when user changes
   useEffect(() => {
-    if (_user) {
+    if (__user) {
       setFormData({
         firstName: safeUser.firstName,
         lastName: safeUser.lastName,
@@ -74,14 +74,14 @@ const UserProfileScreen: React.FC = () => {
     }
 
     try {
-      setIsLoading(_true);
-      await updateUser(_formData);
-      setIsEditing(_false);
+      setIsLoading(__true);
+      await updateUser(__formData);
+      setIsEditing(__false);
       Alert.alert('Success', 'Profile updated successfully');
-    } catch (_error) {
+    } catch (__error) {
       Alert.alert('Error', 'Failed to update profile. Please try again.');
     } finally {
-      setIsLoading(_false);
+      setIsLoading(__false);
     }
   };
 
@@ -96,7 +96,7 @@ const UserProfileScreen: React.FC = () => {
             await signOut();
             // Use goBack instead of reset to avoid navigation errors
             navigation.goBack();
-          } catch (_error) {
+          } catch (__error) {
             Alert.alert('Error', 'Failed to logout. Please try again.');
           }
         },
@@ -115,13 +115,13 @@ const UserProfileScreen: React.FC = () => {
 
   // Settings
   const [profileSettings, setProfileSettings] = useState({
-    emailNotifications: true,
-    smsNotifications: false,
-    twoFactorAuth: true,
-    autoLogout: true,
-    biometricLogin: true,
-    showTips: true,
-    shareAnalytics: false,
+    emailNotifications: _true,
+    smsNotifications: _false,
+    twoFactorAuth: _true,
+    autoLogout: _true,
+    biometricLogin: _true,
+    showTips: _true,
+    shareAnalytics: _false,
   });
 
   const handleChangePassword = () => {
@@ -169,8 +169,8 @@ const UserProfileScreen: React.FC = () => {
     }));
   };
 
-  const getRoleDisplayName = (role: string) => {
-    switch (_role) {
+  const getRoleDisplayName = (role: _string) => {
+    switch (__role) {
       case 'owner':
         return 'Business Owner';
       case 'manager':
@@ -182,8 +182,8 @@ const UserProfileScreen: React.FC = () => {
     }
   };
 
-  const getRoleIcon = (role: string) => {
-    switch (_role) {
+  const getRoleIcon = (role: _string) => {
+    switch (__role) {
       case 'owner':
         return 'business';
       case 'manager':
@@ -488,7 +488,7 @@ const UserProfileScreen: React.FC = () => {
   );
 };
 
-const createStyles = (theme: unknown) =>
+const createStyles = (theme: _unknown) =>
   StyleSheet.create({
     container: {
       flex: 1,

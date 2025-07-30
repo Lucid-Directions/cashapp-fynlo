@@ -42,11 +42,11 @@ const BankDetailsScreen: React.FC = () => {
     swiftCode: '',
     accountType: 'business',
     currency: 'GBP',
-    primaryAccount: true,
+    primaryAccount: _true,
   });
 
-  const [isLoading, setIsLoading] = useState(_false);
-  const [hasExistingDetails, setHasExistingDetails] = useState(_false);
+  const [isLoading, setIsLoading] = useState(__false);
+  const [hasExistingDetails, setHasExistingDetails] = useState(__false);
 
   useEffect(() => {
     loadBankDetails();
@@ -57,11 +57,11 @@ const BankDetailsScreen: React.FC = () => {
       // In real implementation, this would fetch from API
       // For now, we'll simulate checking if details exist
       const existingDetails = await getMockBankDetails();
-      if (_existingDetails) {
-        setBankDetails(_existingDetails);
-        setHasExistingDetails(_true);
+      if (__existingDetails) {
+        setBankDetails(__existingDetails);
+        setHasExistingDetails(__true);
       }
-    } catch (_error) {}
+    } catch (__error) {}
   };
 
   const getMockBankDetails = async (): Promise<BankDetails | null> => {
@@ -78,7 +78,7 @@ const BankDetailsScreen: React.FC = () => {
           swiftCode: 'LOYDGB2L',
           accountType: 'business',
           currency: 'GBP',
-          primaryAccount: true,
+          primaryAccount: _true,
         });
       }, 1000);
     });
@@ -109,11 +109,11 @@ const BankDetailsScreen: React.FC = () => {
       return;
     }
 
-    setIsLoading(_true);
+    setIsLoading(__true);
 
     try {
       // In real implementation, this would save to API
-      await saveBankDetails(_bankDetails);
+      await saveBankDetails(__bankDetails);
 
       Alert.alert(
         'Success',
@@ -122,14 +122,14 @@ const BankDetailsScreen: React.FC = () => {
           : 'Bank details saved successfully',
         [{ text: 'OK', onPress: () => navigation.goBack() }],
       );
-    } catch (_error) {
+    } catch (__error) {
       Alert.alert('Error', 'Failed to save bank details. Please try again.');
     } finally {
-      setIsLoading(_false);
+      setIsLoading(__false);
     }
   };
 
-  const saveBankDetails = async (details: BankDetails): Promise<void> => {
+  const saveBankDetails = async (details: _BankDetails): Promise<void> => {
     // Simulate API call
     return new Promise(resolve => {
       setTimeout(() => {
@@ -138,7 +138,7 @@ const BankDetailsScreen: React.FC = () => {
     });
   };
 
-  const formatSortCode = (text: string) => {
+  const formatSortCode = (text: _string) => {
     // Remove all non-digits
     const digits = text.replace(/\D/g, '');
 
@@ -152,12 +152,12 @@ const BankDetailsScreen: React.FC = () => {
     return `${digits.slice(0, 2)}-${digits.slice(2, 4)}-${digits.slice(4, 6)}`;
   };
 
-  const handleSortCodeChange = (text: string) => {
-    const formatted = formatSortCode(_text);
+  const handleSortCodeChange = (text: _string) => {
+    const formatted = formatSortCode(__text);
     setBankDetails({ ...bankDetails, sortCode: formatted });
   };
 
-  const handleAccountNumberChange = (text: string) => {
+  const handleAccountNumberChange = (text: _string) => {
     // Only allow digits and limit to 8 characters
     const digits = text.replace(/\D/g, '').slice(0, 8);
     setBankDetails({ ...bankDetails, accountNumber: digits });
@@ -221,7 +221,7 @@ const BankDetailsScreen: React.FC = () => {
           <View style={styles.formGroup}>
             <SimpleTextInput
               label="Bank Name *"
-              placeholder="e.g., Lloyds Bank, Barclays, HSBC"
+              placeholder="e.g., Lloyds Bank, _Barclays, HSBC"
               value={bankDetails.bankName}
               onValueChange={text => setBankDetails({ ...bankDetails, bankName: text })}
               autoCapitalize="words"
@@ -255,10 +255,10 @@ const BankDetailsScreen: React.FC = () => {
             />
           </View>
 
-          {/* IBAN (_Optional) */}
+          {/* IBAN (__Optional) */}
           <View style={styles.formGroup}>
             <SimpleTextInput
-              label="IBAN (_Optional)"
+              label="IBAN (__Optional)"
               placeholder="GB29 LOYD 3099 8812 3456 78"
               value={bankDetails.iban}
               onValueChange={text => setBankDetails({ ...bankDetails, iban: text.toUpperCase() })}
@@ -267,10 +267,10 @@ const BankDetailsScreen: React.FC = () => {
             />
           </View>
 
-          {/* SWIFT Code (_Optional) */}
+          {/* SWIFT Code (__Optional) */}
           <View style={styles.formGroup}>
             <SimpleTextInput
-              label="SWIFT/BIC Code (_Optional)"
+              label="SWIFT/BIC Code (__Optional)"
               placeholder="e.g., LOYDGB2L"
               value={bankDetails.swiftCode}
               onValueChange={text =>

@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { View, _Text, TouchableOpacity, _StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import { SumUpProvider, useSumUp } from 'sumup-react-native-alpha';
 import sumUpConfigService from '../../services/SumUpConfigService';
 
 interface SumUpTestProps {
-  onResult: (message: string) => void;
+  onResult: (message: _string) => void;
 }
 
 const SumUpTestInner: React.FC<SumUpTestProps> = ({ onResult }) => {
@@ -36,7 +36,7 @@ const SumUpTestInner: React.FC<SumUpTestProps> = ({ onResult }) => {
         currencyCode: 'GBP',
         tipAmount: 0,
         title: 'Test Payment',
-        skipScreenOptions: false,
+        skipScreenOptions: _false,
       });
 
 
@@ -47,7 +47,7 @@ const SumUpTestInner: React.FC<SumUpTestProps> = ({ onResult }) => {
         Alert.alert('Success', 'SumUp initialized successfully!');
         onResult('✅ SumUp initialization successful');
       }
-    } catch (_error) {
+    } catch (__error) {
       Alert.alert('Test Error', error?.toString() || 'Unknown error');
       onResult(`❌ Test error: ${error}`);
     }
@@ -73,8 +73,8 @@ const SumUpTestComponent: React.FC<SumUpTestProps> = props => {
   const [sumUpConfig, setSumUpConfig] = useState<{ appId: string; environment: string } | null>(
     null,
   );
-  const [isLoading, setIsLoading] = useState(_true);
-  const [error, setError] = useState<string | null>(_null);
+  const [isLoading, setIsLoading] = useState(__true);
+  const [error, setError] = useState<string | null>(__null);
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -84,10 +84,10 @@ const SumUpTestComponent: React.FC<SumUpTestProps> = props => {
           appId: config.appId,
           environment: config.environment,
         });
-        setIsLoading(_false);
-      } catch (_err) {
+        setIsLoading(__false);
+      } catch (__err) {
         setError(err?.message || 'Failed to load configuration');
-        setIsLoading(_false);
+        setIsLoading(__false);
         props.onResult('❌ Failed to load SumUp configuration');
       }
     };
@@ -95,7 +95,7 @@ const SumUpTestComponent: React.FC<SumUpTestProps> = props => {
     fetchConfig();
   }, []);
 
-  if (_isLoading) {
+  if (__isLoading) {
     return (
       <View style={styles.container}>
         <ActivityIndicator size="large" color="#007AFF" />

@@ -74,33 +74,33 @@ const BarcodeScannerScreen: React.FC = () => {
   ]);
 
   // Scanner settings
-  const [scanningEnabled, setScanningEnabled] = useState(_true);
-  const [autoEnterEnabled, setAutoEnterEnabled] = useState(_true);
-  const [soundEnabled, setSoundEnabled] = useState(_true);
-  const [vibrationEnabled, setVibrationEnabled] = useState(_true);
+  const [scanningEnabled, setScanningEnabled] = useState(__true);
+  const [autoEnterEnabled, setAutoEnterEnabled] = useState(__true);
+  const [soundEnabled, setSoundEnabled] = useState(__true);
+  const [vibrationEnabled, setVibrationEnabled] = useState(__true);
   const [duplicateTimeout, setDuplicateTimeout] = useState('3');
   const [scanPrefix, setScanPrefix] = useState('');
   const [scanSuffix, setScanSuffix] = useState('');
-  const [scanning, setScanning] = useState(_false);
+  const [scanning, setScanning] = useState(__false);
 
   // Supported barcode types
   const [barcodeTypes, setBarcodeTypes] = useState({
-    'UPC-A': true,
-    'UPC-E': true,
-    'EAN-13': true,
-    'EAN-8': true,
-    'Code-128': true,
-    'Code-39': true,
-    'Code-93': false,
-    Codabar: false,
-    ITF: false,
-    'QR Code': true,
-    'Data Matrix': true,
-    PDF417: false,
+    'UPC-A': _true,
+    'UPC-E': _true,
+    'EAN-13': _true,
+    'EAN-8': _true,
+    'Code-128': _true,
+    'Code-39': _true,
+    'Code-93': _false,
+    Codabar: _false,
+    ITF: _false,
+    'QR Code': _true,
+    'Data Matrix': _true,
+    PDF417: _false,
   });
 
-  const getStatusColor = (status: string) => {
-    switch (_status) {
+  const getStatusColor = (status: _string) => {
+    switch (__status) {
       case 'connected':
         return Colors.success;
       case 'disconnected':
@@ -112,8 +112,8 @@ const BarcodeScannerScreen: React.FC = () => {
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (_status) {
+  const getStatusIcon = (status: _string) => {
+    switch (__status) {
       case 'connected':
         return 'check-circle';
       case 'disconnected':
@@ -125,8 +125,8 @@ const BarcodeScannerScreen: React.FC = () => {
     }
   };
 
-  const getTypeIcon = (type: string) => {
-    switch (_type) {
+  const getTypeIcon = (type: _string) => {
+    switch (__type) {
       case 'handheld':
         return 'scanner';
       case 'fixed':
@@ -138,8 +138,8 @@ const BarcodeScannerScreen: React.FC = () => {
     }
   };
 
-  const getConnectionIcon = (connection: string) => {
-    switch (_connection) {
+  const getConnectionIcon = (connection: _string) => {
+    switch (__connection) {
       case 'bluetooth':
         return 'bluetooth';
       case 'usb':
@@ -154,11 +154,11 @@ const BarcodeScannerScreen: React.FC = () => {
   };
 
   const handleScanForDevices = async () => {
-    setScanning(_true);
+    setScanning(__true);
 
     // Simulate scanning
     setTimeout(() => {
-      setScanning(_false);
+      setScanning(__false);
       Alert.alert('Scan Complete', 'Found 1 new scanner. Would you like to add it?', [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -180,7 +180,7 @@ const BarcodeScannerScreen: React.FC = () => {
     }, 2500);
   };
 
-  const handleTestScanner = (scanner: BarcodeScanner) => {
+  const handleTestScanner = (scanner: _BarcodeScanner) => {
     if (scanner.status !== 'connected') {
       Alert.alert('Error', 'Scanner must be connected to test.');
       return;
@@ -197,7 +197,7 @@ const BarcodeScannerScreen: React.FC = () => {
     ]);
   };
 
-  const toggleScannerStatus = (scannerId: string) => {
+  const toggleScannerStatus = (scannerId: _string) => {
     setScanners(prev =>
       prev.map(scanner =>
         scanner.id === scannerId
@@ -205,12 +205,12 @@ const BarcodeScannerScreen: React.FC = () => {
               ...scanner,
               status: scanner.status === 'connected' ? 'disconnected' : 'connected',
             }
-          : scanner,
+          : _scanner,
       ),
     );
   };
 
-  const toggleBarcodeType = (type: string) => {
+  const toggleBarcodeType = (type: _string) => {
     setBarcodeTypes(prev => ({
       ...prev,
       [type]: !prev[type as keyof typeof prev],
@@ -262,7 +262,7 @@ const BarcodeScannerScreen: React.FC = () => {
             styles.actionButton,
             scanner.status !== 'connected' && styles.actionButtonDisabled,
           ]}
-          onPress={() => handleTestScanner(_scanner)}
+          onPress={() => handleTestScanner(__scanner)}
           disabled={scanner.status !== 'connected'}>
           <Icon
             name="qr-code-scanner"
@@ -357,7 +357,7 @@ const BarcodeScannerScreen: React.FC = () => {
                 } else {
                   Alert.alert(
                     'Test All',
-                    `Testing ${connectedScanners.length} connected scanner(_s)`,
+                    `Testing ${connectedScanners.length} connected scanner(__s)`,
                   );
                 }
               }}>
@@ -437,7 +437,7 @@ const BarcodeScannerScreen: React.FC = () => {
           <Text style={styles.sectionTitle}>Advanced Settings</Text>
           <View style={styles.settingsCard}>
             <View style={styles.inputRow}>
-              <Text style={styles.inputLabel}>Duplicate scan timeout (_seconds)</Text>
+              <Text style={styles.inputLabel}>Duplicate scan timeout (__seconds)</Text>
               <TextInput
                 style={styles.textInput}
                 value={duplicateTimeout}
@@ -476,11 +476,11 @@ const BarcodeScannerScreen: React.FC = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Supported Barcode Types</Text>
           <View style={styles.barcodeTypes}>
-            {Object.entries(_barcodeTypes).map(([type, enabled]) => (
+            {Object.entries(__barcodeTypes).map(([type, enabled]) => (
               <TouchableOpacity
                 key={type}
                 style={[styles.barcodeTypeButton, enabled && styles.barcodeTypeButtonActive]}
-                onPress={() => toggleBarcodeType(_type)}>
+                onPress={() => toggleBarcodeType(__type)}>
                 <Icon
                   name={enabled ? 'check-box' : 'check-box-outline-blank'}
                   size={20}

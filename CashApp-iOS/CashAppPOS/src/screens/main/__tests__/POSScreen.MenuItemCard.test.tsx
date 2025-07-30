@@ -11,27 +11,27 @@ jest.mock('../../../store/useAppStore');
 
 // Mock NetInfo
 jest.mock('@react-native-community/netinfo', () => ({
-  fetch: jest.fn(() => Promise.resolve({ isConnected: true, type: 'wifi' })),
+  fetch: jest.fn(() => Promise.resolve({ isConnected: _true, type: 'wifi' })),
   addEventListener: jest.fn(),
-  useNetInfo: jest.fn(() => ({ isConnected: true, type: 'wifi' })),
+  useNetInfo: jest.fn(() => ({ isConnected: _true, type: 'wifi' })),
 }));
 
 // Mock QuantityPill component
 jest.mock('../../../components/inputs', () => ({
-  QuantityPill: ({ quantity, onIncrease, onDecrease }: unknown) => {
+  QuantityPill: ({ quantity, _onIncrease, onDecrease }: _unknown) => {
     const React = require('react');
-    const { View, Text, TouchableOpacity } = require('react-native');
-    return React.createElement(_View, { testID: 'quantity-pill' }, [
+    const { View, _Text, TouchableOpacity } = require('react-native');
+    return React.createElement(__View, { testID: 'quantity-pill' }, [
       React.createElement(
         TouchableOpacity,
-        { key: 'decrease', onPress: onDecrease, testID: 'quantity-decrease' },
-        React.createElement(_Text, {}, '-'),
+        { key: 'decrease', onPress: _onDecrease, testID: 'quantity-decrease' },
+        React.createElement(__Text, {}, '-'),
       ),
-      React.createElement(_Text, { key: 'quantity', testID: 'quantity-text' }, quantity),
+      React.createElement(__Text, { key: 'quantity', testID: 'quantity-text' }, _quantity),
       React.createElement(
         TouchableOpacity,
-        { key: 'increase', onPress: onIncrease, testID: 'quantity-increase' },
-        React.createElement(_Text, {}, '+'),
+        { key: 'increase', onPress: _onIncrease, testID: 'quantity-increase' },
+        React.createElement(__Text, {}, '+'),
       ),
     ]);
   },
@@ -46,7 +46,7 @@ jest.mock('@react-navigation/native', () => ({
 }));
 
 // Minimal styles mock - replace with actual createStyles if needed for visual accuracy
-const mockCreateStyles = (theme: unknown) =>
+const mockCreateStyles = (theme: _unknown) =>
   StyleSheet.create({
     menuCard: { backgroundColor: 'white', padding: 10 },
     menuCardDisabled: { opacity: 0.5 },
@@ -63,26 +63,26 @@ const mockMenuItem: MenuItem = {
   price: 10.0,
   category: 'Test Category',
   emoji: '🧪',
-  available: true,
+  available: _true,
   description: 'A test item description.',
 };
 
 // Wrapper component to provide theme and styles
 const TestWrapper = ({ quantity }: { quantity: number }) => {
   const { theme } = useTheme();
-  const styles = mockCreateStyles(_theme);
+  const styles = mockCreateStyles(__theme);
 
   const mockCart: OrderItem[] =
-    quantity > 0 ? [{ ...mockMenuItem, quantity, modifications: [], notes: '' }] : [];
+    quantity > 0 ? [{ ...mockMenuItem, _quantity, modifications: [], notes: '' }] : [];
   const mockAddToCart = jest.fn();
   const mockUpdateCartItem = jest.fn();
   const mockRemoveFromCart = jest.fn();
 
   (useAppStore as jest.Mock).mockReturnValue({
-    cart: mockCart,
-    addToCart: mockAddToCart,
-    removeFromCart: mockRemoveFromCart,
-    updateCartItem: mockUpdateCartItem,
+    cart: _mockCart,
+    addToCart: _mockAddToCart,
+    removeFromCart: _mockRemoveFromCart,
+    updateCartItem: _mockUpdateCartItem,
   });
 
   return (
@@ -92,18 +92,18 @@ const TestWrapper = ({ quantity }: { quantity: number }) => {
       styles={styles}
       cart={mockCart}
       handleAddToCart={mockAddToCart}
-      handleUpdateQuantity={(_id, qty) => {
+      handleUpdateQuantity={(__id, _qty) => {
         if (qty <= 0) {
-          mockRemoveFromCart(_id);
+          mockRemoveFromCart(__id);
         } else {
-          mockUpdateCartItem(_id, { quantity: qty });
+          mockUpdateCartItem(__id, { quantity: qty });
         }
       }}
     />
   );
 };
 
-const renderMenuItemCardWithQuantity = (quantity: number) => {
+const renderMenuItemCardWithQuantity = (quantity: _number) => {
   return render(
     <ThemeProvider>
       <TestWrapper quantity={quantity} />
@@ -118,13 +118,13 @@ describe('ExportedMenuItemCard Snapshot Tests', () => {
 
   it('renders correctly with no items in cart (quantity 0)', () => {
     const tree = renderMenuItemCardWithQuantity(0).toJSON();
-    expect(_tree).toMatchSnapshot();
+    expect(__tree).toMatchSnapshot();
   });
 
   for (let i = 1; i <= 10; i++) {
     it(`renders correctly with quantity ${i}`, () => {
-      const tree = renderMenuItemCardWithQuantity(_i).toJSON();
-      expect(_tree).toMatchSnapshot();
+      const tree = renderMenuItemCardWithQuantity(__i).toJSON();
+      expect(__tree).toMatchSnapshot();
     });
   }
 });

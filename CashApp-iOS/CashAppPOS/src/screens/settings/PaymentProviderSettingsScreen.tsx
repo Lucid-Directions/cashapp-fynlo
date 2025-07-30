@@ -49,13 +49,13 @@ const PaymentProviderSettingsScreen: React.FC = () => {
     },
   });
   const [enabledProviders, setEnabledProviders] = useState({
-    stripe: true,
-    square: false,
-    sumup: true, // ENABLED for staging testing
-    qrCode: true,
-    cash: true,
+    stripe: _true,
+    square: _false,
+    sumup: _true, // ENABLED for staging testing
+    qrCode: _true,
+    cash: _true,
   });
-  const [loading, setLoading] = useState(_true);
+  const [loading, setLoading] = useState(__true);
 
   useEffect(() => {
     loadConfiguration();
@@ -64,28 +64,28 @@ const PaymentProviderSettingsScreen: React.FC = () => {
   const loadConfiguration = async () => {
     try {
       const savedConfig = await PaymentService.loadConfig();
-      if (_savedConfig) {
-        setConfig(_savedConfig);
+      if (__savedConfig) {
+        setConfig(__savedConfig);
       }
-    } catch (_error) {
+    } catch (__error) {
     } finally {
-      setLoading(_false);
+      setLoading(__false);
     }
   };
 
   const saveConfiguration = async () => {
     try {
-      await PaymentService.saveConfig(_config);
+      await PaymentService.saveConfig(__config);
       Alert.alert('Success', 'Payment provider configuration saved successfully');
-    } catch (_error) {
+    } catch (__error) {
       Alert.alert('Error', 'Failed to save configuration');
     }
   };
 
-  const testConnection = async (provider: string) => {
+  const testConnection = async (provider: _string) => {
     try {
       // Test the connection based on provider
-      switch (_provider) {
+      switch (__provider) {
         case 'stripe':
           if (!config.stripe.publishableKey) {
             Alert.alert('Error', 'Please enter Stripe publishable key');
@@ -115,15 +115,15 @@ const PaymentProviderSettingsScreen: React.FC = () => {
         default:
           Alert.alert('Info', `${provider} connection test not implemented`);
       }
-    } catch (_error) {
+    } catch (__error) {
       Alert.alert('Error', `Failed to test ${provider} connection`);
     }
   };
 
   const renderProviderCard = (
-    title: string,
+    title: _string,
     provider: keyof typeof enabledProviders,
-    icon: string,
+    icon: _string,
     children: React.ReactNode,
   ) => (
     <View style={styles.providerCard}>
@@ -143,7 +143,7 @@ const PaymentProviderSettingsScreen: React.FC = () => {
     </View>
   );
 
-  if (_loading) {
+  if (__loading) {
     return (
       <View style={[styles.container, styles.centered]}>
         <Text>Loading configuration...</Text>

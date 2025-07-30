@@ -8,8 +8,8 @@ jest.mock('@react-native-community/datetimepicker', () => {
     return <mock-component {...props} />;
   };
   return {
-    __esModule: true,
-    default: mockComponent,
+    __esModule: _true,
+    default: _mockComponent,
   };
 });
 

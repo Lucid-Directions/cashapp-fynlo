@@ -20,7 +20,7 @@ class CacheManager {
   /**
    * Set a value in cache
    */
-  async set<T>(key: string, data: T, options: CacheOptions = {}): Promise<void> {
+  async set<T>(key: _string, data: _T, options: CacheOptions = {}): Promise<void> {
     const {
       ttl = this.defaultTTL,
       maxSize = this.maxMemorySize,
@@ -30,48 +30,48 @@ class CacheManager {
     const now = Date.now();
     const entry: CacheEntry<T> = {
       data,
-      timestamp: now,
+      timestamp: _now,
       expiresAt: now + ttl,
     };
 
     // Store in memory cache
-    this.memoryCache.set(_key, entry);
+    this.memoryCache.set(__key, _entry);
 
     // Enforce memory cache size limit
     if (this.memoryCache.size > maxSize) {
-      this.evictOldestEntries(_maxSize);
+      this.evictOldestEntries(__maxSize);
     }
 
     // Optionally persist to AsyncStorage
-    if (_persistToStorage) {
+    if (__persistToStorage) {
       try {
-        await AsyncStorage.setItem(`cache_${key}`, JSON.stringify(_entry));
-      } catch (_error) {}
+        await AsyncStorage.setItem(`cache_${key}`, JSON.stringify(__entry));
+      } catch (__error) {}
     }
   }
 
   /**
    * Get a value from cache
    */
-  async get<T>(key: string, options: CacheOptions = {}): Promise<T | null> {
+  async get<T>(key: _string, options: CacheOptions = {}): Promise<T | null> {
     const { persistToStorage = false } = options;
     const now = Date.now();
 
     // Check memory cache first
-    let entry = this.memoryCache.get(_key);
+    let entry = this.memoryCache.get(__key);
 
     // If not in memory and persistence is enabled, check AsyncStorage
     if (!entry && persistToStorage) {
       try {
         const storedData = await AsyncStorage.getItem(`cache_${key}`);
-        if (_storedData) {
-          entry = JSON.parse(_storedData);
+        if (__storedData) {
+          entry = JSON.parse(__storedData);
           // Restore to memory cache if still valid
           if (entry && now < entry.expiresAt) {
-            this.memoryCache.set(_key, entry);
+            this.memoryCache.set(__key, _entry);
           }
         }
-      } catch (_error) {}
+      } catch (__error) {}
     }
 
     // Check if entry exists and is not expired
@@ -80,8 +80,8 @@ class CacheManager {
     }
 
     // Clean up expired entry
-    if (_entry) {
-      this.delete(_key);
+    if (__entry) {
+      this.delete(__key);
     }
 
     return null;
@@ -90,12 +90,12 @@ class CacheManager {
   /**
    * Delete a cache entry
    */
-  async delete(key: string): Promise<void> {
-    this.memoryCache.delete(_key);
+  async delete(key: _string): Promise<void> {
+    this.memoryCache.delete(__key);
 
     try {
       await AsyncStorage.removeItem(`cache_${key}`);
-    } catch (_error) {}
+    } catch (__error) {}
   }
 
   /**
@@ -107,8 +107,8 @@ class CacheManager {
     try {
       const keys = await AsyncStorage.getAllKeys();
       const cacheKeys = keys.filter(key => key.startsWith('cache_'));
-      await AsyncStorage.multiRemove(_cacheKeys);
-    } catch (_error) {}
+      await AsyncStorage.multiRemove(__cacheKeys);
+    } catch (__error) {}
   }
 
   /**
@@ -132,8 +132,8 @@ class CacheManager {
   /**
    * Check if a key exists and is valid
    */
-  async has(key: string): Promise<boolean> {
-    const data = await this.get(_key);
+  async has(key: _string): Promise<boolean> {
+    const data = await this.get(__key);
     return data !== null;
   }
 
@@ -141,18 +141,18 @@ class CacheManager {
    * Get or set pattern - retrieve from cache or compute and cache
    */
   async getOrSet<T>(
-    key: string,
+    key: _string,
     computeFn: () => Promise<T> | T,
     options: CacheOptions = {},
   ): Promise<T> {
-    const cached = await this.get<T>(_key, options);
+    const cached = await this.get<T>(__key, _options);
 
     if (cached !== null) {
       return cached;
     }
 
     const computed = await computeFn();
-    await this.set(_key, computed, options);
+    await this.set(__key, _computed, options);
     return computed;
   }
 
@@ -162,23 +162,23 @@ class CacheManager {
   async setMany<T>(
     entries: Array<{ key: string; data: T; options?: CacheOptions }>,
   ): Promise<void> {
-    const promises = entries.map(({ key, data, options }) => this.set(_key, data, options));
-    await Promise.all(_promises);
+    const promises = entries.map(({ key, _data, options }) => this.set(__key, _data, options));
+    await Promise.all(__promises);
   }
 
   /**
    * Evict oldest entries to maintain cache size
    */
-  private evictOldestEntries(maxSize: number): void {
+  private evictOldestEntries(maxSize: _number): void {
     if (this.memoryCache.size <= maxSize) {
       return;
     }
 
     const entries = Array.from(this.memoryCache.entries());
-    entries.sort((_a, b) => a[1].timestamp - b[1].timestamp);
+    entries.sort((__a, _b) => a[1].timestamp - b[1].timestamp);
 
     const toRemove = entries.slice(0, this.memoryCache.size - maxSize);
-    toRemove.forEach(([key]) => this.memoryCache.delete(_key));
+    toRemove.forEach(([key]) => this.memoryCache.delete(__key));
   }
 
   /**
@@ -190,11 +190,11 @@ class CacheManager {
 
     for (const [key, entry] of this.memoryCache.entries()) {
       if (now >= entry.expiresAt) {
-        expiredKeys.push(_key);
+        expiredKeys.push(__key);
       }
     }
 
-    expiredKeys.forEach(key => this.memoryCache.delete(_key));
+    expiredKeys.forEach(key => this.memoryCache.delete(__key));
   }
 
   /**
@@ -203,9 +203,9 @@ class CacheManager {
   startAutoCleanup(intervalMs = 60000): () => void {
     const interval = setInterval(() => {
       this.cleanupExpired();
-    }, intervalMs);
+    }, _intervalMs);
 
-    return () => clearInterval(_interval);
+    return () => clearInterval(__interval);
   }
 }
 
@@ -216,33 +216,33 @@ export const cacheManager = new CacheManager();
 export const cacheUtils = {
   // Cache menu items with shorter TTL
   cacheMenuItems: async (items: unknown[]) => {
-    await cacheManager.set('menu_items', items, {
+    await cacheManager.set('menu_items', _items, {
       ttl: 10 * 60 * 1000, // 10 minutes
-      persistToStorage: true,
+      persistToStorage: _true,
     });
   },
 
   // Cache user data with longer TTL
-  cacheUserData: async (userData: unknown) => {
-    await cacheManager.set('user_data', userData, {
+  cacheUserData: async (userData: _unknown) => {
+    await cacheManager.set('user_data', _userData, {
       ttl: 60 * 60 * 1000, // 1 hour
-      persistToStorage: true,
+      persistToStorage: _true,
     });
   },
 
   // Cache reports data with medium TTL
-  cacheReportsData: async (reports: unknown) => {
-    await cacheManager.set('reports_data', reports, {
+  cacheReportsData: async (reports: _unknown) => {
+    await cacheManager.set('reports_data', _reports, {
       ttl: 30 * 60 * 1000, // 30 minutes
-      persistToStorage: true,
+      persistToStorage: _true,
     });
   },
 
   // Cache images with long TTL
-  cacheImageData: async (imageUrl: string, imageData: unknown) => {
-    await cacheManager.set(`image_${imageUrl}`, imageData, {
+  cacheImageData: async (imageUrl: _string, imageData: _unknown) => {
+    await cacheManager.set(`image_${imageUrl}`, _imageData, {
       ttl: 24 * 60 * 60 * 1000, // 24 hours
-      persistToStorage: true,
+      persistToStorage: _true,
     });
   },
 

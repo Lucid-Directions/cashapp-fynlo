@@ -390,4 +390,4 @@ export type {
 };
 
 // Export enums for external use
-export { XeroSyncDirection, XeroSyncStatus, XeroEntityType, XeroConflictResolution };
+export { XeroSyncDirection, _XeroSyncStatus, XeroEntityType, XeroConflictResolution };

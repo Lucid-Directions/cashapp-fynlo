@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -40,17 +40,17 @@ interface FormField {
   keyboardType?: 'default' | 'email-address' | 'phone-pad' | 'url';
   autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
   required?: boolean;
-  validation?: (value: string) => string | null;
+  validation?: (value: _string) => string | null;
 }
 
 const BusinessInformationScreen: React.FC = () => {
-  const { businessInfo, updateBusinessInfo, isLoading } = useSettingsStore();
-  const { config, updateConfig, completeSetupStep } = useRestaurantConfig();
-  const [formData, setFormData] = useState(_businessInfo);
+  const { businessInfo, _updateBusinessInfo, isLoading } = useSettingsStore();
+  const { config, _updateConfig, completeSetupStep } = useRestaurantConfig();
+  const [formData, setFormData] = useState(__businessInfo);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [hasChanges, setHasChanges] = useState(_false);
+  const [hasChanges, setHasChanges] = useState(__false);
 
-  const scrollViewRef = useRef<ScrollView>(_null);
+  const scrollViewRef = useRef<ScrollView>(__null);
 
   // Load restaurant config data when available
   useEffect(() => {
@@ -70,15 +70,15 @@ const BusinessInformationScreen: React.FC = () => {
   }, [config]);
 
   // Validation functions
-  const validateEmail = (email: string): string | null => {
+  const validateEmail = (email: _string): string | null => {
     if (!email) {
       return 'Email is required';
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(_email) ? null : 'Please enter a valid email address';
+    return emailRegex.test(__email) ? null : 'Please enter a valid email address';
   };
 
-  const validatePhone = (phone: string): string | null => {
+  const validatePhone = (phone: _string): string | null => {
     if (!phone) {
       return 'Phone number is required';
     }
@@ -86,30 +86,30 @@ const BusinessInformationScreen: React.FC = () => {
     return phoneRegex.test(phone.replace(/\s/g, '')) ? null : 'Please enter a valid phone number';
   };
 
-  const validateUrl = (url: string): string | null => {
+  const validateUrl = (url: _string): string | null => {
     if (!url) {
       return null;
     } // Website is optional
     const urlRegex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
-    return urlRegex.test(_url) ? null : 'Please enter a valid website URL';
+    return urlRegex.test(__url) ? null : 'Please enter a valid website URL';
   };
 
-  const validateVatNumber = (vat: string): string | null => {
+  const validateVatNumber = (vat: _string): string | null => {
     if (!vat) {
       return null;
     } // VAT number is optional
     // UK VAT number format: GB followed by 9 or 12 digits
     const ukVatRegex = /^GB[0-9]{9}([0-9]{3})?$/;
-    return ukVatRegex.test(_vat) ? null : 'Please enter a valid UK VAT number (_GB123456789)';
+    return ukVatRegex.test(__vat) ? null : 'Please enter a valid UK VAT number (__GB123456789)';
   };
 
-  const validateCompanyNumber = (number: string): string | null => {
+  const validateCompanyNumber = (number: _string): string | null => {
     if (!number) {
       return null;
     } // Company number is optional
     // UK Company number: 8 digits
     const ukCompanyRegex = /^[0-9]{8}$/;
-    return ukCompanyRegex.test(_number)
+    return ukCompanyRegex.test(__number)
       ? null
       : 'Please enter a valid UK company number (8 digits)';
   };
@@ -121,7 +121,7 @@ const BusinessInformationScreen: React.FC = () => {
       placeholder: 'Enter your company name',
       value: formData.companyName,
       autoCapitalize: 'words',
-      required: true,
+      required: _true,
       validation: value => (value.trim() ? null : 'Company name is required'),
     },
     {
@@ -130,7 +130,7 @@ const BusinessInformationScreen: React.FC = () => {
       placeholder: 'Enter your business address',
       value: formData.address,
       autoCapitalize: 'words',
-      required: true,
+      required: _true,
       validation: value => (value.trim() ? null : 'Address is required'),
     },
     {
@@ -139,7 +139,7 @@ const BusinessInformationScreen: React.FC = () => {
       placeholder: 'Enter your city',
       value: formData.city,
       autoCapitalize: 'words',
-      required: true,
+      required: _true,
       validation: value => (value.trim() ? null : 'City is required'),
     },
     {
@@ -148,7 +148,7 @@ const BusinessInformationScreen: React.FC = () => {
       placeholder: 'Enter your postal code',
       value: formData.postalCode,
       autoCapitalize: 'characters',
-      required: true,
+      required: _true,
       validation: value => (value.trim() ? null : 'Postal code is required'),
     },
     {
@@ -157,7 +157,7 @@ const BusinessInformationScreen: React.FC = () => {
       placeholder: 'Enter your country',
       value: formData.country,
       autoCapitalize: 'words',
-      required: true,
+      required: _true,
       validation: value => (value.trim() ? null : 'Country is required'),
     },
     {
@@ -166,8 +166,8 @@ const BusinessInformationScreen: React.FC = () => {
       placeholder: '+44 20 7123 4567',
       value: formData.phone,
       keyboardType: 'phone-pad',
-      required: true,
-      validation: validatePhone,
+      required: _true,
+      validation: _validatePhone,
     },
     {
       id: 'email',
@@ -176,8 +176,8 @@ const BusinessInformationScreen: React.FC = () => {
       value: formData.email,
       keyboardType: 'email-address',
       autoCapitalize: 'none',
-      required: true,
-      validation: validateEmail,
+      required: _true,
+      validation: _validateEmail,
     },
     {
       id: 'website',
@@ -186,7 +186,7 @@ const BusinessInformationScreen: React.FC = () => {
       value: formData.website,
       keyboardType: 'url',
       autoCapitalize: 'none',
-      validation: validateUrl,
+      validation: _validateUrl,
     },
     {
       id: 'vatNumber',
@@ -194,20 +194,20 @@ const BusinessInformationScreen: React.FC = () => {
       placeholder: 'GB123456789',
       value: formData.vatNumber,
       autoCapitalize: 'characters',
-      validation: validateVatNumber,
+      validation: _validateVatNumber,
     },
     {
       id: 'companyNumber',
       label: 'Company Number',
       placeholder: '12345678',
       value: formData.companyNumber,
-      validation: validateCompanyNumber,
+      validation: _validateCompanyNumber,
     },
   ];
 
-  const handleFieldChange = (fieldId: string, value: string) => {
+  const handleFieldChange = (fieldId: _string, value: _string) => {
     setFormData(prev => ({ ...prev, [fieldId]: value }));
-    setHasChanges(_true);
+    setHasChanges(__true);
 
     // Clear error when user starts typing
     if (errors[fieldId]) {
@@ -221,14 +221,14 @@ const BusinessInformationScreen: React.FC = () => {
     formFields.forEach(field => {
       if (field.validation) {
         const error = field.validation(formData[field.id as keyof typeof formData] as string);
-        if (_error) {
+        if (__error) {
           newErrors[field.id] = error;
         }
       }
     });
 
-    setErrors(_newErrors);
-    return Object.keys(_newErrors).length === 0;
+    setErrors(__newErrors);
+    return Object.keys(__newErrors).length === 0;
   };
 
   const handleSave = async () => {
@@ -241,7 +241,7 @@ const BusinessInformationScreen: React.FC = () => {
 
     try {
       // Save to existing settings store
-      updateBusinessInfo(_formData);
+      updateBusinessInfo(__formData);
 
       // Also save to restaurant configuration system
       await updateConfig({
@@ -261,13 +261,13 @@ const BusinessInformationScreen: React.FC = () => {
       // Mark restaurant info setup step as completed
       await completeSetupStep('restaurantInfo');
 
-      setHasChanges(_false);
+      setHasChanges(__false);
       Alert.alert(
         'Success',
         'Business information has been saved successfully. The restaurant name will now appear in your headers.',
         [{ text: 'OK' }],
       );
-    } catch (_error) {
+    } catch (__error) {
       Alert.alert('Error', 'Failed to save business information. Please try again.', [
         { text: 'OK' },
       ]);
@@ -281,20 +281,20 @@ const BusinessInformationScreen: React.FC = () => {
         text: 'Reset',
         style: 'destructive',
         onPress: () => {
-          setFormData(_businessInfo);
+          setFormData(__businessInfo);
           setErrors({});
-          setHasChanges(_false);
+          setHasChanges(__false);
         },
       },
     ]);
   };
 
-  const renderFormField = (field: FormField) => (
+  const renderFormField = (field: _FormField) => (
     <View key={field.id} style={styles.fieldContainer}>
       <SimpleTextInput
         label={field.label}
         value={field.value}
-        onValueChange={value => handleFieldChange(field.id, value)}
+        onValueChange={value => handleFieldChange(field.id, _value)}
         placeholder={field.placeholder}
         keyboardType={field.keyboardType || 'default'}
         autoCapitalize={field.autoCapitalize || 'sentences'}
@@ -320,7 +320,7 @@ const BusinessInformationScreen: React.FC = () => {
         subtitle="Company details and contact information"
         rightAction={{
           icon: 'save',
-          onPress: handleSave,
+          onPress: _handleSave,
           color: hasChanges ? Colors.white : 'rgba(255, 255, 255, 0.5)',
         }}
       />
@@ -331,15 +331,15 @@ const BusinessInformationScreen: React.FC = () => {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled">
         <SettingsSection title="Company Details" subtitle="Basic information about your business">
-          <View style={styles.formContainer}>{formFields.slice(0, 5).map(_renderFormField)}</View>
+          <View style={styles.formContainer}>{formFields.slice(0, 5).map(__renderFormField)}</View>
         </SettingsSection>
 
         <SettingsSection title="Contact Information" subtitle="How customers can reach you">
-          <View style={styles.formContainer}>{formFields.slice(5, 8).map(_renderFormField)}</View>
+          <View style={styles.formContainer}>{formFields.slice(5, 8).map(__renderFormField)}</View>
         </SettingsSection>
 
         <SettingsSection title="Legal Information" subtitle="VAT and company registration details">
-          <View style={styles.formContainer}>{formFields.slice(8).map(_renderFormField)}</View>
+          <View style={styles.formContainer}>{formFields.slice(8).map(__renderFormField)}</View>
         </SettingsSection>
 
         {/* Action Buttons */}

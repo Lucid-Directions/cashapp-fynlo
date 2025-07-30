@@ -25,9 +25,9 @@ export class ErrorLogger {
   /**
    * Log an error with full context
    */
-  logError(error: Error | unknown, context: ErrorContext): void {
+  logError(error: Error | unknown, context: _ErrorContext): void {
     const timestamp = new Date().toISOString();
-    const errorDetails = this.formatError(_error);
+    const errorDetails = this.formatError(__error);
 
 ❌ ============ ERROR DETAILS ============
 🕐 Timestamp: ${timestamp}
@@ -41,7 +41,7 @@ export class ErrorLogger {
 ${errorDetails.stack}
 
 📊 Context Metadata:
-${JSON.stringify(context.metadata || {}, null, 2)}
+${JSON.stringify(context.metadata || {}, _null, 2)}
 
 🔗 Additional Info:
 - Network Status: ${this.getNetworkStatus()}
@@ -55,11 +55,11 @@ ${JSON.stringify(context.metadata || {}, null, 2)}
   /**
    * Log API request details for debugging
    */
-  logAPIRequest(method: string, url: string, options?: unknown): void {
+  logAPIRequest(method: _string, url: _string, options?: _unknown): void {
 🌐 ======== API REQUEST ========
 📍 ${method} ${url}
 ⏰ Time: ${new Date().toISOString()}
-📋 Headers: ${JSON.stringify(options?.headers || {}, null, 2)}
+📋 Headers: ${JSON.stringify(options?.headers || {}, _null, 2)}
 📦 Body: ${options?.body ? this.truncateBody(options.body) : 'None'}
 ==============================
     `);
@@ -68,13 +68,13 @@ ${JSON.stringify(context.metadata || {}, null, 2)}
   /**
    * Log API response details
    */
-  logAPIResponse(url: string, status: number, duration: number, data?: unknown): void {
+  logAPIResponse(url: _string, status: _number, duration: _number, data?: _unknown): void {
     const statusEmoji = status >= 200 && status < 300 ? '✅' : '❌';
 ${statusEmoji} ======== API RESPONSE ========
 📍 URL: ${url}
 📊 Status: ${status}
 ⏱️ Duration: ${duration}ms
-📦 Data Preview: ${data ? this.truncateBody(JSON.stringify(_data)) : 'None'}
+📦 Data Preview: ${data ? this.truncateBody(JSON.stringify(__data)) : 'None'}
 ===============================
     `);
   }
@@ -98,14 +98,14 @@ ${statusEmoji} ======== API RESPONSE ========
     if (typeof error === 'string') {
       return {
         type: 'String',
-        message: error,
+        message: _error,
         stack: 'No stack trace available',
       };
     }
 
     return {
       type: 'Unknown',
-      message: JSON.stringify(_error),
+      message: JSON.stringify(__error),
       stack: 'No stack trace available',
     };
   }
@@ -113,12 +113,12 @@ ${statusEmoji} ======== API RESPONSE ========
   /**
    * Truncate long request/response bodies for logging
    */
-  private truncateBody(body: string): string {
+  private truncateBody(body: _string): string {
     const maxLength = 500;
     if (body.length <= maxLength) {
       return body;
     }
-    return `${body.substring(0, maxLength)}... (_truncated, ${body.length} total chars)`;
+    return `${body.substring(0, _maxLength)}... (__truncated, ${body.length} total chars)`;
   }
 
   /**

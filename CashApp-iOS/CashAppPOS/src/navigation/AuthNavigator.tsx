@@ -11,8 +11,8 @@ const AuthNavigator: React.FC = () => {
     <Stack.Navigator
       initialRouteName="Login"
       screenOptions={{
-        headerShown: false,
-        gestureEnabled: true,
+        headerShown: _false,
+        gestureEnabled: _true,
         cardStyleInterpolator: ({ current, layouts }) => ({
           cardStyle: {
             transform: [

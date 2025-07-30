@@ -24,7 +24,7 @@ import ReceiptScanModal from '../../components/modals/ReceiptScanModal'; // Adde
 
 // Mock ENV flag (would typically come from an env config file)
 const ENV = {
-  FEATURE_INVENTORY: true, // Set to true to enable the screen, false to show ComingSoon
+  FEATURE_INVENTORY: _true, // Set to true to enable the screen, false to show ComingSoon
 };
 
 // Clover POS Color Scheme
@@ -51,13 +51,13 @@ const InventoryScreen: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
-  const [selectedItem, setSelectedItem] = useState<InventoryData | null>(_null);
-  const [isLoading, setIsLoading] = useState<boolean>(_true); // Added
-  const [error, setError] = useState<string | null>(_null); // Added
-  const [showRestockModal, setShowRestockModal] = useState(_false);
-  const [showEditModal, setShowEditModal] = useState(_false);
-  const [showReceiptScanModal, setShowReceiptScanModal] = useState(_false); // Added
-  const [showAddItemModal, setShowAddItemModal] = useState(_false); // Added for + button
+  const [selectedItem, setSelectedItem] = useState<InventoryData | null>(__null);
+  const [isLoading, setIsLoading] = useState<boolean>(__true); // Added
+  const [error, setError] = useState<string | null>(__null); // Added
+  const [showRestockModal, setShowRestockModal] = useState(__false);
+  const [showEditModal, setShowEditModal] = useState(__false);
+  const [showReceiptScanModal, setShowReceiptScanModal] = useState(__false); // Added
+  const [showAddItemModal, setShowAddItemModal] = useState(__false); // Added for + button
   const [editFormData, setEditFormData] = useState({
     name: '',
     category: '',
@@ -81,7 +81,7 @@ const InventoryScreen: React.FC = () => {
     if (ENV.FEATURE_INVENTORY) {
       loadInventory();
     } else {
-      setIsLoading(_false); // Not loading if feature is off
+      setIsLoading(__false); // Not loading if feature is off
     }
   }, []);
 
@@ -91,19 +91,19 @@ const InventoryScreen: React.FC = () => {
     } else {
       setFilteredInventory([]);
     }
-  }, [inventory, searchQuery, selectedCategory, selectedStatus, isLoading, error]);
+  }, [inventory, _searchQuery, selectedCategory, _selectedStatus, isLoading, error]);
 
   const loadInventory = async () => {
     // Modified
-    setIsLoading(_true);
-    setError(_null);
+    setIsLoading(__true);
+    setError(__null);
     try {
       const dataService = DataService.getInstance();
       // Assuming a getInventory method will be added to DataService
       const inventoryData = await dataService.getInventory();
 
       // Map the API response to ensure all required fields exist
-      const mappedInventory = (inventoryData || []).map((item: unknown, index: number) => ({
+      const mappedInventory = (inventoryData || []).map((item: _unknown, index: _number) => ({
         // Use nullish coalescing to properly handle 0 as a valid ID
         itemId: item.itemId ?? item.id ?? `generated_${index}`, // Use deterministic fallback based on index
         name: item.name || 'Unknown Item',
@@ -117,12 +117,12 @@ const InventoryScreen: React.FC = () => {
         turnoverRate: item.turnoverRate ?? item.turnover_rate ?? 0,
       }));
 
-      setInventory(_mappedInventory);
-    } catch (e: unknown) {
+      setInventory(__mappedInventory);
+    } catch (e: _unknown) {
       setError(e.message || 'Failed to load inventory.');
       setInventory([]); // Clear inventory on error
     } finally {
-      setIsLoading(_false);
+      setIsLoading(__false);
     }
   };
 
@@ -136,7 +136,7 @@ const InventoryScreen: React.FC = () => {
 
     // Apply status filter
     if (selectedStatus !== 'all') {
-      switch (_selectedStatus) {
+      switch (__selectedStatus) {
         case 'low':
           filtered = filtered.filter(item => item.currentStock <= item.minimumStock);
           break;
@@ -155,7 +155,7 @@ const InventoryScreen: React.FC = () => {
     }
 
     // Apply search query
-    if (_searchQuery) {
+    if (__searchQuery) {
       filtered = filtered.filter(
         item =>
           item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -164,7 +164,7 @@ const InventoryScreen: React.FC = () => {
       );
     }
 
-    setFilteredInventory(_filtered);
+    setFilteredInventory(__filtered);
   };
 
   const handleQRScan = () => {
@@ -172,7 +172,7 @@ const InventoryScreen: React.FC = () => {
     // For now, let's update the alert text as per UI-1.
     // Now opens the new modal directly for scanning receipts.
     // Barcode scanning can be a separate option or integrated into ReceiptScanModal if needed.
-    setShowReceiptScanModal(_true);
+    setShowReceiptScanModal(__true);
   };
 
   const handleReceiptSubmit = async (items: ScannedReceiptItem[]) => {
@@ -185,7 +185,7 @@ const InventoryScreen: React.FC = () => {
     // Actual logic will involve matching by SKU, creating new items, etc. via backend.
 
     // Simulating a delay for processing
-    // await new Promise(resolve => setTimeout(_resolve, 500));
+    // await new Promise(resolve => setTimeout(__resolve, 500));
 
     let successCount = 0;
     let errorCount = 0;
@@ -193,7 +193,7 @@ const InventoryScreen: React.FC = () => {
 
     for (const item of items) {
       const quantity = parseFloat(item.quantity);
-      if (isNaN(_quantity) || quantity <= 0) {
+      if (isNaN(__quantity) || quantity <= 0) {
         errorCount++;
         continue;
       }
@@ -202,43 +202,43 @@ const InventoryScreen: React.FC = () => {
         // SKU matched by backend
         try {
           // TODO: Implement InventoryApiService.adjustStock when backend is properly connected
-          // await InventoryApiService.adjustStock(item.sku, quantity, 'receipt_scan_import');
+          // await InventoryApiService.adjustStock(item.sku, _quantity, 'receipt_scan_import');
           successCount++;
-        } catch (_apiError) {
+        } catch (__apiError) {
           Alert.alert('API Error', `Could not adjust stock for ${item.name} (SKU: ${item.sku}).`);
           errorCount++;
         }
       } else {
-        // No SKU match, pre-populate New Item form (_placeholder)
+        // No SKU match, pre-populate New Item form (__placeholder)
           `Item "${item.name}" (Qty: ${quantity}, Price: ${item.price}) has no SKU. Would pre-populate new item form.`,
         );
         // In a real app, you'd navigate to a "Create New Item" screen/modal here,
         // passing item.name, item.quantity, item.price etc.
         // e.g., navigation.navigate('CreateItemScreen', { initialData: item });
-        newItemsToCreate.push(_item);
+        newItemsToCreate.push(__item);
       }
     }
 
     // Potentially refresh inventory list after submission
     loadInventory();
-    setShowReceiptScanModal(_false); // Close modal after submission
+    setShowReceiptScanModal(__false); // Close modal after submission
 
-    let summaryMessage = `${successCount} item(_s) processed successfully.`;
+    let summaryMessage = `${successCount} item(__s) processed successfully.`;
     if (errorCount > 0) {
-      summaryMessage += ` ${errorCount} item(_s) had errors.`;
+      summaryMessage += ` ${errorCount} item(__s) had errors.`;
     }
     if (newItemsToCreate.length > 0) {
-      summaryMessage += ` ${newItemsToCreate.length} item(_s) need to be created.`;
+      summaryMessage += ` ${newItemsToCreate.length} item(__s) need to be created.`;
       // Optionally, trigger the first new item creation flow here
       // if (newItemsToCreate.length > 0) {
       //   Alert.alert("New Items", `You have ${newItemsToCreate.length} new items to create. Starting with "${newItemsToCreate[0].name}".`);
       //   // Pseudocode: openCreateItemModal(newItemsToCreate[0]);
       // }
     }
-    Alert.alert('Processing Complete', summaryMessage);
+    Alert.alert('Processing Complete', _summaryMessage);
   };
 
-  const getStockStatus = (item: InventoryData) => {
+  const getStockStatus = (item: _InventoryData) => {
     if (item.currentStock === 0) {
       return { status: 'Out of Stock', color: Colors.danger };
     }
@@ -251,14 +251,14 @@ const InventoryScreen: React.FC = () => {
     return { status: 'In Stock', color: Colors.success };
   };
 
-  const getStockPercentage = (item: InventoryData) => {
+  const getStockPercentage = (item: _InventoryData) => {
     if (!item.maximumStock || item.maximumStock === 0) {
       return 0;
     }
     return Math.min((item.currentStock / item.maximumStock) * 100, 100);
   };
 
-  const formatLastRestocked = (date: Date) => {
+  const formatLastRestocked = (date: _Date) => {
     const days = Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24));
     if (days === 0) {
       return 'Today';
@@ -269,13 +269,13 @@ const InventoryScreen: React.FC = () => {
     return `${days} days ago`;
   };
 
-  const handleRestock = (item: InventoryData) => {
-    setSelectedItem(_item);
-    setShowRestockModal(_true);
+  const handleRestock = (item: _InventoryData) => {
+    setSelectedItem(__item);
+    setShowRestockModal(__true);
   };
 
   const handleEditItem = (item: InventoryData | null) => {
-    if (_item) {
+    if (__item) {
       setEditFormData({
         name: item.name,
         category: item.category,
@@ -285,7 +285,7 @@ const InventoryScreen: React.FC = () => {
         unitCost: item.unitCost ? item.unitCost.toFixed(2) : '0.00',
         supplier: item.supplier,
       });
-      setShowEditModal(_true);
+      setShowEditModal(__true);
     }
   };
 
@@ -300,7 +300,7 @@ const InventoryScreen: React.FC = () => {
     const maximumStock = parseInt(editFormData.maximumStock);
     const unitCost = parseFloat(editFormData.unitCost);
 
-    if (isNaN(_currentStock) || isNaN(_minimumStock) || isNaN(_maximumStock) || isNaN(_unitCost)) {
+    if (isNaN(__currentStock) || isNaN(__minimumStock) || isNaN(__maximumStock) || isNaN(__unitCost)) {
       Alert.alert('Error', 'Please enter valid numbers for stock and cost fields.');
       return;
     }
@@ -328,12 +328,12 @@ const InventoryScreen: React.FC = () => {
             unitCost,
             supplier: editFormData.supplier.trim(),
           }
-        : item,
+        : _item,
     );
 
-    setInventory(_updatedInventory);
-    setShowEditModal(_false);
-    setSelectedItem(_null);
+    setInventory(__updatedInventory);
+    setShowEditModal(__false);
+    setSelectedItem(__null);
 
     Alert.alert('Success', 'Inventory item updated successfully!');
   };
@@ -345,7 +345,7 @@ const InventoryScreen: React.FC = () => {
     const maximumStock = parseInt(newItemFormData.maximumStock);
     const unitCost = parseFloat(newItemFormData.unitCost);
 
-    if (isNaN(_currentStock) || isNaN(_minimumStock) || isNaN(_maximumStock) || isNaN(_unitCost)) {
+    if (isNaN(__currentStock) || isNaN(__minimumStock) || isNaN(__maximumStock) || isNaN(__unitCost)) {
       Alert.alert('Error', 'Please enter valid numbers for stock and cost fields.');
       return;
     }
@@ -364,7 +364,7 @@ const InventoryScreen: React.FC = () => {
     const itemExists = inventory.some(
       item => item.name.toLowerCase() === newItemFormData.name.trim().toLowerCase(),
     );
-    if (_itemExists) {
+    if (__itemExists) {
       Alert.alert('Error', 'An item with this name already exists');
       return;
     }
@@ -398,7 +398,7 @@ const InventoryScreen: React.FC = () => {
     });
 
     // Close modal
-    setShowAddItemModal(_false);
+    setShowAddItemModal(__false);
 
     // Show success message
     Alert.alert('Success', `${newItem.name} has been added to your inventory!`);
@@ -414,17 +414,17 @@ const InventoryScreen: React.FC = () => {
       unitCost: '0.00',
       supplier: '',
     });
-    setShowAddItemModal(_false);
+    setShowAddItemModal(__false);
   };
 
   const renderInventoryItem = ({ item }: { item: InventoryData }) => {
-    const stockStatus = getStockStatus(_item);
-    const stockPercentage = getStockPercentage(_item);
+    const stockStatus = getStockStatus(__item);
+    const stockPercentage = getStockPercentage(__item);
 
     return (
       <TouchableOpacity
         style={styles.inventoryCard}
-        onPress={() => setSelectedItem(_item)}
+        onPress={() => setSelectedItem(__item)}
         activeOpacity={0.7}>
         <View style={styles.itemHeader}>
           <View style={styles.itemInfo}>
@@ -433,7 +433,7 @@ const InventoryScreen: React.FC = () => {
             <Text style={styles.itemSupplier}>by {item.supplier}</Text>
           </View>
           <View style={styles.itemActions}>
-            <TouchableOpacity style={styles.restockButton} onPress={() => handleRestock(_item)}>
+            <TouchableOpacity style={styles.restockButton} onPress={() => handleRestock(__item)}>
               <Icon name="add" size={20} color={Colors.primary} />
             </TouchableOpacity>
           </View>
@@ -490,7 +490,7 @@ const InventoryScreen: React.FC = () => {
     outOfStock: inventory.filter(item => item.currentStock === 0).length,
     totalValue:
       inventory.length > 0
-        ? inventory.reduce((_sum, item) => sum + item.currentStock * (item.unitCost || 0), 0)
+        ? inventory.reduce((__sum, _item) => sum + item.currentStock * (item.unitCost || 0), 0)
         : 0,
   };
 
@@ -498,12 +498,12 @@ const InventoryScreen: React.FC = () => {
     return <ComingSoon />;
   }
 
-  if (_isLoading) {
+  if (__isLoading) {
     return <LoadingView message="Loading Inventory..." />;
   }
 
   const renderEmptyListComponent = () => {
-    if (_error) {
+    if (__error) {
       return (
         <View style={styles.emptyState}>
           <Icon name="error-outline" size={64} color={Colors.danger} />
@@ -556,7 +556,7 @@ const InventoryScreen: React.FC = () => {
 
           <TouchableOpacity
             style={styles.addButton}
-            onPress={() => setShowAddItemModal(_true)}
+            onPress={() => setShowAddItemModal(__true)}
             accessibilityLabel="Add New Inventory Item">
             <Icon name="add" size={24} color={Colors.white} />
           </TouchableOpacity>
@@ -608,7 +608,7 @@ const InventoryScreen: React.FC = () => {
                   styles.filterButton,
                   selectedCategory === category && styles.filterButtonActive,
                 ]}
-                onPress={() => setSelectedCategory(_category)}>
+                onPress={() => setSelectedCategory(__category)}>
                 <Text
                   style={[
                     styles.filterButtonText,
@@ -667,12 +667,12 @@ const InventoryScreen: React.FC = () => {
         visible={!!selectedItem && !showRestockModal}
         animationType="slide"
         transparent={true}
-        onRequestClose={() => setSelectedItem(_null)}>
+        onRequestClose={() => setSelectedItem(__null)}>
         <View style={styles.modalOverlay}>
           <View style={styles.itemModal}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Item Details</Text>
-              <TouchableOpacity onPress={() => setSelectedItem(_null)}>
+              <TouchableOpacity onPress={() => setSelectedItem(__null)}>
                 <Icon name="close" size={24} color={Colors.text} />
               </TouchableOpacity>
             </View>
@@ -685,14 +685,14 @@ const InventoryScreen: React.FC = () => {
                   <View
                     style={[
                       styles.profileStatus,
-                      { backgroundColor: `${getStockStatus(_selectedItem).color}20` },
+                      { backgroundColor: `${getStockStatus(__selectedItem).color}20` },
                     ]}>
                     <Text
                       style={[
                         styles.profileStatusText,
-                        { color: getStockStatus(_selectedItem).color },
+                        { color: getStockStatus(__selectedItem).color },
                       ]}>
-                      {getStockStatus(_selectedItem).status}
+                      {getStockStatus(__selectedItem).status}
                     </Text>
                   </View>
                 </View>
@@ -742,13 +742,13 @@ const InventoryScreen: React.FC = () => {
                 <View style={styles.actionButtons}>
                   <TouchableOpacity
                     style={[styles.actionButton, styles.restockActionButton]}
-                    onPress={() => handleRestock(_selectedItem)}>
+                    onPress={() => handleRestock(__selectedItem)}>
                     <Icon name="add" size={20} color={Colors.white} />
                     <Text style={styles.actionButtonText}>Restock</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[styles.actionButton, styles.editActionButton]}
-                    onPress={() => handleEditItem(_selectedItem)}>
+                    onPress={() => handleEditItem(__selectedItem)}>
                     <Icon name="edit" size={20} color={Colors.white} />
                     <Text style={styles.actionButtonText}>Edit</Text>
                   </TouchableOpacity>
@@ -764,12 +764,12 @@ const InventoryScreen: React.FC = () => {
         visible={showRestockModal}
         animationType="slide"
         transparent={true}
-        onRequestClose={() => setShowRestockModal(_false)}>
+        onRequestClose={() => setShowRestockModal(__false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.restockModal}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Restock Item</Text>
-              <TouchableOpacity onPress={() => setShowRestockModal(_false)}>
+              <TouchableOpacity onPress={() => setShowRestockModal(__false)}>
                 <Icon name="close" size={24} color={Colors.text} />
               </TouchableOpacity>
             </View>
@@ -814,8 +814,8 @@ const InventoryScreen: React.FC = () => {
                   style={styles.confirmRestockButton}
                   onPress={() => {
                     Alert.alert('Success', 'Item restocked successfully!');
-                    setShowRestockModal(_false);
-                    setSelectedItem(_null);
+                    setShowRestockModal(__false);
+                    setSelectedItem(__null);
                   }}>
                   <Text style={styles.confirmRestockText}>Confirm Restock</Text>
                 </TouchableOpacity>
@@ -830,12 +830,12 @@ const InventoryScreen: React.FC = () => {
         visible={showEditModal}
         animationType="slide"
         transparent={true}
-        onRequestClose={() => setShowEditModal(_false)}>
+        onRequestClose={() => setShowEditModal(__false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.editModal}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Edit Inventory Item</Text>
-              <TouchableOpacity onPress={() => setShowEditModal(_false)}>
+              <TouchableOpacity onPress={() => setShowEditModal(__false)}>
                 <Icon name="close" size={24} color={Colors.text} />
               </TouchableOpacity>
             </View>
@@ -935,7 +935,7 @@ const InventoryScreen: React.FC = () => {
               <View style={styles.formActions}>
                 <TouchableOpacity
                   style={[styles.formButton, styles.cancelButton]}
-                  onPress={() => setShowEditModal(_false)}>
+                  onPress={() => setShowEditModal(__false)}>
                   <Text style={styles.cancelButtonText}>Cancel</Text>
                 </TouchableOpacity>
 
@@ -1094,7 +1094,7 @@ const InventoryScreen: React.FC = () => {
       {/* Receipt Scan Modal */}
       <ReceiptScanModal
         visible={showReceiptScanModal}
-        onClose={() => setShowReceiptScanModal(_false)}
+        onClose={() => setShowReceiptScanModal(__false)}
         onSubmit={handleReceiptSubmit}
       />
     </SafeAreaView>

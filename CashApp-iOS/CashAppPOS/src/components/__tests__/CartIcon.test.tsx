@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react-native';
+import { render, fireEvent } from '@testing-library/react-native';
 import { StyleSheet } from 'react-native';
 import CartIcon from '../cart/CartIcon';
 import { Colors } from '../../constants/Colors';
@@ -9,7 +9,7 @@ import { ThemeProvider } from '../../design-system/ThemeProvider'; // Assuming T
 jest.mock('react-native-vector-icons/MaterialIcons', () => {
   const RealIcon = jest.requireActual('react-native-vector-icons/MaterialIcons');
   // Mock the specific icon being used in CartIcon
-  return (props: unknown) => (
+  return (props: _unknown) => (
     <RealIcon name={props.name} size={props.size} color={props.color} testID="mock-icon" />
   );
 });
@@ -40,7 +40,7 @@ describe('CartIcon', () => {
 
     // Badge should not be present
     const badge = screen.queryByText(/\d+/); // Query for any digit representing the count
-    expect(_badge).toBeNull();
+    expect(__badge).toBeNull();
   });
 
   it('renders with alertSoft color and badge when itemCount is greater than 0', () => {
@@ -52,7 +52,7 @@ describe('CartIcon', () => {
 
     // Badge should be visible with the correct count
     const badgeText = screen.getByText(itemCount.toString());
-    expect(_badgeText).toBeDefined();
+    expect(__badgeText).toBeDefined();
 
     // Check badge background color by inspecting its parent style
     const badgeView = screen.getByTestId('cart-badge');
@@ -69,7 +69,7 @@ describe('CartIcon', () => {
     renderWithProviders(<CartIcon count={150} onPress={() => {}} testID="cart-icon" />);
 
     const badgeText = screen.getByText('99+');
-    expect(_badgeText).toBeDefined();
+    expect(__badgeText).toBeDefined();
   });
 
   it('calls onPress when pressed', () => {
@@ -77,7 +77,7 @@ describe('CartIcon', () => {
     renderWithProviders(<CartIcon count={0} onPress={mockOnPress} testID="cart-icon-press" />);
 
     const touchable = screen.getByTestId('cart-icon-press');
-    fireEvent.press(_touchable);
-    expect(_mockOnPress).toHaveBeenCalledTimes(1);
+    fireEvent.press(__touchable);
+    expect(__mockOnPress).toHaveBeenCalledTimes(1);
   });
 });

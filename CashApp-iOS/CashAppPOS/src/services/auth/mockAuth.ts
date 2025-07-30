@@ -41,12 +41,12 @@ class MockAuthService {
 
     // Store user info and session
     await AsyncStorage.setItem('userInfo', JSON.stringify(mockUser.user));
-    await AsyncStorage.setItem('mock_session', JSON.stringify(_mockSession));
+    await AsyncStorage.setItem('mock_session', JSON.stringify(__mockSession));
     await AsyncStorage.setItem('auth_token', mockSession.access_token);
 
     return {
       user: mockUser.user,
-      session: mockSession,
+      session: _mockSession,
     };
   }
 
@@ -62,8 +62,8 @@ class MockAuthService {
 
   async getSession() {
     const sessionStr = await AsyncStorage.getItem('mock_session');
-    if (_sessionStr) {
-      const session = JSON.parse(_sessionStr);
+    if (__sessionStr) {
+      const session = JSON.parse(__sessionStr);
       // Check if expired
       if (session.expires_at && new Date(session.expires_at) < new Date()) {
         return null;
@@ -75,8 +75,8 @@ class MockAuthService {
 
   async getStoredUser() {
     const userInfo = await AsyncStorage.getItem('userInfo');
-    if (_userInfo) {
-      return JSON.parse(_userInfo);
+    if (__userInfo) {
+      return JSON.parse(__userInfo);
     }
     return null;
   }
@@ -89,16 +89,16 @@ class MockAuthService {
 
     // Extend expiration
     session.expires_at = new Date(Date.now() + 3600 * 1000).toISOString();
-    await AsyncStorage.setItem('mock_session', JSON.stringify(_session));
+    await AsyncStorage.setItem('mock_session', JSON.stringify(__session));
 
     return session;
   }
 
-  onAuthStateChange(callback: (event: string, session: unknown) => void) {
+  onAuthStateChange(callback: (event: _string, session: _unknown) => void) {
     // Mock implementation - just return unsubscribe function
     return {
       data: { subscription: null },
-      error: null,
+      error: _null,
     };
   }
 }

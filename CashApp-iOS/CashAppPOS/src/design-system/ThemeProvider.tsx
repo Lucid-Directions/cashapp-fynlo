@@ -1,7 +1,7 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useState, ReactNode } from 'react';
 import { Appearance, ColorSchemeName } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Theme, lightTheme, darkThemeConfig } from './theme';
+import { Theme, darkThemeConfig } from './theme';
 
 // Theme mode types
 export type ThemeMode = 'light' | 'dark' | 'auto';
@@ -33,13 +33,13 @@ interface ThemeContextType {
   themeMode: ThemeMode;
   colorTheme: ColorTheme;
   isDark: boolean;
-  setThemeMode: (mode: ThemeMode) => void;
-  setColorTheme: (colorTheme: ColorTheme) => void;
+  setThemeMode: (mode: _ThemeMode) => void;
+  setColorTheme: (colorTheme: _ColorTheme) => void;
   toggleTheme: () => void;
 }
 
 // Create context
-const ThemeContext = createContext<ThemeContextType | undefined>(_undefined);
+const ThemeContext = createContext<ThemeContextType | undefined>(__undefined);
 
 // Storage keys for theme preferences
 const THEME_STORAGE_KEY = 'fynlo_theme_mode';
@@ -141,14 +141,14 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   defaultTheme = 'light',
   defaultColorTheme = 'default',
 }) => {
-  const [themeMode, setThemeModeState] = useState<ThemeMode>(_defaultTheme);
-  const [colorTheme, setColorThemeState] = useState<ColorTheme>(_defaultColorTheme);
+  const [themeMode, setThemeModeState] = useState<ThemeMode>(__defaultTheme);
+  const [colorTheme, setColorThemeState] = useState<ColorTheme>(__defaultColorTheme);
   const [systemColorScheme, setSystemColorScheme] = useState<ColorSchemeName>(
     Appearance.getColorScheme(),
   );
 
   // Apply color theme to base theme
-  const applyColorTheme = (baseTheme: Theme, colorThemeId: ColorTheme): Theme => {
+  const applyColorTheme = (baseTheme: _Theme, colorThemeId: _ColorTheme): Theme => {
     const colorOption = colorThemeOptions.find(option => option.id === colorThemeId);
     if (!colorOption) {
       return baseTheme;
@@ -167,9 +167,9 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
 
   // Calculate current theme based on mode, system preference, and color theme
   const calculateCurrentTheme = (
-    mode: ThemeMode,
-    systemScheme: ColorSchemeName,
-    colorThemeId: ColorTheme,
+    mode: _ThemeMode,
+    systemScheme: _ColorSchemeName,
+    colorThemeId: _ColorTheme,
   ): Theme => {
     let baseTheme: Theme;
     if (mode === 'auto') {
@@ -178,11 +178,11 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
       baseTheme = mode === 'dark' ? darkThemeConfig : lightTheme;
     }
 
-    return applyColorTheme(_baseTheme, colorThemeId);
+    return applyColorTheme(__baseTheme, _colorThemeId);
   };
 
   const [currentTheme, setCurrentTheme] = useState<Theme>(
-    calculateCurrentTheme(_themeMode, systemColorScheme, colorTheme),
+    calculateCurrentTheme(__themeMode, _systemColorScheme, colorTheme),
   );
 
   // Load theme preferences from storage
@@ -190,11 +190,11 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
     const loadThemePreferences = async () => {
       try {
         const [savedTheme, savedColorTheme] = await Promise.all([
-          AsyncStorage.getItem(_THEME_STORAGE_KEY),
-          AsyncStorage.getItem(_COLOR_THEME_STORAGE_KEY),
+          AsyncStorage.getItem(__THEME_STORAGE_KEY),
+          AsyncStorage.getItem(__COLOR_THEME_STORAGE_KEY),
         ]);
 
-        if (savedTheme && ['light', 'dark', 'auto'].includes(_savedTheme)) {
+        if (savedTheme && ['light', 'dark', 'auto'].includes(__savedTheme)) {
           setThemeModeState(savedTheme as ThemeMode);
         }
 
@@ -202,12 +202,12 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
           // If orange theme is stored, reset to default green theme
           if (savedColorTheme === 'orange') {
             setColorThemeState('default');
-            await AsyncStorage.setItem(_COLOR_THEME_STORAGE_KEY, 'default');
+            await AsyncStorage.setItem(__COLOR_THEME_STORAGE_KEY, 'default');
           } else {
             setColorThemeState(savedColorTheme as ColorTheme);
           }
         }
-      } catch (_error) {}
+      } catch (__error) {}
     };
 
     loadThemePreferences();
@@ -216,7 +216,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   // Listen to system color scheme changes
   useEffect(() => {
     const subscription = Appearance.addChangeListener(({ colorScheme }) => {
-      setSystemColorScheme(_colorScheme);
+      setSystemColorScheme(__colorScheme);
     });
 
     return () => subscription?.remove();
@@ -224,34 +224,34 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
 
   // Update current theme when mode, color theme, or system scheme changes
   useEffect(() => {
-    const newTheme = calculateCurrentTheme(_themeMode, systemColorScheme, colorTheme);
-    setCurrentTheme(_newTheme);
-  }, [themeMode, systemColorScheme, colorTheme]);
+    const newTheme = calculateCurrentTheme(__themeMode, _systemColorScheme, colorTheme);
+    setCurrentTheme(__newTheme);
+  }, [themeMode, _systemColorScheme, colorTheme]);
 
   // Set theme mode and persist to storage
-  const setThemeMode = async (mode: ThemeMode) => {
+  const setThemeMode = async (mode: _ThemeMode) => {
     try {
-      setThemeModeState(_mode);
-      await AsyncStorage.setItem(_THEME_STORAGE_KEY, mode);
-    } catch (_error) {}
+      setThemeModeState(__mode);
+      await AsyncStorage.setItem(__THEME_STORAGE_KEY, _mode);
+    } catch (__error) {}
   };
 
   // Set color theme and persist to storage
-  const setColorTheme = async (colorThemeId: ColorTheme) => {
+  const setColorTheme = async (colorThemeId: _ColorTheme) => {
     try {
-      setColorThemeState(_colorThemeId);
-      await AsyncStorage.setItem(_COLOR_THEME_STORAGE_KEY, colorThemeId);
-    } catch (_error) {}
+      setColorThemeState(__colorThemeId);
+      await AsyncStorage.setItem(__COLOR_THEME_STORAGE_KEY, _colorThemeId);
+    } catch (__error) {}
   };
 
   // Toggle between light and dark mode
   const toggleTheme = () => {
     const newMode = currentTheme.isDark ? 'light' : 'dark';
-    setThemeMode(_newMode);
+    setThemeMode(__newMode);
   };
 
   const contextValue: ThemeContextType = {
-    theme: currentTheme,
+    theme: _currentTheme,
     themeMode,
     colorTheme,
     isDark: currentTheme.isDark,
@@ -265,7 +265,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
 
 // Hook to use theme context
 export const useTheme = (): ThemeContextType => {
-  const context = useContext(_ThemeContext);
+  const context = useContext(__ThemeContext);
   if (context === undefined) {
     throw new Error('useTheme must be used within a ThemeProvider');
   }
@@ -274,21 +274,21 @@ export const useTheme = (): ThemeContextType => {
 
 // HOC for components that need theme
 export function withTheme<P extends object>(Component: React.ComponentType<P & { theme: Theme }>) {
-  return function ThemedComponent(props: P) {
+  return function ThemedComponent(props: _P) {
     const { theme } = useTheme();
     return <Component {...props} theme={theme} />;
   };
 }
 
 // Utility hook for creating themed styles
-export function useThemedStyles<T>(createStyles: (theme: Theme) => T): T {
+export function useThemedStyles<T>(createStyles: (theme: _Theme) => T): T {
   const { theme } = useTheme();
-  return React.useMemo(() => createStyles(_theme), [theme, createStyles]);
+  return React.useMemo(() => createStyles(__theme), [theme, createStyles]);
 }
 
 // Style factory helper
-export function createThemedStyles<T>(styleFactory: (theme: Theme) => T) {
-  return (theme: Theme): T => styleFactory(_theme);
+export function createThemedStyles<T>(styleFactory: (theme: _Theme) => T) {
+  return (theme: _Theme): T => styleFactory(__theme);
 }
 
 // Export color theme options for use in components

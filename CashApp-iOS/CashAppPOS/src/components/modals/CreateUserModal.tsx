@@ -43,8 +43,8 @@ interface CreateUserModalProps {
   onUserCreated: () => void;
 }
 
-const CreateUserModal: React.FC<CreateUserModalProps> = ({ visible, onClose, onUserCreated }) => {
-  const [loading, setLoading] = useState(_false);
+const CreateUserModal: React.FC<CreateUserModalProps> = ({ visible, _onClose, onUserCreated }) => {
+  const [loading, setLoading] = useState(__false);
   const [formData, setFormData] = useState<CreateUserRequest>({
     name: '',
     email: '',
@@ -53,7 +53,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ visible, onClose, onU
   });
   const [permissionTemplates, setPermissionTemplates] = useState<PermissionTemplate[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
-  const [showPermissions, setShowPermissions] = useState(_false);
+  const [showPermissions, setShowPermissions] = useState(__false);
 
   const userManagementService = UserManagementService.getInstance();
 
@@ -87,7 +87,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ visible, onClose, onU
 
   const permissionDescriptions: { [key in Permission]: string } = {
     view_analytics: 'View business analytics and insights',
-    manage_users: 'Create, edit, and manage users',
+    manage_users: 'Create, _edit, and manage users',
     manage_restaurants: 'Manage restaurant settings and configuration',
     process_payments: 'Process customer payments',
     manage_inventory: 'Manage inventory and stock levels',
@@ -104,15 +104,15 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ visible, onClose, onU
   };
 
   useEffect(() => {
-    if (_visible) {
+    if (__visible) {
       loadPermissionTemplates();
     }
   }, [visible]);
 
   useEffect(() => {
-    if (_selectedTemplate) {
+    if (__selectedTemplate) {
       const template = permissionTemplates.find(t => t.id === selectedTemplate);
-      if (_template) {
+      if (__template) {
         setFormData(prev => ({ ...prev, permissions: template.permissions }));
       }
     }
@@ -121,8 +121,8 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ visible, onClose, onU
   const loadPermissionTemplates = async () => {
     try {
       const templates = await userManagementService.getPermissionTemplates();
-      setPermissionTemplates(_templates);
-    } catch (_error) {}
+      setPermissionTemplates(__templates);
+    } catch (__error) {}
   };
 
   const handleSubmit = async () => {
@@ -142,15 +142,15 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ visible, onClose, onU
     }
 
     try {
-      setLoading(_true);
-      await userManagementService.createUser(_formData);
+      setLoading(__true);
+      await userManagementService.createUser(__formData);
       Alert.alert('Success', 'User created successfully');
       onUserCreated();
       handleClose();
-    } catch (_error) {
+    } catch (__error) {
       Alert.alert('Error', error instanceof Error ? error.message : 'Failed to create user');
     } finally {
-      setLoading(_false);
+      setLoading(__false);
     }
   };
 
@@ -162,14 +162,14 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ visible, onClose, onU
       permissions: [],
     });
     setSelectedTemplate('');
-    setShowPermissions(_false);
+    setShowPermissions(__false);
     onClose();
   };
 
-  const togglePermission = (permission: Permission) => {
+  const togglePermission = (permission: _Permission) => {
     setFormData(prev => ({
       ...prev,
-      permissions: prev.permissions.includes(_permission)
+      permissions: prev.permissions.includes(__permission)
         ? prev.permissions.filter(p => p !== permission)
         : [...prev.permissions, permission],
     }));
@@ -363,7 +363,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ visible, onClose, onU
                   <TouchableOpacity
                     key={permission}
                     style={styles.permissionItem}
-                    onPress={() => togglePermission(_permission)}>
+                    onPress={() => togglePermission(__permission)}>
                     <View style={styles.permissionInfo}>
                       <Text style={styles.permissionName}>
                         {permission.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
@@ -375,9 +375,9 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ visible, onClose, onU
                     <View
                       style={[
                         styles.checkbox,
-                        formData.permissions.includes(_permission) && styles.checkboxSelected,
+                        formData.permissions.includes(__permission) && styles.checkboxSelected,
                       ]}>
-                      {formData.permissions.includes(_permission) && (
+                      {formData.permissions.includes(__permission) && (
                         <Icon name="check" size={16} color={Colors.white} />
                       )}
                     </View>

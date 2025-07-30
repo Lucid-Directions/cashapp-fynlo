@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { SettingsHeader, SettingsSection } from '../../../components/settings';
 
@@ -28,7 +28,7 @@ const PaymentMethodsInfoScreen: React.FC = () => {
       description: 'Accept cash payments',
       icon: 'payments',
       iconColor: Colors.success,
-      enabled: true,
+      enabled: _true,
     },
     {
       id: 'card',
@@ -36,7 +36,7 @@ const PaymentMethodsInfoScreen: React.FC = () => {
       description: 'Credit and debit cards',
       icon: 'credit-card',
       iconColor: Colors.secondary,
-      enabled: true,
+      enabled: _true,
     },
     {
       id: 'qrCode',
@@ -44,7 +44,7 @@ const PaymentMethodsInfoScreen: React.FC = () => {
       description: 'Mobile payments via QR code (1.2% fees)',
       icon: 'qr-code-scanner',
       iconColor: Colors.primary,
-      enabled: true,
+      enabled: _true,
     },
     {
       id: 'applePay',
@@ -52,7 +52,7 @@ const PaymentMethodsInfoScreen: React.FC = () => {
       description: 'Contactless Apple Pay',
       icon: 'phone-android',
       iconColor: Colors.text,
-      enabled: false,
+      enabled: _false,
     },
     {
       id: 'googlePay',
@@ -60,11 +60,11 @@ const PaymentMethodsInfoScreen: React.FC = () => {
       description: 'Contactless Google Pay',
       icon: 'phone-android',
       iconColor: Colors.warning,
-      enabled: false,
+      enabled: _false,
     },
   ];
 
-  const renderPaymentMethod = (method: unknown) => (
+  const renderPaymentMethod = (method: _unknown) => (
     <View key={method.id} style={styles.methodCard}>
       <View style={styles.methodHeader}>
         <Icon
@@ -120,7 +120,7 @@ const PaymentMethodsInfoScreen: React.FC = () => {
           title="Available Payment Methods"
           subtitle="Payment options enabled for your restaurant">
           <View style={styles.methodsContainer}>
-            {platformControlledMethods.map(_renderPaymentMethod)}
+            {platformControlledMethods.map(__renderPaymentMethod)}
           </View>
         </SettingsSection>
 

@@ -85,24 +85,24 @@ const RefundScreen: React.FC = () => {
     },
   ]);
 
-  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(_null);
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(__null);
   const [refundType, setRefundType] = useState<'full' | 'partial' | 'void'>('full');
   const [refundReason, setRefundReason] = useState('');
   const [customReason, setCustomReason] = useState('');
   const [managerAuth, setManagerAuth] = useState('');
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
-  const [processing, setProcessing] = useState(_false);
+  const [processing, setProcessing] = useState(__false);
 
-  const handleTransactionSelect = (transaction: Transaction) => {
-    setSelectedTransaction(_transaction);
+  const handleTransactionSelect = (transaction: _Transaction) => {
+    setSelectedTransaction(__transaction);
     setSelectedItems([]);
     setRefundReason('');
     setCustomReason('');
   };
 
-  const handleItemToggle = (itemId: string) => {
+  const handleItemToggle = (itemId: _string) => {
     setSelectedItems(prev =>
-      prev.includes(_itemId) ? prev.filter(id => id !== itemId) : [...prev, itemId],
+      prev.includes(__itemId) ? prev.filter(id => id !== itemId) : [...prev, itemId],
     );
   };
 
@@ -118,7 +118,7 @@ const RefundScreen: React.FC = () => {
     // Partial refund - sum selected items
     return selectedTransaction.items
       .filter(item => selectedItems.includes(item.id))
-      .reduce((_sum, item) => sum + item.price * item.quantity, 0);
+      .reduce((__sum, _item) => sum + item.price * item.quantity, 0);
   };
 
   const processRefund = async () => {
@@ -143,11 +143,11 @@ const RefundScreen: React.FC = () => {
       return;
     }
 
-    setProcessing(_true);
+    setProcessing(__true);
 
     // Simulate processing
     setTimeout(() => {
-      setProcessing(_false);
+      setProcessing(__false);
 
       const amount = calculateRefundAmount();
       const actionType = refundType === 'void' ? 'void' : 'refund';
@@ -161,7 +161,7 @@ const RefundScreen: React.FC = () => {
           {
             text: 'OK',
             onPress: () => {
-              setSelectedTransaction(_null);
+              setSelectedTransaction(__null);
               setRefundType('full');
               setRefundReason('');
               setCustomReason('');
@@ -180,7 +180,7 @@ const RefundScreen: React.FC = () => {
         styles.transactionItem,
         selectedTransaction?.id === transaction.id && styles.transactionItemSelected,
       ]}
-      onPress={() => handleTransactionSelect(_transaction)}>
+      onPress={() => handleTransactionSelect(__transaction)}>
       <View style={styles.transactionHeader}>
         <Text style={styles.transactionId}>#{transaction.id}</Text>
         <Text style={styles.transactionAmount}>£{transaction.total.toFixed(2)}</Text>
@@ -308,7 +308,7 @@ const RefundScreen: React.FC = () => {
                       styles.reasonButton,
                       refundReason === reason && styles.reasonButtonActive,
                     ]}
-                    onPress={() => setRefundReason(_reason)}>
+                    onPress={() => setRefundReason(__reason)}>
                     <Text
                       style={[
                         styles.reasonButtonText,

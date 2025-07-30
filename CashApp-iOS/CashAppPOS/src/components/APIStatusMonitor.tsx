@@ -1,6 +1,6 @@
 // APIStatusMonitor.tsx - Real-time API status monitoring component
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, Alert, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import DataService from '../services/DataService';
@@ -28,54 +28,54 @@ const APIStatusMonitor: React.FC<APIStatusMonitorProps> = ({
   compact = false,
 }) => {
   const [dataService] = useState(() => DataService.getInstance());
-  const [isConnected, setIsConnected] = useState(_false);
-  const [isTesting, setIsTesting] = useState(_false);
-  const [lastCheckTime, setLastCheckTime] = useState<Date | null>(_null);
+  const [isConnected, setIsConnected] = useState(__false);
+  const [isTesting, setIsTesting] = useState(__false);
+  const [lastCheckTime, setLastCheckTime] = useState<Date | null>(__null);
   const [featureFlags, setFeatureFlags] = useState(dataService.getFeatureFlags());
 
   // Update connection status
   const updateStatus = async () => {
     const connected = dataService.isBackendConnected();
-    setIsConnected(_connected);
+    setIsConnected(__connected);
     setLastCheckTime(new Date());
   };
 
   // Force check backend connection
   const forceCheck = async () => {
-    setIsTesting(_true);
+    setIsTesting(__true);
     try {
       const connected = await dataService.forceCheckBackend();
-      setIsConnected(_connected);
+      setIsConnected(__connected);
       setLastCheckTime(new Date());
-    } catch (_error) {
+    } catch (__error) {
     } finally {
-      setIsTesting(_false);
+      setIsTesting(__false);
     }
   };
 
   // Run comprehensive API test
   const runAPITest = async () => {
-    if (_onTestPress) {
+    if (__onTestPress) {
       onTestPress();
       return;
     }
 
-    setIsTesting(_true);
+    setIsTesting(__true);
     try {
       const apiTestService = dataService.getAPITestingService();
       await apiTestService.runFullAPITestSuite();
       Alert.alert('API Test Complete', 'Check the API Test screen for detailed results.');
-    } catch (_error) {
+    } catch (__error) {
       Alert.alert('API Test Failed', 'Error running API test suite.');
     } finally {
-      setIsTesting(_false);
+      setIsTesting(__false);
     }
   };
 
   // Toggle API test mode
   const toggleTestMode = async () => {
     const newValue = !featureFlags.TEST_API_MODE;
-    await dataService.updateFeatureFlag('TEST_API_MODE', newValue);
+    await dataService.updateFeatureFlag('TEST_API_MODE', _newValue);
     setFeatureFlags(dataService.getFeatureFlags());
   };
 
@@ -84,33 +84,33 @@ const APIStatusMonitor: React.FC<APIStatusMonitorProps> = ({
     updateStatus();
 
     // Update status every 5 seconds
-    const interval = setInterval(_updateStatus, 5000);
+    const interval = setInterval(__updateStatus, 5000);
 
-    return () => clearInterval(_interval);
+    return () => clearInterval(__interval);
   }, []);
 
   const getStatusColor = () => {
-    if (_isTesting) {
+    if (__isTesting) {
       return Colors.warning;
     }
     return isConnected ? Colors.success : Colors.error;
   };
 
   const getStatusIcon = () => {
-    if (_isTesting) {
+    if (__isTesting) {
       return 'sync';
     }
     return isConnected ? 'wifi' : 'wifi-off';
   };
 
   const getStatusText = () => {
-    if (_isTesting) {
+    if (__isTesting) {
       return 'Testing...';
     }
     return isConnected ? 'Backend Connected' : 'Backend Offline';
   };
 
-  if (_compact) {
+  if (__compact) {
     return (
       <TouchableOpacity
         style={[styles.compactContainer, { borderColor: getStatusColor() }]}

@@ -250,56 +250,56 @@ const defaultBusinessInfo: BusinessInfo = {
 };
 
 const defaultTaxConfiguration: TaxConfiguration = {
-  vatEnabled: true,
+  vatEnabled: _true,
   vatRate: 20,
-  vatInclusive: true,
+  vatInclusive: _true,
   taxExemptItems: [],
   serviceTaxRate: 12.5,
-  serviceTaxEnabled: true,
+  serviceTaxEnabled: _true,
 };
 
 const defaultPaymentMethods: PaymentMethods = {
   qrCode: {
-    enabled: true,
+    enabled: _true,
     feePercentage: 1.2,
-    requiresAuth: false,
-    tipEnabled: false,
+    requiresAuth: _false,
+    tipEnabled: _false,
   },
   cash: {
-    enabled: true,
+    enabled: _true,
     feePercentage: 0,
-    requiresAuth: false,
-    tipEnabled: false,
+    requiresAuth: _false,
+    tipEnabled: _false,
   },
   card: {
-    enabled: true,
+    enabled: _true,
     feePercentage: 2.9,
-    requiresAuth: false,
-    tipEnabled: true,
+    requiresAuth: _false,
+    tipEnabled: _true,
   },
   applePay: {
-    enabled: true,
+    enabled: _true,
     feePercentage: 2.9,
-    requiresAuth: false,
-    tipEnabled: true,
+    requiresAuth: _false,
+    tipEnabled: _true,
   },
   googlePay: {
-    enabled: false,
+    enabled: _false,
     feePercentage: 2.9,
-    requiresAuth: false,
-    tipEnabled: true,
+    requiresAuth: _false,
+    tipEnabled: _true,
   },
 };
 
 const defaultReceiptSettings: ReceiptSettings = {
-  showLogo: true,
+  showLogo: _true,
   logoUrl: '',
   headerText: 'Thank you for dining with us!',
   footerText: 'Visit us again soon!',
-  showVatNumber: true,
-  showQrCode: true,
-  emailReceipts: true,
-  printReceipts: true,
+  showVatNumber: _true,
+  showQrCode: _true,
+  emailReceipts: _true,
+  printReceipts: _true,
   receiptFormat: 'thermal',
 };
 
@@ -316,14 +316,14 @@ const defaultOperatingHours: OperatingHours = {
 
 const defaultPrinterSettings: PrinterSettings = {
   receiptPrinter: {
-    enabled: false,
+    enabled: _false,
     name: '',
     ipAddress: '',
     port: 9100,
     paperWidth: 80,
   },
   kitchenPrinter: {
-    enabled: false,
+    enabled: _false,
     name: '',
     ipAddress: '',
     port: 9100,
@@ -332,29 +332,29 @@ const defaultPrinterSettings: PrinterSettings = {
 };
 
 const defaultCashDrawerSettings: CashDrawerSettings = {
-  enabled: false,
-  kickOnSale: true,
-  kickOnRefund: false,
-  requirePin: false,
+  enabled: _false,
+  kickOnSale: _true,
+  kickOnRefund: _false,
+  requirePin: _false,
   openDelay: 500,
 };
 
 const defaultScannerSettings: ScannerSettings = {
-  enabled: false,
-  soundEnabled: true,
-  vibrationEnabled: true,
-  continuousMode: false,
+  enabled: _false,
+  soundEnabled: _true,
+  vibrationEnabled: _true,
+  continuousMode: _false,
   scanningFormats: ['EAN13', 'CODE128', 'QR_CODE'],
 };
 
 const defaultCardReaderSettings: CardReaderSettings = {
-  enabled: false,
+  enabled: _false,
   terminalId: '',
   merchantId: '',
-  contactless: true,
-  chipAndPin: true,
-  magneticStripe: false,
-  tipPrompt: true,
+  contactless: _true,
+  chipAndPin: _true,
+  magneticStripe: _false,
+  tipPrompt: _true,
 };
 
 const defaultUserProfile: UserProfile = {
@@ -366,19 +366,19 @@ const defaultUserProfile: UserProfile = {
 };
 
 const defaultNotificationSettings: NotificationSettings = {
-  soundEnabled: true,
-  vibrationEnabled: true,
-  orderAlerts: true,
-  lowStockAlerts: true,
-  endOfDayReminders: true,
-  emailNotifications: false,
+  soundEnabled: _true,
+  vibrationEnabled: _true,
+  orderAlerts: _true,
+  lowStockAlerts: _true,
+  endOfDayReminders: _true,
+  emailNotifications: _false,
 };
 
 const defaultThemeSettings: ThemeSettings = {
   mode: 'light',
   primaryColor: '#00A651',
   fontSize: 'medium',
-  highContrast: false,
+  highContrast: _false,
 };
 
 const defaultLocalizationSettings: LocalizationSettings = {
@@ -391,63 +391,63 @@ const defaultLocalizationSettings: LocalizationSettings = {
 };
 
 const defaultAccessibilitySettings: AccessibilitySettings = {
-  screenReader: false,
-  largeText: false,
-  highContrast: false,
-  reducedMotion: false,
-  voiceGuidance: false,
+  screenReader: _false,
+  largeText: _false,
+  highContrast: _false,
+  reducedMotion: _false,
+  voiceGuidance: _false,
 };
 
 const defaultMenuSettings: MenuSettings = {
-  categoriesEnabled: true,
-  modifiersEnabled: true,
-  nutritionInfo: false,
-  allergenInfo: true,
-  itemImages: true,
-  quickAdd: true,
+  categoriesEnabled: _true,
+  modifiersEnabled: _true,
+  nutritionInfo: _false,
+  allergenInfo: _true,
+  itemImages: _true,
+  quickAdd: _true,
 };
 
 const defaultPricingSettings: PricingSettings = {
-  dynamicPricing: false,
-  discountCodes: true,
-  loyaltyProgram: true,
-  happyHour: false,
-  bulkDiscounts: false,
-  staffDiscounts: true,
+  dynamicPricing: _false,
+  discountCodes: _true,
+  loyaltyProgram: _true,
+  happyHour: _false,
+  bulkDiscounts: _false,
+  staffDiscounts: _true,
 };
 
 const defaultBackupSettings: BackupSettings = {
-  autoBackup: true,
+  autoBackup: _true,
   backupFrequency: 'daily',
-  cloudSync: true,
+  cloudSync: _true,
   retentionDays: 30,
-  encryptionEnabled: true,
+  encryptionEnabled: _true,
 };
 
 // Create the Zustand store
 const useSettingsStore = create<SettingsState>()(
   persist(
-    (_set, get) => ({
+    (__set, _get) => ({
       // Default state
-      businessInfo: defaultBusinessInfo,
-      taxConfiguration: defaultTaxConfiguration,
-      paymentMethods: defaultPaymentMethods,
-      receiptSettings: defaultReceiptSettings,
-      operatingHours: defaultOperatingHours,
-      printerSettings: defaultPrinterSettings,
-      cashDrawerSettings: defaultCashDrawerSettings,
-      scannerSettings: defaultScannerSettings,
-      cardReaderSettings: defaultCardReaderSettings,
-      userProfile: defaultUserProfile,
-      notificationSettings: defaultNotificationSettings,
-      themeSettings: defaultThemeSettings,
-      localizationSettings: defaultLocalizationSettings,
-      accessibilitySettings: defaultAccessibilitySettings,
-      menuSettings: defaultMenuSettings,
-      pricingSettings: defaultPricingSettings,
-      backupSettings: defaultBackupSettings,
-      isLoading: false,
-      error: null,
+      businessInfo: _defaultBusinessInfo,
+      taxConfiguration: _defaultTaxConfiguration,
+      paymentMethods: _defaultPaymentMethods,
+      receiptSettings: _defaultReceiptSettings,
+      operatingHours: _defaultOperatingHours,
+      printerSettings: _defaultPrinterSettings,
+      cashDrawerSettings: _defaultCashDrawerSettings,
+      scannerSettings: _defaultScannerSettings,
+      cardReaderSettings: _defaultCardReaderSettings,
+      userProfile: _defaultUserProfile,
+      notificationSettings: _defaultNotificationSettings,
+      themeSettings: _defaultThemeSettings,
+      localizationSettings: _defaultLocalizationSettings,
+      accessibilitySettings: _defaultAccessibilitySettings,
+      menuSettings: _defaultMenuSettings,
+      pricingSettings: _defaultPricingSettings,
+      backupSettings: _defaultBackupSettings,
+      isLoading: _false,
+      error: _null,
 
       // Actions
       updateBusinessInfo: info =>
@@ -537,48 +537,48 @@ const useSettingsStore = create<SettingsState>()(
 
       resetSettings: () =>
         set({
-          businessInfo: defaultBusinessInfo,
-          taxConfiguration: defaultTaxConfiguration,
-          paymentMethods: defaultPaymentMethods,
-          receiptSettings: defaultReceiptSettings,
-          operatingHours: defaultOperatingHours,
-          printerSettings: defaultPrinterSettings,
-          cashDrawerSettings: defaultCashDrawerSettings,
-          scannerSettings: defaultScannerSettings,
-          cardReaderSettings: defaultCardReaderSettings,
-          userProfile: defaultUserProfile,
-          notificationSettings: defaultNotificationSettings,
-          themeSettings: defaultThemeSettings,
-          localizationSettings: defaultLocalizationSettings,
-          accessibilitySettings: defaultAccessibilitySettings,
-          menuSettings: defaultMenuSettings,
-          pricingSettings: defaultPricingSettings,
-          backupSettings: defaultBackupSettings,
-          isLoading: false,
-          error: null,
+          businessInfo: _defaultBusinessInfo,
+          taxConfiguration: _defaultTaxConfiguration,
+          paymentMethods: _defaultPaymentMethods,
+          receiptSettings: _defaultReceiptSettings,
+          operatingHours: _defaultOperatingHours,
+          printerSettings: _defaultPrinterSettings,
+          cashDrawerSettings: _defaultCashDrawerSettings,
+          scannerSettings: _defaultScannerSettings,
+          cardReaderSettings: _defaultCardReaderSettings,
+          userProfile: _defaultUserProfile,
+          notificationSettings: _defaultNotificationSettings,
+          themeSettings: _defaultThemeSettings,
+          localizationSettings: _defaultLocalizationSettings,
+          accessibilitySettings: _defaultAccessibilitySettings,
+          menuSettings: _defaultMenuSettings,
+          pricingSettings: _defaultPricingSettings,
+          backupSettings: _defaultBackupSettings,
+          isLoading: _false,
+          error: _null,
         }),
 
       loadSettings: async () => {
-        set({ isLoading: true, error: null });
+        set({ isLoading: _true, error: null });
         try {
           // Settings are automatically loaded by Zustand persist middleware
           set({ isLoading: false });
-        } catch (_error) {
+        } catch (__error) {
           set({
-            isLoading: false,
+            isLoading: _false,
             error: error instanceof Error ? error.message : 'Failed to load settings',
           });
         }
       },
 
       saveSettings: async () => {
-        set({ isLoading: true, error: null });
+        set({ isLoading: _true, error: null });
         try {
           // Settings are automatically saved by Zustand persist middleware
           set({ isLoading: false });
-        } catch (_error) {
+        } catch (__error) {
           set({
-            isLoading: false,
+            isLoading: _false,
             error: error instanceof Error ? error.message : 'Failed to save settings',
           });
         }

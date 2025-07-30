@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Switch } from 'react-native';
+import { StyleSheet, View, ScrollView, Switch } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import ThemeSwitcher, { ThemeToggle } from '../../../components/theme/ThemeSwitcher';
@@ -24,13 +24,13 @@ const Colors = {
 
 const ThemeOptionsScreen: React.FC = () => {
   const navigation = useNavigation();
-  const { theme, themeMode, isDark } = useTheme();
+  const { theme, _themeMode, isDark } = useTheme();
 
   // Display preferences
-  const [highContrast, setHighContrast] = useState(_false);
-  const [reducedMotion, setReducedMotion] = useState(_false);
-  const [largeText, setLargeText] = useState(_false);
-  const [showAnimations, setShowAnimations] = useState(_true);
+  const [highContrast, setHighContrast] = useState(__false);
+  const [reducedMotion, setReducedMotion] = useState(__false);
+  const [largeText, setLargeText] = useState(__false);
+  const [showAnimations, setShowAnimations] = useState(__true);
   const [screenTimeout, setScreenTimeout] = useState('5min');
 
   const displayOptions = [
@@ -42,8 +42,8 @@ const ThemeOptionsScreen: React.FC = () => {
     { id: 'never', label: 'Never' },
   ];
 
-  const handleScreenTimeoutChange = (timeout: string) => {
-    setScreenTimeout(_timeout);
+  const handleScreenTimeoutChange = (timeout: _string) => {
+    setScreenTimeout(__timeout);
   };
 
   return (

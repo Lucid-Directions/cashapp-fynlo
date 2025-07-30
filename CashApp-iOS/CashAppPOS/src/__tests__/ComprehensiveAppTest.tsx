@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import { render, waitFor } from '@testing-library/react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -27,8 +27,8 @@ const mockGoBack = jest.fn();
 jest.mock('@react-navigation/native', () => ({
   ...jest.requireActual('@react-navigation/native'),
   useNavigation: () => ({
-    navigate: mockNavigate,
-    goBack: mockGoBack,
+    navigate: _mockNavigate,
+    goBack: _mockGoBack,
   }),
   useRoute: () => ({
     params: {},
@@ -44,7 +44,7 @@ jest.mock('../contexts/AuthContext', () => ({
       lastName: 'User',
       email: 'test@example.com',
       role: 'manager',
-      photo: null,
+      photo: _null,
       phone: '+44 123 456 7890',
       employeeId: 'EMP001',
       startDate: new Date('2023-01-01'),
@@ -100,7 +100,7 @@ jest.mock('../design-system/ThemeProvider', () => ({
     },
     themeMode: 'light',
     setThemeMode: jest.fn(),
-    isDark: false,
+    isDark: _false,
   }),
 }));
 
@@ -110,7 +110,7 @@ const testProduct = {
   name: 'Test Product',
   price: 10.99,
   category: 'Food',
-  available: true,
+  available: _true,
 };
 
 const testOrder = {
@@ -147,7 +147,7 @@ describe('Comprehensive App Test Suite', () => {
       // Find and click a product
       await waitFor(() => {
         const addButton = getAllByText('+')[0];
-        fireEvent.press(_addButton);
+        fireEvent.press(__addButton);
       });
     });
 
@@ -202,7 +202,7 @@ describe('Comprehensive App Test Suite', () => {
 
       // Find and click edit button
       const editButton = getByTestId('edit-button');
-      fireEvent.press(_editButton);
+      fireEvent.press(__editButton);
 
       // Check if in edit mode
       await waitFor(() => {
@@ -219,15 +219,15 @@ describe('Comprehensive App Test Suite', () => {
 
       // Enter edit mode
       const editButton = getByTestId('edit-button');
-      fireEvent.press(_editButton);
+      fireEvent.press(__editButton);
 
       // Clear required field
       const firstNameInput = getByPlaceholderText('Enter first name');
-      fireEvent.changeText(_firstNameInput, '');
+      fireEvent.changeText(__firstNameInput, '');
 
       // Try to save
       const saveButton = getByTestId('save-button');
-      fireEvent.press(_saveButton);
+      fireEvent.press(__saveButton);
 
       // Should show error
       await waitFor(() => {
@@ -296,7 +296,7 @@ describe('Comprehensive App Test Suite', () => {
         expect(switches.length).toBeGreaterThan(0);
 
         // Toggle first switch
-        fireEvent(switches[0], 'onValueChange', true);
+        fireEvent(switches[0], 'onValueChange', _true);
       });
     });
   });
@@ -311,9 +311,9 @@ describe('Comprehensive App Test Suite', () => {
 
       // Click on User Settings
       const userSettingsButton = getByText('User Settings');
-      fireEvent.press(_userSettingsButton);
+      fireEvent.press(__userSettingsButton);
 
-      expect(_mockNavigate).toHaveBeenCalledWith('UserSettings');
+      expect(__mockNavigate).toHaveBeenCalledWith('UserSettings');
     });
 
     it('should handle back navigation', async () => {
@@ -324,9 +324,9 @@ describe('Comprehensive App Test Suite', () => {
       );
 
       const backButton = getByTestId('back-button');
-      fireEvent.press(_backButton);
+      fireEvent.press(__backButton);
 
-      expect(_mockGoBack).toHaveBeenCalled();
+      expect(__mockGoBack).toHaveBeenCalled();
     });
   });
 
@@ -341,7 +341,7 @@ describe('Comprehensive App Test Suite', () => {
       );
 
       const saved = await AsyncStorage.getItem('userPreferences');
-      expect(JSON.parse(_saved)).toEqual({
+      expect(JSON.parse(__saved)).toEqual({
         theme: 'dark',
         language: 'en',
       });
@@ -380,7 +380,7 @@ describe('Comprehensive App Test Suite', () => {
       const renderTime = endTime - startTime;
 
       // Should render in less than 1 second
-      expect(_renderTime).toBeLessThan(1000);
+      expect(__renderTime).toBeLessThan(1000);
     });
   });
 });

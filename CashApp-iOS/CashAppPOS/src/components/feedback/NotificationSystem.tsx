@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import React, { createContext, useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -62,35 +62,35 @@ export interface NotificationAction {
 
 interface NotificationContextType {
   showNotification: (notification: Omit<Notification, 'id'>) => string;
-  hideNotification: (id: string) => void;
+  hideNotification: (id: _string) => void;
   clearAllNotifications: () => void;
-  showSuccess: (title: string, message?: string, duration?: number) => string;
-  showError: (title: string, message?: string, duration?: number) => string;
-  showWarning: (title: string, message?: string, duration?: number) => string;
-  showInfo: (title: string, message?: string, duration?: number) => string;
-  showLoading: (title: string, message?: string) => string;
+  showSuccess: (title: _string, message?: _string, duration?: _number) => string;
+  showError: (title: _string, message?: _string, duration?: _number) => string;
+  showWarning: (title: _string, message?: _string, duration?: _number) => string;
+  showInfo: (title: _string, message?: _string, duration?: _number) => string;
+  showLoading: (title: _string, message?: _string) => string;
 }
 
-const NotificationContext = createContext<NotificationContextType | undefined>(_undefined);
+const NotificationContext = createContext<NotificationContextType | undefined>(__undefined);
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const { width: _screenWidth, height: screenHeight } = Dimensions.get('window');
 const statusBarHeight = Platform.OS === 'ios' ? 44 : StatusBar.currentHeight || 0;
 
 interface NotificationItemProps {
   notification: Notification;
-  onHide: (id: string) => void;
+  onHide: (id: _string) => void;
   index: number;
 }
 
-const NotificationItem: React.FC<NotificationItemProps> = ({ notification, onHide, index }) => {
+const NotificationItem: React.FC<NotificationItemProps> = ({ notification, _onHide, index }) => {
   const [animation] = useState(new Animated.Value(0));
-  const [visible, setVisible] = useState(_true);
+  const [visible, setVisible] = useState(__true);
 
   useEffect(() => {
     // Slide in animation
-    Animated.spring(_animation, {
+    Animated.spring(__animation, {
       toValue: 1,
-      useNativeDriver: true,
+      useNativeDriver: _true,
       tension: 100,
       friction: 8,
     }).start();
@@ -101,17 +101,17 @@ const NotificationItem: React.FC<NotificationItemProps> = ({ notification, onHid
         hideNotification();
       }, notification.duration || 4000);
 
-      return () => clearTimeout(_timer);
+      return () => clearTimeout(__timer);
     }
   }, []);
 
   const hideNotification = useCallback(() => {
-    Animated.timing(_animation, {
+    Animated.timing(__animation, {
       toValue: 0,
       duration: 300,
-      useNativeDriver: true,
+      useNativeDriver: _true,
     }).start(() => {
-      setVisible(_false);
+      setVisible(__false);
       onHide(notification.id);
     });
   }, [notification.id, onHide]);
@@ -156,35 +156,35 @@ const NotificationItem: React.FC<NotificationItemProps> = ({ notification, onHid
       case NotificationPosition.TOP:
         positionStyle = {
           top: statusBarHeight + margin + index * 80,
-          left: margin,
-          right: margin,
+          left: _margin,
+          right: _margin,
         };
         break;
       case NotificationPosition.BOTTOM:
         positionStyle = {
           bottom: margin + index * 80,
-          left: margin,
-          right: margin,
+          left: _margin,
+          right: _margin,
         };
         break;
       case NotificationPosition.CENTER:
         positionStyle = {
           top: screenHeight / 2 - 40 + index * 80,
-          left: margin,
-          right: margin,
+          left: _margin,
+          right: _margin,
         };
         break;
       default:
         positionStyle = {
           top: statusBarHeight + margin + index * 80,
-          left: margin,
-          right: margin,
+          left: _margin,
+          right: _margin,
         };
     }
 
     return {
       ...positionStyle,
-      transform: baseTransform,
+      transform: _baseTransform,
     };
   };
 
@@ -263,7 +263,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
       setNotifications(prev => {
         const newNotifications = [notification, ...prev];
         // Limit the number of notifications
-        return newNotifications.slice(0, maxNotifications);
+        return newNotifications.slice(0, _maxNotifications);
       });
 
       return id;
@@ -271,7 +271,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
     [maxNotifications],
   );
 
-  const hideNotification = useCallback((id: string) => {
+  const hideNotification = useCallback((id: _string) => {
     setNotifications(prev => prev.filter(n => n.id !== id));
   }, []);
 
@@ -280,7 +280,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
   }, []);
 
   const showSuccess = useCallback(
-    (title: string, message?: string, duration?: number): string => {
+    (title: _string, message?: _string, duration?: _number): string => {
       return showNotification({
         title,
         message,
@@ -292,7 +292,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
   );
 
   const showError = useCallback(
-    (title: string, message?: string, duration?: number): string => {
+    (title: _string, message?: _string, duration?: _number): string => {
       return showNotification({
         title,
         message,
@@ -304,7 +304,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
   );
 
   const showWarning = useCallback(
-    (title: string, message?: string, duration?: number): string => {
+    (title: _string, message?: _string, duration?: _number): string => {
       return showNotification({
         title,
         message,
@@ -316,7 +316,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
   );
 
   const showInfo = useCallback(
-    (title: string, message?: string, duration?: number): string => {
+    (title: _string, message?: _string, duration?: _number): string => {
       return showNotification({
         title,
         message,
@@ -328,12 +328,12 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
   );
 
   const showLoading = useCallback(
-    (title: string, message?: string): string => {
+    (title: _string, message?: _string): string => {
       return showNotification({
         title,
         message,
         type: NotificationType.LOADING,
-        persistent: true,
+        persistent: _true,
         duration: 0,
       });
     },
@@ -355,7 +355,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
     <NotificationContext.Provider value={contextValue}>
       {children}
       <View style={styles.notificationContainer} pointerEvents="box-none">
-        {notifications.map((_notification, index) => (
+        {notifications.map((__notification, _index) => (
           <NotificationItem
             key={notification.id}
             notification={notification}
@@ -369,7 +369,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
 };
 
 export const useNotification = (): NotificationContextType => {
-  const context = useContext(_NotificationContext);
+  const context = useContext(__NotificationContext);
   if (!context) {
     throw new Error('useNotification must be used within a NotificationProvider');
   }
@@ -393,10 +393,10 @@ export const ProgressNotification: React.FC<ProgressNotificationProps> = ({
   const [animation] = useState(new Animated.Value(0));
 
   useEffect(() => {
-    Animated.timing(_animation, {
+    Animated.timing(__animation, {
       toValue: progress / 100,
       duration: 300,
-      useNativeDriver: false,
+      useNativeDriver: _false,
     }).start();
   }, [progress]);
 
@@ -427,7 +427,7 @@ export const ProgressNotification: React.FC<ProgressNotificationProps> = ({
         />
       </View>
 
-      <Text style={styles.progressText}>{Math.round(_progress)}%</Text>
+      <Text style={styles.progressText}>{Math.round(__progress)}%</Text>
     </View>
   );
 };

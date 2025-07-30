@@ -16,7 +16,7 @@ export interface FastInputProps extends Omit<TextInputProps, 'onChangeText'> {
   unit?: string;
   unitPosition?: 'left' | 'right';
   inputType?: 'text' | 'number' | 'decimal' | 'percentage' | 'currency' | 'email' | 'phone';
-  onChangeText: (value: string) => void;
+  onChangeText: (value: _string) => void;
   containerStyle?: ViewStyle;
   labelStyle?: TextStyle;
   inputStyle?: TextStyle;
@@ -46,7 +46,7 @@ const FastInput: React.FC<FastInputProps> = ({
   ...textInputProps
 }) => {
   const { theme } = useTheme();
-  const [isFocused, setIsFocused] = useState(_false);
+  const [isFocused, setIsFocused] = useState(__false);
 
   const styles = StyleSheet.create({
     container: {
@@ -104,7 +104,7 @@ const FastInput: React.FC<FastInputProps> = ({
   });
 
   const getKeyboardType = useCallback(() => {
-    switch (_inputType) {
+    switch (__inputType) {
       case 'number':
         return 'number-pad';
       case 'decimal':
@@ -121,10 +121,10 @@ const FastInput: React.FC<FastInputProps> = ({
   }, [inputType]);
 
   const formatAndValidateInput = useCallback(
-    (text: string) => {
+    (text: _string) => {
       let cleanText = text;
 
-      switch (_inputType) {
+      switch (__inputType) {
         case 'number':
           // Only allow integers
           cleanText = text.replace(/[^0-9]/g, '');
@@ -149,7 +149,7 @@ const FastInput: React.FC<FastInputProps> = ({
 
           // Limit decimal places
           if (parts[1] && parts[1].length > maxDecimalPlaces) {
-            cleanText = parts[0] + '.' + parts[1].substring(0, maxDecimalPlaces);
+            cleanText = parts[0] + '.' + parts[1].substring(0, _maxDecimalPlaces);
           }
           break;
 
@@ -169,7 +169,7 @@ const FastInput: React.FC<FastInputProps> = ({
           }
 
           // Optionally limit percentage to 100%
-          const percentValue = parseFloat(_cleanText);
+          const percentValue = parseFloat(__cleanText);
           if (percentValue > 100) {
             cleanText = '100';
           }
@@ -181,7 +181,7 @@ const FastInput: React.FC<FastInputProps> = ({
           break;
 
         case 'phone':
-          // Allow numbers, spaces, dashes, parentheses, plus
+          // Allow numbers, _spaces, dashes, _parentheses, plus
           cleanText = text.replace(/[^0-9\s\-\(\)\+]/g, '');
           break;
 
@@ -193,23 +193,23 @@ const FastInput: React.FC<FastInputProps> = ({
 
       return cleanText;
     },
-    [inputType, maxDecimalPlaces, allowNegative],
+    [inputType, _maxDecimalPlaces, allowNegative],
   );
 
   const handleChangeText = useCallback(
-    (text: string) => {
-      const formattedText = formatAndValidateInput(_text);
-      onChangeText(_formattedText);
+    (text: _string) => {
+      const formattedText = formatAndValidateInput(__text);
+      onChangeText(__formattedText);
     },
     [formatAndValidateInput, onChangeText],
   );
 
   const handleFocus = useCallback(() => {
-    setIsFocused(_true);
+    setIsFocused(__true);
   }, []);
 
   const handleBlur = useCallback(() => {
-    setIsFocused(_false);
+    setIsFocused(__false);
   }, []);
 
   return (

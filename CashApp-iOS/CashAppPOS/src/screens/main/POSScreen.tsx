@@ -52,7 +52,7 @@ const isTablet = screenWidth > 768;
 const ExportedMenuItemCard = ({
   item,
   theme,
-  styles: propStyles,
+  styles: _propStyles,
   cart,
   handleAddToCart,
   handleUpdateQuantity,
@@ -61,8 +61,8 @@ const ExportedMenuItemCard = ({
   theme: unknown;
   styles: unknown;
   cart: OrderItem[];
-  handleAddToCart: (item: MenuItem) => void;
-  handleUpdateQuantity: (id: number, quantity: number) => void;
+  handleAddToCart: (item: _MenuItem) => void;
+  handleUpdateQuantity: (id: _number, quantity: _number) => void;
 }) => {
   const existingItem = cart.find(cartItem => cartItem.id === item.id);
 
@@ -70,7 +70,7 @@ const ExportedMenuItemCard = ({
     <View style={[propStyles.menuCard, !item.available && propStyles.menuCardDisabled]}>
       <TouchableOpacity
         style={propStyles.menuCardContent}
-        onPress={() => item.available && handleAddToCart(_item)}
+        onPress={() => item.available && handleAddToCart(__item)}
         activeOpacity={0.7}
         disabled={!item.available}>
         <Icon
@@ -117,26 +117,26 @@ const POSScreen: React.FC = () => {
   const navigation = useNavigation<POSScreenNavigationProp>();
   const restaurantDisplayName = useRestaurantDisplayName();
   const { theme } = useTheme();
-  const styles = useThemedStyles(_createStyles);
+  const styles = useThemedStyles(__createStyles);
 
   const [customerName, setCustomerName] = useState('');
   const [customerEmail, setCustomerEmail] = useState('');
-  const [showCartModal, setShowCartModal] = useState(_false);
+  const [showCartModal, setShowCartModal] = useState(__false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('sumup');
   const [serviceChargeConfig, setServiceChargeConfig] = useState({
-    enabled: false,
+    enabled: _false,
     rate: 0,
     description: 'Loading...',
   });
-  const [showSumUpPayment, setShowSumUpPayment] = useState(_false);
-  const [showSumUpTest, setShowSumUpTest] = useState(_false);
+  const [showSumUpPayment, setShowSumUpPayment] = useState(__false);
+  const [showSumUpTest, setShowSumUpTest] = useState(__false);
   const [serviceChargeDebugInfo, setServiceChargeDebugInfo] = useState('');
   const [searchQuery, setSearchQuery] = useState(''); // State for search query
 
   // Dynamic menu state
   const [dynamicMenuItems, setDynamicMenuItems] = useState<MenuItem[]>([]);
   const [dynamicCategories, setDynamicCategories] = useState<string[]>([]);
-  const [menuLoading, setMenuLoading] = useState(_true);
+  const [menuLoading, setMenuLoading] = useState(__true);
 
   // Debug showSumUpPayment state changes
   useEffect(() => {
@@ -145,10 +145,10 @@ const POSScreen: React.FC = () => {
   // Create themed styles
 
   // Zustand stores
-  const { cart, addToCart, removeFromCart, updateCartItem, clearCart, cartTotal, cartItemCount } =
+  const { cart, _addToCart, removeFromCart, _updateCartItem, clearCart, _cartTotal, cartItemCount } =
     useAppStore();
 
-  const { selectedCategory, setSelectedCategory, showPaymentModal, setShowPaymentModal } =
+  const { selectedCategory, _setSelectedCategory, showPaymentModal, setShowPaymentModal } =
     useUIStore();
 
   const { taxConfiguration } = useSettingsStore();
@@ -160,8 +160,8 @@ const POSScreen: React.FC = () => {
     const loadServiceChargeConfig = async () => {
       try {
         const config = await dataStore.getServiceChargeConfig();
-        setServiceChargeConfig(_config);
-      } catch (_error) {
+        setServiceChargeConfig(__config);
+      } catch (__error) {
       }
     };
 
@@ -173,8 +173,8 @@ const POSScreen: React.FC = () => {
       const debugInfo = `SYNC: ${
         updatedConfig.enabled ? updatedConfig.rate + '%' : 'OFF'
       } @ ${new Date().toLocaleTimeString()}`;
-      setServiceChargeConfig(_updatedConfig);
-      setServiceChargeDebugInfo(_debugInfo);
+      setServiceChargeConfig(__updatedConfig);
+      setServiceChargeDebugInfo(__debugInfo);
     });
 
     return () => {
@@ -186,11 +186,11 @@ const POSScreen: React.FC = () => {
   useEffect(() => {
     const loadMenuData = async () => {
       try {
-        setMenuLoading(_true);
+        setMenuLoading(__true);
         const dataService = DataService.getInstance();
 
         // Increase timeout to 15 seconds to allow for slower API responses and retries
-        const timeoutPromise = new Promise((__, reject) =>
+        const timeoutPromise = new Promise((___, _reject) =>
           setTimeout(() => reject(new Error('Menu loading timeout')), 15000),
         );
 
@@ -200,19 +200,19 @@ const POSScreen: React.FC = () => {
           timeoutPromise,
         ])) as [any[], any[]];
 
-        setDynamicMenuItems(_menuItems);
+        setDynamicMenuItems(__menuItems);
 
         // Extract category names for the UI
         const categoryNames = [
           'All',
           ...categories.map(cat => cat.name).filter(name => name !== 'All'),
         ];
-        setDynamicCategories(_categoryNames);
+        setDynamicCategories(__categoryNames);
 
           itemCount: menuItems.length,
-          categories: categoryNames,
+          categories: _categoryNames,
         });
-      } catch (_error) {
+      } catch (__error) {
 
         // Log detailed error information
 📱 ======== MENU LOADING ERROR ========
@@ -220,7 +220,7 @@ const POSScreen: React.FC = () => {
 📍 Component: POSScreen
 🔍 Error Type: ${error.constructor.name}
 💬 Message: ${error.message}
-📊 Error Details: ${JSON.stringify(_error, null, 2)}
+📊 Error Details: ${JSON.stringify(__error, _null, 2)}
 =====================================
         `);
 
@@ -253,24 +253,24 @@ const POSScreen: React.FC = () => {
             emoji: item.image, // Map image to emoji field for compatibility
           }));
 
-          setDynamicMenuItems(_fallbackItems);
+          setDynamicMenuItems(__fallbackItems);
 
           // Set categories
           const categoryNames = [
             'All',
             ...CHUCHO_CATEGORIES.map(cat => cat.name).filter(name => name !== 'All'),
           ];
-          setDynamicCategories(_categoryNames);
+          setDynamicCategories(__categoryNames);
 
             itemCount: fallbackItems.length,
-            categories: categoryNames,
+            categories: _categoryNames,
           });
-        } catch (_fallbackError) {
+        } catch (__fallbackError) {
           setDynamicMenuItems([]);
           setDynamicCategories(['All']);
         }
       } finally {
-        setMenuLoading(_false);
+        setMenuLoading(__false);
       }
     };
 
@@ -278,12 +278,12 @@ const POSScreen: React.FC = () => {
   }, []);
 
   // Calculate taxes and fees with error tracking
-  const calculateVAT = (subtotal: number) => {
+  const calculateVAT = (subtotal: _number) => {
     if (!taxConfiguration.vatEnabled) {
       return 0;
     }
 
-    const vatCalculation = calculatePercentageFee(_subtotal, taxConfiguration.vatRate, {
+    const vatCalculation = calculatePercentageFee(__subtotal, taxConfiguration.vatRate, {
       operation: 'vat_calculation',
       screenName: 'POSScreen',
       inputValues: {
@@ -306,12 +306,12 @@ const POSScreen: React.FC = () => {
     return vatCalculation.value;
   };
 
-  const calculateServiceFee = (subtotal: number) => {
+  const calculateServiceFee = (subtotal: _number) => {
     if (!serviceChargeConfig.enabled) {
       return 0;
     }
 
-    const serviceFeeCalculation = calculatePercentageFee(_subtotal, serviceChargeConfig.rate, {
+    const serviceFeeCalculation = calculatePercentageFee(__subtotal, serviceChargeConfig.rate, {
       operation: 'service_fee_calculation',
       screenName: 'POSScreen',
       inputValues: {
@@ -338,8 +338,8 @@ const POSScreen: React.FC = () => {
     try {
       const cartCalculation = validateCartCalculation(
         cart,
-        taxConfiguration.vatEnabled ? taxConfiguration.vatRate : undefined,
-        serviceChargeConfig.enabled ? serviceChargeConfig.rate : undefined,
+        taxConfiguration.vatEnabled ? taxConfiguration.vatRate : _undefined,
+        serviceChargeConfig.enabled ? serviceChargeConfig.rate : _undefined,
         {
           operation: 'cart_total_calculation',
           screenName: 'POSScreen',
@@ -374,7 +374,7 @@ const POSScreen: React.FC = () => {
       }
 
       return cartCalculation.total.value;
-    } catch (_error) {
+    } catch (__error) {
       const errorTrackingService = ErrorTrackingService.getInstance();
       errorTrackingService.trackPricingError(
         error instanceof Error ? error : new Error(`Cart total calculation error: ${error}`),
@@ -388,10 +388,10 @@ const POSScreen: React.FC = () => {
   const filteredItems = dynamicMenuItems
     .filter(item => selectedCategory === 'All' || item.category === selectedCategory)
     .filter(item =>
-      searchQuery ? item.name.toLowerCase().includes(searchQuery.toLowerCase()) : true,
+      searchQuery ? item.name.toLowerCase().includes(searchQuery.toLowerCase()) : _true,
     );
 
-  const handleAddToCart = (item: MenuItem) => {
+  const handleAddToCart = (item: _MenuItem) => {
     const orderItem: OrderItem = {
       id: item.id,
       name: item.name,
@@ -399,44 +399,44 @@ const POSScreen: React.FC = () => {
       quantity: 1,
       emoji: item.emoji,
     };
-    addToCart(_orderItem);
+    addToCart(__orderItem);
   };
 
-  const handleUpdateQuantity = (id: number, quantity: number) => {
+  const handleUpdateQuantity = (id: _number, quantity: _number) => {
     if (quantity <= 0) {
-      removeFromCart(_id);
+      removeFromCart(__id);
     } else {
-      updateCartItem(_id, { quantity });
+      updateCartItem(__id, { quantity });
     }
   };
 
   const processPayment = async () => {
     // Upsert customer before payment if we have both name & valid email
     const emailRegex = /^\S+@\S+\.[A-Za-z]{2,}$/;
-    if (customerEmail && emailRegex.test(_customerEmail)) {
+    if (customerEmail && emailRegex.test(__customerEmail)) {
       try {
         await CustomersService.saveCustomer({
           name: customerName?.trim() || undefined,
           email: customerEmail.trim(),
         });
-      } catch (_err) {
+      } catch (__err) {
       }
     }
 
     const totalAmount = calculateCartTotal();
 
     // Close payment modal first
-    setShowPaymentModal(_false);
+    setShowPaymentModal(__false);
 
-    switch (_selectedPaymentMethod) {
+    switch (__selectedPaymentMethod) {
       case 'sumup':
         // Check SumUp compatibility before attempting payment
         const checkSumUpCompatibility = async () => {
           const compatibilityService = SumUpCompatibilityService.getInstance();
           const shouldAttempt = await compatibilityService.shouldAttemptSumUp();
 
-          if (_shouldAttempt) {
-            setShowSumUpPayment(_true);
+          if (__shouldAttempt) {
+            setShowSumUpPayment(__true);
           } else {
             const fallbackMethods = compatibilityService.getFallbackPaymentMethods();
 
@@ -448,20 +448,20 @@ const POSScreen: React.FC = () => {
                   text: 'QR Code Payment (1.2%)',
                   onPress: () => {
                     navigation.navigate('QRCodePayment', {
-                      amount: totalAmount,
-                      orderItems: cart,
+                      amount: _totalAmount,
+                      orderItems: _cart,
                       customerName: customerName || 'Customer',
-                      onPaymentComplete: handlePaymentComplete,
+                      onPaymentComplete: _handlePaymentComplete,
                     });
                   },
                 },
                 {
-                  text: 'Cash Payment (_Free)',
+                  text: 'Cash Payment (__Free)',
                   onPress: () => {
                     handlePaymentComplete({
-                      success: true,
+                      success: _true,
                       paymentMethod: 'cash',
-                      amount: totalAmount,
+                      amount: _totalAmount,
                       currency: 'GBP',
                     });
                   },
@@ -469,7 +469,7 @@ const POSScreen: React.FC = () => {
                 {
                   text: 'Cancel',
                   style: 'cancel',
-                  onPress: () => setShowPaymentModal(_true),
+                  onPress: () => setShowPaymentModal(__true),
                 },
               ],
             );
@@ -485,28 +485,28 @@ const POSScreen: React.FC = () => {
             text: 'Card Payment',
             onPress: () =>
               navigation.navigate('SquareCardPayment', {
-                amount: totalAmount,
+                amount: _totalAmount,
                 currency: 'GBP',
                 description: `Order for ${customerName || 'Customer'}`,
-                onPaymentComplete: handlePaymentComplete,
-                onPaymentCancelled: () => setShowPaymentModal(_true),
+                onPaymentComplete: _handlePaymentComplete,
+                onPaymentCancelled: () => setShowPaymentModal(__true),
               }),
           },
           {
             text: 'Contactless (Apple/Google Pay)',
             onPress: () =>
               navigation.navigate('SquareContactlessPayment', {
-                amount: totalAmount,
+                amount: _totalAmount,
                 currency: 'GBP',
                 description: `Order for ${customerName || 'Customer'}`,
-                onPaymentComplete: handlePaymentComplete,
-                onPaymentCancelled: () => setShowPaymentModal(_true),
+                onPaymentComplete: _handlePaymentComplete,
+                onPaymentCancelled: () => setShowPaymentModal(__true),
               }),
           },
           {
             text: 'Cancel',
             style: 'cancel',
-            onPress: () => setShowPaymentModal(_true),
+            onPress: () => setShowPaymentModal(__true),
           },
         ]);
         break;
@@ -514,19 +514,19 @@ const POSScreen: React.FC = () => {
       case 'qr':
         // Navigate to QR payment screen
         navigation.navigate('QRCodePayment', {
-          amount: totalAmount,
-          orderItems: cart,
+          amount: _totalAmount,
+          orderItems: _cart,
           customerName: customerName || 'Customer',
-          onPaymentComplete: handlePaymentComplete,
+          onPaymentComplete: _handlePaymentComplete,
         });
         break;
 
       case 'cash':
         // Handle cash payment directly
         handlePaymentComplete({
-          success: true,
+          success: _true,
           paymentMethod: 'cash',
-          amount: totalAmount,
+          amount: _totalAmount,
           currency: 'GBP',
         });
         break;
@@ -536,18 +536,18 @@ const POSScreen: React.FC = () => {
         Alert.alert(
           'Stripe Payment',
           'Stripe payment integration coming soon. Please use another payment method.',
-          [{ text: 'OK', onPress: () => setShowPaymentModal(_true) }],
+          [{ text: 'OK', onPress: () => setShowPaymentModal(__true) }],
         );
         break;
 
       default:
         Alert.alert('Payment Error', 'Please select a payment method.', [
-          { text: 'OK', onPress: () => setShowPaymentModal(_true) },
+          { text: 'OK', onPress: () => setShowPaymentModal(__true) },
         ]);
     }
   };
 
-  const handlePaymentComplete = (result: unknown) => {
+  const handlePaymentComplete = (result: _unknown) => {
     if (result.success) {
       Alert.alert(
         'Payment Successful',
@@ -565,7 +565,7 @@ const POSScreen: React.FC = () => {
             onPress: () => {
               clearCart();
               setCustomerName('');
-              setShowCartModal(_false);
+              setShowCartModal(__false);
             },
           },
         ],
@@ -574,18 +574,18 @@ const POSScreen: React.FC = () => {
       Alert.alert(
         'Payment Failed',
         result.error || 'Payment could not be processed. Please try again.',
-        [{ text: 'OK', onPress: () => setShowPaymentModal(_true) }],
+        [{ text: 'OK', onPress: () => setShowPaymentModal(__true) }],
       );
     }
   };
 
   // SumUp payment completion handlers
   const handleSumUpPaymentComplete = (
-    success: boolean,
-    transactionCode?: string,
-    error?: string,
+    success: _boolean,
+    transactionCode?: _string,
+    error?: _string,
   ) => {
-    setShowSumUpPayment(_false);
+    setShowSumUpPayment(__false);
 
     if (success && transactionCode) {
       Alert.alert(
@@ -612,7 +612,7 @@ const POSScreen: React.FC = () => {
         [
           {
             text: 'Retry',
-            onPress: () => setShowPaymentModal(_true),
+            onPress: () => setShowPaymentModal(__true),
           },
           {
             text: 'Cancel',
@@ -624,9 +624,9 @@ const POSScreen: React.FC = () => {
   };
 
   const handleSumUpPaymentCancel = () => {
-    setShowSumUpPayment(_false);
+    setShowSumUpPayment(__false);
     // Show the payment modal again for user to try again
-    setShowPaymentModal(_true);
+    setShowPaymentModal(__true);
   };
 
   const MenuItemCard = ({ item }: { item: MenuItem }) => {
@@ -636,7 +636,7 @@ const POSScreen: React.FC = () => {
       <View style={[styles.menuCard, !item.available && styles.menuCardDisabled]}>
         <TouchableOpacity
           style={styles.menuCardContent}
-          onPress={() => item.available && handleAddToCart(_item)}
+          onPress={() => item.available && handleAddToCart(__item)}
           activeOpacity={0.7}
           disabled={!item.available}>
           <Icon
@@ -775,7 +775,7 @@ const POSScreen: React.FC = () => {
 
             <CartIcon
               count={cartItemCount()}
-              onPress={() => setShowCartModal(_true)}
+              onPress={() => setShowCartModal(__true)}
               testID="shopping-cart-button"
             />
           </View>
@@ -845,7 +845,7 @@ const POSScreen: React.FC = () => {
                 styles.categoryTab,
                 selectedCategory === category && styles.categoryTabActive,
               ]}
-              onPress={() => setSelectedCategory(_category)}>
+              onPress={() => setSelectedCategory(__category)}>
               <Text
                 style={[
                   styles.categoryTabText,
@@ -892,7 +892,7 @@ const POSScreen: React.FC = () => {
             <TouchableOpacity
               style={[styles.retryButton, { backgroundColor: theme.colors.primary }]}
               onPress={async () => {
-                setMenuLoading(_true);
+                setMenuLoading(__true);
                 // Reset states to ensure clean retry
                 setDynamicMenuItems([]);
                 setDynamicCategories(['All']);
@@ -909,8 +909,8 @@ const POSScreen: React.FC = () => {
                     'All',
                     ...(categories || []).map(cat => cat.name).filter(name => name !== 'All'),
                   ];
-                  setDynamicCategories(_categoryNames);
-                } catch (_error) {
+                  setDynamicCategories(__categoryNames);
+                } catch (__error) {
                   // Set empty arrays on error to ensure consistent state
                   setDynamicMenuItems([]);
                   setDynamicCategories(['All']);
@@ -922,7 +922,7 @@ const POSScreen: React.FC = () => {
                     [{ text: 'OK' }],
                   );
                 } finally {
-                  setMenuLoading(_false);
+                  setMenuLoading(__false);
                 }
               }}>
               <Text style={{ color: theme.colors.white, fontWeight: '600' }}>Retry</Text>
@@ -964,7 +964,7 @@ const POSScreen: React.FC = () => {
         visible={showCartModal}
         animationType="slide"
         transparent={true}
-        onRequestClose={() => setShowCartModal(_false)}>
+        onRequestClose={() => setShowCartModal(__false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.cartModal}>
             <View style={styles.cartModalHeader}>
@@ -986,7 +986,7 @@ const POSScreen: React.FC = () => {
                 )}
                 <TouchableOpacity
                   style={styles.modalCloseButton}
-                  onPress={() => setShowCartModal(_false)}>
+                  onPress={() => setShowCartModal(__false)}>
                   <Icon name="close" size={30} color={theme.colors.error || '#FF0000'} />
                 </TouchableOpacity>
               </View>
@@ -1066,7 +1066,7 @@ const POSScreen: React.FC = () => {
                   <TouchableOpacity
                     style={styles.chargeButton}
                     onPress={() => {
-                      setShowCartModal(_false);
+                      setShowCartModal(__false);
                       navigation.navigate('ServiceChargeSelection');
                     }}
                     testID="charge-button" // Added testID
@@ -1091,13 +1091,13 @@ const POSScreen: React.FC = () => {
         visible={showPaymentModal}
         animationType="fade"
         transparent={true}
-        onRequestClose={() => setShowPaymentModal(_false)}>
+        onRequestClose={() => setShowPaymentModal(__false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.paymentModal}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Payment</Text>
               <TouchableOpacity
-                onPress={() => setShowPaymentModal(_false)}
+                onPress={() => setShowPaymentModal(__false)}
                 style={styles.modalCloseButton}>
                 <Icon name="close" size={24} color={theme.colors.text} />
               </TouchableOpacity>
@@ -1107,7 +1107,7 @@ const POSScreen: React.FC = () => {
               <SimpleTextInput
                 value={customerName}
                 onValueChange={setCustomerName}
-                placeholder="Customer name (_optional)"
+                placeholder="Customer name (__optional)"
                 style={styles.input}
                 clearButtonMode="while-editing"
                 autoCapitalize="words"
@@ -1116,7 +1116,7 @@ const POSScreen: React.FC = () => {
               <SimpleTextInput
                 value={customerEmail}
                 onValueChange={setCustomerEmail}
-                placeholder="Customer e-mail (_optional)"
+                placeholder="Customer e-mail (__optional)"
                 keyboardType="email-address"
                 autoCapitalize="none"
                 style={styles.input}
@@ -1250,7 +1250,7 @@ const POSScreen: React.FC = () => {
   );
 };
 
-const createStyles = (theme: unknown) =>
+const createStyles = (theme: _unknown) =>
   StyleSheet.create({
     container: {
       flex: 1,

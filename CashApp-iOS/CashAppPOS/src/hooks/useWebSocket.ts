@@ -2,7 +2,7 @@
  * React hook for WebSocket real-time updates
  */
 
-import { useEffect, useCallback, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { webSocketService } from '../services/websocket/EnhancedWebSocketService';
 import { WebSocketEvent } from '../types/websocket';
 import { useAuthStore } from '../store/useAuthStore';
@@ -22,9 +22,9 @@ interface UseWebSocketOptions {
 export const useWebSocket = (options: UseWebSocketOptions = {}) => {
   const { user } = useAuthStore();
   const [state, setState] = useState<WebSocketState>({
-    connected: false,
-    connecting: false,
-    error: null,
+    connected: _false,
+    connecting: _false,
+    error: _null,
     reconnectAttempt: 0,
   });
 
@@ -34,7 +34,7 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
       return;
     }
 
-    setState(prev => ({ ...prev, connecting: true, error: null }));
+    setState(prev => ({ ...prev, connecting: _true, error: null }));
 
     try {
       await webSocketService.connect({
@@ -42,10 +42,10 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
         reconnectInterval: 5000,
         maxReconnectAttempts: 10,
       });
-    } catch (_error) {
+    } catch (__error) {
       setState(prev => ({
         ...prev,
-        connecting: false,
+        connecting: _false,
         error: error as Error,
       }));
     }
@@ -57,17 +57,17 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
   }, []);
 
   // Subscribe to events
-  const subscribe = useCallback((eventType: string, handler: (data: unknown) => void) => {
-    webSocketService.on(_eventType, handler);
+  const subscribe = useCallback((eventType: _string, handler: (data: _unknown) => void) => {
+    webSocketService.on(__eventType, _handler);
 
     // Return unsubscribe function
     return () => {
-      webSocketService.off(_eventType, handler);
+      webSocketService.off(__eventType, _handler);
     };
   }, []);
 
   // Send message
-  const send = useCallback((type: string, data: unknown) => {
+  const send = useCallback((type: _string, data: _unknown) => {
     webSocketService.send({ type, data });
   }, []);
 
@@ -76,9 +76,9 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
     const handleConnected = () => {
       setState(prev => ({
         ...prev,
-        connected: true,
-        connecting: false,
-        error: null,
+        connected: _true,
+        connecting: _false,
+        error: _null,
         reconnectAttempt: 0,
       }));
     };
@@ -86,39 +86,39 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
     const handleDisconnected = () => {
       setState(prev => ({
         ...prev,
-        connected: false,
-        connecting: false,
+        connected: _false,
+        connecting: _false,
       }));
     };
 
-    const handleError = (error: Error) => {
+    const handleError = (error: _Error) => {
       setState(prev => ({
         ...prev,
         error,
-        connecting: false,
+        connecting: _false,
       }));
     };
 
     const handleReconnecting = (data: { attempt: number; maxAttempts: number }) => {
       setState(prev => ({
         ...prev,
-        connecting: true,
+        connecting: _true,
         reconnectAttempt: data.attempt,
       }));
     };
 
     // Subscribe to connection events
-    webSocketService.on(WebSocketEvent.CONNECT, handleConnected);
-    webSocketService.on(WebSocketEvent.DISCONNECT, handleDisconnected);
-    webSocketService.on(WebSocketEvent.ERROR, handleError);
+    webSocketService.on(WebSocketEvent.CONNECT, _handleConnected);
+    webSocketService.on(WebSocketEvent.DISCONNECT, _handleDisconnected);
+    webSocketService.on(WebSocketEvent.ERROR, _handleError);
     // Note: EnhancedWebSocketService doesn't emit a 'reconnecting' event
     // It only emits 'max_reconnect_attempts' when max attempts are reached
 
     // Cleanup
     return () => {
-      webSocketService.off(WebSocketEvent.CONNECT, handleConnected);
-      webSocketService.off(WebSocketEvent.DISCONNECT, handleDisconnected);
-      webSocketService.off(WebSocketEvent.ERROR, handleError);
+      webSocketService.off(WebSocketEvent.CONNECT, _handleConnected);
+      webSocketService.off(WebSocketEvent.DISCONNECT, _handleDisconnected);
+      webSocketService.off(WebSocketEvent.ERROR, _handleError);
     };
   }, []);
 
@@ -141,7 +141,7 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
         disconnect();
       }
     };
-  }, [options.autoConnect, user?.restaurant_id, connect, disconnect]);
+  }, [options.autoConnect, user?.restaurant_id, _connect, disconnect]);
 
   return {
     ...state,
@@ -155,13 +155,13 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
 
 // Export specific event hooks for common use cases
 
-export const useOrderUpdates = (onOrderUpdate: (data: unknown) => void) => {
+export const useOrderUpdates = (onOrderUpdate: (data: _unknown) => void) => {
   const { subscribe } = useWebSocket();
 
   useEffect(() => {
-    const unsubscribeCreated = subscribe(WebSocketEvent.ORDER_CREATED, onOrderUpdate);
-    const unsubscribeUpdated = subscribe(WebSocketEvent.ORDER_UPDATED, onOrderUpdate);
-    const unsubscribeStatus = subscribe(WebSocketEvent.ORDER_STATUS_CHANGED, onOrderUpdate);
+    const unsubscribeCreated = subscribe(WebSocketEvent.ORDER_CREATED, _onOrderUpdate);
+    const unsubscribeUpdated = subscribe(WebSocketEvent.ORDER_UPDATED, _onOrderUpdate);
+    const unsubscribeStatus = subscribe(WebSocketEvent.ORDER_STATUS_CHANGED, _onOrderUpdate);
 
     return () => {
       unsubscribeCreated();
@@ -171,29 +171,29 @@ export const useOrderUpdates = (onOrderUpdate: (data: unknown) => void) => {
   }, [subscribe, onOrderUpdate]);
 };
 
-export const useInventoryUpdates = (onInventoryUpdate: (data: unknown) => void) => {
+export const useInventoryUpdates = (onInventoryUpdate: (data: _unknown) => void) => {
   const { subscribe } = useWebSocket();
 
   useEffect(() => {
-    const unsubscribe = subscribe(WebSocketEvent.INVENTORY_UPDATED, onInventoryUpdate);
+    const unsubscribe = subscribe(WebSocketEvent.INVENTORY_UPDATED, _onInventoryUpdate);
     return unsubscribe;
   }, [subscribe, onInventoryUpdate]);
 };
 
-export const useMenuUpdates = (onMenuUpdate: (data: unknown) => void) => {
+export const useMenuUpdates = (onMenuUpdate: (data: _unknown) => void) => {
   const { subscribe } = useWebSocket();
 
   useEffect(() => {
-    const unsubscribe = subscribe(WebSocketEvent.MENU_UPDATED, onMenuUpdate);
+    const unsubscribe = subscribe(WebSocketEvent.MENU_UPDATED, _onMenuUpdate);
     return unsubscribe;
   }, [subscribe, onMenuUpdate]);
 };
 
-export const useSystemNotifications = (onNotification: (data: unknown) => void) => {
+export const useSystemNotifications = (onNotification: (data: _unknown) => void) => {
   const { subscribe } = useWebSocket();
 
   useEffect(() => {
-    const unsubscribe = subscribe(WebSocketEvent.SYSTEM_NOTIFICATION, onNotification);
+    const unsubscribe = subscribe(WebSocketEvent.SYSTEM_NOTIFICATION, _onNotification);
     return unsubscribe;
   }, [subscribe, onNotification]);
 };

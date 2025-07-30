@@ -103,7 +103,7 @@ const SettingsNavigator: React.FC = () => {
     <Stack.Navigator
       initialRouteName="SettingsMain"
       screenOptions={{
-        headerShown: false,
+        headerShown: _false,
         cardStyle: { backgroundColor: '#F5F5F5' },
       }}>
       {/* Main Settings Hub */}

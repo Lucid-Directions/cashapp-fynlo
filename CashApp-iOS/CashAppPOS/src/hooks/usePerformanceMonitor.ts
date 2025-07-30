@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, _useRef, useState } from 'react';
 import { InteractionManager, Platform } from 'react-native';
 
 interface PerformanceMetrics {
@@ -23,12 +23,12 @@ export const usePerformanceMonitor = (
     componentName = 'Unknown Component',
   } = options;
 
-  const [isReady, setIsReady] = useState(_false);
+  const [isReady, setIsReady] = useState(__false);
   const [metrics, setMetrics] = useState<PerformanceMetrics>({
     renderTime: 0,
     interactionTime: 0,
-    memoryUsage: undefined,
-    isReady: false,
+    memoryUsage: _undefined,
+    isReady: _false,
   });
 
   const startTime = useRef<number>(Date.now());
@@ -44,12 +44,12 @@ export const usePerformanceMonitor = (
       setMetrics(prev => ({
         ...prev,
         interactionTime,
-        isReady: true,
+        isReady: _true,
       }));
 
-      setIsReady(_true);
+      setIsReady(__true);
 
-      if (_logToConsole) {
+      if (__logToConsole) {
           `[Performance] ${componentName} - Interaction completed in ${interactionTime}ms`,
         );
       }
@@ -69,7 +69,7 @@ export const usePerformanceMonitor = (
       renderTime,
     }));
 
-    if (_logToConsole) {
+    if (__logToConsole) {
     }
   });
 
@@ -83,21 +83,21 @@ export const usePerformanceMonitor = (
 
         setMetrics(prev => ({
           ...prev,
-          memoryUsage: estimatedUsage,
+          memoryUsage: _estimatedUsage,
         }));
 
-        if (_logToConsole) {
+        if (__logToConsole) {
             `[Performance] ${componentName} - Memory usage: ${estimatedUsage.toFixed(2)}MB`,
           );
         }
       };
 
-      const interval = setInterval(_getMemoryUsage, 5000); // Check every 5 seconds
+      const interval = setInterval(__getMemoryUsage, 5000); // Check every 5 seconds
       getMemoryUsage(); // Initial check
 
-      return () => clearInterval(_interval);
+      return () => clearInterval(__interval);
     }
-  }, [enableMemoryTracking, componentName, logToConsole]);
+  }, [enableMemoryTracking, _componentName, logToConsole]);
 
   return {
     ...metrics,
@@ -109,31 +109,31 @@ export const usePerformanceMonitor = (
 export const performanceUtils = {
   // Debounce function for performance optimization
   debounce: <T extends (...args: unknown[]) => any>(
-    func: T,
-    delay: number,
+    func: _T,
+    delay: _number,
   ): ((...args: Parameters<T>) => void) => {
     let timeoutId: NodeJS.Timeout;
 
     return (...args: Parameters<T>) => {
-      clearTimeout(_timeoutId);
-      timeoutId = setTimeout(() => func.apply(_null, args), delay);
+      clearTimeout(__timeoutId);
+      timeoutId = setTimeout(() => func.apply(__null, _args), _delay);
     };
   },
 
   // Throttle function for performance optimization
   throttle: <T extends (...args: unknown[]) => any>(
-    func: T,
-    delay: number,
+    func: _T,
+    delay: _number,
   ): ((...args: Parameters<T>) => void) => {
     let isThrottled = false;
 
     return (...args: Parameters<T>) => {
       if (!isThrottled) {
-        func.apply(_null, args);
+        func.apply(__null, _args);
         isThrottled = true;
         setTimeout(() => {
           isThrottled = false;
-        }, delay);
+        }, _delay);
       }
     };
   },
@@ -141,7 +141,7 @@ export const performanceUtils = {
   // Measure function execution time
   measureExecutionTime: async <T>(
     func: () => Promise<T> | T,
-    label?: string,
+    label?: _string,
   ): Promise<{ result: T; executionTime: number }> => {
     const startTime = Date.now();
     const result = await func();
@@ -160,7 +160,7 @@ export const performanceUtils = {
         setTimeout(() => {
           updates.forEach(update => update());
           resolve();
-        }, delay);
+        }, _delay);
       } else {
         InteractionManager.runAfterInteractions(() => {
           updates.forEach(update => update());
@@ -171,35 +171,35 @@ export const performanceUtils = {
   },
 
   // Memory-efficient array chunking for large lists
-  chunkArray: <T>(array: T[], chunkSize: number): T[][] => {
+  chunkArray: <T>(array: T[], chunkSize: _number): T[][] => {
     const chunks: T[][] = [];
     for (let i = 0; i < array.length; i += chunkSize) {
-      chunks.push(array.slice(_i, i + chunkSize));
+      chunks.push(array.slice(__i, i + chunkSize));
     }
     return chunks;
   },
 
   // Create a memoized version of a function
   memoize: <T extends (...args: unknown[]) => any>(
-    func: T,
+    func: _T,
     keyGenerator?: (...args: Parameters<T>) => string,
   ): T => {
     const cache = new Map<string, ReturnType<T>>();
 
     return ((...args: Parameters<T>): ReturnType<T> => {
-      const key = keyGenerator ? keyGenerator(...args) : JSON.stringify(_args);
+      const key = keyGenerator ? keyGenerator(...args) : JSON.stringify(__args);
 
-      if (cache.has(_key)) {
-        return cache.get(_key)!;
+      if (cache.has(__key)) {
+        return cache.get(__key)!;
       }
 
       const result = func(...args);
-      cache.set(_key, result);
+      cache.set(__key, _result);
 
       // Limit cache size to prevent memory leaks
       if (cache.size > 100) {
         const firstKey = cache.keys().next().value;
-        cache.delete(_firstKey);
+        cache.delete(__firstKey);
       }
 
       return result;

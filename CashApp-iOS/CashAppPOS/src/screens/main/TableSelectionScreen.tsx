@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -62,23 +62,23 @@ export const TableSelectionScreen: React.FC = () => {
   const { user } = useAppStore();
   const [tables, setTables] = useState<Table[]>([]);
   const [sections, setSections] = useState<Section[]>([]);
-  const [selectedSection, setSelectedSection] = useState<string | null>(_null);
+  const [selectedSection, setSelectedSection] = useState<string | null>(__null);
   const [orderType, setOrderType] = useState(0); // 0 = Dine In
-  const [loading, setLoading] = useState(_true);
-  const [refreshing, setRefreshing] = useState(_false);
+  const [loading, setLoading] = useState(__true);
+  const [refreshing, setRefreshing] = useState(__false);
 
   const fetchFloorPlan = useCallback(async () => {
     try {
-      const response = await DatabaseService.getRestaurantFloorPlan(_selectedSection);
+      const response = await DatabaseService.getRestaurantFloorPlan(__selectedSection);
       if (response.tables) {
         setTables(response.tables);
         setSections(response.sections || []);
       }
-    } catch (_error) {
+    } catch (__error) {
       Alert.alert('Error', 'Failed to load tables');
     } finally {
-      setLoading(_false);
-      setRefreshing(_false);
+      setLoading(__false);
+      setRefreshing(__false);
     }
   }, [selectedSection]);
 
@@ -87,12 +87,12 @@ export const TableSelectionScreen: React.FC = () => {
   }, [fetchFloorPlan]);
 
   const onRefresh = () => {
-    setRefreshing(_true);
+    setRefreshing(__true);
     fetchFloorPlan();
   };
 
-  const getTableStatusColor = (status: string) => {
-    switch (_status) {
+  const getTableStatusColor = (status: _string) => {
+    switch (__status) {
       case 'available':
         return '#27ae60';
       case 'occupied':
@@ -108,7 +108,7 @@ export const TableSelectionScreen: React.FC = () => {
     }
   };
 
-  const handleTableSelect = async (table: Table) => {
+  const handleTableSelect = async (table: _Table) => {
     const orderTypeMap = ['dine_in', 'takeout', 'pickup', 'delivery'];
     const selectedOrderType = orderTypeMap[orderType];
 
@@ -126,12 +126,12 @@ export const TableSelectionScreen: React.FC = () => {
       navigation.navigate('POS', {
         tableId: table.id,
         tableName: table.display_name,
-        orderType: selectedOrderType,
+        orderType: _selectedOrderType,
       });
     } else {
       // For takeout/pickup/delivery, no table needed
       navigation.navigate('POS', {
-        orderType: selectedOrderType,
+        orderType: _selectedOrderType,
       });
     }
   };
@@ -143,7 +143,7 @@ export const TableSelectionScreen: React.FC = () => {
     return (
       <TouchableOpacity
         style={[styles.tableCard, { borderColor: statusColor }]}
-        onPress={() => handleTableSelect(_item)}
+        onPress={() => handleTableSelect(__item)}
         disabled={orderType !== 0 && item.status !== 'available'}>
         <View style={[styles.tableHeader, { backgroundColor: statusColor }]}>
           <Text style={styles.tableName}>{item.name}</Text>
@@ -194,7 +194,7 @@ export const TableSelectionScreen: React.FC = () => {
     ? tables.filter(table => table.section.id === selectedSection)
     : tables;
 
-  if (_loading) {
+  if (__loading) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>

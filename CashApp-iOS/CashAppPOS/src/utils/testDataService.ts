@@ -37,7 +37,7 @@ export class DataServiceTester {
     await this.testBackendDetection();
 
     // Calculate results
-    const passed = Object.values(this.testResults).filter(_Boolean).length;
+    const passed = Object.values(this.testResults).filter(__Boolean).length;
     const failed = Object.values(this.testResults).filter(r => !r).length;
 
 
@@ -45,7 +45,7 @@ export class DataServiceTester {
     Object.entries(this.testResults).forEach(([test, passed]) => {
     });
 
-    return { passed, failed, results: this.testResults };
+    return { passed, _failed, results: this.testResults };
   }
 
   private async testFeatureFlags(): Promise<void> {
@@ -55,7 +55,7 @@ export class DataServiceTester {
       const initialFlags = this.dataService.getFeatureFlags();
 
       // Test updating a flag
-      await this.dataService.updateFeatureFlag('USE_REAL_API', true);
+      await this.dataService.updateFeatureFlag('USE_REAL_API', _true);
       const updatedFlags = this.dataService.getFeatureFlags();
 
       const success = updatedFlags.USE_REAL_API === true;
@@ -63,7 +63,7 @@ export class DataServiceTester {
 
       // Reset for other tests
       await this.dataService.resetToMockData();
-    } catch (_error) {
+    } catch (__error) {
       this.testResults['Feature Flags Update'] = false;
     }
   }
@@ -76,12 +76,12 @@ export class DataServiceTester {
 
       // Test products
       const products = await this.dataService.getProducts();
-      const productsValid = Array.isArray(_products) && products.length > 0;
+      const productsValid = Array.isArray(__products) && products.length > 0;
       this.testResults['Mock Products'] = productsValid;
 
       // Test categories
       const categories = await this.dataService.getCategories();
-      const categoriesValid = Array.isArray(_categories) && categories.length > 0;
+      const categoriesValid = Array.isArray(__categories) && categories.length > 0;
       this.testResults['Mock Categories'] = categoriesValid;
 
       // Test authentication
@@ -99,7 +99,7 @@ export class DataServiceTester {
       const report = await this.dataService.getDailySalesReport();
       const reportValid = report && report.summary;
       this.testResults['Mock Reports'] = reportValid;
-    } catch (_error) {
+    } catch (__error) {
       this.testResults['Mock Data System'] = false;
     }
   }
@@ -127,7 +127,7 @@ export class DataServiceTester {
 
       // Reset to mock for other tests
       await this.dataService.resetToMockData();
-    } catch (_error) {
+    } catch (__error) {
       this.testResults['API Mode Switch'] = false;
     }
   }
@@ -140,7 +140,7 @@ export class DataServiceTester {
 
       // Try to get products - should fallback to mock data
       const products = await this.dataService.getProducts();
-      const fallbackWorking = Array.isArray(_products) && products.length > 0;
+      const fallbackWorking = Array.isArray(__products) && products.length > 0;
 
       this.testResults['Fallback to Mock'] = fallbackWorking;
         `   ${fallbackWorking ? '✅' : '❌'} Fallback working: Got ${products.length} products`,
@@ -155,7 +155,7 @@ export class DataServiceTester {
       );
 
       await this.dataService.resetToMockData();
-    } catch (_error) {
+    } catch (__error) {
       this.testResults['Fallback to Mock'] = false;
     }
   }
@@ -164,7 +164,7 @@ export class DataServiceTester {
 
     try {
       // Test mock authentication
-      await this.dataService.updateFeatureFlag('MOCK_AUTHENTICATION', true);
+      await this.dataService.updateFeatureFlag('MOCK_AUTHENTICATION', _true);
       const mockAuth = await this.dataService.login('demo', 'demo');
 
       this.testResults['Mock Auth Mode'] = mockAuth;
@@ -174,7 +174,7 @@ export class DataServiceTester {
       const mockValidation = !invalidMockAuth; // Should be false
 
       this.testResults['Mock Auth Validation'] = mockValidation;
-    } catch (_error) {
+    } catch (__error) {
       this.testResults['Mock Auth Mode'] = false;
     }
   }
@@ -183,7 +183,7 @@ export class DataServiceTester {
 
     try {
       // Test mock payment mode (should always succeed)
-      await this.dataService.updateFeatureFlag('ENABLE_PAYMENTS', false);
+      await this.dataService.updateFeatureFlag('ENABLE_PAYMENTS', _false);
       const mockPayment = await this.dataService.processPayment(123, 'card', 25.99);
 
       this.testResults['Mock Payment'] = mockPayment;
@@ -193,7 +193,7 @@ export class DataServiceTester {
       let allPaymentsSucceed = true;
 
       for (const method of paymentMethods) {
-        const result = await this.dataService.processPayment(123, method, 10.0);
+        const result = await this.dataService.processPayment(123, _method, 10.0);
         if (!result) {
           allPaymentsSucceed = false;
         }
@@ -202,7 +202,7 @@ export class DataServiceTester {
       this.testResults['Payment Methods'] = allPaymentsSucceed;
         `   ${allPaymentsSucceed ? '✅' : '❌'} All payment methods: ${allPaymentsSucceed}`,
       );
-    } catch (_error) {
+    } catch (__error) {
       this.testResults['Mock Payment'] = false;
     }
   }
@@ -220,7 +220,7 @@ export class DataServiceTester {
       await this.dataService.enableRealAPI();
 
       // Wait a moment for backend check
-      await new Promise(resolve => setTimeout(_resolve, 1000));
+      await new Promise(resolve => setTimeout(__resolve, 1000));
 
       const newStatus = this.dataService.getConnectionStatus();
       const detectionWorking = newStatus.mode === 'REAL';
@@ -228,7 +228,7 @@ export class DataServiceTester {
       this.testResults['Backend Detection'] = detectionWorking;
 
       await this.dataService.resetToMockData();
-    } catch (_error) {
+    } catch (__error) {
       this.testResults['Backend Detection'] = false;
     }
   }
@@ -249,7 +249,7 @@ export class DataServiceTester {
       );
 
       return success;
-    } catch (_error) {
+    } catch (__error) {
       return false;
     }
   }
@@ -267,7 +267,7 @@ export const quickTestDataService = async () => {
 };
 
 // For debugging in React Native debugger
-if (___DEV__) {
+if (____DEV__) {
   (global as unknown).testDataService = runDataServiceTests;
   (global as unknown).quickTestDataService = quickTestDataService;
 }

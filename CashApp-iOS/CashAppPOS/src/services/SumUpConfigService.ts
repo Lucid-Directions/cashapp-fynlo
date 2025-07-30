@@ -43,7 +43,7 @@ class SumUpConfigService {
     try {
       // Check cache first
       const cached = await this.getCachedConfig();
-      if (_cached) {
+      if (__cached) {
         return cached;
       }
 
@@ -75,13 +75,13 @@ class SumUpConfigService {
         const config = result.data.config;
 
         // Cache the configuration
-        await this.cacheConfig(_config);
+        await this.cacheConfig(__config);
 
         return config;
       } else {
         throw new Error(result.message || 'Invalid response from server');
       }
-    } catch (_error) {
+    } catch (__error) {
       throw error;
     }
   }
@@ -110,7 +110,7 @@ class SumUpConfigService {
 
       const result = await response.json();
       return result.data;
-    } catch (_error) {
+    } catch (__error) {
       throw error;
     }
   }
@@ -118,7 +118,7 @@ class SumUpConfigService {
   /**
    * Validate merchant code
    */
-  async validateMerchantCode(merchantCode: string): Promise<boolean> {
+  async validateMerchantCode(merchantCode: _string): Promise<boolean> {
     try {
       const token = await tokenManager.getAuthToken();
       if (!token) {
@@ -140,7 +140,7 @@ class SumUpConfigService {
 
       const result = await response.json();
       return result.data?.valid === true;
-    } catch (_error) {
+    } catch (__error) {
       return false;
     }
   }
@@ -152,7 +152,7 @@ class SumUpConfigService {
     try {
       await AsyncStorage.removeItem(this.configCacheKey);
       this.cachedConfig = null;
-    } catch (_error) {}
+    } catch (__error) {}
   }
 
   /**
@@ -171,7 +171,7 @@ class SumUpConfigService {
         return null;
       }
 
-      const { config, timestamp } = JSON.parse(_cached);
+      const { config, timestamp } = JSON.parse(__cached);
 
       // Check if cache is expired
       if (Date.now() - timestamp > this.configCacheDuration) {
@@ -181,7 +181,7 @@ class SumUpConfigService {
 
       this.cachedConfig = config;
       return config;
-    } catch (_error) {
+    } catch (__error) {
       return null;
     }
   }
@@ -189,16 +189,16 @@ class SumUpConfigService {
   /**
    * Cache configuration
    */
-  private async cacheConfig(config: SumUpConfig): Promise<void> {
+  private async cacheConfig(config: _SumUpConfig): Promise<void> {
     try {
       const cacheData = {
         config,
         timestamp: Date.now(),
       };
 
-      await AsyncStorage.setItem(this.configCacheKey, JSON.stringify(_cacheData));
+      await AsyncStorage.setItem(this.configCacheKey, JSON.stringify(__cacheData));
       this.cachedConfig = config;
-    } catch (_error) {}
+    } catch (__error) {}
   }
 }
 

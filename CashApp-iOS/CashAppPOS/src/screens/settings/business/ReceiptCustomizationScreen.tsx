@@ -36,24 +36,24 @@ const Colors = {
 };
 
 const ReceiptCustomizationScreen: React.FC = () => {
-  const { receiptSettings, updateReceiptSettings, businessInfo, isLoading } = useSettingsStore();
-  const [formData, setFormData] = useState(_receiptSettings);
-  const [hasChanges, setHasChanges] = useState(_false);
+  const { receiptSettings, _updateReceiptSettings, businessInfo, isLoading } = useSettingsStore();
+  const [formData, setFormData] = useState(__receiptSettings);
+  const [hasChanges, setHasChanges] = useState(__false);
   const [logoUri, setLogoUri] = useState<string | null>(receiptSettings.logoUri || null);
 
-  const handleFieldChange = (field: string, value: unknown) => {
+  const handleFieldChange = (field: _string, value: _unknown) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    setHasChanges(_true);
+    setHasChanges(__true);
   };
 
   const handleSave = async () => {
     try {
-      updateReceiptSettings(_formData);
-      setHasChanges(_false);
+      updateReceiptSettings(__formData);
+      setHasChanges(__false);
       Alert.alert('Success', 'Receipt customization has been saved successfully.', [
         { text: 'OK' },
       ]);
-    } catch (_error) {
+    } catch (__error) {
       Alert.alert('Error', 'Failed to save receipt customization. Please try again.', [
         { text: 'OK' },
       ]);
@@ -67,8 +67,8 @@ const ReceiptCustomizationScreen: React.FC = () => {
         text: 'Reset',
         style: 'destructive',
         onPress: () => {
-          setFormData(_receiptSettings);
-          setHasChanges(_false);
+          setFormData(__receiptSettings);
+          setHasChanges(__false);
         },
       },
     ]);
@@ -106,8 +106,8 @@ const ReceiptCustomizationScreen: React.FC = () => {
         {
           text: 'Use This Logo',
           onPress: () => {
-            setLogoUri(_selectedLogo);
-            handleFieldChange('logoUri', selectedLogo);
+            setLogoUri(__selectedLogo);
+            handleFieldChange('logoUri', _selectedLogo);
             Alert.alert('Success', "Logo has been updated! Don't forget to save your changes.");
           },
         },
@@ -122,8 +122,8 @@ const ReceiptCustomizationScreen: React.FC = () => {
         text: 'Remove',
         style: 'destructive',
         onPress: () => {
-          setLogoUri(_null);
-          handleFieldChange('logoUri', null);
+          setLogoUri(__null);
+          handleFieldChange('logoUri', _null);
         },
       },
     ]);
@@ -189,7 +189,7 @@ const ReceiptCustomizationScreen: React.FC = () => {
         </View>
 
         <View style={styles.receiptItems}>
-          {sampleReceiptData.items.map((_item, index) => (
+          {sampleReceiptData.items.map((__item, _index) => (
             <View key={index} style={styles.receiptItem}>
               <Text style={styles.receiptItemName}>{item.name}</Text>
               <Text style={styles.receiptItemQty}>x{item.qty}</Text>
@@ -238,7 +238,7 @@ const ReceiptCustomizationScreen: React.FC = () => {
         subtitle="Customize your receipt appearance"
         rightAction={{
           icon: 'save',
-          onPress: handleSave,
+          onPress: _handleSave,
           color: hasChanges ? Colors.white : 'rgba(255, 255, 255, 0.5)',
         }}
       />
@@ -255,7 +255,7 @@ const ReceiptCustomizationScreen: React.FC = () => {
             iconColor={Colors.primary}>
             <ToggleSwitch
               value={formData.printReceipts}
-              onValueChange={value => handleFieldChange('printReceipts', value)}
+              onValueChange={value => handleFieldChange('printReceipts', _value)}
             />
           </SettingsCard>
 
@@ -266,7 +266,7 @@ const ReceiptCustomizationScreen: React.FC = () => {
             iconColor={Colors.secondary}>
             <ToggleSwitch
               value={formData.emailReceipts}
-              onValueChange={value => handleFieldChange('emailReceipts', value)}
+              onValueChange={value => handleFieldChange('emailReceipts', _value)}
             />
           </SettingsCard>
 
@@ -278,7 +278,7 @@ const ReceiptCustomizationScreen: React.FC = () => {
             value={formData.receiptFormat === 'thermal' ? 'Thermal (80mm)' : 'A4 Paper'}
             onPress={() => {
               const newFormat = formData.receiptFormat === 'thermal' ? 'a4' : 'thermal';
-              handleFieldChange('receiptFormat', newFormat);
+              handleFieldChange('receiptFormat', _newFormat);
             }}
           />
         </SettingsSection>
@@ -292,7 +292,7 @@ const ReceiptCustomizationScreen: React.FC = () => {
             iconColor={Colors.primary}>
             <ToggleSwitch
               value={formData.showLogo}
-              onValueChange={value => handleFieldChange('showLogo', value)}
+              onValueChange={value => handleFieldChange('showLogo', _value)}
             />
           </SettingsCard>
 
@@ -345,7 +345,7 @@ const ReceiptCustomizationScreen: React.FC = () => {
             <TextInput
               style={styles.textInput}
               value={formData.headerText}
-              onChangeText={value => handleFieldChange('headerText', value)}
+              onChangeText={value => handleFieldChange('headerText', _value)}
               placeholder="Thank you for dining with us!"
               multiline
               numberOfLines={2}
@@ -357,7 +357,7 @@ const ReceiptCustomizationScreen: React.FC = () => {
             <TextInput
               style={styles.textInput}
               value={formData.footerText}
-              onChangeText={value => handleFieldChange('footerText', value)}
+              onChangeText={value => handleFieldChange('footerText', _value)}
               placeholder="Visit us again soon!"
               multiline
               numberOfLines={2}
@@ -374,7 +374,7 @@ const ReceiptCustomizationScreen: React.FC = () => {
             iconColor={Colors.success}>
             <ToggleSwitch
               value={formData.showVatNumber}
-              onValueChange={value => handleFieldChange('showVatNumber', value)}
+              onValueChange={value => handleFieldChange('showVatNumber', _value)}
             />
           </SettingsCard>
 
@@ -385,7 +385,7 @@ const ReceiptCustomizationScreen: React.FC = () => {
             iconColor={Colors.darkGray}>
             <ToggleSwitch
               value={formData.showQrCode}
-              onValueChange={value => handleFieldChange('showQrCode', value)}
+              onValueChange={value => handleFieldChange('showQrCode', _value)}
             />
           </SettingsCard>
         </SettingsSection>

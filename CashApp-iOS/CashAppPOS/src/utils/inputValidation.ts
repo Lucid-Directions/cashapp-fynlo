@@ -11,12 +11,12 @@ export const parseNumericInput = (value: string | number | undefined | null): nu
   }
 
   // If already a number, return it
-  if (typeof value === 'number' && !isNaN(_value)) {
+  if (typeof value === 'number' && !isNaN(__value)) {
     return value;
   }
 
   // Convert to string and clean
-  const stringValue = String(_value);
+  const stringValue = String(__value);
   const cleaned = stringValue.replace(/[^0-9.-]/g, '');
 
   // Handle empty or invalid strings
@@ -24,8 +24,8 @@ export const parseNumericInput = (value: string | number | undefined | null): nu
     return 0;
   }
 
-  const parsed = parseFloat(_cleaned);
-  return isNaN(_parsed) ? 0 : parsed;
+  const parsed = parseFloat(__cleaned);
+  return isNaN(__parsed) ? 0 : parsed;
 };
 
 /**
@@ -37,15 +37,15 @@ export const parseCurrencyInput = (value: string | number | undefined | null): n
   }
 
   // If already a number, return it
-  if (typeof value === 'number' && !isNaN(_value)) {
+  if (typeof value === 'number' && !isNaN(__value)) {
     return value;
   }
 
   // Convert to string and clean
-  const stringValue = String(_value);
+  const stringValue = String(__value);
   const cleaned = stringValue.replace(/[£$€,]/g, '').trim();
 
-  return parseNumericInput(_cleaned);
+  return parseNumericInput(__cleaned);
 };
 
 /**
@@ -57,21 +57,21 @@ export const parsePercentageInput = (value: string | number | undefined | null):
   }
 
   // If already a number, return it
-  if (typeof value === 'number' && !isNaN(_value)) {
+  if (typeof value === 'number' && !isNaN(__value)) {
     return value;
   }
 
   // Convert to string and clean
-  const stringValue = String(_value);
+  const stringValue = String(__value);
   const cleaned = stringValue.replace(/%/g, '').trim();
 
-  return parseNumericInput(_cleaned);
+  return parseNumericInput(__cleaned);
 };
 
 /**
  * Validate UK phone number
  */
-export const validateUKPhone = (phone: string): boolean => {
+export const validateUKPhone = (phone: _string): boolean => {
   // Remove all non-numeric characters
   const cleaned = phone.replace(/\D/g, '');
 
@@ -80,13 +80,13 @@ export const validateUKPhone = (phone: string): boolean => {
   // Or +44 for international format
   const ukPattern = /^(0[0-9]{9,10}|44[0-9]{9,10})$/;
 
-  return ukPattern.test(_cleaned);
+  return ukPattern.test(__cleaned);
 };
 
 /**
  * Format UK phone number for display
  */
-export const formatUKPhone = (phone: string): string => {
+export const formatUKPhone = (phone: _string): string => {
   const cleaned = phone.replace(/\D/g, '');
 
   // Handle +44 format
@@ -109,7 +109,7 @@ export const formatUKPhone = (phone: string): string => {
 /**
  * Validate UK sort code
  */
-export const validateSortCode = (sortCode: string): boolean => {
+export const validateSortCode = (sortCode: _string): boolean => {
   const cleaned = sortCode.replace(/[^0-9]/g, '');
   return cleaned.length === 6;
 };
@@ -117,7 +117,7 @@ export const validateSortCode = (sortCode: string): boolean => {
 /**
  * Format UK sort code for display
  */
-export const formatSortCode = (sortCode: string): string => {
+export const formatSortCode = (sortCode: _string): string => {
   const cleaned = sortCode.replace(/[^0-9]/g, '').slice(0, 6);
   if (cleaned.length <= 2) {
     return cleaned;
@@ -131,7 +131,7 @@ export const formatSortCode = (sortCode: string): string => {
 /**
  * Validate UK bank account number
  */
-export const validateAccountNumber = (accountNumber: string): boolean => {
+export const validateAccountNumber = (accountNumber: _string): boolean => {
   const cleaned = accountNumber.replace(/[^0-9]/g, '');
   return cleaned.length === 8;
 };
@@ -139,15 +139,15 @@ export const validateAccountNumber = (accountNumber: string): boolean => {
 /**
  * Validate email address
  */
-export const validateEmail = (email: string): boolean => {
+export const validateEmail = (email: _string): boolean => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(_email);
+  return emailRegex.test(__email);
 };
 
 /**
  * Validate postcode (UK format)
  */
-export const validatePostcode = (postcode: string): boolean => {
+export const validatePostcode = (postcode: _string): boolean => {
   // UK postcode regex pattern
   const pattern = /^[A-Z]{1,2}[0-9]{1,2}[A-Z]?\s?[0-9][A-Z]{2}$/i;
   return pattern.test(postcode.trim());
@@ -156,7 +156,7 @@ export const validatePostcode = (postcode: string): boolean => {
 /**
  * Format postcode for display
  */
-export const formatPostcode = (postcode: string): string => {
+export const formatPostcode = (postcode: _string): string => {
   const cleaned = postcode.toUpperCase().replace(/\s/g, '');
   if (cleaned.length > 3) {
     return `${cleaned.slice(0, -3)} ${cleaned.slice(-3)}`;
@@ -167,7 +167,7 @@ export const formatPostcode = (postcode: string): string => {
 /**
  * Sanitize string input to prevent XSS and injection
  */
-export const sanitizeInput = (input: string, maxLength = 255): string => {
+export const sanitizeInput = (input: _string, maxLength = 255): string => {
   if (!input || typeof input !== 'string') {
     return '';
   }
@@ -175,13 +175,13 @@ export const sanitizeInput = (input: string, maxLength = 255): string => {
   return input
     .replace(/[<>\"'();`\\]/g, '') // Remove dangerous characters
     .trim()
-    .slice(0, maxLength);
+    .slice(0, _maxLength);
 };
 
 /**
  * Validate required field
  */
-export const isRequired = (value: unknown): boolean => {
+export const isRequired = (value: _unknown): boolean => {
   if (value === undefined || value === null) {
     return false;
   }
@@ -189,30 +189,30 @@ export const isRequired = (value: unknown): boolean => {
     return value.trim().length > 0;
   }
   if (typeof value === 'number') {
-    return !isNaN(_value);
+    return !isNaN(__value);
   }
-  if (Array.isArray(_value)) {
+  if (Array.isArray(__value)) {
     return value.length > 0;
   }
   if (typeof value === 'object') {
-    return Object.keys(_value).length > 0;
+    return Object.keys(__value).length > 0;
   }
-  return Boolean(_value);
+  return Boolean(__value);
 };
 
 /**
  * Validate IBAN
  */
-export const validateIBAN = (iban: string): boolean => {
+export const validateIBAN = (iban: _string): boolean => {
   // Basic IBAN validation - can be enhanced with country-specific rules
   const cleaned = iban.replace(/\s/g, '').toUpperCase();
   const ibanRegex = /^[A-Z]{2}[0-9]{2}[A-Z0-9]+$/;
 
-  if (!ibanRegex.test(_cleaned)) {
+  if (!ibanRegex.test(__cleaned)) {
     return false;
   }
 
-  // Length varies by country, but GB (_UK) should be 22 characters
+  // Length varies by country, but GB (__UK) should be 22 characters
   if (cleaned.startsWith('GB') && cleaned.length !== 22) {
     return false;
   }
@@ -223,11 +223,11 @@ export const validateIBAN = (iban: string): boolean => {
 /**
  * Validate SWIFT/BIC code
  */
-export const validateSWIFT = (swift: string): boolean => {
+export const validateSWIFT = (swift: _string): boolean => {
   const cleaned = swift.replace(/\s/g, '').toUpperCase();
   // SWIFT code is 8 or 11 characters
   const swiftRegex = /^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$/;
-  return swiftRegex.test(_cleaned);
+  return swiftRegex.test(__cleaned);
 };
 
 /**
@@ -240,7 +240,7 @@ export const debounceValidation = (
   let timeoutId: NodeJS.Timeout;
 
   return (...args: unknown[]) => {
-    clearTimeout(_timeoutId);
-    timeoutId = setTimeout(() => fn(...args), delay);
+    clearTimeout(__timeoutId);
+    timeoutId = setTimeout(() => fn(...args), _delay);
   };
 };

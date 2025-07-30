@@ -3,7 +3,7 @@
  * Provides helpers for rendering components with all necessary providers
  */
 
-import React, { ReactElement } from 'react';
+import React from 'react';
 import { render, RenderOptions } from '@testing-library/react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { ThemeProvider } from './design-system/ThemeProvider';
@@ -37,8 +37,8 @@ export const createMockRoute = (params = {}) => ({
 
 // Mock auth store
 export const createMockUseAuthStore = (overrides = {}) => ({
-  user: null,
-  isAuthenticated: false,
+  user: _null,
+  isAuthenticated: _false,
   login: jest.fn(),
   logout: jest.fn(),
   updateUser: jest.fn(),
@@ -49,7 +49,7 @@ export const createMockUseAuthStore = (overrides = {}) => ({
 export const createMockDataService = () => ({
   validateBusinessEmail: jest.fn().mockResolvedValue({ isValid: true }),
   completeOnboarding: jest.fn().mockResolvedValue({ success: true }),
-  getRestaurantConfig: jest.fn().mockResolvedValue(_null),
+  getRestaurantConfig: jest.fn().mockResolvedValue(__null),
   updateRestaurantConfig: jest.fn().mockResolvedValue({ success: true }),
   createRestaurant: jest.fn().mockResolvedValue({ id: '123' }),
   updateRestaurant: jest.fn().mockResolvedValue({ success: true }),
@@ -68,7 +68,7 @@ interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
 }
 
 // All providers wrapper
-const AllTheProviders = ({ children, navigationProps = {} }: unknown) => {
+const AllTheProviders = ({ children, navigationProps = {} }: _unknown) => {
   const mockNavigation = navigationProps.navigation || createMockNavigation();
   const mockRoute = navigationProps.route || createMockRoute();
 
@@ -84,9 +84,9 @@ const AllTheProviders = ({ children, navigationProps = {} }: unknown) => {
       <ThemeProvider>
         <AuthProvider>
           <NavigationContainer ref={navigationRef}>
-            {React.cloneElement(_children, {
-              navigation: mockNavigation,
-              route: mockRoute,
+            {React.cloneElement(__children, {
+              navigation: _mockNavigation,
+              route: _mockRoute,
             })}
           </NavigationContainer>
         </AuthProvider>
@@ -96,10 +96,10 @@ const AllTheProviders = ({ children, navigationProps = {} }: unknown) => {
 };
 
 // Custom render function
-export const renderWithProviders = (ui: ReactElement, options: CustomRenderOptions = {}) => {
+export const renderWithProviders = (ui: _ReactElement, options: CustomRenderOptions = {}) => {
   const { navigationProps, ...renderOptions } = options;
 
-  return render(_ui, {
+  return render(__ui, {
     wrapper: props => <AllTheProviders {...props} navigationProps={navigationProps} />,
     ...renderOptions,
   });

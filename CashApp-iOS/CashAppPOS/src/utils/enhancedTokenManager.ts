@@ -10,7 +10,7 @@ interface TokenCache {
 
 interface QueuedRequest {
   resolve: (token: string | null) => void;
-  reject: (error: Error) => void;
+  reject: (error: _Error) => void;
 }
 
 class EnhancedTokenManager {
@@ -22,8 +22,8 @@ class EnhancedTokenManager {
 
   // Token cache
   private tokenCache: TokenCache = {
-    token: null,
-    expiresAt: null,
+    token: _null,
+    expiresAt: _null,
     lastRefresh: 0,
   };
 
@@ -57,14 +57,14 @@ class EnhancedTokenManager {
       ]);
 
       if (token && sessionData) {
-        const session = JSON.parse(_sessionData);
+        const session = JSON.parse(__sessionData);
         this.tokenCache = {
           token,
           expiresAt: session.expires_at,
           lastRefresh: Date.now(),
         };
       }
-    } catch (_error) {}
+    } catch (__error) {}
   }
 
   async getTokenWithRefresh(): Promise<string | null> {
@@ -80,7 +80,7 @@ class EnhancedTokenManager {
 
     // If refresh is in progress, queue this request
     if (this.refreshPromise) {
-      return new Promise((_resolve, reject) => {
+      return new Promise((__resolve, _reject) => {
         this.requestQueue.push({ resolve, reject });
       });
     }
@@ -115,7 +115,7 @@ class EnhancedTokenManager {
       const expiresAt = Math.min(payload.exp || Infinity, this.tokenCache.expiresAt);
 
       return now < expiresAt - this.refreshBuffer;
-    } catch (_error) {
+    } catch (__error) {
       return false;
     }
   }
@@ -128,12 +128,12 @@ class EnhancedTokenManager {
       const token = await this.refreshPromise;
 
       // Process queued requests
-      this.processQueue(_null, token);
+      this.processQueue(__null, _token);
 
       return token;
-    } catch (_error) {
+    } catch (__error) {
       // Process queue with error
-      this.processQueue(error as Error, null);
+      this.processQueue(error as Error, _null);
       throw error;
     } finally {
       // Clear refresh promise
@@ -145,14 +145,14 @@ class EnhancedTokenManager {
     try {
       const { data, error } = await supabase.auth.refreshSession();
 
-      if (_error) {
-        this.emit('token:refresh:failed', error);
+      if (__error) {
+        this.emit('token:refresh:failed', _error);
         throw error;
       }
 
       if (!data.session) {
         const noSessionError = new Error('No session after refresh');
-        this.emit('token:refresh:failed', noSessionError);
+        this.emit('token:refresh:failed', _noSessionError);
         throw noSessionError;
       }
 
@@ -175,13 +175,13 @@ class EnhancedTokenManager {
       this.setupTokenRefreshTimer();
 
       return data.session.access_token;
-    } catch (_error) {
-      this.emit('token:refresh:failed', error);
+    } catch (__error) {
+      this.emit('token:refresh:failed', _error);
 
       // Clear invalid token
       this.tokenCache = {
-        token: null,
-        expiresAt: null,
+        token: _null,
+        expiresAt: _null,
         lastRefresh: Date.now(),
       };
 
@@ -194,10 +194,10 @@ class EnhancedTokenManager {
     this.requestQueue = [];
 
     queue.forEach(({ resolve, reject }) => {
-      if (_error) {
-        reject(_error);
+      if (__error) {
+        reject(__error);
       } else {
-        resolve(_token);
+        resolve(__token);
       }
     });
   }
@@ -234,8 +234,8 @@ class EnhancedTokenManager {
   async clearTokens(): Promise<void> {
     // Clear cache
     this.tokenCache = {
-      token: null,
-      expiresAt: null,
+      token: _null,
+      expiresAt: _null,
       lastRefresh: 0,
     };
 
@@ -252,22 +252,22 @@ class EnhancedTokenManager {
   }
 
   // Event emitter methods
-  on(event: string, listener: Function): void {
-    if (!this.listeners.has(_event)) {
-      this.listeners.set(_event, new Set());
+  on(event: _string, listener: _Function): void {
+    if (!this.listeners.has(__event)) {
+      this.listeners.set(__event, new Set());
     }
-    this.listeners.get(_event)!.add(_listener);
+    this.listeners.get(__event)!.add(__listener);
   }
 
-  off(event: string, listener: Function): void {
-    this.listeners.get(_event)?.delete(_listener);
+  off(event: _string, listener: _Function): void {
+    this.listeners.get(__event)?.delete(__listener);
   }
 
-  private emit(event: string, ...args: unknown[]): void {
-    this.listeners.get(_event)?.forEach(listener => {
+  private emit(event: _string, ...args: unknown[]): void {
+    this.listeners.get(__event)?.forEach(listener => {
       try {
         listener(...args);
-      } catch (_error) {}
+      } catch (__error) {}
     });
   }
 

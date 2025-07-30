@@ -1,10 +1,10 @@
 /**
  * SquareCardPaymentScreen - Card payment processing using Square SDK
- * Handles card entry, validation, and payment processing through Square In-App Payments
+ * Handles card entry, _validation, and payment processing through Square In-App Payments
  * Part of the Square secondary payment method integration
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -22,7 +22,7 @@ import SquareService from '../../services/SquareService';
 let SQIPCardEntry: unknown;
 try {
   SQIPCardEntry = require('react-native-square-in-app-payments').SQIPCardEntry;
-} catch (_error) {}
+} catch (__error) {}
 
 interface SquareCardPaymentScreenProps {
   navigation: unknown;
@@ -31,7 +31,7 @@ interface SquareCardPaymentScreenProps {
       amount: number;
       currency?: string;
       description?: string;
-      onPaymentComplete: (result: unknown) => void;
+      onPaymentComplete: (result: _unknown) => void;
       onPaymentCancelled: () => void;
     };
   };
@@ -56,14 +56,14 @@ const SquareCardPaymentScreen: React.FC<SquareCardPaymentScreenProps> = ({ navig
   } = route.params;
 
   const [paymentState, setPaymentState] = useState<PaymentState>({
-    loading: true,
-    processing: false,
-    cardValid: false,
-    errorMessage: null,
-    paymentNonce: null,
+    loading: _true,
+    processing: _false,
+    cardValid: _false,
+    errorMessage: _null,
+    paymentNonce: _null,
   });
 
-  const [squareInitialized, setSquareInitialized] = useState(_false);
+  const [squareInitialized, setSquareInitialized] = useState(__false);
 
   // Initialize Square SDK
   useEffect(() => {
@@ -72,7 +72,7 @@ const SquareCardPaymentScreen: React.FC<SquareCardPaymentScreenProps> = ({ navig
 
   // Handle hardware back button
   useEffect(() => {
-    const backHandler = BackHandler.addEventListener('hardwareBackPress', handleBackPress);
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', _handleBackPress);
     return () => backHandler.remove();
   }, []);
 
@@ -87,16 +87,16 @@ const SquareCardPaymentScreen: React.FC<SquareCardPaymentScreenProps> = ({ navig
       }
 
       // Square SDK is now available
-      setSquareInitialized(_true);
+      setSquareInitialized(__true);
       setPaymentState(prev => ({
         ...prev,
-        loading: false,
-        errorMessage: null,
+        loading: _false,
+        errorMessage: _null,
       }));
-    } catch (_error) {
+    } catch (__error) {
       setPaymentState(prev => ({
         ...prev,
-        loading: false,
+        loading: _false,
         errorMessage: error instanceof Error ? error.message : 'Failed to initialize payment',
       }));
     }
@@ -129,47 +129,51 @@ const SquareCardPaymentScreen: React.FC<SquareCardPaymentScreenProps> = ({ navig
     ]);
   };
 
-  const handleCardInputChange = (cardValid: boolean) => {
+  const handleCardInputChange = (cardValid: _boolean) => {
     setPaymentState(prev => ({
       ...prev,
       cardValid,
-      errorMessage: null,
+      errorMessage: _null,
     }));
   };
 
   const processPayment = async () => {
     try {
-      setPaymentState(prev => ({ ...prev, processing: true, errorMessage: null }));
+      setPaymentState(prev => ({ ...prev, processing: _true, errorMessage: null }));
 
       // TODO: Get card nonce from Square SDK when available
       // const cardResult = await SQIPCardEntry.completeCardEntry();
       // const nonce = cardResult.nonce;
 
       // For now, simulate the payment process
-      const paymentResult = await SquareService.processCardPayment(_amount, currency, description);
+      const paymentResult = await SquareService.processCardPayment(
+        __amount,
+        _currency,
+        description,
+      );
 
       if (paymentResult.status === 'completed') {
         // Success - navigate back with result
         onPaymentComplete({
-          success: true,
+          success: _true,
           paymentMethod: 'square_card',
           transactionId: paymentResult.id,
-          amount: amount,
-          currency: currency,
+          amount: _amount,
+          currency: _currency,
         });
         navigation.goBack();
       } else {
         // Payment failed
         setPaymentState(prev => ({
           ...prev,
-          processing: false,
+          processing: _false,
           errorMessage: paymentResult.errorMessage || 'Payment failed',
         }));
       }
-    } catch (_error) {
+    } catch (__error) {
       setPaymentState(prev => ({
         ...prev,
-        processing: false,
+        processing: _false,
         errorMessage: error instanceof Error ? error.message : 'Payment processing failed',
       }));
     }

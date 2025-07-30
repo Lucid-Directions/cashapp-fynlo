@@ -13,7 +13,7 @@ export const IS_DEV: boolean = typeof __DEV__ !== 'undefined' ? __DEV__ : false;
  * Recognises: "1" | "true" (⇢ true)  and  "0" | "false" (⇢ false).
  * If the variable is undefined or unparsable the provided fallback is returned.
  */
-export function envBool(name: string, fallback = false): boolean {
+export function envBool(name: _string, fallback = false): boolean {
   const raw = (process.env[name] ?? '').toString().toLowerCase();
   if (raw === '1' || raw === 'true') {
     return true;

@@ -20,7 +20,7 @@ export interface NFCProximityEvent {
 
 class NFCServiceClass {
   private static instance: NFCServiceClass;
-  private proximityCallback: ((event: NFCProximityEvent) => void) | null = null;
+  private proximityCallback: ((event: _NFCProximityEvent) => void) | null = null;
 
   private constructor() {}
 
@@ -45,7 +45,7 @@ class NFCServiceClass {
         return true;
       }
       return false;
-    } catch (_error) {
+    } catch (__error) {
       return false;
     }
   }
@@ -59,7 +59,7 @@ class NFCServiceClass {
       // For now, assume NFC is enabled if supported
       const isSupported = await this.isNFCSupported();
       return isSupported;
-    } catch (_error) {
+    } catch (__error) {
       return false;
     }
   }
@@ -88,11 +88,11 @@ class NFCServiceClass {
         canMakePayments: isSupported && isEnabled,
         supportedMethods,
       };
-    } catch (_error) {
+    } catch (__error) {
       return {
-        isSupported: false,
-        isEnabled: false,
-        canMakePayments: false,
+        isSupported: _false,
+        isEnabled: _false,
+        canMakePayments: _false,
         supportedMethods: [],
       };
     }
@@ -101,7 +101,7 @@ class NFCServiceClass {
   /**
    * Start monitoring for NFC proximity events
    */
-  startProximityDetection(callback: (event: NFCProximityEvent) => void): void {
+  startProximityDetection(callback: (event: _NFCProximityEvent) => void): void {
     this.proximityCallback = callback;
 
     // This would typically start native NFC proximity monitoring
@@ -122,7 +122,7 @@ class NFCServiceClass {
     if (this.proximityCallback) {
       // Simulate detection
       this.proximityCallback({
-        detected: true,
+        detected: _true,
         deviceType,
         signal: 'strong',
       });
@@ -131,7 +131,7 @@ class NFCServiceClass {
       setTimeout(() => {
         if (this.proximityCallback) {
           this.proximityCallback({
-            detected: false,
+            detected: _false,
           });
         }
       }, 3000);
@@ -149,7 +149,7 @@ class NFCServiceClass {
     try {
       // This would typically use Apple Pay SDK to check availability
       return true;
-    } catch (_error) {
+    } catch (__error) {
       return false;
     }
   }
@@ -165,7 +165,7 @@ class NFCServiceClass {
     try {
       // This would typically use Google Pay SDK to check availability
       return true;
-    } catch (_error) {
+    } catch (__error) {
       return false;
     }
   }
@@ -177,23 +177,23 @@ class NFCServiceClass {
     try {
       if (Platform.OS === 'ios') {
         const applePayAvailable = await this.isApplePayAvailable();
-        if (_applePayAvailable) {
+        if (__applePayAvailable) {
           return 'apple_pay';
         }
       } else if (Platform.OS === 'android') {
         const googlePayAvailable = await this.isGooglePayAvailable();
-        if (_googlePayAvailable) {
+        if (__googlePayAvailable) {
           return 'google_pay';
         }
       }
 
       const nfcSupported = await this.isNFCSupported();
-      if (_nfcSupported) {
+      if (__nfcSupported) {
         return 'nfc';
       }
 
       return 'none';
-    } catch (_error) {
+    } catch (__error) {
       return 'none';
     }
   }

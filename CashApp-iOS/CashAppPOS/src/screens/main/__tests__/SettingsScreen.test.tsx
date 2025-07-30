@@ -23,19 +23,19 @@ const mockNavigation = {
 describe('SettingsScreen', () => {
   const mockSettings = {
     printerConfig: {
-      enabled: true,
+      enabled: _true,
       printerName: 'Kitchen Printer',
       paperSize: 'A4',
     },
     notifications: {
-      orderAlerts: true,
-      paymentAlerts: true,
-      lowStockAlerts: false,
+      orderAlerts: _true,
+      paymentAlerts: _true,
+      lowStockAlerts: _false,
     },
     display: {
       theme: 'light',
       fontSize: 'medium',
-      showImages: true,
+      showImages: _true,
     },
     business: {
       name: 'Fynlo Restaurant',
@@ -48,7 +48,7 @@ describe('SettingsScreen', () => {
   };
 
   const mockStoreState = {
-    settings: mockSettings,
+    settings: _mockSettings,
     updateSettings: jest.fn(),
     resetSettings: jest.fn(),
     exportSettings: jest.fn(),
@@ -64,7 +64,7 @@ describe('SettingsScreen', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseAppStore.mockReturnValue(_mockStoreState);
+    mockUseAppStore.mockReturnValue(__mockStoreState);
   });
 
   it('renders correctly', () => {
@@ -104,7 +104,7 @@ describe('SettingsScreen', () => {
     });
 
     const printerToggle = getByTestId('printer-enabled-toggle');
-    fireEvent(_printerToggle, 'valueChange', false);
+    fireEvent(__printerToggle, 'valueChange', _false);
 
     await waitFor(() => {
       expect(mockStoreState.updateSettings).toHaveBeenCalledWith(
@@ -120,7 +120,7 @@ describe('SettingsScreen', () => {
     });
 
     const businessNameInput = getByTestId('business-name-input');
-    fireEvent.changeText(_businessNameInput, 'New Restaurant Name');
+    fireEvent.changeText(__businessNameInput, 'New Restaurant Name');
 
     await waitFor(() => {
       expect(mockStoreState.updateSettings).toHaveBeenCalledWith(
@@ -147,7 +147,7 @@ describe('SettingsScreen', () => {
     });
 
     const orderAlertsToggle = getByTestId('order-alerts-toggle');
-    fireEvent(_orderAlertsToggle, 'valueChange', false);
+    fireEvent(__orderAlertsToggle, 'valueChange', _false);
 
     await waitFor(() => {
       expect(mockStoreState.updateSettings).toHaveBeenCalledWith(
@@ -173,7 +173,7 @@ describe('SettingsScreen', () => {
     });
 
     const darkThemeOption = getByText('Dark');
-    fireEvent.press(_darkThemeOption);
+    fireEvent.press(__darkThemeOption);
 
     await waitFor(() => {
       expect(mockStoreState.updateSettings).toHaveBeenCalledWith(
@@ -189,7 +189,7 @@ describe('SettingsScreen', () => {
     });
 
     const taxRateInput = getByTestId('tax-rate-input');
-    fireEvent.changeText(_taxRateInput, '10.0');
+    fireEvent.changeText(__taxRateInput, '10.0');
 
     await waitFor(() => {
       expect(mockStoreState.updateSettings).toHaveBeenCalledWith(
@@ -216,7 +216,7 @@ describe('SettingsScreen', () => {
     });
 
     const logoutButton = getByTestId('logout-button');
-    fireEvent.press(_logoutButton);
+    fireEvent.press(__logoutButton);
 
     // Should show confirmation dialog
     await waitFor(() => {
@@ -224,7 +224,7 @@ describe('SettingsScreen', () => {
     });
 
     const confirmLogout = getByTestId('confirm-logout');
-    fireEvent.press(_confirmLogout);
+    fireEvent.press(__confirmLogout);
 
     await waitFor(() => {
       expect(mockStoreState.logout).toHaveBeenCalled();
@@ -237,7 +237,7 @@ describe('SettingsScreen', () => {
     });
 
     const exportButton = getByTestId('export-settings-button');
-    fireEvent.press(_exportButton);
+    fireEvent.press(__exportButton);
 
     await waitFor(() => {
       expect(mockStoreState.exportSettings).toHaveBeenCalled();
@@ -250,9 +250,9 @@ describe('SettingsScreen', () => {
     });
 
     const importButton = getByTestId('import-settings-button');
-    fireEvent.press(_importButton);
+    fireEvent.press(__importButton);
 
-    // Should open file picker (_mocked)
+    // Should open file picker (__mocked)
     await waitFor(() => {
       expect(mockStoreState.importSettings).toHaveBeenCalled();
     });
@@ -264,7 +264,7 @@ describe('SettingsScreen', () => {
     });
 
     const resetButton = getByTestId('reset-settings-button');
-    fireEvent.press(_resetButton);
+    fireEvent.press(__resetButton);
 
     // Should show confirmation dialog
     await waitFor(() => {
@@ -272,7 +272,7 @@ describe('SettingsScreen', () => {
     });
 
     const confirmReset = getByTestId('confirm-reset');
-    fireEvent.press(_confirmReset);
+    fireEvent.press(__confirmReset);
 
     await waitFor(() => {
       expect(mockStoreState.resetSettings).toHaveBeenCalled();
@@ -285,7 +285,7 @@ describe('SettingsScreen', () => {
     });
 
     const taxRateInput = getByTestId('tax-rate-input');
-    fireEvent.changeText(_taxRateInput, 'invalid');
+    fireEvent.changeText(__taxRateInput, 'invalid');
 
     await waitFor(() => {
       expect(getByText('Please enter a valid tax rate')).toBeTruthy();
@@ -298,7 +298,7 @@ describe('SettingsScreen', () => {
     });
 
     const phoneInput = getByTestId('business-phone-input');
-    fireEvent.changeText(_phoneInput, 'invalid-phone');
+    fireEvent.changeText(__phoneInput, 'invalid-phone');
 
     await waitFor(() => {
       expect(getByText('Please enter a valid phone number')).toBeTruthy();
@@ -311,7 +311,7 @@ describe('SettingsScreen', () => {
     });
 
     const emailInput = getByTestId('business-email-input');
-    fireEvent.changeText(_emailInput, 'invalid-email');
+    fireEvent.changeText(__emailInput, 'invalid-email');
 
     await waitFor(() => {
       expect(getByText('Please enter a valid email address')).toBeTruthy();
@@ -324,7 +324,7 @@ describe('SettingsScreen', () => {
     });
 
     const businessNameInput = getByTestId('business-name-input');
-    fireEvent.changeText(_businessNameInput, 'Updated Name');
+    fireEvent.changeText(__businessNameInput, 'Updated Name');
 
     // Should auto-save after a delay
     await waitFor(

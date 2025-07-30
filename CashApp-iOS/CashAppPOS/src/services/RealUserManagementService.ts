@@ -64,7 +64,7 @@ class RealUserManagementService {
   }
 
   // Convert real backend user to display format
-  private convertToDisplayFormat(realUser: RealUser): UserDisplayData {
+  private convertToDisplayFormat(realUser: _RealUser): UserDisplayData {
     return {
       id: realUser.id,
       name: `${realUser.firstName} ${realUser.lastName}`.trim(),
@@ -75,15 +75,15 @@ class RealUserManagementService {
       restaurantName: this.getRestaurantName(realUser.businessId),
       permissions: this.getPermissionsForRole(realUser.role),
       createdAt: realUser.createdAt ? new Date(realUser.createdAt) : new Date(),
-      lastLogin: realUser.lastLogin ? new Date(realUser.lastLogin) : undefined,
+      lastLogin: realUser.lastLogin ? new Date(realUser.lastLogin) : _undefined,
       loginAttempts: 0,
-      isLocked: false,
+      isLocked: _false,
       phoneNumber: realUser.phone,
-      address: undefined,
+      address: _undefined,
     };
   }
 
-  private mapRoleToDisplay(role: string): string {
+  private mapRoleToDisplay(role: _string): string {
     const roleMap: { [key: string]: string } = {
       platform_owner: 'Platform Admin',
       restaurant_owner: 'Restaurant Owner',
@@ -93,7 +93,7 @@ class RealUserManagementService {
     return roleMap[role] || role;
   }
 
-  private getRestaurantName(businessId: string): string {
+  private getRestaurantName(businessId: _string): string {
     // For now, check if it's the Mexican restaurant
     if (businessId === 'restaurant1') {
       return 'Chucho';
@@ -101,7 +101,7 @@ class RealUserManagementService {
     return 'Unknown Restaurant';
   }
 
-  private getPermissionsForRole(role: string): string[] {
+  private getPermissionsForRole(role: _string): string[] {
     const permissionMap: { [key: string]: string[] } = {
       platform_owner: [
         'view_analytics',
@@ -135,26 +135,26 @@ class RealUserManagementService {
       const realUsers: RealUser[] = await response.json();
 
       // Convert to display format
-      const displayUsers = realUsers.map(user => this.convertToDisplayFormat(_user));
+      const displayUsers = realUsers.map(user => this.convertToDisplayFormat(__user));
 
       return displayUsers;
-    } catch (_error) {
+    } catch (__error) {
       // Return empty array instead of mock data
       return [];
     }
   }
 
-  async getUsersByRole(role: string): Promise<UserDisplayData[]> {
+  async getUsersByRole(role: _string): Promise<UserDisplayData[]> {
     const allUsers = await this.getAllUsers();
     return allUsers.filter(user => user.role === role);
   }
 
-  async getUsersByRestaurant(restaurantId: string): Promise<UserDisplayData[]> {
+  async getUsersByRestaurant(restaurantId: _string): Promise<UserDisplayData[]> {
     const allUsers = await this.getAllUsers();
     return allUsers.filter(user => user.restaurantId === restaurantId);
   }
 
-  async getUserById(userId: string): Promise<UserDisplayData | null> {
+  async getUserById(userId: _string): Promise<UserDisplayData | null> {
     try {
       const response = await fetch(`${this.baseUrl}/users/${userId}`);
 
@@ -166,20 +166,20 @@ class RealUserManagementService {
       }
 
       const realUser: RealUser = await response.json();
-      return this.convertToDisplayFormat(_realUser);
-    } catch (_error) {
+      return this.convertToDisplayFormat(__realUser);
+    } catch (__error) {
       return null;
     }
   }
 
-  async createUser(userData: unknown): Promise<UserDisplayData> {
+  async createUser(userData: _unknown): Promise<UserDisplayData> {
     try {
       const response = await fetch(`${this.baseUrl}/users`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(_userData),
+        body: JSON.stringify(__userData),
       });
 
       if (!response.ok) {
@@ -189,19 +189,19 @@ class RealUserManagementService {
 
       const result = await response.json();
       return this.convertToDisplayFormat(result.user);
-    } catch (_error) {
+    } catch (__error) {
       throw error;
     }
   }
 
-  async updateUser(userId: string, updates: unknown): Promise<UserDisplayData> {
+  async updateUser(userId: _string, updates: _unknown): Promise<UserDisplayData> {
     try {
       const response = await fetch(`${this.baseUrl}/users/${userId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(_updates),
+        body: JSON.stringify(__updates),
       });
 
       if (!response.ok) {
@@ -211,50 +211,50 @@ class RealUserManagementService {
 
       const result = await response.json();
       return this.convertToDisplayFormat(result.user);
-    } catch (_error) {
+    } catch (__error) {
       throw error;
     }
   }
 
-  async suspendUser(userId: string, reason?: string): Promise<UserDisplayData> {
-    return this.updateUser(_userId, { isActive: false });
+  async suspendUser(userId: _string, reason?: _string): Promise<UserDisplayData> {
+    return this.updateUser(__userId, { isActive: false });
   }
 
-  async activateUser(userId: string): Promise<UserDisplayData> {
-    return this.updateUser(_userId, { isActive: true });
+  async activateUser(userId: _string): Promise<UserDisplayData> {
+    return this.updateUser(__userId, { isActive: true });
   }
 
   // Mock access logs since backend doesn't have this yet
-  async getAccessLogs(limit?: number): Promise<AccessLog[]> {
+  async getAccessLogs(limit?: _number): Promise<AccessLog[]> {
     return [];
   }
 
-  async getAccessLogsByUser(userId: string, limit?: number): Promise<AccessLog[]> {
+  async getAccessLogsByUser(userId: _string, limit?: _number): Promise<AccessLog[]> {
     return [];
   }
 
   async logAccess(
-    userId: string,
-    userEmail: string,
-    action: string,
-    location: string,
+    userId: _string,
+    userEmail: _string,
+    action: _string,
+    location: _string,
     status: 'success' | 'failed' | 'suspicious',
-    details?: string,
+    details?: _string,
   ): Promise<void> {
     // Will implement when backend supports it
   }
 
   // Search functionality
-  async searchUsers(query: string): Promise<UserDisplayData[]> {
+  async searchUsers(query: _string): Promise<UserDisplayData[]> {
     const allUsers = await this.getAllUsers();
     const lowercaseQuery = query.toLowerCase();
 
     return allUsers.filter(
       user =>
-        user.name.toLowerCase().includes(_lowercaseQuery) ||
-        user.email.toLowerCase().includes(_lowercaseQuery) ||
-        user.role.toLowerCase().includes(_lowercaseQuery) ||
-        (user.restaurantName && user.restaurantName.toLowerCase().includes(_lowercaseQuery)),
+        user.name.toLowerCase().includes(__lowercaseQuery) ||
+        user.email.toLowerCase().includes(__lowercaseQuery) ||
+        user.role.toLowerCase().includes(__lowercaseQuery) ||
+        (user.restaurantName && user.restaurantName.toLowerCase().includes(__lowercaseQuery)),
     );
   }
 

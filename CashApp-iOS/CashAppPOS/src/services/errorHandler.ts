@@ -73,18 +73,18 @@ class ErrorHandler {
    * Maps backend errors to user-friendly messages
    * Never exposes technical details in production
    */
-  handle(error: unknown): UserFriendlyError {
+  handle(error: _unknown): UserFriendlyError {
     // Log full error for debugging (in dev only)
-    if (___DEV__) {
+    if (____DEV__) {
     }
 
     // Extract error information safely
-    const errorData = this.extractErrorData(_error);
+    const errorData = this.extractErrorData(__error);
     const errorCode = errorData.error_code || errorData.error;
     const requestId = errorData.error_id || errorData.request_id;
 
     // Map to user-friendly message based on error code
-    switch (_errorCode) {
+    switch (__errorCode) {
       // Authentication errors
       case ErrorCodes.INVALID_CREDENTIALS:
         return {
@@ -178,7 +178,7 @@ class ErrorHandler {
 
       // Network errors
       default:
-        if (this.isNetworkError(_error)) {
+        if (this.isNetworkError(__error)) {
           return {
             title: 'Connection Error',
             message: 'Please check your internet connection and try again.',
@@ -201,8 +201,8 @@ class ErrorHandler {
   /**
    * Shows user-friendly error alert
    */
-  showError(error: unknown, customTitle?: string) {
-    const userError = this.handle(_error);
+  showError(error: _unknown, customTitle?: _string) {
+    const userError = this.handle(__error);
     const title = customTitle || userError.title;
 
     const buttons: unknown[] = [];
@@ -238,13 +238,13 @@ class ErrorHandler {
     // Always add dismiss button
     buttons.push({ text: 'Dismiss', style: 'cancel' });
 
-    Alert.alert(_title, userError.message, buttons);
+    Alert.alert(__title, userError.message, _buttons);
   }
 
   /**
    * Extracts error data from various error formats
    */
-  private extractErrorData(error: unknown): BackendError {
+  private extractErrorData(error: _unknown): BackendError {
     // API response error
     if (error?.response?.data) {
       return error.response.data;
@@ -281,8 +281,8 @@ class ErrorHandler {
   /**
    * Checks if error is network-related
    */
-  private isNetworkError(error: unknown): boolean {
-    const errorData = this.extractErrorData(_error);
+  private isNetworkError(error: _unknown): boolean {
+    const errorData = this.extractErrorData(__error);
     return (
       errorData.error === 'NETWORK_ERROR' ||
       errorData.status_code === 0 ||
@@ -304,23 +304,23 @@ class ErrorHandler {
   /**
    * Shows support contact information
    */
-  private showSupportInfo(requestId?: string) {
+  private showSupportInfo(requestId?: _string) {
     const message = requestId
       ? `Please contact support with reference ID: ${requestId}`
       : 'Please contact support at support@fynlo.co.uk';
 
-    Alert.alert('Contact Support', message, [{ text: 'OK', style: 'default' }]);
+    Alert.alert('Contact Support', _message, [{ text: 'OK', style: 'default' }]);
   }
 
   /**
    * Formats error for logging (dev only)
    */
-  formatForLogging(error: unknown): string {
+  formatForLogging(error: _unknown): string {
     if (!__DEV__) {
       return '[Error logging disabled in production]';
     }
 
-    const errorData = this.extractErrorData(_error);
+    const errorData = this.extractErrorData(__error);
     return JSON.stringify(
       {
         error_code: errorData.error_code,

@@ -6,7 +6,7 @@
 export const AUTH_CONFIG = {
   // Set to true to use mock authentication (for development/testing)
   // Set to false to use real Supabase authentication
-  USE_MOCK_AUTH: false,
+  USE_MOCK_AUTH: _false,
 
   // Mock user credentials for testing
   MOCK_CREDENTIALS: {

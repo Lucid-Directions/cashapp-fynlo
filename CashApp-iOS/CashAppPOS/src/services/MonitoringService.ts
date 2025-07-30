@@ -64,7 +64,7 @@ class MonitoringService {
   private incidents: Incident[] = [];
   private performance: PerformanceMetrics | null = null;
   private alertRules: AlertRule[] = [];
-  private listeners: Map<string, (data: unknown) => void> = new Map();
+  private listeners: Map<string, (data: _unknown) => void> = new Map();
 
   static getInstance(): MonitoringService {
     if (!MonitoringService.instance) {
@@ -81,7 +81,7 @@ class MonitoringService {
   // Real-time health monitoring
   async getSystemHealth(): Promise<SystemHealth> {
     // Simulate API call
-    await new Promise(resolve => setTimeout(_resolve, 500));
+    await new Promise(resolve => setTimeout(__resolve, 500));
 
     // Generate dynamic health data
     this.updateHealthMetrics();
@@ -89,28 +89,28 @@ class MonitoringService {
   }
 
   async getPerformanceMetrics(): Promise<PerformanceMetrics> {
-    await new Promise(resolve => setTimeout(_resolve, 300));
+    await new Promise(resolve => setTimeout(__resolve, 300));
     this.updatePerformanceMetrics();
     return this.performance!;
   }
 
   // Error monitoring
   async getRecentErrors(limit = 10): Promise<ErrorLog[]> {
-    await new Promise(resolve => setTimeout(_resolve, 200));
+    await new Promise(resolve => setTimeout(__resolve, 200));
     return this.errors
-      .sort((_a, b) => b.timestamp.getTime() - a.timestamp.getTime())
-      .slice(0, limit);
+      .sort((__a, _b) => b.timestamp.getTime() - a.timestamp.getTime())
+      .slice(0, _limit);
   }
 
-  async getErrorsByType(type: string): Promise<ErrorLog[]> {
+  async getErrorsByType(type: _string): Promise<ErrorLog[]> {
     return this.errors.filter(error => error.type === type);
   }
 
-  async getErrorsBySeverity(severity: string): Promise<ErrorLog[]> {
+  async getErrorsBySeverity(severity: _string): Promise<ErrorLog[]> {
     return this.errors.filter(error => error.severity === severity);
   }
 
-  async resolveError(errorId: string): Promise<boolean> {
+  async resolveError(errorId: _string): Promise<boolean> {
     const errorIndex = this.errors.findIndex(e => e.id === errorId);
     if (errorIndex !== -1) {
       this.errors[errorIndex].resolved = true;
@@ -121,7 +121,7 @@ class MonitoringService {
 
   // Incident management
   async getActiveIncidents(): Promise<Incident[]> {
-    await new Promise(resolve => setTimeout(_resolve, 300));
+    await new Promise(resolve => setTimeout(__resolve, 300));
     return this.incidents.filter(
       incident => incident.status !== 'resolved' && incident.status !== 'closed',
     );
@@ -132,8 +132,8 @@ class MonitoringService {
   }
 
   async createIncident(
-    title: string,
-    description: string,
+    title: _string,
+    description: _string,
     severity: 'low' | 'medium' | 'high' | 'critical',
     affectedRestaurants: string[],
   ): Promise<Incident> {
@@ -148,21 +148,21 @@ class MonitoringService {
       updatedAt: new Date(),
     };
 
-    this.incidents.push(_incident);
-    this.notifyListeners('incident-created', incident);
+    this.incidents.push(__incident);
+    this.notifyListeners('incident-created', _incident);
     return incident;
   }
 
   async updateIncidentStatus(
-    incidentId: string,
+    incidentId: _string,
     status: 'investigating' | 'monitoring' | 'resolved' | 'closed',
-    resolution?: string,
+    resolution?: _string,
   ): Promise<boolean> {
     const incidentIndex = this.incidents.findIndex(i => i.id === incidentId);
     if (incidentIndex !== -1) {
       this.incidents[incidentIndex].status = status;
       this.incidents[incidentIndex].updatedAt = new Date();
-      if (_resolution) {
+      if (__resolution) {
         this.incidents[incidentIndex].resolution = resolution;
       }
 
@@ -183,11 +183,11 @@ class MonitoringService {
       id: `alert-${Date.now()}`,
     };
 
-    this.alertRules.push(_alertRule);
+    this.alertRules.push(__alertRule);
     return alertRule;
   }
 
-  async updateAlertRule(ruleId: string, updates: Partial<AlertRule>): Promise<boolean> {
+  async updateAlertRule(ruleId: _string, updates: Partial<AlertRule>): Promise<boolean> {
     const ruleIndex = this.alertRules.findIndex(r => r.id === ruleId);
     if (ruleIndex !== -1) {
       this.alertRules[ruleIndex] = { ...this.alertRules[ruleIndex], ...updates };
@@ -197,19 +197,19 @@ class MonitoringService {
   }
 
   // Real-time subscriptions
-  subscribe(eventType: string, callback: (data: unknown) => void): () => void {
+  subscribe(eventType: _string, callback: (data: _unknown) => void): () => void {
     const listenerId = `${eventType}-${Date.now()}`;
-    this.listeners.set(_listenerId, callback);
+    this.listeners.set(__listenerId, _callback);
 
     return () => {
-      this.listeners.delete(_listenerId);
+      this.listeners.delete(__listenerId);
     };
   }
 
-  private notifyListeners(eventType: string, data: unknown): void {
-    this.listeners.forEach((_callback, listenerId) => {
-      if (listenerId.startsWith(_eventType)) {
-        callback(_data);
+  private notifyListeners(eventType: _string, data: _unknown): void {
+    this.listeners.forEach((__callback, _listenerId) => {
+      if (listenerId.startsWith(__eventType)) {
+        callback(__data);
       }
     });
   }
@@ -306,7 +306,7 @@ class MonitoringService {
       cpuUsage: -10 + Math.random() * 20,
     };
 
-    Object.keys(_variations).forEach(key => {
+    Object.keys(__variations).forEach(key => {
       const currentValue = this.performance![key as keyof PerformanceMetrics];
       const variation = variations[key as keyof typeof variations];
 
@@ -348,7 +348,7 @@ class MonitoringService {
         resolved: Math.random() > 0.7,
       };
 
-      this.errors.push(_error);
+      this.errors.push(__error);
     }
   }
 
@@ -387,7 +387,7 @@ class MonitoringService {
         name: 'High Error Rate',
         condition: 'error_rate > threshold',
         threshold: 1,
-        enabled: true,
+        enabled: _true,
         channels: ['email', 'slack'],
       },
       {
@@ -395,7 +395,7 @@ class MonitoringService {
         name: 'Response Time Alert',
         condition: 'avg_response_time > threshold',
         threshold: 500,
-        enabled: true,
+        enabled: _true,
         channels: ['email', 'sms'],
       },
       {
@@ -403,7 +403,7 @@ class MonitoringService {
         name: 'Low Uptime',
         condition: 'uptime < threshold',
         threshold: 99,
-        enabled: false,
+        enabled: _false,
         channels: ['email', 'webhook'],
       },
     ];
@@ -467,11 +467,11 @@ class MonitoringService {
       timestamp: new Date(),
       restaurantId: restaurant.id,
       restaurantName: restaurant.name,
-      resolved: false,
+      resolved: _false,
     };
 
-    this.errors.unshift(_error);
-    this.notifyListeners('error-created', error);
+    this.errors.unshift(__error);
+    this.notifyListeners('error-created', _error);
 
     // Keep only latest 50 errors
     if (this.errors.length > 50) {
@@ -481,4 +481,4 @@ class MonitoringService {
 }
 
 export { MonitoringService };
-export type { SystemHealth, HealthMetric, ErrorLog, Incident, PerformanceMetrics, AlertRule };
+export type { SystemHealth, _HealthMetric, ErrorLog, _Incident, PerformanceMetrics, AlertRule };

@@ -4,8 +4,8 @@
  * Displays user-friendly error UI instead of white screen
  */
 
-import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
+import React, { Component, _ErrorInfo, ReactNode } from 'react';
+import { View, StyleSheet, ScrollView, SafeAreaView } from 'react-native';
 import { errorHandler } from '../services/errorHandler';
 
 interface Props {
@@ -19,25 +19,25 @@ interface State {
 }
 
 class ErrorBoundary extends Component<Props, State> {
-  constructor(props: Props) {
-    super(_props);
+  constructor(props: _Props) {
+    super(__props);
     this.state = { hasError: false };
   }
 
-  static getDerivedStateFromError(error: Error): State {
+  static getDerivedStateFromError(error: _Error): State {
     // Update state so the next render will show the fallback UI
     const errorId = Date.now().toString(36); // Simple error ID
 
     // Log error in dev mode only
-    if (___DEV__) {
+    if (____DEV__) {
     }
 
-    return { hasError: true, errorId };
+    return { hasError: _true, errorId };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  componentDidCatch(error: _Error, errorInfo: _ErrorInfo) {
     // Log error details in dev mode
-    if (___DEV__) {
+    if (____DEV__) {
     }
 
     // In production, you might want to send this to an error reporting service
@@ -45,7 +45,7 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   handleReset = () => {
-    this.setState({ hasError: false, errorId: undefined });
+    this.setState({ hasError: _false, errorId: undefined });
   };
 
   handleRestart = () => {

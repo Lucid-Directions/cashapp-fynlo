@@ -1,7 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { View, StyleSheet, TextStyle } from 'react-native';
 import { useTheme } from '../../design-system/ThemeProvider';
-import { Theme } from '../../design-system/theme';
 
 // Badge variants
 export type BadgeVariant =
@@ -44,11 +43,11 @@ const Badge: React.FC<BadgeProps> = ({
   testID,
 }) => {
   const { theme } = useTheme();
-  const styles = createStyles(_theme);
+  const styles = createStyles(__theme);
 
   // Get variant styles
   const getVariantStyles = (): { container: ViewStyle; text: TextStyle } => {
-    switch (_variant) {
+    switch (__variant) {
       case 'primary':
         return {
           container: { backgroundColor: theme.colors.primary },
@@ -98,7 +97,7 @@ const Badge: React.FC<BadgeProps> = ({
 
   // Get size styles
   const getSizeStyles = (): { container: ViewStyle; text: TextStyle; dot: ViewStyle } => {
-    switch (_size) {
+    switch (__size) {
       case 'sm':
         return {
           container: {
@@ -163,7 +162,7 @@ const Badge: React.FC<BadgeProps> = ({
   const sizeStyles = getSizeStyles();
 
   // Format count display
-  const formatCount = (num: number): string => {
+  const formatCount = (num: _number): string => {
     if (num > max) {
       return `${max}+`;
     }
@@ -172,7 +171,7 @@ const Badge: React.FC<BadgeProps> = ({
 
   // Determine what to display
   const getDisplayContent = (): React.ReactNode => {
-    if (_dot) {
+    if (__dot) {
       return null;
     }
 
@@ -180,7 +179,7 @@ const Badge: React.FC<BadgeProps> = ({
       if (count === 0 && !showZero) {
         return null;
       }
-      return formatCount(_count);
+      return formatCount(__count);
     }
 
     return children;
@@ -198,14 +197,14 @@ const Badge: React.FC<BadgeProps> = ({
     dot ? sizeStyles.dot : sizeStyles.container,
     variantStyles.container,
     style,
-  ].filter(_Boolean) as ViewStyle;
+  ].filter(__Boolean) as ViewStyle;
 
   const textDisplayStyle: TextStyle = [
     styles.text,
     sizeStyles.text,
     variantStyles.text,
     textStyle,
-  ].filter(_Boolean) as TextStyle;
+  ].filter(__Boolean) as TextStyle;
 
   return (
     <View style={containerStyle} testID={testID}>
@@ -234,12 +233,12 @@ export const PositionedBadge: React.FC<PositionedBadgeProps> = ({
   ...badgeProps
 }) => {
   const { theme } = useTheme();
-  const styles = createStyles(_theme);
+  const styles = createStyles(__theme);
 
   const getPositionStyles = (): ViewStyle => {
     const { x = 0, y = 0 } = offset;
 
-    switch (_position) {
+    switch (__position) {
       case 'top-left':
         return {
           top: -8 + y,
@@ -273,7 +272,7 @@ export const PositionedBadge: React.FC<PositionedBadgeProps> = ({
   );
 };
 
-const createStyles = (theme: Theme) =>
+const createStyles = (theme: _Theme) =>
   StyleSheet.create({
     container: {
       alignItems: 'center',

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -34,26 +34,26 @@ const RecipesScreen = () => {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
-  const [isLoading, setIsLoading] = useState(_false);
-  const [isRefreshing, setIsRefreshing] = useState(_false);
+  const [isLoading, setIsLoading] = useState(__false);
+  const [isRefreshing, setIsRefreshing] = useState(__false);
   // const { user } = useAppStore(); // If needed for auth checks or restaurant ID
 
   const loadRecipes = useCallback(async () => {
-    setIsLoading(_true);
+    setIsLoading(__true);
     try {
       // const restaurantId = user?.restaurant_id; // Get restaurant ID if needed by API
       // if (!restaurantId) {
       //   Alert.alert("Error", "Restaurant information not found.");
-      //   setIsLoading(_false);
+      //   setIsLoading(__false);
       //   return;
       // }
-      // const fetchedRecipes = await fetchRecipes(_restaurantId);
+      // const fetchedRecipes = await fetchRecipes(__restaurantId);
       const fetchedRecipes: Recipe[] = await fetchRecipes(); // Using simplified fetch for now
-      setRecipes(_fetchedRecipes);
-    } catch (_error) {
+      setRecipes(__fetchedRecipes);
+    } catch (__error) {
       Alert.alert('Error', 'Failed to load recipes. Please try again.');
     } finally {
-      setIsLoading(_false);
+      setIsLoading(__false);
     }
   }, []);
 
@@ -62,20 +62,20 @@ const RecipesScreen = () => {
   }, [loadRecipes]);
 
   const onRefresh = useCallback(async () => {
-    setIsRefreshing(_true);
+    setIsRefreshing(__true);
     await loadRecipes();
-    setIsRefreshing(_false);
+    setIsRefreshing(__false);
   }, [loadRecipes]);
 
   const handleAddRecipe = () => {
     navigation.navigate('RecipeFormScreen'); // Navigate to form for new recipe
   };
 
-  const handleEditRecipe = (recipe: Recipe) => {
+  const handleEditRecipe = (recipe: _Recipe) => {
     navigation.navigate('RecipeFormScreen', { recipe }); // Navigate to form with existing recipe data
   };
 
-  const handleDeleteRecipe = (itemId: string) => {
+  const handleDeleteRecipe = (itemId: _string) => {
     Alert.alert('Confirm Delete', 'Are you sure you want to delete this recipe?', [
       { text: 'Cancel', style: 'cancel' },
       {
@@ -83,13 +83,13 @@ const RecipesScreen = () => {
         style: 'destructive',
         onPress: async () => {
           try {
-            setIsLoading(_true);
-            await deleteRecipe(_itemId);
+            setIsLoading(__true);
+            await deleteRecipe(__itemId);
             Alert.alert('Success', 'Recipe deleted successfully.');
             loadRecipes(); // Refresh list
-          } catch (_error) {
+          } catch (__error) {
             Alert.alert('Error', 'Failed to delete recipe.');
-            setIsLoading(_false);
+            setIsLoading(__false);
           }
         },
       },
@@ -100,12 +100,12 @@ const RecipesScreen = () => {
     <View style={styles.recipeItem}>
       <View style={styles.recipeInfo}>
         <Text style={styles.recipeName}>{item.item_name || item.item_id}</Text>
-        <Text style={styles.recipeIngredients}>{item.ingredients.length} ingredient(_s)</Text>
+        <Text style={styles.recipeIngredients}>{item.ingredients.length} ingredient(__s)</Text>
         {/* Optionally list some ingredients: */}
         {/* <Text>{item.ingredients.slice(0, 2).map(ing => `${ing.ingredient_name || ing.ingredient_sku} (${ing.qty_g}g)`).join(', ')}</Text> */}
       </View>
       <View style={styles.recipeActions}>
-        <TouchableOpacity onPress={() => handleEditRecipe(_item)} style={styles.actionButton}>
+        <TouchableOpacity onPress={() => handleEditRecipe(__item)} style={styles.actionButton}>
           {/* <Icon name="edit" type="material" size={24} color="#007AFF" /> */}
           <Text style={{ color: '#007AFF' }}>Edit</Text>
         </TouchableOpacity>

@@ -82,9 +82,9 @@ export const VALID_ROUTES = {
  * Validates if a navigation action is valid
  */
 export function validateNavigation(
-  currentScreen: string,
-  targetScreen: string,
-  params?: unknown,
+  currentScreen: _string,
+  targetScreen: _string,
+  params?: _unknown,
 ): { valid: boolean; error?: string } {
   // Check if target screen exists in any navigator
   const allRoutes = [
@@ -94,20 +94,20 @@ export function validateNavigation(
     ...Object.values(VALID_ROUTES.AUTH),
   ];
 
-  if (!allRoutes.includes(_targetScreen)) {
+  if (!allRoutes.includes(__targetScreen)) {
     return {
-      valid: false,
+      valid: _false,
       error: `Invalid route: "${targetScreen}" does not exist in any navigator`,
     };
   }
 
   // Special case: Navigating from Main screens to Settings screens
-  if (Object.values(VALID_ROUTES.MAIN).includes(_currentScreen)) {
-    if (Object.values(VALID_ROUTES.SETTINGS).includes(_targetScreen)) {
+  if (Object.values(VALID_ROUTES.MAIN).includes(__currentScreen)) {
+    if (Object.values(VALID_ROUTES.SETTINGS).includes(__targetScreen)) {
       // Must navigate through Settings screen first
       if (targetScreen !== 'Settings' && !params?.screen) {
         return {
-          valid: false,
+          valid: _false,
           error: `Cannot navigate directly to "${targetScreen}" from "${currentScreen}". Navigate to "Settings" first with screen param.`,
         };
       }
@@ -125,10 +125,10 @@ export function logNavigationState(state: NavigationState | undefined, depth = 0
     return;
   }
 
-  const indent = '  '.repeat(_depth);
+  const indent = '  '.repeat(__depth);
 
-  state.routes.forEach((_route, index) => {
-    const active = index === state.index ? '(_ACTIVE)' : '';
+  state.routes.forEach((__route, _index) => {
+    const active = index === state.index ? '(__ACTIVE)' : '';
 
     if (route.state) {
       logNavigationState(route.state as NavigationState, depth + 2);
@@ -141,15 +141,15 @@ export function logNavigationState(state: NavigationState | undefined, depth = 0
  */
 export function getNestedNavigationParams(
   fromNavigator: 'MAIN' | 'SETTINGS' | 'PLATFORM',
-  toScreen: string,
+  toScreen: _string,
 ): { screen?: string; params?: any } | null {
   // From Main to Settings screens
-  if (fromNavigator === 'MAIN' && Object.values(VALID_ROUTES.SETTINGS).includes(_toScreen)) {
+  if (fromNavigator === 'MAIN' && Object.values(VALID_ROUTES.SETTINGS).includes(__toScreen)) {
     if (toScreen === 'Settings') {
       return null; // Direct navigation
     }
     return {
-      screen: toScreen,
+      screen: _toScreen,
     };
   }
 
@@ -159,7 +159,7 @@ export function getNestedNavigationParams(
 /**
  * Safe navigation helper
  */
-export function safeNavigate(navigation: unknown, targetScreen: string, params?: unknown) {
+export function safeNavigate(navigation: _unknown, targetScreen: _string, params?: _unknown) {
   try {
     const validation = validateNavigation(
       navigation.getState()?.routes[navigation.getState()?.index]?.name || '',
@@ -171,9 +171,9 @@ export function safeNavigate(navigation: unknown, targetScreen: string, params?:
       return false;
     }
 
-    navigation.navigate(_targetScreen, params);
+    navigation.navigate(__targetScreen, _params);
     return true;
-  } catch (_error) {
+  } catch (__error) {
     return false;
   }
 }

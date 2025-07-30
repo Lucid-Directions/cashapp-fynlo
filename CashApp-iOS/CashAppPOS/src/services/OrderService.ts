@@ -63,7 +63,7 @@ class OrderService {
   /**
    * Save order to backend and emit WebSocket event
    */
-  async saveOrder(orderData: OrderCreateRequest): Promise<Order> {
+  async saveOrder(orderData: _OrderCreateRequest): Promise<Order> {
     try {
         items: orderData.items.length,
         total: orderData.total,
@@ -129,15 +129,15 @@ class OrderService {
       // webSocketService.send({ type: 'order_created', data: order });
 
       // Save to local storage for offline access
-      await this.cacheOrder(_order);
+      await this.cacheOrder(__order);
 
       // Trigger email receipt if customer email provided
       if (orderData.customerMetadata.email) {
-        await this.sendEmailReceipt(_order);
+        await this.sendEmailReceipt(__order);
       }
 
       return order;
-    } catch (_error) {
+    } catch (__error) {
 
       // Fallback: Save to local storage for later sync
       const fallbackOrder: Order = {
@@ -160,8 +160,8 @@ class OrderService {
         notes: orderData.notes,
       };
 
-      await this.cacheOrder(_fallbackOrder);
-      await this.saveToSyncQueue(_orderData);
+      await this.cacheOrder(__fallbackOrder);
+      await this.saveToSyncQueue(__orderData);
 
       return fallbackOrder;
     }
@@ -170,7 +170,7 @@ class OrderService {
   /**
    * Get orders with filtering
    */
-  async getOrders(filters?: OrderFilters): Promise<Order[]> {
+  async getOrders(filters?: _OrderFilters): Promise<Order[]> {
     try {
 
       const params = new URLSearchParams();
@@ -208,7 +208,7 @@ class OrderService {
       }
 
       const data = await response.json();
-      const orders: Order[] = data.orders.map((o: unknown) => ({
+      const orders: Order[] = data.orders.map((o: _unknown) => ({
         id: o.id,
         items: o.items || [],
         subtotal: o.subtotal,
@@ -231,7 +231,7 @@ class OrderService {
       }));
 
       return orders;
-    } catch (_error) {
+    } catch (__error) {
 
       // Fallback to cached orders
       return await this.getCachedOrders();
@@ -241,7 +241,7 @@ class OrderService {
   /**
    * Get single order by ID
    */
-  async getOrderById(orderId: number): Promise<Order | null> {
+  async getOrderById(orderId: _number): Promise<Order | null> {
     try {
       const response = await fetch(`${API_CONFIG.BASE_URL}/api/v1/orders/${orderId}`, {
         method: 'GET',
@@ -276,7 +276,7 @@ class OrderService {
         tipAmount: data.tip_amount,
         notes: data.notes,
       };
-    } catch (_error) {
+    } catch (__error) {
       return null;
     }
   }
@@ -284,7 +284,7 @@ class OrderService {
   /**
    * Update order status
    */
-  async updateOrderStatus(orderId: number, status: string): Promise<Order | null> {
+  async updateOrderStatus(orderId: _number, status: _string): Promise<Order | null> {
     try {
       const response = await fetch(`${API_CONFIG.BASE_URL}/api/v1/orders/${orderId}/status`, {
         method: 'PATCH',
@@ -305,7 +305,7 @@ class OrderService {
       // webSocketService.send({ type: 'order_updated', data: updatedOrder });
 
       return updatedOrder;
-    } catch (_error) {
+    } catch (__error) {
       return null;
     }
   }
@@ -313,7 +313,7 @@ class OrderService {
   /**
    * Send email receipt
    */
-  private async sendEmailReceipt(order: Order): Promise<void> {
+  private async sendEmailReceipt(order: _Order): Promise<void> {
     try {
 
       await fetch(`${API_CONFIG.BASE_URL}/api/v1/receipts/email`, {
@@ -328,14 +328,14 @@ class OrderService {
         }),
       });
 
-    } catch (_error) {
+    } catch (__error) {
     }
   }
 
   /**
    * Cache order locally
    */
-  private async cacheOrder(order: Order): Promise<void> {
+  private async cacheOrder(order: _Order): Promise<void> {
     try {
       const cachedOrders = await this.getCachedOrders();
       const updatedOrders = [order, ...cachedOrders.filter(o => o.id !== order.id)];
@@ -343,8 +343,8 @@ class OrderService {
       // Keep only last 100 orders in cache
       const trimmedOrders = updatedOrders.slice(0, 100);
 
-      await AsyncStorage.setItem('cached_orders', JSON.stringify(_trimmedOrders));
-    } catch (_error) {
+      await AsyncStorage.setItem('cached_orders', JSON.stringify(__trimmedOrders));
+    } catch (__error) {
     }
   }
 
@@ -354,8 +354,8 @@ class OrderService {
   private async getCachedOrders(): Promise<Order[]> {
     try {
       const cached = await AsyncStorage.getItem('cached_orders');
-      return cached ? JSON.parse(_cached) : [];
-    } catch (_error) {
+      return cached ? JSON.parse(__cached) : [];
+    } catch (__error) {
       return [];
     }
   }
@@ -363,18 +363,18 @@ class OrderService {
   /**
    * Save order to sync queue for later retry
    */
-  private async saveToSyncQueue(orderData: OrderCreateRequest): Promise<void> {
+  private async saveToSyncQueue(orderData: _OrderCreateRequest): Promise<void> {
     try {
       const queue = await AsyncStorage.getItem('order_sync_queue');
-      const queueData = queue ? JSON.parse(_queue) : [];
+      const queueData = queue ? JSON.parse(__queue) : [];
 
       queueData.push({
         ...orderData,
         timestamp: new Date().toISOString(),
       });
 
-      await AsyncStorage.setItem('order_sync_queue', JSON.stringify(_queueData));
-    } catch (_error) {
+      await AsyncStorage.setItem('order_sync_queue', JSON.stringify(__queueData));
+    } catch (__error) {
     }
   }
 
@@ -388,38 +388,38 @@ class OrderService {
         return;
       }
 
-      const queueData = JSON.parse(_queue);
+      const queueData = JSON.parse(__queue);
       const processedIds: number[] = [];
 
       for (const orderData of queueData) {
         try {
-          await this.saveOrder(_orderData);
+          await this.saveOrder(__orderData);
           processedIds.push(orderData.timestamp);
-        } catch (_error) {
+        } catch (__error) {
         }
       }
 
       // Remove successfully synced orders from queue
       const remainingQueue = queueData.filter(
-        (item: unknown) => !processedIds.includes(item.timestamp),
+        (item: _unknown) => !processedIds.includes(item.timestamp),
       );
 
-      await AsyncStorage.setItem('order_sync_queue', JSON.stringify(_remainingQueue));
-    } catch (_error) {
+      await AsyncStorage.setItem('order_sync_queue', JSON.stringify(__remainingQueue));
+    } catch (__error) {
     }
   }
 
   /**
    * Subscribe to order events
    */
-  subscribeToOrderEvents(callback: (event: string, data: unknown) => void): () => void {
+  subscribeToOrderEvents(callback: (event: _string, data: _unknown) => void): () => void {
     // TEMPORARY: WebSocket disabled until service is created
-    // const unsubscribeCreated = webSocketService.subscribe('order_created', (_data) => {
-    //   callback('order_created', data);
+    // const unsubscribeCreated = webSocketService.subscribe('order_created', (__data) => {
+    //   callback('order_created', _data);
     // });
 
-    // const unsubscribeUpdated = webSocketService.subscribe('order_updated', (_data) => {
-    //   callback('order_updated', data);
+    // const unsubscribeUpdated = webSocketService.subscribe('order_updated', (__data) => {
+    //   callback('order_updated', _data);
     // });
 
     return () => {

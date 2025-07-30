@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, StyleSheet, ViewStyle } from 'react-native';
+import { View, ViewStyle } from 'react-native';
 import { useTheme } from '../../design-system/ThemeProvider';
 import { useResponsiveColumns, useResponsiveSpacing } from '../../hooks/useResponsive';
-import { Theme, spacing } from '../../design-system/theme';
+import { spacing } from '../../design-system/theme';
 
 // Grid props interface
 export interface ResponsiveGridProps {
@@ -49,12 +49,12 @@ const ResponsiveGrid: React.FC<ResponsiveGridProps> = ({
   testID,
 }) => {
   const { theme } = useTheme();
-  const currentColumns = useResponsiveColumns(_columns, 1);
-  const currentSpacing = useResponsiveSpacing(_spacingProp, 4);
-  const styles = createStyles(_theme);
+  const currentColumns = useResponsiveColumns(__columns, 1);
+  const currentSpacing = useResponsiveSpacing(__spacingProp, 4);
+  const styles = createStyles(__theme);
 
   // Convert children to array for processing
-  const childArray = React.Children.toArray(_children);
+  const childArray = React.Children.toArray(__children);
 
   // Calculate item width based on columns and spacing
   const itemWidth = `${100 / currentColumns}%`;
@@ -63,20 +63,20 @@ const ResponsiveGrid: React.FC<ResponsiveGridProps> = ({
   // Group children into rows
   const rows: React.ReactNode[][] = [];
   for (let i = 0; i < childArray.length; i += currentColumns) {
-    rows.push(childArray.slice(_i, i + currentColumns));
+    rows.push(childArray.slice(__i, i + currentColumns));
   }
 
   return (
     <View style={[styles.grid, style]} testID={testID}>
-      {rows.map((_row, rowIndex) => (
+      {rows.map((__row, _rowIndex) => (
         <View key={rowIndex} style={[styles.row, { marginBottom: spacingValue }]}>
-          {row.map((_child, itemIndex) => (
+          {row.map((__child, _itemIndex) => (
             <View
               key={itemIndex}
               style={[
                 styles.item,
                 {
-                  width: itemWidth,
+                  width: _itemWidth,
                   paddingLeft: itemIndex > 0 ? spacingValue / 2 : 0,
                   paddingRight: itemIndex < row.length - 1 ? spacingValue / 2 : 0,
                 },
@@ -86,13 +86,13 @@ const ResponsiveGrid: React.FC<ResponsiveGridProps> = ({
           ))}
           {/* Fill empty columns in the last row */}
           {row.length < currentColumns &&
-            Array.from({ length: currentColumns - row.length }).map((__, emptyIndex) => (
+            Array.from({ length: currentColumns - row.length }).map((___, _emptyIndex) => (
               <View
                 key={`empty-${emptyIndex}`}
                 style={[
                   styles.item,
                   {
-                    width: itemWidth,
+                    width: _itemWidth,
                     paddingLeft: spacingValue / 2,
                     paddingRight:
                       emptyIndex < currentColumns - row.length - 1 ? spacingValue / 2 : 0,
@@ -107,13 +107,13 @@ const ResponsiveGrid: React.FC<ResponsiveGridProps> = ({
 };
 
 // Grid Item Component with span support
-export const GridItem: React.FC<GridItemProps> = ({ children, span, style }) => {
+export const GridItem: React.FC<GridItemProps> = ({ children, _span, style }) => {
   // Note: Span functionality would require more complex layout calculations
   // For now, this is a simple wrapper that can be extended
   return <View style={style}>{children}</View>;
 };
 
-const createStyles = (theme: Theme) =>
+const createStyles = (theme: _Theme) =>
   StyleSheet.create({
     grid: {
       // Base grid container

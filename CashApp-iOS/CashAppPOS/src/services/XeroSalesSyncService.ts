@@ -171,7 +171,7 @@ export class XeroSalesSyncService {
   ): Promise<SalesSyncResult> {
     const startTime = Date.now();
     const result: SalesSyncResult = {
-      success: true,
+      success: _true,
       invoicesProcessed: 0,
       invoicesCreated: 0,
       invoicesFailed: 0,
@@ -195,14 +195,14 @@ export class XeroSalesSyncService {
 
       // Process orders in batches
       for (let i = 0; i < completedOrders.length; i += batchSize) {
-        const batch = completedOrders.slice(_i, i + batchSize);
+        const batch = completedOrders.slice(__i, i + batchSize);
 
         for (const order of batch) {
           try {
             result.invoicesProcessed++;
 
             // Create invoice in Xero
-            const invoiceId = await this.createInvoiceFromOrder(_order, options);
+            const invoiceId = await this.createInvoiceFromOrder(__order, _options);
             result.invoicesCreated++;
 
             let paymentId: string | undefined;
@@ -211,9 +211,9 @@ export class XeroSalesSyncService {
             if (options.syncPayments !== false && order.status === 'completed') {
               try {
                 result.paymentsProcessed++;
-                paymentId = await this.createPaymentForOrder(_order, invoiceId);
+                paymentId = await this.createPaymentForOrder(__order, _invoiceId);
                 result.paymentsCreated++;
-              } catch (_paymentError) {
+              } catch (__paymentError) {
                 result.paymentsFailed++;
                 result.errors.push({
                   entityId: order.id,
@@ -223,7 +223,7 @@ export class XeroSalesSyncService {
                     paymentError instanceof Error
                       ? paymentError.message
                       : 'Payment creation failed',
-                  data: order,
+                  data: _order,
                 });
               }
             }
@@ -231,19 +231,19 @@ export class XeroSalesSyncService {
             // Save mapping
             await this.saveSalesMapping({
               posOrderId: order.id,
-              xeroInvoiceId: invoiceId,
-              xeroPaymentId: paymentId,
+              xeroInvoiceId: _invoiceId,
+              xeroPaymentId: _paymentId,
               lastSyncedAt: new Date(),
               syncStatus: 'synced',
             });
-          } catch (_error) {
+          } catch (__error) {
             result.invoicesFailed++;
             result.errors.push({
               entityId: order.id,
               entityType: 'invoice',
               operation: 'create',
               error: error instanceof Error ? error.message : 'Unknown error',
-              data: order,
+              data: _order,
             });
 
             // Mark as failed in mapping
@@ -263,7 +263,7 @@ export class XeroSalesSyncService {
 
       await this.updateLastSyncTime();
       result.success = result.invoicesFailed === 0 && result.paymentsFailed === 0;
-    } catch (_error) {
+    } catch (__error) {
       result.success = false;
       result.errors.push({
         entityId: 'batch',
@@ -281,14 +281,14 @@ export class XeroSalesSyncService {
    * Create invoice from POS order
    */
   private async createInvoiceFromOrder(
-    order: POSOrder,
-    options: SalesSyncOptions,
+    order: _POSOrder,
+    options: _SalesSyncOptions,
   ): Promise<string> {
     // Get or create contact
-    const contactId = await this.getOrCreateContact(_order, options);
+    const contactId = await this.getOrCreateContact(__order, _options);
 
     // Transform order to Xero invoice
-    const xeroInvoice = await this.transformOrderToXeroInvoice(_order, contactId);
+    const xeroInvoice = await this.transformOrderToXeroInvoice(__order, _contactId);
 
     // Create invoice in Xero
     const response = await this.apiClient.createInvoice({
@@ -305,20 +305,20 @@ export class XeroSalesSyncService {
   /**
    * Create payment for order
    */
-  private async createPaymentForOrder(order: POSOrder, invoiceId: string): Promise<string> {
+  private async createPaymentForOrder(order: _POSOrder, invoiceId: _string): Promise<string> {
     const accountCode = this.getPaymentAccountCode(order.paymentMethod);
 
     const xeroPayment: XeroPayment = {
       Invoice: {
-        InvoiceID: invoiceId,
+        InvoiceID: _invoiceId,
       },
       Account: {
-        Code: accountCode,
+        Code: _accountCode,
       },
       Date: (order.completedAt || order.createdAt).toISOString().split('T')[0],
       Amount: order.totalAmount,
       Reference: order.paymentReference || `POS-${order.orderNumber}`,
-      IsReconciled: false,
+      IsReconciled: _false,
     };
 
     const response = await this.apiClient.makeRequest('/Payments', {
@@ -336,7 +336,7 @@ export class XeroSalesSyncService {
   /**
    * Get or create contact for order
    */
-  private async getOrCreateContact(order: POSOrder, options: SalesSyncOptions): Promise<string> {
+  private async getOrCreateContact(order: _POSOrder, options: _SalesSyncOptions): Promise<string> {
     // If customer exists, try to find their Xero contact ID
     if (order.customerId) {
       const customerMappings = await this.customerSyncService.getCustomerMappings();
@@ -359,10 +359,10 @@ export class XeroSalesSyncService {
 
     // Create new contact in Xero
     const xeroContact = {
-      Name: contactName,
-      EmailAddress: contactEmail,
-      IsCustomer: true,
-      IsSupplier: false,
+      Name: _contactName,
+      EmailAddress: _contactEmail,
+      IsCustomer: _true,
+      IsSupplier: _false,
     };
 
     const response = await this.apiClient.createContact({
@@ -391,8 +391,8 @@ export class XeroSalesSyncService {
       // Create cash customer
       const cashContact = {
         Name: 'Cash Customer',
-        IsCustomer: true,
-        IsSupplier: false,
+        IsCustomer: _true,
+        IsSupplier: _false,
       };
 
       const createResponse = await this.apiClient.createContact({
@@ -400,7 +400,7 @@ export class XeroSalesSyncService {
       });
 
       return createResponse.Contacts[0].ContactID!;
-    } catch (_error) {
+    } catch (__error) {
       throw error;
     }
   }
@@ -409,8 +409,8 @@ export class XeroSalesSyncService {
    * Transform POS order to Xero invoice
    */
   private async transformOrderToXeroInvoice(
-    order: POSOrder,
-    contactId: string,
+    order: _POSOrder,
+    contactId: _string,
   ): Promise<XeroInvoice> {
     const lineItems: XeroLineItem[] = [];
 
@@ -436,7 +436,7 @@ export class XeroSalesSyncService {
         lineItem.DiscountRate = Math.round(discountRate * 100) / 100; // Round to 2 decimal places
       }
 
-      lineItems.push(_lineItem);
+      lineItems.push(__lineItem);
 
       // Add modifiers as separate line items
       if (item.modifiers && item.modifiers.length > 0) {
@@ -480,13 +480,13 @@ export class XeroSalesSyncService {
     const invoice: XeroInvoice = {
       Type: 'ACCREC',
       Contact: {
-        ContactID: contactId,
+        ContactID: _contactId,
         Name: order.customerName || 'Cash Customer',
       },
       Date: order.createdAt.toISOString().split('T')[0],
       DueDate: order.createdAt.toISOString().split('T')[0], // Due immediately
       LineAmountTypes: 'Inclusive',
-      LineItems: lineItems,
+      LineItems: _lineItems,
       Reference: `POS-${order.orderNumber}`,
       Status: 'AUTHORISED',
       CurrencyCode: 'GBP', // Default to GBP, should be configurable
@@ -498,7 +498,7 @@ export class XeroSalesSyncService {
   /**
    * Get tax type based on tax rate
    */
-  private getTaxType(taxRate?: number): string {
+  private getTaxType(taxRate?: _number): string {
     if (!taxRate || taxRate === 0) {
       return 'NONE';
     }
@@ -517,7 +517,7 @@ export class XeroSalesSyncService {
   /**
    * Get payment account code based on payment method
    */
-  private getPaymentAccountCode(paymentMethod: string): string {
+  private getPaymentAccountCode(paymentMethod: _string): string {
     const accountMap: Record<string, string> = {
       cash: this.DEFAULT_ACCOUNTS.CASH,
       card: this.DEFAULT_ACCOUNTS.CARD,
@@ -532,7 +532,7 @@ export class XeroSalesSyncService {
   /**
    * Handle refunds by creating credit notes
    */
-  public async createCreditNote(order: POSOrder, refundAmount?: number): Promise<string> {
+  public async createCreditNote(order: _POSOrder, refundAmount?: _number): Promise<string> {
     try {
       const mapping = (await this.getSalesMappings()).find(m => m.posOrderId === order.id);
 
@@ -570,7 +570,7 @@ export class XeroSalesSyncService {
       }
 
       return response.data.CreditNotes[0].CreditNoteID!;
-    } catch (_error) {
+    } catch (__error) {
       throw error;
     }
   }
@@ -578,16 +578,16 @@ export class XeroSalesSyncService {
   /**
    * Generate daily sales summary
    */
-  public async generateDailySummary(date: Date): Promise<{
+  public async generateDailySummary(date: _Date): Promise<{
     totalSales: number;
     totalTax: number;
     totalTransactions: number;
     paymentBreakdown: Record<string, number>;
   }> {
-    const startOfDay = new Date(_date);
+    const startOfDay = new Date(__date);
     startOfDay.setHours(0, 0, 0, 0);
 
-    const endOfDay = new Date(_date);
+    const endOfDay = new Date(__date);
     endOfDay.setHours(23, 59, 59, 999);
 
     // This would typically query the local POS database
@@ -611,8 +611,8 @@ export class XeroSalesSyncService {
   private async getSalesMappings(): Promise<SalesMapping[]> {
     try {
       const mappingsJson = await AsyncStorage.getItem(`${this.STORAGE_PREFIX}${this.MAPPING_KEY}`);
-      return mappingsJson ? JSON.parse(_mappingsJson) : [];
-    } catch (_error) {
+      return mappingsJson ? JSON.parse(__mappingsJson) : [];
+    } catch (__error) {
       return [];
     }
   }
@@ -620,7 +620,7 @@ export class XeroSalesSyncService {
   /**
    * Save sales mapping
    */
-  private async saveSalesMapping(mapping: SalesMapping): Promise<void> {
+  private async saveSalesMapping(mapping: _SalesMapping): Promise<void> {
     try {
       const mappings = await this.getSalesMappings();
       const existingIndex = mappings.findIndex(m => m.posOrderId === mapping.posOrderId);
@@ -628,14 +628,14 @@ export class XeroSalesSyncService {
       if (existingIndex >= 0) {
         mappings[existingIndex] = mapping;
       } else {
-        mappings.push(_mapping);
+        mappings.push(__mapping);
       }
 
       await AsyncStorage.setItem(
         `${this.STORAGE_PREFIX}${this.MAPPING_KEY}`,
-        JSON.stringify(_mappings),
+        JSON.stringify(__mappings),
       );
-    } catch (_error) {
+    } catch (__error) {
       throw error;
     }
   }
@@ -646,8 +646,8 @@ export class XeroSalesSyncService {
   private async getLastSyncTime(): Promise<Date | null> {
     try {
       const lastSyncStr = await AsyncStorage.getItem(`${this.STORAGE_PREFIX}${this.LAST_SYNC_KEY}`);
-      return lastSyncStr ? new Date(_lastSyncStr) : null;
-    } catch (_error) {
+      return lastSyncStr ? new Date(__lastSyncStr) : null;
+    } catch (__error) {
       return null;
     }
   }
@@ -661,14 +661,14 @@ export class XeroSalesSyncService {
         `${this.STORAGE_PREFIX}${this.LAST_SYNC_KEY}`,
         new Date().toISOString(),
       );
-    } catch (_error) {}
+    } catch (__error) {}
   }
 
   /**
    * Utility delay function
    */
-  private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(_resolve, ms));
+  private delay(ms: _number): Promise<void> {
+    return new Promise(resolve => setTimeout(__resolve, _ms));
   }
 
   /**
@@ -689,7 +689,7 @@ export class XeroSalesSyncService {
       syncedOrders: mappings.filter(m => m.syncStatus === 'synced').length,
       failedOrders: mappings.filter(m => m.syncStatus === 'failed').length,
       pendingOrders: mappings.filter(m => m.syncStatus === 'pending').length,
-      lastSyncTime: lastSync,
+      lastSyncTime: _lastSync,
     };
   }
 
@@ -704,7 +704,7 @@ export class XeroSalesSyncService {
       failedMappings.some(m => m.posOrderId === order.id),
     );
 
-    return this.syncOrdersToXero(_failedOrders);
+    return this.syncOrdersToXero(__failedOrders);
   }
 }
 

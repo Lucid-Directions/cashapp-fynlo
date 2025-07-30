@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   StyleSheet,
   Text,
@@ -14,15 +14,15 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { useNavigation, RouteProp } from '@react-navigation/native';
 import Colors from '../../constants/Colors';
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const { width: _screenWidth, height: screenHeight } = Dimensions.get('window');
 
 type QRScannerRouteProp = RouteProp<
   {
     QRScanner: {
-      onScanned: (data: string) => void;
+      onScanned: (data: _string) => void;
       title?: string;
       subtitle?: string;
     };
@@ -46,14 +46,14 @@ const QRScannerScreen: React.FC = () => {
     subtitle = 'Point camera at QR code',
   } = route.params || {};
 
-  const [hasPermission, setHasPermission] = useState<boolean | null>(_null);
-  const [isScanning, setIsScanning] = useState(_true);
-  const [flashEnabled, setFlashEnabled] = useState(_false);
-  const [scannedData, setScannedData] = useState<ScanResult | null>(_null);
-  const [isLoading, setIsLoading] = useState(_true);
-  const [permissionDenied, setPermissionDenied] = useState(_false);
+  const [hasPermission, setHasPermission] = useState<boolean | null>(__null);
+  const [isScanning, setIsScanning] = useState(__true);
+  const [flashEnabled, setFlashEnabled] = useState(__false);
+  const [scannedData, setScannedData] = useState<ScanResult | null>(__null);
+  const [isLoading, setIsLoading] = useState(__true);
+  const [permissionDenied, setPermissionDenied] = useState(__false);
 
-  const scanTimeoutRef = useRef<NodeJS.Timeout | null>(_null);
+  const scanTimeoutRef = useRef<NodeJS.Timeout | null>(__null);
 
   useEffect(() => {
     requestCameraPermission();
@@ -67,7 +67,7 @@ const QRScannerScreen: React.FC = () => {
 
   const requestCameraPermission = async () => {
     try {
-      setIsLoading(_true);
+      setIsLoading(__true);
 
       if (Platform.OS === 'android') {
         const granted = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.CAMERA, {
@@ -80,25 +80,25 @@ const QRScannerScreen: React.FC = () => {
         });
 
         if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-          setHasPermission(_true);
-          setPermissionDenied(_false);
+          setHasPermission(__true);
+          setPermissionDenied(__false);
         } else {
-          setHasPermission(_false);
-          setPermissionDenied(_true);
+          setHasPermission(__false);
+          setPermissionDenied(__true);
         }
       } else {
         // For iOS, we'll simulate permission request
         // In real implementation, this would use react-native-permissions
         setTimeout(() => {
-          setHasPermission(_true);
-          setPermissionDenied(_false);
+          setHasPermission(__true);
+          setPermissionDenied(__false);
         }, 1000);
       }
-    } catch (_error) {
-      setHasPermission(_false);
-      setPermissionDenied(_true);
+    } catch (__error) {
+      setHasPermission(__false);
+      setPermissionDenied(__true);
     } finally {
-      setIsLoading(_false);
+      setIsLoading(__false);
     }
   };
 
@@ -121,36 +121,36 @@ const QRScannerScreen: React.FC = () => {
     const randomCode = mockQRCodes[Math.floor(Math.random() * mockQRCodes.length)];
 
     const result: ScanResult = {
-      data: randomCode,
+      data: _randomCode,
       type: 'QR_CODE',
       timestamp: new Date(),
     };
 
-    setScannedData(_result);
-    setIsScanning(_false);
+    setScannedData(__result);
+    setIsScanning(__false);
 
     // Provide haptic feedback simulation
 
     // Auto-confirm after 2 seconds or let user manually confirm
     scanTimeoutRef.current = setTimeout(() => {
-      handleConfirmScan(_result);
+      handleConfirmScan(__result);
     }, 2000);
   };
 
-  const handleConfirmScan = (result: ScanResult) => {
+  const handleConfirmScan = (result: _ScanResult) => {
     if (scanTimeoutRef.current) {
       clearTimeout(scanTimeoutRef.current);
     }
 
-    if (_onScanned) {
+    if (__onScanned) {
       onScanned(result.data);
     }
     navigation.goBack();
   };
 
   const handleRetryScanning = () => {
-    setScannedData(_null);
-    setIsScanning(_true);
+    setScannedData(__null);
+    setIsScanning(__true);
     if (scanTimeoutRef.current) {
       clearTimeout(scanTimeoutRef.current);
     }
@@ -167,7 +167,7 @@ const QRScannerScreen: React.FC = () => {
     );
   };
 
-  const getQRCodeTypeDisplay = (data: string) => {
+  const getQRCodeTypeDisplay = (data: _string) => {
     if (data.startsWith('PAYMENT:')) {
       return 'Payment QR Code';
     }
@@ -192,14 +192,14 @@ const QRScannerScreen: React.FC = () => {
     return 'QR Code';
   };
 
-  const formatScannedData = (data: string) => {
+  const formatScannedData = (data: _string) => {
     if (data.length > 50) {
       return data.substring(0, 47) + '...';
     }
     return data;
   };
 
-  if (_isLoading) {
+  if (__isLoading) {
     return (
       <SafeAreaView style={styles.container}>
         <StatusBar barStyle="light-content" backgroundColor={Colors.primary} />
@@ -322,7 +322,7 @@ const QRScannerScreen: React.FC = () => {
 
                 <TouchableOpacity
                   style={styles.confirmButton}
-                  onPress={() => handleConfirmScan(_scannedData)}>
+                  onPress={() => handleConfirmScan(__scannedData)}>
                   <Icon name="check" size={20} color={Colors.white} />
                   <Text style={styles.confirmButtonText}>Use This Code</Text>
                 </TouchableOpacity>

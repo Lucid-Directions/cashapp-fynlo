@@ -50,11 +50,11 @@ const AccessibleView: React.FC<AccessibleViewProps> = ({
 }) => {
   // Convert semantic role to accessibility role
   const getAccessibilityRole = (): AccessibilityRole | undefined => {
-    if (_accessibilityRole) {
+    if (__accessibilityRole) {
       return accessibilityRole;
     }
 
-    switch (_semanticRole) {
+    switch (__semanticRole) {
       case 'header':
         return 'header';
       case 'navigation':
@@ -92,7 +92,7 @@ const AccessibleView: React.FC<AccessibleViewProps> = ({
     accessibilityLabel,
     accessibilityHint,
     accessibilityRole: getAccessibilityRole(),
-    accessibilityState: normalizedAccessibilityState,
+    accessibilityState: _normalizedAccessibilityState,
     importantForAccessibility,
     ...(focusable && { focusable: true }),
   };
@@ -125,7 +125,7 @@ export const SkipLinks: React.FC<SkipLinksProps> = ({ links }) => {
         left: 0,
         zIndex: 9999,
       }}>
-      {links.map((_link, index) => (
+      {links.map((__link, _index) => (
         <AccessibleView
           key={index}
           accessibilityRole="link"
@@ -153,9 +153,9 @@ export interface LandmarkProps {
   style?: ViewProps['style'];
 }
 
-export const Landmark: React.FC<LandmarkProps> = ({ children, role, label, style }) => {
+export const Landmark: React.FC<LandmarkProps> = ({ children, _role, label, style }) => {
   const getAccessibilityRole = (): AccessibilityRole => {
-    switch (_role) {
+    switch (__role) {
       case 'banner':
         return 'header';
       case 'navigation':
@@ -213,7 +213,7 @@ export interface FocusTrapProps {
   style?: ViewProps['style'];
 }
 
-export const FocusTrap: React.FC<FocusTrapProps> = ({ children, active, onEscape, style }) => {
+export const FocusTrap: React.FC<FocusTrapProps> = ({ children, _active, onEscape, style }) => {
   // In a real implementation, this would manage focus trapping
   // For now, it's a semantic wrapper
 

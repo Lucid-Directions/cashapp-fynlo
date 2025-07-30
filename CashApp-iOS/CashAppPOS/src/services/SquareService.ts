@@ -20,7 +20,7 @@ try {
   SQIPCardEntry = SquareSDK.SQIPCardEntry;
   SQIPApplePay = SquareSDK.SQIPApplePay;
   SQIPGooglePay = SquareSDK.SQIPGooglePay;
-} catch (_error) {
+} catch (__error) {
     'Square SDK not available. Square payments will be disabled. Please install dependencies with: npm install && cd ios && pod install',
   );
 }
@@ -98,20 +98,20 @@ class SquareServiceClass {
   /**
    * Initialize Square service with configuration
    */
-  async initialize(config: SquareConfig): Promise<void> {
+  async initialize(config: _SquareConfig): Promise<void> {
     try {
       this.config = config;
 
       // Initialize Square SDK if available
-      if (_SQIPCore) {
+      if (__SQIPCore) {
         await SQIPCore.setSquareApplicationId(config.applicationId);
       } else {
         throw new Error(this.getSDKUnavailableMessage());
       }
 
       this.initialized = true;
-      await this.saveConfig(_config);
-    } catch (_error) {
+      await this.saveConfig(__config);
+    } catch (__error) {
       throw error;
     }
   }
@@ -120,9 +120,9 @@ class SquareServiceClass {
    * Process card payment using Square SDK
    */
   async processCardPayment(
-    amount: number,
+    amount: _number,
     currency = 'GBP',
-    description?: string,
+    description?: _string,
   ): Promise<SquareCardPayment> {
     try {
       if (!this.initialized || !this.config) {
@@ -134,9 +134,9 @@ class SquareServiceClass {
       // Check if SDK is available
       if (!SQIPCardEntry) {
         return {
-          id: paymentId,
-          amount: amount,
-          currency: currency,
+          id: _paymentId,
+          amount: _amount,
+          currency: _currency,
           status: 'failed',
           errorMessage: this.getSDKUnavailableMessage(),
         };
@@ -144,15 +144,15 @@ class SquareServiceClass {
 
       // Start Square card entry flow
       const cardEntryResult = await SQIPCardEntry.startCardEntryFlow({
-        collectPostalCode: false,
-        skipCardHolderNameEntry: true,
+        collectPostalCode: _false,
+        skipCardHolderNameEntry: _true,
       });
 
       if (cardEntryResult.canceled) {
         return {
-          id: paymentId,
-          amount: amount,
-          currency: currency,
+          id: _paymentId,
+          amount: _amount,
+          currency: _currency,
           status: 'cancelled',
           errorMessage: 'Payment cancelled by user',
         };
@@ -168,9 +168,9 @@ class SquareServiceClass {
 
         if (paymentResult.success) {
           return {
-            id: paymentId,
-            amount: amount,
-            currency: currency,
+            id: _paymentId,
+            amount: _amount,
+            currency: _currency,
             status: 'completed',
             nonce: cardEntryResult.nonce,
             cardBrand: cardEntryResult.card?.brand,
@@ -180,17 +180,17 @@ class SquareServiceClass {
       }
 
       return {
-        id: paymentId,
-        amount: amount,
-        currency: currency,
+        id: _paymentId,
+        amount: _amount,
+        currency: _currency,
         status: 'failed',
         errorMessage: 'Square SDK not available - placeholder implementation',
       };
-    } catch (_error) {
+    } catch (__error) {
       return {
         id: this.generatePaymentId(),
-        amount: amount,
-        currency: currency,
+        amount: _amount,
+        currency: _currency,
         status: 'failed',
         errorMessage: error instanceof Error ? error.message : 'Card payment failed',
       };
@@ -201,10 +201,10 @@ class SquareServiceClass {
    * Process contactless payment (Apple Pay / Google Pay)
    */
   async processContactlessPayment(
-    amount: number,
+    amount: _number,
     currency = 'GBP',
     paymentMethod: 'apple_pay' | 'google_pay',
-    description?: string,
+    description?: _string,
   ): Promise<SquareContactlessPayment> {
     try {
       if (!this.initialized || !this.config) {
@@ -214,15 +214,15 @@ class SquareServiceClass {
       const paymentId = this.generatePaymentId();
 
       // Check device support
-      const deviceSupported = await this.isContactlessSupported(_paymentMethod);
+      const deviceSupported = await this.isContactlessSupported(__paymentMethod);
       if (!deviceSupported) {
         return {
-          id: paymentId,
-          amount: amount,
-          currency: currency,
+          id: _paymentId,
+          amount: _amount,
+          currency: _currency,
           status: 'failed',
-          paymentMethod: paymentMethod,
-          deviceSupported: false,
+          paymentMethod: _paymentMethod,
+          deviceSupported: _false,
           errorMessage: `${paymentMethod} not supported on this device`,
         };
       }
@@ -233,12 +233,12 @@ class SquareServiceClass {
       if (paymentMethod === 'apple_pay') {
         if (!SQIPApplePay) {
           return {
-            id: paymentId,
-            amount: amount,
-            currency: currency,
+            id: _paymentId,
+            amount: _amount,
+            currency: _currency,
             status: 'failed',
-            paymentMethod: paymentMethod,
-            deviceSupported: false,
+            paymentMethod: _paymentMethod,
+            deviceSupported: _false,
             errorMessage: this.getSDKUnavailableMessage(),
           };
         }
@@ -247,38 +247,38 @@ class SquareServiceClass {
           price: amount.toString(),
           summaryLabel: description || 'Fynlo POS Payment',
           countryCode: 'GB',
-          currencyCode: currency,
+          currencyCode: _currency,
         });
 
         if (applePayResult.nonce) {
           nonce = applePayResult.nonce;
         } else if (applePayResult.canceled) {
           return {
-            id: paymentId,
-            amount: amount,
-            currency: currency,
+            id: _paymentId,
+            amount: _amount,
+            currency: _currency,
             status: 'cancelled',
-            paymentMethod: paymentMethod,
-            deviceSupported: deviceSupported,
+            paymentMethod: _paymentMethod,
+            deviceSupported: _deviceSupported,
             errorMessage: 'Payment cancelled by user',
           };
         }
       } else if (paymentMethod === 'google_pay') {
         if (!SQIPGooglePay) {
           return {
-            id: paymentId,
-            amount: amount,
-            currency: currency,
+            id: _paymentId,
+            amount: _amount,
+            currency: _currency,
             status: 'failed',
-            paymentMethod: paymentMethod,
-            deviceSupported: false,
+            paymentMethod: _paymentMethod,
+            deviceSupported: _false,
             errorMessage: this.getSDKUnavailableMessage(),
           };
         }
         await SQIPGooglePay.initializeGooglePay(this.config.applicationId, this.config.locationId);
         const googlePayResult = await SQIPGooglePay.requestGooglePayNonce({
           price: amount.toString(),
-          currencyCode: currency,
+          currencyCode: _currency,
           priceStatus: 'FINAL',
         });
 
@@ -286,49 +286,49 @@ class SquareServiceClass {
           nonce = googlePayResult.nonce;
         } else if (googlePayResult.canceled) {
           return {
-            id: paymentId,
-            amount: amount,
-            currency: currency,
+            id: _paymentId,
+            amount: _amount,
+            currency: _currency,
             status: 'cancelled',
-            paymentMethod: paymentMethod,
-            deviceSupported: deviceSupported,
+            paymentMethod: _paymentMethod,
+            deviceSupported: _deviceSupported,
             errorMessage: 'Payment cancelled by user',
           };
         }
       }
 
       // Process payment with obtained nonce
-      if (_nonce) {
-        const paymentResult = await this.processPaymentWithNonce(_nonce, amount, currency);
+      if (__nonce) {
+        const paymentResult = await this.processPaymentWithNonce(__nonce, _amount, currency);
 
         if (paymentResult.success) {
           return {
-            id: paymentId,
-            amount: amount,
-            currency: currency,
+            id: _paymentId,
+            amount: _amount,
+            currency: _currency,
             status: 'completed',
-            paymentMethod: paymentMethod,
-            deviceSupported: deviceSupported,
+            paymentMethod: _paymentMethod,
+            deviceSupported: _deviceSupported,
           };
         }
       }
       return {
-        id: paymentId,
-        amount: amount,
-        currency: currency,
+        id: _paymentId,
+        amount: _amount,
+        currency: _currency,
         status: 'failed',
-        paymentMethod: paymentMethod,
-        deviceSupported: deviceSupported,
+        paymentMethod: _paymentMethod,
+        deviceSupported: _deviceSupported,
         errorMessage: 'Square SDK not available - placeholder implementation',
       };
-    } catch (_error) {
+    } catch (__error) {
       return {
         id: this.generatePaymentId(),
-        amount: amount,
-        currency: currency,
+        amount: _amount,
+        currency: _currency,
         status: 'failed',
-        paymentMethod: paymentMethod,
-        deviceSupported: false,
+        paymentMethod: _paymentMethod,
+        deviceSupported: _false,
         errorMessage: error instanceof Error ? error.message : 'Contactless payment failed',
       };
     }
@@ -338,10 +338,10 @@ class SquareServiceClass {
    * Process payment using Square API (after obtaining nonce)
    */
   async processPaymentWithNonce(
-    nonce: string,
-    amount: number,
+    nonce: _string,
+    amount: _number,
     currency = 'GBP',
-    locationId?: string,
+    locationId?: _string,
   ): Promise<SquarePaymentResult> {
     try {
       if (!this.config) {
@@ -349,10 +349,10 @@ class SquareServiceClass {
       }
 
       const requestBody = {
-        source_id: nonce,
+        source_id: _nonce,
         amount_money: {
           amount: Math.round(amount * 100), // Convert to smallest currency unit
-          currency: currency,
+          currency: _currency,
         },
         location_id: locationId || this.config.locationId,
         idempotency_key: this.generateIdempotencyKey(),
@@ -365,7 +365,7 @@ class SquareServiceClass {
           'Content-Type': 'application/json',
           'Square-Version': '2023-10-18',
         },
-        body: JSON.stringify(_requestBody),
+        body: JSON.stringify(__requestBody),
       });
 
       if (!response.ok) {
@@ -376,13 +376,13 @@ class SquareServiceClass {
       const data = await response.json();
 
       return {
-        success: true,
+        success: _true,
         transactionId: data.payment.id,
-        nonce: nonce,
+        nonce: _nonce,
       };
-    } catch (_error) {
+    } catch (__error) {
       return {
-        success: false,
+        success: _false,
         error: error instanceof Error ? error.message : 'Payment processing failed',
       };
     }
@@ -392,18 +392,18 @@ class SquareServiceClass {
    * Calculate Square processing fees
    */
   calculateFee(
-    amount: number,
+    amount: _number,
     paymentType: 'in_person' | 'online' | 'manual',
     isUKCard = true,
   ): number {
     const amountDecimal = amount;
 
-    switch (_paymentType) {
+    switch (__paymentType) {
       case 'in_person':
         return amountDecimal * this.feeStructure.inPersonRate;
 
       case 'online':
-        if (_isUKCard) {
+        if (__isUKCard) {
           return (
             amountDecimal * this.feeStructure.onlineRateUK + this.feeStructure.onlineFixedFeeUK
           );
@@ -433,8 +433,8 @@ class SquareServiceClass {
    * Calculate cost comparison vs other providers
    */
   calculateCostComparison(
-    amount: number,
-    monthlyVolume: number,
+    amount: _number,
+    monthlyVolume: _number,
   ): {
     totalCost: number;
     effectiveRate: number;
@@ -451,8 +451,8 @@ class SquareServiceClass {
     const stripeCost = amount * 0.014 + 0.25; // Stripe UK rates
 
     return {
-      totalCost: squareCost,
-      effectiveRate: effectiveRate,
+      totalCost: _squareCost,
+      effectiveRate: _effectiveRate,
       comparison: {
         vsSumUp: squareCost - sumUpHighVolumeCost,
         vsStripe: squareCost - stripeCost,
@@ -472,7 +472,7 @@ class SquareServiceClass {
       }
 
       return false;
-    } catch (_error) {
+    } catch (__error) {
       return false;
     }
   }
@@ -528,7 +528,7 @@ class SquareServiceClass {
       });
 
       return response.ok;
-    } catch (_error) {
+    } catch (__error) {
       return false;
     }
   }
@@ -537,10 +537,10 @@ class SquareServiceClass {
    * Process refund
    */
   async processRefund(
-    paymentId: string,
-    amount: number,
+    paymentId: _string,
+    amount: _number,
     currency = 'GBP',
-    reason?: string,
+    reason?: _string,
   ): Promise<SquarePaymentResult> {
     try {
       if (!this.config) {
@@ -549,10 +549,10 @@ class SquareServiceClass {
 
       const requestBody = {
         idempotency_key: this.generateIdempotencyKey(),
-        payment_id: paymentId,
+        payment_id: _paymentId,
         amount_money: {
           amount: Math.round(amount * 100),
-          currency: currency,
+          currency: _currency,
         },
         reason: reason || 'Refund processed via Finlow POS',
       };
@@ -564,7 +564,7 @@ class SquareServiceClass {
           'Content-Type': 'application/json',
           'Square-Version': '2023-10-18',
         },
-        body: JSON.stringify(_requestBody),
+        body: JSON.stringify(__requestBody),
       });
 
       if (!response.ok) {
@@ -575,12 +575,12 @@ class SquareServiceClass {
       const data = await response.json();
 
       return {
-        success: true,
+        success: _true,
         transactionId: data.refund.id,
       };
-    } catch (_error) {
+    } catch (__error) {
       return {
-        success: false,
+        success: _false,
         error: error instanceof Error ? error.message : 'Refund processing failed',
       };
     }
@@ -589,7 +589,7 @@ class SquareServiceClass {
   /**
    * Get payment details
    */
-  async getPaymentDetails(paymentId: string): Promise<unknown> {
+  async getPaymentDetails(paymentId: _string): Promise<unknown> {
     try {
       if (!this.config) {
         throw new Error('Square service not initialized');
@@ -609,7 +609,7 @@ class SquareServiceClass {
 
       const data = await response.json();
       return data.payment;
-    } catch (_error) {
+    } catch (__error) {
       throw error;
     }
   }
@@ -620,7 +620,7 @@ class SquareServiceClass {
   private isSDKAvailable(): boolean {
     try {
       return typeof SQIPCore !== 'undefined' && SQIPCore !== null;
-    } catch (_error) {
+    } catch (__error) {
       return false;
     }
   }
@@ -632,7 +632,7 @@ class SquareServiceClass {
     const isSimulator = Platform.OS === 'ios' && __DEV__;
     const baseMessage = 'Square SDK not available.';
 
-    if (_isSimulator) {
+    if (__isSimulator) {
       return `${baseMessage} Run: npm install && cd ios && pod install && npm run build:ios`;
     } else {
       return `${baseMessage} Please contact support or reinstall the app.`;
@@ -660,10 +660,10 @@ class SquareServiceClass {
   /**
    * Save Square configuration
    */
-  private async saveConfig(config: SquareConfig): Promise<void> {
+  private async saveConfig(config: _SquareConfig): Promise<void> {
     try {
-      await AsyncStorage.setItem('square_config', JSON.stringify(_config));
-    } catch (_error) {
+      await AsyncStorage.setItem('square_config', JSON.stringify(__config));
+    } catch (__error) {
       throw error;
     }
   }
@@ -674,13 +674,13 @@ class SquareServiceClass {
   async loadConfig(): Promise<SquareConfig | null> {
     try {
       const configString = await AsyncStorage.getItem('square_config');
-      if (_configString) {
-        const config = JSON.parse(_configString);
+      if (__configString) {
+        const config = JSON.parse(__configString);
         this.config = config;
         return config;
       }
       return null;
-    } catch (_error) {
+    } catch (__error) {
       return null;
     }
   }
@@ -693,7 +693,7 @@ class SquareServiceClass {
       await AsyncStorage.removeItem('square_config');
       this.config = null;
       this.initialized = false;
-    } catch (_error) {
+    } catch (__error) {
       throw error;
     }
   }

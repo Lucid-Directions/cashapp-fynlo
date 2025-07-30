@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, StyleSheet, Dimensions } from 'react-native';
 
 // Fynlo POS Color Scheme
 const Colors = {
@@ -50,7 +50,7 @@ const Chart: React.FC<ChartProps> = ({
     return (
       <View style={styles.chartContainer}>
         <View style={[styles.barsContainer, { height }]}>
-          {data.map((_item, index) => {
+          {data.map((__item, _index) => {
             const barHeight = (item.value / maxValue) * (height - 40);
             const color = item.color || Colors.primary;
 
@@ -68,9 +68,9 @@ const Chart: React.FC<ChartProps> = ({
                     style={[
                       styles.bar,
                       {
-                        height: barHeight,
-                        width: barWidth,
-                        backgroundColor: color,
+                        height: _barHeight,
+                        width: _barWidth,
+                        backgroundColor: _color,
                       },
                     ]}
                   />
@@ -96,14 +96,14 @@ const Chart: React.FC<ChartProps> = ({
         <View style={[styles.lineContainer, { height }]}>
           <View style={styles.lineChartArea}>
             {/* Grid lines */}
-            {[0.25, 0.5, 0.75, 1].map((_ratio, index) => (
+            {[0.25, 0.5, 0.75, 1].map((__ratio, _index) => (
               <View
                 key={index}
                 style={[
                   styles.gridLine,
                   {
                     bottom: ratio * lineHeight,
-                    width: chartWidth,
+                    width: _chartWidth,
                   },
                 ]}
               />
@@ -111,7 +111,7 @@ const Chart: React.FC<ChartProps> = ({
 
             {/* Data points and line */}
             <View style={styles.lineWrapper}>
-              {data.map((_item, index) => {
+              {data.map((__item, _index) => {
                 const pointHeight = (item.value / maxValue) * lineHeight;
                 const pointX = index * stepWidth;
 
@@ -123,9 +123,9 @@ const Chart: React.FC<ChartProps> = ({
                         style={[
                           styles.lineSegment,
                           {
-                            left: pointX,
-                            bottom: pointHeight,
-                            width: stepWidth,
+                            left: _pointX,
+                            bottom: _pointHeight,
+                            width: _stepWidth,
                             transform: [
                               {
                                 rotate: `${Math.atan2(
@@ -164,7 +164,7 @@ const Chart: React.FC<ChartProps> = ({
 
           {/* X-axis labels */}
           <View style={styles.xAxisLabels}>
-            {data.map((_item, index) => (
+            {data.map((__item, _index) => (
               <Text key={index} style={styles.axisLabel} numberOfLines={1}>
                 {item.label}
               </Text>
@@ -176,8 +176,8 @@ const Chart: React.FC<ChartProps> = ({
   };
 
   const renderPieChart = () => {
-    const total = data.reduce((_sum, item) => sum + item.value, 0);
-    const radius = Math.min(_chartWidth, height) / 3;
+    const total = data.reduce((__sum, _item) => sum + item.value, 0);
+    const radius = Math.min(__chartWidth, _height) / 3;
     const centerX = chartWidth / 2;
     const centerY = height / 2;
 
@@ -186,14 +186,14 @@ const Chart: React.FC<ChartProps> = ({
         <View style={[styles.pieContainer, { height }]}>
           <View style={styles.pieChart}>
             {/* Simple pie representation with rectangles */}
-            {data.map((_item, index) => {
+            {data.map((__item, _index) => {
               const percentage = (item.value / total) * 100;
               const color = item.color || `hsl(${(index * 360) / data.length}, 70%, 50%)`;
 
               return (
                 <View key={index} style={styles.pieSegment}>
                   <View
-                    style={[styles.pieColor, { backgroundColor: color, width: `${percentage}%` }]}
+                    style={[styles.pieColor, { backgroundColor: _color, width: `${percentage}%` }]}
                   />
                   <Text style={styles.pieLabel}>
                     {item.label}: {percentage.toFixed(1)}%
@@ -208,7 +208,7 @@ const Chart: React.FC<ChartProps> = ({
   };
 
   const renderChart = () => {
-    switch (_type) {
+    switch (__type) {
       case 'line':
         return renderLineChart();
       case 'pie':

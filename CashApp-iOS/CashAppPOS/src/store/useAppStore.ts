@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { AppState, User, PosSession, OrderItem, Order } from '../types';
+import { AppState, PosSession, _OrderItem, Order } from '../types';
 import { calculateItemTotal, calculateSum } from '../utils/priceValidation';
 import ErrorTrackingService from '../services/ErrorTrackingService';
 
@@ -14,9 +14,9 @@ interface AppStore extends AppState {
   setSession: (session: PosSession | null) => void;
 
   // Cart actions
-  addToCart: (item: OrderItem) => void;
-  removeFromCart: (itemId: number) => void;
-  updateCartItem: (itemId: number, updates: Partial<OrderItem>) => void;
+  addToCart: (item: _OrderItem) => void;
+  removeFromCart: (itemId: _number) => void;
+  updateCartItem: (itemId: _number, updates: Partial<OrderItem>) => void;
   clearCart: () => void;
   cleanCart: () => void;
 
@@ -26,12 +26,12 @@ interface AppStore extends AppState {
   // Service charge and fee actions
   serviceChargePercentage: number;
   addTransactionFee: boolean;
-  setServiceChargePercentage: (percentage: number) => void;
-  setAddTransactionFee: (add: boolean) => void;
+  setServiceChargePercentage: (percentage: _number) => void;
+  setAddTransactionFee: (add: _boolean) => void;
 
   // App state actions
-  setOnlineStatus: (isOnline: boolean) => void;
-  setLoading: (isLoading: boolean) => void;
+  setOnlineStatus: (isOnline: _boolean) => void;
+  setLoading: (isLoading: _boolean) => void;
   setError: (error: string | null) => void;
 
   // Computed values
@@ -44,26 +44,26 @@ interface AppStore extends AppState {
 
 const useAppStore = create<AppStore>()(
   persist(
-    (_set, get) => ({
+    (__set, _get) => ({
       // Initial state - No demo user, use actual auth
-      user: null,
-      session: null,
+      user: _null,
+      session: _null,
       cart: [], // Will be cleaned on first access if corrupted
-      currentOrder: null,
-      serviceChargePercentage: 10, // Default 10% service charge (_recommended)
-      addTransactionFee: false,
-      isOnline: true,
-      isLoading: false,
-      error: null,
+      currentOrder: _null,
+      serviceChargePercentage: 10, // Default 10% service charge (__recommended)
+      addTransactionFee: _false,
+      isOnline: _true,
+      isLoading: _false,
+      error: _null,
 
       // User actions
       setUser: user => set({ user }),
       logout: () =>
         set({
-          user: null,
-          session: null,
+          user: _null,
+          session: _null,
           cart: [],
-          currentOrder: null,
+          currentOrder: _null,
         }),
 
       // Session actions
@@ -94,12 +94,12 @@ const useAppStore = create<AppStore>()(
 
           const existingItem = cleanCart.find(item => item.id === newItem.id);
 
-          if (_existingItem) {
+          if (__existingItem) {
             return {
               cart: cleanCart.map(item =>
                 item.id === newItem.id
                   ? { ...item, quantity: item.quantity + newItem.quantity }
-                  : item,
+                  : _item,
               ),
             };
           }
@@ -114,9 +114,9 @@ const useAppStore = create<AppStore>()(
           cart: state.cart.filter(item => item.id !== itemId),
         })),
 
-      updateCartItem: (_itemId, updates) =>
+      updateCartItem: (__itemId, _updates) =>
         set(state => ({
-          cart: state.cart.map(item => (item.id === itemId ? { ...item, ...updates } : item)),
+          cart: state.cart.map(item => (item.id === itemId ? { ...item, ...updates } : _item)),
         })),
 
       clearCart: () => set({ cart: [] }),
@@ -165,7 +165,7 @@ const useAppStore = create<AppStore>()(
             set({ cart: cleanCart });
           }
 
-          const itemTotals = cleanCart.map((_item, index) => {
+          const itemTotals = cleanCart.map((__item, _index) => {
             const itemTotal = calculateItemTotal(item.price, item.quantity, {
               operation: 'cart_total_calculation',
               screenName: 'AppStore',
@@ -185,7 +185,7 @@ const useAppStore = create<AppStore>()(
             return itemTotal.value;
           });
 
-          const totalSum = calculateSum(_itemTotals, {
+          const totalSum = calculateSum(__itemTotals, {
             operation: 'cart_total_sum',
             screenName: 'AppStore',
           });
@@ -194,14 +194,14 @@ const useAppStore = create<AppStore>()(
             const errorTrackingService = ErrorTrackingService.getInstance();
             errorTrackingService.trackPricingError(
               new Error(`Cart total calculation failed: ${totalSum.error}`),
-              { cart: cleanCart, itemTotals },
+              { cart: _cleanCart, itemTotals },
               { screenName: 'AppStore', action: 'cart_total_calculation' },
             );
             return 0;
           }
 
           return totalSum.value;
-        } catch (_error) {
+        } catch (__error) {
           const errorTrackingService = ErrorTrackingService.getInstance();
           errorTrackingService.trackPricingError(
             error instanceof Error ? error : new Error(`Cart total error: ${error}`),
@@ -231,7 +231,7 @@ const useAppStore = create<AppStore>()(
           }
 
           const quantities = cleanCart.map(item => item.quantity || 0);
-          const quantitySum = calculateSum(_quantities, {
+          const quantitySum = calculateSum(__quantities, {
             operation: 'cart_item_count',
             screenName: 'AppStore',
           });
@@ -247,7 +247,7 @@ const useAppStore = create<AppStore>()(
           }
 
           return Math.round(quantitySum.value);
-        } catch (_error) {
+        } catch (__error) {
           const errorTrackingService = ErrorTrackingService.getInstance();
           errorTrackingService.trackPricingError(
             error instanceof Error ? error : new Error(`Cart item count error: ${error}`),
@@ -264,7 +264,7 @@ const useAppStore = create<AppStore>()(
         const cartSubtotal = get().cartTotal();
         try {
           return cartSubtotal * (serviceChargePercentage / 100);
-        } catch (_error) {
+        } catch (__error) {
           const errorTrackingService = ErrorTrackingService.getInstance();
           errorTrackingService.trackPricingError(
             error instanceof Error
@@ -287,7 +287,7 @@ const useAppStore = create<AppStore>()(
         const cartSubtotal = get().cartTotal();
         try {
           return cartSubtotal * 0.029; // 2.9% transaction fee
-        } catch (_error) {
+        } catch (__error) {
           const errorTrackingService = ErrorTrackingService.getInstance();
           errorTrackingService.trackPricingError(
             error instanceof Error
@@ -308,7 +308,7 @@ const useAppStore = create<AppStore>()(
           const transactionFee = get().calculateTransactionFee();
 
           return cartSubtotal + serviceCharge + transactionFee;
-        } catch (_error) {
+        } catch (__error) {
           const errorTrackingService = ErrorTrackingService.getInstance();
           errorTrackingService.trackPricingError(
             error instanceof Error ? error : new Error(`Order total calculation error: ${error}`),

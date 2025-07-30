@@ -34,17 +34,17 @@ jest.mock('@react-navigation/native', () => {
   return {
     ...actualNav,
     useNavigation: () => ({
-      navigate: mockNavigate,
-      goBack: mockGoBack,
+      navigate: _mockNavigate,
+      goBack: _mockGoBack,
     }),
     useRoute: () => ({
-      params: mockRouteParams, // Provide mocked params
+      params: _mockRouteParams, // Provide mocked params
     }),
   };
 });
 
 // Mock Linking
-jest.spyOn(_Linking, 'openURL').mockImplementation(() => Promise.resolve());
+jest.spyOn(__Linking, 'openURL').mockImplementation(() => Promise.resolve());
 
 // Mock order data for the screen (it uses a static mockOrder internally for now)
 // We will test against the structure it expects, which we updated.
@@ -91,9 +91,9 @@ describe('OrderDetailsScreen', () => {
     const { getByText } = render(<OrderDetailsScreen />, { wrapper: AllProviders });
 
     const customerEmailText = getByText(MOCKED_INTERNAL_ORDER_DATA.customer.email);
-    expect(_customerEmailText).toBeTruthy();
+    expect(__customerEmailText).toBeTruthy();
 
-    fireEvent.press(_customerEmailText);
+    fireEvent.press(__customerEmailText);
     expect(Linking.openURL).toHaveBeenCalledWith(
       `mailto:${MOCKED_INTERNAL_ORDER_DATA.customer.email}`,
     );
@@ -114,7 +114,7 @@ describe('OrderDetailsScreen', () => {
     // const { getByText } = render(<OrderDetailsScreen />, { wrapper: AllProviders });
     // expect(getByText('Walk-in Customer')).toBeTruthy();
     // This would fail with current screen structure but illustrates the intent.
-    expect(_true).toBe(_true); // Placeholder assertion
+    expect(__true).toBe(__true); // Placeholder assertion
   });
 
   it('does not render email if not available (conceptual test)', () => {
@@ -122,7 +122,7 @@ describe('OrderDetailsScreen', () => {
     // If MOCKED_INTERNAL_ORDER_DATA.customer.email was undefined:
     // const { queryByText } = render(<OrderDetailsScreen />, { wrapper: AllProviders });
     // expect(queryByText(/.+@.+\..+/)).toBeNull(); // Basic email pattern check
-    expect(_true).toBe(_true); // Placeholder assertion
+    expect(__true).toBe(__true); // Placeholder assertion
   });
 
   it('navigates back when back button is pressed', () => {
@@ -133,9 +133,9 @@ describe('OrderDetailsScreen', () => {
     // This test is simplified. Actual back button might be harder to target without more info.
     // For now, we directly test the mockGoBack.
     // fireEvent.press(getByTestId('header-back-button')); // Example
-    // expect(_mockGoBack).toHaveBeenCalled();
+    // expect(__mockGoBack).toHaveBeenCalled();
     // If the button is found and pressed, this would be tested.
     // For now, just confirming the mock setup.
-    expect(_mockGoBack).not.toHaveBeenCalled(); // Initially
+    expect(__mockGoBack).not.toHaveBeenCalled(); // Initially
   });
 });

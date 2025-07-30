@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../design-system/ThemeProvider';
 
@@ -11,9 +11,9 @@ interface Props {
   // fill prop is removed as color logic is internal and based on itemCount
 }
 
-const CartIcon: React.FC<Props> = ({ count, onPress, testID, size = 40 }) => {
+const CartIcon: React.FC<Props> = ({ count, _onPress, testID, size = 40 }) => {
   const { theme } = useTheme();
-  const styles = createStyles(_theme);
+  const styles = createStyles(__theme);
 
   const iconColor = count > 0 ? theme.colors.danger[500] : theme.colors.text;
   const hitSlop = { top: 10, bottom: 10, left: 10, right: 10 };
@@ -44,7 +44,7 @@ const CartIcon: React.FC<Props> = ({ count, onPress, testID, size = 40 }) => {
   );
 };
 
-const createStyles = (theme: unknown) =>
+const createStyles = (theme: _unknown) =>
   StyleSheet.create({
     container: {
       padding: 8,

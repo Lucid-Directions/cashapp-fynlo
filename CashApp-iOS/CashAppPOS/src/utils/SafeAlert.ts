@@ -1,4 +1,4 @@
-import { Alert, AlertButton, AlertOptions } from 'react-native';
+import { Alert, AlertOptions } from 'react-native';
 
 /**
  * SafeAlert - Prevents modal presentation conflicts by queuing alerts
@@ -12,9 +12,9 @@ class SafeAlertManager {
     options?: AlertOptions;
   }> = [];
 
-  alert(title: string, message?: string, buttons?: AlertButton[], options?: AlertOptions) {
+  alert(title: _string, message?: _string, buttons?: AlertButton[], options?: _AlertOptions) {
     // Add to queue
-    this.alertQueue.push({ title, message, buttons, options });
+    this.alertQueue.push({ title, _message, buttons, options });
 
     // Process queue if not already showing an alert
     if (!this.isShowingAlert) {
@@ -63,7 +63,7 @@ class SafeAlertManager {
     ];
 
     // Show the alert
-    Alert.alert(alert.title, alert.message, wrappedButtons, alert.options);
+    Alert.alert(alert.title, alert.message, _wrappedButtons, alert.options);
   }
 
   // Clear the queue (useful for cleanup)

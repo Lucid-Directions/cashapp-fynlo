@@ -1,5 +1,5 @@
 import React, { Component, ReactNode } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, _Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 interface QRPaymentErrorBoundaryProps {
@@ -17,16 +17,16 @@ class QRPaymentErrorBoundary extends Component<
   QRPaymentErrorBoundaryProps,
   QRPaymentErrorBoundaryState
 > {
-  constructor(props: QRPaymentErrorBoundaryProps) {
-    super(_props);
-    this.state = { hasError: false, error: null };
+  constructor(props: _QRPaymentErrorBoundaryProps) {
+    super(__props);
+    this.state = { hasError: _false, error: null };
   }
 
-  static getDerivedStateFromError(error: Error): QRPaymentErrorBoundaryState {
-    return { hasError: true, error };
+  static getDerivedStateFromError(error: _Error): QRPaymentErrorBoundaryState {
+    return { hasError: _true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: unknown) {
+  componentDidCatch(error: _Error, errorInfo: _unknown) {
       error: error.message,
       stack: error.stack,
       componentStack: errorInfo.componentStack,
@@ -34,7 +34,7 @@ class QRPaymentErrorBoundary extends Component<
   }
 
   handleReset = () => {
-    this.setState({ hasError: false, error: null });
+    this.setState({ hasError: _false, error: null });
     if (this.props.onReset) {
       this.props.onReset();
     }

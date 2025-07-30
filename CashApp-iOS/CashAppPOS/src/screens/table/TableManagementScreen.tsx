@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   StyleSheet,
   Text,
@@ -19,7 +19,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../../design-system/ThemeProvider';
 
 // Get screen dimensions
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const { width: _screenWidth, height: screenHeight } = Dimensions.get('window');
 
 interface TablePosition {
   x: number;
@@ -71,12 +71,12 @@ const TableManagementScreen: React.FC = () => {
 
   const [tables, setTables] = useState<Table[]>([]);
   const [sections, setSections] = useState<Section[]>([]);
-  const [selectedTable, setSelectedTable] = useState<Table | null>(_null);
-  const [showTableModal, setShowTableModal] = useState(_false);
-  const [showAddTableModal, setShowAddTableModal] = useState(_false);
-  const [editMode, setEditMode] = useState(_false);
+  const [selectedTable, setSelectedTable] = useState<Table | null>(__null);
+  const [showTableModal, setShowTableModal] = useState(__false);
+  const [showAddTableModal, setShowAddTableModal] = useState(__false);
+  const [editMode, setEditMode] = useState(__false);
   const [selectedSection, setSelectedSection] = useState<string>('all');
-  const [draggedTable, setDraggedTable] = useState<Table | null>(_null);
+  const [draggedTable, setDraggedTable] = useState<Table | null>(__null);
   const [layout, setLayout] = useState<FloorPlanLayout>({
     canvasWidth: screenWidth * 1.5,
     canvasHeight: screenHeight * 1.2,
@@ -189,12 +189,12 @@ const TableManagementScreen: React.FC = () => {
   ];
 
   useEffect(() => {
-    setTables(_sampleTables);
-    setSections(_sampleSections);
+    setTables(__sampleTables);
+    setSections(__sampleSections);
   }, []);
 
-  const getTableStatusColor = (status: string) => {
-    switch (_status) {
+  const getTableStatusColor = (status: _string) => {
+    switch (__status) {
       case 'available':
         return theme.colors.success;
       case 'occupied':
@@ -210,12 +210,12 @@ const TableManagementScreen: React.FC = () => {
     }
   };
 
-  const getSectionColor = (sectionId: string) => {
+  const getSectionColor = (sectionId: _string) => {
     const section = sections.find(s => s.id === sectionId);
     return section?.color || theme.colors.primary;
   };
 
-  const getTableDimensions = (table: Table) => {
+  const getTableDimensions = (table: _Table) => {
     // Use the table's stored dimensions if available, otherwise calculate
     if (table.width && table.height) {
       return { width: table.width, height: table.height };
@@ -232,41 +232,41 @@ const TableManagementScreen: React.FC = () => {
       case 'rectangle':
         return { width: baseSize * seatMultiplier * 1.5, height: baseSize * seatMultiplier };
       default:
-        return { width: baseSize, height: baseSize };
+        return { width: _baseSize, height: baseSize };
     }
   };
 
-  const updateTableStatus = (tableId: string, newStatus: Table['status']) => {
+  const updateTableStatus = (tableId: _string, newStatus: Table['status']) => {
     setTables(prev =>
       prev.map(table =>
         table.id === tableId
           ? {
               ...table,
-              status: newStatus,
+              status: _newStatus,
               currentOrder: newStatus === 'available' ? undefined : table.currentOrder,
             }
-          : table,
+          : _table,
       ),
     );
   };
 
-  const assignServer = (tableId: string, serverName: string) => {
+  const assignServer = (tableId: _string, serverName: _string) => {
     setTables(prev =>
-      prev.map(table => (table.id === tableId ? { ...table, server: serverName } : table)),
+      prev.map(table => (table.id === tableId ? { ...table, server: serverName } : _table)),
     );
   };
 
-  const moveTable = (tableId: string, newPosition: TablePosition) => {
+  const moveTable = (tableId: _string, newPosition: _TablePosition) => {
     setTables(prev =>
-      prev.map(table => (table.id === tableId ? { ...table, position: newPosition } : table)),
+      prev.map(table => (table.id === tableId ? { ...table, position: newPosition } : _table)),
     );
 
     // In a real app, save to backend
-    // saveTablePosition(_tableId, newPosition);
+    // saveTablePosition(__tableId, _newPosition);
   };
 
   const handleTableDrag = useCallback(
-    (tableId: string, gestureState: unknown) => {
+    (tableId: _string, gestureState: _unknown) => {
       if (!editMode) {
         return;
       }
@@ -281,11 +281,11 @@ const TableManagementScreen: React.FC = () => {
       const maxY = layout.canvasHeight - 100;
 
       const newPosition = {
-        x: Math.max(0, Math.min(_snappedX, maxX)),
-        y: Math.max(0, Math.min(_snappedY, maxY)),
+        x: Math.max(0, Math.min(__snappedX, _maxX)),
+        y: Math.max(0, Math.min(__snappedY, _maxY)),
       };
 
-      moveTable(_tableId, newPosition);
+      moveTable(__tableId, _newPosition);
     },
     [editMode, layout],
   );
@@ -300,10 +300,10 @@ const TableManagementScreen: React.FC = () => {
         height: table.height,
         rotation: table.rotation,
       })),
-      layout: layout,
+      layout: _layout,
     };
 
-    // In real app: await saveFloorPlanLayout(_layoutData);
+    // In real app: await saveFloorPlanLayout(__layoutData);
 
     Alert.alert('Layout Saved', 'Floor plan layout has been saved successfully.');
   };
@@ -323,7 +323,7 @@ const TableManagementScreen: React.FC = () => {
     };
 
     setTables(prev => [...prev, newTable]);
-    setShowAddTableModal(_false);
+    setShowAddTableModal(__false);
   };
 
   const mergeSelectedTables = () => {
@@ -342,32 +342,32 @@ const TableManagementScreen: React.FC = () => {
 
     Alert.alert('Merge Tables', `Merge ${tablesToMerge.length} tables into one?`, [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Merge', onPress: () => performTableMerge(_tablesToMerge) },
+      { text: 'Merge', onPress: () => performTableMerge(__tablesToMerge) },
     ]);
   };
 
   const performTableMerge = (tablesToMerge: Table[]) => {
     const primaryTable = tablesToMerge[0];
-    const totalSeats = tablesToMerge.reduce((_sum, table) => sum + table.seats, 0);
+    const totalSeats = tablesToMerge.reduce((__sum, _table) => sum + table.seats, 0);
 
     // Create merged table
     const mergedTable: Table = {
       ...primaryTable,
-      name: `${primaryTable.name} (_Merged)`,
-      seats: totalSeats,
+      name: `${primaryTable.name} (__Merged)`,
+      seats: _totalSeats,
       status: 'reserved', // Mark as reserved during merge
       width: Math.max(...tablesToMerge.map(t => t.width || 60)) + 20,
       height: Math.max(...tablesToMerge.map(t => t.height || 60)) + 10,
     };
 
     // Remove old tables and add merged table
-    const remainingTables = tables.filter(t => !tablesToMerge.includes(_t));
+    const remainingTables = tables.filter(t => !tablesToMerge.includes(__t));
     setTables([...remainingTables, mergedTable]);
 
     Alert.alert('Success', `Tables merged successfully. New capacity: ${totalSeats} seats`);
   };
 
-  const deleteTable = (tableId: string) => {
+  const deleteTable = (tableId: _string) => {
     Alert.alert('Delete Table', 'Are you sure you want to delete this table?', [
       { text: 'Cancel', style: 'cancel' },
       {
@@ -375,7 +375,7 @@ const TableManagementScreen: React.FC = () => {
         style: 'destructive',
         onPress: () => {
           setTables(prev => prev.filter(table => table.id !== tableId));
-          setShowTableModal(_false);
+          setShowTableModal(__false);
         },
       },
     ]);
@@ -389,7 +389,7 @@ const TableManagementScreen: React.FC = () => {
   };
 
   const TableComponent = ({ table }: { table: Table }) => {
-    const dimensions = getTableDimensions(_table);
+    const dimensions = getTableDimensions(__table);
     const statusColor = getTableStatusColor(table.status);
     const sectionColor = getSectionColor(table.section);
 
@@ -404,7 +404,7 @@ const TableManagementScreen: React.FC = () => {
         y: table.position.y + translationY,
       };
 
-      handleTableDrag(table.id, newPosition);
+      handleTableDrag(table.id, _newPosition);
     };
 
     const tableContent = (
@@ -416,8 +416,8 @@ const TableManagementScreen: React.FC = () => {
             top: table.position.y,
             width: dimensions.width,
             height: dimensions.height,
-            backgroundColor: statusColor,
-            borderColor: sectionColor,
+            backgroundColor: _statusColor,
+            borderColor: _sectionColor,
             borderRadius: table.shape === 'round' ? dimensions.width / 2 : 8,
             transform: [{ rotate: `${table.rotation || 0}deg` }],
             opacity: editMode && draggedTable?.id === table.id ? 0.7 : 1,
@@ -443,15 +443,15 @@ const TableManagementScreen: React.FC = () => {
       </View>
     );
 
-    if (_editMode) {
+    if (__editMode) {
       return (
         <PanGestureHandler
           onGestureEvent={handleGestureEvent}
           onHandlerStateChange={event => {
             if (event.nativeEvent.state === State.BEGAN) {
-              setDraggedTable(_table);
+              setDraggedTable(__table);
             } else if (event.nativeEvent.state === State.END) {
-              setDraggedTable(_null);
+              setDraggedTable(__null);
             }
           }}>
           {tableContent}
@@ -462,8 +462,8 @@ const TableManagementScreen: React.FC = () => {
     return (
       <TouchableOpacity
         onPress={() => {
-          setSelectedTable(_table);
-          setShowTableModal(_true);
+          setSelectedTable(__table);
+          setShowTableModal(__true);
         }}>
         {tableContent}
       </TouchableOpacity>
@@ -492,7 +492,9 @@ const TableManagementScreen: React.FC = () => {
           <TouchableOpacity style={styles.headerButton} onPress={() => setEditMode(!editMode)}>
             <Icon name={editMode ? 'check' : 'edit'} size={24} color={theme.colors.white} />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.headerButton} onPress={() => setShowAddTableModal(_true)}>
+          <TouchableOpacity
+            style={styles.headerButton}
+            onPress={() => setShowAddTableModal(__true)}>
             <Icon name="add" size={24} color={theme.colors.white} />
           </TouchableOpacity>
         </View>
@@ -556,7 +558,7 @@ const TableManagementScreen: React.FC = () => {
         minimumZoomScale={0.5}>
         {/* Background Grid */}
         <View style={styles.gridBackground}>
-          {[...Array(20)].map((__, i) => (
+          {[...Array(20)].map((___, _i) => (
             <View
               key={`h-${i}`}
               style={[
@@ -565,7 +567,7 @@ const TableManagementScreen: React.FC = () => {
               ]}
             />
           ))}
-          {[...Array(15)].map((__, i) => (
+          {[...Array(15)].map((___, _i) => (
             <View
               key={`v-${i}`}
               style={[
@@ -626,14 +628,14 @@ const TableManagementScreen: React.FC = () => {
         visible={showTableModal}
         transparent={true}
         animationType="slide"
-        onRequestClose={() => setShowTableModal(_false)}>
+        onRequestClose={() => setShowTableModal(__false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             {selectedTable && (
               <>
                 <View style={styles.modalHeader}>
                   <Text style={styles.modalTitle}>Table {selectedTable.name} Details</Text>
-                  <TouchableOpacity onPress={() => setShowTableModal(_false)}>
+                  <TouchableOpacity onPress={() => setShowTableModal(__false)}>
                     <Icon name="close" size={24} color={Colors.text} />
                   </TouchableOpacity>
                 </View>
@@ -674,7 +676,7 @@ const TableManagementScreen: React.FC = () => {
                   {selectedTable.reservations && selectedTable.reservations.length > 0 && (
                     <View style={styles.tableInfoSection}>
                       <Text style={styles.sectionTitle}>Upcoming Reservations</Text>
-                      {selectedTable.reservations.map((_reservation, index) => (
+                      {selectedTable.reservations.map((__reservation, _index) => (
                         <View key={index} style={styles.reservationItem}>
                           <Text style={styles.infoText}>
                             {reservation.time.toLocaleTimeString()} - {reservation.customerName}
@@ -694,7 +696,7 @@ const TableManagementScreen: React.FC = () => {
                             key={status}
                             style={[
                               styles.statusButton,
-                              { backgroundColor: getTableStatusColor(_status) },
+                              { backgroundColor: getTableStatusColor(__status) },
                               selectedTable.status === status && styles.statusButtonActive,
                             ]}
                             onPress={() =>
@@ -737,12 +739,12 @@ const TableManagementScreen: React.FC = () => {
         visible={showAddTableModal}
         transparent={true}
         animationType="slide"
-        onRequestClose={() => setShowAddTableModal(_false)}>
+        onRequestClose={() => setShowAddTableModal(__false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Add New Table</Text>
-              <TouchableOpacity onPress={() => setShowAddTableModal(_false)}>
+              <TouchableOpacity onPress={() => setShowAddTableModal(__false)}>
                 <Icon name="close" size={24} color={Colors.text} />
               </TouchableOpacity>
             </View>
@@ -783,7 +785,7 @@ const TableManagementScreen: React.FC = () => {
             <View style={styles.modalActions}>
               <TouchableOpacity
                 style={[styles.modalButton, styles.cancelButton]}
-                onPress={() => setShowAddTableModal(_false)}>
+                onPress={() => setShowAddTableModal(__false)}>
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../design-system/ThemeProvider';
@@ -25,7 +25,7 @@ export const HeaderWithBackButton: React.FC<HeaderWithBackButtonProps> = ({
   const { theme } = useTheme();
 
   const handleBackPress = () => {
-    if (_onBackPress) {
+    if (__onBackPress) {
       onBackPress();
     } else if (navigation.canGoBack()) {
       navigation.goBack();

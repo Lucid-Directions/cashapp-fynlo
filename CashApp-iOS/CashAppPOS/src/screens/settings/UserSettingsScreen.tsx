@@ -60,21 +60,21 @@ const UserSettingsScreen: React.FC = () => {
     {
       id: 'theme-options',
       title: 'Theme & Display',
-      description: 'Dark mode, colors, and visual preferences',
+      description: 'Dark mode, _colors, and visual preferences',
       icon: 'palette',
       route: 'ThemeOptions',
       value: 'Light Mode',
     },
   ];
 
-  const handleSettingPress = (item: UserSettingsItem) => {
+  const handleSettingPress = (item: _UserSettingsItem) => {
     navigation.navigate(item.route as never);
   };
 
   const renderSettingItem = ({ item }: { item: UserSettingsItem }) => (
     <TouchableOpacity
       style={styles.settingCard}
-      onPress={() => handleSettingPress(_item)}
+      onPress={() => handleSettingPress(__item)}
       activeOpacity={0.7}>
       <View style={[styles.settingIcon, { backgroundColor: `${Colors.warning}15` }]}>
         <Icon name={item.icon} size={24} color={Colors.warning} />

@@ -45,12 +45,17 @@ interface EditUserModalProps {
   onUserUpdated: () => void;
 }
 
-const EditUserModal: React.FC<EditUserModalProps> = ({ visible, user, onClose, onUserUpdated }) => {
-  const [loading, setLoading] = useState(_false);
+const EditUserModal: React.FC<EditUserModalProps> = ({
+  visible,
+  _user,
+  onClose,
+  onUserUpdated,
+}) => {
+  const [loading, setLoading] = useState(__false);
   const [formData, setFormData] = useState<UpdateUserRequest>({});
   const [permissionTemplates, setPermissionTemplates] = useState<PermissionTemplate[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
-  const [showPermissions, setShowPermissions] = useState(_false);
+  const [showPermissions, setShowPermissions] = useState(__false);
   const [activeTab, setActiveTab] = useState<'basic' | 'permissions' | 'security'>('basic');
 
   const userManagementService = UserManagementService.getInstance();
@@ -85,7 +90,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ visible, user, onClose, o
 
   const permissionDescriptions: { [key in Permission]: string } = {
     view_analytics: 'View business analytics and insights',
-    manage_users: 'Create, edit, and manage users',
+    manage_users: 'Create, _edit, and manage users',
     manage_restaurants: 'Manage restaurant settings and configuration',
     process_payments: 'Process customer payments',
     manage_inventory: 'Manage inventory and stock levels',
@@ -121,8 +126,8 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ visible, user, onClose, o
   const loadPermissionTemplates = async () => {
     try {
       const templates = await userManagementService.getPermissionTemplates();
-      setPermissionTemplates(_templates);
-    } catch (_error) {}
+      setPermissionTemplates(__templates);
+    } catch (__error) {}
   };
 
   const handleSubmit = async () => {
@@ -142,22 +147,22 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ visible, user, onClose, o
     }
 
     try {
-      setLoading(_true);
-      await userManagementService.updateUser(user.id, formData);
+      setLoading(__true);
+      await userManagementService.updateUser(user.id, _formData);
       Alert.alert('Success', 'User updated successfully');
       onUserUpdated();
       handleClose();
-    } catch (_error) {
+    } catch (__error) {
       Alert.alert('Error', error instanceof Error ? error.message : 'Failed to update user');
     } finally {
-      setLoading(_false);
+      setLoading(__false);
     }
   };
 
   const handleClose = () => {
     setFormData({});
     setSelectedTemplate('');
-    setShowPermissions(_false);
+    setShowPermissions(__false);
     setActiveTab('basic');
     onClose();
   };
@@ -177,15 +182,15 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ visible, user, onClose, o
           style: 'destructive',
           onPress: async () => {
             try {
-              setLoading(_true);
+              setLoading(__true);
               await userManagementService.suspendUser(user.id, 'Suspended via admin panel');
               Alert.alert('Success', 'User suspended successfully');
               onUserUpdated();
               handleClose();
-            } catch (_error) {
+            } catch (__error) {
               Alert.alert('Error', 'Failed to suspend user');
             } finally {
-              setLoading(_false);
+              setLoading(__false);
             }
           },
         },
@@ -199,15 +204,15 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ visible, user, onClose, o
     }
 
     try {
-      setLoading(_true);
+      setLoading(__true);
       await userManagementService.activateUser(user.id);
       Alert.alert('Success', 'User activated successfully');
       onUserUpdated();
       handleClose();
-    } catch (_error) {
+    } catch (__error) {
       Alert.alert('Error', 'Failed to activate user');
     } finally {
-      setLoading(_false);
+      setLoading(__false);
     }
   };
 
@@ -226,15 +231,15 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ visible, user, onClose, o
           style: 'destructive',
           onPress: async () => {
             try {
-              setLoading(_true);
+              setLoading(__true);
               await userManagementService.deleteUser(user.id);
               Alert.alert('Success', 'User deleted successfully');
               onUserUpdated();
               handleClose();
-            } catch (_error) {
+            } catch (__error) {
               Alert.alert('Error', 'Failed to delete user');
             } finally {
-              setLoading(_false);
+              setLoading(__false);
             }
           },
         },
@@ -242,20 +247,20 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ visible, user, onClose, o
     );
   };
 
-  const togglePermission = (permission: Permission) => {
+  const togglePermission = (permission: _Permission) => {
     setFormData(prev => ({
       ...prev,
-      permissions: prev.permissions?.includes(_permission)
+      permissions: prev.permissions?.includes(__permission)
         ? prev.permissions.filter(p => p !== permission)
         : [...(prev.permissions || []), permission],
     }));
   };
 
-  const applyTemplate = (templateId: string) => {
+  const applyTemplate = (templateId: _string) => {
     const template = permissionTemplates.find(t => t.id === templateId);
-    if (_template) {
+    if (__template) {
       setFormData(prev => ({ ...prev, permissions: template.permissions }));
-      setSelectedTemplate(_templateId);
+      setSelectedTemplate(__templateId);
     }
   };
 
@@ -472,7 +477,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ visible, user, onClose, o
                     <TouchableOpacity
                       key={permission}
                       style={styles.permissionItem}
-                      onPress={() => togglePermission(_permission)}>
+                      onPress={() => togglePermission(__permission)}>
                       <View style={styles.permissionInfo}>
                         <Text style={styles.permissionName}>
                           {permission.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
@@ -484,9 +489,9 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ visible, user, onClose, o
                       <View
                         style={[
                           styles.checkbox,
-                          formData.permissions?.includes(_permission) && styles.checkboxSelected,
+                          formData.permissions?.includes(__permission) && styles.checkboxSelected,
                         ]}>
-                        {formData.permissions?.includes(_permission) && (
+                        {formData.permissions?.includes(__permission) && (
                           <Icon name="check" size={16} color={Colors.white} />
                         )}
                       </View>

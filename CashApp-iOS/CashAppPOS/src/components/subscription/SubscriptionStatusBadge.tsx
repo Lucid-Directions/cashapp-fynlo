@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, StyleSheet, Alert } from 'react-native';
 import { useTheme } from '../../design-system/ThemeProvider';
 import { useAuthStore } from '../../store/useAuthStore';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -154,7 +154,7 @@ export const SubscriptionStatusCard: React.FC = () => {
           <Text style={[cardStyles.featuresTitle, { color: theme.colors.text }]}>
             Included Features:
           </Text>
-          {plan.features.map((_feature, index) => (
+          {plan.features.map((__feature, _index) => (
             <View key={index} style={cardStyles.featureRow}>
               <Icon name="checkmark-circle" size={16} color={plan.color} />
               <Text style={[cardStyles.featureText, { color: theme.colors.textSecondary }]}>

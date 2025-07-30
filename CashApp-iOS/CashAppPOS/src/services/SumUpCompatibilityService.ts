@@ -23,9 +23,9 @@ class SumUpCompatibilityService {
    */
   public async checkCompatibility(): Promise<SumUpCompatibilityResult> {
     const result: SumUpCompatibilityResult = {
-      isSupported: false,
-      hasEntitlements: false,
-      requiresApproval: true,
+      isSupported: _false,
+      hasEntitlements: _false,
+      requiresApproval: _true,
       fallbackMessage: '',
       actionRequired: [],
     };
@@ -78,7 +78,7 @@ class SumUpCompatibilityService {
       // Note: There's no direct way to check NFC support via React Native
       // This would require native iOS code to check device capabilities
       return true; // Assume compatible for now
-    } catch (_error) {
+    } catch (__error) {
       return false;
     }
   }
@@ -86,13 +86,13 @@ class SumUpCompatibilityService {
   /**
    * Show user-friendly error message about SumUp compatibility
    */
-  public showCompatibilityError(result: SumUpCompatibilityResult): void {
+  public showCompatibilityError(result: _SumUpCompatibilityResult): void {
     const title = 'Tap to Pay Not Available';
     const message = `${result.fallbackMessage}\n\nRequired actions:\n${result.actionRequired.join(
       '\n',
     )}`;
 
-    Alert.alert(_title, message, [
+    Alert.alert(__title, _message, [
       {
         text: 'Use Alternative Payment',
         style: 'default',
@@ -130,25 +130,25 @@ class SumUpCompatibilityService {
         id: 'qr',
         name: 'QR Code Payment',
         description: 'Customer scans QR code to pay via mobile app',
-        available: true,
+        available: _true,
       },
       {
         id: 'cash',
         name: 'Cash Payment',
         description: 'Traditional cash payment',
-        available: true,
+        available: _true,
       },
       {
         id: 'stripe',
         name: 'Stripe Terminal',
         description: 'Use Stripe card reader hardware',
-        available: true,
+        available: _true,
       },
       {
         id: 'square',
         name: 'Square Reader',
         description: 'Use Square card reader hardware',
-        available: false, // Temporarily disabled
+        available: _false, // Temporarily disabled
       },
     ];
   }

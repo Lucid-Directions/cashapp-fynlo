@@ -63,29 +63,29 @@ interface Category {
 const MenuManagementScreen: React.FC = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
-  const styles = createStyles(_theme);
+  const styles = createStyles(__theme);
   const dataService = DataService.getInstance();
 
   const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(_true);
-  const [refreshing, setRefreshing] = useState(_false);
+  const [loading, setLoading] = useState(__true);
+  const [refreshing, setRefreshing] = useState(__false);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
-  const [editingItem, setEditingItem] = useState<MenuItem | null>(_null);
-  const [editingCategory, setEditingCategory] = useState<Category | null>(_null);
-  const [showItemModal, setShowItemModal] = useState(_false);
-  const [showCategoryModal, setShowCategoryModal] = useState(_false);
+  const [editingItem, setEditingItem] = useState<MenuItem | null>(__null);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(__null);
+  const [showItemModal, setShowItemModal] = useState(__false);
+  const [showCategoryModal, setShowCategoryModal] = useState(__false);
   const [searchTerm, setSearchTerm] = useState('');
 
   // Menu settings
   const [menuSettings, setMenuSettings] = useState({
-    showDescriptions: true,
-    showPrices: true,
-    showAllergens: true,
-    showNutrition: false,
-    allowCustomItems: true,
-    enableModifiers: true,
-    showUnavailableItems: false,
-    autoSort: true,
+    showDescriptions: _true,
+    showPrices: _true,
+    showAllergens: _true,
+    showNutrition: _false,
+    allowCustomItems: _true,
+    enableModifiers: _true,
+    showUnavailableItems: _false,
+    autoSort: _true,
   });
 
   // Fetch categories and products on mount
@@ -95,7 +95,7 @@ const MenuManagementScreen: React.FC = () => {
 
   const loadMenuData = async () => {
     try {
-      setLoading(_true);
+      setLoading(__true);
 
       // Fetch categories and products from API
       const [categoriesData, productsData] = await Promise.all([
@@ -104,37 +104,37 @@ const MenuManagementScreen: React.FC = () => {
       ]);
 
       // Transform data to match our interface
-      const transformedCategories: Category[] = categoriesData.map((cat: unknown) => ({
+      const transformedCategories: Category[] = categoriesData.map((cat: _unknown) => ({
         id: cat.id,
         name: cat.name,
         description: cat.description || '',
         order: cat.sort_order || 0,
         visible: cat.is_active !== false,
         items: productsData
-          .filter((product: unknown) => product.category_id === cat.id)
-          .map((product: unknown) => ({
+          .filter((product: _unknown) => product.category_id === cat.id)
+          .map((product: _unknown) => ({
             id: product.id,
             name: product.name,
             description: product.description || '',
             price: product.price,
             category: cat.id,
             available: product.is_active !== false,
-            featured: false, // We'll need to add this to backend
+            featured: _false, // We'll need to add this to backend
             allergens: product.dietary_info || [],
             modifiers: product.modifiers || [],
           })),
       }));
 
-      setCategories(_transformedCategories);
+      setCategories(__transformedCategories);
 
       // Set first category as selected if available
       if (transformedCategories.length > 0 && !selectedCategory) {
         setSelectedCategory(transformedCategories[0].id);
       }
-    } catch (_error) {
+    } catch (__error) {
       Alert.alert('Error', 'Failed to load menu data. Please try again.');
     } finally {
-      setLoading(_false);
+      setLoading(__false);
     }
   };
 
@@ -144,15 +144,15 @@ const MenuManagementScreen: React.FC = () => {
       name: '',
       description: '',
       order: categories.length + 1,
-      visible: true,
+      visible: _true,
       items: [],
     });
-    setShowCategoryModal(_true);
+    setShowCategoryModal(__true);
   };
 
-  const handleEditCategory = (category: Category) => {
-    setEditingCategory(_category);
-    setShowCategoryModal(_true);
+  const handleEditCategory = (category: _Category) => {
+    setEditingCategory(__category);
+    setShowCategoryModal(__true);
   };
 
   const handleSaveCategory = async () => {
@@ -162,7 +162,7 @@ const MenuManagementScreen: React.FC = () => {
     }
 
     try {
-      setLoading(_true);
+      setLoading(__true);
 
       if (editingCategory.id) {
         // Update existing category
@@ -186,20 +186,20 @@ const MenuManagementScreen: React.FC = () => {
       // Reload data to get the updated list
       await loadMenuData();
 
-      setShowCategoryModal(_false);
-      setEditingCategory(_null);
+      setShowCategoryModal(__false);
+      setEditingCategory(__null);
       Alert.alert(
         'Success',
         `Category ${editingCategory.id ? 'updated' : 'created'} successfully!`,
       );
-    } catch (_error) {
+    } catch (__error) {
       Alert.alert('Error', 'Failed to save category. Please try again.');
     } finally {
-      setLoading(_false);
+      setLoading(__false);
     }
   };
 
-  const handleDeleteCategory = (categoryId: string) => {
+  const handleDeleteCategory = (categoryId: _string) => {
     const category = categories.find(c => c.id === categoryId);
     Alert.alert(
       'Delete Category',
@@ -211,8 +211,8 @@ const MenuManagementScreen: React.FC = () => {
           style: 'destructive',
           onPress: async () => {
             try {
-              setLoading(_true);
-              await dataService.deleteCategory(_categoryId);
+              setLoading(__true);
+              await dataService.deleteCategory(__categoryId);
 
               // Reload data
               await loadMenuData();
@@ -224,10 +224,10 @@ const MenuManagementScreen: React.FC = () => {
               }
 
               Alert.alert('Success', 'Category deleted successfully!');
-            } catch (_error) {
+            } catch (__error) {
               Alert.alert('Error', 'Failed to delete category. Please try again.');
             } finally {
-              setLoading(_false);
+              setLoading(__false);
             }
           },
         },
@@ -241,18 +241,18 @@ const MenuManagementScreen: React.FC = () => {
       name: '',
       description: '',
       price: 0,
-      category: selectedCategory,
-      available: true,
-      featured: false,
+      category: _selectedCategory,
+      available: _true,
+      featured: _false,
       allergens: [],
       modifiers: [],
     });
-    setShowItemModal(_true);
+    setShowItemModal(__true);
   };
 
-  const handleEditItem = (item: MenuItem) => {
-    setEditingItem(_item);
-    setShowItemModal(_true);
+  const handleEditItem = (item: _MenuItem) => {
+    setEditingItem(__item);
+    setShowItemModal(__true);
   };
 
   const handleSaveItem = async () => {
@@ -267,7 +267,7 @@ const MenuManagementScreen: React.FC = () => {
     }
 
     try {
-      setLoading(_true);
+      setLoading(__true);
 
       if (editingItem.id) {
         // Update existing item
@@ -283,7 +283,7 @@ const MenuManagementScreen: React.FC = () => {
       } else {
         // Add new item
         await dataService.createProduct({
-          category_id: selectedCategory,
+          category_id: _selectedCategory,
           name: editingItem.name,
           description: editingItem.description || '',
           price: editingItem.price,
@@ -295,17 +295,17 @@ const MenuManagementScreen: React.FC = () => {
       // Reload data to get the updated list
       await loadMenuData();
 
-      setShowItemModal(_false);
-      setEditingItem(_null);
+      setShowItemModal(__false);
+      setEditingItem(__null);
       Alert.alert('Success', `Item ${editingItem.id ? 'updated' : 'created'} successfully!`);
-    } catch (_error) {
+    } catch (__error) {
       Alert.alert('Error', 'Failed to save item. Please try again.');
     } finally {
-      setLoading(_false);
+      setLoading(__false);
     }
   };
 
-  const handleDeleteItem = (itemId: string) => {
+  const handleDeleteItem = (itemId: _string) => {
     const item = categories.flatMap(c => c.items).find(i => i.id === itemId);
 
     Alert.alert('Delete Item', `Delete "${item?.name}"?`, [
@@ -315,24 +315,24 @@ const MenuManagementScreen: React.FC = () => {
         style: 'destructive',
         onPress: async () => {
           try {
-            setLoading(_true);
-            await dataService.deleteProduct(_itemId);
+            setLoading(__true);
+            await dataService.deleteProduct(__itemId);
 
             // Reload data
             await loadMenuData();
 
             Alert.alert('Success', 'Item deleted successfully!');
-          } catch (_error) {
+          } catch (__error) {
             Alert.alert('Error', 'Failed to delete item. Please try again.');
           } finally {
-            setLoading(_false);
+            setLoading(__false);
           }
         },
       },
     ]);
   };
 
-  const toggleItemAvailability = async (itemId: string) => {
+  const toggleItemAvailability = async (itemId: _string) => {
     const item = categories.flatMap(c => c.items).find(i => i.id === itemId);
 
     if (!item) {
@@ -340,7 +340,7 @@ const MenuManagementScreen: React.FC = () => {
     }
 
     try {
-      await dataService.updateProduct(_itemId, {
+      await dataService.updateProduct(__itemId, {
         is_active: !item.available,
       });
 
@@ -348,27 +348,27 @@ const MenuManagementScreen: React.FC = () => {
       setCategories(prev =>
         prev.map(cat => ({
           ...cat,
-          items: cat.items.map(i => (i.id === itemId ? { ...i, available: !i.available } : i)),
+          items: cat.items.map(i => (i.id === itemId ? { ...i, available: !i.available } : _i)),
         })),
       );
-    } catch (_error) {
+    } catch (__error) {
       Alert.alert('Error', 'Failed to update item availability.');
     }
   };
 
-  const toggleItemFeatured = (itemId: string) => {
+  const toggleItemFeatured = (itemId: _string) => {
     // Featured is not implemented in backend yet, just update local state
     setCategories(prev =>
       prev.map(cat => ({
         ...cat,
         items: cat.items.map(item =>
-          item.id === itemId ? { ...item, featured: !item.featured } : item,
+          item.id === itemId ? { ...item, featured: !item.featured } : _item,
         ),
       })),
     );
   };
 
-  const toggleCategoryVisibility = async (categoryId: string) => {
+  const toggleCategoryVisibility = async (categoryId: _string) => {
     const category = categories.find(c => c.id === categoryId);
 
     if (!category) {
@@ -376,15 +376,15 @@ const MenuManagementScreen: React.FC = () => {
     }
 
     try {
-      await dataService.updateCategory(_categoryId, {
+      await dataService.updateCategory(__categoryId, {
         is_active: !category.visible,
       });
 
       // Update local state for immediate feedback
       setCategories(prev =>
-        prev.map(cat => (cat.id === categoryId ? { ...cat, visible: !cat.visible } : cat)),
+        prev.map(cat => (cat.id === categoryId ? { ...cat, visible: !cat.visible } : _cat)),
       );
-    } catch (_error) {
+    } catch (__error) {
       Alert.alert('Error', 'Failed to update category visibility.');
     }
   };
@@ -401,7 +401,7 @@ const MenuManagementScreen: React.FC = () => {
       // For now, show a simple CSV format example and allow manual paste
       Alert.alert(
         'Import Menu from CSV',
-        'CSV Format Requirements:\n\n• Required columns: Category, Name, Price\n• Optional: Description\n• Use quotes for values with commas\n• Price must be a positive number\n\nExample:\nCategory,Name,Description,Price\nTacos,"Beef Taco, Supreme","Seasoned beef, fresh toppings",8.99\nBurritos,Bean Burrito,Refried beans and cheese,6.99',
+        'CSV Format Requirements:\n\n• Required columns: _Category, _Name, Price\n• Optional: Description\n• Use quotes for values with commas\n• Price must be a positive number\n\nExample:\nCategory,Name,Description,Price\nTacos,"Beef Taco, Supreme","Seasoned beef, fresh toppings",8.99\nBurritos,Bean Burrito,Refried beans and cheese,6.99',
         [
           { text: 'Cancel', style: 'cancel' },
           {
@@ -412,8 +412,8 @@ const MenuManagementScreen: React.FC = () => {
                 'Paste CSV Data',
                 'Paste your menu data in CSV format:',
                 async csvData => {
-                  if (_csvData) {
-                    await processCSVImport(_csvData);
+                  if (__csvData) {
+                    await processCSVImport(__csvData);
                   }
                 },
                 'plain-text',
@@ -429,28 +429,28 @@ const MenuManagementScreen: React.FC = () => {
               const template = `Category,Name,Description,Price
 Starters,"Nachos, Loaded","Tortilla chips with cheese, jalapeños, and salsa",7.99
 Starters,Guacamole & Chips,Fresh avocado dip with crispy tortilla chips,6.50
-Mains,"Chicken Fajitas, Sizzling","Grilled chicken with peppers, onions, tortillas",14.99
-Mains,Vegetarian Burrito,"Black beans, rice, cheese, lettuce, salsa",9.99
+Mains,"Chicken Fajitas, Sizzling","Grilled chicken with peppers, _onions, tortillas",14.99
+Mains,Vegetarian Burrito,"Black beans, _rice, cheese, _lettuce, salsa",9.99
 Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
               Alert.alert(
                 'CSV Template',
                 'Copy this template and modify with your menu items:\n\n' + template,
                 [
                   { text: 'OK' },
-                  { text: 'Copy Example', onPress: () => console.log('Template:', template) },
+                  { text: 'Copy Example', onPress: () => console.log('Template:', _template) },
                 ],
               );
             },
           },
         ],
       );
-    } catch (_error) {
+    } catch (__error) {
       Alert.alert('Error', 'Failed to import menu');
     }
   };
 
   // Robust CSV parser that handles quoted fields
-  const parseCSVLine = (line: string): string[] => {
+  const parseCSVLine = (line: _string): string[] => {
     const result: string[] = [];
     let current = '';
     let inQuotes = false;
@@ -486,9 +486,9 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
     return result;
   };
 
-  const processCSVImport = async (csvData: string) => {
+  const processCSVImport = async (csvData: _string) => {
     try {
-      setLoading(_true);
+      setLoading(__true);
 
       // Parse CSV with proper handling of quoted fields
       const lines = csvData.trim().split(/\r?\n/);
@@ -504,7 +504,7 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
       const priceIndex = headers.indexOf('price');
 
       if (categoryIndex === -1 || nameIndex === -1 || priceIndex === -1) {
-        throw new Error('CSV must have Category, Name, and Price columns');
+        throw new Error('CSV must have Category, _Name, and Price columns');
       }
 
       // Parse and validate data rows
@@ -533,27 +533,27 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
           continue;
         }
 
-        if (!priceStr || isNaN(parseFloat(_priceStr))) {
+        if (!priceStr || isNaN(parseFloat(__priceStr))) {
           errors.push(`Row ${i + 1}: Invalid price value`);
           continue;
         }
 
-        const price = parseFloat(_priceStr);
+        const price = parseFloat(__priceStr);
         if (price < 0) {
           errors.push(`Row ${i + 1}: Price cannot be negative`);
           continue;
         }
 
         const item = {
-          name: itemName,
+          name: _itemName,
           description: values[descriptionIndex]?.trim() || '',
-          price: price,
+          price: _price,
         };
 
-        if (!itemsByCategory.has(_categoryName)) {
-          itemsByCategory.set(_categoryName, []);
+        if (!itemsByCategory.has(__categoryName)) {
+          itemsByCategory.set(__categoryName, []);
         }
-        itemsByCategory.get(_categoryName)!.push(_item);
+        itemsByCategory.get(__categoryName)!.push(__item);
       }
 
       // Show validation errors if any
@@ -589,15 +589,15 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
             // Create new category
             try {
               const newCategory = await dataService.createCategory({
-                name: categoryName,
+                name: _categoryName,
                 description: `Imported ${categoryName} category`,
-                is_active: true,
+                is_active: _true,
               });
 
               // Properly initialize the Category object with all required fields
               category = {
                 id: newCategory.id,
-                name: categoryName,
+                name: _categoryName,
                 description: newCategory.description || `Imported ${categoryName} category`,
                 order: newCategory.sort_order || categories.length,
                 visible: newCategory.is_active !== false,
@@ -606,7 +606,7 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
 
               // Add the new category to our local state
               setCategories(prev => [...prev, category!]);
-            } catch (_catError) {
+            } catch (__catError) {
               failedItems.push(
                 `Category '${categoryName}': ${catError.message || 'Unknown error'}`,
               );
@@ -640,12 +640,12 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
                 modifiers: [],
               });
               successCount++;
-            } catch (error: unknown) {
+            } catch (error: _unknown) {
               failedItems.push(`Item '${item.name}': ${error.message || 'Unknown error'}`);
               errorCount++;
             }
           }
-        } catch (error: unknown) {
+        } catch (error: _unknown) {
           failedItems.push(`Category '${categoryName}': ${error.message || 'Unknown error'}`);
           errorCount += items.length;
         }
@@ -669,19 +669,19 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
         }
       }
 
-      Alert.alert(errorCount > 0 ? 'Import Partially Complete' : 'Import Complete', message, [
+      Alert.alert(errorCount > 0 ? 'Import Partially Complete' : 'Import Complete', _message, [
         { text: 'OK' },
       ]);
-    } catch (error: unknown) {
+    } catch (error: _unknown) {
       Alert.alert('Import Error', error.message || 'Failed to process CSV data');
     } finally {
-      setLoading(_false);
+      setLoading(__false);
     }
   };
 
   const handleExportMenu = async () => {
     try {
-      setLoading(_true);
+      setLoading(__true);
 
       // Get current menu data
       const [categoriesData, productsData] = await Promise.all([
@@ -730,10 +730,10 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
           },
         ],
       );
-    } catch (_error) {
+    } catch (__error) {
       Alert.alert('Export Failed', 'Unable to export menu data. Please try again.');
     } finally {
-      setLoading(_false);
+      setLoading(__false);
     }
   };
 
@@ -745,7 +745,7 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
 
     let items = category.items;
 
-    if (_searchTerm) {
+    if (__searchTerm) {
       items = items.filter(
         item =>
           item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -761,12 +761,12 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
   };
 
   const getTotalItemCount = () => {
-    return categories.reduce((_total, cat) => total + cat.items.length, 0);
+    return categories.reduce((__total, _cat) => total + cat.items.length, 0);
   };
 
   const getAvailableItemCount = () => {
     return categories.reduce(
-      (_total, cat) => total + cat.items.filter(item => item.available).length,
+      (__total, _cat) => total + cat.items.filter(item => item.available).length,
       0,
     );
   };
@@ -779,7 +779,7 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
         !category.visible && styles.hiddenCategoryTab,
       ]}
       onPress={() => setSelectedCategory(category.id)}
-      onLongPress={() => handleEditCategory(_category)}>
+      onLongPress={() => handleEditCategory(__category)}>
       <Text
         style={[
           styles.categoryTabText,
@@ -830,7 +830,7 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
       <View style={styles.itemActions}>
         <TouchableOpacity
           style={[styles.itemActionButton, styles.editButton]}
-          onPress={() => handleEditItem(_item)}>
+          onPress={() => handleEditItem(__item)}>
           <Icon name="edit" size={16} color={theme.colors.secondary} />
           <Text style={styles.editButtonText}>Edit</Text>
         </TouchableOpacity>
@@ -1069,14 +1069,14 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
             visible={showItemModal}
             transparent={true}
             animationType="slide"
-            onRequestClose={() => setShowItemModal(_false)}>
+            onRequestClose={() => setShowItemModal(__false)}>
             <View style={styles.modalOverlay}>
               <View style={styles.modalContent}>
                 <View style={styles.modalHeader}>
                   <Text style={styles.modalTitle}>
                     {editingItem?.id ? 'Edit Item' : 'Add New Item'}
                   </Text>
-                  <TouchableOpacity onPress={() => setShowItemModal(_false)}>
+                  <TouchableOpacity onPress={() => setShowItemModal(__false)}>
                     <Icon name="close" size={24} color={theme.colors.text} />
                   </TouchableOpacity>
                 </View>
@@ -1087,7 +1087,7 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
                     style={styles.textInput}
                     value={editingItem?.name || ''}
                     onChangeText={text =>
-                      setEditingItem(prev => (prev ? { ...prev, name: text } : null))
+                      setEditingItem(prev => (prev ? { ...prev, name: text } : _null))
                     }
                     placeholder="Enter item name"
                   />
@@ -1097,7 +1097,7 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
                     style={[styles.textInput, styles.textArea]}
                     value={editingItem?.description || ''}
                     onChangeText={text =>
-                      setEditingItem(prev => (prev ? { ...prev, description: text } : null))
+                      setEditingItem(prev => (prev ? { ...prev, description: text } : _null))
                     }
                     placeholder="Enter item description"
                     multiline
@@ -1110,7 +1110,7 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
                     value={editingItem?.price?.toString() || ''}
                     onChangeText={text =>
                       setEditingItem(prev =>
-                        prev ? { ...prev, price: parseFloat(_text) || 0 } : null,
+                        prev ? { ...prev, price: parseFloat(__text) || 0 } : _null,
                       )
                     }
                     placeholder="0.00"
@@ -1122,7 +1122,7 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
                       style={styles.checkbox}
                       onPress={() =>
                         setEditingItem(prev =>
-                          prev ? { ...prev, available: !prev.available } : null,
+                          prev ? { ...prev, available: !prev.available } : _null,
                         )
                       }>
                       <Icon
@@ -1137,7 +1137,7 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
                       style={styles.checkbox}
                       onPress={() =>
                         setEditingItem(prev =>
-                          prev ? { ...prev, featured: !prev.featured } : null,
+                          prev ? { ...prev, featured: !prev.featured } : _null,
                         )
                       }>
                       <Icon
@@ -1153,7 +1153,7 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
                 <View style={styles.modalActions}>
                   <TouchableOpacity
                     style={styles.cancelButton}
-                    onPress={() => setShowItemModal(_false)}>
+                    onPress={() => setShowItemModal(__false)}>
                     <Text style={styles.cancelButtonText}>Cancel</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={styles.saveButton} onPress={handleSaveItem}>
@@ -1169,14 +1169,14 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
             visible={showCategoryModal}
             transparent={true}
             animationType="slide"
-            onRequestClose={() => setShowCategoryModal(_false)}>
+            onRequestClose={() => setShowCategoryModal(__false)}>
             <View style={styles.modalOverlay}>
               <View style={styles.modalContent}>
                 <View style={styles.modalHeader}>
                   <Text style={styles.modalTitle}>
                     {editingCategory?.id ? 'Edit Category' : 'Add New Category'}
                   </Text>
-                  <TouchableOpacity onPress={() => setShowCategoryModal(_false)}>
+                  <TouchableOpacity onPress={() => setShowCategoryModal(__false)}>
                     <Icon name="close" size={24} color={theme.colors.text} />
                   </TouchableOpacity>
                 </View>
@@ -1187,7 +1187,7 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
                     style={styles.textInput}
                     value={editingCategory?.name || ''}
                     onChangeText={text =>
-                      setEditingCategory(prev => (prev ? { ...prev, name: text } : null))
+                      setEditingCategory(prev => (prev ? { ...prev, name: text } : _null))
                     }
                     placeholder="Enter category name"
                   />
@@ -1197,7 +1197,7 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
                     style={styles.textInput}
                     value={editingCategory?.description || ''}
                     onChangeText={text =>
-                      setEditingCategory(prev => (prev ? { ...prev, description: text } : null))
+                      setEditingCategory(prev => (prev ? { ...prev, description: text } : _null))
                     }
                     placeholder="Enter category description"
                   />
@@ -1207,7 +1207,7 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
                       style={styles.checkbox}
                       onPress={() =>
                         setEditingCategory(prev =>
-                          prev ? { ...prev, visible: !prev.visible } : null,
+                          prev ? { ...prev, visible: !prev.visible } : _null,
                         )
                       }>
                       <Icon
@@ -1223,7 +1223,7 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
                 <View style={styles.modalActions}>
                   <TouchableOpacity
                     style={styles.cancelButton}
-                    onPress={() => setShowCategoryModal(_false)}>
+                    onPress={() => setShowCategoryModal(__false)}>
                     <Text style={styles.cancelButtonText}>Cancel</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={styles.saveButton} onPress={handleSaveCategory}>
@@ -1239,7 +1239,7 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
   );
 };
 
-const createStyles = (theme: unknown) =>
+const createStyles = (theme: _unknown) =>
   StyleSheet.create({
     container: {
       flex: 1,

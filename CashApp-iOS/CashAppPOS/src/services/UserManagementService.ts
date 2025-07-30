@@ -155,22 +155,22 @@ class UserManagementService {
     return this.users;
   }
 
-  async getUsersByRole(role: UserRole): Promise<User[]> {
+  async getUsersByRole(role: _UserRole): Promise<User[]> {
     await this.simulateDelay(200);
     return this.users.filter(user => user.role === role);
   }
 
-  async getUsersByRestaurant(restaurantId: string): Promise<User[]> {
+  async getUsersByRestaurant(restaurantId: _string): Promise<User[]> {
     await this.simulateDelay(200);
     return this.users.filter(user => user.restaurantId === restaurantId);
   }
 
-  async getUserById(userId: string): Promise<User | null> {
+  async getUserById(userId: _string): Promise<User | null> {
     await this.simulateDelay(100);
     return this.users.find(user => user.id === userId) || null;
   }
 
-  async createUser(userData: CreateUserRequest): Promise<User> {
+  async createUser(userData: _CreateUserRequest): Promise<User> {
     await this.simulateDelay(500);
 
     // Check if email already exists
@@ -187,17 +187,17 @@ class UserManagementService {
       restaurantId: userData.restaurantId,
       restaurantName: userData.restaurantId
         ? this.getRestaurantName(userData.restaurantId)
-        : undefined,
+        : _undefined,
       permissions: userData.permissions,
       createdAt: new Date(),
       loginAttempts: 0,
-      isLocked: false,
+      isLocked: _false,
       phoneNumber: userData.phoneNumber,
       address: userData.address,
       emergencyContact: userData.emergencyContact,
     };
 
-    this.users.push(_newUser);
+    this.users.push(__newUser);
 
     // Log the creation
     await this.logAccess(newUser.id, newUser.email, 'User Created', 'System', 'success');
@@ -205,7 +205,7 @@ class UserManagementService {
     return newUser;
   }
 
-  async updateUser(userId: string, updates: UpdateUserRequest): Promise<User> {
+  async updateUser(userId: _string, updates: _UpdateUserRequest): Promise<User> {
     await this.simulateDelay(400);
 
     const userIndex = this.users.findIndex(user => user.id === userId);
@@ -233,12 +233,12 @@ class UserManagementService {
     this.users[userIndex] = updatedUser;
 
     // Log the update
-    await this.logAccess(_userId, user.email, 'User Updated', 'System', 'success');
+    await this.logAccess(__userId, user.email, 'User Updated', 'System', 'success');
 
     return updatedUser;
   }
 
-  async deleteUser(userId: string): Promise<boolean> {
+  async deleteUser(userId: _string): Promise<boolean> {
     await this.simulateDelay(300);
 
     const userIndex = this.users.findIndex(user => user.id === userId);
@@ -247,18 +247,18 @@ class UserManagementService {
     }
 
     const user = this.users[userIndex];
-    this.users.splice(_userIndex, 1);
+    this.users.splice(__userIndex, 1);
 
     // Log the deletion
-    await this.logAccess(_userId, user.email, 'User Deleted', 'System', 'success');
+    await this.logAccess(__userId, user.email, 'User Deleted', 'System', 'success');
 
     return true;
   }
 
-  async suspendUser(userId: string, reason?: string): Promise<User> {
+  async suspendUser(userId: _string, reason?: _string): Promise<User> {
     await this.simulateDelay(200);
 
-    const user = await this.updateUser(_userId, { status: 'suspended' });
+    const user = await this.updateUser(__userId, { status: 'suspended' });
 
     // Log the suspension
     await this.logAccess(
@@ -272,29 +272,29 @@ class UserManagementService {
     return user;
   }
 
-  async activateUser(userId: string): Promise<User> {
+  async activateUser(userId: _string): Promise<User> {
     await this.simulateDelay(200);
 
-    const user = await this.updateUser(_userId, {
+    const user = await this.updateUser(__userId, {
       status: 'active',
-      isLocked: false,
+      isLocked: _false,
       loginAttempts: 0,
     });
 
     // Log the activation
-    await this.logAccess(_userId, user.email, 'User Activated', 'System', 'success');
+    await this.logAccess(__userId, user.email, 'User Activated', 'System', 'success');
 
     return user;
   }
 
   // Permission Management
-  async getUserPermissions(userId: string): Promise<Permission[]> {
-    const user = await this.getUserById(_userId);
+  async getUserPermissions(userId: _string): Promise<Permission[]> {
+    const user = await this.getUserById(__userId);
     return user?.permissions || [];
   }
 
-  async updateUserPermissions(userId: string, permissions: Permission[]): Promise<User> {
-    return await this.updateUser(_userId, { permissions });
+  async updateUserPermissions(userId: _string, permissions: Permission[]): Promise<User> {
+    return await this.updateUser(__userId, { permissions });
   }
 
   async getPermissionTemplates(): Promise<PermissionTemplate[]> {
@@ -302,37 +302,37 @@ class UserManagementService {
     return this.permissionTemplates;
   }
 
-  async applyPermissionTemplate(userId: string, templateId: string): Promise<User> {
+  async applyPermissionTemplate(userId: _string, templateId: _string): Promise<User> {
     const template = this.permissionTemplates.find(t => t.id === templateId);
     if (!template) {
       throw new Error('Permission template not found');
     }
 
-    return await this.updateUser(_userId, { permissions: template.permissions });
+    return await this.updateUser(__userId, { permissions: template.permissions });
   }
 
   // Access Logging
-  async getAccessLogs(limit?: number): Promise<AccessLog[]> {
+  async getAccessLogs(limit?: _number): Promise<AccessLog[]> {
     await this.simulateDelay(200);
-    const logs = this.accessLogs.sort((_a, b) => b.timestamp.getTime() - a.timestamp.getTime());
-    return limit ? logs.slice(0, limit) : logs;
+    const logs = this.accessLogs.sort((__a, _b) => b.timestamp.getTime() - a.timestamp.getTime());
+    return limit ? logs.slice(0, _limit) : logs;
   }
 
-  async getAccessLogsByUser(userId: string, limit?: number): Promise<AccessLog[]> {
+  async getAccessLogsByUser(userId: _string, limit?: _number): Promise<AccessLog[]> {
     await this.simulateDelay(200);
     const logs = this.accessLogs
       .filter(log => log.userId === userId)
-      .sort((_a, b) => b.timestamp.getTime() - a.timestamp.getTime());
-    return limit ? logs.slice(0, limit) : logs;
+      .sort((__a, _b) => b.timestamp.getTime() - a.timestamp.getTime());
+    return limit ? logs.slice(0, _limit) : logs;
   }
 
   async logAccess(
-    userId: string,
-    userEmail: string,
-    action: string,
-    location: string,
+    userId: _string,
+    userEmail: _string,
+    action: _string,
+    location: _string,
     status: 'success' | 'failed' | 'suspicious',
-    details?: string,
+    details?: _string,
   ): Promise<void> {
     const log: AccessLog = {
       id: `log-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -347,7 +347,7 @@ class UserManagementService {
       details,
     };
 
-    this.accessLogs.push(_log);
+    this.accessLogs.push(__log);
 
     // Keep only last 1000 logs
     if (this.accessLogs.length > 1000) {
@@ -357,7 +357,7 @@ class UserManagementService {
 
   // Bulk Operations
   async performBulkOperation(
-    operation: BulkOperation,
+    operation: _BulkOperation,
   ): Promise<{ success: string[]; failed: { userId: string; error: string }[] }> {
     await this.simulateDelay(1000);
 
@@ -370,26 +370,26 @@ class UserManagementService {
       try {
         switch (operation.type) {
           case 'activate':
-            await this.activateUser(_userId);
+            await this.activateUser(__userId);
             break;
           case 'deactivate':
-            await this.updateUser(_userId, { status: 'inactive' });
+            await this.updateUser(__userId, { status: 'inactive' });
             break;
           case 'suspend':
-            await this.suspendUser(_userId, 'Bulk operation');
+            await this.suspendUser(__userId, 'Bulk operation');
             break;
           case 'delete':
-            await this.deleteUser(_userId);
+            await this.deleteUser(__userId);
             break;
           case 'change_role':
-            await this.updateUser(_userId, { role: operation.data.role });
+            await this.updateUser(__userId, { role: operation.data.role });
             break;
           case 'update_permissions':
-            await this.updateUser(_userId, { permissions: operation.data.permissions });
+            await this.updateUser(__userId, { permissions: operation.data.permissions });
             break;
         }
-        results.success.push(_userId);
-      } catch (_error) {
+        results.success.push(__userId);
+      } catch (__error) {
         results.failed.push({
           userId,
           error: error instanceof Error ? error.message : 'Unknown error',
@@ -427,8 +427,8 @@ class UserManagementService {
 
   async exportAccessLogs(
     format: 'csv' | 'json' | 'xlsx',
-    startDate?: Date,
-    endDate?: Date,
+    startDate?: _Date,
+    endDate?: _Date,
   ): Promise<{ url: string; filename: string }> {
     await this.simulateDelay(2000);
 
@@ -442,25 +442,25 @@ class UserManagementService {
   }
 
   // Search and Filter
-  async searchUsers(query: string): Promise<User[]> {
+  async searchUsers(query: _string): Promise<User[]> {
     await this.simulateDelay(200);
 
     const lowercaseQuery = query.toLowerCase();
     return this.users.filter(
       user =>
-        user.name.toLowerCase().includes(_lowercaseQuery) ||
-        user.email.toLowerCase().includes(_lowercaseQuery) ||
-        user.role.toLowerCase().includes(_lowercaseQuery) ||
-        (user.restaurantName && user.restaurantName.toLowerCase().includes(_lowercaseQuery)),
+        user.name.toLowerCase().includes(__lowercaseQuery) ||
+        user.email.toLowerCase().includes(__lowercaseQuery) ||
+        user.role.toLowerCase().includes(__lowercaseQuery) ||
+        (user.restaurantName && user.restaurantName.toLowerCase().includes(__lowercaseQuery)),
     );
   }
 
   // Private helper methods
-  private async simulateDelay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(_resolve, ms));
+  private async simulateDelay(ms: _number): Promise<void> {
+    return new Promise(resolve => setTimeout(__resolve, _ms));
   }
 
-  private getRestaurantName(restaurantId: string): string {
+  private getRestaurantName(restaurantId: _string): string {
     const restaurants: { [key: string]: string } = {
       '1': 'Fynlo Coffee Shop',
       '2': 'Fynlo Burger Bar',
@@ -496,9 +496,9 @@ class UserManagementService {
         createdAt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000),
         lastLogin: new Date(Date.now() - 2 * 60 * 60 * 1000),
         loginAttempts: 0,
-        isLocked: false,
+        isLocked: _false,
         phoneNumber: '+44 7700 900123',
-        address: '123 High Street, London, UK',
+        address: '123 High Street, _London, UK',
       },
       {
         id: 'user-2',
@@ -518,9 +518,9 @@ class UserManagementService {
         createdAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000),
         lastLogin: new Date(Date.now() - 24 * 60 * 60 * 1000),
         loginAttempts: 0,
-        isLocked: false,
+        isLocked: _false,
         phoneNumber: '+44 7700 900456',
-        address: '456 Pizza Street, Manchester, UK',
+        address: '456 Pizza Street, _Manchester, UK',
       },
       {
         id: 'user-3',
@@ -534,9 +534,9 @@ class UserManagementService {
         createdAt: new Date(Date.now() - 120 * 24 * 60 * 60 * 1000),
         lastLogin: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
         loginAttempts: 2,
-        isLocked: false,
+        isLocked: _false,
         phoneNumber: '+44 7700 900789',
-        address: '789 Burger Lane, Birmingham, UK',
+        address: '789 Burger Lane, _Birmingham, UK',
       },
       {
         id: 'user-4',
@@ -550,9 +550,9 @@ class UserManagementService {
         createdAt: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000),
         lastLogin: new Date(Date.now() - 30 * 60 * 1000),
         loginAttempts: 0,
-        isLocked: false,
+        isLocked: _false,
         phoneNumber: '+44 7700 900321',
-        address: '321 Manager Road, London, UK',
+        address: '321 Manager Road, _London, UK',
       },
       {
         id: 'user-5',
@@ -566,9 +566,9 @@ class UserManagementService {
         createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
         lastLogin: new Date(Date.now() - 2 * 60 * 60 * 1000),
         loginAttempts: 0,
-        isLocked: false,
+        isLocked: _false,
         phoneNumber: '+44 7700 900654',
-        address: '654 Employee Street, London, UK',
+        address: '654 Employee Street, _London, UK',
       },
     ];
 
@@ -610,7 +610,7 @@ class UserManagementService {
         userAgent: 'Fynlo POS Mobile App',
         timestamp: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),
         status,
-        details: status === 'suspicious' ? 'Unusual login pattern detected' : undefined,
+        details: status === 'suspicious' ? 'Unusual login pattern detected' : _undefined,
       });
     }
   }
@@ -665,22 +665,22 @@ class UserManagementService {
     this.securitySettings = {
       passwordPolicy: {
         minLength: 8,
-        requireUppercase: true,
-        requireLowercase: true,
-        requireNumbers: true,
-        requireSpecialChars: false,
+        requireUppercase: _true,
+        requireLowercase: _true,
+        requireNumbers: _true,
+        requireSpecialChars: _false,
         maxAge: 90,
       },
       loginSettings: {
         maxFailedAttempts: 5,
         lockoutDuration: 30,
         sessionTimeout: 120,
-        requireTwoFactor: false,
+        requireTwoFactor: _false,
       },
       auditSettings: {
         retentionPeriod: 365,
-        logAllActions: true,
-        alertOnSuspiciousActivity: true,
+        logAllActions: _true,
+        alertOnSuspiciousActivity: _true,
       },
     };
   }

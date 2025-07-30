@@ -11,7 +11,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 
 interface SimpleTextInputProps {
   value: string;
-  onValueChange: (value: string) => void;
+  onValueChange: (value: _string) => void;
   placeholder?: string;
   label?: string;
   style?: unknown;
@@ -46,33 +46,33 @@ const SimpleTextInput: React.FC<SimpleTextInputProps> = ({
   onSubmitEditing,
   clearButtonMode = 'while-editing',
 }) => {
-  const [internalValue, setInternalValue] = useState(_value);
-  const [isFocused, setIsFocused] = useState(_false);
-  const [showPassword, setShowPassword] = useState(_false);
-  const inputRef = useRef<TextInput>(_null);
+  const [internalValue, setInternalValue] = useState(__value);
+  const [isFocused, setIsFocused] = useState(__false);
+  const [showPassword, setShowPassword] = useState(__false);
+  const inputRef = useRef<TextInput>(__null);
 
-  const handleTextChange = (text: string) => {
+  const handleTextChange = (text: _string) => {
     // FIXED: Update both internal state AND parent immediately
-    setInternalValue(_text);
-    if (_onValueChange) {
-      onValueChange(_text);
+    setInternalValue(__text);
+    if (__onValueChange) {
+      onValueChange(__text);
     }
   };
 
   const handleFocus = () => {
-    setIsFocused(_true);
+    setIsFocused(__true);
     // Set internal value to the current prop value when focusing
-    setInternalValue(_value);
+    setInternalValue(__value);
   };
 
   const handleBlur = () => {
-    setIsFocused(_false);
+    setIsFocused(__false);
     // No need to call onValueChange here since it's already called during typing
   };
 
   const handleClear = () => {
     setInternalValue('');
-    if (_onValueChange) {
+    if (__onValueChange) {
       onValueChange('');
     }
     inputRef.current?.focus();

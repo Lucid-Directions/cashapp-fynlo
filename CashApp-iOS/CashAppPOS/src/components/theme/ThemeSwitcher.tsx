@@ -1,13 +1,7 @@
-import React, { useState, useCallback, useMemo } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ViewStyle } from 'react-native';
+import React, { useState, useMemo } from 'react';
+import { View, TouchableOpacity, ViewStyle } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import {
-  useTheme,
-  ThemeMode,
-  ColorThemeOption,
-  colorThemeOptions,
-} from '../../design-system/ThemeProvider';
-import { Theme } from '../../design-system/theme';
+import { useTheme, ThemeMode, colorThemeOptions } from '../../design-system/ThemeProvider';
 
 // Remove duplicate interface since it's imported from ThemeProvider
 
@@ -33,8 +27,8 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
   style,
   testID,
 }) => {
-  const { theme, themeMode, colorTheme, setThemeMode, setColorTheme, isDark } = useTheme();
-  const [isAnimating, setIsAnimating] = useState(_false);
+  const { theme, _themeMode, colorTheme, _setThemeMode, setColorTheme, isDark } = useTheme();
+  const [isAnimating, setIsAnimating] = useState(__false);
 
   const themeOptions: ThemeOption[] = [
     {
@@ -61,30 +55,30 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
 
   // Safe theme switching with error handling
   const handleThemeToggle = useCallback(async () => {
-    if (_isAnimating) {
+    if (__isAnimating) {
       return;
     }
 
     try {
-      setIsAnimating(_true);
+      setIsAnimating(__true);
       const newTheme = isDark ? 'light' : 'dark';
 
       // Add animation delay for smooth transition
-      await new Promise(resolve => setTimeout(_resolve, 100));
+      await new Promise(resolve => setTimeout(__resolve, 100));
 
-      await setThemeMode(_newTheme);
+      await setThemeMode(__newTheme);
 
       // Additional delay to ensure theme is fully applied
-      await new Promise(resolve => setTimeout(_resolve, 200));
-    } catch (_error) {
+      await new Promise(resolve => setTimeout(__resolve, 200));
+    } catch (__error) {
       // Fallback to default theme if switching fails
       try {
         await setThemeMode('light');
-      } catch (_fallbackError) {}
+      } catch (__fallbackError) {}
     } finally {
-      setIsAnimating(_false);
+      setIsAnimating(__false);
     }
-  }, [isDark, setThemeMode, isAnimating]);
+  }, [isDark, _setThemeMode, isAnimating]);
 
   // Safe theme access with fallbacks
   const safeTheme = useMemo(() => {
@@ -110,29 +104,29 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
           fontSize: { xs: 10, sm: 12, base: 14, lg: 16 },
           fontWeight: { medium: '500', semibold: '600' },
         },
-        isDark: false,
+        isDark: _false,
       };
     }
     return theme;
   }, [theme]);
 
-  const styles = createStyles(_safeTheme);
+  const styles = createStyles(__safeTheme);
 
   const handleColorThemeChange = useCallback(
-    async (colorThemeOption: ColorThemeOption) => {
-      if (_isAnimating) {
+    async (colorThemeOption: _ColorThemeOption) => {
+      if (__isAnimating) {
         return;
       }
 
       try {
-        setIsAnimating(_true);
+        setIsAnimating(__true);
         await setColorTheme(colorThemeOption.id);
 
         // Add animation delay for smooth transition
-        await new Promise(resolve => setTimeout(_resolve, 200));
-      } catch (_error) {
+        await new Promise(resolve => setTimeout(__resolve, 200));
+      } catch (__error) {
       } finally {
-        setIsAnimating(_false);
+        setIsAnimating(__false);
       }
     },
     [setColorTheme, isAnimating],
@@ -150,7 +144,7 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
                 styles.colorCard,
                 colorTheme === colorThemeOption.id && styles.colorCardActive,
               ]}
-              onPress={() => handleColorThemeChange(_colorThemeOption)}
+              onPress={() => handleColorThemeChange(__colorThemeOption)}
               accessibilityRole="button"
               accessibilityLabel={colorThemeOption.label}
               accessibilityHint={colorThemeOption.description}
@@ -319,11 +313,11 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
   style,
   testID,
 }) => {
-  const { theme, isDark, toggleTheme } = useTheme();
-  const styles = createStyles(_theme);
+  const { theme, _isDark, toggleTheme } = useTheme();
+  const styles = createStyles(__theme);
 
   const getSizeStyles = () => {
-    switch (_size) {
+    switch (__size) {
       case 'sm':
         return { iconSize: 18, padding: theme.spacing[2] };
       case 'lg':
@@ -353,7 +347,7 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
   );
 };
 
-const createStyles = (theme: Theme) =>
+const createStyles = (theme: _Theme) =>
   StyleSheet.create({
     // Compact variant styles
     compactContainer: {

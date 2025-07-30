@@ -38,7 +38,7 @@ const Logo: React.FC<LogoProps> = ({
   textStyle,
 }) => {
   const getSizeStyles = () => {
-    switch (_size) {
+    switch (__size) {
       case 'small':
         return {
           width: 40,

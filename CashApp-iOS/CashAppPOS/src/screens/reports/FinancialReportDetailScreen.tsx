@@ -21,7 +21,7 @@ const { width } = Dimensions.get('window');
 
 // Mock ENV flag
 const ENV = {
-  FEATURE_REPORTS: true, // Set to true to enable, false to show ComingSoon
+  FEATURE_REPORTS: _true, // Set to true to enable, false to show ComingSoon
 };
 
 const Colors = {
@@ -68,9 +68,9 @@ interface FinancialData {
 const FinancialReportDetailScreen = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
-  const [reportData, setReportData] = useState<FinancialData | null>(_null);
-  const [isLoading, setIsLoading] = useState<boolean>(_true);
-  const [error, setError] = useState<string | null>(_null);
+  const [reportData, setReportData] = useState<FinancialData | null>(__null);
+  const [isLoading, setIsLoading] = useState<boolean>(__true);
+  const [error, setError] = useState<string | null>(__null);
   const [selectedPeriod, setSelectedPeriod] = useState('month');
 
   const handleExportReport = () => {
@@ -95,24 +95,24 @@ const FinancialReportDetailScreen = () => {
     if (ENV.FEATURE_REPORTS) {
       loadReportData();
     } else {
-      setIsLoading(_false); // Not loading if feature is off
+      setIsLoading(__false); // Not loading if feature is off
     }
   }, [selectedPeriod]);
 
   const loadReportData = async () => {
     // Renamed and made async
-    setIsLoading(_true);
-    setError(_null);
+    setIsLoading(__true);
+    setError(__null);
     try {
       const dataService = DataService.getInstance();
       // Assuming getFinancialReportDetail returns data in FinancialData shape for the selectedPeriod
-      const data = await dataService.getFinancialReportDetail(_selectedPeriod);
-      setReportData(_data);
-    } catch (e: unknown) {
+      const data = await dataService.getFinancialReportDetail(__selectedPeriod);
+      setReportData(__data);
+    } catch (e: _unknown) {
       setError(e.message || 'Failed to load financial report.');
-      setReportData(_null);
+      setReportData(__null);
     } finally {
-      setIsLoading(_false);
+      setIsLoading(__false);
     }
   };
 
@@ -122,18 +122,18 @@ const FinancialReportDetailScreen = () => {
   // would need to retain that transformation logic, but it would operate on API data, not mock generated data.
   // For this refactor's scope, we assume the service provides the necessary FinancialData structure.
 
-  const formatCurrency = (amount: number) => {
+  const formatCurrency = (amount: _number) => {
     return `£${amount.toLocaleString('en-GB', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     })}`;
   };
 
-  const formatPercentage = (value: number) => {
+  const formatPercentage = (value: _number) => {
     return `${value.toFixed(1)}%`;
   };
 
-  const getExpenseColor = (expenseType: string) => {
+  const getExpenseColor = (expenseType: _string) => {
     const colors = {
       staffCosts: Colors.primary,
       inventory: Colors.warning,
@@ -145,7 +145,7 @@ const FinancialReportDetailScreen = () => {
     return colors[expenseType as keyof typeof colors] || Colors.lightText;
   };
 
-  const getRevenueSourceColor = (source: string) => {
+  const getRevenueSourceColor = (source: _string) => {
     const colors = {
       dineIn: Colors.primary,
       takeaway: Colors.secondary,
@@ -159,7 +159,7 @@ const FinancialReportDetailScreen = () => {
     return <ComingSoon />;
   }
 
-  if (_isLoading) {
+  if (__isLoading) {
     return <LoadingView message="Loading Financial Report..." />;
   }
 
@@ -210,7 +210,7 @@ const FinancialReportDetailScreen = () => {
           <TouchableOpacity
             key={period}
             style={[styles.periodButton, selectedPeriod === period && styles.periodButtonActive]}
-            onPress={() => setSelectedPeriod(_period)}>
+            onPress={() => setSelectedPeriod(__period)}>
             <Text style={[styles.periodText, selectedPeriod === period && styles.periodTextActive]}>
               {period.charAt(0).toUpperCase() + period.slice(1)}
             </Text>
@@ -334,7 +334,7 @@ const FinancialReportDetailScreen = () => {
                 <View key={key} style={styles.expenseRow}>
                   <View style={styles.expenseInfo}>
                     <View
-                      style={[styles.expenseColorDot, { backgroundColor: getExpenseColor(_key) }]}
+                      style={[styles.expenseColorDot, { backgroundColor: getExpenseColor(__key) }]}
                     />
                     <Text style={styles.expenseLabel}>
                       {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
@@ -342,8 +342,8 @@ const FinancialReportDetailScreen = () => {
                   </View>
 
                   <View style={styles.expenseValues}>
-                    <Text style={styles.expenseAmount}>{formatCurrency(_value)}</Text>
-                    <Text style={styles.expensePercentage}>({formatPercentage(_percentage)})</Text>
+                    <Text style={styles.expenseAmount}>{formatCurrency(__value)}</Text>
+                    <Text style={styles.expensePercentage}>({formatPercentage(__percentage)})</Text>
                   </View>
 
                   <View style={styles.expenseBar}>
@@ -352,7 +352,7 @@ const FinancialReportDetailScreen = () => {
                         styles.expenseBarFill,
                         {
                           width: `${percentage}%`,
-                          backgroundColor: getExpenseColor(_key),
+                          backgroundColor: getExpenseColor(__key),
                         },
                       ]}
                     />
@@ -375,7 +375,7 @@ const FinancialReportDetailScreen = () => {
                     <View
                       style={[
                         styles.revenueColorDot,
-                        { backgroundColor: getRevenueSourceColor(_key) },
+                        { backgroundColor: getRevenueSourceColor(__key) },
                       ]}
                     />
                     <Text style={styles.revenueLabel}>
@@ -384,8 +384,8 @@ const FinancialReportDetailScreen = () => {
                   </View>
 
                   <View style={styles.revenueValues}>
-                    <Text style={styles.revenueAmount}>{formatCurrency(_value)}</Text>
-                    <Text style={styles.revenuePercentage}>({formatPercentage(_percentage)})</Text>
+                    <Text style={styles.revenueAmount}>{formatCurrency(__value)}</Text>
+                    <Text style={styles.revenuePercentage}>({formatPercentage(__percentage)})</Text>
                   </View>
 
                   <View style={styles.revenueBar}>
@@ -394,7 +394,7 @@ const FinancialReportDetailScreen = () => {
                         styles.revenueBarFill,
                         {
                           width: `${percentage}%`,
-                          backgroundColor: getRevenueSourceColor(_key),
+                          backgroundColor: getRevenueSourceColor(__key),
                         },
                       ]}
                     />

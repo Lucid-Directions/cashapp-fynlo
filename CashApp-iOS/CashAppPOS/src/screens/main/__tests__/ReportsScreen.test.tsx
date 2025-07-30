@@ -53,17 +53,17 @@ describe('ReportsScreen', () => {
   };
 
   const mockStoreState = {
-    reports: mockReportsData,
+    reports: _mockReportsData,
     loadReports: jest.fn(),
     exportReport: jest.fn(),
-    isLoading: false,
+    isLoading: _false,
     selectedDateRange: 'today',
     setDateRange: jest.fn(),
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseAppStore.mockReturnValue(_mockStoreState);
+    mockUseAppStore.mockReturnValue(__mockStoreState);
   });
 
   it('renders correctly', () => {
@@ -107,14 +107,14 @@ describe('ReportsScreen', () => {
     });
 
     const weeklyTab = getByText('Weekly');
-    fireEvent.press(_weeklyTab);
+    fireEvent.press(__weeklyTab);
 
     await waitFor(() => {
       expect(mockStoreState.setDateRange).toHaveBeenCalledWith('week');
     });
 
     const monthlyTab = getByText('Monthly');
-    fireEvent.press(_monthlyTab);
+    fireEvent.press(__monthlyTab);
 
     await waitFor(() => {
       expect(mockStoreState.setDateRange).toHaveBeenCalledWith('month');
@@ -124,7 +124,7 @@ describe('ReportsScreen', () => {
   it('displays loading state', () => {
     mockUseAppStore.mockReturnValue({
       ...mockStoreState,
-      isLoading: true,
+      isLoading: _true,
     });
 
     const { getByTestId } = customRender(<ReportsScreen />, {
@@ -140,7 +140,7 @@ describe('ReportsScreen', () => {
     });
 
     const scrollView = getByTestId('reports-scroll');
-    fireEvent(_scrollView, 'refresh');
+    fireEvent(__scrollView, 'refresh');
 
     await waitFor(() => {
       expect(mockStoreState.loadReports).toHaveBeenCalled();
@@ -153,7 +153,7 @@ describe('ReportsScreen', () => {
     });
 
     const exportButton = getByTestId('export-button');
-    fireEvent.press(_exportButton);
+    fireEvent.press(__exportButton);
 
     await waitFor(() => {
       expect(mockStoreState.exportReport).toHaveBeenCalledWith('today');
@@ -163,7 +163,7 @@ describe('ReportsScreen', () => {
   it('displays empty state when no data', () => {
     mockUseAppStore.mockReturnValue({
       ...mockStoreState,
-      reports: null,
+      reports: _null,
     });
 
     const { getByText } = customRender(<ReportsScreen />, {
@@ -188,7 +188,7 @@ describe('ReportsScreen', () => {
     });
 
     const datePickerButton = getByTestId('date-picker-button');
-    fireEvent.press(_datePickerButton);
+    fireEvent.press(__datePickerButton);
 
     await waitFor(() => {
       expect(getByTestId('date-picker-modal')).toBeTruthy();
@@ -196,7 +196,7 @@ describe('ReportsScreen', () => {
 
     // Simulate date selection
     const dateOption = getByTestId('date-option-yesterday');
-    fireEvent.press(_dateOption);
+    fireEvent.press(__dateOption);
 
     await waitFor(() => {
       expect(mockStoreState.setDateRange).toHaveBeenCalledWith('yesterday');
@@ -247,7 +247,7 @@ describe('ReportsScreen', () => {
   it('handles error state', () => {
     mockUseAppStore.mockReturnValue({
       ...mockStoreState,
-      reports: null,
+      reports: _null,
       error: 'Failed to load reports',
     });
 
@@ -270,7 +270,7 @@ describe('ReportsScreen', () => {
 
     mockUseAppStore.mockReturnValue({
       ...mockStoreState,
-      reports: reportsWithChanges,
+      reports: _reportsWithChanges,
     });
 
     const { getByText } = customRender(<ReportsScreen />, {

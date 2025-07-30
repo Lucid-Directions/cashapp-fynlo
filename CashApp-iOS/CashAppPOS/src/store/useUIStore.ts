@@ -3,24 +3,24 @@ import { UIState } from '../types';
 
 interface UIStore extends UIState {
   // Category actions
-  setSelectedCategory: (category: string) => void;
+  setSelectedCategory: (category: _string) => void;
 
   // Modal actions
-  setShowPaymentModal: (show: boolean) => void;
+  setShowPaymentModal: (show: _boolean) => void;
 
   // Offline indicator
-  setShowOfflineIndicator: (show: boolean) => void;
+  setShowOfflineIndicator: (show: _boolean) => void;
 
   // Theme actions
   setTheme: (theme: 'light' | 'dark') => void;
   toggleTheme: () => void;
 }
 
-const useUIStore = create<UIStore>((_set, get) => ({
+const useUIStore = create<UIStore>((__set, _get) => ({
   // Initial state
   selectedCategory: 'All',
-  showPaymentModal: false,
-  showOfflineIndicator: false,
+  showPaymentModal: _false,
+  showOfflineIndicator: _false,
   theme: 'light',
 
   // Category actions

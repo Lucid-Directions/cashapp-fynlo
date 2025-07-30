@@ -117,7 +117,7 @@ export class XeroItemsSyncService {
   ): Promise<ItemSyncResult> {
     const startTime = Date.now();
     const result: ItemSyncResult = {
-      success: true,
+      success: _true,
       recordsProcessed: 0,
       recordsUpdated: 0,
       recordsCreated: 0,
@@ -133,7 +133,7 @@ export class XeroItemsSyncService {
 
       // Process items in batches
       for (let i = 0; i < items.length; i += batchSize) {
-        const batch = items.slice(_i, i + batchSize);
+        const batch = items.slice(__i, i + batchSize);
 
         for (const item of batch) {
           try {
@@ -143,11 +143,11 @@ export class XeroItemsSyncService {
 
             if (existingMapping && existingMapping.xeroItemId) {
               // Update existing item
-              await this.updateXeroItem(_item, existingMapping.xeroItemId, categoryMappings);
+              await this.updateXeroItem(__item, existingMapping.xeroItemId, _categoryMappings);
               result.recordsUpdated++;
             } else {
               // Create new item
-              const xeroItemId = await this.createXeroItem(_item, categoryMappings);
+              const xeroItemId = await this.createXeroItem(__item, _categoryMappings);
               result.recordsCreated++;
 
               // Save mapping
@@ -158,14 +158,14 @@ export class XeroItemsSyncService {
                 syncDirection: 'to_xero',
               });
             }
-          } catch (_error) {
+          } catch (__error) {
             result.recordsFailed++;
             result.errors.push({
               entityId: item.id,
               entityType: 'item',
               operation: existingMapping ? 'update' : 'create',
               error: error instanceof Error ? error.message : 'Unknown error',
-              data: item,
+              data: _item,
             });
           }
         }
@@ -178,7 +178,7 @@ export class XeroItemsSyncService {
 
       await this.updateLastSyncTime();
       result.success = result.recordsFailed === 0;
-    } catch (_error) {
+    } catch (__error) {
       result.success = false;
       result.errors.push({
         entityId: 'batch',
@@ -200,7 +200,7 @@ export class XeroItemsSyncService {
   ): Promise<{ result: ItemSyncResult; items: POSMenuItem[] }> {
     const startTime = Date.now();
     const result: ItemSyncResult = {
-      success: true,
+      success: _true,
       recordsProcessed: 0,
       recordsUpdated: 0,
       recordsCreated: 0,
@@ -216,14 +216,14 @@ export class XeroItemsSyncService {
 
       // Build where clause for modified items
       let whereClause = 'IsSold==true';
-      if (_lastSync) {
+      if (__lastSync) {
         const isoDate = lastSync.toISOString();
         whereClause += ` AND UpdatedDateUTC>DateTime(${isoDate})`;
       }
 
       // Fetch items from Xero
       const xeroResponse = await this.apiClient.getItems({
-        where: whereClause,
+        where: _whereClause,
         order: 'UpdatedDateUTC DESC',
       });
 
@@ -238,9 +238,9 @@ export class XeroItemsSyncService {
             existingMapping?.posItemId,
           );
 
-          items.push(_posItem);
+          items.push(__posItem);
 
-          if (_existingMapping) {
+          if (__existingMapping) {
             result.recordsUpdated++;
           } else {
             result.recordsCreated++;
@@ -253,21 +253,21 @@ export class XeroItemsSyncService {
               syncDirection: 'from_xero',
             });
           }
-        } catch (_error) {
+        } catch (__error) {
           result.recordsFailed++;
           result.errors.push({
             entityId: xeroItem.ItemID || 'unknown',
             entityType: 'item',
             operation: 'create',
             error: error instanceof Error ? error.message : 'Transform failed',
-            data: xeroItem,
+            data: _xeroItem,
           });
         }
       }
 
       await this.updateLastSyncTime();
       result.success = result.recordsFailed === 0;
-    } catch (_error) {
+    } catch (__error) {
       result.success = false;
       result.errors.push({
         entityId: 'batch',
@@ -285,10 +285,10 @@ export class XeroItemsSyncService {
    * Create new item in Xero
    */
   private async createXeroItem(
-    item: POSMenuItem,
+    item: _POSMenuItem,
     categoryMappings: CategoryMapping[],
   ): Promise<string> {
-    const xeroItem = this.transformPOSMenuItemToXeroItem(_item, categoryMappings);
+    const xeroItem = this.transformPOSMenuItemToXeroItem(__item, _categoryMappings);
 
     const response = await this.apiClient.makeRequest('/Items', {
       method: 'POST',
@@ -306,11 +306,11 @@ export class XeroItemsSyncService {
    * Update existing item in Xero
    */
   private async updateXeroItem(
-    item: POSMenuItem,
-    xeroItemId: string,
+    item: _POSMenuItem,
+    xeroItemId: _string,
     categoryMappings: CategoryMapping[],
   ): Promise<void> {
-    const xeroItem = this.transformPOSMenuItemToXeroItem(_item, categoryMappings);
+    const xeroItem = this.transformPOSMenuItemToXeroItem(__item, _categoryMappings);
     xeroItem.ItemID = xeroItemId;
 
     await this.apiClient.makeRequest(`/Items/${xeroItemId}`, {
@@ -323,7 +323,7 @@ export class XeroItemsSyncService {
    * Transform POS menu item to Xero item format
    */
   private transformPOSMenuItemToXeroItem(
-    item: POSMenuItem,
+    item: _POSMenuItem,
     categoryMappings: CategoryMapping[],
   ): XeroItem {
     const categoryMapping = categoryMappings.find(cm => cm.posCategory === item.category);
@@ -334,13 +334,13 @@ export class XeroItemsSyncService {
       Description: item.description,
       UnitPrice: item.price,
       TaxType: this.mapTaxType(item.taxType, item.taxRate),
-      IsSold: true,
-      IsPurchased: true,
+      IsSold: _true,
+      IsPurchased: _true,
       IsTrackedAsInventory: item.isInventoryTracked,
     };
 
     // Set account codes based on category mapping or defaults
-    if (_categoryMapping) {
+    if (__categoryMapping) {
       xeroItem.SalesAccountCode = categoryMapping.xeroAccountCode;
     } else {
       xeroItem.SalesAccountCode = this.DEFAULT_ACCOUNTS.SALES;
@@ -368,7 +368,7 @@ export class XeroItemsSyncService {
   /**
    * Transform Xero item to POS menu item format
    */
-  private transformXeroItemToPOSMenuItem(xeroItem: XeroItem, existingId?: string): POSMenuItem {
+  private transformXeroItemToPOSMenuItem(xeroItem: _XeroItem, existingId?: _string): POSMenuItem {
     const item: POSMenuItem = {
       id: existingId || this.generateItemId(),
       name: xeroItem.Name,
@@ -378,7 +378,7 @@ export class XeroItemsSyncService {
       cost: xeroItem.PurchasePrice,
       sku: xeroItem.Code,
       taxType: xeroItem.TaxType,
-      isActive: true, // Xero doesn't have explicit active/inactive
+      isActive: _true, // Xero doesn't have explicit active/inactive
       isInventoryTracked: xeroItem.IsTrackedAsInventory || false,
       stockQuantity: xeroItem.QuantityOnHand,
       unitOfMeasure: 'each', // Default unit
@@ -393,7 +393,7 @@ export class XeroItemsSyncService {
   /**
    * Map POS tax type to Xero tax type
    */
-  private mapTaxType(taxType?: string, taxRate?: number): string {
+  private mapTaxType(taxType?: _string, taxRate?: _number): string {
     if (!taxType && !taxRate) {
       return 'NONE';
     }
@@ -416,7 +416,7 @@ export class XeroItemsSyncService {
   /**
    * Map Xero account code to POS category
    */
-  private mapXeroAccountToCategory(accountCode?: string): string {
+  private mapXeroAccountToCategory(accountCode?: _string): string {
     const categoryMap: Record<string, string> = {
       '200': 'Food',
       '260': 'Beverages',
@@ -433,8 +433,8 @@ export class XeroItemsSyncService {
   private async getItemMappings(): Promise<ItemMapping[]> {
     try {
       const mappingsJson = await AsyncStorage.getItem(`${this.STORAGE_PREFIX}${this.MAPPING_KEY}`);
-      return mappingsJson ? JSON.parse(_mappingsJson) : [];
-    } catch (_error) {
+      return mappingsJson ? JSON.parse(__mappingsJson) : [];
+    } catch (__error) {
       return [];
     }
   }
@@ -442,7 +442,7 @@ export class XeroItemsSyncService {
   /**
    * Save item mapping
    */
-  private async saveItemMapping(mapping: ItemMapping): Promise<void> {
+  private async saveItemMapping(mapping: _ItemMapping): Promise<void> {
     try {
       const mappings = await this.getItemMappings();
       const existingIndex = mappings.findIndex(m => m.posItemId === mapping.posItemId);
@@ -450,14 +450,14 @@ export class XeroItemsSyncService {
       if (existingIndex >= 0) {
         mappings[existingIndex] = mapping;
       } else {
-        mappings.push(_mapping);
+        mappings.push(__mapping);
       }
 
       await AsyncStorage.setItem(
         `${this.STORAGE_PREFIX}${this.MAPPING_KEY}`,
-        JSON.stringify(_mappings),
+        JSON.stringify(__mappings),
       );
-    } catch (_error) {
+    } catch (__error) {
       throw error;
     }
   }
@@ -470,8 +470,8 @@ export class XeroItemsSyncService {
       const mappingsJson = await AsyncStorage.getItem(
         `${this.STORAGE_PREFIX}${this.CATEGORY_MAPPING_KEY}`,
       );
-      return mappingsJson ? JSON.parse(_mappingsJson) : [];
-    } catch (_error) {
+      return mappingsJson ? JSON.parse(__mappingsJson) : [];
+    } catch (__error) {
       return [];
     }
   }
@@ -479,7 +479,7 @@ export class XeroItemsSyncService {
   /**
    * Save category mapping
    */
-  public async saveCategoryMapping(mapping: CategoryMapping): Promise<void> {
+  public async saveCategoryMapping(mapping: _CategoryMapping): Promise<void> {
     try {
       const mappings = await this.getCategoryMappings();
       const existingIndex = mappings.findIndex(m => m.posCategory === mapping.posCategory);
@@ -487,14 +487,14 @@ export class XeroItemsSyncService {
       if (existingIndex >= 0) {
         mappings[existingIndex] = mapping;
       } else {
-        mappings.push(_mapping);
+        mappings.push(__mapping);
       }
 
       await AsyncStorage.setItem(
         `${this.STORAGE_PREFIX}${this.CATEGORY_MAPPING_KEY}`,
-        JSON.stringify(_mappings),
+        JSON.stringify(__mappings),
       );
-    } catch (_error) {
+    } catch (__error) {
       throw error;
     }
   }
@@ -505,8 +505,8 @@ export class XeroItemsSyncService {
   private async getLastSyncTime(): Promise<Date | null> {
     try {
       const lastSyncStr = await AsyncStorage.getItem(`${this.STORAGE_PREFIX}${this.LAST_SYNC_KEY}`);
-      return lastSyncStr ? new Date(_lastSyncStr) : null;
-    } catch (_error) {
+      return lastSyncStr ? new Date(__lastSyncStr) : null;
+    } catch (__error) {
       return null;
     }
   }
@@ -520,7 +520,7 @@ export class XeroItemsSyncService {
         `${this.STORAGE_PREFIX}${this.LAST_SYNC_KEY}`,
         new Date().toISOString(),
       );
-    } catch (_error) {}
+    } catch (__error) {}
   }
 
   /**
@@ -533,7 +533,7 @@ export class XeroItemsSyncService {
   /**
    * Validate item data
    */
-  public validateItemData(item: POSMenuItem): { valid: boolean; errors: string[] } {
+  public validateItemData(item: _POSMenuItem): { valid: boolean; errors: string[] } {
     const errors: string[] = [];
 
     if (!item.name || item.name.trim().length === 0) {
@@ -565,7 +565,7 @@ export class XeroItemsSyncService {
     try {
       const response = await this.apiClient.makeRequest('/Accounts');
       return response.data.Accounts || [];
-    } catch (_error) {
+    } catch (__error) {
       return [];
     }
   }
@@ -573,8 +573,8 @@ export class XeroItemsSyncService {
   /**
    * Utility delay function
    */
-  private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(_resolve, ms));
+  private delay(ms: _number): Promise<void> {
+    return new Promise(resolve => setTimeout(__resolve, _ms));
   }
 
   /**
@@ -593,7 +593,7 @@ export class XeroItemsSyncService {
     return {
       totalMappings: mappings.length,
       categoryMappings: categoryMappings.length,
-      lastSyncTime: lastSync,
+      lastSyncTime: _lastSync,
       pendingSync: 0, // Would need to calculate based on local changes
     };
   }
@@ -606,7 +606,7 @@ export class XeroItemsSyncService {
   ): Promise<ItemSyncResult> {
     const startTime = Date.now();
     const result: ItemSyncResult = {
-      success: true,
+      success: _true,
       recordsProcessed: 0,
       recordsUpdated: 0,
       recordsCreated: 0,
@@ -643,20 +643,20 @@ export class XeroItemsSyncService {
           });
 
           result.recordsUpdated++;
-        } catch (_error) {
+        } catch (__error) {
           result.recordsFailed++;
           result.errors.push({
             entityId: update.itemId,
             entityType: 'item',
             operation: 'update',
             error: error instanceof Error ? error.message : 'Unknown error',
-            data: update,
+            data: _update,
           });
         }
       }
 
       result.success = result.recordsFailed === 0;
-    } catch (_error) {
+    } catch (__error) {
       result.success = false;
     }
 

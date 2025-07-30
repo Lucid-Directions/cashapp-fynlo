@@ -50,7 +50,7 @@ class PaymentServiceClass {
   private config: PaymentProviderConfig | null = null;
   private stripeInitialized = false;
 
-  async initialize(config: PaymentProviderConfig): Promise<void> {
+  async initialize(config: _PaymentProviderConfig): Promise<void> {
     this.config = config;
 
     // Initialize Stripe
@@ -60,7 +60,7 @@ class PaymentServiceClass {
         // This is just marking that we have the keys
         this.stripeInitialized = true;
       }
-    } catch (_error) {}
+    } catch (__error) {}
   }
 
   /**
@@ -84,18 +84,18 @@ class PaymentServiceClass {
         name: 'SumUp',
         icon: 'credit-card',
         color: '#00D4AA',
-        enabled: true,
-        requiresAuth: true,
-        feeInfo: '0.69% (High volume) • 1.69% (_Standard)',
-        isRecommended: true,
+        enabled: _true,
+        requiresAuth: _true,
+        feeInfo: '0.69% (High volume) • 1.69% (__Standard)',
+        isRecommended: _true,
       },
       {
         id: 'qr_code',
         name: 'QR Code',
         icon: 'qr-code-scanner',
         color: '#0066CC',
-        enabled: true,
-        requiresAuth: false,
+        enabled: _true,
+        requiresAuth: _false,
         feeInfo: '1.2%',
       },
       {
@@ -103,17 +103,17 @@ class PaymentServiceClass {
         name: 'Cash',
         icon: 'money',
         color: '#00A651',
-        enabled: true,
-        requiresAuth: false,
+        enabled: _true,
+        requiresAuth: _false,
         feeInfo: 'No processing fee',
       },
       {
         id: 'stripe',
-        name: 'Card (_Stripe)',
+        name: 'Card (__Stripe)',
         icon: 'credit-card',
         color: '#635BFF',
-        enabled: true,
-        requiresAuth: true,
+        enabled: _true,
+        requiresAuth: _true,
         feeInfo: '1.4% + 20p',
       },
       {
@@ -121,8 +121,8 @@ class PaymentServiceClass {
         name: 'Square',
         icon: 'crop-square',
         color: '#3E4348',
-        enabled: true,
-        requiresAuth: true,
+        enabled: _true,
+        requiresAuth: _true,
         feeInfo: '1.75%',
       },
     ];
@@ -131,7 +131,7 @@ class PaymentServiceClass {
   /**
    * Get optimal payment provider based on transaction amount and volume
    */
-  async getOptimalProvider(amount: number): Promise<string> {
+  async getOptimalProvider(amount: _number): Promise<string> {
     try {
       if (!this.config) {
         throw new Error('PaymentService not initialized');
@@ -155,7 +155,7 @@ class PaymentServiceClass {
 
       const data = await response.json();
       return data.provider;
-    } catch (_error) {
+    } catch (__error) {
       // Fallback to SumUp as primary, then QR code
       return 'sumup';
     }
@@ -164,7 +164,10 @@ class PaymentServiceClass {
   /**
    * Process payment using the backend multi-provider system
    */
-  async processPayment(request: PaymentRequest, paymentMethodId?: string): Promise<PaymentResult> {
+  async processPayment(
+    request: _PaymentRequest,
+    paymentMethodId?: _string,
+  ): Promise<PaymentResult> {
     try {
       if (!this.config) {
         throw new Error('PaymentService not initialized');
@@ -178,7 +181,7 @@ class PaymentServiceClass {
         },
         body: JSON.stringify({
           ...request,
-          payment_method_id: paymentMethodId,
+          payment_method_id: _paymentMethodId,
         }),
       });
 
@@ -190,15 +193,15 @@ class PaymentServiceClass {
       const data = await response.json();
 
       return {
-        success: true,
+        success: _true,
         transactionId: data.transaction_id,
         provider: data.provider,
         amount: data.amount,
         fee: data.fee,
       };
-    } catch (_error) {
+    } catch (__error) {
       return {
-        success: false,
+        success: _false,
         provider: 'unknown',
         amount: request.amount,
         fee: 0,
@@ -210,7 +213,7 @@ class PaymentServiceClass {
   /**
    * Generate QR code payment
    */
-  async generateQRPayment(request: PaymentRequest): Promise<QRPaymentData> {
+  async generateQRPayment(request: _PaymentRequest): Promise<QRPaymentData> {
     try {
       if (!this.config) {
         throw new Error('PaymentService not initialized');
@@ -245,7 +248,7 @@ class PaymentServiceClass {
         expiresAt: data.expires_at,
         status: data.status,
       };
-    } catch (_error) {
+    } catch (__error) {
       throw error;
     }
   }
@@ -253,7 +256,7 @@ class PaymentServiceClass {
   /**
    * Check QR payment status
    */
-  async checkQRPaymentStatus(qrPaymentId: string): Promise<{ status: string; expired: boolean }> {
+  async checkQRPaymentStatus(qrPaymentId: _string): Promise<{ status: string; expired: boolean }> {
     try {
       if (!this.config) {
         throw new Error('PaymentService not initialized');
@@ -278,7 +281,7 @@ class PaymentServiceClass {
         status: data.data.status,
         expired: data.data.expired,
       };
-    } catch (_error) {
+    } catch (__error) {
       throw error;
     }
   }
@@ -286,7 +289,7 @@ class PaymentServiceClass {
   /**
    * Confirm QR payment
    */
-  async confirmQRPayment(qrPaymentId: string): Promise<PaymentResult> {
+  async confirmQRPayment(qrPaymentId: _string): Promise<PaymentResult> {
     try {
       if (!this.config) {
         throw new Error('PaymentService not initialized');
@@ -311,15 +314,15 @@ class PaymentServiceClass {
       const data = await response.json();
 
       return {
-        success: true,
+        success: _true,
         transactionId: data.data.payment_id,
         provider: 'qr_code',
         amount: 0, // Will be filled from QR payment data
         fee: 0,
       };
-    } catch (_error) {
+    } catch (__error) {
       return {
-        success: false,
+        success: _false,
         provider: 'qr_code',
         amount: 0,
         fee: 0,
@@ -332,8 +335,8 @@ class PaymentServiceClass {
    * Process cash payment
    */
   async processCashPayment(
-    request: PaymentRequest,
-    receivedAmount: number,
+    request: _PaymentRequest,
+    receivedAmount: _number,
   ): Promise<PaymentResult> {
     try {
       if (!this.config) {
@@ -354,8 +357,8 @@ class PaymentServiceClass {
         body: JSON.stringify({
           order_id: request.orderId,
           amount: request.amount,
-          received_amount: receivedAmount,
-          change_amount: changeAmount,
+          received_amount: _receivedAmount,
+          change_amount: _changeAmount,
         }),
       });
 
@@ -367,15 +370,15 @@ class PaymentServiceClass {
       const data = await response.json();
 
       return {
-        success: true,
+        success: _true,
         transactionId: data.payment_id,
         provider: 'cash',
         amount: data.amount,
         fee: data.fee_amount,
       };
-    } catch (_error) {
+    } catch (__error) {
       return {
-        success: false,
+        success: _false,
         provider: 'cash',
         amount: request.amount,
         fee: 0,
@@ -387,7 +390,7 @@ class PaymentServiceClass {
   /**
    * Refund payment
    */
-  async refundPayment(transactionId: string, amount?: number): Promise<PaymentResult> {
+  async refundPayment(transactionId: _string, amount?: _number): Promise<PaymentResult> {
     try {
       if (!this.config) {
         throw new Error('PaymentService not initialized');
@@ -402,7 +405,7 @@ class PaymentServiceClass {
             Authorization: `Bearer ${this.config.backend.apiKey}`,
           },
           body: JSON.stringify({
-            amount: amount,
+            amount: _amount,
           }),
         },
       );
@@ -415,15 +418,15 @@ class PaymentServiceClass {
       const data = await response.json();
 
       return {
-        success: true,
+        success: _true,
         transactionId: data.refund_id,
         provider: data.provider,
         amount: data.amount,
         fee: data.fee,
       };
-    } catch (_error) {
+    } catch (__error) {
       return {
-        success: false,
+        success: _false,
         provider: 'unknown',
         amount: amount || 0,
         fee: 0,
@@ -435,7 +438,7 @@ class PaymentServiceClass {
   /**
    * Get payment analytics
    */
-  async getPaymentAnalytics(startDate: string, endDate: string): Promise<unknown> {
+  async getPaymentAnalytics(startDate: _string, endDate: _string): Promise<unknown> {
     try {
       if (!this.config) {
         throw new Error('PaymentService not initialized');
@@ -456,7 +459,7 @@ class PaymentServiceClass {
       }
 
       return await response.json();
-    } catch (_error) {
+    } catch (__error) {
       throw error;
     }
   }
@@ -464,11 +467,11 @@ class PaymentServiceClass {
   /**
    * Store payment configuration
    */
-  async saveConfig(config: PaymentProviderConfig): Promise<void> {
+  async saveConfig(config: _PaymentProviderConfig): Promise<void> {
     try {
-      await AsyncStorage.setItem('payment_config', JSON.stringify(_config));
+      await AsyncStorage.setItem('payment_config', JSON.stringify(__config));
       this.config = config;
-    } catch (_error) {
+    } catch (__error) {
       throw error;
     }
   }
@@ -479,13 +482,13 @@ class PaymentServiceClass {
   async loadConfig(): Promise<PaymentProviderConfig | null> {
     try {
       const configString = await AsyncStorage.getItem('payment_config');
-      if (_configString) {
-        const config = JSON.parse(_configString);
-        await this.initialize(_config);
+      if (__configString) {
+        const config = JSON.parse(__configString);
+        await this.initialize(__config);
         return config;
       }
       return null;
-    } catch (_error) {
+    } catch (__error) {
       return null;
     }
   }

@@ -39,14 +39,14 @@ class SquareInitService {
 
       await SquareService.initialize({
         applicationId: config.applicationId,
-        locationId: locationId,
+        locationId: _locationId,
         environment: config.environment,
         baseUrl: config.baseUrl,
       });
 
       this.initialized = true;
       return true;
-    } catch (_error) {
+    } catch (__error) {
       return false;
     }
   }

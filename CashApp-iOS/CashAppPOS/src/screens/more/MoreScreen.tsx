@@ -27,7 +27,7 @@ interface MenuOption {
 const MoreScreen: React.FC = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
-  const styles = useThemedStyles(_createStyles);
+  const styles = useThemedStyles(__createStyles);
   const { user } = useAppStore();
   const { signOut } = useAuth();
 
@@ -62,7 +62,7 @@ const MoreScreen: React.FC = () => {
         {
           id: 'dining-room',
           title: 'Dining Room',
-          subtitle: 'Floor plan, tables, and reservations',
+          subtitle: 'Floor plan, _tables, and reservations',
           icon: 'table-restaurant',
           route: 'TableManagement',
           color: theme.colors.primary,
@@ -75,7 +75,7 @@ const MoreScreen: React.FC = () => {
         {
           id: 'reports',
           title: 'Reports',
-          subtitle: 'Sales, financial, and business reports',
+          subtitle: 'Sales, _financial, and business reports',
           icon: 'bar-chart',
           route: 'Reports',
           color: theme.colors.secondary,
@@ -97,7 +97,7 @@ const MoreScreen: React.FC = () => {
         {
           id: 'settings',
           title: 'Settings',
-          subtitle: 'Business, hardware, and app configuration',
+          subtitle: 'Business, _hardware, and app configuration',
           icon: 'settings',
           route: 'Settings',
           color: theme.colors.darkGray,
@@ -118,7 +118,7 @@ const MoreScreen: React.FC = () => {
         {
           id: 'help',
           title: 'Help & Support',
-          subtitle: 'Guides, tutorials, and contact',
+          subtitle: 'Guides, _tutorials, and contact',
           icon: 'help',
           route: 'Help',
           color: theme.colors.darkGray,
@@ -134,12 +134,12 @@ const MoreScreen: React.FC = () => {
     },
   ];
 
-  const handleOptionPress = async (option: MenuOption) => {
+  const handleOptionPress = async (option: _MenuOption) => {
     if (option.id === 'logout') {
       // Handle logout using AuthContext
       try {
         await signOut();
-      } catch (_error) {}
+      } catch (__error) {}
     } else if (option.route) {
       // Navigate to the route
       navigation.navigate(option.route as never);
@@ -188,19 +188,19 @@ const MoreScreen: React.FC = () => {
         </View>
 
         {/* Menu Sections */}
-        {menuSections.map((_section, sectionIndex) => (
+        {menuSections.map((__section, _sectionIndex) => (
           <View key={section.title} style={styles.section}>
             <Text style={styles.sectionTitle}>{section.title}</Text>
 
             <View style={styles.optionsContainer}>
-              {section.options.map((_option, index) => (
+              {section.options.map((__option, _index) => (
                 <TouchableOpacity
                   key={option.id}
                   style={[
                     styles.optionCard,
                     index === section.options.length - 1 && styles.lastOptionCard,
                   ]}
-                  onPress={() => handleOptionPress(_option)}
+                  onPress={() => handleOptionPress(__option)}
                   activeOpacity={0.7}>
                   <View style={[styles.optionIcon, { backgroundColor: `${option.color}15` }]}>
                     <Icon
@@ -239,7 +239,7 @@ const MoreScreen: React.FC = () => {
   );
 };
 
-const createStyles = (theme: unknown) =>
+const createStyles = (theme: _unknown) =>
   StyleSheet.create({
     container: {
       flex: 1,

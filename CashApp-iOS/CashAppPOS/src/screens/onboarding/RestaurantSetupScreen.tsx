@@ -63,7 +63,7 @@ const RestaurantSetupScreen: React.FC = () => {
   });
 
   const [currentStep, setCurrentStep] = useState(1);
-  const [loading, setLoading] = useState(_false);
+  const [loading, setLoading] = useState(__false);
 
   const businessTypes = [
     'Restaurant',
@@ -78,7 +78,7 @@ const RestaurantSetupScreen: React.FC = () => {
     'Other',
   ];
 
-  const updateField = (field: keyof RestaurantFormData, value: string) => {
+  const updateField = (field: keyof RestaurantFormData, value: _string) => {
     setFormData(prev => {
       const updated = { ...prev, [field]: value };
 
@@ -91,8 +91,8 @@ const RestaurantSetupScreen: React.FC = () => {
     });
   };
 
-  const validateStep = (step: number): boolean => {
-    switch (_step) {
+  const validateStep = (step: _number): boolean => {
+    switch (__step) {
       case 1:
         return !!(formData.restaurantName && formData.displayName && formData.businessType);
       case 2:
@@ -105,7 +105,7 @@ const RestaurantSetupScreen: React.FC = () => {
   };
 
   const nextStep = () => {
-    if (!validateStep(_currentStep)) {
+    if (!validateStep(__currentStep)) {
       Alert.alert('Missing Information', 'Please fill in all required fields before continuing.');
       return;
     }
@@ -125,7 +125,7 @@ const RestaurantSetupScreen: React.FC = () => {
 
   const saveRestaurantInfo = async () => {
     try {
-      setLoading(_true);
+      setLoading(__true);
 
       await updateConfig({
         restaurantName: formData.restaurantName,
@@ -158,10 +158,10 @@ const RestaurantSetupScreen: React.FC = () => {
           },
         ],
       );
-    } catch (_error) {
+    } catch (__error) {
       Alert.alert('Error', 'Failed to save restaurant information. Please try again.');
     } finally {
-      setLoading(_false);
+      setLoading(__false);
     }
   };
 
@@ -203,7 +203,7 @@ const RestaurantSetupScreen: React.FC = () => {
         <TextInput
           style={styles.textInput}
           value={formData.restaurantName}
-          onChangeText={value => updateField('restaurantName', value)}
+          onChangeText={value => updateField('restaurantName', _value)}
           placeholder="e.g., Maria's Mexican Kitchen"
           placeholderTextColor={Colors.mediumGray}
         />
@@ -215,7 +215,7 @@ const RestaurantSetupScreen: React.FC = () => {
         <TextInput
           style={styles.textInput}
           value={formData.displayName}
-          onChangeText={value => updateField('displayName', value)}
+          onChangeText={value => updateField('displayName', _value)}
           placeholder="e.g., Maria's Kitchen"
           placeholderTextColor={Colors.mediumGray}
         />
@@ -234,7 +234,7 @@ const RestaurantSetupScreen: React.FC = () => {
                 styles.businessTypeButton,
                 formData.businessType === type && styles.businessTypeButtonActive,
               ]}
-              onPress={() => updateField('businessType', type)}>
+              onPress={() => updateField('businessType', _type)}>
               <Text
                 style={[
                   styles.businessTypeText,
@@ -259,7 +259,7 @@ const RestaurantSetupScreen: React.FC = () => {
         <TextInput
           style={styles.textInput}
           value={formData.phone}
-          onChangeText={value => updateField('phone', value)}
+          onChangeText={value => updateField('phone', _value)}
           placeholder="+44 20 1234 5678"
           placeholderTextColor={Colors.mediumGray}
           keyboardType="phone-pad"
@@ -271,7 +271,7 @@ const RestaurantSetupScreen: React.FC = () => {
         <TextInput
           style={styles.textInput}
           value={formData.email}
-          onChangeText={value => updateField('email', value)}
+          onChangeText={value => updateField('email', _value)}
           placeholder="owner@mariaskitchen.co.uk"
           placeholderTextColor={Colors.mediumGray}
           keyboardType="email-address"
@@ -293,7 +293,7 @@ const RestaurantSetupScreen: React.FC = () => {
         <TextInput
           style={styles.textInput}
           value={formData.street}
-          onChangeText={value => updateField('street', value)}
+          onChangeText={value => updateField('street', _value)}
           placeholder="123 High Street"
           placeholderTextColor={Colors.mediumGray}
         />
@@ -305,7 +305,7 @@ const RestaurantSetupScreen: React.FC = () => {
           <TextInput
             style={styles.textInput}
             value={formData.city}
-            onChangeText={value => updateField('city', value)}
+            onChangeText={value => updateField('city', _value)}
             placeholder="London"
             placeholderTextColor={Colors.mediumGray}
           />
@@ -316,7 +316,7 @@ const RestaurantSetupScreen: React.FC = () => {
           <TextInput
             style={styles.textInput}
             value={formData.zipCode}
-            onChangeText={value => updateField('zipCode', value)}
+            onChangeText={value => updateField('zipCode', _value)}
             placeholder="SW1A 1AA"
             placeholderTextColor={Colors.mediumGray}
             autoCapitalize="characters"
@@ -330,7 +330,7 @@ const RestaurantSetupScreen: React.FC = () => {
           <TextInput
             style={styles.textInput}
             value={formData.state}
-            onChangeText={value => updateField('state', value)}
+            onChangeText={value => updateField('state', _value)}
             placeholder="Greater London"
             placeholderTextColor={Colors.mediumGray}
           />
@@ -351,7 +351,7 @@ const RestaurantSetupScreen: React.FC = () => {
   );
 
   const renderCurrentStep = () => {
-    switch (_currentStep) {
+    switch (__currentStep) {
       case 1:
         return renderStep1();
       case 2:
@@ -408,9 +408,9 @@ const RestaurantSetupScreen: React.FC = () => {
           <View style={styles.navigationSpacer} />
 
           <TouchableOpacity
-            style={[styles.nextButton, !validateStep(_currentStep) && styles.nextButtonDisabled]}
+            style={[styles.nextButton, !validateStep(__currentStep) && styles.nextButtonDisabled]}
             onPress={nextStep}
-            disabled={loading || !validateStep(_currentStep)}>
+            disabled={loading || !validateStep(__currentStep)}>
             <Text style={styles.nextButtonText}>
               {loading ? 'Saving...' : currentStep === 3 ? 'Complete Setup' : 'Next'}
             </Text>

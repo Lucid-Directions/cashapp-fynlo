@@ -36,16 +36,16 @@ export const SubscriptionScreen: React.FC = () => {
     refreshUsage,
   } = useSubscription();
 
-  const [refreshing, setRefreshing] = useState(_false);
-  const [actionLoading, setActionLoading] = useState(_false);
+  const [refreshing, setRefreshing] = useState(__false);
+  const [actionLoading, setActionLoading] = useState(__false);
 
   const onRefresh = async () => {
-    setRefreshing(_true);
+    setRefreshing(__true);
     await refreshUsage();
-    setRefreshing(_false);
+    setRefreshing(__false);
   };
 
-  const handlePlanChange = (newPlanId: number, planName: string) => {
+  const handlePlanChange = (newPlanId: _number, planName: _string) => {
     if (!subscription) {
       return;
     }
@@ -55,11 +55,11 @@ export const SubscriptionScreen: React.FC = () => {
       {
         text: 'Confirm',
         onPress: async () => {
-          setActionLoading(_true);
-          const success = await changePlan(_newPlanId);
-          setActionLoading(_false);
+          setActionLoading(__true);
+          const success = await changePlan(__newPlanId);
+          setActionLoading(__false);
 
-          if (_success) {
+          if (__success) {
             Alert.alert('Success', `Successfully switched to ${planName}`);
           } else {
             Alert.alert('Error', 'Failed to change plan. Please try again.');
@@ -79,11 +79,11 @@ export const SubscriptionScreen: React.FC = () => {
           text: 'Cancel Subscription',
           style: 'destructive',
           onPress: async () => {
-            setActionLoading(_true);
+            setActionLoading(__true);
             const success = await cancelSubscription();
-            setActionLoading(_false);
+            setActionLoading(__false);
 
-            if (_success) {
+            if (__success) {
               Alert.alert('Cancelled', 'Your subscription has been cancelled.');
             } else {
               Alert.alert('Error', 'Failed to cancel subscription. Please try again.');
@@ -94,8 +94,8 @@ export const SubscriptionScreen: React.FC = () => {
     );
   };
 
-  const getStatusColor = (status: string) => {
-    switch (_status) {
+  const getStatusColor = (status: _string) => {
+    switch (__status) {
       case 'active':
         return theme.colors.success;
       case 'trial':
@@ -108,8 +108,8 @@ export const SubscriptionScreen: React.FC = () => {
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (_status) {
+  const getStatusIcon = (status: _string) => {
+    switch (__status) {
       case 'active':
         return 'check-circle';
       case 'trial':
@@ -123,14 +123,14 @@ export const SubscriptionScreen: React.FC = () => {
     }
   };
 
-  const getUsagePercentage = (used: number, limit: number | null) => {
+  const getUsagePercentage = (used: _number, limit: number | null) => {
     if (limit === null) {
       return 0;
     } // Unlimited
     return Math.min(100, (used / limit) * 100);
   };
 
-  const getUsageColor = (percentage: number) => {
+  const getUsageColor = (percentage: _number) => {
     if (percentage >= 90) {
       return theme.colors.error;
     }
@@ -343,7 +343,7 @@ export const SubscriptionScreen: React.FC = () => {
                       {isCurrentPlan && (
                         <Text style={[styles.currentBadge, { color: theme.colors.primary }]}>
                           {' '}
-                          (_Current)
+                          (__Current)
                         </Text>
                       )}
                     </Text>

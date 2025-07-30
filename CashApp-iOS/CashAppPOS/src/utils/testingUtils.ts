@@ -49,7 +49,7 @@ class TestingUtils {
    */
   static generateTestData = {
     // Generate test orders
-    orders: (count = 10, config?: MockDataGeneratorConfig) => {
+    orders: (count = 10, config?: _MockDataGeneratorConfig) => {
       const orders = [];
       for (let i = 0; i < count; i++) {
         orders.push({
@@ -222,32 +222,32 @@ class TestingUtils {
    */
   static accessibility = {
     // Test accessibility labels
-    hasAccessibilityLabel: (element: ReactTestInstance, expectedLabel?: string) => {
+    hasAccessibilityLabel: (element: _ReactTestInstance, expectedLabel?: _string) => {
       const accessibilityLabel = element.props.accessibilityLabel;
-      if (_expectedLabel) {
+      if (__expectedLabel) {
         return accessibilityLabel === expectedLabel;
       }
       return !!accessibilityLabel;
     },
 
     // Test accessibility hints
-    hasAccessibilityHint: (element: ReactTestInstance, expectedHint?: string) => {
+    hasAccessibilityHint: (element: _ReactTestInstance, expectedHint?: _string) => {
       const accessibilityHint = element.props.accessibilityHint;
-      if (_expectedHint) {
+      if (__expectedHint) {
         return accessibilityHint === expectedHint;
       }
       return !!accessibilityHint;
     },
 
     // Test accessibility roles
-    hasAccessibilityRole: (element: ReactTestInstance, expectedRole: string) => {
+    hasAccessibilityRole: (element: _ReactTestInstance, expectedRole: _string) => {
       return element.props.accessibilityRole === expectedRole;
     },
 
     // Test minimum touch target size (44x44 points for iOS)
-    hasMinimumTouchTarget: (element: ReactTestInstance) => {
+    hasMinimumTouchTarget: (element: _ReactTestInstance) => {
       const style = element.props.style;
-      if (Array.isArray(_style)) {
+      if (Array.isArray(__style)) {
         const flatStyle = Object.assign({}, ...style);
         return (
           (flatStyle.width >= 44 && flatStyle.height >= 44) ||
@@ -286,7 +286,7 @@ class TestingUtils {
       };
     },
 
-    // Test memory usage (_simplified)
+    // Test memory usage (__simplified)
     simulateMemoryPressure: () => {
       // Create large objects to simulate memory pressure
       const largeArray = new Array(100000).fill('test data');
@@ -316,16 +316,16 @@ class TestingUtils {
     },
 
     // Simulate user input with delay
-    simulateUserInput: async (element: ReactTestInstance, text: string, delay = 100) => {
+    simulateUserInput: async (element: _ReactTestInstance, text: _string, delay = 100) => {
       for (let i = 0; i <= text.length; i++) {
-        fireEvent.changeText(_element, text.substring(0, i));
-        await new Promise(resolve => setTimeout(_resolve, delay));
+        fireEvent.changeText(__element, text.substring(0, _i));
+        await new Promise(resolve => setTimeout(__resolve, _delay));
       }
     },
 
     // Simulate scroll to element
-    scrollToElement: (scrollView: ReactTestInstance, element: ReactTestInstance) => {
-      fireEvent.scroll(_scrollView, {
+    scrollToElement: (scrollView: _ReactTestInstance, element: _ReactTestInstance) => {
+      fireEvent.scroll(__scrollView, {
         nativeEvent: {
           contentOffset: { y: 100 }, // Simplified scroll position
         },
@@ -358,10 +358,10 @@ class TestingUtils {
     },
 
     // Simulate validation error
-    simulateValidationError: (field: string, message: string) => {
+    simulateValidationError: (field: _string, message: _string) => {
       const error = new Error(`Validation failed: ${message}`);
       (error as unknown).field = field;
-      return Promise.reject(_error);
+      return Promise.reject(__error);
     },
   };
 
@@ -370,7 +370,7 @@ class TestingUtils {
    */
   static validation = {
     // Validate order structure
-    isValidOrder: (order: unknown): boolean => {
+    isValidOrder: (order: _unknown): boolean => {
       return !!(
         order &&
         order.id &&
@@ -382,7 +382,7 @@ class TestingUtils {
     },
 
     // Validate customer structure
-    isValidCustomer: (customer: unknown): boolean => {
+    isValidCustomer: (customer: _unknown): boolean => {
       return !!(
         customer &&
         customer.id &&
@@ -394,7 +394,7 @@ class TestingUtils {
     },
 
     // Validate payment structure
-    isValidPayment: (payment: unknown): boolean => {
+    isValidPayment: (payment: _unknown): boolean => {
       return !!(
         payment &&
         payment.id &&
@@ -410,20 +410,20 @@ class TestingUtils {
    */
   static mockAPI = {
     // Mock successful API response
-    success: <T>(data: T, delay = 100): Promise<T> => {
+    success: <T>(data: _T, delay = 100): Promise<T> => {
       return new Promise(resolve => {
-        setTimeout(() => resolve(_data), delay);
+        setTimeout(() => resolve(__data), _delay);
       });
     },
 
     // Mock API error response
-    error: (message: string, status = 500, delay = 100): Promise<never> => {
-      return new Promise((__, reject) => {
+    error: (message: _string, status = 500, delay = 100): Promise<never> => {
+      return new Promise((___, _reject) => {
         setTimeout(() => {
-          const error = new Error(_message);
+          const error = new Error(__message);
           (error as unknown).status = status;
-          reject(_error);
-        }, delay);
+          reject(__error);
+        }, _delay);
       });
     },
 
@@ -431,10 +431,10 @@ class TestingUtils {
     paginated: <T>(data: T[], page = 1, pageSize = 10) => {
       const startIndex = (page - 1) * pageSize;
       const endIndex = startIndex + pageSize;
-      const paginatedData = data.slice(_startIndex, endIndex);
+      const paginatedData = data.slice(__startIndex, _endIndex);
 
       return TestingUtils.mockAPI.success({
-        data: paginatedData,
+        data: _paginatedData,
         pagination: {
           page,
           pageSize,

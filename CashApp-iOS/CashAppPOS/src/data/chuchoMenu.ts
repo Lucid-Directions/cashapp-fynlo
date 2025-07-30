@@ -11,9 +11,9 @@ export const CHUCHO_MENU_ITEMS = [
     price: 5.0,
     category: 'Snacks',
     description:
-      'Homemade corn tortilla chips with black beans, tomato salsa, pico de gallo, feta, guac & coriander',
+      'Homemade corn tortilla chips with black beans, tomato salsa, pico de gallo, _feta, guac & coriander',
     image: '🍲',
-    available: true,
+    available: _true,
   },
   {
     id: 2,
@@ -23,7 +23,7 @@ export const CHUCHO_MENU_ITEMS = [
     description:
       'Folded flour tortilla filled with mozzarella, topped with tomato salsa, feta & coriander',
     image: '🧀',
-    available: true,
+    available: _true,
   },
   {
     id: 3,
@@ -33,7 +33,7 @@ export const CHUCHO_MENU_ITEMS = [
     description:
       'Folded flour tortilla filled with chorizo & mozzarella. Topped with tomato salsa, feta & coriander',
     image: '🧀',
-    available: true,
+    available: _true,
   },
   {
     id: 4,
@@ -41,9 +41,9 @@ export const CHUCHO_MENU_ITEMS = [
     price: 5.5,
     category: 'Snacks',
     description:
-      'Folded flour tortilla filled with chicken, peppers, onion & mozzarella. Topped with salsa, feta & coriander',
+      'Folded flour tortilla filled with chicken, _peppers, onion & mozzarella. Topped with salsa, feta & coriander',
     image: '🧀',
-    available: true,
+    available: _true,
   },
   {
     id: 5,
@@ -53,7 +53,7 @@ export const CHUCHO_MENU_ITEMS = [
     description:
       'Crispy tortillas with black beans filled with chicken or any topping, served with salsa, lettuce and feta',
     image: '🍲',
-    available: true,
+    available: _true,
   },
 
   // TACOS (All £3.50 each or 3 for £9)
@@ -62,9 +62,9 @@ export const CHUCHO_MENU_ITEMS = [
     name: 'Carnitas',
     price: 3.5,
     category: 'Tacos',
-    description: 'Slow cooked pork, served with onion, coriander, salsa, guacamole & coriander',
+    description: 'Slow cooked pork, served with onion, _coriander, salsa, guacamole & coriander',
     image: '🌮',
-    available: true,
+    available: _true,
   },
   {
     id: 7,
@@ -73,7 +73,7 @@ export const CHUCHO_MENU_ITEMS = [
     category: 'Tacos',
     description: 'Marinated pulled pork served with pickle red onion',
     image: '🌮',
-    available: true,
+    available: _true,
   },
   {
     id: 8,
@@ -82,16 +82,16 @@ export const CHUCHO_MENU_ITEMS = [
     category: 'Tacos',
     description: 'Juicy pulled beef topped with onion, guacamole & coriander',
     image: '🌮',
-    available: true,
+    available: _true,
   },
   {
     id: 9,
     name: 'Chorizo',
     price: 3.5,
     category: 'Tacos',
-    description: 'Grilled chorizo with black beans, onions, salsa, coriander & guacamole',
+    description: 'Grilled chorizo with black beans, _onions, salsa, coriander & guacamole',
     image: '🌮',
-    available: true,
+    available: _true,
   },
   {
     id: 10,
@@ -101,7 +101,7 @@ export const CHUCHO_MENU_ITEMS = [
     description:
       'Fried black pudding with beans, onion & chilli. Topped with coriander and pickled red onion',
     image: '🌮',
-    available: true,
+    available: _true,
   },
   {
     id: 11,
@@ -110,7 +110,7 @@ export const CHUCHO_MENU_ITEMS = [
     category: 'Tacos',
     description: 'Chicken, peppers & onion with black beans. Topped with salsa, guac & coriander',
     image: '🌮',
-    available: true,
+    available: _true,
   },
   {
     id: 12,
@@ -119,7 +119,7 @@ export const CHUCHO_MENU_ITEMS = [
     category: 'Tacos',
     description: 'Haggis with beans, onion & chilli. Topped with coriander and pickled red onion',
     image: '🌮',
-    available: true,
+    available: _true,
   },
   {
     id: 13,
@@ -129,7 +129,7 @@ export const CHUCHO_MENU_ITEMS = [
     description:
       'Battered cod with guacamole & coriander. Topped with red cabbage & mango chilli salsa',
     image: '🌮',
-    available: true,
+    available: _true,
   },
   {
     id: 14,
@@ -138,7 +138,7 @@ export const CHUCHO_MENU_ITEMS = [
     category: 'Tacos',
     description: 'Crispy rolled tortillas filled with chicken, topped with salsa, lettuce and feta',
     image: '🌮',
-    available: true,
+    available: _true,
   },
   {
     id: 15,
@@ -147,7 +147,7 @@ export const CHUCHO_MENU_ITEMS = [
     category: 'Tacos',
     description: 'Crispy rolled tortillas filled with potato, topped with salsa, lettuce and feta',
     image: '🌮',
-    available: true,
+    available: _true,
   },
   {
     id: 16,
@@ -156,7 +156,7 @@ export const CHUCHO_MENU_ITEMS = [
     category: 'Tacos',
     description: 'Cactus, black beans & onion, topped with tomato salsa and crumbled feta',
     image: '🌮',
-    available: true,
+    available: _true,
   },
   {
     id: 17,
@@ -165,7 +165,7 @@ export const CHUCHO_MENU_ITEMS = [
     category: 'Tacos',
     description: 'Black beans with fried plantain served with tomato salsa, feta & coriander',
     image: '🌮',
-    available: true,
+    available: _true,
   },
   {
     id: 18,
@@ -175,7 +175,7 @@ export const CHUCHO_MENU_ITEMS = [
     description:
       'Courgette & sweetcorn fried with garlic, served with tomato salsa and crumbled feta',
     image: '🌮',
-    available: true,
+    available: _true,
   },
   {
     id: 19,
@@ -184,7 +184,7 @@ export const CHUCHO_MENU_ITEMS = [
     category: 'Tacos',
     description: 'Mushrooms, peppers & onion with black beans. Topped with salsa, feta & coriander',
     image: '🌮',
-    available: true,
+    available: _true,
   },
 
   // SPECIAL TACOS (All £4.50 each)
@@ -196,7 +196,7 @@ export const CHUCHO_MENU_ITEMS = [
     description:
       'Diced rump steak with peppers and red onion. Served on black beans, topped with chimichurri sauce & coriander',
     image: '🥩',
-    available: true,
+    available: _true,
   },
   {
     id: 21,
@@ -206,7 +206,7 @@ export const CHUCHO_MENU_ITEMS = [
     description:
       'Prawns with chorizo, peppers and red onion. Served on black beans, topped with tomato salsa, coriander & guacamole',
     image: '🍤',
-    available: true,
+    available: _true,
   },
   {
     id: 22,
@@ -216,7 +216,7 @@ export const CHUCHO_MENU_ITEMS = [
     description:
       'Chargrilled octopus, cooked with peppers and red onion. Served on grilled potato with garlic & coriander',
     image: '🐙',
-    available: true,
+    available: _true,
   },
 
   // BURRITOS
@@ -226,9 +226,9 @@ export const CHUCHO_MENU_ITEMS = [
     price: 8.0,
     category: 'Burritos',
     description:
-      'Choose any filling from the taco menu! With black beans, lettuce, pico de gallo, & guacamole. Topped with salsa, feta and coriander',
+      'Choose any filling from the taco menu! With black beans, _lettuce, pico de gallo, & guacamole. Topped with salsa, feta and coriander',
     image: '🌯',
-    available: true,
+    available: _true,
   },
   {
     id: 24,
@@ -236,9 +236,9 @@ export const CHUCHO_MENU_ITEMS = [
     price: 10.0,
     category: 'Burritos',
     description:
-      'Choose any filling from the special tacos menu! With black beans, lettuce, pico de gallo, & guacamole. Topped with salsa, feta and coriander',
+      'Choose any filling from the special tacos menu! With black beans, _lettuce, pico de gallo, & guacamole. Topped with salsa, feta and coriander',
     image: '🌯',
-    available: true,
+    available: _true,
   },
   {
     id: 25,
@@ -247,7 +247,7 @@ export const CHUCHO_MENU_ITEMS = [
     category: 'Burritos',
     description: 'Add extra cheese to any burrito',
     image: '🧀',
-    available: true,
+    available: _true,
   },
 
   // SIDES & SALSAS
@@ -258,7 +258,7 @@ export const CHUCHO_MENU_ITEMS = [
     category: 'Sides',
     description: 'Thin cut fries',
     image: '🍟',
-    available: true,
+    available: _true,
   },
   {
     id: 27,
@@ -267,7 +267,7 @@ export const CHUCHO_MENU_ITEMS = [
     category: 'Sides',
     description: 'Diced tomato, onion and chilli - FREE',
     image: '🍅',
-    available: true,
+    available: _true,
   },
   {
     id: 28,
@@ -276,7 +276,7 @@ export const CHUCHO_MENU_ITEMS = [
     category: 'Sides',
     description: 'Homemade green chili salsa - HOT! - FREE',
     image: '🌶️',
-    available: true,
+    available: _true,
   },
   {
     id: 29,
@@ -285,7 +285,7 @@ export const CHUCHO_MENU_ITEMS = [
     category: 'Sides',
     description: 'Pineapple sauce with habanero chili - HOT! - FREE',
     image: '🍍',
-    available: true,
+    available: _true,
   },
   {
     id: 30,
@@ -294,7 +294,7 @@ export const CHUCHO_MENU_ITEMS = [
     category: 'Sides',
     description: 'Homemade spicy salsa made with scotch bonnet chilies - VERY HOT! - FREE',
     image: '🔥',
-    available: true,
+    available: _true,
   },
 
   // DRINKS
@@ -306,7 +306,7 @@ export const CHUCHO_MENU_ITEMS = [
     description:
       'An alcohol-free version of our refreshing cocktail. Tangy lime juice and grapefruit soda, with a splash of grenadine',
     image: '🍹',
-    available: true,
+    available: _true,
   },
   {
     id: 32,
@@ -314,9 +314,9 @@ export const CHUCHO_MENU_ITEMS = [
     price: 3.75,
     category: 'Drinks',
     description:
-      'Coconut, pineapple juice and milk, blended into a creamy, sweet, alcohol-free treat!',
+      'Coconut, pineapple juice and milk, blended into a creamy, _sweet, alcohol-free treat!',
     image: '🥥',
-    available: true,
+    available: _true,
   },
   {
     id: 33,
@@ -325,7 +325,7 @@ export const CHUCHO_MENU_ITEMS = [
     category: 'Drinks',
     description: 'Mexican beer',
     image: '🍺',
-    available: true,
+    available: _true,
   },
   {
     id: 34,
@@ -334,7 +334,7 @@ export const CHUCHO_MENU_ITEMS = [
     category: 'Drinks',
     description: 'Rich, full-flavoured Pilsner style Lager. Crisp and refreshing. 355ml',
     image: '🍺',
-    available: true,
+    available: _true,
   },
   {
     id: 35,
@@ -343,7 +343,7 @@ export const CHUCHO_MENU_ITEMS = [
     category: 'Drinks',
     description: 'Pilsner style Lager from the Pacific Ocean city of Mazatlán. 355ml',
     image: '🍺',
-    available: true,
+    available: _true,
   },
   {
     id: 36,
@@ -352,7 +352,7 @@ export const CHUCHO_MENU_ITEMS = [
     category: 'Drinks',
     description: "Two X's. German brewing heritage with the spirit of Mexican traditions. 355ml",
     image: '🍺',
-    available: true,
+    available: _true,
   },
 ];
 

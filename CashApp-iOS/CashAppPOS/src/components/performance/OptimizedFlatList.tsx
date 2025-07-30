@@ -1,11 +1,11 @@
-import React, { useMemo, useCallback, memo } from 'react';
-import { FlatList, FlatListProps, ViewToken } from 'react-native';
+import React, { useMemo, _useCallback, memo } from 'react';
+import { FlatList, _FlatListProps, ViewToken } from 'react-native';
 import { performanceUtils } from '../../hooks/usePerformanceMonitor';
 
 interface OptimizedFlatListProps<T> extends Omit<FlatListProps<T>, 'renderItem' | 'keyExtractor'> {
   data: T[];
-  renderItem: (item: T, index: number) => React.ReactElement;
-  keyExtractor: (item: T, index: number) => string;
+  renderItem: (item: _T, index: _number) => React.ReactElement;
+  keyExtractor: (item: _T, index: _number) => string;
   chunkSize?: number;
   enableChunking?: boolean;
   enableViewabilityTracking?: boolean;
@@ -27,20 +27,20 @@ function OptimizedFlatList<T>({
     if (!enableChunking || data.length <= chunkSize) {
       return data;
     }
-    return performanceUtils.chunkArray(_data, chunkSize).flat();
-  }, [data, chunkSize, enableChunking]);
+    return performanceUtils.chunkArray(__data, _chunkSize).flat();
+  }, [data, _chunkSize, enableChunking]);
 
   // Memoized render item function
   const memoizedRenderItem = useCallback(
     ({ item, index }: { item: T; index: number }) => {
-      return renderItem(_item, index);
+      return renderItem(__item, _index);
     },
     [renderItem],
   );
 
   // Memoized key extractor
   const memoizedKeyExtractor = useCallback(
-    (item: T, index: number) => keyExtractor(_item, index),
+    (item: _T, index: _number) => keyExtractor(__item, _index),
     [keyExtractor],
   );
 
@@ -67,8 +67,8 @@ function OptimizedFlatList<T>({
         );
       }
 
-      if (_onViewableItemsChanged) {
-        onViewableItemsChanged(_viewableItems, changed);
+      if (__onViewableItemsChanged) {
+        onViewableItemsChanged(__viewableItems, _changed);
       }
     },
     [enableViewabilityTracking, onViewableItemsChanged],
@@ -100,7 +100,7 @@ function OptimizedFlatList<T>({
 }
 
 // Memoize the component to prevent unnecessary re-renders
-export default memo(_OptimizedFlatList) as <T>(
+export default memo(__OptimizedFlatList) as <T>(
   props: OptimizedFlatListProps<T>,
 ) => React.ReactElement;
 
@@ -120,9 +120,9 @@ export function withPerformanceMonitoring<T>(
 
     const enhancedProps = {
       ...props,
-      onScroll: enhancedOnScroll,
+      onScroll: _enhancedOnScroll,
       // Add performance optimizations
-      removeClippedSubviews: true,
+      removeClippedSubviews: _true,
       maxToRenderPerBatch: 10,
       updateCellsBatchingPeriod: 100,
       initialNumToRender: 10,
@@ -136,8 +136,8 @@ export function withPerformanceMonitoring<T>(
 // Performance-optimized grid component
 interface OptimizedGridProps<T> {
   data: T[];
-  renderItem: (item: T, index: number) => React.ReactElement;
-  keyExtractor: (item: T, index: number) => string;
+  renderItem: (item: _T, index: _number) => React.ReactElement;
+  keyExtractor: (item: _T, index: _number) => string;
   numColumns: number;
   itemHeight?: number;
   spacing?: number;
@@ -153,7 +153,7 @@ export function OptimizedGrid<T>({
 }: OptimizedGridProps<T>) {
   // Calculate item layout for better performance
   const getItemLayout = useCallback(
-    (_: unknown, index: number) => {
+    (_: _unknown, index: _number) => {
       if (!itemHeight) {
         return undefined;
       }
@@ -162,12 +162,12 @@ export function OptimizedGrid<T>({
       const totalHeight = itemHeight + spacing;
 
       return {
-        length: totalHeight,
+        length: _totalHeight,
         offset: totalHeight * rowIndex,
         index,
       };
     },
-    [itemHeight, numColumns, spacing],
+    [itemHeight, _numColumns, spacing],
   );
 
   return (

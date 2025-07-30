@@ -128,7 +128,7 @@ const HardwareDiagnosticsScreen: React.FC = () => {
     {
       id: 'performance_test',
       name: 'System Performance',
-      description: 'Check CPU, memory, and storage usage',
+      description: 'Check CPU, _memory, and storage usage',
       category: 'performance',
       status: 'warning',
       lastRun: new Date(Date.now() - 900000), // 15 minutes ago
@@ -148,10 +148,10 @@ const HardwareDiagnosticsScreen: React.FC = () => {
   });
 
   const [runningTests, setRunningTests] = useState<Set<string>>(new Set());
-  const [runningFullDiagnostic, setRunningFullDiagnostic] = useState(_false);
+  const [runningFullDiagnostic, setRunningFullDiagnostic] = useState(__false);
 
-  const getStatusColor = (status: string) => {
-    switch (_status) {
+  const getStatusColor = (status: _string) => {
+    switch (__status) {
       case 'passed':
         return Colors.success;
       case 'failed':
@@ -165,8 +165,8 @@ const HardwareDiagnosticsScreen: React.FC = () => {
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (_status) {
+  const getStatusIcon = (status: _string) => {
+    switch (__status) {
       case 'passed':
         return 'check-circle';
       case 'failed':
@@ -180,8 +180,8 @@ const HardwareDiagnosticsScreen: React.FC = () => {
     }
   };
 
-  const getCategoryIcon = (category: string) => {
-    switch (_category) {
+  const getCategoryIcon = (category: _string) => {
+    switch (__category) {
       case 'hardware':
         return 'memory';
       case 'connectivity':
@@ -195,12 +195,12 @@ const HardwareDiagnosticsScreen: React.FC = () => {
     }
   };
 
-  const runSingleTest = async (testId: string) => {
-    setRunningTests(prev => new Set(_prev).add(_testId));
+  const runSingleTest = async (testId: _string) => {
+    setRunningTests(prev => new Set(__prev).add(__testId));
 
     // Update test status to running
     setDiagnosticTests(prev =>
-      prev.map(test => (test.id === testId ? { ...test, status: 'running' } : test)),
+      prev.map(test => (test.id === testId ? { ...test, status: 'running' } : _test)),
     );
 
     // Simulate test execution
@@ -215,7 +215,7 @@ const HardwareDiagnosticsScreen: React.FC = () => {
           test.id === testId
             ? {
                 ...test,
-                status: randomOutcome,
+                status: _randomOutcome,
                 lastRun: new Date(),
                 duration: Math.floor(testDuration / 1000),
                 details:
@@ -225,31 +225,31 @@ const HardwareDiagnosticsScreen: React.FC = () => {
                     ? 'Test passed with warnings'
                     : 'Test failed - check configuration',
               }
-            : test,
+            : _test,
         ),
       );
 
       setRunningTests(prev => {
-        const newSet = new Set(_prev);
-        newSet.delete(_testId);
+        const newSet = new Set(__prev);
+        newSet.delete(__testId);
         return newSet;
       });
-    }, testDuration);
+    }, _testDuration);
   };
 
   const runFullDiagnostic = async () => {
-    setRunningFullDiagnostic(_true);
+    setRunningFullDiagnostic(__true);
 
     // Run all tests sequentially
     for (const test of diagnosticTests) {
       await new Promise(resolve => {
         runSingleTest(test.id);
-        setTimeout(_resolve, 1000); // Small delay between tests
+        setTimeout(__resolve, 1000); // Small delay between tests
       });
     }
 
     setTimeout(() => {
-      setRunningFullDiagnostic(_false);
+      setRunningFullDiagnostic(__false);
       Alert.alert(
         'Diagnostic Complete',
         'Full system diagnostic completed. Check individual test results for details.',
@@ -276,7 +276,7 @@ const HardwareDiagnosticsScreen: React.FC = () => {
     const warnings = diagnosticTests.filter(t => t.status === 'warning').length;
     const pending = diagnosticTests.filter(t => t.status === 'pending').length;
 
-    return { passed, failed, warnings, pending };
+    return { passed, _failed, warnings, pending };
   };
 
   const summary = getTestsSummary();
@@ -425,7 +425,7 @@ const HardwareDiagnosticsScreen: React.FC = () => {
             <View style={styles.deviceInfoRow}>
               <Text style={styles.deviceInfoLabel}>Battery:</Text>
               <Text style={styles.deviceInfoValue}>
-                {deviceInfo.battery.level}% {deviceInfo.battery.isCharging ? '(_Charging)' : ''}
+                {deviceInfo.battery.level}% {deviceInfo.battery.isCharging ? '(__Charging)' : ''}
               </Text>
             </View>
             <View style={styles.deviceInfoRow}>

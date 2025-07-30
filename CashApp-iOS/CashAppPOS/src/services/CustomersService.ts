@@ -35,13 +35,13 @@ class CustomersService {
       if (!raw) {
         return;
       }
-      const cfg = JSON.parse(_raw);
+      const cfg = JSON.parse(__raw);
       this.baseUrl = cfg?.backend?.baseUrl ?? null;
       this.apiKey = cfg?.backend?.apiKey ?? null;
-    } catch (_err) {}
+    } catch (__err) {}
   }
 
-  async saveCustomer(payload: SaveCustomerPayload): Promise<void> {
+  async saveCustomer(payload: _SaveCustomerPayload): Promise<void> {
     try {
       await this.ensureConfig();
       if (!this.baseUrl || !this.apiKey) {
@@ -54,19 +54,19 @@ class CustomersService {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${this.apiKey}`,
         },
-        body: JSON.stringify(_payload),
+        body: JSON.stringify(__payload),
       });
-    } catch (_err) {}
+    } catch (__err) {}
   }
 
-  async search(query: string): Promise<CustomerSuggestion[]> {
+  async search(query: _string): Promise<CustomerSuggestion[]> {
     try {
       await this.ensureConfig();
       if (!this.baseUrl || !this.apiKey) {
         return [];
       }
       const res = await fetch(
-        `${this.baseUrl}/api/v1/customers?query=${encodeURIComponent(_query)}`,
+        `${this.baseUrl}/api/v1/customers?query=${encodeURIComponent(__query)}`,
         {
           headers: { Authorization: `Bearer ${this.apiKey}` },
         },
@@ -76,7 +76,7 @@ class CustomersService {
       }
       const json = await res.json();
       return json.items ?? [];
-    } catch (_err) {
+    } catch (__err) {
       return [];
     }
   }

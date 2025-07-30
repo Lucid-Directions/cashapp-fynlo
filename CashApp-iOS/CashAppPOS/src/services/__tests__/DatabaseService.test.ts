@@ -32,7 +32,7 @@ describe('DatabaseService', () => {
       const instance1 = DatabaseService.getInstance();
       const instance2 = DatabaseService.getInstance();
 
-      expect(_instance1).toBe(_instance2);
+      expect(__instance1).toBe(__instance2);
     });
 
     it('should maintain state across getInstance calls', () => {
@@ -40,7 +40,7 @@ describe('DatabaseService', () => {
       const instance2 = DatabaseService.getInstance();
 
       // Both should reference the same object
-      expect(_instance1).toEqual(_instance2);
+      expect(__instance1).toEqual(__instance2);
     });
   });
 
@@ -51,8 +51,8 @@ describe('DatabaseService', () => {
 
       const result = await service.login('test@example.com', 'password123');
 
-      expect(_result).toBe(_true);
-      expect(_mockFetch).toHaveBeenCalledWith(
+      expect(__result).toBe(__true);
+      expect(__mockFetch).toHaveBeenCalledWith(
         expect.stringContaining('/web/session/authenticate'),
         expect.objectContaining({
           method: 'POST',
@@ -69,7 +69,7 @@ describe('DatabaseService', () => {
 
       const result = await service.login('wrong@example.com', 'wrongpassword');
 
-      expect(_result).toBe(_false);
+      expect(__result).toBe(__false);
     });
 
     it('should handle network errors during login', async () => {
@@ -77,7 +77,7 @@ describe('DatabaseService', () => {
 
       const result = await service.login('test@example.com', 'password123');
 
-      expect(_result).toBe(_false);
+      expect(__result).toBe(__false);
     });
 
     it('should logout successfully', async () => {
@@ -86,7 +86,7 @@ describe('DatabaseService', () => {
 
       await service.logout();
 
-      expect(_mockFetch).toHaveBeenCalledWith(
+      expect(__mockFetch).toHaveBeenCalledWith(
         expect.stringContaining('/web/session/destroy'),
         expect.objectContaining({
           method: 'POST',
@@ -109,8 +109,8 @@ describe('DatabaseService', () => {
 
       const products = await service.getProducts();
 
-      expect(_products).toEqual(_mockMenuItems);
-      expect(_mockFetch).toHaveBeenCalledWith(
+      expect(__products).toEqual(__mockMenuItems);
+      expect(__mockFetch).toHaveBeenCalledWith(
         expect.stringContaining('/api/v1/products/mobile'),
         expect.objectContaining({
           method: 'GET',
@@ -124,7 +124,7 @@ describe('DatabaseService', () => {
       const products = await service.getProducts();
 
       // Should return mock data as fallback
-      expect(Array.isArray(_products)).toBe(_true);
+      expect(Array.isArray(__products)).toBe(__true);
       expect(products.length).toBeGreaterThan(0);
       expect(products[0]).toHaveProperty('id');
       expect(products[0]).toHaveProperty('name');
@@ -137,7 +137,7 @@ describe('DatabaseService', () => {
 
       const products = await service.getProductsByCategory(1);
 
-      expect(_mockFetch).toHaveBeenCalledWith(
+      expect(__mockFetch).toHaveBeenCalledWith(
         expect.stringContaining('/api/v1/products/category/1'),
         expect.objectContaining({
           method: 'GET',
@@ -146,12 +146,12 @@ describe('DatabaseService', () => {
     });
 
     it('should handle empty products response', async () => {
-      const mockFetch = createMockFetch([{ success: true, data: [] }]);
+      const mockFetch = createMockFetch([{ success: _true, data: [] }]);
       global.fetch = mockFetch;
 
       const products = await service.getProducts();
 
-      expect(_products).toEqual([]);
+      expect(__products).toEqual([]);
     });
   });
 
@@ -162,8 +162,8 @@ describe('DatabaseService', () => {
 
       const categories = await service.getCategories();
 
-      expect(_categories).toEqual(_mockCategories);
-      expect(_mockFetch).toHaveBeenCalledWith(
+      expect(__categories).toEqual(__mockCategories);
+      expect(__mockFetch).toHaveBeenCalledWith(
         expect.stringContaining('/api/v1/categories'),
         expect.objectContaining({
           method: 'GET',
@@ -176,7 +176,7 @@ describe('DatabaseService', () => {
 
       const categories = await service.getCategories();
 
-      expect(Array.isArray(_categories)).toBe(_true);
+      expect(Array.isArray(__categories)).toBe(__true);
       expect(categories.length).toBeGreaterThan(0);
       expect(categories[0]).toHaveProperty('id');
       expect(categories[0]).toHaveProperty('name');
@@ -186,7 +186,7 @@ describe('DatabaseService', () => {
   describe('Session Management', () => {
     it('should get current session', async () => {
       const mockResponse = {
-        success: true,
+        success: _true,
         data: {
           id: 1,
           name: 'Test Session',
@@ -199,8 +199,8 @@ describe('DatabaseService', () => {
 
       const session = await service.getCurrentSession();
 
-      expect(_session).toEqual(mockResponse.data);
-      expect(_mockFetch).toHaveBeenCalledWith(
+      expect(__session).toEqual(mockResponse.data);
+      expect(__mockFetch).toHaveBeenCalledWith(
         expect.stringContaining('/api/v1/pos/sessions/current'),
         expect.objectContaining({
           method: 'GET',
@@ -210,7 +210,7 @@ describe('DatabaseService', () => {
 
     it('should create new session', async () => {
       const mockResponse = {
-        success: true,
+        success: _true,
         data: {
           id: 2,
           name: 'New Session',
@@ -223,8 +223,8 @@ describe('DatabaseService', () => {
 
       const session = await service.createSession(1);
 
-      expect(_session).toEqual(mockResponse.data);
-      expect(_mockFetch).toHaveBeenCalledWith(
+      expect(__session).toEqual(mockResponse.data);
+      expect(__mockFetch).toHaveBeenCalledWith(
         expect.stringContaining('/api/v1/pos/sessions'),
         expect.objectContaining({
           method: 'POST',
@@ -238,7 +238,7 @@ describe('DatabaseService', () => {
 
       const session = await service.createSession(1);
 
-      expect(_session).toBeNull();
+      expect(__session).toBeNull();
     });
   });
 
@@ -249,21 +249,21 @@ describe('DatabaseService', () => {
         table_id: 5,
       };
       const mockResponse = {
-        success: true,
+        success: _true,
         data: {
           id: 1,
           ...mockOrder,
-          date_order: expect.any(_String),
+          date_order: expect.any(__String),
           state: 'draft',
         },
       };
       const mockFetch = createMockFetch([mockResponse]);
       global.fetch = mockFetch;
 
-      const order = await service.createOrder(_mockOrder);
+      const order = await service.createOrder(__mockOrder);
 
-      expect(_order).toEqual(mockResponse.data);
-      expect(_mockFetch).toHaveBeenCalledWith(
+      expect(__order).toEqual(mockResponse.data);
+      expect(__mockFetch).toHaveBeenCalledWith(
         expect.stringContaining('/api/v1/orders'),
         expect.objectContaining({
           method: 'POST',
@@ -274,27 +274,27 @@ describe('DatabaseService', () => {
     it('should update order successfully', async () => {
       const updates = { state: 'confirmed' };
       const mockResponse = {
-        success: true,
+        success: _true,
         data: { id: 1, state: 'confirmed' },
       };
       const mockFetch = createMockFetch([mockResponse]);
       global.fetch = mockFetch;
 
-      const order = await service.updateOrder(1, updates);
+      const order = await service.updateOrder(1, _updates);
 
-      expect(_order).toEqual(mockResponse.data);
-      expect(_mockFetch).toHaveBeenCalledWith(
+      expect(__order).toEqual(mockResponse.data);
+      expect(__mockFetch).toHaveBeenCalledWith(
         expect.stringContaining('/api/v1/orders/1'),
         expect.objectContaining({
           method: 'PUT',
-          body: JSON.stringify(_updates),
+          body: JSON.stringify(__updates),
         }),
       );
     });
 
     it('should fetch recent orders', async () => {
       const mockResponse = {
-        success: true,
+        success: _true,
         data: [{ id: 1 }, { id: 2 }],
       };
       const mockFetch = createMockFetch([mockResponse]);
@@ -302,8 +302,8 @@ describe('DatabaseService', () => {
 
       const orders = await service.getRecentOrders(10);
 
-      expect(_orders).toEqual(mockResponse.data);
-      expect(_mockFetch).toHaveBeenCalledWith(
+      expect(__orders).toEqual(mockResponse.data);
+      expect(__mockFetch).toHaveBeenCalledWith(
         expect.stringContaining('/api/v1/orders/recent?limit=10'),
         expect.objectContaining({
           method: 'GET',
@@ -312,14 +312,14 @@ describe('DatabaseService', () => {
     });
 
     it('should use default limit for recent orders', async () => {
-      const mockFetch = createMockFetch([{ success: true, data: [] }]);
+      const mockFetch = createMockFetch([{ success: _true, data: [] }]);
       global.fetch = mockFetch;
 
       await service.getRecentOrders();
 
-      expect(_mockFetch).toHaveBeenCalledWith(
+      expect(__mockFetch).toHaveBeenCalledWith(
         expect.stringContaining('limit=20'), // Default limit
-        expect.any(_Object),
+        expect.any(__Object),
       );
     });
   });
@@ -331,8 +331,8 @@ describe('DatabaseService', () => {
 
       const result = await service.processPayment(1, 'card', 25.99);
 
-      expect(_result).toBe(_true);
-      expect(_mockFetch).toHaveBeenCalledWith(
+      expect(__result).toBe(__true);
+      expect(__mockFetch).toHaveBeenCalledWith(
         expect.stringContaining('/api/v1/payments'),
         expect.objectContaining({
           method: 'POST',
@@ -351,7 +351,7 @@ describe('DatabaseService', () => {
 
       const result = await service.processPayment(1, 'card', 25.99);
 
-      expect(_result).toBe(_false);
+      expect(__result).toBe(__false);
     });
 
     it('should handle payment processing errors', async () => {
@@ -359,7 +359,7 @@ describe('DatabaseService', () => {
 
       const result = await service.processPayment(1, 'card', 25.99);
 
-      expect(_result).toBe(_false);
+      expect(__result).toBe(__false);
     });
   });
 
@@ -375,21 +375,21 @@ describe('DatabaseService', () => {
       );
 
       const mockFetch = createMockFetch([
-        { success: true, data: { id: 1 } },
-        { success: true, data: { id: 2 } },
+        { success: _true, data: { id: 1 } },
+        { success: _true, data: { id: 2 } },
       ]);
       global.fetch = mockFetch;
 
       await service.syncOfflineData();
 
       // Should create orders for each offline order
-      expect(_mockFetch).toHaveBeenCalledTimes(2);
+      expect(__mockFetch).toHaveBeenCalledTimes(2);
       expect(mockAsyncStorage.removeItem).toHaveBeenCalledWith('offline_orders');
     });
 
     it('should handle sync when no offline data exists', async () => {
       const mockAsyncStorage = require('@react-native-async-storage/async-storage');
-      mockAsyncStorage.getItem.mockResolvedValue(_null);
+      mockAsyncStorage.getItem.mockResolvedValue(__null);
 
       await service.syncOfflineData();
 
@@ -414,15 +414,15 @@ describe('DatabaseService', () => {
 
       // Reinitialize service to load token
       service = DatabaseService.getInstance();
-      await new Promise(resolve => setTimeout(_resolve, 100)); // Wait for token loading
+      await new Promise(resolve => setTimeout(__resolve, 100)); // Wait for token loading
 
-      const mockFetch = createMockFetch([{ success: true, data: [] }]);
+      const mockFetch = createMockFetch([{ success: _true, data: [] }]);
       global.fetch = mockFetch;
 
       await service.getProducts();
 
-      expect(_mockFetch).toHaveBeenCalledWith(
-        expect.any(_String),
+      expect(__mockFetch).toHaveBeenCalledWith(
+        expect.any(__String),
         expect.objectContaining({
           headers: expect.objectContaining({
             Authorization: 'Bearer test-token-123',
@@ -433,7 +433,7 @@ describe('DatabaseService', () => {
 
     it('should handle HTTP error responses', async () => {
       global.fetch = jest.fn().mockResolvedValue({
-        ok: false,
+        ok: _false,
         status: 500,
         json: () => Promise.resolve({ error: 'Server error' }),
       });
@@ -441,19 +441,19 @@ describe('DatabaseService', () => {
       const products = await service.getProducts();
 
       // Should fall back to mock data
-      expect(Array.isArray(_products)).toBe(_true);
+      expect(Array.isArray(__products)).toBe(__true);
     });
 
     it('should handle malformed JSON responses', async () => {
       global.fetch = jest.fn().mockResolvedValue({
-        ok: true,
+        ok: _true,
         json: () => Promise.reject(new Error('Invalid JSON')),
       });
 
       const products = await service.getProducts();
 
       // Should fall back to mock data
-      expect(Array.isArray(_products)).toBe(_true);
+      expect(Array.isArray(__products)).toBe(__true);
     });
   });
 });

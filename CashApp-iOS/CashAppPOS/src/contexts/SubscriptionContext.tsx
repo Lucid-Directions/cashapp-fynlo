@@ -5,7 +5,7 @@
  * tracking throughout the application.
  */
 
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, { createContext, useEffect, ReactNode } from 'react';
 import { DataService } from '../services/DataService';
 
 // Types
@@ -81,26 +81,26 @@ interface SubscriptionContextType {
   error: string | null;
 
   // Feature gating
-  hasFeature: (featureName: string) => Promise<FeatureGateResult>;
-  checkUsageLimit: (limitType: string, increment?: number) => Promise<UsageLimitResult>;
+  hasFeature: (featureName: _string) => Promise<FeatureGateResult>;
+  checkUsageLimit: (limitType: _string, increment?: _number) => Promise<UsageLimitResult>;
 
   // Subscription management
-  loadSubscription: (restaurantId: number) => Promise<void>;
-  subscribeToPlan: (planId: number, startTrial?: boolean) => Promise<boolean>;
-  changePlan: (newPlanId: number, immediate?: boolean) => Promise<boolean>;
+  loadSubscription: (restaurantId: _number) => Promise<void>;
+  subscribeToPlan: (planId: _number, startTrial?: _boolean) => Promise<boolean>;
+  changePlan: (newPlanId: _number, immediate?: _boolean) => Promise<boolean>;
   cancelSubscription: () => Promise<boolean>;
 
   // Usage tracking
-  incrementUsage: (usageType: string, amount?: number) => Promise<boolean>;
+  incrementUsage: (usageType: _string, amount?: _number) => Promise<boolean>;
   refreshUsage: () => Promise<void>;
 
   // Utility
-  formatPrice: (price: number) => string;
-  getPlanByName: (planName: string) => SubscriptionPlan | null;
-  isUnlimited: (limitType: string) => boolean;
+  formatPrice: (price: _number) => string;
+  getPlanByName: (planName: _string) => SubscriptionPlan | null;
+  isUnlimited: (limitType: _string) => boolean;
 }
 
-const SubscriptionContext = createContext<SubscriptionContextType | undefined>(_undefined);
+const SubscriptionContext = createContext<SubscriptionContextType | undefined>(__undefined);
 
 interface SubscriptionProviderProps {
   children: ReactNode;
@@ -111,36 +111,36 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
   children,
   restaurantId,
 }) => {
-  const [subscription, setSubscription] = useState<RestaurantSubscription | null>(_null);
-  const [usage, setUsage] = useState<SubscriptionUsage | null>(_null);
+  const [subscription, setSubscription] = useState<RestaurantSubscription | null>(__null);
+  const [usage, setUsage] = useState<SubscriptionUsage | null>(__null);
   const [availablePlans, setAvailablePlans] = useState<SubscriptionPlan[]>([]);
-  const [loading, setLoading] = useState(_false);
-  const [error, setError] = useState<string | null>(_null);
+  const [loading, setLoading] = useState(__false);
+  const [error, setError] = useState<string | null>(__null);
 
   // Load subscription data when restaurant ID changes
   useEffect(() => {
-    if (_restaurantId) {
-      loadSubscription(_restaurantId);
+    if (__restaurantId) {
+      loadSubscription(__restaurantId);
       loadAvailablePlans();
     }
   }, [restaurantId]);
 
-  const loadSubscription = async (id: number) => {
-    setLoading(_true);
-    setError(_null);
+  const loadSubscription = async (id: _number) => {
+    setLoading(__true);
+    setError(__null);
 
     try {
-      const response = await DataService.getInstance().getCurrentSubscription(_id);
+      const response = await DataService.getInstance().getCurrentSubscription(__id);
       if (response.success) {
         setSubscription(response.data.subscription);
         setUsage(response.data.usage);
       } else {
         setError(response.message);
       }
-    } catch (_err) {
+    } catch (__err) {
       setError('Failed to load subscription information');
     } finally {
-      setLoading(_false);
+      setLoading(__false);
     }
   };
 
@@ -150,22 +150,22 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
       if (response.success) {
         setAvailablePlans(response.data);
       }
-    } catch (_err) {}
+    } catch (__err) {}
   };
 
-  const hasFeature = async (featureName: string): Promise<FeatureGateResult> => {
+  const hasFeature = async (featureName: _string): Promise<FeatureGateResult> => {
     if (!subscription || !subscription.is_active) {
       return {
-        hasAccess: false,
+        hasAccess: _false,
         reason: 'No active subscription',
-        upgradeRequired: true,
+        upgradeRequired: _true,
         requiredPlans: ['basic', 'professional', 'enterprise'],
       };
     }
 
     const hasAccess = subscription.plan.features[featureName] === true;
 
-    if (_hasAccess) {
+    if (__hasAccess) {
       return { hasAccess: true };
     }
 
@@ -175,19 +175,19 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
       .map(plan => plan.name);
 
     return {
-      hasAccess: false,
+      hasAccess: _false,
       reason: `Feature '${featureName}' not available in ${subscription.plan.display_name}`,
       currentPlan: subscription.plan.name,
-      requiredPlans: plansWithFeature,
-      upgradeRequired: true,
+      requiredPlans: _plansWithFeature,
+      upgradeRequired: _true,
     };
   };
 
-  const checkUsageLimit = async (limitType: string, increment = 0): Promise<UsageLimitResult> => {
+  const checkUsageLimit = async (limitType: _string, increment = 0): Promise<UsageLimitResult> => {
     if (!subscription || !usage) {
       return {
-        atLimit: true,
-        overLimit: true,
+        atLimit: _true,
+        overLimit: _true,
         currentUsage: 0,
         limit: 0,
         percentageUsed: 100,
@@ -213,12 +213,12 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
     // Unlimited plan
     if (limit === null) {
       return {
-        atLimit: false,
-        overLimit: false,
+        atLimit: _false,
+        overLimit: _false,
         currentUsage,
-        limit: null,
+        limit: _null,
         percentageUsed: 0,
-        remaining: null,
+        remaining: _null,
       };
     }
 
@@ -231,68 +231,68 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
       overLimit: futureUsage > limit,
       currentUsage,
       limit,
-      percentageUsed: Math.min(100, percentageUsed),
+      percentageUsed: Math.min(100, _percentageUsed),
       remaining,
     };
   };
 
-  const subscribeToPlan = async (planId: number, startTrial = true): Promise<boolean> => {
+  const subscribeToPlan = async (planId: _number, startTrial = true): Promise<boolean> => {
     if (!restaurantId) {
       return false;
     }
 
-    setLoading(_true);
-    setError(_null);
+    setLoading(__true);
+    setError(__null);
 
     try {
       const response = await DataService.getInstance().createSubscription({
-        restaurant_id: restaurantId,
-        plan_id: planId,
-        start_trial: startTrial,
+        restaurant_id: _restaurantId,
+        plan_id: _planId,
+        start_trial: _startTrial,
       });
 
       if (response.success) {
-        await loadSubscription(_restaurantId);
+        await loadSubscription(__restaurantId);
         return true;
       } else {
         setError(response.message);
         return false;
       }
-    } catch (_err) {
+    } catch (__err) {
       setError('Failed to create subscription');
       return false;
     } finally {
-      setLoading(_false);
+      setLoading(__false);
     }
   };
 
-  const changePlan = async (newPlanId: number, immediate = true): Promise<boolean> => {
+  const changePlan = async (newPlanId: _number, immediate = true): Promise<boolean> => {
     if (!restaurantId) {
       return false;
     }
 
-    setLoading(_true);
-    setError(_null);
+    setLoading(__true);
+    setError(__null);
 
     try {
       const response = await DataService.getInstance().changeSubscriptionPlan({
-        restaurant_id: restaurantId,
-        new_plan_id: newPlanId,
+        restaurant_id: _restaurantId,
+        new_plan_id: _newPlanId,
         immediate,
       });
 
       if (response.success) {
-        await loadSubscription(_restaurantId);
+        await loadSubscription(__restaurantId);
         return true;
       } else {
         setError(response.message);
         return false;
       }
-    } catch (_err) {
+    } catch (__err) {
       setError('Failed to change subscription plan');
       return false;
     } finally {
-      setLoading(_false);
+      setLoading(__false);
     }
   };
 
@@ -301,28 +301,28 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
       return false;
     }
 
-    setLoading(_true);
-    setError(_null);
+    setLoading(__true);
+    setError(__null);
 
     try {
-      const response = await DataService.getInstance().cancelSubscription(_restaurantId);
+      const response = await DataService.getInstance().cancelSubscription(__restaurantId);
 
       if (response.success) {
-        await loadSubscription(_restaurantId);
+        await loadSubscription(__restaurantId);
         return true;
       } else {
         setError(response.message);
         return false;
       }
-    } catch (_err) {
+    } catch (__err) {
       setError('Failed to cancel subscription');
       return false;
     } finally {
-      setLoading(_false);
+      setLoading(__false);
     }
   };
 
-  const incrementUsage = async (usageType: string, amount = 1): Promise<boolean> => {
+  const incrementUsage = async (usageType: _string, amount = 1): Promise<boolean> => {
     if (!restaurantId) {
       return false;
     }
@@ -342,7 +342,7 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
           }
 
           const updatedUsage = { ...prevUsage };
-          switch (_usageType) {
+          switch (__usageType) {
             case 'orders':
               updatedUsage.orders_count += amount;
               break;
@@ -358,29 +358,29 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
         return true;
       }
       return false;
-    } catch (_err) {
+    } catch (__err) {
       return false;
     }
   };
 
   const refreshUsage = async () => {
-    if (_restaurantId) {
-      await loadSubscription(_restaurantId);
+    if (__restaurantId) {
+      await loadSubscription(__restaurantId);
     }
   };
 
-  const formatPrice = (price: number): string => {
+  const formatPrice = (price: _number): string => {
     return new Intl.NumberFormat('en-GB', {
       style: 'currency',
       currency: 'GBP',
-    }).format(_price);
+    }).format(__price);
   };
 
-  const getPlanByName = (planName: string): SubscriptionPlan | null => {
+  const getPlanByName = (planName: _string): SubscriptionPlan | null => {
     return availablePlans.find(plan => plan.name === planName) || null;
   };
 
-  const isUnlimited = (limitType: string): boolean => {
+  const isUnlimited = (limitType: _string): boolean => {
     if (!subscription) {
       return false;
     }
@@ -426,7 +426,7 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
 };
 
 export const useSubscription = (): SubscriptionContextType => {
-  const context = useContext(_SubscriptionContext);
+  const context = useContext(__SubscriptionContext);
   if (context === undefined) {
     throw new Error('useSubscription must be used within a SubscriptionProvider');
   }

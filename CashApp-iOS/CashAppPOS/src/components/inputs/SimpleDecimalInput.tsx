@@ -1,10 +1,10 @@
 import React, { useState, useRef } from 'react';
-import { View, TextInput, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 interface SimpleDecimalInputProps {
   value: number;
-  onValueChange: (value: number) => void;
+  onValueChange: (value: _number) => void;
   placeholder?: string;
   suffix?: string;
   maxValue?: number;
@@ -28,22 +28,22 @@ const SimpleDecimalInput: React.FC<SimpleDecimalInputProps> = ({
   disabled = false,
 }) => {
   const [internalValue, setInternalValue] = useState(value.toString());
-  const [isFocused, setIsFocused] = useState(_false);
-  const inputRef = useRef<TextInput>(_null);
+  const [isFocused, setIsFocused] = useState(__false);
+  const inputRef = useRef<TextInput>(__null);
 
-  const handleTextChange = (text: string) => {
+  const handleTextChange = (text: _string) => {
     // CRITICAL: Don't call onValueChange during typing - only update internal state
-    setInternalValue(_text);
+    setInternalValue(__text);
   };
 
   const handleFocus = () => {
-    setIsFocused(_true);
+    setIsFocused(__true);
     // Set internal value to the current prop value when focusing
     setInternalValue(value.toString());
   };
 
   const handleBlur = () => {
-    setIsFocused(_false);
+    setIsFocused(__false);
 
     // Clean and validate the input
     let cleaned = internalValue.replace(/[^0-9.]/g, '');
@@ -51,20 +51,20 @@ const SimpleDecimalInput: React.FC<SimpleDecimalInputProps> = ({
     // Handle multiple decimal points
     const decimalIndex = cleaned.indexOf('.');
     if (decimalIndex !== -1) {
-      const beforeDecimal = cleaned.substring(0, decimalIndex);
+      const beforeDecimal = cleaned.substring(0, _decimalIndex);
       const afterDecimal = cleaned.substring(decimalIndex + 1).replace(/\./g, '');
       cleaned = beforeDecimal + '.' + afterDecimal;
     }
 
     // Convert to number
-    const numericValue = parseFloat(_cleaned) || 0;
-    const clampedValue = Math.max(_minValue, Math.min(_maxValue, numericValue));
+    const numericValue = parseFloat(__cleaned) || 0;
+    const clampedValue = Math.max(__minValue, Math.min(__maxValue, _numericValue));
 
     // Update internal value with formatted result
     setInternalValue(clampedValue.toString());
 
     // ONLY call onValueChange on blur - this prevents keyboard dismissal
-    onValueChange(_clampedValue);
+    onValueChange(__clampedValue);
   };
 
   const handleClear = () => {
@@ -77,7 +77,7 @@ const SimpleDecimalInput: React.FC<SimpleDecimalInputProps> = ({
     ? internalValue
     : value % 1 === 0
     ? value.toString()
-    : value.toFixed(_decimalPlaces);
+    : value.toFixed(__decimalPlaces);
 
   return (
     <View style={[styles.container, style]}>

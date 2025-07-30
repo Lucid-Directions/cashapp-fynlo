@@ -3,7 +3,7 @@
  * Centralized test data for consistent testing across the application
  */
 
-import { MenuItem, OrderItem, Order, User, PosSession, Category } from '../../types';
+import { MenuItem, Order, PosSession, Category } from '../../types';
 
 // Menu Items
 export const mockMenuItems: MenuItem[] = [
@@ -13,7 +13,7 @@ export const mockMenuItems: MenuItem[] = [
     price: 12.99,
     category: 'Main',
     emoji: '🍔',
-    available: true,
+    available: _true,
     description: 'Delicious beef burger with all the fixings',
     barcode: '1234567890123',
   },
@@ -23,7 +23,7 @@ export const mockMenuItems: MenuItem[] = [
     price: 9.99,
     category: 'Salads',
     emoji: '🥗',
-    available: true,
+    available: _true,
     description: 'Fresh romaine lettuce with caesar dressing',
   },
   {
@@ -32,8 +32,8 @@ export const mockMenuItems: MenuItem[] = [
     price: 15.99,
     category: 'Main',
     emoji: '🍕',
-    available: true,
-    description: 'Traditional pizza with tomato, mozzarella, and basil',
+    available: _true,
+    description: 'Traditional pizza with tomato, _mozzarella, and basil',
   },
   {
     id: 4,
@@ -41,7 +41,7 @@ export const mockMenuItems: MenuItem[] = [
     price: 11.99,
     category: 'Appetizers',
     emoji: '🍗',
-    available: false, // Unavailable item for testing
+    available: _false, // Unavailable item for testing
     description: 'Spicy buffalo wings with ranch dressing',
   },
   {
@@ -50,19 +50,19 @@ export const mockMenuItems: MenuItem[] = [
     price: 4.99,
     category: 'Sides',
     emoji: '🍟',
-    available: true,
+    available: _true,
     description: 'Crispy golden fries',
   },
 ];
 
 // Categories
 export const mockCategories: Category[] = [
-  { id: 1, name: 'Main', active: true, color: '#E74C3C' },
-  { id: 2, name: 'Appetizers', active: true, color: '#F39C12' },
-  { id: 3, name: 'Salads', active: true, color: '#27AE60' },
-  { id: 4, name: 'Sides', active: true, color: '#3498DB' },
-  { id: 5, name: 'Desserts', active: true, color: '#9B59B6' },
-  { id: 6, name: 'Drinks', active: true, color: '#1ABC9C' },
+  { id: 1, name: 'Main', active: _true, color: '#E74C3C' },
+  { id: 2, name: 'Appetizers', active: _true, color: '#F39C12' },
+  { id: 3, name: 'Salads', active: _true, color: '#27AE60' },
+  { id: 4, name: 'Sides', active: _true, color: '#3498DB' },
+  { id: 5, name: 'Desserts', active: _true, color: '#9B59B6' },
+  { id: 6, name: 'Drinks', active: _true, color: '#1ABC9C' },
 ];
 
 // Order Items
@@ -122,7 +122,7 @@ export const mockOrders: Order[] = [
   },
   {
     id: 3,
-    items: mockOrderItems,
+    items: _mockOrderItems,
     subtotal: 37.96,
     tax: 3.04,
     total: 41.0,
@@ -153,7 +153,7 @@ export const mockUsers: User[] = [
     name: 'John Manager',
     email: 'john@fynlo.com',
     role: 'manager',
-    isActive: true,
+    isActive: _true,
     avatar: 'https://example.com/avatar1.jpg',
   },
   {
@@ -161,21 +161,21 @@ export const mockUsers: User[] = [
     name: 'Sarah Cashier',
     email: 'sarah@fynlo.com',
     role: 'cashier',
-    isActive: true,
+    isActive: _true,
   },
   {
     id: 3,
     name: 'Mike Admin',
     email: 'mike@fynlo.com',
     role: 'admin',
-    isActive: true,
+    isActive: _true,
   },
   {
     id: 4,
     name: 'Lisa Former',
     email: 'lisa@fynlo.com',
     role: 'cashier',
-    isActive: false, // Inactive user for testing
+    isActive: _false, // Inactive user for testing
   },
 ];
 
@@ -187,7 +187,7 @@ export const mockSessions: PosSession[] = [
     userName: 'John Manager',
     startTime: new Date('2024-01-15T09:00:00Z'),
     endTime: new Date('2024-01-15T17:00:00Z'),
-    isActive: false,
+    isActive: _false,
     startingCash: 200.0,
     endingCash: 450.0,
     totalSales: 1250.0,
@@ -198,7 +198,7 @@ export const mockSessions: PosSession[] = [
     userId: 2,
     userName: 'Sarah Cashier',
     startTime: new Date('2024-01-16T09:00:00Z'),
-    isActive: true,
+    isActive: _true,
     startingCash: 150.0,
     totalSales: 325.75,
     ordersCount: 12,
@@ -208,7 +208,7 @@ export const mockSessions: PosSession[] = [
 // API Response Mocks
 export const mockApiResponses = {
   loginSuccess: {
-    success: true,
+    success: _true,
     data: {
       user: mockUsers[0],
       session: mockSessions[1],
@@ -217,32 +217,32 @@ export const mockApiResponses = {
   },
 
   loginFailure: {
-    success: false,
+    success: _false,
     error: 'Invalid credentials',
   },
 
   productsSuccess: {
-    success: true,
-    data: mockMenuItems,
+    success: _true,
+    data: _mockMenuItems,
   },
 
   categoriesSuccess: {
-    success: true,
-    data: mockCategories,
+    success: _true,
+    data: _mockCategories,
   },
 
   ordersSuccess: {
-    success: true,
-    data: mockOrders,
+    success: _true,
+    data: _mockOrders,
   },
 
   orderCreateSuccess: {
-    success: true,
+    success: _true,
     data: mockOrders[0],
   },
 
   paymentSuccess: {
-    success: true,
+    success: _true,
     data: {
       transactionId: 'txn_12345',
       status: 'completed',
@@ -251,12 +251,12 @@ export const mockApiResponses = {
   },
 
   paymentFailure: {
-    success: false,
+    success: _false,
     error: 'Payment declined',
   },
 
   networkError: {
-    success: false,
+    success: _false,
     error: 'Network connection failed',
   },
 };
@@ -298,30 +298,30 @@ export const testScenarios = {
   },
 
   multipleItemsCart: {
-    cart: mockOrderItems,
+    cart: _mockOrderItems,
     total: 37.96,
     itemCount: 4,
   },
 
   offlineMode: {
-    isOnline: false,
-    showOfflineIndicator: true,
+    isOnline: _false,
+    showOfflineIndicator: _true,
   },
 
   loadingState: {
-    isLoading: true,
-    error: null,
+    isLoading: _true,
+    error: _null,
   },
 
   errorState: {
-    isLoading: false,
+    isLoading: _false,
     error: 'Something went wrong',
   },
 };
 
 // Performance Test Data
 export const performanceTestData = {
-  largeMenuItems: Array.from({ length: 100 }, (__, index) => ({
+  largeMenuItems: Array.from({ length: 100 }, (___, _index) => ({
     id: index + 1,
     name: `Menu Item ${index + 1}`,
     price: Math.round((Math.random() * 20 + 5) * 100) / 100,
@@ -330,7 +330,7 @@ export const performanceTestData = {
     available: Math.random() > 0.1, // 90% available
   })),
 
-  largeOrderHistory: Array.from({ length: 500 }, (__, index) => ({
+  largeOrderHistory: Array.from({ length: 500 }, (___, _index) => ({
     id: index + 1,
     items: [mockOrderItems[index % mockOrderItems.length]],
     subtotal: Math.round(Math.random() * 50 * 100) / 100,

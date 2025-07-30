@@ -15,7 +15,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
 // import { scanReceipt, ScannedItemAPIResponse } from '../../services/InventoryApiService'; // Temporarily disabled
-// import { launchCamera, ImagePickerResponse, MediaType } from 'react-native-image-picker'; // Temporarily disabled
+// import { launchCamera, _ImagePickerResponse, MediaType } from 'react-native-image-picker'; // Temporarily disabled
 
 // Temporary interfaces to prevent crashes
 interface ScannedItemAPIResponse {
@@ -41,11 +41,11 @@ interface ReceiptScanModalProps {
   onSubmit: (items: ReceiptItem[]) => void;
 }
 
-const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, onSubmit }) => {
+const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, _onClose, onSubmit }) => {
   const { theme } = useTheme();
-  const styles = useThemedStyles(_createStyles);
+  const styles = useThemedStyles(__createStyles);
   const [step, setStep] = useState<'capture' | 'spinning' | 'review' | 'submitting'>('capture');
-  const [capturedImage, setCapturedImage] = useState<unknown>(_null); // Placeholder for image data
+  const [capturedImage, setCapturedImage] = useState<unknown>(__null); // Placeholder for image data
   const [parsedItems, setParsedItems] = useState<ReceiptItem[]>([]);
 
   const requestCameraPermission = async () => {
@@ -59,7 +59,7 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
           buttonPositive: 'OK',
         });
         return granted === PermissionsAndroid.RESULTS.GRANTED;
-      } catch (_err) {
+      } catch (__err) {
         return false;
       }
     }
@@ -101,12 +101,12 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
       const options = {
         mediaType: 'photo' as MediaType,
         quality: 0.8,
-        includeBase64: true,
+        includeBase64: _true,
         maxWidth: 1024,
         maxHeight: 1024,
       };
 
-      launchCamera(_options, (response: ImagePickerResponse) => {
+      launchCamera(__options, (response: _ImagePickerResponse) => {
         if (response.didCancel || response.errorMessage) {
           return;
         }
@@ -120,17 +120,17 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
           processReceiptImage(asset.base64 || '');
         }
       });
-    } catch (_error) {
+    } catch (__error) {
       Alert.alert('Camera Error', 'Unable to access camera. Please try again.');
     }
     */
   };
 
-  const processReceiptImage = async (base64Image: string) => {
+  const processReceiptImage = async (base64Image: _string) => {
     // Temporarily disabled API call to prevent crashes
     try {
       // Simulate processing delay
-      await new Promise(resolve => setTimeout(_resolve, 2000));
+      await new Promise(resolve => setTimeout(__resolve, 2000));
 
       // Mock response for testing
       const mockApiResponse: ScannedItemAPIResponse[] = [
@@ -138,7 +138,7 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
           name: 'Scanned Item 1',
           quantity: 2,
           price: 5.99,
-          sku_match: null,
+          sku_match: _null,
           raw_text_name: 'Item 1',
         },
         {
@@ -150,7 +150,7 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
         },
       ];
 
-      const clientReceiptItems: ReceiptItem[] = mockApiResponse.map((_item, index) => ({
+      const clientReceiptItems: ReceiptItem[] = mockApiResponse.map((__item, _index) => ({
         id: `api-${index}-${Date.now()}`, // Generate a unique ID for local list management
         name: item.name,
         quantity: item.quantity.toString(),
@@ -159,9 +159,9 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
         originalName: item.raw_text_name || item.name,
       }));
 
-      setParsedItems(_clientReceiptItems);
+      setParsedItems(__clientReceiptItems);
       setStep('review');
-    } catch (_error) {
+    } catch (__error) {
       Alert.alert('Error Processing Receipt', 'Could not process the receipt. Please try again.');
       setStep('capture'); // Go back to capture step on error
     }
@@ -169,9 +169,9 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
     // TODO: Implement real API call when backend is properly connected
     /*
     try {
-      const apiResponseItems = await scanReceipt(_base64Image);
+      const apiResponseItems = await scanReceipt(__base64Image);
 
-      const clientReceiptItems: ReceiptItem[] = apiResponseItems.map((_item, index) => ({
+      const clientReceiptItems: ReceiptItem[] = apiResponseItems.map((__item, _index) => ({
         id: `api-${index}-${Date.now()}`, // Generate a unique ID for local list management
         name: item.name,
         quantity: item.quantity.toString(),
@@ -180,18 +180,18 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
         originalName: item.raw_text_name || item.name,
       }));
 
-      setParsedItems(_clientReceiptItems);
+      setParsedItems(__clientReceiptItems);
       setStep('review');
-    } catch (_error) {
+    } catch (__error) {
       Alert.alert('Error Processing Receipt', error.message || 'Could not process the receipt. Please try again.');
       setStep('capture'); // Go back to capture step on error
     }
     */
   };
 
-  const handleItemChange = (id: string, field: 'name' | 'quantity' | 'price', value: string) => {
+  const handleItemChange = (id: _string, field: 'name' | 'quantity' | 'price', value: _string) => {
     setParsedItems(prevItems =>
-      prevItems.map(item => (item.id === id ? { ...item, [field]: value } : item)),
+      prevItems.map(item => (item.id === id ? { ...item, [field]: value } : _item)),
     );
   };
 
@@ -202,7 +202,7 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
     ]);
   };
 
-  const handleRemoveItem = (id: string) => {
+  const handleRemoveItem = (id: _string) => {
     setParsedItems(prevItems => prevItems.filter(item => item.id !== id));
   };
 
@@ -226,16 +226,16 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
     setStep('submitting');
     try {
       // Simulate submission
-      await new Promise(resolve => setTimeout(_resolve, 1500));
-      onSubmit(_parsedItems);
+      await new Promise(resolve => setTimeout(__resolve, 1500));
+      onSubmit(__parsedItems);
       Alert.alert('Success', 'Receipt items submitted successfully!');
       onClose(); // Close modal on successful submission
-    } catch (_error) {
+    } catch (__error) {
       Alert.alert('Error', 'Failed to submit items. Please try again.');
     } finally {
       // Reset state if modal is kept open, or handled by onClose re-initializing.
       // For now, onClose will reset it when InventoryScreen re-renders modal.
-      // If modal state was internal, would reset here: setStep('capture'); setCapturedImage(_null);
+      // If modal state was internal, would reset here: setStep('capture'); setCapturedImage(__null);
     }
   };
 
@@ -265,27 +265,27 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
     <View style={styles.stepContainer}>
       <Text style={styles.modalTitle}>Review Items</Text>
       <ScrollView style={styles.itemList}>
-        {parsedItems.map((_item, index) => (
+        {parsedItems.map((__item, _index) => (
           <View key={item.id} style={styles.itemRow}>
             <View style={styles.itemInputs}>
               <TextInput
                 style={[styles.input, styles.nameInput]}
                 placeholder="Item Name"
                 value={item.name}
-                onChangeText={text => handleItemChange(item.id, 'name', text)}
+                onChangeText={text => handleItemChange(item.id, 'name', _text)}
               />
               <TextInput
                 style={[styles.input, styles.quantityInput]}
                 placeholder="Qty"
                 value={item.quantity}
-                onChangeText={text => handleItemChange(item.id, 'quantity', text)}
+                onChangeText={text => handleItemChange(item.id, 'quantity', _text)}
                 keyboardType="numeric"
               />
               <TextInput
                 style={[styles.input, styles.priceInput]}
                 placeholder="Price"
                 value={item.price}
-                onChangeText={text => handleItemChange(item.id, 'price', text)}
+                onChangeText={text => handleItemChange(item.id, 'price', _text)}
                 keyboardType="decimal-pad"
               />
             </View>
@@ -329,7 +329,7 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
   );
 };
 
-const createStyles = (theme: unknown) =>
+const createStyles = (theme: _unknown) =>
   StyleSheet.create({
     modalOverlay: {
       flex: 1,

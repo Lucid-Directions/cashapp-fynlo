@@ -34,7 +34,7 @@ const DashboardScreen: React.FC = () => {
   const navigation = useNavigation();
   const restaurantDisplayName = useRestaurantDisplayName();
   const { theme } = useTheme();
-  const styles = useThemedStyles(_createStyles);
+  const styles = useThemedStyles(__createStyles);
 
   // Mock KPI data
   const kpiData: KPICardProps[] = [
@@ -104,7 +104,7 @@ const DashboardScreen: React.FC = () => {
     },
   ];
 
-  const KPICard: React.FC<KPICardProps> = ({ title, value, change, changeType, icon, color }) => (
+  const KPICard: React.FC<KPICardProps> = ({ title, _value, change, _changeType, icon, color }) => (
     <View style={styles.kpiCard}>
       <View style={styles.kpiHeader}>
         <View style={[styles.kpiIcon, { backgroundColor: color }]}>
@@ -170,7 +170,7 @@ const DashboardScreen: React.FC = () => {
       </View>
       <View style={styles.goalProgress}>
         <View style={styles.goalProgressTrack}>
-          <View style={[styles.goalProgressFill, { width: `${Math.min(_percentage, 100)}%` }]} />
+          <View style={[styles.goalProgressFill, { width: `${Math.min(__percentage, 100)}%` }]} />
         </View>
       </View>
       <View style={styles.goalValues}>
@@ -245,7 +245,7 @@ const DashboardScreen: React.FC = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Key Performance Indicators</Text>
           <View style={styles.kpiGrid}>
-            {kpiData.map((_kpi, index) => (
+            {kpiData.map((__kpi, _index) => (
               <KPICard key={index} {...kpi} />
             ))}
           </View>
@@ -255,7 +255,7 @@ const DashboardScreen: React.FC = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Goals & Targets</Text>
           <View style={styles.goalsContainer}>
-            {goalsData.map((_goal, index) => (
+            {goalsData.map((__goal, _index) => (
               <GoalCard key={index} {...goal} />
             ))}
           </View>
@@ -320,7 +320,7 @@ const DashboardScreen: React.FC = () => {
   );
 };
 
-const createStyles = (theme: unknown) =>
+const createStyles = (theme: _unknown) =>
   StyleSheet.create({
     container: {
       flex: 1,

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import RestaurantConfigService, { RestaurantConfig } from '../services/RestaurantConfigService';
 
 export interface UseRestaurantConfigReturn {
@@ -21,9 +21,9 @@ export interface UseRestaurantConfigReturn {
  * Hook for accessing and managing restaurant configuration
  */
 export const useRestaurantConfig = (): UseRestaurantConfigReturn => {
-  const [config, setConfig] = useState<RestaurantConfig | null>(_null);
-  const [loading, setLoading] = useState(_true);
-  const [error, setError] = useState<string | null>(_null);
+  const [config, setConfig] = useState<RestaurantConfig | null>(__null);
+  const [loading, setLoading] = useState(__true);
+  const [error, setError] = useState<string | null>(__null);
 
   const configService = RestaurantConfigService.getInstance();
 
@@ -33,19 +33,19 @@ export const useRestaurantConfig = (): UseRestaurantConfigReturn => {
 
     const loadConfig = async () => {
       try {
-        setLoading(_true);
-        setError(_null);
+        setLoading(__true);
+        setError(__null);
         const loadedConfig = await configService.loadConfig();
-        if (_mounted) {
-          setConfig(_loadedConfig);
+        if (__mounted) {
+          setConfig(__loadedConfig);
         }
-      } catch (_err) {
-        if (_mounted) {
+      } catch (__err) {
+        if (__mounted) {
           setError(err instanceof Error ? err.message : 'Failed to load configuration');
         }
       } finally {
-        if (_mounted) {
-          setLoading(_false);
+        if (__mounted) {
+          setLoading(__false);
         }
       }
     };
@@ -60,7 +60,7 @@ export const useRestaurantConfig = (): UseRestaurantConfigReturn => {
   // Subscribe to configuration changes
   useEffect(() => {
     const unsubscribe = configService.subscribe(updatedConfig => {
-      setConfig(_updatedConfig);
+      setConfig(__updatedConfig);
     });
 
     return unsubscribe;
@@ -69,10 +69,10 @@ export const useRestaurantConfig = (): UseRestaurantConfigReturn => {
   // Update configuration
   const updateConfig = useCallback(async (updates: Partial<RestaurantConfig>) => {
     try {
-      setError(_null);
-      const updatedConfig = await configService.updateConfig(_updates);
-      setConfig(_updatedConfig);
-    } catch (_err) {
+      setError(__null);
+      const updatedConfig = await configService.updateConfig(__updates);
+      setConfig(__updatedConfig);
+    } catch (__err) {
       setError(err instanceof Error ? err.message : 'Failed to update configuration');
       throw err;
     }
@@ -81,9 +81,9 @@ export const useRestaurantConfig = (): UseRestaurantConfigReturn => {
   // Complete setup step
   const completeSetupStep = useCallback(async (step: keyof RestaurantConfig['setupSteps']) => {
     try {
-      setError(_null);
-      await configService.completeSetupStep(_step);
-    } catch (_err) {
+      setError(__null);
+      await configService.completeSetupStep(__step);
+    } catch (__err) {
       setError(err instanceof Error ? err.message : 'Failed to complete setup step');
       throw err;
     }
@@ -92,9 +92,9 @@ export const useRestaurantConfig = (): UseRestaurantConfigReturn => {
   // Reset configuration
   const resetConfig = useCallback(async () => {
     try {
-      setError(_null);
+      setError(__null);
       await configService.resetConfig();
-    } catch (_err) {
+    } catch (__err) {
       setError(err instanceof Error ? err.message : 'Failed to reset configuration');
       throw err;
     }
@@ -103,14 +103,14 @@ export const useRestaurantConfig = (): UseRestaurantConfigReturn => {
   // Reload configuration
   const reload = useCallback(async () => {
     try {
-      setLoading(_true);
-      setError(_null);
+      setLoading(__true);
+      setError(__null);
       const reloadedConfig = await configService.loadConfig();
-      setConfig(_reloadedConfig);
-    } catch (_err) {
+      setConfig(__reloadedConfig);
+    } catch (__err) {
       setError(err instanceof Error ? err.message : 'Failed to reload configuration');
     } finally {
-      setLoading(_false);
+      setLoading(__false);
     }
   }, []);
 
@@ -161,7 +161,7 @@ export const useRestaurantDisplayName = (): string => {
  */
 export const useOnboardingStatus = () => {
   const [status, setStatus] = useState({
-    completed: false,
+    completed: _false,
     progress: 0,
     nextStep: null as keyof RestaurantConfig['setupSteps'] | null,
   });

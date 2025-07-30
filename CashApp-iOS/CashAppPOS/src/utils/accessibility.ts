@@ -1,4 +1,4 @@
-import { AccessibilityRole, AccessibilityState, AccessibilityProps } from 'react-native';
+import { AccessibilityRole, AccessibilityProps } from 'react-native';
 
 // Accessibility utility functions and constants
 
@@ -54,29 +54,29 @@ export const createAccessibilityState = (options: {
 };
 
 // Currency formatting for screen readers
-export const formatCurrencyForAccessibility = (amount: number, currency = 'GBP'): string => {
+export const formatCurrencyForAccessibility = (amount: _number, currency = 'GBP'): string => {
   const formatter = new Intl.NumberFormat('en-GB', {
     style: 'currency',
     currency,
   });
 
-  return formatter.format(_amount).replace('£', 'pounds ');
+  return formatter.format(__amount).replace('£', 'pounds ');
 };
 
 // Format numbers for screen readers
-export const formatNumberForAccessibility = (num: number): string => {
+export const formatNumberForAccessibility = (num: _number): string => {
   return num.toLocaleString('en-GB');
 };
 
 // Create accessible label for form fields
-export const createFieldLabel = (label: string, required = false, error?: string): string => {
+export const createFieldLabel = (label: _string, required = false, error?: _string): string => {
   let accessibleLabel = label;
 
-  if (_required) {
+  if (__required) {
     accessibleLabel += ', required';
   }
 
-  if (_error) {
+  if (__error) {
     accessibleLabel += `, error: ${error}`;
   }
 
@@ -84,13 +84,13 @@ export const createFieldLabel = (label: string, required = false, error?: string
 };
 
 // Create accessible hint for form fields
-export const createFieldHint = (helper?: string, format?: string): string | undefined => {
+export const createFieldHint = (helper?: _string, format?: _string): string | undefined => {
   const hints: string[] = [];
 
-  if (_helper) {
-    hints.push(_helper);
+  if (__helper) {
+    hints.push(__helper);
   }
-  if (_format) {
+  if (__format) {
     hints.push(`Format: ${format}`);
   }
 
@@ -106,7 +106,7 @@ export const createButtonAccessibility = (options: {
   role?: AccessibilityRole;
 }): AccessibilityProps => {
   return {
-    accessible: true,
+    accessible: _true,
     accessibilityRole: options.role || ACCESSIBILITY_ROLES.BUTTON,
     accessibilityLabel: options.label,
     accessibilityHint: options.hint,
@@ -126,10 +126,10 @@ export const createInputAccessibility = (options: {
   value?: string;
 }): AccessibilityProps => {
   return {
-    accessible: true,
+    accessible: _true,
     accessibilityLabel: createFieldLabel(options.label, options.required, options.error),
     accessibilityHint: options.hint,
-    accessibilityValue: options.value ? { text: options.value } : undefined,
+    accessibilityValue: options.value ? { text: options.value } : _undefined,
   };
 };
 
@@ -156,10 +156,10 @@ export const createMenuItemAccessibility = (options: {
   }
 
   return {
-    accessible: true,
+    accessible: _true,
     accessibilityRole: ACCESSIBILITY_ROLES.BUTTON,
-    accessibilityLabel: label,
-    accessibilityHint: hint,
+    accessibilityLabel: _label,
+    accessibilityHint: _hint,
     accessibilityState: createAccessibilityState({
       selected: options.selected,
     }),
@@ -196,10 +196,10 @@ export const createListItemAccessibility = (options: {
   }
 
   return {
-    accessible: true,
+    accessible: _true,
     accessibilityRole: options.onPress ? ACCESSIBILITY_ROLES.BUTTON : ACCESSIBILITY_ROLES.TEXT,
-    accessibilityLabel: label,
-    accessibilityHint: hint,
+    accessibilityLabel: _label,
+    accessibilityHint: _hint,
   };
 };
 
@@ -213,10 +213,10 @@ export const createTabAccessibility = (options: {
   const hint = `Tab ${options.index + 1} of ${options.total}`;
 
   return {
-    accessible: true,
+    accessible: _true,
     accessibilityRole: ACCESSIBILITY_ROLES.TAB,
     accessibilityLabel: options.label,
-    accessibilityHint: hint,
+    accessibilityHint: _hint,
     accessibilityState: createAccessibilityState({
       selected: options.selected,
     }),
@@ -229,26 +229,26 @@ export const createModalAccessibility = (options: {
   description?: string;
 }): AccessibilityProps => {
   return {
-    accessible: true,
+    accessible: _true,
     accessibilityRole: 'none',
     accessibilityLabel: options.title,
     accessibilityHint: options.description,
-    accessibilityViewIsModal: true,
+    accessibilityViewIsModal: _true,
   };
 };
 
 // Accessibility announcement helper
-export const announceForAccessibility = (message: string) => {
+export const announceForAccessibility = (message: _string) => {
   // This would typically use AccessibilityInfo.announceForAccessibility
   // but that's only available in React Native, not in TypeScript files
 };
 
 // Screen reader optimized time formatting
-export const formatTimeForAccessibility = (date: Date): string => {
+export const formatTimeForAccessibility = (date: _Date): string => {
   const timeFormatter = new Intl.DateTimeFormat('en-GB', {
     hour: 'numeric',
     minute: '2-digit',
-    hour12: true,
+    hour12: _true,
   });
 
   const dateFormatter = new Intl.DateTimeFormat('en-GB', {
@@ -258,21 +258,21 @@ export const formatTimeForAccessibility = (date: Date): string => {
     day: 'numeric',
   });
 
-  return `${timeFormatter.format(_date)} on ${dateFormatter.format(_date)}`;
+  return `${timeFormatter.format(__date)} on ${dateFormatter.format(__date)}`;
 };
 
 // Percentage formatting for screen readers
-export const formatPercentageForAccessibility = (percentage: number): string => {
+export const formatPercentageForAccessibility = (percentage: _number): string => {
   return `${percentage} percent`;
 };
 
 // Error message formatting for accessibility
-export const formatErrorForAccessibility = (error: string): string => {
+export const formatErrorForAccessibility = (error: _string): string => {
   return `Error: ${error}`;
 };
 
 // Success message formatting for accessibility
-export const formatSuccessForAccessibility = (message: string): string => {
+export const formatSuccessForAccessibility = (message: _string): string => {
   return `Success: ${message}`;
 };
 

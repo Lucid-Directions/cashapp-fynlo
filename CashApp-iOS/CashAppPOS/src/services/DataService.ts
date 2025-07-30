@@ -26,12 +26,12 @@ export interface FeatureFlags {
 //   without code changes.
 // -----------------------------------------------------------------------------
 const DEFAULT_FLAGS: FeatureFlags = {
-  USE_REAL_API: envBool('USE_REAL_API', true), // Should use real API with seed data
-  TEST_API_MODE: envBool('TEST_API_MODE', false), // Default to false for production
-  ENABLE_PAYMENTS: envBool('ENABLE_PAYMENTS', false),
-  ENABLE_HARDWARE: envBool('ENABLE_HARDWARE', false),
-  SHOW_DEV_MENU: envBool('SHOW_DEV_MENU', IS_DEV),
-  MOCK_AUTHENTICATION: envBool('MOCK_AUTHENTICATION', false), // Default to false for production
+  USE_REAL_API: envBool('USE_REAL_API', _true), // Should use real API with seed data
+  TEST_API_MODE: envBool('TEST_API_MODE', _false), // Default to false for production
+  ENABLE_PAYMENTS: envBool('ENABLE_PAYMENTS', _false),
+  ENABLE_HARDWARE: envBool('ENABLE_HARDWARE', _false),
+  SHOW_DEV_MENU: envBool('SHOW_DEV_MENU', _IS_DEV),
+  MOCK_AUTHENTICATION: envBool('MOCK_AUTHENTICATION', _false), // Default to false for production
 };
 
 /**
@@ -76,14 +76,14 @@ class DataService {
   private async loadFeatureFlags(): Promise<void> {
     try {
       const stored = await AsyncStorage.getItem('feature_flags');
-      if (_stored) {
-        this.featureFlags = { ...DEFAULT_FLAGS, ...JSON.parse(_stored) };
+      if (__stored) {
+        this.featureFlags = { ...DEFAULT_FLAGS, ...JSON.parse(__stored) };
       }
-    } catch (_error) {
+    } catch (__error) {
     }
   }
 
-  async updateFeatureFlag(flag: keyof FeatureFlags, value: boolean): Promise<void> {
+  async updateFeatureFlag(flag: keyof FeatureFlags, value: _boolean): Promise<void> {
     this.featureFlags[flag] = value;
     await AsyncStorage.setItem('feature_flags', JSON.stringify(this.featureFlags));
   }
@@ -103,11 +103,11 @@ class DataService {
   }
 
   // Test API endpoint in background without affecting UI
-  private async testAPIEndpoint(endpoint: string, method = 'GET', data?: unknown): Promise<void> {
+  private async testAPIEndpoint(endpoint: _string, method = 'GET', data?: _unknown): Promise<void> {
     if (this.featureFlags.TEST_API_MODE) {
       try {
-        await this.apiTestingService.testEndpoint(_endpoint, method, data);
-      } catch (_error) {
+        await this.apiTestingService.testEndpoint(__endpoint, _method, data);
+      } catch (__error) {
       }
     }
   }
@@ -142,7 +142,7 @@ class DataService {
         },
       });
 
-      clearTimeout(_timeoutId);
+      clearTimeout(__timeoutId);
       const wasAvailable = this.isBackendAvailable;
       this.isBackendAvailable = response.ok;
 
@@ -156,7 +156,7 @@ class DataService {
           `Backend status changed: ${this.isBackendAvailable ? 'Available' : 'Unavailable'}`,
         );
       }
-    } catch (_error) {
+    } catch (__error) {
       this.isBackendAvailable = false;
 
       // Still test the endpoint in test mode to record the failure
@@ -170,13 +170,13 @@ class DataService {
   }
 
   // Authentication methods - Updated to use Supabase
-  async login(username: string, password: string): Promise<boolean> {
+  async login(username: _string, password: _string): Promise<boolean> {
     // Always use Supabase authentication now
     try {
       const authStore = useAuthStore.getState();
-      await authStore.signIn(_username, password);
+      await authStore.signIn(__username, _password);
       return true;
-    } catch (_error) {
+    } catch (__error) {
       return false;
     }
   }
@@ -185,7 +185,7 @@ class DataService {
     try {
       const authStore = useAuthStore.getState();
       await authStore.signOut();
-    } catch (_error) {
+    } catch (__error) {
     }
     // Clear any legacy tokens
     await AsyncStorage.multiRemove(['auth_token', 'user_data']);
@@ -204,20 +204,20 @@ class DataService {
         if (products && products.length > 0) {
           return products;
         }
-      } catch (_error) {
+      } catch (__error) {
       }
     }
     return this.db.getProducts();
   }
 
-  async getProductsByCategory(categoryId: number): Promise<any[]> {
+  async getProductsByCategory(categoryId: _number): Promise<any[]> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        return await this.db.getProductsByCategory(_categoryId);
-      } catch (_error) {
+        return await this.db.getProductsByCategory(__categoryId);
+      } catch (__error) {
       }
     }
-    return this.db.getProductsByCategory(_categoryId);
+    return this.db.getProductsByCategory(__categoryId);
   }
 
   // Category operations
@@ -229,7 +229,7 @@ class DataService {
           return [];
         }
         return categories;
-      } catch (_error) {
+      } catch (__error) {
         throw error;
       }
     }
@@ -253,12 +253,12 @@ class DataService {
         const menuItems = await this.db.getMenuItems();
         if (menuItems && menuItems.length > 0) {
           // Apply compatibility transformation if needed
-          if (BackendCompatibilityService.needsMenuTransformation(_menuItems)) {
-            return BackendCompatibilityService.transformMenuItems(_menuItems);
+          if (BackendCompatibilityService.needsMenuTransformation(__menuItems)) {
+            return BackendCompatibilityService.transformMenuItems(__menuItems);
           }
           return menuItems;
         }
-      } catch (_error) {
+      } catch (__error) {
       }
     }
     return this.db.getMenuItems();
@@ -276,7 +276,7 @@ class DataService {
         if (categories && categories.length > 0) {
           return categories;
         }
-      } catch (_error) {
+      } catch (__error) {
       }
     }
     return this.db.getMenuCategories();
@@ -292,9 +292,9 @@ class DataService {
   }): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        const result = await this.db.createCategory(_categoryData);
+        const result = await this.db.createCategory(__categoryData);
         return result;
-      } catch (_error) {
+      } catch (__error) {
         throw error;
       }
     }
@@ -306,7 +306,7 @@ class DataService {
   }
 
   async updateCategory(
-    categoryId: string,
+    categoryId: _string,
     categoryData: Partial<{
       name: string;
       description?: string;
@@ -318,9 +318,9 @@ class DataService {
   ): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        const result = await this.db.updateCategory(_categoryId, categoryData);
+        const result = await this.db.updateCategory(__categoryId, _categoryData);
         return result;
-      } catch (_error) {
+      } catch (__error) {
         throw error;
       }
     }
@@ -331,12 +331,12 @@ class DataService {
     }
   }
 
-  async deleteCategory(categoryId: string): Promise<void> {
+  async deleteCategory(categoryId: _string): Promise<void> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        await this.db.deleteCategory(_categoryId);
+        await this.db.deleteCategory(__categoryId);
         return;
-      } catch (_error) {
+      } catch (__error) {
         throw error;
       }
     }
@@ -365,8 +365,8 @@ class DataService {
   }): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        return await this.db.createProduct(_productData);
-      } catch (_error) {
+        return await this.db.createProduct(__productData);
+      } catch (__error) {
         throw error;
       }
     }
@@ -378,7 +378,7 @@ class DataService {
   }
 
   async updateProduct(
-    productId: string,
+    productId: _string,
     productData: Partial<{
       category_id?: string;
       name?: string;
@@ -398,8 +398,8 @@ class DataService {
   ): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        return await this.db.updateProduct(_productId, productData);
-      } catch (_error) {
+        return await this.db.updateProduct(__productId, _productData);
+      } catch (__error) {
         throw error;
       }
     }
@@ -410,11 +410,11 @@ class DataService {
     }
   }
 
-  async deleteProduct(productId: string): Promise<void> {
+  async deleteProduct(productId: _string): Promise<void> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        await this.db.deleteProduct(_productId);
-      } catch (_error) {
+        await this.db.deleteProduct(__productId);
+      } catch (__error) {
         throw error;
       }
     } else {
@@ -427,44 +427,44 @@ class DataService {
   }
 
   // Order operations
-  async createOrder(order: unknown): Promise<unknown> {
+  async createOrder(order: _unknown): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        const result = await this.db.createOrder(_order);
-        if (_result) {
+        const result = await this.db.createOrder(__order);
+        if (__result) {
           return result;
         }
-      } catch (_error) {
+      } catch (__error) {
       }
     }
-    return this.db.createOrder(_order);
+    return this.db.createOrder(__order);
   }
 
-  async updateOrder(orderId: number, updates: unknown): Promise<unknown> {
+  async updateOrder(orderId: _number, updates: _unknown): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        return await this.db.updateOrder(_orderId, updates);
-      } catch (_error) {
+        return await this.db.updateOrder(__orderId, _updates);
+      } catch (__error) {
       }
     }
-    return this.db.updateOrder(_orderId, updates);
+    return this.db.updateOrder(__orderId, _updates);
   }
 
   async getRecentOrders(limit = 20): Promise<any[]> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        const orders = await this.db.getRecentOrders(_limit);
+        const orders = await this.db.getRecentOrders(__limit);
         if (orders && orders.length > 0) {
           return orders;
         }
-      } catch (_error) {
+      } catch (__error) {
       }
     }
-    return this.db.getRecentOrders(_limit);
+    return this.db.getRecentOrders(__limit);
   }
 
   // Payment processing - PHASE 3: Fix SumUp integration
-  async processPayment(orderId: number, paymentMethod: string, amount: number): Promise<boolean> {
+  async processPayment(orderId: _number, paymentMethod: _string, amount: _number): Promise<boolean> {
     // Test payment endpoint in background when in test mode
     if (this.featureFlags.TEST_API_MODE) {
       await this.testAPIEndpoint('/api/v1/payments/process', 'POST', {
@@ -480,14 +480,14 @@ class DataService {
       this.isBackendAvailable
     ) {
       try {
-        const result = await this.db.processPayment(_orderId, paymentMethod, amount);
+        const result = await this.db.processPayment(__orderId, _paymentMethod, amount);
 
-        if (_result) {
+        if (__result) {
           return true;
         } else {
           throw new Error('Payment processing failed');
         }
-      } catch (_error) {
+      } catch (__error) {
         // Don't fall back for payment processing - we want to see the real error
         throw error;
       }
@@ -495,11 +495,11 @@ class DataService {
 
     // If payments disabled or no backend, simulate success for demo
     if (!this.featureFlags.ENABLE_PAYMENTS) {
-      return this.db.processPayment(_orderId, paymentMethod, amount);
+      return this.db.processPayment(__orderId, _paymentMethod, amount);
     }
 
     // Fallback to mock if no backend available
-    return this.db.processPayment(_orderId, paymentMethod, amount);
+    return this.db.processPayment(__orderId, _paymentMethod, amount);
   }
 
   // Restaurant operations
@@ -510,44 +510,44 @@ class DataService {
         if (floorPlan && floorPlan.tables && floorPlan.tables.length > 0) {
           return floorPlan;
         }
-      } catch (_error) {
+      } catch (__error) {
       }
     }
     return this.db.getRestaurantFloorPlan(sectionId ?? undefined);
   }
 
-  async updateTableStatus(tableId: string, status: string, additionalData?: unknown): Promise<unknown> {
+  async updateTableStatus(tableId: _string, status: _string, additionalData?: _unknown): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        return await this.db.updateTableStatus(_tableId, status, additionalData);
-      } catch (_error) {
+        return await this.db.updateTableStatus(__tableId, _status, additionalData);
+      } catch (__error) {
       }
     }
-    return this.db.updateTableStatus(_tableId, status, additionalData);
+    return this.db.updateTableStatus(__tableId, _status, additionalData);
   }
 
   // Analytics and Reporting
-  async getDailySalesReport(date?: string): Promise<unknown> {
+  async getDailySalesReport(date?: _string): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        const report = await this.db.getDailySalesReport(_date);
+        const report = await this.db.getDailySalesReport(__date);
         if (report && report.summary) {
           return report;
         }
-      } catch (_error) {
+      } catch (__error) {
       }
     }
-    return this.db.getDailySalesReport(_date);
+    return this.db.getDailySalesReport(__date);
   }
 
-  async getSalesSummary(dateFrom?: string, dateTo?: string): Promise<unknown> {
+  async getSalesSummary(dateFrom?: _string, dateTo?: _string): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         const summary = await this.db.getSalesSummary(dateFrom ?? undefined, dateTo ?? undefined);
         if (summary && summary.summary) {
           return summary;
         }
-      } catch (_error) {
+      } catch (__error) {
       }
     }
     return this.db.getSalesSummary(dateFrom ?? undefined, dateTo ?? undefined);
@@ -558,27 +558,27 @@ class DataService {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         return await this.db.getCurrentSession();
-      } catch (_error) {
+      } catch (__error) {
       }
     }
     return this.db.getCurrentSession();
   }
 
-  async createSession(configId: number): Promise<unknown> {
+  async createSession(configId: _number): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        return await this.db.createSession(_configId);
-      } catch (_error) {
+        return await this.db.createSession(__configId);
+      } catch (__error) {
       }
     }
-    return this.db.createSession(_configId);
+    return this.db.createSession(__configId);
   }
 
   // Hardware operations (always mock for now)
-  async printReceipt(order: unknown): Promise<boolean> {
+  async printReceipt(order: _unknown): Promise<boolean> {
     if (this.featureFlags.ENABLE_HARDWARE) {
     }
-    return this.db.printReceipt(_order);
+    return this.db.printReceipt(__order);
   }
 
   async openCashDrawer(): Promise<boolean> {
@@ -604,13 +604,13 @@ class DataService {
 
   // Development utilities
   async resetToMockData(): Promise<void> {
-    await this.updateFeatureFlag('USE_REAL_API', false);
-    await this.updateFeatureFlag('ENABLE_PAYMENTS', false);
-    await this.updateFeatureFlag('ENABLE_HARDWARE', false);
+    await this.updateFeatureFlag('USE_REAL_API', _false);
+    await this.updateFeatureFlag('ENABLE_PAYMENTS', _false);
+    await this.updateFeatureFlag('ENABLE_HARDWARE', _false);
   }
 
   async enableRealAPI(): Promise<void> {
-    await this.updateFeatureFlag('USE_REAL_API', true);
+    await this.updateFeatureFlag('USE_REAL_API', _true);
     await this.checkBackendAvailability();
   }
 
@@ -634,13 +634,13 @@ class DataService {
         const result = await response.json();
         const customers = result.data || result;
           '✅ API customers received:',
-          Array.isArray(_customers) ? customers.length : 'not an array',
+          Array.isArray(__customers) ? customers.length : 'not an array',
         );
-        return Array.isArray(_customers) ? customers : [];
+        return Array.isArray(__customers) ? customers : [];
       } else {
         throw new Error(`API error: ${response.status}`);
       }
-    } catch (_error) {
+    } catch (__error) {
       throw error; // No fallback - API must work for production readiness
     }
   }
@@ -655,7 +655,7 @@ class DataService {
       } else {
         throw new Error('Invalid inventory data received from API');
       }
-    } catch (_error) {
+    } catch (__error) {
       throw error; // No fallback - API must work for production readiness
     }
   }
@@ -669,22 +669,22 @@ class DataService {
         const result = await response.json();
         const employees = result.data || result;
           '✅ API employees received:',
-          Array.isArray(_employees) ? employees.length : 'not an array',
+          Array.isArray(__employees) ? employees.length : 'not an array',
         );
 
         // Apply compatibility transformation if needed
         if (
-          Array.isArray(_employees) &&
-          BackendCompatibilityService.needsEmployeeTransformation(_employees)
+          Array.isArray(__employees) &&
+          BackendCompatibilityService.needsEmployeeTransformation(__employees)
         ) {
-          return BackendCompatibilityService.transformEmployees(_employees);
+          return BackendCompatibilityService.transformEmployees(__employees);
         }
 
-        return Array.isArray(_employees) ? employees : [];
+        return Array.isArray(__employees) ? employees : [];
       } else {
         throw new Error(`API error: ${response.status} - ${response.statusText}`);
       }
-    } catch (_error) {
+    } catch (__error) {
 
       // PRODUCTION READY: Return empty array instead of mock data
       // Screens should handle empty state gracefully with EmptyState component
@@ -692,17 +692,17 @@ class DataService {
     }
   }
 
-  async getWeekSchedule(weekStart: Date, employees: unknown[]): Promise<any | null> {
+  async getWeekSchedule(weekStart: _Date, employees: unknown[]): Promise<any | null> {
 
     try {
-      const schedule = await this.db.getWeekSchedule(_weekStart, employees);
+      const schedule = await this.db.getWeekSchedule(__weekStart, _employees);
       return schedule;
-    } catch (_error) {
+    } catch (__error) {
       throw error; // No fallback - API must work for production readiness
     }
   }
 
-  async getOrders(dateRange: string): Promise<any[]> {
+  async getOrders(dateRange: _string): Promise<any[]> {
       dateRange,
       USE_REAL_API: this.featureFlags.USE_REAL_API,
       isBackendAvailable: this.isBackendAvailable,
@@ -723,19 +723,19 @@ class DataService {
           const result = await response.json();
           const orders = result.data || result;
             '✅ API orders received:',
-            Array.isArray(_orders) ? orders.length : 'not an array',
+            Array.isArray(__orders) ? orders.length : 'not an array',
           );
-          return Array.isArray(_orders) ? orders : [];
+          return Array.isArray(__orders) ? orders : [];
         } else {
           throw new Error(`API error: ${response.status}`);
         }
-      } catch (_error) {
+      } catch (__error) {
         throw error; // No fallback - API must work for production readiness
       }
     }
   }
 
-  async getFinancialReportDetail(period: string): Promise<any | null> {
+  async getFinancialReportDetail(period: _string): Promise<any | null> {
       period,
       USE_REAL_API: this.featureFlags.USE_REAL_API,
       isBackendAvailable: this.isBackendAvailable,
@@ -762,13 +762,13 @@ class DataService {
         } else {
           throw new Error(`API error: ${response.status}`);
         }
-      } catch (_error) {
+      } catch (__error) {
         throw error; // No fallback - API must work for production readiness
       }
     }
   }
 
-  async getSalesReportDetail(period: string): Promise<any[]> {
+  async getSalesReportDetail(period: _string): Promise<any[]> {
 
     try {
       const authToken = await this.getAuthToken();
@@ -788,11 +788,11 @@ class DataService {
         const salesData = result.data || result;
 
         // Transform API data to match frontend SalesData[] interface
-        if (salesData && !Array.isArray(_salesData)) {
+        if (salesData && !Array.isArray(__salesData)) {
           // Convert API format to SalesData array format
-          const transformedData = this.transformApiDataToArray(_salesData, period);
+          const transformedData = this.transformApiDataToArray(__salesData, _period);
           return transformedData;
-        } else if (Array.isArray(_salesData)) {
+        } else if (Array.isArray(__salesData)) {
           return salesData;
         } else {
           throw new Error('Invalid sales data format received from API');
@@ -800,7 +800,7 @@ class DataService {
       } else {
         throw new Error(`API error: ${response.status}`);
       }
-    } catch (_error) {
+    } catch (__error) {
       throw error; // No fallback - API must work for production readiness
     }
   }
@@ -809,7 +809,7 @@ class DataService {
    * Transform API response data to SalesData array format
    * Handles various API response formats and converts to frontend interface
    */
-  private transformApiDataToArray(apiData: unknown, period: string): unknown[] {
+  private transformApiDataToArray(apiData: _unknown, period: _string): unknown[] {
     try {
       // If API returns object with sales data, extract it
       if (apiData && typeof apiData === 'object') {
@@ -830,12 +830,12 @@ class DataService {
 
       // Return empty array if no valid data
       return [];
-    } catch (_error) {
+    } catch (__error) {
       return [];
     }
   }
 
-  async getStaffReportDetail(period: string): Promise<any[]> {
+  async getStaffReportDetail(period: _string): Promise<any[]> {
     // Should return StaffMember[]
       period,
       USE_REAL_API: this.featureFlags.USE_REAL_API,
@@ -863,13 +863,13 @@ class DataService {
         } else {
           throw new Error(`API error: ${response.status}`);
         }
-      } catch (_error) {
+      } catch (__error) {
         throw error; // No fallback - API must work for production readiness
       }
     }
   }
 
-  async getLaborReport(period: string): Promise<unknown> {
+  async getLaborReport(period: _string): Promise<unknown> {
       period,
       USE_REAL_API: this.featureFlags.USE_REAL_API,
       isBackendAvailable: this.isBackendAvailable,
@@ -896,7 +896,7 @@ class DataService {
         } else {
           throw new Error(`API error: ${response.status}`);
         }
-      } catch (_error) {
+      } catch (__error) {
         throw error; // No fallback - API must work for production readiness
       }
     }
@@ -928,7 +928,7 @@ class DataService {
         } else {
           throw new Error(`API error: ${response.status}`);
         }
-      } catch (_error) {
+      } catch (__error) {
         throw error; // No fallback - API must work for production readiness
       }
     }
@@ -975,7 +975,7 @@ class DataService {
         hourly_rate: employeeData.hourlyRate,
         start_date: employeeData.startDate,
         permissions: employeeData.permissions || [],
-        is_active: true,
+        is_active: _true,
       });
 
       if (response.ok) {
@@ -986,7 +986,7 @@ class DataService {
         const errorText = await response.text();
         throw new Error(`Failed to create employee: ${response.status} - ${errorText}`);
       }
-    } catch (_error) {
+    } catch (__error) {
       throw new Error(`Employee creation failed: ${error.message}`);
     }
   }
@@ -1007,7 +1007,7 @@ class DataService {
         const errorText = await response.text();
         throw new Error(`Failed to delete employee: ${response.status} - ${errorText}`);
       }
-    } catch (_error) {
+    } catch (__error) {
       throw new Error(`Employee deletion failed: ${error.message}`);
     }
   }
@@ -1031,11 +1031,11 @@ class DataService {
         if (response.ok) {
           const result = await response.json();
           const inventoryData = result.data || result;
-          return Array.isArray(_inventoryData) ? inventoryData : [];
+          return Array.isArray(__inventoryData) ? inventoryData : [];
         } else {
           throw new Error(`API error: ${response.status}`);
         }
-      } catch (_error) {
+      } catch (__error) {
         throw error; // No fallback - API must work for production readiness
       }
     }
@@ -1064,14 +1064,14 @@ class DataService {
         if (response.ok) {
           const result = await response.json();
           return {
-            success: true,
+            success: _true,
             data: result.data || result,
             message: 'Plans retrieved successfully',
           };
         } else {
           throw new Error(`API error: ${response.status}`);
         }
-      } catch (_error) {
+      } catch (__error) {
         throw error;
       }
     }
@@ -1079,7 +1079,7 @@ class DataService {
     throw new Error('Subscription plans require API connection');
   }
 
-  async getCurrentSubscription(restaurantId: number): Promise<unknown> {
+  async getCurrentSubscription(restaurantId: _number): Promise<unknown> {
 
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
@@ -1098,20 +1098,20 @@ class DataService {
         if (response.ok) {
           const result = await response.json();
           return {
-            success: true,
+            success: _true,
             data: result.data || result,
             message: 'Subscription retrieved successfully',
           };
         } else if (response.status === 404) {
           return {
-            success: false,
-            data: null,
+            success: _false,
+            data: _null,
             message: 'No active subscription found',
           };
         } else {
           throw new Error(`API error: ${response.status}`);
         }
-      } catch (_error) {
+      } catch (__error) {
         throw error;
       }
     }
@@ -1119,7 +1119,7 @@ class DataService {
     throw new Error('Subscription data requires API connection');
   }
 
-  async createSubscription(subscriptionData: unknown): Promise<unknown> {
+  async createSubscription(subscriptionData: _unknown): Promise<unknown> {
 
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
@@ -1130,28 +1130,28 @@ class DataService {
             'Content-Type': 'application/json',
             ...(authToken && { Authorization: `Bearer ${authToken}` }),
           },
-          body: JSON.stringify(_subscriptionData),
+          body: JSON.stringify(__subscriptionData),
         });
 
         if (response.ok) {
           const result = await response.json();
           return {
-            success: true,
+            success: _true,
             data: result.data || result,
             message: result.message || 'Subscription created successfully',
           };
         } else {
           const errorData = await response.json();
           return {
-            success: false,
-            data: null,
+            success: _false,
+            data: _null,
             message: errorData.message || `Failed to create subscription: ${response.status}`,
           };
         }
-      } catch (_error) {
+      } catch (__error) {
         return {
-          success: false,
-          data: null,
+          success: _false,
+          data: _null,
           message: error.message || 'Failed to create subscription',
         };
       }
@@ -1160,7 +1160,7 @@ class DataService {
     throw new Error('Subscription creation requires API connection');
   }
 
-  async changeSubscriptionPlan(changeData: unknown): Promise<unknown> {
+  async changeSubscriptionPlan(changeData: _unknown): Promise<unknown> {
 
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
@@ -1171,28 +1171,28 @@ class DataService {
             'Content-Type': 'application/json',
             ...(authToken && { Authorization: `Bearer ${authToken}` }),
           },
-          body: JSON.stringify(_changeData),
+          body: JSON.stringify(__changeData),
         });
 
         if (response.ok) {
           const result = await response.json();
           return {
-            success: true,
+            success: _true,
             data: result.data || result,
             message: result.message || 'Plan changed successfully',
           };
         } else {
           const errorData = await response.json();
           return {
-            success: false,
-            data: null,
+            success: _false,
+            data: _null,
             message: errorData.message || `Failed to change plan: ${response.status}`,
           };
         }
-      } catch (_error) {
+      } catch (__error) {
         return {
-          success: false,
-          data: null,
+          success: _false,
+          data: _null,
           message: error.message || 'Failed to change subscription plan',
         };
       }
@@ -1201,7 +1201,7 @@ class DataService {
     throw new Error('Plan change requires API connection');
   }
 
-  async cancelSubscription(restaurantId: number): Promise<unknown> {
+  async cancelSubscription(restaurantId: _number): Promise<unknown> {
 
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
@@ -1220,22 +1220,22 @@ class DataService {
         if (response.ok) {
           const result = await response.json();
           return {
-            success: true,
+            success: _true,
             data: result.data || result,
             message: result.message || 'Subscription cancelled successfully',
           };
         } else {
           const errorData = await response.json();
           return {
-            success: false,
-            data: null,
+            success: _false,
+            data: _null,
             message: errorData.message || `Failed to cancel subscription: ${response.status}`,
           };
         }
-      } catch (_error) {
+      } catch (__error) {
         return {
-          success: false,
-          data: null,
+          success: _false,
+          data: _null,
           message: error.message || 'Failed to cancel subscription',
         };
       }
@@ -1244,7 +1244,7 @@ class DataService {
     throw new Error('Subscription cancellation requires API connection');
   }
 
-  async incrementUsage(restaurantId: number, usageType: string, amount = 1): Promise<unknown> {
+  async incrementUsage(restaurantId: _number, usageType: _string, amount = 1): Promise<unknown> {
 
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
@@ -1263,22 +1263,22 @@ class DataService {
         if (response.ok) {
           const result = await response.json();
           return {
-            success: true,
+            success: _true,
             data: result.data || result,
             message: result.message || 'Usage incremented successfully',
           };
         } else {
           const errorData = await response.json();
           return {
-            success: false,
-            data: null,
+            success: _false,
+            data: _null,
             message: errorData.message || `Failed to increment usage: ${response.status}`,
           };
         }
-      } catch (_error) {
+      } catch (__error) {
         return {
-          success: false,
-          data: null,
+          success: _false,
+          data: _null,
           message: error.message || 'Failed to increment usage',
         };
       }

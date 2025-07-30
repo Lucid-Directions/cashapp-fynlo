@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, StyleSheet, ActivityIndicator, SafeAreaView } from 'react-native';
+import { Text, ActivityIndicator, SafeAreaView } from 'react-native';
 import { useTheme } from '../../design-system/ThemeProvider';
 
 interface LoadingViewProps {

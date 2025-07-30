@@ -28,15 +28,15 @@ interface TableRevenueWidgetProps {
 const TableRevenueWidget: React.FC<TableRevenueWidgetProps> = ({ onPress, compact = false }) => {
   const { theme } = useTheme();
   const [data, setData] = useState<TableRevenueData[]>([]);
-  const [loading, setLoading] = useState(_true);
-  const [refreshing, setRefreshing] = useState(_false);
-  const [error, setError] = useState<string | null>(_null);
+  const [loading, setLoading] = useState(__true);
+  const [refreshing, setRefreshing] = useState(__false);
+  const [error, setError] = useState<string | null>(__null);
   const [selectedPeriod, setSelectedPeriod] = useState<'today' | 'week' | 'month'>('today');
 
   const fetchTableRevenue = async () => {
     try {
-      setLoading(_true);
-      setError(_null);
+      setLoading(__true);
+      setError(__null);
 
       // Mock data for demo - in real app, call API
       const mockData: TableRevenueData[] = [
@@ -83,14 +83,14 @@ const TableRevenueWidget: React.FC<TableRevenueWidgetProps> = ({ onPress, compac
       ];
 
       // Simulate API delay
-      await new Promise(resolve => setTimeout(_resolve, 500));
+      await new Promise(resolve => setTimeout(__resolve, 500));
 
-      setData(_mockData);
-    } catch (_err) {
+      setData(__mockData);
+    } catch (__err) {
       setError('Failed to load table revenue data');
     } finally {
-      setLoading(_false);
-      setRefreshing(_false);
+      setLoading(__false);
+      setRefreshing(__false);
     }
   };
 
@@ -99,14 +99,14 @@ const TableRevenueWidget: React.FC<TableRevenueWidgetProps> = ({ onPress, compac
   }, [selectedPeriod]);
 
   const onRefresh = () => {
-    setRefreshing(_true);
+    setRefreshing(__true);
     fetchTableRevenue();
   };
 
-  const totalRevenue = data.reduce((_sum, table) => sum + table.total_revenue, 0);
-  const totalOrders = data.reduce((_sum, table) => sum + table.order_count, 0);
+  const totalRevenue = data.reduce((__sum, _table) => sum + table.total_revenue, 0);
+  const totalOrders = data.reduce((__sum, _table) => sum + table.order_count, 0);
 
-  const renderTableRow = (table: TableRevenueData, index: number) => (
+  const renderTableRow = (table: _TableRevenueData, index: _number) => (
     <View
       key={table.table_id}
       style={[styles.tableRow, { borderBottomColor: theme.colors.border }]}>
@@ -149,7 +149,7 @@ const TableRevenueWidget: React.FC<TableRevenueWidgetProps> = ({ onPress, compac
     );
   }
 
-  if (_error) {
+  if (__error) {
     return (
       <View style={[styles.container, { backgroundColor: theme.colors.white }]}>
         <View style={styles.header}>
@@ -199,7 +199,7 @@ const TableRevenueWidget: React.FC<TableRevenueWidgetProps> = ({ onPress, compac
                 borderColor: theme.colors.primary,
               },
             ]}
-            onPress={() => setSelectedPeriod(_period)}>
+            onPress={() => setSelectedPeriod(__period)}>
             <Text
               style={[
                 styles.periodButtonText,
@@ -265,7 +265,7 @@ const TableRevenueWidget: React.FC<TableRevenueWidgetProps> = ({ onPress, compac
                 Avg Order
               </Text>
             </View>
-            {data.slice(0, compact ? 3 : data.length).map(_renderTableRow)}
+            {data.slice(0, compact ? 3 : data.length).map(__renderTableRow)}
             {compact && data.length > 3 && (
               <TouchableOpacity style={styles.viewMoreButton} onPress={onPress}>
                 <Text style={[styles.viewMoreText, { color: theme.colors.primary }]}>

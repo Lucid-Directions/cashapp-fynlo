@@ -6,7 +6,7 @@
  * ReferenceError issues in production iOS builds.
  */
 
-import { TextInput, ScrollView, KeyboardAvoidingView, FlatList } from 'react-native';
+import { TextInput, KeyboardAvoidingView, FlatList } from 'react-native';
 
 // Global registry to prevent tree-shaking
 const ComponentRegistry = {

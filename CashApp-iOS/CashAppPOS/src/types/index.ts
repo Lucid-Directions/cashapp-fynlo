@@ -112,7 +112,7 @@ export type MainStackParamList = {
   Employees: undefined;
   EmployeeSchedule: undefined;
   QRScanner: {
-    onScanned: (data: string) => void;
+    onScanned: (data: _string) => void;
     title?: string;
     subtitle?: string;
   };
@@ -140,26 +140,26 @@ export type MainStackParamList = {
     amount: number;
     orderItems: OrderItem[];
     customerName: string;
-    onPaymentComplete: (result: unknown) => void;
+    onPaymentComplete: (result: _unknown) => void;
   };
   QRCodePayment: {
     amount: number;
     orderItems: OrderItem[];
     customerName: string;
-    onPaymentComplete: (result: unknown) => void;
+    onPaymentComplete: (result: _unknown) => void;
   };
   SquareCardPayment: {
     amount: number;
     currency?: string;
     description?: string;
-    onPaymentComplete: (result: unknown) => void;
+    onPaymentComplete: (result: _unknown) => void;
     onPaymentCancelled: () => void;
   };
   SquareContactlessPayment: {
     amount: number;
     currency?: string;
     description?: string;
-    onPaymentComplete: (result: unknown) => void;
+    onPaymentComplete: (result: _unknown) => void;
     onPaymentCancelled: () => void;
   };
 };

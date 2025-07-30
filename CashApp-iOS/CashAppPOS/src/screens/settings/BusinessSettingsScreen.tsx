@@ -37,7 +37,7 @@ const BusinessSettingsScreen: React.FC = () => {
     {
       id: 'business-info',
       title: 'Business Information',
-      description: 'Company name, address, and contact details',
+      description: 'Company name, _address, and contact details',
       icon: 'business-center',
       route: 'BusinessInformation',
       status: 'incomplete',
@@ -76,14 +76,14 @@ const BusinessSettingsScreen: React.FC = () => {
     {
       id: 'operating-hours',
       title: 'Operating Hours',
-      description: 'Business hours, holidays, and special events',
+      description: 'Business hours, _holidays, and special events',
       icon: 'schedule',
       route: 'OperatingHours',
     },
   ];
 
-  const getStatusColor = (status?: string) => {
-    switch (_status) {
+  const getStatusColor = (status?: _string) => {
+    switch (__status) {
       case 'complete':
         return Colors.success;
       case 'incomplete':
@@ -95,8 +95,8 @@ const BusinessSettingsScreen: React.FC = () => {
     }
   };
 
-  const getStatusIcon = (status?: string) => {
-    switch (_status) {
+  const getStatusIcon = (status?: _string) => {
+    switch (__status) {
       case 'complete':
         return 'check-circle';
       case 'incomplete':
@@ -108,12 +108,12 @@ const BusinessSettingsScreen: React.FC = () => {
     }
   };
 
-  const handleSettingPress = (item: BusinessSettingsItem) => {
+  const handleSettingPress = (item: _BusinessSettingsItem) => {
     if (item.route === 'PaymentMethodsInfo') {
       // Show alert instead of navigating
       Alert.alert(
         'Payment Methods',
-        'Payment processing is managed by the platform owner. Current supported methods:\n\n• Card payments (Chip & PIN, Contactless)\n• Apple Pay & Google Pay\n• Cash transactions\n• QR Code payments\n\nContact platform support for changes or questions.',
+        'Payment processing is managed by the platform owner. Current supported methods:\n\n• Card payments (Chip & PIN, _Contactless)\n• Apple Pay & Google Pay\n• Cash transactions\n• QR Code payments\n\nContact platform support for changes or questions.',
         [{ text: 'OK' }],
       );
       return;
@@ -124,7 +124,7 @@ const BusinessSettingsScreen: React.FC = () => {
   const renderSettingItem = ({ item }: { item: BusinessSettingsItem }) => (
     <TouchableOpacity
       style={styles.settingCard}
-      onPress={() => handleSettingPress(_item)}
+      onPress={() => handleSettingPress(__item)}
       activeOpacity={0.7}>
       <View style={[styles.settingIcon, { backgroundColor: `${Colors.primary}15` }]}>
         <Icon name={item.icon} size={24} color={Colors.primary} />

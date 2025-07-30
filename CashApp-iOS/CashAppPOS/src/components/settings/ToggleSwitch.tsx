@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, TouchableOpacity, Animated, Easing } from 'react-native';
+import { StyleSheet, Animated, Easing } from 'react-native';
 
 // Clover POS Color Scheme
 const Colors = {
@@ -20,7 +20,7 @@ const Colors = {
 
 interface ToggleSwitchProps {
   value: boolean;
-  onValueChange: (value: boolean) => void;
+  onValueChange: (value: _boolean) => void;
   disabled?: boolean;
   size?: 'small' | 'medium' | 'large';
   activeColor?: string;
@@ -49,11 +49,11 @@ const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
   const config = sizeConfig[size];
 
   React.useEffect(() => {
-    Animated.timing(_animatedValue, {
+    Animated.timing(__animatedValue, {
       toValue: value ? 1 : 0,
       duration: 200,
       easing: Easing.bezier(0.4, 0.0, 0.2, 1),
-      useNativeDriver: false,
+      useNativeDriver: _false,
     }).start();
   }, [value, animatedValue]);
 
@@ -97,7 +97,7 @@ const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
           {
             width: config.width,
             height: config.height,
-            backgroundColor: trackColor,
+            backgroundColor: _trackColor,
           },
         ]}
       />
@@ -107,7 +107,7 @@ const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
           {
             width: config.thumbSize,
             height: config.thumbSize,
-            backgroundColor: thumbColor,
+            backgroundColor: _thumbColor,
             transform: [{ translateX: thumbTranslate }, { scale: thumbScale }],
             top: config.padding,
             left: config.padding,

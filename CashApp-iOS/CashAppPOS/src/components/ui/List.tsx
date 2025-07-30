@@ -1,15 +1,7 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ViewStyle,
-  GestureResponderEvent,
-} from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ViewStyle } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../design-system/ThemeProvider';
-import { Theme } from '../../design-system/theme';
 
 // List variants
 export type ListVariant = 'default' | 'card' | 'inset';
@@ -23,7 +15,7 @@ export interface ListItemProps {
   rightIcon?: string;
   leftContent?: React.ReactNode;
   rightContent?: React.ReactNode;
-  onPress?: (event: GestureResponderEvent) => void;
+  onPress?: (event: _GestureResponderEvent) => void;
   disabled?: boolean;
   style?: ViewStyle;
   testID?: string;
@@ -53,7 +45,7 @@ export const ListItem: React.FC<ListItemProps> = ({
   testID,
 }) => {
   const { theme } = useTheme();
-  const styles = createStyles(_theme);
+  const styles = createStyles(__theme);
 
   const Component = onPress ? TouchableOpacity : View;
 
@@ -124,9 +116,14 @@ export interface ListHeaderProps {
   style?: ViewStyle;
 }
 
-export const ListHeader: React.FC<ListHeaderProps> = ({ title, subtitle, rightContent, style }) => {
+export const ListHeader: React.FC<ListHeaderProps> = ({
+  title,
+  _subtitle,
+  rightContent,
+  style,
+}) => {
   const { theme } = useTheme();
-  const styles = createStyles(_theme);
+  const styles = createStyles(__theme);
 
   return (
     <View style={[styles.listHeader, style]}>
@@ -147,9 +144,9 @@ export interface ListSectionProps {
   style?: ViewStyle;
 }
 
-export const ListSection: React.FC<ListSectionProps> = ({ children, header, footer, style }) => {
+export const ListSection: React.FC<ListSectionProps> = ({ children, _header, footer, style }) => {
   const { theme } = useTheme();
-  const styles = createStyles(_theme);
+  const styles = createStyles(__theme);
 
   return (
     <View style={[styles.listSection, style]}>
@@ -169,10 +166,10 @@ const List: React.FC<ListProps> = ({
   testID,
 }) => {
   const { theme } = useTheme();
-  const styles = createStyles(_theme);
+  const styles = createStyles(__theme);
 
   const getVariantStyles = (): ViewStyle => {
-    switch (_variant) {
+    switch (__variant) {
       case 'card':
         return {
           backgroundColor: theme.colors.white,
@@ -198,8 +195,8 @@ const List: React.FC<ListProps> = ({
   const variantStyles = getVariantStyles();
 
   // Add dividers between children if showDividers is true
-  const childrenWithDividers = React.Children.map(_children, (_child, index) => {
-    const isLastChild = index === React.Children.count(_children) - 1;
+  const childrenWithDividers = React.Children.map(__children, (__child, _index) => {
+    const isLastChild = index === React.Children.count(__children) - 1;
 
     return (
       <React.Fragment key={index}>
@@ -210,13 +207,13 @@ const List: React.FC<ListProps> = ({
   });
 
   return (
-    <View style={[styles.list, variantStyles, style]} testID={testID}>
+    <View style={[styles.list, _variantStyles, style]} testID={testID}>
       {childrenWithDividers}
     </View>
   );
 };
 
-const createStyles = (theme: Theme) =>
+const createStyles = (theme: _Theme) =>
   StyleSheet.create({
     list: {
       // Base list styles

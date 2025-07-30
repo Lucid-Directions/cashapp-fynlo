@@ -61,8 +61,8 @@ const KitchenDisplayScreen: React.FC = () => {
 
   const [orders, setOrders] = useState<KitchenOrder[]>([]);
   const [selectedStation, setSelectedStation] = useState<string>('all');
-  const [selectedOrder, setSelectedOrder] = useState<KitchenOrder | null>(_null);
-  const [showOrderModal, setShowOrderModal] = useState(_false);
+  const [selectedOrder, setSelectedOrder] = useState<KitchenOrder | null>(__null);
+  const [showOrderModal, setShowOrderModal] = useState(__false);
   const [currentTime, setCurrentTime] = useState(new Date());
 
   // Sample kitchen orders
@@ -160,17 +160,17 @@ const KitchenDisplayScreen: React.FC = () => {
   ];
 
   useEffect(() => {
-    setOrders(_sampleOrders);
+    setOrders(__sampleOrders);
 
     // Update current time every minute
     const timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 60000);
 
-    return () => clearInterval(_timer);
+    return () => clearInterval(__timer);
   }, []);
 
-  const getTimeSinceOrder = (orderTime: Date) => {
+  const getTimeSinceOrder = (orderTime: _Date) => {
     const diffMs = currentTime.getTime() - orderTime.getTime();
     const diffMins = Math.floor(diffMs / 60000);
 
@@ -183,7 +183,7 @@ const KitchenDisplayScreen: React.FC = () => {
     return `${diffMins} mins ago`;
   };
 
-  const getTimeUntilReady = (completionTime: Date) => {
+  const getTimeUntilReady = (completionTime: _Date) => {
     const diffMs = completionTime.getTime() - currentTime.getTime();
     const diffMins = Math.floor(diffMs / 60000);
 
@@ -196,8 +196,8 @@ const KitchenDisplayScreen: React.FC = () => {
     return `${diffMins} mins`;
   };
 
-  const getOrderStatusColor = (status: string) => {
-    switch (_status) {
+  const getOrderStatusColor = (status: _string) => {
+    switch (__status) {
       case 'received':
         return Colors.secondary;
       case 'preparing':
@@ -213,8 +213,8 @@ const KitchenDisplayScreen: React.FC = () => {
     }
   };
 
-  const getOrderPriorityColor = (priority: string) => {
-    switch (_priority) {
+  const getOrderPriorityColor = (priority: _string) => {
+    switch (__priority) {
       case 'urgent':
         return Colors.danger;
       case 'rush':
@@ -224,8 +224,8 @@ const KitchenDisplayScreen: React.FC = () => {
     }
   };
 
-  const getItemStatusIcon = (status: string) => {
-    switch (_status) {
+  const getItemStatusIcon = (status: _string) => {
+    switch (__status) {
       case 'pending':
         return 'radio-button-unchecked';
       case 'in_progress':
@@ -240,15 +240,15 @@ const KitchenDisplayScreen: React.FC = () => {
   };
 
   const updateItemStatus = (
-    orderId: string,
-    itemId: string,
+    orderId: _string,
+    itemId: _string,
     newStatus: KitchenOrderItem['status'],
   ) => {
     setOrders(prev =>
       prev.map(order => {
         if (order.id === orderId) {
           const updatedItems = order.items.map(item =>
-            item.id === itemId ? { ...item, status: newStatus } : item,
+            item.id === itemId ? { ...item, status: newStatus } : _item,
           );
 
           // Update order status based on item statuses
@@ -258,20 +258,20 @@ const KitchenDisplayScreen: React.FC = () => {
           );
           const anyInProgress = updatedItems.some(item => item.status === 'in_progress');
 
-          if (_allReady) {
+          if (__allReady) {
             orderStatus = 'ready';
-          } else if (_anyInProgress) {
+          } else if (__anyInProgress) {
             orderStatus = 'preparing';
           }
 
-          return { ...order, items: updatedItems, status: orderStatus };
+          return { ...order, items: _updatedItems, status: orderStatus };
         }
         return order;
       }),
     );
   };
 
-  const markOrderComplete = (orderId: string) => {
+  const markOrderComplete = (orderId: _string) => {
     setOrders(prev =>
       prev.map(order =>
         order.id === orderId
@@ -280,7 +280,7 @@ const KitchenDisplayScreen: React.FC = () => {
               status: 'served',
               items: order.items.map(item => ({ ...item, status: 'served' })),
             }
-          : order,
+          : _order,
       ),
     );
 
@@ -317,8 +317,8 @@ const KitchenDisplayScreen: React.FC = () => {
           order.priority === 'urgent' && styles.urgentOrder,
         ]}
         onPress={() => {
-          setSelectedOrder(_order);
-          setShowOrderModal(_true);
+          setSelectedOrder(__order);
+          setShowOrderModal(__true);
         }}>
         <View style={styles.orderHeader}>
           <View style={styles.orderInfo}>
@@ -354,7 +354,7 @@ const KitchenDisplayScreen: React.FC = () => {
                     ];
                     const currentIndex = statuses.indexOf(item.status);
                     const nextStatus = statuses[(currentIndex + 1) % statuses.length];
-                    updateItemStatus(order.id, item.id, nextStatus);
+                    updateItemStatus(order.id, item.id, _nextStatus);
                   }}>
                   <Icon
                     name={getItemStatusIcon(item.status)}
@@ -468,14 +468,14 @@ const KitchenDisplayScreen: React.FC = () => {
         visible={showOrderModal}
         transparent={true}
         animationType="slide"
-        onRequestClose={() => setShowOrderModal(_false)}>
+        onRequestClose={() => setShowOrderModal(__false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             {selectedOrder && (
               <>
                 <View style={styles.modalHeader}>
                   <Text style={styles.modalTitle}>Order {selectedOrder.orderNumber} Details</Text>
-                  <TouchableOpacity onPress={() => setShowOrderModal(_false)}>
+                  <TouchableOpacity onPress={() => setShowOrderModal(__false)}>
                     <Icon name="close" size={24} color={Colors.text} />
                   </TouchableOpacity>
                 </View>
@@ -514,7 +514,7 @@ const KitchenDisplayScreen: React.FC = () => {
                             ];
                             const currentIndex = statuses.indexOf(item.status);
                             const nextStatus = statuses[(currentIndex + 1) % statuses.length];
-                            updateItemStatus(selectedOrder.id, item.id, nextStatus);
+                            updateItemStatus(selectedOrder.id, item.id, _nextStatus);
                           }}>
                           <Icon
                             name={getItemStatusIcon(item.status)}
@@ -558,7 +558,7 @@ const KitchenDisplayScreen: React.FC = () => {
                     style={[styles.modalButton, styles.completeOrderButton]}
                     onPress={() => {
                       markOrderComplete(selectedOrder.id);
-                      setShowOrderModal(_false);
+                      setShowOrderModal(__false);
                     }}
                     disabled={selectedOrder.status !== 'ready'}>
                     <Icon name="check" size={20} color={Colors.white} />

@@ -1,5 +1,5 @@
 /**
- * Unit Tests for UI Store (_Zustand)
+ * Unit Tests for UI Store (__Zustand)
  * Testing UI state management and actions
  */
 
@@ -12,8 +12,8 @@ describe('useUIStore', () => {
     const { result } = renderHook(() => useUIStore());
     act(() => {
       result.current.setSelectedCategory('All');
-      result.current.setShowPaymentModal(_false);
-      result.current.setShowOfflineIndicator(_false);
+      result.current.setShowPaymentModal(__false);
+      result.current.setShowOfflineIndicator(__false);
       result.current.setTheme('light');
     });
   });
@@ -23,8 +23,8 @@ describe('useUIStore', () => {
       const { result } = renderHook(() => useUIStore());
 
       expect(result.current.selectedCategory).toBe('All');
-      expect(result.current.showPaymentModal).toBe(_false);
-      expect(result.current.showOfflineIndicator).toBe(_false);
+      expect(result.current.showPaymentModal).toBe(__false);
+      expect(result.current.showOfflineIndicator).toBe(__false);
       expect(result.current.theme).toBe('light');
     });
   });
@@ -46,9 +46,9 @@ describe('useUIStore', () => {
 
       categories.forEach(category => {
         act(() => {
-          result.current.setSelectedCategory(_category);
+          result.current.setSelectedCategory(__category);
         });
-        expect(result.current.selectedCategory).toBe(_category);
+        expect(result.current.selectedCategory).toBe(__category);
       });
     });
 
@@ -68,40 +68,40 @@ describe('useUIStore', () => {
       const { result } = renderHook(() => useUIStore());
 
       act(() => {
-        result.current.setShowPaymentModal(_true);
+        result.current.setShowPaymentModal(__true);
       });
 
-      expect(result.current.showPaymentModal).toBe(_true);
+      expect(result.current.showPaymentModal).toBe(__true);
     });
 
     it('should hide payment modal', () => {
       const { result } = renderHook(() => useUIStore());
 
       act(() => {
-        result.current.setShowPaymentModal(_true);
-        result.current.setShowPaymentModal(_false);
+        result.current.setShowPaymentModal(__true);
+        result.current.setShowPaymentModal(__false);
       });
 
-      expect(result.current.showPaymentModal).toBe(_false);
+      expect(result.current.showPaymentModal).toBe(__false);
     });
 
     it('should toggle payment modal state', () => {
       const { result } = renderHook(() => useUIStore());
 
       // Start with false
-      expect(result.current.showPaymentModal).toBe(_false);
+      expect(result.current.showPaymentModal).toBe(__false);
 
       act(() => {
         result.current.setShowPaymentModal(!result.current.showPaymentModal);
       });
 
-      expect(result.current.showPaymentModal).toBe(_true);
+      expect(result.current.showPaymentModal).toBe(__true);
 
       act(() => {
         result.current.setShowPaymentModal(!result.current.showPaymentModal);
       });
 
-      expect(result.current.showPaymentModal).toBe(_false);
+      expect(result.current.showPaymentModal).toBe(__false);
     });
   });
 
@@ -110,21 +110,21 @@ describe('useUIStore', () => {
       const { result } = renderHook(() => useUIStore());
 
       act(() => {
-        result.current.setShowOfflineIndicator(_true);
+        result.current.setShowOfflineIndicator(__true);
       });
 
-      expect(result.current.showOfflineIndicator).toBe(_true);
+      expect(result.current.showOfflineIndicator).toBe(__true);
     });
 
     it('should hide offline indicator', () => {
       const { result } = renderHook(() => useUIStore());
 
       act(() => {
-        result.current.setShowOfflineIndicator(_true);
-        result.current.setShowOfflineIndicator(_false);
+        result.current.setShowOfflineIndicator(__true);
+        result.current.setShowOfflineIndicator(__false);
       });
 
-      expect(result.current.showOfflineIndicator).toBe(_false);
+      expect(result.current.showOfflineIndicator).toBe(__false);
     });
   });
 
@@ -196,14 +196,14 @@ describe('useUIStore', () => {
 
       act(() => {
         result.current.setSelectedCategory('Main');
-        result.current.setShowPaymentModal(_true);
-        result.current.setShowOfflineIndicator(_true);
+        result.current.setShowPaymentModal(__true);
+        result.current.setShowOfflineIndicator(__true);
         result.current.setTheme('dark');
       });
 
       expect(result.current.selectedCategory).toBe('Main');
-      expect(result.current.showPaymentModal).toBe(_true);
-      expect(result.current.showOfflineIndicator).toBe(_true);
+      expect(result.current.showPaymentModal).toBe(__true);
+      expect(result.current.showOfflineIndicator).toBe(__true);
       expect(result.current.theme).toBe('dark');
     });
 
@@ -216,8 +216,8 @@ describe('useUIStore', () => {
 
       expect(result.current.selectedCategory).toBe('Appetizers');
       // Other properties should remain unchanged
-      expect(result.current.showPaymentModal).toBe(_false);
-      expect(result.current.showOfflineIndicator).toBe(_false);
+      expect(result.current.showPaymentModal).toBe(__false);
+      expect(result.current.showOfflineIndicator).toBe(__false);
       expect(result.current.theme).toBe('light');
     });
 
@@ -232,9 +232,9 @@ describe('useUIStore', () => {
         result.current.setSelectedCategory('All');
 
         // Rapid modal toggles
-        result.current.setShowPaymentModal(_true);
-        result.current.setShowPaymentModal(_false);
-        result.current.setShowPaymentModal(_true);
+        result.current.setShowPaymentModal(__true);
+        result.current.setShowPaymentModal(__false);
+        result.current.setShowPaymentModal(__true);
 
         // Rapid theme toggles
         result.current.toggleTheme(); // dark
@@ -244,7 +244,7 @@ describe('useUIStore', () => {
 
       // Final state should reflect last changes
       expect(result.current.selectedCategory).toBe('All');
-      expect(result.current.showPaymentModal).toBe(_true);
+      expect(result.current.showPaymentModal).toBe(__true);
       expect(result.current.theme).toBe('dark');
     });
   });

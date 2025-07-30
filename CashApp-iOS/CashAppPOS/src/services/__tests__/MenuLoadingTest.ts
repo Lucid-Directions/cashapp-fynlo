@@ -1,6 +1,6 @@
 /**
  * Menu Loading Performance Test
- * Tests the improved menu loading with timeout, retry, and caching
+ * Tests the improved menu loading with timeout, _retry, and caching
  */
 
 import DatabaseService from '../DatabaseService';
@@ -32,16 +32,16 @@ describe('Menu Loading Performance', () => {
       attemptCount++;
       if (attemptCount === 1) {
         // First attempt: simulate timeout
-        return new Promise((__, reject) => {
+        return new Promise((___, _reject) => {
           setTimeout(() => reject(new Error('AbortError')), 100);
         });
       } else {
         // Second attempt: success
         return Promise.resolve({
-          ok: true,
+          ok: _true,
           json: () =>
             Promise.resolve({
-              success: true,
+              success: _true,
               data: [{ id: 1, name: 'Test Item', price: 10.99, category: 'Test' }],
             }),
         });
@@ -49,9 +49,9 @@ describe('Menu Loading Performance', () => {
     });
 
     const items = await dbService.getMenuItems();
-    expect(_items).toHaveLength(1);
+    expect(__items).toHaveLength(1);
     expect(items[0].name).toBe('Test Item');
-    expect(_attemptCount).toBe(2); // Should have retried once
+    expect(__attemptCount).toBe(2); // Should have retried once
   });
 
   test('should use cache on subsequent calls', async () => {
@@ -60,10 +60,10 @@ describe('Menu Loading Performance', () => {
     global.fetch = jest.fn().mockImplementation(() => {
       fetchCallCount++;
       return Promise.resolve({
-        ok: true,
+        ok: _true,
         json: () =>
           Promise.resolve({
-            success: true,
+            success: _true,
             data: [{ id: 1, name: 'Cached Item', price: 5.99, category: 'Test' }],
           }),
       });
@@ -71,12 +71,12 @@ describe('Menu Loading Performance', () => {
 
     // First call - should hit API
     const items1 = await dbService.getMenuItems();
-    expect(_fetchCallCount).toBe(1);
+    expect(__fetchCallCount).toBe(1);
     expect(items1[0].name).toBe('Cached Item');
 
     // Second call - should use cache
     const items2 = await dbService.getMenuItems();
-    expect(_fetchCallCount).toBe(1); // No additional fetch
+    expect(__fetchCallCount).toBe(1); // No additional fetch
     expect(items2[0].name).toBe('Cached Item');
   });
 
@@ -93,10 +93,10 @@ describe('Menu Loading Performance', () => {
   test('should handle expired cache gracefully', async () => {
     // First call - successful
     global.fetch = jest.fn().mockResolvedValueOnce({
-      ok: true,
+      ok: _true,
       json: () =>
         Promise.resolve({
-          success: true,
+          success: _true,
           data: [{ id: 1, name: 'Original Item', price: 7.99, category: 'Test' }],
         }),
     });

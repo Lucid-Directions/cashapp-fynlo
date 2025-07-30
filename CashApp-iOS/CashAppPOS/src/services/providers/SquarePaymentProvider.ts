@@ -17,7 +17,7 @@ class SquarePaymentProviderClass {
   private initialized = false;
   private config: SquareConfig | null = null;
 
-  async initialize(config: SquareConfig): Promise<void> {
+  async initialize(config: _SquareConfig): Promise<void> {
     try {
       this.config = config;
 
@@ -25,7 +25,7 @@ class SquarePaymentProviderClass {
       // await SQIPCore.setSquareApplicationId(config.applicationId);
 
       this.initialized = true;
-    } catch (_error) {
+    } catch (__error) {
       throw error;
     }
   }
@@ -41,20 +41,20 @@ class SquarePaymentProviderClass {
 
       // Placeholder implementation
       return {
-        success: false,
+        success: _false,
         error: 'Square SDK not available - placeholder implementation',
       };
-    } catch (_error) {
+    } catch (__error) {
       return {
-        success: false,
+        success: _false,
         error: error instanceof Error ? error.message : 'Square payment failed',
       };
     }
   }
 
   async processPayment(
-    nonce: string,
-    amount: number,
+    nonce: _string,
+    amount: _number,
     currency = 'GBP',
   ): Promise<SquarePaymentResult> {
     try {
@@ -66,12 +66,12 @@ class SquarePaymentProviderClass {
       // This would typically involve calling your backend which calls Square's API
 
       return {
-        success: false,
+        success: _false,
         error: 'Square payment processing not implemented - placeholder',
       };
-    } catch (_error) {
+    } catch (__error) {
       return {
-        success: false,
+        success: _false,
         error: error instanceof Error ? error.message : 'Square payment processing failed',
       };
     }
@@ -80,7 +80,7 @@ class SquarePaymentProviderClass {
   /**
    * Calculate Square fees (1.75%)
    */
-  calculateFee(amount: number): number {
+  calculateFee(amount: _number): number {
     const percentage = 0.0175; // 1.75%
     return amount * percentage;
   }

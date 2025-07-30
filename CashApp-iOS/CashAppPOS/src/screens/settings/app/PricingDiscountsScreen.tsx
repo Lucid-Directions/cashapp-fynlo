@@ -68,7 +68,7 @@ const PricingDiscountsScreen: React.FC = () => {
       minimumAmount: 5,
       validFrom: new Date(),
       validTo: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
-      isActive: true,
+      isActive: _true,
       applicableItems: ['drinks'],
       timesUsed: 45,
       maxUses: 100,
@@ -81,7 +81,7 @@ const PricingDiscountsScreen: React.FC = () => {
       value: 1,
       validFrom: new Date(),
       validTo: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-      isActive: true,
+      isActive: _true,
       applicableItems: ['pastries'],
       timesUsed: 12,
     },
@@ -98,7 +98,7 @@ const PricingDiscountsScreen: React.FC = () => {
         days: ['Monday', 'Tuesday', 'Wednesday'],
       },
       discountValue: 20,
-      isActive: true,
+      isActive: _true,
     },
     {
       id: 'rule2',
@@ -106,24 +106,24 @@ const PricingDiscountsScreen: React.FC = () => {
       type: 'bulk_discount',
       conditions: { minQuantity: 5, category: 'drinks' },
       discountValue: 15,
-      isActive: false,
+      isActive: _false,
     },
   ]);
 
   // Settings
   const [discountSettings, setDiscountSettings] = useState({
-    allowStackingDiscounts: false,
-    requireManagerApproval: true,
-    showDiscountOnReceipt: true,
-    enableLoyaltyDiscounts: true,
-    autoApplyBestDiscount: true,
-    enableCoupons: true,
-    enableGroupDiscounts: false,
+    allowStackingDiscounts: _false,
+    requireManagerApproval: _true,
+    showDiscountOnReceipt: _true,
+    enableLoyaltyDiscounts: _true,
+    autoApplyBestDiscount: _true,
+    enableCoupons: _true,
+    enableGroupDiscounts: _false,
     maxDiscountPercentage: 50,
   });
 
-  const [editingDiscount, setEditingDiscount] = useState<Discount | null>(_null);
-  const [showDiscountModal, setShowDiscountModal] = useState(_false);
+  const [editingDiscount, setEditingDiscount] = useState<Discount | null>(__null);
+  const [showDiscountModal, setShowDiscountModal] = useState(__false);
 
   const handleCreateDiscount = () => {
     setEditingDiscount({
@@ -134,16 +134,16 @@ const PricingDiscountsScreen: React.FC = () => {
       value: 0,
       validFrom: new Date(),
       validTo: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-      isActive: true,
+      isActive: _true,
       applicableItems: [],
       timesUsed: 0,
     });
-    setShowDiscountModal(_true);
+    setShowDiscountModal(__true);
   };
 
-  const handleEditDiscount = (discount: Discount) => {
-    setEditingDiscount(_discount);
-    setShowDiscountModal(_true);
+  const handleEditDiscount = (discount: _Discount) => {
+    setEditingDiscount(__discount);
+    setShowDiscountModal(__true);
   };
 
   const handleSaveDiscount = () => {
@@ -159,7 +159,7 @@ const PricingDiscountsScreen: React.FC = () => {
 
     if (editingDiscount.id) {
       // Update existing discount
-      setDiscounts(prev => prev.map(d => (d.id === editingDiscount.id ? editingDiscount : d)));
+      setDiscounts(prev => prev.map(d => (d.id === editingDiscount.id ? editingDiscount : _d)));
     } else {
       // Add new discount
       const newDiscount = {
@@ -169,11 +169,11 @@ const PricingDiscountsScreen: React.FC = () => {
       setDiscounts(prev => [...prev, newDiscount]);
     }
 
-    setShowDiscountModal(_false);
-    setEditingDiscount(_null);
+    setShowDiscountModal(__false);
+    setEditingDiscount(__null);
   };
 
-  const handleDeleteDiscount = (discountId: string) => {
+  const handleDeleteDiscount = (discountId: _string) => {
     const discount = discounts.find(d => d.id === discountId);
     Alert.alert('Delete Discount', `Delete "${discount?.name}"?`, [
       { text: 'Cancel', style: 'cancel' },
@@ -187,17 +187,17 @@ const PricingDiscountsScreen: React.FC = () => {
     ]);
   };
 
-  const toggleDiscountStatus = (discountId: string) => {
+  const toggleDiscountStatus = (discountId: _string) => {
     setDiscounts(prev =>
       prev.map(discount =>
-        discount.id === discountId ? { ...discount, isActive: !discount.isActive } : discount,
+        discount.id === discountId ? { ...discount, isActive: !discount.isActive } : _discount,
       ),
     );
   };
 
-  const togglePricingRule = (ruleId: string) => {
+  const togglePricingRule = (ruleId: _string) => {
     setPricingRules(prev =>
-      prev.map(rule => (rule.id === ruleId ? { ...rule, isActive: !rule.isActive } : rule)),
+      prev.map(rule => (rule.id === ruleId ? { ...rule, isActive: !rule.isActive } : _rule)),
     );
   };
 
@@ -208,8 +208,8 @@ const PricingDiscountsScreen: React.FC = () => {
     }));
   };
 
-  const getDiscountTypeIcon = (type: string) => {
-    switch (_type) {
+  const getDiscountTypeIcon = (type: _string) => {
+    switch (__type) {
       case 'percentage':
         return 'percent';
       case 'fixed_amount':
@@ -221,7 +221,7 @@ const PricingDiscountsScreen: React.FC = () => {
     }
   };
 
-  const formatDiscountValue = (discount: Discount) => {
+  const formatDiscountValue = (discount: _Discount) => {
     switch (discount.type) {
       case 'percentage':
         return `${discount.value}% off`;
@@ -234,11 +234,11 @@ const PricingDiscountsScreen: React.FC = () => {
     }
   };
 
-  const isDiscountExpired = (discount: Discount) => {
+  const isDiscountExpired = (discount: _Discount) => {
     return new Date() > discount.validTo;
   };
 
-  const isDiscountActive = (discount: Discount) => {
+  const isDiscountActive = (discount: _Discount) => {
     const now = new Date();
     return discount.isActive && now >= discount.validFrom && now <= discount.validTo;
   };
@@ -248,7 +248,7 @@ const PricingDiscountsScreen: React.FC = () => {
       style={[
         styles.discountCard,
         !discount.isActive && styles.inactiveCard,
-        isDiscountExpired(_discount) && styles.expiredCard,
+        isDiscountExpired(__discount) && styles.expiredCard,
       ]}>
       <View style={styles.discountHeader}>
         <View style={styles.discountInfo}>
@@ -256,13 +256,13 @@ const PricingDiscountsScreen: React.FC = () => {
             <Icon
               name={getDiscountTypeIcon(discount.type)}
               size={20}
-              color={isDiscountActive(_discount) ? Colors.primary : Colors.mediumGray}
+              color={isDiscountActive(__discount) ? Colors.primary : Colors.mediumGray}
             />
             <Text
-              style={[styles.discountName, !isDiscountActive(_discount) && styles.inactiveText]}>
+              style={[styles.discountName, !isDiscountActive(__discount) && styles.inactiveText]}>
               {discount.name}
             </Text>
-            {isDiscountExpired(_discount) && (
+            {isDiscountExpired(__discount) && (
               <View style={styles.expiredBadge}>
                 <Text style={styles.expiredText}>Expired</Text>
               </View>
@@ -272,13 +272,13 @@ const PricingDiscountsScreen: React.FC = () => {
           <Text
             style={[
               styles.discountDescription,
-              !isDiscountActive(_discount) && styles.inactiveText,
+              !isDiscountActive(__discount) && styles.inactiveText,
             ]}>
             {discount.description}
           </Text>
 
           <View style={styles.discountDetails}>
-            <Text style={styles.discountValue}>{formatDiscountValue(_discount)}</Text>
+            <Text style={styles.discountValue}>{formatDiscountValue(__discount)}</Text>
             {discount.minimumAmount && (
               <Text style={styles.discountCondition}>
                 Min: £{discount.minimumAmount.toFixed(2)}
@@ -311,7 +311,7 @@ const PricingDiscountsScreen: React.FC = () => {
       <View style={styles.discountButtons}>
         <TouchableOpacity
           style={styles.discountButton}
-          onPress={() => handleEditDiscount(_discount)}>
+          onPress={() => handleEditDiscount(__discount)}>
           <Icon name="edit" size={16} color={Colors.secondary} />
           <Text style={styles.discountButtonText}>Edit</Text>
         </TouchableOpacity>
@@ -376,7 +376,7 @@ const PricingDiscountsScreen: React.FC = () => {
             </View>
             <View style={styles.statCard}>
               <Text style={styles.statValue}>
-                {discounts.reduce((_sum, d) => sum + d.timesUsed, 0)}
+                {discounts.reduce((__sum, _d) => sum + d.timesUsed, 0)}
               </Text>
               <Text style={styles.statLabel}>Total Uses</Text>
             </View>
@@ -520,14 +520,14 @@ const PricingDiscountsScreen: React.FC = () => {
         visible={showDiscountModal}
         transparent={true}
         animationType="slide"
-        onRequestClose={() => setShowDiscountModal(_false)}>
+        onRequestClose={() => setShowDiscountModal(__false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>
                 {editingDiscount?.id ? 'Edit Discount' : 'Create Discount'}
               </Text>
-              <TouchableOpacity onPress={() => setShowDiscountModal(_false)}>
+              <TouchableOpacity onPress={() => setShowDiscountModal(__false)}>
                 <Icon name="close" size={24} color={Colors.text} />
               </TouchableOpacity>
             </View>
@@ -538,7 +538,7 @@ const PricingDiscountsScreen: React.FC = () => {
                 style={styles.textInput}
                 value={editingDiscount?.name || ''}
                 onChangeText={text =>
-                  setEditingDiscount(prev => (prev ? { ...prev, name: text } : null))
+                  setEditingDiscount(prev => (prev ? { ...prev, name: text } : _null))
                 }
                 placeholder="Enter discount name"
               />
@@ -548,7 +548,7 @@ const PricingDiscountsScreen: React.FC = () => {
                 style={[styles.textInput, styles.textArea]}
                 value={editingDiscount?.description || ''}
                 onChangeText={text =>
-                  setEditingDiscount(prev => (prev ? { ...prev, description: text } : null))
+                  setEditingDiscount(prev => (prev ? { ...prev, description: text } : _null))
                 }
                 placeholder="Enter discount description"
                 multiline
@@ -561,7 +561,7 @@ const PricingDiscountsScreen: React.FC = () => {
                 value={editingDiscount?.value?.toString() || ''}
                 onChangeText={text =>
                   setEditingDiscount(prev =>
-                    prev ? { ...prev, value: parseFloat(_text) || 0 } : null,
+                    prev ? { ...prev, value: parseFloat(__text) || 0 } : _null,
                   )
                 }
                 placeholder={editingDiscount?.type === 'percentage' ? '10' : '5.00'}
@@ -573,7 +573,7 @@ const PricingDiscountsScreen: React.FC = () => {
                   style={styles.checkbox}
                   onPress={() =>
                     setEditingDiscount(prev =>
-                      prev ? { ...prev, isActive: !prev.isActive } : null,
+                      prev ? { ...prev, isActive: !prev.isActive } : _null,
                     )
                   }>
                   <Icon
@@ -589,7 +589,7 @@ const PricingDiscountsScreen: React.FC = () => {
             <View style={styles.modalActions}>
               <TouchableOpacity
                 style={styles.cancelButton}
-                onPress={() => setShowDiscountModal(_false)}>
+                onPress={() => setShowDiscountModal(__false)}>
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.saveButton} onPress={handleSaveDiscount}>

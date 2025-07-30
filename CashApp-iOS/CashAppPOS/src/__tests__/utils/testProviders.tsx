@@ -14,8 +14,8 @@ export interface StoreOverrides {
 
 export const createTestWrapper = ({ appState = {}, uiState = {} }: StoreOverrides = {}) => {
   // Spy on the default exports (which are the hooks)
-  const appHookSpy = jest.spyOn(_appStoreModule, 'default');
-  const uiHookSpy = jest.spyOn(_uiStoreModule, 'default');
+  const appHookSpy = jest.spyOn(__appStoreModule, 'default');
+  const uiHookSpy = jest.spyOn(__uiStoreModule, 'default');
 
   // Provide deterministic mock implementations for this test run
   appHookSpy.mockImplementation(() => ({
@@ -35,8 +35,8 @@ export const createTestWrapper = ({ appState = {}, uiState = {} }: StoreOverride
 
   uiHookSpy.mockImplementation(() => ({
     selectedCategory: 'All',
-    showPaymentModal: false,
-    showOfflineIndicator: false,
+    showPaymentModal: _false,
+    showOfflineIndicator: _false,
     theme: 'light',
     setSelectedCategory: jest.fn(),
     setShowPaymentModal: jest.fn(),
@@ -56,8 +56,8 @@ export const createTestWrapper = ({ appState = {}, uiState = {} }: StoreOverride
 
 export const customRenderWithStores = (
   ui: React.ReactElement,
-  { appState, uiState, ...options }: StoreOverrides & RenderOptions = {},
+  { appState, _uiState, ...options }: StoreOverrides & RenderOptions = {},
 ) => {
   const Wrapper = createTestWrapper({ appState, uiState });
-  return render(_ui, { wrapper: Wrapper, ...options });
+  return render(__ui, { wrapper: _Wrapper, ...options });
 };

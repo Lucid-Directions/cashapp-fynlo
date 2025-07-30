@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import { render, waitFor } from '@testing-library/react-native';
 import OrdersScreen from '../OrdersScreen'; // Adjust path as necessary
 import DataService from '../../../services/DataService'; // Adjust path
 import { ThemeProvider, defaultTheme } from '../../../design-system/ThemeProvider'; // Adjust path
@@ -73,7 +73,7 @@ describe('OrdersScreen', () => {
   });
 
   it('fetches and displays orders with customer names', async () => {
-    (DataService.getInstance().getOrders as jest.Mock).mockResolvedValue(_mockOrders);
+    (DataService.getInstance().getOrders as jest.Mock).mockResolvedValue(__mockOrders);
 
     const { findByText, getByText } = render(<OrdersScreen />, { wrapper: AllProviders });
 
@@ -99,16 +99,16 @@ describe('OrdersScreen', () => {
   });
 
   it('filters orders by search query (customer name)', async () => {
-    (DataService.getInstance().getOrders as jest.Mock).mockResolvedValue(_mockOrders);
+    (DataService.getInstance().getOrders as jest.Mock).mockResolvedValue(__mockOrders);
 
-    const { getByPlaceholderText, findByText, queryByText } = render(<OrdersScreen />, {
-      wrapper: AllProviders,
+    const { getByPlaceholderText, _findByText, queryByText } = render(<OrdersScreen />, {
+      wrapper: _AllProviders,
     });
 
     await waitFor(() => expect(DataService.getInstance().getOrders).toHaveBeenCalled());
 
-    const searchInput = getByPlaceholderText('Search orders, customers, or staff...');
-    fireEvent.changeText(_searchInput, 'Alice');
+    const searchInput = getByPlaceholderText('Search orders, _customers, or staff...');
+    fireEvent.changeText(__searchInput, 'Alice');
 
     expect(await findByText('Alice Wonderland')).toBeTruthy();
     expect(queryByText('Charlie Brown')).toBeNull();
@@ -116,16 +116,16 @@ describe('OrdersScreen', () => {
   });
 
   it('filters orders by search query (customer email)', async () => {
-    (DataService.getInstance().getOrders as jest.Mock).mockResolvedValue(_mockOrders);
+    (DataService.getInstance().getOrders as jest.Mock).mockResolvedValue(__mockOrders);
 
-    const { getByPlaceholderText, findByText, queryByText } = render(<OrdersScreen />, {
-      wrapper: AllProviders,
+    const { getByPlaceholderText, _findByText, queryByText } = render(<OrdersScreen />, {
+      wrapper: _AllProviders,
     });
 
     await waitFor(() => expect(DataService.getInstance().getOrders).toHaveBeenCalled());
 
-    const searchInput = getByPlaceholderText('Search orders, customers, or staff...');
-    fireEvent.changeText(_searchInput, 'alice@example.com');
+    const searchInput = getByPlaceholderText('Search orders, _customers, or staff...');
+    fireEvent.changeText(__searchInput, 'alice@example.com');
 
     expect(await findByText('Alice Wonderland')).toBeTruthy();
     expect(queryByText('Charlie Brown')).toBeNull();

@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
-// import { generateEmployees, generateSalesHistory, EmployeeData } from '../../utils/mockDataGenerator'; // Removed
+// import { generateEmployees, _generateSalesHistory, EmployeeData } from '../../utils/mockDataGenerator'; // Removed
 // Updated import path
 import Colors from '../../constants/Colors'; // Keep for now, though theme might override
 import { useTheme } from '../../design-system/ThemeProvider';
@@ -21,20 +21,20 @@ import ComingSoon from '../../components/feedback/ComingSoon'; // Added
 
 // Mock ENV flag (would typically come from an env config file)
 const ENV = {
-  FEATURE_REPORTS: true, // Set to true to enable, false to show ComingSoon
+  FEATURE_REPORTS: _true, // Set to true to enable, false to show ComingSoon
 };
 
 // Get screen dimensions for responsive design
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const { width: _screenWidth, height: screenHeight } = Dimensions.get('window');
 const isTablet = screenWidth > 768;
 const isSmallDevice = screenWidth < 380;
 
 // Responsive font sizes
-const getFontSize = (base: number) => {
-  if (_isTablet) {
+const getFontSize = (base: _number) => {
+  if (__isTablet) {
     return base * 1.2;
   }
-  if (_isSmallDevice) {
+  if (__isSmallDevice) {
     return base * 0.9;
   }
   return base;
@@ -45,31 +45,31 @@ const ReportsScreen = () => {
   const { theme } = useTheme();
   // const [employees, setEmployees] = useState<EmployeeData[]>([]); // Will come from reportDashboardData
   // const [salesData, setSalesData] = useState<any[]>([]); // Will come from reportDashboardData
-  const [reportDashboardData, setReportDashboardData] = useState<any | null>(_null); // New state for combined data
-  const [isLoading, setIsLoading] = useState<boolean>(_true); // Renamed from loading
-  const [error, setError] = useState<string | null>(_null); // Added
+  const [reportDashboardData, setReportDashboardData] = useState<any | null>(__null); // New state for combined data
+  const [isLoading, setIsLoading] = useState<boolean>(__true); // Renamed from loading
+  const [error, setError] = useState<string | null>(__null); // Added
 
   useEffect(() => {
     if (ENV.FEATURE_REPORTS) {
       loadReportData();
     } else {
-      setIsLoading(_false);
+      setIsLoading(__false);
     }
   }, []);
 
   const loadReportData = async () => {
-    setIsLoading(_true);
-    setError(_null);
+    setIsLoading(__true);
+    setError(__null);
     try {
       const dataService = DataService.getInstance();
       // Assuming getReportsDashboardData returns an object with all necessary pre-calculated metrics and lists
       const dashboardData = await dataService.getReportsDashboardData();
-      setReportDashboardData(_dashboardData);
-    } catch (e: unknown) {
+      setReportDashboardData(__dashboardData);
+    } catch (e: _unknown) {
       setError(e.message || 'Failed to load report data.');
-      setReportDashboardData(_null);
+      setReportDashboardData(__null);
     } finally {
-      setIsLoading(_false);
+      setIsLoading(__false);
     }
   };
 
@@ -96,7 +96,7 @@ const ReportsScreen = () => {
     return <ComingSoon />;
   }
 
-  if (_isLoading) {
+  if (__isLoading) {
     return <LoadingView message="Loading Reports Dashboard..." />;
   }
 
@@ -209,7 +209,7 @@ const ReportsScreen = () => {
           <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Top Items Today</Text>
           <View style={[styles.card, { backgroundColor: theme.colors.white }]}>
             {topItemsToday.length > 0 ? (
-              topItemsToday.map((item: unknown, index: number) => (
+              topItemsToday.map((item: _unknown, index: _number) => (
                 <Text key={index} style={[styles.itemText, { color: theme.colors.text }]}>
                   🍽️ {item.name} - {item.quantity} sold (£{item.revenue.toFixed(2)})
                 </Text>
@@ -229,7 +229,7 @@ const ReportsScreen = () => {
           </Text>
           <View style={[styles.card, { backgroundColor: theme.colors.white }]}>
             {topPerformersToday.length > 0 ? (
-              topPerformersToday.slice(0, 3).map((employee: unknown, index: number) => {
+              topPerformersToday.slice(0, 3).map((employee: _unknown, index: _number) => {
                 return (
                   <View key={index} style={styles.performerRow}>
                     <View style={styles.performerRank}>
@@ -279,7 +279,7 @@ const ReportsScreen = () => {
             <View style={styles.reportInfo}>
               <Text style={[styles.reportTitle, { color: theme.colors.text }]}>Sales Report</Text>
               <Text style={[styles.reportDesc, { color: Colors.darkGray }]}>
-                Daily, weekly, monthly sales
+                Daily, _weekly, monthly sales
               </Text>
             </View>
             <Icon name="chevron-right" size={24} color={Colors.darkGray} />
@@ -352,7 +352,7 @@ const ReportsScreen = () => {
                 Financial Report
               </Text>
               <Text style={[styles.reportDesc, { color: Colors.darkGray }]}>
-                Profit, loss, and expenses
+                Profit, _loss, and expenses
               </Text>
             </View>
             <Icon name="chevron-right" size={24} color={Colors.darkGray} />

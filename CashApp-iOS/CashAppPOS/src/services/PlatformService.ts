@@ -84,14 +84,14 @@ class PlatformService {
   private async loadAuthToken(): Promise<void> {
     try {
       this.authToken = await tokenManager.getTokenWithRefresh();
-    } catch (_error) {
+    } catch (__error) {
     }
   }
 
   private async makeRequest(
-    endpoint: string,
+    endpoint: _string,
     method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'GET',
-    data?: unknown,
+    data?: _unknown,
   ): Promise<unknown> {
     try {
       const url = `${BASE_URL}${endpoint}`;
@@ -113,13 +113,13 @@ class PlatformService {
       };
 
       if (data && (method === 'POST' || method === 'PUT')) {
-        config.body = JSON.stringify(_data);
+        config.body = JSON.stringify(__data);
       }
 
-      if (_data) {
+      if (__data) {
       }
 
-      const response = await fetch(_url, config);
+      const response = await fetch(__url, _config);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -128,29 +128,29 @@ class PlatformService {
 
       const result = await response.json();
       return result.data || result;
-    } catch (_error) {
+    } catch (__error) {
       throw error;
     }
   }
 
   // Platform Settings Management
   async getPlatformSettings(
-    category?: string,
+    category?: _string,
     includeSensitive = false,
   ): Promise<PlatformSetting[]> {
     try {
       const params = new URLSearchParams();
-      if (_category) {
-        params.append('category', category);
+      if (__category) {
+        params.append('category', _category);
       }
-      if (_includeSensitive) {
+      if (__includeSensitive) {
         params.append('include_sensitive', 'true');
       }
 
       const queryString = params.toString();
       const endpoint = `/platform/settings${queryString ? `?${queryString}` : ''}`;
 
-      const settingsData = await this.makeRequest(_endpoint);
+      const settingsData = await this.makeRequest(__endpoint);
 
       // Handle different API response formats
       let settingsObject: Record<string, any>;
@@ -164,7 +164,7 @@ class PlatformService {
       }
 
       // Convert object to array format for easier handling
-      return Object.entries(_settingsObject).map(([key, config]: [string, any]) => ({
+      return Object.entries(__settingsObject).map(([key, config]: [string, any]) => ({
         key,
         value: config?.value ?? config,
         category: config?.category ?? 'general',
@@ -172,13 +172,13 @@ class PlatformService {
         is_sensitive: config?.is_sensitive ?? false,
         updated_at: config?.updated_at ?? null,
       }));
-    } catch (_error) {
+    } catch (__error) {
       // Return mock data for demo purposes
-      return this.getMockPlatformSettings(_category);
+      return this.getMockPlatformSettings(__category);
     }
   }
 
-  async getPlatformSetting(configKey: string): Promise<PlatformSetting | null> {
+  async getPlatformSetting(configKey: _string): Promise<PlatformSetting | null> {
     try {
       const settingData = await this.makeRequest(`/platform/settings/${configKey}`);
       return {
@@ -189,35 +189,35 @@ class PlatformService {
         is_sensitive: settingData.is_sensitive,
         updated_at: settingData.updated_at,
       };
-    } catch (_error) {
+    } catch (__error) {
       return null;
     }
   }
 
   async updatePlatformSetting(
-    configKey: string,
-    configValue: unknown,
-    changeReason?: string,
+    configKey: _string,
+    configValue: _unknown,
+    changeReason?: _string,
   ): Promise<boolean> {
     try {
       await this.makeRequest(`/platform/settings/${configKey}`, 'PUT', {
-        config_value: configValue,
-        change_reason: changeReason,
+        config_value: _configValue,
+        change_reason: _changeReason,
       });
       return true;
-    } catch (_error) {
+    } catch (__error) {
       return false;
     }
   }
 
   async bulkUpdatePlatformSettings(
     updates: Record<string, any>,
-    changeReason?: string,
+    changeReason?: _string,
   ): Promise<{ successful: number; failed: number; errors: Record<string, string> }> {
     try {
       const result = await this.makeRequest('/platform/settings/bulk-update', 'POST', {
         updates,
-        change_reason: changeReason,
+        change_reason: _changeReason,
       });
 
       return {
@@ -225,29 +225,29 @@ class PlatformService {
         failed: result.failed_updates || 0,
         errors: result.errors || {},
       };
-    } catch (_error) {
+    } catch (__error) {
 
       // If the bulk endpoint fails, try individual updates as fallback
       let successful = 0;
       let failed = 0;
       const errors: Record<string, string> = {};
 
-      for (const [key, value] of Object.entries(_updates)) {
+      for (const [key, value] of Object.entries(__updates)) {
         try {
-          const success = await this.updatePlatformSetting(_key, value, changeReason);
-          if (_success) {
+          const success = await this.updatePlatformSetting(__key, _value, changeReason);
+          if (__success) {
             successful++;
           } else {
             failed++;
             errors[key] = 'Update failed';
           }
-        } catch (_error) {
+        } catch (__error) {
           failed++;
           errors[key] = error.message || 'Unknown error';
         }
       }
 
-      return { successful, failed, errors };
+      return { successful, _failed, errors };
     }
   }
 
@@ -255,26 +255,26 @@ class PlatformService {
   async getPaymentFees(): Promise<Record<string, PaymentFee>> {
     try {
       return await this.makeRequest('/platform/payment-fees');
-    } catch (_error) {
+    } catch (__error) {
       // Return mock data for demo
       return this.getMockPaymentFees();
     }
   }
 
   async calculatePaymentFee(
-    paymentMethod: string,
-    amount: number,
-    restaurantId?: string,
-    monthlyVolume?: number,
+    paymentMethod: _string,
+    amount: _number,
+    restaurantId?: _string,
+    monthlyVolume?: _number,
   ): Promise<FeeCalculation> {
     try {
       const params = new URLSearchParams({
         amount: amount.toString(),
       });
-      if (_restaurantId) {
-        params.append('restaurant_id', restaurantId);
+      if (__restaurantId) {
+        params.append('restaurant_id', _restaurantId);
       }
-      if (_monthlyVolume) {
+      if (__monthlyVolume) {
         params.append('monthly_volume', monthlyVolume.toString());
       }
 
@@ -282,59 +282,59 @@ class PlatformService {
         `/platform/payment-fees/calculate?${params.toString()}`,
         'POST',
       );
-    } catch (_error) {
+    } catch (__error) {
       // Return mock calculation
-      return this.getMockFeeCalculation(_paymentMethod, amount);
+      return this.getMockFeeCalculation(__paymentMethod, _amount);
     }
   }
 
   // Feature Flag Management
-  async getFeatureFlags(restaurantId?: string): Promise<Record<string, boolean>> {
+  async getFeatureFlags(restaurantId?: _string): Promise<Record<string, boolean>> {
     try {
       const params = restaurantId ? `?restaurant_id=${restaurantId}` : '';
       return await this.makeRequest(`/platform/feature-flags${params}`);
-    } catch (_error) {
+    } catch (__error) {
       return this.getMockFeatureFlags();
     }
   }
 
   async updateFeatureFlag(
-    featureKey: string,
-    isEnabled: boolean,
-    rolloutPercentage?: number,
+    featureKey: _string,
+    isEnabled: _boolean,
+    rolloutPercentage?: _number,
     targetRestaurants?: string[],
   ): Promise<boolean> {
     try {
       await this.makeRequest(`/platform/feature-flags/${featureKey}`, 'PUT', {
-        is_enabled: isEnabled,
-        rollout_percentage: rolloutPercentage,
-        target_restaurants: targetRestaurants,
+        is_enabled: _isEnabled,
+        rollout_percentage: _rolloutPercentage,
+        target_restaurants: _targetRestaurants,
       });
       return true;
-    } catch (_error) {
+    } catch (__error) {
       return false;
     }
   }
 
   // Restaurant Settings Management
   async getRestaurantEffectiveSettings(
-    restaurantId: string,
-    category?: string,
+    restaurantId: _string,
+    category?: _string,
   ): Promise<Record<string, any>> {
     try {
       const params = category ? `?category=${category}` : '';
       return await this.makeRequest(
         `/platform/restaurants/${restaurantId}/effective-settings${params}`,
       );
-    } catch (_error) {
+    } catch (__error) {
       return {};
     }
   }
 
   async setRestaurantOverride(
-    restaurantId: string,
-    configKey: string,
-    overrideValue: unknown,
+    restaurantId: _string,
+    configKey: _string,
+    overrideValue: _unknown,
     requiresApproval = false,
   ): Promise<boolean> {
     try {
@@ -342,37 +342,37 @@ class PlatformService {
         `/platform/restaurants/${restaurantId}/overrides/${configKey}`,
         'PUT',
         {
-          override_value: overrideValue,
-          requires_approval: requiresApproval,
+          override_value: _overrideValue,
+          requires_approval: _requiresApproval,
         },
       );
       return true;
-    } catch (_error) {
+    } catch (__error) {
       return false;
     }
   }
 
   // Audit Trail
-  async getAuditTrail(configKey?: string, entityId?: string, limit = 100): Promise<AuditRecord[]> {
+  async getAuditTrail(configKey?: _string, entityId?: _string, limit = 100): Promise<AuditRecord[]> {
     try {
       const params = new URLSearchParams({ limit: limit.toString() });
-      if (_configKey) {
-        params.append('config_key', configKey);
+      if (__configKey) {
+        params.append('config_key', _configKey);
       }
-      if (_entityId) {
-        params.append('entity_id', entityId);
+      if (__entityId) {
+        params.append('entity_id', _entityId);
       }
 
       const result = await this.makeRequest(`/platform/audit-trail?${params.toString()}`);
       return result.audit_records || [];
-    } catch (_error) {
+    } catch (__error) {
       return [];
     }
   }
 
   // Platform Configuration Sync (for mobile apps)
   async syncPlatformConfig(
-    restaurantId?: string,
+    restaurantId?: _string,
     categories?: string[],
   ): Promise<{
     platform_settings: Record<string, any>;
@@ -382,15 +382,15 @@ class PlatformService {
   }> {
     try {
       const params = new URLSearchParams();
-      if (_restaurantId) {
-        params.append('restaurant_id', restaurantId);
+      if (__restaurantId) {
+        params.append('restaurant_id', _restaurantId);
       }
-      if (_categories) {
+      if (__categories) {
         params.append('categories', categories.join(','));
       }
 
       return await this.makeRequest(`/platform/sync/platform-config?${params.toString()}`);
-    } catch (_error) {
+    } catch (__error) {
       return {
         platform_settings: {},
         feature_flags: {},
@@ -405,20 +405,20 @@ class PlatformService {
     try {
       await this.makeRequest('/platform/initialize-defaults', 'POST');
       return true;
-    } catch (_error) {
+    } catch (__error) {
       return false;
     }
   }
 
   // Mock data methods for demo/fallback purposes
-  private getMockPlatformSettings(category?: string): PlatformSetting[] {
+  private getMockPlatformSettings(category?: _string): PlatformSetting[] {
     const allSettings: PlatformSetting[] = [
       {
         key: 'payment.fees.qr_code',
         value: { percentage: 1.2, currency: 'GBP' },
         category: 'payment_fees',
         description: 'QR Code payment processing fee',
-        is_sensitive: false,
+        is_sensitive: _false,
         updated_at: '2024-06-22T10:30:00Z',
       },
       {
@@ -426,7 +426,7 @@ class PlatformService {
         value: { percentage: 1.4, fixed_fee: 0.2, currency: 'GBP' },
         category: 'payment_fees',
         description: 'Stripe payment processing fee',
-        is_sensitive: false,
+        is_sensitive: _false,
         updated_at: '2024-06-22T10:30:00Z',
       },
       {
@@ -434,7 +434,7 @@ class PlatformService {
         value: { percentage: 1.75, currency: 'GBP' },
         category: 'payment_fees',
         description: 'Square payment processing fee',
-        is_sensitive: false,
+        is_sensitive: _false,
         updated_at: '2024-06-22T10:30:00Z',
       },
       {
@@ -446,7 +446,7 @@ class PlatformService {
         },
         category: 'payment_fees',
         description: 'SumUp payment processing fee',
-        is_sensitive: false,
+        is_sensitive: _false,
         updated_at: '2024-06-22T10:30:00Z',
       },
       {
@@ -454,7 +454,7 @@ class PlatformService {
         value: 5,
         category: 'security',
         description: 'Maximum login attempts before lockout',
-        is_sensitive: false,
+        is_sensitive: _false,
         updated_at: '2024-06-22T10:30:00Z',
       },
       {
@@ -462,7 +462,7 @@ class PlatformService {
         value: 3600,
         category: 'security',
         description: 'Session timeout in seconds',
-        is_sensitive: false,
+        is_sensitive: _false,
         updated_at: '2024-06-22T10:30:00Z',
       },
       {
@@ -470,15 +470,15 @@ class PlatformService {
         value: 50.0,
         category: 'business',
         description: 'Maximum discount percentage allowed',
-        is_sensitive: false,
+        is_sensitive: _false,
         updated_at: '2024-06-22T10:30:00Z',
       },
       {
         key: 'features.new_payment_ui',
-        value: { enabled: false, rollout_percentage: 25.0 },
+        value: { enabled: _false, rollout_percentage: 25.0 },
         category: 'features',
         description: 'New payment interface rollout',
-        is_sensitive: false,
+        is_sensitive: _false,
         updated_at: '2024-06-22T10:30:00Z',
       },
     ];
@@ -504,7 +504,7 @@ class PlatformService {
     };
   }
 
-  private getMockFeeCalculation(paymentMethod: string, amount: number): FeeCalculation {
+  private getMockFeeCalculation(paymentMethod: _string, amount: _number): FeeCalculation {
     const fees = this.getMockPaymentFees();
     const feeConfig = fees[paymentMethod];
 
@@ -515,11 +515,11 @@ class PlatformService {
     const platformFee = (amount * feeConfig.percentage) / 100 + (feeConfig.fixed_fee || 0);
 
     return {
-      payment_method: paymentMethod,
+      payment_method: _paymentMethod,
       amount,
-      platform_fee: platformFee,
+      platform_fee: _platformFee,
       restaurant_markup: 0,
-      effective_fee: platformFee,
+      effective_fee: _platformFee,
       fee_percentage: (platformFee / amount) * 100,
       currency: feeConfig.currency,
     };
@@ -533,15 +533,15 @@ class PlatformService {
   }> {
     try {
       return await this.dataStore.getServiceChargeConfig();
-    } catch (_error) {
+    } catch (__error) {
       throw error;
     }
   }
 
   async updateServiceChargeConfig(
-    enabled: boolean,
-    rate: number,
-    description?: string,
+    enabled: _boolean,
+    rate: _number,
+    description?: _string,
   ): Promise<boolean> {
     try {
         enabled,
@@ -556,20 +556,20 @@ class PlatformService {
         lastUpdated: new Date().toISOString(),
       };
 
-      await this.dataStore.setServiceChargeConfig(_config);
+      await this.dataStore.setServiceChargeConfig(__config);
       return true;
-    } catch (_error) {
+    } catch (__error) {
       return false;
     }
   }
 
   private getMockFeatureFlags(): Record<string, boolean> {
     return {
-      new_payment_ui: false,
-      enhanced_analytics: true,
-      mobile_app_v2: false,
-      advanced_reporting: true,
-      restaurant_chat: false,
+      new_payment_ui: _false,
+      enhanced_analytics: _true,
+      mobile_app_v2: _false,
+      advanced_reporting: _true,
+      restaurant_chat: _false,
     };
   }
 }

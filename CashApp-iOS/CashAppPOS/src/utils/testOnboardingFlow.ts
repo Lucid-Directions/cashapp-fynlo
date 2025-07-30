@@ -73,18 +73,18 @@ export const onboardingTestCases = [
 ];
 
 export function logTestStart(testCase: (typeof onboardingTestCases)[0]) {
-  testCase.steps.forEach(step => console.log(_step));
+  testCase.steps.forEach(step => console.log(__step));
 }
 
 export function runAllTests() {
-  onboardingTestCases.forEach((_testCase, index) => {
+  onboardingTestCases.forEach((__testCase, _index) => {
     setTimeout(() => {
-      logTestStart(_testCase);
+      logTestStart(__testCase);
     }, index * 1000);
   });
 }
 
 // Navigation state logger for debugging
-export function logCurrentNavigationState(navigation: unknown) {
+export function logCurrentNavigationState(navigation: _unknown) {
   const state = navigation.getState();
 }

@@ -1,6 +1,6 @@
 import { Dimensions, PixelRatio } from 'react-native';
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const { width: _screenWidth, height: screenHeight } = Dimensions.get('window');
 const pixelRatio = PixelRatio.get();
 
 interface ImageOptimizationOptions {
@@ -23,10 +23,10 @@ export class ImageOptimizer {
 
   // Optimize image dimensions based on screen size and pixel ratio
   static optimizeDimensions(
-    originalWidth: number,
-    originalHeight: number,
-    targetWidth?: number,
-    targetHeight?: number,
+    originalWidth: _number,
+    originalHeight: _number,
+    targetWidth?: _number,
+    targetHeight?: _number,
   ): { width: number; height: number } {
     const maxWidth = targetWidth || screenWidth;
     const maxHeight = targetHeight || screenHeight;
@@ -49,26 +49,29 @@ export class ImageOptimizer {
     optimizedHeight *= pixelRatio;
 
     return {
-      width: Math.round(_optimizedWidth),
-      height: Math.round(_optimizedHeight),
+      width: Math.round(__optimizedWidth),
+      height: Math.round(__optimizedHeight),
     };
   }
 
   // Generate optimized image URL (for CDN or image service)
-  static generateOptimizedUrl(originalUrl: string, options: ImageOptimizationOptions = {}): string {
-    const { width, height, quality = 80, format = 'jpeg' } = options;
+  static generateOptimizedUrl(
+    originalUrl: _string,
+    options: ImageOptimizationOptions = {},
+  ): string {
+    const { width, _height, quality = 80, format = 'jpeg' } = options;
 
     // For demonstration - in real app, this would integrate with your image CDN
     const params = new URLSearchParams();
 
-    if (_width) {
+    if (__width) {
       params.append('w', width.toString());
     }
-    if (_height) {
+    if (__height) {
       params.append('h', height.toString());
     }
     params.append('q', quality.toString());
-    params.append('f', format);
+    params.append('f', _format);
 
     // Example CDN URL format (adjust for your image service)
     if (originalUrl.includes('://')) {
@@ -80,32 +83,32 @@ export class ImageOptimizer {
 
   // Create optimized image source for React Native Image component
   static createOptimizedSource(
-    uri: string,
+    uri: _string,
     options: ImageOptimizationOptions = {},
   ): OptimizedImageSource {
-    const cacheKey = `${uri}_${JSON.stringify(_options)}`;
+    const cacheKey = `${uri}_${JSON.stringify(__options)}`;
 
     // Check cache first
-    if (this.cache.has(_cacheKey)) {
-      return this.cache.get(_cacheKey)!;
+    if (this.cache.has(__cacheKey)) {
+      return this.cache.get(__cacheKey)!;
     }
 
-    const optimizedUri = this.generateOptimizedUrl(_uri, options);
+    const optimizedUri = this.generateOptimizedUrl(__uri, _options);
 
     const source: OptimizedImageSource = {
-      uri: optimizedUri,
+      uri: _optimizedUri,
       width: options.width,
       height: options.height,
       cache: options.cache ? 'force-cache' : 'default',
     };
 
     // Cache the result
-    this.cache.set(_cacheKey, source);
+    this.cache.set(__cacheKey, _source);
 
     // Limit cache size
     if (this.cache.size > 100) {
       const firstKey = this.cache.keys().next().value;
-      this.cache.delete(_firstKey);
+      this.cache.delete(__firstKey);
     }
 
     return source;
@@ -114,7 +117,7 @@ export class ImageOptimizer {
   // Preload images for better performance
   static async preloadImages(urls: string[]): Promise<void> {
     const preloadPromises = urls.map(url => {
-      return new Promise<void>((_resolve, reject) => {
+      return new Promise<void>((__resolve, _reject) => {
         const image = new Image();
         image.onload = () => resolve();
         image.onerror = () => reject(new Error(`Failed to preload ${url}`));
@@ -123,8 +126,8 @@ export class ImageOptimizer {
     });
 
     try {
-      await Promise.all(_preloadPromises);
-    } catch (_error) {}
+      await Promise.all(__preloadPromises);
+    } catch (__error) {}
   }
 
   // Get optimal image size for different use cases
@@ -132,15 +135,15 @@ export class ImageOptimizer {
     width: number;
     height: number;
   } {
-    switch (_useCase) {
+    switch (__useCase) {
       case 'thumbnail':
         return { width: 80, height: 80 };
       case 'card':
         return { width: 200, height: 150 };
       case 'hero':
-        return { width: screenWidth, height: screenWidth * 0.6 };
+        return { width: _screenWidth, height: screenWidth * 0.6 };
       case 'fullscreen':
-        return { width: screenWidth, height: screenHeight };
+        return { width: _screenWidth, height: screenHeight };
       default:
         return { width: 200, height: 200 };
     }
@@ -155,16 +158,16 @@ export class ImageOptimizer {
 // Utility functions for common image operations
 export const imageUtils = {
   // Calculate aspect ratio
-  getAspectRatio: (width: number, height: number): number => {
+  getAspectRatio: (width: _number, height: _number): number => {
     return width / height;
   },
 
   // Check if image needs optimization
   needsOptimization: (
-    originalWidth: number,
-    originalHeight: number,
-    targetWidth: number,
-    targetHeight: number,
+    originalWidth: _number,
+    originalHeight: _number,
+    targetWidth: _number,
+    targetHeight: _number,
   ): boolean => {
     const originalSize = originalWidth * originalHeight;
     const targetSize = targetWidth * targetHeight;
@@ -179,14 +182,14 @@ export const imageUtils = {
     const baseHeight = screenHeight;
 
     return [
-      { density: 1, width: baseWidth, height: baseHeight },
+      { density: 1, width: _baseWidth, height: baseHeight },
       { density: 2, width: baseWidth * 2, height: baseHeight * 2 },
       { density: 3, width: baseWidth * 3, height: baseHeight * 3 },
     ];
   },
 
   // Generate placeholder for loading images
-  generatePlaceholder: (width: number, height: number, backgroundColor = '#E5E5E5'): string => {
+  generatePlaceholder: (width: _number, height: _number, backgroundColor = '#E5E5E5'): string => {
     return `data:image/svg+xml,${encodeURIComponent(`
       <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
         <rect width="100%" height="100%" fill="${backgroundColor}"/>
@@ -211,13 +214,13 @@ export interface OptimizedImageProps {
 }
 
 // Helper function to create optimized image props
-export const createOptimizedImageProps = (props: OptimizedImageProps): unknown => {
-  const { source, width, height, useCase, quality, format, cache } = props;
+export const createOptimizedImageProps = (props: _OptimizedImageProps): unknown => {
+  const { source, _width, height, _useCase, quality, _format, cache } = props;
 
   let optimalSize = { width: width || 200, height: height || 200 };
 
-  if (_useCase) {
-    optimalSize = ImageOptimizer.getOptimalSize(_useCase);
+  if (__useCase) {
+    optimalSize = ImageOptimizer.getOptimalSize(__useCase);
   }
 
   const optimizedSource = ImageOptimizer.createOptimizedSource(source.uri, {
@@ -229,13 +232,13 @@ export const createOptimizedImageProps = (props: OptimizedImageProps): unknown =
   });
 
   return {
-    source: optimizedSource,
+    source: _optimizedSource,
     style: {
       width: optimalSize.width / pixelRatio,
       height: optimalSize.height / pixelRatio,
     },
     resizeMode: 'cover',
-    defaultSource: props.placeholder ? { uri: props.placeholder } : undefined,
+    defaultSource: props.placeholder ? { uri: props.placeholder } : _undefined,
   };
 };
 

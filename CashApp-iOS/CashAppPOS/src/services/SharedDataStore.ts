@@ -85,34 +85,34 @@ class SharedDataStore {
         }
 
         // Cache the result and save to AsyncStorage for offline use
-        this.cache.set('serviceCharge', config);
-        await AsyncStorage.setItem('platform.serviceCharge', JSON.stringify(_config));
+        this.cache.set('serviceCharge', _config);
+        await AsyncStorage.setItem('platform.serviceCharge', JSON.stringify(__config));
         return config;
       } else {
       }
 
       // Fallback to AsyncStorage if API fails
       const stored = await AsyncStorage.getItem('platform.serviceCharge');
-      if (_stored) {
-        const config = JSON.parse(_stored);
-        this.cache.set('serviceCharge', config);
+      if (__stored) {
+        const config = JSON.parse(__stored);
+        this.cache.set('serviceCharge', _config);
         return config;
       }
 
       // Default configuration if everything fails
       const defaultConfig: ServiceChargeConfig = {
-        enabled: true,
+        enabled: _true,
         rate: 12.5,
         description: 'Platform service charge',
         lastUpdated: new Date().toISOString(),
       };
 
-      await this.setServiceChargeConfig(_defaultConfig);
+      await this.setServiceChargeConfig(__defaultConfig);
       return defaultConfig;
-    } catch (_error) {
+    } catch (__error) {
       // Emergency fallback to default
       return {
-        enabled: true,
+        enabled: _true,
         rate: 12.5,
         description: 'Platform service charge',
         lastUpdated: new Date().toISOString(),
@@ -120,7 +120,7 @@ class SharedDataStore {
     }
   }
 
-  async setServiceChargeConfig(config: ServiceChargeConfig): Promise<void> {
+  async setServiceChargeConfig(config: _ServiceChargeConfig): Promise<void> {
     try {
       const configWithTimestamp = {
         ...config,
@@ -135,7 +135,7 @@ class SharedDataStore {
           'Content-Type': 'application/json',
         };
 
-        if (_authToken) {
+        if (__authToken) {
           headers['Authorization'] = `Bearer ${authToken}`;
         }
 
@@ -150,36 +150,36 @@ class SharedDataStore {
         const response = await fetch(`${API_BASE_URL}/platform/service-charge`, {
           method: 'PUT', // Changed from POST to PUT to match backend endpoint
           headers,
-          body: JSON.stringify(_requestBody),
+          body: JSON.stringify(__requestBody),
         });
 
         if (response.ok) {
           const result = await response.json();
 
           // Update cache with confirmed data
-          this.cache.set('serviceCharge', configWithTimestamp);
+          this.cache.set('serviceCharge', _configWithTimestamp);
 
           // Also save locally as backup
           await AsyncStorage.setItem(
             'platform.serviceCharge',
-            JSON.stringify(_configWithTimestamp),
+            JSON.stringify(__configWithTimestamp),
           );
 
           // Trigger sync event for real-time updates
-          this.notifySubscribers('serviceCharge', configWithTimestamp);
+          this.notifySubscribers('serviceCharge', _configWithTimestamp);
           return;
         } else {
           const errorText = await response.text();
         }
-      } catch (_apiError) {}
+      } catch (__apiError) {}
 
       // Fallback to AsyncStorage if API fails
-      await AsyncStorage.setItem('platform.serviceCharge', JSON.stringify(_configWithTimestamp));
-      this.cache.set('serviceCharge', configWithTimestamp);
+      await AsyncStorage.setItem('platform.serviceCharge', JSON.stringify(__configWithTimestamp));
+      this.cache.set('serviceCharge', _configWithTimestamp);
 
       // Trigger sync event for real-time updates
-      this.notifySubscribers('serviceCharge', configWithTimestamp);
-    } catch (_error) {
+      this.notifySubscribers('serviceCharge', _configWithTimestamp);
+    } catch (__error) {
       throw error;
     }
   }
@@ -188,113 +188,113 @@ class SharedDataStore {
   async getPaymentConfig(): Promise<PaymentConfig> {
     try {
       const cached = this.cache.get('payments');
-      if (_cached) {
+      if (__cached) {
         return cached;
       }
 
       const stored = await AsyncStorage.getItem('platform.payments');
-      if (_stored) {
-        const config = JSON.parse(_stored);
-        this.cache.set('payments', config);
+      if (__stored) {
+        const config = JSON.parse(__stored);
+        this.cache.set('payments', _config);
         return config;
       }
 
       // Default payment configuration
       const defaultConfig: PaymentConfig = {
-        sumupEnabled: true,
+        sumupEnabled: _true,
         sumupFeeRate: 0.69,
-        cardPaymentsEnabled: true,
-        qrPaymentsEnabled: true,
-        cashPaymentsEnabled: true,
+        cardPaymentsEnabled: _true,
+        qrPaymentsEnabled: _true,
+        cashPaymentsEnabled: _true,
         lastUpdated: new Date().toISOString(),
       };
 
-      await this.setPaymentConfig(_defaultConfig);
+      await this.setPaymentConfig(__defaultConfig);
       return defaultConfig;
-    } catch (_error) {
+    } catch (__error) {
       throw error;
     }
   }
 
-  async setPaymentConfig(config: PaymentConfig): Promise<void> {
+  async setPaymentConfig(config: _PaymentConfig): Promise<void> {
     try {
       const configWithTimestamp = {
         ...config,
         lastUpdated: new Date().toISOString(),
       };
 
-      await AsyncStorage.setItem('platform.payments', JSON.stringify(_configWithTimestamp));
-      this.cache.set('payments', configWithTimestamp);
+      await AsyncStorage.setItem('platform.payments', JSON.stringify(__configWithTimestamp));
+      this.cache.set('payments', _configWithTimestamp);
 
-      this.notifySubscribers('payments', configWithTimestamp);
-    } catch (_error) {
+      this.notifySubscribers('payments', _configWithTimestamp);
+    } catch (__error) {
       throw error;
     }
   }
 
   // Generic platform setting management
-  async getPlatformSetting(key: string): Promise<unknown> {
+  async getPlatformSetting(key: _string): Promise<unknown> {
     try {
-      const cached = this.cache.get(_key);
-      if (_cached) {
+      const cached = this.cache.get(__key);
+      if (__cached) {
         return cached;
       }
 
       const stored = await AsyncStorage.getItem(`platform.${key}`);
-      if (_stored) {
-        const value = JSON.parse(_stored);
-        this.cache.set(_key, value);
+      if (__stored) {
+        const value = JSON.parse(__stored);
+        this.cache.set(__key, _value);
         return value;
       }
 
       return null;
-    } catch (_error) {
+    } catch (__error) {
       return null;
     }
   }
 
-  async setPlatformSetting(key: string, value: unknown): Promise<void> {
+  async setPlatformSetting(key: _string, value: _unknown): Promise<void> {
     try {
       const valueWithTimestamp = {
-        data: value,
+        data: _value,
         lastUpdated: new Date().toISOString(),
       };
 
-      await AsyncStorage.setItem(`platform.${key}`, JSON.stringify(_valueWithTimestamp));
-      this.cache.set(_key, valueWithTimestamp);
+      await AsyncStorage.setItem(`platform.${key}`, JSON.stringify(__valueWithTimestamp));
+      this.cache.set(__key, _valueWithTimestamp);
 
-      this.notifySubscribers(_key, valueWithTimestamp);
-    } catch (_error) {
+      this.notifySubscribers(__key, _valueWithTimestamp);
+    } catch (__error) {
       throw error;
     }
   }
 
   // Real-time subscription system
-  private subscribers: Map<string, Set<(data: unknown) => void>> = new Map();
+  private subscribers: Map<string, Set<(data: _unknown) => void>> = new Map();
 
-  subscribe(key: string, callback: (data: unknown) => void): () => void {
-    if (!this.subscribers.has(_key)) {
-      this.subscribers.set(_key, new Set());
+  subscribe(key: _string, callback: (data: _unknown) => void): () => void {
+    if (!this.subscribers.has(__key)) {
+      this.subscribers.set(__key, new Set());
     }
 
-    this.subscribers.get(_key)!.add(_callback);
+    this.subscribers.get(__key)!.add(__callback);
 
     // Return unsubscribe function
     return () => {
-      const subs = this.subscribers.get(_key);
-      if (_subs) {
-        subs.delete(_callback);
+      const subs = this.subscribers.get(__key);
+      if (__subs) {
+        subs.delete(__callback);
       }
     };
   }
 
-  private notifySubscribers(key: string, data: unknown): void {
-    const subs = this.subscribers.get(_key);
-    if (_subs) {
+  private notifySubscribers(key: _string, data: _unknown): void {
+    const subs = this.subscribers.get(__key);
+    if (__subs) {
       subs.forEach(callback => {
         try {
-          callback(_data);
-        } catch (_error) {}
+          callback(__data);
+        } catch (__error) {}
       });
     }
   }
@@ -305,9 +305,9 @@ class SharedDataStore {
       const keys = await AsyncStorage.getAllKeys();
       const platformKeys = keys.filter(key => key.startsWith('platform.'));
 
-      await AsyncStorage.multiRemove(_platformKeys);
+      await AsyncStorage.multiRemove(__platformKeys);
       this.cache.clear();
-    } catch (_error) {
+    } catch (__error) {
       throw error;
     }
   }
@@ -322,7 +322,7 @@ class SharedDataStore {
         serviceCharge,
         payments,
       };
-    } catch (_error) {
+    } catch (__error) {
       throw error;
     }
   }

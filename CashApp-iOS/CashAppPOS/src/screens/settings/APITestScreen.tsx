@@ -30,8 +30,8 @@ const APITestScreen: React.FC = () => {
   const [apiTestService] = useState(() => APITestingService.getInstance());
   const [testResults, setTestResults] = useState<APITestResult[]>([]);
   const [testSuites, setTestSuites] = useState<APITestSuite[]>([]);
-  const [isRunning, setIsRunning] = useState(_false);
-  const [refreshing, setRefreshing] = useState(_false);
+  const [isRunning, setIsRunning] = useState(__false);
+  const [refreshing, setRefreshing] = useState(__false);
   const [selectedTab, setSelectedTab] = useState<'results' | 'suites' | 'health'>('health');
 
   useEffect(() => {
@@ -44,33 +44,33 @@ const APITestScreen: React.FC = () => {
   };
 
   const handleRefresh = async () => {
-    setRefreshing(_true);
+    setRefreshing(__true);
     await loadTestData();
-    setRefreshing(_false);
+    setRefreshing(__false);
   };
 
   const runFullTestSuite = async () => {
-    setIsRunning(_true);
+    setIsRunning(__true);
     try {
       await apiTestService.runFullAPITestSuite();
       await loadTestData();
       Alert.alert('Test Complete', 'API test suite finished. Check results below.');
-    } catch (_error) {
+    } catch (__error) {
       Alert.alert('Test Failed', 'Error running API test suite');
     } finally {
-      setIsRunning(_false);
+      setIsRunning(__false);
     }
   };
 
-  const testIndividualEndpoint = async (endpoint: string, method = 'GET') => {
-    setIsRunning(_true);
+  const testIndividualEndpoint = async (endpoint: _string, method = 'GET') => {
+    setIsRunning(__true);
     try {
-      await apiTestService.testEndpoint(_endpoint, method);
+      await apiTestService.testEndpoint(__endpoint, _method);
       await loadTestData();
-    } catch (_error) {
+    } catch (__error) {
       Alert.alert('Test Failed', `Error testing ${endpoint}`);
     } finally {
-      setIsRunning(_false);
+      setIsRunning(__false);
     }
   };
 
@@ -88,11 +88,11 @@ const APITestScreen: React.FC = () => {
     ]);
   };
 
-  const getStatusColor = (success: boolean) => {
+  const getStatusColor = (success: _boolean) => {
     return success ? Colors.success : Colors.error;
   };
 
-  const getStatusIcon = (success: boolean) => {
+  const getStatusIcon = (success: _boolean) => {
     return success ? 'check-circle' : 'error';
   };
 
@@ -184,7 +184,7 @@ const APITestScreen: React.FC = () => {
           testResults
             .slice()
             .reverse()
-            .map((_result, index) => (
+            .map((__result, _index) => (
               <View key={index} style={styles.resultCard}>
                 <View style={styles.resultHeader}>
                   <View style={styles.resultMethod}>
@@ -238,7 +238,7 @@ const APITestScreen: React.FC = () => {
           testSuites
             .slice()
             .reverse()
-            .map((_suite, index) => (
+            .map((__suite, _index) => (
               <View key={index} style={styles.suiteCard}>
                 <View style={styles.suiteHeader}>
                   <Text style={styles.suiteName}>{suite.name}</Text>
@@ -255,7 +255,7 @@ const APITestScreen: React.FC = () => {
                   {suite.tests.filter(t => t.success).length}/{suite.tests.length} tests passed
                 </Text>
 
-                {suite.tests.map((_test, testIndex) => (
+                {suite.tests.map((__test, _testIndex) => (
                   <View key={testIndex} style={styles.suiteTest}>
                     <Icon
                       name={getStatusIcon(test.success)}

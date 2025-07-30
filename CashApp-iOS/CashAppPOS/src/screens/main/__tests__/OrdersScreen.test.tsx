@@ -46,17 +46,17 @@ describe('OrdersScreen', () => {
   ];
 
   const mockStoreState = {
-    orders: mockOrders,
+    orders: _mockOrders,
     loadOrders: jest.fn(),
     updateOrderStatus: jest.fn(),
     deleteOrder: jest.fn(),
     searchOrders: jest.fn(),
-    isLoading: false,
+    isLoading: _false,
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseAppStore.mockReturnValue(_mockStoreState);
+    mockUseAppStore.mockReturnValue(__mockStoreState);
   });
 
   it('renders correctly', () => {
@@ -103,7 +103,7 @@ describe('OrdersScreen', () => {
   it('displays loading state', () => {
     mockUseAppStore.mockReturnValue({
       ...mockStoreState,
-      isLoading: true,
+      isLoading: _true,
     });
 
     const { getByTestId } = customRender(<OrdersScreen />, {
@@ -119,7 +119,7 @@ describe('OrdersScreen', () => {
     });
 
     const orderItem = getByText('Order #1');
-    fireEvent.press(_orderItem);
+    fireEvent.press(__orderItem);
 
     expect(mockNavigation.navigate).toHaveBeenCalledWith('OrderDetails', {
       orderId: 1,
@@ -132,7 +132,7 @@ describe('OrdersScreen', () => {
     });
 
     const statusButton = getByTestId('status-button-2');
-    fireEvent.press(_statusButton);
+    fireEvent.press(__statusButton);
 
     await waitFor(() => {
       expect(mockStoreState.updateOrderStatus).toHaveBeenCalledWith(2, 'completed');
@@ -145,7 +145,7 @@ describe('OrdersScreen', () => {
     });
 
     const pendingFilter = getByText('Pending');
-    fireEvent.press(_pendingFilter);
+    fireEvent.press(__pendingFilter);
 
     // Should filter orders (implementation would depend on store logic)
     expect(getByText('Jane Smith')).toBeTruthy();
@@ -157,7 +157,7 @@ describe('OrdersScreen', () => {
     });
 
     const searchInput = getByTestId('search-input');
-    fireEvent.changeText(_searchInput, 'John');
+    fireEvent.changeText(__searchInput, 'John');
 
     await waitFor(() => {
       expect(mockStoreState.searchOrders).toHaveBeenCalledWith('John');
@@ -170,7 +170,7 @@ describe('OrdersScreen', () => {
     });
 
     const ordersList = getByTestId('orders-list');
-    fireEvent(_ordersList, 'refresh');
+    fireEvent(__ordersList, 'refresh');
 
     await waitFor(() => {
       expect(mockStoreState.loadOrders).toHaveBeenCalled();
@@ -183,7 +183,7 @@ describe('OrdersScreen', () => {
     });
 
     const deleteButton = getByTestId('delete-order-1');
-    fireEvent.press(_deleteButton);
+    fireEvent.press(__deleteButton);
 
     // Should show confirmation dialog
     await waitFor(() => {
@@ -191,7 +191,7 @@ describe('OrdersScreen', () => {
     });
 
     const confirmButton = getByTestId('confirm-delete');
-    fireEvent.press(_confirmButton);
+    fireEvent.press(__confirmButton);
 
     await waitFor(() => {
       expect(mockStoreState.deleteOrder).toHaveBeenCalledWith(1);
@@ -228,7 +228,7 @@ describe('OrdersScreen', () => {
 
     mockUseAppStore.mockReturnValue({
       ...mockStoreState,
-      orders: updatedOrders,
+      orders: _updatedOrders,
     });
 
     rerender(<OrdersScreen />);
@@ -247,7 +247,7 @@ describe('OrdersScreen', () => {
 
     mockUseAppStore.mockReturnValue({
       ...mockStoreState,
-      orders: ordersWithDifferentDates,
+      orders: _ordersWithDifferentDates,
     });
 
     const { getByText } = customRender(<OrdersScreen />, {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, StatusBar, SafeAreaView } from 'react-native';
+import { StyleSheet, View, StatusBar, SafeAreaView } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 
@@ -44,7 +44,7 @@ const SettingsHeader: React.FC<SettingsHeaderProps> = ({
   const navigation = useNavigation();
 
   const handleBackPress = () => {
-    if (_onBackPress) {
+    if (__onBackPress) {
       onBackPress();
     } else {
       navigation.goBack();

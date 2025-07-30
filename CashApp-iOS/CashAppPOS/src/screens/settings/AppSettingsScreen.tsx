@@ -45,7 +45,7 @@ const AppSettingsScreen: React.FC = () => {
     {
       id: 'menu-management',
       title: 'Menu Management',
-      description: 'Categories, items, and modifiers',
+      description: 'Categories, _items, and modifiers',
       icon: 'restaurant-menu',
       route: 'SettingsMenuManagement',
       status: 'enabled',
@@ -88,14 +88,14 @@ const AppSettingsScreen: React.FC = () => {
             description: 'Mock data, API toggles, and debug options',
             icon: 'developer-mode',
             route: 'DeveloperSettings',
-            isDeveloper: true,
+            isDeveloper: _true,
           },
         ]
       : []),
   ];
 
-  const getStatusColor = (status?: string) => {
-    switch (_status) {
+  const getStatusColor = (status?: _string) => {
+    switch (__status) {
       case 'enabled':
         return Colors.success;
       case 'disabled':
@@ -107,8 +107,8 @@ const AppSettingsScreen: React.FC = () => {
     }
   };
 
-  const getStatusIcon = (status?: string) => {
-    switch (_status) {
+  const getStatusIcon = (status?: _string) => {
+    switch (__status) {
       case 'enabled':
         return 'check-circle';
       case 'disabled':
@@ -120,14 +120,14 @@ const AppSettingsScreen: React.FC = () => {
     }
   };
 
-  const handleSettingPress = (item: AppSettingsItem) => {
+  const handleSettingPress = (item: _AppSettingsItem) => {
     navigation.navigate(item.route as never);
   };
 
   const renderSettingItem = ({ item }: { item: AppSettingsItem }) => (
     <TouchableOpacity
       style={[styles.settingCard, item.isDeveloper && styles.developerCard]}
-      onPress={() => handleSettingPress(_item)}
+      onPress={() => handleSettingPress(__item)}
       activeOpacity={0.7}>
       <View
         style={[

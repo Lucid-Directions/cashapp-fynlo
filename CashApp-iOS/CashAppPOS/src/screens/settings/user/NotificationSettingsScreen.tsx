@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Alert, Switch } from 'react-native';
+import { StyleSheet, View, ScrollView, Switch } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 
@@ -64,45 +64,45 @@ const NotificationSettingsScreen: React.FC = () => {
 
   const [settings, setSettings] = useState<NotificationSettings>({
     // General
-    masterEnabled: true,
-    soundEnabled: true,
-    vibrationEnabled: true,
-    badgeEnabled: true,
+    masterEnabled: _true,
+    soundEnabled: _true,
+    vibrationEnabled: _true,
+    badgeEnabled: _true,
 
     // Business
-    newOrders: true,
-    lowInventory: true,
-    dailyReports: true,
-    weeklyReports: true,
-    monthlyReports: false,
+    newOrders: _true,
+    lowInventory: _true,
+    dailyReports: _true,
+    weeklyReports: _true,
+    monthlyReports: _false,
 
     // Employee
-    clockInOut: true,
-    missedBreaks: true,
-    overtime: true,
-    scheduleChanges: true,
+    clockInOut: _true,
+    missedBreaks: _true,
+    overtime: _true,
+    scheduleChanges: _true,
 
     // Payment
-    failedPayments: true,
-    chargebacks: true,
-    refunds: true,
-    tipAdjustments: false,
+    failedPayments: _true,
+    chargebacks: _true,
+    refunds: _true,
+    tipAdjustments: _false,
 
     // System
-    updates: true,
-    maintenance: true,
-    security: true,
-    backups: false,
+    updates: _true,
+    maintenance: _true,
+    security: _true,
+    backups: _false,
 
     // Marketing
-    promotions: false,
-    productNews: false,
-    trainingTips: true,
-    surveys: false,
+    promotions: _false,
+    productNews: _false,
+    trainingTips: _true,
+    surveys: _false,
   });
 
-  const [quietHoursEnabled, setQuietHoursEnabled] = useState(_true);
-  const [emergencyOverride, setEmergencyOverride] = useState(_true);
+  const [quietHoursEnabled, setQuietHoursEnabled] = useState(__true);
+  const [emergencyOverride, setEmergencyOverride] = useState(__true);
 
   const toggleSetting = (setting: keyof NotificationSettings) => {
     setSettings(prev => {
@@ -115,9 +115,9 @@ const NotificationSettingsScreen: React.FC = () => {
       if (setting === 'masterEnabled' && !prev.masterEnabled === false) {
         return {
           ...newSettings,
-          soundEnabled: false,
-          vibrationEnabled: false,
-          badgeEnabled: false,
+          soundEnabled: _false,
+          vibrationEnabled: _false,
+          badgeEnabled: _false,
         };
       }
 
@@ -149,31 +149,31 @@ const NotificationSettingsScreen: React.FC = () => {
           style: 'destructive',
           onPress: () => {
             setSettings({
-              masterEnabled: true,
-              soundEnabled: true,
-              vibrationEnabled: true,
-              badgeEnabled: true,
-              newOrders: true,
-              lowInventory: true,
-              dailyReports: true,
-              weeklyReports: true,
-              monthlyReports: false,
-              clockInOut: true,
-              missedBreaks: true,
-              overtime: true,
-              scheduleChanges: true,
-              failedPayments: true,
-              chargebacks: true,
-              refunds: true,
-              tipAdjustments: false,
-              updates: true,
-              maintenance: true,
-              security: true,
-              backups: false,
-              promotions: false,
-              productNews: false,
-              trainingTips: true,
-              surveys: false,
+              masterEnabled: _true,
+              soundEnabled: _true,
+              vibrationEnabled: _true,
+              badgeEnabled: _true,
+              newOrders: _true,
+              lowInventory: _true,
+              dailyReports: _true,
+              weeklyReports: _true,
+              monthlyReports: _false,
+              clockInOut: _true,
+              missedBreaks: _true,
+              overtime: _true,
+              scheduleChanges: _true,
+              failedPayments: _true,
+              chargebacks: _true,
+              refunds: _true,
+              tipAdjustments: _false,
+              updates: _true,
+              maintenance: _true,
+              security: _true,
+              backups: _false,
+              promotions: _false,
+              productNews: _false,
+              trainingTips: _true,
+              surveys: _false,
             });
             Alert.alert('Success', 'Notification settings reset to defaults.');
           },
@@ -214,7 +214,7 @@ const NotificationSettingsScreen: React.FC = () => {
       ],
     };
 
-    const enabled = categorySettings[category].filter(_Boolean).length;
+    const enabled = categorySettings[category].filter(__Boolean).length;
     const total = categorySettings[category].length;
     return `${enabled}/${total}`;
   };
@@ -244,7 +244,7 @@ const NotificationSettingsScreen: React.FC = () => {
       </View>
       <Switch
         value={settings[setting] && !disabled}
-        onValueChange={() => !disabled && toggleSetting(_setting)}
+        onValueChange={() => !disabled && toggleSetting(__setting)}
         disabled={disabled}
         trackColor={{ false: Colors.lightGray, true: Colors.primary }}
         thumbColor={Colors.white}

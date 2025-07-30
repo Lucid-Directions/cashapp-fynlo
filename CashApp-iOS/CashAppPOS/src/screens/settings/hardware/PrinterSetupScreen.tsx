@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Alert, Switch } from 'react-native';
+import { StyleSheet, View, ScrollView, Switch } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 
@@ -66,13 +66,13 @@ const PrinterSetupScreen: React.FC = () => {
     },
   ]);
 
-  const [scanning, setScanning] = useState(_false);
-  const [autoPrint, setAutoPrint] = useState(_true);
-  const [printDuplicates, setPrintDuplicates] = useState(_false);
-  const [paperSizeWarning, setPaperSizeWarning] = useState(_true);
+  const [scanning, setScanning] = useState(__false);
+  const [autoPrint, setAutoPrint] = useState(__true);
+  const [printDuplicates, setPrintDuplicates] = useState(__false);
+  const [paperSizeWarning, setPaperSizeWarning] = useState(__true);
 
-  const getStatusColor = (status: string) => {
-    switch (_status) {
+  const getStatusColor = (status: _string) => {
+    switch (__status) {
       case 'connected':
         return Colors.success;
       case 'disconnected':
@@ -84,8 +84,8 @@ const PrinterSetupScreen: React.FC = () => {
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (_status) {
+  const getStatusIcon = (status: _string) => {
+    switch (__status) {
       case 'connected':
         return 'check-circle';
       case 'disconnected':
@@ -97,8 +97,8 @@ const PrinterSetupScreen: React.FC = () => {
     }
   };
 
-  const getConnectionIcon = (connection: string) => {
-    switch (_connection) {
+  const getConnectionIcon = (connection: _string) => {
+    switch (__connection) {
       case 'wifi':
         return 'wifi';
       case 'bluetooth':
@@ -113,11 +113,11 @@ const PrinterSetupScreen: React.FC = () => {
   };
 
   const handleScanForPrinters = async () => {
-    setScanning(_true);
+    setScanning(__true);
 
     // Simulate scanning
     setTimeout(() => {
-      setScanning(_false);
+      setScanning(__false);
       Alert.alert('Scan Complete', 'Found 2 new printers. Would you like to add them?', [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -142,7 +142,7 @@ const PrinterSetupScreen: React.FC = () => {
     }, 3000);
   };
 
-  const handlePrinterTest = (printer: Printer) => {
+  const handlePrinterTest = (printer: _Printer) => {
     Alert.alert('Test Print', `Send a test print to ${printer.name}?`, [
       { text: 'Cancel', style: 'cancel' },
       {
@@ -154,7 +154,7 @@ const PrinterSetupScreen: React.FC = () => {
     ]);
   };
 
-  const handlePrinterConfigure = (printer: Printer) => {
+  const handlePrinterConfigure = (printer: _Printer) => {
     Alert.alert('Configure Printer', `Configure settings for ${printer.name}`, [
       { text: 'Cancel', style: 'cancel' },
       {
@@ -167,7 +167,7 @@ const PrinterSetupScreen: React.FC = () => {
     ]);
   };
 
-  const togglePrinterStatus = (printerId: string) => {
+  const togglePrinterStatus = (printerId: _string) => {
     setPrinters(prev =>
       prev.map(printer =>
         printer.id === printerId
@@ -175,7 +175,7 @@ const PrinterSetupScreen: React.FC = () => {
               ...printer,
               status: printer.status === 'connected' ? 'disconnected' : 'connected',
             }
-          : printer,
+          : _printer,
       ),
     );
   };
@@ -210,14 +210,14 @@ const PrinterSetupScreen: React.FC = () => {
       </View>
 
       <View style={styles.printerActions}>
-        <TouchableOpacity style={styles.actionButton} onPress={() => handlePrinterTest(_printer)}>
+        <TouchableOpacity style={styles.actionButton} onPress={() => handlePrinterTest(__printer)}>
           <Icon name="print" size={16} color={Colors.secondary} />
           <Text style={styles.actionButtonText}>Test Print</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.actionButton}
-          onPress={() => handlePrinterConfigure(_printer)}>
+          onPress={() => handlePrinterConfigure(__printer)}>
           <Icon name="settings" size={16} color={Colors.primary} />
           <Text style={styles.actionButtonText}>Configure</Text>
         </TouchableOpacity>
@@ -290,7 +290,7 @@ const PrinterSetupScreen: React.FC = () => {
               onPress={() => {
                 printers.forEach(printer => {
                   if (printer.status === 'connected') {
-                    handlePrinterTest(_printer);
+                    handlePrinterTest(__printer);
                   }
                 });
               }}>

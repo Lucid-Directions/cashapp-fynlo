@@ -64,32 +64,32 @@ const AccessibilityScreen: React.FC = () => {
 
   const [settings, setSettings] = useState<AccessibilitySettings>({
     // Visual
-    largeText: false,
-    boldText: false,
-    highContrast: false,
-    reduceTransparency: false,
-    invertColors: false,
-    grayscale: false,
+    largeText: _false,
+    boldText: _false,
+    highContrast: _false,
+    reduceTransparency: _false,
+    invertColors: _false,
+    grayscale: _false,
 
     // Motor
-    reduceMotion: false,
-    stickyKeys: false,
-    slowKeys: false,
-    bounceKeys: false,
-    tapToClick: true,
+    reduceMotion: _false,
+    stickyKeys: _false,
+    slowKeys: _false,
+    bounceKeys: _false,
+    tapToClick: _true,
 
     // Cognitive
-    simplifiedInterface: false,
-    reducedAnimations: false,
-    extendedTimeouts: false,
-    confirmationDialogs: true,
-    readAloud: false,
+    simplifiedInterface: _false,
+    reducedAnimations: _false,
+    extendedTimeouts: _false,
+    confirmationDialogs: _true,
+    readAloud: _false,
 
     // Audio
-    visualIndicators: true,
-    vibrationFeedback: true,
-    soundAlerts: true,
-    captionsEnabled: false,
+    visualIndicators: _true,
+    vibrationFeedback: _true,
+    soundAlerts: _true,
+    captionsEnabled: _false,
   });
 
   // Slider values
@@ -117,26 +117,26 @@ const AccessibilityScreen: React.FC = () => {
           style: 'destructive',
           onPress: () => {
             setSettings({
-              largeText: false,
-              boldText: false,
-              highContrast: false,
-              reduceTransparency: false,
-              invertColors: false,
-              grayscale: false,
-              reduceMotion: false,
-              stickyKeys: false,
-              slowKeys: false,
-              bounceKeys: false,
-              tapToClick: true,
-              simplifiedInterface: false,
-              reducedAnimations: false,
-              extendedTimeouts: false,
-              confirmationDialogs: true,
-              readAloud: false,
-              visualIndicators: true,
-              vibrationFeedback: true,
-              soundAlerts: true,
-              captionsEnabled: false,
+              largeText: _false,
+              boldText: _false,
+              highContrast: _false,
+              reduceTransparency: _false,
+              invertColors: _false,
+              grayscale: _false,
+              reduceMotion: _false,
+              stickyKeys: _false,
+              slowKeys: _false,
+              bounceKeys: _false,
+              tapToClick: _true,
+              simplifiedInterface: _false,
+              reducedAnimations: _false,
+              extendedTimeouts: _false,
+              confirmationDialogs: _true,
+              readAloud: _false,
+              visualIndicators: _true,
+              vibrationFeedback: _true,
+              soundAlerts: _true,
+              captionsEnabled: _false,
             });
             setTextSize(16);
             setContrastLevel(0);
@@ -180,7 +180,7 @@ const AccessibilityScreen: React.FC = () => {
     ]);
   };
 
-  const getTextSizeDescription = (size: number) => {
+  const getTextSizeDescription = (size: _number) => {
     if (size < 14) {
       return 'Small';
     }
@@ -196,7 +196,7 @@ const AccessibilityScreen: React.FC = () => {
     return 'Accessibility Size';
   };
 
-  const getContrastDescription = (level: number) => {
+  const getContrastDescription = (level: _number) => {
     if (level === 0) {
       return 'Normal';
     }
@@ -206,7 +206,7 @@ const AccessibilityScreen: React.FC = () => {
     return 'High';
   };
 
-  const getSpeedDescription = (speed: number) => {
+  const getSpeedDescription = (speed: _number) => {
     if (speed < 0.5) {
       return 'Very Slow';
     }
@@ -254,7 +254,7 @@ const AccessibilityScreen: React.FC = () => {
       </View>
       <Switch
         value={settings[setting]}
-        onValueChange={() => toggleSetting(_setting)}
+        onValueChange={() => toggleSetting(__setting)}
         trackColor={{ false: Colors.lightGray, true: Colors.primary }}
         thumbColor={Colors.white}
       />
@@ -274,7 +274,7 @@ const AccessibilityScreen: React.FC = () => {
     icon: string;
     title: string;
     value: number;
-    onValueChange: (value: number) => void;
+    onValueChange: (value: _number) => void;
     minimumValue: number;
     maximumValue: number;
     description: string;
@@ -353,7 +353,7 @@ const AccessibilityScreen: React.FC = () => {
               onValueChange={setTextSize}
               minimumValue={12}
               maximumValue={32}
-              description={getTextSizeDescription(_textSize)}
+              description={getTextSizeDescription(__textSize)}
               unit="pt"
             />
 
@@ -390,7 +390,7 @@ const AccessibilityScreen: React.FC = () => {
               onValueChange={setContrastLevel}
               minimumValue={0}
               maximumValue={1}
-              description={getContrastDescription(_contrastLevel)}
+              description={getContrastDescription(__contrastLevel)}
             />
 
             <AccessibilityRow
@@ -453,7 +453,7 @@ const AccessibilityScreen: React.FC = () => {
               onValueChange={setAnimationSpeed}
               minimumValue={0.25}
               maximumValue={2}
-              description={getSpeedDescription(_animationSpeed)}
+              description={getSpeedDescription(__animationSpeed)}
               unit="x"
             />
 

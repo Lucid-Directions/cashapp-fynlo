@@ -21,13 +21,13 @@ import { useAuth } from '../../contexts/AuthContext';
 const ProfileScreenContent: React.FC = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
-  const styles = useThemedStyles(_createStyles);
+  const styles = useThemedStyles(__createStyles);
   const { user, session } = useAppStore();
   const { updateUser } = useAuth();
 
   // Modal states
-  const [showEditModal, setShowEditModal] = useState(_false);
-  const [showPasswordModal, setShowPasswordModal] = useState(_false);
+  const [showEditModal, setShowEditModal] = useState(__false);
+  const [showPasswordModal, setShowPasswordModal] = useState(__false);
 
   // Edit form state
   const [editForm, setEditForm] = useState({
@@ -51,7 +51,7 @@ const ProfileScreenContent: React.FC = () => {
       email: user?.email || '',
       phone: user?.phone || '',
     });
-    setShowEditModal(_true);
+    setShowEditModal(__true);
   };
 
   const handleSaveProfile = async () => {
@@ -76,9 +76,9 @@ const ProfileScreenContent: React.FC = () => {
         phone: editForm.phone.trim(),
       });
 
-      setShowEditModal(_false);
+      setShowEditModal(__false);
       Alert.alert('Success', 'Profile updated successfully!');
-    } catch (_error) {
+    } catch (__error) {
       Alert.alert('Error', 'Failed to update profile. Please try again.');
     }
   };
@@ -89,7 +89,7 @@ const ProfileScreenContent: React.FC = () => {
       newPassword: '',
       confirmPassword: '',
     });
-    setShowPasswordModal(_true);
+    setShowPasswordModal(__true);
   };
 
   const handleSavePassword = async () => {
@@ -118,14 +118,14 @@ const ProfileScreenContent: React.FC = () => {
     try {
       // In a real app, this would call an API to change password
       Alert.alert('Success', 'Password changed successfully!', [
-        { text: 'OK', onPress: () => setShowPasswordModal(_false) },
+        { text: 'OK', onPress: () => setShowPasswordModal(__false) },
       ]);
-    } catch (_error) {
+    } catch (__error) {
       Alert.alert('Error', 'Failed to change password. Please try again.');
     }
   };
 
-  const InfoCard = ({ title, value, icon }: { title: string; value: string; icon: string }) => (
+  const InfoCard = ({ title, _value, icon }: { title: string; value: string; icon: string }) => (
     <View style={styles.infoCard}>
       <View style={styles.infoIcon}>
         <Icon name={icon} size={24} color={theme.colors.secondary} />
@@ -229,12 +229,12 @@ const ProfileScreenContent: React.FC = () => {
         visible={showEditModal}
         animationType="slide"
         transparent={true}
-        onRequestClose={() => setShowEditModal(_false)}>
+        onRequestClose={() => setShowEditModal(__false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modal}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Edit Profile</Text>
-              <TouchableOpacity onPress={() => setShowEditModal(_false)}>
+              <TouchableOpacity onPress={() => setShowEditModal(__false)}>
                 <Icon name="close" size={24} color={theme.colors.text} />
               </TouchableOpacity>
             </View>
@@ -290,7 +290,7 @@ const ProfileScreenContent: React.FC = () => {
               <View style={styles.modalActions}>
                 <TouchableOpacity
                   style={[styles.modalButton, styles.cancelButton]}
-                  onPress={() => setShowEditModal(_false)}>
+                  onPress={() => setShowEditModal(__false)}>
                   <Text style={styles.cancelButtonText}>Cancel</Text>
                 </TouchableOpacity>
 
@@ -310,12 +310,12 @@ const ProfileScreenContent: React.FC = () => {
         visible={showPasswordModal}
         animationType="slide"
         transparent={true}
-        onRequestClose={() => setShowPasswordModal(_false)}>
+        onRequestClose={() => setShowPasswordModal(__false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modal}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Change Password</Text>
-              <TouchableOpacity onPress={() => setShowPasswordModal(_false)}>
+              <TouchableOpacity onPress={() => setShowPasswordModal(__false)}>
                 <Icon name="close" size={24} color={theme.colors.text} />
               </TouchableOpacity>
             </View>
@@ -360,7 +360,7 @@ const ProfileScreenContent: React.FC = () => {
               <View style={styles.modalActions}>
                 <TouchableOpacity
                   style={[styles.modalButton, styles.cancelButton]}
-                  onPress={() => setShowPasswordModal(_false)}>
+                  onPress={() => setShowPasswordModal(__false)}>
                   <Text style={styles.cancelButtonText}>Cancel</Text>
                 </TouchableOpacity>
 
@@ -378,7 +378,7 @@ const ProfileScreenContent: React.FC = () => {
   );
 };
 
-const createStyles = (theme: unknown) =>
+const createStyles = (theme: _unknown) =>
   StyleSheet.create({
     container: {
       flex: 1,

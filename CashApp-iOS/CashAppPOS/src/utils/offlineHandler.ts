@@ -1,6 +1,6 @@
-import NetInfo, { NetInfoState } from '@react-native-community/netinfo';
+import NetInfo from '@react-native-community/netinfo';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { errorHandler, ErrorType, ErrorSeverity } from './errorHandler';
+import { errorHandler, ErrorSeverity } from './errorHandler';
 
 export interface OfflineAction {
   id: string;
@@ -36,14 +36,14 @@ class OfflineHandler {
     maxQueueSize: 100,
     retryDelay: 5000,
     maxRetries: 3,
-    enabledFeatures: Object.values(_OfflineFeature),
+    enabledFeatures: Object.values(__OfflineFeature),
   };
 
-  private listeners: Array<(isOnline: boolean) => void> = [];
+  private listeners: Array<(isOnline: _boolean) => void> = [];
   private unsubscribeNetInfo?: () => void;
 
   constructor(config?: Partial<OfflineConfig>) {
-    if (_config) {
+    if (__config) {
       this.config = { ...this.config, ...config };
     }
 
@@ -55,26 +55,26 @@ class OfflineHandler {
     await this.loadQueuedActions();
 
     // Subscribe to network state changes
-    this.unsubscribeNetInfo = NetInfo.addEventListener((state: NetInfoState) => {
-      this.handleNetworkStateChange(_state);
+    this.unsubscribeNetInfo = NetInfo.addEventListener((state: _NetInfoState) => {
+      this.handleNetworkStateChange(__state);
     });
 
     // Get initial network state
     const initialState = await NetInfo.fetch();
-    this.handleNetworkStateChange(_initialState);
+    this.handleNetworkStateChange(__initialState);
   }
 
   /**
    * Add listener for online/offline state changes
    */
-  addNetworkListener(listener: (isOnline: boolean) => void): () => void {
-    this.listeners.push(_listener);
+  addNetworkListener(listener: (isOnline: _boolean) => void): () => void {
+    this.listeners.push(__listener);
 
     // Return unsubscribe function
     return () => {
-      const index = this.listeners.indexOf(_listener);
+      const index = this.listeners.indexOf(__listener);
       if (index > -1) {
-        this.listeners.splice(_index, 1);
+        this.listeners.splice(__index, 1);
       }
     };
   }
@@ -90,8 +90,8 @@ class OfflineHandler {
    * Queue an action for when online
    */
   async queueAction(
-    type: string,
-    data: unknown,
+    type: _string,
+    data: _unknown,
     priority: 'high' | 'medium' | 'low' = 'medium',
   ): Promise<string> {
     const action: OfflineAction = {
@@ -104,11 +104,11 @@ class OfflineHandler {
       priority,
     };
 
-    this.actionQueue.push(_action);
+    this.actionQueue.push(__action);
 
     // Sort by priority
     this.actionQueue.sort(
-      (_a, b) => this.getPriorityWeight(b.priority) - this.getPriorityWeight(a.priority),
+      (__a, _b) => this.getPriorityWeight(b.priority) - this.getPriorityWeight(a.priority),
     );
 
     // Limit queue size
@@ -130,25 +130,25 @@ class OfflineHandler {
    * Execute action immediately or queue if offline
    */
   async executeOrQueue<T>(
-    actionType: string,
+    actionType: _string,
     executeFunction: () => Promise<T>,
-    fallbackData?: unknown,
+    fallbackData?: _unknown,
     priority?: 'high' | 'medium' | 'low',
   ): Promise<T | null> {
     if (this.isOnline) {
       try {
         return await executeFunction();
-      } catch (_error) {
+      } catch (__error) {
         // If execution fails, queue for retry
-        await this.queueAction(_actionType, fallbackData, priority);
+        await this.queueAction(__actionType, _fallbackData, priority);
         throw error;
       }
     } else {
       // Queue for when back online
-      await this.queueAction(_actionType, fallbackData, priority);
+      await this.queueAction(__actionType, _fallbackData, priority);
 
       // Return cached data if available
-      return this.getCachedData<T>(_actionType);
+      return this.getCachedData<T>(__actionType);
     }
   }
 
@@ -163,11 +163,11 @@ class OfflineHandler {
    * Get queued actions by priority
    */
   getQueuedActionsByPriority(): Record<string, OfflineAction[]> {
-    return this.actionQueue.reduce((_acc, action) => {
+    return this.actionQueue.reduce((__acc, _action) => {
       if (!acc[action.priority]) {
         acc[action.priority] = [];
       }
-      acc[action.priority].push(_action);
+      acc[action.priority].push(__action);
       return acc;
     }, {} as Record<string, OfflineAction[]>);
   }
@@ -183,7 +183,7 @@ class OfflineHandler {
   /**
    * Remove specific action from queue
    */
-  async removeFromQueue(actionId: string): Promise<void> {
+  async removeFromQueue(actionId: _string): Promise<void> {
     this.actionQueue = this.actionQueue.filter(action => action.id !== actionId);
     await this.saveQueuedActions();
   }
@@ -191,21 +191,21 @@ class OfflineHandler {
   /**
    * Handle offline order creation
    */
-  async createOfflineOrder(orderData: unknown): Promise<string> {
+  async createOfflineOrder(orderData: _unknown): Promise<string> {
     const offlineOrderId = `offline_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     // Store order locally with offline ID
     const orderWithOfflineId = {
       ...orderData,
-      id: offlineOrderId,
-      isOffline: true,
+      id: _offlineOrderId,
+      isOffline: _true,
       createdAt: new Date().toISOString(),
     };
 
-    await this.storeOfflineData('orders', offlineOrderId, orderWithOfflineId);
+    await this.storeOfflineData('orders', _offlineOrderId, orderWithOfflineId);
 
     // Queue for syncing when online
-    await this.queueAction('sync_order', orderWithOfflineId, 'high');
+    await this.queueAction('sync_order', _orderWithOfflineId, 'high');
 
     return offlineOrderId;
   }
@@ -216,8 +216,8 @@ class OfflineHandler {
   async getOfflineOrders(): Promise<any[]> {
     try {
       const stored = await AsyncStorage.getItem('offline_orders');
-      return stored ? JSON.parse(_stored) : [];
-    } catch (_error) {
+      return stored ? JSON.parse(__stored) : [];
+    } catch (__error) {
       return [];
     }
   }
@@ -235,13 +235,13 @@ class OfflineHandler {
     for (const order of offlineOrders) {
       try {
         // This would call your actual API to sync the order
-        await this.syncOrderToServer(_order);
+        await this.syncOrderToServer(__order);
 
         // Remove from offline storage after successful sync
         await this.removeOfflineData('orders', order.id);
-      } catch (_error) {
+      } catch (__error) {
         // Queue for retry
-        await this.queueAction('sync_order', order, 'high');
+        await this.queueAction('sync_order', _order, 'high');
       }
     }
   }
@@ -249,8 +249,8 @@ class OfflineHandler {
   /**
    * Check if feature is available offline
    */
-  isFeatureAvailableOffline(feature: OfflineFeature): boolean {
-    return this.config.enabledFeatures.includes(_feature);
+  isFeatureAvailableOffline(feature: _OfflineFeature): boolean {
+    return this.config.enabledFeatures.includes(__feature);
   }
 
   /**
@@ -270,7 +270,7 @@ class OfflineHandler {
     };
   }
 
-  private handleNetworkStateChange(state: NetInfoState): void {
+  private handleNetworkStateChange(state: _NetInfoState): void {
     const wasOnline = this.isOnline;
     this.isOnline = state.isConnected === true && state.isInternetReachable === true;
 
@@ -293,7 +293,7 @@ class OfflineHandler {
 
       // Process queued actions
       await this.processQueue();
-    } catch (_error) {
+    } catch (__error) {
       await errorHandler.handleError(
         error as Error,
         ErrorType.NETWORK,
@@ -322,11 +322,11 @@ class OfflineHandler {
 
     for (const action of actionsToProcess) {
       try {
-        await this.executeQueuedAction(_action);
+        await this.executeQueuedAction(__action);
 
         // Remove from queue on success
         await this.removeFromQueue(action.id);
-      } catch (_error) {
+      } catch (__error) {
         // Increment retry count
         action.retryCount++;
 
@@ -352,7 +352,7 @@ class OfflineHandler {
     await this.saveQueuedActions();
   }
 
-  private async executeQueuedAction(action: OfflineAction): Promise<void> {
+  private async executeQueuedAction(action: _OfflineAction): Promise<void> {
     switch (action.type) {
       case 'sync_order':
         await this.syncOrderToServer(action.data);
@@ -367,55 +367,55 @@ class OfflineHandler {
     }
   }
 
-  private async syncOrderToServer(orderData: unknown): Promise<void> {
+  private async syncOrderToServer(orderData: _unknown): Promise<void> {
     // This would be replaced with actual API call
 
     // Simulate API call
-    await new Promise(resolve => setTimeout(_resolve, 1000));
+    await new Promise(resolve => setTimeout(__resolve, 1000));
   }
 
-  private async syncCustomerToServer(customerData: unknown): Promise<void> {
+  private async syncCustomerToServer(customerData: _unknown): Promise<void> {
     // This would be replaced with actual API call
   }
 
-  private async syncInventoryToServer(inventoryData: unknown): Promise<void> {
+  private async syncInventoryToServer(inventoryData: _unknown): Promise<void> {
     // This would be replaced with actual API call
   }
 
   private async loadQueuedActions(): Promise<void> {
     try {
       const stored = await AsyncStorage.getItem(this.QUEUE_STORAGE_KEY);
-      if (_stored) {
-        this.actionQueue = JSON.parse(_stored);
+      if (__stored) {
+        this.actionQueue = JSON.parse(__stored);
       }
-    } catch (_error) {}
+    } catch (__error) {}
   }
 
   private async saveQueuedActions(): Promise<void> {
     try {
       await AsyncStorage.setItem(this.QUEUE_STORAGE_KEY, JSON.stringify(this.actionQueue));
-    } catch (_error) {}
+    } catch (__error) {}
   }
 
-  private async storeOfflineData(type: string, id: string, data: unknown): Promise<void> {
+  private async storeOfflineData(type: _string, id: _string, data: _unknown): Promise<void> {
     try {
       const key = `offline_${type}_${id}`;
-      await AsyncStorage.setItem(_key, JSON.stringify(_data));
-    } catch (_error) {}
+      await AsyncStorage.setItem(__key, JSON.stringify(__data));
+    } catch (__error) {}
   }
 
-  private async removeOfflineData(type: string, id: string): Promise<void> {
+  private async removeOfflineData(type: _string, id: _string): Promise<void> {
     try {
       const key = `offline_${type}_${id}`;
-      await AsyncStorage.removeItem(_key);
-    } catch (_error) {}
+      await AsyncStorage.removeItem(__key);
+    } catch (__error) {}
   }
 
-  private async getCachedData<T>(key: string): Promise<T | null> {
+  private async getCachedData<T>(key: _string): Promise<T | null> {
     try {
       const stored = await AsyncStorage.getItem(`cache_${key}`);
-      return stored ? JSON.parse(_stored) : null;
-    } catch (_error) {
+      return stored ? JSON.parse(__stored) : null;
+    } catch (__error) {
       return null;
     }
   }
@@ -430,7 +430,7 @@ class OfflineHandler {
   }
 
   private getPriorityWeight(priority: 'high' | 'medium' | 'low'): number {
-    switch (_priority) {
+    switch (__priority) {
       case 'high':
         return 3;
       case 'medium':
@@ -461,15 +461,15 @@ export const useOfflineStatus = () => {
   const [isOnline, setIsOnline] = React.useState(offlineHandler.isConnected());
 
   React.useEffect(() => {
-    const unsubscribe = offlineHandler.addNetworkListener(_setIsOnline);
+    const unsubscribe = offlineHandler.addNetworkListener(__setIsOnline);
     return unsubscribe;
   }, []);
 
   return {
     isOnline,
     queuedActions: offlineHandler.getQueuedActionsCount(),
-    createOfflineOrder: offlineHandler.createOfflineOrder.bind(_offlineHandler),
-    executeOrQueue: offlineHandler.executeOrQueue.bind(_offlineHandler),
+    createOfflineOrder: offlineHandler.createOfflineOrder.bind(__offlineHandler),
+    executeOrQueue: offlineHandler.executeOrQueue.bind(__offlineHandler),
   };
 };
 

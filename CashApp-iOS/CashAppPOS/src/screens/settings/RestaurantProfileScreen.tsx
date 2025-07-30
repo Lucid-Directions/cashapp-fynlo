@@ -32,7 +32,7 @@ const Colors = {
 
 const RestaurantProfileScreen: React.FC = () => {
   const navigation = useNavigation();
-  const { config, updateConfig, loading, error } = useRestaurantConfig();
+  const { config, _updateConfig, loading, error } = useRestaurantConfig();
 
   const [formData, setFormData] = useState({
     restaurantName: '',
@@ -51,12 +51,12 @@ const RestaurantProfileScreen: React.FC = () => {
     timezone: 'Europe/London',
   });
 
-  const [hasChanges, setHasChanges] = useState(_false);
-  const [saving, setSaving] = useState(_false);
+  const [hasChanges, setHasChanges] = useState(__false);
+  const [saving, setSaving] = useState(__false);
 
   // Load config data
   useEffect(() => {
-    if (_config) {
+    if (__config) {
       setFormData({
         restaurantName: config.restaurantName || '',
         displayName: config.displayName || '',
@@ -76,14 +76,14 @@ const RestaurantProfileScreen: React.FC = () => {
     }
   }, [config]);
 
-  const updateField = (field: string, value: string | number) => {
+  const updateField = (field: _string, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    setHasChanges(_true);
+    setHasChanges(__true);
   };
 
   const handleSave = async () => {
     try {
-      setSaving(_true);
+      setSaving(__true);
 
       await updateConfig({
         restaurantName: formData.restaurantName,
@@ -104,12 +104,12 @@ const RestaurantProfileScreen: React.FC = () => {
         timezone: formData.timezone,
       });
 
-      setHasChanges(_false);
+      setHasChanges(__false);
       Alert.alert('Success', 'Restaurant profile updated successfully!');
-    } catch (_error) {
+    } catch (__error) {
       Alert.alert('Error', 'Failed to update restaurant profile. Please try again.');
     } finally {
-      setSaving(_false);
+      setSaving(__false);
     }
   };
 
@@ -124,7 +124,7 @@ const RestaurantProfileScreen: React.FC = () => {
         text: 'Discard',
         style: 'destructive',
         onPress: () => {
-          if (_config) {
+          if (__config) {
             setFormData({
               restaurantName: config.restaurantName || '',
               displayName: config.displayName || '',
@@ -141,7 +141,7 @@ const RestaurantProfileScreen: React.FC = () => {
               taxRate: config.taxRate || 0.2,
               timezone: config.timezone || 'Europe/London',
             });
-            setHasChanges(_false);
+            setHasChanges(__false);
           }
         },
       },
@@ -201,7 +201,7 @@ const RestaurantProfileScreen: React.FC = () => {
             <TextInput
               style={styles.textInput}
               value={formData.restaurantName}
-              onChangeText={value => updateField('restaurantName', value)}
+              onChangeText={value => updateField('restaurantName', _value)}
               placeholder="Enter restaurant name"
               placeholderTextColor={Colors.mediumGray}
             />
@@ -213,7 +213,7 @@ const RestaurantProfileScreen: React.FC = () => {
             <TextInput
               style={styles.textInput}
               value={formData.displayName}
-              onChangeText={value => updateField('displayName', value)}
+              onChangeText={value => updateField('displayName', _value)}
               placeholder="Enter display name"
               placeholderTextColor={Colors.mediumGray}
             />
@@ -232,7 +232,7 @@ const RestaurantProfileScreen: React.FC = () => {
                     styles.businessTypeButton,
                     formData.businessType === type && styles.businessTypeButtonActive,
                   ]}
-                  onPress={() => updateField('businessType', type)}>
+                  onPress={() => updateField('businessType', _type)}>
                   <Text
                     style={[
                       styles.businessTypeText,
@@ -255,7 +255,7 @@ const RestaurantProfileScreen: React.FC = () => {
             <TextInput
               style={styles.textInput}
               value={formData.phone}
-              onChangeText={value => updateField('phone', value)}
+              onChangeText={value => updateField('phone', _value)}
               placeholder="+44 20 1234 5678"
               placeholderTextColor={Colors.mediumGray}
               keyboardType="phone-pad"
@@ -267,7 +267,7 @@ const RestaurantProfileScreen: React.FC = () => {
             <TextInput
               style={styles.textInput}
               value={formData.email}
-              onChangeText={value => updateField('email', value)}
+              onChangeText={value => updateField('email', _value)}
               placeholder="restaurant@example.com"
               placeholderTextColor={Colors.mediumGray}
               keyboardType="email-address"
@@ -276,11 +276,11 @@ const RestaurantProfileScreen: React.FC = () => {
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Website (_Optional)</Text>
+            <Text style={styles.inputLabel}>Website (__Optional)</Text>
             <TextInput
               style={styles.textInput}
               value={formData.website}
-              onChangeText={value => updateField('website', value)}
+              onChangeText={value => updateField('website', _value)}
               placeholder="https://restaurant.com"
               placeholderTextColor={Colors.mediumGray}
               keyboardType="url"
@@ -298,7 +298,7 @@ const RestaurantProfileScreen: React.FC = () => {
             <TextInput
               style={styles.textInput}
               value={formData.street}
-              onChangeText={value => updateField('street', value)}
+              onChangeText={value => updateField('street', _value)}
               placeholder="123 High Street"
               placeholderTextColor={Colors.mediumGray}
             />
@@ -310,7 +310,7 @@ const RestaurantProfileScreen: React.FC = () => {
               <TextInput
                 style={styles.textInput}
                 value={formData.city}
-                onChangeText={value => updateField('city', value)}
+                onChangeText={value => updateField('city', _value)}
                 placeholder="London"
                 placeholderTextColor={Colors.mediumGray}
               />
@@ -321,7 +321,7 @@ const RestaurantProfileScreen: React.FC = () => {
               <TextInput
                 style={styles.textInput}
                 value={formData.zipCode}
-                onChangeText={value => updateField('zipCode', value)}
+                onChangeText={value => updateField('zipCode', _value)}
                 placeholder="SW1A 1AA"
                 placeholderTextColor={Colors.mediumGray}
                 autoCapitalize="characters"
@@ -365,7 +365,7 @@ const RestaurantProfileScreen: React.FC = () => {
             <TextInput
               style={styles.textInput}
               value={(formData.taxRate * 100).toString()}
-              onChangeText={value => updateField('taxRate', parseFloat(_value) / 100 || 0)}
+              onChangeText={value => updateField('taxRate', parseFloat(__value) / 100 || 0)}
               placeholder="20"
               placeholderTextColor={Colors.mediumGray}
               keyboardType="numeric"

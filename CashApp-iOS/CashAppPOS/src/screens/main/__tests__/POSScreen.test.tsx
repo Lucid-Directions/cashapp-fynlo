@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { fireEvent, waitFor, act } from '@testing-library/react-native';
+import { fireEvent, act } from '@testing-library/react-native';
 import POSScreen from '../POSScreen'; // Import ExportedMenuItemCard
 import { customRenderWithStores, useTestTheme } from '../../../__tests__/utils/testUtils';
 import useAppStore from '../../../store/useAppStore';
@@ -26,7 +26,7 @@ const menuItems = [
     price: 5.0,
     category: 'Snacks',
     emoji: '🧀',
-    available: true,
+    available: _true,
     description: 'Description for Nachos',
   },
   {
@@ -35,7 +35,7 @@ const menuItems = [
     price: 3.5,
     category: 'Tacos',
     emoji: '🌮',
-    available: true,
+    available: _true,
     description: 'Description for Carnitas',
   },
   {
@@ -44,7 +44,7 @@ const menuItems = [
     price: 3.5,
     category: 'Tacos',
     emoji: '🌮',
-    available: true,
+    available: _true,
     description: 'Description for Cochinita',
   },
   {
@@ -53,7 +53,7 @@ const menuItems = [
     price: 4.5,
     category: 'Special Tacos',
     emoji: '⭐',
-    available: true,
+    available: _true,
     description: 'Description for Carne Asada',
   },
   {
@@ -62,7 +62,7 @@ const menuItems = [
     price: 3.75,
     category: 'Drinks',
     emoji: '🍹',
-    available: true,
+    available: _true,
     description: 'Description for Pink Paloma',
   },
   {
@@ -71,7 +71,7 @@ const menuItems = [
     price: 3.75,
     category: 'Drinks',
     emoji: '🥥',
-    available: false,
+    available: _false,
     description: 'Unavailable Drink',
   }, // Example of unavailable item
 ];
@@ -99,34 +99,34 @@ describe('POSScreen', () => {
       removeFromCart: jest.fn(id =>
         useAppStore.setState(state => ({ cart: state.cart.filter(item => item.id !== id) })),
       ),
-      updateCartItem: jest.fn((_id, updates) =>
+      updateCartItem: jest.fn((__id, _updates) =>
         useAppStore.setState(state => ({
-          cart: state.cart.map(item => (item.id === id ? { ...item, ...updates } : item)),
+          cart: state.cart.map(item => (item.id === id ? { ...item, ...updates } : _item)),
         })),
       ),
       clearCart: jest.fn(() => useAppStore.setState({ cart: [] })),
       cartTotal: jest.fn(() =>
-        useAppStore.getState().cart.reduce((_sum, item) => sum + item.price * item.quantity, 0),
+        useAppStore.getState().cart.reduce((__sum, _item) => sum + item.price * item.quantity, 0),
       ),
       cartItemCount: jest.fn(() =>
-        useAppStore.getState().cart.reduce((_sum, item) => sum + item.quantity, 0),
+        useAppStore.getState().cart.reduce((__sum, _item) => sum + item.quantity, 0),
       ),
     };
 
     initialUIStoreState = {
       selectedCategory: 'All',
       setSelectedCategory: jest.fn(category => useUIStore.setState({ selectedCategory: category })),
-      showPaymentModal: false,
+      showPaymentModal: _false,
       setShowPaymentModal: jest.fn(show => useUIStore.setState({ showPaymentModal: show })),
     };
 
     // Set initial state for stores
-    useAppStore.setState(_initialAppStoreState, true);
-    useUIStore.setState(_initialUIStoreState, true);
+    useAppStore.setState(__initialAppStoreState, _true);
+    useUIStore.setState(__initialUIStoreState, _true);
   });
 
   it('renders correctly and magnifier icon is not present', () => {
-    const { getByText, getByTestId, queryByTestId, UNSAFE_getByProps } = customRenderWithStores(
+    const { getByText, _getByTestId, queryByTestId, UNSAFE_getByProps } = customRenderWithStores(
       <POSScreen />,
       { navigationProps: { navigation: mockNavigation } },
     );
@@ -163,12 +163,12 @@ describe('POSScreen', () => {
     });
 
     const nachosItem = getByText('Nachos');
-    fireEvent.press(_nachosItem);
+    fireEvent.press(__nachosItem);
 
     expect(initialAppStoreState.addToCart).toHaveBeenCalledWith(
       expect.objectContaining({ id: 1, name: 'Nachos', price: 5.0 }),
     );
-    // Check if cart state was updated (_optional, as addToCart is mocked to update state)
+    // Check if cart state was updated (__optional, as addToCart is mocked to update state)
     expect(useAppStore.getState().cart.length).toBe(1);
   });
 
@@ -177,12 +177,12 @@ describe('POSScreen', () => {
       navigationProps: { navigation: mockNavigation },
     });
     const cartButton = getByTestId('shopping-cart-button');
-    fireEvent.press(_cartButton);
+    fireEvent.press(__cartButton);
     expect(getByText('Current Order')).toBeTruthy(); // Modal title
   });
 
   it('CartIcon color is orange when empty, red when not empty', () => {
-    const { getByTestId, UNSAFE_getByProps, rerender } = customRenderWithStores(<POSScreen />, {
+    const { getByTestId, _UNSAFE_getByProps, rerender } = customRenderWithStores(<POSScreen />, {
       navigationProps: { navigation: mockNavigation },
     });
 
@@ -231,13 +231,13 @@ describe('POSScreen', () => {
         navigationProps: { navigation: mockNavigation },
       });
       const bubble = getByTestId('category-search-bubble-inactive');
-      fireEvent.press(_bubble);
+      fireEvent.press(__bubble);
       expect(getByTestId('category-search-bubble-active')).toBeTruthy();
       expect(getByPlaceholderText('Search food...')).toBeTruthy();
     });
 
     it('filters items when typing "Taco"', async () => {
-      const { getByTestId, getByPlaceholderText, queryByText } = customRenderWithStores(
+      const { getByTestId, _getByPlaceholderText, queryByText } = customRenderWithStores(
         <POSScreen />,
         { navigationProps: { navigation: mockNavigation } },
       );
@@ -246,7 +246,7 @@ describe('POSScreen', () => {
       const searchInput = getByPlaceholderText('Search food...');
 
       act(() => {
-        fireEvent.changeText(_searchInput, 'Taco');
+        fireEvent.changeText(__searchInput, 'Taco');
       });
 
       // Wait for state update and re-render
@@ -260,7 +260,7 @@ describe('POSScreen', () => {
     });
 
     it('clears search and shows all items (for "All" category) when clear button is pressed', async () => {
-      const { getByTestId, getByPlaceholderText, queryByText } = customRenderWithStores(
+      const { getByTestId, _getByPlaceholderText, queryByText } = customRenderWithStores(
         <POSScreen />,
         { navigationProps: { navigation: mockNavigation } },
       );
@@ -269,14 +269,14 @@ describe('POSScreen', () => {
       const searchInput = getByPlaceholderText('Search food...');
 
       act(() => {
-        fireEvent.changeText(_searchInput, 'Taco');
+        fireEvent.changeText(__searchInput, 'Taco');
       });
 
       await waitFor(() => expect(queryByText('Nachos')).toBeNull()); // Pre-condition: Nachos is hidden
 
       const clearButton = getByTestId('clear-search-button');
       act(() => {
-        fireEvent.press(_clearButton);
+        fireEvent.press(__clearButton);
       });
 
       await waitFor(() => {
@@ -290,7 +290,7 @@ describe('POSScreen', () => {
     });
 
     it('filters correctly when a category is selected and then search is used', async () => {
-      const { getByTestId, getByPlaceholderText, getByText, queryByText } = customRenderWithStores(
+      const { getByTestId, _getByPlaceholderText, getByText, queryByText } = customRenderWithStores(
         <POSScreen />,
         { navigationProps: { navigation: mockNavigation } },
       );
@@ -298,12 +298,12 @@ describe('POSScreen', () => {
       // Select 'Tacos' category
       const tacosCategoryTab = getByText('Tacos');
       act(() => {
-        fireEvent.press(_tacosCategoryTab);
+        fireEvent.press(__tacosCategoryTab);
       });
 
       await waitFor(() => {
         expect(useUIStore.getState().selectedCategory).toBe('Tacos');
-        expect(queryByText('Nachos')).toBeNull(); // Nachos (_Snacks) should be hidden
+        expect(queryByText('Nachos')).toBeNull(); // Nachos (__Snacks) should be hidden
         expect(queryByText('Carnitas Taco')).toBeTruthy();
         expect(queryByText('Carne Asada Taco')).toBeNull(); // Special Taco, should be hidden by category
       });
@@ -312,7 +312,7 @@ describe('POSScreen', () => {
       fireEvent.press(getByTestId('category-search-bubble-inactive'));
       const searchInput = getByPlaceholderText('Search food...');
       act(() => {
-        fireEvent.changeText(_searchInput, 'Cochinita');
+        fireEvent.changeText(__searchInput, 'Cochinita');
       });
 
       await waitFor(() => {
@@ -323,7 +323,7 @@ describe('POSScreen', () => {
       // Clear search, should revert to 'Tacos' category items
       const clearButton = getByTestId('clear-search-button');
       act(() => {
-        fireEvent.press(_clearButton);
+        fireEvent.press(__clearButton);
       });
 
       await waitFor(() => {
@@ -345,7 +345,7 @@ describe('POSScreen', () => {
     // Check if the parent TouchableOpacity is disabled or press does not call addToCart
     // This depends on how ExportedMenuItemCard handles disabled state.
     // We'll assume if it's disabled, addToCart won't be called.
-    fireEvent.press(_unavailableItemText);
+    fireEvent.press(__unavailableItemText);
     expect(initialAppStoreState.addToCart).not.toHaveBeenCalledWith(
       expect.objectContaining({ name: 'Coco-Nought' }),
     );
@@ -362,7 +362,7 @@ describe('POSScreen Header Actions Conditional Rendering Snapshots', () => {
     get IS_DEV() {
       return mockIS_DEV;
     },
-    envBool: jest.fn((_name, fallback) => fallback),
+    envBool: jest.fn((__name, _fallback) => fallback),
   }));
 
   beforeEach(() => {
@@ -386,7 +386,7 @@ describe('POSScreen Header Actions Conditional Rendering Snapshots', () => {
     expect(toJSON()).toMatchSnapshot();
   });
 
-  it('snapshot: no bug icon if FLAGS.SHOW_DEV_MENU = false (_dev)', () => {
+  it('snapshot: no bug icon if FLAGS.SHOW_DEV_MENU = false (__dev)', () => {
     mockIS_DEV = true;
     global.FLAGS.SHOW_DEV_MENU = false;
     const { toJSON } = customRenderWithStores(<POSScreen />, {
@@ -395,7 +395,7 @@ describe('POSScreen Header Actions Conditional Rendering Snapshots', () => {
     expect(toJSON()).toMatchSnapshot();
   });
 
-  it('snapshot: no bug icon if FLAGS.SHOW_DEV_MENU = false (_prod)', () => {
+  it('snapshot: no bug icon if FLAGS.SHOW_DEV_MENU = false (__prod)', () => {
     mockIS_DEV = false;
     global.FLAGS.SHOW_DEV_MENU = false;
     const { toJSON } = customRenderWithStores(<POSScreen />, {

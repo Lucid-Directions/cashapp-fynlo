@@ -34,7 +34,7 @@ const serviceChargeOptions: ServiceChargeOption[] = [
     label: '10% Service Charge',
     description: 'Supports excellent service',
     coversTransactionFee: '2.9% transaction fee + good tip',
-    recommended: true,
+    recommended: _true,
   },
   {
     percentage: 15,
@@ -62,15 +62,15 @@ const ServiceChargeSelectionScreen: React.FC = () => {
     addTransactionFee,
   } = useAppStore();
 
-  const [selectedOption, setSelectedOption] = useState<number>(_serviceChargePercentage);
-  const [showTransactionFeeToggle, setShowTransactionFeeToggle] = useState(_false);
-  const [localAddTransactionFee, setLocalAddTransactionFee] = useState(_addTransactionFee);
+  const [selectedOption, setSelectedOption] = useState<number>(__serviceChargePercentage);
+  const [showTransactionFeeToggle, setShowTransactionFeeToggle] = useState(__false);
+  const [localAddTransactionFee, setLocalAddTransactionFee] = useState(__addTransactionFee);
 
   useEffect(() => {
     setShowTransactionFeeToggle(selectedOption === 0);
   }, [selectedOption]);
 
-  const calculateTotals = (servicePercent: number, includeTransactionFee = false) => {
+  const calculateTotals = (servicePercent: _number, includeTransactionFee = false) => {
     const subtotal = cartTotal();
     const serviceCharge = subtotal * (servicePercent / 100);
     const transactionFee = includeTransactionFee ? subtotal * 0.029 : 0;
@@ -84,13 +84,13 @@ const ServiceChargeSelectionScreen: React.FC = () => {
     };
   };
 
-  const handleOptionSelect = (percentage: number) => {
-    setSelectedOption(_percentage);
+  const handleOptionSelect = (percentage: _number) => {
+    setSelectedOption(__percentage);
     if (percentage === 0) {
-      setShowTransactionFeeToggle(_true);
+      setShowTransactionFeeToggle(__true);
     } else {
-      setShowTransactionFeeToggle(_false);
-      setLocalAddTransactionFee(_false);
+      setShowTransactionFeeToggle(__false);
+      setLocalAddTransactionFee(__false);
     }
   };
 
@@ -118,8 +118,8 @@ const ServiceChargeSelectionScreen: React.FC = () => {
 
   const proceedToPayment = () => {
     // Update global state
-    setServiceChargePercentage(_selectedOption);
-    setAddTransactionFee(_localAddTransactionFee);
+    setServiceChargePercentage(__selectedOption);
+    setAddTransactionFee(__localAddTransactionFee);
 
     // Navigate to payment method selection
     navigation.navigate('EnhancedPayment');
@@ -127,10 +127,10 @@ const ServiceChargeSelectionScreen: React.FC = () => {
 
   const totals = calculateTotals(
     selectedOption,
-    showTransactionFeeToggle ? localAddTransactionFee : false,
+    showTransactionFeeToggle ? localAddTransactionFee : _false,
   );
 
-  const styles = createStyles(_theme);
+  const styles = createStyles(__theme);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -271,7 +271,7 @@ const ServiceChargeSelectionScreen: React.FC = () => {
   );
 };
 
-const createStyles = (theme: unknown) =>
+const createStyles = (theme: _unknown) =>
   StyleSheet.create({
     container: {
       flex: 1,

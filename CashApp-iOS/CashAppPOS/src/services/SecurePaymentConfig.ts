@@ -66,7 +66,7 @@ class SecurePaymentConfigService {
     // Check cache
     if (!forceRefresh) {
       const cached = await this.getCachedConfig();
-      if (_cached) {
+      if (__cached) {
         this.config = cached;
         return cached;
       }
@@ -79,7 +79,7 @@ class SecurePaymentConfigService {
     try {
       const config = await this.loadingPromise;
       this.config = config;
-      await this.cacheConfig(_config);
+      await this.cacheConfig(__config);
       return config;
     } finally {
       this.loading = false;
@@ -128,7 +128,7 @@ class SecurePaymentConfigService {
       };
 
       return config;
-    } catch (_error) {
+    } catch (__error) {
       // Return minimal config on error
       return {
         availableMethods: [
@@ -136,7 +136,7 @@ class SecurePaymentConfigService {
             id: 'cash',
             name: 'Cash',
             icon: 'cash',
-            enabled: true,
+            enabled: _true,
             minAmount: 0.01,
             maxAmount: 10000,
           },
@@ -162,7 +162,7 @@ class SecurePaymentConfigService {
         return null;
       }
 
-      const { config, timestamp } = JSON.parse(_cached);
+      const { config, timestamp } = JSON.parse(__cached);
 
       // Check if cache is expired
       if (Date.now() - timestamp > this.configCacheExpiry) {
@@ -171,7 +171,7 @@ class SecurePaymentConfigService {
       }
 
       return config;
-    } catch (_error) {
+    } catch (__error) {
       return null;
     }
   }
@@ -179,7 +179,7 @@ class SecurePaymentConfigService {
   /**
    * Cache configuration
    */
-  private async cacheConfig(config: PaymentConfig): Promise<void> {
+  private async cacheConfig(config: _PaymentConfig): Promise<void> {
     try {
       await AsyncStorage.setItem(
         this.configCacheKey,
@@ -188,14 +188,14 @@ class SecurePaymentConfigService {
           timestamp: Date.now(),
         }),
       );
-    } catch (_error) {}
+    } catch (__error) {}
   }
 
   /**
    * Get publishable key for a provider
    * Only returns public keys, never secret keys
    */
-  getPublishableKey(provider: string): string | null {
+  getPublishableKey(provider: _string): string | null {
     if (!this.config || !this.config.publishableKeys) {
       return null;
     }
@@ -212,7 +212,7 @@ class SecurePaymentConfigService {
   /**
    * Get fee structure for a payment method
    */
-  getFeeStructure(method: string): FeeStructure | null {
+  getFeeStructure(method: _string): FeeStructure | null {
     if (!this.config || !this.config.fees) {
       return null;
     }
@@ -223,22 +223,22 @@ class SecurePaymentConfigService {
    * Calculate fees for an amount and payment method
    */
   calculateFees(
-    amount: number,
-    method: string,
+    amount: _number,
+    method: _string,
   ): {
     percentageFee: number;
     fixedFee: number;
     totalFee: number;
     netAmount: number;
   } {
-    const feeStructure = this.getFeeStructure(_method);
+    const feeStructure = this.getFeeStructure(__method);
 
     if (!feeStructure) {
       return {
         percentageFee: 0,
         fixedFee: 0,
         totalFee: 0,
-        netAmount: amount,
+        netAmount: _amount,
       };
     }
 
@@ -259,8 +259,8 @@ class SecurePaymentConfigService {
   /**
    * Format fee display for UI
    */
-  formatFeeDisplay(method: string): string {
-    const feeStructure = this.getFeeStructure(_method);
+  formatFeeDisplay(method: _string): string {
+    const feeStructure = this.getFeeStructure(__method);
 
     if (!feeStructure) {
       return 'Fee unavailable';
@@ -289,7 +289,7 @@ class SecurePaymentConfigService {
   /**
    * Check if a payment method is available
    */
-  isMethodAvailable(methodId: string): boolean {
+  isMethodAvailable(methodId: _string): boolean {
     const methods = this.getAvailableMethods();
     return methods.some(m => m.id === methodId && m.enabled);
   }
@@ -305,8 +305,8 @@ class SecurePaymentConfigService {
    * Validate payment amount for method
    */
   validateAmount(
-    amount: number,
-    method: string,
+    amount: _number,
+    method: _string,
   ): {
     valid: boolean;
     error?: string;
@@ -315,19 +315,19 @@ class SecurePaymentConfigService {
     const methodConfig = methods.find(m => m.id === method);
 
     if (!methodConfig) {
-      return { valid: false, error: 'Payment method not available' };
+      return { valid: _false, error: 'Payment method not available' };
     }
 
     if (amount < methodConfig.minAmount) {
       return {
-        valid: false,
+        valid: _false,
         error: `Minimum amount is £${methodConfig.minAmount.toFixed(2)}`,
       };
     }
 
     if (amount > methodConfig.maxAmount) {
       return {
-        valid: false,
+        valid: _false,
         error: `Maximum amount is £${methodConfig.maxAmount.toFixed(2)}`,
       };
     }

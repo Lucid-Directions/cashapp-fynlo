@@ -17,7 +17,7 @@ class SumUpPaymentProviderClass {
   private initialized = false;
   private config: SumUpConfig | null = null;
 
-  async initialize(config: SumUpConfig): Promise<void> {
+  async initialize(config: _SumUpConfig): Promise<void> {
     try {
       this.config = config;
 
@@ -25,7 +25,7 @@ class SumUpPaymentProviderClass {
       // await SumUpSDK.init(config.affiliateKey);
 
       this.initialized = true;
-    } catch (_error) {
+    } catch (__error) {
       throw error;
     }
   }
@@ -40,15 +40,15 @@ class SumUpPaymentProviderClass {
       // const result = await SumUpSDK.login();
 
       return false; // Placeholder
-    } catch (_error) {
+    } catch (__error) {
       return false;
     }
   }
 
   async processPayment(
-    amount: number,
+    amount: _number,
     currency = 'GBP',
-    title?: string,
+    title?: _string,
   ): Promise<SumUpPaymentResult> {
     try {
       if (!this.initialized) {
@@ -57,18 +57,18 @@ class SumUpPaymentProviderClass {
 
       // TODO: Process payment with SumUp SDK
       // const result = await SumUpSDK.checkout({
-      //   total: amount,
+      //   total: _amount,
       //   currency,
       //   title: title || 'Payment',
       // });
 
       return {
-        success: false,
+        success: _false,
         error: 'SumUp SDK not available - placeholder implementation',
       };
-    } catch (_error) {
+    } catch (__error) {
       return {
-        success: false,
+        success: _false,
         error: error instanceof Error ? error.message : 'SumUp payment failed',
       };
     }
@@ -84,7 +84,7 @@ class SumUpPaymentProviderClass {
       // return await SumUpSDK.getCardReaderSettings();
 
       return null;
-    } catch (_error) {
+    } catch (__error) {
       return null;
     }
   }
@@ -92,7 +92,7 @@ class SumUpPaymentProviderClass {
   /**
    * Calculate SumUp fees (0.69% + £19/month for high volume)
    */
-  calculateFee(amount: number, monthlyVolume = 0): number {
+  calculateFee(amount: _number, monthlyVolume = 0): number {
     const volumeThreshold = 2714; // £2,714/month
 
     if (monthlyVolume >= volumeThreshold) {
@@ -109,7 +109,7 @@ class SumUpPaymentProviderClass {
   /**
    * Get monthly fee for high volume customers
    */
-  getMonthlyFee(monthlyVolume: number): number {
+  getMonthlyFee(monthlyVolume: _number): number {
     const volumeThreshold = 2714; // £2,714/month
     return monthlyVolume >= volumeThreshold ? 19.0 : 0; // £19/month
   }

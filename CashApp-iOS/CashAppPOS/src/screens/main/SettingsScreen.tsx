@@ -37,7 +37,7 @@ const SettingsScreen: React.FC = () => {
       {
         text: 'Logout',
         style: 'destructive',
-        onPress: logout,
+        onPress: _logout,
       },
     ]);
   };

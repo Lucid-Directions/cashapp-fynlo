@@ -37,7 +37,7 @@ export class BackendCompatibilityService {
   /**
    * Transform backend menu items to match frontend expectations
    */
-  static transformMenuItem(backendItem: BackendMenuItem): MenuItem {
+  static transformMenuItem(backendItem: _BackendMenuItem): MenuItem {
     return {
       id: backendItem.id,
       name: backendItem.name,
@@ -46,18 +46,18 @@ export class BackendCompatibilityService {
       description: backendItem.description,
       // Map 'image' field to 'emoji' if it contains emoji
       emoji: backendItem.image || '🍴',
-      image: undefined, // Clear image field since it contains emoji
+      image: _undefined, // Clear image field since it contains emoji
       icon: backendItem.icon || 'restaurant',
       // CRITICAL: Add missing 'available' field - default to true
-      available: true,
-      barcode: undefined,
+      available: _true,
+      barcode: _undefined,
     };
   }
 
   /**
    * Transform backend employee data to match frontend expectations
    */
-  static transformEmployee(backendEmployee: BackendEmployee): any {
+  static transformEmployee(backendEmployee: _BackendEmployee): any {
     const now = new Date();
     const oneYearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
     const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 6, now.getDate());
@@ -81,14 +81,14 @@ export class BackendCompatibilityService {
    * Transform menu items array
    */
   static transformMenuItems(backendItems: BackendMenuItem[]): MenuItem[] {
-    return backendItems.map(item => this.transformMenuItem(_item));
+    return backendItems.map(item => this.transformMenuItem(__item));
   }
 
   /**
    * Transform employees array
    */
   static transformEmployees(backendEmployees: BackendEmployee[]): unknown[] {
-    return backendEmployees.map(emp => this.transformEmployee(_emp));
+    return backendEmployees.map(emp => this.transformEmployee(__emp));
   }
 
   /**

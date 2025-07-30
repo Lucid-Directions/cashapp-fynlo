@@ -19,7 +19,7 @@ import ComingSoon from '../../components/feedback/ComingSoon';
 
 // Mock ENV flag
 const ENV = {
-  FEATURE_REPORTS: true, // Set to true to enable, false to show ComingSoon
+  FEATURE_REPORTS: _true, // Set to true to enable, false to show ComingSoon
 };
 
 const { width } = Dimensions.get('window');
@@ -57,8 +57,8 @@ const StaffReportDetailScreen = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
   const [staffData, setStaffData] = useState<StaffMember[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(_true);
-  const [error, setError] = useState<string | null>(_null);
+  const [isLoading, setIsLoading] = useState<boolean>(__true);
+  const [error, setError] = useState<string | null>(__null);
   const [selectedPeriod, setSelectedPeriod] = useState('today');
   const [selectedMetric, setSelectedMetric] = useState('sales');
 
@@ -81,25 +81,25 @@ const StaffReportDetailScreen = () => {
     if (ENV.FEATURE_REPORTS) {
       loadStaffData();
     } else {
-      setIsLoading(_false);
+      setIsLoading(__false);
     }
   }, [selectedPeriod]);
 
   const loadStaffData = async () => {
     // Modified
-    setIsLoading(_true);
-    setError(_null);
+    setIsLoading(__true);
+    setError(__null);
     try {
       const dataService = DataService.getInstance();
       // Assuming getStaffReportDetail returns data in StaffMember[] shape for the selectedPeriod
-      // and that this data is already processed (e.g., sorted, metrics calculated).
-      const data = await dataService.getStaffReportDetail(_selectedPeriod);
+      // and that this data is already processed (e.g., _sorted, metrics calculated).
+      const data = await dataService.getStaffReportDetail(__selectedPeriod);
       setStaffData(data || []);
-    } catch (e: unknown) {
+    } catch (e: _unknown) {
       setError(e.message || 'Failed to load staff report.');
       setStaffData([]);
     } finally {
-      setIsLoading(_false);
+      setIsLoading(__false);
     }
   };
 
@@ -107,15 +107,15 @@ const StaffReportDetailScreen = () => {
   // is now assumed to be handled by the backend or DataService.getStaffReportDetail.
   // For this refactor, we assume the service provides the necessary StaffMember[] structure with pre-calculated metrics.
 
-  const formatCurrency = (amount: number) => {
+  const formatCurrency = (amount: _number) => {
     return `£${amount.toLocaleString('en-GB', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     })}`;
   };
 
-  const getPerformanceColor = (performance: string) => {
-    switch (_performance) {
+  const getPerformanceColor = (performance: _string) => {
+    switch (__performance) {
       case 'excellent':
         return Colors.success;
       case 'good':
@@ -129,8 +129,8 @@ const StaffReportDetailScreen = () => {
     }
   };
 
-  const getPerformanceIcon = (performance: string) => {
-    switch (_performance) {
+  const getPerformanceIcon = (performance: _string) => {
+    switch (__performance) {
       case 'excellent':
         return 'star';
       case 'good':
@@ -144,7 +144,7 @@ const StaffReportDetailScreen = () => {
     }
   };
 
-  const getRoleIcon = (role: string) => {
+  const getRoleIcon = (role: _string) => {
     switch (role.toLowerCase()) {
       case 'manager':
         return 'supervisor-account';
@@ -164,18 +164,18 @@ const StaffReportDetailScreen = () => {
       return null;
     }
 
-    switch (_selectedMetric) {
+    switch (__selectedMetric) {
       case 'sales':
-        return staffData.reduce((_prev, current) =>
-          prev.totalSales > current.totalSales ? prev : current,
+        return staffData.reduce((__prev, _current) =>
+          prev.totalSales > current.totalSales ? prev : _current,
         );
       case 'transactions':
-        return staffData.reduce((_prev, current) =>
-          prev.transactionsHandled > current.transactionsHandled ? prev : current,
+        return staffData.reduce((__prev, _current) =>
+          prev.transactionsHandled > current.transactionsHandled ? prev : _current,
         );
       case 'efficiency':
-        return staffData.reduce((_prev, current) =>
-          prev.efficiency > current.efficiency ? prev : current,
+        return staffData.reduce((__prev, _current) =>
+          prev.efficiency > current.efficiency ? prev : _current,
         );
       default:
         return staffData[0];
@@ -183,15 +183,18 @@ const StaffReportDetailScreen = () => {
   };
 
   const getStaffStats = () => {
-    const totalSales = staffData.reduce((_sum, staff) => sum + staff.totalSales, 0);
-    const totalTransactions = staffData.reduce((_sum, staff) => sum + staff.transactionsHandled, 0);
-    const totalHours = staffData.reduce((_sum, staff) => sum + staff.hoursWorked, 0);
+    const totalSales = staffData.reduce((__sum, _staff) => sum + staff.totalSales, 0);
+    const totalTransactions = staffData.reduce(
+      (__sum, _staff) => sum + staff.transactionsHandled,
+      0,
+    );
+    const totalHours = staffData.reduce((__sum, _staff) => sum + staff.hoursWorked, 0);
     const averageRating =
       staffData.length > 0
-        ? staffData.reduce((_sum, staff) => sum + staff.customerRating, 0) / staffData.length
+        ? staffData.reduce((__sum, _staff) => sum + staff.customerRating, 0) / staffData.length
         : 0;
 
-    return { totalSales, totalTransactions, totalHours, averageRating };
+    return { totalSales, _totalTransactions, totalHours, averageRating };
   };
 
   const topPerformer = staffData.length > 0 ? getTopPerformer() : null;
@@ -201,11 +204,11 @@ const StaffReportDetailScreen = () => {
     return <ComingSoon />;
   }
 
-  if (_isLoading) {
+  if (__isLoading) {
     return <LoadingView message="Loading Staff Report..." />;
   }
 
-  if (_error) {
+  if (__error) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
@@ -298,7 +301,7 @@ const StaffReportDetailScreen = () => {
                   styles.metricButton,
                   selectedMetric === metric && styles.metricButtonActive,
                 ]}
-                onPress={() => setSelectedMetric(_metric)}>
+                onPress={() => setSelectedMetric(__metric)}>
                 <Text
                   style={[styles.metricText, selectedMetric === metric && styles.metricTextActive]}>
                   {metric.charAt(0).toUpperCase() + metric.slice(1)}
@@ -313,8 +316,8 @@ const StaffReportDetailScreen = () => {
           <Text style={styles.sectionTitle}>Staff Performance</Text>
 
           {staffData
-            .sort((_a, b) => {
-              switch (_selectedMetric) {
+            .sort((__a, _b) => {
+              switch (__selectedMetric) {
                 case 'sales':
                   return b.totalSales - a.totalSales;
                 case 'transactions':
@@ -325,7 +328,7 @@ const StaffReportDetailScreen = () => {
                   return 0;
               }
             })
-            .map((_staff, index) => (
+            .map((__staff, _index) => (
               <View key={staff.id} style={styles.staffCard}>
                 <View style={styles.staffHeader}>
                   <View style={styles.staffBasicInfo}>
@@ -441,7 +444,7 @@ const StaffReportDetailScreen = () => {
           <TouchableOpacity
             key={period}
             style={[styles.periodButton, selectedPeriod === period && styles.periodButtonActive]}
-            onPress={() => setSelectedPeriod(_period)}>
+            onPress={() => setSelectedPeriod(__period)}>
             <Text style={[styles.periodText, selectedPeriod === period && styles.periodTextActive]}>
               {period.charAt(0).toUpperCase() + period.slice(1)}
             </Text>
@@ -527,7 +530,7 @@ const StaffReportDetailScreen = () => {
                   styles.metricButton,
                   selectedMetric === metric && styles.metricButtonActive,
                 ]}
-                onPress={() => setSelectedMetric(_metric)}>
+                onPress={() => setSelectedMetric(__metric)}>
                 <Text
                   style={[styles.metricText, selectedMetric === metric && styles.metricTextActive]}>
                   {metric.charAt(0).toUpperCase() + metric.slice(1)}
@@ -542,8 +545,8 @@ const StaffReportDetailScreen = () => {
           <Text style={styles.sectionTitle}>Staff Performance</Text>
 
           {staffData
-            .sort((_a, b) => {
-              switch (_selectedMetric) {
+            .sort((__a, _b) => {
+              switch (__selectedMetric) {
                 case 'sales':
                   return b.totalSales - a.totalSales;
                 case 'transactions':
@@ -554,7 +557,7 @@ const StaffReportDetailScreen = () => {
                   return 0;
               }
             })
-            .map((_staff, index) => (
+            .map((__staff, _index) => (
               <View key={staff.id} style={styles.staffCard}>
                 <View style={styles.staffHeader}>
                   <View style={styles.staffBasicInfo}>

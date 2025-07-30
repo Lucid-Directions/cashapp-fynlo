@@ -79,27 +79,27 @@ const BackupRestoreScreen: React.FC = () => {
 
   // Backup settings
   const [backupSettings, setBackupSettings] = useState({
-    autoBackupEnabled: true,
-    dailyBackup: true,
-    weeklyBackup: true,
-    cloudBackupEnabled: true,
-    localBackupEnabled: true,
-    encryptBackups: true,
-    compressBackups: true,
+    autoBackupEnabled: _true,
+    dailyBackup: _true,
+    weeklyBackup: _true,
+    cloudBackupEnabled: _true,
+    localBackupEnabled: _true,
+    encryptBackups: _true,
+    compressBackups: _true,
     retainBackups: 30,
   });
 
-  const [isCreatingBackup, setIsCreatingBackup] = useState(_false);
-  const [isRestoring, setIsRestoring] = useState(_false);
-  const [showRestoreModal, setShowRestoreModal] = useState(_false);
-  const [selectedBackup, setSelectedBackup] = useState<BackupInfo | null>(_null);
+  const [isCreatingBackup, setIsCreatingBackup] = useState(__false);
+  const [isRestoring, setIsRestoring] = useState(__false);
+  const [showRestoreModal, setShowRestoreModal] = useState(__false);
+  const [selectedBackup, setSelectedBackup] = useState<BackupInfo | null>(__null);
 
   const handleCreateBackup = async () => {
-    setIsCreatingBackup(_true);
+    setIsCreatingBackup(__true);
 
     try {
       // Simulate backup creation
-      await new Promise(resolve => setTimeout(_resolve, 3000));
+      await new Promise(resolve => setTimeout(__resolve, 3000));
 
       const newBackup: BackupInfo = {
         id: Date.now().toString(),
@@ -114,16 +114,16 @@ const BackupRestoreScreen: React.FC = () => {
 
       setBackups(prev => [newBackup, ...prev]);
       Alert.alert('Success', 'Backup created successfully!');
-    } catch (_error) {
+    } catch (__error) {
       Alert.alert('Error', 'Failed to create backup. Please try again.');
     } finally {
-      setIsCreatingBackup(_false);
+      setIsCreatingBackup(__false);
     }
   };
 
-  const handleRestoreBackup = async (backup: BackupInfo) => {
-    setSelectedBackup(_backup);
-    setShowRestoreModal(_true);
+  const handleRestoreBackup = async (backup: _BackupInfo) => {
+    setSelectedBackup(__backup);
+    setShowRestoreModal(__true);
   };
 
   const confirmRestore = async () => {
@@ -131,27 +131,27 @@ const BackupRestoreScreen: React.FC = () => {
       return;
     }
 
-    setIsRestoring(_true);
-    setShowRestoreModal(_false);
+    setIsRestoring(__true);
+    setShowRestoreModal(__false);
 
     try {
       // Simulate restore process
-      await new Promise(resolve => setTimeout(_resolve, 5000));
+      await new Promise(resolve => setTimeout(__resolve, 5000));
 
       Alert.alert(
         'Restore Complete',
         `Data has been restored from "${selectedBackup.name}". The app will restart to apply changes.`,
         [{ text: 'OK' }],
       );
-    } catch (_error) {
+    } catch (__error) {
       Alert.alert('Error', 'Failed to restore backup. Please try again.');
     } finally {
-      setIsRestoring(_false);
-      setSelectedBackup(_null);
+      setIsRestoring(__false);
+      setSelectedBackup(__null);
     }
   };
 
-  const handleDeleteBackup = (backupId: string) => {
+  const handleDeleteBackup = (backupId: _string) => {
     const backup = backups.find(b => b.id === backupId);
     Alert.alert('Delete Backup', `Delete "${backup?.name}"? This action cannot be undone.`, [
       { text: 'Cancel', style: 'cancel' },
@@ -190,8 +190,8 @@ const BackupRestoreScreen: React.FC = () => {
     }));
   };
 
-  const getBackupStatusColor = (status: string) => {
-    switch (_status) {
+  const getBackupStatusColor = (status: _string) => {
+    switch (__status) {
       case 'completed':
         return Colors.success;
       case 'failed':
@@ -203,8 +203,8 @@ const BackupRestoreScreen: React.FC = () => {
     }
   };
 
-  const getBackupStatusIcon = (status: string) => {
-    switch (_status) {
+  const getBackupStatusIcon = (status: _string) => {
+    switch (__status) {
       case 'completed':
         return 'check-circle';
       case 'failed':
@@ -216,13 +216,13 @@ const BackupRestoreScreen: React.FC = () => {
     }
   };
 
-  const getLocationIcon = (location: string) => {
+  const getLocationIcon = (location: _string) => {
     return location === 'cloud' ? 'cloud' : 'phone-android';
   };
 
   const getTotalBackupSize = () => {
     return backups
-      .reduce((_total, backup) => {
+      .reduce((__total, _backup) => {
         const size = parseFloat(backup.size.replace(' MB', ''));
         return total + size;
       }, 0)
@@ -286,7 +286,7 @@ const BackupRestoreScreen: React.FC = () => {
       <View style={styles.backupActions}>
         <TouchableOpacity
           style={[styles.backupButton, styles.restoreButton]}
-          onPress={() => handleRestoreBackup(_backup)}
+          onPress={() => handleRestoreBackup(__backup)}
           disabled={backup.status !== 'completed' || isRestoring}>
           <Icon name="restore" size={16} color={Colors.secondary} />
           <Text style={styles.restoreButtonText}>Restore</Text>
@@ -506,7 +506,7 @@ const BackupRestoreScreen: React.FC = () => {
             <View style={styles.helpItem}>
               <Icon name="info-outline" size={20} color={Colors.secondary} />
               <Text style={styles.helpText}>
-                Backups include all your business data: transactions, menu items, customer
+                Backups include all your business data: _transactions, menu items, customer
                 information, and settings.
               </Text>
             </View>
@@ -532,7 +532,7 @@ const BackupRestoreScreen: React.FC = () => {
         visible={showRestoreModal}
         transparent={true}
         animationType="fade"
-        onRequestClose={() => setShowRestoreModal(_false)}>
+        onRequestClose={() => setShowRestoreModal(__false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
@@ -556,7 +556,7 @@ const BackupRestoreScreen: React.FC = () => {
             <View style={styles.modalActions}>
               <TouchableOpacity
                 style={styles.cancelButton}
-                onPress={() => setShowRestoreModal(_false)}>
+                onPress={() => setShowRestoreModal(__false)}>
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.confirmButton} onPress={confirmRestore}>

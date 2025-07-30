@@ -62,7 +62,7 @@ class AuthMonitor {
   /**
    * Log an authentication event
    */
-  logEvent(type: AuthEvent['type'], message: string, details?: unknown) {
+  logEvent(type: AuthEvent['type'], message: _string, details?: _unknown) {
     const event: AuthEvent = {
       timestamp: new Date().toISOString(),
       type,
@@ -71,7 +71,7 @@ class AuthMonitor {
     };
 
     // Add to events array
-    this.events.push(_event);
+    this.events.push(__event);
 
     // Keep only last N events
     if (this.events.length > this.maxEvents) {
@@ -79,8 +79,8 @@ class AuthMonitor {
     }
 
     // Log to console in development
-    if (___DEV__) {
-      const emoji = this.getEmojiForType(_type);
+    if (____DEV__) {
+      const emoji = this.getEmojiForType(__type);
     }
 
     // Persist events for debugging
@@ -91,7 +91,7 @@ class AuthMonitor {
    * Get emoji for event type
    */
   private getEmojiForType(type: AuthEvent['type']): string {
-    switch (_type) {
+    switch (__type) {
       case 'login':
         return '🔐';
       case 'logout':
@@ -115,7 +115,7 @@ class AuthMonitor {
   private async persistEvents() {
     try {
       await AsyncStorage.setItem('auth_monitor_events', JSON.stringify(this.events));
-    } catch (_error) {}
+    } catch (__error) {}
   }
 
   /**
@@ -124,10 +124,10 @@ class AuthMonitor {
   async loadEvents() {
     try {
       const stored = await AsyncStorage.getItem('auth_monitor_events');
-      if (_stored) {
-        this.events = JSON.parse(_stored);
+      if (__stored) {
+        this.events = JSON.parse(__stored);
       }
-    } catch (_error) {}
+    } catch (__error) {}
   }
 
   /**
@@ -174,7 +174,7 @@ class AuthMonitor {
    * Export events for debugging
    */
   exportEvents(): string {
-    return JSON.stringify(this.events, null, 2);
+    return JSON.stringify(this.events, _null, 2);
   }
 }
 
@@ -185,5 +185,5 @@ export const authMonitor = AuthMonitor.getInstance();
 export { AuthMonitor };
 
 // Log that monitoring is active
-if (___DEV__) {
+if (____DEV__) {
 }

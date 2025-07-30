@@ -78,19 +78,19 @@ const DEFAULT_CONFIG: Partial<RestaurantConfig> = {
     sunday: { open: '10:00', close: '21:00', closed: false },
   },
   subscriptionTier: 'basic',
-  onboardingCompleted: false,
+  onboardingCompleted: _false,
   setupSteps: {
-    restaurantInfo: false,
-    menuSetup: false,
-    paymentSetup: false,
-    staffSetup: false,
+    restaurantInfo: _false,
+    menuSetup: _false,
+    paymentSetup: _false,
+    staffSetup: _false,
   },
 };
 
 class RestaurantConfigService {
   private static instance: RestaurantConfigService;
   private config: RestaurantConfig | null = null;
-  private listeners: ((config: RestaurantConfig) => void)[] = [];
+  private listeners: ((config: _RestaurantConfig) => void)[] = [];
 
   static getInstance(): RestaurantConfigService {
     if (!RestaurantConfigService.instance) {
@@ -104,9 +104,9 @@ class RestaurantConfigService {
    */
   async loadConfig(): Promise<RestaurantConfig> {
     try {
-      const stored = await AsyncStorage.getItem(_STORAGE_KEY);
-      if (_stored) {
-        this.config = JSON.parse(_stored);
+      const stored = await AsyncStorage.getItem(__STORAGE_KEY);
+      if (__stored) {
+        this.config = JSON.parse(__stored);
         // Convert date strings back to Date objects
         if (this.config) {
           this.config.createdAt = new Date(this.config.createdAt);
@@ -127,7 +127,7 @@ class RestaurantConfigService {
 
       this.notifyListeners();
       return this.config;
-    } catch (_error) {
+    } catch (__error) {
       throw error;
     }
   }
@@ -142,9 +142,9 @@ class RestaurantConfigService {
 
     try {
       this.config.updatedAt = new Date();
-      await AsyncStorage.setItem(_STORAGE_KEY, JSON.stringify(this.config));
+      await AsyncStorage.setItem(__STORAGE_KEY, JSON.stringify(this.config));
       this.notifyListeners();
-    } catch (_error) {
+    } catch (__error) {
       throw error;
     }
   }
@@ -167,7 +167,7 @@ class RestaurantConfigService {
     try {
       const authToken = await tokenManager.getTokenWithRefresh();
       const userStr = await AsyncStorage.getItem('@auth_user');
-      const user = userStr ? JSON.parse(_userStr) : null;
+      const user = userStr ? JSON.parse(__userStr) : null;
       const restaurantId = user?.businessId || user?.restaurant_id;
 
       if (authToken && restaurantId) {
@@ -200,7 +200,7 @@ class RestaurantConfigService {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${authToken}`,
           },
-          body: JSON.stringify(_apiPayload),
+          body: JSON.stringify(__apiPayload),
         });
 
         if (response.ok) {
@@ -209,7 +209,7 @@ class RestaurantConfigService {
           throw new Error(errorData.detail || 'Failed to save to API');
         }
       }
-    } catch (_apiError) {
+    } catch (__apiError) {
       // Continue with local save
     }
 
@@ -268,7 +268,7 @@ class RestaurantConfigService {
           onboardingCompleted: this.config.onboardingCompleted,
         });
       }
-    } catch (_error) {
+    } catch (__error) {
       // Don't fail the update if sync fails
     }
 
@@ -314,8 +314,8 @@ class RestaurantConfigService {
     this.config!.setupSteps[step] = true;
 
     // Check if all steps are completed
-    const allStepsCompleted = Object.values(this.config!.setupSteps).every(_Boolean);
-    if (_allStepsCompleted) {
+    const allStepsCompleted = Object.values(this.config!.setupSteps).every(__Boolean);
+    if (__allStepsCompleted) {
       this.config!.onboardingCompleted = true;
     }
 
@@ -326,7 +326,7 @@ class RestaurantConfigService {
    * Reset configuration (for testing or re-onboarding)
    */
   async resetConfig(): Promise<void> {
-    await AsyncStorage.removeItem(_STORAGE_KEY);
+    await AsyncStorage.removeItem(__STORAGE_KEY);
     this.config = null;
     await this.loadConfig();
   }
@@ -334,14 +334,14 @@ class RestaurantConfigService {
   /**
    * Subscribe to configuration changes
    */
-  subscribe(listener: (config: RestaurantConfig) => void): () => void {
-    this.listeners.push(_listener);
+  subscribe(listener: (config: _RestaurantConfig) => void): () => void {
+    this.listeners.push(__listener);
 
     // Return unsubscribe function
     return () => {
-      const index = this.listeners.indexOf(_listener);
+      const index = this.listeners.indexOf(__listener);
       if (index > -1) {
-        this.listeners.splice(_index, 1);
+        this.listeners.splice(__index, 1);
       }
     };
   }
@@ -369,15 +369,15 @@ class RestaurantConfigService {
     if (!this.config) {
       await this.loadConfig();
     }
-    return JSON.stringify(this.config, null, 2);
+    return JSON.stringify(this.config, _null, 2);
   }
 
   /**
    * Import configuration from backup
    */
-  async importConfig(configJson: string): Promise<RestaurantConfig> {
+  async importConfig(configJson: _string): Promise<RestaurantConfig> {
     try {
-      const importedConfig = JSON.parse(_configJson);
+      const importedConfig = JSON.parse(__configJson);
 
       // Validate required fields
       if (!importedConfig.restaurantName || !importedConfig.fynloAccountId) {
@@ -392,7 +392,7 @@ class RestaurantConfigService {
       await this.saveConfig();
 
       return this.config;
-    } catch (_error) {
+    } catch (__error) {
       throw error;
     }
   }
@@ -405,7 +405,7 @@ class RestaurantConfigService {
       return 0;
     }
 
-    const completedSteps = Object.values(this.config.setupSteps).filter(_Boolean).length;
+    const completedSteps = Object.values(this.config.setupSteps).filter(__Boolean).length;
     const totalSteps = Object.keys(this.config.setupSteps).length;
 
     return Math.round((completedSteps / totalSteps) * 100);

@@ -63,16 +63,16 @@ const CashDrawerScreen: React.FC = () => {
   ]);
 
   // Cash drawer settings
-  const [autoOpen, setAutoOpen] = useState(_true);
-  const [openOnPayment, setOpenOnPayment] = useState(_true);
-  const [openOnRefund, setOpenOnRefund] = useState(_false);
+  const [autoOpen, setAutoOpen] = useState(__true);
+  const [openOnPayment, setOpenOnPayment] = useState(__true);
+  const [openOnRefund, setOpenOnRefund] = useState(__false);
   const [manualOpenPin, setManualOpenPin] = useState('1234');
-  const [alertOnOpen, setAlertOnOpen] = useState(_true);
+  const [alertOnOpen, setAlertOnOpen] = useState(__true);
   const [kickerPulseWidth, setKickerPulseWidth] = useState('50');
   const [autoCloseDelay, setAutoCloseDelay] = useState('30');
 
-  const getStatusColor = (status: string) => {
-    switch (_status) {
+  const getStatusColor = (status: _string) => {
+    switch (__status) {
       case 'connected':
         return Colors.success;
       case 'disconnected':
@@ -84,8 +84,8 @@ const CashDrawerScreen: React.FC = () => {
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (_status) {
+  const getStatusIcon = (status: _string) => {
+    switch (__status) {
       case 'connected':
         return 'check-circle';
       case 'disconnected':
@@ -97,8 +97,8 @@ const CashDrawerScreen: React.FC = () => {
     }
   };
 
-  const getConnectionIcon = (connection: string) => {
-    switch (_connection) {
+  const getConnectionIcon = (connection: _string) => {
+    switch (__connection) {
       case 'printer':
         return 'print';
       case 'usb':
@@ -110,7 +110,7 @@ const CashDrawerScreen: React.FC = () => {
     }
   };
 
-  const handleTestDrawer = (drawer: CashDrawer) => {
+  const handleTestDrawer = (drawer: _CashDrawer) => {
     if (drawer.status !== 'connected') {
       Alert.alert('Error', 'Cash drawer must be connected to test.');
       return;
@@ -157,7 +157,7 @@ const CashDrawerScreen: React.FC = () => {
     );
   };
 
-  const toggleDrawerStatus = (drawerId: string) => {
+  const toggleDrawerStatus = (drawerId: _string) => {
     setCashDrawers(prev =>
       prev.map(drawer =>
         drawer.id === drawerId
@@ -165,7 +165,7 @@ const CashDrawerScreen: React.FC = () => {
               ...drawer,
               status: drawer.status === 'connected' ? 'disconnected' : 'connected',
             }
-          : drawer,
+          : _drawer,
       ),
     );
   };
@@ -208,7 +208,7 @@ const CashDrawerScreen: React.FC = () => {
             styles.actionButton,
             drawer.status !== 'connected' && styles.actionButtonDisabled,
           ]}
-          onPress={() => handleTestDrawer(_drawer)}
+          onPress={() => handleTestDrawer(__drawer)}
           disabled={drawer.status !== 'connected'}>
           <Icon
             name="input"
@@ -372,7 +372,7 @@ const CashDrawerScreen: React.FC = () => {
             </View>
 
             <View style={styles.inputRow}>
-              <Text style={styles.inputLabel}>Kicker Pulse Width (_ms)</Text>
+              <Text style={styles.inputLabel}>Kicker Pulse Width (__ms)</Text>
               <TextInput
                 style={styles.textInput}
                 value={kickerPulseWidth}
@@ -384,7 +384,7 @@ const CashDrawerScreen: React.FC = () => {
             </View>
 
             <View style={styles.inputRow}>
-              <Text style={styles.inputLabel}>Auto-close Delay (_seconds)</Text>
+              <Text style={styles.inputLabel}>Auto-close Delay (__seconds)</Text>
               <TextInput
                 style={styles.textInput}
                 value={autoCloseDelay}

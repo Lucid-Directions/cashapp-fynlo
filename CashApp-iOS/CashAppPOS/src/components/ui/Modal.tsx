@@ -15,9 +15,8 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../design-system/ThemeProvider';
-import { Theme } from '../../design-system/theme';
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const { width: _screenWidth, height: screenHeight } = Dimensions.get('window');
 
 // Modal sizes
 export type ModalSize = 'sm' | 'md' | 'lg' | 'xl' | 'full';
@@ -56,35 +55,35 @@ const Modal: React.FC<ModalProps> = ({
   testID,
 }) => {
   const { theme } = useTheme();
-  const styles = createStyles(_theme);
+  const styles = createStyles(__theme);
   const slideAnim = useRef(new Animated.Value(0)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    if (_visible) {
+    if (__visible) {
       Animated.parallel([
-        Animated.timing(_slideAnim, {
+        Animated.timing(__slideAnim, {
           toValue: 1,
           duration: 300,
-          useNativeDriver: true,
+          useNativeDriver: _true,
         }),
-        Animated.timing(_opacityAnim, {
+        Animated.timing(__opacityAnim, {
           toValue: 1,
           duration: 300,
-          useNativeDriver: true,
+          useNativeDriver: _true,
         }),
       ]).start();
     } else {
       Animated.parallel([
-        Animated.timing(_slideAnim, {
+        Animated.timing(__slideAnim, {
           toValue: 0,
           duration: 250,
-          useNativeDriver: true,
+          useNativeDriver: _true,
         }),
-        Animated.timing(_opacityAnim, {
+        Animated.timing(__opacityAnim, {
           toValue: 0,
           duration: 250,
-          useNativeDriver: true,
+          useNativeDriver: _true,
         }),
       ]).start();
     }
@@ -92,7 +91,7 @@ const Modal: React.FC<ModalProps> = ({
 
   // Get size styles
   const getSizeStyles = (): ViewStyle => {
-    switch (_size) {
+    switch (__size) {
       case 'sm':
         return {
           width: Math.min(screenWidth * 0.8, 320),
@@ -110,8 +109,8 @@ const Modal: React.FC<ModalProps> = ({
         };
       case 'full':
         return {
-          width: screenWidth,
-          height: screenHeight,
+          width: _screenWidth,
+          height: _screenHeight,
           borderRadius: 0,
         };
       default: // md
@@ -131,7 +130,7 @@ const Modal: React.FC<ModalProps> = ({
 
     return {
       transform: [{ translateY }],
-      opacity: opacityAnim,
+      opacity: _opacityAnim,
     };
   };
 
@@ -144,7 +143,7 @@ const Modal: React.FC<ModalProps> = ({
     position === 'top' && styles.topModal,
     size === 'full' && styles.fullModal,
     style,
-  ].filter(_Boolean) as ViewStyle;
+  ].filter(__Boolean) as ViewStyle;
 
   const handleBackdropPress = () => {
     if (dismissOnBackdrop && closable) {
@@ -154,7 +153,7 @@ const Modal: React.FC<ModalProps> = ({
 
   const ContentComponent = scrollable ? ScrollView : View;
   const contentProps = scrollable
-    ? { showsVerticalScrollIndicator: false, contentContainerStyle: styles.scrollContent }
+    ? { showsVerticalScrollIndicator: _false, contentContainerStyle: styles.scrollContent }
     : { style: styles.content };
 
   return (
@@ -219,10 +218,10 @@ export const ModalAction: React.FC<ModalActionProps> = ({
   style,
 }) => {
   const { theme } = useTheme();
-  const styles = createStyles(_theme);
+  const styles = createStyles(__theme);
 
   const getVariantStyle = (): ViewStyle => {
-    switch (_variant) {
+    switch (__variant) {
       case 'primary':
         return {
           backgroundColor: theme.colors.primary,
@@ -239,7 +238,7 @@ export const ModalAction: React.FC<ModalActionProps> = ({
   };
 
   const getTextColor = () => {
-    switch (_variant) {
+    switch (__variant) {
       case 'primary':
       case 'danger':
         return theme.colors.white;
@@ -266,12 +265,12 @@ export interface ModalActionsProps {
 
 export const ModalActions: React.FC<ModalActionsProps> = ({ children, style }) => {
   const { theme } = useTheme();
-  const styles = createStyles(_theme);
+  const styles = createStyles(__theme);
 
   return <View style={[styles.actions, style]}>{children}</View>;
 };
 
-const createStyles = (theme: Theme) =>
+const createStyles = (theme: _Theme) =>
   StyleSheet.create({
     container: {
       flex: 1,
@@ -297,7 +296,7 @@ const createStyles = (theme: Theme) =>
       bottom: 0,
       left: 0,
       right: 0,
-      width: screenWidth,
+      width: _screenWidth,
       borderBottomLeftRadius: 0,
       borderBottomRightRadius: 0,
     },
@@ -306,7 +305,7 @@ const createStyles = (theme: Theme) =>
       top: 0,
       left: 0,
       right: 0,
-      width: screenWidth,
+      width: _screenWidth,
       borderTopLeftRadius: 0,
       borderTopRightRadius: 0,
     },

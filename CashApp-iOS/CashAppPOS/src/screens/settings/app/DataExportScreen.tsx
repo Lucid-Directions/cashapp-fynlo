@@ -57,23 +57,23 @@ const DataExportScreen: React.FC = () => {
   const [selectedDataTypes, setSelectedDataTypes] = useState<string[]>([]);
   const [selectedFormat, setSelectedFormat] = useState<'csv' | 'pdf' | 'excel' | 'json'>('csv');
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
-  const [isExporting, setIsExporting] = useState(_false);
-  const [showTemplateModal, setShowTemplateModal] = useState(_false);
-  const [showHistoryModal, setShowHistoryModal] = useState(_false);
+  const [isExporting, setIsExporting] = useState(__false);
+  const [showTemplateModal, setShowTemplateModal] = useState(__false);
+  const [showHistoryModal, setShowHistoryModal] = useState(__false);
 
   const [exportSettings, setExportSettings] = useState({
-    includeImages: false,
-    compressFiles: true,
-    encryptData: true,
-    includeMetadata: true,
-    anonymizeCustomers: false,
+    includeImages: _false,
+    compressFiles: _true,
+    encryptData: _true,
+    includeMetadata: _true,
+    anonymizeCustomers: _false,
   });
 
   const dataTypes = [
     {
       id: 'transactions',
       name: 'Transactions',
-      description: 'Sales, refunds, and payment data',
+      description: 'Sales, _refunds, and payment data',
       icon: 'receipt',
     },
     {
@@ -85,7 +85,7 @@ const DataExportScreen: React.FC = () => {
     {
       id: 'menu',
       name: 'Menu Items',
-      description: 'Products, categories, and pricing',
+      description: 'Products, _categories, and pricing',
       icon: 'restaurant-menu',
     },
     {
@@ -127,7 +127,7 @@ const DataExportScreen: React.FC = () => {
       description: 'Transactions and payment summary for daily reporting',
       dataTypes: ['transactions'],
       format: 'pdf',
-      isCustom: false,
+      isCustom: _false,
     },
     {
       id: 'customer-backup',
@@ -135,7 +135,7 @@ const DataExportScreen: React.FC = () => {
       description: 'Complete customer database with purchase history',
       dataTypes: ['customers', 'transactions'],
       format: 'csv',
-      isCustom: false,
+      isCustom: _false,
     },
     {
       id: 'full-backup',
@@ -143,7 +143,7 @@ const DataExportScreen: React.FC = () => {
       description: 'All business data for migration or backup purposes',
       dataTypes: ['transactions', 'customers', 'menu', 'employees', 'inventory', 'settings'],
       format: 'json',
-      isCustom: false,
+      isCustom: _false,
     },
     {
       id: 'tax-report',
@@ -151,7 +151,7 @@ const DataExportScreen: React.FC = () => {
       description: 'Financial data formatted for tax preparation',
       dataTypes: ['transactions', 'customers'],
       format: 'excel',
-      isCustom: false,
+      isCustom: _false,
     },
   ];
 
@@ -188,16 +188,16 @@ const DataExportScreen: React.FC = () => {
     },
   ];
 
-  const handleDataTypeToggle = (dataTypeId: string) => {
+  const handleDataTypeToggle = (dataTypeId: _string) => {
     setSelectedDataTypes(prev =>
-      prev.includes(_dataTypeId) ? prev.filter(id => id !== dataTypeId) : [...prev, dataTypeId],
+      prev.includes(__dataTypeId) ? prev.filter(id => id !== dataTypeId) : [...prev, dataTypeId],
     );
   };
 
-  const handleSelectTemplate = (template: ExportTemplate) => {
+  const handleSelectTemplate = (template: _ExportTemplate) => {
     setSelectedDataTypes(template.dataTypes);
     setSelectedFormat(template.format);
-    setShowTemplateModal(_false);
+    setShowTemplateModal(__false);
     Alert.alert(
       'Template Applied',
       `"${template.name}" template has been applied to your export settings.`,
@@ -210,11 +210,11 @@ const DataExportScreen: React.FC = () => {
       return;
     }
 
-    setIsExporting(_true);
+    setIsExporting(__true);
 
     try {
       // Simulate export process
-      await new Promise(resolve => setTimeout(_resolve, 3000));
+      await new Promise(resolve => setTimeout(__resolve, 3000));
 
       const dataTypeNames = selectedDataTypes
         .map(id => dataTypes.find(dt => dt.id === id)?.name)
@@ -229,14 +229,14 @@ const DataExportScreen: React.FC = () => {
       // Reset selections
       setSelectedDataTypes([]);
       setDateRange({ start: '', end: '' });
-    } catch (_error) {
+    } catch (__error) {
       Alert.alert('Error', 'Failed to export data. Please try again.');
     } finally {
-      setIsExporting(_false);
+      setIsExporting(__false);
     }
   };
 
-  const handleDownload = (exportItem: ExportHistory) => {
+  const handleDownload = (exportItem: _ExportHistory) => {
     Alert.alert('Download', `Download "${exportItem.name}"?`, [
       { text: 'Cancel', style: 'cancel' },
       {
@@ -255,8 +255,8 @@ const DataExportScreen: React.FC = () => {
     }));
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (_status) {
+  const getStatusIcon = (status: _string) => {
+    switch (__status) {
       case 'completed':
         return 'check-circle';
       case 'failed':
@@ -268,8 +268,8 @@ const DataExportScreen: React.FC = () => {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (_status) {
+  const getStatusColor = (status: _string) => {
+    switch (__status) {
       case 'completed':
         return Colors.success;
       case 'failed':
@@ -281,7 +281,7 @@ const DataExportScreen: React.FC = () => {
     }
   };
 
-  const getFormatIcon = (format: string) => {
+  const getFormatIcon = (format: _string) => {
     switch (format.toLowerCase()) {
       case 'pdf':
         return 'picture-as-pdf';
@@ -304,7 +304,7 @@ const DataExportScreen: React.FC = () => {
           <Icon name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Data Export</Text>
-        <TouchableOpacity style={styles.historyButton} onPress={() => setShowHistoryModal(_true)}>
+        <TouchableOpacity style={styles.historyButton} onPress={() => setShowHistoryModal(__true)}>
           <Icon name="history" size={24} color={Colors.white} />
         </TouchableOpacity>
       </View>
@@ -327,7 +327,7 @@ const DataExportScreen: React.FC = () => {
             <Text style={styles.sectionTitle}>Export Templates</Text>
             <TouchableOpacity
               style={styles.viewAllButton}
-              onPress={() => setShowTemplateModal(_true)}>
+              onPress={() => setShowTemplateModal(__true)}>
               <Text style={styles.viewAllText}>View All</Text>
               <Icon name="chevron-right" size={20} color={Colors.primary} />
             </TouchableOpacity>
@@ -341,7 +341,7 @@ const DataExportScreen: React.FC = () => {
               <TouchableOpacity
                 key={template.id}
                 style={styles.templateCard}
-                onPress={() => handleSelectTemplate(_template)}>
+                onPress={() => handleSelectTemplate(__template)}>
                 <Icon name={getFormatIcon(template.format)} size={32} color={Colors.primary} />
                 <Text style={styles.templateName}>{template.name}</Text>
                 <Text style={styles.templateDescription}>{template.description}</Text>
@@ -407,7 +407,7 @@ const DataExportScreen: React.FC = () => {
                 ]}
                 onPress={() => setSelectedFormat(format as unknown)}>
                 <Icon
-                  name={getFormatIcon(_format)}
+                  name={getFormatIcon(__format)}
                   size={24}
                   color={selectedFormat === format ? Colors.white : Colors.primary}
                 />
@@ -423,9 +423,9 @@ const DataExportScreen: React.FC = () => {
           </View>
         </View>
 
-        {/* Date Range (_Optional) */}
+        {/* Date Range (__Optional) */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Date Range (_Optional)</Text>
+          <Text style={styles.sectionTitle}>Date Range (__Optional)</Text>
           <Text style={styles.sectionSubtitle}>Leave blank to export all historical data</Text>
           <View style={styles.dateRangeContainer}>
             <View style={styles.dateInputContainer}>
@@ -590,12 +590,12 @@ const DataExportScreen: React.FC = () => {
         visible={showTemplateModal}
         transparent={true}
         animationType="slide"
-        onRequestClose={() => setShowTemplateModal(_false)}>
+        onRequestClose={() => setShowTemplateModal(__false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Export Templates</Text>
-              <TouchableOpacity onPress={() => setShowTemplateModal(_false)}>
+              <TouchableOpacity onPress={() => setShowTemplateModal(__false)}>
                 <Icon name="close" size={24} color={Colors.text} />
               </TouchableOpacity>
             </View>
@@ -605,7 +605,7 @@ const DataExportScreen: React.FC = () => {
                 <TouchableOpacity
                   key={template.id}
                   style={styles.templateListItem}
-                  onPress={() => handleSelectTemplate(_template)}>
+                  onPress={() => handleSelectTemplate(__template)}>
                   <View style={styles.templateIcon}>
                     <Icon name={getFormatIcon(template.format)} size={24} color={Colors.primary} />
                   </View>
@@ -633,12 +633,12 @@ const DataExportScreen: React.FC = () => {
         visible={showHistoryModal}
         transparent={true}
         animationType="slide"
-        onRequestClose={() => setShowHistoryModal(_false)}>
+        onRequestClose={() => setShowHistoryModal(__false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Export History</Text>
-              <TouchableOpacity onPress={() => setShowHistoryModal(_false)}>
+              <TouchableOpacity onPress={() => setShowHistoryModal(__false)}>
                 <Icon name="close" size={24} color={Colors.text} />
               </TouchableOpacity>
             </View>
@@ -673,7 +673,7 @@ const DataExportScreen: React.FC = () => {
                   {exportItem.status === 'completed' && (
                     <TouchableOpacity
                       style={styles.downloadButton}
-                      onPress={() => handleDownload(_exportItem)}>
+                      onPress={() => handleDownload(__exportItem)}>
                       <Icon name="file-download" size={20} color={Colors.secondary} />
                     </TouchableOpacity>
                   )}

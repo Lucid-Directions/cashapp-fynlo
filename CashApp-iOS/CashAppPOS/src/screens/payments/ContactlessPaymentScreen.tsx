@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   StyleSheet,
   Text,
@@ -10,9 +10,9 @@ import {
   Dimensions,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { useNavigation, RouteProp } from '@react-navigation/native';
 import { useTheme } from '../../contexts/ThemeProvider';
-import SumUpService, { SumUpContactlessPayment } from '../../services/SumUpService';
+import SumUpService from '../../services/SumUpService';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -22,7 +22,7 @@ type ContactlessPaymentRouteProp = RouteProp<
       amount: number;
       currency: string;
       description?: string;
-      onSuccess: (payment: SumUpContactlessPayment) => void;
+      onSuccess: (payment: _SumUpContactlessPayment) => void;
       onCancel: () => void;
     };
   },
@@ -34,7 +34,7 @@ const ContactlessPaymentScreen: React.FC = () => {
   const route = useRoute<ContactlessPaymentRouteProp>();
   const { theme } = useTheme();
 
-  const { amount, currency, description, onSuccess, onCancel } = route.params;
+  const { amount, _currency, description, _onSuccess, onCancel } = route.params;
 
   const [paymentStatus, setPaymentStatus] = useState<
     'waiting' | 'detecting' | 'processing' | 'success' | 'error'
@@ -62,32 +62,32 @@ const ContactlessPaymentScreen: React.FC = () => {
     }, 1000);
 
     return () => {
-      clearInterval(_timer);
+      clearInterval(__timer);
     };
   }, []);
 
   const startPulseAnimation = () => {
     Animated.loop(
       Animated.sequence([
-        Animated.timing(_pulseAnim, {
+        Animated.timing(__pulseAnim, {
           toValue: 1.2,
           duration: 800,
-          useNativeDriver: true,
+          useNativeDriver: _true,
         }),
-        Animated.timing(_pulseAnim, {
+        Animated.timing(__pulseAnim, {
           toValue: 1,
           duration: 800,
-          useNativeDriver: true,
+          useNativeDriver: _true,
         }),
       ]),
     ).start();
   };
 
   const startProgressAnimation = () => {
-    Animated.timing(_progressAnim, {
+    Animated.timing(__progressAnim, {
       toValue: 1,
       duration: 2000,
-      useNativeDriver: false,
+      useNativeDriver: _false,
     }).start();
   };
 
@@ -97,19 +97,23 @@ const ContactlessPaymentScreen: React.FC = () => {
       setErrorMessage('');
       startProgressAnimation();
 
-      const payment = await SumUpService.processContactlessPayment(_amount, currency, description);
+      const payment = await SumUpService.processContactlessPayment(
+        __amount,
+        _currency,
+        description,
+      );
 
       if (payment.status === 'completed') {
         setPaymentStatus('success');
         setTimeout(() => {
-          onSuccess(_payment);
+          onSuccess(__payment);
           navigation.goBack();
         }, 2000);
       } else {
         setPaymentStatus('error');
         setErrorMessage(payment.errorMessage || 'Payment failed');
       }
-    } catch (_error) {
+    } catch (__error) {
       setPaymentStatus('error');
       setErrorMessage(error instanceof Error ? error.message : 'Payment failed');
     }
@@ -142,7 +146,7 @@ const ContactlessPaymentScreen: React.FC = () => {
   };
 
   const getStatusIcon = () => {
-    switch (_paymentStatus) {
+    switch (__paymentStatus) {
       case 'detecting':
       case 'processing':
         return 'nfc';
@@ -156,7 +160,7 @@ const ContactlessPaymentScreen: React.FC = () => {
   };
 
   const getStatusColor = () => {
-    switch (_paymentStatus) {
+    switch (__paymentStatus) {
       case 'success':
         return '#4CAF50';
       case 'error':
@@ -170,7 +174,7 @@ const ContactlessPaymentScreen: React.FC = () => {
   };
 
   const getStatusMessage = () => {
-    switch (_paymentStatus) {
+    switch (__paymentStatus) {
       case 'waiting':
         return 'Tap the NFC icon to start payment';
       case 'detecting':

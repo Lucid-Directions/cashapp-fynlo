@@ -18,11 +18,11 @@ import { useNavigation, DrawerActions } from '@react-navigation/native';
 import { DrawerNavigationProp } from '@react-navigation/drawer';
 import useAppStore from '../../store/useAppStore';
 import useUIStore from '../../store/useUIStore';
-import { MenuItem, OrderItem, DrawerParamList } from '../../types';
+import { MenuItem, DrawerParamList } from '../../types';
 // import Logo from '../../components/Logo';
 
 // Get screen dimensions
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const { width: _screenWidth, height: screenHeight } = Dimensions.get('window');
 const isTablet = screenWidth > 768;
 
 // Modern POS Color Scheme (matching screenshots)
@@ -54,9 +54,9 @@ const menuItems: MenuItem[] = [
     price: 5.0,
     category: 'Snacks',
     emoji: '🧀',
-    available: true,
+    available: _true,
     description:
-      'Homemade corn tortilla chips with black beans, tomato salsa, pico de gallo, feta, guac & coriander',
+      'Homemade corn tortilla chips with black beans, tomato salsa, pico de gallo, _feta, guac & coriander',
   },
   {
     id: 2,
@@ -64,7 +64,7 @@ const menuItems: MenuItem[] = [
     price: 5.5,
     category: 'Snacks',
     emoji: '🫓',
-    available: true,
+    available: _true,
     description:
       'Folded flour tortilla filled with mozzarella, topped with tomato salsa, feta & coriander',
   },
@@ -74,7 +74,7 @@ const menuItems: MenuItem[] = [
     price: 5.5,
     category: 'Snacks',
     emoji: '🌶️',
-    available: true,
+    available: _true,
     description:
       'Folded flour tortilla filled with chorizo & mozzarella. Topped with tomato salsa, feta & coriander',
   },
@@ -84,9 +84,9 @@ const menuItems: MenuItem[] = [
     price: 5.5,
     category: 'Snacks',
     emoji: '🐔',
-    available: true,
+    available: _true,
     description:
-      'Folded flour tortilla filled with chicken, peppers, onion & mozzarella. Topped with salsa, feta & coriander',
+      'Folded flour tortilla filled with chicken, _peppers, onion & mozzarella. Topped with salsa, feta & coriander',
   },
   {
     id: 5,
@@ -94,7 +94,7 @@ const menuItems: MenuItem[] = [
     price: 6.5,
     category: 'Snacks',
     emoji: '🥙',
-    available: true,
+    available: _true,
     description:
       'Crispy tortillas with black beans filled with chicken or any topping, served with salsa, lettuce and feta',
   },
@@ -106,8 +106,8 @@ const menuItems: MenuItem[] = [
     price: 3.5,
     category: 'Tacos',
     emoji: '🌮',
-    available: true,
-    description: 'Slow cooked pork, served with onion, coriander, salsa, guacamole & coriander',
+    available: _true,
+    description: 'Slow cooked pork, served with onion, _coriander, salsa, guacamole & coriander',
   },
   {
     id: 7,
@@ -115,7 +115,7 @@ const menuItems: MenuItem[] = [
     price: 3.5,
     category: 'Tacos',
     emoji: '🌮',
-    available: true,
+    available: _true,
     description: 'Marinated pulled pork served with pickle red onion',
   },
   {
@@ -124,7 +124,7 @@ const menuItems: MenuItem[] = [
     price: 3.5,
     category: 'Tacos',
     emoji: '🌮',
-    available: true,
+    available: _true,
     description: 'Juicy pulled beef topped with onion, guacamole & coriander',
   },
   {
@@ -133,8 +133,8 @@ const menuItems: MenuItem[] = [
     price: 3.5,
     category: 'Tacos',
     emoji: '🌮',
-    available: true,
-    description: 'Grilled chorizo with black beans, onions, salsa, coriander & guacamole',
+    available: _true,
+    description: 'Grilled chorizo with black beans, _onions, salsa, coriander & guacamole',
   },
   {
     id: 10,
@@ -142,7 +142,7 @@ const menuItems: MenuItem[] = [
     price: 3.5,
     category: 'Tacos',
     emoji: '🌮',
-    available: true,
+    available: _true,
     description:
       'Fried black pudding with beans, onion & chilli. Topped with coriander and pickled red onion',
   },
@@ -152,7 +152,7 @@ const menuItems: MenuItem[] = [
     price: 3.5,
     category: 'Tacos',
     emoji: '🌮',
-    available: true,
+    available: _true,
     description: 'Chicken, peppers & onion with black beans. Topped with salsa, guac & coriander',
   },
   {
@@ -161,7 +161,7 @@ const menuItems: MenuItem[] = [
     price: 3.5,
     category: 'Tacos',
     emoji: '🌮',
-    available: true,
+    available: _true,
     description: 'Haggis with beans, onion & chilli. Topped with coriander and pickled red onion',
   },
   {
@@ -170,7 +170,7 @@ const menuItems: MenuItem[] = [
     price: 3.5,
     category: 'Tacos',
     emoji: '🌮',
-    available: true,
+    available: _true,
     description:
       'Battered cod with guacamole & coriander. Topped with red cabbage & mango chilli salsa',
   },
@@ -180,7 +180,7 @@ const menuItems: MenuItem[] = [
     price: 3.5,
     category: 'Tacos',
     emoji: '🌮',
-    available: true,
+    available: _true,
     description: 'Crispy rolled tortillas filled with chicken, topped with salsa, lettuce and feta',
   },
   {
@@ -189,7 +189,7 @@ const menuItems: MenuItem[] = [
     price: 3.5,
     category: 'Tacos',
     emoji: '🌮',
-    available: true,
+    available: _true,
     description: 'Crispy rolled tortillas filled with potato, topped with salsa, lettuce and feta',
   },
   {
@@ -198,7 +198,7 @@ const menuItems: MenuItem[] = [
     price: 3.5,
     category: 'Tacos',
     emoji: '🌮',
-    available: true,
+    available: _true,
     description: 'Cactus, black beans & onion, topped with tomato salsa and crumbled feta',
   },
   {
@@ -207,7 +207,7 @@ const menuItems: MenuItem[] = [
     price: 3.5,
     category: 'Tacos',
     emoji: '🌮',
-    available: true,
+    available: _true,
     description: 'Black beans with fried plantain served with tomato salsa, feta & coriander',
   },
   {
@@ -216,7 +216,7 @@ const menuItems: MenuItem[] = [
     price: 3.5,
     category: 'Tacos',
     emoji: '🌮',
-    available: true,
+    available: _true,
     description:
       'Courgette & sweetcorn fried with garlic, served with tomato salsa and crumbled feta',
   },
@@ -226,7 +226,7 @@ const menuItems: MenuItem[] = [
     price: 3.5,
     category: 'Tacos',
     emoji: '🌮',
-    available: true,
+    available: _true,
     description: 'Mushrooms, peppers & onion with black beans. Topped with salsa, feta & coriander',
   },
 
@@ -237,7 +237,7 @@ const menuItems: MenuItem[] = [
     price: 4.5,
     category: 'Special Tacos',
     emoji: '⭐',
-    available: true,
+    available: _true,
     description:
       'Diced rump steak with peppers and red onion. Served on black beans, topped with chimichurri sauce & coriander',
   },
@@ -247,7 +247,7 @@ const menuItems: MenuItem[] = [
     price: 4.5,
     category: 'Special Tacos',
     emoji: '🦐',
-    available: true,
+    available: _true,
     description:
       'Prawns with chorizo, peppers and red onion. Served on black beans, topped with tomato salsa, coriander & guacamole',
   },
@@ -257,7 +257,7 @@ const menuItems: MenuItem[] = [
     price: 4.5,
     category: 'Special Tacos',
     emoji: '🐙',
-    available: true,
+    available: _true,
     description:
       'Chargrilled octopus, cooked with peppers and red onion. Served on grilled potato with garlic & coriander',
   },
@@ -269,9 +269,9 @@ const menuItems: MenuItem[] = [
     price: 8.0,
     category: 'Burritos',
     emoji: '🌯',
-    available: true,
+    available: _true,
     description:
-      'Choose any filling from the taco menu! With black beans, lettuce, pico de gallo, & guacamole. Topped with salsa, feta and coriander.',
+      'Choose any filling from the taco menu! With black beans, _lettuce, pico de gallo, & guacamole. Topped with salsa, feta and coriander.',
   },
   {
     id: 24,
@@ -279,9 +279,9 @@ const menuItems: MenuItem[] = [
     price: 10.0,
     category: 'Burritos',
     emoji: '🌯',
-    available: true,
+    available: _true,
     description:
-      'Choose any filling from the special tacos menu! With black beans, lettuce, pico de gallo, & guacamole. Topped with salsa, feta and coriander.',
+      'Choose any filling from the special tacos menu! With black beans, _lettuce, pico de gallo, & guacamole. Topped with salsa, feta and coriander.',
   },
   {
     id: 25,
@@ -289,7 +289,7 @@ const menuItems: MenuItem[] = [
     price: 1.0,
     category: 'Burritos',
     emoji: '🧀',
-    available: true,
+    available: _true,
     description: 'Add extra cheese to any burrito',
   },
 
@@ -300,7 +300,7 @@ const menuItems: MenuItem[] = [
     price: 3.5,
     category: 'Sides',
     emoji: '🍟',
-    available: true,
+    available: _true,
     description: 'Thin cut fries',
   },
   {
@@ -309,7 +309,7 @@ const menuItems: MenuItem[] = [
     price: 0.0,
     category: 'Sides',
     emoji: '🍅',
-    available: true,
+    available: _true,
     description: 'Diced tomato, onion and chilli - FREE!',
   },
   {
@@ -318,7 +318,7 @@ const menuItems: MenuItem[] = [
     price: 0.0,
     category: 'Sides',
     emoji: '🌶️',
-    available: true,
+    available: _true,
     description: 'Homemade green chili salsa - HOT! - FREE!',
   },
   {
@@ -327,7 +327,7 @@ const menuItems: MenuItem[] = [
     price: 0.0,
     category: 'Sides',
     emoji: '🍍',
-    available: true,
+    available: _true,
     description: 'Pineapple sauce with habanero chili - HOT! - FREE!',
   },
   {
@@ -336,7 +336,7 @@ const menuItems: MenuItem[] = [
     price: 0.0,
     category: 'Sides',
     emoji: '🔥',
-    available: true,
+    available: _true,
     description: 'Homemade spicy salsa made with scotch bonnet chilies - VERY HOT! - FREE!',
   },
 
@@ -347,7 +347,7 @@ const menuItems: MenuItem[] = [
     price: 3.75,
     category: 'Drinks',
     emoji: '🍹',
-    available: true,
+    available: _true,
     description:
       'An alcohol-free version of our refreshing cocktail. Tangy lime juice and grapefruit soda, with a splash of grenadine',
   },
@@ -357,9 +357,9 @@ const menuItems: MenuItem[] = [
     price: 3.75,
     category: 'Drinks',
     emoji: '🥥',
-    available: true,
+    available: _true,
     description:
-      'Coconut, pineapple juice and milk, blended into a creamy, sweet, alcohol-free treat!',
+      'Coconut, pineapple juice and milk, blended into a creamy, _sweet, alcohol-free treat!',
   },
   {
     id: 33,
@@ -367,7 +367,7 @@ const menuItems: MenuItem[] = [
     price: 3.8,
     category: 'Drinks',
     emoji: '🍺',
-    available: true,
+    available: _true,
     description: 'Mexican beer',
   },
   {
@@ -376,7 +376,7 @@ const menuItems: MenuItem[] = [
     price: 4.0,
     category: 'Drinks',
     emoji: '🍺',
-    available: true,
+    available: _true,
     description: 'Rich, full-flavoured Pilsner style Lager. Crisp and refreshing. 355ml',
   },
   {
@@ -385,7 +385,7 @@ const menuItems: MenuItem[] = [
     price: 4.0,
     category: 'Drinks',
     emoji: '🍺',
-    available: true,
+    available: _true,
     description: 'Pilsner style Lager from the Pacific Ocean city of Mazatlán. 355ml',
   },
   {
@@ -394,7 +394,7 @@ const menuItems: MenuItem[] = [
     price: 4.0,
     category: 'Drinks',
     emoji: '🍺',
-    available: true,
+    available: _true,
     description: '"Two X\'s". German brewing heritage with the spirit of Mexican traditions. 355ml',
   },
 ];
@@ -406,7 +406,7 @@ type POSScreenNavigationProp = DrawerNavigationProp<DrawerParamList>;
 const POSScreen: React.FC = () => {
   const navigation = useNavigation<POSScreenNavigationProp>();
   const [customerName, setCustomerName] = useState('');
-  const [showCartModal, setShowCartModal] = useState(_false);
+  const [showCartModal, setShowCartModal] = useState(__false);
 
   // Zustand stores
   const {
@@ -421,7 +421,7 @@ const POSScreen: React.FC = () => {
     session,
   } = useAppStore();
 
-  const { selectedCategory, setSelectedCategory, showPaymentModal, setShowPaymentModal } =
+  const { selectedCategory, _setSelectedCategory, showPaymentModal, setShowPaymentModal } =
     useUIStore();
 
   const filteredItems =
@@ -429,7 +429,7 @@ const POSScreen: React.FC = () => {
       ? menuItems
       : menuItems.filter(item => item.category === selectedCategory);
 
-  const handleAddToCart = (item: MenuItem) => {
+  const handleAddToCart = (item: _MenuItem) => {
     const orderItem: OrderItem = {
       id: item.id,
       name: item.name,
@@ -437,14 +437,14 @@ const POSScreen: React.FC = () => {
       quantity: 1,
       emoji: item.emoji,
     };
-    addToCart(_orderItem);
+    addToCart(__orderItem);
   };
 
-  const handleUpdateQuantity = (id: number, quantity: number) => {
+  const handleUpdateQuantity = (id: _number, quantity: _number) => {
     if (quantity <= 0) {
-      removeFromCart(_id);
+      removeFromCart(__id);
     } else {
-      updateCartItem(_id, { quantity });
+      updateCartItem(__id, { quantity });
     }
   };
 
@@ -460,8 +460,8 @@ const POSScreen: React.FC = () => {
           onPress: () => {
             clearCart();
             setCustomerName('');
-            setShowPaymentModal(_false);
-            setShowCartModal(_false);
+            setShowPaymentModal(__false);
+            setShowCartModal(__false);
           },
         },
       ],
@@ -471,7 +471,7 @@ const POSScreen: React.FC = () => {
   const MenuItemCard = ({ item }: { item: MenuItem }) => (
     <TouchableOpacity
       style={[styles.menuCard, !item.available && styles.menuCardDisabled]}
-      onPress={() => item.available && handleAddToCart(_item)}
+      onPress={() => item.available && handleAddToCart(__item)}
       activeOpacity={0.7}
       disabled={!item.available}>
       <View style={styles.menuItemImage}>
@@ -536,7 +536,7 @@ const POSScreen: React.FC = () => {
             onPress={() => {
               Alert.alert(
                 'Table Selection',
-                'Select order type: Dine In, Takeout, Pickup, or Delivery',
+                'Select order type: Dine In, _Takeout, Pickup, or Delivery',
                 [
                   { text: 'Dine In', onPress: () => console.log('Dine In selected') },
                   { text: 'Takeout', onPress: () => console.log('Takeout selected') },
@@ -553,7 +553,7 @@ const POSScreen: React.FC = () => {
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.headerButton, styles.cartButton]}
-            onPress={() => setShowCartModal(_true)}>
+            onPress={() => setShowCartModal(__true)}>
             <Icon name="shopping-cart" size={20} color={Colors.white} />
             {cartItemCount() > 0 && (
               <View style={styles.cartBadge}>
@@ -592,7 +592,7 @@ const POSScreen: React.FC = () => {
                   styles.categoryButton,
                   selectedCategory === category && styles.categoryButtonActive,
                 ]}
-                onPress={() => setSelectedCategory(_category)}>
+                onPress={() => setSelectedCategory(__category)}>
                 <Text
                   style={[
                     styles.categoryButtonText,
@@ -648,7 +648,7 @@ const POSScreen: React.FC = () => {
 
                 <TouchableOpacity
                   style={styles.checkoutButton}
-                  onPress={() => setShowPaymentModal(_true)}>
+                  onPress={() => setShowPaymentModal(__true)}>
                   <Text style={styles.checkoutButtonText}>Charge £{cartTotal().toFixed(2)}</Text>
                 </TouchableOpacity>
               </View>
@@ -662,7 +662,7 @@ const POSScreen: React.FC = () => {
         visible={showCartModal}
         animationType="slide"
         transparent={true}
-        onRequestClose={() => setShowCartModal(_false)}>
+        onRequestClose={() => setShowCartModal(__false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.cartModal}>
             <View style={styles.modalHeader}>
@@ -675,7 +675,7 @@ const POSScreen: React.FC = () => {
                 )}
                 <TouchableOpacity
                   style={styles.closeButton}
-                  onPress={() => setShowCartModal(_false)}>
+                  onPress={() => setShowCartModal(__false)}>
                   <Icon name="close" size={24} color={Colors.text} />
                 </TouchableOpacity>
               </View>
@@ -703,8 +703,8 @@ const POSScreen: React.FC = () => {
                   <TouchableOpacity
                     style={styles.checkoutButton}
                     onPress={() => {
-                      setShowCartModal(_false);
-                      setShowPaymentModal(_true);
+                      setShowCartModal(__false);
+                      setShowPaymentModal(__true);
                     }}>
                     <Icon name="payment" size={20} color={Colors.white} />
                     <Text style={styles.checkoutButtonText}>Process Payment</Text>
@@ -721,20 +721,20 @@ const POSScreen: React.FC = () => {
         visible={showPaymentModal}
         animationType="slide"
         transparent={true}
-        onRequestClose={() => setShowPaymentModal(_false)}>
+        onRequestClose={() => setShowPaymentModal(__false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.paymentModal}>
             <View style={styles.modalHeader}>
               <Text style={styles.paymentTitle}>Process Payment</Text>
               <TouchableOpacity
                 style={styles.closeButton}
-                onPress={() => setShowPaymentModal(_false)}>
+                onPress={() => setShowPaymentModal(__false)}>
                 <Icon name="close" size={24} color={Colors.text} />
               </TouchableOpacity>
             </View>
 
             <View style={styles.paymentSection}>
-              <Text style={styles.paymentLabel}>Customer Name (_Optional)</Text>
+              <Text style={styles.paymentLabel}>Customer Name (__Optional)</Text>
               <TextInput
                 style={styles.paymentInput}
                 value={customerName}
@@ -764,7 +764,7 @@ const POSScreen: React.FC = () => {
             <View style={styles.paymentButtons}>
               <TouchableOpacity
                 style={styles.cancelButton}
-                onPress={() => setShowPaymentModal(_false)}>
+                onPress={() => setShowPaymentModal(__false)}>
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
 

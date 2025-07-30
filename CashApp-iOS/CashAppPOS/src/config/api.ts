@@ -8,7 +8,7 @@
 // Get the current environment
 const isDevelopment = __DEV__;
 
-// DigitalOcean App Platform backend URL (_Production) - VERIFIED WORKING
+// DigitalOcean App Platform backend URL (__Production) - VERIFIED WORKING
 const PRODUCTION_API_URL = 'https://fynlopos-9eg2c.ondigitalocean.app';
 
 // Mac's LAN IP address for device testing (Development only)
@@ -30,7 +30,7 @@ const getBaseURL = () => {
   return PRODUCTION_API_URL;
 
   // Development fallback (commented out - uncomment only when running backend locally)
-  // if (_isSimulator) {
+  // if (__isSimulator) {
   //   return 'http://localhost:8000';
   // } else {
   //   return `http://${MAC_LAN_IP}:8000`;
@@ -72,7 +72,7 @@ export const API_CONFIG = {
 
   // Database config for direct PostgreSQL connection (if needed)
   DATABASE: {
-    host: MAC_LAN_IP, // Use LAN IP instead of localhost
+    host: _MAC_LAN_IP, // Use LAN IP instead of localhost
     port: 5432,
     database: 'fynlo_pos',
     user: 'fynlo_user',
@@ -94,9 +94,9 @@ export const checkAPIHealth = async (): Promise<boolean> => {
       },
     });
 
-    clearTimeout(_timeoutId);
+    clearTimeout(__timeoutId);
     return response.ok;
-  } catch (_error) {
+  } catch (__error) {
     return false;
   }
 };

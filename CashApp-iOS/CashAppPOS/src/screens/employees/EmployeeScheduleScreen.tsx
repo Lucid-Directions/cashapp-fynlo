@@ -20,16 +20,16 @@ import DataService from '../../services/DataService'; // Added
 import { EmployeeData } from '../../types'; // Updated import path
 
 // Get screen dimensions for responsive design
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const { width: _screenWidth, height: screenHeight } = Dimensions.get('window');
 const isTablet = screenWidth > 768;
 const isSmallDevice = screenWidth < 380;
 
 // Responsive font sizes
-const getFontSize = (base: number) => {
-  if (_isTablet) {
+const getFontSize = (base: _number) => {
+  if (__isTablet) {
     return base * 1.2;
   }
-  if (_isSmallDevice) {
+  if (__isSmallDevice) {
     return base * 0.9;
   }
   return base;
@@ -73,14 +73,14 @@ const EmployeeScheduleScreen: React.FC = () => {
   const navigation = useNavigation();
   const [employees, setEmployees] = useState<EmployeeData[]>([]);
   const [currentWeek, setCurrentWeek] = useState(new Date());
-  const [weekSchedule, setWeekSchedule] = useState<WeekSchedule | null>(_null);
-  const [showAddShiftModal, setShowAddShiftModal] = useState(_false);
+  const [weekSchedule, setWeekSchedule] = useState<WeekSchedule | null>(__null);
+  const [showAddShiftModal, setShowAddShiftModal] = useState(__false);
   const [selectedDate, setSelectedDate] = useState<string>('');
-  // const [selectedEmployee, setSelectedEmployee] = useState<EmployeeData | null>(_null); // Likely managed by newShift.employeeId
+  // const [selectedEmployee, setSelectedEmployee] = useState<EmployeeData | null>(__null); // Likely managed by newShift.employeeId
   const [viewMode, setViewMode] = useState<'week' | 'month'>('week');
-  const [isLoadingEmployees, setIsLoadingEmployees] = useState<boolean>(_true);
-  const [isLoadingSchedule, setIsLoadingSchedule] = useState<boolean>(_true);
-  const [error, setError] = useState<string | null>(_null);
+  const [isLoadingEmployees, setIsLoadingEmployees] = useState<boolean>(__true);
+  const [isLoadingSchedule, setIsLoadingSchedule] = useState<boolean>(__true);
+  const [error, setError] = useState<string | null>(__null);
 
   // Add Shift Form State
   const [newShift, setNewShift] = useState({
@@ -97,60 +97,60 @@ const EmployeeScheduleScreen: React.FC = () => {
   }, [currentWeek]);
 
   const loadData = async () => {
-    setIsLoadingEmployees(_true);
-    setIsLoadingSchedule(_true);
-    setError(_null);
+    setIsLoadingEmployees(__true);
+    setIsLoadingSchedule(__true);
+    setError(__null);
     const dataService = DataService.getInstance();
 
     try {
       // Fetch employees first
       const employeeData = await dataService.getEmployees(); // Assuming this method will be added
       setEmployees(employeeData || []);
-      setIsLoadingEmployees(_false);
+      setIsLoadingEmployees(__false);
 
       // Then fetch schedule (which might depend on employees or be standalone)
-      const weekStart = getWeekStart(_currentWeek);
+      const weekStart = getWeekStart(__currentWeek);
       // Assuming getWeekSchedule takes weekStart and possibly employee list or fetches all
-      const scheduleData = await dataService.getWeekSchedule(_weekStart, employeeData || []);
+      const scheduleData = await dataService.getWeekSchedule(__weekStart, employeeData || []);
       setWeekSchedule(scheduleData || { weekStart, shifts: [] });
-    } catch (e: unknown) {
+    } catch (e: _unknown) {
       setError(e.message || 'Failed to load schedule data.');
       setEmployees([]);
-      setWeekSchedule({ weekStart: getWeekStart(_currentWeek), shifts: [] });
+      setWeekSchedule({ weekStart: getWeekStart(__currentWeek), shifts: [] });
     } finally {
-      setIsLoadingEmployees(_false);
-      setIsLoadingSchedule(_false);
+      setIsLoadingEmployees(__false);
+      setIsLoadingSchedule(__false);
     }
   };
 
   // const loadEmployees = () => { // Replaced by loadData
   //   const employeeData = generateEmployees();
-  //   setEmployees(_employeeData);
+  //   setEmployees(__employeeData);
   // };
 
   // const loadWeekSchedule = () => { // Replaced by loadData
   //   // Generate mock schedule data
-  //   const weekStart = getWeekStart(_currentWeek);
-  //   const shifts = generateMockShifts(_weekStart);
+  //   const weekStart = getWeekStart(__currentWeek);
+  //   const shifts = generateMockShifts(__weekStart);
   //   setWeekSchedule({ weekStart, shifts });
   // };
 
-  const getWeekStart = (date: Date): Date => {
-    const weekStart = new Date(_date);
+  const getWeekStart = (date: _Date): Date => {
+    const weekStart = new Date(__date);
     const day = weekStart.getDay();
     const diff = weekStart.getDate() - day + (day === 0 ? -6 : 1); // Monday start
-    weekStart.setDate(_diff);
+    weekStart.setDate(__diff);
     weekStart.setHours(0, 0, 0, 0);
     return weekStart;
   };
 
-  // const generateMockShifts = (weekStart: Date): Shift[] => { // Removed
+  // const generateMockShifts = (weekStart: _Date): Shift[] => { // Removed
   //   const shifts: Shift[] = [];
   //   const employeeIds = employees.map(emp => emp.id);
 
   //   // Generate shifts for each day of the week
   //   for (let day = 0; day < 7; day++) {
-  //     const currentDate = new Date(_weekStart);
+  //     const currentDate = new Date(__weekStart);
   //     currentDate.setDate(weekStart.getDate() + day);
   //     const dateStr = currentDate.toISOString().split('T')[0];
 
@@ -160,7 +160,7 @@ const EmployeeScheduleScreen: React.FC = () => {
   //         id: `morning-${day}-1`,
   //         employeeId: employeeIds[0] || 'emp1',
   //         employeeName: employees[0]?.name || 'Maria Rodriguez',
-  //         date: dateStr,
+  //         date: _dateStr,
   //         startTime: '08:00',
   //         endTime: '16:00',
   //         role: 'Manager',
@@ -173,7 +173,7 @@ const EmployeeScheduleScreen: React.FC = () => {
   //         id: `morning-${day}-2`,
   //         employeeId: employeeIds[1] || 'emp2',
   //         employeeName: employees[1]?.name || 'Carlos Martinez',
-  //         date: dateStr,
+  //         date: _dateStr,
   //         startTime: '09:00',
   //         endTime: '17:00',
   //         role: 'Cashier',
@@ -186,7 +186,7 @@ const EmployeeScheduleScreen: React.FC = () => {
   //         id: `evening-${day}-1`,
   //         employeeId: employeeIds[2] || 'emp3',
   //         employeeName: employees[2]?.name || 'Sofia Hernandez',
-  //         date: dateStr,
+  //         date: _dateStr,
   //         startTime: '14:00',
   //         endTime: '22:00',
   //         role: 'Server',
@@ -199,7 +199,7 @@ const EmployeeScheduleScreen: React.FC = () => {
   //         id: `sunday-${day}-1`,
   //         employeeId: employeeIds[0] || 'emp1',
   //         employeeName: employees[0]?.name || 'Maria Rodriguez',
-  //         date: dateStr,
+  //         date: _dateStr,
   //         startTime: '10:00',
   //         endTime: '18:00',
   //         role: 'Manager',
@@ -227,17 +227,17 @@ const EmployeeScheduleScreen: React.FC = () => {
     return days;
   };
 
-  const getDayName = (dateStr: string): string => {
-    const date = new Date(_dateStr);
+  const getDayName = (dateStr: _string): string => {
+    const date = new Date(__dateStr);
     return date.toLocaleDateString('en-US', { weekday: 'short' });
   };
 
-  const getDayNumber = (dateStr: string): string => {
-    const date = new Date(_dateStr);
+  const getDayNumber = (dateStr: _string): string => {
+    const date = new Date(__dateStr);
     return date.getDate().toString();
   };
 
-  const getShiftsForDay = (dateStr: string): Shift[] => {
+  const getShiftsForDay = (dateStr: _string): Shift[] => {
     if (!weekSchedule) {
       return [];
     }
@@ -245,9 +245,9 @@ const EmployeeScheduleScreen: React.FC = () => {
   };
 
   const navigateWeek = (direction: 'prev' | 'next') => {
-    const newWeek = new Date(_currentWeek);
+    const newWeek = new Date(__currentWeek);
     newWeek.setDate(currentWeek.getDate() + (direction === 'next' ? 7 : -7));
-    setCurrentWeek(_newWeek);
+    setCurrentWeek(__newWeek);
   };
 
   const formatWeekRange = (): string => {
@@ -271,10 +271,10 @@ const EmployeeScheduleScreen: React.FC = () => {
     return `${start} - ${end}`;
   };
 
-  const handleAddShift = (date: string) => {
-    setSelectedDate(_date);
+  const handleAddShift = (date: _string) => {
+    setSelectedDate(__date);
     setNewShift({ ...newShift, date });
-    setShowAddShiftModal(_true);
+    setShowAddShiftModal(__true);
   };
 
   const saveShift = () => {
@@ -305,14 +305,14 @@ const EmployeeScheduleScreen: React.FC = () => {
       notes: newShift.notes,
     };
 
-    if (_weekSchedule) {
+    if (__weekSchedule) {
       setWeekSchedule({
         ...weekSchedule,
         shifts: [...weekSchedule.shifts, shift],
       });
     }
 
-    setShowAddShiftModal(_false);
+    setShowAddShiftModal(__false);
     setNewShift({
       employeeId: '',
       date: '',
@@ -325,8 +325,8 @@ const EmployeeScheduleScreen: React.FC = () => {
     Alert.alert('Success', 'Shift added successfully');
   };
 
-  const getStatusColor = (status: string) => {
-    switch (_status) {
+  const getStatusColor = (status: _string) => {
+    switch (__status) {
       case 'completed':
         return Colors.success;
       case 'confirmed':
@@ -340,8 +340,8 @@ const EmployeeScheduleScreen: React.FC = () => {
     }
   };
 
-  const getStatusText = (status: string) => {
-    switch (_status) {
+  const getStatusText = (status: _string) => {
+    switch (__status) {
       case 'completed':
         return 'Completed';
       case 'confirmed':
@@ -359,16 +359,16 @@ const EmployeeScheduleScreen: React.FC = () => {
     if (!weekSchedule) {
       return 0;
     }
-    return weekSchedule.shifts.reduce((_total, shift) => total + shift.duration, 0);
+    return weekSchedule.shifts.reduce((__total, _shift) => total + shift.duration, 0);
   };
 
-  const getEmployeeHours = (employeeId: string): number => {
+  const getEmployeeHours = (employeeId: _string): number => {
     if (!weekSchedule) {
       return 0;
     }
     return weekSchedule.shifts
       .filter(shift => shift.employeeId === employeeId)
-      .reduce((_total, shift) => total + shift.duration, 0);
+      .reduce((__total, _shift) => total + shift.duration, 0);
   };
 
   if (isLoadingEmployees || isLoadingSchedule) {
@@ -382,7 +382,7 @@ const EmployeeScheduleScreen: React.FC = () => {
     );
   }
 
-  if (_error) {
+  if (__error) {
     return (
       <SafeAreaView style={[styles.container, styles.centered]}>
         <Icon name="error-outline" size={64} color={Colors.danger} />
@@ -429,24 +429,26 @@ const EmployeeScheduleScreen: React.FC = () => {
       <ScrollView style={styles.content}>
         {/* Week Grid */}
         <View style={styles.weekGrid}>
-          {getWeekDays().map((_date, index) => {
-            const dayShifts = getShiftsForDay(_date);
+          {getWeekDays().map((__date, _index) => {
+            const dayShifts = getShiftsForDay(__date);
             const isToday = date === new Date().toISOString().split('T')[0];
 
             return (
               <View key={date} style={styles.dayColumn}>
                 <View style={[styles.dayHeader, isToday && styles.todayHeader]}>
                   <Text style={[styles.dayName, isToday && styles.todayText]}>
-                    {getDayName(_date)}
+                    {getDayName(__date)}
                   </Text>
                   <Text style={[styles.dayNumber, isToday && styles.todayText]}>
-                    {getDayNumber(_date)}
+                    {getDayNumber(__date)}
                   </Text>
                 </View>
 
                 <View style={styles.dayContent}>
                   {dayShifts.length === 0 ? (
-                    <TouchableOpacity style={styles.emptyDay} onPress={() => handleAddShift(_date)}>
+                    <TouchableOpacity
+                      style={styles.emptyDay}
+                      onPress={() => handleAddShift(__date)}>
                       <Icon name="add" size={20} color={Colors.lightText} />
                       <Text style={styles.emptyDayText}>Add Shift</Text>
                     </TouchableOpacity>
@@ -474,7 +476,7 @@ const EmployeeScheduleScreen: React.FC = () => {
                   {dayShifts.length > 0 && (
                     <TouchableOpacity
                       style={styles.addShiftButton}
-                      onPress={() => handleAddShift(_date)}>
+                      onPress={() => handleAddShift(__date)}>
                       <Icon name="add" size={16} color={Colors.primary} />
                     </TouchableOpacity>
                   )}
@@ -535,12 +537,12 @@ const EmployeeScheduleScreen: React.FC = () => {
         visible={showAddShiftModal}
         animationType="slide"
         presentationStyle="pageSheet"
-        onRequestClose={() => setShowAddShiftModal(_false)}>
+        onRequestClose={() => setShowAddShiftModal(__false)}>
         <SafeAreaView style={styles.modalContainer}>
           <View style={styles.modalHeader}>
             <TouchableOpacity
               style={styles.modalBackButton}
-              onPress={() => setShowAddShiftModal(_false)}>
+              onPress={() => setShowAddShiftModal(__false)}>
               <Icon name="close" size={24} color={Colors.text} />
             </TouchableOpacity>
             <Text style={styles.modalTitle}>Add New Shift</Text>
@@ -587,7 +589,7 @@ const EmployeeScheduleScreen: React.FC = () => {
               <Text style={styles.formLabel}>Date</Text>
               <Text style={styles.selectedDate}>
                 {selectedDate
-                  ? new Date(_selectedDate).toLocaleDateString('en-US', {
+                  ? new Date(__selectedDate).toLocaleDateString('en-US', {
                       weekday: 'long',
                       year: 'numeric',
                       month: 'long',
@@ -642,7 +644,7 @@ const EmployeeScheduleScreen: React.FC = () => {
             </View>
 
             <View style={styles.formSection}>
-              <Text style={styles.formLabel}>Notes (_Optional)</Text>
+              <Text style={styles.formLabel}>Notes (__Optional)</Text>
               <TextInput
                 style={styles.notesInput}
                 value={newShift.notes}

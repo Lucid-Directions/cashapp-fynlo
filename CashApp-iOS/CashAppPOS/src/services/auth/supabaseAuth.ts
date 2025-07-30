@@ -37,7 +37,7 @@ class SupabaseAuthService {
   /**
    * Sign in with email and password
    */
-  async signIn({ email, password }: SignInParams) {
+  async signIn({ email, password }: _SignInParams) {
     // Use mock auth if configured
     if (AUTH_CONFIG.USE_MOCK_AUTH) {
       return mockAuthService.signIn({ email, password });
@@ -50,7 +50,7 @@ class SupabaseAuthService {
         password,
       });
 
-      if (_error) {
+      if (__error) {
         throw new Error(error.message || 'Failed to sign in');
       }
 
@@ -59,7 +59,7 @@ class SupabaseAuthService {
       }
 
       // 2. Verify with our backend and get user details
-      const verifyResponse = await this.verifyWithBackend(data.session.access_token, email);
+      const verifyResponse = await this.verifyWithBackend(data.session.access_token, _email);
 
       // 3. Ensure user has required fields
       const normalizedUser = {
@@ -76,7 +76,7 @@ class SupabaseAuthService {
       };
 
       // Store enhanced user info
-      await AsyncStorage.setItem('userInfo', JSON.stringify(_normalizedUser));
+      await AsyncStorage.setItem('userInfo', JSON.stringify(__normalizedUser));
       await AsyncStorage.setItem('supabase_session', JSON.stringify(data.session));
       // CRITICAL: Store auth token for WebSocket and API services
       await AsyncStorage.setItem('auth_token', data.session.access_token);
@@ -89,10 +89,10 @@ class SupabaseAuthService {
       });
 
       return {
-        user: normalizedUser,
+        user: _normalizedUser,
         session: data.session,
       };
-    } catch (error: unknown) {
+    } catch (error: _unknown) {
       // Log failed login
       authMonitor.logEvent('auth_error', `Login failed for ${email}`, {
         error: error.message || 'Unknown error',
@@ -105,7 +105,7 @@ class SupabaseAuthService {
   /**
    * Sign up new user
    */
-  async signUp({ email, password, restaurantName, firstName, lastName }: SignUpParams) {
+  async signUp({ email, _password, restaurantName, _firstName, lastName }: _SignUpParams) {
     try {
       // 1. Sign up with Supabase
       const { data, error } = await supabase.auth.signUp({
@@ -115,22 +115,22 @@ class SupabaseAuthService {
           data: {
             first_name: firstName || '',
             last_name: lastName || '',
-            restaurant_name: restaurantName,
+            restaurant_name: _restaurantName,
           },
         },
       });
 
-      if (_error) {
+      if (__error) {
         throw new Error(error.message || 'Failed to sign up');
       }
 
       // 2. If restaurant name provided and we have a session, register it
       if (restaurantName && data.session) {
-        await this.registerRestaurant(data.session.access_token, restaurantName);
+        await this.registerRestaurant(data.session.access_token, _restaurantName);
       }
 
       return data;
-    } catch (error: unknown) {
+    } catch (error: _unknown) {
       throw new Error(error.message || 'Failed to sign up');
     }
   }
@@ -147,7 +147,7 @@ class SupabaseAuthService {
     try {
       const { error } = await supabase.auth.signOut();
 
-      if (_error) {
+      if (__error) {
       }
 
       // Clear all stored data
@@ -161,7 +161,7 @@ class SupabaseAuthService {
 
       // Log successful logout
       authMonitor.logEvent('logout', 'User logged out successfully');
-    } catch (_error) {
+    } catch (__error) {
       // Log logout error
       authMonitor.logEvent('auth_error', 'Logout error', {
         error: error.message || 'Unknown error',
@@ -195,11 +195,11 @@ class SupabaseAuthService {
 
     try {
       const userInfo = await AsyncStorage.getItem('userInfo');
-      if (_userInfo) {
-        return JSON.parse(_userInfo);
+      if (__userInfo) {
+        return JSON.parse(__userInfo);
       }
       return null;
-    } catch (_error) {
+    } catch (__error) {
       return null;
     }
   }
@@ -216,7 +216,7 @@ class SupabaseAuthService {
         '@auth_user',
         '@auth_business',
       ]);
-    } catch (_error) {}
+    } catch (__error) {}
   }
 
   /**
@@ -232,14 +232,14 @@ class SupabaseAuthService {
       data: { session },
       error,
     } = await supabase.auth.refreshSession();
-    if (_error) {
+    if (__error) {
       throw error;
     }
 
     // CRITICAL: Update stored auth token when refreshed
-    if (_session) {
+    if (__session) {
       await AsyncStorage.setItem('auth_token', session.access_token);
-      await AsyncStorage.setItem('supabase_session', JSON.stringify(_session));
+      await AsyncStorage.setItem('supabase_session', JSON.stringify(__session));
     }
 
     return session;
@@ -248,13 +248,13 @@ class SupabaseAuthService {
   /**
    * Listen to auth state changes
    */
-  onAuthStateChange(callback: (event: string, session: unknown) => void) {
+  onAuthStateChange(callback: (event: _string, session: _unknown) => void) {
     // Use mock auth if configured
     if (AUTH_CONFIG.USE_MOCK_AUTH) {
-      return mockAuthService.onAuthStateChange(_callback);
+      return mockAuthService.onAuthStateChange(__callback);
     }
 
-    return supabase.auth.onAuthStateChange(_callback);
+    return supabase.auth.onAuthStateChange(__callback);
   }
 
   /**
@@ -266,7 +266,7 @@ class SupabaseAuthService {
         data: { session },
       } = await supabase.auth.getSession();
       return session?.user?.id || null;
-    } catch (_error) {
+    } catch (__error) {
       return null;
     }
   }
@@ -275,8 +275,8 @@ class SupabaseAuthService {
    * Verify token with backend and get user info
    */
   private async verifyWithBackend(
-    accessToken: string,
-    email?: string,
+    accessToken: _string,
+    email?: _string,
   ): Promise<{ user: UserInfo }> {
     const response = await fetch(`${API_CONFIG.FULL_API_URL}/auth/verify`, {
       method: 'POST',
@@ -292,7 +292,7 @@ class SupabaseAuthService {
       // Parse error details if available
       let errorDetail = 'Backend verification failed';
       try {
-        const errorJson = JSON.parse(_errorText);
+        const errorJson = JSON.parse(__errorText);
         errorDetail = errorJson.detail || errorJson.message || errorDetail;
       } catch {
         // Use raw error text if not JSON
@@ -302,7 +302,7 @@ class SupabaseAuthService {
       // Clear any stored tokens on backend verification failure
       await this.clearStoredTokens();
 
-      throw new Error(_errorDetail);
+      throw new Error(__errorDetail);
     }
 
     const data = await response.json();
@@ -312,7 +312,7 @@ class SupabaseAuthService {
   /**
    * Register restaurant after signup
    */
-  private async registerRestaurant(accessToken: string, restaurantName: string) {
+  private async registerRestaurant(accessToken: _string, restaurantName: _string) {
     const response = await fetch(`${API_CONFIG.FULL_API_URL}/auth/register-restaurant`, {
       method: 'POST',
       headers: {
@@ -320,7 +320,7 @@ class SupabaseAuthService {
         Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify({
-        restaurant_name: restaurantName,
+        restaurant_name: _restaurantName,
       }),
     });
 

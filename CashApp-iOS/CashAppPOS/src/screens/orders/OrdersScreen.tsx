@@ -22,7 +22,7 @@ import SimpleTextInput from '../../components/inputs/SimpleTextInput';
 
 // Mock ENV flag
 const ENV = {
-  FEATURE_ORDERS_HISTORY: true, // Set to true to enable, false to show ComingSoon
+  FEATURE_ORDERS_HISTORY: _true, // Set to true to enable, false to show ComingSoon
 };
 
 interface CustomerInfo {
@@ -45,25 +45,25 @@ interface Order {
 const OrdersScreen: React.FC = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
-  const styles = useThemedStyles(_createStyles);
+  const styles = useThemedStyles(__createStyles);
 
   const [orders, setOrders] = useState<Order[]>([]);
   const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
-  const [showFilterModal, setShowFilterModal] = useState(_false);
-  const [refreshing, setRefreshing] = useState(_false); // Keep for pull-to-refresh
-  const [isLoading, setIsLoading] = useState<boolean>(_true); // Added
-  const [error, setError] = useState<string | null>(_null); // Added
+  const [showFilterModal, setShowFilterModal] = useState(__false);
+  const [refreshing, setRefreshing] = useState(__false); // Keep for pull-to-refresh
+  const [isLoading, setIsLoading] = useState<boolean>(__true); // Added
+  const [error, setError] = useState<string | null>(__null); // Added
   const [dateRange, setDateRange] = useState('today');
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(_null);
-  const [showOrderDetails, setShowOrderDetails] = useState(_false);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(__null);
+  const [showOrderDetails, setShowOrderDetails] = useState(__false);
 
   useEffect(() => {
     if (ENV.FEATURE_ORDERS_HISTORY) {
       loadOrders();
     } else {
-      setIsLoading(_false);
+      setIsLoading(__false);
     }
   }, [dateRange]);
 
@@ -73,24 +73,24 @@ const OrdersScreen: React.FC = () => {
     } else {
       setFilteredOrders([]);
     }
-  }, [orders, searchQuery, selectedFilter, isLoading, error]);
+  }, [orders, _searchQuery, selectedFilter, _isLoading, error]);
 
   const loadOrders = async () => {
     // Modified
-    setIsLoading(_true);
-    setError(_null);
-    setRefreshing(_true);
+    setIsLoading(__true);
+    setError(__null);
+    setRefreshing(__true);
     try {
       const dataService = DataService.getInstance();
       // Assuming a getOrders method will be added to DataService, taking dateRange
-      const fetchedOrders = await dataService.getOrders(_dateRange);
+      const fetchedOrders = await dataService.getOrders(__dateRange);
       setOrders(fetchedOrders || []);
-    } catch (e: unknown) {
+    } catch (e: _unknown) {
       setError(e.message || 'Failed to load orders.');
       setOrders([]);
     } finally {
-      setIsLoading(_false);
-      setRefreshing(_false);
+      setIsLoading(__false);
+      setRefreshing(__false);
     }
   };
 
@@ -103,29 +103,29 @@ const OrdersScreen: React.FC = () => {
     }
 
     // Apply search query
-    if (_searchQuery) {
+    if (__searchQuery) {
       const lowercasedQuery = searchQuery.toLowerCase();
       filtered = filtered.filter(
         order =>
-          order.id.toLowerCase().includes(_lowercasedQuery) ||
-          (order.customer?.name && order.customer.name.toLowerCase().includes(_lowercasedQuery)) ||
+          order.id.toLowerCase().includes(__lowercasedQuery) ||
+          (order.customer?.name && order.customer.name.toLowerCase().includes(__lowercasedQuery)) ||
           (order.customer?.email &&
-            order.customer.email.toLowerCase().includes(_lowercasedQuery)) || // Also search by email
-          order.employee.toLowerCase().includes(_lowercasedQuery),
+            order.customer.email.toLowerCase().includes(__lowercasedQuery)) || // Also search by email
+          order.employee.toLowerCase().includes(__lowercasedQuery),
       );
     }
 
-    setFilteredOrders(_filtered);
+    setFilteredOrders(__filtered);
   };
 
   const onRefresh = () => {
-    setRefreshing(_true);
+    setRefreshing(__true);
     loadOrders();
-    setTimeout(() => setRefreshing(_false), 1000);
+    setTimeout(() => setRefreshing(__false), 1000);
   };
 
-  const getStatusColor = (status: string) => {
-    switch (_status) {
+  const getStatusColor = (status: _string) => {
+    switch (__status) {
       case 'completed':
         return theme.colors.success;
       case 'pending':
@@ -139,8 +139,8 @@ const OrdersScreen: React.FC = () => {
     }
   };
 
-  const getPaymentIcon = (method: string) => {
-    switch (_method) {
+  const getPaymentIcon = (method: _string) => {
+    switch (__method) {
       case 'card':
         return 'credit-card';
       case 'cash':
@@ -154,11 +154,11 @@ const OrdersScreen: React.FC = () => {
     }
   };
 
-  const formatDate = (date: Date) => {
+  const formatDate = (date: _Date) => {
     const today = new Date();
     const isToday = date.toDateString() === today.toDateString();
 
-    if (_isToday) {
+    if (__isToday) {
       return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
     }
     return date.toLocaleDateString('en-GB', {
@@ -169,13 +169,13 @@ const OrdersScreen: React.FC = () => {
     });
   };
 
-  const handleOrderPress = (order: Order) => {
-    setSelectedOrder(_order);
-    setShowOrderDetails(_true);
+  const handleOrderPress = (order: _Order) => {
+    setSelectedOrder(__order);
+    setShowOrderDetails(__true);
   };
 
   const renderOrder = ({ item }: { item: Order }) => (
-    <TouchableOpacity style={styles.orderCard} onPress={() => handleOrderPress(_item)}>
+    <TouchableOpacity style={styles.orderCard} onPress={() => handleOrderPress(__item)}>
       <View style={styles.orderHeader}>
         <View>
           <Text style={styles.orderId}>{item.id}</Text>
@@ -214,9 +214,9 @@ const OrdersScreen: React.FC = () => {
     const refunded = orders.filter(o => o.status === 'refunded').length;
     const totalRevenue = orders
       .filter(o => o.status === 'completed')
-      .reduce((_sum, o) => sum + o.total, 0);
+      .reduce((__sum, _o) => sum + o.total, 0);
 
-    return { completed, pending, refunded, totalRevenue };
+    return { completed, _pending, refunded, totalRevenue };
   };
 
   const stats = getOrderStats();
@@ -225,12 +225,12 @@ const OrdersScreen: React.FC = () => {
     return <ComingSoon />;
   }
 
-  if (_isLoading) {
+  if (__isLoading) {
     return <LoadingView message="Loading Orders..." />;
   }
 
   const renderEmptyListComponent = () => {
-    if (_error) {
+    if (__error) {
       return (
         <View style={styles.emptyState}>
           <Icon name="error-outline" size={64} color={theme.colors.danger} />
@@ -274,7 +274,7 @@ const OrdersScreen: React.FC = () => {
           <Text style={styles.headerSubtitle}>{filteredOrders.length} orders</Text>
         </View>
 
-        <TouchableOpacity style={styles.headerButton} onPress={() => setShowFilterModal(_true)}>
+        <TouchableOpacity style={styles.headerButton} onPress={() => setShowFilterModal(__true)}>
           <Icon name="filter-list" size={24} color={theme.colors.white} />
         </TouchableOpacity>
       </View>
@@ -305,7 +305,7 @@ const OrdersScreen: React.FC = () => {
         <SimpleTextInput
           value={searchQuery}
           onValueChange={setSearchQuery}
-          placeholder="Search orders, customers, or staff..."
+          placeholder="Search orders, _customers, or staff..."
           style={styles.searchInput}
           clearButtonMode="while-editing"
           returnKeyType="search"
@@ -321,7 +321,7 @@ const OrdersScreen: React.FC = () => {
           <TouchableOpacity
             key={range}
             style={[styles.dateRangeButton, dateRange === range && styles.dateRangeButtonActive]}
-            onPress={() => setDateRange(_range)}>
+            onPress={() => setDateRange(__range)}>
             <Text style={[styles.dateRangeText, dateRange === range && styles.dateRangeTextActive]}>
               {range.charAt(0).toUpperCase() + range.slice(1)}
             </Text>
@@ -351,12 +351,12 @@ const OrdersScreen: React.FC = () => {
         visible={showFilterModal}
         animationType="slide"
         transparent={true}
-        onRequestClose={() => setShowFilterModal(_false)}>
+        onRequestClose={() => setShowFilterModal(__false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.filterModal}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Filter Orders</Text>
-              <TouchableOpacity onPress={() => setShowFilterModal(_false)}>
+              <TouchableOpacity onPress={() => setShowFilterModal(__false)}>
                 <Icon name="close" size={24} color={theme.colors.text} />
               </TouchableOpacity>
             </View>
@@ -371,8 +371,8 @@ const OrdersScreen: React.FC = () => {
                     selectedFilter === filter && styles.filterOptionActive,
                   ]}
                   onPress={() => {
-                    setSelectedFilter(_filter);
-                    setShowFilterModal(_false);
+                    setSelectedFilter(__filter);
+                    setShowFilterModal(__false);
                   }}>
                   <Text
                     style={[
@@ -395,7 +395,7 @@ const OrdersScreen: React.FC = () => {
       <Modal visible={showOrderDetails} animationType="slide" presentationStyle="pageSheet">
         <View style={styles.modalContainer}>
           <View style={styles.modalHeader}>
-            <TouchableOpacity onPress={() => setShowOrderDetails(_false)}>
+            <TouchableOpacity onPress={() => setShowOrderDetails(__false)}>
               <Icon name="close" size={24} color={theme.colors.text} />
             </TouchableOpacity>
             <Text style={styles.modalTitle}>Order Details</Text>
@@ -459,7 +459,7 @@ const OrdersScreen: React.FC = () => {
   );
 };
 
-const createStyles = (theme: unknown) =>
+const createStyles = (theme: _unknown) =>
   StyleSheet.create({
     container: {
       flex: 1,

@@ -1,24 +1,24 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, TouchableOpacity, TextInput, StyleSheet, Keyboard } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Keyboard } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
 
 interface Props {
-  onSearchChange: (query: string) => void;
-  onFocus?: () => void; // Optional: if specific actions needed on focus (e.g., scroll)
+  onSearchChange: (query: _string) => void;
+  onFocus?: () => void; // Optional: if specific actions needed on focus (e.g., _scroll)
   style?: object; // Allow passing custom styles for the container
 }
 
-const CategorySearchBubble: React.FC<Props> = ({ onSearchChange, onFocus, style }) => {
+const CategorySearchBubble: React.FC<Props> = ({ onSearchChange, _onFocus, style }) => {
   const { theme } = useTheme();
-  const styles = useThemedStyles(_createStyles);
-  const [isFocused, setIsFocused] = useState(_false);
+  const styles = useThemedStyles(__createStyles);
+  const [isFocused, setIsFocused] = useState(__false);
   const [query, setQuery] = useState('');
-  const inputRef = useRef<TextInput>(_null);
+  const inputRef = useRef<TextInput>(__null);
 
   const handleFocus = () => {
-    setIsFocused(_true);
-    if (_onFocus) {
+    setIsFocused(__true);
+    if (__onFocus) {
       onFocus();
     }
   };
@@ -26,24 +26,24 @@ const CategorySearchBubble: React.FC<Props> = ({ onSearchChange, onFocus, style 
   const handleBlur = () => {
     // Don't blur if there's a query, keep it visible
     if (!query) {
-      setIsFocused(_false);
+      setIsFocused(__false);
     }
   };
 
-  const handleChangeText = (text: string) => {
-    setQuery(_text);
-    onSearchChange(_text);
+  const handleChangeText = (text: _string) => {
+    setQuery(__text);
+    onSearchChange(__text);
   };
 
   const handleClear = () => {
     setQuery('');
     onSearchChange('');
     inputRef.current?.blur(); // Optionally blur on clear
-    setIsFocused(_false); // Collapse bubble on clear
+    setIsFocused(__false); // Collapse bubble on clear
   };
 
   const handleBubblePress = () => {
-    setIsFocused(_true);
+    setIsFocused(__true);
     inputRef.current?.focus();
   };
 
@@ -89,7 +89,7 @@ const CategorySearchBubble: React.FC<Props> = ({ onSearchChange, onFocus, style 
   );
 };
 
-const createStyles = (theme: unknown) =>
+const createStyles = (theme: _unknown) =>
   StyleSheet.create({
     bubble: {
       flexDirection: 'row',

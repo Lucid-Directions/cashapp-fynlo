@@ -70,7 +70,7 @@ const HelpScreen: React.FC = () => {
           id: '1',
           question: 'How do I set up my restaurant information?',
           answer:
-            'Go to Settings → Business Settings → Business Information to enter your restaurant name, address, and contact details. This information will appear throughout your POS system.',
+            'Go to Settings → Business Settings → Business Information to enter your restaurant name, _address, and contact details. This information will appear throughout your POS system.',
         },
         {
           id: '2',
@@ -103,13 +103,13 @@ const HelpScreen: React.FC = () => {
           id: '2',
           question: 'How do I add new menu items?',
           answer:
-            'Go to More → Menu Management to add, edit, or remove items from your menu. You can organize items by categories and set pricing.',
+            'Go to More → Menu Management to add, _edit, or remove items from your menu. You can organize items by categories and set pricing.',
         },
         {
           id: '3',
           question: 'How do I view sales reports?',
           answer:
-            'Access reports through More → Reports or Dashboard. View daily, weekly, and monthly sales data, top-selling items, and performance metrics.',
+            'Access reports through More → Reports or Dashboard. View daily, _weekly, and monthly sales data, top-selling items, and performance metrics.',
         },
       ],
     },
@@ -151,13 +151,13 @@ const HelpScreen: React.FC = () => {
           id: '1',
           question: 'How do I add new staff members?',
           answer:
-            'Go to More → Employees → Add Employee. Set their role, permissions, and PIN for quick login during shifts.',
+            'Go to More → Employees → Add Employee. Set their role, _permissions, and PIN for quick login during shifts.',
         },
         {
           id: '2',
           question: 'What are the different user roles?',
           answer:
-            'Owner (full access), Manager (_reports, staff, settings), Employee (_POS, basic functions). Each role has specific permissions.',
+            'Owner (full access), Manager (__reports, _staff, settings), Employee (__POS, basic functions). Each role has specific permissions.',
         },
         {
           id: '3',
@@ -234,16 +234,16 @@ const HelpScreen: React.FC = () => {
 
   const [expandedSections, setExpandedSections] = React.useState<string[]>([]);
 
-  const toggleSection = (sectionId: string) => {
+  const toggleSection = (sectionId: _string) => {
     setExpandedSections(prev =>
-      prev.includes(_sectionId) ? prev.filter(id => id !== sectionId) : [...prev, sectionId],
+      prev.includes(__sectionId) ? prev.filter(id => id !== sectionId) : [...prev, sectionId],
     );
   };
 
-  const toggleItem = (sectionId: string, itemId: string) => {
+  const toggleItem = (sectionId: _string, itemId: _string) => {
     const key = `${sectionId}-${itemId}`;
     setExpandedSections(prev =>
-      prev.includes(_key) ? prev.filter(id => id !== key) : [...prev, key],
+      prev.includes(__key) ? prev.filter(id => id !== key) : [...prev, key],
     );
   };
 

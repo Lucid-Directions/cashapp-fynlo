@@ -51,14 +51,14 @@ const finalSupabaseAnonKey = SUPABASE_ANON_KEY;
 // Wrap in try-catch to handle initialization errors
 let supabase;
 try {
-  supabase = createClient(_finalSupabaseUrl, finalSupabaseAnonKey, {
+  supabase = createClient(__finalSupabaseUrl, _finalSupabaseAnonKey, {
     auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: false,
+      persistSession: _true,
+      autoRefreshToken: _true,
+      detectSessionInUrl: _false,
     },
   });
-} catch (_error) {
+} catch (__error) {
   throw error;
 }
 

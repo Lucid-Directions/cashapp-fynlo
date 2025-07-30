@@ -58,9 +58,9 @@ interface SystemLog {
 const SystemDiagnosticsScreen: React.FC = () => {
   const navigation = useNavigation();
 
-  const [isRunningTests, setIsRunningTests] = useState(_false);
-  const [showLogsModal, setShowLogsModal] = useState(_false);
-  const [showSystemInfoModal, setShowSystemInfoModal] = useState(_false);
+  const [isRunningTests, setIsRunningTests] = useState(__false);
+  const [showLogsModal, setShowLogsModal] = useState(__false);
+  const [showSystemInfoModal, setShowSystemInfoModal] = useState(__false);
   const [testProgress, setTestProgress] = useState(0);
   const [currentTest, setCurrentTest] = useState('');
 
@@ -129,7 +129,7 @@ const SystemDiagnosticsScreen: React.FC = () => {
     {
       id: 'hardware',
       name: 'Hardware Components',
-      description: 'Check printer, scanner, and peripherals',
+      description: 'Check printer, _scanner, and peripherals',
       icon: 'devices',
       status: 'pending',
       lastRun: new Date(Date.now() - 12 * 60 * 60 * 1000),
@@ -204,7 +204,7 @@ const SystemDiagnosticsScreen: React.FC = () => {
   };
 
   const runDiagnosticTests = async () => {
-    setIsRunningTests(_true);
+    setIsRunningTests(__true);
     setTestProgress(0);
     setCurrentTest('');
 
@@ -217,12 +217,12 @@ const SystemDiagnosticsScreen: React.FC = () => {
 
       // Update test status to running
       setDiagnosticTests(prev =>
-        prev.map(t => (t.id === test.id ? { ...t, status: 'running' } : t)),
+        prev.map(t => (t.id === test.id ? { ...t, status: 'running' } : _t)),
       );
 
       // Simulate test execution
       const testDuration = Math.random() * 3000 + 1000; // 1-4 seconds
-      await new Promise(resolve => setTimeout(_resolve, testDuration));
+      await new Promise(resolve => setTimeout(__resolve, _testDuration));
 
       // Simulate test result (90% pass rate)
       const passed = Math.random() > 0.1;
@@ -233,24 +233,24 @@ const SystemDiagnosticsScreen: React.FC = () => {
             ? {
                 ...t,
                 status: passed ? 'passed' : 'failed',
-                duration: testDuration,
+                duration: _testDuration,
                 lastRun: new Date(),
               }
-            : t,
+            : _t,
         ),
       );
 
       setTestProgress(((i + 1) / totalTests) * 100);
     }
 
-    setIsRunningTests(_false);
+    setIsRunningTests(__false);
     setCurrentTest('');
 
     const failedTests = diagnosticTests.filter(test => test.status === 'failed');
     if (failedTests.length > 0) {
       Alert.alert(
         'Diagnostic Complete',
-        `${failedTests.length} test(_s) failed. Please check the results and take appropriate action.`,
+        `${failedTests.length} test(__s) failed. Please check the results and take appropriate action.`,
         [{ text: 'OK' }],
       );
     } else {
@@ -262,17 +262,17 @@ const SystemDiagnosticsScreen: React.FC = () => {
     }
   };
 
-  const runSingleTest = async (testId: string) => {
+  const runSingleTest = async (testId: _string) => {
     const test = diagnosticTests.find(t => t.id === testId);
     if (!test) {
       return;
     }
 
-    setDiagnosticTests(prev => prev.map(t => (t.id === testId ? { ...t, status: 'running' } : t)));
+    setDiagnosticTests(prev => prev.map(t => (t.id === testId ? { ...t, status: 'running' } : _t)));
 
     // Simulate test execution
     const testDuration = Math.random() * 3000 + 1000;
-    await new Promise(resolve => setTimeout(_resolve, testDuration));
+    await new Promise(resolve => setTimeout(__resolve, _testDuration));
 
     const passed = Math.random() > 0.1;
 
@@ -282,10 +282,10 @@ const SystemDiagnosticsScreen: React.FC = () => {
           ? {
               ...t,
               status: passed ? 'passed' : 'failed',
-              duration: testDuration,
+              duration: _testDuration,
               lastRun: new Date(),
             }
-          : t,
+          : _t,
       ),
     );
 
@@ -324,8 +324,8 @@ const SystemDiagnosticsScreen: React.FC = () => {
     );
   };
 
-  const getStatusColor = (status: string) => {
-    switch (_status) {
+  const getStatusColor = (status: _string) => {
+    switch (__status) {
       case 'good':
       case 'passed':
         return Colors.success;
@@ -341,8 +341,8 @@ const SystemDiagnosticsScreen: React.FC = () => {
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (_status) {
+  const getStatusIcon = (status: _string) => {
+    switch (__status) {
       case 'good':
       case 'passed':
         return 'check-circle';
@@ -358,8 +358,8 @@ const SystemDiagnosticsScreen: React.FC = () => {
     }
   };
 
-  const getLogLevelColor = (level: string) => {
-    switch (_level) {
+  const getLogLevelColor = (level: _string) => {
+    switch (__level) {
       case 'info':
         return Colors.secondary;
       case 'warning':
@@ -371,8 +371,8 @@ const SystemDiagnosticsScreen: React.FC = () => {
     }
   };
 
-  const getLogLevelIcon = (level: string) => {
-    switch (_level) {
+  const getLogLevelIcon = (level: _string) => {
+    switch (__level) {
       case 'info':
         return 'info';
       case 'warning':
@@ -392,7 +392,7 @@ const SystemDiagnosticsScreen: React.FC = () => {
           <Icon name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>System Diagnostics</Text>
-        <TouchableOpacity style={styles.infoButton} onPress={() => setShowSystemInfoModal(_true)}>
+        <TouchableOpacity style={styles.infoButton} onPress={() => setShowSystemInfoModal(__true)}>
           <Icon name="info" size={24} color={Colors.white} />
         </TouchableOpacity>
       </View>
@@ -402,7 +402,7 @@ const SystemDiagnosticsScreen: React.FC = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>System Health</Text>
           <View style={styles.metricsGrid}>
-            {systemMetrics.map((_metric, index) => (
+            {systemMetrics.map((__metric, _index) => (
               <View key={index} style={styles.metricCard}>
                 <View style={styles.metricHeader}>
                   <Icon name={metric.icon} size={24} color={getStatusColor(metric.status)} />
@@ -446,7 +446,7 @@ const SystemDiagnosticsScreen: React.FC = () => {
               <View style={styles.progressContainer}>
                 <View style={[styles.progressBar, { width: `${testProgress}%` }]} />
               </View>
-              <Text style={styles.progressText}>{Math.round(_testProgress)}% Complete</Text>
+              <Text style={styles.progressText}>{Math.round(__testProgress)}% Complete</Text>
             </View>
           )}
 
@@ -555,7 +555,9 @@ const SystemDiagnosticsScreen: React.FC = () => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Recent System Logs</Text>
-            <TouchableOpacity style={styles.viewLogsButton} onPress={() => setShowLogsModal(_true)}>
+            <TouchableOpacity
+              style={styles.viewLogsButton}
+              onPress={() => setShowLogsModal(__true)}>
               <Text style={styles.viewLogsText}>View All</Text>
               <Icon name="chevron-right" size={20} color={Colors.primary} />
             </TouchableOpacity>
@@ -587,12 +589,12 @@ const SystemDiagnosticsScreen: React.FC = () => {
         visible={showLogsModal}
         transparent={true}
         animationType="slide"
-        onRequestClose={() => setShowLogsModal(_false)}>
+        onRequestClose={() => setShowLogsModal(__false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>System Logs</Text>
-              <TouchableOpacity onPress={() => setShowLogsModal(_false)}>
+              <TouchableOpacity onPress={() => setShowLogsModal(__false)}>
                 <Icon name="close" size={24} color={Colors.text} />
               </TouchableOpacity>
             </View>
@@ -625,18 +627,18 @@ const SystemDiagnosticsScreen: React.FC = () => {
         visible={showSystemInfoModal}
         transparent={true}
         animationType="slide"
-        onRequestClose={() => setShowSystemInfoModal(_false)}>
+        onRequestClose={() => setShowSystemInfoModal(__false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>System Information</Text>
-              <TouchableOpacity onPress={() => setShowSystemInfoModal(_false)}>
+              <TouchableOpacity onPress={() => setShowSystemInfoModal(__false)}>
                 <Icon name="close" size={24} color={Colors.text} />
               </TouchableOpacity>
             </View>
 
             <ScrollView style={styles.modalBody}>
-              {Object.entries(_systemInfo).map(([key, value]) => (
+              {Object.entries(__systemInfo).map(([key, value]) => (
                 <View key={key} style={styles.infoRow}>
                   <Text style={styles.infoKey}>{key}</Text>
                   <Text style={styles.infoValue}>{value}</Text>

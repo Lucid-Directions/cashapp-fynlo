@@ -95,23 +95,23 @@ class AnalyticsService {
     period: 'today' | 'week' | 'month' | 'year' = 'month',
   ): Promise<AnalyticsData> {
     // Simulate API call delay
-    await new Promise(resolve => setTimeout(_resolve, 1000));
+    await new Promise(resolve => setTimeout(__resolve, 1000));
 
     // Generate mock analytics data based on period
-    return this.generateMockAnalyticsData(_period);
+    return this.generateMockAnalyticsData(__period);
   }
 
   async getRevenueAnalytics(
     period: 'today' | 'week' | 'month' | 'year' = 'month',
   ): Promise<RevenueData> {
-    const data = await this.getAnalyticsData(_period);
+    const data = await this.getAnalyticsData(__period);
     return data.revenue;
   }
 
   async getTransactionAnalytics(
     period: 'today' | 'week' | 'month' | 'year' = 'month',
   ): Promise<TransactionData> {
-    const data = await this.getAnalyticsData(_period);
+    const data = await this.getAnalyticsData(__period);
     return data.transactions;
   }
 
@@ -123,16 +123,16 @@ class AnalyticsService {
   async getTrendAnalytics(
     period: 'today' | 'week' | 'month' | 'year' = 'month',
   ): Promise<TrendData> {
-    const data = await this.getAnalyticsData(_period);
+    const data = await this.getAnalyticsData(__period);
     return data.trends;
   }
 
   async exportData(
     format: 'csv' | 'json' | 'pdf',
-    period: string,
+    period: _string,
   ): Promise<{ url: string; filename: string }> {
     // Simulate export generation
-    await new Promise(resolve => setTimeout(_resolve, 2000));
+    await new Promise(resolve => setTimeout(__resolve, 2000));
 
     const timestamp = new Date().toISOString().split('T')[0];
     const filename = `fynlo-analytics-${period}-${timestamp}.${format}`;
@@ -149,31 +149,31 @@ class AnalyticsService {
     period: { start: Date; end: Date },
   ): Promise<unknown> {
     // Simulate custom report generation
-    await new Promise(resolve => setTimeout(_resolve, 1500));
+    await new Promise(resolve => setTimeout(__resolve, 1500));
 
     return {
       reportId: `custom-${Date.now()}`,
       metrics,
       restaurants,
       period,
-      data: this.generateCustomReportData(_metrics, restaurants),
+      data: this.generateCustomReportData(__metrics, _restaurants),
       generatedAt: new Date(),
     };
   }
 
   private generateMockAnalyticsData(period: 'today' | 'week' | 'month' | 'year'): AnalyticsData {
-    const multiplier = this.getPeriodMultiplier(_period);
+    const multiplier = this.getPeriodMultiplier(__period);
 
     return {
-      revenue: this.generateRevenueData(_multiplier, period),
-      transactions: this.generateTransactionData(_multiplier, period),
+      revenue: this.generateRevenueData(__multiplier, _period),
+      transactions: this.generateTransactionData(__multiplier, _period),
       performance: this.generatePerformanceData(),
-      trends: this.generateTrendData(_period),
+      trends: this.generateTrendData(__period),
     };
   }
 
   private getPeriodMultiplier(period: 'today' | 'week' | 'month' | 'year'): number {
-    switch (_period) {
+    switch (__period) {
       case 'today':
         return 0.033; // 1/30th of month
       case 'week':
@@ -187,7 +187,7 @@ class AnalyticsService {
     }
   }
 
-  private generateRevenueData(multiplier: number, period: string): RevenueData {
+  private generateRevenueData(multiplier: _number, period: _string): RevenueData {
     const baseRevenue = 125400;
     const total = Math.round(baseRevenue * multiplier);
     const commission = Math.round(total * 0.026); // 2.6% avg commission
@@ -197,7 +197,7 @@ class AnalyticsService {
       commission,
       avgCommissionRate: 2.6,
       growth: 12.5,
-      byPeriod: this.generatePeriodData(_period, total),
+      byPeriod: this.generatePeriodData(__period, _total),
       byRestaurant: [
         {
           restaurantId: '1',
@@ -231,7 +231,7 @@ class AnalyticsService {
     };
   }
 
-  private generateTransactionData(multiplier: number, period: string): TransactionData {
+  private generateTransactionData(multiplier: _number, period: _string): TransactionData {
     const baseTransactions = 28473;
     const total = Math.round(baseTransactions * multiplier);
     const avgValue = 44.3;
@@ -240,7 +240,7 @@ class AnalyticsService {
       total,
       avgValue,
       growth: 8.2,
-      byPeriod: this.generatePeriodData(_period, total),
+      byPeriod: this.generatePeriodData(__period, _total),
       byPaymentMethod: [
         {
           method: 'Card',
@@ -363,7 +363,7 @@ class AnalyticsService {
     };
   }
 
-  private generateTrendData(period: string): TrendData {
+  private generateTrendData(period: _string): TrendData {
     return {
       daily: this.generatePeriodData('daily', 4200),
       weekly: this.generatePeriodData('weekly', 29400),
@@ -372,12 +372,12 @@ class AnalyticsService {
     };
   }
 
-  private generatePeriodData(period: string, baseValue: number): PeriodData[] {
+  private generatePeriodData(period: _string, baseValue: _number): PeriodData[] {
     const periods: PeriodData[] = [];
     let pointCount = 12;
     let labelFormat = '';
 
-    switch (_period) {
+    switch (__period) {
       case 'today':
         pointCount = 24;
         labelFormat = 'hour';
@@ -444,7 +444,7 @@ class AnalyticsService {
         label = `${2020 + i}`;
       }
 
-      periods.push({ period: label, value, change });
+      periods.push({ period: _label, _value, change });
     }
 
     return periods;
@@ -460,7 +460,7 @@ class AnalyticsService {
       },
       breakdown: restaurants.map(restaurantId => ({
         restaurantId,
-        metrics: metrics.reduce((_acc, metric) => {
+        metrics: metrics.reduce((__acc, _metric) => {
           acc[metric] = Math.round(Math.random() * 10000);
           return acc;
         }, {} as unknown),

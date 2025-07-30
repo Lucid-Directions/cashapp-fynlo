@@ -97,12 +97,12 @@ interface HealthScores {
 
 const PaymentAnalyticsScreen: React.FC = () => {
   const navigation = useNavigation();
-  const [loading, setLoading] = useState(_true);
-  const [refreshing, setRefreshing] = useState(_false);
+  const [loading, setLoading] = useState(__true);
+  const [refreshing, setRefreshing] = useState(__false);
   const [selectedPeriod, setSelectedPeriod] = useState('30');
-  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(_null);
-  const [volumeData, setVolumeData] = useState<VolumeData | null>(_null);
-  const [healthScores, setHealthScores] = useState<HealthScores | null>(_null);
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(__null);
+  const [volumeData, setVolumeData] = useState<VolumeData | null>(__null);
+  const [healthScores, setHealthScores] = useState<HealthScores | null>(__null);
   const [error, setError] = useState<string>('');
 
   useEffect(() => {
@@ -114,27 +114,27 @@ const PaymentAnalyticsScreen: React.FC = () => {
       setError('');
 
       // Simulate API calls (replace with actual API endpoints)
-      const [performanceResponse, volumeResponse, healthResponse] = await Promise.all([
+      const [performanceResponse, _volumeResponse, healthResponse] = await Promise.all([
         fetchProviderPerformance(),
         fetchVolumeData(),
         fetchHealthScores(),
       ]);
 
-      setAnalyticsData(_performanceResponse);
-      setVolumeData(_volumeResponse);
-      setHealthScores(_healthResponse);
-    } catch (_err) {
+      setAnalyticsData(__performanceResponse);
+      setVolumeData(__volumeResponse);
+      setHealthScores(__healthResponse);
+    } catch (__err) {
       setError('Failed to load analytics data');
     } finally {
-      setLoading(_false);
-      setRefreshing(_false);
+      setLoading(__false);
+      setRefreshing(__false);
     }
   };
 
   // Mock API calls - replace with actual API integration
   const fetchProviderPerformance = async (): Promise<AnalyticsData> => {
     // Simulate API delay
-    await new Promise(resolve => setTimeout(_resolve, 1000));
+    await new Promise(resolve => setTimeout(__resolve, 1000));
 
     return {
       overall_metrics: {
@@ -195,13 +195,13 @@ const PaymentAnalyticsScreen: React.FC = () => {
   };
 
   const fetchVolumeData = async (): Promise<VolumeData> => {
-    await new Promise(resolve => setTimeout(_resolve, 800));
+    await new Promise(resolve => setTimeout(__resolve, 800));
 
     const today = new Date();
     const trends = [];
 
     for (let i = 29; i >= 0; i--) {
-      const date = new Date(_today);
+      const date = new Date(__today);
       date.setDate(date.getDate() - i);
 
       trends.push({
@@ -214,7 +214,7 @@ const PaymentAnalyticsScreen: React.FC = () => {
     }
 
     return {
-      daily_trends: trends,
+      daily_trends: _trends,
       growth_metrics: {
         volume_growth: 12.5,
         transaction_growth: 8.3,
@@ -224,7 +224,7 @@ const PaymentAnalyticsScreen: React.FC = () => {
   };
 
   const fetchHealthScores = async (): Promise<HealthScores> => {
-    await new Promise(resolve => setTimeout(_resolve, 600));
+    await new Promise(resolve => setTimeout(__resolve, 600));
 
     return {
       health_scores: {
@@ -267,11 +267,16 @@ const PaymentAnalyticsScreen: React.FC = () => {
   };
 
   const onRefresh = () => {
-    setRefreshing(_true);
+    setRefreshing(__true);
     loadAnalyticsData();
   };
 
-  const renderMetricCard = (title: string, value: string, subtitle?: string, trend?: number) => (
+  const renderMetricCard = (
+    title: _string,
+    value: _string,
+    subtitle?: _string,
+    trend?: _number,
+  ) => (
     <View style={styles.metricCard}>
       <Text style={styles.metricTitle}>{title}</Text>
       <Text style={styles.metricValue}>{value}</Text>
@@ -289,16 +294,16 @@ const PaymentAnalyticsScreen: React.FC = () => {
               styles.trendText,
               trend >= 0 ? styles.trendPositiveText : styles.trendNegativeText,
             ]}>
-            {Math.abs(_trend).toFixed(1)}%
+            {Math.abs(__trend).toFixed(1)}%
           </Text>
         </View>
       )}
     </View>
   );
 
-  const renderProviderHealth = (provider: string, health: unknown) => {
-    const getStatusColor = (status: string) => {
-      switch (_status) {
+  const renderProviderHealth = (provider: _string, health: _unknown) => {
+    const getStatusColor = (status: _string) => {
+      switch (__status) {
         case 'excellent':
           return Colors.success;
         case 'good':
@@ -402,7 +407,7 @@ const PaymentAnalyticsScreen: React.FC = () => {
     const providers = Object.entries(analyticsData.provider_performance);
     const colors = [Colors.primary, Colors.secondary, Colors.warning, Colors.success];
 
-    const pieData = providers.map(([provider, data], index) => ({
+    const pieData = providers.map(([provider, data], _index) => ({
       name: provider.replace('_', ' ').toUpperCase(),
       population: data.total_volume,
       color: colors[index % colors.length],
@@ -429,7 +434,7 @@ const PaymentAnalyticsScreen: React.FC = () => {
     );
   };
 
-  if (_loading) {
+  if (__loading) {
     return (
       <View style={[styles.container, styles.centered]}>
         <ActivityIndicator size="large" color={Colors.primary} />
@@ -461,7 +466,7 @@ const PaymentAnalyticsScreen: React.FC = () => {
             <TouchableOpacity
               key={period}
               style={[styles.periodButton, selectedPeriod === period && styles.periodButtonActive]}
-              onPress={() => setSelectedPeriod(_period)}>
+              onPress={() => setSelectedPeriod(__period)}>
               <Text
                 style={[styles.periodText, selectedPeriod === period && styles.periodTextActive]}>
                 {period} Days
@@ -518,7 +523,7 @@ const PaymentAnalyticsScreen: React.FC = () => {
               </View>
             </View>
             {Object.entries(healthScores.health_scores).map(([provider, health]) =>
-              renderProviderHealth(_provider, health),
+              renderProviderHealth(__provider, _health),
             )}
           </View>
         )}
@@ -527,7 +532,7 @@ const PaymentAnalyticsScreen: React.FC = () => {
         {analyticsData?.recommendations && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Recommendations</Text>
-            {analyticsData.recommendations.map((_rec, index) => (
+            {analyticsData.recommendations.map((__rec, _index) => (
               <View key={index} style={styles.recommendationCard}>
                 <View style={styles.recommendationHeader}>
                   <View

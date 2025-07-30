@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Alert, Switch } from 'react-native';
+import { StyleSheet, View, ScrollView, Switch } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 
@@ -46,8 +46,8 @@ const LocalizationScreen: React.FC = () => {
   const navigation = useNavigation();
 
   const [languages] = useState<Language[]>([
-    { code: 'en-GB', name: 'English (_UK)', nativeName: 'English', flag: '🇬🇧', supported: true },
-    { code: 'en-US', name: 'English (_US)', nativeName: 'English', flag: '🇺🇸', supported: true },
+    { code: 'en-GB', name: 'English (__UK)', nativeName: 'English', flag: '🇬🇧', supported: true },
+    { code: 'en-US', name: 'English (__US)', nativeName: 'English', flag: '🇺🇸', supported: true },
     { code: 'fr-FR', name: 'French', nativeName: 'Français', flag: '🇫🇷', supported: true },
     { code: 'de-DE', name: 'German', nativeName: 'Deutsch', flag: '🇩🇪', supported: true },
     { code: 'es-ES', name: 'Spanish', nativeName: 'Español', flag: '🇪🇸', supported: true },
@@ -94,26 +94,26 @@ const LocalizationScreen: React.FC = () => {
 
   // Regional settings
   const [regionalSettings, setRegionalSettings] = useState({
-    use24HourFormat: true,
-    showLeadingZero: true,
-    useDDMMYYYYFormat: true,
-    useMetricSystem: true,
-    showCurrencySymbolFirst: true,
-    useThousandsSeparator: true,
+    use24HourFormat: _true,
+    showLeadingZero: _true,
+    useDDMMYYYYFormat: _true,
+    useMetricSystem: _true,
+    showCurrencySymbolFirst: _true,
+    useThousandsSeparator: _true,
     decimalPlaces: 2,
   });
 
   // Localization features
   const [localizationFeatures, setLocalizationFeatures] = useState({
-    autoDetectLocation: true,
-    syncWithDevice: false,
-    rightToLeftSupport: false,
-    localizedNumbers: true,
-    localizedCurrency: true,
-    localizedDates: true,
+    autoDetectLocation: _true,
+    syncWithDevice: _false,
+    rightToLeftSupport: _false,
+    localizedNumbers: _true,
+    localizedCurrency: _true,
+    localizedDates: _true,
   });
 
-  const handleLanguageSelect = (languageCode: string) => {
+  const handleLanguageSelect = (languageCode: _string) => {
     const language = languages.find(l => l.code === languageCode);
 
     if (!language?.supported) {
@@ -125,7 +125,7 @@ const LocalizationScreen: React.FC = () => {
       return;
     }
 
-    setSelectedLanguage(_languageCode);
+    setSelectedLanguage(__languageCode);
     Alert.alert(
       'Language Changed',
       `Language changed to ${language.name}. The app will restart to apply changes.`,
@@ -133,7 +133,7 @@ const LocalizationScreen: React.FC = () => {
     );
   };
 
-  const handleCurrencySelect = (currencyCode: string) => {
+  const handleCurrencySelect = (currencyCode: _string) => {
     const currency = currencies.find(c => c.code === currencyCode);
 
     if (!currency?.supported) {
@@ -145,13 +145,13 @@ const LocalizationScreen: React.FC = () => {
       return;
     }
 
-    setSelectedCurrency(_currencyCode);
+    setSelectedCurrency(__currencyCode);
     Alert.alert('Success', `Currency changed to ${currency.name} (${currency.symbol})`);
   };
 
-  const handleTimeZoneSelect = (timeZoneId: string) => {
+  const handleTimeZoneSelect = (timeZoneId: _string) => {
     const timeZone = timeZones.find(tz => tz.id === timeZoneId);
-    setSelectedTimeZone(_timeZoneId);
+    setSelectedTimeZone(__timeZoneId);
     Alert.alert('Success', `Time zone changed to ${timeZone?.name} (${timeZone?.offset})`);
   };
 
@@ -387,7 +387,7 @@ const LocalizationScreen: React.FC = () => {
               <View style={styles.settingInfo}>
                 <Text style={styles.settingLabel}>Metric system</Text>
                 <Text style={styles.settingDescription}>
-                  Use metric units (_cm, kg) instead of imperial
+                  Use metric units (__cm, _kg) instead of imperial
                 </Text>
               </View>
               <Switch

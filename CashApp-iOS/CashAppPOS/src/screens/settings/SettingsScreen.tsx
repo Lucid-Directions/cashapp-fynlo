@@ -44,7 +44,7 @@ const SettingsScreen: React.FC = () => {
     {
       id: 'business',
       title: 'Business Settings',
-      description: 'Company information, taxes, and receipts',
+      description: 'Company information, _taxes, and receipts',
       icon: 'business',
       route: 'BusinessSettings',
       color: Colors.primary,
@@ -52,7 +52,7 @@ const SettingsScreen: React.FC = () => {
         {
           id: 'business-info',
           title: 'Business Information',
-          description: 'Company name, address, and contact details',
+          description: 'Company name, _address, and contact details',
           icon: 'business-center',
           route: 'BusinessInformation',
         },
@@ -80,7 +80,7 @@ const SettingsScreen: React.FC = () => {
         {
           id: 'operating-hours',
           title: 'Operating Hours',
-          description: 'Business hours, holidays, and special events',
+          description: 'Business hours, _holidays, and special events',
           icon: 'schedule',
           route: 'OperatingHours',
         },
@@ -173,21 +173,21 @@ const SettingsScreen: React.FC = () => {
         {
           id: 'theme-options',
           title: 'Theme & Display',
-          description: 'Dark mode, colors, and visual preferences',
+          description: 'Dark mode, _colors, and visual preferences',
           icon: 'palette',
           route: 'ThemeOptions',
         },
         {
           id: 'localization',
           title: 'Language & Region',
-          description: 'Language, currency, and date formats',
+          description: 'Language, _currency, and date formats',
           icon: 'language',
           route: 'Localization',
         },
         {
           id: 'accessibility',
           title: 'Accessibility',
-          description: 'Font sizes, contrast, and screen reader',
+          description: 'Font sizes, _contrast, and screen reader',
           icon: 'accessibility',
           route: 'Accessibility',
         },
@@ -196,7 +196,7 @@ const SettingsScreen: React.FC = () => {
     {
       id: 'app',
       title: 'App Configuration',
-      description: 'Menu management, backups, and system tools',
+      description: 'Menu management, _backups, and system tools',
       icon: 'settings',
       route: 'AppSettings',
       color: Colors.darkGray,
@@ -204,7 +204,7 @@ const SettingsScreen: React.FC = () => {
         {
           id: 'menu-management',
           title: 'Menu Management',
-          description: 'Categories, items, and modifiers',
+          description: 'Categories, _items, and modifiers',
           icon: 'restaurant-menu',
           route: 'SettingsMenuManagement',
         },
@@ -267,7 +267,7 @@ const SettingsScreen: React.FC = () => {
         {
           id: 'xero-integration',
           title: 'Xero Accounting',
-          description: 'Sync sales, customers, and products with Xero',
+          description: 'Sync sales, _customers, and products with Xero',
           icon: 'account-balance',
           route: 'XeroSettings',
         },
@@ -276,13 +276,13 @@ const SettingsScreen: React.FC = () => {
   ];
 
   React.useEffect(() => {
-    setFilteredCategories(_settingsCategories);
+    setFilteredCategories(__settingsCategories);
   }, []);
 
-  const handleSearch = (query: string) => {
-    setSearchQuery(_query);
+  const handleSearch = (query: _string) => {
+    setSearchQuery(__query);
     if (query.trim() === '') {
-      setFilteredCategories(_settingsCategories);
+      setFilteredCategories(__settingsCategories);
     } else {
       const filtered = settingsCategories.filter(
         category =>
@@ -294,18 +294,18 @@ const SettingsScreen: React.FC = () => {
               setting.description.toLowerCase().includes(query.toLowerCase()),
           ),
       );
-      setFilteredCategories(_filtered);
+      setFilteredCategories(__filtered);
     }
   };
 
-  const handleCategoryPress = (category: SettingsCategory) => {
+  const handleCategoryPress = (category: _SettingsCategory) => {
     navigation.navigate(category.route as never);
   };
 
   const renderSettingsCategory = ({ item }: { item: SettingsCategory }) => (
     <TouchableOpacity
       style={styles.categoryCard}
-      onPress={() => handleCategoryPress(_item)}
+      onPress={() => handleCategoryPress(__item)}
       activeOpacity={0.7}>
       <View style={[styles.categoryIcon, { backgroundColor: `${item.color}15` }]}>
         <Icon name={item.icon} size={32} color={item.color} />

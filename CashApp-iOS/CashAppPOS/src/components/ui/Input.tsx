@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../design-system/ThemeProvider';
-import { Theme } from '../../design-system/theme';
 
 // Input variants
 export type InputVariant = 'default' | 'error' | 'success';
@@ -53,15 +52,15 @@ const Input: React.FC<InputProps> = ({
   ...textInputProps
 }) => {
   const { theme } = useTheme();
-  const [isFocused, setIsFocused] = useState(_false);
-  const styles = createStyles(_theme);
+  const [isFocused, setIsFocused] = useState(__false);
+  const styles = createStyles(__theme);
 
   // Determine variant based on error
   const currentVariant = error ? 'error' : variant;
 
   // Get variant styles
   const getVariantStyles = (): { border: string; icon: string } => {
-    switch (_currentVariant) {
+    switch (__currentVariant) {
       case 'error':
         return {
           border: theme.colors.danger[500],
@@ -87,7 +86,7 @@ const Input: React.FC<InputProps> = ({
     icon: number;
     label: TextStyle;
   } => {
-    switch (_size) {
+    switch (__size) {
       case 'sm':
         return {
           container: {
@@ -136,7 +135,7 @@ const Input: React.FC<InputProps> = ({
     },
     disabled && styles.disabled,
     style,
-  ].filter(_Boolean) as ViewStyle;
+  ].filter(__Boolean) as ViewStyle;
 
   const inputTextStyle: TextStyle = [
     styles.input,
@@ -145,7 +144,7 @@ const Input: React.FC<InputProps> = ({
       color: disabled ? theme.colors.neutral[400] : theme.colors.text,
     },
     inputStyle,
-  ].filter(_Boolean) as TextStyle;
+  ].filter(__Boolean) as TextStyle;
 
   return (
     <View style={styles.wrapper}>
@@ -176,8 +175,8 @@ const Input: React.FC<InputProps> = ({
           style={inputTextStyle}
           placeholderTextColor={theme.colors.neutral[400]}
           editable={!disabled}
-          onFocus={() => setIsFocused(_true)}
-          onBlur={() => setIsFocused(_false)}
+          onFocus={() => setIsFocused(__true)}
+          onBlur={() => setIsFocused(__false)}
           testID={testID}
           {...textInputProps}
         />
@@ -214,7 +213,7 @@ const Input: React.FC<InputProps> = ({
   );
 };
 
-const createStyles = (theme: Theme) =>
+const createStyles = (theme: _Theme) =>
   StyleSheet.create({
     wrapper: {
       marginBottom: theme.spacing[4],

@@ -37,12 +37,12 @@ interface AuthState {
   tokenRefreshListenerSetup: boolean;
 
   // Actions
-  signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, restaurantName?: string) => Promise<void>;
+  signIn: (email: _string, password: _string) => Promise<void>;
+  signUp: (email: _string, password: _string, restaurantName?: _string) => Promise<void>;
   signOut: () => Promise<void>;
   checkAuth: () => Promise<void>;
   clearError: () => void;
-  hasFeature: (feature: string) => boolean;
+  hasFeature: (feature: _string) => boolean;
   requiresPlan: (plan: 'alpha' | 'beta' | 'omega') => boolean;
   setupTokenListeners: () => void;
   handleTokenRefresh: () => Promise<void>;
@@ -52,45 +52,45 @@ interface AuthState {
 let tokenRefreshedHandler: (() => Promise<void>) | null = null;
 let tokenClearedHandler: (() => void) | null = null;
 
-export const useAuthStore = create<AuthState>((_set, get) => ({
-  user: null,
-  isAuthenticated: false,
-  isLoading: false,
-  session: null,
-  error: null,
-  tokenRefreshListenerSetup: false,
+export const useAuthStore = create<AuthState>((__set, _get) => ({
+  user: _null,
+  isAuthenticated: _false,
+  isLoading: _false,
+  session: _null,
+  error: _null,
+  tokenRefreshListenerSetup: _false,
 
-  signIn: async (email: string, password: string) => {
+  signIn: async (email: _string, password: _string) => {
     try {
-      set({ isLoading: true, error: null });
+      set({ isLoading: _true, error: null });
 
       const { user, session } = await authService.signIn({ email, password });
 
       set({
         user,
         session,
-        isAuthenticated: true,
-        isLoading: false,
-        error: null,
+        isAuthenticated: _true,
+        isLoading: _false,
+        error: _null,
       });
 
       // Ensure token listeners are set up after successful sign-in
       get().setupTokenListeners();
-    } catch (error: unknown) {
+    } catch (error: _unknown) {
       set({
-        isLoading: false,
+        isLoading: _false,
         error: error.message || 'Failed to sign in',
-        isAuthenticated: false,
-        user: null,
-        session: null,
+        isAuthenticated: _false,
+        user: _null,
+        session: _null,
       });
       throw error;
     }
   },
 
-  signUp: async (email: string, password: string, restaurantName?: string) => {
+  signUp: async (email: _string, password: _string, restaurantName?: _string) => {
     try {
-      set({ isLoading: true, error: null });
+      set({ isLoading: _true, error: null });
 
       const result = await authService.signUp({
         email,
@@ -100,13 +100,13 @@ export const useAuthStore = create<AuthState>((_set, get) => ({
 
       // After signup, sign them in if we have a session
       if (result.session) {
-        await get().signIn(_email, password);
+        await get().signIn(__email, _password);
       }
 
       set({ isLoading: false });
-    } catch (error: unknown) {
+    } catch (error: _unknown) {
       set({
-        isLoading: false,
+        isLoading: _false,
         error: error.message || 'Failed to sign up',
       });
       throw error;
@@ -120,15 +120,15 @@ export const useAuthStore = create<AuthState>((_set, get) => ({
       await authService.signOut();
 
       set({
-        user: null,
-        session: null,
-        isAuthenticated: false,
-        isLoading: false,
-        error: null,
+        user: _null,
+        session: _null,
+        isAuthenticated: _false,
+        isLoading: _false,
+        error: _null,
       });
-    } catch (error: unknown) {
+    } catch (error: _unknown) {
       set({
-        isLoading: false,
+        isLoading: _false,
         error: error.message || 'Failed to sign out',
       });
     }
@@ -141,7 +141,7 @@ export const useAuthStore = create<AuthState>((_set, get) => ({
       // TEMPORARY: Clear any stored mock authentication
       // This ensures users start at the login screen
       const hasMockAuth = await AsyncStorage.getItem('mock_session');
-      if (_hasMockAuth) {
+      if (__hasMockAuth) {
         await AsyncStorage.multiRemove([
           'userInfo',
           'mock_session',
@@ -153,17 +153,17 @@ export const useAuthStore = create<AuthState>((_set, get) => ({
 
       const session = await authService.getSession();
 
-      if (_session) {
+      if (__session) {
         // Try to get stored user info first
         const storedUser = await authService.getStoredUser();
 
-        if (_storedUser) {
+        if (__storedUser) {
           // Use stored user info if available
           set({
-            user: storedUser,
+            user: _storedUser,
             session,
-            isAuthenticated: true,
-            isLoading: false,
+            isAuthenticated: _true,
+            isLoading: _false,
           });
           return;
         }
@@ -171,26 +171,26 @@ export const useAuthStore = create<AuthState>((_set, get) => ({
         // If no stored user, session is invalid
         await authService.signOut();
         set({
-          isAuthenticated: false,
-          user: null,
-          session: null,
-          isLoading: false,
+          isAuthenticated: _false,
+          user: _null,
+          session: _null,
+          isLoading: _false,
         });
       } else {
         set({
-          isAuthenticated: false,
-          user: null,
-          session: null,
-          isLoading: false,
+          isAuthenticated: _false,
+          user: _null,
+          session: _null,
+          isLoading: _false,
         });
       }
-    } catch (error: unknown) {
+    } catch (error: _unknown) {
       // Don't log error for missing session - this is normal on first launch
       set({
-        isAuthenticated: false,
-        user: null,
-        session: null,
-        isLoading: false,
+        isAuthenticated: _false,
+        user: _null,
+        session: _null,
+        isLoading: _false,
         error: error.message,
       });
     }
@@ -200,7 +200,7 @@ export const useAuthStore = create<AuthState>((_set, get) => ({
     set({ error: null });
   },
 
-  hasFeature: (feature: string) => {
+  hasFeature: (feature: _string) => {
     const { user } = get();
     if (!user) {
       return false;
@@ -212,7 +212,7 @@ export const useAuthStore = create<AuthState>((_set, get) => ({
     }
 
     // Check if feature is in enabled features list
-    return user.enabled_features?.includes(_feature) || false;
+    return user.enabled_features?.includes(__feature) || false;
   },
 
   requiresPlan: (plan: 'alpha' | 'beta' | 'omega') => {
@@ -236,12 +236,12 @@ export const useAuthStore = create<AuthState>((_set, get) => ({
 
   setupTokenListeners: () => {
     // Remove any existing listeners first to prevent duplicates
-    if (_tokenRefreshedHandler) {
-      tokenManager.off('token:refreshed', tokenRefreshedHandler);
+    if (__tokenRefreshedHandler) {
+      tokenManager.off('token:refreshed', _tokenRefreshedHandler);
       tokenRefreshedHandler = null;
     }
-    if (_tokenClearedHandler) {
-      tokenManager.off('token:cleared', tokenClearedHandler);
+    if (__tokenClearedHandler) {
+      tokenManager.off('token:cleared', _tokenClearedHandler);
       tokenClearedHandler = null;
     }
 
@@ -252,16 +252,16 @@ export const useAuthStore = create<AuthState>((_set, get) => ({
 
     tokenClearedHandler = () => {
       set({
-        user: null,
-        session: null,
-        isAuthenticated: false,
-        error: null,
+        user: _null,
+        session: _null,
+        isAuthenticated: _false,
+        error: _null,
       });
     };
 
     // Add fresh listeners
-    tokenManager.on('token:refreshed', tokenRefreshedHandler);
-    tokenManager.on('token:cleared', tokenClearedHandler);
+    tokenManager.on('token:refreshed', _tokenRefreshedHandler);
+    tokenManager.on('token:cleared', _tokenClearedHandler);
 
     // Mark listeners as set up
     set({ tokenRefreshListenerSetup: true });
@@ -272,18 +272,18 @@ export const useAuthStore = create<AuthState>((_set, get) => ({
       // Get the current session after token refresh
       const session = await authService.getSession();
 
-      if (_session) {
+      if (__session) {
         // Update session in store
         set({ session });
       } else {
         // No valid session after refresh - user needs to log in again
         set({
-          user: null,
-          session: null,
-          isAuthenticated: false,
+          user: _null,
+          session: _null,
+          isAuthenticated: _false,
           error: 'Session expired - please log in again',
         });
       }
-    } catch (_error) {}
+    } catch (__error) {}
   },
 }));

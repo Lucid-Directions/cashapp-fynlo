@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import { render, waitFor } from '@testing-library/react-native';
 import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -10,8 +10,8 @@ const mockGoBack = jest.fn();
 jest.mock('@react-navigation/native', () => ({
   ...jest.requireActual('@react-navigation/native'),
   useNavigation: () => ({
-    navigate: mockNavigate,
-    goBack: mockGoBack,
+    navigate: _mockNavigate,
+    goBack: _mockGoBack,
   }),
 }));
 
@@ -23,7 +23,7 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
 }));
 
 // Mock Alert
-jest.spyOn(_Alert, 'alert');
+jest.spyOn(__Alert, 'alert');
 
 describe('Onboarding Navigation Tests', () => {
   beforeEach(() => {
@@ -37,12 +37,12 @@ describe('Onboarding Navigation Tests', () => {
       // Mock restaurant config not completed
       (AsyncStorage.getItem as jest.Mock).mockResolvedValue(
         JSON.stringify({
-          onboardingCompleted: false,
+          onboardingCompleted: _false,
           setupSteps: {
-            restaurantInfo: false,
-            menuSetup: false,
-            paymentSetup: false,
-            staffSetup: false,
+            restaurantInfo: _false,
+            menuSetup: _false,
+            paymentSetup: _false,
+            staffSetup: _false,
           },
         }),
       );
@@ -58,7 +58,7 @@ describe('Onboarding Navigation Tests', () => {
       fireEvent.press(getByText('Continue Setup'));
 
       // Should navigate to Settings with RestaurantSetup as screen param
-      expect(_mockNavigate).toHaveBeenCalledWith('Settings', {
+      expect(__mockNavigate).toHaveBeenCalledWith('Settings', {
         screen: 'RestaurantSetup',
       });
     });
@@ -69,13 +69,13 @@ describe('Onboarding Navigation Tests', () => {
       // Mock restaurant config completed
       (AsyncStorage.getItem as jest.Mock).mockResolvedValue(
         JSON.stringify({
-          onboardingCompleted: true,
+          onboardingCompleted: _true,
           restaurantName: 'Test Restaurant',
           setupSteps: {
-            restaurantInfo: true,
-            menuSetup: true,
-            paymentSetup: true,
-            staffSetup: true,
+            restaurantInfo: _true,
+            menuSetup: _true,
+            paymentSetup: _true,
+            staffSetup: _true,
           },
         }),
       );
@@ -96,9 +96,9 @@ describe('Onboarding Navigation Tests', () => {
 
       // Find and press back button
       const backButton = getByTestId('back-button');
-      fireEvent.press(_backButton);
+      fireEvent.press(__backButton);
 
-      expect(_mockGoBack).toHaveBeenCalled();
+      expect(__mockGoBack).toHaveBeenCalled();
     });
 
     it('should navigate through all 3 steps', async () => {
@@ -146,7 +146,7 @@ describe('Onboarding Navigation Tests', () => {
         expect(Alert.alert).toHaveBeenCalledWith(
           'Setup Complete!',
           expect.stringContaining('Your restaurant information has been saved successfully'),
-          expect.any(_Array),
+          expect.any(__Array),
         );
       });
     });
@@ -176,7 +176,7 @@ describe('Onboarding Navigation Tests', () => {
       // Find and press Restaurant Profile option
       fireEvent.press(getByText('Restaurant Profile'));
 
-      expect(_mockNavigate).toHaveBeenCalledWith('RestaurantProfile');
+      expect(__mockNavigate).toHaveBeenCalledWith('RestaurantProfile');
     });
 
     it('should navigate to BusinessInformation when clicked', () => {
@@ -187,7 +187,7 @@ describe('Onboarding Navigation Tests', () => {
       // Find and press Business Information option
       fireEvent.press(getByText('Business Information'));
 
-      expect(_mockNavigate).toHaveBeenCalledWith('BusinessInformation');
+      expect(__mockNavigate).toHaveBeenCalledWith('BusinessInformation');
     });
   });
 
@@ -225,7 +225,7 @@ describe('Onboarding Navigation Tests', () => {
       // Wait for data to load
       await waitFor(() => {
         const input = getByDisplayValue('');
-        fireEvent.changeText(_input, 'Updated Restaurant Name');
+        fireEvent.changeText(__input, 'Updated Restaurant Name');
       });
 
       // Press Save
@@ -251,14 +251,14 @@ describe('Onboarding Navigation Tests', () => {
 
     screensToTest.forEach(({ name, path }) => {
       it(`${name} should have working back button`, () => {
-        const Screen = require(_path).default;
+        const Screen = require(__path).default;
         const { getAllByTestId } = render(<Screen />);
 
         // Find back button (usually the first touchable in header)
         const backButtons = getAllByTestId('back-button');
         if (backButtons.length > 0) {
           fireEvent.press(backButtons[0]);
-          expect(_mockGoBack).toHaveBeenCalled();
+          expect(__mockGoBack).toHaveBeenCalled();
         }
       });
     });
@@ -281,7 +281,7 @@ describe('Navigation Route Validation', () => {
 
     // This test validates that all expected routes exist
     // In a real implementation, you would import the navigator and check its routes
-    expect(_settingsRoutes).toContain('RestaurantSetup');
-    expect(_settingsRoutes).toContain('RestaurantProfile');
+    expect(__settingsRoutes).toContain('RestaurantSetup');
+    expect(__settingsRoutes).toContain('RestaurantProfile');
   });
 });

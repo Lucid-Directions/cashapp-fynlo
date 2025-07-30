@@ -63,10 +63,10 @@ interface LaborSummary {
 const LaborReportDetailScreen = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
-  const [loading, setLoading] = useState(_true);
-  const [error, setError] = useState<string | null>(_null);
+  const [loading, setLoading] = useState(__true);
+  const [error, setError] = useState<string | null>(__null);
   const [laborData, setLaborData] = useState<LaborData[]>([]);
-  const [summary, setSummary] = useState<LaborSummary | null>(_null);
+  const [summary, setSummary] = useState<LaborSummary | null>(__null);
   const [selectedPeriod, setSelectedPeriod] = useState('week');
 
   useEffect(() => {
@@ -75,15 +75,15 @@ const LaborReportDetailScreen = () => {
 
   const loadLaborData = async () => {
     try {
-      setLoading(_true);
-      setError(_null);
+      setLoading(__true);
+      setError(__null);
 
       const dataService = DataService.getInstance();
-      const data = await dataService.getLaborReport(_selectedPeriod);
+      const data = await dataService.getLaborReport(__selectedPeriod);
 
       // Process the data
       const processedData: LaborData[] =
-        data.employees?.map((emp: unknown) => ({
+        data.employees?.map((emp: _unknown) => ({
           employeeId: emp.id,
           employeeName: emp.name || `${emp.first_name} ${emp.last_name}`,
           role: emp.role,
@@ -103,21 +103,21 @@ const LaborReportDetailScreen = () => {
 
       // Calculate summary
       const summaryData: LaborSummary = {
-        totalScheduledHours: processedData.reduce((_sum, emp) => sum + emp.scheduledHours, 0),
-        totalActualHours: processedData.reduce((_sum, emp) => sum + emp.actualHours, 0),
-        totalOvertimeHours: processedData.reduce((_sum, emp) => sum + emp.overtimeHours, 0),
-        totalLaborCost: processedData.reduce((_sum, emp) => sum + emp.totalCost, 0),
+        totalScheduledHours: processedData.reduce((__sum, _emp) => sum + emp.scheduledHours, 0),
+        totalActualHours: processedData.reduce((__sum, _emp) => sum + emp.actualHours, 0),
+        totalOvertimeHours: processedData.reduce((__sum, _emp) => sum + emp.overtimeHours, 0),
+        totalLaborCost: processedData.reduce((__sum, _emp) => sum + emp.totalCost, 0),
         averageEfficiency:
           processedData.length > 0
-            ? processedData.reduce((_sum, emp) => sum + emp.efficiency, 0) / processedData.length
+            ? processedData.reduce((__sum, _emp) => sum + emp.efficiency, 0) / processedData.length
             : 0,
         laborCostPercentage: data.labor_cost_percentage || 0,
         totalRevenue: data.total_revenue || 0,
       };
 
-      setLaborData(_processedData);
-      setSummary(_summaryData);
-    } catch (_error) {
+      setLaborData(__processedData);
+      setSummary(__summaryData);
+    } catch (__error) {
       setError('Failed to load labor data. Please try again.');
       Alert.alert(
         'Error',
@@ -125,7 +125,7 @@ const LaborReportDetailScreen = () => {
         [{ text: 'OK' }],
       );
     } finally {
-      setLoading(_false);
+      setLoading(__false);
     }
   };
 
@@ -133,18 +133,18 @@ const LaborReportDetailScreen = () => {
     Alert.alert('Export Labor Report', 'Export functionality will be available soon');
   };
 
-  const formatCurrency = (amount: number) => {
+  const formatCurrency = (amount: _number) => {
     return `£${amount.toLocaleString('en-GB', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     })}`;
   };
 
-  const formatHours = (hours: number) => {
+  const formatHours = (hours: _number) => {
     return `${hours.toFixed(1)}h`;
   };
 
-  const getEfficiencyColor = (efficiency: number) => {
+  const getEfficiencyColor = (efficiency: _number) => {
     if (efficiency >= 95) {
       return Colors.success;
     }
@@ -173,7 +173,7 @@ const LaborReportDetailScreen = () => {
           <TouchableOpacity
             key={period}
             style={[styles.periodButton, selectedPeriod === period && styles.periodButtonActive]}
-            onPress={() => setSelectedPeriod(_period)}>
+            onPress={() => setSelectedPeriod(__period)}>
             <Text
               style={[
                 styles.periodButtonText,

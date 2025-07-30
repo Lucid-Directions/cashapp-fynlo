@@ -26,12 +26,12 @@ jest.mock('../../../services/DatabaseService');
 const mockDatabaseService = DatabaseService as jest.Mocked<typeof DatabaseService>;
 
 // Mock Alert
-jest.spyOn(_Alert, 'alert');
+jest.spyOn(__Alert, 'alert');
 
 // Mock Zustand store
 const mockStore = createMockAppStore();
 jest.mock('../../../store/useAppStore', () => ({
-  __esModule: true,
+  __esModule: _true,
   default: jest.fn(() => mockStore),
 }));
 
@@ -77,7 +77,7 @@ describe('LoginScreen', () => {
       const { getByPlaceholderText } = render(<LoginScreen />);
       const usernameInput = getByPlaceholderText('Username');
 
-      fireEvent.changeText(_usernameInput, 'test@example.com');
+      fireEvent.changeText(__usernameInput, 'test@example.com');
 
       expect(usernameInput.props.value).toBe('test@example.com');
     });
@@ -86,7 +86,7 @@ describe('LoginScreen', () => {
       const { getByPlaceholderText } = render(<LoginScreen />);
       const passwordInput = getByPlaceholderText('Password');
 
-      fireEvent.changeText(_passwordInput, 'password123');
+      fireEvent.changeText(__passwordInput, 'password123');
 
       expect(passwordInput.props.value).toBe('password123');
     });
@@ -96,17 +96,17 @@ describe('LoginScreen', () => {
       const passwordInput = getByPlaceholderText('Password');
 
       // Initially password should be hidden
-      expect(passwordInput.props.secureTextEntry).toBe(_true);
+      expect(passwordInput.props.secureTextEntry).toBe(__true);
 
       // Find and press the visibility toggle button
       const toggleButton = getByTestId('password-toggle');
-      fireEvent.press(_toggleButton);
+      fireEvent.press(__toggleButton);
 
-      expect(passwordInput.props.secureTextEntry).toBe(_false);
+      expect(passwordInput.props.secureTextEntry).toBe(__false);
 
       // Press again to hide
-      fireEvent.press(_toggleButton);
-      expect(passwordInput.props.secureTextEntry).toBe(_true);
+      fireEvent.press(__toggleButton);
+      expect(passwordInput.props.secureTextEntry).toBe(__true);
     });
   });
 
@@ -115,7 +115,7 @@ describe('LoginScreen', () => {
       const { getByText } = render(<LoginScreen />);
       const loginButton = getByText('Sign In');
 
-      fireEvent.press(_loginButton);
+      fireEvent.press(__loginButton);
 
       await waitFor(() => {
         expect(Alert.alert).toHaveBeenCalledWith(
@@ -130,8 +130,8 @@ describe('LoginScreen', () => {
       const passwordInput = getByPlaceholderText('Password');
       const loginButton = getByText('Sign In');
 
-      fireEvent.changeText(_passwordInput, 'password123');
-      fireEvent.press(_loginButton);
+      fireEvent.changeText(__passwordInput, 'password123');
+      fireEvent.press(__loginButton);
 
       await waitFor(() => {
         expect(Alert.alert).toHaveBeenCalledWith(
@@ -146,8 +146,8 @@ describe('LoginScreen', () => {
       const usernameInput = getByPlaceholderText('Username');
       const loginButton = getByText('Sign In');
 
-      fireEvent.changeText(_usernameInput, 'test@example.com');
-      fireEvent.press(_loginButton);
+      fireEvent.changeText(__usernameInput, 'test@example.com');
+      fireEvent.press(__loginButton);
 
       await waitFor(() => {
         expect(Alert.alert).toHaveBeenCalledWith(
@@ -158,9 +158,9 @@ describe('LoginScreen', () => {
     });
 
     it('should attempt login with valid credentials', async () => {
-      const mockLogin = jest.fn().mockResolvedValue(_true);
+      const mockLogin = jest.fn().mockResolvedValue(__true);
       mockDatabaseService.getInstance.mockReturnValue({
-        login: mockLogin,
+        login: _mockLogin,
       } as unknown);
 
       const { getByText, getByPlaceholderText } = render(<LoginScreen />);
@@ -168,21 +168,21 @@ describe('LoginScreen', () => {
       const passwordInput = getByPlaceholderText('Password');
       const loginButton = getByText('Sign In');
 
-      fireEvent.changeText(_usernameInput, 'test@example.com');
-      fireEvent.changeText(_passwordInput, 'password123');
-      fireEvent.press(_loginButton);
+      fireEvent.changeText(__usernameInput, 'test@example.com');
+      fireEvent.changeText(__passwordInput, 'password123');
+      fireEvent.press(__loginButton);
 
       await waitFor(() => {
-        expect(_mockLogin).toHaveBeenCalledWith('test@example.com', 'password123');
+        expect(__mockLogin).toHaveBeenCalledWith('test@example.com', 'password123');
         expect(mockStore.setUser).toHaveBeenCalled();
         expect(mockStore.setSession).toHaveBeenCalled();
       });
     });
 
     it('should handle login failure', async () => {
-      const mockLogin = jest.fn().mockResolvedValue(_false);
+      const mockLogin = jest.fn().mockResolvedValue(__false);
       mockDatabaseService.getInstance.mockReturnValue({
-        login: mockLogin,
+        login: _mockLogin,
       } as unknown);
 
       const { getByText, getByPlaceholderText } = render(<LoginScreen />);
@@ -190,9 +190,9 @@ describe('LoginScreen', () => {
       const passwordInput = getByPlaceholderText('Password');
       const loginButton = getByText('Sign In');
 
-      fireEvent.changeText(_usernameInput, 'wrong@example.com');
-      fireEvent.changeText(_passwordInput, 'wrongpassword');
-      fireEvent.press(_loginButton);
+      fireEvent.changeText(__usernameInput, 'wrong@example.com');
+      fireEvent.changeText(__passwordInput, 'wrongpassword');
+      fireEvent.press(__loginButton);
 
       await waitFor(() => {
         expect(Alert.alert).toHaveBeenCalledWith('Login Failed', 'Invalid username or password');
@@ -202,7 +202,7 @@ describe('LoginScreen', () => {
     it('should handle login error', async () => {
       const mockLogin = jest.fn().mockRejectedValue(new Error('Network error'));
       mockDatabaseService.getInstance.mockReturnValue({
-        login: mockLogin,
+        login: _mockLogin,
       } as unknown);
 
       const { getByText, getByPlaceholderText } = render(<LoginScreen />);
@@ -210,9 +210,9 @@ describe('LoginScreen', () => {
       const passwordInput = getByPlaceholderText('Password');
       const loginButton = getByText('Sign In');
 
-      fireEvent.changeText(_usernameInput, 'test@example.com');
-      fireEvent.changeText(_passwordInput, 'password123');
-      fireEvent.press(_loginButton);
+      fireEvent.changeText(__usernameInput, 'test@example.com');
+      fireEvent.changeText(__passwordInput, 'password123');
+      fireEvent.press(__loginButton);
 
       await waitFor(() => {
         expect(Alert.alert).toHaveBeenCalledWith(
@@ -225,9 +225,9 @@ describe('LoginScreen', () => {
     it('should show loading state during login', async () => {
       const mockLogin = jest
         .fn()
-        .mockImplementation(() => new Promise(resolve => setTimeout(() => resolve(_true), 100)));
+        .mockImplementation(() => new Promise(resolve => setTimeout(() => resolve(__true), 100)));
       mockDatabaseService.getInstance.mockReturnValue({
-        login: mockLogin,
+        login: _mockLogin,
       } as unknown);
 
       const { getByText, getByPlaceholderText } = render(<LoginScreen />);
@@ -235,9 +235,9 @@ describe('LoginScreen', () => {
       const passwordInput = getByPlaceholderText('Password');
       const loginButton = getByText('Sign In');
 
-      fireEvent.changeText(_usernameInput, 'test@example.com');
-      fireEvent.changeText(_passwordInput, 'password123');
-      fireEvent.press(_loginButton);
+      fireEvent.changeText(__usernameInput, 'test@example.com');
+      fireEvent.changeText(__passwordInput, 'password123');
+      fireEvent.press(__loginButton);
 
       // Should show loading text
       expect(getByText('Signing In...')).toBeTruthy();
@@ -250,9 +250,9 @@ describe('LoginScreen', () => {
     it('should disable button during loading', async () => {
       const mockLogin = jest
         .fn()
-        .mockImplementation(() => new Promise(resolve => setTimeout(() => resolve(_true), 100)));
+        .mockImplementation(() => new Promise(resolve => setTimeout(() => resolve(__true), 100)));
       mockDatabaseService.getInstance.mockReturnValue({
-        login: mockLogin,
+        login: _mockLogin,
       } as unknown);
 
       const { getByText, getByPlaceholderText } = render(<LoginScreen />);
@@ -260,15 +260,15 @@ describe('LoginScreen', () => {
       const passwordInput = getByPlaceholderText('Password');
       const loginButton = getByText('Sign In');
 
-      fireEvent.changeText(_usernameInput, 'test@example.com');
-      fireEvent.changeText(_passwordInput, 'password123');
-      fireEvent.press(_loginButton);
+      fireEvent.changeText(__usernameInput, 'test@example.com');
+      fireEvent.changeText(__passwordInput, 'password123');
+      fireEvent.press(__loginButton);
 
       // Button should be disabled during loading
-      expect(loginButton.props.disabled).toBe(_true);
+      expect(loginButton.props.disabled).toBe(__true);
 
       await waitFor(() => {
-        expect(loginButton.props.disabled).toBe(_false);
+        expect(loginButton.props.disabled).toBe(__false);
       });
     });
   });
@@ -278,7 +278,7 @@ describe('LoginScreen', () => {
       const { getByText } = render(<LoginScreen />);
       const forgotPasswordButton = getByText('Forgot Password?');
 
-      fireEvent.press(_forgotPasswordButton);
+      fireEvent.press(__forgotPasswordButton);
 
       expect(mockNavigation.navigate).toHaveBeenCalledWith('ForgotPassword');
     });
@@ -309,9 +309,9 @@ describe('LoginScreen', () => {
 
   describe('Form Validation', () => {
     it('should trim whitespace from username', async () => {
-      const mockLogin = jest.fn().mockResolvedValue(_true);
+      const mockLogin = jest.fn().mockResolvedValue(__true);
       mockDatabaseService.getInstance.mockReturnValue({
-        login: mockLogin,
+        login: _mockLogin,
       } as unknown);
 
       const { getByText, getByPlaceholderText } = render(<LoginScreen />);
@@ -319,19 +319,19 @@ describe('LoginScreen', () => {
       const passwordInput = getByPlaceholderText('Password');
       const loginButton = getByText('Sign In');
 
-      fireEvent.changeText(_usernameInput, '  test@example.com  ');
-      fireEvent.changeText(_passwordInput, 'password123');
-      fireEvent.press(_loginButton);
+      fireEvent.changeText(__usernameInput, '  test@example.com  ');
+      fireEvent.changeText(__passwordInput, 'password123');
+      fireEvent.press(__loginButton);
 
       await waitFor(() => {
-        expect(_mockLogin).toHaveBeenCalledWith('test@example.com', 'password123');
+        expect(__mockLogin).toHaveBeenCalledWith('test@example.com', 'password123');
       });
     });
 
     it('should handle special characters in credentials', async () => {
-      const mockLogin = jest.fn().mockResolvedValue(_true);
+      const mockLogin = jest.fn().mockResolvedValue(__true);
       mockDatabaseService.getInstance.mockReturnValue({
-        login: mockLogin,
+        login: _mockLogin,
       } as unknown);
 
       const { getByText, getByPlaceholderText } = render(<LoginScreen />);
@@ -339,21 +339,21 @@ describe('LoginScreen', () => {
       const passwordInput = getByPlaceholderText('Password');
       const loginButton = getByText('Sign In');
 
-      fireEvent.changeText(_usernameInput, 'test+user@example.com');
-      fireEvent.changeText(_passwordInput, 'P@ssw0rd!123');
-      fireEvent.press(_loginButton);
+      fireEvent.changeText(__usernameInput, 'test+user@example.com');
+      fireEvent.changeText(__passwordInput, 'P@ssw0rd!123');
+      fireEvent.press(__loginButton);
 
       await waitFor(() => {
-        expect(_mockLogin).toHaveBeenCalledWith('test+user@example.com', 'P@ssw0rd!123');
+        expect(__mockLogin).toHaveBeenCalledWith('test+user@example.com', 'P@ssw0rd!123');
       });
     });
   });
 
   describe('Store Integration', () => {
     it('should call setLoading during login process', async () => {
-      const mockLogin = jest.fn().mockResolvedValue(_true);
+      const mockLogin = jest.fn().mockResolvedValue(__true);
       mockDatabaseService.getInstance.mockReturnValue({
-        login: mockLogin,
+        login: _mockLogin,
       } as unknown);
 
       const { getByText, getByPlaceholderText } = render(<LoginScreen />);
@@ -361,13 +361,13 @@ describe('LoginScreen', () => {
       const passwordInput = getByPlaceholderText('Password');
       const loginButton = getByText('Sign In');
 
-      fireEvent.changeText(_usernameInput, 'test@example.com');
-      fireEvent.changeText(_passwordInput, 'password123');
-      fireEvent.press(_loginButton);
+      fireEvent.changeText(__usernameInput, 'test@example.com');
+      fireEvent.changeText(__passwordInput, 'password123');
+      fireEvent.press(__loginButton);
 
       await waitFor(() => {
-        expect(mockStore.setLoading).toHaveBeenCalledWith(_true);
-        expect(mockStore.setLoading).toHaveBeenCalledWith(_false);
+        expect(mockStore.setLoading).toHaveBeenCalledWith(__true);
+        expect(mockStore.setLoading).toHaveBeenCalledWith(__false);
       });
     });
   });

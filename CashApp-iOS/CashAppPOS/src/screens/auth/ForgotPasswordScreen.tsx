@@ -28,7 +28,7 @@ const Colors = {
 const ForgotPasswordScreen: React.FC = () => {
   const navigation = useNavigation();
   const [email, setEmail] = useState('');
-  const [isLoading, setIsLoading] = useState(_false);
+  const [isLoading, setIsLoading] = useState(__false);
 
   const handleResetPassword = async () => {
     if (!email.trim()) {
@@ -36,11 +36,11 @@ const ForgotPasswordScreen: React.FC = () => {
       return;
     }
 
-    setIsLoading(_true);
+    setIsLoading(__true);
 
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(_resolve, 2000));
+      await new Promise(resolve => setTimeout(__resolve, 2000));
 
       Alert.alert(
         'Reset Link Sent',
@@ -52,10 +52,10 @@ const ForgotPasswordScreen: React.FC = () => {
           },
         ],
       );
-    } catch (_error) {
+    } catch (__error) {
       Alert.alert('Error', 'Failed to send reset link. Please try again.');
     } finally {
-      setIsLoading(_false);
+      setIsLoading(__false);
     }
   };
 

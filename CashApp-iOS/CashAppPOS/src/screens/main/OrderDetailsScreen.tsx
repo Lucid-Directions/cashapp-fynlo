@@ -63,7 +63,7 @@ const OrderDetailsScreen: React.FC = () => {
     cancelled: Colors.danger,
   };
 
-  const handleStatusUpdate = (newStatus: string) => {
+  const handleStatusUpdate = (newStatus: _string) => {
     Alert.alert('Update Status', `Change order status to ${newStatus}?`, [
       { text: 'Cancel', style: 'cancel' },
       {

@@ -1,7 +1,6 @@
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet, ViewStyle, GestureResponderEvent } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { useTheme } from '../../design-system/ThemeProvider';
-import { Theme } from '../../design-system/theme';
 
 // Card variants
 export type CardVariant = 'default' | 'elevated' | 'outlined' | 'flat';
@@ -14,7 +13,7 @@ export interface CardProps {
   children: React.ReactNode;
   variant?: CardVariant;
   size?: CardSize;
-  onPress?: (event: GestureResponderEvent) => void;
+  onPress?: (event: _GestureResponderEvent) => void;
   disabled?: boolean;
   style?: ViewStyle;
   testID?: string;
@@ -30,11 +29,11 @@ const Card: React.FC<CardProps> = ({
   testID,
 }) => {
   const { theme } = useTheme();
-  const styles = createStyles(_theme);
+  const styles = createStyles(__theme);
 
   // Get variant styles
   const getVariantStyles = (): ViewStyle => {
-    switch (_variant) {
+    switch (__variant) {
       case 'elevated':
         return {
           backgroundColor: theme.colors.white,
@@ -60,7 +59,7 @@ const Card: React.FC<CardProps> = ({
 
   // Get size styles
   const getSizeStyles = (): ViewStyle => {
-    switch (_size) {
+    switch (__size) {
       case 'sm':
         return {
           padding: theme.spacing[3],
@@ -88,7 +87,7 @@ const Card: React.FC<CardProps> = ({
     sizeStyles,
     disabled && styles.disabled,
     style,
-  ].filter(_Boolean) as ViewStyle;
+  ].filter(__Boolean) as ViewStyle;
 
   const Component = onPress ? TouchableOpacity : View;
 
@@ -112,7 +111,7 @@ export interface CardHeaderProps {
 
 export const CardHeader: React.FC<CardHeaderProps> = ({ children, style }) => {
   const { theme } = useTheme();
-  const styles = createStyles(_theme);
+  const styles = createStyles(__theme);
 
   return <View style={[styles.header, style]}>{children}</View>;
 };
@@ -125,7 +124,7 @@ export interface CardBodyProps {
 
 export const CardBody: React.FC<CardBodyProps> = ({ children, style }) => {
   const { theme } = useTheme();
-  const styles = createStyles(_theme);
+  const styles = createStyles(__theme);
 
   return <View style={[styles.body, style]}>{children}</View>;
 };
@@ -138,12 +137,12 @@ export interface CardFooterProps {
 
 export const CardFooter: React.FC<CardFooterProps> = ({ children, style }) => {
   const { theme } = useTheme();
-  const styles = createStyles(_theme);
+  const styles = createStyles(__theme);
 
   return <View style={[styles.footer, style]}>{children}</View>;
 };
 
-const createStyles = (theme: Theme) =>
+const createStyles = (theme: _Theme) =>
   StyleSheet.create({
     base: {
       overflow: 'hidden',

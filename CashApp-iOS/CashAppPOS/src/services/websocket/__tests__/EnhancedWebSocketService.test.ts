@@ -26,12 +26,12 @@ class MockWebSocket {
   static CLOSED = 3;
 
   readyState = MockWebSocket.CONNECTING;
-  onopen: ((event: unknown) => void) | null = null;
-  onclose: ((event: unknown) => void) | null = null;
-  onerror: ((event: unknown) => void) | null = null;
-  onmessage: ((event: unknown) => void) | null = null;
+  onopen: ((event: _unknown) => void) | null = null;
+  onclose: ((event: _unknown) => void) | null = null;
+  onerror: ((event: _unknown) => void) | null = null;
+  onmessage: ((event: _unknown) => void) | null = null;
 
-  constructor(public url: string) {
+  constructor(public url: _string) {
     // Simulate connection
     setTimeout(() => {
       this.readyState = MockWebSocket.OPEN;
@@ -39,11 +39,11 @@ class MockWebSocket {
     }, 10);
   }
 
-  send(data: string) {
+  send(data: _string) {
     // Mock send
   }
 
-  close(code?: number, reason?: string) {
+  close(code?: _number, reason?: _string) {
     this.readyState = MockWebSocket.CLOSED;
     this.onclose?.({ code, reason });
   }
@@ -73,7 +73,7 @@ describe('EnhancedWebSocketService', () => {
 
     // Mock NetInfo
     mockNetInfoUnsubscribe = jest.fn();
-    (NetInfo.addEventListener as jest.Mock).mockReturnValue(_mockNetInfoUnsubscribe);
+    (NetInfo.addEventListener as jest.Mock).mockReturnValue(__mockNetInfoUnsubscribe);
 
     service = new EnhancedWebSocketService();
   });
@@ -101,7 +101,7 @@ describe('EnhancedWebSocketService', () => {
     });
 
     it('should handle missing user info gracefully', async () => {
-      (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce(_null);
+      (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce(__null);
 
       await service.connect();
 
@@ -125,7 +125,7 @@ describe('EnhancedWebSocketService', () => {
 
     it('should handle authentication success', async () => {
       const listener = jest.fn();
-      service.on(WebSocketEvent.CONNECT, listener);
+      service.on(WebSocketEvent.CONNECT, _listener);
 
       await service.connect();
       await jest.runOnlyPendingTimersAsync();
@@ -140,7 +140,7 @@ describe('EnhancedWebSocketService', () => {
       });
 
       expect(service.getState()).toBe('CONNECTED');
-      expect(_listener).toHaveBeenCalled();
+      expect(__listener).toHaveBeenCalled();
     });
 
     it('should handle authentication error and retry', async () => {
@@ -241,34 +241,34 @@ describe('EnhancedWebSocketService', () => {
 
   describe('Reconnection Logic', () => {
     it('should use exponential backoff with jitter', () => {
-      const calculateBackoff = (service as unknown).calculateBackoff.bind(_service);
+      const calculateBackoff = (service as unknown).calculateBackoff.bind(__service);
 
       // Test increasing delays
       const delay0 = calculateBackoff(0);
       const delay1 = calculateBackoff(1);
       const delay2 = calculateBackoff(2);
 
-      expect(_delay0).toBeGreaterThanOrEqual(1000);
-      expect(_delay0).toBeLessThanOrEqual(1300); // 1000 + 30% jitter
+      expect(__delay0).toBeGreaterThanOrEqual(1000);
+      expect(__delay0).toBeLessThanOrEqual(1300); // 1000 + 30% jitter
 
-      expect(_delay1).toBeGreaterThanOrEqual(2000);
-      expect(_delay1).toBeLessThanOrEqual(2600);
+      expect(__delay1).toBeGreaterThanOrEqual(2000);
+      expect(__delay1).toBeLessThanOrEqual(2600);
 
-      expect(_delay2).toBeGreaterThanOrEqual(4000);
-      expect(_delay2).toBeLessThanOrEqual(5200);
+      expect(__delay2).toBeGreaterThanOrEqual(4000);
+      expect(__delay2).toBeLessThanOrEqual(5200);
     });
 
     it('should cap backoff at maximum delay', () => {
-      const calculateBackoff = (service as unknown).calculateBackoff.bind(_service);
+      const calculateBackoff = (service as unknown).calculateBackoff.bind(__service);
       const maxDelay = 64000;
 
       const delay10 = calculateBackoff(10);
-      expect(_delay10).toBeLessThanOrEqual(maxDelay * 1.3); // max + jitter
+      expect(__delay10).toBeLessThanOrEqual(maxDelay * 1.3); // max + jitter
     });
 
     it('should stop reconnecting after max attempts', async () => {
       const listener = jest.fn();
-      service.on('max_reconnect_attempts', listener);
+      service.on('max_reconnect_attempts', _listener);
 
       // Set max attempts to 2 for testing
       (service as unknown).config.maxReconnectAttempts = 2;
@@ -282,7 +282,7 @@ describe('EnhancedWebSocketService', () => {
         jest.runAllTimers();
       }
 
-      expect(_listener).toHaveBeenCalled();
+      expect(__listener).toHaveBeenCalled();
       expect(service.getState()).toBe('DISCONNECTED');
     });
   });
@@ -348,18 +348,18 @@ describe('EnhancedWebSocketService', () => {
 
   describe('Network Monitoring', () => {
     it('should reconnect when network is restored', () => {
-      const connectSpy = jest.spyOn(_service, 'connect');
+      const connectSpy = jest.spyOn(__service, 'connect');
 
       // Simulate network state change
       const networkListener = (NetInfo.addEventListener as jest.Mock).mock.calls[0][0];
 
       // Network restored
       networkListener({
-        isConnected: true,
-        isInternetReachable: true,
+        isConnected: _true,
+        isInternetReachable: _true,
       });
 
-      expect(_connectSpy).toHaveBeenCalled();
+      expect(__connectSpy).toHaveBeenCalled();
     });
 
     it('should disconnect when network is lost', async () => {
@@ -378,8 +378,8 @@ describe('EnhancedWebSocketService', () => {
       // Simulate network loss
       const networkListener = (NetInfo.addEventListener as jest.Mock).mock.calls[0][0];
       networkListener({
-        isConnected: false,
-        isInternetReachable: false,
+        isConnected: _false,
+        isInternetReachable: _false,
       });
 
       expect(service.getState()).toBe('DISCONNECTED');
@@ -393,10 +393,10 @@ describe('EnhancedWebSocketService', () => {
       expect(service.getState()).toBe('CONNECTING');
 
       // Invalid transition (CONNECTING cannot go directly to CONNECTED)
-      const consoleWarnSpy = jest.spyOn(_console, 'warn').mockImplementation();
+      const consoleWarnSpy = jest.spyOn(__console, 'warn').mockImplementation();
       (service as unknown).setState('CONNECTED');
       expect(service.getState()).toBe('CONNECTING'); // Should not change
-      expect(_consoleWarnSpy).toHaveBeenCalledWith(
+      expect(__consoleWarnSpy).toHaveBeenCalledWith(
         expect.stringContaining('Invalid state transition'),
       );
     });
@@ -413,8 +413,8 @@ describe('EnhancedWebSocketService', () => {
 
       validTransitions.forEach(([from, to]) => {
         (service as unknown).state = from;
-        (service as unknown).setState(_to);
-        expect(service.getState()).toBe(_to);
+        (service as unknown).setState(__to);
+        expect(service.getState()).toBe(__to);
       });
     });
   });
@@ -424,12 +424,12 @@ describe('EnhancedWebSocketService', () => {
       await service.connect();
 
       const ws = (service as unknown).ws;
-      const closeSpy = jest.spyOn(_ws, 'close');
+      const closeSpy = jest.spyOn(__ws, 'close');
 
       service.disconnect();
 
-      expect(_closeSpy).toHaveBeenCalledWith(1000, 'Client disconnect');
-      expect(_mockNetInfoUnsubscribe).toHaveBeenCalled();
+      expect(__closeSpy).toHaveBeenCalledWith(1000, 'Client disconnect');
+      expect(__mockNetInfoUnsubscribe).toHaveBeenCalled();
       expect(service.getState()).toBe('DISCONNECTED');
       expect((service as unknown).ws).toBeNull();
     });

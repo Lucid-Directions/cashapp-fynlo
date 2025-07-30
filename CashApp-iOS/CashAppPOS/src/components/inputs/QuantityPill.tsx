@@ -10,9 +10,9 @@
  */
 
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ViewStyle } from 'react-native';
+import { View, TouchableOpacity, ViewStyle } from 'react-native';
 import { Plus, Minus } from 'lucide-react-native';
-import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
+import Animated, { useSharedValue, withTiming } from 'react-native-reanimated';
 import { useTheme } from '../../design-system/ThemeProvider';
 
 interface QuantityPillProps {
@@ -66,7 +66,7 @@ const QuantityPill: React.FC<QuantityPillProps> = ({
 
   // Color scheme configurations
   const getColorScheme = () => {
-    switch (_colorScheme) {
+    switch (__colorScheme) {
       case 'primary':
         return {
           backgroundColor: theme.colors.primary,

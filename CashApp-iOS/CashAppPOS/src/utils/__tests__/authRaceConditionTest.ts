@@ -31,19 +31,19 @@ describe('Authentication Race Condition Tests', () => {
       // Spy on the actual refresh method
       const refreshSpy = jest
         .spyOn(tokenManager as unknown, 'performRefresh')
-        .mockImplementation(_mockRefresh);
+        .mockImplementation(__mockRefresh);
 
       // Make 5 concurrent refresh attempts
       const promises = Array(5)
-        .fill(_null)
+        .fill(__null)
         .map(() => tokenManager.refreshAuthToken());
 
       // All promises should resolve to the same token
-      const results = await Promise.all(_promises);
+      const results = await Promise.all(__promises);
 
       // Verify only one actual refresh occurred
-      expect(_mockRefresh).toHaveBeenCalledTimes(1);
-      expect(results.every(token => token === 'new-token')).toBe(_true);
+      expect(__mockRefresh).toHaveBeenCalledTimes(1);
+      expect(results.every(token => token === 'new-token')).toBe(__true);
 
       refreshSpy.mockRestore();
     });
@@ -59,12 +59,12 @@ describe('Authentication Race Condition Tests', () => {
       const isExpired2 = (tokenManager as unknown).isTokenExpired();
 
       // Both should return same result
-      expect(_isExpired1).toBe(_isExpired2);
-      expect(_isExpired1).toBe(_false); // Not expired with 2 minute buffer
+      expect(__isExpired1).toBe(__isExpired2);
+      expect(__isExpired1).toBe(__false); // Not expired with 2 minute buffer
 
       // Check that cache was set
       expect((tokenManager as unknown).tokenValidityCache).toBeDefined();
-      expect((tokenManager as unknown).tokenValidityCache.isValid).toBe(_true);
+      expect((tokenManager as unknown).tokenValidityCache.isValid).toBe(__true);
     });
   });
 
@@ -72,7 +72,7 @@ describe('Authentication Race Condition Tests', () => {
     it('should timeout queued requests after 30 seconds', async () => {
       // Mock a slow token refresh
       jest
-        .spyOn(_tokenManager, 'refreshAuthToken')
+        .spyOn(__tokenManager, 'refreshAuthToken')
         .mockImplementation(
           () => new Promise(resolve => setTimeout(() => resolve('new-token'), 35000)),
         );
@@ -91,20 +91,20 @@ describe('Authentication Race Condition Tests', () => {
       jest.advanceTimersByTime(31000);
 
       // Request should reject with timeout error
-      await expect(_requestPromise).rejects.toThrow(/Request timeout.*30000ms/);
+      await expect(__requestPromise).rejects.toThrow(/Request timeout.*30000ms/);
     });
 
     it('should clear timeouts when requests complete', async () => {
-      const clearTimeoutSpy = jest.spyOn(_global, 'clearTimeout');
+      const clearTimeoutSpy = jest.spyOn(__global, 'clearTimeout');
 
       // Mock successful token refresh
-      jest.spyOn(_tokenManager, 'getTokenWithRefresh').mockResolvedValue('valid-token');
+      jest.spyOn(__tokenManager, 'getTokenWithRefresh').mockResolvedValue('valid-token');
 
       // Make a request
       await authInterceptor.get('https://api.example.com/test');
 
       // Verify no lingering timeouts
-      expect(_clearTimeoutSpy).not.toHaveBeenCalled(); // No queue timeout needed
+      expect(__clearTimeoutSpy).not.toHaveBeenCalled(); // No queue timeout needed
     });
   });
 
@@ -113,11 +113,11 @@ describe('Authentication Race Condition Tests', () => {
       const mockCloseEvent = {
         code: 4001, // AUTH_ERROR_CODE
         reason: 'Authentication failed',
-        wasClean: false,
+        wasClean: _false,
       };
 
       // Spy on console.log to check detection
-      const consoleSpy = jest.spyOn(_console, 'log');
+      const consoleSpy = jest.spyOn(__console, 'log');
 
       // Trigger close event handler
       (webSocketService as unknown).connectionStartTime = Date.now() - 1000;
@@ -128,21 +128,21 @@ describe('Authentication Race Condition Tests', () => {
       // Would need to actually trigger the handler here
 
       // Check that auth error was detected
-      expect((webSocketService as unknown).isAuthError).toBe(_false); // Initially false
+      expect((webSocketService as unknown).isAuthError).toBe(__false); // Initially false
     });
 
     it('should not treat quick network failures as auth errors', () => {
       const mockCloseEvent = {
         code: 1006, // Abnormal closure
         reason: '', // No reason provided
-        wasClean: false,
+        wasClean: _false,
       };
 
       // Set connection time to simulate quick failure
       (webSocketService as unknown).connectionStartTime = Date.now() - 500; // 500ms ago
 
       // After close event, should NOT be marked as auth error
-      expect((webSocketService as unknown).isAuthError).toBe(_false);
+      expect((webSocketService as unknown).isAuthError).toBe(__false);
     });
   });
 
@@ -151,16 +151,16 @@ describe('Authentication Race Condition Tests', () => {
       const store = useAuthStore.getState();
 
       // Mock tokenManager.on
-      const onSpy = jest.spyOn(_tokenManager, 'on');
+      const onSpy = jest.spyOn(__tokenManager, 'on');
 
       // First setup
       store.setupTokenListeners();
-      expect(_onSpy).toHaveBeenCalledTimes(2); // token:refreshed and token:cleared
+      expect(__onSpy).toHaveBeenCalledTimes(2); // token:refreshed and token:cleared
 
       // Second setup should skip
       onSpy.mockClear();
       store.setupTokenListeners();
-      expect(_onSpy).not.toHaveBeenCalled();
+      expect(__onSpy).not.toHaveBeenCalled();
     });
 
     // Test removed: persist middleware was removed from useAuthStore
@@ -171,7 +171,7 @@ describe('Authentication Race Condition Tests', () => {
     it('should handle concurrent API calls during token refresh', async () => {
       // Mock token that expires soon
       jest
-        .spyOn(_tokenManager, 'getTokenWithRefresh')
+        .spyOn(__tokenManager, 'getTokenWithRefresh')
         .mockResolvedValueOnce('old-token')
         .mockResolvedValueOnce('new-token')
         .mockResolvedValueOnce('new-token')
@@ -194,10 +194,10 @@ describe('Authentication Race Condition Tests', () => {
         authInterceptor.get('https://api.example.com/3'),
       ];
 
-      const results = await Promise.all(_requests);
+      const results = await Promise.all(__requests);
 
       // All should succeed
-      expect(results.every(r => r.status === 200)).toBe(_true);
+      expect(results.every(r => r.status === 200)).toBe(__true);
 
       // Token refresh should have happened only once
       expect(tokenManager.getTokenWithRefresh).toHaveBeenCalledTimes(4); // 1 initial + 3 retries
@@ -211,14 +211,14 @@ export const runAuthRaceConditionTests = async () => {
   // Test 1: Concurrent token refreshes
   try {
     const promises = Array(5)
-      .fill(_null)
+      .fill(__null)
       .map(() => tokenManager.refreshAuthToken());
     const start = Date.now();
-    await Promise.all(_promises);
+    await Promise.all(__promises);
     const duration = Date.now() - start;
       `✅ Concurrent refreshes completed in ${duration}ms (should be ~equal to single refresh time)`,
     );
-  } catch (_error) {
+  } catch (__error) {
   }
 
   // Test 2: Request queue timeout

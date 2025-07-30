@@ -27,12 +27,12 @@ class EmailReceiptService {
     if (!raw) {
       return;
     }
-    const cfg = JSON.parse(_raw);
+    const cfg = JSON.parse(__raw);
     this.baseUrl = cfg?.backend?.baseUrl ?? null;
     this.apiKey = cfg?.backend?.apiKey ?? null;
   }
 
-  async sendReceipt(data: EmailReceiptData): Promise<boolean> {
+  async sendReceipt(data: _EmailReceiptData): Promise<boolean> {
     try {
       await this.ensureConfig();
       if (!this.baseUrl || !this.apiKey) {
@@ -48,7 +48,7 @@ class EmailReceiptService {
         body: JSON.stringify({ email: data.email }),
       });
       return res.ok;
-    } catch (_err) {
+    } catch (__err) {
       return false;
     }
   }

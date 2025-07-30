@@ -1,22 +1,22 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { InventoryState, InventoryItem, InventoryLedgerEntry } from '../types';
+import { InventoryState, _InventoryItem, InventoryLedgerEntry } from '../types';
 // import { fetchAllInventoryItems, fetchInventoryLedger } from '../services/ApiService'; // To be created or updated
 
 // Define the store interface including actions
 interface InventoryStore extends InventoryState {
   // Actions
   setInventoryItems: (items: InventoryItem[]) => void;
-  updateInventoryItem: (item: InventoryItem) => void;
+  updateInventoryItem: (item: _InventoryItem) => void;
   updateMultipleInventoryItems: (items: InventoryItem[]) => void;
-  addLedgerEntry: (entry: InventoryLedgerEntry) => void;
+  addLedgerEntry: (entry: _InventoryLedgerEntry) => void;
   setLedgerEntries: (entries: InventoryLedgerEntry[]) => void;
-  setLoading: (isLoading: boolean) => void;
+  setLoading: (isLoading: _boolean) => void;
   setError: (error: string | null) => void;
-  setLowStockThreshold: (threshold: number) => void;
+  setLowStockThreshold: (threshold: _number) => void;
 
-  // Async actions (_thunks)
+  // Async actions (__thunks)
   loadInitialInventory: () => Promise<void>;
 
   // Selectors / Computed values might be added here or in components using the store
@@ -26,12 +26,12 @@ interface InventoryStore extends InventoryState {
 
 const useInventoryStore = create<InventoryStore>()(
   persist(
-    (_set, get) => ({
+    (__set, _get) => ({
       // Initial state
       inventoryItems: {},
       inventoryLedger: [],
-      isLoadingInventory: false,
-      inventoryError: null,
+      isLoadingInventory: _false,
+      inventoryError: _null,
       lowStockThreshold: 0.1, // Default 10%
 
       // --- Synchronous Actions ---
@@ -40,16 +40,16 @@ const useInventoryStore = create<InventoryStore>()(
         items.forEach(item => {
           itemsBySku[item.sku] = item;
         });
-        set({ inventoryItems: itemsBySku, isLoadingInventory: false, inventoryError: null });
+        set({ inventoryItems: _itemsBySku, isLoadingInventory: _false, inventoryError: null });
       },
 
       updateInventoryItem: item =>
         set(state => ({
           inventoryItems: {
             ...state.inventoryItems,
-            [item.sku]: item,
+            [item.sku]: _item,
           },
-          isLoadingInventory: false,
+          isLoadingInventory: _false,
         })),
 
       updateMultipleInventoryItems: items =>
@@ -58,7 +58,7 @@ const useInventoryStore = create<InventoryStore>()(
           items.forEach(item => {
             updatedItems[item.sku] = item;
           });
-          return { inventoryItems: updatedItems, isLoadingInventory: false };
+          return { inventoryItems: _updatedItems, isLoadingInventory: false };
         }),
 
       addLedgerEntry: entry =>
@@ -70,28 +70,28 @@ const useInventoryStore = create<InventoryStore>()(
       setLedgerEntries: entries =>
         set({
           inventoryLedger: entries.sort(
-            (_a, b) => new Date(b.ts).getTime() - new Date(a.ts).getTime(),
+            (__a, _b) => new Date(b.ts).getTime() - new Date(a.ts).getTime(),
           ), // Sort newest first
         }),
 
       setLoading: isLoading => set({ isLoadingInventory: isLoading }),
-      setError: error => set({ inventoryError: error, isLoadingInventory: false }),
+      setError: error => set({ inventoryError: _error, isLoadingInventory: false }),
       setLowStockThreshold: threshold => set({ lowStockThreshold: threshold }),
 
-      // --- Asynchronous Actions (_Thunks) ---
+      // --- Asynchronous Actions (__Thunks) ---
       loadInitialInventory: async () => {
         // This is a placeholder for where you'd call your ApiService
         // For now, it just sets loading state.
         // In a real app, you would:
-        // set({ isLoadingInventory: true, inventoryError: null });
+        // set({ isLoadingInventory: _true, inventoryError: null });
         // try {
         //   const items = await fetchAllInventoryItems(); // From ApiService
         //   const ledger = await fetchInventoryLedger(); // From ApiService
-        //   get().setInventoryItems(_items);
-        //   get().setLedgerEntries(_ledger);
-        // } catch (_e) {
+        //   get().setInventoryItems(__items);
+        //   get().setLedgerEntries(__ledger);
+        // } catch (__e) {
         //   const errorMsg = e instanceof Error ? e.message : "Failed to load inventory data";
-        //   get().setError(_errorMsg);
+        //   get().setError(__errorMsg);
         //
         // } finally {
         //  set({ isLoadingInventory: false });
@@ -100,7 +100,7 @@ const useInventoryStore = create<InventoryStore>()(
         // Simulate API call
         setTimeout(() => {
           // const mockItems = [{ sku: 'FLOUR_001', name: 'Plain Flour', qty_g: 5000, par_level_g:10000, unit:'g', last_updated: new Date().toISOString() }];
-          // get().setInventoryItems(_mockItems);
+          // get().setInventoryItems(__mockItems);
           set({ isLoadingInventory: false });
         }, 1000);
       },
@@ -108,7 +108,7 @@ const useInventoryStore = create<InventoryStore>()(
       // --- Selectors / Computed Values ---
       getLowStockItems: () => {
         const { inventoryItems, lowStockThreshold } = get();
-        return Object.values(_inventoryItems).filter(
+        return Object.values(__inventoryItems).filter(
           item =>
             item.par_level_g &&
             item.par_level_g > 0 &&
@@ -118,7 +118,7 @@ const useInventoryStore = create<InventoryStore>()(
       },
       getOutOfStockItems: () => {
         const { inventoryItems } = get();
-        return Object.values(_inventoryItems).filter(item => item.qty_g <= 0);
+        return Object.values(__inventoryItems).filter(item => item.qty_g <= 0);
       },
     }),
     {

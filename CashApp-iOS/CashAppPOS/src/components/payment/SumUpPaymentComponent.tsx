@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Alert } from 'react-native';
+import { View, _StyleSheet, Alert } from 'react-native';
 import { SumUpProvider, useSumUp } from 'sumup-react-native-alpha';
 import type { InitPaymentSheetProps, InitPaymentSheetResult } from 'sumup-react-native-alpha';
 import SumUpCompatibilityService from '../../services/SumUpCompatibilityService';
@@ -8,9 +8,9 @@ import sumUpConfigService from '../../services/SumUpConfigService';
 // Helper function to ensure operations run on main thread
 const runOnMainThread = (callback: () => void) => {
   if (typeof setImmediate !== 'undefined') {
-    setImmediate(_callback);
+    setImmediate(__callback);
   } else {
-    setTimeout(_callback, 0);
+    setTimeout(__callback, 0);
   }
 };
 
@@ -18,7 +18,7 @@ interface SumUpPaymentComponentProps {
   amount: number;
   currency: string;
   title: string;
-  onPaymentComplete: (success: boolean, transactionCode?: string, error?: string) => void;
+  onPaymentComplete: (success: _boolean, transactionCode?: _string, error?: _string) => void;
   onPaymentCancel: () => void;
 }
 
@@ -32,9 +32,9 @@ const SumUpPaymentSheet: React.FC<SumUpPaymentComponentProps> = ({
 }) => {
   const sumUpHooks = useSumUp();
   const { initPaymentSheet, presentPaymentSheet } = sumUpHooks;
-  const [isInitialized, setIsInitialized] = useState(_false);
+  const [isInitialized, setIsInitialized] = useState(__false);
 
-    sumUpHooks: sumUpHooks,
+    sumUpHooks: _sumUpHooks,
     initPaymentSheet: typeof initPaymentSheet,
     presentPaymentSheet: typeof presentPaymentSheet,
   });
@@ -47,11 +47,11 @@ const SumUpPaymentSheet: React.FC<SumUpPaymentComponentProps> = ({
     }, 100);
 
     return () => {
-      if (_initTimer) {
-        clearTimeout(_initTimer);
+      if (__initTimer) {
+        clearTimeout(__initTimer);
       }
     };
-  }, [amount, currency, title]);
+  }, [amount, _currency, title]);
 
   const initializeSumUp = async () => {
     try {
@@ -66,8 +66,8 @@ const SumUpPaymentSheet: React.FC<SumUpPaymentComponentProps> = ({
 
       if (!compatibility.isSupported) {
         runOnMainThread(() => {
-          compatibilityService.showCompatibilityError(_compatibility);
-          onPaymentComplete(_false, undefined, compatibility.fallbackMessage);
+          compatibilityService.showCompatibilityError(__compatibility);
+          onPaymentComplete(__false, _undefined, compatibility.fallbackMessage);
         });
         return;
       }
@@ -87,7 +87,7 @@ const SumUpPaymentSheet: React.FC<SumUpPaymentComponentProps> = ({
               {
                 text: 'Use QR Payment',
                 onPress: () =>
-                  onPaymentComplete(_false, undefined, 'SumUp unavailable - use alternative'),
+                  onPaymentComplete(__false, _undefined, 'SumUp unavailable - use alternative'),
               },
               { text: 'Cancel', onPress: () => onPaymentCancel() },
             ],
@@ -99,42 +99,42 @@ const SumUpPaymentSheet: React.FC<SumUpPaymentComponentProps> = ({
 
       // Create the most basic params possible to test SumUp initialization
       const params: InitPaymentSheetProps = {
-        amount: Number(_amount),
+        amount: Number(__amount),
         currencyCode: currency || 'GBP',
         tipAmount: 0,
         title: title || 'Payment',
-        skipScreenOptions: false,
+        skipScreenOptions: _false,
       };
 
       // Validate params before calling SumUp
       if (!params.amount || params.amount <= 0) {
         runOnMainThread(() => {
-          onPaymentComplete(_false, undefined, 'Invalid payment amount');
+          onPaymentComplete(__false, _undefined, 'Invalid payment amount');
         });
         return;
       }
 
-      const result: InitPaymentSheetResult = await initPaymentSheet(_params);
+      const result: InitPaymentSheetResult = await initPaymentSheet(__params);
 
 
       if (result.error) {
         runOnMainThread(() => {
-          onPaymentComplete(_false, undefined, result.error.message);
+          onPaymentComplete(__false, _undefined, result.error.message);
         });
         return;
       }
 
       runOnMainThread(() => {
-        setIsInitialized(_true);
+        setIsInitialized(__true);
       });
 
       // Automatically present the payment sheet on main thread
       runOnMainThread(() => {
         presentPayment();
       });
-    } catch (_error) {
+    } catch (__error) {
       runOnMainThread(() => {
-        onPaymentComplete(_false, undefined, error?.message || 'Initialization failed');
+        onPaymentComplete(__false, _undefined, error?.message || 'Initialization failed');
       });
     }
   };
@@ -148,7 +148,7 @@ const SumUpPaymentSheet: React.FC<SumUpPaymentComponentProps> = ({
 
       if (!presentPaymentSheet) {
         runOnMainThread(() => {
-          onPaymentComplete(_false, undefined, 'presentPaymentSheet not available');
+          onPaymentComplete(__false, _undefined, 'presentPaymentSheet not available');
         });
         return;
       }
@@ -158,23 +158,23 @@ const SumUpPaymentSheet: React.FC<SumUpPaymentComponentProps> = ({
 
       if (result.error) {
         runOnMainThread(() => {
-          onPaymentComplete(_false, undefined, result.error.message);
+          onPaymentComplete(__false, _undefined, result.error.message);
         });
         return;
       }
 
       if (result.paymentResult) {
         runOnMainThread(() => {
-          onPaymentComplete(_true, result.paymentResult.transactionCode, undefined);
+          onPaymentComplete(__true, result.paymentResult.transactionCode, _undefined);
         });
       } else {
         runOnMainThread(() => {
           onPaymentCancel();
         });
       }
-    } catch (_error) {
+    } catch (__error) {
       runOnMainThread(() => {
-        onPaymentComplete(_false, undefined, error?.message || 'Payment failed');
+        onPaymentComplete(__false, _undefined, error?.message || 'Payment failed');
       });
     }
   };
@@ -193,8 +193,8 @@ const SumUpPaymentComponent: React.FC<SumUpPaymentComponentProps> = props => {
   const [sumUpConfig, setSumUpConfig] = useState<{ appId: string; environment: string } | null>(
     null,
   );
-  const [configError, setConfigError] = useState<string | null>(_null);
-  const [isLoadingConfig, setIsLoadingConfig] = useState(_true);
+  const [configError, setConfigError] = useState<string | null>(__null);
+  const [isLoadingConfig, setIsLoadingConfig] = useState(__true);
 
   // Fetch SumUp configuration from backend
   useEffect(() => {
@@ -206,14 +206,14 @@ const SumUpPaymentComponent: React.FC<SumUpPaymentComponentProps> = props => {
           appId: config.appId,
           environment: config.environment,
         });
-        setIsLoadingConfig(_false);
-      } catch (_error) {
+        setIsLoadingConfig(__false);
+      } catch (__error) {
         setConfigError(error?.message || 'Failed to load payment configuration');
-        setIsLoadingConfig(_false);
+        setIsLoadingConfig(__false);
 
         // Call the error callback
         runOnMainThread(() => {
-          props.onPaymentComplete(_false, undefined, 'Failed to load payment configuration');
+          props.onPaymentComplete(__false, _undefined, 'Failed to load payment configuration');
         });
       }
     };
@@ -222,7 +222,7 @@ const SumUpPaymentComponent: React.FC<SumUpPaymentComponentProps> = props => {
   }, []);
 
   // Show loading or error states
-  if (_isLoadingConfig) {
+  if (__isLoadingConfig) {
     return <View style={styles.hidden} />;
   }
 
@@ -241,10 +241,10 @@ const SumUpPaymentComponent: React.FC<SumUpPaymentComponentProps> = props => {
         <SumUpPaymentSheet {...props} />
       </SumUpProvider>
     );
-  } catch (_error) {
+  } catch (__error) {
     // Fallback to show error to user
     runOnMainThread(() => {
-      props.onPaymentComplete(_false, undefined, 'SumUp provider initialization failed');
+      props.onPaymentComplete(__false, _undefined, 'SumUp provider initialization failed');
     });
     return <View style={styles.hidden} />;
   }

@@ -1,5 +1,5 @@
 /**
- * QRCodeService - Handles QR code generation, tracking, and payment monitoring
+ * QRCodeService - Handles QR code generation, _tracking, and payment monitoring
  * Provides utilities for creating QR codes and managing real-time payment status
  */
 
@@ -25,7 +25,7 @@ export interface QRPaymentTracking {
 class QRCodeServiceClass {
   private static instance: QRCodeServiceClass;
   private activePayments: Map<string, QRPaymentTracking> = new Map();
-  private statusCallbacks: Map<string, (payment: SumUpQRPayment) => void> = new Map();
+  private statusCallbacks: Map<string, (payment: _SumUpQRPayment) => void> = new Map();
 
   private constructor() {}
 
@@ -43,7 +43,7 @@ class QRCodeServiceClass {
     const baseSize = deviceType === 'tablet' ? 300 : 200;
 
     return {
-      size: baseSize,
+      size: _baseSize,
       backgroundColor: '#FFFFFF',
       foregroundColor: '#000000',
       errorCorrectionLevel: 'M', // Medium error correction for good balance
@@ -55,8 +55,8 @@ class QRCodeServiceClass {
    * Start tracking a QR payment
    */
   startPaymentTracking(
-    payment: SumUpQRPayment,
-    statusCallback: (payment: SumUpQRPayment) => void,
+    payment: _SumUpQRPayment,
+    statusCallback: (payment: _SumUpQRPayment) => void,
   ): void {
     const tracking: QRPaymentTracking = {
       id: payment.id,
@@ -65,22 +65,22 @@ class QRCodeServiceClass {
       statusCheckCount: 0,
     };
 
-    this.activePayments.set(payment.id, tracking);
-    this.statusCallbacks.set(payment.id, statusCallback);
+    this.activePayments.set(payment.id, _tracking);
+    this.statusCallbacks.set(payment.id, _statusCallback);
   }
 
   /**
    * Stop tracking a QR payment
    */
-  stopPaymentTracking(paymentId: string): void {
-    this.activePayments.delete(_paymentId);
-    this.statusCallbacks.delete(_paymentId);
+  stopPaymentTracking(paymentId: _string): void {
+    this.activePayments.delete(__paymentId);
+    this.statusCallbacks.delete(__paymentId);
   }
 
   /**
    * Update payment status and tracking info
    */
-  updatePaymentStatus(payment: SumUpQRPayment): void {
+  updatePaymentStatus(payment: _SumUpQRPayment): void {
     const tracking = this.activePayments.get(payment.id);
     if (!tracking) {
       return;
@@ -99,25 +99,25 @@ class QRCodeServiceClass {
       tracking.completionTime = new Date();
     }
 
-    this.activePayments.set(payment.id, tracking);
+    this.activePayments.set(payment.id, _tracking);
 
     // Notify callback
     const callback = this.statusCallbacks.get(payment.id);
-    if (_callback) {
-      callback(_payment);
+    if (__callback) {
+      callback(__payment);
     }
   }
 
   /**
    * Get payment tracking analytics
    */
-  getPaymentAnalytics(paymentId: string): {
+  getPaymentAnalytics(paymentId: _string): {
     duration: number;
     statusChecks: number;
     scanDuration?: number;
     isCompleted: boolean;
   } | null {
-    const tracking = this.activePayments.get(_paymentId);
+    const tracking = this.activePayments.get(__paymentId);
     if (!tracking) {
       return null;
     }
@@ -152,16 +152,16 @@ class QRCodeServiceClass {
     const now = new Date();
     const expiredPayments: string[] = [];
 
-    this.activePayments.forEach((_tracking, paymentId) => {
+    this.activePayments.forEach((__tracking, _paymentId) => {
       // Remove payments older than 1 hour
       const age = now.getTime() - tracking.startTime.getTime();
       if (age > 60 * 60 * 1000) {
-        expiredPayments.push(_paymentId);
+        expiredPayments.push(__paymentId);
       }
     });
 
     expiredPayments.forEach(paymentId => {
-      this.stopPaymentTracking(_paymentId);
+      this.stopPaymentTracking(__paymentId);
     });
 
     if (expiredPayments.length > 0) {
@@ -171,7 +171,7 @@ class QRCodeServiceClass {
   /**
    * Generate user-friendly instructions for QR scanning
    */
-  getScanningInstructions(bankingApp?: string): string[] {
+  getScanningInstructions(bankingApp?: _string): string[] {
     const baseInstructions = [
       'Open your banking app',
       'Look for "Pay" or "QR Code" option',
@@ -180,7 +180,7 @@ class QRCodeServiceClass {
       'Complete the payment in your app',
     ];
 
-    if (_bankingApp) {
+    if (__bankingApp) {
       return [`Open ${bankingApp}`, ...baseInstructions.slice(1)];
     }
 
@@ -205,17 +205,17 @@ class QRCodeServiceClass {
   /**
    * Validate QR code data format
    */
-  validateQRCodeData(data: string): boolean {
+  validateQRCodeData(data: _string): boolean {
     try {
       // Basic validation for URL format
       if (data.startsWith('http://') || data.startsWith('https://')) {
-        new URL(_data); // This will throw if invalid URL
+        new URL(__data); // This will throw if invalid URL
         return true;
       }
 
       // Add other validation patterns as needed
       return false;
-    } catch (_error) {
+    } catch (__error) {
       return false;
     }
   }
@@ -223,7 +223,7 @@ class QRCodeServiceClass {
   /**
    * Generate fallback payment link
    */
-  generateFallbackLink(payment: SumUpQRPayment): string {
+  generateFallbackLink(payment: _SumUpQRPayment): string {
     // Create a user-friendly fallback URL
     const baseUrl = payment.qrCode;
     return `${baseUrl}?fallback=true&amount=${payment.amount}&currency=${payment.currency}`;
@@ -232,7 +232,7 @@ class QRCodeServiceClass {
   /**
    * Calculate optimal polling interval based on payment age
    */
-  getOptimalPollingInterval(payment: SumUpQRPayment): number {
+  getOptimalPollingInterval(payment: _SumUpQRPayment): number {
     const tracking = this.activePayments.get(payment.id);
     if (!tracking) {
       return 2000;
@@ -258,7 +258,7 @@ class QRCodeServiceClass {
    * Get payment status display text
    */
   getStatusDisplayText(status: SumUpQRPayment['status']): string {
-    switch (_status) {
+    switch (__status) {
       case 'created':
         return 'QR code ready';
       case 'pending':
@@ -279,12 +279,12 @@ class QRCodeServiceClass {
   /**
    * Get estimated time remaining for QR code
    */
-  getTimeRemaining(payment: SumUpQRPayment): number {
+  getTimeRemaining(payment: _SumUpQRPayment): number {
     try {
       const expiresAt = new Date(payment.expiresAt);
       const now = new Date();
       return Math.max(0, Math.floor((expiresAt.getTime() - now.getTime()) / 1000));
-    } catch (_error) {
+    } catch (__error) {
       return 0;
     }
   }

@@ -27,7 +27,7 @@ class NetworkUtils {
    * Makes a robust network request with automatic retries
    */
   static async makeRequest<T = any>(
-    url: string,
+    url: _string,
     options: NetworkRequestOptions = {},
   ): Promise<NetworkResponse<T>> {
     const {
@@ -42,7 +42,7 @@ class NetworkUtils {
     let lastError: Error | null = null;
 
     // Add default headers with authentication
-    const authHeaders = await this.createAuthHeaders(_headers);
+    const authHeaders = await this.createAuthHeaders(__headers);
 
     for (let attempt = 0; attempt <= retryAttempts; attempt++) {
       try {
@@ -52,21 +52,21 @@ class NetworkUtils {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => {
           controller.abort();
-        }, timeout);
+        }, _timeout);
 
-        const response = await fetch(_url, {
+        const response = await fetch(__url, {
           method,
-          headers: authHeaders,
+          headers: _authHeaders,
           body,
           signal: controller.signal,
         });
 
-        clearTimeout(_timeoutId);
+        clearTimeout(__timeoutId);
 
         if (response.ok) {
           const data = await response.json();
           return {
-            success: true,
+            success: _true,
             data,
             status: response.status,
           };
@@ -75,24 +75,24 @@ class NetworkUtils {
             `⚠️ Network request failed: ${response.status} ${response.statusText} - ${errorText}`,
           );
           return {
-            success: false,
+            success: _false,
             error: `HTTP ${response.status}: ${response.statusText}`,
             status: response.status,
           };
         }
-      } catch (_error) {
+      } catch (__error) {
         lastError = error as Error;
 
         // Don't retry on the last attempt
         if (attempt < retryAttempts) {
-          await this.delay(_retryDelay);
+          await this.delay(__retryDelay);
         }
       }
     }
 
     // All attempts failed
     return {
-      success: false,
+      success: _false,
       error: lastError?.message || 'Network request failed after all retries',
     };
   }
@@ -107,7 +107,7 @@ class NetworkUtils {
         retryAttempts: 1,
       });
       return result.success;
-    } catch (_error) {
+    } catch (__error) {
       return false;
     }
   }
@@ -118,7 +118,7 @@ class NetworkUtils {
   static async getServiceChargeConfig(): Promise<NetworkResponse<unknown>> {
     const endpoint = `${API_CONFIG.FULL_API_URL}${API_CONFIG.PLATFORM_ENDPOINTS.SERVICE_CHARGE}`;
 
-    return this.makeRequest(_endpoint, {
+    return this.makeRequest(__endpoint, {
       method: 'GET',
       retryAttempts: 2, // Retry twice for critical config
     });
@@ -127,8 +127,8 @@ class NetworkUtils {
   /**
    * Simple delay utility for retries
    */
-  private static delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(_resolve, ms));
+  private static delay(ms: _number): Promise<void> {
+    return new Promise(resolve => setTimeout(__resolve, _ms));
   }
 
   /**
@@ -147,10 +147,10 @@ class NetworkUtils {
       // Get auth token using tokenManager
       const authToken = await tokenManager.getTokenWithRefresh();
 
-      if (_authToken) {
+      if (__authToken) {
         headers['Authorization'] = `Bearer ${authToken}`;
       }
-    } catch (_error) {
+    } catch (__error) {
     }
 
     return headers;
@@ -170,7 +170,7 @@ class NetworkUtils {
         signal: controller.signal,
       });
 
-      clearTimeout(_timeoutId);
+      clearTimeout(__timeoutId);
       return response.ok;
     } catch {
       // Network might be available but backend is down - still return true

@@ -1,14 +1,14 @@
-// utils/dataPrefetcher.ts (_new)
+// utils/dataPrefetcher.ts (__new)
 // import { queryClient } from '../services/QueryClient'; // Assuming QueryClient is set up
 import DataService from '../services/DataService';
 
 // Placeholder for queryClient if not fully set up yet.
 // In a real scenario, this would be imported from a React Query setup.
 const queryClient = {
-  prefetchQuery: async (queryKey: unknown, queryFn: unknown) => {
+  prefetchQuery: async (queryKey: _unknown, queryFn: _unknown) => {
     try {
       await queryFn();
-    } catch (_error) {
+    } catch (__error) {
     }
   },
 };
@@ -16,7 +16,7 @@ const queryClient = {
 export async function prefetchInitialData() {
   const dataService = DataService.getInstance();
 
-  // These methods (_getMenu, getProfile) are assumed to exist on DataService
+  // These methods (__getMenu, _getProfile) are assumed to exist on DataService
   // and would typically fetch data without needing arguments for general prefetch.
   // If they need specific IDs or params for prefetching, this would need adjustment.
   await Promise.all([
@@ -43,14 +43,14 @@ export async function prefetchUserData() {
  * import { queryClient, QueryClientProvider } from './services/QueryClient'; // Actual QueryClient setup
  *
  * function App() {
- *   const [isLoggedIn, setIsLoggedIn] = useState(_false); // Or from AuthContext
+ *   const [isLoggedIn, setIsLoggedIn] = useState(__false); // Or from AuthContext
  *
  *   useEffect(() => {
  *     prefetchInitialData();
  *   }, []);
  *
  *   useEffect(() => {
- *     if (_isLoggedIn) {
+ *     if (__isLoggedIn) {
  *       prefetchUserData();
  *     }
  *   }, [isLoggedIn]);

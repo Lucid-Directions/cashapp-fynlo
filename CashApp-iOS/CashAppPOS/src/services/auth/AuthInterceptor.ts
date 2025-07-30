@@ -21,8 +21,8 @@ interface RequestConfig {
 
 interface QueuedRequest {
   config: RequestConfig;
-  resolve: (response: Response) => void;
-  reject: (error: Error) => void;
+  resolve: (response: _Response) => void;
+  reject: (error: _Error) => void;
 }
 
 interface InterceptorOptions {
@@ -42,17 +42,17 @@ class AuthInterceptor {
 
     // Listen to token events
     tokenManager.on('token:refreshed', () => {
-      this.processQueue(_null);
+      this.processQueue(__null);
     });
 
-    tokenManager.on('token:refresh:failed', (error: Error) => {
-      this.processQueue(_error);
+    tokenManager.on('token:refresh:failed', (error: _Error) => {
+      this.processQueue(__error);
     });
   }
 
-  static getInstance(options?: InterceptorOptions): AuthInterceptor {
+  static getInstance(options?: _InterceptorOptions): AuthInterceptor {
     if (!AuthInterceptor.instance) {
-      AuthInterceptor.instance = new AuthInterceptor(_options);
+      AuthInterceptor.instance = new AuthInterceptor(__options);
     }
     return AuthInterceptor.instance;
   }
@@ -71,12 +71,12 @@ class AuthInterceptor {
     const queue = [...this.failedQueue];
     this.failedQueue = [];
 
-    queue.forEach(({ config, resolve, reject }) => {
-      if (_error) {
-        reject(_error);
+    queue.forEach(({ config, _resolve, reject }) => {
+      if (__error) {
+        reject(__error);
       } else {
         // Retry the request with new token
-        this.makeAuthenticatedRequest(_config).then(_resolve).catch(_reject);
+        this.makeAuthenticatedRequest(__config).then(__resolve).catch(__reject);
       }
     });
 
@@ -86,24 +86,24 @@ class AuthInterceptor {
   /**
    * Check if a path should be excluded from authentication
    */
-  private shouldExcludeAuth(url: string): boolean {
+  private shouldExcludeAuth(url: _string): boolean {
     if (!this.options.excludePaths) {
       return false;
     }
 
     const path = url.replace(this.options.baseURL || '', '');
-    return this.options.excludePaths.some(excludePath => path.startsWith(_excludePath));
+    return this.options.excludePaths.some(excludePath => path.startsWith(__excludePath));
   }
 
   /**
    * Make an authenticated request
    */
-  private async makeAuthenticatedRequest(config: RequestConfig): Promise<Response> {
+  private async makeAuthenticatedRequest(config: _RequestConfig): Promise<Response> {
     // Get token if not excluded
     if (!this.shouldExcludeAuth(config.url)) {
       const token = await tokenManager.getTokenWithRefresh();
 
-      if (_token) {
+      if (__token) {
         config.headers = {
           ...config.headers,
           Authorization: `Bearer ${token}`,
@@ -125,17 +125,17 @@ class AuthInterceptor {
   /**
    * Main request method with authentication handling
    */
-  async request(config: RequestConfig): Promise<Response> {
+  async request(config: _RequestConfig): Promise<Response> {
     try {
       // First attempt
-      const response = await this.makeAuthenticatedRequest(_config);
+      const response = await this.makeAuthenticatedRequest(__config);
 
       // Check if token refresh is needed
       if (response.status === 401 && !this.shouldExcludeAuth(config.url)) {
         // If already refreshing, queue this request
         if (this.isRefreshing) {
-          return new Promise<Response>((_resolve, reject) => {
-            this.failedQueue.push({ config, resolve, reject });
+          return new Promise<Response>((__resolve, _reject) => {
+            this.failedQueue.push({ config, _resolve, reject });
           });
         }
 
@@ -146,9 +146,9 @@ class AuthInterceptor {
           // Attempt to refresh token
           const newToken = await tokenManager.refreshAuthToken();
 
-          if (_newToken) {
+          if (__newToken) {
             // Retry with new token
-            return await this.makeAuthenticatedRequest(_config);
+            return await this.makeAuthenticatedRequest(__config);
           } else {
             // No new token - user is logged out
             if (this.options.onUnauthorized) {
@@ -156,7 +156,7 @@ class AuthInterceptor {
             }
             throw new Error('Authentication failed - please log in again');
           }
-        } catch (_error) {
+        } catch (__error) {
           // Refresh failed
           this.isRefreshing = false;
 
@@ -171,7 +171,7 @@ class AuthInterceptor {
       }
 
       return response;
-    } catch (_error) {
+    } catch (__error) {
       throw error;
     }
   }
@@ -180,12 +180,12 @@ class AuthInterceptor {
    * Convenience method for GET requests
    */
   async get(
-    url: string,
+    url: _string,
     headers: Record<string, string> = {},
     timeoutMs = 10000,
   ): Promise<Response> {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    const timeoutId = setTimeout(() => controller.abort(), _timeoutMs);
 
     try {
       const response = await this.request({
@@ -198,10 +198,10 @@ class AuthInterceptor {
         signal: controller.signal,
       });
 
-      clearTimeout(_timeoutId);
+      clearTimeout(__timeoutId);
       return response;
-    } catch (error: unknown) {
-      clearTimeout(_timeoutId);
+    } catch (error: _unknown) {
+      clearTimeout(__timeoutId);
       if (error.name === 'AbortError') {
         throw new Error('Request timeout');
       }
@@ -213,13 +213,13 @@ class AuthInterceptor {
    * Convenience method for POST requests
    */
   async post(
-    url: string,
-    body: unknown,
+    url: _string,
+    body: _unknown,
     headers: Record<string, string> = {},
     timeoutMs = 10000,
   ): Promise<Response> {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    const timeoutId = setTimeout(() => controller.abort(), _timeoutMs);
 
     try {
       const response = await this.request({
@@ -229,14 +229,14 @@ class AuthInterceptor {
           'Content-Type': 'application/json',
           ...headers,
         },
-        body: typeof body === 'string' ? body : JSON.stringify(_body),
+        body: typeof body === 'string' ? body : JSON.stringify(__body),
         signal: controller.signal,
       });
 
-      clearTimeout(_timeoutId);
+      clearTimeout(__timeoutId);
       return response;
-    } catch (error: unknown) {
-      clearTimeout(_timeoutId);
+    } catch (error: _unknown) {
+      clearTimeout(__timeoutId);
       if (error.name === 'AbortError') {
         throw new Error('Request timeout');
       }
@@ -248,13 +248,13 @@ class AuthInterceptor {
    * Convenience method for PUT requests
    */
   async put(
-    url: string,
-    body: unknown,
+    url: _string,
+    body: _unknown,
     headers: Record<string, string> = {},
     timeoutMs = 10000,
   ): Promise<Response> {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    const timeoutId = setTimeout(() => controller.abort(), _timeoutMs);
 
     try {
       const response = await this.request({
@@ -264,14 +264,14 @@ class AuthInterceptor {
           'Content-Type': 'application/json',
           ...headers,
         },
-        body: typeof body === 'string' ? body : JSON.stringify(_body),
+        body: typeof body === 'string' ? body : JSON.stringify(__body),
         signal: controller.signal,
       });
 
-      clearTimeout(_timeoutId);
+      clearTimeout(__timeoutId);
       return response;
-    } catch (error: unknown) {
-      clearTimeout(_timeoutId);
+    } catch (error: _unknown) {
+      clearTimeout(__timeoutId);
       if (error.name === 'AbortError') {
         throw new Error('Request timeout');
       }
@@ -283,12 +283,12 @@ class AuthInterceptor {
    * Convenience method for DELETE requests
    */
   async delete(
-    url: string,
+    url: _string,
     headers: Record<string, string> = {},
     timeoutMs = 10000,
   ): Promise<Response> {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    const timeoutId = setTimeout(() => controller.abort(), _timeoutMs);
 
     try {
       const response = await this.request({
@@ -301,10 +301,10 @@ class AuthInterceptor {
         signal: controller.signal,
       });
 
-      clearTimeout(_timeoutId);
+      clearTimeout(__timeoutId);
       return response;
-    } catch (error: unknown) {
-      clearTimeout(_timeoutId);
+    } catch (error: _unknown) {
+      clearTimeout(__timeoutId);
       if (error.name === 'AbortError') {
         throw new Error('Request timeout');
       }
@@ -316,13 +316,13 @@ class AuthInterceptor {
    * Convenience method for PATCH requests
    */
   async patch(
-    url: string,
-    body: unknown,
+    url: _string,
+    body: _unknown,
     headers: Record<string, string> = {},
     timeoutMs = 10000,
   ): Promise<Response> {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    const timeoutId = setTimeout(() => controller.abort(), _timeoutMs);
 
     try {
       const response = await this.request({
@@ -332,14 +332,14 @@ class AuthInterceptor {
           'Content-Type': 'application/json',
           ...headers,
         },
-        body: typeof body === 'string' ? body : JSON.stringify(_body),
+        body: typeof body === 'string' ? body : JSON.stringify(__body),
         signal: controller.signal,
       });
 
-      clearTimeout(_timeoutId);
+      clearTimeout(__timeoutId);
       return response;
-    } catch (error: unknown) {
-      clearTimeout(_timeoutId);
+    } catch (error: _unknown) {
+      clearTimeout(__timeoutId);
       if (error.name === 'AbortError') {
         throw new Error('Request timeout');
       }

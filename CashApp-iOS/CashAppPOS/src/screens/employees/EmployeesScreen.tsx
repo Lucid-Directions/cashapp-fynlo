@@ -29,10 +29,10 @@ const EmployeesScreen: React.FC = () => {
   const [filteredEmployees, setFilteredEmployees] = useState<EmployeeData[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRole, setSelectedRole] = useState<string>('all');
-  const [showAddModal, setShowAddModal] = useState(_false);
-  const [selectedEmployee, setSelectedEmployee] = useState<EmployeeData | null>(_null);
-  const [isLoading, setIsLoading] = useState<boolean>(_true); // Added
-  const [error, setError] = useState<string | null>(_null); // Added
+  const [showAddModal, setShowAddModal] = useState(__false);
+  const [selectedEmployee, setSelectedEmployee] = useState<EmployeeData | null>(__null);
+  const [isLoading, setIsLoading] = useState<boolean>(__true); // Added
+  const [error, setError] = useState<string | null>(__null); // Added
 
   // Add Employee Form State
   const [newEmployee, setNewEmployee] = useState({
@@ -55,22 +55,22 @@ const EmployeesScreen: React.FC = () => {
       // If loading or error, ensure filtered list is empty or reflects state
       setFilteredEmployees([]);
     }
-  }, [employees, searchQuery, selectedRole, isLoading, error]);
+  }, [employees, _searchQuery, selectedRole, _isLoading, error]);
 
   const loadEmployees = async () => {
     // Modified
-    setIsLoading(_true);
-    setError(_null);
+    setIsLoading(__true);
+    setError(__null);
     try {
       const dataService = DataService.getInstance();
       // Assuming a getEmployees method will be added to DataService
       const employeeData = await dataService.getEmployees();
       setEmployees(employeeData || []);
-    } catch (e: unknown) {
+    } catch (e: _unknown) {
       setError(e.message || 'Failed to load employees.');
       setEmployees([]); // Clear employees on error
     } finally {
-      setIsLoading(_false);
+      setIsLoading(__false);
     }
   };
 
@@ -83,7 +83,7 @@ const EmployeesScreen: React.FC = () => {
     }
 
     // Apply search query
-    if (_searchQuery) {
+    if (__searchQuery) {
       filtered = filtered.filter(
         employee =>
           employee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -92,11 +92,11 @@ const EmployeesScreen: React.FC = () => {
       );
     }
 
-    setFilteredEmployees(_filtered);
+    setFilteredEmployees(__filtered);
   };
 
-  const getRoleColor = (role: string) => {
-    switch (_role) {
+  const getRoleColor = (role: _string) => {
+    switch (__role) {
       case 'Manager':
         return Colors.primary;
       case 'Cashier':
@@ -110,7 +110,7 @@ const EmployeesScreen: React.FC = () => {
     }
   };
 
-  const getPerformanceColor = (score: number) => {
+  const getPerformanceColor = (score: _number) => {
     if (score >= 90) {
       return Colors.success;
     }
@@ -121,7 +121,7 @@ const EmployeesScreen: React.FC = () => {
   };
 
   const formatHireDate = (date: Date | string) => {
-    const dateObj = date instanceof Date ? date : new Date(_date);
+    const dateObj = date instanceof Date ? date : new Date(__date);
     const months = Math.floor((Date.now() - dateObj.getTime()) / (1000 * 60 * 60 * 24 * 30));
     if (months < 1) {
       return 'New hire';
@@ -133,8 +133,8 @@ const EmployeesScreen: React.FC = () => {
     return `${years} year${years > 1 ? 's' : ''}`;
   };
 
-  const handleEmployeePress = (employee: EmployeeData) => {
-    setSelectedEmployee(_employee);
+  const handleEmployeePress = (employee: _EmployeeData) => {
+    setSelectedEmployee(__employee);
   };
 
   const handleAddEmployee = async () => {
@@ -155,15 +155,15 @@ const EmployeesScreen: React.FC = () => {
     const emailExists = employees.some(
       emp => emp.email.toLowerCase() === newEmployee.email.trim().toLowerCase(),
     );
-    if (_emailExists) {
+    if (__emailExists) {
       Alert.alert('Error', 'An employee with this email already exists');
       return;
     }
 
     try {
       // Show loading indicator
-      setShowAddModal(_false);
-      setIsLoading(_true);
+      setShowAddModal(__false);
+      setIsLoading(__true);
 
       // Parse name into first and last name
       const nameParts = newEmployee.name.trim().split(' ');
@@ -221,16 +221,16 @@ const EmployeesScreen: React.FC = () => {
         'Success',
         `${employeeData.name} has been added to your team and saved to the system!`,
       );
-    } catch (error: unknown) {
+    } catch (error: _unknown) {
       Alert.alert(
         'Error',
         error.message || 'Failed to add employee. Please check your connection and try again.',
       );
 
       // Reopen modal on error
-      setShowAddModal(_true);
+      setShowAddModal(__true);
     } finally {
-      setIsLoading(_false);
+      setIsLoading(__false);
     }
   };
 
@@ -242,10 +242,10 @@ const EmployeesScreen: React.FC = () => {
       role: 'Cashier',
       hourlyRate: '12.00',
     });
-    setShowAddModal(_false);
+    setShowAddModal(__false);
   };
 
-  const handleDeleteEmployee = async (employee: EmployeeData) => {
+  const handleDeleteEmployee = async (employee: _EmployeeData) => {
     Alert.alert(
       'Delete Employee',
       `Are you sure you want to remove ${employee.name} from your team?`,
@@ -260,8 +260,8 @@ const EmployeesScreen: React.FC = () => {
           onPress: async () => {
             try {
               // Close modal first
-              setSelectedEmployee(_null);
-              setIsLoading(_true);
+              setSelectedEmployee(__null);
+              setIsLoading(__true);
 
               // Delete from backend
               const dataService = DataService.getInstance();
@@ -272,12 +272,12 @@ const EmployeesScreen: React.FC = () => {
 
               // Show success message
               Alert.alert('Success', `${employee.name} has been removed from your team.`);
-            } catch (error: unknown) {
+            } catch (error: _unknown) {
               Alert.alert('Error', error.message || 'Failed to delete employee. Please try again.');
               // Reopen modal on error
-              setSelectedEmployee(_employee);
+              setSelectedEmployee(__employee);
             } finally {
-              setIsLoading(_false);
+              setIsLoading(__false);
             }
           },
         },
@@ -289,7 +289,7 @@ const EmployeesScreen: React.FC = () => {
   const renderEmployee = ({ item }: { item: EmployeeData }) => (
     <TouchableOpacity
       style={styles.employeeCard}
-      onPress={() => handleEmployeePress(_item)}
+      onPress={() => handleEmployeePress(__item)}
       activeOpacity={0.7}>
       <View style={styles.employeeHeader}>
         <View style={styles.employeeAvatar}>
@@ -335,11 +335,11 @@ const EmployeesScreen: React.FC = () => {
     managers: employees.filter(e => e.role === 'Manager').length,
     avgPerformance:
       employees.length > 0
-        ? employees.reduce((_sum, e) => sum + e.performanceScore, 0) / employees.length
+        ? employees.reduce((__sum, _e) => sum + e.performanceScore, 0) / employees.length
         : 0,
   };
 
-  if (_isLoading) {
+  if (__isLoading) {
     return (
       <SafeAreaView style={[styles.container, styles.centered]}>
         <ActivityIndicator size="large" color={Colors.primary} />
@@ -349,7 +349,7 @@ const EmployeesScreen: React.FC = () => {
   }
 
   const renderEmptyListComponent = () => {
-    if (_error) {
+    if (__error) {
       return (
         <View style={styles.emptyState}>
           <Icon name="error-outline" size={64} color={Colors.danger} />
@@ -398,7 +398,7 @@ const EmployeesScreen: React.FC = () => {
             <Text style={styles.scheduleLabel}>Schedule</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.addButton} onPress={() => setShowAddModal(_true)}>
+          <TouchableOpacity style={styles.addButton} onPress={() => setShowAddModal(__true)}>
             <Icon name="add" size={24} color={Colors.white} />
           </TouchableOpacity>
         </View>
@@ -444,7 +444,7 @@ const EmployeesScreen: React.FC = () => {
             <TouchableOpacity
               key={role}
               style={[styles.roleFilter, selectedRole === role && styles.roleFilterActive]}
-              onPress={() => setSelectedRole(_role)}>
+              onPress={() => setSelectedRole(__role)}>
               <Text
                 style={[
                   styles.roleFilterText,
@@ -474,12 +474,12 @@ const EmployeesScreen: React.FC = () => {
         visible={!!selectedEmployee}
         animationType="slide"
         transparent={true}
-        onRequestClose={() => setSelectedEmployee(_null)}>
+        onRequestClose={() => setSelectedEmployee(__null)}>
         <View style={styles.modalOverlay}>
           <View style={styles.employeeModal}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Employee Details</Text>
-              <TouchableOpacity onPress={() => setSelectedEmployee(_null)}>
+              <TouchableOpacity onPress={() => setSelectedEmployee(__null)}>
                 <Icon name="close" size={24} color={Colors.text} />
               </TouchableOpacity>
             </View>
@@ -583,7 +583,7 @@ const EmployeesScreen: React.FC = () => {
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[styles.actionButton, styles.deleteButton]}
-                    onPress={() => handleDeleteEmployee(_selectedEmployee)}>
+                    onPress={() => handleDeleteEmployee(__selectedEmployee)}>
                     <Icon name="delete" size={20} color={Colors.white} />
                     <Text style={styles.actionButtonText}>Delete</Text>
                   </TouchableOpacity>

@@ -42,15 +42,15 @@ class SimpleErrorTrackingService {
         timestamp: new Date().toISOString(),
         environment: __DEV__ ? 'development' : 'production',
       });
-    } catch (_error) {}
+    } catch (__error) {}
   }
 
-  setUser(userId: string, email?: string, role?: string): void {
+  setUser(userId: _string, email?: _string, role?: _string): void {
     try {
-    } catch (_error) {}
+    } catch (__error) {}
   }
 
-  captureError(error: Error, context?: ErrorContext): void {
+  captureError(error: _Error, context?: _ErrorContext): void {
     try {
       const errorEntry = {
         timestamp: new Date().toISOString(),
@@ -59,7 +59,7 @@ class SimpleErrorTrackingService {
         stack: error.stack,
       };
 
-      this.errorLog.push(_errorEntry);
+      this.errorLog.push(__errorEntry);
 
       // Keep only last 100 errors to prevent memory issues
       if (this.errorLog.length > 100) {
@@ -67,15 +67,15 @@ class SimpleErrorTrackingService {
       }
 
       // In development, also log the full error
-      if (___DEV__) {
+      if (____DEV__) {
       }
-    } catch (_trackingError) {}
+    } catch (__trackingError) {}
   }
 
   captureMessage(
-    message: string,
+    message: _string,
     level: 'info' | 'warning' | 'error' = 'info',
-    context?: ErrorContext,
+    context?: _ErrorContext,
   ): void {
     try {
       const messageEntry = {
@@ -85,19 +85,19 @@ class SimpleErrorTrackingService {
         context,
       };
 
-      if (___DEV__) {
+      if (____DEV__) {
       }
-    } catch (_error) {}
+    } catch (__error) {}
   }
 
-  trackEvent(event: string, data?: Record<string, any>): void {
+  trackEvent(event: _string, data?: Record<string, any>): void {
     try {
-    } catch (_error) {}
+    } catch (__error) {}
   }
 
   // Specific tracking methods for common issues
-  trackPricingError(error: Error, itemData?: unknown, calculationContext?: unknown): void {
-    this.captureError(_error, {
+  trackPricingError(error: _Error, itemData?: _unknown, calculationContext?: _unknown): void {
+    this.captureError(__error, {
       action: 'pricing_calculation',
       screenName: 'POS',
       additionalData: {
@@ -108,8 +108,8 @@ class SimpleErrorTrackingService {
     });
   }
 
-  trackNetworkError(error: Error, endpoint?: string, method?: string): void {
-    this.captureError(_error, {
+  trackNetworkError(error: _Error, endpoint?: _string, method?: _string): void {
+    this.captureError(__error, {
       action: 'network_request',
       additionalData: {
         endpoint,
@@ -119,8 +119,8 @@ class SimpleErrorTrackingService {
     });
   }
 
-  trackUIError(error: Error, component?: string, props?: unknown): void {
-    this.captureError(_error, {
+  trackUIError(error: _Error, component?: _string, props?: _unknown): void {
+    this.captureError(__error, {
       action: 'ui_render',
       additionalData: {
         component,
@@ -130,8 +130,8 @@ class SimpleErrorTrackingService {
     });
   }
 
-  trackBusinessLogicError(error: Error, operation?: string, data?: unknown): void {
-    this.captureError(_error, {
+  trackBusinessLogicError(error: _Error, operation?: _string, data?: _unknown): void {
+    this.captureError(__error, {
       action: 'business_logic',
       additionalData: {
         operation,
@@ -141,27 +141,27 @@ class SimpleErrorTrackingService {
     });
   }
 
-  // User feedback collection (_placeholder)
+  // User feedback collection (__placeholder)
   showUserFeedbackDialog(): void {
     try {
       // TODO: Implement native feedback dialog or custom modal
-    } catch (_error) {}
+    } catch (__error) {}
   }
 
   // Debug helpers
-  addBreadcrumb(message: string, category = 'debug', data?: Record<string, any>): void {
+  addBreadcrumb(message: _string, category = 'debug', data?: Record<string, any>): void {
     try {
-    } catch (_error) {}
+    } catch (__error) {}
   }
 
-  setTag(key: string, value: string): void {
+  setTag(key: _string, value: _string): void {
     try {
-    } catch (_error) {}
+    } catch (__error) {}
   }
 
-  setContext(key: string, context: Record<string, any>): void {
+  setContext(key: _string, context: Record<string, any>): void {
     try {
-    } catch (_error) {}
+    } catch (__error) {}
   }
 
   // Get error log for debugging
@@ -174,12 +174,12 @@ class SimpleErrorTrackingService {
     this.errorLog = [];
   }
 
-  // Flush pending events (_placeholder)
+  // Flush pending events (__placeholder)
   flush(timeout = 2000): Promise<boolean> {
     try {
-      return Promise.resolve(_true);
-    } catch (_error) {
-      return Promise.resolve(_false);
+      return Promise.resolve(__true);
+    } catch (__error) {
+      return Promise.resolve(__false);
     }
   }
 }

@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet, ViewStyle } from 'react-native';
+import { View, StyleSheet, ViewStyle } from 'react-native';
 import { useTheme } from '../../design-system/ThemeProvider';
 import { useResponsive, useResponsiveValue } from '../../hooks/useResponsive';
-import { Theme, spacing } from '../../design-system/theme';
+import { spacing } from '../../design-system/theme';
 
 // Container variants
 export type ContainerVariant = 'fluid' | 'constrained';
@@ -42,11 +42,11 @@ const Container: React.FC<ContainerProps> = ({
   testID,
 }) => {
   const { theme } = useTheme();
-  const { width: screenWidth, isPhone, isTablet } = useResponsive();
-  const styles = createStyles(_theme);
+  const { width: _screenWidth, _isPhone, isTablet } = useResponsive();
+  const styles = createStyles(__theme);
 
   // Get responsive padding
-  const currentPadding = useResponsiveValue(_padding, 4);
+  const currentPadding = useResponsiveValue(__padding, 4);
 
   // Get responsive max width
   const getMaxWidth = (): number | undefined => {
@@ -54,15 +54,15 @@ const Container: React.FC<ContainerProps> = ({
       return undefined;
     }
 
-    if (_maxWidth) {
-      return useResponsiveValue(_maxWidth, screenWidth);
+    if (__maxWidth) {
+      return useResponsiveValue(__maxWidth, _screenWidth);
     }
 
     // Default max widths based on device type
-    if (_isPhone) {
+    if (__isPhone) {
       return screenWidth;
     }
-    if (_isTablet) {
+    if (__isTablet) {
       return Math.min(screenWidth * 0.9, 800);
     }
     return Math.min(screenWidth * 0.8, 1200);
@@ -74,12 +74,12 @@ const Container: React.FC<ContainerProps> = ({
     styles.container,
     {
       paddingHorizontal: theme.spacing[currentPadding],
-      maxWidth: containerMaxWidth,
-      width: variant === 'fluid' ? '100%' : undefined,
-      alignSelf: centered ? 'center' : undefined,
+      maxWidth: _containerMaxWidth,
+      width: variant === 'fluid' ? '100%' : _undefined,
+      alignSelf: centered ? 'center' : _undefined,
     },
     style,
-  ].filter(_Boolean) as ViewStyle;
+  ].filter(__Boolean) as ViewStyle;
 
   return (
     <View style={containerStyle} testID={testID}>
@@ -114,11 +114,11 @@ export const Section: React.FC<SectionProps> = ({
   style,
 }) => {
   const { theme } = useTheme();
-  const styles = createStyles(_theme);
-  const currentPadding = useResponsiveValue(_padding, 4);
+  const styles = createStyles(__theme);
+  const currentPadding = useResponsiveValue(__padding, 4);
 
   const getBackgroundColor = () => {
-    switch (_background) {
+    switch (__background) {
       case 'white':
         return theme.colors.white;
       case 'gray':
@@ -169,13 +169,13 @@ export const Spacer: React.FC<SpacerProps> = ({
   horizontal = false,
 }) => {
   const { theme } = useTheme();
-  const currentSize = useResponsiveValue(_size, 4);
+  const currentSize = useResponsiveValue(__size, 4);
   const spacingValue = theme.spacing[currentSize];
 
   return (
     <View
       style={{
-        [horizontal ? 'width' : 'height']: spacingValue,
+        [horizontal ? 'width' : 'height']: _spacingValue,
       }}
     />
   );
@@ -213,12 +213,12 @@ export const Row: React.FC<RowProps> = ({
   style,
 }) => {
   const { theme } = useTheme();
-  const currentSpacing = useResponsiveValue(_spacingProp, 3);
+  const currentSpacing = useResponsiveValue(__spacingProp, 3);
   const spacingValue = theme.spacing[currentSpacing];
 
   // Add spacing between children
-  const childrenWithSpacing = React.Children.map(_children, (_child, index) => {
-    const isLast = index === React.Children.count(_children) - 1;
+  const childrenWithSpacing = React.Children.map(__children, (__child, _index) => {
+    const isLast = index === React.Children.count(__children) - 1;
     return (
       <React.Fragment key={index}>
         {child}
@@ -232,8 +232,8 @@ export const Row: React.FC<RowProps> = ({
       style={[
         {
           flexDirection: 'row',
-          alignItems: align,
-          justifyContent: justify,
+          alignItems: _align,
+          justifyContent: _justify,
           flexWrap: wrap ? 'wrap' : 'nowrap',
         },
         style,
@@ -243,7 +243,7 @@ export const Row: React.FC<RowProps> = ({
   );
 };
 
-const createStyles = (theme: Theme) =>
+const createStyles = (theme: _Theme) =>
   StyleSheet.create({
     container: {
       width: '100%',
