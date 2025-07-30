@@ -126,27 +126,47 @@ echo "   This may take 5-10 minutes..."
 # Wait for deployment to start
 sleep 10
 
-# Check deployment status
-DEPLOYMENT_ID=$(doctl apps list-deployments $APP_ID --format ID --no-header | head -1)
+# Get the latest deployment (sort by created_at descending)
+DEPLOYMENT_ID=$(doctl apps list-deployments $APP_ID --format ID,UpdatedAt --no-header | sort -k2 -r | head -1 | awk '{print $1}')
 if [ ! -z "$DEPLOYMENT_ID" ]; then
     echo "   Deployment ID: $DEPLOYMENT_ID"
     
-    # Monitor until complete
-    while true; do
+    # Monitor until complete (with timeout)
+    TIMEOUT=600  # 10 minutes timeout
+    ELAPSED=0
+    
+    while [ $ELAPSED -lt $TIMEOUT ]; do
         STATUS=$(doctl apps get-deployment $APP_ID $DEPLOYMENT_ID --format Phase --no-header)
-        echo "   Status: $STATUS"
+        echo "   Status: $STATUS (${ELAPSED}s elapsed)"
         
-        if [ "$STATUS" = "ACTIVE" ]; then
-            echo "✅ Deployment successful!"
-            break
-        elif [ "$STATUS" = "ERROR" ] || [ "$STATUS" = "CANCELED" ]; then
-            echo "❌ Deployment failed with status: $STATUS"
-            echo "   Check logs: doctl apps logs $APP_ID"
-            exit 1
-        fi
+        case "$STATUS" in
+            "ACTIVE")
+                echo "✅ Deployment successful!"
+                break
+                ;;
+            "ERROR"|"CANCELED"|"SUPERSEDED")
+                echo "❌ Deployment failed with status: $STATUS"
+                echo "   Check logs: doctl apps logs $APP_ID"
+                exit 1
+                ;;
+            "PENDING"|"BUILDING"|"DEPLOYING")
+                # Still in progress
+                ;;
+            *)
+                echo "⚠️  Unknown deployment status: $STATUS"
+                ;;
+        esac
         
         sleep 30
+        ELAPSED=$((ELAPSED + 30))
     done
+    
+    if [ $ELAPSED -ge $TIMEOUT ]; then
+        echo "❌ Deployment timeout after ${TIMEOUT} seconds"
+        echo "   Current status: $STATUS"
+        echo "   Check deployment: doctl apps get-deployment $APP_ID $DEPLOYMENT_ID"
+        exit 1
+    fi
 fi
 
 # Verify new configuration

@@ -105,13 +105,17 @@ THRESHOLD_WARNING=50
 THRESHOLD_CRITICAL=150
 THRESHOLD_EMERGENCY=200
 
+# Check for required dependencies
+command -v curl >/dev/null 2>&1 || { echo "Error: curl is required but not installed."; exit 1; }
+command -v jq >/dev/null 2>&1 || { echo "Error: jq is required but not installed."; exit 1; }
+command -v bc >/dev/null 2>&1 || { echo "Error: bc is required but not installed."; exit 1; }
+
 # Get current balance
 BALANCE_JSON=$(curl -s -X GET "https://api.digitalocean.com/v2/customers/my/balance" \\
   -H "Authorization: Bearer $DIGITALOCEAN_TOKEN")
 
-# Extract month-to-date usage
-CURRENT_USAGE=$(echo $BALANCE_JSON | jq -r '.month_to_date_usage // 0')
-CURRENT_USAGE_DOLLARS=$(echo "scale=2; $CURRENT_USAGE / 1" | bc)
+# Extract month-to-date usage (API returns value in dollars as string)
+CURRENT_USAGE_DOLLARS=$(echo $BALANCE_JSON | jq -r '.month_to_date_usage // "0"')
 
 # Calculate daily average and projection
 DAY_OF_MONTH=$(date +%d)

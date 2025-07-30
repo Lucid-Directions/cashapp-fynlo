@@ -78,8 +78,18 @@ class DailyCostTracker:
         std_dev = statistics.stdev(recent_averages) if len(recent_averages) > 1 else 0
         
         # Calculate today's actual spend
-        yesterday = history[-1] if history else {"month_to_date": 0}
-        today_spend = current["month_to_date"] - yesterday.get("month_to_date", 0)
+        yesterday = history[-1] if history else {"month_to_date": 0, "date": ""}
+        
+        # Check if we're in the same month
+        current_month = current["date"][:7]  # YYYY-MM
+        yesterday_month = yesterday.get("date", "")[:7]
+        
+        if current_month == yesterday_month:
+            # Same month - normal calculation
+            today_spend = current["month_to_date"] - yesterday.get("month_to_date", 0)
+        else:
+            # New month - today's spend is just the current month-to-date
+            today_spend = current["month_to_date"]
         
         # Detect spike
         spike_detected = False
