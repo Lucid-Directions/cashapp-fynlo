@@ -223,7 +223,9 @@ const OrderHistoryScreen: React.FC = () => {
   };
 
   const confirmReprint = (type: 'customer' | 'kitchen' | 'both') => {
-    if (!selectedOrder) return;
+    if (!selectedOrder) {
+      return;
+    }
 
     Alert.alert(
       'Receipt Reprinted',

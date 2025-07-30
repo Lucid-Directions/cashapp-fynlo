@@ -138,7 +138,7 @@ class AuthMonitor {
   /**
    * Get recent events
    */
-  getRecentEvents(count: number = 20): AuthEvent[] {
+  getRecentEvents(count = 20): AuthEvent[] {
     return this.events.slice(-count);
   }
 

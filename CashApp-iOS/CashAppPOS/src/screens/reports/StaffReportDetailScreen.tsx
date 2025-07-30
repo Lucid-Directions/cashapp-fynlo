@@ -160,7 +160,9 @@ const StaffReportDetailScreen = () => {
   };
 
   const getTopPerformer = () => {
-    if (staffData.length === 0) return null;
+    if (staffData.length === 0) {
+      return null;
+    }
 
     switch (selectedMetric) {
       case 'sales':

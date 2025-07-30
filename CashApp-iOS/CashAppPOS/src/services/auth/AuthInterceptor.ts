@@ -87,7 +87,9 @@ class AuthInterceptor {
    * Check if a path should be excluded from authentication
    */
   private shouldExcludeAuth(url: string): boolean {
-    if (!this.options.excludePaths) return false;
+    if (!this.options.excludePaths) {
+      return false;
+    }
 
     const path = url.replace(this.options.baseURL || '', '');
     return this.options.excludePaths.some(excludePath => path.startsWith(excludePath));
@@ -181,7 +183,7 @@ class AuthInterceptor {
   async get(
     url: string,
     headers: Record<string, string> = {},
-    timeoutMs: number = 10000,
+    timeoutMs = 10000,
   ): Promise<Response> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
@@ -215,7 +217,7 @@ class AuthInterceptor {
     url: string,
     body: any,
     headers: Record<string, string> = {},
-    timeoutMs: number = 10000,
+    timeoutMs = 10000,
   ): Promise<Response> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
@@ -250,7 +252,7 @@ class AuthInterceptor {
     url: string,
     body: any,
     headers: Record<string, string> = {},
-    timeoutMs: number = 10000,
+    timeoutMs = 10000,
   ): Promise<Response> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
@@ -284,7 +286,7 @@ class AuthInterceptor {
   async delete(
     url: string,
     headers: Record<string, string> = {},
-    timeoutMs: number = 10000,
+    timeoutMs = 10000,
   ): Promise<Response> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
@@ -318,7 +320,7 @@ class AuthInterceptor {
     url: string,
     body: any,
     headers: Record<string, string> = {},
-    timeoutMs: number = 10000,
+    timeoutMs = 10000,
   ): Promise<Response> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);

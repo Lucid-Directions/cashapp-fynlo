@@ -267,11 +267,7 @@ export const calculateSum = (
 /**
  * Safely formats a price for display
  */
-export const formatPrice = (
-  value: any,
-  currency: string = '£',
-  context?: CalculationContext,
-): string => {
+export const formatPrice = (value: any, currency = '£', context?: CalculationContext): string => {
   const validation = validatePrice(value, context);
 
   if (!validation.isValid) {

@@ -162,7 +162,9 @@ const HomeHubScreen: React.FC = () => {
 
   // Filter icons based on user role
   const getVisibleIcons = () => {
-    if (!user?.role) return [];
+    if (!user?.role) {
+      return [];
+    }
     return hubIcons.filter(icon => icon.requiredRoles.includes(user.role));
   };
 
@@ -267,7 +269,9 @@ const HomeHubScreen: React.FC = () => {
       account: 'Account & Settings',
     };
 
-    if (icons.length === 0) return null;
+    if (icons.length === 0) {
+      return null;
+    }
 
     return (
       <View style={styles.categorySection}>

@@ -89,7 +89,7 @@ class SumUpServiceClass {
    */
   async createCheckout(
     amount: number,
-    currency: string = 'GBP',
+    currency = 'GBP',
     description?: string,
     returnUrl?: string,
   ): Promise<SumUpCheckout> {
@@ -178,7 +178,7 @@ class SumUpServiceClass {
    */
   async processContactlessPayment(
     amount: number,
-    currency: string = 'GBP',
+    currency = 'GBP',
     description?: string,
   ): Promise<SumUpContactlessPayment> {
     try {
@@ -228,7 +228,7 @@ class SumUpServiceClass {
    */
   async createQRPayment(
     amount: number,
-    currency: string = 'GBP',
+    currency = 'GBP',
     description?: string,
   ): Promise<SumUpQRPayment> {
     try {

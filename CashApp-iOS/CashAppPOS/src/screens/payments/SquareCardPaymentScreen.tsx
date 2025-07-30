@@ -215,7 +215,9 @@ const SquareCardPaymentScreen: React.FC<SquareCardPaymentScreenProps> = ({ navig
   };
 
   const renderErrorMessage = () => {
-    if (!paymentState.errorMessage) return null;
+    if (!paymentState.errorMessage) {
+      return null;
+    }
 
     return (
       <View style={[styles.errorContainer, { backgroundColor: theme.colors.error + '15' }]}>

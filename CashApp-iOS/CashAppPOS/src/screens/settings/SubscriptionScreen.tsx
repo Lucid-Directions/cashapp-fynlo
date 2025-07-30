@@ -5,7 +5,7 @@
  * manage billing, and upgrade/downgrade plans.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -46,7 +46,9 @@ export const SubscriptionScreen: React.FC = () => {
   };
 
   const handlePlanChange = (newPlanId: number, planName: string) => {
-    if (!subscription) return;
+    if (!subscription) {
+      return;
+    }
 
     Alert.alert('Change Plan', `Are you sure you want to switch to the ${planName}?`, [
       { text: 'Cancel', style: 'cancel' },
@@ -122,13 +124,19 @@ export const SubscriptionScreen: React.FC = () => {
   };
 
   const getUsagePercentage = (used: number, limit: number | null) => {
-    if (limit === null) return 0; // Unlimited
+    if (limit === null) {
+      return 0;
+    } // Unlimited
     return Math.min(100, (used / limit) * 100);
   };
 
   const getUsageColor = (percentage: number) => {
-    if (percentage >= 90) return theme.colors.error;
-    if (percentage >= 75) return theme.colors.warning;
+    if (percentage >= 90) {
+      return theme.colors.error;
+    }
+    if (percentage >= 75) {
+      return theme.colors.warning;
+    }
     return theme.colors.success;
   };
 

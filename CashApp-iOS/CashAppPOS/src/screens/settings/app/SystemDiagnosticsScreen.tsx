@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -6,9 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
-  ActivityIndicator,
   Modal,
-  ProgressBarAndroid,
   Platform,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -266,7 +264,9 @@ const SystemDiagnosticsScreen: React.FC = () => {
 
   const runSingleTest = async (testId: string) => {
     const test = diagnosticTests.find(t => t.id === testId);
-    if (!test) return;
+    if (!test) {
+      return;
+    }
 
     setDiagnosticTests(prev => prev.map(t => (t.id === testId ? { ...t, status: 'running' } : t)));
 

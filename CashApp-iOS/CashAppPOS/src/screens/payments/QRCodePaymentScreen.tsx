@@ -71,7 +71,9 @@ const QRCodePaymentScreen: React.FC = () => {
   const initializeQRPayment = async () => {
     try {
       // Check if component is still mounted
-      if (!isMountedRef.current) return;
+      if (!isMountedRef.current) {
+        return;
+      }
 
       setPaymentStatus('loading');
       setErrorMessage('');
@@ -79,7 +81,9 @@ const QRCodePaymentScreen: React.FC = () => {
       const payment = await SumUpService.createQRPayment(amount, currency, description);
 
       // Ensure component is still mounted before updating state
-      if (!isMountedRef.current) return;
+      if (!isMountedRef.current) {
+        return;
+      }
 
       setQrPayment(payment);
       setPaymentStatus('waiting');
@@ -163,7 +167,9 @@ const QRCodePaymentScreen: React.FC = () => {
         const updatedPayment = await SumUpService.pollQRPaymentStatus(payment);
 
         // Double-check if component is still mounted before state updates
-        if (!isMountedRef.current) return;
+        if (!isMountedRef.current) {
+          return;
+        }
 
         setQrPayment(updatedPayment);
         setPaymentStatus(updatedPayment.status);

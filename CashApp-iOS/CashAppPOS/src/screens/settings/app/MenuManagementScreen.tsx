@@ -8,10 +8,8 @@ import {
   Alert,
   Switch,
   TextInput,
-  FlatList,
   Modal,
   ActivityIndicator,
-  Platform,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
@@ -342,7 +340,9 @@ const MenuManagementScreen: React.FC = () => {
   const toggleItemAvailability = async (itemId: string) => {
     const item = categories.flatMap(c => c.items).find(i => i.id === itemId);
 
-    if (!item) return;
+    if (!item) {
+      return;
+    }
 
     try {
       await dataService.updateProduct(itemId, {
@@ -377,7 +377,9 @@ const MenuManagementScreen: React.FC = () => {
   const toggleCategoryVisibility = async (categoryId: string) => {
     const category = categories.find(c => c.id === categoryId);
 
-    if (!category) return;
+    if (!category) {
+      return;
+    }
 
     try {
       await dataService.updateCategory(categoryId, {
@@ -518,7 +520,9 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
       const errors: string[] = [];
 
       for (let i = 1; i < lines.length; i++) {
-        if (!lines[i].trim()) continue; // Skip empty lines
+        if (!lines[i].trim()) {
+          continue;
+        } // Skip empty lines
 
         const values = parseCSVLine(lines[i]);
 
@@ -748,7 +752,9 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
 
   const getSelectedCategoryItems = () => {
     const category = categories.find(c => c.id === selectedCategory);
-    if (!category) return [];
+    if (!category) {
+      return [];
+    }
 
     let items = category.items;
 

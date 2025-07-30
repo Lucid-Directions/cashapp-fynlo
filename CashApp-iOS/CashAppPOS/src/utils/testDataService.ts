@@ -225,7 +225,9 @@ export class DataServiceTester {
 
       for (const method of paymentMethods) {
         const result = await this.dataService.processPayment(123, method, 10.0);
-        if (!result) allPaymentsSucceed = false;
+        if (!result) {
+          allPaymentsSucceed = false;
+        }
       }
 
       this.testResults['Payment Methods'] = allPaymentsSucceed;

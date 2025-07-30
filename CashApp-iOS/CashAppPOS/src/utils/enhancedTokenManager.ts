@@ -1,4 +1,3 @@
-import { AuthTokens, User } from '@fynlo/shared';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../lib/supabase';
 import { AUTH_CONFIG } from '../config/auth.config';
@@ -219,7 +218,9 @@ class EnhancedTokenManager {
       clearTimeout(this.refreshTimer);
     }
 
-    if (!this.tokenCache.expiresAt) return;
+    if (!this.tokenCache.expiresAt) {
+      return;
+    }
 
     // Calculate time until refresh needed
     const now = Math.floor(Date.now() / 1000);

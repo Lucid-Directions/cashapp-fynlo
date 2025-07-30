@@ -181,24 +181,44 @@ const AccessibilityScreen: React.FC = () => {
   };
 
   const getTextSizeDescription = (size: number) => {
-    if (size < 14) return 'Small';
-    if (size < 18) return 'Medium';
-    if (size < 22) return 'Large';
-    if (size < 26) return 'Extra Large';
+    if (size < 14) {
+      return 'Small';
+    }
+    if (size < 18) {
+      return 'Medium';
+    }
+    if (size < 22) {
+      return 'Large';
+    }
+    if (size < 26) {
+      return 'Extra Large';
+    }
     return 'Accessibility Size';
   };
 
   const getContrastDescription = (level: number) => {
-    if (level === 0) return 'Normal';
-    if (level < 0.5) return 'Moderate';
+    if (level === 0) {
+      return 'Normal';
+    }
+    if (level < 0.5) {
+      return 'Moderate';
+    }
     return 'High';
   };
 
   const getSpeedDescription = (speed: number) => {
-    if (speed < 0.5) return 'Very Slow';
-    if (speed < 1) return 'Slow';
-    if (speed === 1) return 'Normal';
-    if (speed < 1.5) return 'Fast';
+    if (speed < 0.5) {
+      return 'Very Slow';
+    }
+    if (speed < 1) {
+      return 'Slow';
+    }
+    if (speed === 1) {
+      return 'Normal';
+    }
+    if (speed < 1.5) {
+      return 'Fast';
+    }
     return 'Very Fast';
   };
 

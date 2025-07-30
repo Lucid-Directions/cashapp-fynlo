@@ -1,4 +1,4 @@
-import { Platform, NativeModules } from 'react-native';
+import { Platform } from 'react-native';
 
 // Note: This service provides a bridge between our existing architecture
 // and the React hook-based SumUp SDK. The actual SumUp functionality

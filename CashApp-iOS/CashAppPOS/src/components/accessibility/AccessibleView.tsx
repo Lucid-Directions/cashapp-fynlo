@@ -50,7 +50,9 @@ const AccessibleView: React.FC<AccessibleViewProps> = ({
 }) => {
   // Convert semantic role to accessibility role
   const getAccessibilityRole = (): AccessibilityRole | undefined => {
-    if (accessibilityRole) return accessibilityRole;
+    if (accessibilityRole) {
+      return accessibilityRole;
+    }
 
     switch (semanticRole) {
       case 'header':

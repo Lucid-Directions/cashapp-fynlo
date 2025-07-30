@@ -6,8 +6,6 @@ import API_CONFIG from '../config/api';
 import { envBool, IS_DEV } from '../env';
 import { useAuthStore } from '../store/useAuthStore';
 import BackendCompatibilityService from './BackendCompatibilityService';
-import { supabase } from '../lib/supabase';
-import { AUTH_CONFIG } from '../config/auth.config';
 import tokenManager from '../utils/tokenManager';
 import authInterceptor from './auth/AuthInterceptor';
 
@@ -50,7 +48,7 @@ class DataService {
   private featureFlags: FeatureFlags = DEFAULT_FLAGS;
   private databaseService: DatabaseService;
   private apiTestingService: APITestingService;
-  private isBackendAvailable: boolean = false;
+  private isBackendAvailable = false;
   private db: ReturnType<typeof DatabaseService.getInstance>;
 
   constructor() {
@@ -106,11 +104,7 @@ class DataService {
   }
 
   // Test API endpoint in background without affecting UI
-  private async testAPIEndpoint(
-    endpoint: string,
-    method: string = 'GET',
-    data?: any,
-  ): Promise<void> {
+  private async testAPIEndpoint(endpoint: string, method = 'GET', data?: any): Promise<void> {
     if (this.featureFlags.TEST_API_MODE) {
       try {
         await this.apiTestingService.testEndpoint(endpoint, method, data);
@@ -460,7 +454,9 @@ class DataService {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         const result = await this.db.createOrder(order);
-        if (result) return result;
+        if (result) {
+          return result;
+        }
       } catch (error) {
         console.log('Failed to create order via API, using mock');
       }
@@ -479,7 +475,7 @@ class DataService {
     return this.db.updateOrder(orderId, updates);
   }
 
-  async getRecentOrders(limit: number = 20): Promise<any[]> {
+  async getRecentOrders(limit = 20): Promise<any[]> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         const orders = await this.db.getRecentOrders(limit);
@@ -859,7 +855,7 @@ class DataService {
 
       if (response.ok) {
         const result = await response.json();
-        let salesData = result.data || result;
+        const salesData = result.data || result;
 
         // Transform API data to match frontend SalesData[] interface
         if (salesData && !Array.isArray(salesData)) {
@@ -1362,7 +1358,7 @@ class DataService {
     throw new Error('Subscription cancellation requires API connection');
   }
 
-  async incrementUsage(restaurantId: number, usageType: string, amount: number = 1): Promise<any> {
+  async incrementUsage(restaurantId: number, usageType: string, amount = 1): Promise<any> {
     console.log('DataService.incrementUsage called', { restaurantId, usageType, amount });
 
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {

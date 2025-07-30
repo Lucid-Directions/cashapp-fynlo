@@ -127,7 +127,9 @@ const BackupRestoreScreen: React.FC = () => {
   };
 
   const confirmRestore = async () => {
-    if (!selectedBackup) return;
+    if (!selectedBackup) {
+      return;
+    }
 
     setIsRestoring(true);
     setShowRestoreModal(false);

@@ -4,7 +4,6 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import {
   useTheme,
   ThemeMode,
-  ColorTheme,
   ColorThemeOption,
   colorThemeOptions,
 } from '../../design-system/ThemeProvider';
@@ -62,7 +61,9 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
 
   // Safe theme switching with error handling
   const handleThemeToggle = useCallback(async () => {
-    if (isAnimating) return;
+    if (isAnimating) {
+      return;
+    }
 
     try {
       setIsAnimating(true);
@@ -122,7 +123,9 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
 
   const handleColorThemeChange = useCallback(
     async (colorThemeOption: ColorThemeOption) => {
-      if (isAnimating) return;
+      if (isAnimating) {
+        return;
+      }
 
       try {
         setIsAnimating(true);

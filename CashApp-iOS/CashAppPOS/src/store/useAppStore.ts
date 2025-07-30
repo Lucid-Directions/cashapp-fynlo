@@ -281,7 +281,9 @@ const useAppStore = create<AppStore>()(
       // Transaction fee calculation (2.9% processing fee)
       calculateTransactionFee: () => {
         const { addTransactionFee } = get();
-        if (!addTransactionFee) return 0;
+        if (!addTransactionFee) {
+          return 0;
+        }
 
         const cartSubtotal = get().cartTotal();
         try {

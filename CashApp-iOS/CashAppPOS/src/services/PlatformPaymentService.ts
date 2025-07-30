@@ -3,7 +3,6 @@
  * Extends existing PaymentService patterns while adding platform fee management
  */
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import PlatformService, { PaymentFee, FeeCalculation } from './PlatformService';
 import PaymentService from './PaymentService';
 
@@ -34,7 +33,7 @@ class PlatformPaymentService {
   private platformService: PlatformService;
   private paymentService: PaymentService;
   private cachedFees: Record<string, PaymentFee> | null = null;
-  private cacheExpiry: number = 0;
+  private cacheExpiry = 0;
   private readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
   private constructor() {
@@ -68,7 +67,9 @@ class PlatformPaymentService {
 
       for (const method of baseMethods) {
         const platformFee = platformFees[method.id];
-        if (!platformFee) continue;
+        if (!platformFee) {
+          continue;
+        }
 
         // Calculate effective fee for this amount
         let effectiveFee: FeeCalculation | undefined;

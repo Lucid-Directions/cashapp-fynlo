@@ -49,7 +49,9 @@ const SumUpPaymentSheet: React.FC<SumUpPaymentComponentProps> = ({
     }, 100);
 
     return () => {
-      if (initTimer) clearTimeout(initTimer);
+      if (initTimer) {
+        clearTimeout(initTimer);
+      }
     };
   }, [amount, currency, title]);
 

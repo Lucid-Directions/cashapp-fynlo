@@ -7,7 +7,6 @@ import {
   SafeAreaView,
   TouchableOpacity,
   FlatList,
-  Image,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';

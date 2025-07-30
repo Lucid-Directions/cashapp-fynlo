@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import PaymentService, { PaymentRequest, QRPaymentData } from '../../services/PaymentService';
@@ -173,14 +173,18 @@ export const QRCodePayment: React.FC<QRCodePaymentProps> = ({
 
   const generateQRPayment = async () => {
     try {
-      if (!isMountedRef.current) return;
+      if (!isMountedRef.current) {
+        return;
+      }
 
       setStatus('generating');
       setError('');
 
       const data = await PaymentService.generateQRPayment(request);
 
-      if (!isMountedRef.current) return;
+      if (!isMountedRef.current) {
+        return;
+      }
 
       setQrData(data);
       setStatus('waiting');
@@ -195,12 +199,16 @@ export const QRCodePayment: React.FC<QRCodePaymentProps> = ({
   };
 
   const checkPaymentStatus = async () => {
-    if (!qrData || !isMountedRef.current) return;
+    if (!qrData || !isMountedRef.current) {
+      return;
+    }
 
     try {
       const statusResult = await PaymentService.checkQRPaymentStatus(qrData.qrPaymentId);
 
-      if (!isMountedRef.current) return;
+      if (!isMountedRef.current) {
+        return;
+      }
 
       if (statusResult.status === 'completed') {
         setStatus('completed');

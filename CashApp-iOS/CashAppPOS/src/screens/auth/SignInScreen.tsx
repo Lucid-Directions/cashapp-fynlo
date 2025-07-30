@@ -10,7 +10,6 @@ import {
   ScrollView,
   ActivityIndicator,
   Switch,
-  Image,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { SimpleTextInput } from '../../components/inputs';
@@ -69,7 +68,9 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
   };
 
   const handleSignIn = async () => {
-    if (!validateForm()) return;
+    if (!validateForm()) {
+      return;
+    }
 
     setIsLoading(true);
     try {
@@ -182,7 +183,9 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
               value={email}
               onValueChange={text => {
                 setEmail(text);
-                if (errors.email) setErrors(prev => ({ ...prev, email: undefined }));
+                if (errors.email) {
+                  setErrors(prev => ({ ...prev, email: undefined }));
+                }
               }}
               placeholder="Enter your email"
               keyboardType="email-address"
@@ -200,7 +203,9 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
               value={password}
               onValueChange={text => {
                 setPassword(text);
-                if (errors.password) setErrors(prev => ({ ...prev, password: undefined }));
+                if (errors.password) {
+                  setErrors(prev => ({ ...prev, password: undefined }));
+                }
               }}
               placeholder="Enter your password"
               secureTextEntry={true} // Fixed prop name

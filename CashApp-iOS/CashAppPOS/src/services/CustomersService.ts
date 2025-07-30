@@ -27,10 +27,14 @@ class CustomersService {
   }
 
   private async ensureConfig() {
-    if (this.baseUrl && this.apiKey) return;
+    if (this.baseUrl && this.apiKey) {
+      return;
+    }
     try {
       const raw = await AsyncStorage.getItem('payment_service_config');
-      if (!raw) return;
+      if (!raw) {
+        return;
+      }
       const cfg = JSON.parse(raw);
       this.baseUrl = cfg?.backend?.baseUrl ?? null;
       this.apiKey = cfg?.backend?.apiKey ?? null;
@@ -42,7 +46,9 @@ class CustomersService {
   async saveCustomer(payload: SaveCustomerPayload): Promise<void> {
     try {
       await this.ensureConfig();
-      if (!this.baseUrl || !this.apiKey) throw new Error('API config missing');
+      if (!this.baseUrl || !this.apiKey) {
+        throw new Error('API config missing');
+      }
 
       await fetch(`${this.baseUrl}/api/v1/customers`, {
         method: 'POST',
@@ -60,14 +66,18 @@ class CustomersService {
   async search(query: string): Promise<CustomerSuggestion[]> {
     try {
       await this.ensureConfig();
-      if (!this.baseUrl || !this.apiKey) return [];
+      if (!this.baseUrl || !this.apiKey) {
+        return [];
+      }
       const res = await fetch(
         `${this.baseUrl}/api/v1/customers?query=${encodeURIComponent(query)}`,
         {
           headers: { Authorization: `Bearer ${this.apiKey}` },
         },
       );
-      if (!res.ok) return [];
+      if (!res.ok) {
+        return [];
+      }
       const json = await res.json();
       return json.items ?? [];
     } catch (err) {

@@ -25,8 +25,12 @@ const SUPABASE_ANON_KEY =
 // Validate required environment variables
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
   const missingVars = [];
-  if (!SUPABASE_URL) missingVars.push('SUPABASE_URL');
-  if (!SUPABASE_ANON_KEY) missingVars.push('SUPABASE_ANON_KEY');
+  if (!SUPABASE_URL) {
+    missingVars.push('SUPABASE_URL');
+  }
+  if (!SUPABASE_ANON_KEY) {
+    missingVars.push('SUPABASE_ANON_KEY');
+  }
 
   console.error('Environment variables missing:', {
     SUPABASE_URL: SUPABASE_URL ? '[SET]' : '[MISSING]',

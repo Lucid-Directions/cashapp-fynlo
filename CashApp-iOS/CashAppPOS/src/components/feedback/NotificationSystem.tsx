@@ -190,7 +190,9 @@ const NotificationItem: React.FC<NotificationItemProps> = ({ notification, onHid
 
   const { backgroundColor, iconName } = getNotificationStyle();
 
-  if (!visible) return null;
+  if (!visible) {
+    return null;
+  }
 
   return (
     <Animated.View style={[styles.notificationContainer, getContainerStyle()]}>

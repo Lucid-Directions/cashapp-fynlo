@@ -179,13 +179,27 @@ class OrderService {
       console.log('📋 Fetching orders...', filters);
 
       const params = new URLSearchParams();
-      if (filters?.status) params.append('status', filters.status);
-      if (filters?.dateFrom) params.append('date_from', filters.dateFrom.toISOString());
-      if (filters?.dateTo) params.append('date_to', filters.dateTo.toISOString());
-      if (filters?.customerEmail) params.append('customer_email', filters.customerEmail);
-      if (filters?.paymentMethod) params.append('payment_method', filters.paymentMethod);
-      if (filters?.limit) params.append('limit', filters.limit.toString());
-      if (filters?.offset) params.append('offset', filters.offset.toString());
+      if (filters?.status) {
+        params.append('status', filters.status);
+      }
+      if (filters?.dateFrom) {
+        params.append('date_from', filters.dateFrom.toISOString());
+      }
+      if (filters?.dateTo) {
+        params.append('date_to', filters.dateTo.toISOString());
+      }
+      if (filters?.customerEmail) {
+        params.append('customer_email', filters.customerEmail);
+      }
+      if (filters?.paymentMethod) {
+        params.append('payment_method', filters.paymentMethod);
+      }
+      if (filters?.limit) {
+        params.append('limit', filters.limit.toString());
+      }
+      if (filters?.offset) {
+        params.append('offset', filters.offset.toString());
+      }
 
       const response = await fetch(`${API_CONFIG.BASE_URL}/api/v1/orders?${params}`, {
         method: 'GET',
@@ -385,7 +399,9 @@ class OrderService {
   async processSyncQueue(): Promise<void> {
     try {
       const queue = await AsyncStorage.getItem('order_sync_queue');
-      if (!queue) return;
+      if (!queue) {
+        return;
+      }
 
       const queueData = JSON.parse(queue);
       const processedIds: number[] = [];

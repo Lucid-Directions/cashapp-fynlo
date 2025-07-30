@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Dimensions, ScaledSize } from 'react-native';
-import { breakpoints, deviceTypes } from '../design-system/theme';
+import { Dimensions } from 'react-native';
+import { breakpoints } from '../design-system/theme';
 
 interface ResponsiveHookReturn {
   width: number;
@@ -38,11 +38,21 @@ export const useResponsive = (): ResponsiveHookReturn => {
 
   // Breakpoint detection
   const getBreakpoint = (): 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl' => {
-    if (width >= breakpoints.xxl) return 'xxl';
-    if (width >= breakpoints.xl) return 'xl';
-    if (width >= breakpoints.lg) return 'lg';
-    if (width >= breakpoints.md) return 'md';
-    if (width >= breakpoints.sm) return 'sm';
+    if (width >= breakpoints.xxl) {
+      return 'xxl';
+    }
+    if (width >= breakpoints.xl) {
+      return 'xl';
+    }
+    if (width >= breakpoints.lg) {
+      return 'lg';
+    }
+    if (width >= breakpoints.md) {
+      return 'md';
+    }
+    if (width >= breakpoints.sm) {
+      return 'sm';
+    }
     return 'xs';
   };
 
@@ -72,7 +82,9 @@ export const useResponsiveValue = <T>(
   const { breakpoint } = useResponsive();
 
   // Return value based on current breakpoint, falling back to smaller breakpoints
-  if (values[breakpoint] !== undefined) return values[breakpoint]!;
+  if (values[breakpoint] !== undefined) {
+    return values[breakpoint]!;
+  }
 
   // Fallback logic
   const breakpointOrder: Array<keyof typeof values> = ['xxl', 'xl', 'lg', 'md', 'sm', 'xs'];
@@ -80,7 +92,9 @@ export const useResponsiveValue = <T>(
 
   for (let i = currentIndex + 1; i < breakpointOrder.length; i++) {
     const key = breakpointOrder[i];
-    if (values[key] !== undefined) return values[key]!;
+    if (values[key] !== undefined) {
+      return values[key]!;
+    }
   }
 
   return fallback;
@@ -96,7 +110,7 @@ export const useResponsiveColumns = (
     xl?: number;
     xxl?: number;
   },
-  defaultColumns: number = 1,
+  defaultColumns = 1,
 ): number => {
   return useResponsiveValue(columns, defaultColumns);
 };

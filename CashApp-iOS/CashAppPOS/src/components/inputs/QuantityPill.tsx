@@ -10,14 +10,9 @@
  */
 
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ViewStyle } from 'react-native';
 import { Plus, Minus } from 'lucide-react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  interpolate,
-} from 'react-native-reanimated';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { useTheme } from '../../design-system/ThemeProvider';
 
 interface QuantityPillProps {

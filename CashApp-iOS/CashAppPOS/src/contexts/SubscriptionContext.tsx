@@ -240,7 +240,9 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
   };
 
   const subscribeToPlan = async (planId: number, startTrial = true): Promise<boolean> => {
-    if (!restaurantId) return false;
+    if (!restaurantId) {
+      return false;
+    }
 
     setLoading(true);
     setError(null);
@@ -268,7 +270,9 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
   };
 
   const changePlan = async (newPlanId: number, immediate = true): Promise<boolean> => {
-    if (!restaurantId) return false;
+    if (!restaurantId) {
+      return false;
+    }
 
     setLoading(true);
     setError(null);
@@ -296,7 +300,9 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
   };
 
   const cancelSubscription = async (): Promise<boolean> => {
-    if (!restaurantId) return false;
+    if (!restaurantId) {
+      return false;
+    }
 
     setLoading(true);
     setError(null);
@@ -320,7 +326,9 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
   };
 
   const incrementUsage = async (usageType: string, amount = 1): Promise<boolean> => {
-    if (!restaurantId) return false;
+    if (!restaurantId) {
+      return false;
+    }
 
     try {
       const response = await DataService.getInstance().incrementUsage(
@@ -332,7 +340,9 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
       if (response.success) {
         // Update local usage state
         setUsage(prevUsage => {
-          if (!prevUsage) return null;
+          if (!prevUsage) {
+            return null;
+          }
 
           const updatedUsage = { ...prevUsage };
           switch (usageType) {
@@ -375,7 +385,9 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
   };
 
   const isUnlimited = (limitType: string): boolean => {
-    if (!subscription) return false;
+    if (!subscription) {
+      return false;
+    }
 
     const limitMap = {
       orders: subscription.plan.max_orders_per_month,

@@ -324,7 +324,9 @@ const SquareContactlessPaymentScreen: React.FC<SquareContactlessPaymentScreenPro
   };
 
   const renderErrorMessage = () => {
-    if (!contactlessState.errorMessage) return null;
+    if (!contactlessState.errorMessage) {
+      return null;
+    }
 
     return (
       <View style={[styles.errorContainer, { backgroundColor: theme.colors.error + '15' }]}>

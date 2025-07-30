@@ -203,10 +203,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   hasFeature: (feature: string) => {
     const { user } = get();
-    if (!user) return false;
+    if (!user) {
+      return false;
+    }
 
     // Platform owners have all features
-    if (user.is_platform_owner) return true;
+    if (user.is_platform_owner) {
+      return true;
+    }
 
     // Check if feature is in enabled features list
     return user.enabled_features?.includes(feature) || false;
@@ -214,10 +218,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   requiresPlan: (plan: 'alpha' | 'beta' | 'omega') => {
     const { user } = get();
-    if (!user) return false;
+    if (!user) {
+      return false;
+    }
 
     // Platform owners have access to all plans
-    if (user.is_platform_owner) return true;
+    if (user.is_platform_owner) {
+      return true;
+    }
 
     // Check plan hierarchy
     const planHierarchy = { alpha: 1, beta: 2, omega: 3 };

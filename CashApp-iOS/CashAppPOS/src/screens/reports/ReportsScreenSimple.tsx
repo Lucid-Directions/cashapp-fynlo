@@ -8,13 +8,11 @@ import {
   ScrollView,
   TouchableOpacity,
   Dimensions,
-  ActivityIndicator, // Will be replaced by LoadingView
-  Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 // import { generateEmployees, generateSalesHistory, EmployeeData } from '../../utils/mockDataGenerator'; // Removed
-import { EmployeeData } from '../../types'; // Updated import path
+// Updated import path
 import Colors from '../../constants/Colors'; // Keep for now, though theme might override
 import { useTheme } from '../../design-system/ThemeProvider';
 import DataService from '../../services/DataService'; // Added
@@ -33,8 +31,12 @@ const isSmallDevice = screenWidth < 380;
 
 // Responsive font sizes
 const getFontSize = (base: number) => {
-  if (isTablet) return base * 1.2;
-  if (isSmallDevice) return base * 0.9;
+  if (isTablet) {
+    return base * 1.2;
+  }
+  if (isSmallDevice) {
+    return base * 0.9;
+  }
   return base;
 };
 

@@ -172,7 +172,7 @@ class SimpleErrorTrackingService {
   }
 
   // Debug helpers
-  addBreadcrumb(message: string, category: string = 'debug', data?: Record<string, any>): void {
+  addBreadcrumb(message: string, category = 'debug', data?: Record<string, any>): void {
     try {
       console.log(`🍞 Breadcrumb [${category}]:`, message, data);
     } catch (error) {
@@ -208,7 +208,7 @@ class SimpleErrorTrackingService {
   }
 
   // Flush pending events (placeholder)
-  flush(timeout: number = 2000): Promise<boolean> {
+  flush(timeout = 2000): Promise<boolean> {
     try {
       console.log('🚽 Flushing error events...');
       return Promise.resolve(true);

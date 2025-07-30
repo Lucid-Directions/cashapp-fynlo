@@ -21,7 +21,9 @@ describe('API Integration Tests', () => {
 
   describe('Backend Health Check', () => {
     it('should connect to backend health endpoint', async () => {
-      if (SKIP_API_TESTS) return;
+      if (SKIP_API_TESTS) {
+        return;
+      }
 
       try {
         const response = await fetch(`${API_BASE_URL}/health`);
@@ -38,7 +40,9 @@ describe('API Integration Tests', () => {
     });
 
     it('should verify API documentation is accessible', async () => {
-      if (SKIP_API_TESTS) return;
+      if (SKIP_API_TESTS) {
+        return;
+      }
 
       const response = await fetch(`${API_BASE_URL}/docs`);
       expect(response.ok).toBe(true);
@@ -48,7 +52,9 @@ describe('API Integration Tests', () => {
 
   describe('Authentication Endpoints', () => {
     it('should handle login attempt', async () => {
-      if (SKIP_API_TESTS) return;
+      if (SKIP_API_TESTS) {
+        return;
+      }
 
       // Test with invalid credentials first
       const loginResult = await databaseService.login('test@example.com', 'wrongpassword');
@@ -57,7 +63,9 @@ describe('API Integration Tests', () => {
     });
 
     it('should handle logout request', async () => {
-      if (SKIP_API_TESTS) return;
+      if (SKIP_API_TESTS) {
+        return;
+      }
 
       // Should not throw error even if not authenticated
       await expect(databaseService.logout()).resolves.not.toThrow();
@@ -66,7 +74,9 @@ describe('API Integration Tests', () => {
 
   describe('Products API', () => {
     it('should fetch products from API', async () => {
-      if (SKIP_API_TESTS) return;
+      if (SKIP_API_TESTS) {
+        return;
+      }
 
       try {
         const products = await databaseService.getProducts();
@@ -91,7 +101,9 @@ describe('API Integration Tests', () => {
     });
 
     it('should fetch categories from API', async () => {
-      if (SKIP_API_TESTS) return;
+      if (SKIP_API_TESTS) {
+        return;
+      }
 
       try {
         const categories = await databaseService.getCategories();
@@ -114,7 +126,9 @@ describe('API Integration Tests', () => {
 
   describe('Orders API', () => {
     it('should handle order creation', async () => {
-      if (SKIP_API_TESTS) return;
+      if (SKIP_API_TESTS) {
+        return;
+      }
 
       const orderData = {
         items: [
@@ -145,7 +159,9 @@ describe('API Integration Tests', () => {
     });
 
     it('should fetch recent orders', async () => {
-      if (SKIP_API_TESTS) return;
+      if (SKIP_API_TESTS) {
+        return;
+      }
 
       try {
         const orders = await databaseService.getRecentOrders(5);
@@ -168,7 +184,9 @@ describe('API Integration Tests', () => {
 
   describe('Restaurant API', () => {
     it('should fetch restaurant floor plan', async () => {
-      if (SKIP_API_TESTS) return;
+      if (SKIP_API_TESTS) {
+        return;
+      }
 
       try {
         const floorPlan = await databaseService.getRestaurantFloorPlan();
@@ -188,7 +206,9 @@ describe('API Integration Tests', () => {
 
   describe('Reports API', () => {
     it('should fetch daily sales report', async () => {
-      if (SKIP_API_TESTS) return;
+      if (SKIP_API_TESTS) {
+        return;
+      }
 
       try {
         const report = await databaseService.getDailySalesReport();
@@ -206,7 +226,9 @@ describe('API Integration Tests', () => {
     });
 
     it('should fetch sales summary', async () => {
-      if (SKIP_API_TESTS) return;
+      if (SKIP_API_TESTS) {
+        return;
+      }
 
       try {
         const summary = await databaseService.getSalesSummary();
@@ -226,7 +248,9 @@ describe('API Integration Tests', () => {
 
   describe('Payment API', () => {
     it('should handle payment processing', async () => {
-      if (SKIP_API_TESTS) return;
+      if (SKIP_API_TESTS) {
+        return;
+      }
 
       try {
         const result = await databaseService.processPayment(123, 'card', 25.99);
@@ -243,7 +267,9 @@ describe('API Integration Tests', () => {
 
   describe('Error Handling', () => {
     it('should handle network timeouts gracefully', async () => {
-      if (SKIP_API_TESTS) return;
+      if (SKIP_API_TESTS) {
+        return;
+      }
 
       // Test with a non-existent endpoint
       try {
@@ -254,7 +280,9 @@ describe('API Integration Tests', () => {
     });
 
     it('should handle malformed requests', async () => {
-      if (SKIP_API_TESTS) return;
+      if (SKIP_API_TESTS) {
+        return;
+      }
 
       try {
         const response = await fetch(`${API_BASE_URL}/api/v1/products`, {

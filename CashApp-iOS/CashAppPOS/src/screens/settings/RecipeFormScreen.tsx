@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -43,7 +43,9 @@ type RecipeFormScreenRouteProp = RouteProp<{ params: { recipe?: Recipe } }, 'par
 
 // Mock SelectIngredientModal and FormFieldNumber until actual components are found/created
 const SelectProductModal = ({ isVisible, onClose, products, onSelectProduct }) => {
-  if (!isVisible) return null;
+  if (!isVisible) {
+    return null;
+  }
   return (
     <View style={styles.modalOverlay}>
       <View style={styles.modalContainer}>
@@ -71,7 +73,9 @@ const SelectProductModal = ({ isVisible, onClose, products, onSelectProduct }) =
 };
 
 const SelectIngredientModal = ({ isVisible, onClose, inventoryItems, onSelectIngredient }) => {
-  if (!isVisible) return null;
+  if (!isVisible) {
+    return null;
+  }
   return (
     <View style={styles.modalOverlay}>
       <View style={styles.modalContainer}>
@@ -237,7 +241,9 @@ const RecipeFormScreen = () => {
       Alert.alert('Validation Error', 'Please correct the errors in the form.');
       return;
     }
-    if (!selectedProduct) return; // Should be caught by validation
+    if (!selectedProduct) {
+      return;
+    } // Should be caught by validation
 
     setIsLoading(true);
     const recipeData: Recipe = {

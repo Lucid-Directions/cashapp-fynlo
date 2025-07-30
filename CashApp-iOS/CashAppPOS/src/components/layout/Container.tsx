@@ -50,15 +50,21 @@ const Container: React.FC<ContainerProps> = ({
 
   // Get responsive max width
   const getMaxWidth = (): number | undefined => {
-    if (variant === 'fluid') return undefined;
+    if (variant === 'fluid') {
+      return undefined;
+    }
 
     if (maxWidth) {
       return useResponsiveValue(maxWidth, screenWidth);
     }
 
     // Default max widths based on device type
-    if (isPhone) return screenWidth;
-    if (isTablet) return Math.min(screenWidth * 0.9, 800);
+    if (isPhone) {
+      return screenWidth;
+    }
+    if (isTablet) {
+      return Math.min(screenWidth * 0.9, 800);
+    }
     return Math.min(screenWidth * 0.8, 1200);
   };
 

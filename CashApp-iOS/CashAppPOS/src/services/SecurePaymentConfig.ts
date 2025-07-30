@@ -52,7 +52,7 @@ class SecurePaymentConfigService {
    * Load payment configuration from backend
    * Uses caching to minimize API calls
    */
-  async loadConfiguration(forceRefresh: boolean = false): Promise<PaymentConfig> {
+  async loadConfiguration(forceRefresh = false): Promise<PaymentConfig> {
     // Return existing promise if already loading
     if (this.loading && this.loadingPromise) {
       return this.loadingPromise;

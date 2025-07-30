@@ -61,8 +61,12 @@ export class ImageOptimizer {
     // For demonstration - in real app, this would integrate with your image CDN
     const params = new URLSearchParams();
 
-    if (width) params.append('w', width.toString());
-    if (height) params.append('h', height.toString());
+    if (width) {
+      params.append('w', width.toString());
+    }
+    if (height) {
+      params.append('h', height.toString());
+    }
     params.append('q', quality.toString());
     params.append('f', format);
 
@@ -185,11 +189,7 @@ export const imageUtils = {
   },
 
   // Generate placeholder for loading images
-  generatePlaceholder: (
-    width: number,
-    height: number,
-    backgroundColor: string = '#E5E5E5',
-  ): string => {
+  generatePlaceholder: (width: number, height: number, backgroundColor = '#E5E5E5'): string => {
     return `data:image/svg+xml,${encodeURIComponent(`
       <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
         <rect width="100%" height="100%" fill="${backgroundColor}"/>

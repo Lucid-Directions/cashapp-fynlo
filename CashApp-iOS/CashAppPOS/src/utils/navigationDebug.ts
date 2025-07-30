@@ -121,7 +121,9 @@ export function validateNavigation(
  * Debug helper to log navigation state
  */
 export function logNavigationState(state: NavigationState | undefined, depth = 0) {
-  if (!state) return;
+  if (!state) {
+    return;
+  }
 
   const indent = '  '.repeat(depth);
   console.log(`${indent}Navigator: ${state.type || 'Stack'}`);

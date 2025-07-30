@@ -60,7 +60,7 @@ class ErrorTrackingService {
     return { operation: context.operation, startTime: Date.now() };
   }
 
-  finishTransaction(transaction: any, success: boolean = true): void {
+  finishTransaction(transaction: any, success = true): void {
     if (transaction) {
       const duration = Date.now() - transaction.startTime;
       console.log(
@@ -111,7 +111,7 @@ class ErrorTrackingService {
   }
 
   // Debug helpers
-  addBreadcrumb(message: string, category: string = 'debug', data?: Record<string, any>): void {
+  addBreadcrumb(message: string, category = 'debug', data?: Record<string, any>): void {
     this.simpleTracker.addBreadcrumb(message, category, data);
   }
 
@@ -124,7 +124,7 @@ class ErrorTrackingService {
   }
 
   // Flush pending events
-  flush(timeout: number = 2000): Promise<boolean> {
+  flush(timeout = 2000): Promise<boolean> {
     return this.simpleTracker.flush(timeout);
   }
 }

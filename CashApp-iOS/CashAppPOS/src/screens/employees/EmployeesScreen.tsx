@@ -111,16 +111,24 @@ const EmployeesScreen: React.FC = () => {
   };
 
   const getPerformanceColor = (score: number) => {
-    if (score >= 90) return Colors.success;
-    if (score >= 80) return Colors.warning;
+    if (score >= 90) {
+      return Colors.success;
+    }
+    if (score >= 80) {
+      return Colors.warning;
+    }
     return Colors.danger;
   };
 
   const formatHireDate = (date: Date | string) => {
     const dateObj = date instanceof Date ? date : new Date(date);
     const months = Math.floor((Date.now() - dateObj.getTime()) / (1000 * 60 * 60 * 24 * 30));
-    if (months < 1) return 'New hire';
-    if (months < 12) return `${months} months`;
+    if (months < 1) {
+      return 'New hire';
+    }
+    if (months < 12) {
+      return `${months} months`;
+    }
     const years = Math.floor(months / 12);
     return `${years} year${years > 1 ? 's' : ''}`;
   };

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback, memo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   StyleSheet,
   Text,
@@ -16,9 +16,6 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
-import LazyLoadingWrapper from '../../components/performance/LazyLoadingWrapper';
-import { TableSkeleton } from '../../components/performance/SkeletonLoader';
-import { usePerformanceMonitor, performanceUtils } from '../../hooks/usePerformanceMonitor';
 import { useTheme } from '../../design-system/ThemeProvider';
 
 // Get screen dimensions
@@ -270,7 +267,9 @@ const TableManagementScreen: React.FC = () => {
 
   const handleTableDrag = useCallback(
     (tableId: string, gestureState: any) => {
-      if (!editMode) return;
+      if (!editMode) {
+        return;
+      }
 
       // Snap to grid
       const gridSize = layout.gridSize;
@@ -396,7 +395,9 @@ const TableManagementScreen: React.FC = () => {
     const sectionColor = getSectionColor(table.section);
 
     const handleGestureEvent = (event: GestureEvent<PanGestureHandlerGestureEvent>) => {
-      if (!editMode) return;
+      if (!editMode) {
+        return;
+      }
 
       const { translationX, translationY } = event.nativeEvent;
       const newPosition = {

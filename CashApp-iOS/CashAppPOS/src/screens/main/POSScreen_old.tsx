@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -12,8 +12,6 @@ import {
   TextInput,
   Alert,
   Dimensions,
-  Platform,
-  Image,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation, DrawerActions } from '@react-navigation/native';
@@ -21,7 +19,6 @@ import { DrawerNavigationProp } from '@react-navigation/drawer';
 import useAppStore from '../../store/useAppStore';
 import useUIStore from '../../store/useUIStore';
 import { MenuItem, OrderItem, DrawerParamList } from '../../types';
-import DatabaseService from '../../services/DatabaseService';
 // import Logo from '../../components/Logo';
 
 // Get screen dimensions

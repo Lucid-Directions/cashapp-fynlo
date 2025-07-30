@@ -7,7 +7,6 @@ import {
   ScrollView,
   Alert,
   Switch,
-  TextInput,
   Image,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';

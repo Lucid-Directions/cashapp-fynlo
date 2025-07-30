@@ -4,7 +4,7 @@
  */
 
 import DatabaseService from '../../services/DatabaseService';
-import { mockApiResponses, mockMenuItems, mockUsers } from '../fixtures/mockData';
+import { mockMenuItems } from '../fixtures/mockData';
 
 // Mock fetch for controlled testing
 const mockFetch = jest.fn();

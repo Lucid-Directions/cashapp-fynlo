@@ -279,7 +279,9 @@ class RestaurantDataService {
     try {
       if (!this.currentRestaurantId) {
         const storedId = await AsyncStorage.getItem('current_restaurant_id');
-        if (!storedId) return null;
+        if (!storedId) {
+          return null;
+        }
         this.currentRestaurantId = storedId;
       }
 
@@ -409,7 +411,9 @@ class RestaurantDataService {
   }): Promise<void> {
     try {
       const current = await this.getCurrentRestaurantData();
-      if (!current) return;
+      if (!current) {
+        return;
+      }
 
       await this.updateCurrentRestaurant(metrics);
     } catch (error) {

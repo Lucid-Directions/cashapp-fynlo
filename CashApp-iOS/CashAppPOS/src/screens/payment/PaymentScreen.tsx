@@ -15,8 +15,6 @@ import useAppStore from '../../store/useAppStore';
 import useSettingsStore from '../../store/useSettingsStore';
 import PaymentService, { PaymentRequest, PaymentResult } from '../../services/PaymentService';
 import QRCodePayment from '../../components/payment/QRCodePayment';
-import SquarePaymentProvider from '../../services/providers/SquarePaymentProvider';
-import SumUpPaymentProvider from '../../services/providers/SumUpPaymentProvider';
 import SumUpNativeService from '../../services/SumUpNativeService';
 import SumUpPaymentComponent from '../../components/payment/SumUpPaymentComponent';
 
@@ -67,12 +65,16 @@ const PaymentScreen: React.FC = () => {
   };
 
   const calculateTax = (subtotal: number) => {
-    if (!taxConfiguration.vatEnabled) return 0;
+    if (!taxConfiguration.vatEnabled) {
+      return 0;
+    }
     return subtotal * (taxConfiguration.vatRate / 100);
   };
 
   const calculateServiceCharge = (subtotal: number) => {
-    if (!taxConfiguration.serviceTaxEnabled) return 0;
+    if (!taxConfiguration.serviceTaxEnabled) {
+      return 0;
+    }
     return subtotal * (taxConfiguration.serviceTaxRate / 100);
   };
 
@@ -325,10 +327,7 @@ const PaymentScreen: React.FC = () => {
   };
 
   // SumUp Payment Function - React Hook Based Integration
-  const processSumUpPayment = async (
-    request: PaymentRequest,
-    paymentMethod: string = 'tapToPay',
-  ) => {
+  const processSumUpPayment = async (request: PaymentRequest, paymentMethod = 'tapToPay') => {
     try {
       console.log('🏦 Starting SumUp payment flow with React hooks...');
 

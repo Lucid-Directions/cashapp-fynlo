@@ -20,7 +20,7 @@ export interface ShadowStyle extends ViewStyle {
  */
 export const ShadowUtils = {
   // Light shadow for cards and components
-  light: (backgroundColor: string = '#FFFFFF'): ShadowStyle => ({
+  light: (backgroundColor = '#FFFFFF'): ShadowStyle => ({
     backgroundColor,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 1 },
@@ -30,7 +30,7 @@ export const ShadowUtils = {
   }),
 
   // Medium shadow for elevated components
-  medium: (backgroundColor: string = '#FFFFFF'): ShadowStyle => ({
+  medium: (backgroundColor = '#FFFFFF'): ShadowStyle => ({
     backgroundColor,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
@@ -40,7 +40,7 @@ export const ShadowUtils = {
   }),
 
   // Strong shadow for modals and popovers
-  strong: (backgroundColor: string = '#FFFFFF'): ShadowStyle => ({
+  strong: (backgroundColor = '#FFFFFF'): ShadowStyle => ({
     backgroundColor,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 4 },
@@ -50,7 +50,7 @@ export const ShadowUtils = {
   }),
 
   // Subtle shadow for buttons
-  button: (backgroundColor: string = '#00A651'): ShadowStyle => ({
+  button: (backgroundColor = '#00A651'): ShadowStyle => ({
     backgroundColor,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 1 },
@@ -60,7 +60,7 @@ export const ShadowUtils = {
   }),
 
   // No shadow (for performance-critical components)
-  none: (backgroundColor: string = 'transparent'): ShadowStyle => ({
+  none: (backgroundColor = 'transparent'): ShadowStyle => ({
     backgroundColor,
     shadowColor: 'transparent',
     shadowOffset: { width: 0, height: 0 },
@@ -93,7 +93,7 @@ export const ShadowUtils = {
  */
 export const createOptimizedShadow = (
   shadowLevel: 'light' | 'medium' | 'strong' | 'button' | 'none' = 'medium',
-  backgroundColor: string = '#FFFFFF',
+  backgroundColor = '#FFFFFF',
 ): ShadowStyle => {
   return ShadowUtils[shadowLevel](backgroundColor);
 };

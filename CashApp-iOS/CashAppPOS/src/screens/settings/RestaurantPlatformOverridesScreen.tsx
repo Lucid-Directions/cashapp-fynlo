@@ -11,8 +11,6 @@ import {
   Alert,
   ActivityIndicator,
   RefreshControl,
-  Switch,
-  TextInput,
   Text,
   TouchableOpacity,
 } from 'react-native';
@@ -206,7 +204,9 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
         {
           text: 'Submit Request',
           onPress: newValueString => {
-            if (!newValueString) return;
+            if (!newValueString) {
+              return;
+            }
 
             try {
               // Parse the new value (this is simplified - real implementation would have proper type handling)
@@ -365,7 +365,9 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
 
         {/* Other categories */}
         {Object.entries(categorizedSettings).map(([category, settings]) => {
-          if (category === 'payment_fees') return null; // Already handled above
+          if (category === 'payment_fees') {
+            return null;
+          } // Already handled above
 
           const categoryInfo = getCategoryInfo(category);
           const isExpanded = expandedCategories.has(category);

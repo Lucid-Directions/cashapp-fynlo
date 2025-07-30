@@ -51,7 +51,7 @@ class APITestingService {
   // Test individual API endpoint
   async testEndpoint(
     endpoint: string,
-    method: string = 'GET',
+    method = 'GET',
     body?: any,
     headers?: Record<string, string>,
   ): Promise<APITestResult> {
@@ -321,7 +321,9 @@ class APITestingService {
 
   // Validate response format matches frontend expectations
   validateResponseFormat(response: any, endpoint: string): boolean {
-    if (!response) return false;
+    if (!response) {
+      return false;
+    }
 
     // Check for standardized response format
     const hasSuccessField = typeof response.success === 'boolean';

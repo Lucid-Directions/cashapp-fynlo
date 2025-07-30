@@ -4,14 +4,13 @@ import {
   Text,
   View,
   ScrollView,
-  TextInput,
   TouchableOpacity,
   Alert,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { SettingsHeader, SettingsSection, SettingsCard } from '../../../components/settings';
+import { SettingsHeader, SettingsSection } from '../../../components/settings';
 import useSettingsStore from '../../../store/useSettingsStore';
 import { useRestaurantConfig } from '../../../hooks/useRestaurantConfig';
 import SimpleTextInput from '../../../components/inputs/SimpleTextInput';
@@ -72,32 +71,42 @@ const BusinessInformationScreen: React.FC = () => {
 
   // Validation functions
   const validateEmail = (email: string): string | null => {
-    if (!email) return 'Email is required';
+    if (!email) {
+      return 'Email is required';
+    }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email) ? null : 'Please enter a valid email address';
   };
 
   const validatePhone = (phone: string): string | null => {
-    if (!phone) return 'Phone number is required';
+    if (!phone) {
+      return 'Phone number is required';
+    }
     const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
     return phoneRegex.test(phone.replace(/\s/g, '')) ? null : 'Please enter a valid phone number';
   };
 
   const validateUrl = (url: string): string | null => {
-    if (!url) return null; // Website is optional
+    if (!url) {
+      return null;
+    } // Website is optional
     const urlRegex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
     return urlRegex.test(url) ? null : 'Please enter a valid website URL';
   };
 
   const validateVatNumber = (vat: string): string | null => {
-    if (!vat) return null; // VAT number is optional
+    if (!vat) {
+      return null;
+    } // VAT number is optional
     // UK VAT number format: GB followed by 9 or 12 digits
     const ukVatRegex = /^GB[0-9]{9}([0-9]{3})?$/;
     return ukVatRegex.test(vat) ? null : 'Please enter a valid UK VAT number (GB123456789)';
   };
 
   const validateCompanyNumber = (number: string): string | null => {
-    if (!number) return null; // Company number is optional
+    if (!number) {
+      return null;
+    } // Company number is optional
     // UK Company number: 8 digits
     const ukCompanyRegex = /^[0-9]{8}$/;
     return ukCompanyRegex.test(number) ? null : 'Please enter a valid UK company number (8 digits)';

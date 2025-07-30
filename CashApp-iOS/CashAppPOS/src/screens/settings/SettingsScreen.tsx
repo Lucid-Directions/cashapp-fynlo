@@ -6,7 +6,6 @@ import {
   StatusBar,
   SafeAreaView,
   TouchableOpacity,
-  ScrollView,
   TextInput,
   FlatList,
 } from 'react-native';

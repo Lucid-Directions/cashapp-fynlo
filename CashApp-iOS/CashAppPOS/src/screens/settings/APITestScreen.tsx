@@ -62,7 +62,7 @@ const APITestScreen: React.FC = () => {
     }
   };
 
-  const testIndividualEndpoint = async (endpoint: string, method: string = 'GET') => {
+  const testIndividualEndpoint = async (endpoint: string, method = 'GET') => {
     setIsRunning(true);
     try {
       await apiTestService.testEndpoint(endpoint, method);

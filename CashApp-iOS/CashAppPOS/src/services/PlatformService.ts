@@ -3,7 +3,6 @@
  * Handles communication with the platform settings API while maintaining existing patterns
  */
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import SharedDataStore from './SharedDataStore';
 import tokenManager from '../utils/tokenManager';
 
@@ -144,12 +143,16 @@ class PlatformService {
   // Platform Settings Management
   async getPlatformSettings(
     category?: string,
-    includeSensitive: boolean = false,
+    includeSensitive = false,
   ): Promise<PlatformSetting[]> {
     try {
       const params = new URLSearchParams();
-      if (category) params.append('category', category);
-      if (includeSensitive) params.append('include_sensitive', 'true');
+      if (category) {
+        params.append('category', category);
+      }
+      if (includeSensitive) {
+        params.append('include_sensitive', 'true');
+      }
 
       const queryString = params.toString();
       const endpoint = `/platform/settings${queryString ? `?${queryString}` : ''}`;
@@ -281,8 +284,12 @@ class PlatformService {
       const params = new URLSearchParams({
         amount: amount.toString(),
       });
-      if (restaurantId) params.append('restaurant_id', restaurantId);
-      if (monthlyVolume) params.append('monthly_volume', monthlyVolume.toString());
+      if (restaurantId) {
+        params.append('restaurant_id', restaurantId);
+      }
+      if (monthlyVolume) {
+        params.append('monthly_volume', monthlyVolume.toString());
+      }
 
       return await this.makeRequest(
         `/platform/payment-fees/calculate?${params.toString()}`,
@@ -345,7 +352,7 @@ class PlatformService {
     restaurantId: string,
     configKey: string,
     overrideValue: any,
-    requiresApproval: boolean = false,
+    requiresApproval = false,
   ): Promise<boolean> {
     try {
       await this.makeRequest(
@@ -364,15 +371,15 @@ class PlatformService {
   }
 
   // Audit Trail
-  async getAuditTrail(
-    configKey?: string,
-    entityId?: string,
-    limit: number = 100,
-  ): Promise<AuditRecord[]> {
+  async getAuditTrail(configKey?: string, entityId?: string, limit = 100): Promise<AuditRecord[]> {
     try {
       const params = new URLSearchParams({ limit: limit.toString() });
-      if (configKey) params.append('config_key', configKey);
-      if (entityId) params.append('entity_id', entityId);
+      if (configKey) {
+        params.append('config_key', configKey);
+      }
+      if (entityId) {
+        params.append('entity_id', entityId);
+      }
 
       const result = await this.makeRequest(`/platform/audit-trail?${params.toString()}`);
       return result.audit_records || [];
@@ -394,8 +401,12 @@ class PlatformService {
   }> {
     try {
       const params = new URLSearchParams();
-      if (restaurantId) params.append('restaurant_id', restaurantId);
-      if (categories) params.append('categories', categories.join(','));
+      if (restaurantId) {
+        params.append('restaurant_id', restaurantId);
+      }
+      if (categories) {
+        params.append('categories', categories.join(','));
+      }
 
       return await this.makeRequest(`/platform/sync/platform-config?${params.toString()}`);
     } catch (error) {

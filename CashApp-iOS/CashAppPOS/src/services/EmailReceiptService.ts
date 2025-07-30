@@ -20,9 +20,13 @@ class EmailReceiptService {
   }
 
   private async ensureConfig() {
-    if (this.baseUrl && this.apiKey) return;
+    if (this.baseUrl && this.apiKey) {
+      return;
+    }
     const raw = await AsyncStorage.getItem('payment_service_config');
-    if (!raw) return;
+    if (!raw) {
+      return;
+    }
     const cfg = JSON.parse(raw);
     this.baseUrl = cfg?.backend?.baseUrl ?? null;
     this.apiKey = cfg?.backend?.apiKey ?? null;
@@ -31,7 +35,9 @@ class EmailReceiptService {
   async sendReceipt(data: EmailReceiptData): Promise<boolean> {
     try {
       await this.ensureConfig();
-      if (!this.baseUrl || !this.apiKey) throw new Error('API config missing');
+      if (!this.baseUrl || !this.apiKey) {
+        throw new Error('API config missing');
+      }
 
       const res = await fetch(`${this.baseUrl}/api/v1/orders/${data.orderId}/email_receipt`, {
         method: 'POST',

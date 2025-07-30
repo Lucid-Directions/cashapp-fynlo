@@ -86,7 +86,9 @@ class QRCodeServiceClass {
    */
   updatePaymentStatus(payment: SumUpQRPayment): void {
     const tracking = this.activePayments.get(payment.id);
-    if (!tracking) return;
+    if (!tracking) {
+      return;
+    }
 
     tracking.lastStatusCheck = new Date();
     tracking.statusCheckCount += 1;
@@ -120,7 +122,9 @@ class QRCodeServiceClass {
     isCompleted: boolean;
   } | null {
     const tracking = this.activePayments.get(paymentId);
-    if (!tracking) return null;
+    if (!tracking) {
+      return null;
+    }
 
     const now = new Date();
     const duration = now.getTime() - tracking.startTime.getTime();
@@ -235,7 +239,9 @@ class QRCodeServiceClass {
    */
   getOptimalPollingInterval(payment: SumUpQRPayment): number {
     const tracking = this.activePayments.get(payment.id);
-    if (!tracking) return 2000; // Default 2 seconds
+    if (!tracking) {
+      return 2000;
+    } // Default 2 seconds
 
     const age = new Date().getTime() - tracking.startTime.getTime();
 

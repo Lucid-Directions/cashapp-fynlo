@@ -50,7 +50,7 @@ class SumUpPaymentProviderClass {
 
   async processPayment(
     amount: number,
-    currency: string = 'GBP',
+    currency = 'GBP',
     title?: string,
   ): Promise<SumUpPaymentResult> {
     try {
@@ -96,7 +96,7 @@ class SumUpPaymentProviderClass {
   /**
    * Calculate SumUp fees (0.69% + £19/month for high volume)
    */
-  calculateFee(amount: number, monthlyVolume: number = 0): number {
+  calculateFee(amount: number, monthlyVolume = 0): number {
     const volumeThreshold = 2714; // £2,714/month
 
     if (monthlyVolume >= volumeThreshold) {

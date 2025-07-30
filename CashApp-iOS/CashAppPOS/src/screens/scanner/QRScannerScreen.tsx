@@ -104,7 +104,9 @@ const QRScannerScreen: React.FC = () => {
   };
 
   const simulateQRScan = () => {
-    if (!isScanning) return;
+    if (!isScanning) {
+      return;
+    }
 
     // Simulate different types of QR codes
     const mockQRCodes = [
@@ -168,13 +170,27 @@ const QRScannerScreen: React.FC = () => {
   };
 
   const getQRCodeTypeDisplay = (data: string) => {
-    if (data.startsWith('PAYMENT:')) return 'Payment QR Code';
-    if (data.startsWith('PRODUCT:')) return 'Product Code';
-    if (data.startsWith('TABLE:')) return 'Table Code';
-    if (data.startsWith('MENU:')) return 'Menu Item';
-    if (data.startsWith('CUSTOMER:')) return 'Customer Code';
-    if (data.startsWith('INVENTORY:')) return 'Inventory Item';
-    if (data.startsWith('http')) return 'Website Link';
+    if (data.startsWith('PAYMENT:')) {
+      return 'Payment QR Code';
+    }
+    if (data.startsWith('PRODUCT:')) {
+      return 'Product Code';
+    }
+    if (data.startsWith('TABLE:')) {
+      return 'Table Code';
+    }
+    if (data.startsWith('MENU:')) {
+      return 'Menu Item';
+    }
+    if (data.startsWith('CUSTOMER:')) {
+      return 'Customer Code';
+    }
+    if (data.startsWith('INVENTORY:')) {
+      return 'Inventory Item';
+    }
+    if (data.startsWith('http')) {
+      return 'Website Link';
+    }
     return 'QR Code';
   };
 

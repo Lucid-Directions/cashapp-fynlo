@@ -4,8 +4,8 @@
  */
 
 import React from 'react';
-import { fireEvent, waitFor, within, act } from '@testing-library/react-native';
-import { Alert, Keyboard, TextInput } from 'react-native';
+import { fireEvent, waitFor } from '@testing-library/react-native';
+import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { renderWithProviders } from '../../../test-utils';
 import ComprehensiveRestaurantOnboardingScreen from '../ComprehensiveRestaurantOnboardingScreen';

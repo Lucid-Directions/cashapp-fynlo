@@ -29,8 +29,12 @@ const isSmallDevice = screenWidth < 380;
 
 // Responsive font sizes
 const getFontSize = (base: number) => {
-  if (isTablet) return base * 1.2;
-  if (isSmallDevice) return base * 0.9;
+  if (isTablet) {
+    return base * 1.2;
+  }
+  if (isSmallDevice) {
+    return base * 0.9;
+  }
   return base;
 };
 
@@ -337,7 +341,9 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
   // };
 
   const getWeekDays = (): string[] => {
-    if (!weekSchedule || !weekSchedule.weekStart) return [];
+    if (!weekSchedule || !weekSchedule.weekStart) {
+      return [];
+    }
 
     const days = [];
     // Ensure weekStart is a valid Date object
@@ -370,7 +376,9 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
   };
 
   const getShiftsForDay = (dateStr: string): Shift[] => {
-    if (!weekSchedule) return [];
+    if (!weekSchedule) {
+      return [];
+    }
     return weekSchedule.shifts
       .filter(shift => shift.date === dateStr)
       .sort((a, b) => a.startTime.localeCompare(b.startTime));
@@ -383,7 +391,9 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
   };
 
   const formatWeekRange = (): string => {
-    if (!weekSchedule || !weekSchedule.weekStart) return '';
+    if (!weekSchedule || !weekSchedule.weekStart) {
+      return '';
+    }
 
     // Ensure weekStart is a valid Date object
     const startDate =
@@ -413,7 +423,9 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
   };
 
   const calculateWeekSummary = () => {
-    if (!weekSchedule) return { totalHours: 0, totalCost: 0, coverage: 0 };
+    if (!weekSchedule) {
+      return { totalHours: 0, totalCost: 0, coverage: 0 };
+    }
 
     const totalHours = weekSchedule.shifts.reduce((sum, shift) => sum + shift.duration, 0);
     const totalCost = weekSchedule.shifts.reduce((sum, shift) => sum + (shift.laborCost || 0), 0);
@@ -490,7 +502,9 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
     }
 
     const employee = employees.find(emp => emp.id === newShift.employeeId);
-    if (!employee) return;
+    if (!employee) {
+      return;
+    }
 
     // Calculate duration
     const duration = (newShift.endTime.getTime() - newShift.startTime.getTime()) / (1000 * 60 * 60);
@@ -530,7 +544,9 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
     }
 
     const employee = employees.find(emp => emp.id === editShift.employeeId);
-    if (!employee) return;
+    if (!employee) {
+      return;
+    }
 
     // Calculate duration
     const duration =
@@ -566,7 +582,9 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
   };
 
   const deleteShift = () => {
-    if (!selectedShift) return;
+    if (!selectedShift) {
+      return;
+    }
 
     Alert.alert('Delete Shift', 'Are you sure you want to delete this shift?', [
       { text: 'Cancel', style: 'cancel' },
@@ -763,7 +781,9 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
           const isToday = date === new Date().toISOString().split('T')[0];
           const isSelected = date === selectedDate;
 
-          if (dayShifts.length === 0) return null;
+          if (dayShifts.length === 0) {
+            return null;
+          }
 
           return (
             <View key={date} style={styles.listDaySection}>

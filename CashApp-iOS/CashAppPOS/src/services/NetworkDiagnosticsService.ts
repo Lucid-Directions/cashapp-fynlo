@@ -102,7 +102,7 @@ class NetworkDiagnosticsService {
   /**
    * Test a specific endpoint with timeout
    */
-  private async testEndpoint(url: string, timeout: number = 5000): Promise<APIEndpointTest> {
+  private async testEndpoint(url: string, timeout = 5000): Promise<APIEndpointTest> {
     const startTime = Date.now();
 
     try {

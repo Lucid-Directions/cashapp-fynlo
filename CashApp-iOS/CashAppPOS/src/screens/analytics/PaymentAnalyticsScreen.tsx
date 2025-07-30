@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
-import { LineChart, BarChart, PieChart } from 'react-native-chart-kit';
+import { LineChart, PieChart } from 'react-native-chart-kit';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -349,7 +349,9 @@ const PaymentAnalyticsScreen: React.FC = () => {
   };
 
   const renderVolumeChart = () => {
-    if (!volumeData?.daily_trends) return null;
+    if (!volumeData?.daily_trends) {
+      return null;
+    }
 
     const chartData = {
       labels: volumeData.daily_trends.slice(-7).map(d => {
@@ -394,7 +396,9 @@ const PaymentAnalyticsScreen: React.FC = () => {
   };
 
   const renderProviderDistribution = () => {
-    if (!analyticsData?.provider_performance) return null;
+    if (!analyticsData?.provider_performance) {
+      return null;
+    }
 
     const providers = Object.entries(analyticsData.provider_performance);
     const colors = [Colors.primary, Colors.secondary, Colors.warning, Colors.success];

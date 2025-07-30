@@ -8,7 +8,7 @@ import { getSquareConfig, getSquareLocationId } from '../config/square';
 
 class SquareInitService {
   private static instance: SquareInitService;
-  private initialized: boolean = false;
+  private initialized = false;
 
   private constructor() {}
 

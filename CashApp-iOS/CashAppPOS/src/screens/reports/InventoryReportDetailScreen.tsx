@@ -95,13 +95,19 @@ const InventoryReportDetailScreen = () => {
     currentStock: number,
     reorderLevel: number,
   ): 'in_stock' | 'low_stock' | 'out_of_stock' => {
-    if (currentStock === 0) return 'out_of_stock';
-    if (currentStock <= reorderLevel) return 'low_stock';
+    if (currentStock === 0) {
+      return 'out_of_stock';
+    }
+    if (currentStock <= reorderLevel) {
+      return 'low_stock';
+    }
     return 'in_stock';
   };
 
   const getFilteredData = () => {
-    if (selectedCategory === 'all') return inventoryData;
+    if (selectedCategory === 'all') {
+      return inventoryData;
+    }
     return inventoryData.filter(item => item.category === selectedCategory);
   };
 

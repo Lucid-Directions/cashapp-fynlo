@@ -79,7 +79,9 @@ const CustomersScreen: React.FC = () => {
           break;
         case 'new':
           filtered = filtered.filter(customer => {
-            if (!customer.joinedDate) return false;
+            if (!customer.joinedDate) {
+              return false;
+            }
             const joinedDate =
               customer.joinedDate instanceof Date
                 ? customer.joinedDate
@@ -108,23 +110,43 @@ const CustomersScreen: React.FC = () => {
   };
 
   const getCustomerLevel = (customer: CustomerData) => {
-    if (customer.totalSpent > 1000) return { level: 'VIP', color: theme.colors.warning[500] };
-    if (customer.totalSpent > 500) return { level: 'Premium', color: theme.colors.secondary };
-    if (customer.orderCount >= 10) return { level: 'Regular', color: theme.colors.primary };
+    if (customer.totalSpent > 1000) {
+      return { level: 'VIP', color: theme.colors.warning[500] };
+    }
+    if (customer.totalSpent > 500) {
+      return { level: 'Premium', color: theme.colors.secondary };
+    }
+    if (customer.orderCount >= 10) {
+      return { level: 'Regular', color: theme.colors.primary };
+    }
     return { level: 'New', color: theme.colors.darkGray };
   };
 
   const formatDate = (date: Date | string | undefined) => {
-    if (!date) return 'Never';
+    if (!date) {
+      return 'Never';
+    }
     const dateObj = date instanceof Date ? date : new Date(date);
-    if (isNaN(dateObj.getTime())) return 'Never';
+    if (isNaN(dateObj.getTime())) {
+      return 'Never';
+    }
 
     const days = Math.floor((Date.now() - dateObj.getTime()) / (1000 * 60 * 60 * 24));
-    if (days === 0) return 'Today';
-    if (days === 1) return 'Yesterday';
-    if (days < 7) return `${days} days ago`;
-    if (days < 30) return `${Math.floor(days / 7)} weeks ago`;
-    if (days < 365) return `${Math.floor(days / 30)} months ago`;
+    if (days === 0) {
+      return 'Today';
+    }
+    if (days === 1) {
+      return 'Yesterday';
+    }
+    if (days < 7) {
+      return `${days} days ago`;
+    }
+    if (days < 30) {
+      return `${Math.floor(days / 7)} weeks ago`;
+    }
+    if (days < 365) {
+      return `${Math.floor(days / 30)} months ago`;
+    }
     return `${Math.floor(days / 365)} years ago`;
   };
 
@@ -180,7 +202,9 @@ const CustomersScreen: React.FC = () => {
     total: customers.length,
     vip: customers.filter(c => c.totalSpent > 1000).length,
     new: customers.filter(c => {
-      if (!c.joinedDate) return false;
+      if (!c.joinedDate) {
+        return false;
+      }
       const joinedDate = c.joinedDate instanceof Date ? c.joinedDate : new Date(c.joinedDate);
       const days = (Date.now() - joinedDate.getTime()) / (1000 * 60 * 60 * 24);
       return days <= 30;

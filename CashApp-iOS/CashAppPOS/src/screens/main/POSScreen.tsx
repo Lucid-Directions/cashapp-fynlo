@@ -10,11 +10,9 @@ import {
   ScrollView,
   FlatList,
   Modal,
-  TextInput,
   Alert,
   Dimensions,
   Platform,
-  Image,
   Animated,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -26,18 +24,14 @@ import useAppStore from '../../store/useAppStore';
 import useUIStore from '../../store/useUIStore';
 import useSettingsStore from '../../store/useSettingsStore';
 import { MenuItem, OrderItem } from '../../types';
-import DatabaseService from '../../services/DatabaseService';
 import { useRestaurantDisplayName } from '../../hooks/useRestaurantConfig';
-import PlatformService from '../../services/PlatformService';
 import ErrorTrackingService from '../../services/ErrorTrackingService';
 import {
-  validatePrice,
   calculatePercentageFee,
   validateCartCalculation,
   formatPrice,
 } from '../../utils/priceValidation';
 import SumUpPaymentComponent from '../../components/payment/SumUpPaymentComponent';
-import SumUpTestComponent from '../../components/payment/SumUpTestComponent';
 import SumUpCompatibilityService from '../../services/SumUpCompatibilityService';
 import SharedDataStore from '../../services/SharedDataStore';
 import SimpleTextInput from '../../components/inputs/SimpleTextInput';
@@ -299,7 +293,9 @@ const POSScreen: React.FC = () => {
 
   // Calculate taxes and fees with error tracking
   const calculateVAT = (subtotal: number) => {
-    if (!taxConfiguration.vatEnabled) return 0;
+    if (!taxConfiguration.vatEnabled) {
+      return 0;
+    }
 
     const vatCalculation = calculatePercentageFee(subtotal, taxConfiguration.vatRate, {
       operation: 'vat_calculation',
@@ -325,7 +321,9 @@ const POSScreen: React.FC = () => {
   };
 
   const calculateServiceFee = (subtotal: number) => {
-    if (!serviceChargeConfig.enabled) return 0;
+    if (!serviceChargeConfig.enabled) {
+      return 0;
+    }
 
     const serviceFeeCalculation = calculatePercentageFee(subtotal, serviceChargeConfig.rate, {
       operation: 'service_fee_calculation',

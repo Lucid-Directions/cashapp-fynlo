@@ -108,11 +108,13 @@ export default memo(OptimizedFlatList) as <T>(
 // Higher-order component for adding performance monitoring to any FlatList
 export function withPerformanceMonitoring<T>(
   Component: React.ComponentType<FlatListProps<T>>,
-  componentName: string = 'FlatList',
+  componentName = 'FlatList',
 ) {
   return memo((props: FlatListProps<T>) => {
     const enhancedOnScroll = useMemo(() => {
-      if (!props.onScroll) return undefined;
+      if (!props.onScroll) {
+        return undefined;
+      }
 
       return performanceUtils.throttle(props.onScroll, 16);
     }, [props.onScroll]);
@@ -153,7 +155,9 @@ export function OptimizedGrid<T>({
   // Calculate item layout for better performance
   const getItemLayout = useCallback(
     (_: any, index: number) => {
-      if (!itemHeight) return undefined;
+      if (!itemHeight) {
+        return undefined;
+      }
 
       const rowIndex = Math.floor(index / numColumns);
       const totalHeight = itemHeight + spacing;

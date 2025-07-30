@@ -516,11 +516,21 @@ export const getResponsiveValue = <T>(
   },
   fallback: T,
 ): T => {
-  if (screenWidth >= breakpoints.xl && values.xl !== undefined) return values.xl;
-  if (screenWidth >= breakpoints.lg && values.lg !== undefined) return values.lg;
-  if (screenWidth >= breakpoints.md && values.md !== undefined) return values.md;
-  if (screenWidth >= breakpoints.sm && values.sm !== undefined) return values.sm;
-  if (values.xs !== undefined) return values.xs;
+  if (screenWidth >= breakpoints.xl && values.xl !== undefined) {
+    return values.xl;
+  }
+  if (screenWidth >= breakpoints.lg && values.lg !== undefined) {
+    return values.lg;
+  }
+  if (screenWidth >= breakpoints.md && values.md !== undefined) {
+    return values.md;
+  }
+  if (screenWidth >= breakpoints.sm && values.sm !== undefined) {
+    return values.sm;
+  }
+  if (values.xs !== undefined) {
+    return values.xs;
+  }
   return fallback;
 };
 

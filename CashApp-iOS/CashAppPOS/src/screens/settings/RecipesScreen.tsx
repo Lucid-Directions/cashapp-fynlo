@@ -13,7 +13,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 // import { Icon } from 'react-native-elements'; // Or your preferred icon library
 
-import useAppStore from '../../store/useAppStore'; // For user/auth state if needed
+// For user/auth state if needed
 // import { Recipe, RecipeIngredient } from '../../types'; // Assuming these types exist or will be created
 import { fetchRecipes, deleteRecipe } from '../../services/ApiService'; // Assuming ApiService will be updated
 

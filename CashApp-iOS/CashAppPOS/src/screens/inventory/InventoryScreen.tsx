@@ -10,8 +10,7 @@ import {
   FlatList,
   TextInput,
   Modal,
-  Alert,
-  ActivityIndicator, // Will be replaced by LoadingView
+  Alert, // Will be replaced by LoadingView
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
@@ -245,11 +244,15 @@ const InventoryScreen: React.FC = () => {
   };
 
   const getStockStatus = (item: InventoryData) => {
-    if (item.currentStock === 0) return { status: 'Out of Stock', color: Colors.danger };
-    if (item.currentStock <= item.minimumStock)
+    if (item.currentStock === 0) {
+      return { status: 'Out of Stock', color: Colors.danger };
+    }
+    if (item.currentStock <= item.minimumStock) {
       return { status: 'Low Stock', color: Colors.warning };
-    if (item.currentStock > item.maximumStock)
+    }
+    if (item.currentStock > item.maximumStock) {
       return { status: 'Overstocked', color: Colors.secondary };
+    }
     return { status: 'In Stock', color: Colors.success };
   };
 
@@ -262,8 +265,12 @@ const InventoryScreen: React.FC = () => {
 
   const formatLastRestocked = (date: Date) => {
     const days = Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24));
-    if (days === 0) return 'Today';
-    if (days === 1) return 'Yesterday';
+    if (days === 0) {
+      return 'Today';
+    }
+    if (days === 1) {
+      return 'Yesterday';
+    }
     return `${days} days ago`;
   };
 
@@ -288,7 +295,9 @@ const InventoryScreen: React.FC = () => {
   };
 
   const handleSaveEdit = () => {
-    if (!selectedItem) return;
+    if (!selectedItem) {
+      return;
+    }
 
     // Validate input
     const currentStock = parseInt(editFormData.currentStock);

@@ -158,7 +158,7 @@ export const performanceUtils = {
   },
 
   // Batch state updates for better performance
-  batchUpdates: <T>(updates: Array<() => void>, delay: number = 0): Promise<void> => {
+  batchUpdates: <T>(updates: Array<() => void>, delay = 0): Promise<void> => {
     return new Promise(resolve => {
       if (delay > 0) {
         setTimeout(() => {

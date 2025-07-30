@@ -95,7 +95,7 @@ class MonitoringService {
   }
 
   // Error monitoring
-  async getRecentErrors(limit: number = 10): Promise<ErrorLog[]> {
+  async getRecentErrors(limit = 10): Promise<ErrorLog[]> {
     await new Promise(resolve => setTimeout(resolve, 200));
     return this.errors
       .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
@@ -266,7 +266,9 @@ class MonitoringService {
   }
 
   private updateHealthMetrics(): void {
-    if (!this.healthData) return;
+    if (!this.healthData) {
+      return;
+    }
 
     // Simulate real-time updates
     Object.keys(this.healthData).forEach(key => {
@@ -291,7 +293,9 @@ class MonitoringService {
   }
 
   private updatePerformanceMetrics(): void {
-    if (!this.performance) return;
+    if (!this.performance) {
+      return;
+    }
 
     const variations = {
       uptime: -0.1 + Math.random() * 0.2,

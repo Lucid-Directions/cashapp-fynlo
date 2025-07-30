@@ -5,7 +5,6 @@ import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
 import { useAuthStore } from '../store/useAuthStore';
 import { useTheme } from '../design-system/ThemeProvider';
-import { isFeatureEnabled } from '../config/featureFlags';
 import AuthScreen from '../screens/auth/AuthScreen';
 import MainNavigator from './MainNavigator';
 import ComprehensiveRestaurantOnboardingScreen from '../screens/onboarding/ComprehensiveRestaurantOnboardingScreen';

@@ -7,7 +7,6 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
-import { PaymentRequest, PaymentResult } from './PaymentService';
 
 // Square SDK imports - conditionally loaded to prevent crashes
 let SQIPCore: any;
@@ -77,7 +76,7 @@ export interface SquareFeeStructure {
 class SquareServiceClass {
   private static instance: SquareServiceClass;
   private config: SquareConfig | null = null;
-  private initialized: boolean = false;
+  private initialized = false;
   private feeStructure: SquareFeeStructure = {
     inPersonRate: 0.0175, // 1.75%
     onlineRateUK: 0.014, // 1.4%
@@ -125,7 +124,7 @@ class SquareServiceClass {
    */
   async processCardPayment(
     amount: number,
-    currency: string = 'GBP',
+    currency = 'GBP',
     description?: string,
   ): Promise<SquareCardPayment> {
     try {
@@ -207,7 +206,7 @@ class SquareServiceClass {
    */
   async processContactlessPayment(
     amount: number,
-    currency: string = 'GBP',
+    currency = 'GBP',
     paymentMethod: 'apple_pay' | 'google_pay',
     description?: string,
   ): Promise<SquareContactlessPayment> {
@@ -346,7 +345,7 @@ class SquareServiceClass {
   async processPaymentWithNonce(
     nonce: string,
     amount: number,
-    currency: string = 'GBP',
+    currency = 'GBP',
     locationId?: string,
   ): Promise<SquarePaymentResult> {
     try {
@@ -401,7 +400,7 @@ class SquareServiceClass {
   calculateFee(
     amount: number,
     paymentType: 'in_person' | 'online' | 'manual',
-    isUKCard: boolean = true,
+    isUKCard = true,
   ): number {
     const amountDecimal = amount;
 
@@ -548,7 +547,7 @@ class SquareServiceClass {
   async processRefund(
     paymentId: string,
     amount: number,
-    currency: string = 'GBP',
+    currency = 'GBP',
     reason?: string,
   ): Promise<SquarePaymentResult> {
     try {

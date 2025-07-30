@@ -165,7 +165,9 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ visible, user, onClose, o
   };
 
   const handleSuspendUser = async () => {
-    if (!user) return;
+    if (!user) {
+      return;
+    }
 
     Alert.alert(
       'Suspend User',
@@ -194,7 +196,9 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ visible, user, onClose, o
   };
 
   const handleActivateUser = async () => {
-    if (!user) return;
+    if (!user) {
+      return;
+    }
 
     try {
       setLoading(true);
@@ -210,7 +214,9 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ visible, user, onClose, o
   };
 
   const handleDeleteUser = async () => {
-    if (!user) return;
+    if (!user) {
+      return;
+    }
 
     Alert.alert(
       'Delete User',
@@ -259,7 +265,9 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ visible, user, onClose, o
     template => formData.role && template.applicableRoles.includes(formData.role),
   );
 
-  if (!user) return null;
+  if (!user) {
+    return null;
+  }
 
   return (
     <Modal

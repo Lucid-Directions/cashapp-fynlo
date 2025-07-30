@@ -9,7 +9,6 @@ import {
   ScrollView,
   TextInput,
   Alert,
-  Switch,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
@@ -115,7 +114,9 @@ const RestaurantProfileScreen: React.FC = () => {
   };
 
   const handleReset = () => {
-    if (!hasChanges) return;
+    if (!hasChanges) {
+      return;
+    }
 
     Alert.alert('Discard Changes', 'Are you sure you want to discard all unsaved changes?', [
       { text: 'Cancel', style: 'cancel' },

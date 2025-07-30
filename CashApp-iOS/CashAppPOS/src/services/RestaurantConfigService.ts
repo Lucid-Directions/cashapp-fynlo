@@ -137,7 +137,9 @@ class RestaurantConfigService {
    * Save restaurant configuration to storage
    */
   async saveConfig(): Promise<void> {
-    if (!this.config) return;
+    if (!this.config) {
+      return;
+    }
 
     try {
       this.config.updatedAt = new Date();
@@ -408,7 +410,9 @@ class RestaurantConfigService {
    * Get setup progress percentage
    */
   getSetupProgress(): number {
-    if (!this.config) return 0;
+    if (!this.config) {
+      return 0;
+    }
 
     const completedSteps = Object.values(this.config.setupSteps).filter(Boolean).length;
     const totalSteps = Object.keys(this.config.setupSteps).length;
@@ -420,7 +424,9 @@ class RestaurantConfigService {
    * Get next required setup step
    */
   getNextSetupStep(): keyof RestaurantConfig['setupSteps'] | null {
-    if (!this.config) return 'restaurantInfo';
+    if (!this.config) {
+      return 'restaurantInfo';
+    }
 
     const steps: (keyof RestaurantConfig['setupSteps'])[] = [
       'restaurantInfo',

@@ -8,7 +8,7 @@
  * TODO: Remove this service once backend is fully deployed with correct data structures
  */
 
-import { MenuItem, OrderItem } from '../types';
+import { MenuItem } from '../types';
 
 interface BackendMenuItem {
   id: number;
@@ -95,7 +95,9 @@ export class BackendCompatibilityService {
    * Check if backend response needs transformation
    */
   static needsMenuTransformation(items: any[]): boolean {
-    if (!items || items.length === 0) return false;
+    if (!items || items.length === 0) {
+      return false;
+    }
 
     // Check if first item has 'available' field
     const firstItem = items[0];
@@ -106,7 +108,9 @@ export class BackendCompatibilityService {
    * Check if employee data needs transformation
    */
   static needsEmployeeTransformation(employees: any[]): boolean {
-    if (!employees || employees.length === 0) return false;
+    if (!employees || employees.length === 0) {
+      return false;
+    }
 
     // Check if first employee has 'hireDate' field
     const firstEmployee = employees[0];

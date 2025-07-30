@@ -1,4 +1,4 @@
-import XeroAuthService, { XeroTokens } from './XeroAuthService';
+import XeroAuthService from './XeroAuthService';
 
 export interface XeroApiResponse<T = any> {
   data: T;

@@ -29,7 +29,9 @@ class SafeAlertManager {
     }
 
     const alert = this.alertQueue.shift();
-    if (!alert) return;
+    if (!alert) {
+      return;
+    }
 
     this.isShowingAlert = true;
 

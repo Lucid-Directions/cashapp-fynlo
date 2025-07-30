@@ -146,8 +146,12 @@ const LaborReportDetailScreen = () => {
   };
 
   const getEfficiencyColor = (efficiency: number) => {
-    if (efficiency >= 95) return Colors.success;
-    if (efficiency >= 85) return Colors.warning;
+    if (efficiency >= 95) {
+      return Colors.success;
+    }
+    if (efficiency >= 85) {
+      return Colors.warning;
+    }
     return Colors.danger;
   };
 

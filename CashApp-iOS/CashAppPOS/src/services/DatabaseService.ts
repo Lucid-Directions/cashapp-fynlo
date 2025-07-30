@@ -1,6 +1,5 @@
 // DatabaseService.ts - Mobile database API service for CashApp POS
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { supabase } from '../lib/supabase';
 import { CHUCHO_MENU_ITEMS, CHUCHO_CATEGORIES } from '../data/chuchoMenu';
 import BackendCompatibilityService from './BackendCompatibilityService';
 import tokenManager from '../utils/tokenManager';
@@ -129,7 +128,7 @@ class DatabaseService {
   private async apiRequest(
     endpoint: string,
     options: RequestInit = {},
-    retryCount: number = 0,
+    retryCount = 0,
     initialStartTime?: number,
   ): Promise<any> {
     const url = `${API_BASE_URL}${endpoint}`;
@@ -834,7 +833,7 @@ class DatabaseService {
     }
   }
 
-  async getRecentOrders(limit: number = 20): Promise<Order[]> {
+  async getRecentOrders(limit = 20): Promise<Order[]> {
     try {
       const response = await this.apiRequest(`/api/v1/orders/recent?limit=${limit}`, {
         method: 'GET',
@@ -964,8 +963,12 @@ class DatabaseService {
       let queryParams = '';
       if (dateFrom || dateTo) {
         const params = new URLSearchParams();
-        if (dateFrom) params.append('date_from', dateFrom);
-        if (dateTo) params.append('date_to', dateTo);
+        if (dateFrom) {
+          params.append('date_from', dateFrom);
+        }
+        if (dateTo) {
+          params.append('date_to', dateTo);
+        }
         queryParams = `?${params.toString()}`;
       }
 
@@ -1081,7 +1084,7 @@ class DatabaseService {
     }
   }
 
-  async getOrders(limit: number = 100): Promise<any[]> {
+  async getOrders(limit = 100): Promise<any[]> {
     try {
       const response = await this.apiRequest(`/api/v1/orders?limit=${limit}`, {
         method: 'GET',

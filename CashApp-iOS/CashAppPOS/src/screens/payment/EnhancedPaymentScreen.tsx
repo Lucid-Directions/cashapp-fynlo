@@ -5,7 +5,6 @@ import {
   View,
   TouchableOpacity,
   ScrollView,
-  TextInput,
   Modal,
   Alert,
   KeyboardAvoidingView,
@@ -100,13 +99,17 @@ const EnhancedPaymentScreen: React.FC = () => {
   };
 
   const calculateTax = (subtotal: number) => {
-    if (!taxConfiguration.vatEnabled) return 0;
+    if (!taxConfiguration.vatEnabled) {
+      return 0;
+    }
     return subtotal * (taxConfiguration.vatRate / 100);
   };
 
   const calculatePlatformServiceCharge = (subtotal: number) => {
     // Use PLATFORM service charge settings, not restaurant settings (legacy)
-    if (!platformServiceCharge.enabled) return 0;
+    if (!platformServiceCharge.enabled) {
+      return 0;
+    }
     return subtotal * (platformServiceCharge.rate / 100);
   };
 

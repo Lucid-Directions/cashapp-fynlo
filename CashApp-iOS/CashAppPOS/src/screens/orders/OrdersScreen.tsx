@@ -8,10 +8,8 @@ import {
   TouchableOpacity,
   ScrollView,
   FlatList,
-  TextInput,
   Modal,
-  RefreshControl,
-  ActivityIndicator, // Will be replaced by LoadingView
+  RefreshControl, // Will be replaced by LoadingView
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';

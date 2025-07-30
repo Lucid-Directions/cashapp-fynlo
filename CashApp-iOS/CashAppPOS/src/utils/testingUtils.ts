@@ -49,7 +49,7 @@ class TestingUtils {
    */
   static generateTestData = {
     // Generate test orders
-    orders: (count: number = 10, config?: MockDataGeneratorConfig) => {
+    orders: (count = 10, config?: MockDataGeneratorConfig) => {
       const orders = [];
       for (let i = 0; i < count; i++) {
         orders.push({
@@ -69,7 +69,7 @@ class TestingUtils {
     },
 
     // Generate test order items
-    orderItems: (count: number = 3) => {
+    orderItems: (count = 3) => {
       const items = [];
       const menuItems = ['Burger', 'Pizza', 'Salad', 'Fries', 'Drink', 'Dessert'];
 
@@ -86,7 +86,7 @@ class TestingUtils {
     },
 
     // Generate test customers
-    customers: (count: number = 50) => {
+    customers: (count = 50) => {
       const customers = [];
       const firstNames = ['John', 'Jane', 'Mike', 'Sarah', 'David', 'Emma'];
       const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia'];
@@ -106,7 +106,7 @@ class TestingUtils {
     },
 
     // Generate test payment data
-    payments: (count: number = 20) => {
+    payments: (count = 20) => {
       const payments = [];
       const methods = ['card', 'cash', 'mobile_pay'];
 
@@ -302,7 +302,7 @@ class TestingUtils {
    */
   static common = {
     // Wait for element to appear
-    waitForElement: async (getElement: () => ReactTestInstance | null, timeout: number = 5000) => {
+    waitForElement: async (getElement: () => ReactTestInstance | null, timeout = 5000) => {
       return waitFor(
         () => {
           const element = getElement();
@@ -316,7 +316,7 @@ class TestingUtils {
     },
 
     // Simulate user input with delay
-    simulateUserInput: async (element: ReactTestInstance, text: string, delay: number = 100) => {
+    simulateUserInput: async (element: ReactTestInstance, text: string, delay = 100) => {
       for (let i = 0; i <= text.length; i++) {
         fireEvent.changeText(element, text.substring(0, i));
         await new Promise(resolve => setTimeout(resolve, delay));
@@ -333,7 +333,7 @@ class TestingUtils {
     },
 
     // Generate random delay for realistic testing
-    randomDelay: (min: number = 100, max: number = 500) => {
+    randomDelay: (min = 100, max = 500) => {
       return Math.floor(Math.random() * (max - min + 1)) + min;
     },
   };
@@ -353,7 +353,7 @@ class TestingUtils {
     },
 
     // Simulate payment error
-    simulatePaymentError: (errorCode: string = 'CARD_DECLINED') => {
+    simulatePaymentError: (errorCode = 'CARD_DECLINED') => {
       return Promise.reject(new Error(`Payment failed: ${errorCode}`));
     },
 
@@ -410,14 +410,14 @@ class TestingUtils {
    */
   static mockAPI = {
     // Mock successful API response
-    success: <T>(data: T, delay: number = 100): Promise<T> => {
+    success: <T>(data: T, delay = 100): Promise<T> => {
       return new Promise(resolve => {
         setTimeout(() => resolve(data), delay);
       });
     },
 
     // Mock API error response
-    error: (message: string, status: number = 500, delay: number = 100): Promise<never> => {
+    error: (message: string, status = 500, delay = 100): Promise<never> => {
       return new Promise((_, reject) => {
         setTimeout(() => {
           const error = new Error(message);
@@ -428,7 +428,7 @@ class TestingUtils {
     },
 
     // Mock paginated response
-    paginated: <T>(data: T[], page: number = 1, pageSize: number = 10) => {
+    paginated: <T>(data: T[], page = 1, pageSize = 10) => {
       const startIndex = (page - 1) * pageSize;
       const endIndex = startIndex + pageSize;
       const paginatedData = data.slice(startIndex, endIndex);

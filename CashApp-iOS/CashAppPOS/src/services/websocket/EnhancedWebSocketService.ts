@@ -19,17 +19,17 @@ export class EnhancedWebSocketService {
   // Heartbeat mechanism
   private heartbeatTimer: NodeJS.Timeout | null = null;
   private pongTimer: NodeJS.Timeout | null = null;
-  private missedPongs: number = 0;
-  private maxMissedPongs: number = 3;
+  private missedPongs = 0;
+  private maxMissedPongs = 3;
 
   // Reconnection logic
-  private reconnectAttempts: number = 0;
+  private reconnectAttempts = 0;
   private reconnectTimer: NodeJS.Timeout | null = null;
-  private maxBackoffDelay: number = 64000; // 64 seconds max
+  private maxBackoffDelay = 64000; // 64 seconds max
 
   // Message queue for offline/reconnecting
   private messageQueue: WebSocketMessage[] = [];
-  private maxQueueSize: number = 100; // Prevent unbounded growth
+  private maxQueueSize = 100; // Prevent unbounded growth
   private listeners: Map<string, Set<Function>> = new Map();
 
   // Network monitoring
@@ -162,7 +162,9 @@ export class EnhancedWebSocketService {
   }
 
   private setupEventHandlers(): void {
-    if (!this.ws) return;
+    if (!this.ws) {
+      return;
+    }
 
     this.ws.onmessage = event => {
       try {
@@ -373,7 +375,9 @@ export class EnhancedWebSocketService {
   }
 
   private processMessageQueue(): void {
-    if (this.messageQueue.length === 0) return;
+    if (this.messageQueue.length === 0) {
+      return;
+    }
 
     console.log(`📤 Processing ${this.messageQueue.length} queued messages`);
 

@@ -119,8 +119,12 @@ export const validateSortCode = (sortCode: string): boolean => {
  */
 export const formatSortCode = (sortCode: string): string => {
   const cleaned = sortCode.replace(/[^0-9]/g, '').slice(0, 6);
-  if (cleaned.length <= 2) return cleaned;
-  if (cleaned.length <= 4) return `${cleaned.slice(0, 2)}-${cleaned.slice(2)}`;
+  if (cleaned.length <= 2) {
+    return cleaned;
+  }
+  if (cleaned.length <= 4) {
+    return `${cleaned.slice(0, 2)}-${cleaned.slice(2)}`;
+  }
   return `${cleaned.slice(0, 2)}-${cleaned.slice(2, 4)}-${cleaned.slice(4, 6)}`;
 };
 
@@ -163,8 +167,10 @@ export const formatPostcode = (postcode: string): string => {
 /**
  * Sanitize string input to prevent XSS and injection
  */
-export const sanitizeInput = (input: string, maxLength: number = 255): string => {
-  if (!input || typeof input !== 'string') return '';
+export const sanitizeInput = (input: string, maxLength = 255): string => {
+  if (!input || typeof input !== 'string') {
+    return '';
+  }
 
   return input
     .replace(/[<>\"'();`\\]/g, '') // Remove dangerous characters
@@ -176,11 +182,21 @@ export const sanitizeInput = (input: string, maxLength: number = 255): string =>
  * Validate required field
  */
 export const isRequired = (value: any): boolean => {
-  if (value === undefined || value === null) return false;
-  if (typeof value === 'string') return value.trim().length > 0;
-  if (typeof value === 'number') return !isNaN(value);
-  if (Array.isArray(value)) return value.length > 0;
-  if (typeof value === 'object') return Object.keys(value).length > 0;
+  if (value === undefined || value === null) {
+    return false;
+  }
+  if (typeof value === 'string') {
+    return value.trim().length > 0;
+  }
+  if (typeof value === 'number') {
+    return !isNaN(value);
+  }
+  if (Array.isArray(value)) {
+    return value.length > 0;
+  }
+  if (typeof value === 'object') {
+    return Object.keys(value).length > 0;
+  }
   return Boolean(value);
 };
 
@@ -192,10 +208,14 @@ export const validateIBAN = (iban: string): boolean => {
   const cleaned = iban.replace(/\s/g, '').toUpperCase();
   const ibanRegex = /^[A-Z]{2}[0-9]{2}[A-Z0-9]+$/;
 
-  if (!ibanRegex.test(cleaned)) return false;
+  if (!ibanRegex.test(cleaned)) {
+    return false;
+  }
 
   // Length varies by country, but GB (UK) should be 22 characters
-  if (cleaned.startsWith('GB') && cleaned.length !== 22) return false;
+  if (cleaned.startsWith('GB') && cleaned.length !== 22) {
+    return false;
+  }
 
   return true;
 };
@@ -215,7 +235,7 @@ export const validateSWIFT = (swift: string): boolean => {
  */
 export const debounceValidation = (
   fn: (...args: any[]) => any,
-  delay: number = 300,
+  delay = 300,
 ): ((...args: any[]) => void) => {
   let timeoutId: NodeJS.Timeout;
 

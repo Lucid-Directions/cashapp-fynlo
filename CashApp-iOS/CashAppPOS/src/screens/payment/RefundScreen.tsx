@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
-import useAppStore from '../../store/useAppStore';
 
 // Clover POS Color Scheme
 const Colors = {
@@ -108,7 +107,9 @@ const RefundScreen: React.FC = () => {
   };
 
   const calculateRefundAmount = () => {
-    if (!selectedTransaction) return 0;
+    if (!selectedTransaction) {
+      return 0;
+    }
 
     if (refundType === 'full' || refundType === 'void') {
       return selectedTransaction.total;

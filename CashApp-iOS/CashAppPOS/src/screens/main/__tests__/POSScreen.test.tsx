@@ -6,7 +6,7 @@
 // @ts-nocheck
 import React from 'react';
 import { fireEvent, waitFor, act } from '@testing-library/react-native';
-import POSScreen, { ExportedMenuItemCard } from '../POSScreen'; // Import ExportedMenuItemCard
+import POSScreen from '../POSScreen'; // Import ExportedMenuItemCard
 import { customRenderWithStores, useTestTheme } from '../../../__tests__/utils/testUtils';
 import useAppStore from '../../../store/useAppStore';
 import useUIStore from '../../../store/useUIStore';

@@ -1,4 +1,3 @@
-import QRCode from 'react-native-qrcode-svg';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export interface PaymentRequest {

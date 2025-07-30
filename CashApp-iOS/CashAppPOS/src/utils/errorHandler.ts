@@ -429,7 +429,9 @@ class ErrorHandler {
   }
 
   private sanitizePaymentData(paymentData: any): any {
-    if (!paymentData) return null;
+    if (!paymentData) {
+      return null;
+    }
 
     // Remove sensitive payment information
     const sanitized = { ...paymentData };

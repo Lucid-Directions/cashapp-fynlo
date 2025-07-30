@@ -1,13 +1,7 @@
 import axios from 'axios';
 import API_CONFIG from '../config/api';
-import {
-  InventoryItem,
-  RecipeClient,
-  RecipeIngredientClient,
-  InventoryLedgerEntry,
-  Recipe,
-} from '../types'; // Assuming Recipe is the backend type for creation
-import useAppStore from '../store/useAppStore'; // For token
+import { InventoryItem, RecipeClient, InventoryLedgerEntry, Recipe } from '../types'; // Assuming Recipe is the backend type for creation
+// For token
 
 const API_URL = API_CONFIG.BASE_URL + '/api/v1';
 
@@ -36,10 +30,7 @@ apiClient.interceptors.request.use(
 
 // --- Inventory Item API Calls ---
 
-export const fetchInventoryItems = async (
-  skip: number = 0,
-  limit: number = 100,
-): Promise<InventoryItem[]> => {
+export const fetchInventoryItems = async (skip = 0, limit = 100): Promise<InventoryItem[]> => {
   try {
     const response = await apiClient.get<InventoryItem[]>(
       `/inventory/items/?skip=${skip}&limit=${limit}`,
@@ -99,7 +90,7 @@ export const deleteInventoryItem = async (sku: string): Promise<InventoryItem> =
 export const adjustStock = async (
   sku: string,
   change_qty_g: number,
-  reason: string = 'manual_adjustment',
+  reason = 'manual_adjustment',
 ): Promise<any> => {
   try {
     const response = await apiClient.post(`/inventory/items/${sku}/adjust-stock`, {
@@ -118,10 +109,7 @@ export const adjustStock = async (
 // Note: The Recipe type from backend for creation/update might differ from RecipeClient for display
 // Assuming RecipeCreate type from backend schemas is what we send. For simplicity, using Recipe type from types/index.ts for now.
 
-export const fetchRecipes = async (
-  skip: number = 0,
-  limit: number = 100,
-): Promise<RecipeClient[]> => {
+export const fetchRecipes = async (skip = 0, limit = 100): Promise<RecipeClient[]> => {
   try {
     // This endpoint returns List[RecipeResponse] which matches RecipeClient structure
     const response = await apiClient.get<RecipeClient[]>(`/recipes/?skip=${skip}&limit=${limit}`);
@@ -199,15 +187,19 @@ export const deleteRecipe = async (itemId: string): Promise<void> => {
 
 export const fetchInventoryLedger = async (
   sku?: string,
-  skip: number = 0,
-  limit: number = 100,
+  skip = 0,
+  limit = 100,
   startDate?: string,
   endDate?: string,
 ): Promise<InventoryLedgerEntry[]> => {
   try {
     const params: any = { skip, limit };
-    if (startDate) params.start_date = startDate;
-    if (endDate) params.end_date = endDate;
+    if (startDate) {
+      params.start_date = startDate;
+    }
+    if (endDate) {
+      params.end_date = endDate;
+    }
 
     const url = sku ? `/inventory/ledger/${sku}` : '/inventory/ledger/';
     const response = await apiClient.get<InventoryLedgerEntry[]>(url, { params });

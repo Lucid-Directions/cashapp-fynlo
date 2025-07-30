@@ -178,7 +178,9 @@ class CacheManager {
    * Evict oldest entries to maintain cache size
    */
   private evictOldestEntries(maxSize: number): void {
-    if (this.memoryCache.size <= maxSize) return;
+    if (this.memoryCache.size <= maxSize) {
+      return;
+    }
 
     const entries = Array.from(this.memoryCache.entries());
     entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
@@ -206,7 +208,7 @@ class CacheManager {
   /**
    * Auto cleanup interval - call this to start automatic cleanup
    */
-  startAutoCleanup(intervalMs: number = 60000): () => void {
+  startAutoCleanup(intervalMs = 60000): () => void {
     const interval = setInterval(() => {
       this.cleanupExpired();
     }, intervalMs);

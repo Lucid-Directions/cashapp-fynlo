@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import { render, fireEvent } from '@testing-library/react-native';
 import OrderDetailsScreen from '../OrderDetailsScreen'; // Adjust path
 import { Linking } from 'react-native';
 import { ThemeProvider, defaultTheme } from '../../../design-system/ThemeProvider'; // Adjust path

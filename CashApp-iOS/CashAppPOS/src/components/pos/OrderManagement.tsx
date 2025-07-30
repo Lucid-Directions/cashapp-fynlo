@@ -10,7 +10,7 @@ import {
   Modal,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { OrderItem, Order } from '../../types';
+import { OrderItem } from '../../types';
 import useAppStore from '../../store/useAppStore';
 import useSettingsStore from '../../store/useSettingsStore';
 import SharedDataStore from '../../services/SharedDataStore';
@@ -64,13 +64,17 @@ const OrderManagement: React.FC<OrderManagementProps> = ({ visible, onClose, onC
   };
 
   const calculateTax = (subtotal: number) => {
-    if (!taxConfiguration.vatEnabled) return 0;
+    if (!taxConfiguration.vatEnabled) {
+      return 0;
+    }
     return subtotal * (taxConfiguration.vatRate / 100);
   };
 
   const calculateServiceCharge = (subtotal: number) => {
     // Use PLATFORM service charge settings, not restaurant settings
-    if (!platformServiceCharge.enabled) return 0;
+    if (!platformServiceCharge.enabled) {
+      return 0;
+    }
     return subtotal * (platformServiceCharge.rate / 100);
   };
 
@@ -237,7 +241,9 @@ const OrderManagement: React.FC<OrderManagementProps> = ({ visible, onClose, onC
   };
 
   const renderEditModal = () => {
-    if (!editingItem) return null;
+    if (!editingItem) {
+      return null;
+    }
 
     return (
       <Modal

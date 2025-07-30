@@ -3,7 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react-native';
 import { StyleSheet } from 'react-native';
 import CartIcon from '../cart/CartIcon';
 import { Colors } from '../../constants/Colors';
-import { ThemeProvider, defaultTheme } from '../../design-system/ThemeProvider'; // Assuming ThemeProvider is needed
+import { ThemeProvider } from '../../design-system/ThemeProvider'; // Assuming ThemeProvider is needed
 
 // Mock react-native-vector-icons/MaterialIcons
 jest.mock('react-native-vector-icons/MaterialIcons', () => {

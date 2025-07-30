@@ -70,7 +70,7 @@ const ServiceChargeSelectionScreen: React.FC = () => {
     setShowTransactionFeeToggle(selectedOption === 0);
   }, [selectedOption]);
 
-  const calculateTotals = (servicePercent: number, includeTransactionFee: boolean = false) => {
+  const calculateTotals = (servicePercent: number, includeTransactionFee = false) => {
     const subtotal = cartTotal();
     const serviceCharge = subtotal * (servicePercent / 100);
     const transactionFee = includeTransactionFee ? subtotal * 0.029 : 0;

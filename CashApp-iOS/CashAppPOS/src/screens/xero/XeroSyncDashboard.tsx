@@ -188,7 +188,9 @@ const XeroSyncDashboard: React.FC = () => {
    * Format date for display
    */
   const formatDate = (date: Date | null) => {
-    if (!date) return 'Never';
+    if (!date) {
+      return 'Never';
+    }
     return date.toLocaleString();
   };
 
@@ -196,7 +198,9 @@ const XeroSyncDashboard: React.FC = () => {
    * Format duration
    */
   const formatDuration = (start: Date, end?: Date) => {
-    if (!end) return 'Running...';
+    if (!end) {
+      return 'Running...';
+    }
     const duration = end.getTime() - start.getTime();
     return `${Math.round(duration / 1000)}s`;
   };

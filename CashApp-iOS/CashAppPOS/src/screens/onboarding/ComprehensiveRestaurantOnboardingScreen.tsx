@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
-  KeyboardAvoidingView,
   Platform,
   Switch,
   TextInput,
@@ -293,7 +292,9 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         return !!(formData.restaurantName && formData.displayName && formData.businessType);
 
       case 2: // Contact
-        if (!formData.phone || !formData.email) return false;
+        if (!formData.phone || !formData.email) {
+          return false;
+        }
 
         // Check data validity without setting state
         const phoneValid = validateUKPhone(formData.phone);
@@ -305,7 +306,9 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         return phoneValid && emailValid && noContactErrors;
 
       case 3: // Location
-        if (!formData.street || !formData.city || !formData.zipCode) return false;
+        if (!formData.street || !formData.city || !formData.zipCode) {
+          return false;
+        }
 
         // Check postcode validity
         const postcodeValid = validatePostcode(formData.zipCode);
@@ -314,7 +317,9 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         return postcodeValid && noPostcodeError;
 
       case 4: // Owner Info
-        if (!formData.ownerName || !formData.ownerEmail) return false;
+        if (!formData.ownerName || !formData.ownerEmail) {
+          return false;
+        }
 
         // Check email validity and existing errors
         const ownerEmailValid = validateEmail(formData.ownerEmail);

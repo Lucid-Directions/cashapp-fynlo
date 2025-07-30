@@ -34,20 +34,27 @@ export const createAccessibilityState = (options: {
 }): AccessibilityState => {
   const state: AccessibilityState = {};
 
-  if (options.selected !== undefined) state.selected = options.selected;
-  if (options.disabled !== undefined) state.disabled = options.disabled;
-  if (options.checked !== undefined) state.checked = options.checked;
-  if (options.expanded !== undefined) state.expanded = options.expanded;
-  if (options.busy !== undefined) state.busy = options.busy;
+  if (options.selected !== undefined) {
+    state.selected = options.selected;
+  }
+  if (options.disabled !== undefined) {
+    state.disabled = options.disabled;
+  }
+  if (options.checked !== undefined) {
+    state.checked = options.checked;
+  }
+  if (options.expanded !== undefined) {
+    state.expanded = options.expanded;
+  }
+  if (options.busy !== undefined) {
+    state.busy = options.busy;
+  }
 
   return state;
 };
 
 // Currency formatting for screen readers
-export const formatCurrencyForAccessibility = (
-  amount: number,
-  currency: string = 'GBP',
-): string => {
+export const formatCurrencyForAccessibility = (amount: number, currency = 'GBP'): string => {
   const formatter = new Intl.NumberFormat('en-GB', {
     style: 'currency',
     currency,
@@ -62,11 +69,7 @@ export const formatNumberForAccessibility = (num: number): string => {
 };
 
 // Create accessible label for form fields
-export const createFieldLabel = (
-  label: string,
-  required: boolean = false,
-  error?: string,
-): string => {
+export const createFieldLabel = (label: string, required = false, error?: string): string => {
   let accessibleLabel = label;
 
   if (required) {
@@ -84,8 +87,12 @@ export const createFieldLabel = (
 export const createFieldHint = (helper?: string, format?: string): string | undefined => {
   const hints: string[] = [];
 
-  if (helper) hints.push(helper);
-  if (format) hints.push(`Format: ${format}`);
+  if (helper) {
+    hints.push(helper);
+  }
+  if (format) {
+    hints.push(`Format: ${format}`);
+  }
 
   return hints.length > 0 ? hints.join('. ') : undefined;
 };

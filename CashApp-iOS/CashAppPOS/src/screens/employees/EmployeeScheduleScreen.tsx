@@ -26,8 +26,12 @@ const isSmallDevice = screenWidth < 380;
 
 // Responsive font sizes
 const getFontSize = (base: number) => {
-  if (isTablet) return base * 1.2;
-  if (isSmallDevice) return base * 0.9;
+  if (isTablet) {
+    return base * 1.2;
+  }
+  if (isSmallDevice) {
+    return base * 0.9;
+  }
   return base;
 };
 
@@ -210,7 +214,9 @@ const EmployeeScheduleScreen: React.FC = () => {
   // };
 
   const getWeekDays = (): string[] => {
-    if (!weekSchedule) return [];
+    if (!weekSchedule) {
+      return [];
+    }
 
     const days = [];
     for (let i = 0; i < 7; i++) {
@@ -232,7 +238,9 @@ const EmployeeScheduleScreen: React.FC = () => {
   };
 
   const getShiftsForDay = (dateStr: string): Shift[] => {
-    if (!weekSchedule) return [];
+    if (!weekSchedule) {
+      return [];
+    }
     return weekSchedule.shifts.filter(shift => shift.date === dateStr);
   };
 
@@ -243,7 +251,9 @@ const EmployeeScheduleScreen: React.FC = () => {
   };
 
   const formatWeekRange = (): string => {
-    if (!weekSchedule) return '';
+    if (!weekSchedule) {
+      return '';
+    }
 
     const weekEnd = new Date(weekSchedule.weekStart);
     weekEnd.setDate(weekSchedule.weekStart.getDate() + 6);
@@ -274,7 +284,9 @@ const EmployeeScheduleScreen: React.FC = () => {
     }
 
     const employee = employees.find(emp => emp.id === newShift.employeeId);
-    if (!employee) return;
+    if (!employee) {
+      return;
+    }
 
     const startTime = new Date(`2000-01-01T${newShift.startTime}:00`);
     const endTime = new Date(`2000-01-01T${newShift.endTime}:00`);
@@ -344,12 +356,16 @@ const EmployeeScheduleScreen: React.FC = () => {
   };
 
   const getTotalHours = (): number => {
-    if (!weekSchedule) return 0;
+    if (!weekSchedule) {
+      return 0;
+    }
     return weekSchedule.shifts.reduce((total, shift) => total + shift.duration, 0);
   };
 
   const getEmployeeHours = (employeeId: string): number => {
-    if (!weekSchedule) return 0;
+    if (!weekSchedule) {
+      return 0;
+    }
     return weekSchedule.shifts
       .filter(shift => shift.employeeId === employeeId)
       .reduce((total, shift) => total + shift.duration, 0);

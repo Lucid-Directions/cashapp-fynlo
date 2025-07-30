@@ -8,7 +8,6 @@ import {
   FlatList,
   Alert,
   Modal,
-  TextInput,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
@@ -175,8 +174,12 @@ const KitchenDisplayScreen: React.FC = () => {
     const diffMs = currentTime.getTime() - orderTime.getTime();
     const diffMins = Math.floor(diffMs / 60000);
 
-    if (diffMins < 1) return 'Just now';
-    if (diffMins === 1) return '1 min ago';
+    if (diffMins < 1) {
+      return 'Just now';
+    }
+    if (diffMins === 1) {
+      return '1 min ago';
+    }
     return `${diffMins} mins ago`;
   };
 
@@ -184,8 +187,12 @@ const KitchenDisplayScreen: React.FC = () => {
     const diffMs = completionTime.getTime() - currentTime.getTime();
     const diffMins = Math.floor(diffMs / 60000);
 
-    if (diffMins <= 0) return 'Overdue';
-    if (diffMins === 1) return '1 min';
+    if (diffMins <= 0) {
+      return 'Overdue';
+    }
+    if (diffMins === 1) {
+      return '1 min';
+    }
     return `${diffMins} mins`;
   };
 

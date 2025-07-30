@@ -28,8 +28,12 @@ const isSmallDevice = screenWidth < 380;
 
 // Responsive font sizes
 const getFontSize = (base: number) => {
-  if (isTablet) return base * 1.2;
-  if (isSmallDevice) return base * 0.9;
+  if (isTablet) {
+    return base * 1.2;
+  }
+  if (isSmallDevice) {
+    return base * 0.9;
+  }
   return base;
 };
 

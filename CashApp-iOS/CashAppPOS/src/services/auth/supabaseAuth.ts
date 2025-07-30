@@ -259,7 +259,9 @@ class SupabaseAuthService {
       data: { session },
       error,
     } = await supabase.auth.refreshSession();
-    if (error) throw error;
+    if (error) {
+      throw error;
+    }
 
     // CRITICAL: Update stored auth token when refreshed
     if (session) {

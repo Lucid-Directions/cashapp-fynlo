@@ -68,14 +68,20 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
   const validateStep1 = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!firstName.trim()) newErrors.firstName = 'First name is required';
-    if (!lastName.trim()) newErrors.lastName = 'Last name is required';
+    if (!firstName.trim()) {
+      newErrors.firstName = 'First name is required';
+    }
+    if (!lastName.trim()) {
+      newErrors.lastName = 'Last name is required';
+    }
     if (!email.trim()) {
       newErrors.email = 'Email is required';
     } else if (!email.includes('@')) {
       newErrors.email = 'Please enter a valid email address';
     }
-    if (!phone.trim()) newErrors.phone = 'Phone number is required';
+    if (!phone.trim()) {
+      newErrors.phone = 'Phone number is required';
+    }
     if (!password.trim()) {
       newErrors.password = 'Password is required';
     } else if (password.length < 8) {
@@ -97,10 +103,18 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
   const validateStep2 = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!businessName.trim()) newErrors.businessName = 'Business name is required';
-    if (!businessAddress.trim()) newErrors.businessAddress = 'Business address is required';
-    if (!businessPhone.trim()) newErrors.businessPhone = 'Business phone is required';
-    if (!acceptedTerms) newErrors.terms = 'You must accept the terms and conditions';
+    if (!businessName.trim()) {
+      newErrors.businessName = 'Business name is required';
+    }
+    if (!businessAddress.trim()) {
+      newErrors.businessAddress = 'Business address is required';
+    }
+    if (!businessPhone.trim()) {
+      newErrors.businessPhone = 'Business phone is required';
+    }
+    if (!acceptedTerms) {
+      newErrors.terms = 'You must accept the terms and conditions';
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -121,7 +135,9 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
   };
 
   const handleSignUp = async () => {
-    if (!validateStep2()) return;
+    if (!validateStep2()) {
+      return;
+    }
 
     setIsLoading(true);
     try {
@@ -180,7 +196,9 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
             value={firstName}
             onValueChange={text => {
               setFirstName(text);
-              if (errors.firstName) setErrors(prev => ({ ...prev, firstName: '' }));
+              if (errors.firstName) {
+                setErrors(prev => ({ ...prev, firstName: '' }));
+              }
             }}
             placeholder="John"
             autoCapitalize="words"
@@ -197,7 +215,9 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
             value={lastName}
             onValueChange={text => {
               setLastName(text);
-              if (errors.lastName) setErrors(prev => ({ ...prev, lastName: '' }));
+              if (errors.lastName) {
+                setErrors(prev => ({ ...prev, lastName: '' }));
+              }
             }}
             placeholder="Smith"
             autoCapitalize="words"
@@ -213,7 +233,9 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
           value={email}
           onValueChange={text => {
             setEmail(text);
-            if (errors.email) setErrors(prev => ({ ...prev, email: '' }));
+            if (errors.email) {
+              setErrors(prev => ({ ...prev, email: '' }));
+            }
           }}
           placeholder="john@example.com"
           keyboardType="email-address"
@@ -229,7 +251,9 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
           value={phone}
           onValueChange={text => {
             setPhone(text);
-            if (errors.phone) setErrors(prev => ({ ...prev, phone: '' }));
+            if (errors.phone) {
+              setErrors(prev => ({ ...prev, phone: '' }));
+            }
           }}
           placeholder="+44 7700 900123"
           keyboardType="phone-pad"
@@ -243,7 +267,9 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
           value={password}
           onValueChange={text => {
             setPassword(text);
-            if (errors.password) setErrors(prev => ({ ...prev, password: '' }));
+            if (errors.password) {
+              setErrors(prev => ({ ...prev, password: '' }));
+            }
           }}
           placeholder="At least 8 characters"
           secure={!showPassword} // Use 'secure' prop
@@ -259,7 +285,9 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
           value={confirmPassword}
           onValueChange={text => {
             setConfirmPassword(text);
-            if (errors.confirmPassword) setErrors(prev => ({ ...prev, confirmPassword: '' }));
+            if (errors.confirmPassword) {
+              setErrors(prev => ({ ...prev, confirmPassword: '' }));
+            }
           }}
           placeholder="Repeat your password"
           secure={!showConfirmPassword} // Use 'secure' prop
@@ -274,7 +302,9 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
           value={pin}
           onValueChange={text => {
             setPin(text.replace(/[^0-9]/g, '').slice(0, 4));
-            if (errors.pin) setErrors(prev => ({ ...prev, pin: '' }));
+            if (errors.pin) {
+              setErrors(prev => ({ ...prev, pin: '' }));
+            }
           }}
           placeholder="1234"
           keyboardType="numeric"
@@ -299,7 +329,9 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
           value={businessName}
           onValueChange={text => {
             setBusinessName(text);
-            if (errors.businessName) setErrors(prev => ({ ...prev, businessName: '' }));
+            if (errors.businessName) {
+              setErrors(prev => ({ ...prev, businessName: '' }));
+            }
           }}
           placeholder="Your Business Name"
           autoCapitalize="words"
@@ -328,7 +360,9 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
           value={businessAddress}
           onValueChange={text => {
             setBusinessAddress(text);
-            if (errors.businessAddress) setErrors(prev => ({ ...prev, businessAddress: '' }));
+            if (errors.businessAddress) {
+              setErrors(prev => ({ ...prev, businessAddress: '' }));
+            }
           }}
           placeholder="123 High Street, London, SW1A 1AA"
           multiline
@@ -343,7 +377,9 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
           value={businessPhone}
           onValueChange={text => {
             setBusinessPhone(text);
-            if (errors.businessPhone) setErrors(prev => ({ ...prev, businessPhone: '' }));
+            if (errors.businessPhone) {
+              setErrors(prev => ({ ...prev, businessPhone: '' }));
+            }
           }}
           placeholder="+44 20 7946 0958"
           keyboardType="phone-pad"

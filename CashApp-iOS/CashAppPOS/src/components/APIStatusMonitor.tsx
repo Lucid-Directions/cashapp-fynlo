@@ -91,17 +91,23 @@ const APIStatusMonitor: React.FC<APIStatusMonitorProps> = ({
   }, []);
 
   const getStatusColor = () => {
-    if (isTesting) return Colors.warning;
+    if (isTesting) {
+      return Colors.warning;
+    }
     return isConnected ? Colors.success : Colors.error;
   };
 
   const getStatusIcon = () => {
-    if (isTesting) return 'sync';
+    if (isTesting) {
+      return 'sync';
+    }
     return isConnected ? 'wifi' : 'wifi-off';
   };
 
   const getStatusText = () => {
-    if (isTesting) return 'Testing...';
+    if (isTesting) {
+      return 'Testing...';
+    }
     return isConnected ? 'Backend Connected' : 'Backend Offline';
   };
 

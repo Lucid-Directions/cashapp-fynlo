@@ -1,21 +1,17 @@
 import React from 'react';
-import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
+import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Import all screens
 import POSScreen from '../screens/main/POSScreen';
-import DashboardScreen from '../screens/main/DashboardScreen';
 import OrdersScreen from '../screens/orders/OrdersScreen';
 import InventoryScreen from '../screens/inventory/InventoryScreen';
 import SettingsScreen from '../screens/settings/SettingsScreen';
-import EnhancedPaymentScreen from '../screens/payment/EnhancedPaymentScreen';
 import UserProfileScreen from '../screens/settings/user/UserProfileScreen';
 import ThemeOptionsScreen from '../screens/settings/user/ThemeOptionsScreen';
 import PaymentMethodsScreen from '../screens/settings/business/PaymentMethodsScreen';
-import BusinessInformationScreen from '../screens/settings/business/BusinessInformationScreen';
-import MenuManagementScreen from '../screens/settings/app/MenuManagementScreen';
 
 // Mock all dependencies
 jest.mock('@react-native-async-storage/async-storage');
