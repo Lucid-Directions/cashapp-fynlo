@@ -57,7 +57,15 @@ def clear_database():
         # Disable foreign key checks for PostgreSQL
         session.execute(text("SET session_replication_role = 'replica';"))
         
-        # Get all table names
+        # Get all table names - whitelist for security
+        ALLOWED_TABLES = {
+            'payments', 'order_items', 'orders', 'customers',
+            'stock_movements', 'inventory_items', 'suppliers',
+            'schedules', 'employee_profiles', 'products', 'categories',
+            'sections', 'restaurant_tables', 'restaurants',
+            'platforms', 'users', 'daily_reports'
+        }
+        
         tables = [
             'payments', 'order_items', 'orders', 'customers',
             'stock_movements', 'inventory_items', 'suppliers',
@@ -68,7 +76,11 @@ def clear_database():
         
         # Clear tables in order
         for table in tables:
+            # Validate table name against whitelist
+            if table not in ALLOWED_TABLES:
+                raise ValueError(f"Table '{table}' is not in the allowed tables list")
             try:
+                # Table name validated against whitelist, safe to use
                 session.execute(text(f"TRUNCATE TABLE {table} CASCADE;"))
                 logger.info(f"Cleared table: {table}")
             except Exception as e:
