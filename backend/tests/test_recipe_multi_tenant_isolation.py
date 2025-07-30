@@ -150,8 +150,9 @@ class TestRecipeMultiTenantIsolation:
         item1, item2 = test_inventory_items
         
         # Try to create recipe for restaurant 1 using restaurant 2's inventory item
-        # This should be prevented by application logic
-        with pytest.raises(Exception):  # Should raise validation error
+        # This should be prevented by database trigger
+        from sqlalchemy.exc import IntegrityError
+        with pytest.raises(IntegrityError) as exc_info:
             recipe = Recipe(
                 restaurant_id=restaurant1.id,
                 item_id=product1.id,
@@ -160,6 +161,9 @@ class TestRecipeMultiTenantIsolation:
             )
             db.add(recipe)
             db.commit()
+        
+        # Verify the exception message mentions the constraint
+        assert "Ingredient SKU" in str(exc_info.value) or "recipe_ingredient_restaurant_check" in str(exc_info.value)
     
     def test_recipe_api_endpoint_isolation(self, client: TestClient, test_users, test_products, test_inventory_items):
         """Test API endpoint isolation for recipes"""

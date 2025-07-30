@@ -343,7 +343,10 @@ def get_product_details_with_recipe(db: Session, item_id: UUID, restaurant_id: U
     """
     Retrieves a product and its associated recipe ingredients, including ingredient names.
     """
-    product = db.query(Product).filter(Product.id == item_id).first()
+    product = db.query(Product).filter(
+        Product.id == item_id,
+        Product.restaurant_id == restaurant_id
+    ).first()
     if not product:
         return None
 

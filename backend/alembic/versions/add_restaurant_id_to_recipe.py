@@ -43,6 +43,32 @@ def upgrade():
     # Add index on restaurant_id for performance
     op.create_index('ix_recipe_restaurant_id', 'recipe', ['restaurant_id'])
     
+    # Add check constraint to ensure recipe ingredients belong to same restaurant
+    # This requires a function to validate the constraint
+    op.execute("""
+        CREATE OR REPLACE FUNCTION check_recipe_ingredient_restaurant()
+        RETURNS TRIGGER AS $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT 1 FROM inventory i
+                WHERE i.sku = NEW.ingredient_sku
+                AND i.restaurant_id = NEW.restaurant_id
+            ) THEN
+                RAISE EXCEPTION 'Ingredient SKU % does not exist for restaurant %', 
+                    NEW.ingredient_sku, NEW.restaurant_id;
+            END IF;
+            RETURN NEW;
+        END;
+        $$ LANGUAGE plpgsql;
+    """)
+    
+    op.execute("""
+        CREATE TRIGGER recipe_ingredient_restaurant_check
+        BEFORE INSERT OR UPDATE ON recipe
+        FOR EACH ROW
+        EXECUTE FUNCTION check_recipe_ingredient_restaurant();
+    """)
+    
     # Populate restaurant_id from related product's restaurant_id
     op.execute("""
         UPDATE recipe r
@@ -56,6 +82,10 @@ def upgrade():
 
 
 def downgrade():
+    # Drop trigger and function
+    op.execute("DROP TRIGGER IF EXISTS recipe_ingredient_restaurant_check ON recipe")
+    op.execute("DROP FUNCTION IF EXISTS check_recipe_ingredient_restaurant()")
+    
     # Drop index
     op.drop_index('ix_recipe_restaurant_id', table_name='recipe')
     
