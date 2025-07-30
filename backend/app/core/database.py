@@ -167,7 +167,7 @@ class User(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     
     # Relationships
-    restaurants = relationship("UserRestaurant", back_populates="user")
+    restaurants = relationship("UserRestaurant", foreign_keys="[UserRestaurant.user_id]", back_populates="user")
     current_restaurant = relationship("Restaurant", foreign_keys=[current_restaurant_id])
 
 class UserRestaurant(Base):
