@@ -87,14 +87,24 @@ async def init_fastapi_limiter():
     Initializes the fastapi-limiter with the Redis client.
     This should be called during application startup after Redis is connected.
     """
-    if not redis_client or not await redis_client.exists("ping_test_key"): # Check if redis_client is connected
-         # This check relies on redis_client.exists() using the actual redis connection
-         # or its mock fallback.
-        if settings.ENVIRONMENT not in ["development", "testing", "local"] or not redis_client._mock_storage:
-            logger.error("Rate limiter cannot be initialized: Redis is not available and not in mock mode.")
-            # In production, this is a critical failure.
-            # Depending on policy, might raise an error or disable rate limiting with a warning.
-            # For now, log error and limiter might operate in a no-op or error state.
+    try:
+        # Try to ping Redis to check connectivity
+        if redis_client and hasattr(redis_client, 'ping'):
+            await redis_client.ping()
+            logger.info("✅ Redis is available for rate limiting")
+        else:
+            # Check if we're in mock mode
+            if settings.ENVIRONMENT in ["development", "testing", "local"] and hasattr(redis_client, '_mock_storage'):
+                logger.info("✅ Rate limiter using mock storage in development mode")
+            else:
+                logger.warning("Rate limiter cannot be initialized: Redis is not available and not in mock mode.")
+                return
+    except Exception as e:
+        # Redis connection failed
+        if settings.ENVIRONMENT in ["development", "testing", "local"]:
+            logger.warning(f"Redis connection failed, using mock storage: {e}")
+        else:
+            logger.error(f"Rate limiter cannot be initialized in production: Redis connection failed: {e}")
             return
 
     # The `limiter` object we created earlier will be used by route decorators.
