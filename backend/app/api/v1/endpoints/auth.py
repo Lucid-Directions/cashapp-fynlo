@@ -20,6 +20,7 @@ from app.schemas.auth import AuthVerifyResponse, RegisterRestaurantRequest
 from app.core.feature_gate import get_plan_features
 from app.services.audit_logger import AuditLoggerService
 from app.models.audit_log import AuditEventType, AuditEventStatus
+from app.middleware.rate_limit_middleware import limiter, AUTH_RATE
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -44,6 +45,7 @@ def ensure_uuid(value) -> uuid.UUID:
 
 
 @router.post("/verify", response_model=AuthVerifyResponse)
+@limiter.limit(AUTH_RATE)
 async def verify_supabase_user(
     request: Request,
     authorization: Optional[str] = Header(None),
@@ -465,7 +467,9 @@ async def verify_supabase_user(
 
 
 @router.post("/register-restaurant")
+@limiter.limit(AUTH_RATE)
 async def register_restaurant(
+    request: Request,
     data: RegisterRestaurantRequest,
     authorization: Optional[str] = Header(None),
     db: Session = Depends(get_db)
