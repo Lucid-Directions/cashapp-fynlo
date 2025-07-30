@@ -34,7 +34,8 @@ async def get_current_user_with_tenant_validation(
         await TenantSecurity.validate_restaurant_access(
             user=current_user,
             restaurant_id=restaurant_id,
-            operation="access"
+            operation="access",
+            db=db
         )
     elif not TenantSecurity.is_platform_owner(current_user) and not current_user.restaurant_id:
         # Non-platform owners must have a restaurant
@@ -83,7 +84,8 @@ async def validate_resource_access(
         await TenantSecurity.validate_restaurant_access(
             user=current_user,
             restaurant_id=str(resource.restaurant_id),
-            operation="access"
+            operation="access",
+            db=db
         )
     
     return resource
@@ -160,7 +162,8 @@ class SecureQuery:
         query = TenantSecurity.apply_tenant_filter(
             query=query,
             user=current_user,
-            model_class=self.model_class
+            model_class=self.model_class,
+            db=db
         )
         
         return query
