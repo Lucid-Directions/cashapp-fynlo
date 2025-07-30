@@ -99,8 +99,10 @@ class DailyCostTracker:
             # Same month - normal calculation
             today_spend = current["month_to_date"] - yesterday.get("month_to_date", 0)
         else:
-            # New month - today's spend is just the current month-to-date
-            today_spend = current["month_to_date"]
+            # New month - calculate average daily spend for the new month
+            # This prevents false spikes when comparing multiple days of spending against daily average
+            days_in_new_month = current["day_of_month"]
+            today_spend = current["month_to_date"] / days_in_new_month if days_in_new_month > 0 else 0
         
         # Detect spike
         spike_detected = False
