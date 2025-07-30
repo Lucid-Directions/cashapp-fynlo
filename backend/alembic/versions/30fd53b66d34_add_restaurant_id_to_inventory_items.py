@@ -46,11 +46,23 @@ def upgrade() -> None:
     
     if first_restaurant:
         # Update all existing inventory items to belong to the first restaurant
-        op.execute(
-            f"UPDATE inventory SET restaurant_id = '{first_restaurant[0]}' WHERE restaurant_id IS NULL"
+        # Using parameterized query to prevent SQL injection
+        connection.execute(
+            text("UPDATE inventory SET restaurant_id = :restaurant_id WHERE restaurant_id IS NULL"),
+            {"restaurant_id": first_restaurant[0]}
         )
     
-    # Now make the column NOT NULL
+    # Check if there are any inventory items before making column NOT NULL
+    inventory_count = connection.execute(text("SELECT COUNT(*) FROM inventory")).scalar()
+    
+    if inventory_count > 0 and not first_restaurant:
+        # If we have inventory but no restaurants, we need to handle this gracefully
+        raise Exception(
+            "Cannot complete migration: Inventory items exist but no restaurants found. "
+            "Please create at least one restaurant before running this migration."
+        )
+    
+    # Only make the column NOT NULL if we successfully updated all records or table is empty
     op.alter_column('inventory', 'restaurant_id',
                     existing_type=postgresql.UUID(as_uuid=True),
                     nullable=False)
@@ -70,13 +82,28 @@ def upgrade() -> None:
     op.create_index('ix_inventory_ledger_restaurant_id', 'inventory_ledger', ['restaurant_id'])
     
     # Update existing ledger entries based on their inventory item's restaurant
-    op.execute("""
+    connection.execute(text("""
         UPDATE inventory_ledger 
         SET restaurant_id = inventory.restaurant_id
         FROM inventory
         WHERE inventory_ledger.sku = inventory.sku
         AND inventory_ledger.restaurant_id IS NULL
-    """)
+    """))
+    
+    # Check if there are any inventory_ledger items before making column NOT NULL
+    ledger_count = connection.execute(text("SELECT COUNT(*) FROM inventory_ledger")).scalar()
+    
+    if ledger_count > 0:
+        # Verify all ledger entries have restaurant_id set
+        null_count = connection.execute(
+            text("SELECT COUNT(*) FROM inventory_ledger WHERE restaurant_id IS NULL")
+        ).scalar()
+        
+        if null_count > 0:
+            raise Exception(
+                f"Cannot complete migration: {null_count} inventory_ledger entries "
+                "still have NULL restaurant_id. This may indicate orphaned ledger entries."
+            )
     
     # Make ledger restaurant_id NOT NULL
     op.alter_column('inventory_ledger', 'restaurant_id',
