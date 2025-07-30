@@ -1,8 +1,12 @@
-# DigitalOcean Cost Optimization Guide
+# DigitalOcean Cost Optimization & Monitoring Guide
 
 ## 🎯 Overview
 
-This guide addresses the zombie resource problem identified in Issue #416, which is costing $50-100/month in unnecessary expenses. Our goal is to implement both immediate cleanup and long-term prevention strategies.
+This guide addresses two critical infrastructure cost issues:
+1. **Issue #416**: Zombie resources costing $50-100/month in unnecessary expenses
+2. **Issue #417**: Zero visibility into costs until monthly bill arrives (silent budget drain)
+
+Our solution implements both immediate cleanup and comprehensive cost monitoring to prevent future issues.
 
 ## 📊 Current Situation
 
@@ -185,12 +189,72 @@ jobs:
 - Automated cost control
 - Reduced manual audit effort
 
+## 💸 Cost Monitoring Implementation (Issue #417)
+
+### The Problem
+- No visibility into costs until monthly bill arrives
+- Silent budget drain without alerts
+- Can't detect cost spikes until too late
+- No daily tracking or trend analysis
+
+### Our Solution
+
+#### 1. Billing Alerts (Critical - Do This First!)
+```bash
+# Configure alerts using the setup script
+python scripts/digitalocean-billing-alerts.py
+
+# Set up hourly monitoring
+./do-billing-monitor.sh
+```
+
+**Alert Thresholds**:
+- $10 - Early warning of unusual activity
+- $50 - Mid-month checkpoint
+- $150 - Approaching expected budget
+- $200 - Budget exceeded!
+
+#### 2. Daily Cost Tracking
+```bash
+# Run daily cost analysis
+python scripts/digitalocean-daily-costs.py
+
+# Add to crontab for daily 9 AM reports
+0 9 * * * /path/to/scripts/digitalocean-daily-costs.py
+```
+
+**Features**:
+- Daily spending analysis
+- Cost spike detection (>50% increase)
+- Week-over-week trending
+- Top cost drivers identification
+- Budget tracking and projections
+
+#### 3. Real-time Monitoring
+```bash
+# Hourly cost checks via cron
+0 * * * * /usr/local/bin/do-billing-monitor.sh
+
+# Slack/email alerts on thresholds
+# Budget projection warnings
+# Spike detection within hours
+```
+
+### Expected Benefits
+- **Immediate alerts** on cost anomalies
+- **Daily visibility** instead of monthly surprises
+- **20-30% cost savings** through proactive monitoring
+- **Prevent budget overruns** with early warnings
+
 ## 🛠️ Tools and Scripts
 
 ### Included Scripts
-1. **digitalocean-cost-audit.py** - Comprehensive resource audit
-2. **digitalocean-monitoring.py** - Ongoing monitoring and alerts
-3. **cleanup-zombies-*.sh** - Generated cleanup scripts (review before running!)
+1. **digitalocean-cost-audit.py** - Comprehensive resource audit (Issue #416)
+2. **digitalocean-monitoring.py** - Resource tagging and retention monitoring
+3. **digitalocean-billing-alerts.py** - Billing alert configuration (Issue #417)
+4. **digitalocean-daily-costs.py** - Daily cost tracking with spike detection (Issue #417)
+5. **optimize-app-platform.sh** - App Platform optimization
+6. **cleanup-zombies-*.sh** - Generated cleanup scripts (review before running!)
 
 ### Required Tools
 ```bash
