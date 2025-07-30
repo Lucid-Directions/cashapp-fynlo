@@ -16,6 +16,7 @@ from app.core.redis_client import get_redis, RedisClient
 from app.core.responses import APIResponseHelper
 from app.core.exceptions import FynloException, ErrorCodes
 from app.core.tenant_security import TenantSecurity
+from app.core.cache_service import cache_service
 
 router = APIRouter()
 
@@ -169,9 +170,8 @@ async def create_category(
     db.commit()
     db.refresh(new_category)
     
-    # Clear categories cache
-    await redis.invalidate_product_cache(restaurant_id)
-    await redis.delete(f"categories:{restaurant_id}")
+    # Clear categories cache using enhanced cache service
+    await cache_service.invalidate_restaurant_cache(restaurant_id)
     
     category_response = CategoryResponse(
         id=str(new_category.id),
@@ -222,9 +222,8 @@ async def update_category(
     db.commit()
     db.refresh(category)
     
-    # Clear categories cache
-    await redis.invalidate_product_cache(str(category.restaurant_id))
-    await redis.delete(f"categories:{category.restaurant_id}")
+    # Clear categories cache using enhanced cache service
+    await cache_service.invalidate_restaurant_cache(str(category.restaurant_id))
     
     category_response = CategoryResponse(
         id=str(category.id),
@@ -281,9 +280,8 @@ async def delete_category(
     
     db.commit()
     
-    # Clear categories cache
-    await redis.invalidate_product_cache(str(category.restaurant_id))
-    await redis.delete(f"categories:{category.restaurant_id}")
+    # Clear categories cache using enhanced cache service
+    await cache_service.invalidate_restaurant_cache(str(category.restaurant_id))
     
     return APIResponseHelper.success(
         message=f"Category '{category.name}' deleted successfully"
@@ -492,8 +490,8 @@ async def create_product(
     db.commit()
     db.refresh(new_product)
     
-    # Clear caches
-    await redis.invalidate_product_cache(restaurant_id)
+    # Clear caches using enhanced cache service
+    await cache_service.invalidate_restaurant_cache(restaurant_id)
     
     return ProductResponse(
         id=str(new_product.id),
@@ -576,9 +574,9 @@ async def update_product(
     db.commit()
     db.refresh(product)
     
-    # Clear caches
+    # Clear caches using enhanced cache service
     restaurant_id = str(product.restaurant_id)
-    await redis.invalidate_product_cache(restaurant_id)
+    await cache_service.invalidate_restaurant_cache(restaurant_id)
     
     return ProductResponse(
         id=str(product.id),
@@ -630,9 +628,9 @@ async def delete_product(
     product.updated_at = datetime.utcnow()
     db.commit()
     
-    # Clear caches
+    # Clear caches using enhanced cache service
     restaurant_id = str(product.restaurant_id)
-    await redis.invalidate_product_cache(restaurant_id)
+    await cache_service.invalidate_restaurant_cache(restaurant_id)
     
     return APIResponseHelper.success(message="Product deleted successfully")
 

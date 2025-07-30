@@ -88,6 +88,22 @@ async def lifespan(app: FastAPI):
         from app.core.redis_client import redis_client
         await init_instance_tracker(redis_client)
         
+        # Initialize cache warming
+        logger.info("Initializing cache warming...")
+        from app.core.cache_warmer import warm_cache_on_startup, warm_cache_task
+        import asyncio
+        
+        # Get a database session for initial warming
+        db = next(get_db())
+        try:
+            await warm_cache_on_startup(db)
+        finally:
+            db.close()
+        
+        # Start background cache warming task
+        asyncio.create_task(warm_cache_task())
+        logger.info("✅ Cache warming initialized")
+        
         logger.info("✅ Core services initialized successfully")
     except Exception as e:
         logger.error(f"Core services initialization failed: {e}")

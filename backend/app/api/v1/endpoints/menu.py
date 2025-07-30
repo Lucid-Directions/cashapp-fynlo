@@ -15,6 +15,7 @@ from app.core.redis_client import get_redis, RedisClient
 from app.core.responses import APIResponseHelper
 from app.api.v1.endpoints.products import CategoryResponse, ProductResponse
 from app.core.onboarding_helper import OnboardingHelper
+from app.core.cache_service import cache_service, cached
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -77,12 +78,12 @@ def format_menu_item(product, category_name=None):
     }
 
 @router.get("/items")
+@cached(ttl=300, prefix="menu_items", key_params=["restaurant_id", "category"])
 async def get_menu_items(
     restaurant_id: Optional[str] = Query(None),
     category: Optional[str] = Query(None),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-    redis: RedisClient = Depends(get_redis)
+    current_user: User = Depends(get_current_user)
 ):
     """Get menu items (products) for frontend compatibility"""
     start_time = time.time()
@@ -111,14 +112,6 @@ async def get_menu_items(
         )
     
     logger.info(f"Menu items request started - Restaurant: {restaurant_id}, Category: {category}")
-    
-    # Check cache first
-    cache_key = f"menu_items:{restaurant_id}:{category or 'all'}"
-    cached_items = await redis.get(cache_key)
-    if cached_items:
-        cache_time = time.time() - start_time
-        logger.info(f"Menu items returned from cache in {cache_time:.3f}s")
-        return APIResponseHelper.success(data=cached_items)
     
     # Build query
     query = db.query(Product).filter(
@@ -157,9 +150,6 @@ async def get_menu_items(
         category_name = categories_dict.get(product.category_id, 'Uncategorized')
         menu_items.append(format_menu_item(product, category_name))
     
-    # Cache for 5 minutes
-    await redis.set(cache_key, menu_items, expire=300)
-    
     # Log execution time and performance warnings
     execution_time = time.time() - start_time
     logger.info(f"Menu items request completed in {execution_time:.3f}s - Items: {len(menu_items)}")
@@ -181,11 +171,11 @@ async def get_menu_items(
     )
 
 @router.get("/categories")
+@cached(ttl=300, prefix="menu_categories", key_params=["restaurant_id"])
 async def get_menu_categories(
     restaurant_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-    redis: RedisClient = Depends(get_redis)
+    current_user: User = Depends(get_current_user)
 ):
     """Get menu categories for frontend compatibility"""
     
@@ -212,11 +202,6 @@ async def get_menu_categories(
             db=db
         )
     
-    # Check cache first
-    cache_key = f"menu_categories:{restaurant_id}"
-    cached_categories = await redis.get(cache_key)
-    if cached_categories:
-        return APIResponseHelper.success(data=cached_categories)
     
     # Get categories
     categories = db.query(Category).filter(
@@ -236,9 +221,6 @@ async def get_menu_categories(
     # Always include 'All' category at the beginning
     if not any(cat['name'] == 'All' for cat in menu_categories):
         menu_categories.insert(0, {'id': 1, 'name': 'All', 'active': True})
-    
-    # Cache for 5 minutes
-    await redis.set(cache_key, menu_categories, expire=300)
     
     return APIResponseHelper.success(
         data=menu_categories,
