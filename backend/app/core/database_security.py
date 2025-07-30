@@ -156,8 +156,8 @@ class DatabaseSecurityConfig:
                 CREATE OR REPLACE FUNCTION sanitize_text(input_text text)
                 RETURNS text AS $$
                 BEGIN
-                    -- Remove null bytes
-                    input_text := replace(input_text, E'\\x00', '');
+                    -- Remove null bytes using chr(0) instead of E'\\x00' to avoid encoding issues
+                    input_text := replace(input_text, chr(0), '');
                     
                     -- Limit length
                     IF length(input_text) > 1000 THEN
