@@ -63,7 +63,11 @@ interface AuthContextType {
   isPlatformOwner: boolean;
   managedRestaurants: Business[];
   signIn: (email: string, password: string, rememberMe?: boolean) => Promise<boolean>;
-  signUp: (userData: Partial<User>, businessData: Partial<Business>, password: string) => Promise<boolean>;
+  signUp: (
+    userData: Partial<User>,
+    businessData: Partial<Business>,
+    password: string,
+  ) => Promise<boolean>;
   signOut: () => Promise<void>;
   updateUser: (userData: Partial<User>) => Promise<void>;
   updateBusiness: (businessData: Partial<Business>) => Promise<void>;
@@ -93,7 +97,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const signInStore = useAuthStore(state => state.signIn);
   const signOutStore = useAuthStore(state => state.signOut);
   const checkAuthStore = useAuthStore(state => state.checkAuth);
-  
+
   // Legacy state for compatibility
   const [user, setUser] = useState<User | null>(null);
   const [business, setBusiness] = useState<Business | null>(null);
@@ -122,7 +126,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         managedRestaurants: [],
       };
       setUser(legacyUser);
-      
+
       // Set business if available
       if (authStoreUser.restaurant_id && authStoreUser.restaurant_name) {
         setBusiness({
@@ -154,11 +158,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const loadStoredAuth = async () => {
     try {
       setIsLoading(true);
-      
+
       // Check auth state from Supabase
       console.log('🔐 Checking Supabase authentication state...');
       await checkAuthStore();
-      
     } catch (error) {
       console.error('Error loading stored auth:', error);
     } finally {
@@ -170,269 +173,22 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       // Use Supabase auth store
       await signInStore(email, password);
-      
+
       if (rememberMe) {
         await AsyncStorage.setItem(STORAGE_KEYS.REMEMBER_ME, 'true');
       }
-      
+
       return true;
     } catch (error) {
       console.error('Sign in error:', error);
       return false;
     }
   };
-        console.log('🌐 API URL:', `${API_CONFIG.FULL_API_URL}/auth/login`);
-        
-        const authToken = await AsyncStorage.getItem('auth_token');
-        const response = await fetch(`${API_CONFIG.FULL_API_URL}/auth/login`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            email: email.trim(),
-            password: password,
-          }),
-        });
-
-        console.log('📡 Response status:', response.status);
-        const responseText = await response.text();
-        console.log('📄 Response:', responseText.substring(0, 200));
-
-        if (response.ok) {
-          const data = JSON.parse(responseText);
-          
-          // Store JWT token
-          if (data.access_token) {
-            await AsyncStorage.setItem('auth_token', data.access_token);
-          }
-
-          // Convert API user data to our User interface
-          const apiUser = data.user;
-          if (!apiUser) {
-            throw new Error('User data not found in API response');
-          }
-          
-          const updatedUser: User = {
-            id: apiUser.id || apiUser.user_id,
-            firstName: apiUser.first_name || apiUser.firstName || 'User',
-            lastName: apiUser.last_name || apiUser.lastName || '',
-            email: apiUser.email,
-            phone: apiUser.phone || '',
-            role: apiUser.role || 'employee',
-            pin: apiUser.pin || '0000',
-            employeeId: apiUser.employee_id || `EMP${apiUser.id}`,
-            businessId: apiUser.restaurant_id || apiUser.business_id || 'restaurant1',
-            startDate: apiUser.created_at ? new Date(apiUser.created_at) : new Date(),
-            lastLogin: new Date(),
-            permissions: apiUser.permissions || ['*'],
-            isActive: apiUser.is_active !== false,
-            platformId: apiUser.platform_id,
-            managedRestaurants: apiUser.managed_restaurants,
-          };
-
-          setUser(updatedUser);
-
-          // Handle platform owner vs restaurant user
-          if (updatedUser.role === 'platform_owner') {
-            // Continue with platform owner logic...
-          } else {
-            // Load restaurant data from API
-            try {
-              const restaurantResponse = await fetch(`${API_CONFIG.FULL_API_URL}/restaurants/${updatedUser.businessId}`, {
-                headers: {
-                  'Authorization': `Bearer ${data.access_token}`,
-                },
-              });
-
-              if (restaurantResponse.ok) {
-                const restaurantData = await restaurantResponse.json();
-                const businessData: Business = {
-                  id: restaurantData.id,
-                  name: restaurantData.name,
-                  address: restaurantData.address || '',
-                  phone: restaurantData.phone || '',
-                  email: restaurantData.email || '',
-                  vatNumber: restaurantData.vat_number || '',
-                  registrationNumber: restaurantData.registration_number || '',
-                  type: 'restaurant',
-                  currency: restaurantData.currency || 'GBP',
-                  timezone: restaurantData.timezone || 'Europe/London',
-                  ownerId: restaurantData.owner_id || updatedUser.id,
-                };
-                setBusiness(businessData);
-                await AsyncStorage.setItem(STORAGE_KEYS.BUSINESS, JSON.stringify(businessData));
-              }
-            } catch (restaurantError) {
-              console.log('Failed to load restaurant data, using defaults');
-            }
-          }
-
-          await AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(updatedUser));
-          await AsyncStorage.setItem(STORAGE_KEYS.REMEMBER_ME, rememberMe.toString());
-
-          return true;
-        } else {
-          // Parse error response
-          try {
-            const errorData = JSON.parse(responseText);
-            console.log('❌ API error:', errorData.error?.message || errorData.message || 'Unknown error');
-          } catch {
-            console.log('❌ API error: Could not parse response');
-          }
-        }
-      } catch (apiError) {
-        console.log('API authentication failed, falling back to mock for demo accounts:', apiError);
-      }
-
-      // Fallback to mock authentication for demo accounts only
-      const credentials = MOCK_CREDENTIALS.find(
-        cred => cred.email.toLowerCase() === email.toLowerCase() && cred.password === password
-      );
-
-      if (!credentials) {
-        return false;
-      }
-
-      // Find user data
-      const userData = MOCK_USERS.find(u => u.email.toLowerCase() === email.toLowerCase());
-      
-      if (!userData || !userData.isActive) {
-        return false;
-      }
-
-      // Update last login
-      const updatedUser = {
-        ...userData,
-        lastLogin: new Date(),
-      };
-
-      setUser(updatedUser);
-
-      // Handle platform owner vs restaurant user
-      if (updatedUser.role === 'platform_owner') {
-        try {
-          // Load REAL restaurant data from RestaurantDataService
-          const restaurantDataService = RestaurantDataService.getInstance();
-          let realRestaurants = await restaurantDataService.getPlatformRestaurants('platform_owner_1');
-        
-          // INITIALIZE: If no restaurants exist, populate with mock data for the Mexican restaurant
-          if (!Array.isArray(realRestaurants) || realRestaurants.length === 0) {
-            console.log('🏗️ Initializing platform restaurants - no restaurants found, adding mock data');
-            
-            // Convert MOCK_RESTAURANTS to RestaurantData format for RestaurantDataService
-            const restaurantDataList = MOCK_RESTAURANTS.map(business => ({
-              id: business.id,
-              name: business.name,
-              displayName: business.name,
-              businessType: business.type,
-              address: business.address,
-              phone: business.phone,
-              email: business.email,
-              website: '', // Not in Business type
-              vatNumber: business.vatNumber,
-              registrationNumber: business.registrationNumber,
-              platformOwnerId: business.platformOwnerId,
-              ownerId: business.ownerId,
-              subscriptionTier: business.subscriptionTier,
-              currency: business.currency,
-              monthlyRevenue: business.monthlyRevenue,
-              commissionRate: business.commissionRate,
-              isActive: business.isActive,
-              onboardingCompleted: true,
-              joinedDate: business.joinedDate,
-              lastActivity: business.lastActivity,
-              timezone: business.timezone,
-              theme: 'default',
-              primaryColor: '#FF6B35',
-              todayTransactions: 0,
-              todayRevenue: 0,
-              activeOrders: 0,
-              averageOrderValue: 0,
-            }));
-            
-            // Save to RestaurantDataService
-            await restaurantDataService.savePlatformRestaurants('platform_owner_1', restaurantDataList);
-            console.log(`✅ Initialized ${restaurantDataList.length} restaurants for platform owner`);
-            
-            // Reload the restaurants after initialization
-            realRestaurants = await restaurantDataService.getPlatformRestaurants('platform_owner_1');
-          }
-        
-        // Convert to Business type - ADD SAFETY CHECK for array
-        const businesses = Array.isArray(realRestaurants) 
-          ? realRestaurants.map(r => restaurantDataService.toBusinessType(r))
-          : [];
-        setManagedRestaurants(businesses);
-        
-        // Create REAL platform data based on actual restaurants - ADD SAFETY CHECK for array
-        const totalRevenue = Array.isArray(realRestaurants) 
-          ? realRestaurants.reduce((sum, r) => sum + (r.monthlyRevenue || 0), 0)
-          : 0;
-        const realPlatformData: Platform = {
-          id: 'platform1',
-          name: 'Fynlo POS Platform',
-          ownerId: updatedUser.id,
-          createdDate: new Date(2024, 0, 1),
-          totalRestaurants: Array.isArray(realRestaurants) ? realRestaurants.length : 0, // REAL count from data
-          totalRevenue: totalRevenue, // REAL revenue from restaurants
-          isActive: true,
-        };
-        
-        setPlatform(realPlatformData);
-        console.log(`✅ Platform data loaded with REAL data: ${Array.isArray(realRestaurants) ? realRestaurants.length : 0} restaurants, £${totalRevenue} total revenue`);
-        
-        // Set first restaurant as default if exists
-        if (businesses.length > 0) {
-          setBusiness(businesses[0]);
-        }
-        
-        // Store platform data
-        await AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(updatedUser));
-        await AsyncStorage.setItem('platform_data', JSON.stringify(realPlatformData));
-        await AsyncStorage.setItem('managed_restaurants', JSON.stringify(businesses));
-        if (businesses.length > 0) {
-          await AsyncStorage.setItem(STORAGE_KEYS.BUSINESS, JSON.stringify(businesses[0]));
-        }
-        } catch (platformError) {
-          console.error('❌ Error loading platform owner data:', platformError);
-          // Fallback to empty state but still allow login
-          setManagedRestaurants([]);
-          setPlatform({
-            id: 'platform1',
-            name: 'Fynlo POS Platform',
-            ownerId: updatedUser.id,
-            createdDate: new Date(2024, 0, 1),
-            totalRestaurants: 0,
-            totalRevenue: 0,
-            isActive: true,
-          });
-        }
-      } else {
-        // Regular restaurant user
-        const businessData = MOCK_RESTAURANTS.find(r => r.id === updatedUser.businessId) || MOCK_RESTAURANTS[0];
-        setBusiness(businessData);
-        
-        // Store business data
-        await AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(updatedUser));
-        await AsyncStorage.setItem(STORAGE_KEYS.BUSINESS, JSON.stringify(businessData));
-      }
-
-      await AsyncStorage.setItem(STORAGE_KEYS.REMEMBER_ME, rememberMe.toString());
-
-      return true;
-    } catch (error) {
-      console.error('Error signing in:', error);
-      return false;
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const signUp = async (
-    userData: Partial<User>, 
-    businessData: Partial<Business>, 
-    password: string
+    userData: Partial<User>,
+    businessData: Partial<Business>,
+    password: string,
   ): Promise<boolean> => {
     try {
       setIsLoading(true);
@@ -441,7 +197,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       await new Promise(resolve => setTimeout(resolve, 1500));
 
       // Check if email already exists
-      const existingUser = MOCK_USERS.find(u => u.email.toLowerCase() === userData.email?.toLowerCase());
+      const existingUser = MOCK_USERS.find(
+        u => u.email.toLowerCase() === userData.email?.toLowerCase(),
+      );
       if (existingUser) {
         return false;
       }
@@ -500,7 +258,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const signOut = async (): Promise<void> => {
     try {
       setIsLoading(true);
-      
+
       // Clear stored data including JWT token
       await Promise.all([
         AsyncStorage.removeItem(STORAGE_KEYS.USER),
@@ -565,7 +323,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       // Check if email exists
       const userExists = MOCK_CREDENTIALS.find(
-        cred => cred.email.toLowerCase() === email.toLowerCase()
+        cred => cred.email.toLowerCase() === email.toLowerCase(),
       );
 
       return !!userExists;
@@ -579,27 +337,31 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       if (user?.role === 'platform_owner') {
         console.log('🏢 Loading REAL platform data for platform owner');
-        
+
         // Load REAL restaurant data first
         const restaurantDataService = RestaurantDataService.getInstance();
-        const realRestaurants = await restaurantDataService.getPlatformRestaurants('platform_owner_1');
+        const realRestaurants = await restaurantDataService.getPlatformRestaurants(
+          'platform_owner_1',
+        );
         const businesses = realRestaurants.map(r => restaurantDataService.toBusinessType(r));
         setManagedRestaurants(businesses);
-        
+
         // Generate REAL platform data based on actual restaurants
         const totalRevenue = realRestaurants.reduce((sum, r) => sum + (r.monthlyRevenue || 0), 0);
         const realPlatformData: Platform = {
           id: 'platform1',
           name: 'Fynlo POS Platform',
-          ownerId: 'platform_owner_1', 
+          ownerId: 'platform_owner_1',
           createdDate: new Date(2024, 0, 1),
           totalRestaurants: realRestaurants.length, // REAL count from backend
           totalRevenue: totalRevenue, // REAL revenue from backend
           isActive: true,
         };
-        
+
         setPlatform(realPlatformData);
-        console.log(`✅ Platform data loaded: ${realRestaurants.length} restaurants, £${totalRevenue} total revenue`);
+        console.log(
+          `✅ Platform data loaded: ${realRestaurants.length} restaurants, £${totalRevenue} total revenue`,
+        );
       }
     } catch (error) {
       console.error('Error loading platform data:', error);
@@ -610,7 +372,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       if (user?.role === 'platform_owner') {
         console.log(`🔄 Switching to restaurant: ${restaurantId}`);
-        
+
         // Find restaurant in the REAL managed restaurants data
         const restaurant = managedRestaurants.find(r => r.id === restaurantId);
         if (restaurant) {
@@ -630,17 +392,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => {
     if (user?.role === 'platform_owner') {
       const restaurantDataService = RestaurantDataService.getInstance();
-      
+
       // Subscribe to platform restaurants changes
       const unsubscribe = restaurantDataService.subscribeToPlatformRestaurants(
         'platform_owner_1',
-        (updatedRestaurants) => {
+        updatedRestaurants => {
           console.log('🔄 Platform restaurants updated in real-time:', updatedRestaurants.length);
           const businesses = updatedRestaurants.map(r => restaurantDataService.toBusinessType(r));
           setManagedRestaurants(businesses);
-        }
+        },
       );
-      
+
       return () => {
         unsubscribe();
       };
@@ -667,11 +429,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     switchRestaurant,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = (): AuthContextType => {

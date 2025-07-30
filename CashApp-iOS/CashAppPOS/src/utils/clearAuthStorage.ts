@@ -6,8 +6,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
  */
 export async function clearAuthStorage() {
   try {
-    console.log('🧹 Clearing auth storage...');
-
     // Clear auth-related keys
     await AsyncStorage.removeItem('auth-storage');
     await AsyncStorage.removeItem('userInfo');
@@ -27,9 +25,5 @@ export async function clearAuthStorage() {
     if (authKeys.length > 0) {
       await AsyncStorage.multiRemove(authKeys);
     }
-
-    console.log('✅ Auth storage cleared successfully');
-  } catch (error) {
-    console.error('❌ Error clearing auth storage:', error);
-  }
+  } catch (error) {}
 }
