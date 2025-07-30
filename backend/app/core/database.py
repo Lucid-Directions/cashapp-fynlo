@@ -61,17 +61,29 @@ if "postgresql" in database_url:
         # For non-DigitalOcean databases, add statement timeout
         connect_args["options"] = "-c statement_timeout=30000"  # 30 second statement timeout
 
+# Import security config
+from app.core.database_security import DatabaseSecurityConfig
+
+# Merge security settings with existing connect_args
+secure_engine_args = DatabaseSecurityConfig.get_secure_engine_args()
+secure_connect_args = secure_engine_args.pop('connect_args', {})
+# Merge with existing connect_args
+for key, value in connect_args.items():
+    if key not in secure_connect_args:
+        secure_connect_args[key] = value
+
 engine = create_engine(
     database_url,
-    echo=settings.DEBUG,
+    echo=settings.DEBUG and settings.ENVIRONMENT != "production",  # Never echo in production
     poolclass=QueuePool,
-    pool_size=20,          # Number of persistent connections
-    max_overflow=10,       # Maximum overflow connections above pool_size
-    pool_recycle=3600,     # Recycle connections after 1 hour (avoid stale connections)
-    pool_pre_ping=True,    # Test connections before using (handles network issues)
-    pool_timeout=30,       # Timeout for getting connection from pool
-    pool_reset_on_return='rollback',  # Reset session on return to pool
-    connect_args=connect_args
+    pool_size=secure_engine_args.get('pool_size', 20),
+    max_overflow=secure_engine_args.get('max_overflow', 10),
+    pool_recycle=secure_engine_args.get('pool_recycle', 3600),
+    pool_pre_ping=secure_engine_args.get('pool_pre_ping', True),
+    pool_timeout=30,
+    pool_reset_on_return='rollback',
+    connect_args=secure_connect_args,
+    future=secure_engine_args.get('future', True)
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -505,5 +517,15 @@ def get_db_with_rls(user_id: Optional[str] = None, restaurant_id: Optional[str] 
         db.close()
 
 async def init_db():
-    """Initialize database tables"""
+    """Initialize database tables and apply security measures"""
+    # Create tables
     Base.metadata.create_all(bind=engine)
+    
+    # Apply database security hardening
+    try:
+        from app.core.database_security import apply_all_security_measures
+        apply_all_security_measures(engine)
+        logger.info("Database security measures applied")
+    except Exception as e:
+        logger.warning(f"Could not apply all security measures: {e}")
+        # Continue without failing startup
