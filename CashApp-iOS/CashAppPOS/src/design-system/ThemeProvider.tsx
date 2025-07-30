@@ -150,7 +150,9 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   // Apply color theme to base theme
   const applyColorTheme = (baseTheme: Theme, colorThemeId: ColorTheme): Theme => {
     const colorOption = colorThemeOptions.find(option => option.id === colorThemeId);
-    if (!colorOption) return baseTheme;
+    if (!colorOption) {
+      return baseTheme;
+    }
 
     return {
       ...baseTheme,
