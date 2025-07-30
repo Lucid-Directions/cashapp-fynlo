@@ -189,6 +189,7 @@ describe('POSScreen', () => {
     // Initial state: cart is empty
     let cartIconComponent = UNSAFE_getByProps({ testID: 'shopping-cart-button' });
     let internalIcon = cartIconComponent.findAllByType(
+// eslint-disable-next-line @typescript-eslint/no-var-requires
       require('react-native-vector-icons/MaterialIcons').default,
     )[0];
     // Check for theme.colors.primary (Fynlo orange) - exact color depends on your theme setup
@@ -213,6 +214,7 @@ describe('POSScreen', () => {
 
     cartIconComponent = UNSAFE_getByProps({ testID: 'shopping-cart-button' });
     internalIcon = cartIconComponent.findAllByType(
+// eslint-disable-next-line @typescript-eslint/no-var-requires
       require('react-native-vector-icons/MaterialIcons').default,
     )[0];
     expect(internalIcon.props.color).toBe('#FF3B30'); // Red when not empty

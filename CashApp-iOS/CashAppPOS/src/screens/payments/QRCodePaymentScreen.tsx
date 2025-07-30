@@ -340,6 +340,7 @@ const QRCodePaymentScreen: React.FC = () => {
       padding: 20,
       borderRadius: 16,
       marginBottom: 30,
+// eslint-disable-next-line @typescript-eslint/no-var-requires
       ...require('../../utils/ShadowUtils').createOptimizedShadow('medium', 'white'),
     },
     loadingContainer: {

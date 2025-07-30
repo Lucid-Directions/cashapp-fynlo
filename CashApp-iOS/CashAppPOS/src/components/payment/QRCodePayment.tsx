@@ -455,6 +455,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     marginBottom: 16,
+// eslint-disable-next-line @typescript-eslint/no-var-requires
     ...require('../../utils/ShadowUtils').createOptimizedShadow('medium', Colors.white),
   },
   qrInstructions: {

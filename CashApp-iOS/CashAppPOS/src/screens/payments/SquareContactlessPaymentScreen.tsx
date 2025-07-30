@@ -22,6 +22,7 @@ import SquareService from '../../services/SquareService';
 let SQIPApplePay: unknown;
 let SQIPGooglePay: unknown;
 try {
+// eslint-disable-next-line @typescript-eslint/no-var-requires
   const SquareSDK = require('react-native-square-in-app-payments');
   SQIPApplePay = SquareSDK.SQIPApplePay;
   SQIPGooglePay = SquareSDK.SQIPGooglePay;

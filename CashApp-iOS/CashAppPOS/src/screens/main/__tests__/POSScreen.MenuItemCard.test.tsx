@@ -19,7 +19,9 @@ jest.mock('@react-native-community/netinfo', () => ({
 // Mock QuantityPill component
 jest.mock('../../../components/inputs', () => ({
   QuantityPill: ({ quantity, _onIncrease, onDecrease }: _unknown) => {
+// eslint-disable-next-line @typescript-eslint/no-var-requires
     const React = require('react');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
     const { View, _Text, TouchableOpacity } = require('react-native');
     return React.createElement(__View, { testID: 'quantity-pill' }, [
       React.createElement(
