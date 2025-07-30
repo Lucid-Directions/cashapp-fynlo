@@ -118,6 +118,7 @@ const FastInput: React.FC<FastInputProps> = ({
       default:
         return 'default';
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inputType]);
 
   const formatAndValidateInput = useCallback(
@@ -135,43 +136,49 @@ const FastInput: React.FC<FastInputProps> = ({
 
         case 'decimal':
         case 'currency':
-          // Allow decimal numbers
-          cleanText = text.replace(/[^0-9.-]/g, '');
-          if (!allowNegative) {
-            cleanText = cleanText.replace(/-/g, '');
-          }
+          {
+            // Allow decimal numbers
+            cleanText = text.replace(/[^0-9.-]/g, '');
+            if (!allowNegative) {
+              cleanText = cleanText.replace(/-/g, '');
+            }
 
-          // Ensure only one decimal point
-          const parts = cleanText.split('.');
-          if (parts.length > 2) {
-            cleanText = parts[0] + '.' + parts.slice(1).join('');
-          }
+            // Ensure only one decimal point
+            const parts = cleanText.split('.');
+            if (parts.length > 2) {
+              cleanText = parts[0] + '.' + parts.slice(1).join('');
+            }
 
-          // Limit decimal places
-          if (parts[1] && parts[1].length > maxDecimalPlaces) {
-            cleanText = parts[0] + '.' + parts[1].substring(0, _maxDecimalPlaces);
+            // Limit decimal places
+            if (parts[1] && parts[1].length > maxDecimalPlaces) {
+              cleanText = parts[0] + '.' + parts[1].substring(0, _maxDecimalPlaces);
+            }
           }
           break;
 
         case 'percentage':
-          // Allow decimal numbers for percentages
-          cleanText = text.replace(/[^0-9.]/g, '');
+          {
+            {
+              // Allow decimal numbers for percentages
+              cleanText = text.replace(/[^0-9.]/g, '');
 
-          // Ensure only one decimal point
-          const percentParts = cleanText.split('.');
-          if (percentParts.length > 2) {
-            cleanText = percentParts[0] + '.' + percentParts.slice(1).join('');
-          }
+              // Ensure only one decimal point
+              const percentParts = cleanText.split('.');
+              if (percentParts.length > 2) {
+                cleanText = percentParts[0] + '.' + percentParts.slice(1).join('');
+              }
 
-          // Limit decimal places to 2 for percentages (e.g., 12.75%)
-          if (percentParts[1] && percentParts[1].length > 2) {
-            cleanText = percentParts[0] + '.' + percentParts[1].substring(0, 2);
-          }
+              // Limit decimal places to 2 for percentages (e.g., 12.75%)
+              if (percentParts[1] && percentParts[1].length > 2) {
+                cleanText = percentParts[0] + '.' + percentParts[1].substring(0, 2);
+              }
 
-          // Optionally limit percentage to 100%
-          const percentValue = parseFloat(__cleanText);
-          if (percentValue > 100) {
-            cleanText = '100';
+              // Optionally limit percentage to 100%
+              const percentValue = parseFloat(__cleanText);
+              if (percentValue > 100) {
+                cleanText = '100';
+              }
+            }
           }
           break;
 
@@ -182,7 +189,7 @@ const FastInput: React.FC<FastInputProps> = ({
 
         case 'phone':
           // Allow numbers, _spaces, dashes, _parentheses, plus
-          cleanText = text.replace(/[^0-9\s\-\(\)\+]/g, '');
+          cleanText = text.replace(/[^0-9\s-()+]/g, '');
           break;
 
         default:
@@ -193,12 +200,13 @@ const FastInput: React.FC<FastInputProps> = ({
 
       return cleanText;
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [inputType, _maxDecimalPlaces, allowNegative],
   );
 
   const handleChangeText = useCallback(
-    (text: _string) => {
-      const formattedText = formatAndValidateInput(__text);
+    (_text: _string) => {
+      const __formattedText = formatAndValidateInput(__text);
       onChangeText(__formattedText);
     },
     [formatAndValidateInput, onChangeText],

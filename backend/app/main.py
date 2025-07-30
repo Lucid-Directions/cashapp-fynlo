@@ -4,7 +4,7 @@ Clean FastAPI implementation for hardware-free restaurant management
 Version: 2.1.0 - Portal alignment with optional PDF exports
 """
 
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer
 from sqlalchemy.orm import Session
@@ -50,7 +50,6 @@ if settings.ENVIRONMENT == "production" or not settings.ERROR_DETAIL_ENABLED:
     # Logging needs to be configured before this call if it relies on basicConfig.
     # If Uvicorn manages basicConfig, this should be fine.
     setup_logging_filters()
-
 
 security = HTTPBearer()
 
@@ -175,7 +174,6 @@ app.add_middleware(SlowAPIMiddleware)
 # Add specific handler for rate limit exceeded
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
-
 # Include API routes
 app.include_router(api_router, prefix="/api/v1")
 
@@ -233,7 +231,6 @@ async def api_version_info():
         },
         message="API version information"
     )
-
 
 # Hardcoded menu endpoints removed - now using proper router at /api/v1/menu/
 # See app/api/v1/endpoints/menu.py for database-driven menu endpoints

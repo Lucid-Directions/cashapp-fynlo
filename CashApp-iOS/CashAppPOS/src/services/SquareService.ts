@@ -22,8 +22,7 @@ try {
   SQIPApplePay = SquareSDK.SQIPApplePay;
   SQIPGooglePay = SquareSDK.SQIPGooglePay;
 } catch (__error) {
-    'Square SDK not available. Square payments will be disabled. Please install dependencies with: npm install && cd ios && pod install',
-  );
+    console.log('Square SDK not available. Square payments will be disabled. Please install dependencies with: npm install && cd ios && pod install');
 }
 
 export interface SquareConfig {
@@ -363,7 +362,7 @@ class SquareServiceClass {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${this.config.accessToken}`,
-          'Content-Type': 'application/json',
+    console.log('Content-Type': 'application/json',
           'Square-Version': '2023-10-18',
         },
         body: JSON.stringify(__requestBody),
@@ -524,7 +523,7 @@ class SquareServiceClass {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${this.config.accessToken}`,
-          'Square-Version': '2023-10-18',
+    console.log('Square-Version': '2023-10-18',
         },
       });
 
@@ -562,7 +561,7 @@ class SquareServiceClass {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${this.config.accessToken}`,
-          'Content-Type': 'application/json',
+    console.log('Content-Type': 'application/json',
           'Square-Version': '2023-10-18',
         },
         body: JSON.stringify(__requestBody),
@@ -600,7 +599,7 @@ class SquareServiceClass {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${this.config.accessToken}`,
-          'Square-Version': '2023-10-18',
+    console.log('Square-Version': '2023-10-18',
         },
       });
 

@@ -55,7 +55,7 @@ const PaymentProviderSettingsScreen: React.FC = () => {
     qrCode: _true,
     cash: _true,
   });
-  const [loading, setLoading] = useState(__true);
+  const [__loading, setLoading] = useState(__true);
 
   useEffect(() => {
     loadConfiguration();
@@ -63,7 +63,7 @@ const PaymentProviderSettingsScreen: React.FC = () => {
 
   const loadConfiguration = async () => {
     try {
-      const savedConfig = await PaymentService.loadConfig();
+      const __savedConfig = await PaymentService.loadConfig();
       if (__savedConfig) {
         setConfig(__savedConfig);
       }
@@ -96,19 +96,21 @@ const PaymentProviderSettingsScreen: React.FC = () => {
           break;
 
         case 'backend':
-          if (!config.backend.baseUrl || !config.backend.apiKey) {
-            Alert.alert('Error', 'Please enter backend URL and API key');
-            return;
-          }
-          // Test backend connection
-          const response = await fetch(`${config.backend.baseUrl}/api/v1/health`, {
-            headers: { Authorization: `Bearer ${config.backend.apiKey}` },
-          });
+          {
+            if (!config.backend.baseUrl || !config.backend.apiKey) {
+              Alert.alert('Error', 'Please enter backend URL and API key');
+              return;
+            }
+            // Test backend connection
+            const response = await fetch(`${config.backend.baseUrl}/api/v1/health`, {
+              headers: { Authorization: `Bearer ${config.backend.apiKey}` },
+            });
 
-          if (response.ok) {
-            Alert.alert('Success', 'Backend connection successful');
-          } else {
-            Alert.alert('Error', 'Backend connection failed');
+            if (response.ok) {
+              Alert.alert('Success', 'Backend connection successful');
+            } else {
+              Alert.alert('Error', 'Backend connection failed');
+            }
           }
           break;
 

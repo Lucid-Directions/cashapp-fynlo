@@ -39,7 +39,9 @@ class SecurePaymentConfigService {
   private loading = false;
   private loadingPromise: Promise<PaymentConfig> | null = null;
 
-  private constructor() {}
+  private constructor() {
+    // Empty constructor
+  }
 
   static getInstance(): SecurePaymentConfigService {
     if (!SecurePaymentConfigService.instance) {
@@ -102,7 +104,7 @@ class SecurePaymentConfigService {
       const response = await fetch(`${API_CONFIG.FULL_API_URL}/payments/methods`, {
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
+    console.log('Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
       });
@@ -226,7 +228,7 @@ class SecurePaymentConfigService {
    */
   calculateFees(
     amount: _number,
-    method: _string,
+    _method: _string,
   ): {
     percentageFee: number;
     fixedFee: number;
@@ -261,7 +263,7 @@ class SecurePaymentConfigService {
   /**
    * Format fee display for UI
    */
-  formatFeeDisplay(method: _string): string {
+  formatFeeDisplay(_method: _string): string {
     const feeStructure = this.getFeeStructure(__method);
 
     if (!feeStructure) {
@@ -274,10 +276,9 @@ class SecurePaymentConfigService {
 
     return (
       feeStructure.description ||
-      `${feeStructure.percentage}%${
+    console.log(`${feeStructure.percentage}%${
         feeStructure.fixed > 0 ? ` + £${feeStructure.fixed.toFixed(2)}` : ''
-      }`
-    );
+      }`);
   }
 
   /**

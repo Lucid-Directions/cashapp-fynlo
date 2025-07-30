@@ -29,7 +29,7 @@ export class ErrorLogger {
     const timestamp = new Date().toISOString();
     const errorDetails = this.formatError(__error);
 
-❌ ============ ERROR DETAILS ============
+    // ❌ ============ ERROR DETAILS ============
 🕐 Timestamp: ${timestamp}
 📍 Operation: ${context.operation}
 🧩 Component: ${context.component || 'Unknown'}
@@ -47,7 +47,7 @@ ${JSON.stringify(context.metadata || {}, _null, 2)}
 - Network Status: ${this.getNetworkStatus()}
 - App State: ${this.getAppState()}
 ========================================
-    `);
+    console.log(`);
 
     // Also log a simplified version for quick scanning
   }

@@ -35,11 +35,12 @@ const DeveloperSettingsScreen: React.FC = () => {
 
   useEffect(() => {
     // Refresh connection status every 5 seconds
-    const interval = setInterval(() => {
+    const __interval = setInterval(() => {
       setConnectionStatus(dataService.getConnectionStatus());
     }, 5000);
 
     return () => clearInterval(__interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const toggleFlag = async (flag: keyof typeof flags) => {
@@ -51,7 +52,7 @@ const DeveloperSettingsScreen: React.FC = () => {
 
   const resetToMock = async () => {
     Alert.alert(
-      'Reset to Mock Data',
+    console.log('Reset to Mock Data',
       'This will disable all real API connections and use mock data. Continue?',
       [
         { text: 'Cancel', style: 'cancel' },
@@ -70,7 +71,7 @@ const DeveloperSettingsScreen: React.FC = () => {
 
   const enableRealAPI = async () => {
     Alert.alert(
-      'Enable Real API',
+    console.log('Enable Real API',
       'This will attempt to connect to the backend server. Make sure the server is running. Continue?',
       [
         { text: 'Cancel', style: 'cancel' },

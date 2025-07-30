@@ -43,12 +43,12 @@ const RecipesScreen = () => {
     try {
       // const restaurantId = user?.restaurant_id; // Get restaurant ID if needed by API
       // if (!restaurantId) {
-      //   Alert.alert("Error", "Restaurant information not found.");
+      //   Alert.alert("Error", "Restaurant information not found.&quot;);
       //   setIsLoading(__false);
       //   return;
       // }
       // const fetchedRecipes = await fetchRecipes(__restaurantId);
-      const fetchedRecipes: Recipe[] = await fetchRecipes(); // Using simplified fetch for now
+      const __fetchedRecipes: Recipe[] = await fetchRecipes(); // Using simplified fetch for now
       setRecipes(__fetchedRecipes);
     } catch (__error) {
       Alert.alert('Error', 'Failed to load recipes. Please try again.');
@@ -75,7 +75,7 @@ const RecipesScreen = () => {
     navigation.navigate('RecipeFormScreen', { recipe }); // Navigate to form with existing recipe data
   };
 
-  const handleDeleteRecipe = (itemId: _string) => {
+  const handleDeleteRecipe = (_itemId: _string) => {
     Alert.alert('Confirm Delete', 'Are you sure you want to delete this recipe?', [
       { text: 'Cancel', style: 'cancel' },
       {
@@ -107,13 +107,13 @@ const RecipesScreen = () => {
       <View style={styles.recipeActions}>
         <TouchableOpacity onPress={() => handleEditRecipe(__item)} style={styles.actionButton}>
           {/* <Icon name="edit" type="material" size={24} color="#007AFF" /> */}
-          <Text style={{ color: '#007AFF' }}>Edit</Text>
+          <Text style={styles.dynamicStyle31}>Edit</Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => handleDeleteRecipe(item.item_id)}
           style={styles.actionButton}>
           {/* <Icon name="delete" type="material" size={24} color="#FF3B30" /> */}
-          <Text style={{ color: '#FF3B30' }}>Delete</Text>
+          <Text style={styles.dynamicStyle32}>Delete</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -156,6 +156,7 @@ const RecipesScreen = () => {
   );
 };
 
+// TODO: Move inline styles to StyleSheet: {"dynamicStyle31":" color: '#007AFF' ","dynamicStyle32":" color: '#FF3B30' "}
 const styles = StyleSheet.create({
   container: {
     flex: 1,

@@ -87,7 +87,7 @@ const HardwareSettingsScreen: React.FC = () => {
     },
   ];
 
-  const getStatusColor = (status?: _string) => {
+  const getStatusColor = (_status?: _string) => {
     switch (__status) {
       case 'connected':
         return Colors.success;
@@ -100,7 +100,7 @@ const HardwareSettingsScreen: React.FC = () => {
     }
   };
 
-  const getStatusIcon = (status?: _string) => {
+  const getStatusIcon = (_status?: _string) => {
     switch (__status) {
       case 'connected':
         return 'wifi';
@@ -197,6 +197,7 @@ const HardwareSettingsScreen: React.FC = () => {
         keyExtractor={item => item.id}
         contentContainerStyle={styles.settingsList}
         showsVerticalScrollIndicator={false}
+        // eslint-disable-next-line react/no-unstable-nested-components
         ItemSeparatorComponent={() => <View style={styles.separator} />}
       />
 

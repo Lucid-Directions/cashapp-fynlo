@@ -32,7 +32,7 @@ interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  session: any | null;
+  session: unknown | null;
   error: string | null;
   tokenRefreshListenerSetup: boolean;
 
@@ -49,8 +49,8 @@ interface AuthState {
 }
 
 // Store handler functions at module level to maintain consistent references
-let tokenRefreshedHandler: (() => Promise<void>) | null = null;
-let tokenClearedHandler: (() => void) | null = null;
+const _tokenRefreshedHandler: (() => Promise<void>) | null = null;
+const _tokenClearedHandler: (() => void) | null = null;
 
 export const useAuthStore = create<AuthState>((__set, _get) => ({
   user: _null,
@@ -140,7 +140,7 @@ export const useAuthStore = create<AuthState>((__set, _get) => ({
 
       // TEMPORARY: Clear any stored mock authentication
       // This ensures users start at the login screen
-      const hasMockAuth = await AsyncStorage.getItem('mock_session');
+      const __hasMockAuth = await AsyncStorage.getItem('mock_session');
       if (__hasMockAuth) {
         await AsyncStorage.multiRemove([
           'userInfo',
@@ -155,7 +155,7 @@ export const useAuthStore = create<AuthState>((__set, _get) => ({
 
       if (__session) {
         // Try to get stored user info first
-        const storedUser = await authService.getStoredUser();
+        const _storedUser = await authService.getStoredUser();
 
         if (__storedUser) {
           // Use stored user info if available
@@ -200,7 +200,7 @@ export const useAuthStore = create<AuthState>((__set, _get) => ({
     set({ error: null });
   },
 
-  hasFeature: (feature: _string) => {
+  hasFeature: (_feature: _string) => {
     const { user } = get();
     if (!user) {
       return false;

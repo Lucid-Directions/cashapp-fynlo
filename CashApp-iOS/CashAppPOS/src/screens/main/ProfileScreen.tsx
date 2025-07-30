@@ -125,6 +125,7 @@ const ProfileScreenContent: React.FC = () => {
     }
   };
 
+  // eslint-disable-next-line react/no-unstable-nested-components
   const InfoCard = ({ title, _value, icon }: { title: string; value: string; icon: string }) => (
     <View style={styles.infoCard}>
       <View style={styles.infoIcon}>
@@ -378,250 +379,28 @@ const ProfileScreenContent: React.FC = () => {
   );
 };
 
-const createStyles = (theme: _unknown) =>
+const __createStyles = (theme: _unknown) =>
   StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: theme.colors.background,
-    },
-    header: {
-      backgroundColor: theme.colors.primary,
-      paddingHorizontal: 20,
-      paddingVertical: 15,
-      elevation: 4,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.1,
       shadowRadius: 4,
       flexDirection: 'row',
       justifyContent: 'space-between',
-      alignItems: 'center',
+      alignItems: 'center'
     },
-    headerLeft: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      flex: 1,
-    },
-    headerButton: {
-      padding: 8,
-      marginRight: 12,
-    },
-    headerTitle: {
-      color: theme.colors.white,
-      fontSize: 20,
-      fontWeight: 'bold',
-    },
-    content: {
-      flex: 1,
-      padding: 20,
-    },
-    profileHeader: {
-      alignItems: 'center',
-      paddingVertical: 30,
-    },
-    profileLogo: {
-      marginBottom: 16,
-    },
-    avatar: {
-      width: 100,
-      height: 100,
-      borderRadius: 50,
-      backgroundColor: theme.colors.secondary,
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginBottom: 15,
-    },
-    userName: {
-      fontSize: 24,
-      fontWeight: 'bold',
-      color: theme.colors.text,
-      marginBottom: 5,
-    },
-    userRole: {
-      fontSize: 14,
-      color: theme.colors.lightText,
-      fontWeight: '600',
-    },
-    section: {
-      marginBottom: 30,
-    },
-    sectionTitle: {
-      fontSize: 18,
-      fontWeight: 'bold',
-      color: theme.colors.text,
-      marginBottom: 15,
-    },
-    infoContainer: {
-      backgroundColor: theme.colors.white,
-      borderRadius: 12,
-      elevation: 2,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 1 },
       shadowOpacity: 0.1,
       shadowRadius: 2,
     },
-    infoCard: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      padding: 20,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.colors.lightGray,
-    },
-    infoIcon: {
-      marginRight: 15,
-    },
-    infoContent: {
-      flex: 1,
-    },
-    infoTitle: {
-      fontSize: 14,
-      color: theme.colors.lightText,
-      marginBottom: 4,
-    },
-    infoValue: {
-      fontSize: 16,
-      fontWeight: '600',
-      color: theme.colors.text,
-    },
-    sessionCard: {
-      backgroundColor: theme.colors.white,
-      borderRadius: 12,
-      padding: 20,
-      elevation: 2,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 1 },
       shadowOpacity: 0.1,
       shadowRadius: 2,
     },
-    sessionHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: 15,
-    },
-    sessionTitle: {
-      fontSize: 18,
-      fontWeight: 'bold',
-      color: theme.colors.text,
-      marginLeft: 10,
-    },
-    sessionInfo: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-    },
-    sessionItem: {
-      alignItems: 'center',
-    },
-    sessionLabel: {
-      fontSize: 14,
-      color: theme.colors.lightText,
-      marginBottom: 4,
-    },
-    sessionValue: {
-      fontSize: 16,
-      fontWeight: 'bold',
-      color: theme.colors.text,
-    },
-    actionButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: theme.colors.white,
-      borderRadius: 12,
-      padding: 20,
-      marginBottom: 15,
-      elevation: 2,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 1 },
       shadowOpacity: 0.1,
       shadowRadius: 2,
-    },
-    actionButtonText: {
-      fontSize: 16,
-      fontWeight: '600',
-      color: theme.colors.text,
-      marginLeft: 15,
-      flex: 1,
     },
     // Modal Styles
-    modalOverlay: {
-      flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    modal: {
-      backgroundColor: theme.colors.white,
-      borderRadius: 16,
-      width: '90%',
-      maxHeight: '80%',
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 10 },
       shadowOpacity: 0.1,
       shadowRadius: 20,
       elevation: 10,
-    },
-    modalHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      padding: 20,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.colors.lightGray,
-    },
-    modalTitle: {
-      fontSize: 20,
-      fontWeight: '600',
-      color: theme.colors.text,
-    },
-    modalContent: {
-      padding: 20,
-    },
-    formGroup: {
-      marginBottom: 20,
-    },
-    formLabel: {
-      fontSize: 16,
-      fontWeight: '600',
-      color: theme.colors.text,
-      marginBottom: 8,
-    },
-    formInput: {
-      borderWidth: 1,
-      borderColor: theme.colors.lightGray,
-      borderRadius: 8,
-      paddingHorizontal: 16,
-      paddingVertical: 12,
-      fontSize: 16,
-      color: theme.colors.text,
-      backgroundColor: theme.colors.white,
-    },
-    modalActions: {
-      flexDirection: 'row',
-      gap: 12,
-      marginTop: 24,
-      paddingBottom: 20,
-    },
-    modalButton: {
-      flex: 1,
-      paddingVertical: 14,
-      borderRadius: 8,
-      alignItems: 'center',
-    },
-    cancelButton: {
-      backgroundColor: theme.colors.lightGray,
-    },
-    saveButton: {
-      backgroundColor: theme.colors.primary,
-    },
-    cancelButtonText: {
-      color: theme.colors.text,
-      fontSize: 16,
-      fontWeight: '600',
-    },
-    saveButtonText: {
-      color: theme.colors.white,
-      fontSize: 16,
-      fontWeight: '600',
-    },
+    }
   });
 
 const ProfileScreen: React.FC = () => {

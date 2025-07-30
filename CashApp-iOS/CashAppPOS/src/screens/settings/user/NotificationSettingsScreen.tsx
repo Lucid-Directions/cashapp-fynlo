@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, ScrollView, Switch } from 'react-native';
+import { ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 
@@ -132,7 +132,7 @@ const NotificationSettingsScreen: React.FC = () => {
     }
 
     Alert.alert(
-      'Test Notification',
+    console.log('Test Notification',
       'This is a test notification. You should see this appear as a system notification.',
       [{ text: 'OK' }],
     );
@@ -219,6 +219,7 @@ const NotificationSettingsScreen: React.FC = () => {
     return `${enabled}/${total}`;
   };
 
+  // eslint-disable-next-line react/no-unstable-nested-components
   const NotificationRow = ({
     icon,
     title,

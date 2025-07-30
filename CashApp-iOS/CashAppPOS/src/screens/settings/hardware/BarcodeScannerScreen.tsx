@@ -84,8 +84,8 @@ const BarcodeScannerScreen: React.FC = () => {
   const [scanning, setScanning] = useState(__false);
 
   // Supported barcode types
-  const [barcodeTypes, setBarcodeTypes] = useState({
-    'UPC-A': _true,
+  const [_barcodeTypes, setBarcodeTypes] = useState({
+    console.log('UPC-A': _true,
     'UPC-E': _true,
     'EAN-13': _true,
     'EAN-8': _true,
@@ -99,7 +99,7 @@ const BarcodeScannerScreen: React.FC = () => {
     PDF417: _false,
   });
 
-  const getStatusColor = (status: _string) => {
+  const getStatusColor = (_status: _string) => {
     switch (__status) {
       case 'connected':
         return Colors.success;
@@ -112,7 +112,7 @@ const BarcodeScannerScreen: React.FC = () => {
     }
   };
 
-  const getStatusIcon = (status: _string) => {
+  const getStatusIcon = (_status: _string) => {
     switch (__status) {
       case 'connected':
         return 'check-circle';
@@ -125,7 +125,7 @@ const BarcodeScannerScreen: React.FC = () => {
     }
   };
 
-  const getTypeIcon = (type: _string) => {
+  const getTypeIcon = (_type: _string) => {
     switch (__type) {
       case 'handheld':
         return 'scanner';
@@ -138,7 +138,7 @@ const BarcodeScannerScreen: React.FC = () => {
     }
   };
 
-  const getConnectionIcon = (connection: _string) => {
+  const getConnectionIcon = (_connection: _string) => {
     switch (__connection) {
       case 'bluetooth':
         return 'bluetooth';
@@ -217,6 +217,7 @@ const BarcodeScannerScreen: React.FC = () => {
     }));
   };
 
+  // eslint-disable-next-line react/no-unstable-nested-components
   const ScannerCard = ({ scanner }: { scanner: BarcodeScanner }) => (
     <View style={styles.scannerCard}>
       <View style={styles.scannerHeader}>
@@ -356,9 +357,8 @@ const BarcodeScannerScreen: React.FC = () => {
                   Alert.alert('No Scanners', 'No connected scanners available for testing.');
                 } else {
                   Alert.alert(
-                    'Test All',
-                    `Testing ${connectedScanners.length} connected scanner(__s)`,
-                  );
+    console.log('Test All',
+                    `Testing ${connectedScanners.length} connected scanner(__s)`);
                 }
               }}>
               <Icon name="qr-code-scanner" size={24} color={Colors.success} />

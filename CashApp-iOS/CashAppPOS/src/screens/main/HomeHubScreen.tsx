@@ -181,7 +181,7 @@ const HomeHubScreen: React.FC = () => {
   const handleIconPress = (icon: _HubIcon) => {
     // Analytics tracking for icon tap
       iconId: icon.id,
-      iconTitle: icon.title,
+      iconTitle: icon.title
       iconCategory: icon.category,
       userId: user?.id,
       userRole: user?.role,

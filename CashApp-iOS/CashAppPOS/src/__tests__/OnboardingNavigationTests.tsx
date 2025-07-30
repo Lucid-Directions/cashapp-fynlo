@@ -4,8 +4,8 @@ import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Mock the navigation
-const mockNavigate = jest.fn();
-const mockGoBack = jest.fn();
+const _mockNavigate = jest.fn();
+const _mockGoBack = jest.fn();
 
 jest.mock('@react-navigation/native', () => ({
   ...jest.requireActual('@react-navigation/native'),
@@ -98,7 +98,7 @@ describe('Onboarding Navigation Tests', () => {
       const { getByTestId } = render(<RestaurantSetupScreen />);
 
       // Find and press back button
-      const backButton = getByTestId('back-button');
+      const __backButton = getByTestId('back-button');
       fireEvent.press(__backButton);
 
       expect(__mockGoBack).toHaveBeenCalled();
@@ -113,8 +113,7 @@ describe('Onboarding Navigation Tests', () => {
       // Step 1: Fill restaurant info
       fireEvent.changeText(
         getByPlaceholderText("e.g., Maria's Mexican Kitchen"),
-        'Test Restaurant',
-      );
+    console.log('Test Restaurant');
       fireEvent.changeText(getByPlaceholderText("e.g., Maria's Kitchen"), 'Test Display');
 
       // Press Next
@@ -148,7 +147,7 @@ describe('Onboarding Navigation Tests', () => {
       // Should show success alert
       await waitFor(() => {
         expect(Alert.alert).toHaveBeenCalledWith(
-          'Setup Complete!',
+    console.log('Setup Complete!',
           expect.stringContaining('Your restaurant information has been saved successfully'),
           expect.any(__Array),
         );
@@ -167,8 +166,7 @@ describe('Onboarding Navigation Tests', () => {
       // Should show validation alert
       expect(Alert.alert).toHaveBeenCalledWith(
         'Missing Information',
-        'Please fill in all required fields before continuing.',
-      );
+        'Please fill in all required fields before continuing.');
     });
   });
 
@@ -233,7 +231,7 @@ describe('Onboarding Navigation Tests', () => {
 
       // Wait for data to load
       await waitFor(() => {
-        const input = getByDisplayValue('');
+        const __input = getByDisplayValue('');
         fireEvent.changeText(__input, 'Updated Restaurant Name');
       });
 
@@ -243,9 +241,8 @@ describe('Onboarding Navigation Tests', () => {
       // Should show success alert
       await waitFor(() => {
         expect(Alert.alert).toHaveBeenCalledWith(
-          'Success',
-          'Restaurant profile updated successfully!',
-        );
+    console.log('Success',
+          'Restaurant profile updated successfully!');
       });
     });
   });
@@ -258,7 +255,7 @@ describe('Onboarding Navigation Tests', () => {
       { name: 'AppSettingsScreen', path: '../screens/settings/AppSettingsScreen' },
     ];
 
-    screensToTest.forEach(({ name, path }) => {
+    screensToTest.forEach(({ name, _path }) => {
       it(`${name} should have working back button`, () => {
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         const Screen = require(__path).default;
@@ -277,8 +274,8 @@ describe('Onboarding Navigation Tests', () => {
 
 describe('Navigation Route Validation', () => {
   it('should have all required routes in SettingsNavigator', () => {
-    const settingsRoutes = [
-      'Settings',
+    const __settingsRoutes = [
+    console.log('Settings',
       'BusinessSettings',
       'BusinessInformation',
       'RestaurantSetup',

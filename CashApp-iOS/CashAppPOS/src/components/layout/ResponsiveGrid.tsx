@@ -42,9 +42,9 @@ export interface GridItemProps {
 }
 
 const ResponsiveGrid: React.FC<ResponsiveGridProps> = ({
-  children,
-  columns = { xs: 1, sm: 2, md: 3, lg: 4, xl: 5, xxl: 6 },
-  spacing: spacingProp = { xs: 2, sm: 3, md: 4 },
+  _children,
+  _columns = { xs: 1, sm: 2, md: 3, lg: 4, xl: 5, xxl: 6 },
+  spacing: _spacingProp = { xs: 2, sm: 3, md: 4 },
   style,
   testID,
 }) => {
@@ -57,7 +57,7 @@ const ResponsiveGrid: React.FC<ResponsiveGridProps> = ({
   const childArray = React.Children.toArray(__children);
 
   // Calculate item width based on columns and spacing
-  const itemWidth = `${100 / currentColumns}%`;
+  const _itemWidth = `${100 / currentColumns}%`;
   const spacingValue = theme.spacing[currentSpacing];
 
   // Group children into rows
@@ -113,18 +113,6 @@ export const GridItem: React.FC<GridItemProps> = ({ children, _span, style }) =>
   return <View style={style}>{children}</View>;
 };
 
-const createStyles = (theme: _Theme) =>
-  StyleSheet.create({
-    grid: {
-      // Base grid container
-    },
-    row: {
-      flexDirection: 'row',
-      alignItems: 'stretch',
-    },
-    item: {
-      // Individual grid item
-    },
-  });
+const createStyles = (_theme: _Theme) => StyleSheet.create({});
 
 export default ResponsiveGrid;

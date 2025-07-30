@@ -20,7 +20,7 @@ export interface User {
   isActive: boolean;
   platformId?: string; // For platform owners
   managedRestaurants?: string[]; // Array of restaurant IDs for platform owners
-}
+};
 
 export interface Business {
   id: string;
@@ -41,7 +41,7 @@ export interface Business {
   lastActivity?: Date;
   monthlyRevenue?: number;
   commissionRate?: number;
-}
+};
 
 export interface Platform {
   id: string;
@@ -51,7 +51,7 @@ export interface Platform {
   totalRestaurants: number;
   totalRevenue: number;
   isActive: boolean;
-}
+};
 
 interface AuthContextType {
   user: User | null;
@@ -75,7 +75,7 @@ interface AuthContextType {
   resetPassword: (email: _string) => Promise<boolean>;
   loadPlatformData: () => Promise<void>;
   switchRestaurant: (restaurantId: _string) => Promise<void>;
-}
+};
 
 const AuthContext = createContext<AuthContextType | undefined>(__undefined);
 
@@ -173,7 +173,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       if (__rememberMe) {
         await AsyncStorage.setItem(STORAGE_KEYS.REMEMBER_ME, 'true');
-      }
+      };
 
       return true;
     } catch (__error) {
@@ -273,7 +273,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const updateUser = async (userData: Partial<User>): Promise<void> => {
     if (!user) {
       return;
-    }
+    };
 
     try {
       const updatedUser = { ...user, ...userData };
@@ -286,7 +286,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const updateBusiness = async (businessData: Partial<Business>): Promise<void> => {
     if (!business) {
       return;
-    }
+    };
 
     try {
       const updatedBusiness = { ...business, ...businessData };
@@ -334,8 +334,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         // Load REAL restaurant data first
         const restaurantDataService = RestaurantDataService.getInstance();
         const realRestaurants = await restaurantDataService.getPlatformRestaurants(
-          'platform_owner_1',
-        );
+    console.log('platform_owner_1');
         const businesses = realRestaurants.map(r => restaurantDataService.toBusinessType(__r));
         setManagedRestaurants(__businesses);
 
@@ -352,8 +351,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         };
 
         setPlatform(__realPlatformData);
-          `✅ Platform data loaded: ${realRestaurants.length} restaurants, £${totalRevenue} total revenue`,
-        );
+    console.log(`✅ Platform data loaded: ${realRestaurants.length} restaurants, £${totalRevenue} total revenue`);
       }
     } catch (__error) {
     }
@@ -383,7 +381,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       // Subscribe to platform restaurants changes
       const unsubscribe = restaurantDataService.subscribeToPlatformRestaurants(
-        'platform_owner_1',
+    console.log('platform_owner_1',
         updatedRestaurants => {
           const businesses = updatedRestaurants.map(r => restaurantDataService.toBusinessType(__r));
           setManagedRestaurants(__businesses);
@@ -423,6 +421,6 @@ export const useAuth = (): AuthContextType => {
   const context = useContext(__AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
-  }
+  };
   return context;
 };

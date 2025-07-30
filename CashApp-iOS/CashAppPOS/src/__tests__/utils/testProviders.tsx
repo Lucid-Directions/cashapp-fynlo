@@ -4,8 +4,8 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { render, RenderOptions } from '@testing-library/react-native';
 
 // Lazy-import stores to avoid circular deps in Jest
-const appStoreModule = jest.requireActual('../../store/useAppStore');
-const uiStoreModule = jest.requireActual('../../store/useUIStore');
+const __appStoreModule = jest.requireActual('../../store/useAppStore');
+const __uiStoreModule = jest.requireActual('../../store/useUIStore');
 
 export interface StoreOverrides {
   appState?: Record<string, unknown>;
@@ -47,6 +47,7 @@ export const createTestWrapper = ({ appState = {}, uiState = {} }: StoreOverride
   }));
 
   // Return a wrapper component for @testing-library/react-native
+  // eslint-disable-next-line react/display-name
   return ({ children }: { children: React.ReactNode }) => (
     <SafeAreaProvider>
       <NavigationContainer>{children}</NavigationContainer>
@@ -58,6 +59,6 @@ export const customRenderWithStores = (
   ui: React.ReactElement,
   { appState, _uiState, ...options }: StoreOverrides & RenderOptions = {},
 ) => {
-  const Wrapper = createTestWrapper({ appState, uiState });
+  const _Wrapper = createTestWrapper({ appState, uiState });
   return render(__ui, { wrapper: _Wrapper, ...options });
 };

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, _Text, TouchableOpacity, _StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { View, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { SumUpProvider, useSumUp } from 'sumup-react-native-alpha';
 import sumUpConfigService from '../../services/SumUpConfigService';
 
@@ -11,6 +11,7 @@ const SumUpTestInner: React.FC<SumUpTestProps> = ({ onResult }) => {
   const sumUpHooks = useSumUp();
 
   useEffect(() => {
+    console.log({
       hasHooks: !!sumUpHooks,
       initPaymentSheet: typeof sumUpHooks?.initPaymentSheet,
       presentPaymentSheet: typeof sumUpHooks?.presentPaymentSheet,
@@ -30,7 +31,6 @@ const SumUpTestInner: React.FC<SumUpTestProps> = ({ onResult }) => {
         return;
       }
 
-
       const result = await sumUpHooks.initPaymentSheet({
         amount: 1.0,
         currencyCode: 'GBP',
@@ -38,7 +38,6 @@ const SumUpTestInner: React.FC<SumUpTestProps> = ({ onResult }) => {
         title: 'Test Payment',
         skipScreenOptions: _false,
       });
-
 
       if (result.error) {
         Alert.alert('SumUp Init Failed', result.error.message);

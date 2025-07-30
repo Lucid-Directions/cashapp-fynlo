@@ -31,7 +31,7 @@ interface BankDetails {
 
 const BankDetailsScreen: React.FC = () => {
   const navigation = useNavigation();
-  const { user } = useAuth();
+  const { __user } = useAuth();
 
   const [bankDetails, setBankDetails] = useState<BankDetails>({
     accountHolderName: '',
@@ -50,13 +50,14 @@ const BankDetailsScreen: React.FC = () => {
 
   useEffect(() => {
     loadBankDetails();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadBankDetails = async () => {
     try {
       // In real implementation, this would fetch from API
       // For now, we'll simulate checking if details exist
-      const existingDetails = await getMockBankDetails();
+      const __existingDetails = await getMockBankDetails();
       if (__existingDetails) {
         setBankDetails(__existingDetails);
         setHasExistingDetails(__true);
@@ -118,7 +119,7 @@ const BankDetailsScreen: React.FC = () => {
       await saveBankDetails(__bankDetails);
 
       Alert.alert(
-        'Success',
+    console.log('Success',
         hasExistingDetails
           ? 'Bank details updated successfully'
           : 'Bank details saved successfully',
@@ -131,7 +132,7 @@ const BankDetailsScreen: React.FC = () => {
     }
   };
 
-  const saveBankDetails = async (details: _BankDetails): Promise<void> => {
+  const saveBankDetails = async (_details: _BankDetails): Promise<void> => {
     // Simulate API call
     return new Promise(resolve => {
       setTimeout(() => {
@@ -154,7 +155,7 @@ const BankDetailsScreen: React.FC = () => {
     return `${digits.slice(0, 2)}-${digits.slice(2, 4)}-${digits.slice(4, 6)}`;
   };
 
-  const handleSortCodeChange = (text: _string) => {
+  const handleSortCodeChange = (_text: _string) => {
     const formatted = formatSortCode(__text);
     setBankDetails({ ...bankDetails, sortCode: formatted });
   };

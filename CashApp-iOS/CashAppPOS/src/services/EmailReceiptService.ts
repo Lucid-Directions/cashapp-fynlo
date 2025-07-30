@@ -10,7 +10,9 @@ class EmailReceiptService {
   private baseUrl: string | null = null;
   private apiKey: string | null = null;
 
-  private constructor() {}
+  private constructor() {
+    // Empty constructor
+  }
 
   static getInstance(): EmailReceiptService {
     if (!EmailReceiptService.instance) {

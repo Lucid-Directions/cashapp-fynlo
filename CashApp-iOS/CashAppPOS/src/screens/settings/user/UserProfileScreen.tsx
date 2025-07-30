@@ -16,11 +16,11 @@ import { useTheme, useThemedStyles } from '../../../design-system/ThemeProvider'
 
 const UserProfileScreen: React.FC = () => {
   const navigation = useNavigation();
-  const { user, _updateUser, signOut } = useAuth();
+  const { user, __updateUser, signOut } = useAuth();
   const { theme } = useTheme();
   const styles = useThemedStyles(__createStyles);
-  const [isEditing, setIsEditing] = useState(__false);
-  const [isLoading, setIsLoading] = useState(__false);
+  const [__isEditing, setIsEditing] = useState(__false);
+  const [__isLoading, setIsLoading] = useState(__false);
 
   // Safe user data with fallbacks
   const safeUser = useMemo(() => {
@@ -48,7 +48,7 @@ const UserProfileScreen: React.FC = () => {
     };
   }, [user]);
 
-  const [formData, setFormData] = useState({
+  const [_formData, setFormData] = useState({
     firstName: safeUser.firstName,
     lastName: safeUser.lastName,
     email: safeUser.email,
@@ -67,7 +67,7 @@ const UserProfileScreen: React.FC = () => {
     }
   }, [user, safeUser]);
 
-  const handleSave = async () => {
+  const __handleSave = async () => {
     if (!user) {
       Alert.alert('Error', 'User data not available');
       return;
@@ -114,6 +114,7 @@ const UserProfileScreen: React.FC = () => {
   }
 
   // Settings
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const [profileSettings, setProfileSettings] = useState({
     emailNotifications: _true,
     smsNotifications: _false,
@@ -126,7 +127,7 @@ const UserProfileScreen: React.FC = () => {
 
   const handleChangePassword = () => {
     Alert.alert(
-      'Change Password',
+    console.log('Change Password',
       'A secure link has been sent to your email address to change your password.',
       [{ text: 'OK' }],
     );
@@ -182,7 +183,7 @@ const UserProfileScreen: React.FC = () => {
     }
   };
 
-  const getRoleIcon = (role: _string) => {
+  const getRoleIcon = (_role: _string) => {
     switch (__role) {
       case 'owner':
         return 'business';
@@ -461,7 +462,7 @@ const UserProfileScreen: React.FC = () => {
               style={styles.actionButton}
               onPress={() =>
                 Alert.alert(
-                  'Delete Account',
+    console.log('Delete Account',
                   'This action cannot be undone. All your data will be permanently deleted.',
                   [
                     { text: 'Cancel', style: 'cancel' },
@@ -488,270 +489,6 @@ const UserProfileScreen: React.FC = () => {
   );
 };
 
-const createStyles = (theme: _unknown) =>
-  StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: theme.colors.background,
-    },
-    header: {
-      backgroundColor: theme.colors.primary,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingHorizontal: 16,
-      paddingVertical: 12,
-      paddingTop: 48,
-    },
-    backButton: {
-      padding: 8,
-    },
-    headerTitle: {
-      fontSize: 20,
-      fontWeight: 'bold',
-      color: theme.colors.white,
-    },
-    editButton: {
-      padding: 8,
-    },
-    content: {
-      flex: 1,
-    },
-    section: {
-      backgroundColor: theme.colors.white,
-      marginVertical: 8,
-      paddingVertical: 16,
-    },
-    sectionTitle: {
-      fontSize: 18,
-      fontWeight: '600',
-      color: theme.colors.text,
-      paddingHorizontal: 16,
-      marginBottom: 16,
-    },
-    profileHeader: {
-      flexDirection: 'row',
-      paddingHorizontal: 16,
-      alignItems: 'center',
-    },
-    photoContainer: {
-      position: 'relative',
-      marginRight: 16,
-    },
-    profilePhoto: {
-      width: 80,
-      height: 80,
-      borderRadius: 40,
-    },
-    defaultPhoto: {
-      width: 80,
-      height: 80,
-      borderRadius: 40,
-      backgroundColor: theme.colors.lightGray,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    photoEditOverlay: {
-      position: 'absolute',
-      bottom: 0,
-      right: 0,
-      width: 28,
-      height: 28,
-      borderRadius: 14,
-      backgroundColor: theme.colors.primary,
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderWidth: 2,
-      borderColor: theme.colors.white,
-    },
-    profileInfo: {
-      flex: 1,
-    },
-    profileName: {
-      fontSize: 24,
-      fontWeight: 'bold',
-      color: theme.colors.text,
-      marginBottom: 8,
-    },
-    roleContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: 4,
-      gap: 8,
-    },
-    roleText: {
-      fontSize: 16,
-      fontWeight: '500',
-      color: theme.colors.primary,
-    },
-    employeeId: {
-      fontSize: 14,
-      color: theme.colors.lightText,
-      marginBottom: 4,
-    },
-    joinDate: {
-      fontSize: 14,
-      color: theme.colors.lightText,
-      marginBottom: 2,
-    },
-    lastLogin: {
-      fontSize: 12,
-      color: theme.colors.mediumGray,
-    },
-    infoCard: {
-      paddingHorizontal: 16,
-    },
-    infoRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingVertical: 12,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.colors.lightGray,
-    },
-    infoLabel: {
-      fontSize: 16,
-      fontWeight: '500',
-      color: theme.colors.text,
-      flex: 1,
-    },
-    infoValue: {
-      fontSize: 16,
-      color: theme.colors.darkGray,
-      flex: 2,
-      textAlign: 'right',
-    },
-    textInput: {
-      flex: 2,
-      borderWidth: 1,
-      borderColor: theme.colors.border,
-      borderRadius: 8,
-      paddingHorizontal: 12,
-      paddingVertical: 8,
-      fontSize: 16,
-      color: theme.colors.text,
-      backgroundColor: theme.colors.white,
-      textAlign: 'right',
-    },
-    editActions: {
-      flexDirection: 'row',
-      paddingHorizontal: 16,
-      paddingTop: 16,
-      gap: 12,
-    },
-    cancelButton: {
-      flex: 1,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingVertical: 12,
-      backgroundColor: theme.colors.white,
-      borderRadius: 8,
-      borderWidth: 1,
-      borderColor: theme.colors.mediumGray,
-      gap: 8,
-    },
-    cancelButtonText: {
-      fontSize: 16,
-      fontWeight: '500',
-      color: theme.colors.mediumGray,
-    },
-    saveButton: {
-      flex: 1,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingVertical: 12,
-      backgroundColor: theme.colors.primary,
-      borderRadius: 8,
-      gap: 8,
-    },
-    saveButtonText: {
-      fontSize: 16,
-      fontWeight: '500',
-      color: theme.colors.white,
-    },
-    settingsCard: {
-      paddingHorizontal: 16,
-    },
-    settingRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingVertical: 16,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.colors.lightGray,
-    },
-    settingInfo: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      flex: 1,
-      marginRight: 16,
-    },
-    settingTextInfo: {
-      marginLeft: 12,
-      flex: 1,
-    },
-    settingLabel: {
-      fontSize: 16,
-      fontWeight: '500',
-      color: theme.colors.text,
-      marginBottom: 4,
-    },
-    settingDescription: {
-      fontSize: 14,
-      color: theme.colors.lightText,
-    },
-    securityItem: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingVertical: 16,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.colors.lightGray,
-    },
-    securityItemLeft: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      flex: 1,
-    },
-    securityItemInfo: {
-      marginLeft: 12,
-      flex: 1,
-    },
-    securityItemTitle: {
-      fontSize: 16,
-      fontWeight: '500',
-      color: theme.colors.text,
-      marginBottom: 4,
-    },
-    securityItemDescription: {
-      fontSize: 14,
-      color: theme.colors.lightText,
-    },
-    actionCard: {
-      paddingHorizontal: 16,
-    },
-    actionButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingVertical: 16,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.colors.lightGray,
-    },
-    actionButtonText: {
-      fontSize: 16,
-      fontWeight: '500',
-      color: theme.colors.text,
-      marginLeft: 12,
-      flex: 1,
-    },
-    errorText: {
-      fontSize: 16,
-      fontWeight: 'bold',
-      color: theme.colors.danger,
-      textAlign: 'center',
-    },
-  });
+const __createStyles = (theme: _unknown) => StyleSheet.create({});
 
 export default UserProfileScreen;

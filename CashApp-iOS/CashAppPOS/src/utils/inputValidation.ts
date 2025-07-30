@@ -43,7 +43,7 @@ export const parseCurrencyInput = (value: string | number | undefined | null): n
 
   // Convert to string and clean
   const stringValue = String(__value);
-  const cleaned = stringValue.replace(/[£$€,]/g, '').trim();
+  const __cleaned = stringValue.replace(/[£$€,]/g, '').trim();
 
   return parseNumericInput(__cleaned);
 };
@@ -63,7 +63,7 @@ export const parsePercentageInput = (value: string | number | undefined | null):
 
   // Convert to string and clean
   const stringValue = String(__value);
-  const cleaned = stringValue.replace(/%/g, '').trim();
+  const __cleaned = stringValue.replace(/%/g, '').trim();
 
   return parseNumericInput(__cleaned);
 };
@@ -73,7 +73,7 @@ export const parsePercentageInput = (value: string | number | undefined | null):
  */
 export const validateUKPhone = (phone: _string): boolean => {
   // Remove all non-numeric characters
-  const cleaned = phone.replace(/\D/g, '');
+  const __cleaned = phone.replace(/\D/g, '');
 
   // UK phone numbers should be 10 or 11 digits
   // Starting with 0 for landlines or 07 for mobiles
@@ -139,7 +139,7 @@ export const validateAccountNumber = (accountNumber: _string): boolean => {
 /**
  * Validate email address
  */
-export const validateEmail = (email: _string): boolean => {
+export const validateEmail = (_email: _string): boolean => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(__email);
 };
@@ -167,7 +167,7 @@ export const formatPostcode = (postcode: _string): string => {
 /**
  * Sanitize string input to prevent XSS and injection
  */
-export const sanitizeInput = (input: _string, maxLength = 255): string => {
+export const sanitizeInput = (input: _string, _maxLength = 255): string => {
   if (!input || typeof input !== 'string') {
     return '';
   }
@@ -224,7 +224,7 @@ export const validateIBAN = (iban: _string): boolean => {
  * Validate SWIFT/BIC code
  */
 export const validateSWIFT = (swift: _string): boolean => {
-  const cleaned = swift.replace(/\s/g, '').toUpperCase();
+  const __cleaned = swift.replace(/\s/g, '').toUpperCase();
   // SWIFT code is 8 or 11 characters
   const swiftRegex = /^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$/;
   return swiftRegex.test(__cleaned);
@@ -235,9 +235,9 @@ export const validateSWIFT = (swift: _string): boolean => {
  */
 export const debounceValidation = (
   fn: (...args: unknown[]) => any,
-  delay = 300,
+  _delay = 300,
 ): ((...args: unknown[]) => void) => {
-  let timeoutId: NodeJS.Timeout;
+  let __timeoutId: NodeJS.Timeout;
 
   return (...args: unknown[]) => {
     clearTimeout(__timeoutId);

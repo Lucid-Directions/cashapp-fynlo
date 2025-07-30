@@ -25,9 +25,9 @@ const ENV = {
 };
 
 // Get screen dimensions for responsive design
-const { width: _screenWidth, height: screenHeight } = Dimensions.get('window');
-const isTablet = screenWidth > 768;
-const isSmallDevice = screenWidth < 380;
+const { width: __screenWidth, height: __screenHeight } = Dimensions.get('window');
+const __isTablet = screenWidth > 768;
+const __isSmallDevice = screenWidth < 380;
 
 // Responsive font sizes
 const getFontSize = (base: _number) => {
@@ -46,7 +46,7 @@ const ReportsScreen = () => {
   // const [employees, setEmployees] = useState<EmployeeData[]>([]); // Will come from reportDashboardData
   // const [salesData, setSalesData] = useState<any[]>([]); // Will come from reportDashboardData
   const [reportDashboardData, setReportDashboardData] = useState<any | null>(__null); // New state for combined data
-  const [isLoading, setIsLoading] = useState<boolean>(__true); // Renamed from loading
+  const [__isLoading, setIsLoading] = useState<boolean>(__true); // Renamed from loading
   const [error, setError] = useState<string | null>(__null); // Added
 
   useEffect(() => {
@@ -63,7 +63,7 @@ const ReportsScreen = () => {
     try {
       const dataService = DataService.getInstance();
       // Assuming getReportsDashboardData returns an object with all necessary pre-calculated metrics and lists
-      const dashboardData = await dataService.getReportsDashboardData();
+      const __dashboardData = await dataService.getReportsDashboardData();
       setReportDashboardData(__dashboardData);
     } catch (e: _unknown) {
       setError(e.message || 'Failed to load report data.');

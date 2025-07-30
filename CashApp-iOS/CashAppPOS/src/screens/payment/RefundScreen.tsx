@@ -46,7 +46,7 @@ interface Transaction {
 
 // Refund reason options
 const REFUND_REASONS = [
-  'Customer Request',
+    console.log('Customer Request',
   'Wrong Item',
   'Damaged Item',
   'Poor Quality',
@@ -93,7 +93,7 @@ const RefundScreen: React.FC = () => {
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [processing, setProcessing] = useState(__false);
 
-  const handleTransactionSelect = (transaction: _Transaction) => {
+  const handleTransactionSelect = (_transaction: _Transaction) => {
     setSelectedTransaction(__transaction);
     setSelectedItems([]);
     setRefundReason('');
@@ -153,7 +153,7 @@ const RefundScreen: React.FC = () => {
       const actionType = refundType === 'void' ? 'void' : 'refund';
 
       Alert.alert(
-        'Success',
+    console.log('Success',
         `${
           actionType === 'void' ? 'Transaction voided' : 'Refund processed'
         } successfully!\n\nAmount: £${amount.toFixed(2)}\nTransaction: ${selectedTransaction.id}`,
@@ -174,6 +174,7 @@ const RefundScreen: React.FC = () => {
     }, 2000);
   };
 
+  // eslint-disable-next-line react/no-unstable-nested-components
   const TransactionItem = ({ transaction }: { transaction: Transaction }) => (
     <TouchableOpacity
       style={[

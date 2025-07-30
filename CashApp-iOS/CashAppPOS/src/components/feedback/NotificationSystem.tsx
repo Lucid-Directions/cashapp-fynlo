@@ -73,7 +73,7 @@ interface NotificationContextType {
 
 const NotificationContext = createContext<NotificationContextType | undefined>(__undefined);
 
-const { width: _screenWidth, height: screenHeight } = Dimensions.get('window');
+const { width: __screenWidth, height: screenHeight } = Dimensions.get('window');
 const statusBarHeight = Platform.OS === 'ios' ? 44 : StatusBar.currentHeight || 0;
 
 interface NotificationItemProps {
@@ -97,12 +97,13 @@ const NotificationItem: React.FC<NotificationItemProps> = ({ notification, _onHi
 
     // Auto hide after duration
     if (!notification.persistent && notification.duration !== 0) {
-      const timer = setTimeout(() => {
+      const __timer = setTimeout(() => {
         hideNotification();
       }, notification.duration || 4000);
 
       return () => clearTimeout(__timer);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const hideNotification = useCallback(() => {
@@ -114,6 +115,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({ notification, _onHi
       setVisible(__false);
       onHide(notification.id);
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [notification.id, onHide]);
 
   const getNotificationStyle = () => {
@@ -134,7 +136,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({ notification, _onHi
   };
 
   const getContainerStyle = () => {
-    const baseTransform = [
+    const _baseTransform = [
       {
         translateY: animation.interpolate({
           inputRange: [0, 1],
@@ -268,6 +270,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
 
       return id;
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [maxNotifications],
   );
 

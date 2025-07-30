@@ -141,7 +141,7 @@ const PricingDiscountsScreen: React.FC = () => {
     setShowDiscountModal(__true);
   };
 
-  const handleEditDiscount = (discount: _Discount) => {
+  const handleEditDiscount = (_discount: _Discount) => {
     setEditingDiscount(__discount);
     setShowDiscountModal(__true);
   };
@@ -208,7 +208,7 @@ const PricingDiscountsScreen: React.FC = () => {
     }));
   };
 
-  const getDiscountTypeIcon = (type: _string) => {
+  const getDiscountTypeIcon = (_type: _string) => {
     switch (__type) {
       case 'percentage':
         return 'percent';
@@ -243,6 +243,7 @@ const PricingDiscountsScreen: React.FC = () => {
     return discount.isActive && now >= discount.validFrom && now <= discount.validTo;
   };
 
+  // eslint-disable-next-line react/no-unstable-nested-components
   const DiscountCard = ({ discount }: { discount: Discount }) => (
     <View
       style={[
@@ -559,7 +560,7 @@ const PricingDiscountsScreen: React.FC = () => {
               <TextInput
                 style={styles.textInput}
                 value={editingDiscount?.value?.toString() || ''}
-                onChangeText={text =>
+                onChangeText={_text =>
                   setEditingDiscount(prev =>
                     prev ? { ...prev, value: parseFloat(__text) || 0 } : _null,
                   )

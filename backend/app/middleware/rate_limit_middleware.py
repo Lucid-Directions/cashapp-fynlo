@@ -4,7 +4,7 @@ Rate limiting middleware using fastapi-limiter.
 import logging
 from typing import Optional
 
-from fastapi import Request, HTTPException, status, Depends
+from fastapi import Request, status, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -70,7 +70,6 @@ async def identify_portal_client(request: Request) -> str:
 # or a compatible mock if Redis connection fails in dev/test.
 limiter = Limiter(key_func=identify_client, strategy="moving-window")
 
-
 # --- RateLimitMiddleware ---
 # We will use the SlowAPIMiddleware and apply limits per-route using decorators.
 # However, to manage the redis connection for the limiter, we need to initialize it.
@@ -132,7 +131,6 @@ async def init_fastapi_limiter():
     # `request.state.limiter` in dependencies, this would be cleaner.
     # For now, the global `limiter` instance should work with decorators.
     logger.info("✅ Rate limiter configured to use Redis client (or mock).")
-
 
 # Custom exception handler for RateLimitExceeded to provide a standard API response.
 # This is already handled by slowapi's default handler if we add it to the app.

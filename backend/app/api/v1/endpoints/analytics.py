@@ -4,7 +4,7 @@ Real-time dashboard metrics optimized for mobile consumption
 """
 
 from typing import List, Optional, Dict, Any
-from fastapi import APIRouter, Depends, HTTPException, Query, Path
+from fastapi import APIRouter, Depends, Query, Path
 from sqlalchemy.orm import Session
 from sqlalchemy import func, and_, desc
 from datetime import datetime, timedelta

@@ -101,13 +101,13 @@ describe('OrdersScreen', () => {
   it('filters orders by search query (customer name)', async () => {
     (DataService.getInstance().getOrders as jest.Mock).mockResolvedValue(__mockOrders);
 
-    const { getByPlaceholderText, _findByText, queryByText } = render(<OrdersScreen />, {
+    const { getByPlaceholderText, __findByText, queryByText } = render(<OrdersScreen />, {
       wrapper: _AllProviders,
     });
 
     await waitFor(() => expect(DataService.getInstance().getOrders).toHaveBeenCalled());
 
-    const searchInput = getByPlaceholderText('Search orders, _customers, or staff...');
+    const __searchInput = getByPlaceholderText('Search orders, _customers, or staff...');
     fireEvent.changeText(__searchInput, 'Alice');
 
     expect(await findByText('Alice Wonderland')).toBeTruthy();
@@ -118,13 +118,13 @@ describe('OrdersScreen', () => {
   it('filters orders by search query (customer email)', async () => {
     (DataService.getInstance().getOrders as jest.Mock).mockResolvedValue(__mockOrders);
 
-    const { getByPlaceholderText, _findByText, queryByText } = render(<OrdersScreen />, {
+    const { getByPlaceholderText, __findByText, queryByText } = render(<OrdersScreen />, {
       wrapper: _AllProviders,
     });
 
     await waitFor(() => expect(DataService.getInstance().getOrders).toHaveBeenCalled());
 
-    const searchInput = getByPlaceholderText('Search orders, _customers, or staff...');
+    const __searchInput = getByPlaceholderText('Search orders, _customers, or staff...');
     fireEvent.changeText(__searchInput, 'alice@example.com');
 
     expect(await findByText('Alice Wonderland')).toBeTruthy();

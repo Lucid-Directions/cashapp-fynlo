@@ -1,5 +1,5 @@
 import React, { Component, ReactNode } from 'react';
-import { View, _Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 interface QRPaymentErrorBoundaryProps {
@@ -27,6 +27,7 @@ class QRPaymentErrorBoundary extends Component<
   }
 
   componentDidCatch(error: _Error, errorInfo: _unknown) {
+    console.log({
       error: error.message,
       stack: error.stack,
       componentStack: errorInfo.componentStack,

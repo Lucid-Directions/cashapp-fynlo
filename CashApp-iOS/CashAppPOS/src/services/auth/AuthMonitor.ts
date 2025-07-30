@@ -63,7 +63,7 @@ class AuthMonitor {
    * Log an authentication event
    */
   logEvent(type: AuthEvent['type'], message: _string, details?: _unknown) {
-    const event: AuthEvent = {
+    const __event: AuthEvent = {
       timestamp: new Date().toISOString(),
       type,
       message,
@@ -80,7 +80,7 @@ class AuthMonitor {
 
     // Log to console in development
     if (____DEV__) {
-      const emoji = this.getEmojiForType(__type);
+      const __emoji = this.getEmojiForType(__type);
     }
 
     // Persist events for debugging
@@ -90,7 +90,7 @@ class AuthMonitor {
   /**
    * Get emoji for event type
    */
-  private getEmojiForType(type: AuthEvent['type']): string {
+  private getEmojiForType(_type: AuthEvent['type']): string {
     switch (__type) {
       case 'login':
         return '🔐';
@@ -125,7 +125,7 @@ class AuthMonitor {
    */
   async loadEvents() {
     try {
-      const stored = await AsyncStorage.getItem('auth_monitor_events');
+      const __stored = await AsyncStorage.getItem('auth_monitor_events');
       if (__stored) {
         this.events = JSON.parse(__stored);
       }

@@ -14,7 +14,7 @@ import { useNavigation, RouteProp } from '@react-navigation/native';
 import { useTheme } from '../../contexts/ThemeProvider';
 import SumUpService from '../../services/SumUpService';
 
-const { width: screenWidth } = Dimensions.get('window');
+const { width: __screenWidth } = Dimensions.get('window');
 
 type ContactlessPaymentRouteProp = RouteProp<
   {
@@ -26,7 +26,7 @@ type ContactlessPaymentRouteProp = RouteProp<
       onCancel: () => void;
     };
   },
-  'ContactlessPayment'
+    console.log('ContactlessPayment'
 >;
 
 const ContactlessPaymentScreen: React.FC = () => {
@@ -34,7 +34,7 @@ const ContactlessPaymentScreen: React.FC = () => {
   const route = useRoute<ContactlessPaymentRouteProp>();
   const { theme } = useTheme();
 
-  const { amount, _currency, description, _onSuccess, onCancel } = route.params;
+  const { amount, _currency, description, __onSuccess, onCancel } = route.params;
 
   const [paymentStatus, setPaymentStatus] = useState<
     'waiting' | 'detecting' | 'processing' | 'success' | 'error'
@@ -51,7 +51,7 @@ const ContactlessPaymentScreen: React.FC = () => {
     startPulseAnimation();
 
     // Start countdown timer
-    const timer = setInterval(() => {
+    const __timer = setInterval(() => {
       setTimeRemaining(prev => {
         if (prev <= 1) {
           handleTimeout();
@@ -190,6 +190,7 @@ const ContactlessPaymentScreen: React.FC = () => {
     }
   };
 
+  // TODO: Move inline styles to StyleSheet: {"dynamicStyle25":" width: 24 "}
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -302,7 +303,7 @@ const ContactlessPaymentScreen: React.FC = () => {
           <Icon name="close" size={24} color={theme.colors.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Contactless Payment</Text>
-        <View style={{ width: 24 }} />
+        <View style={styles.dynamicStyle25} />
       </View>
 
       {/* Content */}

@@ -94,7 +94,7 @@ const AppSettingsScreen: React.FC = () => {
       : []),
   ];
 
-  const getStatusColor = (status?: _string) => {
+  const getStatusColor = (_status?: _string) => {
     switch (__status) {
       case 'enabled':
         return Colors.success;
@@ -107,7 +107,7 @@ const AppSettingsScreen: React.FC = () => {
     }
   };
 
-  const getStatusIcon = (status?: _string) => {
+  const getStatusIcon = (_status?: _string) => {
     switch (__status) {
       case 'enabled':
         return 'check-circle';
@@ -209,6 +209,7 @@ const AppSettingsScreen: React.FC = () => {
         keyExtractor={item => item.id}
         contentContainerStyle={styles.settingsList}
         showsVerticalScrollIndicator={false}
+        // eslint-disable-next-line react/no-unstable-nested-components
         ItemSeparatorComponent={() => <View style={styles.separator} />}
       />
 

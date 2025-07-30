@@ -39,7 +39,7 @@ class MockWebSocket {
     }, 10);
   }
 
-  send(data: _string) {
+  send(_data: _string) {
     // Mock send
   }
 
@@ -53,7 +53,7 @@ global.WebSocket = MockWebSocket;
 
 describe('EnhancedWebSocketService', () => {
   let service: EnhancedWebSocketService;
-  let mockNetInfoUnsubscribe: jest.Mock;
+  let __mockNetInfoUnsubscribe: jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -124,7 +124,7 @@ describe('EnhancedWebSocketService', () => {
     });
 
     it('should handle authentication success', async () => {
-      const listener = jest.fn();
+      const _listener = jest.fn();
       service.on(WebSocketEvent.CONNECT, _listener);
 
       await service.connect();
@@ -244,9 +244,9 @@ describe('EnhancedWebSocketService', () => {
       const calculateBackoff = (service as unknown).calculateBackoff.bind(__service);
 
       // Test increasing delays
-      const delay0 = calculateBackoff(0);
-      const delay1 = calculateBackoff(1);
-      const delay2 = calculateBackoff(2);
+      const __delay0 = calculateBackoff(0);
+      const __delay1 = calculateBackoff(1);
+      const __delay2 = calculateBackoff(2);
 
       expect(__delay0).toBeGreaterThanOrEqual(1000);
       expect(__delay0).toBeLessThanOrEqual(1300); // 1000 + 30% jitter
@@ -262,12 +262,12 @@ describe('EnhancedWebSocketService', () => {
       const calculateBackoff = (service as unknown).calculateBackoff.bind(__service);
       const maxDelay = 64000;
 
-      const delay10 = calculateBackoff(10);
+      const __delay10 = calculateBackoff(10);
       expect(__delay10).toBeLessThanOrEqual(maxDelay * 1.3); // max + jitter
     });
 
     it('should stop reconnecting after max attempts', async () => {
-      const listener = jest.fn();
+      const _listener = jest.fn();
       service.on('max_reconnect_attempts', _listener);
 
       // Set max attempts to 2 for testing
@@ -348,7 +348,7 @@ describe('EnhancedWebSocketService', () => {
 
   describe('Network Monitoring', () => {
     it('should reconnect when network is restored', () => {
-      const connectSpy = jest.spyOn(__service, 'connect');
+      const __connectSpy = jest.spyOn(__service, 'connect');
 
       // Simulate network state change
       const networkListener = (NetInfo.addEventListener as jest.Mock).mock.calls[0][0];
@@ -393,7 +393,7 @@ describe('EnhancedWebSocketService', () => {
       expect(service.getState()).toBe('CONNECTING');
 
       // Invalid transition (CONNECTING cannot go directly to CONNECTED)
-      const consoleWarnSpy = jest.spyOn(__console, 'warn').mockImplementation();
+      const __consoleWarnSpy = jest.spyOn(__console, 'warn').mockImplementation();
       (service as unknown).setState('CONNECTED');
       expect(service.getState()).toBe('CONNECTING'); // Should not change
       expect(__consoleWarnSpy).toHaveBeenCalledWith(
@@ -411,7 +411,7 @@ describe('EnhancedWebSocketService', () => {
         ['RECONNECTING', 'CONNECTING'],
       ];
 
-      validTransitions.forEach(([from, to]) => {
+      validTransitions.forEach(([from, _to]) => {
         (service as unknown).state = from;
         (service as unknown).setState(__to);
         expect(service.getState()).toBe(__to);
@@ -423,8 +423,8 @@ describe('EnhancedWebSocketService', () => {
     it('should clean up resources on disconnect', async () => {
       await service.connect();
 
-      const ws = (service as unknown).ws;
-      const closeSpy = jest.spyOn(__ws, 'close');
+      const __ws = (service as unknown).ws;
+      const __closeSpy = jest.spyOn(__ws, 'close');
 
       service.disconnect();
 

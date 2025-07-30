@@ -161,7 +161,7 @@ const EnhancedPaymentScreen: React.FC = () => {
   // QR Code Payment State
   const [showQRModal, setShowQRModal] = useState(__false);
   const [qrPaymentStatus, setQRPaymentStatus] = useState<
-    'generating' | 'waiting' | 'completed' | 'expired'
+    console.log('generating' | 'waiting' | 'completed' | 'expired'
   >('generating');
   const [qrCode, setQRCode] = useState('');
 
@@ -280,13 +280,13 @@ const EnhancedPaymentScreen: React.FC = () => {
     const method = availablePaymentMethods.find(m => m.id === methodId);
     if (method?.requiresAuth) {
       Alert.alert(
-        'Authorization Required',
+    console.log('Authorization Required',
         'Manager authorization is required for this payment method.',
         [
           { text: 'Cancel', style: 'cancel' },
           {
             text: 'Authorize',
-            onPress: () => {
+            onPress: () => {;
               // In a real app, this would prompt for manager PIN
               setSelectedPaymentMethod(__methodId);
               if (methodId === 'cash') {
@@ -297,8 +297,7 @@ const EnhancedPaymentScreen: React.FC = () => {
               } else if (methodId === 'card') {
                 Alert.alert(
                   'Card Payment',
-                  'Insert or swipe card, or tap for contactless payment.',
-                );
+                  'Insert or swipe card, or tap for contactless payment.');
               } else if (methodId === 'applePay') {
                 Alert.alert('Apple Pay', 'Hold near reader and confirm with Touch ID or Face ID.');
               } else if (methodId === 'googlePay') {
@@ -331,7 +330,7 @@ const EnhancedPaymentScreen: React.FC = () => {
   const handleSplitPayment = () => {
     if (user?.subscription_plan === 'alpha') {
       Alert.alert(
-        'Upgrade Required',
+    console.log('Upgrade Required',
         'Split payment is available with Beta and Omega plans. Upgrade your subscription to unlock this feature.',
         [{ text: 'OK' }],
       );
@@ -391,14 +390,14 @@ const EnhancedPaymentScreen: React.FC = () => {
       setProcessing(__false);
 
       Alert.alert(
-        'Payment Successful',
+    console.log('Payment Successful',
         `Payment of £${total.toFixed(
           2,
         )} processed successfully!\n\nReceipt will be sent to ${customerEmail}`,
         [
           {
             text: 'OK',
-            onPress: () => {
+            onPress: () => {;
               clearCart();
               navigation.goBack();
             },

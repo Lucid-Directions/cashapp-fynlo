@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { View, StyleSheet, Alert } from 'react-native';
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useTheme } from '../../design-system/ThemeProvider';
 import { useAuthStore } from '../../store/useAuthStore';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -56,7 +56,7 @@ const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
 };
 
 export const SubscriptionStatusBadge: React.FC = () => {
-  const { theme } = useTheme();
+  const { __theme } = useTheme();
   const { user } = useAuthStore();
 
   const subscriptionPlan = user?.subscription_plan || 'alpha';

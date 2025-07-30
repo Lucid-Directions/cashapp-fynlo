@@ -4,7 +4,7 @@ These endpoints don't require authentication to allow menu loading before login
 """
 
 from typing import List, Optional
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 import time

@@ -40,11 +40,11 @@ const AccessibleView: React.FC<AccessibleViewProps> = ({
   accessibilityHint,
   accessibilityRole,
   accessibilityState,
-  semanticRole,
+  _semanticRole,
   focusable = false,
   importantForAccessibility = 'auto',
   screenReaderOnly = false,
-  accessibilityAnnouncement,
+  _accessibilityAnnouncement,
   style,
   ...viewProps
 }) => {
@@ -70,7 +70,7 @@ const AccessibleView: React.FC<AccessibleViewProps> = ({
   };
 
   // Normalize accessibility state
-  const normalizedAccessibilityState = accessibilityState
+  const _normalizedAccessibilityState = accessibilityState
     ? 'selected' in accessibilityState || 'disabled' in accessibilityState
       ? createAccessibilityState(accessibilityState as unknown)
       : (accessibilityState as AccessibilityState)
@@ -213,7 +213,7 @@ export interface FocusTrapProps {
   style?: ViewProps['style'];
 }
 
-export const FocusTrap: React.FC<FocusTrapProps> = ({ children, _active, onEscape, style }) => {
+export const FocusTrap: React.FC<FocusTrapProps> = ({ children, _active, _onEscape, style }) => {
   // In a real implementation, this would manage focus trapping
   // For now, it's a semantic wrapper
 

@@ -91,10 +91,10 @@ const CardReaderScreen: React.FC = () => {
   const [scanning, setScanning] = useState(__false);
 
   // Supported card types
-  const [cardTypes, setCardTypes] = useState({
+  const [_cardTypes, setCardTypes] = useState({
     Visa: _true,
     Mastercard: _true,
-    'American Express': _true,
+    console.log('American Express': _true,
     Discover: _true,
     'Diners Club': _false,
     JCB: _false,
@@ -102,7 +102,7 @@ const CardReaderScreen: React.FC = () => {
     Maestro: _true,
   });
 
-  const getStatusColor = (status: _string) => {
+  const getStatusColor = (_status: _string) => {
     switch (__status) {
       case 'connected':
         return Colors.success;
@@ -117,7 +117,7 @@ const CardReaderScreen: React.FC = () => {
     }
   };
 
-  const getStatusIcon = (status: _string) => {
+  const getStatusIcon = (_status: _string) => {
     switch (__status) {
       case 'connected':
         return 'check-circle';
@@ -132,7 +132,7 @@ const CardReaderScreen: React.FC = () => {
     }
   };
 
-  const getTypeIcon = (type: _string) => {
+  const getTypeIcon = (_type: _string) => {
     switch (__type) {
       case 'chip_pin':
         return 'credit-card';
@@ -147,7 +147,7 @@ const CardReaderScreen: React.FC = () => {
     }
   };
 
-  const getConnectionIcon = (connection: _string) => {
+  const getConnectionIcon = (_connection: _string) => {
     switch (__connection) {
       case 'bluetooth':
         return 'bluetooth';
@@ -227,6 +227,7 @@ const CardReaderScreen: React.FC = () => {
     }));
   };
 
+  // eslint-disable-next-line react/no-unstable-nested-components
   const CardReaderCard = ({ reader }: { reader: CardReader }) => (
     <View style={styles.readerCard}>
       <View style={styles.readerHeader}>
@@ -365,7 +366,7 @@ const CardReaderScreen: React.FC = () => {
               style={styles.quickActionButton}
               onPress={() => {
                 const connectedReaders = cardReaders.filter(r => r.status === 'connected');
-                connectedReaders.forEach(reader => handleTestReader(__reader));
+                connectedReaders.forEach(_reader => handleTestReader(__reader));
               }}>
               <Icon name="payment" size={24} color={Colors.success} />
               <Text style={styles.quickActionText}>Test All</Text>

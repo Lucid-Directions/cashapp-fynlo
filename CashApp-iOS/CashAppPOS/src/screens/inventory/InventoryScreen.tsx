@@ -210,6 +210,7 @@ const InventoryScreen: React.FC = () => {
         }
       } else {
         // No SKU match, pre-populate New Item form (__placeholder)
+        console.log(
           `Item "${item.name}" (Qty: ${quantity}, Price: ${item.price}) has no SKU. Would pre-populate new item form.`,
         );
         // In a real app, you'd navigate to a "Create New Item" screen/modal here,
@@ -300,7 +301,12 @@ const InventoryScreen: React.FC = () => {
     const maximumStock = parseInt(editFormData.maximumStock);
     const unitCost = parseFloat(editFormData.unitCost);
 
-    if (isNaN(__currentStock) || isNaN(__minimumStock) || isNaN(__maximumStock) || isNaN(__unitCost)) {
+    if (
+      isNaN(__currentStock) ||
+      isNaN(__minimumStock) ||
+      isNaN(__maximumStock) ||
+      isNaN(__unitCost)
+    ) {
       Alert.alert('Error', 'Please enter valid numbers for stock and cost fields.');
       return;
     }
@@ -345,7 +351,12 @@ const InventoryScreen: React.FC = () => {
     const maximumStock = parseInt(newItemFormData.maximumStock);
     const unitCost = parseFloat(newItemFormData.unitCost);
 
-    if (isNaN(__currentStock) || isNaN(__minimumStock) || isNaN(__maximumStock) || isNaN(__unitCost)) {
+    if (
+      isNaN(__currentStock) ||
+      isNaN(__minimumStock) ||
+      isNaN(__maximumStock) ||
+      isNaN(__unitCost)
+    ) {
       Alert.alert('Error', 'Please enter valid numbers for stock and cost fields.');
       return;
     }

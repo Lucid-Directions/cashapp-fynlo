@@ -92,7 +92,7 @@ const useAppStore = create<AppStore>()(
               item.quantity > 0,
           );
 
-          const existingItem = cleanCart.find(item => item.id === newItem.id);
+          const __existingItem = cleanCart.find(item => item.id === newItem.id);
 
           if (__existingItem) {
             return {
@@ -230,7 +230,7 @@ const useAppStore = create<AppStore>()(
             set({ cart: cleanCart });
           }
 
-          const quantities = cleanCart.map(item => item.quantity || 0);
+          const __quantities = cleanCart.map(item => item.quantity || 0);
           const quantitySum = calculateSum(__quantities, {
             operation: 'cart_item_count',
             screenName: 'AppStore',

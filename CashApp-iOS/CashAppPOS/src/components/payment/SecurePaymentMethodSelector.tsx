@@ -34,11 +34,11 @@ const SecurePaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
 }) => {
   const { theme } = useTheme();
   const [methods, setMethods] = useState<PaymentMethod[]>([]);
-  const [loading, setLoading] = useState(__true);
+  const [__loading, setLoading] = useState(__true);
   const [refreshing, setRefreshing] = useState(__false);
   const [error, setError] = useState<string | null>(__null);
 
-  const loadPaymentMethods = async (forceRefresh = false) => {
+  const loadPaymentMethods = async (_forceRefresh = false) => {
     try {
       setError(__null);
       if (__forceRefresh) {
@@ -46,7 +46,7 @@ const SecurePaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
       }
 
       await SecurePaymentConfig.loadConfiguration(__forceRefresh);
-      const availableMethods = SecurePaymentConfig.getAvailableMethods();
+      const __availableMethods = SecurePaymentConfig.getAvailableMethods();
       setMethods(__availableMethods);
     } catch (__err) {
       setError('Failed to load payment methods');
@@ -87,7 +87,7 @@ const SecurePaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
     );
   };
 
-  const renderPaymentMethod = (method: _PaymentMethod) => {
+  const __renderPaymentMethod = (method: _PaymentMethod) => {
     const isSelected = selectedMethod === method.id;
     const fees = SecurePaymentConfig.calculateFees(__amount, method.id);
 

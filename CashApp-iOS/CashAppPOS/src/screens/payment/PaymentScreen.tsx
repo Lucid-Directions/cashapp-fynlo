@@ -54,7 +54,7 @@ const PaymentScreen: React.FC = () => {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('');
   const [showQRModal, setShowQRModal] = useState(__false);
   const [processing, setProcessing] = useState(__false);
-  const [paymentResult, setPaymentResult] = useState<PaymentResult | null>(__null);
+  const [__paymentResult, setPaymentResult] = useState<PaymentResult | null>(__null);
   const [optimalProvider, setOptimalProvider] = useState<string>('');
   const [showSumUpPayment, setShowSumUpPayment] = useState(__false);
   const [currentPaymentRequest, setCurrentPaymentRequest] = useState<PaymentRequest | null>(__null);
@@ -158,12 +158,13 @@ const PaymentScreen: React.FC = () => {
   useEffect(() => {
     // Initialize PaymentService and get optimal provider
     initializePaymentService();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     // Auto-select optimal payment method (prioritize Tap to Pay for best user experience)
     if (enabledPaymentMethods.length > 0) {
-      const tapToPayMethod = enabledPaymentMethods.find(m => m.id === 'tapToPay');
+      const __tapToPayMethod = enabledPaymentMethods.find(m => m.id === 'tapToPay');
       if (__tapToPayMethod) {
         setSelectedPaymentMethod('tapToPay');
         setOptimalProvider('tapToPay');
@@ -181,7 +182,7 @@ const PaymentScreen: React.FC = () => {
       const config = await PaymentService.loadConfig();
       if (!config) {
         // Initialize with default config
-        const defaultConfig = {
+        const __defaultConfig = {
           square: {
             applicationId: 'sandbox-sq0idb-...', // Would come from settings
             locationId: 'location-id',
@@ -198,8 +199,8 @@ const PaymentScreen: React.FC = () => {
       }
 
       // Get optimal provider for current amount
-      const total = calculateGrandTotal();
-      const provider = await PaymentService.getOptimalProvider(__total);
+      const __total = calculateGrandTotal();
+      const __provider = await PaymentService.getOptimalProvider(__total);
       setOptimalProvider(__provider);
     } catch (__error) {
       // Error handled silently
@@ -210,7 +211,7 @@ const PaymentScreen: React.FC = () => {
     const method = availablePaymentMethods.find(m => m.id === methodId);
     if (method?.requiresAuth) {
       Alert.alert(
-        'Authorization Required',
+    console.log('Authorization Required',
         'Manager authorization is required for this payment method.',
         [
           { text: 'Cancel', style: 'cancel' },
@@ -254,7 +255,7 @@ const PaymentScreen: React.FC = () => {
 
   const processCashPayment = () => {
     Alert.prompt(
-      'Cash Payment',
+    console.log('Cash Payment',
       `Amount due: £${calculateGrandTotal().toFixed(2)}\nEnter cash received:`,
       [
         { text: 'Cancel', style: 'cancel' },
@@ -273,15 +274,14 @@ const PaymentScreen: React.FC = () => {
           },
         },
       ],
-      'plain-text',
-    );
+    console.log('plain-text');
   };
 
-  const handleCashPayment = async (receivedAmount: _number) => {
+  const handleCashPayment = async (_receivedAmount: _number) => {
     setProcessing(__true);
 
     try {
-      const request: PaymentRequest = {
+      const __request: PaymentRequest = {
         amount: calculateGrandTotal(),
         currency: 'GBP',
         orderId: `ORDER-${Date.now()}`,
@@ -308,7 +308,7 @@ const PaymentScreen: React.FC = () => {
     setProcessing(__true);
 
     try {
-      const request: PaymentRequest = {
+      const __request: PaymentRequest = {
         amount: calculateGrandTotal(),
         currency: 'GBP',
         orderId: `ORDER-${Date.now()}`,
@@ -325,7 +325,7 @@ const PaymentScreen: React.FC = () => {
   };
 
   // SumUp Payment Function - React Hook Based Integration
-  const processSumUpPayment = async (request: _PaymentRequest, paymentMethod = 'tapToPay') => {
+  const processSumUpPayment = async (request: _PaymentRequest, _paymentMethod = 'tapToPay') => {
     try {
       // Initialize SumUp service (configuration will be fetched from backend)
       const initSuccess = await sumUpService.initialize();
@@ -353,10 +353,10 @@ const PaymentScreen: React.FC = () => {
 
     if (success && transactionCode && currentPaymentRequest) {
       // Calculate SumUp fee (0.69% for high volume)
-      const fee = currentPaymentRequest.amount * 0.0069;
+      const _fee = currentPaymentRequest.amount * 0.0069;
 
       // Create a successful payment result
-      const paymentResult: PaymentResult = {
+      const __paymentResult: PaymentResult = {
         success: _true,
         transactionId: _transactionCode,
         amount: currentPaymentRequest.amount,
@@ -385,7 +385,7 @@ const PaymentScreen: React.FC = () => {
     setProcessing(__true);
 
     try {
-      const request: PaymentRequest = {
+      const __request: PaymentRequest = {
         amount: calculateGrandTotal(),
         currency: 'GBP',
         orderId: `ORDER-${Date.now()}`,

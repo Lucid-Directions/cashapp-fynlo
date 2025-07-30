@@ -54,12 +54,12 @@ const ServiceChargeSelectionScreen: React.FC = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
   const {
-    cart,
+    _cart,
     cartTotal,
     setServiceChargePercentage,
     setAddTransactionFee,
-    serviceChargePercentage,
-    addTransactionFee,
+    _serviceChargePercentage,
+    _addTransactionFee,
   } = useAppStore();
 
   const [selectedOption, setSelectedOption] = useState<number>(__serviceChargePercentage);
@@ -101,7 +101,7 @@ const ServiceChargeSelectionScreen: React.FC = () => {
   const handleContinue = () => {
     if (selectedOption === 0 && !localAddTransactionFee) {
       Alert.alert(
-        'Processing Costs',
+    console.log('Processing Costs',
         'Without a service charge or transaction fee, the restaurant will cover all processing costs (2.9%). Continue anyway?',
         [
           { text: 'Go Back', style: 'cancel' },
@@ -273,259 +273,8 @@ const ServiceChargeSelectionScreen: React.FC = () => {
 
 const createStyles = (theme: _unknown) =>
   StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: theme.colors.background,
     },
-    header: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingHorizontal: 16,
-      paddingVertical: 12,
-      backgroundColor: theme.colors.surface,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.colors.border,
-    },
-    backButton: {
-      padding: 8,
-    },
-    headerTitle: {
-      fontSize: 18,
-      fontWeight: '600',
-      color: theme.colors.text,
-    },
-    placeholder: {
-      width: 40,
-    },
-    content: {
-      flex: 1,
-      paddingHorizontal: 16,
-    },
-    explanationSection: {
-      paddingVertical: 20,
-    },
-    explanationTitle: {
-      fontSize: 24,
-      fontWeight: '700',
-      color: theme.colors.text,
-      marginBottom: 8,
-    },
-    explanationText: {
-      fontSize: 16,
-      color: theme.colors.textSecondary,
-      lineHeight: 22,
-    },
-    optionsSection: {
-      marginBottom: 24,
-    },
-    optionCard: {
-      backgroundColor: theme.colors.surface,
-      borderRadius: 12,
-      padding: 16,
-      marginBottom: 12,
-      borderWidth: 2,
-      borderColor: theme.colors.border,
-      position: 'relative',
-    },
-    optionCardSelected: {
-      borderColor: theme.colors.primary,
-      backgroundColor: `${theme.colors.primary}08`,
-    },
-    recommendedBadge: {
-      position: 'absolute',
-      top: -8,
-      right: 12,
-      backgroundColor: theme.colors.success,
-      paddingHorizontal: 12,
-      paddingVertical: 4,
-      borderRadius: 12,
-    },
-    recommendedText: {
-      fontSize: 10,
-      fontWeight: '700',
-      color: theme.colors.white,
-      letterSpacing: 0.5,
-    },
-    optionHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: 8,
-    },
-    optionLeft: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      flex: 1,
-    },
-    radioButton: {
-      width: 24,
-      height: 24,
-      borderRadius: 12,
-      borderWidth: 2,
-      borderColor: theme.colors.border,
-      marginRight: 12,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    radioButtonSelected: {
-      borderColor: theme.colors.primary,
-      backgroundColor: theme.colors.primary,
-    },
-    optionInfo: {
-      flex: 1,
-    },
-    optionLabel: {
-      fontSize: 16,
-      fontWeight: '600',
-      color: theme.colors.text,
-    },
-    optionDescription: {
-      fontSize: 14,
-      color: theme.colors.textSecondary,
-      marginTop: 2,
-    },
-    optionRight: {
-      alignItems: 'flex-end',
-    },
-    optionAmount: {
-      fontSize: 18,
-      fontWeight: '700',
-      color: theme.colors.text,
-    },
-    feeExplanation: {
-      fontSize: 12,
-      color: theme.colors.textSecondary,
-      fontStyle: 'italic',
-    },
-    transactionFeeSection: {
-      backgroundColor: theme.colors.surface,
-      borderRadius: 12,
-      padding: 16,
-      marginBottom: 24,
-      borderWidth: 1,
-      borderColor: theme.colors.border,
-    },
-    sectionTitle: {
-      fontSize: 18,
-      fontWeight: '600',
-      color: theme.colors.text,
-      marginBottom: 8,
-    },
-    feeExplanationText: {
-      fontSize: 14,
-      color: theme.colors.textSecondary,
-      marginBottom: 16,
-      lineHeight: 20,
-    },
-    toggleButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingVertical: 12,
-      paddingHorizontal: 16,
-      borderRadius: 8,
-      borderWidth: 1,
-      borderColor: theme.colors.border,
-      backgroundColor: theme.colors.background,
-    },
-    toggleButtonSelected: {
-      borderColor: theme.colors.primary,
-      backgroundColor: `${theme.colors.primary}08`,
-    },
-    toggleIndicator: {
-      width: 20,
-      height: 20,
-      borderRadius: 10,
-      borderWidth: 2,
-      borderColor: theme.colors.border,
-      marginRight: 12,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    toggleIndicatorSelected: {
-      borderColor: theme.colors.primary,
-      backgroundColor: theme.colors.primary,
-    },
-    toggleText: {
-      fontSize: 16,
-      fontWeight: '500',
-      color: theme.colors.text,
-    },
-    warningSection: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginTop: 12,
-      paddingTop: 12,
-      borderTopWidth: 1,
-      borderTopColor: theme.colors.border,
-    },
-    warningText: {
-      fontSize: 14,
-      color: theme.colors.warning,
-      marginLeft: 8,
-      fontWeight: '500',
-    },
-    summarySection: {
-      backgroundColor: theme.colors.surface,
-      borderRadius: 12,
-      padding: 16,
-      marginBottom: 24,
-    },
-    summaryTitle: {
-      fontSize: 18,
-      fontWeight: '600',
-      color: theme.colors.text,
-      marginBottom: 12,
-    },
-    summaryRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingVertical: 6,
-    },
-    summaryLabel: {
-      fontSize: 16,
-      color: theme.colors.textSecondary,
-    },
-    summaryValue: {
-      fontSize: 16,
-      fontWeight: '500',
-      color: theme.colors.text,
-    },
-    totalRow: {
-      borderTopWidth: 1,
-      borderTopColor: theme.colors.border,
-      marginTop: 8,
-      paddingTop: 12,
-    },
-    totalLabel: {
-      fontSize: 18,
-      fontWeight: '700',
-      color: theme.colors.text,
-    },
-    totalValue: {
-      fontSize: 20,
-      fontWeight: '700',
-      color: theme.colors.primary,
-    },
-    footer: {
-      paddingHorizontal: 16,
-      paddingVertical: 16,
-      backgroundColor: theme.colors.surface,
-      borderTopWidth: 1,
-      borderTopColor: theme.colors.border,
-    },
-    continueButton: {
-      backgroundColor: theme.colors.primary,
-      borderRadius: 12,
-      paddingVertical: 16,
-      alignItems: 'center',
-    },
-    continueButtonText: {
-      fontSize: 18,
-      fontWeight: '600',
-      color: theme.colors.white,
-    },
+    }
   });
 
 export default ServiceChargeSelectionScreen;

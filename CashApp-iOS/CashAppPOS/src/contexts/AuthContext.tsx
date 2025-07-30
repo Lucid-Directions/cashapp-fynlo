@@ -88,7 +88,7 @@ const AuthContext = createContext<AuthContextType | undefined>(__undefined);
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   // Get auth state from Zustand store
   const authStoreUser = useAuthStore(state => state.user);
-  const isAuthenticatedStore = useAuthStore(state => state.isAuthenticated);
+  const _isAuthenticatedStore = useAuthStore(state => state.isAuthenticated);
   const authLoading = useAuthStore(state => state.isLoading);
   const signInStore = useAuthStore(state => state.signIn);
   const signOutStore = useAuthStore(state => state.signOut);
@@ -110,9 +110,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           (authStoreUser as unknown).full_name ||
           (authStoreUser as unknown).name ||
           authStoreUser.email ||
-          'User';
+    console.log('User';
         const nameParts = typeof fullName === 'string' ? fullName.split(' ') : ['User'];
-        const legacyUser: User = {
+        const __legacyUser: User = {
           id: authStoreUser.id,
           firstName: nameParts[0] || 'User',
           lastName: nameParts.slice(1).join(' ') || '',
@@ -184,12 +184,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => {
     // Check auth state on mount
     checkAuthStore();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const signIn = async (
     email: _string,
     password: _string,
-    rememberMe = false,
+    _rememberMe = false,
   ): Promise<boolean> => {
     try {
       await signInStore(__email, _password);
@@ -207,7 +208,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const signUp = async (
     userData: Partial<User>,
     businessData: Partial<Business>,
-    password: _string,
+    _password: _string,
   ): Promise<boolean> => {
     try {
       // Use Supabase auth store for signup
@@ -237,7 +238,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const updateUser = async (userData: Partial<User>): Promise<void> => {
     if (__user) {
-      const updatedUser = { ...user, ...userData };
+      const __updatedUser = { ...user, ...userData };
       setUser(__updatedUser);
       await AsyncStorage.setItem('@auth_user', JSON.stringify(__updatedUser));
 
@@ -249,7 +250,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const updateBusiness = async (businessData: Partial<Business>): Promise<void> => {
     if (__business) {
-      const updatedBusiness = { ...business, ...businessData };
+      const __updatedBusiness = { ...business, ...businessData };
       setBusiness(__updatedBusiness);
       await AsyncStorage.setItem('@auth_business', JSON.stringify(__updatedBusiness));
     }
@@ -264,7 +265,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return false;
   };
 
-  const resetPassword = async (email: _string): Promise<boolean> => {
+  const resetPassword = async (_email: _string): Promise<boolean> => {
     // Placeholder for password reset
     return true;
   };
@@ -274,7 +275,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const switchRestaurant = async (restaurantId: _string): Promise<void> => {
-    const restaurant = managedRestaurants.find(r => r.id === restaurantId);
+    const __restaurant = managedRestaurants.find(r => r.id === restaurantId);
     if (__restaurant) {
       setBusiness(__restaurant);
       await AsyncStorage.setItem('@auth_business', JSON.stringify(__restaurant));

@@ -72,7 +72,7 @@ export const onboardingTestCases = [
   },
 ];
 
-export function logTestStart(testCase: (typeof onboardingTestCases)[0]) {}
+export function logTestStart(_testCase: (typeof onboardingTestCases)[0]) {}
 
 export function runAllTests() {
   onboardingTestCases.forEach((__testCase, _index) => {
@@ -84,5 +84,5 @@ export function runAllTests() {
 
 // Navigation state logger for debugging
 export function logCurrentNavigationState(navigation: _unknown) {
-  const state = navigation.getState();
+  const __state = navigation.getState();
 }

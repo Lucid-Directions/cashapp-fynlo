@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { View, TouchableOpacity, ViewStyle } from 'react-native';
+import { Text, TouchableOpacity, View, ViewStyle } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme, ThemeMode, colorThemeOptions } from '../../design-system/ThemeProvider';
 
@@ -27,7 +27,7 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
   style,
   testID,
 }) => {
-  const { theme, _themeMode, colorTheme, _setThemeMode, setColorTheme, isDark } = useTheme();
+  const { theme, __themeMode, colorTheme, _setThemeMode, setColorTheme, isDark } = useTheme();
   const [isAnimating, setIsAnimating] = useState(__false);
 
   const themeOptions: ThemeOption[] = [
@@ -61,15 +61,15 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
 
     try {
       setIsAnimating(__true);
-      const newTheme = isDark ? 'light' : 'dark';
+      const __newTheme = isDark ? 'light' : 'dark';
 
       // Add animation delay for smooth transition
-      await new Promise(resolve => setTimeout(__resolve, 100));
+      await new Promise(_resolve => setTimeout(__resolve, 100));
 
       await setThemeMode(__newTheme);
 
       // Additional delay to ensure theme is fully applied
-      await new Promise(resolve => setTimeout(__resolve, 200));
+      await new Promise(_resolve => setTimeout(__resolve, 200));
     } catch (__error) {
       // Fallback to default theme if switching fails
       try {
@@ -80,6 +80,7 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
     } finally {
       setIsAnimating(__false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDark, _setThemeMode, isAnimating]);
 
   // Safe theme access with fallbacks
@@ -125,12 +126,13 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
         await setColorTheme(colorThemeOption.id);
 
         // Add animation delay for smooth transition
-        await new Promise(resolve => setTimeout(__resolve, 200));
+        await new Promise(_resolve => setTimeout(__resolve, 200));
       } catch (__error) {
       } finally {
         setIsAnimating(__false);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [setColorTheme, isAnimating],
   );
 
@@ -310,12 +312,12 @@ export interface ThemeToggleProps {
 }
 
 export const ThemeToggle: React.FC<ThemeToggleProps> = ({
-  size = 'md',
+  _size = 'md',
   showLabels = false,
   style,
   testID,
 }) => {
-  const { theme, _isDark, toggleTheme } = useTheme();
+  const { theme, __isDark, toggleTheme } = useTheme();
   const styles = createStyles(__theme);
 
   const getSizeStyles = () => {
@@ -352,194 +354,10 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
 const createStyles = (theme: _Theme) =>
   StyleSheet.create({
     // Compact variant styles
-    compactContainer: {
-      flexDirection: 'row',
-      backgroundColor: theme.colors.neutral[100],
-      borderRadius: theme.borderRadius.lg,
-      padding: theme.spacing[1],
-    },
-    compactButton: {
-      flex: 1,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingVertical: theme.spacing[2],
-      paddingHorizontal: theme.spacing[3],
-      borderRadius: theme.borderRadius.md,
-      gap: theme.spacing[2],
-    },
-    compactButtonActive: {
-      backgroundColor: theme.colors.primary,
-    },
-    compactLabel: {
-      fontSize: theme.typography.fontSize.sm,
-      fontWeight: theme.typography.fontWeight.medium,
-      color: theme.colors.neutral[600],
-    },
-    compactLabelActive: {
-      color: theme.colors.white,
-    },
-
     // Expanded variant styles
-    expandedContainer: {
-      gap: theme.spacing[3],
-    },
-    expandedCard: {
-      backgroundColor: theme.colors.white,
-      borderRadius: theme.borderRadius.xl,
-      padding: theme.spacing[4],
-      borderWidth: 2,
-      borderColor: theme.colors.neutral[200],
-      alignItems: 'center',
-      position: 'relative',
-    },
-    expandedCardActive: {
-      borderColor: theme.colors.primary,
-      backgroundColor: theme.colors.primary[50] || theme.colors.neutral[50],
-    },
-    expandedIconContainer: {
-      marginBottom: theme.spacing[3],
-    },
-    expandedTitle: {
-      fontSize: theme.typography.fontSize.lg,
-      fontWeight: theme.typography.fontWeight.semibold,
-      color: theme.colors.text,
-      marginBottom: theme.spacing[1],
-    },
-    expandedTitleActive: {
-      color: theme.colors.primary,
-    },
-    expandedDescription: {
-      fontSize: theme.typography.fontSize.sm,
-      color: theme.colors.neutral[600],
-      textAlign: 'center',
-    },
-    expandedCheckmark: {
-      position: 'absolute',
-      top: theme.spacing[2],
-      right: theme.spacing[2],
-    },
-
     // List variant styles
-    listContainer: {
-      backgroundColor: theme.colors.white,
-      borderRadius: theme.borderRadius.xl,
-      overflow: 'hidden',
-    },
-    listItem: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: theme.spacing[4],
-      paddingVertical: theme.spacing[3],
-      borderBottomWidth: 1,
-      borderBottomColor: theme.colors.neutral[100],
-    },
-    listItemActive: {
-      backgroundColor: theme.colors.primary[50] || theme.colors.neutral[50],
-    },
-    listIconContainer: {
-      marginRight: theme.spacing[3],
-      width: 32,
-      alignItems: 'center',
-    },
-    listContent: {
-      flex: 1,
-    },
-    listTitle: {
-      fontSize: theme.typography.fontSize.base,
-      fontWeight: theme.typography.fontWeight.medium,
-      color: theme.colors.text,
-      marginBottom: theme.spacing[1],
-    },
-    listTitleActive: {
-      color: theme.colors.primary,
-    },
-    listDescription: {
-      fontSize: theme.typography.fontSize.sm,
-      color: theme.colors.neutral[600],
-    },
-    listTrailing: {
-      marginLeft: theme.spacing[3],
-    },
-
     // Toggle styles
-    toggleButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: theme.colors.neutral[100],
-      borderRadius: theme.borderRadius.full,
-      gap: theme.spacing[2],
-    },
-    toggleButtonDark: {
-      backgroundColor: theme.colors.neutral[800],
-    },
-    toggleLabel: {
-      fontSize: theme.typography.fontSize.sm,
-      fontWeight: theme.typography.fontWeight.medium,
-      color: theme.colors.text,
-    },
-
     // Colors variant styles
-    colorsContainer: {
-      backgroundColor: theme.colors.white,
-      borderRadius: theme.borderRadius.xl,
-      padding: theme.spacing[4],
-    },
-    colorsGrid: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      gap: theme.spacing[3],
-      justifyContent: 'space-between',
-    },
-    colorCard: {
-      width: '48%',
-      backgroundColor: theme.colors.neutral[50],
-      borderRadius: theme.borderRadius.lg,
-      padding: theme.spacing[3],
-      borderWidth: 2,
-      borderColor: theme.colors.neutral[200],
-      alignItems: 'center',
-      position: 'relative',
-      minHeight: 120,
-    },
-    colorCardActive: {
-      borderColor: theme.colors.primary,
-      backgroundColor: theme.colors.primary[50] || theme.colors.neutral[50],
-    },
-    colorPreview: {
-      flexDirection: 'row',
-      marginBottom: theme.spacing[2],
-      gap: theme.spacing[1],
-    },
-    colorSwatch: {
-      width: 16,
-      height: 16,
-      borderRadius: theme.borderRadius.sm,
-      borderWidth: 1,
-      borderColor: theme.colors.neutral[200],
-    },
-    colorLabel: {
-      fontSize: theme.typography.fontSize.sm,
-      fontWeight: theme.typography.fontWeight.semibold,
-      color: theme.colors.text,
-      textAlign: 'center',
-      marginBottom: theme.spacing[1],
-    },
-    colorLabelActive: {
-      color: theme.colors.primary,
-    },
-    colorDescription: {
-      fontSize: theme.typography.fontSize.xs,
-      color: theme.colors.neutral[600],
-      textAlign: 'center',
-      lineHeight: 16,
-    },
-    colorCheckmark: {
-      position: 'absolute',
-      top: theme.spacing[2],
-      right: theme.spacing[2],
-    },
   });
 
 export default ThemeSwitcher;

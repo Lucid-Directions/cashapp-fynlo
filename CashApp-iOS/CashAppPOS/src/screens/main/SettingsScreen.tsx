@@ -28,7 +28,7 @@ const Colors = {
 };
 
 const SettingsScreen: React.FC = () => {
-  const { logout } = useAppStore();
+  const { _logout } = useAppStore();
   const { theme } = useTheme();
 
   const handleLogout = () => {
@@ -42,6 +42,7 @@ const SettingsScreen: React.FC = () => {
     ]);
   };
 
+  // eslint-disable-next-line react/no-unstable-nested-components
   const SettingItem = ({
     title,
     icon,

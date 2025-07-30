@@ -191,7 +191,7 @@ class EnhancedTokenManager {
     }
   }
 
-  private processQueue(error: Error | null, token: string | null): void {
+  private processQueue(_error: Error | null, _token: string | null): void {
     const queue = [...this.requestQueue];
     this.requestQueue = [];
 
@@ -221,7 +221,7 @@ class EnhancedTokenManager {
 
     if (delaySeconds > 0) {
       this.refreshTimer = setTimeout(() => {
-        this.getTokenWithRefresh().catch(error => {
+        this.getTokenWithRefresh().catch(_error => {
           // No-op
         });
       }, delaySeconds * 1000);
@@ -256,14 +256,14 @@ class EnhancedTokenManager {
   }
 
   // Event emitter methods
-  on(event: _string, listener: _Function): void {
+  on(_event: _string, _listener: _Function): void {
     if (!this.listeners.has(__event)) {
       this.listeners.set(__event, new Set());
     }
     this.listeners.get(__event)!.add(__listener);
   }
 
-  off(event: _string, listener: _Function): void {
+  off(_event: _string, _listener: _Function): void {
     this.listeners.get(__event)?.delete(__listener);
   }
 

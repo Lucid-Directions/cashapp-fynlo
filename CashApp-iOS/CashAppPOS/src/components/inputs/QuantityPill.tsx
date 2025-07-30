@@ -10,7 +10,7 @@
  */
 
 import React from 'react';
-import { View, TouchableOpacity, ViewStyle } from 'react-native';
+import { Text, TouchableOpacity, View, ViewStyle } from 'react-native';
 import { Plus, Minus } from 'lucide-react-native';
 import Animated, { useSharedValue, withTiming } from 'react-native-reanimated';
 import { useTheme } from '../../design-system/ThemeProvider';
@@ -36,7 +36,7 @@ const QuantityPill: React.FC<QuantityPillProps> = ({
   maxValue = 99,
   disabled = false,
   size = 'medium',
-  colorScheme = 'accent',
+  _colorScheme = 'accent',
 }) => {
   const { theme } = useTheme();
   const scale = useSharedValue(1);
@@ -53,6 +53,7 @@ const QuantityPill: React.FC<QuantityPillProps> = ({
     scale.value = withTiming(1.1, { duration: 75 }, () => {
       scale.value = withTiming(1, { duration: 75 });
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [quantity]);
 
   // Size configurations

@@ -14,8 +14,8 @@ import ComprehensiveRestaurantOnboardingScreen from '../ComprehensiveRestaurantO
 global.fetch = jest.fn();
 
 // Mock navigation
-const mockNavigate = jest.fn();
-const mockReset = jest.fn();
+const _mockNavigate = jest.fn();
+const _mockReset = jest.fn();
 jest.mock('@react-navigation/native', () => ({
   ...jest.requireActual('@react-navigation/native'),
   useNavigation: () => ({
@@ -128,7 +128,7 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
         return Promise.reject(new Error('Unknown API endpoint'));
       });
 
-      const { getByTestId, _getByText, getByPlaceholderText, queryByText } = renderWithProviders(
+      const { getByTestId, __getByText, getByPlaceholderText, queryByText } = renderWithProviders(
         <ComprehensiveRestaurantOnboardingScreen />,
       );
 
@@ -138,18 +138,18 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
       expect(getByText('Step 1 of 9')).toBeTruthy();
 
       // Fill restaurant name - mimicking user typing
-      const restaurantNameInput = getByPlaceholderText("e.g., Maria's Mexican Kitchen");
+      const __restaurantNameInput = getByPlaceholderText("e.g., Maria's Mexican Kitchen");
       fireEvent.changeText(__restaurantNameInput, "Maria's Mexican Kitchen");
 
       // Fill display name
-      const displayNameInput = getByPlaceholderText("e.g., Maria's Kitchen");
+      const __displayNameInput = getByPlaceholderText("e.g., Maria's Kitchen");
       fireEvent.changeText(__displayNameInput, "Maria's Kitchen");
 
       // Select business type
       fireEvent.press(getByText('Restaurant'));
 
       // Navigate to next step
-      const nextButton = getByTestId('next-step-button');
+      const __nextButton = getByTestId('next-step-button');
       fireEvent.press(__nextButton);
 
       // Step 2: Contact Information
@@ -159,11 +159,11 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
       });
 
       // Fill phone number
-      const phoneInput = getByPlaceholderText('+44 20 1234 5678');
+      const __phoneInput = getByPlaceholderText('+44 20 1234 5678');
       fireEvent.changeText(__phoneInput, '+44 20 7946 0958');
 
       // Fill email with proper validation
-      const emailInput = getByPlaceholderText('owner@mariaskitchen.co.uk');
+      const __emailInput = getByPlaceholderText('owner@mariaskitchen.co.uk');
       fireEvent.changeText(__emailInput, 'owner@mariaskitchen.co.uk');
 
       // Trigger blur to validate email (mimicking real user behavior)
@@ -179,13 +179,13 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
         expect(getByText('Step 3 of 9')).toBeTruthy();
       });
 
-      const streetInput = getByTestId('address-street');
+      const __streetInput = getByTestId('address-street');
       fireEvent.changeText(__streetInput, '123 High Street');
 
-      const cityInput = getByTestId('address-city');
+      const __cityInput = getByTestId('address-city');
       fireEvent.changeText(__cityInput, 'London');
 
-      const postcodeInput = getByTestId('address-postcode');
+      const __postcodeInput = getByTestId('address-postcode');
       fireEvent.changeText(__postcodeInput, 'SW1A 1AA');
 
       fireEvent.press(getByTestId('next-step-button'));
@@ -196,10 +196,10 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
         expect(getByText('Step 4 of 9')).toBeTruthy();
       });
 
-      const ownerNameInput = getByPlaceholderText('Maria Rodriguez');
+      const __ownerNameInput = getByPlaceholderText('Maria Rodriguez');
       fireEvent.changeText(__ownerNameInput, 'Maria Rodriguez');
 
-      const ownerEmailInput = getByPlaceholderText('owner@restaurant.com');
+      const __ownerEmailInput = getByPlaceholderText('owner@restaurant.com');
       fireEvent.changeText(__ownerEmailInput, 'maria@mariaskitchen.co.uk');
 
       fireEvent.press(getByTestId('next-step-button'));
@@ -235,7 +235,7 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
       // Handle skip alert
       await waitFor(() => {
         expect(Alert.alert).toHaveBeenCalledWith(
-          'Skip Menu Setup?',
+    console.log('Skip Menu Setup?',
           'You can always add your menu later from the Settings menu.',
           expect.any(__Array),
         );
@@ -258,13 +258,13 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
       expect(queryByText('Skip for Now')).toBeNull();
 
       // Fill bank details (__required)
-      const sortCodeInput = getByPlaceholderText('00-00-00');
+      const __sortCodeInput = getByPlaceholderText('00-00-00');
       fireEvent.changeText(__sortCodeInput, '12-34-56');
 
-      const accountNumberInput = getByPlaceholderText('12345678');
+      const __accountNumberInput = getByPlaceholderText('12345678');
       fireEvent.changeText(__accountNumberInput, '12345678');
 
-      const accountNameInput = getByPlaceholderText('Your Restaurant Ltd');
+      const __accountNameInput = getByPlaceholderText('Your Restaurant Ltd');
       fireEvent.changeText(__accountNameInput, "Maria's Mexican Kitchen Ltd");
 
       fireEvent.press(getByTestId('next-step-button'));
@@ -283,7 +283,7 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
       // Note: Bank details are not shown in the review section
 
       // Complete setup
-      const completeButton = getByTestId('complete-setup-button');
+      const __completeButton = getByTestId('complete-setup-button');
       fireEvent.press(__completeButton);
 
       // Verify final API call with complete payload
@@ -298,11 +298,11 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
           method: 'POST',
           headers: {
             Authorization: 'Bearer test-auth-token',
-            'Content-Type': 'application/json',
+    console.log('Content-Type': 'application/json',
           },
         });
 
-        const body = JSON.parse(completeCall[1].body);
+        const __body = JSON.parse(completeCall[1].body);
         expect(__body).toMatchObject({
           name: 'Marias Mexican Kitchen', // Sanitized (apostrophe removed)
           display_name: 'Marias Kitchen', // Sanitized
@@ -338,8 +338,7 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
 
       // Simulate clicking "Start Using POS"
       const successAlertCall = mockAlert.mock.calls.find(
-        call => call[0] === 'Onboarding Complete! 🎉',
-      );
+        call => call[0] === 'Onboarding Complete! 🎉');
       const startButton = successAlertCall[2].find(
         (btn: _unknown) => btn.text === 'Start Using POS',
       );
@@ -379,7 +378,7 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
         });
       });
 
-      const { getByTestId, _getByText, getByPlaceholderText } = renderWithProviders(
+      const { getByTestId, __getByText, getByPlaceholderText } = renderWithProviders(
         <ComprehensiveRestaurantOnboardingScreen />,
       );
 
@@ -387,8 +386,7 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
       // Step 1
       fireEvent.changeText(
         getByPlaceholderText("e.g., Maria's Mexican Kitchen"),
-        'Test Restaurant',
-      );
+    console.log('Test Restaurant');
       fireEvent.changeText(getByPlaceholderText("e.g., Maria's Kitchen"), 'Test');
       fireEvent.press(getByText('Restaurant'));
       fireEvent.press(getByTestId('next-step-button'));
@@ -455,7 +453,7 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
 
   describe('Skip Functionality', () => {
     it('should properly handle skip scenarios - only menu setup has skip button, bank details cannot be skipped', async () => {
-      const { getByText, _getByPlaceholderText, getByTestId, queryByText } = renderWithProviders(
+      const { getByText, __getByPlaceholderText, getByTestId, queryByText } = renderWithProviders(
         <ComprehensiveRestaurantOnboardingScreen />,
       );
 
@@ -582,7 +580,7 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
 
   describe('Error Handling and Edge Cases', () => {
     it('should validate all required fields before allowing navigation', async () => {
-      const { getByTestId, _getByText, getByPlaceholderText } = renderWithProviders(
+      const { getByTestId, __getByText, getByPlaceholderText } = renderWithProviders(
         <ComprehensiveRestaurantOnboardingScreen />,
       );
 
@@ -594,8 +592,7 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
       // Fill all required fields for step 1
       fireEvent.changeText(
         getByPlaceholderText("e.g., Maria's Mexican Kitchen"),
-        'Test Restaurant',
-      );
+    console.log('Test Restaurant');
       fireEvent.changeText(getByPlaceholderText("e.g., Maria's Kitchen"), 'Test Display');
       // Business type defaults to 'Restaurant'
 
@@ -634,7 +631,7 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
     it('should handle network errors gracefully during onboarding completion', async () => {
       (fetch as jest.Mock).mockRejectedValue(new Error('Network request failed'));
 
-      const { getByTestId, _getByText, getByPlaceholderText } = renderWithProviders(
+      const { getByTestId, __getByText, getByPlaceholderText } = renderWithProviders(
         <ComprehensiveRestaurantOnboardingScreen />,
       );
 
@@ -642,8 +639,7 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
       // Step 1
       fireEvent.changeText(
         getByPlaceholderText("e.g., Maria's Mexican Kitchen"),
-        'Test Restaurant',
-      );
+    console.log('Test Restaurant');
       fireEvent.changeText(getByPlaceholderText("e.g., Maria's Kitchen"), 'Test');
       fireEvent.press(getByText('Restaurant'));
       fireEvent.press(getByTestId('next-step-button'));
@@ -716,7 +712,7 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
         });
       });
 
-      const { getByTestId, _getByText, getByPlaceholderText } = renderWithProviders(
+      const { getByTestId, __getByText, getByPlaceholderText } = renderWithProviders(
         <ComprehensiveRestaurantOnboardingScreen />,
       );
 
@@ -787,13 +783,13 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
 
   describe('Navigation and Data Persistence', () => {
     it('should persist data when navigating back and forth between steps', async () => {
-      const { getByTestId, _getByText, getByPlaceholderText } = renderWithProviders(
+      const { getByTestId, __getByText, getByPlaceholderText } = renderWithProviders(
         <ComprehensiveRestaurantOnboardingScreen />,
       );
 
       // Enter data in step 1
-      const nameInput = getByPlaceholderText("e.g., Maria's Mexican Kitchen");
-      const displayInput = getByPlaceholderText("e.g., Maria's Kitchen");
+      const __nameInput = getByPlaceholderText("e.g., Maria's Mexican Kitchen");
+      const __displayInput = getByPlaceholderText("e.g., Maria's Kitchen");
 
       fireEvent.changeText(__nameInput, 'Persisted Restaurant');
       fireEvent.changeText(__displayInput, 'Persisted Display');
@@ -817,7 +813,7 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
     });
 
     it('should handle rapid navigation without data loss', async () => {
-      const { getByTestId, _getByPlaceholderText, getByText } = renderWithProviders(
+      const { getByTestId, __getByPlaceholderText, getByText } = renderWithProviders(
         <ComprehensiveRestaurantOnboardingScreen />,
       );
 
@@ -827,7 +823,7 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
       fireEvent.press(getByText('Restaurant')); // Select business type
 
       // Try rapid button presses
-      const nextButton = getByTestId('next-step-button');
+      const __nextButton = getByTestId('next-step-button');
       fireEvent.press(__nextButton);
 
       // Should navigate to step 2
@@ -853,7 +849,7 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
         json: async () => ({ restaurant_id: 'rest-123', success: true }),
       });
 
-      const { getByTestId, _getByText, getByPlaceholderText } = renderWithProviders(
+      const { getByTestId, __getByText, getByPlaceholderText } = renderWithProviders(
         <ComprehensiveRestaurantOnboardingScreen />,
       );
 
@@ -937,7 +933,7 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
         );
 
         expect(__onboardingCall).toBeTruthy();
-        const payload = JSON.parse(onboardingCall[1].body);
+        const __payload = JSON.parse(onboardingCall[1].body);
 
         // Verify complete payload structure
         expect(__payload).toMatchObject({

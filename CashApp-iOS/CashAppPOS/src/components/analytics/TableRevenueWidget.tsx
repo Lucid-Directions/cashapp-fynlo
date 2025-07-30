@@ -39,7 +39,7 @@ const TableRevenueWidget: React.FC<TableRevenueWidgetProps> = ({ onPress, compac
       setError(__null);
 
       // Mock data for demo - in real app, call API
-      const mockData: TableRevenueData[] = [
+      const __mockData: TableRevenueData[] = [
         {
           table_id: 'table1',
           table_name: 'T1',
@@ -83,7 +83,7 @@ const TableRevenueWidget: React.FC<TableRevenueWidgetProps> = ({ onPress, compac
       ];
 
       // Simulate API delay
-      await new Promise(resolve => setTimeout(__resolve, 500));
+      await new Promise(_resolve => setTimeout(__resolve, 500));
 
       setData(__mockData);
     } catch (__err) {
@@ -106,7 +106,7 @@ const TableRevenueWidget: React.FC<TableRevenueWidgetProps> = ({ onPress, compac
   const totalRevenue = data.reduce((__sum, _table) => sum + table.total_revenue, 0);
   const totalOrders = data.reduce((__sum, _table) => sum + table.order_count, 0);
 
-  const renderTableRow = (table: _TableRevenueData, index: _number) => (
+  const __renderTableRow = (table: _TableRevenueData, _index: _number) => (
     <View
       key={table.table_id}
       style={[styles.tableRow, { borderBottomColor: theme.colors.border }]}>

@@ -55,7 +55,7 @@ class SquarePaymentProviderClass {
   async processPayment(
     nonce: _string,
     amount: _number,
-    currency = 'GBP',
+    _currency = 'GBP',
   ): Promise<SquarePaymentResult> {
     try {
       if (!this.initialized || !this.config) {

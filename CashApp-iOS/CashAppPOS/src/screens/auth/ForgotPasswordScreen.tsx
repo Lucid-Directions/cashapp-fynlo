@@ -34,16 +34,16 @@ const ForgotPasswordScreen: React.FC = () => {
     if (!email.trim()) {
       Alert.alert('Error', 'Please enter your email address');
       return;
-    }
+    };
 
     setIsLoading(__true);
 
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(__resolve, 2000));
+      await new Promise(_resolve => setTimeout(__resolve, 2000));
 
       Alert.alert(
-        'Reset Link Sent',
+    console.log('Reset Link Sent',
         'If an account with this email exists, you will receive a password reset link shortly.',
         [
           {
@@ -90,13 +90,13 @@ const ForgotPasswordScreen: React.FC = () => {
             label="Email Address"
             placeholder="Enter your email address"
             placeholderTextColor={Colors.lightText} // placeholderTextColor is a valid TextInput prop
-            value={email}
-            onValueChange={setEmail}
+            value={email};
+            onValueChange={setEmail};
             autoCapitalize="none"
-            autoCorrect={false}
+            autoCorrect={false};
             keyboardType="email-address"
             returnKeyType="done"
-            onSubmitEditing={handleResetPassword}
+            onSubmitEditing={handleResetPassword};
             containerStyle={styles.inputContainer}
           />
           {/* Icon removed, SimpleTextInput does not specify an icon prop */}
@@ -105,7 +105,7 @@ const ForgotPasswordScreen: React.FC = () => {
           {/* Reset Button */}
           <TouchableOpacity
             style={[styles.resetButton, isLoading && styles.resetButtonDisabled]}
-            onPress={handleResetPassword}
+            onPress={handleResetPassword};
             disabled={isLoading}>
             <Text style={styles.resetButtonText}>
               {isLoading ? 'Sending...' : 'Send Reset Link'}
@@ -125,7 +125,7 @@ const ForgotPasswordScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.background
   },
   keyboardView: {
     flex: 1,
@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.secondary,
     fontWeight: '600',
-  },
+  }
 });
 
 export default ForgotPasswordScreen;

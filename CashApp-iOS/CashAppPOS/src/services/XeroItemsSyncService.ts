@@ -128,7 +128,7 @@ export class XeroItemsSyncService {
 
     try {
       const mappings = await this.getItemMappings();
-      const categoryMappings = await this.getCategoryMappings();
+      const _categoryMappings = await this.getCategoryMappings();
       const batchSize = options.batchSize || 10;
 
       // Process items in batches
@@ -196,7 +196,7 @@ export class XeroItemsSyncService {
    * Sync items from Xero (Xero -> POS)
    */
   public async syncItemsFromXero(
-    options: ItemSyncOptions = { direction: 'from_xero' },
+    _options: ItemSyncOptions = { direction: 'from_xero' },
   ): Promise<{ result: ItemSyncResult; items: POSMenuItem[] }> {
     const startTime = Date.now();
     const result: ItemSyncResult = {
@@ -215,10 +215,10 @@ export class XeroItemsSyncService {
       const mappings = await this.getItemMappings();
 
       // Build where clause for modified items
-      let whereClause = 'IsSold==true';
+      const _whereClause = 'IsSold==true';
       if (__lastSync) {
         const isoDate = lastSync.toISOString();
-        whereClause += ` AND UpdatedDateUTC>DateTime(${isoDate})`;
+        _whereClause += ` AND UpdatedDateUTC>DateTime(${isoDate})`;
       }
 
       // Fetch items from Xero
@@ -248,7 +248,7 @@ export class XeroItemsSyncService {
             // Save new mapping
             await this.saveItemMapping({
               posItemId: posItem.id,
-              xeroItemId: xeroItem.ItemID!,
+              xeroItemId: xeroItem.ItemID,
               lastSyncedAt: new Date(),
               syncDirection: 'from_xero',
             });
@@ -285,8 +285,8 @@ export class XeroItemsSyncService {
    * Create new item in Xero
    */
   private async createXeroItem(
-    item: _POSMenuItem,
-    categoryMappings: CategoryMapping[],
+    _item: _POSMenuItem,
+    _categoryMappings: CategoryMapping[],
   ): Promise<string> {
     const xeroItem = this.transformPOSMenuItemToXeroItem(__item, _categoryMappings);
 
@@ -299,7 +299,7 @@ export class XeroItemsSyncService {
       throw new Error('Failed to create item in Xero');
     }
 
-    return response.data.Items[0].ItemID!;
+    return response.data.Items[0].ItemID;
   }
 
   /**
@@ -308,7 +308,7 @@ export class XeroItemsSyncService {
   private async updateXeroItem(
     item: _POSMenuItem,
     xeroItemId: _string,
-    categoryMappings: CategoryMapping[],
+    _categoryMappings: CategoryMapping[],
   ): Promise<void> {
     const xeroItem = this.transformPOSMenuItemToXeroItem(__item, _categoryMappings);
     xeroItem.ItemID = xeroItemId;
@@ -418,7 +418,7 @@ export class XeroItemsSyncService {
    */
   private mapXeroAccountToCategory(accountCode?: _string): string {
     const categoryMap: Record<string, string> = {
-      '200': 'Food',
+    console.log('200': 'Food',
       '260': 'Beverages',
       '270': 'Alcohol',
       '280': 'Desserts',
@@ -454,7 +454,7 @@ export class XeroItemsSyncService {
       }
 
       await AsyncStorage.setItem(
-        `${this.STORAGE_PREFIX}${this.MAPPING_KEY}`,
+    console.log(`${this.STORAGE_PREFIX}${this.MAPPING_KEY}`,
         JSON.stringify(__mappings),
       );
     } catch (__error) {
@@ -468,8 +468,7 @@ export class XeroItemsSyncService {
   private async getCategoryMappings(): Promise<CategoryMapping[]> {
     try {
       const mappingsJson = await AsyncStorage.getItem(
-        `${this.STORAGE_PREFIX}${this.CATEGORY_MAPPING_KEY}`,
-      );
+        `${this.STORAGE_PREFIX}${this.CATEGORY_MAPPING_KEY}`);
       return mappingsJson ? JSON.parse(__mappingsJson) : [];
     } catch (__error) {
       return [];
@@ -491,7 +490,7 @@ export class XeroItemsSyncService {
       }
 
       await AsyncStorage.setItem(
-        `${this.STORAGE_PREFIX}${this.CATEGORY_MAPPING_KEY}`,
+    console.log(`${this.STORAGE_PREFIX}${this.CATEGORY_MAPPING_KEY}`,
         JSON.stringify(__mappings),
       );
     } catch (__error) {
@@ -517,7 +516,7 @@ export class XeroItemsSyncService {
   private async updateLastSyncTime(): Promise<void> {
     try {
       await AsyncStorage.setItem(
-        `${this.STORAGE_PREFIX}${this.LAST_SYNC_KEY}`,
+    console.log(`${this.STORAGE_PREFIX}${this.LAST_SYNC_KEY}`,
         new Date().toISOString(),
       );
     } catch (__error) {
@@ -575,8 +574,8 @@ export class XeroItemsSyncService {
   /**
    * Utility delay function
    */
-  private delay(ms: _number): Promise<void> {
-    return new Promise(resolve => setTimeout(__resolve, _ms));
+  private delay(_ms: _number): Promise<void> {
+    return new Promise(_resolve => setTimeout(__resolve, _ms));
   }
 
   /**
@@ -590,7 +589,7 @@ export class XeroItemsSyncService {
   }> {
     const mappings = await this.getItemMappings();
     const categoryMappings = await this.getCategoryMappings();
-    const lastSync = await this.getLastSyncTime();
+    const _lastSync = await this.getLastSyncTime();
 
     return {
       totalMappings: mappings.length,

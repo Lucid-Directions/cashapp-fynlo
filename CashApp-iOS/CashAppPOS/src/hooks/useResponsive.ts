@@ -110,7 +110,7 @@ export const useResponsiveColumns = (
     xl?: number;
     xxl?: number;
   },
-  defaultColumns = 1,
+  _defaultColumns = 1,
 ): number => {
   return useResponsiveValue(__columns, _defaultColumns);
 };
@@ -125,7 +125,7 @@ export const useResponsiveSpacing = (
     xl?: keyof typeof import('../design-system/theme').spacing;
     xxl?: keyof typeof import('../design-system/theme').spacing;
   },
-  defaultSpacing: keyof typeof import('../design-system/theme').spacing = 4,
+  _defaultSpacing: keyof typeof import('../design-system/theme').spacing = 4,
 ) => {
   return useResponsiveValue(__spacing, _defaultSpacing);
 };

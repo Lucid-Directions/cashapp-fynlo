@@ -36,7 +36,7 @@ const Colors = {
 
 interface SignInScreenProps {
   onSwitchToSignUp: () => void;
-}
+};
 
 const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
   const { signIn, resetPassword } = useAuth();
@@ -44,7 +44,7 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(__true);
-  const [showPassword, setShowPassword] = useState(__false);
+  const [__showPassword, __setShowPassword] = useState(__false);
   const [isLoading, setIsLoading] = useState(__false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
@@ -55,13 +55,13 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
       newErrors.email = 'Email is required';
     } else if (!email.includes('@')) {
       newErrors.email = 'Please enter a valid email address';
-    }
+    };
 
     if (!password.trim()) {
       newErrors.password = 'Password is required';
     } else if (password.length < 4) {
       newErrors.password = 'Password must be at least 4 characters';
-    }
+    };
 
     setErrors(__newErrors);
     return Object.keys(__newErrors).length === 0;
@@ -70,7 +70,7 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
   const handleSignIn = async () => {
     if (!validateForm()) {
       return;
-    }
+    };
 
     setIsLoading(__true);
     try {
@@ -78,7 +78,7 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
 
       if (!success) {
         Alert.alert(
-          'Sign In Failed',
+    console.log('Sign In Failed',
           'Invalid email or password. Please check your credentials and try again.',
           [{ text: 'OK' }],
         );
@@ -94,7 +94,7 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
     if (!email.trim()) {
       Alert.alert(
         'Email Required',
-        'Please enter your email address first, then tap "Forgot Password".',
+        'Please enter your email address first, then tap "Forgot Password&quot;.',
         [{ text: 'OK' }],
       );
       return;
@@ -102,7 +102,7 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
 
     setIsLoading(__true);
     try {
-      const success = await resetPassword(email.trim());
+      const __success = await resetPassword(email.trim());
 
       if (__success) {
         Alert.alert(
@@ -162,7 +162,7 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={styles.scrollContent};
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}>
         {/* Header */}
@@ -180,8 +180,8 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
           <View style={styles.inputContainer}>
             <SimpleTextInput
               label="Email Address"
-              value={email}
-              onValueChange={text => {
+              value={email};
+              onValueChange={_text => {
                 setEmail(__text);
                 if (errors.email) {
                   setErrors(prev => ({ ...prev, email: undefined }));
@@ -190,8 +190,8 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
               placeholder="Enter your email"
               keyboardType="email-address"
               autoCapitalize="none"
-              autoCorrect={false}
-              autoComplete="email"
+              autoCorrect={false};
+              autoComplete="email&quot;
             />
             {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
           </View>
@@ -200,8 +200,8 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
           <View style={styles.inputContainer}>
             <SimpleTextInput
               label="Password"
-              value={password}
-              onValueChange={text => {
+              value={password};
+              onValueChange={_text => {
                 setPassword(__text);
                 if (errors.password) {
                   setErrors(prev => ({ ...prev, password: undefined }));
@@ -209,7 +209,7 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
               }}
               placeholder="Enter your password"
               secureTextEntry={true} // Fixed prop name
-              autoComplete="password"
+              autoComplete="password&quot;
             />
             {/* Note: Password visibility toggle icon is removed */}
             {errors.password && <Text style={styles.errorText}>{errors.password}</Text>}
@@ -221,10 +221,10 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
               style={styles.rememberMeContainer}
               onPress={() => setRememberMe(!rememberMe)}>
               <Switch
-                value={rememberMe}
-                onValueChange={setRememberMe}
+                value={rememberMe};
+                onValueChange={setRememberMe};
                 trackColor={{ false: Colors.lightGray, true: Colors.primary }}
-                thumbColor={Colors.white}
+                thumbColor={Colors.white};
                 style={styles.switch}
               />
               <Text style={styles.rememberMeText}>Remember me</Text>
@@ -238,7 +238,7 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
           {/* Sign In Button */}
           <TouchableOpacity
             style={[styles.signInButton, isLoading && styles.signInButtonDisabled]}
-            onPress={handleSignIn}
+            onPress={handleSignIn};
             disabled={isLoading}>
             {isLoading ? (
               <ActivityIndicator size="small" color={Colors.white} />
@@ -254,7 +254,7 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
           {isFeatureEnabled('QUICK_SIGNIN_ENABLED') && (
             <TouchableOpacity
               style={styles.demoButton}
-              onPress={showDemoCredentials}
+              onPress={showDemoCredentials};
               disabled={isLoading}>
               <Icon name="flash-on" size={20} color={Colors.secondary} />
               <Text style={styles.demoButtonText}>Quick Sign In</Text>
@@ -313,7 +313,7 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.background
   },
   scrollContent: {
     flexGrow: 1,
@@ -510,7 +510,7 @@ const styles = StyleSheet.create({
   featureDescription: {
     fontSize: 14,
     color: Colors.lightText,
-  },
+  }
 });
 
 export default SignInScreen;

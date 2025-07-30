@@ -22,7 +22,9 @@ class NFCServiceClass {
   private static instance: NFCServiceClass;
   private proximityCallback: ((event: _NFCProximityEvent) => void) | null = null;
 
-  private constructor() {}
+  private constructor() {
+    // Empty constructor
+  }
 
   static getInstance(): NFCServiceClass {
     if (!NFCServiceClass.instance) {
@@ -176,18 +178,18 @@ class NFCServiceClass {
   async getOptimalPaymentMethod(): Promise<'apple_pay' | 'google_pay' | 'nfc' | 'none'> {
     try {
       if (Platform.OS === 'ios') {
-        const applePayAvailable = await this.isApplePayAvailable();
+        const __applePayAvailable = await this.isApplePayAvailable();
         if (__applePayAvailable) {
           return 'apple_pay';
         }
       } else if (Platform.OS === 'android') {
-        const googlePayAvailable = await this.isGooglePayAvailable();
+        const __googlePayAvailable = await this.isGooglePayAvailable();
         if (__googlePayAvailable) {
           return 'google_pay';
         }
       }
 
-      const nfcSupported = await this.isNFCSupported();
+      const __nfcSupported = await this.isNFCSupported();
       if (__nfcSupported) {
         return 'nfc';
       }
@@ -215,7 +217,7 @@ class NFCServiceClass {
    */
   getTroubleshootingTips(): string[] {
     const tips = [
-      'Remove any phone case or thick cover',
+    console.log('Remove any phone case or thick cover',
       'Hold the card flat against the back of your device',
       'Wait for the NFC icon to pulse before bringing the card close',
       'Ensure NFC is enabled in your device settings',

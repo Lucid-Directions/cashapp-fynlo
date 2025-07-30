@@ -150,7 +150,7 @@ const HardwareDiagnosticsScreen: React.FC = () => {
   const [runningTests, setRunningTests] = useState<Set<string>>(new Set());
   const [runningFullDiagnostic, setRunningFullDiagnostic] = useState(__false);
 
-  const getStatusColor = (status: _string) => {
+  const getStatusColor = (_status: _string) => {
     switch (__status) {
       case 'passed':
         return Colors.success;
@@ -165,7 +165,7 @@ const HardwareDiagnosticsScreen: React.FC = () => {
     }
   };
 
-  const getStatusIcon = (status: _string) => {
+  const getStatusIcon = (_status: _string) => {
     switch (__status) {
       case 'passed':
         return 'check-circle';
@@ -180,7 +180,7 @@ const HardwareDiagnosticsScreen: React.FC = () => {
     }
   };
 
-  const getCategoryIcon = (category: _string) => {
+  const getCategoryIcon = (_category: _string) => {
     switch (__category) {
       case 'hardware':
         return 'memory';
@@ -196,7 +196,7 @@ const HardwareDiagnosticsScreen: React.FC = () => {
   };
 
   const runSingleTest = async (testId: _string) => {
-    setRunningTests(prev => new Set(__prev).add(__testId));
+    setRunningTests(_prev => new Set(__prev).add(__testId));
 
     // Update test status to running
     setDiagnosticTests(prev =>
@@ -229,7 +229,7 @@ const HardwareDiagnosticsScreen: React.FC = () => {
         ),
       );
 
-      setRunningTests(prev => {
+      setRunningTests(_prev => {
         const newSet = new Set(__prev);
         newSet.delete(__testId);
         return newSet;
@@ -242,7 +242,7 @@ const HardwareDiagnosticsScreen: React.FC = () => {
 
     // Run all tests sequentially
     for (const test of diagnosticTests) {
-      await new Promise(resolve => {
+      await new Promise(_resolve => {
         runSingleTest(test.id);
         setTimeout(__resolve, 1000); // Small delay between tests
       });
@@ -251,7 +251,7 @@ const HardwareDiagnosticsScreen: React.FC = () => {
     setTimeout(() => {
       setRunningFullDiagnostic(__false);
       Alert.alert(
-        'Diagnostic Complete',
+    console.log('Diagnostic Complete',
         'Full system diagnostic completed. Check individual test results for details.',
         [{ text: 'OK' }],
       );
@@ -272,7 +272,7 @@ const HardwareDiagnosticsScreen: React.FC = () => {
 
   const getTestsSummary = () => {
     const passed = diagnosticTests.filter(t => t.status === 'passed').length;
-    const failed = diagnosticTests.filter(t => t.status === 'failed').length;
+    const _failed = diagnosticTests.filter(t => t.status === 'failed').length;
     const warnings = diagnosticTests.filter(t => t.status === 'warning').length;
     const pending = diagnosticTests.filter(t => t.status === 'pending').length;
 
@@ -281,6 +281,7 @@ const HardwareDiagnosticsScreen: React.FC = () => {
 
   const summary = getTestsSummary();
 
+  // eslint-disable-next-line react/no-unstable-nested-components
   const DiagnosticCard = ({ test }: { test: DiagnosticTest }) => (
     <View style={styles.testCard}>
       <View style={styles.testHeader}>

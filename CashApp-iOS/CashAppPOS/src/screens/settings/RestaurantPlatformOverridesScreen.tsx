@@ -45,25 +45,28 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
 
   // Mock restaurant ID - in real app, this would come from auth context
   const restaurantId = 'restaurant-123';
-  const userRole = 'restaurant_owner'; // This would come from auth context
+  const __userRole = 'restaurant_owner'; // This would come from auth context
 
-  const [effectiveSettings, setEffectiveSettings] = useState<Record<string, EffectiveSetting>>({});
-  const [loading, setLoading] = useState(__true);
+  const [__effectiveSettings, setEffectiveSettings] = useState<Record<string, EffectiveSetting>>(
+    {},
+  );
+  const [__loading, setLoading] = useState(__true);
   const [refreshing, setRefreshing] = useState(__false);
   const [error, setError] = useState<string | null>(__null);
-  const [pendingOverrides, setPendingOverrides] = useState<OverrideRequest[]>([]);
+  const [__pendingOverrides, __setPendingOverrides] = useState<OverrideRequest[]>([]);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
 
   const platformService = PlatformService.getInstance();
 
   useEffect(() => {
     loadEffectiveSettings();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadEffectiveSettings = async () => {
     try {
       setError(__null);
-      const settings = await platformService.getRestaurantEffectiveSettings(__restaurantId);
+      const __settings = await platformService.getRestaurantEffectiveSettings(__restaurantId);
 
       // Convert to our interface format
       const formattedSettings: Record<string, EffectiveSetting> = {};
@@ -91,8 +94,8 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
   };
 
   const loadMockSettings = () => {
-    const mockSettings: Record<string, EffectiveSetting> = {
-      'business.discount.maximum': {
+    const __mockSettings: Record<string, EffectiveSetting> = {
+    console.log('business.discount.maximum': {
         key: 'business.discount.maximum',
         value: { percentage: 50.0 },
         source: 'platform',
@@ -143,7 +146,7 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
     loadEffectiveSettings();
   };
 
-  const toggleCategoryExpansion = (category: _string) => {
+  const toggleCategoryExpansion = (_category: _string) => {
     const newExpanded = new Set(__expandedCategories);
     if (newExpanded.has(__category)) {
       newExpanded.delete(__category);
@@ -155,16 +158,16 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
 
   const requestOverride = async (
     setting: _EffectiveSetting,
-    newValue: _unknown,
-    reason: _string,
+    _newValue: _unknown,
+    _reason: _string,
   ) => {
     try {
       const requiresApproval = shouldRequireApproval(setting.key, _newValue);
 
-      const success = await platformService.setRestaurantOverride(
+      const __success = await platformService.setRestaurantOverride(
         restaurantId,
         setting.key,
-        newValue,
+        _newValue,
         requiresApproval,
       );
 
@@ -173,8 +176,7 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
           'Override Request Submitted',
           requiresApproval
             ? 'Your override request has been submitted for platform approval.'
-            : 'Setting override has been applied successfully.',
-        );
+            : 'Setting override has been applied successfully.');
 
         // Reload settings to show updated values
         loadEffectiveSettings();
@@ -199,7 +201,7 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
 
   const showOverrideDialog = (setting: _EffectiveSetting) => {
     Alert.prompt(
-      'Request Setting Override',
+    console.log('Request Setting Override',
       `Current value: ${JSON.stringify(setting.value)}\n\nEnter new value:`,
       [
         { text: 'Cancel', style: 'cancel' },
@@ -212,12 +214,12 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
 
             try {
               // Parse the new value (this is simplified - real implementation would have proper type handling)
-              let newValue;
+              let _newValue;
               try {
-                newValue = JSON.parse(__newValueString);
+                _newValue = JSON.parse(__newValueString);
               } catch {
                 // If not valid JSON, treat as string
-                newValue = newValueString;
+                _newValue = newValueString;
               }
 
               Alert.prompt(
@@ -495,202 +497,7 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
 
 const createStyles = (theme: _unknown) =>
   StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: theme.colors.background,
-    },
-    header: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: 16,
-      paddingVertical: 12,
-      backgroundColor: theme.colors.surface,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.colors.border,
-    },
-    backButton: {
-      marginRight: 12,
-    },
-    title: {
-      fontSize: 20,
-      fontWeight: '600',
-      color: theme.colors.text,
-    },
-    content: {
-      flex: 1,
-      paddingHorizontal: 16,
-    },
-    loadingContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      paddingHorizontal: 16,
-    },
-    loadingText: {
-      marginTop: 12,
-      fontSize: 16,
-      color: theme.colors.textLight,
-    },
-    errorCard: {
-      marginTop: 16,
-      padding: 16,
-    },
-    errorContent: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: 12,
-    },
-    errorText: {
-      marginLeft: 8,
-      fontSize: 16,
-      color: theme.colors.error,
-      flex: 1,
-    },
-    retryButton: {
-      alignSelf: 'flex-start',
-    },
-    infoCard: {
-      marginTop: 16,
-      padding: 16,
-    },
-    infoHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: 8,
-    },
-    infoTitle: {
-      marginLeft: 8,
-      fontSize: 16,
-      fontWeight: '600',
-      color: theme.colors.text,
-    },
-    infoText: {
-      fontSize: 14,
-      color: theme.colors.textLight,
-      lineHeight: 20,
-      marginBottom: 12,
-    },
-    statusIndicators: {
-      flexDirection: 'row',
-      justifyContent: 'space-around',
-    },
-    statusItem: {
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    statusDot: {
-      width: 8,
-      height: 8,
-      borderRadius: 4,
-      marginRight: 4,
-    },
-    statusText: {
-      fontSize: 12,
-      color: theme.colors.textLight,
-    },
-    categorySection: {
-      marginTop: 16,
-    },
-    sectionTitle: {
-      fontSize: 18,
-      fontWeight: '600',
-      color: theme.colors.text,
-      marginBottom: 12,
-    },
-    categoryCard: {
-      marginTop: 16,
-      overflow: 'hidden',
-    },
-    categoryHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      padding: 16,
-    },
-    categoryTitleContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      flex: 1,
-    },
-    categoryTextContainer: {
-      marginLeft: 12,
-    },
-    categoryTitle: {
-      fontSize: 16,
-      fontWeight: '600',
-      color: theme.colors.text,
-    },
-    categorySubtitle: {
-      fontSize: 12,
-      color: theme.colors.textLight,
-      marginTop: 2,
-    },
-    settingsContainer: {
-      borderTopWidth: 1,
-      borderTopColor: theme.colors.border,
-    },
-    settingItem: {
-      padding: 16,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.colors.border,
-    },
-    settingHeader: {
-      flexDirection: 'row',
-      alignItems: 'flex-start',
-      justifyContent: 'space-between',
-      marginBottom: 8,
-    },
-    settingInfo: {
-      flex: 1,
-    },
-    settingName: {
-      fontSize: 14,
-      fontWeight: '500',
-      color: theme.colors.text,
-      textTransform: 'capitalize',
-      marginBottom: 2,
-    },
-    settingDescription: {
-      fontSize: 12,
-      color: theme.colors.textLight,
-    },
-    settingStatus: {
-      alignItems: 'flex-end',
-    },
-    sourceIndicator: {
-      width: 12,
-      height: 12,
-      borderRadius: 6,
-    },
-    settingValue: {
-      marginBottom: 8,
-    },
-    valueText: {
-      fontSize: 14,
-      color: theme.colors.text,
-      fontFamily: 'monospace',
-      marginBottom: 2,
-    },
-    sourceText: {
-      fontSize: 12,
-      color: theme.colors.textLight,
-    },
-    actionContainer: {
-      alignItems: 'flex-start',
-    },
-    lockedContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    lockedText: {
-      marginLeft: 4,
-      fontSize: 12,
-      color: theme.colors.textLight,
-      fontStyle: 'italic',
-    },
-    bottomPadding: {
-      height: 24,
-    },
+    categorySub,
   });
 
 export default RestaurantPlatformOverridesScreen;

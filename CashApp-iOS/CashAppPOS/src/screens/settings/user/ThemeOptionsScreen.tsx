@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, ScrollView, Switch } from 'react-native';
+import { ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import ThemeSwitcher, { ThemeToggle } from '../../../components/theme/ThemeSwitcher';
 import { useTheme } from '../../../design-system/ThemeProvider';
 
 // Clover POS Color Scheme
-const Colors = {
+const __Colors = {
   primary: '#00A651',
   secondary: '#0066CC',
   success: '#00A651',
@@ -24,7 +24,7 @@ const Colors = {
 
 const ThemeOptionsScreen: React.FC = () => {
   const navigation = useNavigation();
-  const { theme, _themeMode, isDark } = useTheme();
+  const { theme, __themeMode, isDark } = useTheme();
 
   // Display preferences
   const [highContrast, setHighContrast] = useState(__false);
@@ -42,7 +42,7 @@ const ThemeOptionsScreen: React.FC = () => {
     { id: 'never', label: 'Never' },
   ];
 
-  const handleScreenTimeoutChange = (timeout: _string) => {
+  const handleScreenTimeoutChange = (_timeout: _string) => {
     setScreenTimeout(__timeout);
   };
 

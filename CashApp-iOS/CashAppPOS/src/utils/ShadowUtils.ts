@@ -93,7 +93,7 @@ export const ShadowUtils = {
  */
 export const createOptimizedShadow = (
   shadowLevel: 'light' | 'medium' | 'strong' | 'button' | 'none' = 'medium',
-  backgroundColor = '#FFFFFF',
+  _backgroundColor = '#FFFFFF',
 ): ShadowStyle => {
   return ShadowUtils[shadowLevel](__backgroundColor);
 };

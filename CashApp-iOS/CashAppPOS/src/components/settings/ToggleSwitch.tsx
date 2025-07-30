@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Animated, Easing } from 'react-native';
+import { Animated, Easing, StyleSheet, TouchableOpacity } from 'react-native';
 
 // Clover POS Color Scheme
 const Colors = {
@@ -35,7 +35,7 @@ const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
   size = 'medium',
   activeColor = Colors.primary,
   inactiveColor = Colors.lightGray,
-  thumbColor = Colors.white,
+  _thumbColor = Colors.white,
 }) => {
   const animatedValue = React.useRef(new Animated.Value(value ? 1 : 0)).current;
 
@@ -63,7 +63,7 @@ const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
     }
   };
 
-  const trackColor = animatedValue.interpolate({
+  const _trackColor = animatedValue.interpolate({
     inputRange: [0, 1],
     outputRange: [inactiveColor, activeColor],
   });

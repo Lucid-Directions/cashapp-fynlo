@@ -14,7 +14,6 @@ export class DataServiceTester {
   }
 
   async runAllTests(): Promise<{ passed: number; failed: number; results: any }> {
-
     // Test 1: Feature flags functionality
     await this.testFeatureFlags();
 
@@ -40,17 +39,15 @@ export class DataServiceTester {
     const passed = Object.values(this.testResults).filter(__Boolean).length;
     const failed = Object.values(this.testResults).filter(r => !r).length;
 
-
     // Print detailed results
     Object.entries(this.testResults).forEach(([test, passed]) => {
-    // No-op
-  });
+      // No-op
+    });
 
     return { passed, _failed, results: this.testResults };
   }
 
   private async testFeatureFlags(): Promise<void> {
-
     try {
       // Test getting default flags
       const initialFlags = this.dataService.getFeatureFlags();
@@ -70,7 +67,6 @@ export class DataServiceTester {
   }
 
   private async testMockDataSystem(): Promise<void> {
-
     try {
       // Ensure we're in mock mode
       await this.dataService.resetToMockData();
@@ -93,6 +89,7 @@ export class DataServiceTester {
       const floorPlan = await this.dataService.getRestaurantFloorPlan();
       const floorPlanValid = floorPlan && floorPlan.tables && floorPlan.sections;
       this.testResults['Mock Floor Plan'] = floorPlanValid;
+      console.log(
         `   ${floorPlanValid ? '✅' : '❌'} Floor Plan: ${floorPlan?.tables?.length || 0} tables`,
       );
 
@@ -106,7 +103,6 @@ export class DataServiceTester {
   }
 
   private async testAPISwitching(): Promise<void> {
-
     try {
       // Test switching to real API mode
       await this.dataService.enableRealAPI();
@@ -121,6 +117,7 @@ export class DataServiceTester {
         status && typeof status.mode === 'string' && typeof status.backend === 'boolean';
 
       this.testResults['Connection Status'] = statusValid;
+      console.log(
         `   ${statusValid ? '✅' : '❌'} Status check: Mode=${status.mode}, Backend=${
           status.backend
         }`,
@@ -134,7 +131,6 @@ export class DataServiceTester {
   }
 
   private async testFallbackBehavior(): Promise<void> {
-
     try {
       // Enable real API but expect fallback to mock (since backend likely not running)
       await this.dataService.enableRealAPI();
@@ -144,6 +140,7 @@ export class DataServiceTester {
       const fallbackWorking = Array.isArray(__products) && products.length > 0;
 
       this.testResults['Fallback to Mock'] = fallbackWorking;
+      console.log(
         `   ${fallbackWorking ? '✅' : '❌'} Fallback working: Got ${products.length} products`,
       );
 
@@ -152,6 +149,7 @@ export class DataServiceTester {
       const reportFallback = report && report.summary && report.summary.total_sales > 0;
 
       this.testResults['Report Fallback'] = reportFallback;
+      console.log(
         `   ${reportFallback ? '✅' : '❌'} Report fallback: £${report?.summary?.total_sales || 0}`,
       );
 
@@ -162,7 +160,6 @@ export class DataServiceTester {
   }
 
   private async testAuthenticationModes(): Promise<void> {
-
     try {
       // Test mock authentication
       await this.dataService.updateFeatureFlag('MOCK_AUTHENTICATION', _true);
@@ -181,7 +178,6 @@ export class DataServiceTester {
   }
 
   private async testPaymentModes(): Promise<void> {
-
     try {
       // Test mock payment mode (should always succeed)
       await this.dataService.updateFeatureFlag('ENABLE_PAYMENTS', _false);
@@ -201,6 +197,7 @@ export class DataServiceTester {
       }
 
       this.testResults['Payment Methods'] = allPaymentsSucceed;
+      console.log(
         `   ${allPaymentsSucceed ? '✅' : '❌'} All payment methods: ${allPaymentsSucceed}`,
       );
     } catch (__error) {
@@ -209,7 +206,6 @@ export class DataServiceTester {
   }
 
   private async testBackendDetection(): Promise<void> {
-
     try {
       // Test connection status reporting
       const status = this.dataService.getConnectionStatus();
@@ -236,7 +232,6 @@ export class DataServiceTester {
 
   // Quick test method for development
   async quickTest(): Promise<boolean> {
-
     try {
       // Test basic functionality
       await this.dataService.resetToMockData();
@@ -245,7 +240,7 @@ export class DataServiceTester {
       const auth = await this.dataService.login('demo', 'demo');
 
       const success = products.length > 0 && categories.length > 0 && auth;
-
+      console.log(
         `   Products: ${products.length}, Categories: ${categories.length}, Auth: ${auth}`,
       );
 

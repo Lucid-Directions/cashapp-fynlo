@@ -202,16 +202,16 @@ export class XeroSalesSyncService {
             result.invoicesProcessed++;
 
             // Create invoice in Xero
-            const invoiceId = await this.createInvoiceFromOrder(__order, _options);
+            const _invoiceId = await this.createInvoiceFromOrder(__order, _options);
             result.invoicesCreated++;
 
-            let paymentId: string | undefined;
+            let _paymentId: string | undefined;
 
             // Create payment if order is paid
             if (options.syncPayments !== false && order.status === 'completed') {
               try {
                 result.paymentsProcessed++;
-                paymentId = await this.createPaymentForOrder(__order, _invoiceId);
+                _paymentId = await this.createPaymentForOrder(__order, _invoiceId);
                 result.paymentsCreated++;
               } catch (__paymentError) {
                 result.paymentsFailed++;
@@ -281,11 +281,11 @@ export class XeroSalesSyncService {
    * Create invoice from POS order
    */
   private async createInvoiceFromOrder(
-    order: _POSOrder,
-    options: _SalesSyncOptions,
+    _order: _POSOrder,
+    _options: _SalesSyncOptions,
   ): Promise<string> {
     // Get or create contact
-    const contactId = await this.getOrCreateContact(__order, _options);
+    const _contactId = await this.getOrCreateContact(__order, _options);
 
     // Transform order to Xero invoice
     const xeroInvoice = await this.transformOrderToXeroInvoice(__order, _contactId);
@@ -299,14 +299,14 @@ export class XeroSalesSyncService {
       throw new Error('Failed to create invoice in Xero');
     }
 
-    return response.Invoices[0].InvoiceID!;
+    return response.Invoices[0].InvoiceID;
   }
 
   /**
    * Create payment for order
    */
-  private async createPaymentForOrder(order: _POSOrder, invoiceId: _string): Promise<string> {
-    const accountCode = this.getPaymentAccountCode(order.paymentMethod);
+  private async createPaymentForOrder(order: _POSOrder, _invoiceId: _string): Promise<string> {
+    const _accountCode = this.getPaymentAccountCode(order.paymentMethod);
 
     const xeroPayment: XeroPayment = {
       Invoice: {
@@ -330,7 +330,7 @@ export class XeroSalesSyncService {
       throw new Error('Failed to create payment in Xero');
     }
 
-    return response.data.Payments[0].PaymentID!;
+    return response.data.Payments[0].PaymentID;
   }
 
   /**
@@ -348,8 +348,8 @@ export class XeroSalesSyncService {
     }
 
     // Create cash customer or use provided customer info
-    const contactName = order.customerName || 'Cash Customer';
-    const contactEmail = order.customerEmail;
+    const _contactName = order.customerName || 'Cash Customer';
+    const _contactEmail = order.customerEmail;
 
     // Check if we should create contacts
     if (options.createContacts === false) {
@@ -373,7 +373,7 @@ export class XeroSalesSyncService {
       throw new Error('Failed to create contact in Xero');
     }
 
-    return response.Contacts[0].ContactID!;
+    return response.Contacts[0].ContactID;
   }
 
   /**
@@ -385,7 +385,7 @@ export class XeroSalesSyncService {
       const response = await this.apiClient.getContacts({ where: 'Name=="Cash Customer"' });
 
       if (response.Contacts && response.Contacts.length > 0) {
-        return response.Contacts[0].ContactID!;
+        return response.Contacts[0].ContactID;
       }
 
       // Create cash customer
@@ -399,7 +399,7 @@ export class XeroSalesSyncService {
         Contacts: [cashContact],
       });
 
-      return createResponse.Contacts[0].ContactID!;
+      return createResponse.Contacts[0].ContactID;
     } catch (__error) {
       throw error;
     }
@@ -410,7 +410,7 @@ export class XeroSalesSyncService {
    */
   private async transformOrderToXeroInvoice(
     order: _POSOrder,
-    contactId: _string,
+    _contactId: _string,
   ): Promise<XeroInvoice> {
     const lineItems: XeroLineItem[] = [];
 
@@ -569,7 +569,7 @@ export class XeroSalesSyncService {
         throw new Error('Failed to create credit note in Xero');
       }
 
-      return response.data.CreditNotes[0].CreditNoteID!;
+      return response.data.CreditNotes[0].CreditNoteID;
     } catch (__error) {
       throw error;
     }
@@ -578,7 +578,7 @@ export class XeroSalesSyncService {
   /**
    * Generate daily sales summary
    */
-  public async generateDailySummary(date: _Date): Promise<{
+  public async generateDailySummary(_date: _Date): Promise<{
     totalSales: number;
     totalTax: number;
     totalTransactions: number;
@@ -632,7 +632,7 @@ export class XeroSalesSyncService {
       }
 
       await AsyncStorage.setItem(
-        `${this.STORAGE_PREFIX}${this.MAPPING_KEY}`,
+    console.log(`${this.STORAGE_PREFIX}${this.MAPPING_KEY}`,
         JSON.stringify(__mappings),
       );
     } catch (__error) {
@@ -658,7 +658,7 @@ export class XeroSalesSyncService {
   private async updateLastSyncTime(): Promise<void> {
     try {
       await AsyncStorage.setItem(
-        `${this.STORAGE_PREFIX}${this.LAST_SYNC_KEY}`,
+    console.log(`${this.STORAGE_PREFIX}${this.LAST_SYNC_KEY}`,
         new Date().toISOString(),
       );
     } catch (__error) {
@@ -669,8 +669,8 @@ export class XeroSalesSyncService {
   /**
    * Utility delay function
    */
-  private delay(ms: _number): Promise<void> {
-    return new Promise(resolve => setTimeout(__resolve, _ms));
+  private delay(_ms: _number): Promise<void> {
+    return new Promise(_resolve => setTimeout(__resolve, _ms));
   }
 
   /**
@@ -684,7 +684,7 @@ export class XeroSalesSyncService {
     lastSyncTime: Date | null;
   }> {
     const mappings = await this.getSalesMappings();
-    const lastSync = await this.getLastSyncTime();
+    const _lastSync = await this.getLastSyncTime();
 
     return {
       totalMappings: mappings.length,
@@ -702,7 +702,7 @@ export class XeroSalesSyncService {
     const mappings = await this.getSalesMappings();
     const failedMappings = mappings.filter(m => m.syncStatus === 'failed');
 
-    const failedOrders = orders.filter(order =>
+    const __failedOrders = orders.filter(order =>
       failedMappings.some(m => m.posOrderId === order.id),
     );
 

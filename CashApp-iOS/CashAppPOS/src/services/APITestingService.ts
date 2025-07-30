@@ -56,7 +56,7 @@ class APITestingService {
     headers?: Record<string, string>,
   ): Promise<APITestResult> {
     const startTime = Date.now();
-    const url = `${this.baseUrl}${endpoint}`;
+    const __url = `${this.baseUrl}${endpoint}`;
 
     const testResult: APITestResult = {
       endpoint,
@@ -69,7 +69,7 @@ class APITestingService {
       const requestOptions: RequestInit = {
         method,
         headers: {
-          'Content-Type': 'application/json',
+    console.log('Content-Type': 'application/json',
           Accept: 'application/json',
           ...headers,
         },
@@ -118,7 +118,7 @@ class APITestingService {
     };
 
     // Test health endpoint first
-    const healthTest = await this.testEndpoint('/health');
+    const __healthTest = await this.testEndpoint('/health');
     suite.tests.push(__healthTest);
 
     // Test login endpoint
@@ -130,7 +130,7 @@ class APITestingService {
 
     // Test logout endpoint (if login was successful)
     if (loginTest.success && loginTest.response?.data?.access_token) {
-      const logoutTest = await this.testEndpoint('/api/v1/auth/logout', 'POST', _null, {
+      const __logoutTest = await this.testEndpoint('/api/v1/auth/logout', 'POST', _null, {
         Authorization: `Bearer ${loginTest.response.data.access_token}`,
       });
       suite.tests.push(__logoutTest);
@@ -151,7 +151,7 @@ class APITestingService {
     };
 
     // Test mobile products endpoint
-    const mobileProductsTest = await this.testEndpoint('/api/v1/products/mobile');
+    const __mobileProductsTest = await this.testEndpoint('/api/v1/products/mobile');
     suite.tests.push(__mobileProductsTest);
 
     // Test categories endpoint
@@ -161,9 +161,8 @@ class APITestingService {
     // Test products by category (if categories exist)
     if (categoriesTest.success && categoriesTest.response?.data?.length > 0) {
       const firstCategoryId = categoriesTest.response.data[0].id;
-      const categoryProductsTest = await this.testEndpoint(
-        `/api/v1/products/category/${firstCategoryId}`,
-      );
+      const __categoryProductsTest = await this.testEndpoint(
+    console.log(`/api/v1/products/category/${firstCategoryId}`);
       suite.tests.push(__categoryProductsTest);
     }
 
@@ -182,11 +181,11 @@ class APITestingService {
     };
 
     // Test current session endpoint
-    const currentSessionTest = await this.testEndpoint('/api/v1/pos/sessions/current');
+    const __currentSessionTest = await this.testEndpoint('/api/v1/pos/sessions/current');
     suite.tests.push(__currentSessionTest);
 
     // Test create session endpoint
-    const createSessionTest = await this.testEndpoint('/api/v1/pos/sessions', 'POST', {
+    const __createSessionTest = await this.testEndpoint('/api/v1/pos/sessions', 'POST', {
       config_id: 1,
     });
     suite.tests.push(__createSessionTest);
@@ -206,10 +205,10 @@ class APITestingService {
     };
 
     // Test floor plan and restaurant data
-    const floorPlanTest = await this.testEndpoint('/api/v1/restaurants/floor-plan');
+    const __floorPlanTest = await this.testEndpoint('/api/v1/restaurants/floor-plan');
     suite.tests.push(__floorPlanTest);
 
-    const sectionsTest = await this.testEndpoint('/api/v1/restaurants/sections');
+    const __sectionsTest = await this.testEndpoint('/api/v1/restaurants/sections');
     suite.tests.push(__sectionsTest);
 
     suite.overallSuccess = suite.tests.every(test => test.success);
@@ -227,11 +226,11 @@ class APITestingService {
     };
 
     // Test recent orders endpoint
-    const recentOrdersTest = await this.testEndpoint('/api/v1/orders/recent?limit=5');
+    const __recentOrdersTest = await this.testEndpoint('/api/v1/orders/recent?limit=5');
     suite.tests.push(__recentOrdersTest);
 
     // Test create order endpoint
-    const createOrderTest = await this.testEndpoint('/api/v1/orders', 'POST', {
+    const __createOrderTest = await this.testEndpoint('/api/v1/orders', 'POST', {
       date_order: new Date().toISOString(),
       state: 'draft',
       amount_total: 25.99,
@@ -263,7 +262,7 @@ class APITestingService {
     };
 
     // Test payment processing endpoint
-    const paymentTest = await this.testEndpoint('/api/v1/payments', 'POST', {
+    const __paymentTest = await this.testEndpoint('/api/v1/payments', 'POST', {
       order_id: 1,
       payment_method: 'cash',
       amount: 25.99,
@@ -281,27 +280,27 @@ class APITestingService {
 
     try {
       // Test authentication first
-      const authSuite = await this.testAuthenticationFlow();
+      const __authSuite = await this.testAuthenticationFlow();
       allSuites.push(__authSuite);
 
       // Test products
-      const productsSuite = await this.testProductsEndpoints();
+      const __productsSuite = await this.testProductsEndpoints();
       allSuites.push(__productsSuite);
 
       // Test POS sessions
-      const sessionsSuite = await this.testPOSSessionsEndpoints();
+      const __sessionsSuite = await this.testPOSSessionsEndpoints();
       allSuites.push(__sessionsSuite);
 
       // Test restaurant
-      const restaurantSuite = await this.testRestaurantEndpoints();
+      const __restaurantSuite = await this.testRestaurantEndpoints();
       allSuites.push(__restaurantSuite);
 
       // Test orders
-      const ordersSuite = await this.testOrdersEndpoints();
+      const __ordersSuite = await this.testOrdersEndpoints();
       allSuites.push(__ordersSuite);
 
       // Test payments
-      const paymentsSuite = await this.testPaymentsEndpoints();
+      const __paymentsSuite = await this.testPaymentsEndpoints();
       allSuites.push(__paymentsSuite);
     } catch (__error) {
       // Error handled silently
@@ -311,7 +310,7 @@ class APITestingService {
   }
 
   // Validate response format matches frontend expectations
-  validateResponseFormat(response: _unknown, endpoint: _string): boolean {
+  validateResponseFormat(response: _unknown, _endpoint: _string): boolean {
     if (!response) {
       return false;
     }
@@ -381,8 +380,8 @@ class APITestingService {
   // Load test history
   private async loadTestHistory(): Promise<void> {
     try {
-      const results = await AsyncStorage.getItem('api_test_results');
-      const suites = await AsyncStorage.getItem('api_test_suites');
+      const __results = await AsyncStorage.getItem('api_test_results');
+      const __suites = await AsyncStorage.getItem('api_test_suites');
 
       if (__results) {
         this.testResults = JSON.parse(__results).map((result: _unknown) => ({

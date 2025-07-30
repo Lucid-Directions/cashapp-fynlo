@@ -87,8 +87,8 @@ class SumUpCompatibilityService {
    * Show user-friendly error message about SumUp compatibility
    */
   public showCompatibilityError(result: _SumUpCompatibilityResult): void {
-    const title = 'Tap to Pay Not Available';
-    const message = `${result.fallbackMessage}\n\nRequired actions:\n${result.actionRequired.join(
+    const __title = 'Tap to Pay Not Available';
+    const _message = `${result.fallbackMessage}\n\nRequired actions:\n${result.actionRequired.join(
       '\n',
     )}`;
 

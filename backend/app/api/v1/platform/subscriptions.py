@@ -4,7 +4,7 @@ Platform subscription management endpoints.
 
 from datetime import datetime, timedelta
 from typing import List, Optional
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import func, and_
 
@@ -14,7 +14,6 @@ from app.core.responses import APIResponseHelper
 from app.models.subscription import SubscriptionPlan
 
 router = APIRouter(prefix="/subscriptions", tags=["platform-subscriptions"])
-
 
 @router.get("/summary")
 async def get_subscription_summary(
@@ -83,7 +82,6 @@ async def get_subscription_summary(
             status_code=500
         )
 
-
 @router.get("/expiring")
 async def get_expiring_subscriptions(
     days: int = Query(30, ge=1, le=90),
@@ -127,7 +125,6 @@ async def get_expiring_subscriptions(
             message=f"Failed to fetch expiring subscriptions: {str(e)}",
             status_code=500
         )
-
 
 @router.get("/churn-analysis")
 async def get_churn_analysis(
@@ -202,7 +199,6 @@ async def get_churn_analysis(
             message=f"Failed to analyze churn: {str(e)}",
             status_code=500
         )
-
 
 @router.post("/batch-update")
 async def batch_update_subscriptions(

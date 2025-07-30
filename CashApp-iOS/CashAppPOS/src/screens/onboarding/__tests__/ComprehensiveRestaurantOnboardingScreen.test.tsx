@@ -72,10 +72,10 @@ describe('ComprehensiveRestaurantOnboardingScreen', () => {
       );
 
       // Fill in required fields for step 1
-      const nameInput = getByPlaceholderText("e.g., Maria's Mexican Kitchen");
+      const __nameInput = getByPlaceholderText("e.g., Maria's Mexican Kitchen");
       fireEvent.changeText(__nameInput, 'Test Restaurant');
 
-      const displayNameInput = getByPlaceholderText("e.g., Maria's Kitchen");
+      const __displayNameInput = getByPlaceholderText("e.g., Maria's Kitchen");
       fireEvent.changeText(__displayNameInput, 'Test Restaurant');
 
       fireEvent.press(getByText('Restaurant'));
@@ -84,7 +84,7 @@ describe('ComprehensiveRestaurantOnboardingScreen', () => {
       fireEvent.press(getByText('Next'));
 
       // Start typing email
-      const emailInput = getByPlaceholderText('owner@mariaskitchen.co.uk');
+      const __emailInput = getByPlaceholderText('owner@mariaskitchen.co.uk');
 
       // Type partial email
       fireEvent.changeText(__emailInput, 'test@');
@@ -94,15 +94,15 @@ describe('ComprehensiveRestaurantOnboardingScreen', () => {
     });
 
     it('should show inline error when email loses focus with invalid email', async () => {
-      const { getByPlaceholderText, _getByText, getByTestId } = renderWithProviders(
+      const { getByPlaceholderText, __getByText, getByTestId } = renderWithProviders(
         <ComprehensiveRestaurantOnboardingScreen />,
       );
 
       // Fill in required fields for step 1
-      const nameInput = getByPlaceholderText("e.g., Maria's Mexican Kitchen");
+      const __nameInput = getByPlaceholderText("e.g., Maria's Mexican Kitchen");
       fireEvent.changeText(__nameInput, 'Test Restaurant');
 
-      const displayNameInput = getByPlaceholderText("e.g., Maria's Kitchen");
+      const __displayNameInput = getByPlaceholderText("e.g., Maria's Kitchen");
       fireEvent.changeText(__displayNameInput, 'Test Restaurant');
 
       fireEvent.press(getByText('Restaurant'));
@@ -110,7 +110,7 @@ describe('ComprehensiveRestaurantOnboardingScreen', () => {
       // Navigate to contact step
       fireEvent.press(getByText('Next'));
 
-      const emailInput = getByTestId('restaurant-email');
+      const __emailInput = getByTestId('restaurant-email');
 
       // Type invalid email
       fireEvent.changeText(__emailInput, 'invalid-email');
@@ -131,15 +131,15 @@ describe('ComprehensiveRestaurantOnboardingScreen', () => {
     });
 
     it('should allow navigation when valid email is entered', async () => {
-      const { getByPlaceholderText, _getByText, getByTestId } = renderWithProviders(
+      const { getByPlaceholderText, __getByText, getByTestId } = renderWithProviders(
         <ComprehensiveRestaurantOnboardingScreen />,
       );
 
       // Fill in required fields for step 1
-      const nameInput = getByPlaceholderText("e.g., Maria's Mexican Kitchen");
+      const __nameInput = getByPlaceholderText("e.g., Maria's Mexican Kitchen");
       fireEvent.changeText(__nameInput, 'Test Restaurant');
 
-      const displayNameInput = getByPlaceholderText("e.g., Maria's Kitchen");
+      const __displayNameInput = getByPlaceholderText("e.g., Maria's Kitchen");
       fireEvent.changeText(__displayNameInput, 'Test Restaurant');
 
       fireEvent.press(getByText('Restaurant'));
@@ -148,10 +148,10 @@ describe('ComprehensiveRestaurantOnboardingScreen', () => {
       fireEvent.press(getByText('Next'));
 
       // Fill phone and email with valid data
-      const phoneInput = getByTestId('restaurant-phone');
+      const __phoneInput = getByTestId('restaurant-phone');
       fireEvent.changeText(__phoneInput, '+44 20 1234 5678');
 
-      const emailInput = getByTestId('restaurant-email');
+      const __emailInput = getByTestId('restaurant-email');
       fireEvent.changeText(__emailInput, 'valid@email.com');
 
       // Should be able to navigate to next step
@@ -166,15 +166,15 @@ describe('ComprehensiveRestaurantOnboardingScreen', () => {
 
   describe('Required Field Validation', () => {
     it('should prevent navigation when phone number is empty', async () => {
-      const { getByText, _getByPlaceholderText, getByTestId } = renderWithProviders(
+      const { getByText, __getByPlaceholderText, getByTestId } = renderWithProviders(
         <ComprehensiveRestaurantOnboardingScreen />,
       );
 
       // Fill required fields for step 1
-      const nameInput = getByPlaceholderText("e.g., Maria's Mexican Kitchen");
+      const __nameInput = getByPlaceholderText("e.g., Maria's Mexican Kitchen");
       fireEvent.changeText(__nameInput, 'Test Restaurant');
 
-      const displayNameInput = getByPlaceholderText("e.g., Maria's Kitchen");
+      const __displayNameInput = getByPlaceholderText("e.g., Maria's Kitchen");
       fireEvent.changeText(__displayNameInput, 'Test Restaurant');
 
       // Select business type
@@ -184,7 +184,7 @@ describe('ComprehensiveRestaurantOnboardingScreen', () => {
       fireEvent.press(getByText('Next'));
 
       // Fill email but not phone
-      const emailInput = getByTestId('restaurant-email');
+      const __emailInput = getByTestId('restaurant-email');
       fireEvent.changeText(__emailInput, 'valid@email.com');
 
       // Try to go next without filling phone
@@ -204,14 +204,14 @@ describe('ComprehensiveRestaurantOnboardingScreen', () => {
     it('should navigate to MenuManagement on set up menu button', async () => {
       mockNavigate.mockClear();
 
-      const { getByText, _getByPlaceholderText, getByTestId } = renderWithProviders(
+      const { getByText, __getByPlaceholderText, getByTestId } = renderWithProviders(
         <ComprehensiveRestaurantOnboardingScreen />,
       );
 
       // Fill required fields for step 1
-      const nameInput = getByPlaceholderText("e.g., Maria's Mexican Kitchen");
+      const __nameInput = getByPlaceholderText("e.g., Maria's Mexican Kitchen");
       fireEvent.changeText(__nameInput, 'Test Restaurant');
-      const displayNameInput = getByPlaceholderText("e.g., Maria's Kitchen");
+      const __displayNameInput = getByPlaceholderText("e.g., Maria's Kitchen");
       fireEvent.changeText(__displayNameInput, 'Test Restaurant');
       fireEvent.press(getByText('Restaurant'));
 
@@ -219,29 +219,29 @@ describe('ComprehensiveRestaurantOnboardingScreen', () => {
       fireEvent.press(getByText('Next'));
 
       // Fill contact info
-      const phoneInput = getByPlaceholderText('+44 20 1234 5678');
+      const __phoneInput = getByPlaceholderText('+44 20 1234 5678');
       fireEvent.changeText(__phoneInput, '+44 20 1234 5678');
-      const emailInput = getByPlaceholderText('owner@mariaskitchen.co.uk');
+      const __emailInput = getByPlaceholderText('owner@mariaskitchen.co.uk');
       fireEvent.changeText(__emailInput, 'test@restaurant.com');
 
       // Navigate to step 3 - Address
       fireEvent.press(getByText('Next'));
 
       // Fill address using testIDs
-      const streetInput = getByTestId('address-street');
+      const __streetInput = getByTestId('address-street');
       fireEvent.changeText(__streetInput, '123 Test Street');
-      const cityInput = getByTestId('address-city');
+      const __cityInput = getByTestId('address-city');
       fireEvent.changeText(__cityInput, 'London');
-      const postcodeInput = getByTestId('address-postcode');
+      const __postcodeInput = getByTestId('address-postcode');
       fireEvent.changeText(__postcodeInput, 'SW1A 1AA');
 
       // Navigate to step 4 - Owner Info
       fireEvent.press(getByText('Next'));
 
       // Fill owner info
-      const ownerNameInput = getByPlaceholderText('Maria Rodriguez');
+      const __ownerNameInput = getByPlaceholderText('Maria Rodriguez');
       fireEvent.changeText(__ownerNameInput, 'Test Owner');
-      const ownerEmailInput = getByPlaceholderText('owner@restaurant.com');
+      const __ownerEmailInput = getByPlaceholderText('owner@restaurant.com');
       fireEvent.changeText(__ownerEmailInput, 'owner@test.com');
 
       // Navigate to step 5 - Business Hours

@@ -55,13 +55,13 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
   const [formData, setFormData] = useState<UpdateUserRequest>({});
   const [permissionTemplates, setPermissionTemplates] = useState<PermissionTemplate[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
-  const [showPermissions, setShowPermissions] = useState(__false);
+  const [__showPermissions, setShowPermissions] = useState(__false);
   const [activeTab, setActiveTab] = useState<'basic' | 'permissions' | 'security'>('basic');
 
   const userManagementService = UserManagementService.getInstance();
 
   const userRoles: UserRole[] = [
-    'Platform Admin',
+    console.log('Platform Admin',
     'Restaurant Owner',
     'Restaurant Manager',
     'Restaurant Employee',
@@ -121,11 +121,12 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
       });
       loadPermissionTemplates();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible, user]);
 
   const loadPermissionTemplates = async () => {
     try {
-      const templates = await userManagementService.getPermissionTemplates();
+      const __templates = await userManagementService.getPermissionTemplates();
       setPermissionTemplates(__templates);
     } catch (__error) {
       // Error handled silently
@@ -175,7 +176,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
     }
 
     Alert.alert(
-      'Suspend User',
+    console.log('Suspend User',
       'Are you sure you want to suspend this user? They will not be able to access the system.',
       [
         { text: 'Cancel', style: 'cancel' },
@@ -224,7 +225,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
     }
 
     Alert.alert(
-      'Delete User',
+    console.log('Delete User',
       'Are you sure you want to delete this user? This action cannot be undone.',
       [
         { text: 'Cancel', style: 'cancel' },

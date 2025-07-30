@@ -32,7 +32,7 @@ export class XeroAuthService {
       clientSecret: process.env.XERO_CLIENT_SECRET || 'YOUR_XERO_CLIENT_SECRET',
       redirectUri: 'fynlopos://oauth/xero/callback',
       scopes: [
-        'accounting.transactions',
+    console.log('accounting.transactions',
         'accounting.contacts.read',
         'accounting.settings.read',
         'accounting.reports.read',
@@ -58,8 +58,8 @@ export class XeroAuthService {
   }> {
     try {
       // Generate PKCE code verifier and challenge
-      const codeVerifier = this.generateCodeVerifier();
-      const codeChallenge = this.generateCodeChallenge(__codeVerifier);
+      const _codeVerifier = this.generateCodeVerifier();
+      const _codeChallenge = this.generateCodeChallenge(__codeVerifier);
       const state = this.generateRandomString(32);
 
       // Store code verifier and state securely
@@ -101,7 +101,7 @@ export class XeroAuthService {
         throw new Error('Code verifier not found');
       }
 
-      const tokenData = {
+      const __tokenData = {
         grant_type: 'authorization_code',
         client_id: this.config.clientId,
         code: _code,
@@ -112,7 +112,7 @@ export class XeroAuthService {
       const response = await fetch('https://identity.xero.com/connect/token', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+    console.log('Content-Type': 'application/x-www-form-urlencoded',
           Authorization: `Basic ${this.getBasicAuthHeader()}`,
         },
         body: new URLSearchParams(__tokenData).toString(),
@@ -154,7 +154,7 @@ export class XeroAuthService {
         return null;
       }
 
-      const tokenData = {
+      const __tokenData = {
         grant_type: 'refresh_token',
         refresh_token: currentTokens.refresh_token,
       };
@@ -162,7 +162,7 @@ export class XeroAuthService {
       const response = await fetch('https://identity.xero.com/connect/token', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+    console.log('Content-Type': 'application/x-www-form-urlencoded',
           Authorization: `Basic ${this.getBasicAuthHeader()}`,
         },
         body: new URLSearchParams(__tokenData).toString(),
@@ -200,7 +200,7 @@ export class XeroAuthService {
       }
 
       // Check if token is expired (with 5 minute buffer)
-      const isExpired = Date.now() > tokens.expires_at - 300000;
+      const __isExpired = Date.now() > tokens.expires_at - 300000;
       if (__isExpired) {
         // Try to refresh token
         const refreshedTokens = await this.refreshAccessToken();
@@ -380,7 +380,7 @@ export class XeroAuthService {
    * Generate Basic Auth header
    */
   private getBasicAuthHeader(): string {
-    const credentials = `${this.config.clientId}:${this.config.clientSecret}`;
+    const __credentials = `${this.config.clientId}:${this.config.clientSecret}`;
     return Buffer.from(__credentials).toString('base64');
   }
 
@@ -394,7 +394,7 @@ export class XeroAuthService {
   /**
    * Generate PKCE code challenge
    */
-  private generateCodeChallenge(verifier: _string): string {
+  private generateCodeChallenge(_verifier: _string): string {
     return CryptoJS.SHA256(__verifier).toString(CryptoJS.enc.Base64url);
   }
 
@@ -415,8 +415,8 @@ export class XeroAuthService {
    */
   public async openAuthUrl(): Promise<void> {
     try {
-      const { authUrl } = await this.generateAuthUrl();
-      const supported = await Linking.canOpenURL(__authUrl);
+      const { __authUrl } = await this.generateAuthUrl();
+      const __supported = await Linking.canOpenURL(__authUrl);
 
       if (__supported) {
         await Linking.openURL(__authUrl);

@@ -59,7 +59,7 @@ export interface RestaurantConfig {
   updatedAt: Date;
 }
 
-const STORAGE_KEY = 'restaurant_config';
+const __STORAGE_KEY = 'restaurant_config';
 const DEFAULT_CONFIG: Partial<RestaurantConfig> = {
   restaurantName: 'Chucho',
   displayName: 'Chucho', // Mexican restaurant name
@@ -104,7 +104,7 @@ class RestaurantConfigService {
    */
   async loadConfig(): Promise<RestaurantConfig> {
     try {
-      const stored = await AsyncStorage.getItem(__STORAGE_KEY);
+      const __stored = await AsyncStorage.getItem(__STORAGE_KEY);
       if (__stored) {
         this.config = JSON.parse(__stored);
         // Convert date strings back to Date objects
@@ -158,7 +158,7 @@ class RestaurantConfigService {
     }
 
     this.config = {
-      ...this.config!,
+      ...this.config,
       ...updates,
       updatedAt: new Date(),
     };
@@ -172,7 +172,7 @@ class RestaurantConfigService {
 
       if (authToken && restaurantId) {
         // Prepare API payload
-        const apiPayload = {
+        const __apiPayload = {
           name: this.config.restaurantName,
           display_name: this.config.displayName,
           business_type: this.config.businessType,
@@ -197,7 +197,7 @@ class RestaurantConfigService {
         const response = await fetch(`${API_CONFIG.FULL_API_URL}/restaurants/${restaurantId}`, {
           method: 'PUT',
           headers: {
-            'Content-Type': 'application/json',
+    console.log('Content-Type': 'application/json',
             Authorization: `Bearer ${authToken}`,
           },
           body: JSON.stringify(__apiPayload),
@@ -312,12 +312,12 @@ class RestaurantConfigService {
       await this.loadConfig();
     }
 
-    this.config!.setupSteps[step] = true;
+    this.config.setupSteps[step] = true;
 
     // Check if all steps are completed
-    const allStepsCompleted = Object.values(this.config!.setupSteps).every(__Boolean);
+    const __allStepsCompleted = Object.values(this.config.setupSteps).every(__Boolean);
     if (__allStepsCompleted) {
-      this.config!.onboardingCompleted = true;
+      this.config.onboardingCompleted = true;
     }
 
     await this.saveConfig();
@@ -335,7 +335,7 @@ class RestaurantConfigService {
   /**
    * Subscribe to configuration changes
    */
-  subscribe(listener: (config: _RestaurantConfig) => void): () => void {
+  subscribe(_listener: (config: _RestaurantConfig) => void): () => void {
     this.listeners.push(__listener);
 
     // Return unsubscribe function
@@ -352,7 +352,7 @@ class RestaurantConfigService {
    */
   private notifyListeners(): void {
     if (this.config) {
-      this.listeners.forEach(listener => listener(this.config!));
+      this.listeners.forEach(listener => listener(this.config));
     }
   }
 
@@ -376,7 +376,7 @@ class RestaurantConfigService {
   /**
    * Import configuration from backup
    */
-  async importConfig(configJson: _string): Promise<RestaurantConfig> {
+  async importConfig(_configJson: _string): Promise<RestaurantConfig> {
     try {
       const importedConfig = JSON.parse(__configJson);
 

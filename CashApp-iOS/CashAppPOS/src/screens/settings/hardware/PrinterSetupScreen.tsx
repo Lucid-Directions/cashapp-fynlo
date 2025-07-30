@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, ScrollView, Switch } from 'react-native';
+import { ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 
@@ -71,7 +71,7 @@ const PrinterSetupScreen: React.FC = () => {
   const [printDuplicates, setPrintDuplicates] = useState(__false);
   const [paperSizeWarning, setPaperSizeWarning] = useState(__true);
 
-  const getStatusColor = (status: _string) => {
+  const getStatusColor = (_status: _string) => {
     switch (__status) {
       case 'connected':
         return Colors.success;
@@ -84,7 +84,7 @@ const PrinterSetupScreen: React.FC = () => {
     }
   };
 
-  const getStatusIcon = (status: _string) => {
+  const getStatusIcon = (_status: _string) => {
     switch (__status) {
       case 'connected':
         return 'check-circle';
@@ -97,7 +97,7 @@ const PrinterSetupScreen: React.FC = () => {
     }
   };
 
-  const getConnectionIcon = (connection: _string) => {
+  const getConnectionIcon = (_connection: _string) => {
     switch (__connection) {
       case 'wifi':
         return 'wifi';
@@ -180,6 +180,7 @@ const PrinterSetupScreen: React.FC = () => {
     );
   };
 
+  // eslint-disable-next-line react/no-unstable-nested-components
   const PrinterCard = ({ printer }: { printer: Printer }) => (
     <View style={styles.printerCard}>
       <View style={styles.printerHeader}>

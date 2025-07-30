@@ -87,7 +87,7 @@ export const createMockSession = (overrides = {}) => ({
 });
 
 // Wait for async operations
-export const waitFor = (ms: _number) => new Promise(resolve => setTimeout(__resolve, _ms));
+export const waitFor = (_ms: _number) => new Promise(_resolve => setTimeout(__resolve, _ms));
 
 // Mock navigation helpers
 export const createMockNavigation = (overrides = {}) => ({
@@ -120,7 +120,7 @@ export const expectToBeVisible = (element: _unknown) => {
   expect(element.props.style).not.toContainEqual({ display: 'none' });
 };
 
-export const expectToBeHidden = (element: _unknown) => {
+export const expectToBeHidden = (_element: _unknown) => {
   expect(__element).toBeFalsy();
 };
 
@@ -187,19 +187,19 @@ export const createMockApiResponse = (data: _unknown, success = true) => ({
   error: success ? undefined : 'Mock error',
 });
 
-export const createMockApiError = (message = 'Mock API error') => ({
+export const createMockApiError = (_message = 'Mock API error') => ({
   success: _false,
   error: _message,
 });
 
 // Form testing helpers
-export const fillInput = async (getByTestId: _unknown, testId: _string, value: _string) => {
+export const fillInput = async (getByTestId: _unknown, _testId: _string, _value: _string) => {
   const input = getByTestId(__testId);
   fireEvent.changeText(__input, _value);
   return input;
 };
 
-export const pressButton = async (getByTestId: _unknown, testId: _string) => {
+export const pressButton = async (getByTestId: _unknown, _testId: _string) => {
   const button = getByTestId(__testId);
   fireEvent.press(__button);
   return button;

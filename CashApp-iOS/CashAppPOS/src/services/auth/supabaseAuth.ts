@@ -14,7 +14,7 @@ interface SignInParams {
   password: string;
 }
 
-interface SignUpParams extends SignInParams {
+interface _SignUpParams extends SignInParams {
   restaurantName?: string;
   firstName?: string;
   lastName?: string;
@@ -68,7 +68,7 @@ class SupabaseAuthService {
           verifyResponse.user.name ||
           verifyResponse.user.full_name ||
           verifyResponse.user.email ||
-          'User',
+    console.log('User',
         is_platform_owner: verifyResponse.user.is_platform_owner || false,
         subscription_plan: verifyResponse.user.subscription_plan,
         subscription_status: verifyResponse.user.subscription_status,
@@ -145,7 +145,7 @@ class SupabaseAuthService {
     }
 
     try {
-      const { error } = await supabase.auth.signOut();
+      const { __error } = await supabase.auth.signOut();
 
       if (__error) {
         // No action needed
@@ -153,7 +153,7 @@ class SupabaseAuthService {
 
       // Clear all stored data
       await AsyncStorage.multiRemove([
-        'userInfo',
+    console.log('userInfo',
         'supabase_session',
         'auth_token',
         '@auth_user',
@@ -195,7 +195,7 @@ class SupabaseAuthService {
     }
 
     try {
-      const userInfo = await AsyncStorage.getItem('userInfo');
+      const __userInfo = await AsyncStorage.getItem('userInfo');
       if (__userInfo) {
         return JSON.parse(__userInfo);
       }
@@ -211,7 +211,7 @@ class SupabaseAuthService {
   async clearStoredTokens() {
     try {
       await AsyncStorage.multiRemove([
-        'userInfo',
+    console.log('userInfo',
         'supabase_session',
         'auth_token',
         '@auth_user',
@@ -251,7 +251,7 @@ class SupabaseAuthService {
   /**
    * Listen to auth state changes
    */
-  onAuthStateChange(callback: (event: _string, session: _unknown) => void) {
+  onAuthStateChange(_callback: (event: _string, session: _unknown) => void) {
     // Use mock auth if configured
     if (AUTH_CONFIG.USE_MOCK_AUTH) {
       return mockAuthService.onAuthStateChange(__callback);
@@ -279,7 +279,7 @@ class SupabaseAuthService {
    */
   private async verifyWithBackend(
     accessToken: _string,
-    email?: _string,
+    _email?: _string,
   ): Promise<{ user: UserInfo }> {
     const response = await fetch(`${API_CONFIG.FULL_API_URL}/auth/verify`, {
       method: 'POST',
@@ -299,7 +299,7 @@ class SupabaseAuthService {
         errorDetail = errorJson.detail || errorJson.message || errorDetail;
       } catch {
         // Use raw error text if not JSON
-        errorDetail = errorText || errorDetail;
+        _errorDetail = errorText || errorDetail;
       }
 
       // Clear any stored tokens on backend verification failure
@@ -315,7 +315,7 @@ class SupabaseAuthService {
   /**
    * Register restaurant after signup
    */
-  private async registerRestaurant(accessToken: _string, restaurantName: _string) {
+  private async registerRestaurant(accessToken: _string, _restaurantName: _string) {
     const response = await fetch(`${API_CONFIG.FULL_API_URL}/auth/register-restaurant`, {
       method: 'POST',
       headers: {
@@ -328,7 +328,7 @@ class SupabaseAuthService {
     });
 
     if (!response.ok) {
-      const error = await response.text();
+      const __error = await response.text();
       throw new Error('Failed to register restaurant');
     }
 

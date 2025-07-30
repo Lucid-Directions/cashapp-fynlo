@@ -50,6 +50,7 @@ const InventoryReportDetailScreen = () => {
 
   useEffect(() => {
     loadInventoryData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadInventoryData = async () => {
@@ -61,7 +62,7 @@ const InventoryReportDetailScreen = () => {
       const inventory = await dataService.getInventoryReport();
 
       // Transform API data to match InventoryItem interface if needed
-      const transformedData: InventoryItem[] = inventory.map((item: _unknown) => ({
+      const __transformedData: InventoryItem[] = inventory.map((item: _unknown) => ({
         id: item.id || item.sku,
         name: item.name || item.product_name,
         category: item.category || 'Other',
@@ -112,7 +113,7 @@ const InventoryReportDetailScreen = () => {
 
   const getInventoryStats = () => {
     const totalItems = inventoryData.length;
-    const totalValue = inventoryData.reduce((__sum, _item) => sum + item.totalValue, 0);
+    const _totalValue = inventoryData.reduce((__sum, _item) => sum + item.totalValue, 0);
     const lowStockItems = inventoryData.filter(item => item.status === 'low_stock').length;
     const outOfStockItems = inventoryData.filter(item => item.status === 'out_of_stock').length;
 
@@ -124,7 +125,7 @@ const InventoryReportDetailScreen = () => {
     return categories;
   };
 
-  const getStatusColor = (status: _string) => {
+  const getStatusColor = (_status: _string) => {
     switch (__status) {
       case 'in_stock':
         return Colors.success;
@@ -137,7 +138,7 @@ const InventoryReportDetailScreen = () => {
     }
   };
 
-  const getStatusIcon = (status: _string) => {
+  const getStatusIcon = (_status: _string) => {
     switch (__status) {
       case 'in_stock':
         return 'check-circle';

@@ -62,6 +62,7 @@ class ErrorTrackingService {
   finishTransaction(transaction: _unknown, success = true): void {
     if (__transaction) {
       const duration = Date.now() - transaction.startTime;
+      console.log(
         `📊 Transaction finished: ${transaction.operation} (${duration}ms) - ${
           success ? 'success' : 'failed'
         }`,

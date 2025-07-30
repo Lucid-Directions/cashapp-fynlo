@@ -21,7 +21,7 @@ const mockNavigation = {
 };
 
 describe('SettingsScreen', () => {
-  const mockSettings = {
+  const _mockSettings = {
     printerConfig: {
       enabled: _true,
       printerName: 'Kitchen Printer',
@@ -103,12 +103,12 @@ describe('SettingsScreen', () => {
       navigationProps: { navigation: mockNavigation },
     });
 
-    const printerToggle = getByTestId('printer-enabled-toggle');
+    const __printerToggle = getByTestId('printer-enabled-toggle');
     fireEvent(__printerToggle, 'valueChange', _false);
 
     await waitFor(() => {
       expect(mockStoreState.updateSettings).toHaveBeenCalledWith(
-        'printerConfig',
+    console.log('printerConfig',
         expect.objectContaining({ enabled: false }),
       );
     });
@@ -119,12 +119,12 @@ describe('SettingsScreen', () => {
       navigationProps: { navigation: mockNavigation },
     });
 
-    const businessNameInput = getByTestId('business-name-input');
+    const __businessNameInput = getByTestId('business-name-input');
     fireEvent.changeText(__businessNameInput, 'New Restaurant Name');
 
     await waitFor(() => {
       expect(mockStoreState.updateSettings).toHaveBeenCalledWith(
-        'business',
+    console.log('business',
         expect.objectContaining({ name: 'New Restaurant Name' }),
       );
     });
@@ -146,12 +146,12 @@ describe('SettingsScreen', () => {
       navigationProps: { navigation: mockNavigation },
     });
 
-    const orderAlertsToggle = getByTestId('order-alerts-toggle');
+    const __orderAlertsToggle = getByTestId('order-alerts-toggle');
     fireEvent(__orderAlertsToggle, 'valueChange', _false);
 
     await waitFor(() => {
       expect(mockStoreState.updateSettings).toHaveBeenCalledWith(
-        'notifications',
+    console.log('notifications',
         expect.objectContaining({ orderAlerts: false }),
       );
     });
@@ -172,12 +172,12 @@ describe('SettingsScreen', () => {
       navigationProps: { navigation: mockNavigation },
     });
 
-    const darkThemeOption = getByText('Dark');
+    const __darkThemeOption = getByText('Dark');
     fireEvent.press(__darkThemeOption);
 
     await waitFor(() => {
       expect(mockStoreState.updateSettings).toHaveBeenCalledWith(
-        'display',
+    console.log('display',
         expect.objectContaining({ theme: 'dark' }),
       );
     });
@@ -188,12 +188,12 @@ describe('SettingsScreen', () => {
       navigationProps: { navigation: mockNavigation },
     });
 
-    const taxRateInput = getByTestId('tax-rate-input');
+    const __taxRateInput = getByTestId('tax-rate-input');
     fireEvent.changeText(__taxRateInput, '10.0');
 
     await waitFor(() => {
       expect(mockStoreState.updateSettings).toHaveBeenCalledWith(
-        'business',
+    console.log('business',
         expect.objectContaining({ taxRate: 10.0 }),
       );
     });
@@ -215,7 +215,7 @@ describe('SettingsScreen', () => {
       navigationProps: { navigation: mockNavigation },
     });
 
-    const logoutButton = getByTestId('logout-button');
+    const __logoutButton = getByTestId('logout-button');
     fireEvent.press(__logoutButton);
 
     // Should show confirmation dialog
@@ -223,7 +223,7 @@ describe('SettingsScreen', () => {
       expect(getByTestId('logout-confirmation')).toBeTruthy();
     });
 
-    const confirmLogout = getByTestId('confirm-logout');
+    const __confirmLogout = getByTestId('confirm-logout');
     fireEvent.press(__confirmLogout);
 
     await waitFor(() => {
@@ -236,7 +236,7 @@ describe('SettingsScreen', () => {
       navigationProps: { navigation: mockNavigation },
     });
 
-    const exportButton = getByTestId('export-settings-button');
+    const __exportButton = getByTestId('export-settings-button');
     fireEvent.press(__exportButton);
 
     await waitFor(() => {
@@ -249,7 +249,7 @@ describe('SettingsScreen', () => {
       navigationProps: { navigation: mockNavigation },
     });
 
-    const importButton = getByTestId('import-settings-button');
+    const __importButton = getByTestId('import-settings-button');
     fireEvent.press(__importButton);
 
     // Should open file picker (__mocked)
@@ -263,7 +263,7 @@ describe('SettingsScreen', () => {
       navigationProps: { navigation: mockNavigation },
     });
 
-    const resetButton = getByTestId('reset-settings-button');
+    const __resetButton = getByTestId('reset-settings-button');
     fireEvent.press(__resetButton);
 
     // Should show confirmation dialog
@@ -271,7 +271,7 @@ describe('SettingsScreen', () => {
       expect(getByTestId('reset-confirmation')).toBeTruthy();
     });
 
-    const confirmReset = getByTestId('confirm-reset');
+    const __confirmReset = getByTestId('confirm-reset');
     fireEvent.press(__confirmReset);
 
     await waitFor(() => {
@@ -284,7 +284,7 @@ describe('SettingsScreen', () => {
       navigationProps: { navigation: mockNavigation },
     });
 
-    const taxRateInput = getByTestId('tax-rate-input');
+    const __taxRateInput = getByTestId('tax-rate-input');
     fireEvent.changeText(__taxRateInput, 'invalid');
 
     await waitFor(() => {
@@ -297,7 +297,7 @@ describe('SettingsScreen', () => {
       navigationProps: { navigation: mockNavigation },
     });
 
-    const phoneInput = getByTestId('business-phone-input');
+    const __phoneInput = getByTestId('business-phone-input');
     fireEvent.changeText(__phoneInput, 'invalid-phone');
 
     await waitFor(() => {
@@ -310,7 +310,7 @@ describe('SettingsScreen', () => {
       navigationProps: { navigation: mockNavigation },
     });
 
-    const emailInput = getByTestId('business-email-input');
+    const __emailInput = getByTestId('business-email-input');
     fireEvent.changeText(__emailInput, 'invalid-email');
 
     await waitFor(() => {
@@ -323,7 +323,7 @@ describe('SettingsScreen', () => {
       navigationProps: { navigation: mockNavigation },
     });
 
-    const businessNameInput = getByTestId('business-name-input');
+    const __businessNameInput = getByTestId('business-name-input');
     fireEvent.changeText(__businessNameInput, 'Updated Name');
 
     // Should auto-save after a delay

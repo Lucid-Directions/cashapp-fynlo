@@ -19,13 +19,13 @@ import { Button } from '../../components/ui';
 import SquareService from '../../services/SquareService';
 
 // Square SDK imports - conditionally loaded
-let SQIPApplePay: unknown;
-let SQIPGooglePay: unknown;
+let _SQIPApplePay: unknown;
+let _SQIPGooglePay: unknown;
 try {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const SquareSDK = require('react-native-square-in-app-payments');
-  SQIPApplePay = SquareSDK.SQIPApplePay;
-  SQIPGooglePay = SquareSDK.SQIPGooglePay;
+  _SQIPApplePay = SquareSDK._SQIPApplePay;
+  _SQIPGooglePay = SquareSDK._SQIPGooglePay;
 } catch (__error) {
   // Error handled silently
 }
@@ -81,6 +81,7 @@ const SquareContactlessPaymentScreen: React.FC<SquareContactlessPaymentScreenPro
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', _handleBackPress);
     return () => backHandler.remove();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const initializeContactlessSupport = async () => {
@@ -120,7 +121,7 @@ const SquareContactlessPaymentScreen: React.FC<SquareContactlessPaymentScreenPro
     }
   };
 
-  const handleBackPress = useCallback(() => {
+  const _handleBackPress = useCallback(() => {
     if (contactlessState.processing) {
       Alert.alert(
         'Payment in Progress',
@@ -131,6 +132,7 @@ const SquareContactlessPaymentScreen: React.FC<SquareContactlessPaymentScreenPro
     }
     handleCancelPayment();
     return true;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contactlessState.processing]);
 
   const handleCancelPayment = () => {

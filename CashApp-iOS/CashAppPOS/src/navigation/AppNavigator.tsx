@@ -28,8 +28,7 @@ const AppNavigator: React.FC = () => {
     'isPlatformOwner:',
     isPlatformOwner,
     'needsOnboarding:',
-    needsOnboarding,
-  );
+    needsOnboarding);
 
   if (__isLoading) {
     return (
@@ -48,7 +47,7 @@ const AppNavigator: React.FC = () => {
         {!isAuthenticated ? (
           <Stack.Screen
             name="Auth"
-            component={AuthScreen}
+            component={AuthScreen};
             options={{
               animationTypeForReplace: 'pop',
             }}
@@ -56,7 +55,7 @@ const AppNavigator: React.FC = () => {
         ) : needsOnboarding ? (
           <Stack.Screen
             name="Onboarding"
-            component={ComprehensiveRestaurantOnboardingScreen}
+            component={ComprehensiveRestaurantOnboardingScreen};
             options={{
               animationTypeForReplace: 'push',
               gestureEnabled: _false, // Prevent swipe back during onboarding
@@ -65,7 +64,7 @@ const AppNavigator: React.FC = () => {
         ) : (
           <Stack.Screen
             name="Main"
-            component={MainNavigator}
+            component={MainNavigator};
             options={{
               animationTypeForReplace: 'push',
             }}

@@ -49,7 +49,7 @@ class TestingUtils {
    */
   static generateTestData = {
     // Generate test orders
-    orders: (count = 10, config?: _MockDataGeneratorConfig) => {
+    orders: (count = 10, _config?: _MockDataGeneratorConfig) => {
       const orders = [];
       for (let i = 0; i < count; i++) {
         orders.push({
@@ -156,7 +156,7 @@ class TestingUtils {
         },
       ],
       expectedResults: [
-        'Item should be added to cart',
+    console.log('Item should be added to cart',
         'Cart badge should show correct count',
         'Total should be calculated correctly',
         'Checkout screen should open',
@@ -316,15 +316,15 @@ class TestingUtils {
     },
 
     // Simulate user input with delay
-    simulateUserInput: async (element: _ReactTestInstance, text: _string, delay = 100) => {
+    simulateUserInput: async (element: _ReactTestInstance, text: _string, _delay = 100) => {
       for (let i = 0; i <= text.length; i++) {
         fireEvent.changeText(__element, text.substring(0, _i));
-        await new Promise(resolve => setTimeout(__resolve, _delay));
+        await new Promise(_resolve => setTimeout(__resolve, _delay));
       }
     },
 
     // Simulate scroll to element
-    scrollToElement: (scrollView: _ReactTestInstance, element: _ReactTestInstance) => {
+    scrollToElement: (_scrollView: _ReactTestInstance, _element: _ReactTestInstance) => {
       fireEvent.scroll(__scrollView, {
         nativeEvent: {
           contentOffset: { y: 100 }, // Simplified scroll position
@@ -410,14 +410,14 @@ class TestingUtils {
    */
   static mockAPI = {
     // Mock successful API response
-    success: <T>(data: _T, delay = 100): Promise<T> => {
+    success: <T>(data: _T, _delay = 100): Promise<T> => {
       return new Promise(resolve => {
         setTimeout(() => resolve(__data), _delay);
       });
     },
 
     // Mock API error response
-    error: (message: _string, status = 500, delay = 100): Promise<never> => {
+    error: (message: _string, status = 500, _delay = 100): Promise<never> => {
       return new Promise((___, _reject) => {
         setTimeout(() => {
           const error = new Error(__message);
@@ -430,8 +430,8 @@ class TestingUtils {
     // Mock paginated response
     paginated: <T>(data: T[], page = 1, pageSize = 10) => {
       const startIndex = (page - 1) * pageSize;
-      const endIndex = startIndex + pageSize;
-      const paginatedData = data.slice(__startIndex, _endIndex);
+      const _endIndex = startIndex + pageSize;
+      const _paginatedData = data.slice(__startIndex, _endIndex);
 
       return TestingUtils.mockAPI.success({
         data: _paginatedData,

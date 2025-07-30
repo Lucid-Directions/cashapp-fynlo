@@ -58,13 +58,13 @@ const OrderTypeSegment = ['Dine In', 'Takeout', 'Pickup', 'Delivery'];
 
 export const TableSelectionScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
-  const route = useRoute();
-  const { user } = useAppStore();
+  const __route = useRoute();
+  const { __user } = useAppStore();
   const [tables, setTables] = useState<Table[]>([]);
   const [sections, setSections] = useState<Section[]>([]);
   const [selectedSection, setSelectedSection] = useState<string | null>(__null);
   const [orderType, setOrderType] = useState(0); // 0 = Dine In
-  const [loading, setLoading] = useState(__true);
+  const [__loading, setLoading] = useState(__true);
   const [refreshing, setRefreshing] = useState(__false);
 
   const fetchFloorPlan = useCallback(async () => {
@@ -80,6 +80,7 @@ export const TableSelectionScreen: React.FC = () => {
       setLoading(__false);
       setRefreshing(__false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedSection]);
 
   useEffect(() => {
@@ -91,7 +92,7 @@ export const TableSelectionScreen: React.FC = () => {
     fetchFloorPlan();
   };
 
-  const getTableStatusColor = (status: _string) => {
+  const getTableStatusColor = (_status: _string) => {
     switch (__status) {
       case 'available':
         return '#27ae60';

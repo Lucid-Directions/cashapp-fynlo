@@ -81,22 +81,22 @@ class MonitoringService {
   // Real-time health monitoring
   async getSystemHealth(): Promise<SystemHealth> {
     // Simulate API call
-    await new Promise(resolve => setTimeout(__resolve, 500));
+    await new Promise(_resolve => setTimeout(__resolve, 500));
 
     // Generate dynamic health data
     this.updateHealthMetrics();
-    return this.healthData!;
+    return this.healthData;
   }
 
   async getPerformanceMetrics(): Promise<PerformanceMetrics> {
-    await new Promise(resolve => setTimeout(__resolve, 300));
+    await new Promise(_resolve => setTimeout(__resolve, 300));
     this.updatePerformanceMetrics();
-    return this.performance!;
+    return this.performance;
   }
 
   // Error monitoring
-  async getRecentErrors(limit = 10): Promise<ErrorLog[]> {
-    await new Promise(resolve => setTimeout(__resolve, 200));
+  async getRecentErrors(_limit = 10): Promise<ErrorLog[]> {
+    await new Promise(_resolve => setTimeout(__resolve, 200));
     return this.errors
       .sort((__a, _b) => b.timestamp.getTime() - a.timestamp.getTime())
       .slice(0, _limit);
@@ -121,7 +121,7 @@ class MonitoringService {
 
   // Incident management
   async getActiveIncidents(): Promise<Incident[]> {
-    await new Promise(resolve => setTimeout(__resolve, 300));
+    await new Promise(_resolve => setTimeout(__resolve, 300));
     return this.incidents.filter(
       incident => incident.status !== 'resolved' && incident.status !== 'closed',
     );
@@ -197,8 +197,8 @@ class MonitoringService {
   }
 
   // Real-time subscriptions
-  subscribe(eventType: _string, callback: (data: _unknown) => void): () => void {
-    const listenerId = `${eventType}-${Date.now()}`;
+  subscribe(eventType: _string, _callback: (data: _unknown) => void): () => void {
+    const __listenerId = `${eventType}-${Date.now()}`;
     this.listeners.set(__listenerId, _callback);
 
     return () => {
@@ -206,7 +206,7 @@ class MonitoringService {
     };
   }
 
-  private notifyListeners(eventType: _string, data: _unknown): void {
+  private notifyListeners(_eventType: _string, _data: _unknown): void {
     this.listeners.forEach((__callback, _listenerId) => {
       if (listenerId.startsWith(__eventType)) {
         callback(__data);
@@ -272,11 +272,11 @@ class MonitoringService {
 
     // Simulate real-time updates
     Object.keys(this.healthData).forEach(key => {
-      const metric = this.healthData![key as keyof SystemHealth];
+      const metric = this.healthData[key as keyof SystemHealth];
       const variation = -5 + Math.random() * 10; // -5% to +5%
 
       if (metric.name.includes('Response Time') || metric.name.includes('Latency')) {
-        const currentValue = parseInt(metric.value);
+        const currentValue = parseInt(metric.value, 10);
         const newValue = Math.max(10, currentValue + Math.round((currentValue * variation) / 100));
         metric.value = `${newValue}ms`;
         metric.status = newValue > 200 ? 'error' : newValue > 100 ? 'warning' : 'good';
@@ -307,7 +307,7 @@ class MonitoringService {
     };
 
     Object.keys(__variations).forEach(key => {
-      const currentValue = this.performance![key as keyof PerformanceMetrics];
+      const currentValue = this.performance[key as keyof PerformanceMetrics];
       const variation = variations[key as keyof typeof variations];
 
       let newValue: number;
@@ -321,7 +321,7 @@ class MonitoringService {
         newValue = Math.max(0, currentValue + variation);
       }
 
-      this.performance![key as keyof PerformanceMetrics] = newValue;
+      this.performance[key as keyof PerformanceMetrics] = newValue;
     });
   }
 
@@ -337,7 +337,7 @@ class MonitoringService {
 
     for (let i = 0; i < 15; i++) {
       const restaurant = restaurants[Math.floor(Math.random() * restaurants.length)];
-      const error: ErrorLog = {
+      const __error: ErrorLog = {
         id: `error-${Date.now()}-${i}`,
         type: errorTypes[Math.floor(Math.random() * errorTypes.length)] as unknown,
         message: this.generateErrorMessage(),
@@ -459,7 +459,7 @@ class MonitoringService {
     ];
 
     const restaurant = restaurants[Math.floor(Math.random() * restaurants.length)];
-    const error: ErrorLog = {
+    const _error: ErrorLog = {
       id: `error-${Date.now()}`,
       type: errorTypes[Math.floor(Math.random() * errorTypes.length)] as unknown,
       message: this.generateErrorMessage(),

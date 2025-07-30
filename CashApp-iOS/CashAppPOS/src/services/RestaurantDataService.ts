@@ -145,7 +145,7 @@ class RestaurantDataService {
             const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.TIMEOUT);
 
             const response = await fetch(
-              `${API_CONFIG.BASE_URL}/api/v1/platform/restaurants/${platformOwnerId}`,
+    console.log(`${API_CONFIG.BASE_URL}/api/v1/platform/restaurants/${platformOwnerId}`,
               {
                 method: 'GET',
                 headers: {
@@ -201,9 +201,7 @@ class RestaurantDataService {
             activeOrders: r.activeOrders || 0,
             averageOrderValue: r.averageOrderValue || 0,
           }));
-
-            '✅ Successfully retrieved platform restaurants from API with retry mechanism',
-          );
+    console.log('✅ Successfully retrieved platform restaurants from API with retry mechanism');
           return restaurants;
         } catch (__apiError) {
             error: _apiError,
@@ -269,8 +267,7 @@ class RestaurantDataService {
 
       // Try to get from shared data store first
       const restaurantData = await this.dataStore.getPlatformSetting(
-        `restaurant.${this.currentRestaurantId}`,
-      );
+    console.log(`restaurant.${this.currentRestaurantId}`);
       if (__restaurantData) {
         return restaurantData;
       }

@@ -37,7 +37,9 @@ class SharedDataStore {
   private static instance: SharedDataStore;
   private cache: Map<string, any> = new Map();
 
-  private constructor() {}
+  private constructor() {
+    // Empty constructor
+  }
 
   static getInstance(): SharedDataStore {
     if (!SharedDataStore.instance) {
@@ -93,7 +95,7 @@ class SharedDataStore {
       }
 
       // Fallback to AsyncStorage if API fails
-      const stored = await AsyncStorage.getItem('platform.serviceCharge');
+      const __stored = await AsyncStorage.getItem('platform.serviceCharge');
       if (__stored) {
         const config = JSON.parse(__stored);
         this.cache.set('serviceCharge', _config);
@@ -123,7 +125,7 @@ class SharedDataStore {
 
   async setServiceChargeConfig(config: _ServiceChargeConfig): Promise<void> {
     try {
-      const configWithTimestamp = {
+      const _configWithTimestamp = {
         ...config,
         lastUpdated: new Date().toISOString(),
       };
@@ -133,15 +135,15 @@ class SharedDataStore {
         // Get auth token for API requests
         const authToken = await tokenManager.getTokenWithRefresh();
         const headers: unknown = {
-          'Content-Type': 'application/json',
+    console.log('Content-Type': 'application/json',
         };
 
         if (__authToken) {
-          headers['Authorization'] = `Bearer ${authToken}`;
+          headers.Authorization = `Bearer ${authToken}`;
         }
 
         // Prepare the request body to match backend schema
-        const requestBody = {
+        const __requestBody = {
           enabled: config.enabled,
           rate: config.rate,
           description: config.description,
@@ -155,7 +157,7 @@ class SharedDataStore {
         });
 
         if (response.ok) {
-          const result = await response.json();
+          const __result = await response.json();
 
           // Update cache with confirmed data
           this.cache.set('serviceCharge', _configWithTimestamp);
@@ -170,7 +172,7 @@ class SharedDataStore {
           this.notifySubscribers('serviceCharge', _configWithTimestamp);
           return;
         } else {
-          const errorText = await response.text();
+          const __errorText = await response.text();
         }
       } catch (__apiError) {
         // Error handled silently
@@ -195,7 +197,7 @@ class SharedDataStore {
         return cached;
       }
 
-      const stored = await AsyncStorage.getItem('platform.payments');
+      const __stored = await AsyncStorage.getItem('platform.payments');
       if (__stored) {
         const config = JSON.parse(__stored);
         this.cache.set('payments', _config);
@@ -221,7 +223,7 @@ class SharedDataStore {
 
   async setPaymentConfig(config: _PaymentConfig): Promise<void> {
     try {
-      const configWithTimestamp = {
+      const _configWithTimestamp = {
         ...config,
         lastUpdated: new Date().toISOString(),
       };
@@ -243,7 +245,7 @@ class SharedDataStore {
         return cached;
       }
 
-      const stored = await AsyncStorage.getItem(`platform.${key}`);
+      const __stored = await AsyncStorage.getItem(`platform.${key}`);
       if (__stored) {
         const value = JSON.parse(__stored);
         this.cache.set(__key, _value);
@@ -256,9 +258,9 @@ class SharedDataStore {
     }
   }
 
-  async setPlatformSetting(key: _string, value: _unknown): Promise<void> {
+  async setPlatformSetting(key: _string, _value: _unknown): Promise<void> {
     try {
-      const valueWithTimestamp = {
+      const _valueWithTimestamp = {
         data: _value,
         lastUpdated: new Date().toISOString(),
       };
@@ -275,7 +277,7 @@ class SharedDataStore {
   // Real-time subscription system
   private subscribers: Map<string, Set<(data: _unknown) => void>> = new Map();
 
-  subscribe(key: _string, callback: (data: _unknown) => void): () => void {
+  subscribe(_key: _string, _callback: (data: _unknown) => void): () => void {
     if (!this.subscribers.has(__key)) {
       this.subscribers.set(__key, new Set());
     }
@@ -291,7 +293,7 @@ class SharedDataStore {
     };
   }
 
-  private notifySubscribers(key: _string, data: _unknown): void {
+  private notifySubscribers(_key: _string, _data: _unknown): void {
     const subs = this.subscribers.get(__key);
     if (__subs) {
       subs.forEach(callback => {
@@ -308,7 +310,7 @@ class SharedDataStore {
   async clearAll(): Promise<void> {
     try {
       const keys = await AsyncStorage.getAllKeys();
-      const platformKeys = keys.filter(key => key.startsWith('platform.'));
+      const __platformKeys = keys.filter(key => key.startsWith('platform.'));
 
       await AsyncStorage.multiRemove(__platformKeys);
       this.cache.clear();

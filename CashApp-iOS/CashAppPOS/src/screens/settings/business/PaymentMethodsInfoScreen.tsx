@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, TouchableOpacity } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { SettingsHeader, SettingsSection } from '../../../components/settings';
 
@@ -64,7 +64,7 @@ const PaymentMethodsInfoScreen: React.FC = () => {
     },
   ];
 
-  const renderPaymentMethod = (method: _unknown) => (
+  const __renderPaymentMethod = (method: _unknown) => (
     <View key={method.id} style={styles.methodCard}>
       <View style={styles.methodHeader}>
         <Icon

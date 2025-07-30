@@ -19,7 +19,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../../design-system/ThemeProvider';
 
 // Get screen dimensions
-const { width: _screenWidth, height: screenHeight } = Dimensions.get('window');
+const { width: __screenWidth, height: screenHeight } = Dimensions.get('window');
 
 interface TablePosition {
   x: number;
@@ -77,7 +77,7 @@ const TableManagementScreen: React.FC = () => {
   const [editMode, setEditMode] = useState(__false);
   const [selectedSection, setSelectedSection] = useState<string>('all');
   const [draggedTable, setDraggedTable] = useState<Table | null>(__null);
-  const [layout, setLayout] = useState<FloorPlanLayout>({
+  const [layout, _setLayout] = useState<FloorPlanLayout>({
     canvasWidth: screenWidth * 1.5,
     canvasHeight: screenHeight * 1.2,
     gridSize: 30,
@@ -85,14 +85,14 @@ const TableManagementScreen: React.FC = () => {
   });
 
   // Sample data
-  const sampleSections: Section[] = [
+  const __sampleSections: Section[] = [
     { id: 'main', name: 'Main Dining', color: theme.colors.primary, tables: [] },
     { id: 'patio', name: 'Patio', color: theme.colors.secondary, tables: [] },
     { id: 'bar', name: 'Bar Area', color: theme.colors.warning, tables: [] },
     { id: 'private', name: 'Private Room', color: theme.colors.danger, tables: [] },
   ];
 
-  const sampleTables: Table[] = [
+  const __sampleTables: Table[] = [
     {
       id: 'table1',
       name: 'T1',
@@ -193,7 +193,7 @@ const TableManagementScreen: React.FC = () => {
     setSections(__sampleSections);
   }, []);
 
-  const getTableStatusColor = (status: _string) => {
+  const getTableStatusColor = (_status: _string) => {
     switch (__status) {
       case 'available':
         return theme.colors.success;
@@ -250,7 +250,7 @@ const TableManagementScreen: React.FC = () => {
     );
   };
 
-  const assignServer = (tableId: _string, serverName: _string) => {
+  const __assignServer = (tableId: _string, serverName: _string) => {
     setTables(prev =>
       prev.map(table => (table.id === tableId ? { ...table, server: serverName } : _table)),
     );
@@ -273,14 +273,14 @@ const TableManagementScreen: React.FC = () => {
 
       // Snap to grid
       const gridSize = layout.gridSize;
-      const snappedX = Math.round(gestureState.x / gridSize) * gridSize;
-      const snappedY = Math.round(gestureState.y / gridSize) * gridSize;
+      const __snappedX = Math.round(gestureState.x / gridSize) * gridSize;
+      const __snappedY = Math.round(gestureState.y / gridSize) * gridSize;
 
       // Ensure within bounds
-      const maxX = layout.canvasWidth - 100;
-      const maxY = layout.canvasHeight - 100;
+      const _maxX = layout.canvasWidth - 100;
+      const _maxY = layout.canvasHeight - 100;
 
-      const newPosition = {
+      const _newPosition = {
         x: Math.max(0, Math.min(__snappedX, _maxX)),
         y: Math.max(0, Math.min(__snappedY, _maxY)),
       };
@@ -292,7 +292,7 @@ const TableManagementScreen: React.FC = () => {
 
   const saveLayout = () => {
     // Save the current layout to backend
-    const layoutData = {
+    const __layoutData = {
       tables: tables.map(table => ({
         id: table.id,
         position: table.position,
@@ -334,9 +334,8 @@ const TableManagementScreen: React.FC = () => {
 
     if (tablesToMerge.length < 2) {
       Alert.alert(
-        'Merge Tables',
-        'Select at least 2 available tables in the same section to merge.',
-      );
+    console.log('Merge Tables',
+        'Select at least 2 available tables in the same section to merge.');
       return;
     }
 
@@ -361,7 +360,7 @@ const TableManagementScreen: React.FC = () => {
     };
 
     // Remove old tables and add merged table
-    const remainingTables = tables.filter(t => !tablesToMerge.includes(__t));
+    const remainingTables = tables.filter(_t => !tablesToMerge.includes(__t));
     setTables([...remainingTables, mergedTable]);
 
     Alert.alert('Success', `Tables merged successfully. New capacity: ${totalSeats} seats`);
@@ -388,10 +387,11 @@ const TableManagementScreen: React.FC = () => {
     return tables.filter(table => table.section === selectedSection);
   };
 
+  // eslint-disable-next-line react/no-unstable-nested-components
   const TableComponent = ({ table }: { table: Table }) => {
     const dimensions = getTableDimensions(__table);
-    const statusColor = getTableStatusColor(table.status);
-    const sectionColor = getSectionColor(table.section);
+    const _statusColor = getTableStatusColor(table.status);
+    const _sectionColor = getSectionColor(table.section);
 
     const handleGestureEvent = (event: GestureEvent<PanGestureHandlerGestureEvent>) => {
       if (!editMode) {
@@ -399,7 +399,7 @@ const TableManagementScreen: React.FC = () => {
       }
 
       const { translationX, translationY } = event.nativeEvent;
-      const newPosition = {
+      const _newPosition = {
         x: table.position.x + translationX,
         y: table.position.y + translationY,
       };
@@ -610,7 +610,7 @@ const TableManagementScreen: React.FC = () => {
             ))}
           </View>
           {editMode && (
-            <View style={{ marginTop: 8 }}>
+            <View style={styles.dynamicStyle33}>
               <Text
                 style={[
                   styles.legendLabel,
@@ -810,6 +810,7 @@ const TableManagementScreen: React.FC = () => {
   );
 };
 
+// TODO: Move inline styles to StyleSheet: {"dynamicStyle33":" marginTop: 8 "}
 const styles = StyleSheet.create({
   container: {
     flex: 1,

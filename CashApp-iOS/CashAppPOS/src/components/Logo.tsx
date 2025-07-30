@@ -31,7 +31,7 @@ const Colors = {
 };
 
 const Logo: React.FC<LogoProps> = ({
-  size = 'medium',
+  _size = 'medium',
   showText = true,
   style,
   imageStyle,

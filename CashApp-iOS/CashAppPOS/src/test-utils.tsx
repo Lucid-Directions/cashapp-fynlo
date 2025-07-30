@@ -68,9 +68,9 @@ interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
 }
 
 // All providers wrapper
-const AllTheProviders = ({ children, navigationProps = {} }: _unknown) => {
-  const mockNavigation = navigationProps.navigation || createMockNavigation();
-  const mockRoute = navigationProps.route || createMockRoute();
+const AllTheProviders = ({ _children, navigationProps = {} }: _unknown) => {
+  const _mockNavigation = navigationProps.navigation || createMockNavigation();
+  const _mockRoute = navigationProps.route || createMockRoute();
 
   // Create navigation state
   const navigationRef = React.createRef<unknown>();

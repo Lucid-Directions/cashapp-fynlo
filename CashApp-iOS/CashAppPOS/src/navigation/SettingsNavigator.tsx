@@ -93,7 +93,7 @@ export type SettingsStackParamList = {
 
   // Recipe Management
   RecipesScreen: undefined;
-  RecipeFormScreen: { recipe?: any }; // Using 'any' for recipe type placeholder
+  RecipeFormScreen: { recipe?: unknown }; // Using 'any' for recipe type placeholder
 };
 
 const Stack = createStackNavigator<SettingsStackParamList>();

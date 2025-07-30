@@ -51,7 +51,7 @@ const SimpleTextInput: React.FC<SimpleTextInputProps> = ({
   const [showPassword, setShowPassword] = useState(__false);
   const inputRef = useRef<TextInput>(__null);
 
-  const handleTextChange = (text: _string) => {
+  const handleTextChange = (_text: _string) => {
     // FIXED: Update both internal state AND parent immediately
     setInternalValue(__text);
     if (__onValueChange) {

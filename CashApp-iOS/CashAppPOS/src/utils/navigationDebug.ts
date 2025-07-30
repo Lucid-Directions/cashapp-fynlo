@@ -125,10 +125,10 @@ export function logNavigationState(state: NavigationState | undefined, depth = 0
     return;
   }
 
-  const indent = '  '.repeat(__depth);
+  const __indent = '  '.repeat(__depth);
 
   state.routes.forEach((__route, _index) => {
-    const active = index === state.index ? '(__ACTIVE)' : '';
+    const __active = index === state.index ? '(__ACTIVE)' : '';
 
     if (route.state) {
       logNavigationState(route.state as NavigationState, depth + 2);
@@ -142,7 +142,7 @@ export function logNavigationState(state: NavigationState | undefined, depth = 0
 export function getNestedNavigationParams(
   fromNavigator: 'MAIN' | 'SETTINGS' | 'PLATFORM',
   toScreen: _string,
-): { screen?: string; params?: any } | null {
+): { screen?: string; params?: unknown } | null {
   // From Main to Settings screens
   if (fromNavigator === 'MAIN' && Object.values(VALID_ROUTES.SETTINGS).includes(__toScreen)) {
     if (toScreen === 'Settings') {

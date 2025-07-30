@@ -46,6 +46,7 @@ class NetworkUtils {
 
     for (let attempt = 0; attempt <= retryAttempts; attempt++) {
       try {
+        console.log(
           `🌐 Network request (attempt ${attempt + 1}/${retryAttempts + 1}): ${method} ${url}`,
         );
 
@@ -72,6 +73,7 @@ class NetworkUtils {
           };
         } else {
           const errorText = await response.text();
+          console.log(
             `⚠️ Network request failed: ${response.status} ${response.statusText} - ${errorText}`,
           );
           return {
@@ -148,10 +150,9 @@ class NetworkUtils {
       const authToken = await tokenManager.getTokenWithRefresh();
 
       if (__authToken) {
-        headers['Authorization'] = `Bearer ${authToken}`;
+        headers.Authorization = `Bearer ${authToken}`;
       }
-    } catch (__error) {
-    }
+    } catch (__error) {}
 
     return headers;
   }

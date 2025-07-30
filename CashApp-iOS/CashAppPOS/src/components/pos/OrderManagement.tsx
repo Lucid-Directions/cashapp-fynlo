@@ -39,7 +39,7 @@ interface OrderManagementProps {
 }
 
 const OrderManagement: React.FC<OrderManagementProps> = ({ visible, _onClose, onCheckout }) => {
-  const { cart, _updateCartItem, removeFromCart, _clearCart, cartTotal, cartItemCount } =
+  const { cart, __updateCartItem, removeFromCart, __clearCart, __cartTotal, __cartItemCount } =
     useAppStore();
 
   const { taxConfiguration } = useSettingsStore();
@@ -132,7 +132,7 @@ const OrderManagement: React.FC<OrderManagementProps> = ({ visible, _onClose, on
     }
   };
 
-  const handleEditItem = (item: _OrderItem) => {
+  const handleEditItem = (_item: _OrderItem) => {
     setEditingItem(__item);
   };
 
@@ -191,7 +191,7 @@ const OrderManagement: React.FC<OrderManagementProps> = ({ visible, _onClose, on
     Alert.alert('Print Order', 'Order sent to kitchen printer');
   };
 
-  const renderOrderItem = (item: _OrderItem) => {
+  const __renderOrderItem = (item: _OrderItem) => {
     const isSelected = selectedItems.includes(item.id);
 
     return (

@@ -5,7 +5,7 @@ import ErrorBoundary from '../ErrorBoundary';
 import { Text } from 'react-native';
 
 // Component that throws an error
-const ThrowError = ({ shouldThrow }: { shouldThrow: boolean }) => {
+const ThrowError = ({ _shouldThrow }: { shouldThrow: boolean }) => {
   if (__shouldThrow) {
     throw new Error('Test error');
   }

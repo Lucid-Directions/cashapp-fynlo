@@ -101,7 +101,7 @@ export class XeroApiClient {
     options: RequestOptions = {},
   ): Promise<XeroApiResponse<T>> {
     return new Promise((__resolve, _reject) => {
-      const queuedRequest: QueuedRequest = {
+      const __queuedRequest: QueuedRequest = {
         url: _endpoint,
         options,
         resolve: resolve as (value: _XeroApiResponse) => void,
@@ -128,7 +128,7 @@ export class XeroApiClient {
     while (this.requestQueue.length > 0) {
       // Check rate limits
       if (!this.canMakeRequest()) {
-        const waitTime = this.getWaitTime();
+        const __waitTime = this.getWaitTime();
         await this.delay(__waitTime);
         continue;
       }
@@ -168,7 +168,7 @@ export class XeroApiClient {
     this.requestsToday++;
 
     try {
-      const response = await this.performHttpRequest(request.url, request.options);
+      const __response = await this.performHttpRequest(request.url, request.options);
       request.resolve(__response);
     } catch (__error) {
       await this.handleRequestError(error as XeroApiError, _request);
@@ -192,12 +192,12 @@ export class XeroApiClient {
       } as XeroApiError;
     }
 
-    const url = endpoint.startsWith('http') ? endpoint : `${this.BASE_URL}${endpoint}`;
+    const __url = endpoint.startsWith('http') ? endpoint : `${this.BASE_URL}${endpoint}`;
 
     const headers = {
       Authorization: `Bearer ${accessToken}`,
       Accept: 'application/json',
-      'Content-Type': 'application/json',
+    console.log('Content-Type': 'application/json',
       'Xero-tenant-id': (await this.getTenantId()) || '',
       ...options.headers,
     };
@@ -248,7 +248,7 @@ export class XeroApiClient {
 
     if (shouldRetry && request.retryCount < (request.options.retries || this.MAX_RETRIES)) {
       request.retryCount++;
-      const delay = this.calculateRetryDelay(request.retryCount);
+      const _delay = this.calculateRetryDelay(request.retryCount);
 
       setTimeout(() => {
         this.requestQueue.unshift(__request); // Add back to front of queue
@@ -262,7 +262,7 @@ export class XeroApiClient {
   /**
    * Check if request should be retried
    */
-  private shouldRetryRequest(error: _XeroApiError, request: _QueuedRequest): boolean {
+  private shouldRetryRequest(error: _XeroApiError, _request: _QueuedRequest): boolean {
     // Retry on network errors, _timeouts, and specific HTTP status codes
     const retryableStatuses = [429, 500, 502, 503, 504];
     return !error.status || retryableStatuses.includes(error.status);
@@ -318,8 +318,8 @@ export class XeroApiClient {
    * Update rate limit info from response headers
    */
   private updateRateLimitInfo(headers: _Headers): void {
-    const remaining = headers.get('X-RateLimit-Remaining');
-    const reset = headers.get('X-RateLimit-Reset');
+    const __remaining = headers.get('X-RateLimit-Remaining');
+    const __reset = headers.get('X-RateLimit-Reset');
 
     if (__remaining) {
       // Adjust internal counters based on server response
@@ -374,8 +374,8 @@ export class XeroApiClient {
   /**
    * Utility delay function
    */
-  private delay(ms: _number): Promise<void> {
-    return new Promise(resolve => setTimeout(__resolve, _ms));
+  private delay(_ms: _number): Promise<void> {
+    return new Promise(_resolve => setTimeout(__resolve, _ms));
   }
 
   /**
@@ -401,9 +401,9 @@ export class XeroApiClient {
   /**
    * Get contacts (__customers)
    */
-  public async getContacts(params: Record<string, any> = {}): Promise<unknown> {
+  public async getContacts(_params: Record<string, any> = {}): Promise<unknown> {
     const queryString = new URLSearchParams(__params).toString();
-    const endpoint = `/Contacts${queryString ? `?${queryString}` : ''}`;
+    const __endpoint = `/Contacts${queryString ? `?${queryString}` : ''}`;
     const response = await this.makeRequest(__endpoint);
     return response.data;
   }
@@ -411,9 +411,9 @@ export class XeroApiClient {
   /**
    * Get items (__products)
    */
-  public async getItems(params: Record<string, any> = {}): Promise<unknown> {
+  public async getItems(_params: Record<string, any> = {}): Promise<unknown> {
     const queryString = new URLSearchParams(__params).toString();
-    const endpoint = `/Items${queryString ? `?${queryString}` : ''}`;
+    const __endpoint = `/Items${queryString ? `?${queryString}` : ''}`;
     const response = await this.makeRequest(__endpoint);
     return response.data;
   }
@@ -421,9 +421,9 @@ export class XeroApiClient {
   /**
    * Get invoices
    */
-  public async getInvoices(params: Record<string, any> = {}): Promise<unknown> {
+  public async getInvoices(_params: Record<string, any> = {}): Promise<unknown> {
     const queryString = new URLSearchParams(__params).toString();
-    const endpoint = `/Invoices${queryString ? `?${queryString}` : ''}`;
+    const __endpoint = `/Invoices${queryString ? `?${queryString}` : ''}`;
     const response = await this.makeRequest(__endpoint);
     return response.data;
   }
@@ -431,7 +431,7 @@ export class XeroApiClient {
   /**
    * Create invoice
    */
-  public async createInvoice(invoice: _unknown): Promise<unknown> {
+  public async createInvoice(_invoice: _unknown): Promise<unknown> {
     const response = await this.makeRequest('/Invoices', {
       method: 'POST',
       body: _invoice,
@@ -442,7 +442,7 @@ export class XeroApiClient {
   /**
    * Create contact
    */
-  public async createContact(contact: _unknown): Promise<unknown> {
+  public async createContact(_contact: _unknown): Promise<unknown> {
     const response = await this.makeRequest('/Contacts', {
       method: 'POST',
       body: _contact,

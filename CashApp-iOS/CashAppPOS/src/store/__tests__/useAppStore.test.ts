@@ -13,7 +13,6 @@ import {
 
 // Mock AsyncStorage
 jest.mock('@react-native-async-storage/async-storage', () =>
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
   require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
 );
 
@@ -46,7 +45,7 @@ describe('useAppStore', () => {
   describe('User Management', () => {
     it('should set user correctly', () => {
       const { result } = renderHook(() => useAppStore());
-      const mockUser = createMockUser();
+      const __mockUser = createMockUser();
 
       act(() => {
         result.current.setUser(__mockUser);
@@ -57,9 +56,9 @@ describe('useAppStore', () => {
 
     it('should clear user on logout', () => {
       const { result } = renderHook(() => useAppStore());
-      const mockUser = createMockUser();
-      const mockSession = createMockSession();
-      const mockOrderItem = createMockOrderItem();
+      const __mockUser = createMockUser();
+      const __mockSession = createMockSession();
+      const __mockOrderItem = createMockOrderItem();
 
       // Set up state
       act(() => {
@@ -83,7 +82,7 @@ describe('useAppStore', () => {
   describe('Session Management', () => {
     it('should set session correctly', () => {
       const { result } = renderHook(() => useAppStore());
-      const mockSession = createMockSession();
+      const __mockSession = createMockSession();
 
       act(() => {
         result.current.setSession(__mockSession);
@@ -94,7 +93,7 @@ describe('useAppStore', () => {
 
     it('should clear session', () => {
       const { result } = renderHook(() => useAppStore());
-      const mockSession = createMockSession();
+      const __mockSession = createMockSession();
 
       act(() => {
         result.current.setSession(__mockSession);
@@ -108,7 +107,7 @@ describe('useAppStore', () => {
   describe('Cart Management', () => {
     it('should add item to empty cart', () => {
       const { result } = renderHook(() => useAppStore());
-      const mockItem = createMockOrderItem();
+      const __mockItem = createMockOrderItem();
 
       act(() => {
         result.current.addToCart(__mockItem);
@@ -120,7 +119,7 @@ describe('useAppStore', () => {
 
     it('should increase quantity when adding existing item', () => {
       const { result } = renderHook(() => useAppStore());
-      const mockItem = createMockOrderItem({ id: 1, quantity: 1 });
+      const __mockItem = createMockOrderItem({ id: 1, quantity: 1 });
 
       act(() => {
         result.current.addToCart(__mockItem);
@@ -133,8 +132,8 @@ describe('useAppStore', () => {
 
     it('should add multiple different items', () => {
       const { result } = renderHook(() => useAppStore());
-      const item1 = createMockOrderItem({ id: 1, name: 'Item 1' });
-      const item2 = createMockOrderItem({ id: 2, name: 'Item 2' });
+      const __item1 = createMockOrderItem({ id: 1, name: 'Item 1' });
+      const __item2 = createMockOrderItem({ id: 2, name: 'Item 2' });
 
       act(() => {
         result.current.addToCart(__item1);
@@ -148,7 +147,7 @@ describe('useAppStore', () => {
 
     it('should remove item from cart', () => {
       const { result } = renderHook(() => useAppStore());
-      const mockItem = createMockOrderItem({ id: 1 });
+      const __mockItem = createMockOrderItem({ id: 1 });
 
       act(() => {
         result.current.addToCart(__mockItem);
@@ -160,7 +159,7 @@ describe('useAppStore', () => {
 
     it('should not remove non-existent item', () => {
       const { result } = renderHook(() => useAppStore());
-      const mockItem = createMockOrderItem({ id: 1 });
+      const __mockItem = createMockOrderItem({ id: 1 });
 
       act(() => {
         result.current.addToCart(__mockItem);
@@ -186,8 +185,8 @@ describe('useAppStore', () => {
 
     it('should clear entire cart', () => {
       const { result } = renderHook(() => useAppStore());
-      const item1 = createMockOrderItem({ id: 1 });
-      const item2 = createMockOrderItem({ id: 2 });
+      const __item1 = createMockOrderItem({ id: 1 });
+      const __item2 = createMockOrderItem({ id: 2 });
 
       act(() => {
         result.current.addToCart(__item1);
@@ -202,15 +201,15 @@ describe('useAppStore', () => {
   describe('Computed Values', () => {
     it('should calculate cart total correctly', () => {
       const { result } = renderHook(() => useAppStore());
-      const item1 = createMockOrderItem({ id: 1, price: 10.99, quantity: 2 });
-      const item2 = createMockOrderItem({ id: 2, price: 5.49, quantity: 1 });
+      const __item1 = createMockOrderItem({ id: 1, price: 10.99, quantity: 2 });
+      const __item2 = createMockOrderItem({ id: 2, price: 5.49, quantity: 1 });
 
       act(() => {
         result.current.addToCart(__item1);
         result.current.addToCart(__item2);
       });
 
-      const expectedTotal = 10.99 * 2 + 5.49 * 1; // 27.47
+      const __expectedTotal = 10.99 * 2 + 5.49 * 1; // 27.47
       expect(result.current.cartTotal()).toBeCloseTo(__expectedTotal, 2);
     });
 
@@ -222,8 +221,8 @@ describe('useAppStore', () => {
 
     it('should calculate cart item count correctly', () => {
       const { result } = renderHook(() => useAppStore());
-      const item1 = createMockOrderItem({ id: 1, quantity: 2 });
-      const item2 = createMockOrderItem({ id: 2, quantity: 3 });
+      const __item1 = createMockOrderItem({ id: 1, quantity: 2 });
+      const __item2 = createMockOrderItem({ id: 2, quantity: 3 });
 
       act(() => {
         result.current.addToCart(__item1);
@@ -275,7 +274,7 @@ describe('useAppStore', () => {
 
     it('should set error state', () => {
       const { result } = renderHook(() => useAppStore());
-      const errorMessage = 'Test error message';
+      const __errorMessage = 'Test error message';
 
       act(() => {
         result.current.setError(__errorMessage);
@@ -294,7 +293,7 @@ describe('useAppStore', () => {
   describe('Order Management', () => {
     it('should set current order', () => {
       const { result } = renderHook(() => useAppStore());
-      const mockOrder = {
+      const __mockOrder = {
         id: 1,
         items: [createMockOrderItem()],
         subtotal: 12.99,
@@ -313,7 +312,7 @@ describe('useAppStore', () => {
 
     it('should clear current order', () => {
       const { result } = renderHook(() => useAppStore());
-      const mockOrder = {
+      const __mockOrder = {
         id: 1,
         items: [],
         subtotal: 0,
@@ -335,7 +334,7 @@ describe('useAppStore', () => {
   describe('Complex Scenarios', () => {
     it('should handle rapid cart updates', () => {
       const { result } = renderHook(() => useAppStore());
-      const item = createMockOrderItem({ id: 1, quantity: 1 });
+      const __item = createMockOrderItem({ id: 1, quantity: 1 });
 
       act(() => {
         // Rapid additions
@@ -357,9 +356,9 @@ describe('useAppStore', () => {
 
     it('should maintain state consistency during logout', () => {
       const { result } = renderHook(() => useAppStore());
-      const mockUser = createMockUser();
-      const mockSession = createMockSession();
-      const mockItem = createMockOrderItem();
+      const __mockUser = createMockUser();
+      const __mockSession = createMockSession();
+      const __mockItem = createMockOrderItem();
 
       act(() => {
         // Set up complex state

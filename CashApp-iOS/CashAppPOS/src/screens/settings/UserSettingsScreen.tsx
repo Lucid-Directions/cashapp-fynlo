@@ -135,6 +135,7 @@ const UserSettingsScreen: React.FC = () => {
         keyExtractor={item => item.id}
         contentContainerStyle={styles.settingsList}
         showsVerticalScrollIndicator={false}
+        // eslint-disable-next-line react/no-unstable-nested-components
         ItemSeparatorComponent={() => <View style={styles.separator} />}
       />
 

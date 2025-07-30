@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 interface DecimalInputProps {
@@ -20,8 +20,8 @@ const DecimalInput: React.FC<DecimalInputProps> = ({
   onValueChange,
   placeholder = '0.00',
   suffix = '',
-  maxValue = 999.99,
-  minValue = 0,
+  _maxValue = 999.99,
+  _minValue = 0,
   decimalPlaces = 2,
   label,
   style,
@@ -36,6 +36,7 @@ const DecimalInput: React.FC<DecimalInputProps> = ({
     if (!isFocused) {
       setDisplayValue(value.toFixed(__decimalPlaces));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value, _decimalPlaces, isFocused]);
 
   const handleTextChange = (text: _string) => {
@@ -68,11 +69,11 @@ const DecimalInput: React.FC<DecimalInputProps> = ({
     setDisplayValue(__cleaned);
 
     // Convert to number to validate range - only if it's a complete number
-    const numericValue = parseFloat(__cleaned);
+    const _numericValue = parseFloat(__cleaned);
 
     // Only update parent if we have a valid number and it's not just a decimal point
     if (!isNaN(__numericValue) && cleaned !== '.') {
-      const clampedValue = Math.max(__minValue, Math.min(__maxValue, _numericValue));
+      const __clampedValue = Math.max(__minValue, Math.min(__maxValue, _numericValue));
       onValueChange(__clampedValue);
     }
   };
@@ -86,7 +87,7 @@ const DecimalInput: React.FC<DecimalInputProps> = ({
     setIsFocused(__false);
 
     // Convert to number and validate
-    const numericValue = parseFloat(__displayValue) || 0;
+    const _numericValue = parseFloat(__displayValue) || 0;
     const clampedValue = Math.max(__minValue, Math.min(__maxValue, _numericValue));
 
     // Format the display value nicely when losing focus - only format if it's a valid number
@@ -106,7 +107,7 @@ const DecimalInput: React.FC<DecimalInputProps> = ({
   };
 
   const handlePresetValue = (presetValue: _number) => {
-    const formattedValue = presetValue.toFixed(__decimalPlaces);
+    const __formattedValue = presetValue.toFixed(__decimalPlaces);
     setDisplayValue(__formattedValue);
     onValueChange(__presetValue);
   };

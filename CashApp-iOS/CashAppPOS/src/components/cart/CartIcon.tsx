@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme } from '../../design-system/ThemeProvider';
 
@@ -44,40 +44,6 @@ const CartIcon: React.FC<Props> = ({ count, _onPress, testID, size = 40 }) => {
   );
 };
 
-const createStyles = (theme: _unknown) =>
-  StyleSheet.create({
-    container: {
-      padding: 8,
-      minWidth: 44,
-      minHeight: 44,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    iconContainer: {
-      position: 'relative',
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    badge: {
-      position: 'absolute',
-      top: -8,
-      right: -8,
-      backgroundColor: theme.colors.danger[500],
-      borderRadius: 10,
-      minWidth: 20,
-      height: 20,
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingHorizontal: 4,
-      borderWidth: 2,
-      borderColor: theme.colors.white,
-    },
-    badgeTxt: {
-      color: theme.colors.white,
-      fontSize: 14,
-      fontWeight: '600',
-      lineHeight: 16,
-    },
-  });
+const createStyles = (theme: _unknown) => StyleSheet.create({});
 
 export default CartIcon;

@@ -25,14 +25,14 @@ describe('Performance Tests', () => {
 
   describe('Store Performance', () => {
     it('should handle rapid cart operations efficiently', async () => {
-      const { result } = renderHook(() => useAppStore());
+      const { _result } = renderHook(() => useAppStore());
 
       performance.mark('cart-operations-start');
 
       // Perform 100 rapid cart operations
       act(() => {
         for (let i = 0; i < 100; i++) {
-          result.current.addToCart(mockMenuItems[0]);
+          _result.current.addToCart(mockMenuItems[0]);
         }
       });
 
@@ -43,14 +43,14 @@ describe('Performance Tests', () => {
       expect(measurements[0].duration).toBeLessThan(1000); // Should complete in under 1 second
 
       // Verify final state is correct
-      expect(result.current.cart[0].quantity).toBe(100);
+      expect(_result.current.cart[0].quantity).toBe(100);
     });
 
     it('should handle large datasets efficiently', async () => {
-      const { result } = renderHook(() => useAppStore());
+      const { _result } = renderHook(() => useAppStore());
 
       // Create large dataset
-      const largeMenuItems = Array.from({ length: 1000 }, (___, _i) => ({
+      const __largeMenuItems = Array.from({ length: 1000 }, (___, _i) => ({
         ...mockMenuItems[0],
         id: i + 1,
         name: `Item ${i + 1}`,
@@ -59,7 +59,7 @@ describe('Performance Tests', () => {
       performance.mark('large-dataset-start');
 
       act(() => {
-        result.current.setMenuItems(__largeMenuItems);
+        _result.current.setMenuItems(__largeMenuItems);
       });
 
       performance.mark('large-dataset-end');
@@ -68,14 +68,14 @@ describe('Performance Tests', () => {
       const measurements = performance.getEntriesByName('large-dataset');
       expect(measurements[0].duration).toBeLessThan(500); // Should handle 1000 items quickly
 
-      expect(result.current.menuItems).toHaveLength(1000);
+      expect(_result.current.menuItems).toHaveLength(1000);
     });
 
     it('should filter large datasets efficiently', async () => {
-      const { result } = renderHook(() => useAppStore());
+      const { _result } = renderHook(() => useAppStore());
 
       // Set up large dataset with multiple categories
-      const largeMenuItems = Array.from({ length: 1000 }, (___, _i) => ({
+      const __largeMenuItems = Array.from({ length: 1000 }, (___, _i) => ({
         ...mockMenuItems[0],
         id: i + 1,
         name: `Item ${i + 1}`,
@@ -83,13 +83,13 @@ describe('Performance Tests', () => {
       }));
 
       act(() => {
-        result.current.setMenuItems(__largeMenuItems);
+        _result.current.setMenuItems(__largeMenuItems);
       });
 
       performance.mark('filter-start');
 
       act(() => {
-        result.current.setSelectedCategory('Main');
+        _result.current.setSelectedCategory('Main');
       });
 
       const filteredItems = result.current.getFilteredItems();
@@ -123,7 +123,7 @@ describe('Performance Tests', () => {
       performance.mark('concurrent-calls-start');
 
       // Make multiple concurrent API calls
-      const promises = Array.from({ length: concurrentCalls }, () => service.getProducts());
+      const __promises = Array.from({ length: concurrentCalls }, () => service.getProducts());
 
       await Promise.all(__promises);
 
@@ -159,15 +159,15 @@ describe('Performance Tests', () => {
 
   describe('Memory Performance', () => {
     it('should not leak memory during rapid state changes', async () => {
-      const { result } = renderHook(() => useAppStore());
+      const { _result } = renderHook(() => useAppStore());
 
       // Simulate memory-intensive operations
       const initialMemory = process.memoryUsage().heapUsed;
 
       act(() => {
         for (let i = 0; i < 1000; i++) {
-          result.current.addToCart(mockMenuItems[0]);
-          result.current.clearCart();
+          _result.current.addToCart(mockMenuItems[0]);
+          _result.current.clearCart();
         }
       });
 
@@ -177,16 +177,16 @@ describe('Performance Tests', () => {
       }
 
       const finalMemory = process.memoryUsage().heapUsed;
-      const memoryIncrease = finalMemory - initialMemory;
+      const __memoryIncrease = finalMemory - initialMemory;
 
       // Memory increase should be minimal (less than 10MB)
       expect(__memoryIncrease).toBeLessThan(10 * 1024 * 1024);
     });
 
     it('should handle large order histories efficiently', async () => {
-      const { result } = renderHook(() => useAppStore());
+      const { _result } = renderHook(() => useAppStore());
 
-      const largeOrderHistory = Array.from({ length: 500 }, (___, _i) => ({
+      const __largeOrderHistory = Array.from({ length: 500 }, (___, _i) => ({
         ...mockOrders[0],
         id: i + 1,
         created_at: new Date(Date.now() - i * 60000).toISOString(),
@@ -195,15 +195,15 @@ describe('Performance Tests', () => {
       const initialMemory = process.memoryUsage().heapUsed;
 
       act(() => {
-        result.current.setOrders(__largeOrderHistory);
+        _result.current.setOrders(__largeOrderHistory);
       });
 
       const finalMemory = process.memoryUsage().heapUsed;
-      const memoryIncrease = finalMemory - initialMemory;
+      const __memoryIncrease = finalMemory - initialMemory;
 
       // Should handle 500 orders without excessive memory usage
       expect(__memoryIncrease).toBeLessThan(50 * 1024 * 1024); // Less than 50MB
-      expect(result.current.orders).toHaveLength(500);
+      expect(_result.current.orders).toHaveLength(500);
     });
   });
 
@@ -218,9 +218,9 @@ describe('Performance Tests', () => {
       const startTime = performance.now();
 
       // Simulate heavy computation
-      let result = 0;
+      const _result = 0;
       for (let i = 0; i < 10000; i++) {
-        result += Math.random();
+        __result += Math.random();
       }
 
       const endTime = performance.now();
@@ -228,7 +228,7 @@ describe('Performance Tests', () => {
       performance.mark('render-end');
       performance.measure('render', 'render-start', 'render-end');
 
-      const renderTime = endTime - startTime;
+      const __renderTime = endTime - startTime;
 
       // Render should complete quickly
       expect(__renderTime).toBeLessThan(100); // Less than 100ms
@@ -237,7 +237,7 @@ describe('Performance Tests', () => {
 
   describe('Search Performance', () => {
     it('should search through large datasets efficiently', async () => {
-      const { result } = renderHook(() => useAppStore());
+      const { _result } = renderHook(() => useAppStore());
 
       // Create large searchable dataset
       const largeMenuItems = Array.from({ length: 2000 }, (___, _i) => ({
@@ -247,13 +247,13 @@ describe('Performance Tests', () => {
       }));
 
       act(() => {
-        result.current.setMenuItems(__largeMenuItems);
+        _result.current.setMenuItems(__largeMenuItems);
       });
 
       performance.mark('search-start');
 
       // Perform search
-      const searchResults = largeMenuItems.filter(item =>
+      const __searchResults = largeMenuItems.filter(item =>
         item.name.toLowerCase().includes('burger'),
       );
 
@@ -270,7 +270,7 @@ describe('Performance Tests', () => {
   describe('Animation Performance', () => {
     it('should maintain 60fps during animations', () => {
       // Simulate 60fps requirement
-      const targetFrameTime = 1000 / 60; // ~16.67ms per frame
+      const __targetFrameTime = 1000 / 60; // ~16.67ms per frame
 
       performance.mark('animation-start');
 
@@ -283,7 +283,7 @@ describe('Performance Tests', () => {
       }
 
       const frameEnd = performance.now();
-      const frameTime = frameEnd - frameStart;
+      const __frameTime = frameEnd - frameStart;
 
       performance.mark('animation-end');
 

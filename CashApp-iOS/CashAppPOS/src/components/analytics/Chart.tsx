@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, Dimensions } from 'react-native';
+import { Dimensions, StyleSheet, Text, View } from 'react-native';
 
 // Fynlo POS Color Scheme
 const Colors = {
@@ -36,7 +36,7 @@ interface ChartProps {
 
 const Chart: React.FC<ChartProps> = ({
   data,
-  type = 'bar',
+  _type = 'bar',
   title,
   height = 200,
   showValues = true,
@@ -45,14 +45,14 @@ const Chart: React.FC<ChartProps> = ({
   const maxValue = Math.max(...data.map(d => d.value));
 
   const renderBarChart = () => {
-    const barWidth = chartWidth / data.length - 10;
+    const _barWidth = chartWidth / data.length - 10;
 
     return (
       <View style={styles.chartContainer}>
         <View style={[styles.barsContainer, { height }]}>
           {data.map((__item, _index) => {
-            const barHeight = (item.value / maxValue) * (height - 40);
-            const color = item.color || Colors.primary;
+            const _barHeight = (item.value / maxValue) * (height - 40);
+            const _color = item.color || Colors.primary;
 
             return (
               <View key={index} style={styles.barWrapper}>
@@ -177,9 +177,9 @@ const Chart: React.FC<ChartProps> = ({
 
   const renderPieChart = () => {
     const total = data.reduce((__sum, _item) => sum + item.value, 0);
-    const radius = Math.min(__chartWidth, _height) / 3;
-    const centerX = chartWidth / 2;
-    const centerY = height / 2;
+    const __radius = Math.min(__chartWidth, _height) / 3;
+    const __centerX = chartWidth / 2;
+    const __centerY = height / 2;
 
     return (
       <View style={styles.chartContainer}>
@@ -188,7 +188,7 @@ const Chart: React.FC<ChartProps> = ({
             {/* Simple pie representation with rectangles */}
             {data.map((__item, _index) => {
               const percentage = (item.value / total) * 100;
-              const color = item.color || `hsl(${(index * 360) / data.length}, 70%, 50%)`;
+              const _color = item.color || `hsl(${(index * 360) / data.length}, 70%, 50%)`;
 
               return (
                 <View key={index} style={styles.pieSegment}>

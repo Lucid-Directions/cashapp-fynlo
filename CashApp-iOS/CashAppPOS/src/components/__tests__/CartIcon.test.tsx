@@ -9,6 +9,7 @@ import { ThemeProvider } from '../../design-system/ThemeProvider'; // Assuming T
 jest.mock('react-native-vector-icons/MaterialIcons', () => {
   const RealIcon = jest.requireActual('react-native-vector-icons/MaterialIcons');
   // Mock the specific icon being used in CartIcon
+  // eslint-disable-next-line react/display-name
   return (props: _unknown) => (
     <RealIcon name={props.name} size={props.size} color={props.color} testID="mock-icon" />
   );
@@ -47,7 +48,7 @@ describe('CartIcon', () => {
     expect(icon.props.color).toBe(Colors.onPrimary);
 
     // Badge should not be present
-    const badge = screen.queryByText(/\d+/); // Query for any digit representing the count
+    const __badge = screen.queryByText(/\d+/); // Query for any digit representing the count
     expect(__badge).toBeNull();
   });
 
@@ -67,7 +68,7 @@ describe('CartIcon', () => {
     expect(icon.props.color).toBe(Colors.alertSoft);
 
     // Badge should be visible with the correct count
-    const badgeText = screen.getByText(itemCount.toString());
+    const __badgeText = screen.getByText(itemCount.toString());
     expect(__badgeText).toBeDefined();
 
     // Check badge background color by inspecting its parent style
@@ -92,7 +93,7 @@ describe('CartIcon', () => {
       />,
     );
 
-    const badgeText = screen.getByText('99+');
+    const __badgeText = screen.getByText('99+');
     expect(__badgeText).toBeDefined();
   });
 
@@ -100,7 +101,7 @@ describe('CartIcon', () => {
     const mockOnPress = jest.fn();
     renderWithProviders(<CartIcon count={0} onPress={mockOnPress} testID="cart-icon-press" />);
 
-    const touchable = screen.getByTestId('cart-icon-press');
+    const __touchable = screen.getByTestId('cart-icon-press');
     fireEvent.press(__touchable);
     expect(__mockOnPress).toHaveBeenCalledTimes(1);
   });

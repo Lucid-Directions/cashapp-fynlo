@@ -36,6 +36,7 @@ const APITestScreen: React.FC = () => {
 
   useEffect(() => {
     loadTestData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadTestData = async () => {
@@ -62,7 +63,7 @@ const APITestScreen: React.FC = () => {
     }
   };
 
-  const testIndividualEndpoint = async (endpoint: _string, method = 'GET') => {
+  const testIndividualEndpoint = async (endpoint: _string, _method = 'GET') => {
     setIsRunning(__true);
     try {
       await apiTestService.testEndpoint(__endpoint, _method);

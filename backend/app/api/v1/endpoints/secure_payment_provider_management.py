@@ -2,8 +2,9 @@
 Payment Provider Management Endpoints
 Handles configuration and testing of payment providers
 """
+from app.core.exceptions import AuthorizationException
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from typing import Dict, Any, List
 from decimal import Decimal
 from sqlalchemy.orm import Session
@@ -16,7 +17,6 @@ from app.services.secure_payment_config import SecurePaymentConfigService
 from app.services.payment_factory import PaymentProviderFactory
 
 router = APIRouter()
-
 
 @router.post("/payment-providers/configure")
 async def configure_payment_provider(
@@ -37,10 +37,7 @@ async def configure_payment_provider(
     try:
         # Check user permissions
         if current_user.role not in ['platform_owner', 'restaurant_owner']:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Only owners can configure payment providers"
-            )
+            raise AuthorizationException(message="Only owners can configure payment providers")
         
         # Initialize config service
         config_service = SecurePaymentConfigService(db)
@@ -68,7 +65,6 @@ async def configure_payment_provider(
             message=f"Failed to configure payment provider: {str(e)}",
             status_code=status.HTTP_400_BAD_REQUEST
         )
-
 
 @router.get("/payment-providers")
 async def list_payment_providers(
@@ -115,7 +111,6 @@ async def list_payment_providers(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
-
 @router.post("/payment-providers/{provider}/test")
 async def test_payment_provider(
     provider: str,
@@ -126,10 +121,7 @@ async def test_payment_provider(
     try:
         # Check permissions
         if current_user.role not in ['platform_owner', 'restaurant_owner', 'manager']:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Insufficient permissions"
-            )
+            raise AuthorizationException(message="Insufficient permissions")
         
         # Initialize provider factory
         factory = PaymentProviderFactory()
@@ -157,7 +149,6 @@ async def test_payment_provider(
             message=f"Provider test failed: {str(e)}",
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
-
 
 @router.post("/payment-providers/{provider}/calculate-fee")
 async def calculate_provider_fee(
@@ -201,7 +192,6 @@ async def calculate_provider_fee(
             message=f"Failed to calculate fee: {str(e)}",
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
-
 
 @router.get("/payment-providers/best-provider")
 async def get_best_provider(
@@ -248,7 +238,6 @@ async def get_best_provider(
             message=f"Failed to determine best provider: {str(e)}",
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
-
 
 def _get_fee_structure(provider: str) -> Dict[str, Any]:
     """Get fee structure for a provider"""

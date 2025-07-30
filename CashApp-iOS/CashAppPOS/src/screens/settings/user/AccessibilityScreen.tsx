@@ -108,7 +108,7 @@ const AccessibilityScreen: React.FC = () => {
 
   const handleResetToDefaults = () => {
     Alert.alert(
-      'Reset Accessibility Settings',
+    console.log('Reset Accessibility Settings',
       'This will reset all accessibility settings to their default values. Continue?',
       [
         { text: 'Cancel', style: 'cancel' },
@@ -222,6 +222,7 @@ const AccessibilityScreen: React.FC = () => {
     return 'Very Fast';
   };
 
+  // eslint-disable-next-line react/no-unstable-nested-components
   const AccessibilityRow = ({
     icon,
     title,

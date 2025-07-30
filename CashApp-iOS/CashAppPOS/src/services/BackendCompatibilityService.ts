@@ -57,10 +57,10 @@ export class BackendCompatibilityService {
   /**
    * Transform backend employee data to match frontend expectations
    */
-  static transformEmployee(backendEmployee: _BackendEmployee): any {
+  static transformEmployee(backendEmployee: _BackendEmployee): unknown {
     const now = new Date();
     const oneYearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
-    const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 6, now.getDate());
+    const __sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 6, now.getDate());
 
     return {
       ...backendEmployee,
@@ -81,14 +81,14 @@ export class BackendCompatibilityService {
    * Transform menu items array
    */
   static transformMenuItems(backendItems: BackendMenuItem[]): MenuItem[] {
-    return backendItems.map(item => this.transformMenuItem(__item));
+    return backendItems.map(_item => this.transformMenuItem(__item));
   }
 
   /**
    * Transform employees array
    */
   static transformEmployees(backendEmployees: BackendEmployee[]): unknown[] {
-    return backendEmployees.map(emp => this.transformEmployee(__emp));
+    return backendEmployees.map(_emp => this.transformEmployee(__emp));
   }
 
   /**

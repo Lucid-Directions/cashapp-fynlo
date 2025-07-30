@@ -153,7 +153,7 @@ export const calculateItemTotal = (
   }
 
   try {
-    const total = priceValidation.value * quantityValidation.value;
+    const __total = priceValidation.value * quantityValidation.value;
     return validatePrice(__total, {
       ...context,
       operation: 'item_total_calculation',
@@ -162,7 +162,7 @@ export const calculateItemTotal = (
   } catch (__error) {
     const errorTrackingService = ErrorTrackingService.getInstance();
     errorTrackingService.trackPricingError(
-      error instanceof Error ? error : new Error(`Item total calculation error: ${error}`),
+      error instanceof Error ? error : new Error(`Item _total calculation error: ${error}`),
       { price, quantity },
       context,
     );
@@ -170,7 +170,7 @@ export const calculateItemTotal = (
     return {
       isValid: _false,
       value: 0,
-      error: `Item total calculation failed: ${error}`,
+      error: `Item _total calculation failed: ${error}`,
     };
   }
 };
@@ -195,7 +195,7 @@ export const calculatePercentageFee = (
   }
 
   try {
-    const fee = subtotalValidation.value * (percentageValidation.value / 100);
+    const __fee = subtotalValidation.value * (percentageValidation.value / 100);
     return validatePrice(__fee, {
       ...context,
       operation: 'percentage_fee_calculation',
@@ -225,13 +225,13 @@ export const calculateSum = (
   context?: _CalculationContext,
 ): PriceValidationResult => {
   try {
-    let total = 0;
+    const _total = 0;
     const invalidValues: unknown[] = [];
 
     for (let i = 0; i < values.length; i++) {
       const validation = validatePrice(values[i], _context);
       if (validation.isValid) {
-        total += validation.value;
+        _total += validation.value;
       } else {
         invalidValues.push({ index: _i, value: values[i], error: validation.error });
       }
@@ -314,12 +314,12 @@ export const validateCartCalculation = (
   subtotal: PriceValidationResult;
   tax: PriceValidationResult;
   serviceCharge: PriceValidationResult;
-  total: PriceValidationResult;
+  _total: PriceValidationResult;
   hasErrors: boolean;
 } => {
   // Calculate subtotal
-  const itemTotals = cartItems.map((__item, _index) => {
-    const itemContext = {
+  const __itemTotals = cartItems.map((__item, _index) => {
+    const _itemContext = {
       ...context,
       operation: 'cart_item_calculation',
       component: `cart_item_${index}`,
@@ -352,7 +352,7 @@ export const validateCartCalculation = (
     : { isValid: _true, value: 0 };
 
   // Calculate total
-  const total = calculateSum([subtotal.value, tax.value, serviceCharge.value], {
+  const _total = calculateSum([subtotal.value, tax.value, serviceCharge.value], {
     ...context,
     operation: 'cart_total_calculation',
   });
@@ -363,7 +363,7 @@ export const validateCartCalculation = (
     subtotal,
     tax,
     serviceCharge,
-    total,
+    _total,
     hasErrors,
   };
 };

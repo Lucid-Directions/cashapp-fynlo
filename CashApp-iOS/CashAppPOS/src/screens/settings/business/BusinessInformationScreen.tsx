@@ -44,8 +44,8 @@ interface FormField {
 }
 
 const BusinessInformationScreen: React.FC = () => {
-  const { businessInfo, _updateBusinessInfo, isLoading } = useSettingsStore();
-  const { config, _updateConfig, completeSetupStep } = useRestaurantConfig();
+  const { __businessInfo, __updateBusinessInfo, isLoading } = useSettingsStore();
+  const { config, __updateConfig, completeSetupStep } = useRestaurantConfig();
   const [formData, setFormData] = useState(__businessInfo);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [hasChanges, setHasChanges] = useState(__false);
@@ -70,7 +70,7 @@ const BusinessInformationScreen: React.FC = () => {
   }, [config]);
 
   // Validation functions
-  const validateEmail = (email: _string): string | null => {
+  const _validateEmail = (email: _string): string | null => {
     if (!email) {
       return 'Email is required';
     }
@@ -78,15 +78,15 @@ const BusinessInformationScreen: React.FC = () => {
     return emailRegex.test(__email) ? null : 'Please enter a valid email address';
   };
 
-  const validatePhone = (phone: _string): string | null => {
+  const _validatePhone = (phone: _string): string | null => {
     if (!phone) {
       return 'Phone number is required';
     }
-    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+    const phoneRegex = /^[+]?[1-9][\d]{0,15}$/;
     return phoneRegex.test(phone.replace(/\s/g, '')) ? null : 'Please enter a valid phone number';
   };
 
-  const validateUrl = (url: _string): string | null => {
+  const _validateUrl = (url: _string): string | null => {
     if (!url) {
       return null;
     } // Website is optional
@@ -94,7 +94,7 @@ const BusinessInformationScreen: React.FC = () => {
     return urlRegex.test(__url) ? null : 'Please enter a valid website URL';
   };
 
-  const validateVatNumber = (vat: _string): string | null => {
+  const _validateVatNumber = (vat: _string): string | null => {
     if (!vat) {
       return null;
     } // VAT number is optional
@@ -103,7 +103,7 @@ const BusinessInformationScreen: React.FC = () => {
     return ukVatRegex.test(__vat) ? null : 'Please enter a valid UK VAT number (__GB123456789)';
   };
 
-  const validateCompanyNumber = (number: _string): string | null => {
+  const _validateCompanyNumber = (number: _string): string | null => {
     if (!number) {
       return null;
     } // Company number is optional
@@ -289,12 +289,12 @@ const BusinessInformationScreen: React.FC = () => {
     ]);
   };
 
-  const renderFormField = (field: _FormField) => (
+  const __renderFormField = (field: _FormField) => (
     <View key={field.id} style={styles.fieldContainer}>
       <SimpleTextInput
         label={field.label}
         value={field.value}
-        onValueChange={value => handleFieldChange(field.id, _value)}
+        onValueChange={_value => handleFieldChange(field.id, _value)}
         placeholder={field.placeholder}
         keyboardType={field.keyboardType || 'default'}
         autoCapitalize={field.autoCapitalize || 'sentences'}

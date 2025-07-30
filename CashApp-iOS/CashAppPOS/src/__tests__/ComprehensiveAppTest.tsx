@@ -22,8 +22,8 @@ jest.mock('react-native/Libraries/Alert/Alert', () => ({
 }));
 
 // Mock navigation
-const mockNavigate = jest.fn();
-const mockGoBack = jest.fn();
+const _mockNavigate = jest.fn();
+const _mockGoBack = jest.fn();
 jest.mock('@react-navigation/native', () => ({
   ...jest.requireActual('@react-navigation/native'),
   useNavigation: () => ({
@@ -113,7 +113,7 @@ const testProduct = {
   available: _true,
 };
 
-const testOrder = {
+const __testOrder = {
   id: 'ORD001',
   items: [{ ...testProduct, quantity: 2 }],
   total: 21.98,
@@ -128,7 +128,7 @@ describe('Comprehensive App Test Suite', () => {
 
   describe('POS Screen Tests', () => {
     it('should render POS screen correctly', () => {
-      const { getByText, getByTestId } = render(
+      const { getByText, __getByTestId } = render(
         <NavigationContainer>
           <POSScreen />
         </NavigationContainer>,
@@ -138,7 +138,7 @@ describe('Comprehensive App Test Suite', () => {
     });
 
     it('should add items to cart', async () => {
-      const { getByText, getAllByText } = render(
+      const { __getByText, getAllByText } = render(
         <NavigationContainer>
           <POSScreen />
         </NavigationContainer>,
@@ -146,7 +146,7 @@ describe('Comprehensive App Test Suite', () => {
 
       // Find and click a product
       await waitFor(() => {
-        const addButton = getAllByText('+')[0];
+        const __addButton = getAllByText('+')[0];
         fireEvent.press(__addButton);
       });
     });
@@ -201,7 +201,7 @@ describe('Comprehensive App Test Suite', () => {
       );
 
       // Find and click edit button
-      const editButton = getByTestId('edit-button');
+      const __editButton = getByTestId('edit-button');
       fireEvent.press(__editButton);
 
       // Check if in edit mode
@@ -218,15 +218,15 @@ describe('Comprehensive App Test Suite', () => {
       );
 
       // Enter edit mode
-      const editButton = getByTestId('edit-button');
+      const __editButton = getByTestId('edit-button');
       fireEvent.press(__editButton);
 
       // Clear required field
-      const firstNameInput = getByPlaceholderText('Enter first name');
+      const __firstNameInput = getByPlaceholderText('Enter first name');
       fireEvent.changeText(__firstNameInput, '');
 
       // Try to save
-      const saveButton = getByTestId('save-button');
+      const __saveButton = getByTestId('save-button');
       fireEvent.press(__saveButton);
 
       // Should show error
@@ -303,14 +303,14 @@ describe('Comprehensive App Test Suite', () => {
 
   describe('Navigation Tests', () => {
     it('should navigate between screens', async () => {
-      const { getByText, getByTestId } = render(
+      const { getByText, __getByTestId } = render(
         <NavigationContainer>
           <SettingsScreen />
         </NavigationContainer>,
       );
 
       // Click on User Settings
-      const userSettingsButton = getByText('User Settings');
+      const __userSettingsButton = getByText('User Settings');
       fireEvent.press(__userSettingsButton);
 
       expect(__mockNavigate).toHaveBeenCalledWith('UserSettings');
@@ -323,7 +323,7 @@ describe('Comprehensive App Test Suite', () => {
         </NavigationContainer>,
       );
 
-      const backButton = getByTestId('back-button');
+      const __backButton = getByTestId('back-button');
       fireEvent.press(__backButton);
 
       expect(__mockGoBack).toHaveBeenCalled();
@@ -333,14 +333,14 @@ describe('Comprehensive App Test Suite', () => {
   describe('Data Persistence Tests', () => {
     it('should save user preferences', async () => {
       await AsyncStorage.setItem(
-        'userPreferences',
+    console.log('userPreferences',
         JSON.stringify({
           theme: 'dark',
           language: 'en',
         }),
       );
 
-      const saved = await AsyncStorage.getItem('userPreferences');
+      const __saved = await AsyncStorage.getItem('userPreferences');
       expect(JSON.parse(__saved)).toEqual({
         theme: 'dark',
         language: 'en',
@@ -370,14 +370,14 @@ describe('Comprehensive App Test Suite', () => {
     it('should render large lists efficiently', async () => {
       const startTime = Date.now();
 
-      const { getByTestId } = render(
+      const { __getByTestId } = render(
         <NavigationContainer>
           <InventoryScreen />
         </NavigationContainer>,
       );
 
       const endTime = Date.now();
-      const renderTime = endTime - startTime;
+      const __renderTime = endTime - startTime;
 
       // Should render in less than 1 second
       expect(__renderTime).toBeLessThan(1000);

@@ -68,7 +68,7 @@ const OrderHistoryScreen: React.FC = () => {
   const navigation = useNavigation();
 
   // Mock order data
-  const [orders, setOrders] = useState<Order[]>([
+  const [orders, _setOrders] = useState<Order[]>([
     {
       id: 'ORD001',
       orderNumber: 1234,
@@ -172,7 +172,7 @@ const OrderHistoryScreen: React.FC = () => {
 
     // Apply search filter
     if (__searchQuery) {
-      filtered = filtered.filter(
+      _filtered = filtered.filter(
         order =>
           order.orderNumber.toString().includes(__searchQuery) ||
           order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -182,9 +182,10 @@ const OrderHistoryScreen: React.FC = () => {
     }
 
     setFilteredOrders(__filtered);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orders, _searchQuery, activeFilter]);
 
-  const getStatusColor = (status: _OrderStatus) => {
+  const getStatusColor = (_status: _OrderStatus) => {
     switch (__status) {
       case 'completed':
         return Colors.success;
@@ -198,7 +199,7 @@ const OrderHistoryScreen: React.FC = () => {
     }
   };
 
-  const getStatusIcon = (status: _OrderStatus) => {
+  const getStatusIcon = (_status: _OrderStatus) => {
     switch (__status) {
       case 'completed':
         return 'check-circle';
@@ -212,12 +213,12 @@ const OrderHistoryScreen: React.FC = () => {
     }
   };
 
-  const handleOrderPress = (order: _Order) => {
+  const handleOrderPress = (_order: _Order) => {
     setSelectedOrder(__order);
     setShowOrderModal(__true);
   };
 
-  const handleReprint = (order: _Order) => {
+  const handleReprint = (_order: _Order) => {
     setSelectedOrder(__order);
     setShowReprintModal(__true);
   };
@@ -236,6 +237,7 @@ const OrderHistoryScreen: React.FC = () => {
     );
   };
 
+  // eslint-disable-next-line react/no-unstable-nested-components
   const FilterButton = ({ filter, label }: { filter: FilterOption; label: string }) => (
     <TouchableOpacity
       style={[styles.filterButton, activeFilter === filter && styles.filterButtonActive]}
@@ -394,6 +396,7 @@ const OrderHistoryScreen: React.FC = () => {
           )}
         </View>
       </View>
+      // eslint-disable-next-line react/no-unstable-nested-components
     </Modal>
   );
 

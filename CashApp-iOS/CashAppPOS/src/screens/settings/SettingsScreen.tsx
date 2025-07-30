@@ -284,7 +284,7 @@ const SettingsScreen: React.FC = () => {
     if (query.trim() === '') {
       setFilteredCategories(__settingsCategories);
     } else {
-      const filtered = settingsCategories.filter(
+      const __filtered = settingsCategories.filter(
         category =>
           category.title.toLowerCase().includes(query.toLowerCase()) ||
           category.description.toLowerCase().includes(query.toLowerCase()) ||
@@ -377,6 +377,7 @@ const SettingsScreen: React.FC = () => {
         keyExtractor={item => item.id}
         contentContainerStyle={styles.categoriesList}
         showsVerticalScrollIndicator={false}
+        // eslint-disable-next-line react/no-unstable-nested-components
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         ListHeaderComponent={() => (
           <View style={styles.subscriptionSection}>

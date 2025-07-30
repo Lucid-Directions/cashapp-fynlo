@@ -17,7 +17,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useAuthStore } from '../../store/useAuthStore';
 import Logo from '../../components/Logo';
 
-const { width, height } = Dimensions.get('window');
+const { __width, __height } = Dimensions.get('window');
 
 // Clover POS Color Scheme
 const Colors = {

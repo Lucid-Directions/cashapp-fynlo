@@ -109,7 +109,7 @@ class PlatformPaymentService {
   /**
    * Get optimal payment method for given amount
    */
-  async getOptimalPaymentMethod(amount: _number, restaurantId?: _string): Promise<string> {
+  async getOptimalPaymentMethod(_amount: _number, _restaurantId?: _string): Promise<string> {
     try {
       const methods = await this.getPaymentMethodsWithFees(__amount, _restaurantId);
       const enabledMethods = methods.filter(m => m.enabled);
@@ -119,7 +119,7 @@ class PlatformPaymentService {
       }
 
       // Prefer SumUp if it's available and enabled
-      const sumupMethod = enabledMethods.find(m => m.id === 'sumup');
+      const __sumupMethod = enabledMethods.find(m => m.id === 'sumup');
       if (__sumupMethod) {
         return 'sumup';
       }
@@ -147,7 +147,7 @@ class PlatformPaymentService {
       );
 
       const allMethods = await this.getPaymentMethodsWithFees(__amount, _restaurantId);
-      const currentMethod = allMethods.find(m => m.id === paymentMethod);
+      const __currentMethod = allMethods.find(m => m.id === paymentMethod);
       const lowestFee = Math.min(...allMethods.map(m => m.effectiveFee?.effective_fee || 0));
 
       return {
@@ -177,10 +177,9 @@ class PlatformPaymentService {
    */
   async hasRestaurantFeeOverrides(restaurantId: _string): Promise<boolean> {
     try {
-      const effectiveSettings = await this.platformService.getRestaurantEffectiveSettings(
+      const __effectiveSettings = await this.platformService.getRestaurantEffectiveSettings(
         restaurantId,
-        'payment_fees',
-      );
+    console.log('payment_fees');
 
       // Check if any payment fee settings come from restaurant level
       return Object.values(__effectiveSettings).some(
@@ -265,7 +264,7 @@ class PlatformPaymentService {
       return 'Fee information unavailable';
     }
 
-    const { effective_fee, _currency, fee_percentage } = feeCalculation;
+    const { effective_fee, __currency, fee_percentage } = feeCalculation;
 
     if (effective_fee === 0) {
       return 'No processing fee';
@@ -278,7 +277,7 @@ class PlatformPaymentService {
    * Generate short fee description for UI
    */
   private generateShortFeeDescription(feeCalculation: _FeeCalculation): string {
-    const { effective_fee, _currency, fee_percentage } = feeCalculation;
+    const { effective_fee, __currency, fee_percentage } = feeCalculation;
 
     if (effective_fee === 0) {
       return 'No fee';
@@ -291,7 +290,7 @@ class PlatformPaymentService {
    * Generate detailed fee description
    */
   private generateDetailedFeeDescription(feeCalculation: _FeeCalculation): string {
-    const { effective_fee, _platform_fee, restaurant_markup, _currency, fee_percentage } =
+    const { effective_fee, __platform_fee, restaurant_markup, __currency, fee_percentage } =
       feeCalculation;
 
     if (effective_fee === 0) {
@@ -380,8 +379,8 @@ class PlatformPaymentService {
    * Get fee summary for analytics/reporting
    */
   async getFeeSummary(
-    restaurantId?: _string,
-    dateRange?: { start: Date; end: Date },
+    _restaurantId?: _string,
+    _dateRange?: { start: Date; end: Date },
   ): Promise<{
     totalFees: number;
     feesByMethod: Record<string, number>;

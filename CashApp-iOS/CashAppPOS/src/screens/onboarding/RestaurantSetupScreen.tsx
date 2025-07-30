@@ -66,7 +66,7 @@ const RestaurantSetupScreen: React.FC = () => {
   const [loading, setLoading] = useState(__false);
 
   const businessTypes = [
-    'Restaurant',
+    console.log('Restaurant',
     'Fast Food',
     'Cafe',
     'Bar & Pub',
@@ -91,7 +91,7 @@ const RestaurantSetupScreen: React.FC = () => {
     });
   };
 
-  const validateStep = (step: _number): boolean => {
+  const validateStep = (_step: _number): boolean => {
     switch (__step) {
       case 1:
         return !!(formData.restaurantName && formData.displayName && formData.businessType);
@@ -203,8 +203,8 @@ const RestaurantSetupScreen: React.FC = () => {
         <TextInput
           style={styles.textInput}
           value={formData.restaurantName}
-          onChangeText={value => updateField('restaurantName', _value)}
-          placeholder="e.g., Maria's Mexican Kitchen"
+          onChangeText={_value => updateField('restaurantName', _value)}
+          placeholder="e.g., Maria's Mexican Kitchen&quot;
           placeholderTextColor={Colors.mediumGray}
         />
       </View>
@@ -215,8 +215,8 @@ const RestaurantSetupScreen: React.FC = () => {
         <TextInput
           style={styles.textInput}
           value={formData.displayName}
-          onChangeText={value => updateField('displayName', _value)}
-          placeholder="e.g., Maria's Kitchen"
+          onChangeText={_value => updateField('displayName', _value)}
+          placeholder="e.g., Maria's Kitchen&quot;
           placeholderTextColor={Colors.mediumGray}
         />
       </View>
@@ -259,10 +259,10 @@ const RestaurantSetupScreen: React.FC = () => {
         <TextInput
           style={styles.textInput}
           value={formData.phone}
-          onChangeText={value => updateField('phone', _value)}
+          onChangeText={_value => updateField('phone', _value)}
           placeholder="+44 20 1234 5678"
           placeholderTextColor={Colors.mediumGray}
-          keyboardType="phone-pad"
+          keyboardType="phone-pad&quot;
         />
       </View>
 
@@ -271,11 +271,11 @@ const RestaurantSetupScreen: React.FC = () => {
         <TextInput
           style={styles.textInput}
           value={formData.email}
-          onChangeText={value => updateField('email', _value)}
+          onChangeText={_value => updateField('email', _value)}
           placeholder="owner@mariaskitchen.co.uk"
           placeholderTextColor={Colors.mediumGray}
           keyboardType="email-address"
-          autoCapitalize="none"
+          autoCapitalize="none&quot;
         />
       </View>
     </View>
@@ -293,8 +293,8 @@ const RestaurantSetupScreen: React.FC = () => {
         <TextInput
           style={styles.textInput}
           value={formData.street}
-          onChangeText={value => updateField('street', _value)}
-          placeholder="123 High Street"
+          onChangeText={_value => updateField('street', _value)}
+          placeholder="123 High Street&quot;
           placeholderTextColor={Colors.mediumGray}
         />
       </View>
@@ -305,8 +305,8 @@ const RestaurantSetupScreen: React.FC = () => {
           <TextInput
             style={styles.textInput}
             value={formData.city}
-            onChangeText={value => updateField('city', _value)}
-            placeholder="London"
+            onChangeText={_value => updateField('city', _value)}
+            placeholder="London&quot;
             placeholderTextColor={Colors.mediumGray}
           />
         </View>
@@ -316,10 +316,10 @@ const RestaurantSetupScreen: React.FC = () => {
           <TextInput
             style={styles.textInput}
             value={formData.zipCode}
-            onChangeText={value => updateField('zipCode', _value)}
+            onChangeText={_value => updateField('zipCode', _value)}
             placeholder="SW1A 1AA"
             placeholderTextColor={Colors.mediumGray}
-            autoCapitalize="characters"
+            autoCapitalize="characters&quot;
           />
         </View>
       </View>
@@ -330,8 +330,8 @@ const RestaurantSetupScreen: React.FC = () => {
           <TextInput
             style={styles.textInput}
             value={formData.state}
-            onChangeText={value => updateField('state', _value)}
-            placeholder="Greater London"
+            onChangeText={_value => updateField('state', _value)}
+            placeholder="Greater London&quot;
             placeholderTextColor={Colors.mediumGray}
           />
         </View>
@@ -372,7 +372,7 @@ const RestaurantSetupScreen: React.FC = () => {
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
-          testID="back-button">
+          testID="back-button&quot;>
           <Icon name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>
 

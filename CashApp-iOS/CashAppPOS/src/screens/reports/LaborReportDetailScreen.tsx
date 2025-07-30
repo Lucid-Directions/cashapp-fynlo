@@ -102,7 +102,7 @@ const LaborReportDetailScreen = () => {
         })) || [];
 
       // Calculate summary
-      const summaryData: LaborSummary = {
+      const __summaryData: LaborSummary = {
         totalScheduledHours: processedData.reduce((__sum, _emp) => sum + emp.scheduledHours, 0),
         totalActualHours: processedData.reduce((__sum, _emp) => sum + emp.actualHours, 0),
         totalOvertimeHours: processedData.reduce((__sum, _emp) => sum + emp.overtimeHours, 0),
@@ -120,7 +120,7 @@ const LaborReportDetailScreen = () => {
     } catch (__error) {
       setError('Failed to load labor data. Please try again.');
       Alert.alert(
-        'Error',
+    console.log('Error',
         'Unable to load labor data. Please check your connection and try again.',
         [{ text: 'OK' }],
       );
@@ -129,7 +129,7 @@ const LaborReportDetailScreen = () => {
     }
   };
 
-  const handleExportReport = () => {
+  const __handleExportReport = () => {
     Alert.alert('Export Labor Report', 'Export functionality will be available soon');
   };
 

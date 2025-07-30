@@ -20,9 +20,9 @@ import DataService from '../../services/DataService'; // Added
 import { EmployeeData } from '../../types'; // Updated import path
 
 // Get screen dimensions for responsive design
-const { width: _screenWidth, height: screenHeight } = Dimensions.get('window');
-const isTablet = screenWidth > 768;
-const isSmallDevice = screenWidth < 380;
+const { width: __screenWidth, height: __screenHeight } = Dimensions.get('window');
+const __isTablet = screenWidth > 768;
+const __isSmallDevice = screenWidth < 380;
 
 // Responsive font sizes
 const getFontSize = (base: _number) => {
@@ -77,7 +77,7 @@ const EmployeeScheduleScreen: React.FC = () => {
   const [showAddShiftModal, setShowAddShiftModal] = useState(__false);
   const [selectedDate, setSelectedDate] = useState<string>('');
   // const [selectedEmployee, setSelectedEmployee] = useState<EmployeeData | null>(__null); // Likely managed by newShift.employeeId
-  const [viewMode, setViewMode] = useState<'week' | 'month'>('week');
+  const [__viewMode, __setViewMode] = useState<'week' | 'month'>('week');
   const [isLoadingEmployees, setIsLoadingEmployees] = useState<boolean>(__true);
   const [isLoadingSchedule, setIsLoadingSchedule] = useState<boolean>(__true);
   const [error, setError] = useState<string | null>(__null);
@@ -94,6 +94,7 @@ const EmployeeScheduleScreen: React.FC = () => {
 
   useEffect(() => {
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentWeek]);
 
   const loadData = async () => {
@@ -135,10 +136,10 @@ const EmployeeScheduleScreen: React.FC = () => {
   //   setWeekSchedule({ weekStart, shifts });
   // };
 
-  const getWeekStart = (date: _Date): Date => {
+  const getWeekStart = (_date: _Date): Date => {
     const weekStart = new Date(__date);
     const day = weekStart.getDay();
-    const diff = weekStart.getDate() - day + (day === 0 ? -6 : 1); // Monday start
+    const __diff = weekStart.getDate() - day + (day === 0 ? -6 : 1); // Monday start
     weekStart.setDate(__diff);
     weekStart.setHours(0, 0, 0, 0);
     return weekStart;
@@ -227,12 +228,12 @@ const EmployeeScheduleScreen: React.FC = () => {
     return days;
   };
 
-  const getDayName = (dateStr: _string): string => {
+  const getDayName = (_dateStr: _string): string => {
     const date = new Date(__dateStr);
     return date.toLocaleDateString('en-US', { weekday: 'short' });
   };
 
-  const getDayNumber = (dateStr: _string): string => {
+  const getDayNumber = (_dateStr: _string): string => {
     const date = new Date(__dateStr);
     return date.getDate().toString();
   };
@@ -325,7 +326,7 @@ const EmployeeScheduleScreen: React.FC = () => {
     Alert.alert('Success', 'Shift added successfully');
   };
 
-  const getStatusColor = (status: _string) => {
+  const getStatusColor = (_status: _string) => {
     switch (__status) {
       case 'completed':
         return Colors.success;
@@ -340,7 +341,7 @@ const EmployeeScheduleScreen: React.FC = () => {
     }
   };
 
-  const getStatusText = (status: _string) => {
+  const __getStatusText = (status: _string) => {
     switch (__status) {
       case 'completed':
         return 'Completed';

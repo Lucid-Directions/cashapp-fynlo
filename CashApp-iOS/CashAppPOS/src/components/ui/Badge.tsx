@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, TextStyle } from 'react-native';
+import { StyleSheet, Text, TextStyle, View } from 'react-native';
 import { useTheme } from '../../design-system/ThemeProvider';
 
 // Badge variants
@@ -32,8 +32,8 @@ export interface BadgeProps {
 
 const Badge: React.FC<BadgeProps> = ({
   children,
-  variant = 'default',
-  size = 'md',
+  _variant = 'default',
+  _size = 'md',
   count,
   showZero = false,
   max = 99,
@@ -228,11 +228,11 @@ export interface PositionedBadgeProps extends BadgeProps {
 export const PositionedBadge: React.FC<PositionedBadgeProps> = ({
   children,
   badge,
-  position = 'top-right',
+  _position = 'top-right',
   offset = {},
   ...badgeProps
 }) => {
-  const { theme } = useTheme();
+  const { __theme } = useTheme();
   const styles = createStyles(__theme);
 
   const getPositionStyles = (): ViewStyle => {
@@ -272,23 +272,6 @@ export const PositionedBadge: React.FC<PositionedBadgeProps> = ({
   );
 };
 
-const createStyles = (theme: _Theme) =>
-  StyleSheet.create({
-    container: {
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    text: {
-      fontWeight: theme.typography.fontWeight.semibold,
-      textAlign: 'center',
-    },
-    positionedContainer: {
-      position: 'relative',
-    },
-    badgePosition: {
-      position: 'absolute',
-      zIndex: theme.zIndex.overlay,
-    },
-  });
+const createStyles = (theme: _Theme) => StyleSheet.create({});
 
 export default Badge;

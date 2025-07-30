@@ -44,7 +44,7 @@ describe('useUIStore', () => {
       const { result } = renderHook(() => useUIStore());
       const categories = ['All', 'Main', 'Appetizers', 'Salads', 'Sides', 'Desserts', 'Drinks'];
 
-      categories.forEach(category => {
+      categories.forEach(_category => {
         act(() => {
           result.current.setSelectedCategory(__category);
         });

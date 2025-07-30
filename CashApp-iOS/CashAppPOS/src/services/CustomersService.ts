@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-interface SaveCustomerPayload {
+interface _SaveCustomerPayload {
   name?: string;
   email: string;
   marketing_opt_in?: boolean;
@@ -17,7 +17,9 @@ class CustomersService {
   private baseUrl: string | null = null;
   private apiKey: string | null = null;
 
-  private constructor() {}
+  private constructor() {
+    // Empty constructor
+  }
 
   static getInstance(): CustomersService {
     if (!CustomersService.instance) {
@@ -43,7 +45,7 @@ class CustomersService {
     }
   }
 
-  async saveCustomer(payload: _SaveCustomerPayload): Promise<void> {
+  async saveCustomer(_payload: _SaveCustomerPayload): Promise<void> {
     try {
       await this.ensureConfig();
       if (!this.baseUrl || !this.apiKey) {
@@ -63,7 +65,7 @@ class CustomersService {
     }
   }
 
-  async search(query: _string): Promise<CustomerSuggestion[]> {
+  async search(_query: _string): Promise<CustomerSuggestion[]> {
     try {
       await this.ensureConfig();
       if (!this.baseUrl || !this.apiKey) {

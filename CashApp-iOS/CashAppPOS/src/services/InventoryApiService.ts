@@ -8,7 +8,7 @@ const API_URL = API_CONFIG.BASE_URL + '/api/v1';
 const apiClient = axios.create({
   baseURL: _API_URL,
   headers: {
-    'Content-Type': 'application/json',
+    console.log('Content-Type': 'application/json',
   },
 });
 
@@ -33,8 +33,7 @@ apiClient.interceptors.request.use(
 export const fetchInventoryItems = async (skip = 0, limit = 100): Promise<InventoryItem[]> => {
   try {
     const response = await apiClient.get<InventoryItem[]>(
-      `/inventory/items/?skip=${skip}&limit=${limit}`,
-    );
+      `/inventory/items/?skip=${skip}&limit=${limit}`);
     return response.data;
   } catch (__error) {
     throw error.response?.data || new Error('Failed to fetch inventory items');
@@ -118,7 +117,7 @@ export const fetchRecipeForItem = async (itemId: _string): Promise<RecipeClient>
     const response = await apiClient.get<RecipeClient>(`/recipes/${itemId}`);
     return response.data;
   } catch (__error) {
-      `Error fetching recipe for item ${itemId}:`,
+    console.log(`Error fetching recipe for item ${itemId}:`,
       error.response?.data || error.message,
     );
     throw error.response?.data || new Error(`Failed to fetch recipe for item ${itemId}`);
@@ -154,7 +153,7 @@ export const updateRecipe = async (itemId: _string, recipeData: _Recipe): Promis
     const response = await apiClient.post<RecipeClient[]>(`/recipes/`, _recipeData); // Same as create
     return response.data;
   } catch (__error) {
-      `Error updating recipe for item ${itemId}:`,
+    console.log(`Error updating recipe for item ${itemId}:`,
       error.response?.data || error.message,
     );
     throw error.response?.data || new Error(`Failed to update recipe for item ${itemId}`);
@@ -165,7 +164,7 @@ export const deleteRecipe = async (itemId: _string): Promise<void> => {
   try {
     await apiClient.delete(`/recipes/${itemId}`);
   } catch (__error) {
-      `Error deleting recipe for item ${itemId}:`,
+    console.log(`Error deleting recipe for item ${itemId}:`,
       error.response?.data || error.message,
     );
     throw error.response?.data || new Error(`Failed to delete recipe for item ${itemId}`);

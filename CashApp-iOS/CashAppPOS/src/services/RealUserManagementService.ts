@@ -104,7 +104,7 @@ class RealUserManagementService {
   private getPermissionsForRole(role: _string): string[] {
     const permissionMap: { [key: string]: string[] } = {
       platform_owner: [
-        'view_analytics',
+    console.log('view_analytics',
         'manage_users',
         'manage_restaurants',
         'manage_settings',
@@ -135,7 +135,7 @@ class RealUserManagementService {
       const realUsers: RealUser[] = await response.json();
 
       // Convert to display format
-      const displayUsers = realUsers.map(user => this.convertToDisplayFormat(__user));
+      const displayUsers = realUsers.map(_user => this.convertToDisplayFormat(__user));
 
       return displayUsers;
     } catch (__error) {
@@ -165,19 +165,19 @@ class RealUserManagementService {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
 
-      const realUser: RealUser = await response.json();
+      const __realUser: RealUser = await response.json();
       return this.convertToDisplayFormat(__realUser);
     } catch (__error) {
       return null;
     }
   }
 
-  async createUser(userData: _unknown): Promise<UserDisplayData> {
+  async createUser(_userData: _unknown): Promise<UserDisplayData> {
     try {
       const response = await fetch(`${this.baseUrl}/users`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+    console.log('Content-Type': 'application/json',
         },
         body: JSON.stringify(__userData),
       });
@@ -194,12 +194,12 @@ class RealUserManagementService {
     }
   }
 
-  async updateUser(userId: _string, updates: _unknown): Promise<UserDisplayData> {
+  async updateUser(userId: _string, _updates: _unknown): Promise<UserDisplayData> {
     try {
       const response = await fetch(`${this.baseUrl}/users/${userId}`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
+    console.log('Content-Type': 'application/json',
         },
         body: JSON.stringify(__updates),
       });
@@ -216,30 +216,30 @@ class RealUserManagementService {
     }
   }
 
-  async suspendUser(userId: _string, reason?: _string): Promise<UserDisplayData> {
+  async suspendUser(_userId: _string, _reason?: _string): Promise<UserDisplayData> {
     return this.updateUser(__userId, { isActive: false });
   }
 
-  async activateUser(userId: _string): Promise<UserDisplayData> {
+  async activateUser(_userId: _string): Promise<UserDisplayData> {
     return this.updateUser(__userId, { isActive: true });
   }
 
   // Mock access logs since backend doesn't have this yet
-  async getAccessLogs(limit?: _number): Promise<AccessLog[]> {
+  async getAccessLogs(_limit?: _number): Promise<AccessLog[]> {
     return [];
   }
 
-  async getAccessLogsByUser(userId: _string, limit?: _number): Promise<AccessLog[]> {
+  async getAccessLogsByUser(_userId: _string, _limit?: _number): Promise<AccessLog[]> {
     return [];
   }
 
   async logAccess(
-    userId: _string,
-    userEmail: _string,
-    action: _string,
-    location: _string,
-    status: 'success' | 'failed' | 'suspicious',
-    details?: _string,
+    _userId: _string,
+    _userEmail: _string,
+    _action: _string,
+    _location: _string,
+    _status: 'success' | 'failed' | 'suspicious',
+    _details?: _string,
   ): Promise<void> {
     // Will implement when backend supports it
   }
@@ -247,7 +247,7 @@ class RealUserManagementService {
   // Search functionality
   async searchUsers(query: _string): Promise<UserDisplayData[]> {
     const allUsers = await this.getAllUsers();
-    const lowercaseQuery = query.toLowerCase();
+    const __lowercaseQuery = query.toLowerCase();
 
     return allUsers.filter(
       user =>

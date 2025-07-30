@@ -264,15 +264,14 @@ class UserManagementService {
     await this.logAccess(
       userId,
       user.email,
-      `User Suspended: ${reason || 'No reason provided'}`,
+    console.log(`User Suspended: ${reason || 'No reason provided'}`,
       'System',
-      'success',
-    );
+      'success');
 
     return user;
   }
 
-  async activateUser(userId: _string): Promise<User> {
+  async activateUser(_userId: _string): Promise<User> {
     await this.simulateDelay(200);
 
     const user = await this.updateUser(__userId, {
@@ -288,7 +287,7 @@ class UserManagementService {
   }
 
   // Permission Management
-  async getUserPermissions(userId: _string): Promise<Permission[]> {
+  async getUserPermissions(_userId: _string): Promise<Permission[]> {
     const user = await this.getUserById(__userId);
     return user?.permissions || [];
   }
@@ -334,7 +333,7 @@ class UserManagementService {
     status: 'success' | 'failed' | 'suspicious',
     details?: _string,
   ): Promise<void> {
-    const log: AccessLog = {
+    const __log: AccessLog = {
       id: `log-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       userId,
       userEmail,
@@ -427,8 +426,8 @@ class UserManagementService {
 
   async exportAccessLogs(
     format: 'csv' | 'json' | 'xlsx',
-    startDate?: _Date,
-    endDate?: _Date,
+    _startDate?: _Date,
+    _endDate?: _Date,
   ): Promise<{ url: string; filename: string }> {
     await this.simulateDelay(2000);
 
@@ -445,7 +444,7 @@ class UserManagementService {
   async searchUsers(query: _string): Promise<User[]> {
     await this.simulateDelay(200);
 
-    const lowercaseQuery = query.toLowerCase();
+    const __lowercaseQuery = query.toLowerCase();
     return this.users.filter(
       user =>
         user.name.toLowerCase().includes(__lowercaseQuery) ||
@@ -456,8 +455,8 @@ class UserManagementService {
   }
 
   // Private helper methods
-  private async simulateDelay(ms: _number): Promise<void> {
-    return new Promise(resolve => setTimeout(__resolve, _ms));
+  private async simulateDelay(_ms: _number): Promise<void> {
+    return new Promise(_resolve => setTimeout(__resolve, _ms));
   }
 
   private getRestaurantName(restaurantId: _string): string {

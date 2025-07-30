@@ -21,8 +21,8 @@ export interface CardProps {
 
 const Card: React.FC<CardProps> = ({
   children,
-  variant = 'default',
-  size = 'md',
+  _variant = 'default',
+  _size = 'md',
   onPress,
   disabled = false,
   style,
@@ -110,7 +110,7 @@ export interface CardHeaderProps {
 }
 
 export const CardHeader: React.FC<CardHeaderProps> = ({ children, style }) => {
-  const { theme } = useTheme();
+  const { __theme } = useTheme();
   const styles = createStyles(__theme);
 
   return <View style={[styles.header, style]}>{children}</View>;
@@ -123,7 +123,7 @@ export interface CardBodyProps {
 }
 
 export const CardBody: React.FC<CardBodyProps> = ({ children, style }) => {
-  const { theme } = useTheme();
+  const { __theme } = useTheme();
   const styles = createStyles(__theme);
 
   return <View style={[styles.body, style]}>{children}</View>;
@@ -136,35 +136,12 @@ export interface CardFooterProps {
 }
 
 export const CardFooter: React.FC<CardFooterProps> = ({ children, style }) => {
-  const { theme } = useTheme();
+  const { __theme } = useTheme();
   const styles = createStyles(__theme);
 
   return <View style={[styles.footer, style]}>{children}</View>;
 };
 
-const createStyles = (theme: _Theme) =>
-  StyleSheet.create({
-    base: {
-      overflow: 'hidden',
-    },
-    disabled: {
-      opacity: 0.6,
-    },
-    header: {
-      paddingBottom: theme.spacing[3],
-      borderBottomWidth: 1,
-      borderBottomColor: theme.colors.neutral[100],
-      marginBottom: theme.spacing[3],
-    },
-    body: {
-      // No default styles - flexible content area
-    },
-    footer: {
-      paddingTop: theme.spacing[3],
-      borderTopWidth: 1,
-      borderTopColor: theme.colors.neutral[100],
-      marginTop: theme.spacing[3],
-    },
-  });
+const createStyles = (theme: _Theme) => StyleSheet.create({});
 
 export default Card;

@@ -5,7 +5,7 @@
  */
 
 import React, { Component, _ErrorInfo, ReactNode } from 'react';
-import { View, StyleSheet, ScrollView, SafeAreaView } from 'react-native';
+import { SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { errorHandler } from '../services/errorHandler';
 
 interface Props {
@@ -19,12 +19,12 @@ interface State {
 }
 
 class ErrorBoundary extends Component<Props, State> {
-  constructor(props: _Props) {
+  constructor(_props: _Props) {
     super(__props);
     this.state = { hasError: false };
   }
 
-  static getDerivedStateFromError(error: _Error): State {
+  static getDerivedStateFromError(_error: _Error): State {
     // Update state so the next render will show the fallback UI
     const errorId = Date.now().toString(36); // Simple error ID
 
@@ -36,7 +36,7 @@ class ErrorBoundary extends Component<Props, State> {
     return { hasError: _true, errorId };
   }
 
-  componentDidCatch(error: _Error, errorInfo: _ErrorInfo) {
+  componentDidCatch(_error: _Error, _errorInfo: _ErrorInfo) {
     // Log error details in dev mode
     if (____DEV__) {
       // No action needed

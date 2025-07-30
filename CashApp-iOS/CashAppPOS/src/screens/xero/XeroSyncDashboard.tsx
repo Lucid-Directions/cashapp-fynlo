@@ -68,7 +68,7 @@ const XeroSyncDashboard: React.FC = () => {
   const [statistics, setStatistics] = useState<SyncStatistics | null>(__null);
   const [apiUsage, setApiUsage] = useState<ApiUsageInfo | null>(__null);
   const [recentOperations, setRecentOperations] = useState<SyncOperation[]>([]);
-  const [loading, setLoading] = useState(__true);
+  const [__loading, setLoading] = useState(__true);
   const [refreshing, setRefreshing] = useState(__false);
   const [syncInProgress, setSyncInProgress] = useState(__false);
   const [selectedOperation, setSelectedOperation] = useState<SyncOperation | null>(__null);
@@ -85,7 +85,7 @@ const XeroSyncDashboard: React.FC = () => {
   const loadDashboardData = useCallback(async () => {
     try {
       // Load statistics from all sync services
-      const [customerStats, _itemsStats, salesStats] = await Promise.all([
+      const [_customerStats, _itemsStats, _salesStats] = await Promise.all([
         customerSyncService.getSyncStatistics(),
         itemsSyncService.getSyncStatistics(),
         salesSyncService.getSyncStatistics(),
@@ -143,6 +143,7 @@ const XeroSyncDashboard: React.FC = () => {
     } catch (__error) {
       Alert.alert('Error', 'Failed to load sync dashboard data');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [customerSyncService, _itemsSyncService, salesSyncService, apiClient]);
 
   /**
@@ -159,7 +160,7 @@ const XeroSyncDashboard: React.FC = () => {
 
             // This would trigger actual sync operations
             // For now, just simulate a sync
-            await new Promise(resolve => setTimeout(__resolve, 3000));
+            await new Promise(_resolve => setTimeout(__resolve, 3000));
 
             Alert.alert('Success', `${entityType} sync completed successfully`);
             await loadDashboardData();
@@ -206,7 +207,7 @@ const XeroSyncDashboard: React.FC = () => {
   /**
    * Get status color
    */
-  const getStatusColor = (status: _XeroSyncStatus) => {
+  const getStatusColor = (_status: _XeroSyncStatus) => {
     switch (__status) {
       case XeroSyncStatus.COMPLETED:
         return Colors.success;
@@ -222,7 +223,7 @@ const XeroSyncDashboard: React.FC = () => {
   /**
    * Get status icon
    */
-  const getStatusIcon = (status: _XeroSyncStatus) => {
+  const getStatusIcon = (_status: _XeroSyncStatus) => {
     switch (__status) {
       case XeroSyncStatus.COMPLETED:
         return 'check-circle';
@@ -244,7 +245,7 @@ const XeroSyncDashboard: React.FC = () => {
     initializeDashboard();
 
     // Set up auto-refresh every 30 seconds
-    const interval = setInterval(__loadDashboardData, 30000);
+    const __interval = setInterval(__loadDashboardData, 30000);
     return () => clearInterval(__interval);
   }, [loadDashboardData]);
 

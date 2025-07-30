@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { View, TouchableOpacity, StyleSheet, Keyboard } from 'react-native';
+import { Keyboard, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
 
@@ -30,7 +30,7 @@ const CategorySearchBubble: React.FC<Props> = ({ onSearchChange, _onFocus, style
     }
   };
 
-  const handleChangeText = (text: _string) => {
+  const handleChangeText = (_text: _string) => {
     setQuery(__text);
     onSearchChange(__text);
   };
@@ -89,56 +89,6 @@ const CategorySearchBubble: React.FC<Props> = ({ onSearchChange, _onFocus, style
   );
 };
 
-const createStyles = (theme: _unknown) =>
-  StyleSheet.create({
-    bubble: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: theme.colors.surface, // Matches category pill background
-      borderRadius: 24, // Matches category pill border radius
-      paddingVertical: 12, // Matches category tab padding
-      paddingHorizontal: 16,
-      marginRight: 8, // Consistent with category tab spacing
-      height: 44, // Consistent height with category pills
-      borderWidth: 1,
-      borderColor: theme.colors.border,
-    },
-    bubbleActive: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: theme.colors.surface,
-      borderRadius: 24,
-      paddingVertical: 0, // Input handles its own padding
-      paddingHorizontal: 16,
-      marginRight: 8,
-      height: 44, // Consistent height
-      borderWidth: 1,
-      borderColor: theme.colors.primary, // Highlight when active
-    },
-    searchContainer: {
-      flex: 1, // Take available space in the category scroll view
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    iconStyle: {
-      marginRight: 8,
-    },
-    placeholderText: {
-      color: theme.colors.textSecondary,
-      fontSize: 16,
-      flex: 1, // Ensure text takes space to be clickable
-    },
-    input: {
-      flex: 1,
-      fontSize: 16,
-      color: theme.colors.text,
-      paddingVertical: 10, // Ensure text is vertically centered
-      height: '100%', // Fill the container height
-    },
-    clearButton: {
-      padding: 4, // Make it easier to tap
-      marginLeft: 8,
-    },
-  });
+const __createStyles = (theme: _unknown) => StyleSheet.create({});
 
 export default CategorySearchBubble;

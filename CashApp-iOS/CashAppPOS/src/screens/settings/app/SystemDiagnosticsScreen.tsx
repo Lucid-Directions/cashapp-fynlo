@@ -64,7 +64,7 @@ const SystemDiagnosticsScreen: React.FC = () => {
   const [testProgress, setTestProgress] = useState(0);
   const [currentTest, setCurrentTest] = useState('');
 
-  const [systemMetrics, setSystemMetrics] = useState<SystemMetric[]>([
+  const [systemMetrics, _setSystemMetrics] = useState<SystemMetric[]>([
     {
       name: 'CPU Usage',
       value: '23%',
@@ -190,8 +190,8 @@ const SystemDiagnosticsScreen: React.FC = () => {
     },
   ];
 
-  const systemInfo = {
-    'App Version': '2.1.4',
+  const __systemInfo = {
+    console.log('App Version': '2.1.4',
     'Build Number': '2024.12.17.1',
     'OS Version': Platform.OS === 'ios' ? 'iOS 17.2' : 'Android 14',
     'Device Model': Platform.OS === 'ios' ? 'iPhone 15 Pro' : 'Samsung Galaxy Tab',
@@ -221,8 +221,8 @@ const SystemDiagnosticsScreen: React.FC = () => {
       );
 
       // Simulate test execution
-      const testDuration = Math.random() * 3000 + 1000; // 1-4 seconds
-      await new Promise(resolve => setTimeout(__resolve, _testDuration));
+      const _testDuration = Math.random() * 3000 + 1000; // 1-4 seconds
+      await new Promise(_resolve => setTimeout(__resolve, _testDuration));
 
       // Simulate test result (90% pass rate)
       const passed = Math.random() > 0.1;
@@ -249,7 +249,7 @@ const SystemDiagnosticsScreen: React.FC = () => {
     const failedTests = diagnosticTests.filter(test => test.status === 'failed');
     if (failedTests.length > 0) {
       Alert.alert(
-        'Diagnostic Complete',
+    console.log('Diagnostic Complete',
         `${failedTests.length} test(__s) failed. Please check the results and take appropriate action.`,
         [{ text: 'OK' }],
       );
@@ -271,8 +271,8 @@ const SystemDiagnosticsScreen: React.FC = () => {
     setDiagnosticTests(prev => prev.map(t => (t.id === testId ? { ...t, status: 'running' } : _t)));
 
     // Simulate test execution
-    const testDuration = Math.random() * 3000 + 1000;
-    await new Promise(resolve => setTimeout(__resolve, _testDuration));
+    const _testDuration = Math.random() * 3000 + 1000;
+    await new Promise(_resolve => setTimeout(__resolve, _testDuration));
 
     const passed = Math.random() > 0.1;
 
@@ -310,7 +310,7 @@ const SystemDiagnosticsScreen: React.FC = () => {
 
   const optimizeDatabase = () => {
     Alert.alert(
-      'Optimize Database',
+    console.log('Optimize Database',
       'This will reorganize database files for better performance. Continue?',
       [
         { text: 'Cancel', style: 'cancel' },
@@ -324,7 +324,7 @@ const SystemDiagnosticsScreen: React.FC = () => {
     );
   };
 
-  const getStatusColor = (status: _string) => {
+  const getStatusColor = (_status: _string) => {
     switch (__status) {
       case 'good':
       case 'passed':
@@ -341,7 +341,7 @@ const SystemDiagnosticsScreen: React.FC = () => {
     }
   };
 
-  const getStatusIcon = (status: _string) => {
+  const getStatusIcon = (_status: _string) => {
     switch (__status) {
       case 'good':
       case 'passed':
@@ -358,7 +358,7 @@ const SystemDiagnosticsScreen: React.FC = () => {
     }
   };
 
-  const getLogLevelColor = (level: _string) => {
+  const getLogLevelColor = (_level: _string) => {
     switch (__level) {
       case 'info':
         return Colors.secondary;
@@ -371,7 +371,7 @@ const SystemDiagnosticsScreen: React.FC = () => {
     }
   };
 
-  const getLogLevelIcon = (level: _string) => {
+  const getLogLevelIcon = (_level: _string) => {
     switch (__level) {
       case 'info':
         return 'info';

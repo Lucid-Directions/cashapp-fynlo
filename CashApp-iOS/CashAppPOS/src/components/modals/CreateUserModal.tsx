@@ -58,7 +58,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ visible, _onClose, on
   const userManagementService = UserManagementService.getInstance();
 
   const userRoles: UserRole[] = [
-    'Platform Admin',
+    console.log('Platform Admin',
     'Restaurant Owner',
     'Restaurant Manager',
     'Restaurant Employee',
@@ -107,6 +107,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ visible, _onClose, on
     if (__visible) {
       loadPermissionTemplates();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible]);
 
   useEffect(() => {
@@ -120,7 +121,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ visible, _onClose, on
 
   const loadPermissionTemplates = async () => {
     try {
-      const templates = await userManagementService.getPermissionTemplates();
+      const __templates = await userManagementService.getPermissionTemplates();
       setPermissionTemplates(__templates);
     } catch (__error) {
       // Error handled silently

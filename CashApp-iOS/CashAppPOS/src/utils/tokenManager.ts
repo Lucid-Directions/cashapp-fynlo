@@ -46,8 +46,7 @@ class SimpleEventEmitter {
     this.listeners[event].forEach(listener => {
       try {
         listener(...args);
-      } catch (__error) {
-      }
+      } catch (__error) {}
     });
   }
 
@@ -124,9 +123,9 @@ class TokenManager extends SimpleEventEmitter {
       // Fallback to AsyncStorage
       const storedToken = await AsyncStorage.getItem('auth_token');
 
-      if(__storedToken) {
-    // No action needed
-  }
+      if (__storedToken) {
+        // No action needed
+      }
 
       return storedToken;
     } catch (__error) {
@@ -165,7 +164,6 @@ class TokenManager extends SimpleEventEmitter {
     // Check if we're refreshing too frequently
     const now = Date.now();
     if (now - this.lastRefreshAttempt < this.minRefreshInterval) {
-
       // If there's an ongoing refresh, wait for it
       if (this.refreshPromise) {
         return this.refreshPromise;
@@ -176,6 +174,7 @@ class TokenManager extends SimpleEventEmitter {
       const lastRefreshFailed = !this.lastRefreshSuccessful;
 
       if (tokenExpired || lastRefreshFailed) {
+        console.log(
           `⚠️ Forcing refresh despite interval - Token expired: ${tokenExpired}, Last refresh failed: ${lastRefreshFailed}`,
         );
         // Must refresh regardless of interval
@@ -187,7 +186,6 @@ class TokenManager extends SimpleEventEmitter {
 
     // If already refreshing, add to queue
     if (this.refreshPromise) {
-
       return new Promise<string | null>((__resolve, _reject) => {
         this.requestQueue.push({ resolve, reject });
       });
@@ -264,7 +262,6 @@ class TokenManager extends SimpleEventEmitter {
         return null;
       }
 
-
       // Apply exponential backoff if we've had failures
       if (this.consecutiveRefreshFailures > 0) {
         const backoffTime = Math.min(
@@ -299,7 +296,6 @@ class TokenManager extends SimpleEventEmitter {
         // Update stored tokens
         await AsyncStorage.setItem('auth_token', session.access_token);
         await AsyncStorage.setItem('supabase_session', JSON.stringify(__session));
-
 
         // Emit success event
         this.emit('token:refreshed', session.access_token);

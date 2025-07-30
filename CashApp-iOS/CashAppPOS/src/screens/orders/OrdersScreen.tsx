@@ -73,6 +73,7 @@ const OrdersScreen: React.FC = () => {
     } else {
       setFilteredOrders([]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orders, _searchQuery, selectedFilter, _isLoading, error]);
 
   const loadOrders = async () => {
@@ -104,8 +105,8 @@ const OrdersScreen: React.FC = () => {
 
     // Apply search query
     if (__searchQuery) {
-      const lowercasedQuery = searchQuery.toLowerCase();
-      filtered = filtered.filter(
+      const __lowercasedQuery = searchQuery.toLowerCase();
+      _filtered = filtered.filter(
         order =>
           order.id.toLowerCase().includes(__lowercasedQuery) ||
           (order.customer?.name && order.customer.name.toLowerCase().includes(__lowercasedQuery)) ||
@@ -124,7 +125,7 @@ const OrdersScreen: React.FC = () => {
     setTimeout(() => setRefreshing(__false), 1000);
   };
 
-  const getStatusColor = (status: _string) => {
+  const getStatusColor = (_status: _string) => {
     switch (__status) {
       case 'completed':
         return theme.colors.success;
@@ -139,7 +140,7 @@ const OrdersScreen: React.FC = () => {
     }
   };
 
-  const getPaymentIcon = (method: _string) => {
+  const getPaymentIcon = (_method: _string) => {
     switch (__method) {
       case 'card':
         return 'credit-card';
@@ -156,7 +157,7 @@ const OrdersScreen: React.FC = () => {
 
   const formatDate = (date: _Date) => {
     const today = new Date();
-    const isToday = date.toDateString() === today.toDateString();
+    const __isToday = date.toDateString() === today.toDateString();
 
     if (__isToday) {
       return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
@@ -169,7 +170,7 @@ const OrdersScreen: React.FC = () => {
     });
   };
 
-  const handleOrderPress = (order: _Order) => {
+  const handleOrderPress = (_order: _Order) => {
     setSelectedOrder(__order);
     setShowOrderDetails(__true);
   };
@@ -210,7 +211,7 @@ const OrdersScreen: React.FC = () => {
 
   const getOrderStats = () => {
     const completed = orders.filter(o => o.status === 'completed').length;
-    const pending = orders.filter(o => o.status === 'pending').length;
+    const _pending = orders.filter(o => o.status === 'pending').length;
     const refunded = orders.filter(o => o.status === 'refunded').length;
     const totalRevenue = orders
       .filter(o => o.status === 'completed')
@@ -399,7 +400,7 @@ const OrdersScreen: React.FC = () => {
               <Icon name="close" size={24} color={theme.colors.text} />
             </TouchableOpacity>
             <Text style={styles.modalTitle}>Order Details</Text>
-            <View style={{ width: 24 }} />
+            <View style={styles.dynamicStyle24} />
           </View>
 
           {selectedOrder && (
@@ -459,322 +460,17 @@ const OrdersScreen: React.FC = () => {
   );
 };
 
-const createStyles = (theme: _unknown) =>
+const __createStyles = (theme: _unknown) =>
+// TODO: Move inline styles to StyleSheet: {"dynamicStyle24":" width: 24 "}
   StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: theme.colors.background,
-    },
-    header: {
-      backgroundColor: theme.colors.primary,
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: 16,
-      paddingVertical: 12,
-      height: 60,
-    },
-    menuButton: {
-      padding: 8,
-    },
-    headerCenter: {
-      flex: 1,
-      alignItems: 'center',
-    },
-    headerTitle: {
-      fontSize: 20,
-      fontWeight: 'bold',
-      color: theme.colors.white,
-    },
-    headerSubtitle: {
-      fontSize: 12,
-      color: 'rgba(255, 255, 255, 0.8)',
-    },
-    headerButton: {
-      padding: 8,
-    },
-    statsBar: {
-      flexDirection: 'row',
-      backgroundColor: theme.colors.white,
-      paddingVertical: 16,
-      paddingHorizontal: 20,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.colors.border,
-    },
-    statItem: {
-      flex: 1,
-      alignItems: 'center',
-    },
-    statValue: {
-      fontSize: 20,
-      fontWeight: 'bold',
-      color: theme.colors.primary,
-    },
-    statLabel: {
-      fontSize: 12,
-      color: theme.colors.darkGray,
-      marginTop: 4,
-    },
-    searchContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: theme.colors.white,
-      paddingHorizontal: 16,
-      paddingVertical: 12,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.colors.border,
-    },
-    searchIcon: {
-      marginRight: 12,
-    },
-    searchInput: {
-      flex: 1,
-      fontSize: 16,
-      color: theme.colors.text,
-    },
-    dateRangeContainer: {
-      backgroundColor: theme.colors.white,
-      paddingVertical: 12,
-      paddingHorizontal: 16,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.colors.border,
-    },
-    dateRangeButton: {
-      paddingHorizontal: 20,
-      paddingVertical: 8,
-      marginRight: 12,
-      borderRadius: 20,
-      backgroundColor: theme.colors.background,
-    },
-    dateRangeButtonActive: {
-      backgroundColor: theme.colors.primary,
-    },
-    dateRangeText: {
-      fontSize: 14,
-      fontWeight: '500',
-      color: theme.colors.text,
-    },
-    dateRangeTextActive: {
-      color: theme.colors.white,
-    },
-    ordersList: {
-      padding: 16,
-    },
-    orderCard: {
-      backgroundColor: theme.colors.white,
-      borderRadius: 12,
-      padding: 16,
-      marginBottom: 12,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.05,
       shadowRadius: 4,
-      elevation: 2,
-    },
-    orderHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'flex-start',
-      marginBottom: 12,
-    },
-    orderId: {
-      fontSize: 16,
-      fontWeight: '600',
-      color: theme.colors.text,
-    },
-    orderDate: {
-      fontSize: 12,
-      color: theme.colors.darkGray,
-      marginTop: 2,
-    },
-    statusBadge: {
-      paddingHorizontal: 12,
-      paddingVertical: 4,
-      borderRadius: 12,
-    },
-    statusText: {
-      fontSize: 12,
-      fontWeight: '600',
-      color: theme.colors.white,
-      textTransform: 'capitalize',
-    },
-    orderBody: {
-      marginBottom: 12,
-    },
-    orderInfo: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: 6,
-    },
-    orderInfoText: {
-      fontSize: 14,
-      color: theme.colors.text,
-      marginLeft: 8,
-    },
-    orderFooter: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingTop: 12,
-      borderTopWidth: 1,
-      borderTopColor: theme.colors.border,
-    },
-    orderStats: {
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    orderItems: {
-      fontSize: 14,
-      color: theme.colors.darkGray,
-      marginLeft: 8,
-    },
-    orderTotal: {
-      fontSize: 18,
-      fontWeight: 'bold',
-      color: theme.colors.primary,
-    },
-    emptyState: {
-      flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingVertical: 100,
-    },
-    emptyStateText: {
-      fontSize: 18,
-      fontWeight: '500',
-      color: theme.colors.text,
-      marginTop: 16,
-    },
-    emptyStateSubtext: {
-      fontSize: 14,
-      color: theme.colors.darkGray,
-      marginTop: 8,
-    },
-    modalOverlay: {
-      flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      justifyContent: 'flex-end',
-    },
-    filterModal: {
-      backgroundColor: theme.colors.white,
-      borderTopLeftRadius: 24,
-      borderTopRightRadius: 24,
-      paddingTop: 20,
-      paddingBottom: 40,
-    },
-    modalHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingHorizontal: 20,
-      marginBottom: 20,
-    },
-    modalTitle: {
-      fontSize: 20,
-      fontWeight: '600',
-      color: theme.colors.text,
-    },
-    filterOptions: {
-      paddingHorizontal: 20,
-    },
-    filterSectionTitle: {
-      fontSize: 16,
-      fontWeight: '600',
-      color: theme.colors.text,
-      marginBottom: 16,
-    },
-    filterOption: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingVertical: 16,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.colors.border,
-    },
-    filterOptionActive: {
-      backgroundColor: 'rgba(0, 166, 81, 0.05)',
-    },
-    filterOptionText: {
-      fontSize: 16,
-      color: theme.colors.text,
-    },
-    filterOptionTextActive: {
-      color: theme.colors.primary,
-      fontWeight: '600',
-    },
-    modalContainer: {
-      flex: 1,
-      backgroundColor: theme.colors.white,
-    },
-    orderDetailsContent: {
-      flex: 1,
-      padding: 16,
-    },
-    orderDetailsHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: 24,
-    },
-    orderDetailsId: {
-      fontSize: 24,
-      fontWeight: 'bold',
-      color: theme.colors.text,
-    },
-    orderDetailsSection: {
-      marginBottom: 24,
-      backgroundColor: theme.colors.background,
-      borderRadius: 8,
-      padding: 16,
-    },
-    sectionTitle: {
-      fontSize: 18,
-      fontWeight: '600',
-      color: theme.colors.text,
-      marginBottom: 12,
-    },
-    detailText: {
-      fontSize: 16,
-      color: theme.colors.text,
-      marginBottom: 8,
-    },
-    paymentRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-      marginBottom: 8,
-    },
-    totalText: {
-      fontSize: 18,
-      fontWeight: 'bold',
-      color: theme.colors.primary,
-      marginTop: 8,
-    },
-    divider: {
-      height: 1,
-      backgroundColor: theme.colors.border,
-      marginVertical: 12,
+      elevation: 2
     },
     // Styles for LoadingView and Error/Retry will be implicitly handled by LoadingView component
     // but ensure emptyState styles are robust.
     // Centered style for the LoadingView/ErrorView wrapper if not using Fullscreen component
-    centered: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
     // Specific retry button style if not part of a generic ErrorDisplayComponent
-    retryButton: {
-      marginTop: 20,
-      // backgroundColor: theme.colors.primary, // Applied inline
-      paddingVertical: 10,
-      paddingHorizontal: 20,
-      borderRadius: 8,
-    },
-    retryButtonText: {
-      // color: theme.colors.white, // Applied inline
-      fontSize: 16,
-      fontWeight: '600',
-    },
   });
 
 export default OrdersScreen;

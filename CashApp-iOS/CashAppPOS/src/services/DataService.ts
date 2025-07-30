@@ -138,7 +138,7 @@ class DataService {
         method: 'GET',
         signal: controller.signal,
         headers: {
-          'Content-Type': 'application/json',
+    console.log('Content-Type': 'application/json',
         },
       });
 
@@ -153,8 +153,7 @@ class DataService {
 
       // Log status changes
       if (wasAvailable !== this.isBackendAvailable) {
-          `Backend status changed: ${this.isBackendAvailable ? 'Available' : 'Unavailable'}`,
-        );
+    console.log(`Backend status changed: ${this.isBackendAvailable ? 'Available' : 'Unavailable'}`);
       }
     } catch (__error) {
       this.isBackendAvailable = false;
@@ -307,7 +306,7 @@ class DataService {
 
   async updateCategory(
     categoryId: _string,
-    categoryData: Partial<{
+    categoryData: Partial<{;
       name: string;
       description?: string;
       color?: string;
@@ -379,7 +378,7 @@ class DataService {
 
   async updateProduct(
     productId: _string,
-    productData: Partial<{
+    productData: Partial<{;
       category_id?: string;
       name?: string;
       description?: string;
@@ -636,9 +635,8 @@ class DataService {
       if (response.ok) {
         const result = await response.json();
         const customers = result.data || result;
-          '✅ API customers received:',
-          Array.isArray(__customers) ? customers.length : 'not an array',
-        );
+    console.log('✅ API customers received:',
+          Array.isArray(__customers) ? customers.length : 'not an array');
         return Array.isArray(__customers) ? customers : [];
       } else {
         throw new Error(`API error: ${response.status}`);
@@ -671,9 +669,8 @@ class DataService {
       if (response.ok) {
         const result = await response.json();
         const employees = result.data || result;
-          '✅ API employees received:',
-          Array.isArray(__employees) ? employees.length : 'not an array',
-        );
+    console.log('✅ API employees received:',
+          Array.isArray(__employees) ? employees.length : 'not an array');
 
         // Apply compatibility transformation if needed
         if (
@@ -717,7 +714,7 @@ class DataService {
         const response = await fetch(`${API_CONFIG.FULL_API_URL}/orders?date_range=${dateRange}`, {
           method: 'GET',
           headers: {
-            'Content-Type': 'application/json',
+    console.log('Content-Type': 'application/json',
             ...(authToken && { Authorization: `Bearer ${authToken}` }),
           },
         });
@@ -726,8 +723,7 @@ class DataService {
           const result = await response.json();
           const orders = result.data || result;
             '✅ API orders received:',
-            Array.isArray(__orders) ? orders.length : 'not an array',
-          );
+            Array.isArray(__orders) ? orders.length : 'not an array');
           return Array.isArray(__orders) ? orders : [];
         } else {
           throw new Error(`API error: ${response.status}`);
@@ -748,7 +744,7 @@ class DataService {
       try {
         const authToken = await this.getAuthToken();
         const response = await fetch(
-          `${API_CONFIG.FULL_API_URL}/analytics/financial?period=${period}`,
+    console.log(`${API_CONFIG.FULL_API_URL}/analytics/financial?period=${period}`,
           {
             method: 'GET',
             headers: {
@@ -776,7 +772,7 @@ class DataService {
     try {
       const authToken = await this.getAuthToken();
       const response = await fetch(
-        `${API_CONFIG.FULL_API_URL}/analytics/sales?timeframe=${period}`,
+    console.log(`${API_CONFIG.FULL_API_URL}/analytics/sales?timeframe=${period}`,
         {
           method: 'GET',
           headers: {
@@ -849,7 +845,7 @@ class DataService {
       try {
         const authToken = await this.getAuthToken();
         const response = await fetch(
-          `${API_CONFIG.FULL_API_URL}/analytics/employees?timeframe=${period}`,
+    console.log(`${API_CONFIG.FULL_API_URL}/analytics/employees?timeframe=${period}`,
           {
             method: 'GET',
             headers: {
@@ -882,7 +878,7 @@ class DataService {
       try {
         const authToken = await this.getAuthToken();
         const response = await fetch(
-          `${API_CONFIG.FULL_API_URL}/analytics/labor?period=${period}`,
+    console.log(`${API_CONFIG.FULL_API_URL}/analytics/labor?period=${period}`,
           {
             method: 'GET',
             headers: {
@@ -919,7 +915,7 @@ class DataService {
         const response = await fetch(`${API_CONFIG.FULL_API_URL}/analytics/dashboard/mobile`, {
           method: 'GET',
           headers: {
-            'Content-Type': 'application/json',
+    console.log('Content-Type': 'application/json',
             ...(authToken && { Authorization: `Bearer ${authToken}` }),
           },
         });
@@ -1001,8 +997,7 @@ class DataService {
 
     try {
       const response = await authInterceptor.delete(
-        `${API_CONFIG.FULL_API_URL}/employees/${employeeId}`,
-      );
+    console.log(`${API_CONFIG.FULL_API_URL}/employees/${employeeId}`);
 
       if (response.ok) {
         return;
@@ -1026,7 +1021,7 @@ class DataService {
         const response = await fetch(`${API_CONFIG.FULL_API_URL}/inventory`, {
           method: 'GET',
           headers: {
-            'Content-Type': 'application/json',
+    console.log('Content-Type': 'application/json',
             ...(authToken && { Authorization: `Bearer ${authToken}` }),
           },
         });
@@ -1059,7 +1054,7 @@ class DataService {
         const response = await fetch(`${API_CONFIG.FULL_API_URL}/subscriptions/plans`, {
           method: 'GET',
           headers: {
-            'Content-Type': 'application/json',
+    console.log('Content-Type': 'application/json',
             ...(authToken && { Authorization: `Bearer ${authToken}` }),
           },
         });
@@ -1088,7 +1083,7 @@ class DataService {
       try {
         const authToken = await this.getAuthToken();
         const response = await fetch(
-          `${API_CONFIG.FULL_API_URL}/subscriptions/current?restaurant_id=${restaurantId}`,
+    console.log(`${API_CONFIG.FULL_API_URL}/subscriptions/current?restaurant_id=${restaurantId}`,
           {
             method: 'GET',
             headers: {
@@ -1130,7 +1125,7 @@ class DataService {
         const response = await fetch(`${API_CONFIG.FULL_API_URL}/subscriptions/subscribe`, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
+    console.log('Content-Type': 'application/json',
             ...(authToken && { Authorization: `Bearer ${authToken}` }),
           },
           body: JSON.stringify(__subscriptionData),
@@ -1171,7 +1166,7 @@ class DataService {
         const response = await fetch(`${API_CONFIG.FULL_API_URL}/subscriptions/change-plan`, {
           method: 'PUT',
           headers: {
-            'Content-Type': 'application/json',
+    console.log('Content-Type': 'application/json',
             ...(authToken && { Authorization: `Bearer ${authToken}` }),
           },
           body: JSON.stringify(__changeData),
@@ -1210,7 +1205,7 @@ class DataService {
       try {
         const authToken = await this.getAuthToken();
         const response = await fetch(
-          `${API_CONFIG.FULL_API_URL}/subscriptions/cancel?restaurant_id=${restaurantId}`,
+    console.log(`${API_CONFIG.FULL_API_URL}/subscriptions/cancel?restaurant_id=${restaurantId}`,
           {
             method: 'POST',
             headers: {
@@ -1253,7 +1248,7 @@ class DataService {
       try {
         const authToken = await this.getAuthToken();
         const response = await fetch(
-          `${API_CONFIG.FULL_API_URL}/subscriptions/usage/increment?restaurant_id=${restaurantId}&usage_type=${usageType}&amount=${amount}`,
+    console.log(`${API_CONFIG.FULL_API_URL}/subscriptions/usage/increment?restaurant_id=${restaurantId}&usage_type=${usageType}&amount=${amount}`,
           {
             method: 'POST',
             headers: {

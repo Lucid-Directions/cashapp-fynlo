@@ -78,19 +78,19 @@ const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({
 // Pre-built skeleton components for common use cases
 export const MenuItemSkeleton: React.FC = () => (
   <View style={styles.menuItemSkeleton}>
-    <SkeletonLoader width="100%" height={120} borderRadius={8} style={{ marginBottom: 8 }} />
-    <SkeletonLoader width="80%" height={16} style={{ marginBottom: 4 }} />
-    <SkeletonLoader width="60%" height={14} style={{ marginBottom: 8 }} />
+    <SkeletonLoader width="100%" height={120} borderRadius={8} style={styles.dynamicStyle5} />
+    <SkeletonLoader width="80%" height={16} style={styles.dynamicStyle6} />
+    <SkeletonLoader width="60%" height={14} style={styles.dynamicStyle7} />
     <SkeletonLoader width="40%" height={18} />
   </View>
 );
 
 export const OrderItemSkeleton: React.FC = () => (
   <View style={styles.orderItemSkeleton}>
-    <SkeletonLoader width={50} height={50} borderRadius={25} style={{ marginRight: 12 }} />
+    <SkeletonLoader width={50} height={50} borderRadius={25} style={styles.dynamicStyle8} />
     <View style={styles.orderItemContent}>
-      <SkeletonLoader width="70%" height={16} style={{ marginBottom: 4 }} />
-      <SkeletonLoader width="50%" height={14} style={{ marginBottom: 4 }} />
+      <SkeletonLoader width="70%" height={16} style={styles.dynamicStyle9} />
+      <SkeletonLoader width="50%" height={14} style={styles.dynamicStyle10} />
       <SkeletonLoader width="30%" height={16} />
     </View>
   </View>
@@ -98,20 +98,21 @@ export const OrderItemSkeleton: React.FC = () => (
 
 export const TableSkeleton: React.FC = () => (
   <View style={styles.tableSkeleton}>
-    <SkeletonLoader width={60} height={60} borderRadius={30} style={{ marginBottom: 8 }} />
-    <SkeletonLoader width="80%" height={14} style={{ marginBottom: 4 }} />
+    <SkeletonLoader width={60} height={60} borderRadius={30} style={styles.dynamicStyle11} />
+    <SkeletonLoader width="80%" height={14} style={styles.dynamicStyle12} />
     <SkeletonLoader width="60%" height={12} />
   </View>
 );
 
 export const ReportCardSkeleton: React.FC = () => (
   <View style={styles.reportCardSkeleton}>
-    <SkeletonLoader width="100%" height={16} style={{ marginBottom: 8 }} />
-    <SkeletonLoader width="40%" height={24} style={{ marginBottom: 8 }} />
+    <SkeletonLoader width="100%" height={16} style={styles.dynamicStyle13} />
+    <SkeletonLoader width="40%" height={24} style={styles.dynamicStyle14} />
     <SkeletonLoader width="60%" height={14} />
   </View>
 );
 
+// TODO: Move inline styles to StyleSheet: {"dynamicStyle5":" marginBottom: 8 ","dynamicStyle6":" marginBottom: 4 ","dynamicStyle7":" marginBottom: 8 ","dynamicStyle8":" marginRight: 12 ","dynamicStyle9":" marginBottom: 4 ","dynamicStyle10":" marginBottom: 4 ","dynamicStyle11":" marginBottom: 8 ","dynamicStyle12":" marginBottom: 4 ","dynamicStyle13":" marginBottom: 8 ","dynamicStyle14":" marginBottom: 8 "}
 const styles = StyleSheet.create({
   container: {
     backgroundColor: Colors.lightGray,

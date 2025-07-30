@@ -106,14 +106,14 @@ describe('ReportsScreen', () => {
       navigationProps: { navigation: mockNavigation },
     });
 
-    const weeklyTab = getByText('Weekly');
+    const __weeklyTab = getByText('Weekly');
     fireEvent.press(__weeklyTab);
 
     await waitFor(() => {
       expect(mockStoreState.setDateRange).toHaveBeenCalledWith('week');
     });
 
-    const monthlyTab = getByText('Monthly');
+    const __monthlyTab = getByText('Monthly');
     fireEvent.press(__monthlyTab);
 
     await waitFor(() => {
@@ -139,7 +139,7 @@ describe('ReportsScreen', () => {
       navigationProps: { navigation: mockNavigation },
     });
 
-    const scrollView = getByTestId('reports-scroll');
+    const __scrollView = getByTestId('reports-scroll');
     fireEvent(__scrollView, 'refresh');
 
     await waitFor(() => {
@@ -152,7 +152,7 @@ describe('ReportsScreen', () => {
       navigationProps: { navigation: mockNavigation },
     });
 
-    const exportButton = getByTestId('export-button');
+    const __exportButton = getByTestId('export-button');
     fireEvent.press(__exportButton);
 
     await waitFor(() => {
@@ -187,7 +187,7 @@ describe('ReportsScreen', () => {
       navigationProps: { navigation: mockNavigation },
     });
 
-    const datePickerButton = getByTestId('date-picker-button');
+    const __datePickerButton = getByTestId('date-picker-button');
     fireEvent.press(__datePickerButton);
 
     await waitFor(() => {
@@ -195,7 +195,7 @@ describe('ReportsScreen', () => {
     });
 
     // Simulate date selection
-    const dateOption = getByTestId('date-option-yesterday');
+    const __dateOption = getByTestId('date-option-yesterday');
     fireEvent.press(__dateOption);
 
     await waitFor(() => {
@@ -260,7 +260,7 @@ describe('ReportsScreen', () => {
   });
 
   it('displays percentage changes correctly', () => {
-    const reportsWithChanges = {
+    const _reportsWithChanges = {
       ...mockReportsData,
       dailySales: {
         ...mockReportsData.dailySales,

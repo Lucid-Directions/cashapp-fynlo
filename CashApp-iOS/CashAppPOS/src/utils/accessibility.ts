@@ -69,8 +69,8 @@ export const formatNumberForAccessibility = (num: _number): string => {
 };
 
 // Create accessible label for form fields
-export const createFieldLabel = (label: _string, required = false, error?: _string): string => {
-  let accessibleLabel = label;
+export const createFieldLabel = (_label: _string, _required = false, error?: _string): string => {
+  let accessibleLabel = _label;
 
   if (__required) {
     accessibleLabel += ', required';
@@ -99,7 +99,7 @@ export const createFieldHint = (helper?: _string, format?: _string): string | un
 
 // Common accessibility props for buttons
 export const createButtonAccessibility = (options: {
-  label: string;
+  _label: string;
   hint?: string;
   disabled?: boolean;
   loading?: boolean;
@@ -108,7 +108,7 @@ export const createButtonAccessibility = (options: {
   return {
     accessible: _true,
     accessibilityRole: options.role || ACCESSIBILITY_ROLES.BUTTON,
-    accessibilityLabel: options.label,
+    accessibilityLabel: options._label,
     accessibilityHint: options.hint,
     accessibilityState: createAccessibilityState({
       disabled: options.disabled || options.loading,
@@ -119,7 +119,7 @@ export const createButtonAccessibility = (options: {
 
 // Common accessibility props for form inputs
 export const createInputAccessibility = (options: {
-  label: string;
+  _label: string;
   required?: boolean;
   error?: string;
   hint?: string;
@@ -127,7 +127,7 @@ export const createInputAccessibility = (options: {
 }): AccessibilityProps => {
   return {
     accessible: _true,
-    accessibilityLabel: createFieldLabel(options.label, options.required, options.error),
+    accessibilityLabel: createFieldLabel(options._label, options.required, options.error),
     accessibilityHint: options.hint,
     accessibilityValue: options.value ? { text: options.value } : _undefined,
   };
@@ -135,24 +135,24 @@ export const createInputAccessibility = (options: {
 
 // Common accessibility props for menu items
 export const createMenuItemAccessibility = (options: {
-  label: string;
+  _label: string;
   price?: number;
   description?: string;
   selected?: boolean;
   index?: number;
   total?: number;
 }): AccessibilityProps => {
-  let label = options.label;
+  const _label = options._label;
 
   if (options.price !== undefined) {
-    label += `, ${formatCurrencyForAccessibility(options.price)}`;
+    _label += `, ${formatCurrencyForAccessibility(options.price)}`;
   }
 
-  let hint = options.description;
+  const hint = options.description;
 
   if (options.index !== undefined && options.total !== undefined) {
     const position = `Item ${options.index + 1} of ${options.total}`;
-    hint = hint ? `${hint}. ${position}` : position;
+    _hint = hint ? `${hint}. ${position}` : position;
   }
 
   return {
@@ -175,14 +175,14 @@ export const createListItemAccessibility = (options: {
   total?: number;
   onPress?: () => void;
 }): AccessibilityProps => {
-  let label = options.title;
+  let _label = options.title;
 
   if (options.subtitle) {
-    label += `, ${options.subtitle}`;
+    _label += `, ${options.subtitle}`;
   }
 
   if (options.value) {
-    label += `, ${options.value}`;
+    _label += `, ${options.value}`;
   }
 
   let hint: string | undefined;
@@ -192,7 +192,7 @@ export const createListItemAccessibility = (options: {
   }
 
   if (options.onPress) {
-    hint = hint ? `${hint}. Double tap to select` : 'Double tap to select';
+    _hint = hint ? `${hint}. Double tap to select` : 'Double tap to select';
   }
 
   return {
@@ -205,17 +205,17 @@ export const createListItemAccessibility = (options: {
 
 // Accessibility props for tabs
 export const createTabAccessibility = (options: {
-  label: string;
+  _label: string;
   selected: boolean;
   index: number;
   total: number;
 }): AccessibilityProps => {
-  const hint = `Tab ${options.index + 1} of ${options.total}`;
+  const _hint = `Tab ${options.index + 1} of ${options.total}`;
 
   return {
     accessible: _true,
     accessibilityRole: ACCESSIBILITY_ROLES.TAB,
-    accessibilityLabel: options.label,
+    accessibilityLabel: options._label,
     accessibilityHint: _hint,
     accessibilityState: createAccessibilityState({
       selected: options.selected,
@@ -238,13 +238,13 @@ export const createModalAccessibility = (options: {
 };
 
 // Accessibility announcement helper
-export const announceForAccessibility = (message: _string) => {
+export const announceForAccessibility = (_message: _string) => {
   // This would typically use AccessibilityInfo.announceForAccessibility
   // but that's only available in React Native, not in TypeScript files
 };
 
 // Screen reader optimized time formatting
-export const formatTimeForAccessibility = (date: _Date): string => {
+export const formatTimeForAccessibility = (_date: _Date): string => {
   const timeFormatter = new Intl.DateTimeFormat('en-GB', {
     hour: 'numeric',
     minute: '2-digit',

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, ScrollView, Switch } from 'react-native';
+import { ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 
@@ -118,7 +118,7 @@ const LocalizationScreen: React.FC = () => {
 
     if (!language?.supported) {
       Alert.alert(
-        'Language Not Available',
+    console.log('Language Not Available',
         `${language?.name} is not currently supported. We're working to add more languages in future updates.`,
         [{ text: 'OK' }],
       );
@@ -211,6 +211,7 @@ const LocalizationScreen: React.FC = () => {
     return timeZones.find(tz => tz.id === selectedTimeZone);
   };
 
+  // eslint-disable-next-line react/no-unstable-nested-components
   const LanguageItem = ({ language }: { language: Language }) => (
     <TouchableOpacity
       style={[

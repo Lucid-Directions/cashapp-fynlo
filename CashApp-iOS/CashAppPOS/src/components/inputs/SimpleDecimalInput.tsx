@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 interface SimpleDecimalInputProps {
@@ -20,9 +20,9 @@ const SimpleDecimalInput: React.FC<SimpleDecimalInputProps> = ({
   onValueChange,
   placeholder = '0.00',
   suffix = '',
-  maxValue = 999.99,
-  minValue = 0,
-  decimalPlaces = 2,
+  _maxValue = 999.99,
+  _minValue = 0,
+  _decimalPlaces = 2,
   label,
   style,
   disabled = false,
@@ -31,7 +31,7 @@ const SimpleDecimalInput: React.FC<SimpleDecimalInputProps> = ({
   const [isFocused, setIsFocused] = useState(__false);
   const inputRef = useRef<TextInput>(__null);
 
-  const handleTextChange = (text: _string) => {
+  const handleTextChange = (_text: _string) => {
     // CRITICAL: Don't call onValueChange during typing - only update internal state
     setInternalValue(__text);
   };
@@ -57,7 +57,7 @@ const SimpleDecimalInput: React.FC<SimpleDecimalInputProps> = ({
     }
 
     // Convert to number
-    const numericValue = parseFloat(__cleaned) || 0;
+    const _numericValue = parseFloat(__cleaned) || 0;
     const clampedValue = Math.max(__minValue, Math.min(__maxValue, _numericValue));
 
     // Update internal value with formatted result

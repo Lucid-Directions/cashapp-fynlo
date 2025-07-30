@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, TouchableOpacity, Alert } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {
   SettingsHeader,
@@ -37,7 +37,7 @@ interface PaymentMethodInfo {
 }
 
 const PaymentMethodsScreen: React.FC = () => {
-  const { paymentMethods, _updatePaymentMethods, isLoading } = useSettingsStore();
+  const { paymentMethods, __updatePaymentMethods, isLoading } = useSettingsStore();
   const [formData, setFormData] = useState(__paymentMethods);
   const [hasChanges, setHasChanges] = useState(__false);
 
@@ -115,7 +115,7 @@ const PaymentMethodsScreen: React.FC = () => {
     setHasChanges(__true);
   };
 
-  const handleTipEnabledToggle = (enabled: _boolean) => {
+  const handleTipEnabledToggle = (_enabled: _boolean) => {
     setFormData(prev => ({
       ...prev,
       card: {
@@ -158,7 +158,7 @@ const PaymentMethodsScreen: React.FC = () => {
     return Object.values(__formData).filter(method => method.enabled).length;
   };
 
-  const renderPaymentMethodCard = (methodInfo: _PaymentMethodInfo) => {
+  const __renderPaymentMethodCard = (methodInfo: _PaymentMethodInfo) => {
     const methodData = formData[methodInfo.id];
     const isEnabled = methodData.enabled;
 
@@ -173,7 +173,7 @@ const PaymentMethodsScreen: React.FC = () => {
           disabled={methodInfo.comingSoon}>
           <ToggleSwitch
             value={isEnabled}
-            onValueChange={enabled => handlePaymentMethodToggle(methodInfo.id, _enabled)}
+            onValueChange={_enabled => handlePaymentMethodToggle(methodInfo.id, _enabled)}
             disabled={methodInfo.comingSoon}
           />
         </SettingsCard>
@@ -189,7 +189,7 @@ const PaymentMethodsScreen: React.FC = () => {
               showChevron={false}>
               <ToggleSwitch
                 value={methodData.requiresAuth}
-                onValueChange={requiresAuth =>
+                onValueChange={_requiresAuth =>
                   handleRequiresAuthToggle(methodInfo.id, _requiresAuth)
                 }
                 size="small"

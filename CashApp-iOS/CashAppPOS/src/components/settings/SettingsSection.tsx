@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, ViewStyle } from 'react-native';
+import { StyleSheet, Text, View, ViewStyle } from 'react-native';
 
 // Clover POS Color Scheme
 const Colors = {

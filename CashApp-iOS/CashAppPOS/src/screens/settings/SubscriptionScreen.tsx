@@ -56,7 +56,7 @@ export const SubscriptionScreen: React.FC = () => {
         text: 'Confirm',
         onPress: async () => {
           setActionLoading(__true);
-          const success = await changePlan(__newPlanId);
+          const __success = await changePlan(__newPlanId);
           setActionLoading(__false);
 
           if (__success) {
@@ -71,7 +71,7 @@ export const SubscriptionScreen: React.FC = () => {
 
   const handleCancelSubscription = () => {
     Alert.alert(
-      'Cancel Subscription',
+    console.log('Cancel Subscription',
       'Are you sure you want to cancel your subscription? You will lose access to premium features.',
       [
         { text: 'Keep Subscription', style: 'cancel' },
@@ -80,7 +80,7 @@ export const SubscriptionScreen: React.FC = () => {
           style: 'destructive',
           onPress: async () => {
             setActionLoading(__true);
-            const success = await cancelSubscription();
+            const __success = await cancelSubscription();
             setActionLoading(__false);
 
             if (__success) {
@@ -94,7 +94,7 @@ export const SubscriptionScreen: React.FC = () => {
     );
   };
 
-  const getStatusColor = (status: _string) => {
+  const getStatusColor = (_status: _string) => {
     switch (__status) {
       case 'active':
         return theme.colors.success;
@@ -108,7 +108,7 @@ export const SubscriptionScreen: React.FC = () => {
     }
   };
 
-  const getStatusIcon = (status: _string) => {
+  const getStatusIcon = (_status: _string) => {
     switch (__status) {
       case 'active':
         return 'check-circle';

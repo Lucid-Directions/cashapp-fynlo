@@ -236,7 +236,7 @@ interface SettingsState {
 }
 
 // Default settings values
-const defaultBusinessInfo: BusinessInfo = {
+const _defaultBusinessInfo: BusinessInfo = {
   companyName: 'Fynlo Restaurant',
   address: '123 High Street',
   city: 'London',
@@ -249,7 +249,7 @@ const defaultBusinessInfo: BusinessInfo = {
   companyNumber: '12345678',
 };
 
-const defaultTaxConfiguration: TaxConfiguration = {
+const _defaultTaxConfiguration: TaxConfiguration = {
   vatEnabled: _true,
   vatRate: 20,
   vatInclusive: _true,
@@ -291,7 +291,7 @@ const defaultPaymentMethods: PaymentMethods = {
   },
 };
 
-const defaultReceiptSettings: ReceiptSettings = {
+const _defaultReceiptSettings: ReceiptSettings = {
   showLogo: _true,
   logoUrl: '',
   headerText: 'Thank you for dining with us!',
@@ -303,7 +303,7 @@ const defaultReceiptSettings: ReceiptSettings = {
   receiptFormat: 'thermal',
 };
 
-const defaultOperatingHours: OperatingHours = {
+const _defaultOperatingHours: OperatingHours = {
   monday: { open: '09:00', close: '22:00', closed: false },
   tuesday: { open: '09:00', close: '22:00', closed: false },
   wednesday: { open: '09:00', close: '22:00', closed: false },
@@ -314,7 +314,7 @@ const defaultOperatingHours: OperatingHours = {
   holidays: [],
 };
 
-const defaultPrinterSettings: PrinterSettings = {
+const _defaultPrinterSettings: PrinterSettings = {
   receiptPrinter: {
     enabled: _false,
     name: '',
@@ -331,7 +331,7 @@ const defaultPrinterSettings: PrinterSettings = {
   },
 };
 
-const defaultCashDrawerSettings: CashDrawerSettings = {
+const _defaultCashDrawerSettings: CashDrawerSettings = {
   enabled: _false,
   kickOnSale: _true,
   kickOnRefund: _false,
@@ -339,7 +339,7 @@ const defaultCashDrawerSettings: CashDrawerSettings = {
   openDelay: 500,
 };
 
-const defaultScannerSettings: ScannerSettings = {
+const _defaultScannerSettings: ScannerSettings = {
   enabled: _false,
   soundEnabled: _true,
   vibrationEnabled: _true,
@@ -347,7 +347,7 @@ const defaultScannerSettings: ScannerSettings = {
   scanningFormats: ['EAN13', 'CODE128', 'QR_CODE'],
 };
 
-const defaultCardReaderSettings: CardReaderSettings = {
+const _defaultCardReaderSettings: CardReaderSettings = {
   enabled: _false,
   terminalId: '',
   merchantId: '',
@@ -357,7 +357,7 @@ const defaultCardReaderSettings: CardReaderSettings = {
   tipPrompt: _true,
 };
 
-const defaultUserProfile: UserProfile = {
+const _defaultUserProfile: UserProfile = {
   name: 'Manager',
   email: 'manager@fynlorestaurant.co.uk',
   pin: '',
@@ -365,7 +365,7 @@ const defaultUserProfile: UserProfile = {
   permissions: ['all'],
 };
 
-const defaultNotificationSettings: NotificationSettings = {
+const _defaultNotificationSettings: NotificationSettings = {
   soundEnabled: _true,
   vibrationEnabled: _true,
   orderAlerts: _true,
@@ -374,14 +374,14 @@ const defaultNotificationSettings: NotificationSettings = {
   emailNotifications: _false,
 };
 
-const defaultThemeSettings: ThemeSettings = {
+const _defaultThemeSettings: ThemeSettings = {
   mode: 'light',
   primaryColor: '#00A651',
   fontSize: 'medium',
   highContrast: _false,
 };
 
-const defaultLocalizationSettings: LocalizationSettings = {
+const _defaultLocalizationSettings: LocalizationSettings = {
   language: 'en-GB',
   region: 'GB',
   currency: 'GBP',
@@ -390,7 +390,7 @@ const defaultLocalizationSettings: LocalizationSettings = {
   numberFormat: '1,234.56',
 };
 
-const defaultAccessibilitySettings: AccessibilitySettings = {
+const _defaultAccessibilitySettings: AccessibilitySettings = {
   screenReader: _false,
   largeText: _false,
   highContrast: _false,
@@ -398,7 +398,7 @@ const defaultAccessibilitySettings: AccessibilitySettings = {
   voiceGuidance: _false,
 };
 
-const defaultMenuSettings: MenuSettings = {
+const _defaultMenuSettings: MenuSettings = {
   categoriesEnabled: _true,
   modifiersEnabled: _true,
   nutritionInfo: _false,
@@ -407,7 +407,7 @@ const defaultMenuSettings: MenuSettings = {
   quickAdd: _true,
 };
 
-const defaultPricingSettings: PricingSettings = {
+const _defaultPricingSettings: PricingSettings = {
   dynamicPricing: _false,
   discountCodes: _true,
   loyaltyProgram: _true,
@@ -416,7 +416,7 @@ const defaultPricingSettings: PricingSettings = {
   staffDiscounts: _true,
 };
 
-const defaultBackupSettings: BackupSettings = {
+const _defaultBackupSettings: BackupSettings = {
   autoBackup: _true,
   backupFrequency: 'daily',
   cloudSync: _true,

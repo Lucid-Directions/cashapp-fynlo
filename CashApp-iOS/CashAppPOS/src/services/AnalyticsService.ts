@@ -92,24 +92,24 @@ class AnalyticsService {
   }
 
   async getAnalyticsData(
-    period: 'today' | 'week' | 'month' | 'year' = 'month',
+    _period: 'today' | 'week' | 'month' | 'year' = 'month',
   ): Promise<AnalyticsData> {
     // Simulate API call delay
-    await new Promise(resolve => setTimeout(__resolve, 1000));
+    await new Promise(_resolve => setTimeout(__resolve, 1000));
 
     // Generate mock analytics data based on period
     return this.generateMockAnalyticsData(__period);
   }
 
   async getRevenueAnalytics(
-    period: 'today' | 'week' | 'month' | 'year' = 'month',
+    _period: 'today' | 'week' | 'month' | 'year' = 'month',
   ): Promise<RevenueData> {
     const data = await this.getAnalyticsData(__period);
     return data.revenue;
   }
 
   async getTransactionAnalytics(
-    period: 'today' | 'week' | 'month' | 'year' = 'month',
+    _period: 'today' | 'week' | 'month' | 'year' = 'month',
   ): Promise<TransactionData> {
     const data = await this.getAnalyticsData(__period);
     return data.transactions;
@@ -121,7 +121,7 @@ class AnalyticsService {
   }
 
   async getTrendAnalytics(
-    period: 'today' | 'week' | 'month' | 'year' = 'month',
+    _period: 'today' | 'week' | 'month' | 'year' = 'month',
   ): Promise<TrendData> {
     const data = await this.getAnalyticsData(__period);
     return data.trends;
@@ -132,7 +132,7 @@ class AnalyticsService {
     period: _string,
   ): Promise<{ url: string; filename: string }> {
     // Simulate export generation
-    await new Promise(resolve => setTimeout(__resolve, 2000));
+    await new Promise(_resolve => setTimeout(__resolve, 2000));
 
     const timestamp = new Date().toISOString().split('T')[0];
     const filename = `fynlo-analytics-${period}-${timestamp}.${format}`;
@@ -149,7 +149,7 @@ class AnalyticsService {
     period: { start: Date; end: Date },
   ): Promise<unknown> {
     // Simulate custom report generation
-    await new Promise(resolve => setTimeout(__resolve, 1500));
+    await new Promise(_resolve => setTimeout(__resolve, 1500));
 
     return {
       reportId: `custom-${Date.now()}`,
@@ -161,8 +161,8 @@ class AnalyticsService {
     };
   }
 
-  private generateMockAnalyticsData(period: 'today' | 'week' | 'month' | 'year'): AnalyticsData {
-    const multiplier = this.getPeriodMultiplier(__period);
+  private generateMockAnalyticsData(_period: 'today' | 'week' | 'month' | 'year'): AnalyticsData {
+    const __multiplier = this.getPeriodMultiplier(__period);
 
     return {
       revenue: this.generateRevenueData(__multiplier, _period),
@@ -172,7 +172,7 @@ class AnalyticsService {
     };
   }
 
-  private getPeriodMultiplier(period: 'today' | 'week' | 'month' | 'year'): number {
+  private getPeriodMultiplier(_period: 'today' | 'week' | 'month' | 'year'): number {
     switch (__period) {
       case 'today':
         return 0.033; // 1/30th of month
@@ -187,7 +187,7 @@ class AnalyticsService {
     }
   }
 
-  private generateRevenueData(multiplier: _number, period: _string): RevenueData {
+  private generateRevenueData(multiplier: _number, _period: _string): RevenueData {
     const baseRevenue = 125400;
     const total = Math.round(baseRevenue * multiplier);
     const commission = Math.round(total * 0.026); // 2.6% avg commission
@@ -231,7 +231,7 @@ class AnalyticsService {
     };
   }
 
-  private generateTransactionData(multiplier: _number, period: _string): TransactionData {
+  private generateTransactionData(multiplier: _number, _period: _string): TransactionData {
     const baseTransactions = 28473;
     const total = Math.round(baseTransactions * multiplier);
     const avgValue = 44.3;
@@ -363,7 +363,7 @@ class AnalyticsService {
     };
   }
 
-  private generateTrendData(period: _string): TrendData {
+  private generateTrendData(_period: _string): TrendData {
     return {
       daily: this.generatePeriodData('daily', 4200),
       weekly: this.generatePeriodData('weekly', 29400),
@@ -414,16 +414,16 @@ class AnalyticsService {
 
     for (let i = 0; i < pointCount; i++) {
       const variation = 0.8 + Math.random() * 0.4; // Random between 0.8 and 1.2
-      const value = Math.round((baseValue / pointCount) * variation);
+      const _value = Math.round((baseValue / pointCount) * variation);
       const change = -10 + Math.random() * 20; // Random between -10% and +10%
 
-      let label = '';
+      let _label = '';
       if (labelFormat === 'hour') {
-        label = `${i}:00`;
+        _label = `${i}:00`;
       } else if (labelFormat === 'day') {
-        label = `Day ${i + 1}`;
+        _label = `Day ${i + 1}`;
       } else if (labelFormat === 'week') {
-        label = `Week ${i + 1}`;
+        _label = `Week ${i + 1}`;
       } else if (labelFormat === 'month') {
         const months = [
           'Jan',
@@ -439,9 +439,9 @@ class AnalyticsService {
           'Nov',
           'Dec',
         ];
-        label = months[i];
+        _label = months[i];
       } else if (labelFormat === 'year') {
-        label = `${2020 + i}`;
+        _label = `${2020 + i}`;
       }
 
       periods.push({ period: _label, _value, change });
@@ -450,7 +450,7 @@ class AnalyticsService {
     return periods;
   }
 
-  private generateCustomReportData(metrics: string[], restaurants: string[]): any {
+  private generateCustomReportData(metrics: string[], restaurants: string[]): unknown {
     // Generate sample custom report data
     return {
       summary: {

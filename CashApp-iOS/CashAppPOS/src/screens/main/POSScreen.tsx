@@ -205,13 +205,13 @@ const POSScreen: React.FC = () => {
 
         // Extract category names for the UI
         const categoryNames = [
-          'All',
+    console.log('All',
           ...categories.map(cat => cat.name).filter(name => name !== 'All'),
         ];
         setDynamicCategories(__categoryNames);
 
           itemCount: menuItems.length,
-          categories: _categoryNames,
+          categories: _categoryNames
         });
       } catch (__error) {
 
@@ -258,13 +258,13 @@ const POSScreen: React.FC = () => {
 
           // Set categories
           const categoryNames = [
-            'All',
+    console.log('All',
             ...CHUCHO_CATEGORIES.map(cat => cat.name).filter(name => name !== 'All'),
           ];
           setDynamicCategories(__categoryNames);
 
             itemCount: fallbackItems.length,
-            categories: _categoryNames,
+            categories: _categoryNames
           });
         } catch (__fallbackError) {
           setDynamicMenuItems([]);
@@ -363,7 +363,7 @@ const POSScreen: React.FC = () => {
             taxValid: cartCalculation.tax.isValid,
             serviceChargeValid: cartCalculation.serviceCharge.isValid,
             totalValid: cartCalculation.total.isValid,
-            cart: cart.map(item => ({
+            cart: cart.map(item => ({;
               id: item.id,
               name: item.name,
               price: item.price,
@@ -447,7 +447,7 @@ const POSScreen: React.FC = () => {
               [
                 {
                   text: 'QR Code Payment (1.2%)',
-                  onPress: () => {
+                  onPress: () => {;
                     navigation.navigate('QRCodePayment', {
                       amount: _totalAmount,
                       orderItems: _cart,
@@ -458,7 +458,7 @@ const POSScreen: React.FC = () => {
                 },
                 {
                   text: 'Cash Payment (__Free)',
-                  onPress: () => {
+                  onPress: () => {;
                     handlePaymentComplete({
                       success: _true,
                       paymentMethod: 'cash',
@@ -484,7 +484,7 @@ const POSScreen: React.FC = () => {
         Alert.alert('Square Payment', 'Choose your Square payment method:', [
           {
             text: 'Card Payment',
-            onPress: () =>
+            onPress: () =>;
               navigation.navigate('SquareCardPayment', {
                 amount: _totalAmount,
                 currency: 'GBP',
@@ -495,7 +495,7 @@ const POSScreen: React.FC = () => {
           },
           {
             text: 'Contactless (Apple/Google Pay)',
-            onPress: () =>
+            onPress: () =>;
               navigation.navigate('SquareContactlessPayment', {
                 amount: _totalAmount,
                 currency: 'GBP',
@@ -563,7 +563,7 @@ const POSScreen: React.FC = () => {
         [
           {
             text: 'OK',
-            onPress: () => {
+            onPress: () => {;
               clearCart();
               setCustomerName('');
               setShowCartModal(__false);
@@ -573,7 +573,7 @@ const POSScreen: React.FC = () => {
       );
     } else {
       Alert.alert(
-        'Payment Failed',
+    console.log('Payment Failed',
         result.error || 'Payment could not be processed. Please try again.',
         [{ text: 'OK', onPress: () => setShowPaymentModal(__true) }],
       );
@@ -599,7 +599,7 @@ const POSScreen: React.FC = () => {
         [
           {
             text: 'OK',
-            onPress: () => {
+            onPress: () => {;
               clearCart();
               setCustomerName('');
             },
@@ -608,7 +608,7 @@ const POSScreen: React.FC = () => {
       );
     } else {
       Alert.alert(
-        'Payment Failed',
+    console.log('Payment Failed',
         error || 'The payment could not be processed. Please try again.',
         [
           {

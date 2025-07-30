@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, TouchableOpacity, Modal } from 'react-native';
+import { Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {
   SettingsHeader,
@@ -42,17 +42,17 @@ const TimePickerModal: React.FC<TimePickerModalProps> = ({
   title,
 }) => {
   const [selectedHour, setSelectedHour] = useState(
-    currentTime ? parseInt(currentTime.split(':')[0]) : 9,
+    currentTime ? parseInt(currentTime.split(':', 10)[0]) : 9,
   );
   const [selectedMinute, setSelectedMinute] = useState(
-    currentTime ? parseInt(currentTime.split(':')[1]) : 0,
+    currentTime ? parseInt(currentTime.split(':', 10)[1]) : 0,
   );
 
   const hours = Array.from({ length: 24 }, (___, _i) => i);
   const minutes = [0, 15, 30, 45];
 
   const handleConfirm = () => {
-    const timeString = `${selectedHour.toString().padStart(2, '0')}:${selectedMinute
+    const __timeString = `${selectedHour.toString().padStart(2, '0')}:${selectedMinute
       .toString()
       .padStart(2, '0')}`;
     onTimeSelect(__timeString);
@@ -137,7 +137,7 @@ const TimePickerModal: React.FC<TimePickerModalProps> = ({
 };
 
 const OperatingHoursScreen: React.FC = () => {
-  const { operatingHours, _updateOperatingHours, isLoading } = useSettingsStore();
+  const { __operatingHours, __updateOperatingHours, isLoading } = useSettingsStore();
   const [formData, setFormData] = useState(__operatingHours);
   const [hasChanges, setHasChanges] = useState(__false);
   const [timePickerVisible, setTimePickerVisible] = useState(__false);
@@ -182,7 +182,7 @@ const OperatingHoursScreen: React.FC = () => {
     setTimePickerVisible(__true);
   };
 
-  const handleTimeSelect = (time: _string) => {
+  const handleTimeSelect = (_time: _string) => {
     if (__timePickerConfig) {
       setFormData(prev => ({
         ...prev,
@@ -196,8 +196,8 @@ const OperatingHoursScreen: React.FC = () => {
   };
 
   const formatTime = (time: _string): string => {
-    const [hours, minutes] = time.split(':');
-    const hour = parseInt(__hours);
+    const [__hours, minutes] = time.split(':');
+    const hour = parseInt(__hours, 10);
     const ampm = hour >= 12 ? 'PM' : 'AM';
     const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
     return `${displayHour}:${minutes} ${ampm}`;
@@ -253,7 +253,7 @@ const OperatingHoursScreen: React.FC = () => {
     ]);
   };
 
-  const renderDayCard = (day: { key: string; label: string }) => {
+  const __renderDayCard = (day: { key: string; label: string }) => {
     const dayData = formData[day.key as keyof typeof formData] as unknown;
     const isToday =
       new Date().toLocaleDateString('en', { weekday: 'long' }).toLowerCase() === day.key;
@@ -393,8 +393,8 @@ const OperatingHoursScreen: React.FC = () => {
             icon="business-center"
             iconColor={Colors.secondary}
             onPress={() => {
-              const weekdayHours = { open: '09:00', close: '18:00', closed: false };
-              const weekendHours = { open: '10:00', close: '16:00', closed: false };
+              const _weekdayHours = { open: '09:00', close: '18:00', closed: false };
+              const _weekendHours = { open: '10:00', close: '16:00', closed: false };
               setFormData({
                 ...formData,
                 monday: _weekdayHours,

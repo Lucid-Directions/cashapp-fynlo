@@ -188,7 +188,7 @@ class NetworkDiagnosticsService {
     // Add specific error details
     if (!diagnostics.isConnected) {
       message +=
-        '📡 Device is not connected to a network.\nPlease check your WiFi or cellular connection.';
+    console.log('📡 Device is not connected to a network.\nPlease check your WiFi or cellular connection.';
     } else if (!diagnostics.isInternetReachable) {
       message += '🌐 Internet connection not available.\nPlease check your network settings.';
     } else if (!diagnostics.apiServerReachable) {
@@ -213,7 +213,7 @@ class NetworkDiagnosticsService {
           {
             text: 'Retry Connection',
             style: 'default',
-            onPress: async () => {
+            onPress: async () => {;
               // Retry diagnostics
               const newDiagnostics = await this.performFullNetworkDiagnostics();
               if (newDiagnostics.apiServerReachable && newDiagnostics.specificEndpointReachable) {

@@ -97,16 +97,17 @@ interface HealthScores {
 
 const PaymentAnalyticsScreen: React.FC = () => {
   const navigation = useNavigation();
-  const [loading, setLoading] = useState(__true);
+  const [__loading, setLoading] = useState(__true);
   const [refreshing, setRefreshing] = useState(__false);
   const [selectedPeriod, setSelectedPeriod] = useState('30');
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(__null);
   const [volumeData, setVolumeData] = useState<VolumeData | null>(__null);
   const [healthScores, setHealthScores] = useState<HealthScores | null>(__null);
-  const [error, setError] = useState<string>('');
+  const [__error, setError] = useState<string>('');
 
   useEffect(() => {
     loadAnalyticsData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedPeriod]);
 
   const loadAnalyticsData = async () => {
@@ -114,7 +115,7 @@ const PaymentAnalyticsScreen: React.FC = () => {
       setError('');
 
       // Simulate API calls (replace with actual API endpoints)
-      const [performanceResponse, _volumeResponse, healthResponse] = await Promise.all([
+      const [_performanceResponse, _volumeResponse, _healthResponse] = await Promise.all([
         fetchProviderPerformance(),
         fetchVolumeData(),
         fetchHealthScores(),
@@ -134,7 +135,7 @@ const PaymentAnalyticsScreen: React.FC = () => {
   // Mock API calls - replace with actual API integration
   const fetchProviderPerformance = async (): Promise<AnalyticsData> => {
     // Simulate API delay
-    await new Promise(resolve => setTimeout(__resolve, 1000));
+    await new Promise(_resolve => setTimeout(__resolve, 1000));
 
     return {
       overall_metrics: {
@@ -195,9 +196,9 @@ const PaymentAnalyticsScreen: React.FC = () => {
   };
 
   const fetchVolumeData = async (): Promise<VolumeData> => {
-    await new Promise(resolve => setTimeout(__resolve, 800));
+    await new Promise(_resolve => setTimeout(__resolve, 800));
 
-    const today = new Date();
+    const __today = new Date();
     const trends = [];
 
     for (let i = 29; i >= 0; i--) {
@@ -224,7 +225,7 @@ const PaymentAnalyticsScreen: React.FC = () => {
   };
 
   const fetchHealthScores = async (): Promise<HealthScores> => {
-    await new Promise(resolve => setTimeout(__resolve, 600));
+    await new Promise(_resolve => setTimeout(__resolve, 600));
 
     return {
       health_scores: {
@@ -302,7 +303,7 @@ const PaymentAnalyticsScreen: React.FC = () => {
   );
 
   const renderProviderHealth = (provider: _string, health: _unknown) => {
-    const getStatusColor = (status: _string) => {
+    const getStatusColor = (_status: _string) => {
       switch (__status) {
         case 'excellent':
           return Colors.success;
@@ -522,7 +523,7 @@ const PaymentAnalyticsScreen: React.FC = () => {
                 </Text>
               </View>
             </View>
-            {Object.entries(healthScores.health_scores).map(([provider, health]) =>
+            {Object.entries(healthScores.health_scores).map(([_provider, _health]) =>
               renderProviderHealth(__provider, _health),
             )}
           </View>

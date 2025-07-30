@@ -5,7 +5,7 @@ This module provides REST API endpoints for managing restaurant subscriptions,
 subscription plans, and usage tracking.
 """
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import datetime, timedelta
@@ -22,9 +22,7 @@ from app.schemas.subscription import (
 )
 from app.core.auth import get_current_user
 
-
 router = APIRouter(prefix="/subscriptions", tags=["subscriptions"])
-
 
 @router.get("/plans")
 async def get_subscription_plans(
@@ -54,7 +52,6 @@ async def get_subscription_plans(
             message=f"Failed to retrieve subscription plans: {str(e)}",
             status_code=500
         )
-
 
 @router.get("/current")
 async def get_current_subscription(
@@ -115,7 +112,6 @@ async def get_current_subscription(
             message=f"Failed to retrieve current subscription: {str(e)}",
             status_code=500
         )
-
 
 @router.post("/subscribe")
 async def create_subscription(
@@ -215,7 +211,6 @@ async def create_subscription(
             status_code=500
         )
 
-
 @router.put("/change-plan")
 async def change_subscription_plan(
     change_data: PlanChangeRequest,
@@ -292,7 +287,6 @@ async def change_subscription_plan(
             status_code=500
         )
 
-
 @router.post("/cancel")
 async def cancel_subscription(
     restaurant_id: int = Query(..., description="Restaurant ID"),
@@ -345,7 +339,6 @@ async def cancel_subscription(
             message=f"Failed to cancel subscription: {str(e)}",
             status_code=500
         )
-
 
 @router.get("/usage")
 async def get_usage_statistics(
@@ -416,7 +409,6 @@ async def get_usage_statistics(
             message=f"Failed to retrieve usage statistics: {str(e)}",
             status_code=500
         )
-
 
 @router.post("/usage/increment")
 async def increment_usage(

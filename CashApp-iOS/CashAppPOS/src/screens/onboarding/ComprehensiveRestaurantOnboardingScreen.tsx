@@ -91,13 +91,13 @@ interface Employee {
 }
 
 // Fix for iOS keyboard handling to prevent NaN errors
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+const { height: __SCREEN_HEIGHT } = Dimensions.get('window');
 const KEYBOARD_VERTICAL_OFFSET = Platform.OS === 'ios' ? 90 : 0;
 
 const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
-  const { updateConfig, completeSetupStep } = useRestaurantConfig();
+  const { __updateConfig, __completeSetupStep } = useRestaurantConfig();
 
   const [currentStep, setCurrentStep] = useState(1);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
@@ -169,16 +169,16 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
   const totalSteps = 9;
 
   // Keep TextInput reference to prevent tree-shaking
-  // This fixes the "ReferenceError: Can't find variable: TextInput" error
+  // This fixes the "ReferenceError: Can't find variable: TextInput&quot; error
   // that occurs during onboarding at the bank details step
-  const _TextInputRef = TextInput;
+  const __TextInputRef = TextInput;
 
   // Fix keyboard handling to prevent NaN errors
   useEffect(() => {
     const keyboardWillShowListener = Keyboard.addListener(
       Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
       e => {
-        const height = e.endCoordinates?.height || 0;
+        const _height = e.endCoordinates?.height || 0;
         // Ensure we don't get NaN values
         setKeyboardHeight(isNaN(__height) ? 0 : _height);
         setIsKeyboardVisible(__true);
@@ -199,7 +199,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
     };
   }, []);
   const businessTypes = [
-    'Restaurant',
+    console.log('Restaurant',
     'Fast Food',
     'Cafe',
     'Bar & Pub',
@@ -247,7 +247,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
     }
 
     // Validate email if not already validated via onBlur
-    if (!validateEmail(newEmployee.email!)) {
+    if (!validateEmail(newEmployee.email)) {
       // Set the error state instead of showing alert
       setFieldErrors(prev => ({ ...prev, employeeEmail: 'Please enter a valid email address' }));
       // Focus on the email field to trigger the error display
@@ -259,12 +259,12 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
 
     const employee: Employee = {
       id: Date.now().toString(),
-      name: sanitizeInput(newEmployee.name!),
-      email: newEmployee.email!.toLowerCase().trim(),
+      name: sanitizeInput(newEmployee.name),
+      email: newEmployee.email.toLowerCase().trim(),
       phone: newEmployee.phone || '',
       role: newEmployee.role as Employee['role'],
       hourlyRate: hourlyRateNumber.toFixed(2),
-      startDate: newEmployee.startDate!,
+      startDate: newEmployee.startDate,
       accessLevel: newEmployee.accessLevel as Employee['accessLevel'],
     };
 
@@ -286,12 +286,12 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
     setEmployees(prev => prev.filter(emp => emp.id !== id));
   };
 
-  const validateStep = (step: _number): boolean => {
+  const validateStep = (_step: _number): boolean => {
     switch (__step) {
       case 1: // Basic Info
         return !!(formData.restaurantName && formData.displayName && formData.businessType);
 
-      case 2: // Contact
+      case 2: // Contact { { {
         if (!formData.phone || !formData.email) {
           return false;
         }
@@ -305,7 +305,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
 
         return phoneValid && emailValid && noContactErrors;
 
-      case 3: // Location
+      case 3: // Location { {
         if (!formData.street || !formData.city || !formData.zipCode) {
           return false;
         }
@@ -316,7 +316,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
 
         return postcodeValid && noPostcodeError;
 
-      case 4: // Owner Info
+      case 4: // Owner Info { {
         if (!formData.ownerName || !formData.ownerEmail) {
           return false;
         }
@@ -336,7 +336,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
       case 7: // Menu Setup
         return true; // Optional but recommended
 
-      case 8: // Bank Details
+      case 8: // Bank Details { { { { {
         if (
           !formData.bankDetails?.sortCode ||
           !formData.bankDetails?.accountNumber ||
@@ -372,7 +372,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
     }
   };
 
-  const triggerValidationErrors = (step: _number) => {
+  const triggerValidationErrors = (_step: _number) => {
     // This function sets error messages when Next is clicked with invalid data
     switch (__step) {
       case 2: // Contact
@@ -390,6 +390,18 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
             ...prev,
             restaurantEmail: 'Please enter a valid email address',
           }));
+        }
+        }
+        }
+        }
+        }
+        }
+        }
+        }
+        }
+        }
+        }
+        }
         }
         break;
 
@@ -476,7 +488,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
       }
 
       // Prepare data for API
-      const restaurantData = {
+      const __restaurantData = {
         name: sanitizeInput(formData.restaurantName),
         display_name: sanitizeInput(formData.displayName),
         business_type: formData.businessType,
@@ -522,14 +534,14 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
+    console.log('Content-Type': 'application/json',
         },
         body: JSON.stringify(__restaurantData),
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
+        throw new Error(errorData.detail || `HTTP error status: ${response.status}`);
       }
 
       const result = await response.json();
@@ -543,7 +555,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
       await checkAuth();
 
       Alert.alert(
-        'Onboarding Complete! 🎉',
+    console.log('Onboarding Complete 🎉',
         `Welcome to Fynlo, ${formData.restaurantName}! Your restaurant is now fully set up and ready to start taking orders.`,
         [
           {
@@ -624,19 +636,19 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         label="Restaurant Name *"
         inputType="text"
         value={formData.restaurantName}
-        onChangeText={value => updateField('restaurantName', _value)}
+        onChangeText={_value => updateField('restaurantName', _value)}
         placeholder="e.g., Maria's Mexican Kitchen"
-        testID="restaurant-name"
+        testID="restaurant-name&quot;
       />
 
       <FastInput
         label="Display Name *"
         inputType="text"
         value={formData.displayName}
-        onChangeText={value => updateField('displayName', _value)}
+        onChangeText={_value => updateField('displayName', _value)}
         placeholder="e.g., Maria's Kitchen"
         containerStyle={styles.inputHint}
-        testID="restaurant-display-name"
+        testID="restaurant-display-name&quot;
       />
       <Text style={styles.hintText}>This is what appears in your POS headers</Text>
 
@@ -672,8 +684,8 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         label="Description (__Optional)"
         inputType="text"
         value={formData.description}
-        onChangeText={value => updateField('description', _value)}
-        placeholder="Brief description of your restaurant's specialty"
+        onChangeText={_value => updateField('description', _value)}
+        placeholder="Brief description of your restaurant's specialty&quot;
         multiline
         numberOfLines={3}
       />
@@ -689,7 +701,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         label="Phone Number *"
         inputType="phone"
         value={formData.phone}
-        onChangeText={value => {
+        onChangeText={_value => {
           updateField('phone', _value);
           // Clear error when user starts typing
           if (fieldErrors.phone) {
@@ -705,14 +717,14 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         }}
         placeholder="+44 20 1234 5678"
         error={fieldErrors.phone}
-        testID="restaurant-phone"
+        testID="restaurant-phone&quot;
       />
 
       <FastInput
         label="Email Address *"
         inputType="email"
         value={formData.email}
-        onChangeText={value => {
+        onChangeText={_value => {
           updateField('email', _value);
           // Clear error when user starts typing
           if (fieldErrors.restaurantEmail) {
@@ -731,15 +743,15 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         }}
         placeholder="owner@mariaskitchen.co.uk"
         error={fieldErrors.restaurantEmail}
-        testID="restaurant-email"
+        testID="restaurant-email&quot;
       />
 
       <FastInput
         label="Website (__Optional)"
         inputType="text"
         value={formData.website}
-        onChangeText={value => updateField('website', _value)}
-        placeholder="https://mariaskitchen.co.uk"
+        onChangeText={_value => updateField('website', _value)}
+        placeholder="https://mariaskitchen.co.uk&quot;
       />
     </View>
   );
@@ -755,29 +767,29 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         label="Street Address *"
         inputType="text"
         value={formData.street}
-        onChangeText={value => updateField('street', _value)}
+        onChangeText={_value => updateField('street', _value)}
         placeholder="123 High Street"
-        testID="address-street"
+        testID="address-street&quot;
       />
 
       <View style={styles.inputRow}>
-        <View style={{ flex: 2 }}>
+        <View style={styles.dynamicStyle16}>
           <FastInput
             label="City *"
             inputType="text"
             value={formData.city}
-            onChangeText={value => updateField('city', _value)}
+            onChangeText={_value => updateField('city', _value)}
             placeholder="London"
-            testID="address-city"
+            testID="address-city&quot;
           />
         </View>
 
-        <View style={{ flex: 1, marginLeft: 12 }}>
+        <View style={styles.dynamicStyle17}>
           <FastInput
             label="Postcode *"
             inputType="text"
             value={formData.zipCode}
-            onChangeText={value => {
+            onChangeText={_value => {
               updateField('zipCode', _value);
               // Clear error when user starts typing
               if (fieldErrors.postcode) {
@@ -793,29 +805,29 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
             }}
             placeholder="SW1A 1AA"
             error={fieldErrors.postcode}
-            testID="address-postcode"
+            testID="address-postcode&quot;
           />
         </View>
       </View>
 
       <View style={styles.inputRow}>
-        <View style={{ flex: 1 }}>
+        <View style={styles.dynamicStyle18}>
           <FastInput
             label="County/State"
             inputType="text"
             value={formData.state}
-            onChangeText={value => updateField('state', _value)}
-            placeholder="Greater London"
+            onChangeText={_value => updateField('state', _value)}
+            placeholder="Greater London&quot;
           />
         </View>
 
-        <View style={{ flex: 1, marginLeft: 12 }}>
+        <View style={styles.dynamicStyle19}>
           <FastInput
             label="Country"
             inputType="text"
             value={formData.country}
-            onChangeText={value => updateField('country', _value)}
-            placeholder="United Kingdom"
+            onChangeText={_value => updateField('country', _value)}
+            placeholder="United Kingdom&quot;
             editable={false}
           />
         </View>
@@ -832,16 +844,16 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         label="Owner/Manager Name *"
         inputType="text"
         value={formData.ownerName}
-        onChangeText={value => updateField('ownerName', _value)}
+        onChangeText={_value => updateField('ownerName', _value)}
         placeholder="Maria Rodriguez"
-        testID="owner-name"
+        testID="owner-name&quot;
       />
 
       <FastInput
         label="Owner Email *"
         inputType="email"
         value={formData.ownerEmail}
-        onChangeText={value => {
+        onChangeText={_value => {
           updateField('ownerEmail', _value);
           // Clear error when user starts typing
           if (fieldErrors.ownerEmail) {
@@ -857,15 +869,15 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         }}
         placeholder="owner@restaurant.com"
         error={fieldErrors.ownerEmail}
-        testID="owner-email"
+        testID="owner-email&quot;
       />
 
       <FastInput
         label="Owner Phone"
         inputType="phone"
         value={formData.ownerPhone}
-        onChangeText={value => updateField('ownerPhone', _value)}
-        placeholder="+44 7123 456789"
+        onChangeText={_value => updateField('ownerPhone', _value)}
+        placeholder="+44 7123 456789&quot;
       />
     </View>
   );
@@ -904,7 +916,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
                       [day]: { ...formData.operatingHours[day], open: value },
                     });
                   }}
-                  placeholder="09:00"
+                  placeholder="09:00&quot;
                   containerStyle={{ marginBottom: 0 }}
                 />
               </View>
@@ -920,7 +932,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
                       [day]: { ...formData.operatingHours[day], close: value },
                     });
                   }}
-                  placeholder="22:00"
+                  placeholder="22:00&quot;
                   containerStyle={{ marginBottom: 0 }}
                 />
               </View>
@@ -941,16 +953,16 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         <Text style={styles.sectionTitle}>Add New Employee</Text>
 
         <View style={styles.inputRow}>
-          <View style={{ flex: 2 }}>
+          <View style={styles.dynamicStyle20}>
             <FastInput
               label="Full Name"
               inputType="text"
               value={newEmployee.name || ''}
               onChangeText={value => setNewEmployee(prev => ({ ...prev, name: value }))}
-              placeholder="John Smith"
+              placeholder="John Smith&quot;
             />
           </View>
-          <View style={{ flex: 1, marginLeft: 12 }}>
+          <View style={styles.dynamicStyle21}>
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Role</Text>
               <ScrollView
@@ -990,7 +1002,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         </View>
 
         <View style={styles.inputRow}>
-          <View style={{ flex: 2 }}>
+          <View style={styles.dynamicStyle22}>
             <FastInput
               label="Email"
               inputType="email"
@@ -1012,17 +1024,17 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
                   setFieldErrors(prev => ({ ...prev, employeeEmail: '' }));
                 }
               }}
-              placeholder="john@mariaskitchen.co.uk"
+              placeholder="john@mariaskitchen.co.uk&quot;
               error={fieldErrors.employeeEmail}
             />
           </View>
-          <View style={{ flex: 1, marginLeft: 12 }}>
+          <View style={styles.dynamicStyle23}>
             <FastInput
               label="Hourly Rate (£)"
               inputType="currency"
               value={newEmployee.hourlyRate || ''}
               onChangeText={value => setNewEmployee(prev => ({ ...prev, hourlyRate: value }))}
-              placeholder="12.50"
+              placeholder="12.50&quot;
             />
           </View>
         </View>
@@ -1131,7 +1143,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
             // Navigate to menu management screen
             navigation.navigate('MenuManagement' as never);
           }}
-          testID="setup-menu-button">
+          testID="setup-menu-button&quot;>
           <Icon name="restaurant-menu" size={20} color={theme.colors.white} />
           <Text style={styles.setupMenuButtonText}>Set Up Menu Now</Text>
         </TouchableOpacity>
@@ -1163,12 +1175,12 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         label="Sort Code *"
         inputType="text"
         value={formData.bankDetails?.sortCode || ''}
-        onChangeText={text => {
-          const formattedSortCode = formatSortCode(__text);
+        onChangeText={_text => {
+          const _formattedSortCode = formatSortCode(__text);
           setFormData(prev => ({
             ...prev,
             bankDetails: {
-              ...prev.bankDetails!,
+              ...prev.bankDetails,
               sortCode: _formattedSortCode,
             },
           }));
@@ -1188,7 +1200,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
           }
         }}
         placeholder="00-00-00"
-        keyboardType="numeric"
+        keyboardType="numeric&quot;
         maxLength={8}
         error={fieldErrors.sortCode}
       />
@@ -1198,11 +1210,11 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         inputType="text"
         value={formData.bankDetails?.accountNumber || ''}
         onChangeText={text => {
-          const cleanedText = text.replace(/[^0-9]/g, '').slice(0, 8);
+          const _cleanedText = text.replace(/[^0-9]/g, '').slice(0, 8);
           setFormData(prev => ({
             ...prev,
             bankDetails: {
-              ...prev.bankDetails!,
+              ...prev.bankDetails,
               accountNumber: _cleanedText,
             },
           }));
@@ -1225,7 +1237,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
           }
         }}
         placeholder="12345678"
-        keyboardType="numeric"
+        keyboardType="numeric&quot;
         maxLength={8}
         error={fieldErrors.accountNumber}
       />
@@ -1234,12 +1246,12 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         label="Account Name *"
         inputType="text"
         value={formData.bankDetails?.accountName || ''}
-        onChangeText={text => {
-          const sanitized = sanitizeInput(__text, 100);
+        onChangeText={_text => {
+          const _sanitized = sanitizeInput(__text, 100);
           setFormData(prev => ({
             ...prev,
             bankDetails: {
-              ...prev.bankDetails!,
+              ...prev.bankDetails,
               accountName: _sanitized,
             },
           }));
@@ -1254,7 +1266,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
           }
         }}
         error={fieldErrors.accountName}
-        placeholder="Your Restaurant Ltd"
+        placeholder="Your Restaurant Ltd&quot;
       />
 
       <FastInput
@@ -1266,7 +1278,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
           setFormData(prev => ({
             ...prev,
             bankDetails: {
-              ...prev.bankDetails!,
+              ...prev.bankDetails,
               iban: _upperCase,
             },
           }));
@@ -1284,7 +1296,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         }}
         error={fieldErrors.iban}
         placeholder="GB00XXXX00000000000000"
-        autoCapitalize="characters"
+        autoCapitalize="characters&quot;
       />
 
       <FastInput
@@ -1299,7 +1311,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
           setFormData(prev => ({
             ...prev,
             bankDetails: {
-              ...prev.bankDetails!,
+              ...prev.bankDetails,
               swiftBic: _upperCase,
             },
           }));
@@ -1317,7 +1329,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         }}
         error={fieldErrors.swiftBic}
         placeholder="XXXXXXXX"
-        autoCapitalize="characters"
+        autoCapitalize="characters&quot;
         maxLength={11}
       />
 
@@ -1376,7 +1388,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
 
       <View style={styles.completionMessage}>
         <Icon name="check-circle" size={48} color={theme.colors.success} />
-        <Text style={styles.completionTitle}>Ready to Launch!</Text>
+        <Text style={styles.completionTitle}>Ready to Launch</Text>
         <Text style={styles.completionDescription}>
           Your restaurant is fully configured and ready to start taking orders with Finlow POS.
         </Text>
@@ -1409,6 +1421,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
     }
   };
 
+// TODO: Move inline styles to StyleSheet: {"dynamicStyle16":" flex: 2 ","dynamicStyle17":" flex: 1, marginLeft: 12 ","dynamicStyle18":" flex: 1 ","dynamicStyle19":" flex: 1, marginLeft: 12 ","dynamicStyle20":" flex: 2 ","dynamicStyle21":" flex: 1, marginLeft: 12 ","dynamicStyle22":" flex: 2 ","dynamicStyle23":" flex: 1, marginLeft: 12 &quot;}
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -1877,7 +1890,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
-          testID="header-back-button">
+          testID="header-back-button&quot;>
           <Icon name="arrow-back" size={24} color={theme.colors.white} />
         </TouchableOpacity>
 

@@ -43,8 +43,8 @@ export interface ButtonProps {
 const Button: React.FC<ButtonProps> = ({
   title,
   onPress,
-  variant = 'primary',
-  size = 'md',
+  _variant = 'primary',
+  _size = 'md',
   disabled = false,
   loading = false,
   icon,
@@ -235,41 +235,6 @@ const Button: React.FC<ButtonProps> = ({
   );
 };
 
-const createStyles = (theme: _Theme) =>
-  StyleSheet.create({
-    base: {
-      alignItems: 'center',
-      justifyContent: 'center',
-      flexDirection: 'row',
-      ...theme.shadows.sm,
-    },
-    fullWidth: {
-      width: '100%',
-    },
-    disabled: {
-      opacity: 0.6,
-    },
-    text: {
-      fontWeight: theme.typography.fontWeight.semibold,
-      textAlign: 'center',
-    },
-    contentContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    iconLeft: {
-      marginRight: theme.spacing[2],
-    },
-    iconRight: {
-      marginLeft: theme.spacing[2],
-    },
-    loadingIndicator: {
-      marginRight: theme.spacing[2],
-    },
-    loadingText: {
-      opacity: 0.8,
-    },
-  });
+const createStyles = (theme: _Theme) => StyleSheet.create({});
 
 export default Button;

@@ -67,7 +67,9 @@ class SumUpServiceClass {
     currency: 'GBP',
   };
 
-  private constructor() {}
+  private constructor() {
+    // Empty constructor
+  }
 
   static getInstance(): SumUpServiceClass {
     if (!SumUpServiceClass.instance) {
@@ -89,9 +91,9 @@ class SumUpServiceClass {
    */
   async createCheckout(
     amount: _number,
-    currency = 'GBP',
+    _currency = 'GBP',
     description?: _string,
-    returnUrl?: _string,
+    _returnUrl?: _string,
   ): Promise<SumUpCheckout> {
     try {
       if (!this.config) {
@@ -111,7 +113,7 @@ class SumUpServiceClass {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${this.config.apiKey}`,
-          'Content-Type': 'application/json',
+    console.log('Content-Type': 'application/json',
         },
         body: JSON.stringify(__checkoutData),
       });
@@ -151,7 +153,7 @@ class SumUpServiceClass {
 
       // This would typically open the SumUp checkout URL
       // For now, we'll simulate a successful payment
-      const fee = this.calculateFee(request.amount);
+      const _fee = this.calculateFee(request.amount);
 
       return {
         success: _true,
@@ -176,7 +178,7 @@ class SumUpServiceClass {
    */
   async processContactlessPayment(
     amount: _number,
-    currency = 'GBP',
+    _currency = 'GBP',
     description?: _string,
   ): Promise<SumUpContactlessPayment> {
     try {
@@ -184,7 +186,7 @@ class SumUpServiceClass {
         throw new Error('SumUp service not initialized');
       }
 
-      const paymentId = this.generatePaymentId();
+      const _paymentId = this.generatePaymentId();
 
       // Use native SumUp SDK for contactless payment
       const result = await SumUpNativeService.checkout({
@@ -223,7 +225,7 @@ class SumUpServiceClass {
    */
   async createQRPayment(
     amount: _number,
-    currency = 'GBP',
+    _currency = 'GBP',
     description?: _string,
   ): Promise<SumUpQRPayment> {
     try {
@@ -367,8 +369,8 @@ class SumUpServiceClass {
    * Check if SumUp is the optimal provider for given volume
    */
   isOptimalForVolume(
-    monthlyVolume: _number,
-    compareRates: { [provider: string]: number },
+    _monthlyVolume: _number,
+    _compareRates: { [provider: string]: number },
   ): boolean {
     const sumupCost = this.calculateMonthlyCost(__monthlyVolume);
     const sumupRate = sumupCost.effectiveRate;
@@ -486,7 +488,7 @@ class SumUpServiceClass {
   /**
    * Save SumUp configuration
    */
-  private async saveConfig(config: _SumUpConfig): Promise<void> {
+  private async saveConfig(_config: _SumUpConfig): Promise<void> {
     try {
       await AsyncStorage.setItem('sumup_config', JSON.stringify(__config));
     } catch (__error) {
@@ -499,7 +501,7 @@ class SumUpServiceClass {
    */
   async loadConfig(): Promise<SumUpConfig | null> {
     try {
-      const configString = await AsyncStorage.getItem('sumup_config');
+      const __configString = await AsyncStorage.getItem('sumup_config');
       if (__configString) {
         const config = JSON.parse(__configString);
         this.config = config;

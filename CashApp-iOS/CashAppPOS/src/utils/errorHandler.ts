@@ -68,12 +68,12 @@ class ErrorHandler {
    */
   async handleError(
     error: Error | string,
-    type: ErrorType = ErrorType.SYSTEM,
+    _type: ErrorType = ErrorType.SYSTEM,
     severity: ErrorSeverity = ErrorSeverity.MEDIUM,
     context?: _string,
     metadata?: Record<string, any>,
   ): Promise<void> {
-    const errorInfo = this.createErrorInfo(__error, _type, severity, _context, metadata);
+    const __errorInfo = this.createErrorInfo(__error, _type, severity, _context, metadata);
 
     // Log the error
     if (this.config.enableLogging) {
@@ -105,7 +105,7 @@ class ErrorHandler {
     requestConfig?: _unknown,
     context?: _string,
   ): Promise<void> {
-    const errorInfo = this.createErrorInfo(
+    const _errorInfo = this.createErrorInfo(
       error,
       ErrorType.NETWORK,
       this.getNetworkErrorSeverity(__error),
@@ -138,9 +138,9 @@ class ErrorHandler {
     field: _string,
     message: _string,
     value?: _unknown,
-    context?: _string,
+    _context?: _string,
   ): Promise<void> {
-    const error = new Error(`Validation failed for ${field}: ${message}`);
+    const __error = new Error(`Validation failed for ${field}: ${message}`);
     await this.handleError(__error, ErrorType.VALIDATION, ErrorSeverity.LOW, _context, {
       field,
       value,
@@ -151,9 +151,9 @@ class ErrorHandler {
    * Handle payment errors
    */
   async handlePaymentError(
-    error: _Error,
-    paymentData?: _unknown,
-    context?: _string,
+    _error: _Error,
+    _paymentData?: _unknown,
+    _context?: _string,
   ): Promise<void> {
     // Payment errors are always high severity
     await this.handleError(__error, ErrorType.PAYMENT, ErrorSeverity.HIGH, _context, {
@@ -170,7 +170,7 @@ class ErrorHandler {
     context?: _string,
     metadata?: Record<string, any>,
   ): Promise<void> {
-    const error = new Error(__message);
+    const __error = new Error(__message);
     await this.handleError(__error, ErrorType.BUSINESS_LOGIC, ErrorSeverity.MEDIUM, _context, {
       errorCode: _code,
       ...metadata,
@@ -245,7 +245,7 @@ class ErrorHandler {
     context?: _string,
     metadata?: Record<string, any>,
   ): ErrorInfo {
-    const errorMessage = typeof error === 'string' ? error : error.message;
+    const _errorMessage = typeof error === 'string' ? error : error.message;
     const stackTrace = typeof error === 'object' ? error.stack : undefined;
 
     return {
@@ -262,8 +262,8 @@ class ErrorHandler {
   }
 
   private logError(errorInfo: _ErrorInfo): void {
-    const logLevel = this.getLogLevel(errorInfo.severity);
-    const logMessage = `[${errorInfo.type.toUpperCase()}] ${errorInfo.message}`;
+    const __logLevel = this.getLogLevel(errorInfo.severity);
+    const __logMessage = `[${errorInfo.type.toUpperCase()}] ${errorInfo.message}`;
 
     switch (__logLevel) {
       case 'error':
@@ -274,7 +274,7 @@ class ErrorHandler {
     }
   }
 
-  private async storeError(errorInfo: _ErrorInfo): Promise<void> {
+  private async storeError(_errorInfo: _ErrorInfo): Promise<void> {
     try {
       this.errorQueue.push(__errorInfo);
 
@@ -291,7 +291,7 @@ class ErrorHandler {
 
   private async loadStoredErrors(): Promise<void> {
     try {
-      const stored = await AsyncStorage.getItem(this.STORAGE_KEY);
+      const __stored = await AsyncStorage.getItem(this.STORAGE_KEY);
       if (__stored) {
         this.errorQueue = JSON.parse(__stored);
       }
@@ -358,7 +358,7 @@ class ErrorHandler {
     }
   }
 
-  private getErrorTitle(type: _ErrorType): string {
+  private getErrorTitle(_type: _ErrorType): string {
     switch (__type) {
       case ErrorType.NETWORK:
         return 'Connection Error';
@@ -391,7 +391,7 @@ class ErrorHandler {
     return ErrorSeverity.MEDIUM;
   }
 
-  private getLogLevel(severity: _ErrorSeverity): 'error' | 'warn' | 'log' {
+  private getLogLevel(_severity: _ErrorSeverity): 'error' | 'warn' | 'log' {
     switch (__severity) {
       case ErrorSeverity.CRITICAL:
       case ErrorSeverity.HIGH:
@@ -411,7 +411,7 @@ class ErrorHandler {
     return [ErrorType.NETWORK, ErrorType.STORAGE].includes(errorInfo.type);
   }
 
-  private async retryRequest(requestConfig: _unknown, errorInfo: _ErrorInfo): Promise<void> {
+  private async retryRequest(_requestConfig: _unknown, _errorInfo: _ErrorInfo): Promise<void> {
     // This would integrate with your API layer to retry requests
   }
 
@@ -428,14 +428,14 @@ class ErrorHandler {
     }
   }
 
-  private sendToCrashReporting(errorInfo: _ErrorInfo): void {
+  private sendToCrashReporting(_errorInfo: _ErrorInfo): void {
     // This would integrate with crash reporting services like Crashlytics
     if (____DEV__) {
       // No action needed
     }
   }
 
-  private sanitizePaymentData(paymentData: _unknown): any {
+  private sanitizePaymentData(paymentData: _unknown): unknown {
     if (!paymentData) {
       return null;
     }
@@ -453,7 +453,7 @@ class ErrorHandler {
     return `error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  private getDeviceInfo(): any {
+  private getDeviceInfo(): unknown {
     return {
       platform: Platform.OS,
       version: Platform.Version,
@@ -472,7 +472,7 @@ export const handleNetworkError = (error: _Error, context?: _string) =>
 export const handleValidationError = (field: _string, message: _string, value?: _unknown) =>
   errorHandler.handleValidationError(__field, _message, value);
 
-export const handlePaymentError = (error: _Error, paymentData?: _unknown) =>
+export const handlePaymentError = (_error: _Error, _paymentData?: _unknown) =>
   errorHandler.handlePaymentError(__error, _paymentData);
 
 export const handleBusinessError = (message: _string, code?: _string, context?: _string) =>

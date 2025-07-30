@@ -17,7 +17,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation, RouteProp } from '@react-navigation/native';
 import Colors from '../../constants/Colors';
 
-const { width: _screenWidth, height: screenHeight } = Dimensions.get('window');
+const { width: __screenWidth, height: __screenHeight } = Dimensions.get('window');
 
 type QRScannerRouteProp = RouteProp<
   {
@@ -50,7 +50,7 @@ const QRScannerScreen: React.FC = () => {
   const [isScanning, setIsScanning] = useState(__true);
   const [flashEnabled, setFlashEnabled] = useState(__false);
   const [scannedData, setScannedData] = useState<ScanResult | null>(__null);
-  const [isLoading, setIsLoading] = useState(__true);
+  const [__isLoading, setIsLoading] = useState(__true);
   const [permissionDenied, setPermissionDenied] = useState(__false);
 
   const scanTimeoutRef = useRef<NodeJS.Timeout | null>(__null);
@@ -118,9 +118,9 @@ const QRScannerScreen: React.FC = () => {
       'INVENTORY:INV789:Ground Coffee - House Blend',
     ];
 
-    const randomCode = mockQRCodes[Math.floor(Math.random() * mockQRCodes.length)];
+    const _randomCode = mockQRCodes[Math.floor(Math.random() * mockQRCodes.length)];
 
-    const result: ScanResult = {
+    const __result: ScanResult = {
       data: _randomCode,
       type: 'QR_CODE',
       timestamp: new Date(),

@@ -5,7 +5,7 @@ Provides secure configuration for mobile app without exposing API keys
 Last updated: 2025-07-29 - Force rebuild after rate limiter fix
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, status, Request
 from typing import Dict, Any, Optional
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field
@@ -21,7 +21,6 @@ from app.middleware.rate_limit_middleware import limiter
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
-
 class SumUpInitRequest(BaseModel):
     """Request model for SumUp initialization"""
     mode: str = Field(default="production", description="Mode: sandbox or production")
@@ -32,7 +31,6 @@ class SumUpInitRequest(BaseModel):
                 "mode": "production"
             }
         }
-
 
 class SumUpConfigData(BaseModel):
     """SumUp SDK configuration data"""
@@ -48,7 +46,6 @@ class SumUpConfigResponse(BaseModel):
     enabled: bool = Field(..., description="Whether SumUp is enabled for this restaurant")
     features: Dict[str, bool] = Field(..., description="Enabled SumUp features")
 
-
 class MerchantValidationRequest(BaseModel):
     """Request model for merchant code validation"""
     merchant_code: str = Field(..., description="SumUp merchant code to validate")
@@ -59,7 +56,6 @@ class MerchantValidationRequest(BaseModel):
                 "merchant_code": "MC123456"
             }
         }
-
 
 @router.post("/initialize", response_model=SumUpConfigResponse)
 @limiter.limit("10/minute")
@@ -172,7 +168,6 @@ async def initialize_sumup(
             error_id=str(e)
         )
 
-
 @router.get("/status")
 @limiter.limit("30/minute")
 async def get_sumup_status(
@@ -224,7 +219,6 @@ async def get_sumup_status(
             message="Failed to retrieve SumUp status",
             error_id=str(e)
         )
-
 
 @router.post("/validate-merchant")
 @limiter.limit("5/minute")

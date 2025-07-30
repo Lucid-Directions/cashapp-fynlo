@@ -8,8 +8,7 @@ const queryClient = {
   prefetchQuery: async (queryKey: _unknown, queryFn: _unknown) => {
     try {
       await queryFn();
-    } catch (__error) {
-    }
+    } catch (__error) {}
   },
 };
 
@@ -32,6 +31,7 @@ export async function prefetchUserData() {
   const dataService = DataService.getInstance();
   // Example:
   // await queryClient.prefetchQuery(['userOrders'], () => dataService.getRecentOrders(5));
+  console.log(
     '[dataPrefetcher] prefetchUserData called (currently no specific user data to prefetch here).',
   );
 }

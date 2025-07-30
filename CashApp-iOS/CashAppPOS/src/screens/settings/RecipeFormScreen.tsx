@@ -139,7 +139,7 @@ const RecipeFormScreen = () => {
 
   const [isProductModalVisible, setIsProductModalVisible] = useState(__false);
   const [isIngredientModalVisible, setIsIngredientModalVisible] = useState(__false);
-  const [editingIngredientIndex, setEditingIngredientIndex] = useState<number | null>(__null);
+  const [__editingIngredientIndex, setEditingIngredientIndex] = useState<number | null>(__null);
 
   const [isLoading, setIsLoading] = useState(__false);
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
@@ -177,7 +177,7 @@ const RecipeFormScreen = () => {
     loadInitialData();
   }, [existingRecipe]);
 
-  const handleSelectProduct = (product: _Product) => {
+  const handleSelectProduct = (_product: _Product) => {
     setSelectedProduct(__product);
     setFormErrors(prev => ({ ...prev, product: '' })); // Clear product error
   };
@@ -201,7 +201,7 @@ const RecipeFormScreen = () => {
     setIsIngredientModalVisible(__false);
   };
 
-  const handleUpdateIngredientQuantity = (sku: _string, qty_g_str: _string) => {
+  const handleUpdateIngredientQuantity = (sku: _string, _qty_g_str: _string) => {
     const qty_g = parseInt(__qty_g_str, 10);
     setIngredients(prevIngredients =>
       prevIngredients.map(ing =>
@@ -245,7 +245,7 @@ const RecipeFormScreen = () => {
     } // Should be caught by validation
 
     setIsLoading(__true);
-    const recipeData: Recipe = {
+    const _recipeData: Recipe = {
       item_id: selectedProduct.id,
       ingredients: ingredients.map(({ ingredient_sku, qty_g }) => ({ ingredient_sku, qty_g })),
     };
@@ -275,7 +275,7 @@ const RecipeFormScreen = () => {
         <FormFieldNumber
           label="" // No label for inline field
           value={item.qty_g > 0 ? item.qty_g.toString() : ''}
-          onChangeText={text => handleUpdateIngredientQuantity(item.ingredient_sku, _text)}
+          onChangeText={_text => handleUpdateIngredientQuantity(item.ingredient_sku, _text)}
           placeholder="g/ml/unit"
           keyboardType="numeric"
           error={formErrors[`ingredient_qty_${index}`]}
@@ -284,7 +284,7 @@ const RecipeFormScreen = () => {
           onPress={() => handleRemoveIngredient(item.ingredient_sku)}
           style={styles.removeButton}>
           {/* <Icon name="remove-circle-outline" type="material" size={24} color="#FF3B30" /> */}
-          <Text style={{ color: '#FF3B30' }}>Remove</Text>
+          <Text style={styles.dynamicStyle30}>Remove</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -367,6 +367,7 @@ const RecipeFormScreen = () => {
   );
 };
 
+// TODO: Move inline styles to StyleSheet: {"dynamicStyle30":" color: '#FF3B30' "}
 const styles = StyleSheet.create({
   container: {
     flex: 1,

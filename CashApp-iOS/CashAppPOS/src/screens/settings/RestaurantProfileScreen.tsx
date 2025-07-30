@@ -32,7 +32,7 @@ const Colors = {
 
 const RestaurantProfileScreen: React.FC = () => {
   const navigation = useNavigation();
-  const { config, _updateConfig, loading, error } = useRestaurantConfig();
+  const { config, __updateConfig, __loading, __error } = useRestaurantConfig();
 
   const [formData, setFormData] = useState({
     restaurantName: '',
@@ -201,7 +201,7 @@ const RestaurantProfileScreen: React.FC = () => {
             <TextInput
               style={styles.textInput}
               value={formData.restaurantName}
-              onChangeText={value => updateField('restaurantName', _value)}
+              onChangeText={_value => updateField('restaurantName', _value)}
               placeholder="Enter restaurant name"
               placeholderTextColor={Colors.mediumGray}
             />
@@ -213,7 +213,7 @@ const RestaurantProfileScreen: React.FC = () => {
             <TextInput
               style={styles.textInput}
               value={formData.displayName}
-              onChangeText={value => updateField('displayName', _value)}
+              onChangeText={_value => updateField('displayName', _value)}
               placeholder="Enter display name"
               placeholderTextColor={Colors.mediumGray}
             />
@@ -255,7 +255,7 @@ const RestaurantProfileScreen: React.FC = () => {
             <TextInput
               style={styles.textInput}
               value={formData.phone}
-              onChangeText={value => updateField('phone', _value)}
+              onChangeText={_value => updateField('phone', _value)}
               placeholder="+44 20 1234 5678"
               placeholderTextColor={Colors.mediumGray}
               keyboardType="phone-pad"
@@ -267,7 +267,7 @@ const RestaurantProfileScreen: React.FC = () => {
             <TextInput
               style={styles.textInput}
               value={formData.email}
-              onChangeText={value => updateField('email', _value)}
+              onChangeText={_value => updateField('email', _value)}
               placeholder="restaurant@example.com"
               placeholderTextColor={Colors.mediumGray}
               keyboardType="email-address"
@@ -280,7 +280,7 @@ const RestaurantProfileScreen: React.FC = () => {
             <TextInput
               style={styles.textInput}
               value={formData.website}
-              onChangeText={value => updateField('website', _value)}
+              onChangeText={_value => updateField('website', _value)}
               placeholder="https://restaurant.com"
               placeholderTextColor={Colors.mediumGray}
               keyboardType="url"
@@ -298,7 +298,7 @@ const RestaurantProfileScreen: React.FC = () => {
             <TextInput
               style={styles.textInput}
               value={formData.street}
-              onChangeText={value => updateField('street', _value)}
+              onChangeText={_value => updateField('street', _value)}
               placeholder="123 High Street"
               placeholderTextColor={Colors.mediumGray}
             />
@@ -310,7 +310,7 @@ const RestaurantProfileScreen: React.FC = () => {
               <TextInput
                 style={styles.textInput}
                 value={formData.city}
-                onChangeText={value => updateField('city', _value)}
+                onChangeText={_value => updateField('city', _value)}
                 placeholder="London"
                 placeholderTextColor={Colors.mediumGray}
               />
@@ -321,7 +321,7 @@ const RestaurantProfileScreen: React.FC = () => {
               <TextInput
                 style={styles.textInput}
                 value={formData.zipCode}
-                onChangeText={value => updateField('zipCode', _value)}
+                onChangeText={_value => updateField('zipCode', _value)}
                 placeholder="SW1A 1AA"
                 placeholderTextColor={Colors.mediumGray}
                 autoCapitalize="characters"
@@ -365,7 +365,7 @@ const RestaurantProfileScreen: React.FC = () => {
             <TextInput
               style={styles.textInput}
               value={(formData.taxRate * 100).toString()}
-              onChangeText={value => updateField('taxRate', parseFloat(__value) / 100 || 0)}
+              onChangeText={_value => updateField('taxRate', parseFloat(__value) / 100 || 0)}
               placeholder="20"
               placeholderTextColor={Colors.mediumGray}
               keyboardType="numeric"

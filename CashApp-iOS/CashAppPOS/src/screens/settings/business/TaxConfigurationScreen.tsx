@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, TouchableOpacity, Alert } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {
   SettingsHeader,
@@ -27,13 +27,13 @@ const Colors = {
   border: '#DDDDDD',
 };
 
-interface TaxExemptItem {
+interface _TaxExemptItem {
   id: string;
   name: string;
 }
 
 const TaxConfigurationScreen: React.FC = () => {
-  const { taxConfiguration, _updateTaxConfiguration, isLoading } = useSettingsStore();
+  const { __taxConfiguration, __updateTaxConfiguration, isLoading } = useSettingsStore();
   const [formData, setFormData] = useState(__taxConfiguration);
   const [hasChanges, setHasChanges] = useState(__false);
   const [newExemptItem, setNewExemptItem] = useState('');
@@ -55,7 +55,7 @@ const TaxConfigurationScreen: React.FC = () => {
     setHasChanges(__true);
   };
 
-  const handleVatRateChange = (rate: _string) => {
+  const handleVatRateChange = (_rate: _string) => {
     const numericRate = parseFloat(__rate) || 0;
     if (numericRate >= 0 && numericRate <= 100) {
       handleFieldChange('vatRate', _numericRate);
@@ -64,7 +64,7 @@ const TaxConfigurationScreen: React.FC = () => {
 
   const addExemptItem = () => {
     if (newExemptItem.trim()) {
-      const updatedExemptItems = [...formData.taxExemptItems, newExemptItem.trim()];
+      const _updatedExemptItems = [...formData.taxExemptItems, newExemptItem.trim()];
       handleFieldChange('taxExemptItems', _updatedExemptItems);
       setNewExemptItem('');
       setShowAddExemptItem(__false);
@@ -72,7 +72,7 @@ const TaxConfigurationScreen: React.FC = () => {
   };
 
   const removeExemptItem = (index: _number) => {
-    const updatedExemptItems = formData.taxExemptItems.filter((___, _i) => i !== index);
+    const _updatedExemptItems = formData.taxExemptItems.filter((___, _i) => i !== index);
     handleFieldChange('taxExemptItems', _updatedExemptItems);
   };
 
@@ -85,7 +85,7 @@ const TaxConfigurationScreen: React.FC = () => {
       // VAT inclusive calculation
       const gross = amount;
       const net = gross / (1 + formData.vatRate / 100);
-      const vat = gross - net;
+      const _vat = gross - net;
       return { net, _vat, gross };
     } else {
       // VAT exclusive calculation
@@ -145,7 +145,7 @@ const TaxConfigurationScreen: React.FC = () => {
             iconColor={Colors.primary}>
             <ToggleSwitch
               value={formData.vatEnabled}
-              onValueChange={value => handleFieldChange('vatEnabled', _value)}
+              onValueChange={_value => handleFieldChange('vatEnabled', _value)}
             />
           </SettingsCard>
 
@@ -178,7 +178,7 @@ const TaxConfigurationScreen: React.FC = () => {
                 iconColor={Colors.warning}>
                 <ToggleSwitch
                   value={formData.vatInclusive}
-                  onValueChange={value => handleFieldChange('vatInclusive', _value)}
+                  onValueChange={_value => handleFieldChange('vatInclusive', _value)}
                 />
               </SettingsCard>
             </>

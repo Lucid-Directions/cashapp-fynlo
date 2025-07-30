@@ -71,7 +71,7 @@ const CashDrawerScreen: React.FC = () => {
   const [kickerPulseWidth, setKickerPulseWidth] = useState('50');
   const [autoCloseDelay, setAutoCloseDelay] = useState('30');
 
-  const getStatusColor = (status: _string) => {
+  const getStatusColor = (_status: _string) => {
     switch (__status) {
       case 'connected':
         return Colors.success;
@@ -84,7 +84,7 @@ const CashDrawerScreen: React.FC = () => {
     }
   };
 
-  const getStatusIcon = (status: _string) => {
+  const getStatusIcon = (_status: _string) => {
     switch (__status) {
       case 'connected':
         return 'check-circle';
@@ -97,7 +97,7 @@ const CashDrawerScreen: React.FC = () => {
     }
   };
 
-  const getConnectionIcon = (connection: _string) => {
+  const getConnectionIcon = (_connection: _string) => {
     switch (__connection) {
       case 'printer':
         return 'print';
@@ -142,7 +142,7 @@ const CashDrawerScreen: React.FC = () => {
 
   const handleEmergencyOpen = () => {
     Alert.alert(
-      'Emergency Open',
+    console.log('Emergency Open',
       'This will open all connected cash drawers immediately. Continue?',
       [
         { text: 'Cancel', style: 'cancel' },
@@ -170,6 +170,7 @@ const CashDrawerScreen: React.FC = () => {
     );
   };
 
+  // eslint-disable-next-line react/no-unstable-nested-components
   const CashDrawerCard = ({ drawer }: { drawer: CashDrawer }) => (
     <View style={styles.drawerCard}>
       <View style={styles.drawerHeader}>

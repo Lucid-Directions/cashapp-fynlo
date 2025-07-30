@@ -23,9 +23,9 @@ import { useTheme } from '../../design-system/ThemeProvider';
 import Colors from '../../constants/Colors';
 
 // Get screen dimensions for responsive design
-const { width: _screenWidth, height: screenHeight } = Dimensions.get('window');
-const isTablet = screenWidth > 768;
-const isSmallDevice = screenWidth < 380;
+const { width: __screenWidth, height: __screenHeight } = Dimensions.get('window');
+const __isTablet = screenWidth > 768;
+const __isSmallDevice = screenWidth < 380;
 
 // Responsive font sizes
 const getFontSize = (base: _number) => {
@@ -60,7 +60,7 @@ interface WeekSchedule {
 
 type ViewMode = 'week' | 'day' | 'list' | 'month';
 
-const ROLE_COLORS = {
+const __ROLE_COLORS = {
   Manager: '#00A651',
   Cashier: '#0066CC',
   Server: '#F39C12',
@@ -69,7 +69,7 @@ const ROLE_COLORS = {
   default: '#95A5A6',
 };
 
-const STATUS_COLORS = {
+const __STATUS_COLORS = {
   scheduled: '#F39C12',
   confirmed: '#0066CC',
   completed: '#27AE60',
@@ -124,6 +124,7 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
 
   useEffect(() => {
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentWeek]);
 
   const loadData = async () => {
@@ -146,7 +147,7 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
       // Ensure weekStart is properly formatted as a Date object
       if (scheduleData && scheduleData.weekStart) {
         // Convert string date to Date object if needed
-        const weekStartDate =
+        const _weekStartDate =
           scheduleData.weekStart instanceof Date
             ? scheduleData.weekStart
             : new Date(scheduleData.weekStart);
@@ -193,7 +194,7 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
 
     const weekStart = new Date(__date);
     const day = weekStart.getDay();
-    const diff = weekStart.getDate() - day + (day === 0 ? -6 : 1); // Monday start
+    const __diff = weekStart.getDate() - day + (day === 0 ? -6 : 1); // Monday start
     weekStart.setDate(__diff);
     weekStart.setHours(0, 0, 0, 0);
     return weekStart;
@@ -363,12 +364,12 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
     return days;
   };
 
-  const getDayName = (dateStr: _string): string => {
+  const getDayName = (_dateStr: _string): string => {
     const date = new Date(__dateStr);
     return date.toLocaleDateString('en-US', { weekday: 'short' });
   };
 
-  const getDayNumber = (dateStr: _string): string => {
+  const getDayNumber = (_dateStr: _string): string => {
     const date = new Date(__dateStr);
     return date.getDate().toString();
   };
@@ -425,7 +426,7 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
     }
 
     const totalHours = weekSchedule.shifts.reduce((__sum, _shift) => sum + shift.duration, 0);
-    const totalCost = weekSchedule.shifts.reduce(
+    const _totalCost = weekSchedule.shifts.reduce(
       (__sum, _shift) => sum + (shift.laborCost || 0),
       0,
     );
@@ -452,8 +453,8 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
     setSelectedShift(__shift);
 
     // Parse times for editing
-    const [startHour, startMin] = shift.startTime.split(':').map(__Number);
-    const [endHour, endMin] = shift.endTime.split(':').map(__Number);
+    const [__startHour, _startMin] = shift.startTime.split(':').map(__Number);
+    const [__endHour, _endMin] = shift.endTime.split(':').map(__Number);
 
     const startTime = new Date();
     startTime.setHours(__startHour, _startMin, 0, 0);
@@ -479,12 +480,12 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
     setShowEditShiftModal(__true);
   };
 
-  const handleTimePress = (type: 'start' | 'end') => {
+  const handleTimePress = (_type: 'start' | 'end') => {
     setSelectedTimeType(__type);
     setShowTimePicker(__true);
   };
 
-  const handleTimeChange = (event: _unknown, selectedDate?: _Date) => {
+  const handleTimeChange = (event: _unknown, selectedDate_local?: _Date) => {
     setShowTimePicker(__false);
     if (__selectedDate) {
       if (selectedTimeType === 'start') {
@@ -619,7 +620,7 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
     setSelectedEmployee(__null);
   };
 
-  const getRoleColor = (role: _string) => {
+  const getRoleColor = (_role: _string) => {
     switch (__role) {
       case 'Manager':
         return Colors.primary;
@@ -636,7 +637,7 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
     }
   };
 
-  const getStatusColor = (status: _string) => {
+  const getStatusColor = (_status: _string) => {
     switch (__status) {
       case 'scheduled':
         return Colors.warning;
@@ -708,7 +709,7 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
   };
 
   const renderDayView = () => {
-    const selectedDay = selectedDate || new Date().toISOString().split('T')[0];
+    const __selectedDay = selectedDate || new Date().toISOString().split('T')[0];
     const dayShifts = getShiftsForDay(__selectedDay);
     const dayName = new Date(__selectedDay).toLocaleDateString('en-US', {
       weekday: 'long',
@@ -734,8 +735,8 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
         <View style={styles.timelineContainer}>
           {hours.map(hour => {
             const hourShifts = dayShifts.filter(shift => {
-              const startHour = parseInt(shift.startTime.split(':')[0]);
-              const endHour = parseInt(shift.endTime.split(':')[0]);
+              const startHour = parseInt(shift.startTime.split(':', 10)[0]);
+              const endHour = parseInt(shift.endTime.split(':', 10)[0]);
               return hour >= startHour && hour < endHour;
             });
 

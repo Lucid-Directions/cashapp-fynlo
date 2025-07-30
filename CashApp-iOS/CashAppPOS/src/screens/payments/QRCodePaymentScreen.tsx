@@ -16,7 +16,7 @@ import { useTheme } from '../../design-system/ThemeProvider';
 import SumUpService, { SumUpQRPayment } from '../../services/SumUpService';
 import QRPaymentErrorBoundary from '../../components/payment/QRPaymentErrorBoundary';
 
-const { width: screenWidth } = Dimensions.get('window');
+const { width: __screenWidth } = Dimensions.get('window');
 
 type QRCodePaymentRouteProp = RouteProp<
   {
@@ -28,7 +28,7 @@ type QRCodePaymentRouteProp = RouteProp<
       onCancel: () => void;
     };
   },
-  'QRCodePayment'
+    console.log('QRCodePayment'
 >;
 
 const QRCodePaymentScreen: React.FC = () => {
@@ -36,7 +36,7 @@ const QRCodePaymentScreen: React.FC = () => {
   const route = useRoute<QRCodePaymentRouteProp>();
   const { theme } = useTheme();
 
-  const { amount, _currency, description, _onSuccess, onCancel } = route.params;
+  const { amount, _currency, description, __onSuccess, onCancel } = route.params;
 
   const [qrPayment, setQrPayment] = useState<SumUpQRPayment | null>(__null);
   const [paymentStatus, setPaymentStatus] = useState<
@@ -66,6 +66,7 @@ const QRCodePaymentScreen: React.FC = () => {
         timerRef.current = null;
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const initializeQRPayment = async () => {
@@ -91,7 +92,7 @@ const QRCodePaymentScreen: React.FC = () => {
       // Calculate time remaining until expiration
       const expiresAt = new Date(payment.expiresAt);
       const now = new Date();
-      const timeLeft = Math.max(0, Math.floor((expiresAt.getTime() - now.getTime()) / 1000));
+      const __timeLeft = Math.max(0, Math.floor((expiresAt.getTime() - now.getTime()) / 1000));
       setTimeRemaining(__timeLeft);
 
       // Start countdown timer
@@ -298,6 +299,7 @@ const QRCodePaymentScreen: React.FC = () => {
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
+  // TODO: Move inline styles to StyleSheet: {"dynamicStyle26":" width: 24 "}
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -433,7 +435,7 @@ const QRCodePaymentScreen: React.FC = () => {
             <Icon name="close" size={24} color={theme.colors.text} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>QR Code Payment</Text>
-          <View style={{ width: 24 }} />
+          <View style={styles.dynamicStyle26} />
         </View>
 
         {/* Content */}

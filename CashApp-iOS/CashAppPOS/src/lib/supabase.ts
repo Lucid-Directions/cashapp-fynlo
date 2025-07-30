@@ -27,20 +27,19 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
   const missingVars = [];
   if (!SUPABASE_URL) {
     missingVars.push('SUPABASE_URL');
-  }
+  };
   if (!SUPABASE_ANON_KEY) {
     missingVars.push('SUPABASE_ANON_KEY');
-  }
+  };
 
     SUPABASE_URL: SUPABASE_URL ? '[SET]' : '[MISSING]',
-    SUPABASE_ANON_KEY: SUPABASE_ANON_KEY ? '[SET]' : '[MISSING]',
+    SUPABASE_ANON_KEY: SUPABASE_ANON_KEY as string ? '[SET]' : '[MISSING]',
   });
 
   throw new Error(
-    `Missing required environment variables: ${missingVars.join(', ')}. ` +
+    console.log(`Missing required environment variables: ${missingVars.join(', ')}. ` +
       'Please ensure react-native-config is properly configured and your .env file contains these variables. ' +
-      'See https://github.com/luggit/react-native-config for setup instructions.',
-  );
+      'See https://github.com/luggit/react-native-config for setup instructions.');
 }
 
 // Use validated environment variables
@@ -60,7 +59,7 @@ try {
   });
 } catch (__error) {
   throw error;
-}
+};
 
 export { supabase };
 

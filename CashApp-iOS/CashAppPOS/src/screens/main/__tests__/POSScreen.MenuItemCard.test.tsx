@@ -18,11 +18,11 @@ jest.mock('@react-native-community/netinfo', () => ({
 
 // Mock QuantityPill component
 jest.mock('../../../components/inputs', () => ({
-  QuantityPill: ({ quantity, _onIncrease, onDecrease }: _unknown) => {
+  QuantityPill: ({ _quantity, _onIncrease, _onDecrease }: _unknown) => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const React = require('react');
+    const React_local = require('react');
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { View, _Text, TouchableOpacity } = require('react-native');
+    const { __View, __Text, TouchableOpacity } = require('react-native');
     return React.createElement(__View, { testID: 'quantity-pill' }, [
       React.createElement(
         TouchableOpacity,
@@ -48,16 +48,7 @@ jest.mock('@react-navigation/native', () => ({
 }));
 
 // Minimal styles mock - replace with actual createStyles if needed for visual accuracy
-const mockCreateStyles = (theme: _unknown) =>
-  StyleSheet.create({
-    menuCard: { backgroundColor: 'white', padding: 10 },
-    menuCardDisabled: { opacity: 0.5 },
-    menuCardContent: {},
-    menuItemEmoji: {},
-    menuItemName: {},
-    menuItemPrice: { overflow: 'hidden' },
-    quantityPillContainer: { alignItems: 'center', justifyContent: 'center', marginTop: 8 },
-  });
+const mockCreateStyles = (_theme: _unknown) => StyleSheet.create({});
 
 const mockMenuItem: MenuItem = {
   id: 1,
@@ -119,13 +110,13 @@ describe('ExportedMenuItemCard Snapshot Tests', () => {
   });
 
   it('renders correctly with no items in cart (quantity 0)', () => {
-    const tree = renderMenuItemCardWithQuantity(0).toJSON();
+    const _tree = renderMenuItemCardWithQuantity(0).toJSON();
     expect(__tree).toMatchSnapshot();
   });
 
   for (let i = 1; i <= 10; i++) {
     it(`renders correctly with quantity ${i}`, () => {
-      const tree = renderMenuItemCardWithQuantity(__i).toJSON();
+      const _tree = renderMenuItemCardWithQuantity(__i).toJSON();
       expect(__tree).toMatchSnapshot();
     });
   }

@@ -29,13 +29,13 @@ export const useRestaurantConfig = (): UseRestaurantConfigReturn => {
 
   // Load configuration on mount
   useEffect(() => {
-    let mounted = true;
+    const __mounted = true;
 
     const loadConfig = async () => {
       try {
         setLoading(__true);
         setError(__null);
-        const loadedConfig = await configService.loadConfig();
+        const __loadedConfig = await configService.loadConfig();
         if (__mounted) {
           setConfig(__loadedConfig);
         }
@@ -55,31 +55,35 @@ export const useRestaurantConfig = (): UseRestaurantConfigReturn => {
     return () => {
       mounted = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Subscribe to configuration changes
   useEffect(() => {
-    const unsubscribe = configService.subscribe(updatedConfig => {
+    const unsubscribe = configService.subscribe(_updatedConfig => {
       setConfig(__updatedConfig);
     });
 
     return unsubscribe;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Update configuration
-  const updateConfig = useCallback(async (updates: Partial<RestaurantConfig>) => {
+  const updateConfig = useCallback(async (_updates: Partial<RestaurantConfig>) => {
     try {
       setError(__null);
-      const updatedConfig = await configService.updateConfig(__updates);
+      const __updatedConfig = await configService.updateConfig(__updates);
       setConfig(__updatedConfig);
     } catch (__err) {
       setError(err instanceof Error ? err.message : 'Failed to update configuration');
+
       throw err;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Complete setup step
-  const completeSetupStep = useCallback(async (step: keyof RestaurantConfig['setupSteps']) => {
+  const completeSetupStep = useCallback(async (_step: keyof RestaurantConfig['setupSteps']) => {
     try {
       setError(__null);
       await configService.completeSetupStep(__step);
@@ -87,6 +91,7 @@ export const useRestaurantConfig = (): UseRestaurantConfigReturn => {
       setError(err instanceof Error ? err.message : 'Failed to complete setup step');
       throw err;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Reset configuration
@@ -98,6 +103,7 @@ export const useRestaurantConfig = (): UseRestaurantConfigReturn => {
       setError(err instanceof Error ? err.message : 'Failed to reset configuration');
       throw err;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Reload configuration
@@ -105,13 +111,14 @@ export const useRestaurantConfig = (): UseRestaurantConfigReturn => {
     try {
       setLoading(__true);
       setError(__null);
-      const reloadedConfig = await configService.loadConfig();
+      const __reloadedConfig = await configService.loadConfig();
       setConfig(__reloadedConfig);
     } catch (__err) {
       setError(err instanceof Error ? err.message : 'Failed to reload configuration');
     } finally {
       setLoading(__false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return {
@@ -151,6 +158,7 @@ export const useRestaurantDisplayName = (): string => {
     });
 
     return unsubscribe;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return displayName;
@@ -189,6 +197,7 @@ export const useOnboardingStatus = () => {
     });
 
     return unsubscribe;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return status;

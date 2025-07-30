@@ -47,8 +47,9 @@ class SimpleErrorTrackingService {
     }
   }
 
-  setUser(userId: _string, email?: _string, role?: _string): void {
+  setUser(_userId: _string, _email?: _string, _role?: _string): void {
     try {
+      // Implementation pending
     } catch (__error) {
       // Error handled silently
     }
@@ -56,7 +57,7 @@ class SimpleErrorTrackingService {
 
   captureError(error: _Error, context?: _ErrorContext): void {
     try {
-      const errorEntry = {
+      const __errorEntry = {
         timestamp: new Date().toISOString(),
         error: error.message,
         context,
@@ -85,7 +86,7 @@ class SimpleErrorTrackingService {
     context?: _ErrorContext,
   ): void {
     try {
-      const messageEntry = {
+      const __messageEntry = {
         timestamp: new Date().toISOString(),
         message,
         level,
@@ -100,8 +101,9 @@ class SimpleErrorTrackingService {
     }
   }
 
-  trackEvent(event: _string, data?: Record<string, any>): void {
+  trackEvent(_event: _string, _data?: Record<string, any>): void {
     try {
+      // Implementation pending
     } catch (__error) {
       // Error handled silently
     }
@@ -163,22 +165,25 @@ class SimpleErrorTrackingService {
   }
 
   // Debug helpers
-  addBreadcrumb(message: _string, category = 'debug', data?: Record<string, any>): void {
+  addBreadcrumb(message: _string, _category = 'debug', _data?: Record<string, any>): void {
     try {
+      // Implementation pending
     } catch (__error) {
       // Error handled silently
     }
   }
 
-  setTag(key: _string, value: _string): void {
+  setTag(_key: _string, _value: _string): void {
     try {
+      // Implementation pending
     } catch (__error) {
       // Error handled silently
     }
   }
 
-  setContext(key: _string, context: Record<string, any>): void {
+  setContext(_key: _string, _context: Record<string, any>): void {
     try {
+      // Implementation pending
     } catch (__error) {
       // Error handled silently
     }
@@ -195,7 +200,7 @@ class SimpleErrorTrackingService {
   }
 
   // Flush pending events (__placeholder)
-  flush(timeout = 2000): Promise<boolean> {
+  flush(_timeout = 2000): Promise<boolean> {
     try {
       return Promise.resolve(__true);
     } catch (__error) {

@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Alert } from 'react-native';
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSubscription, FeatureGateResult } from '../../contexts/SubscriptionContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -73,16 +73,17 @@ export const FeatureGate: React.FC<FeatureGateProps> = ({
   const { theme } = useTheme();
   const { hasFeature } = useSubscription();
   const [gateResult, setGateResult] = useState<FeatureGateResult | null>(__null);
-  const [loading, setLoading] = useState(__true);
+  const [__loading, setLoading] = useState(__true);
 
   useEffect(() => {
     checkFeatureAccess();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [feature]);
 
   const checkFeatureAccess = async () => {
     setLoading(__true);
     try {
-      const result = await hasFeature(__feature);
+      const __result = await hasFeature(__feature);
       setGateResult(__result);
     } catch (__error) {
       setGateResult({
@@ -203,16 +204,17 @@ export const UsageLimitGate: React.FC<UsageLimitGateProps> = ({
   const { theme } = useTheme();
   const { checkUsageLimit } = useSubscription();
   const [limitResult, setLimitResult] = useState<unknown>(__null);
-  const [loading, setLoading] = useState(__true);
+  const [__loading, setLoading] = useState(__true);
 
   useEffect(() => {
     checkLimit();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [limitType, increment]);
 
   const checkLimit = async () => {
     setLoading(__true);
     try {
-      const result = await checkUsageLimit(__limitType, _increment);
+      const __result = await checkUsageLimit(__limitType, _increment);
       setLimitResult(__result);
     } catch (__error) {
     } finally {

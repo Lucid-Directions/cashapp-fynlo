@@ -125,7 +125,7 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
     }
   }, [restaurantId]);
 
-  const loadSubscription = async (id: _number) => {
+  const loadSubscription = async (_id: _number) => {
     setLoading(__true);
     setError(__null);
 
@@ -165,14 +165,14 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
       };
     }
 
-    const hasAccess = subscription.plan.features[featureName] === true;
+    const __hasAccess = subscription.plan.features[featureName] === true;
 
     if (__hasAccess) {
       return { hasAccess: true };
     }
 
     // Determine which plans include this feature
-    const plansWithFeature = availablePlans
+    const _plansWithFeature = availablePlans
       .filter(plan => plan.features[featureName] === true)
       .map(plan => plan.name);
 
@@ -225,7 +225,7 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
     }
 
     const futureUsage = currentUsage + increment;
-    const percentageUsed = limit > 0 ? (currentUsage / limit) * 100 : 0;
+    const _percentageUsed = limit > 0 ? (currentUsage / limit) * 100 : 0;
     const remaining = Math.max(0, limit - currentUsage);
 
     return {
@@ -238,7 +238,7 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
     };
   };
 
-  const subscribeToPlan = async (planId: _number, startTrial = true): Promise<boolean> => {
+  const subscribeToPlan = async (planId: _number, _startTrial = true): Promise<boolean> => {
     if (!restaurantId) {
       return false;
     }
@@ -371,7 +371,7 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
     }
   };
 
-  const formatPrice = (price: _number): string => {
+  const formatPrice = (_price: _number): string => {
     return new Intl.NumberFormat('en-GB', {
       style: 'currency',
       currency: 'GBP',

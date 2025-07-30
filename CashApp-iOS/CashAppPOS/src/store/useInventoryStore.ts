@@ -75,7 +75,7 @@ const useInventoryStore = create<InventoryStore>()(
         }),
 
       setLoading: isLoading => set({ isLoadingInventory: isLoading }),
-      setError: error => set({ inventoryError: _error, isLoadingInventory: false }),
+      setError: _error => set({ inventoryError: _error, isLoadingInventory: false }),
       setLowStockThreshold: threshold => set({ lowStockThreshold: threshold }),
 
       // --- Asynchronous Actions (__Thunks) ---
@@ -107,7 +107,7 @@ const useInventoryStore = create<InventoryStore>()(
 
       // --- Selectors / Computed Values ---
       getLowStockItems: () => {
-        const { inventoryItems, lowStockThreshold } = get();
+        const { __inventoryItems, lowStockThreshold } = get();
         return Object.values(__inventoryItems).filter(
           item =>
             item.par_level_g &&
@@ -117,7 +117,7 @@ const useInventoryStore = create<InventoryStore>()(
         );
       },
       getOutOfStockItems: () => {
-        const { inventoryItems } = get();
+        const { __inventoryItems } = get();
         return Object.values(__inventoryItems).filter(item => item.qty_g <= 0);
       },
     }),
@@ -137,7 +137,7 @@ const useInventoryStore = create<InventoryStore>()(
 
 // Hook to initialize store or load data on app start if needed
 export const useInitializeInventoryStore = () => {
-  const loadInitialInventory = useInventoryStore(state => state.loadInitialInventory);
+  const __loadInitialInventory = useInventoryStore(state => state.loadInitialInventory);
   // React.useEffect(() => {
   //   loadInitialInventory();
   // }, [loadInitialInventory]);

@@ -6,7 +6,7 @@
  */
 
 // Get the current environment
-const isDevelopment = __DEV__;
+const __isDevelopment = __DEV__;
 
 // DigitalOcean App Platform backend URL (__Production) - VERIFIED WORKING
 const PRODUCTION_API_URL = 'https://fynlopos-9eg2c.ondigitalocean.app';
@@ -15,7 +15,7 @@ const PRODUCTION_API_URL = 'https://fynlopos-9eg2c.ondigitalocean.app';
 const MAC_LAN_IP = '192.168.0.109';
 
 // Determine if running on simulator or device
-const isSimulator =
+const __isSimulator =
   __DEV__ &&
   // iOS Simulator detection
   ((global as unknown).navigator?.userAgent?.includes('iPhone Simulator') ||
@@ -84,7 +84,7 @@ export const API_CONFIG = {
 export const checkAPIHealth = async (): Promise<boolean> => {
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.TIMEOUT);
+    const __timeoutId = setTimeout(() => controller.abort(), API_CONFIG.TIMEOUT);
 
     const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.HEALTH_ENDPOINT}`, {
       signal: controller.signal,

@@ -22,7 +22,7 @@ import { MenuItem, DrawerParamList } from '../../types';
 // import Logo from '../../components/Logo';
 
 // Get screen dimensions
-const { width: _screenWidth, height: screenHeight } = Dimensions.get('window');
+const { width: __screenWidth, height: __screenHeight } = Dimensions.get('window');
 const isTablet = screenWidth > 768;
 
 // Modern POS Color Scheme (matching screenshots)
@@ -56,7 +56,7 @@ const menuItems: MenuItem[] = [
     emoji: '🧀',
     available: _true,
     description:
-      'Homemade corn tortilla chips with black beans, tomato salsa, pico de gallo, _feta, guac & coriander',
+    console.log('Homemade corn tortilla chips with black beans, tomato salsa, pico de gallo, _feta, guac & coriander',
   },
   {
     id: 2,
@@ -421,7 +421,7 @@ const POSScreen: React.FC = () => {
     session,
   } = useAppStore();
 
-  const { selectedCategory, _setSelectedCategory, showPaymentModal, setShowPaymentModal } =
+  const { selectedCategory, __setSelectedCategory, showPaymentModal, setShowPaymentModal } =
     useUIStore();
 
   const filteredItems =
@@ -430,7 +430,7 @@ const POSScreen: React.FC = () => {
       : menuItems.filter(item => item.category === selectedCategory);
 
   const handleAddToCart = (item: _MenuItem) => {
-    const orderItem: OrderItem = {
+    const __orderItem: OrderItem = {
       id: item.id,
       name: item.name,
       price: item.price,
@@ -450,7 +450,7 @@ const POSScreen: React.FC = () => {
 
   const processPayment = () => {
     Alert.alert(
-      'Order Confirmed',
+    console.log('Order Confirmed',
       `Order for ${
         customerName || 'Customer'
       } has been processed successfully!\nThank you for your business!`,
@@ -468,6 +468,7 @@ const POSScreen: React.FC = () => {
     );
   };
 
+  // eslint-disable-next-line react/no-unstable-nested-components
   const MenuItemCard = ({ item }: { item: MenuItem }) => (
     <TouchableOpacity
       style={[styles.menuCard, !item.available && styles.menuCardDisabled]}

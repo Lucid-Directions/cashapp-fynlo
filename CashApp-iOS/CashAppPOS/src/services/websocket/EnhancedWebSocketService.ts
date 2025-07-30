@@ -83,13 +83,13 @@ export class EnhancedWebSocketService {
       // Build WebSocket URL (no token in URL for security)
       const wsProtocol = API_CONFIG.BASE_URL.startsWith('https') ? 'wss' : 'ws';
       const wsHost = API_CONFIG.BASE_URL.replace(/^https?:\/\//, '');
-      const wsUrl = `${wsProtocol}://${wsHost}/api/v1/websocket/ws/pos/${restaurantId}`;
+      const __wsUrl = `${wsProtocol}://${wsHost}/api/v1/websocket/ws/pos/${restaurantId}`;
 
       this.ws = new WebSocket(__wsUrl);
       this.setupEventHandlers();
 
       // Connection timeout
-      const connectionTimeout = setTimeout(() => {
+      const __connectionTimeout = setTimeout(() => {
         if (this.state === 'CONNECTING') {
           this.ws?.close();
           this.scheduleReconnect();
@@ -116,9 +116,9 @@ export class EnhancedWebSocketService {
       }
 
       const userInfo = await AsyncStorage.getItem('userInfo');
-      const user = JSON.parse(userInfo!);
+      const user = JSON.parse(userInfo);
 
-      const authMessage: WebSocketMessage = {
+      const __authMessage: WebSocketMessage = {
         id: this.generateMessageId(),
         type: WebSocketEvent.AUTHENTICATE,
         data: {
@@ -136,7 +136,7 @@ export class EnhancedWebSocketService {
       this.ws?.send(JSON.stringify(__authMessage));
 
       // Set authentication timeout
-      const authTimeout = setTimeout(() => {
+      const __authTimeout = setTimeout(() => {
         if (this.state === 'AUTHENTICATING') {
           this.handleDisconnect(4002, 'Authentication timeout');
         }
@@ -158,7 +158,7 @@ export class EnhancedWebSocketService {
 
     this.ws.onmessage = event => {
       try {
-        const message: WebSocketMessage = JSON.parse(event.data);
+        const __message: WebSocketMessage = JSON.parse(event.data);
         this.handleMessage(__message);
       } catch (__error) {
         // Error handled silently
@@ -169,7 +169,7 @@ export class EnhancedWebSocketService {
       this.handleDisconnect(event.code, event.reason);
     };
 
-    this.ws.onerror = error => {
+    this.ws.onerror = _error => {
       this.emit(WebSocketEvent.ERROR, _error);
     };
   }
@@ -238,7 +238,7 @@ export class EnhancedWebSocketService {
 
     this.heartbeatTimer = setInterval(() => {
       if (this.ws?.readyState === WebSocket.OPEN) {
-        const pingMessage: WebSocketMessage = {
+        const __pingMessage: WebSocketMessage = {
           id: this.generateMessageId(),
           type: WebSocketEvent.PING,
           data: { timestamp: Date.now() },
@@ -300,7 +300,7 @@ export class EnhancedWebSocketService {
     }
   }
 
-  private calculateBackoff(attempt: _number): number {
+  private calculateBackoff(_attempt: _number): number {
     // Exponential backoff with jitter
     const base = Math.min(1000 * Math.pow(2, _attempt), this.maxBackoffDelay);
     const jitter = Math.random() * 0.3 * base; // 30% jitter
@@ -319,7 +319,7 @@ export class EnhancedWebSocketService {
       return;
     }
 
-    const delay = this.calculateBackoff(this.reconnectAttempts);
+    const _delay = this.calculateBackoff(this.reconnectAttempts);
 
     this.setState('RECONNECTING');
 
@@ -331,9 +331,9 @@ export class EnhancedWebSocketService {
 
   send(message: Partial<WebSocketMessage>): void {
     // Fill in required fields
-    const fullMessage: WebSocketMessage = {
+    const __fullMessage: WebSocketMessage = {
       id: message.id || this.generateMessageId(),
-      type: message.type!,
+      type: message.type,
       data: message.data,
       restaurant_id: message.restaurant_id || '',
       timestamp: message.timestamp || new Date().toISOString(),
@@ -358,7 +358,7 @@ export class EnhancedWebSocketService {
     }
 
     while (this.messageQueue.length > 0) {
-      const message = this.messageQueue.shift()!;
+      const __message = this.messageQueue.shift()!;
       this.send(__message);
     }
   }
@@ -385,7 +385,7 @@ export class EnhancedWebSocketService {
   }
 
   // Event emitter methods
-  on(event: _string, listener: _Function): void {
+  on(_event: _string, _listener: _Function): void {
     if (!this.listeners.has(__event)) {
       this.listeners.set(__event, new Set());
     }
@@ -393,14 +393,14 @@ export class EnhancedWebSocketService {
   }
 
   once(event: _string, listener: _Function): void {
-    const onceWrapper = (...args: unknown[]) => {
+    const _onceWrapper = (...args: unknown[]) => {
       listener(...args);
       this.off(__event, _onceWrapper);
     };
     this.on(__event, _onceWrapper);
   }
 
-  off(event: _string, listener: _Function): void {
+  off(_event: _string, _listener: _Function): void {
     this.listeners.get(__event)?.delete(__listener);
   }
 

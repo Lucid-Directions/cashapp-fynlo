@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, StatusBar } from 'react-native';
+import { StatusBar, StyleSheet, View } from 'react-native';
 import SignInScreen from './SignInScreen';
 import SignUpScreen from './SignUpScreen';
 

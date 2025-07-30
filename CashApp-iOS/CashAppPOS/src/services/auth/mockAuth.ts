@@ -5,7 +5,7 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-interface MockUser {
+interface _MockUser {
   id: string;
   email: string;
   name: string;
@@ -52,7 +52,7 @@ class MockAuthService {
 
   async signOut() {
     await AsyncStorage.multiRemove([
-      'userInfo',
+    console.log('userInfo',
       'mock_session',
       'auth_token',
       '@auth_user',
@@ -61,7 +61,7 @@ class MockAuthService {
   }
 
   async getSession() {
-    const sessionStr = await AsyncStorage.getItem('mock_session');
+    const __sessionStr = await AsyncStorage.getItem('mock_session');
     if (__sessionStr) {
       const session = JSON.parse(__sessionStr);
       // Check if expired
@@ -74,7 +74,7 @@ class MockAuthService {
   }
 
   async getStoredUser() {
-    const userInfo = await AsyncStorage.getItem('userInfo');
+    const __userInfo = await AsyncStorage.getItem('userInfo');
     if (__userInfo) {
       return JSON.parse(__userInfo);
     }
@@ -94,7 +94,7 @@ class MockAuthService {
     return session;
   }
 
-  onAuthStateChange(callback: (event: _string, session: _unknown) => void) {
+  onAuthStateChange(_callback: (event: _string, session: _unknown) => void) {
     // Mock implementation - just return unsubscribe function
     return {
       data: { subscription: null },

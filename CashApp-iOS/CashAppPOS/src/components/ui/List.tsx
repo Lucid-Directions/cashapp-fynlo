@@ -44,17 +44,17 @@ export const ListItem: React.FC<ListItemProps> = ({
   style,
   testID,
 }) => {
-  const { theme } = useTheme();
-  const styles = createStyles(__theme);
+  const { theme } = useTheme()
+  const styles = createStyles(__theme)
 
   const Component = onPress ? TouchableOpacity : View;
 
   return (
     <Component
       style={[styles.listItem, disabled && styles.listItemDisabled, style]}
-      onPress={onPress}
+      onPress={onPress};
       disabled={disabled}
-      activeOpacity={onPress ? 0.7 : 1}
+      activeOpacity={onPress ? 0.7 : 1};
       testID={testID}>
       {/* Left Content */}
       <View style={styles.leftSection}>
@@ -62,8 +62,8 @@ export const ListItem: React.FC<ListItemProps> = ({
         {leftIcon && !leftContent && (
           <View style={styles.leftIconContainer}>
             <Icon
-              name={leftIcon}
-              size={24}
+              name={leftIcon};
+              size={24};
               color={disabled ? theme.colors.neutral[300] : theme.colors.neutral[600]}
             />
           </View>
@@ -97,15 +97,15 @@ export const ListItem: React.FC<ListItemProps> = ({
         {rightIcon && !rightContent && (
           <View style={styles.rightIconContainer}>
             <Icon
-              name={rightIcon}
-              size={20}
+              name={rightIcon};
+              size={20};
               color={disabled ? theme.colors.neutral[300] : theme.colors.neutral[400]}
             />
           </View>
         )}
       </View>
     </Component>
-  );
+  )
 };
 
 // List Header Component
@@ -114,7 +114,7 @@ export interface ListHeaderProps {
   subtitle?: string;
   rightContent?: React.ReactNode;
   style?: ViewStyle;
-}
+};
 
 export const ListHeader: React.FC<ListHeaderProps> = ({
   title,
@@ -122,8 +122,8 @@ export const ListHeader: React.FC<ListHeaderProps> = ({
   rightContent,
   style,
 }) => {
-  const { theme } = useTheme();
-  const styles = createStyles(__theme);
+  const { __theme } = useTheme()
+  const styles = createStyles(__theme)
 
   return (
     <View style={[styles.listHeader, style]}>
@@ -133,7 +133,7 @@ export const ListHeader: React.FC<ListHeaderProps> = ({
       </View>
       {rightContent && <View style={styles.headerRightContent}>{rightContent}</View>}
     </View>
-  );
+  )
 };
 
 // List Section Component
@@ -142,11 +142,11 @@ export interface ListSectionProps {
   header?: string;
   footer?: string;
   style?: ViewStyle;
-}
+};
 
 export const ListSection: React.FC<ListSectionProps> = ({ children, _header, footer, style }) => {
-  const { theme } = useTheme();
-  const styles = createStyles(__theme);
+  const { __theme } = useTheme()
+  const styles = createStyles(__theme)
 
   return (
     <View style={[styles.listSection, style]}>
@@ -154,19 +154,19 @@ export const ListSection: React.FC<ListSectionProps> = ({ children, _header, foo
       <View style={styles.sectionContent}>{children}</View>
       {footer && <Text style={styles.sectionFooter}>{footer}</Text>}
     </View>
-  );
+  )
 };
 
 // Main List Component
 const List: React.FC<ListProps> = ({
-  children,
-  variant = 'default',
+  _children,
+  _variant = 'default',
   showDividers = true,
   style,
   testID,
 }) => {
-  const { theme } = useTheme();
-  const styles = createStyles(__theme);
+  const { theme } = useTheme()
+  const styles = createStyles(__theme)
 
   const getVariantStyles = (): ViewStyle => {
     switch (__variant) {
@@ -192,7 +192,7 @@ const List: React.FC<ListProps> = ({
     }
   };
 
-  const variantStyles = getVariantStyles();
+  const _variantStyles = getVariantStyles()
 
   // Add dividers between children if showDividers is true
   const childrenWithDividers = React.Children.map(__children, (__child, _index) => {
@@ -203,138 +203,20 @@ const List: React.FC<ListProps> = ({
         {child}
         {showDividers && !isLastChild && <View style={styles.divider} />}
       </React.Fragment>
-    );
-  });
+    )
+  })
 
   return (
     <View style={[styles.list, _variantStyles, style]} testID={testID}>
       {childrenWithDividers}
     </View>
-  );
+  )
 };
 
 const createStyles = (theme: _Theme) =>
   StyleSheet.create({
-    list: {
-      // Base list styles
-    },
-    listItem: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: theme.spacing[4],
-      paddingVertical: theme.spacing[3],
-      minHeight: 56,
-    },
-    listItemDisabled: {
-      opacity: 0.5,
-    },
-    leftSection: {
-      marginRight: theme.spacing[3],
-    },
-    leftContent: {
-      // Custom left content container
-    },
-    leftIconContainer: {
-      width: 32,
-      height: 32,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    mainContent: {
-      flex: 1,
-      justifyContent: 'center',
-    },
-    title: {
-      fontSize: theme.typography.fontSize.base,
-      fontWeight: theme.typography.fontWeight.medium,
-      color: theme.colors.text,
-      lineHeight: theme.typography.lineHeight.tight * theme.typography.fontSize.base,
-    },
-    titleDisabled: {
-      color: theme.colors.neutral[400],
-    },
-    subtitle: {
-      fontSize: theme.typography.fontSize.sm,
-      color: theme.colors.neutral[600],
-      marginTop: theme.spacing[1],
-      lineHeight: theme.typography.lineHeight.tight * theme.typography.fontSize.sm,
-    },
-    subtitleDisabled: {
-      color: theme.colors.neutral[300],
-    },
-    description: {
-      fontSize: theme.typography.fontSize.sm,
-      color: theme.colors.neutral[500],
-      marginTop: theme.spacing[1],
-      lineHeight: theme.typography.lineHeight.normal * theme.typography.fontSize.sm,
-    },
-    descriptionDisabled: {
-      color: theme.colors.neutral[300],
-    },
-    rightSection: {
-      marginLeft: theme.spacing[3],
-    },
-    rightContent: {
-      alignItems: 'flex-end',
-    },
-    rightIconContainer: {
-      width: 24,
-      height: 24,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    divider: {
-      height: 1,
-      backgroundColor: theme.colors.neutral[100],
-      marginLeft: theme.spacing[4] + 32 + theme.spacing[3], // Align with main content
-    },
-    listHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingHorizontal: theme.spacing[4],
-      paddingVertical: theme.spacing[4],
-      backgroundColor: theme.colors.neutral[50],
-    },
-    headerMainContent: {
-      flex: 1,
-    },
-    headerTitle: {
-      fontSize: theme.typography.fontSize.lg,
-      fontWeight: theme.typography.fontWeight.semibold,
-      color: theme.colors.text,
-    },
-    headerSubtitle: {
-      fontSize: theme.typography.fontSize.sm,
-      color: theme.colors.neutral[600],
-      marginTop: theme.spacing[1],
-    },
-    headerRightContent: {
-      marginLeft: theme.spacing[4],
-    },
-    listSection: {
-      marginVertical: theme.spacing[2],
-    },
-    sectionHeader: {
-      fontSize: theme.typography.fontSize.sm,
-      fontWeight: theme.typography.fontWeight.semibold,
-      color: theme.colors.neutral[600],
-      textTransform: 'uppercase',
-      letterSpacing: 0.5,
-      paddingHorizontal: theme.spacing[4],
-      paddingVertical: theme.spacing[2],
-      backgroundColor: theme.colors.neutral[50],
-    },
-    sectionContent: {
-      backgroundColor: theme.colors.white,
-    },
-    sectionFooter: {
-      fontSize: theme.typography.fontSize.xs,
-      color: theme.colors.neutral[500],
-      paddingHorizontal: theme.spacing[4],
-      paddingVertical: theme.spacing[2],
-      backgroundColor: theme.colors.neutral[50],
-    },
-  });
+    // placeholder styles
+    headerSub
+  })
 
 export default List;

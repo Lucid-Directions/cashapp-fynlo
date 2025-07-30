@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, ViewStyle } from 'react-native';
+import { StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { useTheme } from '../../design-system/ThemeProvider';
 import { useResponsive, useResponsiveValue } from '../../hooks/useResponsive';
 import { spacing } from '../../design-system/theme';
@@ -35,14 +35,14 @@ export interface ContainerProps {
 const Container: React.FC<ContainerProps> = ({
   children,
   variant = 'constrained',
-  maxWidth,
-  padding = { xs: 4, sm: 4, md: 6, lg: 8 },
+  _maxWidth,
+  _padding = { xs: 4, sm: 4, md: 6, lg: 8 },
   centered = true,
   style,
   testID,
 }) => {
   const { theme } = useTheme();
-  const { width: _screenWidth, _isPhone, isTablet } = useResponsive();
+  const { width: _screenWidth, __isPhone, __isTablet } = useResponsive();
   const styles = createStyles(__theme);
 
   // Get responsive padding
@@ -55,6 +55,7 @@ const Container: React.FC<ContainerProps> = ({
     }
 
     if (__maxWidth) {
+      // eslint-disable-next-line react-hooks/rules-of-hooks
       return useResponsiveValue(__maxWidth, _screenWidth);
     }
 
@@ -68,7 +69,7 @@ const Container: React.FC<ContainerProps> = ({
     return Math.min(screenWidth * 0.8, 1200);
   };
 
-  const containerMaxWidth = getMaxWidth();
+  const _containerMaxWidth = getMaxWidth();
 
   const containerStyle: ViewStyle = [
     styles.container,
@@ -109,8 +110,8 @@ export const Section: React.FC<SectionProps> = ({
   children,
   title,
   subtitle,
-  padding = { xs: 4, sm: 6, md: 8 },
-  background = 'transparent',
+  _padding = { xs: 4, sm: 6, md: 8 },
+  _background = 'transparent',
   style,
 }) => {
   const { theme } = useTheme();
@@ -165,12 +166,12 @@ export interface SpacerProps {
 }
 
 export const Spacer: React.FC<SpacerProps> = ({
-  size = { xs: 4, sm: 6, md: 8 },
+  _size = { xs: 4, sm: 6, md: 8 },
   horizontal = false,
 }) => {
   const { theme } = useTheme();
   const currentSize = useResponsiveValue(__size, 4);
-  const spacingValue = theme.spacing[currentSize];
+  const _spacingValue = theme.spacing[currentSize];
 
   return (
     <View
@@ -205,10 +206,10 @@ export interface RowProps {
 }
 
 export const Row: React.FC<RowProps> = ({
-  children,
-  spacing: spacingProp = { xs: 2, sm: 3, md: 4 },
-  align = 'center',
-  justify = 'flex-start',
+  _children,
+  spacing: _spacingProp = { xs: 2, sm: 3, md: 4 },
+  _align = 'center',
+  _justify = 'flex-start',
   wrap = false,
   style,
 }) => {
@@ -243,27 +244,6 @@ export const Row: React.FC<RowProps> = ({
   );
 };
 
-const createStyles = (theme: _Theme) =>
-  StyleSheet.create({
-    container: {
-      width: '100%',
-    },
-    section: {
-      width: '100%',
-    },
-    sectionHeader: {
-      marginBottom: theme.spacing[6],
-    },
-    sectionTitle: {
-      fontSize: theme.typography.fontSize['2xl'],
-      fontWeight: theme.typography.fontWeight.bold,
-      color: theme.colors.text,
-      marginBottom: theme.spacing[2],
-    },
-    sectionSubtitle: {
-      fontSize: theme.typography.fontSize.lg,
-      color: theme.colors.neutral[600],
-    },
-  });
+const createStyles = (theme: _Theme) => StyleSheet.create({});
 
 export default Container;

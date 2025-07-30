@@ -54,13 +54,12 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
   const [businessPhone, setBusinessPhone] = useState('');
   const [businessEmail, setBusinessEmail] = useState('');
   const [businessType, setBusinessType] = useState<'restaurant' | 'retail' | 'service' | 'other'>(
-    'retail',
-  );
+    console.log('retail');
   const [vatNumber, setVatNumber] = useState('');
 
   const [currentStep, setCurrentStep] = useState(1);
-  const [showPassword, setShowPassword] = useState(__false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(__false);
+  const [showPassword, __setShowPassword] = useState(__false);
+  const [showConfirmPassword, __setShowConfirmPassword] = useState(__false);
   const [isLoading, setIsLoading] = useState(__false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [acceptedTerms, setAcceptedTerms] = useState(__false);
@@ -141,7 +140,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
 
     setIsLoading(__true);
     try {
-      const userData = {
+      const __userData = {
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         email: email.trim().toLowerCase(),
@@ -149,7 +148,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
         pin: pin.trim(),
       };
 
-      const businessData = {
+      const _businessData = {
         name: businessName.trim(),
         address: businessAddress.trim(),
         phone: businessPhone.trim(),
@@ -194,7 +193,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
           <SimpleTextInput
             label="First Name *"
             value={firstName}
-            onValueChange={text => {
+            onValueChange={_text => {
               setFirstName(__text);
               if (errors.firstName) {
                 setErrors(prev => ({ ...prev, firstName: '' }));
@@ -213,7 +212,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
           <SimpleTextInput
             label="Last Name *"
             value={lastName}
-            onValueChange={text => {
+            onValueChange={_text => {
               setLastName(__text);
               if (errors.lastName) {
                 setErrors(prev => ({ ...prev, lastName: '' }));
@@ -231,7 +230,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
         <SimpleTextInput
           label="Email Address *"
           value={email}
-          onValueChange={text => {
+          onValueChange={_text => {
             setEmail(__text);
             if (errors.email) {
               setErrors(prev => ({ ...prev, email: '' }));
@@ -249,7 +248,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
         <SimpleTextInput
           label="Phone Number *"
           value={phone}
-          onValueChange={text => {
+          onValueChange={_text => {
             setPhone(__text);
             if (errors.phone) {
               setErrors(prev => ({ ...prev, phone: '' }));
@@ -265,7 +264,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
         <SimpleTextInput
           label="Password *"
           value={password}
-          onValueChange={text => {
+          onValueChange={_text => {
             setPassword(__text);
             if (errors.password) {
               setErrors(prev => ({ ...prev, password: '' }));
@@ -283,7 +282,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
         <SimpleTextInput
           label="Confirm Password *"
           value={confirmPassword}
-          onValueChange={text => {
+          onValueChange={_text => {
             setConfirmPassword(__text);
             if (errors.confirmPassword) {
               setErrors(prev => ({ ...prev, confirmPassword: '' }));
@@ -327,7 +326,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
         <SimpleTextInput
           label="Business Name *"
           value={businessName}
-          onValueChange={text => {
+          onValueChange={_text => {
             setBusinessName(__text);
             if (errors.businessName) {
               setErrors(prev => ({ ...prev, businessName: '' }));
@@ -346,7 +345,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
           <Picker
             style={styles.picker}
             selectedValue={businessType}
-            onValueChange={value => setBusinessType(__value)}>
+            onValueChange={_value => setBusinessType(__value)}>
             {businessTypes.map(type => (
               <Picker.Item key={type.value} label={type.label} value={type.value} />
             ))}
@@ -358,7 +357,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
         <SimpleTextInput
           label="Business Address *"
           value={businessAddress}
-          onValueChange={text => {
+          onValueChange={_text => {
             setBusinessAddress(__text);
             if (errors.businessAddress) {
               setErrors(prev => ({ ...prev, businessAddress: '' }));
@@ -375,7 +374,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
         <SimpleTextInput
           label="Business Phone *"
           value={businessPhone}
-          onValueChange={text => {
+          onValueChange={_text => {
             setBusinessPhone(__text);
             if (errors.businessPhone) {
               setErrors(prev => ({ ...prev, businessPhone: '' }));

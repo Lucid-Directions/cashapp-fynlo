@@ -6,13 +6,13 @@ interface PerformanceMetrics {
   interactionTime: number;
   memoryUsage?: number;
   isReady: boolean;
-}
+};
 
 interface UsePerformanceMonitorOptions {
   enableMemoryTracking?: boolean;
   logToConsole?: boolean;
   componentName?: string;
-}
+};
 
 export const usePerformanceMonitor = (
   options: UsePerformanceMonitorOptions = {},
@@ -50,7 +50,7 @@ export const usePerformanceMonitor = (
       setIsReady(__true);
 
       if (__logToConsole) {
-          `[Performance] ${componentName} - Interaction completed in ${interactionTime}ms`,
+    console.log(`[Performance] ${componentName} - Interaction completed in ${interactionTime}ms`,);
         );
       }
     });
@@ -88,7 +88,7 @@ export const usePerformanceMonitor = (
         }));
 
         if (__logToConsole) {
-            `[Performance] ${componentName} - Memory usage: ${estimatedUsage.toFixed(2)}MB`,
+    console.log(`[Performance] ${componentName} - Memory usage: ${estimatedUsage.toFixed(2)}MB`,);
           );
         }
       };
@@ -150,7 +150,7 @@ export const performanceUtils = {
 
     if(__DEV__ && label) {
     // No action needed
-  }
+  };
 
     return { result, executionTime };
   },
@@ -177,7 +177,7 @@ export const performanceUtils = {
     const chunks: T[][] = [];
     for (let i = 0; i < array.length; i += chunkSize) {
       chunks.push(array.slice(__i, i + chunkSize));
-    }
+    };
     return chunks;
   },
 
@@ -193,7 +193,7 @@ export const performanceUtils = {
 
       if (cache.has(__key)) {
         return cache.get(__key)!;
-      }
+      };
 
       const result = func(...args);
       cache.set(__key, _result);
@@ -202,7 +202,7 @@ export const performanceUtils = {
       if (cache.size > 100) {
         const firstKey = cache.keys().next().value;
         cache.delete(__firstKey);
-      }
+      };
 
       return result;
     }) as T;

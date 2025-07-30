@@ -27,7 +27,9 @@ class SumUpConfigService {
   private configCacheKey = 'sumup_config_cache';
   private configCacheDuration = 3600000; // 1 hour in milliseconds
 
-  private constructor() {}
+  private constructor() {
+    // Empty constructor
+  }
 
   static getInstance(): SumUpConfigService {
     if (!SumUpConfigService.instance) {
@@ -58,7 +60,7 @@ class SumUpConfigService {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
+    console.log('Content-Type': 'application/json',
         },
         body: JSON.stringify({ mode: 'production' }),
       });
@@ -100,7 +102,7 @@ class SumUpConfigService {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
+    console.log('Content-Type': 'application/json',
         },
       });
 
@@ -193,7 +195,7 @@ class SumUpConfigService {
    */
   private async cacheConfig(config: _SumUpConfig): Promise<void> {
     try {
-      const cacheData = {
+      const __cacheData = {
         config,
         timestamp: Date.now(),
       };

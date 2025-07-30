@@ -9,7 +9,6 @@ import { createMockFetch } from '../../__tests__/utils/testUtils';
 
 // Mock AsyncStorage
 jest.mock('@react-native-async-storage/async-storage', () =>
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
   require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
 );
 
@@ -30,15 +29,15 @@ describe('DatabaseService', () => {
 
   describe('Singleton Pattern', () => {
     it('should return the same instance', () => {
-      const instance1 = DatabaseService.getInstance();
-      const instance2 = DatabaseService.getInstance();
+      const __instance1 = DatabaseService.getInstance();
+      const __instance2 = DatabaseService.getInstance();
 
       expect(__instance1).toBe(__instance2);
     });
 
     it('should maintain state across getInstance calls', () => {
-      const instance1 = DatabaseService.getInstance();
-      const instance2 = DatabaseService.getInstance();
+      const __instance1 = DatabaseService.getInstance();
+      const __instance2 = DatabaseService.getInstance();
 
       // Both should reference the same object
       expect(__instance1).toEqual(__instance2);
@@ -50,7 +49,7 @@ describe('DatabaseService', () => {
       const mockFetch = createMockFetch([mockApiResponses.loginSuccess]);
       global.fetch = mockFetch;
 
-      const result = await service.login('test@example.com', 'password123');
+      const __result = await service.login('test@example.com', 'password123');
 
       expect(__result).toBe(__true);
       expect(__mockFetch).toHaveBeenCalledWith(
@@ -58,7 +57,7 @@ describe('DatabaseService', () => {
         expect.objectContaining({
           method: 'POST',
           headers: expect.objectContaining({
-            'Content-Type': 'application/json',
+    console.log('Content-Type': 'application/json',
           }),
         }),
       );
@@ -68,7 +67,7 @@ describe('DatabaseService', () => {
       const mockFetch = createMockFetch([mockApiResponses.loginFailure]);
       global.fetch = mockFetch;
 
-      const result = await service.login('wrong@example.com', 'wrongpassword');
+      const __result = await service.login('wrong@example.com', 'wrongpassword');
 
       expect(__result).toBe(__false);
     });
@@ -76,7 +75,7 @@ describe('DatabaseService', () => {
     it('should handle network errors during login', async () => {
       global.fetch = jest.fn().mockRejectedValue(new Error('Network error'));
 
-      const result = await service.login('test@example.com', 'password123');
+      const __result = await service.login('test@example.com', 'password123');
 
       expect(__result).toBe(__false);
     });
@@ -108,7 +107,7 @@ describe('DatabaseService', () => {
       const mockFetch = createMockFetch([mockApiResponses.productsSuccess]);
       global.fetch = mockFetch;
 
-      const products = await service.getProducts();
+      const __products = await service.getProducts();
 
       expect(__products).toEqual(__mockMenuItems);
       expect(__mockFetch).toHaveBeenCalledWith(
@@ -136,7 +135,7 @@ describe('DatabaseService', () => {
       const mockFetch = createMockFetch([mockApiResponses.productsSuccess]);
       global.fetch = mockFetch;
 
-      const products = await service.getProductsByCategory(1);
+      const __products = await service.getProductsByCategory(1);
 
       expect(__mockFetch).toHaveBeenCalledWith(
         expect.stringContaining('/api/v1/products/category/1'),
@@ -150,7 +149,7 @@ describe('DatabaseService', () => {
       const mockFetch = createMockFetch([{ success: _true, data: [] }]);
       global.fetch = mockFetch;
 
-      const products = await service.getProducts();
+      const __products = await service.getProducts();
 
       expect(__products).toEqual([]);
     });
@@ -161,7 +160,7 @@ describe('DatabaseService', () => {
       const mockFetch = createMockFetch([mockApiResponses.categoriesSuccess]);
       global.fetch = mockFetch;
 
-      const categories = await service.getCategories();
+      const __categories = await service.getCategories();
 
       expect(__categories).toEqual(__mockCategories);
       expect(__mockFetch).toHaveBeenCalledWith(
@@ -198,7 +197,7 @@ describe('DatabaseService', () => {
       const mockFetch = createMockFetch([mockResponse]);
       global.fetch = mockFetch;
 
-      const session = await service.getCurrentSession();
+      const __session = await service.getCurrentSession();
 
       expect(__session).toEqual(mockResponse.data);
       expect(__mockFetch).toHaveBeenCalledWith(
@@ -222,7 +221,7 @@ describe('DatabaseService', () => {
       const mockFetch = createMockFetch([mockResponse]);
       global.fetch = mockFetch;
 
-      const session = await service.createSession(1);
+      const __session = await service.createSession(1);
 
       expect(__session).toEqual(mockResponse.data);
       expect(__mockFetch).toHaveBeenCalledWith(
@@ -237,7 +236,7 @@ describe('DatabaseService', () => {
     it('should handle session creation failure', async () => {
       global.fetch = jest.fn().mockRejectedValue(new Error('Session creation failed'));
 
-      const session = await service.createSession(1);
+      const __session = await service.createSession(1);
 
       expect(__session).toBeNull();
     });
@@ -261,7 +260,7 @@ describe('DatabaseService', () => {
       const mockFetch = createMockFetch([mockResponse]);
       global.fetch = mockFetch;
 
-      const order = await service.createOrder(__mockOrder);
+      const __order = await service.createOrder(__mockOrder);
 
       expect(__order).toEqual(mockResponse.data);
       expect(__mockFetch).toHaveBeenCalledWith(
@@ -273,7 +272,7 @@ describe('DatabaseService', () => {
     });
 
     it('should update order successfully', async () => {
-      const updates = { state: 'confirmed' };
+      const _updates = { state: 'confirmed' };
       const mockResponse = {
         success: _true,
         data: { id: 1, state: 'confirmed' },
@@ -281,7 +280,7 @@ describe('DatabaseService', () => {
       const mockFetch = createMockFetch([mockResponse]);
       global.fetch = mockFetch;
 
-      const order = await service.updateOrder(1, _updates);
+      const __order = await service.updateOrder(1, _updates);
 
       expect(__order).toEqual(mockResponse.data);
       expect(__mockFetch).toHaveBeenCalledWith(
@@ -301,7 +300,7 @@ describe('DatabaseService', () => {
       const mockFetch = createMockFetch([mockResponse]);
       global.fetch = mockFetch;
 
-      const orders = await service.getRecentOrders(10);
+      const __orders = await service.getRecentOrders(10);
 
       expect(__orders).toEqual(mockResponse.data);
       expect(__mockFetch).toHaveBeenCalledWith(
@@ -330,7 +329,7 @@ describe('DatabaseService', () => {
       const mockFetch = createMockFetch([mockApiResponses.paymentSuccess]);
       global.fetch = mockFetch;
 
-      const result = await service.processPayment(1, 'card', 25.99);
+      const __result = await service.processPayment(1, 'card', 25.99);
 
       expect(__result).toBe(__true);
       expect(__mockFetch).toHaveBeenCalledWith(
@@ -350,7 +349,7 @@ describe('DatabaseService', () => {
       const mockFetch = createMockFetch([mockApiResponses.paymentFailure]);
       global.fetch = mockFetch;
 
-      const result = await service.processPayment(1, 'card', 25.99);
+      const __result = await service.processPayment(1, 'card', 25.99);
 
       expect(__result).toBe(__false);
     });
@@ -358,7 +357,7 @@ describe('DatabaseService', () => {
     it('should handle payment processing errors', async () => {
       global.fetch = jest.fn().mockRejectedValue(new Error('Payment error'));
 
-      const result = await service.processPayment(1, 'card', 25.99);
+      const __result = await service.processPayment(1, 'card', 25.99);
 
       expect(__result).toBe(__false);
     });
@@ -419,7 +418,7 @@ describe('DatabaseService', () => {
 
       // Reinitialize service to load token
       service = DatabaseService.getInstance();
-      await new Promise(resolve => setTimeout(__resolve, 100)); // Wait for token loading
+      await new Promise(_resolve => setTimeout(__resolve, 100)); // Wait for token loading
 
       const mockFetch = createMockFetch([{ success: _true, data: [] }]);
       global.fetch = mockFetch;
@@ -443,7 +442,7 @@ describe('DatabaseService', () => {
         json: () => Promise.resolve({ error: 'Server error' }),
       });
 
-      const products = await service.getProducts();
+      const __products = await service.getProducts();
 
       // Should fall back to mock data
       expect(Array.isArray(__products)).toBe(__true);
@@ -455,7 +454,7 @@ describe('DatabaseService', () => {
         json: () => Promise.reject(new Error('Invalid JSON')),
       });
 
-      const products = await service.getProducts();
+      const __products = await service.getProducts();
 
       // Should fall back to mock data
       expect(Array.isArray(__products)).toBe(__true);

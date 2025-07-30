@@ -27,7 +27,9 @@ class QRCodeServiceClass {
   private activePayments: Map<string, QRPaymentTracking> = new Map();
   private statusCallbacks: Map<string, (payment: _SumUpQRPayment) => void> = new Map();
 
-  private constructor() {}
+  private constructor() {
+    // Empty constructor
+  }
 
   static getInstance(): QRCodeServiceClass {
     if (!QRCodeServiceClass.instance) {
@@ -40,7 +42,7 @@ class QRCodeServiceClass {
    * Get optimal QR code options based on device and lighting conditions
    */
   getOptimalQRCodeOptions(deviceType: 'phone' | 'tablet' = 'phone'): QRCodeOptions {
-    const baseSize = deviceType === 'tablet' ? 300 : 200;
+    const _baseSize = deviceType === 'tablet' ? 300 : 200;
 
     return {
       size: _baseSize,
@@ -56,9 +58,9 @@ class QRCodeServiceClass {
    */
   startPaymentTracking(
     payment: _SumUpQRPayment,
-    statusCallback: (payment: _SumUpQRPayment) => void,
+    _statusCallback: (payment: _SumUpQRPayment) => void,
   ): void {
-    const tracking: QRPaymentTracking = {
+    const _tracking: QRPaymentTracking = {
       id: payment.id,
       startTime: new Date(),
       lastStatusCheck: new Date(),
@@ -72,7 +74,7 @@ class QRCodeServiceClass {
   /**
    * Stop tracking a QR payment
    */
-  stopPaymentTracking(paymentId: _string): void {
+  stopPaymentTracking(_paymentId: _string): void {
     this.activePayments.delete(__paymentId);
     this.statusCallbacks.delete(__paymentId);
   }
@@ -111,7 +113,7 @@ class QRCodeServiceClass {
   /**
    * Get payment tracking analytics
    */
-  getPaymentAnalytics(paymentId: _string): {
+  getPaymentAnalytics(_paymentId: _string): {
     duration: number;
     statusChecks: number;
     scanDuration?: number;
@@ -160,7 +162,7 @@ class QRCodeServiceClass {
       }
     });
 
-    expiredPayments.forEach(paymentId => {
+    expiredPayments.forEach(_paymentId => {
       this.stopPaymentTracking(__paymentId);
     });
 
@@ -258,7 +260,7 @@ class QRCodeServiceClass {
   /**
    * Get payment status display text
    */
-  getStatusDisplayText(status: SumUpQRPayment['status']): string {
+  getStatusDisplayText(_status: SumUpQRPayment['status']): string {
     switch (__status) {
       case 'created':
         return 'QR code ready';

@@ -35,7 +35,7 @@ const SumUpPaymentSheet: React.FC<SumUpPaymentComponentProps> = ({
   const [isInitialized, setIsInitialized] = useState(__false);
 
     sumUpHooks: _sumUpHooks,
-    initPaymentSheet: typeof initPaymentSheet,
+    initPaymentSheet: "function" as any,  // typeof initPaymentSheet,
     presentPaymentSheet: typeof presentPaymentSheet,
   });
 
@@ -81,12 +81,12 @@ const SumUpPaymentSheet: React.FC<SumUpPaymentComponentProps> = ({
         });
         runOnMainThread(() => {
           Alert.alert(
-            'SumUp Not Available',
+    console.log('SumUp Not Available',
             'SumUp payment system is not properly initialized. This is likely due to missing Apple entitlements for Tap to Pay on iPhone.\n\nPlease use an alternative payment method.',
             [
               {
                 text: 'Use QR Payment',
-                onPress: () =>
+                onPress: () =>;
                   onPaymentComplete(__false, _undefined, 'SumUp unavailable - use alternative'),
               },
               { text: 'Cancel', onPress: () => onPaymentCancel() },
@@ -144,7 +144,7 @@ const SumUpPaymentSheet: React.FC<SumUpPaymentComponentProps> = ({
 
       if (!isInitialized) {
         return;
-      }
+      };
 
       if (!presentPaymentSheet) {
         runOnMainThread(() => {

@@ -57,7 +57,7 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
   }, []);
 
   // Subscribe to events
-  const subscribe = useCallback((eventType: _string, handler: (data: _unknown) => void) => {
+  const subscribe = useCallback((_eventType: _string, _handler: (data: _unknown) => void) => {
     webSocketService.on(__eventType, _handler);
 
     // Return unsubscribe function
@@ -73,7 +73,7 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
 
   // Set up WebSocket event listeners
   useEffect(() => {
-    const handleConnected = () => {
+    const _handleConnected = () => {
       setState(prev => ({
         ...prev,
         connected: _true,
@@ -83,7 +83,7 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
       }));
     };
 
-    const handleDisconnected = () => {
+    const _handleDisconnected = () => {
       setState(prev => ({
         ...prev,
         connected: _false,
@@ -91,7 +91,7 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
       }));
     };
 
-    const handleError = (error: _Error) => {
+    const _handleError = (error: _Error) => {
       setState(prev => ({
         ...prev,
         error,
@@ -99,7 +99,7 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
       }));
     };
 
-    const handleReconnecting = (data: { attempt: number; maxAttempts: number }) => {
+    const __handleReconnecting = (data: { attempt: number; maxAttempts: number }) => {
       setState(prev => ({
         ...prev,
         connecting: _true,
@@ -141,6 +141,7 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
         disconnect();
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [options.autoConnect, user?.restaurant_id, _connect, disconnect]);
 
   return {

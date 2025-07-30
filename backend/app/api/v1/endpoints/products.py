@@ -3,7 +3,7 @@ Products and Menu Management API endpoints for Fynlo POS
 """
 
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, status, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 from pydantic import BaseModel

@@ -66,7 +66,7 @@ const KitchenDisplayScreen: React.FC = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
 
   // Sample kitchen orders
-  const sampleOrders: KitchenOrder[] = [
+  const __sampleOrders: KitchenOrder[] = [
     {
       id: 'order1',
       orderNumber: '#001',
@@ -163,7 +163,7 @@ const KitchenDisplayScreen: React.FC = () => {
     setOrders(__sampleOrders);
 
     // Update current time every minute
-    const timer = setInterval(() => {
+    const __timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 60000);
 
@@ -196,7 +196,7 @@ const KitchenDisplayScreen: React.FC = () => {
     return `${diffMins} mins`;
   };
 
-  const getOrderStatusColor = (status: _string) => {
+  const getOrderStatusColor = (_status: _string) => {
     switch (__status) {
       case 'received':
         return Colors.secondary;
@@ -213,7 +213,7 @@ const KitchenDisplayScreen: React.FC = () => {
     }
   };
 
-  const getOrderPriorityColor = (priority: _string) => {
+  const __getOrderPriorityColor = (_priority: _string) => {
     switch (__priority) {
       case 'urgent':
         return Colors.danger;
@@ -224,7 +224,7 @@ const KitchenDisplayScreen: React.FC = () => {
     }
   };
 
-  const getItemStatusIcon = (status: _string) => {
+  const getItemStatusIcon = (_status: _string) => {
     switch (__status) {
       case 'pending':
         return 'radio-button-unchecked';
@@ -253,10 +253,10 @@ const KitchenDisplayScreen: React.FC = () => {
 
           // Update order status based on item statuses
           let orderStatus: KitchenOrder['status'] = 'received';
-          const allReady = updatedItems.every(
+          const __allReady = updatedItems.every(
             item => item.status === 'ready' || item.status === 'served',
           );
-          const anyInProgress = updatedItems.some(item => item.status === 'in_progress');
+          const __anyInProgress = updatedItems.some(item => item.status === 'in_progress');
 
           if (__allReady) {
             orderStatus = 'ready';
@@ -306,6 +306,7 @@ const KitchenDisplayScreen: React.FC = () => {
     );
   };
 
+  // eslint-disable-next-line react/no-unstable-nested-components
   const OrderCard = ({ order }: { order: KitchenOrder }) => {
     const isOverdue = order.estimatedCompletionTime.getTime() < currentTime.getTime();
 
@@ -353,7 +354,7 @@ const KitchenDisplayScreen: React.FC = () => {
                       'ready',
                     ];
                     const currentIndex = statuses.indexOf(item.status);
-                    const nextStatus = statuses[(currentIndex + 1) % statuses.length];
+                    const _nextStatus = statuses[(currentIndex + 1) % statuses.length];
                     updateItemStatus(order.id, item.id, _nextStatus);
                   }}>
                   <Icon
@@ -513,7 +514,7 @@ const KitchenDisplayScreen: React.FC = () => {
                               'ready',
                             ];
                             const currentIndex = statuses.indexOf(item.status);
-                            const nextStatus = statuses[(currentIndex + 1) % statuses.length];
+                            const _nextStatus = statuses[(currentIndex + 1) % statuses.length];
                             updateItemStatus(selectedOrder.id, item.id, _nextStatus);
                           }}>
                           <Icon

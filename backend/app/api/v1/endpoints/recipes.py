@@ -1,125 +1,67 @@
 """
 API Endpoints for Recipe Management
 """
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from uuid import UUID
-
-from app.core.database import get_db, Product # Import Product model
-from app.core.database import User # Assuming User model for authentication/authorization
-from app.crud import inventory as crud_inventory # Using the same CRUD module
-from app.schemas import inventory_schemas as schemas # Using the same schemas module
-# from app.api.v1.dependencies import get_current_active_user_with_role # Example dependency for role check
-
+from app.core.database import get_db, Product
+from app.core.database import User
+from app.crud import inventory as crud_inventory
+from app.schemas import inventory_schemas as schemas
+from app.core.exceptions import ResourceNotFoundException, ValidationException
 router = APIRouter()
 
-# --- Recipe Endpoints ---
-
-@router.post("/", response_model=List[schemas.Recipe], status_code=201) # Returns list of created recipe ingredients
-async def create_or_update_recipe_for_item_api(
-    recipe_in: schemas.RecipeCreate,
-    db: Session = Depends(get_db)
-    # current_user: User = Depends(get_current_active_user_with_role("owner")) # Example: only owners can manage recipes
-):
+@router.post('/', response_model=List[schemas.Recipe], status_code=201)
+async def create_or_update_recipe_for_item_api(recipe_in: schemas.RecipeCreate, db: Session=Depends(get_db)):
     """
     Create or update the full recipe for a specific menu item (Product).
     - If the item has no recipe, it's created.
     - If the item has an existing recipe, it's entirely replaced by the ingredients provided.
     - If an empty list of ingredients is provided for an existing recipe, it effectively deletes the recipe.
     """
-    # Check if product (item_id) exists
     product = db.query(Product).filter(Product.id == recipe_in.item_id).first()
     if not product:
-        raise HTTPException(status_code=404, detail=f"Product with ID {recipe_in.item_id} not found.")
-
-    # Validate that all ingredient SKUs exist in inventory
+        raise ResourceNotFoundException(message="Product with ID {recipe_in.item_id} not found.", resource_type="Resource")
     for ingredient in recipe_in.ingredients:
         inv_item = crud_inventory.get_inventory_item(db, sku=ingredient.ingredient_sku)
         if not inv_item:
-            raise HTTPException(status_code=400, detail=f"Ingredient with SKU {ingredient.ingredient_sku} not found in inventory.")
-        # qty_g validation (gt=0, le=1000) is handled by Pydantic schema (RecipeIngredientCreate)
-
-    # The CRUD function `create_or_update_recipe_ingredients` handles upsert logic
-    # and deletion of ingredients not present in the new list.
-    db_recipe_ingredients = crud_inventory.create_or_update_recipe_ingredients(
-        db=db,
-        item_id=recipe_in.item_id,
-        ingredients_data=recipe_in.ingredients
-    )
-
+            raise ValidationException(message='', code='BAD_REQUEST')
+    db_recipe_ingredients = crud_inventory.create_or_update_recipe_ingredients(db=db, item_id=recipe_in.item_id, ingredients_data=recipe_in.ingredients)
     if not recipe_in.ingredients and db_recipe_ingredients:
-        # This case should ideally be handled by the CRUD to ensure consistency
-        # For now, if input is empty and output is not, it implies something went wrong or was not fully cleared.
-        # However, create_or_update_recipe_ingredients should return empty list if input ingredients_data is empty.
         pass
-
     return db_recipe_ingredients
 
-
-@router.get("/{item_id}", response_model=schemas.RecipeResponse) # Using the RecipeResponse model
-async def read_recipe_for_item_api(
-    item_id: UUID,
-    db: Session = Depends(get_db)
-    # current_user: User = Depends(get_current_active_user_with_role("owner")) # Or general read access
-):
+@router.get('/{item_id}', response_model=schemas.RecipeResponse)
+async def read_recipe_for_item_api(item_id: UUID, db: Session=Depends(get_db)):
     """
     Retrieve the recipe for a specific menu item, including ingredient details.
     """
     recipe_details = crud_inventory.get_product_details_with_recipe(db, item_id=item_id)
     if not recipe_details:
-        # Check if product exists but has no recipe vs product does not exist
         product = db.query(Product).filter(Product.id == item_id).first()
         if not product:
-            raise HTTPException(status_code=404, detail=f"Product with ID {item_id} not found.")
-        # Product exists but has no recipe, return empty list of ingredients
+            raise ResourceNotFoundException(message="Product with ID {item_id} not found.", resource_type="Resource")
         return schemas.RecipeResponse(item_id=item_id, item_name=product.name, ingredients=[])
-
     return schemas.RecipeResponse(**recipe_details)
 
-
-@router.get("/", response_model=List[schemas.RecipeResponse])
-async def read_all_recipes_api(
-    skip: int = 0,
-    limit: int = Query(default=100, le=200),
-    db: Session = Depends(get_db)
-    # current_user: User = Depends(get_current_active_user_with_role("owner"))
-):
+@router.get('/', response_model=List[schemas.RecipeResponse])
+async def read_all_recipes_api(skip: int=0, limit: int=Query(default=100, le=200), db: Session=Depends(get_db)):
     """
     Retrieve all products that have recipes, along with their recipe details.
     """
     all_recipes_details = crud_inventory.get_all_products_with_recipes(db, skip=skip, limit=limit)
     return [schemas.RecipeResponse(**details) for details in all_recipes_details]
 
-
-@router.delete("/{item_id}", status_code=204) # No content to return
-async def delete_recipe_for_item_api(
-    item_id: UUID,
-    db: Session = Depends(get_db)
-    # current_user: User = Depends(get_current_active_user_with_role("owner"))
-):
+@router.delete('/{item_id}', status_code=204)
+async def delete_recipe_for_item_api(item_id: UUID, db: Session=Depends(get_db)):
     """
     Delete the entire recipe for a specific menu item.
     """
-    # Check if product exists first
     product = db.query(Product).filter(Product.id == item_id).first()
     if not product:
-        raise HTTPException(status_code=404, detail=f"Product with ID {item_id} not found, cannot delete its recipe.")
-
+        raise ResourceNotFoundException(message="Product with ID {item_id} not found, cannot delete its recipe.", resource_type="Resource")
     deleted_count = crud_inventory.delete_recipe_for_item(db, item_id=item_id)
     if deleted_count == 0:
-        # Product exists, but had no recipe to delete. Not an error, but could be a specific response.
-        # For 204, no response body is sent, so client just knows it's gone or was never there.
         pass
-    return None # FastAPI will return 204 No Content
-
-
-# Placeholder for role-based authentication dependency
-# async def get_current_active_user_with_role(required_role: str):
-#     # from app.api.v1.dependencies import get_current_active_user
-#     # current_user = Depends(get_current_active_user) # Your actual user dependency
-#     # if current_user.role != required_role and current_user.role != "admin": # Example admin override
-#     #     raise HTTPException(status_code=403, detail=f"User does not have the required role: {required_role}")
-#     # return current_user
-#     print(f"Auth check for role: {required_role}") # Placeholder log
-#     pass # Allow all for now
+    return None

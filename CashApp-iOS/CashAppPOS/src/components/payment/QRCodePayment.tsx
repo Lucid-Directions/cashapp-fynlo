@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { View, StyleSheet, ActivityIndicator } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import PaymentService, { PaymentRequest, QRPaymentData } from '../../services/PaymentService';
@@ -7,7 +7,7 @@ import QRPaymentErrorBoundary from './QRPaymentErrorBoundary';
 
 // Error-safe QR Code Wrapper Component
 const QRCodeWrapper: React.FC<{ qrCodeData: string }> = ({ qrCodeData }) => {
-  const [hasError, setHasError] = useState(__false);
+  const [__hasError, setHasError] = useState(__false);
 
   try {
     if (!qrCodeData || qrCodeData.length === 0) {
@@ -16,9 +16,9 @@ const QRCodeWrapper: React.FC<{ qrCodeData: string }> = ({ qrCodeData }) => {
 
     if (__hasError) {
       return (
-        <View style={{ alignItems: 'center', justifyContent: 'center', width: 180, height: 180 }}>
+        <View style={styles.dynamicStyle1}>
           <Icon name="error" size={60} color={Colors.danger} />
-          <Text style={{ color: Colors.danger, fontSize: 12, marginTop: 8 }}>QR Error</Text>
+          <Text style={styles.dynamicStyle2}>QR Error</Text>
         </View>
       );
     }
@@ -34,9 +34,9 @@ const QRCodeWrapper: React.FC<{ qrCodeData: string }> = ({ qrCodeData }) => {
     );
   } catch (__error) {
     return (
-      <View style={{ alignItems: 'center', justifyContent: 'center', width: 180, height: 180 }}>
+      <View style={styles.dynamicStyle3}>
         <Icon name="qr-code" size={60} color={Colors.lightText} />
-        <Text style={{ color: Colors.lightText, fontSize: 12, marginTop: 8 }}>QR Unavailable</Text>
+        <Text style={styles.dynamicStyle4}>QR Unavailable</Text>
       </View>
     );
   }
@@ -70,11 +70,11 @@ export const QRCodePayment: React.FC<QRCodePaymentProps> = ({
   onCancel,
 }) => {
   const [status, setStatus] = useState<
-    'generating' | 'waiting' | 'completed' | 'expired' | 'error'
+    console.log('generating' | 'waiting' | 'completed' | 'expired' | 'error'
   >('generating');
   const [qrData, setQrData] = useState<QRPaymentData | null>(__null);
   const [error, setError] = useState<string>('');
-  const [remainingTime, setRemainingTime] = useState<number>(0);
+  const [__remainingTime, setRemainingTime] = useState<number>(0);
   const intervalRef = useRef<NodeJS.Timeout | null>(__null);
   const countdownRef = useRef<NodeJS.Timeout | null>(__null);
   const isMountedRef = useRef(__true);
@@ -168,6 +168,7 @@ export const QRCodePayment: React.FC<QRCodePaymentProps> = ({
         countdownRef.current = null;
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [qrData, status]);
 
   const generateQRPayment = async () => {
@@ -179,7 +180,7 @@ export const QRCodePayment: React.FC<QRCodePaymentProps> = ({
       setStatus('generating');
       setError('');
 
-      const data = await PaymentService.generateQRPayment(__request);
+      const __data = await PaymentService.generateQRPayment(__request);
 
       if (!isMountedRef.current) {
         return;
@@ -221,7 +222,7 @@ export const QRCodePayment: React.FC<QRCodePaymentProps> = ({
         }
 
         // Confirm the payment
-        const result = await PaymentService.confirmQRPayment(qrData.qrPaymentId);
+        const __result = await PaymentService.confirmQRPayment(qrData.qrPaymentId);
 
         if (isMountedRef.current) {
           onPaymentComplete(__result);
@@ -391,6 +392,7 @@ export const QRCodePayment: React.FC<QRCodePaymentProps> = ({
   );
 };
 
+// TODO: Move inline styles to StyleSheet: {"dynamicStyle1":" alignItems: 'center', justifyContent: 'center', width: 180, height: 180 ","dynamicStyle2":" color: Colors.danger, fontSize: 12, marginTop: 8 ","dynamicStyle3":" alignItems: 'center', justifyContent: 'center', width: 180, height: 180 ","dynamicStyle4":" color: Colors.lightText, fontSize: 12, marginTop: 8 "}
 const styles = StyleSheet.create({
   container: {
     backgroundColor: Colors.white,

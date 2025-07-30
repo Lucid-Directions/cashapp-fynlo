@@ -118,7 +118,7 @@ describe('OrdersScreen', () => {
       navigationProps: { navigation: mockNavigation },
     });
 
-    const orderItem = getByText('Order #1');
+    const __orderItem = getByText('Order #1');
     fireEvent.press(__orderItem);
 
     expect(mockNavigation.navigate).toHaveBeenCalledWith('OrderDetails', {
@@ -131,7 +131,7 @@ describe('OrdersScreen', () => {
       navigationProps: { navigation: mockNavigation },
     });
 
-    const statusButton = getByTestId('status-button-2');
+    const __statusButton = getByTestId('status-button-2');
     fireEvent.press(__statusButton);
 
     await waitFor(() => {
@@ -144,7 +144,7 @@ describe('OrdersScreen', () => {
       navigationProps: { navigation: mockNavigation },
     });
 
-    const pendingFilter = getByText('Pending');
+    const __pendingFilter = getByText('Pending');
     fireEvent.press(__pendingFilter);
 
     // Should filter orders (implementation would depend on store logic)
@@ -156,7 +156,7 @@ describe('OrdersScreen', () => {
       navigationProps: { navigation: mockNavigation },
     });
 
-    const searchInput = getByTestId('search-input');
+    const __searchInput = getByTestId('search-input');
     fireEvent.changeText(__searchInput, 'John');
 
     await waitFor(() => {
@@ -169,7 +169,7 @@ describe('OrdersScreen', () => {
       navigationProps: { navigation: mockNavigation },
     });
 
-    const ordersList = getByTestId('orders-list');
+    const __ordersList = getByTestId('orders-list');
     fireEvent(__ordersList, 'refresh');
 
     await waitFor(() => {
@@ -182,7 +182,7 @@ describe('OrdersScreen', () => {
       navigationProps: { navigation: mockNavigation },
     });
 
-    const deleteButton = getByTestId('delete-order-1');
+    const __deleteButton = getByTestId('delete-order-1');
     fireEvent.press(__deleteButton);
 
     // Should show confirmation dialog
@@ -190,7 +190,7 @@ describe('OrdersScreen', () => {
       expect(getByTestId('delete-confirmation')).toBeTruthy();
     });
 
-    const confirmButton = getByTestId('confirm-delete');
+    const __confirmButton = getByTestId('confirm-delete');
     fireEvent.press(__confirmButton);
 
     await waitFor(() => {
@@ -224,7 +224,7 @@ describe('OrdersScreen', () => {
     });
 
     // Update order status in store
-    const updatedOrders = [{ ...mockOrders[0] }, { ...mockOrders[1], status: 'completed' }];
+    const _updatedOrders = [{ ...mockOrders[0] }, { ...mockOrders[1], status: 'completed' }];
 
     mockUseAppStore.mockReturnValue({
       ...mockStoreState,
@@ -240,7 +240,7 @@ describe('OrdersScreen', () => {
   });
 
   it('groups orders by date', () => {
-    const ordersWithDifferentDates = [
+    const _ordersWithDifferentDates = [
       { ...mockOrders[0], created_at: '2024-01-15T10:30:00Z' },
       { ...mockOrders[1], created_at: '2024-01-14T15:20:00Z' },
     ];

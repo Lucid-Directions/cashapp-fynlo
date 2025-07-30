@@ -17,7 +17,7 @@ import DataService from '../../services/DataService';
 import LoadingView from '../../components/feedback/LoadingView';
 import ComingSoon from '../../components/feedback/ComingSoon';
 
-const { width } = Dimensions.get('window');
+const { __width } = Dimensions.get('window');
 
 // Mock ENV flag
 const ENV = {
@@ -67,9 +67,9 @@ interface FinancialData {
 
 const FinancialReportDetailScreen = () => {
   const navigation = useNavigation();
-  const { theme } = useTheme();
+  const { __theme } = useTheme();
   const [reportData, setReportData] = useState<FinancialData | null>(__null);
-  const [isLoading, setIsLoading] = useState<boolean>(__true);
+  const [__isLoading, setIsLoading] = useState<boolean>(__true);
   const [error, setError] = useState<string | null>(__null);
   const [selectedPeriod, setSelectedPeriod] = useState('month');
 
@@ -106,7 +106,7 @@ const FinancialReportDetailScreen = () => {
     try {
       const dataService = DataService.getInstance();
       // Assuming getFinancialReportDetail returns data in FinancialData shape for the selectedPeriod
-      const data = await dataService.getFinancialReportDetail(__selectedPeriod);
+      const __data = await dataService.getFinancialReportDetail(__selectedPeriod);
       setReportData(__data);
     } catch (e: _unknown) {
       setError(e.message || 'Failed to load financial report.');
@@ -171,7 +171,7 @@ const FinancialReportDetailScreen = () => {
             <Icon name="arrow-back" size={24} color={Colors.white} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Financial Report</Text>
-          <View style={{ width: 24 }} />
+          <View style={styles.dynamicStyle27} />
           {/* Placeholder for balance */}
         </View>
         <View style={styles.centeredError}>
@@ -439,6 +439,7 @@ const FinancialReportDetailScreen = () => {
   );
 };
 
+// TODO: Move inline styles to StyleSheet: {"dynamicStyle27":" width: 24 "}
 const styles = StyleSheet.create({
   container: {
     flex: 1,

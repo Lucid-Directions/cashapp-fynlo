@@ -11,7 +11,7 @@ const originalFetch = global.fetch;
 
 describe('Menu Loading Performance', () => {
   let dbService: DatabaseService;
-  let dataService: DataService;
+  let __dataService: DataService;
 
   beforeEach(() => {
     dbService = DatabaseService.getInstance();
@@ -55,7 +55,7 @@ describe('Menu Loading Performance', () => {
   });
 
   test('should use cache on subsequent calls', async () => {
-    let fetchCallCount = 0;
+    const __fetchCallCount = 0;
 
     global.fetch = jest.fn().mockImplementation(() => {
       fetchCallCount++;

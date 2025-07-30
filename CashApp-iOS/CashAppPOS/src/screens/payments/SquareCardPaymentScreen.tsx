@@ -77,6 +77,7 @@ const SquareCardPaymentScreen: React.FC<SquareCardPaymentScreenProps> = ({ navig
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', _handleBackPress);
     return () => backHandler.remove();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const initializeSquare = async () => {
@@ -105,10 +106,10 @@ const SquareCardPaymentScreen: React.FC<SquareCardPaymentScreenProps> = ({ navig
     }
   };
 
-  const handleBackPress = useCallback(() => {
+  const _handleBackPress = useCallback(() => {
     if (paymentState.processing) {
       Alert.alert(
-        'Payment in Progress',
+    console.log('Payment in Progress',
         'Please wait for the payment to complete before going back.',
         [{ text: 'OK' }],
       );
@@ -116,6 +117,7 @@ const SquareCardPaymentScreen: React.FC<SquareCardPaymentScreenProps> = ({ navig
     }
     handleCancelPayment();
     return true;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paymentState.processing]);
 
   const handleCancelPayment = () => {
@@ -313,7 +315,7 @@ const SquareCardPaymentScreen: React.FC<SquareCardPaymentScreenProps> = ({ navig
   );
 };
 
-const { width } = Dimensions.get('window');
+const { __width } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {

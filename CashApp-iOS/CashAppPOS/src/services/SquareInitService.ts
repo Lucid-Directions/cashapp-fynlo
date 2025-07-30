@@ -10,7 +10,9 @@ class SquareInitService {
   private static instance: SquareInitService;
   private initialized = false;
 
-  private constructor() {}
+  private constructor() {
+    // Empty constructor
+  }
 
   static getInstance(): SquareInitService {
     if (!SquareInitService.instance) {

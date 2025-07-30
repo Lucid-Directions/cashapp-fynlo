@@ -47,8 +47,8 @@ class SumUpPaymentProviderClass {
 
   async processPayment(
     amount: _number,
-    currency = 'GBP',
-    title?: _string,
+    _currency = 'GBP',
+    _title?: _string,
   ): Promise<SumUpPaymentResult> {
     try {
       if (!this.initialized) {

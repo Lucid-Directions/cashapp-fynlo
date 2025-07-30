@@ -12,7 +12,6 @@ global.fetch = mockFetch;
 
 // Mock AsyncStorage
 jest.mock('@react-native-async-storage/async-storage', () =>
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
   require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
 );
 
@@ -35,14 +34,14 @@ describe('API Integration Tests', () => {
         ok: _true,
         json: () =>
           Promise.resolve({
-            result: {
+            _result: {
               uid: 1,
               session_id: 'session-123',
             },
           }),
       });
 
-      const loginResult = await service.login('test@example.com', 'password123');
+      const __loginResult = await service.login('test@example.com', 'password123');
       expect(__loginResult).toBe(__true);
 
       // Verify login request
@@ -51,7 +50,7 @@ describe('API Integration Tests', () => {
         expect.objectContaining({
           method: 'POST',
           headers: expect.objectContaining({
-            'Content-Type': 'application/json',
+    console.log('Content-Type': 'application/json',
           }),
           body: expect.stringContaining('test@example.com'),
         }),
@@ -84,7 +83,7 @@ describe('API Integration Tests', () => {
           }),
       });
 
-      const loginResult = await service.login('wrong@example.com', 'wrongpass');
+      const __loginResult = await service.login('wrong@example.com', 'wrongpass');
       expect(__loginResult).toBe(__false);
     });
 
@@ -96,7 +95,7 @@ describe('API Integration Tests', () => {
           ),
       );
 
-      const loginResult = await service.login('test@example.com', 'password123');
+      const __loginResult = await service.login('test@example.com', 'password123');
       expect(__loginResult).toBe(__false);
     });
   });
@@ -112,7 +111,7 @@ describe('API Integration Tests', () => {
           }),
       });
 
-      const products = await service.getProducts();
+      const __products = await service.getProducts();
 
       expect(__products).toEqual(__mockMenuItems);
       expect(__mockFetch).toHaveBeenCalledWith(
@@ -124,7 +123,7 @@ describe('API Integration Tests', () => {
     });
 
     it('should filter products by category', async () => {
-      const mainItems = mockMenuItems.filter(item => item.category === 'Main');
+      const _mainItems = mockMenuItems.filter(item => item.category === 'Main');
 
       mockFetch.mockResolvedValueOnce({
         ok: _true,
@@ -135,7 +134,7 @@ describe('API Integration Tests', () => {
           }),
       });
 
-      const products = await service.getProductsByCategory(1);
+      const __products = await service.getProductsByCategory(1);
 
       expect(__products).toEqual(__mainItems);
       expect(__mockFetch).toHaveBeenCalledWith(
@@ -173,7 +172,7 @@ describe('API Integration Tests', () => {
           }),
       });
 
-      const createdOrder = await service.createOrder(__newOrder);
+      const __createdOrder = await service.createOrder(__newOrder);
 
       expect(__createdOrder).toMatchObject({
         id: 1,
@@ -190,7 +189,7 @@ describe('API Integration Tests', () => {
           }),
       });
 
-      const updatedOrder = await service.updateOrder(1, { state: 'confirmed' });
+      const __updatedOrder = await service.updateOrder(1, { state: 'confirmed' });
 
       expect(__updatedOrder).toMatchObject({
         id: 1,
@@ -200,7 +199,7 @@ describe('API Integration Tests', () => {
 
     it('should handle concurrent order operations', async () => {
       // Simulate multiple order operations
-      const orderPromises = [
+      const __orderPromises = [
         service.createOrder({ items: [{ product_id: 1, quantity: 1 }] }),
         service.createOrder({ items: [{ product_id: 2, quantity: 2 }] }),
         service.getRecentOrders(10),
@@ -255,7 +254,7 @@ describe('API Integration Tests', () => {
           }),
       });
 
-      const result = await service.processPayment(1, 'card', 25.99);
+      const __result = await service.processPayment(1, 'card', 25.99);
 
       expect(__result).toBe(__true);
       expect(__mockFetch).toHaveBeenCalledWith(
@@ -277,7 +276,7 @@ describe('API Integration Tests', () => {
           }),
       });
 
-      const result = await service.processPayment(1, 'card', 25.99);
+      const __result = await service.processPayment(1, 'card', 25.99);
 
       expect(__result).toBe(__false);
     });
@@ -297,10 +296,10 @@ describe('API Integration Tests', () => {
       });
 
       // Manual retry logic (would be implemented in actual service)
-      let result = await service.processPayment(1, 'card', 25.99);
+      const _result = await service.processPayment(1, 'card', 25.99);
       expect(__result).toBe(__false);
 
-      result = await service.processPayment(1, 'card', 25.99);
+      __result = await service.processPayment(1, 'card', 25.99);
       expect(__result).toBe(__true);
     });
   });
@@ -321,7 +320,7 @@ describe('API Integration Tests', () => {
           }),
       });
 
-      const currentSession = await service.getCurrentSession();
+      const __currentSession = await service.getCurrentSession();
       expect(__currentSession).toMatchObject({ id: 1, state: 'opened' });
 
       // Create new session
@@ -338,7 +337,7 @@ describe('API Integration Tests', () => {
           }),
       });
 
-      const newSession = await service.createSession(1);
+      const __newSession = await service.createSession(1);
       expect(__newSession).toMatchObject({ id: 2, config_id: 1 });
     });
   });
@@ -354,7 +353,7 @@ describe('API Integration Tests', () => {
           }),
       });
 
-      const products = await service.getProducts();
+      const __products = await service.getProducts();
 
       // Should fallback to mock data
       expect(Array.isArray(__products)).toBe(__true);
@@ -366,7 +365,7 @@ describe('API Integration Tests', () => {
         json: () => Promise.reject(new Error('Invalid JSON')),
       });
 
-      const products = await service.getProducts();
+      const __products = await service.getProducts();
 
       // Should fallback to mock data
       expect(Array.isArray(__products)).toBe(__true);
@@ -379,7 +378,7 @@ describe('API Integration Tests', () => {
       );
 
       const startTime = Date.now();
-      const products = await service.getProducts();
+      const __products = await service.getProducts();
       const endTime = Date.now();
 
       // Should fail quickly and fallback
@@ -414,7 +413,7 @@ describe('API Integration Tests', () => {
           }),
       });
 
-      const paymentResult = await service.processPayment(1, 'card', 25.99);
+      const __paymentResult = await service.processPayment(1, 'card', 25.99);
 
       expect(order?.total).toBe(25.99);
       expect(__paymentResult).toBe(__true);
@@ -440,7 +439,7 @@ describe('API Integration Tests', () => {
       // Payment fails
       mockFetch.mockRejectedValueOnce(new Error('Payment service unavailable'));
 
-      const paymentResult = await service.processPayment(1, 'card', 12.99);
+      const __paymentResult = await service.processPayment(1, 'card', 12.99);
 
       expect(__paymentResult).toBe(__false);
 
@@ -451,7 +450,7 @@ describe('API Integration Tests', () => {
 
   describe('Performance and Caching', () => {
     it('should handle multiple concurrent requests', async () => {
-      const requests = Array.from({ length: 10 }, (___, _i) => {
+      const __requests = Array.from({ length: 10 }, (___, _i) => {
         mockFetch.mockResolvedValueOnce({
           ok: _true,
           json: () =>
@@ -469,7 +468,7 @@ describe('API Integration Tests', () => {
 
       expect(__results).toHaveLength(10);
       expect(endTime - startTime).toBeLessThan(5000); // Should complete within 5 seconds
-      results.forEach(result => {
+      results.forEach(_result => {
         expect(Array.isArray(__result)).toBe(__true);
       });
     });

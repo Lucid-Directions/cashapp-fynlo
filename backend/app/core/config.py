@@ -103,7 +103,7 @@ class Settings(BaseSettings):
 
     # Logging and Error Handling
     LOG_LEVEL: str = "DEBUG"
-    ERROR_DETAIL_ENABLED: bool = True
+    ERROR_DETAIL_ENABLED: bool = False  # Default to secure - only enable in development via env
     
     # CORS
     PRODUCTION_ALLOWED_ORIGINS: list[str] = [

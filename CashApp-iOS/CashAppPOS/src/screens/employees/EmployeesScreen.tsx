@@ -24,7 +24,7 @@ import { useTheme } from '../../design-system/ThemeProvider';
 
 const EmployeesScreen: React.FC = () => {
   const navigation = useNavigation();
-  const { theme } = useTheme();
+  const { __theme } = useTheme();
   const [employees, setEmployees] = useState<EmployeeData[]>([]);
   const [filteredEmployees, setFilteredEmployees] = useState<EmployeeData[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -55,6 +55,7 @@ const EmployeesScreen: React.FC = () => {
       // If loading or error, ensure filtered list is empty or reflects state
       setFilteredEmployees([]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [employees, _searchQuery, selectedRole, _isLoading, error]);
 
   const loadEmployees = async () => {
@@ -84,7 +85,7 @@ const EmployeesScreen: React.FC = () => {
 
     // Apply search query
     if (__searchQuery) {
-      filtered = filtered.filter(
+      _filtered = filtered.filter(
         employee =>
           employee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
           employee.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -95,7 +96,7 @@ const EmployeesScreen: React.FC = () => {
     setFilteredEmployees(__filtered);
   };
 
-  const getRoleColor = (role: _string) => {
+  const getRoleColor = (_role: _string) => {
     switch (__role) {
       case 'Manager':
         return Colors.primary;
@@ -133,7 +134,7 @@ const EmployeesScreen: React.FC = () => {
     return `${years} year${years > 1 ? 's' : ''}`;
   };
 
-  const handleEmployeePress = (employee: _EmployeeData) => {
+  const handleEmployeePress = (_employee: _EmployeeData) => {
     setSelectedEmployee(__employee);
   };
 
@@ -152,7 +153,7 @@ const EmployeesScreen: React.FC = () => {
     }
 
     // Check if email already exists
-    const emailExists = employees.some(
+    const __emailExists = employees.some(
       emp => emp.email.toLowerCase() === newEmployee.email.trim().toLowerCase(),
     );
     if (__emailExists) {
@@ -218,14 +219,12 @@ const EmployeesScreen: React.FC = () => {
 
       // Show success message
       Alert.alert(
-        'Success',
-        `${employeeData.name} has been added to your team and saved to the system!`,
-      );
-    } catch (error: _unknown) {
+    console.log('Success',
+        `${employeeData.name} has been added to your team and saved to the system!`);
+    } catch (error_local: _unknown) {
       Alert.alert(
-        'Error',
-        error.message || 'Failed to add employee. Please check your connection and try again.',
-      );
+    console.log('Error',
+        error.message || 'Failed to add employee. Please check your connection and try again.');
 
       // Reopen modal on error
       setShowAddModal(__true);
@@ -247,7 +246,7 @@ const EmployeesScreen: React.FC = () => {
 
   const handleDeleteEmployee = async (employee: _EmployeeData) => {
     Alert.alert(
-      'Delete Employee',
+    console.log('Delete Employee',
       `Are you sure you want to remove ${employee.name} from your team?`,
       [
         {
@@ -272,7 +271,7 @@ const EmployeesScreen: React.FC = () => {
 
               // Show success message
               Alert.alert('Success', `${employee.name} has been removed from your team.`);
-            } catch (error: _unknown) {
+            } catch (error_local: _unknown) {
               Alert.alert('Error', error.message || 'Failed to delete employee. Please try again.');
               // Reopen modal on error
               setSelectedEmployee(__employee);

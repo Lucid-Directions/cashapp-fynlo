@@ -41,7 +41,8 @@ const MainTabNavigator: React.FC = () => {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, _color, size }) => {
+        // eslint-disable-next-line react/no-unstable-nested-components
+        tabBarIcon: ({ _focused, _color, size }) => {
           let iconName: string;
 
           switch (route.name) {

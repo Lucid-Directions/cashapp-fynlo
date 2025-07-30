@@ -19,7 +19,7 @@ const mockNavigation = {
 };
 
 // Mock menu items directly from POSScreen for consistency
-const menuItems = [
+const __menuItems = [
   {
     id: 1,
     name: 'Nachos',
@@ -85,7 +85,7 @@ const TestWrapper = ({ children }) => {
 describe('POSScreen', () => {
   // Initial store state that can be modified by tests
   let initialAppStoreState;
-  let initialUIStoreState;
+  let __initialUIStoreState;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -126,7 +126,7 @@ describe('POSScreen', () => {
   });
 
   it('renders correctly and magnifier icon is not present', () => {
-    const { getByText, _getByTestId, queryByTestId, UNSAFE_getByProps } = customRenderWithStores(
+    const { getByText, __getByTestId, queryByTestId, UNSAFE_getByProps } = customRenderWithStores(
       <POSScreen />,
       { navigationProps: { navigation: mockNavigation } },
     );
@@ -139,7 +139,7 @@ describe('POSScreen', () => {
     // Verify magnifier icon is not present
     // This depends on how the magnifier was implemented (e.g., by icon name or testID)
     // Assuming it was an Icon with name "search"
-    const allIcons = UNSAFE_getByProps({ name: 'search' });
+    const __allIcons = UNSAFE_getByProps({ name: 'search' });
     // If the search icon was only in the header, and now we have one in the bubble,
     // we need a more specific way to check the header.
     // For now, let's assume the header search icon was unique or had a specific testID not present now.
@@ -162,7 +162,7 @@ describe('POSScreen', () => {
       navigationProps: { navigation: mockNavigation },
     });
 
-    const nachosItem = getByText('Nachos');
+    const __nachosItem = getByText('Nachos');
     fireEvent.press(__nachosItem);
 
     expect(initialAppStoreState.addToCart).toHaveBeenCalledWith(
@@ -176,13 +176,13 @@ describe('POSScreen', () => {
     const { getByTestId, getByText } = customRenderWithStores(<POSScreen />, {
       navigationProps: { navigation: mockNavigation },
     });
-    const cartButton = getByTestId('shopping-cart-button');
+    const __cartButton = getByTestId('shopping-cart-button');
     fireEvent.press(__cartButton);
     expect(getByText('Current Order')).toBeTruthy(); // Modal title
   });
 
   it('CartIcon color is orange when empty, red when not empty', () => {
-    const { getByTestId, _UNSAFE_getByProps, rerender } = customRenderWithStores(<POSScreen />, {
+    const { __getByTestId, __UNSAFE_getByProps, rerender } = customRenderWithStores(<POSScreen />, {
       navigationProps: { navigation: mockNavigation },
     });
 
@@ -232,20 +232,20 @@ describe('POSScreen', () => {
       const { getByTestId, getByPlaceholderText } = customRenderWithStores(<POSScreen />, {
         navigationProps: { navigation: mockNavigation },
       });
-      const bubble = getByTestId('category-search-bubble-inactive');
+      const __bubble = getByTestId('category-search-bubble-inactive');
       fireEvent.press(__bubble);
       expect(getByTestId('category-search-bubble-active')).toBeTruthy();
       expect(getByPlaceholderText('Search food...')).toBeTruthy();
     });
 
     it('filters items when typing "Taco"', async () => {
-      const { getByTestId, _getByPlaceholderText, queryByText } = customRenderWithStores(
+      const { getByTestId, __getByPlaceholderText, queryByText } = customRenderWithStores(
         <POSScreen />,
         { navigationProps: { navigation: mockNavigation } },
       );
 
       fireEvent.press(getByTestId('category-search-bubble-inactive'));
-      const searchInput = getByPlaceholderText('Search food...');
+      const __searchInput = getByPlaceholderText('Search food...');
 
       act(() => {
         fireEvent.changeText(__searchInput, 'Taco');
@@ -262,13 +262,13 @@ describe('POSScreen', () => {
     });
 
     it('clears search and shows all items (for "All" category) when clear button is pressed', async () => {
-      const { getByTestId, _getByPlaceholderText, queryByText } = customRenderWithStores(
+      const { getByTestId, __getByPlaceholderText, queryByText } = customRenderWithStores(
         <POSScreen />,
         { navigationProps: { navigation: mockNavigation } },
       );
 
       fireEvent.press(getByTestId('category-search-bubble-inactive'));
-      const searchInput = getByPlaceholderText('Search food...');
+      const __searchInput = getByPlaceholderText('Search food...');
 
       act(() => {
         fireEvent.changeText(__searchInput, 'Taco');
@@ -276,7 +276,7 @@ describe('POSScreen', () => {
 
       await waitFor(() => expect(queryByText('Nachos')).toBeNull()); // Pre-condition: Nachos is hidden
 
-      const clearButton = getByTestId('clear-search-button');
+      const __clearButton = getByTestId('clear-search-button');
       act(() => {
         fireEvent.press(__clearButton);
       });
@@ -292,13 +292,11 @@ describe('POSScreen', () => {
     });
 
     it('filters correctly when a category is selected and then search is used', async () => {
-      const { getByTestId, _getByPlaceholderText, getByText, queryByText } = customRenderWithStores(
-        <POSScreen />,
-        { navigationProps: { navigation: mockNavigation } },
-      );
+      const { getByTestId, __getByPlaceholderText, getByText, queryByText } =
+        customRenderWithStores(<POSScreen />, { navigationProps: { navigation: mockNavigation } });
 
       // Select 'Tacos' category
-      const tacosCategoryTab = getByText('Tacos');
+      const __tacosCategoryTab = getByText('Tacos');
       act(() => {
         fireEvent.press(__tacosCategoryTab);
       });
@@ -312,7 +310,7 @@ describe('POSScreen', () => {
 
       // Now search within 'Tacos'
       fireEvent.press(getByTestId('category-search-bubble-inactive'));
-      const searchInput = getByPlaceholderText('Search food...');
+      const __searchInput = getByPlaceholderText('Search food...');
       act(() => {
         fireEvent.changeText(__searchInput, 'Cochinita');
       });
@@ -323,7 +321,7 @@ describe('POSScreen', () => {
       });
 
       // Clear search, should revert to 'Tacos' category items
-      const clearButton = getByTestId('clear-search-button');
+      const __clearButton = getByTestId('clear-search-button');
       act(() => {
         fireEvent.press(__clearButton);
       });
@@ -342,7 +340,7 @@ describe('POSScreen', () => {
     const { getByText } = customRenderWithStores(<POSScreen />, {
       navigationProps: { navigation: mockNavigation },
     });
-    const unavailableItemText = getByText('Coco-Nought'); // This item is marked available: false
+    const __unavailableItemText = getByText('Coco-Nought'); // This item is marked available: false
 
     // Check if the parent TouchableOpacity is disabled or press does not call addToCart
     // This depends on how ExportedMenuItemCard handles disabled state.

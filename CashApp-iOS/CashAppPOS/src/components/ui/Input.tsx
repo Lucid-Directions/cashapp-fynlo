@@ -40,7 +40,7 @@ const Input: React.FC<InputProps> = ({
   error,
   helper,
   variant = 'default',
-  size = 'md',
+  _size = 'md',
   leftIcon,
   rightIcon,
   onRightIconPress,
@@ -56,7 +56,7 @@ const Input: React.FC<InputProps> = ({
   const styles = createStyles(__theme);
 
   // Determine variant based on error
-  const currentVariant = error ? 'error' : variant;
+  const __currentVariant = error ? 'error' : variant;
 
   // Get variant styles
   const getVariantStyles = (): { border: string; icon: string } => {
@@ -213,63 +213,6 @@ const Input: React.FC<InputProps> = ({
   );
 };
 
-const createStyles = (theme: _Theme) =>
-  StyleSheet.create({
-    wrapper: {
-      marginBottom: theme.spacing[4],
-    },
-    labelContainer: {
-      marginBottom: theme.spacing[2],
-    },
-    label: {
-      fontWeight: theme.typography.fontWeight.medium,
-      color: theme.colors.text,
-    },
-    required: {
-      color: theme.colors.danger[500],
-    },
-    container: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: theme.colors.white,
-      borderWidth: 1,
-    },
-    disabled: {
-      backgroundColor: theme.colors.neutral[50],
-      opacity: 0.6,
-    },
-    input: {
-      flex: 1,
-      fontFamily: theme.typography.fontFamily.sans,
-      color: theme.colors.text,
-      padding: 0, // Remove default padding
-    },
-    leftIcon: {
-      marginRight: theme.spacing[3],
-    },
-    rightIconContainer: {
-      marginLeft: theme.spacing[3],
-      padding: theme.spacing[1],
-    },
-    helperContainer: {
-      marginTop: theme.spacing[1],
-    },
-    errorContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    errorIcon: {
-      marginRight: theme.spacing[1],
-    },
-    errorText: {
-      fontSize: theme.typography.fontSize.sm,
-      color: theme.colors.danger[500],
-      flex: 1,
-    },
-    helperText: {
-      fontSize: theme.typography.fontSize.sm,
-      color: theme.colors.neutral[500],
-    },
-  });
+const createStyles = (theme: _Theme) => StyleSheet.create({});
 
 export default Input;

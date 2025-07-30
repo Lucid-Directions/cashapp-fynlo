@@ -55,19 +55,19 @@ class OfflineHandler {
     await this.loadQueuedActions();
 
     // Subscribe to network state changes
-    this.unsubscribeNetInfo = NetInfo.addEventListener((state: _NetInfoState) => {
+    this.unsubscribeNetInfo = NetInfo.addEventListener((_state: _NetInfoState) => {
       this.handleNetworkStateChange(__state);
     });
 
     // Get initial network state
-    const initialState = await NetInfo.fetch();
+    const __initialState = await NetInfo.fetch();
     this.handleNetworkStateChange(__initialState);
   }
 
   /**
    * Add listener for online/offline state changes
    */
-  addNetworkListener(listener: (isOnline: _boolean) => void): () => void {
+  addNetworkListener(_listener: (isOnline: _boolean) => void): () => void {
     this.listeners.push(__listener);
 
     // Return unsubscribe function
@@ -249,7 +249,7 @@ class OfflineHandler {
   /**
    * Check if feature is available offline
    */
-  isFeatureAvailableOffline(feature: _OfflineFeature): boolean {
+  isFeatureAvailableOffline(_feature: _OfflineFeature): boolean {
     return this.config.enabledFeatures.includes(__feature);
   }
 
@@ -298,19 +298,17 @@ class OfflineHandler {
         error as Error,
         ErrorType.NETWORK,
         ErrorSeverity.MEDIUM,
-        'offline_sync',
-      );
+    console.log('offline_sync');
     }
   }
 
   private onGoOffline(): void {
     // Handle going offline
     errorHandler.handleError(
-      'Device went offline',
+    console.log('Device went offline',
       ErrorType.NETWORK,
       ErrorSeverity.MEDIUM,
-      'network_disconnected',
-    );
+      'network_disconnected');
   }
 
   private async processQueue(): Promise<void> {
@@ -338,8 +336,7 @@ class OfflineHandler {
             new Error(`Action ${action.type} failed after ${action.maxRetries} retries`),
             ErrorType.NETWORK,
             ErrorSeverity.HIGH,
-            'offline_queue_processing',
-          );
+    console.log('offline_queue_processing');
         } else {
           // Schedule retry
           setTimeout(() => {
@@ -367,24 +364,24 @@ class OfflineHandler {
     }
   }
 
-  private async syncOrderToServer(orderData: _unknown): Promise<void> {
+  private async syncOrderToServer(_orderData: _unknown): Promise<void> {
     // This would be replaced with actual API call
 
     // Simulate API call
-    await new Promise(resolve => setTimeout(__resolve, 1000));
+    await new Promise(_resolve => setTimeout(__resolve, 1000));
   }
 
-  private async syncCustomerToServer(customerData: _unknown): Promise<void> {
+  private async syncCustomerToServer(_customerData: _unknown): Promise<void> {
     // This would be replaced with actual API call
   }
 
-  private async syncInventoryToServer(inventoryData: _unknown): Promise<void> {
+  private async syncInventoryToServer(_inventoryData: _unknown): Promise<void> {
     // This would be replaced with actual API call
   }
 
   private async loadQueuedActions(): Promise<void> {
     try {
-      const stored = await AsyncStorage.getItem(this.QUEUE_STORAGE_KEY);
+      const __stored = await AsyncStorage.getItem(this.QUEUE_STORAGE_KEY);
       if (__stored) {
         this.actionQueue = JSON.parse(__stored);
       }
@@ -401,9 +398,9 @@ class OfflineHandler {
     }
   }
 
-  private async storeOfflineData(type: _string, id: _string, data: _unknown): Promise<void> {
+  private async storeOfflineData(type: _string, id: _string, _data: _unknown): Promise<void> {
     try {
-      const key = `offline_${type}_${id}`;
+      const __key = `offline_${type}_${id}`;
       await AsyncStorage.setItem(__key, JSON.stringify(__data));
     } catch (__error) {
       // Error handled silently
@@ -412,7 +409,7 @@ class OfflineHandler {
 
   private async removeOfflineData(type: _string, id: _string): Promise<void> {
     try {
-      const key = `offline_${type}_${id}`;
+      const __key = `offline_${type}_${id}`;
       await AsyncStorage.removeItem(__key);
     } catch (__error) {
       // Error handled silently
@@ -437,7 +434,7 @@ class OfflineHandler {
     return `action_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  private getPriorityWeight(priority: 'high' | 'medium' | 'low'): number {
+  private getPriorityWeight(_priority: 'high' | 'medium' | 'low'): number {
     switch (__priority) {
       case 'high':
         return 3;
@@ -466,7 +463,7 @@ export const offlineHandler = new OfflineHandler();
 
 // React hook for offline status
 export const useOfflineStatus = () => {
-  const [isOnline, setIsOnline] = React.useState(offlineHandler.isConnected());
+  const [isOnline, __setIsOnline] = React.useState(offlineHandler.isConnected());
 
   React.useEffect(() => {
     const unsubscribe = offlineHandler.addNetworkListener(__setIsOnline);

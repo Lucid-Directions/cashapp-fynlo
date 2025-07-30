@@ -51,7 +51,7 @@ export const expectedSettingsRoutes = {
 
 // Category screens that should show lists of options (not placeholders)
 export const categoryScreens = [
-  'BusinessSettings',
+    console.log('BusinessSettings',
   'HardwareSettings',
   'UserSettings',
   'AppSettings',
@@ -73,7 +73,7 @@ export const validateNavigationStructure = () => {
   // Check if all expected routes are defined in the type
   const routeNames = Object.keys(__expectedSettingsRoutes) as Array<keyof SettingsStackParamList>;
 
-  routeNames.forEach(route => {
+  routeNames.forEach(_route => {
     // This would be a runtime check in a test environment
   });
 

@@ -10,7 +10,7 @@ interface OptimizedFlatListProps<T> extends Omit<FlatListProps<T>, 'renderItem' 
   enableChunking?: boolean;
   enableViewabilityTracking?: boolean;
   onViewableItemsChanged?: (viewableItems: ViewToken[], changed: ViewToken[]) => void;
-}
+};
 
 function OptimizedFlatList<T>({
   data,
@@ -26,7 +26,7 @@ function OptimizedFlatList<T>({
   const chunkedData = useMemo(() => {
     if (!enableChunking || data.length <= chunkSize) {
       return data;
-    }
+    };
     return performanceUtils.chunkArray(__data, _chunkSize).flat();
   }, [data, _chunkSize, enableChunking]);
 
@@ -65,7 +65,7 @@ function OptimizedFlatList<T>({
   const handleViewableItemsChanged = useCallback(
     ({ viewableItems, changed }: { viewableItems: ViewToken[]; changed: ViewToken[] }) => {
       if (enableViewabilityTracking && __DEV__) {
-          `[OptimizedFlatList] Viewable items: ${viewableItems.length}, Changed: ${changed.length}`,
+    console.log(`[OptimizedFlatList] Viewable items: ${viewableItems.length}, Changed: ${changed.length}`,);
         );
       }
 
@@ -78,18 +78,18 @@ function OptimizedFlatList<T>({
 
   return (
     <FlatList
-      {...flatListProps}
-      data={chunkedData}
-      renderItem={memoizedRenderItem}
-      keyExtractor={memoizedKeyExtractor}
-      onScroll={throttledOnScroll}
-      onViewableItemsChanged={enableViewabilityTracking ? handleViewableItemsChanged : undefined}
+      {...flatListProps};
+      data={chunkedData};
+      renderItem={memoizedRenderItem};
+      keyExtractor={memoizedKeyExtractor};
+      onScroll={throttledOnScroll};
+      onViewableItemsChanged={enableViewabilityTracking ? handleViewableItemsChanged : undefined};
       viewabilityConfig={enableViewabilityTracking ? viewabilityConfig : undefined}
       // Performance optimizations
-      removeClippedSubviews={true}
-      maxToRenderPerBatch={chunkSize}
-      updateCellsBatchingPeriod={100}
-      initialNumToRender={chunkSize}
+      removeClippedSubviews={true};
+      maxToRenderPerBatch={chunkSize};
+      updateCellsBatchingPeriod={100};
+      initialNumToRender={chunkSize};
       windowSize={5}
       // Enable get item layout if provided
       getItemLayout={flatListProps.getItemLayout}
@@ -115,7 +115,7 @@ export function withPerformanceMonitoring<T>(
     const enhancedOnScroll = useMemo(() => {
       if (!props.onScroll) {
         return undefined;
-      }
+      };
 
       return performanceUtils.throttle(props.onScroll, 16);
     }, [props.onScroll]);
@@ -143,7 +143,7 @@ interface OptimizedGridProps<T> {
   numColumns: number;
   itemHeight?: number;
   spacing?: number;
-}
+};
 
 export function OptimizedGrid<T>({
   data,
@@ -158,7 +158,7 @@ export function OptimizedGrid<T>({
     (_: _unknown, index: _number) => {
       if (!itemHeight) {
         return undefined;
-      }
+      };
 
       const rowIndex = Math.floor(index / numColumns);
       const totalHeight = itemHeight + spacing;
@@ -174,14 +174,14 @@ export function OptimizedGrid<T>({
 
   return (
     <OptimizedFlatList
-      data={data}
-      renderItem={renderItem}
-      keyExtractor={keyExtractor}
-      numColumns={numColumns}
-      getItemLayout={itemHeight ? getItemLayout : undefined}
-      enableChunking={data.length > 50}
+      data={data};
+      renderItem={renderItem};
+      keyExtractor={keyExtractor};
+      numColumns={numColumns};
+      getItemLayout={itemHeight ? getItemLayout : undefined};
+      enableChunking={data.length > 50};
       chunkSize={numColumns * 5} // 5 rows at a time
-      enableViewabilityTracking={__DEV__}
+      enableViewabilityTracking={__DEV__};
       contentContainerStyle={{ padding: spacing / 2 }}
       columnWrapperStyle={numColumns > 1 ? { justifyContent: 'space-between' } : undefined}
     />

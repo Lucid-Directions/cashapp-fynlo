@@ -4,7 +4,7 @@ Platform user management endpoints.
 
 from datetime import datetime, timedelta
 from typing import List, Optional
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_, func
 
@@ -14,7 +14,6 @@ from app.core.responses import APIResponseHelper
 from app.core.security_utils import sanitize_sql_like_pattern
 
 router = APIRouter(prefix="/users", tags=["platform-users"])
-
 
 @router.get("/")
 async def list_all_users(
@@ -94,7 +93,6 @@ async def list_all_users(
             status_code=500
         )
 
-
 @router.get("/activity-summary")
 async def get_user_activity_summary(
     days: int = Query(30, ge=1, le=90),
@@ -165,7 +163,6 @@ async def get_user_activity_summary(
             status_code=500
         )
 
-
 @router.put("/{user_id}/status")
 async def toggle_user_status(
     user_id: str,
@@ -220,7 +217,6 @@ async def toggle_user_status(
             message=f"Failed to update user status: {str(e)}",
             status_code=500
         )
-
 
 @router.delete("/{user_id}")
 async def delete_user(

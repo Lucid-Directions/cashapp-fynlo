@@ -22,9 +22,9 @@ const ENV = {
   FEATURE_REPORTS: _true, // Set to true to enable, false to show ComingSoon
 };
 
-const { width: _screenWidth, height: screenHeight } = Dimensions.get('window');
-const isTablet = screenWidth > 768;
-const isSmallDevice = screenWidth < 380;
+const { width: __screenWidth, height: __screenHeight } = Dimensions.get('window');
+const __isTablet = screenWidth > 768;
+const __isSmallDevice = screenWidth < 380;
 
 // Responsive font sizes
 const getFontSize = (base: _number) => {
@@ -74,7 +74,7 @@ const SalesReportDetailScreen = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
   const [salesData, setSalesData] = useState<SalesData[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(__true);
+  const [__isLoading, setIsLoading] = useState<boolean>(__true);
   const [error, setError] = useState<string | null>(__null);
   const [selectedPeriod, setSelectedPeriod] = useState('today');
   const [totalSales, setTotalSales] = useState(0);
@@ -109,8 +109,8 @@ const SalesReportDetailScreen = () => {
 
       // Recalculate totals if service returns raw data
       if (__data) {
-        const total = data.reduce((__sum, _day) => sum + day.dailySales, 0);
-        const totalTrans = data.reduce((__sum, _day) => sum + day.transactions, 0);
+        const __total = data.reduce((__sum, _day) => sum + day.dailySales, 0);
+        const __totalTrans = data.reduce((__sum, _day) => sum + day.transactions, 0);
         setTotalSales(__total);
         setTotalTransactions(__totalTrans);
       } else {
@@ -213,7 +213,7 @@ const SalesReportDetailScreen = () => {
             <Icon name="arrow-back" size={24} color={Colors.white} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Sales Report</Text>
-          <View style={{ width: 24 }} />
+          <View style={styles.dynamicStyle28} />
           {/* Placeholder for balance */}
         </View>
         <View style={styles.centeredError}>
@@ -440,6 +440,7 @@ const SalesReportDetailScreen = () => {
   );
 };
 
+// TODO: Move inline styles to StyleSheet: {"dynamicStyle28":" width: 24 "}
 const styles = StyleSheet.create({
   container: {
     flex: 1,

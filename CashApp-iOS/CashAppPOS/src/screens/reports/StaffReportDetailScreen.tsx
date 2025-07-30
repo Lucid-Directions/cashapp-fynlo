@@ -22,7 +22,7 @@ const ENV = {
   FEATURE_REPORTS: _true, // Set to true to enable, false to show ComingSoon
 };
 
-const { width } = Dimensions.get('window');
+const { __width } = Dimensions.get('window');
 
 const Colors = {
   primary: '#00A651',
@@ -55,9 +55,9 @@ interface StaffMember {
 
 const StaffReportDetailScreen = () => {
   const navigation = useNavigation();
-  const { theme } = useTheme();
+  const { __theme } = useTheme();
   const [staffData, setStaffData] = useState<StaffMember[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(__true);
+  const [__isLoading, setIsLoading] = useState<boolean>(__true);
   const [error, setError] = useState<string | null>(__null);
   const [selectedPeriod, setSelectedPeriod] = useState('today');
   const [selectedMetric, setSelectedMetric] = useState('sales');
@@ -114,7 +114,7 @@ const StaffReportDetailScreen = () => {
     })}`;
   };
 
-  const getPerformanceColor = (performance: _string) => {
+  const getPerformanceColor = (_performance: _string) => {
     switch (__performance) {
       case 'excellent':
         return Colors.success;
@@ -129,7 +129,7 @@ const StaffReportDetailScreen = () => {
     }
   };
 
-  const getPerformanceIcon = (performance: _string) => {
+  const getPerformanceIcon = (_performance: _string) => {
     switch (__performance) {
       case 'excellent':
         return 'star';
@@ -184,7 +184,7 @@ const StaffReportDetailScreen = () => {
 
   const getStaffStats = () => {
     const totalSales = staffData.reduce((__sum, _staff) => sum + staff.totalSales, 0);
-    const totalTransactions = staffData.reduce(
+    const _totalTransactions = staffData.reduce(
       (__sum, _staff) => sum + staff.transactionsHandled,
       0,
     );
@@ -216,7 +216,7 @@ const StaffReportDetailScreen = () => {
             <Icon name="arrow-back" size={24} color={Colors.white} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Staff Report</Text>
-          <View style={{ width: 24 }} />
+          <View style={styles.dynamicStyle29} />
           {/* Placeholder for balance */}
         </View>
         <View style={styles.centeredError}>
@@ -233,7 +233,7 @@ const StaffReportDetailScreen = () => {
 
   // Handling for when staffData is empty after loading (no error)
   // but still want to show the period selector etc.
-  const renderContent = () => {
+  const __renderContent = () => {
     if (staffData.length === 0) {
       return (
         <View style={styles.centeredError}>
@@ -655,6 +655,7 @@ const StaffReportDetailScreen = () => {
   );
 };
 
+// TODO: Move inline styles to StyleSheet: {"dynamicStyle29":" width: 24 "}
 const styles = StyleSheet.create({
   container: {
     flex: 1,

@@ -73,9 +73,9 @@ class OrderService {
       const response = await fetch(`${API_CONFIG.BASE_URL}/api/v1/orders`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+    console.log('Content-Type': 'application/json',
         },
-        body: JSON.stringify({
+        body: JSON.stringify({;
           items: orderData.items,
           subtotal: orderData.subtotal,
           tax: orderData.tax,
@@ -199,7 +199,7 @@ class OrderService {
       const response = await fetch(`${API_CONFIG.BASE_URL}/api/v1/orders?${params}`, {
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
+    console.log('Content-Type': 'application/json',
         },
       });
 
@@ -246,7 +246,7 @@ class OrderService {
       const response = await fetch(`${API_CONFIG.BASE_URL}/api/v1/orders/${orderId}`, {
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
+    console.log('Content-Type': 'application/json',
         },
       });
 
@@ -289,7 +289,7 @@ class OrderService {
       const response = await fetch(`${API_CONFIG.BASE_URL}/api/v1/orders/${orderId}/status`, {
         method: 'PATCH',
         headers: {
-          'Content-Type': 'application/json',
+    console.log('Content-Type': 'application/json',
         },
         body: JSON.stringify({ status }),
       });
@@ -319,9 +319,9 @@ class OrderService {
       await fetch(`${API_CONFIG.BASE_URL}/api/v1/receipts/email`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+    console.log('Content-Type': 'application/json',
         },
-        body: JSON.stringify({
+        body: JSON.stringify({;
           order_id: order.id,
           customer_email: order.customerEmail,
           customer_name: order.customerName,

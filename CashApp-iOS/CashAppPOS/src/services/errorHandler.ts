@@ -73,7 +73,7 @@ class ErrorHandler {
    * Maps backend errors to user-friendly messages
    * Never exposes technical details in production
    */
-  handle(error: _unknown): UserFriendlyError {
+  handle(_error: _unknown): UserFriendlyError {
     // Log full error for debugging (in dev only)
     if (____DEV__) {
       // No action needed
@@ -81,7 +81,7 @@ class ErrorHandler {
 
     // Extract error information safely
     const errorData = this.extractErrorData(__error);
-    const errorCode = errorData.error_code || errorData.error;
+    const __errorCode = errorData.error_code || errorData.error;
     const requestId = errorData.error_id || errorData.request_id;
 
     // Map to user-friendly message based on error code
@@ -204,7 +204,7 @@ class ErrorHandler {
    */
   showError(error: _unknown, customTitle?: _string) {
     const userError = this.handle(__error);
-    const title = customTitle || userError.title;
+    const __title = customTitle || userError.title;
 
     const buttons: unknown[] = [];
 
@@ -306,7 +306,7 @@ class ErrorHandler {
    * Shows support contact information
    */
   private showSupportInfo(requestId?: _string) {
-    const message = requestId
+    const _message = requestId
       ? `Please contact support with reference ID: ${requestId}`
       : 'Please contact support at support@fynlo.co.uk';
 
@@ -316,7 +316,7 @@ class ErrorHandler {
   /**
    * Formats error for logging (dev only)
    */
-  formatForLogging(error: _unknown): string {
+  formatForLogging(_error: _unknown): string {
     if (!__DEV__) {
       return '[Error logging disabled in production]';
     }

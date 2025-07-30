@@ -199,9 +199,8 @@ const DataExportScreen: React.FC = () => {
     setSelectedFormat(template.format);
     setShowTemplateModal(__false);
     Alert.alert(
-      'Template Applied',
-      `"${template.name}" template has been applied to your export settings.`,
-    );
+    console.log('Template Applied',
+      `"${template.name}" template has been applied to your export settings.`);
   };
 
   const handleStartExport = async () => {
@@ -214,14 +213,14 @@ const DataExportScreen: React.FC = () => {
 
     try {
       // Simulate export process
-      await new Promise(resolve => setTimeout(__resolve, 3000));
+      await new Promise(_resolve => setTimeout(__resolve, 3000));
 
       const dataTypeNames = selectedDataTypes
         .map(id => dataTypes.find(dt => dt.id === id)?.name)
         .join(', ');
 
       Alert.alert(
-        'Export Complete',
+    console.log('Export Complete',
         `Your export (${dataTypeNames}) has been generated successfully. Check your email for the download link.`,
         [{ text: 'OK' }],
       );
@@ -255,7 +254,7 @@ const DataExportScreen: React.FC = () => {
     }));
   };
 
-  const getStatusIcon = (status: _string) => {
+  const getStatusIcon = (_status: _string) => {
     switch (__status) {
       case 'completed':
         return 'check-circle';
@@ -268,7 +267,7 @@ const DataExportScreen: React.FC = () => {
     }
   };
 
-  const getStatusColor = (status: _string) => {
+  const getStatusColor = (_status: _string) => {
     switch (__status) {
       case 'completed':
         return Colors.success;

@@ -6,7 +6,7 @@ import uuid
 from typing import Dict, Any, Optional, List
 from decimal import Decimal
 from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException, Request, Header, Query, Path
+from fastapi import APIRouter, Depends, Request, Header, Query, Path
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field, validator
@@ -20,11 +20,9 @@ from app.services.secure_payment_processor import SecurePaymentProcessor, Paymen
 from app.services.secure_payment_config import SecurePaymentConfigService
 from app.middleware.rate_limit_middleware import limiter
 
-
 router = APIRouter()
 security = HTTPBearer()
 logger = logging.getLogger(__name__)
-
 
 # Pydantic models for request/response validation
 class PaymentRequest(BaseModel):
@@ -49,7 +47,6 @@ class PaymentRequest(BaseModel):
             raise ValueError(f"Invalid payment method. Must be one of: {', '.join(valid_methods)}")
         return v
 
-
 class RefundRequest(BaseModel):
     """Refund processing request"""
     transaction_id: str = Field(..., description="Original transaction ID")
@@ -62,12 +59,10 @@ class RefundRequest(BaseModel):
             raise ValueError("Amount cannot have more than 2 decimal places")
         return v
 
-
 class PaymentMethodsResponse(BaseModel):
     """Available payment methods response"""
     methods: List[Dict[str, Any]]
     fees: Dict[str, Dict[str, float]]
-
 
 class PaymentStatusResponse(BaseModel):
     """Payment status response"""
@@ -80,7 +75,6 @@ class PaymentStatusResponse(BaseModel):
     completed_at: Optional[str]
     error_message: Optional[str]
 
-
 # Helper function to get request context
 def get_request_context(request: Request) -> Dict[str, Any]:
     """Extract request context for audit logging"""
@@ -88,7 +82,6 @@ def get_request_context(request: Request) -> Dict[str, Any]:
         'ip_address': request.client.host if request.client else None,
         'user_agent': request.headers.get('user-agent', 'Unknown')
     }
-
 
 @router.post("/process", response_model=Dict[str, Any])
 @limiter.limit("10/minute")  # Rate limit payment processing
@@ -164,7 +157,6 @@ async def process_payment(
             status_code=500,
             error_code="INTERNAL_ERROR"
         )
-
 
 @router.get("/methods", response_model=PaymentMethodsResponse)
 async def get_payment_methods(
@@ -249,8 +241,7 @@ async def get_payment_methods(
         
     except Exception as e:
         logger.error(f"Error getting payment methods: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to get payment methods")
-
+        raise FynloException(message="Failed to get payment methods")
 
 @router.post("/refund", response_model=Dict[str, Any])
 @limiter.limit("5/minute")  # Stricter rate limit for refunds
@@ -297,7 +288,6 @@ async def process_refund(
             status_code=500,
             error_code="INTERNAL_ERROR"
         )
-
 
 @router.get("/status/{payment_id}", response_model=PaymentStatusResponse)
 async def get_payment_status(
@@ -346,7 +336,6 @@ async def get_payment_status(
             status_code=500,
             error_code="INTERNAL_ERROR"
         )
-
 
 @router.post("/webhook/{provider}")
 async def handle_payment_webhook(

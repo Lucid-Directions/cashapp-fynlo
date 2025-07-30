@@ -1,5 +1,5 @@
 import React, { useState, ReactNode } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 // Clover POS Color Scheme
 const Colors = {
@@ -25,7 +25,7 @@ const LazyLoadingWrapper: React.FC<LazyLoadingWrapperProps> = ({
 
   useEffect(() => {
     if (__condition) {
-      const timer = setTimeout(() => {
+      const __timer = setTimeout(() => {
         setIsLoaded(__true);
       }, _delay);
 

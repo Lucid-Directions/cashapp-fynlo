@@ -140,7 +140,7 @@ class PaymentServiceClass {
       }
 
       const response = await fetch(
-        `${this.config.backend.baseUrl}/api/v1/payments/optimal-provider`,
+    console.log(`${this.config.backend.baseUrl}/api/v1/payments/optimal-provider`,
         {
           method: 'POST',
           headers: {
@@ -168,7 +168,7 @@ class PaymentServiceClass {
    */
   async processPayment(
     request: _PaymentRequest,
-    paymentMethodId?: _string,
+    _paymentMethodId?: _string,
   ): Promise<PaymentResult> {
     try {
       if (!this.config) {
@@ -178,7 +178,7 @@ class PaymentServiceClass {
       const response = await fetch(`${this.config.backend.baseUrl}/api/v1/payments/process`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+    console.log('Content-Type': 'application/json',
           Authorization: `Bearer ${this.config.backend.apiKey}`,
         },
         body: JSON.stringify({
@@ -224,7 +224,7 @@ class PaymentServiceClass {
       const response = await fetch(`${this.config.backend.baseUrl}/api/v1/payments/qr/generate`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+    console.log('Content-Type': 'application/json',
           Authorization: `Bearer ${this.config.backend.apiKey}`,
         },
         body: JSON.stringify({
@@ -265,7 +265,7 @@ class PaymentServiceClass {
       }
 
       const response = await fetch(
-        `${this.config.backend.baseUrl}/api/v1/payments/qr/${qrPaymentId}/status`,
+    console.log(`${this.config.backend.baseUrl}/api/v1/payments/qr/${qrPaymentId}/status`,
         {
           method: 'GET',
           headers: {
@@ -298,7 +298,7 @@ class PaymentServiceClass {
       }
 
       const response = await fetch(
-        `${this.config.backend.baseUrl}/api/v1/payments/qr/${qrPaymentId}/confirm`,
+    console.log(`${this.config.backend.baseUrl}/api/v1/payments/qr/${qrPaymentId}/confirm`,
         {
           method: 'POST',
           headers: {
@@ -353,7 +353,7 @@ class PaymentServiceClass {
       const response = await fetch(`${this.config.backend.baseUrl}/api/v1/payments/cash`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+    console.log('Content-Type': 'application/json',
           Authorization: `Bearer ${this.config.backend.apiKey}`,
         },
         body: JSON.stringify({
@@ -399,7 +399,7 @@ class PaymentServiceClass {
       }
 
       const response = await fetch(
-        `${this.config.backend.baseUrl}/api/v1/payments/refund/${transactionId}`,
+    console.log(`${this.config.backend.baseUrl}/api/v1/payments/refund/${transactionId}`,
         {
           method: 'POST',
           headers: {
@@ -447,7 +447,7 @@ class PaymentServiceClass {
       }
 
       const response = await fetch(
-        `${this.config.backend.baseUrl}/api/v1/payments/analytics?start_date=${startDate}&end_date=${endDate}`,
+    console.log(`${this.config.backend.baseUrl}/api/v1/payments/analytics?start_date=${startDate}&end_date=${endDate}`,
         {
           method: 'GET',
           headers: {
@@ -483,7 +483,7 @@ class PaymentServiceClass {
    */
   async loadConfig(): Promise<PaymentProviderConfig | null> {
     try {
-      const configString = await AsyncStorage.getItem('payment_config');
+      const __configString = await AsyncStorage.getItem('payment_config');
       if (__configString) {
         const config = JSON.parse(__configString);
         await this.initialize(__config);

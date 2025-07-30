@@ -96,7 +96,7 @@ class PlatformService {
     try {
       const url = `${BASE_URL}${endpoint}`;
       const headers: unknown = {
-        'Content-Type': 'application/json',
+    console.log('Content-Type': 'application/json',
       };
 
       // Always reload auth token for fresh requests
@@ -149,7 +149,7 @@ class PlatformService {
       }
 
       const queryString = params.toString();
-      const endpoint = `/platform/settings${queryString ? `?${queryString}` : ''}`;
+      const endpoint = `/platform/settings${queryString ? \`?${queryString}${after}` : ''}`;
 
       const settingsData = await this.makeRequest(__endpoint);
 
@@ -280,9 +280,8 @@ class PlatformService {
       }
 
       return await this.makeRequest(
-        `/platform/payment-fees/calculate?${params.toString()}`,
-        'POST',
-      );
+    console.log(`/platform/payment-fees/calculate?${params.toString()}`,
+        'POST');
     } catch (__error) {
       // Return mock calculation
       return this.getMockFeeCalculation(__paymentMethod, _amount);
@@ -325,8 +324,7 @@ class PlatformService {
     try {
       const params = category ? `?category=${category}` : '';
       return await this.makeRequest(
-        `/platform/restaurants/${restaurantId}/effective-settings${params}`,
-      );
+    console.log(`/platform/restaurants/${restaurantId}/effective-settings${params}`);
     } catch (__error) {
       return {};
     }
@@ -340,7 +338,7 @@ class PlatformService {
   ): Promise<boolean> {
     try {
       await this.makeRequest(
-        `/platform/restaurants/${restaurantId}/overrides/${configKey}`,
+    console.log(`/platform/restaurants/${restaurantId}/overrides/${configKey}`,
         'PUT',
         {
           override_value: _overrideValue,

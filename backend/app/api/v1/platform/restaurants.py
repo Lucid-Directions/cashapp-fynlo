@@ -4,7 +4,7 @@ Platform restaurant management endpoints.
 
 from datetime import datetime
 from typing import List, Optional
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 
@@ -15,7 +15,6 @@ from app.schemas.restaurant import RestaurantCreate, RestaurantUpdate
 from app.core.security_utils import sanitize_sql_like_pattern
 
 router = APIRouter(prefix="/restaurants", tags=["platform-restaurants"])
-
 
 @router.get("/")
 async def list_all_restaurants(
@@ -89,7 +88,6 @@ async def list_all_restaurants(
             status_code=500
         )
 
-
 @router.get("/{restaurant_id}")
 async def get_restaurant_details(
     restaurant_id: str,
@@ -153,7 +151,6 @@ async def get_restaurant_details(
             status_code=500
         )
 
-
 @router.put("/{restaurant_id}/subscription")
 async def update_restaurant_subscription(
     restaurant_id: str,
@@ -212,7 +209,6 @@ async def update_restaurant_subscription(
             message=f"Failed to update subscription: {str(e)}",
             status_code=500
         )
-
 
 @router.put("/{restaurant_id}/status")
 async def toggle_restaurant_status(

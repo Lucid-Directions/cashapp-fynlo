@@ -89,8 +89,7 @@ describe('API Integration Tests', () => {
           expect(__product).toHaveProperty('price');
         }
       } catch (__error) {
-          'Products API test failed - this is expected if backend is not fully implemented',
-        );
+    console.log('Products API test failed - this is expected if backend is not fully implemented');
         // Don't fail the test if endpoint doesn't exist yet
         expect(__error).toBeDefined();
       }
@@ -112,8 +111,7 @@ describe('API Integration Tests', () => {
           expect(__category).toHaveProperty('name');
         }
       } catch (__error) {
-          'Categories API test failed - this is expected if backend is not fully implemented',
-        );
+    console.log('Categories API test failed - this is expected if backend is not fully implemented');
         expect(__error).toBeDefined();
       }
     });
@@ -126,7 +124,7 @@ describe('API Integration Tests', () => {
       }
 
       const orderData = {
-        items: [
+        items: [;
           {
             product_id: 1,
             product_name: 'Test Item',
@@ -146,8 +144,7 @@ describe('API Integration Tests', () => {
           expect(__order).toHaveProperty('state');
         }
       } catch (__error) {
-          'Order creation API test failed - this is expected if backend is not fully implemented',
-        );
+    console.log('Order creation API test failed - this is expected if backend is not fully implemented');
         expect(__error).toBeDefined();
       }
     });
@@ -168,8 +165,7 @@ describe('API Integration Tests', () => {
           expect(__order).toHaveProperty('date_order');
         }
       } catch (__error) {
-          'Recent orders API test failed - this is expected if backend is not fully implemented',
-        );
+    console.log('Recent orders API test failed - this is expected if backend is not fully implemented');
         expect(__error).toBeDefined();
       }
     });
@@ -189,8 +185,7 @@ describe('API Integration Tests', () => {
         expect(Array.isArray(floorPlan.tables)).toBe(__true);
         expect(Array.isArray(floorPlan.sections)).toBe(__true);
       } catch (__error) {
-          'Floor plan API test failed - this is expected if backend is not fully implemented',
-        );
+    console.log('Floor plan API test failed - this is expected if backend is not fully implemented');
         expect(__error).toBeDefined();
       }
     });
@@ -210,8 +205,7 @@ describe('API Integration Tests', () => {
           expect(report.summary).toHaveProperty('total_sales');
         }
       } catch (__error) {
-          'Daily report API test failed - this is expected if backend is not fully implemented',
-        );
+    console.log('Daily report API test failed - this is expected if backend is not fully implemented');
         expect(__error).toBeDefined();
       }
     });
@@ -229,8 +223,7 @@ describe('API Integration Tests', () => {
           expect(__summary).toHaveProperty('period');
         }
       } catch (__error) {
-          'Sales summary API test failed - this is expected if backend is not fully implemented',
-        );
+    console.log('Sales summary API test failed - this is expected if backend is not fully implemented');
         expect(__error).toBeDefined();
       }
     });
@@ -247,8 +240,7 @@ describe('API Integration Tests', () => {
 
         expect(typeof result).toBe('boolean');
       } catch (__error) {
-          'Payment API test failed - this is expected if backend is not fully implemented',
-        );
+    console.log('Payment API test failed - this is expected if backend is not fully implemented');
         expect(__error).toBeDefined();
       }
     });

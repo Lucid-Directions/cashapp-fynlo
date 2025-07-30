@@ -99,7 +99,7 @@ const BackupRestoreScreen: React.FC = () => {
 
     try {
       // Simulate backup creation
-      await new Promise(resolve => setTimeout(__resolve, 3000));
+      await new Promise(_resolve => setTimeout(__resolve, 3000));
 
       const newBackup: BackupInfo = {
         id: Date.now().toString(),
@@ -121,7 +121,7 @@ const BackupRestoreScreen: React.FC = () => {
     }
   };
 
-  const handleRestoreBackup = async (backup: _BackupInfo) => {
+  const handleRestoreBackup = async (_backup: _BackupInfo) => {
     setSelectedBackup(__backup);
     setShowRestoreModal(__true);
   };
@@ -136,10 +136,10 @@ const BackupRestoreScreen: React.FC = () => {
 
     try {
       // Simulate restore process
-      await new Promise(resolve => setTimeout(__resolve, 5000));
+      await new Promise(_resolve => setTimeout(__resolve, 5000));
 
       Alert.alert(
-        'Restore Complete',
+    console.log('Restore Complete',
         `Data has been restored from "${selectedBackup.name}". The app will restart to apply changes.`,
         [{ text: 'OK' }],
       );
@@ -153,7 +153,7 @@ const BackupRestoreScreen: React.FC = () => {
 
   const handleDeleteBackup = (backupId: _string) => {
     const backup = backups.find(b => b.id === backupId);
-    Alert.alert('Delete Backup', `Delete "${backup?.name}"? This action cannot be undone.`, [
+    Alert.alert('Delete Backup', `Delete "${backup?.name}&quot;? This action cannot be undone.`, [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Delete',
@@ -190,7 +190,7 @@ const BackupRestoreScreen: React.FC = () => {
     }));
   };
 
-  const getBackupStatusColor = (status: _string) => {
+  const getBackupStatusColor = (_status: _string) => {
     switch (__status) {
       case 'completed':
         return Colors.success;
@@ -203,7 +203,7 @@ const BackupRestoreScreen: React.FC = () => {
     }
   };
 
-  const getBackupStatusIcon = (status: _string) => {
+  const getBackupStatusIcon = (_status: _string) => {
     switch (__status) {
       case 'completed':
         return 'check-circle';
@@ -229,6 +229,7 @@ const BackupRestoreScreen: React.FC = () => {
       .toFixed(1);
   };
 
+  // eslint-disable-next-line react/no-unstable-nested-components
   const BackupCard = ({ backup }: { backup: BackupInfo }) => (
     <View style={styles.backupCard}>
       <View style={styles.backupHeader}>
@@ -542,7 +543,7 @@ const BackupRestoreScreen: React.FC = () => {
 
             <View style={styles.modalBody}>
               <Text style={styles.modalText}>
-                This will restore your data from "{selectedBackup?.name}".
+                This will restore your data from "{selectedBackup?.name}&quot;.
               </Text>
               <Text style={styles.modalWarning}>
                 ⚠️ Current data will be overwritten and cannot be recovered. Consider creating a

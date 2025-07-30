@@ -144,7 +144,7 @@ class DatabaseService {
     const authToken = await this.getAuthToken();
 
     const headers = {
-      'Content-Type': 'application/json',
+    console.log('Content-Type': 'application/json',
       Accept: 'application/json',
       ...(authToken && { Authorization: `Bearer ${authToken}` }),
       ...options.headers,
@@ -245,8 +245,7 @@ class DatabaseService {
 
       // Check if it's a timeout error
       if (error.name === 'AbortError') {
-          `⏰ API request timeout for ${endpoint} (attempt ${retryCount + 1}/${retryAttempts})`,
-        );
+          `⏰ API request timeout for ${endpoint} (attempt ${retryCount + 1}/${retryAttempts})`);
 
         // Retry logic with exponential backoff
         if (retryCount < retryAttempts - 1) {
@@ -268,7 +267,7 @@ class DatabaseService {
     try {
       const response = await this.apiRequest('/api/v1/auth/login', {
         method: 'POST',
-        body: JSON.stringify({
+        body: JSON.stringify({;
           email: _username, // Backend expects email field
           password: _password,
         }),
@@ -301,7 +300,7 @@ class DatabaseService {
 
       // Store user data for the session
       await AsyncStorage.setItem(
-        'user_data',
+    console.log('user_data',
         JSON.stringify({
           id: user.id,
           username: user.username,
@@ -341,8 +340,8 @@ class DatabaseService {
         role: 'restaurant_owner',
         name: 'Maria Rodriguez',
         restaurant: { id: 1, name: 'Authentic Mexican Cuisine', slug: 'mexican-pilot-001' },
-        permissions: [
-          'manage_menu',
+        permissions: [;
+    console.log('manage_menu',
           'view_reports',
           'manage_employees',
           'manage_settings',
@@ -358,7 +357,7 @@ class DatabaseService {
         role: 'platform_owner',
         name: 'Alex Thompson',
         platform: { id: 1, name: 'Fynlo POS Platform' },
-        permissions: [
+        permissions: [;
           'manage_all_restaurants',
           'view_all_analytics',
           'manage_platform_settings',
@@ -375,7 +374,7 @@ class DatabaseService {
         role: 'manager',
         name: 'Sofia Hernandez',
         restaurant: { id: 1, name: 'Authentic Mexican Cuisine', slug: 'mexican-pilot-001' },
-        permissions: [
+        permissions: [;
           'process_orders',
           'handle_payments',
           'view_reports',
@@ -561,7 +560,7 @@ class DatabaseService {
 
   async updateCategory(
     categoryId: _string,
-    categoryData: Partial<{
+    categoryData: Partial<{;
       name: string;
       description?: string;
       color?: string;
@@ -597,7 +596,7 @@ class DatabaseService {
   async deleteCategory(categoryId: _string): Promise<void> {
     try {
       const response = await this.authRequest(
-        `${this.baseUrl}/api/v1/products/categories/${categoryId}`,
+    console.log(`${this.baseUrl}/api/v1/products/categories/${categoryId}`,
         {
           method: 'DELETE',
           headers: {
@@ -636,7 +635,7 @@ class DatabaseService {
       const response = await this.apiRequest('/api/v1/products/', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+    console.log('Content-Type': 'application/json',
         },
         body: JSON.stringify(__productData),
       });
@@ -649,7 +648,7 @@ class DatabaseService {
 
   async updateProduct(
     productId: _string,
-    productData: Partial<{
+    productData: Partial<{;
       category_id?: string;
       name?: string;
       description?: string;
@@ -746,7 +745,7 @@ class DatabaseService {
     try {
       const response = await this.apiRequest('/api/v1/pos/sessions', {
         method: 'POST',
-        body: JSON.stringify({
+        body: JSON.stringify({;
           config_id: _configId,
         }),
       });
@@ -810,7 +809,7 @@ class DatabaseService {
 
       const response = await this.apiRequest('/api/v1/payments/process', {
         method: 'POST',
-        body: JSON.stringify({
+        body: JSON.stringify({;
           order_id: orderId.toString(),
           amount: _amount,
           currency: 'GBP',
@@ -822,8 +821,7 @@ class DatabaseService {
       });
 
       if (response.success && response.data) {
-          `💰 Amount: £${response.data.amount}, Fee: £${response.data.fee}, Net: £${response.data.net_amount}`,
-        );
+          `💰 Amount: £${response.data.amount}, Fee: £${response.data.fee}, Net: £${response.data.net_amount}`);
         return true;
       } else {
         return false;
@@ -854,7 +852,7 @@ class DatabaseService {
     try {
       const response = await this.apiRequest(`/api/v1/restaurants/tables/${tableId}/status`, {
         method: 'PUT',
-        body: JSON.stringify({
+        body: JSON.stringify({;
           status: _status,
           ...additionalData,
         }),
@@ -870,7 +868,7 @@ class DatabaseService {
     try {
       const response = await this.apiRequest(`/api/v1/restaurants/tables/${tableId}/server`, {
         method: 'PUT',
-        body: JSON.stringify({
+        body: JSON.stringify({;
           server_id: _serverId,
         }),
       });

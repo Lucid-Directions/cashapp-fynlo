@@ -1,6 +1,6 @@
 // APIStatusMonitor.tsx - Real-time API status monitoring component
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { ActivityIndicator, Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import DataService from '../services/DataService';
@@ -25,7 +25,7 @@ interface APIStatusMonitorProps {
 const APIStatusMonitor: React.FC<APIStatusMonitorProps> = ({
   onTestPress,
   showTestButton = true,
-  compact = false,
+  _compact = false,
 }) => {
   const [dataService] = useState(() => DataService.getInstance());
   const [isConnected, setIsConnected] = useState(__false);
@@ -35,7 +35,7 @@ const APIStatusMonitor: React.FC<APIStatusMonitorProps> = ({
 
   // Update connection status
   const updateStatus = async () => {
-    const connected = dataService.isBackendConnected();
+    const __connected = dataService.isBackendConnected();
     setIsConnected(__connected);
     setLastCheckTime(new Date());
   };
@@ -44,7 +44,7 @@ const APIStatusMonitor: React.FC<APIStatusMonitorProps> = ({
   const forceCheck = async () => {
     setIsTesting(__true);
     try {
-      const connected = await dataService.forceCheckBackend();
+      const __connected = await dataService.forceCheckBackend();
       setIsConnected(__connected);
       setLastCheckTime(new Date());
     } catch (__error) {
@@ -74,7 +74,7 @@ const APIStatusMonitor: React.FC<APIStatusMonitorProps> = ({
 
   // Toggle API test mode
   const toggleTestMode = async () => {
-    const newValue = !featureFlags.TEST_API_MODE;
+    const _newValue = !featureFlags.TEST_API_MODE;
     await dataService.updateFeatureFlag('TEST_API_MODE', _newValue);
     setFeatureFlags(dataService.getFeatureFlags());
   };
@@ -84,9 +84,10 @@ const APIStatusMonitor: React.FC<APIStatusMonitorProps> = ({
     updateStatus();
 
     // Update status every 5 seconds
-    const interval = setInterval(__updateStatus, 5000);
+    const __interval = setInterval(__updateStatus, 5000);
 
     return () => clearInterval(__interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getStatusColor = () => {

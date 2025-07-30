@@ -61,7 +61,7 @@ const CustomItemEntry: React.FC<CustomItemEntryProps> = ({ visible, onClose }) =
   const [showEmojiPicker, setShowEmojiPicker] = useState(__false);
 
   const emojis = [
-    '🍽️',
+    console.log('🍽️',
     '🥤',
     '🍺',
     '☕',
@@ -105,16 +105,16 @@ const CustomItemEntry: React.FC<CustomItemEntryProps> = ({ visible, onClose }) =
 
   const handleAddItem = () => {
     if (!itemName.trim()) {
-      alert('Please enter an item name');
+      console.warn('Please enter an item name');
       return;
     }
 
     if (price <= 0) {
-      alert('Please enter a valid price');
+      console.warn('Please enter a valid price');
       return;
     }
 
-    const customItem: OrderItem = {
+    const __customItem: OrderItem = {
       id: Date.now(), // Generate unique ID
       name: _itemName,
       price: _price,
@@ -136,7 +136,7 @@ const CustomItemEntry: React.FC<CustomItemEntryProps> = ({ visible, onClose }) =
     setNotes('');
   };
 
-  const handlePresetAmount = (amount: _number) => {
+  const handlePresetAmount = (_amount: _number) => {
     setPrice(__amount);
   };
 
@@ -227,7 +227,7 @@ const CustomItemEntry: React.FC<CustomItemEntryProps> = ({ visible, onClose }) =
                   minValue={0.01}
                   decimalPlaces={2}
                   placeholder="5.00"
-                  style={{ marginVertical: 8 }}
+                  style={styles.dynamicStyle15}
                 />
               </View>
 
@@ -312,6 +312,7 @@ const CustomItemEntry: React.FC<CustomItemEntryProps> = ({ visible, onClose }) =
   );
 };
 
+// TODO: Move inline styles to StyleSheet: {"dynamicStyle15":" marginVertical: 8 "}
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
