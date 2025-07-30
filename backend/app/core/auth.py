@@ -7,12 +7,15 @@ from sqlalchemy.orm import Session
 from typing import Optional
 import uuid
 import logging
+from datetime import datetime, timedelta
+from jose import jwt
 
 from app.core.supabase import supabase_admin
 from app.core.database import get_db
 from app.core.database import User
 from app.services.audit_logger import AuditLoggerService
 from app.models.audit_log import AuditEventType, AuditEventStatus
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -232,3 +235,19 @@ async def verify_websocket_token(
     except Exception as e:
         logger.error(f"WebSocket token verification error: {str(e)}")
         return None
+
+
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+    """
+    Create JWT access token for testing purposes
+    This is primarily used in tests to create valid tokens
+    """
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    return encoded_jwt

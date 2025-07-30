@@ -16,9 +16,8 @@ source venv/bin/activate
 
 # Check if .env file exists
 if [ ! -f ".env" ]; then
-    echo "❌ .env file not found. Copying from .env.example..."
-    cp .env.example .env
-    echo "⚠️  Please edit .env file with your configuration before continuing."
+    echo "❌ .env file not found."
+    echo "⚠️  Please create a .env file with your configuration before continuing."
     exit 1
 fi
 

@@ -14,6 +14,7 @@ from app.api.v1.endpoints import (
     platform_settings_optimized,  # Optimized endpoints for mobile app
     platform_admin,  # Secure platform administration
     sumup,  # SumUp payment provider initialization
+    restaurant_switch,  # Multi-restaurant management
     health, monitoring  # Instance health and monitoring endpoints
 )
 from app.api.v1 import subscriptions
@@ -52,6 +53,9 @@ api_router.include_router(recipes.router, prefix="/recipes", tags=["recipe_manag
 
 # Employee Management
 api_router.include_router(employees.router, prefix="/employees", tags=["employee_management"])
+
+# Restaurant Switching (Multi-restaurant management)
+api_router.include_router(restaurant_switch.router, prefix="/restaurant-switch", tags=["restaurant_management"])
 
 # Menu Management (Frontend compatibility endpoints)
 api_router.include_router(menu.router, prefix="/menu", tags=["menu"])

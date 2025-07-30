@@ -120,12 +120,13 @@ def generate_order_number() -> str:
 def verify_order_access(order, current_user):
     """Verify user has access to the order's restaurant"""
     if current_user.role != 'platform_owner':
-        if current_user.restaurant_id is None:
+        user_restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
+        if user_restaurant_id is None:
             raise HTTPException(
                 status_code=403,
                 detail="Access denied: No restaurant assigned to user"
             )
-        if str(order.restaurant_id) != str(current_user.restaurant_id):
+        if str(order.restaurant_id) != str(user_restaurant_id):
             raise HTTPException(
                 status_code=403,
                 detail="Access denied: You can only access orders from your own restaurant"
@@ -163,18 +164,29 @@ async def get_orders(
         else:
             query = db.query(Order).filter(Order.restaurant_id == restaurant_id)
     else:
-        # Restaurant owners, managers, and employees can only access their own restaurant
-        if current_user.restaurant_id is None:
+        # Restaurant owners, managers, and employees can only access their own restaurant(s)
+        user_restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
+        if user_restaurant_id is None:
             raise HTTPException(
                 status_code=403,
                 detail="Access denied: No restaurant assigned to user"
             )
-        if restaurant_id and str(restaurant_id) != str(current_user.restaurant_id):
-            raise HTTPException(
-                status_code=403,
-                detail="Access denied: You can only view orders from your own restaurant"
+        
+        # Use provided restaurant_id or fallback to user's current restaurant
+        if not restaurant_id:
+            restaurant_id = str(user_restaurant_id)
+        else:
+            # Validate that user has access to the requested restaurant
+            from app.core.tenant_security import TenantSecurity
+            await TenantSecurity.validate_restaurant_access(
+                user=current_user,
+                restaurant_id=restaurant_id,
+                operation="access",
+                resource_type="orders",
+                resource_id=None,
+                db=db
             )
-        restaurant_id = str(current_user.restaurant_id)
+        
         query = db.query(Order).filter(Order.restaurant_id == restaurant_id)
     
     if status:
@@ -261,18 +273,28 @@ async def get_todays_orders(
                 detail="Restaurant ID is required for platform owners"
             )
     else:
-        # Restaurant owners, managers, and employees can only access their own restaurant
-        if current_user.restaurant_id is None:
+        # Restaurant owners, managers, and employees can only access their own restaurant(s)
+        user_restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
+        if user_restaurant_id is None:
             raise HTTPException(
                 status_code=403,
                 detail="Access denied: No restaurant assigned to user"
             )
-        if restaurant_id and str(restaurant_id) != str(current_user.restaurant_id):
-            raise HTTPException(
-                status_code=403,
-                detail="Access denied: You can only view orders from your own restaurant"
+        
+        # Use provided restaurant_id or fallback to user's current restaurant
+        if not restaurant_id:
+            restaurant_id = str(user_restaurant_id)
+        else:
+            # Validate that user has access to the requested restaurant
+            from app.core.tenant_security import TenantSecurity
+            await TenantSecurity.validate_restaurant_access(
+                user=current_user,
+                restaurant_id=restaurant_id,
+                operation="access",
+                resource_type="orders",
+                resource_id=None,
+                db=db
             )
-        restaurant_id = str(current_user.restaurant_id)
     
     # Check cache first
     cache_key = f"orders:today:{restaurant_id}"
@@ -291,6 +313,13 @@ async def get_todays_orders(
             Order.status.in_(["pending", "confirmed", "preparing", "ready"])
         )
     ).order_by(desc(Order.created_at)).all()
+    
+    # Fetch customer information for the orders
+    customer_ids = [order.customer_id for order in orders if order.customer_id]
+    customers_map = {}
+    if customer_ids:
+        customers = db.query(Customer.id, Customer.first_name, Customer.last_name).filter(Customer.id.in_(customer_ids)).all()
+        customers_map = {str(c.id): f"{c.first_name} {c.last_name}" for c in customers}
     
     result = [
         OrderSummary(
@@ -353,18 +382,28 @@ async def create_order(
                 detail="Restaurant ID is required for platform owners"
             )
     else:
-        # Restaurant owners, managers, and employees can only create orders for their own restaurant
-        if current_user.restaurant_id is None:
+        # Restaurant owners, managers, and employees can only create orders for their own restaurant(s)
+        user_restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
+        if user_restaurant_id is None:
             raise HTTPException(
                 status_code=403,
                 detail="Access denied: No restaurant assigned to user"
             )
-        if restaurant_id and str(restaurant_id) != str(current_user.restaurant_id):
-            raise HTTPException(
-                status_code=403,
-                detail="Access denied: You can only create orders for your own restaurant"
+        
+        # Use provided restaurant_id or fallback to user's current restaurant
+        if not restaurant_id:
+            restaurant_id = str(user_restaurant_id)
+        else:
+            # Validate that user has access to the requested restaurant
+            from app.core.tenant_security import TenantSecurity
+            await TenantSecurity.validate_restaurant_access(
+                user=current_user,
+                restaurant_id=restaurant_id,
+                operation="modify",
+                resource_type="orders",
+                resource_id=None,
+                db=db
             )
-        restaurant_id = str(current_user.restaurant_id)
 
     customer_id_to_save = order_data.customer_id
 

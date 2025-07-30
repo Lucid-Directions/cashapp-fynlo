@@ -46,7 +46,8 @@ class Settings(BaseSettings):
     SUPABASE_URL: Optional[str] = None
     SUPABASE_ANON_KEY: Optional[str] = None
     SUPABASE_SERVICE_ROLE_KEY: Optional[str] = None
-    PLATFORM_OWNER_EMAIL: str = "admin@fynlo.co.uk"
+    # Platform owner emails - comma-separated list from environment
+    PLATFORM_OWNER_EMAILS: Optional[str] = None  # e.g., "ryan@fynlo.co.uk,arnaud@fynlo.co.uk"
     # Platform owner verification - requires both email AND secret key
     PLATFORM_OWNER_SECRET_KEY: Optional[str] = None  # Set via environment variable
     PLATFORM_OWNER_REQUIRE_2FA: bool = True  # Require 2FA for platform owners
@@ -169,6 +170,16 @@ class Settings(BaseSettings):
         
         # Single value
         return [v.strip()] if v.strip() else []
+    
+    @property
+    def platform_owner_emails_list(self) -> List[str]:
+        """Get platform owner emails as a list"""
+        if not self.PLATFORM_OWNER_EMAILS:
+            return []
+        
+        # Parse comma-separated emails
+        emails = [email.strip().lower() for email in self.PLATFORM_OWNER_EMAILS.split(',') if email.strip()]
+        return emails
     
     class Config:
         case_sensitive = True

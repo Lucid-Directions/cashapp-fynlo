@@ -6,19 +6,14 @@ Platform Owners (Ryan and Arnaud) have FULL access to everything.
 All other users are restricted to their own restaurant's data.
 """
 
-from typing import Optional, Union
+from typing import Optional, Union, List
 from fastapi import HTTPException, status, Request
 from sqlalchemy.orm import Session, Query
-from app.models import User, Restaurant
+from sqlalchemy import select, func
+from app.models import User, Restaurant, UserRestaurant
 from app.core.security_monitor import security_monitor, SecurityEventType
-
-# Platform owner emails - ONLY these users have full access
-PLATFORM_OWNER_EMAILS = [
-    "ryan@fynlo.com",
-    "arnaud@fynlo.com",
-    "ryand2626@gmail.com",  # Ryan's alternate email if used
-    "arno@fynlo.com",       # Arnaud's alternate email if used
-]
+from app.core.config import settings
+from app.core.validators import validate_uuid_format
 
 
 class TenantSecurity:
@@ -35,7 +30,7 @@ class TenantSecurity:
             
         # Check by role AND email for extra security
         is_owner_role = user.role == "platform_owner"
-        is_owner_email = user.email.lower() in [email.lower() for email in PLATFORM_OWNER_EMAILS]
+        is_owner_email = user.email.lower() in settings.platform_owner_emails_list
         
         # Both conditions must be true for platform owner access
         return is_owner_role and is_owner_email
@@ -47,7 +42,8 @@ class TenantSecurity:
         operation: str = "access",
         resource_type: Optional[str] = None,
         resource_id: Optional[str] = None,
-        request: Optional[Request] = None
+        request: Optional[Request] = None,
+        db: Optional[Session] = None
     ) -> None:
         """
         Validate if user can access a specific restaurant's data
@@ -56,10 +52,19 @@ class TenantSecurity:
             user: Current user
             restaurant_id: Restaurant ID to access
             operation: Type of operation (access, modify, delete)
+            db: Database session (required for multi-restaurant check)
             
         Raises:
             HTTPException: If access is denied
         """
+        # Validate restaurant_id format to prevent SQL injection
+        try:
+            validate_uuid_format(str(restaurant_id))
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid restaurant ID format"
+            )
         # Get client IP for logging
         client_ip = None
         if request:
@@ -77,25 +82,48 @@ class TenantSecurity:
             )
             return  # Full access granted
         
-        # All other users can only access their own restaurant
-        if not user.restaurant_id:
-            # Log access denial
-            await security_monitor.log_access_attempt(
-                user=user,
-                resource_type=resource_type or "restaurant",
-                resource_id=restaurant_id,
-                action=operation,
-                granted=False,
-                ip_address=client_ip or "unknown",
-                reason="User has no restaurant assigned"
-            )
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"Access denied: User has no restaurant assigned"
-            )
+        # Check if user has access to this restaurant (multi-restaurant support)
+        has_access = False
         
-        if str(user.restaurant_id) != str(restaurant_id):
-            # Log cross-tenant access attempt
+        # First check legacy single restaurant assignment
+        if user.restaurant_id and str(user.restaurant_id) == str(restaurant_id):
+            has_access = True
+        
+        # Then check multi-restaurant access for restaurant owners
+        elif db and user.role == "restaurant_owner":
+            # Check if user has access through user_restaurants table
+            user_restaurant = db.query(UserRestaurant).filter(
+                UserRestaurant.user_id == user.id,
+                UserRestaurant.restaurant_id == restaurant_id
+            ).first()
+            
+            if user_restaurant:
+                has_access = True
+                # Update current restaurant context if different
+                if user.current_restaurant_id != restaurant_id:
+                    try:
+                        user.current_restaurant_id = restaurant_id
+                        user.last_restaurant_switch = func.now()
+                        db.commit()
+                    except Exception as e:
+                        db.rollback()
+                        # Log the error but don't fail the access check
+                        await security_monitor.log_event(
+                            user=user,
+                            event_type=SecurityEventType.ERROR,
+                            details={
+                                "error": "Failed to update current restaurant context",
+                                "restaurant_id": restaurant_id,
+                                "exception": str(e)
+                            }
+                        )
+        
+        if not has_access:
+            # Log access denial
+            reason = "User has no access to this restaurant"
+            if not user.restaurant_id and (not db or user.role != "restaurant_owner"):
+                reason = "User has no restaurant assigned"
+            
             await security_monitor.log_access_attempt(
                 user=user,
                 resource_type=resource_type or "restaurant",
@@ -103,11 +131,11 @@ class TenantSecurity:
                 action=operation,
                 granted=False,
                 ip_address=client_ip or "unknown",
-                reason=f"Cross-tenant access attempt from restaurant {user.restaurant_id} to {restaurant_id}"
+                reason=reason
             )
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"Access denied: You can only {operation} data from your own restaurant"
+                detail=f"Access denied: You don't have permission to {operation} data from this restaurant"
             )
     
     @staticmethod
@@ -115,7 +143,8 @@ class TenantSecurity:
         query: Query,
         user: User,
         model_class: type,
-        restaurant_field: str = "restaurant_id"
+        restaurant_field: str = "restaurant_id",
+        db: Optional[Session] = None
     ) -> Query:
         """
         Apply tenant filtering to a SQLAlchemy query
@@ -125,6 +154,7 @@ class TenantSecurity:
             user: Current user
             model_class: Model class being queried
             restaurant_field: Field name for restaurant_id (default: "restaurant_id")
+            db: Database session (required for multi-restaurant filtering)
             
         Returns:
             Filtered query
@@ -133,17 +163,25 @@ class TenantSecurity:
         if TenantSecurity.is_platform_owner(user):
             return query
         
-        # All other users only see their restaurant's data
-        if not user.restaurant_id:
-            # Return empty result for users without restaurant
+        # Get accessible restaurant IDs
+        accessible_restaurants = TenantSecurity.get_accessible_restaurant_ids(user, db)
+        
+        if not accessible_restaurants:
+            # Return empty result for users without restaurant access
             return query.filter(False)
         
-        # Filter by user's restaurant
+        # Filter by accessible restaurants
         filter_field = getattr(model_class, restaurant_field)
-        return query.filter(filter_field == user.restaurant_id)
+        
+        # If only one restaurant, use simple equality
+        if len(accessible_restaurants) == 1:
+            return query.filter(filter_field == accessible_restaurants[0])
+        
+        # Multiple restaurants - use IN clause
+        return query.filter(filter_field.in_(accessible_restaurants))
     
     @staticmethod
-    def get_accessible_restaurant_ids(user: User) -> list[str]:
+    def get_accessible_restaurant_ids(user: User, db: Optional[Session] = None) -> List[str]:
         """
         Get list of restaurant IDs accessible by user
         
@@ -154,11 +192,26 @@ class TenantSecurity:
         if TenantSecurity.is_platform_owner(user):
             return []  # Empty list means "all restaurants"
         
-        # Other users can only access their own restaurant
-        if user.restaurant_id:
-            return [str(user.restaurant_id)]
+        # Use a set for efficient deduplication
+        accessible_restaurants = set()
         
-        return []  # No access
+        # For restaurant owners, check user_restaurants table
+        if db and user.role == "restaurant_owner":
+            # Get all restaurants from user_restaurants table
+            user_restaurants = db.query(UserRestaurant).filter(
+                UserRestaurant.user_id == user.id
+            ).all()
+            
+            for ur in user_restaurants:
+                accessible_restaurants.add(str(ur.restaurant_id))
+        
+        # For non-restaurant owners, only add legacy restaurant_id if it exists
+        # This ensures that if a restaurant owner's access is revoked via user_restaurants,
+        # they don't retain access through the legacy field
+        elif user.restaurant_id:
+            accessible_restaurants.add(str(user.restaurant_id))
+        
+        return list(accessible_restaurants)
     
     @staticmethod
     def validate_cross_restaurant_operation(

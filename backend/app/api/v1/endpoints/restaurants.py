@@ -23,6 +23,7 @@ from app.core.validation import (
 )
 from app.core.websocket import websocket_manager
 from app.schemas.restaurant import RestaurantOnboardingCreate
+from app.core.tenant_security import TenantSecurity
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -102,11 +103,31 @@ async def get_restaurants(
         
         restaurants = query.order_by(Restaurant.name).all()
     
-    # Restaurant users can only see their own restaurant
+    # Restaurant users - handle multi-restaurant access
     else:
-        restaurants = db.query(Restaurant).filter(
-            Restaurant.id == current_user.restaurant_id
-        ).all()
+        from app.core.tenant_security import TenantSecurity
+        from app.core.database import UserRestaurant
+        
+        # Get all accessible restaurants for the user
+        accessible_restaurants = TenantSecurity.get_accessible_restaurant_ids(current_user, db)
+        
+        if not accessible_restaurants:
+            return APIResponseHelper.success(
+                data=[],
+                message="No restaurants accessible",
+                meta={
+                    "user_role": current_user.role,
+                    "active_only": active_only
+                }
+            )
+        
+        # Query all accessible restaurants
+        query = db.query(Restaurant).filter(Restaurant.id.in_(accessible_restaurants))
+        
+        if active_only:
+            query = query.filter(Restaurant.is_active == True)
+        
+        restaurants = query.order_by(Restaurant.name).all()
     
     result = [
         RestaurantResponse(
@@ -140,16 +161,23 @@ async def get_restaurants(
 
 @router.get("/current", response_model=RestaurantResponse)
 async def get_current_restaurant(
+    current_restaurant_id: Optional[str] = Query(None, description="Specific restaurant ID for multi-restaurant users"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Get current user's restaurant"""
+    """Get current restaurant (supports multi-restaurant access)"""
     
-    if not current_user.restaurant_id:
-        raise HTTPException(status_code=404, detail="No restaurant associated with user")
+    # Validate restaurant access
+    await TenantSecurity.validate_restaurant_access(
+        current_user, 
+        current_restaurant_id or current_user.restaurant_id, 
+        db=db
+    )
+    # Use the provided restaurant_id or fall back to user's default
+    restaurant_id = current_restaurant_id or current_user.restaurant_id
     
     restaurant = db.query(Restaurant).filter(
-        Restaurant.id == current_user.restaurant_id
+        Restaurant.id == restaurant_id
     ).first()
     
     if not restaurant:
@@ -440,6 +468,7 @@ async def create_restaurant_onboarding(
 async def update_restaurant(
     restaurant_id: str,
     restaurant_data: RestaurantUpdate,
+    current_restaurant_id: Optional[str] = Query(None, description="Specific restaurant ID for multi-restaurant users"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -449,14 +478,21 @@ async def update_restaurant(
     if not restaurant:
         raise HTTPException(status_code=404, detail="Restaurant not found")
     
-    # Check permissions
-    if (current_user.role == "platform_owner" and 
-        str(restaurant.platform_id) != str(current_user.platform_id)):
-        raise HTTPException(status_code=403, detail="Access denied")
-    
-    if (current_user.role in ["restaurant_owner", "manager"] and 
-        str(restaurant.id) != str(current_user.restaurant_id)):
-        raise HTTPException(status_code=403, detail="Access denied")
+    # Platform owners can update any restaurant in their platform
+    if current_user.role == "platform_owner":
+        if str(restaurant.platform_id) != str(current_user.platform_id):
+            raise HTTPException(status_code=403, detail="Access denied")
+    else:
+        # Restaurant users - validate access to the specific restaurant
+        await TenantSecurity.validate_restaurant_access(
+            current_user, 
+            restaurant_id,  # Must match the restaurant being updated
+            db=db
+        )
+        
+        # Additional check for managers - they can only update settings, not critical fields
+        if current_user.role == "manager" and any(key in restaurant_data.dict(exclude_unset=True) for key in ['is_active', 'payment_methods']):
+            raise HTTPException(status_code=403, detail="Managers cannot modify critical settings")
     
     # Validate and sanitize fields if provided
     update_data = restaurant_data.dict(exclude_unset=True)
@@ -536,6 +572,7 @@ async def update_restaurant(
 async def get_restaurant_stats(
     restaurant_id: str,
     days: int = Query(30, le=365),
+    current_restaurant_id: Optional[str] = Query(None, description="Specific restaurant ID for multi-restaurant users"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -545,14 +582,17 @@ async def get_restaurant_stats(
     if not restaurant:
         raise HTTPException(status_code=404, detail="Restaurant not found")
     
-    # Check permissions
-    if (current_user.role == "platform_owner" and 
-        str(restaurant.platform_id) != str(current_user.platform_id)):
-        raise HTTPException(status_code=403, detail="Access denied")
-    
-    if (current_user.role in ["restaurant_owner", "manager", "employee"] and 
-        str(restaurant.id) != str(current_user.restaurant_id)):
-        raise HTTPException(status_code=403, detail="Access denied")
+    # Platform owners can view stats for any restaurant in their platform
+    if current_user.role == "platform_owner":
+        if str(restaurant.platform_id) != str(current_user.platform_id):
+            raise HTTPException(status_code=403, detail="Access denied")
+    else:
+        # Restaurant users - validate access to the specific restaurant
+        await TenantSecurity.validate_restaurant_access(
+            current_user, 
+            restaurant_id,  # Must match the restaurant being queried
+            db=db
+        )
     
     # Date ranges
     today_start = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
@@ -717,6 +757,7 @@ async def get_platform_stats(
 @router.get("/{restaurant_id}")
 async def get_restaurant(
     restaurant_id: str,
+    current_restaurant_id: Optional[str] = Query(None, description="Specific restaurant ID for multi-restaurant users"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -726,14 +767,17 @@ async def get_restaurant(
     if not restaurant:
         raise HTTPException(status_code=404, detail="Restaurant not found")
     
-    # Check permissions
-    if (current_user.role == "platform_owner" and 
-        str(restaurant.platform_id) != str(current_user.platform_id)):
-        raise HTTPException(status_code=403, detail="Access denied")
-    
-    if (current_user.role in ["restaurant_owner", "manager", "employee"] and 
-        str(restaurant.id) != str(current_user.restaurant_id)):
-        raise HTTPException(status_code=403, detail="Access denied")
+    # Platform owners can view any restaurant in their platform
+    if current_user.role == "platform_owner":
+        if str(restaurant.platform_id) != str(current_user.platform_id):
+            raise HTTPException(status_code=403, detail="Access denied")
+    else:
+        # Restaurant users - validate access to the specific restaurant
+        await TenantSecurity.validate_restaurant_access(
+            current_user, 
+            restaurant_id,  # Must match the restaurant being queried
+            db=db
+        )
     
     return RestaurantResponse(
         id=str(restaurant.id),
@@ -787,12 +831,20 @@ class TableCreate(BaseModel):
 @router.get("/floor-plan")
 async def get_floor_plan(
     section_id: Optional[str] = Query(None),
+    current_restaurant_id: Optional[str] = Query(None, description="Specific restaurant ID for multi-restaurant users"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Get restaurant floor plan with tables and sections"""
     
-    restaurant_id = str(current_user.restaurant_id)
+    # Validate restaurant access
+    await TenantSecurity.validate_restaurant_access(
+        current_user, 
+        current_restaurant_id or current_user.restaurant_id, 
+        db=db
+    )
+    # Use the provided restaurant_id or fall back to user's default
+    restaurant_id = current_restaurant_id or current_user.restaurant_id
     
     # Get sections
     sections_query = db.query(Section).filter(
@@ -867,12 +919,20 @@ async def get_floor_plan(
 
 @router.get("/sections")
 async def get_sections(
+    current_restaurant_id: Optional[str] = Query(None, description="Specific restaurant ID for multi-restaurant users"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Get all restaurant sections"""
     
-    restaurant_id = str(current_user.restaurant_id)
+    # Validate restaurant access
+    await TenantSecurity.validate_restaurant_access(
+        current_user, 
+        current_restaurant_id or current_user.restaurant_id, 
+        db=db
+    )
+    # Use the provided restaurant_id or fall back to user's default
+    restaurant_id = current_restaurant_id or current_user.restaurant_id
     
     sections = db.query(Section).filter(
         and_(
@@ -899,12 +959,20 @@ async def get_sections(
 @router.post("/sections")
 async def create_section(
     section_data: SectionCreate,
+    current_restaurant_id: Optional[str] = Query(None, description="Specific restaurant ID for multi-restaurant users"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Create a new section"""
     
-    restaurant_id = str(current_user.restaurant_id)
+    # Validate restaurant access
+    await TenantSecurity.validate_restaurant_access(
+        current_user, 
+        current_restaurant_id or current_user.restaurant_id, 
+        db=db
+    )
+    # Use the provided restaurant_id or fall back to user's default
+    restaurant_id = current_restaurant_id or current_user.restaurant_id
     
     new_section = Section(
         restaurant_id=restaurant_id,
@@ -931,12 +999,20 @@ async def create_section(
 @router.post("/tables")
 async def create_table(
     table_data: TableCreate,
+    current_restaurant_id: Optional[str] = Query(None, description="Specific restaurant ID for multi-restaurant users"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Create a new table"""
     
-    restaurant_id = str(current_user.restaurant_id)
+    # Validate restaurant access
+    await TenantSecurity.validate_restaurant_access(
+        current_user, 
+        current_restaurant_id or current_user.restaurant_id, 
+        db=db
+    )
+    # Use the provided restaurant_id or fall back to user's default
+    restaurant_id = current_restaurant_id or current_user.restaurant_id
     
     # Verify section exists and belongs to restaurant
     section = db.query(Section).filter(
@@ -985,6 +1061,7 @@ async def create_table(
 async def update_table_status(
     table_id: str,
     status: str,
+    current_restaurant_id: Optional[str] = Query(None, description="Specific restaurant ID for multi-restaurant users"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -998,11 +1075,20 @@ async def update_table_status(
             detail=f"Invalid status. Must be one of: {valid_statuses}"
         )
     
+    # Validate restaurant access
+    await TenantSecurity.validate_restaurant_access(
+        current_user, 
+        current_restaurant_id or current_user.restaurant_id, 
+        db=db
+    )
+    # Use the provided restaurant_id or fall back to user's default
+    restaurant_id = current_restaurant_id or current_user.restaurant_id
+    
     # Find table
     table = db.query(Table).filter(
         and_(
             Table.id == table_id,
-            Table.restaurant_id == current_user.restaurant_id
+            Table.restaurant_id == restaurant_id
         )
     ).first()
     
@@ -1049,16 +1135,26 @@ async def update_table_status(
 async def update_table_server(
     table_id: str,
     server_id: Optional[str] = None,
+    current_restaurant_id: Optional[str] = Query(None, description="Specific restaurant ID for multi-restaurant users"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Assign server to table"""
     
+    # Validate restaurant access
+    await TenantSecurity.validate_restaurant_access(
+        current_user, 
+        current_restaurant_id or current_user.restaurant_id, 
+        db=db
+    )
+    # Use the provided restaurant_id or fall back to user's default
+    restaurant_id = current_restaurant_id or current_user.restaurant_id
+    
     # Find table
     table = db.query(Table).filter(
         and_(
             Table.id == table_id,
-            Table.restaurant_id == current_user.restaurant_id
+            Table.restaurant_id == restaurant_id
         )
     ).first()
     
@@ -1074,7 +1170,7 @@ async def update_table_server(
         server = db.query(User).filter(
             and_(
                 User.id == server_id,
-                User.restaurant_id == current_user.restaurant_id
+                User.restaurant_id == restaurant_id
             )
         ).first()
         
@@ -1118,12 +1214,21 @@ class FloorPlanLayoutUpdate(BaseModel):
 
 @router.get("/floor-plan/layout")
 async def get_floor_plan_layout(
+    current_restaurant_id: Optional[str] = Query(None, description="Specific restaurant ID for multi-restaurant users"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Get restaurant floor plan layout"""
     
-    restaurant_id = str(current_user.restaurant_id)
+    # Validate restaurant access
+    await TenantSecurity.validate_restaurant_access(
+        current_user, 
+        current_restaurant_id or current_user.restaurant_id, 
+        db=db
+    )
+    # Use the provided restaurant_id or fall back to user's default
+    restaurant_id = current_restaurant_id or current_user.restaurant_id
+    
     restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
     
     if not restaurant:
@@ -1143,12 +1248,21 @@ async def get_floor_plan_layout(
 @router.put("/floor-plan/layout")
 async def update_floor_plan_layout(
     layout_data: FloorPlanLayoutUpdate,
+    current_restaurant_id: Optional[str] = Query(None, description="Specific restaurant ID for multi-restaurant users"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Update restaurant floor plan layout"""
     
-    restaurant_id = str(current_user.restaurant_id)
+    # Validate restaurant access
+    await TenantSecurity.validate_restaurant_access(
+        current_user, 
+        current_restaurant_id or current_user.restaurant_id, 
+        db=db
+    )
+    # Use the provided restaurant_id or fall back to user's default
+    restaurant_id = current_restaurant_id or current_user.restaurant_id
+    
     restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
     
     if not restaurant:
@@ -1191,16 +1305,26 @@ class TablePositionUpdate(BaseModel):
 async def update_table_position(
     table_id: str,
     position_data: TablePositionUpdate,
+    current_restaurant_id: Optional[str] = Query(None, description="Specific restaurant ID for multi-restaurant users"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Update table position and dimensions"""
     
+    # Validate restaurant access
+    await TenantSecurity.validate_restaurant_access(
+        current_user, 
+        current_restaurant_id or current_user.restaurant_id, 
+        db=db
+    )
+    # Use the provided restaurant_id or fall back to user's default
+    restaurant_id = current_restaurant_id or current_user.restaurant_id
+    
     # Find table
     table = db.query(Table).filter(
         and_(
             Table.id == table_id,
-            Table.restaurant_id == current_user.restaurant_id
+            Table.restaurant_id == restaurant_id
         )
     ).first()
     
@@ -1231,7 +1355,7 @@ async def update_table_position(
     # Broadcast table update via WebSocket
     try:
         await websocket_manager.broadcast_to_restaurant(
-            str(current_user.restaurant_id),
+            restaurant_id,
             {
                 "type": "table_updated",
                 "table_id": str(table.id),
@@ -1277,12 +1401,20 @@ class TableMergeRequest(BaseModel):
 @router.post("/tables/merge")
 async def merge_tables(
     merge_data: TableMergeRequest,
+    current_restaurant_id: Optional[str] = Query(None, description="Specific restaurant ID for multi-restaurant users"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Merge multiple tables into one"""
     
-    restaurant_id = str(current_user.restaurant_id)
+    # Validate restaurant access
+    await TenantSecurity.validate_restaurant_access(
+        current_user, 
+        current_restaurant_id or current_user.restaurant_id, 
+        db=db
+    )
+    # Use the provided restaurant_id or fall back to user's default
+    restaurant_id = current_restaurant_id or current_user.restaurant_id
     
     # Validate primary table
     primary_table = db.query(Table).filter(
@@ -1370,12 +1502,20 @@ async def merge_tables(
 async def get_revenue_by_table(
     start_date: Optional[str] = Query(None),
     end_date: Optional[str] = Query(None),
+    current_restaurant_id: Optional[str] = Query(None, description="Specific restaurant ID for multi-restaurant users"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Get revenue breakdown by table"""
     
-    restaurant_id = str(current_user.restaurant_id)
+    # Validate restaurant access
+    await TenantSecurity.validate_restaurant_access(
+        current_user, 
+        current_restaurant_id or current_user.restaurant_id, 
+        db=db
+    )
+    # Use the provided restaurant_id or fall back to user's default
+    restaurant_id = current_restaurant_id or current_user.restaurant_id
     
     # Set default date range (today if not specified)
     if not start_date:
@@ -1471,3 +1611,8 @@ async def get_revenue_by_table(
         },
         message=f"Revenue analysis for {len(table_revenue_list)} tables"
     )
+
+# Include restaurant deletion endpoints from restaurant_deletion module
+# Import the router from restaurant_deletion module
+from .restaurant_deletion import router as deletion_router
+router.include_router(deletion_router, tags=["restaurant_deletion"])

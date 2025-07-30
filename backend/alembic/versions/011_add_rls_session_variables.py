@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers
 revision = '011_add_rls_session_variables'
-down_revision = '010_add_row_level_security'
+down_revision = '11cec540dd38'
 branch_labels = None
 depends_on = None
 

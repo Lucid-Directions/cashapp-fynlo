@@ -87,18 +87,28 @@ async def get_menu_items(
     """Get menu items (products) for frontend compatibility"""
     start_time = time.time()
     
-    # Check if user needs onboarding (no restaurant)
-    onboarding_response = OnboardingHelper.handle_onboarding_response(
-        user=current_user,
-        resource_type="menu_items",
-        endpoint_requires_restaurant=True
-    )
-    if onboarding_response:
-        return onboarding_response
+    # Use current user's restaurant context
+    user_restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
+    if not user_restaurant_id:
+        return APIResponseHelper.error(
+            message="User must be assigned to a restaurant",
+            status_code=400
+        )
     
-    # Use user's restaurant if not specified
+    # Use provided restaurant_id or fallback to user's current restaurant
     if not restaurant_id:
-        restaurant_id = str(current_user.restaurant_id)
+        restaurant_id = str(user_restaurant_id)
+    else:
+        # Validate that user has access to the requested restaurant
+        from app.core.tenant_security import TenantSecurity
+        await TenantSecurity.validate_restaurant_access(
+            user=current_user,
+            restaurant_id=restaurant_id,
+            operation="access",
+            resource_type="menu",
+            resource_id=None,
+            db=db
+        )
     
     logger.info(f"Menu items request started - Restaurant: {restaurant_id}, Category: {category}")
     
@@ -179,18 +189,28 @@ async def get_menu_categories(
 ):
     """Get menu categories for frontend compatibility"""
     
-    # Check if user needs onboarding (no restaurant)
-    onboarding_response = OnboardingHelper.handle_onboarding_response(
-        user=current_user,
-        resource_type="menu_items",  # Use same type as it's categories for menu
-        endpoint_requires_restaurant=True
-    )
-    if onboarding_response:
-        return onboarding_response
+    # Use current user's restaurant context
+    user_restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
+    if not user_restaurant_id:
+        return APIResponseHelper.error(
+            message="User must be assigned to a restaurant",
+            status_code=400
+        )
     
-    # Use user's restaurant if not specified
+    # Use provided restaurant_id or fallback to user's current restaurant
     if not restaurant_id:
-        restaurant_id = str(current_user.restaurant_id)
+        restaurant_id = str(user_restaurant_id)
+    else:
+        # Validate that user has access to the requested restaurant
+        from app.core.tenant_security import TenantSecurity
+        await TenantSecurity.validate_restaurant_access(
+            user=current_user,
+            restaurant_id=restaurant_id,
+            operation="access",
+            resource_type="menu",
+            resource_id=None,
+            db=db
+        )
     
     # Check cache first
     cache_key = f"menu_categories:{restaurant_id}"

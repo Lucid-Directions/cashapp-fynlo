@@ -98,8 +98,8 @@ class CategoryResponse:
 
 
 @router.get("/menu", response_model=List[dict])
-def get_menu_items_optimized(
-    restaurant_id: str = Query(..., description="Restaurant ID"),
+async def get_menu_items_optimized(
+    restaurant_id: Optional[str] = Query(None, description="Restaurant ID"),
     category: Optional[str] = Query(None, description="Category ID filter"),
     page: int = Query(1, ge=1),
     limit: int = Query(50, ge=1, le=100),
@@ -116,6 +116,29 @@ def get_menu_items_optimized(
     - Query timeout protection
     """
     try:
+        # Use current user's restaurant context
+        user_restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
+        if not user_restaurant_id:
+            raise FynloException(
+                message="User must be assigned to a restaurant",
+                error_code=ErrorCodes.VALIDATION_ERROR,
+                status_code=400
+            )
+        
+        # Use provided restaurant_id or fallback to user's current restaurant
+        if not restaurant_id:
+            restaurant_id = str(user_restaurant_id)
+        else:
+            # Validate that user has access to the requested restaurant
+            from app.core.tenant_security import TenantSecurity
+            await TenantSecurity.validate_restaurant_access(
+                user=current_user,
+                restaurant_id=restaurant_id,
+                operation="access",
+                resource_type="menu",
+                resource_id=None,
+                db=db
+            )
         # Build cache key
         cache_key = f"menu:v3:{restaurant_id}:{category or 'all'}:{page}:{limit}:{include_inactive}"
         
@@ -197,14 +220,37 @@ def get_menu_items_optimized(
 
 
 @router.get("/menu/categories", response_model=List[dict])
-def get_menu_categories(
-    restaurant_id: str = Query(...),
+async def get_menu_categories(
+    restaurant_id: Optional[str] = Query(None),
     db: Session = Depends(get_db),
     redis_client: RedisClient = Depends(get_redis),
     current_user: User = Depends(get_current_user)
 ):
     """Get menu categories with product counts"""
     try:
+        # Use current user's restaurant context
+        user_restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
+        if not user_restaurant_id:
+            raise FynloException(
+                message="User must be assigned to a restaurant",
+                error_code=ErrorCodes.VALIDATION_ERROR,
+                status_code=400
+            )
+        
+        # Use provided restaurant_id or fallback to user's current restaurant
+        if not restaurant_id:
+            restaurant_id = str(user_restaurant_id)
+        else:
+            # Validate that user has access to the requested restaurant
+            from app.core.tenant_security import TenantSecurity
+            await TenantSecurity.validate_restaurant_access(
+                user=current_user,
+                restaurant_id=restaurant_id,
+                operation="access",
+                resource_type="menu",
+                resource_id=None,
+                db=db
+            )
         cache_key = f"menu_categories:v2:{restaurant_id}"
         
         # Try cache
@@ -269,17 +315,37 @@ def get_menu_categories(
 
 
 @router.post("/menu/cache/invalidate")
-def invalidate_menu_cache(
-    restaurant_id: str = Query(...),
+async def invalidate_menu_cache(
+    restaurant_id: Optional[str] = Query(None),
     current_user: User = Depends(get_current_user),
-    redis_client: RedisClient = Depends(get_redis)
+    redis_client: RedisClient = Depends(get_redis),
+    db: Session = Depends(get_db)
 ):
     """Invalidate menu cache for a restaurant"""
     try:
-        # Verify user has permission
-        if (current_user.restaurant_id != restaurant_id and 
-            current_user.role not in ['platform_owner', 'restaurant_owner']):
-            raise HTTPException(403, "Permission denied")
+        # Use current user's restaurant context
+        user_restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
+        if not user_restaurant_id:
+            raise FynloException(
+                message="User must be assigned to a restaurant",
+                error_code=ErrorCodes.VALIDATION_ERROR,
+                status_code=400
+            )
+        
+        # Use provided restaurant_id or fallback to user's current restaurant
+        if not restaurant_id:
+            restaurant_id = str(user_restaurant_id)
+        else:
+            # Validate that user has access to the requested restaurant
+            from app.core.tenant_security import TenantSecurity
+            await TenantSecurity.validate_restaurant_access(
+                user=current_user,
+                restaurant_id=restaurant_id,
+                operation="modify",
+                resource_type="menu_cache",
+                resource_id=None,
+                db=db
+            )
         
         if not redis_client:
             return APIResponseHelper.success(

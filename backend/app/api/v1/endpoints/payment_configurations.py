@@ -1,12 +1,14 @@
-from fastapi import APIRouter, Depends, HTTPException, Body, Path
+from fastapi import APIRouter, Depends, HTTPException, Body, Path, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional, Dict, Any
 from pydantic import BaseModel
 
-from app.core.database import get_db
+from app.core.database import get_db, User
+from app.core.auth import get_current_user
 from app.schemas.fee_schemas import PaymentMethodEnum, PaymentMethodFeeSettingSchema
 from app.services.payment_config_service import PaymentConfigService
 from app.models.payment_config import PaymentMethodSetting # For ORM response
+from app.core.tenant_security import TenantSecurity
 
 router = APIRouter()
 
@@ -44,7 +46,8 @@ def convert_db_model_to_schema(db_setting: PaymentMethodSetting) -> PaymentMetho
 
 @router.get("/settings/platform-defaults", response_model=List[PaymentMethodFeeSettingSchema])
 def list_platform_default_settings(
-    service: PaymentConfigService = Depends(get_payment_config_service_dep)
+    service: PaymentConfigService = Depends(get_payment_config_service_dep),
+    current_user: User = Depends(get_current_user)
 ):
     """Lists all platform default payment method settings."""
     db_settings = service.get_all_platform_default_settings()
@@ -53,9 +56,14 @@ def list_platform_default_settings(
 @router.post("/settings/platform-defaults", response_model=PaymentMethodFeeSettingSchema, status_code=201)
 def create_platform_default_setting(
     setting_data: PaymentMethodSettingCreateInput,
-    service: PaymentConfigService = Depends(get_payment_config_service_dep)
+    service: PaymentConfigService = Depends(get_payment_config_service_dep),
+    current_user: User = Depends(get_current_user)
 ):
     """Creates a new platform default payment method setting."""
+    # Only platform owners can create platform defaults
+    if current_user.role != 'platform_owner':
+        raise HTTPException(status_code=403, detail="Only platform owners can create platform default settings")
+    
     if setting_data.restaurant_id is not None:
         raise HTTPException(status_code=400, detail="Platform default settings cannot have a restaurant_id.")
 
@@ -83,9 +91,14 @@ def create_platform_default_setting(
 def update_platform_default_setting(
     payment_method: PaymentMethodEnum = Path(...),
     updates: PaymentMethodSettingUpdateInput = Body(...),
-    service: PaymentConfigService = Depends(get_payment_config_service_dep)
+    service: PaymentConfigService = Depends(get_payment_config_service_dep),
+    current_user: User = Depends(get_current_user)
 ):
     """Updates an existing platform default payment method setting."""
+    # Only platform owners can update platform defaults
+    if current_user.role != 'platform_owner':
+        raise HTTPException(status_code=403, detail="Only platform owners can update platform default settings")
+    
     updated_setting = service.update_platform_default_setting(payment_method, updates.dict(exclude_unset=True))
     if not updated_setting:
         raise HTTPException(status_code=404, detail=f"Platform default setting for {payment_method.value} not found.")
@@ -93,9 +106,12 @@ def update_platform_default_setting(
 
 
 @router.get("/settings/restaurants/{restaurant_id}", response_model=List[PaymentMethodFeeSettingSchema])
-def list_restaurant_settings(
+async def list_restaurant_settings(
     restaurant_id: str = Path(...),
-    service: PaymentConfigService = Depends(get_payment_config_service_dep)
+    current_restaurant_id: Optional[str] = Query(None, description="Restaurant ID for multi-location owners"),
+    service: PaymentConfigService = Depends(get_payment_config_service_dep),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
 ):
     """
     Lists all payment method settings for a specific restaurant.
@@ -105,17 +121,43 @@ def list_restaurant_settings(
     For now, this just returns overrides.
     The service method get_payment_method_setting handles fallback logic for a single setting.
     """
+    # Validate access - if accessing a specific restaurant, validate tenant access
+    if restaurant_id:
+        # If current_restaurant_id is provided, validate it matches
+        if current_restaurant_id and current_restaurant_id != restaurant_id:
+            raise HTTPException(status_code=403, detail="Cannot access settings for a different restaurant")
+        
+        # Validate the user has access to this restaurant
+        await TenantSecurity.validate_restaurant_access(
+            current_user, restaurant_id, db=db
+        )
+    
     db_settings = service.get_all_settings_for_restaurant(restaurant_id)
     return [convert_db_model_to_schema(s) for s in db_settings]
 
 
 @router.post("/settings/restaurants/{restaurant_id}", response_model=PaymentMethodFeeSettingSchema, status_code=201)
-def create_or_update_restaurant_setting(
+async def create_or_update_restaurant_setting(
     restaurant_id: str = Path(...),
     setting_data: PaymentMethodSettingCreateInput = Body(...), # Uses same create input, restaurant_id from path
-    service: PaymentConfigService = Depends(get_payment_config_service_dep)
+    current_restaurant_id: Optional[str] = Query(None, description="Restaurant ID for multi-location owners"),
+    service: PaymentConfigService = Depends(get_payment_config_service_dep),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
 ):
     """Creates or updates a restaurant-specific payment method setting (override)."""
+    # Validate access
+    if current_restaurant_id and current_restaurant_id != restaurant_id:
+        raise HTTPException(status_code=403, detail="Cannot modify settings for a different restaurant")
+    
+    # Validate the user has access to this restaurant
+    await TenantSecurity.validate_restaurant_access(
+        current_user, restaurant_id, db=db
+    )
+    
+    # Check permissions - only owners and managers can modify settings
+    if current_user.role not in ['platform_owner', 'restaurant_owner', 'manager']:
+        raise HTTPException(status_code=403, detail="Insufficient permissions to modify payment settings")
 
     # Use the restaurant_id from the path
     typed_dict_data = PaymentMethodFeeSettingSchema(
@@ -137,12 +179,28 @@ def create_or_update_restaurant_setting(
 
 
 @router.delete("/settings/restaurants/{restaurant_id}/{payment_method}", status_code=204)
-def delete_restaurant_setting(
+async def delete_restaurant_setting(
     restaurant_id: str = Path(...),
     payment_method: PaymentMethodEnum = Path(...),
-    service: PaymentConfigService = Depends(get_payment_config_service_dep)
+    current_restaurant_id: Optional[str] = Query(None, description="Restaurant ID for multi-location owners"),
+    service: PaymentConfigService = Depends(get_payment_config_service_dep),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
 ):
     """Deletes a restaurant-specific payment method setting (override)."""
+    # Validate access
+    if current_restaurant_id and current_restaurant_id != restaurant_id:
+        raise HTTPException(status_code=403, detail="Cannot delete settings for a different restaurant")
+    
+    # Validate the user has access to this restaurant
+    await TenantSecurity.validate_restaurant_access(
+        current_user, restaurant_id, db=db
+    )
+    
+    # Check permissions - only owners and managers can delete settings
+    if current_user.role not in ['platform_owner', 'restaurant_owner', 'manager']:
+        raise HTTPException(status_code=403, detail="Insufficient permissions to delete payment settings")
+    
     deleted = service.delete_restaurant_setting(restaurant_id, payment_method)
     if not deleted:
         raise HTTPException(status_code=404, detail=f"Setting for restaurant {restaurant_id}, method {payment_method.value} not found.")

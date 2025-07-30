@@ -36,10 +36,11 @@ async def update_product_secure(
         )
     
     # CRITICAL SECURITY CHECK: Validate user can access this product's restaurant
-    TenantSecurity.validate_restaurant_access(
+    await TenantSecurity.validate_restaurant_access(
         user=current_user,
         restaurant_id=str(product.restaurant_id),
-        operation="modify"
+        operation="modify",
+        db=db
     )
     
     # If we get here, user has access (either platform owner or same restaurant)
@@ -54,10 +55,11 @@ async def update_product_secure(
                 detail="Only platform owners can move products between restaurants"
             )
         # Validate access to target restaurant
-        TenantSecurity.validate_restaurant_access(
+        await TenantSecurity.validate_restaurant_access(
             user=current_user,
             restaurant_id=product_data["restaurant_id"],
-            operation="create"
+            operation="create",
+            db=db
         )
     
     # Update the product...
@@ -82,10 +84,11 @@ async def delete_product_secure(
         )
     
     # CRITICAL: Validate access before deletion
-    TenantSecurity.validate_restaurant_access(
+    await TenantSecurity.validate_restaurant_access(
         user=current_user,
         restaurant_id=str(product.restaurant_id),
-        operation="delete"
+        operation="delete",
+        db=db
     )
     
     # Proceed with soft delete
@@ -113,15 +116,17 @@ async def get_products_secure(
     query = TenantSecurity.apply_tenant_filter(
         query=query,
         user=current_user,
-        model_class=Product
+        model_class=Product,
+        db=db
     )
     
     # If restaurant_id specified, validate access
     if restaurant_id:
-        TenantSecurity.validate_restaurant_access(
+        await TenantSecurity.validate_restaurant_access(
             user=current_user,
             restaurant_id=restaurant_id,
-            operation="view"
+            operation="view",
+            db=db
         )
         query = query.filter(Product.restaurant_id == restaurant_id)
     
@@ -187,10 +192,11 @@ async def bulk_update_products_secure(
         
         # Validate access for each product
         try:
-            TenantSecurity.validate_restaurant_access(
+            await TenantSecurity.validate_restaurant_access(
                 user=current_user,
                 restaurant_id=str(product.restaurant_id),
-                operation="modify"
+                operation="modify",
+                db=db
             )
             
             # Update product...

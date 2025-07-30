@@ -77,9 +77,25 @@ async def get_customers(
 ):
     """Get customers with search and pagination"""
     
-    # Use user's restaurant if not specified
+    # Use current user's restaurant context
+    user_restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
+    if not user_restaurant_id:
+        raise HTTPException(status_code=400, detail="User must be assigned to a restaurant")
+    
+    # Use provided restaurant_id or fallback to user's current restaurant
     if not restaurant_id:
-        restaurant_id = str(current_user.restaurant_id)
+        restaurant_id = str(user_restaurant_id)
+    else:
+        # Validate that user has access to the requested restaurant
+        from app.core.tenant_security import TenantSecurity
+        await TenantSecurity.validate_restaurant_access(
+            user=current_user,
+            restaurant_id=restaurant_id,
+            operation="access",
+            resource_type="customers",
+            resource_id=None,
+            db=db
+        )
     
     query = db.query(Customer).filter(Customer.restaurant_id == restaurant_id)
     
@@ -136,9 +152,25 @@ async def get_customer_stats(
 ):
     """Get customer statistics"""
     
-    # Use user's restaurant if not specified
+    # Use current user's restaurant context
+    user_restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
+    if not user_restaurant_id:
+        raise HTTPException(status_code=400, detail="User must be assigned to a restaurant")
+    
+    # Use provided restaurant_id or fallback to user's current restaurant
     if not restaurant_id:
-        restaurant_id = str(current_user.restaurant_id)
+        restaurant_id = str(user_restaurant_id)
+    else:
+        # Validate that user has access to the requested restaurant
+        from app.core.tenant_security import TenantSecurity
+        await TenantSecurity.validate_restaurant_access(
+            user=current_user,
+            restaurant_id=restaurant_id,
+            operation="access",
+            resource_type="customers",
+            resource_id=None,
+            db=db
+        )
     
     # Check cache first
     cache_key = f"customer_stats:{restaurant_id}"
@@ -207,9 +239,25 @@ async def create_customer(
 ):
     """Create a new customer"""
     
-    # Use user's restaurant if not specified
+    # Use current user's restaurant context
+    user_restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
+    if not user_restaurant_id:
+        raise HTTPException(status_code=400, detail="User must be assigned to a restaurant")
+    
+    # Use provided restaurant_id or fallback to user's current restaurant
     if not restaurant_id:
-        restaurant_id = str(current_user.restaurant_id)
+        restaurant_id = str(user_restaurant_id)
+    else:
+        # Validate that user has access to the requested restaurant
+        from app.core.tenant_security import TenantSecurity
+        await TenantSecurity.validate_restaurant_access(
+            user=current_user,
+            restaurant_id=restaurant_id,
+            operation="create",
+            resource_type="customers",
+            resource_id=None,
+            db=db
+        )
     
     # Check if customer already exists (by email or phone)
     existing_customer = None
@@ -275,6 +323,17 @@ async def get_customer(
     if not customer:
         raise HTTPException(status_code=404, detail="Customer not found")
     
+    # Verify tenant access
+    from app.core.tenant_security import TenantSecurity
+    await TenantSecurity.validate_restaurant_access(
+        user=current_user,
+        restaurant_id=str(customer.restaurant_id),
+        operation="access",
+        resource_type="customers",
+        resource_id=customer_id,
+        db=db
+    )
+    
     # Get last visit
     last_order = db.query(Order).filter(
         Order.customer_id == customer_id
@@ -308,6 +367,17 @@ async def update_customer(
     customer = db.query(Customer).filter(Customer.id == customer_id).first()
     if not customer:
         raise HTTPException(status_code=404, detail="Customer not found")
+    
+    # Verify tenant access
+    from app.core.tenant_security import TenantSecurity
+    await TenantSecurity.validate_restaurant_access(
+        user=current_user,
+        restaurant_id=str(customer.restaurant_id),
+        operation="modify",
+        resource_type="customers",
+        resource_id=customer_id,
+        db=db
+    )
     
     # Update fields if provided - whitelist allowed fields for security
     ALLOWED_UPDATE_FIELDS = {'email', 'phone', 'first_name', 'last_name', 'preferences'}
@@ -353,6 +423,17 @@ async def update_loyalty_points(
     if not customer:
         raise HTTPException(status_code=404, detail="Customer not found")
     
+    # Verify tenant access
+    from app.core.tenant_security import TenantSecurity
+    await TenantSecurity.validate_restaurant_access(
+        user=current_user,
+        restaurant_id=str(customer.restaurant_id),
+        operation="modify",
+        resource_type="customers",
+        resource_id=customer_id,
+        db=db
+    )
+    
     # Validate transaction
     if loyalty_data.transaction_type == "redeemed" and customer.loyalty_points < abs(loyalty_data.points):
         raise HTTPException(status_code=400, detail="Insufficient loyalty points")
@@ -396,6 +477,17 @@ async def get_customer_orders(
     if not customer:
         raise HTTPException(status_code=404, detail="Customer not found")
     
+    # Verify tenant access
+    from app.core.tenant_security import TenantSecurity
+    await TenantSecurity.validate_restaurant_access(
+        user=current_user,
+        restaurant_id=str(customer.restaurant_id),
+        operation="access",
+        resource_type="customers",
+        resource_id=customer_id,
+        db=db
+    )
+    
     orders = db.query(Order).filter(
         Order.customer_id == customer_id
     ).order_by(desc(Order.created_at)).offset(offset).limit(limit).all()
@@ -420,8 +512,26 @@ async def search_customers(
 ):
     """Advanced customer search with enhanced validation"""
     
-    # Use user's restaurant if not specified
-    restaurant_id = search_data.restaurant_id or str(current_user.restaurant_id)
+    # Use current user's restaurant context
+    user_restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
+    if not user_restaurant_id:
+        raise HTTPException(status_code=400, detail="User must be assigned to a restaurant")
+    
+    # Use provided restaurant_id from search_data or fallback to user's current restaurant
+    if not search_data.restaurant_id:
+        restaurant_id = str(user_restaurant_id)
+    else:
+        restaurant_id = search_data.restaurant_id
+        # Validate that user has access to the requested restaurant
+        from app.core.tenant_security import TenantSecurity
+        await TenantSecurity.validate_restaurant_access(
+            user=current_user,
+            restaurant_id=restaurant_id,
+            operation="access",
+            resource_type="customers",
+            resource_id=None,
+            db=db
+        )
     
     query = db.query(Customer).filter(Customer.restaurant_id == restaurant_id)
     
