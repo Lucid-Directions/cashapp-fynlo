@@ -189,8 +189,8 @@ class SecurePaymentConfigService {
         }),
       );
     } catch (__error) {
-    // Error handled silently
-  }
+      // Error handled silently
+    }
   }
 
   /**

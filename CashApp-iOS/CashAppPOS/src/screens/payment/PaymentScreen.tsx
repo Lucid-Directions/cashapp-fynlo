@@ -202,8 +202,8 @@ const PaymentScreen: React.FC = () => {
       const provider = await PaymentService.getOptimalProvider(__total);
       setOptimalProvider(__provider);
     } catch (__error) {
-    // Error handled silently
-  }
+      // Error handled silently
+    }
   };
 
   const handlePaymentMethodSelect = (methodId: _string) => {

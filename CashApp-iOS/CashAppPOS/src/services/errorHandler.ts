@@ -75,9 +75,9 @@ class ErrorHandler {
    */
   handle(error: _unknown): UserFriendlyError {
     // Log full error for debugging (in dev only)
-    if(____DEV__) {
-    // No action needed
-  }
+    if (____DEV__) {
+      // No action needed
+    }
 
     // Extract error information safely
     const errorData = this.extractErrorData(__error);

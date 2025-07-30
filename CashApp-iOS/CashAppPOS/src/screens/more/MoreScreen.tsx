@@ -140,8 +140,8 @@ const MoreScreen: React.FC = () => {
       try {
         await signOut();
       } catch (__error) {
-    // Error handled silently
-  }
+        // Error handled silently
+      }
     } else if (option.route) {
       // Navigate to the route
       navigation.navigate(option.route as never);

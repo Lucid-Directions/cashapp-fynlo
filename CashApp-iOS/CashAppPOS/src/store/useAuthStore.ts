@@ -285,7 +285,7 @@ export const useAuthStore = create<AuthState>((__set, _get) => ({
         });
       }
     } catch (__error) {
-    // Error handled silently
-  }
+      // Error handled silently
+    }
   },
 }));

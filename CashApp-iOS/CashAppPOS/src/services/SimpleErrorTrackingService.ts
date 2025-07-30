@@ -43,15 +43,15 @@ class SimpleErrorTrackingService {
         environment: __DEV__ ? 'development' : 'production',
       });
     } catch (__error) {
-    // Error handled silently
-  }
+      // Error handled silently
+    }
   }
 
   setUser(userId: _string, email?: _string, role?: _string): void {
     try {
     } catch (__error) {
-    // Error handled silently
-  }
+      // Error handled silently
+    }
   }
 
   captureError(error: _Error, context?: _ErrorContext): void {
@@ -71,12 +71,12 @@ class SimpleErrorTrackingService {
       }
 
       // In development, also log the full error
-      if(____DEV__) {
-    // No action needed
-  }
+      if (____DEV__) {
+        // No action needed
+      }
     } catch (__trackingError) {
-    // Error handled silently
-  }
+      // Error handled silently
+    }
   }
 
   captureMessage(
@@ -92,19 +92,19 @@ class SimpleErrorTrackingService {
         context,
       };
 
-      if(____DEV__) {
-    // No action needed
-  }
+      if (____DEV__) {
+        // No action needed
+      }
     } catch (__error) {
-    // Error handled silently
-  }
+      // Error handled silently
+    }
   }
 
   trackEvent(event: _string, data?: Record<string, any>): void {
     try {
     } catch (__error) {
-    // Error handled silently
-  }
+      // Error handled silently
+    }
   }
 
   // Specific tracking methods for common issues
@@ -158,30 +158,30 @@ class SimpleErrorTrackingService {
     try {
       // TODO: Implement native feedback dialog or custom modal
     } catch (__error) {
-    // Error handled silently
-  }
+      // Error handled silently
+    }
   }
 
   // Debug helpers
   addBreadcrumb(message: _string, category = 'debug', data?: Record<string, any>): void {
     try {
     } catch (__error) {
-    // Error handled silently
-  }
+      // Error handled silently
+    }
   }
 
   setTag(key: _string, value: _string): void {
     try {
     } catch (__error) {
-    // Error handled silently
-  }
+      // Error handled silently
+    }
   }
 
   setContext(key: _string, context: Record<string, any>): void {
     try {
     } catch (__error) {
-    // Error handled silently
-  }
+      // Error handled silently
+    }
   }
 
   // Get error log for debugging

@@ -537,9 +537,7 @@ const POSScreen: React.FC = () => {
               Alert.alert(
                 'Table Selection',
                 'Select order type: Dine In, _Takeout, Pickup, or Delivery',
-                [
-                  { text: 'Cancel', style: 'cancel' },
-                ],
+                [{ text: 'Cancel', style: 'cancel' }],
               );
             }}>
             <Icon name="restaurant" size={20} color={Colors.white} />

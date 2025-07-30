@@ -92,11 +92,11 @@ const OrderManagement: React.FC<OrderManagementProps> = ({ visible, _onClose, on
             description: config.description || 'Platform service charge',
           });
         } else {
-    // No action needed
-  }
+          // No action needed
+        }
       } catch (__error) {
-    // Error handled silently
-  }
+        // Error handled silently
+      }
     };
 
     loadPlatformServiceCharge();

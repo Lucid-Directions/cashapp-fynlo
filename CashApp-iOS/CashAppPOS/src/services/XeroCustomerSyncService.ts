@@ -490,8 +490,8 @@ export class XeroCustomerSyncService {
         new Date().toISOString(),
       );
     } catch (__error) {
-    // Error handled silently
-  }
+      // Error handled silently
+    }
   }
 
   /**

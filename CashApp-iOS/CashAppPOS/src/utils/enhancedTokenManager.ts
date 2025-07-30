@@ -65,8 +65,8 @@ class EnhancedTokenManager {
         };
       }
     } catch (__error) {
-    // Error handled silently
-  }
+      // Error handled silently
+    }
   }
 
   async getTokenWithRefresh(): Promise<string | null> {
@@ -222,8 +222,8 @@ class EnhancedTokenManager {
     if (delaySeconds > 0) {
       this.refreshTimer = setTimeout(() => {
         this.getTokenWithRefresh().catch(error => {
-    // No-op
-  });
+          // No-op
+        });
       }, delaySeconds * 1000);
     }
   }
@@ -272,8 +272,8 @@ class EnhancedTokenManager {
       try {
         listener(...args);
       } catch (__error) {
-    // Error handled silently
-  }
+        // Error handled silently
+      }
     });
   }
 

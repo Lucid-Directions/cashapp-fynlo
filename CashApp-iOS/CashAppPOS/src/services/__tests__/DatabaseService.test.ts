@@ -9,7 +9,7 @@ import { createMockFetch } from '../../__tests__/utils/testUtils';
 
 // Mock AsyncStorage
 jest.mock('@react-native-async-storage/async-storage', () =>
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
 );
 
@@ -367,7 +367,7 @@ describe('DatabaseService', () => {
   describe('Offline Data Sync', () => {
     it('should sync offline data when available', async () => {
       // Mock AsyncStorage with offline orders
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const mockAsyncStorage = require('@react-native-async-storage/async-storage');
       mockAsyncStorage.getItem.mockResolvedValue(
         JSON.stringify([
@@ -390,7 +390,7 @@ describe('DatabaseService', () => {
     });
 
     it('should handle sync when no offline data exists', async () => {
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const mockAsyncStorage = require('@react-native-async-storage/async-storage');
       mockAsyncStorage.getItem.mockResolvedValue(__null);
 
@@ -401,7 +401,7 @@ describe('DatabaseService', () => {
     });
 
     it('should handle sync errors gracefully', async () => {
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const mockAsyncStorage = require('@react-native-async-storage/async-storage');
       mockAsyncStorage.getItem.mockRejectedValue(new Error('Storage error'));
 
@@ -413,7 +413,7 @@ describe('DatabaseService', () => {
   describe('API Request Helper', () => {
     it('should include authentication headers when token is available', async () => {
       // Set auth token
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const mockAsyncStorage = require('@react-native-async-storage/async-storage');
       mockAsyncStorage.getItem.mockResolvedValue('test-token-123');
 

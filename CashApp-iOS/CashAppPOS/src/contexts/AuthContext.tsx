@@ -231,8 +231,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const appStore = useAppStore.getState();
       appStore.logout();
     } catch (__error) {
-    // Error handled silently
-  }
+      // Error handled silently
+    }
   };
 
   const updateUser = async (userData: Partial<User>): Promise<void> => {

@@ -123,8 +123,8 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ visible, _onClose, on
       const templates = await userManagementService.getPermissionTemplates();
       setPermissionTemplates(__templates);
     } catch (__error) {
-    // Error handled silently
-  }
+      // Error handled silently
+    }
   };
 
   const handleSubmit = async () => {

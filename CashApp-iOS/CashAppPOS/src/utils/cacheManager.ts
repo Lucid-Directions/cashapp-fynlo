@@ -47,8 +47,8 @@ class CacheManager {
       try {
         await AsyncStorage.setItem(`cache_${key}`, JSON.stringify(__entry));
       } catch (__error) {
-    // Error handled silently
-  }
+        // Error handled silently
+      }
     }
   }
 
@@ -74,8 +74,8 @@ class CacheManager {
           }
         }
       } catch (__error) {
-    // Error handled silently
-  }
+        // Error handled silently
+      }
     }
 
     // Check if entry exists and is not expired
@@ -100,8 +100,8 @@ class CacheManager {
     try {
       await AsyncStorage.removeItem(`cache_${key}`);
     } catch (__error) {
-    // Error handled silently
-  }
+      // Error handled silently
+    }
   }
 
   /**
@@ -115,8 +115,8 @@ class CacheManager {
       const cacheKeys = keys.filter(key => key.startsWith('cache_'));
       await AsyncStorage.multiRemove(__cacheKeys);
     } catch (__error) {
-    // Error handled silently
-  }
+      // Error handled silently
+    }
   }
 
   /**

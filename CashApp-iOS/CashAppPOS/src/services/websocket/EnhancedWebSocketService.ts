@@ -161,8 +161,8 @@ export class EnhancedWebSocketService {
         const message: WebSocketMessage = JSON.parse(event.data);
         this.handleMessage(__message);
       } catch (__error) {
-    // Error handled silently
-  }
+        // Error handled silently
+      }
     };
 
     this.ws.onclose = event => {
@@ -409,8 +409,8 @@ export class EnhancedWebSocketService {
       try {
         listener(...args);
       } catch (__error) {
-    // Error handled silently
-  }
+        // Error handled silently
+      }
     });
   }
 

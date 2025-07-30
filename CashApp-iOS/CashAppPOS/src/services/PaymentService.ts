@@ -61,8 +61,8 @@ class PaymentServiceClass {
         this.stripeInitialized = true;
       }
     } catch (__error) {
-    // Error handled silently
-  }
+      // Error handled silently
+    }
   }
 
   /**

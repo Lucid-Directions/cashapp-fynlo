@@ -128,8 +128,8 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
       const templates = await userManagementService.getPermissionTemplates();
       setPermissionTemplates(__templates);
     } catch (__error) {
-    // Error handled silently
-  }
+      // Error handled silently
+    }
   };
 
   const handleSubmit = async () => {

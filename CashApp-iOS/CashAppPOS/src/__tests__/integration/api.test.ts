@@ -12,7 +12,7 @@ global.fetch = mockFetch;
 
 // Mock AsyncStorage
 jest.mock('@react-native-async-storage/async-storage', () =>
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
 );
 

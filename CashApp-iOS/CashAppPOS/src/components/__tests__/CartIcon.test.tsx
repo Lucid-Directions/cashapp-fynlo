@@ -33,9 +33,15 @@ const renderWithProviders = (ui: React.ReactElement) => {
 
 describe('CartIcon', () => {
   it('renders with correct color and no badge when itemCount is 0', () => {
-    renderWithProviders(<CartIcon count={0} onPress={() => {
-    // No-op
-  }} testID="cart-icon" />);
+    renderWithProviders(
+      <CartIcon
+        count={0}
+        onPress={() => {
+          // No-op
+        }}
+        testID="cart-icon"
+      />,
+    );
 
     const icon = screen.getByTestId('mock-icon'); // Using the mock icon's testID
     expect(icon.props.color).toBe(Colors.onPrimary);
@@ -47,9 +53,15 @@ describe('CartIcon', () => {
 
   it('renders with alertSoft color and badge when itemCount is greater than 0', () => {
     const itemCount = 5;
-    renderWithProviders(<CartIcon count={itemCount} onPress={() => {
-    // No-op
-  }} testID="cart-icon" />);
+    renderWithProviders(
+      <CartIcon
+        count={itemCount}
+        onPress={() => {
+          // No-op
+        }}
+        testID="cart-icon"
+      />,
+    );
 
     const icon = screen.getByTestId('mock-icon');
     expect(icon.props.color).toBe(Colors.alertSoft);
@@ -70,9 +82,15 @@ describe('CartIcon', () => {
   });
 
   it('displays "99+" in badge when itemCount is greater than 99', () => {
-    renderWithProviders(<CartIcon count={150} onPress={() => {
-    // No-op
-  }} testID="cart-icon" />);
+    renderWithProviders(
+      <CartIcon
+        count={150}
+        onPress={() => {
+          // No-op
+        }}
+        testID="cart-icon"
+      />,
+    );
 
     const badgeText = screen.getByText('99+');
     expect(__badgeText).toBeDefined();

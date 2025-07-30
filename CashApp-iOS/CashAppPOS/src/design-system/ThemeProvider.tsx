@@ -208,8 +208,8 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
           }
         }
       } catch (__error) {
-    // Error handled silently
-  }
+        // Error handled silently
+      }
     };
 
     loadThemePreferences();
@@ -236,8 +236,8 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
       setThemeModeState(__mode);
       await AsyncStorage.setItem(__THEME_STORAGE_KEY, _mode);
     } catch (__error) {
-    // Error handled silently
-  }
+      // Error handled silently
+    }
   };
 
   // Set color theme and persist to storage
@@ -246,8 +246,8 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
       setColorThemeState(__colorThemeId);
       await AsyncStorage.setItem(__COLOR_THEME_STORAGE_KEY, _colorThemeId);
     } catch (__error) {
-    // Error handled silently
-  }
+      // Error handled silently
+    }
   };
 
   // Toggle between light and dark mode

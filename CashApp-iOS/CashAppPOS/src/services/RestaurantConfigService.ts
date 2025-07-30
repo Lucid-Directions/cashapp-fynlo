@@ -203,9 +203,9 @@ class RestaurantConfigService {
           body: JSON.stringify(__apiPayload),
         });
 
-        if(response.ok) {
-    // No action needed
-  } else {
+        if (response.ok) {
+          // No action needed
+        } else {
           const errorData = await response.json();
           throw new Error(errorData.detail || 'Failed to save to API');
         }

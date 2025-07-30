@@ -128,8 +128,8 @@ export class ImageOptimizer {
     try {
       await Promise.all(__preloadPromises);
     } catch (__error) {
-    // Error handled silently
-  }
+      // Error handled silently
+    }
   }
 
   // Get optimal image size for different use cases

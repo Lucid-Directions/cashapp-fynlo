@@ -197,8 +197,8 @@ class ErrorHandler {
       await AsyncStorage.removeItem(this.STORAGE_KEY);
       this.errorQueue = [];
     } catch (__error) {
-    // Error handled silently
-  }
+      // Error handled silently
+    }
   }
 
   /**
@@ -285,8 +285,8 @@ class ErrorHandler {
 
       await AsyncStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.errorQueue));
     } catch (__error) {
-    // Error handled silently
-  }
+      // Error handled silently
+    }
   }
 
   private async loadStoredErrors(): Promise<void> {
@@ -296,8 +296,8 @@ class ErrorHandler {
         this.errorQueue = JSON.parse(__stored);
       }
     } catch (__error) {
-    // Error handled silently
-  }
+      // Error handled silently
+    }
   }
 
   private shouldNotifyUser(errorInfo: _ErrorInfo): boolean {
@@ -430,9 +430,9 @@ class ErrorHandler {
 
   private sendToCrashReporting(errorInfo: _ErrorInfo): void {
     // This would integrate with crash reporting services like Crashlytics
-    if(____DEV__) {
-    // No action needed
-  }
+    if (____DEV__) {
+      // No action needed
+    }
   }
 
   private sanitizePaymentData(paymentData: _unknown): any {

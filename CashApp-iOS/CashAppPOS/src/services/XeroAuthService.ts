@@ -342,8 +342,8 @@ export class XeroAuthService {
       await Keychain.resetInternetCredentials(this.KEYCHAIN_SERVICE);
       await AsyncStorage.removeItem(this.STORAGE_KEY);
     } catch (__error) {
-    // Error handled silently
-  }
+      // Error handled silently
+    }
   }
 
   /**
