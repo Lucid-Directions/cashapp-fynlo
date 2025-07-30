@@ -37,11 +37,15 @@ class TestCacheService:
         key = cache_service_instance.cache_key("products", category="tacos", restaurant_id="123")
         assert key == "products:category=tacos:restaurant_id=123"
         
-        # Long key should be hashed
+        # Long key should be hashed with restaurant_id preserved
         long_value = "x" * 200
+        key = cache_service_instance.cache_key("test", value=long_value, restaurant_id="123")
+        assert key.startswith("test:restaurant_id=123:hash:")
+        assert len(key) < 150  # Hashed key should be shorter than original
+        
+        # Long key without restaurant_id uses 'global'
         key = cache_service_instance.cache_key("test", value=long_value)
-        assert key.startswith("test:hash:")
-        assert len(key) < 100  # Hashed key should be shorter
+        assert key.startswith("test:restaurant_id=global:hash:")
     
     @pytest.mark.asyncio
     async def test_cache_get_hit(self, cache_service_instance, mock_redis):
@@ -125,14 +129,13 @@ class TestCacheService:
         
         # Should call delete_pattern for each cache type
         expected_patterns = [
-            "menu_items:restaurant_id=restaurant_123*",
-            "menu_items:hash:*",
-            "menu_categories:restaurant_id=restaurant_123*",
-            "menu_categories:hash:*",
-            "products:restaurant_id=restaurant_123*",
-            "categories:restaurant_id=restaurant_123*",
-            "settings:restaurant_id=restaurant_123*",
-            "analytics:restaurant_id=restaurant_123*"
+            "menu_items:*restaurant_id=restaurant_123*",
+            "menu_categories:*restaurant_id=restaurant_123*",
+            "products:*restaurant_id=restaurant_123*",
+            "categories:*restaurant_id=restaurant_123*",
+            "settings:*restaurant_id=restaurant_123*",
+            "analytics:*restaurant_id=restaurant_123*",
+            "*:restaurant_id=restaurant_123:hash:*"
         ]
         
         assert mock_redis.delete_pattern.call_count == len(expected_patterns)

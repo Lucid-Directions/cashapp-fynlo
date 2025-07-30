@@ -39,8 +39,10 @@ class CacheService:
         key_data = f"{prefix}:" + ":".join(f"{k}={v}" for k, v in sorted(kwargs.items()))
         # Use MD5 hash for long keys to avoid Redis key length limits
         if len(key_data) > 200:
+            # Include restaurant_id in the hash key to maintain tenant isolation
+            restaurant_id = kwargs.get('restaurant_id', 'global')
             key_hash = hashlib.md5(key_data.encode()).hexdigest()
-            return f"{prefix}:hash:{key_hash}"
+            return f"{prefix}:restaurant_id={restaurant_id}:hash:{key_hash}"
         return key_data
     
     async def get(self, key: str) -> Optional[Any]:
@@ -138,15 +140,17 @@ class CacheService:
         Returns:
             int: Number of keys deleted
         """
+        # Patterns must handle alphabetically sorted parameters and new hash format
         patterns = [
-            f"menu_items:restaurant_id={restaurant_id}*",
-            f"menu_items:hash:*",  # Hash-based keys that might contain this restaurant
-            f"menu_categories:restaurant_id={restaurant_id}*",
-            f"menu_categories:hash:*",  # Hash-based keys for categories
-            f"products:restaurant_id={restaurant_id}*",
-            f"categories:restaurant_id={restaurant_id}*",
-            f"settings:restaurant_id={restaurant_id}*",
-            f"analytics:restaurant_id={restaurant_id}*",
+            # Direct keys with restaurant_id in various positions (due to sorting)
+            f"menu_items:*restaurant_id={restaurant_id}*",
+            f"menu_categories:*restaurant_id={restaurant_id}*",
+            f"products:*restaurant_id={restaurant_id}*",
+            f"categories:*restaurant_id={restaurant_id}*",
+            f"settings:*restaurant_id={restaurant_id}*",
+            f"analytics:*restaurant_id={restaurant_id}*",
+            # Hash-based keys with restaurant_id preserved
+            f"*:restaurant_id={restaurant_id}:hash:*",
         ]
         
         total_deleted = 0
