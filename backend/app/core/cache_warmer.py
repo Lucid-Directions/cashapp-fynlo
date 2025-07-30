@@ -228,21 +228,18 @@ async def warm_cache_task():
     Background task to periodically warm caches.
     Should be added to FastAPI's startup event.
     """
+    from app.core.database import SessionLocal
+    
     while True:
         try:
             if cache_warmer.should_warm():
-                # Get a database session with proper cleanup
-                db_gen = get_db()
-                db = next(db_gen)
+                # Use SessionLocal directly for non-dependency-injection contexts
+                db = SessionLocal()
                 try:
                     stats = await cache_warmer.warm_all_caches(db)
                     logger.info(f"Cache warming task completed: {stats}")
                 finally:
-                    # Properly close the generator to ensure cleanup runs
-                    try:
-                        next(db_gen)
-                    except StopIteration:
-                        pass
+                    db.close()
             
             # Sleep for 5 minutes before checking again
             await asyncio.sleep(300)

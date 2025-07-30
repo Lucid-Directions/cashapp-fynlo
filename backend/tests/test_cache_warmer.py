@@ -236,11 +236,11 @@ class TestCacheWarmingTasks:
     @pytest.mark.asyncio
     async def test_warm_cache_task_execution(self):
         """Test the background warming task"""
-        # Mock get_db
+        # Mock SessionLocal
         mock_db = MagicMock()
         
         with patch('app.core.cache_warmer.cache_warmer') as mock_warmer, \
-             patch('app.core.cache_warmer.get_db', return_value=iter([mock_db])), \
+             patch('app.core.database.SessionLocal', return_value=mock_db), \
              patch('asyncio.sleep') as mock_sleep:
             
             # Setup warmer behavior
@@ -264,7 +264,7 @@ class TestCacheWarmingTasks:
         mock_db = MagicMock()
         
         with patch('app.core.cache_warmer.cache_warmer') as mock_warmer, \
-             patch('app.core.cache_warmer.get_db', return_value=iter([mock_db])), \
+             patch('app.core.database.SessionLocal', return_value=mock_db), \
              patch('asyncio.sleep') as mock_sleep:
             
             # Setup warmer to raise error

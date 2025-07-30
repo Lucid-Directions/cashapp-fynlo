@@ -77,39 +77,14 @@ def format_menu_item(product, category_name=None):
         'description': product.description or ''
     }
 
-@router.get("/items")
 @cached(ttl=300, prefix="menu_items", key_params=["restaurant_id", "category"])
-async def get_menu_items(
-    restaurant_id: Optional[str] = Query(None),
-    category: Optional[str] = Query(None),
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+async def _get_menu_items_cached(
+    restaurant_id: str,
+    category: Optional[str],
+    db: Session
 ):
-    """Get menu items (products) for frontend compatibility"""
+    """Internal cached function for getting menu items"""
     start_time = time.time()
-    
-    # Use current user's restaurant context
-    user_restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
-    if not user_restaurant_id:
-        return APIResponseHelper.error(
-            message="User must be assigned to a restaurant",
-            status_code=400
-        )
-    
-    # Use provided restaurant_id or fallback to user's current restaurant
-    if not restaurant_id:
-        restaurant_id = str(user_restaurant_id)
-    else:
-        # Validate that user has access to the requested restaurant
-        from app.core.tenant_security import TenantSecurity
-        await TenantSecurity.validate_restaurant_access(
-            user=current_user,
-            restaurant_id=restaurant_id,
-            operation="access",
-            resource_type="menu",
-            resource_id=None,
-            db=db
-        )
     
     logger.info(f"Menu items request started - Restaurant: {restaurant_id}, Category: {category}")
     
@@ -170,15 +145,15 @@ async def get_menu_items(
         }
     )
 
-@router.get("/categories")
-@cached(ttl=300, prefix="menu_categories", key_params=["restaurant_id"])
-async def get_menu_categories(
+
+@router.get("/items")
+async def get_menu_items(
     restaurant_id: Optional[str] = Query(None),
+    category: Optional[str] = Query(None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Get menu categories for frontend compatibility"""
-    
+    """Get menu items (products) for frontend compatibility"""
     # Use current user's restaurant context
     user_restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
     if not user_restaurant_id:
@@ -202,7 +177,15 @@ async def get_menu_categories(
             db=db
         )
     
-    
+    # Call the cached function with resolved restaurant_id
+    return await _get_menu_items_cached(restaurant_id, category, db)
+
+@cached(ttl=300, prefix="menu_categories", key_params=["restaurant_id"])
+async def _get_menu_categories_cached(
+    restaurant_id: str,
+    db: Session
+):
+    """Internal cached function for getting menu categories"""
     # Get categories
     categories = db.query(Category).filter(
         and_(Category.restaurant_id == restaurant_id, Category.is_active == True)
@@ -230,3 +213,37 @@ async def get_menu_categories(
             "total_count": len(menu_categories)
         }
     )
+
+
+@router.get("/categories")
+async def get_menu_categories(
+    restaurant_id: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Get menu categories for frontend compatibility"""
+    # Use current user's restaurant context
+    user_restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
+    if not user_restaurant_id:
+        return APIResponseHelper.error(
+            message="User must be assigned to a restaurant",
+            status_code=400
+        )
+    
+    # Use provided restaurant_id or fallback to user's current restaurant
+    if not restaurant_id:
+        restaurant_id = str(user_restaurant_id)
+    else:
+        # Validate that user has access to the requested restaurant
+        from app.core.tenant_security import TenantSecurity
+        await TenantSecurity.validate_restaurant_access(
+            user=current_user,
+            restaurant_id=restaurant_id,
+            operation="access",
+            resource_type="menu",
+            resource_id=None,
+            db=db
+        )
+    
+    # Call the cached function with resolved restaurant_id
+    return await _get_menu_categories_cached(restaurant_id, db)

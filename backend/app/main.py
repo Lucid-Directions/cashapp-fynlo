@@ -91,19 +91,15 @@ async def lifespan(app: FastAPI):
         # Initialize cache warming
         logger.info("Initializing cache warming...")
         from app.core.cache_warmer import warm_cache_on_startup, warm_cache_task
+        from app.core.database import SessionLocal
         import asyncio
         
-        # Get a database session for initial warming with proper cleanup
-        db_gen = get_db()
-        db = next(db_gen)
+        # Use SessionLocal directly for non-dependency-injection contexts
+        db = SessionLocal()
         try:
             await warm_cache_on_startup(db)
         finally:
-            # Properly close the generator to ensure cleanup runs
-            try:
-                next(db_gen)
-            except StopIteration:
-                pass
+            db.close()
         
         # Start background cache warming task
         asyncio.create_task(warm_cache_task())
