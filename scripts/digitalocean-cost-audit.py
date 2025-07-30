@@ -210,20 +210,16 @@ class DigitalOceanAuditor:
             for component in app.get("spec", {}).get("services", []):
                 instance_count = component.get("instance_count", 1)
                 
-                # Get deployment info for actual usage
-                deployment_data = self.make_request(f"apps/{app_id}/deployments")
-                if deployment_data:
-                    latest_deployment = deployment_data.get("deployments", [{}])[0]
-                    
-                    # Check if instances are over-provisioned
-                    if instance_count > 1:
-                        optimization_opportunities.append({
-                            "app": app["spec"]["name"],
-                            "component": component["name"],
-                            "current_instances": instance_count,
-                            "recommendation": "Consider reducing instances based on low usage",
-                            "potential_savings": 10 * (instance_count - 1)  # $10/month per extra instance
-                        })
+                # Check if instances are over-provisioned
+                # Note: Without actual usage metrics, we flag any multi-instance service for review
+                if instance_count > 1:
+                    optimization_opportunities.append({
+                        "app": app["spec"]["name"],
+                        "component": component["name"],
+                        "current_instances": instance_count,
+                        "recommendation": "Consider reducing instances based on low usage",
+                        "potential_savings": 10 * (instance_count - 1)  # $10/month per extra instance
+                    })
         
         if optimization_opportunities:
             print(f"  ⚠️  Found {len(optimization_opportunities)} optimization opportunities")
