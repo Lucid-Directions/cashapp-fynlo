@@ -45,7 +45,7 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
   const { theme } = useTheme();
   const styles = useThemedStyles(createStyles);
   const [step, setStep] = useState<'capture' | 'spinning' | 'review' | 'submitting'>('capture');
-  const [capturedImage, setCapturedImage] = useState<any>(null); // Placeholder for image data
+  const [capturedImage, setCapturedImage] = useState<unknown>(null); // Placeholder for image data
   const [parsedItems, setParsedItems] = useState<ReceiptItem[]>([]);
 
   const requestCameraPermission = async () => {
@@ -329,7 +329,7 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
   );
 };
 
-const createStyles = (theme: any) =>
+const createStyles = (theme: unknown) =>
   StyleSheet.create({
     modalOverlay: {
       flex: 1,

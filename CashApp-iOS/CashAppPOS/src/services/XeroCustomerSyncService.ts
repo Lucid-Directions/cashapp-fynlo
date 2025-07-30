@@ -22,7 +22,7 @@ export interface SyncError {
   entityType: 'customer';
   operation: 'create' | 'update' | 'delete';
   error: string;
-  data?: any;
+  data?: unknown;
 }
 
 export interface POSCustomer {

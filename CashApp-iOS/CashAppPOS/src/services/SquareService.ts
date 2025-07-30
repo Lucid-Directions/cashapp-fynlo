@@ -9,10 +9,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 
 // Square SDK imports - conditionally loaded to prevent crashes
-let SQIPCore: any;
-let SQIPCardEntry: any;
-let SQIPApplePay: any;
-let SQIPGooglePay: any;
+let SQIPCore: unknown;
+let SQIPCardEntry: unknown;
+let SQIPApplePay: unknown;
+let SQIPGooglePay: unknown;
 
 try {
   const SquareSDK = require('react-native-square-in-app-payments');
@@ -589,7 +589,7 @@ class SquareServiceClass {
   /**
    * Get payment details
    */
-  async getPaymentDetails(paymentId: string): Promise<any> {
+  async getPaymentDetails(paymentId: string): Promise<unknown> {
     try {
       if (!this.config) {
         throw new Error('Square service not initialized');

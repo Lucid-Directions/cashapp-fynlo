@@ -55,7 +55,7 @@ ${JSON.stringify(context.metadata || {}, null, 2)}
   /**
    * Log API request details for debugging
    */
-  logAPIRequest(method: string, url: string, options?: any): void {
+  logAPIRequest(method: string, url: string, options?: unknown): void {
 🌐 ======== API REQUEST ========
 📍 ${method} ${url}
 ⏰ Time: ${new Date().toISOString()}
@@ -68,7 +68,7 @@ ${JSON.stringify(context.metadata || {}, null, 2)}
   /**
    * Log API response details
    */
-  logAPIResponse(url: string, status: number, duration: number, data?: any): void {
+  logAPIResponse(url: string, status: number, duration: number, data?: unknown): void {
     const statusEmoji = status >= 200 && status < 300 ? '✅' : '❌';
 ${statusEmoji} ======== API RESPONSE ========
 📍 URL: ${url}

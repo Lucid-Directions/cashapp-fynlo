@@ -50,7 +50,7 @@ const TaxConfigurationScreen: React.FC = () => {
     { rate: 0, description: 'Zero Rate (0%)', category: "Books, food, children's clothes, etc." },
   ];
 
-  const handleFieldChange = (field: string, value: any) => {
+  const handleFieldChange = (field: string, value: unknown) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     setHasChanges(true);
   };

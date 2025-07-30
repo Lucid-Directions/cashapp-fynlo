@@ -61,7 +61,7 @@ const InventoryReportDetailScreen = () => {
       const inventory = await dataService.getInventoryReport();
 
       // Transform API data to match InventoryItem interface if needed
-      const transformedData: InventoryItem[] = inventory.map((item: any) => ({
+      const transformedData: InventoryItem[] = inventory.map((item: unknown) => ({
         id: item.id || item.sku,
         name: item.name || item.product_name,
         category: item.category || 'Other',

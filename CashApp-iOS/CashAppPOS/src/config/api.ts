@@ -18,8 +18,8 @@ const MAC_LAN_IP = '192.168.0.109';
 const isSimulator =
   __DEV__ &&
   // iOS Simulator detection
-  ((global as any).navigator?.userAgent?.includes('iPhone Simulator') ||
-    (global as any).navigator?.userAgent?.includes('iPad Simulator') ||
+  ((global as unknown).navigator?.userAgent?.includes('iPhone Simulator') ||
+    (global as unknown).navigator?.userAgent?.includes('iPad Simulator') ||
     // React Native development mode detection
     typeof __DEV__ !== 'undefined');
 

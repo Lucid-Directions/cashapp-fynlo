@@ -26,7 +26,7 @@ class QRPaymentErrorBoundary extends Component<
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: any) {
+  componentDidCatch(error: Error, errorInfo: unknown) {
       error: error.message,
       stack: error.stack,
       componentStack: errorInfo.componentStack,

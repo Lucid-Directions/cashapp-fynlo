@@ -65,7 +65,7 @@ const ReportsScreen = () => {
       // Assuming getReportsDashboardData returns an object with all necessary pre-calculated metrics and lists
       const dashboardData = await dataService.getReportsDashboardData();
       setReportDashboardData(dashboardData);
-    } catch (e: any) {
+    } catch (e: unknown) {
       setError(e.message || 'Failed to load report data.');
       setReportDashboardData(null);
     } finally {
@@ -209,7 +209,7 @@ const ReportsScreen = () => {
           <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Top Items Today</Text>
           <View style={[styles.card, { backgroundColor: theme.colors.white }]}>
             {topItemsToday.length > 0 ? (
-              topItemsToday.map((item: any, index: number) => (
+              topItemsToday.map((item: unknown, index: number) => (
                 <Text key={index} style={[styles.itemText, { color: theme.colors.text }]}>
                   🍽️ {item.name} - {item.quantity} sold (£{item.revenue.toFixed(2)})
                 </Text>
@@ -229,7 +229,7 @@ const ReportsScreen = () => {
           </Text>
           <View style={[styles.card, { backgroundColor: theme.colors.white }]}>
             {topPerformersToday.length > 0 ? (
-              topPerformersToday.slice(0, 3).map((employee: any, index: number) => {
+              topPerformersToday.slice(0, 3).map((employee: unknown, index: number) => {
                 return (
                   <View key={index} style={styles.performerRow}>
                     <View style={styles.performerRank}>

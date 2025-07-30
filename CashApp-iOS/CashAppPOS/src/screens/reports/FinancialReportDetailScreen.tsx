@@ -108,7 +108,7 @@ const FinancialReportDetailScreen = () => {
       // Assuming getFinancialReportDetail returns data in FinancialData shape for the selectedPeriod
       const data = await dataService.getFinancialReportDetail(selectedPeriod);
       setReportData(data);
-    } catch (e: any) {
+    } catch (e: unknown) {
       setError(e.message || 'Failed to load financial report.');
       setReportData(null);
     } finally {

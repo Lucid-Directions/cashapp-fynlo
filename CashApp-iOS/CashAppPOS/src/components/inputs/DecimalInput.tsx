@@ -11,7 +11,7 @@ interface DecimalInputProps {
   minValue?: number;
   decimalPlaces?: number;
   label?: string;
-  style?: any;
+  style?: unknown;
   disabled?: boolean;
 }
 

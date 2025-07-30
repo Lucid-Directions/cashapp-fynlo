@@ -58,8 +58,8 @@ const ExportedMenuItemCard = ({
   handleUpdateQuantity,
 }: {
   item: MenuItem;
-  theme: any;
-  styles: any;
+  theme: unknown;
+  styles: unknown;
   cart: OrderItem[];
   handleAddToCart: (item: MenuItem) => void;
   handleUpdateQuantity: (id: number, quantity: number) => void;
@@ -547,7 +547,7 @@ const POSScreen: React.FC = () => {
     }
   };
 
-  const handlePaymentComplete = (result: any) => {
+  const handlePaymentComplete = (result: unknown) => {
     if (result.success) {
       Alert.alert(
         'Payment Successful',
@@ -1251,7 +1251,7 @@ const POSScreen: React.FC = () => {
   );
 };
 
-const createStyles = (theme: any) =>
+const createStyles = (theme: unknown) =>
   StyleSheet.create({
     container: {
       flex: 1,

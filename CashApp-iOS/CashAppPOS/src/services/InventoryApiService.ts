@@ -86,7 +86,7 @@ export const adjustStock = async (
   sku: string,
   change_qty_g: number,
   reason = 'manual_adjustment',
-): Promise<any> => {
+): Promise<unknown> => {
   try {
     const response = await apiClient.post(`/inventory/items/${sku}/adjust-stock`, {
       sku,
@@ -182,7 +182,7 @@ export const fetchInventoryLedger = async (
   endDate?: string,
 ): Promise<InventoryLedgerEntry[]> => {
   try {
-    const params: any = { skip, limit };
+    const params: unknown = { skip, limit };
     if (startDate) {
       params.start_date = startDate;
     }

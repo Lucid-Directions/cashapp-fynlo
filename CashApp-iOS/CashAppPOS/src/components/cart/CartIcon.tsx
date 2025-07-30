@@ -44,7 +44,7 @@ const CartIcon: React.FC<Props> = ({ count, onPress, testID, size = 40 }) => {
   );
 };
 
-const createStyles = (theme: any) =>
+const createStyles = (theme: unknown) =>
   StyleSheet.create({
     container: {
       padding: 8,

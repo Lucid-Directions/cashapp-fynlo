@@ -30,7 +30,7 @@ describe('Authentication Race Condition Tests', () => {
 
       // Spy on the actual refresh method
       const refreshSpy = jest
-        .spyOn(tokenManager as any, 'performRefresh')
+        .spyOn(tokenManager as unknown, 'performRefresh')
         .mockImplementation(mockRefresh);
 
       // Make 5 concurrent refresh attempts
@@ -50,21 +50,21 @@ describe('Authentication Race Condition Tests', () => {
 
     it('should cache token validity checks', async () => {
       // Mock token expiry time
-      (tokenManager as any).tokenExpiryTime = Math.floor(Date.now() / 1000) + 120; // 2 minutes from now
+      (tokenManager as unknown).tokenExpiryTime = Math.floor(Date.now() / 1000) + 120; // 2 minutes from now
 
       // First check should set cache
-      const isExpired1 = (tokenManager as any).isTokenExpired();
+      const isExpired1 = (tokenManager as unknown).isTokenExpired();
 
       // Immediate second check should use cache
-      const isExpired2 = (tokenManager as any).isTokenExpired();
+      const isExpired2 = (tokenManager as unknown).isTokenExpired();
 
       // Both should return same result
       expect(isExpired1).toBe(isExpired2);
       expect(isExpired1).toBe(false); // Not expired with 2 minute buffer
 
       // Check that cache was set
-      expect((tokenManager as any).tokenValidityCache).toBeDefined();
-      expect((tokenManager as any).tokenValidityCache.isValid).toBe(true);
+      expect((tokenManager as unknown).tokenValidityCache).toBeDefined();
+      expect((tokenManager as unknown).tokenValidityCache.isValid).toBe(true);
     });
   });
 
@@ -78,7 +78,7 @@ describe('Authentication Race Condition Tests', () => {
         );
 
       // Set interceptor as refreshing
-      (authInterceptor as any).isRefreshing = true;
+      (authInterceptor as unknown).isRefreshing = true;
 
       // Queue a request
       const requestPromise = authInterceptor.request({
@@ -120,15 +120,15 @@ describe('Authentication Race Condition Tests', () => {
       const consoleSpy = jest.spyOn(console, 'log');
 
       // Trigger close event handler
-      (webSocketService as any).connectionStartTime = Date.now() - 1000;
-      (webSocketService as any).ws = { readyState: WebSocket.CLOSED };
+      (webSocketService as unknown).connectionStartTime = Date.now() - 1000;
+      (webSocketService as unknown).ws = { readyState: WebSocket.CLOSED };
 
       // Simulate close event
-      const handler = (webSocketService as any).setupEventHandlers;
+      const handler = (webSocketService as unknown).setupEventHandlers;
       // Would need to actually trigger the handler here
 
       // Check that auth error was detected
-      expect((webSocketService as any).isAuthError).toBe(false); // Initially false
+      expect((webSocketService as unknown).isAuthError).toBe(false); // Initially false
     });
 
     it('should not treat quick network failures as auth errors', () => {
@@ -139,10 +139,10 @@ describe('Authentication Race Condition Tests', () => {
       };
 
       // Set connection time to simulate quick failure
-      (webSocketService as any).connectionStartTime = Date.now() - 500; // 500ms ago
+      (webSocketService as unknown).connectionStartTime = Date.now() - 500; // 500ms ago
 
       // After close event, should NOT be marked as auth error
-      expect((webSocketService as any).isAuthError).toBe(false);
+      expect((webSocketService as unknown).isAuthError).toBe(false);
     });
   });
 

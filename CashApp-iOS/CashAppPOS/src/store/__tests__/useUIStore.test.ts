@@ -255,9 +255,9 @@ describe('useUIStore', () => {
 
       act(() => {
         // These should not break the store
-        result.current.setSelectedCategory(undefined as any);
-        result.current.setShowPaymentModal(undefined as any);
-        result.current.setTheme(undefined as any);
+        result.current.setSelectedCategory(undefined as unknown);
+        result.current.setShowPaymentModal(undefined as unknown);
+        result.current.setTheme(undefined as unknown);
       });
 
       // Values should be set even if undefined (TypeScript should prevent this in real usage)
@@ -270,9 +270,9 @@ describe('useUIStore', () => {
       const { result } = renderHook(() => useUIStore());
 
       act(() => {
-        result.current.setSelectedCategory(null as any);
-        result.current.setShowPaymentModal(null as any);
-        result.current.setTheme(null as any);
+        result.current.setSelectedCategory(null as unknown);
+        result.current.setShowPaymentModal(null as unknown);
+        result.current.setTheme(null as unknown);
       });
 
       expect(result.current.selectedCategory).toBeNull();

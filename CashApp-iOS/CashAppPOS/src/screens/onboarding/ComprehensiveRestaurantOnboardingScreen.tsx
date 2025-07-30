@@ -227,7 +227,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
   const dayNames = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
   const dayLabels = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-  const updateField = (field: keyof RestaurantFormData, value: any) => {
+  const updateField = (field: keyof RestaurantFormData, value: unknown) => {
     setFormData(prev => {
       const updated = { ...prev, [field]: value };
 

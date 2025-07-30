@@ -18,7 +18,7 @@ interface AuthEvent {
     | 'auth_error'
     | 'session_expired';
   message: string;
-  details?: any;
+  details?: unknown;
 }
 
 class AuthMonitor {
@@ -62,7 +62,7 @@ class AuthMonitor {
   /**
    * Log an authentication event
    */
-  logEvent(type: AuthEvent['type'], message: string, details?: any) {
+  logEvent(type: AuthEvent['type'], message: string, details?: unknown) {
     const event: AuthEvent = {
       timestamp: new Date().toISOString(),
       type,

@@ -44,7 +44,7 @@ const QRCodeWrapper: React.FC<{ qrCodeData: string }> = ({ qrCodeData }) => {
 
 interface QRCodePaymentProps {
   request: PaymentRequest;
-  onPaymentComplete: (result: any) => void;
+  onPaymentComplete: (result: unknown) => void;
   onCancel: () => void;
 }
 

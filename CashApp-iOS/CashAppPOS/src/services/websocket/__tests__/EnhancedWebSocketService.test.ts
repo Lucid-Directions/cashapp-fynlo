@@ -26,10 +26,10 @@ class MockWebSocket {
   static CLOSED = 3;
 
   readyState = MockWebSocket.CONNECTING;
-  onopen: ((event: any) => void) | null = null;
-  onclose: ((event: any) => void) | null = null;
-  onerror: ((event: any) => void) | null = null;
-  onmessage: ((event: any) => void) | null = null;
+  onopen: ((event: unknown) => void) | null = null;
+  onclose: ((event: unknown) => void) | null = null;
+  onerror: ((event: unknown) => void) | null = null;
+  onmessage: ((event: unknown) => void) | null = null;
 
   constructor(public url: string) {
     // Simulate connection
@@ -132,7 +132,7 @@ describe('EnhancedWebSocketService', () => {
       await jest.runOnlyPendingTimersAsync();
 
       // Simulate auth success
-      const ws = (service as any).ws;
+      const ws = (service as unknown).ws;
       ws.onmessage?.({
         data: JSON.stringify({
           type: WebSocketEvent.AUTHENTICATED,
@@ -151,7 +151,7 @@ describe('EnhancedWebSocketService', () => {
       await jest.runOnlyPendingTimersAsync();
 
       // Simulate auth error
-      const ws = (service as any).ws;
+      const ws = (service as unknown).ws;
       ws.onmessage?.({
         data: JSON.stringify({
           type: WebSocketEvent.AUTH_ERROR,
@@ -171,7 +171,7 @@ describe('EnhancedWebSocketService', () => {
       await jest.runOnlyPendingTimersAsync();
 
       // Simulate auth success
-      const ws = (service as any).ws;
+      const ws = (service as unknown).ws;
       ws.onmessage?.({
         data: JSON.stringify({
           type: WebSocketEvent.AUTHENTICATED,
@@ -194,7 +194,7 @@ describe('EnhancedWebSocketService', () => {
       await jest.runOnlyPendingTimersAsync();
 
       // Authenticate
-      const ws = (service as any).ws;
+      const ws = (service as unknown).ws;
       ws.onmessage?.({
         data: JSON.stringify({
           type: WebSocketEvent.AUTHENTICATED,
@@ -214,7 +214,7 @@ describe('EnhancedWebSocketService', () => {
       });
 
       // Verify missed pongs is reset
-      expect((service as any).missedPongs).toBe(0);
+      expect((service as unknown).missedPongs).toBe(0);
     });
 
     it('should reconnect after missing too many pongs', async () => {
@@ -222,7 +222,7 @@ describe('EnhancedWebSocketService', () => {
       await jest.runOnlyPendingTimersAsync();
 
       // Authenticate
-      const ws = (service as any).ws;
+      const ws = (service as unknown).ws;
       ws.onmessage?.({
         data: JSON.stringify({
           type: WebSocketEvent.AUTHENTICATED,
@@ -242,7 +242,7 @@ describe('EnhancedWebSocketService', () => {
 
   describe('Reconnection Logic', () => {
     it('should use exponential backoff with jitter', () => {
-      const calculateBackoff = (service as any).calculateBackoff.bind(service);
+      const calculateBackoff = (service as unknown).calculateBackoff.bind(service);
 
       // Test increasing delays
       const delay0 = calculateBackoff(0);
@@ -260,7 +260,7 @@ describe('EnhancedWebSocketService', () => {
     });
 
     it('should cap backoff at maximum delay', () => {
-      const calculateBackoff = (service as any).calculateBackoff.bind(service);
+      const calculateBackoff = (service as unknown).calculateBackoff.bind(service);
       const maxDelay = 64000;
 
       const delay10 = calculateBackoff(10);
@@ -272,10 +272,10 @@ describe('EnhancedWebSocketService', () => {
       service.on('max_reconnect_attempts', listener);
 
       // Set max attempts to 2 for testing
-      (service as any).config.maxReconnectAttempts = 2;
+      (service as unknown).config.maxReconnectAttempts = 2;
 
       await service.connect();
-      const ws = (service as any).ws;
+      const ws = (service as unknown).ws;
 
       // Simulate disconnections
       for (let i = 0; i < 3; i++) {
@@ -295,7 +295,7 @@ describe('EnhancedWebSocketService', () => {
         data: { order_id: '123' },
       });
 
-      expect((service as any).messageQueue.length).toBe(1);
+      expect((service as unknown).messageQueue.length).toBe(1);
     });
 
     it('should process queued messages after reconnection', async () => {
@@ -315,7 +315,7 @@ describe('EnhancedWebSocketService', () => {
       await jest.runOnlyPendingTimersAsync();
 
       // Authenticate
-      const ws = (service as any).ws;
+      const ws = (service as unknown).ws;
       ws.onmessage?.({
         data: JSON.stringify({
           type: WebSocketEvent.AUTHENTICATED,
@@ -343,7 +343,7 @@ describe('EnhancedWebSocketService', () => {
         });
       }
 
-      expect((service as any).messageQueue.length).toBe(100);
+      expect((service as unknown).messageQueue.length).toBe(100);
     });
   });
 
@@ -368,7 +368,7 @@ describe('EnhancedWebSocketService', () => {
       await jest.runOnlyPendingTimersAsync();
 
       // Authenticate
-      const ws = (service as any).ws;
+      const ws = (service as unknown).ws;
       ws.onmessage?.({
         data: JSON.stringify({
           type: WebSocketEvent.AUTHENTICATED,
@@ -390,12 +390,12 @@ describe('EnhancedWebSocketService', () => {
   describe('State Management', () => {
     it('should validate state transitions', () => {
       // Valid transition
-      (service as any).setState('CONNECTING');
+      (service as unknown).setState('CONNECTING');
       expect(service.getState()).toBe('CONNECTING');
 
       // Invalid transition (CONNECTING cannot go directly to CONNECTED)
       const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
-      (service as any).setState('CONNECTED');
+      (service as unknown).setState('CONNECTED');
       expect(service.getState()).toBe('CONNECTING'); // Should not change
       expect(consoleWarnSpy).toHaveBeenCalledWith(
         expect.stringContaining('Invalid state transition'),
@@ -413,8 +413,8 @@ describe('EnhancedWebSocketService', () => {
       ];
 
       validTransitions.forEach(([from, to]) => {
-        (service as any).state = from;
-        (service as any).setState(to);
+        (service as unknown).state = from;
+        (service as unknown).setState(to);
         expect(service.getState()).toBe(to);
       });
     });
@@ -424,7 +424,7 @@ describe('EnhancedWebSocketService', () => {
     it('should clean up resources on disconnect', async () => {
       await service.connect();
 
-      const ws = (service as any).ws;
+      const ws = (service as unknown).ws;
       const closeSpy = jest.spyOn(ws, 'close');
 
       service.disconnect();
@@ -432,7 +432,7 @@ describe('EnhancedWebSocketService', () => {
       expect(closeSpy).toHaveBeenCalledWith(1000, 'Client disconnect');
       expect(mockNetInfoUnsubscribe).toHaveBeenCalled();
       expect(service.getState()).toBe('DISCONNECTED');
-      expect((service as any).ws).toBeNull();
+      expect((service as unknown).ws).toBeNull();
     });
 
     it('should clear all timers on disconnect', async () => {
@@ -440,7 +440,7 @@ describe('EnhancedWebSocketService', () => {
       await jest.runOnlyPendingTimersAsync();
 
       // Start heartbeat
-      const ws = (service as any).ws;
+      const ws = (service as unknown).ws;
       ws.onmessage?.({
         data: JSON.stringify({
           type: WebSocketEvent.AUTHENTICATED,
@@ -450,9 +450,9 @@ describe('EnhancedWebSocketService', () => {
 
       service.disconnect();
 
-      expect((service as any).heartbeatTimer).toBeNull();
-      expect((service as any).pongTimer).toBeNull();
-      expect((service as any).reconnectTimer).toBeNull();
+      expect((service as unknown).heartbeatTimer).toBeNull();
+      expect((service as unknown).pongTimer).toBeNull();
+      expect((service as unknown).reconnectTimer).toBeNull();
     });
   });
 });

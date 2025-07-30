@@ -22,7 +22,7 @@ import { useTheme } from '../../design-system/ThemeProvider';
 
 interface EffectiveSetting {
   key: string;
-  value: any;
+  value: unknown;
   source: 'platform' | 'restaurant';
   category: string;
   description: string;
@@ -32,8 +32,8 @@ interface EffectiveSetting {
 
 interface OverrideRequest {
   configKey: string;
-  currentValue: any;
-  requestedValue: any;
+  currentValue: unknown;
+  requestedValue: unknown;
   reason: string;
   requiresApproval: boolean;
 }
@@ -153,7 +153,7 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
     setExpandedCategories(newExpanded);
   };
 
-  const requestOverride = async (setting: EffectiveSetting, newValue: any, reason: string) => {
+  const requestOverride = async (setting: EffectiveSetting, newValue: unknown, reason: string) => {
     try {
       const requiresApproval = shouldRequireApproval(setting.key, newValue);
 
@@ -182,7 +182,7 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
     }
   };
 
-  const shouldRequireApproval = (configKey: string, value: any): boolean => {
+  const shouldRequireApproval = (configKey: string, value: unknown): boolean => {
     // Define rules for when approval is required
     if (configKey.includes('payment.markup') && value.percentage > 0.5) {
       return true;
@@ -489,7 +489,7 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
   );
 };
 
-const createStyles = (theme: any) =>
+const createStyles = (theme: unknown) =>
   StyleSheet.create({
     container: {
       flex: 1,

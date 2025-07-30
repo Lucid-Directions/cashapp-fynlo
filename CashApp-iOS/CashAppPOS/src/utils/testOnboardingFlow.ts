@@ -86,6 +86,6 @@ export function runAllTests() {
 }
 
 // Navigation state logger for debugging
-export function logCurrentNavigationState(navigation: any) {
+export function logCurrentNavigationState(navigation: unknown) {
   const state = navigation.getState();
 }

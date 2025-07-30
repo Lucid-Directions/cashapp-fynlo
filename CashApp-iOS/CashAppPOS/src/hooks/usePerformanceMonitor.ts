@@ -108,7 +108,7 @@ export const usePerformanceMonitor = (
 // Performance timing utilities
 export const performanceUtils = {
   // Debounce function for performance optimization
-  debounce: <T extends (...args: any[]) => any>(
+  debounce: <T extends (...args: unknown[]) => any>(
     func: T,
     delay: number,
   ): ((...args: Parameters<T>) => void) => {
@@ -121,7 +121,7 @@ export const performanceUtils = {
   },
 
   // Throttle function for performance optimization
-  throttle: <T extends (...args: any[]) => any>(
+  throttle: <T extends (...args: unknown[]) => any>(
     func: T,
     delay: number,
   ): ((...args: Parameters<T>) => void) => {
@@ -180,7 +180,7 @@ export const performanceUtils = {
   },
 
   // Create a memoized version of a function
-  memoize: <T extends (...args: any[]) => any>(
+  memoize: <T extends (...args: unknown[]) => any>(
     func: T,
     keyGenerator?: (...args: Parameters<T>) => string,
   ): T => {

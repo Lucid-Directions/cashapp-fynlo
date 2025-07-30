@@ -296,7 +296,7 @@ const PaymentAnalyticsScreen: React.FC = () => {
     </View>
   );
 
-  const renderProviderHealth = (provider: string, health: any) => {
+  const renderProviderHealth = (provider: string, health: unknown) => {
     const getStatusColor = (status: string) => {
       switch (status) {
         case 'excellent':

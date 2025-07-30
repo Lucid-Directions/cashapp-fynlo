@@ -172,7 +172,7 @@ class RealUserManagementService {
     }
   }
 
-  async createUser(userData: any): Promise<UserDisplayData> {
+  async createUser(userData: unknown): Promise<UserDisplayData> {
     try {
       const response = await fetch(`${this.baseUrl}/users`, {
         method: 'POST',
@@ -194,7 +194,7 @@ class RealUserManagementService {
     }
   }
 
-  async updateUser(userId: string, updates: any): Promise<UserDisplayData> {
+  async updateUser(userId: string, updates: unknown): Promise<UserDisplayData> {
     try {
       const response = await fetch(`${this.baseUrl}/users/${userId}`, {
         method: 'PUT',

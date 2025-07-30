@@ -9,7 +9,7 @@ import { ThemeProvider } from '../../design-system/ThemeProvider'; // Assuming T
 jest.mock('react-native-vector-icons/MaterialIcons', () => {
   const RealIcon = jest.requireActual('react-native-vector-icons/MaterialIcons');
   // Mock the specific icon being used in CartIcon
-  return (props: any) => (
+  return (props: unknown) => (
     <RealIcon name={props.name} size={props.size} color={props.color} testID="mock-icon" />
   );
 });

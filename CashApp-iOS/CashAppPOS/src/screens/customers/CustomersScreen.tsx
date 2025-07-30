@@ -57,7 +57,7 @@ const CustomersScreen: React.FC = () => {
       }));
 
       setCustomers(parsedCustomers);
-    } catch (e: any) {
+    } catch (e: unknown) {
       setError(e.message || 'Failed to load customers.');
       setCustomers([]); // Clear customers on error
     } finally {
@@ -471,7 +471,7 @@ const CustomersScreen: React.FC = () => {
   );
 };
 
-const createStyles = (theme: any) =>
+const createStyles = (theme: unknown) =>
   StyleSheet.create({
     container: {
       flex: 1,

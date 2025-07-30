@@ -266,7 +266,7 @@ const TableManagementScreen: React.FC = () => {
   };
 
   const handleTableDrag = useCallback(
-    (tableId: string, gestureState: any) => {
+    (tableId: string, gestureState: unknown) => {
       if (!editMode) {
         return;
       }

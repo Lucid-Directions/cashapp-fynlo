@@ -19,8 +19,8 @@ import { Button } from '../../components/ui';
 import SquareService from '../../services/SquareService';
 
 // Square SDK imports - conditionally loaded
-let SQIPApplePay: any;
-let SQIPGooglePay: any;
+let SQIPApplePay: unknown;
+let SQIPGooglePay: unknown;
 try {
   const SquareSDK = require('react-native-square-in-app-payments');
   SQIPApplePay = SquareSDK.SQIPApplePay;
@@ -29,13 +29,13 @@ try {
 }
 
 interface SquareContactlessPaymentScreenProps {
-  navigation: any;
+  navigation: unknown;
   route: {
     params: {
       amount: number;
       currency?: string;
       description?: string;
-      onPaymentComplete: (result: any) => void;
+      onPaymentComplete: (result: unknown) => void;
       onPaymentCancelled: () => void;
     };
   };

@@ -15,7 +15,7 @@ export interface SumUpCheckoutRequest {
 export interface SumUpCheckoutResult {
   success: boolean;
   transactionCode?: string;
-  additionalInfo?: any;
+  additionalInfo?: unknown;
   error?: string;
 }
 

@@ -436,7 +436,7 @@ class PaymentServiceClass {
   /**
    * Get payment analytics
    */
-  async getPaymentAnalytics(startDate: string, endDate: string): Promise<any> {
+  async getPaymentAnalytics(startDate: string, endDate: string): Promise<unknown> {
     try {
       if (!this.config) {
         throw new Error('PaymentService not initialized');

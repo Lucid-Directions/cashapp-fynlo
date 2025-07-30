@@ -184,7 +184,7 @@ class PlatformPaymentService {
 
       // Check if any payment fee settings come from restaurant level
       return Object.values(effectiveSettings).some(
-        (setting: any) => setting.source === 'restaurant',
+        (setting: unknown) => setting.source === 'restaurant',
       );
     } catch (error) {
       return false;

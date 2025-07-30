@@ -396,7 +396,7 @@ export class EnhancedWebSocketService {
   }
 
   once(event: string, listener: Function): void {
-    const onceWrapper = (...args: any[]) => {
+    const onceWrapper = (...args: unknown[]) => {
       listener(...args);
       this.off(event, onceWrapper);
     };
@@ -407,7 +407,7 @@ export class EnhancedWebSocketService {
     this.listeners.get(event)?.delete(listener);
   }
 
-  private emit(event: string, ...args: any[]): void {
+  private emit(event: string, ...args: unknown[]): void {
     this.listeners.get(event)?.forEach(listener => {
       try {
         listener(...args);

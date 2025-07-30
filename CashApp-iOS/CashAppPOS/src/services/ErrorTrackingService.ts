@@ -59,7 +59,7 @@ class ErrorTrackingService {
     return { operation: context.operation, startTime: Date.now() };
   }
 
-  finishTransaction(transaction: any, success = true): void {
+  finishTransaction(transaction: unknown, success = true): void {
     if (transaction) {
       const duration = Date.now() - transaction.startTime;
         `📊 Transaction finished: ${transaction.operation} (${duration}ms) - ${
@@ -70,7 +70,7 @@ class ErrorTrackingService {
   }
 
   // Specific tracking methods for common issues
-  trackPricingError(error: Error, itemData?: any, calculationContext?: any): void {
+  trackPricingError(error: Error, itemData?: unknown, calculationContext?: unknown): void {
     this.simpleTracker.trackPricingError(error, itemData, calculationContext);
   }
 
@@ -78,11 +78,11 @@ class ErrorTrackingService {
     this.simpleTracker.trackNetworkError(error, endpoint, method);
   }
 
-  trackUIError(error: Error, component?: string, props?: any): void {
+  trackUIError(error: Error, component?: string, props?: unknown): void {
     this.simpleTracker.trackUIError(error, component, props);
   }
 
-  trackBusinessLogicError(error: Error, operation?: string, data?: any): void {
+  trackBusinessLogicError(error: Error, operation?: string, data?: unknown): void {
     this.simpleTracker.trackBusinessLogicError(error, operation, data);
   }
 

@@ -64,7 +64,7 @@ const PaymentMethodsInfoScreen: React.FC = () => {
     },
   ];
 
-  const renderPaymentMethod = (method: any) => (
+  const renderPaymentMethod = (method: unknown) => (
     <View key={method.id} style={styles.methodCard}>
       <View style={styles.methodHeader}>
         <Icon

@@ -104,15 +104,15 @@ const MenuManagementScreen: React.FC = () => {
       ]);
 
       // Transform data to match our interface
-      const transformedCategories: Category[] = categoriesData.map((cat: any) => ({
+      const transformedCategories: Category[] = categoriesData.map((cat: unknown) => ({
         id: cat.id,
         name: cat.name,
         description: cat.description || '',
         order: cat.sort_order || 0,
         visible: cat.is_active !== false,
         items: productsData
-          .filter((product: any) => product.category_id === cat.id)
-          .map((product: any) => ({
+          .filter((product: unknown) => product.category_id === cat.id)
+          .map((product: unknown) => ({
             id: product.id,
             name: product.name,
             description: product.description || '',
@@ -640,12 +640,12 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
                 modifiers: [],
               });
               successCount++;
-            } catch (error: any) {
+            } catch (error: unknown) {
               failedItems.push(`Item '${item.name}': ${error.message || 'Unknown error'}`);
               errorCount++;
             }
           }
-        } catch (error: any) {
+        } catch (error: unknown) {
           failedItems.push(`Category '${categoryName}': ${error.message || 'Unknown error'}`);
           errorCount += items.length;
         }
@@ -672,7 +672,7 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
       Alert.alert(errorCount > 0 ? 'Import Partially Complete' : 'Import Complete', message, [
         { text: 'OK' },
       ]);
-    } catch (error: any) {
+    } catch (error: unknown) {
       Alert.alert('Import Error', error.message || 'Failed to process CSV data');
     } finally {
       setLoading(false);
@@ -1239,7 +1239,7 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
   );
 };
 
-const createStyles = (theme: any) =>
+const createStyles = (theme: unknown) =>
   StyleSheet.create({
     container: {
       flex: 1,

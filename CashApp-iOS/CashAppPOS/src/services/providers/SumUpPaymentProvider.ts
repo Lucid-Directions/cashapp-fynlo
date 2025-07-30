@@ -74,7 +74,7 @@ class SumUpPaymentProviderClass {
     }
   }
 
-  async getCardReaderSettings(): Promise<any> {
+  async getCardReaderSettings(): Promise<unknown> {
     try {
       if (!this.initialized) {
         throw new Error('SumUp not initialized');

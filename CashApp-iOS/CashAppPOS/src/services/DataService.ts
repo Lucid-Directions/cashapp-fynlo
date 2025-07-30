@@ -103,7 +103,7 @@ class DataService {
   }
 
   // Test API endpoint in background without affecting UI
-  private async testAPIEndpoint(endpoint: string, method = 'GET', data?: any): Promise<void> {
+  private async testAPIEndpoint(endpoint: string, method = 'GET', data?: unknown): Promise<void> {
     if (this.featureFlags.TEST_API_MODE) {
       try {
         await this.apiTestingService.testEndpoint(endpoint, method, data);
@@ -289,7 +289,7 @@ class DataService {
     color?: string;
     icon?: string;
     sort_order?: number;
-  }): Promise<any> {
+  }): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         const result = await this.db.createCategory(categoryData);
@@ -315,7 +315,7 @@ class DataService {
       sort_order?: number;
       is_active?: boolean;
     }>,
-  ): Promise<any> {
+  ): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         const result = await this.db.updateCategory(categoryId, categoryData);
@@ -359,10 +359,10 @@ class DataService {
     sku?: string;
     prep_time?: number;
     dietary_info?: string[];
-    modifiers?: any[];
+    modifiers?: unknown[];
     stock_tracking?: boolean;
     stock_quantity?: number;
-  }): Promise<any> {
+  }): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         return await this.db.createProduct(productData);
@@ -390,12 +390,12 @@ class DataService {
       sku?: string;
       prep_time?: number;
       dietary_info?: string[];
-      modifiers?: any[];
+      modifiers?: unknown[];
       stock_tracking?: boolean;
       stock_quantity?: number;
       is_active?: boolean;
     }>,
-  ): Promise<any> {
+  ): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         return await this.db.updateProduct(productId, productData);
@@ -427,7 +427,7 @@ class DataService {
   }
 
   // Order operations
-  async createOrder(order: any): Promise<any> {
+  async createOrder(order: unknown): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         const result = await this.db.createOrder(order);
@@ -440,7 +440,7 @@ class DataService {
     return this.db.createOrder(order);
   }
 
-  async updateOrder(orderId: number, updates: any): Promise<any> {
+  async updateOrder(orderId: number, updates: unknown): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         return await this.db.updateOrder(orderId, updates);
@@ -503,7 +503,7 @@ class DataService {
   }
 
   // Restaurant operations
-  async getRestaurantFloorPlan(sectionId?: string | null): Promise<any> {
+  async getRestaurantFloorPlan(sectionId?: string | null): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         const floorPlan = await this.db.getRestaurantFloorPlan(sectionId ?? undefined);
@@ -516,7 +516,7 @@ class DataService {
     return this.db.getRestaurantFloorPlan(sectionId ?? undefined);
   }
 
-  async updateTableStatus(tableId: string, status: string, additionalData?: any): Promise<any> {
+  async updateTableStatus(tableId: string, status: string, additionalData?: unknown): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         return await this.db.updateTableStatus(tableId, status, additionalData);
@@ -527,7 +527,7 @@ class DataService {
   }
 
   // Analytics and Reporting
-  async getDailySalesReport(date?: string): Promise<any> {
+  async getDailySalesReport(date?: string): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         const report = await this.db.getDailySalesReport(date);
@@ -540,7 +540,7 @@ class DataService {
     return this.db.getDailySalesReport(date);
   }
 
-  async getSalesSummary(dateFrom?: string, dateTo?: string): Promise<any> {
+  async getSalesSummary(dateFrom?: string, dateTo?: string): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         const summary = await this.db.getSalesSummary(dateFrom ?? undefined, dateTo ?? undefined);
@@ -554,7 +554,7 @@ class DataService {
   }
 
   // Session management
-  async getCurrentSession(): Promise<any> {
+  async getCurrentSession(): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         return await this.db.getCurrentSession();
@@ -564,7 +564,7 @@ class DataService {
     return this.db.getCurrentSession();
   }
 
-  async createSession(configId: number): Promise<any> {
+  async createSession(configId: number): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         return await this.db.createSession(configId);
@@ -575,7 +575,7 @@ class DataService {
   }
 
   // Hardware operations (always mock for now)
-  async printReceipt(order: any): Promise<boolean> {
+  async printReceipt(order: unknown): Promise<boolean> {
     if (this.featureFlags.ENABLE_HARDWARE) {
     }
     return this.db.printReceipt(order);
@@ -692,7 +692,7 @@ class DataService {
     }
   }
 
-  async getWeekSchedule(weekStart: Date, employees: any[]): Promise<any | null> {
+  async getWeekSchedule(weekStart: Date, employees: unknown[]): Promise<any | null> {
 
     try {
       const schedule = await this.db.getWeekSchedule(weekStart, employees);
@@ -809,7 +809,7 @@ class DataService {
    * Transform API response data to SalesData array format
    * Handles various API response formats and converts to frontend interface
    */
-  private transformApiDataToArray(apiData: any, period: string): any[] {
+  private transformApiDataToArray(apiData: unknown, period: string): unknown[] {
     try {
       // If API returns object with sales data, extract it
       if (apiData && typeof apiData === 'object') {
@@ -869,7 +869,7 @@ class DataService {
     }
   }
 
-  async getLaborReport(period: string): Promise<any> {
+  async getLaborReport(period: string): Promise<unknown> {
       period,
       USE_REAL_API: this.featureFlags.USE_REAL_API,
       isBackendAvailable: this.isBackendAvailable,
@@ -963,7 +963,7 @@ class DataService {
     hourlyRate?: number;
     startDate?: string;
     permissions?: string[];
-  }): Promise<any> {
+  }): Promise<unknown> {
 
     try {
       const response = await authInterceptor.post(`${API_CONFIG.FULL_API_URL}/employees`, {
@@ -1048,7 +1048,7 @@ class DataService {
   // SUBSCRIPTION MANAGEMENT METHODS
   // ===========================================================================
 
-  async getSubscriptionPlans(): Promise<any> {
+  async getSubscriptionPlans(): Promise<unknown> {
 
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
@@ -1079,7 +1079,7 @@ class DataService {
     throw new Error('Subscription plans require API connection');
   }
 
-  async getCurrentSubscription(restaurantId: number): Promise<any> {
+  async getCurrentSubscription(restaurantId: number): Promise<unknown> {
 
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
@@ -1119,7 +1119,7 @@ class DataService {
     throw new Error('Subscription data requires API connection');
   }
 
-  async createSubscription(subscriptionData: any): Promise<any> {
+  async createSubscription(subscriptionData: unknown): Promise<unknown> {
 
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
@@ -1160,7 +1160,7 @@ class DataService {
     throw new Error('Subscription creation requires API connection');
   }
 
-  async changeSubscriptionPlan(changeData: any): Promise<any> {
+  async changeSubscriptionPlan(changeData: unknown): Promise<unknown> {
 
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
@@ -1201,7 +1201,7 @@ class DataService {
     throw new Error('Plan change requires API connection');
   }
 
-  async cancelSubscription(restaurantId: number): Promise<any> {
+  async cancelSubscription(restaurantId: number): Promise<unknown> {
 
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
@@ -1244,7 +1244,7 @@ class DataService {
     throw new Error('Subscription cancellation requires API connection');
   }
 
-  async incrementUsage(restaurantId: number, usageType: string, amount = 1): Promise<any> {
+  async incrementUsage(restaurantId: number, usageType: string, amount = 1): Promise<unknown> {
 
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {

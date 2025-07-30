@@ -15,7 +15,7 @@ interface RequestConfig {
   url: string;
   method: string;
   headers: Record<string, string>;
-  body?: any;
+  body?: unknown;
   signal?: AbortSignal;
 }
 
@@ -200,7 +200,7 @@ class AuthInterceptor {
 
       clearTimeout(timeoutId);
       return response;
-    } catch (error: any) {
+    } catch (error: unknown) {
       clearTimeout(timeoutId);
       if (error.name === 'AbortError') {
         throw new Error('Request timeout');
@@ -214,7 +214,7 @@ class AuthInterceptor {
    */
   async post(
     url: string,
-    body: any,
+    body: unknown,
     headers: Record<string, string> = {},
     timeoutMs = 10000,
   ): Promise<Response> {
@@ -235,7 +235,7 @@ class AuthInterceptor {
 
       clearTimeout(timeoutId);
       return response;
-    } catch (error: any) {
+    } catch (error: unknown) {
       clearTimeout(timeoutId);
       if (error.name === 'AbortError') {
         throw new Error('Request timeout');
@@ -249,7 +249,7 @@ class AuthInterceptor {
    */
   async put(
     url: string,
-    body: any,
+    body: unknown,
     headers: Record<string, string> = {},
     timeoutMs = 10000,
   ): Promise<Response> {
@@ -270,7 +270,7 @@ class AuthInterceptor {
 
       clearTimeout(timeoutId);
       return response;
-    } catch (error: any) {
+    } catch (error: unknown) {
       clearTimeout(timeoutId);
       if (error.name === 'AbortError') {
         throw new Error('Request timeout');
@@ -303,7 +303,7 @@ class AuthInterceptor {
 
       clearTimeout(timeoutId);
       return response;
-    } catch (error: any) {
+    } catch (error: unknown) {
       clearTimeout(timeoutId);
       if (error.name === 'AbortError') {
         throw new Error('Request timeout');
@@ -317,7 +317,7 @@ class AuthInterceptor {
    */
   async patch(
     url: string,
-    body: any,
+    body: unknown,
     headers: Record<string, string> = {},
     timeoutMs = 10000,
   ): Promise<Response> {
@@ -338,7 +338,7 @@ class AuthInterceptor {
 
       clearTimeout(timeoutId);
       return response;
-    } catch (error: any) {
+    } catch (error: unknown) {
       clearTimeout(timeoutId);
       if (error.name === 'AbortError') {
         throw new Error('Request timeout');

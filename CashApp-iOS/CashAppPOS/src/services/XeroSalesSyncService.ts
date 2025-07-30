@@ -27,7 +27,7 @@ export interface SalesSyncError {
   entityType: 'invoice' | 'payment' | 'contact';
   operation: 'create' | 'update';
   error: string;
-  data?: any;
+  data?: unknown;
 }
 
 export interface POSOrder {

@@ -95,7 +95,7 @@ const StaffReportDetailScreen = () => {
       // and that this data is already processed (e.g., sorted, metrics calculated).
       const data = await dataService.getStaffReportDetail(selectedPeriod);
       setStaffData(data || []);
-    } catch (e: any) {
+    } catch (e: unknown) {
       setError(e.message || 'Failed to load staff report.');
       setStaffData([]);
     } finally {

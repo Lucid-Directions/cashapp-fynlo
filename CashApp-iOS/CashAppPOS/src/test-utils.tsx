@@ -62,18 +62,18 @@ export const createMockDataService = () => ({
 // Custom render options
 interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
   navigationProps?: {
-    navigation?: any;
-    route?: any;
+    navigation?: unknown;
+    route?: unknown;
   };
 }
 
 // All providers wrapper
-const AllTheProviders = ({ children, navigationProps = {} }: any) => {
+const AllTheProviders = ({ children, navigationProps = {} }: unknown) => {
   const mockNavigation = navigationProps.navigation || createMockNavigation();
   const mockRoute = navigationProps.route || createMockRoute();
 
   // Create navigation state
-  const navigationRef = React.createRef<any>();
+  const navigationRef = React.createRef<unknown>();
 
   return (
     <SafeAreaProvider

@@ -158,7 +158,7 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
       } else {
         setWeekSchedule({ weekStart, shifts: [] });
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
       setError(e.message || 'Failed to load schedule data.');
       setEmployees([]);
       setWeekSchedule({ weekStart: getWeekStart(currentWeek), shifts: [] });
@@ -481,7 +481,7 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
     setShowTimePicker(true);
   };
 
-  const handleTimeChange = (event: any, selectedDate?: Date) => {
+  const handleTimeChange = (event: unknown, selectedDate?: Date) => {
     setShowTimePicker(false);
     if (selectedDate) {
       if (selectedTimeType === 'start') {
@@ -1262,7 +1262,7 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
                     { borderColor: getStatusColor(status) },
                     editShift.status === status && { backgroundColor: getStatusColor(status) },
                   ]}
-                  onPress={() => setEditShift({ ...editShift, status: status as any })}>
+                  onPress={() => setEditShift({ ...editShift, status: status as unknown })}>
                   <Text
                     style={[
                       styles.roleButtonText,

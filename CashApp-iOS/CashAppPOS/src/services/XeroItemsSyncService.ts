@@ -23,7 +23,7 @@ export interface ItemSyncError {
   entityType: 'item';
   operation: 'create' | 'update' | 'delete';
   error: string;
-  data?: any;
+  data?: unknown;
 }
 
 export interface POSMenuItem {

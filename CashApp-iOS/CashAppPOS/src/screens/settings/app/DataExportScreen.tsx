@@ -405,7 +405,7 @@ const DataExportScreen: React.FC = () => {
                   styles.formatButton,
                   selectedFormat === format && styles.formatButtonSelected,
                 ]}
-                onPress={() => setSelectedFormat(format as any)}>
+                onPress={() => setSelectedFormat(format as unknown)}>
                 <Icon
                   name={getFormatIcon(format)}
                   size={24}

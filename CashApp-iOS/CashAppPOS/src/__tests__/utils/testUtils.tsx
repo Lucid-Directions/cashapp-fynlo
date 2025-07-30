@@ -11,11 +11,11 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 // Custom render function with providers
 interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
-  initialState?: any;
-  navigationProps?: any;
+  initialState?: unknown;
+  navigationProps?: unknown;
 }
 
-const AllTheProviders = ({ children, navigationProps = {} }: any) => {
+const AllTheProviders = ({ children, navigationProps = {} }: unknown) => {
   return (
     <SafeAreaProvider>
       <NavigationContainer {...navigationProps}>{children}</NavigationContainer>
@@ -116,12 +116,12 @@ export const createMockRoute = (overrides = {}) => ({
 });
 
 // Test assertion helpers
-export const expectToBeVisible = (element: any) => {
+export const expectToBeVisible = (element: unknown) => {
   expect(element).toBeTruthy();
   expect(element.props.style).not.toContainEqual({ display: 'none' });
 };
 
-export const expectToBeHidden = (element: any) => {
+export const expectToBeHidden = (element: unknown) => {
   expect(element).toBeFalsy();
 };
 
@@ -153,10 +153,10 @@ export const createMockAppStore = (initialState = {}) => {
     setLoading: jest.fn(),
     setError: jest.fn(),
     cartTotal: jest.fn(() =>
-      state.cart.reduce((total: number, item: any) => total + item.price * item.quantity, 0),
+      state.cart.reduce((total: number, item: unknown) => total + item.price * item.quantity, 0),
     ),
     cartItemCount: jest.fn(() =>
-      state.cart.reduce((count: number, item: any) => count + item.quantity, 0),
+      state.cart.reduce((count: number, item: unknown) => count + item.quantity, 0),
     ),
   };
 };
@@ -182,7 +182,7 @@ export const createMockUIStore = (initialState = {}) => {
 };
 
 // API response helpers
-export const createMockApiResponse = (data: any, success = true) => ({
+export const createMockApiResponse = (data: unknown, success = true) => ({
   success,
   data: success ? data : undefined,
   error: success ? undefined : 'Mock error',
@@ -194,20 +194,20 @@ export const createMockApiError = (message = 'Mock API error') => ({
 });
 
 // Form testing helpers
-export const fillInput = async (getByTestId: any, testId: string, value: string) => {
+export const fillInput = async (getByTestId: unknown, testId: string, value: string) => {
   const input = getByTestId(testId);
   fireEvent.changeText(input, value);
   return input;
 };
 
-export const pressButton = async (getByTestId: any, testId: string) => {
+export const pressButton = async (getByTestId: unknown, testId: string) => {
   const button = getByTestId(testId);
   fireEvent.press(button);
   return button;
 };
 
 // Mock fetch for API testing
-export const createMockFetch = (responses: any[] = []) => {
+export const createMockFetch = (responses: unknown[] = []) => {
   let callCount = 0;
 
   return jest.fn(() => {

@@ -107,8 +107,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       try {
         // Use full_name if available, otherwise use name or default
         const fullName =
-          (authStoreUser as any).full_name ||
-          (authStoreUser as any).name ||
+          (authStoreUser as unknown).full_name ||
+          (authStoreUser as unknown).name ||
           authStoreUser.email ||
           'User';
         const nameParts = typeof fullName === 'string' ? fullName.split(' ') : ['User'];
@@ -118,7 +118,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           lastName: nameParts.slice(1).join(' ') || '',
           email: authStoreUser.email,
           phone: '',
-          role: authStoreUser.role as any,
+          role: authStoreUser.role as unknown,
           pin: '0000',
           employeeId: `EMP${authStoreUser.id}`,
           businessId: authStoreUser.restaurant_id || '',
@@ -149,7 +149,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             currency: 'GBP',
             timezone: 'Europe/London',
             ownerId: authStoreUser.id,
-            subscriptionTier: (authStoreUser.subscription_plan as any) || 'premium',
+            subscriptionTier: (authStoreUser.subscription_plan as unknown) || 'premium',
             isActive: true,
           });
         }

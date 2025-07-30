@@ -50,7 +50,7 @@ interface PricingRule {
   id: string;
   name: string;
   type: 'bulk_discount' | 'happy_hour' | 'loyalty_tier';
-  conditions: any;
+  conditions: unknown;
   discountValue: number;
   isActive: boolean;
 }

@@ -40,7 +40,7 @@ describe('LoginScreen', () => {
     jest.clearAllMocks();
     mockDatabaseService.getInstance.mockReturnValue({
       login: jest.fn(),
-    } as any);
+    } as unknown);
   });
 
   describe('Rendering', () => {
@@ -161,7 +161,7 @@ describe('LoginScreen', () => {
       const mockLogin = jest.fn().mockResolvedValue(true);
       mockDatabaseService.getInstance.mockReturnValue({
         login: mockLogin,
-      } as any);
+      } as unknown);
 
       const { getByText, getByPlaceholderText } = render(<LoginScreen />);
       const usernameInput = getByPlaceholderText('Username');
@@ -183,7 +183,7 @@ describe('LoginScreen', () => {
       const mockLogin = jest.fn().mockResolvedValue(false);
       mockDatabaseService.getInstance.mockReturnValue({
         login: mockLogin,
-      } as any);
+      } as unknown);
 
       const { getByText, getByPlaceholderText } = render(<LoginScreen />);
       const usernameInput = getByPlaceholderText('Username');
@@ -203,7 +203,7 @@ describe('LoginScreen', () => {
       const mockLogin = jest.fn().mockRejectedValue(new Error('Network error'));
       mockDatabaseService.getInstance.mockReturnValue({
         login: mockLogin,
-      } as any);
+      } as unknown);
 
       const { getByText, getByPlaceholderText } = render(<LoginScreen />);
       const usernameInput = getByPlaceholderText('Username');
@@ -228,7 +228,7 @@ describe('LoginScreen', () => {
         .mockImplementation(() => new Promise(resolve => setTimeout(() => resolve(true), 100)));
       mockDatabaseService.getInstance.mockReturnValue({
         login: mockLogin,
-      } as any);
+      } as unknown);
 
       const { getByText, getByPlaceholderText } = render(<LoginScreen />);
       const usernameInput = getByPlaceholderText('Username');
@@ -253,7 +253,7 @@ describe('LoginScreen', () => {
         .mockImplementation(() => new Promise(resolve => setTimeout(() => resolve(true), 100)));
       mockDatabaseService.getInstance.mockReturnValue({
         login: mockLogin,
-      } as any);
+      } as unknown);
 
       const { getByText, getByPlaceholderText } = render(<LoginScreen />);
       const usernameInput = getByPlaceholderText('Username');
@@ -312,7 +312,7 @@ describe('LoginScreen', () => {
       const mockLogin = jest.fn().mockResolvedValue(true);
       mockDatabaseService.getInstance.mockReturnValue({
         login: mockLogin,
-      } as any);
+      } as unknown);
 
       const { getByText, getByPlaceholderText } = render(<LoginScreen />);
       const usernameInput = getByPlaceholderText('Username');
@@ -332,7 +332,7 @@ describe('LoginScreen', () => {
       const mockLogin = jest.fn().mockResolvedValue(true);
       mockDatabaseService.getInstance.mockReturnValue({
         login: mockLogin,
-      } as any);
+      } as unknown);
 
       const { getByText, getByPlaceholderText } = render(<LoginScreen />);
       const usernameInput = getByPlaceholderText('Username');
@@ -354,7 +354,7 @@ describe('LoginScreen', () => {
       const mockLogin = jest.fn().mockResolvedValue(true);
       mockDatabaseService.getInstance.mockReturnValue({
         login: mockLogin,
-      } as any);
+      } as unknown);
 
       const { getByText, getByPlaceholderText } = render(<LoginScreen />);
       const usernameInput = getByPlaceholderText('Username');

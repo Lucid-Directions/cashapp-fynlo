@@ -117,7 +117,7 @@ const SalesReportDetailScreen = () => {
         setTotalSales(0);
         setTotalTransactions(0);
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
       setError(e.message || 'Failed to load sales report.');
       setSalesData([]);
       setTotalSales(0);

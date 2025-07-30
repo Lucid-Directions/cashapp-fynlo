@@ -243,7 +243,7 @@ const RefundScreen: React.FC = () => {
                       styles.refundTypeButton,
                       refundType === option.key && styles.refundTypeButtonActive,
                     ]}
-                    onPress={() => setRefundType(option.key as any)}>
+                    onPress={() => setRefundType(option.key as unknown)}>
                     <Icon
                       name={option.icon}
                       size={24}

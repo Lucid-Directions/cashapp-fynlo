@@ -5,7 +5,7 @@ import DataService from '../services/DataService';
 // Placeholder for queryClient if not fully set up yet.
 // In a real scenario, this would be imported from a React Query setup.
 const queryClient = {
-  prefetchQuery: async (queryKey: any, queryFn: any) => {
+  prefetchQuery: async (queryKey: unknown, queryFn: unknown) => {
     try {
       await queryFn();
     } catch (error) {

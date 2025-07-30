@@ -13,7 +13,7 @@ const BASE_URL = API_CONFIG.FULL_API_URL;
 
 export interface PlatformSetting {
   key: string;
-  value: any;
+  value: unknown;
   category: string;
   description: string;
   is_sensitive: boolean;
@@ -44,8 +44,8 @@ export interface AuditRecord {
   config_type: string;
   config_key: string;
   entity_id?: string;
-  old_value: any;
-  new_value: any;
+  old_value: unknown;
+  new_value: unknown;
   change_reason?: string;
   change_source: string;
   changed_by: string;
@@ -91,11 +91,11 @@ class PlatformService {
   private async makeRequest(
     endpoint: string,
     method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'GET',
-    data?: any,
-  ): Promise<any> {
+    data?: unknown,
+  ): Promise<unknown> {
     try {
       const url = `${BASE_URL}${endpoint}`;
-      const headers: any = {
+      const headers: unknown = {
         'Content-Type': 'application/json',
       };
 
@@ -196,7 +196,7 @@ class PlatformService {
 
   async updatePlatformSetting(
     configKey: string,
-    configValue: any,
+    configValue: unknown,
     changeReason?: string,
   ): Promise<boolean> {
     try {
@@ -334,7 +334,7 @@ class PlatformService {
   async setRestaurantOverride(
     restaurantId: string,
     configKey: string,
-    overrideValue: any,
+    overrideValue: unknown,
     requiresApproval = false,
   ): Promise<boolean> {
     try {

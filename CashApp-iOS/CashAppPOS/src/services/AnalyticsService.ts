@@ -147,7 +147,7 @@ class AnalyticsService {
     metrics: string[],
     restaurants: string[],
     period: { start: Date; end: Date },
-  ): Promise<any> {
+  ): Promise<unknown> {
     // Simulate custom report generation
     await new Promise(resolve => setTimeout(resolve, 1500));
 
@@ -463,7 +463,7 @@ class AnalyticsService {
         metrics: metrics.reduce((acc, metric) => {
           acc[metric] = Math.round(Math.random() * 10000);
           return acc;
-        }, {} as any),
+        }, {} as unknown),
       })),
     };
   }

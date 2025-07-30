@@ -202,7 +202,7 @@ export const UsageLimitGate: React.FC<UsageLimitGateProps> = ({
 }) => {
   const { theme } = useTheme();
   const { checkUsageLimit } = useSubscription();
-  const [limitResult, setLimitResult] = useState<any>(null);
+  const [limitResult, setLimitResult] = useState<unknown>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

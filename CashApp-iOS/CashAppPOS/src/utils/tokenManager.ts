@@ -39,7 +39,7 @@ class SimpleEventEmitter {
     this.listeners[event] = this.listeners[event].filter(l => l !== listener);
   }
 
-  emit(event: string, ...args: any[]) {
+  emit(event: string, ...args: unknown[]) {
     if (!this.listeners[event]) {
       return;
     }

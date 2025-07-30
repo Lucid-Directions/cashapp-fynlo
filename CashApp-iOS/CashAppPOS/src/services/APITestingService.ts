@@ -8,7 +8,7 @@ export interface APITestResult {
   method: string;
   success: boolean;
   status?: number;
-  response?: any;
+  response?: unknown;
   error?: string;
   timestamp: Date;
   responseTime?: number;
@@ -52,7 +52,7 @@ class APITestingService {
   async testEndpoint(
     endpoint: string,
     method = 'GET',
-    body?: any,
+    body?: unknown,
     headers?: Record<string, string>,
   ): Promise<APITestResult> {
     const startTime = Date.now();
@@ -311,7 +311,7 @@ class APITestingService {
   }
 
   // Validate response format matches frontend expectations
-  validateResponseFormat(response: any, endpoint: string): boolean {
+  validateResponseFormat(response: unknown, endpoint: string): boolean {
     if (!response) {
       return false;
     }
@@ -384,14 +384,14 @@ class APITestingService {
       const suites = await AsyncStorage.getItem('api_test_suites');
 
       if (results) {
-        this.testResults = JSON.parse(results).map((result: any) => ({
+        this.testResults = JSON.parse(results).map((result: unknown) => ({
           ...result,
           timestamp: new Date(result.timestamp),
         }));
       }
 
       if (suites) {
-        this.testSuites = JSON.parse(suites).map((suite: any) => ({
+        this.testSuites = JSON.parse(suites).map((suite: unknown) => ({
           ...suite,
           timestamp: new Date(suite.timestamp),
         }));

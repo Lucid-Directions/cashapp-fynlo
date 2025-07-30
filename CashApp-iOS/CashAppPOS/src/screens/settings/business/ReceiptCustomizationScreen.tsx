@@ -41,7 +41,7 @@ const ReceiptCustomizationScreen: React.FC = () => {
   const [hasChanges, setHasChanges] = useState(false);
   const [logoUri, setLogoUri] = useState<string | null>(receiptSettings.logoUri || null);
 
-  const handleFieldChange = (field: string, value: any) => {
+  const handleFieldChange = (field: string, value: unknown) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     setHasChanges(true);
   };

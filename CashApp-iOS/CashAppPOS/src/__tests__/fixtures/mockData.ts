@@ -337,8 +337,8 @@ export const performanceTestData = {
     tax: Math.round(Math.random() * 5 * 100) / 100,
     total: Math.round(Math.random() * 55 * 100) / 100,
     createdAt: new Date(Date.now() - index * 1000 * 60 * 5), // 5 minutes apart
-    status: ['preparing', 'ready', 'completed'][index % 3] as any,
-    paymentMethod: ['cash', 'card', 'apple_pay'][index % 3] as any,
+    status: ['preparing', 'ready', 'completed'][index % 3] as unknown,
+    paymentMethod: ['cash', 'card', 'apple_pay'][index % 3] as unknown,
   })),
 };
 

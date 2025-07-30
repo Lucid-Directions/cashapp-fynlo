@@ -115,7 +115,7 @@ class NetworkUtils {
   /**
    * Gets platform service charge configuration with robust error handling
    */
-  static async getServiceChargeConfig(): Promise<NetworkResponse<any>> {
+  static async getServiceChargeConfig(): Promise<NetworkResponse<unknown>> {
     const endpoint = `${API_CONFIG.FULL_API_URL}${API_CONFIG.PLATFORM_ENDPOINTS.SERVICE_CHARGE}`;
 
     return this.makeRequest(endpoint, {

@@ -9,7 +9,7 @@ export interface ErrorInfo {
   timestamp: Date;
   context?: string;
   userId?: string;
-  deviceInfo?: any;
+  deviceInfo?: unknown;
   stackTrace?: string;
   metadata?: Record<string, any>;
 }
@@ -100,7 +100,7 @@ class ErrorHandler {
   /**
    * Handle network errors with retry logic
    */
-  async handleNetworkError(error: Error, requestConfig?: any, context?: string): Promise<void> {
+  async handleNetworkError(error: Error, requestConfig?: unknown, context?: string): Promise<void> {
     const errorInfo = this.createErrorInfo(
       error,
       ErrorType.NETWORK,
@@ -127,7 +127,7 @@ class ErrorHandler {
   async handleValidationError(
     field: string,
     message: string,
-    value?: any,
+    value?: unknown,
     context?: string,
   ): Promise<void> {
     const error = new Error(`Validation failed for ${field}: ${message}`);
@@ -140,7 +140,7 @@ class ErrorHandler {
   /**
    * Handle payment errors
    */
-  async handlePaymentError(error: Error, paymentData?: any, context?: string): Promise<void> {
+  async handlePaymentError(error: Error, paymentData?: unknown, context?: string): Promise<void> {
     // Payment errors are always high severity
     await this.handleError(error, ErrorType.PAYMENT, ErrorSeverity.HIGH, context, {
       paymentData: this.sanitizePaymentData(paymentData),
@@ -394,7 +394,7 @@ class ErrorHandler {
     return [ErrorType.NETWORK, ErrorType.STORAGE].includes(errorInfo.type);
   }
 
-  private async retryRequest(requestConfig: any, errorInfo: ErrorInfo): Promise<void> {
+  private async retryRequest(requestConfig: unknown, errorInfo: ErrorInfo): Promise<void> {
     // This would integrate with your API layer to retry requests
   }
 
@@ -417,7 +417,7 @@ class ErrorHandler {
     }
   }
 
-  private sanitizePaymentData(paymentData: any): any {
+  private sanitizePaymentData(paymentData: unknown): any {
     if (!paymentData) {
       return null;
     }
@@ -451,10 +451,10 @@ export const errorHandler = new ErrorHandler();
 export const handleNetworkError = (error: Error, context?: string) =>
   errorHandler.handleNetworkError(error, undefined, context);
 
-export const handleValidationError = (field: string, message: string, value?: any) =>
+export const handleValidationError = (field: string, message: string, value?: unknown) =>
   errorHandler.handleValidationError(field, message, value);
 
-export const handlePaymentError = (error: Error, paymentData?: any) =>
+export const handlePaymentError = (error: Error, paymentData?: unknown) =>
   errorHandler.handlePaymentError(error, paymentData);
 
 export const handleBusinessError = (message: string, code?: string, context?: string) =>

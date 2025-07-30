@@ -113,7 +113,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         lastName: authStoreUser.name.split(' ')[1] || '',
         email: authStoreUser.email,
         phone: '',
-        role: authStoreUser.role as any,
+        role: authStoreUser.role as unknown,
         pin: '0000',
         employeeId: `EMP${authStoreUser.id}`,
         businessId: authStoreUser.restaurant_id || '',

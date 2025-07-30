@@ -5,7 +5,7 @@ import { errorHandler, ErrorType, ErrorSeverity } from './errorHandler';
 export interface OfflineAction {
   id: string;
   type: string;
-  data: any;
+  data: unknown;
   timestamp: Date;
   retryCount: number;
   maxRetries: number;
@@ -91,7 +91,7 @@ class OfflineHandler {
    */
   async queueAction(
     type: string,
-    data: any,
+    data: unknown,
     priority: 'high' | 'medium' | 'low' = 'medium',
   ): Promise<string> {
     const action: OfflineAction = {
@@ -132,7 +132,7 @@ class OfflineHandler {
   async executeOrQueue<T>(
     actionType: string,
     executeFunction: () => Promise<T>,
-    fallbackData?: any,
+    fallbackData?: unknown,
     priority?: 'high' | 'medium' | 'low',
   ): Promise<T | null> {
     if (this.isOnline) {
@@ -191,7 +191,7 @@ class OfflineHandler {
   /**
    * Handle offline order creation
    */
-  async createOfflineOrder(orderData: any): Promise<string> {
+  async createOfflineOrder(orderData: unknown): Promise<string> {
     const offlineOrderId = `offline_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     // Store order locally with offline ID
@@ -368,18 +368,18 @@ class OfflineHandler {
     }
   }
 
-  private async syncOrderToServer(orderData: any): Promise<void> {
+  private async syncOrderToServer(orderData: unknown): Promise<void> {
     // This would be replaced with actual API call
 
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
   }
 
-  private async syncCustomerToServer(customerData: any): Promise<void> {
+  private async syncCustomerToServer(customerData: unknown): Promise<void> {
     // This would be replaced with actual API call
   }
 
-  private async syncInventoryToServer(inventoryData: any): Promise<void> {
+  private async syncInventoryToServer(inventoryData: unknown): Promise<void> {
     // This would be replaced with actual API call
   }
 
@@ -400,7 +400,7 @@ class OfflineHandler {
     }
   }
 
-  private async storeOfflineData(type: string, id: string, data: any): Promise<void> {
+  private async storeOfflineData(type: string, id: string, data: unknown): Promise<void> {
     try {
       const key = `offline_${type}_${id}`;
       await AsyncStorage.setItem(key, JSON.stringify(data));

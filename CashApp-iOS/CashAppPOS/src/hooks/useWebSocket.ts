@@ -57,7 +57,7 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
   }, []);
 
   // Subscribe to events
-  const subscribe = useCallback((eventType: string, handler: (data: any) => void) => {
+  const subscribe = useCallback((eventType: string, handler: (data: unknown) => void) => {
     webSocketService.on(eventType, handler);
 
     // Return unsubscribe function
@@ -67,7 +67,7 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
   }, []);
 
   // Send message
-  const send = useCallback((type: string, data: any) => {
+  const send = useCallback((type: string, data: unknown) => {
     webSocketService.send({ type, data });
   }, []);
 
@@ -155,7 +155,7 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
 
 // Export specific event hooks for common use cases
 
-export const useOrderUpdates = (onOrderUpdate: (data: any) => void) => {
+export const useOrderUpdates = (onOrderUpdate: (data: unknown) => void) => {
   const { subscribe } = useWebSocket();
 
   useEffect(() => {
@@ -171,7 +171,7 @@ export const useOrderUpdates = (onOrderUpdate: (data: any) => void) => {
   }, [subscribe, onOrderUpdate]);
 };
 
-export const useInventoryUpdates = (onInventoryUpdate: (data: any) => void) => {
+export const useInventoryUpdates = (onInventoryUpdate: (data: unknown) => void) => {
   const { subscribe } = useWebSocket();
 
   useEffect(() => {
@@ -180,7 +180,7 @@ export const useInventoryUpdates = (onInventoryUpdate: (data: any) => void) => {
   }, [subscribe, onInventoryUpdate]);
 };
 
-export const useMenuUpdates = (onMenuUpdate: (data: any) => void) => {
+export const useMenuUpdates = (onMenuUpdate: (data: unknown) => void) => {
   const { subscribe } = useWebSocket();
 
   useEffect(() => {
@@ -189,7 +189,7 @@ export const useMenuUpdates = (onMenuUpdate: (data: any) => void) => {
   }, [subscribe, onMenuUpdate]);
 };
 
-export const useSystemNotifications = (onNotification: (data: any) => void) => {
+export const useSystemNotifications = (onNotification: (data: unknown) => void) => {
   const { subscribe } = useWebSocket();
 
   useEffect(() => {

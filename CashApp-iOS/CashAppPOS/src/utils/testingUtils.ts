@@ -13,7 +13,7 @@ export interface TestScenario {
 export interface TestStep {
   action: string;
   target?: string;
-  data?: any;
+  data?: unknown;
   waitFor?: number;
   description: string;
 }
@@ -360,7 +360,7 @@ class TestingUtils {
     // Simulate validation error
     simulateValidationError: (field: string, message: string) => {
       const error = new Error(`Validation failed: ${message}`);
-      (error as any).field = field;
+      (error as unknown).field = field;
       return Promise.reject(error);
     },
   };
@@ -370,7 +370,7 @@ class TestingUtils {
    */
   static validation = {
     // Validate order structure
-    isValidOrder: (order: any): boolean => {
+    isValidOrder: (order: unknown): boolean => {
       return !!(
         order &&
         order.id &&
@@ -382,7 +382,7 @@ class TestingUtils {
     },
 
     // Validate customer structure
-    isValidCustomer: (customer: any): boolean => {
+    isValidCustomer: (customer: unknown): boolean => {
       return !!(
         customer &&
         customer.id &&
@@ -394,7 +394,7 @@ class TestingUtils {
     },
 
     // Validate payment structure
-    isValidPayment: (payment: any): boolean => {
+    isValidPayment: (payment: unknown): boolean => {
       return !!(
         payment &&
         payment.id &&
@@ -421,7 +421,7 @@ class TestingUtils {
       return new Promise((_, reject) => {
         setTimeout(() => {
           const error = new Error(message);
-          (error as any).status = status;
+          (error as unknown).status = status;
           reject(error);
         }, delay);
       });

@@ -103,7 +103,7 @@ const InventoryScreen: React.FC = () => {
       const inventoryData = await dataService.getInventory();
 
       // Map the API response to ensure all required fields exist
-      const mappedInventory = (inventoryData || []).map((item: any, index: number) => ({
+      const mappedInventory = (inventoryData || []).map((item: unknown, index: number) => ({
         // Use nullish coalescing to properly handle 0 as a valid ID
         itemId: item.itemId ?? item.id ?? `generated_${index}`, // Use deterministic fallback based on index
         name: item.name || 'Unknown Item',
@@ -118,7 +118,7 @@ const InventoryScreen: React.FC = () => {
       }));
 
       setInventory(mappedInventory);
-    } catch (e: any) {
+    } catch (e: unknown) {
       setError(e.message || 'Failed to load inventory.');
       setInventory([]); // Clear inventory on error
     } finally {

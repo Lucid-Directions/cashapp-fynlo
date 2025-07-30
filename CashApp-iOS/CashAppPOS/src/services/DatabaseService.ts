@@ -68,8 +68,8 @@ class DatabaseService {
   private authToken: string | null = null;
   private currentSession: PosSession | null = null;
   private menuCache: {
-    items: any[] | null;
-    categories: any[] | null;
+    items: unknown[] | null;
+    categories: unknown[] | null;
     itemsTimestamp: number;
     categoriesTimestamp: number;
   } = {
@@ -127,7 +127,7 @@ class DatabaseService {
     options: RequestInit = {},
     retryCount = 0,
     initialStartTime?: number,
-  ): Promise<any> {
+  ): Promise<unknown> {
     const url = `${API_BASE_URL}${endpoint}`;
     const startTime = initialStartTime || Date.now();
     const elapsedTime = Date.now() - startTime;
@@ -321,7 +321,7 @@ class DatabaseService {
   }
 
   // Get current authenticated user data
-  async getCurrentUser(): Promise<any> {
+  async getCurrentUser(): Promise<unknown> {
     try {
       const userData = await AsyncStorage.getItem('user_data');
       return userData ? JSON.parse(userData) : null;
@@ -543,7 +543,7 @@ class DatabaseService {
     color?: string;
     icon?: string;
     sort_order?: number;
-  }): Promise<any> {
+  }): Promise<unknown> {
     try {
       const response = await this.apiRequest('/api/v1/products/categories', {
         method: 'POST',
@@ -569,7 +569,7 @@ class DatabaseService {
       sort_order?: number;
       is_active?: boolean;
     }>,
-  ): Promise<any> {
+  ): Promise<unknown> {
     try {
       const response = await this.authRequest(
         `${this.baseUrl}/api/v1/products/categories/${categoryId}`,
@@ -628,10 +628,10 @@ class DatabaseService {
     sku?: string;
     prep_time?: number;
     dietary_info?: string[];
-    modifiers?: any[];
+    modifiers?: unknown[];
     stock_tracking?: boolean;
     stock_quantity?: number;
-  }): Promise<any> {
+  }): Promise<unknown> {
     try {
       const response = await this.apiRequest('/api/v1/products/', {
         method: 'POST',
@@ -660,12 +660,12 @@ class DatabaseService {
       sku?: string;
       prep_time?: number;
       dietary_info?: string[];
-      modifiers?: any[];
+      modifiers?: unknown[];
       stock_tracking?: boolean;
       stock_quantity?: number;
       is_active?: boolean;
     }>,
-  ): Promise<any> {
+  ): Promise<unknown> {
     try {
       const response = await this.apiRequest(`/api/v1/products/${productId}`, {
         method: 'PUT',
@@ -702,7 +702,7 @@ class DatabaseService {
   }
 
   // Import Chucho menu data
-  private getChuchoMenuData(): any[] {
+  private getChuchoMenuData(): unknown[] {
     // Transform menu items to match expected format
     return CHUCHO_MENU_ITEMS.map(item => ({
       ...item,
@@ -714,7 +714,7 @@ class DatabaseService {
   // DEPRECATED: Mock menu fallback functions have been removed for production readiness
   // Menu data should come from API or real restaurant configurations
 
-  private getChuchoCategoriesData(): any[] {
+  private getChuchoCategoriesData(): unknown[] {
     // Transform categories to match expected format
     return CHUCHO_CATEGORIES.map(cat => ({
       ...cat,
@@ -722,7 +722,7 @@ class DatabaseService {
     }));
   }
 
-  private getMexicanCategoriesFallback(): any[] {
+  private getMexicanCategoriesFallback(): unknown[] {
     // This function is deprecated. We now use Chucho's actual categories.
     // Redirecting to Chucho categories to ensure consistency
     return this.getChuchoCategoriesData();
@@ -834,7 +834,7 @@ class DatabaseService {
   }
 
   // Restaurant-specific operations - FIXED: Convert to REST API endpoints
-  async getRestaurantFloorPlan(sectionId?: string): Promise<any> {
+  async getRestaurantFloorPlan(sectionId?: string): Promise<unknown> {
     try {
       const endpoint = sectionId
         ? `/api/v1/restaurants/floor-plan?section_id=${sectionId}`
@@ -850,7 +850,7 @@ class DatabaseService {
     }
   }
 
-  async updateTableStatus(tableId: string, status: string, additionalData?: any): Promise<any> {
+  async updateTableStatus(tableId: string, status: string, additionalData?: unknown): Promise<unknown> {
     try {
       const response = await this.apiRequest(`/api/v1/restaurants/tables/${tableId}/status`, {
         method: 'PUT',
@@ -866,7 +866,7 @@ class DatabaseService {
     }
   }
 
-  async assignTableServer(tableId: string, serverId: string): Promise<any> {
+  async assignTableServer(tableId: string, serverId: string): Promise<unknown> {
     try {
       const response = await this.apiRequest(`/api/v1/restaurants/tables/${tableId}/server`, {
         method: 'PUT',
@@ -893,7 +893,7 @@ class DatabaseService {
     }
   }
 
-  async getDailySalesReport(date?: string): Promise<any> {
+  async getDailySalesReport(date?: string): Promise<unknown> {
     try {
       const queryParam = date ? `?date=${date}` : '';
       const response = await this.apiRequest(`/api/v1/reports/daily-sales${queryParam}`, {
@@ -906,7 +906,7 @@ class DatabaseService {
     }
   }
 
-  async getSalesSummary(dateFrom?: string, dateTo?: string): Promise<any> {
+  async getSalesSummary(dateFrom?: string, dateTo?: string): Promise<unknown> {
     try {
       let queryParams = '';
       if (dateFrom || dateTo) {
@@ -1009,7 +1009,7 @@ class DatabaseService {
     }
   }
 
-  async getWeekSchedule(weekStart: Date, employees: any[]): Promise<any | null> {
+  async getWeekSchedule(weekStart: Date, employees: unknown[]): Promise<any | null> {
     try {
       // FIXED: Use GET request instead of POST to match backend
       const response = await this.apiRequest('/api/v1/schedule/week', {

@@ -66,7 +66,7 @@ const EmployeesScreen: React.FC = () => {
       // Assuming a getEmployees method will be added to DataService
       const employeeData = await dataService.getEmployees();
       setEmployees(employeeData || []);
-    } catch (e: any) {
+    } catch (e: unknown) {
       setError(e.message || 'Failed to load employees.');
       setEmployees([]); // Clear employees on error
     } finally {
@@ -221,7 +221,7 @@ const EmployeesScreen: React.FC = () => {
         'Success',
         `${employeeData.name} has been added to your team and saved to the system!`,
       );
-    } catch (error: any) {
+    } catch (error: unknown) {
       Alert.alert(
         'Error',
         error.message || 'Failed to add employee. Please check your connection and try again.',
@@ -272,7 +272,7 @@ const EmployeesScreen: React.FC = () => {
 
               // Show success message
               Alert.alert('Success', `${employee.name} has been removed from your team.`);
-            } catch (error: any) {
+            } catch (error: unknown) {
               Alert.alert('Error', error.message || 'Failed to delete employee. Please try again.');
               // Reopen modal on error
               setSelectedEmployee(employee);

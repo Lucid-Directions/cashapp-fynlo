@@ -153,7 +153,7 @@ export function OptimizedGrid<T>({
 }: OptimizedGridProps<T>) {
   // Calculate item layout for better performance
   const getItemLayout = useCallback(
-    (_: any, index: number) => {
+    (_: unknown, index: number) => {
       if (!itemHeight) {
         return undefined;
       }

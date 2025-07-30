@@ -18,7 +18,7 @@ import { Colors } from '../../design-system/theme';
 
 interface ConnectionStatus {
   isConnected: boolean;
-  organization?: any;
+  organization?: unknown;
   lastSync?: number;
   error?: string;
 }

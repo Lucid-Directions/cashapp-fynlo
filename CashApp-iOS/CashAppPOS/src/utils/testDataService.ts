@@ -268,6 +268,6 @@ export const quickTestDataService = async () => {
 
 // For debugging in React Native debugger
 if (__DEV__) {
-  (global as any).testDataService = runDataServiceTests;
-  (global as any).quickTestDataService = quickTestDataService;
+  (global as unknown).testDataService = runDataServiceTests;
+  (global as unknown).quickTestDataService = quickTestDataService;
 }

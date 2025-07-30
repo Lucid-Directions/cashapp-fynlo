@@ -140,26 +140,26 @@ export type MainStackParamList = {
     amount: number;
     orderItems: OrderItem[];
     customerName: string;
-    onPaymentComplete: (result: any) => void;
+    onPaymentComplete: (result: unknown) => void;
   };
   QRCodePayment: {
     amount: number;
     orderItems: OrderItem[];
     customerName: string;
-    onPaymentComplete: (result: any) => void;
+    onPaymentComplete: (result: unknown) => void;
   };
   SquareCardPayment: {
     amount: number;
     currency?: string;
     description?: string;
-    onPaymentComplete: (result: any) => void;
+    onPaymentComplete: (result: unknown) => void;
     onPaymentCancelled: () => void;
   };
   SquareContactlessPayment: {
     amount: number;
     currency?: string;
     description?: string;
-    onPaymentComplete: (result: any) => void;
+    onPaymentComplete: (result: unknown) => void;
     onPaymentCancelled: () => void;
   };
 };

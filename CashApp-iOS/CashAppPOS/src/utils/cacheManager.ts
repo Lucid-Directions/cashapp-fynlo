@@ -13,7 +13,7 @@ export interface CacheOptions {
 }
 
 class CacheManager {
-  private memoryCache = new Map<string, CacheEntry<any>>();
+  private memoryCache = new Map<string, CacheEntry<unknown>>();
   private defaultTTL = 5 * 60 * 1000; // 5 minutes
   private maxMemorySize = 100;
 
@@ -219,7 +219,7 @@ export const cacheManager = new CacheManager();
 // Utility functions for common caching patterns
 export const cacheUtils = {
   // Cache menu items with shorter TTL
-  cacheMenuItems: async (items: any[]) => {
+  cacheMenuItems: async (items: unknown[]) => {
     await cacheManager.set('menu_items', items, {
       ttl: 10 * 60 * 1000, // 10 minutes
       persistToStorage: true,
@@ -227,7 +227,7 @@ export const cacheUtils = {
   },
 
   // Cache user data with longer TTL
-  cacheUserData: async (userData: any) => {
+  cacheUserData: async (userData: unknown) => {
     await cacheManager.set('user_data', userData, {
       ttl: 60 * 60 * 1000, // 1 hour
       persistToStorage: true,
@@ -235,7 +235,7 @@ export const cacheUtils = {
   },
 
   // Cache reports data with medium TTL
-  cacheReportsData: async (reports: any) => {
+  cacheReportsData: async (reports: unknown) => {
     await cacheManager.set('reports_data', reports, {
       ttl: 30 * 60 * 1000, // 30 minutes
       persistToStorage: true,
@@ -243,7 +243,7 @@ export const cacheUtils = {
   },
 
   // Cache images with long TTL
-  cacheImageData: async (imageUrl: string, imageData: any) => {
+  cacheImageData: async (imageUrl: string, imageData: unknown) => {
     await cacheManager.set(`image_${imageUrl}`, imageData, {
       ttl: 24 * 60 * 60 * 1000, // 24 hours
       persistToStorage: true,

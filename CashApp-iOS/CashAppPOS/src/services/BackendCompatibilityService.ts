@@ -87,14 +87,14 @@ export class BackendCompatibilityService {
   /**
    * Transform employees array
    */
-  static transformEmployees(backendEmployees: BackendEmployee[]): any[] {
+  static transformEmployees(backendEmployees: BackendEmployee[]): unknown[] {
     return backendEmployees.map(emp => this.transformEmployee(emp));
   }
 
   /**
    * Check if backend response needs transformation
    */
-  static needsMenuTransformation(items: any[]): boolean {
+  static needsMenuTransformation(items: unknown[]): boolean {
     if (!items || items.length === 0) {
       return false;
     }
@@ -107,7 +107,7 @@ export class BackendCompatibilityService {
   /**
    * Check if employee data needs transformation
    */
-  static needsEmployeeTransformation(employees: any[]): boolean {
+  static needsEmployeeTransformation(employees: unknown[]): boolean {
     if (!employees || employees.length === 0) {
       return false;
     }

@@ -21,7 +21,7 @@ export interface CalculationContext {
 /**
  * Validates a price value and returns a safe number or 0
  */
-export const validatePrice = (value: any, context?: CalculationContext): PriceValidationResult => {
+export const validatePrice = (value: unknown, context?: CalculationContext): PriceValidationResult => {
   try {
     // Handle null/undefined
     if (value === null || value === undefined) {
@@ -134,8 +134,8 @@ export const validatePrice = (value: any, context?: CalculationContext): PriceVa
  * Safely multiplies price by quantity with validation
  */
 export const calculateItemTotal = (
-  price: any,
-  quantity: any,
+  price: unknown,
+  quantity: unknown,
   context?: CalculationContext,
 ): PriceValidationResult => {
   const priceValidation = validatePrice(price, context);
@@ -176,8 +176,8 @@ export const calculateItemTotal = (
  * Safely calculates percentage-based fees (tax, service charge, etc.)
  */
 export const calculatePercentageFee = (
-  subtotal: any,
-  percentage: any,
+  subtotal: unknown,
+  percentage: unknown,
   context?: CalculationContext,
 ): PriceValidationResult => {
   const subtotalValidation = validatePrice(subtotal, context);
@@ -218,12 +218,12 @@ export const calculatePercentageFee = (
  * Safely sums an array of price values
  */
 export const calculateSum = (
-  values: any[],
+  values: unknown[],
   context?: CalculationContext,
 ): PriceValidationResult => {
   try {
     let total = 0;
-    const invalidValues: any[] = [];
+    const invalidValues: unknown[] = [];
 
     for (let i = 0; i < values.length; i++) {
       const validation = validatePrice(values[i], context);
@@ -267,7 +267,7 @@ export const calculateSum = (
 /**
  * Safely formats a price for display
  */
-export const formatPrice = (value: any, currency = '£', context?: CalculationContext): string => {
+export const formatPrice = (value: unknown, currency = '£', context?: CalculationContext): string => {
   const validation = validatePrice(value, context);
 
   if (!validation.isValid) {
@@ -299,7 +299,7 @@ export const formatPrice = (value: any, currency = '£', context?: CalculationCo
  * Validates cart total calculations with detailed error context
  */
 export const validateCartCalculation = (
-  cartItems: any[],
+  cartItems: unknown[],
   taxRate?: number,
   serviceChargeRate?: number,
   context?: CalculationContext,

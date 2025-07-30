@@ -18,7 +18,7 @@ jest.mock('@react-native-community/netinfo', () => ({
 
 // Mock QuantityPill component
 jest.mock('../../../components/inputs', () => ({
-  QuantityPill: ({ quantity, onIncrease, onDecrease }: any) => {
+  QuantityPill: ({ quantity, onIncrease, onDecrease }: unknown) => {
     const React = require('react');
     const { View, Text, TouchableOpacity } = require('react-native');
     return React.createElement(View, { testID: 'quantity-pill' }, [
@@ -46,7 +46,7 @@ jest.mock('@react-navigation/native', () => ({
 }));
 
 // Minimal styles mock - replace with actual createStyles if needed for visual accuracy
-const mockCreateStyles = (theme: any) =>
+const mockCreateStyles = (theme: unknown) =>
   StyleSheet.create({
     menuCard: { backgroundColor: 'white', padding: 10 },
     menuCardDisabled: { opacity: 0.5 },
