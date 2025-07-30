@@ -1234,7 +1234,6 @@ const POSScreen: React.FC = () => {
       {/* SumUp Payment Component */}
       {showSumUpPayment && (
         <>
-          {console.log(
             '🔄 Rendering SumUpPaymentComponent with showSumUpPayment:',
             showSumUpPayment,
           )}

@@ -538,10 +538,6 @@ const POSScreen: React.FC = () => {
                 'Table Selection',
                 'Select order type: Dine In, _Takeout, Pickup, or Delivery',
                 [
-                  { text: 'Dine In', onPress: () => console.log('Dine In selected') },
-                  { text: 'Takeout', onPress: () => console.log('Takeout selected') },
-                  { text: 'Pickup', onPress: () => console.log('Pickup selected') },
-                  { text: 'Delivery', onPress: () => console.log('Delivery selected') },
                   { text: 'Cancel', style: 'cancel' },
                 ],
               );

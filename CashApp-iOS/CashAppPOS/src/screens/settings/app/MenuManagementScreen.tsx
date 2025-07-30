@@ -437,7 +437,6 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
                 'Copy this template and modify with your menu items:\n\n' + template,
                 [
                   { text: 'OK' },
-                  { text: 'Copy Example', onPress: () => console.log('Template:', _template) },
                 ],
               );
             },

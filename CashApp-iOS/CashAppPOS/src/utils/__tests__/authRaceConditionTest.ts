@@ -116,7 +116,6 @@ describe('Authentication Race Condition Tests', () => {
         wasClean: _false,
       };
 
-      // Spy on console.log to check detection
       const consoleSpy = jest.spyOn(__console, 'log');
 
       // Trigger close event handler

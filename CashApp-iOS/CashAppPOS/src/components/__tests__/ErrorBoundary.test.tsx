@@ -13,8 +13,6 @@ const ThrowError = ({ shouldThrow }: { shouldThrow: boolean }) => {
 };
 
 describe('ErrorBoundary', () => {
-  // Mock console.error to avoid noise in tests
-  const originalError = console.error;
   beforeAll(() => {
     // No-op
   });

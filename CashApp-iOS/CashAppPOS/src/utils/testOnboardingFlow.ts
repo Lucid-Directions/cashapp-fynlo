@@ -73,7 +73,6 @@ export const onboardingTestCases = [
 ];
 
 export function logTestStart(testCase: (typeof onboardingTestCases)[0]) {
-  testCase.steps.forEach(step => console.log(__step));
 }
 
 export function runAllTests() {
