@@ -259,7 +259,7 @@ describe('Comprehensive App Test Suite', () => {
         expect(getByText('Fynlo Green')).toBeTruthy();
         expect(getByText('Ocean Blue')).toBeTruthy();
         expect(getByText('Royal Purple')).toBeTruthy();
-        expect(getByText('Sunset Orange')).toBeTruthy();
+        expect(getByText('Fynlo Orange')).toBeTruthy();
         expect(getByText('Cherry Red')).toBeTruthy();
         expect(getByText('Emerald Teal')).toBeTruthy();
         expect(getByText('Deep Indigo')).toBeTruthy();
