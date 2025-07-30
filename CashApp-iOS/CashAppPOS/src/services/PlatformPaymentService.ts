@@ -80,7 +80,6 @@ class PlatformPaymentService {
             restaurantId,
           );
         } catch (error) {
-          console.warn(`Failed to calculate fee for ${method.id}:`, error);
           // Fall back to basic calculation
           effectiveFee = this.calculateBasicFee(method.id, amount, platformFee);
         }
@@ -102,7 +101,6 @@ class PlatformPaymentService {
 
       return methodsWithFees;
     } catch (error) {
-      console.error('Failed to get payment methods with fees:', error);
       // Fall back to basic payment methods
       return this.getFallbackPaymentMethods();
     }
@@ -129,7 +127,6 @@ class PlatformPaymentService {
       // Return method with lowest effective fee if SumUp not available
       return enabledMethods[0].id;
     } catch (error) {
-      console.error('Failed to determine optimal payment method:', error);
       return 'sumup'; // Default to SumUp
     }
   }
@@ -163,7 +160,6 @@ class PlatformPaymentService {
         hasRestaurantMarkup: feeCalculation.restaurant_markup > 0,
       };
     } catch (error) {
-      console.error('Failed to get fee info:', error);
       return {
         shortDescription: 'Fee information unavailable',
         detailedDescription: 'Unable to calculate processing fee at this time.',
@@ -191,7 +187,6 @@ class PlatformPaymentService {
         (setting: any) => setting.source === 'restaurant',
       );
     } catch (error) {
-      console.error('Failed to check restaurant overrides:', error);
       return false;
     }
   }
@@ -217,7 +212,6 @@ class PlatformPaymentService {
         markupPercentage > 0.5, // Require approval for markups > 0.5%
       );
     } catch (error) {
-      console.error('Failed to update restaurant fee markup:', error);
       return false;
     }
   }
@@ -237,7 +231,6 @@ class PlatformPaymentService {
       this.cacheExpiry = now + this.CACHE_DURATION;
       return this.cachedFees;
     } catch (error) {
-      console.error('Failed to fetch platform fees:', error);
       // Return cached fees if available, otherwise empty
       return this.cachedFees || {};
     }

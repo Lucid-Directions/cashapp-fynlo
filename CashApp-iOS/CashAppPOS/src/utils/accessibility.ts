@@ -241,7 +241,6 @@ export const createModalAccessibility = (options: {
 export const announceForAccessibility = (message: string) => {
   // This would typically use AccessibilityInfo.announceForAccessibility
   // but that's only available in React Native, not in TypeScript files
-  console.log(`Accessibility announcement: ${message}`);
 };
 
 // Screen reader optimized time formatting

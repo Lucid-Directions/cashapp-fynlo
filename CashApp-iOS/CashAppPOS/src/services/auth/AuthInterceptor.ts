@@ -172,7 +172,6 @@ class AuthInterceptor {
 
       return response;
     } catch (error) {
-      console.error('Request failed:', error);
       throw error;
     }
   }

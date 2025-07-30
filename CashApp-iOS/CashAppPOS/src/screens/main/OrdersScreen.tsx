@@ -50,15 +50,12 @@ const OrdersScreen: React.FC = () => {
 
   const loadOrders = async () => {
     try {
-      console.log('📋 Loading orders from OrderService...');
       const fetchedOrders = await orderService.getOrders({
         limit: 50,
         offset: 0,
       });
       setOrders(fetchedOrders);
-      console.log(`✅ Loaded ${fetchedOrders.length} orders`);
     } catch (error) {
-      console.error('❌ Failed to load orders:', error);
       // Keep existing orders on error
     }
   };
@@ -81,7 +78,6 @@ const OrdersScreen: React.FC = () => {
 
     // Subscribe to real-time order updates
     const unsubscribe = orderService.subscribeToOrderEvents((event, data) => {
-      console.log('🔄 Real-time order event:', event, data);
 
       if (event === 'order_created') {
         setOrders(prevOrders => [data, ...prevOrders]);

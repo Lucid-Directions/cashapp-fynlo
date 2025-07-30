@@ -95,7 +95,6 @@ const QRScannerScreen: React.FC = () => {
         }, 1000);
       }
     } catch (error) {
-      console.error('Error requesting camera permission:', error);
       setHasPermission(false);
       setPermissionDenied(true);
     } finally {
@@ -131,7 +130,6 @@ const QRScannerScreen: React.FC = () => {
     setIsScanning(false);
 
     // Provide haptic feedback simulation
-    console.log('QR Code scanned:', randomCode);
 
     // Auto-confirm after 2 seconds or let user manually confirm
     scanTimeoutRef.current = setTimeout(() => {

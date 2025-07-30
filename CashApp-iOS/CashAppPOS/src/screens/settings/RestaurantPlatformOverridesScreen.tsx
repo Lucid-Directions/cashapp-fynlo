@@ -81,7 +81,6 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
 
       setEffectiveSettings(formattedSettings);
     } catch (err) {
-      console.error('Failed to load effective settings:', err);
       setError('Failed to load settings. Please try again.');
       // Load mock data for demo
       loadMockSettings();
@@ -179,7 +178,6 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
         Alert.alert('Error', 'Failed to submit override request.');
       }
     } catch (error) {
-      console.error('Failed to request override:', error);
       Alert.alert('Error', 'An error occurred while submitting the override request.');
     }
   };

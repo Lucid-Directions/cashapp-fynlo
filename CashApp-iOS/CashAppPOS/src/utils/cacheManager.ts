@@ -47,7 +47,6 @@ class CacheManager {
       try {
         await AsyncStorage.setItem(`cache_${key}`, JSON.stringify(entry));
       } catch (error) {
-        console.warn('Failed to persist cache entry to storage:', error);
       }
     }
   }
@@ -74,7 +73,6 @@ class CacheManager {
           }
         }
       } catch (error) {
-        console.warn('Failed to retrieve cache entry from storage:', error);
       }
     }
 
@@ -100,7 +98,6 @@ class CacheManager {
     try {
       await AsyncStorage.removeItem(`cache_${key}`);
     } catch (error) {
-      console.warn('Failed to remove cache entry from storage:', error);
     }
   }
 
@@ -115,7 +112,6 @@ class CacheManager {
       const cacheKeys = keys.filter(key => key.startsWith('cache_'));
       await AsyncStorage.multiRemove(cacheKeys);
     } catch (error) {
-      console.warn('Failed to clear cache from storage:', error);
     }
   }
 

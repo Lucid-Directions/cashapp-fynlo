@@ -65,7 +65,6 @@ class EnhancedTokenManager {
         };
       }
     } catch (error) {
-      console.error('Failed to load cached token:', error);
     }
   }
 
@@ -90,7 +89,6 @@ class EnhancedTokenManager {
     // Check minimum refresh interval
     const now = Date.now();
     if (now - this.tokenCache.lastRefresh < this.minRefreshInterval) {
-      console.log('⏳ Token refresh too recent, using cached token');
       return this.tokenCache.token;
     }
 
@@ -107,7 +105,6 @@ class EnhancedTokenManager {
     try {
       const parts = this.tokenCache.token.split('.');
       if (parts.length !== 3) {
-        console.error('Invalid JWT structure');
         return false;
       }
 
@@ -120,7 +117,6 @@ class EnhancedTokenManager {
 
       return now < expiresAt - this.refreshBuffer;
     } catch (error) {
-      console.error('Token validation error:', error);
       return false;
     }
   }
@@ -148,12 +144,10 @@ class EnhancedTokenManager {
 
   private async doRefresh(): Promise<string | null> {
     try {
-      console.log('🔄 Refreshing authentication token...');
 
       const { data, error } = await supabase.auth.refreshSession();
 
       if (error) {
-        console.error('❌ Token refresh failed:', error);
         this.emit('token:refresh:failed', error);
         throw error;
       }
@@ -177,7 +171,6 @@ class EnhancedTokenManager {
         AsyncStorage.setItem('supabase_session', JSON.stringify(data.session)),
       ]);
 
-      console.log('✅ Token refreshed successfully');
       this.emit('token:refreshed', data.session.access_token);
 
       // Reset refresh timer
@@ -185,7 +178,6 @@ class EnhancedTokenManager {
 
       return data.session.access_token;
     } catch (error) {
-      console.error('❌ Error in token refresh:', error);
       this.emit('token:refresh:failed', error);
 
       // Clear invalid token
@@ -228,18 +220,15 @@ class EnhancedTokenManager {
     const delaySeconds = Math.max(refreshAt - now, 0);
 
     if (delaySeconds > 0) {
-      console.log(`⏰ Scheduling token refresh in ${delaySeconds}s`);
 
       this.refreshTimer = setTimeout(() => {
         this.getTokenWithRefresh().catch(error => {
-          console.error('Scheduled token refresh failed:', error);
         });
       }, delaySeconds * 1000);
     }
   }
 
   async forceRefresh(): Promise<string | null> {
-    console.log('🔄 Forcing token refresh...');
 
     // Clear cache to force refresh
     this.tokenCache.expiresAt = 0;
@@ -284,7 +273,6 @@ class EnhancedTokenManager {
       try {
         listener(...args);
       } catch (error) {
-        console.error(`Error in token manager listener for ${event}:`, error);
       }
     });
   }

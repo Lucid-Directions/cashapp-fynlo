@@ -82,7 +82,6 @@ const OrderManagement: React.FC<OrderManagementProps> = ({ visible, onClose, onC
   useEffect(() => {
     const loadPlatformServiceCharge = async () => {
       try {
-        console.log('💰 OrderManagement - Loading platform service charge...');
         const dataStore = SharedDataStore.getInstance();
         const config = await dataStore.getServiceChargeConfig();
 
@@ -92,12 +91,9 @@ const OrderManagement: React.FC<OrderManagementProps> = ({ visible, onClose, onC
             rate: config.rate,
             description: config.description || 'Platform service charge',
           });
-          console.log('✅ Platform service charge loaded in OrderManagement:', config);
         } else {
-          console.log('⚠️ No platform service charge config found in OrderManagement');
         }
       } catch (error) {
-        console.error('❌ Failed to load platform service charge in OrderManagement:', error);
       }
     };
 
@@ -106,7 +102,6 @@ const OrderManagement: React.FC<OrderManagementProps> = ({ visible, onClose, onC
     // Subscribe to real-time updates
     const dataStore = SharedDataStore.getInstance();
     const unsubscribe = dataStore.subscribe('serviceCharge', updatedConfig => {
-      console.log('🔄 Platform service charge updated in OrderManagement:', updatedConfig);
       setPlatformServiceCharge({
         enabled: updatedConfig.enabled,
         rate: updatedConfig.rate,

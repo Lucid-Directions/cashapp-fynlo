@@ -54,11 +54,9 @@ export class EnhancedWebSocketService {
     this.networkUnsubscribe = NetInfo.addEventListener(state => {
       if (state.isConnected && state.isInternetReachable) {
         if (this.state === 'DISCONNECTED') {
-          console.log('📱 Network restored, reconnecting WebSocket...');
           this.connect();
         }
       } else if (this.state === 'CONNECTED') {
-        console.log('📱 Network lost, WebSocket will reconnect when available');
         this.handleDisconnect(4001, 'Network unavailable');
       }
     });
@@ -66,7 +64,6 @@ export class EnhancedWebSocketService {
 
   async connect(): Promise<void> {
     if (this.state !== 'DISCONNECTED' && this.state !== 'RECONNECTING') {
-      console.log(`⚠️ WebSocket already ${this.state}`);
       return;
     }
 
@@ -88,7 +85,6 @@ export class EnhancedWebSocketService {
       const wsHost = API_CONFIG.BASE_URL.replace(/^https?:\/\//, '');
       const wsUrl = `${wsProtocol}://${wsHost}/api/v1/websocket/ws/pos/${restaurantId}`;
 
-      console.log('🔌 Connecting to WebSocket:', wsUrl);
 
       this.ws = new WebSocket(wsUrl);
       this.setupEventHandlers();
@@ -96,7 +92,6 @@ export class EnhancedWebSocketService {
       // Connection timeout
       const connectionTimeout = setTimeout(() => {
         if (this.state === 'CONNECTING') {
-          console.error('❌ WebSocket connection timeout');
           this.ws?.close();
           this.scheduleReconnect();
         }
@@ -104,11 +99,9 @@ export class EnhancedWebSocketService {
 
       this.ws.onopen = () => {
         clearTimeout(connectionTimeout);
-        console.log('✅ WebSocket connected, authenticating...');
         this.authenticate();
       };
     } catch (error) {
-      console.error('❌ WebSocket connection failed:', error);
       this.setState('DISCONNECTED');
       this.scheduleReconnect();
     }
@@ -146,7 +139,6 @@ export class EnhancedWebSocketService {
       // Set authentication timeout
       const authTimeout = setTimeout(() => {
         if (this.state === 'AUTHENTICATING') {
-          console.error('❌ WebSocket authentication timeout');
           this.handleDisconnect(4002, 'Authentication timeout');
         }
       }, this.config.authTimeout);
@@ -156,7 +148,6 @@ export class EnhancedWebSocketService {
         clearTimeout(authTimeout);
       });
     } catch (error) {
-      console.error('❌ WebSocket authentication failed:', error);
       this.handleDisconnect(4003, 'Authentication failed');
     }
   }
@@ -171,17 +162,14 @@ export class EnhancedWebSocketService {
         const message: WebSocketMessage = JSON.parse(event.data);
         this.handleMessage(message);
       } catch (error) {
-        console.error('❌ Failed to parse WebSocket message:', error);
       }
     };
 
     this.ws.onclose = event => {
-      console.log(`🔌 WebSocket disconnected: ${event.code} - ${event.reason}`);
       this.handleDisconnect(event.code, event.reason);
     };
 
     this.ws.onerror = error => {
-      console.error('❌ WebSocket error:', error);
       this.emit(WebSocketEvent.ERROR, error);
     };
   }
@@ -208,7 +196,6 @@ export class EnhancedWebSocketService {
         break;
 
       case WebSocketEvent.AUTH_ERROR:
-        console.error('❌ WebSocket auth error:', message.data);
         this.handleAuthError(message);
         break;
 
@@ -220,7 +207,6 @@ export class EnhancedWebSocketService {
   }
 
   private handleAuthenticated(): void {
-    console.log('✅ WebSocket authenticated successfully');
     this.setState('CONNECTED');
     this.reconnectAttempts = 0;
 
@@ -235,7 +221,6 @@ export class EnhancedWebSocketService {
   }
 
   private handleAuthError(message: WebSocketMessage): void {
-    console.error('❌ Authentication error:', message.data);
 
     // Try to refresh token and reconnect
     tokenManager
@@ -267,10 +252,8 @@ export class EnhancedWebSocketService {
         // Set pong timeout
         this.pongTimer = setTimeout(() => {
           this.missedPongs++;
-          console.warn(`⚠️ Missed pong ${this.missedPongs}/${this.maxMissedPongs}`);
 
           if (this.missedPongs >= this.maxMissedPongs) {
-            console.error('❌ Too many missed pongs, reconnecting...');
             this.handleDisconnect(4004, 'Heartbeat timeout');
           }
         }, this.config.pongTimeout);
@@ -331,7 +314,6 @@ export class EnhancedWebSocketService {
     }
 
     if (this.reconnectAttempts >= this.config.maxReconnectAttempts) {
-      console.error('❌ Max reconnection attempts reached');
       this.emit('max_reconnect_attempts', {
         attempts: this.reconnectAttempts,
       });
@@ -340,7 +322,6 @@ export class EnhancedWebSocketService {
 
     const delay = this.calculateBackoff(this.reconnectAttempts);
 
-    console.log(`🔄 Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts + 1})`);
     this.setState('RECONNECTING');
 
     this.reconnectTimer = setTimeout(() => {
@@ -365,9 +346,7 @@ export class EnhancedWebSocketService {
       // Queue message for later (with size limit)
       if (this.messageQueue.length < this.maxQueueSize) {
         this.messageQueue.push(fullMessage);
-        console.log(`📦 Message queued (${this.messageQueue.length} in queue)`);
       } else {
-        console.warn(`⚠️ Message queue full (${this.maxQueueSize} messages), dropping oldest`);
         this.messageQueue.shift(); // Remove oldest
         this.messageQueue.push(fullMessage);
       }
@@ -379,7 +358,6 @@ export class EnhancedWebSocketService {
       return;
     }
 
-    console.log(`📤 Processing ${this.messageQueue.length} queued messages`);
 
     while (this.messageQueue.length > 0) {
       const message = this.messageQueue.shift()!;
@@ -388,7 +366,6 @@ export class EnhancedWebSocketService {
   }
 
   disconnect(): void {
-    console.log('👋 Disconnecting WebSocket...');
 
     this.stopHeartbeat();
 
@@ -435,7 +412,6 @@ export class EnhancedWebSocketService {
       try {
         listener(...args);
       } catch (error) {
-        console.error(`Error in WebSocket listener for ${event}:`, error);
       }
     });
   }
@@ -457,11 +433,9 @@ export class EnhancedWebSocketService {
 
     if (this.state !== newState) {
       if (!validTransitions[this.state]?.includes(newState)) {
-        console.warn(`⚠️ Invalid state transition: ${this.state} → ${newState}`);
         return;
       }
 
-      console.log(`🔄 WebSocket state: ${this.state} → ${newState}`);
       this.state = newState;
     }
   }

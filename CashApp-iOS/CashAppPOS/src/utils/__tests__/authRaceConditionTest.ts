@@ -207,10 +207,8 @@ describe('Authentication Race Condition Tests', () => {
 
 // Helper to run specific test scenarios
 export const runAuthRaceConditionTests = async () => {
-  console.log('🧪 Running Authentication Race Condition Tests...');
 
   // Test 1: Concurrent token refreshes
-  console.log('\n1️⃣ Testing concurrent token refresh prevention...');
   try {
     const promises = Array(5)
       .fill(null)
@@ -218,20 +216,15 @@ export const runAuthRaceConditionTests = async () => {
     const start = Date.now();
     await Promise.all(promises);
     const duration = Date.now() - start;
-    console.log(
       `✅ Concurrent refreshes completed in ${duration}ms (should be ~equal to single refresh time)`,
     );
   } catch (error) {
-    console.error('❌ Concurrent refresh test failed:', error);
   }
 
   // Test 2: Request queue timeout
-  console.log('\n2️⃣ Testing request queue timeout...');
   // This would need actual implementation testing
 
   // Test 3: WebSocket auth detection
-  console.log('\n3️⃣ Testing WebSocket auth error detection...');
   // This would need WebSocket connection testing
 
-  console.log('\n✅ Auth race condition tests completed!');
 };

@@ -568,7 +568,6 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         ],
       );
     } catch (error) {
-      console.error('Onboarding error:', error);
       Alert.alert(
         'Error',
         error instanceof Error ? error.message : 'Failed to complete onboarding. Please try again.',

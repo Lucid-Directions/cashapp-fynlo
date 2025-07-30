@@ -35,7 +35,6 @@ class SimpleErrorTrackingService {
     }
 
     try {
-      console.log('🔍 Simple Error Tracking initialized');
       this.isInitialized = true;
 
       // Track successful initialization
@@ -44,15 +43,12 @@ class SimpleErrorTrackingService {
         environment: __DEV__ ? 'development' : 'production',
       });
     } catch (error) {
-      console.error('Failed to initialize Simple Error Tracking:', error);
     }
   }
 
   setUser(userId: string, email?: string, role?: string): void {
     try {
-      console.log('📝 User set in error tracking:', { userId, email, role });
     } catch (error) {
-      console.error('Failed to set user:', error);
     }
   }
 
@@ -72,15 +68,11 @@ class SimpleErrorTrackingService {
         this.errorLog = this.errorLog.slice(-100);
       }
 
-      console.error('🚨 Error captured:', error.message, context);
 
       // In development, also log the full error
       if (__DEV__) {
-        console.error('Full error details:', errorEntry);
       }
     } catch (trackingError) {
-      console.error('Failed to capture error:', trackingError);
-      console.error('Original error:', error);
     }
   }
 
@@ -97,21 +89,16 @@ class SimpleErrorTrackingService {
         context,
       };
 
-      console.log(`📝 Message captured [${level}]:`, message, context);
 
       if (__DEV__) {
-        console.log('Full message details:', messageEntry);
       }
     } catch (error) {
-      console.error('Failed to capture message:', error);
     }
   }
 
   trackEvent(event: string, data?: Record<string, any>): void {
     try {
-      console.log('📊 Event tracked:', event, data);
     } catch (error) {
-      console.error('Failed to track event:', error);
     }
   }
 
@@ -164,35 +151,27 @@ class SimpleErrorTrackingService {
   // User feedback collection (placeholder)
   showUserFeedbackDialog(): void {
     try {
-      console.log('📝 User feedback dialog would be shown here');
       // TODO: Implement native feedback dialog or custom modal
     } catch (error) {
-      console.error('Failed to show feedback dialog:', error);
     }
   }
 
   // Debug helpers
   addBreadcrumb(message: string, category = 'debug', data?: Record<string, any>): void {
     try {
-      console.log(`🍞 Breadcrumb [${category}]:`, message, data);
     } catch (error) {
-      console.error('Failed to add breadcrumb:', error);
     }
   }
 
   setTag(key: string, value: string): void {
     try {
-      console.log(`🏷️ Tag set: ${key} = ${value}`);
     } catch (error) {
-      console.error('Failed to set tag:', error);
     }
   }
 
   setContext(key: string, context: Record<string, any>): void {
     try {
-      console.log(`📝 Context set: ${key}`, context);
     } catch (error) {
-      console.error('Failed to set context:', error);
     }
   }
 
@@ -204,16 +183,13 @@ class SimpleErrorTrackingService {
   // Clear error log
   clearErrorLog(): void {
     this.errorLog = [];
-    console.log('🧹 Error log cleared');
   }
 
   // Flush pending events (placeholder)
   flush(timeout = 2000): Promise<boolean> {
     try {
-      console.log('🚽 Flushing error events...');
       return Promise.resolve(true);
     } catch (error) {
-      console.error('Failed to flush events:', error);
       return Promise.resolve(false);
     }
   }

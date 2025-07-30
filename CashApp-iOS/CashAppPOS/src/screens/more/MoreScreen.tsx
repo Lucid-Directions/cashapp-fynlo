@@ -140,7 +140,6 @@ const MoreScreen: React.FC = () => {
       try {
         await signOut();
       } catch (error) {
-        console.error('Error signing out:', error);
       }
     } else if (option.route) {
       // Navigate to the route

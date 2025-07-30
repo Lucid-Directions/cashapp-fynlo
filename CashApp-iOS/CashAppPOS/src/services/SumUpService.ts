@@ -133,7 +133,6 @@ class SumUpServiceClass {
         expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30 minutes
       };
     } catch (error) {
-      console.error('Failed to create SumUp checkout:', error);
       throw error;
     }
   }
@@ -162,7 +161,6 @@ class SumUpServiceClass {
         fee: fee,
       };
     } catch (error) {
-      console.error('SumUp payment processing failed:', error);
       return {
         success: false,
         provider: 'sumup',
@@ -188,7 +186,6 @@ class SumUpServiceClass {
 
       const paymentId = this.generatePaymentId();
 
-      console.log('🔄 Using Native SumUp SDK for contactless payment');
 
       // Use native SumUp SDK for contactless payment
       const result = await SumUpNativeService.checkout({
@@ -211,7 +208,6 @@ class SumUpServiceClass {
         throw new Error(result.message || 'Contactless payment failed');
       }
     } catch (error) {
-      console.error('Contactless payment failed:', error);
       return {
         id: this.generatePaymentId(),
         amount: amount,
@@ -250,7 +246,6 @@ class SumUpServiceClass {
         statusUrl: `${this.config.baseUrl}/v0.1/checkouts/${checkout.checkoutId}`,
       };
     } catch (error) {
-      console.error('QR payment creation failed:', error);
       throw error;
     }
   }
@@ -282,7 +277,6 @@ class SumUpServiceClass {
         status: this.mapCheckoutStatus(data.status),
       };
     } catch (error) {
-      console.error('QR payment status poll failed:', error);
       return {
         ...qrPayment,
         status: 'failed',
@@ -299,7 +293,6 @@ class SumUpServiceClass {
       // This would typically use device capabilities
       return true; // Assume supported for now
     } catch (error) {
-      console.error('Failed to check contactless support:', error);
       return false;
     }
   }
@@ -433,7 +426,6 @@ class SumUpServiceClass {
 
       return response.ok;
     } catch (error) {
-      console.error('Failed to validate SumUp credentials:', error);
       return false;
     }
   }
@@ -496,7 +488,6 @@ class SumUpServiceClass {
     try {
       await AsyncStorage.setItem('sumup_config', JSON.stringify(config));
     } catch (error) {
-      console.error('Failed to save SumUp config:', error);
       throw error;
     }
   }
@@ -514,7 +505,6 @@ class SumUpServiceClass {
       }
       return null;
     } catch (error) {
-      console.error('Failed to load SumUp config:', error);
       return null;
     }
   }
@@ -527,7 +517,6 @@ class SumUpServiceClass {
       await AsyncStorage.removeItem('sumup_config');
       this.config = null;
     } catch (error) {
-      console.error('Failed to clear SumUp config:', error);
       throw error;
     }
   }

@@ -163,7 +163,6 @@ export class XeroCustomerSyncService {
               });
             }
           } catch (error) {
-            console.error(`Failed to sync customer ${customer.id}:`, error);
             result.recordsFailed++;
             result.errors.push({
               entityId: customer.id,
@@ -184,7 +183,6 @@ export class XeroCustomerSyncService {
       await this.updateLastSyncTime();
       result.success = result.recordsFailed === 0;
     } catch (error) {
-      console.error('Customer sync to Xero failed:', error);
       result.success = false;
       result.errors.push({
         entityId: 'batch',
@@ -260,7 +258,6 @@ export class XeroCustomerSyncService {
             });
           }
         } catch (error) {
-          console.error(`Failed to process Xero contact ${xeroContact.ContactID}:`, error);
           result.recordsFailed++;
           result.errors.push({
             entityId: xeroContact.ContactID || 'unknown',
@@ -275,7 +272,6 @@ export class XeroCustomerSyncService {
       await this.updateLastSyncTime();
       result.success = result.recordsFailed === 0;
     } catch (error) {
-      console.error('Customer sync from Xero failed:', error);
       result.success = false;
       result.errors.push({
         entityId: 'batch',
@@ -445,7 +441,6 @@ export class XeroCustomerSyncService {
       const mappingsJson = await AsyncStorage.getItem(`${this.STORAGE_PREFIX}${this.MAPPING_KEY}`);
       return mappingsJson ? JSON.parse(mappingsJson) : [];
     } catch (error) {
-      console.error('Failed to get customer mappings:', error);
       return [];
     }
   }
@@ -469,7 +464,6 @@ export class XeroCustomerSyncService {
         JSON.stringify(mappings),
       );
     } catch (error) {
-      console.error('Failed to save customer mapping:', error);
       throw error;
     }
   }
@@ -482,7 +476,6 @@ export class XeroCustomerSyncService {
       const lastSyncStr = await AsyncStorage.getItem(`${this.STORAGE_PREFIX}${this.LAST_SYNC_KEY}`);
       return lastSyncStr ? new Date(lastSyncStr) : null;
     } catch (error) {
-      console.error('Failed to get last sync time:', error);
       return null;
     }
   }
@@ -497,7 +490,6 @@ export class XeroCustomerSyncService {
         new Date().toISOString(),
       );
     } catch (error) {
-      console.error('Failed to update last sync time:', error);
     }
   }
 

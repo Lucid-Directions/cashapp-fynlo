@@ -277,7 +277,6 @@ class APITestingService {
 
   // Run comprehensive API test suite
   async runFullAPITestSuite(): Promise<APITestSuite[]> {
-    console.log('🧪 Starting comprehensive API test suite...');
 
     const allSuites: APITestSuite[] = [];
 
@@ -285,37 +284,29 @@ class APITestingService {
       // Test authentication first
       const authSuite = await this.testAuthenticationFlow();
       allSuites.push(authSuite);
-      console.log(`✅ Authentication tests: ${authSuite.overallSuccess ? 'PASSED' : 'FAILED'}`);
 
       // Test products
       const productsSuite = await this.testProductsEndpoints();
       allSuites.push(productsSuite);
-      console.log(`✅ Products tests: ${productsSuite.overallSuccess ? 'PASSED' : 'FAILED'}`);
 
       // Test POS sessions
       const sessionsSuite = await this.testPOSSessionsEndpoints();
       allSuites.push(sessionsSuite);
-      console.log(`✅ POS Sessions tests: ${sessionsSuite.overallSuccess ? 'PASSED' : 'FAILED'}`);
 
       // Test restaurant
       const restaurantSuite = await this.testRestaurantEndpoints();
       allSuites.push(restaurantSuite);
-      console.log(`✅ Restaurant tests: ${restaurantSuite.overallSuccess ? 'PASSED' : 'FAILED'}`);
 
       // Test orders
       const ordersSuite = await this.testOrdersEndpoints();
       allSuites.push(ordersSuite);
-      console.log(`✅ Orders tests: ${ordersSuite.overallSuccess ? 'PASSED' : 'FAILED'}`);
 
       // Test payments
       const paymentsSuite = await this.testPaymentsEndpoints();
       allSuites.push(paymentsSuite);
-      console.log(`✅ Payments tests: ${paymentsSuite.overallSuccess ? 'PASSED' : 'FAILED'}`);
     } catch (error) {
-      console.error('❌ API test suite failed:', error);
     }
 
-    console.log('🎯 API test suite completed');
     return allSuites;
   }
 
@@ -330,7 +321,6 @@ class APITestingService {
     const hasDataOrError = response.data !== undefined || response.error !== undefined;
 
     if (!hasSuccessField || !hasDataOrError) {
-      console.warn(`⚠️ ${endpoint}: Response format doesn't match frontend expectations`);
       return false;
     }
 
@@ -384,7 +374,6 @@ class APITestingService {
       await AsyncStorage.setItem('api_test_results', JSON.stringify(this.testResults));
       await AsyncStorage.setItem('api_test_suites', JSON.stringify(this.testSuites));
     } catch (error) {
-      console.error('Failed to save test history:', error);
     }
   }
 
@@ -408,7 +397,6 @@ class APITestingService {
         }));
       }
     } catch (error) {
-      console.error('Failed to load test history:', error);
     }
   }
 }

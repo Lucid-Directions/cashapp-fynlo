@@ -49,7 +49,6 @@ class EmailReceiptService {
       });
       return res.ok;
     } catch (err) {
-      console.error('EmailReceiptService.sendReceipt', err);
       return false;
     }
   }

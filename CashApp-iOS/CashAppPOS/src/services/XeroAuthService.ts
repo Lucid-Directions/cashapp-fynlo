@@ -80,7 +80,6 @@ export class XeroAuthService {
 
       return { authUrl, codeVerifier, state };
     } catch (error) {
-      console.error('Error generating auth URL:', error);
       throw new Error('Failed to generate authorization URL');
     }
   }
@@ -141,7 +140,6 @@ export class XeroAuthService {
 
       return xeroTokens;
     } catch (error) {
-      console.error('Error exchanging code for tokens:', error);
       throw new Error('Failed to exchange authorization code');
     }
   }
@@ -171,7 +169,6 @@ export class XeroAuthService {
       });
 
       if (!response.ok) {
-        console.error('Token refresh failed:', response.status);
         return null;
       }
 
@@ -188,7 +185,6 @@ export class XeroAuthService {
       await this.storeTokens(refreshedTokens);
       return refreshedTokens;
     } catch (error) {
-      console.error('Error refreshing token:', error);
       return null;
     }
   }
@@ -213,7 +209,6 @@ export class XeroAuthService {
 
       return true;
     } catch (error) {
-      console.error('Error validating token:', error);
       return false;
     }
   }
@@ -246,7 +241,6 @@ export class XeroAuthService {
 
       return response.ok;
     } catch (error) {
-      console.error('Error revoking token:', error);
       // Clear tokens even if revocation fails
       await this.clearStoredTokens();
       return false;
@@ -266,7 +260,6 @@ export class XeroAuthService {
       const tokens = await this.getStoredTokens();
       return tokens?.access_token || null;
     } catch (error) {
-      console.error('Error getting access token:', error);
       return null;
     }
   }
@@ -304,7 +297,6 @@ export class XeroAuthService {
         }),
       );
     } catch (error) {
-      console.error('Error storing tokens:', error);
       throw new Error('Failed to store authentication tokens');
     }
   }
@@ -338,7 +330,6 @@ export class XeroAuthService {
         scopes: settings.scopes || this.config.scopes,
       };
     } catch (error) {
-      console.error('Error retrieving tokens:', error);
       return null;
     }
   }
@@ -351,7 +342,6 @@ export class XeroAuthService {
       await Keychain.resetInternetCredentials(this.KEYCHAIN_SERVICE);
       await AsyncStorage.removeItem(this.STORAGE_KEY);
     } catch (error) {
-      console.error('Error clearing tokens:', error);
     }
   }
 
@@ -433,7 +423,6 @@ export class XeroAuthService {
         throw new Error('Cannot open authorization URL');
       }
     } catch (error) {
-      console.error('Error opening auth URL:', error);
       throw error;
     }
   }

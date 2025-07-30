@@ -132,7 +132,6 @@ const MenuManagementScreen: React.FC = () => {
         setSelectedCategory(transformedCategories[0].id);
       }
     } catch (error) {
-      console.error('Failed to load menu data:', error);
       Alert.alert('Error', 'Failed to load menu data. Please try again.');
     } finally {
       setLoading(false);
@@ -194,7 +193,6 @@ const MenuManagementScreen: React.FC = () => {
         `Category ${editingCategory.id ? 'updated' : 'created'} successfully!`,
       );
     } catch (error) {
-      console.error('Failed to save category:', error);
       Alert.alert('Error', 'Failed to save category. Please try again.');
     } finally {
       setLoading(false);
@@ -227,7 +225,6 @@ const MenuManagementScreen: React.FC = () => {
 
               Alert.alert('Success', 'Category deleted successfully!');
             } catch (error) {
-              console.error('Failed to delete category:', error);
               Alert.alert('Error', 'Failed to delete category. Please try again.');
             } finally {
               setLoading(false);
@@ -302,7 +299,6 @@ const MenuManagementScreen: React.FC = () => {
       setEditingItem(null);
       Alert.alert('Success', `Item ${editingItem.id ? 'updated' : 'created'} successfully!`);
     } catch (error) {
-      console.error('Failed to save item:', error);
       Alert.alert('Error', 'Failed to save item. Please try again.');
     } finally {
       setLoading(false);
@@ -327,7 +323,6 @@ const MenuManagementScreen: React.FC = () => {
 
             Alert.alert('Success', 'Item deleted successfully!');
           } catch (error) {
-            console.error('Failed to delete item:', error);
             Alert.alert('Error', 'Failed to delete item. Please try again.');
           } finally {
             setLoading(false);
@@ -357,7 +352,6 @@ const MenuManagementScreen: React.FC = () => {
         })),
       );
     } catch (error) {
-      console.error('Failed to toggle item availability:', error);
       Alert.alert('Error', 'Failed to update item availability.');
     }
   };
@@ -391,7 +385,6 @@ const MenuManagementScreen: React.FC = () => {
         prev.map(cat => (cat.id === categoryId ? { ...cat, visible: !cat.visible } : cat)),
       );
     } catch (error) {
-      console.error('Failed to toggle category visibility:', error);
       Alert.alert('Error', 'Failed to update category visibility.');
     }
   };
@@ -452,7 +445,6 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
         ],
       );
     } catch (error) {
-      console.error('Import menu error:', error);
       Alert.alert('Error', 'Failed to import menu');
     }
   };
@@ -615,7 +607,6 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
               // Add the new category to our local state
               setCategories(prev => [...prev, category!]);
             } catch (catError) {
-              console.error(`Failed to create category ${categoryName}:`, catError);
               failedItems.push(
                 `Category '${categoryName}': ${catError.message || 'Unknown error'}`,
               );
@@ -650,13 +641,11 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
               });
               successCount++;
             } catch (error: any) {
-              console.error(`Failed to create item ${item.name}:`, error);
               failedItems.push(`Item '${item.name}': ${error.message || 'Unknown error'}`);
               errorCount++;
             }
           }
         } catch (error: any) {
-          console.error(`Failed to process category ${categoryName}:`, error);
           failedItems.push(`Category '${categoryName}': ${error.message || 'Unknown error'}`);
           errorCount += items.length;
         }
@@ -733,7 +722,6 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
           {
             text: 'View Data',
             onPress: () => {
-              console.log('📋 Export Data:', JSON.stringify(exportData, null, 2));
               Alert.alert(
                 'Export Data',
                 'Export data logged to console for debugging. In production, this would download a file.',
@@ -743,7 +731,6 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
         ],
       );
     } catch (error) {
-      console.error('Export failed:', error);
       Alert.alert('Export Failed', 'Unable to export menu data. Please try again.');
     } finally {
       setLoading(false);

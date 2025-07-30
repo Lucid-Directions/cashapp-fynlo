@@ -139,7 +139,6 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
       }
     } catch (err) {
       setError('Failed to load subscription information');
-      console.error('Subscription load error:', err);
     } finally {
       setLoading(false);
     }
@@ -152,7 +151,6 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
         setAvailablePlans(response.data);
       }
     } catch (err) {
-      console.error('Failed to load subscription plans:', err);
     }
   };
 
@@ -362,7 +360,6 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
       }
       return false;
     } catch (err) {
-      console.error('Failed to increment usage:', err);
       return false;
     }
   };

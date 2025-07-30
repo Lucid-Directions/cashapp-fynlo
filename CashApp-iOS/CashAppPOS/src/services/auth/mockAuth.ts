@@ -25,7 +25,6 @@ class MockAuthService {
   ];
 
   async signIn({ email, password }: { email: string; password: string }) {
-    console.log('🔐 Mock sign in for:', email);
 
     const mockUser = this.mockUsers.find(u => u.email === email && u.password === password);
 
@@ -46,7 +45,6 @@ class MockAuthService {
     await AsyncStorage.setItem('mock_session', JSON.stringify(mockSession));
     await AsyncStorage.setItem('auth_token', mockSession.access_token);
 
-    console.log('✅ Mock sign in successful');
 
     return {
       user: mockUser.user,
@@ -55,7 +53,6 @@ class MockAuthService {
   }
 
   async signOut() {
-    console.log('👋 Mock sign out');
     await AsyncStorage.multiRemove([
       'userInfo',
       'mock_session',

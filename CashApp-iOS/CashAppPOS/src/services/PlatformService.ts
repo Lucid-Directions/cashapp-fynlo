@@ -85,7 +85,6 @@ class PlatformService {
     try {
       this.authToken = await tokenManager.getTokenWithRefresh();
     } catch (error) {
-      console.log('No auth token found');
     }
   }
 
@@ -117,25 +116,19 @@ class PlatformService {
         config.body = JSON.stringify(data);
       }
 
-      console.log(`🌐 Making ${method} request to: ${url}`);
       if (data) {
-        console.log('📦 Request data:', JSON.stringify(data, null, 2));
       }
 
       const response = await fetch(url, config);
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error(`❌ HTTP ${response.status}: ${response.statusText}`);
-        console.error('❌ Error response:', errorText);
         throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
       }
 
       const result = await response.json();
-      console.log('✅ API Response:', result);
       return result.data || result;
     } catch (error) {
-      console.error(`❌ API request failed for ${endpoint}:`, error);
       throw error;
     }
   }
@@ -180,7 +173,6 @@ class PlatformService {
         updated_at: config?.updated_at ?? null,
       }));
     } catch (error) {
-      console.error('❌ Failed to fetch platform settings:', error);
       // Return mock data for demo purposes
       return this.getMockPlatformSettings(category);
     }
@@ -198,7 +190,6 @@ class PlatformService {
         updated_at: settingData.updated_at,
       };
     } catch (error) {
-      console.error(`Failed to fetch setting ${configKey}:`, error);
       return null;
     }
   }
@@ -215,7 +206,6 @@ class PlatformService {
       });
       return true;
     } catch (error) {
-      console.error(`Failed to update setting ${configKey}:`, error);
       return false;
     }
   }
@@ -236,10 +226,8 @@ class PlatformService {
         errors: result.errors || {},
       };
     } catch (error) {
-      console.error('❌ Failed to bulk update settings:', error);
 
       // If the bulk endpoint fails, try individual updates as fallback
-      console.log('🔄 Attempting individual updates as fallback...');
       let successful = 0;
       let failed = 0;
       const errors: Record<string, string> = {};
@@ -268,7 +256,6 @@ class PlatformService {
     try {
       return await this.makeRequest('/platform/payment-fees');
     } catch (error) {
-      console.error('Failed to fetch payment fees:', error);
       // Return mock data for demo
       return this.getMockPaymentFees();
     }
@@ -296,7 +283,6 @@ class PlatformService {
         'POST',
       );
     } catch (error) {
-      console.error('Failed to calculate payment fee:', error);
       // Return mock calculation
       return this.getMockFeeCalculation(paymentMethod, amount);
     }
@@ -308,7 +294,6 @@ class PlatformService {
       const params = restaurantId ? `?restaurant_id=${restaurantId}` : '';
       return await this.makeRequest(`/platform/feature-flags${params}`);
     } catch (error) {
-      console.error('Failed to fetch feature flags:', error);
       return this.getMockFeatureFlags();
     }
   }
@@ -327,7 +312,6 @@ class PlatformService {
       });
       return true;
     } catch (error) {
-      console.error(`Failed to update feature flag ${featureKey}:`, error);
       return false;
     }
   }
@@ -343,7 +327,6 @@ class PlatformService {
         `/platform/restaurants/${restaurantId}/effective-settings${params}`,
       );
     } catch (error) {
-      console.error('Failed to fetch restaurant effective settings:', error);
       return {};
     }
   }
@@ -365,7 +348,6 @@ class PlatformService {
       );
       return true;
     } catch (error) {
-      console.error('Failed to set restaurant override:', error);
       return false;
     }
   }
@@ -384,7 +366,6 @@ class PlatformService {
       const result = await this.makeRequest(`/platform/audit-trail?${params.toString()}`);
       return result.audit_records || [];
     } catch (error) {
-      console.error('Failed to fetch audit trail:', error);
       return [];
     }
   }
@@ -410,7 +391,6 @@ class PlatformService {
 
       return await this.makeRequest(`/platform/sync/platform-config?${params.toString()}`);
     } catch (error) {
-      console.error('Failed to sync platform config:', error);
       return {
         platform_settings: {},
         feature_flags: {},
@@ -426,7 +406,6 @@ class PlatformService {
       await this.makeRequest('/platform/initialize-defaults', 'POST');
       return true;
     } catch (error) {
-      console.error('Failed to initialize default settings:', error);
       return false;
     }
   }
@@ -553,10 +532,8 @@ class PlatformService {
     description: string;
   }> {
     try {
-      console.log('📊 Getting service charge config from real data store...');
       return await this.dataStore.getServiceChargeConfig();
     } catch (error) {
-      console.error('❌ Failed to get service charge config:', error);
       throw error;
     }
   }
@@ -567,7 +544,6 @@ class PlatformService {
     description?: string,
   ): Promise<boolean> {
     try {
-      console.log('💾 Updating service charge config in real data store...', {
         enabled,
         rate,
         description,
@@ -581,10 +557,8 @@ class PlatformService {
       };
 
       await this.dataStore.setServiceChargeConfig(config);
-      console.log('✅ Service charge config updated successfully');
       return true;
     } catch (error) {
-      console.error('❌ Failed to update service charge config:', error);
       return false;
     }
   }

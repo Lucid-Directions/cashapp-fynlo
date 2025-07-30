@@ -76,7 +76,6 @@ class ErrorHandler {
   handle(error: any): UserFriendlyError {
     // Log full error for debugging (in dev only)
     if (__DEV__) {
-      console.error('Full error:', error);
     }
 
     // Extract error information safely

@@ -23,12 +23,10 @@ class QRPaymentErrorBoundary extends Component<
   }
 
   static getDerivedStateFromError(error: Error): QRPaymentErrorBoundaryState {
-    console.error('🚨 QR Payment Error Boundary caught error:', error);
     return { hasError: true, error };
   }
 
   componentDidCatch(error: Error, errorInfo: any) {
-    console.error('🚨 QR Payment Error Details:', {
       error: error.message,
       stack: error.stack,
       componentStack: errorInfo.componentStack,

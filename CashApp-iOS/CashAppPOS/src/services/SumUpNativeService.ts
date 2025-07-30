@@ -45,17 +45,13 @@ export class SumUpNativeService {
   async initialize(): Promise<boolean> {
     try {
       if (Platform.OS !== 'ios') {
-        console.warn('SumUp Tap to Pay is only available on iOS');
         return false;
       }
 
-      console.log('🔧 SumUp service initialized (configuration will be fetched from backend)');
       this.isInitialized = true;
 
-      console.log('✅ SumUp service ready - will use React hooks integration');
       return this.isInitialized;
     } catch (error) {
-      console.error('❌ SumUp service initialization error:', error);
       return false;
     }
   }
@@ -65,7 +61,6 @@ export class SumUpNativeService {
    * Note: Handled by React components in hook-based architecture
    */
   async presentLogin(): Promise<boolean> {
-    console.log('🔐 SumUp login will be handled by React component');
     return true;
   }
 
@@ -74,7 +69,6 @@ export class SumUpNativeService {
    * Note: Handled by React components in hook-based architecture
    */
   async loginWithToken(token: string): Promise<boolean> {
-    console.log('🔑 SumUp token login will be handled by React component');
     return true;
   }
 
@@ -83,7 +77,6 @@ export class SumUpNativeService {
    * Note: Handled by React components in hook-based architecture
    */
   async logout(): Promise<boolean> {
-    console.log('🚪 SumUp logout will be handled by React component');
     return true;
   }
 
@@ -92,7 +85,6 @@ export class SumUpNativeService {
    * Note: Handled by React components in hook-based architecture
    */
   async isLoggedIn(): Promise<boolean> {
-    console.log('🔍 SumUp login check will be handled by React component');
     return true; // Assume logged in for now
   }
 
@@ -101,7 +93,6 @@ export class SumUpNativeService {
    * Note: Handled by React components in hook-based architecture
    */
   async checkTapToPayAvailability(): Promise<{ isAvailable: boolean; isActivated: boolean }> {
-    console.log('📱 SumUp Tap to Pay availability will be checked by React component');
     return { isAvailable: true, isActivated: true }; // Assume available for now
   }
 
@@ -110,7 +101,6 @@ export class SumUpNativeService {
    * Note: Handled by React components in hook-based architecture
    */
   async presentTapToPayActivation(): Promise<boolean> {
-    console.log('🚀 SumUp Tap to Pay activation will be handled by React component');
     return true;
   }
 
@@ -124,7 +114,6 @@ export class SumUpNativeService {
         return { success: false, error: 'SumUp service not initialized' };
       }
 
-      console.log('💳 SumUp payment request received:', {
         amount: request.amount,
         title: request.title,
         currencyCode: request.currencyCode || 'GBP',
@@ -132,7 +121,6 @@ export class SumUpNativeService {
       });
 
       // Return a pending result - actual payment will be handled by React component
-      console.log('🔄 Payment will be processed by SumUp React component');
 
       return {
         success: true,
@@ -142,7 +130,6 @@ export class SumUpNativeService {
         },
       };
     } catch (error) {
-      console.error('❌ SumUp checkout error:', error);
       return { success: false, error: error.message };
     }
   }
@@ -152,7 +139,6 @@ export class SumUpNativeService {
    * Note: Handled by React components in hook-based architecture
    */
   async presentCheckoutPreferences(): Promise<boolean> {
-    console.log('⚙️ SumUp preferences will be handled by React component');
     return true;
   }
 
@@ -161,7 +147,6 @@ export class SumUpNativeService {
    * Note: Handled by React components in hook-based architecture
    */
   async getCurrentMerchant(): Promise<SumUpMerchant | null> {
-    console.log('🏪 SumUp merchant info will be retrieved by React component');
     return {
       currencyCode: 'GBP',
       merchantCode: 'DEMO_MERCHANT',
@@ -174,7 +159,6 @@ export class SumUpNativeService {
    */
   private checkInitialized(): boolean {
     if (!this.isInitialized) {
-      console.error('❌ SumUp service not initialized. Call initialize() first.');
       return false;
     }
 

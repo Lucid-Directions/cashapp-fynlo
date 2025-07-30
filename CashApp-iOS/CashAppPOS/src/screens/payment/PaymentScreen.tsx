@@ -202,7 +202,6 @@ const PaymentScreen: React.FC = () => {
       const provider = await PaymentService.getOptimalProvider(total);
       setOptimalProvider(provider);
     } catch (error) {
-      console.error('Failed to initialize payment service:', error);
     }
   };
 
@@ -316,10 +315,8 @@ const PaymentScreen: React.FC = () => {
         metadata: { provider: 'sumup', method: methodId },
       };
 
-      console.log(`🏦 Processing SumUp ${methodId} payment for £${request.amount.toFixed(2)}`);
       await processSumUpPayment(request, methodId);
     } catch (error) {
-      console.error(`❌ ${methodId} payment error:`, error);
       Alert.alert('Payment Error', `Failed to process ${methodId} payment`);
     } finally {
       setProcessing(false);
@@ -329,7 +326,6 @@ const PaymentScreen: React.FC = () => {
   // SumUp Payment Function - React Hook Based Integration
   const processSumUpPayment = async (request: PaymentRequest, paymentMethod = 'tapToPay') => {
     try {
-      console.log('🏦 Starting SumUp payment flow with React hooks...');
 
       // Initialize SumUp service (configuration will be fetched from backend)
       const initSuccess = await sumUpService.initialize();
@@ -341,9 +337,7 @@ const PaymentScreen: React.FC = () => {
       setCurrentPaymentRequest(request);
       setShowSumUpPayment(true);
 
-      console.log('💳 SumUp payment component will handle the payment flow');
     } catch (error) {
-      console.error('❌ SumUp payment error:', error);
       Alert.alert('Payment Error', 'Failed to initialize SumUp payment');
       setProcessing(false);
     }
@@ -359,7 +353,6 @@ const PaymentScreen: React.FC = () => {
     setProcessing(false);
 
     if (success && transactionCode && currentPaymentRequest) {
-      console.log('🎉 SumUp payment completed successfully!', transactionCode);
 
       // Calculate SumUp fee (0.69% for high volume)
       const fee = currentPaymentRequest.amount * 0.0069;
@@ -377,7 +370,6 @@ const PaymentScreen: React.FC = () => {
       setPaymentResult(paymentResult);
       showPaymentSuccess(paymentResult);
     } else {
-      console.error('❌ SumUp payment failed:', error);
       Alert.alert('Payment Failed', error || 'Payment was not completed');
     }
 
@@ -389,7 +381,6 @@ const PaymentScreen: React.FC = () => {
     setShowSumUpPayment(false);
     setProcessing(false);
     setCurrentPaymentRequest(null);
-    console.log('❌ SumUp payment cancelled by user');
   };
 
   const processCardPayment = async (provider: string) => {
@@ -405,7 +396,6 @@ const PaymentScreen: React.FC = () => {
       };
 
       // Route to appropriate payment provider
-      console.log(`Processing ${provider} payment for £${request.amount.toFixed(2)}`);
 
       if (provider === 'sumup') {
         // Process SumUp payment with card detection modal

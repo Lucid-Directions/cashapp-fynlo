@@ -30,7 +30,6 @@ class ErrorBoundary extends Component<Props, State> {
 
     // Log error in dev mode only
     if (__DEV__) {
-      console.error('ErrorBoundary caught:', error);
     }
 
     return { hasError: true, errorId };
@@ -39,7 +38,6 @@ class ErrorBoundary extends Component<Props, State> {
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Log error details in dev mode
     if (__DEV__) {
-      console.error('Error details:', errorInfo);
     }
 
     // In production, you might want to send this to an error reporting service

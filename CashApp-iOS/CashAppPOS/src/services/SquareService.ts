@@ -21,7 +21,6 @@ try {
   SQIPApplePay = SquareSDK.SQIPApplePay;
   SQIPGooglePay = SquareSDK.SQIPGooglePay;
 } catch (error) {
-  console.warn(
     'Square SDK not available. Square payments will be disabled. Please install dependencies with: npm install && cd ios && pod install',
   );
 }
@@ -112,9 +111,7 @@ class SquareServiceClass {
 
       this.initialized = true;
       await this.saveConfig(config);
-      console.log('Square service initialized successfully');
     } catch (error) {
-      console.error('Failed to initialize Square service:', error);
       throw error;
     }
   }
@@ -190,7 +187,6 @@ class SquareServiceClass {
         errorMessage: 'Square SDK not available - placeholder implementation',
       };
     } catch (error) {
-      console.error('Square card payment failed:', error);
       return {
         id: this.generatePaymentId(),
         amount: amount,
@@ -326,7 +322,6 @@ class SquareServiceClass {
         errorMessage: 'Square SDK not available - placeholder implementation',
       };
     } catch (error) {
-      console.error('Square contactless payment failed:', error);
       return {
         id: this.generatePaymentId(),
         amount: amount,
@@ -386,7 +381,6 @@ class SquareServiceClass {
         nonce: nonce,
       };
     } catch (error) {
-      console.error('Square payment processing failed:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Payment processing failed',
@@ -479,7 +473,6 @@ class SquareServiceClass {
 
       return false;
     } catch (error) {
-      console.error('Failed to check contactless support:', error);
       return false;
     }
   }
@@ -536,7 +529,6 @@ class SquareServiceClass {
 
       return response.ok;
     } catch (error) {
-      console.error('Failed to validate Square credentials:', error);
       return false;
     }
   }
@@ -587,7 +579,6 @@ class SquareServiceClass {
         transactionId: data.refund.id,
       };
     } catch (error) {
-      console.error('Square refund processing failed:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Refund processing failed',
@@ -619,7 +610,6 @@ class SquareServiceClass {
       const data = await response.json();
       return data.payment;
     } catch (error) {
-      console.error('Failed to get Square payment details:', error);
       throw error;
     }
   }
@@ -674,7 +664,6 @@ class SquareServiceClass {
     try {
       await AsyncStorage.setItem('square_config', JSON.stringify(config));
     } catch (error) {
-      console.error('Failed to save Square config:', error);
       throw error;
     }
   }
@@ -692,7 +681,6 @@ class SquareServiceClass {
       }
       return null;
     } catch (error) {
-      console.error('Failed to load Square config:', error);
       return null;
     }
   }
@@ -706,7 +694,6 @@ class SquareServiceClass {
       this.config = null;
       this.initialized = false;
     } catch (error) {
-      console.error('Failed to clear Square config:', error);
       throw error;
     }
   }

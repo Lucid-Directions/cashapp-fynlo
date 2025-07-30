@@ -171,7 +171,6 @@ class ErrorHandler {
       const stored = await AsyncStorage.getItem(this.STORAGE_KEY);
       return stored ? JSON.parse(stored) : [];
     } catch (error) {
-      console.warn('Failed to retrieve stored errors:', error);
       return [];
     }
   }
@@ -184,7 +183,6 @@ class ErrorHandler {
       await AsyncStorage.removeItem(this.STORAGE_KEY);
       this.errorQueue = [];
     } catch (error) {
-      console.warn('Failed to clear stored errors:', error);
     }
   }
 
@@ -254,13 +252,10 @@ class ErrorHandler {
 
     switch (logLevel) {
       case 'error':
-        console.error(logMessage, errorInfo);
         break;
       case 'warn':
-        console.warn(logMessage, errorInfo);
         break;
       default:
-        console.log(logMessage, errorInfo);
     }
   }
 
@@ -275,7 +270,6 @@ class ErrorHandler {
 
       await AsyncStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.errorQueue));
     } catch (error) {
-      console.warn('Failed to store error:', error);
     }
   }
 
@@ -286,7 +280,6 @@ class ErrorHandler {
         this.errorQueue = JSON.parse(stored);
       }
     } catch (error) {
-      console.warn('Failed to load stored errors:', error);
     }
   }
 
@@ -403,7 +396,6 @@ class ErrorHandler {
 
   private async retryRequest(requestConfig: any, errorInfo: ErrorInfo): Promise<void> {
     // This would integrate with your API layer to retry requests
-    console.log('Retrying request:', requestConfig);
   }
 
   private attemptRecovery(errorInfo: ErrorInfo): void {
@@ -414,17 +406,14 @@ class ErrorHandler {
         break;
       case ErrorType.AUTHENTICATION:
         // Redirect to login
-        console.log('Redirecting to authentication...');
         break;
       default:
-        console.log('No automatic recovery available for this error type');
     }
   }
 
   private sendToCrashReporting(errorInfo: ErrorInfo): void {
     // This would integrate with crash reporting services like Crashlytics
     if (__DEV__) {
-      console.log('Would send to crash reporting:', errorInfo);
     }
   }
 

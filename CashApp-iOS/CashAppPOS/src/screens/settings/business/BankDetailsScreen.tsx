@@ -62,7 +62,6 @@ const BankDetailsScreen: React.FC = () => {
         setHasExistingDetails(true);
       }
     } catch (error) {
-      console.error('Failed to load bank details:', error);
     }
   };
 
@@ -125,7 +124,6 @@ const BankDetailsScreen: React.FC = () => {
         [{ text: 'OK', onPress: () => navigation.goBack() }],
       );
     } catch (error) {
-      console.error('Failed to save bank details:', error);
       Alert.alert('Error', 'Failed to save bank details. Please try again.');
     } finally {
       setIsLoading(false);
@@ -136,7 +134,6 @@ const BankDetailsScreen: React.FC = () => {
     // Simulate API call
     return new Promise(resolve => {
       setTimeout(() => {
-        console.log('Bank details saved:', details);
         resolve();
       }, 1500);
     });

@@ -208,7 +208,6 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
           }
         }
       } catch (error) {
-        console.warn('Failed to load theme preferences:', error);
       }
     };
 
@@ -236,7 +235,6 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
       setThemeModeState(mode);
       await AsyncStorage.setItem(THEME_STORAGE_KEY, mode);
     } catch (error) {
-      console.warn('Failed to save theme preference:', error);
     }
   };
 
@@ -246,7 +244,6 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
       setColorThemeState(colorThemeId);
       await AsyncStorage.setItem(COLOR_THEME_STORAGE_KEY, colorThemeId);
     } catch (error) {
-      console.warn('Failed to save color theme preference:', error);
     }
   };
 

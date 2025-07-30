@@ -129,7 +129,6 @@ class SecurePaymentConfigService {
 
       return config;
     } catch (error) {
-      console.error('Failed to fetch payment configuration:', error);
 
       // Return minimal config on error
       return {
@@ -174,7 +173,6 @@ class SecurePaymentConfigService {
 
       return config;
     } catch (error) {
-      console.error('Error reading cached config:', error);
       return null;
     }
   }
@@ -192,7 +190,6 @@ class SecurePaymentConfigService {
         }),
       );
     } catch (error) {
-      console.error('Error caching config:', error);
     }
   }
 

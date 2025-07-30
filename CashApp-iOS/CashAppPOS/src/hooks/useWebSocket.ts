@@ -31,7 +31,6 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
   // Handle connection
   const connect = useCallback(async () => {
     if (!user?.restaurant_id) {
-      console.warn('⚠️ Cannot connect WebSocket - no restaurant ID');
       return;
     }
 

@@ -97,7 +97,6 @@ export const checkAPIHealth = async (): Promise<boolean> => {
     clearTimeout(timeoutId);
     return response.ok;
   } catch (error) {
-    console.warn('API health check failed:', error.message);
     return false;
   }
 };

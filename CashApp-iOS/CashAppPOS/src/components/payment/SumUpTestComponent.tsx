@@ -11,7 +11,6 @@ const SumUpTestInner: React.FC<SumUpTestProps> = ({ onResult }) => {
   const sumUpHooks = useSumUp();
 
   useEffect(() => {
-    console.log('🧪 SumUp Test - Hooks available:', {
       hasHooks: !!sumUpHooks,
       initPaymentSheet: typeof sumUpHooks?.initPaymentSheet,
       presentPaymentSheet: typeof sumUpHooks?.presentPaymentSheet,
@@ -31,7 +30,6 @@ const SumUpTestInner: React.FC<SumUpTestProps> = ({ onResult }) => {
         return;
       }
 
-      console.log('🧪 Testing SumUp initialization...');
 
       const result = await sumUpHooks.initPaymentSheet({
         amount: 1.0,
@@ -41,7 +39,6 @@ const SumUpTestInner: React.FC<SumUpTestProps> = ({ onResult }) => {
         skipScreenOptions: false,
       });
 
-      console.log('🧪 SumUp init result:', result);
 
       if (result.error) {
         Alert.alert('SumUp Init Failed', result.error.message);
@@ -51,7 +48,6 @@ const SumUpTestInner: React.FC<SumUpTestProps> = ({ onResult }) => {
         onResult('✅ SumUp initialization successful');
       }
     } catch (error) {
-      console.error('🧪 SumUp test error:', error);
       Alert.alert('Test Error', error?.toString() || 'Unknown error');
       onResult(`❌ Test error: ${error}`);
     }
@@ -83,7 +79,6 @@ const SumUpTestComponent: React.FC<SumUpTestProps> = props => {
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        console.log('🔄 Fetching SumUp configuration for test component...');
         const config = await sumUpConfigService.fetchConfiguration();
         setSumUpConfig({
           appId: config.appId,
@@ -91,7 +86,6 @@ const SumUpTestComponent: React.FC<SumUpTestProps> = props => {
         });
         setIsLoading(false);
       } catch (err) {
-        console.error('❌ Failed to fetch SumUp configuration:', err);
         setError(err?.message || 'Failed to load configuration');
         setIsLoading(false);
         props.onResult('❌ Failed to load SumUp configuration');

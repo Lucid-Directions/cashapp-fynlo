@@ -124,9 +124,7 @@ export class ImageOptimizer {
 
     try {
       await Promise.all(preloadPromises);
-      console.log(`Successfully preloaded ${urls.length} images`);
     } catch (error) {
-      console.warn('Some images failed to preload:', error);
     }
   }
 

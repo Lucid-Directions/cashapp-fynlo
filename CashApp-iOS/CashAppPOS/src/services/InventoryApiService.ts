@@ -37,7 +37,6 @@ export const fetchInventoryItems = async (skip = 0, limit = 100): Promise<Invent
     );
     return response.data;
   } catch (error) {
-    console.error('Error fetching inventory items:', error.response?.data || error.message);
     throw error.response?.data || new Error('Failed to fetch inventory items');
   }
 };
@@ -47,7 +46,6 @@ export const fetchInventoryItem = async (sku: string): Promise<InventoryItem> =>
     const response = await apiClient.get<InventoryItem>(`/inventory/items/${sku}`);
     return response.data;
   } catch (error) {
-    console.error(`Error fetching inventory item ${sku}:`, error.response?.data || error.message);
     throw error.response?.data || new Error(`Failed to fetch inventory item ${sku}`);
   }
 };
@@ -59,7 +57,6 @@ export const createInventoryItem = async (
     const response = await apiClient.post<InventoryItem>('/inventory/items/', itemData);
     return response.data;
   } catch (error) {
-    console.error('Error creating inventory item:', error.response?.data || error.message);
     throw error.response?.data || new Error('Failed to create inventory item');
   }
 };
@@ -72,7 +69,6 @@ export const updateInventoryItem = async (
     const response = await apiClient.put<InventoryItem>(`/inventory/items/${sku}`, itemData);
     return response.data;
   } catch (error) {
-    console.error(`Error updating inventory item ${sku}:`, error.response?.data || error.message);
     throw error.response?.data || new Error(`Failed to update inventory item ${sku}`);
   }
 };
@@ -82,7 +78,6 @@ export const deleteInventoryItem = async (sku: string): Promise<InventoryItem> =
     const response = await apiClient.delete<InventoryItem>(`/inventory/items/${sku}`);
     return response.data; // Usually returns the deleted item or just a success status
   } catch (error) {
-    console.error(`Error deleting inventory item ${sku}:`, error.response?.data || error.message);
     throw error.response?.data || new Error(`Failed to delete inventory item ${sku}`);
   }
 };
@@ -100,7 +95,6 @@ export const adjustStock = async (
     });
     return response.data;
   } catch (error) {
-    console.error(`Error adjusting stock for ${sku}:`, error.response?.data || error.message);
     throw error.response?.data || new Error(`Failed to adjust stock for ${sku}`);
   }
 };
@@ -115,7 +109,6 @@ export const fetchRecipes = async (skip = 0, limit = 100): Promise<RecipeClient[
     const response = await apiClient.get<RecipeClient[]>(`/recipes/?skip=${skip}&limit=${limit}`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching recipes:', error.response?.data || error.message);
     throw error.response?.data || new Error('Failed to fetch recipes');
   }
 };
@@ -125,7 +118,6 @@ export const fetchRecipeForItem = async (itemId: string): Promise<RecipeClient> 
     const response = await apiClient.get<RecipeClient>(`/recipes/${itemId}`);
     return response.data;
   } catch (error) {
-    console.error(
       `Error fetching recipe for item ${itemId}:`,
       error.response?.data || error.message,
     );
@@ -144,7 +136,6 @@ export const createRecipe = async (recipeData: Recipe): Promise<RecipeClient[]> 
     const response = await apiClient.post<RecipeClient[]>(`/recipes/`, recipeData);
     return response.data;
   } catch (error) {
-    console.error('Error creating recipe:', error.response?.data || error.message);
     const detail = error.response?.data?.detail;
     if (typeof detail === 'string' && detail.includes('validation error')) {
       // More specific error
@@ -163,7 +154,6 @@ export const updateRecipe = async (itemId: string, recipeData: Recipe): Promise<
     const response = await apiClient.post<RecipeClient[]>(`/recipes/`, recipeData); // Same as create
     return response.data;
   } catch (error) {
-    console.error(
       `Error updating recipe for item ${itemId}:`,
       error.response?.data || error.message,
     );
@@ -175,7 +165,6 @@ export const deleteRecipe = async (itemId: string): Promise<void> => {
   try {
     await apiClient.delete(`/recipes/${itemId}`);
   } catch (error) {
-    console.error(
       `Error deleting recipe for item ${itemId}:`,
       error.response?.data || error.message,
     );
@@ -205,7 +194,6 @@ export const fetchInventoryLedger = async (
     const response = await apiClient.get<InventoryLedgerEntry[]>(url, { params });
     return response.data;
   } catch (error) {
-    console.error('Error fetching inventory ledger:', error.response?.data || error.message);
     throw error.response?.data || new Error('Failed to fetch inventory ledger');
   }
 };
@@ -213,7 +201,6 @@ export const fetchInventoryLedger = async (
 // --- Mocked Product Fetch for Recipe Form (replace with actual Product service if exists) ---
 export const fetchProducts = async (): Promise<Product[]> => {
   // This should ideally come from a ProductApiService or similar
-  console.warn('fetchProducts is using mocked data in InventoryApiService.ts');
   return new Promise(resolve =>
     setTimeout(
       () =>
@@ -252,7 +239,6 @@ export const scanReceipt = async (imageBase64: string): Promise<ScannedItemAPIRe
     });
     return response.data;
   } catch (error) {
-    console.error('Error scanning receipt:', error.response?.data || error.message);
     // It's good practice to throw a custom error or the error data from the API
     // This allows the caller to handle specific error messages or types
     if (error.response && error.response.data) {

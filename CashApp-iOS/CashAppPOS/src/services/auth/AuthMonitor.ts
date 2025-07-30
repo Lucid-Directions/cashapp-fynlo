@@ -81,7 +81,6 @@ class AuthMonitor {
     // Log to console in development
     if (__DEV__) {
       const emoji = this.getEmojiForType(type);
-      console.log(`${emoji} Auth Event: ${message}`, details || '');
     }
 
     // Persist events for debugging
@@ -117,7 +116,6 @@ class AuthMonitor {
     try {
       await AsyncStorage.setItem('auth_monitor_events', JSON.stringify(this.events));
     } catch (error) {
-      console.error('Failed to persist auth events:', error);
     }
   }
 
@@ -131,7 +129,6 @@ class AuthMonitor {
         this.events = JSON.parse(stored);
       }
     } catch (error) {
-      console.error('Failed to load auth events:', error);
     }
   }
 
@@ -191,5 +188,4 @@ export { AuthMonitor };
 
 // Log that monitoring is active
 if (__DEV__) {
-  console.log('🔍 Auth monitoring active');
 }

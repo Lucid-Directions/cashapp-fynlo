@@ -167,7 +167,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           });
         }
       } catch (error) {
-        console.error('Error syncing auth user:', error);
         // Reset to safe state on error
         setUser(null);
         setBusiness(null);
@@ -197,7 +196,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       return true;
     } catch (error) {
-      console.error('Sign in error:', error);
       return false;
     }
   };
@@ -213,7 +211,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       await authStore.signUp(userData.email || '', password, businessData.name);
       return true;
     } catch (error) {
-      console.error('Sign up error:', error);
       return false;
     }
   };
@@ -230,7 +227,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const appStore = useAppStore.getState();
       appStore.logout();
     } catch (error) {
-      console.error('Sign out error:', error);
     }
   };
 
@@ -265,13 +261,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const resetPassword = async (email: string): Promise<boolean> => {
     // Placeholder for password reset
-    console.log('Password reset requested for:', email);
     return true;
   };
 
   const loadPlatformData = async (): Promise<void> => {
     // This will be implemented when platform features are needed
-    console.log('Loading platform data...');
   };
 
   const switchRestaurant = async (restaurantId: string): Promise<void> => {

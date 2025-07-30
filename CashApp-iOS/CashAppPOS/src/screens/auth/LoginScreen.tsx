@@ -54,12 +54,9 @@ const LoginScreen: React.FC = () => {
     setIsLoading(true);
 
     try {
-      console.log('🚀 Attempting login with:', loginUsername);
       await signIn(loginUsername.trim(), loginPassword);
-      console.log('✅ Login successful, navigation will happen automatically');
       // Navigation happens automatically via AppNavigator
     } catch (error: any) {
-      console.error('Login error:', error);
       Alert.alert('Login Failed', error.message || 'Invalid username or password');
     } finally {
       setIsLoading(false);

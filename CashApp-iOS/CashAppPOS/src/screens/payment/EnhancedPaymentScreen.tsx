@@ -117,7 +117,6 @@ const EnhancedPaymentScreen: React.FC = () => {
   useEffect(() => {
     const loadPlatformServiceCharge = async () => {
       try {
-        console.log('💰 EnhancedPaymentScreen - Loading platform service charge...');
         const dataStore = SharedDataStore.getInstance();
         const config = await dataStore.getServiceChargeConfig();
 
@@ -127,12 +126,9 @@ const EnhancedPaymentScreen: React.FC = () => {
             rate: config.rate,
             description: config.description || 'Platform service charge',
           });
-          console.log('✅ Platform service charge loaded:', config);
         } else {
-          console.log('⚠️ No platform service charge config found');
         }
       } catch (error) {
-        console.error('❌ Failed to load platform service charge:', error);
       }
     };
 
@@ -141,7 +137,6 @@ const EnhancedPaymentScreen: React.FC = () => {
     // Subscribe to real-time updates
     const dataStore = SharedDataStore.getInstance();
     const unsubscribe = dataStore.subscribe('serviceCharge', updatedConfig => {
-      console.log('🔄 Platform service charge updated in real-time:', updatedConfig);
       setPlatformServiceCharge({
         enabled: updatedConfig.enabled,
         rate: updatedConfig.rate,
@@ -190,14 +185,11 @@ const EnhancedPaymentScreen: React.FC = () => {
       // Simulate QR code expiration after 5 minutes with safer state checking
       setTimeout(() => {
         setQRPaymentStatus(current => {
-          console.log('⏰ QR Code expiration check - current status:', current);
           return current === 'waiting' ? 'expired' : current;
         });
       }, 300000); // 5 minutes
 
-      console.log('✅ QR Code generated successfully:', qrString.substring(0, 50) + '...');
     } catch (error) {
-      console.error('❌ Failed to generate QR code:', error);
       setQRPaymentStatus('expired');
       Alert.alert('Error', 'Failed to generate QR code. Please try again.');
     }
@@ -388,7 +380,6 @@ const EnhancedPaymentScreen: React.FC = () => {
         notes: undefined,
       };
 
-      console.log('💳 Processing payment and saving order...', {
         total,
         customer: customerEmail,
         method: selectedPaymentMethod,
@@ -415,7 +406,6 @@ const EnhancedPaymentScreen: React.FC = () => {
       );
     } catch (error) {
       setProcessing(false);
-      console.error('❌ Payment processing failed:', error);
 
       Alert.alert(
         'Payment Failed',

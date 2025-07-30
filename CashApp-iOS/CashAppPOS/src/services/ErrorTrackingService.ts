@@ -56,14 +56,12 @@ class ErrorTrackingService {
   }
 
   startTransaction(context: PerformanceContext): any {
-    console.log('📊 Transaction started:', context.operation);
     return { operation: context.operation, startTime: Date.now() };
   }
 
   finishTransaction(transaction: any, success = true): void {
     if (transaction) {
       const duration = Date.now() - transaction.startTime;
-      console.log(
         `📊 Transaction finished: ${transaction.operation} (${duration}ms) - ${
           success ? 'success' : 'failed'
         }`,

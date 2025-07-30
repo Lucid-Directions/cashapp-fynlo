@@ -68,7 +68,6 @@ class QRCodeServiceClass {
     this.activePayments.set(payment.id, tracking);
     this.statusCallbacks.set(payment.id, statusCallback);
 
-    console.log(`Started tracking QR payment: ${payment.id}`);
   }
 
   /**
@@ -78,7 +77,6 @@ class QRCodeServiceClass {
     this.activePayments.delete(paymentId);
     this.statusCallbacks.delete(paymentId);
 
-    console.log(`Stopped tracking QR payment: ${paymentId}`);
   }
 
   /**
@@ -169,7 +167,6 @@ class QRCodeServiceClass {
     });
 
     if (expiredPayments.length > 0) {
-      console.log(`Cleaned up ${expiredPayments.length} expired QR payments`);
     }
   }
 
@@ -290,7 +287,6 @@ class QRCodeServiceClass {
       const now = new Date();
       return Math.max(0, Math.floor((expiresAt.getTime() - now.getTime()) / 1000));
     } catch (error) {
-      console.error('Failed to calculate time remaining:', error);
       return 0;
     }
   }

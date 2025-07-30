@@ -79,7 +79,6 @@ const InventoryReportDetailScreen = () => {
 
       setInventoryData(transformedData);
     } catch (error) {
-      console.error('Failed to load inventory data:', error);
       setError('Failed to load inventory data. Please try again.');
       Alert.alert(
         'Error',

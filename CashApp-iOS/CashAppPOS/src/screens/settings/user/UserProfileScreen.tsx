@@ -79,7 +79,6 @@ const UserProfileScreen: React.FC = () => {
       setIsEditing(false);
       Alert.alert('Success', 'Profile updated successfully');
     } catch (error) {
-      console.error('Profile update error:', error);
       Alert.alert('Error', 'Failed to update profile. Please try again.');
     } finally {
       setIsLoading(false);
@@ -98,7 +97,6 @@ const UserProfileScreen: React.FC = () => {
             // Use goBack instead of reset to avoid navigation errors
             navigation.goBack();
           } catch (error) {
-            console.error('Logout error:', error);
             Alert.alert('Error', 'Failed to logout. Please try again.');
           }
         },

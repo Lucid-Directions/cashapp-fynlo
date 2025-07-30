@@ -214,7 +214,6 @@ export class XeroSalesSyncService {
                 paymentId = await this.createPaymentForOrder(order, invoiceId);
                 result.paymentsCreated++;
               } catch (paymentError) {
-                console.error(`Failed to create payment for order ${order.id}:`, paymentError);
                 result.paymentsFailed++;
                 result.errors.push({
                   entityId: order.id,
@@ -238,7 +237,6 @@ export class XeroSalesSyncService {
               syncStatus: 'synced',
             });
           } catch (error) {
-            console.error(`Failed to sync order ${order.id}:`, error);
             result.invoicesFailed++;
             result.errors.push({
               entityId: order.id,
@@ -266,7 +264,6 @@ export class XeroSalesSyncService {
       await this.updateLastSyncTime();
       result.success = result.invoicesFailed === 0 && result.paymentsFailed === 0;
     } catch (error) {
-      console.error('Sales sync to Xero failed:', error);
       result.success = false;
       result.errors.push({
         entityId: 'batch',
@@ -404,7 +401,6 @@ export class XeroSalesSyncService {
 
       return createResponse.Contacts[0].ContactID!;
     } catch (error) {
-      console.error('Failed to get or create cash customer:', error);
       throw error;
     }
   }
@@ -575,7 +571,6 @@ export class XeroSalesSyncService {
 
       return response.data.CreditNotes[0].CreditNoteID!;
     } catch (error) {
-      console.error('Failed to create credit note:', error);
       throw error;
     }
   }
@@ -618,7 +613,6 @@ export class XeroSalesSyncService {
       const mappingsJson = await AsyncStorage.getItem(`${this.STORAGE_PREFIX}${this.MAPPING_KEY}`);
       return mappingsJson ? JSON.parse(mappingsJson) : [];
     } catch (error) {
-      console.error('Failed to get sales mappings:', error);
       return [];
     }
   }
@@ -642,7 +636,6 @@ export class XeroSalesSyncService {
         JSON.stringify(mappings),
       );
     } catch (error) {
-      console.error('Failed to save sales mapping:', error);
       throw error;
     }
   }
@@ -655,7 +648,6 @@ export class XeroSalesSyncService {
       const lastSyncStr = await AsyncStorage.getItem(`${this.STORAGE_PREFIX}${this.LAST_SYNC_KEY}`);
       return lastSyncStr ? new Date(lastSyncStr) : null;
     } catch (error) {
-      console.error('Failed to get last sync time:', error);
       return null;
     }
   }
@@ -670,7 +662,6 @@ export class XeroSalesSyncService {
         new Date().toISOString(),
       );
     } catch (error) {
-      console.error('Failed to update last sync time:', error);
     }
   }
 

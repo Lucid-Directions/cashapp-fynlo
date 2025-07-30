@@ -21,7 +21,6 @@ const AppNavigator: React.FC = () => {
     authStoreUser?.needs_onboarding ||
     (!authStoreUser?.restaurant_id && authStoreUser?.role !== 'platform_owner');
 
-  console.log(
     'AppNavigator - User:',
     user?.email,
     'Role:',

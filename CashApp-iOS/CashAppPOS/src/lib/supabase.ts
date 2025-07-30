@@ -32,7 +32,6 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
     missingVars.push('SUPABASE_ANON_KEY');
   }
 
-  console.error('Environment variables missing:', {
     SUPABASE_URL: SUPABASE_URL ? '[SET]' : '[MISSING]',
     SUPABASE_ANON_KEY: SUPABASE_ANON_KEY ? '[SET]' : '[MISSING]',
   });
@@ -60,7 +59,6 @@ try {
     },
   });
 } catch (error) {
-  console.error('Failed to initialize Supabase client:', error);
   throw error;
 }
 

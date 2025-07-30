@@ -48,7 +48,6 @@ const APIStatusMonitor: React.FC<APIStatusMonitorProps> = ({
       setIsConnected(connected);
       setLastCheckTime(new Date());
     } catch (error) {
-      console.error('Force check failed:', error);
     } finally {
       setIsTesting(false);
     }

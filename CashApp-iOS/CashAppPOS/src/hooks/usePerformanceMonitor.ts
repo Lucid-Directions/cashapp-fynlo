@@ -50,7 +50,6 @@ export const usePerformanceMonitor = (
       setIsReady(true);
 
       if (logToConsole) {
-        console.log(
           `[Performance] ${componentName} - Interaction completed in ${interactionTime}ms`,
         );
       }
@@ -71,7 +70,6 @@ export const usePerformanceMonitor = (
     }));
 
     if (logToConsole) {
-      console.log(`[Performance] ${componentName} - Rendered in ${renderTime}ms`);
     }
   });
 
@@ -89,7 +87,6 @@ export const usePerformanceMonitor = (
         }));
 
         if (logToConsole) {
-          console.log(
             `[Performance] ${componentName} - Memory usage: ${estimatedUsage.toFixed(2)}MB`,
           );
         }
@@ -151,7 +148,6 @@ export const performanceUtils = {
     const executionTime = Date.now() - startTime;
 
     if (__DEV__ && label) {
-      console.log(`[Performance] ${label} executed in ${executionTime}ms`);
     }
 
     return { result, executionTime };

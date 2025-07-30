@@ -60,7 +60,6 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
         });
         return granted === PermissionsAndroid.RESULTS.GRANTED;
       } catch (err) {
-        console.warn(err);
         return false;
       }
     }
@@ -109,7 +108,6 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
 
       launchCamera(options, (response: ImagePickerResponse) => {
         if (response.didCancel || response.errorMessage) {
-          console.log('Camera cancelled or error:', response.errorMessage);
           return;
         }
 
@@ -123,7 +121,6 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
         }
       });
     } catch (error) {
-      console.error('Camera error:', error);
       Alert.alert('Camera Error', 'Unable to access camera. Please try again.');
     }
     */
@@ -165,7 +162,6 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
       setParsedItems(clientReceiptItems);
       setStep('review');
     } catch (error) {
-      console.error('Error scanning receipt via API:', error);
       Alert.alert('Error Processing Receipt', 'Could not process the receipt. Please try again.');
       setStep('capture'); // Go back to capture step on error
     }
@@ -187,7 +183,6 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
       setParsedItems(clientReceiptItems);
       setStep('review');
     } catch (error) {
-      console.error('Error scanning receipt via API:', error);
       Alert.alert('Error Processing Receipt', error.message || 'Could not process the receipt. Please try again.');
       setStep('capture'); // Go back to capture step on error
     }
@@ -237,7 +232,6 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
       onClose(); // Close modal on successful submission
     } catch (error) {
       Alert.alert('Error', 'Failed to submit items. Please try again.');
-      console.error('Submission error:', error);
     } finally {
       // Reset state if modal is kept open, or handled by onClose re-initializing.
       // For now, onClose will reset it when InventoryScreen re-renders modal.

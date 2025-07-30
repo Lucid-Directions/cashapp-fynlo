@@ -22,9 +22,7 @@ export const ensureComponentsLoaded = () => {
 
   components.forEach(name => {
     if (ComponentRegistry[name as keyof typeof ComponentRegistry]) {
-      console.log(`✅ ${name} component registered`);
     } else {
-      console.error(`❌ ${name} component not found!`);
     }
   });
 };

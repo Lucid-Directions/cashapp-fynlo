@@ -303,7 +303,6 @@ const TableManagementScreen: React.FC = () => {
       layout: layout,
     };
 
-    console.log('Saving layout:', layoutData);
     // In real app: await saveFloorPlanLayout(layoutData);
 
     Alert.alert('Layout Saved', 'Floor plan layout has been saved successfully.');

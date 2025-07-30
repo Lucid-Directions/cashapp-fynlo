@@ -169,7 +169,6 @@ const RecipeFormScreen = () => {
           );
         }
       } catch (error) {
-        console.error('Failed to load initial data for recipe form:', error);
         Alert.alert('Error', 'Failed to load necessary data. Please try again.');
       } finally {
         setIsLoading(false);
@@ -263,7 +262,6 @@ const RecipeFormScreen = () => {
       }
       navigation.goBack();
     } catch (error) {
-      console.error('Failed to save recipe:', error);
       Alert.alert('Error', `Failed to save recipe: ${error.message || 'Please try again.'}`);
     } finally {
       setIsLoading(false);

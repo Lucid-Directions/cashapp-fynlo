@@ -49,7 +49,6 @@ const SecurePaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
       const availableMethods = SecurePaymentConfig.getAvailableMethods();
       setMethods(availableMethods);
     } catch (err) {
-      console.error('Error loading payment methods:', err);
       setError('Failed to load payment methods');
     } finally {
       setLoading(false);

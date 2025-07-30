@@ -159,10 +159,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setIsLoading(true);
 
       // Check auth state from Supabase
-      console.log('🔐 Checking Supabase authentication state...');
       await checkAuthStore();
     } catch (error) {
-      console.error('Error loading stored auth:', error);
     } finally {
       setIsLoading(false);
     }
@@ -179,7 +177,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       return true;
     } catch (error) {
-      console.error('Sign in error:', error);
       return false;
     }
   };
@@ -247,7 +244,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       return true;
     } catch (error) {
-      console.error('Error signing up:', error);
       return false;
     } finally {
       setIsLoading(false);
@@ -269,7 +265,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setUser(null);
       setBusiness(null);
     } catch (error) {
-      console.error('Error signing out:', error);
     } finally {
       setIsLoading(false);
     }
@@ -285,7 +280,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setUser(updatedUser);
       await AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(updatedUser));
     } catch (error) {
-      console.error('Error updating user:', error);
     }
   };
 
@@ -299,7 +293,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setBusiness(updatedBusiness);
       await AsyncStorage.setItem(STORAGE_KEYS.BUSINESS, JSON.stringify(updatedBusiness));
     } catch (error) {
-      console.error('Error updating business:', error);
     }
   };
 
@@ -314,7 +307,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const biometricEnabled = await AsyncStorage.getItem(STORAGE_KEYS.BIOMETRIC_ENABLED);
       return biometricEnabled === 'true';
     } catch (error) {
-      console.error('Error checking biometric:', error);
       return false;
     }
   };
@@ -331,7 +323,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       return !!userExists;
     } catch (error) {
-      console.error('Error resetting password:', error);
       return false;
     }
   };
@@ -339,7 +330,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const loadPlatformData = async (): Promise<void> => {
     try {
       if (user?.role === 'platform_owner') {
-        console.log('🏢 Loading REAL platform data for platform owner');
 
         // Load REAL restaurant data first
         const restaurantDataService = RestaurantDataService.getInstance();
@@ -362,32 +352,26 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         };
 
         setPlatform(realPlatformData);
-        console.log(
           `✅ Platform data loaded: ${realRestaurants.length} restaurants, £${totalRevenue} total revenue`,
         );
       }
     } catch (error) {
-      console.error('Error loading platform data:', error);
     }
   };
 
   const switchRestaurant = async (restaurantId: string): Promise<void> => {
     try {
       if (user?.role === 'platform_owner') {
-        console.log(`🔄 Switching to restaurant: ${restaurantId}`);
 
         // Find restaurant in the REAL managed restaurants data
         const restaurant = managedRestaurants.find(r => r.id === restaurantId);
         if (restaurant) {
           setBusiness(restaurant);
           await AsyncStorage.setItem(STORAGE_KEYS.BUSINESS, JSON.stringify(restaurant));
-          console.log(`✅ Switched to restaurant: ${restaurant.name}`);
         } else {
-          console.error(`❌ Restaurant ${restaurantId} not found in managed restaurants`);
         }
       }
     } catch (error) {
-      console.error('Error switching restaurant:', error);
     }
   };
 
@@ -400,7 +384,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const unsubscribe = restaurantDataService.subscribeToPlatformRestaurants(
         'platform_owner_1',
         updatedRestaurants => {
-          console.log('🔄 Platform restaurants updated in real-time:', updatedRestaurants.length);
           const businesses = updatedRestaurants.map(r => restaurantDataService.toBusinessType(r));
           setManagedRestaurants(businesses);
         },

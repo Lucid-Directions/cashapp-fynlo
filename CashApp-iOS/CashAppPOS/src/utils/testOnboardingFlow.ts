@@ -73,20 +73,10 @@ export const onboardingTestCases = [
 ];
 
 export function logTestStart(testCase: (typeof onboardingTestCases)[0]) {
-  console.log(`\n========================================`);
-  console.log(`TEST: ${testCase.name}`);
-  console.log(`ID: ${testCase.id}`);
-  console.log(`========================================`);
-  console.log('\nSteps to perform:');
   testCase.steps.forEach(step => console.log(step));
-  console.log(`\nExpected Result: ${testCase.expectedResult}`);
-  console.log(`========================================\n`);
 }
 
 export function runAllTests() {
-  console.log('ONBOARDING FLOW TEST SUITE');
-  console.log('===========================');
-  console.log('Please perform each test manually and verify results\n');
 
   onboardingTestCases.forEach((testCase, index) => {
     setTimeout(() => {
@@ -98,9 +88,4 @@ export function runAllTests() {
 // Navigation state logger for debugging
 export function logCurrentNavigationState(navigation: any) {
   const state = navigation.getState();
-  console.log('\nCurrent Navigation State:');
-  console.log('-------------------------');
-  console.log('Current Route:', state.routes[state.index].name);
-  console.log('Route Stack:', state.routes.map((r: any) => r.name).join(' -> '));
-  console.log('-------------------------\n');
 }

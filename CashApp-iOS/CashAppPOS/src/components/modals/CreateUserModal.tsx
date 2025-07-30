@@ -123,7 +123,6 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ visible, onClose, onU
       const templates = await userManagementService.getPermissionTemplates();
       setPermissionTemplates(templates);
     } catch (error) {
-      console.error('Failed to load permission templates:', error);
     }
   };
 

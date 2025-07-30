@@ -88,7 +88,6 @@ const TableRevenueWidget: React.FC<TableRevenueWidgetProps> = ({ onPress, compac
       setData(mockData);
     } catch (err) {
       setError('Failed to load table revenue data');
-      console.error('Error fetching table revenue:', err);
     } finally {
       setLoading(false);
       setRefreshing(false);
