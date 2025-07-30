@@ -12,14 +12,8 @@ from sqlalchemy.orm import Session, Query
 from sqlalchemy import select, func
 from app.models import User, Restaurant, UserRestaurant
 from app.core.security_monitor import security_monitor, SecurityEventType
-
-# Platform owner emails - ONLY these users have full access
-PLATFORM_OWNER_EMAILS = [
-    "ryan@fynlo.com",
-    "arnaud@fynlo.com",
-    "ryand2626@gmail.com",  # Ryan's alternate email if used
-    "arno@fynlo.com",       # Arnaud's alternate email if used
-]
+from app.core.config import settings
+from app.core.validators import validate_uuid_format
 
 
 class TenantSecurity:
@@ -36,7 +30,7 @@ class TenantSecurity:
             
         # Check by role AND email for extra security
         is_owner_role = user.role == "platform_owner"
-        is_owner_email = user.email.lower() in [email.lower() for email in PLATFORM_OWNER_EMAILS]
+        is_owner_email = user.email.lower() in settings.platform_owner_emails_list
         
         # Both conditions must be true for platform owner access
         return is_owner_role and is_owner_email
@@ -63,6 +57,14 @@ class TenantSecurity:
         Raises:
             HTTPException: If access is denied
         """
+        # Validate restaurant_id format to prevent SQL injection
+        try:
+            validate_uuid_format(str(restaurant_id))
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid restaurant ID format"
+            )
         # Get client IP for logging
         client_ip = None
         if request:
@@ -99,9 +101,22 @@ class TenantSecurity:
                 has_access = True
                 # Update current restaurant context if different
                 if user.current_restaurant_id != restaurant_id:
-                    user.current_restaurant_id = restaurant_id
-                    user.last_restaurant_switch = func.now()
-                    db.commit()
+                    try:
+                        user.current_restaurant_id = restaurant_id
+                        user.last_restaurant_switch = func.now()
+                        db.commit()
+                    except Exception as e:
+                        db.rollback()
+                        # Log the error but don't fail the access check
+                        await security_monitor.log_event(
+                            user=user,
+                            event_type=SecurityEventType.ERROR,
+                            details={
+                                "error": "Failed to update current restaurant context",
+                                "restaurant_id": restaurant_id,
+                                "exception": str(e)
+                            }
+                        )
         
         if not has_access:
             # Log access denial

@@ -1587,3 +1587,8 @@ async def get_revenue_by_table(
         },
         message=f"Revenue analysis for {len(table_revenue_list)} tables"
     )
+
+# Include restaurant deletion endpoints from restaurant_deletion module
+# Import the router from restaurant_deletion module
+from .restaurant_deletion import router as deletion_router
+router.include_router(deletion_router, tags=["restaurant_deletion"])

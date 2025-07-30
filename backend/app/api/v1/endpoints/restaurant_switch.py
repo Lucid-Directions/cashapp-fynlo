@@ -14,7 +14,8 @@ from app.models import User, Restaurant, UserRestaurant
 from app.core.dependencies import get_current_user
 from app.core.response_helper import APIResponseHelper
 from app.core.tenant_security import TenantSecurity
-from app.core.security_monitor import security_monitor
+from app.core.security_monitor import security_monitor, SecurityEventType
+from app.core.validators import validate_uuid_format
 
 router = APIRouter()
 
@@ -139,6 +140,15 @@ async def switch_restaurant(
     Switch to a different restaurant
     Only restaurant owners with multiple restaurants can switch
     """
+    # Validate restaurant_id format
+    try:
+        validate_uuid_format(restaurant_id)
+    except ValueError:
+        return APIResponseHelper.error(
+            message="Invalid restaurant ID format",
+            status_code=status.HTTP_400_BAD_REQUEST
+        )
+    
     # Only restaurant owners can switch
     if current_user.role != "restaurant_owner":
         return APIResponseHelper.error(
@@ -190,12 +200,24 @@ async def switch_restaurant(
             status_code=status.HTTP_404_NOT_FOUND
         )
     
-    # Update current restaurant
+    # Update current restaurant with proper locking
     old_restaurant_id = current_user.current_restaurant_id
-    current_user.current_restaurant_id = restaurant_id
-    current_user.last_restaurant_switch = datetime.utcnow()
     
     try:
+        # Use with_for_update() for row-level locking to prevent race conditions
+        locked_user = db.query(User).filter(
+            User.id == current_user.id
+        ).with_for_update().first()
+        
+        if not locked_user:
+            return APIResponseHelper.error(
+                message="User not found",
+                status_code=status.HTTP_404_NOT_FOUND
+            )
+        
+        locked_user.current_restaurant_id = restaurant_id
+        locked_user.last_restaurant_switch = datetime.utcnow()
+        
         db.commit()
         
         # Log successful switch
@@ -223,6 +245,15 @@ async def switch_restaurant(
         
     except Exception as e:
         db.rollback()
+        await security_monitor.log_event(
+            user=current_user,
+            event_type=SecurityEventType.ERROR,
+            details={
+                "error": "Failed to switch restaurant",
+                "restaurant_id": restaurant_id,
+                "exception": str(e)
+            }
+        )
         return APIResponseHelper.error(
             message="Failed to switch restaurant",
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
