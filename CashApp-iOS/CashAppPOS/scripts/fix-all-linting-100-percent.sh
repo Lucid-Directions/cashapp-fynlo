@@ -52,36 +52,9 @@ echo -e "\n${YELLOW}Step 4/8: Removing unused variables and imports...${NC}"
 # First, remove unused imports
 npx eslint src --fix --ext .js,.jsx,.ts,.tsx --rule 'no-unused-vars: off' --rule '@typescript-eslint/no-unused-vars: off' --rule 'unused-imports/no-unused-imports: error' --quiet 2>/dev/null || true
 
-# Create a custom script to remove unused variables
-cat > /tmp/remove-unused-vars.js << 'EOF'
-const fs = require('fs');
-const path = require('path');
-const { ESLint } = require('eslint');
+# Skip the custom ESLint script and just use the command line
+npx eslint src --fix --ext .js,.jsx,.ts,.tsx --rule '@typescript-eslint/no-unused-vars: ["error", {"vars": "all", "args": "none", "ignoreRestSiblings": true}]' --quiet 2>/dev/null || true
 
-async function removeUnusedVars() {
-  const eslint = new ESLint({
-    fix: true,
-    baseConfig: {
-      parser: '@typescript-eslint/parser',
-      plugins: ['@typescript-eslint'],
-      rules: {
-        '@typescript-eslint/no-unused-vars': ['error', {
-          vars: 'all',
-          args: 'none',
-          ignoreRestSiblings: true
-        }]
-      }
-    }
-  });
-
-  const results = await eslint.lintFiles(['src/**/*.{js,jsx,ts,tsx}']);
-  await ESLint.outputFixes(results);
-}
-
-removeUnusedVars().catch(console.error);
-EOF
-
-node /tmp/remove-unused-vars.js
 commit_changes "fix: remove unused variables (252 errors)"
 
 # Step 5: Remove console statements
