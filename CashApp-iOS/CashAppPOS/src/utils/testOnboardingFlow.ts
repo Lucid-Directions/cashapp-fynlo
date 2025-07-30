@@ -73,14 +73,13 @@ export const onboardingTestCases = [
 ];
 
 export function logTestStart(testCase: (typeof onboardingTestCases)[0]) {
-  testCase.steps.forEach(step => console.log(step));
+  testCase.steps.forEach(step => console.log(_step));
 }
 
 export function runAllTests() {
-
-  onboardingTestCases.forEach((testCase, index) => {
+  onboardingTestCases.forEach((_testCase, index) => {
     setTimeout(() => {
-      logTestStart(testCase);
+      logTestStart(_testCase);
     }, index * 1000);
   });
 }

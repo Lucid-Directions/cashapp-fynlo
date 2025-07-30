@@ -23,7 +23,7 @@ export const usePerformanceMonitor = (
     componentName = 'Unknown Component',
   } = options;
 
-  const [isReady, setIsReady] = useState(false);
+  const [isReady, setIsReady] = useState(_false);
   const [metrics, setMetrics] = useState<PerformanceMetrics>({
     renderTime: 0,
     interactionTime: 0,
@@ -47,9 +47,9 @@ export const usePerformanceMonitor = (
         isReady: true,
       }));
 
-      setIsReady(true);
+      setIsReady(_true);
 
-      if (logToConsole) {
+      if (_logToConsole) {
           `[Performance] ${componentName} - Interaction completed in ${interactionTime}ms`,
         );
       }
@@ -69,7 +69,7 @@ export const usePerformanceMonitor = (
       renderTime,
     }));
 
-    if (logToConsole) {
+    if (_logToConsole) {
     }
   });
 
@@ -86,16 +86,16 @@ export const usePerformanceMonitor = (
           memoryUsage: estimatedUsage,
         }));
 
-        if (logToConsole) {
+        if (_logToConsole) {
             `[Performance] ${componentName} - Memory usage: ${estimatedUsage.toFixed(2)}MB`,
           );
         }
       };
 
-      const interval = setInterval(getMemoryUsage, 5000); // Check every 5 seconds
+      const interval = setInterval(_getMemoryUsage, 5000); // Check every 5 seconds
       getMemoryUsage(); // Initial check
 
-      return () => clearInterval(interval);
+      return () => clearInterval(_interval);
     }
   }, [enableMemoryTracking, componentName, logToConsole]);
 
@@ -115,8 +115,8 @@ export const performanceUtils = {
     let timeoutId: NodeJS.Timeout;
 
     return (...args: Parameters<T>) => {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => func.apply(null, args), delay);
+      clearTimeout(_timeoutId);
+      timeoutId = setTimeout(() => func.apply(_null, args), delay);
     };
   },
 
@@ -129,7 +129,7 @@ export const performanceUtils = {
 
     return (...args: Parameters<T>) => {
       if (!isThrottled) {
-        func.apply(null, args);
+        func.apply(_null, args);
         isThrottled = true;
         setTimeout(() => {
           isThrottled = false;
@@ -174,7 +174,7 @@ export const performanceUtils = {
   chunkArray: <T>(array: T[], chunkSize: number): T[][] => {
     const chunks: T[][] = [];
     for (let i = 0; i < array.length; i += chunkSize) {
-      chunks.push(array.slice(i, i + chunkSize));
+      chunks.push(array.slice(_i, i + chunkSize));
     }
     return chunks;
   },
@@ -187,19 +187,19 @@ export const performanceUtils = {
     const cache = new Map<string, ReturnType<T>>();
 
     return ((...args: Parameters<T>): ReturnType<T> => {
-      const key = keyGenerator ? keyGenerator(...args) : JSON.stringify(args);
+      const key = keyGenerator ? keyGenerator(...args) : JSON.stringify(_args);
 
-      if (cache.has(key)) {
-        return cache.get(key)!;
+      if (cache.has(_key)) {
+        return cache.get(_key)!;
       }
 
       const result = func(...args);
-      cache.set(key, result);
+      cache.set(_key, result);
 
       // Limit cache size to prevent memory leaks
       if (cache.size > 100) {
         const firstKey = cache.keys().next().value;
-        cache.delete(firstKey);
+        cache.delete(_firstKey);
       }
 
       return result;

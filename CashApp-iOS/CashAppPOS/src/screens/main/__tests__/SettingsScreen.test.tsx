@@ -64,7 +64,7 @@ describe('SettingsScreen', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseAppStore.mockReturnValue(mockStoreState);
+    mockUseAppStore.mockReturnValue(_mockStoreState);
   });
 
   it('renders correctly', () => {
@@ -104,7 +104,7 @@ describe('SettingsScreen', () => {
     });
 
     const printerToggle = getByTestId('printer-enabled-toggle');
-    fireEvent(printerToggle, 'valueChange', false);
+    fireEvent(_printerToggle, 'valueChange', false);
 
     await waitFor(() => {
       expect(mockStoreState.updateSettings).toHaveBeenCalledWith(
@@ -120,7 +120,7 @@ describe('SettingsScreen', () => {
     });
 
     const businessNameInput = getByTestId('business-name-input');
-    fireEvent.changeText(businessNameInput, 'New Restaurant Name');
+    fireEvent.changeText(_businessNameInput, 'New Restaurant Name');
 
     await waitFor(() => {
       expect(mockStoreState.updateSettings).toHaveBeenCalledWith(
@@ -147,7 +147,7 @@ describe('SettingsScreen', () => {
     });
 
     const orderAlertsToggle = getByTestId('order-alerts-toggle');
-    fireEvent(orderAlertsToggle, 'valueChange', false);
+    fireEvent(_orderAlertsToggle, 'valueChange', false);
 
     await waitFor(() => {
       expect(mockStoreState.updateSettings).toHaveBeenCalledWith(
@@ -173,7 +173,7 @@ describe('SettingsScreen', () => {
     });
 
     const darkThemeOption = getByText('Dark');
-    fireEvent.press(darkThemeOption);
+    fireEvent.press(_darkThemeOption);
 
     await waitFor(() => {
       expect(mockStoreState.updateSettings).toHaveBeenCalledWith(
@@ -189,7 +189,7 @@ describe('SettingsScreen', () => {
     });
 
     const taxRateInput = getByTestId('tax-rate-input');
-    fireEvent.changeText(taxRateInput, '10.0');
+    fireEvent.changeText(_taxRateInput, '10.0');
 
     await waitFor(() => {
       expect(mockStoreState.updateSettings).toHaveBeenCalledWith(
@@ -216,7 +216,7 @@ describe('SettingsScreen', () => {
     });
 
     const logoutButton = getByTestId('logout-button');
-    fireEvent.press(logoutButton);
+    fireEvent.press(_logoutButton);
 
     // Should show confirmation dialog
     await waitFor(() => {
@@ -224,7 +224,7 @@ describe('SettingsScreen', () => {
     });
 
     const confirmLogout = getByTestId('confirm-logout');
-    fireEvent.press(confirmLogout);
+    fireEvent.press(_confirmLogout);
 
     await waitFor(() => {
       expect(mockStoreState.logout).toHaveBeenCalled();
@@ -237,7 +237,7 @@ describe('SettingsScreen', () => {
     });
 
     const exportButton = getByTestId('export-settings-button');
-    fireEvent.press(exportButton);
+    fireEvent.press(_exportButton);
 
     await waitFor(() => {
       expect(mockStoreState.exportSettings).toHaveBeenCalled();
@@ -250,9 +250,9 @@ describe('SettingsScreen', () => {
     });
 
     const importButton = getByTestId('import-settings-button');
-    fireEvent.press(importButton);
+    fireEvent.press(_importButton);
 
-    // Should open file picker (mocked)
+    // Should open file picker (_mocked)
     await waitFor(() => {
       expect(mockStoreState.importSettings).toHaveBeenCalled();
     });
@@ -264,7 +264,7 @@ describe('SettingsScreen', () => {
     });
 
     const resetButton = getByTestId('reset-settings-button');
-    fireEvent.press(resetButton);
+    fireEvent.press(_resetButton);
 
     // Should show confirmation dialog
     await waitFor(() => {
@@ -272,7 +272,7 @@ describe('SettingsScreen', () => {
     });
 
     const confirmReset = getByTestId('confirm-reset');
-    fireEvent.press(confirmReset);
+    fireEvent.press(_confirmReset);
 
     await waitFor(() => {
       expect(mockStoreState.resetSettings).toHaveBeenCalled();
@@ -285,7 +285,7 @@ describe('SettingsScreen', () => {
     });
 
     const taxRateInput = getByTestId('tax-rate-input');
-    fireEvent.changeText(taxRateInput, 'invalid');
+    fireEvent.changeText(_taxRateInput, 'invalid');
 
     await waitFor(() => {
       expect(getByText('Please enter a valid tax rate')).toBeTruthy();
@@ -298,7 +298,7 @@ describe('SettingsScreen', () => {
     });
 
     const phoneInput = getByTestId('business-phone-input');
-    fireEvent.changeText(phoneInput, 'invalid-phone');
+    fireEvent.changeText(_phoneInput, 'invalid-phone');
 
     await waitFor(() => {
       expect(getByText('Please enter a valid phone number')).toBeTruthy();
@@ -311,7 +311,7 @@ describe('SettingsScreen', () => {
     });
 
     const emailInput = getByTestId('business-email-input');
-    fireEvent.changeText(emailInput, 'invalid-email');
+    fireEvent.changeText(_emailInput, 'invalid-email');
 
     await waitFor(() => {
       expect(getByText('Please enter a valid email address')).toBeTruthy();
@@ -324,7 +324,7 @@ describe('SettingsScreen', () => {
     });
 
     const businessNameInput = getByTestId('business-name-input');
-    fireEvent.changeText(businessNameInput, 'Updated Name');
+    fireEvent.changeText(_businessNameInput, 'Updated Name');
 
     // Should auto-save after a delay
     await waitFor(

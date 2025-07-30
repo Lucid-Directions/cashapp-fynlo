@@ -44,7 +44,7 @@ const SettingsHeader: React.FC<SettingsHeaderProps> = ({
   const navigation = useNavigation();
 
   const handleBackPress = () => {
-    if (onBackPress) {
+    if (_onBackPress) {
       onBackPress();
     } else {
       navigation.goBack();

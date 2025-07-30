@@ -27,19 +27,18 @@ const DecimalInput: React.FC<DecimalInputProps> = ({
   style,
   disabled = false,
 }) => {
-  const [displayValue, setDisplayValue] = useState(value.toFixed(decimalPlaces));
-  const [isFocused, setIsFocused] = useState(false);
-  const inputRef = useRef<TextInput>(null);
+  const [displayValue, setDisplayValue] = useState(value.toFixed(_decimalPlaces));
+  const [isFocused, setIsFocused] = useState(_false);
+  const inputRef = useRef<TextInput>(_null);
 
   // Update display when external value changes
   useEffect(() => {
     if (!isFocused) {
-      setDisplayValue(value.toFixed(decimalPlaces));
+      setDisplayValue(value.toFixed(_decimalPlaces));
     }
   }, [value, decimalPlaces, isFocused]);
 
   const handleTextChange = (text: string) => {
-
     // Allow empty string - don't call onValueChange yet
     if (text === '') {
       setDisplayValue('');
@@ -66,41 +65,39 @@ const DecimalInput: React.FC<DecimalInputProps> = ({
     }
 
     // Update display value with cleaned input
-    setDisplayValue(cleaned);
+    setDisplayValue(_cleaned);
 
     // Convert to number to validate range - only if it's a complete number
-    const numericValue = parseFloat(cleaned);
+    const numericValue = parseFloat(_cleaned);
 
     // Only update parent if we have a valid number and it's not just a decimal point
-    if (!isNaN(numericValue) && cleaned !== '.') {
-      const clampedValue = Math.max(minValue, Math.min(maxValue, numericValue));
-      onValueChange(clampedValue);
+    if (!isNaN(_numericValue) && cleaned !== '.') {
+      const clampedValue = Math.max(_minValue, Math.min(_maxValue, numericValue));
+      onValueChange(_clampedValue);
     }
-
   };
 
   const handleFocus = () => {
-    setIsFocused(true);
+    setIsFocused(_true);
     // Don't clear the input - keep the current value visible for editing
   };
 
   const handleBlur = () => {
-    setIsFocused(false);
+    setIsFocused(_false);
 
     // Convert to number and validate
-    const numericValue = parseFloat(displayValue) || 0;
-    const clampedValue = Math.max(minValue, Math.min(maxValue, numericValue));
+    const numericValue = parseFloat(_displayValue) || 0;
+    const clampedValue = Math.max(_minValue, Math.min(_maxValue, numericValue));
 
     // Format the display value nicely when losing focus - only format if it's a valid number
-    if (!isNaN(numericValue) && displayValue !== '') {
-      setDisplayValue(clampedValue.toFixed(decimalPlaces));
+    if (!isNaN(_numericValue) && displayValue !== '') {
+      setDisplayValue(clampedValue.toFixed(_decimalPlaces));
 
       // Only call onValueChange if the value actually changed
       if (clampedValue !== value) {
-        onValueChange(clampedValue);
+        onValueChange(_clampedValue);
       }
     }
-
   };
 
   const handleClear = () => {
@@ -109,9 +106,9 @@ const DecimalInput: React.FC<DecimalInputProps> = ({
   };
 
   const handlePresetValue = (presetValue: number) => {
-    const formattedValue = presetValue.toFixed(decimalPlaces);
-    setDisplayValue(formattedValue);
-    onValueChange(presetValue);
+    const formattedValue = presetValue.toFixed(_decimalPlaces);
+    setDisplayValue(_formattedValue);
+    onValueChange(_presetValue);
   };
 
   // Common preset values for service charges
@@ -166,7 +163,7 @@ const DecimalInput: React.FC<DecimalInputProps> = ({
               <TouchableOpacity
                 key={preset}
                 style={[styles.presetButton, value === preset && styles.presetButtonActive]}
-                onPress={() => handlePresetValue(preset)}>
+                onPress={() => handlePresetValue(_preset)}>
                 <Text
                   style={[
                     styles.presetButtonText,

@@ -25,7 +25,7 @@ export const HeaderWithBackButton: React.FC<HeaderWithBackButtonProps> = ({
   const { theme } = useTheme();
 
   const handleBackPress = () => {
-    if (onBackPress) {
+    if (_onBackPress) {
       onBackPress();
     } else if (navigation.canGoBack()) {
       navigation.goBack();

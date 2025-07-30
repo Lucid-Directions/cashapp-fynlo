@@ -46,7 +46,7 @@ class SquareInitService {
 
       this.initialized = true;
       return true;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }

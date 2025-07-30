@@ -120,7 +120,7 @@ const PaymentMethodsInfoScreen: React.FC = () => {
           title="Available Payment Methods"
           subtitle="Payment options enabled for your restaurant">
           <View style={styles.methodsContainer}>
-            {platformControlledMethods.map(renderPaymentMethod)}
+            {platformControlledMethods.map(_renderPaymentMethod)}
           </View>
         </SettingsSection>
 

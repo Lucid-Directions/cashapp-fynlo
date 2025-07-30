@@ -129,15 +129,15 @@ class OrderService {
       // webSocketService.send({ type: 'order_created', data: order });
 
       // Save to local storage for offline access
-      await this.cacheOrder(order);
+      await this.cacheOrder(_order);
 
       // Trigger email receipt if customer email provided
       if (orderData.customerMetadata.email) {
-        await this.sendEmailReceipt(order);
+        await this.sendEmailReceipt(_order);
       }
 
       return order;
-    } catch (error) {
+    } catch (_error) {
 
       // Fallback: Save to local storage for later sync
       const fallbackOrder: Order = {
@@ -160,8 +160,8 @@ class OrderService {
         notes: orderData.notes,
       };
 
-      await this.cacheOrder(fallbackOrder);
-      await this.saveToSyncQueue(orderData);
+      await this.cacheOrder(_fallbackOrder);
+      await this.saveToSyncQueue(_orderData);
 
       return fallbackOrder;
     }
@@ -231,7 +231,7 @@ class OrderService {
       }));
 
       return orders;
-    } catch (error) {
+    } catch (_error) {
 
       // Fallback to cached orders
       return await this.getCachedOrders();
@@ -276,7 +276,7 @@ class OrderService {
         tipAmount: data.tip_amount,
         notes: data.notes,
       };
-    } catch (error) {
+    } catch (_error) {
       return null;
     }
   }
@@ -305,7 +305,7 @@ class OrderService {
       // webSocketService.send({ type: 'order_updated', data: updatedOrder });
 
       return updatedOrder;
-    } catch (error) {
+    } catch (_error) {
       return null;
     }
   }
@@ -328,7 +328,7 @@ class OrderService {
         }),
       });
 
-    } catch (error) {
+    } catch (_error) {
     }
   }
 
@@ -343,8 +343,8 @@ class OrderService {
       // Keep only last 100 orders in cache
       const trimmedOrders = updatedOrders.slice(0, 100);
 
-      await AsyncStorage.setItem('cached_orders', JSON.stringify(trimmedOrders));
-    } catch (error) {
+      await AsyncStorage.setItem('cached_orders', JSON.stringify(_trimmedOrders));
+    } catch (_error) {
     }
   }
 
@@ -354,8 +354,8 @@ class OrderService {
   private async getCachedOrders(): Promise<Order[]> {
     try {
       const cached = await AsyncStorage.getItem('cached_orders');
-      return cached ? JSON.parse(cached) : [];
-    } catch (error) {
+      return cached ? JSON.parse(_cached) : [];
+    } catch (_error) {
       return [];
     }
   }
@@ -366,15 +366,15 @@ class OrderService {
   private async saveToSyncQueue(orderData: OrderCreateRequest): Promise<void> {
     try {
       const queue = await AsyncStorage.getItem('order_sync_queue');
-      const queueData = queue ? JSON.parse(queue) : [];
+      const queueData = queue ? JSON.parse(_queue) : [];
 
       queueData.push({
         ...orderData,
         timestamp: new Date().toISOString(),
       });
 
-      await AsyncStorage.setItem('order_sync_queue', JSON.stringify(queueData));
-    } catch (error) {
+      await AsyncStorage.setItem('order_sync_queue', JSON.stringify(_queueData));
+    } catch (_error) {
     }
   }
 
@@ -388,14 +388,14 @@ class OrderService {
         return;
       }
 
-      const queueData = JSON.parse(queue);
+      const queueData = JSON.parse(_queue);
       const processedIds: number[] = [];
 
       for (const orderData of queueData) {
         try {
-          await this.saveOrder(orderData);
+          await this.saveOrder(_orderData);
           processedIds.push(orderData.timestamp);
-        } catch (error) {
+        } catch (_error) {
         }
       }
 
@@ -404,8 +404,8 @@ class OrderService {
         (item: unknown) => !processedIds.includes(item.timestamp),
       );
 
-      await AsyncStorage.setItem('order_sync_queue', JSON.stringify(remainingQueue));
-    } catch (error) {
+      await AsyncStorage.setItem('order_sync_queue', JSON.stringify(_remainingQueue));
+    } catch (_error) {
     }
   }
 
@@ -414,11 +414,11 @@ class OrderService {
    */
   subscribeToOrderEvents(callback: (event: string, data: unknown) => void): () => void {
     // TEMPORARY: WebSocket disabled until service is created
-    // const unsubscribeCreated = webSocketService.subscribe('order_created', (data) => {
+    // const unsubscribeCreated = webSocketService.subscribe('order_created', (_data) => {
     //   callback('order_created', data);
     // });
 
-    // const unsubscribeUpdated = webSocketService.subscribe('order_updated', (data) => {
+    // const unsubscribeUpdated = webSocketService.subscribe('order_updated', (_data) => {
     //   callback('order_updated', data);
     // });
 

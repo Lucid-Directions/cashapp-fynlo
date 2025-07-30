@@ -59,11 +59,11 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
   const [vatNumber, setVatNumber] = useState('');
 
   const [currentStep, setCurrentStep] = useState(1);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(_false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(_false);
+  const [isLoading, setIsLoading] = useState(_false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(_false);
 
   const validateStep1 = () => {
     const newErrors: Record<string, string> = {};
@@ -92,12 +92,12 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
     }
     if (!pin.trim()) {
       newErrors.pin = 'PIN is required';
-    } else if (pin.length !== 4 || !/^\d{4}$/.test(pin)) {
+    } else if (pin.length !== 4 || !/^\d{4}$/.test(_pin)) {
       newErrors.pin = 'PIN must be exactly 4 digits';
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    setErrors(_newErrors);
+    return Object.keys(_newErrors).length === 0;
   };
 
   const validateStep2 = () => {
@@ -116,8 +116,8 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
       newErrors.terms = 'You must accept the terms and conditions';
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    setErrors(_newErrors);
+    return Object.keys(_newErrors).length === 0;
   };
 
   const handleNext = () => {
@@ -139,7 +139,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
       return;
     }
 
-    setIsLoading(true);
+    setIsLoading(_true);
     try {
       const userData = {
         firstName: firstName.trim(),
@@ -158,7 +158,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
         vatNumber: vatNumber.trim(),
       };
 
-      const success = await signUp(userData, businessData, password);
+      const success = await signUp(_userData, businessData, password);
 
       if (!success) {
         Alert.alert(
@@ -167,12 +167,12 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
           [{ text: 'OK' }],
         );
       }
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', 'An unexpected error occurred during registration. Please try again.', [
         { text: 'OK' },
       ]);
     } finally {
-      setIsLoading(false);
+      setIsLoading(_false);
     }
   };
 
@@ -195,7 +195,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
             label="First Name *"
             value={firstName}
             onValueChange={text => {
-              setFirstName(text);
+              setFirstName(_text);
               if (errors.firstName) {
                 setErrors(prev => ({ ...prev, firstName: '' }));
               }
@@ -214,7 +214,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
             label="Last Name *"
             value={lastName}
             onValueChange={text => {
-              setLastName(text);
+              setLastName(_text);
               if (errors.lastName) {
                 setErrors(prev => ({ ...prev, lastName: '' }));
               }
@@ -232,7 +232,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
           label="Email Address *"
           value={email}
           onValueChange={text => {
-            setEmail(text);
+            setEmail(_text);
             if (errors.email) {
               setErrors(prev => ({ ...prev, email: '' }));
             }
@@ -250,7 +250,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
           label="Phone Number *"
           value={phone}
           onValueChange={text => {
-            setPhone(text);
+            setPhone(_text);
             if (errors.phone) {
               setErrors(prev => ({ ...prev, phone: '' }));
             }
@@ -266,7 +266,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
           label="Password *"
           value={password}
           onValueChange={text => {
-            setPassword(text);
+            setPassword(_text);
             if (errors.password) {
               setErrors(prev => ({ ...prev, password: '' }));
             }
@@ -284,7 +284,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
           label="Confirm Password *"
           value={confirmPassword}
           onValueChange={text => {
-            setConfirmPassword(text);
+            setConfirmPassword(_text);
             if (errors.confirmPassword) {
               setErrors(prev => ({ ...prev, confirmPassword: '' }));
             }
@@ -328,7 +328,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
           label="Business Name *"
           value={businessName}
           onValueChange={text => {
-            setBusinessName(text);
+            setBusinessName(_text);
             if (errors.businessName) {
               setErrors(prev => ({ ...prev, businessName: '' }));
             }
@@ -346,7 +346,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
           <Picker
             style={styles.picker}
             selectedValue={businessType}
-            onValueChange={value => setBusinessType(value)}>
+            onValueChange={value => setBusinessType(_value)}>
             {businessTypes.map(type => (
               <Picker.Item key={type.value} label={type.label} value={type.value} />
             ))}
@@ -359,7 +359,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
           label="Business Address *"
           value={businessAddress}
           onValueChange={text => {
-            setBusinessAddress(text);
+            setBusinessAddress(_text);
             if (errors.businessAddress) {
               setErrors(prev => ({ ...prev, businessAddress: '' }));
             }
@@ -376,7 +376,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
           label="Business Phone *"
           value={businessPhone}
           onValueChange={text => {
-            setBusinessPhone(text);
+            setBusinessPhone(_text);
             if (errors.businessPhone) {
               setErrors(prev => ({ ...prev, businessPhone: '' }));
             }
@@ -392,7 +392,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
           label="Business Email"
           value={businessEmail}
           onValueChange={setBusinessEmail}
-          placeholder="contact@yourbusiness.com (optional)"
+          placeholder="contact@yourbusiness.com (_optional)"
           keyboardType="email-address"
           autoCapitalize="none"
         />
@@ -405,7 +405,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
           label="VAT Number"
           value={vatNumber}
           onValueChange={setVatNumber}
-          placeholder="GB123456789 (optional)"
+          placeholder="GB123456789 (_optional)"
           autoCapitalize="characters"
         />
         {/* helpText was originally a separate Text component, keeping it that way. */}

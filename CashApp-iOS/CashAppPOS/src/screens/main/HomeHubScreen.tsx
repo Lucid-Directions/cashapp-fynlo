@@ -36,7 +36,7 @@ interface HubIcon {
 const HomeHubScreen: React.FC = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
-  const styles = useThemedStyles(createStyles);
+  const styles = useThemedStyles(_createStyles);
   const { user, signOut } = useAuth();
   const { cartItemCount } = useAppStore();
   const { connected: wsConnected } = useWebSocket({ autoConnect: true });
@@ -196,7 +196,7 @@ const HomeHubScreen: React.FC = () => {
   const handleSignOut = async () => {
     try {
       await signOut();
-    } catch (error) {
+    } catch (_error) {
     }
   };
 
@@ -209,21 +209,21 @@ const HomeHubScreen: React.FC = () => {
       visibleIconsCount: visibleIcons.length,
       timestamp: new Date().toISOString(),
     });
-    // TODO: Integrate with actual analytics service (Firebase, Mixpanel, etc.)
+    // TODO: Integrate with actual analytics service (_Firebase, Mixpanel, etc.)
   }, [user, visibleIcons.length]);
 
   const IconCard: React.FC<{ icon: HubIcon }> = ({ icon }) => {
     const scaleValue = new Animated.Value(1);
 
     const handlePressIn = () => {
-      Animated.spring(scaleValue, {
+      Animated.spring(_scaleValue, {
         toValue: 0.95,
         useNativeDriver: true,
       }).start();
     };
 
     const handlePressOut = () => {
-      Animated.spring(scaleValue, {
+      Animated.spring(_scaleValue, {
         toValue: 1,
         friction: 3,
         useNativeDriver: true,
@@ -234,7 +234,7 @@ const HomeHubScreen: React.FC = () => {
       <Animated.View style={[{ transform: [{ scale: scaleValue }] }]}>
         <TouchableOpacity
           style={[styles.iconCard, { width: cardWidth }]}
-          onPress={() => handleIconPress(icon)}
+          onPress={() => handleIconPress(_icon)}
           onPressIn={handlePressIn}
           onPressOut={handlePressOut}
           activeOpacity={1}

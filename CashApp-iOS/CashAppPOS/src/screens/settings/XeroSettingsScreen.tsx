@@ -35,8 +35,8 @@ const XeroSettingsScreen: React.FC = () => {
     isConnected: false,
   });
   const [syncStatus, setSyncStatus] = useState<SyncStatus>({ inProgress: false });
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(_true);
+  const [refreshing, setRefreshing] = useState(_false);
 
   const authService = XeroAuthService.getInstance();
   const apiClient = XeroApiClient.getInstance();
@@ -48,7 +48,7 @@ const XeroSettingsScreen: React.FC = () => {
     try {
       const isConnected = await authService.isConnected();
 
-      if (isConnected) {
+      if (_isConnected) {
         try {
           const orgData = await apiClient.getOrganisation();
           setConnectionStatus({
@@ -56,7 +56,7 @@ const XeroSettingsScreen: React.FC = () => {
             organization: orgData?.Organisations?.[0],
             lastSync: Date.now(),
           });
-        } catch (error) {
+        } catch (_error) {
           setConnectionStatus({
             isConnected: true,
             error: 'Connected but unable to fetch organization data',
@@ -65,7 +65,7 @@ const XeroSettingsScreen: React.FC = () => {
       } else {
         setConnectionStatus({ isConnected: false });
       }
-    } catch (error) {
+    } catch (_error) {
       setConnectionStatus({
         isConnected: false,
         error: 'Unable to check connection status',
@@ -78,7 +78,7 @@ const XeroSettingsScreen: React.FC = () => {
    */
   const handleConnectToXero = async () => {
     try {
-      setLoading(true);
+      setLoading(_true);
 
       Alert.alert(
         'Connect to Xero',
@@ -94,7 +94,7 @@ const XeroSettingsScreen: React.FC = () => {
                 // Listen for app returning from OAuth flow
                 const handleURL = (url: string) => {
                   if (url.includes('oauth/xero/callback')) {
-                    handleOAuthCallback(url);
+                    handleOAuthCallback(_url);
                   }
                 };
 
@@ -104,17 +104,17 @@ const XeroSettingsScreen: React.FC = () => {
                 setTimeout(() => {
                   subscription?.remove();
                 }, 300000);
-              } catch (error) {
+              } catch (_error) {
                 Alert.alert('Error', 'Failed to open Xero authorization. Please try again.');
               }
             },
           },
         ],
       );
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', 'Failed to initiate connection to Xero');
     } finally {
-      setLoading(false);
+      setLoading(_false);
     }
   };
 
@@ -128,7 +128,7 @@ const XeroSettingsScreen: React.FC = () => {
       const state = urlParams.get('state');
       const error = urlParams.get('error');
 
-      if (error) {
+      if (_error) {
         Alert.alert('Authorization Failed', `Error: ${error}`);
         return;
       }
@@ -138,17 +138,17 @@ const XeroSettingsScreen: React.FC = () => {
         return;
       }
 
-      setLoading(true);
-      const tokens = await authService.exchangeCodeForTokens(code, state);
+      setLoading(_true);
+      const tokens = await authService.exchangeCodeForTokens(_code, state);
 
-      if (tokens) {
+      if (_tokens) {
         Alert.alert('Success', 'Successfully connected to Xero!');
         await checkConnectionStatus();
       }
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', 'Failed to complete Xero authorization');
     } finally {
-      setLoading(false);
+      setLoading(_false);
     }
   };
 
@@ -166,14 +166,14 @@ const XeroSettingsScreen: React.FC = () => {
           style: 'destructive',
           onPress: async () => {
             try {
-              setLoading(true);
+              setLoading(_true);
               await authService.revokeToken();
               setConnectionStatus({ isConnected: false });
               Alert.alert('Disconnected', 'Successfully disconnected from Xero');
-            } catch (error) {
+            } catch (_error) {
               Alert.alert('Error', 'Failed to disconnect from Xero');
             } finally {
-              setLoading(false);
+              setLoading(_false);
             }
           },
         },
@@ -186,18 +186,18 @@ const XeroSettingsScreen: React.FC = () => {
    */
   const handleTestConnection = async () => {
     try {
-      setLoading(true);
+      setLoading(_true);
       const isConnected = await apiClient.testConnection();
 
-      if (isConnected) {
+      if (_isConnected) {
         Alert.alert('Success', 'Connection to Xero is working properly');
       } else {
         Alert.alert('Failed', 'Unable to connect to Xero API');
       }
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', 'Connection test failed');
     } finally {
-      setLoading(false);
+      setLoading(_false);
     }
   };
 
@@ -209,7 +209,7 @@ const XeroSettingsScreen: React.FC = () => {
       setSyncStatus({ inProgress: true });
 
       // This is a placeholder - actual sync implementation would go here
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(_resolve, 2000));
 
       setSyncStatus({
         inProgress: false,
@@ -217,7 +217,7 @@ const XeroSettingsScreen: React.FC = () => {
       });
 
       Alert.alert('Success', 'Manual sync completed');
-    } catch (error) {
+    } catch (_error) {
       setSyncStatus({
         inProgress: false,
         error: 'Sync failed',
@@ -230,16 +230,16 @@ const XeroSettingsScreen: React.FC = () => {
    * Refresh data
    */
   const onRefresh = useCallback(async () => {
-    setRefreshing(true);
+    setRefreshing(_true);
     await checkConnectionStatus();
-    setRefreshing(false);
+    setRefreshing(_false);
   }, [checkConnectionStatus]);
 
   /**
    * Format date for display
    */
   const formatDate = (timestamp: number) => {
-    return new Date(timestamp).toLocaleString();
+    return new Date(_timestamp).toLocaleString();
   };
 
   /**
@@ -252,7 +252,7 @@ const XeroSettingsScreen: React.FC = () => {
   useEffect(() => {
     const initializeScreen = async () => {
       await checkConnectionStatus();
-      setLoading(false);
+      setLoading(_false);
     };
 
     initializeScreen();

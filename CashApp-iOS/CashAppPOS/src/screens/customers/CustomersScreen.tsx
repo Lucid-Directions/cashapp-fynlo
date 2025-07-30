@@ -22,14 +22,14 @@ import { CustomerData } from '../../types'; // Updated import path
 const CustomersScreen: React.FC = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
-  const styles = useThemedStyles(createStyles);
+  const styles = useThemedStyles(_createStyles);
   const [customers, setCustomers] = useState<CustomerData[]>([]);
   const [filteredCustomers, setFilteredCustomers] = useState<CustomerData[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSegment, setSelectedSegment] = useState('all');
-  const [selectedCustomer, setSelectedCustomer] = useState<CustomerData | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true); // Added
-  const [error, setError] = useState<string | null>(null); // Added
+  const [selectedCustomer, setSelectedCustomer] = useState<CustomerData | null>(_null);
+  const [isLoading, setIsLoading] = useState<boolean>(_true); // Added
+  const [error, setError] = useState<string | null>(_null); // Added
 
   useEffect(() => {
     loadCustomers();
@@ -41,8 +41,8 @@ const CustomersScreen: React.FC = () => {
 
   const loadCustomers = async () => {
     // Modified
-    setIsLoading(true);
-    setError(null);
+    setIsLoading(_true);
+    setError(_null);
     try {
       const dataService = DataService.getInstance();
       // Assuming a getCustomers method will be added to DataService
@@ -56,12 +56,12 @@ const CustomersScreen: React.FC = () => {
         lastVisit: customer.lastVisit ? new Date(customer.lastVisit) : null,
       }));
 
-      setCustomers(parsedCustomers);
+      setCustomers(_parsedCustomers);
     } catch (e: unknown) {
       setError(e.message || 'Failed to load customers.');
       setCustomers([]); // Clear customers on error
     } finally {
-      setIsLoading(false);
+      setIsLoading(_false);
     }
   };
 
@@ -70,7 +70,7 @@ const CustomersScreen: React.FC = () => {
 
     // Apply segment filter
     if (selectedSegment !== 'all') {
-      switch (selectedSegment) {
+      switch (_selectedSegment) {
         case 'vip':
           filtered = filtered.filter(customer => customer.totalSpent > 500);
           break;
@@ -97,16 +97,16 @@ const CustomersScreen: React.FC = () => {
     }
 
     // Apply search query
-    if (searchQuery) {
+    if (_searchQuery) {
       filtered = filtered.filter(
         customer =>
           customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
           customer.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          customer.phone.includes(searchQuery),
+          customer.phone.includes(_searchQuery),
       );
     }
 
-    setFilteredCustomers(filtered);
+    setFilteredCustomers(_filtered);
   };
 
   const getCustomerLevel = (customer: CustomerData) => {
@@ -126,7 +126,7 @@ const CustomersScreen: React.FC = () => {
     if (!date) {
       return 'Never';
     }
-    const dateObj = date instanceof Date ? date : new Date(date);
+    const dateObj = date instanceof Date ? date : new Date(_date);
     if (isNaN(dateObj.getTime())) {
       return 'Never';
     }
@@ -151,12 +151,12 @@ const CustomersScreen: React.FC = () => {
   };
 
   const renderCustomer = ({ item }: { item: CustomerData }) => {
-    const customerLevel = getCustomerLevel(item);
+    const customerLevel = getCustomerLevel(_item);
 
     return (
       <TouchableOpacity
         style={styles.customerCard}
-        onPress={() => setSelectedCustomer(item)}
+        onPress={() => setSelectedCustomer(_item)}
         activeOpacity={0.7}>
         <View style={styles.customerHeader}>
           <View style={styles.customerAvatar}>
@@ -211,11 +211,11 @@ const CustomersScreen: React.FC = () => {
     }).length,
     avgSpent:
       customers.length > 0
-        ? customers.reduce((sum, c) => sum + c.totalSpent, 0) / customers.length
+        ? customers.reduce((_sum, c) => sum + c.totalSpent, 0) / customers.length
         : 0,
   };
 
-  if (isLoading) {
+  if (_isLoading) {
     return (
       <SafeAreaView style={[styles.container, styles.centered]}>
         <ActivityIndicator size="large" color={theme.colors.primary} />
@@ -225,7 +225,7 @@ const CustomersScreen: React.FC = () => {
   }
 
   const renderEmptyListComponent = () => {
-    if (error) {
+    if (_error) {
       return (
         <View style={styles.emptyState}>
           <Icon name="error-outline" size={64} color={theme.colors.danger[500]} />
@@ -350,12 +350,12 @@ const CustomersScreen: React.FC = () => {
         visible={!!selectedCustomer}
         animationType="slide"
         transparent={true}
-        onRequestClose={() => setSelectedCustomer(null)}>
+        onRequestClose={() => setSelectedCustomer(_null)}>
         <View style={styles.modalOverlay}>
           <View style={styles.customerModal}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Customer Details</Text>
-              <TouchableOpacity onPress={() => setSelectedCustomer(null)}>
+              <TouchableOpacity onPress={() => setSelectedCustomer(_null)}>
                 <Icon name="close" size={24} color={theme.colors.text} />
               </TouchableOpacity>
             </View>
@@ -370,14 +370,14 @@ const CustomersScreen: React.FC = () => {
                   <View
                     style={[
                       styles.profileLevel,
-                      { backgroundColor: `${getCustomerLevel(selectedCustomer).color}20` },
+                      { backgroundColor: `${getCustomerLevel(_selectedCustomer).color}20` },
                     ]}>
                     <Text
                       style={[
                         styles.profileLevelText,
-                        { color: getCustomerLevel(selectedCustomer).color },
+                        { color: getCustomerLevel(_selectedCustomer).color },
                       ]}>
-                      {getCustomerLevel(selectedCustomer).level} Customer
+                      {getCustomerLevel(_selectedCustomer).level} Customer
                     </Text>
                   </View>
                 </View>
@@ -431,7 +431,7 @@ const CustomersScreen: React.FC = () => {
                 <View style={styles.detailsSection}>
                   <Text style={styles.sectionTitle}>Preferred Items</Text>
                   <View style={styles.preferredItems}>
-                    {selectedCustomer.preferredItems?.map((item, index) => (
+                    {selectedCustomer.preferredItems?.map((_item, index) => (
                       <View key={index} style={styles.preferredItem}>
                         <Text style={styles.preferredItemText}>{item}</Text>
                       </View>
@@ -443,7 +443,7 @@ const CustomersScreen: React.FC = () => {
                   <View style={styles.detailsSection}>
                     <Text style={styles.sectionTitle}>Tags</Text>
                     <View style={styles.customerTags}>
-                      {selectedCustomer.tags?.map((tag, index) => (
+                      {selectedCustomer.tags?.map((_tag, index) => (
                         <View key={index} style={styles.customerTag}>
                           <Text style={styles.customerTagText}>{tag}</Text>
                         </View>

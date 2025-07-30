@@ -37,23 +37,23 @@ const Colors = {
 
 const ReceiptCustomizationScreen: React.FC = () => {
   const { receiptSettings, updateReceiptSettings, businessInfo, isLoading } = useSettingsStore();
-  const [formData, setFormData] = useState(receiptSettings);
-  const [hasChanges, setHasChanges] = useState(false);
+  const [formData, setFormData] = useState(_receiptSettings);
+  const [hasChanges, setHasChanges] = useState(_false);
   const [logoUri, setLogoUri] = useState<string | null>(receiptSettings.logoUri || null);
 
   const handleFieldChange = (field: string, value: unknown) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    setHasChanges(true);
+    setHasChanges(_true);
   };
 
   const handleSave = async () => {
     try {
-      updateReceiptSettings(formData);
-      setHasChanges(false);
+      updateReceiptSettings(_formData);
+      setHasChanges(_false);
       Alert.alert('Success', 'Receipt customization has been saved successfully.', [
         { text: 'OK' },
       ]);
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', 'Failed to save receipt customization. Please try again.', [
         { text: 'OK' },
       ]);
@@ -67,8 +67,8 @@ const ReceiptCustomizationScreen: React.FC = () => {
         text: 'Reset',
         style: 'destructive',
         onPress: () => {
-          setFormData(receiptSettings);
-          setHasChanges(false);
+          setFormData(_receiptSettings);
+          setHasChanges(_false);
         },
       },
     ]);
@@ -106,7 +106,7 @@ const ReceiptCustomizationScreen: React.FC = () => {
         {
           text: 'Use This Logo',
           onPress: () => {
-            setLogoUri(selectedLogo);
+            setLogoUri(_selectedLogo);
             handleFieldChange('logoUri', selectedLogo);
             Alert.alert('Success', "Logo has been updated! Don't forget to save your changes.");
           },
@@ -122,7 +122,7 @@ const ReceiptCustomizationScreen: React.FC = () => {
         text: 'Remove',
         style: 'destructive',
         onPress: () => {
-          setLogoUri(null);
+          setLogoUri(_null);
           handleFieldChange('logoUri', null);
         },
       },
@@ -189,7 +189,7 @@ const ReceiptCustomizationScreen: React.FC = () => {
         </View>
 
         <View style={styles.receiptItems}>
-          {sampleReceiptData.items.map((item, index) => (
+          {sampleReceiptData.items.map((_item, index) => (
             <View key={index} style={styles.receiptItem}>
               <Text style={styles.receiptItemName}>{item.name}</Text>
               <Text style={styles.receiptItemQty}>x{item.qty}</Text>

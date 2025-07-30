@@ -46,11 +46,11 @@ interface FormField {
 const BusinessInformationScreen: React.FC = () => {
   const { businessInfo, updateBusinessInfo, isLoading } = useSettingsStore();
   const { config, updateConfig, completeSetupStep } = useRestaurantConfig();
-  const [formData, setFormData] = useState(businessInfo);
+  const [formData, setFormData] = useState(_businessInfo);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [hasChanges, setHasChanges] = useState(false);
+  const [hasChanges, setHasChanges] = useState(_false);
 
-  const scrollViewRef = useRef<ScrollView>(null);
+  const scrollViewRef = useRef<ScrollView>(_null);
 
   // Load restaurant config data when available
   useEffect(() => {
@@ -75,7 +75,7 @@ const BusinessInformationScreen: React.FC = () => {
       return 'Email is required';
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email) ? null : 'Please enter a valid email address';
+    return emailRegex.test(_email) ? null : 'Please enter a valid email address';
   };
 
   const validatePhone = (phone: string): string | null => {
@@ -91,7 +91,7 @@ const BusinessInformationScreen: React.FC = () => {
       return null;
     } // Website is optional
     const urlRegex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
-    return urlRegex.test(url) ? null : 'Please enter a valid website URL';
+    return urlRegex.test(_url) ? null : 'Please enter a valid website URL';
   };
 
   const validateVatNumber = (vat: string): string | null => {
@@ -100,7 +100,7 @@ const BusinessInformationScreen: React.FC = () => {
     } // VAT number is optional
     // UK VAT number format: GB followed by 9 or 12 digits
     const ukVatRegex = /^GB[0-9]{9}([0-9]{3})?$/;
-    return ukVatRegex.test(vat) ? null : 'Please enter a valid UK VAT number (GB123456789)';
+    return ukVatRegex.test(_vat) ? null : 'Please enter a valid UK VAT number (_GB123456789)';
   };
 
   const validateCompanyNumber = (number: string): string | null => {
@@ -109,7 +109,9 @@ const BusinessInformationScreen: React.FC = () => {
     } // Company number is optional
     // UK Company number: 8 digits
     const ukCompanyRegex = /^[0-9]{8}$/;
-    return ukCompanyRegex.test(number) ? null : 'Please enter a valid UK company number (8 digits)';
+    return ukCompanyRegex.test(_number)
+      ? null
+      : 'Please enter a valid UK company number (8 digits)';
   };
 
   const formFields: FormField[] = [
@@ -205,7 +207,7 @@ const BusinessInformationScreen: React.FC = () => {
 
   const handleFieldChange = (fieldId: string, value: string) => {
     setFormData(prev => ({ ...prev, [fieldId]: value }));
-    setHasChanges(true);
+    setHasChanges(_true);
 
     // Clear error when user starts typing
     if (errors[fieldId]) {
@@ -219,14 +221,14 @@ const BusinessInformationScreen: React.FC = () => {
     formFields.forEach(field => {
       if (field.validation) {
         const error = field.validation(formData[field.id as keyof typeof formData] as string);
-        if (error) {
+        if (_error) {
           newErrors[field.id] = error;
         }
       }
     });
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    setErrors(_newErrors);
+    return Object.keys(_newErrors).length === 0;
   };
 
   const handleSave = async () => {
@@ -239,7 +241,7 @@ const BusinessInformationScreen: React.FC = () => {
 
     try {
       // Save to existing settings store
-      updateBusinessInfo(formData);
+      updateBusinessInfo(_formData);
 
       // Also save to restaurant configuration system
       await updateConfig({
@@ -259,13 +261,13 @@ const BusinessInformationScreen: React.FC = () => {
       // Mark restaurant info setup step as completed
       await completeSetupStep('restaurantInfo');
 
-      setHasChanges(false);
+      setHasChanges(_false);
       Alert.alert(
         'Success',
         'Business information has been saved successfully. The restaurant name will now appear in your headers.',
         [{ text: 'OK' }],
       );
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', 'Failed to save business information. Please try again.', [
         { text: 'OK' },
       ]);
@@ -279,9 +281,9 @@ const BusinessInformationScreen: React.FC = () => {
         text: 'Reset',
         style: 'destructive',
         onPress: () => {
-          setFormData(businessInfo);
+          setFormData(_businessInfo);
           setErrors({});
-          setHasChanges(false);
+          setHasChanges(_false);
         },
       },
     ]);
@@ -329,15 +331,15 @@ const BusinessInformationScreen: React.FC = () => {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled">
         <SettingsSection title="Company Details" subtitle="Basic information about your business">
-          <View style={styles.formContainer}>{formFields.slice(0, 5).map(renderFormField)}</View>
+          <View style={styles.formContainer}>{formFields.slice(0, 5).map(_renderFormField)}</View>
         </SettingsSection>
 
         <SettingsSection title="Contact Information" subtitle="How customers can reach you">
-          <View style={styles.formContainer}>{formFields.slice(5, 8).map(renderFormField)}</View>
+          <View style={styles.formContainer}>{formFields.slice(5, 8).map(_renderFormField)}</View>
         </SettingsSection>
 
         <SettingsSection title="Legal Information" subtitle="VAT and company registration details">
-          <View style={styles.formContainer}>{formFields.slice(8).map(renderFormField)}</View>
+          <View style={styles.formContainer}>{formFields.slice(8).map(_renderFormField)}</View>
         </SettingsSection>
 
         {/* Action Buttons */}

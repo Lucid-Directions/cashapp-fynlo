@@ -63,17 +63,17 @@ interface Category {
 const MenuManagementScreen: React.FC = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
-  const styles = createStyles(theme);
+  const styles = createStyles(_theme);
   const dataService = DataService.getInstance();
 
   const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(_true);
+  const [refreshing, setRefreshing] = useState(_false);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
-  const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
-  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-  const [showItemModal, setShowItemModal] = useState(false);
-  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [editingItem, setEditingItem] = useState<MenuItem | null>(_null);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(_null);
+  const [showItemModal, setShowItemModal] = useState(_false);
+  const [showCategoryModal, setShowCategoryModal] = useState(_false);
   const [searchTerm, setSearchTerm] = useState('');
 
   // Menu settings
@@ -95,7 +95,7 @@ const MenuManagementScreen: React.FC = () => {
 
   const loadMenuData = async () => {
     try {
-      setLoading(true);
+      setLoading(_true);
 
       // Fetch categories and products from API
       const [categoriesData, productsData] = await Promise.all([
@@ -125,16 +125,16 @@ const MenuManagementScreen: React.FC = () => {
           })),
       }));
 
-      setCategories(transformedCategories);
+      setCategories(_transformedCategories);
 
       // Set first category as selected if available
       if (transformedCategories.length > 0 && !selectedCategory) {
         setSelectedCategory(transformedCategories[0].id);
       }
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', 'Failed to load menu data. Please try again.');
     } finally {
-      setLoading(false);
+      setLoading(_false);
     }
   };
 
@@ -147,12 +147,12 @@ const MenuManagementScreen: React.FC = () => {
       visible: true,
       items: [],
     });
-    setShowCategoryModal(true);
+    setShowCategoryModal(_true);
   };
 
   const handleEditCategory = (category: Category) => {
-    setEditingCategory(category);
-    setShowCategoryModal(true);
+    setEditingCategory(_category);
+    setShowCategoryModal(_true);
   };
 
   const handleSaveCategory = async () => {
@@ -162,7 +162,7 @@ const MenuManagementScreen: React.FC = () => {
     }
 
     try {
-      setLoading(true);
+      setLoading(_true);
 
       if (editingCategory.id) {
         // Update existing category
@@ -186,16 +186,16 @@ const MenuManagementScreen: React.FC = () => {
       // Reload data to get the updated list
       await loadMenuData();
 
-      setShowCategoryModal(false);
-      setEditingCategory(null);
+      setShowCategoryModal(_false);
+      setEditingCategory(_null);
       Alert.alert(
         'Success',
         `Category ${editingCategory.id ? 'updated' : 'created'} successfully!`,
       );
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', 'Failed to save category. Please try again.');
     } finally {
-      setLoading(false);
+      setLoading(_false);
     }
   };
 
@@ -211,8 +211,8 @@ const MenuManagementScreen: React.FC = () => {
           style: 'destructive',
           onPress: async () => {
             try {
-              setLoading(true);
-              await dataService.deleteCategory(categoryId);
+              setLoading(_true);
+              await dataService.deleteCategory(_categoryId);
 
               // Reload data
               await loadMenuData();
@@ -224,10 +224,10 @@ const MenuManagementScreen: React.FC = () => {
               }
 
               Alert.alert('Success', 'Category deleted successfully!');
-            } catch (error) {
+            } catch (_error) {
               Alert.alert('Error', 'Failed to delete category. Please try again.');
             } finally {
-              setLoading(false);
+              setLoading(_false);
             }
           },
         },
@@ -247,12 +247,12 @@ const MenuManagementScreen: React.FC = () => {
       allergens: [],
       modifiers: [],
     });
-    setShowItemModal(true);
+    setShowItemModal(_true);
   };
 
   const handleEditItem = (item: MenuItem) => {
-    setEditingItem(item);
-    setShowItemModal(true);
+    setEditingItem(_item);
+    setShowItemModal(_true);
   };
 
   const handleSaveItem = async () => {
@@ -267,7 +267,7 @@ const MenuManagementScreen: React.FC = () => {
     }
 
     try {
-      setLoading(true);
+      setLoading(_true);
 
       if (editingItem.id) {
         // Update existing item
@@ -295,13 +295,13 @@ const MenuManagementScreen: React.FC = () => {
       // Reload data to get the updated list
       await loadMenuData();
 
-      setShowItemModal(false);
-      setEditingItem(null);
+      setShowItemModal(_false);
+      setEditingItem(_null);
       Alert.alert('Success', `Item ${editingItem.id ? 'updated' : 'created'} successfully!`);
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', 'Failed to save item. Please try again.');
     } finally {
-      setLoading(false);
+      setLoading(_false);
     }
   };
 
@@ -315,17 +315,17 @@ const MenuManagementScreen: React.FC = () => {
         style: 'destructive',
         onPress: async () => {
           try {
-            setLoading(true);
-            await dataService.deleteProduct(itemId);
+            setLoading(_true);
+            await dataService.deleteProduct(_itemId);
 
             // Reload data
             await loadMenuData();
 
             Alert.alert('Success', 'Item deleted successfully!');
-          } catch (error) {
+          } catch (_error) {
             Alert.alert('Error', 'Failed to delete item. Please try again.');
           } finally {
-            setLoading(false);
+            setLoading(_false);
           }
         },
       },
@@ -340,7 +340,7 @@ const MenuManagementScreen: React.FC = () => {
     }
 
     try {
-      await dataService.updateProduct(itemId, {
+      await dataService.updateProduct(_itemId, {
         is_active: !item.available,
       });
 
@@ -351,7 +351,7 @@ const MenuManagementScreen: React.FC = () => {
           items: cat.items.map(i => (i.id === itemId ? { ...i, available: !i.available } : i)),
         })),
       );
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', 'Failed to update item availability.');
     }
   };
@@ -376,7 +376,7 @@ const MenuManagementScreen: React.FC = () => {
     }
 
     try {
-      await dataService.updateCategory(categoryId, {
+      await dataService.updateCategory(_categoryId, {
         is_active: !category.visible,
       });
 
@@ -384,7 +384,7 @@ const MenuManagementScreen: React.FC = () => {
       setCategories(prev =>
         prev.map(cat => (cat.id === categoryId ? { ...cat, visible: !cat.visible } : cat)),
       );
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', 'Failed to update category visibility.');
     }
   };
@@ -412,8 +412,8 @@ const MenuManagementScreen: React.FC = () => {
                 'Paste CSV Data',
                 'Paste your menu data in CSV format:',
                 async csvData => {
-                  if (csvData) {
-                    await processCSVImport(csvData);
+                  if (_csvData) {
+                    await processCSVImport(_csvData);
                   }
                 },
                 'plain-text',
@@ -444,7 +444,7 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
           },
         ],
       );
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', 'Failed to import menu');
     }
   };
@@ -488,7 +488,7 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
 
   const processCSVImport = async (csvData: string) => {
     try {
-      setLoading(true);
+      setLoading(_true);
 
       // Parse CSV with proper handling of quoted fields
       const lines = csvData.trim().split(/\r?\n/);
@@ -533,12 +533,12 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
           continue;
         }
 
-        if (!priceStr || isNaN(parseFloat(priceStr))) {
+        if (!priceStr || isNaN(parseFloat(_priceStr))) {
           errors.push(`Row ${i + 1}: Invalid price value`);
           continue;
         }
 
-        const price = parseFloat(priceStr);
+        const price = parseFloat(_priceStr);
         if (price < 0) {
           errors.push(`Row ${i + 1}: Price cannot be negative`);
           continue;
@@ -550,10 +550,10 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
           price: price,
         };
 
-        if (!itemsByCategory.has(categoryName)) {
-          itemsByCategory.set(categoryName, []);
+        if (!itemsByCategory.has(_categoryName)) {
+          itemsByCategory.set(_categoryName, []);
         }
-        itemsByCategory.get(categoryName)!.push(item);
+        itemsByCategory.get(_categoryName)!.push(_item);
       }
 
       // Show validation errors if any
@@ -606,7 +606,7 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
 
               // Add the new category to our local state
               setCategories(prev => [...prev, category!]);
-            } catch (catError) {
+            } catch (_catError) {
               failedItems.push(
                 `Category '${categoryName}': ${catError.message || 'Unknown error'}`,
               );
@@ -675,13 +675,13 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
     } catch (error: unknown) {
       Alert.alert('Import Error', error.message || 'Failed to process CSV data');
     } finally {
-      setLoading(false);
+      setLoading(_false);
     }
   };
 
   const handleExportMenu = async () => {
     try {
-      setLoading(true);
+      setLoading(_true);
 
       // Get current menu data
       const [categoriesData, productsData] = await Promise.all([
@@ -730,10 +730,10 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
           },
         ],
       );
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Export Failed', 'Unable to export menu data. Please try again.');
     } finally {
-      setLoading(false);
+      setLoading(_false);
     }
   };
 
@@ -745,7 +745,7 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
 
     let items = category.items;
 
-    if (searchTerm) {
+    if (_searchTerm) {
       items = items.filter(
         item =>
           item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -761,12 +761,12 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
   };
 
   const getTotalItemCount = () => {
-    return categories.reduce((total, cat) => total + cat.items.length, 0);
+    return categories.reduce((_total, cat) => total + cat.items.length, 0);
   };
 
   const getAvailableItemCount = () => {
     return categories.reduce(
-      (total, cat) => total + cat.items.filter(item => item.available).length,
+      (_total, cat) => total + cat.items.filter(item => item.available).length,
       0,
     );
   };
@@ -779,7 +779,7 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
         !category.visible && styles.hiddenCategoryTab,
       ]}
       onPress={() => setSelectedCategory(category.id)}
-      onLongPress={() => handleEditCategory(category)}>
+      onLongPress={() => handleEditCategory(_category)}>
       <Text
         style={[
           styles.categoryTabText,
@@ -830,7 +830,7 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
       <View style={styles.itemActions}>
         <TouchableOpacity
           style={[styles.itemActionButton, styles.editButton]}
-          onPress={() => handleEditItem(item)}>
+          onPress={() => handleEditItem(_item)}>
           <Icon name="edit" size={16} color={theme.colors.secondary} />
           <Text style={styles.editButtonText}>Edit</Text>
         </TouchableOpacity>
@@ -1069,14 +1069,14 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
             visible={showItemModal}
             transparent={true}
             animationType="slide"
-            onRequestClose={() => setShowItemModal(false)}>
+            onRequestClose={() => setShowItemModal(_false)}>
             <View style={styles.modalOverlay}>
               <View style={styles.modalContent}>
                 <View style={styles.modalHeader}>
                   <Text style={styles.modalTitle}>
                     {editingItem?.id ? 'Edit Item' : 'Add New Item'}
                   </Text>
-                  <TouchableOpacity onPress={() => setShowItemModal(false)}>
+                  <TouchableOpacity onPress={() => setShowItemModal(_false)}>
                     <Icon name="close" size={24} color={theme.colors.text} />
                   </TouchableOpacity>
                 </View>
@@ -1110,7 +1110,7 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
                     value={editingItem?.price?.toString() || ''}
                     onChangeText={text =>
                       setEditingItem(prev =>
-                        prev ? { ...prev, price: parseFloat(text) || 0 } : null,
+                        prev ? { ...prev, price: parseFloat(_text) || 0 } : null,
                       )
                     }
                     placeholder="0.00"
@@ -1153,7 +1153,7 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
                 <View style={styles.modalActions}>
                   <TouchableOpacity
                     style={styles.cancelButton}
-                    onPress={() => setShowItemModal(false)}>
+                    onPress={() => setShowItemModal(_false)}>
                     <Text style={styles.cancelButtonText}>Cancel</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={styles.saveButton} onPress={handleSaveItem}>
@@ -1169,14 +1169,14 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
             visible={showCategoryModal}
             transparent={true}
             animationType="slide"
-            onRequestClose={() => setShowCategoryModal(false)}>
+            onRequestClose={() => setShowCategoryModal(_false)}>
             <View style={styles.modalOverlay}>
               <View style={styles.modalContent}>
                 <View style={styles.modalHeader}>
                   <Text style={styles.modalTitle}>
                     {editingCategory?.id ? 'Edit Category' : 'Add New Category'}
                   </Text>
-                  <TouchableOpacity onPress={() => setShowCategoryModal(false)}>
+                  <TouchableOpacity onPress={() => setShowCategoryModal(_false)}>
                     <Icon name="close" size={24} color={theme.colors.text} />
                   </TouchableOpacity>
                 </View>
@@ -1223,7 +1223,7 @@ Desserts,Churros,"Cinnamon sugar dusted, with chocolate sauce",5.99`;
                 <View style={styles.modalActions}>
                   <TouchableOpacity
                     style={styles.cancelButton}
-                    onPress={() => setShowCategoryModal(false)}>
+                    onPress={() => setShowCategoryModal(_false)}>
                     <Text style={styles.cancelButtonText}>Cancel</Text>
                   </TouchableOpacity>
                   <TouchableOpacity style={styles.saveButton} onPress={handleSaveCategory}>

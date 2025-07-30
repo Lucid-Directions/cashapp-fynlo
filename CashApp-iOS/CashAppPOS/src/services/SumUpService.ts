@@ -81,7 +81,7 @@ class SumUpServiceClass {
    */
   async initialize(config: SumUpConfig): Promise<void> {
     this.config = config;
-    await this.saveConfig(config);
+    await this.saveConfig(_config);
   }
 
   /**
@@ -113,7 +113,7 @@ class SumUpServiceClass {
           Authorization: `Bearer ${this.config.apiKey}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(checkoutData),
+        body: JSON.stringify(_checkoutData),
       });
 
       if (!response.ok) {
@@ -132,7 +132,7 @@ class SumUpServiceClass {
         status: 'created',
         expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30 minutes
       };
-    } catch (error) {
+    } catch (_error) {
       throw error;
     }
   }
@@ -160,7 +160,7 @@ class SumUpServiceClass {
         amount: request.amount,
         fee: fee,
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         success: false,
         provider: 'sumup',
@@ -186,7 +186,6 @@ class SumUpServiceClass {
 
       const paymentId = this.generatePaymentId();
 
-
       // Use native SumUp SDK for contactless payment
       const result = await SumUpNativeService.checkout({
         amount: amount,
@@ -207,7 +206,7 @@ class SumUpServiceClass {
       } else {
         throw new Error(result.message || 'Contactless payment failed');
       }
-    } catch (error) {
+    } catch (_error) {
       return {
         id: this.generatePaymentId(),
         amount: amount,
@@ -233,7 +232,7 @@ class SumUpServiceClass {
       }
 
       // Create checkout for QR payment
-      const checkout = await this.createCheckout(amount, currency, description);
+      const checkout = await this.createCheckout(_amount, currency, description);
 
       return {
         id: checkout.checkoutId,
@@ -245,7 +244,7 @@ class SumUpServiceClass {
         pollInterval: 2000, // Poll every 2 seconds
         statusUrl: `${this.config.baseUrl}/v0.1/checkouts/${checkout.checkoutId}`,
       };
-    } catch (error) {
+    } catch (_error) {
       throw error;
     }
   }
@@ -276,7 +275,7 @@ class SumUpServiceClass {
         ...qrPayment,
         status: this.mapCheckoutStatus(data.status),
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         ...qrPayment,
         status: 'failed',
@@ -292,7 +291,7 @@ class SumUpServiceClass {
       // Check if NFC is available on the device
       // This would typically use device capabilities
       return true; // Assume supported for now
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -368,11 +367,11 @@ class SumUpServiceClass {
    * Check if SumUp is the optimal provider for given volume
    */
   isOptimalForVolume(monthlyVolume: number, compareRates: { [provider: string]: number }): boolean {
-    const sumupCost = this.calculateMonthlyCost(monthlyVolume);
+    const sumupCost = this.calculateMonthlyCost(_monthlyVolume);
     const sumupRate = sumupCost.effectiveRate;
 
     // Compare with other providers
-    const lowestCompetitorRate = Math.min(...Object.values(compareRates));
+    const lowestCompetitorRate = Math.min(...Object.values(_compareRates));
 
     return sumupRate <= lowestCompetitorRate;
   }
@@ -425,7 +424,7 @@ class SumUpServiceClass {
       });
 
       return response.ok;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -486,8 +485,8 @@ class SumUpServiceClass {
    */
   private async saveConfig(config: SumUpConfig): Promise<void> {
     try {
-      await AsyncStorage.setItem('sumup_config', JSON.stringify(config));
-    } catch (error) {
+      await AsyncStorage.setItem('sumup_config', JSON.stringify(_config));
+    } catch (_error) {
       throw error;
     }
   }
@@ -498,13 +497,13 @@ class SumUpServiceClass {
   async loadConfig(): Promise<SumUpConfig | null> {
     try {
       const configString = await AsyncStorage.getItem('sumup_config');
-      if (configString) {
-        const config = JSON.parse(configString);
+      if (_configString) {
+        const config = JSON.parse(_configString);
         this.config = config;
         return config;
       }
       return null;
-    } catch (error) {
+    } catch (_error) {
       return null;
     }
   }
@@ -516,7 +515,7 @@ class SumUpServiceClass {
     try {
       await AsyncStorage.removeItem('sumup_config');
       this.config = null;
-    } catch (error) {
+    } catch (_error) {
       throw error;
     }
   }

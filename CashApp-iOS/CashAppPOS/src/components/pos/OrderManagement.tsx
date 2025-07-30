@@ -44,8 +44,8 @@ const OrderManagement: React.FC<OrderManagementProps> = ({ visible, onClose, onC
 
   const { taxConfiguration } = useSettingsStore();
 
-  const [editingItem, setEditingItem] = useState<OrderItem | null>(null);
-  const [splitMode, setSplitMode] = useState(false);
+  const [editingItem, setEditingItem] = useState<OrderItem | null>(_null);
+  const [splitMode, setSplitMode] = useState(_false);
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
   const [customerName, setCustomerName] = useState('');
   const [tableNumber, setTableNumber] = useState('');
@@ -60,7 +60,7 @@ const OrderManagement: React.FC<OrderManagementProps> = ({ visible, onClose, onC
 
   // Calculate totals
   const calculateSubtotal = () => {
-    return cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    return cart.reduce((_sum, item) => sum + item.price * item.quantity, 0);
   };
 
   const calculateTax = (subtotal: number) => {
@@ -85,7 +85,7 @@ const OrderManagement: React.FC<OrderManagementProps> = ({ visible, onClose, onC
         const dataStore = SharedDataStore.getInstance();
         const config = await dataStore.getServiceChargeConfig();
 
-        if (config) {
+        if (_config) {
           setPlatformServiceCharge({
             enabled: config.enabled,
             rate: config.rate,
@@ -93,8 +93,7 @@ const OrderManagement: React.FC<OrderManagementProps> = ({ visible, onClose, onC
           });
         } else {
         }
-      } catch (error) {
-      }
+      } catch (_error) {}
     };
 
     loadPlatformServiceCharge();
@@ -116,8 +115,8 @@ const OrderManagement: React.FC<OrderManagementProps> = ({ visible, onClose, onC
 
   const calculateTotal = () => {
     const subtotal = calculateSubtotal();
-    const tax = calculateTax(subtotal);
-    const service = calculateServiceCharge(subtotal);
+    const tax = calculateTax(_subtotal);
+    const service = calculateServiceCharge(_subtotal);
     return subtotal + tax + service;
   };
 
@@ -131,13 +130,13 @@ const OrderManagement: React.FC<OrderManagementProps> = ({ visible, onClose, onC
   };
 
   const handleEditItem = (item: OrderItem) => {
-    setEditingItem(item);
+    setEditingItem(_item);
   };
 
   const handleSaveEdit = () => {
-    if (editingItem) {
+    if (_editingItem) {
       updateCartItem(editingItem.id, editingItem);
-      setEditingItem(null);
+      setEditingItem(_null);
     }
   };
 
@@ -153,7 +152,7 @@ const OrderManagement: React.FC<OrderManagementProps> = ({ visible, onClose, onC
         text: 'Split',
         onPress: () => {
           // In a real app, this would create a new order
-          setSplitMode(false);
+          setSplitMode(_false);
           setSelectedItems([]);
           Alert.alert('Success', 'Order split successfully');
         },
@@ -163,7 +162,7 @@ const OrderManagement: React.FC<OrderManagementProps> = ({ visible, onClose, onC
 
   const toggleItemSelection = (itemId: number) => {
     setSelectedItems(prev => {
-      if (prev.includes(itemId)) {
+      if (prev.includes(_itemId)) {
         return prev.filter(id => id !== itemId);
       } else {
         return [...prev, itemId];
@@ -214,20 +213,20 @@ const OrderManagement: React.FC<OrderManagementProps> = ({ visible, onClose, onC
           <View style={styles.quantityControls}>
             <TouchableOpacity
               style={styles.quantityButton}
-              onPress={() => handleQuantityChange(item, -1)}>
+              onPress={() => handleQuantityChange(_item, -1)}>
               <Icon name="remove" size={18} color={Colors.primary} />
             </TouchableOpacity>
             <Text style={styles.quantityText}>{item.quantity}</Text>
             <TouchableOpacity
               style={styles.quantityButton}
-              onPress={() => handleQuantityChange(item, 1)}>
+              onPress={() => handleQuantityChange(_item, 1)}>
               <Icon name="add" size={18} color={Colors.primary} />
             </TouchableOpacity>
           </View>
 
           <Text style={styles.itemPrice}>£{(item.price * item.quantity).toFixed(2)}</Text>
 
-          <TouchableOpacity style={styles.editButton} onPress={() => handleEditItem(item)}>
+          <TouchableOpacity style={styles.editButton} onPress={() => handleEditItem(_item)}>
             <Icon name="edit" size={18} color={Colors.secondary} />
           </TouchableOpacity>
         </View>
@@ -245,12 +244,12 @@ const OrderManagement: React.FC<OrderManagementProps> = ({ visible, onClose, onC
         visible={!!editingItem}
         transparent
         animationType="slide"
-        onRequestClose={() => setEditingItem(null)}>
+        onRequestClose={() => setEditingItem(_null)}>
         <View style={styles.modalOverlay}>
           <View style={styles.editModalContent}>
             <View style={styles.editModalHeader}>
               <Text style={styles.editModalTitle}>Edit Item</Text>
-              <TouchableOpacity onPress={() => setEditingItem(null)}>
+              <TouchableOpacity onPress={() => setEditingItem(_null)}>
                 <Icon name="close" size={24} color={Colors.darkGray} />
               </TouchableOpacity>
             </View>
@@ -303,7 +302,7 @@ const OrderManagement: React.FC<OrderManagementProps> = ({ visible, onClose, onC
                 style={[styles.editButton, styles.deleteButton]}
                 onPress={() => {
                   removeFromCart(editingItem.id);
-                  setEditingItem(null);
+                  setEditingItem(_null);
                 }}>
                 <Text style={styles.deleteButtonText}>Remove Item</Text>
               </TouchableOpacity>
@@ -388,7 +387,7 @@ const OrderManagement: React.FC<OrderManagementProps> = ({ visible, onClose, onC
               <Text style={styles.emptyCartSubtext}>Add items to get started</Text>
             </View>
           ) : (
-            cart.map(renderOrderItem)
+            cart.map(_renderOrderItem)
           )}
         </ScrollView>
 

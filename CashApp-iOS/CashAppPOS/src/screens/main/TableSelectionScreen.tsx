@@ -62,23 +62,23 @@ export const TableSelectionScreen: React.FC = () => {
   const { user } = useAppStore();
   const [tables, setTables] = useState<Table[]>([]);
   const [sections, setSections] = useState<Section[]>([]);
-  const [selectedSection, setSelectedSection] = useState<string | null>(null);
+  const [selectedSection, setSelectedSection] = useState<string | null>(_null);
   const [orderType, setOrderType] = useState(0); // 0 = Dine In
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(_true);
+  const [refreshing, setRefreshing] = useState(_false);
 
   const fetchFloorPlan = useCallback(async () => {
     try {
-      const response = await DatabaseService.getRestaurantFloorPlan(selectedSection);
+      const response = await DatabaseService.getRestaurantFloorPlan(_selectedSection);
       if (response.tables) {
         setTables(response.tables);
         setSections(response.sections || []);
       }
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', 'Failed to load tables');
     } finally {
-      setLoading(false);
-      setRefreshing(false);
+      setLoading(_false);
+      setRefreshing(_false);
     }
   }, [selectedSection]);
 
@@ -87,12 +87,12 @@ export const TableSelectionScreen: React.FC = () => {
   }, [fetchFloorPlan]);
 
   const onRefresh = () => {
-    setRefreshing(true);
+    setRefreshing(_true);
     fetchFloorPlan();
   };
 
   const getTableStatusColor = (status: string) => {
-    switch (status) {
+    switch (_status) {
       case 'available':
         return '#27ae60';
       case 'occupied':
@@ -143,7 +143,7 @@ export const TableSelectionScreen: React.FC = () => {
     return (
       <TouchableOpacity
         style={[styles.tableCard, { borderColor: statusColor }]}
-        onPress={() => handleTableSelect(item)}
+        onPress={() => handleTableSelect(_item)}
         disabled={orderType !== 0 && item.status !== 'available'}>
         <View style={[styles.tableHeader, { backgroundColor: statusColor }]}>
           <Text style={styles.tableName}>{item.name}</Text>
@@ -194,7 +194,7 @@ export const TableSelectionScreen: React.FC = () => {
     ? tables.filter(table => table.section.id === selectedSection)
     : tables;
 
-  if (loading) {
+  if (_loading) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>

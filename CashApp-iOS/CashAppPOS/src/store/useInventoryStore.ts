@@ -16,7 +16,7 @@ interface InventoryStore extends InventoryState {
   setError: (error: string | null) => void;
   setLowStockThreshold: (threshold: number) => void;
 
-  // Async actions (thunks)
+  // Async actions (_thunks)
   loadInitialInventory: () => Promise<void>;
 
   // Selectors / Computed values might be added here or in components using the store
@@ -26,7 +26,7 @@ interface InventoryStore extends InventoryState {
 
 const useInventoryStore = create<InventoryStore>()(
   persist(
-    (set, get) => ({
+    (_set, get) => ({
       // Initial state
       inventoryItems: {},
       inventoryLedger: [],
@@ -70,7 +70,7 @@ const useInventoryStore = create<InventoryStore>()(
       setLedgerEntries: entries =>
         set({
           inventoryLedger: entries.sort(
-            (a, b) => new Date(b.ts).getTime() - new Date(a.ts).getTime(),
+            (_a, b) => new Date(b.ts).getTime() - new Date(a.ts).getTime(),
           ), // Sort newest first
         }),
 
@@ -78,7 +78,7 @@ const useInventoryStore = create<InventoryStore>()(
       setError: error => set({ inventoryError: error, isLoadingInventory: false }),
       setLowStockThreshold: threshold => set({ lowStockThreshold: threshold }),
 
-      // --- Asynchronous Actions (Thunks) ---
+      // --- Asynchronous Actions (_Thunks) ---
       loadInitialInventory: async () => {
         // This is a placeholder for where you'd call your ApiService
         // For now, it just sets loading state.
@@ -87,12 +87,12 @@ const useInventoryStore = create<InventoryStore>()(
         // try {
         //   const items = await fetchAllInventoryItems(); // From ApiService
         //   const ledger = await fetchInventoryLedger(); // From ApiService
-        //   get().setInventoryItems(items);
-        //   get().setLedgerEntries(ledger);
-        // } catch (e) {
+        //   get().setInventoryItems(_items);
+        //   get().setLedgerEntries(_ledger);
+        // } catch (_e) {
         //   const errorMsg = e instanceof Error ? e.message : "Failed to load inventory data";
-        //   get().setError(errorMsg);
-        //   
+        //   get().setError(_errorMsg);
+        //
         // } finally {
         //  set({ isLoadingInventory: false });
         // }
@@ -100,7 +100,7 @@ const useInventoryStore = create<InventoryStore>()(
         // Simulate API call
         setTimeout(() => {
           // const mockItems = [{ sku: 'FLOUR_001', name: 'Plain Flour', qty_g: 5000, par_level_g:10000, unit:'g', last_updated: new Date().toISOString() }];
-          // get().setInventoryItems(mockItems);
+          // get().setInventoryItems(_mockItems);
           set({ isLoadingInventory: false });
         }, 1000);
       },
@@ -108,7 +108,7 @@ const useInventoryStore = create<InventoryStore>()(
       // --- Selectors / Computed Values ---
       getLowStockItems: () => {
         const { inventoryItems, lowStockThreshold } = get();
-        return Object.values(inventoryItems).filter(
+        return Object.values(_inventoryItems).filter(
           item =>
             item.par_level_g &&
             item.par_level_g > 0 &&
@@ -118,7 +118,7 @@ const useInventoryStore = create<InventoryStore>()(
       },
       getOutOfStockItems: () => {
         const { inventoryItems } = get();
-        return Object.values(inventoryItems).filter(item => item.qty_g <= 0);
+        return Object.values(_inventoryItems).filter(item => item.qty_g <= 0);
       },
     }),
     {

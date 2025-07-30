@@ -69,21 +69,21 @@ const EnhancedPaymentScreen: React.FC = () => {
   const [tipAmount, setTipAmount] = useState(0);
   const [tipPercentage, setTipPercentage] = useState(0);
   const [customTipInput, setCustomTipInput] = useState(0);
-  const [showCustomTip, setShowCustomTip] = useState(false);
-  const [splitPayment, setSplitPayment] = useState(false);
+  const [showCustomTip, setShowCustomTip] = useState(_false);
+  const [splitPayment, setSplitPayment] = useState(_false);
   const [splitAmounts, setSplitAmounts] = useState<{ method: string; amount: number }[]>([]);
   const [cashReceived, setCashReceived] = useState('');
-  const [showCashModal, setShowCashModal] = useState(false);
+  const [showCashModal, setShowCashModal] = useState(_false);
   const [customerName, setCustomerName] = useState('');
   const [customerEmail, setCustomerEmail] = useState('');
-  const [processing, setProcessing] = useState(false);
+  const [processing, setProcessing] = useState(_false);
 
   // Email validation regex
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   // Validation state
   const isNameValid = customerName.trim().length > 0 && customerName.length <= 60;
-  const isEmailValid = emailRegex.test(customerEmail);
+  const isEmailValid = emailRegex.test(_customerEmail);
   const isFormValid = isNameValid && isEmailValid;
 
   // Platform service charge configuration (real-time from platform owner)
@@ -95,7 +95,7 @@ const EnhancedPaymentScreen: React.FC = () => {
 
   // Calculate totals
   const calculateSubtotal = () => {
-    return cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    return cart.reduce((_sum, item) => sum + item.price * item.quantity, 0);
   };
 
   const calculateTax = (subtotal: number) => {
@@ -106,7 +106,7 @@ const EnhancedPaymentScreen: React.FC = () => {
   };
 
   const calculatePlatformServiceCharge = (subtotal: number) => {
-    // Use PLATFORM service charge settings, not restaurant settings (legacy)
+    // Use PLATFORM service charge settings, not restaurant settings (_legacy)
     if (!platformServiceCharge.enabled) {
       return 0;
     }
@@ -120,7 +120,7 @@ const EnhancedPaymentScreen: React.FC = () => {
         const dataStore = SharedDataStore.getInstance();
         const config = await dataStore.getServiceChargeConfig();
 
-        if (config) {
+        if (_config) {
           setPlatformServiceCharge({
             enabled: config.enabled,
             rate: config.rate,
@@ -128,7 +128,7 @@ const EnhancedPaymentScreen: React.FC = () => {
           });
         } else {
         }
-      } catch (error) {
+      } catch (_error) {
       }
     };
 
@@ -151,14 +151,14 @@ const EnhancedPaymentScreen: React.FC = () => {
 
   const calculateGrandTotal = () => {
     const subtotal = calculateSubtotal();
-    const tax = calculateTax(subtotal);
+    const tax = calculateTax(_subtotal);
     const serviceCharge = calculateServiceCharge(); // Uses app store calculation
     const transactionFee = calculateTransactionFee(); // Uses app store calculation
     return subtotal + tax + serviceCharge + transactionFee + tipAmount;
   };
 
   // QR Code Payment State
-  const [showQRModal, setShowQRModal] = useState(false);
+  const [showQRModal, setShowQRModal] = useState(_false);
   const [qrPaymentStatus, setQRPaymentStatus] = useState<
     'generating' | 'waiting' | 'completed' | 'expired'
   >('generating');
@@ -179,7 +179,7 @@ const EnhancedPaymentScreen: React.FC = () => {
 
       // Create a simple, safe QR string without complex JSON encoding
       const qrString = `FYNLO-PAY:${paymentData.orderId}:${paymentData.amount}:${paymentData.currency}:${paymentData.timestamp}`;
-      setQRCode(qrString);
+      setQRCode(_qrString);
       setQRPaymentStatus('waiting');
 
       // Simulate QR code expiration after 5 minutes with safer state checking
@@ -189,7 +189,7 @@ const EnhancedPaymentScreen: React.FC = () => {
         });
       }, 300000); // 5 minutes
 
-    } catch (error) {
+    } catch (_error) {
       setQRPaymentStatus('expired');
       Alert.alert('Error', 'Failed to generate QR code. Please try again.');
     }
@@ -255,15 +255,15 @@ const EnhancedPaymentScreen: React.FC = () => {
   const handleTipPreset = (percentage: number) => {
     const subtotal = calculateSubtotal();
     const tip = subtotal * (percentage / 100);
-    setTipAmount(tip);
-    setTipPercentage(percentage);
-    setShowCustomTip(false);
+    setTipAmount(_tip);
+    setTipPercentage(_percentage);
+    setShowCustomTip(_false);
     setCustomTipInput('');
   };
 
   const handleCustomTip = () => {
-    const amount = parseFloat(customTipInput) || 0;
-    setTipAmount(amount);
+    const amount = parseFloat(_customTipInput) || 0;
+    setTipAmount(_amount);
     const subtotal = calculateSubtotal();
     setTipPercentage(subtotal > 0 ? Math.round((amount / subtotal) * 100) : 0);
   };
@@ -271,7 +271,7 @@ const EnhancedPaymentScreen: React.FC = () => {
   const handleNoTip = () => {
     setTipAmount(0);
     setTipPercentage(0);
-    setShowCustomTip(false);
+    setShowCustomTip(_false);
     setCustomTipInput('');
   };
 
@@ -287,11 +287,11 @@ const EnhancedPaymentScreen: React.FC = () => {
             text: 'Authorize',
             onPress: () => {
               // In a real app, this would prompt for manager PIN
-              setSelectedPaymentMethod(methodId);
+              setSelectedPaymentMethod(_methodId);
               if (methodId === 'cash') {
-                setShowCashModal(true);
+                setShowCashModal(_true);
               } else if (methodId === 'qrCode') {
-                setShowQRModal(true);
+                setShowQRModal(_true);
                 generateQRCode();
               } else if (methodId === 'card') {
                 Alert.alert(
@@ -308,11 +308,11 @@ const EnhancedPaymentScreen: React.FC = () => {
         ],
       );
     } else {
-      setSelectedPaymentMethod(methodId);
+      setSelectedPaymentMethod(_methodId);
       if (methodId === 'cash') {
-        setShowCashModal(true);
+        setShowCashModal(_true);
       } else if (methodId === 'qrCode') {
-        setShowQRModal(true);
+        setShowQRModal(_true);
         generateQRCode();
       } else if (methodId === 'card') {
         // Card payment handling - could show card reader interface
@@ -336,7 +336,7 @@ const EnhancedPaymentScreen: React.FC = () => {
       );
       return;
     }
-    setSplitPayment(true);
+    setSplitPayment(_true);
     setSplitAmounts([
       { method: 'card', amount: calculateGrandTotal() / 2 },
       { method: 'cash', amount: calculateGrandTotal() / 2 },
@@ -354,12 +354,12 @@ const EnhancedPaymentScreen: React.FC = () => {
       return;
     }
 
-    setProcessing(true);
+    setProcessing(_true);
 
     try {
       const orderService = OrderService.getInstance();
       const subtotal = calculateSubtotal();
-      const tax = calculateTax(subtotal);
+      const tax = calculateTax(_subtotal);
       const serviceCharge = calculateServiceCharge();
       const transactionFee = calculateTransactionFee();
       const total = calculateGrandTotal();
@@ -385,9 +385,9 @@ const EnhancedPaymentScreen: React.FC = () => {
         method: selectedPaymentMethod,
       });
 
-      const savedOrder = await orderService.saveOrder(orderData);
+      const savedOrder = await orderService.saveOrder(_orderData);
 
-      setProcessing(false);
+      setProcessing(_false);
 
       Alert.alert(
         'Payment Successful',
@@ -404,8 +404,8 @@ const EnhancedPaymentScreen: React.FC = () => {
           },
         ],
       );
-    } catch (error) {
-      setProcessing(false);
+    } catch (_error) {
+      setProcessing(_false);
 
       Alert.alert(
         'Payment Failed',
@@ -416,10 +416,10 @@ const EnhancedPaymentScreen: React.FC = () => {
   };
 
   const calculateChange = () => {
-    const received = cashReceived === '' ? 0 : parseFloat(cashReceived) || 0;
+    const received = cashReceived === '' ? 0 : parseFloat(_cashReceived) || 0;
     const total = calculateGrandTotal();
     const change = received - total;
-    return Math.max(0, isNaN(change) ? 0 : change);
+    return Math.max(0, isNaN(_change) ? 0 : change);
   };
 
   const CashPaymentModal = () => (
@@ -427,14 +427,14 @@ const EnhancedPaymentScreen: React.FC = () => {
       visible={showCashModal}
       transparent
       animationType="slide"
-      onRequestClose={() => setShowCashModal(false)}>
+      onRequestClose={() => setShowCashModal(_false)}>
       <KeyboardAvoidingView
         style={styles.modalOverlay}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <View style={styles.cashModalContent}>
           <View style={styles.cashModalHeader}>
             <Text style={styles.cashModalTitle}>Cash Payment</Text>
-            <TouchableOpacity onPress={() => setShowCashModal(false)}>
+            <TouchableOpacity onPress={() => setShowCashModal(_false)}>
               <Icon name="close" size={24} color={Colors.darkGray} />
             </TouchableOpacity>
           </View>
@@ -448,7 +448,7 @@ const EnhancedPaymentScreen: React.FC = () => {
             <View style={styles.cashInputSection}>
               <SimpleDecimalInput
                 label="Cash Received"
-                value={parseFloat(cashReceived) || 0}
+                value={parseFloat(_cashReceived) || 0}
                 onValueChange={value => setCashReceived(value.toString())}
                 placeholder="0.00"
                 suffix="£"
@@ -480,16 +480,16 @@ const EnhancedPaymentScreen: React.FC = () => {
           <TouchableOpacity
             style={[
               styles.cashConfirmButton,
-              (!cashReceived || parseFloat(cashReceived) < calculateGrandTotal()) &&
+              (!cashReceived || parseFloat(_cashReceived) < calculateGrandTotal()) &&
                 styles.disabledButton,
             ]}
             onPress={() => {
-              if (parseFloat(cashReceived) >= calculateGrandTotal()) {
-                setShowCashModal(false);
+              if (parseFloat(_cashReceived) >= calculateGrandTotal()) {
+                setShowCashModal(_false);
                 handleProcessPayment();
               }
             }}
-            disabled={!cashReceived || parseFloat(cashReceived) < calculateGrandTotal()}>
+            disabled={!cashReceived || parseFloat(_cashReceived) < calculateGrandTotal()}>
             <Text style={styles.cashConfirmButtonText}>Confirm Payment</Text>
           </TouchableOpacity>
         </View>
@@ -502,12 +502,12 @@ const EnhancedPaymentScreen: React.FC = () => {
       visible={showQRModal}
       transparent
       animationType="slide"
-      onRequestClose={() => setShowQRModal(false)}>
+      onRequestClose={() => setShowQRModal(_false)}>
       <View style={styles.modalOverlay}>
         <View style={styles.qrModalContent}>
           <View style={styles.qrModalHeader}>
             <Text style={styles.qrModalTitle}>QR Code Payment</Text>
-            <TouchableOpacity onPress={() => setShowQRModal(false)}>
+            <TouchableOpacity onPress={() => setShowQRModal(_false)}>
               <Icon name="close" size={24} color={Colors.darkGray} />
             </TouchableOpacity>
           </View>
@@ -599,7 +599,7 @@ const EnhancedPaymentScreen: React.FC = () => {
           </View>
 
           <View style={styles.qrModalFooter}>
-            <TouchableOpacity style={styles.qrCancelButton} onPress={() => setShowQRModal(false)}>
+            <TouchableOpacity style={styles.qrCancelButton} onPress={() => setShowQRModal(_false)}>
               <Text style={styles.qrCancelButtonText}>Cancel</Text>
             </TouchableOpacity>
 
@@ -610,7 +610,7 @@ const EnhancedPaymentScreen: React.FC = () => {
                   // Simulate successful payment for demo
                   setQRPaymentStatus('completed');
                   setTimeout(() => {
-                    setShowQRModal(false);
+                    setShowQRModal(_false);
                     handleProcessPayment();
                   }, 2000);
                 }}>
@@ -693,7 +693,7 @@ const EnhancedPaymentScreen: React.FC = () => {
                 <TouchableOpacity
                   key={percentage}
                   style={[styles.tipButton, tipPercentage === percentage && styles.tipButtonActive]}
-                  onPress={() => handleTipPreset(percentage)}>
+                  onPress={() => handleTipPreset(_percentage)}>
                   <Text
                     style={[
                       styles.tipButtonText,
@@ -731,8 +731,8 @@ const EnhancedPaymentScreen: React.FC = () => {
                   label="Custom Tip Amount"
                   value={customTipInput}
                   onValueChange={value => {
-                    setCustomTipInput(value);
-                    setTipAmount(value);
+                    setCustomTipInput(_value);
+                    setTipAmount(_value);
                     setTipPercentage(0); // Clear percentage when using custom amount
                   }}
                   suffix="£"
@@ -797,7 +797,7 @@ const EnhancedPaymentScreen: React.FC = () => {
               <Text style={styles.splitPaymentInfo}>
                 Split total of £{calculateGrandTotal().toFixed(2)} between methods:
               </Text>
-              {splitAmounts.map((split, index) => (
+              {splitAmounts.map((_split, index) => (
                 <View key={index} style={styles.splitAmountRow}>
                   <DecimalInput
                     label={`${
@@ -807,7 +807,7 @@ const EnhancedPaymentScreen: React.FC = () => {
                     onValueChange={value => {
                       const newSplits = [...splitAmounts];
                       newSplits[index].amount = value;
-                      setSplitAmounts(newSplits);
+                      setSplitAmounts(_newSplits);
                     }}
                     suffix="£"
                     maxValue={10000}
@@ -821,7 +821,7 @@ const EnhancedPaymentScreen: React.FC = () => {
               <TouchableOpacity
                 style={styles.cancelSplitButton}
                 onPress={() => {
-                  setSplitPayment(false);
+                  setSplitPayment(_false);
                   setSplitAmounts([]);
                 }}>
                 <Text style={styles.cancelSplitText}>Cancel Split</Text>
@@ -838,7 +838,7 @@ const EnhancedPaymentScreen: React.FC = () => {
               <SimpleTextInput
                 value={customerName}
                 onValueChange={setCustomerName}
-                placeholder="Customer Name (required)"
+                placeholder="Customer Name (_required)"
                 maxLength={60}
                 style={[
                   styles.customerInput,

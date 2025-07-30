@@ -154,7 +154,7 @@ export const SubscriptionStatusCard: React.FC = () => {
           <Text style={[cardStyles.featuresTitle, { color: theme.colors.text }]}>
             Included Features:
           </Text>
-          {plan.features.map((feature, index) => (
+          {plan.features.map((_feature, index) => (
             <View key={index} style={cardStyles.featureRow}>
               <Icon name="checkmark-circle" size={16} color={plan.color} />
               <Text style={[cardStyles.featureText, { color: theme.colors.textSecondary }]}>

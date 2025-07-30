@@ -52,16 +52,16 @@ const PaymentScreen: React.FC = () => {
   const sumUpService = SumUpNativeService.getInstance();
 
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('');
-  const [showQRModal, setShowQRModal] = useState(false);
-  const [processing, setProcessing] = useState(false);
-  const [paymentResult, setPaymentResult] = useState<PaymentResult | null>(null);
+  const [showQRModal, setShowQRModal] = useState(_false);
+  const [processing, setProcessing] = useState(_false);
+  const [paymentResult, setPaymentResult] = useState<PaymentResult | null>(_null);
   const [optimalProvider, setOptimalProvider] = useState<string>('');
-  const [showSumUpPayment, setShowSumUpPayment] = useState(false);
-  const [currentPaymentRequest, setCurrentPaymentRequest] = useState<PaymentRequest | null>(null);
+  const [showSumUpPayment, setShowSumUpPayment] = useState(_false);
+  const [currentPaymentRequest, setCurrentPaymentRequest] = useState<PaymentRequest | null>(_null);
 
   // Calculate totals
   const calculateSubtotal = () => {
-    return cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    return cart.reduce((_sum, item) => sum + item.price * item.quantity, 0);
   };
 
   const calculateTax = (subtotal: number) => {
@@ -80,8 +80,8 @@ const PaymentScreen: React.FC = () => {
 
   const calculateGrandTotal = () => {
     const subtotal = calculateSubtotal();
-    const tax = calculateTax(subtotal);
-    const service = calculateServiceCharge(subtotal);
+    const tax = calculateTax(_subtotal);
+    const service = calculateServiceCharge(_subtotal);
     return subtotal + tax + service;
   };
 
@@ -164,7 +164,7 @@ const PaymentScreen: React.FC = () => {
     // Auto-select optimal payment method (prioritize Tap to Pay for best user experience)
     if (enabledPaymentMethods.length > 0) {
       const tapToPayMethod = enabledPaymentMethods.find(m => m.id === 'tapToPay');
-      if (tapToPayMethod) {
+      if (_tapToPayMethod) {
         setSelectedPaymentMethod('tapToPay');
         setOptimalProvider('tapToPay');
       } else {
@@ -194,15 +194,14 @@ const PaymentScreen: React.FC = () => {
             apiKey: 'your-api-key', // Would come from auth
           },
         };
-        await PaymentService.initialize(defaultConfig);
+        await PaymentService.initialize(_defaultConfig);
       }
 
       // Get optimal provider for current amount
       const total = calculateGrandTotal();
-      const provider = await PaymentService.getOptimalProvider(total);
-      setOptimalProvider(provider);
-    } catch (error) {
-    }
+      const provider = await PaymentService.getOptimalProvider(_total);
+      setOptimalProvider(_provider);
+    } catch (_error) {}
   };
 
   const handlePaymentMethodSelect = (methodId: string) => {
@@ -216,22 +215,22 @@ const PaymentScreen: React.FC = () => {
           {
             text: 'Authorize',
             onPress: () => {
-              setSelectedPaymentMethod(methodId);
-              processPaymentMethod(methodId);
+              setSelectedPaymentMethod(_methodId);
+              processPaymentMethod(_methodId);
             },
           },
         ],
       );
     } else {
-      setSelectedPaymentMethod(methodId);
-      processPaymentMethod(methodId);
+      setSelectedPaymentMethod(_methodId);
+      processPaymentMethod(_methodId);
     }
   };
 
   const processPaymentMethod = (methodId: string) => {
-    switch (methodId) {
+    switch (_methodId) {
       case 'qrCode':
-        setShowQRModal(true);
+        setShowQRModal(_true);
         break;
       case 'cash':
         processCashPayment();
@@ -240,11 +239,11 @@ const PaymentScreen: React.FC = () => {
       case 'applePaySumUp':
       case 'cardEntry':
         // All SumUp payment methods
-        processSumUpPaymentMethod(methodId);
+        processSumUpPaymentMethod(_methodId);
         break;
       // Backup providers (hidden from UI)
       case 'square':
-        processCardPayment(methodId);
+        processCardPayment(_methodId);
         break;
       default:
         Alert.alert('Payment Method', `${methodId} payment not implemented yet`);
@@ -268,7 +267,7 @@ const PaymentScreen: React.FC = () => {
               return;
             }
 
-            handleCashPayment(received);
+            handleCashPayment(_received);
           },
         },
       ],
@@ -277,7 +276,7 @@ const PaymentScreen: React.FC = () => {
   };
 
   const handleCashPayment = async (receivedAmount: number) => {
-    setProcessing(true);
+    setProcessing(_true);
 
     try {
       const request: PaymentRequest = {
@@ -287,24 +286,24 @@ const PaymentScreen: React.FC = () => {
         description: `Order with ${cart.length} items`,
       };
 
-      const result = await PaymentService.processCashPayment(request, receivedAmount);
+      const result = await PaymentService.processCashPayment(_request, receivedAmount);
 
       if (result.success) {
-        setPaymentResult(result);
-        showPaymentSuccess(result);
+        setPaymentResult(_result);
+        showPaymentSuccess(_result);
       } else {
         Alert.alert('Payment Failed', result.error || 'Cash payment failed');
       }
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Payment Error', 'Failed to process cash payment');
     } finally {
-      setProcessing(false);
+      setProcessing(_false);
     }
   };
 
   // New SumUp Payment Method Handler
   const processSumUpPaymentMethod = async (methodId: string) => {
-    setProcessing(true);
+    setProcessing(_true);
 
     try {
       const request: PaymentRequest = {
@@ -315,18 +314,17 @@ const PaymentScreen: React.FC = () => {
         metadata: { provider: 'sumup', method: methodId },
       };
 
-      await processSumUpPayment(request, methodId);
-    } catch (error) {
+      await processSumUpPayment(_request, methodId);
+    } catch (_error) {
       Alert.alert('Payment Error', `Failed to process ${methodId} payment`);
     } finally {
-      setProcessing(false);
+      setProcessing(_false);
     }
   };
 
   // SumUp Payment Function - React Hook Based Integration
   const processSumUpPayment = async (request: PaymentRequest, paymentMethod = 'tapToPay') => {
     try {
-
       // Initialize SumUp service (configuration will be fetched from backend)
       const initSuccess = await sumUpService.initialize();
       if (!initSuccess) {
@@ -334,12 +332,11 @@ const PaymentScreen: React.FC = () => {
       }
 
       // Set the current payment request and show the SumUp component
-      setCurrentPaymentRequest(request);
-      setShowSumUpPayment(true);
-
-    } catch (error) {
+      setCurrentPaymentRequest(_request);
+      setShowSumUpPayment(_true);
+    } catch (_error) {
       Alert.alert('Payment Error', 'Failed to initialize SumUp payment');
-      setProcessing(false);
+      setProcessing(_false);
     }
   };
 
@@ -349,11 +346,10 @@ const PaymentScreen: React.FC = () => {
     transactionCode?: string,
     error?: string,
   ) => {
-    setShowSumUpPayment(false);
-    setProcessing(false);
+    setShowSumUpPayment(_false);
+    setProcessing(_false);
 
     if (success && transactionCode && currentPaymentRequest) {
-
       // Calculate SumUp fee (0.69% for high volume)
       const fee = currentPaymentRequest.amount * 0.0069;
 
@@ -367,24 +363,24 @@ const PaymentScreen: React.FC = () => {
         error: undefined,
       };
 
-      setPaymentResult(paymentResult);
-      showPaymentSuccess(paymentResult);
+      setPaymentResult(_paymentResult);
+      showPaymentSuccess(_paymentResult);
     } else {
       Alert.alert('Payment Failed', error || 'Payment was not completed');
     }
 
-    setCurrentPaymentRequest(null);
+    setCurrentPaymentRequest(_null);
   };
 
   // Handle SumUp payment cancellation
   const handleSumUpPaymentCancel = () => {
-    setShowSumUpPayment(false);
-    setProcessing(false);
-    setCurrentPaymentRequest(null);
+    setShowSumUpPayment(_false);
+    setProcessing(_false);
+    setCurrentPaymentRequest(_null);
   };
 
   const processCardPayment = async (provider: string) => {
-    setProcessing(true);
+    setProcessing(_true);
 
     try {
       const request: PaymentRequest = {
@@ -399,29 +395,29 @@ const PaymentScreen: React.FC = () => {
 
       if (provider === 'sumup') {
         // Process SumUp payment with card detection modal
-        await processSumUpPayment(request);
+        await processSumUpPayment(_request);
       } else {
         // Process other payment providers
-        const result = await PaymentService.processPayment(request);
+        const result = await PaymentService.processPayment(_request);
         if (result.success) {
-          setPaymentResult(result);
-          showPaymentSuccess(result);
+          setPaymentResult(_result);
+          showPaymentSuccess(_result);
         } else {
           Alert.alert('Payment Failed', result.error || 'Card payment failed');
         }
       }
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Payment Error', 'Failed to process card payment');
     } finally {
-      setProcessing(false);
+      setProcessing(_false);
     }
   };
 
   const handleQRPaymentComplete = (result: PaymentResult) => {
-    setShowQRModal(false);
-    setPaymentResult(result);
+    setShowQRModal(_false);
+    setPaymentResult(_result);
     if (result.success) {
-      showPaymentSuccess(result);
+      showPaymentSuccess(_result);
     } else {
       Alert.alert('QR Payment Failed', result.error || 'QR payment failed');
     }
@@ -597,7 +593,7 @@ const PaymentScreen: React.FC = () => {
         visible={showQRModal}
         transparent
         animationType="slide"
-        onRequestClose={() => setShowQRModal(false)}>
+        onRequestClose={() => setShowQRModal(_false)}>
         <View style={styles.modalOverlay}>
           <QRCodePayment
             request={{
@@ -607,7 +603,7 @@ const PaymentScreen: React.FC = () => {
               description: `Order with ${cart.length} items`,
             }}
             onPaymentComplete={handleQRPaymentComplete}
-            onCancel={() => setShowQRModal(false)}
+            onCancel={() => setShowQRModal(_false)}
           />
         </View>
       </Modal>

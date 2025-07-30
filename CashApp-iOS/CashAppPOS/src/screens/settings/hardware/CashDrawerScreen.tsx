@@ -63,16 +63,16 @@ const CashDrawerScreen: React.FC = () => {
   ]);
 
   // Cash drawer settings
-  const [autoOpen, setAutoOpen] = useState(true);
-  const [openOnPayment, setOpenOnPayment] = useState(true);
-  const [openOnRefund, setOpenOnRefund] = useState(false);
+  const [autoOpen, setAutoOpen] = useState(_true);
+  const [openOnPayment, setOpenOnPayment] = useState(_true);
+  const [openOnRefund, setOpenOnRefund] = useState(_false);
   const [manualOpenPin, setManualOpenPin] = useState('1234');
-  const [alertOnOpen, setAlertOnOpen] = useState(true);
+  const [alertOnOpen, setAlertOnOpen] = useState(_true);
   const [kickerPulseWidth, setKickerPulseWidth] = useState('50');
   const [autoCloseDelay, setAutoCloseDelay] = useState('30');
 
   const getStatusColor = (status: string) => {
-    switch (status) {
+    switch (_status) {
       case 'connected':
         return Colors.success;
       case 'disconnected':
@@ -85,7 +85,7 @@ const CashDrawerScreen: React.FC = () => {
   };
 
   const getStatusIcon = (status: string) => {
-    switch (status) {
+    switch (_status) {
       case 'connected':
         return 'check-circle';
       case 'disconnected':
@@ -98,7 +98,7 @@ const CashDrawerScreen: React.FC = () => {
   };
 
   const getConnectionIcon = (connection: string) => {
-    switch (connection) {
+    switch (_connection) {
       case 'printer':
         return 'print';
       case 'usb':
@@ -208,7 +208,7 @@ const CashDrawerScreen: React.FC = () => {
             styles.actionButton,
             drawer.status !== 'connected' && styles.actionButtonDisabled,
           ]}
-          onPress={() => handleTestDrawer(drawer)}
+          onPress={() => handleTestDrawer(_drawer)}
           disabled={drawer.status !== 'connected'}>
           <Icon
             name="input"
@@ -372,7 +372,7 @@ const CashDrawerScreen: React.FC = () => {
             </View>
 
             <View style={styles.inputRow}>
-              <Text style={styles.inputLabel}>Kicker Pulse Width (ms)</Text>
+              <Text style={styles.inputLabel}>Kicker Pulse Width (_ms)</Text>
               <TextInput
                 style={styles.textInput}
                 value={kickerPulseWidth}
@@ -384,7 +384,7 @@ const CashDrawerScreen: React.FC = () => {
             </View>
 
             <View style={styles.inputRow}>
-              <Text style={styles.inputLabel}>Auto-close Delay (seconds)</Text>
+              <Text style={styles.inputLabel}>Auto-close Delay (_seconds)</Text>
               <TextInput
                 style={styles.textInput}
                 value={autoCloseDelay}

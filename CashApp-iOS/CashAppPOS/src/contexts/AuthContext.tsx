@@ -83,7 +83,7 @@ interface AuthContextType {
   switchRestaurant: (restaurantId: string) => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType | undefined>(_undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   // Get auth state from Zustand store
@@ -95,15 +95,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const checkAuthStore = useAuthStore(state => state.checkAuth);
 
   // Legacy state for compatibility
-  const [user, setUser] = useState<User | null>(null);
-  const [business, setBusiness] = useState<Business | null>(null);
-  const [platform, setPlatform] = useState<Platform | null>(null);
+  const [user, setUser] = useState<User | null>(_null);
+  const [business, setBusiness] = useState<Business | null>(_null);
+  const [platform, setPlatform] = useState<Platform | null>(_null);
   const [managedRestaurants, setManagedRestaurants] = useState<Business[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(_true);
 
   // Sync auth store user with legacy user format
   useEffect(() => {
-    if (authStoreUser) {
+    if (_authStoreUser) {
       try {
         // Use full_name if available, otherwise use name or default
         const fullName =
@@ -129,11 +129,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           platformId: authStoreUser.is_platform_owner ? authStoreUser.id : undefined,
           managedRestaurants: [],
         };
-        setUser(legacyUser);
+        setUser(_legacyUser);
 
         // Sync with AppStore
         const appStore = useAppStore.getState();
-        appStore.setUser(legacyUser);
+        appStore.setUser(_legacyUser);
 
         // Set business if available
         if (authStoreUser.restaurant_id && authStoreUser.restaurant_name) {
@@ -166,19 +166,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             isActive: true,
           });
         }
-      } catch (error) {
+      } catch (_error) {
         // Reset to safe state on error
-        setUser(null);
-        setBusiness(null);
-        setPlatform(null);
+        setUser(_null);
+        setBusiness(_null);
+        setPlatform(_null);
       }
     } else {
-      setUser(null);
-      setBusiness(null);
-      setPlatform(null);
+      setUser(_null);
+      setBusiness(_null);
+      setPlatform(_null);
     }
 
-    setIsLoading(authLoading);
+    setIsLoading(_authLoading);
   }, [authStoreUser, authLoading]);
 
   useEffect(() => {
@@ -188,14 +188,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const signIn = async (email: string, password: string, rememberMe = false): Promise<boolean> => {
     try {
-      await signInStore(email, password);
+      await signInStore(_email, password);
 
-      if (rememberMe) {
+      if (_rememberMe) {
         await AsyncStorage.setItem('@auth_remember_me', 'true');
       }
 
       return true;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   };
@@ -210,7 +210,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const authStore = useAuthStore.getState();
       await authStore.signUp(userData.email || '', password, businessData.name);
       return true;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   };
@@ -218,35 +218,34 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const signOut = async (): Promise<void> => {
     try {
       await signOutStore();
-      setUser(null);
-      setBusiness(null);
-      setPlatform(null);
+      setUser(_null);
+      setBusiness(_null);
+      setPlatform(_null);
       setManagedRestaurants([]);
 
       // Clear AppStore user
       const appStore = useAppStore.getState();
       appStore.logout();
-    } catch (error) {
-    }
+    } catch (_error) {}
   };
 
   const updateUser = async (userData: Partial<User>): Promise<void> => {
-    if (user) {
+    if (_user) {
       const updatedUser = { ...user, ...userData };
-      setUser(updatedUser);
-      await AsyncStorage.setItem('@auth_user', JSON.stringify(updatedUser));
+      setUser(_updatedUser);
+      await AsyncStorage.setItem('@auth_user', JSON.stringify(_updatedUser));
 
       // Sync with AppStore
       const appStore = useAppStore.getState();
-      appStore.setUser(updatedUser);
+      appStore.setUser(_updatedUser);
     }
   };
 
   const updateBusiness = async (businessData: Partial<Business>): Promise<void> => {
-    if (business) {
+    if (_business) {
       const updatedBusiness = { ...business, ...businessData };
-      setBusiness(updatedBusiness);
-      await AsyncStorage.setItem('@auth_business', JSON.stringify(updatedBusiness));
+      setBusiness(_updatedBusiness);
+      await AsyncStorage.setItem('@auth_business', JSON.stringify(_updatedBusiness));
     }
   };
 
@@ -270,9 +269,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const switchRestaurant = async (restaurantId: string): Promise<void> => {
     const restaurant = managedRestaurants.find(r => r.id === restaurantId);
-    if (restaurant) {
-      setBusiness(restaurant);
-      await AsyncStorage.setItem('@auth_business', JSON.stringify(restaurant));
+    if (_restaurant) {
+      setBusiness(_restaurant);
+      await AsyncStorage.setItem('@auth_business', JSON.stringify(_restaurant));
     }
   };
 
@@ -300,7 +299,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 };
 
 export const useAuth = () => {
-  const context = useContext(AuthContext);
+  const context = useContext(_AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }

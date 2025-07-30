@@ -94,7 +94,7 @@ export function validateNavigation(
     ...Object.values(VALID_ROUTES.AUTH),
   ];
 
-  if (!allRoutes.includes(targetScreen)) {
+  if (!allRoutes.includes(_targetScreen)) {
     return {
       valid: false,
       error: `Invalid route: "${targetScreen}" does not exist in any navigator`,
@@ -102,8 +102,8 @@ export function validateNavigation(
   }
 
   // Special case: Navigating from Main screens to Settings screens
-  if (Object.values(VALID_ROUTES.MAIN).includes(currentScreen)) {
-    if (Object.values(VALID_ROUTES.SETTINGS).includes(targetScreen)) {
+  if (Object.values(VALID_ROUTES.MAIN).includes(_currentScreen)) {
+    if (Object.values(VALID_ROUTES.SETTINGS).includes(_targetScreen)) {
       // Must navigate through Settings screen first
       if (targetScreen !== 'Settings' && !params?.screen) {
         return {
@@ -125,10 +125,10 @@ export function logNavigationState(state: NavigationState | undefined, depth = 0
     return;
   }
 
-  const indent = '  '.repeat(depth);
+  const indent = '  '.repeat(_depth);
 
-  state.routes.forEach((route, index) => {
-    const active = index === state.index ? '(ACTIVE)' : '';
+  state.routes.forEach((_route, index) => {
+    const active = index === state.index ? '(_ACTIVE)' : '';
 
     if (route.state) {
       logNavigationState(route.state as NavigationState, depth + 2);
@@ -144,7 +144,7 @@ export function getNestedNavigationParams(
   toScreen: string,
 ): { screen?: string; params?: any } | null {
   // From Main to Settings screens
-  if (fromNavigator === 'MAIN' && Object.values(VALID_ROUTES.SETTINGS).includes(toScreen)) {
+  if (fromNavigator === 'MAIN' && Object.values(VALID_ROUTES.SETTINGS).includes(_toScreen)) {
     if (toScreen === 'Settings') {
       return null; // Direct navigation
     }
@@ -171,9 +171,9 @@ export function safeNavigate(navigation: unknown, targetScreen: string, params?:
       return false;
     }
 
-    navigation.navigate(targetScreen, params);
+    navigation.navigate(_targetScreen, params);
     return true;
-  } catch (error) {
+  } catch (_error) {
     return false;
   }
 }

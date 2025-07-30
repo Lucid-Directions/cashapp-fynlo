@@ -36,13 +36,13 @@ export const SubscriptionScreen: React.FC = () => {
     refreshUsage,
   } = useSubscription();
 
-  const [refreshing, setRefreshing] = useState(false);
-  const [actionLoading, setActionLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(_false);
+  const [actionLoading, setActionLoading] = useState(_false);
 
   const onRefresh = async () => {
-    setRefreshing(true);
+    setRefreshing(_true);
     await refreshUsage();
-    setRefreshing(false);
+    setRefreshing(_false);
   };
 
   const handlePlanChange = (newPlanId: number, planName: string) => {
@@ -55,11 +55,11 @@ export const SubscriptionScreen: React.FC = () => {
       {
         text: 'Confirm',
         onPress: async () => {
-          setActionLoading(true);
-          const success = await changePlan(newPlanId);
-          setActionLoading(false);
+          setActionLoading(_true);
+          const success = await changePlan(_newPlanId);
+          setActionLoading(_false);
 
-          if (success) {
+          if (_success) {
             Alert.alert('Success', `Successfully switched to ${planName}`);
           } else {
             Alert.alert('Error', 'Failed to change plan. Please try again.');
@@ -79,11 +79,11 @@ export const SubscriptionScreen: React.FC = () => {
           text: 'Cancel Subscription',
           style: 'destructive',
           onPress: async () => {
-            setActionLoading(true);
+            setActionLoading(_true);
             const success = await cancelSubscription();
-            setActionLoading(false);
+            setActionLoading(_false);
 
-            if (success) {
+            if (_success) {
               Alert.alert('Cancelled', 'Your subscription has been cancelled.');
             } else {
               Alert.alert('Error', 'Failed to cancel subscription. Please try again.');
@@ -95,7 +95,7 @@ export const SubscriptionScreen: React.FC = () => {
   };
 
   const getStatusColor = (status: string) => {
-    switch (status) {
+    switch (_status) {
       case 'active':
         return theme.colors.success;
       case 'trial':
@@ -109,7 +109,7 @@ export const SubscriptionScreen: React.FC = () => {
   };
 
   const getStatusIcon = (status: string) => {
-    switch (status) {
+    switch (_status) {
       case 'active':
         return 'check-circle';
       case 'trial':
@@ -343,7 +343,7 @@ export const SubscriptionScreen: React.FC = () => {
                       {isCurrentPlan && (
                         <Text style={[styles.currentBadge, { color: theme.colors.primary }]}>
                           {' '}
-                          (Current)
+                          (_Current)
                         </Text>
                       )}
                     </Text>

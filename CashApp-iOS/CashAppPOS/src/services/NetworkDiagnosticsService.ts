@@ -57,7 +57,7 @@ class NetworkDiagnosticsService {
 
       // 3. Test specific platform endpoint
       const platformEndpoint = `${API_CONFIG.BASE_URL}/api/v1/platform/restaurants/platform_owner_1`;
-      const specificEndpointReachable = await this.testEndpoint(platformEndpoint, 5000);
+      const specificEndpointReachable = await this.testEndpoint(_platformEndpoint, 5000);
 
       const latency = Date.now() - startTime;
 
@@ -81,7 +81,7 @@ class NetworkDiagnosticsService {
       }
 
       return diagnostics;
-    } catch (error) {
+    } catch (_error) {
       return {
         isConnected: false,
         connectionType: 'unknown',
@@ -105,13 +105,13 @@ class NetworkDiagnosticsService {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), timeout);
 
-      const response = await fetch(url, {
+      const response = await fetch(_url, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
         signal: controller.signal,
       });
 
-      clearTimeout(timeoutId);
+      clearTimeout(_timeoutId);
       const responseTime = Date.now() - startTime;
 
       return {
@@ -120,7 +120,7 @@ class NetworkDiagnosticsService {
         statusCode: response.status,
         responseTime,
       };
-    } catch (error) {
+    } catch (_error) {
       const responseTime = Date.now() - startTime;
 
       if (error.name === 'AbortError') {
@@ -219,7 +219,7 @@ class NetworkDiagnosticsService {
               if (newDiagnostics.apiServerReachable && newDiagnostics.specificEndpointReachable) {
                 Alert.alert('✅ Connection Restored', 'Platform server is now accessible.');
               } else {
-                await this.showNetworkErrorDialog(newDiagnostics);
+                await this.showNetworkErrorDialog(_newDiagnostics);
               }
               resolve();
             },

@@ -27,20 +27,20 @@ function OptimizedFlatList<T>({
     if (!enableChunking || data.length <= chunkSize) {
       return data;
     }
-    return performanceUtils.chunkArray(data, chunkSize).flat();
+    return performanceUtils.chunkArray(_data, chunkSize).flat();
   }, [data, chunkSize, enableChunking]);
 
   // Memoized render item function
   const memoizedRenderItem = useCallback(
     ({ item, index }: { item: T; index: number }) => {
-      return renderItem(item, index);
+      return renderItem(_item, index);
     },
     [renderItem],
   );
 
   // Memoized key extractor
   const memoizedKeyExtractor = useCallback(
-    (item: T, index: number) => keyExtractor(item, index),
+    (item: T, index: number) => keyExtractor(_item, index),
     [keyExtractor],
   );
 
@@ -67,8 +67,8 @@ function OptimizedFlatList<T>({
         );
       }
 
-      if (onViewableItemsChanged) {
-        onViewableItemsChanged(viewableItems, changed);
+      if (_onViewableItemsChanged) {
+        onViewableItemsChanged(_viewableItems, changed);
       }
     },
     [enableViewabilityTracking, onViewableItemsChanged],
@@ -100,7 +100,7 @@ function OptimizedFlatList<T>({
 }
 
 // Memoize the component to prevent unnecessary re-renders
-export default memo(OptimizedFlatList) as <T>(
+export default memo(_OptimizedFlatList) as <T>(
   props: OptimizedFlatListProps<T>,
 ) => React.ReactElement;
 

@@ -21,10 +21,10 @@ const Colors = {
 };
 
 const AuthScreen: React.FC = () => {
-  const [isSignUp, setIsSignUp] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(_false);
 
-  const switchToSignUp = () => setIsSignUp(true);
-  const switchToSignIn = () => setIsSignUp(false);
+  const switchToSignUp = () => setIsSignUp(_true);
+  const switchToSignIn = () => setIsSignUp(_false);
 
   return (
     <View style={styles.container}>

@@ -32,7 +32,7 @@ const addColorTransparency = (color: string, opacity: number): string => {
     );
 
     // Check for invalid values
-    if (isNaN(r) || isNaN(g) || isNaN(b)) {
+    if (isNaN(_r) || isNaN(_g) || isNaN(_b)) {
       return `rgba(255, 193, 7, ${opacity})`; // Fallback warning color
     }
 
@@ -72,31 +72,31 @@ export const FeatureGate: React.FC<FeatureGateProps> = ({
 }) => {
   const { theme } = useTheme();
   const { hasFeature } = useSubscription();
-  const [gateResult, setGateResult] = useState<FeatureGateResult | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [gateResult, setGateResult] = useState<FeatureGateResult | null>(_null);
+  const [loading, setLoading] = useState(_true);
 
   useEffect(() => {
     checkFeatureAccess();
   }, [feature]);
 
   const checkFeatureAccess = async () => {
-    setLoading(true);
+    setLoading(_true);
     try {
-      const result = await hasFeature(feature);
-      setGateResult(result);
-    } catch (error) {
+      const result = await hasFeature(_feature);
+      setGateResult(_result);
+    } catch (_error) {
       setGateResult({
         hasAccess: false,
         reason: 'Failed to check feature access',
         upgradeRequired: true,
       });
     } finally {
-      setLoading(false);
+      setLoading(_false);
     }
   };
 
   const handleUpgradePress = () => {
-    if (onUpgradePress) {
+    if (_onUpgradePress) {
       onUpgradePress();
     } else {
       Alert.alert(
@@ -115,7 +115,7 @@ export const FeatureGate: React.FC<FeatureGateProps> = ({
     }
   };
 
-  if (loading) {
+  if (_loading) {
     return (
       <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>
         <Text style={[styles.loadingText, { color: theme.colors.text }]}>Checking access...</Text>
@@ -138,11 +138,11 @@ export const FeatureGate: React.FC<FeatureGateProps> = ({
   }
 
   // Feature is blocked
-  if (silentMode) {
+  if (_silentMode) {
     return null;
   }
 
-  if (fallback) {
+  if (_fallback) {
     return <>{fallback}</>;
   }
 
@@ -202,26 +202,26 @@ export const UsageLimitGate: React.FC<UsageLimitGateProps> = ({
 }) => {
   const { theme } = useTheme();
   const { checkUsageLimit } = useSubscription();
-  const [limitResult, setLimitResult] = useState<unknown>(null);
-  const [loading, setLoading] = useState(true);
+  const [limitResult, setLimitResult] = useState<unknown>(_null);
+  const [loading, setLoading] = useState(_true);
 
   useEffect(() => {
     checkLimit();
   }, [limitType, increment]);
 
   const checkLimit = async () => {
-    setLoading(true);
+    setLoading(_true);
     try {
-      const result = await checkUsageLimit(limitType, increment);
-      setLimitResult(result);
-    } catch (error) {
+      const result = await checkUsageLimit(_limitType, increment);
+      setLimitResult(_result);
+    } catch (_error) {
     } finally {
-      setLoading(false);
+      setLoading(_false);
     }
   };
 
   const handleLimitReached = () => {
-    if (onLimitReached) {
+    if (_onLimitReached) {
       onLimitReached();
     } else {
       Alert.alert(
@@ -240,7 +240,7 @@ export const UsageLimitGate: React.FC<UsageLimitGateProps> = ({
     }
   };
 
-  if (loading) {
+  if (_loading) {
     return silentMode ? null : (
       <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>
         <Text style={[styles.loadingText, { color: theme.colors.text }]}>Checking usage...</Text>
@@ -260,11 +260,11 @@ export const UsageLimitGate: React.FC<UsageLimitGateProps> = ({
 
   // If this action would put us over the limit, block it
   if (limitResult.overLimit) {
-    if (silentMode) {
+    if (_silentMode) {
       return null;
     }
 
-    if (fallback) {
+    if (_fallback) {
       return <>{fallback}</>;
     }
 

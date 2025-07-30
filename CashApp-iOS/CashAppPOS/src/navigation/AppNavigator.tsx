@@ -31,7 +31,7 @@ const AppNavigator: React.FC = () => {
     needsOnboarding,
   );
 
-  if (isLoading) {
+  if (_isLoading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={theme.colors.primary} />

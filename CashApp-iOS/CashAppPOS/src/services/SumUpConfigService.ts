@@ -43,7 +43,7 @@ class SumUpConfigService {
     try {
       // Check cache first
       const cached = await this.getCachedConfig();
-      if (cached) {
+      if (_cached) {
         return cached;
       }
 
@@ -75,13 +75,13 @@ class SumUpConfigService {
         const config = result.data.config;
 
         // Cache the configuration
-        await this.cacheConfig(config);
+        await this.cacheConfig(_config);
 
         return config;
       } else {
         throw new Error(result.message || 'Invalid response from server');
       }
-    } catch (error) {
+    } catch (_error) {
       throw error;
     }
   }
@@ -110,7 +110,7 @@ class SumUpConfigService {
 
       const result = await response.json();
       return result.data;
-    } catch (error) {
+    } catch (_error) {
       throw error;
     }
   }
@@ -140,7 +140,7 @@ class SumUpConfigService {
 
       const result = await response.json();
       return result.data?.valid === true;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -152,8 +152,7 @@ class SumUpConfigService {
     try {
       await AsyncStorage.removeItem(this.configCacheKey);
       this.cachedConfig = null;
-    } catch (error) {
-    }
+    } catch (_error) {}
   }
 
   /**
@@ -172,7 +171,7 @@ class SumUpConfigService {
         return null;
       }
 
-      const { config, timestamp } = JSON.parse(cached);
+      const { config, timestamp } = JSON.parse(_cached);
 
       // Check if cache is expired
       if (Date.now() - timestamp > this.configCacheDuration) {
@@ -182,7 +181,7 @@ class SumUpConfigService {
 
       this.cachedConfig = config;
       return config;
-    } catch (error) {
+    } catch (_error) {
       return null;
     }
   }
@@ -197,10 +196,9 @@ class SumUpConfigService {
         timestamp: Date.now(),
       };
 
-      await AsyncStorage.setItem(this.configCacheKey, JSON.stringify(cacheData));
+      await AsyncStorage.setItem(this.configCacheKey, JSON.stringify(_cacheData));
       this.cachedConfig = config;
-    } catch (error) {
-    }
+    } catch (_error) {}
   }
 }
 

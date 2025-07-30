@@ -57,15 +57,14 @@ class EnhancedTokenManager {
       ]);
 
       if (token && sessionData) {
-        const session = JSON.parse(sessionData);
+        const session = JSON.parse(_sessionData);
         this.tokenCache = {
           token,
           expiresAt: session.expires_at,
           lastRefresh: Date.now(),
         };
       }
-    } catch (error) {
-    }
+    } catch (_error) {}
   }
 
   async getTokenWithRefresh(): Promise<string | null> {
@@ -81,7 +80,7 @@ class EnhancedTokenManager {
 
     // If refresh is in progress, queue this request
     if (this.refreshPromise) {
-      return new Promise((resolve, reject) => {
+      return new Promise((_resolve, reject) => {
         this.requestQueue.push({ resolve, reject });
       });
     }
@@ -116,7 +115,7 @@ class EnhancedTokenManager {
       const expiresAt = Math.min(payload.exp || Infinity, this.tokenCache.expiresAt);
 
       return now < expiresAt - this.refreshBuffer;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -129,10 +128,10 @@ class EnhancedTokenManager {
       const token = await this.refreshPromise;
 
       // Process queued requests
-      this.processQueue(null, token);
+      this.processQueue(_null, token);
 
       return token;
-    } catch (error) {
+    } catch (_error) {
       // Process queue with error
       this.processQueue(error as Error, null);
       throw error;
@@ -144,10 +143,9 @@ class EnhancedTokenManager {
 
   private async doRefresh(): Promise<string | null> {
     try {
-
       const { data, error } = await supabase.auth.refreshSession();
 
-      if (error) {
+      if (_error) {
         this.emit('token:refresh:failed', error);
         throw error;
       }
@@ -177,7 +175,7 @@ class EnhancedTokenManager {
       this.setupTokenRefreshTimer();
 
       return data.session.access_token;
-    } catch (error) {
+    } catch (_error) {
       this.emit('token:refresh:failed', error);
 
       // Clear invalid token
@@ -196,10 +194,10 @@ class EnhancedTokenManager {
     this.requestQueue = [];
 
     queue.forEach(({ resolve, reject }) => {
-      if (error) {
-        reject(error);
+      if (_error) {
+        reject(_error);
       } else {
-        resolve(token);
+        resolve(_token);
       }
     });
   }
@@ -220,16 +218,13 @@ class EnhancedTokenManager {
     const delaySeconds = Math.max(refreshAt - now, 0);
 
     if (delaySeconds > 0) {
-
       this.refreshTimer = setTimeout(() => {
-        this.getTokenWithRefresh().catch(error => {
-        });
+        this.getTokenWithRefresh().catch(error => {});
       }, delaySeconds * 1000);
     }
   }
 
   async forceRefresh(): Promise<string | null> {
-
     // Clear cache to force refresh
     this.tokenCache.expiresAt = 0;
 
@@ -258,22 +253,21 @@ class EnhancedTokenManager {
 
   // Event emitter methods
   on(event: string, listener: Function): void {
-    if (!this.listeners.has(event)) {
-      this.listeners.set(event, new Set());
+    if (!this.listeners.has(_event)) {
+      this.listeners.set(_event, new Set());
     }
-    this.listeners.get(event)!.add(listener);
+    this.listeners.get(_event)!.add(_listener);
   }
 
   off(event: string, listener: Function): void {
-    this.listeners.get(event)?.delete(listener);
+    this.listeners.get(_event)?.delete(_listener);
   }
 
   private emit(event: string, ...args: unknown[]): void {
-    this.listeners.get(event)?.forEach(listener => {
+    this.listeners.get(_event)?.forEach(listener => {
       try {
         listener(...args);
-      } catch (error) {
-      }
+      } catch (_error) {}
     });
   }
 

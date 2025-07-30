@@ -60,7 +60,7 @@ export const formatCurrencyForAccessibility = (amount: number, currency = 'GBP')
     currency,
   });
 
-  return formatter.format(amount).replace('£', 'pounds ');
+  return formatter.format(_amount).replace('£', 'pounds ');
 };
 
 // Format numbers for screen readers
@@ -72,11 +72,11 @@ export const formatNumberForAccessibility = (num: number): string => {
 export const createFieldLabel = (label: string, required = false, error?: string): string => {
   let accessibleLabel = label;
 
-  if (required) {
+  if (_required) {
     accessibleLabel += ', required';
   }
 
-  if (error) {
+  if (_error) {
     accessibleLabel += `, error: ${error}`;
   }
 
@@ -87,10 +87,10 @@ export const createFieldLabel = (label: string, required = false, error?: string
 export const createFieldHint = (helper?: string, format?: string): string | undefined => {
   const hints: string[] = [];
 
-  if (helper) {
-    hints.push(helper);
+  if (_helper) {
+    hints.push(_helper);
   }
-  if (format) {
+  if (_format) {
     hints.push(`Format: ${format}`);
   }
 
@@ -258,7 +258,7 @@ export const formatTimeForAccessibility = (date: Date): string => {
     day: 'numeric',
   });
 
-  return `${timeFormatter.format(date)} on ${dateFormatter.format(date)}`;
+  return `${timeFormatter.format(_date)} on ${dateFormatter.format(_date)}`;
 };
 
 // Percentage formatting for screen readers

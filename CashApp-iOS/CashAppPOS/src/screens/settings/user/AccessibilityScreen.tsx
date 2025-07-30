@@ -254,7 +254,7 @@ const AccessibilityScreen: React.FC = () => {
       </View>
       <Switch
         value={settings[setting]}
-        onValueChange={() => toggleSetting(setting)}
+        onValueChange={() => toggleSetting(_setting)}
         trackColor={{ false: Colors.lightGray, true: Colors.primary }}
         thumbColor={Colors.white}
       />
@@ -353,7 +353,7 @@ const AccessibilityScreen: React.FC = () => {
               onValueChange={setTextSize}
               minimumValue={12}
               maximumValue={32}
-              description={getTextSizeDescription(textSize)}
+              description={getTextSizeDescription(_textSize)}
               unit="pt"
             />
 
@@ -390,7 +390,7 @@ const AccessibilityScreen: React.FC = () => {
               onValueChange={setContrastLevel}
               minimumValue={0}
               maximumValue={1}
-              description={getContrastDescription(contrastLevel)}
+              description={getContrastDescription(_contrastLevel)}
             />
 
             <AccessibilityRow
@@ -453,7 +453,7 @@ const AccessibilityScreen: React.FC = () => {
               onValueChange={setAnimationSpeed}
               minimumValue={0.25}
               maximumValue={2}
-              description={getSpeedDescription(animationSpeed)}
+              description={getSpeedDescription(_animationSpeed)}
               unit="x"
             />
 

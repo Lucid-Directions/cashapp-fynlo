@@ -55,7 +55,7 @@ const PaymentProviderSettingsScreen: React.FC = () => {
     qrCode: true,
     cash: true,
   });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(_true);
 
   useEffect(() => {
     loadConfiguration();
@@ -64,20 +64,20 @@ const PaymentProviderSettingsScreen: React.FC = () => {
   const loadConfiguration = async () => {
     try {
       const savedConfig = await PaymentService.loadConfig();
-      if (savedConfig) {
-        setConfig(savedConfig);
+      if (_savedConfig) {
+        setConfig(_savedConfig);
       }
-    } catch (error) {
+    } catch (_error) {
     } finally {
-      setLoading(false);
+      setLoading(_false);
     }
   };
 
   const saveConfiguration = async () => {
     try {
-      await PaymentService.saveConfig(config);
+      await PaymentService.saveConfig(_config);
       Alert.alert('Success', 'Payment provider configuration saved successfully');
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', 'Failed to save configuration');
     }
   };
@@ -85,7 +85,7 @@ const PaymentProviderSettingsScreen: React.FC = () => {
   const testConnection = async (provider: string) => {
     try {
       // Test the connection based on provider
-      switch (provider) {
+      switch (_provider) {
         case 'stripe':
           if (!config.stripe.publishableKey) {
             Alert.alert('Error', 'Please enter Stripe publishable key');
@@ -115,7 +115,7 @@ const PaymentProviderSettingsScreen: React.FC = () => {
         default:
           Alert.alert('Info', `${provider} connection test not implemented`);
       }
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', `Failed to test ${provider} connection`);
     }
   };
@@ -143,7 +143,7 @@ const PaymentProviderSettingsScreen: React.FC = () => {
     </View>
   );
 
-  if (loading) {
+  if (_loading) {
     return (
       <View style={[styles.container, styles.centered]}>
         <Text>Loading configuration...</Text>

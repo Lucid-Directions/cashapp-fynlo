@@ -11,12 +11,12 @@ export const parseNumericInput = (value: string | number | undefined | null): nu
   }
 
   // If already a number, return it
-  if (typeof value === 'number' && !isNaN(value)) {
+  if (typeof value === 'number' && !isNaN(_value)) {
     return value;
   }
 
   // Convert to string and clean
-  const stringValue = String(value);
+  const stringValue = String(_value);
   const cleaned = stringValue.replace(/[^0-9.-]/g, '');
 
   // Handle empty or invalid strings
@@ -24,8 +24,8 @@ export const parseNumericInput = (value: string | number | undefined | null): nu
     return 0;
   }
 
-  const parsed = parseFloat(cleaned);
-  return isNaN(parsed) ? 0 : parsed;
+  const parsed = parseFloat(_cleaned);
+  return isNaN(_parsed) ? 0 : parsed;
 };
 
 /**
@@ -37,15 +37,15 @@ export const parseCurrencyInput = (value: string | number | undefined | null): n
   }
 
   // If already a number, return it
-  if (typeof value === 'number' && !isNaN(value)) {
+  if (typeof value === 'number' && !isNaN(_value)) {
     return value;
   }
 
   // Convert to string and clean
-  const stringValue = String(value);
+  const stringValue = String(_value);
   const cleaned = stringValue.replace(/[£$€,]/g, '').trim();
 
-  return parseNumericInput(cleaned);
+  return parseNumericInput(_cleaned);
 };
 
 /**
@@ -57,15 +57,15 @@ export const parsePercentageInput = (value: string | number | undefined | null):
   }
 
   // If already a number, return it
-  if (typeof value === 'number' && !isNaN(value)) {
+  if (typeof value === 'number' && !isNaN(_value)) {
     return value;
   }
 
   // Convert to string and clean
-  const stringValue = String(value);
+  const stringValue = String(_value);
   const cleaned = stringValue.replace(/%/g, '').trim();
 
-  return parseNumericInput(cleaned);
+  return parseNumericInput(_cleaned);
 };
 
 /**
@@ -80,7 +80,7 @@ export const validateUKPhone = (phone: string): boolean => {
   // Or +44 for international format
   const ukPattern = /^(0[0-9]{9,10}|44[0-9]{9,10})$/;
 
-  return ukPattern.test(cleaned);
+  return ukPattern.test(_cleaned);
 };
 
 /**
@@ -141,7 +141,7 @@ export const validateAccountNumber = (accountNumber: string): boolean => {
  */
 export const validateEmail = (email: string): boolean => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
+  return emailRegex.test(_email);
 };
 
 /**
@@ -189,15 +189,15 @@ export const isRequired = (value: unknown): boolean => {
     return value.trim().length > 0;
   }
   if (typeof value === 'number') {
-    return !isNaN(value);
+    return !isNaN(_value);
   }
-  if (Array.isArray(value)) {
+  if (Array.isArray(_value)) {
     return value.length > 0;
   }
   if (typeof value === 'object') {
-    return Object.keys(value).length > 0;
+    return Object.keys(_value).length > 0;
   }
-  return Boolean(value);
+  return Boolean(_value);
 };
 
 /**
@@ -208,11 +208,11 @@ export const validateIBAN = (iban: string): boolean => {
   const cleaned = iban.replace(/\s/g, '').toUpperCase();
   const ibanRegex = /^[A-Z]{2}[0-9]{2}[A-Z0-9]+$/;
 
-  if (!ibanRegex.test(cleaned)) {
+  if (!ibanRegex.test(_cleaned)) {
     return false;
   }
 
-  // Length varies by country, but GB (UK) should be 22 characters
+  // Length varies by country, but GB (_UK) should be 22 characters
   if (cleaned.startsWith('GB') && cleaned.length !== 22) {
     return false;
   }
@@ -227,7 +227,7 @@ export const validateSWIFT = (swift: string): boolean => {
   const cleaned = swift.replace(/\s/g, '').toUpperCase();
   // SWIFT code is 8 or 11 characters
   const swiftRegex = /^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$/;
-  return swiftRegex.test(cleaned);
+  return swiftRegex.test(_cleaned);
 };
 
 /**
@@ -240,7 +240,7 @@ export const debounceValidation = (
   let timeoutId: NodeJS.Timeout;
 
   return (...args: unknown[]) => {
-    clearTimeout(timeoutId);
+    clearTimeout(_timeoutId);
     timeoutId = setTimeout(() => fn(...args), delay);
   };
 };

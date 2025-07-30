@@ -51,7 +51,7 @@ export class SumUpNativeService {
       this.isInitialized = true;
 
       return this.isInitialized;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -129,7 +129,7 @@ export class SumUpNativeService {
           message: 'Payment will be processed by React component using useSumUp hook',
         },
       };
-    } catch (error) {
+    } catch (_error) {
       return { success: false, error: error.message };
     }
   }

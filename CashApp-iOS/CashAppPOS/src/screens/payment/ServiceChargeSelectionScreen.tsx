@@ -62,9 +62,9 @@ const ServiceChargeSelectionScreen: React.FC = () => {
     addTransactionFee,
   } = useAppStore();
 
-  const [selectedOption, setSelectedOption] = useState<number>(serviceChargePercentage);
-  const [showTransactionFeeToggle, setShowTransactionFeeToggle] = useState(false);
-  const [localAddTransactionFee, setLocalAddTransactionFee] = useState(addTransactionFee);
+  const [selectedOption, setSelectedOption] = useState<number>(_serviceChargePercentage);
+  const [showTransactionFeeToggle, setShowTransactionFeeToggle] = useState(_false);
+  const [localAddTransactionFee, setLocalAddTransactionFee] = useState(_addTransactionFee);
 
   useEffect(() => {
     setShowTransactionFeeToggle(selectedOption === 0);
@@ -85,12 +85,12 @@ const ServiceChargeSelectionScreen: React.FC = () => {
   };
 
   const handleOptionSelect = (percentage: number) => {
-    setSelectedOption(percentage);
+    setSelectedOption(_percentage);
     if (percentage === 0) {
-      setShowTransactionFeeToggle(true);
+      setShowTransactionFeeToggle(_true);
     } else {
-      setShowTransactionFeeToggle(false);
-      setLocalAddTransactionFee(false);
+      setShowTransactionFeeToggle(_false);
+      setLocalAddTransactionFee(_false);
     }
   };
 
@@ -118,8 +118,8 @@ const ServiceChargeSelectionScreen: React.FC = () => {
 
   const proceedToPayment = () => {
     // Update global state
-    setServiceChargePercentage(selectedOption);
-    setAddTransactionFee(localAddTransactionFee);
+    setServiceChargePercentage(_selectedOption);
+    setAddTransactionFee(_localAddTransactionFee);
 
     // Navigate to payment method selection
     // @ts-ignore
@@ -131,7 +131,7 @@ const ServiceChargeSelectionScreen: React.FC = () => {
     showTransactionFeeToggle ? localAddTransactionFee : false,
   );
 
-  const styles = createStyles(theme);
+  const styles = createStyles(_theme);
 
   return (
     <SafeAreaView style={styles.container}>

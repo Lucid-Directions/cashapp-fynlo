@@ -35,11 +35,10 @@ class CustomersService {
       if (!raw) {
         return;
       }
-      const cfg = JSON.parse(raw);
+      const cfg = JSON.parse(_raw);
       this.baseUrl = cfg?.backend?.baseUrl ?? null;
       this.apiKey = cfg?.backend?.apiKey ?? null;
-    } catch (err) {
-    }
+    } catch (_err) {}
   }
 
   async saveCustomer(payload: SaveCustomerPayload): Promise<void> {
@@ -55,10 +54,9 @@ class CustomersService {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${this.apiKey}`,
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(_payload),
       });
-    } catch (err) {
-    }
+    } catch (_err) {}
   }
 
   async search(query: string): Promise<CustomerSuggestion[]> {
@@ -68,7 +66,7 @@ class CustomersService {
         return [];
       }
       const res = await fetch(
-        `${this.baseUrl}/api/v1/customers?query=${encodeURIComponent(query)}`,
+        `${this.baseUrl}/api/v1/customers?query=${encodeURIComponent(_query)}`,
         {
           headers: { Authorization: `Bearer ${this.apiKey}` },
         },
@@ -78,7 +76,7 @@ class CustomersService {
       }
       const json = await res.json();
       return json.items ?? [];
-    } catch (err) {
+    } catch (_err) {
       return [];
     }
   }

@@ -42,7 +42,7 @@ class NetworkUtils {
     let lastError: Error | null = null;
 
     // Add default headers with authentication
-    const authHeaders = await this.createAuthHeaders(headers);
+    const authHeaders = await this.createAuthHeaders(_headers);
 
     for (let attempt = 0; attempt <= retryAttempts; attempt++) {
       try {
@@ -54,14 +54,14 @@ class NetworkUtils {
           controller.abort();
         }, timeout);
 
-        const response = await fetch(url, {
+        const response = await fetch(_url, {
           method,
           headers: authHeaders,
           body,
           signal: controller.signal,
         });
 
-        clearTimeout(timeoutId);
+        clearTimeout(_timeoutId);
 
         if (response.ok) {
           const data = await response.json();
@@ -80,12 +80,12 @@ class NetworkUtils {
             status: response.status,
           };
         }
-      } catch (error) {
+      } catch (_error) {
         lastError = error as Error;
 
         // Don't retry on the last attempt
         if (attempt < retryAttempts) {
-          await this.delay(retryDelay);
+          await this.delay(_retryDelay);
         }
       }
     }
@@ -107,7 +107,7 @@ class NetworkUtils {
         retryAttempts: 1,
       });
       return result.success;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -118,7 +118,7 @@ class NetworkUtils {
   static async getServiceChargeConfig(): Promise<NetworkResponse<unknown>> {
     const endpoint = `${API_CONFIG.FULL_API_URL}${API_CONFIG.PLATFORM_ENDPOINTS.SERVICE_CHARGE}`;
 
-    return this.makeRequest(endpoint, {
+    return this.makeRequest(_endpoint, {
       method: 'GET',
       retryAttempts: 2, // Retry twice for critical config
     });
@@ -128,7 +128,7 @@ class NetworkUtils {
    * Simple delay utility for retries
    */
   private static delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise(resolve => setTimeout(_resolve, ms));
   }
 
   /**
@@ -147,10 +147,10 @@ class NetworkUtils {
       // Get auth token using tokenManager
       const authToken = await tokenManager.getTokenWithRefresh();
 
-      if (authToken) {
+      if (_authToken) {
         headers['Authorization'] = `Bearer ${authToken}`;
       }
-    } catch (error) {
+    } catch (_error) {
     }
 
     return headers;
@@ -170,7 +170,7 @@ class NetworkUtils {
         signal: controller.signal,
       });
 
-      clearTimeout(timeoutId);
+      clearTimeout(_timeoutId);
       return response.ok;
     } catch {
       // Network might be available but backend is down - still return true

@@ -78,7 +78,7 @@ class SumUpCompatibilityService {
       // Note: There's no direct way to check NFC support via React Native
       // This would require native iOS code to check device capabilities
       return true; // Assume compatible for now
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -92,7 +92,7 @@ class SumUpCompatibilityService {
       '\n',
     )}`;
 
-    Alert.alert(title, message, [
+    Alert.alert(_title, message, [
       {
         text: 'Use Alternative Payment',
         style: 'default',

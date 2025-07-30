@@ -57,7 +57,7 @@ class ErrorHandler {
   private readonly STORAGE_KEY = 'app_errors';
 
   constructor(config?: Partial<ErrorHandlerConfig>) {
-    if (config) {
+    if (_config) {
       this.config = { ...this.config, ...config };
     }
     this.loadStoredErrors();
@@ -73,28 +73,28 @@ class ErrorHandler {
     context?: string,
     metadata?: Record<string, any>,
   ): Promise<void> {
-    const errorInfo = this.createErrorInfo(error, type, severity, context, metadata);
+    const errorInfo = this.createErrorInfo(_error, type, severity, context, metadata);
 
     // Log the error
     if (this.config.enableLogging) {
-      this.logError(errorInfo);
+      this.logError(_errorInfo);
     }
 
     // Store error for reporting
-    await this.storeError(errorInfo);
+    await this.storeError(_errorInfo);
 
     // Show user notification if needed
-    if (this.config.enableUserNotification && this.shouldNotifyUser(errorInfo)) {
-      await this.showUserNotification(errorInfo);
+    if (this.config.enableUserNotification && this.shouldNotifyUser(_errorInfo)) {
+      await this.showUserNotification(_errorInfo);
     }
 
     // Send to crash reporting service
     if (this.config.enableCrashReporting) {
-      this.sendToCrashReporting(errorInfo);
+      this.sendToCrashReporting(_errorInfo);
     }
 
     // Handle automatic recovery if possible
-    this.attemptRecovery(errorInfo);
+    this.attemptRecovery(_errorInfo);
   }
 
   /**
@@ -104,19 +104,25 @@ class ErrorHandler {
     const errorInfo = this.createErrorInfo(
       error,
       ErrorType.NETWORK,
-      this.getNetworkErrorSeverity(error),
+      this.getNetworkErrorSeverity(_error),
       context,
       { requestConfig },
     );
 
-    await this.handleError(error, ErrorType.NETWORK, this.getNetworkErrorSeverity(error), context, {
-      requestConfig,
-    });
+    await this.handleError(
+      _error,
+      ErrorType.NETWORK,
+      this.getNetworkErrorSeverity(_error),
+      context,
+      {
+        requestConfig,
+      },
+    );
 
     // Automatic retry for network errors
-    if (requestConfig && this.shouldRetry(errorInfo)) {
+    if (requestConfig && this.shouldRetry(_errorInfo)) {
       setTimeout(() => {
-        this.retryRequest(requestConfig, errorInfo);
+        this.retryRequest(_requestConfig, errorInfo);
       }, this.config.retryDelay);
     }
   }
@@ -131,7 +137,7 @@ class ErrorHandler {
     context?: string,
   ): Promise<void> {
     const error = new Error(`Validation failed for ${field}: ${message}`);
-    await this.handleError(error, ErrorType.VALIDATION, ErrorSeverity.LOW, context, {
+    await this.handleError(_error, ErrorType.VALIDATION, ErrorSeverity.LOW, context, {
       field,
       value,
     });
@@ -142,8 +148,8 @@ class ErrorHandler {
    */
   async handlePaymentError(error: Error, paymentData?: unknown, context?: string): Promise<void> {
     // Payment errors are always high severity
-    await this.handleError(error, ErrorType.PAYMENT, ErrorSeverity.HIGH, context, {
-      paymentData: this.sanitizePaymentData(paymentData),
+    await this.handleError(_error, ErrorType.PAYMENT, ErrorSeverity.HIGH, context, {
+      paymentData: this.sanitizePaymentData(_paymentData),
     });
   }
 
@@ -156,8 +162,8 @@ class ErrorHandler {
     context?: string,
     metadata?: Record<string, any>,
   ): Promise<void> {
-    const error = new Error(message);
-    await this.handleError(error, ErrorType.BUSINESS_LOGIC, ErrorSeverity.MEDIUM, context, {
+    const error = new Error(_message);
+    await this.handleError(_error, ErrorType.BUSINESS_LOGIC, ErrorSeverity.MEDIUM, context, {
       errorCode: code,
       ...metadata,
     });
@@ -169,8 +175,8 @@ class ErrorHandler {
   async getStoredErrors(): Promise<ErrorInfo[]> {
     try {
       const stored = await AsyncStorage.getItem(this.STORAGE_KEY);
-      return stored ? JSON.parse(stored) : [];
-    } catch (error) {
+      return stored ? JSON.parse(_stored) : [];
+    } catch (_error) {
       return [];
     }
   }
@@ -182,8 +188,7 @@ class ErrorHandler {
     try {
       await AsyncStorage.removeItem(this.STORAGE_KEY);
       this.errorQueue = [];
-    } catch (error) {
-    }
+    } catch (_error) {}
   }
 
   /**
@@ -250,7 +255,7 @@ class ErrorHandler {
     const logLevel = this.getLogLevel(errorInfo.severity);
     const logMessage = `[${errorInfo.type.toUpperCase()}] ${errorInfo.message}`;
 
-    switch (logLevel) {
+    switch (_logLevel) {
       case 'error':
         break;
       case 'warn':
@@ -261,7 +266,7 @@ class ErrorHandler {
 
   private async storeError(errorInfo: ErrorInfo): Promise<void> {
     try {
-      this.errorQueue.push(errorInfo);
+      this.errorQueue.push(_errorInfo);
 
       // Limit stored errors
       if (this.errorQueue.length > this.config.maxStoredErrors) {
@@ -269,18 +274,16 @@ class ErrorHandler {
       }
 
       await AsyncStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.errorQueue));
-    } catch (error) {
-    }
+    } catch (_error) {}
   }
 
   private async loadStoredErrors(): Promise<void> {
     try {
       const stored = await AsyncStorage.getItem(this.STORAGE_KEY);
-      if (stored) {
-        this.errorQueue = JSON.parse(stored);
+      if (_stored) {
+        this.errorQueue = JSON.parse(_stored);
       }
-    } catch (error) {
-    }
+    } catch (_error) {}
   }
 
   private shouldNotifyUser(errorInfo: ErrorInfo): boolean {
@@ -298,7 +301,7 @@ class ErrorHandler {
   }
 
   private async showUserNotification(errorInfo: ErrorInfo): Promise<void> {
-    const userMessage = this.getUserFriendlyMessage(errorInfo);
+    const userMessage = this.getUserFriendlyMessage(_errorInfo);
     const title = this.getErrorTitle(errorInfo.type);
 
     if (Platform.OS === 'ios' || Platform.OS === 'android') {
@@ -307,12 +310,12 @@ class ErrorHandler {
         userMessage,
         [
           { text: 'OK', style: 'default' },
-          ...(this.canRetry(errorInfo)
+          ...(this.canRetry(_errorInfo)
             ? [
                 {
                   text: 'Retry',
                   style: 'default',
-                  onPress: () => this.attemptRecovery(errorInfo),
+                  onPress: () => this.attemptRecovery(_errorInfo),
                 },
               ]
             : []),
@@ -342,7 +345,7 @@ class ErrorHandler {
   }
 
   private getErrorTitle(type: ErrorType): string {
-    switch (type) {
+    switch (_type) {
       case ErrorType.NETWORK:
         return 'Connection Error';
       case ErrorType.PAYMENT:
@@ -375,7 +378,7 @@ class ErrorHandler {
   }
 
   private getLogLevel(severity: ErrorSeverity): 'error' | 'warn' | 'log' {
-    switch (severity) {
+    switch (_severity) {
       case ErrorSeverity.CRITICAL:
       case ErrorSeverity.HIGH:
         return 'error';
@@ -413,7 +416,7 @@ class ErrorHandler {
 
   private sendToCrashReporting(errorInfo: ErrorInfo): void {
     // This would integrate with crash reporting services like Crashlytics
-    if (__DEV__) {
+    if (___DEV__) {
     }
   }
 
@@ -449,15 +452,15 @@ export const errorHandler = new ErrorHandler();
 
 // Convenience functions for common error scenarios
 export const handleNetworkError = (error: Error, context?: string) =>
-  errorHandler.handleNetworkError(error, undefined, context);
+  errorHandler.handleNetworkError(_error, undefined, context);
 
 export const handleValidationError = (field: string, message: string, value?: unknown) =>
-  errorHandler.handleValidationError(field, message, value);
+  errorHandler.handleValidationError(_field, message, value);
 
 export const handlePaymentError = (error: Error, paymentData?: unknown) =>
-  errorHandler.handlePaymentError(error, paymentData);
+  errorHandler.handlePaymentError(_error, paymentData);
 
 export const handleBusinessError = (message: string, code?: string, context?: string) =>
-  errorHandler.handleBusinessError(message, code, context);
+  errorHandler.handleBusinessError(_message, code, context);
 
 export default errorHandler;

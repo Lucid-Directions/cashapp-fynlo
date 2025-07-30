@@ -71,7 +71,7 @@ export const validateNavigationStructure = () => {
   const issues: string[] = [];
 
   // Check if all expected routes are defined in the type
-  const routeNames = Object.keys(expectedSettingsRoutes) as Array<keyof SettingsStackParamList>;
+  const routeNames = Object.keys(_expectedSettingsRoutes) as Array<keyof SettingsStackParamList>;
 
   routeNames.forEach(route => {
     // This would be a runtime check in a test environment

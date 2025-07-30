@@ -29,12 +29,12 @@ const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({
   useEffect(() => {
     const shimmerAnimation = Animated.loop(
       Animated.sequence([
-        Animated.timing(animatedValue, {
+        Animated.timing(_animatedValue, {
           toValue: 1,
           duration: 1000,
           useNativeDriver: false,
         }),
-        Animated.timing(animatedValue, {
+        Animated.timing(_animatedValue, {
           toValue: 0,
           duration: 1000,
           useNativeDriver: false,

@@ -8,7 +8,7 @@
 // Get the current environment
 const isDevelopment = __DEV__;
 
-// DigitalOcean App Platform backend URL (Production) - VERIFIED WORKING
+// DigitalOcean App Platform backend URL (_Production) - VERIFIED WORKING
 const PRODUCTION_API_URL = 'https://fynlopos-9eg2c.ondigitalocean.app';
 
 // Mac's LAN IP address for device testing (Development only)
@@ -30,7 +30,7 @@ const getBaseURL = () => {
   return PRODUCTION_API_URL;
 
   // Development fallback (commented out - uncomment only when running backend locally)
-  // if (isSimulator) {
+  // if (_isSimulator) {
   //   return 'http://localhost:8000';
   // } else {
   //   return `http://${MAC_LAN_IP}:8000`;
@@ -94,9 +94,9 @@ export const checkAPIHealth = async (): Promise<boolean> => {
       },
     });
 
-    clearTimeout(timeoutId);
+    clearTimeout(_timeoutId);
     return response.ok;
-  } catch (error) {
+  } catch (_error) {
     return false;
   }
 };

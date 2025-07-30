@@ -18,13 +18,13 @@ apiClient.interceptors.request.use(
     // const token = useAppStore.getState().user?.token; // Adjust based on how token is stored
     // Simulating token for now
     const token = 'fake-jwt-token';
-    if (token) {
+    if (_token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
   error => {
-    return Promise.reject(error);
+    return Promise.reject(_error);
   },
 );
 
@@ -36,7 +36,7 @@ export const fetchInventoryItems = async (skip = 0, limit = 100): Promise<Invent
       `/inventory/items/?skip=${skip}&limit=${limit}`,
     );
     return response.data;
-  } catch (error) {
+  } catch (_error) {
     throw error.response?.data || new Error('Failed to fetch inventory items');
   }
 };
@@ -45,7 +45,7 @@ export const fetchInventoryItem = async (sku: string): Promise<InventoryItem> =>
   try {
     const response = await apiClient.get<InventoryItem>(`/inventory/items/${sku}`);
     return response.data;
-  } catch (error) {
+  } catch (_error) {
     throw error.response?.data || new Error(`Failed to fetch inventory item ${sku}`);
   }
 };
@@ -56,7 +56,7 @@ export const createInventoryItem = async (
   try {
     const response = await apiClient.post<InventoryItem>('/inventory/items/', itemData);
     return response.data;
-  } catch (error) {
+  } catch (_error) {
     throw error.response?.data || new Error('Failed to create inventory item');
   }
 };
@@ -68,7 +68,7 @@ export const updateInventoryItem = async (
   try {
     const response = await apiClient.put<InventoryItem>(`/inventory/items/${sku}`, itemData);
     return response.data;
-  } catch (error) {
+  } catch (_error) {
     throw error.response?.data || new Error(`Failed to update inventory item ${sku}`);
   }
 };
@@ -77,7 +77,7 @@ export const deleteInventoryItem = async (sku: string): Promise<InventoryItem> =
   try {
     const response = await apiClient.delete<InventoryItem>(`/inventory/items/${sku}`);
     return response.data; // Usually returns the deleted item or just a success status
-  } catch (error) {
+  } catch (_error) {
     throw error.response?.data || new Error(`Failed to delete inventory item ${sku}`);
   }
 };
@@ -94,7 +94,7 @@ export const adjustStock = async (
       reason,
     });
     return response.data;
-  } catch (error) {
+  } catch (_error) {
     throw error.response?.data || new Error(`Failed to adjust stock for ${sku}`);
   }
 };
@@ -108,7 +108,7 @@ export const fetchRecipes = async (skip = 0, limit = 100): Promise<RecipeClient[
     // This endpoint returns List[RecipeResponse] which matches RecipeClient structure
     const response = await apiClient.get<RecipeClient[]>(`/recipes/?skip=${skip}&limit=${limit}`);
     return response.data;
-  } catch (error) {
+  } catch (_error) {
     throw error.response?.data || new Error('Failed to fetch recipes');
   }
 };
@@ -117,7 +117,7 @@ export const fetchRecipeForItem = async (itemId: string): Promise<RecipeClient> 
   try {
     const response = await apiClient.get<RecipeClient>(`/recipes/${itemId}`);
     return response.data;
-  } catch (error) {
+  } catch (_error) {
       `Error fetching recipe for item ${itemId}:`,
       error.response?.data || error.message,
     );
@@ -135,7 +135,7 @@ export const createRecipe = async (recipeData: Recipe): Promise<RecipeClient[]> 
     // For now, let's assume the response can be mapped or is directly usable.
     const response = await apiClient.post<RecipeClient[]>(`/recipes/`, recipeData);
     return response.data;
-  } catch (error) {
+  } catch (_error) {
     const detail = error.response?.data?.detail;
     if (typeof detail === 'string' && detail.includes('validation error')) {
       // More specific error
@@ -153,7 +153,7 @@ export const updateRecipe = async (itemId: string, recipeData: Recipe): Promise<
   try {
     const response = await apiClient.post<RecipeClient[]>(`/recipes/`, recipeData); // Same as create
     return response.data;
-  } catch (error) {
+  } catch (_error) {
       `Error updating recipe for item ${itemId}:`,
       error.response?.data || error.message,
     );
@@ -164,7 +164,7 @@ export const updateRecipe = async (itemId: string, recipeData: Recipe): Promise<
 export const deleteRecipe = async (itemId: string): Promise<void> => {
   try {
     await apiClient.delete(`/recipes/${itemId}`);
-  } catch (error) {
+  } catch (_error) {
       `Error deleting recipe for item ${itemId}:`,
       error.response?.data || error.message,
     );
@@ -183,17 +183,17 @@ export const fetchInventoryLedger = async (
 ): Promise<InventoryLedgerEntry[]> => {
   try {
     const params: unknown = { skip, limit };
-    if (startDate) {
+    if (_startDate) {
       params.start_date = startDate;
     }
-    if (endDate) {
+    if (_endDate) {
       params.end_date = endDate;
     }
 
     const url = sku ? `/inventory/ledger/${sku}` : '/inventory/ledger/';
-    const response = await apiClient.get<InventoryLedgerEntry[]>(url, { params });
+    const response = await apiClient.get<InventoryLedgerEntry[]>(_url, { params });
     return response.data;
-  } catch (error) {
+  } catch (_error) {
     throw error.response?.data || new Error('Failed to fetch inventory ledger');
   }
 };
@@ -238,7 +238,7 @@ export const scanReceipt = async (imageBase64: string): Promise<ScannedItemAPIRe
       image_base64: imageBase64,
     });
     return response.data;
-  } catch (error) {
+  } catch (_error) {
     // It's good practice to throw a custom error or the error data from the API
     // This allows the caller to handle specific error messages or types
     if (error.response && error.response.data) {

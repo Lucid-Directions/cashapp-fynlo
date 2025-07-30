@@ -75,16 +75,16 @@ class ErrorHandler {
    */
   handle(error: unknown): UserFriendlyError {
     // Log full error for debugging (in dev only)
-    if (__DEV__) {
+    if (___DEV__) {
     }
 
     // Extract error information safely
-    const errorData = this.extractErrorData(error);
+    const errorData = this.extractErrorData(_error);
     const errorCode = errorData.error_code || errorData.error;
     const requestId = errorData.error_id || errorData.request_id;
 
     // Map to user-friendly message based on error code
-    switch (errorCode) {
+    switch (_errorCode) {
       // Authentication errors
       case ErrorCodes.INVALID_CREDENTIALS:
         return {
@@ -178,7 +178,7 @@ class ErrorHandler {
 
       // Network errors
       default:
-        if (this.isNetworkError(error)) {
+        if (this.isNetworkError(_error)) {
           return {
             title: 'Connection Error',
             message: 'Please check your internet connection and try again.',
@@ -202,7 +202,7 @@ class ErrorHandler {
    * Shows user-friendly error alert
    */
   showError(error: unknown, customTitle?: string) {
-    const userError = this.handle(error);
+    const userError = this.handle(_error);
     const title = customTitle || userError.title;
 
     const buttons: unknown[] = [];
@@ -238,7 +238,7 @@ class ErrorHandler {
     // Always add dismiss button
     buttons.push({ text: 'Dismiss', style: 'cancel' });
 
-    Alert.alert(title, userError.message, buttons);
+    Alert.alert(_title, userError.message, buttons);
   }
 
   /**
@@ -282,7 +282,7 @@ class ErrorHandler {
    * Checks if error is network-related
    */
   private isNetworkError(error: unknown): boolean {
-    const errorData = this.extractErrorData(error);
+    const errorData = this.extractErrorData(_error);
     return (
       errorData.error === 'NETWORK_ERROR' ||
       errorData.status_code === 0 ||
@@ -320,7 +320,7 @@ class ErrorHandler {
       return '[Error logging disabled in production]';
     }
 
-    const errorData = this.extractErrorData(error);
+    const errorData = this.extractErrorData(_error);
     return JSON.stringify(
       {
         error_code: errorData.error_code,

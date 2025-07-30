@@ -39,12 +39,12 @@ const DeveloperSettingsScreen: React.FC = () => {
       setConnectionStatus(dataService.getConnectionStatus());
     }, 5000);
 
-    return () => clearInterval(interval);
+    return () => clearInterval(_interval);
   }, []);
 
   const toggleFlag = async (flag: keyof typeof flags) => {
     const newValue = !flags[flag];
-    await dataService.updateFeatureFlag(flag, newValue);
+    await dataService.updateFeatureFlag(_flag, newValue);
     setFlags({ ...flags, [flag]: newValue });
     setConnectionStatus(dataService.getConnectionStatus());
   };

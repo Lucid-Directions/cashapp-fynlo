@@ -34,7 +34,7 @@ const DashboardScreen: React.FC = () => {
   const navigation = useNavigation();
   const restaurantDisplayName = useRestaurantDisplayName();
   const { theme } = useTheme();
-  const styles = useThemedStyles(createStyles);
+  const styles = useThemedStyles(_createStyles);
 
   // Mock KPI data
   const kpiData: KPICardProps[] = [
@@ -170,7 +170,7 @@ const DashboardScreen: React.FC = () => {
       </View>
       <View style={styles.goalProgress}>
         <View style={styles.goalProgressTrack}>
-          <View style={[styles.goalProgressFill, { width: `${Math.min(percentage, 100)}%` }]} />
+          <View style={[styles.goalProgressFill, { width: `${Math.min(_percentage, 100)}%` }]} />
         </View>
       </View>
       <View style={styles.goalValues}>
@@ -245,7 +245,7 @@ const DashboardScreen: React.FC = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Key Performance Indicators</Text>
           <View style={styles.kpiGrid}>
-            {kpiData.map((kpi, index) => (
+            {kpiData.map((_kpi, index) => (
               <KPICard key={index} {...kpi} />
             ))}
           </View>
@@ -255,7 +255,7 @@ const DashboardScreen: React.FC = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Goals & Targets</Text>
           <View style={styles.goalsContainer}>
-            {goalsData.map((goal, index) => (
+            {goalsData.map((_goal, index) => (
               <GoalCard key={index} {...goal} />
             ))}
           </View>

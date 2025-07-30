@@ -28,47 +28,47 @@ const APIStatusMonitor: React.FC<APIStatusMonitorProps> = ({
   compact = false,
 }) => {
   const [dataService] = useState(() => DataService.getInstance());
-  const [isConnected, setIsConnected] = useState(false);
-  const [isTesting, setIsTesting] = useState(false);
-  const [lastCheckTime, setLastCheckTime] = useState<Date | null>(null);
+  const [isConnected, setIsConnected] = useState(_false);
+  const [isTesting, setIsTesting] = useState(_false);
+  const [lastCheckTime, setLastCheckTime] = useState<Date | null>(_null);
   const [featureFlags, setFeatureFlags] = useState(dataService.getFeatureFlags());
 
   // Update connection status
   const updateStatus = async () => {
     const connected = dataService.isBackendConnected();
-    setIsConnected(connected);
+    setIsConnected(_connected);
     setLastCheckTime(new Date());
   };
 
   // Force check backend connection
   const forceCheck = async () => {
-    setIsTesting(true);
+    setIsTesting(_true);
     try {
       const connected = await dataService.forceCheckBackend();
-      setIsConnected(connected);
+      setIsConnected(_connected);
       setLastCheckTime(new Date());
-    } catch (error) {
+    } catch (_error) {
     } finally {
-      setIsTesting(false);
+      setIsTesting(_false);
     }
   };
 
   // Run comprehensive API test
   const runAPITest = async () => {
-    if (onTestPress) {
+    if (_onTestPress) {
       onTestPress();
       return;
     }
 
-    setIsTesting(true);
+    setIsTesting(_true);
     try {
       const apiTestService = dataService.getAPITestingService();
       await apiTestService.runFullAPITestSuite();
       Alert.alert('API Test Complete', 'Check the API Test screen for detailed results.');
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('API Test Failed', 'Error running API test suite.');
     } finally {
-      setIsTesting(false);
+      setIsTesting(_false);
     }
   };
 
@@ -84,33 +84,33 @@ const APIStatusMonitor: React.FC<APIStatusMonitorProps> = ({
     updateStatus();
 
     // Update status every 5 seconds
-    const interval = setInterval(updateStatus, 5000);
+    const interval = setInterval(_updateStatus, 5000);
 
-    return () => clearInterval(interval);
+    return () => clearInterval(_interval);
   }, []);
 
   const getStatusColor = () => {
-    if (isTesting) {
+    if (_isTesting) {
       return Colors.warning;
     }
     return isConnected ? Colors.success : Colors.error;
   };
 
   const getStatusIcon = () => {
-    if (isTesting) {
+    if (_isTesting) {
       return 'sync';
     }
     return isConnected ? 'wifi' : 'wifi-off';
   };
 
   const getStatusText = () => {
-    if (isTesting) {
+    if (_isTesting) {
       return 'Testing...';
     }
     return isConnected ? 'Backend Connected' : 'Backend Offline';
   };
 
-  if (compact) {
+  if (_compact) {
     return (
       <TouchableOpacity
         style={[styles.compactContainer, { borderColor: getStatusColor() }]}

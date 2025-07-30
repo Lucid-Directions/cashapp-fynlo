@@ -79,7 +79,7 @@ class PlatformPaymentService {
             amount,
             restaurantId,
           );
-        } catch (error) {
+        } catch (_error) {
           // Fall back to basic calculation
           effectiveFee = this.calculateBasicFee(method.id, amount, platformFee);
         }
@@ -88,19 +88,19 @@ class PlatformPaymentService {
           ...method,
           platformFee,
           effectiveFee,
-          feeInfo: this.generateFeeInfo(effectiveFee),
+          feeInfo: this.generateFeeInfo(_effectiveFee),
         });
       }
 
       // Sort by effective fee (lowest first)
-      methodsWithFees.sort((a, b) => {
+      methodsWithFees.sort((_a, b) => {
         const feeA = a.effectiveFee?.effective_fee || 0;
         const feeB = b.effectiveFee?.effective_fee || 0;
         return feeA - feeB;
       });
 
       return methodsWithFees;
-    } catch (error) {
+    } catch (_error) {
       // Fall back to basic payment methods
       return this.getFallbackPaymentMethods();
     }
@@ -111,7 +111,7 @@ class PlatformPaymentService {
    */
   async getOptimalPaymentMethod(amount: number, restaurantId?: string): Promise<string> {
     try {
-      const methods = await this.getPaymentMethodsWithFees(amount, restaurantId);
+      const methods = await this.getPaymentMethodsWithFees(_amount, restaurantId);
       const enabledMethods = methods.filter(m => m.enabled);
 
       if (enabledMethods.length === 0) {
@@ -120,13 +120,13 @@ class PlatformPaymentService {
 
       // Prefer SumUp if it's available and enabled
       const sumupMethod = enabledMethods.find(m => m.id === 'sumup');
-      if (sumupMethod) {
+      if (_sumupMethod) {
         return 'sumup';
       }
 
       // Return method with lowest effective fee if SumUp not available
       return enabledMethods[0].id;
-    } catch (error) {
+    } catch (_error) {
       return 'sumup'; // Default to SumUp
     }
   }
@@ -146,20 +146,20 @@ class PlatformPaymentService {
         restaurantId,
       );
 
-      const allMethods = await this.getPaymentMethodsWithFees(amount, restaurantId);
+      const allMethods = await this.getPaymentMethodsWithFees(_amount, restaurantId);
       const currentMethod = allMethods.find(m => m.id === paymentMethod);
       const lowestFee = Math.min(...allMethods.map(m => m.effectiveFee?.effective_fee || 0));
 
       return {
-        shortDescription: this.generateShortFeeDescription(feeCalculation),
-        detailedDescription: this.generateDetailedFeeDescription(feeCalculation),
+        shortDescription: this.generateShortFeeDescription(_feeCalculation),
+        detailedDescription: this.generateDetailedFeeDescription(_feeCalculation),
         feeAmount: feeCalculation.effective_fee,
         feePercentage: feeCalculation.fee_percentage,
         currency: feeCalculation.currency,
         isOptimal: feeCalculation.effective_fee === lowestFee,
         hasRestaurantMarkup: feeCalculation.restaurant_markup > 0,
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         shortDescription: 'Fee information unavailable',
         detailedDescription: 'Unable to calculate processing fee at this time.',
@@ -183,10 +183,10 @@ class PlatformPaymentService {
       );
 
       // Check if any payment fee settings come from restaurant level
-      return Object.values(effectiveSettings).some(
+      return Object.values(_effectiveSettings).some(
         (setting: unknown) => setting.source === 'restaurant',
       );
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -211,7 +211,7 @@ class PlatformPaymentService {
         markupConfig,
         markupPercentage > 0.5, // Require approval for markups > 0.5%
       );
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -230,7 +230,7 @@ class PlatformPaymentService {
       this.cachedFees = await this.platformService.getPaymentFees();
       this.cacheExpiry = now + this.CACHE_DURATION;
       return this.cachedFees;
-    } catch (error) {
+    } catch (_error) {
       // Return cached fees if available, otherwise empty
       return this.cachedFees || {};
     }
@@ -322,7 +322,7 @@ class PlatformPaymentService {
         color: '#00D4AA',
         enabled: true,
         requiresAuth: true,
-        feeInfo: '0.69% (High volume) • 1.69% (Standard)',
+        feeInfo: '0.69% (High volume) • 1.69% (_Standard)',
         platformFee: { percentage: 0.69, currency: 'GBP' },
       },
       {
@@ -347,7 +347,7 @@ class PlatformPaymentService {
       },
       {
         id: 'stripe',
-        name: 'Card (Stripe)',
+        name: 'Card (_Stripe)',
         icon: 'credit-card',
         color: '#635BFF',
         enabled: true,

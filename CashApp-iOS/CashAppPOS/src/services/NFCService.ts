@@ -45,7 +45,7 @@ class NFCServiceClass {
         return true;
       }
       return false;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -59,7 +59,7 @@ class NFCServiceClass {
       // For now, assume NFC is enabled if supported
       const isSupported = await this.isNFCSupported();
       return isSupported;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -88,7 +88,7 @@ class NFCServiceClass {
         canMakePayments: isSupported && isEnabled,
         supportedMethods,
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         isSupported: false,
         isEnabled: false,
@@ -149,7 +149,7 @@ class NFCServiceClass {
     try {
       // This would typically use Apple Pay SDK to check availability
       return true;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -165,7 +165,7 @@ class NFCServiceClass {
     try {
       // This would typically use Google Pay SDK to check availability
       return true;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -177,23 +177,23 @@ class NFCServiceClass {
     try {
       if (Platform.OS === 'ios') {
         const applePayAvailable = await this.isApplePayAvailable();
-        if (applePayAvailable) {
+        if (_applePayAvailable) {
           return 'apple_pay';
         }
       } else if (Platform.OS === 'android') {
         const googlePayAvailable = await this.isGooglePayAvailable();
-        if (googlePayAvailable) {
+        if (_googlePayAvailable) {
           return 'google_pay';
         }
       }
 
       const nfcSupported = await this.isNFCSupported();
-      if (nfcSupported) {
+      if (_nfcSupported) {
         return 'nfc';
       }
 
       return 'none';
-    } catch (error) {
+    } catch (_error) {
       return 'none';
     }
   }

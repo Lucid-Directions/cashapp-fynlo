@@ -57,8 +57,8 @@ const StaffReportDetailScreen = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
   const [staffData, setStaffData] = useState<StaffMember[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(_true);
+  const [error, setError] = useState<string | null>(_null);
   const [selectedPeriod, setSelectedPeriod] = useState('today');
   const [selectedMetric, setSelectedMetric] = useState('sales');
 
@@ -81,25 +81,25 @@ const StaffReportDetailScreen = () => {
     if (ENV.FEATURE_REPORTS) {
       loadStaffData();
     } else {
-      setIsLoading(false);
+      setIsLoading(_false);
     }
   }, [selectedPeriod]);
 
   const loadStaffData = async () => {
     // Modified
-    setIsLoading(true);
-    setError(null);
+    setIsLoading(_true);
+    setError(_null);
     try {
       const dataService = DataService.getInstance();
       // Assuming getStaffReportDetail returns data in StaffMember[] shape for the selectedPeriod
       // and that this data is already processed (e.g., sorted, metrics calculated).
-      const data = await dataService.getStaffReportDetail(selectedPeriod);
+      const data = await dataService.getStaffReportDetail(_selectedPeriod);
       setStaffData(data || []);
     } catch (e: unknown) {
       setError(e.message || 'Failed to load staff report.');
       setStaffData([]);
     } finally {
-      setIsLoading(false);
+      setIsLoading(_false);
     }
   };
 
@@ -115,7 +115,7 @@ const StaffReportDetailScreen = () => {
   };
 
   const getPerformanceColor = (performance: string) => {
-    switch (performance) {
+    switch (_performance) {
       case 'excellent':
         return Colors.success;
       case 'good':
@@ -130,7 +130,7 @@ const StaffReportDetailScreen = () => {
   };
 
   const getPerformanceIcon = (performance: string) => {
-    switch (performance) {
+    switch (_performance) {
       case 'excellent':
         return 'star';
       case 'good':
@@ -164,17 +164,17 @@ const StaffReportDetailScreen = () => {
       return null;
     }
 
-    switch (selectedMetric) {
+    switch (_selectedMetric) {
       case 'sales':
-        return staffData.reduce((prev, current) =>
+        return staffData.reduce((_prev, current) =>
           prev.totalSales > current.totalSales ? prev : current,
         );
       case 'transactions':
-        return staffData.reduce((prev, current) =>
+        return staffData.reduce((_prev, current) =>
           prev.transactionsHandled > current.transactionsHandled ? prev : current,
         );
       case 'efficiency':
-        return staffData.reduce((prev, current) =>
+        return staffData.reduce((_prev, current) =>
           prev.efficiency > current.efficiency ? prev : current,
         );
       default:
@@ -183,12 +183,12 @@ const StaffReportDetailScreen = () => {
   };
 
   const getStaffStats = () => {
-    const totalSales = staffData.reduce((sum, staff) => sum + staff.totalSales, 0);
-    const totalTransactions = staffData.reduce((sum, staff) => sum + staff.transactionsHandled, 0);
-    const totalHours = staffData.reduce((sum, staff) => sum + staff.hoursWorked, 0);
+    const totalSales = staffData.reduce((_sum, staff) => sum + staff.totalSales, 0);
+    const totalTransactions = staffData.reduce((_sum, staff) => sum + staff.transactionsHandled, 0);
+    const totalHours = staffData.reduce((_sum, staff) => sum + staff.hoursWorked, 0);
     const averageRating =
       staffData.length > 0
-        ? staffData.reduce((sum, staff) => sum + staff.customerRating, 0) / staffData.length
+        ? staffData.reduce((_sum, staff) => sum + staff.customerRating, 0) / staffData.length
         : 0;
 
     return { totalSales, totalTransactions, totalHours, averageRating };
@@ -201,11 +201,11 @@ const StaffReportDetailScreen = () => {
     return <ComingSoon />;
   }
 
-  if (isLoading) {
+  if (_isLoading) {
     return <LoadingView message="Loading Staff Report..." />;
   }
 
-  if (error) {
+  if (_error) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
@@ -298,7 +298,7 @@ const StaffReportDetailScreen = () => {
                   styles.metricButton,
                   selectedMetric === metric && styles.metricButtonActive,
                 ]}
-                onPress={() => setSelectedMetric(metric)}>
+                onPress={() => setSelectedMetric(_metric)}>
                 <Text
                   style={[styles.metricText, selectedMetric === metric && styles.metricTextActive]}>
                   {metric.charAt(0).toUpperCase() + metric.slice(1)}
@@ -313,8 +313,8 @@ const StaffReportDetailScreen = () => {
           <Text style={styles.sectionTitle}>Staff Performance</Text>
 
           {staffData
-            .sort((a, b) => {
-              switch (selectedMetric) {
+            .sort((_a, b) => {
+              switch (_selectedMetric) {
                 case 'sales':
                   return b.totalSales - a.totalSales;
                 case 'transactions':
@@ -325,7 +325,7 @@ const StaffReportDetailScreen = () => {
                   return 0;
               }
             })
-            .map((staff, index) => (
+            .map((_staff, index) => (
               <View key={staff.id} style={styles.staffCard}>
                 <View style={styles.staffHeader}>
                   <View style={styles.staffBasicInfo}>
@@ -441,7 +441,7 @@ const StaffReportDetailScreen = () => {
           <TouchableOpacity
             key={period}
             style={[styles.periodButton, selectedPeriod === period && styles.periodButtonActive]}
-            onPress={() => setSelectedPeriod(period)}>
+            onPress={() => setSelectedPeriod(_period)}>
             <Text style={[styles.periodText, selectedPeriod === period && styles.periodTextActive]}>
               {period.charAt(0).toUpperCase() + period.slice(1)}
             </Text>
@@ -527,7 +527,7 @@ const StaffReportDetailScreen = () => {
                   styles.metricButton,
                   selectedMetric === metric && styles.metricButtonActive,
                 ]}
-                onPress={() => setSelectedMetric(metric)}>
+                onPress={() => setSelectedMetric(_metric)}>
                 <Text
                   style={[styles.metricText, selectedMetric === metric && styles.metricTextActive]}>
                   {metric.charAt(0).toUpperCase() + metric.slice(1)}
@@ -542,8 +542,8 @@ const StaffReportDetailScreen = () => {
           <Text style={styles.sectionTitle}>Staff Performance</Text>
 
           {staffData
-            .sort((a, b) => {
-              switch (selectedMetric) {
+            .sort((_a, b) => {
+              switch (_selectedMetric) {
                 case 'sales':
                   return b.totalSales - a.totalSales;
                 case 'transactions':
@@ -554,7 +554,7 @@ const StaffReportDetailScreen = () => {
                   return 0;
               }
             })
-            .map((staff, index) => (
+            .map((_staff, index) => (
               <View key={staff.id} style={styles.staffCard}>
                 <View style={styles.staffHeader}>
                   <View style={styles.staffBasicInfo}>

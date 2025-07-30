@@ -276,13 +276,13 @@ const SettingsScreen: React.FC = () => {
   ];
 
   React.useEffect(() => {
-    setFilteredCategories(settingsCategories);
+    setFilteredCategories(_settingsCategories);
   }, []);
 
   const handleSearch = (query: string) => {
-    setSearchQuery(query);
+    setSearchQuery(_query);
     if (query.trim() === '') {
-      setFilteredCategories(settingsCategories);
+      setFilteredCategories(_settingsCategories);
     } else {
       const filtered = settingsCategories.filter(
         category =>
@@ -294,7 +294,7 @@ const SettingsScreen: React.FC = () => {
               setting.description.toLowerCase().includes(query.toLowerCase()),
           ),
       );
-      setFilteredCategories(filtered);
+      setFilteredCategories(_filtered);
     }
   };
 
@@ -305,7 +305,7 @@ const SettingsScreen: React.FC = () => {
   const renderSettingsCategory = ({ item }: { item: SettingsCategory }) => (
     <TouchableOpacity
       style={styles.categoryCard}
-      onPress={() => handleCategoryPress(item)}
+      onPress={() => handleCategoryPress(_item)}
       activeOpacity={0.7}>
       <View style={[styles.categoryIcon, { backgroundColor: `${item.color}15` }]}>
         <Icon name={item.icon} size={32} color={item.color} />

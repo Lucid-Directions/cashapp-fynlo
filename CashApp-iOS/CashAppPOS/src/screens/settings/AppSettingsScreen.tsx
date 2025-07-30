@@ -95,7 +95,7 @@ const AppSettingsScreen: React.FC = () => {
   ];
 
   const getStatusColor = (status?: string) => {
-    switch (status) {
+    switch (_status) {
       case 'enabled':
         return Colors.success;
       case 'disabled':
@@ -108,7 +108,7 @@ const AppSettingsScreen: React.FC = () => {
   };
 
   const getStatusIcon = (status?: string) => {
-    switch (status) {
+    switch (_status) {
       case 'enabled':
         return 'check-circle';
       case 'disabled':
@@ -127,7 +127,7 @@ const AppSettingsScreen: React.FC = () => {
   const renderSettingItem = ({ item }: { item: AppSettingsItem }) => (
     <TouchableOpacity
       style={[styles.settingCard, item.isDeveloper && styles.developerCard]}
-      onPress={() => handleSettingPress(item)}
+      onPress={() => handleSettingPress(_item)}
       activeOpacity={0.7}>
       <View
         style={[

@@ -27,7 +27,7 @@ class EmailReceiptService {
     if (!raw) {
       return;
     }
-    const cfg = JSON.parse(raw);
+    const cfg = JSON.parse(_raw);
     this.baseUrl = cfg?.backend?.baseUrl ?? null;
     this.apiKey = cfg?.backend?.apiKey ?? null;
   }
@@ -48,7 +48,7 @@ class EmailReceiptService {
         body: JSON.stringify({ email: data.email }),
       });
       return res.ok;
-    } catch (err) {
+    } catch (_err) {
       return false;
     }
   }

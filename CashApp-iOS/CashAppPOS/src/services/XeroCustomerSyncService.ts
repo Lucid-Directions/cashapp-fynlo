@@ -137,7 +137,7 @@ export class XeroCustomerSyncService {
 
       // Process customers in batches
       for (let i = 0; i < customers.length; i += batchSize) {
-        const batch = customers.slice(i, i + batchSize);
+        const batch = customers.slice(_i, i + batchSize);
 
         for (const customer of batch) {
           try {
@@ -147,11 +147,11 @@ export class XeroCustomerSyncService {
 
             if (existingMapping && existingMapping.xeroContactId) {
               // Update existing contact
-              await this.updateXeroContact(customer, existingMapping.xeroContactId);
+              await this.updateXeroContact(_customer, existingMapping.xeroContactId);
               result.recordsUpdated++;
             } else {
               // Create new contact
-              const xeroContactId = await this.createXeroContact(customer);
+              const xeroContactId = await this.createXeroContact(_customer);
               result.recordsCreated++;
 
               // Save mapping
@@ -162,7 +162,7 @@ export class XeroCustomerSyncService {
                 syncDirection: 'to_xero',
               });
             }
-          } catch (error) {
+          } catch (_error) {
             result.recordsFailed++;
             result.errors.push({
               entityId: customer.id,
@@ -182,7 +182,7 @@ export class XeroCustomerSyncService {
 
       await this.updateLastSyncTime();
       result.success = result.recordsFailed === 0;
-    } catch (error) {
+    } catch (_error) {
       result.success = false;
       result.errors.push({
         entityId: 'batch',
@@ -220,7 +220,7 @@ export class XeroCustomerSyncService {
 
       // Build where clause for modified contacts
       let whereClause = 'IsCustomer==true';
-      if (lastSync) {
+      if (_lastSync) {
         const isoDate = lastSync.toISOString();
         whereClause += ` AND UpdatedDateUTC>DateTime(${isoDate})`;
       }
@@ -242,9 +242,9 @@ export class XeroCustomerSyncService {
             existingMapping?.posCustomerId,
           );
 
-          customers.push(posCustomer);
+          customers.push(_posCustomer);
 
-          if (existingMapping) {
+          if (_existingMapping) {
             result.recordsUpdated++;
           } else {
             result.recordsCreated++;
@@ -257,7 +257,7 @@ export class XeroCustomerSyncService {
               syncDirection: 'from_xero',
             });
           }
-        } catch (error) {
+        } catch (_error) {
           result.recordsFailed++;
           result.errors.push({
             entityId: xeroContact.ContactID || 'unknown',
@@ -271,7 +271,7 @@ export class XeroCustomerSyncService {
 
       await this.updateLastSyncTime();
       result.success = result.recordsFailed === 0;
-    } catch (error) {
+    } catch (_error) {
       result.success = false;
       result.errors.push({
         entityId: 'batch',
@@ -301,7 +301,7 @@ export class XeroCustomerSyncService {
     const fromXeroResult = await this.syncCustomersFromXero({ direction: 'from_xero' });
 
     // Then, sync to Xero with conflict resolution
-    const toXeroResult = await this.syncCustomersToXero(posCustomers, { direction: 'to_xero' });
+    const toXeroResult = await this.syncCustomersToXero(_posCustomers, { direction: 'to_xero' });
 
     // Merge results
     const combinedResult: SyncResult = {
@@ -324,7 +324,7 @@ export class XeroCustomerSyncService {
    * Create new contact in Xero
    */
   private async createXeroContact(customer: POSCustomer): Promise<string> {
-    const xeroContact = this.transformPOSCustomerToXeroContact(customer);
+    const xeroContact = this.transformPOSCustomerToXeroContact(_customer);
 
     const response = await this.apiClient.createContact({
       Contacts: [xeroContact],
@@ -341,7 +341,7 @@ export class XeroCustomerSyncService {
    * Update existing contact in Xero
    */
   private async updateXeroContact(customer: POSCustomer, xeroContactId: string): Promise<void> {
-    const xeroContact = this.transformPOSCustomerToXeroContact(customer);
+    const xeroContact = this.transformPOSCustomerToXeroContact(_customer);
     xeroContact.ContactID = xeroContactId;
 
     await this.apiClient.makeRequest(`/Contacts/${xeroContactId}`, {
@@ -439,8 +439,8 @@ export class XeroCustomerSyncService {
   private async getCustomerMappings(): Promise<CustomerMapping[]> {
     try {
       const mappingsJson = await AsyncStorage.getItem(`${this.STORAGE_PREFIX}${this.MAPPING_KEY}`);
-      return mappingsJson ? JSON.parse(mappingsJson) : [];
-    } catch (error) {
+      return mappingsJson ? JSON.parse(_mappingsJson) : [];
+    } catch (_error) {
       return [];
     }
   }
@@ -456,14 +456,14 @@ export class XeroCustomerSyncService {
       if (existingIndex >= 0) {
         mappings[existingIndex] = mapping;
       } else {
-        mappings.push(mapping);
+        mappings.push(_mapping);
       }
 
       await AsyncStorage.setItem(
         `${this.STORAGE_PREFIX}${this.MAPPING_KEY}`,
-        JSON.stringify(mappings),
+        JSON.stringify(_mappings),
       );
-    } catch (error) {
+    } catch (_error) {
       throw error;
     }
   }
@@ -474,8 +474,8 @@ export class XeroCustomerSyncService {
   private async getLastSyncTime(): Promise<Date | null> {
     try {
       const lastSyncStr = await AsyncStorage.getItem(`${this.STORAGE_PREFIX}${this.LAST_SYNC_KEY}`);
-      return lastSyncStr ? new Date(lastSyncStr) : null;
-    } catch (error) {
+      return lastSyncStr ? new Date(_lastSyncStr) : null;
+    } catch (_error) {
       return null;
     }
   }
@@ -489,8 +489,7 @@ export class XeroCustomerSyncService {
         `${this.STORAGE_PREFIX}${this.LAST_SYNC_KEY}`,
         new Date().toISOString(),
       );
-    } catch (error) {
-    }
+    } catch (_error) {}
   }
 
   /**
@@ -529,16 +528,16 @@ export class XeroCustomerSyncService {
    */
   private isValidEmail(email: string): boolean {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
+    return emailRegex.test(_email);
   }
 
   private isValidPhone(phone: string): boolean {
     const phoneRegex = /^[\+]?[\d\s\-\(\)]{10,}$/;
-    return phoneRegex.test(phone);
+    return phoneRegex.test(_phone);
   }
 
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise(resolve => setTimeout(_resolve, ms));
   }
 
   /**

@@ -96,7 +96,7 @@ class DatabaseService {
     try {
       // Use tokenManager for consistent token retrieval
       this.authToken = await tokenManager.getTokenWithRefresh();
-    } catch (error) {
+    } catch (_error) {
     }
   }
 
@@ -105,7 +105,7 @@ class DatabaseService {
       this.authToken = token;
       // CRITICAL: Must persist token for tokenManager to access it
       await AsyncStorage.setItem('auth_token', token);
-    } catch (error) {
+    } catch (_error) {
     }
   }
 
@@ -114,7 +114,7 @@ class DatabaseService {
     const token = await tokenManager.getTokenWithRefresh();
 
     // Update internal reference if we got a token
-    if (token) {
+    if (_token) {
       this.authToken = token;
     }
 
@@ -155,22 +155,22 @@ class DatabaseService {
 
     // Create AbortController for timeout - adjust for elapsed time
     const controller = new AbortController();
-    const remainingTimeout = Math.min(timeout, totalTimeout - elapsedTime);
+    const remainingTimeout = Math.min(_timeout, totalTimeout - elapsedTime);
     const timeoutId = setTimeout(() => controller.abort(), remainingTimeout);
 
     try {
-      const response = await fetch(url, {
+      const response = await fetch(_url, {
         ...options,
         headers,
         signal: controller.signal,
       });
 
-      clearTimeout(timeoutId);
+      clearTimeout(_timeoutId);
       const duration = Date.now() - startTime;
       const data = await response.json();
 
       // Log the response
-      errorLogger.logAPIResponse(url, response.status, duration, data);
+      errorLogger.logAPIResponse(_url, response.status, duration, data);
 
       // Handle 401 Unauthorized - token might be expired
       if (response.status === 401) {
@@ -178,7 +178,7 @@ class DatabaseService {
         // Try to refresh the token using token manager
         const newToken = await tokenManager.refreshAuthToken();
 
-        if (newToken) {
+        if (_newToken) {
           // Create a new timeout for the retry request
           const retryElapsedTime = Date.now() - startTime;
           const retryRemainingTimeout = Math.max(1000, totalTimeout - retryElapsedTime); // At least 1 second
@@ -193,13 +193,13 @@ class DatabaseService {
               Authorization: `Bearer ${newToken}`,
             };
 
-            const retryResponse = await fetch(url, {
+            const retryResponse = await fetch(_url, {
               ...options,
               headers: newHeaders,
               signal: retryController.signal,
             });
 
-            clearTimeout(retryTimeoutId);
+            clearTimeout(_retryTimeoutId);
             const retryData = await retryResponse.json();
 
             if (!retryResponse.ok) {
@@ -207,12 +207,12 @@ class DatabaseService {
                 retryData.message ||
                 retryData.detail ||
                 `HTTP error! status: ${retryResponse.status}`;
-              throw new Error(errorMessage);
+              throw new Error(_errorMessage);
             }
 
             return retryData;
-          } catch (retryError) {
-            clearTimeout(retryTimeoutId);
+          } catch (_retryError) {
+            clearTimeout(_retryTimeoutId);
             throw retryError;
           }
         }
@@ -223,16 +223,16 @@ class DatabaseService {
         // Backend returns error in standardized format
         const errorMessage =
           data.message || data.detail || `HTTP error! status: ${response.status}`;
-        throw new Error(errorMessage);
+        throw new Error(_errorMessage);
       }
 
       return data;
-    } catch (error) {
-      clearTimeout(timeoutId);
+    } catch (_error) {
+      clearTimeout(_timeoutId);
       const duration = Date.now() - startTime;
 
       // Enhanced error logging with context
-      errorLogger.logError(error, {
+      errorLogger.logError(_error, {
         operation: `API Request: ${options.method || 'GET'} ${endpoint}`,
         component: 'DatabaseService',
         metadata: {
@@ -252,8 +252,8 @@ class DatabaseService {
         if (retryCount < retryAttempts - 1) {
           const retryDelay = API_CONFIG.RETRY_DELAY || 1000;
           const delay = retryDelay * Math.pow(2, retryCount);
-          await new Promise(resolve => setTimeout(resolve, delay));
-          return this.apiRequest(endpoint, options, retryCount + 1, startTime);
+          await new Promise(resolve => setTimeout(_resolve, delay));
+          return this.apiRequest(_endpoint, options, retryCount + 1, startTime);
         }
 
         throw new Error(`API Timeout: Request failed after ${retryAttempts} attempts`);
@@ -280,10 +280,10 @@ class DatabaseService {
         return true;
       }
       return false;
-    } catch (error) {
+    } catch (_error) {
 
       // Fallback to test users for development/testing
-      return await this.authenticateTestUser(username, password);
+      return await this.authenticateTestUser(_username, password);
     }
   }
 
@@ -294,10 +294,10 @@ class DatabaseService {
       u => (u.username === username || u.email === username) && u.password === password,
     );
 
-    if (user) {
+    if (_user) {
       // Generate a mock JWT token for the session
       const mockToken = `mock_jwt_${user.id}_${Date.now()}`;
-      await this.saveAuthToken(mockToken);
+      await this.saveAuthToken(_mockToken);
 
       // Store user data for the session
       await AsyncStorage.setItem(
@@ -324,8 +324,8 @@ class DatabaseService {
   async getCurrentUser(): Promise<unknown> {
     try {
       const userData = await AsyncStorage.getItem('user_data');
-      return userData ? JSON.parse(userData) : null;
-    } catch (error) {
+      return userData ? JSON.parse(_userData) : null;
+    } catch (_error) {
       return null;
     }
   }
@@ -400,7 +400,7 @@ class DatabaseService {
   async logout(): Promise<void> {
     try {
       await this.apiRequest('/api/v1/auth/logout', { method: 'POST' });
-    } catch (error) {
+    } catch (_error) {
     } finally {
       // Always clear local session data
       this.authToken = null;
@@ -417,7 +417,7 @@ class DatabaseService {
       });
 
       return response.data || [];
-    } catch (error) {
+    } catch (_error) {
       throw error; // Re-throw the error
     }
   }
@@ -429,7 +429,7 @@ class DatabaseService {
       });
 
       return response.data || [];
-    } catch (error) {
+    } catch (_error) {
       throw error; // Re-throw the error
     }
   }
@@ -442,7 +442,7 @@ class DatabaseService {
       });
 
       return response.data || [];
-    } catch (error) {
+    } catch (_error) {
       throw error; // Re-throw the error
     }
   }
@@ -477,7 +477,7 @@ class DatabaseService {
       }
 
       return [];
-    } catch (error) {
+    } catch (_error) {
 
       // If we have cached data that's expired, use it as fallback
       if (this.menuCache.items) {
@@ -521,7 +521,7 @@ class DatabaseService {
       this.menuCache.categories = fallback;
       this.menuCache.categoriesTimestamp = Date.now();
       return fallback;
-    } catch (error) {
+    } catch (_error) {
 
       // If we have cached data that's expired, use it as fallback
       if (this.menuCache.categories) {
@@ -550,11 +550,11 @@ class DatabaseService {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(categoryData),
+        body: JSON.stringify(_categoryData),
       });
 
       return response.data;
-    } catch (error) {
+    } catch (_error) {
       throw error;
     }
   }
@@ -578,7 +578,7 @@ class DatabaseService {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(categoryData),
+          body: JSON.stringify(_categoryData),
         },
       );
 
@@ -589,7 +589,7 @@ class DatabaseService {
 
       const result = await response.json();
       return result.data || result;
-    } catch (error) {
+    } catch (_error) {
       throw error;
     }
   }
@@ -611,7 +611,7 @@ class DatabaseService {
         throw new Error(`Failed to delete category: ${error}`);
       }
 
-    } catch (error) {
+    } catch (_error) {
       throw error;
     }
   }
@@ -638,11 +638,11 @@ class DatabaseService {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(productData),
+        body: JSON.stringify(_productData),
       });
 
       return response.data;
-    } catch (error) {
+    } catch (_error) {
       throw error;
     }
   }
@@ -672,11 +672,11 @@ class DatabaseService {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(productData),
+        body: JSON.stringify(_productData),
       });
 
       return response.data;
-    } catch (error) {
+    } catch (_error) {
       throw error;
     }
   }
@@ -686,7 +686,7 @@ class DatabaseService {
       await this.apiRequest(`/api/v1/products/${productId}`, {
         method: 'DELETE',
       });
-    } catch (error) {
+    } catch (_error) {
       throw error;
     }
   }
@@ -737,7 +737,7 @@ class DatabaseService {
 
       this.currentSession = response.data;
       return this.currentSession;
-    } catch (error) {
+    } catch (_error) {
       return null;
     }
   }
@@ -753,7 +753,7 @@ class DatabaseService {
 
       this.currentSession = response.data;
       return this.currentSession;
-    } catch (error) {
+    } catch (_error) {
       return null;
     }
   }
@@ -770,11 +770,11 @@ class DatabaseService {
 
       const response = await this.apiRequest('/api/v1/orders', {
         method: 'POST',
-        body: JSON.stringify(orderData),
+        body: JSON.stringify(_orderData),
       });
 
       return response.data;
-    } catch (error) {
+    } catch (_error) {
       return null;
     }
   }
@@ -783,11 +783,11 @@ class DatabaseService {
     try {
       const response = await this.apiRequest(`/api/v1/orders/${orderId}`, {
         method: 'PUT',
-        body: JSON.stringify(updates),
+        body: JSON.stringify(_updates),
       });
 
       return response.data;
-    } catch (error) {
+    } catch (_error) {
       return null;
     }
   }
@@ -799,7 +799,7 @@ class DatabaseService {
       });
 
       return response.data || [];
-    } catch (error) {
+    } catch (_error) {
       return [];
     }
   }
@@ -828,7 +828,7 @@ class DatabaseService {
       } else {
         return false;
       }
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -840,12 +840,12 @@ class DatabaseService {
         ? `/api/v1/restaurants/floor-plan?section_id=${sectionId}`
         : '/api/v1/restaurants/floor-plan';
 
-      const response = await this.apiRequest(endpoint, {
+      const response = await this.apiRequest(_endpoint, {
         method: 'GET',
       });
 
       return response.data || null;
-    } catch (error) {
+    } catch (_error) {
       throw error;
     }
   }
@@ -861,7 +861,7 @@ class DatabaseService {
       });
 
       return response.data;
-    } catch (error) {
+    } catch (_error) {
       return null;
     }
   }
@@ -876,7 +876,7 @@ class DatabaseService {
       });
 
       return response.data;
-    } catch (error) {
+    } catch (_error) {
       return null;
     }
   }
@@ -888,7 +888,7 @@ class DatabaseService {
       });
 
       return response.data || [];
-    } catch (error) {
+    } catch (_error) {
       return [];
     }
   }
@@ -901,7 +901,7 @@ class DatabaseService {
       });
 
       return response.data || null;
-    } catch (error) {
+    } catch (_error) {
       throw error;
     }
   }
@@ -911,10 +911,10 @@ class DatabaseService {
       let queryParams = '';
       if (dateFrom || dateTo) {
         const params = new URLSearchParams();
-        if (dateFrom) {
+        if (_dateFrom) {
           params.append('date_from', dateFrom);
         }
-        if (dateTo) {
+        if (_dateTo) {
           params.append('date_to', dateTo);
         }
         queryParams = `?${params.toString()}`;
@@ -925,7 +925,7 @@ class DatabaseService {
       });
 
       return response.data || null;
-    } catch (error) {
+    } catch (_error) {
       throw error;
     }
   }
@@ -935,14 +935,14 @@ class DatabaseService {
     try {
       // Sync any offline orders, products, etc.
       const offlineOrders = await AsyncStorage.getItem('offline_orders');
-      if (offlineOrders) {
-        const orders = JSON.parse(offlineOrders);
+      if (_offlineOrders) {
+        const orders = JSON.parse(_offlineOrders);
         for (const order of orders) {
-          await this.createOrder(order);
+          await this.createOrder(_order);
         }
         await AsyncStorage.removeItem('offline_orders');
       }
-    } catch (error) {
+    } catch (_error) {
     }
   }
 
@@ -974,7 +974,7 @@ class DatabaseService {
       });
 
       return response.data || [];
-    } catch (error) {
+    } catch (_error) {
       // Return empty array instead of throwing to prevent app crashes
       return [];
     }
@@ -992,7 +992,7 @@ class DatabaseService {
       });
 
       return response.data || [];
-    } catch (error) {
+    } catch (_error) {
       throw new Error('Backend connection required for inventory data');
     }
   }
@@ -1004,7 +1004,7 @@ class DatabaseService {
       });
 
       return response.data || [];
-    } catch (error) {
+    } catch (_error) {
       throw new Error('Backend connection required for employee data');
     }
   }
@@ -1017,7 +1017,7 @@ class DatabaseService {
       });
 
       return response.data || null;
-    } catch (error) {
+    } catch (_error) {
       throw new Error('Backend connection required for schedule data');
     }
   }
@@ -1029,7 +1029,7 @@ class DatabaseService {
       });
 
       return response.data || [];
-    } catch (error) {
+    } catch (_error) {
       return [];
     }
   }
@@ -1063,7 +1063,7 @@ class DatabaseService {
       });
 
       return response.data || null;
-    } catch (error) {
+    } catch (_error) {
       throw new Error('Backend connection required for analytics dashboard data');
     }
   }

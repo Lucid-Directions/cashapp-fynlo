@@ -43,10 +43,10 @@ const Container: React.FC<ContainerProps> = ({
 }) => {
   const { theme } = useTheme();
   const { width: screenWidth, isPhone, isTablet } = useResponsive();
-  const styles = createStyles(theme);
+  const styles = createStyles(_theme);
 
   // Get responsive padding
-  const currentPadding = useResponsiveValue(padding, 4);
+  const currentPadding = useResponsiveValue(_padding, 4);
 
   // Get responsive max width
   const getMaxWidth = (): number | undefined => {
@@ -54,15 +54,15 @@ const Container: React.FC<ContainerProps> = ({
       return undefined;
     }
 
-    if (maxWidth) {
-      return useResponsiveValue(maxWidth, screenWidth);
+    if (_maxWidth) {
+      return useResponsiveValue(_maxWidth, screenWidth);
     }
 
     // Default max widths based on device type
-    if (isPhone) {
+    if (_isPhone) {
       return screenWidth;
     }
-    if (isTablet) {
+    if (_isTablet) {
       return Math.min(screenWidth * 0.9, 800);
     }
     return Math.min(screenWidth * 0.8, 1200);
@@ -79,7 +79,7 @@ const Container: React.FC<ContainerProps> = ({
       alignSelf: centered ? 'center' : undefined,
     },
     style,
-  ].filter(Boolean) as ViewStyle;
+  ].filter(_Boolean) as ViewStyle;
 
   return (
     <View style={containerStyle} testID={testID}>
@@ -114,11 +114,11 @@ export const Section: React.FC<SectionProps> = ({
   style,
 }) => {
   const { theme } = useTheme();
-  const styles = createStyles(theme);
-  const currentPadding = useResponsiveValue(padding, 4);
+  const styles = createStyles(_theme);
+  const currentPadding = useResponsiveValue(_padding, 4);
 
   const getBackgroundColor = () => {
-    switch (background) {
+    switch (_background) {
       case 'white':
         return theme.colors.white;
       case 'gray':
@@ -169,7 +169,7 @@ export const Spacer: React.FC<SpacerProps> = ({
   horizontal = false,
 }) => {
   const { theme } = useTheme();
-  const currentSize = useResponsiveValue(size, 4);
+  const currentSize = useResponsiveValue(_size, 4);
   const spacingValue = theme.spacing[currentSize];
 
   return (
@@ -213,12 +213,12 @@ export const Row: React.FC<RowProps> = ({
   style,
 }) => {
   const { theme } = useTheme();
-  const currentSpacing = useResponsiveValue(spacingProp, 3);
+  const currentSpacing = useResponsiveValue(_spacingProp, 3);
   const spacingValue = theme.spacing[currentSpacing];
 
   // Add spacing between children
-  const childrenWithSpacing = React.Children.map(children, (child, index) => {
-    const isLast = index === React.Children.count(children) - 1;
+  const childrenWithSpacing = React.Children.map(_children, (_child, index) => {
+    const isLast = index === React.Children.count(_children) - 1;
     return (
       <React.Fragment key={index}>
         {child}

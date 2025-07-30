@@ -8,9 +8,9 @@ import sumUpConfigService from '../../services/SumUpConfigService';
 // Helper function to ensure operations run on main thread
 const runOnMainThread = (callback: () => void) => {
   if (typeof setImmediate !== 'undefined') {
-    setImmediate(callback);
+    setImmediate(_callback);
   } else {
-    setTimeout(callback, 0);
+    setTimeout(_callback, 0);
   }
 };
 
@@ -32,7 +32,7 @@ const SumUpPaymentSheet: React.FC<SumUpPaymentComponentProps> = ({
 }) => {
   const sumUpHooks = useSumUp();
   const { initPaymentSheet, presentPaymentSheet } = sumUpHooks;
-  const [isInitialized, setIsInitialized] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(_false);
 
     sumUpHooks: sumUpHooks,
     initPaymentSheet: typeof initPaymentSheet,
@@ -47,8 +47,8 @@ const SumUpPaymentSheet: React.FC<SumUpPaymentComponentProps> = ({
     }, 100);
 
     return () => {
-      if (initTimer) {
-        clearTimeout(initTimer);
+      if (_initTimer) {
+        clearTimeout(_initTimer);
       }
     };
   }, [amount, currency, title]);
@@ -66,8 +66,8 @@ const SumUpPaymentSheet: React.FC<SumUpPaymentComponentProps> = ({
 
       if (!compatibility.isSupported) {
         runOnMainThread(() => {
-          compatibilityService.showCompatibilityError(compatibility);
-          onPaymentComplete(false, undefined, compatibility.fallbackMessage);
+          compatibilityService.showCompatibilityError(_compatibility);
+          onPaymentComplete(_false, undefined, compatibility.fallbackMessage);
         });
         return;
       }
@@ -87,7 +87,7 @@ const SumUpPaymentSheet: React.FC<SumUpPaymentComponentProps> = ({
               {
                 text: 'Use QR Payment',
                 onPress: () =>
-                  onPaymentComplete(false, undefined, 'SumUp unavailable - use alternative'),
+                  onPaymentComplete(_false, undefined, 'SumUp unavailable - use alternative'),
               },
               { text: 'Cancel', onPress: () => onPaymentCancel() },
             ],
@@ -99,7 +99,7 @@ const SumUpPaymentSheet: React.FC<SumUpPaymentComponentProps> = ({
 
       // Create the most basic params possible to test SumUp initialization
       const params: InitPaymentSheetProps = {
-        amount: Number(amount),
+        amount: Number(_amount),
         currencyCode: currency || 'GBP',
         tipAmount: 0,
         title: title || 'Payment',
@@ -109,32 +109,32 @@ const SumUpPaymentSheet: React.FC<SumUpPaymentComponentProps> = ({
       // Validate params before calling SumUp
       if (!params.amount || params.amount <= 0) {
         runOnMainThread(() => {
-          onPaymentComplete(false, undefined, 'Invalid payment amount');
+          onPaymentComplete(_false, undefined, 'Invalid payment amount');
         });
         return;
       }
 
-      const result: InitPaymentSheetResult = await initPaymentSheet(params);
+      const result: InitPaymentSheetResult = await initPaymentSheet(_params);
 
 
       if (result.error) {
         runOnMainThread(() => {
-          onPaymentComplete(false, undefined, result.error.message);
+          onPaymentComplete(_false, undefined, result.error.message);
         });
         return;
       }
 
       runOnMainThread(() => {
-        setIsInitialized(true);
+        setIsInitialized(_true);
       });
 
       // Automatically present the payment sheet on main thread
       runOnMainThread(() => {
         presentPayment();
       });
-    } catch (error) {
+    } catch (_error) {
       runOnMainThread(() => {
-        onPaymentComplete(false, undefined, error?.message || 'Initialization failed');
+        onPaymentComplete(_false, undefined, error?.message || 'Initialization failed');
       });
     }
   };
@@ -148,7 +148,7 @@ const SumUpPaymentSheet: React.FC<SumUpPaymentComponentProps> = ({
 
       if (!presentPaymentSheet) {
         runOnMainThread(() => {
-          onPaymentComplete(false, undefined, 'presentPaymentSheet not available');
+          onPaymentComplete(_false, undefined, 'presentPaymentSheet not available');
         });
         return;
       }
@@ -158,23 +158,23 @@ const SumUpPaymentSheet: React.FC<SumUpPaymentComponentProps> = ({
 
       if (result.error) {
         runOnMainThread(() => {
-          onPaymentComplete(false, undefined, result.error.message);
+          onPaymentComplete(_false, undefined, result.error.message);
         });
         return;
       }
 
       if (result.paymentResult) {
         runOnMainThread(() => {
-          onPaymentComplete(true, result.paymentResult.transactionCode, undefined);
+          onPaymentComplete(_true, result.paymentResult.transactionCode, undefined);
         });
       } else {
         runOnMainThread(() => {
           onPaymentCancel();
         });
       }
-    } catch (error) {
+    } catch (_error) {
       runOnMainThread(() => {
-        onPaymentComplete(false, undefined, error?.message || 'Payment failed');
+        onPaymentComplete(_false, undefined, error?.message || 'Payment failed');
       });
     }
   };
@@ -193,8 +193,8 @@ const SumUpPaymentComponent: React.FC<SumUpPaymentComponentProps> = props => {
   const [sumUpConfig, setSumUpConfig] = useState<{ appId: string; environment: string } | null>(
     null,
   );
-  const [configError, setConfigError] = useState<string | null>(null);
-  const [isLoadingConfig, setIsLoadingConfig] = useState(true);
+  const [configError, setConfigError] = useState<string | null>(_null);
+  const [isLoadingConfig, setIsLoadingConfig] = useState(_true);
 
   // Fetch SumUp configuration from backend
   useEffect(() => {
@@ -206,14 +206,14 @@ const SumUpPaymentComponent: React.FC<SumUpPaymentComponentProps> = props => {
           appId: config.appId,
           environment: config.environment,
         });
-        setIsLoadingConfig(false);
-      } catch (error) {
+        setIsLoadingConfig(_false);
+      } catch (_error) {
         setConfigError(error?.message || 'Failed to load payment configuration');
-        setIsLoadingConfig(false);
+        setIsLoadingConfig(_false);
 
         // Call the error callback
         runOnMainThread(() => {
-          props.onPaymentComplete(false, undefined, 'Failed to load payment configuration');
+          props.onPaymentComplete(_false, undefined, 'Failed to load payment configuration');
         });
       }
     };
@@ -222,7 +222,7 @@ const SumUpPaymentComponent: React.FC<SumUpPaymentComponentProps> = props => {
   }, []);
 
   // Show loading or error states
-  if (isLoadingConfig) {
+  if (_isLoadingConfig) {
     return <View style={styles.hidden} />;
   }
 
@@ -241,10 +241,10 @@ const SumUpPaymentComponent: React.FC<SumUpPaymentComponentProps> = props => {
         <SumUpPaymentSheet {...props} />
       </SumUpProvider>
     );
-  } catch (error) {
+  } catch (_error) {
     // Fallback to show error to user
     runOnMainThread(() => {
-      props.onPaymentComplete(false, undefined, 'SumUp provider initialization failed');
+      props.onPaymentComplete(_false, undefined, 'SumUp provider initialization failed');
     });
     return <View style={styles.hidden} />;
   }

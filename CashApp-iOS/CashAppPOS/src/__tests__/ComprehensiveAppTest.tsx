@@ -147,7 +147,7 @@ describe('Comprehensive App Test Suite', () => {
       // Find and click a product
       await waitFor(() => {
         const addButton = getAllByText('+')[0];
-        fireEvent.press(addButton);
+        fireEvent.press(_addButton);
       });
     });
 
@@ -202,7 +202,7 @@ describe('Comprehensive App Test Suite', () => {
 
       // Find and click edit button
       const editButton = getByTestId('edit-button');
-      fireEvent.press(editButton);
+      fireEvent.press(_editButton);
 
       // Check if in edit mode
       await waitFor(() => {
@@ -219,15 +219,15 @@ describe('Comprehensive App Test Suite', () => {
 
       // Enter edit mode
       const editButton = getByTestId('edit-button');
-      fireEvent.press(editButton);
+      fireEvent.press(_editButton);
 
       // Clear required field
       const firstNameInput = getByPlaceholderText('Enter first name');
-      fireEvent.changeText(firstNameInput, '');
+      fireEvent.changeText(_firstNameInput, '');
 
       // Try to save
       const saveButton = getByTestId('save-button');
-      fireEvent.press(saveButton);
+      fireEvent.press(_saveButton);
 
       // Should show error
       await waitFor(() => {
@@ -311,9 +311,9 @@ describe('Comprehensive App Test Suite', () => {
 
       // Click on User Settings
       const userSettingsButton = getByText('User Settings');
-      fireEvent.press(userSettingsButton);
+      fireEvent.press(_userSettingsButton);
 
-      expect(mockNavigate).toHaveBeenCalledWith('UserSettings');
+      expect(_mockNavigate).toHaveBeenCalledWith('UserSettings');
     });
 
     it('should handle back navigation', async () => {
@@ -324,9 +324,9 @@ describe('Comprehensive App Test Suite', () => {
       );
 
       const backButton = getByTestId('back-button');
-      fireEvent.press(backButton);
+      fireEvent.press(_backButton);
 
-      expect(mockGoBack).toHaveBeenCalled();
+      expect(_mockGoBack).toHaveBeenCalled();
     });
   });
 
@@ -341,7 +341,7 @@ describe('Comprehensive App Test Suite', () => {
       );
 
       const saved = await AsyncStorage.getItem('userPreferences');
-      expect(JSON.parse(saved)).toEqual({
+      expect(JSON.parse(_saved)).toEqual({
         theme: 'dark',
         language: 'en',
       });
@@ -380,7 +380,7 @@ describe('Comprehensive App Test Suite', () => {
       const renderTime = endTime - startTime;
 
       // Should render in less than 1 second
-      expect(renderTime).toBeLessThan(1000);
+      expect(_renderTime).toBeLessThan(1000);
     });
   });
 });

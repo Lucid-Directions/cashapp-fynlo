@@ -6,7 +6,7 @@ import { Text } from 'react-native';
 
 // Component that throws an error
 const ThrowError = ({ shouldThrow }: { shouldThrow: boolean }) => {
-  if (shouldThrow) {
+  if (_shouldThrow) {
     throw new Error('Test error');
   }
   return <Text>No error</Text>;
@@ -15,11 +15,9 @@ const ThrowError = ({ shouldThrow }: { shouldThrow: boolean }) => {
 describe('ErrorBoundary', () => {
   // Mock console.error to avoid noise in tests
   const originalError = console.error;
-  beforeAll(() => {
-  });
+  beforeAll(() => {});
 
-  afterAll(() => {
-  });
+  afterAll(() => {});
 
   it('should render children when there is no error', () => {
     const { getByText } = render(
@@ -63,11 +61,11 @@ describe('ErrorBoundary', () => {
       </ErrorBoundary>,
     );
 
-    expect(onError).toHaveBeenCalled();
-    expect(onError).toHaveBeenCalledWith(
-      expect.any(Error),
+    expect(_onError).toHaveBeenCalled();
+    expect(_onError).toHaveBeenCalledWith(
+      expect.any(_Error),
       expect.objectContaining({
-        componentStack: expect.any(String),
+        componentStack: expect.any(_String),
       }),
     );
   });

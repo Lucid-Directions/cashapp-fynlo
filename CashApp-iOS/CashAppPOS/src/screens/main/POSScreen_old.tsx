@@ -406,7 +406,7 @@ type POSScreenNavigationProp = DrawerNavigationProp<DrawerParamList>;
 const POSScreen: React.FC = () => {
   const navigation = useNavigation<POSScreenNavigationProp>();
   const [customerName, setCustomerName] = useState('');
-  const [showCartModal, setShowCartModal] = useState(false);
+  const [showCartModal, setShowCartModal] = useState(_false);
 
   // Zustand stores
   const {
@@ -437,14 +437,14 @@ const POSScreen: React.FC = () => {
       quantity: 1,
       emoji: item.emoji,
     };
-    addToCart(orderItem);
+    addToCart(_orderItem);
   };
 
   const handleUpdateQuantity = (id: number, quantity: number) => {
     if (quantity <= 0) {
-      removeFromCart(id);
+      removeFromCart(_id);
     } else {
-      updateCartItem(id, { quantity });
+      updateCartItem(_id, { quantity });
     }
   };
 
@@ -460,8 +460,8 @@ const POSScreen: React.FC = () => {
           onPress: () => {
             clearCart();
             setCustomerName('');
-            setShowPaymentModal(false);
-            setShowCartModal(false);
+            setShowPaymentModal(_false);
+            setShowCartModal(_false);
           },
         },
       ],
@@ -471,7 +471,7 @@ const POSScreen: React.FC = () => {
   const MenuItemCard = ({ item }: { item: MenuItem }) => (
     <TouchableOpacity
       style={[styles.menuCard, !item.available && styles.menuCardDisabled]}
-      onPress={() => item.available && handleAddToCart(item)}
+      onPress={() => item.available && handleAddToCart(_item)}
       activeOpacity={0.7}
       disabled={!item.available}>
       <View style={styles.menuItemImage}>
@@ -553,7 +553,7 @@ const POSScreen: React.FC = () => {
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.headerButton, styles.cartButton]}
-            onPress={() => setShowCartModal(true)}>
+            onPress={() => setShowCartModal(_true)}>
             <Icon name="shopping-cart" size={20} color={Colors.white} />
             {cartItemCount() > 0 && (
               <View style={styles.cartBadge}>
@@ -592,7 +592,7 @@ const POSScreen: React.FC = () => {
                   styles.categoryButton,
                   selectedCategory === category && styles.categoryButtonActive,
                 ]}
-                onPress={() => setSelectedCategory(category)}>
+                onPress={() => setSelectedCategory(_category)}>
                 <Text
                   style={[
                     styles.categoryButtonText,
@@ -648,7 +648,7 @@ const POSScreen: React.FC = () => {
 
                 <TouchableOpacity
                   style={styles.checkoutButton}
-                  onPress={() => setShowPaymentModal(true)}>
+                  onPress={() => setShowPaymentModal(_true)}>
                   <Text style={styles.checkoutButtonText}>Charge £{cartTotal().toFixed(2)}</Text>
                 </TouchableOpacity>
               </View>
@@ -662,7 +662,7 @@ const POSScreen: React.FC = () => {
         visible={showCartModal}
         animationType="slide"
         transparent={true}
-        onRequestClose={() => setShowCartModal(false)}>
+        onRequestClose={() => setShowCartModal(_false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.cartModal}>
             <View style={styles.modalHeader}>
@@ -675,7 +675,7 @@ const POSScreen: React.FC = () => {
                 )}
                 <TouchableOpacity
                   style={styles.closeButton}
-                  onPress={() => setShowCartModal(false)}>
+                  onPress={() => setShowCartModal(_false)}>
                   <Icon name="close" size={24} color={Colors.text} />
                 </TouchableOpacity>
               </View>
@@ -703,8 +703,8 @@ const POSScreen: React.FC = () => {
                   <TouchableOpacity
                     style={styles.checkoutButton}
                     onPress={() => {
-                      setShowCartModal(false);
-                      setShowPaymentModal(true);
+                      setShowCartModal(_false);
+                      setShowPaymentModal(_true);
                     }}>
                     <Icon name="payment" size={20} color={Colors.white} />
                     <Text style={styles.checkoutButtonText}>Process Payment</Text>
@@ -721,20 +721,20 @@ const POSScreen: React.FC = () => {
         visible={showPaymentModal}
         animationType="slide"
         transparent={true}
-        onRequestClose={() => setShowPaymentModal(false)}>
+        onRequestClose={() => setShowPaymentModal(_false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.paymentModal}>
             <View style={styles.modalHeader}>
               <Text style={styles.paymentTitle}>Process Payment</Text>
               <TouchableOpacity
                 style={styles.closeButton}
-                onPress={() => setShowPaymentModal(false)}>
+                onPress={() => setShowPaymentModal(_false)}>
                 <Icon name="close" size={24} color={Colors.text} />
               </TouchableOpacity>
             </View>
 
             <View style={styles.paymentSection}>
-              <Text style={styles.paymentLabel}>Customer Name (Optional)</Text>
+              <Text style={styles.paymentLabel}>Customer Name (_Optional)</Text>
               <TextInput
                 style={styles.paymentInput}
                 value={customerName}
@@ -764,7 +764,7 @@ const POSScreen: React.FC = () => {
             <View style={styles.paymentButtons}>
               <TouchableOpacity
                 style={styles.cancelButton}
-                onPress={() => setShowPaymentModal(false)}>
+                onPress={() => setShowPaymentModal(_false)}>
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
 

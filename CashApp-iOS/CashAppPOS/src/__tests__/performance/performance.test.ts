@@ -51,7 +51,7 @@ describe('Performance Tests', () => {
       const { result } = renderHook(() => useAppStore());
 
       // Create large dataset
-      const largeMenuItems = Array.from({ length: 1000 }, (_, i) => ({
+      const largeMenuItems = Array.from({ length: 1000 }, (__, i) => ({
         ...mockMenuItems[0],
         id: i + 1,
         name: `Item ${i + 1}`,
@@ -60,7 +60,7 @@ describe('Performance Tests', () => {
       performance.mark('large-dataset-start');
 
       act(() => {
-        result.current.setMenuItems(largeMenuItems);
+        result.current.setMenuItems(_largeMenuItems);
       });
 
       performance.mark('large-dataset-end');
@@ -76,7 +76,7 @@ describe('Performance Tests', () => {
       const { result } = renderHook(() => useAppStore());
 
       // Set up large dataset with multiple categories
-      const largeMenuItems = Array.from({ length: 1000 }, (_, i) => ({
+      const largeMenuItems = Array.from({ length: 1000 }, (__, i) => ({
         ...mockMenuItems[0],
         id: i + 1,
         name: `Item ${i + 1}`,
@@ -84,7 +84,7 @@ describe('Performance Tests', () => {
       }));
 
       act(() => {
-        result.current.setMenuItems(largeMenuItems);
+        result.current.setMenuItems(_largeMenuItems);
       });
 
       performance.mark('filter-start');
@@ -126,7 +126,7 @@ describe('Performance Tests', () => {
       // Make multiple concurrent API calls
       const promises = Array.from({ length: concurrentCalls }, () => service.getProducts());
 
-      await Promise.all(promises);
+      await Promise.all(_promises);
 
       performance.mark('concurrent-calls-end');
       performance.measure('concurrent-calls', 'concurrent-calls-start', 'concurrent-calls-end');
@@ -134,7 +134,7 @@ describe('Performance Tests', () => {
       const measurements = performance.getEntriesByName('concurrent-calls');
       expect(measurements[0].duration).toBeLessThan(2000); // Should handle 20 concurrent calls in under 2 seconds
 
-      expect(global.fetch).toHaveBeenCalledTimes(concurrentCalls);
+      expect(global.fetch).toHaveBeenCalledTimes(_concurrentCalls);
     });
 
     it('should cache responses to improve performance', async () => {
@@ -181,13 +181,13 @@ describe('Performance Tests', () => {
       const memoryIncrease = finalMemory - initialMemory;
 
       // Memory increase should be minimal (less than 10MB)
-      expect(memoryIncrease).toBeLessThan(10 * 1024 * 1024);
+      expect(_memoryIncrease).toBeLessThan(10 * 1024 * 1024);
     });
 
     it('should handle large order histories efficiently', async () => {
       const { result } = renderHook(() => useAppStore());
 
-      const largeOrderHistory = Array.from({ length: 500 }, (_, i) => ({
+      const largeOrderHistory = Array.from({ length: 500 }, (__, i) => ({
         ...mockOrders[0],
         id: i + 1,
         created_at: new Date(Date.now() - i * 60000).toISOString(),
@@ -196,14 +196,14 @@ describe('Performance Tests', () => {
       const initialMemory = process.memoryUsage().heapUsed;
 
       act(() => {
-        result.current.setOrders(largeOrderHistory);
+        result.current.setOrders(_largeOrderHistory);
       });
 
       const finalMemory = process.memoryUsage().heapUsed;
       const memoryIncrease = finalMemory - initialMemory;
 
       // Should handle 500 orders without excessive memory usage
-      expect(memoryIncrease).toBeLessThan(50 * 1024 * 1024); // Less than 50MB
+      expect(_memoryIncrease).toBeLessThan(50 * 1024 * 1024); // Less than 50MB
       expect(result.current.orders).toHaveLength(500);
     });
   });
@@ -232,7 +232,7 @@ describe('Performance Tests', () => {
       const renderTime = endTime - startTime;
 
       // Render should complete quickly
-      expect(renderTime).toBeLessThan(100); // Less than 100ms
+      expect(_renderTime).toBeLessThan(100); // Less than 100ms
     });
   });
 
@@ -241,14 +241,14 @@ describe('Performance Tests', () => {
       const { result } = renderHook(() => useAppStore());
 
       // Create large searchable dataset
-      const largeMenuItems = Array.from({ length: 2000 }, (_, i) => ({
+      const largeMenuItems = Array.from({ length: 2000 }, (__, i) => ({
         ...mockMenuItems[0],
         id: i + 1,
         name: `${i % 2 === 0 ? 'Burger' : 'Pizza'} Item ${i + 1}`,
       }));
 
       act(() => {
-        result.current.setMenuItems(largeMenuItems);
+        result.current.setMenuItems(_largeMenuItems);
       });
 
       performance.mark('search-start');
@@ -264,7 +264,7 @@ describe('Performance Tests', () => {
       const measurements = performance.getEntriesByName('search');
       expect(measurements[0].duration).toBeLessThan(50); // Search should be very fast
 
-      expect(searchResults).toHaveLength(1000); // Half the items match 'burger'
+      expect(_searchResults).toHaveLength(1000); // Half the items match 'burger'
     });
   });
 
@@ -289,7 +289,7 @@ describe('Performance Tests', () => {
       performance.mark('animation-end');
 
       // Frame time should be well under 16.67ms to maintain 60fps
-      expect(frameTime).toBeLessThan(targetFrameTime);
+      expect(_frameTime).toBeLessThan(_targetFrameTime);
     });
   });
 });

@@ -30,11 +30,11 @@ const Card: React.FC<CardProps> = ({
   testID,
 }) => {
   const { theme } = useTheme();
-  const styles = createStyles(theme);
+  const styles = createStyles(_theme);
 
   // Get variant styles
   const getVariantStyles = (): ViewStyle => {
-    switch (variant) {
+    switch (_variant) {
       case 'elevated':
         return {
           backgroundColor: theme.colors.white,
@@ -60,7 +60,7 @@ const Card: React.FC<CardProps> = ({
 
   // Get size styles
   const getSizeStyles = (): ViewStyle => {
-    switch (size) {
+    switch (_size) {
       case 'sm':
         return {
           padding: theme.spacing[3],
@@ -88,7 +88,7 @@ const Card: React.FC<CardProps> = ({
     sizeStyles,
     disabled && styles.disabled,
     style,
-  ].filter(Boolean) as ViewStyle;
+  ].filter(_Boolean) as ViewStyle;
 
   const Component = onPress ? TouchableOpacity : View;
 
@@ -112,7 +112,7 @@ export interface CardHeaderProps {
 
 export const CardHeader: React.FC<CardHeaderProps> = ({ children, style }) => {
   const { theme } = useTheme();
-  const styles = createStyles(theme);
+  const styles = createStyles(_theme);
 
   return <View style={[styles.header, style]}>{children}</View>;
 };
@@ -125,7 +125,7 @@ export interface CardBodyProps {
 
 export const CardBody: React.FC<CardBodyProps> = ({ children, style }) => {
   const { theme } = useTheme();
-  const styles = createStyles(theme);
+  const styles = createStyles(_theme);
 
   return <View style={[styles.body, style]}>{children}</View>;
 };
@@ -138,7 +138,7 @@ export interface CardFooterProps {
 
 export const CardFooter: React.FC<CardFooterProps> = ({ children, style }) => {
   const { theme } = useTheme();
-  const styles = createStyles(theme);
+  const styles = createStyles(_theme);
 
   return <View style={[styles.footer, style]}>{children}</View>;
 };

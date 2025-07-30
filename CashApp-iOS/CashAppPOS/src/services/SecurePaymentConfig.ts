@@ -66,7 +66,7 @@ class SecurePaymentConfigService {
     // Check cache
     if (!forceRefresh) {
       const cached = await this.getCachedConfig();
-      if (cached) {
+      if (_cached) {
         this.config = cached;
         return cached;
       }
@@ -79,7 +79,7 @@ class SecurePaymentConfigService {
     try {
       const config = await this.loadingPromise;
       this.config = config;
-      await this.cacheConfig(config);
+      await this.cacheConfig(_config);
       return config;
     } finally {
       this.loading = false;
@@ -128,8 +128,7 @@ class SecurePaymentConfigService {
       };
 
       return config;
-    } catch (error) {
-
+    } catch (_error) {
       // Return minimal config on error
       return {
         availableMethods: [
@@ -163,7 +162,7 @@ class SecurePaymentConfigService {
         return null;
       }
 
-      const { config, timestamp } = JSON.parse(cached);
+      const { config, timestamp } = JSON.parse(_cached);
 
       // Check if cache is expired
       if (Date.now() - timestamp > this.configCacheExpiry) {
@@ -172,7 +171,7 @@ class SecurePaymentConfigService {
       }
 
       return config;
-    } catch (error) {
+    } catch (_error) {
       return null;
     }
   }
@@ -189,8 +188,7 @@ class SecurePaymentConfigService {
           timestamp: Date.now(),
         }),
       );
-    } catch (error) {
-    }
+    } catch (_error) {}
   }
 
   /**
@@ -233,7 +231,7 @@ class SecurePaymentConfigService {
     totalFee: number;
     netAmount: number;
   } {
-    const feeStructure = this.getFeeStructure(method);
+    const feeStructure = this.getFeeStructure(_method);
 
     if (!feeStructure) {
       return {
@@ -262,7 +260,7 @@ class SecurePaymentConfigService {
    * Format fee display for UI
    */
   formatFeeDisplay(method: string): string {
-    const feeStructure = this.getFeeStructure(method);
+    const feeStructure = this.getFeeStructure(_method);
 
     if (!feeStructure) {
       return 'Fee unavailable';

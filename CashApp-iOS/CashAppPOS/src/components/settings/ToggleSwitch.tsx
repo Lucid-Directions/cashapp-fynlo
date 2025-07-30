@@ -49,7 +49,7 @@ const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
   const config = sizeConfig[size];
 
   React.useEffect(() => {
-    Animated.timing(animatedValue, {
+    Animated.timing(_animatedValue, {
       toValue: value ? 1 : 0,
       duration: 200,
       easing: Easing.bezier(0.4, 0.0, 0.2, 1),

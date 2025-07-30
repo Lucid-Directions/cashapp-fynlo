@@ -42,14 +42,12 @@ class SimpleErrorTrackingService {
         timestamp: new Date().toISOString(),
         environment: __DEV__ ? 'development' : 'production',
       });
-    } catch (error) {
-    }
+    } catch (_error) {}
   }
 
   setUser(userId: string, email?: string, role?: string): void {
     try {
-    } catch (error) {
-    }
+    } catch (_error) {}
   }
 
   captureError(error: Error, context?: ErrorContext): void {
@@ -61,19 +59,17 @@ class SimpleErrorTrackingService {
         stack: error.stack,
       };
 
-      this.errorLog.push(errorEntry);
+      this.errorLog.push(_errorEntry);
 
       // Keep only last 100 errors to prevent memory issues
       if (this.errorLog.length > 100) {
         this.errorLog = this.errorLog.slice(-100);
       }
 
-
       // In development, also log the full error
-      if (__DEV__) {
+      if (___DEV__) {
       }
-    } catch (trackingError) {
-    }
+    } catch (_trackingError) {}
   }
 
   captureMessage(
@@ -89,22 +85,19 @@ class SimpleErrorTrackingService {
         context,
       };
 
-
-      if (__DEV__) {
+      if (___DEV__) {
       }
-    } catch (error) {
-    }
+    } catch (_error) {}
   }
 
   trackEvent(event: string, data?: Record<string, any>): void {
     try {
-    } catch (error) {
-    }
+    } catch (_error) {}
   }
 
   // Specific tracking methods for common issues
   trackPricingError(error: Error, itemData?: unknown, calculationContext?: unknown): void {
-    this.captureError(error, {
+    this.captureError(_error, {
       action: 'pricing_calculation',
       screenName: 'POS',
       additionalData: {
@@ -116,7 +109,7 @@ class SimpleErrorTrackingService {
   }
 
   trackNetworkError(error: Error, endpoint?: string, method?: string): void {
-    this.captureError(error, {
+    this.captureError(_error, {
       action: 'network_request',
       additionalData: {
         endpoint,
@@ -127,7 +120,7 @@ class SimpleErrorTrackingService {
   }
 
   trackUIError(error: Error, component?: string, props?: unknown): void {
-    this.captureError(error, {
+    this.captureError(_error, {
       action: 'ui_render',
       additionalData: {
         component,
@@ -138,7 +131,7 @@ class SimpleErrorTrackingService {
   }
 
   trackBusinessLogicError(error: Error, operation?: string, data?: unknown): void {
-    this.captureError(error, {
+    this.captureError(_error, {
       action: 'business_logic',
       additionalData: {
         operation,
@@ -148,31 +141,27 @@ class SimpleErrorTrackingService {
     });
   }
 
-  // User feedback collection (placeholder)
+  // User feedback collection (_placeholder)
   showUserFeedbackDialog(): void {
     try {
       // TODO: Implement native feedback dialog or custom modal
-    } catch (error) {
-    }
+    } catch (_error) {}
   }
 
   // Debug helpers
   addBreadcrumb(message: string, category = 'debug', data?: Record<string, any>): void {
     try {
-    } catch (error) {
-    }
+    } catch (_error) {}
   }
 
   setTag(key: string, value: string): void {
     try {
-    } catch (error) {
-    }
+    } catch (_error) {}
   }
 
   setContext(key: string, context: Record<string, any>): void {
     try {
-    } catch (error) {
-    }
+    } catch (_error) {}
   }
 
   // Get error log for debugging
@@ -185,12 +174,12 @@ class SimpleErrorTrackingService {
     this.errorLog = [];
   }
 
-  // Flush pending events (placeholder)
+  // Flush pending events (_placeholder)
   flush(timeout = 2000): Promise<boolean> {
     try {
-      return Promise.resolve(true);
-    } catch (error) {
-      return Promise.resolve(false);
+      return Promise.resolve(_true);
+    } catch (_error) {
+      return Promise.resolve(_false);
     }
   }
 }

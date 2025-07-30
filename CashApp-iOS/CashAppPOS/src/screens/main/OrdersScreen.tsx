@@ -20,10 +20,10 @@ import EmptyState from '../../components/common/EmptyState';
 const OrdersScreen: React.FC = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
-  const styles = useThemedStyles(createStyles);
+  const styles = useThemedStyles(_createStyles);
   const [orders, setOrders] = useState<Order[]>([]);
-  const [refreshing, setRefreshing] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(_false);
+  const [loading, setLoading] = useState(_true);
   const [filter, setFilter] = useState<'all' | 'preparing' | 'ready' | 'completed'>('all');
   const orderService = OrderService.getInstance();
 
@@ -54,31 +54,30 @@ const OrdersScreen: React.FC = () => {
         limit: 50,
         offset: 0,
       });
-      setOrders(fetchedOrders);
-    } catch (error) {
+      setOrders(_fetchedOrders);
+    } catch (_error) {
       // Keep existing orders on error
     }
   };
 
   const onRefresh = async () => {
-    setRefreshing(true);
+    setRefreshing(_true);
     await loadOrders();
-    setRefreshing(false);
+    setRefreshing(_false);
   };
 
   // Load orders on component mount
   useEffect(() => {
     const initializeOrders = async () => {
-      setLoading(true);
+      setLoading(_true);
       await loadOrders();
-      setLoading(false);
+      setLoading(_false);
     };
 
     initializeOrders();
 
     // Subscribe to real-time order updates
-    const unsubscribe = orderService.subscribeToOrderEvents((event, data) => {
-
+    const unsubscribe = orderService.subscribeToOrderEvents((_event, data) => {
       if (event === 'order_created') {
         setOrders(prevOrders => [data, ...prevOrders]);
       } else if (event === 'order_updated') {
@@ -119,7 +118,7 @@ const OrdersScreen: React.FC = () => {
   const OrderCard = ({ order }: { order: Order }) => (
     <TouchableOpacity
       style={styles.orderCard}
-      onPress={() => handleOrderPress(order)}
+      onPress={() => handleOrderPress(_order)}
       activeOpacity={0.7}>
       <View style={styles.orderHeader}>
         <View style={styles.orderInfo}>
@@ -194,7 +193,7 @@ const OrdersScreen: React.FC = () => {
   }) => (
     <TouchableOpacity
       style={[styles.filterButton, filter === value && styles.filterButtonActive]}
-      onPress={() => setFilter(value)}>
+      onPress={() => setFilter(_value)}>
       <Text style={[styles.filterButtonText, filter === value && styles.filterButtonTextActive]}>
         {title}
       </Text>

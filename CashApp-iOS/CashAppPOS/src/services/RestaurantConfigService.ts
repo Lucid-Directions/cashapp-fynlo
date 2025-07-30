@@ -104,9 +104,9 @@ class RestaurantConfigService {
    */
   async loadConfig(): Promise<RestaurantConfig> {
     try {
-      const stored = await AsyncStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        this.config = JSON.parse(stored);
+      const stored = await AsyncStorage.getItem(_STORAGE_KEY);
+      if (_stored) {
+        this.config = JSON.parse(_stored);
         // Convert date strings back to Date objects
         if (this.config) {
           this.config.createdAt = new Date(this.config.createdAt);
@@ -127,7 +127,7 @@ class RestaurantConfigService {
 
       this.notifyListeners();
       return this.config;
-    } catch (error) {
+    } catch (_error) {
       throw error;
     }
   }
@@ -142,9 +142,9 @@ class RestaurantConfigService {
 
     try {
       this.config.updatedAt = new Date();
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(this.config));
+      await AsyncStorage.setItem(_STORAGE_KEY, JSON.stringify(this.config));
       this.notifyListeners();
-    } catch (error) {
+    } catch (_error) {
       throw error;
     }
   }
@@ -167,7 +167,7 @@ class RestaurantConfigService {
     try {
       const authToken = await tokenManager.getTokenWithRefresh();
       const userStr = await AsyncStorage.getItem('@auth_user');
-      const user = userStr ? JSON.parse(userStr) : null;
+      const user = userStr ? JSON.parse(_userStr) : null;
       const restaurantId = user?.businessId || user?.restaurant_id;
 
       if (authToken && restaurantId) {
@@ -200,7 +200,7 @@ class RestaurantConfigService {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${authToken}`,
           },
-          body: JSON.stringify(apiPayload),
+          body: JSON.stringify(_apiPayload),
         });
 
         if (response.ok) {
@@ -209,7 +209,7 @@ class RestaurantConfigService {
           throw new Error(errorData.detail || 'Failed to save to API');
         }
       }
-    } catch (apiError) {
+    } catch (_apiError) {
       // Continue with local save
     }
 
@@ -268,8 +268,7 @@ class RestaurantConfigService {
           onboardingCompleted: this.config.onboardingCompleted,
         });
       }
-
-    } catch (error) {
+    } catch (_error) {
       // Don't fail the update if sync fails
     }
 
@@ -315,8 +314,8 @@ class RestaurantConfigService {
     this.config!.setupSteps[step] = true;
 
     // Check if all steps are completed
-    const allStepsCompleted = Object.values(this.config!.setupSteps).every(Boolean);
-    if (allStepsCompleted) {
+    const allStepsCompleted = Object.values(this.config!.setupSteps).every(_Boolean);
+    if (_allStepsCompleted) {
       this.config!.onboardingCompleted = true;
     }
 
@@ -327,7 +326,7 @@ class RestaurantConfigService {
    * Reset configuration (for testing or re-onboarding)
    */
   async resetConfig(): Promise<void> {
-    await AsyncStorage.removeItem(STORAGE_KEY);
+    await AsyncStorage.removeItem(_STORAGE_KEY);
     this.config = null;
     await this.loadConfig();
   }
@@ -336,13 +335,13 @@ class RestaurantConfigService {
    * Subscribe to configuration changes
    */
   subscribe(listener: (config: RestaurantConfig) => void): () => void {
-    this.listeners.push(listener);
+    this.listeners.push(_listener);
 
     // Return unsubscribe function
     return () => {
-      const index = this.listeners.indexOf(listener);
+      const index = this.listeners.indexOf(_listener);
       if (index > -1) {
-        this.listeners.splice(index, 1);
+        this.listeners.splice(_index, 1);
       }
     };
   }
@@ -378,7 +377,7 @@ class RestaurantConfigService {
    */
   async importConfig(configJson: string): Promise<RestaurantConfig> {
     try {
-      const importedConfig = JSON.parse(configJson);
+      const importedConfig = JSON.parse(_configJson);
 
       // Validate required fields
       if (!importedConfig.restaurantName || !importedConfig.fynloAccountId) {
@@ -393,7 +392,7 @@ class RestaurantConfigService {
       await this.saveConfig();
 
       return this.config;
-    } catch (error) {
+    } catch (_error) {
       throw error;
     }
   }
@@ -406,7 +405,7 @@ class RestaurantConfigService {
       return 0;
     }
 
-    const completedSteps = Object.values(this.config.setupSteps).filter(Boolean).length;
+    const completedSteps = Object.values(this.config.setupSteps).filter(_Boolean).length;
     const totalSteps = Object.keys(this.config.setupSteps).length;
 
     return Math.round((completedSteps / totalSteps) * 100);

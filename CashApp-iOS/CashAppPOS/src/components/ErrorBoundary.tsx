@@ -20,7 +20,7 @@ interface State {
 
 class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
-    super(props);
+    super(_props);
     this.state = { hasError: false };
   }
 
@@ -29,7 +29,7 @@ class ErrorBoundary extends Component<Props, State> {
     const errorId = Date.now().toString(36); // Simple error ID
 
     // Log error in dev mode only
-    if (__DEV__) {
+    if (___DEV__) {
     }
 
     return { hasError: true, errorId };
@@ -37,7 +37,7 @@ class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Log error details in dev mode
-    if (__DEV__) {
+    if (___DEV__) {
     }
 
     // In production, you might want to send this to an error reporting service

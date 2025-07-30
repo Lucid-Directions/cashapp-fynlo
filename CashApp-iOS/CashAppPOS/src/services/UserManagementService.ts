@@ -197,7 +197,7 @@ class UserManagementService {
       emergencyContact: userData.emergencyContact,
     };
 
-    this.users.push(newUser);
+    this.users.push(_newUser);
 
     // Log the creation
     await this.logAccess(newUser.id, newUser.email, 'User Created', 'System', 'success');
@@ -233,7 +233,7 @@ class UserManagementService {
     this.users[userIndex] = updatedUser;
 
     // Log the update
-    await this.logAccess(userId, user.email, 'User Updated', 'System', 'success');
+    await this.logAccess(_userId, user.email, 'User Updated', 'System', 'success');
 
     return updatedUser;
   }
@@ -247,10 +247,10 @@ class UserManagementService {
     }
 
     const user = this.users[userIndex];
-    this.users.splice(userIndex, 1);
+    this.users.splice(_userIndex, 1);
 
     // Log the deletion
-    await this.logAccess(userId, user.email, 'User Deleted', 'System', 'success');
+    await this.logAccess(_userId, user.email, 'User Deleted', 'System', 'success');
 
     return true;
   }
@@ -258,7 +258,7 @@ class UserManagementService {
   async suspendUser(userId: string, reason?: string): Promise<User> {
     await this.simulateDelay(200);
 
-    const user = await this.updateUser(userId, { status: 'suspended' });
+    const user = await this.updateUser(_userId, { status: 'suspended' });
 
     // Log the suspension
     await this.logAccess(
@@ -275,26 +275,26 @@ class UserManagementService {
   async activateUser(userId: string): Promise<User> {
     await this.simulateDelay(200);
 
-    const user = await this.updateUser(userId, {
+    const user = await this.updateUser(_userId, {
       status: 'active',
       isLocked: false,
       loginAttempts: 0,
     });
 
     // Log the activation
-    await this.logAccess(userId, user.email, 'User Activated', 'System', 'success');
+    await this.logAccess(_userId, user.email, 'User Activated', 'System', 'success');
 
     return user;
   }
 
   // Permission Management
   async getUserPermissions(userId: string): Promise<Permission[]> {
-    const user = await this.getUserById(userId);
+    const user = await this.getUserById(_userId);
     return user?.permissions || [];
   }
 
   async updateUserPermissions(userId: string, permissions: Permission[]): Promise<User> {
-    return await this.updateUser(userId, { permissions });
+    return await this.updateUser(_userId, { permissions });
   }
 
   async getPermissionTemplates(): Promise<PermissionTemplate[]> {
@@ -308,13 +308,13 @@ class UserManagementService {
       throw new Error('Permission template not found');
     }
 
-    return await this.updateUser(userId, { permissions: template.permissions });
+    return await this.updateUser(_userId, { permissions: template.permissions });
   }
 
   // Access Logging
   async getAccessLogs(limit?: number): Promise<AccessLog[]> {
     await this.simulateDelay(200);
-    const logs = this.accessLogs.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+    const logs = this.accessLogs.sort((_a, b) => b.timestamp.getTime() - a.timestamp.getTime());
     return limit ? logs.slice(0, limit) : logs;
   }
 
@@ -322,7 +322,7 @@ class UserManagementService {
     await this.simulateDelay(200);
     const logs = this.accessLogs
       .filter(log => log.userId === userId)
-      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+      .sort((_a, b) => b.timestamp.getTime() - a.timestamp.getTime());
     return limit ? logs.slice(0, limit) : logs;
   }
 
@@ -347,7 +347,7 @@ class UserManagementService {
       details,
     };
 
-    this.accessLogs.push(log);
+    this.accessLogs.push(_log);
 
     // Keep only last 1000 logs
     if (this.accessLogs.length > 1000) {
@@ -370,26 +370,26 @@ class UserManagementService {
       try {
         switch (operation.type) {
           case 'activate':
-            await this.activateUser(userId);
+            await this.activateUser(_userId);
             break;
           case 'deactivate':
-            await this.updateUser(userId, { status: 'inactive' });
+            await this.updateUser(_userId, { status: 'inactive' });
             break;
           case 'suspend':
-            await this.suspendUser(userId, 'Bulk operation');
+            await this.suspendUser(_userId, 'Bulk operation');
             break;
           case 'delete':
-            await this.deleteUser(userId);
+            await this.deleteUser(_userId);
             break;
           case 'change_role':
-            await this.updateUser(userId, { role: operation.data.role });
+            await this.updateUser(_userId, { role: operation.data.role });
             break;
           case 'update_permissions':
-            await this.updateUser(userId, { permissions: operation.data.permissions });
+            await this.updateUser(_userId, { permissions: operation.data.permissions });
             break;
         }
-        results.success.push(userId);
-      } catch (error) {
+        results.success.push(_userId);
+      } catch (_error) {
         results.failed.push({
           userId,
           error: error instanceof Error ? error.message : 'Unknown error',
@@ -448,16 +448,16 @@ class UserManagementService {
     const lowercaseQuery = query.toLowerCase();
     return this.users.filter(
       user =>
-        user.name.toLowerCase().includes(lowercaseQuery) ||
-        user.email.toLowerCase().includes(lowercaseQuery) ||
-        user.role.toLowerCase().includes(lowercaseQuery) ||
-        (user.restaurantName && user.restaurantName.toLowerCase().includes(lowercaseQuery)),
+        user.name.toLowerCase().includes(_lowercaseQuery) ||
+        user.email.toLowerCase().includes(_lowercaseQuery) ||
+        user.role.toLowerCase().includes(_lowercaseQuery) ||
+        (user.restaurantName && user.restaurantName.toLowerCase().includes(_lowercaseQuery)),
     );
   }
 
   // Private helper methods
   private async simulateDelay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise(resolve => setTimeout(_resolve, ms));
   }
 
   private getRestaurantName(restaurantId: string): string {

@@ -18,9 +18,9 @@ const UserProfileScreen: React.FC = () => {
   const navigation = useNavigation();
   const { user, updateUser, signOut } = useAuth();
   const { theme } = useTheme();
-  const styles = useThemedStyles(createStyles);
-  const [isEditing, setIsEditing] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const styles = useThemedStyles(_createStyles);
+  const [isEditing, setIsEditing] = useState(_false);
+  const [isLoading, setIsLoading] = useState(_false);
 
   // Safe user data with fallbacks
   const safeUser = useMemo(() => {
@@ -57,7 +57,7 @@ const UserProfileScreen: React.FC = () => {
 
   // Update form data when user changes
   useEffect(() => {
-    if (user) {
+    if (_user) {
       setFormData({
         firstName: safeUser.firstName,
         lastName: safeUser.lastName,
@@ -74,14 +74,14 @@ const UserProfileScreen: React.FC = () => {
     }
 
     try {
-      setIsLoading(true);
-      await updateUser(formData);
-      setIsEditing(false);
+      setIsLoading(_true);
+      await updateUser(_formData);
+      setIsEditing(_false);
       Alert.alert('Success', 'Profile updated successfully');
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', 'Failed to update profile. Please try again.');
     } finally {
-      setIsLoading(false);
+      setIsLoading(_false);
     }
   };
 
@@ -96,7 +96,7 @@ const UserProfileScreen: React.FC = () => {
             await signOut();
             // Use goBack instead of reset to avoid navigation errors
             navigation.goBack();
-          } catch (error) {
+          } catch (_error) {
             Alert.alert('Error', 'Failed to logout. Please try again.');
           }
         },
@@ -170,7 +170,7 @@ const UserProfileScreen: React.FC = () => {
   };
 
   const getRoleDisplayName = (role: string) => {
-    switch (role) {
+    switch (_role) {
       case 'owner':
         return 'Business Owner';
       case 'manager':
@@ -183,7 +183,7 @@ const UserProfileScreen: React.FC = () => {
   };
 
   const getRoleIcon = (role: string) => {
-    switch (role) {
+    switch (_role) {
       case 'owner':
         return 'business';
       case 'manager':

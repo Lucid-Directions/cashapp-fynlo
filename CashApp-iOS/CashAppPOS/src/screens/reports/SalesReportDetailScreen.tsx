@@ -28,10 +28,10 @@ const isSmallDevice = screenWidth < 380;
 
 // Responsive font sizes
 const getFontSize = (base: number) => {
-  if (isTablet) {
+  if (_isTablet) {
     return base * 1.2;
   }
-  if (isSmallDevice) {
+  if (_isSmallDevice) {
     return base * 0.9;
   }
   return base;
@@ -74,8 +74,8 @@ const SalesReportDetailScreen = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
   const [salesData, setSalesData] = useState<SalesData[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(_true);
+  const [error, setError] = useState<string | null>(_null);
   const [selectedPeriod, setSelectedPeriod] = useState('today');
   const [totalSales, setTotalSales] = useState(0);
   const [totalTransactions, setTotalTransactions] = useState(0);
@@ -91,28 +91,28 @@ const SalesReportDetailScreen = () => {
     if (ENV.FEATURE_REPORTS) {
       loadSalesData();
     } else {
-      setIsLoading(false);
+      setIsLoading(_false);
     }
   }, [selectedPeriod]);
 
   const loadSalesData = async () => {
     // Modified
-    setIsLoading(true);
-    setError(null);
+    setIsLoading(_true);
+    setError(_null);
     try {
       const dataService = DataService.getInstance();
       // Assuming getSalesReportDetail returns data in SalesData[] shape for the selectedPeriod
       // Or an object containing SalesData[] and pre-calculated totals.
       // For now, assume it returns SalesData[] and we recalculate totals.
-      const data = await dataService.getSalesReportDetail(selectedPeriod);
+      const data = await dataService.getSalesReportDetail(_selectedPeriod);
       setSalesData(data || []);
 
       // Recalculate totals if service returns raw data
-      if (data) {
-        const total = data.reduce((sum, day) => sum + day.dailySales, 0);
-        const totalTrans = data.reduce((sum, day) => sum + day.transactions, 0);
-        setTotalSales(total);
-        setTotalTransactions(totalTrans);
+      if (_data) {
+        const total = data.reduce((_sum, day) => sum + day.dailySales, 0);
+        const totalTrans = data.reduce((_sum, day) => sum + day.transactions, 0);
+        setTotalSales(_total);
+        setTotalTransactions(_totalTrans);
       } else {
         setTotalSales(0);
         setTotalTransactions(0);
@@ -123,7 +123,7 @@ const SalesReportDetailScreen = () => {
       setTotalSales(0);
       setTotalTransactions(0);
     } finally {
-      setIsLoading(false);
+      setIsLoading(_false);
     }
   };
 
@@ -156,9 +156,9 @@ const SalesReportDetailScreen = () => {
       });
     });
 
-    return Object.entries(itemMap)
+    return Object.entries(_itemMap)
       .map(([name, data]) => ({ name, ...data }))
-      .sort((a, b) => b.sold - a.sold)
+      .sort((_a, b) => b.sold - a.sold)
       .slice(0, 5);
   };
 
@@ -201,11 +201,11 @@ const SalesReportDetailScreen = () => {
     return <ComingSoon />;
   }
 
-  if (isLoading) {
+  if (_isLoading) {
     return <LoadingView message="Loading Sales Report..." />;
   }
 
-  if (error) {
+  if (_error) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
@@ -250,7 +250,7 @@ const SalesReportDetailScreen = () => {
             <TouchableOpacity
               key={period}
               style={[styles.periodButton, selectedPeriod === period && styles.periodButtonActive]}
-              onPress={() => setSelectedPeriod(period)}>
+              onPress={() => setSelectedPeriod(_period)}>
               <Text
                 style={[styles.periodText, selectedPeriod === period && styles.periodTextActive]}>
                 {period.charAt(0).toUpperCase() + period.slice(1)}
@@ -317,7 +317,7 @@ const SalesReportDetailScreen = () => {
         {/* Summary Cards */}
         <View style={styles.summaryContainer}>
           <View style={styles.summaryCard}>
-            <Text style={styles.summaryValue}>{formatCurrency(totalSales)}</Text>
+            <Text style={styles.summaryValue}>{formatCurrency(_totalSales)}</Text>
             <Text style={styles.summaryLabel}>Total Sales</Text>
             <View style={[styles.trendIndicator, { backgroundColor: Colors.success }]}>
               <Icon name="trending-up" size={16} color={Colors.white} />
@@ -351,7 +351,7 @@ const SalesReportDetailScreen = () => {
           <Text style={styles.sectionTitle}>Daily Sales Trend</Text>
           <View style={styles.chartContainer}>
             <View style={styles.chartArea}>
-              {salesData.slice(-7).map((day, index) => {
+              {salesData.slice(-7).map((_day, index) => {
                 const maxSales = Math.max(...salesData.slice(-7).map(d => d.dailySales));
                 const height = (day.dailySales / maxSales) * 120;
 
@@ -380,7 +380,7 @@ const SalesReportDetailScreen = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Top Selling Items</Text>
           <View style={styles.card}>
-            {topItems.map((item, index) => (
+            {topItems.map((_item, index) => (
               <View key={index} style={styles.itemRow}>
                 <View style={styles.itemRank}>
                   <Text style={styles.rankText}>{index + 1}</Text>

@@ -40,7 +40,7 @@ describe('CartIcon', () => {
 
     // Badge should not be present
     const badge = screen.queryByText(/\d+/); // Query for any digit representing the count
-    expect(badge).toBeNull();
+    expect(_badge).toBeNull();
   });
 
   it('renders with alertSoft color and badge when itemCount is greater than 0', () => {
@@ -52,7 +52,7 @@ describe('CartIcon', () => {
 
     // Badge should be visible with the correct count
     const badgeText = screen.getByText(itemCount.toString());
-    expect(badgeText).toBeDefined();
+    expect(_badgeText).toBeDefined();
 
     // Check badge background color by inspecting its parent style
     const badgeView = screen.getByTestId('cart-badge');
@@ -69,7 +69,7 @@ describe('CartIcon', () => {
     renderWithProviders(<CartIcon count={150} onPress={() => {}} testID="cart-icon" />);
 
     const badgeText = screen.getByText('99+');
-    expect(badgeText).toBeDefined();
+    expect(_badgeText).toBeDefined();
   });
 
   it('calls onPress when pressed', () => {
@@ -77,7 +77,7 @@ describe('CartIcon', () => {
     renderWithProviders(<CartIcon count={0} onPress={mockOnPress} testID="cart-icon-press" />);
 
     const touchable = screen.getByTestId('cart-icon-press');
-    fireEvent.press(touchable);
-    expect(mockOnPress).toHaveBeenCalledTimes(1);
+    fireEvent.press(_touchable);
+    expect(_mockOnPress).toHaveBeenCalledTimes(1);
   });
 });

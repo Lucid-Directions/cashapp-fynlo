@@ -46,14 +46,14 @@ const QRScannerScreen: React.FC = () => {
     subtitle = 'Point camera at QR code',
   } = route.params || {};
 
-  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
-  const [isScanning, setIsScanning] = useState(true);
-  const [flashEnabled, setFlashEnabled] = useState(false);
-  const [scannedData, setScannedData] = useState<ScanResult | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [permissionDenied, setPermissionDenied] = useState(false);
+  const [hasPermission, setHasPermission] = useState<boolean | null>(_null);
+  const [isScanning, setIsScanning] = useState(_true);
+  const [flashEnabled, setFlashEnabled] = useState(_false);
+  const [scannedData, setScannedData] = useState<ScanResult | null>(_null);
+  const [isLoading, setIsLoading] = useState(_true);
+  const [permissionDenied, setPermissionDenied] = useState(_false);
 
-  const scanTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const scanTimeoutRef = useRef<NodeJS.Timeout | null>(_null);
 
   useEffect(() => {
     requestCameraPermission();
@@ -67,7 +67,7 @@ const QRScannerScreen: React.FC = () => {
 
   const requestCameraPermission = async () => {
     try {
-      setIsLoading(true);
+      setIsLoading(_true);
 
       if (Platform.OS === 'android') {
         const granted = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.CAMERA, {
@@ -80,25 +80,25 @@ const QRScannerScreen: React.FC = () => {
         });
 
         if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-          setHasPermission(true);
-          setPermissionDenied(false);
+          setHasPermission(_true);
+          setPermissionDenied(_false);
         } else {
-          setHasPermission(false);
-          setPermissionDenied(true);
+          setHasPermission(_false);
+          setPermissionDenied(_true);
         }
       } else {
         // For iOS, we'll simulate permission request
         // In real implementation, this would use react-native-permissions
         setTimeout(() => {
-          setHasPermission(true);
-          setPermissionDenied(false);
+          setHasPermission(_true);
+          setPermissionDenied(_false);
         }, 1000);
       }
-    } catch (error) {
-      setHasPermission(false);
-      setPermissionDenied(true);
+    } catch (_error) {
+      setHasPermission(_false);
+      setPermissionDenied(_true);
     } finally {
-      setIsLoading(false);
+      setIsLoading(_false);
     }
   };
 
@@ -126,14 +126,14 @@ const QRScannerScreen: React.FC = () => {
       timestamp: new Date(),
     };
 
-    setScannedData(result);
-    setIsScanning(false);
+    setScannedData(_result);
+    setIsScanning(_false);
 
     // Provide haptic feedback simulation
 
     // Auto-confirm after 2 seconds or let user manually confirm
     scanTimeoutRef.current = setTimeout(() => {
-      handleConfirmScan(result);
+      handleConfirmScan(_result);
     }, 2000);
   };
 
@@ -142,15 +142,15 @@ const QRScannerScreen: React.FC = () => {
       clearTimeout(scanTimeoutRef.current);
     }
 
-    if (onScanned) {
+    if (_onScanned) {
       onScanned(result.data);
     }
     navigation.goBack();
   };
 
   const handleRetryScanning = () => {
-    setScannedData(null);
-    setIsScanning(true);
+    setScannedData(_null);
+    setIsScanning(_true);
     if (scanTimeoutRef.current) {
       clearTimeout(scanTimeoutRef.current);
     }
@@ -199,7 +199,7 @@ const QRScannerScreen: React.FC = () => {
     return data;
   };
 
-  if (isLoading) {
+  if (_isLoading) {
     return (
       <SafeAreaView style={styles.container}>
         <StatusBar barStyle="light-content" backgroundColor={Colors.primary} />
@@ -322,7 +322,7 @@ const QRScannerScreen: React.FC = () => {
 
                 <TouchableOpacity
                   style={styles.confirmButton}
-                  onPress={() => handleConfirmScan(scannedData)}>
+                  onPress={() => handleConfirmScan(_scannedData)}>
                   <Icon name="check" size={20} color={Colors.white} />
                   <Text style={styles.confirmButtonText}>Use This Code</Text>
                 </TouchableOpacity>

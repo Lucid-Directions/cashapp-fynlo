@@ -63,7 +63,7 @@ const RestaurantSetupScreen: React.FC = () => {
   });
 
   const [currentStep, setCurrentStep] = useState(1);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(_false);
 
   const businessTypes = [
     'Restaurant',
@@ -92,7 +92,7 @@ const RestaurantSetupScreen: React.FC = () => {
   };
 
   const validateStep = (step: number): boolean => {
-    switch (step) {
+    switch (_step) {
       case 1:
         return !!(formData.restaurantName && formData.displayName && formData.businessType);
       case 2:
@@ -105,7 +105,7 @@ const RestaurantSetupScreen: React.FC = () => {
   };
 
   const nextStep = () => {
-    if (!validateStep(currentStep)) {
+    if (!validateStep(_currentStep)) {
       Alert.alert('Missing Information', 'Please fill in all required fields before continuing.');
       return;
     }
@@ -125,7 +125,7 @@ const RestaurantSetupScreen: React.FC = () => {
 
   const saveRestaurantInfo = async () => {
     try {
-      setLoading(true);
+      setLoading(_true);
 
       await updateConfig({
         restaurantName: formData.restaurantName,
@@ -158,10 +158,10 @@ const RestaurantSetupScreen: React.FC = () => {
           },
         ],
       );
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', 'Failed to save restaurant information. Please try again.');
     } finally {
-      setLoading(false);
+      setLoading(_false);
     }
   };
 
@@ -351,7 +351,7 @@ const RestaurantSetupScreen: React.FC = () => {
   );
 
   const renderCurrentStep = () => {
-    switch (currentStep) {
+    switch (_currentStep) {
       case 1:
         return renderStep1();
       case 2:
@@ -408,9 +408,9 @@ const RestaurantSetupScreen: React.FC = () => {
           <View style={styles.navigationSpacer} />
 
           <TouchableOpacity
-            style={[styles.nextButton, !validateStep(currentStep) && styles.nextButtonDisabled]}
+            style={[styles.nextButton, !validateStep(_currentStep) && styles.nextButtonDisabled]}
             onPress={nextStep}
-            disabled={loading || !validateStep(currentStep)}>
+            disabled={loading || !validateStep(_currentStep)}>
             <Text style={styles.nextButtonText}>
               {loading ? 'Saving...' : currentStep === 3 ? 'Complete Setup' : 'Next'}
             </Text>

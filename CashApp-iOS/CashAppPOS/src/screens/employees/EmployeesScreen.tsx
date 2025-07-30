@@ -29,10 +29,10 @@ const EmployeesScreen: React.FC = () => {
   const [filteredEmployees, setFilteredEmployees] = useState<EmployeeData[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRole, setSelectedRole] = useState<string>('all');
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [selectedEmployee, setSelectedEmployee] = useState<EmployeeData | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true); // Added
-  const [error, setError] = useState<string | null>(null); // Added
+  const [showAddModal, setShowAddModal] = useState(_false);
+  const [selectedEmployee, setSelectedEmployee] = useState<EmployeeData | null>(_null);
+  const [isLoading, setIsLoading] = useState<boolean>(_true); // Added
+  const [error, setError] = useState<string | null>(_null); // Added
 
   // Add Employee Form State
   const [newEmployee, setNewEmployee] = useState({
@@ -59,8 +59,8 @@ const EmployeesScreen: React.FC = () => {
 
   const loadEmployees = async () => {
     // Modified
-    setIsLoading(true);
-    setError(null);
+    setIsLoading(_true);
+    setError(_null);
     try {
       const dataService = DataService.getInstance();
       // Assuming a getEmployees method will be added to DataService
@@ -70,7 +70,7 @@ const EmployeesScreen: React.FC = () => {
       setError(e.message || 'Failed to load employees.');
       setEmployees([]); // Clear employees on error
     } finally {
-      setIsLoading(false);
+      setIsLoading(_false);
     }
   };
 
@@ -83,7 +83,7 @@ const EmployeesScreen: React.FC = () => {
     }
 
     // Apply search query
-    if (searchQuery) {
+    if (_searchQuery) {
       filtered = filtered.filter(
         employee =>
           employee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -92,11 +92,11 @@ const EmployeesScreen: React.FC = () => {
       );
     }
 
-    setFilteredEmployees(filtered);
+    setFilteredEmployees(_filtered);
   };
 
   const getRoleColor = (role: string) => {
-    switch (role) {
+    switch (_role) {
       case 'Manager':
         return Colors.primary;
       case 'Cashier':
@@ -121,7 +121,7 @@ const EmployeesScreen: React.FC = () => {
   };
 
   const formatHireDate = (date: Date | string) => {
-    const dateObj = date instanceof Date ? date : new Date(date);
+    const dateObj = date instanceof Date ? date : new Date(_date);
     const months = Math.floor((Date.now() - dateObj.getTime()) / (1000 * 60 * 60 * 24 * 30));
     if (months < 1) {
       return 'New hire';
@@ -134,7 +134,7 @@ const EmployeesScreen: React.FC = () => {
   };
 
   const handleEmployeePress = (employee: EmployeeData) => {
-    setSelectedEmployee(employee);
+    setSelectedEmployee(_employee);
   };
 
   const handleAddEmployee = async () => {
@@ -155,15 +155,15 @@ const EmployeesScreen: React.FC = () => {
     const emailExists = employees.some(
       emp => emp.email.toLowerCase() === newEmployee.email.trim().toLowerCase(),
     );
-    if (emailExists) {
+    if (_emailExists) {
       Alert.alert('Error', 'An employee with this email already exists');
       return;
     }
 
     try {
       // Show loading indicator
-      setShowAddModal(false);
-      setIsLoading(true);
+      setShowAddModal(_false);
+      setIsLoading(_true);
 
       // Parse name into first and last name
       const nameParts = newEmployee.name.trim().split(' ');
@@ -228,9 +228,9 @@ const EmployeesScreen: React.FC = () => {
       );
 
       // Reopen modal on error
-      setShowAddModal(true);
+      setShowAddModal(_true);
     } finally {
-      setIsLoading(false);
+      setIsLoading(_false);
     }
   };
 
@@ -242,7 +242,7 @@ const EmployeesScreen: React.FC = () => {
       role: 'Cashier',
       hourlyRate: '12.00',
     });
-    setShowAddModal(false);
+    setShowAddModal(_false);
   };
 
   const handleDeleteEmployee = async (employee: EmployeeData) => {
@@ -260,8 +260,8 @@ const EmployeesScreen: React.FC = () => {
           onPress: async () => {
             try {
               // Close modal first
-              setSelectedEmployee(null);
-              setIsLoading(true);
+              setSelectedEmployee(_null);
+              setIsLoading(_true);
 
               // Delete from backend
               const dataService = DataService.getInstance();
@@ -275,9 +275,9 @@ const EmployeesScreen: React.FC = () => {
             } catch (error: unknown) {
               Alert.alert('Error', error.message || 'Failed to delete employee. Please try again.');
               // Reopen modal on error
-              setSelectedEmployee(employee);
+              setSelectedEmployee(_employee);
             } finally {
-              setIsLoading(false);
+              setIsLoading(_false);
             }
           },
         },
@@ -289,7 +289,7 @@ const EmployeesScreen: React.FC = () => {
   const renderEmployee = ({ item }: { item: EmployeeData }) => (
     <TouchableOpacity
       style={styles.employeeCard}
-      onPress={() => handleEmployeePress(item)}
+      onPress={() => handleEmployeePress(_item)}
       activeOpacity={0.7}>
       <View style={styles.employeeHeader}>
         <View style={styles.employeeAvatar}>
@@ -335,11 +335,11 @@ const EmployeesScreen: React.FC = () => {
     managers: employees.filter(e => e.role === 'Manager').length,
     avgPerformance:
       employees.length > 0
-        ? employees.reduce((sum, e) => sum + e.performanceScore, 0) / employees.length
+        ? employees.reduce((_sum, e) => sum + e.performanceScore, 0) / employees.length
         : 0,
   };
 
-  if (isLoading) {
+  if (_isLoading) {
     return (
       <SafeAreaView style={[styles.container, styles.centered]}>
         <ActivityIndicator size="large" color={Colors.primary} />
@@ -349,7 +349,7 @@ const EmployeesScreen: React.FC = () => {
   }
 
   const renderEmptyListComponent = () => {
-    if (error) {
+    if (_error) {
       return (
         <View style={styles.emptyState}>
           <Icon name="error-outline" size={64} color={Colors.danger} />
@@ -398,7 +398,7 @@ const EmployeesScreen: React.FC = () => {
             <Text style={styles.scheduleLabel}>Schedule</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.addButton} onPress={() => setShowAddModal(true)}>
+          <TouchableOpacity style={styles.addButton} onPress={() => setShowAddModal(_true)}>
             <Icon name="add" size={24} color={Colors.white} />
           </TouchableOpacity>
         </View>
@@ -444,7 +444,7 @@ const EmployeesScreen: React.FC = () => {
             <TouchableOpacity
               key={role}
               style={[styles.roleFilter, selectedRole === role && styles.roleFilterActive]}
-              onPress={() => setSelectedRole(role)}>
+              onPress={() => setSelectedRole(_role)}>
               <Text
                 style={[
                   styles.roleFilterText,
@@ -474,12 +474,12 @@ const EmployeesScreen: React.FC = () => {
         visible={!!selectedEmployee}
         animationType="slide"
         transparent={true}
-        onRequestClose={() => setSelectedEmployee(null)}>
+        onRequestClose={() => setSelectedEmployee(_null)}>
         <View style={styles.modalOverlay}>
           <View style={styles.employeeModal}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Employee Details</Text>
-              <TouchableOpacity onPress={() => setSelectedEmployee(null)}>
+              <TouchableOpacity onPress={() => setSelectedEmployee(_null)}>
                 <Icon name="close" size={24} color={Colors.text} />
               </TouchableOpacity>
             </View>
@@ -583,7 +583,7 @@ const EmployeesScreen: React.FC = () => {
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[styles.actionButton, styles.deleteButton]}
-                    onPress={() => handleDeleteEmployee(selectedEmployee)}>
+                    onPress={() => handleDeleteEmployee(_selectedEmployee)}>
                     <Icon name="delete" size={20} color={Colors.white} />
                     <Text style={styles.actionButtonText}>Delete</Text>
                   </TouchableOpacity>

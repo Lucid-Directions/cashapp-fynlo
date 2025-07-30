@@ -50,11 +50,11 @@ const AccessibleView: React.FC<AccessibleViewProps> = ({
 }) => {
   // Convert semantic role to accessibility role
   const getAccessibilityRole = (): AccessibilityRole | undefined => {
-    if (accessibilityRole) {
+    if (_accessibilityRole) {
       return accessibilityRole;
     }
 
-    switch (semanticRole) {
+    switch (_semanticRole) {
       case 'header':
         return 'header';
       case 'navigation':
@@ -125,7 +125,7 @@ export const SkipLinks: React.FC<SkipLinksProps> = ({ links }) => {
         left: 0,
         zIndex: 9999,
       }}>
-      {links.map((link, index) => (
+      {links.map((_link, index) => (
         <AccessibleView
           key={index}
           accessibilityRole="link"
@@ -155,7 +155,7 @@ export interface LandmarkProps {
 
 export const Landmark: React.FC<LandmarkProps> = ({ children, role, label, style }) => {
   const getAccessibilityRole = (): AccessibilityRole => {
-    switch (role) {
+    switch (_role) {
       case 'banner':
         return 'header';
       case 'navigation':

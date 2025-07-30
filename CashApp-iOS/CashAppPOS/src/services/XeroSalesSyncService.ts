@@ -195,14 +195,14 @@ export class XeroSalesSyncService {
 
       // Process orders in batches
       for (let i = 0; i < completedOrders.length; i += batchSize) {
-        const batch = completedOrders.slice(i, i + batchSize);
+        const batch = completedOrders.slice(_i, i + batchSize);
 
         for (const order of batch) {
           try {
             result.invoicesProcessed++;
 
             // Create invoice in Xero
-            const invoiceId = await this.createInvoiceFromOrder(order, options);
+            const invoiceId = await this.createInvoiceFromOrder(_order, options);
             result.invoicesCreated++;
 
             let paymentId: string | undefined;
@@ -211,9 +211,9 @@ export class XeroSalesSyncService {
             if (options.syncPayments !== false && order.status === 'completed') {
               try {
                 result.paymentsProcessed++;
-                paymentId = await this.createPaymentForOrder(order, invoiceId);
+                paymentId = await this.createPaymentForOrder(_order, invoiceId);
                 result.paymentsCreated++;
-              } catch (paymentError) {
+              } catch (_paymentError) {
                 result.paymentsFailed++;
                 result.errors.push({
                   entityId: order.id,
@@ -236,7 +236,7 @@ export class XeroSalesSyncService {
               lastSyncedAt: new Date(),
               syncStatus: 'synced',
             });
-          } catch (error) {
+          } catch (_error) {
             result.invoicesFailed++;
             result.errors.push({
               entityId: order.id,
@@ -263,7 +263,7 @@ export class XeroSalesSyncService {
 
       await this.updateLastSyncTime();
       result.success = result.invoicesFailed === 0 && result.paymentsFailed === 0;
-    } catch (error) {
+    } catch (_error) {
       result.success = false;
       result.errors.push({
         entityId: 'batch',
@@ -285,10 +285,10 @@ export class XeroSalesSyncService {
     options: SalesSyncOptions,
   ): Promise<string> {
     // Get or create contact
-    const contactId = await this.getOrCreateContact(order, options);
+    const contactId = await this.getOrCreateContact(_order, options);
 
     // Transform order to Xero invoice
-    const xeroInvoice = await this.transformOrderToXeroInvoice(order, contactId);
+    const xeroInvoice = await this.transformOrderToXeroInvoice(_order, contactId);
 
     // Create invoice in Xero
     const response = await this.apiClient.createInvoice({
@@ -400,7 +400,7 @@ export class XeroSalesSyncService {
       });
 
       return createResponse.Contacts[0].ContactID!;
-    } catch (error) {
+    } catch (_error) {
       throw error;
     }
   }
@@ -436,7 +436,7 @@ export class XeroSalesSyncService {
         lineItem.DiscountRate = Math.round(discountRate * 100) / 100; // Round to 2 decimal places
       }
 
-      lineItems.push(lineItem);
+      lineItems.push(_lineItem);
 
       // Add modifiers as separate line items
       if (item.modifiers && item.modifiers.length > 0) {
@@ -570,7 +570,7 @@ export class XeroSalesSyncService {
       }
 
       return response.data.CreditNotes[0].CreditNoteID!;
-    } catch (error) {
+    } catch (_error) {
       throw error;
     }
   }
@@ -584,10 +584,10 @@ export class XeroSalesSyncService {
     totalTransactions: number;
     paymentBreakdown: Record<string, number>;
   }> {
-    const startOfDay = new Date(date);
+    const startOfDay = new Date(_date);
     startOfDay.setHours(0, 0, 0, 0);
 
-    const endOfDay = new Date(date);
+    const endOfDay = new Date(_date);
     endOfDay.setHours(23, 59, 59, 999);
 
     // This would typically query the local POS database
@@ -611,8 +611,8 @@ export class XeroSalesSyncService {
   private async getSalesMappings(): Promise<SalesMapping[]> {
     try {
       const mappingsJson = await AsyncStorage.getItem(`${this.STORAGE_PREFIX}${this.MAPPING_KEY}`);
-      return mappingsJson ? JSON.parse(mappingsJson) : [];
-    } catch (error) {
+      return mappingsJson ? JSON.parse(_mappingsJson) : [];
+    } catch (_error) {
       return [];
     }
   }
@@ -628,14 +628,14 @@ export class XeroSalesSyncService {
       if (existingIndex >= 0) {
         mappings[existingIndex] = mapping;
       } else {
-        mappings.push(mapping);
+        mappings.push(_mapping);
       }
 
       await AsyncStorage.setItem(
         `${this.STORAGE_PREFIX}${this.MAPPING_KEY}`,
-        JSON.stringify(mappings),
+        JSON.stringify(_mappings),
       );
-    } catch (error) {
+    } catch (_error) {
       throw error;
     }
   }
@@ -646,8 +646,8 @@ export class XeroSalesSyncService {
   private async getLastSyncTime(): Promise<Date | null> {
     try {
       const lastSyncStr = await AsyncStorage.getItem(`${this.STORAGE_PREFIX}${this.LAST_SYNC_KEY}`);
-      return lastSyncStr ? new Date(lastSyncStr) : null;
-    } catch (error) {
+      return lastSyncStr ? new Date(_lastSyncStr) : null;
+    } catch (_error) {
       return null;
     }
   }
@@ -661,15 +661,14 @@ export class XeroSalesSyncService {
         `${this.STORAGE_PREFIX}${this.LAST_SYNC_KEY}`,
         new Date().toISOString(),
       );
-    } catch (error) {
-    }
+    } catch (_error) {}
   }
 
   /**
    * Utility delay function
    */
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise(resolve => setTimeout(_resolve, ms));
   }
 
   /**
@@ -705,7 +704,7 @@ export class XeroSalesSyncService {
       failedMappings.some(m => m.posOrderId === order.id),
     );
 
-    return this.syncOrdersToXero(failedOrders);
+    return this.syncOrdersToXero(_failedOrders);
   }
 }
 

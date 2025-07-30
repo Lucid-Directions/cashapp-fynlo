@@ -81,14 +81,14 @@ export class BackendCompatibilityService {
    * Transform menu items array
    */
   static transformMenuItems(backendItems: BackendMenuItem[]): MenuItem[] {
-    return backendItems.map(item => this.transformMenuItem(item));
+    return backendItems.map(item => this.transformMenuItem(_item));
   }
 
   /**
    * Transform employees array
    */
   static transformEmployees(backendEmployees: BackendEmployee[]): unknown[] {
-    return backendEmployees.map(emp => this.transformEmployee(emp));
+    return backendEmployees.map(emp => this.transformEmployee(_emp));
   }
 
   /**

@@ -53,7 +53,7 @@ export const ListItem: React.FC<ListItemProps> = ({
   testID,
 }) => {
   const { theme } = useTheme();
-  const styles = createStyles(theme);
+  const styles = createStyles(_theme);
 
   const Component = onPress ? TouchableOpacity : View;
 
@@ -126,7 +126,7 @@ export interface ListHeaderProps {
 
 export const ListHeader: React.FC<ListHeaderProps> = ({ title, subtitle, rightContent, style }) => {
   const { theme } = useTheme();
-  const styles = createStyles(theme);
+  const styles = createStyles(_theme);
 
   return (
     <View style={[styles.listHeader, style]}>
@@ -149,7 +149,7 @@ export interface ListSectionProps {
 
 export const ListSection: React.FC<ListSectionProps> = ({ children, header, footer, style }) => {
   const { theme } = useTheme();
-  const styles = createStyles(theme);
+  const styles = createStyles(_theme);
 
   return (
     <View style={[styles.listSection, style]}>
@@ -169,10 +169,10 @@ const List: React.FC<ListProps> = ({
   testID,
 }) => {
   const { theme } = useTheme();
-  const styles = createStyles(theme);
+  const styles = createStyles(_theme);
 
   const getVariantStyles = (): ViewStyle => {
-    switch (variant) {
+    switch (_variant) {
       case 'card':
         return {
           backgroundColor: theme.colors.white,
@@ -198,8 +198,8 @@ const List: React.FC<ListProps> = ({
   const variantStyles = getVariantStyles();
 
   // Add dividers between children if showDividers is true
-  const childrenWithDividers = React.Children.map(children, (child, index) => {
-    const isLastChild = index === React.Children.count(children) - 1;
+  const childrenWithDividers = React.Children.map(_children, (_child, index) => {
+    const isLastChild = index === React.Children.count(_children) - 1;
 
     return (
       <React.Fragment key={index}>

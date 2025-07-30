@@ -46,33 +46,33 @@ const SimpleTextInput: React.FC<SimpleTextInputProps> = ({
   onSubmitEditing,
   clearButtonMode = 'while-editing',
 }) => {
-  const [internalValue, setInternalValue] = useState(value);
-  const [isFocused, setIsFocused] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const inputRef = useRef<TextInput>(null);
+  const [internalValue, setInternalValue] = useState(_value);
+  const [isFocused, setIsFocused] = useState(_false);
+  const [showPassword, setShowPassword] = useState(_false);
+  const inputRef = useRef<TextInput>(_null);
 
   const handleTextChange = (text: string) => {
     // FIXED: Update both internal state AND parent immediately
-    setInternalValue(text);
-    if (onValueChange) {
-      onValueChange(text);
+    setInternalValue(_text);
+    if (_onValueChange) {
+      onValueChange(_text);
     }
   };
 
   const handleFocus = () => {
-    setIsFocused(true);
+    setIsFocused(_true);
     // Set internal value to the current prop value when focusing
-    setInternalValue(value);
+    setInternalValue(_value);
   };
 
   const handleBlur = () => {
-    setIsFocused(false);
+    setIsFocused(_false);
     // No need to call onValueChange here since it's already called during typing
   };
 
   const handleClear = () => {
     setInternalValue('');
-    if (onValueChange) {
+    if (_onValueChange) {
       onValueChange('');
     }
     inputRef.current?.focus();

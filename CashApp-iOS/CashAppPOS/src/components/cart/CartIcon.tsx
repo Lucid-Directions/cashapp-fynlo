@@ -13,7 +13,7 @@ interface Props {
 
 const CartIcon: React.FC<Props> = ({ count, onPress, testID, size = 40 }) => {
   const { theme } = useTheme();
-  const styles = createStyles(theme);
+  const styles = createStyles(_theme);
 
   const iconColor = count > 0 ? theme.colors.danger[500] : theme.colors.text;
   const hitSlop = { top: 10, bottom: 10, left: 10, right: 10 };

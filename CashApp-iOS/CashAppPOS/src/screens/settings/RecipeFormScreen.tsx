@@ -34,7 +34,7 @@ interface RecipeIngredient {
   ingredient_name?: string; // For display
 }
 interface Recipe {
-  item_id: string; // Product ID (UUID)
+  item_id: string; // Product ID (_UUID)
   item_name?: string; // Product name
   ingredients: RecipeIngredient[];
 }
@@ -57,7 +57,7 @@ const SelectProductModal = ({ isVisible, onClose, products, onSelectProduct }) =
             <TouchableOpacity
               style={styles.modalItem}
               onPress={() => {
-                onSelectProduct(item);
+                onSelectProduct(_item);
                 onClose();
               }}>
               <Text>{item.name}</Text>
@@ -87,7 +87,7 @@ const SelectIngredientModal = ({ isVisible, onClose, inventoryItems, onSelectIng
             <TouchableOpacity
               style={styles.modalItem}
               onPress={() => {
-                onSelectIngredient(item);
+                onSelectIngredient(_item);
                 onClose();
               }}>
               <Text>
@@ -132,31 +132,31 @@ const RecipeFormScreen = () => {
   const insets = useSafeAreaInsets();
   const existingRecipe = route.params?.recipe;
 
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(_null);
   const [ingredients, setIngredients] = useState<RecipeIngredient[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([]);
 
-  const [isProductModalVisible, setIsProductModalVisible] = useState(false);
-  const [isIngredientModalVisible, setIsIngredientModalVisible] = useState(false);
-  const [editingIngredientIndex, setEditingIngredientIndex] = useState<number | null>(null);
+  const [isProductModalVisible, setIsProductModalVisible] = useState(_false);
+  const [isIngredientModalVisible, setIsIngredientModalVisible] = useState(_false);
+  const [editingIngredientIndex, setEditingIngredientIndex] = useState<number | null>(_null);
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(_false);
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
     // Load products and inventory items for selection
     const loadInitialData = async () => {
-      setIsLoading(true);
+      setIsLoading(_true);
       try {
         const [fetchedProducts, fetchedInventoryItems] = await Promise.all([
           DatabaseService.getProducts(), // Fetch products from DatabaseService
           DatabaseService.getInventoryItems(), // Fetch inventory items from DatabaseService
         ]);
-        setProducts(fetchedProducts);
-        setInventoryItems(fetchedInventoryItems);
+        setProducts(_fetchedProducts);
+        setInventoryItems(_fetchedInventoryItems);
 
-        if (existingRecipe) {
+        if (_existingRecipe) {
           const product = fetchedProducts.find(p => p.id === existingRecipe.item_id);
           setSelectedProduct(product || null);
           setIngredients(
@@ -168,23 +168,23 @@ const RecipeFormScreen = () => {
             })),
           );
         }
-      } catch (error) {
+      } catch (_error) {
         Alert.alert('Error', 'Failed to load necessary data. Please try again.');
       } finally {
-        setIsLoading(false);
+        setIsLoading(_false);
       }
     };
     loadInitialData();
   }, [existingRecipe]);
 
   const handleSelectProduct = (product: Product) => {
-    setSelectedProduct(product);
+    setSelectedProduct(_product);
     setFormErrors(prev => ({ ...prev, product: '' })); // Clear product error
   };
 
   const handleAddIngredient = () => {
-    setEditingIngredientIndex(null); // Ensure we are adding new, not editing
-    setIsIngredientModalVisible(true);
+    setEditingIngredientIndex(_null); // Ensure we are adding new, not editing
+    setIsIngredientModalVisible(_true);
   };
 
   const handleSelectIngredient = (ingredient: InventoryItem) => {
@@ -198,14 +198,14 @@ const RecipeFormScreen = () => {
       ingredient_name: ingredient.name,
     };
     setIngredients(prev => [...prev, newIngredient]);
-    setIsIngredientModalVisible(false);
+    setIsIngredientModalVisible(_false);
   };
 
   const handleUpdateIngredientQuantity = (sku: string, qty_g_str: string) => {
-    const qty_g = parseInt(qty_g_str, 10);
+    const qty_g = parseInt(_qty_g_str, 10);
     setIngredients(prevIngredients =>
       prevIngredients.map(ing =>
-        ing.ingredient_sku === sku ? { ...ing, qty_g: isNaN(qty_g) ? 0 : qty_g } : ing,
+        ing.ingredient_sku === sku ? { ...ing, qty_g: isNaN(_qty_g) ? 0 : qty_g } : ing,
       ),
     );
     // Validate quantity on save or blur
@@ -223,7 +223,7 @@ const RecipeFormScreen = () => {
     if (ingredients.length === 0) {
       errors.ingredients = 'A recipe must have at least one ingredient.';
     }
-    ingredients.forEach((ing, index) => {
+    ingredients.forEach((_ing, index) => {
       if (ing.qty_g <= 0) {
         errors[`ingredient_qty_${index}`] = 'Quantity must be greater than 0.';
       }
@@ -231,8 +231,8 @@ const RecipeFormScreen = () => {
         errors[`ingredient_qty_${index}`] = 'Quantity cannot exceed 1000g.';
       }
     });
-    setFormErrors(errors);
-    return Object.keys(errors).length === 0;
+    setFormErrors(_errors);
+    return Object.keys(_errors).length === 0;
   };
 
   const handleSaveRecipe = async () => {
@@ -244,27 +244,27 @@ const RecipeFormScreen = () => {
       return;
     } // Should be caught by validation
 
-    setIsLoading(true);
+    setIsLoading(_true);
     const recipeData: Recipe = {
       item_id: selectedProduct.id,
       ingredients: ingredients.map(({ ingredient_sku, qty_g }) => ({ ingredient_sku, qty_g })),
     };
 
     try {
-      if (existingRecipe) {
+      if (_existingRecipe) {
         // The API for create_or_update_recipe_for_item_api handles both cases.
         // No separate updateRecipe function is strictly needed if using that endpoint.
         await DatabaseService.updateRecipe(existingRecipe.item_id, recipeData);
         Alert.alert('Success', 'Recipe updated successfully!');
       } else {
-        await DatabaseService.createRecipe(recipeData);
+        await DatabaseService.createRecipe(_recipeData);
         Alert.alert('Success', 'Recipe created successfully!');
       }
       navigation.goBack();
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', `Failed to save recipe: ${error.message || 'Please try again.'}`);
     } finally {
-      setIsLoading(false);
+      setIsLoading(_false);
     }
   };
 
@@ -310,11 +310,11 @@ const RecipeFormScreen = () => {
         </Text>
 
         <TouchableOpacity
-          onPress={() => setIsProductModalVisible(true)}
+          onPress={() => setIsProductModalVisible(_true)}
           style={styles.selectButton}
           disabled={!!existingRecipe}>
           <Text style={styles.selectButtonText}>
-            {selectedProduct ? selectedProduct.name : 'Select Menu Item (Product)'}
+            {selectedProduct ? selectedProduct.name : 'Select Menu Item (_Product)'}
           </Text>
         </TouchableOpacity>
         {formErrors.product && <Text style={styles.errorText}>{formErrors.product}</Text>}
@@ -337,7 +337,7 @@ const RecipeFormScreen = () => {
           <FlatList
             data={ingredients}
             renderItem={renderIngredientItem}
-            keyExtractor={(item, index) => item.ingredient_sku + index}
+            keyExtractor={(_item, index) => item.ingredient_sku + index}
             scrollEnabled={false} // As it's inside a ScrollView
           />
         )}
@@ -353,13 +353,13 @@ const RecipeFormScreen = () => {
 
       <SelectProductModal
         isVisible={isProductModalVisible}
-        onClose={() => setIsProductModalVisible(false)}
+        onClose={() => setIsProductModalVisible(_false)}
         products={products}
         onSelectProduct={handleSelectProduct}
       />
       <SelectIngredientModal
         isVisible={isIngredientModalVisible}
-        onClose={() => setIsIngredientModalVisible(false)}
+        onClose={() => setIsIngredientModalVisible(_false)}
         inventoryItems={inventoryItems}
         onSelectIngredient={handleSelectIngredient}
       />
@@ -455,7 +455,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  // Styles for FormFieldNumber (mocked)
+  // Styles for FormFieldNumber (_mocked)
   fieldContainer: {
     flex: 1, // Take available space for the input
     marginRight: 10, // Space before remove button
@@ -499,7 +499,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
   },
-  // Modal styles (mocked)
+  // Modal styles (_mocked)
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',

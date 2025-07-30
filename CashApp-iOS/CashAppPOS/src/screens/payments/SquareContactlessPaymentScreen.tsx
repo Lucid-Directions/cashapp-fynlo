@@ -25,8 +25,7 @@ try {
   const SquareSDK = require('react-native-square-in-app-payments');
   SQIPApplePay = SquareSDK.SQIPApplePay;
   SQIPGooglePay = SquareSDK.SQIPGooglePay;
-} catch (error) {
-}
+} catch (_error) {}
 
 interface SquareContactlessPaymentScreenProps {
   navigation: unknown;
@@ -108,7 +107,7 @@ const SquareContactlessPaymentScreen: React.FC<SquareContactlessPaymentScreenPro
         googlePaySupported,
         errorMessage: null,
       }));
-    } catch (error) {
+    } catch (_error) {
       setContactlessState(prev => ({
         ...prev,
         loading: false,
@@ -181,7 +180,7 @@ const SquareContactlessPaymentScreen: React.FC<SquareContactlessPaymentScreenPro
           errorMessage: paymentResult.errorMessage || 'Apple Pay payment failed',
         }));
       }
-    } catch (error) {
+    } catch (_error) {
       setContactlessState(prev => ({
         ...prev,
         processing: false,
@@ -225,7 +224,7 @@ const SquareContactlessPaymentScreen: React.FC<SquareContactlessPaymentScreenPro
           errorMessage: paymentResult.errorMessage || 'Google Pay payment failed',
         }));
       }
-    } catch (error) {
+    } catch (_error) {
       setContactlessState(prev => ({
         ...prev,
         processing: false,

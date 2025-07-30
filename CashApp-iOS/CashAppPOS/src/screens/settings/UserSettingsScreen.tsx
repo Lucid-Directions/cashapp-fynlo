@@ -74,7 +74,7 @@ const UserSettingsScreen: React.FC = () => {
   const renderSettingItem = ({ item }: { item: UserSettingsItem }) => (
     <TouchableOpacity
       style={styles.settingCard}
-      onPress={() => handleSettingPress(item)}
+      onPress={() => handleSettingPress(_item)}
       activeOpacity={0.7}>
       <View style={[styles.settingIcon, { backgroundColor: `${Colors.warning}15` }]}>
         <Icon name={item.icon} size={24} color={Colors.warning} />

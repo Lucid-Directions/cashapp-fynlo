@@ -76,10 +76,10 @@ class DataService {
   private async loadFeatureFlags(): Promise<void> {
     try {
       const stored = await AsyncStorage.getItem('feature_flags');
-      if (stored) {
-        this.featureFlags = { ...DEFAULT_FLAGS, ...JSON.parse(stored) };
+      if (_stored) {
+        this.featureFlags = { ...DEFAULT_FLAGS, ...JSON.parse(_stored) };
       }
-    } catch (error) {
+    } catch (_error) {
     }
   }
 
@@ -106,8 +106,8 @@ class DataService {
   private async testAPIEndpoint(endpoint: string, method = 'GET', data?: unknown): Promise<void> {
     if (this.featureFlags.TEST_API_MODE) {
       try {
-        await this.apiTestingService.testEndpoint(endpoint, method, data);
-      } catch (error) {
+        await this.apiTestingService.testEndpoint(_endpoint, method, data);
+      } catch (_error) {
       }
     }
   }
@@ -142,7 +142,7 @@ class DataService {
         },
       });
 
-      clearTimeout(timeoutId);
+      clearTimeout(_timeoutId);
       const wasAvailable = this.isBackendAvailable;
       this.isBackendAvailable = response.ok;
 
@@ -156,7 +156,7 @@ class DataService {
           `Backend status changed: ${this.isBackendAvailable ? 'Available' : 'Unavailable'}`,
         );
       }
-    } catch (error) {
+    } catch (_error) {
       this.isBackendAvailable = false;
 
       // Still test the endpoint in test mode to record the failure
@@ -174,9 +174,9 @@ class DataService {
     // Always use Supabase authentication now
     try {
       const authStore = useAuthStore.getState();
-      await authStore.signIn(username, password);
+      await authStore.signIn(_username, password);
       return true;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -185,7 +185,7 @@ class DataService {
     try {
       const authStore = useAuthStore.getState();
       await authStore.signOut();
-    } catch (error) {
+    } catch (_error) {
     }
     // Clear any legacy tokens
     await AsyncStorage.multiRemove(['auth_token', 'user_data']);
@@ -204,7 +204,7 @@ class DataService {
         if (products && products.length > 0) {
           return products;
         }
-      } catch (error) {
+      } catch (_error) {
       }
     }
     return this.db.getProducts();
@@ -213,11 +213,11 @@ class DataService {
   async getProductsByCategory(categoryId: number): Promise<any[]> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        return await this.db.getProductsByCategory(categoryId);
-      } catch (error) {
+        return await this.db.getProductsByCategory(_categoryId);
+      } catch (_error) {
       }
     }
-    return this.db.getProductsByCategory(categoryId);
+    return this.db.getProductsByCategory(_categoryId);
   }
 
   // Category operations
@@ -229,7 +229,7 @@ class DataService {
           return [];
         }
         return categories;
-      } catch (error) {
+      } catch (_error) {
         throw error;
       }
     }
@@ -253,12 +253,12 @@ class DataService {
         const menuItems = await this.db.getMenuItems();
         if (menuItems && menuItems.length > 0) {
           // Apply compatibility transformation if needed
-          if (BackendCompatibilityService.needsMenuTransformation(menuItems)) {
-            return BackendCompatibilityService.transformMenuItems(menuItems);
+          if (BackendCompatibilityService.needsMenuTransformation(_menuItems)) {
+            return BackendCompatibilityService.transformMenuItems(_menuItems);
           }
           return menuItems;
         }
-      } catch (error) {
+      } catch (_error) {
       }
     }
     return this.db.getMenuItems();
@@ -276,7 +276,7 @@ class DataService {
         if (categories && categories.length > 0) {
           return categories;
         }
-      } catch (error) {
+      } catch (_error) {
       }
     }
     return this.db.getMenuCategories();
@@ -292,9 +292,9 @@ class DataService {
   }): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        const result = await this.db.createCategory(categoryData);
+        const result = await this.db.createCategory(_categoryData);
         return result;
-      } catch (error) {
+      } catch (_error) {
         throw error;
       }
     }
@@ -318,9 +318,9 @@ class DataService {
   ): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        const result = await this.db.updateCategory(categoryId, categoryData);
+        const result = await this.db.updateCategory(_categoryId, categoryData);
         return result;
-      } catch (error) {
+      } catch (_error) {
         throw error;
       }
     }
@@ -334,9 +334,9 @@ class DataService {
   async deleteCategory(categoryId: string): Promise<void> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        await this.db.deleteCategory(categoryId);
+        await this.db.deleteCategory(_categoryId);
         return;
-      } catch (error) {
+      } catch (_error) {
         throw error;
       }
     }
@@ -365,8 +365,8 @@ class DataService {
   }): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        return await this.db.createProduct(productData);
-      } catch (error) {
+        return await this.db.createProduct(_productData);
+      } catch (_error) {
         throw error;
       }
     }
@@ -398,8 +398,8 @@ class DataService {
   ): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        return await this.db.updateProduct(productId, productData);
-      } catch (error) {
+        return await this.db.updateProduct(_productId, productData);
+      } catch (_error) {
         throw error;
       }
     }
@@ -413,8 +413,8 @@ class DataService {
   async deleteProduct(productId: string): Promise<void> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        await this.db.deleteProduct(productId);
-      } catch (error) {
+        await this.db.deleteProduct(_productId);
+      } catch (_error) {
         throw error;
       }
     } else {
@@ -430,37 +430,37 @@ class DataService {
   async createOrder(order: unknown): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        const result = await this.db.createOrder(order);
-        if (result) {
+        const result = await this.db.createOrder(_order);
+        if (_result) {
           return result;
         }
-      } catch (error) {
+      } catch (_error) {
       }
     }
-    return this.db.createOrder(order);
+    return this.db.createOrder(_order);
   }
 
   async updateOrder(orderId: number, updates: unknown): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        return await this.db.updateOrder(orderId, updates);
-      } catch (error) {
+        return await this.db.updateOrder(_orderId, updates);
+      } catch (_error) {
       }
     }
-    return this.db.updateOrder(orderId, updates);
+    return this.db.updateOrder(_orderId, updates);
   }
 
   async getRecentOrders(limit = 20): Promise<any[]> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        const orders = await this.db.getRecentOrders(limit);
+        const orders = await this.db.getRecentOrders(_limit);
         if (orders && orders.length > 0) {
           return orders;
         }
-      } catch (error) {
+      } catch (_error) {
       }
     }
-    return this.db.getRecentOrders(limit);
+    return this.db.getRecentOrders(_limit);
   }
 
   // Payment processing - PHASE 3: Fix SumUp integration
@@ -480,14 +480,14 @@ class DataService {
       this.isBackendAvailable
     ) {
       try {
-        const result = await this.db.processPayment(orderId, paymentMethod, amount);
+        const result = await this.db.processPayment(_orderId, paymentMethod, amount);
 
-        if (result) {
+        if (_result) {
           return true;
         } else {
           throw new Error('Payment processing failed');
         }
-      } catch (error) {
+      } catch (_error) {
         // Don't fall back for payment processing - we want to see the real error
         throw error;
       }
@@ -495,11 +495,11 @@ class DataService {
 
     // If payments disabled or no backend, simulate success for demo
     if (!this.featureFlags.ENABLE_PAYMENTS) {
-      return this.db.processPayment(orderId, paymentMethod, amount);
+      return this.db.processPayment(_orderId, paymentMethod, amount);
     }
 
     // Fallback to mock if no backend available
-    return this.db.processPayment(orderId, paymentMethod, amount);
+    return this.db.processPayment(_orderId, paymentMethod, amount);
   }
 
   // Restaurant operations
@@ -510,7 +510,7 @@ class DataService {
         if (floorPlan && floorPlan.tables && floorPlan.tables.length > 0) {
           return floorPlan;
         }
-      } catch (error) {
+      } catch (_error) {
       }
     }
     return this.db.getRestaurantFloorPlan(sectionId ?? undefined);
@@ -519,25 +519,25 @@ class DataService {
   async updateTableStatus(tableId: string, status: string, additionalData?: unknown): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        return await this.db.updateTableStatus(tableId, status, additionalData);
-      } catch (error) {
+        return await this.db.updateTableStatus(_tableId, status, additionalData);
+      } catch (_error) {
       }
     }
-    return this.db.updateTableStatus(tableId, status, additionalData);
+    return this.db.updateTableStatus(_tableId, status, additionalData);
   }
 
   // Analytics and Reporting
   async getDailySalesReport(date?: string): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        const report = await this.db.getDailySalesReport(date);
+        const report = await this.db.getDailySalesReport(_date);
         if (report && report.summary) {
           return report;
         }
-      } catch (error) {
+      } catch (_error) {
       }
     }
-    return this.db.getDailySalesReport(date);
+    return this.db.getDailySalesReport(_date);
   }
 
   async getSalesSummary(dateFrom?: string, dateTo?: string): Promise<unknown> {
@@ -547,7 +547,7 @@ class DataService {
         if (summary && summary.summary) {
           return summary;
         }
-      } catch (error) {
+      } catch (_error) {
       }
     }
     return this.db.getSalesSummary(dateFrom ?? undefined, dateTo ?? undefined);
@@ -558,7 +558,7 @@ class DataService {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         return await this.db.getCurrentSession();
-      } catch (error) {
+      } catch (_error) {
       }
     }
     return this.db.getCurrentSession();
@@ -567,18 +567,18 @@ class DataService {
   async createSession(configId: number): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        return await this.db.createSession(configId);
-      } catch (error) {
+        return await this.db.createSession(_configId);
+      } catch (_error) {
       }
     }
-    return this.db.createSession(configId);
+    return this.db.createSession(_configId);
   }
 
   // Hardware operations (always mock for now)
   async printReceipt(order: unknown): Promise<boolean> {
     if (this.featureFlags.ENABLE_HARDWARE) {
     }
-    return this.db.printReceipt(order);
+    return this.db.printReceipt(_order);
   }
 
   async openCashDrawer(): Promise<boolean> {
@@ -634,13 +634,13 @@ class DataService {
         const result = await response.json();
         const customers = result.data || result;
           '✅ API customers received:',
-          Array.isArray(customers) ? customers.length : 'not an array',
+          Array.isArray(_customers) ? customers.length : 'not an array',
         );
-        return Array.isArray(customers) ? customers : [];
+        return Array.isArray(_customers) ? customers : [];
       } else {
         throw new Error(`API error: ${response.status}`);
       }
-    } catch (error) {
+    } catch (_error) {
       throw error; // No fallback - API must work for production readiness
     }
   }
@@ -655,7 +655,7 @@ class DataService {
       } else {
         throw new Error('Invalid inventory data received from API');
       }
-    } catch (error) {
+    } catch (_error) {
       throw error; // No fallback - API must work for production readiness
     }
   }
@@ -669,22 +669,22 @@ class DataService {
         const result = await response.json();
         const employees = result.data || result;
           '✅ API employees received:',
-          Array.isArray(employees) ? employees.length : 'not an array',
+          Array.isArray(_employees) ? employees.length : 'not an array',
         );
 
         // Apply compatibility transformation if needed
         if (
-          Array.isArray(employees) &&
-          BackendCompatibilityService.needsEmployeeTransformation(employees)
+          Array.isArray(_employees) &&
+          BackendCompatibilityService.needsEmployeeTransformation(_employees)
         ) {
-          return BackendCompatibilityService.transformEmployees(employees);
+          return BackendCompatibilityService.transformEmployees(_employees);
         }
 
-        return Array.isArray(employees) ? employees : [];
+        return Array.isArray(_employees) ? employees : [];
       } else {
         throw new Error(`API error: ${response.status} - ${response.statusText}`);
       }
-    } catch (error) {
+    } catch (_error) {
 
       // PRODUCTION READY: Return empty array instead of mock data
       // Screens should handle empty state gracefully with EmptyState component
@@ -695,9 +695,9 @@ class DataService {
   async getWeekSchedule(weekStart: Date, employees: unknown[]): Promise<any | null> {
 
     try {
-      const schedule = await this.db.getWeekSchedule(weekStart, employees);
+      const schedule = await this.db.getWeekSchedule(_weekStart, employees);
       return schedule;
-    } catch (error) {
+    } catch (_error) {
       throw error; // No fallback - API must work for production readiness
     }
   }
@@ -723,13 +723,13 @@ class DataService {
           const result = await response.json();
           const orders = result.data || result;
             '✅ API orders received:',
-            Array.isArray(orders) ? orders.length : 'not an array',
+            Array.isArray(_orders) ? orders.length : 'not an array',
           );
-          return Array.isArray(orders) ? orders : [];
+          return Array.isArray(_orders) ? orders : [];
         } else {
           throw new Error(`API error: ${response.status}`);
         }
-      } catch (error) {
+      } catch (_error) {
         throw error; // No fallback - API must work for production readiness
       }
     }
@@ -762,7 +762,7 @@ class DataService {
         } else {
           throw new Error(`API error: ${response.status}`);
         }
-      } catch (error) {
+      } catch (_error) {
         throw error; // No fallback - API must work for production readiness
       }
     }
@@ -788,11 +788,11 @@ class DataService {
         const salesData = result.data || result;
 
         // Transform API data to match frontend SalesData[] interface
-        if (salesData && !Array.isArray(salesData)) {
+        if (salesData && !Array.isArray(_salesData)) {
           // Convert API format to SalesData array format
-          const transformedData = this.transformApiDataToArray(salesData, period);
+          const transformedData = this.transformApiDataToArray(_salesData, period);
           return transformedData;
-        } else if (Array.isArray(salesData)) {
+        } else if (Array.isArray(_salesData)) {
           return salesData;
         } else {
           throw new Error('Invalid sales data format received from API');
@@ -800,7 +800,7 @@ class DataService {
       } else {
         throw new Error(`API error: ${response.status}`);
       }
-    } catch (error) {
+    } catch (_error) {
       throw error; // No fallback - API must work for production readiness
     }
   }
@@ -830,7 +830,7 @@ class DataService {
 
       // Return empty array if no valid data
       return [];
-    } catch (error) {
+    } catch (_error) {
       return [];
     }
   }
@@ -863,7 +863,7 @@ class DataService {
         } else {
           throw new Error(`API error: ${response.status}`);
         }
-      } catch (error) {
+      } catch (_error) {
         throw error; // No fallback - API must work for production readiness
       }
     }
@@ -896,7 +896,7 @@ class DataService {
         } else {
           throw new Error(`API error: ${response.status}`);
         }
-      } catch (error) {
+      } catch (_error) {
         throw error; // No fallback - API must work for production readiness
       }
     }
@@ -928,7 +928,7 @@ class DataService {
         } else {
           throw new Error(`API error: ${response.status}`);
         }
-      } catch (error) {
+      } catch (_error) {
         throw error; // No fallback - API must work for production readiness
       }
     }
@@ -986,7 +986,7 @@ class DataService {
         const errorText = await response.text();
         throw new Error(`Failed to create employee: ${response.status} - ${errorText}`);
       }
-    } catch (error) {
+    } catch (_error) {
       throw new Error(`Employee creation failed: ${error.message}`);
     }
   }
@@ -1007,7 +1007,7 @@ class DataService {
         const errorText = await response.text();
         throw new Error(`Failed to delete employee: ${response.status} - ${errorText}`);
       }
-    } catch (error) {
+    } catch (_error) {
       throw new Error(`Employee deletion failed: ${error.message}`);
     }
   }
@@ -1031,11 +1031,11 @@ class DataService {
         if (response.ok) {
           const result = await response.json();
           const inventoryData = result.data || result;
-          return Array.isArray(inventoryData) ? inventoryData : [];
+          return Array.isArray(_inventoryData) ? inventoryData : [];
         } else {
           throw new Error(`API error: ${response.status}`);
         }
-      } catch (error) {
+      } catch (_error) {
         throw error; // No fallback - API must work for production readiness
       }
     }
@@ -1071,7 +1071,7 @@ class DataService {
         } else {
           throw new Error(`API error: ${response.status}`);
         }
-      } catch (error) {
+      } catch (_error) {
         throw error;
       }
     }
@@ -1111,7 +1111,7 @@ class DataService {
         } else {
           throw new Error(`API error: ${response.status}`);
         }
-      } catch (error) {
+      } catch (_error) {
         throw error;
       }
     }
@@ -1130,7 +1130,7 @@ class DataService {
             'Content-Type': 'application/json',
             ...(authToken && { Authorization: `Bearer ${authToken}` }),
           },
-          body: JSON.stringify(subscriptionData),
+          body: JSON.stringify(_subscriptionData),
         });
 
         if (response.ok) {
@@ -1148,7 +1148,7 @@ class DataService {
             message: errorData.message || `Failed to create subscription: ${response.status}`,
           };
         }
-      } catch (error) {
+      } catch (_error) {
         return {
           success: false,
           data: null,
@@ -1171,7 +1171,7 @@ class DataService {
             'Content-Type': 'application/json',
             ...(authToken && { Authorization: `Bearer ${authToken}` }),
           },
-          body: JSON.stringify(changeData),
+          body: JSON.stringify(_changeData),
         });
 
         if (response.ok) {
@@ -1189,7 +1189,7 @@ class DataService {
             message: errorData.message || `Failed to change plan: ${response.status}`,
           };
         }
-      } catch (error) {
+      } catch (_error) {
         return {
           success: false,
           data: null,
@@ -1232,7 +1232,7 @@ class DataService {
             message: errorData.message || `Failed to cancel subscription: ${response.status}`,
           };
         }
-      } catch (error) {
+      } catch (_error) {
         return {
           success: false,
           data: null,
@@ -1275,7 +1275,7 @@ class DataService {
             message: errorData.message || `Failed to increment usage: ${response.status}`,
           };
         }
-      } catch (error) {
+      } catch (_error) {
         return {
           success: false,
           data: null,

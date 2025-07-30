@@ -122,8 +122,8 @@ const PricingDiscountsScreen: React.FC = () => {
     maxDiscountPercentage: 50,
   });
 
-  const [editingDiscount, setEditingDiscount] = useState<Discount | null>(null);
-  const [showDiscountModal, setShowDiscountModal] = useState(false);
+  const [editingDiscount, setEditingDiscount] = useState<Discount | null>(_null);
+  const [showDiscountModal, setShowDiscountModal] = useState(_false);
 
   const handleCreateDiscount = () => {
     setEditingDiscount({
@@ -138,12 +138,12 @@ const PricingDiscountsScreen: React.FC = () => {
       applicableItems: [],
       timesUsed: 0,
     });
-    setShowDiscountModal(true);
+    setShowDiscountModal(_true);
   };
 
   const handleEditDiscount = (discount: Discount) => {
-    setEditingDiscount(discount);
-    setShowDiscountModal(true);
+    setEditingDiscount(_discount);
+    setShowDiscountModal(_true);
   };
 
   const handleSaveDiscount = () => {
@@ -169,8 +169,8 @@ const PricingDiscountsScreen: React.FC = () => {
       setDiscounts(prev => [...prev, newDiscount]);
     }
 
-    setShowDiscountModal(false);
-    setEditingDiscount(null);
+    setShowDiscountModal(_false);
+    setEditingDiscount(_null);
   };
 
   const handleDeleteDiscount = (discountId: string) => {
@@ -209,7 +209,7 @@ const PricingDiscountsScreen: React.FC = () => {
   };
 
   const getDiscountTypeIcon = (type: string) => {
-    switch (type) {
+    switch (_type) {
       case 'percentage':
         return 'percent';
       case 'fixed_amount':
@@ -248,7 +248,7 @@ const PricingDiscountsScreen: React.FC = () => {
       style={[
         styles.discountCard,
         !discount.isActive && styles.inactiveCard,
-        isDiscountExpired(discount) && styles.expiredCard,
+        isDiscountExpired(_discount) && styles.expiredCard,
       ]}>
       <View style={styles.discountHeader}>
         <View style={styles.discountInfo}>
@@ -256,12 +256,13 @@ const PricingDiscountsScreen: React.FC = () => {
             <Icon
               name={getDiscountTypeIcon(discount.type)}
               size={20}
-              color={isDiscountActive(discount) ? Colors.primary : Colors.mediumGray}
+              color={isDiscountActive(_discount) ? Colors.primary : Colors.mediumGray}
             />
-            <Text style={[styles.discountName, !isDiscountActive(discount) && styles.inactiveText]}>
+            <Text
+              style={[styles.discountName, !isDiscountActive(_discount) && styles.inactiveText]}>
               {discount.name}
             </Text>
-            {isDiscountExpired(discount) && (
+            {isDiscountExpired(_discount) && (
               <View style={styles.expiredBadge}>
                 <Text style={styles.expiredText}>Expired</Text>
               </View>
@@ -271,13 +272,13 @@ const PricingDiscountsScreen: React.FC = () => {
           <Text
             style={[
               styles.discountDescription,
-              !isDiscountActive(discount) && styles.inactiveText,
+              !isDiscountActive(_discount) && styles.inactiveText,
             ]}>
             {discount.description}
           </Text>
 
           <View style={styles.discountDetails}>
-            <Text style={styles.discountValue}>{formatDiscountValue(discount)}</Text>
+            <Text style={styles.discountValue}>{formatDiscountValue(_discount)}</Text>
             {discount.minimumAmount && (
               <Text style={styles.discountCondition}>
                 Min: £{discount.minimumAmount.toFixed(2)}
@@ -310,7 +311,7 @@ const PricingDiscountsScreen: React.FC = () => {
       <View style={styles.discountButtons}>
         <TouchableOpacity
           style={styles.discountButton}
-          onPress={() => handleEditDiscount(discount)}>
+          onPress={() => handleEditDiscount(_discount)}>
           <Icon name="edit" size={16} color={Colors.secondary} />
           <Text style={styles.discountButtonText}>Edit</Text>
         </TouchableOpacity>
@@ -375,7 +376,7 @@ const PricingDiscountsScreen: React.FC = () => {
             </View>
             <View style={styles.statCard}>
               <Text style={styles.statValue}>
-                {discounts.reduce((sum, d) => sum + d.timesUsed, 0)}
+                {discounts.reduce((_sum, d) => sum + d.timesUsed, 0)}
               </Text>
               <Text style={styles.statLabel}>Total Uses</Text>
             </View>
@@ -519,14 +520,14 @@ const PricingDiscountsScreen: React.FC = () => {
         visible={showDiscountModal}
         transparent={true}
         animationType="slide"
-        onRequestClose={() => setShowDiscountModal(false)}>
+        onRequestClose={() => setShowDiscountModal(_false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>
                 {editingDiscount?.id ? 'Edit Discount' : 'Create Discount'}
               </Text>
-              <TouchableOpacity onPress={() => setShowDiscountModal(false)}>
+              <TouchableOpacity onPress={() => setShowDiscountModal(_false)}>
                 <Icon name="close" size={24} color={Colors.text} />
               </TouchableOpacity>
             </View>
@@ -560,7 +561,7 @@ const PricingDiscountsScreen: React.FC = () => {
                 value={editingDiscount?.value?.toString() || ''}
                 onChangeText={text =>
                   setEditingDiscount(prev =>
-                    prev ? { ...prev, value: parseFloat(text) || 0 } : null,
+                    prev ? { ...prev, value: parseFloat(_text) || 0 } : null,
                   )
                 }
                 placeholder={editingDiscount?.type === 'percentage' ? '10' : '5.00'}
@@ -588,7 +589,7 @@ const PricingDiscountsScreen: React.FC = () => {
             <View style={styles.modalActions}>
               <TouchableOpacity
                 style={styles.cancelButton}
-                onPress={() => setShowDiscountModal(false)}>
+                onPress={() => setShowDiscountModal(_false)}>
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.saveButton} onPress={handleSaveDiscount}>

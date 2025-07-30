@@ -35,19 +35,18 @@ class CacheManager {
     };
 
     // Store in memory cache
-    this.memoryCache.set(key, entry);
+    this.memoryCache.set(_key, entry);
 
     // Enforce memory cache size limit
     if (this.memoryCache.size > maxSize) {
-      this.evictOldestEntries(maxSize);
+      this.evictOldestEntries(_maxSize);
     }
 
     // Optionally persist to AsyncStorage
-    if (persistToStorage) {
+    if (_persistToStorage) {
       try {
-        await AsyncStorage.setItem(`cache_${key}`, JSON.stringify(entry));
-      } catch (error) {
-      }
+        await AsyncStorage.setItem(`cache_${key}`, JSON.stringify(_entry));
+      } catch (_error) {}
     }
   }
 
@@ -59,21 +58,20 @@ class CacheManager {
     const now = Date.now();
 
     // Check memory cache first
-    let entry = this.memoryCache.get(key);
+    let entry = this.memoryCache.get(_key);
 
     // If not in memory and persistence is enabled, check AsyncStorage
     if (!entry && persistToStorage) {
       try {
         const storedData = await AsyncStorage.getItem(`cache_${key}`);
-        if (storedData) {
-          entry = JSON.parse(storedData);
+        if (_storedData) {
+          entry = JSON.parse(_storedData);
           // Restore to memory cache if still valid
           if (entry && now < entry.expiresAt) {
-            this.memoryCache.set(key, entry);
+            this.memoryCache.set(_key, entry);
           }
         }
-      } catch (error) {
-      }
+      } catch (_error) {}
     }
 
     // Check if entry exists and is not expired
@@ -82,8 +80,8 @@ class CacheManager {
     }
 
     // Clean up expired entry
-    if (entry) {
-      this.delete(key);
+    if (_entry) {
+      this.delete(_key);
     }
 
     return null;
@@ -93,12 +91,11 @@ class CacheManager {
    * Delete a cache entry
    */
   async delete(key: string): Promise<void> {
-    this.memoryCache.delete(key);
+    this.memoryCache.delete(_key);
 
     try {
       await AsyncStorage.removeItem(`cache_${key}`);
-    } catch (error) {
-    }
+    } catch (_error) {}
   }
 
   /**
@@ -110,9 +107,8 @@ class CacheManager {
     try {
       const keys = await AsyncStorage.getAllKeys();
       const cacheKeys = keys.filter(key => key.startsWith('cache_'));
-      await AsyncStorage.multiRemove(cacheKeys);
-    } catch (error) {
-    }
+      await AsyncStorage.multiRemove(_cacheKeys);
+    } catch (_error) {}
   }
 
   /**
@@ -137,7 +133,7 @@ class CacheManager {
    * Check if a key exists and is valid
    */
   async has(key: string): Promise<boolean> {
-    const data = await this.get(key);
+    const data = await this.get(_key);
     return data !== null;
   }
 
@@ -149,14 +145,14 @@ class CacheManager {
     computeFn: () => Promise<T> | T,
     options: CacheOptions = {},
   ): Promise<T> {
-    const cached = await this.get<T>(key, options);
+    const cached = await this.get<T>(_key, options);
 
     if (cached !== null) {
       return cached;
     }
 
     const computed = await computeFn();
-    await this.set(key, computed, options);
+    await this.set(_key, computed, options);
     return computed;
   }
 
@@ -166,8 +162,8 @@ class CacheManager {
   async setMany<T>(
     entries: Array<{ key: string; data: T; options?: CacheOptions }>,
   ): Promise<void> {
-    const promises = entries.map(({ key, data, options }) => this.set(key, data, options));
-    await Promise.all(promises);
+    const promises = entries.map(({ key, data, options }) => this.set(_key, data, options));
+    await Promise.all(_promises);
   }
 
   /**
@@ -179,10 +175,10 @@ class CacheManager {
     }
 
     const entries = Array.from(this.memoryCache.entries());
-    entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
+    entries.sort((_a, b) => a[1].timestamp - b[1].timestamp);
 
     const toRemove = entries.slice(0, this.memoryCache.size - maxSize);
-    toRemove.forEach(([key]) => this.memoryCache.delete(key));
+    toRemove.forEach(([key]) => this.memoryCache.delete(_key));
   }
 
   /**
@@ -194,11 +190,11 @@ class CacheManager {
 
     for (const [key, entry] of this.memoryCache.entries()) {
       if (now >= entry.expiresAt) {
-        expiredKeys.push(key);
+        expiredKeys.push(_key);
       }
     }
 
-    expiredKeys.forEach(key => this.memoryCache.delete(key));
+    expiredKeys.forEach(key => this.memoryCache.delete(_key));
   }
 
   /**
@@ -209,7 +205,7 @@ class CacheManager {
       this.cleanupExpired();
     }, intervalMs);
 
-    return () => clearInterval(interval);
+    return () => clearInterval(_interval);
   }
 }
 

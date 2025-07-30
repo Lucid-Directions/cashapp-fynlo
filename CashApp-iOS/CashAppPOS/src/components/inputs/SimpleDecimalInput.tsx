@@ -28,22 +28,22 @@ const SimpleDecimalInput: React.FC<SimpleDecimalInputProps> = ({
   disabled = false,
 }) => {
   const [internalValue, setInternalValue] = useState(value.toString());
-  const [isFocused, setIsFocused] = useState(false);
-  const inputRef = useRef<TextInput>(null);
+  const [isFocused, setIsFocused] = useState(_false);
+  const inputRef = useRef<TextInput>(_null);
 
   const handleTextChange = (text: string) => {
     // CRITICAL: Don't call onValueChange during typing - only update internal state
-    setInternalValue(text);
+    setInternalValue(_text);
   };
 
   const handleFocus = () => {
-    setIsFocused(true);
+    setIsFocused(_true);
     // Set internal value to the current prop value when focusing
     setInternalValue(value.toString());
   };
 
   const handleBlur = () => {
-    setIsFocused(false);
+    setIsFocused(_false);
 
     // Clean and validate the input
     let cleaned = internalValue.replace(/[^0-9.]/g, '');
@@ -57,14 +57,14 @@ const SimpleDecimalInput: React.FC<SimpleDecimalInputProps> = ({
     }
 
     // Convert to number
-    const numericValue = parseFloat(cleaned) || 0;
-    const clampedValue = Math.max(minValue, Math.min(maxValue, numericValue));
+    const numericValue = parseFloat(_cleaned) || 0;
+    const clampedValue = Math.max(_minValue, Math.min(_maxValue, numericValue));
 
     // Update internal value with formatted result
     setInternalValue(clampedValue.toString());
 
     // ONLY call onValueChange on blur - this prevents keyboard dismissal
-    onValueChange(clampedValue);
+    onValueChange(_clampedValue);
   };
 
   const handleClear = () => {
@@ -77,7 +77,7 @@ const SimpleDecimalInput: React.FC<SimpleDecimalInputProps> = ({
     ? internalValue
     : value % 1 === 0
     ? value.toString()
-    : value.toFixed(decimalPlaces);
+    : value.toFixed(_decimalPlaces);
 
   return (
     <View style={[styles.container, style]}>

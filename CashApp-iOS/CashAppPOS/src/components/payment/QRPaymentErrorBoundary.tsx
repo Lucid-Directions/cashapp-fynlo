@@ -18,7 +18,7 @@ class QRPaymentErrorBoundary extends Component<
   QRPaymentErrorBoundaryState
 > {
   constructor(props: QRPaymentErrorBoundaryProps) {
-    super(props);
+    super(_props);
     this.state = { hasError: false, error: null };
   }
 

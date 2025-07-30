@@ -77,7 +77,7 @@ interface AuthContextType {
   switchRestaurant: (restaurantId: string) => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType | undefined>(_undefined);
 
 const STORAGE_KEYS = {
   USER: '@auth_user',
@@ -98,15 +98,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const checkAuthStore = useAuthStore(state => state.checkAuth);
 
   // Legacy state for compatibility
-  const [user, setUser] = useState<User | null>(null);
-  const [business, setBusiness] = useState<Business | null>(null);
-  const [platform, setPlatform] = useState<Platform | null>(null);
+  const [user, setUser] = useState<User | null>(_null);
+  const [business, setBusiness] = useState<Business | null>(_null);
+  const [platform, setPlatform] = useState<Platform | null>(_null);
   const [managedRestaurants, setManagedRestaurants] = useState<Business[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(_true);
 
   // Sync auth store user with legacy user format
   useEffect(() => {
-    if (authStoreUser) {
+    if (_authStoreUser) {
       const legacyUser: User = {
         id: authStoreUser.id,
         firstName: authStoreUser.name.split(' ')[0] || 'User',
@@ -124,7 +124,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         platformId: authStoreUser.is_platform_owner ? authStoreUser.id : undefined,
         managedRestaurants: [],
       };
-      setUser(legacyUser);
+      setUser(_legacyUser);
 
       // Set business if available
       if (authStoreUser.restaurant_id && authStoreUser.restaurant_name) {
@@ -145,8 +145,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         });
       }
     } else {
-      setUser(null);
-      setBusiness(null);
+      setUser(_null);
+      setBusiness(_null);
     }
   }, [authStoreUser]);
 
@@ -156,27 +156,27 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const loadStoredAuth = async () => {
     try {
-      setIsLoading(true);
+      setIsLoading(_true);
 
       // Check auth state from Supabase
       await checkAuthStore();
-    } catch (error) {
+    } catch (_error) {
     } finally {
-      setIsLoading(false);
+      setIsLoading(_false);
     }
   };
 
   const signIn = async (email: string, password: string, rememberMe = false): Promise<boolean> => {
     try {
       // Use Supabase auth store
-      await signInStore(email, password);
+      await signInStore(_email, password);
 
-      if (rememberMe) {
+      if (_rememberMe) {
         await AsyncStorage.setItem(STORAGE_KEYS.REMEMBER_ME, 'true');
       }
 
       return true;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   };
@@ -187,16 +187,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     password: string,
   ): Promise<boolean> => {
     try {
-      setIsLoading(true);
+      setIsLoading(_true);
 
       // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise(resolve => setTimeout(_resolve, 1500));
 
       // Check if email already exists
       const existingUser = MOCK_USERS.find(
         u => u.email.toLowerCase() === userData.email?.toLowerCase(),
       );
-      if (existingUser) {
+      if (_existingUser) {
         return false;
       }
 
@@ -234,25 +234,25 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       newUser.businessId = newBusiness.id;
 
-      setUser(newUser);
-      setBusiness(newBusiness);
+      setUser(_newUser);
+      setBusiness(_newBusiness);
 
       // Store authentication data
-      await AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(newUser));
-      await AsyncStorage.setItem(STORAGE_KEYS.BUSINESS, JSON.stringify(newBusiness));
+      await AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(_newUser));
+      await AsyncStorage.setItem(STORAGE_KEYS.BUSINESS, JSON.stringify(_newBusiness));
       await AsyncStorage.setItem(STORAGE_KEYS.REMEMBER_ME, 'true');
 
       return true;
-    } catch (error) {
+    } catch (_error) {
       return false;
     } finally {
-      setIsLoading(false);
+      setIsLoading(_false);
     }
   };
 
   const signOut = async (): Promise<void> => {
     try {
-      setIsLoading(true);
+      setIsLoading(_true);
 
       // Clear stored data including JWT token
       await Promise.all([
@@ -262,11 +262,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         AsyncStorage.removeItem('auth_token'), // Clear JWT token for API calls
       ]);
 
-      setUser(null);
-      setBusiness(null);
-    } catch (error) {
+      setUser(_null);
+      setBusiness(_null);
+    } catch (_error) {
     } finally {
-      setIsLoading(false);
+      setIsLoading(_false);
     }
   };
 
@@ -277,9 +277,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     try {
       const updatedUser = { ...user, ...userData };
-      setUser(updatedUser);
-      await AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(updatedUser));
-    } catch (error) {
+      setUser(_updatedUser);
+      await AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(_updatedUser));
+    } catch (_error) {
     }
   };
 
@@ -290,9 +290,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     try {
       const updatedBusiness = { ...business, ...businessData };
-      setBusiness(updatedBusiness);
-      await AsyncStorage.setItem(STORAGE_KEYS.BUSINESS, JSON.stringify(updatedBusiness));
-    } catch (error) {
+      setBusiness(_updatedBusiness);
+      await AsyncStorage.setItem(STORAGE_KEYS.BUSINESS, JSON.stringify(_updatedBusiness));
+    } catch (_error) {
     }
   };
 
@@ -306,7 +306,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       // For now, we'll simulate a successful biometric check
       const biometricEnabled = await AsyncStorage.getItem(STORAGE_KEYS.BIOMETRIC_ENABLED);
       return biometricEnabled === 'true';
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   };
@@ -314,7 +314,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const resetPassword = async (email: string): Promise<boolean> => {
     try {
       // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(_resolve, 1000));
 
       // Check if email exists
       const userExists = MOCK_CREDENTIALS.find(
@@ -322,7 +322,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       );
 
       return !!userExists;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   };
@@ -336,11 +336,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const realRestaurants = await restaurantDataService.getPlatformRestaurants(
           'platform_owner_1',
         );
-        const businesses = realRestaurants.map(r => restaurantDataService.toBusinessType(r));
-        setManagedRestaurants(businesses);
+        const businesses = realRestaurants.map(r => restaurantDataService.toBusinessType(_r));
+        setManagedRestaurants(_businesses);
 
         // Generate REAL platform data based on actual restaurants
-        const totalRevenue = realRestaurants.reduce((sum, r) => sum + (r.monthlyRevenue || 0), 0);
+        const totalRevenue = realRestaurants.reduce((_sum, r) => sum + (r.monthlyRevenue || 0), 0);
         const realPlatformData: Platform = {
           id: 'platform1',
           name: 'Fynlo POS Platform',
@@ -351,11 +351,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           isActive: true,
         };
 
-        setPlatform(realPlatformData);
+        setPlatform(_realPlatformData);
           `✅ Platform data loaded: ${realRestaurants.length} restaurants, £${totalRevenue} total revenue`,
         );
       }
-    } catch (error) {
+    } catch (_error) {
     }
   };
 
@@ -365,13 +365,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         // Find restaurant in the REAL managed restaurants data
         const restaurant = managedRestaurants.find(r => r.id === restaurantId);
-        if (restaurant) {
-          setBusiness(restaurant);
-          await AsyncStorage.setItem(STORAGE_KEYS.BUSINESS, JSON.stringify(restaurant));
+        if (_restaurant) {
+          setBusiness(_restaurant);
+          await AsyncStorage.setItem(STORAGE_KEYS.BUSINESS, JSON.stringify(_restaurant));
         } else {
         }
       }
-    } catch (error) {
+    } catch (_error) {
     }
   };
 
@@ -384,8 +384,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const unsubscribe = restaurantDataService.subscribeToPlatformRestaurants(
         'platform_owner_1',
         updatedRestaurants => {
-          const businesses = updatedRestaurants.map(r => restaurantDataService.toBusinessType(r));
-          setManagedRestaurants(businesses);
+          const businesses = updatedRestaurants.map(r => restaurantDataService.toBusinessType(_r));
+          setManagedRestaurants(_businesses);
         },
       );
 
@@ -419,7 +419,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 };
 
 export const useAuth = (): AuthContextType => {
-  const context = useContext(AuthContext);
+  const context = useContext(_AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }

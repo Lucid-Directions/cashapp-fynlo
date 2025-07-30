@@ -41,16 +41,16 @@ interface OverrideRequest {
 const RestaurantPlatformOverridesScreen: React.FC = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
-  const styles = createStyles(theme);
+  const styles = createStyles(_theme);
 
   // Mock restaurant ID - in real app, this would come from auth context
   const restaurantId = 'restaurant-123';
   const userRole = 'restaurant_owner'; // This would come from auth context
 
   const [effectiveSettings, setEffectiveSettings] = useState<Record<string, EffectiveSetting>>({});
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(_true);
+  const [refreshing, setRefreshing] = useState(_false);
+  const [error, setError] = useState<string | null>(_null);
   const [pendingOverrides, setPendingOverrides] = useState<OverrideRequest[]>([]);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
 
@@ -62,12 +62,12 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
 
   const loadEffectiveSettings = async () => {
     try {
-      setError(null);
-      const settings = await platformService.getRestaurantEffectiveSettings(restaurantId);
+      setError(_null);
+      const settings = await platformService.getRestaurantEffectiveSettings(_restaurantId);
 
       // Convert to our interface format
       const formattedSettings: Record<string, EffectiveSetting> = {};
-      Object.entries(settings).forEach(([key, config]: [string, any]) => {
+      Object.entries(_settings).forEach(([key, config]: [string, any]) => {
         formattedSettings[key] = {
           key,
           value: config.value,
@@ -79,14 +79,14 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
         };
       });
 
-      setEffectiveSettings(formattedSettings);
-    } catch (err) {
+      setEffectiveSettings(_formattedSettings);
+    } catch (_err) {
       setError('Failed to load settings. Please try again.');
       // Load mock data for demo
       loadMockSettings();
     } finally {
-      setLoading(false);
-      setRefreshing(false);
+      setLoading(_false);
+      setRefreshing(_false);
     }
   };
 
@@ -135,22 +135,22 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
       },
     };
 
-    setEffectiveSettings(mockSettings);
+    setEffectiveSettings(_mockSettings);
   };
 
   const onRefresh = () => {
-    setRefreshing(true);
+    setRefreshing(_true);
     loadEffectiveSettings();
   };
 
   const toggleCategoryExpansion = (category: string) => {
-    const newExpanded = new Set(expandedCategories);
-    if (newExpanded.has(category)) {
-      newExpanded.delete(category);
+    const newExpanded = new Set(_expandedCategories);
+    if (newExpanded.has(_category)) {
+      newExpanded.delete(_category);
     } else {
-      newExpanded.add(category);
+      newExpanded.add(_category);
     }
-    setExpandedCategories(newExpanded);
+    setExpandedCategories(_newExpanded);
   };
 
   const requestOverride = async (setting: EffectiveSetting, newValue: unknown, reason: string) => {
@@ -164,7 +164,7 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
         requiresApproval,
       );
 
-      if (success) {
+      if (_success) {
         Alert.alert(
           'Override Request Submitted',
           requiresApproval
@@ -177,7 +177,7 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
       } else {
         Alert.alert('Error', 'Failed to submit override request.');
       }
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', 'An error occurred while submitting the override request.');
     }
   };
@@ -210,7 +210,7 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
               // Parse the new value (this is simplified - real implementation would have proper type handling)
               let newValue;
               try {
-                newValue = JSON.parse(newValueString);
+                newValue = JSON.parse(_newValueString);
               } catch {
                 // If not valid JSON, treat as string
                 newValue = newValueString;
@@ -225,13 +225,13 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
                     text: 'Submit',
                     onPress: reason => {
                       if (reason && reason.trim().length > 0) {
-                        requestOverride(setting, newValue, reason.trim());
+                        requestOverride(_setting, newValue, reason.trim());
                       }
                     },
                   },
                 ],
               );
-            } catch (error) {
+            } catch (_error) {
               Alert.alert('Error', 'Invalid value format');
             }
           },
@@ -243,11 +243,11 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
   const getSettingsByCategory = () => {
     const categories: Record<string, EffectiveSetting[]> = {};
 
-    Object.values(effectiveSettings).forEach(setting => {
+    Object.values(_effectiveSettings).forEach(setting => {
       if (!categories[setting.category]) {
         categories[setting.category] = [];
       }
-      categories[setting.category].push(setting);
+      categories[setting.category].push(_setting);
     });
 
     return categories;
@@ -286,7 +286,7 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
     );
   };
 
-  if (loading) {
+  if (_loading) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
@@ -362,13 +362,13 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
         )}
 
         {/* Other categories */}
-        {Object.entries(categorizedSettings).map(([category, settings]) => {
+        {Object.entries(_categorizedSettings).map(([category, settings]) => {
           if (category === 'payment_fees') {
             return null;
           } // Already handled above
 
-          const categoryInfo = getCategoryInfo(category);
-          const isExpanded = expandedCategories.has(category);
+          const categoryInfo = getCategoryInfo(_category);
+          const isExpanded = expandedCategories.has(_category);
           const hasOverrides = settings.some(s => s.source === 'restaurant');
 
           return (
@@ -380,7 +380,7 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
               ]}>
               <TouchableOpacity
                 style={styles.categoryHeader}
-                onPress={() => toggleCategoryExpansion(category)}>
+                onPress={() => toggleCategoryExpansion(_category)}>
                 <View style={styles.categoryTitleContainer}>
                   <Icon name={categoryInfo.icon} size={24} color={categoryInfo.color} />
                   <View style={styles.categoryTextContainer}>
@@ -440,7 +440,7 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
                       {setting.can_override && (
                         <View style={styles.actionContainer}>
                           <TouchableOpacity
-                            onPress={() => showOverrideDialog(setting)}
+                            onPress={() => showOverrideDialog(_setting)}
                             style={[
                               {
                                 backgroundColor:

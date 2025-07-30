@@ -49,12 +49,10 @@ class SharedDataStore {
   // Service Charge Management
   async getServiceChargeConfig(): Promise<ServiceChargeConfig> {
     try {
-
       // Try to get from real backend API first using robust networking
       const networkResult = await NetworkUtils.getServiceChargeConfig();
 
       if (networkResult.success && networkResult.data) {
-
         // Handle different API response formats
         let config: ServiceChargeConfig;
         const result = networkResult.data;
@@ -88,15 +86,15 @@ class SharedDataStore {
 
         // Cache the result and save to AsyncStorage for offline use
         this.cache.set('serviceCharge', config);
-        await AsyncStorage.setItem('platform.serviceCharge', JSON.stringify(config));
+        await AsyncStorage.setItem('platform.serviceCharge', JSON.stringify(_config));
         return config;
       } else {
       }
 
       // Fallback to AsyncStorage if API fails
       const stored = await AsyncStorage.getItem('platform.serviceCharge');
-      if (stored) {
-        const config = JSON.parse(stored);
+      if (_stored) {
+        const config = JSON.parse(_stored);
         this.cache.set('serviceCharge', config);
         return config;
       }
@@ -109,10 +107,9 @@ class SharedDataStore {
         lastUpdated: new Date().toISOString(),
       };
 
-      await this.setServiceChargeConfig(defaultConfig);
+      await this.setServiceChargeConfig(_defaultConfig);
       return defaultConfig;
-    } catch (error) {
-
+    } catch (_error) {
       // Emergency fallback to default
       return {
         enabled: true,
@@ -138,7 +135,7 @@ class SharedDataStore {
           'Content-Type': 'application/json',
         };
 
-        if (authToken) {
+        if (_authToken) {
           headers['Authorization'] = `Bearer ${authToken}`;
         }
 
@@ -153,7 +150,7 @@ class SharedDataStore {
         const response = await fetch(`${API_BASE_URL}/platform/service-charge`, {
           method: 'PUT', // Changed from POST to PUT to match backend endpoint
           headers,
-          body: JSON.stringify(requestBody),
+          body: JSON.stringify(_requestBody),
         });
 
         if (response.ok) {
@@ -163,7 +160,10 @@ class SharedDataStore {
           this.cache.set('serviceCharge', configWithTimestamp);
 
           // Also save locally as backup
-          await AsyncStorage.setItem('platform.serviceCharge', JSON.stringify(configWithTimestamp));
+          await AsyncStorage.setItem(
+            'platform.serviceCharge',
+            JSON.stringify(_configWithTimestamp),
+          );
 
           // Trigger sync event for real-time updates
           this.notifySubscribers('serviceCharge', configWithTimestamp);
@@ -171,17 +171,15 @@ class SharedDataStore {
         } else {
           const errorText = await response.text();
         }
-      } catch (apiError) {
-      }
+      } catch (_apiError) {}
 
       // Fallback to AsyncStorage if API fails
-      await AsyncStorage.setItem('platform.serviceCharge', JSON.stringify(configWithTimestamp));
+      await AsyncStorage.setItem('platform.serviceCharge', JSON.stringify(_configWithTimestamp));
       this.cache.set('serviceCharge', configWithTimestamp);
-
 
       // Trigger sync event for real-time updates
       this.notifySubscribers('serviceCharge', configWithTimestamp);
-    } catch (error) {
+    } catch (_error) {
       throw error;
     }
   }
@@ -190,13 +188,13 @@ class SharedDataStore {
   async getPaymentConfig(): Promise<PaymentConfig> {
     try {
       const cached = this.cache.get('payments');
-      if (cached) {
+      if (_cached) {
         return cached;
       }
 
       const stored = await AsyncStorage.getItem('platform.payments');
-      if (stored) {
-        const config = JSON.parse(stored);
+      if (_stored) {
+        const config = JSON.parse(_stored);
         this.cache.set('payments', config);
         return config;
       }
@@ -211,9 +209,9 @@ class SharedDataStore {
         lastUpdated: new Date().toISOString(),
       };
 
-      await this.setPaymentConfig(defaultConfig);
+      await this.setPaymentConfig(_defaultConfig);
       return defaultConfig;
-    } catch (error) {
+    } catch (_error) {
       throw error;
     }
   }
@@ -225,11 +223,11 @@ class SharedDataStore {
         lastUpdated: new Date().toISOString(),
       };
 
-      await AsyncStorage.setItem('platform.payments', JSON.stringify(configWithTimestamp));
+      await AsyncStorage.setItem('platform.payments', JSON.stringify(_configWithTimestamp));
       this.cache.set('payments', configWithTimestamp);
 
       this.notifySubscribers('payments', configWithTimestamp);
-    } catch (error) {
+    } catch (_error) {
       throw error;
     }
   }
@@ -237,20 +235,20 @@ class SharedDataStore {
   // Generic platform setting management
   async getPlatformSetting(key: string): Promise<unknown> {
     try {
-      const cached = this.cache.get(key);
-      if (cached) {
+      const cached = this.cache.get(_key);
+      if (_cached) {
         return cached;
       }
 
       const stored = await AsyncStorage.getItem(`platform.${key}`);
-      if (stored) {
-        const value = JSON.parse(stored);
-        this.cache.set(key, value);
+      if (_stored) {
+        const value = JSON.parse(_stored);
+        this.cache.set(_key, value);
         return value;
       }
 
       return null;
-    } catch (error) {
+    } catch (_error) {
       return null;
     }
   }
@@ -262,11 +260,11 @@ class SharedDataStore {
         lastUpdated: new Date().toISOString(),
       };
 
-      await AsyncStorage.setItem(`platform.${key}`, JSON.stringify(valueWithTimestamp));
-      this.cache.set(key, valueWithTimestamp);
+      await AsyncStorage.setItem(`platform.${key}`, JSON.stringify(_valueWithTimestamp));
+      this.cache.set(_key, valueWithTimestamp);
 
-      this.notifySubscribers(key, valueWithTimestamp);
-    } catch (error) {
+      this.notifySubscribers(_key, valueWithTimestamp);
+    } catch (_error) {
       throw error;
     }
   }
@@ -275,29 +273,28 @@ class SharedDataStore {
   private subscribers: Map<string, Set<(data: unknown) => void>> = new Map();
 
   subscribe(key: string, callback: (data: unknown) => void): () => void {
-    if (!this.subscribers.has(key)) {
-      this.subscribers.set(key, new Set());
+    if (!this.subscribers.has(_key)) {
+      this.subscribers.set(_key, new Set());
     }
 
-    this.subscribers.get(key)!.add(callback);
+    this.subscribers.get(_key)!.add(_callback);
 
     // Return unsubscribe function
     return () => {
-      const subs = this.subscribers.get(key);
-      if (subs) {
-        subs.delete(callback);
+      const subs = this.subscribers.get(_key);
+      if (_subs) {
+        subs.delete(_callback);
       }
     };
   }
 
   private notifySubscribers(key: string, data: unknown): void {
-    const subs = this.subscribers.get(key);
-    if (subs) {
+    const subs = this.subscribers.get(_key);
+    if (_subs) {
       subs.forEach(callback => {
         try {
-          callback(data);
-        } catch (error) {
-        }
+          callback(_data);
+        } catch (_error) {}
       });
     }
   }
@@ -308,10 +305,9 @@ class SharedDataStore {
       const keys = await AsyncStorage.getAllKeys();
       const platformKeys = keys.filter(key => key.startsWith('platform.'));
 
-      await AsyncStorage.multiRemove(platformKeys);
+      await AsyncStorage.multiRemove(_platformKeys);
       this.cache.clear();
-
-    } catch (error) {
+    } catch (_error) {
       throw error;
     }
   }
@@ -326,7 +322,7 @@ class SharedDataStore {
         serviceCharge,
         payments,
       };
-    } catch (error) {
+    } catch (_error) {
       throw error;
     }
   }

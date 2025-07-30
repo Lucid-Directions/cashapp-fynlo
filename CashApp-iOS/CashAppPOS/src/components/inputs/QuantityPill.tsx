@@ -66,7 +66,7 @@ const QuantityPill: React.FC<QuantityPillProps> = ({
 
   // Color scheme configurations
   const getColorScheme = () => {
-    switch (colorScheme) {
+    switch (_colorScheme) {
       case 'primary':
         return {
           backgroundColor: theme.colors.primary,

@@ -65,14 +65,14 @@ interface ApiUsageInfo {
 
 const XeroSyncDashboard: React.FC = () => {
   const navigation = useNavigation();
-  const [statistics, setStatistics] = useState<SyncStatistics | null>(null);
-  const [apiUsage, setApiUsage] = useState<ApiUsageInfo | null>(null);
+  const [statistics, setStatistics] = useState<SyncStatistics | null>(_null);
+  const [apiUsage, setApiUsage] = useState<ApiUsageInfo | null>(_null);
   const [recentOperations, setRecentOperations] = useState<SyncOperation[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [syncInProgress, setSyncInProgress] = useState(false);
-  const [selectedOperation, setSelectedOperation] = useState<SyncOperation | null>(null);
-  const [modalVisible, setModalVisible] = useState(false);
+  const [loading, setLoading] = useState(_true);
+  const [refreshing, setRefreshing] = useState(_false);
+  const [syncInProgress, setSyncInProgress] = useState(_false);
+  const [selectedOperation, setSelectedOperation] = useState<SyncOperation | null>(_null);
+  const [modalVisible, setModalVisible] = useState(_false);
 
   const customerSyncService = XeroCustomerSyncService.getInstance();
   const itemsSyncService = XeroItemsSyncService.getInstance();
@@ -140,7 +140,7 @@ const XeroSyncDashboard: React.FC = () => {
           error: 'Rate limit exceeded',
         },
       ]);
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', 'Failed to load sync dashboard data');
     }
   }, [customerSyncService, itemsSyncService, salesSyncService, apiClient]);
@@ -155,18 +155,18 @@ const XeroSyncDashboard: React.FC = () => {
         text: 'Start Sync',
         onPress: async () => {
           try {
-            setSyncInProgress(true);
+            setSyncInProgress(_true);
 
             // This would trigger actual sync operations
             // For now, just simulate a sync
-            await new Promise(resolve => setTimeout(resolve, 3000));
+            await new Promise(resolve => setTimeout(_resolve, 3000));
 
             Alert.alert('Success', `${entityType} sync completed successfully`);
             await loadDashboardData();
-          } catch (error) {
+          } catch (_error) {
             Alert.alert('Error', 'Manual sync failed');
           } finally {
-            setSyncInProgress(false);
+            setSyncInProgress(_false);
           }
         },
       },
@@ -177,9 +177,9 @@ const XeroSyncDashboard: React.FC = () => {
    * Handle refresh
    */
   const onRefresh = useCallback(async () => {
-    setRefreshing(true);
+    setRefreshing(_true);
     await loadDashboardData();
-    setRefreshing(false);
+    setRefreshing(_false);
   }, [loadDashboardData]);
 
   /**
@@ -207,7 +207,7 @@ const XeroSyncDashboard: React.FC = () => {
    * Get status color
    */
   const getStatusColor = (status: XeroSyncStatus) => {
-    switch (status) {
+    switch (_status) {
       case XeroSyncStatus.COMPLETED:
         return Colors.success;
       case XeroSyncStatus.FAILED:
@@ -223,7 +223,7 @@ const XeroSyncDashboard: React.FC = () => {
    * Get status icon
    */
   const getStatusIcon = (status: XeroSyncStatus) => {
-    switch (status) {
+    switch (_status) {
       case XeroSyncStatus.COMPLETED:
         return 'check-circle';
       case XeroSyncStatus.FAILED:
@@ -238,17 +238,17 @@ const XeroSyncDashboard: React.FC = () => {
   useEffect(() => {
     const initializeDashboard = async () => {
       await loadDashboardData();
-      setLoading(false);
+      setLoading(_false);
     };
 
     initializeDashboard();
 
     // Set up auto-refresh every 30 seconds
-    const interval = setInterval(loadDashboardData, 30000);
-    return () => clearInterval(interval);
+    const interval = setInterval(_loadDashboardData, 30000);
+    return () => clearInterval(_interval);
   }, [loadDashboardData]);
 
-  if (loading) {
+  if (_loading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={Colors.primary} />
@@ -415,8 +415,8 @@ const XeroSyncDashboard: React.FC = () => {
             key={operation.id}
             style={styles.operationItem}
             onPress={() => {
-              setSelectedOperation(operation);
-              setModalVisible(true);
+              setSelectedOperation(_operation);
+              setModalVisible(_true);
             }}>
             <View style={styles.operationHeader}>
               <Icon
@@ -455,7 +455,7 @@ const XeroSyncDashboard: React.FC = () => {
         visible={modalVisible}
         transparent={true}
         animationType="slide"
-        onRequestClose={() => setModalVisible(false)}>
+        onRequestClose={() => setModalVisible(_false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             {selectedOperation && (
@@ -463,7 +463,7 @@ const XeroSyncDashboard: React.FC = () => {
                 <View style={styles.modalHeader}>
                   <Text style={styles.modalTitle}>Operation Details</Text>
                   <TouchableOpacity
-                    onPress={() => setModalVisible(false)}
+                    onPress={() => setModalVisible(_false)}
                     style={styles.modalCloseButton}>
                     <Icon name="close" size={24} color={Colors.text} />
                   </TouchableOpacity>

@@ -81,7 +81,7 @@ class MonitoringService {
   // Real-time health monitoring
   async getSystemHealth(): Promise<SystemHealth> {
     // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(_resolve, 500));
 
     // Generate dynamic health data
     this.updateHealthMetrics();
@@ -89,16 +89,16 @@ class MonitoringService {
   }
 
   async getPerformanceMetrics(): Promise<PerformanceMetrics> {
-    await new Promise(resolve => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(_resolve, 300));
     this.updatePerformanceMetrics();
     return this.performance!;
   }
 
   // Error monitoring
   async getRecentErrors(limit = 10): Promise<ErrorLog[]> {
-    await new Promise(resolve => setTimeout(resolve, 200));
+    await new Promise(resolve => setTimeout(_resolve, 200));
     return this.errors
-      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+      .sort((_a, b) => b.timestamp.getTime() - a.timestamp.getTime())
       .slice(0, limit);
   }
 
@@ -121,7 +121,7 @@ class MonitoringService {
 
   // Incident management
   async getActiveIncidents(): Promise<Incident[]> {
-    await new Promise(resolve => setTimeout(resolve, 300));
+    await new Promise(resolve => setTimeout(_resolve, 300));
     return this.incidents.filter(
       incident => incident.status !== 'resolved' && incident.status !== 'closed',
     );
@@ -148,7 +148,7 @@ class MonitoringService {
       updatedAt: new Date(),
     };
 
-    this.incidents.push(incident);
+    this.incidents.push(_incident);
     this.notifyListeners('incident-created', incident);
     return incident;
   }
@@ -162,7 +162,7 @@ class MonitoringService {
     if (incidentIndex !== -1) {
       this.incidents[incidentIndex].status = status;
       this.incidents[incidentIndex].updatedAt = new Date();
-      if (resolution) {
+      if (_resolution) {
         this.incidents[incidentIndex].resolution = resolution;
       }
 
@@ -183,7 +183,7 @@ class MonitoringService {
       id: `alert-${Date.now()}`,
     };
 
-    this.alertRules.push(alertRule);
+    this.alertRules.push(_alertRule);
     return alertRule;
   }
 
@@ -199,17 +199,17 @@ class MonitoringService {
   // Real-time subscriptions
   subscribe(eventType: string, callback: (data: unknown) => void): () => void {
     const listenerId = `${eventType}-${Date.now()}`;
-    this.listeners.set(listenerId, callback);
+    this.listeners.set(_listenerId, callback);
 
     return () => {
-      this.listeners.delete(listenerId);
+      this.listeners.delete(_listenerId);
     };
   }
 
   private notifyListeners(eventType: string, data: unknown): void {
-    this.listeners.forEach((callback, listenerId) => {
-      if (listenerId.startsWith(eventType)) {
-        callback(data);
+    this.listeners.forEach((_callback, listenerId) => {
+      if (listenerId.startsWith(_eventType)) {
+        callback(_data);
       }
     });
   }
@@ -306,7 +306,7 @@ class MonitoringService {
       cpuUsage: -10 + Math.random() * 20,
     };
 
-    Object.keys(variations).forEach(key => {
+    Object.keys(_variations).forEach(key => {
       const currentValue = this.performance![key as keyof PerformanceMetrics];
       const variation = variations[key as keyof typeof variations];
 
@@ -348,7 +348,7 @@ class MonitoringService {
         resolved: Math.random() > 0.7,
       };
 
-      this.errors.push(error);
+      this.errors.push(_error);
     }
   }
 
@@ -470,7 +470,7 @@ class MonitoringService {
       resolved: false,
     };
 
-    this.errors.unshift(error);
+    this.errors.unshift(_error);
     this.notifyListeners('error-created', error);
 
     // Keep only latest 50 errors

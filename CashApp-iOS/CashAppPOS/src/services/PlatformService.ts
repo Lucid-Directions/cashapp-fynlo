@@ -84,7 +84,7 @@ class PlatformService {
   private async loadAuthToken(): Promise<void> {
     try {
       this.authToken = await tokenManager.getTokenWithRefresh();
-    } catch (error) {
+    } catch (_error) {
     }
   }
 
@@ -113,13 +113,13 @@ class PlatformService {
       };
 
       if (data && (method === 'POST' || method === 'PUT')) {
-        config.body = JSON.stringify(data);
+        config.body = JSON.stringify(_data);
       }
 
-      if (data) {
+      if (_data) {
       }
 
-      const response = await fetch(url, config);
+      const response = await fetch(_url, config);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -128,7 +128,7 @@ class PlatformService {
 
       const result = await response.json();
       return result.data || result;
-    } catch (error) {
+    } catch (_error) {
       throw error;
     }
   }
@@ -140,17 +140,17 @@ class PlatformService {
   ): Promise<PlatformSetting[]> {
     try {
       const params = new URLSearchParams();
-      if (category) {
+      if (_category) {
         params.append('category', category);
       }
-      if (includeSensitive) {
+      if (_includeSensitive) {
         params.append('include_sensitive', 'true');
       }
 
       const queryString = params.toString();
       const endpoint = `/platform/settings${queryString ? `?${queryString}` : ''}`;
 
-      const settingsData = await this.makeRequest(endpoint);
+      const settingsData = await this.makeRequest(_endpoint);
 
       // Handle different API response formats
       let settingsObject: Record<string, any>;
@@ -164,7 +164,7 @@ class PlatformService {
       }
 
       // Convert object to array format for easier handling
-      return Object.entries(settingsObject).map(([key, config]: [string, any]) => ({
+      return Object.entries(_settingsObject).map(([key, config]: [string, any]) => ({
         key,
         value: config?.value ?? config,
         category: config?.category ?? 'general',
@@ -172,9 +172,9 @@ class PlatformService {
         is_sensitive: config?.is_sensitive ?? false,
         updated_at: config?.updated_at ?? null,
       }));
-    } catch (error) {
+    } catch (_error) {
       // Return mock data for demo purposes
-      return this.getMockPlatformSettings(category);
+      return this.getMockPlatformSettings(_category);
     }
   }
 
@@ -189,7 +189,7 @@ class PlatformService {
         is_sensitive: settingData.is_sensitive,
         updated_at: settingData.updated_at,
       };
-    } catch (error) {
+    } catch (_error) {
       return null;
     }
   }
@@ -205,7 +205,7 @@ class PlatformService {
         change_reason: changeReason,
       });
       return true;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -225,23 +225,23 @@ class PlatformService {
         failed: result.failed_updates || 0,
         errors: result.errors || {},
       };
-    } catch (error) {
+    } catch (_error) {
 
       // If the bulk endpoint fails, try individual updates as fallback
       let successful = 0;
       let failed = 0;
       const errors: Record<string, string> = {};
 
-      for (const [key, value] of Object.entries(updates)) {
+      for (const [key, value] of Object.entries(_updates)) {
         try {
-          const success = await this.updatePlatformSetting(key, value, changeReason);
-          if (success) {
+          const success = await this.updatePlatformSetting(_key, value, changeReason);
+          if (_success) {
             successful++;
           } else {
             failed++;
             errors[key] = 'Update failed';
           }
-        } catch (error) {
+        } catch (_error) {
           failed++;
           errors[key] = error.message || 'Unknown error';
         }
@@ -255,7 +255,7 @@ class PlatformService {
   async getPaymentFees(): Promise<Record<string, PaymentFee>> {
     try {
       return await this.makeRequest('/platform/payment-fees');
-    } catch (error) {
+    } catch (_error) {
       // Return mock data for demo
       return this.getMockPaymentFees();
     }
@@ -271,10 +271,10 @@ class PlatformService {
       const params = new URLSearchParams({
         amount: amount.toString(),
       });
-      if (restaurantId) {
+      if (_restaurantId) {
         params.append('restaurant_id', restaurantId);
       }
-      if (monthlyVolume) {
+      if (_monthlyVolume) {
         params.append('monthly_volume', monthlyVolume.toString());
       }
 
@@ -282,9 +282,9 @@ class PlatformService {
         `/platform/payment-fees/calculate?${params.toString()}`,
         'POST',
       );
-    } catch (error) {
+    } catch (_error) {
       // Return mock calculation
-      return this.getMockFeeCalculation(paymentMethod, amount);
+      return this.getMockFeeCalculation(_paymentMethod, amount);
     }
   }
 
@@ -293,7 +293,7 @@ class PlatformService {
     try {
       const params = restaurantId ? `?restaurant_id=${restaurantId}` : '';
       return await this.makeRequest(`/platform/feature-flags${params}`);
-    } catch (error) {
+    } catch (_error) {
       return this.getMockFeatureFlags();
     }
   }
@@ -311,7 +311,7 @@ class PlatformService {
         target_restaurants: targetRestaurants,
       });
       return true;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -326,7 +326,7 @@ class PlatformService {
       return await this.makeRequest(
         `/platform/restaurants/${restaurantId}/effective-settings${params}`,
       );
-    } catch (error) {
+    } catch (_error) {
       return {};
     }
   }
@@ -347,7 +347,7 @@ class PlatformService {
         },
       );
       return true;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -356,16 +356,16 @@ class PlatformService {
   async getAuditTrail(configKey?: string, entityId?: string, limit = 100): Promise<AuditRecord[]> {
     try {
       const params = new URLSearchParams({ limit: limit.toString() });
-      if (configKey) {
+      if (_configKey) {
         params.append('config_key', configKey);
       }
-      if (entityId) {
+      if (_entityId) {
         params.append('entity_id', entityId);
       }
 
       const result = await this.makeRequest(`/platform/audit-trail?${params.toString()}`);
       return result.audit_records || [];
-    } catch (error) {
+    } catch (_error) {
       return [];
     }
   }
@@ -382,15 +382,15 @@ class PlatformService {
   }> {
     try {
       const params = new URLSearchParams();
-      if (restaurantId) {
+      if (_restaurantId) {
         params.append('restaurant_id', restaurantId);
       }
-      if (categories) {
+      if (_categories) {
         params.append('categories', categories.join(','));
       }
 
       return await this.makeRequest(`/platform/sync/platform-config?${params.toString()}`);
-    } catch (error) {
+    } catch (_error) {
       return {
         platform_settings: {},
         feature_flags: {},
@@ -405,7 +405,7 @@ class PlatformService {
     try {
       await this.makeRequest('/platform/initialize-defaults', 'POST');
       return true;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -533,7 +533,7 @@ class PlatformService {
   }> {
     try {
       return await this.dataStore.getServiceChargeConfig();
-    } catch (error) {
+    } catch (_error) {
       throw error;
     }
   }
@@ -556,9 +556,9 @@ class PlatformService {
         lastUpdated: new Date().toISOString(),
       };
 
-      await this.dataStore.setServiceChargeConfig(config);
+      await this.dataStore.setServiceChargeConfig(_config);
       return true;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }

@@ -88,7 +88,7 @@ const HardwareSettingsScreen: React.FC = () => {
   ];
 
   const getStatusColor = (status?: string) => {
-    switch (status) {
+    switch (_status) {
       case 'connected':
         return Colors.success;
       case 'disconnected':
@@ -101,7 +101,7 @@ const HardwareSettingsScreen: React.FC = () => {
   };
 
   const getStatusIcon = (status?: string) => {
-    switch (status) {
+    switch (_status) {
       case 'connected':
         return 'wifi';
       case 'disconnected':
@@ -120,7 +120,7 @@ const HardwareSettingsScreen: React.FC = () => {
   const renderSettingItem = ({ item }: { item: HardwareSettingsItem }) => (
     <TouchableOpacity
       style={styles.settingCard}
-      onPress={() => handleSettingPress(item)}
+      onPress={() => handleSettingPress(_item)}
       activeOpacity={0.7}>
       <View style={[styles.settingIcon, { backgroundColor: `${Colors.secondary}15` }]}>
         <Icon name={item.icon} size={24} color={Colors.secondary} />

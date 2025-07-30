@@ -84,7 +84,7 @@ class RestaurantDataService {
         if (attempt > 1) {
         }
         return result;
-      } catch (error) {
+      } catch (_error) {
         lastError = error instanceof Error ? error : new Error('Unknown error');
 
         // Don't retry on timeout errors - they indicate longer network issues
@@ -95,7 +95,7 @@ class RestaurantDataService {
         // Don't wait after the last attempt
         if (attempt < maxRetries) {
           const delay = baseDelay * Math.pow(2, attempt - 1); // Exponential backoff
-          await new Promise(resolve => setTimeout(resolve, delay));
+          await new Promise(resolve => setTimeout(_resolve, delay));
         }
       }
     }
@@ -131,7 +131,7 @@ class RestaurantDataService {
 
       // If network issues detected, show user-friendly error dialog
       if (!diagnostics.apiServerReachable || !diagnostics.specificEndpointReachable) {
-        await networkDiagnostics.showNetworkErrorDialog(diagnostics);
+        await networkDiagnostics.showNetworkErrorDialog(_diagnostics);
       }
 
       // SECOND: Try to get from real backend API with enhanced error handling and retry logic
@@ -154,7 +154,7 @@ class RestaurantDataService {
               },
             );
 
-            clearTimeout(timeoutId);
+            clearTimeout(_timeoutId);
 
             if (!response.ok) {
               throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -204,7 +204,7 @@ class RestaurantDataService {
             '✅ Successfully retrieved platform restaurants from API with retry mechanism',
           );
           return restaurants;
-        } catch (apiError) {
+        } catch (_apiError) {
             error: apiError,
             message: apiError instanceof Error ? apiError.message : 'Unknown error',
             url: `${API_CONFIG.BASE_URL}/api/v1/platform/restaurants/${platformOwnerId}`,
@@ -226,13 +226,13 @@ class RestaurantDataService {
       if (restaurants.length === 0) {
         const currentRestaurant = await this.getCurrentRestaurantData();
         if (currentRestaurant && currentRestaurant.platformOwnerId === platformOwnerId) {
-          restaurants.push(currentRestaurant);
-          await this.savePlatformRestaurants(platformOwnerId, restaurants);
+          restaurants.push(_currentRestaurant);
+          await this.savePlatformRestaurants(_platformOwnerId, restaurants);
         }
       }
 
       return restaurants;
-    } catch (error) {
+    } catch (_error) {
       return [];
     }
   }
@@ -246,7 +246,7 @@ class RestaurantDataService {
   ): Promise<void> {
     try {
       await this.dataStore.setPlatformSetting(`restaurants.${platformOwnerId}`, restaurants);
-    } catch (error) {
+    } catch (_error) {
       throw error;
     }
   }
@@ -268,18 +268,18 @@ class RestaurantDataService {
       const restaurantData = await this.dataStore.getPlatformSetting(
         `restaurant.${this.currentRestaurantId}`,
       );
-      if (restaurantData) {
+      if (_restaurantData) {
         return restaurantData;
       }
 
       // Fallback to local storage
       const localData = await AsyncStorage.getItem(`restaurant_data_${this.currentRestaurantId}`);
-      if (localData) {
-        return JSON.parse(localData);
+      if (_localData) {
+        return JSON.parse(_localData);
       }
 
       return null;
-    } catch (error) {
+    } catch (_error) {
       return null;
     }
   }
@@ -311,14 +311,14 @@ class RestaurantDataService {
         if (index >= 0) {
           platformRestaurants[index] = updated;
         } else {
-          platformRestaurants.push(updated);
+          platformRestaurants.push(_updated);
         }
 
         await this.savePlatformRestaurants(current.platformOwnerId, platformRestaurants);
       }
 
       return updated;
-    } catch (error) {
+    } catch (_error) {
       throw error;
     }
   }
@@ -361,7 +361,7 @@ class RestaurantDataService {
 
       // Add to platform restaurants
       const platformRestaurants = await this.getPlatformRestaurants(newRestaurant.platformOwnerId);
-      platformRestaurants.push(newRestaurant);
+      platformRestaurants.push(_newRestaurant);
       await this.savePlatformRestaurants(newRestaurant.platformOwnerId, platformRestaurants);
 
       // Set as current restaurant
@@ -369,7 +369,7 @@ class RestaurantDataService {
       await AsyncStorage.setItem('current_restaurant_id', newRestaurant.id);
 
       return newRestaurant;
-    } catch (error) {
+    } catch (_error) {
       throw error;
     }
   }
@@ -389,8 +389,8 @@ class RestaurantDataService {
         return;
       }
 
-      await this.updateCurrentRestaurant(metrics);
-    } catch (error) {
+      await this.updateCurrentRestaurant(_metrics);
+    } catch (_error) {
     }
   }
 

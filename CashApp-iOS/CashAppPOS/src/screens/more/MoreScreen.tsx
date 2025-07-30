@@ -27,7 +27,7 @@ interface MenuOption {
 const MoreScreen: React.FC = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
-  const styles = useThemedStyles(createStyles);
+  const styles = useThemedStyles(_createStyles);
   const { user } = useAppStore();
   const { signOut } = useAuth();
 
@@ -139,8 +139,7 @@ const MoreScreen: React.FC = () => {
       // Handle logout using AuthContext
       try {
         await signOut();
-      } catch (error) {
-      }
+      } catch (_error) {}
     } else if (option.route) {
       // Navigate to the route
       navigation.navigate(option.route as never);
@@ -189,19 +188,19 @@ const MoreScreen: React.FC = () => {
         </View>
 
         {/* Menu Sections */}
-        {menuSections.map((section, sectionIndex) => (
+        {menuSections.map((_section, sectionIndex) => (
           <View key={section.title} style={styles.section}>
             <Text style={styles.sectionTitle}>{section.title}</Text>
 
             <View style={styles.optionsContainer}>
-              {section.options.map((option, index) => (
+              {section.options.map((_option, index) => (
                 <TouchableOpacity
                   key={option.id}
                   style={[
                     styles.optionCard,
                     index === section.options.length - 1 && styles.lastOptionCard,
                   ]}
-                  onPress={() => handleOptionPress(option)}
+                  onPress={() => handleOptionPress(_option)}
                   activeOpacity={0.7}>
                   <View style={[styles.optionIcon, { backgroundColor: `${option.color}15` }]}>
                     <Icon

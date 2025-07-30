@@ -42,13 +42,13 @@ jest.mock('../../../store/useAuthStore', () => {
     isAuthenticated: false,
     isLoading: false,
     updateUser: jest.fn(),
-    checkAuth: jest.fn().mockResolvedValue(true),
+    checkAuth: jest.fn().mockResolvedValue(_true),
     signIn: jest.fn(),
     signOut: jest.fn(),
   };
 
   const useAuthStore = jest.fn(selector => {
-    return selector ? selector(mockState) : mockState;
+    return selector ? selector(_mockState) : mockState;
   });
 
   // Add getState method
@@ -70,7 +70,7 @@ jest.mock('../../../store/useAppStore', () => ({
       activeRestaurant: null,
       setActiveRestaurant: jest.fn(),
     };
-    return selector ? selector(state) : state;
+    return selector ? selector(_state) : state;
   }),
 }));
 
@@ -100,7 +100,7 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
     mockAlert.mockClear();
     (fetch as jest.Mock).mockClear();
     (AsyncStorage.getItem as jest.Mock).mockResolvedValue('test-auth-token');
-    (AsyncStorage.setItem as jest.Mock).mockResolvedValue(undefined);
+    (AsyncStorage.setItem as jest.Mock).mockResolvedValue(_undefined);
   });
 
   afterEach(() => {
@@ -139,18 +139,18 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
 
       // Fill restaurant name - mimicking user typing
       const restaurantNameInput = getByPlaceholderText("e.g., Maria's Mexican Kitchen");
-      fireEvent.changeText(restaurantNameInput, "Maria's Mexican Kitchen");
+      fireEvent.changeText(_restaurantNameInput, "Maria's Mexican Kitchen");
 
       // Fill display name
       const displayNameInput = getByPlaceholderText("e.g., Maria's Kitchen");
-      fireEvent.changeText(displayNameInput, "Maria's Kitchen");
+      fireEvent.changeText(_displayNameInput, "Maria's Kitchen");
 
       // Select business type
       fireEvent.press(getByText('Restaurant'));
 
       // Navigate to next step
       const nextButton = getByTestId('next-step-button');
-      fireEvent.press(nextButton);
+      fireEvent.press(_nextButton);
 
       // Step 2: Contact Information
       await waitFor(() => {
@@ -160,14 +160,14 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
 
       // Fill phone number
       const phoneInput = getByPlaceholderText('+44 20 1234 5678');
-      fireEvent.changeText(phoneInput, '+44 20 7946 0958');
+      fireEvent.changeText(_phoneInput, '+44 20 7946 0958');
 
       // Fill email with proper validation
       const emailInput = getByPlaceholderText('owner@mariaskitchen.co.uk');
-      fireEvent.changeText(emailInput, 'owner@mariaskitchen.co.uk');
+      fireEvent.changeText(_emailInput, 'owner@mariaskitchen.co.uk');
 
       // Trigger blur to validate email (mimicking real user behavior)
-      fireEvent(emailInput, 'blur');
+      fireEvent(_emailInput, 'blur');
 
       // Email validation is done locally, no API call expected
 
@@ -180,13 +180,13 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
       });
 
       const streetInput = getByTestId('address-street');
-      fireEvent.changeText(streetInput, '123 High Street');
+      fireEvent.changeText(_streetInput, '123 High Street');
 
       const cityInput = getByTestId('address-city');
-      fireEvent.changeText(cityInput, 'London');
+      fireEvent.changeText(_cityInput, 'London');
 
       const postcodeInput = getByTestId('address-postcode');
-      fireEvent.changeText(postcodeInput, 'SW1A 1AA');
+      fireEvent.changeText(_postcodeInput, 'SW1A 1AA');
 
       fireEvent.press(getByTestId('next-step-button'));
 
@@ -197,10 +197,10 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
       });
 
       const ownerNameInput = getByPlaceholderText('Maria Rodriguez');
-      fireEvent.changeText(ownerNameInput, 'Maria Rodriguez');
+      fireEvent.changeText(_ownerNameInput, 'Maria Rodriguez');
 
       const ownerEmailInput = getByPlaceholderText('owner@restaurant.com');
-      fireEvent.changeText(ownerEmailInput, 'maria@mariaskitchen.co.uk');
+      fireEvent.changeText(_ownerEmailInput, 'maria@mariaskitchen.co.uk');
 
       fireEvent.press(getByTestId('next-step-button'));
 
@@ -237,7 +237,7 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
         expect(Alert.alert).toHaveBeenCalledWith(
           'Skip Menu Setup?',
           'You can always add your menu later from the Settings menu.',
-          expect.any(Array),
+          expect.any(_Array),
         );
       });
 
@@ -257,15 +257,15 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
       expect(queryByText('Skip')).toBeNull();
       expect(queryByText('Skip for Now')).toBeNull();
 
-      // Fill bank details (required)
+      // Fill bank details (_required)
       const sortCodeInput = getByPlaceholderText('00-00-00');
-      fireEvent.changeText(sortCodeInput, '12-34-56');
+      fireEvent.changeText(_sortCodeInput, '12-34-56');
 
       const accountNumberInput = getByPlaceholderText('12345678');
-      fireEvent.changeText(accountNumberInput, '12345678');
+      fireEvent.changeText(_accountNumberInput, '12345678');
 
       const accountNameInput = getByPlaceholderText('Your Restaurant Ltd');
-      fireEvent.changeText(accountNameInput, "Maria's Mexican Kitchen Ltd");
+      fireEvent.changeText(_accountNameInput, "Maria's Mexican Kitchen Ltd");
 
       fireEvent.press(getByTestId('next-step-button'));
 
@@ -284,7 +284,7 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
 
       // Complete setup
       const completeButton = getByTestId('complete-setup-button');
-      fireEvent.press(completeButton);
+      fireEvent.press(_completeButton);
 
       // Verify final API call with complete payload
       await waitFor(() => {
@@ -293,7 +293,7 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
           call[0].includes('/restaurants/onboarding/create'),
         );
 
-        expect(completeCall).toBeTruthy();
+        expect(_completeCall).toBeTruthy();
         expect(completeCall[1]).toMatchObject({
           method: 'POST',
           headers: {
@@ -303,7 +303,7 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
         });
 
         const body = JSON.parse(completeCall[1].body);
-        expect(body).toMatchObject({
+        expect(_body).toMatchObject({
           name: 'Marias Mexican Kitchen', // Sanitized (apostrophe removed)
           display_name: 'Marias Kitchen', // Sanitized
           business_type: 'Restaurant',
@@ -332,7 +332,7 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
         expect(Alert.alert).toHaveBeenCalledWith(
           'Onboarding Complete! 🎉',
           expect.stringContaining("Welcome to Fynlo, Maria's Mexican Kitchen!"),
-          expect.any(Array),
+          expect.any(_Array),
         );
       });
 
@@ -340,12 +340,14 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
       const successAlertCall = mockAlert.mock.calls.find(
         call => call[0] === 'Onboarding Complete! 🎉',
       );
-      const startButton = successAlertCall[2].find((btn: unknown) => btn.text === 'Start Using POS');
+      const startButton = successAlertCall[2].find(
+        (btn: unknown) => btn.text === 'Start Using POS',
+      );
       startButton.onPress();
 
       // Verify navigation to main app
       await waitFor(() => {
-        expect(mockReset).toHaveBeenCalledWith({
+        expect(_mockReset).toHaveBeenCalledWith({
           index: 0,
           routes: [{ name: 'Main' }],
         });
@@ -426,7 +428,7 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
       const alertCall = alertCalls[alertCalls.length - 1];
       alertCall[2].find((btn: unknown) => btn.text === 'Skip').onPress();
 
-      // Step 8 - Bank Details (required)
+      // Step 8 - Bank Details (_required)
       await waitFor(() => getByText('Bank Details'));
       fireEvent.changeText(getByPlaceholderText('00-00-00'), '12-34-56');
       fireEvent.changeText(getByPlaceholderText('12345678'), '12345678');
@@ -446,7 +448,7 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
       });
 
       // Verify we didn't navigate away (still on review step)
-      expect(mockReset).not.toHaveBeenCalled();
+      expect(_mockReset).not.toHaveBeenCalled();
       expect(getByText('Review & Complete')).toBeTruthy();
     });
   });
@@ -530,22 +532,22 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
       const nameInput = getByPlaceholderText("e.g., Maria's Mexican Kitchen");
 
       // Verify text input properties that enable dictation
-      expect(nameInput.props.autoCorrect).not.toBe(false);
+      expect(nameInput.props.autoCorrect).not.toBe(_false);
       expect(nameInput.props.autoComplete).not.toBe('off');
       expect(nameInput.props.keyboardType).not.toBe('visible-password');
-      expect(nameInput.props.secureTextEntry).not.toBe(true);
+      expect(nameInput.props.secureTextEntry).not.toBe(_true);
 
       // Simulate dictation input (in real app, this comes from speech recognition)
-      fireEvent.changeText(nameInput, "Maria's Mexican Kitchen");
+      fireEvent.changeText(_nameInput, "Maria's Mexican Kitchen");
       expect(nameInput.props.value).toBe("Maria's Mexican Kitchen");
 
       // Test that all inputs are dictation-friendly
       const displayNameInput = getByPlaceholderText("e.g., Maria's Kitchen");
-      expect(displayNameInput.props.autoCorrect).not.toBe(false);
+      expect(displayNameInput.props.autoCorrect).not.toBe(_false);
 
       // Navigate to contact step
-      fireEvent.changeText(nameInput, 'Test');
-      fireEvent.changeText(displayNameInput, 'Test');
+      fireEvent.changeText(_nameInput, 'Test');
+      fireEvent.changeText(_displayNameInput, 'Test');
       fireEvent.press(getByTestId('next-step-button'));
 
       // Check email input supports dictation
@@ -554,7 +556,7 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
 
       // Email inputs typically have autoCorrect false, but should still support dictation
       expect(emailInput.props.keyboardType).toBe('email-address');
-      expect(emailInput.props.secureTextEntry).not.toBe(true);
+      expect(emailInput.props.secureTextEntry).not.toBe(_true);
     });
 
     it('should handle dictation character issue (only typing "V")', async () => {
@@ -565,12 +567,12 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
       const nameInput = getByPlaceholderText("e.g., Maria's Mexican Kitchen");
 
       // Test that full text is accepted, not just single characters
-      fireEvent.changeText(nameInput, 'V'); // Current buggy behavior
+      fireEvent.changeText(_nameInput, 'V'); // Current buggy behavior
       expect(nameInput.props.value).toBe('V');
 
       // Clear and test proper behavior
-      fireEvent.changeText(nameInput, '');
-      fireEvent.changeText(nameInput, 'Voice Dictated Restaurant Name');
+      fireEvent.changeText(_nameInput, '');
+      fireEvent.changeText(_nameInput, 'Voice Dictated Restaurant Name');
       expect(nameInput.props.value).toBe('Voice Dictated Restaurant Name');
 
       // Verify no text transformation is interfering
@@ -681,7 +683,7 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
       const alertCall = alertCalls[alertCalls.length - 1];
       alertCall[2].find((btn: unknown) => btn.text === 'Skip').onPress();
 
-      // Step 8 - Bank Details (required)
+      // Step 8 - Bank Details (_required)
       await waitFor(() => getByText('Bank Details'));
       fireEvent.changeText(getByPlaceholderText('00-00-00'), '12-34-56');
       fireEvent.changeText(getByPlaceholderText('12345678'), '12345678');
@@ -694,7 +696,7 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
 
       // Should handle network error gracefully
       await waitFor(() => {
-        expect(fetch).toHaveBeenCalled();
+        expect(_fetch).toHaveBeenCalled();
         const errorAlerts = mockAlert.mock.calls.filter(call => call[0] === 'Error');
         expect(errorAlerts.length).toBeGreaterThan(0);
       });
@@ -704,7 +706,7 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
       // Mock API timeout for onboarding completion
       (fetch as jest.Mock).mockImplementation(url => {
         if (url.includes('/restaurants/onboarding/create')) {
-          return new Promise((_, reject) =>
+          return new Promise((__, reject) =>
             setTimeout(() => reject(new Error('Request timeout')), 100),
           );
         }
@@ -760,7 +762,7 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
       const alertCall = alertCalls[alertCalls.length - 1];
       alertCall[2].find((btn: unknown) => btn.text === 'Skip').onPress();
 
-      // Step 8 - Bank Details (required)
+      // Step 8 - Bank Details (_required)
       await waitFor(() => getByText('Bank Details'));
       fireEvent.changeText(getByPlaceholderText('00-00-00'), '12-34-56');
       fireEvent.changeText(getByPlaceholderText('12345678'), '12345678');
@@ -774,7 +776,7 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
       // Should handle timeout gracefully
       await waitFor(
         () => {
-          expect(fetch).toHaveBeenCalled();
+          expect(_fetch).toHaveBeenCalled();
           const errorAlerts = mockAlert.mock.calls.filter(call => call[0] === 'Error');
           expect(errorAlerts.length).toBeGreaterThan(0);
         },
@@ -793,8 +795,8 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
       const nameInput = getByPlaceholderText("e.g., Maria's Mexican Kitchen");
       const displayInput = getByPlaceholderText("e.g., Maria's Kitchen");
 
-      fireEvent.changeText(nameInput, 'Persisted Restaurant');
-      fireEvent.changeText(displayInput, 'Persisted Display');
+      fireEvent.changeText(_nameInput, 'Persisted Restaurant');
+      fireEvent.changeText(_displayInput, 'Persisted Display');
       fireEvent.press(getByText('Restaurant'));
 
       // Navigate to step 2
@@ -826,7 +828,7 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
 
       // Try rapid button presses
       const nextButton = getByTestId('next-step-button');
-      fireEvent.press(nextButton);
+      fireEvent.press(_nextButton);
 
       // Should navigate to step 2
       await waitFor(() => getByText('Contact Information'));
@@ -934,11 +936,11 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
           call[0].includes('/restaurants/onboarding/create'),
         );
 
-        expect(onboardingCall).toBeTruthy();
+        expect(_onboardingCall).toBeTruthy();
         const payload = JSON.parse(onboardingCall[1].body);
 
         // Verify complete payload structure
-        expect(payload).toMatchObject({
+        expect(_payload).toMatchObject({
           name: 'API Test Restaurant', // Sanitized
           display_name: 'API Test', // Sanitized
           business_type: 'Restaurant',

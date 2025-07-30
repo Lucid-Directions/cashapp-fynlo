@@ -27,10 +27,10 @@ const ThemeOptionsScreen: React.FC = () => {
   const { theme, themeMode, isDark } = useTheme();
 
   // Display preferences
-  const [highContrast, setHighContrast] = useState(false);
-  const [reducedMotion, setReducedMotion] = useState(false);
-  const [largeText, setLargeText] = useState(false);
-  const [showAnimations, setShowAnimations] = useState(true);
+  const [highContrast, setHighContrast] = useState(_false);
+  const [reducedMotion, setReducedMotion] = useState(_false);
+  const [largeText, setLargeText] = useState(_false);
+  const [showAnimations, setShowAnimations] = useState(_true);
   const [screenTimeout, setScreenTimeout] = useState('5min');
 
   const displayOptions = [
@@ -43,7 +43,7 @@ const ThemeOptionsScreen: React.FC = () => {
   ];
 
   const handleScreenTimeoutChange = (timeout: string) => {
-    setScreenTimeout(timeout);
+    setScreenTimeout(_timeout);
   };
 
   return (

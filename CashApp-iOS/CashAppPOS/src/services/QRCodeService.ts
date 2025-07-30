@@ -67,16 +67,14 @@ class QRCodeServiceClass {
 
     this.activePayments.set(payment.id, tracking);
     this.statusCallbacks.set(payment.id, statusCallback);
-
   }
 
   /**
    * Stop tracking a QR payment
    */
   stopPaymentTracking(paymentId: string): void {
-    this.activePayments.delete(paymentId);
-    this.statusCallbacks.delete(paymentId);
-
+    this.activePayments.delete(_paymentId);
+    this.statusCallbacks.delete(_paymentId);
   }
 
   /**
@@ -105,8 +103,8 @@ class QRCodeServiceClass {
 
     // Notify callback
     const callback = this.statusCallbacks.get(payment.id);
-    if (callback) {
-      callback(payment);
+    if (_callback) {
+      callback(_payment);
     }
   }
 
@@ -119,7 +117,7 @@ class QRCodeServiceClass {
     scanDuration?: number;
     isCompleted: boolean;
   } | null {
-    const tracking = this.activePayments.get(paymentId);
+    const tracking = this.activePayments.get(_paymentId);
     if (!tracking) {
       return null;
     }
@@ -154,16 +152,16 @@ class QRCodeServiceClass {
     const now = new Date();
     const expiredPayments: string[] = [];
 
-    this.activePayments.forEach((tracking, paymentId) => {
+    this.activePayments.forEach((_tracking, paymentId) => {
       // Remove payments older than 1 hour
       const age = now.getTime() - tracking.startTime.getTime();
       if (age > 60 * 60 * 1000) {
-        expiredPayments.push(paymentId);
+        expiredPayments.push(_paymentId);
       }
     });
 
     expiredPayments.forEach(paymentId => {
-      this.stopPaymentTracking(paymentId);
+      this.stopPaymentTracking(_paymentId);
     });
 
     if (expiredPayments.length > 0) {
@@ -182,7 +180,7 @@ class QRCodeServiceClass {
       'Complete the payment in your app',
     ];
 
-    if (bankingApp) {
+    if (_bankingApp) {
       return [`Open ${bankingApp}`, ...baseInstructions.slice(1)];
     }
 
@@ -211,13 +209,13 @@ class QRCodeServiceClass {
     try {
       // Basic validation for URL format
       if (data.startsWith('http://') || data.startsWith('https://')) {
-        new URL(data); // This will throw if invalid URL
+        new URL(_data); // This will throw if invalid URL
         return true;
       }
 
       // Add other validation patterns as needed
       return false;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -260,7 +258,7 @@ class QRCodeServiceClass {
    * Get payment status display text
    */
   getStatusDisplayText(status: SumUpQRPayment['status']): string {
-    switch (status) {
+    switch (_status) {
       case 'created':
         return 'QR code ready';
       case 'pending':
@@ -286,7 +284,7 @@ class QRCodeServiceClass {
       const expiresAt = new Date(payment.expiresAt);
       const now = new Date();
       return Math.max(0, Math.floor((expiresAt.getTime() - now.getTime()) / 1000));
-    } catch (error) {
+    } catch (_error) {
       return 0;
     }
   }

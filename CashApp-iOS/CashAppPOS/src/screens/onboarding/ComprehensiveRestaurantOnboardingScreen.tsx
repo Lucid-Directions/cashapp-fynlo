@@ -101,8 +101,8 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
 
   const [currentStep, setCurrentStep] = useState(1);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
-  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(_false);
+  const [loading, setLoading] = useState(_false);
   const [fieldErrors, setFieldErrors] = useState({
     // Step 2 - Contact
     phone: '',
@@ -180,8 +180,8 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
       e => {
         const height = e.endCoordinates?.height || 0;
         // Ensure we don't get NaN values
-        setKeyboardHeight(isNaN(height) ? 0 : height);
-        setIsKeyboardVisible(true);
+        setKeyboardHeight(isNaN(_height) ? 0 : height);
+        setIsKeyboardVisible(_true);
       },
     );
 
@@ -189,7 +189,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
       Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
       () => {
         setKeyboardHeight(0);
-        setIsKeyboardVisible(false);
+        setIsKeyboardVisible(_false);
       },
     );
 
@@ -287,7 +287,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
   };
 
   const validateStep = (step: number): boolean => {
-    switch (step) {
+    switch (_step) {
       case 1: // Basic Info
         return !!(formData.restaurantName && formData.displayName && formData.businessType);
 
@@ -374,7 +374,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
 
   const triggerValidationErrors = (step: number) => {
     // This function sets error messages when Next is clicked with invalid data
-    switch (step) {
+    switch (_step) {
       case 2: // Contact
         // Check for empty required fields first
         if (!formData.phone) {
@@ -409,7 +409,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         }
         break;
 
-      // Note: Case 6 (Employee) removed - employees are optional and validated when adding
+      // Note: Case 6 (_Employee) removed - employees are optional and validated when adding
 
       case 8: // Bank Details
         if (!formData.bankDetails?.accountName) {
@@ -443,9 +443,9 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
   };
 
   const nextStep = () => {
-    if (!validateStep(currentStep)) {
+    if (!validateStep(_currentStep)) {
       // Trigger validation errors to show feedback
-      triggerValidationErrors(currentStep);
+      triggerValidationErrors(_currentStep);
       return;
     }
 
@@ -464,7 +464,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
 
   const completeOnboarding = async () => {
     try {
-      setLoading(true);
+      setLoading(_true);
 
       // Get auth token from AsyncStorage
       const token = await AsyncStorage.getItem('auth_token');
@@ -524,7 +524,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(restaurantData),
+        body: JSON.stringify(_restaurantData),
       });
 
       if (!response.ok) {
@@ -567,13 +567,13 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
           },
         ],
       );
-    } catch (error) {
+    } catch (_error) {
       Alert.alert(
         'Error',
         error instanceof Error ? error.message : 'Failed to complete onboarding. Please try again.',
       );
     } finally {
-      setLoading(false);
+      setLoading(_false);
     }
   };
 
@@ -585,7 +585,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         contentContainerStyle={styles.stepIndicatorContent}
         scrollIndicatorInsets={{ top: 0, left: 0, bottom: 0, right: 0 }}
         contentInset={{ left: 0, right: 0, top: 0, bottom: 0 }}>
-        {Array.from({ length: totalSteps }, (_, index) => {
+        {Array.from({ length: totalSteps }, (__, index) => {
           const step = index + 1;
           return (
             <View key={step} style={styles.stepIndicatorItem}>
@@ -669,7 +669,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
       </View>
 
       <FastInput
-        label="Description (Optional)"
+        label="Description (_Optional)"
         inputType="text"
         value={formData.description}
         onChangeText={value => updateField('description', value)}
@@ -735,7 +735,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
       />
 
       <FastInput
-        label="Website (Optional)"
+        label="Website (_Optional)"
         inputType="text"
         value={formData.website}
         onChangeText={value => updateField('website', value)}
@@ -875,7 +875,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
       <Text style={styles.stepTitle}>Business Hours</Text>
       <Text style={styles.stepDescription}>Set your restaurant's operating hours</Text>
 
-      {dayNames.map((day, index) => (
+      {dayNames.map((_day, index) => (
         <View key={day} style={styles.businessHourRow}>
           <View style={styles.dayInfo}>
             <Text style={styles.dayLabel}>{dayLabels[index]}</Text>
@@ -1164,7 +1164,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         inputType="text"
         value={formData.bankDetails?.sortCode || ''}
         onChangeText={text => {
-          const formattedSortCode = formatSortCode(text);
+          const formattedSortCode = formatSortCode(_text);
           setFormData(prev => ({
             ...prev,
             bankDetails: {
@@ -1235,7 +1235,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
         inputType="text"
         value={formData.bankDetails?.accountName || ''}
         onChangeText={text => {
-          const sanitized = sanitizeInput(text, 100);
+          const sanitized = sanitizeInput(_text, 100);
           setFormData(prev => ({
             ...prev,
             bankDetails: {
@@ -1258,7 +1258,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
       />
 
       <FastInput
-        label="IBAN (Optional)"
+        label="IBAN (_Optional)"
         inputType="text"
         value={formData.bankDetails?.iban || ''}
         onChangeText={text => {
@@ -1288,7 +1288,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
       />
 
       <FastInput
-        label="SWIFT/BIC Code (Optional)"
+        label="SWIFT/BIC Code (_Optional)"
         inputType="text"
         value={formData.bankDetails?.swiftBic || ''}
         onChangeText={text => {
@@ -1385,7 +1385,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
   );
 
   const renderCurrentStep = () => {
-    switch (currentStep) {
+    switch (_currentStep) {
       case 1:
         return renderStep1();
       case 2:
@@ -1919,9 +1919,9 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
           <View style={styles.navigationSpacer} />
 
           <TouchableOpacity
-            style={[styles.nextButton, !validateStep(currentStep) && styles.nextButtonDisabled]}
+            style={[styles.nextButton, !validateStep(_currentStep) && styles.nextButtonDisabled]}
             onPress={nextStep}
-            disabled={loading || !validateStep(currentStep)}
+            disabled={loading || !validateStep(_currentStep)}
             testID={currentStep === totalSteps ? 'complete-setup-button' : 'next-step-button'}>
             <Text style={styles.nextButtonText}>
               {loading ? 'Saving...' : currentStep === totalSteps ? 'Complete Setup' : 'Next'}

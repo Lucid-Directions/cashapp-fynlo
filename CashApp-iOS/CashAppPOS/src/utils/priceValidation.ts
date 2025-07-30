@@ -21,7 +21,10 @@ export interface CalculationContext {
 /**
  * Validates a price value and returns a safe number or 0
  */
-export const validatePrice = (value: unknown, context?: CalculationContext): PriceValidationResult => {
+export const validatePrice = (
+  value: unknown,
+  context?: CalculationContext,
+): PriceValidationResult => {
   try {
     // Handle null/undefined
     if (value === null || value === undefined) {
@@ -35,7 +38,7 @@ export const validatePrice = (value: unknown, context?: CalculationContext): Pri
     // Handle string conversion
     let numValue: number;
     if (typeof value === 'string') {
-      numValue = parseFloat(value);
+      numValue = parseFloat(_value);
     } else if (typeof value === 'number') {
       numValue = value;
     } else {
@@ -47,7 +50,7 @@ export const validatePrice = (value: unknown, context?: CalculationContext): Pri
     }
 
     // Check for NaN
-    if (isNaN(numValue)) {
+    if (isNaN(_numValue)) {
       const errorTrackingService = ErrorTrackingService.getInstance();
       errorTrackingService.trackPricingError(
         new Error(`NaN detected in price validation: ${value}`),
@@ -79,7 +82,7 @@ export const validatePrice = (value: unknown, context?: CalculationContext): Pri
     }
 
     // Check for infinity
-    if (!Number.isFinite(numValue)) {
+    if (!Number.isFinite(_numValue)) {
       const errorTrackingService = ErrorTrackingService.getInstance();
       errorTrackingService.trackPricingError(
         new Error(`Infinite price detected: ${numValue}`),
@@ -114,7 +117,7 @@ export const validatePrice = (value: unknown, context?: CalculationContext): Pri
       isValid: true,
       value: Number(numValue.toFixed(2)), // Ensure 2 decimal places
     };
-  } catch (error) {
+  } catch (_error) {
     const errorTrackingService = ErrorTrackingService.getInstance();
     errorTrackingService.trackPricingError(
       error instanceof Error ? error : new Error(`Price validation error: ${error}`),
@@ -138,8 +141,8 @@ export const calculateItemTotal = (
   quantity: unknown,
   context?: CalculationContext,
 ): PriceValidationResult => {
-  const priceValidation = validatePrice(price, context);
-  const quantityValidation = validatePrice(quantity, context);
+  const priceValidation = validatePrice(_price, context);
+  const quantityValidation = validatePrice(_quantity, context);
 
   if (!priceValidation.isValid || !quantityValidation.isValid) {
     return {
@@ -151,12 +154,12 @@ export const calculateItemTotal = (
 
   try {
     const total = priceValidation.value * quantityValidation.value;
-    return validatePrice(total, {
+    return validatePrice(_total, {
       ...context,
       operation: 'item_total_calculation',
       inputValues: { price: priceValidation.value, quantity: quantityValidation.value },
     });
-  } catch (error) {
+  } catch (_error) {
     const errorTrackingService = ErrorTrackingService.getInstance();
     errorTrackingService.trackPricingError(
       error instanceof Error ? error : new Error(`Item total calculation error: ${error}`),
@@ -173,15 +176,15 @@ export const calculateItemTotal = (
 };
 
 /**
- * Safely calculates percentage-based fees (tax, service charge, etc.)
+ * Safely calculates percentage-based fees (_tax, service charge, etc.)
  */
 export const calculatePercentageFee = (
   subtotal: unknown,
   percentage: unknown,
   context?: CalculationContext,
 ): PriceValidationResult => {
-  const subtotalValidation = validatePrice(subtotal, context);
-  const percentageValidation = validatePrice(percentage, context);
+  const subtotalValidation = validatePrice(_subtotal, context);
+  const percentageValidation = validatePrice(_percentage, context);
 
   if (!subtotalValidation.isValid || !percentageValidation.isValid) {
     return {
@@ -193,12 +196,12 @@ export const calculatePercentageFee = (
 
   try {
     const fee = subtotalValidation.value * (percentageValidation.value / 100);
-    return validatePrice(fee, {
+    return validatePrice(_fee, {
       ...context,
       operation: 'percentage_fee_calculation',
       inputValues: { subtotal: subtotalValidation.value, percentage: percentageValidation.value },
     });
-  } catch (error) {
+  } catch (_error) {
     const errorTrackingService = ErrorTrackingService.getInstance();
     errorTrackingService.trackPricingError(
       error instanceof Error ? error : new Error(`Percentage fee calculation error: ${error}`),
@@ -243,12 +246,12 @@ export const calculateSum = (
       );
     }
 
-    return validatePrice(total, {
+    return validatePrice(_total, {
       ...context,
       operation: 'sum_calculation',
       inputValues: { valuesCount: values.length, invalidValuesCount: invalidValues.length },
     });
-  } catch (error) {
+  } catch (_error) {
     const errorTrackingService = ErrorTrackingService.getInstance();
     errorTrackingService.trackPricingError(
       error instanceof Error ? error : new Error(`Sum calculation error: ${error}`),
@@ -267,8 +270,12 @@ export const calculateSum = (
 /**
  * Safely formats a price for display
  */
-export const formatPrice = (value: unknown, currency = '£', context?: CalculationContext): string => {
-  const validation = validatePrice(value, context);
+export const formatPrice = (
+  value: unknown,
+  currency = '£',
+  context?: CalculationContext,
+): string => {
+  const validation = validatePrice(_value, context);
 
   if (!validation.isValid) {
     const errorTrackingService = ErrorTrackingService.getInstance();
@@ -283,7 +290,7 @@ export const formatPrice = (value: unknown, currency = '£', context?: Calculati
 
   try {
     return `${currency}${validation.value.toFixed(2)}`;
-  } catch (error) {
+  } catch (_error) {
     const errorTrackingService = ErrorTrackingService.getInstance();
     errorTrackingService.trackPricingError(
       error instanceof Error ? error : new Error(`Price formatting error: ${error}`),
@@ -311,7 +318,7 @@ export const validateCartCalculation = (
   hasErrors: boolean;
 } => {
   // Calculate subtotal
-  const itemTotals = cartItems.map((item, index) => {
+  const itemTotals = cartItems.map((_item, index) => {
     const itemContext = {
       ...context,
       operation: 'cart_item_calculation',
@@ -323,7 +330,7 @@ export const validateCartCalculation = (
     return itemTotal.value;
   });
 
-  const subtotal = calculateSum(itemTotals, {
+  const subtotal = calculateSum(_itemTotals, {
     ...context,
     operation: 'cart_subtotal_calculation',
   });

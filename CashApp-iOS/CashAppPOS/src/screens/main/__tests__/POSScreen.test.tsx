@@ -100,17 +100,17 @@ describe('POSScreen', () => {
       removeFromCart: jest.fn(id =>
         useAppStore.setState(state => ({ cart: state.cart.filter(item => item.id !== id) })),
       ),
-      updateCartItem: jest.fn((id, updates) =>
+      updateCartItem: jest.fn((_id, updates) =>
         useAppStore.setState(state => ({
           cart: state.cart.map(item => (item.id === id ? { ...item, ...updates } : item)),
         })),
       ),
       clearCart: jest.fn(() => useAppStore.setState({ cart: [] })),
       cartTotal: jest.fn(() =>
-        useAppStore.getState().cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
+        useAppStore.getState().cart.reduce((_sum, item) => sum + item.price * item.quantity, 0),
       ),
       cartItemCount: jest.fn(() =>
-        useAppStore.getState().cart.reduce((sum, item) => sum + item.quantity, 0),
+        useAppStore.getState().cart.reduce((_sum, item) => sum + item.quantity, 0),
       ),
     };
 
@@ -122,8 +122,8 @@ describe('POSScreen', () => {
     };
 
     // Set initial state for stores
-    useAppStore.setState(initialAppStoreState, true);
-    useUIStore.setState(initialUIStoreState, true);
+    useAppStore.setState(_initialAppStoreState, true);
+    useUIStore.setState(_initialUIStoreState, true);
   });
 
   it('renders correctly and magnifier icon is not present', () => {
@@ -164,12 +164,12 @@ describe('POSScreen', () => {
     });
 
     const nachosItem = getByText('Nachos');
-    fireEvent.press(nachosItem);
+    fireEvent.press(_nachosItem);
 
     expect(initialAppStoreState.addToCart).toHaveBeenCalledWith(
       expect.objectContaining({ id: 1, name: 'Nachos', price: 5.0 }),
     );
-    // Check if cart state was updated (optional, as addToCart is mocked to update state)
+    // Check if cart state was updated (_optional, as addToCart is mocked to update state)
     expect(useAppStore.getState().cart.length).toBe(1);
   });
 
@@ -178,7 +178,7 @@ describe('POSScreen', () => {
       navigationProps: { navigation: mockNavigation },
     });
     const cartButton = getByTestId('shopping-cart-button');
-    fireEvent.press(cartButton);
+    fireEvent.press(_cartButton);
     expect(getByText('Current Order')).toBeTruthy(); // Modal title
   });
 
@@ -232,7 +232,7 @@ describe('POSScreen', () => {
         navigationProps: { navigation: mockNavigation },
       });
       const bubble = getByTestId('category-search-bubble-inactive');
-      fireEvent.press(bubble);
+      fireEvent.press(_bubble);
       expect(getByTestId('category-search-bubble-active')).toBeTruthy();
       expect(getByPlaceholderText('Search food...')).toBeTruthy();
     });
@@ -247,7 +247,7 @@ describe('POSScreen', () => {
       const searchInput = getByPlaceholderText('Search food...');
 
       act(() => {
-        fireEvent.changeText(searchInput, 'Taco');
+        fireEvent.changeText(_searchInput, 'Taco');
       });
 
       // Wait for state update and re-render
@@ -270,14 +270,14 @@ describe('POSScreen', () => {
       const searchInput = getByPlaceholderText('Search food...');
 
       act(() => {
-        fireEvent.changeText(searchInput, 'Taco');
+        fireEvent.changeText(_searchInput, 'Taco');
       });
 
       await waitFor(() => expect(queryByText('Nachos')).toBeNull()); // Pre-condition: Nachos is hidden
 
       const clearButton = getByTestId('clear-search-button');
       act(() => {
-        fireEvent.press(clearButton);
+        fireEvent.press(_clearButton);
       });
 
       await waitFor(() => {
@@ -299,12 +299,12 @@ describe('POSScreen', () => {
       // Select 'Tacos' category
       const tacosCategoryTab = getByText('Tacos');
       act(() => {
-        fireEvent.press(tacosCategoryTab);
+        fireEvent.press(_tacosCategoryTab);
       });
 
       await waitFor(() => {
         expect(useUIStore.getState().selectedCategory).toBe('Tacos');
-        expect(queryByText('Nachos')).toBeNull(); // Nachos (Snacks) should be hidden
+        expect(queryByText('Nachos')).toBeNull(); // Nachos (_Snacks) should be hidden
         expect(queryByText('Carnitas Taco')).toBeTruthy();
         expect(queryByText('Carne Asada Taco')).toBeNull(); // Special Taco, should be hidden by category
       });
@@ -313,7 +313,7 @@ describe('POSScreen', () => {
       fireEvent.press(getByTestId('category-search-bubble-inactive'));
       const searchInput = getByPlaceholderText('Search food...');
       act(() => {
-        fireEvent.changeText(searchInput, 'Cochinita');
+        fireEvent.changeText(_searchInput, 'Cochinita');
       });
 
       await waitFor(() => {
@@ -324,7 +324,7 @@ describe('POSScreen', () => {
       // Clear search, should revert to 'Tacos' category items
       const clearButton = getByTestId('clear-search-button');
       act(() => {
-        fireEvent.press(clearButton);
+        fireEvent.press(_clearButton);
       });
 
       await waitFor(() => {
@@ -346,7 +346,7 @@ describe('POSScreen', () => {
     // Check if the parent TouchableOpacity is disabled or press does not call addToCart
     // This depends on how ExportedMenuItemCard handles disabled state.
     // We'll assume if it's disabled, addToCart won't be called.
-    fireEvent.press(unavailableItemText);
+    fireEvent.press(_unavailableItemText);
     expect(initialAppStoreState.addToCart).not.toHaveBeenCalledWith(
       expect.objectContaining({ name: 'Coco-Nought' }),
     );
@@ -363,7 +363,7 @@ describe('POSScreen Header Actions Conditional Rendering Snapshots', () => {
     get IS_DEV() {
       return mockIS_DEV;
     },
-    envBool: jest.fn((name, fallback) => fallback),
+    envBool: jest.fn((_name, fallback) => fallback),
   }));
 
   beforeEach(() => {
@@ -388,7 +388,7 @@ describe('POSScreen Header Actions Conditional Rendering Snapshots', () => {
     expect(toJSON()).toMatchSnapshot();
   });
 
-  it('snapshot: no bug icon if FLAGS.SHOW_DEV_MENU = false (dev)', () => {
+  it('snapshot: no bug icon if FLAGS.SHOW_DEV_MENU = false (_dev)', () => {
     mockIS_DEV = true;
     // @ts-ignore
     global.FLAGS.SHOW_DEV_MENU = false;
@@ -398,7 +398,7 @@ describe('POSScreen Header Actions Conditional Rendering Snapshots', () => {
     expect(toJSON()).toMatchSnapshot();
   });
 
-  it('snapshot: no bug icon if FLAGS.SHOW_DEV_MENU = false (prod)', () => {
+  it('snapshot: no bug icon if FLAGS.SHOW_DEV_MENU = false (_prod)', () => {
     mockIS_DEV = false;
     // @ts-ignore
     global.FLAGS.SHOW_DEV_MENU = false;

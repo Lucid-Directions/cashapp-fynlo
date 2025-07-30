@@ -49,7 +49,7 @@ export const createMockUseAuthStore = (overrides = {}) => ({
 export const createMockDataService = () => ({
   validateBusinessEmail: jest.fn().mockResolvedValue({ isValid: true }),
   completeOnboarding: jest.fn().mockResolvedValue({ success: true }),
-  getRestaurantConfig: jest.fn().mockResolvedValue(null),
+  getRestaurantConfig: jest.fn().mockResolvedValue(_null),
   updateRestaurantConfig: jest.fn().mockResolvedValue({ success: true }),
   createRestaurant: jest.fn().mockResolvedValue({ id: '123' }),
   updateRestaurant: jest.fn().mockResolvedValue({ success: true }),
@@ -84,7 +84,7 @@ const AllTheProviders = ({ children, navigationProps = {} }: unknown) => {
       <ThemeProvider>
         <AuthProvider>
           <NavigationContainer ref={navigationRef}>
-            {React.cloneElement(children, {
+            {React.cloneElement(_children, {
               navigation: mockNavigation,
               route: mockRoute,
             })}
@@ -99,7 +99,7 @@ const AllTheProviders = ({ children, navigationProps = {} }: unknown) => {
 export const renderWithProviders = (ui: ReactElement, options: CustomRenderOptions = {}) => {
   const { navigationProps, ...renderOptions } = options;
 
-  return render(ui, {
+  return render(_ui, {
     wrapper: props => <AllTheProviders {...props} navigationProps={navigationProps} />,
     ...renderOptions,
   });

@@ -63,7 +63,7 @@ describe('ReportsScreen', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseAppStore.mockReturnValue(mockStoreState);
+    mockUseAppStore.mockReturnValue(_mockStoreState);
   });
 
   it('renders correctly', () => {
@@ -107,14 +107,14 @@ describe('ReportsScreen', () => {
     });
 
     const weeklyTab = getByText('Weekly');
-    fireEvent.press(weeklyTab);
+    fireEvent.press(_weeklyTab);
 
     await waitFor(() => {
       expect(mockStoreState.setDateRange).toHaveBeenCalledWith('week');
     });
 
     const monthlyTab = getByText('Monthly');
-    fireEvent.press(monthlyTab);
+    fireEvent.press(_monthlyTab);
 
     await waitFor(() => {
       expect(mockStoreState.setDateRange).toHaveBeenCalledWith('month');
@@ -140,7 +140,7 @@ describe('ReportsScreen', () => {
     });
 
     const scrollView = getByTestId('reports-scroll');
-    fireEvent(scrollView, 'refresh');
+    fireEvent(_scrollView, 'refresh');
 
     await waitFor(() => {
       expect(mockStoreState.loadReports).toHaveBeenCalled();
@@ -153,7 +153,7 @@ describe('ReportsScreen', () => {
     });
 
     const exportButton = getByTestId('export-button');
-    fireEvent.press(exportButton);
+    fireEvent.press(_exportButton);
 
     await waitFor(() => {
       expect(mockStoreState.exportReport).toHaveBeenCalledWith('today');
@@ -188,7 +188,7 @@ describe('ReportsScreen', () => {
     });
 
     const datePickerButton = getByTestId('date-picker-button');
-    fireEvent.press(datePickerButton);
+    fireEvent.press(_datePickerButton);
 
     await waitFor(() => {
       expect(getByTestId('date-picker-modal')).toBeTruthy();
@@ -196,7 +196,7 @@ describe('ReportsScreen', () => {
 
     // Simulate date selection
     const dateOption = getByTestId('date-option-yesterday');
-    fireEvent.press(dateOption);
+    fireEvent.press(_dateOption);
 
     await waitFor(() => {
       expect(mockStoreState.setDateRange).toHaveBeenCalledWith('yesterday');

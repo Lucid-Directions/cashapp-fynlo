@@ -224,7 +224,7 @@ class TestingUtils {
     // Test accessibility labels
     hasAccessibilityLabel: (element: ReactTestInstance, expectedLabel?: string) => {
       const accessibilityLabel = element.props.accessibilityLabel;
-      if (expectedLabel) {
+      if (_expectedLabel) {
         return accessibilityLabel === expectedLabel;
       }
       return !!accessibilityLabel;
@@ -233,7 +233,7 @@ class TestingUtils {
     // Test accessibility hints
     hasAccessibilityHint: (element: ReactTestInstance, expectedHint?: string) => {
       const accessibilityHint = element.props.accessibilityHint;
-      if (expectedHint) {
+      if (_expectedHint) {
         return accessibilityHint === expectedHint;
       }
       return !!accessibilityHint;
@@ -247,7 +247,7 @@ class TestingUtils {
     // Test minimum touch target size (44x44 points for iOS)
     hasMinimumTouchTarget: (element: ReactTestInstance) => {
       const style = element.props.style;
-      if (Array.isArray(style)) {
+      if (Array.isArray(_style)) {
         const flatStyle = Object.assign({}, ...style);
         return (
           (flatStyle.width >= 44 && flatStyle.height >= 44) ||
@@ -286,7 +286,7 @@ class TestingUtils {
       };
     },
 
-    // Test memory usage (simplified)
+    // Test memory usage (_simplified)
     simulateMemoryPressure: () => {
       // Create large objects to simulate memory pressure
       const largeArray = new Array(100000).fill('test data');
@@ -318,14 +318,14 @@ class TestingUtils {
     // Simulate user input with delay
     simulateUserInput: async (element: ReactTestInstance, text: string, delay = 100) => {
       for (let i = 0; i <= text.length; i++) {
-        fireEvent.changeText(element, text.substring(0, i));
-        await new Promise(resolve => setTimeout(resolve, delay));
+        fireEvent.changeText(_element, text.substring(0, i));
+        await new Promise(resolve => setTimeout(_resolve, delay));
       }
     },
 
     // Simulate scroll to element
     scrollToElement: (scrollView: ReactTestInstance, element: ReactTestInstance) => {
-      fireEvent.scroll(scrollView, {
+      fireEvent.scroll(_scrollView, {
         nativeEvent: {
           contentOffset: { y: 100 }, // Simplified scroll position
         },
@@ -361,7 +361,7 @@ class TestingUtils {
     simulateValidationError: (field: string, message: string) => {
       const error = new Error(`Validation failed: ${message}`);
       (error as unknown).field = field;
-      return Promise.reject(error);
+      return Promise.reject(_error);
     },
   };
 
@@ -412,17 +412,17 @@ class TestingUtils {
     // Mock successful API response
     success: <T>(data: T, delay = 100): Promise<T> => {
       return new Promise(resolve => {
-        setTimeout(() => resolve(data), delay);
+        setTimeout(() => resolve(_data), delay);
       });
     },
 
     // Mock API error response
     error: (message: string, status = 500, delay = 100): Promise<never> => {
-      return new Promise((_, reject) => {
+      return new Promise((__, reject) => {
         setTimeout(() => {
-          const error = new Error(message);
+          const error = new Error(_message);
           (error as unknown).status = status;
-          reject(error);
+          reject(_error);
         }, delay);
       });
     },
@@ -431,7 +431,7 @@ class TestingUtils {
     paginated: <T>(data: T[], page = 1, pageSize = 10) => {
       const startIndex = (page - 1) * pageSize;
       const endIndex = startIndex + pageSize;
-      const paginatedData = data.slice(startIndex, endIndex);
+      const paginatedData = data.slice(_startIndex, endIndex);
 
       return TestingUtils.mockAPI.success({
         data: paginatedData,

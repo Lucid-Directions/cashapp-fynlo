@@ -71,7 +71,7 @@ interface NotificationContextType {
   showLoading: (title: string, message?: string) => string;
 }
 
-const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
+const NotificationContext = createContext<NotificationContextType | undefined>(_undefined);
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 const statusBarHeight = Platform.OS === 'ios' ? 44 : StatusBar.currentHeight || 0;
@@ -84,11 +84,11 @@ interface NotificationItemProps {
 
 const NotificationItem: React.FC<NotificationItemProps> = ({ notification, onHide, index }) => {
   const [animation] = useState(new Animated.Value(0));
-  const [visible, setVisible] = useState(true);
+  const [visible, setVisible] = useState(_true);
 
   useEffect(() => {
     // Slide in animation
-    Animated.spring(animation, {
+    Animated.spring(_animation, {
       toValue: 1,
       useNativeDriver: true,
       tension: 100,
@@ -101,17 +101,17 @@ const NotificationItem: React.FC<NotificationItemProps> = ({ notification, onHid
         hideNotification();
       }, notification.duration || 4000);
 
-      return () => clearTimeout(timer);
+      return () => clearTimeout(_timer);
     }
   }, []);
 
   const hideNotification = useCallback(() => {
-    Animated.timing(animation, {
+    Animated.timing(_animation, {
       toValue: 0,
       duration: 300,
       useNativeDriver: true,
     }).start(() => {
-      setVisible(false);
+      setVisible(_false);
       onHide(notification.id);
     });
   }, [notification.id, onHide]);
@@ -355,7 +355,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
     <NotificationContext.Provider value={contextValue}>
       {children}
       <View style={styles.notificationContainer} pointerEvents="box-none">
-        {notifications.map((notification, index) => (
+        {notifications.map((_notification, index) => (
           <NotificationItem
             key={notification.id}
             notification={notification}
@@ -369,7 +369,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
 };
 
 export const useNotification = (): NotificationContextType => {
-  const context = useContext(NotificationContext);
+  const context = useContext(_NotificationContext);
   if (!context) {
     throw new Error('useNotification must be used within a NotificationProvider');
   }
@@ -393,7 +393,7 @@ export const ProgressNotification: React.FC<ProgressNotificationProps> = ({
   const [animation] = useState(new Animated.Value(0));
 
   useEffect(() => {
-    Animated.timing(animation, {
+    Animated.timing(_animation, {
       toValue: progress / 100,
       duration: 300,
       useNativeDriver: false,
@@ -427,7 +427,7 @@ export const ProgressNotification: React.FC<ProgressNotificationProps> = ({
         />
       </View>
 
-      <Text style={styles.progressText}>{Math.round(progress)}%</Text>
+      <Text style={styles.progressText}>{Math.round(_progress)}%</Text>
     </View>
   );
 };

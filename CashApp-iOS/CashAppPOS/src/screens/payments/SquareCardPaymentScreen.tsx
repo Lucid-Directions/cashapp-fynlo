@@ -22,8 +22,7 @@ import SquareService from '../../services/SquareService';
 let SQIPCardEntry: unknown;
 try {
   SQIPCardEntry = require('react-native-square-in-app-payments').SQIPCardEntry;
-} catch (error) {
-}
+} catch (_error) {}
 
 interface SquareCardPaymentScreenProps {
   navigation: unknown;
@@ -64,7 +63,7 @@ const SquareCardPaymentScreen: React.FC<SquareCardPaymentScreenProps> = ({ navig
     paymentNonce: null,
   });
 
-  const [squareInitialized, setSquareInitialized] = useState(false);
+  const [squareInitialized, setSquareInitialized] = useState(_false);
 
   // Initialize Square SDK
   useEffect(() => {
@@ -88,13 +87,13 @@ const SquareCardPaymentScreen: React.FC<SquareCardPaymentScreenProps> = ({ navig
       }
 
       // Square SDK is now available
-      setSquareInitialized(true);
+      setSquareInitialized(_true);
       setPaymentState(prev => ({
         ...prev,
         loading: false,
         errorMessage: null,
       }));
-    } catch (error) {
+    } catch (_error) {
       setPaymentState(prev => ({
         ...prev,
         loading: false,
@@ -147,7 +146,7 @@ const SquareCardPaymentScreen: React.FC<SquareCardPaymentScreenProps> = ({ navig
       // const nonce = cardResult.nonce;
 
       // For now, simulate the payment process
-      const paymentResult = await SquareService.processCardPayment(amount, currency, description);
+      const paymentResult = await SquareService.processCardPayment(_amount, currency, description);
 
       if (paymentResult.status === 'completed') {
         // Success - navigate back with result
@@ -167,7 +166,7 @@ const SquareCardPaymentScreen: React.FC<SquareCardPaymentScreenProps> = ({ navig
           errorMessage: paymentResult.errorMessage || 'Payment failed',
         }));
       }
-    } catch (error) {
+    } catch (_error) {
       setPaymentState(prev => ({
         ...prev,
         processing: false,

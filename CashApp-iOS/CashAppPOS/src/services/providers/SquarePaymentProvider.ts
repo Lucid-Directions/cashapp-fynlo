@@ -25,7 +25,7 @@ class SquarePaymentProviderClass {
       // await SQIPCore.setSquareApplicationId(config.applicationId);
 
       this.initialized = true;
-    } catch (error) {
+    } catch (_error) {
       throw error;
     }
   }
@@ -44,7 +44,7 @@ class SquarePaymentProviderClass {
         success: false,
         error: 'Square SDK not available - placeholder implementation',
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Square payment failed',
@@ -69,7 +69,7 @@ class SquarePaymentProviderClass {
         success: false,
         error: 'Square payment processing not implemented - placeholder',
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Square payment processing failed',

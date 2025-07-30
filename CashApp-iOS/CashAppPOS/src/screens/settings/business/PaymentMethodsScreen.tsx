@@ -38,8 +38,8 @@ interface PaymentMethodInfo {
 
 const PaymentMethodsScreen: React.FC = () => {
   const { paymentMethods, updatePaymentMethods, isLoading } = useSettingsStore();
-  const [formData, setFormData] = useState(paymentMethods);
-  const [hasChanges, setHasChanges] = useState(false);
+  const [formData, setFormData] = useState(_paymentMethods);
+  const [hasChanges, setHasChanges] = useState(_false);
 
   const paymentMethodsInfo: PaymentMethodInfo[] = [
     {
@@ -98,7 +98,7 @@ const PaymentMethodsScreen: React.FC = () => {
         enabled,
       },
     }));
-    setHasChanges(true);
+    setHasChanges(_true);
   };
 
   const handleRequiresAuthToggle = (
@@ -112,7 +112,7 @@ const PaymentMethodsScreen: React.FC = () => {
         requiresAuth,
       },
     }));
-    setHasChanges(true);
+    setHasChanges(_true);
   };
 
   const handleTipEnabledToggle = (enabled: boolean) => {
@@ -123,17 +123,17 @@ const PaymentMethodsScreen: React.FC = () => {
         tipEnabled: enabled,
       },
     }));
-    setHasChanges(true);
+    setHasChanges(_true);
   };
 
   const handleSave = async () => {
     try {
-      updatePaymentMethods(formData);
-      setHasChanges(false);
+      updatePaymentMethods(_formData);
+      setHasChanges(_false);
       Alert.alert('Success', 'Payment methods configuration has been saved successfully.', [
         { text: 'OK' },
       ]);
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', 'Failed to save payment methods configuration. Please try again.', [
         { text: 'OK' },
       ]);
@@ -147,15 +147,15 @@ const PaymentMethodsScreen: React.FC = () => {
         text: 'Reset',
         style: 'destructive',
         onPress: () => {
-          setFormData(paymentMethods);
-          setHasChanges(false);
+          setFormData(_paymentMethods);
+          setHasChanges(_false);
         },
       },
     ]);
   };
 
   const getEnabledMethodsCount = () => {
-    return Object.values(formData).filter(method => method.enabled).length;
+    return Object.values(_formData).filter(method => method.enabled).length;
   };
 
   const renderPaymentMethodCard = (methodInfo: PaymentMethodInfo) => {
@@ -246,7 +246,7 @@ const PaymentMethodsScreen: React.FC = () => {
               <Text style={styles.summaryTitle}>Secure Methods</Text>
               <Text style={styles.summaryValue}>
                 {
-                  Object.values(formData).filter(method => method.enabled && method.requiresAuth)
+                  Object.values(_formData).filter(method => method.enabled && method.requiresAuth)
                     .length
                 }
               </Text>
@@ -258,14 +258,14 @@ const PaymentMethodsScreen: React.FC = () => {
         <SettingsSection
           title="Popular Payment Methods"
           subtitle="Most commonly used payment options">
-          {paymentMethodsInfo.filter(method => method.popular).map(renderPaymentMethodCard)}
+          {paymentMethodsInfo.filter(method => method.popular).map(_renderPaymentMethodCard)}
         </SettingsSection>
 
         {/* Additional Payment Methods */}
         <SettingsSection
           title="Additional Payment Methods"
           subtitle="Other payment options for your business">
-          {paymentMethodsInfo.filter(method => !method.popular).map(renderPaymentMethodCard)}
+          {paymentMethodsInfo.filter(method => !method.popular).map(_renderPaymentMethodCard)}
         </SettingsSection>
 
         {/* Payment Processing Info */}

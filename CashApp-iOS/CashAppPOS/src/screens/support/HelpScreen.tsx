@@ -157,7 +157,7 @@ const HelpScreen: React.FC = () => {
           id: '2',
           question: 'What are the different user roles?',
           answer:
-            'Owner (full access), Manager (reports, staff, settings), Employee (POS, basic functions). Each role has specific permissions.',
+            'Owner (full access), Manager (_reports, staff, settings), Employee (_POS, basic functions). Each role has specific permissions.',
         },
         {
           id: '3',
@@ -236,14 +236,14 @@ const HelpScreen: React.FC = () => {
 
   const toggleSection = (sectionId: string) => {
     setExpandedSections(prev =>
-      prev.includes(sectionId) ? prev.filter(id => id !== sectionId) : [...prev, sectionId],
+      prev.includes(_sectionId) ? prev.filter(id => id !== sectionId) : [...prev, sectionId],
     );
   };
 
   const toggleItem = (sectionId: string, itemId: string) => {
     const key = `${sectionId}-${itemId}`;
     setExpandedSections(prev =>
-      prev.includes(key) ? prev.filter(id => id !== key) : [...prev, key],
+      prev.includes(_key) ? prev.filter(id => id !== key) : [...prev, key],
     );
   };
 

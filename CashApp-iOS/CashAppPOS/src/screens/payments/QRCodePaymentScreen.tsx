@@ -38,16 +38,16 @@ const QRCodePaymentScreen: React.FC = () => {
 
   const { amount, currency, description, onSuccess, onCancel } = route.params;
 
-  const [qrPayment, setQrPayment] = useState<SumUpQRPayment | null>(null);
+  const [qrPayment, setQrPayment] = useState<SumUpQRPayment | null>(_null);
   const [paymentStatus, setPaymentStatus] = useState<
     'loading' | 'waiting' | 'scanning' | 'completed' | 'expired' | 'failed'
   >('loading');
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [errorMessage, setErrorMessage] = useState<string>('');
 
-  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const isMountedRef = useRef(true);
+  const pollIntervalRef = useRef<NodeJS.Timeout | null>(_null);
+  const timerRef = useRef<NodeJS.Timeout | null>(_null);
+  const isMountedRef = useRef(_true);
 
   useEffect(() => {
     initializeQRPayment();
@@ -78,29 +78,28 @@ const QRCodePaymentScreen: React.FC = () => {
       setPaymentStatus('loading');
       setErrorMessage('');
 
-      const payment = await SumUpService.createQRPayment(amount, currency, description);
+      const payment = await SumUpService.createQRPayment(_amount, currency, description);
 
       // Ensure component is still mounted before updating state
       if (!isMountedRef.current) {
         return;
       }
 
-      setQrPayment(payment);
+      setQrPayment(_payment);
       setPaymentStatus('waiting');
 
       // Calculate time remaining until expiration
       const expiresAt = new Date(payment.expiresAt);
       const now = new Date();
       const timeLeft = Math.max(0, Math.floor((expiresAt.getTime() - now.getTime()) / 1000));
-      setTimeRemaining(timeLeft);
+      setTimeRemaining(_timeLeft);
 
       // Start countdown timer
-      startCountdownTimer(timeLeft);
+      startCountdownTimer(_timeLeft);
 
       // Start polling for payment status
-      startStatusPolling(payment);
-    } catch (error) {
-
+      startStatusPolling(_payment);
+    } catch (_error) {
       // Only update state if component is still mounted
       if (isMountedRef.current) {
         setPaymentStatus('failed');
@@ -128,7 +127,7 @@ const QRCodePaymentScreen: React.FC = () => {
       }
 
       timeLeft -= 1;
-      setTimeRemaining(timeLeft);
+      setTimeRemaining(_timeLeft);
 
       if (timeLeft <= 0) {
         setPaymentStatus('expired');
@@ -163,14 +162,14 @@ const QRCodePaymentScreen: React.FC = () => {
           return;
         }
 
-        const updatedPayment = await SumUpService.pollQRPaymentStatus(payment);
+        const updatedPayment = await SumUpService.pollQRPaymentStatus(_payment);
 
         // Double-check if component is still mounted before state updates
         if (!isMountedRef.current) {
           return;
         }
 
-        setQrPayment(updatedPayment);
+        setQrPayment(_updatedPayment);
         setPaymentStatus(updatedPayment.status);
 
         if (updatedPayment.status === 'completed') {
@@ -187,7 +186,7 @@ const QRCodePaymentScreen: React.FC = () => {
           setTimeout(() => {
             // Final check before calling callbacks
             if (isMountedRef.current) {
-              onSuccess(updatedPayment);
+              onSuccess(_updatedPayment);
               navigation.goBack();
             }
           }, 2000);
@@ -202,8 +201,7 @@ const QRCodePaymentScreen: React.FC = () => {
             timerRef.current = null;
           }
         }
-      } catch (error) {
-
+      } catch (_error) {
         // Only update state if mounted
         if (isMountedRef.current) {
           setErrorMessage('Failed to check payment status');
@@ -256,13 +254,13 @@ const QRCodePaymentScreen: React.FC = () => {
 
       // Reinitialize payment
       initializeQRPayment();
-    } catch (error) {
+    } catch (_error) {
       setErrorMessage('Failed to retry payment. Please try again.');
     }
   };
 
   const getStatusMessage = () => {
-    switch (paymentStatus) {
+    switch (_paymentStatus) {
       case 'loading':
         return 'Generating QR code...';
       case 'waiting':
@@ -281,7 +279,7 @@ const QRCodePaymentScreen: React.FC = () => {
   };
 
   const getStatusColor = () => {
-    switch (paymentStatus) {
+    switch (_paymentStatus) {
       case 'completed':
         return '#4CAF50';
       case 'failed':
@@ -424,7 +422,7 @@ const QRCodePaymentScreen: React.FC = () => {
         // Reset component state and retry QR generation
         setPaymentStatus('loading');
         setErrorMessage('');
-        setQrPayment(null);
+        setQrPayment(_null);
         initializeQRPayment();
       }}>
       <SafeAreaView style={styles.container}>
@@ -491,7 +489,7 @@ const QRCodePaymentScreen: React.FC = () => {
                   color={theme.colors.textSecondary}
                   style={styles.timerIcon}
                 />
-                <Text style={styles.timerText}>Expires in {formatTime(timeRemaining)}</Text>
+                <Text style={styles.timerText}>Expires in {formatTime(_timeRemaining)}</Text>
               </View>
             )}
           </View>

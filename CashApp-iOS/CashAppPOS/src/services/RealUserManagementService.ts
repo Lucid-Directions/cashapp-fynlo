@@ -135,10 +135,10 @@ class RealUserManagementService {
       const realUsers: RealUser[] = await response.json();
 
       // Convert to display format
-      const displayUsers = realUsers.map(user => this.convertToDisplayFormat(user));
+      const displayUsers = realUsers.map(user => this.convertToDisplayFormat(_user));
 
       return displayUsers;
-    } catch (error) {
+    } catch (_error) {
       // Return empty array instead of mock data
       return [];
     }
@@ -166,8 +166,8 @@ class RealUserManagementService {
       }
 
       const realUser: RealUser = await response.json();
-      return this.convertToDisplayFormat(realUser);
-    } catch (error) {
+      return this.convertToDisplayFormat(_realUser);
+    } catch (_error) {
       return null;
     }
   }
@@ -179,7 +179,7 @@ class RealUserManagementService {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(userData),
+        body: JSON.stringify(_userData),
       });
 
       if (!response.ok) {
@@ -189,7 +189,7 @@ class RealUserManagementService {
 
       const result = await response.json();
       return this.convertToDisplayFormat(result.user);
-    } catch (error) {
+    } catch (_error) {
       throw error;
     }
   }
@@ -201,7 +201,7 @@ class RealUserManagementService {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(updates),
+        body: JSON.stringify(_updates),
       });
 
       if (!response.ok) {
@@ -211,17 +211,17 @@ class RealUserManagementService {
 
       const result = await response.json();
       return this.convertToDisplayFormat(result.user);
-    } catch (error) {
+    } catch (_error) {
       throw error;
     }
   }
 
   async suspendUser(userId: string, reason?: string): Promise<UserDisplayData> {
-    return this.updateUser(userId, { isActive: false });
+    return this.updateUser(_userId, { isActive: false });
   }
 
   async activateUser(userId: string): Promise<UserDisplayData> {
-    return this.updateUser(userId, { isActive: true });
+    return this.updateUser(_userId, { isActive: true });
   }
 
   // Mock access logs since backend doesn't have this yet
@@ -251,10 +251,10 @@ class RealUserManagementService {
 
     return allUsers.filter(
       user =>
-        user.name.toLowerCase().includes(lowercaseQuery) ||
-        user.email.toLowerCase().includes(lowercaseQuery) ||
-        user.role.toLowerCase().includes(lowercaseQuery) ||
-        (user.restaurantName && user.restaurantName.toLowerCase().includes(lowercaseQuery)),
+        user.name.toLowerCase().includes(_lowercaseQuery) ||
+        user.email.toLowerCase().includes(_lowercaseQuery) ||
+        user.role.toLowerCase().includes(_lowercaseQuery) ||
+        (user.restaurantName && user.restaurantName.toLowerCase().includes(_lowercaseQuery)),
     );
   }
 

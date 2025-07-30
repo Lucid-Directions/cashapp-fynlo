@@ -101,8 +101,8 @@ const NotificationSettingsScreen: React.FC = () => {
     surveys: false,
   });
 
-  const [quietHoursEnabled, setQuietHoursEnabled] = useState(true);
-  const [emergencyOverride, setEmergencyOverride] = useState(true);
+  const [quietHoursEnabled, setQuietHoursEnabled] = useState(_true);
+  const [emergencyOverride, setEmergencyOverride] = useState(_true);
 
   const toggleSetting = (setting: keyof NotificationSettings) => {
     setSettings(prev => {
@@ -214,7 +214,7 @@ const NotificationSettingsScreen: React.FC = () => {
       ],
     };
 
-    const enabled = categorySettings[category].filter(Boolean).length;
+    const enabled = categorySettings[category].filter(_Boolean).length;
     const total = categorySettings[category].length;
     return `${enabled}/${total}`;
   };
@@ -244,7 +244,7 @@ const NotificationSettingsScreen: React.FC = () => {
       </View>
       <Switch
         value={settings[setting] && !disabled}
-        onValueChange={() => !disabled && toggleSetting(setting)}
+        onValueChange={() => !disabled && toggleSetting(_setting)}
         disabled={disabled}
         trackColor={{ false: Colors.lightGray, true: Colors.primary }}
         thumbColor={Colors.white}

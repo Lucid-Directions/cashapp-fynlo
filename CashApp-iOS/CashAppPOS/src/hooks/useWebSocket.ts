@@ -42,7 +42,7 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
         reconnectInterval: 5000,
         maxReconnectAttempts: 10,
       });
-    } catch (error) {
+    } catch (_error) {
       setState(prev => ({
         ...prev,
         connecting: false,
@@ -58,11 +58,11 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
 
   // Subscribe to events
   const subscribe = useCallback((eventType: string, handler: (data: unknown) => void) => {
-    webSocketService.on(eventType, handler);
+    webSocketService.on(_eventType, handler);
 
     // Return unsubscribe function
     return () => {
-      webSocketService.off(eventType, handler);
+      webSocketService.off(_eventType, handler);
     };
   }, []);
 

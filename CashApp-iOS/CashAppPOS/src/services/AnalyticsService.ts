@@ -95,23 +95,23 @@ class AnalyticsService {
     period: 'today' | 'week' | 'month' | 'year' = 'month',
   ): Promise<AnalyticsData> {
     // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(_resolve, 1000));
 
     // Generate mock analytics data based on period
-    return this.generateMockAnalyticsData(period);
+    return this.generateMockAnalyticsData(_period);
   }
 
   async getRevenueAnalytics(
     period: 'today' | 'week' | 'month' | 'year' = 'month',
   ): Promise<RevenueData> {
-    const data = await this.getAnalyticsData(period);
+    const data = await this.getAnalyticsData(_period);
     return data.revenue;
   }
 
   async getTransactionAnalytics(
     period: 'today' | 'week' | 'month' | 'year' = 'month',
   ): Promise<TransactionData> {
-    const data = await this.getAnalyticsData(period);
+    const data = await this.getAnalyticsData(_period);
     return data.transactions;
   }
 
@@ -123,7 +123,7 @@ class AnalyticsService {
   async getTrendAnalytics(
     period: 'today' | 'week' | 'month' | 'year' = 'month',
   ): Promise<TrendData> {
-    const data = await this.getAnalyticsData(period);
+    const data = await this.getAnalyticsData(_period);
     return data.trends;
   }
 
@@ -132,7 +132,7 @@ class AnalyticsService {
     period: string,
   ): Promise<{ url: string; filename: string }> {
     // Simulate export generation
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise(resolve => setTimeout(_resolve, 2000));
 
     const timestamp = new Date().toISOString().split('T')[0];
     const filename = `fynlo-analytics-${period}-${timestamp}.${format}`;
@@ -149,31 +149,31 @@ class AnalyticsService {
     period: { start: Date; end: Date },
   ): Promise<unknown> {
     // Simulate custom report generation
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise(resolve => setTimeout(_resolve, 1500));
 
     return {
       reportId: `custom-${Date.now()}`,
       metrics,
       restaurants,
       period,
-      data: this.generateCustomReportData(metrics, restaurants),
+      data: this.generateCustomReportData(_metrics, restaurants),
       generatedAt: new Date(),
     };
   }
 
   private generateMockAnalyticsData(period: 'today' | 'week' | 'month' | 'year'): AnalyticsData {
-    const multiplier = this.getPeriodMultiplier(period);
+    const multiplier = this.getPeriodMultiplier(_period);
 
     return {
-      revenue: this.generateRevenueData(multiplier, period),
-      transactions: this.generateTransactionData(multiplier, period),
+      revenue: this.generateRevenueData(_multiplier, period),
+      transactions: this.generateTransactionData(_multiplier, period),
       performance: this.generatePerformanceData(),
-      trends: this.generateTrendData(period),
+      trends: this.generateTrendData(_period),
     };
   }
 
   private getPeriodMultiplier(period: 'today' | 'week' | 'month' | 'year'): number {
-    switch (period) {
+    switch (_period) {
       case 'today':
         return 0.033; // 1/30th of month
       case 'week':
@@ -197,7 +197,7 @@ class AnalyticsService {
       commission,
       avgCommissionRate: 2.6,
       growth: 12.5,
-      byPeriod: this.generatePeriodData(period, total),
+      byPeriod: this.generatePeriodData(_period, total),
       byRestaurant: [
         {
           restaurantId: '1',
@@ -240,7 +240,7 @@ class AnalyticsService {
       total,
       avgValue,
       growth: 8.2,
-      byPeriod: this.generatePeriodData(period, total),
+      byPeriod: this.generatePeriodData(_period, total),
       byPaymentMethod: [
         {
           method: 'Card',
@@ -377,7 +377,7 @@ class AnalyticsService {
     let pointCount = 12;
     let labelFormat = '';
 
-    switch (period) {
+    switch (_period) {
       case 'today':
         pointCount = 24;
         labelFormat = 'hour';
@@ -460,7 +460,7 @@ class AnalyticsService {
       },
       breakdown: restaurants.map(restaurantId => ({
         restaurantId,
-        metrics: metrics.reduce((acc, metric) => {
+        metrics: metrics.reduce((_acc, metric) => {
           acc[metric] = Math.round(Math.random() * 10000);
           return acc;
         }, {} as unknown),

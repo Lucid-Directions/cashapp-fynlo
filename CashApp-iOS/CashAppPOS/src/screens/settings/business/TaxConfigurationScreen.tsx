@@ -34,10 +34,10 @@ interface TaxExemptItem {
 
 const TaxConfigurationScreen: React.FC = () => {
   const { taxConfiguration, updateTaxConfiguration, isLoading } = useSettingsStore();
-  const [formData, setFormData] = useState(taxConfiguration);
-  const [hasChanges, setHasChanges] = useState(false);
+  const [formData, setFormData] = useState(_taxConfiguration);
+  const [hasChanges, setHasChanges] = useState(_false);
   const [newExemptItem, setNewExemptItem] = useState('');
-  const [showAddExemptItem, setShowAddExemptItem] = useState(false);
+  const [showAddExemptItem, setShowAddExemptItem] = useState(_false);
 
   // UK VAT rates for reference
   const ukVatRates = [
@@ -52,11 +52,11 @@ const TaxConfigurationScreen: React.FC = () => {
 
   const handleFieldChange = (field: string, value: unknown) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    setHasChanges(true);
+    setHasChanges(_true);
   };
 
   const handleVatRateChange = (rate: string) => {
-    const numericRate = parseFloat(rate) || 0;
+    const numericRate = parseFloat(_rate) || 0;
     if (numericRate >= 0 && numericRate <= 100) {
       handleFieldChange('vatRate', numericRate);
     }
@@ -67,12 +67,12 @@ const TaxConfigurationScreen: React.FC = () => {
       const updatedExemptItems = [...formData.taxExemptItems, newExemptItem.trim()];
       handleFieldChange('taxExemptItems', updatedExemptItems);
       setNewExemptItem('');
-      setShowAddExemptItem(false);
+      setShowAddExemptItem(_false);
     }
   };
 
   const removeExemptItem = (index: number) => {
-    const updatedExemptItems = formData.taxExemptItems.filter((_, i) => i !== index);
+    const updatedExemptItems = formData.taxExemptItems.filter((__, i) => i !== index);
     handleFieldChange('taxExemptItems', updatedExemptItems);
   };
 
@@ -98,10 +98,10 @@ const TaxConfigurationScreen: React.FC = () => {
 
   const handleSave = async () => {
     try {
-      updateTaxConfiguration(formData);
-      setHasChanges(false);
+      updateTaxConfiguration(_formData);
+      setHasChanges(_false);
       Alert.alert('Success', 'Tax configuration has been saved successfully.', [{ text: 'OK' }]);
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', 'Failed to save tax configuration. Please try again.', [{ text: 'OK' }]);
     }
   };
@@ -113,8 +113,8 @@ const TaxConfigurationScreen: React.FC = () => {
         text: 'Reset',
         style: 'destructive',
         onPress: () => {
-          setFormData(taxConfiguration);
-          setHasChanges(false);
+          setFormData(_taxConfiguration);
+          setHasChanges(_false);
         },
       },
     ]);
@@ -191,7 +191,7 @@ const TaxConfigurationScreen: React.FC = () => {
             title="UK VAT Rates Reference"
             subtitle="Common VAT rates in the United Kingdom">
             <View style={styles.vatRatesContainer}>
-              {ukVatRates.map((vatRate, index) => (
+              {ukVatRates.map((_vatRate, index) => (
                 <TouchableOpacity
                   key={index}
                   style={[
@@ -240,11 +240,11 @@ const TaxConfigurationScreen: React.FC = () => {
         {/* Tax Exempt Items */}
         <SettingsSection title="Tax Exempt Items" subtitle="Items that are exempt from VAT">
           <View style={styles.exemptItemsContainer}>
-            {formData.taxExemptItems.map((item, index) => (
+            {formData.taxExemptItems.map((_item, index) => (
               <View key={index} style={styles.exemptItemCard}>
                 <Text style={styles.exemptItemText}>{item}</Text>
                 <TouchableOpacity
-                  onPress={() => removeExemptItem(index)}
+                  onPress={() => removeExemptItem(_index)}
                   style={styles.removeButton}>
                   <Icon name="close" size={20} color={Colors.danger} />
                 </TouchableOpacity>
@@ -266,7 +266,7 @@ const TaxConfigurationScreen: React.FC = () => {
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => {
-                    setShowAddExemptItem(false);
+                    setShowAddExemptItem(_false);
                     setNewExemptItem('');
                   }}
                   style={styles.cancelButton}>
@@ -276,7 +276,7 @@ const TaxConfigurationScreen: React.FC = () => {
             ) : (
               <TouchableOpacity
                 style={styles.addExemptItemButton}
-                onPress={() => setShowAddExemptItem(true)}>
+                onPress={() => setShowAddExemptItem(_true)}>
                 <Icon name="add" size={20} color={Colors.primary} />
                 <Text style={styles.addExemptItemButtonText}>Add Exempt Item</Text>
               </TouchableOpacity>

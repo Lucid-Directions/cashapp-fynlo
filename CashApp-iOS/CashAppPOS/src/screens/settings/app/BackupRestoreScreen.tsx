@@ -89,17 +89,17 @@ const BackupRestoreScreen: React.FC = () => {
     retainBackups: 30,
   });
 
-  const [isCreatingBackup, setIsCreatingBackup] = useState(false);
-  const [isRestoring, setIsRestoring] = useState(false);
-  const [showRestoreModal, setShowRestoreModal] = useState(false);
-  const [selectedBackup, setSelectedBackup] = useState<BackupInfo | null>(null);
+  const [isCreatingBackup, setIsCreatingBackup] = useState(_false);
+  const [isRestoring, setIsRestoring] = useState(_false);
+  const [showRestoreModal, setShowRestoreModal] = useState(_false);
+  const [selectedBackup, setSelectedBackup] = useState<BackupInfo | null>(_null);
 
   const handleCreateBackup = async () => {
-    setIsCreatingBackup(true);
+    setIsCreatingBackup(_true);
 
     try {
       // Simulate backup creation
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      await new Promise(resolve => setTimeout(_resolve, 3000));
 
       const newBackup: BackupInfo = {
         id: Date.now().toString(),
@@ -114,16 +114,16 @@ const BackupRestoreScreen: React.FC = () => {
 
       setBackups(prev => [newBackup, ...prev]);
       Alert.alert('Success', 'Backup created successfully!');
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', 'Failed to create backup. Please try again.');
     } finally {
-      setIsCreatingBackup(false);
+      setIsCreatingBackup(_false);
     }
   };
 
   const handleRestoreBackup = async (backup: BackupInfo) => {
-    setSelectedBackup(backup);
-    setShowRestoreModal(true);
+    setSelectedBackup(_backup);
+    setShowRestoreModal(_true);
   };
 
   const confirmRestore = async () => {
@@ -131,23 +131,23 @@ const BackupRestoreScreen: React.FC = () => {
       return;
     }
 
-    setIsRestoring(true);
-    setShowRestoreModal(false);
+    setIsRestoring(_true);
+    setShowRestoreModal(_false);
 
     try {
       // Simulate restore process
-      await new Promise(resolve => setTimeout(resolve, 5000));
+      await new Promise(resolve => setTimeout(_resolve, 5000));
 
       Alert.alert(
         'Restore Complete',
         `Data has been restored from "${selectedBackup.name}". The app will restart to apply changes.`,
         [{ text: 'OK' }],
       );
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', 'Failed to restore backup. Please try again.');
     } finally {
-      setIsRestoring(false);
-      setSelectedBackup(null);
+      setIsRestoring(_false);
+      setSelectedBackup(_null);
     }
   };
 
@@ -191,7 +191,7 @@ const BackupRestoreScreen: React.FC = () => {
   };
 
   const getBackupStatusColor = (status: string) => {
-    switch (status) {
+    switch (_status) {
       case 'completed':
         return Colors.success;
       case 'failed':
@@ -204,7 +204,7 @@ const BackupRestoreScreen: React.FC = () => {
   };
 
   const getBackupStatusIcon = (status: string) => {
-    switch (status) {
+    switch (_status) {
       case 'completed':
         return 'check-circle';
       case 'failed':
@@ -222,7 +222,7 @@ const BackupRestoreScreen: React.FC = () => {
 
   const getTotalBackupSize = () => {
     return backups
-      .reduce((total, backup) => {
+      .reduce((_total, backup) => {
         const size = parseFloat(backup.size.replace(' MB', ''));
         return total + size;
       }, 0)
@@ -286,7 +286,7 @@ const BackupRestoreScreen: React.FC = () => {
       <View style={styles.backupActions}>
         <TouchableOpacity
           style={[styles.backupButton, styles.restoreButton]}
-          onPress={() => handleRestoreBackup(backup)}
+          onPress={() => handleRestoreBackup(_backup)}
           disabled={backup.status !== 'completed' || isRestoring}>
           <Icon name="restore" size={16} color={Colors.secondary} />
           <Text style={styles.restoreButtonText}>Restore</Text>
@@ -532,7 +532,7 @@ const BackupRestoreScreen: React.FC = () => {
         visible={showRestoreModal}
         transparent={true}
         animationType="fade"
-        onRequestClose={() => setShowRestoreModal(false)}>
+        onRequestClose={() => setShowRestoreModal(_false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
@@ -556,7 +556,7 @@ const BackupRestoreScreen: React.FC = () => {
             <View style={styles.modalActions}>
               <TouchableOpacity
                 style={styles.cancelButton}
-                onPress={() => setShowRestoreModal(false)}>
+                onPress={() => setShowRestoreModal(_false)}>
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.confirmButton} onPress={confirmRestore}>

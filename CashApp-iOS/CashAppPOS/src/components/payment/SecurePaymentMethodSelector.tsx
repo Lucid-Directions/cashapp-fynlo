@@ -34,25 +34,25 @@ const SecurePaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
 }) => {
   const { theme } = useTheme();
   const [methods, setMethods] = useState<PaymentMethod[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(_true);
+  const [refreshing, setRefreshing] = useState(_false);
+  const [error, setError] = useState<string | null>(_null);
 
   const loadPaymentMethods = async (forceRefresh = false) => {
     try {
-      setError(null);
-      if (forceRefresh) {
-        setRefreshing(true);
+      setError(_null);
+      if (_forceRefresh) {
+        setRefreshing(_true);
       }
 
-      await SecurePaymentConfig.loadConfiguration(forceRefresh);
+      await SecurePaymentConfig.loadConfiguration(_forceRefresh);
       const availableMethods = SecurePaymentConfig.getAvailableMethods();
-      setMethods(availableMethods);
-    } catch (err) {
+      setMethods(_availableMethods);
+    } catch (_err) {
       setError('Failed to load payment methods');
     } finally {
-      setLoading(false);
-      setRefreshing(false);
+      setLoading(_false);
+      setRefreshing(_false);
     }
   };
 
@@ -72,7 +72,7 @@ const SecurePaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
   };
 
   const renderFeeInfo = (method: PaymentMethod) => {
-    const fees = SecurePaymentConfig.calculateFees(amount, method.id);
+    const fees = SecurePaymentConfig.calculateFees(_amount, method.id);
     const feeDisplay = SecurePaymentConfig.formatFeeDisplay(method.id);
 
     return (
@@ -89,7 +89,7 @@ const SecurePaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
 
   const renderPaymentMethod = (method: PaymentMethod) => {
     const isSelected = selectedMethod === method.id;
-    const fees = SecurePaymentConfig.calculateFees(amount, method.id);
+    const fees = SecurePaymentConfig.calculateFees(_amount, method.id);
 
     return (
       <TouchableOpacity
@@ -102,7 +102,7 @@ const SecurePaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
           },
           disabled && styles.disabledCard,
         ]}
-        onPress={() => !disabled && onMethodSelected(method)}
+        onPress={() => !disabled && onMethodSelected(_method)}
         disabled={disabled}>
         <View style={styles.methodHeader}>
           <Icon
@@ -112,7 +112,7 @@ const SecurePaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
           />
           <View style={styles.methodInfo}>
             <Text style={[styles.methodName, { color: theme.colors.text }]}>{method.name}</Text>
-            {renderFeeInfo(method)}
+            {renderFeeInfo(_method)}
           </View>
           {amount > 0 && (
             <View style={styles.netAmountContainer}>
@@ -141,7 +141,7 @@ const SecurePaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
     );
   };
 
-  if (loading) {
+  if (_loading) {
     return (
       <View style={[styles.container, styles.centerContent]}>
         <ActivityIndicator size="large" color={theme.colors.primary} />
@@ -152,14 +152,14 @@ const SecurePaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
     );
   }
 
-  if (error) {
+  if (_error) {
     return (
       <View style={[styles.container, styles.centerContent]}>
         <Icon name="alert-circle" size={48} color={theme.colors.error} />
         <Text style={[styles.errorText, { color: theme.colors.error }]}>{error}</Text>
         <TouchableOpacity
           style={[styles.retryButton, { backgroundColor: theme.colors.primary }]}
-          onPress={() => loadPaymentMethods(true)}>
+          onPress={() => loadPaymentMethods(_true)}>
           <Text style={[styles.retryButtonText, { color: theme.colors.onPrimary }]}>Retry</Text>
         </TouchableOpacity>
       </View>
@@ -183,7 +183,7 @@ const SecurePaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
-          onRefresh={() => loadPaymentMethods(true)}
+          onRefresh={() => loadPaymentMethods(_true)}
           colors={[theme.colors.primary]}
         />
       }>
@@ -196,7 +196,7 @@ const SecurePaymentMethodSelector: React.FC<PaymentMethodSelectorProps> = ({
         )}
       </View>
 
-      <View style={styles.methodsList}>{methods.map(renderPaymentMethod)}</View>
+      <View style={styles.methodsList}>{methods.map(_renderPaymentMethod)}</View>
 
       <View style={[styles.infoBox, { backgroundColor: theme.colors.surfaceLight }]}>
         <Icon name="information" size={20} color={theme.colors.primary} />

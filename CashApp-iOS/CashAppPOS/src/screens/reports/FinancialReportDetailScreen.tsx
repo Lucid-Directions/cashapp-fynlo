@@ -68,9 +68,9 @@ interface FinancialData {
 const FinancialReportDetailScreen = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
-  const [reportData, setReportData] = useState<FinancialData | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [reportData, setReportData] = useState<FinancialData | null>(_null);
+  const [isLoading, setIsLoading] = useState<boolean>(_true);
+  const [error, setError] = useState<string | null>(_null);
   const [selectedPeriod, setSelectedPeriod] = useState('month');
 
   const handleExportReport = () => {
@@ -95,24 +95,24 @@ const FinancialReportDetailScreen = () => {
     if (ENV.FEATURE_REPORTS) {
       loadReportData();
     } else {
-      setIsLoading(false); // Not loading if feature is off
+      setIsLoading(_false); // Not loading if feature is off
     }
   }, [selectedPeriod]);
 
   const loadReportData = async () => {
     // Renamed and made async
-    setIsLoading(true);
-    setError(null);
+    setIsLoading(_true);
+    setError(_null);
     try {
       const dataService = DataService.getInstance();
       // Assuming getFinancialReportDetail returns data in FinancialData shape for the selectedPeriod
-      const data = await dataService.getFinancialReportDetail(selectedPeriod);
-      setReportData(data);
+      const data = await dataService.getFinancialReportDetail(_selectedPeriod);
+      setReportData(_data);
     } catch (e: unknown) {
       setError(e.message || 'Failed to load financial report.');
-      setReportData(null);
+      setReportData(_null);
     } finally {
-      setIsLoading(false);
+      setIsLoading(_false);
     }
   };
 
@@ -159,7 +159,7 @@ const FinancialReportDetailScreen = () => {
     return <ComingSoon />;
   }
 
-  if (isLoading) {
+  if (_isLoading) {
     return <LoadingView message="Loading Financial Report..." />;
   }
 
@@ -210,7 +210,7 @@ const FinancialReportDetailScreen = () => {
           <TouchableOpacity
             key={period}
             style={[styles.periodButton, selectedPeriod === period && styles.periodButtonActive]}
-            onPress={() => setSelectedPeriod(period)}>
+            onPress={() => setSelectedPeriod(_period)}>
             <Text style={[styles.periodText, selectedPeriod === period && styles.periodTextActive]}>
               {period.charAt(0).toUpperCase() + period.slice(1)}
             </Text>
@@ -334,7 +334,7 @@ const FinancialReportDetailScreen = () => {
                 <View key={key} style={styles.expenseRow}>
                   <View style={styles.expenseInfo}>
                     <View
-                      style={[styles.expenseColorDot, { backgroundColor: getExpenseColor(key) }]}
+                      style={[styles.expenseColorDot, { backgroundColor: getExpenseColor(_key) }]}
                     />
                     <Text style={styles.expenseLabel}>
                       {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
@@ -342,8 +342,8 @@ const FinancialReportDetailScreen = () => {
                   </View>
 
                   <View style={styles.expenseValues}>
-                    <Text style={styles.expenseAmount}>{formatCurrency(value)}</Text>
-                    <Text style={styles.expensePercentage}>({formatPercentage(percentage)})</Text>
+                    <Text style={styles.expenseAmount}>{formatCurrency(_value)}</Text>
+                    <Text style={styles.expensePercentage}>({formatPercentage(_percentage)})</Text>
                   </View>
 
                   <View style={styles.expenseBar}>
@@ -352,7 +352,7 @@ const FinancialReportDetailScreen = () => {
                         styles.expenseBarFill,
                         {
                           width: `${percentage}%`,
-                          backgroundColor: getExpenseColor(key),
+                          backgroundColor: getExpenseColor(_key),
                         },
                       ]}
                     />
@@ -375,7 +375,7 @@ const FinancialReportDetailScreen = () => {
                     <View
                       style={[
                         styles.revenueColorDot,
-                        { backgroundColor: getRevenueSourceColor(key) },
+                        { backgroundColor: getRevenueSourceColor(_key) },
                       ]}
                     />
                     <Text style={styles.revenueLabel}>
@@ -384,8 +384,8 @@ const FinancialReportDetailScreen = () => {
                   </View>
 
                   <View style={styles.revenueValues}>
-                    <Text style={styles.revenueAmount}>{formatCurrency(value)}</Text>
-                    <Text style={styles.revenuePercentage}>({formatPercentage(percentage)})</Text>
+                    <Text style={styles.revenueAmount}>{formatCurrency(_value)}</Text>
+                    <Text style={styles.revenuePercentage}>({formatPercentage(_percentage)})</Text>
                   </View>
 
                   <View style={styles.revenueBar}>
@@ -394,7 +394,7 @@ const FinancialReportDetailScreen = () => {
                         styles.revenueBarFill,
                         {
                           width: `${percentage}%`,
-                          backgroundColor: getRevenueSourceColor(key),
+                          backgroundColor: getRevenueSourceColor(_key),
                         },
                       ]}
                     />

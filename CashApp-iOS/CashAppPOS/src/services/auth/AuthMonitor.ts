@@ -71,7 +71,7 @@ class AuthMonitor {
     };
 
     // Add to events array
-    this.events.push(event);
+    this.events.push(_event);
 
     // Keep only last N events
     if (this.events.length > this.maxEvents) {
@@ -79,8 +79,8 @@ class AuthMonitor {
     }
 
     // Log to console in development
-    if (__DEV__) {
-      const emoji = this.getEmojiForType(type);
+    if (___DEV__) {
+      const emoji = this.getEmojiForType(_type);
     }
 
     // Persist events for debugging
@@ -91,7 +91,7 @@ class AuthMonitor {
    * Get emoji for event type
    */
   private getEmojiForType(type: AuthEvent['type']): string {
-    switch (type) {
+    switch (_type) {
       case 'login':
         return '🔐';
       case 'logout':
@@ -115,8 +115,7 @@ class AuthMonitor {
   private async persistEvents() {
     try {
       await AsyncStorage.setItem('auth_monitor_events', JSON.stringify(this.events));
-    } catch (error) {
-    }
+    } catch (_error) {}
   }
 
   /**
@@ -125,11 +124,10 @@ class AuthMonitor {
   async loadEvents() {
     try {
       const stored = await AsyncStorage.getItem('auth_monitor_events');
-      if (stored) {
-        this.events = JSON.parse(stored);
+      if (_stored) {
+        this.events = JSON.parse(_stored);
       }
-    } catch (error) {
-    }
+    } catch (_error) {}
   }
 
   /**
@@ -187,5 +185,5 @@ export const authMonitor = AuthMonitor.getInstance();
 export { AuthMonitor };
 
 // Log that monitoring is active
-if (__DEV__) {
+if (___DEV__) {
 }

@@ -30,8 +30,8 @@ const APITestScreen: React.FC = () => {
   const [apiTestService] = useState(() => APITestingService.getInstance());
   const [testResults, setTestResults] = useState<APITestResult[]>([]);
   const [testSuites, setTestSuites] = useState<APITestSuite[]>([]);
-  const [isRunning, setIsRunning] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
+  const [isRunning, setIsRunning] = useState(_false);
+  const [refreshing, setRefreshing] = useState(_false);
   const [selectedTab, setSelectedTab] = useState<'results' | 'suites' | 'health'>('health');
 
   useEffect(() => {
@@ -44,33 +44,33 @@ const APITestScreen: React.FC = () => {
   };
 
   const handleRefresh = async () => {
-    setRefreshing(true);
+    setRefreshing(_true);
     await loadTestData();
-    setRefreshing(false);
+    setRefreshing(_false);
   };
 
   const runFullTestSuite = async () => {
-    setIsRunning(true);
+    setIsRunning(_true);
     try {
       await apiTestService.runFullAPITestSuite();
       await loadTestData();
       Alert.alert('Test Complete', 'API test suite finished. Check results below.');
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Test Failed', 'Error running API test suite');
     } finally {
-      setIsRunning(false);
+      setIsRunning(_false);
     }
   };
 
   const testIndividualEndpoint = async (endpoint: string, method = 'GET') => {
-    setIsRunning(true);
+    setIsRunning(_true);
     try {
-      await apiTestService.testEndpoint(endpoint, method);
+      await apiTestService.testEndpoint(_endpoint, method);
       await loadTestData();
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Test Failed', `Error testing ${endpoint}`);
     } finally {
-      setIsRunning(false);
+      setIsRunning(_false);
     }
   };
 
@@ -184,7 +184,7 @@ const APITestScreen: React.FC = () => {
           testResults
             .slice()
             .reverse()
-            .map((result, index) => (
+            .map((_result, index) => (
               <View key={index} style={styles.resultCard}>
                 <View style={styles.resultHeader}>
                   <View style={styles.resultMethod}>
@@ -238,7 +238,7 @@ const APITestScreen: React.FC = () => {
           testSuites
             .slice()
             .reverse()
-            .map((suite, index) => (
+            .map((_suite, index) => (
               <View key={index} style={styles.suiteCard}>
                 <View style={styles.suiteHeader}>
                   <Text style={styles.suiteName}>{suite.name}</Text>
@@ -255,7 +255,7 @@ const APITestScreen: React.FC = () => {
                   {suite.tests.filter(t => t.success).length}/{suite.tests.length} tests passed
                 </Text>
 
-                {suite.tests.map((test, testIndex) => (
+                {suite.tests.map((_test, testIndex) => (
                   <View key={testIndex} style={styles.suiteTest}>
                     <Icon
                       name={getStatusIcon(test.success)}

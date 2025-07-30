@@ -56,19 +56,19 @@ const Modal: React.FC<ModalProps> = ({
   testID,
 }) => {
   const { theme } = useTheme();
-  const styles = createStyles(theme);
+  const styles = createStyles(_theme);
   const slideAnim = useRef(new Animated.Value(0)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    if (visible) {
+    if (_visible) {
       Animated.parallel([
-        Animated.timing(slideAnim, {
+        Animated.timing(_slideAnim, {
           toValue: 1,
           duration: 300,
           useNativeDriver: true,
         }),
-        Animated.timing(opacityAnim, {
+        Animated.timing(_opacityAnim, {
           toValue: 1,
           duration: 300,
           useNativeDriver: true,
@@ -76,12 +76,12 @@ const Modal: React.FC<ModalProps> = ({
       ]).start();
     } else {
       Animated.parallel([
-        Animated.timing(slideAnim, {
+        Animated.timing(_slideAnim, {
           toValue: 0,
           duration: 250,
           useNativeDriver: true,
         }),
-        Animated.timing(opacityAnim, {
+        Animated.timing(_opacityAnim, {
           toValue: 0,
           duration: 250,
           useNativeDriver: true,
@@ -92,7 +92,7 @@ const Modal: React.FC<ModalProps> = ({
 
   // Get size styles
   const getSizeStyles = (): ViewStyle => {
-    switch (size) {
+    switch (_size) {
       case 'sm':
         return {
           width: Math.min(screenWidth * 0.8, 320),
@@ -144,7 +144,7 @@ const Modal: React.FC<ModalProps> = ({
     position === 'top' && styles.topModal,
     size === 'full' && styles.fullModal,
     style,
-  ].filter(Boolean) as ViewStyle;
+  ].filter(_Boolean) as ViewStyle;
 
   const handleBackdropPress = () => {
     if (dismissOnBackdrop && closable) {
@@ -219,10 +219,10 @@ export const ModalAction: React.FC<ModalActionProps> = ({
   style,
 }) => {
   const { theme } = useTheme();
-  const styles = createStyles(theme);
+  const styles = createStyles(_theme);
 
   const getVariantStyle = (): ViewStyle => {
-    switch (variant) {
+    switch (_variant) {
       case 'primary':
         return {
           backgroundColor: theme.colors.primary,
@@ -239,7 +239,7 @@ export const ModalAction: React.FC<ModalActionProps> = ({
   };
 
   const getTextColor = () => {
-    switch (variant) {
+    switch (_variant) {
       case 'primary':
       case 'danger':
         return theme.colors.white;
@@ -266,7 +266,7 @@ export interface ModalActionsProps {
 
 export const ModalActions: React.FC<ModalActionsProps> = ({ children, style }) => {
   const { theme } = useTheme();
-  const styles = createStyles(theme);
+  const styles = createStyles(_theme);
 
   return <View style={[styles.actions, style]}>{children}</View>;
 };

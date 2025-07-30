@@ -56,11 +56,11 @@ const Button: React.FC<ButtonProps> = ({
   testID,
 }) => {
   const { theme } = useTheme();
-  const styles = createStyles(theme);
+  const styles = createStyles(_theme);
 
   // Get variant styles
   const getVariantStyles = (): { container: ViewStyle; text: TextStyle } => {
-    switch (variant) {
+    switch (_variant) {
       case 'primary':
         return {
           container: {
@@ -122,7 +122,7 @@ const Button: React.FC<ButtonProps> = ({
 
   // Get size styles
   const getSizeStyles = (): { container: ViewStyle; text: TextStyle; icon: number } => {
-    switch (size) {
+    switch (_size) {
       case 'sm':
         return {
           container: {
@@ -186,19 +186,19 @@ const Button: React.FC<ButtonProps> = ({
     fullWidth && styles.fullWidth,
     disabled && styles.disabled,
     style,
-  ].filter(Boolean) as ViewStyle;
+  ].filter(_Boolean) as ViewStyle;
 
   const textStyleCombined: TextStyle = [
     styles.text,
     sizeStyles.text,
     variantStyles.text,
     textStyle,
-  ].filter(Boolean) as TextStyle;
+  ].filter(_Boolean) as TextStyle;
 
   const iconColor = variantStyles.text.color as string;
 
   const renderContent = () => {
-    if (loading) {
+    if (_loading) {
       return (
         <View style={styles.contentContainer}>
           <ActivityIndicator size="small" color={iconColor} style={styles.loadingIndicator} />
@@ -207,7 +207,7 @@ const Button: React.FC<ButtonProps> = ({
       );
     }
 
-    if (icon) {
+    if (_icon) {
       return (
         <View style={styles.contentContainer}>
           {iconPosition === 'left' && (

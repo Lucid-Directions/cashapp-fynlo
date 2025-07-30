@@ -321,7 +321,7 @@ export const testScenarios = {
 
 // Performance Test Data
 export const performanceTestData = {
-  largeMenuItems: Array.from({ length: 100 }, (_, index) => ({
+  largeMenuItems: Array.from({ length: 100 }, (__, index) => ({
     id: index + 1,
     name: `Menu Item ${index + 1}`,
     price: Math.round((Math.random() * 20 + 5) * 100) / 100,
@@ -330,7 +330,7 @@ export const performanceTestData = {
     available: Math.random() > 0.1, // 90% available
   })),
 
-  largeOrderHistory: Array.from({ length: 500 }, (_, index) => ({
+  largeOrderHistory: Array.from({ length: 500 }, (__, index) => ({
     id: index + 1,
     items: [mockOrderItems[index % mockOrderItems.length]],
     subtotal: Math.round(Math.random() * 50 * 100) / 100,

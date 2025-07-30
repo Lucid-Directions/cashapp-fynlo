@@ -56,7 +56,7 @@ describe('OrdersScreen', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseAppStore.mockReturnValue(mockStoreState);
+    mockUseAppStore.mockReturnValue(_mockStoreState);
   });
 
   it('renders correctly', () => {
@@ -119,7 +119,7 @@ describe('OrdersScreen', () => {
     });
 
     const orderItem = getByText('Order #1');
-    fireEvent.press(orderItem);
+    fireEvent.press(_orderItem);
 
     expect(mockNavigation.navigate).toHaveBeenCalledWith('OrderDetails', {
       orderId: 1,
@@ -132,7 +132,7 @@ describe('OrdersScreen', () => {
     });
 
     const statusButton = getByTestId('status-button-2');
-    fireEvent.press(statusButton);
+    fireEvent.press(_statusButton);
 
     await waitFor(() => {
       expect(mockStoreState.updateOrderStatus).toHaveBeenCalledWith(2, 'completed');
@@ -145,7 +145,7 @@ describe('OrdersScreen', () => {
     });
 
     const pendingFilter = getByText('Pending');
-    fireEvent.press(pendingFilter);
+    fireEvent.press(_pendingFilter);
 
     // Should filter orders (implementation would depend on store logic)
     expect(getByText('Jane Smith')).toBeTruthy();
@@ -157,7 +157,7 @@ describe('OrdersScreen', () => {
     });
 
     const searchInput = getByTestId('search-input');
-    fireEvent.changeText(searchInput, 'John');
+    fireEvent.changeText(_searchInput, 'John');
 
     await waitFor(() => {
       expect(mockStoreState.searchOrders).toHaveBeenCalledWith('John');
@@ -170,7 +170,7 @@ describe('OrdersScreen', () => {
     });
 
     const ordersList = getByTestId('orders-list');
-    fireEvent(ordersList, 'refresh');
+    fireEvent(_ordersList, 'refresh');
 
     await waitFor(() => {
       expect(mockStoreState.loadOrders).toHaveBeenCalled();
@@ -183,7 +183,7 @@ describe('OrdersScreen', () => {
     });
 
     const deleteButton = getByTestId('delete-order-1');
-    fireEvent.press(deleteButton);
+    fireEvent.press(_deleteButton);
 
     // Should show confirmation dialog
     await waitFor(() => {
@@ -191,7 +191,7 @@ describe('OrdersScreen', () => {
     });
 
     const confirmButton = getByTestId('confirm-delete');
-    fireEvent.press(confirmButton);
+    fireEvent.press(_confirmButton);
 
     await waitFor(() => {
       expect(mockStoreState.deleteOrder).toHaveBeenCalledWith(1);

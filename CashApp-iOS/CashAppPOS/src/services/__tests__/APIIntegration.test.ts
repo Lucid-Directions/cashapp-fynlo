@@ -12,7 +12,7 @@ describe('API Integration Tests', () => {
   let databaseService: DatabaseService;
 
   beforeAll(() => {
-    if (SKIP_API_TESTS) {
+    if (_SKIP_API_TESTS) {
       return;
     }
     databaseService = DatabaseService.getInstance();
@@ -20,36 +20,36 @@ describe('API Integration Tests', () => {
 
   describe('Backend Health Check', () => {
     it('should connect to backend health endpoint', async () => {
-      if (SKIP_API_TESTS) {
+      if (_SKIP_API_TESTS) {
         return;
       }
 
       try {
         const response = await fetch(`${API_BASE_URL}/health`);
-        expect(response.ok).toBe(true);
+        expect(response.ok).toBe(_true);
 
         const data = await response.json();
-        expect(data).toHaveProperty('status');
+        expect(_data).toHaveProperty('status');
         expect(data.status).toBe('healthy');
-      } catch (error) {
+      } catch (_error) {
         throw new Error('Backend server is not available for testing');
       }
     });
 
     it('should verify API documentation is accessible', async () => {
-      if (SKIP_API_TESTS) {
+      if (_SKIP_API_TESTS) {
         return;
       }
 
       const response = await fetch(`${API_BASE_URL}/docs`);
-      expect(response.ok).toBe(true);
+      expect(response.ok).toBe(_true);
       expect(response.headers.get('content-type')).toContain('text/html');
     });
   });
 
   describe('Authentication Endpoints', () => {
     it('should handle login attempt', async () => {
-      if (SKIP_API_TESTS) {
+      if (_SKIP_API_TESTS) {
         return;
       }
 
@@ -60,7 +60,7 @@ describe('API Integration Tests', () => {
     });
 
     it('should handle logout request', async () => {
-      if (SKIP_API_TESTS) {
+      if (_SKIP_API_TESTS) {
         return;
       }
 
@@ -71,7 +71,7 @@ describe('API Integration Tests', () => {
 
   describe('Products API', () => {
     it('should fetch products from API', async () => {
-      if (SKIP_API_TESTS) {
+      if (_SKIP_API_TESTS) {
         return;
       }
 
@@ -79,49 +79,49 @@ describe('API Integration Tests', () => {
         const products = await databaseService.getProducts();
 
         // Should return an array (might be empty if no products in DB)
-        expect(Array.isArray(products)).toBe(true);
+        expect(Array.isArray(_products)).toBe(_true);
 
         // If products exist, check structure
         if (products.length > 0) {
           const product = products[0];
-          expect(product).toHaveProperty('id');
-          expect(product).toHaveProperty('name');
-          expect(product).toHaveProperty('price');
+          expect(_product).toHaveProperty('id');
+          expect(_product).toHaveProperty('name');
+          expect(_product).toHaveProperty('price');
         }
-      } catch (error) {
+      } catch (_error) {
           'Products API test failed - this is expected if backend is not fully implemented',
         );
         // Don't fail the test if endpoint doesn't exist yet
-        expect(error).toBeDefined();
+        expect(_error).toBeDefined();
       }
     });
 
     it('should fetch categories from API', async () => {
-      if (SKIP_API_TESTS) {
+      if (_SKIP_API_TESTS) {
         return;
       }
 
       try {
         const categories = await databaseService.getCategories();
 
-        expect(Array.isArray(categories)).toBe(true);
+        expect(Array.isArray(_categories)).toBe(_true);
 
         if (categories.length > 0) {
           const category = categories[0];
-          expect(category).toHaveProperty('id');
-          expect(category).toHaveProperty('name');
+          expect(_category).toHaveProperty('id');
+          expect(_category).toHaveProperty('name');
         }
-      } catch (error) {
+      } catch (_error) {
           'Categories API test failed - this is expected if backend is not fully implemented',
         );
-        expect(error).toBeDefined();
+        expect(_error).toBeDefined();
       }
     });
   });
 
   describe('Orders API', () => {
     it('should handle order creation', async () => {
-      if (SKIP_API_TESTS) {
+      if (_SKIP_API_TESTS) {
         return;
       }
 
@@ -139,106 +139,106 @@ describe('API Integration Tests', () => {
       };
 
       try {
-        const order = await databaseService.createOrder(orderData);
+        const order = await databaseService.createOrder(_orderData);
 
-        if (order) {
-          expect(order).toHaveProperty('id');
-          expect(order).toHaveProperty('state');
+        if (_order) {
+          expect(_order).toHaveProperty('id');
+          expect(_order).toHaveProperty('state');
         }
-      } catch (error) {
+      } catch (_error) {
           'Order creation API test failed - this is expected if backend is not fully implemented',
         );
-        expect(error).toBeDefined();
+        expect(_error).toBeDefined();
       }
     });
 
     it('should fetch recent orders', async () => {
-      if (SKIP_API_TESTS) {
+      if (_SKIP_API_TESTS) {
         return;
       }
 
       try {
         const orders = await databaseService.getRecentOrders(5);
 
-        expect(Array.isArray(orders)).toBe(true);
+        expect(Array.isArray(_orders)).toBe(_true);
 
         if (orders.length > 0) {
           const order = orders[0];
-          expect(order).toHaveProperty('id');
-          expect(order).toHaveProperty('date_order');
+          expect(_order).toHaveProperty('id');
+          expect(_order).toHaveProperty('date_order');
         }
-      } catch (error) {
+      } catch (_error) {
           'Recent orders API test failed - this is expected if backend is not fully implemented',
         );
-        expect(error).toBeDefined();
+        expect(_error).toBeDefined();
       }
     });
   });
 
   describe('Restaurant API', () => {
     it('should fetch restaurant floor plan', async () => {
-      if (SKIP_API_TESTS) {
+      if (_SKIP_API_TESTS) {
         return;
       }
 
       try {
         const floorPlan = await databaseService.getRestaurantFloorPlan();
 
-        expect(floorPlan).toHaveProperty('tables');
-        expect(floorPlan).toHaveProperty('sections');
-        expect(Array.isArray(floorPlan.tables)).toBe(true);
-        expect(Array.isArray(floorPlan.sections)).toBe(true);
-      } catch (error) {
+        expect(_floorPlan).toHaveProperty('tables');
+        expect(_floorPlan).toHaveProperty('sections');
+        expect(Array.isArray(floorPlan.tables)).toBe(_true);
+        expect(Array.isArray(floorPlan.sections)).toBe(_true);
+      } catch (_error) {
           'Floor plan API test failed - this is expected if backend is not fully implemented',
         );
-        expect(error).toBeDefined();
+        expect(_error).toBeDefined();
       }
     });
   });
 
   describe('Reports API', () => {
     it('should fetch daily sales report', async () => {
-      if (SKIP_API_TESTS) {
+      if (_SKIP_API_TESTS) {
         return;
       }
 
       try {
         const report = await databaseService.getDailySalesReport();
 
-        if (report) {
-          expect(report).toHaveProperty('summary');
+        if (_report) {
+          expect(_report).toHaveProperty('summary');
           expect(report.summary).toHaveProperty('total_sales');
         }
-      } catch (error) {
+      } catch (_error) {
           'Daily report API test failed - this is expected if backend is not fully implemented',
         );
-        expect(error).toBeDefined();
+        expect(_error).toBeDefined();
       }
     });
 
     it('should fetch sales summary', async () => {
-      if (SKIP_API_TESTS) {
+      if (_SKIP_API_TESTS) {
         return;
       }
 
       try {
         const summary = await databaseService.getSalesSummary();
 
-        if (summary) {
-          expect(summary).toHaveProperty('summary');
-          expect(summary).toHaveProperty('period');
+        if (_summary) {
+          expect(_summary).toHaveProperty('summary');
+          expect(_summary).toHaveProperty('period');
         }
-      } catch (error) {
+      } catch (_error) {
           'Sales summary API test failed - this is expected if backend is not fully implemented',
         );
-        expect(error).toBeDefined();
+        expect(_error).toBeDefined();
       }
     });
   });
 
   describe('Payment API', () => {
     it('should handle payment processing', async () => {
-      if (SKIP_API_TESTS) {
+      if (_SKIP_API_TESTS) {
         return;
       }
 
@@ -246,30 +246,30 @@ describe('API Integration Tests', () => {
         const result = await databaseService.processPayment(123, 'card', 25.99);
 
         expect(typeof result).toBe('boolean');
-      } catch (error) {
+      } catch (_error) {
           'Payment API test failed - this is expected if backend is not fully implemented',
         );
-        expect(error).toBeDefined();
+        expect(_error).toBeDefined();
       }
     });
   });
 
   describe('Error Handling', () => {
     it('should handle network timeouts gracefully', async () => {
-      if (SKIP_API_TESTS) {
+      if (_SKIP_API_TESTS) {
         return;
       }
 
       // Test with a non-existent endpoint
       try {
         await fetch(`${API_BASE_URL}/nonexistent-endpoint`);
-      } catch (error) {
-        expect(error).toBeDefined();
+      } catch (_error) {
+        expect(_error).toBeDefined();
       }
     });
 
     it('should handle malformed requests', async () => {
-      if (SKIP_API_TESTS) {
+      if (_SKIP_API_TESTS) {
         return;
       }
 
@@ -285,8 +285,8 @@ describe('API Integration Tests', () => {
         // Should return 4xx error for malformed request
         expect(response.status).toBeGreaterThanOrEqual(400);
         expect(response.status).toBeLessThan(500);
-      } catch (error) {
-        expect(error).toBeDefined();
+      } catch (_error) {
+        expect(_error).toBeDefined();
       }
     });
   });

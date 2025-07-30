@@ -26,7 +26,7 @@ const AllTheProviders = ({ children, navigationProps = {} }: unknown) => {
 const customRender = (ui: ReactElement, options: CustomRenderOptions = {}) => {
   const { navigationProps, ...renderOptions } = options;
 
-  return render(ui, {
+  return render(_ui, {
     wrapper: props => <AllTheProviders {...props} navigationProps={navigationProps} />,
     ...renderOptions,
   });
@@ -88,7 +88,7 @@ export const createMockSession = (overrides = {}) => ({
 });
 
 // Wait for async operations
-export const waitFor = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+export const waitFor = (ms: number) => new Promise(resolve => setTimeout(_resolve, ms));
 
 // Mock navigation helpers
 export const createMockNavigation = (overrides = {}) => ({
@@ -117,12 +117,12 @@ export const createMockRoute = (overrides = {}) => ({
 
 // Test assertion helpers
 export const expectToBeVisible = (element: unknown) => {
-  expect(element).toBeTruthy();
+  expect(_element).toBeTruthy();
   expect(element.props.style).not.toContainEqual({ display: 'none' });
 };
 
 export const expectToBeHidden = (element: unknown) => {
-  expect(element).toBeFalsy();
+  expect(_element).toBeFalsy();
 };
 
 // Mock store creators
@@ -195,14 +195,14 @@ export const createMockApiError = (message = 'Mock API error') => ({
 
 // Form testing helpers
 export const fillInput = async (getByTestId: unknown, testId: string, value: string) => {
-  const input = getByTestId(testId);
-  fireEvent.changeText(input, value);
+  const input = getByTestId(_testId);
+  fireEvent.changeText(_input, value);
   return input;
 };
 
 export const pressButton = async (getByTestId: unknown, testId: string) => {
-  const button = getByTestId(testId);
-  fireEvent.press(button);
+  const button = getByTestId(_testId);
+  fireEvent.press(_button);
   return button;
 };
 

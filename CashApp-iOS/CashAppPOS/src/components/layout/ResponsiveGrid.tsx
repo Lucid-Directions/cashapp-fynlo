@@ -49,12 +49,12 @@ const ResponsiveGrid: React.FC<ResponsiveGridProps> = ({
   testID,
 }) => {
   const { theme } = useTheme();
-  const currentColumns = useResponsiveColumns(columns, 1);
-  const currentSpacing = useResponsiveSpacing(spacingProp, 4);
-  const styles = createStyles(theme);
+  const currentColumns = useResponsiveColumns(_columns, 1);
+  const currentSpacing = useResponsiveSpacing(_spacingProp, 4);
+  const styles = createStyles(_theme);
 
   // Convert children to array for processing
-  const childArray = React.Children.toArray(children);
+  const childArray = React.Children.toArray(_children);
 
   // Calculate item width based on columns and spacing
   const itemWidth = `${100 / currentColumns}%`;
@@ -63,14 +63,14 @@ const ResponsiveGrid: React.FC<ResponsiveGridProps> = ({
   // Group children into rows
   const rows: React.ReactNode[][] = [];
   for (let i = 0; i < childArray.length; i += currentColumns) {
-    rows.push(childArray.slice(i, i + currentColumns));
+    rows.push(childArray.slice(_i, i + currentColumns));
   }
 
   return (
     <View style={[styles.grid, style]} testID={testID}>
-      {rows.map((row, rowIndex) => (
+      {rows.map((_row, rowIndex) => (
         <View key={rowIndex} style={[styles.row, { marginBottom: spacingValue }]}>
-          {row.map((child, itemIndex) => (
+          {row.map((_child, itemIndex) => (
             <View
               key={itemIndex}
               style={[
@@ -86,7 +86,7 @@ const ResponsiveGrid: React.FC<ResponsiveGridProps> = ({
           ))}
           {/* Fill empty columns in the last row */}
           {row.length < currentColumns &&
-            Array.from({ length: currentColumns - row.length }).map((_, emptyIndex) => (
+            Array.from({ length: currentColumns - row.length }).map((__, emptyIndex) => (
               <View
                 key={`empty-${emptyIndex}`}
                 style={[

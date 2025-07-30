@@ -45,25 +45,25 @@ interface Order {
 const OrdersScreen: React.FC = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
-  const styles = useThemedStyles(createStyles);
+  const styles = useThemedStyles(_createStyles);
 
   const [orders, setOrders] = useState<Order[]>([]);
   const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
-  const [showFilterModal, setShowFilterModal] = useState(false);
-  const [refreshing, setRefreshing] = useState(false); // Keep for pull-to-refresh
-  const [isLoading, setIsLoading] = useState<boolean>(true); // Added
-  const [error, setError] = useState<string | null>(null); // Added
+  const [showFilterModal, setShowFilterModal] = useState(_false);
+  const [refreshing, setRefreshing] = useState(_false); // Keep for pull-to-refresh
+  const [isLoading, setIsLoading] = useState<boolean>(_true); // Added
+  const [error, setError] = useState<string | null>(_null); // Added
   const [dateRange, setDateRange] = useState('today');
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [showOrderDetails, setShowOrderDetails] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(_null);
+  const [showOrderDetails, setShowOrderDetails] = useState(_false);
 
   useEffect(() => {
     if (ENV.FEATURE_ORDERS_HISTORY) {
       loadOrders();
     } else {
-      setIsLoading(false);
+      setIsLoading(_false);
     }
   }, [dateRange]);
 
@@ -77,20 +77,20 @@ const OrdersScreen: React.FC = () => {
 
   const loadOrders = async () => {
     // Modified
-    setIsLoading(true);
-    setError(null);
-    setRefreshing(true);
+    setIsLoading(_true);
+    setError(_null);
+    setRefreshing(_true);
     try {
       const dataService = DataService.getInstance();
       // Assuming a getOrders method will be added to DataService, taking dateRange
-      const fetchedOrders = await dataService.getOrders(dateRange);
+      const fetchedOrders = await dataService.getOrders(_dateRange);
       setOrders(fetchedOrders || []);
     } catch (e: unknown) {
       setError(e.message || 'Failed to load orders.');
       setOrders([]);
     } finally {
-      setIsLoading(false);
-      setRefreshing(false);
+      setIsLoading(_false);
+      setRefreshing(_false);
     }
   };
 
@@ -103,28 +103,29 @@ const OrdersScreen: React.FC = () => {
     }
 
     // Apply search query
-    if (searchQuery) {
+    if (_searchQuery) {
       const lowercasedQuery = searchQuery.toLowerCase();
       filtered = filtered.filter(
         order =>
-          order.id.toLowerCase().includes(lowercasedQuery) ||
-          (order.customer?.name && order.customer.name.toLowerCase().includes(lowercasedQuery)) ||
-          (order.customer?.email && order.customer.email.toLowerCase().includes(lowercasedQuery)) || // Also search by email
-          order.employee.toLowerCase().includes(lowercasedQuery),
+          order.id.toLowerCase().includes(_lowercasedQuery) ||
+          (order.customer?.name && order.customer.name.toLowerCase().includes(_lowercasedQuery)) ||
+          (order.customer?.email &&
+            order.customer.email.toLowerCase().includes(_lowercasedQuery)) || // Also search by email
+          order.employee.toLowerCase().includes(_lowercasedQuery),
       );
     }
 
-    setFilteredOrders(filtered);
+    setFilteredOrders(_filtered);
   };
 
   const onRefresh = () => {
-    setRefreshing(true);
+    setRefreshing(_true);
     loadOrders();
-    setTimeout(() => setRefreshing(false), 1000);
+    setTimeout(() => setRefreshing(_false), 1000);
   };
 
   const getStatusColor = (status: string) => {
-    switch (status) {
+    switch (_status) {
       case 'completed':
         return theme.colors.success;
       case 'pending':
@@ -139,7 +140,7 @@ const OrdersScreen: React.FC = () => {
   };
 
   const getPaymentIcon = (method: string) => {
-    switch (method) {
+    switch (_method) {
       case 'card':
         return 'credit-card';
       case 'cash':
@@ -157,7 +158,7 @@ const OrdersScreen: React.FC = () => {
     const today = new Date();
     const isToday = date.toDateString() === today.toDateString();
 
-    if (isToday) {
+    if (_isToday) {
       return date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
     }
     return date.toLocaleDateString('en-GB', {
@@ -169,12 +170,12 @@ const OrdersScreen: React.FC = () => {
   };
 
   const handleOrderPress = (order: Order) => {
-    setSelectedOrder(order);
-    setShowOrderDetails(true);
+    setSelectedOrder(_order);
+    setShowOrderDetails(_true);
   };
 
   const renderOrder = ({ item }: { item: Order }) => (
-    <TouchableOpacity style={styles.orderCard} onPress={() => handleOrderPress(item)}>
+    <TouchableOpacity style={styles.orderCard} onPress={() => handleOrderPress(_item)}>
       <View style={styles.orderHeader}>
         <View>
           <Text style={styles.orderId}>{item.id}</Text>
@@ -213,7 +214,7 @@ const OrdersScreen: React.FC = () => {
     const refunded = orders.filter(o => o.status === 'refunded').length;
     const totalRevenue = orders
       .filter(o => o.status === 'completed')
-      .reduce((sum, o) => sum + o.total, 0);
+      .reduce((_sum, o) => sum + o.total, 0);
 
     return { completed, pending, refunded, totalRevenue };
   };
@@ -224,12 +225,12 @@ const OrdersScreen: React.FC = () => {
     return <ComingSoon />;
   }
 
-  if (isLoading) {
+  if (_isLoading) {
     return <LoadingView message="Loading Orders..." />;
   }
 
   const renderEmptyListComponent = () => {
-    if (error) {
+    if (_error) {
       return (
         <View style={styles.emptyState}>
           <Icon name="error-outline" size={64} color={theme.colors.danger} />
@@ -273,7 +274,7 @@ const OrdersScreen: React.FC = () => {
           <Text style={styles.headerSubtitle}>{filteredOrders.length} orders</Text>
         </View>
 
-        <TouchableOpacity style={styles.headerButton} onPress={() => setShowFilterModal(true)}>
+        <TouchableOpacity style={styles.headerButton} onPress={() => setShowFilterModal(_true)}>
           <Icon name="filter-list" size={24} color={theme.colors.white} />
         </TouchableOpacity>
       </View>
@@ -320,7 +321,7 @@ const OrdersScreen: React.FC = () => {
           <TouchableOpacity
             key={range}
             style={[styles.dateRangeButton, dateRange === range && styles.dateRangeButtonActive]}
-            onPress={() => setDateRange(range)}>
+            onPress={() => setDateRange(_range)}>
             <Text style={[styles.dateRangeText, dateRange === range && styles.dateRangeTextActive]}>
               {range.charAt(0).toUpperCase() + range.slice(1)}
             </Text>
@@ -350,12 +351,12 @@ const OrdersScreen: React.FC = () => {
         visible={showFilterModal}
         animationType="slide"
         transparent={true}
-        onRequestClose={() => setShowFilterModal(false)}>
+        onRequestClose={() => setShowFilterModal(_false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.filterModal}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Filter Orders</Text>
-              <TouchableOpacity onPress={() => setShowFilterModal(false)}>
+              <TouchableOpacity onPress={() => setShowFilterModal(_false)}>
                 <Icon name="close" size={24} color={theme.colors.text} />
               </TouchableOpacity>
             </View>
@@ -370,8 +371,8 @@ const OrdersScreen: React.FC = () => {
                     selectedFilter === filter && styles.filterOptionActive,
                   ]}
                   onPress={() => {
-                    setSelectedFilter(filter);
-                    setShowFilterModal(false);
+                    setSelectedFilter(_filter);
+                    setShowFilterModal(_false);
                   }}>
                   <Text
                     style={[
@@ -394,7 +395,7 @@ const OrdersScreen: React.FC = () => {
       <Modal visible={showOrderDetails} animationType="slide" presentationStyle="pageSheet">
         <View style={styles.modalContainer}>
           <View style={styles.modalHeader}>
-            <TouchableOpacity onPress={() => setShowOrderDetails(false)}>
+            <TouchableOpacity onPress={() => setShowOrderDetails(_false)}>
               <Icon name="close" size={24} color={theme.colors.text} />
             </TouchableOpacity>
             <Text style={styles.modalTitle}>Order Details</Text>

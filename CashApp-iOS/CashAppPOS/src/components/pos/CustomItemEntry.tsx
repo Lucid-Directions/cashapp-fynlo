@@ -58,7 +58,7 @@ const CustomItemEntry: React.FC<CustomItemEntryProps> = ({ visible, onClose }) =
   const [quantity, setQuantity] = useState(1);
   const [selectedEmoji, setSelectedEmoji] = useState('🍽️');
   const [notes, setNotes] = useState('');
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(_false);
 
   const emojis = [
     '🍽️',
@@ -123,7 +123,7 @@ const CustomItemEntry: React.FC<CustomItemEntryProps> = ({ visible, onClose }) =
       notes: notes || undefined,
     };
 
-    addToCart(customItem);
+    addToCart(_customItem);
     handleReset();
     onClose();
   };
@@ -137,7 +137,7 @@ const CustomItemEntry: React.FC<CustomItemEntryProps> = ({ visible, onClose }) =
   };
 
   const handlePresetAmount = (amount: number) => {
-    setPrice(amount);
+    setPrice(_amount);
   };
 
   const handleCommonItem = (item: { name: string; emoji: string }) => {
@@ -166,11 +166,11 @@ const CustomItemEntry: React.FC<CustomItemEntryProps> = ({ visible, onClose }) =
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Common Items</Text>
               <View style={styles.commonItemsGrid}>
-                {commonItems.map((item, index) => (
+                {commonItems.map((_item, index) => (
                   <TouchableOpacity
                     key={index}
                     style={[styles.commonItem, itemName === item.name && styles.commonItemSelected]}
-                    onPress={() => handleCommonItem(item)}>
+                    onPress={() => handleCommonItem(_item)}>
                     <Text style={styles.commonItemEmoji}>{item.emoji}</Text>
                     <Text style={styles.commonItemName}>{item.name}</Text>
                   </TouchableOpacity>
@@ -203,13 +203,13 @@ const CustomItemEntry: React.FC<CustomItemEntryProps> = ({ visible, onClose }) =
               {/* Emoji Picker */}
               {showEmojiPicker && (
                 <View style={styles.emojiPicker}>
-                  {emojis.map((emoji, index) => (
+                  {emojis.map((_emoji, index) => (
                     <TouchableOpacity
                       key={index}
                       style={styles.emojiOption}
                       onPress={() => {
-                        setSelectedEmoji(emoji);
-                        setShowEmojiPicker(false);
+                        setSelectedEmoji(_emoji);
+                        setShowEmojiPicker(_false);
                       }}>
                       <Text style={styles.emojiText}>{emoji}</Text>
                     </TouchableOpacity>
@@ -237,7 +237,7 @@ const CustomItemEntry: React.FC<CustomItemEntryProps> = ({ visible, onClose }) =
                   <TouchableOpacity
                     key={amount}
                     style={styles.presetButton}
-                    onPress={() => handlePresetAmount(amount)}>
+                    onPress={() => handlePresetAmount(_amount)}>
                     <Text style={styles.presetButtonText}>£{amount}</Text>
                   </TouchableOpacity>
                 ))}
@@ -264,7 +264,7 @@ const CustomItemEntry: React.FC<CustomItemEntryProps> = ({ visible, onClose }) =
               {/* Notes */}
               <View style={styles.inputGroup}>
                 <SimpleTextInput
-                  label="Notes (Optional)"
+                  label="Notes (_Optional)"
                   value={notes}
                   onValueChange={setNotes}
                   placeholder="Add any special notes..."
@@ -280,7 +280,7 @@ const CustomItemEntry: React.FC<CustomItemEntryProps> = ({ visible, onClose }) =
             <View style={styles.totalSection}>
               <Text style={styles.totalLabel}>Total Amount:</Text>
               <Text style={styles.totalAmount}>
-                £{((parseFloat(price) || 0) * quantity).toFixed(2)}
+                £{((parseFloat(_price) || 0) * quantity).toFixed(2)}
               </Text>
             </View>
           </ScrollView>
@@ -301,7 +301,7 @@ const CustomItemEntry: React.FC<CustomItemEntryProps> = ({ visible, onClose }) =
             <TouchableOpacity
               style={[styles.actionButton, styles.addButton]}
               onPress={handleAddItem}
-              disabled={!itemName.trim() || !price || parseFloat(price) <= 0}>
+              disabled={!itemName.trim() || !price || parseFloat(_price) <= 0}>
               <Icon name="add" size={20} color={Colors.white} />
               <Text style={styles.addButtonText}>Add Item</Text>
             </TouchableOpacity>

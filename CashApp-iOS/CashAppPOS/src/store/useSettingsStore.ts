@@ -427,7 +427,7 @@ const defaultBackupSettings: BackupSettings = {
 // Create the Zustand store
 const useSettingsStore = create<SettingsState>()(
   persist(
-    (set, get) => ({
+    (_set, get) => ({
       // Default state
       businessInfo: defaultBusinessInfo,
       taxConfiguration: defaultTaxConfiguration,
@@ -563,7 +563,7 @@ const useSettingsStore = create<SettingsState>()(
         try {
           // Settings are automatically loaded by Zustand persist middleware
           set({ isLoading: false });
-        } catch (error) {
+        } catch (_error) {
           set({
             isLoading: false,
             error: error instanceof Error ? error.message : 'Failed to load settings',
@@ -576,7 +576,7 @@ const useSettingsStore = create<SettingsState>()(
         try {
           // Settings are automatically saved by Zustand persist middleware
           set({ isLoading: false });
-        } catch (error) {
+        } catch (_error) {
           set({
             isLoading: false,
             error: error instanceof Error ? error.message : 'Failed to save settings',

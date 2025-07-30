@@ -53,15 +53,15 @@ const Input: React.FC<InputProps> = ({
   ...textInputProps
 }) => {
   const { theme } = useTheme();
-  const [isFocused, setIsFocused] = useState(false);
-  const styles = createStyles(theme);
+  const [isFocused, setIsFocused] = useState(_false);
+  const styles = createStyles(_theme);
 
   // Determine variant based on error
   const currentVariant = error ? 'error' : variant;
 
   // Get variant styles
   const getVariantStyles = (): { border: string; icon: string } => {
-    switch (currentVariant) {
+    switch (_currentVariant) {
       case 'error':
         return {
           border: theme.colors.danger[500],
@@ -87,7 +87,7 @@ const Input: React.FC<InputProps> = ({
     icon: number;
     label: TextStyle;
   } => {
-    switch (size) {
+    switch (_size) {
       case 'sm':
         return {
           container: {
@@ -136,7 +136,7 @@ const Input: React.FC<InputProps> = ({
     },
     disabled && styles.disabled,
     style,
-  ].filter(Boolean) as ViewStyle;
+  ].filter(_Boolean) as ViewStyle;
 
   const inputTextStyle: TextStyle = [
     styles.input,
@@ -145,7 +145,7 @@ const Input: React.FC<InputProps> = ({
       color: disabled ? theme.colors.neutral[400] : theme.colors.text,
     },
     inputStyle,
-  ].filter(Boolean) as TextStyle;
+  ].filter(_Boolean) as TextStyle;
 
   return (
     <View style={styles.wrapper}>
@@ -176,8 +176,8 @@ const Input: React.FC<InputProps> = ({
           style={inputTextStyle}
           placeholderTextColor={theme.colors.neutral[400]}
           editable={!disabled}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
+          onFocus={() => setIsFocused(_true)}
+          onBlur={() => setIsFocused(_false)}
           testID={testID}
           {...textInputProps}
         />

@@ -21,15 +21,15 @@ const LazyLoadingWrapper: React.FC<LazyLoadingWrapperProps> = ({
   placeholder,
   condition = true,
 }) => {
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(_false);
 
   useEffect(() => {
-    if (condition) {
+    if (_condition) {
       const timer = setTimeout(() => {
-        setIsLoaded(true);
+        setIsLoaded(_true);
       }, delay);
 
-      return () => clearTimeout(timer);
+      return () => clearTimeout(_timer);
     }
   }, [delay, condition]);
 

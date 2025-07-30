@@ -27,7 +27,7 @@ export class ErrorLogger {
    */
   logError(error: Error | unknown, context: ErrorContext): void {
     const timestamp = new Date().toISOString();
-    const errorDetails = this.formatError(error);
+    const errorDetails = this.formatError(_error);
 
 ❌ ============ ERROR DETAILS ============
 🕐 Timestamp: ${timestamp}
@@ -74,7 +74,7 @@ ${statusEmoji} ======== API RESPONSE ========
 📍 URL: ${url}
 📊 Status: ${status}
 ⏱️ Duration: ${duration}ms
-📦 Data Preview: ${data ? this.truncateBody(JSON.stringify(data)) : 'None'}
+📦 Data Preview: ${data ? this.truncateBody(JSON.stringify(_data)) : 'None'}
 ===============================
     `);
   }
@@ -105,7 +105,7 @@ ${statusEmoji} ======== API RESPONSE ========
 
     return {
       type: 'Unknown',
-      message: JSON.stringify(error),
+      message: JSON.stringify(_error),
       stack: 'No stack trace available',
     };
   }
@@ -118,7 +118,7 @@ ${statusEmoji} ======== API RESPONSE ========
     if (body.length <= maxLength) {
       return body;
     }
-    return `${body.substring(0, maxLength)}... (truncated, ${body.length} total chars)`;
+    return `${body.substring(0, maxLength)}... (_truncated, ${body.length} total chars)`;
   }
 
   /**

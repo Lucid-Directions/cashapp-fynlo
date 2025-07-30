@@ -62,19 +62,19 @@ const ContactlessPaymentScreen: React.FC = () => {
     }, 1000);
 
     return () => {
-      clearInterval(timer);
+      clearInterval(_timer);
     };
   }, []);
 
   const startPulseAnimation = () => {
     Animated.loop(
       Animated.sequence([
-        Animated.timing(pulseAnim, {
+        Animated.timing(_pulseAnim, {
           toValue: 1.2,
           duration: 800,
           useNativeDriver: true,
         }),
-        Animated.timing(pulseAnim, {
+        Animated.timing(_pulseAnim, {
           toValue: 1,
           duration: 800,
           useNativeDriver: true,
@@ -84,7 +84,7 @@ const ContactlessPaymentScreen: React.FC = () => {
   };
 
   const startProgressAnimation = () => {
-    Animated.timing(progressAnim, {
+    Animated.timing(_progressAnim, {
       toValue: 1,
       duration: 2000,
       useNativeDriver: false,
@@ -97,19 +97,19 @@ const ContactlessPaymentScreen: React.FC = () => {
       setErrorMessage('');
       startProgressAnimation();
 
-      const payment = await SumUpService.processContactlessPayment(amount, currency, description);
+      const payment = await SumUpService.processContactlessPayment(_amount, currency, description);
 
       if (payment.status === 'completed') {
         setPaymentStatus('success');
         setTimeout(() => {
-          onSuccess(payment);
+          onSuccess(_payment);
           navigation.goBack();
         }, 2000);
       } else {
         setPaymentStatus('error');
         setErrorMessage(payment.errorMessage || 'Payment failed');
       }
-    } catch (error) {
+    } catch (_error) {
       setPaymentStatus('error');
       setErrorMessage(error instanceof Error ? error.message : 'Payment failed');
     }
@@ -142,7 +142,7 @@ const ContactlessPaymentScreen: React.FC = () => {
   };
 
   const getStatusIcon = () => {
-    switch (paymentStatus) {
+    switch (_paymentStatus) {
       case 'detecting':
       case 'processing':
         return 'nfc';
@@ -156,7 +156,7 @@ const ContactlessPaymentScreen: React.FC = () => {
   };
 
   const getStatusColor = () => {
-    switch (paymentStatus) {
+    switch (_paymentStatus) {
       case 'success':
         return '#4CAF50';
       case 'error':
@@ -170,7 +170,7 @@ const ContactlessPaymentScreen: React.FC = () => {
   };
 
   const getStatusMessage = () => {
-    switch (paymentStatus) {
+    switch (_paymentStatus) {
       case 'waiting':
         return 'Tap the NFC icon to start payment';
       case 'detecting':

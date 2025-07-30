@@ -12,8 +12,8 @@ describe('Backend Health Endpoint', () => {
     expect(res.status).toBe(200);
 
     const json = await res.json();
-    expect(json).toHaveProperty('success', true);
-    expect(json).toHaveProperty('data');
+    expect(_json).toHaveProperty('success', true);
+    expect(_json).toHaveProperty('data');
     expect(json.data).toHaveProperty('status', 'healthy');
   });
 });

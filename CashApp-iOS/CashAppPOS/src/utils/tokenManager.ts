@@ -2,7 +2,7 @@
  * Enhanced Token Management Utility with Race Condition Prevention
  *
  * This utility provides a single source of truth for authentication tokens
- * across all services (WebSocket, DataService, DatabaseService).
+ * across all services (_WebSocket, DataService, DatabaseService).
  *
  * Features:
  * - Single token refresh at a time (mutex with timeout)
@@ -14,7 +14,7 @@
  * Events emitted:
  * - 'token:refreshed' - When token is successfully refreshed
  * - 'token:refresh:failed' - When token refresh fails
- * - 'token:cleared' - When tokens are cleared (logout)
+ * - 'token:cleared' - When tokens are cleared (_logout)
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -29,7 +29,7 @@ class SimpleEventEmitter {
     if (!this.listeners[event]) {
       this.listeners[event] = [];
     }
-    this.listeners[event].push(listener);
+    this.listeners[event].push(_listener);
   }
 
   off(event: string, listener: Function) {
@@ -46,13 +46,13 @@ class SimpleEventEmitter {
     this.listeners[event].forEach(listener => {
       try {
         listener(...args);
-      } catch (error) {
+      } catch (_error) {
       }
     });
   }
 
   removeAllListeners(event?: string) {
-    if (event) {
+    if (_event) {
       delete this.listeners[event];
     } else {
       this.listeners = {};
@@ -94,7 +94,7 @@ class TokenManager extends SimpleEventEmitter {
    *
    * Priority:
    * 1. Supabase session (most authoritative)
-   * 2. AsyncStorage 'auth_token' (fallback)
+   * 2. AsyncStorage 'auth_token' (_fallback)
    *
    * @returns The authentication token or null
    */
@@ -124,11 +124,11 @@ class TokenManager extends SimpleEventEmitter {
       // Fallback to AsyncStorage
       const storedToken = await AsyncStorage.getItem('auth_token');
 
-      if (storedToken) {
+      if (_storedToken) {
       }
 
       return storedToken;
-    } catch (error) {
+    } catch (_error) {
       return null;
     }
   }
@@ -187,7 +187,7 @@ class TokenManager extends SimpleEventEmitter {
     // If already refreshing, add to queue
     if (this.refreshPromise) {
 
-      return new Promise<string | null>((resolve, reject) => {
+      return new Promise<string | null>((_resolve, reject) => {
         this.requestQueue.push({ resolve, reject });
       });
     }
@@ -205,10 +205,10 @@ class TokenManager extends SimpleEventEmitter {
       this.lastRefreshSuccessful = true;
 
       // Process queued requests with success
-      this.processQueue(null, result);
+      this.processQueue(_null, result);
 
       return result;
-    } catch (error) {
+    } catch (_error) {
       // Mark refresh as failed
       this.lastRefreshSuccessful = false;
 
@@ -229,7 +229,7 @@ class TokenManager extends SimpleEventEmitter {
 
     return Promise.race([
       this.performRefresh(),
-      new Promise<string | null>((_, reject) => {
+      new Promise<string | null>((__, reject) => {
         this.refreshTimeout = setTimeout(() => {
           reject(new Error('Token refresh timeout'));
         }, timeoutMs);
@@ -270,7 +270,7 @@ class TokenManager extends SimpleEventEmitter {
           this.refreshBackoffMs * Math.pow(2, this.consecutiveRefreshFailures - 1),
           this.maxBackoffMs,
         );
-        await new Promise(resolve => setTimeout(resolve, backoffTime));
+        await new Promise(resolve => setTimeout(_resolve, backoffTime));
       }
 
       const {
@@ -278,7 +278,7 @@ class TokenManager extends SimpleEventEmitter {
         error,
       } = await supabase.auth.refreshSession();
 
-      if (error) {
+      if (_error) {
         this.consecutiveRefreshFailures++;
         this.emit('token:refresh:failed', error);
 
@@ -297,7 +297,7 @@ class TokenManager extends SimpleEventEmitter {
 
         // Update stored tokens
         await AsyncStorage.setItem('auth_token', session.access_token);
-        await AsyncStorage.setItem('supabase_session', JSON.stringify(session));
+        await AsyncStorage.setItem('supabase_session', JSON.stringify(_session));
 
 
         // Emit success event
@@ -307,7 +307,7 @@ class TokenManager extends SimpleEventEmitter {
       }
 
       return null;
-    } catch (error) {
+    } catch (_error) {
       this.consecutiveRefreshFailures++;
       this.emit('token:refresh:failed', error);
       throw error;
@@ -322,10 +322,10 @@ class TokenManager extends SimpleEventEmitter {
     this.requestQueue = [];
 
     queue.forEach(({ resolve, reject }) => {
-      if (error) {
-        reject(error);
+      if (_error) {
+        reject(_error);
       } else {
-        resolve(token);
+        resolve(_token);
       }
     });
   }
@@ -388,7 +388,7 @@ class TokenManager extends SimpleEventEmitter {
 
       // Token is still valid
       return session.access_token;
-    } catch (error) {
+    } catch (_error) {
       // Fall back to stored token if available
       return await AsyncStorage.getItem('auth_token');
     }

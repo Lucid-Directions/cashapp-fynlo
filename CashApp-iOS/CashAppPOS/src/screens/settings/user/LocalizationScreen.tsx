@@ -46,8 +46,8 @@ const LocalizationScreen: React.FC = () => {
   const navigation = useNavigation();
 
   const [languages] = useState<Language[]>([
-    { code: 'en-GB', name: 'English (UK)', nativeName: 'English', flag: '🇬🇧', supported: true },
-    { code: 'en-US', name: 'English (US)', nativeName: 'English', flag: '🇺🇸', supported: true },
+    { code: 'en-GB', name: 'English (_UK)', nativeName: 'English', flag: '🇬🇧', supported: true },
+    { code: 'en-US', name: 'English (_US)', nativeName: 'English', flag: '🇺🇸', supported: true },
     { code: 'fr-FR', name: 'French', nativeName: 'Français', flag: '🇫🇷', supported: true },
     { code: 'de-DE', name: 'German', nativeName: 'Deutsch', flag: '🇩🇪', supported: true },
     { code: 'es-ES', name: 'Spanish', nativeName: 'Español', flag: '🇪🇸', supported: true },
@@ -125,7 +125,7 @@ const LocalizationScreen: React.FC = () => {
       return;
     }
 
-    setSelectedLanguage(languageCode);
+    setSelectedLanguage(_languageCode);
     Alert.alert(
       'Language Changed',
       `Language changed to ${language.name}. The app will restart to apply changes.`,
@@ -145,13 +145,13 @@ const LocalizationScreen: React.FC = () => {
       return;
     }
 
-    setSelectedCurrency(currencyCode);
+    setSelectedCurrency(_currencyCode);
     Alert.alert('Success', `Currency changed to ${currency.name} (${currency.symbol})`);
   };
 
   const handleTimeZoneSelect = (timeZoneId: string) => {
     const timeZone = timeZones.find(tz => tz.id === timeZoneId);
-    setSelectedTimeZone(timeZoneId);
+    setSelectedTimeZone(_timeZoneId);
     Alert.alert('Success', `Time zone changed to ${timeZone?.name} (${timeZone?.offset})`);
   };
 
@@ -387,7 +387,7 @@ const LocalizationScreen: React.FC = () => {
               <View style={styles.settingInfo}>
                 <Text style={styles.settingLabel}>Metric system</Text>
                 <Text style={styles.settingDescription}>
-                  Use metric units (cm, kg) instead of imperial
+                  Use metric units (_cm, kg) instead of imperial
                 </Text>
               </View>
               <Switch

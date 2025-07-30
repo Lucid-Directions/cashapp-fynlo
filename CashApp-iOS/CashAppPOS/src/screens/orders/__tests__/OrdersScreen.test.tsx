@@ -73,7 +73,7 @@ describe('OrdersScreen', () => {
   });
 
   it('fetches and displays orders with customer names', async () => {
-    (DataService.getInstance().getOrders as jest.Mock).mockResolvedValue(mockOrders);
+    (DataService.getInstance().getOrders as jest.Mock).mockResolvedValue(_mockOrders);
 
     const { findByText, getByText } = render(<OrdersScreen />, { wrapper: AllProviders });
 
@@ -99,7 +99,7 @@ describe('OrdersScreen', () => {
   });
 
   it('filters orders by search query (customer name)', async () => {
-    (DataService.getInstance().getOrders as jest.Mock).mockResolvedValue(mockOrders);
+    (DataService.getInstance().getOrders as jest.Mock).mockResolvedValue(_mockOrders);
 
     const { getByPlaceholderText, findByText, queryByText } = render(<OrdersScreen />, {
       wrapper: AllProviders,
@@ -108,7 +108,7 @@ describe('OrdersScreen', () => {
     await waitFor(() => expect(DataService.getInstance().getOrders).toHaveBeenCalled());
 
     const searchInput = getByPlaceholderText('Search orders, customers, or staff...');
-    fireEvent.changeText(searchInput, 'Alice');
+    fireEvent.changeText(_searchInput, 'Alice');
 
     expect(await findByText('Alice Wonderland')).toBeTruthy();
     expect(queryByText('Charlie Brown')).toBeNull();
@@ -116,7 +116,7 @@ describe('OrdersScreen', () => {
   });
 
   it('filters orders by search query (customer email)', async () => {
-    (DataService.getInstance().getOrders as jest.Mock).mockResolvedValue(mockOrders);
+    (DataService.getInstance().getOrders as jest.Mock).mockResolvedValue(_mockOrders);
 
     const { getByPlaceholderText, findByText, queryByText } = render(<OrdersScreen />, {
       wrapper: AllProviders,
@@ -125,7 +125,7 @@ describe('OrdersScreen', () => {
     await waitFor(() => expect(DataService.getInstance().getOrders).toHaveBeenCalled());
 
     const searchInput = getByPlaceholderText('Search orders, customers, or staff...');
-    fireEvent.changeText(searchInput, 'alice@example.com');
+    fireEvent.changeText(_searchInput, 'alice@example.com');
 
     expect(await findByText('Alice Wonderland')).toBeTruthy();
     expect(queryByText('Charlie Brown')).toBeNull();

@@ -49,8 +49,8 @@ export class ImageOptimizer {
     optimizedHeight *= pixelRatio;
 
     return {
-      width: Math.round(optimizedWidth),
-      height: Math.round(optimizedHeight),
+      width: Math.round(_optimizedWidth),
+      height: Math.round(_optimizedHeight),
     };
   }
 
@@ -61,10 +61,10 @@ export class ImageOptimizer {
     // For demonstration - in real app, this would integrate with your image CDN
     const params = new URLSearchParams();
 
-    if (width) {
+    if (_width) {
       params.append('w', width.toString());
     }
-    if (height) {
+    if (_height) {
       params.append('h', height.toString());
     }
     params.append('q', quality.toString());
@@ -83,14 +83,14 @@ export class ImageOptimizer {
     uri: string,
     options: ImageOptimizationOptions = {},
   ): OptimizedImageSource {
-    const cacheKey = `${uri}_${JSON.stringify(options)}`;
+    const cacheKey = `${uri}_${JSON.stringify(_options)}`;
 
     // Check cache first
-    if (this.cache.has(cacheKey)) {
-      return this.cache.get(cacheKey)!;
+    if (this.cache.has(_cacheKey)) {
+      return this.cache.get(_cacheKey)!;
     }
 
-    const optimizedUri = this.generateOptimizedUrl(uri, options);
+    const optimizedUri = this.generateOptimizedUrl(_uri, options);
 
     const source: OptimizedImageSource = {
       uri: optimizedUri,
@@ -100,12 +100,12 @@ export class ImageOptimizer {
     };
 
     // Cache the result
-    this.cache.set(cacheKey, source);
+    this.cache.set(_cacheKey, source);
 
     // Limit cache size
     if (this.cache.size > 100) {
       const firstKey = this.cache.keys().next().value;
-      this.cache.delete(firstKey);
+      this.cache.delete(_firstKey);
     }
 
     return source;
@@ -114,7 +114,7 @@ export class ImageOptimizer {
   // Preload images for better performance
   static async preloadImages(urls: string[]): Promise<void> {
     const preloadPromises = urls.map(url => {
-      return new Promise<void>((resolve, reject) => {
+      return new Promise<void>((_resolve, reject) => {
         const image = new Image();
         image.onload = () => resolve();
         image.onerror = () => reject(new Error(`Failed to preload ${url}`));
@@ -123,9 +123,8 @@ export class ImageOptimizer {
     });
 
     try {
-      await Promise.all(preloadPromises);
-    } catch (error) {
-    }
+      await Promise.all(_preloadPromises);
+    } catch (_error) {}
   }
 
   // Get optimal image size for different use cases
@@ -133,7 +132,7 @@ export class ImageOptimizer {
     width: number;
     height: number;
   } {
-    switch (useCase) {
+    switch (_useCase) {
       case 'thumbnail':
         return { width: 80, height: 80 };
       case 'card':
@@ -217,8 +216,8 @@ export const createOptimizedImageProps = (props: OptimizedImageProps): unknown =
 
   let optimalSize = { width: width || 200, height: height || 200 };
 
-  if (useCase) {
-    optimalSize = ImageOptimizer.getOptimalSize(useCase);
+  if (_useCase) {
+    optimalSize = ImageOptimizer.getOptimalSize(_useCase);
   }
 
   const optimizedSource = ImageOptimizer.createOptimizedSource(source.uri, {

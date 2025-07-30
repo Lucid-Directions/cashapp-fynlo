@@ -39,8 +39,8 @@ const LoginScreen: React.FC = () => {
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(_false);
+  const [isLoading, setIsLoading] = useState(_false);
 
   const handleLogin = async (quickUsername?: string, quickPassword?: string) => {
     const loginUsername = quickUsername || username;
@@ -51,7 +51,7 @@ const LoginScreen: React.FC = () => {
       return;
     }
 
-    setIsLoading(true);
+    setIsLoading(_true);
 
     try {
       await signIn(loginUsername.trim(), loginPassword);
@@ -59,7 +59,7 @@ const LoginScreen: React.FC = () => {
     } catch (error: unknown) {
       Alert.alert('Login Failed', error.message || 'Invalid username or password');
     } finally {
-      setIsLoading(false);
+      setIsLoading(_false);
     }
   };
 

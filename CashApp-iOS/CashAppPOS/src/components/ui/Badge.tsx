@@ -44,11 +44,11 @@ const Badge: React.FC<BadgeProps> = ({
   testID,
 }) => {
   const { theme } = useTheme();
-  const styles = createStyles(theme);
+  const styles = createStyles(_theme);
 
   // Get variant styles
   const getVariantStyles = (): { container: ViewStyle; text: TextStyle } => {
-    switch (variant) {
+    switch (_variant) {
       case 'primary':
         return {
           container: { backgroundColor: theme.colors.primary },
@@ -98,7 +98,7 @@ const Badge: React.FC<BadgeProps> = ({
 
   // Get size styles
   const getSizeStyles = (): { container: ViewStyle; text: TextStyle; dot: ViewStyle } => {
-    switch (size) {
+    switch (_size) {
       case 'sm':
         return {
           container: {
@@ -172,7 +172,7 @@ const Badge: React.FC<BadgeProps> = ({
 
   // Determine what to display
   const getDisplayContent = (): React.ReactNode => {
-    if (dot) {
+    if (_dot) {
       return null;
     }
 
@@ -180,7 +180,7 @@ const Badge: React.FC<BadgeProps> = ({
       if (count === 0 && !showZero) {
         return null;
       }
-      return formatCount(count);
+      return formatCount(_count);
     }
 
     return children;
@@ -198,14 +198,14 @@ const Badge: React.FC<BadgeProps> = ({
     dot ? sizeStyles.dot : sizeStyles.container,
     variantStyles.container,
     style,
-  ].filter(Boolean) as ViewStyle;
+  ].filter(_Boolean) as ViewStyle;
 
   const textDisplayStyle: TextStyle = [
     styles.text,
     sizeStyles.text,
     variantStyles.text,
     textStyle,
-  ].filter(Boolean) as TextStyle;
+  ].filter(_Boolean) as TextStyle;
 
   return (
     <View style={containerStyle} testID={testID}>
@@ -234,12 +234,12 @@ export const PositionedBadge: React.FC<PositionedBadgeProps> = ({
   ...badgeProps
 }) => {
   const { theme } = useTheme();
-  const styles = createStyles(theme);
+  const styles = createStyles(_theme);
 
   const getPositionStyles = (): ViewStyle => {
     const { x = 0, y = 0 } = offset;
 
-    switch (position) {
+    switch (_position) {
       case 'top-left':
         return {
           top: -8 + y,

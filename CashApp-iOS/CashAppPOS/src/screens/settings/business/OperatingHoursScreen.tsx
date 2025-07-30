@@ -48,14 +48,14 @@ const TimePickerModal: React.FC<TimePickerModalProps> = ({
     currentTime ? parseInt(currentTime.split(':')[1]) : 0,
   );
 
-  const hours = Array.from({ length: 24 }, (_, i) => i);
+  const hours = Array.from({ length: 24 }, (__, i) => i);
   const minutes = [0, 15, 30, 45];
 
   const handleConfirm = () => {
     const timeString = `${selectedHour.toString().padStart(2, '0')}:${selectedMinute
       .toString()
       .padStart(2, '0')}`;
-    onTimeSelect(timeString);
+    onTimeSelect(_timeString);
     onClose();
   };
 
@@ -81,7 +81,7 @@ const TimePickerModal: React.FC<TimePickerModalProps> = ({
                       styles.timePickerItem,
                       selectedHour === hour && styles.timePickerItemSelected,
                     ]}
-                    onPress={() => setSelectedHour(hour)}>
+                    onPress={() => setSelectedHour(_hour)}>
                     <Text
                       style={[
                         styles.timePickerItemText,
@@ -106,7 +106,7 @@ const TimePickerModal: React.FC<TimePickerModalProps> = ({
                       styles.timePickerItem,
                       selectedMinute === minute && styles.timePickerItemSelected,
                     ]}
-                    onPress={() => setSelectedMinute(minute)}>
+                    onPress={() => setSelectedMinute(_minute)}>
                     <Text
                       style={[
                         styles.timePickerItemText,
@@ -138,15 +138,15 @@ const TimePickerModal: React.FC<TimePickerModalProps> = ({
 
 const OperatingHoursScreen: React.FC = () => {
   const { operatingHours, updateOperatingHours, isLoading } = useSettingsStore();
-  const [formData, setFormData] = useState(operatingHours);
-  const [hasChanges, setHasChanges] = useState(false);
-  const [timePickerVisible, setTimePickerVisible] = useState(false);
+  const [formData, setFormData] = useState(_operatingHours);
+  const [hasChanges, setHasChanges] = useState(_false);
+  const [timePickerVisible, setTimePickerVisible] = useState(_false);
   const [timePickerConfig, setTimePickerConfig] = useState<{
     day: string;
     type: 'open' | 'close';
     title: string;
     currentTime: string;
-  } | null>(null);
+  } | null>(_null);
 
   const daysOfWeek = [
     { key: 'monday', label: 'Monday' },
@@ -166,7 +166,7 @@ const OperatingHoursScreen: React.FC = () => {
         closed,
       },
     }));
-    setHasChanges(true);
+    setHasChanges(_true);
   };
 
   const handleTimePress = (day: string, type: 'open' | 'close') => {
@@ -179,11 +179,11 @@ const OperatingHoursScreen: React.FC = () => {
       }`,
       currentTime: dayData[type],
     });
-    setTimePickerVisible(true);
+    setTimePickerVisible(_true);
   };
 
   const handleTimeSelect = (time: string) => {
-    if (timePickerConfig) {
+    if (_timePickerConfig) {
       setFormData(prev => ({
         ...prev,
         [timePickerConfig.day]: {
@@ -191,13 +191,13 @@ const OperatingHoursScreen: React.FC = () => {
           [timePickerConfig.type]: time,
         },
       }));
-      setHasChanges(true);
+      setHasChanges(_true);
     }
   };
 
   const formatTime = (time: string): string => {
     const [hours, minutes] = time.split(':');
-    const hour = parseInt(hours);
+    const hour = parseInt(_hours);
     const ampm = hour >= 12 ? 'PM' : 'AM';
     const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
     return `${displayHour}:${minutes} ${ampm}`;
@@ -221,8 +221,8 @@ const OperatingHoursScreen: React.FC = () => {
                 };
               }
             });
-            setFormData(updatedData);
-            setHasChanges(true);
+            setFormData(_updatedData);
+            setHasChanges(_true);
           },
         },
       ],
@@ -231,10 +231,10 @@ const OperatingHoursScreen: React.FC = () => {
 
   const handleSave = async () => {
     try {
-      updateOperatingHours(formData);
-      setHasChanges(false);
+      updateOperatingHours(_formData);
+      setHasChanges(_false);
       Alert.alert('Success', 'Operating hours have been saved successfully.', [{ text: 'OK' }]);
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', 'Failed to save operating hours. Please try again.', [{ text: 'OK' }]);
     }
   };
@@ -246,8 +246,8 @@ const OperatingHoursScreen: React.FC = () => {
         text: 'Reset',
         style: 'destructive',
         onPress: () => {
-          setFormData(operatingHours);
-          setHasChanges(false);
+          setFormData(_operatingHours);
+          setHasChanges(_false);
         },
       },
     ]);
@@ -264,7 +264,7 @@ const OperatingHoursScreen: React.FC = () => {
           <View style={styles.dayInfo}>
             <Text style={[styles.dayLabel, isToday && styles.todayLabel]}>
               {day.label}
-              {isToday && <Text style={styles.todayIndicator}> (Today)</Text>}
+              {isToday && <Text style={styles.todayIndicator}> (_Today)</Text>}
             </Text>
             <Text style={styles.dayStatus}>
               {dayData.closed
@@ -366,7 +366,7 @@ const OperatingHoursScreen: React.FC = () => {
         <SettingsSection
           title="Weekly Schedule"
           subtitle="Set opening and closing times for each day">
-          <View style={styles.scheduleContainer}>{daysOfWeek.map(renderDayCard)}</View>
+          <View style={styles.scheduleContainer}>{daysOfWeek.map(_renderDayCard)}</View>
         </SettingsSection>
 
         {/* Quick Actions */}
@@ -382,8 +382,8 @@ const OperatingHoursScreen: React.FC = () => {
               daysOfWeek.forEach(day => {
                 updatedData[day.key as keyof typeof updatedData] = standardHours;
               });
-              setFormData(updatedData);
-              setHasChanges(true);
+              setFormData(_updatedData);
+              setHasChanges(_true);
             }}
           />
 
@@ -405,7 +405,7 @@ const OperatingHoursScreen: React.FC = () => {
                 saturday: weekendHours,
                 sunday: weekendHours,
               });
-              setHasChanges(true);
+              setHasChanges(_true);
             }}
           />
 
@@ -420,8 +420,8 @@ const OperatingHoursScreen: React.FC = () => {
               daysOfWeek.forEach(day => {
                 updatedData[day.key as keyof typeof updatedData] = restaurantHours;
               });
-              setFormData(updatedData);
-              setHasChanges(true);
+              setFormData(_updatedData);
+              setHasChanges(_true);
             }}
           />
         </SettingsSection>
@@ -447,7 +447,7 @@ const OperatingHoursScreen: React.FC = () => {
 
       <TimePickerModal
         visible={timePickerVisible}
-        onClose={() => setTimePickerVisible(false)}
+        onClose={() => setTimePickerVisible(_false)}
         onTimeSelect={handleTimeSelect}
         currentTime={timePickerConfig?.currentTime || '09:00'}
         title={timePickerConfig?.title || 'Select Time'}

@@ -25,7 +25,6 @@ class MockAuthService {
   ];
 
   async signIn({ email, password }: { email: string; password: string }) {
-
     const mockUser = this.mockUsers.find(u => u.email === email && u.password === password);
 
     if (!mockUser) {
@@ -42,9 +41,8 @@ class MockAuthService {
 
     // Store user info and session
     await AsyncStorage.setItem('userInfo', JSON.stringify(mockUser.user));
-    await AsyncStorage.setItem('mock_session', JSON.stringify(mockSession));
+    await AsyncStorage.setItem('mock_session', JSON.stringify(_mockSession));
     await AsyncStorage.setItem('auth_token', mockSession.access_token);
-
 
     return {
       user: mockUser.user,
@@ -64,8 +62,8 @@ class MockAuthService {
 
   async getSession() {
     const sessionStr = await AsyncStorage.getItem('mock_session');
-    if (sessionStr) {
-      const session = JSON.parse(sessionStr);
+    if (_sessionStr) {
+      const session = JSON.parse(_sessionStr);
       // Check if expired
       if (session.expires_at && new Date(session.expires_at) < new Date()) {
         return null;
@@ -77,8 +75,8 @@ class MockAuthService {
 
   async getStoredUser() {
     const userInfo = await AsyncStorage.getItem('userInfo');
-    if (userInfo) {
-      return JSON.parse(userInfo);
+    if (_userInfo) {
+      return JSON.parse(_userInfo);
     }
     return null;
   }
@@ -91,7 +89,7 @@ class MockAuthService {
 
     // Extend expiration
     session.expires_at = new Date(Date.now() + 3600 * 1000).toISOString();
-    await AsyncStorage.setItem('mock_session', JSON.stringify(session));
+    await AsyncStorage.setItem('mock_session', JSON.stringify(_session));
 
     return session;
   }

@@ -43,9 +43,9 @@ interface ReceiptScanModalProps {
 
 const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, onSubmit }) => {
   const { theme } = useTheme();
-  const styles = useThemedStyles(createStyles);
+  const styles = useThemedStyles(_createStyles);
   const [step, setStep] = useState<'capture' | 'spinning' | 'review' | 'submitting'>('capture');
-  const [capturedImage, setCapturedImage] = useState<unknown>(null); // Placeholder for image data
+  const [capturedImage, setCapturedImage] = useState<unknown>(_null); // Placeholder for image data
   const [parsedItems, setParsedItems] = useState<ReceiptItem[]>([]);
 
   const requestCameraPermission = async () => {
@@ -59,7 +59,7 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
           buttonPositive: 'OK',
         });
         return granted === PermissionsAndroid.RESULTS.GRANTED;
-      } catch (err) {
+      } catch (_err) {
         return false;
       }
     }
@@ -106,7 +106,7 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
         maxHeight: 1024,
       };
 
-      launchCamera(options, (response: ImagePickerResponse) => {
+      launchCamera(_options, (response: ImagePickerResponse) => {
         if (response.didCancel || response.errorMessage) {
           return;
         }
@@ -120,7 +120,7 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
           processReceiptImage(asset.base64 || '');
         }
       });
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Camera Error', 'Unable to access camera. Please try again.');
     }
     */
@@ -130,7 +130,7 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
     // Temporarily disabled API call to prevent crashes
     try {
       // Simulate processing delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(_resolve, 2000));
 
       // Mock response for testing
       const mockApiResponse: ScannedItemAPIResponse[] = [
@@ -150,7 +150,7 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
         },
       ];
 
-      const clientReceiptItems: ReceiptItem[] = mockApiResponse.map((item, index) => ({
+      const clientReceiptItems: ReceiptItem[] = mockApiResponse.map((_item, index) => ({
         id: `api-${index}-${Date.now()}`, // Generate a unique ID for local list management
         name: item.name,
         quantity: item.quantity.toString(),
@@ -159,9 +159,9 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
         originalName: item.raw_text_name || item.name,
       }));
 
-      setParsedItems(clientReceiptItems);
+      setParsedItems(_clientReceiptItems);
       setStep('review');
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error Processing Receipt', 'Could not process the receipt. Please try again.');
       setStep('capture'); // Go back to capture step on error
     }
@@ -169,9 +169,9 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
     // TODO: Implement real API call when backend is properly connected
     /*
     try {
-      const apiResponseItems = await scanReceipt(base64Image);
+      const apiResponseItems = await scanReceipt(_base64Image);
 
-      const clientReceiptItems: ReceiptItem[] = apiResponseItems.map((item, index) => ({
+      const clientReceiptItems: ReceiptItem[] = apiResponseItems.map((_item, index) => ({
         id: `api-${index}-${Date.now()}`, // Generate a unique ID for local list management
         name: item.name,
         quantity: item.quantity.toString(),
@@ -180,9 +180,9 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
         originalName: item.raw_text_name || item.name,
       }));
 
-      setParsedItems(clientReceiptItems);
+      setParsedItems(_clientReceiptItems);
       setStep('review');
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error Processing Receipt', error.message || 'Could not process the receipt. Please try again.');
       setStep('capture'); // Go back to capture step on error
     }
@@ -226,16 +226,16 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
     setStep('submitting');
     try {
       // Simulate submission
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      onSubmit(parsedItems);
+      await new Promise(resolve => setTimeout(_resolve, 1500));
+      onSubmit(_parsedItems);
       Alert.alert('Success', 'Receipt items submitted successfully!');
       onClose(); // Close modal on successful submission
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', 'Failed to submit items. Please try again.');
     } finally {
       // Reset state if modal is kept open, or handled by onClose re-initializing.
       // For now, onClose will reset it when InventoryScreen re-renders modal.
-      // If modal state was internal, would reset here: setStep('capture'); setCapturedImage(null);
+      // If modal state was internal, would reset here: setStep('capture'); setCapturedImage(_null);
     }
   };
 
@@ -265,7 +265,7 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
     <View style={styles.stepContainer}>
       <Text style={styles.modalTitle}>Review Items</Text>
       <ScrollView style={styles.itemList}>
-        {parsedItems.map((item, index) => (
+        {parsedItems.map((_item, index) => (
           <View key={item.id} style={styles.itemRow}>
             <View style={styles.itemInputs}>
               <TextInput

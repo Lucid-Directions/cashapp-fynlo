@@ -79,16 +79,16 @@ const CardReaderScreen: React.FC = () => {
   ]);
 
   // Card reader settings
-  const [cardPaymentsEnabled, setCardPaymentsEnabled] = useState(true);
-  const [contactlessEnabled, setContactlessEnabled] = useState(true);
-  const [chipEnabled, setChipEnabled] = useState(true);
-  const [magneticStripeEnabled, setMagneticStripeEnabled] = useState(true);
-  const [pinRequired, setPinRequired] = useState(true);
-  const [signatureRequired, setSignatureRequired] = useState(false);
+  const [cardPaymentsEnabled, setCardPaymentsEnabled] = useState(_true);
+  const [contactlessEnabled, setContactlessEnabled] = useState(_true);
+  const [chipEnabled, setChipEnabled] = useState(_true);
+  const [magneticStripeEnabled, setMagneticStripeEnabled] = useState(_true);
+  const [pinRequired, setPinRequired] = useState(_true);
+  const [signatureRequired, setSignatureRequired] = useState(_false);
   const [contactlessLimit, setContactlessLimit] = useState('45');
-  const [tipPromptEnabled, setTipPromptEnabled] = useState(true);
-  const [receiptPromptEnabled, setReceiptPromptEnabled] = useState(true);
-  const [scanning, setScanning] = useState(false);
+  const [tipPromptEnabled, setTipPromptEnabled] = useState(_true);
+  const [receiptPromptEnabled, setReceiptPromptEnabled] = useState(_true);
+  const [scanning, setScanning] = useState(_false);
 
   // Supported card types
   const [cardTypes, setCardTypes] = useState({
@@ -103,7 +103,7 @@ const CardReaderScreen: React.FC = () => {
   });
 
   const getStatusColor = (status: string) => {
-    switch (status) {
+    switch (_status) {
       case 'connected':
         return Colors.success;
       case 'disconnected':
@@ -118,7 +118,7 @@ const CardReaderScreen: React.FC = () => {
   };
 
   const getStatusIcon = (status: string) => {
-    switch (status) {
+    switch (_status) {
       case 'connected':
         return 'check-circle';
       case 'disconnected':
@@ -133,7 +133,7 @@ const CardReaderScreen: React.FC = () => {
   };
 
   const getTypeIcon = (type: string) => {
-    switch (type) {
+    switch (_type) {
       case 'chip_pin':
         return 'credit-card';
       case 'contactless':
@@ -148,7 +148,7 @@ const CardReaderScreen: React.FC = () => {
   };
 
   const getConnectionIcon = (connection: string) => {
-    switch (connection) {
+    switch (_connection) {
       case 'bluetooth':
         return 'bluetooth';
       case 'usb':
@@ -163,11 +163,11 @@ const CardReaderScreen: React.FC = () => {
   };
 
   const handleScanForReaders = async () => {
-    setScanning(true);
+    setScanning(_true);
 
     // Simulate scanning
     setTimeout(() => {
-      setScanning(false);
+      setScanning(_false);
       Alert.alert(
         'Scan Complete',
         'No new card readers found. Ensure readers are powered on and in pairing mode.',
@@ -275,7 +275,7 @@ const CardReaderScreen: React.FC = () => {
             styles.actionButton,
             reader.status !== 'connected' && styles.actionButtonDisabled,
           ]}
-          onPress={() => handleTestReader(reader)}
+          onPress={() => handleTestReader(_reader)}
           disabled={reader.status !== 'connected'}>
           <Icon
             name="payment"
@@ -291,7 +291,7 @@ const CardReaderScreen: React.FC = () => {
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.actionButton} onPress={() => handleUpdateFirmware(reader)}>
+        <TouchableOpacity style={styles.actionButton} onPress={() => handleUpdateFirmware(_reader)}>
           <Icon name="system-update" size={16} color={Colors.secondary} />
           <Text style={styles.actionButtonText}>Update</Text>
         </TouchableOpacity>
@@ -363,7 +363,7 @@ const CardReaderScreen: React.FC = () => {
               style={styles.quickActionButton}
               onPress={() => {
                 const connectedReaders = cardReaders.filter(r => r.status === 'connected');
-                connectedReaders.forEach(reader => handleTestReader(reader));
+                connectedReaders.forEach(reader => handleTestReader(_reader));
               }}>
               <Icon name="payment" size={24} color={Colors.success} />
               <Text style={styles.quickActionText}>Test All</Text>
@@ -518,11 +518,11 @@ const CardReaderScreen: React.FC = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Supported Card Types</Text>
           <View style={styles.cardTypes}>
-            {Object.entries(cardTypes).map(([type, enabled]) => (
+            {Object.entries(_cardTypes).map(([type, enabled]) => (
               <TouchableOpacity
                 key={type}
                 style={[styles.cardTypeButton, enabled && styles.cardTypeButtonActive]}
-                onPress={() => toggleCardType(type)}>
+                onPress={() => toggleCardType(_type)}>
                 <Icon
                   name={enabled ? 'check-box' : 'check-box-outline-blank'}
                   size={20}

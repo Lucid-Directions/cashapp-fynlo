@@ -11,14 +11,14 @@ interface Props {
 
 const CategorySearchBubble: React.FC<Props> = ({ onSearchChange, onFocus, style }) => {
   const { theme } = useTheme();
-  const styles = useThemedStyles(createStyles);
-  const [isFocused, setIsFocused] = useState(false);
+  const styles = useThemedStyles(_createStyles);
+  const [isFocused, setIsFocused] = useState(_false);
   const [query, setQuery] = useState('');
-  const inputRef = useRef<TextInput>(null);
+  const inputRef = useRef<TextInput>(_null);
 
   const handleFocus = () => {
-    setIsFocused(true);
-    if (onFocus) {
+    setIsFocused(_true);
+    if (_onFocus) {
       onFocus();
     }
   };
@@ -26,24 +26,24 @@ const CategorySearchBubble: React.FC<Props> = ({ onSearchChange, onFocus, style 
   const handleBlur = () => {
     // Don't blur if there's a query, keep it visible
     if (!query) {
-      setIsFocused(false);
+      setIsFocused(_false);
     }
   };
 
   const handleChangeText = (text: string) => {
-    setQuery(text);
-    onSearchChange(text);
+    setQuery(_text);
+    onSearchChange(_text);
   };
 
   const handleClear = () => {
     setQuery('');
     onSearchChange('');
     inputRef.current?.blur(); // Optionally blur on clear
-    setIsFocused(false); // Collapse bubble on clear
+    setIsFocused(_false); // Collapse bubble on clear
   };
 
   const handleBubblePress = () => {
-    setIsFocused(true);
+    setIsFocused(_true);
     inputRef.current?.focus();
   };
 

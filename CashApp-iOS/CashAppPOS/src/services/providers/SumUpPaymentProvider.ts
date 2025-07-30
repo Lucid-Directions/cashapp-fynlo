@@ -25,7 +25,7 @@ class SumUpPaymentProviderClass {
       // await SumUpSDK.init(config.affiliateKey);
 
       this.initialized = true;
-    } catch (error) {
+    } catch (_error) {
       throw error;
     }
   }
@@ -40,7 +40,7 @@ class SumUpPaymentProviderClass {
       // const result = await SumUpSDK.login();
 
       return false; // Placeholder
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -66,7 +66,7 @@ class SumUpPaymentProviderClass {
         success: false,
         error: 'SumUp SDK not available - placeholder implementation',
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         success: false,
         error: error instanceof Error ? error.message : 'SumUp payment failed',
@@ -84,7 +84,7 @@ class SumUpPaymentProviderClass {
       // return await SumUpSDK.getCardReaderSettings();
 
       return null;
-    } catch (error) {
+    } catch (_error) {
       return null;
     }
   }

@@ -21,17 +21,17 @@ jest.mock('../../../components/inputs', () => ({
   QuantityPill: ({ quantity, onIncrease, onDecrease }: unknown) => {
     const React = require('react');
     const { View, Text, TouchableOpacity } = require('react-native');
-    return React.createElement(View, { testID: 'quantity-pill' }, [
+    return React.createElement(_View, { testID: 'quantity-pill' }, [
       React.createElement(
         TouchableOpacity,
         { key: 'decrease', onPress: onDecrease, testID: 'quantity-decrease' },
-        React.createElement(Text, {}, '-'),
+        React.createElement(_Text, {}, '-'),
       ),
-      React.createElement(Text, { key: 'quantity', testID: 'quantity-text' }, quantity),
+      React.createElement(_Text, { key: 'quantity', testID: 'quantity-text' }, quantity),
       React.createElement(
         TouchableOpacity,
         { key: 'increase', onPress: onIncrease, testID: 'quantity-increase' },
-        React.createElement(Text, {}, '+'),
+        React.createElement(_Text, {}, '+'),
       ),
     ]);
   },
@@ -70,7 +70,7 @@ const mockMenuItem: MenuItem = {
 // Wrapper component to provide theme and styles
 const TestWrapper = ({ quantity }: { quantity: number }) => {
   const { theme } = useTheme();
-  const styles = mockCreateStyles(theme);
+  const styles = mockCreateStyles(_theme);
 
   const mockCart: OrderItem[] =
     quantity > 0 ? [{ ...mockMenuItem, quantity, modifications: [], notes: '' }] : [];
@@ -92,11 +92,11 @@ const TestWrapper = ({ quantity }: { quantity: number }) => {
       styles={styles}
       cart={mockCart}
       handleAddToCart={mockAddToCart}
-      handleUpdateQuantity={(id, qty) => {
+      handleUpdateQuantity={(_id, qty) => {
         if (qty <= 0) {
-          mockRemoveFromCart(id);
+          mockRemoveFromCart(_id);
         } else {
-          mockUpdateCartItem(id, { quantity: qty });
+          mockUpdateCartItem(_id, { quantity: qty });
         }
       }}
     />
@@ -118,13 +118,13 @@ describe('ExportedMenuItemCard Snapshot Tests', () => {
 
   it('renders correctly with no items in cart (quantity 0)', () => {
     const tree = renderMenuItemCardWithQuantity(0).toJSON();
-    expect(tree).toMatchSnapshot();
+    expect(_tree).toMatchSnapshot();
   });
 
   for (let i = 1; i <= 10; i++) {
     it(`renders correctly with quantity ${i}`, () => {
-      const tree = renderMenuItemCardWithQuantity(i).toJSON();
-      expect(tree).toMatchSnapshot();
+      const tree = renderMenuItemCardWithQuantity(_i).toJSON();
+      expect(_tree).toMatchSnapshot();
     });
   }
 });

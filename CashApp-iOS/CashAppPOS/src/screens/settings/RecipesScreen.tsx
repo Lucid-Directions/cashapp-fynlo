@@ -34,26 +34,26 @@ const RecipesScreen = () => {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const [recipes, setRecipes] = useState<Recipe[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isLoading, setIsLoading] = useState(_false);
+  const [isRefreshing, setIsRefreshing] = useState(_false);
   // const { user } = useAppStore(); // If needed for auth checks or restaurant ID
 
   const loadRecipes = useCallback(async () => {
-    setIsLoading(true);
+    setIsLoading(_true);
     try {
       // const restaurantId = user?.restaurant_id; // Get restaurant ID if needed by API
       // if (!restaurantId) {
       //   Alert.alert("Error", "Restaurant information not found.");
-      //   setIsLoading(false);
+      //   setIsLoading(_false);
       //   return;
       // }
-      // const fetchedRecipes = await fetchRecipes(restaurantId);
+      // const fetchedRecipes = await fetchRecipes(_restaurantId);
       const fetchedRecipes: Recipe[] = await fetchRecipes(); // Using simplified fetch for now
-      setRecipes(fetchedRecipes);
-    } catch (error) {
+      setRecipes(_fetchedRecipes);
+    } catch (_error) {
       Alert.alert('Error', 'Failed to load recipes. Please try again.');
     } finally {
-      setIsLoading(false);
+      setIsLoading(_false);
     }
   }, []);
 
@@ -62,9 +62,9 @@ const RecipesScreen = () => {
   }, [loadRecipes]);
 
   const onRefresh = useCallback(async () => {
-    setIsRefreshing(true);
+    setIsRefreshing(_true);
     await loadRecipes();
-    setIsRefreshing(false);
+    setIsRefreshing(_false);
   }, [loadRecipes]);
 
   const handleAddRecipe = () => {
@@ -85,13 +85,13 @@ const RecipesScreen = () => {
         style: 'destructive',
         onPress: async () => {
           try {
-            setIsLoading(true);
-            await deleteRecipe(itemId);
+            setIsLoading(_true);
+            await deleteRecipe(_itemId);
             Alert.alert('Success', 'Recipe deleted successfully.');
             loadRecipes(); // Refresh list
-          } catch (error) {
+          } catch (_error) {
             Alert.alert('Error', 'Failed to delete recipe.');
-            setIsLoading(false);
+            setIsLoading(_false);
           }
         },
       },
@@ -102,12 +102,12 @@ const RecipesScreen = () => {
     <View style={styles.recipeItem}>
       <View style={styles.recipeInfo}>
         <Text style={styles.recipeName}>{item.item_name || item.item_id}</Text>
-        <Text style={styles.recipeIngredients}>{item.ingredients.length} ingredient(s)</Text>
+        <Text style={styles.recipeIngredients}>{item.ingredients.length} ingredient(_s)</Text>
         {/* Optionally list some ingredients: */}
         {/* <Text>{item.ingredients.slice(0, 2).map(ing => `${ing.ingredient_name || ing.ingredient_sku} (${ing.qty_g}g)`).join(', ')}</Text> */}
       </View>
       <View style={styles.recipeActions}>
-        <TouchableOpacity onPress={() => handleEditRecipe(item)} style={styles.actionButton}>
+        <TouchableOpacity onPress={() => handleEditRecipe(_item)} style={styles.actionButton}>
           {/* <Icon name="edit" type="material" size={24} color="#007AFF" /> */}
           <Text style={{ color: '#007AFF' }}>Edit</Text>
         </TouchableOpacity>

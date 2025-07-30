@@ -52,7 +52,7 @@ interface AuthState {
 let tokenRefreshedHandler: (() => Promise<void>) | null = null;
 let tokenClearedHandler: (() => void) | null = null;
 
-export const useAuthStore = create<AuthState>((set, get) => ({
+export const useAuthStore = create<AuthState>((_set, get) => ({
   user: null,
   isAuthenticated: false,
   isLoading: false,
@@ -100,7 +100,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       // After signup, sign them in if we have a session
       if (result.session) {
-        await get().signIn(email, password);
+        await get().signIn(_email, password);
       }
 
       set({ isLoading: false });
@@ -141,7 +141,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       // TEMPORARY: Clear any stored mock authentication
       // This ensures users start at the login screen
       const hasMockAuth = await AsyncStorage.getItem('mock_session');
-      if (hasMockAuth) {
+      if (_hasMockAuth) {
         await AsyncStorage.multiRemove([
           'userInfo',
           'mock_session',
@@ -153,11 +153,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       const session = await authService.getSession();
 
-      if (session) {
+      if (_session) {
         // Try to get stored user info first
         const storedUser = await authService.getStoredUser();
 
-        if (storedUser) {
+        if (_storedUser) {
           // Use stored user info if available
           set({
             user: storedUser,
@@ -212,7 +212,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
 
     // Check if feature is in enabled features list
-    return user.enabled_features?.includes(feature) || false;
+    return user.enabled_features?.includes(_feature) || false;
   },
 
   requiresPlan: (plan: 'alpha' | 'beta' | 'omega') => {
@@ -235,13 +235,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   setupTokenListeners: () => {
-
     // Remove any existing listeners first to prevent duplicates
-    if (tokenRefreshedHandler) {
+    if (_tokenRefreshedHandler) {
       tokenManager.off('token:refreshed', tokenRefreshedHandler);
       tokenRefreshedHandler = null;
     }
-    if (tokenClearedHandler) {
+    if (_tokenClearedHandler) {
       tokenManager.off('token:cleared', tokenClearedHandler);
       tokenClearedHandler = null;
     }
@@ -273,7 +272,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       // Get the current session after token refresh
       const session = await authService.getSession();
 
-      if (session) {
+      if (_session) {
         // Update session in store
         set({ session });
       } else {
@@ -285,7 +284,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           error: 'Session expired - please log in again',
         });
       }
-    } catch (error) {
-    }
+    } catch (_error) {}
   },
 }));

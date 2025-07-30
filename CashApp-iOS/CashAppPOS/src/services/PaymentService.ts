@@ -60,8 +60,7 @@ class PaymentServiceClass {
         // This is just marking that we have the keys
         this.stripeInitialized = true;
       }
-    } catch (error) {
-    }
+    } catch (_error) {}
   }
 
   /**
@@ -87,7 +86,7 @@ class PaymentServiceClass {
         color: '#00D4AA',
         enabled: true,
         requiresAuth: true,
-        feeInfo: '0.69% (High volume) • 1.69% (Standard)',
+        feeInfo: '0.69% (High volume) • 1.69% (_Standard)',
         isRecommended: true,
       },
       {
@@ -110,7 +109,7 @@ class PaymentServiceClass {
       },
       {
         id: 'stripe',
-        name: 'Card (Stripe)',
+        name: 'Card (_Stripe)',
         icon: 'credit-card',
         color: '#635BFF',
         enabled: true,
@@ -156,7 +155,7 @@ class PaymentServiceClass {
 
       const data = await response.json();
       return data.provider;
-    } catch (error) {
+    } catch (_error) {
       // Fallback to SumUp as primary, then QR code
       return 'sumup';
     }
@@ -197,7 +196,7 @@ class PaymentServiceClass {
         amount: data.amount,
         fee: data.fee,
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         success: false,
         provider: 'unknown',
@@ -246,7 +245,7 @@ class PaymentServiceClass {
         expiresAt: data.expires_at,
         status: data.status,
       };
-    } catch (error) {
+    } catch (_error) {
       throw error;
     }
   }
@@ -279,7 +278,7 @@ class PaymentServiceClass {
         status: data.data.status,
         expired: data.data.expired,
       };
-    } catch (error) {
+    } catch (_error) {
       throw error;
     }
   }
@@ -318,7 +317,7 @@ class PaymentServiceClass {
         amount: 0, // Will be filled from QR payment data
         fee: 0,
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         success: false,
         provider: 'qr_code',
@@ -374,7 +373,7 @@ class PaymentServiceClass {
         amount: data.amount,
         fee: data.fee_amount,
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         success: false,
         provider: 'cash',
@@ -422,7 +421,7 @@ class PaymentServiceClass {
         amount: data.amount,
         fee: data.fee,
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         success: false,
         provider: 'unknown',
@@ -457,7 +456,7 @@ class PaymentServiceClass {
       }
 
       return await response.json();
-    } catch (error) {
+    } catch (_error) {
       throw error;
     }
   }
@@ -467,9 +466,9 @@ class PaymentServiceClass {
    */
   async saveConfig(config: PaymentProviderConfig): Promise<void> {
     try {
-      await AsyncStorage.setItem('payment_config', JSON.stringify(config));
+      await AsyncStorage.setItem('payment_config', JSON.stringify(_config));
       this.config = config;
-    } catch (error) {
+    } catch (_error) {
       throw error;
     }
   }
@@ -480,13 +479,13 @@ class PaymentServiceClass {
   async loadConfig(): Promise<PaymentProviderConfig | null> {
     try {
       const configString = await AsyncStorage.getItem('payment_config');
-      if (configString) {
-        const config = JSON.parse(configString);
-        await this.initialize(config);
+      if (_configString) {
+        const config = JSON.parse(_configString);
+        await this.initialize(_config);
         return config;
       }
       return null;
-    } catch (error) {
+    } catch (_error) {
       return null;
     }
   }

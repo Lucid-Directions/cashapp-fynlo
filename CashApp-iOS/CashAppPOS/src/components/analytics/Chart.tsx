@@ -50,7 +50,7 @@ const Chart: React.FC<ChartProps> = ({
     return (
       <View style={styles.chartContainer}>
         <View style={[styles.barsContainer, { height }]}>
-          {data.map((item, index) => {
+          {data.map((_item, index) => {
             const barHeight = (item.value / maxValue) * (height - 40);
             const color = item.color || Colors.primary;
 
@@ -96,7 +96,7 @@ const Chart: React.FC<ChartProps> = ({
         <View style={[styles.lineContainer, { height }]}>
           <View style={styles.lineChartArea}>
             {/* Grid lines */}
-            {[0.25, 0.5, 0.75, 1].map((ratio, index) => (
+            {[0.25, 0.5, 0.75, 1].map((_ratio, index) => (
               <View
                 key={index}
                 style={[
@@ -111,7 +111,7 @@ const Chart: React.FC<ChartProps> = ({
 
             {/* Data points and line */}
             <View style={styles.lineWrapper}>
-              {data.map((item, index) => {
+              {data.map((_item, index) => {
                 const pointHeight = (item.value / maxValue) * lineHeight;
                 const pointX = index * stepWidth;
 
@@ -164,7 +164,7 @@ const Chart: React.FC<ChartProps> = ({
 
           {/* X-axis labels */}
           <View style={styles.xAxisLabels}>
-            {data.map((item, index) => (
+            {data.map((_item, index) => (
               <Text key={index} style={styles.axisLabel} numberOfLines={1}>
                 {item.label}
               </Text>
@@ -176,8 +176,8 @@ const Chart: React.FC<ChartProps> = ({
   };
 
   const renderPieChart = () => {
-    const total = data.reduce((sum, item) => sum + item.value, 0);
-    const radius = Math.min(chartWidth, height) / 3;
+    const total = data.reduce((_sum, item) => sum + item.value, 0);
+    const radius = Math.min(_chartWidth, height) / 3;
     const centerX = chartWidth / 2;
     const centerY = height / 2;
 
@@ -186,7 +186,7 @@ const Chart: React.FC<ChartProps> = ({
         <View style={[styles.pieContainer, { height }]}>
           <View style={styles.pieChart}>
             {/* Simple pie representation with rectangles */}
-            {data.map((item, index) => {
+            {data.map((_item, index) => {
               const percentage = (item.value / total) * 100;
               const color = item.color || `hsl(${(index * 360) / data.length}, 70%, 50%)`;
 
@@ -208,7 +208,7 @@ const Chart: React.FC<ChartProps> = ({
   };
 
   const renderChart = () => {
-    switch (type) {
+    switch (_type) {
       case 'line':
         return renderLineChart();
       case 'pie':

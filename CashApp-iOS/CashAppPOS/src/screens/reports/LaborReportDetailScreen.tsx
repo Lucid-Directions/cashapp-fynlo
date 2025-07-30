@@ -63,10 +63,10 @@ interface LaborSummary {
 const LaborReportDetailScreen = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(_true);
+  const [error, setError] = useState<string | null>(_null);
   const [laborData, setLaborData] = useState<LaborData[]>([]);
-  const [summary, setSummary] = useState<LaborSummary | null>(null);
+  const [summary, setSummary] = useState<LaborSummary | null>(_null);
   const [selectedPeriod, setSelectedPeriod] = useState('week');
 
   useEffect(() => {
@@ -75,11 +75,11 @@ const LaborReportDetailScreen = () => {
 
   const loadLaborData = async () => {
     try {
-      setLoading(true);
-      setError(null);
+      setLoading(_true);
+      setError(_null);
 
       const dataService = DataService.getInstance();
-      const data = await dataService.getLaborReport(selectedPeriod);
+      const data = await dataService.getLaborReport(_selectedPeriod);
 
       // Process the data
       const processedData: LaborData[] =
@@ -103,21 +103,21 @@ const LaborReportDetailScreen = () => {
 
       // Calculate summary
       const summaryData: LaborSummary = {
-        totalScheduledHours: processedData.reduce((sum, emp) => sum + emp.scheduledHours, 0),
-        totalActualHours: processedData.reduce((sum, emp) => sum + emp.actualHours, 0),
-        totalOvertimeHours: processedData.reduce((sum, emp) => sum + emp.overtimeHours, 0),
-        totalLaborCost: processedData.reduce((sum, emp) => sum + emp.totalCost, 0),
+        totalScheduledHours: processedData.reduce((_sum, emp) => sum + emp.scheduledHours, 0),
+        totalActualHours: processedData.reduce((_sum, emp) => sum + emp.actualHours, 0),
+        totalOvertimeHours: processedData.reduce((_sum, emp) => sum + emp.overtimeHours, 0),
+        totalLaborCost: processedData.reduce((_sum, emp) => sum + emp.totalCost, 0),
         averageEfficiency:
           processedData.length > 0
-            ? processedData.reduce((sum, emp) => sum + emp.efficiency, 0) / processedData.length
+            ? processedData.reduce((_sum, emp) => sum + emp.efficiency, 0) / processedData.length
             : 0,
         laborCostPercentage: data.labor_cost_percentage || 0,
         totalRevenue: data.total_revenue || 0,
       };
 
-      setLaborData(processedData);
-      setSummary(summaryData);
-    } catch (error) {
+      setLaborData(_processedData);
+      setSummary(_summaryData);
+    } catch (_error) {
       setError('Failed to load labor data. Please try again.');
       Alert.alert(
         'Error',
@@ -125,7 +125,7 @@ const LaborReportDetailScreen = () => {
         [{ text: 'OK' }],
       );
     } finally {
-      setLoading(false);
+      setLoading(_false);
     }
   };
 
@@ -173,7 +173,7 @@ const LaborReportDetailScreen = () => {
           <TouchableOpacity
             key={period}
             style={[styles.periodButton, selectedPeriod === period && styles.periodButtonActive]}
-            onPress={() => setSelectedPeriod(period)}>
+            onPress={() => setSelectedPeriod(_period)}>
             <Text
               style={[
                 styles.periodButtonText,

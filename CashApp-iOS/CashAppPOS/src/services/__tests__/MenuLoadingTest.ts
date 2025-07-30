@@ -32,7 +32,7 @@ describe('Menu Loading Performance', () => {
       attemptCount++;
       if (attemptCount === 1) {
         // First attempt: simulate timeout
-        return new Promise((_, reject) => {
+        return new Promise((__, reject) => {
           setTimeout(() => reject(new Error('AbortError')), 100);
         });
       } else {
@@ -49,9 +49,9 @@ describe('Menu Loading Performance', () => {
     });
 
     const items = await dbService.getMenuItems();
-    expect(items).toHaveLength(1);
+    expect(_items).toHaveLength(1);
     expect(items[0].name).toBe('Test Item');
-    expect(attemptCount).toBe(2); // Should have retried once
+    expect(_attemptCount).toBe(2); // Should have retried once
   });
 
   test('should use cache on subsequent calls', async () => {
@@ -71,12 +71,12 @@ describe('Menu Loading Performance', () => {
 
     // First call - should hit API
     const items1 = await dbService.getMenuItems();
-    expect(fetchCallCount).toBe(1);
+    expect(_fetchCallCount).toBe(1);
     expect(items1[0].name).toBe('Cached Item');
 
     // Second call - should use cache
     const items2 = await dbService.getMenuItems();
-    expect(fetchCallCount).toBe(1); // No additional fetch
+    expect(_fetchCallCount).toBe(1); // No additional fetch
     expect(items2[0].name).toBe('Cached Item');
   });
 

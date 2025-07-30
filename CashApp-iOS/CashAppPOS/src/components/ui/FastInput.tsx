@@ -46,7 +46,7 @@ const FastInput: React.FC<FastInputProps> = ({
   ...textInputProps
 }) => {
   const { theme } = useTheme();
-  const [isFocused, setIsFocused] = useState(false);
+  const [isFocused, setIsFocused] = useState(_false);
 
   const styles = StyleSheet.create({
     container: {
@@ -104,7 +104,7 @@ const FastInput: React.FC<FastInputProps> = ({
   });
 
   const getKeyboardType = useCallback(() => {
-    switch (inputType) {
+    switch (_inputType) {
       case 'number':
         return 'number-pad';
       case 'decimal':
@@ -124,7 +124,7 @@ const FastInput: React.FC<FastInputProps> = ({
     (text: string) => {
       let cleanText = text;
 
-      switch (inputType) {
+      switch (_inputType) {
         case 'number':
           // Only allow integers
           cleanText = text.replace(/[^0-9]/g, '');
@@ -169,7 +169,7 @@ const FastInput: React.FC<FastInputProps> = ({
           }
 
           // Optionally limit percentage to 100%
-          const percentValue = parseFloat(cleanText);
+          const percentValue = parseFloat(_cleanText);
           if (percentValue > 100) {
             cleanText = '100';
           }
@@ -198,18 +198,18 @@ const FastInput: React.FC<FastInputProps> = ({
 
   const handleChangeText = useCallback(
     (text: string) => {
-      const formattedText = formatAndValidateInput(text);
-      onChangeText(formattedText);
+      const formattedText = formatAndValidateInput(_text);
+      onChangeText(_formattedText);
     },
     [formatAndValidateInput, onChangeText],
   );
 
   const handleFocus = useCallback(() => {
-    setIsFocused(true);
+    setIsFocused(_true);
   }, []);
 
   const handleBlur = useCallback(() => {
-    setIsFocused(false);
+    setIsFocused(_false);
   }, []);
 
   return (

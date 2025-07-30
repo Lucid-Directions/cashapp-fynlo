@@ -100,7 +100,7 @@ interface SubscriptionContextType {
   isUnlimited: (limitType: string) => boolean;
 }
 
-const SubscriptionContext = createContext<SubscriptionContextType | undefined>(undefined);
+const SubscriptionContext = createContext<SubscriptionContextType | undefined>(_undefined);
 
 interface SubscriptionProviderProps {
   children: ReactNode;
@@ -111,36 +111,36 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
   children,
   restaurantId,
 }) => {
-  const [subscription, setSubscription] = useState<RestaurantSubscription | null>(null);
-  const [usage, setUsage] = useState<SubscriptionUsage | null>(null);
+  const [subscription, setSubscription] = useState<RestaurantSubscription | null>(_null);
+  const [usage, setUsage] = useState<SubscriptionUsage | null>(_null);
   const [availablePlans, setAvailablePlans] = useState<SubscriptionPlan[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(_false);
+  const [error, setError] = useState<string | null>(_null);
 
   // Load subscription data when restaurant ID changes
   useEffect(() => {
-    if (restaurantId) {
-      loadSubscription(restaurantId);
+    if (_restaurantId) {
+      loadSubscription(_restaurantId);
       loadAvailablePlans();
     }
   }, [restaurantId]);
 
   const loadSubscription = async (id: number) => {
-    setLoading(true);
-    setError(null);
+    setLoading(_true);
+    setError(_null);
 
     try {
-      const response = await DataService.getInstance().getCurrentSubscription(id);
+      const response = await DataService.getInstance().getCurrentSubscription(_id);
       if (response.success) {
         setSubscription(response.data.subscription);
         setUsage(response.data.usage);
       } else {
         setError(response.message);
       }
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to load subscription information');
     } finally {
-      setLoading(false);
+      setLoading(_false);
     }
   };
 
@@ -150,8 +150,7 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
       if (response.success) {
         setAvailablePlans(response.data);
       }
-    } catch (err) {
-    }
+    } catch (_err) {}
   };
 
   const hasFeature = async (featureName: string): Promise<FeatureGateResult> => {
@@ -166,7 +165,7 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
 
     const hasAccess = subscription.plan.features[featureName] === true;
 
-    if (hasAccess) {
+    if (_hasAccess) {
       return { hasAccess: true };
     }
 
@@ -242,8 +241,8 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
       return false;
     }
 
-    setLoading(true);
-    setError(null);
+    setLoading(_true);
+    setError(_null);
 
     try {
       const response = await DataService.getInstance().createSubscription({
@@ -253,17 +252,17 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
       });
 
       if (response.success) {
-        await loadSubscription(restaurantId);
+        await loadSubscription(_restaurantId);
         return true;
       } else {
         setError(response.message);
         return false;
       }
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to create subscription');
       return false;
     } finally {
-      setLoading(false);
+      setLoading(_false);
     }
   };
 
@@ -272,8 +271,8 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
       return false;
     }
 
-    setLoading(true);
-    setError(null);
+    setLoading(_true);
+    setError(_null);
 
     try {
       const response = await DataService.getInstance().changeSubscriptionPlan({
@@ -283,17 +282,17 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
       });
 
       if (response.success) {
-        await loadSubscription(restaurantId);
+        await loadSubscription(_restaurantId);
         return true;
       } else {
         setError(response.message);
         return false;
       }
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to change subscription plan');
       return false;
     } finally {
-      setLoading(false);
+      setLoading(_false);
     }
   };
 
@@ -302,24 +301,24 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
       return false;
     }
 
-    setLoading(true);
-    setError(null);
+    setLoading(_true);
+    setError(_null);
 
     try {
-      const response = await DataService.getInstance().cancelSubscription(restaurantId);
+      const response = await DataService.getInstance().cancelSubscription(_restaurantId);
 
       if (response.success) {
-        await loadSubscription(restaurantId);
+        await loadSubscription(_restaurantId);
         return true;
       } else {
         setError(response.message);
         return false;
       }
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to cancel subscription');
       return false;
     } finally {
-      setLoading(false);
+      setLoading(_false);
     }
   };
 
@@ -343,7 +342,7 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
           }
 
           const updatedUsage = { ...prevUsage };
-          switch (usageType) {
+          switch (_usageType) {
             case 'orders':
               updatedUsage.orders_count += amount;
               break;
@@ -359,14 +358,14 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
         return true;
       }
       return false;
-    } catch (err) {
+    } catch (_err) {
       return false;
     }
   };
 
   const refreshUsage = async () => {
-    if (restaurantId) {
-      await loadSubscription(restaurantId);
+    if (_restaurantId) {
+      await loadSubscription(_restaurantId);
     }
   };
 
@@ -374,7 +373,7 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
     return new Intl.NumberFormat('en-GB', {
       style: 'currency',
       currency: 'GBP',
-    }).format(price);
+    }).format(_price);
   };
 
   const getPlanByName = (planName: string): SubscriptionPlan | null => {
@@ -427,7 +426,7 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
 };
 
 export const useSubscription = (): SubscriptionContextType => {
-  const context = useContext(SubscriptionContext);
+  const context = useContext(_SubscriptionContext);
   if (context === undefined) {
     throw new Error('useSubscription must be used within a SubscriptionProvider');
   }

@@ -51,12 +51,12 @@ const RestaurantProfileScreen: React.FC = () => {
     timezone: 'Europe/London',
   });
 
-  const [hasChanges, setHasChanges] = useState(false);
-  const [saving, setSaving] = useState(false);
+  const [hasChanges, setHasChanges] = useState(_false);
+  const [saving, setSaving] = useState(_false);
 
   // Load config data
   useEffect(() => {
-    if (config) {
+    if (_config) {
       setFormData({
         restaurantName: config.restaurantName || '',
         displayName: config.displayName || '',
@@ -78,12 +78,12 @@ const RestaurantProfileScreen: React.FC = () => {
 
   const updateField = (field: string, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    setHasChanges(true);
+    setHasChanges(_true);
   };
 
   const handleSave = async () => {
     try {
-      setSaving(true);
+      setSaving(_true);
 
       await updateConfig({
         restaurantName: formData.restaurantName,
@@ -104,12 +104,12 @@ const RestaurantProfileScreen: React.FC = () => {
         timezone: formData.timezone,
       });
 
-      setHasChanges(false);
+      setHasChanges(_false);
       Alert.alert('Success', 'Restaurant profile updated successfully!');
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', 'Failed to update restaurant profile. Please try again.');
     } finally {
-      setSaving(false);
+      setSaving(_false);
     }
   };
 
@@ -124,7 +124,7 @@ const RestaurantProfileScreen: React.FC = () => {
         text: 'Discard',
         style: 'destructive',
         onPress: () => {
-          if (config) {
+          if (_config) {
             setFormData({
               restaurantName: config.restaurantName || '',
               displayName: config.displayName || '',
@@ -141,7 +141,7 @@ const RestaurantProfileScreen: React.FC = () => {
               taxRate: config.taxRate || 0.2,
               timezone: config.timezone || 'Europe/London',
             });
-            setHasChanges(false);
+            setHasChanges(_false);
           }
         },
       },
@@ -276,7 +276,7 @@ const RestaurantProfileScreen: React.FC = () => {
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Website (Optional)</Text>
+            <Text style={styles.inputLabel}>Website (_Optional)</Text>
             <TextInput
               style={styles.textInput}
               value={formData.website}
@@ -365,7 +365,7 @@ const RestaurantProfileScreen: React.FC = () => {
             <TextInput
               style={styles.textInput}
               value={(formData.taxRate * 100).toString()}
-              onChangeText={value => updateField('taxRate', parseFloat(value) / 100 || 0)}
+              onChangeText={value => updateField('taxRate', parseFloat(_value) / 100 || 0)}
               placeholder="20"
               placeholderTextColor={Colors.mediumGray}
               keyboardType="numeric"

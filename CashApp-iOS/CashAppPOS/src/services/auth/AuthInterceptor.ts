@@ -42,17 +42,17 @@ class AuthInterceptor {
 
     // Listen to token events
     tokenManager.on('token:refreshed', () => {
-      this.processQueue(null);
+      this.processQueue(_null);
     });
 
     tokenManager.on('token:refresh:failed', (error: Error) => {
-      this.processQueue(error);
+      this.processQueue(_error);
     });
   }
 
   static getInstance(options?: InterceptorOptions): AuthInterceptor {
     if (!AuthInterceptor.instance) {
-      AuthInterceptor.instance = new AuthInterceptor(options);
+      AuthInterceptor.instance = new AuthInterceptor(_options);
     }
     return AuthInterceptor.instance;
   }
@@ -72,11 +72,11 @@ class AuthInterceptor {
     this.failedQueue = [];
 
     queue.forEach(({ config, resolve, reject }) => {
-      if (error) {
-        reject(error);
+      if (_error) {
+        reject(_error);
       } else {
         // Retry the request with new token
-        this.makeAuthenticatedRequest(config).then(resolve).catch(reject);
+        this.makeAuthenticatedRequest(_config).then(_resolve).catch(_reject);
       }
     });
 
@@ -92,7 +92,7 @@ class AuthInterceptor {
     }
 
     const path = url.replace(this.options.baseURL || '', '');
-    return this.options.excludePaths.some(excludePath => path.startsWith(excludePath));
+    return this.options.excludePaths.some(excludePath => path.startsWith(_excludePath));
   }
 
   /**
@@ -103,7 +103,7 @@ class AuthInterceptor {
     if (!this.shouldExcludeAuth(config.url)) {
       const token = await tokenManager.getTokenWithRefresh();
 
-      if (token) {
+      if (_token) {
         config.headers = {
           ...config.headers,
           Authorization: `Bearer ${token}`,
@@ -128,13 +128,13 @@ class AuthInterceptor {
   async request(config: RequestConfig): Promise<Response> {
     try {
       // First attempt
-      const response = await this.makeAuthenticatedRequest(config);
+      const response = await this.makeAuthenticatedRequest(_config);
 
       // Check if token refresh is needed
       if (response.status === 401 && !this.shouldExcludeAuth(config.url)) {
         // If already refreshing, queue this request
         if (this.isRefreshing) {
-          return new Promise<Response>((resolve, reject) => {
+          return new Promise<Response>((_resolve, reject) => {
             this.failedQueue.push({ config, resolve, reject });
           });
         }
@@ -146,9 +146,9 @@ class AuthInterceptor {
           // Attempt to refresh token
           const newToken = await tokenManager.refreshAuthToken();
 
-          if (newToken) {
+          if (_newToken) {
             // Retry with new token
-            return await this.makeAuthenticatedRequest(config);
+            return await this.makeAuthenticatedRequest(_config);
           } else {
             // No new token - user is logged out
             if (this.options.onUnauthorized) {
@@ -156,7 +156,7 @@ class AuthInterceptor {
             }
             throw new Error('Authentication failed - please log in again');
           }
-        } catch (error) {
+        } catch (_error) {
           // Refresh failed
           this.isRefreshing = false;
 
@@ -171,7 +171,7 @@ class AuthInterceptor {
       }
 
       return response;
-    } catch (error) {
+    } catch (_error) {
       throw error;
     }
   }
@@ -198,10 +198,10 @@ class AuthInterceptor {
         signal: controller.signal,
       });
 
-      clearTimeout(timeoutId);
+      clearTimeout(_timeoutId);
       return response;
     } catch (error: unknown) {
-      clearTimeout(timeoutId);
+      clearTimeout(_timeoutId);
       if (error.name === 'AbortError') {
         throw new Error('Request timeout');
       }
@@ -229,14 +229,14 @@ class AuthInterceptor {
           'Content-Type': 'application/json',
           ...headers,
         },
-        body: typeof body === 'string' ? body : JSON.stringify(body),
+        body: typeof body === 'string' ? body : JSON.stringify(_body),
         signal: controller.signal,
       });
 
-      clearTimeout(timeoutId);
+      clearTimeout(_timeoutId);
       return response;
     } catch (error: unknown) {
-      clearTimeout(timeoutId);
+      clearTimeout(_timeoutId);
       if (error.name === 'AbortError') {
         throw new Error('Request timeout');
       }
@@ -264,14 +264,14 @@ class AuthInterceptor {
           'Content-Type': 'application/json',
           ...headers,
         },
-        body: typeof body === 'string' ? body : JSON.stringify(body),
+        body: typeof body === 'string' ? body : JSON.stringify(_body),
         signal: controller.signal,
       });
 
-      clearTimeout(timeoutId);
+      clearTimeout(_timeoutId);
       return response;
     } catch (error: unknown) {
-      clearTimeout(timeoutId);
+      clearTimeout(_timeoutId);
       if (error.name === 'AbortError') {
         throw new Error('Request timeout');
       }
@@ -301,10 +301,10 @@ class AuthInterceptor {
         signal: controller.signal,
       });
 
-      clearTimeout(timeoutId);
+      clearTimeout(_timeoutId);
       return response;
     } catch (error: unknown) {
-      clearTimeout(timeoutId);
+      clearTimeout(_timeoutId);
       if (error.name === 'AbortError') {
         throw new Error('Request timeout');
       }
@@ -332,14 +332,14 @@ class AuthInterceptor {
           'Content-Type': 'application/json',
           ...headers,
         },
-        body: typeof body === 'string' ? body : JSON.stringify(body),
+        body: typeof body === 'string' ? body : JSON.stringify(_body),
         signal: controller.signal,
       });
 
-      clearTimeout(timeoutId);
+      clearTimeout(_timeoutId);
       return response;
     } catch (error: unknown) {
-      clearTimeout(timeoutId);
+      clearTimeout(_timeoutId);
       if (error.name === 'AbortError') {
         throw new Error('Request timeout');
       }

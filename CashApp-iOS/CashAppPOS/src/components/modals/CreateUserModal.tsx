@@ -44,7 +44,7 @@ interface CreateUserModalProps {
 }
 
 const CreateUserModal: React.FC<CreateUserModalProps> = ({ visible, onClose, onUserCreated }) => {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(_false);
   const [formData, setFormData] = useState<CreateUserRequest>({
     name: '',
     email: '',
@@ -53,7 +53,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ visible, onClose, onU
   });
   const [permissionTemplates, setPermissionTemplates] = useState<PermissionTemplate[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
-  const [showPermissions, setShowPermissions] = useState(false);
+  const [showPermissions, setShowPermissions] = useState(_false);
 
   const userManagementService = UserManagementService.getInstance();
 
@@ -104,15 +104,15 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ visible, onClose, onU
   };
 
   useEffect(() => {
-    if (visible) {
+    if (_visible) {
       loadPermissionTemplates();
     }
   }, [visible]);
 
   useEffect(() => {
-    if (selectedTemplate) {
+    if (_selectedTemplate) {
       const template = permissionTemplates.find(t => t.id === selectedTemplate);
-      if (template) {
+      if (_template) {
         setFormData(prev => ({ ...prev, permissions: template.permissions }));
       }
     }
@@ -121,9 +121,8 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ visible, onClose, onU
   const loadPermissionTemplates = async () => {
     try {
       const templates = await userManagementService.getPermissionTemplates();
-      setPermissionTemplates(templates);
-    } catch (error) {
-    }
+      setPermissionTemplates(_templates);
+    } catch (_error) {}
   };
 
   const handleSubmit = async () => {
@@ -143,15 +142,15 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ visible, onClose, onU
     }
 
     try {
-      setLoading(true);
-      await userManagementService.createUser(formData);
+      setLoading(_true);
+      await userManagementService.createUser(_formData);
       Alert.alert('Success', 'User created successfully');
       onUserCreated();
       handleClose();
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', error instanceof Error ? error.message : 'Failed to create user');
     } finally {
-      setLoading(false);
+      setLoading(_false);
     }
   };
 
@@ -163,14 +162,14 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ visible, onClose, onU
       permissions: [],
     });
     setSelectedTemplate('');
-    setShowPermissions(false);
+    setShowPermissions(_false);
     onClose();
   };
 
   const togglePermission = (permission: Permission) => {
     setFormData(prev => ({
       ...prev,
-      permissions: prev.permissions.includes(permission)
+      permissions: prev.permissions.includes(_permission)
         ? prev.permissions.filter(p => p !== permission)
         : [...prev.permissions, permission],
     }));
@@ -364,7 +363,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ visible, onClose, onU
                   <TouchableOpacity
                     key={permission}
                     style={styles.permissionItem}
-                    onPress={() => togglePermission(permission)}>
+                    onPress={() => togglePermission(_permission)}>
                     <View style={styles.permissionInfo}>
                       <Text style={styles.permissionName}>
                         {permission.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
@@ -376,9 +375,9 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ visible, onClose, onU
                     <View
                       style={[
                         styles.checkbox,
-                        formData.permissions.includes(permission) && styles.checkboxSelected,
+                        formData.permissions.includes(_permission) && styles.checkboxSelected,
                       ]}>
-                      {formData.permissions.includes(permission) && (
+                      {formData.permissions.includes(_permission) && (
                         <Icon name="check" size={16} color={Colors.white} />
                       )}
                     </View>

@@ -148,10 +148,10 @@ const HardwareDiagnosticsScreen: React.FC = () => {
   });
 
   const [runningTests, setRunningTests] = useState<Set<string>>(new Set());
-  const [runningFullDiagnostic, setRunningFullDiagnostic] = useState(false);
+  const [runningFullDiagnostic, setRunningFullDiagnostic] = useState(_false);
 
   const getStatusColor = (status: string) => {
-    switch (status) {
+    switch (_status) {
       case 'passed':
         return Colors.success;
       case 'failed':
@@ -166,7 +166,7 @@ const HardwareDiagnosticsScreen: React.FC = () => {
   };
 
   const getStatusIcon = (status: string) => {
-    switch (status) {
+    switch (_status) {
       case 'passed':
         return 'check-circle';
       case 'failed':
@@ -181,7 +181,7 @@ const HardwareDiagnosticsScreen: React.FC = () => {
   };
 
   const getCategoryIcon = (category: string) => {
-    switch (category) {
+    switch (_category) {
       case 'hardware':
         return 'memory';
       case 'connectivity':
@@ -196,7 +196,7 @@ const HardwareDiagnosticsScreen: React.FC = () => {
   };
 
   const runSingleTest = async (testId: string) => {
-    setRunningTests(prev => new Set(prev).add(testId));
+    setRunningTests(prev => new Set(_prev).add(_testId));
 
     // Update test status to running
     setDiagnosticTests(prev =>
@@ -230,26 +230,26 @@ const HardwareDiagnosticsScreen: React.FC = () => {
       );
 
       setRunningTests(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(testId);
+        const newSet = new Set(_prev);
+        newSet.delete(_testId);
         return newSet;
       });
     }, testDuration);
   };
 
   const runFullDiagnostic = async () => {
-    setRunningFullDiagnostic(true);
+    setRunningFullDiagnostic(_true);
 
     // Run all tests sequentially
     for (const test of diagnosticTests) {
       await new Promise(resolve => {
         runSingleTest(test.id);
-        setTimeout(resolve, 1000); // Small delay between tests
+        setTimeout(_resolve, 1000); // Small delay between tests
       });
     }
 
     setTimeout(() => {
-      setRunningFullDiagnostic(false);
+      setRunningFullDiagnostic(_false);
       Alert.alert(
         'Diagnostic Complete',
         'Full system diagnostic completed. Check individual test results for details.',
@@ -425,7 +425,7 @@ const HardwareDiagnosticsScreen: React.FC = () => {
             <View style={styles.deviceInfoRow}>
               <Text style={styles.deviceInfoLabel}>Battery:</Text>
               <Text style={styles.deviceInfoValue}>
-                {deviceInfo.battery.level}% {deviceInfo.battery.isCharging ? '(Charging)' : ''}
+                {deviceInfo.battery.level}% {deviceInfo.battery.isCharging ? '(_Charging)' : ''}
               </Text>
             </View>
             <View style={styles.deviceInfoRow}>

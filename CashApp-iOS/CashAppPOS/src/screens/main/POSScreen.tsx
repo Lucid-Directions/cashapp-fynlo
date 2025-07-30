@@ -70,7 +70,7 @@ const ExportedMenuItemCard = ({
     <View style={[propStyles.menuCard, !item.available && propStyles.menuCardDisabled]}>
       <TouchableOpacity
         style={propStyles.menuCardContent}
-        onPress={() => item.available && handleAddToCart(item)}
+        onPress={() => item.available && handleAddToCart(_item)}
         activeOpacity={0.7}
         disabled={!item.available}>
         <Icon
@@ -117,26 +117,26 @@ const POSScreen: React.FC = () => {
   const navigation = useNavigation<POSScreenNavigationProp>();
   const restaurantDisplayName = useRestaurantDisplayName();
   const { theme } = useTheme();
-  const styles = useThemedStyles(createStyles);
+  const styles = useThemedStyles(_createStyles);
 
   const [customerName, setCustomerName] = useState('');
   const [customerEmail, setCustomerEmail] = useState('');
-  const [showCartModal, setShowCartModal] = useState(false);
+  const [showCartModal, setShowCartModal] = useState(_false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('sumup');
   const [serviceChargeConfig, setServiceChargeConfig] = useState({
     enabled: false,
     rate: 0,
     description: 'Loading...',
   });
-  const [showSumUpPayment, setShowSumUpPayment] = useState(false);
-  const [showSumUpTest, setShowSumUpTest] = useState(false);
+  const [showSumUpPayment, setShowSumUpPayment] = useState(_false);
+  const [showSumUpTest, setShowSumUpTest] = useState(_false);
   const [serviceChargeDebugInfo, setServiceChargeDebugInfo] = useState('');
   const [searchQuery, setSearchQuery] = useState(''); // State for search query
 
   // Dynamic menu state
   const [dynamicMenuItems, setDynamicMenuItems] = useState<MenuItem[]>([]);
   const [dynamicCategories, setDynamicCategories] = useState<string[]>([]);
-  const [menuLoading, setMenuLoading] = useState(true);
+  const [menuLoading, setMenuLoading] = useState(_true);
 
   // Debug showSumUpPayment state changes
   useEffect(() => {
@@ -160,8 +160,8 @@ const POSScreen: React.FC = () => {
     const loadServiceChargeConfig = async () => {
       try {
         const config = await dataStore.getServiceChargeConfig();
-        setServiceChargeConfig(config);
-      } catch (error) {
+        setServiceChargeConfig(_config);
+      } catch (_error) {
       }
     };
 
@@ -173,8 +173,8 @@ const POSScreen: React.FC = () => {
       const debugInfo = `SYNC: ${
         updatedConfig.enabled ? updatedConfig.rate + '%' : 'OFF'
       } @ ${new Date().toLocaleTimeString()}`;
-      setServiceChargeConfig(updatedConfig);
-      setServiceChargeDebugInfo(debugInfo);
+      setServiceChargeConfig(_updatedConfig);
+      setServiceChargeDebugInfo(_debugInfo);
     });
 
     return () => {
@@ -186,11 +186,11 @@ const POSScreen: React.FC = () => {
   useEffect(() => {
     const loadMenuData = async () => {
       try {
-        setMenuLoading(true);
+        setMenuLoading(_true);
         const dataService = DataService.getInstance();
 
         // Increase timeout to 15 seconds to allow for slower API responses and retries
-        const timeoutPromise = new Promise((_, reject) =>
+        const timeoutPromise = new Promise((__, reject) =>
           setTimeout(() => reject(new Error('Menu loading timeout')), 15000),
         );
 
@@ -200,19 +200,19 @@ const POSScreen: React.FC = () => {
           timeoutPromise,
         ])) as [any[], any[]];
 
-        setDynamicMenuItems(menuItems);
+        setDynamicMenuItems(_menuItems);
 
         // Extract category names for the UI
         const categoryNames = [
           'All',
           ...categories.map(cat => cat.name).filter(name => name !== 'All'),
         ];
-        setDynamicCategories(categoryNames);
+        setDynamicCategories(_categoryNames);
 
           itemCount: menuItems.length,
           categories: categoryNames,
         });
-      } catch (error) {
+      } catch (_error) {
 
         // Log detailed error information
 📱 ======== MENU LOADING ERROR ========
@@ -220,7 +220,7 @@ const POSScreen: React.FC = () => {
 📍 Component: POSScreen
 🔍 Error Type: ${error.constructor.name}
 💬 Message: ${error.message}
-📊 Error Details: ${JSON.stringify(error, null, 2)}
+📊 Error Details: ${JSON.stringify(_error, null, 2)}
 =====================================
         `);
 
@@ -253,24 +253,24 @@ const POSScreen: React.FC = () => {
             emoji: item.image, // Map image to emoji field for compatibility
           }));
 
-          setDynamicMenuItems(fallbackItems);
+          setDynamicMenuItems(_fallbackItems);
 
           // Set categories
           const categoryNames = [
             'All',
             ...CHUCHO_CATEGORIES.map(cat => cat.name).filter(name => name !== 'All'),
           ];
-          setDynamicCategories(categoryNames);
+          setDynamicCategories(_categoryNames);
 
             itemCount: fallbackItems.length,
             categories: categoryNames,
           });
-        } catch (fallbackError) {
+        } catch (_fallbackError) {
           setDynamicMenuItems([]);
           setDynamicCategories(['All']);
         }
       } finally {
-        setMenuLoading(false);
+        setMenuLoading(_false);
       }
     };
 
@@ -283,7 +283,7 @@ const POSScreen: React.FC = () => {
       return 0;
     }
 
-    const vatCalculation = calculatePercentageFee(subtotal, taxConfiguration.vatRate, {
+    const vatCalculation = calculatePercentageFee(_subtotal, taxConfiguration.vatRate, {
       operation: 'vat_calculation',
       screenName: 'POSScreen',
       inputValues: {
@@ -311,7 +311,7 @@ const POSScreen: React.FC = () => {
       return 0;
     }
 
-    const serviceFeeCalculation = calculatePercentageFee(subtotal, serviceChargeConfig.rate, {
+    const serviceFeeCalculation = calculatePercentageFee(_subtotal, serviceChargeConfig.rate, {
       operation: 'service_fee_calculation',
       screenName: 'POSScreen',
       inputValues: {
@@ -374,7 +374,7 @@ const POSScreen: React.FC = () => {
       }
 
       return cartCalculation.total.value;
-    } catch (error) {
+    } catch (_error) {
       const errorTrackingService = ErrorTrackingService.getInstance();
       errorTrackingService.trackPricingError(
         error instanceof Error ? error : new Error(`Cart total calculation error: ${error}`),
@@ -399,44 +399,44 @@ const POSScreen: React.FC = () => {
       quantity: 1,
       emoji: item.emoji,
     };
-    addToCart(orderItem);
+    addToCart(_orderItem);
   };
 
   const handleUpdateQuantity = (id: number, quantity: number) => {
     if (quantity <= 0) {
-      removeFromCart(id);
+      removeFromCart(_id);
     } else {
-      updateCartItem(id, { quantity });
+      updateCartItem(_id, { quantity });
     }
   };
 
   const processPayment = async () => {
     // Upsert customer before payment if we have both name & valid email
     const emailRegex = /^\S+@\S+\.[A-Za-z]{2,}$/;
-    if (customerEmail && emailRegex.test(customerEmail)) {
+    if (customerEmail && emailRegex.test(_customerEmail)) {
       try {
         await CustomersService.saveCustomer({
           name: customerName?.trim() || undefined,
           email: customerEmail.trim(),
         });
-      } catch (err) {
+      } catch (_err) {
       }
     }
 
     const totalAmount = calculateCartTotal();
 
     // Close payment modal first
-    setShowPaymentModal(false);
+    setShowPaymentModal(_false);
 
-    switch (selectedPaymentMethod) {
+    switch (_selectedPaymentMethod) {
       case 'sumup':
         // Check SumUp compatibility before attempting payment
         const checkSumUpCompatibility = async () => {
           const compatibilityService = SumUpCompatibilityService.getInstance();
           const shouldAttempt = await compatibilityService.shouldAttemptSumUp();
 
-          if (shouldAttempt) {
-            setShowSumUpPayment(true);
+          if (_shouldAttempt) {
+            setShowSumUpPayment(_true);
           } else {
             const fallbackMethods = compatibilityService.getFallbackPaymentMethods();
 
@@ -456,7 +456,7 @@ const POSScreen: React.FC = () => {
                   },
                 },
                 {
-                  text: 'Cash Payment (Free)',
+                  text: 'Cash Payment (_Free)',
                   onPress: () => {
                     handlePaymentComplete({
                       success: true,
@@ -469,7 +469,7 @@ const POSScreen: React.FC = () => {
                 {
                   text: 'Cancel',
                   style: 'cancel',
-                  onPress: () => setShowPaymentModal(true),
+                  onPress: () => setShowPaymentModal(_true),
                 },
               ],
             );
@@ -489,7 +489,7 @@ const POSScreen: React.FC = () => {
                 currency: 'GBP',
                 description: `Order for ${customerName || 'Customer'}`,
                 onPaymentComplete: handlePaymentComplete,
-                onPaymentCancelled: () => setShowPaymentModal(true),
+                onPaymentCancelled: () => setShowPaymentModal(_true),
               }),
           },
           {
@@ -500,13 +500,13 @@ const POSScreen: React.FC = () => {
                 currency: 'GBP',
                 description: `Order for ${customerName || 'Customer'}`,
                 onPaymentComplete: handlePaymentComplete,
-                onPaymentCancelled: () => setShowPaymentModal(true),
+                onPaymentCancelled: () => setShowPaymentModal(_true),
               }),
           },
           {
             text: 'Cancel',
             style: 'cancel',
-            onPress: () => setShowPaymentModal(true),
+            onPress: () => setShowPaymentModal(_true),
           },
         ]);
         break;
@@ -536,13 +536,13 @@ const POSScreen: React.FC = () => {
         Alert.alert(
           'Stripe Payment',
           'Stripe payment integration coming soon. Please use another payment method.',
-          [{ text: 'OK', onPress: () => setShowPaymentModal(true) }],
+          [{ text: 'OK', onPress: () => setShowPaymentModal(_true) }],
         );
         break;
 
       default:
         Alert.alert('Payment Error', 'Please select a payment method.', [
-          { text: 'OK', onPress: () => setShowPaymentModal(true) },
+          { text: 'OK', onPress: () => setShowPaymentModal(_true) },
         ]);
     }
   };
@@ -565,7 +565,7 @@ const POSScreen: React.FC = () => {
             onPress: () => {
               clearCart();
               setCustomerName('');
-              setShowCartModal(false);
+              setShowCartModal(_false);
             },
           },
         ],
@@ -574,7 +574,7 @@ const POSScreen: React.FC = () => {
       Alert.alert(
         'Payment Failed',
         result.error || 'Payment could not be processed. Please try again.',
-        [{ text: 'OK', onPress: () => setShowPaymentModal(true) }],
+        [{ text: 'OK', onPress: () => setShowPaymentModal(_true) }],
       );
     }
   };
@@ -585,7 +585,7 @@ const POSScreen: React.FC = () => {
     transactionCode?: string,
     error?: string,
   ) => {
-    setShowSumUpPayment(false);
+    setShowSumUpPayment(_false);
 
     if (success && transactionCode) {
       Alert.alert(
@@ -612,7 +612,7 @@ const POSScreen: React.FC = () => {
         [
           {
             text: 'Retry',
-            onPress: () => setShowPaymentModal(true),
+            onPress: () => setShowPaymentModal(_true),
           },
           {
             text: 'Cancel',
@@ -624,9 +624,9 @@ const POSScreen: React.FC = () => {
   };
 
   const handleSumUpPaymentCancel = () => {
-    setShowSumUpPayment(false);
+    setShowSumUpPayment(_false);
     // Show the payment modal again for user to try again
-    setShowPaymentModal(true);
+    setShowPaymentModal(_true);
   };
 
   const MenuItemCard = ({ item }: { item: MenuItem }) => {
@@ -636,7 +636,7 @@ const POSScreen: React.FC = () => {
       <View style={[styles.menuCard, !item.available && styles.menuCardDisabled]}>
         <TouchableOpacity
           style={styles.menuCardContent}
-          onPress={() => item.available && handleAddToCart(item)}
+          onPress={() => item.available && handleAddToCart(_item)}
           activeOpacity={0.7}
           disabled={!item.available}>
           <Icon
@@ -775,7 +775,7 @@ const POSScreen: React.FC = () => {
 
             <CartIcon
               count={cartItemCount()}
-              onPress={() => setShowCartModal(true)}
+              onPress={() => setShowCartModal(_true)}
               testID="shopping-cart-button"
             />
           </View>
@@ -845,7 +845,7 @@ const POSScreen: React.FC = () => {
                 styles.categoryTab,
                 selectedCategory === category && styles.categoryTabActive,
               ]}
-              onPress={() => setSelectedCategory(category)}>
+              onPress={() => setSelectedCategory(_category)}>
               <Text
                 style={[
                   styles.categoryTabText,
@@ -892,7 +892,7 @@ const POSScreen: React.FC = () => {
             <TouchableOpacity
               style={[styles.retryButton, { backgroundColor: theme.colors.primary }]}
               onPress={async () => {
-                setMenuLoading(true);
+                setMenuLoading(_true);
                 // Reset states to ensure clean retry
                 setDynamicMenuItems([]);
                 setDynamicCategories(['All']);
@@ -909,8 +909,8 @@ const POSScreen: React.FC = () => {
                     'All',
                     ...(categories || []).map(cat => cat.name).filter(name => name !== 'All'),
                   ];
-                  setDynamicCategories(categoryNames);
-                } catch (error) {
+                  setDynamicCategories(_categoryNames);
+                } catch (_error) {
                   // Set empty arrays on error to ensure consistent state
                   setDynamicMenuItems([]);
                   setDynamicCategories(['All']);
@@ -922,7 +922,7 @@ const POSScreen: React.FC = () => {
                     [{ text: 'OK' }],
                   );
                 } finally {
-                  setMenuLoading(false);
+                  setMenuLoading(_false);
                 }
               }}>
               <Text style={{ color: theme.colors.white, fontWeight: '600' }}>Retry</Text>
@@ -964,7 +964,7 @@ const POSScreen: React.FC = () => {
         visible={showCartModal}
         animationType="slide"
         transparent={true}
-        onRequestClose={() => setShowCartModal(false)}>
+        onRequestClose={() => setShowCartModal(_false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.cartModal}>
             <View style={styles.cartModalHeader}>
@@ -986,7 +986,7 @@ const POSScreen: React.FC = () => {
                 )}
                 <TouchableOpacity
                   style={styles.modalCloseButton}
-                  onPress={() => setShowCartModal(false)}>
+                  onPress={() => setShowCartModal(_false)}>
                   <Icon name="close" size={30} color={theme.colors.error || '#FF0000'} />
                 </TouchableOpacity>
               </View>
@@ -1066,7 +1066,7 @@ const POSScreen: React.FC = () => {
                   <TouchableOpacity
                     style={styles.chargeButton}
                     onPress={() => {
-                      setShowCartModal(false);
+                      setShowCartModal(_false);
                       // @ts-ignore
                       navigation.navigate('ServiceChargeSelection');
                     }}
@@ -1092,13 +1092,13 @@ const POSScreen: React.FC = () => {
         visible={showPaymentModal}
         animationType="fade"
         transparent={true}
-        onRequestClose={() => setShowPaymentModal(false)}>
+        onRequestClose={() => setShowPaymentModal(_false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.paymentModal}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Payment</Text>
               <TouchableOpacity
-                onPress={() => setShowPaymentModal(false)}
+                onPress={() => setShowPaymentModal(_false)}
                 style={styles.modalCloseButton}>
                 <Icon name="close" size={24} color={theme.colors.text} />
               </TouchableOpacity>
@@ -1108,7 +1108,7 @@ const POSScreen: React.FC = () => {
               <SimpleTextInput
                 value={customerName}
                 onValueChange={setCustomerName}
-                placeholder="Customer name (optional)"
+                placeholder="Customer name (_optional)"
                 style={styles.input}
                 clearButtonMode="while-editing"
                 autoCapitalize="words"
@@ -1117,7 +1117,7 @@ const POSScreen: React.FC = () => {
               <SimpleTextInput
                 value={customerEmail}
                 onValueChange={setCustomerEmail}
-                placeholder="Customer e-mail (optional)"
+                placeholder="Customer e-mail (_optional)"
                 keyboardType="email-address"
                 autoCapitalize="none"
                 style={styles.input}

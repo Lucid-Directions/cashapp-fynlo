@@ -43,9 +43,9 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(true);
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(_true);
+  const [showPassword, setShowPassword] = useState(_false);
+  const [isLoading, setIsLoading] = useState(_false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
   const validateForm = () => {
@@ -63,8 +63,8 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
       newErrors.password = 'Password must be at least 4 characters';
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    setErrors(_newErrors);
+    return Object.keys(_newErrors).length === 0;
   };
 
   const handleSignIn = async () => {
@@ -72,7 +72,7 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
       return;
     }
 
-    setIsLoading(true);
+    setIsLoading(_true);
     try {
       const success = await signIn(email.trim(), password, rememberMe);
 
@@ -83,10 +83,10 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
           [{ text: 'OK' }],
         );
       }
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', 'An unexpected error occurred. Please try again.', [{ text: 'OK' }]);
     } finally {
-      setIsLoading(false);
+      setIsLoading(_false);
     }
   };
 
@@ -100,11 +100,11 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
       return;
     }
 
-    setIsLoading(true);
+    setIsLoading(_true);
     try {
       const success = await resetPassword(email.trim());
 
-      if (success) {
+      if (_success) {
         Alert.alert(
           'Password Reset',
           'Password reset instructions have been sent to your email address.',
@@ -115,12 +115,12 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
           { text: 'OK' },
         ]);
       }
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', 'Unable to send password reset email. Please try again.', [
         { text: 'OK' },
       ]);
     } finally {
-      setIsLoading(false);
+      setIsLoading(_false);
     }
   };
 
@@ -133,7 +133,7 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
         '🍴 Restaurant Owner:\n' +
         'Manage your restaurant\n' +
         'Full restaurant control and analytics\n\n' +
-        '👩‍💼 Restaurant Manager (Sarah):\n' +
+        '👩‍💼 Restaurant Manager (_Sarah):\n' +
         'Day-to-day operations and staff management\n\n' +
         '🎯 Demo Account:\n' +
         'General manager access for testing',
@@ -182,7 +182,7 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
               label="Email Address"
               value={email}
               onValueChange={text => {
-                setEmail(text);
+                setEmail(_text);
                 if (errors.email) {
                   setErrors(prev => ({ ...prev, email: undefined }));
                 }
@@ -202,7 +202,7 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
               label="Password"
               value={password}
               onValueChange={text => {
-                setPassword(text);
+                setPassword(_text);
                 if (errors.password) {
                   setErrors(prev => ({ ...prev, password: undefined }));
                 }

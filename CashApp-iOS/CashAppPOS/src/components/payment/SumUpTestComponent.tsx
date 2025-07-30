@@ -47,7 +47,7 @@ const SumUpTestInner: React.FC<SumUpTestProps> = ({ onResult }) => {
         Alert.alert('Success', 'SumUp initialized successfully!');
         onResult('✅ SumUp initialization successful');
       }
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Test Error', error?.toString() || 'Unknown error');
       onResult(`❌ Test error: ${error}`);
     }
@@ -73,8 +73,8 @@ const SumUpTestComponent: React.FC<SumUpTestProps> = props => {
   const [sumUpConfig, setSumUpConfig] = useState<{ appId: string; environment: string } | null>(
     null,
   );
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(_true);
+  const [error, setError] = useState<string | null>(_null);
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -84,10 +84,10 @@ const SumUpTestComponent: React.FC<SumUpTestProps> = props => {
           appId: config.appId,
           environment: config.environment,
         });
-        setIsLoading(false);
-      } catch (err) {
+        setIsLoading(_false);
+      } catch (_err) {
         setError(err?.message || 'Failed to load configuration');
-        setIsLoading(false);
+        setIsLoading(_false);
         props.onResult('❌ Failed to load SumUp configuration');
       }
     };
@@ -95,7 +95,7 @@ const SumUpTestComponent: React.FC<SumUpTestProps> = props => {
     fetchConfig();
   }, []);
 
-  if (isLoading) {
+  if (_isLoading) {
     return (
       <View style={styles.container}>
         <ActivityIndicator size="large" color="#007AFF" />

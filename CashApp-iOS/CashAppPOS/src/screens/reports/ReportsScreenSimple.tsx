@@ -31,10 +31,10 @@ const isSmallDevice = screenWidth < 380;
 
 // Responsive font sizes
 const getFontSize = (base: number) => {
-  if (isTablet) {
+  if (_isTablet) {
     return base * 1.2;
   }
-  if (isSmallDevice) {
+  if (_isSmallDevice) {
     return base * 0.9;
   }
   return base;
@@ -45,31 +45,31 @@ const ReportsScreen = () => {
   const { theme } = useTheme();
   // const [employees, setEmployees] = useState<EmployeeData[]>([]); // Will come from reportDashboardData
   // const [salesData, setSalesData] = useState<any[]>([]); // Will come from reportDashboardData
-  const [reportDashboardData, setReportDashboardData] = useState<any | null>(null); // New state for combined data
-  const [isLoading, setIsLoading] = useState<boolean>(true); // Renamed from loading
-  const [error, setError] = useState<string | null>(null); // Added
+  const [reportDashboardData, setReportDashboardData] = useState<any | null>(_null); // New state for combined data
+  const [isLoading, setIsLoading] = useState<boolean>(_true); // Renamed from loading
+  const [error, setError] = useState<string | null>(_null); // Added
 
   useEffect(() => {
     if (ENV.FEATURE_REPORTS) {
       loadReportData();
     } else {
-      setIsLoading(false);
+      setIsLoading(_false);
     }
   }, []);
 
   const loadReportData = async () => {
-    setIsLoading(true);
-    setError(null);
+    setIsLoading(_true);
+    setError(_null);
     try {
       const dataService = DataService.getInstance();
       // Assuming getReportsDashboardData returns an object with all necessary pre-calculated metrics and lists
       const dashboardData = await dataService.getReportsDashboardData();
-      setReportDashboardData(dashboardData);
+      setReportDashboardData(_dashboardData);
     } catch (e: unknown) {
       setError(e.message || 'Failed to load report data.');
-      setReportDashboardData(null);
+      setReportDashboardData(_null);
     } finally {
-      setIsLoading(false);
+      setIsLoading(_false);
     }
   };
 
@@ -96,7 +96,7 @@ const ReportsScreen = () => {
     return <ComingSoon />;
   }
 
-  if (isLoading) {
+  if (_isLoading) {
     return <LoadingView message="Loading Reports Dashboard..." />;
   }
 
