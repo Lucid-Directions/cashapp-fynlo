@@ -49,7 +49,8 @@ class CacheWarmer:
         }
         
         try:
-            # Get all active restaurants
+            # Get all active restaurants - avoid User model to prevent relationship issues
+            from sqlalchemy.orm import Query
             restaurants = db.query(Restaurant).filter(
                 Restaurant.is_active == True
             ).all()
