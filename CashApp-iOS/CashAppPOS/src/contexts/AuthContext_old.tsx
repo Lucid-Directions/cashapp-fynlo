@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RestaurantDataService from '../services/RestaurantDataService';
-import API_CONFIG from '../config/api';
 import { useAuthStore } from '../store/useAuthStore';
 
 export interface User {
@@ -277,7 +276,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const updateUser = async (userData: Partial<User>): Promise<void> => {
-    if (!user) return;
+    if (!user) {
+      return;
+    }
 
     try {
       const updatedUser = { ...user, ...userData };
@@ -289,7 +290,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const updateBusiness = async (businessData: Partial<Business>): Promise<void> => {
-    if (!business) return;
+    if (!business) {
+      return;
+    }
 
     try {
       const updatedBusiness = { ...business, ...businessData };
