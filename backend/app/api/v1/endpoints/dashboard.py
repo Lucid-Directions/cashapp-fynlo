@@ -32,8 +32,17 @@ async def get_dashboard_metrics(
     """Get aggregated dashboard metrics for a restaurant"""
     
     # Check permissions
-    if str(current_user.restaurant_id) != restaurant_id and current_user.role != 'platform_owner':
-        raise HTTPException(status_code=403, detail="Not authorized to view this dashboard")
+    if current_user.role != 'platform_owner':
+        # Validate that user has access to the requested restaurant
+        from app.core.tenant_security import TenantSecurity
+        await TenantSecurity.validate_restaurant_access(
+            user=current_user,
+            restaurant_id=restaurant_id,
+            operation="access",
+            resource_type="dashboard",
+            resource_id=None,
+            db=db
+        )
     
     # Check cache
     cache_key = f"dashboard:{restaurant_id}:{period}"
@@ -229,10 +238,14 @@ async def get_platform_dashboard(
     else:  # year
         start_date = end_date - timedelta(days=365)
     
-    # Get all active restaurants
-    restaurants = db.query(Restaurant).filter(
-        Restaurant.is_active == True
-    ).all()
+    # Get all active restaurants - platform owners can see all
+    if current_user.role == 'platform_owner':
+        restaurants = db.query(Restaurant).filter(
+            Restaurant.is_active == True
+        ).all()
+    else:
+        # Non-platform owners shouldn't access this endpoint
+        raise HTTPException(status_code=403, detail="Platform owner access required")
     
     # Aggregate metrics across all restaurants
     total_revenue = 0

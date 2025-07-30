@@ -3,8 +3,8 @@ Payment Provider Management Endpoints
 Handles configuration and testing of payment providers
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from typing import Dict, Any, List
+from fastapi import APIRouter, Depends, HTTPException, status, Query
+from typing import Dict, Any, List, Optional
 from decimal import Decimal
 from sqlalchemy.orm import Session
 
@@ -14,6 +14,7 @@ from app.core.responses import APIResponseHelper
 from app.core.database import User
 from app.services.secure_payment_config import SecurePaymentConfigService
 from app.services.payment_factory import PaymentProviderFactory
+from app.core.tenant_security import TenantSecurity
 
 router = APIRouter()
 
@@ -23,6 +24,7 @@ async def configure_payment_provider(
     provider: str,
     credentials: Dict[str, Any],
     mode: str = "sandbox",
+    current_restaurant_id: Optional[str] = Query(None, description="Restaurant ID for multi-location owners"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -35,6 +37,11 @@ async def configure_payment_provider(
         mode: sandbox or production
     """
     try:
+        # Validate restaurant access for multi-tenant
+        restaurant_id = await TenantSecurity.validate_restaurant_access(
+            db, current_user, current_restaurant_id
+        )
+        
         # Check user permissions
         if current_user.role not in ['platform_owner', 'restaurant_owner']:
             raise HTTPException(
@@ -48,7 +55,7 @@ async def configure_payment_provider(
         # Store provider configuration
         config_id = config_service.store_provider_config(
             provider=provider,
-            restaurant_id=current_user.restaurant_id,
+            restaurant_id=restaurant_id,
             credentials=credentials,
             mode=mode
         )
@@ -72,19 +79,25 @@ async def configure_payment_provider(
 
 @router.get("/payment-providers")
 async def list_payment_providers(
+    current_restaurant_id: Optional[str] = Query(None, description="Restaurant ID for multi-location owners"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Get all configured payment providers for the restaurant"""
     try:
+        # Validate restaurant access for multi-tenant
+        restaurant_id = await TenantSecurity.validate_restaurant_access(
+            db, current_user, current_restaurant_id
+        )
+        
         config_service = SecurePaymentConfigService(db)
         
         # Get provider configurations
-        configs = config_service.list_provider_configs(current_user.restaurant_id)
+        configs = config_service.list_provider_configs(restaurant_id)
         
         # Initialize provider factory
         factory = PaymentProviderFactory()
-        await factory.initialize(current_user.restaurant_id)
+        await factory.initialize(restaurant_id)
         
         # Get provider info
         provider_info = factory.get_provider_info()
@@ -119,11 +132,17 @@ async def list_payment_providers(
 @router.post("/payment-providers/{provider}/test")
 async def test_payment_provider(
     provider: str,
+    current_restaurant_id: Optional[str] = Query(None, description="Restaurant ID for multi-location owners"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Test a payment provider connection"""
     try:
+        # Validate restaurant access for multi-tenant
+        restaurant_id = await TenantSecurity.validate_restaurant_access(
+            db, current_user, current_restaurant_id
+        )
+        
         # Check permissions
         if current_user.role not in ['platform_owner', 'restaurant_owner', 'manager']:
             raise HTTPException(
@@ -133,7 +152,7 @@ async def test_payment_provider(
         
         # Initialize provider factory
         factory = PaymentProviderFactory()
-        await factory.initialize(current_user.restaurant_id)
+        await factory.initialize(restaurant_id)
         
         # Get the specific provider
         provider_instance = await factory.get_provider(provider)
@@ -163,14 +182,20 @@ async def test_payment_provider(
 async def calculate_provider_fee(
     provider: str,
     amount: Decimal,
+    current_restaurant_id: Optional[str] = Query(None, description="Restaurant ID for multi-location owners"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Calculate fees for a specific provider and amount"""
     try:
+        # Validate restaurant access for multi-tenant
+        restaurant_id = await TenantSecurity.validate_restaurant_access(
+            db, current_user, current_restaurant_id
+        )
+        
         # Initialize provider factory
         factory = PaymentProviderFactory()
-        await factory.initialize(current_user.restaurant_id)
+        await factory.initialize(restaurant_id)
         
         # Get the specific provider
         provider_instance = await factory.get_provider(provider)
@@ -207,14 +232,20 @@ async def calculate_provider_fee(
 async def get_best_provider(
     amount: Decimal,
     payment_method: str = "card",
+    current_restaurant_id: Optional[str] = Query(None, description="Restaurant ID for multi-location owners"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Get the best provider for a transaction based on fees and performance"""
     try:
+        # Validate restaurant access for multi-tenant
+        restaurant_id = await TenantSecurity.validate_restaurant_access(
+            db, current_user, current_restaurant_id
+        )
+        
         # Initialize provider factory
         factory = PaymentProviderFactory()
-        await factory.initialize(current_user.restaurant_id)
+        await factory.initialize(restaurant_id)
         
         # Get best provider
         best_provider = await factory.get_best_provider(

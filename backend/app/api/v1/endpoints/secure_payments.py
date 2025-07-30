@@ -19,6 +19,7 @@ from app.core.exceptions import FynloException
 from app.services.secure_payment_processor import SecurePaymentProcessor, PaymentProcessingError
 from app.services.secure_payment_config import SecurePaymentConfigService
 from app.middleware.rate_limit_middleware import limiter
+from app.core.tenant_security import TenantSecurity
 
 
 router = APIRouter()
@@ -95,6 +96,7 @@ def get_request_context(request: Request) -> Dict[str, Any]:
 async def process_payment(
     payment_request: PaymentRequest,
     request: Request,
+    current_restaurant_id: Optional[str] = Query(None, description="Restaurant ID for multi-location owners"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -109,9 +111,15 @@ async def process_payment(
     - Automatic provider fallback
     """
     try:
+        # Validate restaurant access for multi-tenant
+        restaurant_id = await TenantSecurity.validate_restaurant_access(
+            db, current_user, current_restaurant_id
+        )
+        
         # Add user context to request
         request_context = get_request_context(request)
         request_context['user_id'] = str(current_user.id)
+        request_context['restaurant_id'] = str(restaurant_id)
         
         # Initialize payment processor
         processor = SecurePaymentProcessor(db, request_context)
@@ -123,7 +131,7 @@ async def process_payment(
             payment_method=payment_request.payment_method,
             payment_details=payment_request.payment_details,
             user_id=str(current_user.id),
-            restaurant_id=str(current_user.restaurant_id),
+            restaurant_id=str(restaurant_id),
             metadata=payment_request.metadata
         )
         
@@ -168,6 +176,7 @@ async def process_payment(
 
 @router.get("/methods", response_model=PaymentMethodsResponse)
 async def get_payment_methods(
+    current_restaurant_id: Optional[str] = Query(None, description="Restaurant ID for multi-location owners"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -179,10 +188,15 @@ async def get_payment_methods(
     - Fee structure for transparency
     """
     try:
+        # Validate restaurant access for multi-tenant
+        restaurant_id = await TenantSecurity.validate_restaurant_access(
+            db, current_user, current_restaurant_id
+        )
+        
         # Get configured payment providers
         config_service = SecurePaymentConfigService(db)
         configs = config_service.list_provider_configs(
-            restaurant_id=str(current_user.restaurant_id)
+            restaurant_id=str(restaurant_id)
         )
         
         # Build available methods
@@ -257,6 +271,7 @@ async def get_payment_methods(
 async def process_refund(
     refund_request: RefundRequest,
     request: Request,
+    current_restaurant_id: Optional[str] = Query(None, description="Restaurant ID for multi-location owners"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -270,6 +285,11 @@ async def process_refund(
     - Audit logging
     """
     try:
+        # Validate restaurant access for multi-tenant
+        restaurant_id = await TenantSecurity.validate_restaurant_access(
+            db, current_user, current_restaurant_id
+        )
+        
         # Check permissions - only managers and above can process refunds
         if current_user.role not in ['manager', 'restaurant_owner', 'platform_owner']:
             return APIResponseHelper.error(
@@ -302,6 +322,7 @@ async def process_refund(
 @router.get("/status/{payment_id}", response_model=PaymentStatusResponse)
 async def get_payment_status(
     payment_id: str = Path(..., description="Payment ID"),
+    current_restaurant_id: Optional[str] = Query(None, description="Restaurant ID for multi-location owners"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -311,12 +332,17 @@ async def get_payment_status(
     Returns current status of a payment transaction
     """
     try:
+        # Validate restaurant access for multi-tenant
+        restaurant_id = await TenantSecurity.validate_restaurant_access(
+            db, current_user, current_restaurant_id
+        )
+        
         # Get payment from database
         from app.services.secure_payment_processor import Payment
         
         payment = db.query(Payment).filter_by(
             id=payment_id,
-            restaurant_id=str(current_user.restaurant_id)
+            restaurant_id=str(restaurant_id)
         ).first()
         
         if not payment:

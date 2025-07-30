@@ -66,13 +66,15 @@ async def register_device_token(
     Register device token for push notifications
     """
     try:
-        restaurant_id = str(current_user.restaurant_id)
+        # Use current restaurant context
+        restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
         if not restaurant_id:
             raise FynloException(
                 message="User must be associated with a restaurant",
                 error_code=ErrorCodes.VALIDATION_ERROR,
                 status_code=400
             )
+        restaurant_id = str(restaurant_id)
         
         push_service = get_push_service()
         success = await push_service.register_device_token(
@@ -167,6 +169,18 @@ async def send_notification(
                 status_code=403
             )
         
+        # Validate target restaurants if specified
+        if request.target_restaurants:
+            from app.core.tenant_security import TenantSecurity
+            for restaurant_id in request.target_restaurants:
+                await TenantSecurity.validate_restaurant_access(
+                    user=current_user,
+                    restaurant_id=restaurant_id,
+                    operation="access",
+                    resource_type="notifications",
+                    db=db
+                )
+        
         # Validate notification type and priority
         try:
             notification_type = NotificationType(request.notification_type)
@@ -225,6 +239,18 @@ async def send_templated_notification(
     Send notification using predefined template
     """
     try:
+        # Validate target restaurants if specified
+        if request.target_restaurants:
+            from app.core.tenant_security import TenantSecurity
+            for restaurant_id in request.target_restaurants:
+                await TenantSecurity.validate_restaurant_access(
+                    user=current_user,
+                    restaurant_id=restaurant_id,
+                    operation="access",
+                    resource_type="notifications",
+                    db=db
+                )
+        
         # Validate notification type
         try:
             notification_type = NotificationType(request.notification_type)

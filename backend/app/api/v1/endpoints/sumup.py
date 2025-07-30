@@ -11,12 +11,14 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field
 import os
 import logging
+from fastapi import Query
 
 from app.core.database import get_db, User
 from app.core.auth import get_current_user
 from app.core.responses import APIResponseHelper, ErrorCodes
 from app.core.exceptions import FynloException
 from app.middleware.rate_limit_middleware import limiter
+from app.core.tenant_security import TenantSecurity
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -66,6 +68,7 @@ class MerchantValidationRequest(BaseModel):
 async def initialize_sumup(
     request: Request,
     init_request: SumUpInitRequest,
+    current_restaurant_id: Optional[str] = Query(None, description="Restaurant ID for multi-location owners"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -87,13 +90,10 @@ async def initialize_sumup(
         - Rate limited to prevent abuse
     """
     try:
-        # Validate user has proper access
-        if not current_user.restaurant_id:
-            return APIResponseHelper.error(
-                message="User not associated with a restaurant",
-                error_code=ErrorCodes.FORBIDDEN,
-                status_code=status.HTTP_403_FORBIDDEN
-            )
+        # Validate restaurant access for multi-tenant
+        restaurant_id = await TenantSecurity.validate_restaurant_access(
+            db, current_user, current_restaurant_id
+        )
         
         # Check if restaurant has active subscription
         # TODO: Add subscription validation when subscription service is available
@@ -105,7 +105,7 @@ async def initialize_sumup(
         # Check if SumUp is properly configured
         sumup_api_key = os.getenv("SUMUP_API_KEY")
         if not sumup_api_key:
-            logger.warning(f"SumUp API key not configured for restaurant {current_user.restaurant_id}")
+            logger.warning(f"SumUp API key not configured for restaurant {restaurant_id}")
             return APIResponseHelper.success(
                 data={
                     "merchant_code": None,
@@ -142,7 +142,7 @@ async def initialize_sumup(
         # Log initialization request for audit
         logger.info(
             f"SumUp initialization requested by user {current_user.id} "
-            f"for restaurant {current_user.restaurant_id} in {environment} mode"
+            f"for restaurant {restaurant_id} in {environment} mode"
         )
         
         # Build response using the proper model
@@ -177,6 +177,7 @@ async def initialize_sumup(
 @limiter.limit("30/minute")
 async def get_sumup_status(
     request: Request,
+    current_restaurant_id: Optional[str] = Query(None, description="Restaurant ID for multi-location owners"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -190,12 +191,10 @@ async def get_sumup_status(
     - Feature availability
     """
     try:
-        if not current_user.restaurant_id:
-            return APIResponseHelper.error(
-                message="User not associated with a restaurant",
-                error_code=ErrorCodes.FORBIDDEN,
-                status_code=status.HTTP_403_FORBIDDEN
-            )
+        # Validate restaurant access for multi-tenant
+        restaurant_id = await TenantSecurity.validate_restaurant_access(
+            db, current_user, current_restaurant_id
+        )
         
         # Check SumUp configuration
         sumup_api_key = os.getenv("SUMUP_API_KEY")
@@ -231,6 +230,7 @@ async def get_sumup_status(
 async def validate_merchant_code(
     request: Request,
     validation_request: MerchantValidationRequest,
+    current_restaurant_id: Optional[str] = Query(None, description="Restaurant ID for multi-location owners"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -243,6 +243,11 @@ async def validate_merchant_code(
     Note: Actual validation would require calling SumUp API
     """
     try:
+        # Validate restaurant access for multi-tenant
+        restaurant_id = await TenantSecurity.validate_restaurant_access(
+            db, current_user, current_restaurant_id
+        )
+        
         # Check permissions
         if current_user.role not in ['platform_owner', 'restaurant_owner', 'manager']:
             return APIResponseHelper.forbidden(

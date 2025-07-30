@@ -3,7 +3,7 @@ POS Session Management API endpoints for Fynlo POS
 """
 
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 from pydantic import BaseModel
@@ -14,6 +14,7 @@ from app.core.database import get_db, PosSession, User
 from app.core.auth import get_current_user
 from app.core.responses import APIResponseHelper
 from app.core.exceptions import FynloException, ErrorCodes
+from app.core.tenant_security import TenantSecurity
 
 router = APIRouter()
 
@@ -35,16 +36,24 @@ class PosSessionResponse(BaseModel):
 
 @router.get("/sessions/current")
 async def get_current_session(
+    current_restaurant_id: Optional[str] = Query(None, description="Specific restaurant ID for multi-restaurant users"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Get the current active POS session"""
     
+    # Validate restaurant access
+    restaurant_id = TenantSecurity.validate_restaurant_access(
+        current_user, 
+        current_restaurant_id, 
+        db
+    )
+    
     # Find the active session for this user
     active_session = db.query(PosSession).filter(
         and_(
             PosSession.user_id == current_user.id,
-            PosSession.restaurant_id == current_user.restaurant_id,
+            PosSession.restaurant_id == restaurant_id,
             PosSession.state.in_(["opening_control", "opened"]),
             PosSession.is_active == True
         )
@@ -76,16 +85,24 @@ async def get_current_session(
 @router.post("/sessions")
 async def create_session(
     session_data: PosSessionCreate,
+    current_restaurant_id: Optional[str] = Query(None, description="Specific restaurant ID for multi-restaurant users"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Create a new POS session"""
     
+    # Validate restaurant access
+    restaurant_id = TenantSecurity.validate_restaurant_access(
+        current_user, 
+        current_restaurant_id, 
+        db
+    )
+    
     # Check if user already has an active session
     existing_session = db.query(PosSession).filter(
         and_(
             PosSession.user_id == current_user.id,
-            PosSession.restaurant_id == current_user.restaurant_id,
+            PosSession.restaurant_id == restaurant_id,
             PosSession.state.in_(["opening_control", "opened"]),
             PosSession.is_active == True
         )
@@ -99,7 +116,7 @@ async def create_session(
     
     # Create new session
     new_session = PosSession(
-        restaurant_id=current_user.restaurant_id,
+        restaurant_id=restaurant_id,
         user_id=current_user.id,
         name=session_data.name or f"POS Session {datetime.utcnow().strftime('%H:%M')}",
         state="opening_control",
@@ -133,6 +150,7 @@ async def create_session(
 async def update_session_state(
     session_id: str,
     state: str,
+    current_restaurant_id: Optional[str] = Query(None, description="Specific restaurant ID for multi-restaurant users"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -145,6 +163,13 @@ async def update_session_state(
             error_code=ErrorCodes.RESOURCE_NOT_FOUND,
             detail="POS session not found"
         )
+    
+    # Validate restaurant access
+    TenantSecurity.validate_restaurant_access(
+        current_user, 
+        str(session.restaurant_id), 
+        db
+    )
     
     # Check if user owns this session
     if session.user_id != current_user.id:
@@ -191,15 +216,23 @@ async def update_session_state(
 @router.get("/sessions")
 async def get_sessions(
     limit: int = 10,
+    current_restaurant_id: Optional[str] = Query(None, description="Specific restaurant ID for multi-restaurant users"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Get POS sessions for the current user"""
     
+    # Validate restaurant access
+    restaurant_id = TenantSecurity.validate_restaurant_access(
+        current_user, 
+        current_restaurant_id, 
+        db
+    )
+    
     sessions = db.query(PosSession).filter(
         and_(
             PosSession.user_id == current_user.id,
-            PosSession.restaurant_id == current_user.restaurant_id
+            PosSession.restaurant_id == restaurant_id
         )
     ).order_by(PosSession.start_at.desc()).limit(limit).all()
     

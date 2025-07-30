@@ -22,6 +22,7 @@ from app.core.auth import get_current_user
 from app.core.responses import APIResponseHelper
 from app.core.exceptions import FynloException, ErrorCodes
 from app.core.transaction_manager import transactional, transaction_manager
+from app.core.tenant_security import TenantSecurity
 from app.services.payment_factory import payment_factory
 from app.services.audit_logger import AuditLoggerService
 from app.models.audit_log import AuditEventType, AuditEventStatus
@@ -124,16 +125,25 @@ def generate_qr_code(data: str) -> str:
 async def generate_qr_payment(
     payment_request: QRPaymentRequest, # Renamed from 'request' to avoid conflict
     request: Request, # Added for rate limiter
+    current_restaurant_id: Optional[str] = Query(None, description="Restaurant ID for multi-location owners"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """Generate QR code for payment with 1.2% fee advantage"""
+    # Validate restaurant access for multi-tenant
+    restaurant_id = await TenantSecurity.validate_restaurant_access(
+        db, current_user, current_restaurant_id
+    )
+    
     audit_service = AuditLoggerService(db)
     ip_address = request.client.host if request.client else "unknown"
     user_agent = request.headers.get("user-agent", "unknown")
 
-    # Verify order exists
-    order = db.query(Order).filter(Order.id == payment_request.order_id).first()
+    # Verify order exists and belongs to the restaurant
+    order = db.query(Order).filter(
+        Order.id == payment_request.order_id,
+        Order.restaurant_id == restaurant_id
+    ).first()
     if not order:
         # Log attempt to generate QR for non-existent order?
         # This might be more of a validation error than a payment initiation failure.
@@ -222,10 +232,16 @@ async def generate_qr_payment(
 async def confirm_qr_payment(
     request: Request,
     qr_payment_id: str,
+    current_restaurant_id: Optional[str] = Query(None, description="Restaurant ID for multi-location owners"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """Confirm QR payment completion"""
+    # Validate restaurant access for multi-tenant
+    restaurant_id = await TenantSecurity.validate_restaurant_access(
+        db, current_user, current_restaurant_id
+    )
+    
     audit_service = AuditLoggerService(db)
     ip_address = request.client.host if request.client else "unknown"
     user_agent = request.headers.get("user-agent", "unknown")
@@ -284,8 +300,11 @@ async def confirm_qr_payment(
         )
         raise HTTPException(status_code=400, detail=f"Cannot confirm QR payment with status: {qr_payment_db_record.status}")
     
-    # Get order for validation
-    order = db.query(Order).filter(Order.id == qr_payment_db_record.order_id).first()
+    # Get order for validation and ensure it belongs to the restaurant
+    order = db.query(Order).filter(
+        Order.id == qr_payment_db_record.order_id,
+        Order.restaurant_id == restaurant_id
+    ).first()
     if not order:
         # This case should ideally not be reached if DB integrity is maintained
         # but log it defensively if it does.
@@ -386,16 +405,25 @@ async def confirm_qr_payment(
 async def process_stripe_payment(
     payment_request_data: StripePaymentRequest, # Renamed from 'request'
     request: Request, # Added for rate limiter
+    current_restaurant_id: Optional[str] = Query(None, description="Restaurant ID for multi-location owners"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """Process Stripe payment"""
+    # Validate restaurant access for multi-tenant
+    restaurant_id = await TenantSecurity.validate_restaurant_access(
+        db, current_user, current_restaurant_id
+    )
+    
     audit_service = AuditLoggerService(db)
     ip_address = request.client.host if request.client else "unknown"
     user_agent = request.headers.get("user-agent", "unknown")
 
-    # Verify order exists
-    order = db.query(Order).filter(Order.id == payment_request_data.order_id).first()
+    # Verify order exists and belongs to the restaurant
+    order = db.query(Order).filter(
+        Order.id == payment_request_data.order_id,
+        Order.restaurant_id == restaurant_id
+    ).first()
     if not order:
         # Log attempt for non-existent order
         await audit_service.create_audit_log(
@@ -460,7 +488,7 @@ async def process_stripe_payment(
             metadata={
                 "order_id": str(payment_request_data.order_id),
                 "payment_id": str(payment_db_record.id),
-                "restaurant_id": str(order.restaurant_id)
+                "restaurant_id": str(restaurant_id)
             },
             confirmation_method='manual',
             confirm=True,
@@ -556,15 +584,24 @@ async def process_stripe_payment(
 async def process_cash_payment(
     payment_request_data: CashPaymentRequest, # Renamed from 'request'
     request: Request,
+    current_restaurant_id: Optional[str] = Query(None, description="Restaurant ID for multi-location owners"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """Process cash payment"""
+    # Validate restaurant access for multi-tenant
+    restaurant_id = await TenantSecurity.validate_restaurant_access(
+        db, current_user, current_restaurant_id
+    )
+    
     audit_service = AuditLoggerService(db)
     ip_address = request.client.host if request.client else "unknown"
     user_agent = request.headers.get("user-agent", "unknown")
 
-    order = db.query(Order).filter(Order.id == payment_request_data.order_id).first()
+    order = db.query(Order).filter(
+        Order.id == payment_request_data.order_id,
+        Order.restaurant_id == restaurant_id
+    ).first()
     if not order:
         # No audit log here as it's a basic validation, not a payment process failure yet.
         raise HTTPException(status_code=404, detail="Order not found")
@@ -637,10 +674,23 @@ async def process_cash_payment(
 @router.get("/order/{order_id}")
 async def get_order_payments(
     order_id: str,
+    current_restaurant_id: Optional[str] = Query(None, description="Restaurant ID for multi-location owners"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """Get all payments for an order"""
+    # Validate restaurant access for multi-tenant
+    restaurant_id = await TenantSecurity.validate_restaurant_access(
+        db, current_user, current_restaurant_id
+    )
+    
+    # Verify order belongs to the restaurant
+    order = db.query(Order).filter(
+        Order.id == order_id,
+        Order.restaurant_id == restaurant_id
+    ).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
     
     payments = db.query(Payment).filter(Payment.order_id == order_id).all()
     
@@ -694,6 +744,7 @@ async def process_payment(
     payment_data_req: PaymentRequest, # Renamed from payment_data to avoid confusion
     request: Request,
     provider_query: Optional[str] = Query(None, alias="provider", description="Force specific provider"), # Renamed provider
+    current_restaurant_id: Optional[str] = Query(None, description="Restaurant ID for multi-location owners"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -715,7 +766,15 @@ async def process_payment(
     payment_db_record = None # Initialize
 
     try:
-        order = db.query(Order).filter(Order.id == payment_data_req.order_id).first()
+        # Validate restaurant access for multi-tenant
+        restaurant_id = await TenantSecurity.validate_restaurant_access(
+            db, current_user, current_restaurant_id
+        )
+        
+        order = db.query(Order).filter(
+            Order.id == payment_data_req.order_id,
+            Order.restaurant_id == restaurant_id
+        ).first()
         if not order:
             await audit_service.create_audit_log(
                 event_type=AuditEventType.PAYMENT_FAILURE, event_status=AuditEventStatus.FAILURE,
@@ -739,7 +798,7 @@ async def process_payment(
         monthly_volume = Decimal("2000")
         provider_instance = await payment_factory.select_optimal_provider(
             amount=Decimal(str(payment_data_req.amount)),
-            restaurant_id=str(order.restaurant_id) if hasattr(order, 'restaurant_id') else "default",
+            restaurant_id=str(restaurant_id),
             monthly_volume=monthly_volume,
             force_provider=provider_query,
             db_session=db
@@ -765,7 +824,7 @@ async def process_payment(
             payment_method_id=payment_data_req.payment_method_id,
             metadata={
                 "order_id": payment_data_req.order_id,
-                "restaurant_id": str(order.restaurant_id) if hasattr(order, 'restaurant_id') else "default",
+                "restaurant_id": str(restaurant_id),
                 **(payment_data_req.metadata or {})
             }
         )
@@ -868,15 +927,25 @@ async def refund_payment(
     transaction_id: str,
     refund_data_req: RefundRequest, # Renamed from refund_data
     request: Request,
+    current_restaurant_id: Optional[str] = Query(None, description="Restaurant ID for multi-location owners"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """Refund a payment"""
+    # Validate restaurant access for multi-tenant
+    restaurant_id = await TenantSecurity.validate_restaurant_access(
+        db, current_user, current_restaurant_id
+    )
+    
     audit_service = AuditLoggerService(db)
     ip_address = request.client.host if request.client else "unknown"
     user_agent = request.headers.get("user-agent", "unknown")
 
-    payment_db_record = db.query(Payment).filter(Payment.external_id == transaction_id).first()
+    # Ensure payment belongs to the restaurant
+    payment_db_record = db.query(Payment).join(Order).filter(
+        Payment.external_id == transaction_id,
+        Order.restaurant_id == restaurant_id
+    ).first()
     if not payment_db_record:
         await audit_service.create_audit_log(
             event_type=AuditEventType.REFUND_FAILURE, event_status=AuditEventStatus.FAILURE,
@@ -988,9 +1057,16 @@ async def refund_payment(
 
 @router.get("/providers")
 async def get_available_providers(
-    current_user: User = Depends(get_current_user)
+    current_restaurant_id: Optional[str] = Query(None, description="Restaurant ID for multi-location owners"),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
 ):
     """Get list of available payment providers and their costs"""
+    # Validate restaurant access for multi-tenant
+    restaurant_id = await TenantSecurity.validate_restaurant_access(
+        db, current_user, current_restaurant_id
+    )
+    
     providers = payment_factory.get_available_providers()
     
     # Calculate sample costs for common amounts
@@ -1068,10 +1144,16 @@ class SquarePaymentResponseData(BaseModel):
 async def square_create_payment_endpoint(
     http_request: Request,
     payment_create_req: SquareCreatePaymentRequest,
+    current_restaurant_id: Optional[str] = Query(None, description="Restaurant ID for multi-location owners"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """Create a Square payment. If auto_complete is true, this attempts to finalize the payment."""
+    # Validate restaurant access for multi-tenant
+    restaurant_id = await TenantSecurity.validate_restaurant_access(
+        db, current_user, current_restaurant_id
+    )
+    
     audit_service = AuditLoggerService(db)
     ip_address = http_request.client.host if http_request.client else "unknown"
     user_agent = http_request.headers.get("user-agent", "unknown")
@@ -1084,7 +1166,10 @@ async def square_create_payment_endpoint(
         # Validate order if order_id is provided
         order = None
         if payment_create_req.order_id:
-            order = db.query(Order).filter(Order.id == payment_create_req.order_id).first()
+            order = db.query(Order).filter(
+                Order.id == payment_create_req.order_id,
+                Order.restaurant_id == restaurant_id
+            ).first()
             if not order:
                 # Log and raise error if order_id is given but order not found
                 await audit_service.create_audit_log(
@@ -1195,10 +1280,16 @@ async def square_create_payment_endpoint(
 async def square_process_payment_endpoint(
     http_request: Request,
     payment_process_req: SquareProcessPaymentRequest,
+    current_restaurant_id: Optional[str] = Query(None, description="Restaurant ID for multi-location owners"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """Process (complete) a Square payment that was created with auto_complete=false."""
+    # Validate restaurant access for multi-tenant
+    restaurant_id = await TenantSecurity.validate_restaurant_access(
+        db, current_user, current_restaurant_id
+    )
+    
     audit_service = AuditLoggerService(db)
     ip_address = http_request.client.host if http_request.client else "unknown"
     user_agent = http_request.headers.get("user-agent", "unknown")
@@ -1209,7 +1300,12 @@ async def square_process_payment_endpoint(
             raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Square provider not available.")
 
         # Find the original payment record in our DB by external_id (Square Payment ID)
-        payment_db = db.query(Payment).filter(Payment.external_id == payment_process_req.payment_id, Payment.provider == "square").first()
+        # Ensure it belongs to the restaurant
+        payment_db = db.query(Payment).join(Order).filter(
+            Payment.external_id == payment_process_req.payment_id,
+            Payment.provider == "square",
+            Order.restaurant_id == restaurant_id
+        ).first()
         if not payment_db:
             await audit_service.create_audit_log(
                 event_type=AuditEventType.PAYMENT_FAILURE, event_status=AuditEventStatus.FAILURE,
@@ -1298,10 +1394,16 @@ async def square_process_payment_endpoint(
 async def square_get_payment_status_endpoint(
     http_request: Request,
     payment_id: str, # This is the Square Payment ID (external_id)
+    current_restaurant_id: Optional[str] = Query(None, description="Restaurant ID for multi-location owners"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     """Get the status of a Square payment by its Square Payment ID."""
+    # Validate restaurant access for multi-tenant
+    restaurant_id = await TenantSecurity.validate_restaurant_access(
+        db, current_user, current_restaurant_id
+    )
+    
     audit_service = AuditLoggerService(db)
     ip_address = http_request.client.host if http_request.client else "unknown"
     user_agent = http_request.headers.get("user-agent", "unknown")

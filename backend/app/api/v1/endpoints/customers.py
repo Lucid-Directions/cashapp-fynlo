@@ -14,6 +14,8 @@ from app.core.auth import get_current_user
 from app.core.redis_client import get_redis, RedisClient
 from app.core.responses import APIResponseHelper
 from app.core.exceptions import FynloException, ErrorCodes
+from app.core.security_utils import sanitize_sql_like_pattern, sanitize_search_term
+from app.schemas.search_schemas import CustomerSearchRequest
 
 router = APIRouter()
 
@@ -377,10 +379,12 @@ async def update_customer(
         db=db
     )
     
-    # Update fields if provided
+    # Update fields if provided - whitelist allowed fields for security
+    ALLOWED_UPDATE_FIELDS = {'email', 'phone', 'first_name', 'last_name', 'preferences'}
     update_data = customer_data.dict(exclude_unset=True)
     for field, value in update_data.items():
-        setattr(customer, field, value)
+        if field in ALLOWED_UPDATE_FIELDS and hasattr(customer, field):
+            setattr(customer, field, value)
     
     customer.updated_at = datetime.utcnow()
     db.commit()
@@ -502,22 +506,22 @@ async def get_customer_orders(
 
 @router.post("/search")
 async def search_customers(
-    search_data: dict,
-    restaurant_id: Optional[str] = Query(None),
+    search_data: CustomerSearchRequest,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Advanced customer search"""
+    """Advanced customer search with enhanced validation"""
     
     # Use current user's restaurant context
     user_restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
     if not user_restaurant_id:
         raise HTTPException(status_code=400, detail="User must be assigned to a restaurant")
     
-    # Use provided restaurant_id or fallback to user's current restaurant
-    if not restaurant_id:
+    # Use provided restaurant_id from search_data or fallback to user's current restaurant
+    if not search_data.restaurant_id:
         restaurant_id = str(user_restaurant_id)
     else:
+        restaurant_id = search_data.restaurant_id
         # Validate that user has access to the requested restaurant
         from app.core.tenant_security import TenantSecurity
         await TenantSecurity.validate_restaurant_access(
@@ -531,15 +535,18 @@ async def search_customers(
     
     query = db.query(Customer).filter(Customer.restaurant_id == restaurant_id)
     
-    # Search by multiple criteria
-    if "email" in search_data and search_data["email"]:
-        query = query.filter(Customer.email.ilike(f"%{search_data['email']}%"))
+    # All search inputs are already validated and sanitized by Pydantic schema
+    if search_data.email:
+        # Email already sanitized by CustomerSearchRequest validator
+        query = query.filter(Customer.email.ilike(f"%{search_data.email}%"))
     
-    if "phone" in search_data and search_data["phone"]:
-        query = query.filter(Customer.phone.ilike(f"%{search_data['phone']}%"))
+    if search_data.phone:
+        # Phone already sanitized by CustomerSearchRequest validator
+        query = query.filter(Customer.phone.ilike(f"%{search_data.phone}%"))
     
-    if "name" in search_data and search_data["name"]:
-        name_pattern = f"%{search_data['name']}%"
+    if search_data.name:
+        # Name already sanitized by CustomerSearchRequest validator
+        name_pattern = f"%{search_data.name}%"
         query = query.filter(
             or_(
                 Customer.first_name.ilike(name_pattern),
@@ -547,13 +554,20 @@ async def search_customers(
             )
         )
     
-    if "min_spent" in search_data and search_data["min_spent"]:
-        query = query.filter(Customer.total_spent >= search_data["min_spent"])
+    if search_data.min_spent is not None:
+        query = query.filter(Customer.total_spent >= search_data.min_spent)
     
-    if "min_points" in search_data and search_data["min_points"]:
-        query = query.filter(Customer.loyalty_points >= search_data["min_points"])
+    # Apply sorting - sort_by is already validated against whitelist
+    if search_data.sort_by:
+        order_func = desc if search_data.sort_order == "desc" else lambda x: x
+        sort_column = getattr(Customer, search_data.sort_by)
+        query = query.order_by(order_func(sort_column))
+    else:
+        query = query.order_by(desc(Customer.total_spent))
     
-    customers = query.order_by(desc(Customer.total_spent)).limit(50).all()
+    # Apply pagination
+    offset = (search_data.page - 1) * search_data.limit
+    customers = query.offset(offset).limit(search_data.limit).all()
     
     return [
         {
