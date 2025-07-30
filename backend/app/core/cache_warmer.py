@@ -12,7 +12,7 @@ from sqlalchemy import and_
 
 from app.core.cache_service import cache_service
 from app.core.database import get_db
-from app.models import Restaurant, Product, Category, RestaurantSettings
+from app.models import Restaurant, Product, Category
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
@@ -68,10 +68,10 @@ class CacheWarmer:
                     if categories_warmed:
                         stats["categories_warmed"] += 1
                     
-                    # Warm settings cache
-                    settings_warmed = await self._warm_settings_cache(db, restaurant)
-                    if settings_warmed:
-                        stats["settings_warmed"] += 1
+                    # Settings warming disabled - RestaurantSettings model not available
+                    # settings_warmed = await self._warm_settings_cache(db, restaurant)
+                    # if settings_warmed:
+                    #     stats["settings_warmed"] += 1
                     
                     stats["restaurants_warmed"] += 1
                     
@@ -144,14 +144,20 @@ class CacheWarmer:
             ).order_by(Category.sort_order, Category.name).all()
             
             # Transform to cache format
-            menu_categories = [
-                {
-                    'id': int(str(cat.id).replace('-', '')[:8], 16) % 100000,
+            menu_categories = []
+            for cat in categories:
+                try:
+                    # Try to convert UUID-style ID to integer
+                    cat_id = int(str(cat.id).replace('-', '')[:8], 16) % 100000
+                except (ValueError, TypeError):
+                    # Fallback for non-UUID IDs (like in tests)
+                    cat_id = hash(str(cat.id)) % 100000
+                
+                menu_categories.append({
+                    'id': cat_id,
                     'name': cat.name,
                     'active': cat.is_active
-                }
-                for cat in categories
-            ]
+                })
             
             # Always include 'All' category
             if not any(cat['name'] == 'All' for cat in menu_categories):
@@ -170,38 +176,10 @@ class CacheWarmer:
             logger.error(f"Failed to warm categories cache for restaurant {restaurant.id}: {e}")
             return False
     
-    async def _warm_settings_cache(self, db: Session, restaurant: Restaurant) -> bool:
-        """Warm settings cache for a restaurant"""
-        try:
-            # Get settings
-            settings = db.query(RestaurantSettings).filter(
-                RestaurantSettings.restaurant_id == restaurant.id
-            ).first()
-            
-            if not settings:
-                return False
-            
-            # Transform to cache format
-            settings_data = {
-                "service_charge_percentage": float(settings.service_charge_percentage),
-                "vat_percentage": float(settings.vat_percentage),
-                "currency": settings.currency,
-                "timezone": settings.timezone,
-                "opening_hours": settings.opening_hours,
-            }
-            
-            # Cache with appropriate key
-            cache_key = cache_service.cache_key("settings", restaurant_id=str(restaurant.id))
-            success = await cache_service.set(cache_key, settings_data, ttl=1800)
-            
-            if success:
-                logger.debug(f"Warmed settings cache for restaurant {restaurant.id}")
-            
-            return success
-            
-        except Exception as e:
-            logger.error(f"Failed to warm settings cache for restaurant {restaurant.id}: {e}")
-            return False
+    # Settings warming disabled - RestaurantSettings model not available
+    # async def _warm_settings_cache(self, db: Session, restaurant: Restaurant) -> bool:
+    #     """Warm settings cache for a restaurant"""
+    #     pass
     
     async def warm_specific_restaurant(self, db: Session, restaurant_id: str) -> dict:
         """
@@ -225,7 +203,8 @@ class CacheWarmer:
             "restaurant_id": restaurant_id,
             "menu_warmed": await self._warm_menu_cache(db, restaurant),
             "categories_warmed": await self._warm_categories_cache(db, restaurant),
-            "settings_warmed": await self._warm_settings_cache(db, restaurant),
+            # Settings warming disabled - RestaurantSettings model not available
+            "settings_warmed": False,
             "timestamp": datetime.utcnow()
         }
         
@@ -252,13 +231,18 @@ async def warm_cache_task():
     while True:
         try:
             if cache_warmer.should_warm():
-                # Get a database session
-                db = next(get_db())
+                # Get a database session with proper cleanup
+                db_gen = get_db()
+                db = next(db_gen)
                 try:
                     stats = await cache_warmer.warm_all_caches(db)
                     logger.info(f"Cache warming task completed: {stats}")
                 finally:
-                    db.close()
+                    # Properly close the generator to ensure cleanup runs
+                    try:
+                        next(db_gen)
+                    except StopIteration:
+                        pass
             
             # Sleep for 5 minutes before checking again
             await asyncio.sleep(300)

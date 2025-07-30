@@ -38,59 +38,45 @@ class TestCacheWarmer:
     @pytest.fixture
     def mock_menu_items(self):
         """Create mock menu items"""
-        return [
-            MagicMock(
-                id="item_1",
-                name="Tacos",
-                description="Delicious tacos",
-                price=8.99,
-                category_id="cat_1",
-                image_url="http://example.com/tacos.jpg",
-                is_active=True,
-                is_active=True
-            ),
-            MagicMock(
-                id="item_2",
-                name="Burrito",
-                description="Big burrito",
-                price=10.99,
-                category_id="cat_1",
-                image_url="http://example.com/burrito.jpg",
-                is_active=True,
-                is_active=True
-            )
-        ]
+        item1 = MagicMock()
+        item1.id = "item_1"
+        item1.name = "Tacos"
+        item1.description = "Delicious tacos"
+        item1.price = 8.99
+        item1.category_id = "cat_1"
+        item1.image_url = "http://example.com/tacos.jpg"
+        item1.is_active = True
+        
+        item2 = MagicMock()
+        item2.id = "item_2"
+        item2.name = "Burrito"
+        item2.description = "Big burrito"
+        item2.price = 10.99
+        item2.category_id = "cat_1"
+        item2.image_url = "http://example.com/burrito.jpg"
+        item2.is_active = True
+        
+        return [item1, item2]
     
     @pytest.fixture
     def mock_categories(self):
         """Create mock categories"""
-        return [
-            MagicMock(
-                id="cat_1",
-                name="Main Dishes",
-                description="Main course items",
-                is_active=True,
-                sort_order=1
-            ),
-            MagicMock(
-                id="cat_2",
-                name="Beverages",
-                description="Drinks",
-                is_active=True,
-                sort_order=2
-            )
-        ]
+        cat1 = MagicMock()
+        cat1.id = "cat_1"
+        cat1.name = "Main Dishes"
+        cat1.description = "Main course items"
+        cat1.is_active = True
+        cat1.sort_order = 1
+        
+        cat2 = MagicMock()
+        cat2.id = "cat_2"
+        cat2.name = "Beverages"
+        cat2.description = "Drinks"
+        cat2.is_active = True
+        cat2.sort_order = 2
+        
+        return [cat1, cat2]
     
-    @pytest.fixture
-    def mock_settings(self):
-        """Create mock restaurant settings"""
-        return MagicMock(
-            service_charge_percentage=10.0,
-            vat_percentage=20.0,
-            currency="GBP",
-            timezone="Europe/London",
-            opening_hours={"monday": "9-17", "tuesday": "9-17"}
-        )
     
     @pytest.mark.asyncio
     async def test_warm_all_caches_success(self, cache_warmer_instance, mock_db, mock_restaurants):
@@ -110,7 +96,7 @@ class TestCacheWarmer:
         assert stats["restaurants_warmed"] == 2
         assert stats["menus_warmed"] == 2
         assert stats["categories_warmed"] == 2
-        assert stats["settings_warmed"] == 2
+        assert stats["settings_warmed"] == 0  # Settings warming disabled
         assert stats["errors"] == []
         assert "started_at" in stats
         assert "completed_at" in stats
@@ -119,7 +105,7 @@ class TestCacheWarmer:
         # Verify each restaurant was warmed
         assert cache_warmer_instance._warm_menu_cache.call_count == 2
         assert cache_warmer_instance._warm_categories_cache.call_count == 2
-        assert cache_warmer_instance._warm_settings_cache.call_count == 2
+        # Settings warming disabled
     
     @pytest.mark.asyncio
     async def test_warm_all_caches_already_warming(self, cache_warmer_instance, mock_db):
@@ -137,7 +123,7 @@ class TestCacheWarmer:
         # Setup one successful and one failing warm
         cache_warmer_instance._warm_menu_cache = AsyncMock(side_effect=[True, Exception("Menu error")])
         cache_warmer_instance._warm_categories_cache = AsyncMock(return_value=True)
-        cache_warmer_instance._warm_settings_cache = AsyncMock(return_value=True)
+        # Settings warming disabled
         
         mock_db.query.return_value.filter.return_value.all.return_value = mock_restaurants
         
@@ -193,39 +179,6 @@ class TestCacheWarmer:
             assert categories_data[2]["name"] == "Beverages"
             assert kwargs["ttl"] == 3600
     
-    @pytest.mark.asyncio
-    async def test_warm_settings_cache(self, cache_warmer_instance, mock_db, mock_restaurants, mock_settings):
-        """Test warming settings cache for a restaurant"""
-        restaurant = mock_restaurants[0]
-        
-        # Setup settings query
-        mock_db.query.return_value.filter.return_value.first.return_value = mock_settings
-        
-        with patch.object(cache_service, 'set', return_value=True) as mock_set:
-            result = await cache_warmer_instance._warm_settings_cache(mock_db, restaurant)
-            
-            assert result is True
-            
-            # Verify cache was set with correct data
-            mock_set.assert_called_once()
-            cache_key, settings_data, kwargs = mock_set.call_args[0][0], mock_set.call_args[0][1], mock_set.call_args[1]
-            
-            assert settings_data["service_charge_percentage"] == 10.0
-            assert settings_data["vat_percentage"] == 20.0
-            assert settings_data["currency"] == "GBP"
-            assert kwargs["ttl"] == 1800
-    
-    @pytest.mark.asyncio
-    async def test_warm_settings_cache_no_settings(self, cache_warmer_instance, mock_db, mock_restaurants):
-        """Test warming settings cache when no settings exist"""
-        restaurant = mock_restaurants[0]
-        
-        # No settings found
-        mock_db.query.return_value.filter.return_value.first.return_value = None
-        
-        result = await cache_warmer_instance._warm_settings_cache(mock_db, restaurant)
-        
-        assert result is False
     
     @pytest.mark.asyncio
     async def test_warm_specific_restaurant(self, cache_warmer_instance, mock_db, mock_restaurants):
@@ -238,7 +191,7 @@ class TestCacheWarmer:
         # Mock warming methods
         cache_warmer_instance._warm_menu_cache = AsyncMock(return_value=True)
         cache_warmer_instance._warm_categories_cache = AsyncMock(return_value=True)
-        cache_warmer_instance._warm_settings_cache = AsyncMock(return_value=False)
+        # Settings warming disabled
         
         stats = await cache_warmer_instance.warm_specific_restaurant(mock_db, "rest_1")
         
@@ -304,7 +257,6 @@ class TestCacheWarmingTasks:
             
             # Verify warming was called
             mock_warmer.warm_all_caches.assert_called_once_with(mock_db)
-            mock_db.close.assert_called_once()
     
     @pytest.mark.asyncio
     async def test_warm_cache_task_error_handling(self):

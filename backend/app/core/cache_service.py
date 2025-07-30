@@ -361,47 +361,5 @@ async def warm_menu_cache(db):
         return 0
 
 
-async def warm_settings_cache(db):
-    """
-    Pre-populate cache with restaurant settings.
-    """
-    from app.models import Restaurant, RestaurantSettings
-    
-    try:
-        # Get all active restaurants
-        restaurants = db.query(Restaurant).filter(
-            Restaurant.is_active == True
-        ).all()
-        
-        warmed_count = 0
-        for restaurant in restaurants:
-            # Get settings
-            settings = db.query(RestaurantSettings).filter(
-                RestaurantSettings.restaurant_id == restaurant.id
-            ).first()
-            
-            if settings:
-                # Generate cache key
-                cache_key = cache_service.cache_key(
-                    "settings",
-                    restaurant_id=str(restaurant.id)
-                )
-                
-                # Convert to dict for caching
-                settings_data = {
-                    "service_charge_percentage": float(settings.service_charge_percentage),
-                    "vat_percentage": float(settings.vat_percentage),
-                    "currency": settings.currency,
-                    "timezone": settings.timezone,
-                    "opening_hours": settings.opening_hours,
-                }
-                
-                # Cache it
-                if await cache_service.set(cache_key, settings_data, ttl=1800):
-                    warmed_count += 1
-        
-        logger.info(f"Warmed settings cache for {warmed_count} restaurants")
-        return warmed_count
-    except Exception as e:
-        logger.error(f"Error warming settings cache: {e}")
-        return 0
+# Note: warm_settings_cache removed as RestaurantSettings model doesn't exist
+# Settings appear to be managed through PlatformConfiguration instead

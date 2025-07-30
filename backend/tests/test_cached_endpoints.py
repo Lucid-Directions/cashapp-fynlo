@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, AsyncMock, patch
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from app.core.database import User, Restaurant, Category, Product, RestaurantSettings
+from app.core.database import User, Restaurant, Category, Product, get_db
 from app.core.cache_service import cache_service
 from app.core.auth import get_current_user
 from app.main import app
