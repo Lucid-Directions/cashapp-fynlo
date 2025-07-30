@@ -277,12 +277,12 @@ export function withTheme<P extends object>(
 }
 
 // Utility hook for creating themed styles
-export const useThemedStyles = <T>(
+export function useThemedStyles<T>(
   createStyles: (theme: Theme) => T
-): T => {
+): T {
   const { theme } = useTheme();
   return React.useMemo(() => createStyles(theme), [theme, createStyles]);
-};
+}
 
 // Style factory helper
 export const createThemedStyles = <T>(
