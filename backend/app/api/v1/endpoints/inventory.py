@@ -12,7 +12,7 @@ from app.core.database import get_db
 from app.core.database import User # Assuming User model for authentication/authorization
 from app.crud import inventory as crud_inventory
 from app.schemas import inventory_schemas as schemas
-from app.api.v1.dependencies import get_current_user
+from app.core.dependencies import get_current_user
 from app.core.tenant_security import TenantSecurity
 from app.core.response_helper import APIResponseHelper
 
