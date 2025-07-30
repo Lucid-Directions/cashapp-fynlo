@@ -49,6 +49,8 @@ celery==5.3.6
 # Monitoring & Logging - Latest versions
 python-dotenv==1.0.0
 python-json-logger==2.0.7
+pybreaker==1.4.0  # Circuit breaker for external API calls
+psutil==5.9.8  # System monitoring for health checks
 
 # Validation Dependencies - Required for core validation
 jsonschema==4.21.1
