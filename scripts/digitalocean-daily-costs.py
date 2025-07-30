@@ -10,6 +10,7 @@ import requests
 from datetime import datetime, timedelta
 from typing import Dict, List, Tuple
 import statistics
+import calendar
 
 class DailyCostTracker:
     def __init__(self, api_token: str):
@@ -32,10 +33,20 @@ class DailyCostTracker:
             # Get current date info
             today = datetime.now()
             day_of_month = today.day
-            days_in_month = (datetime(today.year, today.month + 1, 1) - timedelta(days=1)).day if today.month < 12 else 31
+            days_in_month = calendar.monthrange(today.year, today.month)[1]
             
-            # Calculate metrics
-            mtd_usage = float(data.get('month_to_date_usage', '0'))
+            # Calculate metrics with safe conversion
+            try:
+                mtd_usage = float(data.get('month_to_date_usage', '0'))
+            except (ValueError, TypeError):
+                mtd_usage = 0.0
+                print(f"⚠️  Warning: Invalid month_to_date_usage value")
+            
+            try:
+                account_balance = float(data.get('account_balance', '0'))
+            except (ValueError, TypeError):
+                account_balance = 0.0
+                
             daily_average = mtd_usage / day_of_month if day_of_month > 0 else 0
             projected_monthly = daily_average * days_in_month
             
@@ -45,7 +56,7 @@ class DailyCostTracker:
                 "daily_average": round(daily_average, 2),
                 "projected_monthly": round(projected_monthly, 2),
                 "day_of_month": day_of_month,
-                "account_balance": float(data.get('account_balance', '0'))
+                "account_balance": account_balance
             }
         except Exception as e:
             print(f"❌ Error fetching costs: {e}")

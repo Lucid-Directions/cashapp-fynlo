@@ -8,7 +8,7 @@ import os
 import json
 import smtplib
 from email.mime.text import MIMEText
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Set
 import requests
 import schedule
@@ -106,18 +106,22 @@ class ResourceMonitor:
         
         # Snapshot retention (30 days for non-critical)
         response = self.make_request("snapshots")
-        cutoff_date = datetime.now() - timedelta(days=30)
+        cutoff_date = datetime.now(timezone.utc) - timedelta(days=30)
         
         for snapshot in response.get("snapshots", []):
             tags = snapshot.get("tags", [])
             if "critical-backup" not in tags:
-                created_at = datetime.fromisoformat(snapshot["created_at"].replace("Z", "+00:00"))
+                try:
+                    created_at = datetime.fromisoformat(snapshot["created_at"].replace("Z", "+00:00"))
+                except ValueError:
+                    continue  # Skip snapshot with invalid date
+                    
                 if created_at < cutoff_date:
                     policy_violations.append({
                         "type": "snapshot",
                         "id": snapshot["id"],
                         "name": snapshot["name"],
-                        "violation": f"Non-critical snapshot older than 30 days ({(datetime.now() - created_at).days} days)",
+                        "violation": f"Non-critical snapshot older than 30 days ({(datetime.now(timezone.utc) - created_at).days} days)",
                         "action": "delete"
                     })
         
@@ -129,7 +133,10 @@ class ResourceMonitor:
                 for tag in tags:
                     if tag.startswith("auto-delete:"):
                         delete_after = tag.split(":")[1]
-                        created_at = datetime.fromisoformat(resource["created_at"].replace("Z", "+00:00"))
+                        try:
+                            created_at = datetime.fromisoformat(resource["created_at"].replace("Z", "+00:00"))
+                        except ValueError:
+                            continue  # Skip resource with invalid date
                         
                         if delete_after == "7days":
                             expiry = created_at + timedelta(days=7)
@@ -138,7 +145,7 @@ class ResourceMonitor:
                         else:
                             continue
                         
-                        if datetime.now() > expiry:
+                        if datetime.now(timezone.utc) > expiry:
                             policy_violations.append({
                                 "type": resource_type[:-1],  # Remove 's'
                                 "id": resource["id"],

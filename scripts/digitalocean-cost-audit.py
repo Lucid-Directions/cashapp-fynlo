@@ -7,7 +7,7 @@ Identifies zombie resources and calculates potential savings
 import os
 import sys
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Tuple
 import requests
 
@@ -52,10 +52,14 @@ class DigitalOceanAuditor:
             print("  ⚠️  Unable to access snapshots")
             return old_snapshots, total_cost
         
-        cutoff_date = datetime.now() - timedelta(days=30)
+        cutoff_date = datetime.now(timezone.utc) - timedelta(days=30)
         
         for snapshot in data.get("snapshots", []):
-            created_at = datetime.fromisoformat(snapshot["created_at"].replace("Z", "+00:00"))
+            try:
+                created_at = datetime.fromisoformat(snapshot["created_at"].replace("Z", "+00:00"))
+            except ValueError:
+                continue  # Skip snapshot with invalid date
+                
             if created_at < cutoff_date:
                 size_gb = snapshot["size_gigabytes"]
                 monthly_cost = size_gb * 0.05  # $0.05/GB/month
@@ -65,7 +69,7 @@ class DigitalOceanAuditor:
                     "name": snapshot["name"],
                     "size_gb": size_gb,
                     "created_at": snapshot["created_at"],
-                    "age_days": (datetime.now() - created_at).days,
+                    "age_days": (datetime.now(timezone.utc) - created_at).days,
                     "monthly_cost": monthly_cost,
                     "resource_type": snapshot.get("resource_type", "unknown")
                 })
