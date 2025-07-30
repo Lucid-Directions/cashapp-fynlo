@@ -26,7 +26,7 @@ describe('Menu Loading Performance', () => {
 
   test('should handle timeout and retry', async () => {
     let attemptCount = 0;
-    
+
     // Mock fetch to simulate timeout on first attempt
     global.fetch = jest.fn().mockImplementation(() => {
       attemptCount++;
@@ -39,12 +39,11 @@ describe('Menu Loading Performance', () => {
         // Second attempt: success
         return Promise.resolve({
           ok: true,
-          json: () => Promise.resolve({
-            success: true,
-            data: [
-              { id: 1, name: 'Test Item', price: 10.99, category: 'Test' }
-            ]
-          })
+          json: () =>
+            Promise.resolve({
+              success: true,
+              data: [{ id: 1, name: 'Test Item', price: 10.99, category: 'Test' }],
+            }),
         });
       }
     });
@@ -57,17 +56,16 @@ describe('Menu Loading Performance', () => {
 
   test('should use cache on subsequent calls', async () => {
     let fetchCallCount = 0;
-    
+
     global.fetch = jest.fn().mockImplementation(() => {
       fetchCallCount++;
       return Promise.resolve({
         ok: true,
-        json: () => Promise.resolve({
-          success: true,
-          data: [
-            { id: 1, name: 'Cached Item', price: 5.99, category: 'Test' }
-          ]
-        })
+        json: () =>
+          Promise.resolve({
+            success: true,
+            data: [{ id: 1, name: 'Cached Item', price: 5.99, category: 'Test' }],
+          }),
       });
     });
 
@@ -96,12 +94,11 @@ describe('Menu Loading Performance', () => {
     // First call - successful
     global.fetch = jest.fn().mockResolvedValueOnce({
       ok: true,
-      json: () => Promise.resolve({
-        success: true,
-        data: [
-          { id: 1, name: 'Original Item', price: 7.99, category: 'Test' }
-        ]
-      })
+      json: () =>
+        Promise.resolve({
+          success: true,
+          data: [{ id: 1, name: 'Original Item', price: 7.99, category: 'Test' }],
+        }),
     });
 
     const items1 = await dbService.getMenuItems();

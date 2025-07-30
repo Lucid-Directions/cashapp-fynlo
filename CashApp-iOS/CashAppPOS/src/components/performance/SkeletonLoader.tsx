@@ -39,7 +39,7 @@ const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({
           duration: 1000,
           useNativeDriver: false,
         }),
-      ])
+      ]),
     );
 
     shimmerAnimation.start();
@@ -62,8 +62,7 @@ const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({
           borderRadius,
         },
         style,
-      ]}
-    >
+      ]}>
       <Animated.View
         style={[
           styles.shimmer,

@@ -9,9 +9,10 @@ import { ThemeProvider, defaultTheme } from '../../design-system/ThemeProvider';
 jest.mock('react-native-vector-icons/MaterialIcons', () => {
   const RealIcon = jest.requireActual('react-native-vector-icons/MaterialIcons');
   // Mock the specific icon being used in CartIcon
-  return (props: any) => <RealIcon name={props.name} size={props.size} color={props.color} testID="mock-icon" />;
+  return (props: any) => (
+    <RealIcon name={props.name} size={props.size} color={props.color} testID="mock-icon" />
+  );
 });
-
 
 const mockTheme = {
   colors: {
@@ -27,11 +28,7 @@ const mockTheme = {
 
 // Helper to render with ThemeProvider if your component uses useTheme
 const renderWithProviders = (ui: React.ReactElement) => {
-  return render(
-    <ThemeProvider theme={mockTheme}>
-      {ui}
-    </ThemeProvider>
-  );
+  return render(<ThemeProvider theme={mockTheme}>{ui}</ThemeProvider>);
 };
 
 describe('CartIcon', () => {

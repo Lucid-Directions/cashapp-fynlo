@@ -114,7 +114,7 @@ const BusinessSettingsScreen: React.FC = () => {
       Alert.alert(
         'Payment Methods',
         'Payment processing is managed by the platform owner. Current supported methods:\n\n• Card payments (Chip & PIN, Contactless)\n• Apple Pay & Google Pay\n• Cash transactions\n• QR Code payments\n\nContact platform support for changes or questions.',
-        [{ text: 'OK' }]
+        [{ text: 'OK' }],
       );
       return;
     }
@@ -125,24 +125,19 @@ const BusinessSettingsScreen: React.FC = () => {
     <TouchableOpacity
       style={styles.settingCard}
       onPress={() => handleSettingPress(item)}
-      activeOpacity={0.7}
-    >
+      activeOpacity={0.7}>
       <View style={[styles.settingIcon, { backgroundColor: `${Colors.primary}15` }]}>
         <Icon name={item.icon} size={24} color={Colors.primary} />
       </View>
-      
+
       <View style={styles.settingContent}>
         <Text style={styles.settingTitle}>{item.title}</Text>
         <Text style={styles.settingDescription}>{item.description}</Text>
       </View>
-      
+
       <View style={styles.settingStatus}>
         {item.status && (
-          <Icon 
-            name={getStatusIcon(item.status)} 
-            size={20} 
-            color={getStatusColor(item.status)} 
-          />
+          <Icon name={getStatusIcon(item.status)} size={20} color={getStatusColor(item.status)} />
         )}
         <Icon name="chevron-right" size={24} color={Colors.lightGray} />
       </View>
@@ -152,22 +147,21 @@ const BusinessSettingsScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor={Colors.primary} barStyle="light-content" />
-      
+
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
-          testID="back-button"
-        >
+          testID="back-button">
           <Icon name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>
-        
+
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle}>Business Settings</Text>
           <Text style={styles.headerSubtitle}>Configure your business information</Text>
         </View>
-        
+
         <TouchableOpacity style={styles.helpButton}>
           <Icon name="help-outline" size={24} color={Colors.white} />
         </TouchableOpacity>

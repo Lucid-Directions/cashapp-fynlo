@@ -30,8 +30,8 @@ const ENV = {
 
 // Clover POS Color Scheme
 const Colors = {
-  primary: '#00A651',      // Clover Green
-  secondary: '#0066CC',    // Clover Blue
+  primary: '#00A651', // Clover Green
+  secondary: '#0066CC', // Clover Blue
   success: '#00A651',
   warning: '#FF6B35',
   danger: '#E74C3C',
@@ -94,14 +94,15 @@ const InventoryScreen: React.FC = () => {
     }
   }, [inventory, searchQuery, selectedCategory, selectedStatus, isLoading, error]);
 
-  const loadInventory = async () => { // Modified
+  const loadInventory = async () => {
+    // Modified
     setIsLoading(true);
     setError(null);
     try {
       const dataService = DataService.getInstance();
       // Assuming a getInventory method will be added to DataService
       const inventoryData = await dataService.getInventory();
-      
+
       // Map the API response to ensure all required fields exist
       const mappedInventory = (inventoryData || []).map((item: any, index: number) => ({
         // Use nullish coalescing to properly handle 0 as a valid ID
@@ -116,7 +117,7 @@ const InventoryScreen: React.FC = () => {
         lastRestocked: item.lastRestocked ? new Date(item.lastRestocked) : new Date(),
         turnoverRate: item.turnoverRate ?? item.turnover_rate ?? 0,
       }));
-      
+
       setInventory(mappedInventory);
     } catch (e: any) {
       setError(e.message || 'Failed to load inventory.');
@@ -147,8 +148,8 @@ const InventoryScreen: React.FC = () => {
           filtered = filtered.filter(item => item.currentStock > item.maximumStock);
           break;
         case 'optimal':
-          filtered = filtered.filter(item => 
-            item.currentStock > item.minimumStock && item.currentStock <= item.maximumStock
+          filtered = filtered.filter(
+            item => item.currentStock > item.minimumStock && item.currentStock <= item.maximumStock,
           );
           break;
       }
@@ -156,10 +157,11 @@ const InventoryScreen: React.FC = () => {
 
     // Apply search query
     if (searchQuery) {
-      filtered = filtered.filter(item =>
-        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.supplier.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.category.toLowerCase().includes(searchQuery.toLowerCase())
+      filtered = filtered.filter(
+        item =>
+          item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          item.supplier.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          item.category.toLowerCase().includes(searchQuery.toLowerCase()),
       );
     }
 
@@ -199,7 +201,8 @@ const InventoryScreen: React.FC = () => {
         continue;
       }
 
-      if (item.sku) { // SKU matched by backend
+      if (item.sku) {
+        // SKU matched by backend
         try {
           // TODO: Implement InventoryApiService.adjustStock when backend is properly connected
           console.log(`Would adjust stock for SKU ${item.sku} by ${quantity} (simulated)`);
@@ -212,7 +215,9 @@ const InventoryScreen: React.FC = () => {
         }
       } else {
         // No SKU match, pre-populate New Item form (placeholder)
-        console.log(`Item "${item.name}" (Qty: ${quantity}, Price: ${item.price}) has no SKU. Would pre-populate new item form.`);
+        console.log(
+          `Item "${item.name}" (Qty: ${quantity}, Price: ${item.price}) has no SKU. Would pre-populate new item form.`,
+        );
         // In a real app, you'd navigate to a "Create New Item" screen/modal here,
         // passing item.name, item.quantity, item.price etc.
         // e.g., navigation.navigate('CreateItemScreen', { initialData: item });
@@ -241,8 +246,10 @@ const InventoryScreen: React.FC = () => {
 
   const getStockStatus = (item: InventoryData) => {
     if (item.currentStock === 0) return { status: 'Out of Stock', color: Colors.danger };
-    if (item.currentStock <= item.minimumStock) return { status: 'Low Stock', color: Colors.warning };
-    if (item.currentStock > item.maximumStock) return { status: 'Overstocked', color: Colors.secondary };
+    if (item.currentStock <= item.minimumStock)
+      return { status: 'Low Stock', color: Colors.warning };
+    if (item.currentStock > item.maximumStock)
+      return { status: 'Overstocked', color: Colors.secondary };
     return { status: 'In Stock', color: Colors.success };
   };
 
@@ -305,7 +312,7 @@ const InventoryScreen: React.FC = () => {
     }
 
     // Update the inventory item
-    const updatedInventory = inventory.map(item => 
+    const updatedInventory = inventory.map(item =>
       item.itemId === selectedItem.itemId
         ? {
             ...item,
@@ -317,13 +324,13 @@ const InventoryScreen: React.FC = () => {
             unitCost,
             supplier: editFormData.supplier.trim(),
           }
-        : item
+        : item,
     );
 
     setInventory(updatedInventory);
     setShowEditModal(false);
     setSelectedItem(null);
-    
+
     Alert.alert('Success', 'Inventory item updated successfully!');
   };
 
@@ -350,8 +357,8 @@ const InventoryScreen: React.FC = () => {
     }
 
     // Check if item already exists
-    const itemExists = inventory.some(item => 
-      item.name.toLowerCase() === newItemFormData.name.trim().toLowerCase()
+    const itemExists = inventory.some(
+      item => item.name.toLowerCase() === newItemFormData.name.trim().toLowerCase(),
     );
     if (itemExists) {
       Alert.alert('Error', 'An item with this name already exists');
@@ -374,7 +381,7 @@ const InventoryScreen: React.FC = () => {
 
     // Add to inventory list
     setInventory([...inventory, newItem]);
-    
+
     // Reset form
     setNewItemFormData({
       name: '',
@@ -385,10 +392,10 @@ const InventoryScreen: React.FC = () => {
       unitCost: '0.00',
       supplier: '',
     });
-    
+
     // Close modal
     setShowAddItemModal(false);
-    
+
     // Show success message
     Alert.alert('Success', `${newItem.name} has been added to your inventory!`);
   };
@@ -409,13 +416,12 @@ const InventoryScreen: React.FC = () => {
   const renderInventoryItem = ({ item }: { item: InventoryData }) => {
     const stockStatus = getStockStatus(item);
     const stockPercentage = getStockPercentage(item);
-    
+
     return (
-      <TouchableOpacity 
+      <TouchableOpacity
         style={styles.inventoryCard}
         onPress={() => setSelectedItem(item)}
-        activeOpacity={0.7}
-      >
+        activeOpacity={0.7}>
         <View style={styles.itemHeader}>
           <View style={styles.itemInfo}>
             <Text style={styles.itemName}>{item.name}</Text>
@@ -423,10 +429,7 @@ const InventoryScreen: React.FC = () => {
             <Text style={styles.itemSupplier}>by {item.supplier}</Text>
           </View>
           <View style={styles.itemActions}>
-            <TouchableOpacity 
-              style={styles.restockButton}
-              onPress={() => handleRestock(item)}
-            >
+            <TouchableOpacity style={styles.restockButton} onPress={() => handleRestock(item)}>
               <Icon name="add" size={20} color={Colors.primary} />
             </TouchableOpacity>
           </View>
@@ -435,14 +438,14 @@ const InventoryScreen: React.FC = () => {
         <View style={styles.stockInfo}>
           <View style={styles.stockLevel}>
             <View style={styles.stockBar}>
-              <View 
+              <View
                 style={[
-                  styles.stockProgress, 
-                  { 
+                  styles.stockProgress,
+                  {
                     width: `${stockPercentage}%`,
-                    backgroundColor: stockStatus.color 
-                  }
-                ]} 
+                    backgroundColor: stockStatus.color,
+                  },
+                ]}
               />
             </View>
             <Text style={styles.stockText}>
@@ -459,7 +462,9 @@ const InventoryScreen: React.FC = () => {
         <View style={styles.itemMetrics}>
           <View style={styles.metric}>
             <Icon name="attach-money" size={16} color={Colors.darkGray} />
-            <Text style={styles.metricText}>£{item.unitCost ? item.unitCost.toFixed(2) : '0.00'}</Text>
+            <Text style={styles.metricText}>
+              £{item.unitCost ? item.unitCost.toFixed(2) : '0.00'}
+            </Text>
           </View>
           <View style={styles.metric}>
             <Icon name="trending-up" size={16} color={Colors.darkGray} />
@@ -479,7 +484,10 @@ const InventoryScreen: React.FC = () => {
     total: inventory.length,
     lowStock: inventory.filter(item => item.currentStock <= item.minimumStock).length,
     outOfStock: inventory.filter(item => item.currentStock === 0).length,
-    totalValue: inventory.length > 0 ? inventory.reduce((sum, item) => sum + (item.currentStock * (item.unitCost || 0)), 0) : 0,
+    totalValue:
+      inventory.length > 0
+        ? inventory.reduce((sum, item) => sum + item.currentStock * (item.unitCost || 0), 0)
+        : 0,
   };
 
   if (!ENV.FEATURE_INVENTORY) {
@@ -508,7 +516,9 @@ const InventoryScreen: React.FC = () => {
         <Icon name="inventory" size={64} color={Colors.lightGray} />
         <Text style={styles.emptyStateText}>No items found</Text>
         <Text style={styles.emptyStateSubtext}>
-          {searchQuery ? 'Try adjusting your search' : 'Add your first inventory item or pull to refresh'}
+          {searchQuery
+            ? 'Try adjusting your search'
+            : 'Add your first inventory item or pull to refresh'}
         </Text>
       </View>
     );
@@ -517,36 +527,33 @@ const InventoryScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor={Colors.primary} barStyle="light-content" />
-      
+
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
-          activeOpacity={0.7}
-        >
+          activeOpacity={0.7}>
           <Icon name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>
-        
+
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle}>Inventory</Text>
           <Text style={styles.headerSubtitle}>{filteredInventory.length} items</Text>
         </View>
-        
+
         <View style={styles.headerActions}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.scanButton}
             onPress={handleQRScan}
-            accessibilityLabel="Scan Receipt or Barcode"
-          >
+            accessibilityLabel="Scan Receipt or Barcode">
             <Icon name="camera" size={24} color={Colors.white} />
           </TouchableOpacity>
-          
-          <TouchableOpacity 
+
+          <TouchableOpacity
             style={styles.addButton}
             onPress={() => setShowAddItemModal(true)}
-            accessibilityLabel="Add New Inventory Item"
-          >
+            accessibilityLabel="Add New Inventory Item">
             <Icon name="add" size={24} color={Colors.white} />
           </TouchableOpacity>
         </View>
@@ -587,11 +594,7 @@ const InventoryScreen: React.FC = () => {
           />
         </View>
 
-        <ScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false}
-          style={styles.filterSection}
-        >
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterSection}>
           <View style={styles.filterGroup}>
             <Text style={styles.filterGroupTitle}>Category:</Text>
             {['all', ...categories].map(category => (
@@ -599,14 +602,14 @@ const InventoryScreen: React.FC = () => {
                 key={category}
                 style={[
                   styles.filterButton,
-                  selectedCategory === category && styles.filterButtonActive
+                  selectedCategory === category && styles.filterButtonActive,
                 ]}
-                onPress={() => setSelectedCategory(category)}
-              >
-                <Text style={[
-                  styles.filterButtonText,
-                  selectedCategory === category && styles.filterButtonTextActive
-                ]}>
+                onPress={() => setSelectedCategory(category)}>
+                <Text
+                  style={[
+                    styles.filterButtonText,
+                    selectedCategory === category && styles.filterButtonTextActive,
+                  ]}>
                   {category === 'all' ? 'All' : category}
                 </Text>
               </TouchableOpacity>
@@ -614,11 +617,7 @@ const InventoryScreen: React.FC = () => {
           </View>
         </ScrollView>
 
-        <ScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false}
-          style={styles.filterSection}
-        >
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterSection}>
           <View style={styles.filterGroup}>
             <Text style={styles.filterGroupTitle}>Status:</Text>
             {[
@@ -631,14 +630,14 @@ const InventoryScreen: React.FC = () => {
                 key={status.key}
                 style={[
                   styles.filterButton,
-                  selectedStatus === status.key && styles.filterButtonActive
+                  selectedStatus === status.key && styles.filterButtonActive,
                 ]}
-                onPress={() => setSelectedStatus(status.key)}
-              >
-                <Text style={[
-                  styles.filterButtonText,
-                  selectedStatus === status.key && styles.filterButtonTextActive
-                ]}>
+                onPress={() => setSelectedStatus(status.key)}>
+                <Text
+                  style={[
+                    styles.filterButtonText,
+                    selectedStatus === status.key && styles.filterButtonTextActive,
+                  ]}>
                   {status.label}
                 </Text>
               </TouchableOpacity>
@@ -664,8 +663,7 @@ const InventoryScreen: React.FC = () => {
         visible={!!selectedItem && !showRestockModal}
         animationType="slide"
         transparent={true}
-        onRequestClose={() => setSelectedItem(null)}
-      >
+        onRequestClose={() => setSelectedItem(null)}>
         <View style={styles.modalOverlay}>
           <View style={styles.itemModal}>
             <View style={styles.modalHeader}>
@@ -674,14 +672,22 @@ const InventoryScreen: React.FC = () => {
                 <Icon name="close" size={24} color={Colors.text} />
               </TouchableOpacity>
             </View>
-            
+
             {selectedItem && (
               <ScrollView style={styles.modalContent}>
                 <View style={styles.itemProfile}>
                   <Text style={styles.profileItemName}>{selectedItem.name}</Text>
                   <Text style={styles.profileCategory}>{selectedItem.category}</Text>
-                  <View style={[styles.profileStatus, { backgroundColor: `${getStockStatus(selectedItem).color}20` }]}>
-                    <Text style={[styles.profileStatusText, { color: getStockStatus(selectedItem).color }]}>
+                  <View
+                    style={[
+                      styles.profileStatus,
+                      { backgroundColor: `${getStockStatus(selectedItem).color}20` },
+                    ]}>
+                    <Text
+                      style={[
+                        styles.profileStatusText,
+                        { color: getStockStatus(selectedItem).color },
+                      ]}>
                       {getStockStatus(selectedItem).status}
                     </Text>
                   </View>
@@ -717,7 +723,9 @@ const InventoryScreen: React.FC = () => {
                   </View>
                   <View style={styles.detailRow}>
                     <Icon name="attach-money" size={20} color={Colors.darkGray} />
-                    <Text style={styles.detailText}>£{selectedItem.unitCost.toFixed(2)} per unit</Text>
+                    <Text style={styles.detailText}>
+                      £{selectedItem.unitCost.toFixed(2)} per unit
+                    </Text>
                   </View>
                   <View style={styles.detailRow}>
                     <Icon name="schedule" size={20} color={Colors.darkGray} />
@@ -728,17 +736,15 @@ const InventoryScreen: React.FC = () => {
                 </View>
 
                 <View style={styles.actionButtons}>
-                  <TouchableOpacity 
+                  <TouchableOpacity
                     style={[styles.actionButton, styles.restockActionButton]}
-                    onPress={() => handleRestock(selectedItem)}
-                  >
+                    onPress={() => handleRestock(selectedItem)}>
                     <Icon name="add" size={20} color={Colors.white} />
                     <Text style={styles.actionButtonText}>Restock</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity 
+                  <TouchableOpacity
                     style={[styles.actionButton, styles.editActionButton]}
-                    onPress={() => handleEditItem(selectedItem)}
-                  >
+                    onPress={() => handleEditItem(selectedItem)}>
                     <Icon name="edit" size={20} color={Colors.white} />
                     <Text style={styles.actionButtonText}>Edit</Text>
                   </TouchableOpacity>
@@ -754,8 +760,7 @@ const InventoryScreen: React.FC = () => {
         visible={showRestockModal}
         animationType="slide"
         transparent={true}
-        onRequestClose={() => setShowRestockModal(false)}
-      >
+        onRequestClose={() => setShowRestockModal(false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.restockModal}>
             <View style={styles.modalHeader}>
@@ -764,21 +769,23 @@ const InventoryScreen: React.FC = () => {
                 <Icon name="close" size={24} color={Colors.text} />
               </TouchableOpacity>
             </View>
-            
+
             {selectedItem && (
               <View style={styles.restockContent}>
                 <Text style={styles.restockItemName}>{selectedItem.name}</Text>
                 <Text style={styles.restockCurrentStock}>
                   Current Stock: {selectedItem.currentStock} units
                 </Text>
-                
+
                 <View style={styles.restockInputSection}>
                   <Text style={styles.inputLabel}>Quantity to Add</Text>
                   <TextInput
                     style={styles.quantityInput}
                     placeholder="Enter quantity"
                     keyboardType="numeric"
-                    defaultValue={(selectedItem.maximumStock - selectedItem.currentStock).toString()}
+                    defaultValue={(
+                      selectedItem.maximumStock - selectedItem.currentStock
+                    ).toString()}
                   />
                 </View>
 
@@ -799,14 +806,13 @@ const InventoryScreen: React.FC = () => {
                   </View>
                 </View>
 
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.confirmRestockButton}
                   onPress={() => {
                     Alert.alert('Success', 'Item restocked successfully!');
                     setShowRestockModal(false);
                     setSelectedItem(null);
-                  }}
-                >
+                  }}>
                   <Text style={styles.confirmRestockText}>Confirm Restock</Text>
                 </TouchableOpacity>
               </View>
@@ -820,8 +826,7 @@ const InventoryScreen: React.FC = () => {
         visible={showEditModal}
         animationType="slide"
         transparent={true}
-        onRequestClose={() => setShowEditModal(false)}
-      >
+        onRequestClose={() => setShowEditModal(false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.editModal}>
             <View style={styles.modalHeader}>
@@ -830,14 +835,14 @@ const InventoryScreen: React.FC = () => {
                 <Icon name="close" size={24} color={Colors.text} />
               </TouchableOpacity>
             </View>
-            
+
             <ScrollView style={styles.editContent} showsVerticalScrollIndicator={false}>
               <View style={styles.formGroup}>
                 <Text style={styles.formLabel}>Item Name</Text>
                 <TextInput
                   style={styles.formInput}
                   value={editFormData.name}
-                  onChangeText={(text) => setEditFormData({...editFormData, name: text})}
+                  onChangeText={text => setEditFormData({ ...editFormData, name: text })}
                   placeholder="Enter item name"
                 />
               </View>
@@ -850,14 +855,14 @@ const InventoryScreen: React.FC = () => {
                       key={cat}
                       style={[
                         styles.categoryOption,
-                        editFormData.category === cat && styles.categoryOptionSelected
+                        editFormData.category === cat && styles.categoryOptionSelected,
                       ]}
-                      onPress={() => setEditFormData({...editFormData, category: cat})}
-                    >
-                      <Text style={[
-                        styles.categoryOptionText,
-                        editFormData.category === cat && styles.categoryOptionTextSelected
-                      ]}>
+                      onPress={() => setEditFormData({ ...editFormData, category: cat })}>
+                      <Text
+                        style={[
+                          styles.categoryOptionText,
+                          editFormData.category === cat && styles.categoryOptionTextSelected,
+                        ]}>
                         {cat}
                       </Text>
                     </TouchableOpacity>
@@ -871,7 +876,7 @@ const InventoryScreen: React.FC = () => {
                   <TextInput
                     style={styles.formInput}
                     value={editFormData.currentStock}
-                    onChangeText={(text) => setEditFormData({...editFormData, currentStock: text})}
+                    onChangeText={text => setEditFormData({ ...editFormData, currentStock: text })}
                     placeholder="0"
                     keyboardType="numeric"
                   />
@@ -882,7 +887,7 @@ const InventoryScreen: React.FC = () => {
                   <TextInput
                     style={styles.formInput}
                     value={editFormData.unitCost}
-                    onChangeText={(text) => setEditFormData({...editFormData, unitCost: text})}
+                    onChangeText={text => setEditFormData({ ...editFormData, unitCost: text })}
                     placeholder="0.00"
                     keyboardType="decimal-pad"
                   />
@@ -895,7 +900,7 @@ const InventoryScreen: React.FC = () => {
                   <TextInput
                     style={styles.formInput}
                     value={editFormData.minimumStock}
-                    onChangeText={(text) => setEditFormData({...editFormData, minimumStock: text})}
+                    onChangeText={text => setEditFormData({ ...editFormData, minimumStock: text })}
                     placeholder="0"
                     keyboardType="numeric"
                   />
@@ -906,7 +911,7 @@ const InventoryScreen: React.FC = () => {
                   <TextInput
                     style={styles.formInput}
                     value={editFormData.maximumStock}
-                    onChangeText={(text) => setEditFormData({...editFormData, maximumStock: text})}
+                    onChangeText={text => setEditFormData({ ...editFormData, maximumStock: text })}
                     placeholder="0"
                     keyboardType="numeric"
                   />
@@ -918,23 +923,21 @@ const InventoryScreen: React.FC = () => {
                 <TextInput
                   style={styles.formInput}
                   value={editFormData.supplier}
-                  onChangeText={(text) => setEditFormData({...editFormData, supplier: text})}
+                  onChangeText={text => setEditFormData({ ...editFormData, supplier: text })}
                   placeholder="Enter supplier name"
                 />
               </View>
 
               <View style={styles.formActions}>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={[styles.formButton, styles.cancelButton]}
-                  onPress={() => setShowEditModal(false)}
-                >
+                  onPress={() => setShowEditModal(false)}>
                   <Text style={styles.cancelButtonText}>Cancel</Text>
                 </TouchableOpacity>
-                
-                <TouchableOpacity 
+
+                <TouchableOpacity
                   style={[styles.formButton, styles.saveButton]}
-                  onPress={handleSaveEdit}
-                >
+                  onPress={handleSaveEdit}>
                   <Icon name="save" size={20} color={Colors.white} />
                   <Text style={styles.saveButtonText}>Save Changes</Text>
                 </TouchableOpacity>
@@ -949,8 +952,7 @@ const InventoryScreen: React.FC = () => {
         visible={showAddItemModal}
         animationType="slide"
         transparent={true}
-        onRequestClose={handleCancelAddItem}
-      >
+        onRequestClose={handleCancelAddItem}>
         <View style={styles.modalOverlay}>
           <View style={styles.addItemModal}>
             <View style={styles.modalHeader}>
@@ -959,14 +961,14 @@ const InventoryScreen: React.FC = () => {
                 <Icon name="close" size={24} color={Colors.text} />
               </TouchableOpacity>
             </View>
-            
+
             <ScrollView style={styles.addItemContent} showsVerticalScrollIndicator={false}>
               <View style={styles.formGroup}>
                 <Text style={styles.formLabel}>Item Name *</Text>
                 <TextInput
                   style={styles.formInput}
                   value={newItemFormData.name}
-                  onChangeText={(text) => setNewItemFormData({...newItemFormData, name: text})}
+                  onChangeText={text => setNewItemFormData({ ...newItemFormData, name: text })}
                   placeholder="Enter item name"
                   placeholderTextColor={Colors.darkGray}
                 />
@@ -980,14 +982,14 @@ const InventoryScreen: React.FC = () => {
                       key={cat}
                       style={[
                         styles.categoryOption,
-                        newItemFormData.category === cat && styles.categoryOptionSelected
+                        newItemFormData.category === cat && styles.categoryOptionSelected,
                       ]}
-                      onPress={() => setNewItemFormData({...newItemFormData, category: cat})}
-                    >
-                      <Text style={[
-                        styles.categoryOptionText,
-                        newItemFormData.category === cat && styles.categoryOptionTextSelected
-                      ]}>
+                      onPress={() => setNewItemFormData({ ...newItemFormData, category: cat })}>
+                      <Text
+                        style={[
+                          styles.categoryOptionText,
+                          newItemFormData.category === cat && styles.categoryOptionTextSelected,
+                        ]}>
                         {cat}
                       </Text>
                     </TouchableOpacity>
@@ -1001,7 +1003,9 @@ const InventoryScreen: React.FC = () => {
                   <TextInput
                     style={styles.formInput}
                     value={newItemFormData.currentStock}
-                    onChangeText={(text) => setNewItemFormData({...newItemFormData, currentStock: text})}
+                    onChangeText={text =>
+                      setNewItemFormData({ ...newItemFormData, currentStock: text })
+                    }
                     placeholder="0"
                     keyboardType="numeric"
                     placeholderTextColor={Colors.darkGray}
@@ -1013,7 +1017,9 @@ const InventoryScreen: React.FC = () => {
                   <TextInput
                     style={styles.formInput}
                     value={newItemFormData.unitCost}
-                    onChangeText={(text) => setNewItemFormData({...newItemFormData, unitCost: text})}
+                    onChangeText={text =>
+                      setNewItemFormData({ ...newItemFormData, unitCost: text })
+                    }
                     placeholder="0.00"
                     keyboardType="decimal-pad"
                     placeholderTextColor={Colors.darkGray}
@@ -1027,7 +1033,9 @@ const InventoryScreen: React.FC = () => {
                   <TextInput
                     style={styles.formInput}
                     value={newItemFormData.minimumStock}
-                    onChangeText={(text) => setNewItemFormData({...newItemFormData, minimumStock: text})}
+                    onChangeText={text =>
+                      setNewItemFormData({ ...newItemFormData, minimumStock: text })
+                    }
                     placeholder="5"
                     keyboardType="numeric"
                     placeholderTextColor={Colors.darkGray}
@@ -1039,7 +1047,9 @@ const InventoryScreen: React.FC = () => {
                   <TextInput
                     style={styles.formInput}
                     value={newItemFormData.maximumStock}
-                    onChangeText={(text) => setNewItemFormData({...newItemFormData, maximumStock: text})}
+                    onChangeText={text =>
+                      setNewItemFormData({ ...newItemFormData, maximumStock: text })
+                    }
                     placeholder="50"
                     keyboardType="numeric"
                     placeholderTextColor={Colors.darkGray}
@@ -1052,24 +1062,22 @@ const InventoryScreen: React.FC = () => {
                 <TextInput
                   style={styles.formInput}
                   value={newItemFormData.supplier}
-                  onChangeText={(text) => setNewItemFormData({...newItemFormData, supplier: text})}
+                  onChangeText={text => setNewItemFormData({ ...newItemFormData, supplier: text })}
                   placeholder="Enter supplier name"
                   placeholderTextColor={Colors.darkGray}
                 />
               </View>
 
               <View style={styles.formActions}>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={[styles.formButton, styles.cancelButton]}
-                  onPress={handleCancelAddItem}
-                >
+                  onPress={handleCancelAddItem}>
                   <Text style={styles.cancelButtonText}>Cancel</Text>
                 </TouchableOpacity>
-                
-                <TouchableOpacity 
+
+                <TouchableOpacity
                   style={[styles.formButton, styles.saveButton]}
-                  onPress={handleAddNewItem}
-                >
+                  onPress={handleAddNewItem}>
                   <Icon name="add" size={20} color={Colors.white} />
                   <Text style={styles.saveButtonText}>Add Item</Text>
                 </TouchableOpacity>

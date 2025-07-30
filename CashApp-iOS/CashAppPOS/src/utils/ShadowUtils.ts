@@ -70,16 +70,14 @@ export const ShadowUtils = {
   }),
 
   // Custom shadow with optimized defaults
-  custom: (
-    options: {
-      backgroundColor?: string;
-      shadowColor?: string;
-      offset?: { width: number; height: number };
-      opacity?: number;
-      radius?: number;
-      elevation?: number;
-    }
-  ): ShadowStyle => ({
+  custom: (options: {
+    backgroundColor?: string;
+    shadowColor?: string;
+    offset?: { width: number; height: number };
+    opacity?: number;
+    radius?: number;
+    elevation?: number;
+  }): ShadowStyle => ({
     backgroundColor: options.backgroundColor || '#FFFFFF',
     shadowColor: options.shadowColor || '#000000',
     shadowOffset: options.offset || { width: 0, height: 2 },
@@ -95,7 +93,7 @@ export const ShadowUtils = {
  */
 export const createOptimizedShadow = (
   shadowLevel: 'light' | 'medium' | 'strong' | 'button' | 'none' = 'medium',
-  backgroundColor: string = '#FFFFFF'
+  backgroundColor: string = '#FFFFFF',
 ): ShadowStyle => {
   return ShadowUtils[shadowLevel](backgroundColor);
 };

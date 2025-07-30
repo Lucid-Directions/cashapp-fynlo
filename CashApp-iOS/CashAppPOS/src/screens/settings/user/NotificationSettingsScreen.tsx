@@ -1,13 +1,5 @@
 import React, { useState } from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-  ScrollView,
-  Alert,
-  Switch,
-} from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Alert, Switch } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 
@@ -34,32 +26,32 @@ interface NotificationSettings {
   soundEnabled: boolean;
   vibrationEnabled: boolean;
   badgeEnabled: boolean;
-  
+
   // Business notifications
   newOrders: boolean;
   lowInventory: boolean;
   dailyReports: boolean;
   weeklyReports: boolean;
   monthlyReports: boolean;
-  
+
   // Employee notifications
   clockInOut: boolean;
   missedBreaks: boolean;
   overtime: boolean;
   scheduleChanges: boolean;
-  
+
   // Payment notifications
   failedPayments: boolean;
   chargebacks: boolean;
   refunds: boolean;
   tipAdjustments: boolean;
-  
+
   // System notifications
   updates: boolean;
   maintenance: boolean;
   security: boolean;
   backups: boolean;
-  
+
   // Marketing notifications
   promotions: boolean;
   productNews: boolean;
@@ -69,39 +61,39 @@ interface NotificationSettings {
 
 const NotificationSettingsScreen: React.FC = () => {
   const navigation = useNavigation();
-  
+
   const [settings, setSettings] = useState<NotificationSettings>({
     // General
     masterEnabled: true,
     soundEnabled: true,
     vibrationEnabled: true,
     badgeEnabled: true,
-    
+
     // Business
     newOrders: true,
     lowInventory: true,
     dailyReports: true,
     weeklyReports: true,
     monthlyReports: false,
-    
+
     // Employee
     clockInOut: true,
     missedBreaks: true,
     overtime: true,
     scheduleChanges: true,
-    
+
     // Payment
     failedPayments: true,
     chargebacks: true,
     refunds: true,
     tipAdjustments: false,
-    
+
     // System
     updates: true,
     maintenance: true,
     security: true,
     backups: false,
-    
+
     // Marketing
     promotions: false,
     productNews: false,
@@ -116,9 +108,9 @@ const NotificationSettingsScreen: React.FC = () => {
     setSettings(prev => {
       const newSettings = {
         ...prev,
-        [setting]: !prev[setting]
+        [setting]: !prev[setting],
       };
-      
+
       // If master is disabled, disable all others
       if (setting === 'masterEnabled' && !prev.masterEnabled === false) {
         return {
@@ -128,7 +120,7 @@ const NotificationSettingsScreen: React.FC = () => {
           badgeEnabled: false,
         };
       }
-      
+
       return newSettings;
     });
   };
@@ -138,11 +130,11 @@ const NotificationSettingsScreen: React.FC = () => {
       Alert.alert('Notifications Disabled', 'Please enable notifications first.');
       return;
     }
-    
+
     Alert.alert(
       'Test Notification',
       'This is a test notification. You should see this appear as a system notification.',
-      [{ text: 'OK' }]
+      [{ text: 'OK' }],
     );
   };
 
@@ -152,61 +144,88 @@ const NotificationSettingsScreen: React.FC = () => {
       'This will reset all notification settings to their default values. Continue?',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Reset', style: 'destructive', onPress: () => {
-          setSettings({
-            masterEnabled: true,
-            soundEnabled: true,
-            vibrationEnabled: true,
-            badgeEnabled: true,
-            newOrders: true,
-            lowInventory: true,
-            dailyReports: true,
-            weeklyReports: true,
-            monthlyReports: false,
-            clockInOut: true,
-            missedBreaks: true,
-            overtime: true,
-            scheduleChanges: true,
-            failedPayments: true,
-            chargebacks: true,
-            refunds: true,
-            tipAdjustments: false,
-            updates: true,
-            maintenance: true,
-            security: true,
-            backups: false,
-            promotions: false,
-            productNews: false,
-            trainingTips: true,
-            surveys: false,
-          });
-          Alert.alert('Success', 'Notification settings reset to defaults.');
-        }}
-      ]
+        {
+          text: 'Reset',
+          style: 'destructive',
+          onPress: () => {
+            setSettings({
+              masterEnabled: true,
+              soundEnabled: true,
+              vibrationEnabled: true,
+              badgeEnabled: true,
+              newOrders: true,
+              lowInventory: true,
+              dailyReports: true,
+              weeklyReports: true,
+              monthlyReports: false,
+              clockInOut: true,
+              missedBreaks: true,
+              overtime: true,
+              scheduleChanges: true,
+              failedPayments: true,
+              chargebacks: true,
+              refunds: true,
+              tipAdjustments: false,
+              updates: true,
+              maintenance: true,
+              security: true,
+              backups: false,
+              promotions: false,
+              productNews: false,
+              trainingTips: true,
+              surveys: false,
+            });
+            Alert.alert('Success', 'Notification settings reset to defaults.');
+          },
+        },
+      ],
     );
   };
 
-  const getEnabledCount = (category: 'business' | 'employee' | 'payment' | 'system' | 'marketing') => {
+  const getEnabledCount = (
+    category: 'business' | 'employee' | 'payment' | 'system' | 'marketing',
+  ) => {
     const categorySettings = {
-      business: [settings.newOrders, settings.lowInventory, settings.dailyReports, settings.weeklyReports, settings.monthlyReports],
-      employee: [settings.clockInOut, settings.missedBreaks, settings.overtime, settings.scheduleChanges],
-      payment: [settings.failedPayments, settings.chargebacks, settings.refunds, settings.tipAdjustments],
+      business: [
+        settings.newOrders,
+        settings.lowInventory,
+        settings.dailyReports,
+        settings.weeklyReports,
+        settings.monthlyReports,
+      ],
+      employee: [
+        settings.clockInOut,
+        settings.missedBreaks,
+        settings.overtime,
+        settings.scheduleChanges,
+      ],
+      payment: [
+        settings.failedPayments,
+        settings.chargebacks,
+        settings.refunds,
+        settings.tipAdjustments,
+      ],
       system: [settings.updates, settings.maintenance, settings.security, settings.backups],
-      marketing: [settings.promotions, settings.productNews, settings.trainingTips, settings.surveys],
+      marketing: [
+        settings.promotions,
+        settings.productNews,
+        settings.trainingTips,
+        settings.surveys,
+      ],
     };
-    
+
     const enabled = categorySettings[category].filter(Boolean).length;
     const total = categorySettings[category].length;
     return `${enabled}/${total}`;
   };
 
-  const NotificationRow = ({ 
-    icon, 
-    title, 
-    description, 
-    setting, 
-    disabled = false 
-  }: { 
+  const NotificationRow = ({
+    icon,
+    title,
+    description,
+    setting,
+    disabled = false,
+  }: {
     icon: string;
     title: string;
     description: string;
@@ -273,7 +292,7 @@ const NotificationSettingsScreen: React.FC = () => {
               setting="soundEnabled"
               disabled={masterDisabled}
             />
-            
+
             <NotificationRow
               icon="vibration"
               title="Vibration"
@@ -281,7 +300,7 @@ const NotificationSettingsScreen: React.FC = () => {
               setting="vibrationEnabled"
               disabled={masterDisabled}
             />
-            
+
             <NotificationRow
               icon="circle-notifications"
               title="Badge Count"
@@ -298,12 +317,17 @@ const NotificationSettingsScreen: React.FC = () => {
           <View style={styles.settingsCard}>
             <View style={styles.notificationRow}>
               <View style={styles.notificationInfo}>
-                <Icon name="do-not-disturb" size={24} color={masterDisabled ? Colors.mediumGray : Colors.secondary} />
+                <Icon
+                  name="do-not-disturb"
+                  size={24}
+                  color={masterDisabled ? Colors.mediumGray : Colors.secondary}
+                />
                 <View style={styles.notificationTextInfo}>
                   <Text style={[styles.notificationTitle, masterDisabled && styles.disabledText]}>
                     Quiet Hours (10 PM - 8 AM)
                   </Text>
-                  <Text style={[styles.notificationDescription, masterDisabled && styles.disabledText]}>
+                  <Text
+                    style={[styles.notificationDescription, masterDisabled && styles.disabledText]}>
                     Reduce notifications during sleep hours
                   </Text>
                 </View>
@@ -319,12 +343,17 @@ const NotificationSettingsScreen: React.FC = () => {
 
             <View style={styles.notificationRow}>
               <View style={styles.notificationInfo}>
-                <Icon name="priority-high" size={24} color={masterDisabled ? Colors.mediumGray : Colors.danger} />
+                <Icon
+                  name="priority-high"
+                  size={24}
+                  color={masterDisabled ? Colors.mediumGray : Colors.danger}
+                />
                 <View style={styles.notificationTextInfo}>
                   <Text style={[styles.notificationTitle, masterDisabled && styles.disabledText]}>
                     Emergency Override
                   </Text>
-                  <Text style={[styles.notificationDescription, masterDisabled && styles.disabledText]}>
+                  <Text
+                    style={[styles.notificationDescription, masterDisabled && styles.disabledText]}>
                     Critical alerts ignore quiet hours
                   </Text>
                 </View>
@@ -354,7 +383,7 @@ const NotificationSettingsScreen: React.FC = () => {
               setting="newOrders"
               disabled={masterDisabled}
             />
-            
+
             <NotificationRow
               icon="inventory"
               title="Low Inventory"
@@ -362,7 +391,7 @@ const NotificationSettingsScreen: React.FC = () => {
               setting="lowInventory"
               disabled={masterDisabled}
             />
-            
+
             <NotificationRow
               icon="today"
               title="Daily Reports"
@@ -370,7 +399,7 @@ const NotificationSettingsScreen: React.FC = () => {
               setting="dailyReports"
               disabled={masterDisabled}
             />
-            
+
             <NotificationRow
               icon="date-range"
               title="Weekly Reports"
@@ -378,7 +407,7 @@ const NotificationSettingsScreen: React.FC = () => {
               setting="weeklyReports"
               disabled={masterDisabled}
             />
-            
+
             <NotificationRow
               icon="calendar-month"
               title="Monthly Reports"
@@ -403,7 +432,7 @@ const NotificationSettingsScreen: React.FC = () => {
               setting="clockInOut"
               disabled={masterDisabled}
             />
-            
+
             <NotificationRow
               icon="free-breakfast"
               title="Missed Breaks"
@@ -411,7 +440,7 @@ const NotificationSettingsScreen: React.FC = () => {
               setting="missedBreaks"
               disabled={masterDisabled}
             />
-            
+
             <NotificationRow
               icon="timer"
               title="Overtime Alerts"
@@ -419,7 +448,7 @@ const NotificationSettingsScreen: React.FC = () => {
               setting="overtime"
               disabled={masterDisabled}
             />
-            
+
             <NotificationRow
               icon="schedule"
               title="Schedule Changes"
@@ -444,7 +473,7 @@ const NotificationSettingsScreen: React.FC = () => {
               setting="failedPayments"
               disabled={masterDisabled}
             />
-            
+
             <NotificationRow
               icon="undo"
               title="Chargebacks"
@@ -452,7 +481,7 @@ const NotificationSettingsScreen: React.FC = () => {
               setting="chargebacks"
               disabled={masterDisabled}
             />
-            
+
             <NotificationRow
               icon="money-off"
               title="Refunds"
@@ -460,7 +489,7 @@ const NotificationSettingsScreen: React.FC = () => {
               setting="refunds"
               disabled={masterDisabled}
             />
-            
+
             <NotificationRow
               icon="attach-money"
               title="Tip Adjustments"
@@ -485,7 +514,7 @@ const NotificationSettingsScreen: React.FC = () => {
               setting="updates"
               disabled={masterDisabled}
             />
-            
+
             <NotificationRow
               icon="build"
               title="Maintenance"
@@ -493,7 +522,7 @@ const NotificationSettingsScreen: React.FC = () => {
               setting="maintenance"
               disabled={masterDisabled}
             />
-            
+
             <NotificationRow
               icon="security"
               title="Security Alerts"
@@ -501,7 +530,7 @@ const NotificationSettingsScreen: React.FC = () => {
               setting="security"
               disabled={masterDisabled}
             />
-            
+
             <NotificationRow
               icon="backup"
               title="Backup Status"
@@ -526,7 +555,7 @@ const NotificationSettingsScreen: React.FC = () => {
               setting="promotions"
               disabled={masterDisabled}
             />
-            
+
             <NotificationRow
               icon="new-releases"
               title="Product News"
@@ -534,7 +563,7 @@ const NotificationSettingsScreen: React.FC = () => {
               setting="productNews"
               disabled={masterDisabled}
             />
-            
+
             <NotificationRow
               icon="school"
               title="Training Tips"
@@ -542,7 +571,7 @@ const NotificationSettingsScreen: React.FC = () => {
               setting="trainingTips"
               disabled={masterDisabled}
             />
-            
+
             <NotificationRow
               icon="feedback"
               title="Surveys"
@@ -565,7 +594,9 @@ const NotificationSettingsScreen: React.FC = () => {
 
             <TouchableOpacity style={styles.actionButton} onPress={handleResetToDefaults}>
               <Icon name="restore" size={24} color={Colors.warning} />
-              <Text style={[styles.actionButtonText, { color: Colors.warning }]}>Reset to Defaults</Text>
+              <Text style={[styles.actionButtonText, { color: Colors.warning }]}>
+                Reset to Defaults
+              </Text>
               <Icon name="chevron-right" size={24} color={Colors.lightText} />
             </TouchableOpacity>
           </View>

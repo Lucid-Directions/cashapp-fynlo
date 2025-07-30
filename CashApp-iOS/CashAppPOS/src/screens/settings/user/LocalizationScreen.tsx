@@ -1,13 +1,5 @@
 import React, { useState } from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-  ScrollView,
-  Alert,
-  Switch,
-} from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Alert, Switch } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 
@@ -52,7 +44,7 @@ interface TimeZone {
 
 const LocalizationScreen: React.FC = () => {
   const navigation = useNavigation();
-  
+
   const [languages] = useState<Language[]>([
     { code: 'en-GB', name: 'English (UK)', nativeName: 'English', flag: '🇬🇧', supported: true },
     { code: 'en-US', name: 'English (US)', nativeName: 'English', flag: '🇺🇸', supported: true },
@@ -99,7 +91,7 @@ const LocalizationScreen: React.FC = () => {
   const [selectedLanguage, setSelectedLanguage] = useState('en-GB');
   const [selectedCurrency, setSelectedCurrency] = useState('GBP');
   const [selectedTimeZone, setSelectedTimeZone] = useState('Europe/London');
-  
+
   // Regional settings
   const [regionalSettings, setRegionalSettings] = useState({
     use24HourFormat: true,
@@ -123,12 +115,12 @@ const LocalizationScreen: React.FC = () => {
 
   const handleLanguageSelect = (languageCode: string) => {
     const language = languages.find(l => l.code === languageCode);
-    
+
     if (!language?.supported) {
       Alert.alert(
         'Language Not Available',
         `${language?.name} is not currently supported. We're working to add more languages in future updates.`,
-        [{ text: 'OK' }]
+        [{ text: 'OK' }],
       );
       return;
     }
@@ -137,18 +129,18 @@ const LocalizationScreen: React.FC = () => {
     Alert.alert(
       'Language Changed',
       `Language changed to ${language.name}. The app will restart to apply changes.`,
-      [{ text: 'OK' }]
+      [{ text: 'OK' }],
     );
   };
 
   const handleCurrencySelect = (currencyCode: string) => {
     const currency = currencies.find(c => c.code === currencyCode);
-    
+
     if (!currency?.supported) {
       Alert.alert(
         'Currency Not Available',
         `${currency?.name} is not currently supported. We're working to add more currencies.`,
-        [{ text: 'OK' }]
+        [{ text: 'OK' }],
       );
       return;
     }
@@ -166,44 +158,45 @@ const LocalizationScreen: React.FC = () => {
   const toggleRegionalSetting = (setting: keyof typeof regionalSettings) => {
     setRegionalSettings(prev => ({
       ...prev,
-      [setting]: !prev[setting]
+      [setting]: !prev[setting],
     }));
   };
 
   const toggleLocalizationFeature = (feature: keyof typeof localizationFeatures) => {
     setLocalizationFeatures(prev => ({
       ...prev,
-      [feature]: !prev[feature]
+      [feature]: !prev[feature],
     }));
   };
 
   const handleImportLocale = () => {
-    Alert.alert(
-      'Import Locale Settings',
-      'Import settings from another device or backup?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'From File', onPress: () => {
+    Alert.alert('Import Locale Settings', 'Import settings from another device or backup?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'From File',
+        onPress: () => {
           Alert.alert('Info', 'File browser would open here');
-        }},
-        { text: 'From Device', onPress: () => {
+        },
+      },
+      {
+        text: 'From Device',
+        onPress: () => {
           Alert.alert('Info', 'Device locale detection would run here');
-        }}
-      ]
-    );
+        },
+      },
+    ]);
   };
 
   const handleExportLocale = () => {
-    Alert.alert(
-      'Export Locale Settings',
-      'Export current settings for backup or transfer?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Export', onPress: () => {
+    Alert.alert('Export Locale Settings', 'Export current settings for backup or transfer?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Export',
+        onPress: () => {
           Alert.alert('Success', 'Locale settings exported successfully!');
-        }}
-      ]
-    );
+        },
+      },
+    ]);
   };
 
   const getSelectedLanguage = () => {
@@ -223,29 +216,20 @@ const LocalizationScreen: React.FC = () => {
       style={[
         styles.languageItem,
         selectedLanguage === language.code && styles.selectedItem,
-        !language.supported && styles.disabledItem
+        !language.supported && styles.disabledItem,
       ]}
       onPress={() => handleLanguageSelect(language.code)}
-      disabled={!language.supported}
-    >
+      disabled={!language.supported}>
       <Text style={styles.flagText}>{language.flag}</Text>
       <View style={styles.languageInfo}>
-        <Text style={[
-          styles.languageName,
-          !language.supported && styles.disabledText
-        ]}>
+        <Text style={[styles.languageName, !language.supported && styles.disabledText]}>
           {language.name}
         </Text>
-        <Text style={[
-          styles.languageNative,
-          !language.supported && styles.disabledText
-        ]}>
+        <Text style={[styles.languageNative, !language.supported && styles.disabledText]}>
           {language.nativeName}
         </Text>
       </View>
-      {!language.supported && (
-        <Text style={styles.comingSoonText}>Coming Soon</Text>
-      )}
+      {!language.supported && <Text style={styles.comingSoonText}>Coming Soon</Text>}
       {selectedLanguage === language.code && (
         <Icon name="check-circle" size={24} color={Colors.primary} />
       )}
@@ -257,36 +241,24 @@ const LocalizationScreen: React.FC = () => {
       style={[
         styles.currencyItem,
         selectedCurrency === currency.code && styles.selectedItem,
-        !currency.supported && styles.disabledItem
+        !currency.supported && styles.disabledItem,
       ]}
       onPress={() => handleCurrencySelect(currency.code)}
-      disabled={!currency.supported}
-    >
+      disabled={!currency.supported}>
       <View style={styles.currencySymbol}>
-        <Text style={[
-          styles.currencySymbolText,
-          !currency.supported && styles.disabledText
-        ]}>
+        <Text style={[styles.currencySymbolText, !currency.supported && styles.disabledText]}>
           {currency.symbol}
         </Text>
       </View>
       <View style={styles.currencyInfo}>
-        <Text style={[
-          styles.currencyName,
-          !currency.supported && styles.disabledText
-        ]}>
+        <Text style={[styles.currencyName, !currency.supported && styles.disabledText]}>
           {currency.name}
         </Text>
-        <Text style={[
-          styles.currencyCode,
-          !currency.supported && styles.disabledText
-        ]}>
+        <Text style={[styles.currencyCode, !currency.supported && styles.disabledText]}>
           {currency.code}
         </Text>
       </View>
-      {!currency.supported && (
-        <Text style={styles.comingSoonText}>Coming Soon</Text>
-      )}
+      {!currency.supported && <Text style={styles.comingSoonText}>Coming Soon</Text>}
       {selectedCurrency === currency.code && (
         <Icon name="check-circle" size={24} color={Colors.primary} />
       )}
@@ -295,12 +267,8 @@ const LocalizationScreen: React.FC = () => {
 
   const TimeZoneItem = ({ timeZone }: { timeZone: TimeZone }) => (
     <TouchableOpacity
-      style={[
-        styles.timeZoneItem,
-        selectedTimeZone === timeZone.id && styles.selectedItem
-      ]}
-      onPress={() => handleTimeZoneSelect(timeZone.id)}
-    >
+      style={[styles.timeZoneItem, selectedTimeZone === timeZone.id && styles.selectedItem]}
+      onPress={() => handleTimeZoneSelect(timeZone.id)}>
       <View style={styles.timeZoneInfo}>
         <Text style={styles.timeZoneName}>{timeZone.name}</Text>
         <Text style={styles.timeZoneDetails}>
@@ -433,9 +401,7 @@ const LocalizationScreen: React.FC = () => {
             <View style={styles.settingRow}>
               <View style={styles.settingInfo}>
                 <Text style={styles.settingLabel}>Currency symbol first</Text>
-                <Text style={styles.settingDescription}>
-                  Display as £10.50 instead of 10.50£
-                </Text>
+                <Text style={styles.settingDescription}>Display as £10.50 instead of 10.50£</Text>
               </View>
               <Switch
                 value={regionalSettings.showCurrencySymbolFirst}
@@ -499,9 +465,7 @@ const LocalizationScreen: React.FC = () => {
             <View style={styles.settingRow}>
               <View style={styles.settingInfo}>
                 <Text style={styles.settingLabel}>Localized numbers</Text>
-                <Text style={styles.settingDescription}>
-                  Format numbers according to region
-                </Text>
+                <Text style={styles.settingDescription}>Format numbers according to region</Text>
               </View>
               <Switch
                 value={localizationFeatures.localizedNumbers}
@@ -529,10 +493,9 @@ const LocalizationScreen: React.FC = () => {
               <Icon name="chevron-right" size={24} color={Colors.lightText} />
             </TouchableOpacity>
 
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.actionButton}
-              onPress={() => Alert.alert('Info', 'Device locale sync would be implemented here')}
-            >
+              onPress={() => Alert.alert('Info', 'Device locale sync would be implemented here')}>
               <Icon name="sync" size={24} color={Colors.success} />
               <Text style={styles.actionButtonText}>Sync with Device</Text>
               <Icon name="chevron-right" size={24} color={Colors.lightText} />

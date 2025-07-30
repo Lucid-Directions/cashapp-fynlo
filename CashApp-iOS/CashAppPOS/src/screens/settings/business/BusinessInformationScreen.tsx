@@ -50,7 +50,7 @@ const BusinessInformationScreen: React.FC = () => {
   const [formData, setFormData] = useState(businessInfo);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [hasChanges, setHasChanges] = useState(false);
-  
+
   const scrollViewRef = useRef<ScrollView>(null);
 
   // Load restaurant config data when available
@@ -111,7 +111,7 @@ const BusinessInformationScreen: React.FC = () => {
       value: formData.companyName,
       autoCapitalize: 'words',
       required: true,
-      validation: (value) => value.trim() ? null : 'Company name is required',
+      validation: value => (value.trim() ? null : 'Company name is required'),
     },
     {
       id: 'address',
@@ -120,7 +120,7 @@ const BusinessInformationScreen: React.FC = () => {
       value: formData.address,
       autoCapitalize: 'words',
       required: true,
-      validation: (value) => value.trim() ? null : 'Address is required',
+      validation: value => (value.trim() ? null : 'Address is required'),
     },
     {
       id: 'city',
@@ -129,7 +129,7 @@ const BusinessInformationScreen: React.FC = () => {
       value: formData.city,
       autoCapitalize: 'words',
       required: true,
-      validation: (value) => value.trim() ? null : 'City is required',
+      validation: value => (value.trim() ? null : 'City is required'),
     },
     {
       id: 'postalCode',
@@ -138,7 +138,7 @@ const BusinessInformationScreen: React.FC = () => {
       value: formData.postalCode,
       autoCapitalize: 'characters',
       required: true,
-      validation: (value) => value.trim() ? null : 'Postal code is required',
+      validation: value => (value.trim() ? null : 'Postal code is required'),
     },
     {
       id: 'country',
@@ -147,7 +147,7 @@ const BusinessInformationScreen: React.FC = () => {
       value: formData.country,
       autoCapitalize: 'words',
       required: true,
-      validation: (value) => value.trim() ? null : 'Country is required',
+      validation: value => (value.trim() ? null : 'Country is required'),
     },
     {
       id: 'phone',
@@ -197,7 +197,7 @@ const BusinessInformationScreen: React.FC = () => {
   const handleFieldChange = (fieldId: string, value: string) => {
     setFormData(prev => ({ ...prev, [fieldId]: value }));
     setHasChanges(true);
-    
+
     // Clear error when user starts typing
     if (errors[fieldId]) {
       setErrors(prev => ({ ...prev, [fieldId]: '' }));
@@ -206,7 +206,7 @@ const BusinessInformationScreen: React.FC = () => {
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
-    
+
     formFields.forEach(field => {
       if (field.validation) {
         const error = field.validation(formData[field.id as keyof typeof formData] as string);
@@ -222,18 +222,16 @@ const BusinessInformationScreen: React.FC = () => {
 
   const handleSave = async () => {
     if (!validateForm()) {
-      Alert.alert(
-        'Validation Error',
-        'Please correct the errors in the form before saving.',
-        [{ text: 'OK' }]
-      );
+      Alert.alert('Validation Error', 'Please correct the errors in the form before saving.', [
+        { text: 'OK' },
+      ]);
       return;
     }
 
     try {
       // Save to existing settings store
       updateBusinessInfo(formData);
-      
+
       // Also save to restaurant configuration system
       await updateConfig({
         restaurantName: formData.companyName,
@@ -251,39 +249,33 @@ const BusinessInformationScreen: React.FC = () => {
 
       // Mark restaurant info setup step as completed
       await completeSetupStep('restaurantInfo');
-      
+
       setHasChanges(false);
       Alert.alert(
         'Success',
         'Business information has been saved successfully. The restaurant name will now appear in your headers.',
-        [{ text: 'OK' }]
+        [{ text: 'OK' }],
       );
     } catch (error) {
-      Alert.alert(
-        'Error',
-        'Failed to save business information. Please try again.',
-        [{ text: 'OK' }]
-      );
+      Alert.alert('Error', 'Failed to save business information. Please try again.', [
+        { text: 'OK' },
+      ]);
     }
   };
 
   const handleReset = () => {
-    Alert.alert(
-      'Reset Changes',
-      'Are you sure you want to discard all unsaved changes?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Reset',
-          style: 'destructive',
-          onPress: () => {
-            setFormData(businessInfo);
-            setErrors({});
-            setHasChanges(false);
-          },
+    Alert.alert('Reset Changes', 'Are you sure you want to discard all unsaved changes?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Reset',
+        style: 'destructive',
+        onPress: () => {
+          setFormData(businessInfo);
+          setErrors({});
+          setHasChanges(false);
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const renderFormField = (field: FormField) => (
@@ -291,15 +283,12 @@ const BusinessInformationScreen: React.FC = () => {
       <SimpleTextInput
         label={field.label}
         value={field.value}
-        onValueChange={(value) => handleFieldChange(field.id, value)}
+        onValueChange={value => handleFieldChange(field.id, value)}
         placeholder={field.placeholder}
         keyboardType={field.keyboardType || 'default'}
         autoCapitalize={field.autoCapitalize || 'sentences'}
         autoCorrect={false}
-        style={[
-          styles.textInput,
-          errors[field.id] && styles.textInputError,
-        ]}
+        style={[styles.textInput, errors[field.id] && styles.textInputError]}
         clearButtonMode="while-editing"
       />
       {errors[field.id] && (
@@ -312,10 +301,9 @@ const BusinessInformationScreen: React.FC = () => {
   );
 
   return (
-    <KeyboardAvoidingView 
-      style={styles.container} 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <SettingsHeader
         title="Business Information"
         subtitle="Company details and contact information"
@@ -326,37 +314,21 @@ const BusinessInformationScreen: React.FC = () => {
         }}
       />
 
-      <ScrollView 
+      <ScrollView
         ref={scrollViewRef}
         style={styles.content}
         showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-      >
-        <SettingsSection
-          title="Company Details"
-          subtitle="Basic information about your business"
-        >
-          <View style={styles.formContainer}>
-            {formFields.slice(0, 5).map(renderFormField)}
-          </View>
+        keyboardShouldPersistTaps="handled">
+        <SettingsSection title="Company Details" subtitle="Basic information about your business">
+          <View style={styles.formContainer}>{formFields.slice(0, 5).map(renderFormField)}</View>
         </SettingsSection>
 
-        <SettingsSection
-          title="Contact Information"
-          subtitle="How customers can reach you"
-        >
-          <View style={styles.formContainer}>
-            {formFields.slice(5, 8).map(renderFormField)}
-          </View>
+        <SettingsSection title="Contact Information" subtitle="How customers can reach you">
+          <View style={styles.formContainer}>{formFields.slice(5, 8).map(renderFormField)}</View>
         </SettingsSection>
 
-        <SettingsSection
-          title="Legal Information"
-          subtitle="VAT and company registration details"
-        >
-          <View style={styles.formContainer}>
-            {formFields.slice(8).map(renderFormField)}
-          </View>
+        <SettingsSection title="Legal Information" subtitle="VAT and company registration details">
+          <View style={styles.formContainer}>{formFields.slice(8).map(renderFormField)}</View>
         </SettingsSection>
 
         {/* Action Buttons */}
@@ -364,17 +336,13 @@ const BusinessInformationScreen: React.FC = () => {
           <TouchableOpacity
             style={[styles.button, styles.saveButton]}
             onPress={handleSave}
-            disabled={!hasChanges || isLoading}
-          >
+            disabled={!hasChanges || isLoading}>
             <Icon name="save" size={20} color={Colors.white} />
             <Text style={styles.saveButtonText}>Save Changes</Text>
           </TouchableOpacity>
 
           {hasChanges && (
-            <TouchableOpacity
-              style={[styles.button, styles.resetButton]}
-              onPress={handleReset}
-            >
+            <TouchableOpacity style={[styles.button, styles.resetButton]} onPress={handleReset}>
               <Icon name="refresh" size={20} color={Colors.danger} />
               <Text style={styles.resetButtonText}>Reset</Text>
             </TouchableOpacity>
@@ -385,8 +353,8 @@ const BusinessInformationScreen: React.FC = () => {
         <View style={styles.helpContainer}>
           <Icon name="info-outline" size={16} color={Colors.mediumGray} />
           <Text style={styles.helpText}>
-            This information will appear on receipts and customer communications.
-            Fields marked with * are required.
+            This information will appear on receipts and customer communications. Fields marked with
+            * are required.
           </Text>
         </View>
       </ScrollView>

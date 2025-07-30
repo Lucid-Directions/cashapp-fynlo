@@ -244,13 +244,17 @@ const SettingsScreen: React.FC = () => {
           icon: 'bug-report',
           route: 'SystemDiagnostics',
         },
-        ...__DEV__ ? [{
-          id: 'developer-settings',
-          title: 'Developer Settings',
-          description: 'Mock data, API toggles, and debug options',
-          icon: 'developer-mode',
-          route: 'DeveloperSettings',
-        }] : [],
+        ...(__DEV__
+          ? [
+              {
+                id: 'developer-settings',
+                title: 'Developer Settings',
+                description: 'Mock data, API toggles, and debug options',
+                icon: 'developer-mode',
+                route: 'DeveloperSettings',
+              },
+            ]
+          : []),
       ],
     },
     {
@@ -281,13 +285,15 @@ const SettingsScreen: React.FC = () => {
     if (query.trim() === '') {
       setFilteredCategories(settingsCategories);
     } else {
-      const filtered = settingsCategories.filter(category =>
-        category.title.toLowerCase().includes(query.toLowerCase()) ||
-        category.description.toLowerCase().includes(query.toLowerCase()) ||
-        category.settings.some(setting =>
-          setting.title.toLowerCase().includes(query.toLowerCase()) ||
-          setting.description.toLowerCase().includes(query.toLowerCase())
-        )
+      const filtered = settingsCategories.filter(
+        category =>
+          category.title.toLowerCase().includes(query.toLowerCase()) ||
+          category.description.toLowerCase().includes(query.toLowerCase()) ||
+          category.settings.some(
+            setting =>
+              setting.title.toLowerCase().includes(query.toLowerCase()) ||
+              setting.description.toLowerCase().includes(query.toLowerCase()),
+          ),
       );
       setFilteredCategories(filtered);
     }
@@ -301,12 +307,11 @@ const SettingsScreen: React.FC = () => {
     <TouchableOpacity
       style={styles.categoryCard}
       onPress={() => handleCategoryPress(item)}
-      activeOpacity={0.7}
-    >
+      activeOpacity={0.7}>
       <View style={[styles.categoryIcon, { backgroundColor: `${item.color}15` }]}>
         <Icon name={item.icon} size={32} color={item.color} />
       </View>
-      
+
       <View style={styles.categoryContent}>
         <View style={styles.categoryHeader}>
           <Text style={styles.categoryTitle}>{item.title}</Text>
@@ -317,11 +322,9 @@ const SettingsScreen: React.FC = () => {
           )}
         </View>
         <Text style={styles.categoryDescription}>{item.description}</Text>
-        <Text style={styles.categoryItemCount}>
-          {item.settings.length} settings
-        </Text>
+        <Text style={styles.categoryItemCount}>{item.settings.length} settings</Text>
       </View>
-      
+
       <Icon name="chevron-right" size={24} color={Colors.lightGray} />
     </TouchableOpacity>
   );
@@ -329,22 +332,21 @@ const SettingsScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor={Colors.primary} barStyle="light-content" />
-      
+
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
-          activeOpacity={0.7}
-        >
+          activeOpacity={0.7}>
           <Icon name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>
-        
+
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle}>{restaurantDisplayName} Settings</Text>
           <Text style={styles.headerSubtitle}>Configure your POS system</Text>
         </View>
-        
+
         <TouchableOpacity style={styles.helpButton}>
           <Icon name="help-outline" size={24} color={Colors.white} />
         </TouchableOpacity>
@@ -386,9 +388,7 @@ const SettingsScreen: React.FC = () => {
           <View style={styles.emptyState}>
             <Icon name="search-off" size={64} color={Colors.lightGray} />
             <Text style={styles.emptyStateText}>No settings found</Text>
-            <Text style={styles.emptyStateSubtext}>
-              Try adjusting your search terms
-            </Text>
+            <Text style={styles.emptyStateSubtext}>Try adjusting your search terms</Text>
           </View>
         }
       />

@@ -18,7 +18,7 @@ describe('ErrorBoundary', () => {
   beforeAll(() => {
     console.error = jest.fn();
   });
-  
+
   afterAll(() => {
     console.error = originalError;
   });
@@ -27,7 +27,7 @@ describe('ErrorBoundary', () => {
     const { getByText } = render(
       <ErrorBoundary>
         <ThrowError shouldThrow={false} />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
 
     expect(getByText('No error')).toBeTruthy();
@@ -37,7 +37,7 @@ describe('ErrorBoundary', () => {
     const { getByText } = render(
       <ErrorBoundary>
         <ThrowError shouldThrow={true} />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
 
     expect(getByText('Oops! Something went wrong')).toBeTruthy();
@@ -46,11 +46,11 @@ describe('ErrorBoundary', () => {
 
   it('should render custom fallback when provided', () => {
     const customFallback = <Text>Custom error message</Text>;
-    
+
     const { getByText } = render(
       <ErrorBoundary fallback={customFallback}>
         <ThrowError shouldThrow={true} />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
 
     expect(getByText('Custom error message')).toBeTruthy();
@@ -58,11 +58,11 @@ describe('ErrorBoundary', () => {
 
   it('should call onError callback when error occurs', () => {
     const onError = jest.fn();
-    
+
     render(
       <ErrorBoundary onError={onError}>
         <ThrowError shouldThrow={true} />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     );
 
     expect(onError).toHaveBeenCalled();
@@ -70,7 +70,7 @@ describe('ErrorBoundary', () => {
       expect.any(Error),
       expect.objectContaining({
         componentStack: expect.any(String),
-      })
+      }),
     );
   });
 });

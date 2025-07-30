@@ -18,39 +18,44 @@ import QRPaymentErrorBoundary from '../../components/payment/QRPaymentErrorBound
 
 const { width: screenWidth } = Dimensions.get('window');
 
-type QRCodePaymentRouteProp = RouteProp<{
-  QRCodePayment: {
-    amount: number;
-    currency: string;
-    description?: string;
-    onSuccess: (payment: SumUpQRPayment) => void;
-    onCancel: () => void;
-  };
-}, 'QRCodePayment'>;
+type QRCodePaymentRouteProp = RouteProp<
+  {
+    QRCodePayment: {
+      amount: number;
+      currency: string;
+      description?: string;
+      onSuccess: (payment: SumUpQRPayment) => void;
+      onCancel: () => void;
+    };
+  },
+  'QRCodePayment'
+>;
 
 const QRCodePaymentScreen: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute<QRCodePaymentRouteProp>();
   const { theme } = useTheme();
-  
+
   const { amount, currency, description, onSuccess, onCancel } = route.params;
-  
+
   const [qrPayment, setQrPayment] = useState<SumUpQRPayment | null>(null);
-  const [paymentStatus, setPaymentStatus] = useState<'loading' | 'waiting' | 'scanning' | 'completed' | 'expired' | 'failed'>('loading');
+  const [paymentStatus, setPaymentStatus] = useState<
+    'loading' | 'waiting' | 'scanning' | 'completed' | 'expired' | 'failed'
+  >('loading');
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [errorMessage, setErrorMessage] = useState<string>('');
-  
+
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const isMountedRef = useRef(true);
-  
+
   useEffect(() => {
     initializeQRPayment();
-    
+
     return () => {
       // Mark component as unmounted to prevent state updates
       isMountedRef.current = false;
-      
+
       // Clean up all timers
       if (pollIntervalRef.current) {
         clearInterval(pollIntervalRef.current);
@@ -62,38 +67,37 @@ const QRCodePaymentScreen: React.FC = () => {
       }
     };
   }, []);
-  
+
   const initializeQRPayment = async () => {
     try {
       // Check if component is still mounted
       if (!isMountedRef.current) return;
-      
+
       setPaymentStatus('loading');
       setErrorMessage('');
-      
+
       const payment = await SumUpService.createQRPayment(amount, currency, description);
-      
+
       // Ensure component is still mounted before updating state
       if (!isMountedRef.current) return;
-      
+
       setQrPayment(payment);
       setPaymentStatus('waiting');
-      
+
       // Calculate time remaining until expiration
       const expiresAt = new Date(payment.expiresAt);
       const now = new Date();
       const timeLeft = Math.max(0, Math.floor((expiresAt.getTime() - now.getTime()) / 1000));
       setTimeRemaining(timeLeft);
-      
+
       // Start countdown timer
       startCountdownTimer(timeLeft);
-      
+
       // Start polling for payment status
       startStatusPolling(payment);
-      
     } catch (error) {
       console.error('❌ QR Payment initialization failed:', error);
-      
+
       // Only update state if component is still mounted
       if (isMountedRef.current) {
         setPaymentStatus('failed');
@@ -101,15 +105,15 @@ const QRCodePaymentScreen: React.FC = () => {
       }
     }
   };
-  
+
   const startCountdownTimer = (initialTime: number) => {
     let timeLeft = initialTime;
-    
+
     // Clear any existing timer first
     if (timerRef.current) {
       clearInterval(timerRef.current);
     }
-    
+
     timerRef.current = setInterval(() => {
       // Check if component is still mounted
       if (!isMountedRef.current) {
@@ -119,13 +123,13 @@ const QRCodePaymentScreen: React.FC = () => {
         }
         return;
       }
-      
+
       timeLeft -= 1;
       setTimeRemaining(timeLeft);
-      
+
       if (timeLeft <= 0) {
         setPaymentStatus('expired');
-        
+
         // Clean up intervals
         if (pollIntervalRef.current) {
           clearInterval(pollIntervalRef.current);
@@ -138,13 +142,13 @@ const QRCodePaymentScreen: React.FC = () => {
       }
     }, 1000);
   };
-  
+
   const startStatusPolling = (payment: SumUpQRPayment) => {
     // Clear any existing polling first
     if (pollIntervalRef.current) {
       clearInterval(pollIntervalRef.current);
     }
-    
+
     pollIntervalRef.current = setInterval(async () => {
       try {
         // Check if component is still mounted
@@ -155,15 +159,15 @@ const QRCodePaymentScreen: React.FC = () => {
           }
           return;
         }
-        
+
         const updatedPayment = await SumUpService.pollQRPaymentStatus(payment);
-        
+
         // Double-check if component is still mounted before state updates
         if (!isMountedRef.current) return;
-        
+
         setQrPayment(updatedPayment);
         setPaymentStatus(updatedPayment.status);
-        
+
         if (updatedPayment.status === 'completed') {
           // Payment successful - clean up intervals
           if (pollIntervalRef.current) {
@@ -174,7 +178,7 @@ const QRCodePaymentScreen: React.FC = () => {
             clearInterval(timerRef.current);
             timerRef.current = null;
           }
-          
+
           setTimeout(() => {
             // Final check before calling callbacks
             if (isMountedRef.current) {
@@ -195,7 +199,7 @@ const QRCodePaymentScreen: React.FC = () => {
         }
       } catch (error) {
         console.error('❌ Failed to poll QR payment status:', error);
-        
+
         // Only update state if mounted
         if (isMountedRef.current) {
           setErrorMessage('Failed to check payment status');
@@ -203,38 +207,34 @@ const QRCodePaymentScreen: React.FC = () => {
       }
     }, payment.pollInterval || 2000);
   };
-  
+
   const handleCancel = () => {
-    Alert.alert(
-      'Cancel Payment',
-      'Are you sure you want to cancel this payment?',
-      [
-        { text: 'Continue', style: 'cancel' },
-        { 
-          text: 'Cancel Payment', 
-          style: 'destructive',
-          onPress: () => {
-            // Clean up all timers
-            if (pollIntervalRef.current) {
-              clearInterval(pollIntervalRef.current);
-              pollIntervalRef.current = null;
-            }
-            if (timerRef.current) {
-              clearInterval(timerRef.current);
-              timerRef.current = null;
-            }
-            
-            // Mark as unmounted to prevent further state updates
-            isMountedRef.current = false;
-            
-            onCancel();
-            navigation.goBack();
+    Alert.alert('Cancel Payment', 'Are you sure you want to cancel this payment?', [
+      { text: 'Continue', style: 'cancel' },
+      {
+        text: 'Cancel Payment',
+        style: 'destructive',
+        onPress: () => {
+          // Clean up all timers
+          if (pollIntervalRef.current) {
+            clearInterval(pollIntervalRef.current);
+            pollIntervalRef.current = null;
           }
+          if (timerRef.current) {
+            clearInterval(timerRef.current);
+            timerRef.current = null;
+          }
+
+          // Mark as unmounted to prevent further state updates
+          isMountedRef.current = false;
+
+          onCancel();
+          navigation.goBack();
         },
-      ]
-    );
+      },
+    ]);
   };
-  
+
   const handleRetry = () => {
     try {
       // Clean up existing timers
@@ -246,10 +246,10 @@ const QRCodePaymentScreen: React.FC = () => {
         clearInterval(timerRef.current);
         timerRef.current = null;
       }
-      
+
       // Reset error state
       setErrorMessage('');
-      
+
       // Reinitialize payment
       initializeQRPayment();
     } catch (error) {
@@ -257,7 +257,7 @@ const QRCodePaymentScreen: React.FC = () => {
       setErrorMessage('Failed to retry payment. Please try again.');
     }
   };
-  
+
   const getStatusMessage = () => {
     switch (paymentStatus) {
       case 'loading':
@@ -276,7 +276,7 @@ const QRCodePaymentScreen: React.FC = () => {
         return 'Ready for payment';
     }
   };
-  
+
   const getStatusColor = () => {
     switch (paymentStatus) {
       case 'completed':
@@ -290,13 +290,13 @@ const QRCodePaymentScreen: React.FC = () => {
         return theme.colors.primary;
     }
   };
-  
+
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
-  
+
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -414,15 +414,16 @@ const QRCodePaymentScreen: React.FC = () => {
       fontWeight: '600',
     },
   });
-  
+
   return (
-    <QRPaymentErrorBoundary onReset={() => {
-      // Reset component state and retry QR generation
-      setPaymentStatus('loading');
-      setErrorMessage('');
-      setQrPayment(null);
-      initializeQRPayment();
-    }}>
+    <QRPaymentErrorBoundary
+      onReset={() => {
+        // Reset component state and retry QR generation
+        setPaymentStatus('loading');
+        setErrorMessage('');
+        setQrPayment(null);
+        initializeQRPayment();
+      }}>
       <SafeAreaView style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
@@ -432,88 +433,82 @@ const QRCodePaymentScreen: React.FC = () => {
           <Text style={styles.headerTitle}>QR Code Payment</Text>
           <View style={{ width: 24 }} />
         </View>
-      
-      {/* Content */}
-      <View style={styles.content}>
-        {/* Amount Display */}
-        <View style={styles.amountContainer}>
-          <Text style={styles.amountLabel}>Amount to Pay</Text>
-          <Text style={styles.amount}>
-            {currency === 'GBP' ? '£' : currency}{amount.toFixed(2)}
-          </Text>
-        </View>
-        
-        {/* QR Code */}
-        <View style={styles.qrContainer}>
-          {paymentStatus === 'loading' ? (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color={theme.colors.primary} />
+
+        {/* Content */}
+        <View style={styles.content}>
+          {/* Amount Display */}
+          <View style={styles.amountContainer}>
+            <Text style={styles.amountLabel}>Amount to Pay</Text>
+            <Text style={styles.amount}>
+              {currency === 'GBP' ? '£' : currency}
+              {amount.toFixed(2)}
+            </Text>
+          </View>
+
+          {/* QR Code */}
+          <View style={styles.qrContainer}>
+            {paymentStatus === 'loading' ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color={theme.colors.primary} />
+              </View>
+            ) : qrPayment ? (
+              <QRCode value={qrPayment.qrCode} size={200} backgroundColor="white" color="black" />
+            ) : null}
+          </View>
+
+          {/* Status */}
+          <View style={styles.statusContainer}>
+            <View style={styles.statusIcon}>
+              {paymentStatus === 'completed' && (
+                <Icon name="check-circle" size={48} color="#4CAF50" />
+              )}
+              {(paymentStatus === 'failed' || paymentStatus === 'expired') && (
+                <Icon name="error" size={48} color="#F44336" />
+              )}
+              {paymentStatus === 'scanning' && (
+                <Icon name="qr-code-scanner" size={48} color="#FF9800" />
+              )}
             </View>
-          ) : qrPayment ? (
-            <QRCode
-              value={qrPayment.qrCode}
-              size={200}
-              backgroundColor="white"
-              color="black"
-            />
-          ) : null}
-        </View>
-        
-        {/* Status */}
-        <View style={styles.statusContainer}>
-          <View style={styles.statusIcon}>
-            {paymentStatus === 'completed' && (
-              <Icon name="check-circle" size={48} color="#4CAF50" />
+
+            <Text style={[styles.statusMessage, { color: getStatusColor() }]}>
+              {getStatusMessage()}
+            </Text>
+
+            {paymentStatus === 'waiting' && (
+              <Text style={styles.instructions}>
+                Open your banking app and scan this QR code to complete the payment
+              </Text>
             )}
-            {(paymentStatus === 'failed' || paymentStatus === 'expired') && (
-              <Icon name="error" size={48} color="#F44336" />
-            )}
-            {paymentStatus === 'scanning' && (
-              <Icon name="qr-code-scanner" size={48} color="#FF9800" />
+
+            {(paymentStatus === 'waiting' || paymentStatus === 'scanning') && timeRemaining > 0 && (
+              <View style={styles.timerContainer}>
+                <Icon
+                  name="schedule"
+                  size={16}
+                  color={theme.colors.textSecondary}
+                  style={styles.timerIcon}
+                />
+                <Text style={styles.timerText}>Expires in {formatTime(timeRemaining)}</Text>
+              </View>
             )}
           </View>
-          
-          <Text style={[styles.statusMessage, { color: getStatusColor() }]}>
-            {getStatusMessage()}
-          </Text>
-          
-          {paymentStatus === 'waiting' && (
-            <Text style={styles.instructions}>
-              Open your banking app and scan this QR code to complete the payment
-            </Text>
+        </View>
+
+        {/* Bottom Buttons */}
+        <View style={styles.buttonContainer}>
+          {(paymentStatus === 'failed' || paymentStatus === 'expired') && (
+            <TouchableOpacity style={styles.retryButton} onPress={handleRetry}>
+              <Text style={styles.retryButtonText}>Generate New QR Code</Text>
+            </TouchableOpacity>
           )}
-          
-          {(paymentStatus === 'waiting' || paymentStatus === 'scanning') && timeRemaining > 0 && (
-            <View style={styles.timerContainer}>
-              <Icon 
-                name="schedule" 
-                size={16} 
-                color={theme.colors.textSecondary} 
-                style={styles.timerIcon}
-              />
-              <Text style={styles.timerText}>
-                Expires in {formatTime(timeRemaining)}
-              </Text>
-            </View>
+
+          {paymentStatus !== 'completed' && (
+            <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
+              <Text style={styles.cancelButtonText}>Cancel Payment</Text>
+            </TouchableOpacity>
           )}
         </View>
-      </View>
-      
-      {/* Bottom Buttons */}
-      <View style={styles.buttonContainer}>
-        {(paymentStatus === 'failed' || paymentStatus === 'expired') && (
-          <TouchableOpacity style={styles.retryButton} onPress={handleRetry}>
-            <Text style={styles.retryButtonText}>Generate New QR Code</Text>
-          </TouchableOpacity>
-        )}
-        
-        {paymentStatus !== 'completed' && (
-          <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
-            <Text style={styles.cancelButtonText}>Cancel Payment</Text>
-          </TouchableOpacity>
-        )}
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
     </QRPaymentErrorBoundary>
   );
 };

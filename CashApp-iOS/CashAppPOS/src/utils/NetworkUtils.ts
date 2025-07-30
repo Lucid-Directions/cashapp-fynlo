@@ -28,7 +28,7 @@ class NetworkUtils {
    */
   static async makeRequest<T = any>(
     url: string,
-    options: NetworkRequestOptions = {}
+    options: NetworkRequestOptions = {},
   ): Promise<NetworkResponse<T>> {
     const {
       method = 'GET',
@@ -46,7 +46,9 @@ class NetworkUtils {
 
     for (let attempt = 0; attempt <= retryAttempts; attempt++) {
       try {
-        console.log(`🌐 Network request (attempt ${attempt + 1}/${retryAttempts + 1}): ${method} ${url}`);
+        console.log(
+          `🌐 Network request (attempt ${attempt + 1}/${retryAttempts + 1}): ${method} ${url}`,
+        );
 
         const controller = new AbortController();
         const timeoutId = setTimeout(() => {
@@ -73,7 +75,9 @@ class NetworkUtils {
           };
         } else {
           const errorText = await response.text();
-          console.warn(`⚠️ Network request failed: ${response.status} ${response.statusText} - ${errorText}`);
+          console.warn(
+            `⚠️ Network request failed: ${response.status} ${response.statusText} - ${errorText}`,
+          );
           return {
             success: false,
             error: `HTTP ${response.status}: ${response.statusText}`,
@@ -120,7 +124,7 @@ class NetworkUtils {
    */
   static async getServiceChargeConfig(): Promise<NetworkResponse<any>> {
     const endpoint = `${API_CONFIG.FULL_API_URL}${API_CONFIG.PLATFORM_ENDPOINTS.SERVICE_CHARGE}`;
-    
+
     return this.makeRequest(endpoint, {
       method: 'GET',
       retryAttempts: 2, // Retry twice for critical config
@@ -137,17 +141,19 @@ class NetworkUtils {
   /**
    * Creates headers with authentication if available
    */
-  static async createAuthHeaders(additionalHeaders: Record<string, string> = {}): Promise<Record<string, string>> {
+  static async createAuthHeaders(
+    additionalHeaders: Record<string, string> = {},
+  ): Promise<Record<string, string>> {
     const headers = {
       'Content-Type': 'application/json',
-      'Accept': 'application/json',
+      Accept: 'application/json',
       ...additionalHeaders,
     };
 
     try {
       // Get auth token using tokenManager
       const authToken = await tokenManager.getTokenWithRefresh();
-      
+
       if (authToken) {
         headers['Authorization'] = `Bearer ${authToken}`;
       }
@@ -166,12 +172,12 @@ class NetworkUtils {
       // Check if our backend is reachable instead of external services
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 3000);
-      
+
       const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.HEALTH_ENDPOINT}`, {
         method: 'GET',
         signal: controller.signal,
       });
-      
+
       clearTimeout(timeoutId);
       return response.ok;
     } catch {

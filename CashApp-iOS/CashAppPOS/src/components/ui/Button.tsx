@@ -13,13 +13,13 @@ import { useTheme } from '../../design-system/ThemeProvider';
 import { Theme } from '../../design-system/theme';
 
 // Button variants
-export type ButtonVariant = 
-  | 'primary' 
-  | 'secondary' 
-  | 'outline' 
-  | 'ghost' 
-  | 'danger' 
-  | 'success' 
+export type ButtonVariant =
+  | 'primary'
+  | 'secondary'
+  | 'outline'
+  | 'ghost'
+  | 'danger'
+  | 'success'
   | 'warning';
 
 // Button sizes
@@ -201,14 +201,8 @@ const Button: React.FC<ButtonProps> = ({
     if (loading) {
       return (
         <View style={styles.contentContainer}>
-          <ActivityIndicator 
-            size="small" 
-            color={iconColor} 
-            style={styles.loadingIndicator} 
-          />
-          <Text style={[textStyleCombined, styles.loadingText]}>
-            {title}
-          </Text>
+          <ActivityIndicator size="small" color={iconColor} style={styles.loadingIndicator} />
+          <Text style={[textStyleCombined, styles.loadingText]}>{title}</Text>
         </View>
       );
     }
@@ -217,21 +211,11 @@ const Button: React.FC<ButtonProps> = ({
       return (
         <View style={styles.contentContainer}>
           {iconPosition === 'left' && (
-            <Icon 
-              name={icon} 
-              size={sizeStyles.icon} 
-              color={iconColor} 
-              style={styles.iconLeft} 
-            />
+            <Icon name={icon} size={sizeStyles.icon} color={iconColor} style={styles.iconLeft} />
           )}
           <Text style={textStyleCombined}>{title}</Text>
           {iconPosition === 'right' && (
-            <Icon 
-              name={icon} 
-              size={sizeStyles.icon} 
-              color={iconColor} 
-              style={styles.iconRight} 
-            />
+            <Icon name={icon} size={sizeStyles.icon} color={iconColor} style={styles.iconRight} />
           )}
         </View>
       );
@@ -246,8 +230,7 @@ const Button: React.FC<ButtonProps> = ({
       onPress={onPress}
       disabled={disabled || loading}
       activeOpacity={0.7}
-      testID={testID}
-    >
+      testID={testID}>
       {renderContent()}
     </TouchableOpacity>
   );

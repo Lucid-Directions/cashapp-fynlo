@@ -85,10 +85,10 @@ class RealUserManagementService {
 
   private mapRoleToDisplay(role: string): string {
     const roleMap: { [key: string]: string } = {
-      'platform_owner': 'Platform Admin',
-      'restaurant_owner': 'Restaurant Owner',
-      'manager': 'Restaurant Manager',
-      'employee': 'Restaurant Employee',
+      platform_owner: 'Platform Admin',
+      restaurant_owner: 'Restaurant Owner',
+      manager: 'Restaurant Manager',
+      employee: 'Restaurant Employee',
     };
     return roleMap[role] || role;
   }
@@ -103,10 +103,22 @@ class RealUserManagementService {
 
   private getPermissionsForRole(role: string): string[] {
     const permissionMap: { [key: string]: string[] } = {
-      'platform_owner': ['view_analytics', 'manage_users', 'manage_restaurants', 'manage_settings', 'view_reports'],
-      'restaurant_owner': ['view_analytics', 'manage_users', 'manage_menu', 'view_reports', 'manage_settings'],
-      'manager': ['manage_orders', 'access_pos', 'manage_tables', 'view_kitchen_orders'],
-      'employee': ['access_pos', 'process_payments'],
+      platform_owner: [
+        'view_analytics',
+        'manage_users',
+        'manage_restaurants',
+        'manage_settings',
+        'view_reports',
+      ],
+      restaurant_owner: [
+        'view_analytics',
+        'manage_users',
+        'manage_menu',
+        'view_reports',
+        'manage_settings',
+      ],
+      manager: ['manage_orders', 'access_pos', 'manage_tables', 'view_kitchen_orders'],
+      employee: ['access_pos', 'process_payments'],
     };
     return permissionMap[role] || [];
   }
@@ -116,17 +128,17 @@ class RealUserManagementService {
     try {
       console.log('🔍 Fetching users from real backend...');
       const response = await fetch(`${this.baseUrl}/users`);
-      
+
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
-      
+
       const realUsers: RealUser[] = await response.json();
       console.log('✅ Found real users:', realUsers.length);
-      
+
       // Convert to display format
       const displayUsers = realUsers.map(user => this.convertToDisplayFormat(user));
-      
+
       return displayUsers;
     } catch (error) {
       console.error('❌ Failed to fetch users from backend:', error);
@@ -148,14 +160,14 @@ class RealUserManagementService {
   async getUserById(userId: string): Promise<UserDisplayData | null> {
     try {
       const response = await fetch(`${this.baseUrl}/users/${userId}`);
-      
+
       if (!response.ok) {
         if (response.status === 404) {
           return null;
         }
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
-      
+
       const realUser: RealUser = await response.json();
       return this.convertToDisplayFormat(realUser);
     } catch (error) {
@@ -173,12 +185,12 @@ class RealUserManagementService {
         },
         body: JSON.stringify(userData),
       });
-      
+
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || 'Failed to create user');
       }
-      
+
       const result = await response.json();
       return this.convertToDisplayFormat(result.user);
     } catch (error) {
@@ -196,12 +208,12 @@ class RealUserManagementService {
         },
         body: JSON.stringify(updates),
       });
-      
+
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || 'Failed to update user');
       }
-      
+
       const result = await response.json();
       return this.convertToDisplayFormat(result.user);
     } catch (error) {
@@ -228,7 +240,14 @@ class RealUserManagementService {
     return [];
   }
 
-  async logAccess(userId: string, userEmail: string, action: string, location: string, status: 'success' | 'failed' | 'suspicious', details?: string): Promise<void> {
+  async logAccess(
+    userId: string,
+    userEmail: string,
+    action: string,
+    location: string,
+    status: 'success' | 'failed' | 'suspicious',
+    details?: string,
+  ): Promise<void> {
     // Will implement when backend supports it
     console.log(`📝 Would log: ${userEmail} - ${action} - ${status}`);
   }
@@ -237,20 +256,23 @@ class RealUserManagementService {
   async searchUsers(query: string): Promise<UserDisplayData[]> {
     const allUsers = await this.getAllUsers();
     const lowercaseQuery = query.toLowerCase();
-    
-    return allUsers.filter(user =>
-      user.name.toLowerCase().includes(lowercaseQuery) ||
-      user.email.toLowerCase().includes(lowercaseQuery) ||
-      user.role.toLowerCase().includes(lowercaseQuery) ||
-      (user.restaurantName && user.restaurantName.toLowerCase().includes(lowercaseQuery))
+
+    return allUsers.filter(
+      user =>
+        user.name.toLowerCase().includes(lowercaseQuery) ||
+        user.email.toLowerCase().includes(lowercaseQuery) ||
+        user.role.toLowerCase().includes(lowercaseQuery) ||
+        (user.restaurantName && user.restaurantName.toLowerCase().includes(lowercaseQuery)),
     );
   }
 
   // Placeholder methods for compatibility
-  async exportAccessLogs(format: 'csv' | 'json' | 'xlsx'): Promise<{ url: string; filename: string }> {
+  async exportAccessLogs(
+    format: 'csv' | 'json' | 'xlsx',
+  ): Promise<{ url: string; filename: string }> {
     const timestamp = new Date().toISOString().split('T')[0];
     const filename = `fynlo-access-logs-${timestamp}.${format}`;
-    
+
     return {
       url: `https://api.fynlopos.com/exports/${filename}`,
       filename,

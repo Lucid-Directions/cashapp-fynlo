@@ -1,15 +1,12 @@
 import React, { useState } from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-  Switch,
-} from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Alert, Switch } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { SettingsHeader, SettingsSection, SettingsCard, ToggleSwitch } from '../../../components/settings';
+import {
+  SettingsHeader,
+  SettingsSection,
+  SettingsCard,
+  ToggleSwitch,
+} from '../../../components/settings';
 import { SimpleTextInput, SimpleDecimalInput } from '../../../components/inputs';
 import useSettingsStore from '../../../store/useSettingsStore';
 
@@ -45,8 +42,12 @@ const TaxConfigurationScreen: React.FC = () => {
   // UK VAT rates for reference
   const ukVatRates = [
     { rate: 20, description: 'Standard Rate (20%)', category: 'Most goods and services' },
-    { rate: 5, description: 'Reduced Rate (5%)', category: 'Children\'s car seats, home energy, etc.' },
-    { rate: 0, description: 'Zero Rate (0%)', category: 'Books, food, children\'s clothes, etc.' },
+    {
+      rate: 5,
+      description: 'Reduced Rate (5%)',
+      category: "Children's car seats, home energy, etc.",
+    },
+    { rate: 0, description: 'Zero Rate (0%)', category: "Books, food, children's clothes, etc." },
   ];
 
   const handleFieldChange = (field: string, value: any) => {
@@ -60,7 +61,6 @@ const TaxConfigurationScreen: React.FC = () => {
       handleFieldChange('vatRate', numericRate);
     }
   };
-
 
   const addExemptItem = () => {
     if (newExemptItem.trim()) {
@@ -100,36 +100,24 @@ const TaxConfigurationScreen: React.FC = () => {
     try {
       updateTaxConfiguration(formData);
       setHasChanges(false);
-      Alert.alert(
-        'Success',
-        'Tax configuration has been saved successfully.',
-        [{ text: 'OK' }]
-      );
+      Alert.alert('Success', 'Tax configuration has been saved successfully.', [{ text: 'OK' }]);
     } catch (error) {
-      Alert.alert(
-        'Error',
-        'Failed to save tax configuration. Please try again.',
-        [{ text: 'OK' }]
-      );
+      Alert.alert('Error', 'Failed to save tax configuration. Please try again.', [{ text: 'OK' }]);
     }
   };
 
   const handleReset = () => {
-    Alert.alert(
-      'Reset Changes',
-      'Are you sure you want to discard all unsaved changes?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Reset',
-          style: 'destructive',
-          onPress: () => {
-            setFormData(taxConfiguration);
-            setHasChanges(false);
-          },
+    Alert.alert('Reset Changes', 'Are you sure you want to discard all unsaved changes?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Reset',
+        style: 'destructive',
+        onPress: () => {
+          setFormData(taxConfiguration);
+          setHasChanges(false);
         },
-      ]
-    );
+      },
+    ]);
   };
 
   // Example calculation for £100
@@ -149,19 +137,15 @@ const TaxConfigurationScreen: React.FC = () => {
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* VAT Settings */}
-        <SettingsSection
-          title="VAT Configuration"
-          subtitle="Configure Value Added Tax settings"
-        >
+        <SettingsSection title="VAT Configuration" subtitle="Configure Value Added Tax settings">
           <SettingsCard
             title="Enable VAT"
             description="Include VAT in all transactions"
             icon="receipt-long"
-            iconColor={Colors.primary}
-          >
+            iconColor={Colors.primary}>
             <ToggleSwitch
               value={formData.vatEnabled}
-              onValueChange={(value) => handleFieldChange('vatEnabled', value)}
+              onValueChange={value => handleFieldChange('vatEnabled', value)}
             />
           </SettingsCard>
 
@@ -171,13 +155,12 @@ const TaxConfigurationScreen: React.FC = () => {
                 title="VAT Rate"
                 description="Standard VAT rate percentage"
                 icon="percent"
-                iconColor={Colors.secondary}
-              >
+                iconColor={Colors.secondary}>
                 <View style={styles.rateInputContainer}>
                   <SimpleDecimalInput
                     // label="VAT Rate" // Label is part of SettingsCard title
                     value={formData.vatRate} // Pass number directly
-                    onValueChange={(value) => handleVatRateChange(value.toString())} // onValueChange expects number, handleVatRateChange expects string
+                    onValueChange={value => handleVatRateChange(value.toString())} // onValueChange expects number, handleVatRateChange expects string
                     keyboardType="numeric" // Default for SimpleDecimalInput
                     maxLength={5} // Max length for digits before decimal, or total?
                     placeholder="0.00" // Added placeholder
@@ -192,11 +175,10 @@ const TaxConfigurationScreen: React.FC = () => {
                 title="VAT Inclusive Pricing"
                 description="Prices shown include VAT (tax inclusive)"
                 icon="price-check"
-                iconColor={Colors.warning}
-              >
+                iconColor={Colors.warning}>
                 <ToggleSwitch
                   value={formData.vatInclusive}
-                  onValueChange={(value) => handleFieldChange('vatInclusive', value)}
+                  onValueChange={value => handleFieldChange('vatInclusive', value)}
                 />
               </SettingsCard>
             </>
@@ -207,8 +189,7 @@ const TaxConfigurationScreen: React.FC = () => {
         {formData.vatEnabled && (
           <SettingsSection
             title="UK VAT Rates Reference"
-            subtitle="Common VAT rates in the United Kingdom"
-          >
+            subtitle="Common VAT rates in the United Kingdom">
             <View style={styles.vatRatesContainer}>
               {ukVatRates.map((vatRate, index) => (
                 <TouchableOpacity
@@ -217,13 +198,13 @@ const TaxConfigurationScreen: React.FC = () => {
                     styles.vatRateCard,
                     formData.vatRate === vatRate.rate && styles.selectedVatRate,
                   ]}
-                  onPress={() => handleFieldChange('vatRate', vatRate.rate)}
-                >
+                  onPress={() => handleFieldChange('vatRate', vatRate.rate)}>
                   <View style={styles.vatRateHeader}>
-                    <Text style={[
-                      styles.vatRateTitle,
-                      formData.vatRate === vatRate.rate && styles.selectedVatRateText,
-                    ]}>
+                    <Text
+                      style={[
+                        styles.vatRateTitle,
+                        formData.vatRate === vatRate.rate && styles.selectedVatRateText,
+                      ]}>
                       {vatRate.description}
                     </Text>
                     {formData.vatRate === vatRate.rate && (
@@ -240,14 +221,14 @@ const TaxConfigurationScreen: React.FC = () => {
         {/* Service Tax - Platform Controlled */}
         <SettingsSection
           title="Service Charge"
-          subtitle="Service charges are controlled by the platform"
-        >
+          subtitle="Service charges are controlled by the platform">
           <View style={styles.platformControlledCard}>
             <Icon name="lock" size={24} color={Colors.mediumGray} />
             <View style={styles.platformControlledContent}>
               <Text style={styles.platformControlledTitle}>Platform Controlled</Text>
               <Text style={styles.platformControlledDescription}>
-                Service charges are set and managed by the platform owner. Contact support if you need changes.
+                Service charges are set and managed by the platform owner. Contact support if you
+                need changes.
               </Text>
               <Text style={styles.platformControlledRate}>
                 Current Rate: 12.5% (Platform Standard)
@@ -257,18 +238,14 @@ const TaxConfigurationScreen: React.FC = () => {
         </SettingsSection>
 
         {/* Tax Exempt Items */}
-        <SettingsSection
-          title="Tax Exempt Items"
-          subtitle="Items that are exempt from VAT"
-        >
+        <SettingsSection title="Tax Exempt Items" subtitle="Items that are exempt from VAT">
           <View style={styles.exemptItemsContainer}>
             {formData.taxExemptItems.map((item, index) => (
               <View key={index} style={styles.exemptItemCard}>
                 <Text style={styles.exemptItemText}>{item}</Text>
                 <TouchableOpacity
                   onPress={() => removeExemptItem(index)}
-                  style={styles.removeButton}
-                >
+                  style={styles.removeButton}>
                   <Icon name="close" size={20} color={Colors.danger} />
                 </TouchableOpacity>
               </View>
@@ -292,16 +269,14 @@ const TaxConfigurationScreen: React.FC = () => {
                     setShowAddExemptItem(false);
                     setNewExemptItem('');
                   }}
-                  style={styles.cancelButton}
-                >
+                  style={styles.cancelButton}>
                   <Icon name="close" size={20} color={Colors.mediumGray} />
                 </TouchableOpacity>
               </View>
             ) : (
               <TouchableOpacity
                 style={styles.addExemptItemButton}
-                onPress={() => setShowAddExemptItem(true)}
-              >
+                onPress={() => setShowAddExemptItem(true)}>
                 <Icon name="add" size={20} color={Colors.primary} />
                 <Text style={styles.addExemptItemButtonText}>Add Exempt Item</Text>
               </TouchableOpacity>
@@ -313,34 +288,36 @@ const TaxConfigurationScreen: React.FC = () => {
         {formData.vatEnabled && (
           <SettingsSection
             title="Tax Calculation Preview"
-            subtitle="Example calculation for £100.00"
-          >
+            subtitle="Example calculation for £100.00">
             <View style={styles.calculationPreview}>
               <View style={styles.calculationRow}>
                 <Text style={styles.calculationLabel}>
                   {formData.vatInclusive ? 'Gross Amount:' : 'Net Amount:'}
                 </Text>
                 <Text style={styles.calculationValue}>
-                  £{formData.vatInclusive ? exampleCalculation.gross.toFixed(2) : exampleCalculation.net.toFixed(2)}
+                  £
+                  {formData.vatInclusive
+                    ? exampleCalculation.gross.toFixed(2)
+                    : exampleCalculation.net.toFixed(2)}
                 </Text>
               </View>
-              
+
               <View style={styles.calculationRow}>
                 <Text style={styles.calculationLabel}>VAT ({formData.vatRate}%):</Text>
                 <Text style={styles.calculationValue}>£{exampleCalculation.vat.toFixed(2)}</Text>
               </View>
-              
+
               <View style={styles.calculationRow}>
                 <Text style={styles.calculationLabel}>Service (Platform - 12.5%):</Text>
                 <Text style={styles.calculationValue}>
-                  £{(exampleCalculation.net * 12.5 / 100).toFixed(2)}
+                  £{((exampleCalculation.net * 12.5) / 100).toFixed(2)}
                 </Text>
               </View>
-              
+
               <View style={[styles.calculationRow, styles.calculationTotal]}>
                 <Text style={styles.calculationTotalLabel}>Total Amount:</Text>
                 <Text style={styles.calculationTotalValue}>
-                  £{(exampleCalculation.gross + (exampleCalculation.net * 12.5 / 100)).toFixed(2)}
+                  £{(exampleCalculation.gross + (exampleCalculation.net * 12.5) / 100).toFixed(2)}
                 </Text>
               </View>
             </View>
@@ -352,17 +329,13 @@ const TaxConfigurationScreen: React.FC = () => {
           <TouchableOpacity
             style={[styles.button, styles.saveButton]}
             onPress={handleSave}
-            disabled={!hasChanges || isLoading}
-          >
+            disabled={!hasChanges || isLoading}>
             <Icon name="save" size={20} color={Colors.white} />
             <Text style={styles.saveButtonText}>Save Changes</Text>
           </TouchableOpacity>
 
           {hasChanges && (
-            <TouchableOpacity
-              style={[styles.button, styles.resetButton]}
-              onPress={handleReset}
-            >
+            <TouchableOpacity style={[styles.button, styles.resetButton]} onPress={handleReset}>
               <Icon name="refresh" size={20} color={Colors.danger} />
               <Text style={styles.resetButtonText}>Reset</Text>
             </TouchableOpacity>

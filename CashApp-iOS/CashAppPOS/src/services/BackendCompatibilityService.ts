@@ -1,10 +1,10 @@
 /**
  * Backend Compatibility Service
- * 
+ *
  * TEMPORARY service to handle mismatches between frontend expectations
  * and current backend responses. This allows the app to function while
  * waiting for backend deployment to complete.
- * 
+ *
  * TODO: Remove this service once backend is fully deployed with correct data structures
  */
 
@@ -16,7 +16,7 @@ interface BackendMenuItem {
   price: number;
   category: string;
   description?: string;
-  image?: string;  // Backend sends emoji in 'image' field
+  image?: string; // Backend sends emoji in 'image' field
   icon?: string;
   // 'available' field is MISSING from current backend
 }
@@ -61,7 +61,7 @@ export class BackendCompatibilityService {
     const now = new Date();
     const oneYearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
     const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 6, now.getDate());
-    
+
     return {
       ...backendEmployee,
       // Add missing required fields with sensible defaults
@@ -69,9 +69,10 @@ export class BackendCompatibilityService {
       startDate: oneYearAgo.toISOString(),
       phone: '+44 7700 900000', // Default UK phone
       totalOrders: Math.floor(backendEmployee.totalSales / 50), // Estimate
-      avgOrderValue: backendEmployee.totalSales > 0 ? 
-        (backendEmployee.totalSales / Math.floor(backendEmployee.totalSales / 50)).toFixed(2) : 
-        0,
+      avgOrderValue:
+        backendEmployee.totalSales > 0
+          ? (backendEmployee.totalSales / Math.floor(backendEmployee.totalSales / 50)).toFixed(2)
+          : 0,
       hoursWorked: backendEmployee.role === 'manager' ? 1680 : 1120, // Full-time vs part-time
     };
   }
@@ -95,7 +96,7 @@ export class BackendCompatibilityService {
    */
   static needsMenuTransformation(items: any[]): boolean {
     if (!items || items.length === 0) return false;
-    
+
     // Check if first item has 'available' field
     const firstItem = items[0];
     return firstItem && typeof firstItem.available === 'undefined';
@@ -106,7 +107,7 @@ export class BackendCompatibilityService {
    */
   static needsEmployeeTransformation(employees: any[]): boolean {
     if (!employees || employees.length === 0) return false;
-    
+
     // Check if first employee has 'hireDate' field
     const firstEmployee = employees[0];
     return firstEmployee && typeof firstEmployee.hireDate === 'undefined';

@@ -21,17 +21,14 @@ export interface CalculationContext {
 /**
  * Validates a price value and returns a safe number or 0
  */
-export const validatePrice = (
-  value: any, 
-  context?: CalculationContext
-): PriceValidationResult => {
+export const validatePrice = (value: any, context?: CalculationContext): PriceValidationResult => {
   try {
     // Handle null/undefined
     if (value === null || value === undefined) {
       return {
         isValid: false,
         value: 0,
-        error: 'Price value is null or undefined'
+        error: 'Price value is null or undefined',
       };
     }
 
@@ -45,7 +42,7 @@ export const validatePrice = (
       return {
         isValid: false,
         value: 0,
-        error: `Invalid price type: ${typeof value}`
+        error: `Invalid price type: ${typeof value}`,
       };
     }
 
@@ -55,13 +52,13 @@ export const validatePrice = (
       errorTrackingService.trackPricingError(
         new Error(`NaN detected in price validation: ${value}`),
         { originalValue: value, type: typeof value },
-        context
+        context,
       );
-      
+
       return {
         isValid: false,
         value: 0,
-        error: `Price resulted in NaN: ${value}`
+        error: `Price resulted in NaN: ${value}`,
       };
     }
 
@@ -71,13 +68,13 @@ export const validatePrice = (
       errorTrackingService.trackPricingError(
         new Error(`Negative price detected: ${numValue}`),
         { originalValue: value },
-        context
+        context,
       );
-      
+
       return {
         isValid: false,
         value: 0,
-        error: `Negative price not allowed: ${numValue}`
+        error: `Negative price not allowed: ${numValue}`,
       };
     }
 
@@ -87,13 +84,13 @@ export const validatePrice = (
       errorTrackingService.trackPricingError(
         new Error(`Infinite price detected: ${numValue}`),
         { originalValue: value },
-        context
+        context,
       );
-      
+
       return {
         isValid: false,
         value: 0,
-        error: `Price is not finite: ${numValue}`
+        error: `Price is not finite: ${numValue}`,
       };
     }
 
@@ -103,33 +100,32 @@ export const validatePrice = (
       errorTrackingService.trackPricingError(
         new Error(`Unrealistic price detected: ${numValue}`),
         { originalValue: value },
-        context
+        context,
       );
-      
+
       return {
         isValid: false,
         value: 0,
-        error: `Price too large: ${numValue}`
+        error: `Price too large: ${numValue}`,
       };
     }
 
     return {
       isValid: true,
-      value: Number(numValue.toFixed(2)) // Ensure 2 decimal places
+      value: Number(numValue.toFixed(2)), // Ensure 2 decimal places
     };
-
   } catch (error) {
     const errorTrackingService = ErrorTrackingService.getInstance();
     errorTrackingService.trackPricingError(
       error instanceof Error ? error : new Error(`Price validation error: ${error}`),
       { originalValue: value },
-      context
+      context,
     );
-    
+
     return {
       isValid: false,
       value: 0,
-      error: `Price validation failed: ${error}`
+      error: `Price validation failed: ${error}`,
     };
   }
 };
@@ -138,9 +134,9 @@ export const validatePrice = (
  * Safely multiplies price by quantity with validation
  */
 export const calculateItemTotal = (
-  price: any, 
+  price: any,
   quantity: any,
-  context?: CalculationContext
+  context?: CalculationContext,
 ): PriceValidationResult => {
   const priceValidation = validatePrice(price, context);
   const quantityValidation = validatePrice(quantity, context);
@@ -149,7 +145,7 @@ export const calculateItemTotal = (
     return {
       isValid: false,
       value: 0,
-      error: `Invalid price (${priceValidation.error}) or quantity (${quantityValidation.error})`
+      error: `Invalid price (${priceValidation.error}) or quantity (${quantityValidation.error})`,
     };
   }
 
@@ -158,20 +154,20 @@ export const calculateItemTotal = (
     return validatePrice(total, {
       ...context,
       operation: 'item_total_calculation',
-      inputValues: { price: priceValidation.value, quantity: quantityValidation.value }
+      inputValues: { price: priceValidation.value, quantity: quantityValidation.value },
     });
   } catch (error) {
     const errorTrackingService = ErrorTrackingService.getInstance();
     errorTrackingService.trackPricingError(
       error instanceof Error ? error : new Error(`Item total calculation error: ${error}`),
       { price, quantity },
-      context
+      context,
     );
-    
+
     return {
       isValid: false,
       value: 0,
-      error: `Item total calculation failed: ${error}`
+      error: `Item total calculation failed: ${error}`,
     };
   }
 };
@@ -182,7 +178,7 @@ export const calculateItemTotal = (
 export const calculatePercentageFee = (
   subtotal: any,
   percentage: any,
-  context?: CalculationContext
+  context?: CalculationContext,
 ): PriceValidationResult => {
   const subtotalValidation = validatePrice(subtotal, context);
   const percentageValidation = validatePrice(percentage, context);
@@ -191,7 +187,7 @@ export const calculatePercentageFee = (
     return {
       isValid: false,
       value: 0,
-      error: `Invalid subtotal (${subtotalValidation.error}) or percentage (${percentageValidation.error})`
+      error: `Invalid subtotal (${subtotalValidation.error}) or percentage (${percentageValidation.error})`,
     };
   }
 
@@ -200,20 +196,20 @@ export const calculatePercentageFee = (
     return validatePrice(fee, {
       ...context,
       operation: 'percentage_fee_calculation',
-      inputValues: { subtotal: subtotalValidation.value, percentage: percentageValidation.value }
+      inputValues: { subtotal: subtotalValidation.value, percentage: percentageValidation.value },
     });
   } catch (error) {
     const errorTrackingService = ErrorTrackingService.getInstance();
     errorTrackingService.trackPricingError(
       error instanceof Error ? error : new Error(`Percentage fee calculation error: ${error}`),
       { subtotal, percentage },
-      context
+      context,
     );
-    
+
     return {
       isValid: false,
       value: 0,
-      error: `Percentage fee calculation failed: ${error}`
+      error: `Percentage fee calculation failed: ${error}`,
     };
   }
 };
@@ -223,7 +219,7 @@ export const calculatePercentageFee = (
  */
 export const calculateSum = (
   values: any[],
-  context?: CalculationContext
+  context?: CalculationContext,
 ): PriceValidationResult => {
   try {
     let total = 0;
@@ -243,28 +239,27 @@ export const calculateSum = (
       errorTrackingService.trackPricingError(
         new Error(`Invalid values found in sum calculation`),
         { invalidValues, totalValues: values.length },
-        context
+        context,
       );
     }
 
     return validatePrice(total, {
       ...context,
       operation: 'sum_calculation',
-      inputValues: { valuesCount: values.length, invalidValuesCount: invalidValues.length }
+      inputValues: { valuesCount: values.length, invalidValuesCount: invalidValues.length },
     });
-
   } catch (error) {
     const errorTrackingService = ErrorTrackingService.getInstance();
     errorTrackingService.trackPricingError(
       error instanceof Error ? error : new Error(`Sum calculation error: ${error}`),
       { values },
-      context
+      context,
     );
-    
+
     return {
       isValid: false,
       value: 0,
-      error: `Sum calculation failed: ${error}`
+      error: `Sum calculation failed: ${error}`,
     };
   }
 };
@@ -275,18 +270,18 @@ export const calculateSum = (
 export const formatPrice = (
   value: any,
   currency: string = '£',
-  context?: CalculationContext
+  context?: CalculationContext,
 ): string => {
   const validation = validatePrice(value, context);
-  
+
   if (!validation.isValid) {
     const errorTrackingService = ErrorTrackingService.getInstance();
     errorTrackingService.trackPricingError(
       new Error(`Price formatting failed: ${validation.error}`),
       { originalValue: value, currency },
-      context
+      context,
     );
-    
+
     return `${currency}0.00`;
   }
 
@@ -297,9 +292,9 @@ export const formatPrice = (
     errorTrackingService.trackPricingError(
       error instanceof Error ? error : new Error(`Price formatting error: ${error}`),
       { value: validation.value, currency },
-      context
+      context,
     );
-    
+
     return `${currency}0.00`;
   }
 };
@@ -311,7 +306,7 @@ export const validateCartCalculation = (
   cartItems: any[],
   taxRate?: number,
   serviceChargeRate?: number,
-  context?: CalculationContext
+  context?: CalculationContext,
 ): {
   subtotal: PriceValidationResult;
   tax: PriceValidationResult;
@@ -325,34 +320,38 @@ export const validateCartCalculation = (
       ...context,
       operation: 'cart_item_calculation',
       component: `cart_item_${index}`,
-      inputValues: { itemId: item.id, itemName: item.name }
+      inputValues: { itemId: item.id, itemName: item.name },
     };
-    
+
     const itemTotal = calculateItemTotal(item.price, item.quantity, itemContext);
     return itemTotal.value;
   });
 
   const subtotal = calculateSum(itemTotals, {
     ...context,
-    operation: 'cart_subtotal_calculation'
+    operation: 'cart_subtotal_calculation',
   });
 
   // Calculate tax
-  const tax = taxRate ? calculatePercentageFee(subtotal.value, taxRate, {
-    ...context,
-    operation: 'tax_calculation'
-  }) : { isValid: true, value: 0 };
+  const tax = taxRate
+    ? calculatePercentageFee(subtotal.value, taxRate, {
+        ...context,
+        operation: 'tax_calculation',
+      })
+    : { isValid: true, value: 0 };
 
   // Calculate service charge
-  const serviceCharge = serviceChargeRate ? calculatePercentageFee(subtotal.value, serviceChargeRate, {
-    ...context,
-    operation: 'service_charge_calculation'
-  }) : { isValid: true, value: 0 };
+  const serviceCharge = serviceChargeRate
+    ? calculatePercentageFee(subtotal.value, serviceChargeRate, {
+        ...context,
+        operation: 'service_charge_calculation',
+      })
+    : { isValid: true, value: 0 };
 
   // Calculate total
   const total = calculateSum([subtotal.value, tax.value, serviceCharge.value], {
     ...context,
-    operation: 'cart_total_calculation'
+    operation: 'cart_total_calculation',
   });
 
   const hasErrors = !subtotal.isValid || !tax.isValid || !serviceCharge.isValid || !total.isValid;
@@ -362,6 +361,6 @@ export const validateCartCalculation = (
     tax,
     serviceCharge,
     total,
-    hasErrors
+    hasErrors,
   };
 };

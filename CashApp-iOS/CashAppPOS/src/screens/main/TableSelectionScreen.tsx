@@ -118,7 +118,7 @@ export const TableSelectionScreen: React.FC = () => {
         Alert.alert(
           'Table Unavailable',
           `This table is currently ${table.status}. Would you like to select a different table?`,
-          [{ text: 'OK', style: 'default' }]
+          [{ text: 'OK', style: 'default' }],
         );
         return;
       }
@@ -145,30 +145,27 @@ export const TableSelectionScreen: React.FC = () => {
       <TouchableOpacity
         style={[styles.tableCard, { borderColor: statusColor }]}
         onPress={() => handleTableSelect(item)}
-        disabled={orderType !== 0 && item.status !== 'available'}
-      >
+        disabled={orderType !== 0 && item.status !== 'available'}>
         <View style={[styles.tableHeader, { backgroundColor: statusColor }]}>
           <Text style={styles.tableName}>{item.name}</Text>
           <Text style={styles.tableCapacity}>{item.capacity} seats</Text>
         </View>
-        
+
         <View style={styles.tableBody}>
           <Text style={styles.tableSection}>{item.section.name}</Text>
           <Text style={[styles.tableStatus, { color: statusColor }]}>
             {item.status.toUpperCase()}
           </Text>
-          
+
           {isOccupied && item.current_order && (
             <View style={styles.orderInfo}>
               <Text style={styles.orderText}>Order: {item.current_order.name}</Text>
               <Text style={styles.orderAmount}>£{item.current_order.amount.toFixed(2)}</Text>
             </View>
           )}
-          
-          {item.server && (
-            <Text style={styles.serverText}>Server: {item.server.name}</Text>
-          )}
-          
+
+          {item.server && <Text style={styles.serverText}>Server: {item.server.name}</Text>}
+
           {item.stats && (
             <View style={styles.statsRow}>
               <Text style={styles.statText}>Today: {item.stats.orders_today} orders</Text>
@@ -184,16 +181,11 @@ export const TableSelectionScreen: React.FC = () => {
     <TouchableOpacity
       style={[
         styles.sectionChip,
-        { backgroundColor: selectedSection === item.id ? item.color : '#ecf0f1' }
+        { backgroundColor: selectedSection === item.id ? item.color : '#ecf0f1' },
       ]}
-      onPress={() => setSelectedSection(item.id === selectedSection ? null : item.id)}
-    >
+      onPress={() => setSelectedSection(item.id === selectedSection ? null : item.id)}>
       <Text
-        style={[
-          styles.sectionText,
-          { color: selectedSection === item.id ? '#fff' : '#2c3e50' }
-        ]}
-      >
+        style={[styles.sectionText, { color: selectedSection === item.id ? '#fff' : '#2c3e50' }]}>
         {item.name} ({item.table_count})
       </Text>
     </TouchableOpacity>
@@ -218,11 +210,11 @@ export const TableSelectionScreen: React.FC = () => {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Select Table</Text>
-        
+
         <SegmentedControl
           values={OrderTypeSegment}
           selectedIndex={orderType}
-          onChange={(event) => setOrderType(event.nativeEvent.selectedSegmentIndex)}
+          onChange={event => setOrderType(event.nativeEvent.selectedSegmentIndex)}
           style={styles.segmentControl}
         />
       </View>
@@ -231,7 +223,7 @@ export const TableSelectionScreen: React.FC = () => {
         <FlatList
           data={sections}
           renderItem={renderSection}
-          keyExtractor={(item) => item.id}
+          keyExtractor={item => item.id}
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.sectionList}
@@ -242,12 +234,10 @@ export const TableSelectionScreen: React.FC = () => {
         <FlatList
           data={filteredTables}
           renderItem={renderTable}
-          keyExtractor={(item) => item.id}
+          keyExtractor={item => item.id}
           numColumns={2}
           contentContainerStyle={styles.tableList}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          }
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyText}>No tables available</Text>
@@ -256,16 +246,13 @@ export const TableSelectionScreen: React.FC = () => {
         />
       ) : (
         <View style={styles.takeoutContainer}>
-          <Text style={styles.takeoutTitle}>
-            {OrderTypeSegment[orderType]} Order
-          </Text>
+          <Text style={styles.takeoutTitle}>{OrderTypeSegment[orderType]} Order</Text>
           <Text style={styles.takeoutDescription}>
             No table selection required for {OrderTypeSegment[orderType].toLowerCase()} orders.
           </Text>
           <TouchableOpacity
             style={styles.continueButton}
-            onPress={() => handleTableSelect({} as Table)}
-          >
+            onPress={() => handleTableSelect({} as Table)}>
             <Text style={styles.continueButtonText}>Continue to Order</Text>
           </TouchableOpacity>
         </View>

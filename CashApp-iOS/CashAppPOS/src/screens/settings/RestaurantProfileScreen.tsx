@@ -48,7 +48,7 @@ const RestaurantProfileScreen: React.FC = () => {
     zipCode: '',
     country: 'United Kingdom',
     currency: 'GBP',
-    taxRate: 0.20,
+    taxRate: 0.2,
     timezone: 'Europe/London',
   });
 
@@ -71,7 +71,7 @@ const RestaurantProfileScreen: React.FC = () => {
         zipCode: config.address?.zipCode || '',
         country: config.address?.country || 'United Kingdom',
         currency: config.currency || 'GBP',
-        taxRate: config.taxRate || 0.20,
+        taxRate: config.taxRate || 0.2,
         timezone: config.timezone || 'Europe/London',
       });
     }
@@ -85,7 +85,7 @@ const RestaurantProfileScreen: React.FC = () => {
   const handleSave = async () => {
     try {
       setSaving(true);
-      
+
       await updateConfig({
         restaurantName: formData.restaurantName,
         displayName: formData.displayName,
@@ -116,44 +116,48 @@ const RestaurantProfileScreen: React.FC = () => {
 
   const handleReset = () => {
     if (!hasChanges) return;
-    
-    Alert.alert(
-      'Discard Changes',
-      'Are you sure you want to discard all unsaved changes?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Discard',
-          style: 'destructive',
-          onPress: () => {
-            if (config) {
-              setFormData({
-                restaurantName: config.restaurantName || '',
-                displayName: config.displayName || '',
-                businessType: config.businessType || 'Restaurant',
-                phone: config.phone || '',
-                email: config.email || '',
-                website: config.website || '',
-                street: config.address?.street || '',
-                city: config.address?.city || '',
-                state: config.address?.state || '',
-                zipCode: config.address?.zipCode || '',
-                country: config.address?.country || 'United Kingdom',
-                currency: config.currency || 'GBP',
-                taxRate: config.taxRate || 0.20,
-                timezone: config.timezone || 'Europe/London',
-              });
-              setHasChanges(false);
-            }
-          },
+
+    Alert.alert('Discard Changes', 'Are you sure you want to discard all unsaved changes?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Discard',
+        style: 'destructive',
+        onPress: () => {
+          if (config) {
+            setFormData({
+              restaurantName: config.restaurantName || '',
+              displayName: config.displayName || '',
+              businessType: config.businessType || 'Restaurant',
+              phone: config.phone || '',
+              email: config.email || '',
+              website: config.website || '',
+              street: config.address?.street || '',
+              city: config.address?.city || '',
+              state: config.address?.state || '',
+              zipCode: config.address?.zipCode || '',
+              country: config.address?.country || 'United Kingdom',
+              currency: config.currency || 'GBP',
+              taxRate: config.taxRate || 0.2,
+              timezone: config.timezone || 'Europe/London',
+            });
+            setHasChanges(false);
+          }
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const businessTypes = [
-    'Restaurant', 'Fast Food', 'Cafe', 'Bar & Pub', 'Food Truck', 
-    'Bakery', 'Pizzeria', 'Bistro', 'Fine Dining', 'Other'
+    'Restaurant',
+    'Fast Food',
+    'Cafe',
+    'Bar & Pub',
+    'Food Truck',
+    'Bakery',
+    'Pizzeria',
+    'Bistro',
+    'Fine Dining',
+    'Other',
   ];
 
   const currencies = [
@@ -165,27 +169,24 @@ const RestaurantProfileScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor={Colors.primary} barStyle="light-content" />
-      
+
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <Icon name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>
-        
+
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle}>Restaurant Profile</Text>
           <Text style={styles.headerSubtitle}>Manage your restaurant details</Text>
         </View>
-        
-        <TouchableOpacity 
-          style={styles.resetButton}
-          onPress={handleReset}
-          disabled={!hasChanges}
-        >
-          <Icon name="refresh" size={24} color={hasChanges ? Colors.white : 'rgba(255,255,255,0.5)'} />
+
+        <TouchableOpacity style={styles.resetButton} onPress={handleReset} disabled={!hasChanges}>
+          <Icon
+            name="refresh"
+            size={24}
+            color={hasChanges ? Colors.white : 'rgba(255,255,255,0.5)'}
+          />
         </TouchableOpacity>
       </View>
 
@@ -193,13 +194,13 @@ const RestaurantProfileScreen: React.FC = () => {
         {/* Basic Information */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Basic Information</Text>
-          
+
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Restaurant Name *</Text>
             <TextInput
               style={styles.textInput}
               value={formData.restaurantName}
-              onChangeText={(value) => updateField('restaurantName', value)}
+              onChangeText={value => updateField('restaurantName', value)}
               placeholder="Enter restaurant name"
               placeholderTextColor={Colors.mediumGray}
             />
@@ -211,7 +212,7 @@ const RestaurantProfileScreen: React.FC = () => {
             <TextInput
               style={styles.textInput}
               value={formData.displayName}
-              onChangeText={(value) => updateField('displayName', value)}
+              onChangeText={value => updateField('displayName', value)}
               placeholder="Enter display name"
               placeholderTextColor={Colors.mediumGray}
             />
@@ -219,20 +220,23 @@ const RestaurantProfileScreen: React.FC = () => {
 
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Business Type *</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.businessTypeScroll}>
-              {businessTypes.map((type) => (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.businessTypeScroll}>
+              {businessTypes.map(type => (
                 <TouchableOpacity
                   key={type}
                   style={[
                     styles.businessTypeButton,
                     formData.businessType === type && styles.businessTypeButtonActive,
                   ]}
-                  onPress={() => updateField('businessType', type)}
-                >
-                  <Text style={[
-                    styles.businessTypeText,
-                    formData.businessType === type && styles.businessTypeTextActive,
-                  ]}>
+                  onPress={() => updateField('businessType', type)}>
+                  <Text
+                    style={[
+                      styles.businessTypeText,
+                      formData.businessType === type && styles.businessTypeTextActive,
+                    ]}>
                     {type}
                   </Text>
                 </TouchableOpacity>
@@ -244,13 +248,13 @@ const RestaurantProfileScreen: React.FC = () => {
         {/* Contact Information */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Contact Information</Text>
-          
+
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Phone Number *</Text>
             <TextInput
               style={styles.textInput}
               value={formData.phone}
-              onChangeText={(value) => updateField('phone', value)}
+              onChangeText={value => updateField('phone', value)}
               placeholder="+44 20 1234 5678"
               placeholderTextColor={Colors.mediumGray}
               keyboardType="phone-pad"
@@ -262,7 +266,7 @@ const RestaurantProfileScreen: React.FC = () => {
             <TextInput
               style={styles.textInput}
               value={formData.email}
-              onChangeText={(value) => updateField('email', value)}
+              onChangeText={value => updateField('email', value)}
               placeholder="restaurant@example.com"
               placeholderTextColor={Colors.mediumGray}
               keyboardType="email-address"
@@ -275,7 +279,7 @@ const RestaurantProfileScreen: React.FC = () => {
             <TextInput
               style={styles.textInput}
               value={formData.website}
-              onChangeText={(value) => updateField('website', value)}
+              onChangeText={value => updateField('website', value)}
               placeholder="https://restaurant.com"
               placeholderTextColor={Colors.mediumGray}
               keyboardType="url"
@@ -287,13 +291,13 @@ const RestaurantProfileScreen: React.FC = () => {
         {/* Address */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Location</Text>
-          
+
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Street Address *</Text>
             <TextInput
               style={styles.textInput}
               value={formData.street}
-              onChangeText={(value) => updateField('street', value)}
+              onChangeText={value => updateField('street', value)}
               placeholder="123 High Street"
               placeholderTextColor={Colors.mediumGray}
             />
@@ -305,7 +309,7 @@ const RestaurantProfileScreen: React.FC = () => {
               <TextInput
                 style={styles.textInput}
                 value={formData.city}
-                onChangeText={(value) => updateField('city', value)}
+                onChangeText={value => updateField('city', value)}
                 placeholder="London"
                 placeholderTextColor={Colors.mediumGray}
               />
@@ -316,7 +320,7 @@ const RestaurantProfileScreen: React.FC = () => {
               <TextInput
                 style={styles.textInput}
                 value={formData.zipCode}
-                onChangeText={(value) => updateField('zipCode', value)}
+                onChangeText={value => updateField('zipCode', value)}
                 placeholder="SW1A 1AA"
                 placeholderTextColor={Colors.mediumGray}
                 autoCapitalize="characters"
@@ -328,23 +332,26 @@ const RestaurantProfileScreen: React.FC = () => {
         {/* Business Settings */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Business Settings</Text>
-          
+
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Currency</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.currencyScroll}>
-              {currencies.map((currency) => (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.currencyScroll}>
+              {currencies.map(currency => (
                 <TouchableOpacity
                   key={currency.code}
                   style={[
                     styles.currencyButton,
                     formData.currency === currency.code && styles.currencyButtonActive,
                   ]}
-                  onPress={() => updateField('currency', currency.code)}
-                >
-                  <Text style={[
-                    styles.currencyText,
-                    formData.currency === currency.code && styles.currencyTextActive,
-                  ]}>
+                  onPress={() => updateField('currency', currency.code)}>
+                  <Text
+                    style={[
+                      styles.currencyText,
+                      formData.currency === currency.code && styles.currencyTextActive,
+                    ]}>
                     {currency.symbol} {currency.code}
                   </Text>
                 </TouchableOpacity>
@@ -357,7 +364,7 @@ const RestaurantProfileScreen: React.FC = () => {
             <TextInput
               style={styles.textInput}
               value={(formData.taxRate * 100).toString()}
-              onChangeText={(value) => updateField('taxRate', parseFloat(value) / 100 || 0)}
+              onChangeText={value => updateField('taxRate', parseFloat(value) / 100 || 0)}
               placeholder="20"
               placeholderTextColor={Colors.mediumGray}
               keyboardType="numeric"
@@ -372,12 +379,9 @@ const RestaurantProfileScreen: React.FC = () => {
           <TouchableOpacity
             style={[styles.saveButton, saving && styles.saveButtonDisabled]}
             onPress={handleSave}
-            disabled={saving}
-          >
+            disabled={saving}>
             <Icon name="save" size={20} color={Colors.white} />
-            <Text style={styles.saveButtonText}>
-              {saving ? 'Saving...' : 'Save Changes'}
-            </Text>
+            <Text style={styles.saveButtonText}>{saving ? 'Saving...' : 'Save Changes'}</Text>
           </TouchableOpacity>
         </View>
       )}

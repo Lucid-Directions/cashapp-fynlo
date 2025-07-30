@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-  StatusBar,
-  SafeAreaView,
-} from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, StatusBar, SafeAreaView } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 
@@ -64,11 +57,7 @@ const SettingsHeader: React.FC<SettingsHeaderProps> = ({
       <View style={[styles.container, { backgroundColor }]}>
         {/* Left section with back button */}
         {showBackButton && (
-          <TouchableOpacity 
-            style={styles.backButton} 
-            onPress={handleBackPress}
-            activeOpacity={0.7}
-          >
+          <TouchableOpacity style={styles.backButton} onPress={handleBackPress} activeOpacity={0.7}>
             <Icon name="arrow-back" size={24} color={Colors.white} />
           </TouchableOpacity>
         )}
@@ -76,20 +65,14 @@ const SettingsHeader: React.FC<SettingsHeaderProps> = ({
         {/* Center section with title and subtitle */}
         <View style={[styles.centerSection, !showBackButton && styles.centerSectionNoBack]}>
           <Text style={styles.title}>{title}</Text>
-          {subtitle && (
-            <Text style={styles.subtitle}>{subtitle}</Text>
-          )}
+          {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
         </View>
 
         {/* Right section with action button */}
         <View style={styles.rightSection}>
           {rightAction && (
             <TouchableOpacity style={styles.actionButton} onPress={rightAction.onPress}>
-              <Icon 
-                name={rightAction.icon} 
-                size={24} 
-                color={rightAction.color || Colors.white} 
-              />
+              <Icon name={rightAction.icon} size={24} color={rightAction.color || Colors.white} />
             </TouchableOpacity>
           )}
         </View>

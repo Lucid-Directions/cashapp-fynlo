@@ -22,22 +22,22 @@ const { width, height } = Dimensions.get('window');
 
 // Clover POS Color Scheme
 const Colors = {
-  primary: '#00A651',      // Clover Green
-  secondary: '#0066CC',    // Clover Blue  
+  primary: '#00A651', // Clover Green
+  secondary: '#0066CC', // Clover Blue
   success: '#00A651',
-  background: '#F5F5F5',   // Light Gray Background
+  background: '#F5F5F5', // Light Gray Background
   white: '#FFFFFF',
   lightGray: '#E5E5E5',
-  text: '#333333',         // Dark Gray Text
-  lightText: '#666666',    // Medium Gray Text
-  accent: '#0066CC',       // Clover Blue Accent
+  text: '#333333', // Dark Gray Text
+  lightText: '#666666', // Medium Gray Text
+  accent: '#0066CC', // Clover Blue Accent
 };
 
 const LoginScreen: React.FC = () => {
   const navigation = useNavigation();
   const signIn = useAuthStore(state => state.signIn);
   const authLoading = useAuthStore(state => state.isLoading);
-  
+
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -46,7 +46,7 @@ const LoginScreen: React.FC = () => {
   const handleLogin = async (quickUsername?: string, quickPassword?: string) => {
     const loginUsername = quickUsername || username;
     const loginPassword = quickPassword || password;
-    
+
     if (!loginUsername.trim() || !loginPassword.trim()) {
       Alert.alert('Error', 'Please enter both username and password');
       return;
@@ -74,11 +74,10 @@ const LoginScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={Colors.background} />
-      
+
       <KeyboardAvoidingView
         style={styles.keyboardView}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <View style={styles.content}>
           {/* Logo Section */}
           <View style={styles.logoSection}>
@@ -120,21 +119,17 @@ const LoginScreen: React.FC = () => {
               />
               <TouchableOpacity
                 style={styles.passwordToggle}
-                onPress={() => setShowPassword(!showPassword)}
-              >
-                <Icon 
-                  name={showPassword ? "visibility-off" : "visibility"} 
-                  size={20} 
-                  color={Colors.lightText} 
+                onPress={() => setShowPassword(!showPassword)}>
+                <Icon
+                  name={showPassword ? 'visibility-off' : 'visibility'}
+                  size={20}
+                  color={Colors.lightText}
                 />
               </TouchableOpacity>
             </View>
 
             {/* Forgot Password */}
-            <TouchableOpacity
-              style={styles.forgotPasswordButton}
-              onPress={handleForgotPassword}
-            >
+            <TouchableOpacity style={styles.forgotPasswordButton} onPress={handleForgotPassword}>
               <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
             </TouchableOpacity>
 
@@ -142,9 +137,8 @@ const LoginScreen: React.FC = () => {
             <TouchableOpacity
               style={[styles.loginButton, (isLoading || authLoading) && styles.loginButtonDisabled]}
               onPress={() => handleLogin()}
-              disabled={isLoading || authLoading}
-            >
-              {(isLoading || authLoading) ? (
+              disabled={isLoading || authLoading}>
+              {isLoading || authLoading ? (
                 <Text style={styles.loginButtonText}>Signing In...</Text>
               ) : (
                 <>
@@ -157,9 +151,7 @@ const LoginScreen: React.FC = () => {
 
           {/* Footer */}
           <View style={styles.footer}>
-            <Text style={styles.footerText}>
-              Fynlo POS System • Secure Payment Processing
-            </Text>
+            <Text style={styles.footerText}>Fynlo POS System • Secure Payment Processing</Text>
           </View>
         </View>
       </KeyboardAvoidingView>

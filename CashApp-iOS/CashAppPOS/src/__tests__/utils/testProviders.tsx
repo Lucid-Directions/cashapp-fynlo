@@ -61,4 +61,4 @@ export const customRenderWithStores = (
 ) => {
   const Wrapper = createTestWrapper({ appState, uiState });
   return render(ui, { wrapper: Wrapper, ...options });
-}; 
+};

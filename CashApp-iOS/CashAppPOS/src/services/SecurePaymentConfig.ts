@@ -1,6 +1,6 @@
 /**
  * Secure Payment Configuration Service
- * 
+ *
  * Handles loading payment configuration from backend without exposing sensitive data
  * All credentials remain server-side, only public keys are sent to frontend
  */
@@ -103,7 +103,7 @@ class SecurePaymentConfigService {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -130,7 +130,7 @@ class SecurePaymentConfigService {
       return config;
     } catch (error) {
       console.error('Failed to fetch payment configuration:', error);
-      
+
       // Return minimal config on error
       return {
         availableMethods: [
@@ -165,7 +165,7 @@ class SecurePaymentConfigService {
       }
 
       const { config, timestamp } = JSON.parse(cached);
-      
+
       // Check if cache is expired
       if (Date.now() - timestamp > this.configCacheExpiry) {
         await AsyncStorage.removeItem(this.configCacheKey);
@@ -189,7 +189,7 @@ class SecurePaymentConfigService {
         JSON.stringify({
           config,
           timestamp: Date.now(),
-        })
+        }),
       );
     } catch (error) {
       console.error('Error caching config:', error);
@@ -227,14 +227,17 @@ class SecurePaymentConfigService {
   /**
    * Calculate fees for an amount and payment method
    */
-  calculateFees(amount: number, method: string): {
+  calculateFees(
+    amount: number,
+    method: string,
+  ): {
     percentageFee: number;
     fixedFee: number;
     totalFee: number;
     netAmount: number;
   } {
     const feeStructure = this.getFeeStructure(method);
-    
+
     if (!feeStructure) {
       return {
         percentageFee: 0,
@@ -263,7 +266,7 @@ class SecurePaymentConfigService {
    */
   formatFeeDisplay(method: string): string {
     const feeStructure = this.getFeeStructure(method);
-    
+
     if (!feeStructure) {
       return 'Fee unavailable';
     }
@@ -272,7 +275,12 @@ class SecurePaymentConfigService {
       return 'No fees';
     }
 
-    return feeStructure.description || `${feeStructure.percentage}%${feeStructure.fixed > 0 ? ` + £${feeStructure.fixed.toFixed(2)}` : ''}`;
+    return (
+      feeStructure.description ||
+      `${feeStructure.percentage}%${
+        feeStructure.fixed > 0 ? ` + £${feeStructure.fixed.toFixed(2)}` : ''
+      }`
+    );
   }
 
   /**
@@ -301,7 +309,10 @@ class SecurePaymentConfigService {
   /**
    * Validate payment amount for method
    */
-  validateAmount(amount: number, method: string): {
+  validateAmount(
+    amount: number,
+    method: string,
+  ): {
     valid: boolean;
     error?: string;
   } {
@@ -313,16 +324,16 @@ class SecurePaymentConfigService {
     }
 
     if (amount < methodConfig.minAmount) {
-      return { 
-        valid: false, 
-        error: `Minimum amount is £${methodConfig.minAmount.toFixed(2)}` 
+      return {
+        valid: false,
+        error: `Minimum amount is £${methodConfig.minAmount.toFixed(2)}`,
       };
     }
 
     if (amount > methodConfig.maxAmount) {
-      return { 
-        valid: false, 
-        error: `Maximum amount is £${methodConfig.maxAmount.toFixed(2)}` 
+      return {
+        valid: false,
+        error: `Maximum amount is £${methodConfig.maxAmount.toFixed(2)}`,
       };
     }
 

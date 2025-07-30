@@ -82,7 +82,7 @@ class MonitoringService {
   async getSystemHealth(): Promise<SystemHealth> {
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 500));
-    
+
     // Generate dynamic health data
     this.updateHealthMetrics();
     return this.healthData!;
@@ -122,8 +122,8 @@ class MonitoringService {
   // Incident management
   async getActiveIncidents(): Promise<Incident[]> {
     await new Promise(resolve => setTimeout(resolve, 300));
-    return this.incidents.filter(incident => 
-      incident.status !== 'resolved' && incident.status !== 'closed'
+    return this.incidents.filter(
+      incident => incident.status !== 'resolved' && incident.status !== 'closed',
     );
   }
 
@@ -135,7 +135,7 @@ class MonitoringService {
     title: string,
     description: string,
     severity: 'low' | 'medium' | 'high' | 'critical',
-    affectedRestaurants: string[]
+    affectedRestaurants: string[],
   ): Promise<Incident> {
     const incident: Incident = {
       id: `incident-${Date.now()}`,
@@ -156,7 +156,7 @@ class MonitoringService {
   async updateIncidentStatus(
     incidentId: string,
     status: 'investigating' | 'monitoring' | 'resolved' | 'closed',
-    resolution?: string
+    resolution?: string,
   ): Promise<boolean> {
     const incidentIndex = this.incidents.findIndex(i => i.id === incidentId);
     if (incidentIndex !== -1) {
@@ -165,7 +165,7 @@ class MonitoringService {
       if (resolution) {
         this.incidents[incidentIndex].resolution = resolution;
       }
-      
+
       this.notifyListeners('incident-updated', this.incidents[incidentIndex]);
       return true;
     }
@@ -182,7 +182,7 @@ class MonitoringService {
       ...rule,
       id: `alert-${Date.now()}`,
     };
-    
+
     this.alertRules.push(alertRule);
     return alertRule;
   }
@@ -200,7 +200,7 @@ class MonitoringService {
   subscribe(eventType: string, callback: (data: any) => void): () => void {
     const listenerId = `${eventType}-${Date.now()}`;
     this.listeners.set(listenerId, callback);
-    
+
     return () => {
       this.listeners.delete(listenerId);
     };
@@ -271,11 +271,11 @@ class MonitoringService {
     // Simulate real-time updates
     Object.keys(this.healthData).forEach(key => {
       const metric = this.healthData![key as keyof SystemHealth];
-      const variation = -5 + (Math.random() * 10); // -5% to +5%
-      
+      const variation = -5 + Math.random() * 10; // -5% to +5%
+
       if (metric.name.includes('Response Time') || metric.name.includes('Latency')) {
         const currentValue = parseInt(metric.value);
-        const newValue = Math.max(10, currentValue + Math.round(currentValue * variation / 100));
+        const newValue = Math.max(10, currentValue + Math.round((currentValue * variation) / 100));
         metric.value = `${newValue}ms`;
         metric.status = newValue > 200 ? 'error' : newValue > 100 ? 'warning' : 'good';
       } else if (metric.name.includes('Performance') || metric.name.includes('Gateway')) {
@@ -284,7 +284,7 @@ class MonitoringService {
         metric.value = `${newValue.toFixed(1)}%`;
         metric.status = newValue < 95 ? 'error' : newValue < 98 ? 'warning' : 'good';
       }
-      
+
       metric.trend = variation;
       metric.lastUpdated = new Date();
     });
@@ -294,18 +294,18 @@ class MonitoringService {
     if (!this.performance) return;
 
     const variations = {
-      uptime: -0.1 + (Math.random() * 0.2),
-      requestsPerDay: -50000 + (Math.random() * 100000),
-      errorRate: -0.005 + (Math.random() * 0.01),
-      avgResponseTime: -10 + (Math.random() * 20),
-      memoryUsage: -5 + (Math.random() * 10),
-      cpuUsage: -10 + (Math.random() * 20),
+      uptime: -0.1 + Math.random() * 0.2,
+      requestsPerDay: -50000 + Math.random() * 100000,
+      errorRate: -0.005 + Math.random() * 0.01,
+      avgResponseTime: -10 + Math.random() * 20,
+      memoryUsage: -5 + Math.random() * 10,
+      cpuUsage: -10 + Math.random() * 20,
     };
 
     Object.keys(variations).forEach(key => {
       const currentValue = this.performance![key as keyof PerformanceMetrics];
       const variation = variations[key as keyof typeof variations];
-      
+
       let newValue: number;
       if (key === 'uptime') {
         newValue = Math.min(100, Math.max(95, currentValue + variation));
@@ -316,7 +316,7 @@ class MonitoringService {
       } else {
         newValue = Math.max(0, currentValue + variation);
       }
-      
+
       this.performance![key as keyof PerformanceMetrics] = newValue;
     });
   }
@@ -343,7 +343,7 @@ class MonitoringService {
         restaurantName: restaurant.name,
         resolved: Math.random() > 0.7,
       };
-      
+
       this.errors.push(error);
     }
   }
@@ -353,7 +353,8 @@ class MonitoringService {
       {
         id: 'incident-1',
         title: 'Payment Processing Delay',
-        description: 'Multiple restaurants experiencing slower than normal payment processing times',
+        description:
+          'Multiple restaurants experiencing slower than normal payment processing times',
         status: 'investigating',
         severity: 'high',
         affectedRestaurants: ['1', '2', '3'],
@@ -417,7 +418,7 @@ class MonitoringService {
       'Disk space low on server instance',
       'Invalid payment method configuration',
     ];
-    
+
     return messages[Math.floor(Math.random() * messages.length)];
   }
 
@@ -436,7 +437,8 @@ class MonitoringService {
 
     // Simulate new errors occasionally
     setInterval(() => {
-      if (Math.random() < 0.3) { // 30% chance every minute
+      if (Math.random() < 0.3) {
+        // 30% chance every minute
         this.generateNewError();
       }
     }, 60000);
@@ -475,11 +477,4 @@ class MonitoringService {
 }
 
 export { MonitoringService };
-export type {
-  SystemHealth,
-  HealthMetric,
-  ErrorLog,
-  Incident,
-  PerformanceMetrics,
-  AlertRule,
-};
+export type { SystemHealth, HealthMetric, ErrorLog, Incident, PerformanceMetrics, AlertRule };

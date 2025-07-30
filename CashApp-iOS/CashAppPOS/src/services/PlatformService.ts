@@ -91,9 +91,9 @@ class PlatformService {
   }
 
   private async makeRequest(
-    endpoint: string, 
+    endpoint: string,
     method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'GET',
-    data?: any
+    data?: any,
   ): Promise<any> {
     try {
       const url = `${BASE_URL}${endpoint}`;
@@ -103,7 +103,7 @@ class PlatformService {
 
       // Always reload auth token for fresh requests
       await this.loadAuthToken();
-      
+
       if (this.authToken) {
         headers['Authorization'] = `Bearer ${this.authToken}`;
       }
@@ -124,7 +124,7 @@ class PlatformService {
       }
 
       const response = await fetch(url, config);
-      
+
       if (!response.ok) {
         const errorText = await response.text();
         console.error(`❌ HTTP ${response.status}: ${response.statusText}`);
@@ -142,20 +142,23 @@ class PlatformService {
   }
 
   // Platform Settings Management
-  async getPlatformSettings(category?: string, includeSensitive: boolean = false): Promise<PlatformSetting[]> {
+  async getPlatformSettings(
+    category?: string,
+    includeSensitive: boolean = false,
+  ): Promise<PlatformSetting[]> {
     try {
       const params = new URLSearchParams();
       if (category) params.append('category', category);
       if (includeSensitive) params.append('include_sensitive', 'true');
-      
+
       const queryString = params.toString();
       const endpoint = `/platform/settings${queryString ? `?${queryString}` : ''}`;
-      
+
       const settingsData = await this.makeRequest(endpoint);
-      
+
       // Handle different API response formats
       let settingsObject: Record<string, any>;
-      
+
       if (settingsData && typeof settingsData === 'object') {
         // If it's already an object, use it directly
         settingsObject = settingsData;
@@ -163,7 +166,7 @@ class PlatformService {
         // If it's an array or other format, create an empty object
         settingsObject = {};
       }
-      
+
       // Convert object to array format for easier handling
       return Object.entries(settingsObject).map(([key, config]: [string, any]) => ({
         key,
@@ -198,9 +201,9 @@ class PlatformService {
   }
 
   async updatePlatformSetting(
-    configKey: string, 
-    configValue: any, 
-    changeReason?: string
+    configKey: string,
+    configValue: any,
+    changeReason?: string,
   ): Promise<boolean> {
     try {
       await this.makeRequest(`/platform/settings/${configKey}`, 'PUT', {
@@ -215,15 +218,15 @@ class PlatformService {
   }
 
   async bulkUpdatePlatformSettings(
-    updates: Record<string, any>, 
-    changeReason?: string
+    updates: Record<string, any>,
+    changeReason?: string,
   ): Promise<{ successful: number; failed: number; errors: Record<string, string> }> {
     try {
       const result = await this.makeRequest('/platform/settings/bulk-update', 'POST', {
         updates,
         change_reason: changeReason,
       });
-      
+
       return {
         successful: result.successful_updates || 0,
         failed: result.failed_updates || 0,
@@ -231,13 +234,13 @@ class PlatformService {
       };
     } catch (error) {
       console.error('❌ Failed to bulk update settings:', error);
-      
+
       // If the bulk endpoint fails, try individual updates as fallback
       console.log('🔄 Attempting individual updates as fallback...');
       let successful = 0;
       let failed = 0;
       const errors: Record<string, string> = {};
-      
+
       for (const [key, value] of Object.entries(updates)) {
         try {
           const success = await this.updatePlatformSetting(key, value, changeReason);
@@ -252,7 +255,7 @@ class PlatformService {
           errors[key] = error.message || 'Unknown error';
         }
       }
-      
+
       return { successful, failed, errors };
     }
   }
@@ -272,7 +275,7 @@ class PlatformService {
     paymentMethod: string,
     amount: number,
     restaurantId?: string,
-    monthlyVolume?: number
+    monthlyVolume?: number,
   ): Promise<FeeCalculation> {
     try {
       const params = new URLSearchParams({
@@ -283,7 +286,7 @@ class PlatformService {
 
       return await this.makeRequest(
         `/platform/payment-fees/calculate?${params.toString()}`,
-        'POST'
+        'POST',
       );
     } catch (error) {
       console.error('Failed to calculate payment fee:', error);
@@ -307,7 +310,7 @@ class PlatformService {
     featureKey: string,
     isEnabled: boolean,
     rolloutPercentage?: number,
-    targetRestaurants?: string[]
+    targetRestaurants?: string[],
   ): Promise<boolean> {
     try {
       await this.makeRequest(`/platform/feature-flags/${featureKey}`, 'PUT', {
@@ -325,12 +328,12 @@ class PlatformService {
   // Restaurant Settings Management
   async getRestaurantEffectiveSettings(
     restaurantId: string,
-    category?: string
+    category?: string,
   ): Promise<Record<string, any>> {
     try {
       const params = category ? `?category=${category}` : '';
       return await this.makeRequest(
-        `/platform/restaurants/${restaurantId}/effective-settings${params}`
+        `/platform/restaurants/${restaurantId}/effective-settings${params}`,
       );
     } catch (error) {
       console.error('Failed to fetch restaurant effective settings:', error);
@@ -342,7 +345,7 @@ class PlatformService {
     restaurantId: string,
     configKey: string,
     overrideValue: any,
-    requiresApproval: boolean = false
+    requiresApproval: boolean = false,
   ): Promise<boolean> {
     try {
       await this.makeRequest(
@@ -351,7 +354,7 @@ class PlatformService {
         {
           override_value: overrideValue,
           requires_approval: requiresApproval,
-        }
+        },
       );
       return true;
     } catch (error) {
@@ -364,7 +367,7 @@ class PlatformService {
   async getAuditTrail(
     configKey?: string,
     entityId?: string,
-    limit: number = 100
+    limit: number = 100,
   ): Promise<AuditRecord[]> {
     try {
       const params = new URLSearchParams({ limit: limit.toString() });
@@ -382,7 +385,7 @@ class PlatformService {
   // Platform Configuration Sync (for mobile apps)
   async syncPlatformConfig(
     restaurantId?: string,
-    categories?: string[]
+    categories?: string[],
   ): Promise<{
     platform_settings: Record<string, any>;
     feature_flags: Record<string, boolean>;
@@ -430,7 +433,7 @@ class PlatformService {
       },
       {
         key: 'payment.fees.stripe',
-        value: { percentage: 1.4, fixed_fee: 0.20, currency: 'GBP' },
+        value: { percentage: 1.4, fixed_fee: 0.2, currency: 'GBP' },
         category: 'payment_fees',
         description: 'Stripe payment processing fee',
         is_sensitive: false,
@@ -449,7 +452,7 @@ class PlatformService {
         value: {
           standard: { percentage: 1.95 },
           high_volume: { threshold: 2714, percentage: 0.95, monthly_fee: 39 },
-          currency: 'GBP'
+          currency: 'GBP',
         },
         category: 'payment_fees',
         description: 'SumUp payment processing fee',
@@ -496,17 +499,17 @@ class PlatformService {
   private getMockPaymentFees(): Record<string, PaymentFee> {
     return {
       qr_code: { percentage: 1.2, currency: 'GBP' },
-      stripe: { percentage: 1.4, fixed_fee: 0.20, currency: 'GBP' },
-      square: { 
-        percentage: 1.75, 
+      stripe: { percentage: 1.4, fixed_fee: 0.2, currency: 'GBP' },
+      square: {
+        percentage: 1.75,
         currency: 'GBP',
         // Additional Square fee structures
-        high_volume: { threshold: 0, percentage: 1.75, monthly_fee: 0 } // No monthly fee
+        high_volume: { threshold: 0, percentage: 1.75, monthly_fee: 0 }, // No monthly fee
       },
       sumup: {
         percentage: 1.95,
         currency: 'GBP',
-        high_volume: { threshold: 2714, percentage: 0.95, monthly_fee: 39 }
+        high_volume: { threshold: 2714, percentage: 0.95, monthly_fee: 39 },
       },
     };
   }
@@ -514,13 +517,13 @@ class PlatformService {
   private getMockFeeCalculation(paymentMethod: string, amount: number): FeeCalculation {
     const fees = this.getMockPaymentFees();
     const feeConfig = fees[paymentMethod];
-    
+
     if (!feeConfig) {
       throw new Error(`Unknown payment method: ${paymentMethod}`);
     }
 
-    const platformFee = (amount * feeConfig.percentage / 100) + (feeConfig.fixed_fee || 0);
-    
+    const platformFee = (amount * feeConfig.percentage) / 100 + (feeConfig.fixed_fee || 0);
+
     return {
       payment_method: paymentMethod,
       amount,
@@ -550,11 +553,15 @@ class PlatformService {
   async updateServiceChargeConfig(
     enabled: boolean,
     rate: number,
-    description?: string
+    description?: string,
   ): Promise<boolean> {
     try {
-      console.log('💾 Updating service charge config in real data store...', { enabled, rate, description });
-      
+      console.log('💾 Updating service charge config in real data store...', {
+        enabled,
+        rate,
+        description,
+      });
+
       const config = {
         enabled,
         rate,
@@ -570,7 +577,6 @@ class PlatformService {
       return false;
     }
   }
-
 
   private getMockFeatureFlags(): Record<string, boolean> {
     return {

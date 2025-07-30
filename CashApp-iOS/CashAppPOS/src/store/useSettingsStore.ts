@@ -229,7 +229,10 @@ interface SettingsState {
   loadSettings: () => Promise<void>;
   saveSettings: () => Promise<void>;
   initializeStore: () => void;
-  updatePaymentMethod: (methodId: keyof PaymentMethods, config: Partial<PaymentMethodConfig>) => void;
+  updatePaymentMethod: (
+    methodId: keyof PaymentMethods,
+    config: Partial<PaymentMethodConfig>,
+  ) => void;
 }
 
 // Default settings values
@@ -447,88 +450,88 @@ const useSettingsStore = create<SettingsState>()(
       error: null,
 
       // Actions
-      updateBusinessInfo: (info) =>
-        set((state) => ({
+      updateBusinessInfo: info =>
+        set(state => ({
           businessInfo: { ...state.businessInfo, ...info },
         })),
 
-      updateTaxConfiguration: (config) =>
-        set((state) => ({
+      updateTaxConfiguration: config =>
+        set(state => ({
           taxConfiguration: { ...state.taxConfiguration, ...config },
         })),
 
-      updatePaymentMethods: (methods) =>
-        set((state) => ({
+      updatePaymentMethods: methods =>
+        set(state => ({
           paymentMethods: { ...state.paymentMethods, ...methods },
         })),
 
-      updateReceiptSettings: (settings) =>
-        set((state) => ({
+      updateReceiptSettings: settings =>
+        set(state => ({
           receiptSettings: { ...state.receiptSettings, ...settings },
         })),
 
-      updateOperatingHours: (hours) =>
-        set((state) => ({
+      updateOperatingHours: hours =>
+        set(state => ({
           operatingHours: { ...state.operatingHours, ...hours },
         })),
 
-      updatePrinterSettings: (settings) =>
-        set((state) => ({
+      updatePrinterSettings: settings =>
+        set(state => ({
           printerSettings: { ...state.printerSettings, ...settings },
         })),
 
-      updateCashDrawerSettings: (settings) =>
-        set((state) => ({
+      updateCashDrawerSettings: settings =>
+        set(state => ({
           cashDrawerSettings: { ...state.cashDrawerSettings, ...settings },
         })),
 
-      updateScannerSettings: (settings) =>
-        set((state) => ({
+      updateScannerSettings: settings =>
+        set(state => ({
           scannerSettings: { ...state.scannerSettings, ...settings },
         })),
 
-      updateCardReaderSettings: (settings) =>
-        set((state) => ({
+      updateCardReaderSettings: settings =>
+        set(state => ({
           cardReaderSettings: { ...state.cardReaderSettings, ...settings },
         })),
 
-      updateUserProfile: (profile) =>
-        set((state) => ({
+      updateUserProfile: profile =>
+        set(state => ({
           userProfile: { ...state.userProfile, ...profile },
         })),
 
-      updateNotificationSettings: (settings) =>
-        set((state) => ({
+      updateNotificationSettings: settings =>
+        set(state => ({
           notificationSettings: { ...state.notificationSettings, ...settings },
         })),
 
-      updateThemeSettings: (settings) =>
-        set((state) => ({
+      updateThemeSettings: settings =>
+        set(state => ({
           themeSettings: { ...state.themeSettings, ...settings },
         })),
 
-      updateLocalizationSettings: (settings) =>
-        set((state) => ({
+      updateLocalizationSettings: settings =>
+        set(state => ({
           localizationSettings: { ...state.localizationSettings, ...settings },
         })),
 
-      updateAccessibilitySettings: (settings) =>
-        set((state) => ({
+      updateAccessibilitySettings: settings =>
+        set(state => ({
           accessibilitySettings: { ...state.accessibilitySettings, ...settings },
         })),
 
-      updateMenuSettings: (settings) =>
-        set((state) => ({
+      updateMenuSettings: settings =>
+        set(state => ({
           menuSettings: { ...state.menuSettings, ...settings },
         })),
 
-      updatePricingSettings: (settings) =>
-        set((state) => ({
+      updatePricingSettings: settings =>
+        set(state => ({
           pricingSettings: { ...state.pricingSettings, ...settings },
         })),
 
-      updateBackupSettings: (settings) =>
-        set((state) => ({
+      updateBackupSettings: settings =>
+        set(state => ({
           backupSettings: { ...state.backupSettings, ...settings },
         })),
 
@@ -561,9 +564,9 @@ const useSettingsStore = create<SettingsState>()(
           // Settings are automatically loaded by Zustand persist middleware
           set({ isLoading: false });
         } catch (error) {
-          set({ 
-            isLoading: false, 
-            error: error instanceof Error ? error.message : 'Failed to load settings' 
+          set({
+            isLoading: false,
+            error: error instanceof Error ? error.message : 'Failed to load settings',
           });
         }
       },
@@ -574,9 +577,9 @@ const useSettingsStore = create<SettingsState>()(
           // Settings are automatically saved by Zustand persist middleware
           set({ isLoading: false });
         } catch (error) {
-          set({ 
-            isLoading: false, 
-            error: error instanceof Error ? error.message : 'Failed to save settings' 
+          set({
+            isLoading: false,
+            error: error instanceof Error ? error.message : 'Failed to save settings',
           });
         }
       },
@@ -590,8 +593,11 @@ const useSettingsStore = create<SettingsState>()(
       },
 
       // Update payment method configuration
-      updatePaymentMethod: (methodId: keyof PaymentMethods, config: Partial<PaymentMethodConfig>) => {
-        set((state) => ({
+      updatePaymentMethod: (
+        methodId: keyof PaymentMethods,
+        config: Partial<PaymentMethodConfig>,
+      ) => {
+        set(state => ({
           paymentMethods: {
             ...state.paymentMethods,
             [methodId]: {
@@ -605,7 +611,7 @@ const useSettingsStore = create<SettingsState>()(
     {
       name: 'fynlo-settings-storage',
       storage: createJSONStorage(() => AsyncStorage),
-      partialize: (state) => ({
+      partialize: state => ({
         businessInfo: state.businessInfo,
         taxConfiguration: state.taxConfiguration,
         paymentMethods: state.paymentMethods,
@@ -624,8 +630,8 @@ const useSettingsStore = create<SettingsState>()(
         pricingSettings: state.pricingSettings,
         backupSettings: state.backupSettings,
       }),
-    }
-  )
+    },
+  ),
 );
 
 export default useSettingsStore;

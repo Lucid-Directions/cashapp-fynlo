@@ -118,7 +118,7 @@ export class XeroCustomerSyncService {
    */
   public async syncCustomersToXero(
     customers: POSCustomer[],
-    options: CustomerSyncOptions = { direction: 'to_xero' }
+    options: CustomerSyncOptions = { direction: 'to_xero' },
   ): Promise<SyncResult> {
     const startTime = Date.now();
     const result: SyncResult = {
@@ -128,7 +128,7 @@ export class XeroCustomerSyncService {
       recordsCreated: 0,
       recordsFailed: 0,
       errors: [],
-      duration: 0
+      duration: 0,
     };
 
     try {
@@ -138,13 +138,13 @@ export class XeroCustomerSyncService {
       // Process customers in batches
       for (let i = 0; i < customers.length; i += batchSize) {
         const batch = customers.slice(i, i + batchSize);
-        
+
         for (const customer of batch) {
           try {
             result.recordsProcessed++;
-            
+
             const existingMapping = mappings.find(m => m.posCustomerId === customer.id);
-            
+
             if (existingMapping && existingMapping.xeroContactId) {
               // Update existing contact
               await this.updateXeroContact(customer, existingMapping.xeroContactId);
@@ -153,13 +153,13 @@ export class XeroCustomerSyncService {
               // Create new contact
               const xeroContactId = await this.createXeroContact(customer);
               result.recordsCreated++;
-              
+
               // Save mapping
               await this.saveCustomerMapping({
                 posCustomerId: customer.id,
                 xeroContactId,
                 lastSyncedAt: new Date(),
-                syncDirection: 'to_xero'
+                syncDirection: 'to_xero',
               });
             }
           } catch (error) {
@@ -170,7 +170,7 @@ export class XeroCustomerSyncService {
               entityType: 'customer',
               operation: existingMapping ? 'update' : 'create',
               error: error instanceof Error ? error.message : 'Unknown error',
-              data: customer
+              data: customer,
             });
           }
         }
@@ -183,7 +183,6 @@ export class XeroCustomerSyncService {
 
       await this.updateLastSyncTime();
       result.success = result.recordsFailed === 0;
-      
     } catch (error) {
       console.error('Customer sync to Xero failed:', error);
       result.success = false;
@@ -191,7 +190,7 @@ export class XeroCustomerSyncService {
         entityId: 'batch',
         entityType: 'customer',
         operation: 'create',
-        error: error instanceof Error ? error.message : 'Batch sync failed'
+        error: error instanceof Error ? error.message : 'Batch sync failed',
       });
     }
 
@@ -203,7 +202,7 @@ export class XeroCustomerSyncService {
    * Sync customers from Xero (Xero -> POS)
    */
   public async syncCustomersFromXero(
-    options: CustomerSyncOptions = { direction: 'from_xero' }
+    options: CustomerSyncOptions = { direction: 'from_xero' },
   ): Promise<{ result: SyncResult; customers: POSCustomer[] }> {
     const startTime = Date.now();
     const result: SyncResult = {
@@ -213,14 +212,14 @@ export class XeroCustomerSyncService {
       recordsCreated: 0,
       recordsFailed: 0,
       errors: [],
-      duration: 0
+      duration: 0,
     };
     const customers: POSCustomer[] = [];
 
     try {
       const lastSync = await this.getLastSyncTime();
       const mappings = await this.getCustomerMappings();
-      
+
       // Build where clause for modified contacts
       let whereClause = 'IsCustomer==true';
       if (lastSync) {
@@ -231,7 +230,7 @@ export class XeroCustomerSyncService {
       // Fetch contacts from Xero
       const xeroResponse = await this.apiClient.getContacts({
         where: whereClause,
-        order: 'UpdatedDateUTC DESC'
+        order: 'UpdatedDateUTC DESC',
       });
 
       const xeroContacts = xeroResponse.Contacts || [];
@@ -240,21 +239,24 @@ export class XeroCustomerSyncService {
       for (const xeroContact of xeroContacts) {
         try {
           const existingMapping = mappings.find(m => m.xeroContactId === xeroContact.ContactID);
-          const posCustomer = this.transformXeroContactToPOSCustomer(xeroContact, existingMapping?.posCustomerId);
-          
+          const posCustomer = this.transformXeroContactToPOSCustomer(
+            xeroContact,
+            existingMapping?.posCustomerId,
+          );
+
           customers.push(posCustomer);
-          
+
           if (existingMapping) {
             result.recordsUpdated++;
           } else {
             result.recordsCreated++;
-            
+
             // Save new mapping
             await this.saveCustomerMapping({
               posCustomerId: posCustomer.id,
               xeroContactId: xeroContact.ContactID!,
               lastSyncedAt: new Date(),
-              syncDirection: 'from_xero'
+              syncDirection: 'from_xero',
             });
           }
         } catch (error) {
@@ -265,14 +267,13 @@ export class XeroCustomerSyncService {
             entityType: 'customer',
             operation: 'create',
             error: error instanceof Error ? error.message : 'Transform failed',
-            data: xeroContact
+            data: xeroContact,
           });
         }
       }
 
       await this.updateLastSyncTime();
       result.success = result.recordsFailed === 0;
-
     } catch (error) {
       console.error('Customer sync from Xero failed:', error);
       result.success = false;
@@ -280,7 +281,7 @@ export class XeroCustomerSyncService {
         entityId: 'batch',
         entityType: 'customer',
         operation: 'create',
-        error: error instanceof Error ? error.message : 'Batch sync failed'
+        error: error instanceof Error ? error.message : 'Batch sync failed',
       });
     }
 
@@ -293,16 +294,19 @@ export class XeroCustomerSyncService {
    */
   public async syncCustomersBidirectional(
     posCustomers: POSCustomer[],
-    options: CustomerSyncOptions = { direction: 'bidirectional', conflictResolution: 'latest_wins' }
+    options: CustomerSyncOptions = {
+      direction: 'bidirectional',
+      conflictResolution: 'latest_wins',
+    },
   ): Promise<{ result: SyncResult; mergedCustomers: POSCustomer[] }> {
     const startTime = Date.now();
-    
+
     // First, sync from Xero to get latest changes
     const fromXeroResult = await this.syncCustomersFromXero({ direction: 'from_xero' });
-    
+
     // Then, sync to Xero with conflict resolution
     const toXeroResult = await this.syncCustomersToXero(posCustomers, { direction: 'to_xero' });
-    
+
     // Merge results
     const combinedResult: SyncResult = {
       success: fromXeroResult.result.success && toXeroResult.success,
@@ -311,12 +315,12 @@ export class XeroCustomerSyncService {
       recordsCreated: fromXeroResult.result.recordsCreated + toXeroResult.recordsCreated,
       recordsFailed: fromXeroResult.result.recordsFailed + toXeroResult.recordsFailed,
       errors: [...fromXeroResult.result.errors, ...toXeroResult.errors],
-      duration: Date.now() - startTime
+      duration: Date.now() - startTime,
     };
 
     return {
       result: combinedResult,
-      mergedCustomers: fromXeroResult.customers
+      mergedCustomers: fromXeroResult.customers,
     };
   }
 
@@ -325,9 +329,9 @@ export class XeroCustomerSyncService {
    */
   private async createXeroContact(customer: POSCustomer): Promise<string> {
     const xeroContact = this.transformPOSCustomerToXeroContact(customer);
-    
+
     const response = await this.apiClient.createContact({
-      Contacts: [xeroContact]
+      Contacts: [xeroContact],
     });
 
     if (!response.Contacts || response.Contacts.length === 0) {
@@ -346,7 +350,7 @@ export class XeroCustomerSyncService {
 
     await this.apiClient.makeRequest(`/Contacts/${xeroContactId}`, {
       method: 'POST',
-      body: { Contacts: [xeroContact] }
+      body: { Contacts: [xeroContact] },
     });
   }
 
@@ -360,28 +364,32 @@ export class XeroCustomerSyncService {
       TaxNumber: customer.taxNumber,
       IsCustomer: true,
       IsSupplier: false,
-      ContactStatus: customer.isActive ? 'ACTIVE' : 'ARCHIVED'
+      ContactStatus: customer.isActive ? 'ACTIVE' : 'ARCHIVED',
     };
 
     // Add phone if available
     if (customer.phone) {
-      contact.Phones = [{
-        PhoneType: 'DEFAULT',
-        PhoneNumber: customer.phone
-      }];
+      contact.Phones = [
+        {
+          PhoneType: 'DEFAULT',
+          PhoneNumber: customer.phone,
+        },
+      ];
     }
 
     // Add address if available
     if (customer.address) {
-      contact.Addresses = [{
-        AddressType: 'STREET',
-        AddressLine1: customer.address.line1,
-        AddressLine2: customer.address.line2,
-        City: customer.address.city,
-        Region: customer.address.region,
-        PostalCode: customer.address.postalCode,
-        Country: customer.address.country
-      }];
+      contact.Addresses = [
+        {
+          AddressType: 'STREET',
+          AddressLine1: customer.address.line1,
+          AddressLine2: customer.address.line2,
+          City: customer.address.city,
+          Region: customer.address.region,
+          PostalCode: customer.address.postalCode,
+          Country: customer.address.country,
+        },
+      ];
     }
 
     return contact;
@@ -390,7 +398,10 @@ export class XeroCustomerSyncService {
   /**
    * Transform Xero contact to POS customer format
    */
-  private transformXeroContactToPOSCustomer(xeroContact: XeroContact, existingId?: string): POSCustomer {
+  private transformXeroContactToPOSCustomer(
+    xeroContact: XeroContact,
+    existingId?: string,
+  ): POSCustomer {
     const customer: POSCustomer = {
       id: existingId || this.generateCustomerId(),
       name: xeroContact.Name,
@@ -399,25 +410,27 @@ export class XeroCustomerSyncService {
       isActive: xeroContact.ContactStatus === 'ACTIVE',
       createdAt: new Date(),
       updatedAt: new Date(xeroContact.UpdatedDateUTC || Date.now()),
-      xeroContactId: xeroContact.ContactID
+      xeroContactId: xeroContact.ContactID,
     };
 
     // Extract phone
     if (xeroContact.Phones && xeroContact.Phones.length > 0) {
-      const defaultPhone = xeroContact.Phones.find(p => p.PhoneType === 'DEFAULT') || xeroContact.Phones[0];
+      const defaultPhone =
+        xeroContact.Phones.find(p => p.PhoneType === 'DEFAULT') || xeroContact.Phones[0];
       customer.phone = defaultPhone.PhoneNumber;
     }
 
     // Extract address
     if (xeroContact.Addresses && xeroContact.Addresses.length > 0) {
-      const streetAddress = xeroContact.Addresses.find(a => a.AddressType === 'STREET') || xeroContact.Addresses[0];
+      const streetAddress =
+        xeroContact.Addresses.find(a => a.AddressType === 'STREET') || xeroContact.Addresses[0];
       customer.address = {
         line1: streetAddress.AddressLine1,
         line2: streetAddress.AddressLine2,
         city: streetAddress.City,
         region: streetAddress.Region,
         postalCode: streetAddress.PostalCode,
-        country: streetAddress.Country
+        country: streetAddress.Country,
       };
     }
 
@@ -444,14 +457,17 @@ export class XeroCustomerSyncService {
     try {
       const mappings = await this.getCustomerMappings();
       const existingIndex = mappings.findIndex(m => m.posCustomerId === mapping.posCustomerId);
-      
+
       if (existingIndex >= 0) {
         mappings[existingIndex] = mapping;
       } else {
         mappings.push(mapping);
       }
 
-      await AsyncStorage.setItem(`${this.STORAGE_PREFIX}${this.MAPPING_KEY}`, JSON.stringify(mappings));
+      await AsyncStorage.setItem(
+        `${this.STORAGE_PREFIX}${this.MAPPING_KEY}`,
+        JSON.stringify(mappings),
+      );
     } catch (error) {
       console.error('Failed to save customer mapping:', error);
       throw error;
@@ -476,7 +492,10 @@ export class XeroCustomerSyncService {
    */
   private async updateLastSyncTime(): Promise<void> {
     try {
-      await AsyncStorage.setItem(`${this.STORAGE_PREFIX}${this.LAST_SYNC_KEY}`, new Date().toISOString());
+      await AsyncStorage.setItem(
+        `${this.STORAGE_PREFIX}${this.LAST_SYNC_KEY}`,
+        new Date().toISOString(),
+      );
     } catch (error) {
       console.error('Failed to update last sync time:', error);
     }
@@ -509,7 +528,7 @@ export class XeroCustomerSyncService {
 
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
 
@@ -544,7 +563,7 @@ export class XeroCustomerSyncService {
     return {
       totalMappings: mappings.length,
       lastSyncTime: lastSync,
-      pendingSync: 0 // Would need to calculate based on local changes
+      pendingSync: 0, // Would need to calculate based on local changes
     };
   }
 }

@@ -15,8 +15,8 @@ import { useNavigation } from '@react-navigation/native';
 import { useRestaurantConfig, useOnboardingStatus } from '../../hooks/useRestaurantConfig';
 
 const Colors = {
-  primary: '#00A651',      // Clover Green
-  secondary: '#0066CC',    // Clover Blue
+  primary: '#00A651', // Clover Green
+  secondary: '#0066CC', // Clover Blue
   success: '#27AE60',
   warning: '#F39C12',
   danger: '#E74C3C',
@@ -69,17 +69,20 @@ const HelpScreen: React.FC = () => {
         {
           id: '1',
           question: 'How do I set up my restaurant information?',
-          answer: 'Go to Settings → Business Settings → Business Information to enter your restaurant name, address, and contact details. This information will appear throughout your POS system.',
+          answer:
+            'Go to Settings → Business Settings → Business Information to enter your restaurant name, address, and contact details. This information will appear throughout your POS system.',
         },
         {
-          id: '2', 
+          id: '2',
           question: 'How do I customize my restaurant name in headers?',
-          answer: 'Your restaurant name is automatically displayed in headers once you save it in Business Information. The name will replace "Fynlo POS" while maintaining "Powered by Fynlo" branding.',
+          answer:
+            'Your restaurant name is automatically displayed in headers once you save it in Business Information. The name will replace "Fynlo POS" while maintaining "Powered by Fynlo" branding.',
         },
         {
           id: '3',
           question: 'Can I restart the setup process?',
-          answer: 'Yes! Use the "Restaurant Setup" button below to go through the guided setup process again or complete any missing steps.',
+          answer:
+            'Yes! Use the "Restaurant Setup" button below to go through the guided setup process again or complete any missing steps.',
         },
       ],
     },
@@ -93,17 +96,20 @@ const HelpScreen: React.FC = () => {
         {
           id: '1',
           question: 'How do I process my first order?',
-          answer: 'Navigate to the POS screen, select items from the menu, add them to cart, and tap "Process Payment" to complete the transaction.',
+          answer:
+            'Navigate to the POS screen, select items from the menu, add them to cart, and tap "Process Payment" to complete the transaction.',
         },
         {
           id: '2',
           question: 'How do I add new menu items?',
-          answer: 'Go to More → Menu Management to add, edit, or remove items from your menu. You can organize items by categories and set pricing.',
+          answer:
+            'Go to More → Menu Management to add, edit, or remove items from your menu. You can organize items by categories and set pricing.',
         },
         {
           id: '3',
           question: 'How do I view sales reports?',
-          answer: 'Access reports through More → Reports or Dashboard. View daily, weekly, and monthly sales data, top-selling items, and performance metrics.',
+          answer:
+            'Access reports through More → Reports or Dashboard. View daily, weekly, and monthly sales data, top-selling items, and performance metrics.',
         },
       ],
     },
@@ -117,17 +123,20 @@ const HelpScreen: React.FC = () => {
         {
           id: '1',
           question: 'What payment methods are supported?',
-          answer: 'Fynlo supports cash, card payments, Apple Pay, and QR code payments. No additional hardware required for most payment types.',
+          answer:
+            'Fynlo supports cash, card payments, Apple Pay, and QR code payments. No additional hardware required for most payment types.',
         },
         {
           id: '2',
           question: 'How do I process a refund?',
-          answer: 'Find the original transaction in Orders or Reports, select it, and choose "Process Refund". Partial refunds are also supported.',
+          answer:
+            'Find the original transaction in Orders or Reports, select it, and choose "Process Refund". Partial refunds are also supported.',
         },
         {
           id: '3',
           question: 'Can customers pay with QR codes?',
-          answer: 'Yes! Generate a QR code for any order that customers can scan with their banking app or digital wallet to pay instantly.',
+          answer:
+            'Yes! Generate a QR code for any order that customers can scan with their banking app or digital wallet to pay instantly.',
         },
       ],
     },
@@ -141,17 +150,20 @@ const HelpScreen: React.FC = () => {
         {
           id: '1',
           question: 'How do I add new staff members?',
-          answer: 'Go to More → Employees → Add Employee. Set their role, permissions, and PIN for quick login during shifts.',
+          answer:
+            'Go to More → Employees → Add Employee. Set their role, permissions, and PIN for quick login during shifts.',
         },
         {
           id: '2',
           question: 'What are the different user roles?',
-          answer: 'Owner (full access), Manager (reports, staff, settings), Employee (POS, basic functions). Each role has specific permissions.',
+          answer:
+            'Owner (full access), Manager (reports, staff, settings), Employee (POS, basic functions). Each role has specific permissions.',
         },
         {
           id: '3',
           question: 'How does time tracking work?',
-          answer: 'Staff can clock in/out using their PIN. View hours worked, calculate wages, and export timesheet data in the Employees section.',
+          answer:
+            'Staff can clock in/out using their PIN. View hours worked, calculate wages, and export timesheet data in the Employees section.',
         },
       ],
     },
@@ -165,17 +177,20 @@ const HelpScreen: React.FC = () => {
         {
           id: '1',
           question: 'App is running slowly or crashing',
-          answer: 'Try closing and reopening the app. If issues persist, restart your device or contact support for assistance.',
+          answer:
+            'Try closing and reopening the app. If issues persist, restart your device or contact support for assistance.',
         },
         {
           id: '2',
           question: 'Cannot sign out of my account',
-          answer: 'Use the Sign Out option in More → Sign Out. If this doesn\'t work, force close the app and reopen it.',
+          answer:
+            "Use the Sign Out option in More → Sign Out. If this doesn't work, force close the app and reopen it.",
         },
         {
           id: '3',
           question: 'Some features show "Coming Soon"',
-          answer: 'Fynlo is actively being developed. Features with mock data will be fully functional once connected to the backend system.',
+          answer:
+            'Fynlo is actively being developed. Features with mock data will be fully functional once connected to the backend system.',
         },
       ],
     },
@@ -212,33 +227,30 @@ const HelpScreen: React.FC = () => {
       subtitle: 'User guides and tutorials',
       icon: 'library-books',
       color: Colors.warning,
-      action: () => Alert.alert('Documentation', 'Comprehensive documentation will be available soon.'),
+      action: () =>
+        Alert.alert('Documentation', 'Comprehensive documentation will be available soon.'),
     },
   ];
 
   const [expandedSections, setExpandedSections] = React.useState<string[]>([]);
 
   const toggleSection = (sectionId: string) => {
-    setExpandedSections(prev => 
-      prev.includes(sectionId) 
-        ? prev.filter(id => id !== sectionId)
-        : [...prev, sectionId]
+    setExpandedSections(prev =>
+      prev.includes(sectionId) ? prev.filter(id => id !== sectionId) : [...prev, sectionId],
     );
   };
 
   const toggleItem = (sectionId: string, itemId: string) => {
     const key = `${sectionId}-${itemId}`;
-    setExpandedSections(prev => 
-      prev.includes(key) 
-        ? prev.filter(id => id !== key)
-        : [...prev, key]
+    setExpandedSections(prev =>
+      prev.includes(key) ? prev.filter(id => id !== key) : [...prev, key],
     );
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={Colors.primary} />
-      
+
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
@@ -261,16 +273,15 @@ const HelpScreen: React.FC = () => {
                 </Text>
               </View>
               <Text style={styles.setupDescription}>
-                {onboardingStatus.completed 
+                {onboardingStatus.completed
                   ? 'Your restaurant is set up and ready to go! You can update your information anytime.'
-                  : `Complete your restaurant setup to customize your POS system. ${onboardingStatus.progress}% complete.`
-                }
+                  : `Complete your restaurant setup to customize your POS system. ${onboardingStatus.progress}% complete.`}
               </Text>
               {!onboardingStatus.completed && (
                 <View style={styles.setupProgress}>
                   <View style={styles.progressBar}>
-                    <View 
-                      style={[styles.progressFill, { width: `${onboardingStatus.progress}%` }]} 
+                    <View
+                      style={[styles.progressFill, { width: `${onboardingStatus.progress}%` }]}
                     />
                   </View>
                   <Text style={styles.progressText}>{onboardingStatus.progress}% Complete</Text>
@@ -280,20 +291,22 @@ const HelpScreen: React.FC = () => {
             <TouchableOpacity
               style={[
                 styles.setupButton,
-                onboardingStatus.completed && styles.setupButtonSecondary
+                onboardingStatus.completed && styles.setupButtonSecondary,
               ]}
               onPress={() => {
                 // Navigate to Settings first, then to RestaurantSetup
-                navigation.navigate('Settings' as never, {
-                  screen: 'RestaurantSetup'
-                } as never);
+                navigation.navigate(
+                  'Settings' as never,
+                  {
+                    screen: 'RestaurantSetup',
+                  } as never,
+                );
               }}
-              activeOpacity={0.7}
-            >
-              <Icon 
-                name={onboardingStatus.completed ? "edit" : "arrow-forward"} 
-                size={20} 
-                color={Colors.white} 
+              activeOpacity={0.7}>
+              <Icon
+                name={onboardingStatus.completed ? 'edit' : 'arrow-forward'}
+                size={20}
+                color={Colors.white}
               />
               <Text style={styles.setupButtonText}>
                 {onboardingStatus.completed ? 'Edit Setup' : 'Continue Setup'}
@@ -307,12 +320,11 @@ const HelpScreen: React.FC = () => {
           <Text style={styles.sectionTitle}>Get Help</Text>
           <View style={styles.contactGrid}>
             {contactMethods.map(method => (
-              <TouchableOpacity 
-                key={method.id} 
-                style={styles.contactCard} 
+              <TouchableOpacity
+                key={method.id}
+                style={styles.contactCard}
                 onPress={method.action}
-                activeOpacity={0.7}
-              >
+                activeOpacity={0.7}>
                 <View style={[styles.contactIcon, { backgroundColor: method.color }]}>
                   <Icon name={method.icon} size={24} color={Colors.white} />
                 </View>
@@ -328,11 +340,10 @@ const HelpScreen: React.FC = () => {
           <Text style={styles.sectionTitle}>Frequently Asked Questions</Text>
           {helpSections.map(section => (
             <View key={section.id} style={styles.faqSection}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.faqSectionHeader}
                 onPress={() => toggleSection(section.id)}
-                activeOpacity={0.7}
-              >
+                activeOpacity={0.7}>
                 <View style={[styles.faqSectionIcon, { backgroundColor: section.color }]}>
                   <Icon name={section.icon} size={20} color={Colors.white} />
                 </View>
@@ -340,30 +351,33 @@ const HelpScreen: React.FC = () => {
                   <Text style={styles.faqSectionTitle}>{section.title}</Text>
                   <Text style={styles.faqSectionDescription}>{section.description}</Text>
                 </View>
-                <Icon 
-                  name={expandedSections.includes(section.id) ? 'expand-less' : 'expand-more'} 
-                  size={24} 
-                  color={Colors.lightText} 
+                <Icon
+                  name={expandedSections.includes(section.id) ? 'expand-less' : 'expand-more'}
+                  size={24}
+                  color={Colors.lightText}
                 />
               </TouchableOpacity>
-              
+
               {expandedSections.includes(section.id) && (
                 <View style={styles.faqItems}>
                   {section.items.map(item => (
                     <View key={item.id} style={styles.faqItem}>
-                      <TouchableOpacity 
+                      <TouchableOpacity
                         style={styles.faqQuestion}
                         onPress={() => toggleItem(section.id, item.id)}
-                        activeOpacity={0.7}
-                      >
+                        activeOpacity={0.7}>
                         <Text style={styles.faqQuestionText}>{item.question}</Text>
-                        <Icon 
-                          name={expandedSections.includes(`${section.id}-${item.id}`) ? 'expand-less' : 'expand-more'} 
-                          size={20} 
-                          color={Colors.lightText} 
+                        <Icon
+                          name={
+                            expandedSections.includes(`${section.id}-${item.id}`)
+                              ? 'expand-less'
+                              : 'expand-more'
+                          }
+                          size={20}
+                          color={Colors.lightText}
                         />
                       </TouchableOpacity>
-                      
+
                       {expandedSections.includes(`${section.id}-${item.id}`) && (
                         <View style={styles.faqAnswer}>
                           <Text style={styles.faqAnswerText}>{item.answer}</Text>
@@ -407,7 +421,8 @@ const HelpScreen: React.FC = () => {
             <View style={styles.backendNoticeContent}>
               <Text style={styles.backendNoticeTitle}>Development Status</Text>
               <Text style={styles.backendNoticeText}>
-                This app is currently in development mode with mock data. Some features may show placeholder content until the backend system is fully integrated.
+                This app is currently in development mode with mock data. Some features may show
+                placeholder content until the backend system is fully integrated.
               </Text>
             </View>
           </View>

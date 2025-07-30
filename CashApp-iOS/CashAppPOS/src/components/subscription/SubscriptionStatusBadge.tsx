@@ -23,36 +23,52 @@ const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
     displayName: 'Alpha',
     color: '#95a5a6',
     icon: 'flash-outline',
-    features: ['Basic POS', 'Orders', 'Payments', 'Daily Reports']
+    features: ['Basic POS', 'Orders', 'Payments', 'Daily Reports'],
   },
   beta: {
     name: 'beta',
     displayName: 'Beta',
     color: '#3498db',
     icon: 'flash',
-    features: ['Everything in Alpha', 'Inventory', 'Staff Management', 'Advanced Reports', 'Tables', 'Customers']
+    features: [
+      'Everything in Alpha',
+      'Inventory',
+      'Staff Management',
+      'Advanced Reports',
+      'Tables',
+      'Customers',
+    ],
   },
   omega: {
     name: 'omega',
     displayName: 'Omega',
     color: '#9b59b6',
     icon: 'flash-sharp',
-    features: ['Everything in Beta', 'Multi-location', 'API Access', 'Custom Branding', 'Analytics', 'Unlimited Features']
-  }
+    features: [
+      'Everything in Beta',
+      'Multi-location',
+      'API Access',
+      'Custom Branding',
+      'Analytics',
+      'Unlimited Features',
+    ],
+  },
 };
 
 export const SubscriptionStatusBadge: React.FC = () => {
   const { theme } = useTheme();
   const { user } = useAuthStore();
-  
+
   const subscriptionPlan = user?.subscription_plan || 'alpha';
   const subscriptionStatus = user?.subscription_status || 'trial';
   const plan = SUBSCRIPTION_PLANS[subscriptionPlan] || SUBSCRIPTION_PLANS.alpha;
-  
+
   const handlePress = () => {
     Alert.alert(
       `${plan.displayName} Plan`,
-      `Status: ${subscriptionStatus.charAt(0).toUpperCase() + subscriptionStatus.slice(1)}\n\nFeatures:\n${plan.features.join('\n')}`,
+      `Status: ${
+        subscriptionStatus.charAt(0).toUpperCase() + subscriptionStatus.slice(1)
+      }\n\nFeatures:\n${plan.features.join('\n')}`,
       [
         {
           text: 'Upgrade Plan',
@@ -60,26 +76,23 @@ export const SubscriptionStatusBadge: React.FC = () => {
             Alert.alert(
               'Upgrade Subscription',
               'To upgrade your subscription plan, please visit the Fynlo web portal at portal.fynlo.com',
-              [{ text: 'OK' }]
+              [{ text: 'OK' }],
             );
-          }
+          },
         },
-        { text: 'OK', style: 'cancel' }
-      ]
+        { text: 'OK', style: 'cancel' },
+      ],
     );
   };
-  
+
   return (
-    <TouchableOpacity 
+    <TouchableOpacity
       style={[styles.container, { backgroundColor: plan.color }]}
       onPress={handlePress}
-      activeOpacity={0.8}
-    >
+      activeOpacity={0.8}>
       <Icon name={plan.icon} size={16} color="#fff" />
       <Text style={styles.planText}>{plan.displayName}</Text>
-      {subscriptionStatus === 'trial' && (
-        <Text style={styles.trialText}>TRIAL</Text>
-      )}
+      {subscriptionStatus === 'trial' && <Text style={styles.trialText}>TRIAL</Text>}
     </TouchableOpacity>
   );
 };
@@ -91,32 +104,32 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
-    gap: 6
+    gap: 6,
   },
   planText: {
     color: '#fff',
     fontSize: 12,
     fontWeight: '600',
-    letterSpacing: 0.5
+    letterSpacing: 0.5,
   },
   trialText: {
     color: '#fff',
     fontSize: 10,
     fontWeight: 'bold',
     opacity: 0.8,
-    marginLeft: 4
-  }
+    marginLeft: 4,
+  },
 });
 
 // Larger variant for settings screens
 export const SubscriptionStatusCard: React.FC = () => {
   const { theme } = useTheme();
   const { user } = useAuthStore();
-  
+
   const subscriptionPlan = user?.subscription_plan || 'alpha';
   const subscriptionStatus = user?.subscription_status || 'trial';
   const plan = SUBSCRIPTION_PLANS[subscriptionPlan] || SUBSCRIPTION_PLANS.alpha;
-  
+
   return (
     <View style={[cardStyles.card, { backgroundColor: theme.colors.surface }]}>
       <View style={[cardStyles.planHeader, { backgroundColor: plan.color }]}>
@@ -128,14 +141,15 @@ export const SubscriptionStatusCard: React.FC = () => {
           </View>
         )}
       </View>
-      
+
       <View style={cardStyles.cardContent}>
         <Text style={[cardStyles.statusLabel, { color: theme.colors.text }]}>
-          Status: <Text style={cardStyles.statusValue}>
+          Status:{' '}
+          <Text style={cardStyles.statusValue}>
             {subscriptionStatus.charAt(0).toUpperCase() + subscriptionStatus.slice(1)}
           </Text>
         </Text>
-        
+
         <View style={cardStyles.featuresSection}>
           <Text style={[cardStyles.featuresTitle, { color: theme.colors.text }]}>
             Included Features:
@@ -149,17 +163,16 @@ export const SubscriptionStatusCard: React.FC = () => {
             </View>
           ))}
         </View>
-        
-        <TouchableOpacity 
+
+        <TouchableOpacity
           style={[cardStyles.upgradeButton, { borderColor: plan.color }]}
           onPress={() => {
             Alert.alert(
               'Manage Subscription',
               'To manage or upgrade your subscription, please visit the Fynlo web portal at portal.fynlo.com',
-              [{ text: 'OK' }]
+              [{ text: 'OK' }],
             );
-          }}
-        >
+          }}>
           <Text style={[cardStyles.upgradeButtonText, { color: plan.color }]}>
             Manage Subscription
           </Text>
@@ -178,57 +191,57 @@ const cardStyles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 3
+    elevation: 3,
   },
   planHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    gap: 12
+    gap: 12,
   },
   planTitle: {
     color: '#fff',
     fontSize: 20,
     fontWeight: 'bold',
-    flex: 1
+    flex: 1,
   },
   trialBadge: {
     backgroundColor: 'rgba(255,255,255,0.3)',
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 12
+    borderRadius: 12,
   },
   trialBadgeText: {
     color: '#fff',
     fontSize: 11,
-    fontWeight: 'bold'
+    fontWeight: 'bold',
   },
   cardContent: {
-    padding: 16
+    padding: 16,
   },
   statusLabel: {
     fontSize: 14,
-    marginBottom: 16
+    marginBottom: 16,
   },
   statusValue: {
-    fontWeight: '600'
+    fontWeight: '600',
   },
   featuresSection: {
-    marginBottom: 16
+    marginBottom: 16,
   },
   featuresTitle: {
     fontSize: 14,
     fontWeight: '600',
-    marginBottom: 8
+    marginBottom: 8,
   },
   featureRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    marginBottom: 4
+    marginBottom: 4,
   },
   featureText: {
-    fontSize: 13
+    fontSize: 13,
   },
   upgradeButton: {
     flexDirection: 'row',
@@ -237,10 +250,10 @@ const cardStyles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 8,
     padding: 12,
-    gap: 8
+    gap: 8,
   },
   upgradeButtonText: {
     fontSize: 14,
-    fontWeight: '600'
-  }
+    fontWeight: '600',
+  },
 });

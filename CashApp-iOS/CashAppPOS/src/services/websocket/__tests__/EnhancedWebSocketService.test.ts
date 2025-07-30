@@ -14,8 +14,8 @@ jest.mock('@react-native-community/netinfo');
 jest.mock('../../../utils/enhancedTokenManager');
 jest.mock('../../../config/api', () => ({
   default: {
-    BASE_URL: 'https://api.test.com'
-  }
+    BASE_URL: 'https://api.test.com',
+  },
 }));
 
 // Mock WebSocket
@@ -65,8 +65,8 @@ describe('EnhancedWebSocketService', () => {
       JSON.stringify({
         id: 'user123',
         restaurant_id: 'restaurant123',
-        email: 'test@test.com'
-      })
+        email: 'test@test.com',
+      }),
     );
 
     // Mock tokenManager
@@ -136,8 +136,8 @@ describe('EnhancedWebSocketService', () => {
       ws.onmessage?.({
         data: JSON.stringify({
           type: WebSocketEvent.AUTHENTICATED,
-          data: {}
-        })
+          data: {},
+        }),
       });
 
       expect(service.getState()).toBe('CONNECTED');
@@ -155,8 +155,8 @@ describe('EnhancedWebSocketService', () => {
       ws.onmessage?.({
         data: JSON.stringify({
           type: WebSocketEvent.AUTH_ERROR,
-          data: { error: 'Invalid token' }
-        })
+          data: { error: 'Invalid token' },
+        }),
       });
 
       expect(tokenManager.forceRefresh).toHaveBeenCalled();
@@ -175,8 +175,8 @@ describe('EnhancedWebSocketService', () => {
       ws.onmessage?.({
         data: JSON.stringify({
           type: WebSocketEvent.AUTHENTICATED,
-          data: {}
-        })
+          data: {},
+        }),
       });
 
       // Clear previous calls
@@ -198,8 +198,8 @@ describe('EnhancedWebSocketService', () => {
       ws.onmessage?.({
         data: JSON.stringify({
           type: WebSocketEvent.AUTHENTICATED,
-          data: {}
-        })
+          data: {},
+        }),
       });
 
       // Send ping
@@ -209,8 +209,8 @@ describe('EnhancedWebSocketService', () => {
       ws.onmessage?.({
         data: JSON.stringify({
           type: WebSocketEvent.PONG,
-          data: {}
-        })
+          data: {},
+        }),
       });
 
       // Verify missed pongs is reset
@@ -226,14 +226,14 @@ describe('EnhancedWebSocketService', () => {
       ws.onmessage?.({
         data: JSON.stringify({
           type: WebSocketEvent.AUTHENTICATED,
-          data: {}
-        })
+          data: {},
+        }),
       });
 
       // Miss 3 pongs
       for (let i = 0; i < 3; i++) {
         jest.advanceTimersByTime(15000); // Send ping
-        jest.advanceTimersByTime(5000);  // Wait for pong timeout
+        jest.advanceTimersByTime(5000); // Wait for pong timeout
       }
 
       expect(service.getState()).toBe('RECONNECTING');
@@ -292,7 +292,7 @@ describe('EnhancedWebSocketService', () => {
     it('should queue messages when disconnected', () => {
       service.send({
         type: WebSocketEvent.ORDER_CREATED,
-        data: { order_id: '123' }
+        data: { order_id: '123' },
       });
 
       expect((service as any).messageQueue.length).toBe(1);
@@ -304,11 +304,11 @@ describe('EnhancedWebSocketService', () => {
       // Queue messages while disconnected
       service.send({
         type: WebSocketEvent.ORDER_CREATED,
-        data: { order_id: '123' }
+        data: { order_id: '123' },
       });
       service.send({
         type: WebSocketEvent.ORDER_UPDATED,
-        data: { order_id: '123' }
+        data: { order_id: '123' },
       });
 
       await service.connect();
@@ -319,15 +319,17 @@ describe('EnhancedWebSocketService', () => {
       ws.onmessage?.({
         data: JSON.stringify({
           type: WebSocketEvent.AUTHENTICATED,
-          data: {}
-        })
+          data: {},
+        }),
       });
 
       // Check that queued messages were sent
       const sentMessages = sendSpy.mock.calls
         .map(call => JSON.parse(call[0]))
-        .filter(msg => msg.type === WebSocketEvent.ORDER_CREATED || 
-                       msg.type === WebSocketEvent.ORDER_UPDATED);
+        .filter(
+          msg =>
+            msg.type === WebSocketEvent.ORDER_CREATED || msg.type === WebSocketEvent.ORDER_UPDATED,
+        );
 
       expect(sentMessages.length).toBe(2);
     });
@@ -337,7 +339,7 @@ describe('EnhancedWebSocketService', () => {
       for (let i = 0; i < 150; i++) {
         service.send({
           type: WebSocketEvent.DATA_UPDATED,
-          data: { index: i }
+          data: { index: i },
         });
       }
 
@@ -351,11 +353,11 @@ describe('EnhancedWebSocketService', () => {
 
       // Simulate network state change
       const networkListener = (NetInfo.addEventListener as jest.Mock).mock.calls[0][0];
-      
+
       // Network restored
       networkListener({
         isConnected: true,
-        isInternetReachable: true
+        isInternetReachable: true,
       });
 
       expect(connectSpy).toHaveBeenCalled();
@@ -370,15 +372,15 @@ describe('EnhancedWebSocketService', () => {
       ws.onmessage?.({
         data: JSON.stringify({
           type: WebSocketEvent.AUTHENTICATED,
-          data: {}
-        })
+          data: {},
+        }),
       });
 
       // Simulate network loss
       const networkListener = (NetInfo.addEventListener as jest.Mock).mock.calls[0][0];
       networkListener({
         isConnected: false,
-        isInternetReachable: false
+        isInternetReachable: false,
       });
 
       expect(service.getState()).toBe('DISCONNECTED');
@@ -396,7 +398,7 @@ describe('EnhancedWebSocketService', () => {
       (service as any).setState('CONNECTED');
       expect(service.getState()).toBe('CONNECTING'); // Should not change
       expect(consoleWarnSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Invalid state transition')
+        expect.stringContaining('Invalid state transition'),
       );
     });
 
@@ -407,7 +409,7 @@ describe('EnhancedWebSocketService', () => {
         ['AUTHENTICATING', 'CONNECTED'],
         ['CONNECTED', 'DISCONNECTED'],
         ['DISCONNECTED', 'RECONNECTING'],
-        ['RECONNECTING', 'CONNECTING']
+        ['RECONNECTING', 'CONNECTING'],
       ];
 
       validTransitions.forEach(([from, to]) => {
@@ -421,7 +423,7 @@ describe('EnhancedWebSocketService', () => {
   describe('Cleanup', () => {
     it('should clean up resources on disconnect', async () => {
       await service.connect();
-      
+
       const ws = (service as any).ws;
       const closeSpy = jest.spyOn(ws, 'close');
 
@@ -442,8 +444,8 @@ describe('EnhancedWebSocketService', () => {
       ws.onmessage?.({
         data: JSON.stringify({
           type: WebSocketEvent.AUTHENTICATED,
-          data: {}
-        })
+          data: {},
+        }),
       });
 
       service.disconnect();

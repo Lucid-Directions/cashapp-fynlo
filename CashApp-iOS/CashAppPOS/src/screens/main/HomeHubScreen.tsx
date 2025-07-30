@@ -174,7 +174,7 @@ const HomeHubScreen: React.FC = () => {
   const horizontalSpacing = 16;
   const cardMargin = 8; // Proper margin for 2-column layout
   // Fixed width calculation for exact 2-column layout
-  const cardWidth = (screenWidth - (horizontalSpacing * 2) - (cardMargin * 4)) / numColumns;
+  const cardWidth = (screenWidth - horizontalSpacing * 2 - cardMargin * 4) / numColumns;
 
   const handleIconPress = (icon: HubIcon) => {
     // Analytics tracking for icon tap
@@ -186,7 +186,7 @@ const HomeHubScreen: React.FC = () => {
       userRole: user?.role,
       timestamp: new Date().toISOString(),
     });
-    
+
     if (icon.route) {
       navigation.navigate(icon.route as never);
     }
@@ -240,8 +240,7 @@ const HomeHubScreen: React.FC = () => {
           onPressOut={handlePressOut}
           activeOpacity={1}
           accessibilityRole="button"
-          accessibilityLabel={`${icon.title}, ${icon.subtitle}`}
-        >
+          accessibilityLabel={`${icon.title}, ${icon.subtitle}`}>
           <View style={[styles.iconContainer, { backgroundColor: `${icon.color}15` }]}>
             <Icon name={icon.icon} size={iconSize} color={icon.color} />
             {icon.badge && (
@@ -257,7 +256,10 @@ const HomeHubScreen: React.FC = () => {
     );
   };
 
-  const CategorySection: React.FC<{ category: string; icons: HubIcon[] }> = ({ category, icons }) => {
+  const CategorySection: React.FC<{ category: string; icons: HubIcon[] }> = ({
+    category,
+    icons,
+  }) => {
     const categoryTitles = {
       core: 'Core Operations',
       business: 'Business Management',
@@ -269,7 +271,9 @@ const HomeHubScreen: React.FC = () => {
 
     return (
       <View style={styles.categorySection}>
-        <Text style={styles.categoryTitle}>{categoryTitles[category as keyof typeof categoryTitles]}</Text>
+        <Text style={styles.categoryTitle}>
+          {categoryTitles[category as keyof typeof categoryTitles]}
+        </Text>
         <View style={styles.iconGrid}>
           {icons.map(icon => (
             <IconCard key={icon.id} icon={icon} />
@@ -282,7 +286,7 @@ const HomeHubScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor={theme.colors.primary} barStyle="light-content" />
-      
+
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerContent}>
@@ -293,15 +297,12 @@ const HomeHubScreen: React.FC = () => {
         </View>
         <View style={styles.headerActions}>
           <SubscriptionStatusBadge />
-          {wsConnected && (
-            <View style={styles.connectionDot} />
-          )}
+          {wsConnected && <View style={styles.connectionDot} />}
           <TouchableOpacity
             style={styles.signOutButton}
             onPress={handleSignOut}
             accessibilityRole="button"
-            accessibilityLabel="Sign out"
-          >
+            accessibilityLabel="Sign out">
             <Icon name="logout" size={24} color={theme.colors.white} />
           </TouchableOpacity>
         </View>
@@ -325,21 +326,21 @@ const HomeHubScreen: React.FC = () => {
         </View>
 
         {/* Icon Categories */}
-        <CategorySection 
-          category="core" 
-          icons={visibleIcons.filter(icon => icon.category === 'core')} 
+        <CategorySection
+          category="core"
+          icons={visibleIcons.filter(icon => icon.category === 'core')}
         />
-        <CategorySection 
-          category="business" 
-          icons={visibleIcons.filter(icon => icon.category === 'business')} 
+        <CategorySection
+          category="business"
+          icons={visibleIcons.filter(icon => icon.category === 'business')}
         />
-        <CategorySection 
-          category="analytics" 
-          icons={visibleIcons.filter(icon => icon.category === 'analytics')} 
+        <CategorySection
+          category="analytics"
+          icons={visibleIcons.filter(icon => icon.category === 'analytics')}
         />
-        <CategorySection 
-          category="account" 
-          icons={visibleIcons.filter(icon => icon.category === 'account')} 
+        <CategorySection
+          category="account"
+          icons={visibleIcons.filter(icon => icon.category === 'account')}
         />
 
         {/* Footer */}
@@ -352,168 +353,169 @@ const HomeHubScreen: React.FC = () => {
   );
 };
 
-const createStyles = (theme: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-  },
-  header: {
-    backgroundColor: theme.colors.primary,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-  },
-  headerContent: {
-    flex: 1,
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: theme.colors.white,
-  },
-  headerSubtitle: {
-    fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.8)',
-    marginTop: 4,
-  },
-  headerActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  connectionDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#4CAF50',
-    marginLeft: -4,
-  },
-  signOutButton: {
-    padding: 8,
-    borderRadius: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    marginLeft: 8,
-  },
-  content: {
-    flex: 1,
-  },
-  quickStats: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    backgroundColor: theme.colors.white,
-    marginHorizontal: 16,
-    marginTop: 16,
-    padding: 16,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  statItem: {
-    alignItems: 'center',
-  },
-  statValue: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: theme.colors.primary,
-  },
-  statLabel: {
-    fontSize: 12,
-    color: theme.colors.darkGray,
-    marginTop: 4,
-  },
-  categorySection: {
-    marginTop: 24,
-  },
-  categoryTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: theme.colors.darkGray,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: 12,
-    marginHorizontal: 20,
-  },
-  iconGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    paddingHorizontal: 16,
-    justifyContent: 'flex-start',
-  },
-  iconCard: {
-    backgroundColor: theme.colors.white,
-    borderRadius: 12,
-    padding: 16,
-    marginHorizontal: 8,
-    marginBottom: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 120,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-  },
-  iconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 12,
-    position: 'relative',
-  },
-  badge: {
-    position: 'absolute',
-    top: -4,
-    right: -4,
-    backgroundColor: theme.colors.danger[500],
-    borderRadius: 10,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    minWidth: 20,
-    height: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  badgeText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: theme.colors.white,
-  },
-  iconTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: theme.colors.text,
-    textAlign: 'center',
-    marginBottom: 4,
-  },
-  iconSubtitle: {
-    fontSize: 12,
-    color: theme.colors.darkGray,
-    textAlign: 'center',
-  },
-  footer: {
-    alignItems: 'center',
-    paddingVertical: 32,
-    marginTop: 24,
-  },
-  versionText: {
-    fontSize: 14,
-    color: theme.colors.darkGray,
-  },
-  copyrightText: {
-    fontSize: 12,
-    color: theme.colors.lightText,
-    marginTop: 4,
-  },
-});
+const createStyles = (theme: any) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    header: {
+      backgroundColor: theme.colors.primary,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: 20,
+      paddingVertical: 16,
+    },
+    headerContent: {
+      flex: 1,
+    },
+    headerTitle: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      color: theme.colors.white,
+    },
+    headerSubtitle: {
+      fontSize: 14,
+      color: 'rgba(255, 255, 255, 0.8)',
+      marginTop: 4,
+    },
+    headerActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+    },
+    connectionDot: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: '#4CAF50',
+      marginLeft: -4,
+    },
+    signOutButton: {
+      padding: 8,
+      borderRadius: 8,
+      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+      marginLeft: 8,
+    },
+    content: {
+      flex: 1,
+    },
+    quickStats: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      backgroundColor: theme.colors.white,
+      marginHorizontal: 16,
+      marginTop: 16,
+      padding: 16,
+      borderRadius: 12,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.05,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    statItem: {
+      alignItems: 'center',
+    },
+    statValue: {
+      fontSize: 20,
+      fontWeight: 'bold',
+      color: theme.colors.primary,
+    },
+    statLabel: {
+      fontSize: 12,
+      color: theme.colors.darkGray,
+      marginTop: 4,
+    },
+    categorySection: {
+      marginTop: 24,
+    },
+    categoryTitle: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: theme.colors.darkGray,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+      marginBottom: 12,
+      marginHorizontal: 20,
+    },
+    iconGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      paddingHorizontal: 16,
+      justifyContent: 'flex-start',
+    },
+    iconCard: {
+      backgroundColor: theme.colors.white,
+      borderRadius: 12,
+      padding: 16,
+      marginHorizontal: 8,
+      marginBottom: 12,
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: 120,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.05,
+      shadowRadius: 4,
+      elevation: 2,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    iconContainer: {
+      width: 80,
+      height: 80,
+      borderRadius: 20,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 12,
+      position: 'relative',
+    },
+    badge: {
+      position: 'absolute',
+      top: -4,
+      right: -4,
+      backgroundColor: theme.colors.danger[500],
+      borderRadius: 10,
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      minWidth: 20,
+      height: 20,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    badgeText: {
+      fontSize: 12,
+      fontWeight: '600',
+      color: theme.colors.white,
+    },
+    iconTitle: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: theme.colors.text,
+      textAlign: 'center',
+      marginBottom: 4,
+    },
+    iconSubtitle: {
+      fontSize: 12,
+      color: theme.colors.darkGray,
+      textAlign: 'center',
+    },
+    footer: {
+      alignItems: 'center',
+      paddingVertical: 32,
+      marginTop: 24,
+    },
+    versionText: {
+      fontSize: 14,
+      color: theme.colors.darkGray,
+    },
+    copyrightText: {
+      fontSize: 12,
+      color: theme.colors.lightText,
+      marginTop: 4,
+    },
+  });
 
 export default HomeHubScreen;

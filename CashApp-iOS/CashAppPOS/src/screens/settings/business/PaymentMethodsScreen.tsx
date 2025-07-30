@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-} from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { SettingsHeader, SettingsSection, SettingsCard, ToggleSwitch } from '../../../components/settings';
+import {
+  SettingsHeader,
+  SettingsSection,
+  SettingsCard,
+  ToggleSwitch,
+} from '../../../components/settings';
 import useSettingsStore from '../../../store/useSettingsStore';
 
 // Clover POS Color Scheme
@@ -103,7 +101,10 @@ const PaymentMethodsScreen: React.FC = () => {
     setHasChanges(true);
   };
 
-  const handleRequiresAuthToggle = (methodId: keyof typeof paymentMethods, requiresAuth: boolean) => {
+  const handleRequiresAuthToggle = (
+    methodId: keyof typeof paymentMethods,
+    requiresAuth: boolean,
+  ) => {
     setFormData(prev => ({
       ...prev,
       [methodId]: {
@@ -129,36 +130,28 @@ const PaymentMethodsScreen: React.FC = () => {
     try {
       updatePaymentMethods(formData);
       setHasChanges(false);
-      Alert.alert(
-        'Success',
-        'Payment methods configuration has been saved successfully.',
-        [{ text: 'OK' }]
-      );
+      Alert.alert('Success', 'Payment methods configuration has been saved successfully.', [
+        { text: 'OK' },
+      ]);
     } catch (error) {
-      Alert.alert(
-        'Error',
-        'Failed to save payment methods configuration. Please try again.',
-        [{ text: 'OK' }]
-      );
+      Alert.alert('Error', 'Failed to save payment methods configuration. Please try again.', [
+        { text: 'OK' },
+      ]);
     }
   };
 
   const handleReset = () => {
-    Alert.alert(
-      'Reset Changes',
-      'Are you sure you want to discard all unsaved changes?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Reset',
-          style: 'destructive',
-          onPress: () => {
-            setFormData(paymentMethods);
-            setHasChanges(false);
-          },
+    Alert.alert('Reset Changes', 'Are you sure you want to discard all unsaved changes?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Reset',
+        style: 'destructive',
+        onPress: () => {
+          setFormData(paymentMethods);
+          setHasChanges(false);
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const getEnabledMethodsCount = () => {
@@ -177,11 +170,10 @@ const PaymentMethodsScreen: React.FC = () => {
           icon={methodInfo.icon}
           iconColor={isEnabled ? methodInfo.iconColor : Colors.lightGray}
           badge={methodInfo.popular ? 'Popular' : methodInfo.comingSoon ? 'Coming Soon' : undefined}
-          disabled={methodInfo.comingSoon}
-        >
+          disabled={methodInfo.comingSoon}>
           <ToggleSwitch
             value={isEnabled}
-            onValueChange={(enabled) => handlePaymentMethodToggle(methodInfo.id, enabled)}
+            onValueChange={enabled => handlePaymentMethodToggle(methodInfo.id, enabled)}
             disabled={methodInfo.comingSoon}
           />
         </SettingsCard>
@@ -194,11 +186,12 @@ const PaymentMethodsScreen: React.FC = () => {
               description="Manager authorization required for this payment method"
               icon="security"
               iconColor={Colors.warning}
-              showChevron={false}
-            >
+              showChevron={false}>
               <ToggleSwitch
                 value={methodData.requiresAuth}
-                onValueChange={(requiresAuth) => handleRequiresAuthToggle(methodInfo.id, requiresAuth)}
+                onValueChange={requiresAuth =>
+                  handleRequiresAuthToggle(methodInfo.id, requiresAuth)
+                }
                 size="small"
               />
             </SettingsCard>
@@ -210,8 +203,7 @@ const PaymentMethodsScreen: React.FC = () => {
                 description="Show tip options during card transactions"
                 icon="thumb-up"
                 iconColor={Colors.primary}
-                showChevron={false}
-              >
+                showChevron={false}>
                 <ToggleSwitch
                   value={formData.card.tipEnabled}
                   onValueChange={handleTipEnabledToggle}
@@ -241,20 +233,22 @@ const PaymentMethodsScreen: React.FC = () => {
         {/* Summary */}
         <SettingsSection
           title="Payment Methods Summary"
-          subtitle={`${getEnabledMethodsCount()} payment methods enabled`}
-        >
+          subtitle={`${getEnabledMethodsCount()} payment methods enabled`}>
           <View style={styles.summaryContainer}>
             <View style={styles.summaryCard}>
               <Icon name="payment" size={32} color={Colors.primary} />
               <Text style={styles.summaryTitle}>Active Methods</Text>
               <Text style={styles.summaryValue}>{getEnabledMethodsCount()}</Text>
             </View>
-            
+
             <View style={styles.summaryCard}>
               <Icon name="security" size={32} color={Colors.warning} />
               <Text style={styles.summaryTitle}>Secure Methods</Text>
               <Text style={styles.summaryValue}>
-                {Object.values(formData).filter(method => method.enabled && method.requiresAuth).length}
+                {
+                  Object.values(formData).filter(method => method.enabled && method.requiresAuth)
+                    .length
+                }
               </Text>
             </View>
           </View>
@@ -263,37 +257,29 @@ const PaymentMethodsScreen: React.FC = () => {
         {/* Popular Payment Methods */}
         <SettingsSection
           title="Popular Payment Methods"
-          subtitle="Most commonly used payment options"
-        >
-          {paymentMethodsInfo
-            .filter(method => method.popular)
-            .map(renderPaymentMethodCard)
-          }
+          subtitle="Most commonly used payment options">
+          {paymentMethodsInfo.filter(method => method.popular).map(renderPaymentMethodCard)}
         </SettingsSection>
 
         {/* Additional Payment Methods */}
         <SettingsSection
           title="Additional Payment Methods"
-          subtitle="Other payment options for your business"
-        >
-          {paymentMethodsInfo
-            .filter(method => !method.popular)
-            .map(renderPaymentMethodCard)
-          }
+          subtitle="Other payment options for your business">
+          {paymentMethodsInfo.filter(method => !method.popular).map(renderPaymentMethodCard)}
         </SettingsSection>
 
         {/* Payment Processing Info */}
         <SettingsSection
           title="Payment Processing"
-          subtitle="Important information about payment handling"
-        >
+          subtitle="Important information about payment handling">
           <View style={styles.infoContainer}>
             <View style={styles.infoCard}>
               <Icon name="info-outline" size={24} color={Colors.secondary} />
               <View style={styles.infoContent}>
                 <Text style={styles.infoTitle}>Card Processing</Text>
                 <Text style={styles.infoText}>
-                  Card payments require a compatible card reader. Contact support for setup assistance.
+                  Card payments require a compatible card reader. Contact support for setup
+                  assistance.
                 </Text>
               </View>
             </View>
@@ -313,7 +299,8 @@ const PaymentMethodsScreen: React.FC = () => {
               <View style={styles.infoContent}>
                 <Text style={styles.infoTitle}>Processing Fees</Text>
                 <Text style={styles.infoText}>
-                  Different payment methods may have varying processing fees. Check with your payment processor.
+                  Different payment methods may have varying processing fees. Check with your
+                  payment processor.
                 </Text>
               </View>
             </View>
@@ -325,17 +312,13 @@ const PaymentMethodsScreen: React.FC = () => {
           <TouchableOpacity
             style={[styles.button, styles.saveButton]}
             onPress={handleSave}
-            disabled={!hasChanges || isLoading}
-          >
+            disabled={!hasChanges || isLoading}>
             <Icon name="save" size={20} color={Colors.white} />
             <Text style={styles.saveButtonText}>Save Changes</Text>
           </TouchableOpacity>
 
           {hasChanges && (
-            <TouchableOpacity
-              style={[styles.button, styles.resetButton]}
-              onPress={handleReset}
-            >
+            <TouchableOpacity style={[styles.button, styles.resetButton]} onPress={handleReset}>
               <Icon name="refresh" size={20} color={Colors.danger} />
               <Text style={styles.resetButtonText}>Reset</Text>
             </TouchableOpacity>

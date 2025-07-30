@@ -88,22 +88,22 @@ const XeroSyncDashboard: React.FC = () => {
       const [customerStats, itemsStats, salesStats] = await Promise.all([
         customerSyncService.getSyncStatistics(),
         itemsSyncService.getSyncStatistics(),
-        salesSyncService.getSyncStatistics()
+        salesSyncService.getSyncStatistics(),
       ]);
 
       setStatistics({
         customers: customerStats,
         items: itemsStats,
-        sales: salesStats
+        sales: salesStats,
       });
 
       // Load API usage information
       const rateLimitInfo = apiClient.getRateLimitInfo();
       const queueStatus = apiClient.getQueueStatus();
-      
+
       setApiUsage({
         ...rateLimitInfo,
-        ...queueStatus
+        ...queueStatus,
       });
 
       // Load recent operations (mock data for now)
@@ -116,7 +116,7 @@ const XeroSyncDashboard: React.FC = () => {
           endTime: new Date(Date.now() - 280000),
           recordsProcessed: 15,
           recordsSuccess: 14,
-          recordsFailed: 1
+          recordsFailed: 1,
         },
         {
           id: '2',
@@ -126,7 +126,7 @@ const XeroSyncDashboard: React.FC = () => {
           endTime: new Date(Date.now() - 870000),
           recordsProcessed: 8,
           recordsSuccess: 8,
-          recordsFailed: 0
+          recordsFailed: 0,
         },
         {
           id: '3',
@@ -137,10 +137,9 @@ const XeroSyncDashboard: React.FC = () => {
           recordsProcessed: 3,
           recordsSuccess: 1,
           recordsFailed: 2,
-          error: 'Rate limit exceeded'
-        }
+          error: 'Rate limit exceeded',
+        },
       ]);
-
     } catch (error) {
       console.error('Failed to load dashboard data:', error);
       Alert.alert('Error', 'Failed to load sync dashboard data');
@@ -151,33 +150,29 @@ const XeroSyncDashboard: React.FC = () => {
    * Handle manual sync trigger
    */
   const handleManualSync = (entityType: XeroEntityType) => {
-    Alert.alert(
-      'Manual Sync',
-      `Start manual synchronization for ${entityType}?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Start Sync',
-          onPress: async () => {
-            try {
-              setSyncInProgress(true);
-              
-              // This would trigger actual sync operations
-              // For now, just simulate a sync
-              await new Promise(resolve => setTimeout(resolve, 3000));
-              
-              Alert.alert('Success', `${entityType} sync completed successfully`);
-              await loadDashboardData();
-            } catch (error) {
-              console.error('Manual sync failed:', error);
-              Alert.alert('Error', 'Manual sync failed');
-            } finally {
-              setSyncInProgress(false);
-            }
+    Alert.alert('Manual Sync', `Start manual synchronization for ${entityType}?`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Start Sync',
+        onPress: async () => {
+          try {
+            setSyncInProgress(true);
+
+            // This would trigger actual sync operations
+            // For now, just simulate a sync
+            await new Promise(resolve => setTimeout(resolve, 3000));
+
+            Alert.alert('Success', `${entityType} sync completed successfully`);
+            await loadDashboardData();
+          } catch (error) {
+            console.error('Manual sync failed:', error);
+            Alert.alert('Error', 'Manual sync failed');
+          } finally {
+            setSyncInProgress(false);
           }
-        }
-      ]
-    );
+        },
+      },
+    ]);
   };
 
   /**
@@ -263,10 +258,7 @@ const XeroSyncDashboard: React.FC = () => {
   return (
     <ScrollView
       style={styles.container}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-    >
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
@@ -299,7 +291,9 @@ const XeroSyncDashboard: React.FC = () => {
             </View>
             <View style={styles.apiUsageItem}>
               <Text style={styles.apiUsageLabel}>Requests/Min</Text>
-              <Text style={styles.apiUsageValue}>{apiUsage.requestsThisMinute}/{apiUsage.minuteLimit}</Text>
+              <Text style={styles.apiUsageValue}>
+                {apiUsage.requestsThisMinute}/{apiUsage.minuteLimit}
+              </Text>
             </View>
           </View>
         </View>
@@ -316,8 +310,7 @@ const XeroSyncDashboard: React.FC = () => {
               <TouchableOpacity
                 style={styles.syncButton}
                 onPress={() => handleManualSync(XeroEntityType.CONTACT)}
-                disabled={syncInProgress}
-              >
+                disabled={syncInProgress}>
                 <Icon name="sync" size={20} color={Colors.white} />
               </TouchableOpacity>
             </View>
@@ -346,8 +339,7 @@ const XeroSyncDashboard: React.FC = () => {
               <TouchableOpacity
                 style={styles.syncButton}
                 onPress={() => handleManualSync(XeroEntityType.ITEM)}
-                disabled={syncInProgress}
-              >
+                disabled={syncInProgress}>
                 <Icon name="sync" size={20} color={Colors.white} />
               </TouchableOpacity>
             </View>
@@ -376,8 +368,7 @@ const XeroSyncDashboard: React.FC = () => {
               <TouchableOpacity
                 style={styles.syncButton}
                 onPress={() => handleManualSync(XeroEntityType.INVOICE)}
-                disabled={syncInProgress}
-              >
+                disabled={syncInProgress}>
                 <Icon name="sync" size={20} color={Colors.white} />
               </TouchableOpacity>
             </View>
@@ -417,15 +408,14 @@ const XeroSyncDashboard: React.FC = () => {
           <Text style={styles.cardTitle}>Recent Operations</Text>
         </View>
 
-        {recentOperations.map((operation) => (
+        {recentOperations.map(operation => (
           <TouchableOpacity
             key={operation.id}
             style={styles.operationItem}
             onPress={() => {
               setSelectedOperation(operation);
               setModalVisible(true);
-            }}
-          >
+            }}>
             <View style={styles.operationHeader}>
               <Icon
                 name={getStatusIcon(operation.status)}
@@ -433,18 +423,12 @@ const XeroSyncDashboard: React.FC = () => {
                 color={getStatusColor(operation.status)}
               />
               <Text style={styles.operationType}>{operation.type}</Text>
-              <Text style={styles.operationTime}>
-                {formatDate(operation.startTime)}
-              </Text>
+              <Text style={styles.operationTime}>{formatDate(operation.startTime)}</Text>
             </View>
 
             <View style={styles.operationStats}>
-              <Text style={styles.operationStat}>
-                Processed: {operation.recordsProcessed}
-              </Text>
-              <Text style={styles.operationStat}>
-                Success: {operation.recordsSuccess}
-              </Text>
+              <Text style={styles.operationStat}>Processed: {operation.recordsProcessed}</Text>
+              <Text style={styles.operationStat}>Success: {operation.recordsSuccess}</Text>
               {operation.recordsFailed > 0 && (
                 <Text style={[styles.operationStat, { color: Colors.error }]}>
                   Failed: {operation.recordsFailed}
@@ -469,8 +453,7 @@ const XeroSyncDashboard: React.FC = () => {
         visible={modalVisible}
         transparent={true}
         animationType="slide"
-        onRequestClose={() => setModalVisible(false)}
-      >
+        onRequestClose={() => setModalVisible(false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             {selectedOperation && (
@@ -479,8 +462,7 @@ const XeroSyncDashboard: React.FC = () => {
                   <Text style={styles.modalTitle}>Operation Details</Text>
                   <TouchableOpacity
                     onPress={() => setModalVisible(false)}
-                    style={styles.modalCloseButton}
-                  >
+                    style={styles.modalCloseButton}>
                     <Icon name="close" size={24} color={Colors.text} />
                   </TouchableOpacity>
                 </View>
@@ -492,18 +474,26 @@ const XeroSyncDashboard: React.FC = () => {
                   </View>
                   <View style={styles.detailRow}>
                     <Text style={styles.detailLabel}>Status:</Text>
-                    <Text style={[styles.detailValue, { color: getStatusColor(selectedOperation.status) }]}>
+                    <Text
+                      style={[
+                        styles.detailValue,
+                        { color: getStatusColor(selectedOperation.status) },
+                      ]}>
                       {selectedOperation.status}
                     </Text>
                   </View>
                   <View style={styles.detailRow}>
                     <Text style={styles.detailLabel}>Start Time:</Text>
-                    <Text style={styles.detailValue}>{formatDate(selectedOperation.startTime)}</Text>
+                    <Text style={styles.detailValue}>
+                      {formatDate(selectedOperation.startTime)}
+                    </Text>
                   </View>
                   {selectedOperation.endTime && (
                     <View style={styles.detailRow}>
                       <Text style={styles.detailLabel}>End Time:</Text>
-                      <Text style={styles.detailValue}>{formatDate(selectedOperation.endTime)}</Text>
+                      <Text style={styles.detailValue}>
+                        {formatDate(selectedOperation.endTime)}
+                      </Text>
                     </View>
                   )}
                   <View style={styles.detailRow}>

@@ -12,7 +12,14 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { SimpleTextInput } from '../inputs'; // Corrected import
-import { UserManagementService, User, UpdateUserRequest, UserRole, Permission, PermissionTemplate } from '../../services/UserManagementService';
+import {
+  UserManagementService,
+  User,
+  UpdateUserRequest,
+  UserRole,
+  Permission,
+  PermissionTemplate,
+} from '../../services/UserManagementService';
 
 // Fynlo POS Color Scheme
 const Colors = {
@@ -38,12 +45,7 @@ interface EditUserModalProps {
   onUserUpdated: () => void;
 }
 
-const EditUserModal: React.FC<EditUserModalProps> = ({
-  visible,
-  user,
-  onClose,
-  onUserUpdated,
-}) => {
+const EditUserModal: React.FC<EditUserModalProps> = ({ visible, user, onClose, onUserUpdated }) => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<UpdateUserRequest>({});
   const [permissionTemplates, setPermissionTemplates] = useState<PermissionTemplate[]>([]);
@@ -187,7 +189,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
             }
           },
         },
-      ]
+      ],
     );
   };
 
@@ -232,7 +234,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
             }
           },
         },
-      ]
+      ],
     );
   };
 
@@ -253,8 +255,8 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
     }
   };
 
-  const applicableTemplates = permissionTemplates.filter(template =>
-    formData.role && template.applicableRoles.includes(formData.role)
+  const applicableTemplates = permissionTemplates.filter(
+    template => formData.role && template.applicableRoles.includes(formData.role),
   );
 
   if (!user) return null;
@@ -264,8 +266,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
       visible={visible}
       animationType="slide"
       presentationStyle="pageSheet"
-      onRequestClose={handleClose}
-    >
+      onRequestClose={handleClose}>
       <SafeAreaView style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
@@ -276,8 +277,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
           <TouchableOpacity
             onPress={handleSubmit}
             style={[styles.saveButton, loading && styles.saveButtonDisabled]}
-            disabled={loading}
-          >
+            disabled={loading}>
             {loading ? (
               <ActivityIndicator size="small" color={Colors.white} />
             ) : (
@@ -295,21 +295,15 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
           ].map(tab => (
             <TouchableOpacity
               key={tab.key}
-              style={[
-                styles.tabButton,
-                activeTab === tab.key && styles.tabButtonActive,
-              ]}
-              onPress={() => setActiveTab(tab.key as any)}
-            >
+              style={[styles.tabButton, activeTab === tab.key && styles.tabButtonActive]}
+              onPress={() => setActiveTab(tab.key as any)}>
               <Icon
                 name={tab.icon}
                 size={20}
                 color={activeTab === tab.key ? Colors.primary : Colors.mediumGray}
               />
-              <Text style={[
-                styles.tabButtonText,
-                activeTab === tab.key && styles.tabButtonTextActive,
-              ]}>
+              <Text
+                style={[styles.tabButtonText, activeTab === tab.key && styles.tabButtonTextActive]}>
                 {tab.label}
               </Text>
             </TouchableOpacity>
@@ -322,12 +316,12 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
               {/* Basic Information */}
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Basic Information</Text>
-                
+
                 <View style={styles.inputGroup}>
                   <SimpleTextInput
                     label="Full Name *"
                     value={formData.name || ''}
-                    onValueChange={(text) => setFormData(prev => ({ ...prev, name: text }))}
+                    onValueChange={text => setFormData(prev => ({ ...prev, name: text }))}
                     placeholder="Enter full name"
                     autoCapitalize="words"
                   />
@@ -337,7 +331,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
                   <SimpleTextInput
                     label="Email Address *"
                     value={formData.email || ''}
-                    onValueChange={(text) => setFormData(prev => ({ ...prev, email: text }))}
+                    onValueChange={text => setFormData(prev => ({ ...prev, email: text }))}
                     placeholder="Enter email address"
                     keyboardType="email-address"
                     autoCapitalize="none"
@@ -348,7 +342,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
                   <SimpleTextInput
                     label="Phone Number"
                     value={formData.phoneNumber || ''}
-                    onValueChange={(text) => setFormData(prev => ({ ...prev, phoneNumber: text }))}
+                    onValueChange={text => setFormData(prev => ({ ...prev, phoneNumber: text }))}
                     placeholder="Enter phone number"
                     keyboardType="phone-pad"
                   />
@@ -358,7 +352,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
                   <SimpleTextInput
                     label="Address"
                     value={formData.address || ''}
-                    onValueChange={(text) => setFormData(prev => ({ ...prev, address: text }))}
+                    onValueChange={text => setFormData(prev => ({ ...prev, address: text }))}
                     placeholder="Enter address"
                     multiline
                     numberOfLines={3} // This is a valid TextInput prop
@@ -369,23 +363,23 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
               {/* Role and Status */}
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Role & Status</Text>
-                
+
                 <View style={styles.inputGroup}>
                   <Text style={styles.inputLabel}>User Role *</Text>
                   <View style={styles.roleGrid}>
-                    {userRoles.map((role) => (
+                    {userRoles.map(role => (
                       <TouchableOpacity
                         key={role}
                         style={[
                           styles.roleOption,
                           formData.role === role && styles.roleOptionSelected,
                         ]}
-                        onPress={() => setFormData(prev => ({ ...prev, role }))}
-                      >
-                        <Text style={[
-                          styles.roleOptionText,
-                          formData.role === role && styles.roleOptionTextSelected,
-                        ]}>
+                        onPress={() => setFormData(prev => ({ ...prev, role }))}>
+                        <Text
+                          style={[
+                            styles.roleOptionText,
+                            formData.role === role && styles.roleOptionTextSelected,
+                          ]}>
                           {role}
                         </Text>
                       </TouchableOpacity>
@@ -396,19 +390,19 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
                 <View style={styles.inputGroup}>
                   <Text style={styles.inputLabel}>Status</Text>
                   <View style={styles.statusGrid}>
-                    {['active', 'inactive', 'suspended'].map((status) => (
+                    {['active', 'inactive', 'suspended'].map(status => (
                       <TouchableOpacity
                         key={status}
                         style={[
                           styles.statusOption,
                           formData.status === status && styles.statusOptionSelected,
                         ]}
-                        onPress={() => setFormData(prev => ({ ...prev, status: status as any }))}
-                      >
-                        <Text style={[
-                          styles.statusOptionText,
-                          formData.status === status && styles.statusOptionTextSelected,
-                        ]}>
+                        onPress={() => setFormData(prev => ({ ...prev, status: status as any }))}>
+                        <Text
+                          style={[
+                            styles.statusOptionText,
+                            formData.status === status && styles.statusOptionTextSelected,
+                          ]}>
                           {status.charAt(0).toUpperCase() + status.slice(1)}
                         </Text>
                       </TouchableOpacity>
@@ -425,28 +419,32 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
               {applicableTemplates.length > 0 && (
                 <View style={styles.section}>
                   <Text style={styles.sectionTitle}>Permission Templates</Text>
-                  <Text style={styles.sectionSubtitle}>Quick setup with predefined permissions</Text>
-                  
+                  <Text style={styles.sectionSubtitle}>
+                    Quick setup with predefined permissions
+                  </Text>
+
                   <View style={styles.templateGrid}>
-                    {applicableTemplates.map((template) => (
+                    {applicableTemplates.map(template => (
                       <TouchableOpacity
                         key={template.id}
                         style={[
                           styles.templateOption,
                           selectedTemplate === template.id && styles.templateOptionSelected,
                         ]}
-                        onPress={() => applyTemplate(template.id)}
-                      >
-                        <Text style={[
-                          styles.templateOptionTitle,
-                          selectedTemplate === template.id && styles.templateOptionTitleSelected,
-                        ]}>
+                        onPress={() => applyTemplate(template.id)}>
+                        <Text
+                          style={[
+                            styles.templateOptionTitle,
+                            selectedTemplate === template.id && styles.templateOptionTitleSelected,
+                          ]}>
                           {template.name}
                         </Text>
-                        <Text style={[
-                          styles.templateOptionDescription,
-                          selectedTemplate === template.id && styles.templateOptionDescriptionSelected,
-                        ]}>
+                        <Text
+                          style={[
+                            styles.templateOptionDescription,
+                            selectedTemplate === template.id &&
+                              styles.templateOptionDescriptionSelected,
+                          ]}>
                           {template.description}
                         </Text>
                       </TouchableOpacity>
@@ -457,15 +455,16 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
 
               {/* Individual Permissions */}
               <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Individual Permissions ({formData.permissions?.length || 0} selected)</Text>
-                
+                <Text style={styles.sectionTitle}>
+                  Individual Permissions ({formData.permissions?.length || 0} selected)
+                </Text>
+
                 <View style={styles.permissionsList}>
-                  {allPermissions.map((permission) => (
+                  {allPermissions.map(permission => (
                     <TouchableOpacity
                       key={permission}
                       style={styles.permissionItem}
-                      onPress={() => togglePermission(permission)}
-                    >
+                      onPress={() => togglePermission(permission)}>
                       <View style={styles.permissionInfo}>
                         <Text style={styles.permissionName}>
                           {permission.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
@@ -474,10 +473,11 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
                           {permissionDescriptions[permission]}
                         </Text>
                       </View>
-                      <View style={[
-                        styles.checkbox,
-                        formData.permissions?.includes(permission) && styles.checkboxSelected,
-                      ]}>
+                      <View
+                        style={[
+                          styles.checkbox,
+                          formData.permissions?.includes(permission) && styles.checkboxSelected,
+                        ]}>
                         {formData.permissions?.includes(permission) && (
                           <Icon name="check" size={16} color={Colors.white} />
                         )}
@@ -493,13 +493,12 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Security Actions</Text>
               <Text style={styles.sectionSubtitle}>Manage user access and security</Text>
-              
+
               <View style={styles.actionsList}>
                 {user.status === 'suspended' ? (
                   <TouchableOpacity
                     style={[styles.actionButton, styles.actionButtonSuccess]}
-                    onPress={handleActivateUser}
-                  >
+                    onPress={handleActivateUser}>
                     <Icon name="check-circle" size={24} color={Colors.white} />
                     <View style={styles.actionButtonContent}>
                       <Text style={styles.actionButtonTitle}>Activate User</Text>
@@ -509,8 +508,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
                 ) : (
                   <TouchableOpacity
                     style={[styles.actionButton, styles.actionButtonWarning]}
-                    onPress={handleSuspendUser}
-                  >
+                    onPress={handleSuspendUser}>
                     <Icon name="block" size={24} color={Colors.white} />
                     <View style={styles.actionButtonContent}>
                       <Text style={styles.actionButtonTitle}>Suspend User</Text>
@@ -521,8 +519,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
 
                 <TouchableOpacity
                   style={[styles.actionButton, styles.actionButtonDanger]}
-                  onPress={handleDeleteUser}
-                >
+                  onPress={handleDeleteUser}>
                   <Icon name="delete" size={24} color={Colors.white} />
                   <View style={styles.actionButtonContent}>
                     <Text style={styles.actionButtonTitle}>Delete User</Text>

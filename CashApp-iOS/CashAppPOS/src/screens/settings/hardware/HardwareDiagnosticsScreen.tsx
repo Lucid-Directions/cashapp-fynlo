@@ -52,7 +52,7 @@ interface DeviceInfo {
 
 const HardwareDiagnosticsScreen: React.FC = () => {
   const navigation = useNavigation();
-  
+
   const [diagnosticTests, setDiagnosticTests] = useState<DiagnosticTest[]>([
     {
       id: 'printer_test',
@@ -197,37 +197,38 @@ const HardwareDiagnosticsScreen: React.FC = () => {
 
   const runSingleTest = async (testId: string) => {
     setRunningTests(prev => new Set(prev).add(testId));
-    
+
     // Update test status to running
-    setDiagnosticTests(prev => prev.map(test => 
-      test.id === testId 
-        ? { ...test, status: 'running' }
-        : test
-    ));
+    setDiagnosticTests(prev =>
+      prev.map(test => (test.id === testId ? { ...test, status: 'running' } : test)),
+    );
 
     // Simulate test execution
     const testDuration = Math.random() * 10000 + 2000; // 2-12 seconds
-    
+
     setTimeout(() => {
       const outcomes = ['passed', 'failed', 'warning'];
       const randomOutcome = outcomes[Math.floor(Math.random() * outcomes.length)] as any;
-      
-      setDiagnosticTests(prev => prev.map(test => 
-        test.id === testId 
-          ? { 
-              ...test, 
-              status: randomOutcome,
-              lastRun: new Date(),
-              duration: Math.floor(testDuration / 1000),
-              details: randomOutcome === 'passed' 
-                ? 'Test completed successfully'
-                : randomOutcome === 'warning'
-                ? 'Test passed with warnings'
-                : 'Test failed - check configuration'
-            }
-          : test
-      ));
-      
+
+      setDiagnosticTests(prev =>
+        prev.map(test =>
+          test.id === testId
+            ? {
+                ...test,
+                status: randomOutcome,
+                lastRun: new Date(),
+                duration: Math.floor(testDuration / 1000),
+                details:
+                  randomOutcome === 'passed'
+                    ? 'Test completed successfully'
+                    : randomOutcome === 'warning'
+                    ? 'Test passed with warnings'
+                    : 'Test failed - check configuration',
+              }
+            : test,
+        ),
+      );
+
       setRunningTests(prev => {
         const newSet = new Set(prev);
         newSet.delete(testId);
@@ -238,7 +239,7 @@ const HardwareDiagnosticsScreen: React.FC = () => {
 
   const runFullDiagnostic = async () => {
     setRunningFullDiagnostic(true);
-    
+
     // Run all tests sequentially
     for (const test of diagnosticTests) {
       await new Promise(resolve => {
@@ -246,28 +247,27 @@ const HardwareDiagnosticsScreen: React.FC = () => {
         setTimeout(resolve, 1000); // Small delay between tests
       });
     }
-    
+
     setTimeout(() => {
       setRunningFullDiagnostic(false);
       Alert.alert(
         'Diagnostic Complete',
         'Full system diagnostic completed. Check individual test results for details.',
-        [{ text: 'OK' }]
+        [{ text: 'OK' }],
       );
     }, diagnosticTests.length * 1000 + 5000);
   };
 
   const exportDiagnosticReport = () => {
-    Alert.alert(
-      'Export Report',
-      'Export diagnostic report for technical support?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Export', onPress: () => {
+    Alert.alert('Export Report', 'Export diagnostic report for technical support?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Export',
+        onPress: () => {
           Alert.alert('Success', 'Diagnostic report exported to device storage.');
-        }}
-      ]
-    );
+        },
+      },
+    ]);
   };
 
   const getTestsSummary = () => {
@@ -275,7 +275,7 @@ const HardwareDiagnosticsScreen: React.FC = () => {
     const failed = diagnosticTests.filter(t => t.status === 'failed').length;
     const warnings = diagnosticTests.filter(t => t.status === 'warning').length;
     const pending = diagnosticTests.filter(t => t.status === 'pending').length;
-    
+
     return { passed, failed, warnings, pending };
   };
 
@@ -286,64 +286,46 @@ const HardwareDiagnosticsScreen: React.FC = () => {
       <View style={styles.testHeader}>
         <View style={styles.testInfo}>
           <View style={styles.testTitleRow}>
-            <Icon 
-              name={getCategoryIcon(test.category)} 
-              size={20} 
-              color={Colors.primary} 
-            />
+            <Icon name={getCategoryIcon(test.category)} size={20} color={Colors.primary} />
             <Text style={styles.testName}>{test.name}</Text>
           </View>
           <Text style={styles.testDescription}>{test.description}</Text>
-          {test.details && (
-            <Text style={styles.testDetails}>{test.details}</Text>
-          )}
-          {test.errorCode && (
-            <Text style={styles.errorCode}>Error: {test.errorCode}</Text>
-          )}
+          {test.details && <Text style={styles.testDetails}>{test.details}</Text>}
+          {test.errorCode && <Text style={styles.errorCode}>Error: {test.errorCode}</Text>}
           <View style={styles.testMeta}>
             {test.lastRun && (
-              <Text style={styles.lastRun}>
-                Last run: {test.lastRun.toLocaleTimeString()}
-              </Text>
+              <Text style={styles.lastRun}>Last run: {test.lastRun.toLocaleTimeString()}</Text>
             )}
-            {test.duration && (
-              <Text style={styles.duration}>
-                Duration: {test.duration}s
-              </Text>
-            )}
+            {test.duration && <Text style={styles.duration}>Duration: {test.duration}s</Text>}
           </View>
         </View>
-        
+
         <View style={styles.testActions}>
           <View style={[styles.statusBadge, { backgroundColor: getStatusColor(test.status) }]}>
             {test.status === 'running' || runningTests.has(test.id) ? (
               <ActivityIndicator size="small" color={Colors.white} />
             ) : (
-              <Icon 
-                name={getStatusIcon(test.status)} 
-                size={12} 
-                color={Colors.white} 
-              />
+              <Icon name={getStatusIcon(test.status)} size={12} color={Colors.white} />
             )}
             <Text style={styles.statusText}>
               {runningTests.has(test.id) ? 'RUNNING' : test.status.toUpperCase()}
             </Text>
           </View>
-          
+
           <TouchableOpacity
             style={[styles.runButton, runningTests.has(test.id) && styles.runButtonDisabled]}
             onPress={() => runSingleTest(test.id)}
-            disabled={runningTests.has(test.id) || runningFullDiagnostic}
-          >
-            <Icon 
-              name={runningTests.has(test.id) ? "hourglass-empty" : "play-arrow"} 
-              size={16} 
-              color={runningTests.has(test.id) ? Colors.mediumGray : Colors.primary} 
+            disabled={runningTests.has(test.id) || runningFullDiagnostic}>
+            <Icon
+              name={runningTests.has(test.id) ? 'hourglass-empty' : 'play-arrow'}
+              size={16}
+              color={runningTests.has(test.id) ? Colors.mediumGray : Colors.primary}
             />
-            <Text style={[
-              styles.runButtonText,
-              runningTests.has(test.id) && styles.runButtonTextDisabled
-            ]}>
+            <Text
+              style={[
+                styles.runButtonText,
+                runningTests.has(test.id) && styles.runButtonTextDisabled,
+              ]}>
               {runningTests.has(test.id) ? 'Running...' : 'Run Test'}
             </Text>
           </TouchableOpacity>
@@ -360,10 +342,7 @@ const HardwareDiagnosticsScreen: React.FC = () => {
           <Icon name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Hardware Diagnostics</Text>
-        <TouchableOpacity 
-          style={styles.exportButton}
-          onPress={exportDiagnosticReport}
-        >
+        <TouchableOpacity style={styles.exportButton} onPress={exportDiagnosticReport}>
           <Icon name="file-download" size={24} color={Colors.white} />
         </TouchableOpacity>
       </View>
@@ -395,12 +374,14 @@ const HardwareDiagnosticsScreen: React.FC = () => {
                 <Text style={styles.summaryLabel}>Pending</Text>
               </View>
             </View>
-            
+
             <TouchableOpacity
-              style={[styles.fullDiagnosticButton, runningFullDiagnostic && styles.fullDiagnosticButtonDisabled]}
+              style={[
+                styles.fullDiagnosticButton,
+                runningFullDiagnostic && styles.fullDiagnosticButtonDisabled,
+              ]}
               onPress={runFullDiagnostic}
-              disabled={runningFullDiagnostic || runningTests.size > 0}
-            >
+              disabled={runningFullDiagnostic || runningTests.size > 0}>
               {runningFullDiagnostic ? (
                 <ActivityIndicator size="small" color={Colors.white} />
               ) : (

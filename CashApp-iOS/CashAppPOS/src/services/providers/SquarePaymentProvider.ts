@@ -20,10 +20,10 @@ class SquarePaymentProviderClass {
   async initialize(config: SquareConfig): Promise<void> {
     try {
       this.config = config;
-      
+
       // TODO: Initialize Square SDK when available
       // await SQIPCore.setSquareApplicationId(config.applicationId);
-      
+
       this.initialized = true;
       console.log('Square payment provider initialized (placeholder)');
     } catch (error) {
@@ -40,7 +40,7 @@ class SquarePaymentProviderClass {
 
       // TODO: Implement Square card entry when SDK is available
       // const result = await SQIPCardEntry.startCardEntryFlow();
-      
+
       // Placeholder implementation
       return {
         success: false,
@@ -57,7 +57,7 @@ class SquarePaymentProviderClass {
   async processPayment(
     nonce: string,
     amount: number,
-    currency: string = 'GBP'
+    currency: string = 'GBP',
   ): Promise<SquarePaymentResult> {
     try {
       if (!this.initialized || !this.config) {
@@ -66,7 +66,7 @@ class SquarePaymentProviderClass {
 
       // TODO: Process payment with Square API
       // This would typically involve calling your backend which calls Square's API
-      
+
       return {
         success: false,
         error: 'Square payment processing not implemented - placeholder',

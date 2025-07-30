@@ -135,9 +135,9 @@ describe('Comprehensive App Test Suite', () => {
       const { getByText, getByTestId } = render(
         <NavigationContainer>
           <POSScreen />
-        </NavigationContainer>
+        </NavigationContainer>,
       );
-      
+
       expect(getByText('Point of Sale')).toBeTruthy();
     });
 
@@ -145,9 +145,9 @@ describe('Comprehensive App Test Suite', () => {
       const { getByText, getAllByText } = render(
         <NavigationContainer>
           <POSScreen />
-        </NavigationContainer>
+        </NavigationContainer>,
       );
-      
+
       // Find and click a product
       await waitFor(() => {
         const addButton = getAllByText('+')[0];
@@ -159,9 +159,9 @@ describe('Comprehensive App Test Suite', () => {
       const { getByText } = render(
         <NavigationContainer>
           <POSScreen />
-        </NavigationContainer>
+        </NavigationContainer>,
       );
-      
+
       // Check for payment options
       await waitFor(() => {
         expect(getByText(/Card/i)).toBeTruthy();
@@ -174,9 +174,9 @@ describe('Comprehensive App Test Suite', () => {
       const { getByText, queryByText } = render(
         <NavigationContainer>
           <POSScreen />
-        </NavigationContainer>
+        </NavigationContainer>,
       );
-      
+
       await waitFor(() => {
         // Should have £ not $
         expect(getByText(/£/)).toBeTruthy();
@@ -190,9 +190,9 @@ describe('Comprehensive App Test Suite', () => {
       const { getByText } = render(
         <NavigationContainer>
           <UserProfileScreen />
-        </NavigationContainer>
+        </NavigationContainer>,
       );
-      
+
       expect(getByText('User Profile')).toBeTruthy();
       expect(getByText('Test User')).toBeTruthy();
     });
@@ -201,13 +201,13 @@ describe('Comprehensive App Test Suite', () => {
       const { getByTestId, getByText } = render(
         <NavigationContainer>
           <UserProfileScreen />
-        </NavigationContainer>
+        </NavigationContainer>,
       );
-      
+
       // Find and click edit button
       const editButton = getByTestId('edit-button');
       fireEvent.press(editButton);
-      
+
       // Check if in edit mode
       await waitFor(() => {
         expect(getByText('Save Changes')).toBeTruthy();
@@ -218,27 +218,24 @@ describe('Comprehensive App Test Suite', () => {
       const { getByTestId, getByPlaceholderText } = render(
         <NavigationContainer>
           <UserProfileScreen />
-        </NavigationContainer>
+        </NavigationContainer>,
       );
-      
+
       // Enter edit mode
       const editButton = getByTestId('edit-button');
       fireEvent.press(editButton);
-      
+
       // Clear required field
       const firstNameInput = getByPlaceholderText('Enter first name');
       fireEvent.changeText(firstNameInput, '');
-      
+
       // Try to save
       const saveButton = getByTestId('save-button');
       fireEvent.press(saveButton);
-      
+
       // Should show error
       await waitFor(() => {
-        expect(Alert.alert).toHaveBeenCalledWith(
-          'Error',
-          expect.stringContaining('required')
-        );
+        expect(Alert.alert).toHaveBeenCalledWith('Error', expect.stringContaining('required'));
       });
     });
   });
@@ -248,9 +245,9 @@ describe('Comprehensive App Test Suite', () => {
       const { getByText } = render(
         <NavigationContainer>
           <ThemeOptionsScreen />
-        </NavigationContainer>
+        </NavigationContainer>,
       );
-      
+
       expect(getByText('Theme & Display')).toBeTruthy();
       expect(getByText('Color Theme')).toBeTruthy();
     });
@@ -259,9 +256,9 @@ describe('Comprehensive App Test Suite', () => {
       const { getByText } = render(
         <NavigationContainer>
           <ThemeOptionsScreen />
-        </NavigationContainer>
+        </NavigationContainer>,
       );
-      
+
       await waitFor(() => {
         expect(getByText('Fynlo Green')).toBeTruthy();
         expect(getByText('Ocean Blue')).toBeTruthy();
@@ -282,9 +279,9 @@ describe('Comprehensive App Test Suite', () => {
       const { getByText, queryByText } = render(
         <NavigationContainer>
           <PaymentMethodsScreen />
-        </NavigationContainer>
+        </NavigationContainer>,
       );
-      
+
       await waitFor(() => {
         expect(getByText('QR Code Payment')).toBeTruthy();
         expect(queryByText(/Gift Card/i)).toBeFalsy();
@@ -295,13 +292,13 @@ describe('Comprehensive App Test Suite', () => {
       const { getAllByTestId } = render(
         <NavigationContainer>
           <PaymentMethodsScreen />
-        </NavigationContainer>
+        </NavigationContainer>,
       );
-      
+
       await waitFor(() => {
         const switches = getAllByTestId('payment-method-switch');
         expect(switches.length).toBeGreaterThan(0);
-        
+
         // Toggle first switch
         fireEvent(switches[0], 'onValueChange', true);
       });
@@ -313,13 +310,13 @@ describe('Comprehensive App Test Suite', () => {
       const { getByText, getByTestId } = render(
         <NavigationContainer>
           <SettingsScreen />
-        </NavigationContainer>
+        </NavigationContainer>,
       );
-      
+
       // Click on User Settings
       const userSettingsButton = getByText('User Settings');
       fireEvent.press(userSettingsButton);
-      
+
       expect(mockNavigate).toHaveBeenCalledWith('UserSettings');
     });
 
@@ -327,23 +324,26 @@ describe('Comprehensive App Test Suite', () => {
       const { getByTestId } = render(
         <NavigationContainer>
           <UserProfileScreen />
-        </NavigationContainer>
+        </NavigationContainer>,
       );
-      
+
       const backButton = getByTestId('back-button');
       fireEvent.press(backButton);
-      
+
       expect(mockGoBack).toHaveBeenCalled();
     });
   });
 
   describe('Data Persistence Tests', () => {
     it('should save user preferences', async () => {
-      await AsyncStorage.setItem('userPreferences', JSON.stringify({
-        theme: 'dark',
-        language: 'en',
-      }));
-      
+      await AsyncStorage.setItem(
+        'userPreferences',
+        JSON.stringify({
+          theme: 'dark',
+          language: 'en',
+        }),
+      );
+
       const saved = await AsyncStorage.getItem('userPreferences');
       expect(JSON.parse(saved)).toEqual({
         theme: 'dark',
@@ -356,13 +356,13 @@ describe('Comprehensive App Test Suite', () => {
     it('should handle network errors gracefully', async () => {
       // Mock network error
       global.fetch = jest.fn(() => Promise.reject(new Error('Network error')));
-      
+
       const { getByText } = render(
         <NavigationContainer>
           <OrdersScreen />
-        </NavigationContainer>
+        </NavigationContainer>,
       );
-      
+
       await waitFor(() => {
         // Should show error state or empty state
         expect(getByText(/No orders/i)).toBeTruthy();
@@ -373,16 +373,16 @@ describe('Comprehensive App Test Suite', () => {
   describe('Performance Tests', () => {
     it('should render large lists efficiently', async () => {
       const startTime = Date.now();
-      
+
       const { getByTestId } = render(
         <NavigationContainer>
           <InventoryScreen />
-        </NavigationContainer>
+        </NavigationContainer>,
       );
-      
+
       const endTime = Date.now();
       const renderTime = endTime - startTime;
-      
+
       // Should render in less than 1 second
       expect(renderTime).toBeLessThan(1000);
     });

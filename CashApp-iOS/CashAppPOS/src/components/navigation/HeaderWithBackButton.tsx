@@ -39,33 +39,22 @@ export const HeaderWithBackButton: React.FC<HeaderWithBackButtonProps> = ({
     <View style={[styles.header, { backgroundColor: headerBackgroundColor }]}>
       <View style={styles.leftSection}>
         {showBackButton && (
-          <TouchableOpacity
-            onPress={handleBackPress}
-            style={styles.backButton}
-            activeOpacity={0.7}
-          >
-            <Icon
-              name="arrow-back"
-              size={24}
-              color={headerTextColor}
-            />
+          <TouchableOpacity onPress={handleBackPress} style={styles.backButton} activeOpacity={0.7}>
+            <Icon name="arrow-back" size={24} color={headerTextColor} />
           </TouchableOpacity>
         )}
       </View>
-      
+
       <View style={styles.centerSection}>
         <Text
           style={[styles.title, { color: headerTextColor }]}
           numberOfLines={1}
-          ellipsizeMode="tail"
-        >
+          ellipsizeMode="tail">
           {title}
         </Text>
       </View>
-      
-      <View style={styles.rightSection}>
-        {rightComponent}
-      </View>
+
+      <View style={styles.rightSection}>{rightComponent}</View>
     </View>
   );
 };

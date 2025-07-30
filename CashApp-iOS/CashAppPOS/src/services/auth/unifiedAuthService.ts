@@ -1,6 +1,6 @@
 /**
  * Unified Authentication Service
- * 
+ *
  * This service provides a single interface for authentication that
  * automatically switches between mock and real Supabase authentication
  * based on the AUTH_CONFIG setting.

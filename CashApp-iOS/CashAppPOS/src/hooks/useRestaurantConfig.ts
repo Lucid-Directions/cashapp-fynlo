@@ -9,7 +9,7 @@ export interface UseRestaurantConfigReturn {
   isOnboardingCompleted: boolean;
   setupProgress: number;
   nextSetupStep: keyof RestaurantConfig['setupSteps'] | null;
-  
+
   // Actions
   updateConfig: (updates: Partial<RestaurantConfig>) => Promise<void>;
   completeSetupStep: (step: keyof RestaurantConfig['setupSteps']) => Promise<void>;
@@ -59,7 +59,7 @@ export const useRestaurantConfig = (): UseRestaurantConfigReturn => {
 
   // Subscribe to configuration changes
   useEffect(() => {
-    const unsubscribe = configService.subscribe((updatedConfig) => {
+    const unsubscribe = configService.subscribe(updatedConfig => {
       setConfig(updatedConfig);
     });
 
@@ -122,7 +122,7 @@ export const useRestaurantConfig = (): UseRestaurantConfigReturn => {
     isOnboardingCompleted: configService.isOnboardingCompleted(),
     setupProgress: configService.getSetupProgress(),
     nextSetupStep: configService.getNextSetupStep(),
-    
+
     // Actions
     updateConfig,
     completeSetupStep,
@@ -146,7 +146,7 @@ export const useRestaurantDisplayName = (): string => {
 
     loadDisplayName();
 
-    const unsubscribe = configService.subscribe((config) => {
+    const unsubscribe = configService.subscribe(config => {
       setDisplayName(config.displayName || config.restaurantName || 'Fynlo POS');
     });
 

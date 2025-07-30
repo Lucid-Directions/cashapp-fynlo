@@ -91,7 +91,7 @@ class SumUpServiceClass {
     amount: number,
     currency: string = 'GBP',
     description?: string,
-    returnUrl?: string
+    returnUrl?: string,
   ): Promise<SumUpCheckout> {
     try {
       if (!this.config) {
@@ -110,7 +110,7 @@ class SumUpServiceClass {
       const response = await fetch(`${this.config.baseUrl}/v0.1/checkouts`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.config.apiKey}`,
+          Authorization: `Bearer ${this.config.apiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(checkoutData),
@@ -122,7 +122,7 @@ class SumUpServiceClass {
       }
 
       const data = await response.json();
-      
+
       return {
         checkoutId: data.id,
         checkoutUrl: data.checkout_url,
@@ -147,7 +147,7 @@ class SumUpServiceClass {
       const checkout = await this.createCheckout(
         request.amount,
         request.currency,
-        request.description
+        request.description,
       );
 
       // This would typically open the SumUp checkout URL
@@ -179,7 +179,7 @@ class SumUpServiceClass {
   async processContactlessPayment(
     amount: number,
     currency: string = 'GBP',
-    description?: string
+    description?: string,
   ): Promise<SumUpContactlessPayment> {
     try {
       if (!this.config) {
@@ -187,9 +187,9 @@ class SumUpServiceClass {
       }
 
       const paymentId = this.generatePaymentId();
-      
+
       console.log('🔄 Using Native SumUp SDK for contactless payment');
-      
+
       // Use native SumUp SDK for contactless payment
       const result = await SumUpNativeService.checkout({
         amount: amount,
@@ -229,7 +229,7 @@ class SumUpServiceClass {
   async createQRPayment(
     amount: number,
     currency: string = 'GBP',
-    description?: string
+    description?: string,
   ): Promise<SumUpQRPayment> {
     try {
       if (!this.config) {
@@ -238,7 +238,7 @@ class SumUpServiceClass {
 
       // Create checkout for QR payment
       const checkout = await this.createCheckout(amount, currency, description);
-      
+
       return {
         id: checkout.checkoutId,
         qrCode: checkout.checkoutUrl,
@@ -267,7 +267,7 @@ class SumUpServiceClass {
       const response = await fetch(qrPayment.statusUrl, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${this.config.apiKey}`,
+          Authorization: `Bearer ${this.config.apiKey}`,
         },
       });
 
@@ -276,7 +276,7 @@ class SumUpServiceClass {
       }
 
       const data = await response.json();
-      
+
       return {
         ...qrPayment,
         status: this.mapCheckoutStatus(data.status),
@@ -315,9 +315,8 @@ class SumUpServiceClass {
     if (volumeDecimal >= this.feeStructure.volumeThreshold) {
       const transactionFee = amountDecimal * this.feeStructure.highVolumeRate;
       // Add proportional monthly fee
-      const monthlyFeePerTransaction = volumeDecimal > 0 
-        ? this.feeStructure.monthlyFee / (volumeDecimal / amountDecimal)
-        : 0;
+      const monthlyFeePerTransaction =
+        volumeDecimal > 0 ? this.feeStructure.monthlyFee / (volumeDecimal / amountDecimal) : 0;
       return transactionFee + monthlyFeePerTransaction;
     } else {
       // Standard rate for low volume
@@ -342,17 +341,17 @@ class SumUpServiceClass {
     savings?: number;
   } {
     const volume = monthlyVolume;
-    
+
     if (volume >= this.feeStructure.volumeThreshold) {
       // High volume pricing
       const transactionFees = volume * this.feeStructure.highVolumeRate;
       const totalCost = transactionFees + this.feeStructure.monthlyFee;
       const effectiveRate = totalCost / volume;
-      
+
       // Calculate savings vs standard rate
       const standardCost = volume * this.feeStructure.standardRate;
       const savings = standardCost - totalCost;
-      
+
       return {
         totalCost,
         effectiveRate,
@@ -363,7 +362,7 @@ class SumUpServiceClass {
       // Standard pricing
       const totalCost = volume * this.feeStructure.standardRate;
       const effectiveRate = this.feeStructure.standardRate;
-      
+
       return {
         totalCost,
         effectiveRate,
@@ -378,10 +377,10 @@ class SumUpServiceClass {
   isOptimalForVolume(monthlyVolume: number, compareRates: { [provider: string]: number }): boolean {
     const sumupCost = this.calculateMonthlyCost(monthlyVolume);
     const sumupRate = sumupCost.effectiveRate;
-    
+
     // Compare with other providers
     const lowestCompetitorRate = Math.min(...Object.values(compareRates));
-    
+
     return sumupRate <= lowestCompetitorRate;
   }
 
@@ -406,7 +405,7 @@ class SumUpServiceClass {
     merchantCode?: string;
   }> {
     const config = await this.loadConfig();
-    
+
     return {
       isConfigured: !!config,
       hasApiKeys: !!(config?.apiKey && config?.merchantCode),
@@ -428,7 +427,7 @@ class SumUpServiceClass {
       const response = await fetch(`${this.config.baseUrl}/v0.1/me`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${this.config.apiKey}`,
+          Authorization: `Bearer ${this.config.apiKey}`,
         },
       });
 

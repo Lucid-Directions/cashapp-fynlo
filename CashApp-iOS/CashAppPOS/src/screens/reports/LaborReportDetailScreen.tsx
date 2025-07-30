@@ -77,40 +77,44 @@ const LaborReportDetailScreen = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const dataService = DataService.getInstance();
       const data = await dataService.getLaborReport(selectedPeriod);
-      
+
       // Process the data
-      const processedData: LaborData[] = data.employees?.map((emp: any) => ({
-        employeeId: emp.id,
-        employeeName: emp.name || `${emp.first_name} ${emp.last_name}`,
-        role: emp.role,
-        scheduledHours: emp.scheduled_hours || 0,
-        actualHours: emp.actual_hours || 0,
-        overtimeHours: emp.overtime_hours || 0,
-        regularRate: emp.hourly_rate || 0,
-        overtimeRate: (emp.hourly_rate || 0) * 1.5,
-        regularCost: (emp.actual_hours || 0) * (emp.hourly_rate || 0),
-        overtimeCost: (emp.overtime_hours || 0) * ((emp.hourly_rate || 0) * 1.5),
-        totalCost: ((emp.actual_hours || 0) * (emp.hourly_rate || 0)) + ((emp.overtime_hours || 0) * ((emp.hourly_rate || 0) * 1.5)),
-        efficiency: emp.scheduled_hours > 0 ? (emp.actual_hours / emp.scheduled_hours) * 100 : 0,
-        shifts: emp.shifts || [],
-      })) || [];
-      
+      const processedData: LaborData[] =
+        data.employees?.map((emp: any) => ({
+          employeeId: emp.id,
+          employeeName: emp.name || `${emp.first_name} ${emp.last_name}`,
+          role: emp.role,
+          scheduledHours: emp.scheduled_hours || 0,
+          actualHours: emp.actual_hours || 0,
+          overtimeHours: emp.overtime_hours || 0,
+          regularRate: emp.hourly_rate || 0,
+          overtimeRate: (emp.hourly_rate || 0) * 1.5,
+          regularCost: (emp.actual_hours || 0) * (emp.hourly_rate || 0),
+          overtimeCost: (emp.overtime_hours || 0) * ((emp.hourly_rate || 0) * 1.5),
+          totalCost:
+            (emp.actual_hours || 0) * (emp.hourly_rate || 0) +
+            (emp.overtime_hours || 0) * ((emp.hourly_rate || 0) * 1.5),
+          efficiency: emp.scheduled_hours > 0 ? (emp.actual_hours / emp.scheduled_hours) * 100 : 0,
+          shifts: emp.shifts || [],
+        })) || [];
+
       // Calculate summary
       const summaryData: LaborSummary = {
         totalScheduledHours: processedData.reduce((sum, emp) => sum + emp.scheduledHours, 0),
         totalActualHours: processedData.reduce((sum, emp) => sum + emp.actualHours, 0),
         totalOvertimeHours: processedData.reduce((sum, emp) => sum + emp.overtimeHours, 0),
         totalLaborCost: processedData.reduce((sum, emp) => sum + emp.totalCost, 0),
-        averageEfficiency: processedData.length > 0 
-          ? processedData.reduce((sum, emp) => sum + emp.efficiency, 0) / processedData.length 
-          : 0,
+        averageEfficiency:
+          processedData.length > 0
+            ? processedData.reduce((sum, emp) => sum + emp.efficiency, 0) / processedData.length
+            : 0,
         laborCostPercentage: data.labor_cost_percentage || 0,
         totalRevenue: data.total_revenue || 0,
       };
-      
+
       setLaborData(processedData);
       setSummary(summaryData);
     } catch (error) {
@@ -119,7 +123,7 @@ const LaborReportDetailScreen = () => {
       Alert.alert(
         'Error',
         'Unable to load labor data. Please check your connection and try again.',
-        [{ text: 'OK' }]
+        [{ text: 'OK' }],
       );
     } finally {
       setLoading(false);
@@ -131,7 +135,10 @@ const LaborReportDetailScreen = () => {
   };
 
   const formatCurrency = (amount: number) => {
-    return `£${amount.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    return `£${amount.toLocaleString('en-GB', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
   };
 
   const formatHours = (hours: number) => {
@@ -148,37 +155,27 @@ const LaborReportDetailScreen = () => {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <Icon name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Labor Report</Text>
-        <TouchableOpacity 
-          style={styles.headerAction} 
-          onPress={loadLaborData}
-          disabled={loading}
-        >
+        <TouchableOpacity style={styles.headerAction} onPress={loadLaborData} disabled={loading}>
           <Icon name="refresh" size={24} color={Colors.white} />
         </TouchableOpacity>
       </View>
 
       {/* Period Selector */}
       <View style={styles.periodSelector}>
-        {['day', 'week', 'month'].map((period) => (
+        {['day', 'week', 'month'].map(period => (
           <TouchableOpacity
             key={period}
-            style={[
-              styles.periodButton,
-              selectedPeriod === period && styles.periodButtonActive
-            ]}
-            onPress={() => setSelectedPeriod(period)}
-          >
-            <Text style={[
-              styles.periodButtonText,
-              selectedPeriod === period && styles.periodButtonTextActive
-            ]}>
+            style={[styles.periodButton, selectedPeriod === period && styles.periodButtonActive]}
+            onPress={() => setSelectedPeriod(period)}>
+            <Text
+              style={[
+                styles.periodButtonText,
+                selectedPeriod === period && styles.periodButtonTextActive,
+              ]}>
               {period.charAt(0).toUpperCase() + period.slice(1)}
             </Text>
           </TouchableOpacity>
@@ -210,7 +207,7 @@ const LaborReportDetailScreen = () => {
                 </Text>
                 <Text style={[styles.summaryLabel, { color: Colors.darkGray }]}>Scheduled</Text>
               </View>
-              
+
               <View style={[styles.summaryCard, { backgroundColor: theme.colors.white }]}>
                 <Icon name="access-time" size={32} color={Colors.success} />
                 <Text style={[styles.summaryValue, { color: theme.colors.text }]}>
@@ -218,9 +215,13 @@ const LaborReportDetailScreen = () => {
                 </Text>
                 <Text style={[styles.summaryLabel, { color: Colors.darkGray }]}>Actual</Text>
               </View>
-              
+
               <View style={[styles.summaryCard, { backgroundColor: theme.colors.white }]}>
-                <Icon name="trending-up" size={32} color={getEfficiencyColor(summary.averageEfficiency)} />
+                <Icon
+                  name="trending-up"
+                  size={32}
+                  color={getEfficiencyColor(summary.averageEfficiency)}
+                />
                 <Text style={[styles.summaryValue, { color: theme.colors.text }]}>
                   {summary.averageEfficiency.toFixed(0)}%
                 </Text>
@@ -242,23 +243,22 @@ const LaborReportDetailScreen = () => {
             <View style={styles.costPercentageCard}>
               <Text style={styles.costPercentageTitle}>Labor Cost as % of Revenue</Text>
               <View style={styles.costPercentageBar}>
-                <View 
+                <View
                   style={[
-                    styles.costPercentageFill, 
-                    { 
+                    styles.costPercentageFill,
+                    {
                       width: `${Math.min(summary.laborCostPercentage, 100)}%`,
-                      backgroundColor: summary.laborCostPercentage > 30 ? Colors.danger : Colors.success
-                    }
-                  ]} 
+                      backgroundColor:
+                        summary.laborCostPercentage > 30 ? Colors.danger : Colors.success,
+                    },
+                  ]}
                 />
               </View>
               <View style={styles.costPercentageInfo}>
                 <Text style={styles.costPercentageValue}>
                   {summary.laborCostPercentage.toFixed(1)}%
                 </Text>
-                <Text style={styles.costPercentageTarget}>
-                  Target: {'<'} 30%
-                </Text>
+                <Text style={styles.costPercentageTarget}>Target: {'<'} 30%</Text>
               </View>
             </View>
           )}
@@ -266,7 +266,7 @@ const LaborReportDetailScreen = () => {
           {/* Employee Details */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Employee Details</Text>
-            {laborData.map((employee) => (
+            {laborData.map(employee => (
               <View key={employee.employeeId} style={styles.employeeCard}>
                 <View style={styles.employeeHeader}>
                   <View>
@@ -274,10 +274,11 @@ const LaborReportDetailScreen = () => {
                     <Text style={styles.employeeRole}>{employee.role}</Text>
                   </View>
                   <View style={styles.employeeEfficiency}>
-                    <Text style={[
-                      styles.efficiencyValue,
-                      { color: getEfficiencyColor(employee.efficiency) }
-                    ]}>
+                    <Text
+                      style={[
+                        styles.efficiencyValue,
+                        { color: getEfficiencyColor(employee.efficiency) },
+                      ]}>
                       {employee.efficiency.toFixed(0)}%
                     </Text>
                     <Text style={styles.efficiencyLabel}>Efficiency</Text>
@@ -295,10 +296,11 @@ const LaborReportDetailScreen = () => {
                   </View>
                   <View style={styles.statRow}>
                     <Text style={styles.statLabel}>Overtime:</Text>
-                    <Text style={[
-                      styles.statValue,
-                      employee.overtimeHours > 0 && { color: Colors.warning }
-                    ]}>
+                    <Text
+                      style={[
+                        styles.statValue,
+                        employee.overtimeHours > 0 && { color: Colors.warning },
+                      ]}>
                       {formatHours(employee.overtimeHours)}
                     </Text>
                   </View>
@@ -306,11 +308,15 @@ const LaborReportDetailScreen = () => {
 
                 <View style={styles.employeeCosts}>
                   <View style={styles.costRow}>
-                    <Text style={styles.costLabel}>Regular ({formatCurrency(employee.regularRate)}/h):</Text>
+                    <Text style={styles.costLabel}>
+                      Regular ({formatCurrency(employee.regularRate)}/h):
+                    </Text>
                     <Text style={styles.costValue}>{formatCurrency(employee.regularCost)}</Text>
                   </View>
                   <View style={styles.costRow}>
-                    <Text style={styles.costLabel}>Overtime ({formatCurrency(employee.overtimeRate)}/h):</Text>
+                    <Text style={styles.costLabel}>
+                      Overtime ({formatCurrency(employee.overtimeRate)}/h):
+                    </Text>
                     <Text style={styles.costValue}>{formatCurrency(employee.overtimeCost)}</Text>
                   </View>
                   <View style={[styles.costRow, styles.totalRow]}>

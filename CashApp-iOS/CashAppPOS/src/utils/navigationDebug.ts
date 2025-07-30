@@ -22,7 +22,7 @@ export const VALID_ROUTES = {
     HELP: 'Help',
     SETTINGS: 'Settings',
   },
-  
+
   // Settings Navigator Routes
   SETTINGS: {
     MAIN: 'Settings',
@@ -56,7 +56,7 @@ export const VALID_ROUTES = {
     RESTAURANT_SETUP: 'RestaurantSetup',
     RESTAURANT_PROFILE: 'RestaurantProfile',
   },
-  
+
   // Platform Navigator Routes
   PLATFORM: {
     DASHBOARD: 'PlatformDashboard',
@@ -70,7 +70,7 @@ export const VALID_ROUTES = {
     SYSTEM_MONITORING: 'SystemMonitoring',
     USER_MANAGEMENT: 'UserManagement',
   },
-  
+
   // Auth Navigator Routes
   AUTH: {
     LOGIN: 'Login',
@@ -84,7 +84,7 @@ export const VALID_ROUTES = {
 export function validateNavigation(
   currentScreen: string,
   targetScreen: string,
-  params?: any
+  params?: any,
 ): { valid: boolean; error?: string } {
   // Check if target screen exists in any navigator
   const allRoutes = [
@@ -122,14 +122,14 @@ export function validateNavigation(
  */
 export function logNavigationState(state: NavigationState | undefined, depth = 0) {
   if (!state) return;
-  
+
   const indent = '  '.repeat(depth);
   console.log(`${indent}Navigator: ${state.type || 'Stack'}`);
-  
+
   state.routes.forEach((route, index) => {
     const active = index === state.index ? '(ACTIVE)' : '';
     console.log(`${indent}  - ${route.name} ${active}`);
-    
+
     if (route.state) {
       logNavigationState(route.state as NavigationState, depth + 2);
     }
@@ -141,7 +141,7 @@ export function logNavigationState(state: NavigationState | undefined, depth = 0
  */
 export function getNestedNavigationParams(
   fromNavigator: 'MAIN' | 'SETTINGS' | 'PLATFORM',
-  toScreen: string
+  toScreen: string,
 ): { screen?: string; params?: any } | null {
   // From Main to Settings screens
   if (fromNavigator === 'MAIN' && Object.values(VALID_ROUTES.SETTINGS).includes(toScreen)) {
@@ -159,16 +159,12 @@ export function getNestedNavigationParams(
 /**
  * Safe navigation helper
  */
-export function safeNavigate(
-  navigation: any,
-  targetScreen: string,
-  params?: any
-) {
+export function safeNavigate(navigation: any, targetScreen: string, params?: any) {
   try {
     const validation = validateNavigation(
       navigation.getState()?.routes[navigation.getState()?.index]?.name || '',
       targetScreen,
-      params
+      params,
     );
 
     if (!validation.valid) {

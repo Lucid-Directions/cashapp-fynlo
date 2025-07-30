@@ -6,7 +6,7 @@ interface LoadingViewProps {
   message?: string;
 }
 
-const LoadingView: React.FC<LoadingViewProps> = ({ message = "Loading..." }) => {
+const LoadingView: React.FC<LoadingViewProps> = ({ message = 'Loading...' }) => {
   const { theme } = useTheme(); // Use theme if available
 
   return (

@@ -27,7 +27,7 @@ class SumUpCompatibilityService {
       hasEntitlements: false,
       requiresApproval: true,
       fallbackMessage: '',
-      actionRequired: []
+      actionRequired: [],
     };
 
     // Check platform
@@ -61,7 +61,7 @@ class SumUpCompatibilityService {
       '1. Apply for Tap to Pay entitlement at https://developer.apple.com/contact/request/tap-to-pay-on-iphone/',
       '2. Wait for Apple approval (can take weeks)',
       '3. Update app with approved entitlements',
-      '4. Submit app for App Store review'
+      '4. Submit app for App Store review',
     ];
 
     result.isSupported = false; // Not supported until Apple approval
@@ -89,34 +89,32 @@ class SumUpCompatibilityService {
    */
   public showCompatibilityError(result: SumUpCompatibilityResult): void {
     const title = 'Tap to Pay Not Available';
-    const message = `${result.fallbackMessage}\n\nRequired actions:\n${result.actionRequired.join('\n')}`;
-    
-    Alert.alert(
-      title,
-      message,
-      [
-        {
-          text: 'Use Alternative Payment',
-          style: 'default'
-        },
-        {
-          text: 'Learn More',
-          onPress: () => {
-            Alert.alert(
-              'About Tap to Pay on iPhone',
-              'Tap to Pay on iPhone allows merchants to accept contactless payments using just their iPhone. ' +
+    const message = `${result.fallbackMessage}\n\nRequired actions:\n${result.actionRequired.join(
+      '\n',
+    )}`;
+
+    Alert.alert(title, message, [
+      {
+        text: 'Use Alternative Payment',
+        style: 'default',
+      },
+      {
+        text: 'Learn More',
+        onPress: () => {
+          Alert.alert(
+            'About Tap to Pay on iPhone',
+            'Tap to Pay on iPhone allows merchants to accept contactless payments using just their iPhone. ' +
               'However, it requires:\n\n' +
               '• Apple Developer Program membership\n' +
               '• Approval from Apple\n' +
               '• Special entitlements\n' +
               '• App Store review\n\n' +
               'For now, you can use alternative payment methods like QR codes or external card readers.',
-              [{ text: 'OK' }]
-            );
-          }
-        }
-      ]
-    );
+            [{ text: 'OK' }],
+          );
+        },
+      },
+    ]);
   }
 
   /**
@@ -133,26 +131,26 @@ class SumUpCompatibilityService {
         id: 'qr',
         name: 'QR Code Payment',
         description: 'Customer scans QR code to pay via mobile app',
-        available: true
+        available: true,
       },
       {
         id: 'cash',
         name: 'Cash Payment',
         description: 'Traditional cash payment',
-        available: true
+        available: true,
       },
       {
         id: 'stripe',
         name: 'Stripe Terminal',
         description: 'Use Stripe card reader hardware',
-        available: true
+        available: true,
       },
       {
         id: 'square',
         name: 'Square Reader',
         description: 'Use Square card reader hardware',
-        available: false // Temporarily disabled
-      }
+        available: false, // Temporarily disabled
+      },
     ];
   }
 

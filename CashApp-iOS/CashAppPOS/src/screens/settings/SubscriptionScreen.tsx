@@ -1,6 +1,6 @@
 /**
  * Subscription Management Screen
- * 
+ *
  * This screen allows restaurant owners to view their current subscription,
  * manage billing, and upgrade/downgrade plans.
  */
@@ -14,7 +14,7 @@ import {
   TouchableOpacity,
   Alert,
   RefreshControl,
-  ActivityIndicator
+  ActivityIndicator,
 } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useSubscription } from '../../contexts/SubscriptionContext';
@@ -33,7 +33,7 @@ export const SubscriptionScreen: React.FC = () => {
     formatPrice,
     changePlan,
     cancelSubscription,
-    refreshUsage
+    refreshUsage,
   } = useSubscription();
 
   const [refreshing, setRefreshing] = useState(false);
@@ -48,27 +48,23 @@ export const SubscriptionScreen: React.FC = () => {
   const handlePlanChange = (newPlanId: number, planName: string) => {
     if (!subscription) return;
 
-    Alert.alert(
-      'Change Plan',
-      `Are you sure you want to switch to the ${planName}?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Confirm',
-          onPress: async () => {
-            setActionLoading(true);
-            const success = await changePlan(newPlanId);
-            setActionLoading(false);
-            
-            if (success) {
-              Alert.alert('Success', `Successfully switched to ${planName}`);
-            } else {
-              Alert.alert('Error', 'Failed to change plan. Please try again.');
-            }
+    Alert.alert('Change Plan', `Are you sure you want to switch to the ${planName}?`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Confirm',
+        onPress: async () => {
+          setActionLoading(true);
+          const success = await changePlan(newPlanId);
+          setActionLoading(false);
+
+          if (success) {
+            Alert.alert('Success', `Successfully switched to ${planName}`);
+          } else {
+            Alert.alert('Error', 'Failed to change plan. Please try again.');
           }
-        }
-      ]
-    );
+        },
+      },
+    ]);
   };
 
   const handleCancelSubscription = () => {
@@ -84,15 +80,15 @@ export const SubscriptionScreen: React.FC = () => {
             setActionLoading(true);
             const success = await cancelSubscription();
             setActionLoading(false);
-            
+
             if (success) {
               Alert.alert('Cancelled', 'Your subscription has been cancelled.');
             } else {
               Alert.alert('Error', 'Failed to cancel subscription. Please try again.');
             }
-          }
-        }
-      ]
+          },
+        },
+      ],
     );
   };
 
@@ -151,16 +147,11 @@ export const SubscriptionScreen: React.FC = () => {
     return (
       <View style={[styles.errorContainer, { backgroundColor: theme.colors.background }]}>
         <Icon name="alert-circle" size={48} color={theme.colors.error} />
-        <Text style={[styles.errorText, { color: theme.colors.error }]}>
-          {error}
-        </Text>
+        <Text style={[styles.errorText, { color: theme.colors.error }]}>{error}</Text>
         <TouchableOpacity
           style={[styles.retryButton, { backgroundColor: theme.colors.primary }]}
-          onPress={onRefresh}
-        >
-          <Text style={[styles.retryButtonText, { color: theme.colors.surface }]}>
-            Retry
-          </Text>
+          onPress={onRefresh}>
+          <Text style={[styles.retryButtonText, { color: theme.colors.surface }]}>Retry</Text>
         </TouchableOpacity>
       </View>
     );
@@ -175,8 +166,7 @@ export const SubscriptionScreen: React.FC = () => {
           onRefresh={onRefresh}
           tintColor={theme.colors.primary}
         />
-      }
-    >
+      }>
       {/* Current Subscription */}
       {subscription && (
         <SettingsSection title="Current Subscription">
@@ -201,16 +191,18 @@ export const SubscriptionScreen: React.FC = () => {
                 {formatPrice(subscription.plan.price_monthly)}/month
               </Text>
             </View>
-            
+
             <View style={styles.subscriptionDetails}>
               {subscription.is_trial && subscription.trial_end_date && (
                 <Text style={[styles.trialInfo, { color: theme.colors.warning }]}>
                   Trial ends in {subscription.days_until_renewal} days
                 </Text>
               )}
-              
+
               <Text style={[styles.renewalInfo, { color: theme.colors.textSecondary }]}>
-                {subscription.is_trial ? 'Trial period' : `Renews in ${subscription.days_until_renewal} days`}
+                {subscription.is_trial
+                  ? 'Trial period'
+                  : `Renews in ${subscription.days_until_renewal} days`}
               </Text>
             </View>
           </SettingsCard>
@@ -227,7 +219,8 @@ export const SubscriptionScreen: React.FC = () => {
                 <Text style={[styles.usageLabel, { color: theme.colors.text }]}>Orders</Text>
                 <Text style={[styles.usageValue, { color: theme.colors.text }]}>
                   {usage.orders_count}
-                  {subscription.plan.max_orders_per_month && ` / ${subscription.plan.max_orders_per_month}`}
+                  {subscription.plan.max_orders_per_month &&
+                    ` / ${subscription.plan.max_orders_per_month}`}
                 </Text>
               </View>
               {subscription.plan.max_orders_per_month && (
@@ -236,9 +229,17 @@ export const SubscriptionScreen: React.FC = () => {
                     style={[
                       styles.progressFill,
                       {
-                        width: `${getUsagePercentage(usage.orders_count, subscription.plan.max_orders_per_month)}%`,
-                        backgroundColor: getUsageColor(getUsagePercentage(usage.orders_count, subscription.plan.max_orders_per_month))
-                      }
+                        width: `${getUsagePercentage(
+                          usage.orders_count,
+                          subscription.plan.max_orders_per_month,
+                        )}%`,
+                        backgroundColor: getUsageColor(
+                          getUsagePercentage(
+                            usage.orders_count,
+                            subscription.plan.max_orders_per_month,
+                          ),
+                        ),
+                      },
                     ]}
                   />
                 </View>
@@ -248,10 +249,13 @@ export const SubscriptionScreen: React.FC = () => {
             {/* Staff Usage */}
             <View style={styles.usageItem}>
               <View style={styles.usageHeader}>
-                <Text style={[styles.usageLabel, { color: theme.colors.text }]}>Staff Accounts</Text>
+                <Text style={[styles.usageLabel, { color: theme.colors.text }]}>
+                  Staff Accounts
+                </Text>
                 <Text style={[styles.usageValue, { color: theme.colors.text }]}>
                   {usage.staff_count}
-                  {subscription.plan.max_staff_accounts && ` / ${subscription.plan.max_staff_accounts}`}
+                  {subscription.plan.max_staff_accounts &&
+                    ` / ${subscription.plan.max_staff_accounts}`}
                 </Text>
               </View>
               {subscription.plan.max_staff_accounts && (
@@ -260,9 +264,17 @@ export const SubscriptionScreen: React.FC = () => {
                     style={[
                       styles.progressFill,
                       {
-                        width: `${getUsagePercentage(usage.staff_count, subscription.plan.max_staff_accounts)}%`,
-                        backgroundColor: getUsageColor(getUsagePercentage(usage.staff_count, subscription.plan.max_staff_accounts))
-                      }
+                        width: `${getUsagePercentage(
+                          usage.staff_count,
+                          subscription.plan.max_staff_accounts,
+                        )}%`,
+                        backgroundColor: getUsageColor(
+                          getUsagePercentage(
+                            usage.staff_count,
+                            subscription.plan.max_staff_accounts,
+                          ),
+                        ),
+                      },
                     ]}
                   />
                 </View>
@@ -284,9 +296,17 @@ export const SubscriptionScreen: React.FC = () => {
                     style={[
                       styles.progressFill,
                       {
-                        width: `${getUsagePercentage(usage.menu_items_count, subscription.plan.max_menu_items)}%`,
-                        backgroundColor: getUsageColor(getUsagePercentage(usage.menu_items_count, subscription.plan.max_menu_items))
-                      }
+                        width: `${getUsagePercentage(
+                          usage.menu_items_count,
+                          subscription.plan.max_menu_items,
+                        )}%`,
+                        backgroundColor: getUsageColor(
+                          getUsagePercentage(
+                            usage.menu_items_count,
+                            subscription.plan.max_menu_items,
+                          ),
+                        ),
+                      },
                     ]}
                   />
                 </View>
@@ -299,19 +319,23 @@ export const SubscriptionScreen: React.FC = () => {
       {/* Available Plans */}
       {availablePlans.length > 0 && (
         <SettingsSection title="Available Plans">
-          {availablePlans.map((plan) => {
+          {availablePlans.map(plan => {
             const isCurrentPlan = subscription?.plan_id === plan.id;
-            const isDowngrade = subscription && plan.price_monthly < subscription.plan.price_monthly;
-            
+            const isDowngrade =
+              subscription && plan.price_monthly < subscription.plan.price_monthly;
+
             return (
-              <SettingsCard key={plan.id} style={isCurrentPlan ? styles.currentPlanCard : undefined}>
+              <SettingsCard
+                key={plan.id}
+                style={isCurrentPlan ? styles.currentPlanCard : undefined}>
                 <View style={styles.planHeader}>
                   <View style={styles.planInfo}>
                     <Text style={[styles.planTitle, { color: theme.colors.text }]}>
                       {plan.display_name}
                       {isCurrentPlan && (
                         <Text style={[styles.currentBadge, { color: theme.colors.primary }]}>
-                          {' '}(Current)
+                          {' '}
+                          (Current)
                         </Text>
                       )}
                     </Text>
@@ -324,18 +348,19 @@ export const SubscriptionScreen: React.FC = () => {
                       </Text>
                     )}
                   </View>
-                  
+
                   {!isCurrentPlan && (
                     <TouchableOpacity
                       style={[
                         styles.planButton,
                         {
-                          backgroundColor: isDowngrade ? theme.colors.warning : theme.colors.primary,
-                        }
+                          backgroundColor: isDowngrade
+                            ? theme.colors.warning
+                            : theme.colors.primary,
+                        },
                       ]}
                       onPress={() => handlePlanChange(plan.id, plan.display_name)}
-                      disabled={actionLoading}
-                    >
+                      disabled={actionLoading}>
                       <Text style={[styles.planButtonText, { color: theme.colors.surface }]}>
                         {isDowngrade ? 'Downgrade' : 'Upgrade'}
                       </Text>
@@ -399,8 +424,7 @@ export const SubscriptionScreen: React.FC = () => {
             <TouchableOpacity
               style={styles.managementButton}
               onPress={handleCancelSubscription}
-              disabled={actionLoading}
-            >
+              disabled={actionLoading}>
               <Icon name="cancel" size={20} color={theme.colors.error} />
               <Text style={[styles.managementButtonText, { color: theme.colors.error }]}>
                 Cancel Subscription

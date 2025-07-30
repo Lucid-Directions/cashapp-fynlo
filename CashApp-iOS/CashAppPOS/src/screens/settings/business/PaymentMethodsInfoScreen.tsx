@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  ScrollView,
-  TouchableOpacity,
-} from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { SettingsHeader, SettingsSection } from '../../../components/settings';
 
@@ -73,25 +67,26 @@ const PaymentMethodsInfoScreen: React.FC = () => {
   const renderPaymentMethod = (method: any) => (
     <View key={method.id} style={styles.methodCard}>
       <View style={styles.methodHeader}>
-        <Icon 
-          name={method.icon} 
-          size={32} 
-          color={method.enabled ? method.iconColor : Colors.lightGray} 
+        <Icon
+          name={method.icon}
+          size={32}
+          color={method.enabled ? method.iconColor : Colors.lightGray}
         />
         <View style={styles.methodInfo}>
           <Text style={styles.methodName}>{method.name}</Text>
           <Text style={styles.methodDescription}>{method.description}</Text>
         </View>
         <View style={styles.statusContainer}>
-          <Icon 
-            name={method.enabled ? 'check-circle' : 'radio-button-unchecked'} 
-            size={24} 
-            color={method.enabled ? Colors.success : Colors.lightGray} 
+          <Icon
+            name={method.enabled ? 'check-circle' : 'radio-button-unchecked'}
+            size={24}
+            color={method.enabled ? Colors.success : Colors.lightGray}
           />
-          <Text style={[
-            styles.statusText,
-            { color: method.enabled ? Colors.success : Colors.lightGray }
-          ]}>
+          <Text
+            style={[
+              styles.statusText,
+              { color: method.enabled ? Colors.success : Colors.lightGray },
+            ]}>
             {method.enabled ? 'Enabled' : 'Disabled'}
           </Text>
         </View>
@@ -101,23 +96,19 @@ const PaymentMethodsInfoScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <SettingsHeader
-        title="Payment Methods"
-        subtitle="Platform-managed payment configuration"
-      />
+      <SettingsHeader title="Payment Methods" subtitle="Platform-managed payment configuration" />
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Platform Control Notice */}
         <SettingsSection
           title="Platform Management"
-          subtitle="Payment methods are configured by the platform owner"
-        >
+          subtitle="Payment methods are configured by the platform owner">
           <View style={styles.noticeContainer}>
             <View style={styles.noticeCard}>
               <Icon name="lock" size={48} color={Colors.primary} />
               <Text style={styles.noticeTitle}>Platform Controlled</Text>
               <Text style={styles.noticeText}>
-                Payment methods and processing fees are managed centrally by the platform owner. 
+                Payment methods and processing fees are managed centrally by the platform owner.
                 This ensures consistent rates and compliance across all restaurants.
               </Text>
             </View>
@@ -127,8 +118,7 @@ const PaymentMethodsInfoScreen: React.FC = () => {
         {/* Current Payment Methods */}
         <SettingsSection
           title="Available Payment Methods"
-          subtitle="Payment options enabled for your restaurant"
-        >
+          subtitle="Payment options enabled for your restaurant">
           <View style={styles.methodsContainer}>
             {platformControlledMethods.map(renderPaymentMethod)}
           </View>
@@ -137,8 +127,7 @@ const PaymentMethodsInfoScreen: React.FC = () => {
         {/* Processing Information */}
         <SettingsSection
           title="Processing Information"
-          subtitle="Important details about payment processing"
-        >
+          subtitle="Important details about payment processing">
           <View style={styles.infoContainer}>
             <View style={styles.infoCard}>
               <Icon name="trending-down" size={24} color={Colors.success} />
@@ -175,14 +164,13 @@ const PaymentMethodsInfoScreen: React.FC = () => {
         {/* Contact Support */}
         <SettingsSection
           title="Need Changes?"
-          subtitle="Contact platform support for payment method modifications"
-        >
+          subtitle="Contact platform support for payment method modifications">
           <View style={styles.supportContainer}>
             <TouchableOpacity style={styles.supportButton}>
               <Icon name="support" size={24} color={Colors.white} />
               <Text style={styles.supportButtonText}>Contact Platform Support</Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity style={[styles.supportButton, styles.secondaryButton]}>
               <Icon name="help-outline" size={24} color={Colors.primary} />
               <Text style={[styles.supportButtonText, styles.secondaryButtonText]}>

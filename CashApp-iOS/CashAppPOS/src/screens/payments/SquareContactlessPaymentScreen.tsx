@@ -55,7 +55,13 @@ const SquareContactlessPaymentScreen: React.FC<SquareContactlessPaymentScreenPro
   route,
 }) => {
   const { theme } = useTheme();
-  const { amount, currency = 'GBP', description, onPaymentComplete, onPaymentCancelled } = route.params;
+  const {
+    amount,
+    currency = 'GBP',
+    description,
+    onPaymentComplete,
+    onPaymentCancelled,
+  } = route.params;
 
   const [contactlessState, setContactlessState] = useState<ContactlessState>({
     loading: true,
@@ -87,27 +93,29 @@ const SquareContactlessPaymentScreen: React.FC<SquareContactlessPaymentScreenPro
       }
 
       // Check device support for contactless payments
-      const applePaySupported = Platform.OS === 'ios' && await SquareService.isContactlessSupported('apple_pay');
-      const googlePaySupported = Platform.OS === 'android' && await SquareService.isContactlessSupported('google_pay');
+      const applePaySupported =
+        Platform.OS === 'ios' && (await SquareService.isContactlessSupported('apple_pay'));
+      const googlePaySupported =
+        Platform.OS === 'android' && (await SquareService.isContactlessSupported('google_pay'));
 
       if (!applePaySupported && !googlePaySupported) {
         throw new Error('Contactless payments not supported on this device');
       }
 
-      setContactlessState(prev => ({ 
-        ...prev, 
+      setContactlessState(prev => ({
+        ...prev,
         loading: false,
         applePaySupported,
         googlePaySupported,
-        errorMessage: null
+        errorMessage: null,
       }));
-
     } catch (error) {
       console.error('Failed to initialize contactless payments:', error);
-      setContactlessState(prev => ({ 
-        ...prev, 
+      setContactlessState(prev => ({
+        ...prev,
         loading: false,
-        errorMessage: error instanceof Error ? error.message : 'Failed to initialize contactless payments'
+        errorMessage:
+          error instanceof Error ? error.message : 'Failed to initialize contactless payments',
       }));
     }
   };
@@ -117,7 +125,7 @@ const SquareContactlessPaymentScreen: React.FC<SquareContactlessPaymentScreenPro
       Alert.alert(
         'Payment in Progress',
         'Please wait for the payment to complete before going back.',
-        [{ text: 'OK' }]
+        [{ text: 'OK' }],
       );
       return true;
     }
@@ -126,21 +134,17 @@ const SquareContactlessPaymentScreen: React.FC<SquareContactlessPaymentScreenPro
   }, [contactlessState.processing]);
 
   const handleCancelPayment = () => {
-    Alert.alert(
-      'Cancel Payment',
-      'Are you sure you want to cancel this payment?',
-      [
-        { text: 'Continue Payment', style: 'cancel' },
-        { 
-          text: 'Cancel', 
-          style: 'destructive',
-          onPress: () => {
-            onPaymentCancelled();
-            navigation.goBack();
-          }
-        }
-      ]
-    );
+    Alert.alert('Cancel Payment', 'Are you sure you want to cancel this payment?', [
+      { text: 'Continue Payment', style: 'cancel' },
+      {
+        text: 'Cancel',
+        style: 'destructive',
+        onPress: () => {
+          onPaymentCancelled();
+          navigation.goBack();
+        },
+      },
+    ]);
   };
 
   const processApplePayPayment = async () => {
@@ -160,7 +164,7 @@ const SquareContactlessPaymentScreen: React.FC<SquareContactlessPaymentScreenPro
         amount,
         currency,
         'apple_pay',
-        description
+        description,
       );
 
       if (paymentResult.status === 'completed') {
@@ -173,19 +177,18 @@ const SquareContactlessPaymentScreen: React.FC<SquareContactlessPaymentScreenPro
         });
         navigation.goBack();
       } else {
-        setContactlessState(prev => ({ 
-          ...prev, 
+        setContactlessState(prev => ({
+          ...prev,
           processing: false,
-          errorMessage: paymentResult.errorMessage || 'Apple Pay payment failed'
+          errorMessage: paymentResult.errorMessage || 'Apple Pay payment failed',
         }));
       }
-
     } catch (error) {
       console.error('Apple Pay payment failed:', error);
-      setContactlessState(prev => ({ 
-        ...prev, 
+      setContactlessState(prev => ({
+        ...prev,
         processing: false,
-        errorMessage: error instanceof Error ? error.message : 'Apple Pay payment failed'
+        errorMessage: error instanceof Error ? error.message : 'Apple Pay payment failed',
       }));
     }
   };
@@ -206,7 +209,7 @@ const SquareContactlessPaymentScreen: React.FC<SquareContactlessPaymentScreenPro
         amount,
         currency,
         'google_pay',
-        description
+        description,
       );
 
       if (paymentResult.status === 'completed') {
@@ -219,19 +222,18 @@ const SquareContactlessPaymentScreen: React.FC<SquareContactlessPaymentScreenPro
         });
         navigation.goBack();
       } else {
-        setContactlessState(prev => ({ 
-          ...prev, 
+        setContactlessState(prev => ({
+          ...prev,
           processing: false,
-          errorMessage: paymentResult.errorMessage || 'Google Pay payment failed'
+          errorMessage: paymentResult.errorMessage || 'Google Pay payment failed',
         }));
       }
-
     } catch (error) {
       console.error('Google Pay payment failed:', error);
-      setContactlessState(prev => ({ 
-        ...prev, 
+      setContactlessState(prev => ({
+        ...prev,
         processing: false,
-        errorMessage: error instanceof Error ? error.message : 'Google Pay payment failed'
+        errorMessage: error instanceof Error ? error.message : 'Google Pay payment failed',
       }));
     }
   };
@@ -336,14 +338,16 @@ const SquareContactlessPaymentScreen: React.FC<SquareContactlessPaymentScreenPro
   const renderSecurityInfo = () => (
     <View style={styles.securityInfo}>
       <Text style={[styles.securityText, { color: theme.colors.textSecondary }]}>
-        🔒 Contactless payments are secured with device biometrics and Square's PCI-compliant infrastructure
+        🔒 Contactless payments are secured with device biometrics and Square's PCI-compliant
+        infrastructure
       </Text>
     </View>
   );
 
   if (contactlessState.loading) {
     return (
-      <View style={[styles.container, styles.centered, { backgroundColor: theme.colors.background }]}>
+      <View
+        style={[styles.container, styles.centered, { backgroundColor: theme.colors.background }]}>
         <ActivityIndicator size="large" color={theme.colors.primary} />
         <Text style={[styles.loadingText, { color: theme.colors.text }]}>
           Checking Contactless Support

@@ -1,15 +1,12 @@
 import React, { useState } from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-  Modal,
-} from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Alert, Modal } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { SettingsHeader, SettingsSection, SettingsCard, ToggleSwitch } from '../../../components/settings';
+import {
+  SettingsHeader,
+  SettingsSection,
+  SettingsCard,
+  ToggleSwitch,
+} from '../../../components/settings';
 import useSettingsStore from '../../../store/useSettingsStore';
 
 // Clover POS Color Scheme
@@ -45,17 +42,19 @@ const TimePickerModal: React.FC<TimePickerModalProps> = ({
   title,
 }) => {
   const [selectedHour, setSelectedHour] = useState(
-    currentTime ? parseInt(currentTime.split(':')[0]) : 9
+    currentTime ? parseInt(currentTime.split(':')[0]) : 9,
   );
   const [selectedMinute, setSelectedMinute] = useState(
-    currentTime ? parseInt(currentTime.split(':')[1]) : 0
+    currentTime ? parseInt(currentTime.split(':')[1]) : 0,
   );
 
   const hours = Array.from({ length: 24 }, (_, i) => i);
   const minutes = [0, 15, 30, 45];
 
   const handleConfirm = () => {
-    const timeString = `${selectedHour.toString().padStart(2, '0')}:${selectedMinute.toString().padStart(2, '0')}`;
+    const timeString = `${selectedHour.toString().padStart(2, '0')}:${selectedMinute
+      .toString()
+      .padStart(2, '0')}`;
     onTimeSelect(timeString);
     onClose();
   };
@@ -75,21 +74,19 @@ const TimePickerModal: React.FC<TimePickerModalProps> = ({
             <View style={styles.timePicker}>
               <Text style={styles.timePickerLabel}>Hour</Text>
               <ScrollView style={styles.timePickerScroll} showsVerticalScrollIndicator={false}>
-                {hours.map((hour) => (
+                {hours.map(hour => (
                   <TouchableOpacity
                     key={hour}
                     style={[
                       styles.timePickerItem,
                       selectedHour === hour && styles.timePickerItemSelected,
                     ]}
-                    onPress={() => setSelectedHour(hour)}
-                  >
+                    onPress={() => setSelectedHour(hour)}>
                     <Text
                       style={[
                         styles.timePickerItemText,
                         selectedHour === hour && styles.timePickerItemTextSelected,
-                      ]}
-                    >
+                      ]}>
                       {hour.toString().padStart(2, '0')}
                     </Text>
                   </TouchableOpacity>
@@ -102,21 +99,19 @@ const TimePickerModal: React.FC<TimePickerModalProps> = ({
             <View style={styles.timePicker}>
               <Text style={styles.timePickerLabel}>Minute</Text>
               <ScrollView style={styles.timePickerScroll} showsVerticalScrollIndicator={false}>
-                {minutes.map((minute) => (
+                {minutes.map(minute => (
                   <TouchableOpacity
                     key={minute}
                     style={[
                       styles.timePickerItem,
                       selectedMinute === minute && styles.timePickerItemSelected,
                     ]}
-                    onPress={() => setSelectedMinute(minute)}
-                  >
+                    onPress={() => setSelectedMinute(minute)}>
                     <Text
                       style={[
                         styles.timePickerItemText,
                         selectedMinute === minute && styles.timePickerItemTextSelected,
-                      ]}
-                    >
+                      ]}>
                       {minute.toString().padStart(2, '0')}
                     </Text>
                   </TouchableOpacity>
@@ -129,7 +124,9 @@ const TimePickerModal: React.FC<TimePickerModalProps> = ({
             <TouchableOpacity style={styles.modalButton} onPress={onClose}>
               <Text style={styles.modalButtonTextSecondary}>Cancel</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.modalButton, styles.modalButtonPrimary]} onPress={handleConfirm}>
+            <TouchableOpacity
+              style={[styles.modalButton, styles.modalButtonPrimary]}
+              onPress={handleConfirm}>
               <Text style={styles.modalButtonTextPrimary}>Confirm</Text>
             </TouchableOpacity>
           </View>
@@ -177,7 +174,9 @@ const OperatingHoursScreen: React.FC = () => {
     setTimePickerConfig({
       day,
       type,
-      title: `${type === 'open' ? 'Opening' : 'Closing'} Time - ${daysOfWeek.find(d => d.key === day)?.label}`,
+      title: `${type === 'open' ? 'Opening' : 'Closing'} Time - ${
+        daysOfWeek.find(d => d.key === day)?.label
+      }`,
       currentTime: dayData[type],
     });
     setTimePickerVisible(true);
@@ -226,7 +225,7 @@ const OperatingHoursScreen: React.FC = () => {
             setHasChanges(true);
           },
         },
-      ]
+      ],
     );
   };
 
@@ -234,41 +233,30 @@ const OperatingHoursScreen: React.FC = () => {
     try {
       updateOperatingHours(formData);
       setHasChanges(false);
-      Alert.alert(
-        'Success',
-        'Operating hours have been saved successfully.',
-        [{ text: 'OK' }]
-      );
+      Alert.alert('Success', 'Operating hours have been saved successfully.', [{ text: 'OK' }]);
     } catch (error) {
-      Alert.alert(
-        'Error',
-        'Failed to save operating hours. Please try again.',
-        [{ text: 'OK' }]
-      );
+      Alert.alert('Error', 'Failed to save operating hours. Please try again.', [{ text: 'OK' }]);
     }
   };
 
   const handleReset = () => {
-    Alert.alert(
-      'Reset Changes',
-      'Are you sure you want to discard all unsaved changes?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Reset',
-          style: 'destructive',
-          onPress: () => {
-            setFormData(operatingHours);
-            setHasChanges(false);
-          },
+    Alert.alert('Reset Changes', 'Are you sure you want to discard all unsaved changes?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Reset',
+        style: 'destructive',
+        onPress: () => {
+          setFormData(operatingHours);
+          setHasChanges(false);
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const renderDayCard = (day: { key: string; label: string }) => {
     const dayData = formData[day.key as keyof typeof formData] as any;
-    const isToday = new Date().toLocaleDateString('en', { weekday: 'long' }).toLowerCase() === day.key;
+    const isToday =
+      new Date().toLocaleDateString('en', { weekday: 'long' }).toLowerCase() === day.key;
 
     return (
       <View key={day.key} style={[styles.dayCard, isToday && styles.todayCard]}>
@@ -279,13 +267,15 @@ const OperatingHoursScreen: React.FC = () => {
               {isToday && <Text style={styles.todayIndicator}> (Today)</Text>}
             </Text>
             <Text style={styles.dayStatus}>
-              {dayData.closed ? 'Closed' : `${formatTime(dayData.open)} - ${formatTime(dayData.close)}`}
+              {dayData.closed
+                ? 'Closed'
+                : `${formatTime(dayData.open)} - ${formatTime(dayData.close)}`}
             </Text>
           </View>
 
           <ToggleSwitch
             value={!dayData.closed}
-            onValueChange={(open) => handleDayToggle(day.key, !open)}
+            onValueChange={open => handleDayToggle(day.key, !open)}
           />
         </View>
 
@@ -293,24 +283,19 @@ const OperatingHoursScreen: React.FC = () => {
           <View style={styles.timeControls}>
             <TouchableOpacity
               style={styles.timeButton}
-              onPress={() => handleTimePress(day.key, 'open')}
-            >
+              onPress={() => handleTimePress(day.key, 'open')}>
               <Icon name="schedule" size={20} color={Colors.primary} />
               <Text style={styles.timeButtonText}>Open: {formatTime(dayData.open)}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.timeButton}
-              onPress={() => handleTimePress(day.key, 'close')}
-            >
+              onPress={() => handleTimePress(day.key, 'close')}>
               <Icon name="schedule" size={20} color={Colors.danger} />
               <Text style={styles.timeButtonText}>Close: {formatTime(dayData.close)}</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.copyButton}
-              onPress={() => copyToAllDays(day.key)}
-            >
+            <TouchableOpacity style={styles.copyButton} onPress={() => copyToAllDays(day.key)}>
               <Icon name="content-copy" size={16} color={Colors.secondary} />
               <Text style={styles.copyButtonText}>Copy to all</Text>
             </TouchableOpacity>
@@ -321,9 +306,7 @@ const OperatingHoursScreen: React.FC = () => {
   };
 
   const getOpenDaysCount = () => {
-    return daysOfWeek.filter(day => 
-      !formData[day.key as keyof typeof formData].closed
-    ).length;
+    return daysOfWeek.filter(day => !formData[day.key as keyof typeof formData].closed).length;
   };
 
   return (
@@ -342,24 +325,38 @@ const OperatingHoursScreen: React.FC = () => {
         {/* Summary */}
         <SettingsSection
           title="Hours Summary"
-          subtitle={`Open ${getOpenDaysCount()} days per week`}
-        >
+          subtitle={`Open ${getOpenDaysCount()} days per week`}>
           <View style={styles.summaryContainer}>
             <View style={styles.summaryCard}>
               <Icon name="access-time" size={32} color={Colors.primary} />
               <Text style={styles.summaryTitle}>Open Days</Text>
               <Text style={styles.summaryValue}>{getOpenDaysCount()}/7</Text>
             </View>
-            
+
             <View style={styles.summaryCard}>
               <Icon name="today" size={32} color={Colors.secondary} />
               <Text style={styles.summaryTitle}>Today Status</Text>
-              <Text style={[
-                styles.summaryValue,
-                styles.statusText,
-                { color: formData[new Date().toLocaleDateString('en', { weekday: 'long' }).toLowerCase() as keyof typeof formData]?.closed ? Colors.danger : Colors.success }
-              ]}>
-                {formData[new Date().toLocaleDateString('en', { weekday: 'long' }).toLowerCase() as keyof typeof formData]?.closed ? 'Closed' : 'Open'}
+              <Text
+                style={[
+                  styles.summaryValue,
+                  styles.statusText,
+                  {
+                    color: formData[
+                      new Date()
+                        .toLocaleDateString('en', { weekday: 'long' })
+                        .toLowerCase() as keyof typeof formData
+                    ]?.closed
+                      ? Colors.danger
+                      : Colors.success,
+                  },
+                ]}>
+                {formData[
+                  new Date()
+                    .toLocaleDateString('en', { weekday: 'long' })
+                    .toLowerCase() as keyof typeof formData
+                ]?.closed
+                  ? 'Closed'
+                  : 'Open'}
               </Text>
             </View>
           </View>
@@ -368,18 +365,12 @@ const OperatingHoursScreen: React.FC = () => {
         {/* Weekly Schedule */}
         <SettingsSection
           title="Weekly Schedule"
-          subtitle="Set opening and closing times for each day"
-        >
-          <View style={styles.scheduleContainer}>
-            {daysOfWeek.map(renderDayCard)}
-          </View>
+          subtitle="Set opening and closing times for each day">
+          <View style={styles.scheduleContainer}>{daysOfWeek.map(renderDayCard)}</View>
         </SettingsSection>
 
         {/* Quick Actions */}
-        <SettingsSection
-          title="Quick Actions"
-          subtitle="Common schedule adjustments"
-        >
+        <SettingsSection title="Quick Actions" subtitle="Common schedule adjustments">
           <SettingsCard
             title="Open All Days"
             description="Set all days to open with standard hours"
@@ -440,17 +431,13 @@ const OperatingHoursScreen: React.FC = () => {
           <TouchableOpacity
             style={[styles.button, styles.saveButton]}
             onPress={handleSave}
-            disabled={!hasChanges || isLoading}
-          >
+            disabled={!hasChanges || isLoading}>
             <Icon name="save" size={20} color={Colors.white} />
             <Text style={styles.saveButtonText}>Save Changes</Text>
           </TouchableOpacity>
 
           {hasChanges && (
-            <TouchableOpacity
-              style={[styles.button, styles.resetButton]}
-              onPress={handleReset}
-            >
+            <TouchableOpacity style={[styles.button, styles.resetButton]} onPress={handleReset}>
               <Icon name="refresh" size={20} color={Colors.danger} />
               <Text style={styles.resetButtonText}>Reset</Text>
             </TouchableOpacity>

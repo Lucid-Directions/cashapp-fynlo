@@ -74,12 +74,13 @@ const AllTheProviders = ({ children, navigationProps = {} }: any) => {
 
   // Create navigation state
   const navigationRef = React.createRef<any>();
-  
+
   return (
-    <SafeAreaProvider initialMetrics={{
-      frame: { x: 0, y: 0, width: 375, height: 812 },
-      insets: { top: 44, left: 0, right: 0, bottom: 34 },
-    }}>
+    <SafeAreaProvider
+      initialMetrics={{
+        frame: { x: 0, y: 0, width: 375, height: 812 },
+        insets: { top: 44, left: 0, right: 0, bottom: 34 },
+      }}>
       <ThemeProvider>
         <AuthProvider>
           <NavigationContainer ref={navigationRef}>
@@ -95,16 +96,11 @@ const AllTheProviders = ({ children, navigationProps = {} }: any) => {
 };
 
 // Custom render function
-export const renderWithProviders = (
-  ui: ReactElement,
-  options: CustomRenderOptions = {}
-) => {
+export const renderWithProviders = (ui: ReactElement, options: CustomRenderOptions = {}) => {
   const { navigationProps, ...renderOptions } = options;
 
   return render(ui, {
-    wrapper: (props) => (
-      <AllTheProviders {...props} navigationProps={navigationProps} />
-    ),
+    wrapper: props => <AllTheProviders {...props} navigationProps={navigationProps} />,
     ...renderOptions,
   });
 };

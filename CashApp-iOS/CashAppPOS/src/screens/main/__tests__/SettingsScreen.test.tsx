@@ -68,20 +68,18 @@ describe('SettingsScreen', () => {
   });
 
   it('renders correctly', () => {
-    const { getByText, getByTestId } = customRender(
-      <SettingsScreen />,
-      { navigationProps: { navigation: mockNavigation } }
-    );
+    const { getByText, getByTestId } = customRender(<SettingsScreen />, {
+      navigationProps: { navigation: mockNavigation },
+    });
 
     expect(getByText('Settings')).toBeTruthy();
     expect(getByTestId('settings-container')).toBeTruthy();
   });
 
   it('displays business information', () => {
-    const { getByText, getByDisplayValue } = customRender(
-      <SettingsScreen />,
-      { navigationProps: { navigation: mockNavigation } }
-    );
+    const { getByText, getByDisplayValue } = customRender(<SettingsScreen />, {
+      navigationProps: { navigation: mockNavigation },
+    });
 
     expect(getByText('Business Information')).toBeTruthy();
     expect(getByDisplayValue('Fynlo Restaurant')).toBeTruthy();
@@ -91,10 +89,9 @@ describe('SettingsScreen', () => {
   });
 
   it('displays printer settings', () => {
-    const { getByText, getByDisplayValue } = customRender(
-      <SettingsScreen />,
-      { navigationProps: { navigation: mockNavigation } }
-    );
+    const { getByText, getByDisplayValue } = customRender(<SettingsScreen />, {
+      navigationProps: { navigation: mockNavigation },
+    });
 
     expect(getByText('Printer Settings')).toBeTruthy();
     expect(getByDisplayValue('Kitchen Printer')).toBeTruthy();
@@ -102,10 +99,9 @@ describe('SettingsScreen', () => {
   });
 
   it('toggles printer enabled state', async () => {
-    const { getByTestId } = customRender(
-      <SettingsScreen />,
-      { navigationProps: { navigation: mockNavigation } }
-    );
+    const { getByTestId } = customRender(<SettingsScreen />, {
+      navigationProps: { navigation: mockNavigation },
+    });
 
     const printerToggle = getByTestId('printer-enabled-toggle');
     fireEvent(printerToggle, 'valueChange', false);
@@ -113,16 +109,15 @@ describe('SettingsScreen', () => {
     await waitFor(() => {
       expect(mockStoreState.updateSettings).toHaveBeenCalledWith(
         'printerConfig',
-        expect.objectContaining({ enabled: false })
+        expect.objectContaining({ enabled: false }),
       );
     });
   });
 
   it('updates business name', async () => {
-    const { getByTestId } = customRender(
-      <SettingsScreen />,
-      { navigationProps: { navigation: mockNavigation } }
-    );
+    const { getByTestId } = customRender(<SettingsScreen />, {
+      navigationProps: { navigation: mockNavigation },
+    });
 
     const businessNameInput = getByTestId('business-name-input');
     fireEvent.changeText(businessNameInput, 'New Restaurant Name');
@@ -130,16 +125,15 @@ describe('SettingsScreen', () => {
     await waitFor(() => {
       expect(mockStoreState.updateSettings).toHaveBeenCalledWith(
         'business',
-        expect.objectContaining({ name: 'New Restaurant Name' })
+        expect.objectContaining({ name: 'New Restaurant Name' }),
       );
     });
   });
 
   it('displays notification settings', () => {
-    const { getByText, getByTestId } = customRender(
-      <SettingsScreen />,
-      { navigationProps: { navigation: mockNavigation } }
-    );
+    const { getByText, getByTestId } = customRender(<SettingsScreen />, {
+      navigationProps: { navigation: mockNavigation },
+    });
 
     expect(getByText('Notifications')).toBeTruthy();
     expect(getByTestId('order-alerts-toggle')).toBeTruthy();
@@ -148,10 +142,9 @@ describe('SettingsScreen', () => {
   });
 
   it('toggles notification settings', async () => {
-    const { getByTestId } = customRender(
-      <SettingsScreen />,
-      { navigationProps: { navigation: mockNavigation } }
-    );
+    const { getByTestId } = customRender(<SettingsScreen />, {
+      navigationProps: { navigation: mockNavigation },
+    });
 
     const orderAlertsToggle = getByTestId('order-alerts-toggle');
     fireEvent(orderAlertsToggle, 'valueChange', false);
@@ -159,16 +152,15 @@ describe('SettingsScreen', () => {
     await waitFor(() => {
       expect(mockStoreState.updateSettings).toHaveBeenCalledWith(
         'notifications',
-        expect.objectContaining({ orderAlerts: false })
+        expect.objectContaining({ orderAlerts: false }),
       );
     });
   });
 
   it('displays theme settings', () => {
-    const { getByText } = customRender(
-      <SettingsScreen />,
-      { navigationProps: { navigation: mockNavigation } }
-    );
+    const { getByText } = customRender(<SettingsScreen />, {
+      navigationProps: { navigation: mockNavigation },
+    });
 
     expect(getByText('Display')).toBeTruthy();
     expect(getByText('Theme')).toBeTruthy();
@@ -176,10 +168,9 @@ describe('SettingsScreen', () => {
   });
 
   it('changes theme setting', async () => {
-    const { getByText } = customRender(
-      <SettingsScreen />,
-      { navigationProps: { navigation: mockNavigation } }
-    );
+    const { getByText } = customRender(<SettingsScreen />, {
+      navigationProps: { navigation: mockNavigation },
+    });
 
     const darkThemeOption = getByText('Dark');
     fireEvent.press(darkThemeOption);
@@ -187,16 +178,15 @@ describe('SettingsScreen', () => {
     await waitFor(() => {
       expect(mockStoreState.updateSettings).toHaveBeenCalledWith(
         'display',
-        expect.objectContaining({ theme: 'dark' })
+        expect.objectContaining({ theme: 'dark' }),
       );
     });
   });
 
   it('updates tax rate', async () => {
-    const { getByTestId } = customRender(
-      <SettingsScreen />,
-      { navigationProps: { navigation: mockNavigation } }
-    );
+    const { getByTestId } = customRender(<SettingsScreen />, {
+      navigationProps: { navigation: mockNavigation },
+    });
 
     const taxRateInput = getByTestId('tax-rate-input');
     fireEvent.changeText(taxRateInput, '10.0');
@@ -204,16 +194,15 @@ describe('SettingsScreen', () => {
     await waitFor(() => {
       expect(mockStoreState.updateSettings).toHaveBeenCalledWith(
         'business',
-        expect.objectContaining({ taxRate: 10.0 })
+        expect.objectContaining({ taxRate: 10.0 }),
       );
     });
   });
 
   it('displays user information', () => {
-    const { getByText } = customRender(
-      <SettingsScreen />,
-      { navigationProps: { navigation: mockNavigation } }
-    );
+    const { getByText } = customRender(<SettingsScreen />, {
+      navigationProps: { navigation: mockNavigation },
+    });
 
     expect(getByText('Account')).toBeTruthy();
     expect(getByText('John Admin')).toBeTruthy();
@@ -222,10 +211,9 @@ describe('SettingsScreen', () => {
   });
 
   it('handles logout', async () => {
-    const { getByTestId } = customRender(
-      <SettingsScreen />,
-      { navigationProps: { navigation: mockNavigation } }
-    );
+    const { getByTestId } = customRender(<SettingsScreen />, {
+      navigationProps: { navigation: mockNavigation },
+    });
 
     const logoutButton = getByTestId('logout-button');
     fireEvent.press(logoutButton);
@@ -244,10 +232,9 @@ describe('SettingsScreen', () => {
   });
 
   it('exports settings', async () => {
-    const { getByTestId } = customRender(
-      <SettingsScreen />,
-      { navigationProps: { navigation: mockNavigation } }
-    );
+    const { getByTestId } = customRender(<SettingsScreen />, {
+      navigationProps: { navigation: mockNavigation },
+    });
 
     const exportButton = getByTestId('export-settings-button');
     fireEvent.press(exportButton);
@@ -258,10 +245,9 @@ describe('SettingsScreen', () => {
   });
 
   it('imports settings', async () => {
-    const { getByTestId } = customRender(
-      <SettingsScreen />,
-      { navigationProps: { navigation: mockNavigation } }
-    );
+    const { getByTestId } = customRender(<SettingsScreen />, {
+      navigationProps: { navigation: mockNavigation },
+    });
 
     const importButton = getByTestId('import-settings-button');
     fireEvent.press(importButton);
@@ -273,10 +259,9 @@ describe('SettingsScreen', () => {
   });
 
   it('resets settings to default', async () => {
-    const { getByTestId } = customRender(
-      <SettingsScreen />,
-      { navigationProps: { navigation: mockNavigation } }
-    );
+    const { getByTestId } = customRender(<SettingsScreen />, {
+      navigationProps: { navigation: mockNavigation },
+    });
 
     const resetButton = getByTestId('reset-settings-button');
     fireEvent.press(resetButton);
@@ -295,10 +280,9 @@ describe('SettingsScreen', () => {
   });
 
   it('validates tax rate input', async () => {
-    const { getByTestId, getByText } = customRender(
-      <SettingsScreen />,
-      { navigationProps: { navigation: mockNavigation } }
-    );
+    const { getByTestId, getByText } = customRender(<SettingsScreen />, {
+      navigationProps: { navigation: mockNavigation },
+    });
 
     const taxRateInput = getByTestId('tax-rate-input');
     fireEvent.changeText(taxRateInput, 'invalid');
@@ -309,10 +293,9 @@ describe('SettingsScreen', () => {
   });
 
   it('validates phone number format', async () => {
-    const { getByTestId, getByText } = customRender(
-      <SettingsScreen />,
-      { navigationProps: { navigation: mockNavigation } }
-    );
+    const { getByTestId, getByText } = customRender(<SettingsScreen />, {
+      navigationProps: { navigation: mockNavigation },
+    });
 
     const phoneInput = getByTestId('business-phone-input');
     fireEvent.changeText(phoneInput, 'invalid-phone');
@@ -323,10 +306,9 @@ describe('SettingsScreen', () => {
   });
 
   it('validates email format', async () => {
-    const { getByTestId, getByText } = customRender(
-      <SettingsScreen />,
-      { navigationProps: { navigation: mockNavigation } }
-    );
+    const { getByTestId, getByText } = customRender(<SettingsScreen />, {
+      navigationProps: { navigation: mockNavigation },
+    });
 
     const emailInput = getByTestId('business-email-input');
     fireEvent.changeText(emailInput, 'invalid-email');
@@ -337,20 +319,22 @@ describe('SettingsScreen', () => {
   });
 
   it('saves settings automatically', async () => {
-    const { getByTestId } = customRender(
-      <SettingsScreen />,
-      { navigationProps: { navigation: mockNavigation } }
-    );
+    const { getByTestId } = customRender(<SettingsScreen />, {
+      navigationProps: { navigation: mockNavigation },
+    });
 
     const businessNameInput = getByTestId('business-name-input');
     fireEvent.changeText(businessNameInput, 'Updated Name');
 
     // Should auto-save after a delay
-    await waitFor(() => {
-      expect(mockStoreState.updateSettings).toHaveBeenCalledWith(
-        'business',
-        expect.objectContaining({ name: 'Updated Name' })
-      );
-    }, { timeout: 3000 });
+    await waitFor(
+      () => {
+        expect(mockStoreState.updateSettings).toHaveBeenCalledWith(
+          'business',
+          expect.objectContaining({ name: 'Updated Name' }),
+        );
+      },
+      { timeout: 3000 },
+    );
   });
 });

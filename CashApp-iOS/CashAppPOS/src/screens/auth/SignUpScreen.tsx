@@ -38,7 +38,7 @@ interface SignUpScreenProps {
 
 const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
   const { signUp } = useAuth();
-  
+
   // User data
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -47,15 +47,17 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [pin, setPin] = useState('');
-  
+
   // Business data
   const [businessName, setBusinessName] = useState('');
   const [businessAddress, setBusinessAddress] = useState('');
   const [businessPhone, setBusinessPhone] = useState('');
   const [businessEmail, setBusinessEmail] = useState('');
-  const [businessType, setBusinessType] = useState<'restaurant' | 'retail' | 'service' | 'other'>('retail');
+  const [businessType, setBusinessType] = useState<'restaurant' | 'retail' | 'service' | 'other'>(
+    'retail',
+  );
   const [vatNumber, setVatNumber] = useState('');
-  
+
   const [currentStep, setCurrentStep] = useState(1);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -65,7 +67,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
 
   const validateStep1 = () => {
     const newErrors: Record<string, string> = {};
-    
+
     if (!firstName.trim()) newErrors.firstName = 'First name is required';
     if (!lastName.trim()) newErrors.lastName = 'Last name is required';
     if (!email.trim()) {
@@ -87,19 +89,19 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
     } else if (pin.length !== 4 || !/^\d{4}$/.test(pin)) {
       newErrors.pin = 'PIN must be exactly 4 digits';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const validateStep2 = () => {
     const newErrors: Record<string, string> = {};
-    
+
     if (!businessName.trim()) newErrors.businessName = 'Business name is required';
     if (!businessAddress.trim()) newErrors.businessAddress = 'Business address is required';
     if (!businessPhone.trim()) newErrors.businessPhone = 'Business phone is required';
     if (!acceptedTerms) newErrors.terms = 'You must accept the terms and conditions';
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -141,20 +143,18 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
       };
 
       const success = await signUp(userData, businessData, password);
-      
+
       if (!success) {
         Alert.alert(
           'Registration Failed',
           'An account with this email already exists. Please use a different email or sign in instead.',
-          [{ text: 'OK' }]
+          [{ text: 'OK' }],
         );
       }
     } catch (error) {
-      Alert.alert(
-        'Error',
-        'An unexpected error occurred during registration. Please try again.',
-        [{ text: 'OK' }]
-      );
+      Alert.alert('Error', 'An unexpected error occurred during registration. Please try again.', [
+        { text: 'OK' },
+      ]);
     } finally {
       setIsLoading(false);
     }
@@ -178,7 +178,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
           <SimpleTextInput
             label="First Name *"
             value={firstName}
-            onValueChange={(text) => {
+            onValueChange={text => {
               setFirstName(text);
               if (errors.firstName) setErrors(prev => ({ ...prev, firstName: '' }));
             }}
@@ -195,7 +195,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
           <SimpleTextInput
             label="Last Name *"
             value={lastName}
-            onValueChange={(text) => {
+            onValueChange={text => {
               setLastName(text);
               if (errors.lastName) setErrors(prev => ({ ...prev, lastName: '' }));
             }}
@@ -211,7 +211,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
         <SimpleTextInput
           label="Email Address *"
           value={email}
-          onValueChange={(text) => {
+          onValueChange={text => {
             setEmail(text);
             if (errors.email) setErrors(prev => ({ ...prev, email: '' }));
           }}
@@ -227,7 +227,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
         <SimpleTextInput
           label="Phone Number *"
           value={phone}
-          onValueChange={(text) => {
+          onValueChange={text => {
             setPhone(text);
             if (errors.phone) setErrors(prev => ({ ...prev, phone: '' }));
           }}
@@ -241,7 +241,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
         <SimpleTextInput
           label="Password *"
           value={password}
-          onValueChange={(text) => {
+          onValueChange={text => {
             setPassword(text);
             if (errors.password) setErrors(prev => ({ ...prev, password: '' }));
           }}
@@ -257,7 +257,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
         <SimpleTextInput
           label="Confirm Password *"
           value={confirmPassword}
-          onValueChange={(text) => {
+          onValueChange={text => {
             setConfirmPassword(text);
             if (errors.confirmPassword) setErrors(prev => ({ ...prev, confirmPassword: '' }));
           }}
@@ -272,7 +272,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
         <SimpleTextInput
           label="4-Digit PIN *"
           value={pin}
-          onValueChange={(text) => {
+          onValueChange={text => {
             setPin(text.replace(/[^0-9]/g, '').slice(0, 4));
             if (errors.pin) setErrors(prev => ({ ...prev, pin: '' }));
           }}
@@ -297,7 +297,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
         <SimpleTextInput
           label="Business Name *"
           value={businessName}
-          onValueChange={(text) => {
+          onValueChange={text => {
             setBusinessName(text);
             if (errors.businessName) setErrors(prev => ({ ...prev, businessName: '' }));
           }}
@@ -314,8 +314,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
           <Picker
             style={styles.picker}
             selectedValue={businessType}
-            onValueChange={(value) => setBusinessType(value)}
-          >
+            onValueChange={value => setBusinessType(value)}>
             {businessTypes.map(type => (
               <Picker.Item key={type.value} label={type.label} value={type.value} />
             ))}
@@ -327,7 +326,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
         <SimpleTextInput
           label="Business Address *"
           value={businessAddress}
-          onValueChange={(text) => {
+          onValueChange={text => {
             setBusinessAddress(text);
             if (errors.businessAddress) setErrors(prev => ({ ...prev, businessAddress: '' }));
           }}
@@ -342,7 +341,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
         <SimpleTextInput
           label="Business Phone *"
           value={businessPhone}
-          onValueChange={(text) => {
+          onValueChange={text => {
             setBusinessPhone(text);
             if (errors.businessPhone) setErrors(prev => ({ ...prev, businessPhone: '' }));
           }}
@@ -378,20 +377,17 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
       </View>
 
       {/* Terms and Conditions */}
-      <TouchableOpacity 
+      <TouchableOpacity
         style={styles.termsContainer}
-        onPress={() => setAcceptedTerms(!acceptedTerms)}
-      >
-        <Icon 
-          name={acceptedTerms ? "check-box" : "check-box-outline-blank"} 
-          size={24} 
-          color={acceptedTerms ? Colors.primary : Colors.mediumGray} 
+        onPress={() => setAcceptedTerms(!acceptedTerms)}>
+        <Icon
+          name={acceptedTerms ? 'check-box' : 'check-box-outline-blank'}
+          size={24}
+          color={acceptedTerms ? Colors.primary : Colors.mediumGray}
         />
         <View style={styles.termsTextContainer}>
           <Text style={styles.termsText}>
-            I accept the{' '}
-            <Text style={styles.termsLink}>Terms and Conditions</Text>
-            {' '}and{' '}
+            I accept the <Text style={styles.termsLink}>Terms and Conditions</Text> and{' '}
             <Text style={styles.termsLink}>Privacy Policy</Text>
           </Text>
           {errors.terms && <Text style={styles.errorText}>{errors.terms}</Text>}
@@ -401,15 +397,13 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
   );
 
   return (
-    <KeyboardAvoidingView 
+    <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <ScrollView 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <ScrollView
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
+        showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
           <Icon name="storefront" size={48} color={Colors.primary} />
@@ -421,11 +415,23 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
         <View style={styles.progressContainer}>
           <View style={styles.progressBar}>
             <View style={[styles.progressStep, currentStep >= 1 && styles.progressStepActive]}>
-              <Text style={[styles.progressStepText, currentStep >= 1 && styles.progressStepTextActive]}>1</Text>
+              <Text
+                style={[
+                  styles.progressStepText,
+                  currentStep >= 1 && styles.progressStepTextActive,
+                ]}>
+                1
+              </Text>
             </View>
             <View style={[styles.progressLine, currentStep >= 2 && styles.progressLineActive]} />
             <View style={[styles.progressStep, currentStep >= 2 && styles.progressStepActive]}>
-              <Text style={[styles.progressStepText, currentStep >= 2 && styles.progressStepTextActive]}>2</Text>
+              <Text
+                style={[
+                  styles.progressStepText,
+                  currentStep >= 2 && styles.progressStepTextActive,
+                ]}>
+                2
+              </Text>
             </View>
           </View>
           <View style={styles.progressLabels}>
@@ -447,11 +453,10 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
               </TouchableOpacity>
             )}
 
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[styles.nextButton, isLoading && styles.nextButtonDisabled]}
               onPress={currentStep === 1 ? handleNext : handleSignUp}
-              disabled={isLoading}
-            >
+              disabled={isLoading}>
               {isLoading ? (
                 <ActivityIndicator size="small" color={Colors.white} />
               ) : (
@@ -459,10 +464,10 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
                   <Text style={styles.nextButtonText}>
                     {currentStep === 1 ? 'Next' : 'Create Account'}
                   </Text>
-                  <Icon 
-                    name={currentStep === 1 ? "arrow-forward" : "check"} 
-                    size={20} 
-                    color={Colors.white} 
+                  <Icon
+                    name={currentStep === 1 ? 'arrow-forward' : 'check'}
+                    size={20}
+                    color={Colors.white}
                   />
                 </>
               )}

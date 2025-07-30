@@ -35,9 +35,9 @@ export class XeroAuthService {
         'accounting.transactions',
         'accounting.contacts.read',
         'accounting.settings.read',
-        'accounting.reports.read'
+        'accounting.reports.read',
       ],
-      baseUrl: 'https://api.xero.com'
+      baseUrl: 'https://api.xero.com',
     };
   }
 
@@ -51,7 +51,11 @@ export class XeroAuthService {
   /**
    * Generate OAuth 2.0 authorization URL with PKCE
    */
-  public async generateAuthUrl(): Promise<{ authUrl: string; codeVerifier: string; state: string }> {
+  public async generateAuthUrl(): Promise<{
+    authUrl: string;
+    codeVerifier: string;
+    state: string;
+  }> {
     try {
       // Generate PKCE code verifier and challenge
       const codeVerifier = this.generateCodeVerifier();
@@ -69,7 +73,7 @@ export class XeroAuthService {
         scope: this.config.scopes.join(' '),
         state: state,
         code_challenge: codeChallenge,
-        code_challenge_method: 'S256'
+        code_challenge_method: 'S256',
       });
 
       const authUrl = `https://login.xero.com/identity/connect/authorize?${params.toString()}`;
@@ -103,16 +107,16 @@ export class XeroAuthService {
         client_id: this.config.clientId,
         code: code,
         redirect_uri: this.config.redirectUri,
-        code_verifier: codeVerifier
+        code_verifier: codeVerifier,
       };
 
       const response = await fetch('https://identity.xero.com/connect/token', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          'Authorization': `Basic ${this.getBasicAuthHeader()}`
+          Authorization: `Basic ${this.getBasicAuthHeader()}`,
         },
-        body: new URLSearchParams(tokenData).toString()
+        body: new URLSearchParams(tokenData).toString(),
       });
 
       if (!response.ok) {
@@ -120,12 +124,12 @@ export class XeroAuthService {
       }
 
       const tokens = await response.json();
-      
+
       const xeroTokens: XeroTokens = {
         access_token: tokens.access_token,
         refresh_token: tokens.refresh_token,
-        expires_at: Date.now() + (tokens.expires_in * 1000),
-        scopes: tokens.scope?.split(' ') || this.config.scopes
+        expires_at: Date.now() + tokens.expires_in * 1000,
+        scopes: tokens.scope?.split(' ') || this.config.scopes,
       };
 
       // Store tokens securely
@@ -154,16 +158,16 @@ export class XeroAuthService {
 
       const tokenData = {
         grant_type: 'refresh_token',
-        refresh_token: currentTokens.refresh_token
+        refresh_token: currentTokens.refresh_token,
       };
 
       const response = await fetch('https://identity.xero.com/connect/token', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          'Authorization': `Basic ${this.getBasicAuthHeader()}`
+          Authorization: `Basic ${this.getBasicAuthHeader()}`,
         },
-        body: new URLSearchParams(tokenData).toString()
+        body: new URLSearchParams(tokenData).toString(),
       });
 
       if (!response.ok) {
@@ -172,13 +176,13 @@ export class XeroAuthService {
       }
 
       const tokens = await response.json();
-      
+
       const refreshedTokens: XeroTokens = {
         access_token: tokens.access_token,
         refresh_token: tokens.refresh_token || currentTokens.refresh_token,
-        expires_at: Date.now() + (tokens.expires_in * 1000),
+        expires_at: Date.now() + tokens.expires_in * 1000,
         tenant_id: currentTokens.tenant_id,
-        scopes: tokens.scope?.split(' ') || currentTokens.scopes
+        scopes: tokens.scope?.split(' ') || currentTokens.scopes,
       };
 
       await this.storeTokens(refreshedTokens);
@@ -200,7 +204,7 @@ export class XeroAuthService {
       }
 
       // Check if token is expired (with 5 minute buffer)
-      const isExpired = Date.now() > (tokens.expires_at - 300000);
+      const isExpired = Date.now() > tokens.expires_at - 300000;
       if (isExpired) {
         // Try to refresh token
         const refreshedTokens = await this.refreshAccessToken();
@@ -229,12 +233,12 @@ export class XeroAuthService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          'Authorization': `Basic ${this.getBasicAuthHeader()}`
+          Authorization: `Basic ${this.getBasicAuthHeader()}`,
         },
         body: new URLSearchParams({
           token: tokens.refresh_token,
-          token_type_hint: 'refresh_token'
-        }).toString()
+          token_type_hint: 'refresh_token',
+        }).toString(),
       });
 
       // Clear stored tokens regardless of revocation success
@@ -285,17 +289,20 @@ export class XeroAuthService {
         'xero_tokens',
         JSON.stringify({
           access_token: tokens.access_token,
-          refresh_token: tokens.refresh_token
-        })
+          refresh_token: tokens.refresh_token,
+        }),
       );
 
       // Store non-sensitive data in AsyncStorage
-      await AsyncStorage.setItem(this.STORAGE_KEY, JSON.stringify({
-        expires_at: tokens.expires_at,
-        tenant_id: tokens.tenant_id,
-        scopes: tokens.scopes,
-        connected_at: Date.now()
-      }));
+      await AsyncStorage.setItem(
+        this.STORAGE_KEY,
+        JSON.stringify({
+          expires_at: tokens.expires_at,
+          tenant_id: tokens.tenant_id,
+          scopes: tokens.scopes,
+          connected_at: Date.now(),
+        }),
+      );
     } catch (error) {
       console.error('Error storing tokens:', error);
       throw new Error('Failed to store authentication tokens');
@@ -328,7 +335,7 @@ export class XeroAuthService {
         refresh_token: sensitiveTokens.refresh_token,
         expires_at: settings.expires_at,
         tenant_id: settings.tenant_id,
-        scopes: settings.scopes || this.config.scopes
+        scopes: settings.scopes || this.config.scopes,
       };
     } catch (error) {
       console.error('Error retrieving tokens:', error);
@@ -419,7 +426,7 @@ export class XeroAuthService {
     try {
       const { authUrl } = await this.generateAuthUrl();
       const supported = await Linking.canOpenURL(authUrl);
-      
+
       if (supported) {
         await Linking.openURL(authUrl);
       } else {

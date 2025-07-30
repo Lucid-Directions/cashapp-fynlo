@@ -20,11 +20,7 @@ class CacheManager {
   /**
    * Set a value in cache
    */
-  async set<T>(
-    key: string, 
-    data: T, 
-    options: CacheOptions = {}
-  ): Promise<void> {
+  async set<T>(key: string, data: T, options: CacheOptions = {}): Promise<void> {
     const {
       ttl = this.defaultTTL,
       maxSize = this.maxMemorySize,
@@ -100,7 +96,7 @@ class CacheManager {
    */
   async delete(key: string): Promise<void> {
     this.memoryCache.delete(key);
-    
+
     try {
       await AsyncStorage.removeItem(`cache_${key}`);
     } catch (error) {
@@ -113,7 +109,7 @@ class CacheManager {
    */
   async clear(): Promise<void> {
     this.memoryCache.clear();
-    
+
     try {
       const keys = await AsyncStorage.getAllKeys();
       const cacheKeys = keys.filter(key => key.startsWith('cache_'));
@@ -155,10 +151,10 @@ class CacheManager {
   async getOrSet<T>(
     key: string,
     computeFn: () => Promise<T> | T,
-    options: CacheOptions = {}
+    options: CacheOptions = {},
   ): Promise<T> {
     const cached = await this.get<T>(key, options);
-    
+
     if (cached !== null) {
       return cached;
     }
@@ -172,11 +168,9 @@ class CacheManager {
    * Batch operations for better performance
    */
   async setMany<T>(
-    entries: Array<{ key: string; data: T; options?: CacheOptions }>
+    entries: Array<{ key: string; data: T; options?: CacheOptions }>,
   ): Promise<void> {
-    const promises = entries.map(({ key, data, options }) => 
-      this.set(key, data, options)
-    );
+    const promises = entries.map(({ key, data, options }) => this.set(key, data, options));
     await Promise.all(promises);
   }
 

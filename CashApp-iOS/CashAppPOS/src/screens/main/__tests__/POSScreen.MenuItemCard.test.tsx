@@ -22,13 +22,19 @@ jest.mock('../../../components/inputs', () => ({
     const React = require('react');
     const { View, Text, TouchableOpacity } = require('react-native');
     return React.createElement(View, { testID: 'quantity-pill' }, [
-      React.createElement(TouchableOpacity, { key: 'decrease', onPress: onDecrease, testID: 'quantity-decrease' }, 
-        React.createElement(Text, {}, '-')),
+      React.createElement(
+        TouchableOpacity,
+        { key: 'decrease', onPress: onDecrease, testID: 'quantity-decrease' },
+        React.createElement(Text, {}, '-'),
+      ),
       React.createElement(Text, { key: 'quantity', testID: 'quantity-text' }, quantity),
-      React.createElement(TouchableOpacity, { key: 'increase', onPress: onIncrease, testID: 'quantity-increase' }, 
-        React.createElement(Text, {}, '+'))
+      React.createElement(
+        TouchableOpacity,
+        { key: 'increase', onPress: onIncrease, testID: 'quantity-increase' },
+        React.createElement(Text, {}, '+'),
+      ),
     ]);
-  }
+  },
 }));
 
 // Mock useNavigation
@@ -40,21 +46,21 @@ jest.mock('@react-navigation/native', () => ({
 }));
 
 // Minimal styles mock - replace with actual createStyles if needed for visual accuracy
-const mockCreateStyles = (theme: any) => StyleSheet.create({
-  menuCard: { backgroundColor: 'white', padding: 10 },
-  menuCardDisabled: { opacity: 0.5 },
-  menuCardContent: {},
-  menuItemEmoji: {},
-  menuItemName: {},
-  menuItemPrice: { overflow: 'hidden' },
-  quantityPillContainer: { alignItems: 'center', justifyContent: 'center', marginTop: 8 },
-});
-
+const mockCreateStyles = (theme: any) =>
+  StyleSheet.create({
+    menuCard: { backgroundColor: 'white', padding: 10 },
+    menuCardDisabled: { opacity: 0.5 },
+    menuCardContent: {},
+    menuItemEmoji: {},
+    menuItemName: {},
+    menuItemPrice: { overflow: 'hidden' },
+    quantityPillContainer: { alignItems: 'center', justifyContent: 'center', marginTop: 8 },
+  });
 
 const mockMenuItem: MenuItem = {
   id: 1,
   name: 'Test Item',
-  price: 10.00,
+  price: 10.0,
   category: 'Test Category',
   emoji: '🧪',
   available: true,
@@ -66,7 +72,8 @@ const TestWrapper = ({ quantity }: { quantity: number }) => {
   const { theme } = useTheme();
   const styles = mockCreateStyles(theme);
 
-  const mockCart: OrderItem[] = quantity > 0 ? [{ ...mockMenuItem, quantity, modifications: [], notes: '' }] : [];
+  const mockCart: OrderItem[] =
+    quantity > 0 ? [{ ...mockMenuItem, quantity, modifications: [], notes: '' }] : [];
   const mockAddToCart = jest.fn();
   const mockUpdateCartItem = jest.fn();
   const mockRemoveFromCart = jest.fn();
@@ -96,12 +103,11 @@ const TestWrapper = ({ quantity }: { quantity: number }) => {
   );
 };
 
-
 const renderMenuItemCardWithQuantity = (quantity: number) => {
   return render(
     <ThemeProvider>
       <TestWrapper quantity={quantity} />
-    </ThemeProvider>
+    </ThemeProvider>,
   );
 };
 

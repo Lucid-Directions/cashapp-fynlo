@@ -56,7 +56,7 @@ class NetworkDiagnosticsService {
 
       // 2. Test API server health endpoint
       const apiServerReachable = await this.testEndpoint(`${API_CONFIG.BASE_URL}/health`, 5000);
-      
+
       // 3. Test specific platform endpoint
       const platformEndpoint = `${API_CONFIG.BASE_URL}/api/v1/platform/restaurants/platform_owner_1`;
       const specificEndpointReachable = await this.testEndpoint(platformEndpoint, 5000);
@@ -75,12 +75,15 @@ class NetworkDiagnosticsService {
 
       // Add error details if any test failed
       if (!diagnostics.apiServerReachable || !diagnostics.specificEndpointReachable) {
-        diagnostics.error = this.generateDiagnosticError(diagnostics, apiServerReachable, specificEndpointReachable);
+        diagnostics.error = this.generateDiagnosticError(
+          diagnostics,
+          apiServerReachable,
+          specificEndpointReachable,
+        );
       }
 
       console.log('✅ Network diagnostics complete:', diagnostics);
       return diagnostics;
-
     } catch (error) {
       console.error('❌ Network diagnostics failed:', error);
       return {
@@ -101,7 +104,7 @@ class NetworkDiagnosticsService {
    */
   private async testEndpoint(url: string, timeout: number = 5000): Promise<APIEndpointTest> {
     const startTime = Date.now();
-    
+
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), timeout);
@@ -121,10 +124,9 @@ class NetworkDiagnosticsService {
         statusCode: response.status,
         responseTime,
       };
-
     } catch (error) {
       const responseTime = Date.now() - startTime;
-      
+
       if (error.name === 'AbortError') {
         return {
           url,
@@ -149,7 +151,7 @@ class NetworkDiagnosticsService {
   private generateDiagnosticError(
     diagnostics: NetworkDiagnostics,
     apiTest: APIEndpointTest,
-    endpointTest: APIEndpointTest
+    endpointTest: APIEndpointTest,
   ): string {
     const errors: string[] = [];
 
@@ -186,21 +188,23 @@ class NetworkDiagnosticsService {
   async showNetworkErrorDialog(diagnostics: NetworkDiagnostics): Promise<void> {
     const title = '🔐 Platform Owner Login Error';
     let message = 'Unable to connect to the platform server.\n\n';
-    
+
     // Add specific error details
     if (!diagnostics.isConnected) {
-      message += '📡 Device is not connected to a network.\nPlease check your WiFi or cellular connection.';
+      message +=
+        '📡 Device is not connected to a network.\nPlease check your WiFi or cellular connection.';
     } else if (!diagnostics.isInternetReachable) {
       message += '🌐 Internet connection not available.\nPlease check your network settings.';
     } else if (!diagnostics.apiServerReachable) {
       message += `🖥️ Platform server is not running.\nServer: ${API_CONFIG.BASE_URL}\n\nThis typically means:\n• Backend server is offline\n• Network firewall blocking connection\n• IP address has changed`;
     } else if (!diagnostics.specificEndpointReachable) {
-      message += '🔌 Platform authentication endpoint not available.\nThe server is running but the login service may be down.';
+      message +=
+        '🔌 Platform authentication endpoint not available.\nThe server is running but the login service may be down.';
     }
 
     message += '\n\n💾 Using offline mode with cached data for now.';
 
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       Alert.alert(
         title,
         message,
@@ -225,7 +229,7 @@ class NetworkDiagnosticsService {
             },
           },
         ],
-        { cancelable: false }
+        { cancelable: false },
       );
     });
   }
@@ -270,13 +274,7 @@ class NetworkDiagnosticsService {
    * Test multiple IP addresses to find current Mac LAN IP
    */
   async findMacLanIP(): Promise<string | null> {
-    const commonIPRanges = [
-      '192.168.1.',
-      '192.168.0.',
-      '192.168.68.',
-      '10.0.0.',
-      '172.16.',
-    ];
+    const commonIPRanges = ['192.168.1.', '192.168.0.', '192.168.68.', '10.0.0.', '172.16.'];
 
     console.log('🔍 Searching for Mac LAN IP...');
 

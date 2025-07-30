@@ -153,7 +153,7 @@ const Modal: React.FC<ModalProps> = ({
   };
 
   const ContentComponent = scrollable ? ScrollView : View;
-  const contentProps = scrollable 
+  const contentProps = scrollable
     ? { showsVerticalScrollIndicator: false, contentContainerStyle: styles.scrollContent }
     : { style: styles.content };
 
@@ -163,12 +163,10 @@ const Modal: React.FC<ModalProps> = ({
       transparent
       animationType="none"
       onRequestClose={onClose}
-      testID={testID}
-    >
+      testID={testID}>
       <KeyboardAvoidingView
         style={styles.container}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <TouchableWithoutFeedback onPress={handleBackdropPress}>
           <View style={styles.backdrop} />
         </TouchableWithoutFeedback>
@@ -183,11 +181,10 @@ const Modal: React.FC<ModalProps> = ({
                 </Text>
               )}
               {closable && (
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.closeButton}
                   onPress={onClose}
-                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                >
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
                   <Icon name="close" size={24} color={theme.colors.neutral[600]} />
                 </TouchableOpacity>
               )}
@@ -195,16 +192,10 @@ const Modal: React.FC<ModalProps> = ({
           )}
 
           {/* Body */}
-          <ContentComponent {...contentProps}>
-            {children}
-          </ContentComponent>
+          <ContentComponent {...contentProps}>{children}</ContentComponent>
 
           {/* Footer */}
-          {footer && (
-            <View style={styles.footer}>
-              {footer}
-            </View>
-          )}
+          {footer && <View style={styles.footer}>{footer}</View>}
         </Animated.View>
       </KeyboardAvoidingView>
     </RNModal>
@@ -261,11 +252,8 @@ export const ModalAction: React.FC<ModalActionProps> = ({
     <TouchableOpacity
       style={[styles.actionButton, getVariantStyle(), disabled && styles.disabledAction, style]}
       onPress={onPress}
-      disabled={disabled}
-    >
-      <Text style={[styles.actionText, { color: getTextColor() }]}>
-        {children}
-      </Text>
+      disabled={disabled}>
+      <Text style={[styles.actionText, { color: getTextColor() }]}>{children}</Text>
     </TouchableOpacity>
   );
 };
@@ -280,11 +268,7 @@ export const ModalActions: React.FC<ModalActionsProps> = ({ children, style }) =
   const { theme } = useTheme();
   const styles = createStyles(theme);
 
-  return (
-    <View style={[styles.actions, style]}>
-      {children}
-    </View>
-  );
+  return <View style={[styles.actions, style]}>{children}</View>;
 };
 
 const createStyles = (theme: Theme) =>

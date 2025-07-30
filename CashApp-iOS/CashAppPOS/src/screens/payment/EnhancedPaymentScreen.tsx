@@ -54,18 +54,18 @@ const tipPresets = [10, 15, 18, 20, 25];
 const EnhancedPaymentScreen: React.FC = () => {
   const navigation = useNavigation();
   const { user } = useAuth();
-  const { 
-    cart, 
-    clearCart, 
+  const {
+    cart,
+    clearCart,
     cartTotal,
     serviceChargePercentage,
     addTransactionFee,
     calculateServiceCharge,
     calculateTransactionFee,
-    calculateOrderTotal
+    calculateOrderTotal,
   } = useAppStore();
   const { paymentMethods, taxConfiguration } = useSettingsStore();
-  
+
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('');
   const [tipAmount, setTipAmount] = useState(0);
   const [tipPercentage, setTipPercentage] = useState(0);
@@ -78,15 +78,15 @@ const EnhancedPaymentScreen: React.FC = () => {
   const [customerName, setCustomerName] = useState('');
   const [customerEmail, setCustomerEmail] = useState('');
   const [processing, setProcessing] = useState(false);
-  
+
   // Email validation regex
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  
+
   // Validation state
   const isNameValid = customerName.trim().length > 0 && customerName.length <= 60;
   const isEmailValid = emailRegex.test(customerEmail);
   const isFormValid = isNameValid && isEmailValid;
-  
+
   // Platform service charge configuration (real-time from platform owner)
   const [platformServiceCharge, setPlatformServiceCharge] = useState({
     enabled: false,
@@ -96,7 +96,7 @@ const EnhancedPaymentScreen: React.FC = () => {
 
   // Calculate totals
   const calculateSubtotal = () => {
-    return cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    return cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   };
 
   const calculateTax = (subtotal: number) => {
@@ -109,7 +109,7 @@ const EnhancedPaymentScreen: React.FC = () => {
     if (!platformServiceCharge.enabled) return 0;
     return subtotal * (platformServiceCharge.rate / 100);
   };
-  
+
   // Load platform service charge configuration on component mount
   useEffect(() => {
     const loadPlatformServiceCharge = async () => {
@@ -117,7 +117,7 @@ const EnhancedPaymentScreen: React.FC = () => {
         console.log('💰 EnhancedPaymentScreen - Loading platform service charge...');
         const dataStore = SharedDataStore.getInstance();
         const config = await dataStore.getServiceChargeConfig();
-        
+
         if (config) {
           setPlatformServiceCharge({
             enabled: config.enabled,
@@ -132,12 +132,12 @@ const EnhancedPaymentScreen: React.FC = () => {
         console.error('❌ Failed to load platform service charge:', error);
       }
     };
-    
+
     loadPlatformServiceCharge();
-    
+
     // Subscribe to real-time updates
     const dataStore = SharedDataStore.getInstance();
-    const unsubscribe = dataStore.subscribe('serviceCharge', (updatedConfig) => {
+    const unsubscribe = dataStore.subscribe('serviceCharge', updatedConfig => {
       console.log('🔄 Platform service charge updated in real-time:', updatedConfig);
       setPlatformServiceCharge({
         enabled: updatedConfig.enabled,
@@ -145,7 +145,7 @@ const EnhancedPaymentScreen: React.FC = () => {
         description: updatedConfig.description || 'Platform service charge',
       });
     });
-    
+
     return () => {
       unsubscribe();
     };
@@ -161,14 +161,16 @@ const EnhancedPaymentScreen: React.FC = () => {
 
   // QR Code Payment State
   const [showQRModal, setShowQRModal] = useState(false);
-  const [qrPaymentStatus, setQRPaymentStatus] = useState<'generating' | 'waiting' | 'completed' | 'expired'>('generating');
+  const [qrPaymentStatus, setQRPaymentStatus] = useState<
+    'generating' | 'waiting' | 'completed' | 'expired'
+  >('generating');
   const [qrCode, setQRCode] = useState('');
 
   // Generate QR Code for payment with error handling
   const generateQRCode = () => {
     try {
       setQRPaymentStatus('generating');
-      
+
       const paymentData = {
         amount: calculateGrandTotal(),
         currency: 'GBP',
@@ -176,12 +178,12 @@ const EnhancedPaymentScreen: React.FC = () => {
         orderId: `ORDER-${Date.now()}`,
         timestamp: Date.now(),
       };
-      
+
       // Create a simple, safe QR string without complex JSON encoding
       const qrString = `FYNLO-PAY:${paymentData.orderId}:${paymentData.amount}:${paymentData.currency}:${paymentData.timestamp}`;
       setQRCode(qrString);
       setQRPaymentStatus('waiting');
-      
+
       // Simulate QR code expiration after 5 minutes with safer state checking
       setTimeout(() => {
         setQRPaymentStatus(current => {
@@ -189,7 +191,7 @@ const EnhancedPaymentScreen: React.FC = () => {
           return current === 'waiting' ? 'expired' : current;
         });
       }, 300000); // 5 minutes
-      
+
       console.log('✅ QR Code generated successfully:', qrString.substring(0, 50) + '...');
     } catch (error) {
       console.error('❌ Failed to generate QR code:', error);
@@ -286,8 +288,8 @@ const EnhancedPaymentScreen: React.FC = () => {
         'Manager authorization is required for this payment method.',
         [
           { text: 'Cancel', style: 'cancel' },
-          { 
-            text: 'Authorize', 
+          {
+            text: 'Authorize',
             onPress: () => {
               // In a real app, this would prompt for manager PIN
               setSelectedPaymentMethod(methodId);
@@ -297,15 +299,18 @@ const EnhancedPaymentScreen: React.FC = () => {
                 setShowQRModal(true);
                 generateQRCode();
               } else if (methodId === 'card') {
-                Alert.alert('Card Payment', 'Insert or swipe card, or tap for contactless payment.');
+                Alert.alert(
+                  'Card Payment',
+                  'Insert or swipe card, or tap for contactless payment.',
+                );
               } else if (methodId === 'applePay') {
                 Alert.alert('Apple Pay', 'Hold near reader and confirm with Touch ID or Face ID.');
               } else if (methodId === 'googlePay') {
                 Alert.alert('Google Pay', 'Hold near reader and confirm payment.');
               }
-            }
-          }
-        ]
+            },
+          },
+        ],
       );
     } else {
       setSelectedPaymentMethod(methodId);
@@ -332,7 +337,7 @@ const EnhancedPaymentScreen: React.FC = () => {
       Alert.alert(
         'Upgrade Required',
         'Split payment is available with Beta and Omega plans. Upgrade your subscription to unlock this feature.',
-        [{ text: 'OK' }]
+        [{ text: 'OK' }],
       );
       return;
     }
@@ -348,7 +353,7 @@ const EnhancedPaymentScreen: React.FC = () => {
       Alert.alert('Select Payment Method', 'Please select a payment method to continue.');
       return;
     }
-    
+
     if (!isFormValid) {
       Alert.alert('Required Information', 'Please enter valid customer name and email address.');
       return;
@@ -363,7 +368,7 @@ const EnhancedPaymentScreen: React.FC = () => {
       const serviceCharge = calculateServiceCharge();
       const transactionFee = calculateTransactionFee();
       const total = calculateGrandTotal();
-      
+
       const orderData = {
         items: cart,
         subtotal,
@@ -379,44 +384,46 @@ const EnhancedPaymentScreen: React.FC = () => {
         paymentMethod: selectedPaymentMethod,
         notes: undefined,
       };
-      
+
       console.log('💳 Processing payment and saving order...', {
         total,
         customer: customerEmail,
-        method: selectedPaymentMethod
+        method: selectedPaymentMethod,
       });
-      
+
       const savedOrder = await orderService.saveOrder(orderData);
-      
+
       setProcessing(false);
-      
+
       Alert.alert(
         'Payment Successful',
-        `Payment of £${total.toFixed(2)} processed successfully!\n\nReceipt will be sent to ${customerEmail}`,
+        `Payment of £${total.toFixed(
+          2,
+        )} processed successfully!\n\nReceipt will be sent to ${customerEmail}`,
         [
           {
             text: 'OK',
             onPress: () => {
               clearCart();
               navigation.goBack();
-            }
-          }
-        ]
+            },
+          },
+        ],
       );
     } catch (error) {
       setProcessing(false);
       console.error('❌ Payment processing failed:', error);
-      
+
       Alert.alert(
-        'Payment Failed', 
+        'Payment Failed',
         'Unable to process payment. Please try again or contact support.',
-        [{ text: 'OK' }]
+        [{ text: 'OK' }],
       );
     }
   };
 
   const calculateChange = () => {
-    const received = cashReceived === '' ? 0 : (parseFloat(cashReceived) || 0);
+    const received = cashReceived === '' ? 0 : parseFloat(cashReceived) || 0;
     const total = calculateGrandTotal();
     const change = received - total;
     return Math.max(0, isNaN(change) ? 0 : change);
@@ -427,12 +434,10 @@ const EnhancedPaymentScreen: React.FC = () => {
       visible={showCashModal}
       transparent
       animationType="slide"
-      onRequestClose={() => setShowCashModal(false)}
-    >
-      <KeyboardAvoidingView 
+      onRequestClose={() => setShowCashModal(false)}>
+      <KeyboardAvoidingView
         style={styles.modalOverlay}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <View style={styles.cashModalContent}>
           <View style={styles.cashModalHeader}>
             <Text style={styles.cashModalTitle}>Cash Payment</Text>
@@ -451,7 +456,7 @@ const EnhancedPaymentScreen: React.FC = () => {
               <SimpleDecimalInput
                 label="Cash Received"
                 value={parseFloat(cashReceived) || 0}
-                onValueChange={(value) => setCashReceived(value.toString())}
+                onValueChange={value => setCashReceived(value.toString())}
                 placeholder="0.00"
                 suffix="£"
                 maxValue={9999.99}
@@ -464,8 +469,7 @@ const EnhancedPaymentScreen: React.FC = () => {
                 <TouchableOpacity
                   key={amount}
                   style={styles.quickCashButton}
-                  onPress={() => setCashReceived(amount.toString())}
-                >
+                  onPress={() => setCashReceived(amount.toString())}>
                   <Text style={styles.quickCashButtonText}>£{amount}</Text>
                 </TouchableOpacity>
               ))}
@@ -473,10 +477,8 @@ const EnhancedPaymentScreen: React.FC = () => {
 
             <View style={styles.changeSection}>
               <Text style={styles.changeLabel}>Change Due</Text>
-              <Text style={[
-                styles.changeValue,
-                calculateChange() > 0 && styles.changeValuePositive
-              ]}>
+              <Text
+                style={[styles.changeValue, calculateChange() > 0 && styles.changeValuePositive]}>
                 £{calculateChange().toFixed(2)}
               </Text>
             </View>
@@ -485,7 +487,8 @@ const EnhancedPaymentScreen: React.FC = () => {
           <TouchableOpacity
             style={[
               styles.cashConfirmButton,
-              (!cashReceived || parseFloat(cashReceived) < calculateGrandTotal()) && styles.disabledButton
+              (!cashReceived || parseFloat(cashReceived) < calculateGrandTotal()) &&
+                styles.disabledButton,
             ]}
             onPress={() => {
               if (parseFloat(cashReceived) >= calculateGrandTotal()) {
@@ -493,8 +496,7 @@ const EnhancedPaymentScreen: React.FC = () => {
                 handleProcessPayment();
               }
             }}
-            disabled={!cashReceived || parseFloat(cashReceived) < calculateGrandTotal()}
-          >
+            disabled={!cashReceived || parseFloat(cashReceived) < calculateGrandTotal()}>
             <Text style={styles.cashConfirmButtonText}>Confirm Payment</Text>
           </TouchableOpacity>
         </View>
@@ -507,8 +509,7 @@ const EnhancedPaymentScreen: React.FC = () => {
       visible={showQRModal}
       transparent
       animationType="slide"
-      onRequestClose={() => setShowQRModal(false)}
-    >
+      onRequestClose={() => setShowQRModal(false)}>
       <View style={styles.modalOverlay}>
         <View style={styles.qrModalContent}>
           <View style={styles.qrModalHeader}>
@@ -545,16 +546,15 @@ const EnhancedPaymentScreen: React.FC = () => {
                     )}
                   </View>
                   <Text style={styles.qrCodeText}>
-                    {qrCode ? 
-                      'Scan this QR code with your banking app' : 
-                      'QR Code generation failed'
-                    }
+                    {qrCode
+                      ? 'Scan this QR code with your banking app'
+                      : 'QR Code generation failed'}
                   </Text>
                   <Text style={styles.qrOrderId}>
                     Order ID: {qrCode ? qrCode.slice(-12) : 'N/A'}
                   </Text>
                 </View>
-                
+
                 <View style={styles.qrInstructions}>
                   <Text style={styles.instructionTitle}>How to pay:</Text>
                   <Text style={styles.instructionText}>1. Open your banking app</Text>
@@ -587,10 +587,7 @@ const EnhancedPaymentScreen: React.FC = () => {
                   <Icon name="access-time" size={48} color={Colors.warning} />
                   <Text style={styles.qrStatusText}>QR Code Expired</Text>
                   <Text style={styles.qrSubText}>Please generate a new QR code</Text>
-                  <TouchableOpacity 
-                    style={styles.regenerateButton}
-                    onPress={generateQRCode}
-                  >
+                  <TouchableOpacity style={styles.regenerateButton} onPress={generateQRCode}>
                     <Text style={styles.regenerateButtonText}>Generate New QR</Text>
                   </TouchableOpacity>
                 </View>
@@ -609,13 +606,10 @@ const EnhancedPaymentScreen: React.FC = () => {
           </View>
 
           <View style={styles.qrModalFooter}>
-            <TouchableOpacity
-              style={styles.qrCancelButton}
-              onPress={() => setShowQRModal(false)}
-            >
+            <TouchableOpacity style={styles.qrCancelButton} onPress={() => setShowQRModal(false)}>
               <Text style={styles.qrCancelButtonText}>Cancel</Text>
             </TouchableOpacity>
-            
+
             {qrPaymentStatus === 'waiting' && (
               <TouchableOpacity
                 style={styles.qrTestButton}
@@ -626,8 +620,7 @@ const EnhancedPaymentScreen: React.FC = () => {
                     setShowQRModal(false);
                     handleProcessPayment();
                   }, 2000);
-                }}
-              >
+                }}>
                 <Text style={styles.qrTestButtonText}>Simulate Payment</Text>
               </TouchableOpacity>
             )}
@@ -648,11 +641,10 @@ const EnhancedPaymentScreen: React.FC = () => {
         <View style={styles.headerSpacer} />
       </View>
 
-      <ScrollView 
-        style={styles.content} 
+      <ScrollView
+        style={styles.content}
         contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
+        showsVerticalScrollIndicator={false}>
         {/* Order Summary */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Order Summary</Text>
@@ -661,7 +653,7 @@ const EnhancedPaymentScreen: React.FC = () => {
               <Text style={styles.summaryLabel}>Subtotal ({cart.length} items)</Text>
               <Text style={styles.summaryValue}>£{calculateSubtotal().toFixed(2)}</Text>
             </View>
-            
+
             {taxConfiguration.vatEnabled && (
               <View style={styles.summaryRow}>
                 <Text style={styles.summaryLabel}>VAT ({taxConfiguration.vatRate}%)</Text>
@@ -670,38 +662,28 @@ const EnhancedPaymentScreen: React.FC = () => {
                 </Text>
               </View>
             )}
-            
+
             {serviceChargePercentage > 0 && (
               <View style={styles.summaryRow}>
-                <Text style={styles.summaryLabel}>
-                  Service Charge ({serviceChargePercentage}%)
-                </Text>
-                <Text style={styles.summaryValue}>
-                  £{calculateServiceCharge().toFixed(2)}
-                </Text>
+                <Text style={styles.summaryLabel}>Service Charge ({serviceChargePercentage}%)</Text>
+                <Text style={styles.summaryValue}>£{calculateServiceCharge().toFixed(2)}</Text>
               </View>
             )}
-            
+
             {addTransactionFee && (
               <View style={styles.summaryRow}>
-                <Text style={styles.summaryLabel}>
-                  Processing Fee (2.9%)
-                </Text>
-                <Text style={styles.summaryValue}>
-                  £{calculateTransactionFee().toFixed(2)}
-                </Text>
+                <Text style={styles.summaryLabel}>Processing Fee (2.9%)</Text>
+                <Text style={styles.summaryValue}>£{calculateTransactionFee().toFixed(2)}</Text>
               </View>
             )}
-            
+
             {tipAmount > 0 && (
               <View style={styles.summaryRow}>
-                <Text style={styles.summaryLabel}>
-                  Tip ({tipPercentage}%)
-                </Text>
+                <Text style={styles.summaryLabel}>Tip ({tipPercentage}%)</Text>
                 <Text style={styles.summaryValue}>£{tipAmount.toFixed(2)}</Text>
               </View>
             )}
-            
+
             <View style={[styles.summaryRow, styles.totalRow]}>
               <Text style={styles.totalLabel}>Total</Text>
               <Text style={styles.totalValue}>£{calculateGrandTotal().toFixed(2)}</Text>
@@ -717,51 +699,45 @@ const EnhancedPaymentScreen: React.FC = () => {
               {tipPresets.map(percentage => (
                 <TouchableOpacity
                   key={percentage}
-                  style={[
-                    styles.tipButton,
-                    tipPercentage === percentage && styles.tipButtonActive
-                  ]}
-                  onPress={() => handleTipPreset(percentage)}
-                >
-                  <Text style={[
-                    styles.tipButtonText,
-                    tipPercentage === percentage && styles.tipButtonTextActive
-                  ]}>
+                  style={[styles.tipButton, tipPercentage === percentage && styles.tipButtonActive]}
+                  onPress={() => handleTipPreset(percentage)}>
+                  <Text
+                    style={[
+                      styles.tipButtonText,
+                      tipPercentage === percentage && styles.tipButtonTextActive,
+                    ]}>
                     {percentage}%
                   </Text>
-                  <Text style={[
-                    styles.tipButtonAmount,
-                    tipPercentage === percentage && styles.tipButtonAmountActive
-                  ]}>
-                    £{(calculateSubtotal() * percentage / 100).toFixed(2)}
+                  <Text
+                    style={[
+                      styles.tipButtonAmount,
+                      tipPercentage === percentage && styles.tipButtonAmountActive,
+                    ]}>
+                    £{((calculateSubtotal() * percentage) / 100).toFixed(2)}
                   </Text>
                 </TouchableOpacity>
               ))}
             </View>
-            
+
             <View style={styles.tipActions}>
               <TouchableOpacity
                 style={styles.customTipButton}
-                onPress={() => setShowCustomTip(!showCustomTip)}
-              >
+                onPress={() => setShowCustomTip(!showCustomTip)}>
                 <Icon name="edit" size={20} color={Colors.primary} />
                 <Text style={styles.customTipButtonText}>Custom Amount</Text>
               </TouchableOpacity>
-              
-              <TouchableOpacity
-                style={styles.noTipButton}
-                onPress={handleNoTip}
-              >
+
+              <TouchableOpacity style={styles.noTipButton} onPress={handleNoTip}>
                 <Text style={styles.noTipButtonText}>No Tip</Text>
               </TouchableOpacity>
             </View>
-            
+
             {showCustomTip && (
               <View style={styles.customTipInput}>
                 <DecimalInput
                   label="Custom Tip Amount"
                   value={customTipInput}
-                  onValueChange={(value) => {
+                  onValueChange={value => {
                     setCustomTipInput(value);
                     setTipAmount(value);
                     setTipPercentage(0); // Clear percentage when using custom amount
@@ -783,16 +759,13 @@ const EnhancedPaymentScreen: React.FC = () => {
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Payment Method</Text>
             {enabledPaymentMethods.length > 1 && user?.subscription_plan !== 'alpha' && (
-              <TouchableOpacity
-                style={styles.splitPaymentButton}
-                onPress={handleSplitPayment}
-              >
+              <TouchableOpacity style={styles.splitPaymentButton} onPress={handleSplitPayment}>
                 <Icon name="call-split" size={20} color={Colors.secondary} />
                 <Text style={styles.splitPaymentText}>Split Payment</Text>
               </TouchableOpacity>
             )}
           </View>
-          
+
           {!splitPayment ? (
             <View style={styles.paymentMethods}>
               {enabledPaymentMethods.map(method => (
@@ -800,26 +773,26 @@ const EnhancedPaymentScreen: React.FC = () => {
                   key={method.id}
                   style={[
                     styles.paymentMethod,
-                    selectedPaymentMethod === method.id && styles.paymentMethodActive
+                    selectedPaymentMethod === method.id && styles.paymentMethodActive,
                   ]}
-                  onPress={() => handlePaymentMethodSelect(method.id)}
-                >
-                  <Icon 
-                    name={method.icon} 
-                    size={32} 
-                    color={selectedPaymentMethod === method.id ? Colors.white : method.color} 
+                  onPress={() => handlePaymentMethodSelect(method.id)}>
+                  <Icon
+                    name={method.icon}
+                    size={32}
+                    color={selectedPaymentMethod === method.id ? Colors.white : method.color}
                   />
-                  <Text style={[
-                    styles.paymentMethodName,
-                    selectedPaymentMethod === method.id && styles.paymentMethodNameActive
-                  ]}>
+                  <Text
+                    style={[
+                      styles.paymentMethodName,
+                      selectedPaymentMethod === method.id && styles.paymentMethodNameActive,
+                    ]}>
                     {method.name}
                   </Text>
                   {method.requiresAuth && (
-                    <Icon 
-                      name="lock" 
-                      size={16} 
-                      color={selectedPaymentMethod === method.id ? Colors.white : Colors.warning} 
+                    <Icon
+                      name="lock"
+                      size={16}
+                      color={selectedPaymentMethod === method.id ? Colors.white : Colors.warning}
                       style={styles.authIcon}
                     />
                   )}
@@ -834,9 +807,11 @@ const EnhancedPaymentScreen: React.FC = () => {
               {splitAmounts.map((split, index) => (
                 <View key={index} style={styles.splitAmountRow}>
                   <DecimalInput
-                    label={`${availablePaymentMethods.find(m => m.id === split.method)?.name || 'Payment'} Amount`}
+                    label={`${
+                      availablePaymentMethods.find(m => m.id === split.method)?.name || 'Payment'
+                    } Amount`}
                     value={split.amount}
-                    onValueChange={(value) => {
+                    onValueChange={value => {
                       const newSplits = [...splitAmounts];
                       newSplits[index].amount = value;
                       setSplitAmounts(newSplits);
@@ -855,8 +830,7 @@ const EnhancedPaymentScreen: React.FC = () => {
                 onPress={() => {
                   setSplitPayment(false);
                   setSplitAmounts([]);
-                }}
-              >
+                }}>
                 <Text style={styles.cancelSplitText}>Cancel Split</Text>
               </TouchableOpacity>
             </View>
@@ -875,18 +849,20 @@ const EnhancedPaymentScreen: React.FC = () => {
                 maxLength={60}
                 style={[
                   styles.customerInput,
-                  customerName.length > 0 && !isNameValid && styles.inputError
+                  customerName.length > 0 && !isNameValid && styles.inputError,
                 ]}
                 clearButtonMode="while-editing"
                 autoCapitalize="words"
               />
               {customerName.length > 0 && !isNameValid && (
                 <Text style={styles.validationError}>
-                  {customerName.length > 60 ? 'Name too long (max 60 characters)' : 'Name is required'}
+                  {customerName.length > 60
+                    ? 'Name too long (max 60 characters)'
+                    : 'Name is required'}
                 </Text>
               )}
             </View>
-            
+
             <View style={styles.customerField}>
               <SimpleTextInput
                 value={customerEmail}
@@ -897,22 +873,18 @@ const EnhancedPaymentScreen: React.FC = () => {
                 autoComplete="email"
                 style={[
                   styles.customerInput,
-                  customerEmail.length > 0 && !isEmailValid && styles.inputError
+                  customerEmail.length > 0 && !isEmailValid && styles.inputError,
                 ]}
                 clearButtonMode="while-editing"
               />
               {customerEmail.length > 0 && !isEmailValid && (
-                <Text style={styles.validationError}>
-                  Please enter a valid email address
-                </Text>
+                <Text style={styles.validationError}>Please enter a valid email address</Text>
               )}
             </View>
-            
+
             <View style={styles.receiptNote}>
               <Icon name="mail" size={16} color={Colors.lightText} />
-              <Text style={styles.receiptNoteText}>
-                Receipt will be sent via email only
-              </Text>
+              <Text style={styles.receiptNoteText}>Receipt will be sent via email only</Text>
             </View>
           </View>
         </View>
@@ -923,8 +895,7 @@ const EnhancedPaymentScreen: React.FC = () => {
         <TouchableOpacity
           style={[styles.processButton, processing && styles.processingButton]}
           onPress={handleProcessPayment}
-          disabled={processing || (!selectedPaymentMethod && !splitPayment) || !isFormValid}
-        >
+          disabled={processing || (!selectedPaymentMethod && !splitPayment) || !isFormValid}>
           {processing ? (
             <>
               <Icon name="hourglass-empty" size={24} color={Colors.white} />
@@ -943,7 +914,7 @@ const EnhancedPaymentScreen: React.FC = () => {
 
       {/* Cash Payment Modal */}
       <CashPaymentModal />
-      
+
       {/* QR Payment Modal */}
       <QRPaymentModal />
     </View>
@@ -1403,7 +1374,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: Colors.white,
   },
-  
+
   // QR Modal Styles
   qrModalContent: {
     backgroundColor: Colors.white,

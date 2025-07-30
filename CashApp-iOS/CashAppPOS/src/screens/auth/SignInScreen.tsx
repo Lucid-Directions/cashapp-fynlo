@@ -41,29 +41,29 @@ interface SignInScreenProps {
 
 const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
   const { signIn, resetPassword } = useAuth();
-  
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState<{email?: string; password?: string}>({});
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
   const validateForm = () => {
-    const newErrors: {email?: string; password?: string} = {};
-    
+    const newErrors: { email?: string; password?: string } = {};
+
     if (!email.trim()) {
       newErrors.email = 'Email is required';
     } else if (!email.includes('@')) {
       newErrors.email = 'Please enter a valid email address';
     }
-    
+
     if (!password.trim()) {
       newErrors.password = 'Password is required';
     } else if (password.length < 4) {
       newErrors.password = 'Password must be at least 4 characters';
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -74,20 +74,16 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
     setIsLoading(true);
     try {
       const success = await signIn(email.trim(), password, rememberMe);
-      
+
       if (!success) {
         Alert.alert(
           'Sign In Failed',
           'Invalid email or password. Please check your credentials and try again.',
-          [{ text: 'OK' }]
+          [{ text: 'OK' }],
         );
       }
     } catch (error) {
-      Alert.alert(
-        'Error',
-        'An unexpected error occurred. Please try again.',
-        [{ text: 'OK' }]
-      );
+      Alert.alert('Error', 'An unexpected error occurred. Please try again.', [{ text: 'OK' }]);
     } finally {
       setIsLoading(false);
     }
@@ -98,7 +94,7 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
       Alert.alert(
         'Email Required',
         'Please enter your email address first, then tap "Forgot Password".',
-        [{ text: 'OK' }]
+        [{ text: 'OK' }],
       );
       return;
     }
@@ -106,26 +102,22 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
     setIsLoading(true);
     try {
       const success = await resetPassword(email.trim());
-      
+
       if (success) {
         Alert.alert(
           'Password Reset',
           'Password reset instructions have been sent to your email address.',
-          [{ text: 'OK' }]
+          [{ text: 'OK' }],
         );
       } else {
-        Alert.alert(
-          'Email Not Found',
-          'No account found with this email address.',
-          [{ text: 'OK' }]
-        );
+        Alert.alert('Email Not Found', 'No account found with this email address.', [
+          { text: 'OK' },
+        ]);
       }
     } catch (error) {
-      Alert.alert(
-        'Error',
-        'Unable to send password reset email. Please try again.',
-        [{ text: 'OK' }]
-      );
+      Alert.alert('Error', 'Unable to send password reset email. Please try again.', [
+        { text: 'OK' },
+      ]);
     } finally {
       setIsLoading(false);
     }
@@ -135,39 +127,43 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
     Alert.alert(
       'Quick Sign In',
       'Select an account to sign in:\n\n' +
-      '🏢 Platform Owner (Full Control):\n' +
-      'See all restaurants, platform analytics, and settings\n\n' +
-      '🍴 Restaurant Owner:\n' +
-      'Manage your restaurant\n' +
-      'Full restaurant control and analytics\n\n' +
-      '👩‍💼 Restaurant Manager (Sarah):\n' +
-      'Day-to-day operations and staff management\n\n' +
-      '🎯 Demo Account:\n' +
-      'General manager access for testing',
+        '🏢 Platform Owner (Full Control):\n' +
+        'See all restaurants, platform analytics, and settings\n\n' +
+        '🍴 Restaurant Owner:\n' +
+        'Manage your restaurant\n' +
+        'Full restaurant control and analytics\n\n' +
+        '👩‍💼 Restaurant Manager (Sarah):\n' +
+        'Day-to-day operations and staff management\n\n' +
+        '🎯 Demo Account:\n' +
+        'General manager access for testing',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Platform Owner', onPress: () => {
-          setEmail('owner@fynlopos.com');
-          setPassword('platformowner123');
-        }},
-        { text: 'Restaurant Owner', onPress: () => {
-          setEmail('carlos@casaestrella.co.uk');
-          setPassword('password123');
-        }}
-      ]
+        {
+          text: 'Platform Owner',
+          onPress: () => {
+            setEmail('owner@fynlopos.com');
+            setPassword('platformowner123');
+          },
+        },
+        {
+          text: 'Restaurant Owner',
+          onPress: () => {
+            setEmail('carlos@casaestrella.co.uk');
+            setPassword('password123');
+          },
+        },
+      ],
     );
   };
 
   return (
-    <KeyboardAvoidingView 
+    <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <ScrollView 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <ScrollView
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
+        showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
           <Logo size="large" showText={false} />
@@ -184,7 +180,7 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
             <SimpleTextInput
               label="Email Address"
               value={email}
-              onValueChange={(text) => {
+              onValueChange={text => {
                 setEmail(text);
                 if (errors.email) setErrors(prev => ({ ...prev, email: undefined }));
               }}
@@ -202,7 +198,7 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
             <SimpleTextInput
               label="Password"
               value={password}
-              onValueChange={(text) => {
+              onValueChange={text => {
                 setPassword(text);
                 if (errors.password) setErrors(prev => ({ ...prev, password: undefined }));
               }}
@@ -216,10 +212,9 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
 
           {/* Remember Me & Forgot Password */}
           <View style={styles.optionsRow}>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.rememberMeContainer}
-              onPress={() => setRememberMe(!rememberMe)}
-            >
+              onPress={() => setRememberMe(!rememberMe)}>
               <Switch
                 value={rememberMe}
                 onValueChange={setRememberMe}
@@ -236,11 +231,10 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
           </View>
 
           {/* Sign In Button */}
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[styles.signInButton, isLoading && styles.signInButtonDisabled]}
             onPress={handleSignIn}
-            disabled={isLoading}
-          >
+            disabled={isLoading}>
             {isLoading ? (
               <ActivityIndicator size="small" color={Colors.white} />
             ) : (
@@ -253,11 +247,10 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
 
           {/* Quick Sign In Button */}
           {isFeatureEnabled('QUICK_SIGNIN_ENABLED') && (
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.demoButton}
               onPress={showDemoCredentials}
-              disabled={isLoading}
-            >
+              disabled={isLoading}>
               <Icon name="flash-on" size={20} color={Colors.secondary} />
               <Text style={styles.demoButtonText}>Quick Sign In</Text>
             </TouchableOpacity>
@@ -282,7 +275,7 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
         {/* Features */}
         <View style={styles.featuresContainer}>
           <Text style={styles.featuresTitle}>Why Choose Fynlo POS?</Text>
-          
+
           <View style={styles.featureRow}>
             <Icon name="speed" size={24} color={Colors.primary} />
             <View style={styles.featureText}>

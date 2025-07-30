@@ -41,7 +41,7 @@ const ForgotPasswordScreen: React.FC = () => {
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
+
       Alert.alert(
         'Reset Link Sent',
         'If an account with this email exists, you will receive a password reset link shortly.',
@@ -49,8 +49,8 @@ const ForgotPasswordScreen: React.FC = () => {
           {
             text: 'OK',
             onPress: () => navigation.goBack(),
-          }
-        ]
+          },
+        ],
       );
     } catch (error) {
       Alert.alert('Error', 'Failed to send reset link. Please try again.');
@@ -62,17 +62,13 @@ const ForgotPasswordScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={Colors.background} />
-      
+
       <KeyboardAvoidingView
         style={styles.keyboardView}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => navigation.goBack()}
-          >
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <Icon name="arrow-back" size={24} color={Colors.text} />
           </TouchableOpacity>
         </View>
@@ -110,18 +106,14 @@ const ForgotPasswordScreen: React.FC = () => {
           <TouchableOpacity
             style={[styles.resetButton, isLoading && styles.resetButtonDisabled]}
             onPress={handleResetPassword}
-            disabled={isLoading}
-          >
+            disabled={isLoading}>
             <Text style={styles.resetButtonText}>
               {isLoading ? 'Sending...' : 'Send Reset Link'}
             </Text>
           </TouchableOpacity>
 
           {/* Back to Login */}
-          <TouchableOpacity
-            style={styles.backToLoginButton}
-            onPress={() => navigation.goBack()}
-          >
+          <TouchableOpacity style={styles.backToLoginButton} onPress={() => navigation.goBack()}>
             <Text style={styles.backToLoginText}>Back to Login</Text>
           </TouchableOpacity>
         </View>

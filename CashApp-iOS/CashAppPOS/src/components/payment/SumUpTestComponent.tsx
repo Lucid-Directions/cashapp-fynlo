@@ -9,14 +9,14 @@ interface SumUpTestProps {
 
 const SumUpTestInner: React.FC<SumUpTestProps> = ({ onResult }) => {
   const sumUpHooks = useSumUp();
-  
+
   useEffect(() => {
     console.log('🧪 SumUp Test - Hooks available:', {
       hasHooks: !!sumUpHooks,
       initPaymentSheet: typeof sumUpHooks?.initPaymentSheet,
       presentPaymentSheet: typeof sumUpHooks?.presentPaymentSheet,
     });
-    
+
     if (sumUpHooks?.initPaymentSheet && sumUpHooks?.presentPaymentSheet) {
       onResult('✅ SumUp hooks are available and working');
     } else {
@@ -32,9 +32,9 @@ const SumUpTestInner: React.FC<SumUpTestProps> = ({ onResult }) => {
       }
 
       console.log('🧪 Testing SumUp initialization...');
-      
+
       const result = await sumUpHooks.initPaymentSheet({
-        amount: 1.00,
+        amount: 1.0,
         currencyCode: 'GBP',
         tipAmount: 0,
         title: 'Test Payment',
@@ -42,7 +42,7 @@ const SumUpTestInner: React.FC<SumUpTestProps> = ({ onResult }) => {
       });
 
       console.log('🧪 SumUp init result:', result);
-      
+
       if (result.error) {
         Alert.alert('SumUp Init Failed', result.error.message);
         onResult(`❌ Init failed: ${result.error.message}`);
@@ -60,20 +60,23 @@ const SumUpTestInner: React.FC<SumUpTestProps> = ({ onResult }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>SumUp SDK Test</Text>
-      
+
       <TouchableOpacity style={styles.testButton} onPress={testSumUpInit}>
         <Text style={styles.buttonText}>Test SumUp Initialization</Text>
       </TouchableOpacity>
-      
+
       <Text style={styles.info}>
-        This will test if SumUp SDK is properly configured without actually presenting the payment sheet.
+        This will test if SumUp SDK is properly configured without actually presenting the payment
+        sheet.
       </Text>
     </View>
   );
 };
 
-const SumUpTestComponent: React.FC<SumUpTestProps> = (props) => {
-  const [sumUpConfig, setSumUpConfig] = useState<{ appId: string; environment: string } | null>(null);
+const SumUpTestComponent: React.FC<SumUpTestProps> = props => {
+  const [sumUpConfig, setSumUpConfig] = useState<{ appId: string; environment: string } | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -84,7 +87,7 @@ const SumUpTestComponent: React.FC<SumUpTestProps> = (props) => {
         const config = await sumUpConfigService.fetchConfiguration();
         setSumUpConfig({
           appId: config.appId,
-          environment: config.environment
+          environment: config.environment,
         });
         setIsLoading(false);
       } catch (err) {
@@ -118,9 +121,8 @@ const SumUpTestComponent: React.FC<SumUpTestProps> = (props) => {
 
   return (
     <SumUpProvider
-      affiliateKey=""  // Empty string as the SDK requires this prop but we don't use it
-      sumUpAppId={sumUpConfig.appId}
-    >
+      affiliateKey="" // Empty string as the SDK requires this prop but we don't use it
+      sumUpAppId={sumUpConfig.appId}>
       <SumUpTestInner {...props} />
     </SumUpProvider>
   );

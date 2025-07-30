@@ -1,13 +1,6 @@
 // APIStatusMonitor.tsx - Real-time API status monitoring component
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Alert,
-  ActivityIndicator,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import DataService from '../services/DataService';
@@ -21,7 +14,7 @@ interface APIStatusMonitorProps {
 
 /**
  * APIStatusMonitor - Real-time backend connection status
- * 
+ *
  * Features:
  * - Real-time connection status indicator
  * - Backend availability monitoring
@@ -90,10 +83,10 @@ const APIStatusMonitor: React.FC<APIStatusMonitorProps> = ({
   // Set up status monitoring
   useEffect(() => {
     updateStatus();
-    
+
     // Update status every 5 seconds
     const interval = setInterval(updateStatus, 5000);
-    
+
     return () => clearInterval(interval);
   }, []);
 
@@ -117,8 +110,7 @@ const APIStatusMonitor: React.FC<APIStatusMonitorProps> = ({
       <TouchableOpacity
         style={[styles.compactContainer, { borderColor: getStatusColor() }]}
         onPress={forceCheck}
-        disabled={isTesting}
-      >
+        disabled={isTesting}>
         {isTesting ? (
           <ActivityIndicator size="small" color={getStatusColor()} />
         ) : (
@@ -141,22 +133,14 @@ const APIStatusMonitor: React.FC<APIStatusMonitorProps> = ({
             <Icon name={getStatusIcon()} size={24} color={getStatusColor()} />
           )}
           <View style={styles.statusText}>
-            <Text style={[styles.statusTitle, { color: getStatusColor() }]}>
-              {getStatusText()}
-            </Text>
+            <Text style={[styles.statusTitle, { color: getStatusColor() }]}>{getStatusText()}</Text>
             {lastCheckTime && (
-              <Text style={styles.lastCheck}>
-                Last check: {lastCheckTime.toLocaleTimeString()}
-              </Text>
+              <Text style={styles.lastCheck}>Last check: {lastCheckTime.toLocaleTimeString()}</Text>
             )}
           </View>
         </View>
 
-        <TouchableOpacity
-          style={styles.refreshButton}
-          onPress={forceCheck}
-          disabled={isTesting}
-        >
+        <TouchableOpacity style={styles.refreshButton} onPress={forceCheck} disabled={isTesting}>
           <Icon name="refresh" size={20} color={Colors.primary} />
         </TouchableOpacity>
       </View>
@@ -172,10 +156,11 @@ const APIStatusMonitor: React.FC<APIStatusMonitorProps> = ({
         <View style={styles.detailRow}>
           <Text style={styles.detailLabel}>Test Mode:</Text>
           <TouchableOpacity onPress={toggleTestMode} style={styles.toggleButton}>
-            <Text style={[
-              styles.toggleText,
-              { color: featureFlags.TEST_API_MODE ? Colors.primary : Colors.textSecondary }
-            ]}>
+            <Text
+              style={[
+                styles.toggleText,
+                { color: featureFlags.TEST_API_MODE ? Colors.primary : Colors.textSecondary },
+              ]}>
               {featureFlags.TEST_API_MODE ? 'Enabled' : 'Disabled'}
             </Text>
           </TouchableOpacity>
@@ -191,8 +176,7 @@ const APIStatusMonitor: React.FC<APIStatusMonitorProps> = ({
         <TouchableOpacity
           style={[styles.testButton, isTesting && styles.disabledButton]}
           onPress={runAPITest}
-          disabled={isTesting}
-        >
+          disabled={isTesting}>
           <Icon name="science" size={20} color={Colors.white} />
           <Text style={styles.testButtonText}>
             {isTesting ? 'Testing APIs...' : 'Run API Tests'}

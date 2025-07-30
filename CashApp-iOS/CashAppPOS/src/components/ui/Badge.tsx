@@ -1,16 +1,10 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ViewStyle,
-  TextStyle,
-} from 'react-native';
+import { View, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
 import { useTheme } from '../../design-system/ThemeProvider';
 import { Theme } from '../../design-system/theme';
 
 // Badge variants
-export type BadgeVariant = 
+export type BadgeVariant =
   | 'default'
   | 'primary'
   | 'secondary'
@@ -87,7 +81,7 @@ const Badge: React.FC<BadgeProps> = ({
         };
       case 'outline':
         return {
-          container: { 
+          container: {
             backgroundColor: 'transparent',
             borderWidth: 1,
             borderColor: theme.colors.neutral[300],
@@ -114,14 +108,14 @@ const Badge: React.FC<BadgeProps> = ({
             minWidth: 20,
             minHeight: 20,
           },
-          text: { 
+          text: {
             fontSize: theme.typography.fontSize.xs,
             lineHeight: theme.typography.fontSize.xs * 1.2,
           },
-          dot: { 
-            width: 8, 
-            height: 8, 
-            borderRadius: 4 
+          dot: {
+            width: 8,
+            height: 8,
+            borderRadius: 4,
           },
         };
       case 'lg':
@@ -133,14 +127,14 @@ const Badge: React.FC<BadgeProps> = ({
             minWidth: 32,
             minHeight: 32,
           },
-          text: { 
+          text: {
             fontSize: theme.typography.fontSize.base,
             lineHeight: theme.typography.fontSize.base * 1.2,
           },
-          dot: { 
-            width: 16, 
-            height: 16, 
-            borderRadius: 8 
+          dot: {
+            width: 16,
+            height: 16,
+            borderRadius: 8,
           },
         };
       default: // md
@@ -152,14 +146,14 @@ const Badge: React.FC<BadgeProps> = ({
             minWidth: 24,
             minHeight: 24,
           },
-          text: { 
+          text: {
             fontSize: theme.typography.fontSize.sm,
             lineHeight: theme.typography.fontSize.sm * 1.2,
           },
-          dot: { 
-            width: 12, 
-            height: 12, 
-            borderRadius: 6 
+          dot: {
+            width: 12,
+            height: 12,
+            borderRadius: 6,
           },
         };
     }
@@ -181,14 +175,14 @@ const Badge: React.FC<BadgeProps> = ({
     if (dot) {
       return null;
     }
-    
+
     if (count !== undefined) {
       if (count === 0 && !showZero) {
         return null;
       }
       return formatCount(count);
     }
-    
+
     return children;
   };
 
@@ -244,7 +238,7 @@ export const PositionedBadge: React.FC<PositionedBadgeProps> = ({
 
   const getPositionStyles = (): ViewStyle => {
     const { x = 0, y = 0 } = offset;
-    
+
     switch (position) {
       case 'top-left':
         return {

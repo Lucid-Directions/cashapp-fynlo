@@ -121,21 +121,20 @@ const HardwareSettingsScreen: React.FC = () => {
     <TouchableOpacity
       style={styles.settingCard}
       onPress={() => handleSettingPress(item)}
-      activeOpacity={0.7}
-    >
+      activeOpacity={0.7}>
       <View style={[styles.settingIcon, { backgroundColor: `${Colors.secondary}15` }]}>
         <Icon name={item.icon} size={24} color={Colors.secondary} />
       </View>
-      
+
       <View style={styles.settingContent}>
         <View style={styles.settingHeader}>
           <Text style={styles.settingTitle}>{item.title}</Text>
           {item.status && (
             <View style={styles.statusIndicator}>
-              <Icon 
-                name={getStatusIcon(item.status)} 
-                size={16} 
-                color={getStatusColor(item.status)} 
+              <Icon
+                name={getStatusIcon(item.status)}
+                size={16}
+                color={getStatusColor(item.status)}
               />
             </View>
           )}
@@ -147,7 +146,7 @@ const HardwareSettingsScreen: React.FC = () => {
           </Text>
         )}
       </View>
-      
+
       <Icon name="chevron-right" size={24} color={Colors.lightGray} />
     </TouchableOpacity>
   );
@@ -155,22 +154,21 @@ const HardwareSettingsScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor={Colors.secondary} barStyle="light-content" />
-      
+
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
-          testID="back-button"
-        >
+          testID="back-button">
           <Icon name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>
-        
+
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle}>Hardware Configuration</Text>
           <Text style={styles.headerSubtitle}>Manage connected devices</Text>
         </View>
-        
+
         <TouchableOpacity style={styles.helpButton}>
           <Icon name="help-outline" size={24} color={Colors.white} />
         </TouchableOpacity>

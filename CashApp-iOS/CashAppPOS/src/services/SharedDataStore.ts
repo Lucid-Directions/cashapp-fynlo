@@ -50,17 +50,17 @@ class SharedDataStore {
   async getServiceChargeConfig(): Promise<ServiceChargeConfig> {
     try {
       console.log('💰 SharedDataStore - Loading service charge config...');
-      
+
       // Try to get from real backend API first using robust networking
       const networkResult = await NetworkUtils.getServiceChargeConfig();
 
       if (networkResult.success && networkResult.data) {
         console.log('✅ Service charge config received from API:', networkResult.data);
-        
+
         // Handle different API response formats
         let config: ServiceChargeConfig;
         const result = networkResult.data;
-        
+
         if (result.data && result.data.service_charge) {
           // API response with wrapped data
           const serviceChargeData = result.data.service_charge;
@@ -87,7 +87,7 @@ class SharedDataStore {
             lastUpdated: new Date().toISOString(),
           };
         }
-        
+
         // Cache the result and save to AsyncStorage for offline use
         this.cache.set('serviceCharge', config);
         await AsyncStorage.setItem('platform.serviceCharge', JSON.stringify(config));
@@ -118,7 +118,7 @@ class SharedDataStore {
       return defaultConfig;
     } catch (error) {
       console.error('❌ Failed to get service charge config:', error);
-      
+
       // Emergency fallback to default
       return {
         enabled: true,
@@ -143,7 +143,7 @@ class SharedDataStore {
         const headers: any = {
           'Content-Type': 'application/json',
         };
-        
+
         if (authToken) {
           headers['Authorization'] = `Bearer ${authToken}`;
         }
@@ -153,7 +153,7 @@ class SharedDataStore {
           enabled: config.enabled,
           rate: config.rate,
           description: config.description,
-          currency: 'GBP' // Default currency
+          currency: 'GBP', // Default currency
         };
 
         const response = await fetch(`${API_BASE_URL}/platform/service-charge`, {
@@ -165,13 +165,13 @@ class SharedDataStore {
         if (response.ok) {
           const result = await response.json();
           console.log('✅ Service charge saved to API:', result);
-          
+
           // Update cache with confirmed data
           this.cache.set('serviceCharge', configWithTimestamp);
-          
+
           // Also save locally as backup
           await AsyncStorage.setItem('platform.serviceCharge', JSON.stringify(configWithTimestamp));
-          
+
           // Trigger sync event for real-time updates
           this.notifySubscribers('serviceCharge', configWithTimestamp);
           return;
@@ -186,9 +186,9 @@ class SharedDataStore {
       // Fallback to AsyncStorage if API fails
       await AsyncStorage.setItem('platform.serviceCharge', JSON.stringify(configWithTimestamp));
       this.cache.set('serviceCharge', configWithTimestamp);
-      
+
       console.log('✅ Service charge config saved locally (API fallback):', configWithTimestamp);
-      
+
       // Trigger sync event for real-time updates
       this.notifySubscribers('serviceCharge', configWithTimestamp);
     } catch (error) {
@@ -239,7 +239,7 @@ class SharedDataStore {
 
       await AsyncStorage.setItem('platform.payments', JSON.stringify(configWithTimestamp));
       this.cache.set('payments', configWithTimestamp);
-      
+
       console.log('✅ Payment config saved:', configWithTimestamp);
       this.notifySubscribers('payments', configWithTimestamp);
     } catch (error) {
@@ -279,7 +279,7 @@ class SharedDataStore {
 
       await AsyncStorage.setItem(`platform.${key}`, JSON.stringify(valueWithTimestamp));
       this.cache.set(key, valueWithTimestamp);
-      
+
       console.log(`✅ Platform setting ${key} saved:`, valueWithTimestamp);
       this.notifySubscribers(key, valueWithTimestamp);
     } catch (error) {
@@ -295,9 +295,9 @@ class SharedDataStore {
     if (!this.subscribers.has(key)) {
       this.subscribers.set(key, new Set());
     }
-    
+
     this.subscribers.get(key)!.add(callback);
-    
+
     // Return unsubscribe function
     return () => {
       const subs = this.subscribers.get(key);
@@ -325,10 +325,10 @@ class SharedDataStore {
     try {
       const keys = await AsyncStorage.getAllKeys();
       const platformKeys = keys.filter(key => key.startsWith('platform.'));
-      
+
       await AsyncStorage.multiRemove(platformKeys);
       this.cache.clear();
-      
+
       console.log('✅ All platform data cleared');
     } catch (error) {
       console.error('❌ Failed to clear platform data:', error);

@@ -1,11 +1,10 @@
-
 import React from 'react';
 import { render } from '@testing-library/react-native';
 import EnhancedEmployeeScheduleScreen from '../EnhancedEmployeeScheduleScreen';
 
 // Mock the useTheme hook
 jest.mock('@react-native-community/datetimepicker', () => {
-  const mockComponent = (props) => {
+  const mockComponent = props => {
     return <mock-component {...props} />;
   };
   return {

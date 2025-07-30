@@ -59,7 +59,7 @@ interface SystemLog {
 
 const SystemDiagnosticsScreen: React.FC = () => {
   const navigation = useNavigation();
-  
+
   const [isRunningTests, setIsRunningTests] = useState(false);
   const [showLogsModal, setShowLogsModal] = useState(false);
   const [showSystemInfoModal, setShowSystemInfoModal] = useState(false);
@@ -197,11 +197,11 @@ const SystemDiagnosticsScreen: React.FC = () => {
     'Build Number': '2024.12.17.1',
     'OS Version': Platform.OS === 'ios' ? 'iOS 17.2' : 'Android 14',
     'Device Model': Platform.OS === 'ios' ? 'iPhone 15 Pro' : 'Samsung Galaxy Tab',
-    'RAM': '3GB',
-    'Storage': '64GB',
-    'Network': 'WiFi (5GHz)',
+    RAM: '3GB',
+    Storage: '64GB',
+    Network: 'WiFi (5GHz)',
     'Location Services': 'Enabled',
-    'Notifications': 'Enabled',
+    Notifications: 'Enabled',
     'Background Refresh': 'Enabled',
   };
 
@@ -216,11 +216,11 @@ const SystemDiagnosticsScreen: React.FC = () => {
     for (let i = 0; i < testsToRun.length; i++) {
       const test = testsToRun[i];
       setCurrentTest(test.name);
-      
+
       // Update test status to running
-      setDiagnosticTests(prev => prev.map(t => 
-        t.id === test.id ? { ...t, status: 'running' } : t
-      ));
+      setDiagnosticTests(prev =>
+        prev.map(t => (t.id === test.id ? { ...t, status: 'running' } : t)),
+      );
 
       // Simulate test execution
       const testDuration = Math.random() * 3000 + 1000; // 1-4 seconds
@@ -228,36 +228,38 @@ const SystemDiagnosticsScreen: React.FC = () => {
 
       // Simulate test result (90% pass rate)
       const passed = Math.random() > 0.1;
-      
-      setDiagnosticTests(prev => prev.map(t => 
-        t.id === test.id 
-          ? { 
-              ...t, 
-              status: passed ? 'passed' : 'failed',
-              duration: testDuration,
-              lastRun: new Date()
-            } 
-          : t
-      ));
+
+      setDiagnosticTests(prev =>
+        prev.map(t =>
+          t.id === test.id
+            ? {
+                ...t,
+                status: passed ? 'passed' : 'failed',
+                duration: testDuration,
+                lastRun: new Date(),
+              }
+            : t,
+        ),
+      );
 
       setTestProgress(((i + 1) / totalTests) * 100);
     }
 
     setIsRunningTests(false);
     setCurrentTest('');
-    
+
     const failedTests = diagnosticTests.filter(test => test.status === 'failed');
     if (failedTests.length > 0) {
       Alert.alert(
         'Diagnostic Complete',
         `${failedTests.length} test(s) failed. Please check the results and take appropriate action.`,
-        [{ text: 'OK' }]
+        [{ text: 'OK' }],
       );
     } else {
       Alert.alert(
         'All Tests Passed',
         'System diagnostics completed successfully. Your system is running optimally.',
-        [{ text: 'OK' }]
+        [{ text: 'OK' }],
       );
     }
   };
@@ -266,32 +268,28 @@ const SystemDiagnosticsScreen: React.FC = () => {
     const test = diagnosticTests.find(t => t.id === testId);
     if (!test) return;
 
-    setDiagnosticTests(prev => prev.map(t => 
-      t.id === testId ? { ...t, status: 'running' } : t
-    ));
+    setDiagnosticTests(prev => prev.map(t => (t.id === testId ? { ...t, status: 'running' } : t)));
 
     // Simulate test execution
     const testDuration = Math.random() * 3000 + 1000;
     await new Promise(resolve => setTimeout(resolve, testDuration));
 
     const passed = Math.random() > 0.1;
-    
-    setDiagnosticTests(prev => prev.map(t => 
-      t.id === testId 
-        ? { 
-            ...t, 
-            status: passed ? 'passed' : 'failed',
-            duration: testDuration,
-            lastRun: new Date()
-          } 
-        : t
-    ));
 
-    Alert.alert(
-      'Test Complete',
-      `${test.name}: ${passed ? 'PASSED' : 'FAILED'}`,
-      [{ text: 'OK' }]
+    setDiagnosticTests(prev =>
+      prev.map(t =>
+        t.id === testId
+          ? {
+              ...t,
+              status: passed ? 'passed' : 'failed',
+              duration: testDuration,
+              lastRun: new Date(),
+            }
+          : t,
+      ),
     );
+
+    Alert.alert('Test Complete', `${test.name}: ${passed ? 'PASSED' : 'FAILED'}`, [{ text: 'OK' }]);
   };
 
   const clearCache = () => {
@@ -300,10 +298,13 @@ const SystemDiagnosticsScreen: React.FC = () => {
       'This will clear temporary files and may improve performance. Continue?',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Clear', onPress: () => {
-          Alert.alert('Success', 'Cache cleared successfully. 247MB freed.');
-        }}
-      ]
+        {
+          text: 'Clear',
+          onPress: () => {
+            Alert.alert('Success', 'Cache cleared successfully. 247MB freed.');
+          },
+        },
+      ],
     );
   };
 
@@ -313,10 +314,13 @@ const SystemDiagnosticsScreen: React.FC = () => {
       'This will reorganize database files for better performance. Continue?',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Optimize', onPress: () => {
-          Alert.alert('Success', 'Database optimization completed successfully.');
-        }}
-      ]
+        {
+          text: 'Optimize',
+          onPress: () => {
+            Alert.alert('Success', 'Database optimization completed successfully.');
+          },
+        },
+      ],
     );
   };
 
@@ -388,10 +392,7 @@ const SystemDiagnosticsScreen: React.FC = () => {
           <Icon name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>System Diagnostics</Text>
-        <TouchableOpacity 
-          style={styles.infoButton}
-          onPress={() => setShowSystemInfoModal(true)}
-        >
+        <TouchableOpacity style={styles.infoButton} onPress={() => setShowSystemInfoModal(true)}>
           <Icon name="info" size={24} color={Colors.white} />
         </TouchableOpacity>
       </View>
@@ -405,7 +406,12 @@ const SystemDiagnosticsScreen: React.FC = () => {
               <View key={index} style={styles.metricCard}>
                 <View style={styles.metricHeader}>
                   <Icon name={metric.icon} size={24} color={getStatusColor(metric.status)} />
-                  <View style={[styles.statusIndicator, { backgroundColor: getStatusColor(metric.status) }]} />
+                  <View
+                    style={[
+                      styles.statusIndicator,
+                      { backgroundColor: getStatusColor(metric.status) },
+                    ]}
+                  />
                 </View>
                 <Text style={styles.metricValue}>{metric.value}</Text>
                 <Text style={styles.metricName}>{metric.name}</Text>
@@ -419,15 +425,14 @@ const SystemDiagnosticsScreen: React.FC = () => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Diagnostic Tests</Text>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[styles.runAllButton, isRunningTests && styles.runAllButtonDisabled]}
               onPress={runDiagnosticTests}
-              disabled={isRunningTests}
-            >
-              <Icon 
-                name={isRunningTests ? "hourglass-empty" : "play-arrow"} 
-                size={20} 
-                color={Colors.white} 
+              disabled={isRunningTests}>
+              <Icon
+                name={isRunningTests ? 'hourglass-empty' : 'play-arrow'}
+                size={20}
+                color={Colors.white}
               />
               <Text style={styles.runAllButtonText}>
                 {isRunningTests ? 'Running...' : 'Run All'}
@@ -453,28 +458,35 @@ const SystemDiagnosticsScreen: React.FC = () => {
                     <View style={styles.testTitleRow}>
                       <Icon name={test.icon} size={24} color={Colors.primary} />
                       <Text style={styles.testName}>{test.name}</Text>
-                      <View style={[styles.testStatus, { backgroundColor: getStatusColor(test.status) }]}>
+                      <View
+                        style={[
+                          styles.testStatus,
+                          { backgroundColor: getStatusColor(test.status) },
+                        ]}>
                         <Icon name={getStatusIcon(test.status)} size={16} color={Colors.white} />
                       </View>
                     </View>
                     <Text style={styles.testDescription}>{test.description}</Text>
                     {test.lastRun && (
                       <Text style={styles.testLastRun}>
-                        Last run: {test.lastRun.toLocaleDateString()} at {test.lastRun.toLocaleTimeString()}
+                        Last run: {test.lastRun.toLocaleDateString()} at{' '}
+                        {test.lastRun.toLocaleTimeString()}
                       </Text>
                     )}
                   </View>
                 </View>
-                
+
                 <TouchableOpacity
-                  style={[styles.testButton, test.status === 'running' && styles.testButtonDisabled]}
+                  style={[
+                    styles.testButton,
+                    test.status === 'running' && styles.testButtonDisabled,
+                  ]}
                   onPress={() => runSingleTest(test.id)}
-                  disabled={test.status === 'running' || isRunningTests}
-                >
-                  <Icon 
-                    name={test.status === 'running' ? "sync" : "play-arrow"} 
-                    size={16} 
-                    color={Colors.secondary} 
+                  disabled={test.status === 'running' || isRunningTests}>
+                  <Icon
+                    name={test.status === 'running' ? 'sync' : 'play-arrow'}
+                    size={16}
+                    color={Colors.secondary}
                   />
                   <Text style={styles.testButtonText}>
                     {test.status === 'running' ? 'Running' : 'Run Test'}
@@ -511,10 +523,9 @@ const SystemDiagnosticsScreen: React.FC = () => {
               <Icon name="chevron-right" size={24} color={Colors.lightText} />
             </TouchableOpacity>
 
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.maintenanceButton}
-              onPress={() => Alert.alert('Info', 'Update check would be performed here')}
-            >
+              onPress={() => Alert.alert('Info', 'Update check would be performed here')}>
               <Icon name="system-update" size={24} color={Colors.success} />
               <View style={styles.maintenanceButtonContent}>
                 <Text style={styles.maintenanceButtonTitle}>Check for Updates</Text>
@@ -525,10 +536,9 @@ const SystemDiagnosticsScreen: React.FC = () => {
               <Icon name="chevron-right" size={24} color={Colors.lightText} />
             </TouchableOpacity>
 
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.maintenanceButton}
-              onPress={() => Alert.alert('Info', 'Performance report would be generated here')}
-            >
+              onPress={() => Alert.alert('Info', 'Performance report would be generated here')}>
               <Icon name="assessment" size={24} color={Colors.primary} />
               <View style={styles.maintenanceButtonContent}>
                 <Text style={styles.maintenanceButtonTitle}>Generate Performance Report</Text>
@@ -545,30 +555,25 @@ const SystemDiagnosticsScreen: React.FC = () => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Recent System Logs</Text>
-            <TouchableOpacity 
-              style={styles.viewLogsButton}
-              onPress={() => setShowLogsModal(true)}
-            >
+            <TouchableOpacity style={styles.viewLogsButton} onPress={() => setShowLogsModal(true)}>
               <Text style={styles.viewLogsText}>View All</Text>
               <Icon name="chevron-right" size={20} color={Colors.primary} />
             </TouchableOpacity>
           </View>
-          
+
           <View style={styles.logsContainer}>
             {systemLogs.slice(0, 3).map(log => (
               <View key={log.id} style={styles.logItem}>
-                <Icon 
-                  name={getLogLevelIcon(log.level)} 
-                  size={20} 
-                  color={getLogLevelColor(log.level)} 
+                <Icon
+                  name={getLogLevelIcon(log.level)}
+                  size={20}
+                  color={getLogLevelColor(log.level)}
                 />
                 <View style={styles.logContent}>
                   <Text style={styles.logMessage}>{log.message}</Text>
                   <View style={styles.logMeta}>
                     <Text style={styles.logComponent}>{log.component}</Text>
-                    <Text style={styles.logTimestamp}>
-                      {log.timestamp.toLocaleTimeString()}
-                    </Text>
+                    <Text style={styles.logTimestamp}>{log.timestamp.toLocaleTimeString()}</Text>
                   </View>
                 </View>
               </View>
@@ -582,8 +587,7 @@ const SystemDiagnosticsScreen: React.FC = () => {
         visible={showLogsModal}
         transparent={true}
         animationType="slide"
-        onRequestClose={() => setShowLogsModal(false)}
-      >
+        onRequestClose={() => setShowLogsModal(false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
@@ -597,10 +601,10 @@ const SystemDiagnosticsScreen: React.FC = () => {
               {systemLogs.map(log => (
                 <View key={log.id} style={styles.logItemFull}>
                   <View style={styles.logHeader}>
-                    <Icon 
-                      name={getLogLevelIcon(log.level)} 
-                      size={20} 
-                      color={getLogLevelColor(log.level)} 
+                    <Icon
+                      name={getLogLevelIcon(log.level)}
+                      size={20}
+                      color={getLogLevelColor(log.level)}
                     />
                     <Text style={styles.logLevel}>{log.level.toUpperCase()}</Text>
                     <Text style={styles.logTimestampFull}>
@@ -621,8 +625,7 @@ const SystemDiagnosticsScreen: React.FC = () => {
         visible={showSystemInfoModal}
         transparent={true}
         animationType="slide"
-        onRequestClose={() => setShowSystemInfoModal(false)}
-      >
+        onRequestClose={() => setShowSystemInfoModal(false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>

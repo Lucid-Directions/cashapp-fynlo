@@ -37,21 +37,21 @@ interface AccessibilitySettings {
   reduceTransparency: boolean;
   invertColors: boolean;
   grayscale: boolean;
-  
+
   // Motor
   reduceMotion: boolean;
   stickyKeys: boolean;
   slowKeys: boolean;
   bounceKeys: boolean;
   tapToClick: boolean;
-  
+
   // Cognitive
   simplifiedInterface: boolean;
   reducedAnimations: boolean;
   extendedTimeouts: boolean;
   confirmationDialogs: boolean;
   readAloud: boolean;
-  
+
   // Audio
   visualIndicators: boolean;
   vibrationFeedback: boolean;
@@ -61,7 +61,7 @@ interface AccessibilitySettings {
 
 const AccessibilityScreen: React.FC = () => {
   const navigation = useNavigation();
-  
+
   const [settings, setSettings] = useState<AccessibilitySettings>({
     // Visual
     largeText: false,
@@ -70,21 +70,21 @@ const AccessibilityScreen: React.FC = () => {
     reduceTransparency: false,
     invertColors: false,
     grayscale: false,
-    
+
     // Motor
     reduceMotion: false,
     stickyKeys: false,
     slowKeys: false,
     bounceKeys: false,
     tapToClick: true,
-    
+
     // Cognitive
     simplifiedInterface: false,
     reducedAnimations: false,
     extendedTimeouts: false,
     confirmationDialogs: true,
     readAloud: false,
-    
+
     // Audio
     visualIndicators: true,
     vibrationFeedback: true,
@@ -102,7 +102,7 @@ const AccessibilityScreen: React.FC = () => {
   const toggleSetting = (setting: keyof AccessibilitySettings) => {
     setSettings(prev => ({
       ...prev,
-      [setting]: !prev[setting]
+      [setting]: !prev[setting],
     }));
   };
 
@@ -112,67 +112,72 @@ const AccessibilityScreen: React.FC = () => {
       'This will reset all accessibility settings to their default values. Continue?',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Reset', style: 'destructive', onPress: () => {
-          setSettings({
-            largeText: false,
-            boldText: false,
-            highContrast: false,
-            reduceTransparency: false,
-            invertColors: false,
-            grayscale: false,
-            reduceMotion: false,
-            stickyKeys: false,
-            slowKeys: false,
-            bounceKeys: false,
-            tapToClick: true,
-            simplifiedInterface: false,
-            reducedAnimations: false,
-            extendedTimeouts: false,
-            confirmationDialogs: true,
-            readAloud: false,
-            visualIndicators: true,
-            vibrationFeedback: true,
-            soundAlerts: true,
-            captionsEnabled: false,
-          });
-          setTextSize(16);
-          setContrastLevel(0);
-          setAnimationSpeed(1);
-          setTimeoutDuration(30);
-          setButtonSize(44);
-          Alert.alert('Success', 'Accessibility settings reset to defaults.');
-        }}
-      ]
+        {
+          text: 'Reset',
+          style: 'destructive',
+          onPress: () => {
+            setSettings({
+              largeText: false,
+              boldText: false,
+              highContrast: false,
+              reduceTransparency: false,
+              invertColors: false,
+              grayscale: false,
+              reduceMotion: false,
+              stickyKeys: false,
+              slowKeys: false,
+              bounceKeys: false,
+              tapToClick: true,
+              simplifiedInterface: false,
+              reducedAnimations: false,
+              extendedTimeouts: false,
+              confirmationDialogs: true,
+              readAloud: false,
+              visualIndicators: true,
+              vibrationFeedback: true,
+              soundAlerts: true,
+              captionsEnabled: false,
+            });
+            setTextSize(16);
+            setContrastLevel(0);
+            setAnimationSpeed(1);
+            setTimeoutDuration(30);
+            setButtonSize(44);
+            Alert.alert('Success', 'Accessibility settings reset to defaults.');
+          },
+        },
+      ],
     );
   };
 
   const handleAccessibilityShortcuts = () => {
-    Alert.alert(
-      'Accessibility Shortcuts',
-      'Configure quick access to accessibility features:',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Home Button Triple-Click', onPress: () => {
+    Alert.alert('Accessibility Shortcuts', 'Configure quick access to accessibility features:', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Home Button Triple-Click',
+        onPress: () => {
           Alert.alert('Info', 'Home button shortcut configured');
-        }},
-        { text: 'Volume Button Hold', onPress: () => {
+        },
+      },
+      {
+        text: 'Volume Button Hold',
+        onPress: () => {
           Alert.alert('Info', 'Volume button shortcut configured');
-        }}
-      ]
-    );
+        },
+      },
+    ]);
   };
 
   const handleTutorialAccess = () => {
-    Alert.alert(
-      'Accessibility Tutorial',
-      'Learn how to use accessibility features effectively.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Start Tutorial', onPress: () => {
+    Alert.alert('Accessibility Tutorial', 'Learn how to use accessibility features effectively.', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Start Tutorial',
+        onPress: () => {
           Alert.alert('Info', 'Accessibility tutorial would start here');
-        }}
-      ]
-    );
+        },
+      },
+    ]);
   };
 
   const getTextSizeDescription = (size: number) => {
@@ -197,14 +202,14 @@ const AccessibilityScreen: React.FC = () => {
     return 'Very Fast';
   };
 
-  const AccessibilityRow = ({ 
-    icon, 
-    title, 
-    description, 
+  const AccessibilityRow = ({
+    icon,
+    title,
+    description,
     setting,
     iconColor = Colors.secondary,
-    onInfoPress
-  }: { 
+    onInfoPress,
+  }: {
     icon: string;
     title: string;
     description: string;
@@ -236,16 +241,16 @@ const AccessibilityScreen: React.FC = () => {
     </View>
   );
 
-  const SliderRow = ({ 
-    icon, 
-    title, 
-    value, 
-    onValueChange, 
-    minimumValue, 
-    maximumValue, 
+  const SliderRow = ({
+    icon,
+    title,
+    value,
+    onValueChange,
+    minimumValue,
+    maximumValue,
     description,
-    unit = ''
-  }: { 
+    unit = '',
+  }: {
     icon: string;
     title: string;
     value: number;
@@ -260,7 +265,10 @@ const AccessibilityScreen: React.FC = () => {
         <Icon name={icon} size={24} color={Colors.secondary} />
         <View style={styles.sliderTitleInfo}>
           <Text style={styles.sliderTitle}>{title}</Text>
-          <Text style={styles.sliderValue}>{value.toFixed(0)}{unit} - {description}</Text>
+          <Text style={styles.sliderValue}>
+            {value.toFixed(0)}
+            {unit} - {description}
+          </Text>
         </View>
       </View>
       <Slider
@@ -295,16 +303,18 @@ const AccessibilityScreen: React.FC = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Quick Access</Text>
           <View style={styles.quickAccessCard}>
-            <TouchableOpacity style={styles.quickAccessButton} onPress={handleAccessibilityShortcuts}>
+            <TouchableOpacity
+              style={styles.quickAccessButton}
+              onPress={handleAccessibilityShortcuts}>
               <Icon name="touch-app" size={32} color={Colors.primary} />
               <Text style={styles.quickAccessText}>Shortcuts</Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity style={styles.quickAccessButton} onPress={handleTutorialAccess}>
               <Icon name="school" size={32} color={Colors.secondary} />
               <Text style={styles.quickAccessText}>Tutorial</Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity style={styles.quickAccessButton} onPress={handleResetToDefaults}>
               <Icon name="restore" size={32} color={Colors.warning} />
               <Text style={styles.quickAccessText}>Reset</Text>
@@ -332,7 +342,12 @@ const AccessibilityScreen: React.FC = () => {
               title="Bold Text"
               description="Make text easier to read with bold formatting"
               setting="boldText"
-              onInfoPress={() => Alert.alert('Bold Text', 'Increases text weight throughout the app to improve readability.')}
+              onInfoPress={() =>
+                Alert.alert(
+                  'Bold Text',
+                  'Increases text weight throughout the app to improve readability.',
+                )
+              }
             />
 
             <AccessibilityRow
@@ -340,7 +355,12 @@ const AccessibilityScreen: React.FC = () => {
               title="Large Text"
               description="Enable larger text sizes for better readability"
               setting="largeText"
-              onInfoPress={() => Alert.alert('Large Text', 'Uses larger text sizes that scale with your text size slider setting.')}
+              onInfoPress={() =>
+                Alert.alert(
+                  'Large Text',
+                  'Uses larger text sizes that scale with your text size slider setting.',
+                )
+              }
             />
 
             <SliderRow
@@ -358,7 +378,12 @@ const AccessibilityScreen: React.FC = () => {
               title="High Contrast"
               description="Increase contrast for better visibility"
               setting="highContrast"
-              onInfoPress={() => Alert.alert('High Contrast', 'Uses high contrast colors to make content easier to distinguish.')}
+              onInfoPress={() =>
+                Alert.alert(
+                  'High Contrast',
+                  'Uses high contrast colors to make content easier to distinguish.',
+                )
+              }
             />
 
             <AccessibilityRow
@@ -393,7 +418,12 @@ const AccessibilityScreen: React.FC = () => {
               title="Reduce Motion"
               description="Minimize animations and motion effects"
               setting="reduceMotion"
-              onInfoPress={() => Alert.alert('Reduce Motion', 'Reduces or removes animations that might cause motion sensitivity issues.')}
+              onInfoPress={() =>
+                Alert.alert(
+                  'Reduce Motion',
+                  'Reduces or removes animations that might cause motion sensitivity issues.',
+                )
+              }
             />
 
             <SliderRow
@@ -450,7 +480,12 @@ const AccessibilityScreen: React.FC = () => {
               title="Simplified Interface"
               description="Reduce visual complexity and clutter"
               setting="simplifiedInterface"
-              onInfoPress={() => Alert.alert('Simplified Interface', 'Reduces visual complexity by hiding advanced features and using simpler layouts.')}
+              onInfoPress={() =>
+                Alert.alert(
+                  'Simplified Interface',
+                  'Reduces visual complexity by hiding advanced features and using simpler layouts.',
+                )
+              }
             />
 
             <AccessibilityRow
@@ -490,7 +525,12 @@ const AccessibilityScreen: React.FC = () => {
               title="Read Aloud"
               description="Audio feedback for interface elements"
               setting="readAloud"
-              onInfoPress={() => Alert.alert('Read Aloud', 'Uses text-to-speech to read interface elements and content aloud.')}
+              onInfoPress={() =>
+                Alert.alert(
+                  'Read Aloud',
+                  'Uses text-to-speech to read interface elements and content aloud.',
+                )
+              }
             />
           </View>
         </View>
@@ -570,10 +610,9 @@ const AccessibilityScreen: React.FC = () => {
               <Icon name="chevron-right" size={24} color={Colors.lightText} />
             </TouchableOpacity>
 
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.actionButton}
-              onPress={() => Alert.alert('Info', 'Device accessibility settings would open here')}
-            >
+              onPress={() => Alert.alert('Info', 'Device accessibility settings would open here')}>
               <Icon name="phone-android" size={24} color={Colors.secondary} />
               <Text style={styles.actionButtonText}>Device Settings</Text>
               <Icon name="chevron-right" size={24} color={Colors.lightText} />
@@ -581,7 +620,9 @@ const AccessibilityScreen: React.FC = () => {
 
             <TouchableOpacity style={styles.actionButton} onPress={handleResetToDefaults}>
               <Icon name="restore" size={24} color={Colors.warning} />
-              <Text style={[styles.actionButtonText, { color: Colors.warning }]}>Reset to Defaults</Text>
+              <Text style={[styles.actionButtonText, { color: Colors.warning }]}>
+                Reset to Defaults
+              </Text>
               <Icon name="chevron-right" size={24} color={Colors.lightText} />
             </TouchableOpacity>
           </View>

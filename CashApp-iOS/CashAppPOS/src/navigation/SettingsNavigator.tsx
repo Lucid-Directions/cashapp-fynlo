@@ -45,7 +45,7 @@ import RecipeFormScreen from '../screens/settings/RecipeFormScreen';
 
 export type SettingsStackParamList = {
   SettingsMain: undefined;
-  
+
   // Business Settings
   BusinessSettings: undefined;
   BusinessInformation: undefined;
@@ -54,7 +54,7 @@ export type SettingsStackParamList = {
   PaymentMethodsInfo: undefined;
   ReceiptCustomization: undefined;
   OperatingHours: undefined;
-  
+
   // Hardware Configuration
   HardwareSettings: undefined;
   PrinterSetup: undefined;
@@ -62,7 +62,7 @@ export type SettingsStackParamList = {
   BarcodeScanner: undefined;
   CardReader: undefined;
   HardwareDiagnostics: undefined;
-  
+
   // User Preferences
   UserSettings: undefined;
   UserProfile: undefined;
@@ -70,7 +70,7 @@ export type SettingsStackParamList = {
   ThemeOptions: undefined;
   Localization: undefined;
   Accessibility: undefined;
-  
+
   // App Configuration
   AppSettings: undefined;
   SettingsMenuManagement: undefined;
@@ -79,15 +79,15 @@ export type SettingsStackParamList = {
   DataExport: undefined;
   SystemDiagnostics: undefined;
   DeveloperSettings: undefined;
-  
+
   // Integrations
   XeroSettings: undefined;
   XeroSyncDashboard: undefined;
-  
+
   // Onboarding
   RestaurantSetup: undefined;
   RestaurantProfile: undefined;
-  
+
   // Platform Settings
   RestaurantPlatformOverrides: undefined;
 
@@ -98,7 +98,6 @@ export type SettingsStackParamList = {
 
 const Stack = createStackNavigator<SettingsStackParamList>();
 
-
 const SettingsNavigator: React.FC = () => {
   return (
     <Stack.Navigator
@@ -106,149 +105,55 @@ const SettingsNavigator: React.FC = () => {
       screenOptions={{
         headerShown: false,
         cardStyle: { backgroundColor: '#F5F5F5' },
-      }}
-    >
+      }}>
       {/* Main Settings Hub */}
-      <Stack.Screen 
-        name="SettingsMain" 
-        component={SettingsScreen} 
-      />
-      
+      <Stack.Screen name="SettingsMain" component={SettingsScreen} />
+
       {/* Business Settings */}
-      <Stack.Screen 
-        name="BusinessSettings" 
-        component={BusinessSettingsScreen} 
-      />
-      <Stack.Screen 
-        name="BusinessInformation" 
-        component={BusinessInformationScreen} 
-      />
-      <Stack.Screen 
-        name="TaxConfiguration" 
-        component={TaxConfigurationScreen} 
-      />
-      <Stack.Screen 
-        name="PaymentMethods" 
-        component={PaymentMethodsScreen} 
-      />
-      <Stack.Screen 
-        name="PaymentMethodsInfo" 
-        component={PaymentMethodsInfoScreen} 
-      />
-      <Stack.Screen 
-        name="ReceiptCustomization" 
-        component={ReceiptCustomizationScreen} 
-      />
-      <Stack.Screen 
-        name="OperatingHours" 
-        component={OperatingHoursScreen} 
-      />
-      
+      <Stack.Screen name="BusinessSettings" component={BusinessSettingsScreen} />
+      <Stack.Screen name="BusinessInformation" component={BusinessInformationScreen} />
+      <Stack.Screen name="TaxConfiguration" component={TaxConfigurationScreen} />
+      <Stack.Screen name="PaymentMethods" component={PaymentMethodsScreen} />
+      <Stack.Screen name="PaymentMethodsInfo" component={PaymentMethodsInfoScreen} />
+      <Stack.Screen name="ReceiptCustomization" component={ReceiptCustomizationScreen} />
+      <Stack.Screen name="OperatingHours" component={OperatingHoursScreen} />
+
       {/* Hardware Configuration */}
-      <Stack.Screen 
-        name="HardwareSettings" 
-        component={HardwareSettingsScreen} 
-      />
-      <Stack.Screen 
-        name="PrinterSetup" 
-        component={PrinterSetupScreen} 
-      />
-      <Stack.Screen 
-        name="CashDrawer" 
-        component={CashDrawerScreen} 
-      />
-      <Stack.Screen 
-        name="BarcodeScanner" 
-        component={BarcodeScannerScreen} 
-      />
-      <Stack.Screen 
-        name="CardReader" 
-        component={CardReaderScreen} 
-      />
-      <Stack.Screen 
-        name="HardwareDiagnostics" 
-        component={HardwareDiagnosticsScreen} 
-      />
-      
+      <Stack.Screen name="HardwareSettings" component={HardwareSettingsScreen} />
+      <Stack.Screen name="PrinterSetup" component={PrinterSetupScreen} />
+      <Stack.Screen name="CashDrawer" component={CashDrawerScreen} />
+      <Stack.Screen name="BarcodeScanner" component={BarcodeScannerScreen} />
+      <Stack.Screen name="CardReader" component={CardReaderScreen} />
+      <Stack.Screen name="HardwareDiagnostics" component={HardwareDiagnosticsScreen} />
+
       {/* User Preferences */}
-      <Stack.Screen 
-        name="UserSettings" 
-        component={UserSettingsScreen} 
-      />
-      <Stack.Screen 
-        name="UserProfile" 
-        component={UserProfileScreen} 
-      />
-      <Stack.Screen 
-        name="NotificationSettings" 
-        component={NotificationSettingsScreen} 
-      />
-      <Stack.Screen 
-        name="ThemeOptions" 
-        component={ThemeOptionsScreen} 
-      />
-      <Stack.Screen 
-        name="Localization" 
-        component={LocalizationScreen} 
-      />
-      <Stack.Screen 
-        name="Accessibility" 
-        component={AccessibilityScreen} 
-      />
-      
+      <Stack.Screen name="UserSettings" component={UserSettingsScreen} />
+      <Stack.Screen name="UserProfile" component={UserProfileScreen} />
+      <Stack.Screen name="NotificationSettings" component={NotificationSettingsScreen} />
+      <Stack.Screen name="ThemeOptions" component={ThemeOptionsScreen} />
+      <Stack.Screen name="Localization" component={LocalizationScreen} />
+      <Stack.Screen name="Accessibility" component={AccessibilityScreen} />
+
       {/* App Configuration */}
-      <Stack.Screen 
-        name="AppSettings" 
-        component={AppSettingsScreen} 
-      />
-      <Stack.Screen 
-        name="SettingsMenuManagement" 
-        component={MenuManagementScreen} 
-      />
-      <Stack.Screen 
-        name="PricingDiscounts" 
-        component={PricingDiscountsScreen} 
-      />
-      <Stack.Screen 
-        name="BackupRestore" 
-        component={BackupRestoreScreen} 
-      />
-      <Stack.Screen 
-        name="DataExport" 
-        component={DataExportScreen} 
-      />
-      <Stack.Screen 
-        name="SystemDiagnostics" 
-        component={SystemDiagnosticsScreen} 
-      />
-      <Stack.Screen 
-        name="DeveloperSettings" 
-        component={DeveloperSettingsScreen} 
-      />
-      
+      <Stack.Screen name="AppSettings" component={AppSettingsScreen} />
+      <Stack.Screen name="SettingsMenuManagement" component={MenuManagementScreen} />
+      <Stack.Screen name="PricingDiscounts" component={PricingDiscountsScreen} />
+      <Stack.Screen name="BackupRestore" component={BackupRestoreScreen} />
+      <Stack.Screen name="DataExport" component={DataExportScreen} />
+      <Stack.Screen name="SystemDiagnostics" component={SystemDiagnosticsScreen} />
+      <Stack.Screen name="DeveloperSettings" component={DeveloperSettingsScreen} />
+
       {/* Integrations */}
-      <Stack.Screen 
-        name="XeroSettings" 
-        component={XeroSettingsScreen} 
-      />
-      <Stack.Screen 
-        name="XeroSyncDashboard" 
-        component={XeroSyncDashboard} 
-      />
-      
+      <Stack.Screen name="XeroSettings" component={XeroSettingsScreen} />
+      <Stack.Screen name="XeroSyncDashboard" component={XeroSyncDashboard} />
+
       {/* Onboarding */}
-      <Stack.Screen 
-        name="RestaurantSetup" 
-        component={RestaurantSetupScreen} 
-      />
-      <Stack.Screen 
-        name="RestaurantProfile" 
-        component={RestaurantProfileScreen} 
-      />
-      
+      <Stack.Screen name="RestaurantSetup" component={RestaurantSetupScreen} />
+      <Stack.Screen name="RestaurantProfile" component={RestaurantProfileScreen} />
+
       {/* Platform Settings */}
-      <Stack.Screen 
-        name="RestaurantPlatformOverrides" 
+      <Stack.Screen
+        name="RestaurantPlatformOverrides"
         component={RestaurantPlatformOverridesScreen}
         options={{
           title: 'Platform Settings',
@@ -268,12 +173,11 @@ const SettingsNavigator: React.FC = () => {
         name="RecipeFormScreen"
         component={RecipeFormScreen}
         options={({ route }) => ({
-          title: route.params?.recipe ? 'Edit Recipe' : 'Create Recipe'
+          title: route.params?.recipe ? 'Edit Recipe' : 'Create Recipe',
         })}
       />
     </Stack.Navigator>
   );
 };
-
 
 export default SettingsNavigator;

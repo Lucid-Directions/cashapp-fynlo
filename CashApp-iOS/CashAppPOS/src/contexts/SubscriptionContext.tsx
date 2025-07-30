@@ -1,6 +1,6 @@
 /**
  * Subscription Context for managing subscription state and feature access
- * 
+ *
  * This context provides subscription information, feature gating, and usage
  * tracking throughout the application.
  */
@@ -83,17 +83,17 @@ interface SubscriptionContextType {
   // Feature gating
   hasFeature: (featureName: string) => Promise<FeatureGateResult>;
   checkUsageLimit: (limitType: string, increment?: number) => Promise<UsageLimitResult>;
-  
+
   // Subscription management
   loadSubscription: (restaurantId: number) => Promise<void>;
   subscribeToPlan: (planId: number, startTrial?: boolean) => Promise<boolean>;
   changePlan: (newPlanId: number, immediate?: boolean) => Promise<boolean>;
   cancelSubscription: () => Promise<boolean>;
-  
+
   // Usage tracking
   incrementUsage: (usageType: string, amount?: number) => Promise<boolean>;
   refreshUsage: () => Promise<void>;
-  
+
   // Utility
   formatPrice: (price: number) => string;
   getPlanByName: (planName: string) => SubscriptionPlan | null;
@@ -107,9 +107,9 @@ interface SubscriptionProviderProps {
   restaurantId?: number;
 }
 
-export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({ 
-  children, 
-  restaurantId 
+export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
+  children,
+  restaurantId,
 }) => {
   const [subscription, setSubscription] = useState<RestaurantSubscription | null>(null);
   const [usage, setUsage] = useState<SubscriptionUsage | null>(null);
@@ -128,7 +128,7 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
   const loadSubscription = async (id: number) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const response = await DataService.getInstance().getCurrentSubscription(id);
       if (response.success) {
@@ -162,12 +162,12 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
         hasAccess: false,
         reason: 'No active subscription',
         upgradeRequired: true,
-        requiredPlans: ['basic', 'professional', 'enterprise']
+        requiredPlans: ['basic', 'professional', 'enterprise'],
       };
     }
 
     const hasAccess = subscription.plan.features[featureName] === true;
-    
+
     if (hasAccess) {
       return { hasAccess: true };
     }
@@ -182,7 +182,7 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
       reason: `Feature '${featureName}' not available in ${subscription.plan.display_name}`,
       currentPlan: subscription.plan.name,
       requiredPlans: plansWithFeature,
-      upgradeRequired: true
+      upgradeRequired: true,
     };
   };
 
@@ -194,20 +194,20 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
         currentUsage: 0,
         limit: 0,
         percentageUsed: 100,
-        remaining: 0
+        remaining: 0,
       };
     }
 
     const limitMap = {
-      'orders': subscription.plan.max_orders_per_month,
-      'staff': subscription.plan.max_staff_accounts,
-      'menu_items': subscription.plan.max_menu_items
+      orders: subscription.plan.max_orders_per_month,
+      staff: subscription.plan.max_staff_accounts,
+      menu_items: subscription.plan.max_menu_items,
     };
 
     const usageMap = {
-      'orders': usage.orders_count,
-      'staff': usage.staff_count,
-      'menu_items': usage.menu_items_count
+      orders: usage.orders_count,
+      staff: usage.staff_count,
+      menu_items: usage.menu_items_count,
     };
 
     const limit = limitMap[limitType as keyof typeof limitMap];
@@ -221,7 +221,7 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
         currentUsage,
         limit: null,
         percentageUsed: 0,
-        remaining: null
+        remaining: null,
       };
     }
 
@@ -235,7 +235,7 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
       currentUsage,
       limit,
       percentageUsed: Math.min(100, percentageUsed),
-      remaining
+      remaining,
     };
   };
 
@@ -249,7 +249,7 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
       const response = await DataService.getInstance().createSubscription({
         restaurant_id: restaurantId,
         plan_id: planId,
-        start_trial: startTrial
+        start_trial: startTrial,
       });
 
       if (response.success) {
@@ -277,7 +277,7 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
       const response = await DataService.getInstance().changeSubscriptionPlan({
         restaurant_id: restaurantId,
         new_plan_id: newPlanId,
-        immediate
+        immediate,
       });
 
       if (response.success) {
@@ -323,13 +323,17 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
     if (!restaurantId) return false;
 
     try {
-      const response = await DataService.getInstance().incrementUsage(restaurantId, usageType, amount);
-      
+      const response = await DataService.getInstance().incrementUsage(
+        restaurantId,
+        usageType,
+        amount,
+      );
+
       if (response.success) {
         // Update local usage state
         setUsage(prevUsage => {
           if (!prevUsage) return null;
-          
+
           const updatedUsage = { ...prevUsage };
           switch (usageType) {
             case 'orders':
@@ -362,7 +366,7 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
   const formatPrice = (price: number): string => {
     return new Intl.NumberFormat('en-GB', {
       style: 'currency',
-      currency: 'GBP'
+      currency: 'GBP',
     }).format(price);
   };
 
@@ -372,11 +376,11 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
 
   const isUnlimited = (limitType: string): boolean => {
     if (!subscription) return false;
-    
+
     const limitMap = {
-      'orders': subscription.plan.max_orders_per_month,
-      'staff': subscription.plan.max_staff_accounts,
-      'menu_items': subscription.plan.max_menu_items
+      orders: subscription.plan.max_orders_per_month,
+      staff: subscription.plan.max_staff_accounts,
+      menu_items: subscription.plan.max_menu_items,
     };
 
     return limitMap[limitType as keyof typeof limitMap] === null;
@@ -407,14 +411,10 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
     // Utility
     formatPrice,
     getPlanByName,
-    isUnlimited
+    isUnlimited,
   };
 
-  return (
-    <SubscriptionContext.Provider value={value}>
-      {children}
-    </SubscriptionContext.Provider>
-  );
+  return <SubscriptionContext.Provider value={value}>{children}</SubscriptionContext.Provider>;
 };
 
 export const useSubscription = (): SubscriptionContextType => {

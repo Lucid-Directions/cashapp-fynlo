@@ -1,12 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Alert,
-  ActivityIndicator,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import PaymentService, { PaymentRequest, QRPaymentData } from '../../services/PaymentService';
@@ -15,12 +8,12 @@ import QRPaymentErrorBoundary from './QRPaymentErrorBoundary';
 // Error-safe QR Code Wrapper Component
 const QRCodeWrapper: React.FC<{ qrCodeData: string }> = ({ qrCodeData }) => {
   const [hasError, setHasError] = useState(false);
-  
+
   try {
     if (!qrCodeData || qrCodeData.length === 0) {
       throw new Error('Invalid QR code data');
     }
-    
+
     if (hasError) {
       return (
         <View style={{ alignItems: 'center', justifyContent: 'center', width: 180, height: 180 }}>
@@ -29,7 +22,7 @@ const QRCodeWrapper: React.FC<{ qrCodeData: string }> = ({ qrCodeData }) => {
         </View>
       );
     }
-    
+
     return (
       <QRCode
         value={qrCodeData}
@@ -77,7 +70,9 @@ export const QRCodePayment: React.FC<QRCodePaymentProps> = ({
   onPaymentComplete,
   onCancel,
 }) => {
-  const [status, setStatus] = useState<'generating' | 'waiting' | 'completed' | 'expired' | 'error'>('generating');
+  const [status, setStatus] = useState<
+    'generating' | 'waiting' | 'completed' | 'expired' | 'error'
+  >('generating');
   const [qrData, setQrData] = useState<QRPaymentData | null>(null);
   const [error, setError] = useState<string>('');
   const [remainingTime, setRemainingTime] = useState<number>(0);
@@ -87,11 +82,11 @@ export const QRCodePayment: React.FC<QRCodePaymentProps> = ({
 
   useEffect(() => {
     generateQRPayment();
-    
+
     return () => {
       // Mark component as unmounted
       isMountedRef.current = false;
-      
+
       // Clean up all timers
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
@@ -113,7 +108,7 @@ export const QRCodePayment: React.FC<QRCodePaymentProps> = ({
       if (countdownRef.current) {
         clearInterval(countdownRef.current);
       }
-      
+
       // Start polling for payment status
       intervalRef.current = setInterval(() => {
         if (isMountedRef.current) {
@@ -125,16 +120,16 @@ export const QRCodePayment: React.FC<QRCodePaymentProps> = ({
           }
         }
       }, 3000);
-      
+
       // Setup expiration timer
       const expiryTime = new Date(qrData.expiresAt).getTime();
       const now = Date.now();
       const timeLeft = Math.max(0, expiryTime - now);
-      
+
       if (isMountedRef.current) {
         setRemainingTime(Math.floor(timeLeft / 1000));
       }
-      
+
       countdownRef.current = setInterval(() => {
         if (!isMountedRef.current) {
           if (countdownRef.current) {
@@ -143,11 +138,11 @@ export const QRCodePayment: React.FC<QRCodePaymentProps> = ({
           }
           return;
         }
-        
+
         setRemainingTime(prev => {
           if (prev <= 1) {
             setStatus('expired');
-            
+
             // Clean up timers
             if (intervalRef.current) {
               clearInterval(intervalRef.current);
@@ -163,7 +158,7 @@ export const QRCodePayment: React.FC<QRCodePaymentProps> = ({
         });
       }, 1000);
     }
-    
+
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
@@ -179,19 +174,19 @@ export const QRCodePayment: React.FC<QRCodePaymentProps> = ({
   const generateQRPayment = async () => {
     try {
       if (!isMountedRef.current) return;
-      
+
       setStatus('generating');
       setError('');
-      
+
       const data = await PaymentService.generateQRPayment(request);
-      
+
       if (!isMountedRef.current) return;
-      
+
       setQrData(data);
       setStatus('waiting');
     } catch (err) {
       console.error('❌ QR Payment generation failed:', err);
-      
+
       if (isMountedRef.current) {
         setStatus('error');
         setError(err instanceof Error ? err.message : 'Failed to generate QR code');
@@ -204,12 +199,12 @@ export const QRCodePayment: React.FC<QRCodePaymentProps> = ({
 
     try {
       const statusResult = await PaymentService.checkQRPaymentStatus(qrData.qrPaymentId);
-      
+
       if (!isMountedRef.current) return;
-      
+
       if (statusResult.status === 'completed') {
         setStatus('completed');
-        
+
         // Clean up timers
         if (intervalRef.current) {
           clearInterval(intervalRef.current);
@@ -219,10 +214,10 @@ export const QRCodePayment: React.FC<QRCodePaymentProps> = ({
           clearInterval(countdownRef.current);
           countdownRef.current = null;
         }
-        
+
         // Confirm the payment
         const result = await PaymentService.confirmQRPayment(qrData.qrPaymentId);
-        
+
         if (isMountedRef.current) {
           onPaymentComplete(result);
         }
@@ -233,7 +228,7 @@ export const QRCodePayment: React.FC<QRCodePaymentProps> = ({
       }
     } catch (err) {
       console.error('❌ Failed to check QR payment status:', err);
-      
+
       if (isMountedRef.current) {
         setError('Failed to check payment status');
       }
@@ -262,16 +257,12 @@ export const QRCodePayment: React.FC<QRCodePaymentProps> = ({
             <View style={styles.qrCodeWrapper}>
               <QRCodeWrapper qrCodeData={qrData.qrCodeData} />
             </View>
-            
-            <Text style={styles.qrInstructions}>
-              Scan this QR code with your banking app
-            </Text>
-            
+
+            <Text style={styles.qrInstructions}>Scan this QR code with your banking app</Text>
+
             <View style={styles.timeContainer}>
               <Icon name="access-time" size={16} color={Colors.warning} />
-              <Text style={styles.timeText}>
-                Expires in {formatTime(remainingTime)}
-              </Text>
+              <Text style={styles.timeText}>Expires in {formatTime(remainingTime)}</Text>
             </View>
 
             <View style={styles.paymentDetails}>
@@ -348,13 +339,14 @@ export const QRCodePayment: React.FC<QRCodePaymentProps> = ({
   };
 
   return (
-    <QRPaymentErrorBoundary onReset={() => {
-      // Reset component state and regenerate QR
-      setStatus('generating');
-      setError('');
-      setQrData(null);
-      generateQRPayment();
-    }}>
+    <QRPaymentErrorBoundary
+      onReset={() => {
+        // Reset component state and regenerate QR
+        setStatus('generating');
+        setError('');
+        setQrData(null);
+        generateQRPayment();
+      }}>
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.title}>QR Code Payment</Text>
@@ -363,35 +355,34 @@ export const QRCodePayment: React.FC<QRCodePaymentProps> = ({
           </TouchableOpacity>
         </View>
 
-      <View style={styles.amountContainer}>
-        <Text style={styles.amountLabel}>Amount Due</Text>
-        <Text style={styles.amountValue}>£{request.amount.toFixed(2)}</Text>
-      </View>
-
-      {renderQRContent()}
-
-      {status === 'waiting' && (
-        <View style={styles.footer}>
-          <TouchableOpacity
-            style={styles.simulateButton}
-            onPress={() => {
-              // For testing - simulate successful payment
-              setStatus('completed');
-              setTimeout(() => {
-                onPaymentComplete({
-                  success: true,
-                  transactionId: qrData?.qrPaymentId,
-                  provider: 'qr_code',
-                  amount: request.amount,
-                  fee: qrData?.feeAmount || 0,
-                });
-              }, 2000);
-            }}
-          >
-            <Text style={styles.simulateButtonText}>Simulate Payment (Test)</Text>
-          </TouchableOpacity>
+        <View style={styles.amountContainer}>
+          <Text style={styles.amountLabel}>Amount Due</Text>
+          <Text style={styles.amountValue}>£{request.amount.toFixed(2)}</Text>
         </View>
-      )}
+
+        {renderQRContent()}
+
+        {status === 'waiting' && (
+          <View style={styles.footer}>
+            <TouchableOpacity
+              style={styles.simulateButton}
+              onPress={() => {
+                // For testing - simulate successful payment
+                setStatus('completed');
+                setTimeout(() => {
+                  onPaymentComplete({
+                    success: true,
+                    transactionId: qrData?.qrPaymentId,
+                    provider: 'qr_code',
+                    amount: request.amount,
+                    fee: qrData?.feeAmount || 0,
+                  });
+                }, 2000);
+              }}>
+              <Text style={styles.simulateButtonText}>Simulate Payment (Test)</Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
     </QRPaymentErrorBoundary>
   );

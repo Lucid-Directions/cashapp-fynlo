@@ -12,7 +12,13 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { SimpleTextInput } from '../inputs'; // Corrected import
-import { UserManagementService, CreateUserRequest, UserRole, Permission, PermissionTemplate } from '../../services/UserManagementService';
+import {
+  UserManagementService,
+  CreateUserRequest,
+  UserRole,
+  Permission,
+  PermissionTemplate,
+} from '../../services/UserManagementService';
 
 // Fynlo POS Color Scheme
 const Colors = {
@@ -37,11 +43,7 @@ interface CreateUserModalProps {
   onUserCreated: () => void;
 }
 
-const CreateUserModal: React.FC<CreateUserModalProps> = ({
-  visible,
-  onClose,
-  onUserCreated,
-}) => {
+const CreateUserModal: React.FC<CreateUserModalProps> = ({ visible, onClose, onUserCreated }) => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<CreateUserRequest>({
     name: '',
@@ -176,7 +178,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
   };
 
   const applicableTemplates = permissionTemplates.filter(template =>
-    template.applicableRoles.includes(formData.role)
+    template.applicableRoles.includes(formData.role),
   );
 
   return (
@@ -184,8 +186,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
       visible={visible}
       animationType="slide"
       presentationStyle="pageSheet"
-      onRequestClose={handleClose}
-    >
+      onRequestClose={handleClose}>
       <SafeAreaView style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
@@ -196,8 +197,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
           <TouchableOpacity
             onPress={handleSubmit}
             style={[styles.saveButton, loading && styles.saveButtonDisabled]}
-            disabled={loading}
-          >
+            disabled={loading}>
             {loading ? (
               <ActivityIndicator size="small" color={Colors.white} />
             ) : (
@@ -210,12 +210,12 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
           {/* Basic Information */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Basic Information</Text>
-            
+
             <View style={styles.inputGroup}>
               <SimpleTextInput
                 label="Full Name *"
                 value={formData.name}
-                onValueChange={(text) => setFormData(prev => ({ ...prev, name: text }))}
+                onValueChange={text => setFormData(prev => ({ ...prev, name: text }))}
                 placeholder="Enter full name"
                 autoCapitalize="words"
               />
@@ -225,7 +225,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
               <SimpleTextInput
                 label="Email Address *"
                 value={formData.email}
-                onValueChange={(text) => setFormData(prev => ({ ...prev, email: text }))}
+                onValueChange={text => setFormData(prev => ({ ...prev, email: text }))}
                 placeholder="Enter email address"
                 keyboardType="email-address"
                 autoCapitalize="none"
@@ -236,7 +236,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
               <SimpleTextInput
                 label="Phone Number"
                 value={formData.phoneNumber || ''}
-                onValueChange={(text) => setFormData(prev => ({ ...prev, phoneNumber: text }))}
+                onValueChange={text => setFormData(prev => ({ ...prev, phoneNumber: text }))}
                 placeholder="Enter phone number"
                 keyboardType="phone-pad"
               />
@@ -246,26 +246,23 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
           {/* Role Selection */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Role & Restaurant</Text>
-            
+
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>User Role *</Text>
               <View style={styles.roleGrid}>
-                {userRoles.map((role) => (
+                {userRoles.map(role => (
                   <TouchableOpacity
                     key={role}
-                    style={[
-                      styles.roleOption,
-                      formData.role === role && styles.roleOptionSelected,
-                    ]}
+                    style={[styles.roleOption, formData.role === role && styles.roleOptionSelected]}
                     onPress={() => {
                       setFormData(prev => ({ ...prev, role }));
                       setSelectedTemplate(''); // Reset template when role changes
-                    }}
-                  >
-                    <Text style={[
-                      styles.roleOptionText,
-                      formData.role === role && styles.roleOptionTextSelected,
-                    ]}>
+                    }}>
+                    <Text
+                      style={[
+                        styles.roleOptionText,
+                        formData.role === role && styles.roleOptionTextSelected,
+                      ]}>
                       {role}
                     </Text>
                   </TouchableOpacity>
@@ -273,18 +270,21 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
               </View>
             </View>
 
-            {(formData.role === 'Restaurant Owner' || formData.role === 'Restaurant Manager' || formData.role === 'Restaurant Employee' || formData.role === 'Kitchen Staff') && (
+            {(formData.role === 'Restaurant Owner' ||
+              formData.role === 'Restaurant Manager' ||
+              formData.role === 'Restaurant Employee' ||
+              formData.role === 'Kitchen Staff') && (
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>Restaurant</Text>
                 <View style={styles.restaurantGrid}>
-                  {['1', '2', '3', '4'].map((id) => {
+                  {['1', '2', '3', '4'].map(id => {
                     const restaurantNames: { [key: string]: string } = {
                       '1': 'Fynlo Coffee Shop',
                       '2': 'Fynlo Burger Bar',
                       '3': 'Fynlo Pizza Palace',
                       '4': 'Fynlo Taco Stand',
                     };
-                    
+
                     return (
                       <TouchableOpacity
                         key={id}
@@ -292,12 +292,12 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                           styles.restaurantOption,
                           formData.restaurantId === id && styles.restaurantOptionSelected,
                         ]}
-                        onPress={() => setFormData(prev => ({ ...prev, restaurantId: id }))}
-                      >
-                        <Text style={[
-                          styles.restaurantOptionText,
-                          formData.restaurantId === id && styles.restaurantOptionTextSelected,
-                        ]}>
+                        onPress={() => setFormData(prev => ({ ...prev, restaurantId: id }))}>
+                        <Text
+                          style={[
+                            styles.restaurantOptionText,
+                            formData.restaurantId === id && styles.restaurantOptionTextSelected,
+                          ]}>
                           {restaurantNames[id]}
                         </Text>
                       </TouchableOpacity>
@@ -313,27 +313,29 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Permission Templates</Text>
               <Text style={styles.sectionSubtitle}>Quick setup with predefined permissions</Text>
-              
+
               <View style={styles.templateGrid}>
-                {applicableTemplates.map((template) => (
+                {applicableTemplates.map(template => (
                   <TouchableOpacity
                     key={template.id}
                     style={[
                       styles.templateOption,
                       selectedTemplate === template.id && styles.templateOptionSelected,
                     ]}
-                    onPress={() => setSelectedTemplate(template.id)}
-                  >
-                    <Text style={[
-                      styles.templateOptionTitle,
-                      selectedTemplate === template.id && styles.templateOptionTitleSelected,
-                    ]}>
+                    onPress={() => setSelectedTemplate(template.id)}>
+                    <Text
+                      style={[
+                        styles.templateOptionTitle,
+                        selectedTemplate === template.id && styles.templateOptionTitleSelected,
+                      ]}>
                       {template.name}
                     </Text>
-                    <Text style={[
-                      styles.templateOptionDescription,
-                      selectedTemplate === template.id && styles.templateOptionDescriptionSelected,
-                    ]}>
+                    <Text
+                      style={[
+                        styles.templateOptionDescription,
+                        selectedTemplate === template.id &&
+                          styles.templateOptionDescriptionSelected,
+                      ]}>
                       {template.description}
                     </Text>
                   </TouchableOpacity>
@@ -346,9 +348,10 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
           <View style={styles.section}>
             <TouchableOpacity
               style={styles.permissionsHeader}
-              onPress={() => setShowPermissions(!showPermissions)}
-            >
-              <Text style={styles.sectionTitle}>Permissions ({formData.permissions.length} selected)</Text>
+              onPress={() => setShowPermissions(!showPermissions)}>
+              <Text style={styles.sectionTitle}>
+                Permissions ({formData.permissions.length} selected)
+              </Text>
               <Icon
                 name={showPermissions ? 'expand-less' : 'expand-more'}
                 size={24}
@@ -358,12 +361,11 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
 
             {showPermissions && (
               <View style={styles.permissionsList}>
-                {allPermissions.map((permission) => (
+                {allPermissions.map(permission => (
                   <TouchableOpacity
                     key={permission}
                     style={styles.permissionItem}
-                    onPress={() => togglePermission(permission)}
-                  >
+                    onPress={() => togglePermission(permission)}>
                     <View style={styles.permissionInfo}>
                       <Text style={styles.permissionName}>
                         {permission.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
@@ -372,10 +374,11 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                         {permissionDescriptions[permission]}
                       </Text>
                     </View>
-                    <View style={[
-                      styles.checkbox,
-                      formData.permissions.includes(permission) && styles.checkboxSelected,
-                    ]}>
+                    <View
+                      style={[
+                        styles.checkbox,
+                        formData.permissions.includes(permission) && styles.checkboxSelected,
+                      ]}>
                       {formData.permissions.includes(permission) && (
                         <Icon name="check" size={16} color={Colors.white} />
                       )}

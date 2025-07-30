@@ -16,38 +16,43 @@ import SumUpService, { SumUpContactlessPayment } from '../../services/SumUpServi
 
 const { width: screenWidth } = Dimensions.get('window');
 
-type ContactlessPaymentRouteProp = RouteProp<{
-  ContactlessPayment: {
-    amount: number;
-    currency: string;
-    description?: string;
-    onSuccess: (payment: SumUpContactlessPayment) => void;
-    onCancel: () => void;
-  };
-}, 'ContactlessPayment'>;
+type ContactlessPaymentRouteProp = RouteProp<
+  {
+    ContactlessPayment: {
+      amount: number;
+      currency: string;
+      description?: string;
+      onSuccess: (payment: SumUpContactlessPayment) => void;
+      onCancel: () => void;
+    };
+  },
+  'ContactlessPayment'
+>;
 
 const ContactlessPaymentScreen: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute<ContactlessPaymentRouteProp>();
   const { theme } = useTheme();
-  
+
   const { amount, currency, description, onSuccess, onCancel } = route.params;
-  
-  const [paymentStatus, setPaymentStatus] = useState<'waiting' | 'detecting' | 'processing' | 'success' | 'error'>('waiting');
+
+  const [paymentStatus, setPaymentStatus] = useState<
+    'waiting' | 'detecting' | 'processing' | 'success' | 'error'
+  >('waiting');
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [timeRemaining, setTimeRemaining] = useState(60); // 60 second timeout
-  
+
   // Animations
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const progressAnim = useRef(new Animated.Value(0)).current;
-  
+
   useEffect(() => {
     // Start pulse animation
     startPulseAnimation();
-    
+
     // Start countdown timer
     const timer = setInterval(() => {
-      setTimeRemaining((prev) => {
+      setTimeRemaining(prev => {
         if (prev <= 1) {
           handleTimeout();
           return 0;
@@ -55,12 +60,12 @@ const ContactlessPaymentScreen: React.FC = () => {
         return prev - 1;
       });
     }, 1000);
-    
+
     return () => {
       clearInterval(timer);
     };
   }, []);
-  
+
   const startPulseAnimation = () => {
     Animated.loop(
       Animated.sequence([
@@ -74,10 +79,10 @@ const ContactlessPaymentScreen: React.FC = () => {
           duration: 800,
           useNativeDriver: true,
         }),
-      ])
+      ]),
     ).start();
   };
-  
+
   const startProgressAnimation = () => {
     Animated.timing(progressAnim, {
       toValue: 1,
@@ -85,19 +90,15 @@ const ContactlessPaymentScreen: React.FC = () => {
       useNativeDriver: false,
     }).start();
   };
-  
+
   const handleStartPayment = async () => {
     try {
       setPaymentStatus('detecting');
       setErrorMessage('');
       startProgressAnimation();
-      
-      const payment = await SumUpService.processContactlessPayment(
-        amount,
-        currency,
-        description
-      );
-      
+
+      const payment = await SumUpService.processContactlessPayment(amount, currency, description);
+
       if (payment.status === 'completed') {
         setPaymentStatus('success');
         setTimeout(() => {
@@ -113,37 +114,33 @@ const ContactlessPaymentScreen: React.FC = () => {
       setErrorMessage(error instanceof Error ? error.message : 'Payment failed');
     }
   };
-  
+
   const handleCancel = () => {
-    Alert.alert(
-      'Cancel Payment',
-      'Are you sure you want to cancel this payment?',
-      [
-        { text: 'Continue', style: 'cancel' },
-        { 
-          text: 'Cancel Payment', 
-          style: 'destructive',
-          onPress: () => {
-            onCancel();
-            navigation.goBack();
-          }
+    Alert.alert('Cancel Payment', 'Are you sure you want to cancel this payment?', [
+      { text: 'Continue', style: 'cancel' },
+      {
+        text: 'Cancel Payment',
+        style: 'destructive',
+        onPress: () => {
+          onCancel();
+          navigation.goBack();
         },
-      ]
-    );
+      },
+    ]);
   };
-  
+
   const handleTimeout = () => {
     setPaymentStatus('error');
     setErrorMessage('Payment timeout. Please try again.');
   };
-  
+
   const handleRetry = () => {
     setPaymentStatus('waiting');
     setErrorMessage('');
     setTimeRemaining(60);
     progressAnim.setValue(0);
   };
-  
+
   const getStatusIcon = () => {
     switch (paymentStatus) {
       case 'detecting':
@@ -157,7 +154,7 @@ const ContactlessPaymentScreen: React.FC = () => {
         return 'nfc';
     }
   };
-  
+
   const getStatusColor = () => {
     switch (paymentStatus) {
       case 'success':
@@ -171,7 +168,7 @@ const ContactlessPaymentScreen: React.FC = () => {
         return theme.colors.primary;
     }
   };
-  
+
   const getStatusMessage = () => {
     switch (paymentStatus) {
       case 'waiting':
@@ -188,7 +185,7 @@ const ContactlessPaymentScreen: React.FC = () => {
         return 'Ready for contactless payment';
     }
   };
-  
+
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -292,7 +289,7 @@ const ContactlessPaymentScreen: React.FC = () => {
       fontWeight: '600',
     },
   });
-  
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
@@ -303,44 +300,33 @@ const ContactlessPaymentScreen: React.FC = () => {
         <Text style={styles.headerTitle}>Contactless Payment</Text>
         <View style={{ width: 24 }} />
       </View>
-      
+
       {/* Content */}
       <View style={styles.content}>
         {/* Amount Display */}
         <View style={styles.amountContainer}>
           <Text style={styles.amountLabel}>Amount to Pay</Text>
           <Text style={styles.amount}>
-            {currency === 'GBP' ? '£' : currency}{amount.toFixed(2)}
+            {currency === 'GBP' ? '£' : currency}
+            {amount.toFixed(2)}
           </Text>
         </View>
-        
+
         {/* NFC Icon and Status */}
         <View style={styles.nfcContainer}>
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={paymentStatus === 'waiting' ? handleStartPayment : undefined}
-            disabled={paymentStatus !== 'waiting'}
-          >
-            <Animated.View 
-              style={[
-                styles.nfcIcon, 
-                { transform: [{ scale: pulseAnim }] }
-              ]}
-            >
-              <Icon 
-                name={getStatusIcon()} 
-                size={120} 
-                color={getStatusColor()} 
-              />
+            disabled={paymentStatus !== 'waiting'}>
+            <Animated.View style={[styles.nfcIcon, { transform: [{ scale: pulseAnim }] }]}>
+              <Icon name={getStatusIcon()} size={120} color={getStatusColor()} />
             </Animated.View>
           </TouchableOpacity>
-          
-          <Text style={styles.statusMessage}>
-            {getStatusMessage()}
-          </Text>
-          
+
+          <Text style={styles.statusMessage}>{getStatusMessage()}</Text>
+
           {(paymentStatus === 'detecting' || paymentStatus === 'processing') && (
             <View style={styles.progressContainer}>
-              <Animated.View 
+              <Animated.View
                 style={[
                   styles.progressBar,
                   {
@@ -354,17 +340,18 @@ const ContactlessPaymentScreen: React.FC = () => {
             </View>
           )}
         </View>
-        
+
         {/* Timer */}
         {paymentStatus === 'waiting' && (
           <View style={styles.timerContainer}>
             <Text style={styles.timerText}>
-              Time remaining: {Math.floor(timeRemaining / 60)}:{(timeRemaining % 60).toString().padStart(2, '0')}
+              Time remaining: {Math.floor(timeRemaining / 60)}:
+              {(timeRemaining % 60).toString().padStart(2, '0')}
             </Text>
           </View>
         )}
       </View>
-      
+
       {/* Bottom Buttons */}
       <View style={styles.buttonContainer}>
         {paymentStatus === 'error' && (
@@ -372,7 +359,7 @@ const ContactlessPaymentScreen: React.FC = () => {
             <Text style={styles.retryButtonText}>Try Again</Text>
           </TouchableOpacity>
         )}
-        
+
         {paymentStatus !== 'success' && (
           <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
             <Text style={styles.cancelButtonText}>Cancel Payment</Text>

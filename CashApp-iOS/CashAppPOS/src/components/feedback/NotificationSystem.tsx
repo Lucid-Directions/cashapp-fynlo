@@ -82,11 +82,7 @@ interface NotificationItemProps {
   index: number;
 }
 
-const NotificationItem: React.FC<NotificationItemProps> = ({ 
-  notification, 
-  onHide, 
-  index 
-}) => {
+const NotificationItem: React.FC<NotificationItemProps> = ({ notification, onHide, index }) => {
   const [animation] = useState(new Animated.Value(0));
   const [visible, setVisible] = useState(true);
 
@@ -159,28 +155,28 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
     switch (notification.position) {
       case NotificationPosition.TOP:
         positionStyle = {
-          top: statusBarHeight + margin + (index * 80),
+          top: statusBarHeight + margin + index * 80,
           left: margin,
           right: margin,
         };
         break;
       case NotificationPosition.BOTTOM:
         positionStyle = {
-          bottom: margin + (index * 80),
+          bottom: margin + index * 80,
           left: margin,
           right: margin,
         };
         break;
       case NotificationPosition.CENTER:
         positionStyle = {
-          top: screenHeight / 2 - 40 + (index * 80),
+          top: screenHeight / 2 - 40 + index * 80,
           left: margin,
           right: margin,
         };
         break;
       default:
         positionStyle = {
-          top: statusBarHeight + margin + (index * 80),
+          top: statusBarHeight + margin + index * 80,
           left: margin,
           right: margin,
         };
@@ -201,7 +197,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
       <View style={[styles.notification, { backgroundColor }]}>
         <View style={styles.notificationContent}>
           <Icon name={iconName} size={24} color={Colors.white} style={styles.notificationIcon} />
-          
+
           <View style={styles.notificationText}>
             <Text style={styles.notificationTitle} numberOfLines={1}>
               {notification.title}
@@ -232,11 +228,8 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
               if (!notification.persistent) {
                 hideNotification();
               }
-            }}
-          >
-            <Text style={styles.actionButtonText}>
-              {notification.action.label}
-            </Text>
+            }}>
+            <Text style={styles.actionButtonText}>{notification.action.label}</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -249,31 +242,32 @@ interface NotificationProviderProps {
   maxNotifications?: number;
 }
 
-export const NotificationProvider: React.FC<NotificationProviderProps> = ({ 
-  children, 
-  maxNotifications = 5 
+export const NotificationProvider: React.FC<NotificationProviderProps> = ({
+  children,
+  maxNotifications = 5,
 }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
-  const showNotification = useCallback((
-    notificationData: Omit<Notification, 'id'>
-  ): string => {
-    const id = `notification_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    const notification: Notification = {
-      id,
-      position: NotificationPosition.TOP,
-      duration: 4000,
-      ...notificationData,
-    };
+  const showNotification = useCallback(
+    (notificationData: Omit<Notification, 'id'>): string => {
+      const id = `notification_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const notification: Notification = {
+        id,
+        position: NotificationPosition.TOP,
+        duration: 4000,
+        ...notificationData,
+      };
 
-    setNotifications(prev => {
-      const newNotifications = [notification, ...prev];
-      // Limit the number of notifications
-      return newNotifications.slice(0, maxNotifications);
-    });
+      setNotifications(prev => {
+        const newNotifications = [notification, ...prev];
+        // Limit the number of notifications
+        return newNotifications.slice(0, maxNotifications);
+      });
 
-    return id;
-  }, [maxNotifications]);
+      return id;
+    },
+    [maxNotifications],
+  );
 
   const hideNotification = useCallback((id: string) => {
     setNotifications(prev => prev.filter(n => n.id !== id));
@@ -283,70 +277,66 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
     setNotifications([]);
   }, []);
 
-  const showSuccess = useCallback((
-    title: string, 
-    message?: string, 
-    duration?: number
-  ): string => {
-    return showNotification({
-      title,
-      message,
-      type: NotificationType.SUCCESS,
-      duration,
-    });
-  }, [showNotification]);
+  const showSuccess = useCallback(
+    (title: string, message?: string, duration?: number): string => {
+      return showNotification({
+        title,
+        message,
+        type: NotificationType.SUCCESS,
+        duration,
+      });
+    },
+    [showNotification],
+  );
 
-  const showError = useCallback((
-    title: string, 
-    message?: string, 
-    duration?: number
-  ): string => {
-    return showNotification({
-      title,
-      message,
-      type: NotificationType.ERROR,
-      duration: duration || 6000, // Longer duration for errors
-    });
-  }, [showNotification]);
+  const showError = useCallback(
+    (title: string, message?: string, duration?: number): string => {
+      return showNotification({
+        title,
+        message,
+        type: NotificationType.ERROR,
+        duration: duration || 6000, // Longer duration for errors
+      });
+    },
+    [showNotification],
+  );
 
-  const showWarning = useCallback((
-    title: string, 
-    message?: string, 
-    duration?: number
-  ): string => {
-    return showNotification({
-      title,
-      message,
-      type: NotificationType.WARNING,
-      duration,
-    });
-  }, [showNotification]);
+  const showWarning = useCallback(
+    (title: string, message?: string, duration?: number): string => {
+      return showNotification({
+        title,
+        message,
+        type: NotificationType.WARNING,
+        duration,
+      });
+    },
+    [showNotification],
+  );
 
-  const showInfo = useCallback((
-    title: string, 
-    message?: string, 
-    duration?: number
-  ): string => {
-    return showNotification({
-      title,
-      message,
-      type: NotificationType.INFO,
-      duration,
-    });
-  }, [showNotification]);
+  const showInfo = useCallback(
+    (title: string, message?: string, duration?: number): string => {
+      return showNotification({
+        title,
+        message,
+        type: NotificationType.INFO,
+        duration,
+      });
+    },
+    [showNotification],
+  );
 
-  const showLoading = useCallback((
-    title: string, 
-    message?: string
-  ): string => {
-    return showNotification({
-      title,
-      message,
-      type: NotificationType.LOADING,
-      persistent: true,
-      duration: 0,
-    });
-  }, [showNotification]);
+  const showLoading = useCallback(
+    (title: string, message?: string): string => {
+      return showNotification({
+        title,
+        message,
+        type: NotificationType.LOADING,
+        persistent: true,
+        duration: 0,
+      });
+    },
+    [showNotification],
+  );
 
   const contextValue: NotificationContextType = {
     showNotification,
@@ -418,13 +408,11 @@ export const ProgressNotification: React.FC<ProgressNotificationProps> = ({
           </TouchableOpacity>
         )}
       </View>
-      
-      {message && (
-        <Text style={styles.progressMessage}>{message}</Text>
-      )}
-      
+
+      {message && <Text style={styles.progressMessage}>{message}</Text>}
+
       <View style={styles.progressBarContainer}>
-        <Animated.View 
+        <Animated.View
           style={[
             styles.progressBar,
             {
@@ -436,7 +424,7 @@ export const ProgressNotification: React.FC<ProgressNotificationProps> = ({
           ]}
         />
       </View>
-      
+
       <Text style={styles.progressText}>{Math.round(progress)}%</Text>
     </View>
   );

@@ -52,7 +52,7 @@ interface UpdateUserRequest {
   };
 }
 
-type UserRole = 
+type UserRole =
   | 'Platform Admin'
   | 'Restaurant Owner'
   | 'Restaurant Manager'
@@ -63,7 +63,7 @@ type UserRole =
 
 type UserStatus = 'active' | 'inactive' | 'suspended' | 'pending';
 
-type Permission = 
+type Permission =
   | 'view_analytics'
   | 'manage_users'
   | 'manage_restaurants'
@@ -172,7 +172,7 @@ class UserManagementService {
 
   async createUser(userData: CreateUserRequest): Promise<User> {
     await this.simulateDelay(500);
-    
+
     // Check if email already exists
     if (this.users.some(user => user.email === userData.email)) {
       throw new Error('User with this email already exists');
@@ -185,7 +185,9 @@ class UserManagementService {
       role: userData.role,
       status: 'pending',
       restaurantId: userData.restaurantId,
-      restaurantName: userData.restaurantId ? this.getRestaurantName(userData.restaurantId) : undefined,
+      restaurantName: userData.restaurantId
+        ? this.getRestaurantName(userData.restaurantId)
+        : undefined,
       permissions: userData.permissions,
       createdAt: new Date(),
       loginAttempts: 0,
@@ -196,23 +198,23 @@ class UserManagementService {
     };
 
     this.users.push(newUser);
-    
+
     // Log the creation
     await this.logAccess(newUser.id, newUser.email, 'User Created', 'System', 'success');
-    
+
     return newUser;
   }
 
   async updateUser(userId: string, updates: UpdateUserRequest): Promise<User> {
     await this.simulateDelay(400);
-    
+
     const userIndex = this.users.findIndex(user => user.id === userId);
     if (userIndex === -1) {
       throw new Error('User not found');
     }
 
     const user = this.users[userIndex];
-    
+
     // Check if email change conflicts with existing user
     if (updates.email && updates.email !== user.email) {
       if (this.users.some(u => u.email === updates.email && u.id !== userId)) {
@@ -223,20 +225,22 @@ class UserManagementService {
     const updatedUser = {
       ...user,
       ...updates,
-      restaurantName: updates.restaurantId ? this.getRestaurantName(updates.restaurantId) : user.restaurantName,
+      restaurantName: updates.restaurantId
+        ? this.getRestaurantName(updates.restaurantId)
+        : user.restaurantName,
     };
 
     this.users[userIndex] = updatedUser;
-    
+
     // Log the update
     await this.logAccess(userId, user.email, 'User Updated', 'System', 'success');
-    
+
     return updatedUser;
   }
 
   async deleteUser(userId: string): Promise<boolean> {
     await this.simulateDelay(300);
-    
+
     const userIndex = this.users.findIndex(user => user.id === userId);
     if (userIndex === -1) {
       throw new Error('User not found');
@@ -244,32 +248,42 @@ class UserManagementService {
 
     const user = this.users[userIndex];
     this.users.splice(userIndex, 1);
-    
+
     // Log the deletion
     await this.logAccess(userId, user.email, 'User Deleted', 'System', 'success');
-    
+
     return true;
   }
 
   async suspendUser(userId: string, reason?: string): Promise<User> {
     await this.simulateDelay(200);
-    
+
     const user = await this.updateUser(userId, { status: 'suspended' });
-    
+
     // Log the suspension
-    await this.logAccess(userId, user.email, `User Suspended: ${reason || 'No reason provided'}`, 'System', 'success');
-    
+    await this.logAccess(
+      userId,
+      user.email,
+      `User Suspended: ${reason || 'No reason provided'}`,
+      'System',
+      'success',
+    );
+
     return user;
   }
 
   async activateUser(userId: string): Promise<User> {
     await this.simulateDelay(200);
-    
-    const user = await this.updateUser(userId, { status: 'active', isLocked: false, loginAttempts: 0 });
-    
+
+    const user = await this.updateUser(userId, {
+      status: 'active',
+      isLocked: false,
+      loginAttempts: 0,
+    });
+
     // Log the activation
     await this.logAccess(userId, user.email, 'User Activated', 'System', 'success');
-    
+
     return user;
   }
 
@@ -312,7 +326,14 @@ class UserManagementService {
     return limit ? logs.slice(0, limit) : logs;
   }
 
-  async logAccess(userId: string, userEmail: string, action: string, location: string, status: 'success' | 'failed' | 'suspicious', details?: string): Promise<void> {
+  async logAccess(
+    userId: string,
+    userEmail: string,
+    action: string,
+    location: string,
+    status: 'success' | 'failed' | 'suspicious',
+    details?: string,
+  ): Promise<void> {
     const log: AccessLog = {
       id: `log-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       userId,
@@ -335,9 +356,11 @@ class UserManagementService {
   }
 
   // Bulk Operations
-  async performBulkOperation(operation: BulkOperation): Promise<{ success: string[]; failed: { userId: string; error: string }[] }> {
+  async performBulkOperation(
+    operation: BulkOperation,
+  ): Promise<{ success: string[]; failed: { userId: string; error: string }[] }> {
     await this.simulateDelay(1000);
-    
+
     const results = {
       success: [] as string[],
       failed: [] as { userId: string; error: string }[],
@@ -392,22 +415,26 @@ class UserManagementService {
   // Export Functionality
   async exportUsers(format: 'csv' | 'json' | 'xlsx'): Promise<{ url: string; filename: string }> {
     await this.simulateDelay(2000);
-    
+
     const timestamp = new Date().toISOString().split('T')[0];
     const filename = `fynlo-users-${timestamp}.${format}`;
-    
+
     return {
       url: `https://api.fynlopos.com/exports/${filename}`,
       filename,
     };
   }
 
-  async exportAccessLogs(format: 'csv' | 'json' | 'xlsx', startDate?: Date, endDate?: Date): Promise<{ url: string; filename: string }> {
+  async exportAccessLogs(
+    format: 'csv' | 'json' | 'xlsx',
+    startDate?: Date,
+    endDate?: Date,
+  ): Promise<{ url: string; filename: string }> {
     await this.simulateDelay(2000);
-    
+
     const timestamp = new Date().toISOString().split('T')[0];
     const filename = `fynlo-access-logs-${timestamp}.${format}`;
-    
+
     return {
       url: `https://api.fynlopos.com/exports/${filename}`,
       filename,
@@ -417,13 +444,14 @@ class UserManagementService {
   // Search and Filter
   async searchUsers(query: string): Promise<User[]> {
     await this.simulateDelay(200);
-    
+
     const lowercaseQuery = query.toLowerCase();
-    return this.users.filter(user =>
-      user.name.toLowerCase().includes(lowercaseQuery) ||
-      user.email.toLowerCase().includes(lowercaseQuery) ||
-      user.role.toLowerCase().includes(lowercaseQuery) ||
-      (user.restaurantName && user.restaurantName.toLowerCase().includes(lowercaseQuery))
+    return this.users.filter(
+      user =>
+        user.name.toLowerCase().includes(lowercaseQuery) ||
+        user.email.toLowerCase().includes(lowercaseQuery) ||
+        user.role.toLowerCase().includes(lowercaseQuery) ||
+        (user.restaurantName && user.restaurantName.toLowerCase().includes(lowercaseQuery)),
     );
   }
 
@@ -443,7 +471,9 @@ class UserManagementService {
   }
 
   private generateMockIP(): string {
-    return `${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`;
+    return `${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(
+      Math.random() * 255,
+    )}.${Math.floor(Math.random() * 255)}`;
   }
 
   private initializeMockData(): void {
@@ -456,7 +486,13 @@ class UserManagementService {
         status: 'active',
         restaurantId: '1',
         restaurantName: 'Fynlo Coffee Shop',
-        permissions: ['view_analytics', 'manage_users', 'manage_menu', 'view_reports', 'manage_settings'],
+        permissions: [
+          'view_analytics',
+          'manage_users',
+          'manage_menu',
+          'view_reports',
+          'manage_settings',
+        ],
         createdAt: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000),
         lastLogin: new Date(Date.now() - 2 * 60 * 60 * 1000),
         loginAttempts: 0,
@@ -472,7 +508,13 @@ class UserManagementService {
         status: 'active',
         restaurantId: '3',
         restaurantName: 'Fynlo Pizza Palace',
-        permissions: ['view_analytics', 'manage_users', 'manage_menu', 'view_reports', 'manage_settings'],
+        permissions: [
+          'view_analytics',
+          'manage_users',
+          'manage_menu',
+          'view_reports',
+          'manage_settings',
+        ],
         createdAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000),
         lastLogin: new Date(Date.now() - 24 * 60 * 60 * 1000),
         loginAttempts: 0,
@@ -535,15 +577,29 @@ class UserManagementService {
   }
 
   private generateMockAccessLogs(): void {
-    const actions = ['Login', 'Logout', 'Failed Login', 'Password Reset', 'Permission Change', 'Profile Update'];
-    const locations = ['London, UK', 'Manchester, UK', 'Birmingham, UK', 'Liverpool, UK', 'Leeds, UK'];
-    
+    const actions = [
+      'Login',
+      'Logout',
+      'Failed Login',
+      'Password Reset',
+      'Permission Change',
+      'Profile Update',
+    ];
+    const locations = [
+      'London, UK',
+      'Manchester, UK',
+      'Birmingham, UK',
+      'Liverpool, UK',
+      'Leeds, UK',
+    ];
+
     for (let i = 0; i < 50; i++) {
       const user = this.users[Math.floor(Math.random() * this.users.length)];
       const action = actions[Math.floor(Math.random() * actions.length)];
       const location = locations[Math.floor(Math.random() * locations.length)];
-      const status = action === 'Failed Login' ? 'failed' : Math.random() > 0.95 ? 'suspicious' : 'success';
-      
+      const status =
+        action === 'Failed Login' ? 'failed' : Math.random() > 0.95 ? 'suspicious' : 'success';
+
       this.accessLogs.push({
         id: `log-${Date.now()}-${i}`,
         userId: user.id,
@@ -565,14 +621,27 @@ class UserManagementService {
         id: 'template-1',
         name: 'Restaurant Owner',
         description: 'Full access to restaurant management and analytics',
-        permissions: ['view_analytics', 'manage_users', 'manage_menu', 'view_reports', 'manage_settings', 'export_data'],
+        permissions: [
+          'view_analytics',
+          'manage_users',
+          'manage_menu',
+          'view_reports',
+          'manage_settings',
+          'export_data',
+        ],
         applicableRoles: ['Restaurant Owner'],
       },
       {
         id: 'template-2',
         name: 'Restaurant Manager',
         description: 'Day-to-day operations management',
-        permissions: ['manage_orders', 'access_pos', 'manage_tables', 'view_kitchen_orders', 'manage_staff_schedules'],
+        permissions: [
+          'manage_orders',
+          'access_pos',
+          'manage_tables',
+          'view_kitchen_orders',
+          'manage_staff_schedules',
+        ],
         applicableRoles: ['Restaurant Manager'],
       },
       {

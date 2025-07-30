@@ -53,7 +53,7 @@ const commonItems = [
 
 const CustomItemEntry: React.FC<CustomItemEntryProps> = ({ visible, onClose }) => {
   const { addToCart } = useAppStore();
-  
+
   const [itemName, setItemName] = useState('');
   const [price, setPrice] = useState(0);
   const [quantity, setQuantity] = useState(1);
@@ -62,11 +62,46 @@ const CustomItemEntry: React.FC<CustomItemEntryProps> = ({ visible, onClose }) =
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   const emojis = [
-    '🍽️', '🥤', '🍺', '☕', '🍷', '🥃', '🍹', '🧃',
-    '🍕', '🍔', '🌮', '🌯', '🥗', '🥙', '🍜', '🍲',
-    '🍰', '🧁', '🍪', '🍩', '🍨', '🍮', '🎂', '🍫',
-    '🍟', '🥨', '🥖', '🧀', '🥓', '🥚', '🥞', '🧇',
-    '💳', '💷', '🎁', '📦', '🚚', '⭐', '❤️', '👍'
+    '🍽️',
+    '🥤',
+    '🍺',
+    '☕',
+    '🍷',
+    '🥃',
+    '🍹',
+    '🧃',
+    '🍕',
+    '🍔',
+    '🌮',
+    '🌯',
+    '🥗',
+    '🥙',
+    '🍜',
+    '🍲',
+    '🍰',
+    '🧁',
+    '🍪',
+    '🍩',
+    '🍨',
+    '🍮',
+    '🎂',
+    '🍫',
+    '🍟',
+    '🥨',
+    '🥖',
+    '🧀',
+    '🥓',
+    '🥚',
+    '🥞',
+    '🧇',
+    '💳',
+    '💷',
+    '🎁',
+    '📦',
+    '🚚',
+    '⭐',
+    '❤️',
+    '👍',
   ];
 
   const handleAddItem = () => {
@@ -74,7 +109,7 @@ const CustomItemEntry: React.FC<CustomItemEntryProps> = ({ visible, onClose }) =
       alert('Please enter an item name');
       return;
     }
-    
+
     if (price <= 0) {
       alert('Please enter a valid price');
       return;
@@ -114,16 +149,10 @@ const CustomItemEntry: React.FC<CustomItemEntryProps> = ({ visible, onClose }) =
   // formatPrice function removed - DecimalInput handles validation internally
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
-    >
-      <KeyboardAvoidingView 
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <KeyboardAvoidingView
         style={styles.modalOverlay}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <View style={styles.modalContent}>
           {/* Header */}
           <View style={styles.header}>
@@ -141,12 +170,8 @@ const CustomItemEntry: React.FC<CustomItemEntryProps> = ({ visible, onClose }) =
                 {commonItems.map((item, index) => (
                   <TouchableOpacity
                     key={index}
-                    style={[
-                      styles.commonItem,
-                      itemName === item.name && styles.commonItemSelected
-                    ]}
-                    onPress={() => handleCommonItem(item)}
-                  >
+                    style={[styles.commonItem, itemName === item.name && styles.commonItemSelected]}
+                    onPress={() => handleCommonItem(item)}>
                     <Text style={styles.commonItemEmoji}>{item.emoji}</Text>
                     <Text style={styles.commonItemName}>{item.name}</Text>
                   </TouchableOpacity>
@@ -157,14 +182,13 @@ const CustomItemEntry: React.FC<CustomItemEntryProps> = ({ visible, onClose }) =
             {/* Item Details */}
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Item Details</Text>
-              
+
               <View style={styles.inputGroup}>
                 <Text style={styles.inputLabel}>Item Name</Text>
                 <View style={styles.nameInputContainer}>
                   <TouchableOpacity
                     style={styles.emojiButton}
-                    onPress={() => setShowEmojiPicker(!showEmojiPicker)}
-                  >
+                    onPress={() => setShowEmojiPicker(!showEmojiPicker)}>
                     <Text style={styles.selectedEmoji}>{selectedEmoji}</Text>
                   </TouchableOpacity>
                   <SimpleTextInput
@@ -187,8 +211,7 @@ const CustomItemEntry: React.FC<CustomItemEntryProps> = ({ visible, onClose }) =
                       onPress={() => {
                         setSelectedEmoji(emoji);
                         setShowEmojiPicker(false);
-                      }}
-                    >
+                      }}>
                       <Text style={styles.emojiText}>{emoji}</Text>
                     </TouchableOpacity>
                   ))}
@@ -211,12 +234,11 @@ const CustomItemEntry: React.FC<CustomItemEntryProps> = ({ visible, onClose }) =
 
               {/* Preset Amounts */}
               <View style={styles.presetAmounts}>
-                {presetAmounts.map((amount) => (
+                {presetAmounts.map(amount => (
                   <TouchableOpacity
                     key={amount}
                     style={styles.presetButton}
-                    onPress={() => handlePresetAmount(amount)}
-                  >
+                    onPress={() => handlePresetAmount(amount)}>
                     <Text style={styles.presetButtonText}>£{amount}</Text>
                   </TouchableOpacity>
                 ))}
@@ -228,15 +250,13 @@ const CustomItemEntry: React.FC<CustomItemEntryProps> = ({ visible, onClose }) =
                 <View style={styles.quantityControls}>
                   <TouchableOpacity
                     style={styles.quantityButton}
-                    onPress={() => setQuantity(Math.max(1, quantity - 1))}
-                  >
+                    onPress={() => setQuantity(Math.max(1, quantity - 1))}>
                     <Icon name="remove" size={24} color={Colors.primary} />
                   </TouchableOpacity>
                   <Text style={styles.quantityText}>{quantity}</Text>
                   <TouchableOpacity
                     style={styles.quantityButton}
-                    onPress={() => setQuantity(quantity + 1)}
-                  >
+                    onPress={() => setQuantity(quantity + 1)}>
                     <Icon name="add" size={24} color={Colors.primary} />
                   </TouchableOpacity>
                 </View>
@@ -268,26 +288,21 @@ const CustomItemEntry: React.FC<CustomItemEntryProps> = ({ visible, onClose }) =
 
           {/* Actions */}
           <View style={styles.actions}>
-            <TouchableOpacity
-              style={[styles.actionButton, styles.cancelButton]}
-              onPress={onClose}
-            >
+            <TouchableOpacity style={[styles.actionButton, styles.cancelButton]} onPress={onClose}>
               <Text style={styles.cancelButtonText}>Cancel</Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity
               style={[styles.actionButton, styles.clearButton]}
-              onPress={handleReset}
-            >
+              onPress={handleReset}>
               <Icon name="refresh" size={20} color={Colors.warning} />
               <Text style={styles.clearButtonText}>Clear</Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity
               style={[styles.actionButton, styles.addButton]}
               onPress={handleAddItem}
-              disabled={!itemName.trim() || !price || parseFloat(price) <= 0}
-            >
+              disabled={!itemName.trim() || !price || parseFloat(price) <= 0}>
               <Icon name="add" size={20} color={Colors.white} />
               <Text style={styles.addButtonText}>Add Item</Text>
             </TouchableOpacity>

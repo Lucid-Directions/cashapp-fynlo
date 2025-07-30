@@ -81,9 +81,9 @@ const Input: React.FC<InputProps> = ({
   };
 
   // Get size styles
-  const getSizeStyles = (): { 
-    container: ViewStyle; 
-    input: TextStyle; 
+  const getSizeStyles = (): {
+    container: ViewStyle;
+    input: TextStyle;
     icon: number;
     label: TextStyle;
   } => {
@@ -163,9 +163,9 @@ const Input: React.FC<InputProps> = ({
       <View style={containerStyle}>
         {/* Left Icon */}
         {leftIcon && (
-          <Icon 
-            name={leftIcon} 
-            size={sizeStyles.icon} 
+          <Icon
+            name={leftIcon}
+            size={sizeStyles.icon}
             color={variantStyles.icon}
             style={styles.leftIcon}
           />
@@ -184,16 +184,11 @@ const Input: React.FC<InputProps> = ({
 
         {/* Right Icon */}
         {rightIcon && (
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={onRightIconPress}
             disabled={!onRightIconPress}
-            style={styles.rightIconContainer}
-          >
-            <Icon 
-              name={rightIcon} 
-              size={sizeStyles.icon} 
-              color={variantStyles.icon}
-            />
+            style={styles.rightIconContainer}>
+            <Icon name={rightIcon} size={sizeStyles.icon} color={variantStyles.icon} />
           </TouchableOpacity>
         )}
       </View>
@@ -203,18 +198,16 @@ const Input: React.FC<InputProps> = ({
         <View style={styles.helperContainer}>
           {error && (
             <View style={styles.errorContainer}>
-              <Icon 
-                name="error" 
-                size={14} 
+              <Icon
+                name="error"
+                size={14}
                 color={theme.colors.danger[500]}
                 style={styles.errorIcon}
               />
               <Text style={styles.errorText}>{error}</Text>
             </View>
           )}
-          {helper && !error && (
-            <Text style={styles.helperText}>{helper}</Text>
-          )}
+          {helper && !error && <Text style={styles.helperText}>{helper}</Text>}
         </View>
       )}
     </View>

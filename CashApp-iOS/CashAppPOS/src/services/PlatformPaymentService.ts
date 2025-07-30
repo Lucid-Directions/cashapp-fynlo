@@ -52,17 +52,20 @@ class PlatformPaymentService {
   /**
    * Get payment methods with current platform fees
    */
-  async getPaymentMethodsWithFees(amount: number, restaurantId?: string): Promise<PlatformPaymentMethod[]> {
+  async getPaymentMethodsWithFees(
+    amount: number,
+    restaurantId?: string,
+  ): Promise<PlatformPaymentMethod[]> {
     try {
       // Get base payment methods from existing service
       const baseMethods = await this.paymentService.getAvailablePaymentMethods();
-      
+
       // Get platform fees
       const platformFees = await this.getPlatformFees();
-      
+
       // Calculate effective fees for each method
       const methodsWithFees: PlatformPaymentMethod[] = [];
-      
+
       for (const method of baseMethods) {
         const platformFee = platformFees[method.id];
         if (!platformFee) continue;
@@ -73,7 +76,7 @@ class PlatformPaymentService {
           effectiveFee = await this.platformService.calculatePaymentFee(
             method.id,
             amount,
-            restaurantId
+            restaurantId,
           );
         } catch (error) {
           console.warn(`Failed to calculate fee for ${method.id}:`, error);
@@ -111,7 +114,7 @@ class PlatformPaymentService {
     try {
       const methods = await this.getPaymentMethodsWithFees(amount, restaurantId);
       const enabledMethods = methods.filter(m => m.enabled);
-      
+
       if (enabledMethods.length === 0) {
         return 'sumup'; // Default to SumUp
       }
@@ -134,15 +137,15 @@ class PlatformPaymentService {
    * Get detailed fee information for display
    */
   async getPaymentFeeInfo(
-    paymentMethod: string, 
-    amount: number, 
-    restaurantId?: string
+    paymentMethod: string,
+    amount: number,
+    restaurantId?: string,
   ): Promise<PaymentFeeDisplayInfo> {
     try {
       const feeCalculation = await this.platformService.calculatePaymentFee(
         paymentMethod,
         amount,
-        restaurantId
+        restaurantId,
       );
 
       const allMethods = await this.getPaymentMethodsWithFees(amount, restaurantId);
@@ -179,12 +182,12 @@ class PlatformPaymentService {
     try {
       const effectiveSettings = await this.platformService.getRestaurantEffectiveSettings(
         restaurantId,
-        'payment_fees'
+        'payment_fees',
       );
-      
+
       // Check if any payment fee settings come from restaurant level
       return Object.values(effectiveSettings).some(
-        (setting: any) => setting.source === 'restaurant'
+        (setting: any) => setting.source === 'restaurant',
       );
     } catch (error) {
       console.error('Failed to check restaurant overrides:', error);
@@ -198,7 +201,7 @@ class PlatformPaymentService {
   async updateRestaurantFeeMarkup(
     restaurantId: string,
     paymentMethod: string,
-    markupPercentage: number
+    markupPercentage: number,
   ): Promise<boolean> {
     try {
       const markupConfig = {
@@ -210,7 +213,7 @@ class PlatformPaymentService {
         restaurantId,
         `payment.markup.${paymentMethod}`,
         markupConfig,
-        markupPercentage > 0.5 // Require approval for markups > 0.5%
+        markupPercentage > 0.5, // Require approval for markups > 0.5%
       );
     } catch (error) {
       console.error('Failed to update restaurant fee markup:', error);
@@ -223,7 +226,7 @@ class PlatformPaymentService {
    */
   private async getPlatformFees(): Promise<Record<string, PaymentFee>> {
     const now = Date.now();
-    
+
     if (this.cachedFees && now < this.cacheExpiry) {
       return this.cachedFees;
     }
@@ -243,12 +246,12 @@ class PlatformPaymentService {
    * Calculate basic fee when platform calculation fails
    */
   private calculateBasicFee(
-    paymentMethod: string, 
-    amount: number, 
-    platformFee: PaymentFee
+    paymentMethod: string,
+    amount: number,
+    platformFee: PaymentFee,
   ): FeeCalculation {
-    const feeAmount = (amount * platformFee.percentage / 100) + (platformFee.fixed_fee || 0);
-    
+    const feeAmount = (amount * platformFee.percentage) / 100 + (platformFee.fixed_fee || 0);
+
     return {
       payment_method: paymentMethod,
       amount,
@@ -269,7 +272,7 @@ class PlatformPaymentService {
     }
 
     const { effective_fee, currency, fee_percentage } = feeCalculation;
-    
+
     if (effective_fee === 0) {
       return 'No processing fee';
     }
@@ -282,7 +285,7 @@ class PlatformPaymentService {
    */
   private generateShortFeeDescription(feeCalculation: FeeCalculation): string {
     const { effective_fee, currency, fee_percentage } = feeCalculation;
-    
+
     if (effective_fee === 0) {
       return 'No fee';
     }
@@ -294,20 +297,17 @@ class PlatformPaymentService {
    * Generate detailed fee description
    */
   private generateDetailedFeeDescription(feeCalculation: FeeCalculation): string {
-    const { 
-      effective_fee, 
-      platform_fee, 
-      restaurant_markup, 
-      currency, 
-      fee_percentage 
-    } = feeCalculation;
+    const { effective_fee, platform_fee, restaurant_markup, currency, fee_percentage } =
+      feeCalculation;
 
     if (effective_fee === 0) {
       return 'This payment method has no processing fees.';
     }
 
-    let description = `Processing fee: ${fee_percentage.toFixed(2)}% (${currency}${effective_fee.toFixed(2)})`;
-    
+    let description = `Processing fee: ${fee_percentage.toFixed(
+      2,
+    )}% (${currency}${effective_fee.toFixed(2)})`;
+
     if (restaurant_markup > 0) {
       description += `\nPlatform fee: ${currency}${platform_fee.toFixed(2)}`;
       description += `\nRestaurant markup: ${restaurant_markup.toFixed(2)}%`;
@@ -359,7 +359,7 @@ class PlatformPaymentService {
         enabled: true,
         requiresAuth: true,
         feeInfo: '1.4% + 20p',
-        platformFee: { percentage: 1.4, fixed_fee: 0.20, currency: 'GBP' },
+        platformFee: { percentage: 1.4, fixed_fee: 0.2, currency: 'GBP' },
       },
       {
         id: 'square',
@@ -387,7 +387,7 @@ class PlatformPaymentService {
    */
   async getFeeSummary(
     restaurantId?: string,
-    dateRange?: { start: Date; end: Date }
+    dateRange?: { start: Date; end: Date },
   ): Promise<{
     totalFees: number;
     feesByMethod: Record<string, number>;

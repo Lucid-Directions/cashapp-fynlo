@@ -9,31 +9,31 @@ interface AppStore extends AppState {
   // User actions
   setUser: (user: User | null) => void;
   logout: () => void;
-  
+
   // Session actions
   setSession: (session: PosSession | null) => void;
-  
+
   // Cart actions
   addToCart: (item: OrderItem) => void;
   removeFromCart: (itemId: number) => void;
   updateCartItem: (itemId: number, updates: Partial<OrderItem>) => void;
   clearCart: () => void;
   cleanCart: () => void;
-  
+
   // Order actions
   setCurrentOrder: (order: Order | null) => void;
-  
+
   // Service charge and fee actions
   serviceChargePercentage: number;
   addTransactionFee: boolean;
   setServiceChargePercentage: (percentage: number) => void;
   setAddTransactionFee: (add: boolean) => void;
-  
+
   // App state actions
   setOnlineStatus: (isOnline: boolean) => void;
   setLoading: (isLoading: boolean) => void;
   setError: (error: string | null) => void;
-  
+
   // Computed values
   cartTotal: () => number;
   cartItemCount: () => number;
@@ -57,85 +57,108 @@ const useAppStore = create<AppStore>()(
       error: null,
 
       // User actions
-      setUser: (user) => set({ user }),
-      logout: () => set({ 
-        user: null, 
-        session: null, 
-        cart: [], 
-        currentOrder: null 
-      }),
+      setUser: user => set({ user }),
+      logout: () =>
+        set({
+          user: null,
+          session: null,
+          cart: [],
+          currentOrder: null,
+        }),
 
       // Session actions
-      setSession: (session) => set({ session }),
+      setSession: session => set({ session }),
 
       // Cart actions
-      addToCart: (newItem) => set((state) => {
-        // Validate the new item has required properties
-        if (!newItem.id || !newItem.name || typeof newItem.price !== 'number' || typeof newItem.quantity !== 'number') {
-          console.error('Invalid item being added to cart:', newItem);
-          return state;
-        }
+      addToCart: newItem =>
+        set(state => {
+          // Validate the new item has required properties
+          if (
+            !newItem.id ||
+            !newItem.name ||
+            typeof newItem.price !== 'number' ||
+            typeof newItem.quantity !== 'number'
+          ) {
+            console.error('Invalid item being added to cart:', newItem);
+            return state;
+          }
 
-        // Clean cart to remove any corrupted items
-        const cleanCart = state.cart.filter(item => 
-          item.id && item.name && typeof item.price === 'number' && typeof item.quantity === 'number' && item.quantity > 0
-        );
+          // Clean cart to remove any corrupted items
+          const cleanCart = state.cart.filter(
+            item =>
+              item.id &&
+              item.name &&
+              typeof item.price === 'number' &&
+              typeof item.quantity === 'number' &&
+              item.quantity > 0,
+          );
 
-        const existingItem = cleanCart.find(item => item.id === newItem.id);
-        
-        if (existingItem) {
+          const existingItem = cleanCart.find(item => item.id === newItem.id);
+
+          if (existingItem) {
+            return {
+              cart: cleanCart.map(item =>
+                item.id === newItem.id
+                  ? { ...item, quantity: item.quantity + newItem.quantity }
+                  : item,
+              ),
+            };
+          }
+
           return {
-            cart: cleanCart.map(item =>
-              item.id === newItem.id
-                ? { ...item, quantity: item.quantity + newItem.quantity }
-                : item
-            ),
+            cart: [...cleanCart, newItem],
           };
-        }
-        
-        return {
-          cart: [...cleanCart, newItem],
-        };
-      }),
+        }),
 
-      removeFromCart: (itemId) => set((state) => ({
-        cart: state.cart.filter(item => item.id !== itemId),
-      })),
+      removeFromCart: itemId =>
+        set(state => ({
+          cart: state.cart.filter(item => item.id !== itemId),
+        })),
 
-      updateCartItem: (itemId, updates) => set((state) => ({
-        cart: state.cart.map(item =>
-          item.id === itemId ? { ...item, ...updates } : item
-        ),
-      })),
+      updateCartItem: (itemId, updates) =>
+        set(state => ({
+          cart: state.cart.map(item => (item.id === itemId ? { ...item, ...updates } : item)),
+        })),
 
       clearCart: () => set({ cart: [] }),
 
       // Clean corrupted cart data
-      cleanCart: () => set((state) => ({
-        cart: state.cart.filter(item => 
-          item.id && item.name && typeof item.price === 'number' && typeof item.quantity === 'number' && item.quantity > 0
-        )
-      })),
+      cleanCart: () =>
+        set(state => ({
+          cart: state.cart.filter(
+            item =>
+              item.id &&
+              item.name &&
+              typeof item.price === 'number' &&
+              typeof item.quantity === 'number' &&
+              item.quantity > 0,
+          ),
+        })),
 
       // Order actions
-      setCurrentOrder: (currentOrder) => set({ currentOrder }),
+      setCurrentOrder: currentOrder => set({ currentOrder }),
 
       // Service charge and fee actions
-      setServiceChargePercentage: (percentage) => set({ serviceChargePercentage: percentage }),
-      setAddTransactionFee: (add) => set({ addTransactionFee: add }),
+      setServiceChargePercentage: percentage => set({ serviceChargePercentage: percentage }),
+      setAddTransactionFee: add => set({ addTransactionFee: add }),
 
       // App state actions
-      setOnlineStatus: (isOnline) => set({ isOnline }),
-      setLoading: (isLoading) => set({ isLoading }),
-      setError: (error) => set({ error }),
+      setOnlineStatus: isOnline => set({ isOnline }),
+      setLoading: isLoading => set({ isLoading }),
+      setError: error => set({ error }),
 
       // Computed values with error tracking
       cartTotal: () => {
         const { cart } = get();
         try {
           // Clean corrupted items first
-          const cleanCart = cart.filter(item => 
-            item.id && item.name && typeof item.price === 'number' && typeof item.quantity === 'number' && item.quantity > 0
+          const cleanCart = cart.filter(
+            item =>
+              item.id &&
+              item.name &&
+              typeof item.price === 'number' &&
+              typeof item.quantity === 'number' &&
+              item.quantity > 0,
           );
 
           // If cart was dirty, clean it in the store
@@ -147,25 +170,25 @@ const useAppStore = create<AppStore>()(
             const itemTotal = calculateItemTotal(item.price, item.quantity, {
               operation: 'cart_total_calculation',
               screenName: 'AppStore',
-              inputValues: { itemId: item.id, itemName: item.name, index }
+              inputValues: { itemId: item.id, itemName: item.name, index },
             });
-            
+
             if (!itemTotal.isValid) {
               const errorTrackingService = ErrorTrackingService.getInstance();
               errorTrackingService.trackPricingError(
                 new Error(`Invalid item total in cart: ${itemTotal.error}`),
                 { item, index },
-                { screenName: 'AppStore', action: 'cart_total_calculation' }
+                { screenName: 'AppStore', action: 'cart_total_calculation' },
               );
               return 0;
             }
-            
+
             return itemTotal.value;
           });
 
           const totalSum = calculateSum(itemTotals, {
             operation: 'cart_total_sum',
-            screenName: 'AppStore'
+            screenName: 'AppStore',
           });
 
           if (!totalSum.isValid) {
@@ -173,7 +196,7 @@ const useAppStore = create<AppStore>()(
             errorTrackingService.trackPricingError(
               new Error(`Cart total calculation failed: ${totalSum.error}`),
               { cart: cleanCart, itemTotals },
-              { screenName: 'AppStore', action: 'cart_total_calculation' }
+              { screenName: 'AppStore', action: 'cart_total_calculation' },
             );
             return 0;
           }
@@ -184,7 +207,7 @@ const useAppStore = create<AppStore>()(
           errorTrackingService.trackPricingError(
             error instanceof Error ? error : new Error(`Cart total error: ${error}`),
             { cart },
-            { screenName: 'AppStore', action: 'cart_total_calculation' }
+            { screenName: 'AppStore', action: 'cart_total_calculation' },
           );
           return 0;
         }
@@ -194,8 +217,13 @@ const useAppStore = create<AppStore>()(
         const { cart } = get();
         try {
           // Clean corrupted items first
-          const cleanCart = cart.filter(item => 
-            item.id && item.name && typeof item.price === 'number' && typeof item.quantity === 'number' && item.quantity > 0
+          const cleanCart = cart.filter(
+            item =>
+              item.id &&
+              item.name &&
+              typeof item.price === 'number' &&
+              typeof item.quantity === 'number' &&
+              item.quantity > 0,
           );
 
           // If cart was dirty, clean it in the store
@@ -206,7 +234,7 @@ const useAppStore = create<AppStore>()(
           const quantities = cleanCart.map(item => item.quantity || 0);
           const quantitySum = calculateSum(quantities, {
             operation: 'cart_item_count',
-            screenName: 'AppStore'
+            screenName: 'AppStore',
           });
 
           if (!quantitySum.isValid) {
@@ -214,7 +242,7 @@ const useAppStore = create<AppStore>()(
             errorTrackingService.trackPricingError(
               new Error(`Cart item count calculation failed: ${quantitySum.error}`),
               { cart: cleanCart },
-              { screenName: 'AppStore', action: 'cart_item_count' }
+              { screenName: 'AppStore', action: 'cart_item_count' },
             );
             return 0;
           }
@@ -225,7 +253,7 @@ const useAppStore = create<AppStore>()(
           errorTrackingService.trackPricingError(
             error instanceof Error ? error : new Error(`Cart item count error: ${error}`),
             { cart },
-            { screenName: 'AppStore', action: 'cart_item_count' }
+            { screenName: 'AppStore', action: 'cart_item_count' },
           );
           return 0;
         }
@@ -240,9 +268,11 @@ const useAppStore = create<AppStore>()(
         } catch (error) {
           const errorTrackingService = ErrorTrackingService.getInstance();
           errorTrackingService.trackPricingError(
-            error instanceof Error ? error : new Error(`Service charge calculation error: ${error}`),
+            error instanceof Error
+              ? error
+              : new Error(`Service charge calculation error: ${error}`),
             { serviceChargePercentage, cartSubtotal },
-            { screenName: 'AppStore', action: 'service_charge_calculation' }
+            { screenName: 'AppStore', action: 'service_charge_calculation' },
           );
           return 0;
         }
@@ -252,16 +282,18 @@ const useAppStore = create<AppStore>()(
       calculateTransactionFee: () => {
         const { addTransactionFee } = get();
         if (!addTransactionFee) return 0;
-        
+
         const cartSubtotal = get().cartTotal();
         try {
           return cartSubtotal * 0.029; // 2.9% transaction fee
         } catch (error) {
           const errorTrackingService = ErrorTrackingService.getInstance();
           errorTrackingService.trackPricingError(
-            error instanceof Error ? error : new Error(`Transaction fee calculation error: ${error}`),
+            error instanceof Error
+              ? error
+              : new Error(`Transaction fee calculation error: ${error}`),
             { addTransactionFee, cartSubtotal },
-            { screenName: 'AppStore', action: 'transaction_fee_calculation' }
+            { screenName: 'AppStore', action: 'transaction_fee_calculation' },
           );
           return 0;
         }
@@ -273,14 +305,14 @@ const useAppStore = create<AppStore>()(
           const cartSubtotal = get().cartTotal();
           const serviceCharge = get().calculateServiceCharge();
           const transactionFee = get().calculateTransactionFee();
-          
+
           return cartSubtotal + serviceCharge + transactionFee;
         } catch (error) {
           const errorTrackingService = ErrorTrackingService.getInstance();
           errorTrackingService.trackPricingError(
             error instanceof Error ? error : new Error(`Order total calculation error: ${error}`),
             {},
-            { screenName: 'AppStore', action: 'order_total_calculation' }
+            { screenName: 'AppStore', action: 'order_total_calculation' },
           );
           return get().cartTotal(); // Fallback to cart total only
         }
@@ -290,15 +322,15 @@ const useAppStore = create<AppStore>()(
       name: 'cashapp-pos-storage',
       storage: createJSONStorage(() => AsyncStorage),
       // Only persist essential data
-      partialize: (state) => ({
+      partialize: state => ({
         user: state.user,
         session: state.session,
         cart: state.cart,
         serviceChargePercentage: state.serviceChargePercentage,
         addTransactionFee: state.addTransactionFee,
       }),
-    }
-  )
+    },
+  ),
 );
 
 export default useAppStore;

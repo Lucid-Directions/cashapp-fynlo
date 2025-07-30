@@ -12,15 +12,10 @@ class SafeAlertManager {
     options?: AlertOptions;
   }> = [];
 
-  alert(
-    title: string,
-    message?: string,
-    buttons?: AlertButton[],
-    options?: AlertOptions
-  ) {
+  alert(title: string, message?: string, buttons?: AlertButton[], options?: AlertOptions) {
     // Add to queue
     this.alertQueue.push({ title, message, buttons, options });
-    
+
     // Process queue if not already showing an alert
     if (!this.isShowingAlert) {
       this.processQueue();
@@ -46,13 +41,13 @@ class SafeAlertManager {
         if (button.onPress) {
           button.onPress(...args);
         }
-        
+
         // Process next alert in queue after a small delay
         setTimeout(() => {
           this.isShowingAlert = false;
           this.processQueue();
         }, 100);
-      }
+      },
     })) || [
       {
         text: 'OK',
@@ -61,8 +56,8 @@ class SafeAlertManager {
             this.isShowingAlert = false;
             this.processQueue();
           }, 100);
-        }
-      }
+        },
+      },
     ];
 
     // Show the alert

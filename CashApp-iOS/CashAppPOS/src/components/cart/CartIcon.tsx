@@ -18,9 +18,10 @@ const CartIcon: React.FC<Props> = ({ count, onPress, testID, size = 40 }) => {
   const iconColor = count > 0 ? theme.colors.danger[500] : theme.colors.text;
   const hitSlop = { top: 10, bottom: 10, left: 10, right: 10 };
 
-  const accessibilityLabel = count > 0 
-    ? `Shopping cart with ${count} ${count === 1 ? 'item' : 'items'}`
-    : 'Shopping cart, empty';
+  const accessibilityLabel =
+    count > 0
+      ? `Shopping cart with ${count} ${count === 1 ? 'item' : 'items'}`
+      : 'Shopping cart, empty';
 
   return (
     <TouchableOpacity
@@ -30,8 +31,7 @@ const CartIcon: React.FC<Props> = ({ count, onPress, testID, size = 40 }) => {
       accessibilityLabel={accessibilityLabel}
       accessibilityHint="Double tap to view your cart"
       testID={testID}
-      hitSlop={hitSlop}
-    >
+      hitSlop={hitSlop}>
       <View style={styles.iconContainer}>
         <Icon name="shopping-cart" size={size} color={iconColor} />
         {count > 0 && (
@@ -80,4 +80,4 @@ const createStyles = (theme: any) =>
     },
   });
 
-export default CartIcon; 
+export default CartIcon;

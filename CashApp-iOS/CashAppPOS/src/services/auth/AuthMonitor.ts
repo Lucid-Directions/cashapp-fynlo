@@ -1,6 +1,6 @@
 /**
  * Authentication Monitoring Service
- * 
+ *
  * Tracks authentication events, token refreshes, and auth errors
  * for debugging and monitoring purposes.
  */
@@ -10,7 +10,13 @@ import tokenManager from '../../utils/tokenManager';
 
 interface AuthEvent {
   timestamp: string;
-  type: 'login' | 'logout' | 'token_refresh' | 'token_refresh_failed' | 'auth_error' | 'session_expired';
+  type:
+    | 'login'
+    | 'logout'
+    | 'token_refresh'
+    | 'token_refresh_failed'
+    | 'auth_error'
+    | 'session_expired';
   message: string;
   details?: any;
 }
@@ -19,40 +25,40 @@ class AuthMonitor {
   private static instance: AuthMonitor;
   private events: AuthEvent[] = [];
   private maxEvents = 100; // Keep last 100 events
-  
+
   private constructor() {
     this.setupEventListeners();
   }
-  
+
   static getInstance(): AuthMonitor {
     if (!AuthMonitor.instance) {
       AuthMonitor.instance = new AuthMonitor();
     }
     return AuthMonitor.instance;
   }
-  
+
   /**
    * Set up listeners for authentication events
    */
   private setupEventListeners() {
     // Listen to token manager events
-    tokenManager.on('token:refreshed', (token) => {
+    tokenManager.on('token:refreshed', token => {
       this.logEvent('token_refresh', 'Token refreshed successfully', {
-        tokenLength: token?.length || 0
+        tokenLength: token?.length || 0,
       });
     });
-    
-    tokenManager.on('token:refresh:failed', (error) => {
+
+    tokenManager.on('token:refresh:failed', error => {
       this.logEvent('token_refresh_failed', 'Token refresh failed', {
-        error: error?.message || 'Unknown error'
+        error: error?.message || 'Unknown error',
       });
     });
-    
+
     tokenManager.on('token:cleared', () => {
       this.logEvent('logout', 'Tokens cleared');
     });
   }
-  
+
   /**
    * Log an authentication event
    */
@@ -61,42 +67,49 @@ class AuthMonitor {
       timestamp: new Date().toISOString(),
       type,
       message,
-      details
+      details,
     };
-    
+
     // Add to events array
     this.events.push(event);
-    
+
     // Keep only last N events
     if (this.events.length > this.maxEvents) {
       this.events = this.events.slice(-this.maxEvents);
     }
-    
+
     // Log to console in development
     if (__DEV__) {
       const emoji = this.getEmojiForType(type);
       console.log(`${emoji} Auth Event: ${message}`, details || '');
     }
-    
+
     // Persist events for debugging
     this.persistEvents();
   }
-  
+
   /**
    * Get emoji for event type
    */
   private getEmojiForType(type: AuthEvent['type']): string {
     switch (type) {
-      case 'login': return '🔐';
-      case 'logout': return '🔓';
-      case 'token_refresh': return '🔄';
-      case 'token_refresh_failed': return '❌';
-      case 'auth_error': return '⚠️';
-      case 'session_expired': return '⏰';
-      default: return '📝';
+      case 'login':
+        return '🔐';
+      case 'logout':
+        return '🔓';
+      case 'token_refresh':
+        return '🔄';
+      case 'token_refresh_failed':
+        return '❌';
+      case 'auth_error':
+        return '⚠️';
+      case 'session_expired':
+        return '⏰';
+      default:
+        return '📝';
     }
   }
-  
+
   /**
    * Persist events to AsyncStorage for debugging
    */
@@ -107,7 +120,7 @@ class AuthMonitor {
       console.error('Failed to persist auth events:', error);
     }
   }
-  
+
   /**
    * Load persisted events
    */
@@ -121,21 +134,21 @@ class AuthMonitor {
       console.error('Failed to load auth events:', error);
     }
   }
-  
+
   /**
    * Get recent events
    */
   getRecentEvents(count: number = 20): AuthEvent[] {
     return this.events.slice(-count);
   }
-  
+
   /**
    * Get all events
    */
   getAllEvents(): AuthEvent[] {
     return [...this.events];
   }
-  
+
   /**
    * Clear all events
    */
@@ -143,7 +156,7 @@ class AuthMonitor {
     this.events = [];
     await AsyncStorage.removeItem('auth_monitor_events');
   }
-  
+
   /**
    * Get auth statistics
    */
@@ -156,12 +169,12 @@ class AuthMonitor {
       tokenRefreshFailedCount: this.events.filter(e => e.type === 'token_refresh_failed').length,
       authErrorCount: this.events.filter(e => e.type === 'auth_error').length,
       sessionExpiredCount: this.events.filter(e => e.type === 'session_expired').length,
-      lastEvent: this.events[this.events.length - 1] || null
+      lastEvent: this.events[this.events.length - 1] || null,
     };
-    
+
     return stats;
   }
-  
+
   /**
    * Export events for debugging
    */

@@ -5,11 +5,15 @@
 
 import { renderHook, act } from '@testing-library/react-native';
 import useAppStore from '../useAppStore';
-import { createMockUser, createMockSession, createMockOrderItem } from '../../__tests__/utils/testUtils';
+import {
+  createMockUser,
+  createMockSession,
+  createMockOrderItem,
+} from '../../__tests__/utils/testUtils';
 
 // Mock AsyncStorage
 jest.mock('@react-native-async-storage/async-storage', () =>
-  require('@react-native-async-storage/async-storage/jest/async-storage-mock')
+  require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
 );
 
 describe('useAppStore', () => {
@@ -27,7 +31,7 @@ describe('useAppStore', () => {
   describe('Initial State', () => {
     it('should have correct initial state', () => {
       const { result } = renderHook(() => useAppStore());
-      
+
       expect(result.current.user).toBeNull();
       expect(result.current.session).toBeNull();
       expect(result.current.cart).toEqual([]);
@@ -205,7 +209,7 @@ describe('useAppStore', () => {
         result.current.addToCart(item2);
       });
 
-      const expectedTotal = (10.99 * 2) + (5.49 * 1); // 27.47
+      const expectedTotal = 10.99 * 2 + 5.49 * 1; // 27.47
       expect(result.current.cartTotal()).toBeCloseTo(expectedTotal, 2);
     });
 
@@ -337,10 +341,10 @@ describe('useAppStore', () => {
         result.current.addToCart(item);
         result.current.addToCart(item);
         result.current.addToCart(item);
-        
+
         // Update quantity
         result.current.updateCartItem(1, { quantity: 5 });
-        
+
         // Remove and re-add
         result.current.removeFromCart(1);
         result.current.addToCart(item);
@@ -363,7 +367,7 @@ describe('useAppStore', () => {
         result.current.addToCart(mockItem);
         result.current.setError('Some error');
         result.current.setLoading(true);
-        
+
         // Logout should clear user-specific data but preserve app state
         result.current.logout();
       });
@@ -373,7 +377,7 @@ describe('useAppStore', () => {
       expect(result.current.session).toBeNull();
       expect(result.current.cart).toEqual([]);
       expect(result.current.currentOrder).toBeNull();
-      
+
       // App state should be preserved
       expect(result.current.error).toBe('Some error');
       expect(result.current.isLoading).toBe(true);

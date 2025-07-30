@@ -9,7 +9,7 @@ import { createMockFetch } from '../../__tests__/utils/testUtils';
 
 // Mock AsyncStorage
 jest.mock('@react-native-async-storage/async-storage', () =>
-  require('@react-native-async-storage/async-storage/jest/async-storage-mock')
+  require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
 );
 
 // Mock fetch globally
@@ -31,14 +31,14 @@ describe('DatabaseService', () => {
     it('should return the same instance', () => {
       const instance1 = DatabaseService.getInstance();
       const instance2 = DatabaseService.getInstance();
-      
+
       expect(instance1).toBe(instance2);
     });
 
     it('should maintain state across getInstance calls', () => {
       const instance1 = DatabaseService.getInstance();
       const instance2 = DatabaseService.getInstance();
-      
+
       // Both should reference the same object
       expect(instance1).toEqual(instance2);
     });
@@ -59,7 +59,7 @@ describe('DatabaseService', () => {
           headers: expect.objectContaining({
             'Content-Type': 'application/json',
           }),
-        })
+        }),
       );
     });
 
@@ -90,7 +90,7 @@ describe('DatabaseService', () => {
         expect.stringContaining('/web/session/destroy'),
         expect.objectContaining({
           method: 'POST',
-        })
+        }),
       );
     });
 
@@ -114,7 +114,7 @@ describe('DatabaseService', () => {
         expect.stringContaining('/api/v1/products/mobile'),
         expect.objectContaining({
           method: 'GET',
-        })
+        }),
       );
     });
 
@@ -141,7 +141,7 @@ describe('DatabaseService', () => {
         expect.stringContaining('/api/v1/products/category/1'),
         expect.objectContaining({
           method: 'GET',
-        })
+        }),
       );
     });
 
@@ -167,7 +167,7 @@ describe('DatabaseService', () => {
         expect.stringContaining('/api/v1/categories'),
         expect.objectContaining({
           method: 'GET',
-        })
+        }),
       );
     });
 
@@ -204,7 +204,7 @@ describe('DatabaseService', () => {
         expect.stringContaining('/api/v1/pos/sessions/current'),
         expect.objectContaining({
           method: 'GET',
-        })
+        }),
       );
     });
 
@@ -229,7 +229,7 @@ describe('DatabaseService', () => {
         expect.objectContaining({
           method: 'POST',
           body: JSON.stringify({ config_id: 1 }),
-        })
+        }),
       );
     });
 
@@ -267,7 +267,7 @@ describe('DatabaseService', () => {
         expect.stringContaining('/api/v1/orders'),
         expect.objectContaining({
           method: 'POST',
-        })
+        }),
       );
     });
 
@@ -288,7 +288,7 @@ describe('DatabaseService', () => {
         expect.objectContaining({
           method: 'PUT',
           body: JSON.stringify(updates),
-        })
+        }),
       );
     });
 
@@ -307,7 +307,7 @@ describe('DatabaseService', () => {
         expect.stringContaining('/api/v1/orders/recent?limit=10'),
         expect.objectContaining({
           method: 'GET',
-        })
+        }),
       );
     });
 
@@ -319,7 +319,7 @@ describe('DatabaseService', () => {
 
       expect(mockFetch).toHaveBeenCalledWith(
         expect.stringContaining('limit=20'), // Default limit
-        expect.any(Object)
+        expect.any(Object),
       );
     });
   });
@@ -341,7 +341,7 @@ describe('DatabaseService', () => {
             payment_method: 'card',
             amount: 25.99,
           }),
-        })
+        }),
       );
     });
 
@@ -367,10 +367,12 @@ describe('DatabaseService', () => {
     it('should sync offline data when available', async () => {
       // Mock AsyncStorage with offline orders
       const mockAsyncStorage = require('@react-native-async-storage/async-storage');
-      mockAsyncStorage.getItem.mockResolvedValue(JSON.stringify([
-        { items: [{ product_id: 1, quantity: 1 }] },
-        { items: [{ product_id: 2, quantity: 2 }] },
-      ]));
+      mockAsyncStorage.getItem.mockResolvedValue(
+        JSON.stringify([
+          { items: [{ product_id: 1, quantity: 1 }] },
+          { items: [{ product_id: 2, quantity: 2 }] },
+        ]),
+      );
 
       const mockFetch = createMockFetch([
         { success: true, data: { id: 1 } },
@@ -409,7 +411,7 @@ describe('DatabaseService', () => {
       // Set auth token
       const mockAsyncStorage = require('@react-native-async-storage/async-storage');
       mockAsyncStorage.getItem.mockResolvedValue('test-token-123');
-      
+
       // Reinitialize service to load token
       service = DatabaseService.getInstance();
       await new Promise(resolve => setTimeout(resolve, 100)); // Wait for token loading
@@ -423,9 +425,9 @@ describe('DatabaseService', () => {
         expect.any(String),
         expect.objectContaining({
           headers: expect.objectContaining({
-            'Authorization': 'Bearer test-token-123',
+            Authorization: 'Bearer test-token-123',
           }),
-        })
+        }),
       );
     });
 

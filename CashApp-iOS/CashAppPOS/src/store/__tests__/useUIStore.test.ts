@@ -21,7 +21,7 @@ describe('useUIStore', () => {
   describe('Initial State', () => {
     it('should have correct initial state', () => {
       const { result } = renderHook(() => useUIStore());
-      
+
       expect(result.current.selectedCategory).toBe('All');
       expect(result.current.showPaymentModal).toBe(false);
       expect(result.current.showOfflineIndicator).toBe(false);

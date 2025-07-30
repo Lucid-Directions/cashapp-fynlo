@@ -70,8 +70,7 @@ const MainTabNavigator: React.FC = () => {
           marginTop: 4,
         },
         headerShown: false,
-      })}
-    >
+      })}>
       <Tab.Screen
         name="Home"
         component={HomeHubScreen}
@@ -85,18 +84,14 @@ const MainTabNavigator: React.FC = () => {
 
 const MainNavigator: React.FC = () => {
   const { theme } = useTheme();
-  
+
   return (
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
         cardStyle: { backgroundColor: theme.colors.background },
-      }}
-    >
-      <Stack.Screen
-        name="MainTabs"
-        component={MainTabNavigator}
-      />
+      }}>
+      <Stack.Screen name="MainTabs" component={MainTabNavigator} />
       <Stack.Screen
         name="TableSelection"
         component={TableSelectionScreen}

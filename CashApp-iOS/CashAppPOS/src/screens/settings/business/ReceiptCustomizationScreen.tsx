@@ -10,7 +10,12 @@ import {
   Image,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { SettingsHeader, SettingsSection, SettingsCard, ToggleSwitch } from '../../../components/settings';
+import {
+  SettingsHeader,
+  SettingsSection,
+  SettingsCard,
+  ToggleSwitch,
+} from '../../../components/settings';
 import useSettingsStore from '../../../store/useSettingsStore';
 
 // Clover POS Color Scheme
@@ -45,54 +50,42 @@ const ReceiptCustomizationScreen: React.FC = () => {
     try {
       updateReceiptSettings(formData);
       setHasChanges(false);
-      Alert.alert(
-        'Success',
-        'Receipt customization has been saved successfully.',
-        [{ text: 'OK' }]
-      );
+      Alert.alert('Success', 'Receipt customization has been saved successfully.', [
+        { text: 'OK' },
+      ]);
     } catch (error) {
-      Alert.alert(
-        'Error',
-        'Failed to save receipt customization. Please try again.',
-        [{ text: 'OK' }]
-      );
+      Alert.alert('Error', 'Failed to save receipt customization. Please try again.', [
+        { text: 'OK' },
+      ]);
     }
   };
 
   const handleReset = () => {
-    Alert.alert(
-      'Reset Changes',
-      'Are you sure you want to discard all unsaved changes?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Reset',
-          style: 'destructive',
-          onPress: () => {
-            setFormData(receiptSettings);
-            setHasChanges(false);
-          },
+    Alert.alert('Reset Changes', 'Are you sure you want to discard all unsaved changes?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Reset',
+        style: 'destructive',
+        onPress: () => {
+          setFormData(receiptSettings);
+          setHasChanges(false);
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const handleLogoUpload = () => {
-    Alert.alert(
-      'Select Logo Source',
-      'Choose how you would like to add your restaurant logo',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Camera', 
-          onPress: () => simulateImageCapture('camera')
-        },
-        { 
-          text: 'Photo Library', 
-          onPress: () => simulateImageCapture('library')
-        },
-      ]
-    );
+    Alert.alert('Select Logo Source', 'Choose how you would like to add your restaurant logo', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Camera',
+        onPress: () => simulateImageCapture('camera'),
+      },
+      {
+        text: 'Photo Library',
+        onPress: () => simulateImageCapture('library'),
+      },
+    ]);
   };
 
   const simulateImageCapture = (source: 'camera' | 'library') => {
@@ -102,9 +95,9 @@ const ReceiptCustomizationScreen: React.FC = () => {
       'https://via.placeholder.com/200x80/0066CC/FFFFFF?text=RESTAURANT',
       'https://via.placeholder.com/200x80/FF6B35/FFFFFF?text=CAFE+LOGO',
     ];
-    
+
     const selectedLogo = sampleLogos[Math.floor(Math.random() * sampleLogos.length)];
-    
+
     Alert.alert(
       'Logo Selected',
       `Logo selected from ${source}. This is a demo - in production, this would use react-native-image-picker.`,
@@ -115,29 +108,25 @@ const ReceiptCustomizationScreen: React.FC = () => {
           onPress: () => {
             setLogoUri(selectedLogo);
             handleFieldChange('logoUri', selectedLogo);
-            Alert.alert('Success', 'Logo has been updated! Don\'t forget to save your changes.');
-          }
-        }
-      ]
+            Alert.alert('Success', "Logo has been updated! Don't forget to save your changes.");
+          },
+        },
+      ],
     );
   };
 
   const handleRemoveLogo = () => {
-    Alert.alert(
-      'Remove Logo',
-      'Are you sure you want to remove the current logo?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Remove',
-          style: 'destructive',
-          onPress: () => {
-            setLogoUri(null);
-            handleFieldChange('logoUri', null);
-          }
-        }
-      ]
-    );
+    Alert.alert('Remove Logo', 'Are you sure you want to remove the current logo?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Remove',
+        style: 'destructive',
+        onPress: () => {
+          setLogoUri(null);
+          handleFieldChange('logoUri', null);
+        },
+      },
+    ]);
   };
 
   // Sample receipt preview data
@@ -146,11 +135,11 @@ const ReceiptCustomizationScreen: React.FC = () => {
     date: new Date().toLocaleDateString('en-GB'),
     time: new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
     items: [
-      { name: 'Carnitas Taco', qty: 2, price: 7.00 },
-      { name: 'Nachos', qty: 1, price: 5.00 },
-      { name: 'Corona Beer', qty: 1, price: 3.80 },
+      { name: 'Carnitas Taco', qty: 2, price: 7.0 },
+      { name: 'Nachos', qty: 1, price: 5.0 },
+      { name: 'Corona Beer', qty: 1, price: 3.8 },
     ],
-    subtotal: 15.80,
+    subtotal: 15.8,
     vat: 3.16,
     total: 18.96,
   };
@@ -161,8 +150,8 @@ const ReceiptCustomizationScreen: React.FC = () => {
         {formData.showLogo && (
           <View style={styles.logoPlaceholder}>
             {logoUri ? (
-              <Image 
-                source={{ uri: logoUri }} 
+              <Image
+                source={{ uri: logoUri }}
                 style={styles.receiptLogoImage}
                 resizeMode="contain"
               />
@@ -174,19 +163,19 @@ const ReceiptCustomizationScreen: React.FC = () => {
             )}
           </View>
         )}
-        
+
         <Text style={styles.receiptCompanyName}>{businessInfo.companyName}</Text>
         <Text style={styles.receiptAddress}>{businessInfo.address}</Text>
-        <Text style={styles.receiptAddress}>{businessInfo.city}, {businessInfo.postalCode}</Text>
+        <Text style={styles.receiptAddress}>
+          {businessInfo.city}, {businessInfo.postalCode}
+        </Text>
         <Text style={styles.receiptPhone}>Tel: {businessInfo.phone}</Text>
-        
+
         {formData.showVatNumber && businessInfo.vatNumber && (
           <Text style={styles.receiptVat}>VAT: {businessInfo.vatNumber}</Text>
         )}
 
-        {formData.headerText && (
-          <Text style={styles.receiptHeaderText}>{formData.headerText}</Text>
-        )}
+        {formData.headerText && <Text style={styles.receiptHeaderText}>{formData.headerText}</Text>}
       </View>
 
       <View style={styles.receiptDivider} />
@@ -194,7 +183,9 @@ const ReceiptCustomizationScreen: React.FC = () => {
       <View style={styles.receiptBody}>
         <View style={styles.receiptOrderInfo}>
           <Text style={styles.receiptOrderNumber}>Order: {sampleReceiptData.orderNumber}</Text>
-          <Text style={styles.receiptDateTime}>{sampleReceiptData.date} {sampleReceiptData.time}</Text>
+          <Text style={styles.receiptDateTime}>
+            {sampleReceiptData.date} {sampleReceiptData.time}
+          </Text>
         </View>
 
         <View style={styles.receiptItems}>
@@ -228,10 +219,8 @@ const ReceiptCustomizationScreen: React.FC = () => {
       <View style={styles.receiptDivider} />
 
       <View style={styles.receiptFooter}>
-        {formData.footerText && (
-          <Text style={styles.receiptFooterText}>{formData.footerText}</Text>
-        )}
-        
+        {formData.footerText && <Text style={styles.receiptFooterText}>{formData.footerText}</Text>}
+
         {formData.showQrCode && (
           <View style={styles.qrCodePlaceholder}>
             <Icon name="qr-code" size={60} color={Colors.mediumGray} />
@@ -258,17 +247,15 @@ const ReceiptCustomizationScreen: React.FC = () => {
         {/* Receipt Format */}
         <SettingsSection
           title="Receipt Format"
-          subtitle="Choose how receipts are printed and delivered"
-        >
+          subtitle="Choose how receipts are printed and delivered">
           <SettingsCard
             title="Print Receipts"
             description="Automatically print receipts for customers"
             icon="print"
-            iconColor={Colors.primary}
-          >
+            iconColor={Colors.primary}>
             <ToggleSwitch
               value={formData.printReceipts}
-              onValueChange={(value) => handleFieldChange('printReceipts', value)}
+              onValueChange={value => handleFieldChange('printReceipts', value)}
             />
           </SettingsCard>
 
@@ -276,11 +263,10 @@ const ReceiptCustomizationScreen: React.FC = () => {
             title="Email Receipts"
             description="Send digital receipts to customer email"
             icon="email"
-            iconColor={Colors.secondary}
-          >
+            iconColor={Colors.secondary}>
             <ToggleSwitch
               value={formData.emailReceipts}
-              onValueChange={(value) => handleFieldChange('emailReceipts', value)}
+              onValueChange={value => handleFieldChange('emailReceipts', value)}
             />
           </SettingsCard>
 
@@ -298,19 +284,15 @@ const ReceiptCustomizationScreen: React.FC = () => {
         </SettingsSection>
 
         {/* Branding */}
-        <SettingsSection
-          title="Branding"
-          subtitle="Add your logo and company branding"
-        >
+        <SettingsSection title="Branding" subtitle="Add your logo and company branding">
           <SettingsCard
             title="Show Logo"
             description="Display company logo on receipts"
             icon="image"
-            iconColor={Colors.primary}
-          >
+            iconColor={Colors.primary}>
             <ToggleSwitch
               value={formData.showLogo}
-              onValueChange={(value) => handleFieldChange('showLogo', value)}
+              onValueChange={value => handleFieldChange('showLogo', value)}
             />
           </SettingsCard>
 
@@ -320,24 +302,22 @@ const ReceiptCustomizationScreen: React.FC = () => {
                 <View style={styles.logoContainer}>
                   <Text style={styles.logoSectionTitle}>Current Logo</Text>
                   <View style={styles.logoPreview}>
-                    <Image 
-                      source={{ uri: logoUri }} 
+                    <Image
+                      source={{ uri: logoUri }}
                       style={styles.logoImage}
                       resizeMode="contain"
                     />
                   </View>
                   <View style={styles.logoActions}>
-                    <TouchableOpacity 
+                    <TouchableOpacity
                       style={[styles.logoButton, styles.changeLogo]}
-                      onPress={handleLogoUpload}
-                    >
+                      onPress={handleLogoUpload}>
                       <Icon name="edit" size={20} color={Colors.white} />
                       <Text style={styles.logoButtonText}>Change Logo</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity 
+                    <TouchableOpacity
                       style={[styles.logoButton, styles.removeLogo]}
-                      onPress={handleRemoveLogo}
-                    >
+                      onPress={handleRemoveLogo}>
                       <Icon name="delete" size={20} color={Colors.white} />
                       <Text style={styles.logoButtonText}>Remove</Text>
                     </TouchableOpacity>
@@ -359,14 +339,13 @@ const ReceiptCustomizationScreen: React.FC = () => {
         {/* Content Customization */}
         <SettingsSection
           title="Content Customization"
-          subtitle="Customize text that appears on receipts"
-        >
+          subtitle="Customize text that appears on receipts">
           <View style={styles.textInputContainer}>
             <Text style={styles.inputLabel}>Header Text</Text>
             <TextInput
               style={styles.textInput}
               value={formData.headerText}
-              onChangeText={(value) => handleFieldChange('headerText', value)}
+              onChangeText={value => handleFieldChange('headerText', value)}
               placeholder="Thank you for dining with us!"
               multiline
               numberOfLines={2}
@@ -378,7 +357,7 @@ const ReceiptCustomizationScreen: React.FC = () => {
             <TextInput
               style={styles.textInput}
               value={formData.footerText}
-              onChangeText={(value) => handleFieldChange('footerText', value)}
+              onChangeText={value => handleFieldChange('footerText', value)}
               placeholder="Visit us again soon!"
               multiline
               numberOfLines={2}
@@ -387,19 +366,15 @@ const ReceiptCustomizationScreen: React.FC = () => {
         </SettingsSection>
 
         {/* Additional Options */}
-        <SettingsSection
-          title="Additional Options"
-          subtitle="Extra features for your receipts"
-        >
+        <SettingsSection title="Additional Options" subtitle="Extra features for your receipts">
           <SettingsCard
             title="Show VAT Number"
             description="Display VAT registration number"
             icon="receipt-long"
-            iconColor={Colors.success}
-          >
+            iconColor={Colors.success}>
             <ToggleSwitch
               value={formData.showVatNumber}
-              onValueChange={(value) => handleFieldChange('showVatNumber', value)}
+              onValueChange={value => handleFieldChange('showVatNumber', value)}
             />
           </SettingsCard>
 
@@ -407,23 +382,17 @@ const ReceiptCustomizationScreen: React.FC = () => {
             title="QR Code"
             description="Add QR code for digital menu or feedback"
             icon="qr-code"
-            iconColor={Colors.darkGray}
-          >
+            iconColor={Colors.darkGray}>
             <ToggleSwitch
               value={formData.showQrCode}
-              onValueChange={(value) => handleFieldChange('showQrCode', value)}
+              onValueChange={value => handleFieldChange('showQrCode', value)}
             />
           </SettingsCard>
         </SettingsSection>
 
         {/* Receipt Preview */}
-        <SettingsSection
-          title="Receipt Preview"
-          subtitle="Preview how your receipt will look"
-        >
-          <View style={styles.previewContainer}>
-            {renderReceiptPreview()}
-          </View>
+        <SettingsSection title="Receipt Preview" subtitle="Preview how your receipt will look">
+          <View style={styles.previewContainer}>{renderReceiptPreview()}</View>
         </SettingsSection>
 
         {/* Action Buttons */}
@@ -431,17 +400,13 @@ const ReceiptCustomizationScreen: React.FC = () => {
           <TouchableOpacity
             style={[styles.button, styles.saveButton]}
             onPress={handleSave}
-            disabled={!hasChanges || isLoading}
-          >
+            disabled={!hasChanges || isLoading}>
             <Icon name="save" size={20} color={Colors.white} />
             <Text style={styles.saveButtonText}>Save Changes</Text>
           </TouchableOpacity>
 
           {hasChanges && (
-            <TouchableOpacity
-              style={[styles.button, styles.resetButton]}
-              onPress={handleReset}
-            >
+            <TouchableOpacity style={[styles.button, styles.resetButton]} onPress={handleReset}>
               <Icon name="refresh" size={20} color={Colors.danger} />
               <Text style={styles.resetButtonText}>Reset</Text>
             </TouchableOpacity>

@@ -51,7 +51,7 @@ const PaymentProviderSettingsScreen: React.FC = () => {
   const [enabledProviders, setEnabledProviders] = useState({
     stripe: true,
     square: false,
-    sumup: true,  // ENABLED for staging testing
+    sumup: true, // ENABLED for staging testing
     qrCode: true,
     cash: true,
   });
@@ -96,7 +96,7 @@ const PaymentProviderSettingsScreen: React.FC = () => {
           // TODO: Test Stripe connection
           Alert.alert('Test Result', 'Stripe connection test would be performed here');
           break;
-          
+
         case 'backend':
           if (!config.backend.baseUrl || !config.backend.apiKey) {
             Alert.alert('Error', 'Please enter backend URL and API key');
@@ -104,16 +104,16 @@ const PaymentProviderSettingsScreen: React.FC = () => {
           }
           // Test backend connection
           const response = await fetch(`${config.backend.baseUrl}/api/v1/health`, {
-            headers: { 'Authorization': `Bearer ${config.backend.apiKey}` }
+            headers: { Authorization: `Bearer ${config.backend.apiKey}` },
           });
-          
+
           if (response.ok) {
             Alert.alert('Success', 'Backend connection successful');
           } else {
             Alert.alert('Error', 'Backend connection failed');
           }
           break;
-          
+
         default:
           Alert.alert('Info', `${provider} connection test not implemented`);
       }
@@ -127,7 +127,7 @@ const PaymentProviderSettingsScreen: React.FC = () => {
     title: string,
     provider: keyof typeof enabledProviders,
     icon: string,
-    children: React.ReactNode
+    children: React.ReactNode,
   ) => (
     <View style={styles.providerCard}>
       <View style={styles.providerHeader}>
@@ -137,18 +137,12 @@ const PaymentProviderSettingsScreen: React.FC = () => {
         </View>
         <Switch
           value={enabledProviders[provider]}
-          onValueChange={(value) => 
-            setEnabledProviders(prev => ({ ...prev, [provider]: value }))
-          }
+          onValueChange={value => setEnabledProviders(prev => ({ ...prev, [provider]: value }))}
           trackColor={{ false: Colors.lightGray, true: Colors.primary }}
           thumbColor={enabledProviders[provider] ? Colors.white : Colors.mediumGray}
         />
       </View>
-      {enabledProviders[provider] && (
-        <View style={styles.providerContent}>
-          {children}
-        </View>
-      )}
+      {enabledProviders[provider] && <View style={styles.providerContent}>{children}</View>}
     </View>
   );
 
@@ -175,14 +169,17 @@ const PaymentProviderSettingsScreen: React.FC = () => {
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Backend Configuration */}
-        {renderProviderCard('Backend API', 'qrCode', 'api', (
+        {renderProviderCard(
+          'Backend API',
+          'qrCode',
+          'api',
           <>
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Backend URL</Text>
               <TextInput
                 style={styles.input}
                 value={config.backend.baseUrl}
-                onChangeText={(text) => 
+                onChangeText={text =>
                   setConfig(prev => ({ ...prev, backend: { ...prev.backend, baseUrl: text } }))
                 }
                 placeholder="http://localhost:8000"
@@ -194,7 +191,7 @@ const PaymentProviderSettingsScreen: React.FC = () => {
               <TextInput
                 style={styles.input}
                 value={config.backend.apiKey}
-                onChangeText={(text) => 
+                onChangeText={text =>
                   setConfig(prev => ({ ...prev, backend: { ...prev.backend, apiKey: text } }))
                 }
                 placeholder="Enter your API key"
@@ -202,18 +199,18 @@ const PaymentProviderSettingsScreen: React.FC = () => {
                 autoCapitalize="none"
               />
             </View>
-            <TouchableOpacity
-              style={styles.testButton}
-              onPress={() => testConnection('backend')}
-            >
+            <TouchableOpacity style={styles.testButton} onPress={() => testConnection('backend')}>
               <Icon name="wifi" size={20} color={Colors.white} />
               <Text style={styles.testButtonText}>Test Connection</Text>
             </TouchableOpacity>
-          </>
-        ))}
+          </>,
+        )}
 
         {/* Stripe Configuration */}
-        {renderProviderCard('Stripe', 'stripe', 'credit-card', (
+        {renderProviderCard(
+          'Stripe',
+          'stripe',
+          'credit-card',
           <>
             <View style={styles.feeInfo}>
               <Text style={styles.feeText}>Fee: 1.4% + 20p per transaction</Text>
@@ -223,7 +220,7 @@ const PaymentProviderSettingsScreen: React.FC = () => {
               <TextInput
                 style={styles.input}
                 value={config.stripe.publishableKey}
-                onChangeText={(text) => 
+                onChangeText={text =>
                   setConfig(prev => ({ ...prev, stripe: { ...prev.stripe, publishableKey: text } }))
                 }
                 placeholder="pk_test_..."
@@ -235,41 +232,39 @@ const PaymentProviderSettingsScreen: React.FC = () => {
               <TextInput
                 style={styles.input}
                 value={config.stripe.merchantId}
-                onChangeText={(text) => 
+                onChangeText={text =>
                   setConfig(prev => ({ ...prev, stripe: { ...prev.stripe, merchantId: text } }))
                 }
                 placeholder="merchant.your.app"
                 autoCapitalize="none"
               />
             </View>
-            <TouchableOpacity
-              style={styles.testButton}
-              onPress={() => testConnection('stripe')}
-            >
+            <TouchableOpacity style={styles.testButton} onPress={() => testConnection('stripe')}>
               <Icon name="payment" size={20} color={Colors.white} />
               <Text style={styles.testButtonText}>Test Stripe</Text>
             </TouchableOpacity>
-          </>
-        ))}
+          </>,
+        )}
 
         {/* Square Configuration */}
-        {renderProviderCard('Square', 'square', 'contactless-payment', (
+        {renderProviderCard(
+          'Square',
+          'square',
+          'contactless-payment',
           <>
             <View style={styles.feeInfo}>
               <Text style={styles.feeText}>Fee: 1.75% per transaction</Text>
             </View>
             <View style={styles.sdkWarning}>
               <Icon name="warning" size={20} color={Colors.warning} />
-              <Text style={styles.warningText}>
-                Square SDK not available in current build
-              </Text>
+              <Text style={styles.warningText}>Square SDK not available in current build</Text>
             </View>
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Application ID</Text>
               <TextInput
                 style={styles.input}
                 value={config.square.applicationId}
-                onChangeText={(text) => 
+                onChangeText={text =>
                   setConfig(prev => ({ ...prev, square: { ...prev.square, applicationId: text } }))
                 }
                 placeholder="sandbox-sq0idb-..."
@@ -281,18 +276,21 @@ const PaymentProviderSettingsScreen: React.FC = () => {
               <TextInput
                 style={styles.input}
                 value={config.square.locationId}
-                onChangeText={(text) => 
+                onChangeText={text =>
                   setConfig(prev => ({ ...prev, square: { ...prev.square, locationId: text } }))
                 }
                 placeholder="Location ID"
                 autoCapitalize="none"
               />
             </View>
-          </>
-        ))}
+          </>,
+        )}
 
         {/* SumUp Configuration */}
-        {renderProviderCard('SumUp', 'sumup', 'point-of-sale', (
+        {renderProviderCard(
+          'SumUp',
+          'sumup',
+          'point-of-sale',
           <>
             <View style={styles.feeInfo}>
               <Text style={styles.feeText}>Fee: 0.69% + £19/month (high volume)</Text>
@@ -309,52 +307,52 @@ const PaymentProviderSettingsScreen: React.FC = () => {
               <TextInput
                 style={styles.input}
                 value={config.sumup.affiliateKey}
-                onChangeText={(text) => 
+                onChangeText={text =>
                   setConfig(prev => ({ ...prev, sumup: { ...prev.sumup, affiliateKey: text } }))
                 }
                 placeholder="Your SumUp affiliate key"
                 autoCapitalize="none"
               />
             </View>
-          </>
-        ))}
+          </>,
+        )}
 
         {/* QR Code Payments */}
-        {renderProviderCard('QR Code Payments', 'qrCode', 'qr-code', (
+        {renderProviderCard(
+          'QR Code Payments',
+          'qrCode',
+          'qr-code',
           <View style={styles.feeInfo}>
             <Text style={styles.feeText}>Fee: 1.2% per transaction</Text>
             <Text style={styles.feeSubtext}>Lowest fees, processed via backend</Text>
-          </View>
-        ))}
+          </View>,
+        )}
 
         {/* Cash Payments */}
-        {renderProviderCard('Cash Payments', 'cash', 'payments', (
+        {renderProviderCard(
+          'Cash Payments',
+          'cash',
+          'payments',
           <View style={styles.feeInfo}>
             <Text style={styles.feeText}>No processing fees</Text>
             <Text style={styles.feeSubtext}>Manual cash handling required</Text>
-          </View>
-        ))}
+          </View>,
+        )}
 
         {/* Cost Optimization Info */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Smart Routing</Text>
           <Text style={styles.sectionText}>
-            The system automatically selects the most cost-effective payment provider 
-            based on transaction amount and your monthly volume:
+            The system automatically selects the most cost-effective payment provider based on
+            transaction amount and your monthly volume:
           </Text>
           <View style={styles.optimizationList}>
             <Text style={styles.optimizationItem}>
               • SumUp: Best for high volume (£2,714+/month)
             </Text>
-            <Text style={styles.optimizationItem}>
-              • QR Payments: Good balance at 1.2%
-            </Text>
-            <Text style={styles.optimizationItem}>
-              • Stripe: Reliable with 1.4% + 20p
-            </Text>
-            <Text style={styles.optimizationItem}>
-              • Square: Standard 1.75% rate
-            </Text>
+            <Text style={styles.optimizationItem}>• QR Payments: Good balance at 1.2%</Text>
+            <Text style={styles.optimizationItem}>• Stripe: Reliable with 1.4% + 20p</Text>
+            <Text style={styles.optimizationItem}>• Square: Standard 1.75% rate</Text>
           </View>
         </View>
       </ScrollView>

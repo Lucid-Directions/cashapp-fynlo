@@ -112,7 +112,7 @@ export const mockOrders: Order[] = [
     id: 2,
     items: [mockOrderItems[2]],
     subtotal: 9.99,
-    tax: 0.80,
+    tax: 0.8,
     total: 10.79,
     customerName: 'Jane Smith',
     tableNumber: 3,
@@ -125,7 +125,7 @@ export const mockOrders: Order[] = [
     items: mockOrderItems,
     subtotal: 37.96,
     tax: 3.04,
-    total: 41.00,
+    total: 41.0,
     tableNumber: 7,
     createdAt: new Date('2024-01-15T10:15:00Z'),
     status: 'completed',
@@ -188,9 +188,9 @@ export const mockSessions: PosSession[] = [
     startTime: new Date('2024-01-15T09:00:00Z'),
     endTime: new Date('2024-01-15T17:00:00Z'),
     isActive: false,
-    startingCash: 200.00,
-    endingCash: 450.00,
-    totalSales: 1250.00,
+    startingCash: 200.0,
+    endingCash: 450.0,
+    totalSales: 1250.0,
     ordersCount: 45,
   },
   {
@@ -199,7 +199,7 @@ export const mockSessions: PosSession[] = [
     userName: 'Sarah Cashier',
     startTime: new Date('2024-01-16T09:00:00Z'),
     isActive: true,
-    startingCash: 150.00,
+    startingCash: 150.0,
     totalSales: 325.75,
     ordersCount: 12,
   },
@@ -215,32 +215,32 @@ export const mockApiResponses = {
       token: 'mock-jwt-token-12345',
     },
   },
-  
+
   loginFailure: {
     success: false,
     error: 'Invalid credentials',
   },
-  
+
   productsSuccess: {
     success: true,
     data: mockMenuItems,
   },
-  
+
   categoriesSuccess: {
     success: true,
     data: mockCategories,
   },
-  
+
   ordersSuccess: {
     success: true,
     data: mockOrders,
   },
-  
+
   orderCreateSuccess: {
     success: true,
     data: mockOrders[0],
   },
-  
+
   paymentSuccess: {
     success: true,
     data: {
@@ -249,12 +249,12 @@ export const mockApiResponses = {
       amount: 33.45,
     },
   },
-  
+
   paymentFailure: {
     success: false,
     error: 'Payment declined',
   },
-  
+
   networkError: {
     success: false,
     error: 'Network connection failed',
@@ -267,16 +267,16 @@ export const mockFormData = {
     username: 'sarah@fynlo.com',
     password: 'password123',
   },
-  
+
   invalidLogin: {
     username: 'wrong@example.com',
     password: 'wrongpassword',
   },
-  
+
   forgotPassword: {
     email: 'sarah@fynlo.com',
   },
-  
+
   orderCustomer: {
     name: 'Test Customer',
     table: '5',
@@ -290,29 +290,29 @@ export const testScenarios = {
     total: 0,
     itemCount: 0,
   },
-  
+
   singleItemCart: {
     cart: [mockOrderItems[0]],
     total: 25.98, // 2 items * 12.99
     itemCount: 2,
   },
-  
+
   multipleItemsCart: {
     cart: mockOrderItems,
     total: 37.96,
     itemCount: 4,
   },
-  
+
   offlineMode: {
     isOnline: false,
     showOfflineIndicator: true,
   },
-  
+
   loadingState: {
     isLoading: true,
     error: null,
   },
-  
+
   errorState: {
     isLoading: false,
     error: 'Something went wrong',
@@ -329,7 +329,7 @@ export const performanceTestData = {
     emoji: '🍽️',
     available: Math.random() > 0.1, // 90% available
   })),
-  
+
   largeOrderHistory: Array.from({ length: 500 }, (_, index) => ({
     id: index + 1,
     items: [mockOrderItems[index % mockOrderItems.length]],

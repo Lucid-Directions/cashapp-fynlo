@@ -1,9 +1,5 @@
 import React from 'react';
-import {
-  View,
-  StyleSheet,
-  ViewStyle,
-} from 'react-native';
+import { View, StyleSheet, ViewStyle } from 'react-native';
 import { useTheme } from '../../design-system/ThemeProvider';
 import { useResponsiveColumns, useResponsiveSpacing } from '../../hooks/useResponsive';
 import { Theme, spacing } from '../../design-system/theme';
@@ -61,7 +57,7 @@ const ResponsiveGrid: React.FC<ResponsiveGridProps> = ({
   const childArray = React.Children.toArray(children);
 
   // Calculate item width based on columns and spacing
-  const itemWidth = `${(100 / currentColumns)}%`;
+  const itemWidth = `${100 / currentColumns}%`;
   const spacingValue = theme.spacing[currentSpacing];
 
   // Group children into rows
@@ -84,8 +80,7 @@ const ResponsiveGrid: React.FC<ResponsiveGridProps> = ({
                   paddingLeft: itemIndex > 0 ? spacingValue / 2 : 0,
                   paddingRight: itemIndex < row.length - 1 ? spacingValue / 2 : 0,
                 },
-              ]}
-            >
+              ]}>
               {child}
             </View>
           ))}
@@ -99,7 +94,8 @@ const ResponsiveGrid: React.FC<ResponsiveGridProps> = ({
                   {
                     width: itemWidth,
                     paddingLeft: spacingValue / 2,
-                    paddingRight: emptyIndex < currentColumns - row.length - 1 ? spacingValue / 2 : 0,
+                    paddingRight:
+                      emptyIndex < currentColumns - row.length - 1 ? spacingValue / 2 : 0,
                   },
                 ]}
               />
@@ -111,18 +107,10 @@ const ResponsiveGrid: React.FC<ResponsiveGridProps> = ({
 };
 
 // Grid Item Component with span support
-export const GridItem: React.FC<GridItemProps> = ({
-  children,
-  span,
-  style,
-}) => {
+export const GridItem: React.FC<GridItemProps> = ({ children, span, style }) => {
   // Note: Span functionality would require more complex layout calculations
   // For now, this is a simple wrapper that can be extended
-  return (
-    <View style={style}>
-      {children}
-    </View>
-  );
+  return <View style={style}>{children}</View>;
 };
 
 const createStyles = (theme: Theme) =>

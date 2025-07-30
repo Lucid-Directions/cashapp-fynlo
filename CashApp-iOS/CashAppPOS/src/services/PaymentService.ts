@@ -53,7 +53,7 @@ class PaymentServiceClass {
 
   async initialize(config: PaymentProviderConfig): Promise<void> {
     this.config = config;
-    
+
     // Initialize Stripe
     try {
       if (config.stripe.publishableKey) {
@@ -69,16 +69,18 @@ class PaymentServiceClass {
   /**
    * Get available payment methods prioritized with SumUp first
    */
-  async getAvailablePaymentMethods(): Promise<Array<{
-    id: string;
-    name: string;
-    icon: string;
-    color: string;
-    enabled: boolean;
-    requiresAuth: boolean;
-    feeInfo: string;
-    isRecommended?: boolean;
-  }>> {
+  async getAvailablePaymentMethods(): Promise<
+    Array<{
+      id: string;
+      name: string;
+      icon: string;
+      color: string;
+      enabled: boolean;
+      requiresAuth: boolean;
+      feeInfo: string;
+      isRecommended?: boolean;
+    }>
+  > {
     return [
       {
         id: 'sumup',
@@ -138,14 +140,17 @@ class PaymentServiceClass {
         throw new Error('PaymentService not initialized');
       }
 
-      const response = await fetch(`${this.config.backend.baseUrl}/api/v1/payments/optimal-provider`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.config.backend.apiKey}`,
+      const response = await fetch(
+        `${this.config.backend.baseUrl}/api/v1/payments/optimal-provider`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${this.config.backend.apiKey}`,
+          },
+          body: JSON.stringify({ amount }),
         },
-        body: JSON.stringify({ amount }),
-      });
+      );
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -173,7 +178,7 @@ class PaymentServiceClass {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.config.backend.apiKey}`,
+          Authorization: `Bearer ${this.config.backend.apiKey}`,
         },
         body: JSON.stringify({
           ...request,
@@ -187,7 +192,7 @@ class PaymentServiceClass {
       }
 
       const data = await response.json();
-      
+
       return {
         success: true,
         transactionId: data.transaction_id,
@@ -220,7 +225,7 @@ class PaymentServiceClass {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.config.backend.apiKey}`,
+          Authorization: `Bearer ${this.config.backend.apiKey}`,
         },
         body: JSON.stringify({
           order_id: request.orderId,
@@ -234,7 +239,7 @@ class PaymentServiceClass {
       }
 
       const data = await response.json();
-      
+
       return {
         qrPaymentId: data.qr_payment_id,
         qrCodeData: data.qr_code_data,
@@ -260,12 +265,15 @@ class PaymentServiceClass {
         throw new Error('PaymentService not initialized');
       }
 
-      const response = await fetch(`${this.config.backend.baseUrl}/api/v1/payments/qr/${qrPaymentId}/status`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${this.config.backend.apiKey}`,
+      const response = await fetch(
+        `${this.config.backend.baseUrl}/api/v1/payments/qr/${qrPaymentId}/status`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${this.config.backend.apiKey}`,
+          },
         },
-      });
+      );
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -291,13 +299,16 @@ class PaymentServiceClass {
         throw new Error('PaymentService not initialized');
       }
 
-      const response = await fetch(`${this.config.backend.baseUrl}/api/v1/payments/qr/${qrPaymentId}/confirm`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.config.backend.apiKey}`,
+      const response = await fetch(
+        `${this.config.backend.baseUrl}/api/v1/payments/qr/${qrPaymentId}/confirm`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${this.config.backend.apiKey}`,
+          },
         },
-      });
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -305,7 +316,7 @@ class PaymentServiceClass {
       }
 
       const data = await response.json();
-      
+
       return {
         success: true,
         transactionId: data.data.payment_id,
@@ -328,7 +339,10 @@ class PaymentServiceClass {
   /**
    * Process cash payment
    */
-  async processCashPayment(request: PaymentRequest, receivedAmount: number): Promise<PaymentResult> {
+  async processCashPayment(
+    request: PaymentRequest,
+    receivedAmount: number,
+  ): Promise<PaymentResult> {
     try {
       if (!this.config) {
         throw new Error('PaymentService not initialized');
@@ -343,7 +357,7 @@ class PaymentServiceClass {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.config.backend.apiKey}`,
+          Authorization: `Bearer ${this.config.backend.apiKey}`,
         },
         body: JSON.stringify({
           order_id: request.orderId,
@@ -359,7 +373,7 @@ class PaymentServiceClass {
       }
 
       const data = await response.json();
-      
+
       return {
         success: true,
         transactionId: data.payment_id,
@@ -388,16 +402,19 @@ class PaymentServiceClass {
         throw new Error('PaymentService not initialized');
       }
 
-      const response = await fetch(`${this.config.backend.baseUrl}/api/v1/payments/refund/${transactionId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.config.backend.apiKey}`,
+      const response = await fetch(
+        `${this.config.backend.baseUrl}/api/v1/payments/refund/${transactionId}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${this.config.backend.apiKey}`,
+          },
+          body: JSON.stringify({
+            amount: amount,
+          }),
         },
-        body: JSON.stringify({
-          amount: amount,
-        }),
-      });
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -405,7 +422,7 @@ class PaymentServiceClass {
       }
 
       const data = await response.json();
-      
+
       return {
         success: true,
         transactionId: data.refund_id,
@@ -434,12 +451,15 @@ class PaymentServiceClass {
         throw new Error('PaymentService not initialized');
       }
 
-      const response = await fetch(`${this.config.backend.baseUrl}/api/v1/payments/analytics?start_date=${startDate}&end_date=${endDate}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${this.config.backend.apiKey}`,
+      const response = await fetch(
+        `${this.config.backend.baseUrl}/api/v1/payments/analytics?start_date=${startDate}&end_date=${endDate}`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${this.config.backend.apiKey}`,
+          },
         },
-      });
+      );
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);

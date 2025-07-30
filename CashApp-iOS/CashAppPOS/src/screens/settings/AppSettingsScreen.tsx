@@ -68,7 +68,7 @@ const AppSettingsScreen: React.FC = () => {
     },
     {
       id: 'data-export',
-      title: 'Data Export', 
+      title: 'Data Export',
       description: 'Export reports and transaction history',
       icon: 'file-download',
       route: 'DataExport',
@@ -80,14 +80,18 @@ const AppSettingsScreen: React.FC = () => {
       icon: 'bug-report',
       route: 'SystemDiagnostics',
     },
-    ...__DEV__ ? [{
-      id: 'developer-settings',
-      title: 'Developer Settings',
-      description: 'Mock data, API toggles, and debug options',
-      icon: 'developer-mode',
-      route: 'DeveloperSettings',
-      isDeveloper: true,
-    }] : [],
+    ...(__DEV__
+      ? [
+          {
+            id: 'developer-settings',
+            title: 'Developer Settings',
+            description: 'Mock data, API toggles, and debug options',
+            icon: 'developer-mode',
+            route: 'DeveloperSettings',
+            isDeveloper: true,
+          },
+        ]
+      : []),
   ];
 
   const getStatusColor = (status?: string) => {
@@ -122,41 +126,36 @@ const AppSettingsScreen: React.FC = () => {
 
   const renderSettingItem = ({ item }: { item: AppSettingsItem }) => (
     <TouchableOpacity
-      style={[
-        styles.settingCard,
-        item.isDeveloper && styles.developerCard
-      ]}
+      style={[styles.settingCard, item.isDeveloper && styles.developerCard]}
       onPress={() => handleSettingPress(item)}
-      activeOpacity={0.7}
-    >
-      <View style={[
-        styles.settingIcon, 
-        { backgroundColor: item.isDeveloper ? `${Colors.warning}15` : `${Colors.darkGray}15` }
-      ]}>
-        <Icon 
-          name={item.icon} 
-          size={24} 
-          color={item.isDeveloper ? Colors.warning : Colors.darkGray} 
+      activeOpacity={0.7}>
+      <View
+        style={[
+          styles.settingIcon,
+          { backgroundColor: item.isDeveloper ? `${Colors.warning}15` : `${Colors.darkGray}15` },
+        ]}>
+        <Icon
+          name={item.icon}
+          size={24}
+          color={item.isDeveloper ? Colors.warning : Colors.darkGray}
         />
       </View>
-      
+
       <View style={styles.settingContent}>
         <View style={styles.settingHeader}>
           <Text style={styles.settingTitle}>{item.title}</Text>
           {item.status && getStatusIcon(item.status) && (
-            <Icon 
-              name={getStatusIcon(item.status)!} 
-              size={16} 
-              color={getStatusColor(item.status)} 
+            <Icon
+              name={getStatusIcon(item.status)!}
+              size={16}
+              color={getStatusColor(item.status)}
             />
           )}
         </View>
         <Text style={styles.settingDescription}>{item.description}</Text>
-        {item.isDeveloper && (
-          <Text style={styles.developerBadge}>Development Only</Text>
-        )}
+        {item.isDeveloper && <Text style={styles.developerBadge}>Development Only</Text>}
       </View>
-      
+
       <Icon name="chevron-right" size={24} color={Colors.lightGray} />
     </TouchableOpacity>
   );
@@ -164,22 +163,21 @@ const AppSettingsScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor={Colors.darkGray} barStyle="light-content" />
-      
+
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
-          testID="back-button"
-        >
+          testID="back-button">
           <Icon name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>
-        
+
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle}>App Configuration</Text>
           <Text style={styles.headerSubtitle}>Manage app settings and data</Text>
         </View>
-        
+
         <TouchableOpacity style={styles.helpButton}>
           <Icon name="help-outline" size={24} color={Colors.white} />
         </TouchableOpacity>

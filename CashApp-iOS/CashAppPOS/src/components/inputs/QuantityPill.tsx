@@ -1,6 +1,6 @@
 /**
  * QuantityPill - Clean, centered quantity control component
- * 
+ *
  * Features:
  * - Fixed width design that accommodates 2-digit counts
  * - Centered alignment with proper spacing
@@ -10,14 +10,7 @@
  */
 
 import React from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ViewStyle,
-  TextStyle,
-} from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ViewStyle, TextStyle } from 'react-native';
 import { Plus, Minus } from 'lucide-react-native';
 import Animated, {
   useSharedValue,
@@ -153,16 +146,12 @@ const QuantityPill: React.FC<QuantityPillProps> = ({
   return (
     <View style={[styles.container, style]} testID="quantity-pill">
       <TouchableOpacity
-        style={[
-          styles.button,
-          !canDecrease && styles.buttonDisabled,
-        ]}
+        style={[styles.button, !canDecrease && styles.buttonDisabled]}
         onPress={onDecrease}
         disabled={!canDecrease}
         activeOpacity={0.7}
         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-        testID="quantity-decrease"
-      >
+        testID="quantity-decrease">
         <Minus
           size={config.iconSize}
           color={canDecrease ? colors.iconColor : 'rgba(255, 255, 255, 0.5)'}
@@ -177,16 +166,12 @@ const QuantityPill: React.FC<QuantityPillProps> = ({
       </Animated.View>
 
       <TouchableOpacity
-        style={[
-          styles.button,
-          !canIncrease && styles.buttonDisabled,
-        ]}
+        style={[styles.button, !canIncrease && styles.buttonDisabled]}
         onPress={onIncrease}
         disabled={!canIncrease}
         activeOpacity={0.7}
         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-        testID="quantity-increase"
-      >
+        testID="quantity-increase">
         <Plus
           size={config.iconSize}
           color={canIncrease ? colors.iconColor : 'rgba(255, 255, 255, 0.5)'}

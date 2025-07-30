@@ -67,22 +67,22 @@ export const useResponsiveValue = <T>(
     xl?: T;
     xxl?: T;
   },
-  fallback: T
+  fallback: T,
 ): T => {
   const { breakpoint } = useResponsive();
 
   // Return value based on current breakpoint, falling back to smaller breakpoints
   if (values[breakpoint] !== undefined) return values[breakpoint]!;
-  
+
   // Fallback logic
   const breakpointOrder: Array<keyof typeof values> = ['xxl', 'xl', 'lg', 'md', 'sm', 'xs'];
   const currentIndex = breakpointOrder.indexOf(breakpoint);
-  
+
   for (let i = currentIndex + 1; i < breakpointOrder.length; i++) {
     const key = breakpointOrder[i];
     if (values[key] !== undefined) return values[key]!;
   }
-  
+
   return fallback;
 };
 
@@ -96,7 +96,7 @@ export const useResponsiveColumns = (
     xl?: number;
     xxl?: number;
   },
-  defaultColumns: number = 1
+  defaultColumns: number = 1,
 ): number => {
   return useResponsiveValue(columns, defaultColumns);
 };
@@ -111,7 +111,7 @@ export const useResponsiveSpacing = (
     xl?: keyof typeof import('../design-system/theme').spacing;
     xxl?: keyof typeof import('../design-system/theme').spacing;
   },
-  defaultSpacing: keyof typeof import('../design-system/theme').spacing = 4
+  defaultSpacing: keyof typeof import('../design-system/theme').spacing = 4,
 ) => {
   return useResponsiveValue(spacing, defaultSpacing);
 };

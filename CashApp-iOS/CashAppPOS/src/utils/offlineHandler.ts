@@ -46,7 +46,7 @@ class OfflineHandler {
     if (config) {
       this.config = { ...this.config, ...config };
     }
-    
+
     this.initialize();
   }
 
@@ -69,7 +69,7 @@ class OfflineHandler {
    */
   addNetworkListener(listener: (isOnline: boolean) => void): () => void {
     this.listeners.push(listener);
-    
+
     // Return unsubscribe function
     return () => {
       const index = this.listeners.indexOf(listener);
@@ -92,7 +92,7 @@ class OfflineHandler {
   async queueAction(
     type: string,
     data: any,
-    priority: 'high' | 'medium' | 'low' = 'medium'
+    priority: 'high' | 'medium' | 'low' = 'medium',
   ): Promise<string> {
     const action: OfflineAction = {
       id: this.generateActionId(),
@@ -107,7 +107,9 @@ class OfflineHandler {
     this.actionQueue.push(action);
 
     // Sort by priority
-    this.actionQueue.sort((a, b) => this.getPriorityWeight(b.priority) - this.getPriorityWeight(a.priority));
+    this.actionQueue.sort(
+      (a, b) => this.getPriorityWeight(b.priority) - this.getPriorityWeight(a.priority),
+    );
 
     // Limit queue size
     if (this.actionQueue.length > this.config.maxQueueSize) {
@@ -131,7 +133,7 @@ class OfflineHandler {
     actionType: string,
     executeFunction: () => Promise<T>,
     fallbackData?: any,
-    priority?: 'high' | 'medium' | 'low'
+    priority?: 'high' | 'medium' | 'low',
   ): Promise<T | null> {
     if (this.isOnline) {
       try {
@@ -144,7 +146,7 @@ class OfflineHandler {
     } else {
       // Queue for when back online
       await this.queueAction(actionType, fallbackData, priority);
-      
+
       // Return cached data if available
       return this.getCachedData<T>(actionType);
     }
@@ -191,7 +193,7 @@ class OfflineHandler {
    */
   async createOfflineOrder(orderData: any): Promise<string> {
     const offlineOrderId = `offline_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+
     // Store order locally with offline ID
     const orderWithOfflineId = {
       ...orderData,
@@ -201,7 +203,7 @@ class OfflineHandler {
     };
 
     await this.storeOfflineData('orders', offlineOrderId, orderWithOfflineId);
-    
+
     // Queue for syncing when online
     await this.queueAction('sync_order', orderWithOfflineId, 'high');
 
@@ -231,17 +233,17 @@ class OfflineHandler {
     }
 
     const offlineOrders = await this.getOfflineOrders();
-    
+
     for (const order of offlineOrders) {
       try {
         // This would call your actual API to sync the order
         await this.syncOrderToServer(order);
-        
+
         // Remove from offline storage after successful sync
         await this.removeOfflineData('orders', order.id);
       } catch (error) {
         console.warn(`Failed to sync order ${order.id}:`, error);
-        
+
         // Queue for retry
         await this.queueAction('sync_order', order, 'high');
       }
@@ -294,16 +296,15 @@ class OfflineHandler {
     try {
       // Sync offline data
       await this.syncOfflineData();
-      
+
       // Process queued actions
       await this.processQueue();
-      
     } catch (error) {
       await errorHandler.handleError(
         error as Error,
         ErrorType.NETWORK,
         ErrorSeverity.MEDIUM,
-        'offline_sync'
+        'offline_sync',
       );
     }
   }
@@ -314,7 +315,7 @@ class OfflineHandler {
       'Device went offline',
       ErrorType.NETWORK,
       ErrorSeverity.MEDIUM,
-      'network_disconnected'
+      'network_disconnected',
     );
   }
 
@@ -324,27 +325,26 @@ class OfflineHandler {
     }
 
     const actionsToProcess = [...this.actionQueue];
-    
+
     for (const action of actionsToProcess) {
       try {
         await this.executeQueuedAction(action);
-        
+
         // Remove from queue on success
         await this.removeFromQueue(action.id);
-        
       } catch (error) {
         // Increment retry count
         action.retryCount++;
-        
+
         if (action.retryCount >= action.maxRetries) {
           // Remove action that has exceeded max retries
           await this.removeFromQueue(action.id);
-          
+
           await errorHandler.handleError(
             new Error(`Action ${action.type} failed after ${action.maxRetries} retries`),
             ErrorType.NETWORK,
             ErrorSeverity.HIGH,
-            'offline_queue_processing'
+            'offline_queue_processing',
           );
         } else {
           // Schedule retry
@@ -377,7 +377,7 @@ class OfflineHandler {
   private async syncOrderToServer(orderData: any): Promise<void> {
     // This would be replaced with actual API call
     console.log('Syncing order to server:', orderData);
-    
+
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
   }
@@ -449,10 +449,14 @@ class OfflineHandler {
 
   private getPriorityWeight(priority: 'high' | 'medium' | 'low'): number {
     switch (priority) {
-      case 'high': return 3;
-      case 'medium': return 2;
-      case 'low': return 1;
-      default: return 1;
+      case 'high':
+        return 3;
+      case 'medium':
+        return 2;
+      case 'low':
+        return 1;
+      default:
+        return 1;
     }
   }
 

@@ -43,7 +43,7 @@ interface BackupInfo {
 
 const BackupRestoreScreen: React.FC = () => {
   const navigation = useNavigation();
-  
+
   const [backups, setBackups] = useState<BackupInfo[]>([
     {
       id: 'backup1',
@@ -96,11 +96,11 @@ const BackupRestoreScreen: React.FC = () => {
 
   const handleCreateBackup = async () => {
     setIsCreatingBackup(true);
-    
+
     try {
       // Simulate backup creation
       await new Promise(resolve => setTimeout(resolve, 3000));
-      
+
       const newBackup: BackupInfo = {
         id: Date.now().toString(),
         name: `Manual Backup - ${new Date().toLocaleDateString()}`,
@@ -111,7 +111,7 @@ const BackupRestoreScreen: React.FC = () => {
         location: backupSettings.cloudBackupEnabled ? 'cloud' : 'local',
         includes: ['transactions', 'menu', 'customers', 'employees', 'settings'],
       };
-      
+
       setBackups(prev => [newBackup, ...prev]);
       Alert.alert('Success', 'Backup created successfully!');
     } catch (error) {
@@ -128,18 +128,18 @@ const BackupRestoreScreen: React.FC = () => {
 
   const confirmRestore = async () => {
     if (!selectedBackup) return;
-    
+
     setIsRestoring(true);
     setShowRestoreModal(false);
-    
+
     try {
       // Simulate restore process
       await new Promise(resolve => setTimeout(resolve, 5000));
-      
+
       Alert.alert(
         'Restore Complete',
         `Data has been restored from "${selectedBackup.name}". The app will restart to apply changes.`,
-        [{ text: 'OK' }]
+        [{ text: 'OK' }],
       );
     } catch (error) {
       Alert.alert('Error', 'Failed to restore backup. Please try again.');
@@ -151,38 +151,40 @@ const BackupRestoreScreen: React.FC = () => {
 
   const handleDeleteBackup = (backupId: string) => {
     const backup = backups.find(b => b.id === backupId);
-    Alert.alert(
-      'Delete Backup',
-      `Delete "${backup?.name}"? This action cannot be undone.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', style: 'destructive', onPress: () => {
+    Alert.alert('Delete Backup', `Delete "${backup?.name}"? This action cannot be undone.`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () => {
           setBackups(prev => prev.filter(b => b.id !== backupId));
-        }}
-      ]
-    );
+        },
+      },
+    ]);
   };
 
   const handleImportBackup = () => {
-    Alert.alert(
-      'Import Backup',
-      'Select backup file to import:',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'From Device', onPress: () => {
+    Alert.alert('Import Backup', 'Select backup file to import:', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'From Device',
+        onPress: () => {
           Alert.alert('Info', 'File picker would open here');
-        }},
-        { text: 'From Cloud', onPress: () => {
+        },
+      },
+      {
+        text: 'From Cloud',
+        onPress: () => {
           Alert.alert('Info', 'Cloud file browser would open here');
-        }}
-      ]
-    );
+        },
+      },
+    ]);
   };
 
   const toggleBackupSetting = (setting: keyof typeof backupSettings) => {
     setBackupSettings(prev => ({
       ...prev,
-      [setting]: !prev[setting]
+      [setting]: !prev[setting],
     }));
   };
 
@@ -217,10 +219,12 @@ const BackupRestoreScreen: React.FC = () => {
   };
 
   const getTotalBackupSize = () => {
-    return backups.reduce((total, backup) => {
-      const size = parseFloat(backup.size.replace(' MB', ''));
-      return total + size;
-    }, 0).toFixed(1);
+    return backups
+      .reduce((total, backup) => {
+        const size = parseFloat(backup.size.replace(' MB', ''));
+        return total + size;
+      }, 0)
+      .toFixed(1);
   };
 
   const BackupCard = ({ backup }: { backup: BackupInfo }) => (
@@ -228,21 +232,21 @@ const BackupRestoreScreen: React.FC = () => {
       <View style={styles.backupHeader}>
         <View style={styles.backupInfo}>
           <View style={styles.backupTitleRow}>
-            <Icon 
-              name={backup.type === 'automatic' ? 'schedule' : 'save'} 
-              size={20} 
-              color={Colors.primary} 
+            <Icon
+              name={backup.type === 'automatic' ? 'schedule' : 'save'}
+              size={20}
+              color={Colors.primary}
             />
             <Text style={styles.backupName}>{backup.name}</Text>
-            <View style={[styles.statusBadge, { backgroundColor: getBackupStatusColor(backup.status) }]}>
-              <Icon 
-                name={getBackupStatusIcon(backup.status)} 
-                size={12} 
-                color={Colors.white} 
-              />
+            <View
+              style={[
+                styles.statusBadge,
+                { backgroundColor: getBackupStatusColor(backup.status) },
+              ]}>
+              <Icon name={getBackupStatusIcon(backup.status)} size={12} color={Colors.white} />
             </View>
           </View>
-          
+
           <View style={styles.backupDetails}>
             <View style={styles.backupDetailRow}>
               <Icon name={getLocationIcon(backup.location)} size={16} color={Colors.lightText} />
@@ -250,12 +254,12 @@ const BackupRestoreScreen: React.FC = () => {
                 {backup.location === 'cloud' ? 'Cloud Storage' : 'Local Storage'}
               </Text>
             </View>
-            
+
             <View style={styles.backupDetailRow}>
               <Icon name="storage" size={16} color={Colors.lightText} />
               <Text style={styles.backupDetailText}>{backup.size}</Text>
             </View>
-            
+
             <View style={styles.backupDetailRow}>
               <Icon name="schedule" size={16} color={Colors.lightText} />
               <Text style={styles.backupDetailText}>
@@ -281,24 +285,21 @@ const BackupRestoreScreen: React.FC = () => {
         <TouchableOpacity
           style={[styles.backupButton, styles.restoreButton]}
           onPress={() => handleRestoreBackup(backup)}
-          disabled={backup.status !== 'completed' || isRestoring}
-        >
+          disabled={backup.status !== 'completed' || isRestoring}>
           <Icon name="restore" size={16} color={Colors.secondary} />
           <Text style={styles.restoreButtonText}>Restore</Text>
         </TouchableOpacity>
-        
+
         <TouchableOpacity
           style={styles.backupButton}
-          onPress={() => Alert.alert('Info', `Download ${backup.name}`)}
-        >
+          onPress={() => Alert.alert('Info', `Download ${backup.name}`)}>
           <Icon name="file-download" size={16} color={Colors.success} />
           <Text style={styles.backupButtonText}>Download</Text>
         </TouchableOpacity>
-        
+
         <TouchableOpacity
           style={[styles.backupButton, styles.deleteButton]}
-          onPress={() => handleDeleteBackup(backup.id)}
-        >
+          onPress={() => handleDeleteBackup(backup.id)}>
           <Icon name="delete" size={16} color={Colors.danger} />
           <Text style={styles.deleteButtonText}>Delete</Text>
         </TouchableOpacity>
@@ -314,12 +315,15 @@ const BackupRestoreScreen: React.FC = () => {
           <Icon name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Backup & Restore</Text>
-        <TouchableOpacity 
-          style={styles.createBackupButton} 
+        <TouchableOpacity
+          style={styles.createBackupButton}
           onPress={handleCreateBackup}
-          disabled={isCreatingBackup}
-        >
-          <Icon name={isCreatingBackup ? "hourglass-empty" : "backup"} size={24} color={Colors.white} />
+          disabled={isCreatingBackup}>
+          <Icon
+            name={isCreatingBackup ? 'hourglass-empty' : 'backup'}
+            size={24}
+            color={Colors.white}
+          />
         </TouchableOpacity>
       </View>
 
@@ -350,7 +354,9 @@ const BackupRestoreScreen: React.FC = () => {
             </View>
             <View style={styles.statCard}>
               <Text style={styles.statValue}>
-                {backups.find(b => b.type === 'automatic' && b.status === 'completed')?.date.toLocaleDateString() || 'Never'}
+                {backups
+                  .find(b => b.type === 'automatic' && b.status === 'completed')
+                  ?.date.toLocaleDateString() || 'Never'}
               </Text>
               <Text style={styles.statLabel}>Last Auto Backup</Text>
             </View>
@@ -362,32 +368,34 @@ const BackupRestoreScreen: React.FC = () => {
           <Text style={styles.sectionTitle}>Quick Actions</Text>
           <View style={styles.quickActions}>
             <TouchableOpacity
-              style={[styles.quickActionButton, isCreatingBackup && styles.quickActionButtonDisabled]}
+              style={[
+                styles.quickActionButton,
+                isCreatingBackup && styles.quickActionButtonDisabled,
+              ]}
               onPress={handleCreateBackup}
-              disabled={isCreatingBackup}
-            >
-              <Icon 
-                name={isCreatingBackup ? "hourglass-empty" : "backup"} 
-                size={32} 
-                color={isCreatingBackup ? Colors.mediumGray : Colors.primary} 
+              disabled={isCreatingBackup}>
+              <Icon
+                name={isCreatingBackup ? 'hourglass-empty' : 'backup'}
+                size={32}
+                color={isCreatingBackup ? Colors.mediumGray : Colors.primary}
               />
-              <Text style={[styles.quickActionText, isCreatingBackup && styles.quickActionTextDisabled]}>
+              <Text
+                style={[
+                  styles.quickActionText,
+                  isCreatingBackup && styles.quickActionTextDisabled,
+                ]}>
                 {isCreatingBackup ? 'Creating...' : 'Create Backup'}
               </Text>
             </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={styles.quickActionButton}
-              onPress={handleImportBackup}
-            >
+
+            <TouchableOpacity style={styles.quickActionButton} onPress={handleImportBackup}>
               <Icon name="file-upload" size={32} color={Colors.secondary} />
               <Text style={styles.quickActionText}>Import Backup</Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity
               style={styles.quickActionButton}
-              onPress={() => Alert.alert('Info', 'Backup schedule configuration would open here')}
-            >
+              onPress={() => Alert.alert('Info', 'Backup schedule configuration would open here')}>
               <Icon name="schedule" size={32} color={Colors.success} />
               <Text style={styles.quickActionText}>Schedule</Text>
             </TouchableOpacity>
@@ -400,7 +408,7 @@ const BackupRestoreScreen: React.FC = () => {
           {backups.map(backup => (
             <BackupCard key={backup.id} backup={backup} />
           ))}
-          
+
           {backups.length === 0 && (
             <View style={styles.emptyState}>
               <Icon name="backup" size={48} color={Colors.lightGray} />
@@ -434,9 +442,7 @@ const BackupRestoreScreen: React.FC = () => {
             <View style={styles.settingRow}>
               <View style={styles.settingInfo}>
                 <Text style={styles.settingLabel}>Daily backups</Text>
-                <Text style={styles.settingDescription}>
-                  Create backup every day at 3 AM
-                </Text>
+                <Text style={styles.settingDescription}>Create backup every day at 3 AM</Text>
               </View>
               <Switch
                 value={backupSettings.dailyBackup && backupSettings.autoBackupEnabled}
@@ -466,9 +472,7 @@ const BackupRestoreScreen: React.FC = () => {
             <View style={styles.settingRow}>
               <View style={styles.settingInfo}>
                 <Text style={styles.settingLabel}>Cloud backup</Text>
-                <Text style={styles.settingDescription}>
-                  Store backups in secure cloud storage
-                </Text>
+                <Text style={styles.settingDescription}>Store backups in secure cloud storage</Text>
               </View>
               <Switch
                 value={backupSettings.cloudBackupEnabled}
@@ -481,9 +485,7 @@ const BackupRestoreScreen: React.FC = () => {
             <View style={styles.settingRow}>
               <View style={styles.settingInfo}>
                 <Text style={styles.settingLabel}>Encrypt backups</Text>
-                <Text style={styles.settingDescription}>
-                  Protect backups with encryption
-                </Text>
+                <Text style={styles.settingDescription}>Protect backups with encryption</Text>
               </View>
               <Switch
                 value={backupSettings.encryptBackups}
@@ -502,7 +504,8 @@ const BackupRestoreScreen: React.FC = () => {
             <View style={styles.helpItem}>
               <Icon name="info-outline" size={20} color={Colors.secondary} />
               <Text style={styles.helpText}>
-                Backups include all your business data: transactions, menu items, customer information, and settings.
+                Backups include all your business data: transactions, menu items, customer
+                information, and settings.
               </Text>
             </View>
             <View style={styles.helpItem}>
@@ -514,7 +517,8 @@ const BackupRestoreScreen: React.FC = () => {
             <View style={styles.helpItem}>
               <Icon name="schedule" size={20} color={Colors.warning} />
               <Text style={styles.helpText}>
-                Regular backups ensure you never lose important business data. Enable automatic backups for peace of mind.
+                Regular backups ensure you never lose important business data. Enable automatic
+                backups for peace of mind.
               </Text>
             </View>
           </View>
@@ -526,8 +530,7 @@ const BackupRestoreScreen: React.FC = () => {
         visible={showRestoreModal}
         transparent={true}
         animationType="fade"
-        onRequestClose={() => setShowRestoreModal(false)}
-      >
+        onRequestClose={() => setShowRestoreModal(false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
@@ -540,8 +543,8 @@ const BackupRestoreScreen: React.FC = () => {
                 This will restore your data from "{selectedBackup?.name}".
               </Text>
               <Text style={styles.modalWarning}>
-                ⚠️ Current data will be overwritten and cannot be recovered. 
-                Consider creating a backup first.
+                ⚠️ Current data will be overwritten and cannot be recovered. Consider creating a
+                backup first.
               </Text>
               <Text style={styles.modalSubtext}>
                 The app will restart after the restore is complete.
@@ -549,10 +552,9 @@ const BackupRestoreScreen: React.FC = () => {
             </View>
 
             <View style={styles.modalActions}>
-              <TouchableOpacity 
-                style={styles.cancelButton} 
-                onPress={() => setShowRestoreModal(false)}
-              >
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => setShowRestoreModal(false)}>
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.confirmButton} onPress={confirmRestore}>

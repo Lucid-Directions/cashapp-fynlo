@@ -25,53 +25,53 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
     connected: false,
     connecting: false,
     error: null,
-    reconnectAttempt: 0
+    reconnectAttempt: 0,
   });
-  
+
   // Handle connection
   const connect = useCallback(async () => {
     if (!user?.restaurant_id) {
       console.warn('⚠️ Cannot connect WebSocket - no restaurant ID');
       return;
     }
-    
+
     setState(prev => ({ ...prev, connecting: true, error: null }));
-    
+
     try {
       await webSocketService.connect({
         reconnect: options.reconnect !== false,
         reconnectInterval: 5000,
-        maxReconnectAttempts: 10
+        maxReconnectAttempts: 10,
       });
     } catch (error) {
       setState(prev => ({
         ...prev,
         connecting: false,
-        error: error as Error
+        error: error as Error,
       }));
     }
   }, [user?.restaurant_id, options.reconnect]);
-  
+
   // Handle disconnection
   const disconnect = useCallback(() => {
     webSocketService.disconnect();
   }, []);
-  
+
   // Subscribe to events
   const subscribe = useCallback((eventType: string, handler: (data: any) => void) => {
     webSocketService.on(eventType, handler);
-    
+
     // Return unsubscribe function
     return () => {
       webSocketService.off(eventType, handler);
     };
   }, []);
-  
+
   // Send message
   const send = useCallback((type: string, data: any) => {
     webSocketService.send({ type, data });
   }, []);
-  
+
   // Set up WebSocket event listeners
   useEffect(() => {
     const handleConnected = () => {
@@ -80,41 +80,41 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
         connected: true,
         connecting: false,
         error: null,
-        reconnectAttempt: 0
+        reconnectAttempt: 0,
       }));
     };
-    
+
     const handleDisconnected = () => {
       setState(prev => ({
         ...prev,
         connected: false,
-        connecting: false
+        connecting: false,
       }));
     };
-    
+
     const handleError = (error: Error) => {
       setState(prev => ({
         ...prev,
         error,
-        connecting: false
+        connecting: false,
       }));
     };
-    
+
     const handleReconnecting = (data: { attempt: number; maxAttempts: number }) => {
       setState(prev => ({
         ...prev,
         connecting: true,
-        reconnectAttempt: data.attempt
+        reconnectAttempt: data.attempt,
       }));
     };
-    
+
     // Subscribe to connection events
     webSocketService.on(WebSocketEvent.CONNECT, handleConnected);
     webSocketService.on(WebSocketEvent.DISCONNECT, handleDisconnected);
     webSocketService.on(WebSocketEvent.ERROR, handleError);
     // Note: EnhancedWebSocketService doesn't emit a 'reconnecting' event
     // It only emits 'max_reconnect_attempts' when max attempts are reached
-    
+
     // Cleanup
     return () => {
       webSocketService.off(WebSocketEvent.CONNECT, handleConnected);
@@ -122,13 +122,18 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
       webSocketService.off(WebSocketEvent.ERROR, handleError);
     };
   }, []);
-  
+
   // Auto-connect on mount if enabled
   useEffect(() => {
-    if (options.autoConnect !== false && user?.restaurant_id && !state.connected && !state.connecting) {
+    if (
+      options.autoConnect !== false &&
+      user?.restaurant_id &&
+      !state.connected &&
+      !state.connecting
+    ) {
       connect();
     }
-    
+
     // Disconnect on unmount
     return () => {
       // Use webSocketService.isConnected() to get current connection state
@@ -138,14 +143,14 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
       }
     };
   }, [options.autoConnect, user?.restaurant_id, connect, disconnect]);
-  
+
   return {
     ...state,
     connect,
     disconnect,
     subscribe,
     send,
-    isConnected: webSocketService.isConnected()
+    isConnected: webSocketService.isConnected(),
   };
 };
 
@@ -153,12 +158,12 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
 
 export const useOrderUpdates = (onOrderUpdate: (data: any) => void) => {
   const { subscribe } = useWebSocket();
-  
+
   useEffect(() => {
     const unsubscribeCreated = subscribe(WebSocketEvent.ORDER_CREATED, onOrderUpdate);
     const unsubscribeUpdated = subscribe(WebSocketEvent.ORDER_UPDATED, onOrderUpdate);
     const unsubscribeStatus = subscribe(WebSocketEvent.ORDER_STATUS_CHANGED, onOrderUpdate);
-    
+
     return () => {
       unsubscribeCreated();
       unsubscribeUpdated();
@@ -169,7 +174,7 @@ export const useOrderUpdates = (onOrderUpdate: (data: any) => void) => {
 
 export const useInventoryUpdates = (onInventoryUpdate: (data: any) => void) => {
   const { subscribe } = useWebSocket();
-  
+
   useEffect(() => {
     const unsubscribe = subscribe(WebSocketEvent.INVENTORY_UPDATED, onInventoryUpdate);
     return unsubscribe;
@@ -178,7 +183,7 @@ export const useInventoryUpdates = (onInventoryUpdate: (data: any) => void) => {
 
 export const useMenuUpdates = (onMenuUpdate: (data: any) => void) => {
   const { subscribe } = useWebSocket();
-  
+
   useEffect(() => {
     const unsubscribe = subscribe(WebSocketEvent.MENU_UPDATED, onMenuUpdate);
     return unsubscribe;
@@ -187,7 +192,7 @@ export const useMenuUpdates = (onMenuUpdate: (data: any) => void) => {
 
 export const useSystemNotifications = (onNotification: (data: any) => void) => {
   const { subscribe } = useWebSocket();
-  
+
   useEffect(() => {
     const unsubscribe = subscribe(WebSocketEvent.SYSTEM_NOTIFICATION, onNotification);
     return unsubscribe;

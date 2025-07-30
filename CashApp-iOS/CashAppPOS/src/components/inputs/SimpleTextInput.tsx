@@ -31,18 +31,18 @@ interface SimpleTextInputProps {
 const SimpleTextInput: React.FC<SimpleTextInputProps> = ({
   value,
   onValueChange,
-  placeholder = "",
+  placeholder = '',
   label,
   style,
   disabled = false,
   multiline = false,
-  keyboardType = "default",
-  autoCapitalize = "sentences",
+  keyboardType = 'default',
+  autoCapitalize = 'sentences',
   autoCorrect = true,
   secureTextEntry = false,
   maxLength,
   numberOfLines = 1,
-  returnKeyType = "done",
+  returnKeyType = 'done',
   onSubmitEditing,
   clearButtonMode = 'while-editing',
 }) => {
@@ -84,25 +84,27 @@ const SimpleTextInput: React.FC<SimpleTextInputProps> = ({
 
   // Display value: show internal value while focused, prop value when not focused
   const displayValue = isFocused ? internalValue : value;
-  const showClearButton = clearButtonMode !== 'never' && 
+  const showClearButton =
+    clearButtonMode !== 'never' &&
     ((clearButtonMode === 'while-editing' && isFocused && displayValue !== '') ||
-     (clearButtonMode === 'unless-editing' && !isFocused && displayValue !== '') ||
-     (clearButtonMode === 'always' && displayValue !== ''));
+      (clearButtonMode === 'unless-editing' && !isFocused && displayValue !== '') ||
+      (clearButtonMode === 'always' && displayValue !== ''));
 
   return (
     <View style={[styles.container, style]}>
       {label && <Text style={styles.label}>{label}</Text>}
-      
-      <View style={[
-        styles.inputContainer,
-        isFocused && styles.inputContainerFocused,
-        disabled && styles.inputContainerDisabled,
-        multiline && styles.inputContainerMultiline,
-      ]}>
+
+      <View
+        style={[
+          styles.inputContainer,
+          isFocused && styles.inputContainerFocused,
+          disabled && styles.inputContainerDisabled,
+          multiline && styles.inputContainerMultiline,
+        ]}>
         <TextInput
           ref={inputRef}
           style={[
-            styles.input, 
+            styles.input,
             disabled && styles.inputDisabled,
             multiline && styles.inputMultiline,
           ]}
@@ -125,18 +127,14 @@ const SimpleTextInput: React.FC<SimpleTextInputProps> = ({
           onSubmitEditing={onSubmitEditing}
           textAlignVertical={multiline ? 'top' : 'center'}
         />
-        
+
         {/* Password visibility toggle */}
         {secureTextEntry && !disabled && (
           <TouchableOpacity onPress={togglePasswordVisibility} style={styles.passwordToggle}>
-            <Icon 
-              name={showPassword ? "visibility-off" : "visibility"} 
-              size={20} 
-              color="#666" 
-            />
+            <Icon name={showPassword ? 'visibility-off' : 'visibility'} size={20} color="#666" />
           </TouchableOpacity>
         )}
-        
+
         {/* Clear button */}
         {showClearButton && !disabled && !secureTextEntry && (
           <TouchableOpacity onPress={handleClear} style={styles.clearButton}>

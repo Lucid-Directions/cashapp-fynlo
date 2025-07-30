@@ -6,7 +6,11 @@
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react-native';
 import { Alert } from 'react-native';
-import { render, createMockNavigation, createMockAppStore } from '../../../__tests__/utils/testUtils';
+import {
+  render,
+  createMockNavigation,
+  createMockAppStore,
+} from '../../../__tests__/utils/testUtils';
 import LoginScreen from '../LoginScreen';
 import DatabaseService from '../../../services/DatabaseService';
 
@@ -116,7 +120,7 @@ describe('LoginScreen', () => {
       await waitFor(() => {
         expect(Alert.alert).toHaveBeenCalledWith(
           'Error',
-          'Please enter both username and password'
+          'Please enter both username and password',
         );
       });
     });
@@ -132,7 +136,7 @@ describe('LoginScreen', () => {
       await waitFor(() => {
         expect(Alert.alert).toHaveBeenCalledWith(
           'Error',
-          'Please enter both username and password'
+          'Please enter both username and password',
         );
       });
     });
@@ -148,7 +152,7 @@ describe('LoginScreen', () => {
       await waitFor(() => {
         expect(Alert.alert).toHaveBeenCalledWith(
           'Error',
-          'Please enter both username and password'
+          'Please enter both username and password',
         );
       });
     });
@@ -191,10 +195,7 @@ describe('LoginScreen', () => {
       fireEvent.press(loginButton);
 
       await waitFor(() => {
-        expect(Alert.alert).toHaveBeenCalledWith(
-          'Login Failed',
-          'Invalid username or password'
-        );
+        expect(Alert.alert).toHaveBeenCalledWith('Login Failed', 'Invalid username or password');
       });
     });
 
@@ -216,15 +217,15 @@ describe('LoginScreen', () => {
       await waitFor(() => {
         expect(Alert.alert).toHaveBeenCalledWith(
           'Error',
-          'An error occurred during login. Please try again.'
+          'An error occurred during login. Please try again.',
         );
       });
     });
 
     it('should show loading state during login', async () => {
-      const mockLogin = jest.fn().mockImplementation(
-        () => new Promise(resolve => setTimeout(() => resolve(true), 100))
-      );
+      const mockLogin = jest
+        .fn()
+        .mockImplementation(() => new Promise(resolve => setTimeout(() => resolve(true), 100)));
       mockDatabaseService.getInstance.mockReturnValue({
         login: mockLogin,
       } as any);
@@ -247,9 +248,9 @@ describe('LoginScreen', () => {
     });
 
     it('should disable button during loading', async () => {
-      const mockLogin = jest.fn().mockImplementation(
-        () => new Promise(resolve => setTimeout(() => resolve(true), 100))
-      );
+      const mockLogin = jest
+        .fn()
+        .mockImplementation(() => new Promise(resolve => setTimeout(() => resolve(true), 100)));
       mockDatabaseService.getInstance.mockReturnValue({
         login: mockLogin,
       } as any);

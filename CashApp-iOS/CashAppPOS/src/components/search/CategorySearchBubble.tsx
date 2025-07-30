@@ -52,8 +52,7 @@ const CategorySearchBubble: React.FC<Props> = ({ onSearchChange, onFocus, style 
       <TouchableOpacity
         style={[styles.bubble, style]}
         onPress={handleBubblePress}
-        testID="category-search-bubble-inactive"
-      >
+        testID="category-search-bubble-inactive">
         <Icon name="search" size={20} color={theme.colors.textSecondary} style={styles.iconStyle} />
         <Text style={styles.placeholderText}>Search food...</Text>
       </TouchableOpacity>
@@ -61,7 +60,9 @@ const CategorySearchBubble: React.FC<Props> = ({ onSearchChange, onFocus, style 
   }
 
   return (
-    <View style={[styles.searchContainer, styles.bubbleActive, style]} testID="category-search-bubble-active">
+    <View
+      style={[styles.searchContainer, styles.bubbleActive, style]}
+      testID="category-search-bubble-active">
       <Icon name="search" size={20} color={theme.colors.primary} style={styles.iconStyle} />
       <TextInput
         ref={inputRef}
@@ -77,7 +78,10 @@ const CategorySearchBubble: React.FC<Props> = ({ onSearchChange, onFocus, style 
         autoFocus={isFocused} // Keep focused if it was programmatically focused
       />
       {query.length > 0 && (
-        <TouchableOpacity onPress={handleClear} style={styles.clearButton} testID="clear-search-button">
+        <TouchableOpacity
+          onPress={handleClear}
+          style={styles.clearButton}
+          testID="clear-search-button">
           <Icon name="close" size={20} color={theme.colors.textSecondary} />
         </TouchableOpacity>
       )}

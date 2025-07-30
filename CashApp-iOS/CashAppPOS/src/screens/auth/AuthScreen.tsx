@@ -1,9 +1,5 @@
 import React, { useState } from 'react';
-import {
-  StyleSheet,
-  View,
-  StatusBar,
-} from 'react-native';
+import { StyleSheet, View, StatusBar } from 'react-native';
 import SignInScreen from './SignInScreen';
 import SignUpScreen from './SignUpScreen';
 
@@ -32,12 +28,8 @@ const AuthScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <StatusBar
-        backgroundColor={Colors.primary}
-        barStyle="light-content"
-        translucent={false}
-      />
-      
+      <StatusBar backgroundColor={Colors.primary} barStyle="light-content" translucent={false} />
+
       {isSignUp ? (
         <SignUpScreen onSwitchToSignIn={switchToSignIn} />
       ) : (

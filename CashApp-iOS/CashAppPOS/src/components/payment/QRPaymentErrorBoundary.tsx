@@ -13,7 +13,10 @@ interface QRPaymentErrorBoundaryState {
   error: Error | null;
 }
 
-class QRPaymentErrorBoundary extends Component<QRPaymentErrorBoundaryProps, QRPaymentErrorBoundaryState> {
+class QRPaymentErrorBoundary extends Component<
+  QRPaymentErrorBoundaryProps,
+  QRPaymentErrorBoundaryState
+> {
   constructor(props: QRPaymentErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false, error: null };

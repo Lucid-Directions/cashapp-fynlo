@@ -32,24 +32,20 @@ const SettingsScreen: React.FC = () => {
   const { theme } = useTheme();
 
   const handleLogout = () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Logout', 
-          style: 'destructive',
-          onPress: logout 
-        },
-      ]
-    );
+    Alert.alert('Logout', 'Are you sure you want to logout?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Logout',
+        style: 'destructive',
+        onPress: logout,
+      },
+    ]);
   };
 
-  const SettingItem = ({ 
-    title, 
-    icon, 
-    onPress, 
+  const SettingItem = ({
+    title,
+    icon,
+    onPress,
     showArrow = true,
     color = Colors.text,
   }: {
@@ -59,25 +55,19 @@ const SettingsScreen: React.FC = () => {
     showArrow?: boolean;
     color?: string;
   }) => (
-    <TouchableOpacity
-      style={styles.settingItem}
-      onPress={onPress}
-      activeOpacity={0.7}
-    >
+    <TouchableOpacity style={styles.settingItem} onPress={onPress} activeOpacity={0.7}>
       <View style={styles.settingLeft}>
         <Icon name={icon} size={24} color={color} />
         <Text style={[styles.settingTitle, { color }]}>{title}</Text>
       </View>
-      {showArrow && (
-        <Icon name="chevron-right" size={24} color={Colors.lightText} />
-      )}
+      {showArrow && <Icon name="chevron-right" size={24} color={Colors.lightText} />}
     </TouchableOpacity>
   );
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={theme.colors.primary} />
-      
+
       {/* Header with Back Button */}
       <HeaderWithBackButton
         title="Settings"
@@ -93,7 +83,9 @@ const SettingsScreen: React.FC = () => {
             <SettingItem
               title="Notifications"
               icon="notifications"
-              onPress={() => Alert.alert('Coming Soon', 'Notification settings will be available soon')}
+              onPress={() =>
+                Alert.alert('Coming Soon', 'Notification settings will be available soon')
+              }
             />
             <SettingItem
               title="Display"
@@ -115,7 +107,9 @@ const SettingsScreen: React.FC = () => {
             <SettingItem
               title="Payment Methods"
               icon="payment"
-              onPress={() => Alert.alert('Coming Soon', 'Payment method settings will be available soon')}
+              onPress={() =>
+                Alert.alert('Coming Soon', 'Payment method settings will be available soon')
+              }
             />
             <SettingItem
               title="Receipt Settings"

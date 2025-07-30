@@ -59,7 +59,7 @@ const REFUND_REASONS = [
 
 const RefundScreen: React.FC = () => {
   const navigation = useNavigation();
-  
+
   // Mock recent transactions
   const [recentTransactions] = useState<Transaction[]>([
     {
@@ -67,7 +67,7 @@ const RefundScreen: React.FC = () => {
       date: new Date(Date.now() - 3600000), // 1 hour ago
       total: 25.99,
       items: [
-        { id: '1', name: 'Coffee', price: 4.50, quantity: 2 },
+        { id: '1', name: 'Coffee', price: 4.5, quantity: 2 },
         { id: '2', name: 'Sandwich', price: 16.99, quantity: 1 },
       ],
       paymentMethod: 'Card',
@@ -103,23 +103,21 @@ const RefundScreen: React.FC = () => {
 
   const handleItemToggle = (itemId: string) => {
     setSelectedItems(prev =>
-      prev.includes(itemId)
-        ? prev.filter(id => id !== itemId)
-        : [...prev, itemId]
+      prev.includes(itemId) ? prev.filter(id => id !== itemId) : [...prev, itemId],
     );
   };
 
   const calculateRefundAmount = () => {
     if (!selectedTransaction) return 0;
-    
+
     if (refundType === 'full' || refundType === 'void') {
       return selectedTransaction.total;
     }
-    
+
     // Partial refund - sum selected items
     return selectedTransaction.items
       .filter(item => selectedItems.includes(item.id))
-      .reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      .reduce((sum, item) => sum + item.price * item.quantity, 0);
   };
 
   const processRefund = async () => {
@@ -149,13 +147,15 @@ const RefundScreen: React.FC = () => {
     // Simulate processing
     setTimeout(() => {
       setProcessing(false);
-      
+
       const amount = calculateRefundAmount();
       const actionType = refundType === 'void' ? 'void' : 'refund';
-      
+
       Alert.alert(
         'Success',
-        `${actionType === 'void' ? 'Transaction voided' : 'Refund processed'} successfully!\n\nAmount: £${amount.toFixed(2)}\nTransaction: ${selectedTransaction.id}`,
+        `${
+          actionType === 'void' ? 'Transaction voided' : 'Refund processed'
+        } successfully!\n\nAmount: £${amount.toFixed(2)}\nTransaction: ${selectedTransaction.id}`,
         [
           {
             text: 'OK',
@@ -166,9 +166,9 @@ const RefundScreen: React.FC = () => {
               setCustomReason('');
               setManagerAuth('');
               setSelectedItems([]);
-            }
-          }
-        ]
+            },
+          },
+        ],
       );
     }, 2000);
   };
@@ -177,10 +177,9 @@ const RefundScreen: React.FC = () => {
     <TouchableOpacity
       style={[
         styles.transactionItem,
-        selectedTransaction?.id === transaction.id && styles.transactionItemSelected
+        selectedTransaction?.id === transaction.id && styles.transactionItemSelected,
       ]}
-      onPress={() => handleTransactionSelect(transaction)}
-    >
+      onPress={() => handleTransactionSelect(transaction)}>
       <View style={styles.transactionHeader}>
         <Text style={styles.transactionId}>#{transaction.id}</Text>
         <Text style={styles.transactionAmount}>£{transaction.total.toFixed(2)}</Text>
@@ -190,7 +189,9 @@ const RefundScreen: React.FC = () => {
           {transaction.date.toLocaleTimeString()} - {transaction.paymentMethod}
         </Text>
         <View style={[styles.statusBadge, styles[`status${transaction.status.replace('_', '')}`]]}>
-          <Text style={styles.statusText}>{transaction.status.replace('_', ' ').toUpperCase()}</Text>
+          <Text style={styles.statusText}>
+            {transaction.status.replace('_', ' ').toUpperCase()}
+          </Text>
         </View>
       </View>
       <Text style={styles.transactionItems}>
@@ -239,19 +240,19 @@ const RefundScreen: React.FC = () => {
                     key={option.key}
                     style={[
                       styles.refundTypeButton,
-                      refundType === option.key && styles.refundTypeButtonActive
+                      refundType === option.key && styles.refundTypeButtonActive,
                     ]}
-                    onPress={() => setRefundType(option.key as any)}
-                  >
+                    onPress={() => setRefundType(option.key as any)}>
                     <Icon
                       name={option.icon}
                       size={24}
                       color={refundType === option.key ? Colors.white : Colors.darkGray}
                     />
-                    <Text style={[
-                      styles.refundTypeLabel,
-                      refundType === option.key && styles.refundTypeLabelActive
-                    ]}>
+                    <Text
+                      style={[
+                        styles.refundTypeLabel,
+                        refundType === option.key && styles.refundTypeLabelActive,
+                      ]}>
                       {option.label}
                     </Text>
                   </TouchableOpacity>
@@ -269,18 +270,23 @@ const RefundScreen: React.FC = () => {
                       key={item.id}
                       style={[
                         styles.itemRow,
-                        selectedItems.includes(item.id) && styles.itemRowSelected
+                        selectedItems.includes(item.id) && styles.itemRowSelected,
                       ]}
-                      onPress={() => handleItemToggle(item.id)}
-                    >
+                      onPress={() => handleItemToggle(item.id)}>
                       <Icon
-                        name={selectedItems.includes(item.id) ? 'check-box' : 'check-box-outline-blank'}
+                        name={
+                          selectedItems.includes(item.id) ? 'check-box' : 'check-box-outline-blank'
+                        }
                         size={24}
                         color={selectedItems.includes(item.id) ? Colors.primary : Colors.mediumGray}
                       />
                       <View style={styles.itemDetails}>
-                        <Text style={styles.itemName}>{item.quantity}x {item.name}</Text>
-                        <Text style={styles.itemPrice}>£{(item.price * item.quantity).toFixed(2)}</Text>
+                        <Text style={styles.itemName}>
+                          {item.quantity}x {item.name}
+                        </Text>
+                        <Text style={styles.itemPrice}>
+                          £{(item.price * item.quantity).toFixed(2)}
+                        </Text>
                       </View>
                     </TouchableOpacity>
                   ))}
@@ -290,27 +296,29 @@ const RefundScreen: React.FC = () => {
 
             {/* Refund Reason */}
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Reason for {refundType === 'void' ? 'Void' : 'Refund'}</Text>
+              <Text style={styles.sectionTitle}>
+                Reason for {refundType === 'void' ? 'Void' : 'Refund'}
+              </Text>
               <View style={styles.reasonButtons}>
                 {REFUND_REASONS.map(reason => (
                   <TouchableOpacity
                     key={reason}
                     style={[
                       styles.reasonButton,
-                      refundReason === reason && styles.reasonButtonActive
+                      refundReason === reason && styles.reasonButtonActive,
                     ]}
-                    onPress={() => setRefundReason(reason)}
-                  >
-                    <Text style={[
-                      styles.reasonButtonText,
-                      refundReason === reason && styles.reasonButtonTextActive
-                    ]}>
+                    onPress={() => setRefundReason(reason)}>
+                    <Text
+                      style={[
+                        styles.reasonButtonText,
+                        refundReason === reason && styles.reasonButtonTextActive,
+                      ]}>
                       {reason}
                     </Text>
                   </TouchableOpacity>
                 ))}
               </View>
-              
+
               {refundReason === 'Other' && (
                 <TextInput
                   style={styles.customReasonInput}
@@ -371,8 +379,7 @@ const RefundScreen: React.FC = () => {
           <TouchableOpacity
             style={[styles.processButton, processing && styles.processingButton]}
             onPress={processRefund}
-            disabled={processing}
-          >
+            disabled={processing}>
             {processing ? (
               <>
                 <Icon name="hourglass-empty" size={24} color={Colors.white} />
@@ -380,9 +387,14 @@ const RefundScreen: React.FC = () => {
               </>
             ) : (
               <>
-                <Icon name={refundType === 'void' ? 'cancel' : 'money-off'} size={24} color={Colors.white} />
+                <Icon
+                  name={refundType === 'void' ? 'cancel' : 'money-off'}
+                  size={24}
+                  color={Colors.white}
+                />
                 <Text style={styles.processButtonText}>
-                  {refundType === 'void' ? 'Void Transaction' : 'Process Refund'} - £{calculateRefundAmount().toFixed(2)}
+                  {refundType === 'void' ? 'Void Transaction' : 'Process Refund'} - £
+                  {calculateRefundAmount().toFixed(2)}
                 </Text>
               </>
             )}

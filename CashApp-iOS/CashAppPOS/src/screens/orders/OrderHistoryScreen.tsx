@@ -66,19 +66,25 @@ type FilterOption = 'all' | 'today' | 'week' | 'month' | 'completed' | 'cancelle
 
 const OrderHistoryScreen: React.FC = () => {
   const navigation = useNavigation();
-  
+
   // Mock order data
   const [orders, setOrders] = useState<Order[]>([
     {
       id: 'ORD001',
       orderNumber: 1234,
       date: new Date(Date.now() - 1800000), // 30 minutes ago
-      total: 42.50,
-      tax: 7.20,
-      tip: 5.00,
-      subtotal: 30.30,
+      total: 42.5,
+      tax: 7.2,
+      tip: 5.0,
+      subtotal: 30.3,
       items: [
-        { id: '1', name: 'Cappuccino', price: 4.50, quantity: 2, modifiers: ['Extra shot', 'Oat milk'] },
+        {
+          id: '1',
+          name: 'Cappuccino',
+          price: 4.5,
+          quantity: 2,
+          modifiers: ['Extra shot', 'Oat milk'],
+        },
         { id: '2', name: 'Croissant', price: 3.99, quantity: 1 },
         { id: '3', name: 'Avocado Toast', price: 12.99, quantity: 1, modifiers: ['No tomatoes'] },
       ],
@@ -89,7 +95,7 @@ const OrderHistoryScreen: React.FC = () => {
       table: 'T-05',
     },
     {
-      id: 'ORD002', 
+      id: 'ORD002',
       orderNumber: 1235,
       date: new Date(Date.now() - 5400000), // 1.5 hours ago
       total: 28.75,
@@ -98,7 +104,7 @@ const OrderHistoryScreen: React.FC = () => {
       subtotal: 23.87,
       items: [
         { id: '4', name: 'Green Salad', price: 14.99, quantity: 1 },
-        { id: '5', name: 'Sparkling Water', price: 3.50, quantity: 2 },
+        { id: '5', name: 'Sparkling Water', price: 3.5, quantity: 2 },
         { id: '6', name: 'Chocolate Cake', price: 6.99, quantity: 1 },
       ],
       paymentMethod: 'Cash',
@@ -111,7 +117,7 @@ const OrderHistoryScreen: React.FC = () => {
       date: new Date(Date.now() - 7200000), // 2 hours ago
       total: 15.25,
       tax: 2.59,
-      tip: 2.50,
+      tip: 2.5,
       subtotal: 10.16,
       items: [
         { id: '7', name: 'Latte', price: 5.25, quantity: 1 },
@@ -158,17 +164,20 @@ const OrderHistoryScreen: React.FC = () => {
         filtered = orders.filter(order => order.status === 'cancelled');
         break;
       case 'refunded':
-        filtered = orders.filter(order => order.status === 'refunded' || order.status === 'partially_refunded');
+        filtered = orders.filter(
+          order => order.status === 'refunded' || order.status === 'partially_refunded',
+        );
         break;
     }
 
     // Apply search filter
     if (searchQuery) {
-      filtered = filtered.filter(order =>
-        order.orderNumber.toString().includes(searchQuery) ||
-        order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        order.customer?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        order.items.some(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()))
+      filtered = filtered.filter(
+        order =>
+          order.orderNumber.toString().includes(searchQuery) ||
+          order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          order.customer?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          order.items.some(item => item.name.toLowerCase().includes(searchQuery.toLowerCase())),
       );
     }
 
@@ -215,26 +224,22 @@ const OrderHistoryScreen: React.FC = () => {
 
   const confirmReprint = (type: 'customer' | 'kitchen' | 'both') => {
     if (!selectedOrder) return;
-    
+
     Alert.alert(
       'Receipt Reprinted',
-      `${type === 'both' ? 'Customer and kitchen receipts' : `${type} receipt`} reprinted for order #${selectedOrder.orderNumber}`,
-      [{ text: 'OK', onPress: () => setShowReprintModal(false) }]
+      `${
+        type === 'both' ? 'Customer and kitchen receipts' : `${type} receipt`
+      } reprinted for order #${selectedOrder.orderNumber}`,
+      [{ text: 'OK', onPress: () => setShowReprintModal(false) }],
     );
   };
 
   const FilterButton = ({ filter, label }: { filter: FilterOption; label: string }) => (
     <TouchableOpacity
-      style={[
-        styles.filterButton,
-        activeFilter === filter && styles.filterButtonActive
-      ]}
-      onPress={() => setActiveFilter(filter)}
-    >
-      <Text style={[
-        styles.filterButtonText,
-        activeFilter === filter && styles.filterButtonTextActive
-      ]}>
+      style={[styles.filterButton, activeFilter === filter && styles.filterButtonActive]}
+      onPress={() => setActiveFilter(filter)}>
+      <Text
+        style={[styles.filterButtonText, activeFilter === filter && styles.filterButtonTextActive]}>
         {label}
       </Text>
     </TouchableOpacity>
@@ -277,25 +282,21 @@ const OrderHistoryScreen: React.FC = () => {
         <View style={styles.customerInfo}>
           <Icon name="person" size={16} color={Colors.lightText} />
           <Text style={styles.customerName}>{order.customer.name}</Text>
-          {order.customer.email && (
-            <Text style={styles.customerEmail}>{order.customer.email}</Text>
-          )}
+          {order.customer.email && <Text style={styles.customerEmail}>{order.customer.email}</Text>}
         </View>
       )}
 
       <View style={styles.orderActions}>
-        <TouchableOpacity
-          style={styles.actionButton}
-          onPress={() => handleReprint(order)}
-        >
+        <TouchableOpacity style={styles.actionButton} onPress={() => handleReprint(order)}>
           <Icon name="print" size={16} color={Colors.secondary} />
           <Text style={styles.actionButtonText}>Reprint</Text>
         </TouchableOpacity>
-        
+
         <TouchableOpacity
           style={styles.actionButton}
-          onPress={() => {/* Navigate to refund screen */}}
-        >
+          onPress={() => {
+            /* Navigate to refund screen */
+          }}>
           <Icon name="money-off" size={16} color={Colors.warning} />
           <Text style={styles.actionButtonText}>Refund</Text>
         </TouchableOpacity>
@@ -308,8 +309,7 @@ const OrderHistoryScreen: React.FC = () => {
       visible={showOrderModal}
       transparent
       animationType="slide"
-      onRequestClose={() => setShowOrderModal(false)}
-    >
+      onRequestClose={() => setShowOrderModal(false)}>
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
           <View style={styles.modalHeader}>
@@ -325,7 +325,8 @@ const OrderHistoryScreen: React.FC = () => {
                 <Text style={styles.orderNumber}>Order #{selectedOrder.orderNumber}</Text>
                 <Text style={styles.orderId}>{selectedOrder.id}</Text>
                 <Text style={styles.orderDate}>
-                  {selectedOrder.date.toLocaleDateString()} at {selectedOrder.date.toLocaleTimeString()}
+                  {selectedOrder.date.toLocaleDateString()} at{' '}
+                  {selectedOrder.date.toLocaleTimeString()}
                 </Text>
               </View>
 
@@ -334,11 +335,11 @@ const OrderHistoryScreen: React.FC = () => {
                 {selectedOrder.items.map(item => (
                   <View key={item.id} style={styles.detailItem}>
                     <View style={styles.itemInfo}>
-                      <Text style={styles.itemName}>{item.quantity}x {item.name}</Text>
+                      <Text style={styles.itemName}>
+                        {item.quantity}x {item.name}
+                      </Text>
                       {item.modifiers && item.modifiers.length > 0 && (
-                        <Text style={styles.itemModifiers}>
-                          {item.modifiers.join(', ')}
-                        </Text>
+                        <Text style={styles.itemModifiers}>{item.modifiers.join(', ')}</Text>
                       )}
                     </View>
                     <Text style={styles.itemPrice}>£{(item.price * item.quantity).toFixed(2)}</Text>
@@ -399,36 +400,28 @@ const OrderHistoryScreen: React.FC = () => {
       visible={showReprintModal}
       transparent
       animationType="fade"
-      onRequestClose={() => setShowReprintModal(false)}
-    >
+      onRequestClose={() => setShowReprintModal(false)}>
       <View style={styles.modalOverlay}>
         <View style={styles.reprintModalContent}>
           <Text style={styles.reprintModalTitle}>Reprint Receipt</Text>
-          <Text style={styles.reprintModalSubtitle}>
-            Order #{selectedOrder?.orderNumber}
-          </Text>
+          <Text style={styles.reprintModalSubtitle}>Order #{selectedOrder?.orderNumber}</Text>
 
           <View style={styles.reprintOptions}>
             <TouchableOpacity
               style={styles.reprintOption}
-              onPress={() => confirmReprint('customer')}
-            >
+              onPress={() => confirmReprint('customer')}>
               <Icon name="receipt" size={32} color={Colors.primary} />
               <Text style={styles.reprintOptionText}>Customer Receipt</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.reprintOption}
-              onPress={() => confirmReprint('kitchen')}
-            >
+              onPress={() => confirmReprint('kitchen')}>
               <Icon name="restaurant" size={32} color={Colors.secondary} />
               <Text style={styles.reprintOptionText}>Kitchen Receipt</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.reprintOption}
-              onPress={() => confirmReprint('both')}
-            >
+            <TouchableOpacity style={styles.reprintOption} onPress={() => confirmReprint('both')}>
               <Icon name="content-copy" size={32} color={Colors.warning} />
               <Text style={styles.reprintOptionText}>Both Receipts</Text>
             </TouchableOpacity>
@@ -436,8 +429,7 @@ const OrderHistoryScreen: React.FC = () => {
 
           <TouchableOpacity
             style={styles.reprintCancelButton}
-            onPress={() => setShowReprintModal(false)}
-          >
+            onPress={() => setShowReprintModal(false)}>
             <Text style={styles.reprintCancelText}>Cancel</Text>
           </TouchableOpacity>
         </View>

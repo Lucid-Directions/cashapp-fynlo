@@ -46,21 +46,21 @@ const Chart: React.FC<ChartProps> = ({
 
   const renderBarChart = () => {
     const barWidth = chartWidth / data.length - 10;
-    
+
     return (
       <View style={styles.chartContainer}>
         <View style={[styles.barsContainer, { height }]}>
           {data.map((item, index) => {
             const barHeight = (item.value / maxValue) * (height - 40);
             const color = item.color || Colors.primary;
-            
+
             return (
               <View key={index} style={styles.barWrapper}>
                 <View style={styles.barContainer}>
                   {showValues && (
                     <Text style={styles.barValue}>
-                      {typeof item.value === 'number' && item.value > 1000 
-                        ? item.value.toLocaleString() 
+                      {typeof item.value === 'number' && item.value > 1000
+                        ? item.value.toLocaleString()
                         : item.value}
                     </Text>
                   )}
@@ -108,13 +108,13 @@ const Chart: React.FC<ChartProps> = ({
                 ]}
               />
             ))}
-            
+
             {/* Data points and line */}
             <View style={styles.lineWrapper}>
               {data.map((item, index) => {
                 const pointHeight = (item.value / maxValue) * lineHeight;
                 const pointX = index * stepWidth;
-                
+
                 return (
                   <View key={index}>
                     {/* Line segment */}
@@ -129,8 +129,8 @@ const Chart: React.FC<ChartProps> = ({
                             transform: [
                               {
                                 rotate: `${Math.atan2(
-                                  ((data[index + 1].value / maxValue) * lineHeight) - pointHeight,
-                                  stepWidth
+                                  (data[index + 1].value / maxValue) * lineHeight - pointHeight,
+                                  stepWidth,
                                 )}rad`,
                               },
                             ],
@@ -138,7 +138,7 @@ const Chart: React.FC<ChartProps> = ({
                         ]}
                       />
                     )}
-                    
+
                     {/* Data point */}
                     <View
                       style={[
@@ -147,12 +147,11 @@ const Chart: React.FC<ChartProps> = ({
                           left: pointX - pointRadius,
                           bottom: pointHeight - pointRadius,
                         },
-                      ]}
-                    >
+                      ]}>
                       {showValues && (
                         <Text style={styles.pointValue}>
-                          {typeof item.value === 'number' && item.value > 1000 
-                            ? item.value.toLocaleString() 
+                          {typeof item.value === 'number' && item.value > 1000
+                            ? item.value.toLocaleString()
                             : item.value}
                         </Text>
                       )}
@@ -162,7 +161,7 @@ const Chart: React.FC<ChartProps> = ({
               })}
             </View>
           </View>
-          
+
           {/* X-axis labels */}
           <View style={styles.xAxisLabels}>
             {data.map((item, index) => (
@@ -190,14 +189,11 @@ const Chart: React.FC<ChartProps> = ({
             {data.map((item, index) => {
               const percentage = (item.value / total) * 100;
               const color = item.color || `hsl(${(index * 360) / data.length}, 70%, 50%)`;
-              
+
               return (
                 <View key={index} style={styles.pieSegment}>
                   <View
-                    style={[
-                      styles.pieColor,
-                      { backgroundColor: color, width: `${percentage}%` },
-                    ]}
+                    style={[styles.pieColor, { backgroundColor: color, width: `${percentage}%` }]}
                   />
                   <Text style={styles.pieLabel}>
                     {item.label}: {percentage.toFixed(1)}%

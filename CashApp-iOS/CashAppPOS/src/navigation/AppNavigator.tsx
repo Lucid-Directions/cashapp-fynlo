@@ -16,11 +16,22 @@ const AppNavigator: React.FC = () => {
   const { isAuthenticated, isLoading, isPlatformOwner, user } = useAuth();
   const authStoreUser = useAuthStore(state => state.user);
   const { theme } = useTheme();
-  
+
   // Check if user needs onboarding
-  const needsOnboarding = authStoreUser?.needs_onboarding || (!authStoreUser?.restaurant_id && authStoreUser?.role !== 'platform_owner');
-  
-  console.log('AppNavigator - User:', user?.email, 'Role:', user?.role, 'isPlatformOwner:', isPlatformOwner, 'needsOnboarding:', needsOnboarding);
+  const needsOnboarding =
+    authStoreUser?.needs_onboarding ||
+    (!authStoreUser?.restaurant_id && authStoreUser?.role !== 'platform_owner');
+
+  console.log(
+    'AppNavigator - User:',
+    user?.email,
+    'Role:',
+    user?.role,
+    'isPlatformOwner:',
+    isPlatformOwner,
+    'needsOnboarding:',
+    needsOnboarding,
+  );
 
   if (isLoading) {
     return (
@@ -35,8 +46,7 @@ const AppNavigator: React.FC = () => {
       <Stack.Navigator
         screenOptions={{
           headerShown: false,
-        }}
-      >
+        }}>
         {!isAuthenticated ? (
           <Stack.Screen
             name="Auth"

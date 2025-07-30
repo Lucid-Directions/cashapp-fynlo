@@ -37,7 +37,7 @@ export const colors = {
     800: '#006F32',
     900: '#005221',
   },
-  
+
   // Secondary Colors
   secondary: {
     50: '#E6F2FF',
@@ -51,7 +51,7 @@ export const colors = {
     800: '#002951',
     900: '#001428',
   },
-  
+
   // Neutral Colors
   neutral: {
     0: '#FFFFFF',
@@ -67,7 +67,7 @@ export const colors = {
     900: '#171717',
     950: '#0A0A0A',
   },
-  
+
   // Semantic Colors
   success: {
     50: '#F0FDF4',
@@ -76,7 +76,7 @@ export const colors = {
     600: '#16A34A',
     700: '#15803D',
   },
-  
+
   warning: {
     50: '#FFFBEB',
     100: '#FEF3C7',
@@ -84,7 +84,7 @@ export const colors = {
     600: '#D97706',
     700: '#B45309',
   },
-  
+
   danger: {
     50: '#FEF2F2',
     100: '#FEE2E2',
@@ -92,7 +92,7 @@ export const colors = {
     600: '#DC2626',
     700: '#B91C1C',
   },
-  
+
   info: {
     50: '#EFF6FF',
     100: '#DBEAFE',
@@ -100,7 +100,7 @@ export const colors = {
     600: '#2563EB',
     700: '#1D4ED8',
   },
-  
+
   // Legacy color aliases for backward compatibility
   primaryLegacy: '#00A651',
   secondaryLegacy: '#0066CC',
@@ -137,7 +137,7 @@ export const typography = {
       default: 'monospace',
     }),
   },
-  
+
   // Font Sizes
   fontSize: {
     xs: 12,
@@ -154,7 +154,7 @@ export const typography = {
     '8xl': 96,
     '9xl': 128,
   },
-  
+
   // Font Weights
   fontWeight: {
     thin: '100',
@@ -167,7 +167,7 @@ export const typography = {
     extrabold: '800',
     black: '900',
   },
-  
+
   // Line Heights
   lineHeight: {
     none: 1,
@@ -177,7 +177,7 @@ export const typography = {
     relaxed: 1.625,
     loose: 2,
   },
-  
+
   // Letter Spacing
   letterSpacing: {
     tighter: -0.05,
@@ -358,10 +358,10 @@ export const darkTheme = {
   // Primary Colors (keep same for brand consistency)
   primary: colors.primary,
   secondary: colors.secondary,
-  
+
   // Neutral Colors (inverted for dark mode)
   neutral: colors.neutral,
-  
+
   // Semantic Colors (slightly adjusted for dark mode)
   success: {
     ...colors.success,
@@ -379,7 +379,7 @@ export const darkTheme = {
     ...colors.info,
     500: '#3B82F6', // Same info color
   },
-  
+
   // Surface Colors
   background: colors.neutral[950],
   white: colors.neutral[900], // Dark surface instead of white
@@ -389,7 +389,7 @@ export const darkTheme = {
   text: colors.neutral[50],
   lightText: colors.neutral[400],
   border: colors.neutral[700],
-  
+
   // Additional dark theme surfaces
   surface: colors.neutral[900],
   surfaceVariant: colors.neutral[800],
@@ -514,7 +514,7 @@ export const getResponsiveValue = <T>(
     lg?: T;
     xl?: T;
   },
-  fallback: T
+  fallback: T,
 ): T => {
   if (screenWidth >= breakpoints.xl && values.xl !== undefined) return values.xl;
   if (screenWidth >= breakpoints.lg && values.lg !== undefined) return values.lg;
@@ -552,7 +552,7 @@ export const presets = {
       paddingHorizontal: spacing[6],
     },
   },
-  
+
   // Card presets
   card: {
     default: {
@@ -568,7 +568,7 @@ export const presets = {
       ...shadows.lg,
     },
   },
-  
+
   // Input presets
   input: {
     default: {

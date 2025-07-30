@@ -58,7 +58,9 @@ class TestingUtils {
           customerId: `test_customer_${i + 1}`,
           items: TestingUtils.generateTestData.orderItems(Math.floor(Math.random() * 5) + 1),
           total: Math.floor(Math.random() * 10000) / 100,
-          status: ['pending', 'processing', 'completed', 'cancelled'][Math.floor(Math.random() * 4)],
+          status: ['pending', 'processing', 'completed', 'cancelled'][
+            Math.floor(Math.random() * 4)
+          ],
           createdAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),
           type: ['dine_in', 'takeout', 'delivery'][Math.floor(Math.random() * 3)],
         });
@@ -70,7 +72,7 @@ class TestingUtils {
     orderItems: (count: number = 3) => {
       const items = [];
       const menuItems = ['Burger', 'Pizza', 'Salad', 'Fries', 'Drink', 'Dessert'];
-      
+
       for (let i = 0; i < count; i++) {
         items.push({
           id: `test_item_${i + 1}`,
@@ -88,7 +90,7 @@ class TestingUtils {
       const customers = [];
       const firstNames = ['John', 'Jane', 'Mike', 'Sarah', 'David', 'Emma'];
       const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia'];
-      
+
       for (let i = 0; i < count; i++) {
         customers.push({
           id: `test_customer_${i + 1}`,
@@ -107,7 +109,7 @@ class TestingUtils {
     payments: (count: number = 20) => {
       const payments = [];
       const methods = ['card', 'cash', 'mobile_pay'];
-      
+
       for (let i = 0; i < count; i++) {
         payments.push({
           id: `test_payment_${i + 1}`,
@@ -247,11 +249,15 @@ class TestingUtils {
       const style = element.props.style;
       if (Array.isArray(style)) {
         const flatStyle = Object.assign({}, ...style);
-        return (flatStyle.width >= 44 && flatStyle.height >= 44) ||
-               (flatStyle.minWidth >= 44 && flatStyle.minHeight >= 44);
+        return (
+          (flatStyle.width >= 44 && flatStyle.height >= 44) ||
+          (flatStyle.minWidth >= 44 && flatStyle.minHeight >= 44)
+        );
       }
-      return (style?.width >= 44 && style?.height >= 44) ||
-             (style?.minWidth >= 44 && style?.minHeight >= 44);
+      return (
+        (style?.width >= 44 && style?.height >= 44) ||
+        (style?.minWidth >= 44 && style?.minHeight >= 44)
+      );
     },
   };
 
@@ -268,7 +274,9 @@ class TestingUtils {
     },
 
     // Measure async operation time
-    measureAsyncOperation: async <T>(operation: () => Promise<T>): Promise<{ result: T; duration: number }> => {
+    measureAsyncOperation: async <T>(
+      operation: () => Promise<T>,
+    ): Promise<{ result: T; duration: number }> => {
       const startTime = performance.now();
       const result = await operation();
       const endTime = performance.now();
@@ -295,13 +303,16 @@ class TestingUtils {
   static common = {
     // Wait for element to appear
     waitForElement: async (getElement: () => ReactTestInstance | null, timeout: number = 5000) => {
-      return waitFor(() => {
-        const element = getElement();
-        if (!element) {
-          throw new Error('Element not found');
-        }
-        return element;
-      }, { timeout });
+      return waitFor(
+        () => {
+          const element = getElement();
+          if (!element) {
+            throw new Error('Element not found');
+          }
+          return element;
+        },
+        { timeout },
+      );
     },
 
     // Simulate user input with delay
@@ -421,7 +432,7 @@ class TestingUtils {
       const startIndex = (page - 1) * pageSize;
       const endIndex = startIndex + pageSize;
       const paginatedData = data.slice(startIndex, endIndex);
-      
+
       return TestingUtils.mockAPI.success({
         data: paginatedData,
         pagination: {

@@ -1,6 +1,6 @@
 /**
  * OrderService - Handle order persistence and management
- * 
+ *
  * Features:
  * - Save orders to backend with customer metadata
  * - Retrieve orders with filtering and sorting
@@ -68,7 +68,7 @@ class OrderService {
       console.log('💾 Saving order to backend...', {
         items: orderData.items.length,
         total: orderData.total,
-        customer: orderData.customerMetadata.email
+        customer: orderData.customerMetadata.email,
       });
 
       const response = await fetch(`${API_CONFIG.BASE_URL}/api/v1/orders`, {
@@ -141,7 +141,7 @@ class OrderService {
       return order;
     } catch (error) {
       console.error('❌ Failed to save order:', error);
-      
+
       // Fallback: Save to local storage for later sync
       const fallbackOrder: Order = {
         id: Date.now(), // Temporary ID
@@ -225,7 +225,7 @@ class OrderService {
       return orders;
     } catch (error) {
       console.error('❌ Failed to fetch orders:', error);
-      
+
       // Fallback to cached orders
       return await this.getCachedOrders();
     }
@@ -293,7 +293,7 @@ class OrderService {
       }
 
       const updatedOrder = await response.json();
-      
+
       // Emit WebSocket event
       // TEMPORARY: WebSocket disabled until service is created
       // webSocketService.send({ type: 'order_updated', data: updatedOrder });
@@ -337,10 +337,10 @@ class OrderService {
     try {
       const cachedOrders = await this.getCachedOrders();
       const updatedOrders = [order, ...cachedOrders.filter(o => o.id !== order.id)];
-      
+
       // Keep only last 100 orders in cache
       const trimmedOrders = updatedOrders.slice(0, 100);
-      
+
       await AsyncStorage.setItem('cached_orders', JSON.stringify(trimmedOrders));
     } catch (error) {
       console.error('❌ Failed to cache order:', error);
@@ -367,7 +367,7 @@ class OrderService {
     try {
       const queue = await AsyncStorage.getItem('order_sync_queue');
       const queueData = queue ? JSON.parse(queue) : [];
-      
+
       queueData.push({
         ...orderData,
         timestamp: new Date().toISOString(),
@@ -400,10 +400,10 @@ class OrderService {
       }
 
       // Remove successfully synced orders from queue
-      const remainingQueue = queueData.filter((item: any) => 
-        !processedIds.includes(item.timestamp)
+      const remainingQueue = queueData.filter(
+        (item: any) => !processedIds.includes(item.timestamp),
       );
-      
+
       await AsyncStorage.setItem('order_sync_queue', JSON.stringify(remainingQueue));
     } catch (error) {
       console.error('❌ Failed to process sync queue:', error);

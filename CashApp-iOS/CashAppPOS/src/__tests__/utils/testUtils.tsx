@@ -18,23 +18,16 @@ interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
 const AllTheProviders = ({ children, navigationProps = {} }: any) => {
   return (
     <SafeAreaProvider>
-      <NavigationContainer {...navigationProps}>
-        {children}
-      </NavigationContainer>
+      <NavigationContainer {...navigationProps}>{children}</NavigationContainer>
     </SafeAreaProvider>
   );
 };
 
-const customRender = (
-  ui: ReactElement,
-  options: CustomRenderOptions = {}
-) => {
+const customRender = (ui: ReactElement, options: CustomRenderOptions = {}) => {
   const { navigationProps, ...renderOptions } = options;
-  
+
   return render(ui, {
-    wrapper: (props) => (
-      <AllTheProviders {...props} navigationProps={navigationProps} />
-    ),
+    wrapper: props => <AllTheProviders {...props} navigationProps={navigationProps} />,
     ...renderOptions,
   });
 };
@@ -95,8 +88,7 @@ export const createMockSession = (overrides = {}) => ({
 });
 
 // Wait for async operations
-export const waitFor = (ms: number) => 
-  new Promise(resolve => setTimeout(resolve, ms));
+export const waitFor = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 // Mock navigation helpers
 export const createMockNavigation = (overrides = {}) => ({
@@ -146,7 +138,7 @@ export const createMockAppStore = (initialState = {}) => {
   };
 
   const state = { ...defaultState, ...initialState };
-  
+
   return {
     ...state,
     setUser: jest.fn(),
@@ -160,13 +152,11 @@ export const createMockAppStore = (initialState = {}) => {
     setOnlineStatus: jest.fn(),
     setLoading: jest.fn(),
     setError: jest.fn(),
-    cartTotal: jest.fn(() => 
-      state.cart.reduce((total: number, item: any) => 
-        total + (item.price * item.quantity), 0)
+    cartTotal: jest.fn(() =>
+      state.cart.reduce((total: number, item: any) => total + item.price * item.quantity, 0),
     ),
-    cartItemCount: jest.fn(() => 
-      state.cart.reduce((count: number, item: any) => 
-        count + item.quantity, 0)
+    cartItemCount: jest.fn(() =>
+      state.cart.reduce((count: number, item: any) => count + item.quantity, 0),
     ),
   };
 };
@@ -180,7 +170,7 @@ export const createMockUIStore = (initialState = {}) => {
   };
 
   const state = { ...defaultState, ...initialState };
-  
+
   return {
     ...state,
     setSelectedCategory: jest.fn(),
@@ -219,11 +209,11 @@ export const pressButton = async (getByTestId: any, testId: string) => {
 // Mock fetch for API testing
 export const createMockFetch = (responses: any[] = []) => {
   let callCount = 0;
-  
+
   return jest.fn(() => {
     const response = responses[callCount] || { ok: true, json: () => Promise.resolve({}) };
     callCount++;
-    
+
     return Promise.resolve({
       ok: response.ok !== false,
       status: response.status || 200,
