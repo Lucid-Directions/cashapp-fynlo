@@ -192,13 +192,10 @@ class TenantSecurity:
         if TenantSecurity.is_platform_owner(user):
             return []  # Empty list means "all restaurants"
         
-        accessible_restaurants = []
+        # Use a set for efficient deduplication
+        accessible_restaurants = set()
         
-        # Add legacy single restaurant if exists
-        if user.restaurant_id:
-            accessible_restaurants.append(str(user.restaurant_id))
-        
-        # Add multi-restaurant access for restaurant owners
+        # For restaurant owners, check user_restaurants table
         if db and user.role == "restaurant_owner":
             # Get all restaurants from user_restaurants table
             user_restaurants = db.query(UserRestaurant).filter(
@@ -206,11 +203,15 @@ class TenantSecurity:
             ).all()
             
             for ur in user_restaurants:
-                restaurant_id = str(ur.restaurant_id)
-                if restaurant_id not in accessible_restaurants:
-                    accessible_restaurants.append(restaurant_id)
+                accessible_restaurants.add(str(ur.restaurant_id))
         
-        return accessible_restaurants
+        # For non-restaurant owners, only add legacy restaurant_id if it exists
+        # This ensures that if a restaurant owner's access is revoked via user_restaurants,
+        # they don't retain access through the legacy field
+        elif user.restaurant_id:
+            accessible_restaurants.add(str(user.restaurant_id))
+        
+        return list(accessible_restaurants)
     
     @staticmethod
     def validate_cross_restaurant_operation(
