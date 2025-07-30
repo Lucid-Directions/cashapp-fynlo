@@ -2,7 +2,7 @@
 Authentication middleware for Supabase integration
 """
 
-from fastapi import Depends, HTTPException, Header, Request
+from fastapi import Depends, Header, Request
 from sqlalchemy.orm import Session
 from typing import Optional
 import uuid
@@ -16,6 +16,7 @@ from app.core.database import User
 from app.services.audit_logger import AuditLoggerService
 from app.models.audit_log import AuditEventType, AuditEventStatus
 from app.core.config import settings
+from app.core.exceptions import ValidationException, AuthenticationException, FynloException
 
 logger = logging.getLogger(__name__)
 
@@ -43,10 +44,9 @@ async def get_current_user(
             details={"reason": "Missing authorization header"},
             commit=True
         )
-        raise HTTPException(
-            status_code=401,
-            detail="No authorization header",
-            headers={"WWW-Authenticate": "Bearer"},
+        raise AuthenticationException(
+            message="Authentication required",
+            details={"error_code": "MISSING_AUTH_HEADER"}
         )
     
     token = authorization.replace("Bearer ", "")
@@ -66,7 +66,10 @@ async def get_current_user(
                 details={"reason": "Supabase returned no user", "token_prefix": token[:10] + "..."},
                 commit=True
             )
-            raise HTTPException(status_code=401, detail="Invalid token")
+            raise AuthenticationException(
+                message="Authentication failed",
+                details={"error_code": "INVALID_TOKEN"}
+            )
         
         # Get user from our database
         db_user = db.query(User).filter(
@@ -84,7 +87,10 @@ async def get_current_user(
                 details={"reason": "User exists in Supabase but not in local database", "supabase_id": str(supabase_user.id)},
                 commit=True
             )
-            raise HTTPException(status_code=401, detail="User not found in database")
+            raise AuthenticationException(
+                message="Authentication failed",
+                details={"error_code": "AUTHENTICATION_FAILED"}
+            )
         
         if not db_user.is_active:
             await audit_service.create_audit_log(
@@ -98,7 +104,10 @@ async def get_current_user(
                 details={"reason": "User account is deactivated"},
                 commit=True
             )
-            raise HTTPException(status_code=403, detail="User account is inactive")
+            raise AuthenticationException(
+                message="Access denied",
+                details={"error_code": "ACCESS_DENIED"}
+            )
         
         # Log successful access
         await audit_service.create_audit_log(
@@ -115,7 +124,7 @@ async def get_current_user(
         
         return db_user
         
-    except HTTPException:
+    except (AuthenticationException, ValidationException, FynloException):
         raise
     except Exception as e:
         await audit_service.create_audit_log(
@@ -128,10 +137,9 @@ async def get_current_user(
             commit=True
         )
         print(f"Auth error: {str(e)}")
-        raise HTTPException(
-            status_code=401,
-            detail="Could not validate credentials",
-            headers={"WWW-Authenticate": "Bearer"},
+        raise AuthenticationException(
+            message="Authentication failed",
+            details={"error_code": "AUTHENTICATION_FAILED"}
         )
 
 
@@ -140,7 +148,10 @@ async def get_current_active_user(
 ) -> User:
     """Ensure user is active"""
     if not current_user.is_active:
-        raise HTTPException(status_code=400, detail="Inactive user")
+        raise ValidationException(
+            message="Inactive user",
+            details={"error_code": "BAD_REQUEST"}
+        )
     return current_user
 
 
@@ -149,9 +160,9 @@ async def get_platform_owner(
 ) -> User:
     """Ensure user is platform owner"""
     if current_user.role != 'platform_owner':
-        raise HTTPException(
-            status_code=403,
-            detail="Not enough permissions. Platform owner access required."
+        raise AuthenticationException(
+            message="Not enough permissions. Platform owner access required.",
+            details={"error_code": "ACCESS_DENIED"}
         )
     return current_user
 
@@ -162,9 +173,9 @@ async def get_restaurant_user(
 ) -> User:
     """Ensure user has restaurant access"""
     if not current_user.restaurant_id:
-        raise HTTPException(
-            status_code=403,
-            detail="Restaurant access required"
+        raise AuthenticationException(
+            message="Restaurant access required",
+            details={"error_code": "ACCESS_DENIED"}
         )
     return current_user
 
@@ -183,7 +194,7 @@ async def get_current_user_optional(
     
     try:
         return await get_current_user(request, authorization, db)
-    except HTTPException:
+    except (AuthenticationException, ValidationException, FynloException):
         return None
 
 

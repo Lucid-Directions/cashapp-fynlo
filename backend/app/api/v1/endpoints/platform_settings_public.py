@@ -12,6 +12,7 @@ from app.core.database import get_db
 from app.core.responses import APIResponseHelper
 from app.services.cache_service import PlatformCacheService
 import logging
+from app.core.exceptions import ValidationException, AuthenticationException, FynloException, ResourceNotFoundException, ConflictException
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -143,4 +144,4 @@ async def get_payment_methods_public():
         
     except Exception as e:
         logger.error(f"Error in get_payment_methods_public: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise FynloException(detail=str(e))

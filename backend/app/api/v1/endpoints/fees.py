@@ -16,6 +16,7 @@ from app.services.service_charge_calculator import ServiceChargeCalculator
 from app.services.payment_config_service import PaymentConfigService
 from app.services.financial_records_service import FinancialRecordsService # New service
 from pydantic import BaseModel, Field
+from app.core.exceptions import ValidationException, AuthenticationException, FynloException, ResourceNotFoundException, ConflictException
 
 router = APIRouter()
 
@@ -64,14 +65,12 @@ def get_payment_fee_calculator(
 
 def get_service_charge_calculator(
     pfc: PaymentFeeCalculator = Depends(get_payment_fee_calculator),
-    pss: PlatformSettingsService = Depends(get_platform_settings_service),
-) -> ServiceChargeCalculator:
+    pss: PlatformSettingsService = Depends(get_platform_settings_service)) -> ServiceChargeCalculator:
     return ServiceChargeCalculator(payment_fee_calculator=pfc, platform_settings_service=pss)
 
 def get_platform_fee_service(
     pfc: PaymentFeeCalculator = Depends(get_payment_fee_calculator),
-    pss: PlatformSettingsService = Depends(get_platform_settings_service),
-) -> PlatformFeeService:
+    pss: PlatformSettingsService = Depends(get_platform_settings_service)) -> PlatformFeeService:
     return PlatformFeeService(payment_fee_calculator=pfc, platform_settings_service=pss)
 
 def get_financial_records_service(db: Session = Depends(get_db)) -> FinancialRecordsService:
@@ -99,9 +98,7 @@ async def calculate_fees_for_order(
 
     if not payment_method_setting:
         # This should ideally not happen if defaults are seeded for all PaymentMethodEnums
-        raise HTTPException(
-            status_code=404,
-            detail=f"Fee configuration not found for payment method {request.payment_method.value} for restaurant {request.restaurant_id or 'platform default'}."
+        raise ResourceNotFoundException(detail=f"Fee configuration not found for payment method {request.payment_method.value} for restaurant {request.restaurant_id or 'platform default'}."
         )
 
     # Determine who pays processor fees
@@ -111,9 +108,7 @@ async def calculate_fees_for_order(
             customer_pays_processor_fees = request.force_customer_pays_processor_fees
         else:
             # Client tried to override but not allowed
-            raise HTTPException(
-                status_code=400,
-                detail=f"Toggling who pays processor fee is not allowed for payment method {request.payment_method.value}."
+            raise ValidationException(detail=f"Toggling who pays processor fee is not allowed for payment method {request.payment_method.value}."
             )
 
     include_processor_fee_in_sc = payment_method_setting.include_processor_fee_in_service_charge
@@ -137,7 +132,7 @@ async def calculate_fees_for_order(
         except Exception as e:
             # Log the exception details
             # logger.error(f"Error in ServiceChargeCalculator: {e}", exc_info=True)
-            raise HTTPException(status_code=500, detail=f"Error calculating service charge: {str(e)}")
+            raise FynloException(detail=f"Error calculating service charge: {str(e)}")
 
 
     # 3. Calculate final Customer Total Breakdown using PlatformFeeService
@@ -156,10 +151,10 @@ async def calculate_fees_for_order(
         return customer_total_breakdown
 
     except ValueError as ve: # From underlying services if config is missing etc.
-        raise HTTPException(status_code=400, detail=str(ve))
+        raise ValidationException(detail=str(ve))
     except Exception as e:
         # logger.error(f"Error in PlatformFeeService's calculate_customer_total: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Error calculating final customer total: {str(e)}")
+        raise FynloException(detail=f"Error calculating final customer total: {str(e)}")
 
 # To include this router in the main application:
 # In backend/app/api/v1/api.py (or equivalent main router aggregation file):
@@ -213,7 +208,7 @@ async def record_platform_fee(
             transaction_timestamp=db_record.transaction_timestamp.isoformat()
         )
     except ValueError as ve: # Catch specific errors if service raises them
-        raise HTTPException(status_code=400, detail=str(ve))
+        raise ValidationException(detail=str(ve))
     except Exception as e:
         # logger.error(f"Error recording platform fee for order {fee_data_input.order_id}: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Failed to record platform fee: {str(e)}")
+        raise FynloException(detail=f"Failed to record platform fee: {str(e)}")

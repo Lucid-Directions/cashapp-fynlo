@@ -13,7 +13,7 @@ import logging
 from app.core.database import get_db, Restaurant, Platform, User, Order, Customer, Section, Table
 from app.core.auth import get_current_user
 from app.core.responses import APIResponseHelper
-from app.core.exceptions import FynloException, ErrorCodes
+from app.core.exceptions import ValidationException, AuthenticationException, FynloException, ResourceNotFoundException, ConflictException
 from app.core.validation import (
     validate_model_jsonb_fields,
     validate_email,
@@ -181,7 +181,7 @@ async def get_current_restaurant(
     ).first()
     
     if not restaurant:
-        raise HTTPException(status_code=404, detail="Restaurant not found")
+        raise ResourceNotFoundException(detail="Restaurant not found")
     
     return RestaurantResponse(
         id=str(restaurant.id),
@@ -210,7 +210,7 @@ async def create_restaurant(
     """Create a new restaurant (platform owners only)"""
     
     if current_user.role != "platform_owner":
-        raise HTTPException(status_code=403, detail="Only platform owners can create restaurants")
+        raise AuthenticationException(detail="Only platform owners can create restaurants", error_code="ACCESS_DENIED")
     
     # Use user's platform if not specified
     platform_id = platform_id or str(current_user.platform_id)
@@ -218,7 +218,7 @@ async def create_restaurant(
     # Verify platform exists
     platform = db.query(Platform).filter(Platform.id == platform_id).first()
     if not platform:
-        raise HTTPException(status_code=404, detail="Platform not found")
+        raise ResourceNotFoundException(detail="Platform not found")
     
     # Validate and sanitize JSONB fields
     try:
@@ -294,9 +294,7 @@ async def create_restaurant_onboarding(
     
     # Check if user already has a restaurant
     if current_user.restaurant_id:
-        raise HTTPException(
-            status_code=400, 
-            detail="User already has a restaurant associated"
+        raise ValidationException(detail="User already has a restaurant associated"
         )
     
     # Get user's platform (should be set during auth)
@@ -305,7 +303,7 @@ async def create_restaurant_onboarding(
         # If no platform, use default platform
         default_platform = db.query(Platform).filter(Platform.name == "Fynlo").first()
         if not default_platform:
-            raise HTTPException(status_code=500, detail="No default platform found")
+            raise FynloException(detail="No default platform found")
         platform_id = str(default_platform.id)
     
     # Validate and sanitize JSONB fields
@@ -476,12 +474,12 @@ async def update_restaurant(
     
     restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
     if not restaurant:
-        raise HTTPException(status_code=404, detail="Restaurant not found")
+        raise ResourceNotFoundException(detail="Restaurant not found")
     
     # Platform owners can update any restaurant in their platform
     if current_user.role == "platform_owner":
         if str(restaurant.platform_id) != str(current_user.platform_id):
-            raise HTTPException(status_code=403, detail="Access denied")
+            raise AuthenticationException(detail="Access denied", error_code="ACCESS_DENIED")
     else:
         # Restaurant users - validate access to the specific restaurant
         await TenantSecurity.validate_restaurant_access(
@@ -492,7 +490,7 @@ async def update_restaurant(
         
         # Additional check for managers - they can only update settings, not critical fields
         if current_user.role == "manager" and any(key in restaurant_data.dict(exclude_unset=True) for key in ['is_active', 'payment_methods']):
-            raise HTTPException(status_code=403, detail="Managers cannot modify critical settings")
+            raise AuthenticationException(detail="Managers cannot modify critical settings", error_code="ACCESS_DENIED")
     
     # Validate and sanitize fields if provided
     update_data = restaurant_data.dict(exclude_unset=True)
@@ -580,12 +578,12 @@ async def get_restaurant_stats(
     
     restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
     if not restaurant:
-        raise HTTPException(status_code=404, detail="Restaurant not found")
+        raise ResourceNotFoundException(detail="Restaurant not found")
     
     # Platform owners can view stats for any restaurant in their platform
     if current_user.role == "platform_owner":
         if str(restaurant.platform_id) != str(current_user.platform_id):
-            raise HTTPException(status_code=403, detail="Access denied")
+            raise AuthenticationException(detail="Access denied", error_code="ACCESS_DENIED")
     else:
         # Restaurant users - validate access to the specific restaurant
         await TenantSecurity.validate_restaurant_access(
@@ -666,7 +664,7 @@ async def get_platform_stats(
     """Get platform-wide statistics (platform owners only)"""
     
     if current_user.role != "platform_owner":
-        raise HTTPException(status_code=403, detail="Platform owners only")
+        raise AuthenticationException(detail="Platform owners only", error_code="ACCESS_DENIED")
     
     platform_id = platform_id or str(current_user.platform_id)
     
@@ -765,12 +763,12 @@ async def get_restaurant(
     
     restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
     if not restaurant:
-        raise HTTPException(status_code=404, detail="Restaurant not found")
+        raise ResourceNotFoundException(detail="Restaurant not found")
     
     # Platform owners can view any restaurant in their platform
     if current_user.role == "platform_owner":
         if str(restaurant.platform_id) != str(current_user.platform_id):
-            raise HTTPException(status_code=403, detail="Access denied")
+            raise AuthenticationException(detail="Access denied", error_code="ACCESS_DENIED")
     else:
         # Restaurant users - validate access to the specific restaurant
         await TenantSecurity.validate_restaurant_access(

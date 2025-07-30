@@ -16,6 +16,7 @@ from app.core.redis_client import get_redis, RedisClient
 from app.core.responses import APIResponseHelper
 from app.services.activity_logger import ActivityLogger
 from app.middleware.rate_limit_middleware import limiter, PORTAL_DASHBOARD_RATE
+from app.core.exceptions import ValidationException, AuthenticationException, FynloException, ResourceNotFoundException, ConflictException
 
 router = APIRouter()
 
@@ -212,7 +213,7 @@ async def get_platform_dashboard(
     
     # Check if user is platform owner
     if current_user.role != 'platform_owner':
-        raise HTTPException(status_code=403, detail="Platform owner access required")
+        raise AuthenticationException(detail="Platform owner access required", error_code="ACCESS_DENIED")
     
     # Check cache
     cache_key = f"platform_dashboard:{period}"
@@ -245,7 +246,7 @@ async def get_platform_dashboard(
         ).all()
     else:
         # Non-platform owners shouldn't access this endpoint
-        raise HTTPException(status_code=403, detail="Platform owner access required")
+        raise AuthenticationException(detail="Platform owner access required", error_code="ACCESS_DENIED")
     
     # Aggregate metrics across all restaurants
     total_revenue = 0
@@ -364,7 +365,7 @@ async def get_restaurant_comparison(
     
     # Check if user is platform owner
     if current_user.role != 'platform_owner':
-        raise HTTPException(status_code=403, detail="Platform owner access required")
+        raise AuthenticationException(detail="Platform owner access required", error_code="ACCESS_DENIED")
     
     # Calculate date range
     end_date = datetime.utcnow()

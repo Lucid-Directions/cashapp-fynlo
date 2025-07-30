@@ -18,7 +18,7 @@ from app.core.auth import get_current_user
 from app.api.v1.endpoints.customers import CustomerCreate as CustomerCreateSchema # Renamed to avoid conflict
 from app.core.redis_client import get_redis, RedisClient
 from app.core.responses import APIResponseHelper
-from app.core.exceptions import FynloException, ErrorCodes
+from app.core.exceptions import ValidationException, AuthenticationException, FynloException, ResourceNotFoundException, ConflictException
 from app.core.onboarding_helper import OnboardingHelper
 from app.core.websocket import (
     websocket_manager, 
@@ -122,15 +122,11 @@ def verify_order_access(order, current_user):
     if current_user.role != 'platform_owner':
         user_restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
         if user_restaurant_id is None:
-            raise HTTPException(
-                status_code=403,
-                detail="Access denied: No restaurant assigned to user"
-            )
+            raise AuthenticationException(detail="Access denied: No restaurant assigned to user"
+            , error_code="ACCESS_DENIED")
         if str(order.restaurant_id) != str(user_restaurant_id):
-            raise HTTPException(
-                status_code=403,
-                detail="Access denied: You can only access orders from your own restaurant"
-            )
+            raise AuthenticationException(detail="Access denied: You can only access orders from your own restaurant"
+            , error_code="ACCESS_DENIED")
 
 @router.get("/", response_model=List[OrderSummary])
 async def get_orders(
@@ -167,10 +163,8 @@ async def get_orders(
         # Restaurant owners, managers, and employees can only access their own restaurant(s)
         user_restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
         if user_restaurant_id is None:
-            raise HTTPException(
-                status_code=403,
-                detail="Access denied: No restaurant assigned to user"
-            )
+            raise AuthenticationException(detail="Access denied: No restaurant assigned to user"
+            , error_code="ACCESS_DENIED")
         
         # Use provided restaurant_id or fallback to user's current restaurant
         if not restaurant_id:
@@ -268,18 +262,14 @@ async def get_todays_orders(
         # Platform owners can access any restaurant
         if not restaurant_id:
             # Platform owner must specify which restaurant to view
-            raise HTTPException(
-                status_code=400,
-                detail="Restaurant ID is required for platform owners"
+            raise ValidationException(detail="Restaurant ID is required for platform owners"
             )
     else:
         # Restaurant owners, managers, and employees can only access their own restaurant(s)
         user_restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
         if user_restaurant_id is None:
-            raise HTTPException(
-                status_code=403,
-                detail="Access denied: No restaurant assigned to user"
-            )
+            raise AuthenticationException(detail="Access denied: No restaurant assigned to user"
+            , error_code="ACCESS_DENIED")
         
         # Use provided restaurant_id or fallback to user's current restaurant
         if not restaurant_id:
@@ -377,18 +367,14 @@ async def create_order(
     if current_user.role == 'platform_owner':
         # Platform owners must specify which restaurant
         if not restaurant_id:
-            raise HTTPException(
-                status_code=400,
-                detail="Restaurant ID is required for platform owners"
+            raise ValidationException(detail="Restaurant ID is required for platform owners"
             )
     else:
         # Restaurant owners, managers, and employees can only create orders for their own restaurant(s)
         user_restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
         if user_restaurant_id is None:
-            raise HTTPException(
-                status_code=403,
-                detail="Access denied: No restaurant assigned to user"
-            )
+            raise AuthenticationException(detail="Access denied: No restaurant assigned to user"
+            , error_code="ACCESS_DENIED")
         
         # Use provided restaurant_id or fallback to user's current restaurant
         if not restaurant_id:
@@ -453,7 +439,7 @@ async def create_order(
     ).all()
     
     if len(products) != len(product_ids):
-        raise HTTPException(status_code=400, detail="One or more products not found")
+        raise ValidationException(detail="One or more products not found")
     
     # Calculate totals
     totals = calculate_order_totals(order_data.items)
@@ -463,9 +449,7 @@ async def create_order(
         for item in order_data.items:
             product = next(p for p in products if str(p.id) == item.product_id)
             if product.stock_tracking and product.stock_quantity < item.quantity:
-                raise HTTPException(
-                    status_code=400, 
-                    detail=f"Insufficient stock for {product.name}. Available: {product.stock_quantity}, Required: {item.quantity}"
+                raise ValidationException(detail=f"Insufficient stock for {product.name}. Available: {product.stock_quantity}, Required: {item.quantity}"
                 )
         
         # Create order
@@ -535,7 +519,7 @@ async def create_order(
     except Exception as e:
         # Log unexpected errors
         logger.error(f"Order creation failed: {e}")
-        raise HTTPException(status_code=500, detail="Failed to create order")
+        raise FynloException(detail="Failed to create order")
 
     customer_info_response = None
     if new_order.customer_id:
@@ -779,7 +763,7 @@ async def confirm_order(
     except Exception as e:
         db.rollback() # Rollback order status change if deductions fail
         logger.error(f"Failed to apply recipe deductions for order {order.id}: {e}. Order status not confirmed.")
-        raise HTTPException(status_code=500, detail=f"Failed to confirm order due to inventory processing error: {str(e)}")
+        raise FynloException(detail=f"Failed to confirm order due to inventory processing error: {str(e)}")
 
     # Update cache
     await redis.cache_order(str(order.id), {
