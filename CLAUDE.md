@@ -84,13 +84,15 @@
 ## 🚨 GITHUB ISSUE ASSIGNMENT CHECK
 **CRITICAL: BEFORE WORKING ON ANY GITHUB ISSUE**
 - ALWAYS check if the issue is already assigned to someone
+- Me arnaud/sleepyarno and Ryan are both working on this project so we always have to keep that in mind to avoid conflict 
 - If assigned to another developer, DO NOT work on it
 - Inform the user that the issue is assigned and cannot be worked on
 - Only work on unassigned issues or issues assigned to you
 
 ## 🚨 GIT WORKFLOW - MANDATORY PR PROCESS
-**CRITICAL: ALL CHANGES MUST GO THROUGH PULL REQUESTS - NO DIRECT COMMITS**
-**CRITICAL: DO NOT CHANGE ANY CODE - RAISE ALL PROBLEMS AS GITHUB ISSUES**
+**CRITICAL: ALL CHANGES MUST GO THROUGH PULL REQUESTS -
+**CRITICAL: Any amendments to the codebase or working on issues must be done on dedicated Feature brunch And then create a detailed pull request that will trigger the redeployment in DigitalOcean.
+**CRITICAL: Once you create the pull request, Cursor Bugbot will analyze to find some bugs. We need to make sure that we use PR Guardian so that most of the bugs are already identified while we're creating the pull request and making the change.Any bugs found by Cursor on the PR must be corrected within the same PR. Never create a new PR to fix a bug within the PR.
 
 ### MANDATORY WORKFLOW:
 1. **CREATE FEATURE BRANCH**: 
