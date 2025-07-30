@@ -365,7 +365,22 @@ async def verify_websocket_access(
                     logger.warning("Staff access denied - restaurant mismatch")
                     return False, None
 
-        return True, user if user_id else None
+        # CRITICAL SECURITY FIX: Always require authentication
+        # If no user_id provided, deny access
+        if not user_id:
+            logger.warning("WebSocket connection attempted without user_id")
+            # Log security event for monitoring
+            await security_monitor.log_suspicious_activity(
+                event_type="websocket_auth_bypass_attempt",
+                details={
+                    "restaurant_id": restaurant_id,
+                    "connection_type": connection_type,
+                    "error": "Missing user_id"
+                }
+            )
+            return False, None
+
+        return True, user
 
     except Exception as e:
         logger.error(f"WebSocket access verification error: {str(e)}")
