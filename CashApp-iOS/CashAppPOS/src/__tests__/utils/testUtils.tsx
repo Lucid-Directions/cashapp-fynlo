@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Test Utilities for Fynlo POS
  * Provides common testing helpers, wrappers, and utilities

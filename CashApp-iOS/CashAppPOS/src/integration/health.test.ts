@@ -1,4 +1,3 @@
-// @ts-nocheck
 import fetchMock from 'jest-fetch-mock';
 
 describe('Backend Health Endpoint', () => {

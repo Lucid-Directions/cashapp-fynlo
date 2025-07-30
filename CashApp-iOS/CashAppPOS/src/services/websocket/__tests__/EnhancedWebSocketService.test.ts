@@ -49,7 +49,6 @@ class MockWebSocket {
   }
 }
 
-// @ts-ignore
 global.WebSocket = MockWebSocket;
 
 describe('EnhancedWebSocketService', () => {

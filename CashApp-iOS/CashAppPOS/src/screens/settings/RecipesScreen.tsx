@@ -68,12 +68,10 @@ const RecipesScreen = () => {
   }, [loadRecipes]);
 
   const handleAddRecipe = () => {
-    // @ts-ignore
     navigation.navigate('RecipeFormScreen'); // Navigate to form for new recipe
   };
 
   const handleEditRecipe = (recipe: Recipe) => {
-    // @ts-ignore
     navigation.navigate('RecipeFormScreen', { recipe }); // Navigate to form with existing recipe data
   };
 

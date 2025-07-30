@@ -1067,7 +1067,6 @@ const POSScreen: React.FC = () => {
                     style={styles.chargeButton}
                     onPress={() => {
                       setShowCartModal(_false);
-                      // @ts-ignore
                       navigation.navigate('ServiceChargeSelection');
                     }}
                     testID="charge-button" // Added testID

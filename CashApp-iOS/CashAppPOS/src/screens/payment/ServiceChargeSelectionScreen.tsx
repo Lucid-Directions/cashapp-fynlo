@@ -122,7 +122,6 @@ const ServiceChargeSelectionScreen: React.FC = () => {
     setAddTransactionFee(_localAddTransactionFee);
 
     // Navigate to payment method selection
-    // @ts-ignore
     navigation.navigate('EnhancedPayment');
   };
 

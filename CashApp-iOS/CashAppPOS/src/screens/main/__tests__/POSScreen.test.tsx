@@ -3,7 +3,6 @@
  * Testing the main point-of-sale interface
  */
 
-// @ts-nocheck
 import React from 'react';
 import { fireEvent, waitFor, act } from '@testing-library/react-native';
 import POSScreen from '../POSScreen'; // Import ExportedMenuItemCard
@@ -368,7 +367,6 @@ describe('POSScreen Header Actions Conditional Rendering Snapshots', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    // @ts-ignore
     global.FLAGS = { SHOW_DEV_MENU: true }; // Default for these tests
   });
 
@@ -390,7 +388,6 @@ describe('POSScreen Header Actions Conditional Rendering Snapshots', () => {
 
   it('snapshot: no bug icon if FLAGS.SHOW_DEV_MENU = false (_dev)', () => {
     mockIS_DEV = true;
-    // @ts-ignore
     global.FLAGS.SHOW_DEV_MENU = false;
     const { toJSON } = customRenderWithStores(<POSScreen />, {
       navigationProps: { navigation: mockNavigation },
@@ -400,7 +397,6 @@ describe('POSScreen Header Actions Conditional Rendering Snapshots', () => {
 
   it('snapshot: no bug icon if FLAGS.SHOW_DEV_MENU = false (_prod)', () => {
     mockIS_DEV = false;
-    // @ts-ignore
     global.FLAGS.SHOW_DEV_MENU = false;
     const { toJSON } = customRenderWithStores(<POSScreen />, {
       navigationProps: { navigation: mockNavigation },
