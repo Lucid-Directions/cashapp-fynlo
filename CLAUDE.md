@@ -81,6 +81,13 @@
    - Mobile app uses `hasFeature()` checks
    - No plan changes in mobile app (website only)
 
+## 🚨 GITHUB ISSUE ASSIGNMENT CHECK
+**CRITICAL: BEFORE WORKING ON ANY GITHUB ISSUE**
+- ALWAYS check if the issue is already assigned to someone
+- If assigned to another developer, DO NOT work on it
+- Inform the user that the issue is assigned and cannot be worked on
+- Only work on unassigned issues or issues assigned to you
+
 ## 🚨 GIT WORKFLOW - MANDATORY PR PROCESS
 **CRITICAL: ALL CHANGES MUST GO THROUGH PULL REQUESTS - NO DIRECT COMMITS**
 **CRITICAL: DO NOT CHANGE ANY CODE - RAISE ALL PROBLEMS AS GITHUB ISSUES**
