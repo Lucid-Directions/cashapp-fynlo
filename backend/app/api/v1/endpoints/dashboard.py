@@ -294,11 +294,11 @@ async def get_platform_dashboard(
     }
     
     # Calculate platform revenue
-    # Subscription fees (monthly)
+    # Subscription fees (monthly) in GBP
     subscription_revenue = {
-        'alpha': 0,  # FREE
-        'beta': 49,  # £49/month
-        'omega': 119  # £119/month
+        'alpha': 0,  # £0/month + 1% transaction fee
+        'beta': 49,  # £49/month + 1% transaction fee
+        'omega': 119  # £119/month + 1% transaction fee
     }
     
     monthly_subscription_revenue = sum(
