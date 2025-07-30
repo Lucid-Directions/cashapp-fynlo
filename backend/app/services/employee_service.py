@@ -8,7 +8,7 @@ from datetime import datetime, date, time, timedelta
 from decimal import Decimal
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_, func, desc
-from app.core.database import User
+from app.core.database import User, UserRestaurant
 from app.models.employee import EmployeeProfile, Schedule, Shift, TimeEntry, PerformanceMetric
 from app.core.database import Restaurant
 from app.schemas.employee_schemas import (
@@ -37,16 +37,8 @@ class EmployeeService:
     ) -> List[EmployeeResponse]:
         """Get employees with optional filtering"""
         try:
-            # Determine which restaurant to use
-            # Priority: current_restaurant_id > provided restaurant_id > user's default restaurant_id
-            effective_restaurant_id = None
-            
-            if current_user:
-                effective_restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
-            
+            # If specific restaurant_id provided, validate access to it
             if restaurant_id:
-                effective_restaurant_id = restaurant_id
-                # Validate access to the provided restaurant_id
                 await TenantSecurity.validate_restaurant_access(
                     user=current_user,
                     restaurant_id=str(restaurant_id),
@@ -54,17 +46,26 @@ class EmployeeService:
                     resource_type="employees",
                     db=db
                 )
-            
-            # Platform owners can see all employees if no restaurant specified
-            if not effective_restaurant_id and TenantSecurity.is_platform_owner(current_user):
-                query = db.query(EmployeeProfile)
-            elif effective_restaurant_id:
+                # Query for specific restaurant
                 query = db.query(EmployeeProfile).filter(
-                    EmployeeProfile.restaurant_id == effective_restaurant_id
+                    EmployeeProfile.restaurant_id == restaurant_id
                 )
             else:
-                # No restaurant context and not platform owner
-                raise FynloException("User must be assigned to a restaurant", status_code=400)
+                # Get all accessible restaurants for the user
+                accessible_restaurants = TenantSecurity.get_accessible_restaurant_ids(current_user, db)
+                
+                if not accessible_restaurants:
+                    # No restaurant access
+                    raise FynloException("User must be assigned to a restaurant", status_code=400)
+                
+                # Apply tenant filter for all accessible restaurants
+                query = TenantSecurity.apply_tenant_filter(
+                    query=db.query(EmployeeProfile),
+                    user=current_user,
+                    model_class=EmployeeProfile,
+                    restaurant_field="restaurant_id",
+                    db=db
+                )
             
             # Apply role filter
             if role:
@@ -178,23 +179,31 @@ class EmployeeService:
             db.add(new_user)
             db.flush()  # Get the user ID
             
+            # Create UserRestaurant entry to assign employee to restaurant
+            user_restaurant = UserRestaurant(
+                user_id=new_user.id,
+                restaurant_id=target_restaurant_id,
+                role='employee',
+                is_primary=True,
+                assigned_by=current_user.id if current_user else None
+            )
+            db.add(user_restaurant)
+            
             # Create EmployeeProfile
             employee_profile_data = {
                 'user_id': new_user.id,
                 'restaurant_id': target_restaurant_id,
-                'first_name': employee_data.first_name,
-                'last_name': employee_data.last_name,
-                'email': employee_data.email,
-                'phone': employee_data.phone,
-                'role': employee_data.role,
-                'employment_status': employee_data.employment_status,
+                'employment_type': employee_data.employment_status,
                 'hourly_rate': employee_data.hourly_rate,
-                'weekly_hours': employee_data.weekly_hours,
                 'hire_date': employee_data.hire_date or date.today(),
+                'phone': employee_data.phone,
                 'is_active': employee_data.is_active,
-                'emergency_contact_name': employee_data.emergency_contact_name,
-                'emergency_contact_phone': employee_data.emergency_contact_phone,
-                'notes': employee_data.notes
+                'emergency_contact': {
+                    'name': employee_data.emergency_contact_name,
+                    'phone': employee_data.emergency_contact_phone
+                } if employee_data.emergency_contact_name else {},
+                'notes': [{'date': datetime.utcnow().isoformat(), 'note': employee_data.notes, 'author_id': str(current_user.id)}] if employee_data.notes else [],
+                'max_hours_per_week': employee_data.weekly_hours if employee_data.weekly_hours else 40
             }
             
             new_employee = EmployeeProfile(**employee_profile_data)
@@ -422,10 +431,16 @@ class EmployeeService:
             if existing_shift:
                 raise ValueError("Employee is already clocked in")
             
+            # Get employee to access restaurant_id
+            employee_profile = db.query(EmployeeProfile).filter(
+                EmployeeProfile.id == employee_id
+            ).first()
+            
             # Create new shift
             now = datetime.utcnow()
             new_shift = Shift(
                 employee_id=employee_id,
+                restaurant_id=employee_profile.restaurant_id,
                 scheduled_start=now,  # Will be updated based on schedule
                 scheduled_end=now + timedelta(hours=8),  # Default 8-hour shift
                 actual_start=now,
@@ -527,14 +542,24 @@ class EmployeeService:
                 db=db
             )
             
+            # Get accessible restaurants for the user
+            accessible_restaurants = TenantSecurity.get_accessible_restaurant_ids(current_user, db)
+            
+            # If specific restaurant requested, use only that one (after validation)
+            if restaurant_id in accessible_restaurants:
+                restaurant_ids = [restaurant_id]
+            else:
+                # Use all accessible restaurants
+                restaurant_ids = accessible_restaurants
+            
             # Get basic counts
             total_employees = db.query(EmployeeProfile).filter(
-                EmployeeProfile.restaurant_id == restaurant_id
+                EmployeeProfile.restaurant_id.in_(restaurant_ids)
             ).count()
             
             active_employees = db.query(EmployeeProfile).filter(
                 and_(
-                    EmployeeProfile.restaurant_id == restaurant_id,
+                    EmployeeProfile.restaurant_id.in_(restaurant_ids),
                     EmployeeProfile.is_active == True
                 )
             ).count()
@@ -542,7 +567,7 @@ class EmployeeService:
             # Get currently clocked in count
             clocked_in_now = db.query(Shift).join(EmployeeProfile).filter(
                 and_(
-                    EmployeeProfile.restaurant_id == restaurant_id,
+                    EmployeeProfile.restaurant_id.in_(restaurant_ids),
                     Shift.actual_start.isnot(None),
                     Shift.actual_end.is_(None)
                 )
@@ -554,23 +579,23 @@ class EmployeeService:
                 func.count(EmployeeProfile.id).label('count')
             ).filter(
                 and_(
-                    EmployeeProfile.restaurant_id == restaurant_id,
+                    EmployeeProfile.restaurant_id.in_(restaurant_ids),
                     EmployeeProfile.is_active == True
                 )
             ).group_by(EmployeeProfile.role).all()
             
             roles_breakdown = {role: count for role, count in roles_query}
             
-            # Get employment status breakdown
+            # Get employment type breakdown
             status_query = db.query(
-                EmployeeProfile.employment_status,
+                EmployeeProfile.employment_type,
                 func.count(EmployeeProfile.id).label('count')
             ).filter(
                 and_(
-                    EmployeeProfile.restaurant_id == restaurant_id,
+                    EmployeeProfile.restaurant_id.in_(restaurant_ids),
                     EmployeeProfile.is_active == True
                 )
-            ).group_by(EmployeeProfile.employment_status).all()
+            ).group_by(EmployeeProfile.employment_type).all()
             
             employment_status_breakdown = {status: count for status, count in status_query}
             
