@@ -30,12 +30,12 @@ async def create_inventory_item_api(
     # Use current user's restaurant
     restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
     if not restaurant_id:
-        raise ValidationException(detail="User must be assigned to a restaurant")
+        raise ValidationException(message="User must be assigned to a restaurant", field="restaurant_id")
     
     # Check if SKU already exists for this restaurant
     db_item = crud_inventory.get_inventory_item(db, sku=item.sku, restaurant_id=restaurant_id)
     if db_item:
-        raise ValidationException(detail=f"Inventory item with SKU {item.sku} already exists.")
+        raise ValidationException(message=f"Inventory item with SKU {item.sku} already exists.", field="sku")
     
     return crud_inventory.create_inventory_item(db=db, item=item, restaurant_id=restaurant_id)
 
@@ -48,11 +48,11 @@ async def read_inventory_item_api(
     # Use current user's restaurant
     restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
     if not restaurant_id:
-        raise ValidationException(detail="User must be assigned to a restaurant")
+        raise ValidationException(message="User must be assigned to a restaurant", field="restaurant_id")
     
     db_item = crud_inventory.get_inventory_item(db, sku=sku, restaurant_id=restaurant_id)
     if db_item is None:
-        raise ResourceNotFoundException(detail="Inventory item not found")
+        raise ResourceNotFoundException(resource="Inventory item", resource_id=sku)
     
     # Verify tenant access
     await TenantSecurity.validate_restaurant_access(
@@ -76,7 +76,7 @@ async def read_inventory_items_api(
     # Use current user's restaurant
     restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
     if not restaurant_id:
-        raise ValidationException(detail="User must be assigned to a restaurant")
+        raise ValidationException(message="User must be assigned to a restaurant", field="restaurant_id")
     
     items = crud_inventory.get_inventory_items(db, restaurant_id=restaurant_id, skip=skip, limit=limit)
     return items
@@ -91,12 +91,12 @@ async def update_inventory_item_api(
     # Use current user's restaurant
     restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
     if not restaurant_id:
-        raise ValidationException(detail="User must be assigned to a restaurant")
+        raise ValidationException(message="User must be assigned to a restaurant", field="restaurant_id")
     
     # Check if item exists and user has access
     db_item = crud_inventory.get_inventory_item(db, sku=sku, restaurant_id=restaurant_id)
     if not db_item:
-        raise ResourceNotFoundException(detail="Inventory item not found")
+        raise ResourceNotFoundException(resource="Inventory item", resource_id=sku)
     
     # Verify tenant access
     await TenantSecurity.validate_restaurant_access(
@@ -120,12 +120,12 @@ async def delete_inventory_item_api(
     # Use current user's restaurant
     restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
     if not restaurant_id:
-        raise ValidationException(detail="User must be assigned to a restaurant")
+        raise ValidationException(message="User must be assigned to a restaurant", field="restaurant_id")
     
     # Check if item exists and user has access
     db_item = crud_inventory.get_inventory_item(db, sku=sku, restaurant_id=restaurant_id)
     if not db_item:
-        raise ResourceNotFoundException(detail="Inventory item not found")
+        raise ResourceNotFoundException(resource="Inventory item", resource_id=sku)
     
     # Verify tenant access - require owner/manager role for deletion
     await TenantSecurity.validate_restaurant_access(
@@ -141,7 +141,7 @@ async def delete_inventory_item_api(
     from app.models import Recipe
     recipes_using_item = db.query(Recipe).filter(Recipe.ingredient_sku == sku).first()
     if recipes_using_item:
-        raise ValidationException(detail="Cannot delete item, it is used in existing recipes.")
+        raise ValidationException(message="Cannot delete item, it is used in existing recipes.", field="sku")
 
     deleted_item = crud_inventory.delete_inventory_item(db, sku=sku, restaurant_id=restaurant_id)
     return deleted_item
@@ -156,15 +156,15 @@ async def adjust_stock_api(
     # Use current user's restaurant
     restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
     if not restaurant_id:
-        raise ValidationException(detail="User must be assigned to a restaurant")
+        raise ValidationException(message="User must be assigned to a restaurant", field="restaurant_id")
     
     if adjustment.sku != sku:
-        raise ValidationException(detail="SKU in path and body do not match.")
+        raise ValidationException(message="SKU in path and body do not match.", field="sku")
     
     # Check if item exists and user has access
     db_item = crud_inventory.get_inventory_item(db, sku=sku, restaurant_id=restaurant_id)
     if not db_item:
-        raise ResourceNotFoundException(detail="Inventory item not found")
+        raise ResourceNotFoundException(resource="Inventory item", resource_id=sku)
     
     # Verify tenant access
     await TenantSecurity.validate_restaurant_access(
@@ -207,7 +207,7 @@ async def read_all_ledger_entries_api(
     # Use current user's restaurant
     restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
     if not restaurant_id:
-        raise ValidationException(detail="User must be assigned to a restaurant")
+        raise ValidationException(message="User must be assigned to a restaurant", field="restaurant_id")
     
     entries = crud_inventory.get_all_ledger_entries(
         db, 
@@ -232,7 +232,7 @@ async def read_ledger_entries_for_sku_api(
     # Use current user's restaurant
     restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
     if not restaurant_id:
-        raise ValidationException(detail="User must be assigned to a restaurant")
+        raise ValidationException(message="User must be assigned to a restaurant", field="restaurant_id")
     
     # Check if SKU exists and user has access
     item = crud_inventory.get_inventory_item(db, sku, restaurant_id=restaurant_id)
@@ -270,7 +270,7 @@ async def get_inventory_status_summary_api(
     # Use current user's restaurant
     restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
     if not restaurant_id:
-        raise ValidationException(detail="User must be assigned to a restaurant")
+        raise ValidationException(message="User must be assigned to a restaurant", field="restaurant_id")
     
     summary = crud_inventory.get_inventory_status_summary(db, restaurant_id=restaurant_id)
     return summary
@@ -284,7 +284,7 @@ async def get_low_stock_items_api(
     # Use current user's restaurant
     restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
     if not restaurant_id:
-        raise ValidationException(detail="User must be assigned to a restaurant")
+        raise ValidationException(message="User must be assigned to a restaurant", field="restaurant_id")
     
     try:
         low_stock_items = crud_inventory.get_low_stock_items(
@@ -336,7 +336,7 @@ async def scan_receipt_api(
     # Use current user's restaurant
     restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
     if not restaurant_id:
-        raise ValidationException(detail="User must be assigned to a restaurant")
+        raise ValidationException(message="User must be assigned to a restaurant", field="restaurant_id")
     
     # Verify user has permission to scan inventory
     await TenantSecurity.validate_restaurant_access(

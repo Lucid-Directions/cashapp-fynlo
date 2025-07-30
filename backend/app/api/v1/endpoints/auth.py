@@ -21,7 +21,7 @@ from app.core.feature_gate import get_plan_features
 from app.services.audit_logger import AuditLoggerService
 from app.models.audit_log import AuditEventType, AuditEventStatus
 from app.middleware.rate_limit_middleware import limiter, AUTH_RATE
-from app.core.exceptions import ValidationException, AuthenticationException, FynloException, ResourceNotFoundException, ConflictException
+from app.core.exceptions import ValidationException, AuthenticationException, FynloException, ResourceNotFoundException, ConflictException, ServiceUnavailableError, AuthorizationException
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -55,15 +55,13 @@ async def verify_supabase_user(
     """Verify Supabase token and return user info with subscription details"""
     
     if not authorization:
-        raise AuthenticationException(detail="No authorization header provided"
-        )
+        raise AuthenticationException(message="No authorization header provided")
     
     # Extract token from "Bearer <token>" format
     token = authorization.replace("Bearer ", "")
     
     if not token or token == authorization:
-        raise AuthenticationException(detail="Invalid authorization format. Expected: Bearer <token>"
-        )
+        raise AuthenticationException(message="Invalid authorization format. Expected: Bearer <token>")
     
     # Get Supabase client (will initialize if needed)
     client = supabase_admin or get_admin_client()
@@ -71,8 +69,7 @@ async def verify_supabase_user(
         logger.error("Supabase admin client not available")
         logger.error(f"SUPABASE_URL set: {bool(settings.SUPABASE_URL)}")
         logger.error(f"SUPABASE_SERVICE_ROLE_KEY set: {bool(settings.SUPABASE_SERVICE_ROLE_KEY)}")
-        raise FynloException(detail="Authentication service temporarily unavailable. Please check backend configuration."
-        , status_code=503)
+        raise ServiceUnavailableError(message="Authentication service temporarily unavailable. Please check backend configuration.", service_name="Supabase")
     
     try:
         # Verify token with Supabase Admin API
@@ -87,15 +84,13 @@ async def verify_supabase_user(
         # Check if we got a valid response
         if not user_response:
             logger.error("Supabase returned None response for get_user")
-            raise FynloException(detail="Authentication service returned invalid response"
-            , status_code=503)
+            raise ServiceUnavailableError(message="Authentication service returned invalid response", service_name="Supabase")
         
         supabase_user = user_response.user
         
         if not supabase_user:
             logger.warning("Supabase returned no user for the provided token")
-            raise AuthenticationException(detail="Invalid or expired token"
-            )
+            raise AuthenticationException(message="Invalid or expired token")
         
         logger.info(f"Successfully verified Supabase user: {supabase_user.email}")
         
@@ -121,8 +116,7 @@ async def verify_supabase_user(
         except SQLAlchemyError as e:
             logger.error(f"Database query error when finding user: {str(e)}")
             db.rollback()
-            raise FynloException(detail="Database error while retrieving user information"
-            )
+            raise ServiceUnavailableError(message="Database error while retrieving user information", service_name="Database")
         
         if not db_user:
             # First time login - create user with proper transaction handling
@@ -173,18 +167,15 @@ async def verify_supabase_user(
                                 db.rollback()
                                 # Continue with the user even if update fails
                     if not db_user:
-                        raise FynloException(detail="Failed to create user account. Please try again."
-                        )
+                        raise ServiceUnavailableError(message="Failed to create user account. Please try again.", service_name="Database")
                 except SQLAlchemyError as retry_error:
                     logger.error(f"Failed to fetch user after IntegrityError: {str(retry_error)}")
                     db.rollback()
-                    raise FynloException(detail="Database error while creating user account"
-                    )
+                    raise ServiceUnavailableError(message="Database error while creating user account", service_name="Database")
             except SQLAlchemyError as e:
                 logger.error(f"Database error creating user: {str(e)}")
                 db.rollback()
-                raise FynloException(detail="Database error while creating user account"
-                )
+                raise ServiceUnavailableError(message="Database error while creating user account", service_name="Database")
         else:
             # Update last login
             try:
@@ -454,8 +445,7 @@ async def register_restaurant(
         logger.error("Supabase admin client not available")
         logger.error(f"SUPABASE_URL set: {bool(settings.SUPABASE_URL)}")
         logger.error(f"SUPABASE_SERVICE_ROLE_KEY set: {bool(settings.SUPABASE_SERVICE_ROLE_KEY)}")
-        raise FynloException(detail="Authentication service temporarily unavailable. Please check backend configuration."
-        , status_code=503)
+        raise ServiceUnavailableError(message="Authentication service temporarily unavailable. Please check backend configuration.", service_name="Supabase")
     
     try:
         # Verify token

@@ -80,7 +80,7 @@ async def get_customers(
     # Use current user's restaurant context
     user_restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
     if not user_restaurant_id:
-        raise ValidationException(detail="User must be assigned to a restaurant")
+        raise ValidationException(message="User must be assigned to a restaurant", field="restaurant_id")
     
     # Use provided restaurant_id or fallback to user's current restaurant
     if not restaurant_id:
@@ -155,7 +155,7 @@ async def get_customer_stats(
     # Use current user's restaurant context
     user_restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
     if not user_restaurant_id:
-        raise ValidationException(detail="User must be assigned to a restaurant")
+        raise ValidationException(message="User must be assigned to a restaurant", field="restaurant_id")
     
     # Use provided restaurant_id or fallback to user's current restaurant
     if not restaurant_id:
@@ -242,7 +242,7 @@ async def create_customer(
     # Use current user's restaurant context
     user_restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
     if not user_restaurant_id:
-        raise ValidationException(detail="User must be assigned to a restaurant")
+        raise ValidationException(message="User must be assigned to a restaurant", field="restaurant_id")
     
     # Use provided restaurant_id or fallback to user's current restaurant
     if not restaurant_id:
@@ -278,7 +278,7 @@ async def create_customer(
         ).first()
     
     if existing_customer:
-        raise ValidationException(detail="Customer already exists")
+        raise ValidationException(message="Customer already exists", field="email")
     
     new_customer = Customer(
         restaurant_id=restaurant_id,
@@ -321,7 +321,7 @@ async def get_customer(
     
     customer = db.query(Customer).filter(Customer.id == customer_id).first()
     if not customer:
-        raise ResourceNotFoundException(detail="Customer not found")
+        raise ResourceNotFoundException(resource="Customer", resource_id=customer_id)
     
     # Verify tenant access
     from app.core.tenant_security import TenantSecurity
@@ -366,7 +366,7 @@ async def update_customer(
     
     customer = db.query(Customer).filter(Customer.id == customer_id).first()
     if not customer:
-        raise ResourceNotFoundException(detail="Customer not found")
+        raise ResourceNotFoundException(resource="Customer", resource_id=customer_id)
     
     # Verify tenant access
     from app.core.tenant_security import TenantSecurity
@@ -421,7 +421,7 @@ async def update_loyalty_points(
     
     customer = db.query(Customer).filter(Customer.id == customer_id).first()
     if not customer:
-        raise ResourceNotFoundException(detail="Customer not found")
+        raise ResourceNotFoundException(resource="Customer", resource_id=customer_id)
     
     # Verify tenant access
     from app.core.tenant_security import TenantSecurity
@@ -436,7 +436,7 @@ async def update_loyalty_points(
     
     # Validate transaction
     if loyalty_data.transaction_type == "redeemed" and customer.loyalty_points < abs(loyalty_data.points):
-        raise ValidationException(detail="Insufficient loyalty points")
+        raise ValidationException(message="Insufficient loyalty points", field="loyalty_points")
     
     # Update points
     if loyalty_data.transaction_type == "earned":
@@ -475,7 +475,7 @@ async def get_customer_orders(
     
     customer = db.query(Customer).filter(Customer.id == customer_id).first()
     if not customer:
-        raise ResourceNotFoundException(detail="Customer not found")
+        raise ResourceNotFoundException(resource="Customer", resource_id=customer_id)
     
     # Verify tenant access
     from app.core.tenant_security import TenantSecurity
@@ -515,7 +515,7 @@ async def search_customers(
     # Use current user's restaurant context
     user_restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
     if not user_restaurant_id:
-        raise ValidationException(detail="User must be assigned to a restaurant")
+        raise ValidationException(message="User must be assigned to a restaurant", field="restaurant_id")
     
     # Use provided restaurant_id from search_data or fallback to user's current restaurant
     if not search_data.restaurant_id:

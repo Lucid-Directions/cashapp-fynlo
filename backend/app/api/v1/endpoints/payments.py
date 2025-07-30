@@ -160,7 +160,7 @@ async def generate_qr_payment(
         #     details={"order_id": payment_request.order_id, "amount": payment_request.amount, "reason": "Order not found"},
         #     commit=True
         # )
-        raise ResourceNotFoundException(detail="Order not found")
+        raise ResourceNotFoundException(resource="Order", resource_id=payment_request.order_id)
     
     # Calculate fees
     fee_amount = calculate_payment_fee(payment_request.amount, "qr_code")
@@ -260,7 +260,7 @@ async def confirm_qr_payment(
             details={"reason": "QR payment record not found."},
             commit=True
         )
-        raise ResourceNotFoundException(detail="QR payment not found")
+        raise ResourceNotFoundException(resource="QR payment", resource_id=qr_payment_id)
     
     if qr_payment_db_record.expires_at < datetime.utcnow():
         await audit_service.create_audit_log(
@@ -273,7 +273,7 @@ async def confirm_qr_payment(
             details={"order_id": str(qr_payment_db_record.order_id), "amount": qr_payment_db_record.amount, "reason": "QR payment expired."},
             commit=True
         )
-        raise ValidationException(detail="QR payment expired")
+        raise ValidationException(message="QR payment expired", field="qr_payment_id")
     
     if qr_payment_db_record.status == "completed":
         await audit_service.create_audit_log(
@@ -318,7 +318,7 @@ async def confirm_qr_payment(
             details={"order_id": str(qr_payment_db_record.order_id), "reason": "Associated order not found internally."},
             commit=True
         )
-        raise ResourceNotFoundException(detail="Associated order not found")
+        raise ResourceNotFoundException(resource="Associated order", resource_id=qr_payment_db_record.order_id)
     
     if order.payment_status == "completed":
         await audit_service.create_audit_log(
@@ -436,7 +436,7 @@ async def process_stripe_payment(
             details={"order_id": payment_request_data.order_id, "amount": payment_request_data.amount, "reason": "Order not found"},
             commit=True
         )
-        raise ResourceNotFoundException(detail="Order not found")
+        raise ResourceNotFoundException(resource="Order", resource_id=payment_request.order_id)
 
     if order.payment_status == "completed":
         await audit_service.create_audit_log(
@@ -606,7 +606,7 @@ async def process_cash_payment(
     ).first()
     if not order:
         # No audit log here as it's a basic validation, not a payment process failure yet.
-        raise ResourceNotFoundException(detail="Order not found")
+        raise ResourceNotFoundException(resource="Order", resource_id=payment_request.order_id)
 
     if order.payment_status == "completed":
          await audit_service.create_audit_log(
@@ -693,7 +693,7 @@ async def get_order_payments(
         Order.restaurant_id == restaurant_id
     ).first()
     if not order:
-        raise ResourceNotFoundException(detail="Order not found")
+        raise ResourceNotFoundException(resource="Order", resource_id=payment_request.order_id)
     
     payments = db.query(Payment).filter(Payment.order_id == order_id).all()
     
@@ -725,7 +725,7 @@ async def check_qr_payment_status(
     
     qr_payment = db.query(QRPayment).filter(QRPayment.id == qr_payment_id).first()
     if not qr_payment:
-        raise ResourceNotFoundException(detail="QR payment not found")
+        raise ResourceNotFoundException(resource="QR payment", resource_id=qr_payment_id)
     
     data = {
         "qr_payment_id": str(qr_payment.id),
@@ -787,7 +787,7 @@ async def process_payment(
                 details={"order_id": payment_data_req.order_id, "amount": payment_data_req.amount, "reason": "Order not found"},
                 commit=True
             )
-            raise ResourceNotFoundException(detail="Order not found")
+            raise ResourceNotFoundException(resource="Order", resource_id=payment_request.order_id)
 
         if order.payment_status == "completed":
             await audit_service.create_audit_log(
@@ -959,7 +959,7 @@ async def refund_payment(
             details={"external_transaction_id": transaction_id, "reason": "Payment not found"},
             commit=True
         )
-        raise ResourceNotFoundException(detail="Payment not found")
+        raise ResourceNotFoundException(resource="Payment", resource_id=payment_id)
 
     provider_name_from_meta = payment_db_record.payment_metadata.get("provider", payment_db_record.payment_method)
     # Ensure provider_name is a string, e.g. if payment_method was 'stripe_payment'
