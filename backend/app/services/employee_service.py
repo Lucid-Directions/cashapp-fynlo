@@ -19,6 +19,7 @@ from app.schemas.employee_schemas import (
 )
 from app.core.exceptions import FynloException
 from app.core.security import get_password_hash
+from app.core.tenant_security import TenantSecurity
 import logging
 
 logger = logging.getLogger(__name__)
@@ -26,7 +27,7 @@ logger = logging.getLogger(__name__)
 class EmployeeService:
     """Service class for employee management operations"""
 
-    def get_employees(
+    async def get_employees(
         self,
         db: Session,
         restaurant_id: Optional[int] = None,
@@ -36,13 +37,34 @@ class EmployeeService:
     ) -> List[EmployeeResponse]:
         """Get employees with optional filtering"""
         try:
-            query = db.query(EmployeeProfile)
+            # Determine which restaurant to use
+            # Priority: current_restaurant_id > provided restaurant_id > user's default restaurant_id
+            effective_restaurant_id = None
             
-            # Apply restaurant filter if provided or user restriction
+            if current_user:
+                effective_restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
+            
             if restaurant_id:
-                query = query.filter(EmployeeProfile.restaurant_id == restaurant_id)
-            elif current_user and hasattr(current_user, 'restaurant_id'):
-                query = query.filter(EmployeeProfile.restaurant_id == current_user.restaurant_id)
+                effective_restaurant_id = restaurant_id
+                # Validate access to the provided restaurant_id
+                await TenantSecurity.validate_restaurant_access(
+                    user=current_user,
+                    restaurant_id=str(restaurant_id),
+                    operation="access",
+                    resource_type="employees",
+                    db=db
+                )
+            
+            # Platform owners can see all employees if no restaurant specified
+            if not effective_restaurant_id and TenantSecurity.is_platform_owner(current_user):
+                query = db.query(EmployeeProfile)
+            elif effective_restaurant_id:
+                query = db.query(EmployeeProfile).filter(
+                    EmployeeProfile.restaurant_id == effective_restaurant_id
+                )
+            else:
+                # No restaurant context and not platform owner
+                raise FynloException("User must be assigned to a restaurant", status_code=400)
             
             # Apply role filter
             if role:
@@ -56,11 +78,13 @@ class EmployeeService:
             
             return [EmployeeResponse.from_orm(emp) for emp in employees]
             
+        except FynloException:
+            raise
         except Exception as e:
             logger.error(f"Error retrieving employees: {str(e)}")
             raise FynloException(f"Failed to retrieve employees: {str(e)}")
 
-    def get_employee_by_id(
+    async def get_employee_by_id(
         self,
         db: Session,
         employee_id: int,
@@ -75,10 +99,15 @@ class EmployeeService:
             if not employee:
                 return None
             
-            # Check if user has access to this employee
-            if current_user and hasattr(current_user, 'restaurant_id'):
-                if employee.restaurant_id != current_user.restaurant_id:
-                    raise FynloException("Access denied to this employee", status_code=403)
+            # Validate tenant access using TenantSecurity
+            await TenantSecurity.validate_restaurant_access(
+                user=current_user,
+                restaurant_id=str(employee.restaurant_id),
+                operation="access",
+                resource_type="employee",
+                resource_id=str(employee_id),
+                db=db
+            )
             
             return EmployeeResponse.from_orm(employee)
             
@@ -88,7 +117,7 @@ class EmployeeService:
             logger.error(f"Error retrieving employee {employee_id}: {str(e)}")
             raise FynloException(f"Failed to retrieve employee: {str(e)}")
 
-    def create_employee(
+    async def create_employee(
         self,
         db: Session,
         employee_data: EmployeeCreateRequest,
@@ -96,24 +125,42 @@ class EmployeeService:
     ) -> EmployeeResponse:
         """Create new employee"""
         try:
+            # Determine target restaurant
+            # If restaurant_id is provided in the request, validate access to it
+            # Otherwise use the user's current restaurant
+            target_restaurant_id = employee_data.restaurant_id
+            
+            if not target_restaurant_id and current_user:
+                target_restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
+                
+            if not target_restaurant_id:
+                raise FynloException("Restaurant ID must be specified", status_code=400)
+            
+            # Validate access to the target restaurant
+            await TenantSecurity.validate_restaurant_access(
+                user=current_user,
+                restaurant_id=str(target_restaurant_id),
+                operation="modify",
+                resource_type="employees",
+                db=db
+            )
+            
             # Verify restaurant exists
             restaurant = db.query(Restaurant).filter(
-                Restaurant.id == employee_data.restaurant_id
+                Restaurant.id == target_restaurant_id
             ).first()
             if not restaurant:
                 raise ValueError("Restaurant not found")
             
-            # Check if user has access to this restaurant
-            if current_user and hasattr(current_user, 'restaurant_id'):
-                if employee_data.restaurant_id != current_user.restaurant_id:
-                    raise FynloException("Access denied to this restaurant", status_code=403)
-            
-            # Check if email already exists
+            # Check if email already exists for this restaurant
             existing_employee = db.query(EmployeeProfile).filter(
-                EmployeeProfile.email == employee_data.email
+                and_(
+                    EmployeeProfile.email == employee_data.email,
+                    EmployeeProfile.restaurant_id == target_restaurant_id
+                )
             ).first()
             if existing_employee:
-                raise ValueError("Employee with this email already exists")
+                raise ValueError("Employee with this email already exists in this restaurant")
             
             # Create User record first
             user_data = {
@@ -123,7 +170,8 @@ class EmployeeService:
                 'role': 'employee',
                 'is_active': employee_data.is_active,
                 'password_hash': get_password_hash('temp_password_123'),  # Temporary password
-                'restaurant_id': employee_data.restaurant_id
+                'restaurant_id': target_restaurant_id,
+                'current_restaurant_id': target_restaurant_id
             }
             
             new_user = User(**user_data)
@@ -133,7 +181,7 @@ class EmployeeService:
             # Create EmployeeProfile
             employee_profile_data = {
                 'user_id': new_user.id,
-                'restaurant_id': employee_data.restaurant_id,
+                'restaurant_id': target_restaurant_id,
                 'first_name': employee_data.first_name,
                 'last_name': employee_data.last_name,
                 'email': employee_data.email,
@@ -167,7 +215,7 @@ class EmployeeService:
             logger.error(f"Error creating employee: {str(e)}")
             raise FynloException(f"Failed to create employee: {str(e)}")
 
-    def update_employee(
+    async def update_employee(
         self,
         db: Session,
         employee_id: int,
@@ -183,10 +231,15 @@ class EmployeeService:
             if not employee:
                 return None
             
-            # Check access
-            if current_user and hasattr(current_user, 'restaurant_id'):
-                if employee.restaurant_id != current_user.restaurant_id:
-                    raise FynloException("Access denied to this employee", status_code=403)
+            # Validate tenant access using TenantSecurity
+            await TenantSecurity.validate_restaurant_access(
+                user=current_user,
+                restaurant_id=str(employee.restaurant_id),
+                operation="modify",
+                resource_type="employee",
+                resource_id=str(employee_id),
+                db=db
+            )
             
             # Update fields if provided
             update_data = employee_data.dict(exclude_unset=True)
@@ -208,7 +261,7 @@ class EmployeeService:
             logger.error(f"Error updating employee {employee_id}: {str(e)}")
             raise FynloException(f"Failed to update employee: {str(e)}")
 
-    def delete_employee(
+    async def delete_employee(
         self,
         db: Session,
         employee_id: int,
@@ -223,10 +276,15 @@ class EmployeeService:
             if not employee:
                 return False
             
-            # Check access
-            if current_user and hasattr(current_user, 'restaurant_id'):
-                if employee.restaurant_id != current_user.restaurant_id:
-                    raise FynloException("Access denied to this employee", status_code=403)
+            # Validate tenant access using TenantSecurity
+            await TenantSecurity.validate_restaurant_access(
+                user=current_user,
+                restaurant_id=str(employee.restaurant_id),
+                operation="delete",
+                resource_type="employee",
+                resource_id=str(employee_id),
+                db=db
+            )
             
             # Soft delete - mark as inactive
             employee.is_active = False
@@ -252,7 +310,7 @@ class EmployeeService:
 
     # Schedule Management Methods
 
-    def get_employee_schedules(
+    async def get_employee_schedules(
         self,
         db: Session,
         employee_id: int,
@@ -263,7 +321,7 @@ class EmployeeService:
         """Get employee schedules with optional date filtering"""
         try:
             # Verify employee exists and user has access
-            employee = self.get_employee_by_id(db, employee_id, current_user)
+            employee = await self.get_employee_by_id(db, employee_id, current_user)
             if not employee:
                 raise FynloException("Employee not found", status_code=404)
             
@@ -284,7 +342,7 @@ class EmployeeService:
             logger.error(f"Error retrieving schedules for employee {employee_id}: {str(e)}")
             raise FynloException(f"Failed to retrieve schedules: {str(e)}")
 
-    def create_schedule(
+    async def create_schedule(
         self,
         db: Session,
         employee_id: int,
@@ -294,7 +352,7 @@ class EmployeeService:
         """Create new schedule for employee"""
         try:
             # Verify employee exists and user has access
-            employee = self.get_employee_by_id(db, employee_id, current_user)
+            employee = await self.get_employee_by_id(db, employee_id, current_user)
             if not employee:
                 raise FynloException("Employee not found", status_code=404)
             
@@ -339,7 +397,7 @@ class EmployeeService:
             logger.error(f"Error creating schedule: {str(e)}")
             raise FynloException(f"Failed to create schedule: {str(e)}")
 
-    def clock_in(
+    async def clock_in(
         self,
         db: Session,
         employee_id: int,
@@ -347,8 +405,8 @@ class EmployeeService:
     ) -> ShiftResponse:
         """Clock in employee for their shift"""
         try:
-            # Verify employee exists
-            employee = self.get_employee_by_id(db, employee_id, current_user)
+            # Verify employee exists and user has access
+            employee = await self.get_employee_by_id(db, employee_id, current_user)
             if not employee:
                 raise FynloException("Employee not found", status_code=404)
             
@@ -400,7 +458,7 @@ class EmployeeService:
             logger.error(f"Error clocking in employee {employee_id}: {str(e)}")
             raise FynloException(f"Failed to clock in: {str(e)}")
 
-    def clock_out(
+    async def clock_out(
         self,
         db: Session,
         employee_id: int,
@@ -408,6 +466,11 @@ class EmployeeService:
     ) -> ShiftResponse:
         """Clock out employee from their shift"""
         try:
+            # Verify employee exists and user has access
+            employee = await self.get_employee_by_id(db, employee_id, current_user)
+            if not employee:
+                raise FynloException("Employee not found", status_code=404)
+                
             # Find active shift
             active_shift = db.query(Shift).filter(
                 and_(
@@ -447,7 +510,7 @@ class EmployeeService:
             logger.error(f"Error clocking out employee {employee_id}: {str(e)}")
             raise FynloException(f"Failed to clock out: {str(e)}")
 
-    def get_restaurant_employee_summary(
+    async def get_restaurant_employee_summary(
         self,
         db: Session,
         restaurant_id: int,
@@ -455,10 +518,14 @@ class EmployeeService:
     ) -> EmployeeSummary:
         """Get employee summary for restaurant dashboard"""
         try:
-            # Check access
-            if current_user and hasattr(current_user, 'restaurant_id'):
-                if restaurant_id != current_user.restaurant_id:
-                    raise FynloException("Access denied to this restaurant", status_code=403)
+            # Validate tenant access using TenantSecurity
+            await TenantSecurity.validate_restaurant_access(
+                user=current_user,
+                restaurant_id=str(restaurant_id),
+                operation="access",
+                resource_type="employee_summary",
+                db=db
+            )
             
             # Get basic counts
             total_employees = db.query(EmployeeProfile).filter(
@@ -522,7 +589,7 @@ class EmployeeService:
             logger.error(f"Error getting employee summary for restaurant {restaurant_id}: {str(e)}")
             raise FynloException(f"Failed to get employee summary: {str(e)}")
 
-    def get_weekly_schedule(
+    async def get_weekly_schedule(
         self,
         db: Session,
         restaurant_id: int,
@@ -531,10 +598,14 @@ class EmployeeService:
     ) -> WeeklyScheduleResponse:
         """Get weekly schedule for all restaurant employees"""
         try:
-            # Check access
-            if current_user and hasattr(current_user, 'restaurant_id'):
-                if restaurant_id != current_user.restaurant_id:
-                    raise FynloException("Access denied to this restaurant", status_code=403)
+            # Validate tenant access using TenantSecurity
+            await TenantSecurity.validate_restaurant_access(
+                user=current_user,
+                restaurant_id=str(restaurant_id),
+                operation="access",
+                resource_type="weekly_schedule",
+                db=db
+            )
             
             if not week_start:
                 # Default to current week (Monday as start)
@@ -615,7 +686,7 @@ class EmployeeService:
             logger.error(f"Error getting weekly schedule for restaurant {restaurant_id}: {str(e)}")
             raise FynloException(f"Failed to get weekly schedule: {str(e)}")
 
-    def get_employee_shifts(
+    async def get_employee_shifts(
         self,
         db: Session,
         employee_id: int,
@@ -626,7 +697,7 @@ class EmployeeService:
         """Get employee work shifts with optional date filtering"""
         try:
             # Verify employee exists and user has access
-            employee = self.get_employee_by_id(db, employee_id, current_user)
+            employee = await self.get_employee_by_id(db, employee_id, current_user)
             if not employee:
                 raise FynloException("Employee not found", status_code=404)
             
@@ -647,7 +718,7 @@ class EmployeeService:
             logger.error(f"Error retrieving shifts for employee {employee_id}: {str(e)}")
             raise FynloException(f"Failed to retrieve shifts: {str(e)}")
 
-    def get_performance_metrics(
+    async def get_performance_metrics(
         self,
         db: Session,
         employee_id: int,
@@ -658,7 +729,7 @@ class EmployeeService:
         """Get employee performance metrics"""
         try:
             # Verify employee exists and user has access
-            employee = self.get_employee_by_id(db, employee_id, current_user)
+            employee = await self.get_employee_by_id(db, employee_id, current_user)
             if not employee:
                 raise FynloException("Employee not found", status_code=404)
             
@@ -683,7 +754,7 @@ class EmployeeService:
 
     # Additional helper methods
 
-    def update_schedule(
+    async def update_schedule(
         self,
         db: Session,
         schedule_id: int,
@@ -697,7 +768,7 @@ class EmployeeService:
                 return None
             
             # Check access through employee
-            employee = self.get_employee_by_id(db, schedule.employee_id, current_user)
+            employee = await self.get_employee_by_id(db, schedule.employee_id, current_user)
             if not employee:
                 raise FynloException("Access denied", status_code=403)
             
@@ -720,7 +791,7 @@ class EmployeeService:
             logger.error(f"Error updating schedule {schedule_id}: {str(e)}")
             raise FynloException(f"Failed to update schedule: {str(e)}")
 
-    def delete_schedule(
+    async def delete_schedule(
         self,
         db: Session,
         schedule_id: int,
@@ -733,7 +804,7 @@ class EmployeeService:
                 return False
             
             # Check access through employee
-            employee = self.get_employee_by_id(db, schedule.employee_id, current_user)
+            employee = await self.get_employee_by_id(db, schedule.employee_id, current_user)
             if not employee:
                 raise FynloException("Access denied", status_code=403)
             

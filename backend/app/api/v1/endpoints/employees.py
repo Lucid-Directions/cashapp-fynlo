@@ -45,7 +45,7 @@ async def get_employees(
         return onboarding_response
     
     try:
-        employees = employee_service.get_employees(
+        employees = await employee_service.get_employees(
             db=db,
             restaurant_id=restaurant_id,
             role=role,
@@ -70,7 +70,7 @@ async def get_employee(
 ):
     """Get specific employee by ID"""
     try:
-        employee = employee_service.get_employee_by_id(
+        employee = await employee_service.get_employee_by_id(
             db=db,
             employee_id=employee_id,
             current_user=current_user
