@@ -12,6 +12,7 @@ from app.core.database import get_db, Restaurant, User
 from app.core.auth import get_current_platform_owner
 from app.core.responses import APIResponseHelper
 from app.schemas.restaurant import RestaurantCreate, RestaurantUpdate
+from app.core.security_utils import sanitize_sql_like_pattern
 
 router = APIRouter(prefix="/restaurants", tags=["platform-restaurants"])
 
@@ -32,11 +33,12 @@ async def list_all_restaurants(
         
         # Apply filters
         if search:
+            sanitized_search = sanitize_sql_like_pattern(search)
             query = query.filter(
                 or_(
-                    Restaurant.name.ilike(f"%{search}%"),
-                    Restaurant.email.ilike(f"%{search}%"),
-                    Restaurant.phone.ilike(f"%{search}%")
+                    Restaurant.name.ilike(f"%{sanitized_search}%"),
+                    Restaurant.email.ilike(f"%{sanitized_search}%"),
+                    Restaurant.phone.ilike(f"%{sanitized_search}%")
                 )
             )
         

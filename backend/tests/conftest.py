@@ -20,9 +20,9 @@ os.environ["APP_ENV"] = "test"
 
 # Import after setting environment
 from app.main import app
-from app.db.base import Base
+from app.core.database import Base
 from app.core.config import settings
-from app.models import Restaurant, User, Product, Category, Order
+from app.core.database import Restaurant, User, Product, Category, Order
 from app.core.auth import create_access_token
 from datetime import datetime, timedelta
 import uuid
@@ -255,6 +255,16 @@ async def client() -> AsyncGenerator[AsyncClient, None]:
 async def clear_database(db_session: AsyncSession):
     """Clear all data from database tables"""
     # List tables in dependency order (reverse of foreign key dependencies)
+    # Using a whitelist approach for security
+    ALLOWED_TEST_TABLES = {
+        "order_items",
+        "orders", 
+        "products",
+        "categories",
+        "users",
+        "restaurants"
+    }
+    
     tables = [
         "order_items",
         "orders", 
@@ -265,6 +275,11 @@ async def clear_database(db_session: AsyncSession):
     ]
     
     for table in tables:
+        # Validate table name against whitelist
+        if table not in ALLOWED_TEST_TABLES:
+            raise ValueError(f"Table '{table}' is not in the allowed test tables list")
+        # Use parameterized query for table names is not possible in SQL,
+        # but we've validated against a whitelist, so this is safe
         await db_session.execute(text(f"DELETE FROM {table}"))
     
     await db_session.commit()

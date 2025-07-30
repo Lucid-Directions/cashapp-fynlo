@@ -158,34 +158,27 @@ def remove_other_restaurants(db: Session, chucho_restaurant_id: str):
     ).fetchall()
     
     if other_restaurants:
-        other_ids = [str(r[0]) for r in other_restaurants]
+        other_ids = [r[0] for r in other_restaurants]  # Keep as UUID objects
         print(f"   Found {len(other_ids)} other restaurants to remove")
         
-        # Build IN clause with proper parameter binding
-        placeholders = ', '.join([f':id_{i}' for i in range(len(other_ids))])
-        params = {f'id_{i}': id_val for i, id_val in enumerate(other_ids)}
-        
         # Clear dependent data first to avoid foreign key violations
-        # 1. Clear products from other restaurants
-        result = db.execute(
-            text(f"DELETE FROM products WHERE restaurant_id IN ({placeholders})"),
-            params
-        )
-        print(f"   ✅ Deleted {result.rowcount} products from other restaurants")
+        # 1. Clear products from other restaurants using SQLAlchemy's safe in_ operator
+        products_deleted = db.query(Product).filter(
+            Product.restaurant_id.in_(other_ids)
+        ).delete(synchronize_session=False)
+        print(f"   ✅ Deleted {products_deleted} products from other restaurants")
         
         # 2. Clear categories from other restaurants
-        result = db.execute(
-            text(f"DELETE FROM categories WHERE restaurant_id IN ({placeholders})"),
-            params
-        )
-        print(f"   ✅ Deleted {result.rowcount} categories from other restaurants")
+        categories_deleted = db.query(Category).filter(
+            Category.restaurant_id.in_(other_ids)
+        ).delete(synchronize_session=False)
+        print(f"   ✅ Deleted {categories_deleted} categories from other restaurants")
         
         # 3. Now safe to delete the restaurants
-        result = db.execute(
-            text(f"DELETE FROM restaurants WHERE id IN ({placeholders})"),
-            params
-        )
-        print(f"   ✅ Deleted {result.rowcount} other restaurants")
+        restaurants_deleted = db.query(Restaurant).filter(
+            Restaurant.id.in_(other_ids)
+        ).delete(synchronize_session=False)
+        print(f"   ✅ Deleted {restaurants_deleted} other restaurants")
     else:
         print("   ✅ No other restaurants found - only Chucho exists")
     

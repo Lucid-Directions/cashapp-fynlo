@@ -30,6 +30,7 @@ from app.core.mobile_middleware import (
 )
 from app.middleware.version_middleware import APIVersionMiddleware
 from app.middleware.security_headers_middleware import SecurityHeadersMiddleware # Added import
+from app.middleware.sql_injection_waf import SQLInjectionWAFMiddleware
 from app.core.auth import get_current_user
 from datetime import datetime
 
@@ -157,6 +158,9 @@ app.add_middleware(
 # Add RLS middleware for session variable isolation
 from app.middleware.rls_middleware import RLSMiddleware
 app.add_middleware(RLSMiddleware)
+
+# Add SQL Injection WAF middleware for additional protection
+app.add_middleware(SQLInjectionWAFMiddleware, enabled=True, log_attacks=True)
 
 # Add mobile compatibility middleware
 # app.add_middleware(MobileCompatibilityMiddleware, enable_cors=True, enable_port_redirect=True)

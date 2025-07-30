@@ -11,6 +11,7 @@ from sqlalchemy import or_, and_, func
 from app.core.database import get_db, User, Restaurant
 from app.core.auth import get_current_platform_owner
 from app.core.responses import APIResponseHelper
+from app.core.security_utils import sanitize_sql_like_pattern
 
 router = APIRouter(prefix="/users", tags=["platform-users"])
 
@@ -32,11 +33,12 @@ async def list_all_users(
         
         # Apply filters
         if search:
+            sanitized_search = sanitize_sql_like_pattern(search)
             query = query.filter(
                 or_(
-                    User.email.ilike(f"%{search}%"),
-                    User.first_name.ilike(f"%{search}%"),
-                    User.last_name.ilike(f"%{search}%")
+                    User.email.ilike(f"%{sanitized_search}%"),
+                    User.first_name.ilike(f"%{sanitized_search}%"),
+                    User.last_name.ilike(f"%{sanitized_search}%")
                 )
             )
         
