@@ -1,3 +1,9 @@
+/**
+ * Error Boundary Component
+ * Catches JavaScript errors anywhere in the component tree
+ * Displays user-friendly error UI instead of white screen
+ */
+
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import {
   View,
@@ -6,104 +12,60 @@ import {
   TouchableOpacity,
   ScrollView,
   SafeAreaView,
-  Alert,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import ErrorTrackingService from '../services/ErrorTrackingService';
+import { errorHandler } from '../services/errorHandler';
 
 interface Props {
   children: ReactNode;
   fallback?: ReactNode;
-  onError?: (error: Error, errorInfo: ErrorInfo) => void;
 }
 
 interface State {
   hasError: boolean;
-  error: Error | null;
-  errorInfo: ErrorInfo | null;
+  errorId?: string;
 }
 
 class ErrorBoundary extends Component<Props, State> {
-  private errorTrackingService: ErrorTrackingService;
-
   constructor(props: Props) {
     super(props);
-    this.state = {
-      hasError: false,
-      error: null,
-      errorInfo: null,
-    };
-    this.errorTrackingService = ErrorTrackingService.getInstance();
+    this.state = { hasError: false };
   }
 
   static getDerivedStateFromError(error: Error): State {
-    return {
-      hasError: true,
-      error,
-      errorInfo: null,
-    };
+    // Update state so the next render will show the fallback UI
+    const errorId = Date.now().toString(36); // Simple error ID
+    
+    // Log error in dev mode only
+    if (__DEV__) {
+      console.error('ErrorBoundary caught:', error);
+    }
+    
+    return { hasError: true, errorId };
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('🚨 ErrorBoundary caught an error:', error, errorInfo);
-    
-    this.setState({
-      errorInfo,
-    });
-
-    // Track the error with Sentry
-    this.errorTrackingService.captureError(error, {
-      action: 'react_error_boundary',
-      additionalData: {
-        componentStack: errorInfo.componentStack,
-        errorBoundary: true,
-        errorName: error.name,
-        errorMessage: error.message,
-        errorStack: error.stack,
-      }
-    });
-
-    // Call the onError callback if provided
-    if (this.props.onError) {
-      this.props.onError(error, errorInfo);
+    // Log error details in dev mode
+    if (__DEV__) {
+      console.error('Error details:', errorInfo);
     }
+    
+    // In production, you might want to send this to an error reporting service
+    // But be careful not to send sensitive information
   }
 
   handleReset = () => {
-    this.setState({
-      hasError: false,
-      error: null,
-      errorInfo: null,
-    });
-    // Track error recovery
-    this.errorTrackingService.trackEvent('error_boundary_reset');
+    this.setState({ hasError: false, errorId: undefined });
   };
 
-  handleReportError = () => {
-    this.errorTrackingService.showUserFeedbackDialog();
-  };
-
-  handleRestartApp = () => {
-    Alert.alert(
-      'Restart App',
-      'This will close and restart the app. Any unsaved data will be lost.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Restart', 
-          style: 'destructive',
-          onPress: () => {
-            this.errorTrackingService.trackEvent('app_restart_requested');
-            this.handleReset();
-          }
-        },
-      ]
-    );
+  handleRestart = () => {
+    // In a real app, this might trigger a full app restart
+    // For now, just reset the error boundary
+    this.handleReset();
   };
 
   render() {
     if (this.state.hasError) {
-      // Custom fallback provided
+      // Custom fallback UI
       if (this.props.fallback) {
         return <>{this.props.fallback}</>;
       }
@@ -112,33 +74,38 @@ class ErrorBoundary extends Component<Props, State> {
       return (
         <SafeAreaView style={styles.container}>
           <ScrollView contentContainerStyle={styles.content}>
-            <View style={styles.errorContainer}>
-              <Icon name="error-outline" size={64} color="#E74C3C" />
+            <View style={styles.errorCard}>
+              <Text style={styles.errorIcon}>⚠️</Text>
               <Text style={styles.title}>Oops! Something went wrong</Text>
               <Text style={styles.message}>
-                We encountered an unexpected error. Please try again.
+                We're sorry for the inconvenience. The app encountered an unexpected error.
               </Text>
-
-              {__DEV__ && this.state.error && (
-                <View style={styles.debugInfo}>
-                  <Text style={styles.debugTitle}>Debug Information:</Text>
-                  <Text style={styles.errorText}>{this.state.error.toString()}</Text>
-                  {this.state.errorInfo && (
-                    <Text style={styles.stackTrace}>
-                      {this.state.errorInfo.componentStack}
-                    </Text>
-                  )}
-                </View>
+              
+              {__DEV__ && this.state.errorId && (
+                <Text style={styles.errorId}>Error ID: {this.state.errorId}</Text>
               )}
-
-              <TouchableOpacity
-                style={styles.resetButton}
-                onPress={this.handleReset}
-                activeOpacity={0.8}
-              >
-                <Icon name="refresh" size={20} color="#FFFFFF" />
-                <Text style={styles.resetButtonText}>Try Again</Text>
-              </TouchableOpacity>
+              
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity 
+                  style={[styles.button, styles.primaryButton]}
+                  onPress={this.handleRestart}
+                >
+                  <Text style={styles.primaryButtonText}>Try Again</Text>
+                </TouchableOpacity>
+                
+                <TouchableOpacity 
+                  style={[styles.button, styles.secondaryButton]}
+                  onPress={() => {
+                    errorHandler.showSupportInfo(this.state.errorId);
+                  }}
+                >
+                  <Text style={styles.secondaryButtonText}>Contact Support</Text>
+                </TouchableOpacity>
+              </View>
+              
+              <Text style={styles.helpText}>
+                If this problem persists, please contact your manager or IT support.
+              </Text>
             </View>
           </ScrollView>
         </SafeAreaView>
@@ -152,71 +119,82 @@ class ErrorBoundary extends Component<Props, State> {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: '#f5f5f5',
   },
   content: {
     flexGrow: 1,
     justifyContent: 'center',
     padding: 20,
   },
-  errorContainer: {
+  errorCard: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
     alignItems: 'center',
-    padding: 20,
+  },
+  errorIcon: {
+    fontSize: 48,
+    marginBottom: 16,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#2C3E50',
-    marginTop: 20,
-    marginBottom: 10,
+    color: '#333',
+    marginBottom: 8,
     textAlign: 'center',
   },
   message: {
     fontSize: 16,
-    color: '#7F8C8D',
+    color: '#666',
     textAlign: 'center',
-    marginBottom: 30,
-    paddingHorizontal: 20,
+    marginBottom: 24,
+    lineHeight: 22,
   },
-  resetButton: {
-    flexDirection: 'row',
-    backgroundColor: '#00A651',
-    paddingHorizontal: 30,
-    paddingVertical: 15,
+  errorId: {
+    fontSize: 12,
+    color: '#999',
+    marginBottom: 16,
+    fontFamily: 'monospace',
+  },
+  buttonContainer: {
+    width: '100%',
+    marginBottom: 16,
+  },
+  button: {
+    paddingVertical: 12,
+    paddingHorizontal: 24,
     borderRadius: 8,
+    marginVertical: 6,
     alignItems: 'center',
-    marginTop: 20,
   },
-  resetButtonText: {
-    color: '#FFFFFF',
+  primaryButton: {
+    backgroundColor: '#007AFF',
+  },
+  primaryButtonText: {
+    color: 'white',
     fontSize: 16,
     fontWeight: '600',
-    marginLeft: 8,
   },
-  debugInfo: {
-    backgroundColor: '#FFF3CD',
-    padding: 15,
-    borderRadius: 8,
-    marginTop: 20,
-    marginBottom: 20,
-    width: '100%',
+  secondaryButton: {
+    backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: '#007AFF',
   },
-  debugTitle: {
+  secondaryButtonText: {
+    color: '#007AFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  helpText: {
     fontSize: 14,
-    fontWeight: 'bold',
-    color: '#856404',
-    marginBottom: 10,
-  },
-  errorText: {
-    fontSize: 12,
-    color: '#856404',
-    marginBottom: 10,
-    fontFamily: 'monospace',
-  },
-  stackTrace: {
-    fontSize: 10,
-    color: '#666666',
-    fontFamily: 'monospace',
+    color: '#999',
+    textAlign: 'center',
+    fontStyle: 'italic',
   },
 });
 

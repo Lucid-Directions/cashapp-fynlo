@@ -12,6 +12,41 @@ DEFAULT_REDACTED_KEYWORDS = [
     "apikey",
     "access_key",
     "secret_key",
+    "api_key",
+    "private_key",
+    "client_secret",
+    "refresh_token",
+    "session_id",
+    "csrf_token",
+    "database_url",
+    "connection_string",
+    "stripe_key",
+    "square_token",
+    "sumup_key",
+    "webhook_secret",
+    "anon_key",
+    "service_role_key",
+    "resend_api_key",
+    "do_api_token",
+    "spaces_secret",
+    "supabase_key",
+    "pin",
+    "otp",
+    "2fa_code",
+    "verification_code",
+    "account_number",
+    "routing_number",
+    "ssn",
+    "tax_id",
+    "driver_license",
+    # Database/Infrastructure patterns
+    "host",
+    "port",
+    "username",
+    "db_user",
+    "db_password",
+    "redis_url",
+    "postgres_password",
     # Add more keywords as needed
 ]
 REDACTION_PLACEHOLDER = "[REDACTED]"
@@ -34,6 +69,16 @@ class SensitiveDataFilter(logging.Filter):
             re.compile(rf'("{keyword}":\s*)"([^"]*)"', re.IGNORECASE) for keyword in self.redacted_keywords
         ]
         self.auth_header_pattern = re.compile(r'(Authorization:\s*(?:Bearer|Basic)\s+)[^\s]+', re.IGNORECASE)
+        
+        # Additional sensitive patterns
+        self.credit_card_pattern = re.compile(r'\b(?:\d[ -]*?){13,19}\b')
+        self.email_pattern = re.compile(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b')
+        self.ip_pattern = re.compile(r'\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b')
+        self.file_path_pattern = re.compile(r'(/[\w.-]+)+\.(py|js|json|yaml|yml|env|pem|key)')
+        self.db_url_pattern = re.compile(r'(postgresql|postgres|mysql|redis|mongodb)://[^\s]+', re.IGNORECASE)
+        self.url_with_creds_pattern = re.compile(r'(https?://)([^:]+):([^@]+)@', re.IGNORECASE)
+        self.uuid_pattern = re.compile(r'\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b', re.IGNORECASE)
+        self.jwt_pattern = re.compile(r'eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+')
 
 
     def _redact_dict(self, data_dict):
@@ -70,6 +115,20 @@ class SensitiveDataFilter(logging.Filter):
 
             # Redact common Authorization header patterns
             message = self.auth_header_pattern.sub(rf'\1{self.placeholder}', message)
+            
+            # Redact additional sensitive patterns
+            message = self.credit_card_pattern.sub('[CARD_NUMBER]', message)
+            message = self.email_pattern.sub('[EMAIL]', message)
+            message = self.ip_pattern.sub('[IP_ADDRESS]', message)
+            message = self.file_path_pattern.sub('[FILE_PATH]', message)
+            message = self.db_url_pattern.sub('[DATABASE_URL]', message)
+            message = self.url_with_creds_pattern.sub(r'\1[CREDENTIALS]@', message)
+            message = self.jwt_pattern.sub('[JWT_TOKEN]', message)
+            
+            # Redact UUIDs only if they appear after sensitive keywords
+            for keyword in ['user', 'customer', 'session', 'token', 'key']:
+                pattern = re.compile(rf'({keyword}[_\s]*(?:id)?[:\s=]+)([0-9a-f]{{8}}-[0-9a-f]{{4}}-[0-9a-f]{{4}}-[0-9a-f]{{4}}-[0-9a-f]{{12}})', re.IGNORECASE)
+                message = pattern.sub(r'\1[UUID]', message)
 
             # If the message was changed, we need to update record.msg and clear record.message
             # so that the formatter re-evaluates it.
