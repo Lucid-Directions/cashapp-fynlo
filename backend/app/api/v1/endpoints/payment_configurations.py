@@ -42,12 +42,12 @@ def create_platform_default_setting(setting_data: PaymentMethodSettingCreateInpu
     try:
         created_setting = service.create_platform_default_setting(typed_dict_data)
         if not created_setting:
-            raise FynloException(message='Failed to create platform default setting.', code='INTERNAL_ERROR')
+            raise FynloException(message='Failed to create platform default setting.', error_code='INTERNAL_ERROR')
         return convert_db_model_to_schema(created_setting)
     except ValueError as ve:
-        raise ValidationException(message='', code='BAD_REQUEST')
+        raise ValidationException(message='', error_code='BAD_REQUEST')
     except Exception as e:
-        raise FynloException(message="Failed to create setting: {str(e)}")}')
+        raise FynloException(message=f"Failed to create setting: {str(e)}", error_code='INTERNAL_ERROR')
 
 @router.put('/settings/platform-defaults/{payment_method}', response_model=PaymentMethodFeeSettingSchema)
 def update_platform_default_setting(payment_method: PaymentMethodEnum=Path(...), updates: PaymentMethodSettingUpdateInput=Body(...), service: PaymentConfigService=Depends(get_payment_config_service_dep)):
@@ -77,12 +77,12 @@ def create_or_update_restaurant_setting(restaurant_id: str=Path(...), setting_da
     try:
         saved_setting = service.create_or_update_restaurant_setting(restaurant_id, typed_dict_data)
         if not saved_setting:
-            raise FynloException(message='Failed to save restaurant setting.', code='INTERNAL_ERROR')
+            raise FynloException(message='Failed to save restaurant setting.', error_code='INTERNAL_ERROR')
         return convert_db_model_to_schema(saved_setting)
     except ValueError as ve:
-        raise ValidationException(message='', code='BAD_REQUEST')
+        raise ValidationException(message='', error_code='BAD_REQUEST')
     except Exception as e:
-        raise FynloException(message="Failed to save setting for restaurant {restaurant_id}: {str(e)}")}')
+        raise FynloException(message=f"Failed to save setting for restaurant {restaurant_id}: {str(e)}", error_code='INTERNAL_ERROR')
 
 @router.delete('/settings/restaurants/{restaurant_id}/{payment_method}', status_code=204)
 def delete_restaurant_setting(restaurant_id: str=Path(...), payment_method: PaymentMethodEnum=Path(...), service: PaymentConfigService=Depends(get_payment_config_service_dep)):

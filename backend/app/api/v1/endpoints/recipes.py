@@ -26,7 +26,7 @@ async def create_or_update_recipe_for_item_api(recipe_in: schemas.RecipeCreate, 
     for ingredient in recipe_in.ingredients:
         inv_item = crud_inventory.get_inventory_item(db, sku=ingredient.ingredient_sku)
         if not inv_item:
-            raise ValidationException(message='', code='BAD_REQUEST')
+            raise ValidationException(message='', error_code='BAD_REQUEST')
     db_recipe_ingredients = crud_inventory.create_or_update_recipe_ingredients(db=db, item_id=recipe_in.item_id, ingredients_data=recipe_in.ingredients)
     if not recipe_in.ingredients and db_recipe_ingredients:
         pass

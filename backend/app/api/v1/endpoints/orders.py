@@ -100,9 +100,9 @@ def verify_order_access(order, current_user):
     """Verify user has access to the order's restaurant"""
     if current_user.role != 'platform_owner':
         if current_user.restaurant_id is None:
-            raise AuthenticationException(message='Access denied: No restaurant assigned to user', code='UNAUTHORIZED')
+            raise AuthenticationException(message='Access denied: No restaurant assigned to user', error_code='UNAUTHORIZED')
         if str(order.restaurant_id) != str(current_user.restaurant_id):
-            raise AuthenticationException(message='Access denied: You can only access orders from your own restaurant', code='UNAUTHORIZED')
+            raise AuthenticationException(message='Access denied: You can only access orders from your own restaurant', error_code='UNAUTHORIZED')
 
 @router.get('/', response_model=List[OrderSummary])
 async def get_orders(restaurant_id: Optional[str]=Query(None), status: Optional[str]=Query(None), order_type: Optional[str]=Query(None), date_from: Optional[datetime]=Query(None), date_to: Optional[datetime]=Query(None), limit: int=Query(50, le=100), offset: int=Query(0), db: Session=Depends(get_db), current_user: User=Depends(get_current_user)):
@@ -117,9 +117,9 @@ async def get_orders(restaurant_id: Optional[str]=Query(None), status: Optional[
             query = db.query(Order).filter(Order.restaurant_id == restaurant_id)
     else:
         if current_user.restaurant_id is None:
-            raise AuthenticationException(message='Access denied: No restaurant assigned to user', code='UNAUTHORIZED')
+            raise AuthenticationException(message='Access denied: No restaurant assigned to user', error_code='UNAUTHORIZED')
         if restaurant_id and str(restaurant_id) != str(current_user.restaurant_id):
-            raise AuthenticationException(message='Access denied: You can only view orders from your own restaurant', code='UNAUTHORIZED')
+            raise AuthenticationException(message='Access denied: You can only view orders from your own restaurant', error_code='UNAUTHORIZED')
         restaurant_id = str(current_user.restaurant_id)
         query = db.query(Order).filter(Order.restaurant_id == restaurant_id)
     if status:
@@ -152,12 +152,12 @@ async def get_todays_orders(restaurant_id: Optional[str]=Query(None), db: Sessio
         return onboarding_response
     if current_user.role == 'platform_owner':
         if not restaurant_id:
-            raise ValidationException(message='Restaurant ID is required for platform owners', code='MISSING_FIELD', field='ID')
+            raise ValidationException(message='Restaurant ID is required for platform owners', error_code='MISSING_FIELD', field='ID')
     else:
         if current_user.restaurant_id is None:
-            raise AuthenticationException(message='Access denied: No restaurant assigned to user', code='UNAUTHORIZED')
+            raise AuthenticationException(message='Access denied: No restaurant assigned to user', error_code='UNAUTHORIZED')
         if restaurant_id and str(restaurant_id) != str(current_user.restaurant_id):
-            raise AuthenticationException(message='Access denied: You can only view orders from your own restaurant', code='UNAUTHORIZED')
+            raise AuthenticationException(message='Access denied: You can only view orders from your own restaurant', error_code='UNAUTHORIZED')
         restaurant_id = str(current_user.restaurant_id)
     cache_key = f'orders:today:{restaurant_id}'
     cached_orders = await redis.get(cache_key)
@@ -176,12 +176,12 @@ async def create_order(order_data: OrderCreate, restaurant_id: Optional[str]=Que
     """Create a new order"""
     if current_user.role == 'platform_owner':
         if not restaurant_id:
-            raise ValidationException(message='Restaurant ID is required for platform owners', code='MISSING_FIELD', field='ID')
+            raise ValidationException(message='Restaurant ID is required for platform owners', error_code='MISSING_FIELD', field='ID')
     else:
         if current_user.restaurant_id is None:
-            raise AuthenticationException(message='Access denied: No restaurant assigned to user', code='UNAUTHORIZED')
+            raise AuthenticationException(message='Access denied: No restaurant assigned to user', error_code='UNAUTHORIZED')
         if restaurant_id and str(restaurant_id) != str(current_user.restaurant_id):
-            raise AuthenticationException(message='Access denied: You can only create orders for your own restaurant', code='UNAUTHORIZED')
+            raise AuthenticationException(message='Access denied: You can only create orders for your own restaurant', error_code='UNAUTHORIZED')
         restaurant_id = str(current_user.restaurant_id)
     customer_id_to_save = order_data.customer_id
     if not customer_id_to_save and order_data.customer_email:
@@ -201,13 +201,13 @@ async def create_order(order_data: OrderCreate, restaurant_id: Optional[str]=Que
     product_ids = [item.product_id for item in order_data.items]
     products = db.query(Product).filter(and_(Product.id.in_(product_ids), Product.restaurant_id == restaurant_id, Product.is_active == True)).all()
     if len(products) != len(product_ids):
-        raise ValidationException(message='One or more products not found', code='BAD_REQUEST')
+        raise ValidationException(message='One or more products not found', error_code='BAD_REQUEST')
     totals = calculate_order_totals(order_data.items)
     try:
         for item in order_data.items:
             product = next((p for p in products if str(p.id) == item.product_id))
             if product.stock_tracking and product.stock_quantity < item.quantity:
-                raise ValidationException(message='', code='BAD_REQUEST')
+                raise ValidationException(message='', error_code='BAD_REQUEST')
         new_order = Order(restaurant_id=restaurant_id, customer_id=customer_id_to_save, order_number=generate_order_number(), table_number=order_data.table_number, order_type=order_data.order_type, status='pending', items=[item.dict() for item in order_data.items], subtotal=totals['subtotal'], tax_amount=totals['tax_amount'], service_charge=totals['service_charge'], discount_amount=0.0, total_amount=totals['total_amount'], payment_status='pending', special_instructions=order_data.special_instructions, created_by=str(current_user.id))
         db.add(new_order)
         for item in order_data.items:
@@ -227,7 +227,7 @@ async def create_order(order_data: OrderCreate, restaurant_id: Optional[str]=Que
         raise
     except Exception as e:
         logger.error(f'Order creation failed: {e}')
-        raise FynloException(message='Failed to create order', code='INTERNAL_ERROR')
+        raise FynloException(message='Failed to create order', error_code='INTERNAL_ERROR')
     customer_info_response = None
     if new_order.customer_id:
         customer_model = db.query(Customer).filter(Customer.id == new_order.customer_id).first()
@@ -243,7 +243,7 @@ async def get_order(order_id: str, db: Session=Depends(get_db), current_user: Us
         pass
     order = db.query(Order).filter(Order.id == order_id).first()
     if not order:
-        raise FynloException(message='Order not found', error_code=ErrorCodes.NOT_FOUND, details={'order_id': order_id}, status_code=404)
+        raise FynloException(message='Order not found', error_code=ErrorCodes.NOT_FOUND, details={'order_id': order_id}, status_error_code=404)
     verify_order_access(order, current_user)
     customer_info_response = None
     if order.customer_id:
@@ -257,7 +257,7 @@ async def update_order(order_id: str, order_data: OrderUpdate, db: Session=Depen
     """Update an order"""
     order = db.query(Order).filter(Order.id == order_id).first()
     if not order:
-        raise FynloException(message='Order not found', error_code=ErrorCodes.NOT_FOUND, details={'order_id': order_id}, status_code=404)
+        raise FynloException(message='Order not found', error_code=ErrorCodes.NOT_FOUND, details={'order_id': order_id}, status_error_code=404)
     verify_order_access(order, current_user)
     update_data = order_data.dict(exclude_unset=True)
     if 'items' in update_data and update_data['items']:
@@ -290,10 +290,10 @@ async def confirm_order(order_id: str, db: Session=Depends(get_db), current_user
     from app.services.inventory_service import apply_recipe_deductions_for_order
     order = db.query(Order).filter(Order.id == order_id).first()
     if not order:
-        raise FynloException(message='Order not found', error_code=ErrorCodes.NOT_FOUND, details={'order_id': order_id}, status_code=404)
+        raise FynloException(message='Order not found', error_code=ErrorCodes.NOT_FOUND, details={'order_id': order_id}, status_error_code=404)
     verify_order_access(order, current_user)
     if order.status != 'pending':
-        raise FynloException(message=f'Order cannot be confirmed - current status: {order.status}', error_code=ErrorCodes.VALIDATION_ERROR, details={'current_status': order.status, 'required_status': 'pending'}, status_code=400)
+        raise FynloException(message=f'Order cannot be confirmed - current status: {order.status}', error_code=ErrorCodes.VALIDATION_ERROR, details={'current_status': order.status, 'required_status': 'pending'}, status_error_code=400)
     order.status = 'confirmed'
     order.updated_at = datetime.utcnow()
     try:
@@ -303,7 +303,7 @@ async def confirm_order(order_id: str, db: Session=Depends(get_db), current_user
     except Exception as e:
         db.rollback()
         logger.error(f'Failed to apply recipe deductions for order {order.id}: {e}. Order status not confirmed.')
-        raise FynloException(message='', code='INTERNAL_ERROR')
+        raise FynloException(message='', error_code='INTERNAL_ERROR')
     await redis.cache_order(str(order.id), {'id': str(order.id), 'order_number': order.order_number, 'status': order.status, 'total_amount': order.total_amount, 'items': order.items})
     restaurant_id = str(order.restaurant_id)
     await redis.delete(f'orders:today:{restaurant_id}')
@@ -315,10 +315,10 @@ async def cancel_order(order_id: str, reason: Optional[str]=Query(None), db: Ses
     """Cancel an order"""
     order = db.query(Order).filter(Order.id == order_id).first()
     if not order:
-        raise FynloException(message='Order not found', error_code=ErrorCodes.NOT_FOUND, details={'order_id': order_id}, status_code=404)
+        raise FynloException(message='Order not found', error_code=ErrorCodes.NOT_FOUND, details={'order_id': order_id}, status_error_code=404)
     verify_order_access(order, current_user)
     if order.status in ['completed', 'cancelled']:
-        raise FynloException(message=f'Order cannot be cancelled - current status: {order.status}', error_code=ErrorCodes.VALIDATION_ERROR, details={'current_status': order.status, 'invalid_statuses': ['completed', 'cancelled']}, status_code=400)
+        raise FynloException(message=f'Order cannot be cancelled - current status: {order.status}', error_code=ErrorCodes.VALIDATION_ERROR, details={'current_status': order.status, 'invalid_statuses': ['completed', 'cancelled']}, status_error_code=400)
     original_status = order.status
     order.status = 'cancelled'
     order.updated_at = datetime.utcnow()
@@ -339,25 +339,25 @@ async def refund_order(order_id: str, refund_data: RefundRequestSchema, db: Sess
     """
     db_user = db.query(UserModel).filter(UserModel.id == current_user.id).first()
     if not db_user or db_user.role not in ['Manager', 'Admin']:
-        raise AuthenticationException(message='Not authorized to perform refunds.', code='UNAUTHORIZED')
+        raise AuthenticationException(message='Not authorized to perform refunds.', error_code='UNAUTHORIZED')
     order = db.query(Order).filter(Order.id == order_id).first()
     if not order:
-        raise FynloException(message='Order not found', error_code=ErrorCodes.NOT_FOUND, details={'order_id': order_id}, status_code=status.HTTP_404_NOT_FOUND)
+        raise FynloException(message='Order not found', error_code=ErrorCodes.NOT_FOUND, details={'order_id': order_id}, status_error_code=status.HTTP_404_NOT_FOUND)
     verify_order_access(order, current_user)
     if order.status != 'completed':
-        raise FynloException(message=f"Order status '{order.status}' does not allow refunds.", error_code=ErrorCodes.VALIDATION_ERROR, details={'current_status': order.status, 'required_status': 'completed'}, status_code=status.HTTP_400_BAD_REQUEST)
+        raise FynloException(message=f"Order status '{order.status}' does not allow refunds.", error_code=ErrorCodes.VALIDATION_ERROR, details={'current_status': order.status, 'required_status': 'completed'}, status_error_code=status.HTTP_400_BAD_REQUEST)
     is_full_refund = not refund_data.items or len(refund_data.items) == 0
     refund_amount: Decimal
     if is_full_refund:
         refund_amount = refund_data.amount if refund_data.amount is not None else Decimal(str(order.total_amount))
         if refund_amount != Decimal(str(order.total_amount)):
-            raise FynloException(message='Full refund amount must match order total if items are not specified.', error_code=ErrorCodes.VALIDATION_ERROR, status_code=status.HTTP_400_BAD_REQUEST)
+            raise FynloException(message='Full refund amount must match order total if items are not specified.', error_code=ErrorCodes.VALIDATION_ERROR, status_error_code=status.HTTP_400_BAD_REQUEST)
     else:
         calculated_partial_amount = Decimal(0)
         for item_to_refund in refund_data.items:
             found_item = next((oi for oi in order.items if oi.get('product_id') == item_to_refund.line_id), None)
             if not found_item:
-                raise FynloException(message=f'Item with line_id {item_to_refund.line_id} not found in order.', error_code=ErrorCodes.VALIDATION_ERROR, status_code=status.HTTP_400_BAD_REQUEST)
+                raise FynloException(message=f'Item with line_id {item_to_refund.line_id} not found in order.', error_code=ErrorCodes.VALIDATION_ERROR, status_error_code=status.HTTP_400_BAD_REQUEST)
             calculated_partial_amount += Decimal(str(found_item.get('unit_price', 0))) * item_to_refund.qty
         if refund_data.amount is not None and refund_data.amount != calculated_partial_amount:
             logger.warning(f'Provided partial refund amount {refund_data.amount} differs from calculated {calculated_partial_amount}. Using provided amount.')
@@ -365,7 +365,7 @@ async def refund_order(order_id: str, refund_data: RefundRequestSchema, db: Sess
         else:
             refund_amount = calculated_partial_amount
     if refund_amount <= 0:
-        raise FynloException(message='Refund amount must be positive.', error_code=ErrorCodes.VALIDATION_ERROR, status_code=status.HTTP_400_BAD_REQUEST)
+        raise FynloException(message='Refund amount must be positive.', error_code=ErrorCodes.VALIDATION_ERROR, status_error_code=status.HTTP_400_BAD_REQUEST)
     payment_transaction_id = getattr(order, 'payment_transaction_id', None)
     payment_provider_code = getattr(order, 'payment_provider_code', None)
     if not payment_transaction_id or not payment_provider_code:
@@ -374,7 +374,7 @@ async def refund_order(order_id: str, refund_data: RefundRequestSchema, db: Sess
             gateway_refund_id = f'CASH_REFUND_{uuid.uuid4()}'
             refund_status_message = 'Cash refund processed internally.'
         else:
-            raise FynloException(message='Order payment details not found or provider not supported for direct refund.', error_code=ErrorCodes.PAYMENT_ERROR, status_code=status.HTTP_501_NOT_IMPLEMENTED)
+            raise FynloException(message='Order payment details not found or provider not supported for direct refund.', error_code=ErrorCodes.PAYMENT_ERROR, status_error_code=status.HTTP_501_NOT_IMPLEMENTED)
     else:
         try:
             payment_provider_service = get_payment_provider(payment_provider_code)
@@ -382,10 +382,10 @@ async def refund_order(order_id: str, refund_data: RefundRequestSchema, db: Sess
             gateway_refund_id = refund_result.get('refund_id') or refund_result.get('id')
             refund_status_message = refund_result.get('status', 'processed')
             if not refund_result.get('success', True):
-                raise FynloException(message=f"Gateway refund failed: {refund_result.get('error', 'Unknown error')}", error_code=ErrorCodes.PAYMENT_GATEWAY_ERROR, status_code=status.HTTP_502_BAD_GATEWAY)
+                raise FynloException(message=f"Gateway refund failed: {refund_result.get('error', 'Unknown error')}", error_code=ErrorCodes.PAYMENT_GATEWAY_ERROR, status_error_code=status.HTTP_502_BAD_GATEWAY)
         except Exception as e:
             logger.error(f'Error processing refund with gateway {payment_provider_code} for order {order_id}: {e}')
-            raise FynloException(message=f'Gateway refund processing error: {str(e)}', error_code=ErrorCodes.PAYMENT_GATEWAY_ERROR, status_code=status.HTTP_502_BAD_GATEWAY)
+            raise FynloException(message=f'Gateway refund processing error: {str(e)}', error_code=ErrorCodes.PAYMENT_GATEWAY_ERROR, status_error_code=status.HTTP_502_BAD_GATEWAY)
     try:
         with transaction_manager(db_session=db):
             new_refund = Refund(order_id=str(order.id), amount=refund_amount, reason=refund_data.reason)
@@ -407,7 +407,7 @@ async def refund_order(order_id: str, refund_data: RefundRequestSchema, db: Sess
             db.refresh(new_refund)
     except Exception as e:
         logger.error(f'Database error during refund processing for order {order_id}: {e}')
-        raise FynloException(message='Failed to save refund details.', error_code=ErrorCodes.DATABASE_ERROR, status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        raise FynloException(message='Failed to save refund details.', error_code=ErrorCodes.DATABASE_ERROR, status_error_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
     try:
         message_data = {'order_id': str(order.id), 'new_status': order.status, 'refund_details': {'refund_id': str(new_refund.id), 'amount': float(refund_amount), 'is_full': is_full_refund}}
         event_type = EventType.ORDER_REFUNDED

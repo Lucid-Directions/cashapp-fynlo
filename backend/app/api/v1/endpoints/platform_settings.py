@@ -55,7 +55,7 @@ async def get_platform_settings(category: Optional[str]=Query(None, description=
         settings = await service.get_platform_settings(category=category, include_sensitive=include_sensitive)
         return APIResponseHelper.success(data=settings, message=f'Retrieved {len(settings)} platform settings')
     except Exception as e:
-        raise FynloException(message='', code='INTERNAL_ERROR')
+        raise FynloException(message='', error_code='INTERNAL_ERROR')
 
 @router.get('/service-charge', response_model=ServiceChargeConfigResponse, summary='Get service charge configuration', tags=['Platform Settings', 'Service Charge'])
 async def get_service_charge_configuration(db: Session=Depends(get_db), current_user: User=Depends(require_admin_user)):
@@ -66,7 +66,7 @@ async def get_service_charge_configuration(db: Session=Depends(get_db), current_
         return config
     except Exception as e:
         logging.error(f'Error retrieving service charge configuration: {e}', exc_info=True)
-        raise FynloException(message='Failed to retrieve service charge configuration', code='INTERNAL_ERROR')
+        raise FynloException(message='Failed to retrieve service charge configuration', error_code='INTERNAL_ERROR')
 
 @router.put('/service-charge', response_model=ServiceChargeConfigResponse, summary='Update service charge configuration', tags=['Platform Settings', 'Service Charge'])
 async def update_service_charge_configuration(request: ServiceChargeConfigRequest, db: Session=Depends(get_db), current_user: User=Depends(require_admin_user)):
@@ -75,14 +75,14 @@ async def update_service_charge_configuration(request: ServiceChargeConfigReques
         service = PlatformSettingsService(db)
         success = await service.update_service_charge_config(config_data=request.dict(), updated_by=str(current_user.id))
         if not success:
-            raise FynloException(message='Failed to update some service charge settings', code='INTERNAL_ERROR')
+            raise FynloException(message='Failed to update some service charge settings', error_code='INTERNAL_ERROR')
         updated_config = await service.get_service_charge_config()
         return updated_config
     except ValueError as e:
-        raise ValidationException(message='', code='BAD_REQUEST')
+        raise ValidationException(message='', error_code='BAD_REQUEST')
     except Exception as e:
         logging.error(f'Error updating service charge configuration: {e}', exc_info=True)
-        raise FynloException(message='Failed to update service charge configuration', code='INTERNAL_ERROR')
+        raise FynloException(message='Failed to update service charge configuration', error_code='INTERNAL_ERROR')
 
 @router.get('/settings/{config_key}')
 async def get_platform_setting(config_key: str, db: Session=Depends(get_db), current_user: User=Depends(require_admin_user)):
@@ -96,7 +96,7 @@ async def get_platform_setting(config_key: str, db: Session=Depends(get_db), cur
     except HTTPException:
         raise
     except Exception as e:
-        raise FynloException(message='', code='INTERNAL_ERROR')
+        raise FynloException(message='', error_code='INTERNAL_ERROR')
 
 @router.put('/settings/{config_key}')
 async def update_platform_setting(config_key: str, request: PlatformSettingRequest, db: Session=Depends(get_db), current_user: User=Depends(require_admin_user), http_request: Request=None):
@@ -110,11 +110,11 @@ async def update_platform_setting(config_key: str, request: PlatformSettingReque
             pass
         return APIResponseHelper.success(data={'config_key': config_key, 'updated': True}, message=f"Platform setting '{config_key}' updated successfully")
     except ValueError as e:
-        raise ValidationException(message='', code='BAD_REQUEST')
+        raise ValidationException(message='', error_code='BAD_REQUEST')
     except HTTPException:
         raise
     except Exception as e:
-        raise FynloException(message='', code='INTERNAL_ERROR')
+        raise FynloException(message='', error_code='INTERNAL_ERROR')
 
 @router.post('/settings/bulk-update')
 async def bulk_update_platform_settings(request: BulkUpdateRequest, db: Session=Depends(get_db), current_user: User=Depends(require_admin_user)):
@@ -135,7 +135,7 @@ async def bulk_update_platform_settings(request: BulkUpdateRequest, db: Session=
         else:
             return APIResponseHelper.success(data=response_data, message=f'Successfully updated {len(results)} platform settings')
     except Exception as e:
-        raise FynloException(message='', code='INTERNAL_ERROR')
+        raise FynloException(message='', error_code='INTERNAL_ERROR')
 
 @router.get('/payment-fees')
 async def get_payment_fees(db: Session=Depends(get_db), current_user: User=Depends(require_admin_user)):
@@ -145,21 +145,21 @@ async def get_payment_fees(db: Session=Depends(get_db), current_user: User=Depen
         fees = await service.get_payment_fees()
         return APIResponseHelper.success(data=fees, message='Retrieved payment processing fees')
     except Exception as e:
-        raise FynloException(message='', code='INTERNAL_ERROR')
+        raise FynloException(message='', error_code='INTERNAL_ERROR')
 
 @router.post('/payment-fees/calculate')
 async def calculate_payment_fee(payment_method: str, amount: float=Query(..., description='Transaction amount'), restaurant_id: Optional[str]=Query(None, description='Restaurant ID for overrides'), monthly_volume: Optional[float]=Query(None, description='Monthly volume for volume-based pricing'), db: Session=Depends(get_db), current_user: User=Depends(require_admin_user)):
     """Calculate effective payment fee for given parameters"""
     try:
         if amount <= 0:
-            raise ValidationException(message='Amount must be positive', code='INVALID_VALUE', field='Amount')
+            raise ValidationException(message='Amount must be positive', error_code='INVALID_VALUE', field='Amount')
         service = PlatformSettingsService(db)
         fee_calculation = await service.calculate_effective_fee(payment_method=payment_method, amount=amount, restaurant_id=restaurant_id, monthly_volume=monthly_volume)
         return APIResponseHelper.success(data=fee_calculation, message=f'Calculated fee for {payment_method} payment')
     except ValueError as e:
-        raise ValidationException(message='', code='BAD_REQUEST')
+        raise ValidationException(message='', error_code='BAD_REQUEST')
     except Exception as e:
-        raise FynloException(message='', code='INTERNAL_ERROR')
+        raise FynloException(message='', error_code='INTERNAL_ERROR')
 
 @router.get('/feature-flags')
 async def get_feature_flags(restaurant_id: Optional[str]=Query(None, description='Filter for specific restaurant'), db: Session=Depends(get_db), current_user: User=Depends(require_admin_user)):
@@ -169,7 +169,7 @@ async def get_feature_flags(restaurant_id: Optional[str]=Query(None, description
         flags = await service.get_feature_flags(restaurant_id=restaurant_id)
         return APIResponseHelper.success(data=flags, message='Retrieved feature flags')
     except Exception as e:
-        raise FynloException(message='', code='INTERNAL_ERROR')
+        raise FynloException(message='', error_code='INTERNAL_ERROR')
 
 @router.put('/feature-flags/{feature_key}')
 async def update_feature_flag(feature_key: str, request: FeatureFlagRequest, db: Session=Depends(get_db), current_user: User=Depends(require_admin_user)):
@@ -183,7 +183,7 @@ async def update_feature_flag(feature_key: str, request: FeatureFlagRequest, db:
     except HTTPException:
         raise
     except Exception as e:
-        raise FynloException(message='', code='INTERNAL_ERROR')
+        raise FynloException(message='', error_code='INTERNAL_ERROR')
 
 @router.get('/audit-trail')
 async def get_configuration_audit_trail(config_key: Optional[str]=Query(None, description='Filter by configuration key'), entity_id: Optional[str]=Query(None, description='Filter by entity ID'), limit: int=Query(100, description='Maximum number of records', le=1000), db: Session=Depends(get_db), current_user: User=Depends(require_admin_user)):
@@ -193,7 +193,7 @@ async def get_configuration_audit_trail(config_key: Optional[str]=Query(None, de
         audit_trail = await service.get_audit_trail(config_key=config_key, entity_id=entity_id, limit=limit)
         return APIResponseHelper.success(data={'audit_records': audit_trail, 'total_records': len(audit_trail)}, message=f'Retrieved {len(audit_trail)} audit records')
     except Exception as e:
-        raise FynloException(message='', code='INTERNAL_ERROR')
+        raise FynloException(message='', error_code='INTERNAL_ERROR')
 
 @router.post('/initialize-defaults')
 async def initialize_default_settings(db: Session=Depends(get_db), current_user: User=Depends(require_admin_user)):
@@ -204,9 +204,9 @@ async def initialize_default_settings(db: Session=Depends(get_db), current_user:
         if success:
             return APIResponseHelper.success(data={'initialized': True}, message='Default platform settings initialized successfully')
         else:
-            raise FynloException(message='Failed to initialize default settings', code='INTERNAL_ERROR')
+            raise FynloException(message='Failed to initialize default settings', error_code='INTERNAL_ERROR')
     except Exception as e:
-        raise FynloException(message='', code='INTERNAL_ERROR')
+        raise FynloException(message='', error_code='INTERNAL_ERROR')
 
 @router.get('/restaurants/{restaurant_id}/effective-settings')
 async def get_restaurant_effective_settings(restaurant_id: str, category: Optional[str]=Query(None, description='Filter by category'), db: Session=Depends(get_db), current_user: User=Depends(get_current_user)):
@@ -216,7 +216,7 @@ async def get_restaurant_effective_settings(restaurant_id: str, category: Option
         settings = await service.get_restaurant_effective_settings(restaurant_id=restaurant_id, category=category)
         return APIResponseHelper.success(data=settings, message=f'Retrieved effective settings for restaurant {restaurant_id}')
     except Exception as e:
-        raise FynloException(message='', code='INTERNAL_ERROR')
+        raise FynloException(message='', error_code='INTERNAL_ERROR')
 
 @router.put('/restaurants/{restaurant_id}/overrides/{config_key}')
 async def set_restaurant_override(restaurant_id: str, config_key: str, request: RestaurantOverrideRequest, db: Session=Depends(get_db), current_user: User=Depends(get_current_user)):
@@ -228,11 +228,11 @@ async def set_restaurant_override(restaurant_id: str, config_key: str, request: 
             status_msg = 'pending approval' if request.requires_approval else 'active'
             return APIResponseHelper.success(data={'restaurant_id': restaurant_id, 'config_key': config_key, 'status': status_msg}, message=f'Restaurant override set successfully ({status_msg})')
         else:
-            raise FynloException(message='Failed to set restaurant override', code='INTERNAL_ERROR')
+            raise FynloException(message='Failed to set restaurant override', error_code='INTERNAL_ERROR')
     except ValueError as e:
-        raise ValidationException(message='', code='BAD_REQUEST')
+        raise ValidationException(message='', error_code='BAD_REQUEST')
     except Exception as e:
-        raise FynloException(message='', code='INTERNAL_ERROR')
+        raise FynloException(message='', error_code='INTERNAL_ERROR')
 
 @router.get('/sync/platform-config')
 async def sync_platform_config(restaurant_id: Optional[str]=Query(None, description='Restaurant ID for targeted settings'), categories: Optional[str]=Query(None, description='Comma-separated categories'), db: Session=Depends(get_db)):
@@ -253,7 +253,7 @@ async def sync_platform_config(restaurant_id: Optional[str]=Query(None, descript
             effective_settings = await service.get_restaurant_effective_settings(restaurant_id)
         return APIResponseHelper.success(data={'platform_settings': all_settings, 'feature_flags': feature_flags, 'effective_settings': effective_settings, 'sync_timestamp': datetime.utcnow().isoformat(), 'restaurant_id': restaurant_id}, message='Platform configuration synchronized')
     except Exception as e:
-        raise FynloException(message='', code='INTERNAL_ERROR')
+        raise FynloException(message='', error_code='INTERNAL_ERROR')
 
 @router.get('/categories')
 async def get_setting_categories(db: Session=Depends(get_db), current_user: User=Depends(require_admin_user)):
@@ -266,4 +266,4 @@ async def get_setting_categories(db: Session=Depends(get_db), current_user: User
             categories.add(setting_data['category'])
         return APIResponseHelper.success(data=sorted(list(categories)), message=f'Retrieved {len(categories)} setting categories')
     except Exception as e:
-        raise FynloException(message='', code='INTERNAL_ERROR')
+        raise FynloException(message='', error_code='INTERNAL_ERROR')

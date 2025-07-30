@@ -51,7 +51,7 @@ async def test_provider(request: Request, provider_name: str, db: Session=Depend
     await audit_service.create_audit_log(event_type=AuditEventType.ACCESS_GRANTED, event_status=AuditEventStatus.SUCCESS, action_performed=action_description, user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent, commit=True)
     provider = payment_factory.get_provider(provider_name)
     if not provider:
-        raise ResourceNotFoundException(message='Provider not found', code='NOT_FOUND', resource_type='provider')
+        raise ResourceNotFoundException(message='Provider not found', error_code='NOT_FOUND', resource_type='provider')
     try:
         result = await provider.create_checkout(amount=Decimal('1.00'), currency='GBP', return_url='https://fynlo.com/test/success', cancel_url='https://fynlo.com/test/cancel')
         return APIResponseHelper.success(data={'provider': provider_name, 'test_result': 'Provider configured correctly', 'checkout_created': 'checkout_url' in result}, message=f'{provider_name} test successful')
@@ -73,7 +73,7 @@ async def get_provider_analytics_endpoint(request: Request, start_date: str, end
         analytics = await get_provider_analytics(start_date, end_date, db)
         return APIResponseHelper.success(data={'period': {'start': start_date, 'end': end_date}, **analytics}, message='Retrieved provider analytics')
     except Exception as e:
-        raise FynloException(message='', code='INTERNAL_ERROR')
+        raise FynloException(message='', error_code='INTERNAL_ERROR')
 
 @router.get('/providers/cost-comparison')
 async def get_cost_comparison(request: Request, amount: float, monthly_volume: float=5000, db: Session=Depends(get_db), current_user: User=Depends(get_current_user)) -> Dict[str, Any]:
@@ -159,7 +159,7 @@ async def get_restaurant_analytics(restaurant_id: str, db: Session=Depends(get_d
         report = await create_payment_analytics_report(restaurant_id, db)
         return APIResponseHelper.success(data=report, message='Generated restaurant payment analytics')
     except Exception as e:
-        raise FynloException(message='', code='INTERNAL_ERROR')
+        raise FynloException(message='', error_code='INTERNAL_ERROR')
 
 def _calculate_monthly_cost(provider_name: str, monthly_volume: Decimal) -> float:
     """Calculate total monthly cost for a provider"""

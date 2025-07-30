@@ -34,9 +34,9 @@ def trigger_tip_distribution(order_reference: str=Path(..., description='The ref
         distributions = service.distribute_order_tips(order_reference=order_reference, total_tips_collected=request_data.total_tips_collected, service_charge_amount_on_order=request_data.service_charge_amount_on_order, processor_fee_covered_by_service_charge=request_data.processor_fee_covered_by_service_charge, assigned_staff=request_data.assigned_staff, tip_distribution_strategy=request_data.tip_distribution_strategy or 'equal_split')
         return distributions
     except ValueError as ve:
-        raise ValidationException(message='', code='BAD_REQUEST')
+        raise ValidationException(message='', error_code='BAD_REQUEST')
     except Exception as e:
-        raise FynloException(message='', code='INTERNAL_ERROR')
+        raise FynloException(message='', error_code='INTERNAL_ERROR')
 
 @router.get('/orders/{order_reference}/tip-distributions', response_model=List[StaffTipDistributionRecordSchema])
 def get_tip_distributions_for_order_api(order_reference: str=Path(..., description='The reference ID of the order.'), service: StaffTipService=Depends(get_staff_tip_service_dep)):

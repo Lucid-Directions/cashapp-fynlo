@@ -20,7 +20,7 @@ async def update_product_secure(product_id: str, product_data: dict, db: Session
     """
     product = db.query(Product).filter(Product.id == product_id).first()
     if not product:
-        raise ResourceNotFoundException(message='Product not found', code='NOT_FOUND', resource_type='product')
+        raise ResourceNotFoundException(message='Product not found', error_code='NOT_FOUND', resource_type='product')
     TenantSecurity.validate_restaurant_access(user=current_user, restaurant_id=str(product.restaurant_id), operation='modify')
     if 'restaurant_id' in product_data and product_data['restaurant_id'] != str(product.restaurant_id):
         if not TenantSecurity.is_platform_owner(current_user):
@@ -35,7 +35,7 @@ async def delete_product_secure(product_id: str, db: Session=Depends(get_db), cu
     """
     product = db.query(Product).filter(Product.id == product_id).first()
     if not product:
-        raise ResourceNotFoundException(message='Product not found', code='NOT_FOUND', resource_type='product')
+        raise ResourceNotFoundException(message='Product not found', error_code='NOT_FOUND', resource_type='product')
     TenantSecurity.validate_restaurant_access(user=current_user, restaurant_id=str(product.restaurant_id), operation='delete')
     product.is_active = False
     db.commit()

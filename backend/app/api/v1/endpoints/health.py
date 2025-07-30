@@ -36,7 +36,6 @@ router = APIRouter()
 # Instance startup time for uptime calculation
 INSTANCE_START_TIME = datetime.now(timezone.utc)
 
-
 def get_instance_id() -> str:
     """Generate a unique instance ID based on hostname and environment with random suffix."""
     hostname = socket.gethostname()
@@ -71,7 +70,6 @@ def get_instance_id() -> str:
         # If hostname is invalid, generate a safe default with random suffix
         return f"instance-unknown-{random_suffix}"
 
-
 @router.get("/")
 @limiter.limit("1000/minute")  # Very high limit for load balancer health checks
 async def health_basic(request: Request):
@@ -89,7 +87,6 @@ async def health_basic(request: Request):
         },
         message="Service is healthy"
     )
-
 
 @router.get("/detailed")
 @limiter.limit(DEFAULT_RATE)
@@ -226,7 +223,6 @@ async def health_detailed(
         message="Detailed health information retrieved"
     )
 
-
 @router.get("/instances")
 @limiter.limit(DEFAULT_RATE)
 async def health_instances(
@@ -354,7 +350,6 @@ async def health_instances(
         message="Instance information retrieved"
     )
 
-
 @router.get("/ready")
 @limiter.limit("1000/minute")  # High limit for k8s readiness probes
 async def health_ready(
@@ -402,7 +397,6 @@ async def health_ready(
             }
         )
 
-
 @router.get("/live")
 @limiter.limit("1000/minute")  # High limit for k8s liveness probes
 async def health_live(request: Request) -> Dict[str, Any]:
@@ -422,7 +416,6 @@ async def health_live(request: Request) -> Dict[str, Any]:
         },
         message="Instance is alive"
     )
-
 
 # Helper functions
 
@@ -444,7 +437,6 @@ def _format_uptime(seconds: int) -> str:
         parts.append(f"{seconds}s")
     
     return " ".join(parts)
-
 
 async def _check_storage_health() -> str:
     """Check if storage service (DigitalOcean Spaces) is healthy."""

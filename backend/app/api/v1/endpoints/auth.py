@@ -47,18 +47,18 @@ async def verify_supabase_user(request: Request, authorization: Optional[str]=He
         logger.error('Supabase admin client not available')
         logger.error(f'SUPABASE_URL set: {bool(settings.SUPABASE_URL)}')
         logger.error(f'SUPABASE_SERVICE_ROLE_KEY set: {bool(settings.SUPABASE_SERVICE_ROLE_KEY)}')
-        raise FynloException(message='Authentication service temporarily unavailable. Please check backend configuration.', code='INTERNAL_ERROR')
+        raise FynloException(message='Authentication service temporarily unavailable. Please check backend configuration.', error_code='INTERNAL_ERROR')
     try:
         logger.info(f'Verifying token with Supabase (token length: {len(token)})')
         logger.info(f'Supabase client URL: {client.supabase_url}')
         user_response = client.auth.get_user(token)
         if not user_response:
             logger.error('Supabase returned None response for get_user')
-            raise FynloException(message='Authentication service returned invalid response', code='INTERNAL_ERROR')
+            raise FynloException(message='Authentication service returned invalid response', error_code='INTERNAL_ERROR')
         supabase_user = user_response.user
         if not supabase_user:
             logger.warning('Supabase returned no user for the provided token')
-            raise AuthenticationException(message='Invalid or expired token', code='TOKEN_EXPIRED')
+            raise AuthenticationException(message='Invalid or expired token', error_code='TOKEN_EXPIRED')
         logger.info(f'Successfully verified Supabase user: {supabase_user.email}')
         db_user = None
         try:
@@ -72,7 +72,7 @@ async def verify_supabase_user(request: Request, authorization: Optional[str]=He
         except SQLAlchemyError as e:
             logger.error(f'Database query error when finding user: {str(e)}')
             db.rollback()
-            raise FynloException(message='Database error while retrieving user information', code='INTERNAL_ERROR')
+            raise FynloException(message='Database error while retrieving user information', error_code='INTERNAL_ERROR')
         if not db_user:
             logger.info(f'First time login for user: {supabase_user.email}')
             try:
@@ -98,15 +98,15 @@ async def verify_supabase_user(request: Request, authorization: Optional[str]=He
                                 logger.error(f'Failed to update supabase_id in retry path: {str(update_error)}')
                                 db.rollback()
                     if not db_user:
-                        raise FynloException(message='Failed to create user account. Please try again.', code='INTERNAL_ERROR')
+                        raise FynloException(message='Failed to create user account. Please try again.', error_code='INTERNAL_ERROR')
                 except SQLAlchemyError as retry_error:
                     logger.error(f'Failed to fetch user after IntegrityError: {str(retry_error)}')
                     db.rollback()
-                    raise FynloException(message='Database error while creating user account', code='INTERNAL_ERROR')
+                    raise FynloException(message='Database error while creating user account', error_code='INTERNAL_ERROR')
             except SQLAlchemyError as e:
                 logger.error(f'Database error creating user: {str(e)}')
                 db.rollback()
-                raise FynloException(message='Database error while creating user account', code='INTERNAL_ERROR')
+                raise FynloException(message='Database error while creating user account', error_code='INTERNAL_ERROR')
         else:
             try:
                 db_user.last_login = datetime.utcnow()
@@ -182,14 +182,14 @@ async def verify_supabase_user(request: Request, authorization: Optional[str]=He
             raise AuthenticationException(message="Invalid authentication token")
         elif 'expired' in error_msg_lower:
             await audit_logger.create_audit_log(event_type=AuditEventType.AUTHENTICATION, event_status=AuditEventStatus.FAILURE, action_performed='Expired JWT token presented', ip_address=client_ip, user_agent=user_agent, details={'error': 'expired_token'}, risk_score=30)
-            raise AuthenticationException(message='Token has expired. Please sign in again.', code='TOKEN_EXPIRED')
+            raise AuthenticationException(message='Token has expired. Please sign in again.', error_code='TOKEN_EXPIRED')
         elif 'not found' in error_msg_lower:
             await audit_logger.create_audit_log(event_type=AuditEventType.AUTHENTICATION, event_status=AuditEventStatus.FAILURE, action_performed='Authentication attempt for non-existent user', ip_address=client_ip, user_agent=user_agent, details={'error': 'user_not_found'}, risk_score=50)
             raise ResourceNotFoundException(message="User not found. Please sign up first.", resource_type="User")
         else:
             logger.error(f'Unexpected Supabase auth error: {type(e).__name__}: {str(e)}')
             await audit_logger.create_audit_log(event_type=AuditEventType.AUTHENTICATION, event_status=AuditEventStatus.FAILURE, action_performed='Authentication failed with unexpected error', ip_address=client_ip, user_agent=user_agent, details={'error': 'unexpected_auth_error', 'error_type': type(e).__name__}, risk_score=80)
-            raise AuthenticationException(message='Authentication failed. Please sign in again.', code='INVALID_CREDENTIALS')
+            raise AuthenticationException(message='Authentication failed. Please sign in again.', error_code='INVALID_CREDENTIALS')
     except Exception as e:
         error_str = str(e)
         logger.error(f'Auth verification error - Type: {type(e).__name__}, Message: {error_str}')
@@ -208,9 +208,9 @@ async def verify_supabase_user(request: Request, authorization: Optional[str]=He
         logger.error(f'Full exception details: {traceback.format_exc()}')
         if 'supabase' in error_str.lower() and ('missing' in error_str.lower() or 'environment' in error_str.lower()):
             await audit_logger.create_audit_log(event_type=AuditEventType.SYSTEM_EVENT, event_status=AuditEventStatus.FAILURE, action_performed='Authentication service configuration error', ip_address=client_ip, user_agent=user_agent, details={'error': 'service_config_error', 'exception_type': type(e).__name__}, risk_score=90)
-            raise FynloException(message='Authentication service configuration error. Please contact support.', code='INTERNAL_ERROR')
+            raise FynloException(message='Authentication service configuration error. Please contact support.', error_code='INTERNAL_ERROR')
         await audit_logger.create_audit_log(event_type=AuditEventType.AUTHENTICATION, event_status=AuditEventStatus.FAILURE, action_performed='Authentication service error', ip_address=client_ip, user_agent=user_agent, details={'error': 'service_error', 'exception_type': type(e).__name__, 'message': error_str[:200]}, risk_score=60)
-        raise FynloException(message='Authentication service error. Please try again later.', code='INTERNAL_ERROR')
+        raise FynloException(message='Authentication service error. Please try again later.', error_code='INTERNAL_ERROR')
 
 @router.post('/register-restaurant')
 async def register_restaurant(data: RegisterRestaurantRequest, authorization: Optional[str]=Header(None), db: Session=Depends(get_db)):
@@ -223,7 +223,7 @@ async def register_restaurant(data: RegisterRestaurantRequest, authorization: Op
         logger.error('Supabase admin client not available')
         logger.error(f'SUPABASE_URL set: {bool(settings.SUPABASE_URL)}')
         logger.error(f'SUPABASE_SERVICE_ROLE_KEY set: {bool(settings.SUPABASE_SERVICE_ROLE_KEY)}')
-        raise FynloException(message='Authentication service temporarily unavailable. Please check backend configuration.', code='INTERNAL_ERROR')
+        raise FynloException(message='Authentication service temporarily unavailable. Please check backend configuration.', error_code='INTERNAL_ERROR')
     try:
         user_response = client.auth.get_user(token)
         supabase_user = user_response.user
@@ -241,9 +241,9 @@ async def register_restaurant(data: RegisterRestaurantRequest, authorization: Op
                     logger.error(f'Failed to update user supabase_id during registration: {str(e)}')
                     db.rollback()
         if not db_user:
-            raise ResourceNotFoundException(message='User not found', code='NOT_FOUND', resource_type='user')
+            raise ResourceNotFoundException(message='User not found', error_code='NOT_FOUND', resource_type='user')
         if db_user.restaurant_id:
-            raise ValidationException(message='User already has a restaurant', code='BAD_REQUEST')
+            raise ValidationException(message='User already has a restaurant', error_code='BAD_REQUEST')
         user_metadata = supabase_user.user_metadata or {}
         subscription_plan = user_metadata.get('subscription_plan', 'alpha')
         subscription_status = user_metadata.get('subscription_status', 'trial')
@@ -255,18 +255,18 @@ async def register_restaurant(data: RegisterRestaurantRequest, authorization: Op
                 if default_platform:
                     platform_id = str(default_platform.id)
                 else:
-                    raise FynloException(message='No platform found. Please contact support.', code='INTERNAL_ERROR')
+                    raise FynloException(message='No platform found. Please contact support.', error_code='INTERNAL_ERROR')
             address_data = {'street': data.address or '', 'city': '', 'state': '', 'zipCode': '', 'country': 'UK'}
             from app.core.validation import validate_model_jsonb_fields, validate_email, validate_phone, sanitize_string, ValidationError as ValidationErr
             sanitized_name = sanitize_string(data.restaurant_name, 255)
             if not sanitized_name:
                 raise BusinessLogicException(message='Restaurant name cannot be empty', code='OPERATION_NOT_ALLOWED')
             if data.phone and (not validate_phone(data.phone)):
-                raise ValidationException(message='Invalid phone number format', code='BAD_REQUEST')
+                raise ValidationException(message='Invalid phone number format', error_code='BAD_REQUEST')
             try:
                 validated_address = validate_model_jsonb_fields('restaurant', 'address', address_data)
             except ValidationErr as e:
-                raise ValidationException(message='', code='BAD_REQUEST')
+                raise ValidationException(message='', error_code='BAD_REQUEST')
             restaurant = Restaurant(id=uuid.uuid4(), platform_id=platform_id, name=sanitized_name, email=supabase_user.email, phone=data.phone, address=validated_address, timezone='Europe/London', business_hours={'monday': {'open': '09:00', 'close': '22:00'}, 'tuesday': {'open': '09:00', 'close': '22:00'}, 'wednesday': {'open': '09:00', 'close': '22:00'}, 'thursday': {'open': '09:00', 'close': '22:00'}, 'friday': {'open': '09:00', 'close': '23:00'}, 'saturday': {'open': '09:00', 'close': '23:00'}, 'sunday': {'open': '10:00', 'close': '21:00'}}, settings={'currency': 'GBP', 'date_format': 'DD/MM/YYYY', 'time_format': '24h', 'allow_tips': True, 'auto_gratuity_percentage': 12.5, 'print_receipt_default': True}, subscription_plan=subscription_plan, subscription_status=subscription_status, subscription_started_at=datetime.utcnow(), tax_configuration={'vat_rate': 0.2, 'included_in_price': True, 'tax_number': ''}, payment_methods={'cash': True, 'card': True, 'qr_code': True, 'apple_pay': True, 'google_pay': True}, is_active=True)
             db.add(restaurant)
             db_user.restaurant_id = restaurant.id
@@ -282,10 +282,10 @@ async def register_restaurant(data: RegisterRestaurantRequest, authorization: Op
         except SQLAlchemyError as e:
             logger.error(f'Database error creating restaurant: {str(e)}')
             db.rollback()
-            raise FynloException(message='Failed to register restaurant. Please try again.', code='INTERNAL_ERROR')
+            raise FynloException(message='Failed to register restaurant. Please try again.', error_code='INTERNAL_ERROR')
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f'Restaurant registration error: {str(e)}')
         db.rollback()
-        raise FynloException(message='Failed to register restaurant', code='INTERNAL_ERROR')
+        raise FynloException(message='Failed to register restaurant', error_code='INTERNAL_ERROR')

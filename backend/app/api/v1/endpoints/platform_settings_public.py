@@ -71,4 +71,4 @@ async def get_payment_methods_public():
         return APIResponseHelper.success(data={'payment_methods': payment_methods}, message='Payment methods retrieved')
     except Exception as e:
         logger.error(f'Error in get_payment_methods_public: {e}')
-        raise FynloException(message='', code='INTERNAL_ERROR')
+        raise FynloException(message='', error_code='INTERNAL_ERROR')

@@ -18,14 +18,14 @@ router = APIRouter()
 async def create_inventory_item_api(item: schemas.InventoryItemCreate, db: Session=Depends(get_db)):
     db_item = crud_inventory.get_inventory_item(db, sku=item.sku)
     if db_item:
-        raise ValidationException(message='', code='BAD_REQUEST')
+        raise ValidationException(message='', error_code='BAD_REQUEST')
     return crud_inventory.create_inventory_item(db=db, item=item)
 
 @router.get('/items/{sku}', response_model=schemas.InventoryItem)
 async def read_inventory_item_api(sku: str, db: Session=Depends(get_db)):
     db_item = crud_inventory.get_inventory_item(db, sku=sku)
     if db_item is None:
-        raise ResourceNotFoundException(message='Inventory item not found', code='NOT_FOUND', resource_type='item')
+        raise ResourceNotFoundException(message='Inventory item not found', error_code='NOT_FOUND', resource_type='item')
     return db_item
 
 @router.get('/items/', response_model=List[schemas.InventoryItem])
@@ -37,20 +37,20 @@ async def read_inventory_items_api(skip: int=0, limit: int=Query(default=100, le
 async def update_inventory_item_api(sku: str, item_update: schemas.InventoryItemUpdate, db: Session=Depends(get_db)):
     db_item = crud_inventory.update_inventory_item(db, sku=sku, item_update=item_update)
     if db_item is None:
-        raise ResourceNotFoundException(message='Inventory item not found', code='NOT_FOUND', resource_type='item')
+        raise ResourceNotFoundException(message='Inventory item not found', error_code='NOT_FOUND', resource_type='item')
     return db_item
 
 @router.delete('/items/{sku}', response_model=schemas.InventoryItem)
 async def delete_inventory_item_api(sku: str, db: Session=Depends(get_db)):
     db_item = crud_inventory.delete_inventory_item(db, sku=sku)
     if db_item is None:
-        raise ResourceNotFoundException(message='Inventory item not found', code='NOT_FOUND', resource_type='item')
+        raise ResourceNotFoundException(message='Inventory item not found', error_code='NOT_FOUND', resource_type='item')
     return db_item
 
 @router.post('/items/{sku}/adjust-stock', response_model=schemas.StockAdjustmentResult)
 async def adjust_stock_api(sku: str, adjustment: schemas.StockAdjustment=Body(...), db: Session=Depends(get_db)):
     if adjustment.sku != sku:
-        raise ValidationException(message='SKU in path and body do not match.', code='BAD_REQUEST')
+        raise ValidationException(message='SKU in path and body do not match.', error_code='BAD_REQUEST')
     (updated_item, ledger_entry) = crud_inventory.adjust_inventory_item_quantity(db, sku=adjustment.sku, change_qty_g=adjustment.change_qty_g, source=adjustment.reason or 'manual_adjustment', source_id=str(1))
     if not updated_item:
         raise ResourceNotFoundException(message="Inventory item with SKU {sku} not found.", resource_type="Resource")
@@ -80,7 +80,7 @@ async def get_low_stock_items_api(threshold_percentage: float=Query(default=0.1,
         low_stock_items = crud_inventory.get_low_stock_items(db, threshold_percentage=threshold_percentage)
         return low_stock_items
     except ValueError as e:
-        raise ValidationException(message='', code='BAD_REQUEST')
+        raise ValidationException(message='', error_code='BAD_REQUEST')
 
 class ScanReceiptRequest(schemas.BaseModel):
     image_base64: str
@@ -106,7 +106,7 @@ async def scan_receipt_api(scan_request: ScanReceiptRequest, db: Session=Depends
         image_bytes = base64.b64decode(scan_request.image_base64)
         parsed_ocr_items = await ocr_service.parse_receipt_image(image_bytes)
     except Exception as e:
-        raise ValidationException(message='', code='BAD_REQUEST')
+        raise ValidationException(message='', error_code='BAD_REQUEST')
     response_items: List[ScannedItemResponse] = []
     for ocr_item in parsed_ocr_items:
         sku_match_result = f"SKU_FOR_{ocr_item.get('raw_text_name', '').split(' ')[0]}" if ocr_item.get('raw_text_name') else None

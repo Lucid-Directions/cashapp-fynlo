@@ -110,7 +110,7 @@ async def create_customer(customer_data: CustomerCreate, restaurant_id: Optional
     if not existing_customer and customer_data.phone:
         existing_customer = db.query(Customer).filter(and_(Customer.restaurant_id == restaurant_id, Customer.phone == customer_data.phone)).first()
     if existing_customer:
-        raise ValidationException(message='Customer already exists', code='BAD_REQUEST')
+        raise ValidationException(message='Customer already exists', error_code='BAD_REQUEST')
     new_customer = Customer(restaurant_id=restaurant_id, email=customer_data.email, phone=customer_data.phone, first_name=customer_data.first_name, last_name=customer_data.last_name, preferences=customer_data.preferences)
     db.add(new_customer)
     db.commit()
@@ -123,7 +123,7 @@ async def get_customer(customer_id: str, db: Session=Depends(get_db), current_us
     """Get a specific customer"""
     customer = db.query(Customer).filter(Customer.id == customer_id).first()
     if not customer:
-        raise ResourceNotFoundException(message='Customer not found', code='NOT_FOUND', resource_type='customer')
+        raise ResourceNotFoundException(message='Customer not found', error_code='NOT_FOUND', resource_type='customer')
     last_order = db.query(Order).filter(Order.customer_id == customer_id).order_by(desc(Order.created_at)).first()
     return CustomerResponse(id=str(customer.id), email=customer.email, phone=customer.phone, first_name=customer.first_name, last_name=customer.last_name, loyalty_points=customer.loyalty_points, total_spent=customer.total_spent, visit_count=customer.visit_count, preferences=customer.preferences, created_at=customer.created_at, updated_at=customer.updated_at, last_visit=last_order.created_at if last_order else None)
 
@@ -132,7 +132,7 @@ async def update_customer(customer_id: str, customer_data: CustomerUpdate, db: S
     """Update customer information"""
     customer = db.query(Customer).filter(Customer.id == customer_id).first()
     if not customer:
-        raise ResourceNotFoundException(message='Customer not found', code='NOT_FOUND', resource_type='customer')
+        raise ResourceNotFoundException(message='Customer not found', error_code='NOT_FOUND', resource_type='customer')
     ALLOWED_UPDATE_FIELDS = {'email', 'phone', 'first_name', 'last_name', 'preferences'}
     update_data = customer_data.dict(exclude_unset=True)
     for (field, value) in update_data.items():
@@ -150,9 +150,9 @@ async def update_loyalty_points(customer_id: str, loyalty_data: LoyaltyTransacti
     """Update customer loyalty points"""
     customer = db.query(Customer).filter(Customer.id == customer_id).first()
     if not customer:
-        raise ResourceNotFoundException(message='Customer not found', code='NOT_FOUND', resource_type='customer')
+        raise ResourceNotFoundException(message='Customer not found', error_code='NOT_FOUND', resource_type='customer')
     if loyalty_data.transaction_type == 'redeemed' and customer.loyalty_points < abs(loyalty_data.points):
-        raise ValidationException(message='Insufficient loyalty points', code='BAD_REQUEST')
+        raise ValidationException(message='Insufficient loyalty points', error_code='BAD_REQUEST')
     if loyalty_data.transaction_type == 'earned':
         customer.loyalty_points += abs(loyalty_data.points)
     elif loyalty_data.transaction_type == 'redeemed':
@@ -170,7 +170,7 @@ async def get_customer_orders(customer_id: str, limit: int=Query(20, le=50), off
     """Get customer's order history"""
     customer = db.query(Customer).filter(Customer.id == customer_id).first()
     if not customer:
-        raise ResourceNotFoundException(message='Customer not found', code='NOT_FOUND', resource_type='customer')
+        raise ResourceNotFoundException(message='Customer not found', error_code='NOT_FOUND', resource_type='customer')
     orders = db.query(Order).filter(Order.customer_id == customer_id).order_by(desc(Order.created_at)).offset(offset).limit(limit).all()
     return [{'id': str(order.id), 'order_number': order.order_number, 'status': order.status, 'total_amount': order.total_amount, 'payment_status': order.payment_status, 'created_at': order.created_at} for order in orders]
 

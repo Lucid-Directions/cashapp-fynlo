@@ -95,7 +95,7 @@ async def get_current_restaurant(db: Session=Depends(get_db), current_user: User
         raise ResourceNotFoundException(message="No restaurant associated with user", resource_type="User")
     restaurant = db.query(Restaurant).filter(Restaurant.id == current_user.restaurant_id).first()
     if not restaurant:
-        raise ResourceNotFoundException(message='Restaurant not found', code='NOT_FOUND', resource_type='restaurant')
+        raise ResourceNotFoundException(message='Restaurant not found', error_code='NOT_FOUND', resource_type='restaurant')
     return RestaurantResponse(id=str(restaurant.id), platform_id=str(restaurant.platform_id) if restaurant.platform_id else None, name=restaurant.name, address=restaurant.address, phone=restaurant.phone, email=restaurant.email, timezone=restaurant.timezone, business_hours=restaurant.business_hours, settings=restaurant.settings, tax_configuration=restaurant.tax_configuration, payment_methods=restaurant.payment_methods, is_active=restaurant.is_active, created_at=restaurant.created_at, updated_at=restaurant.updated_at)
 
 @router.post('/', response_model=RestaurantResponse)
@@ -106,20 +106,20 @@ async def create_restaurant(restaurant_data: RestaurantCreate, platform_id: Opti
     platform_id = platform_id or str(current_user.platform_id)
     platform = db.query(Platform).filter(Platform.id == platform_id).first()
     if not platform:
-        raise ResourceNotFoundException(message='Platform not found', code='NOT_FOUND', resource_type='platform')
+        raise ResourceNotFoundException(message='Platform not found', error_code='NOT_FOUND', resource_type='platform')
     try:
         validated_address = validate_model_jsonb_fields('restaurant', 'address', restaurant_data.address)
         validated_business_hours = validate_model_jsonb_fields('restaurant', 'business_hours', restaurant_data.business_hours)
         validated_settings = validate_model_jsonb_fields('restaurant', 'settings', restaurant_data.settings)
     except ValidationErr as e:
-        raise FynloException(error_code=ErrorCodes.VALIDATION_ERROR, detail=f'JSONB validation failed: {str(e)}')
+        raise FynloException(error_error_code=ErrorCodes.VALIDATION_ERROR, detail=f'JSONB validation failed: {str(e)}')
     if restaurant_data.email and (not validate_email(restaurant_data.email)):
-        raise FynloException(error_code=ErrorCodes.VALIDATION_ERROR, detail='Invalid email format')
+        raise FynloException(error_error_code=ErrorCodes.VALIDATION_ERROR, detail='Invalid email format')
     if restaurant_data.phone and (not validate_phone(restaurant_data.phone)):
-        raise FynloException(error_code=ErrorCodes.VALIDATION_ERROR, detail='Invalid phone number format')
+        raise FynloException(error_error_code=ErrorCodes.VALIDATION_ERROR, detail='Invalid phone number format')
     sanitized_name = sanitize_string(restaurant_data.name, 255)
     if not sanitized_name:
-        raise FynloException(error_code=ErrorCodes.VALIDATION_ERROR, detail='Restaurant name cannot be empty')
+        raise FynloException(error_error_code=ErrorCodes.VALIDATION_ERROR, detail='Restaurant name cannot be empty')
     new_restaurant = Restaurant(platform_id=platform_id, name=sanitized_name, address=validated_address, phone=restaurant_data.phone, email=restaurant_data.email, timezone=restaurant_data.timezone, business_hours=validated_business_hours, settings=validated_settings)
     db.add(new_restaurant)
     db.commit()
@@ -130,12 +130,12 @@ async def create_restaurant(restaurant_data: RestaurantCreate, platform_id: Opti
 async def create_restaurant_onboarding(restaurant_data: RestaurantOnboardingCreate, db: Session=Depends(get_db), current_user: User=Depends(get_current_user)):
     """Create a restaurant during onboarding for users without restaurants"""
     if current_user.restaurant_id:
-        raise ValidationException(message='User already has a restaurant associated', code='BAD_REQUEST')
+        raise ValidationException(message='User already has a restaurant associated', error_code='BAD_REQUEST')
     platform_id = str(current_user.platform_id) if current_user.platform_id else None
     if not platform_id:
         default_platform = db.query(Platform).filter(Platform.name == 'Fynlo').first()
         if not default_platform:
-            raise FynloException(message='No default platform found', code='INTERNAL_ERROR')
+            raise FynloException(message='No default platform found', error_code='INTERNAL_ERROR')
         platform_id = str(default_platform.id)
     try:
         validated_address = validate_model_jsonb_fields('restaurant', 'address', restaurant_data.address)
@@ -143,14 +143,14 @@ async def create_restaurant_onboarding(restaurant_data: RestaurantOnboardingCrea
         settings = {'display_name': restaurant_data.display_name, 'business_type': restaurant_data.business_type, 'description': restaurant_data.description or '', 'website': restaurant_data.website or '', 'owner_info': restaurant_data.owner_info, 'bank_details': restaurant_data.bank_details, 'currency': 'GBP', 'date_format': 'DD/MM/YYYY', 'time_format': '24h', 'allow_tips': True, 'auto_gratuity_percentage': 12.5, 'print_receipt_default': True}
         validated_settings = validate_model_jsonb_fields('restaurant', 'settings', settings)
     except ValidationErr as e:
-        raise FynloException(error_code=ErrorCodes.VALIDATION_ERROR, detail=f'JSONB validation failed: {str(e)}')
+        raise FynloException(error_error_code=ErrorCodes.VALIDATION_ERROR, detail=f'JSONB validation failed: {str(e)}')
     if restaurant_data.email and (not validate_email(restaurant_data.email)):
-        raise FynloException(error_code=ErrorCodes.VALIDATION_ERROR, detail='Invalid email format')
+        raise FynloException(error_error_code=ErrorCodes.VALIDATION_ERROR, detail='Invalid email format')
     if restaurant_data.phone and (not validate_phone(restaurant_data.phone)):
-        raise FynloException(error_code=ErrorCodes.VALIDATION_ERROR, detail='Invalid phone number format')
+        raise FynloException(error_error_code=ErrorCodes.VALIDATION_ERROR, detail='Invalid phone number format')
     sanitized_name = sanitize_string(restaurant_data.name, 255)
     if not sanitized_name:
-        raise FynloException(error_code=ErrorCodes.VALIDATION_ERROR, detail='Restaurant name cannot be empty')
+        raise FynloException(error_error_code=ErrorCodes.VALIDATION_ERROR, detail='Restaurant name cannot be empty')
     from app.core.supabase_client import get_supabase_client
     supabase = get_supabase_client()
     supabase_user = None
@@ -194,11 +194,11 @@ async def update_restaurant(restaurant_id: str, restaurant_data: RestaurantUpdat
     """Update restaurant settings"""
     restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
     if not restaurant:
-        raise ResourceNotFoundException(message='Restaurant not found', code='NOT_FOUND', resource_type='restaurant')
+        raise ResourceNotFoundException(message='Restaurant not found', error_code='NOT_FOUND', resource_type='restaurant')
     if current_user.role == 'platform_owner' and str(restaurant.platform_id) != str(current_user.platform_id):
-        raise AuthenticationException(message='Access denied', code='UNAUTHORIZED')
+        raise AuthenticationException(message='Access denied', error_code='UNAUTHORIZED')
     if current_user.role in ['restaurant_owner', 'manager'] and str(restaurant.id) != str(current_user.restaurant_id):
-        raise AuthenticationException(message='Access denied', code='UNAUTHORIZED')
+        raise AuthenticationException(message='Access denied', error_code='UNAUTHORIZED')
     update_data = restaurant_data.dict(exclude_unset=True)
     try:
         if 'address' in update_data:
@@ -212,15 +212,15 @@ async def update_restaurant(restaurant_id: str, restaurant_data: RestaurantUpdat
         if 'payment_methods' in update_data:
             update_data['payment_methods'] = validate_model_jsonb_fields('restaurant', 'payment_methods', update_data['payment_methods'])
     except ValidationErr as e:
-        raise FynloException(error_code=ErrorCodes.VALIDATION_ERROR, detail=f'JSONB validation failed: {str(e)}')
+        raise FynloException(error_error_code=ErrorCodes.VALIDATION_ERROR, detail=f'JSONB validation failed: {str(e)}')
     if 'email' in update_data and update_data['email'] and (not validate_email(update_data['email'])):
-        raise FynloException(error_code=ErrorCodes.VALIDATION_ERROR, detail='Invalid email format')
+        raise FynloException(error_error_code=ErrorCodes.VALIDATION_ERROR, detail='Invalid email format')
     if 'phone' in update_data and update_data['phone'] and (not validate_phone(update_data['phone'])):
-        raise FynloException(error_code=ErrorCodes.VALIDATION_ERROR, detail='Invalid phone number format')
+        raise FynloException(error_error_code=ErrorCodes.VALIDATION_ERROR, detail='Invalid phone number format')
     if 'name' in update_data:
         sanitized_name = sanitize_string(update_data['name'], 255)
         if not sanitized_name:
-            raise FynloException(error_code=ErrorCodes.VALIDATION_ERROR, detail='Restaurant name cannot be empty')
+            raise FynloException(error_error_code=ErrorCodes.VALIDATION_ERROR, detail='Restaurant name cannot be empty')
         update_data['name'] = sanitized_name
     for (field, value) in update_data.items():
         setattr(restaurant, field, value)
@@ -234,11 +234,11 @@ async def get_restaurant_stats(restaurant_id: str, days: int=Query(30, le=365), 
     """Get restaurant performance statistics"""
     restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
     if not restaurant:
-        raise ResourceNotFoundException(message='Restaurant not found', code='NOT_FOUND', resource_type='restaurant')
+        raise ResourceNotFoundException(message='Restaurant not found', error_code='NOT_FOUND', resource_type='restaurant')
     if current_user.role == 'platform_owner' and str(restaurant.platform_id) != str(current_user.platform_id):
-        raise AuthenticationException(message='Access denied', code='UNAUTHORIZED')
+        raise AuthenticationException(message='Access denied', error_code='UNAUTHORIZED')
     if current_user.role in ['restaurant_owner', 'manager', 'employee'] and str(restaurant.id) != str(current_user.restaurant_id):
-        raise AuthenticationException(message='Access denied', code='UNAUTHORIZED')
+        raise AuthenticationException(message='Access denied', error_code='UNAUTHORIZED')
     today_start = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
     period_start = today_start - timedelta(days=days)
     daily_revenue = db.query(func.sum(Order.total_amount)).filter(and_(Order.restaurant_id == restaurant_id, Order.created_at >= today_start, Order.status == 'completed')).scalar() or 0
@@ -279,11 +279,11 @@ async def get_restaurant(restaurant_id: str, db: Session=Depends(get_db), curren
     """Get specific restaurant details"""
     restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
     if not restaurant:
-        raise ResourceNotFoundException(message='Restaurant not found', code='NOT_FOUND', resource_type='restaurant')
+        raise ResourceNotFoundException(message='Restaurant not found', error_code='NOT_FOUND', resource_type='restaurant')
     if current_user.role == 'platform_owner' and str(restaurant.platform_id) != str(current_user.platform_id):
-        raise AuthenticationException(message='Access denied', code='UNAUTHORIZED')
+        raise AuthenticationException(message='Access denied', error_code='UNAUTHORIZED')
     if current_user.role in ['restaurant_owner', 'manager', 'employee'] and str(restaurant.id) != str(current_user.restaurant_id):
-        raise AuthenticationException(message='Access denied', code='UNAUTHORIZED')
+        raise AuthenticationException(message='Access denied', error_code='UNAUTHORIZED')
     return RestaurantResponse(id=str(restaurant.id), platform_id=str(restaurant.platform_id) if restaurant.platform_id else None, name=restaurant.name, address=restaurant.address, phone=restaurant.phone, email=restaurant.email, timezone=restaurant.timezone, business_hours=restaurant.business_hours, settings=restaurant.settings, tax_configuration=restaurant.tax_configuration, payment_methods=restaurant.payment_methods, is_active=restaurant.is_active, created_at=restaurant.created_at, updated_at=restaurant.updated_at)
 
 class TableResponse(BaseModel):
@@ -369,7 +369,7 @@ async def create_table(table_data: TableCreate, current_user: User=Depends(get_c
     restaurant_id = str(current_user.restaurant_id)
     section = db.query(Section).filter(and_(Section.id == table_data.section_id, Section.restaurant_id == restaurant_id)).first()
     if not section:
-        raise FynloException(error_code=ErrorCodes.RESOURCE_NOT_FOUND, detail='Section not found')
+        raise FynloException(error_error_code=ErrorCodes.RESOURCE_NOT_FOUND, detail='Section not found')
     new_table = Table(restaurant_id=restaurant_id, section_id=table_data.section_id, name=table_data.name, seats=table_data.seats, x_position=table_data.x_position, y_position=table_data.y_position)
     db.add(new_table)
     db.commit()
@@ -381,10 +381,10 @@ async def update_table_status(table_id: str, status: str, current_user: User=Dep
     """Update table status"""
     valid_statuses = ['available', 'occupied', 'reserved', 'cleaning']
     if status not in valid_statuses:
-        raise FynloException(error_code=ErrorCodes.VALIDATION_ERROR, detail=f'Invalid status. Must be one of: {valid_statuses}')
+        raise FynloException(error_error_code=ErrorCodes.VALIDATION_ERROR, detail=f'Invalid status. Must be one of: {valid_statuses}')
     table = db.query(Table).filter(and_(Table.id == table_id, Table.restaurant_id == current_user.restaurant_id)).first()
     if not table:
-        raise FynloException(error_code=ErrorCodes.RESOURCE_NOT_FOUND, detail='Table not found')
+        raise FynloException(error_error_code=ErrorCodes.RESOURCE_NOT_FOUND, detail='Table not found')
     table.status = status
     table.updated_at = datetime.utcnow()
     db.commit()
@@ -403,12 +403,12 @@ async def update_table_server(table_id: str, server_id: Optional[str]=None, curr
     """Assign server to table"""
     table = db.query(Table).filter(and_(Table.id == table_id, Table.restaurant_id == current_user.restaurant_id)).first()
     if not table:
-        raise FynloException(error_code=ErrorCodes.RESOURCE_NOT_FOUND, detail='Table not found')
+        raise FynloException(error_error_code=ErrorCodes.RESOURCE_NOT_FOUND, detail='Table not found')
     server_name = None
     if server_id:
         server = db.query(User).filter(and_(User.id == server_id, User.restaurant_id == current_user.restaurant_id)).first()
         if not server:
-            raise FynloException(error_code=ErrorCodes.RESOURCE_NOT_FOUND, detail='Server not found')
+            raise FynloException(error_error_code=ErrorCodes.RESOURCE_NOT_FOUND, detail='Server not found')
         server_name = f'{server.first_name} {server.last_name}'
     table.server_id = server_id
     table.updated_at = datetime.utcnow()
@@ -427,7 +427,7 @@ async def get_floor_plan_layout(current_user: User=Depends(get_current_user), db
     restaurant_id = str(current_user.restaurant_id)
     restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
     if not restaurant:
-        raise FynloException(error_code=ErrorCodes.RESOURCE_NOT_FOUND, detail='Restaurant not found')
+        raise FynloException(error_error_code=ErrorCodes.RESOURCE_NOT_FOUND, detail='Restaurant not found')
     return APIResponseHelper.success(data={'layout': restaurant.floor_plan_layout or {}, 'restaurant_id': str(restaurant.id)}, message='Floor plan layout retrieved successfully')
 
 @router.put('/floor-plan/layout')
@@ -436,11 +436,11 @@ async def update_floor_plan_layout(layout_data: FloorPlanLayoutUpdate, current_u
     restaurant_id = str(current_user.restaurant_id)
     restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
     if not restaurant:
-        raise FynloException(error_code=ErrorCodes.RESOURCE_NOT_FOUND, detail='Restaurant not found')
+        raise FynloException(error_error_code=ErrorCodes.RESOURCE_NOT_FOUND, detail='Restaurant not found')
     try:
         validated_layout = validate_model_jsonb_fields('restaurant', 'floor_plan_layout', layout_data.layout)
     except ValidationErr as e:
-        raise FynloException(error_code=ErrorCodes.VALIDATION_ERROR, detail=f'Layout validation failed: {str(e)}')
+        raise FynloException(error_error_code=ErrorCodes.VALIDATION_ERROR, detail=f'Layout validation failed: {str(e)}')
     restaurant.floor_plan_layout = validated_layout
     restaurant.updated_at = datetime.utcnow()
     db.commit()
@@ -459,7 +459,7 @@ async def update_table_position(table_id: str, position_data: TablePositionUpdat
     """Update table position and dimensions"""
     table = db.query(Table).filter(and_(Table.id == table_id, Table.restaurant_id == current_user.restaurant_id)).first()
     if not table:
-        raise FynloException(error_code=ErrorCodes.RESOURCE_NOT_FOUND, detail='Table not found')
+        raise FynloException(error_error_code=ErrorCodes.RESOURCE_NOT_FOUND, detail='Table not found')
     table.x_position = position_data.x_position
     table.y_position = position_data.y_position
     if position_data.width is not None:
@@ -490,14 +490,14 @@ async def merge_tables(merge_data: TableMergeRequest, current_user: User=Depends
     restaurant_id = str(current_user.restaurant_id)
     primary_table = db.query(Table).filter(and_(Table.id == merge_data.primary_table_id, Table.restaurant_id == restaurant_id)).first()
     if not primary_table:
-        raise FynloException(error_code=ErrorCodes.RESOURCE_NOT_FOUND, detail='Primary table not found')
+        raise FynloException(error_error_code=ErrorCodes.RESOURCE_NOT_FOUND, detail='Primary table not found')
     merge_tables = db.query(Table).filter(and_(Table.id.in_(merge_data.tables_to_merge), Table.restaurant_id == restaurant_id)).all()
     if len(merge_tables) != len(merge_data.tables_to_merge):
-        raise FynloException(error_code=ErrorCodes.VALIDATION_ERROR, detail='Some tables to merge were not found')
+        raise FynloException(error_error_code=ErrorCodes.VALIDATION_ERROR, detail='Some tables to merge were not found')
     occupied_tables = [t for t in [primary_table] + merge_tables if t.status == 'occupied']
     if occupied_tables:
         table_names = [t.name for t in occupied_tables]
-        raise FynloException(error_code=ErrorCodes.VALIDATION_ERROR, detail=f"Cannot merge occupied tables: {', '.join(table_names)}")
+        raise FynloException(error_error_code=ErrorCodes.VALIDATION_ERROR, detail=f"Cannot merge occupied tables: {', '.join(table_names)}")
     total_seats = primary_table.seats + sum((t.seats for t in merge_tables))
     primary_table.seats = total_seats
     primary_table.name = merge_data.merged_name or f'{primary_table.name} (Merged)'

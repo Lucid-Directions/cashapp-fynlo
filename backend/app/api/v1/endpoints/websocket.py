@@ -65,7 +65,6 @@ MAX_CONNECTIONS_PER_USER = 5
 # Background task for cleanup
 cleanup_task: Optional[asyncio.Task[None]] = None
 
-
 async def cleanup_connection_tracking() -> None:
     """Periodic cleanup of connection tracking data"""
     while True:
@@ -89,7 +88,6 @@ async def cleanup_connection_tracking() -> None:
             logger.error(f"Connection tracking cleanup error: {str(e)}")
             await asyncio.sleep(300)
 
-
 async def get_or_create_cleanup_task() -> Optional[asyncio.Task[None]]:
     """Lazy initialization of cleanup task"""
     global cleanup_task
@@ -100,7 +98,6 @@ async def get_or_create_cleanup_task() -> Optional[asyncio.Task[None]]:
             # Event loop not running yet
             pass
     return cleanup_task
-
 
 # CORS configuration
 ALLOWED_ORIGINS = [
@@ -115,7 +112,6 @@ ALLOWED_ORIGINS = [
     "fynlo://",  # Mobile app scheme
 ]
 
-
 def validate_uuid(value: str) -> bool:
     """Validate UUID format or special values"""
     if value == "onboarding":
@@ -125,7 +121,6 @@ def validate_uuid(value: str) -> bool:
         return True
     except ValueError:
         return False
-
 
 def validate_origin(origin: Optional[str]) -> bool:
     """Validate WebSocket origin"""
@@ -146,7 +141,6 @@ def validate_origin(origin: Optional[str]) -> bool:
 
     return False
 
-
 async def check_rate_limit(identifier: str) -> bool:
     """Check WebSocket connection rate limit"""
     current_time = datetime.now()
@@ -161,14 +155,12 @@ async def check_rate_limit(identifier: str) -> bool:
     connection_tracker[identifier]["count"] += 1
     return True
 
-
 async def check_connection_limit(user_id: str) -> bool:
     """Check if user has reached connection limit"""
     if len(user_connections[user_id]) >= MAX_CONNECTIONS_PER_USER:
         logger.warning(f"Connection limit exceeded for user {user_id}")
         return False
     return True
-
 
 def sanitize_message_data(data: Any, depth: int = 0, max_depth: int = 10) -> Any:
     """Sanitize all string values in message data while preserving key types"""
@@ -187,7 +179,6 @@ def sanitize_message_data(data: Any, depth: int = 0, max_depth: int = 10) -> Any
         return sanitize_string(data, max_length=1000)
     else:
         return data
-
 
 async def perform_security_checks(
     websocket: WebSocket, user_id: Optional[str] = None
@@ -222,7 +213,6 @@ async def perform_security_checks(
         return False
 
     return True
-
 
 async def verify_websocket_access(
     restaurant_id: str,
@@ -370,7 +360,6 @@ async def verify_websocket_access(
     except Exception as e:
         logger.error(f"WebSocket access verification error: {str(e)}")
         return False, None
-
 
 @router.websocket("/ws/{restaurant_id}")
 async def websocket_endpoint_general(
@@ -565,7 +554,6 @@ async def websocket_endpoint_general(
             except Exception as cleanup_error:
                 logger.error("Error during websocket cleanup: %s", str(cleanup_error))
 
-
 @router.websocket("/ws/kitchen/{restaurant_id}")
 async def websocket_kitchen_endpoint(
     websocket: WebSocket,
@@ -717,7 +705,6 @@ async def websocket_kitchen_endpoint(
             except Exception as cleanup_error:
                 logger.error("Error during websocket cleanup: %s", str(cleanup_error))
 
-
 @router.websocket("/ws/pos/{restaurant_id}")
 async def websocket_pos_endpoint(
     websocket: WebSocket,
@@ -868,7 +855,6 @@ async def websocket_pos_endpoint(
                 await websocket_manager.disconnect(connection_id)
             except Exception as cleanup_error:
                 logger.error("Error during websocket cleanup: %s", str(cleanup_error))
-
 
 @router.websocket("/ws/management/{restaurant_id}")
 async def websocket_management_endpoint(
@@ -1022,9 +1008,7 @@ async def websocket_management_endpoint(
             except Exception as cleanup_error:
                 logger.error("Error during websocket cleanup: %s", str(cleanup_error))
 
-
 # Message handlers
-
 
 async def handle_subscription(connection_id: str, message_data: dict) -> None:
     """Handle event subscription requests"""
@@ -1044,7 +1028,6 @@ async def handle_subscription(connection_id: str, message_data: dict) -> None:
     except Exception as e:
         logger.error(f"Subscription error: {str(e)}")
 
-
 async def handle_unsubscription(connection_id: str, message_data: dict) -> None:
     """Handle event unsubscription requests"""
     try:
@@ -1055,7 +1038,6 @@ async def handle_unsubscription(connection_id: str, message_data: dict) -> None:
 
     except Exception as e:
         logger.error(f"Unsubscription error: {str(e)}")
-
 
 async def handle_kitchen_status_update(
     connection_id: str, restaurant_id: str, message_data: dict, db: Session
@@ -1108,7 +1090,6 @@ async def handle_kitchen_status_update(
     except Exception as e:
         logger.error(f"Kitchen status update error: {str(e)}")
 
-
 async def handle_preparation_time_update(
     connection_id: str, restaurant_id: str, message_data: dict, db: Session
 ) -> None:
@@ -1157,7 +1138,6 @@ async def handle_preparation_time_update(
     except Exception as e:
         logger.error(f"Preparation time update error: {str(e)}")
 
-
 async def handle_pos_order_created(
     connection_id: str, restaurant_id: str, message_data: dict, db: Session
 ) -> None:
@@ -1182,7 +1162,6 @@ async def handle_pos_order_created(
     except Exception as e:
         logger.error(f"POS order created error: {str(e)}")
 
-
 async def handle_pos_payment_processed(
     connection_id: str, restaurant_id: str, message_data: dict, db: Session
 ) -> None:
@@ -1204,7 +1183,6 @@ async def handle_pos_payment_processed(
 
     except Exception as e:
         logger.error(f"POS payment processed error: {str(e)}")
-
 
 async def handle_analytics_request(
     connection_id: str, restaurant_id: str, message_data: dict, db: Session
@@ -1230,9 +1208,7 @@ async def handle_analytics_request(
     except Exception as e:
         logger.error(f"Analytics request error: {str(e)}")
 
-
 # REST endpoints for WebSocket management
-
 
 @router.get("/stats")
 async def get_websocket_stats(
@@ -1262,7 +1238,6 @@ async def get_websocket_stats(
             error_code=ErrorCodes.INTERNAL_ERROR,
             status_code=500,
         )
-
 
 @router.post("/broadcast/{restaurant_id}")
 async def broadcast_message(

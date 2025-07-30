@@ -78,7 +78,7 @@ class EmployeeService:
             # Check if user has access to this employee
             if current_user and hasattr(current_user, 'restaurant_id'):
                 if employee.restaurant_id != current_user.restaurant_id:
-                    raise FynloException("Access denied to this employee", status_code=403)
+                    raise FynloException("Access denied to this employee", status_error_code=403)
             
             return EmployeeResponse.from_orm(employee)
             
@@ -106,7 +106,7 @@ class EmployeeService:
             # Check if user has access to this restaurant
             if current_user and hasattr(current_user, 'restaurant_id'):
                 if employee_data.restaurant_id != current_user.restaurant_id:
-                    raise FynloException("Access denied to this restaurant", status_code=403)
+                    raise FynloException("Access denied to this restaurant", status_error_code=403)
             
             # Check if email already exists
             existing_employee = db.query(EmployeeProfile).filter(
@@ -186,7 +186,7 @@ class EmployeeService:
             # Check access
             if current_user and hasattr(current_user, 'restaurant_id'):
                 if employee.restaurant_id != current_user.restaurant_id:
-                    raise FynloException("Access denied to this employee", status_code=403)
+                    raise FynloException("Access denied to this employee", status_error_code=403)
             
             # Update fields if provided
             update_data = employee_data.dict(exclude_unset=True)
@@ -226,7 +226,7 @@ class EmployeeService:
             # Check access
             if current_user and hasattr(current_user, 'restaurant_id'):
                 if employee.restaurant_id != current_user.restaurant_id:
-                    raise FynloException("Access denied to this employee", status_code=403)
+                    raise FynloException("Access denied to this employee", status_error_code=403)
             
             # Soft delete - mark as inactive
             employee.is_active = False
@@ -265,7 +265,7 @@ class EmployeeService:
             # Verify employee exists and user has access
             employee = self.get_employee_by_id(db, employee_id, current_user)
             if not employee:
-                raise FynloException("Employee not found", status_code=404)
+                raise FynloException("Employee not found", status_error_code=404)
             
             query = db.query(Schedule).filter(Schedule.employee_id == employee_id)
             
@@ -296,7 +296,7 @@ class EmployeeService:
             # Verify employee exists and user has access
             employee = self.get_employee_by_id(db, employee_id, current_user)
             if not employee:
-                raise FynloException("Employee not found", status_code=404)
+                raise FynloException("Employee not found", status_error_code=404)
             
             # Check for conflicts if recurring
             if schedule_data.is_recurring:
@@ -350,7 +350,7 @@ class EmployeeService:
             # Verify employee exists
             employee = self.get_employee_by_id(db, employee_id, current_user)
             if not employee:
-                raise FynloException("Employee not found", status_code=404)
+                raise FynloException("Employee not found", status_error_code=404)
             
             # Check if already clocked in
             existing_shift = db.query(Shift).filter(
@@ -458,7 +458,7 @@ class EmployeeService:
             # Check access
             if current_user and hasattr(current_user, 'restaurant_id'):
                 if restaurant_id != current_user.restaurant_id:
-                    raise FynloException("Access denied to this restaurant", status_code=403)
+                    raise FynloException("Access denied to this restaurant", status_error_code=403)
             
             # Get basic counts
             total_employees = db.query(EmployeeProfile).filter(
@@ -534,7 +534,7 @@ class EmployeeService:
             # Check access
             if current_user and hasattr(current_user, 'restaurant_id'):
                 if restaurant_id != current_user.restaurant_id:
-                    raise FynloException("Access denied to this restaurant", status_code=403)
+                    raise FynloException("Access denied to this restaurant", status_error_code=403)
             
             if not week_start:
                 # Default to current week (Monday as start)
@@ -628,7 +628,7 @@ class EmployeeService:
             # Verify employee exists and user has access
             employee = self.get_employee_by_id(db, employee_id, current_user)
             if not employee:
-                raise FynloException("Employee not found", status_code=404)
+                raise FynloException("Employee not found", status_error_code=404)
             
             query = db.query(Shift).filter(Shift.employee_id == employee_id)
             
@@ -660,7 +660,7 @@ class EmployeeService:
             # Verify employee exists and user has access
             employee = self.get_employee_by_id(db, employee_id, current_user)
             if not employee:
-                raise FynloException("Employee not found", status_code=404)
+                raise FynloException("Employee not found", status_error_code=404)
             
             query = db.query(PerformanceMetric).filter(
                 PerformanceMetric.employee_id == employee_id
@@ -699,7 +699,7 @@ class EmployeeService:
             # Check access through employee
             employee = self.get_employee_by_id(db, schedule.employee_id, current_user)
             if not employee:
-                raise FynloException("Access denied", status_code=403)
+                raise FynloException("Access denied", status_error_code=403)
             
             # Update fields if provided
             update_data = schedule_data.dict(exclude_unset=True)
@@ -735,7 +735,7 @@ class EmployeeService:
             # Check access through employee
             employee = self.get_employee_by_id(db, schedule.employee_id, current_user)
             if not employee:
-                raise FynloException("Access denied", status_code=403)
+                raise FynloException("Access denied", status_error_code=403)
             
             db.delete(schedule)
             db.commit()

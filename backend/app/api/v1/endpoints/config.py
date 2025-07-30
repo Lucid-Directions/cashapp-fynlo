@@ -45,7 +45,7 @@ async def get_configuration_summary(current_user: User=Depends(get_current_user)
         summary['runtime'] = {'available_providers': available_providers, 'total_providers_configured': len(config_manager.providers), 'enabled_providers': len(config_manager.get_enabled_providers())}
         return APIResponseHelper.success(data=summary, message='Configuration summary retrieved successfully')
     except Exception as e:
-        raise FynloException(message='', code='INTERNAL_ERROR')
+        raise FynloException(message='', error_code='INTERNAL_ERROR')
 
 @router.get('/providers')
 async def get_provider_configurations(current_user: User=Depends(get_current_user)):
@@ -56,7 +56,7 @@ async def get_provider_configurations(current_user: User=Depends(get_current_use
             providers_config[name] = {'name': config.name, 'enabled': config.enabled, 'environment': config.environment, 'webhook_url': config.webhook_url, 'timeout_seconds': config.timeout_seconds, 'retry_attempts': config.retry_attempts, 'custom_settings': config.custom_settings, 'has_api_key': bool(config.api_key), 'has_secret_key': bool(config.secret_key)}
         return APIResponseHelper.success(data=providers_config, message=f'Retrieved configuration for {len(providers_config)} providers')
     except Exception as e:
-        raise FynloException(message='', code='INTERNAL_ERROR')
+        raise FynloException(message='', error_code='INTERNAL_ERROR')
 
 @router.get('/providers/{provider_name}')
 async def get_provider_configuration(provider_name: str, current_user: User=Depends(get_current_user)):
@@ -70,7 +70,7 @@ async def get_provider_configuration(provider_name: str, current_user: User=Depe
     except HTTPException:
         raise
     except Exception as e:
-        raise FynloException(message='', code='INTERNAL_ERROR')
+        raise FynloException(message='', error_code='INTERNAL_ERROR')
 
 @router.put('/providers/{provider_name}')
 async def update_provider_configuration(provider_name: str, config_update: ProviderConfigRequest, current_user: User=Depends(get_current_user)):
@@ -79,7 +79,7 @@ async def update_provider_configuration(provider_name: str, config_update: Provi
         current_config = config_manager.get_provider_config(provider_name)
         update_data = {k: v for (k, v) in config_update.dict().items() if v is not None}
         if not update_data:
-            raise ValidationException(message='No configuration changes provided', code='BAD_REQUEST')
+            raise ValidationException(message='No configuration changes provided', error_code='BAD_REQUEST')
         config_manager.update_provider_config(provider_name, **update_data)
         config_manager.save_configuration('providers')
         updated_config = config_manager.get_provider_config(provider_name)
@@ -87,7 +87,7 @@ async def update_provider_configuration(provider_name: str, config_update: Provi
     except HTTPException:
         raise
     except Exception as e:
-        raise FynloException(message='', code='INTERNAL_ERROR')
+        raise FynloException(message='', error_code='INTERNAL_ERROR')
 
 @router.get('/routing')
 async def get_routing_configuration(current_user: User=Depends(get_current_user)):
@@ -97,7 +97,7 @@ async def get_routing_configuration(current_user: User=Depends(get_current_user)
         config_data = {'enabled': routing_config.enabled, 'default_strategy': routing_config.default_strategy, 'volume_thresholds': {k: float(v) for (k, v) in routing_config.volume_thresholds.items()}, 'provider_weights': routing_config.provider_weights, 'fallback_provider': routing_config.fallback_provider, 'available_strategies': [strategy.value for strategy in RoutingStrategy]}
         return APIResponseHelper.success(data=config_data, message='Routing configuration retrieved successfully')
     except Exception as e:
-        raise FynloException(message='', code='INTERNAL_ERROR')
+        raise FynloException(message='', error_code='INTERNAL_ERROR')
 
 @router.put('/routing')
 async def update_routing_configuration(config_update: RoutingConfigRequest, current_user: User=Depends(get_current_user)):
@@ -111,17 +111,17 @@ async def update_routing_configuration(config_update: RoutingConfigRequest, curr
                 RoutingStrategy(config_update.default_strategy)
                 routing_config.default_strategy = config_update.default_strategy
             except ValueError:
-                raise ValidationException(message='', code='BAD_REQUEST')
+                raise ValidationException(message='', error_code='BAD_REQUEST')
         if config_update.fallback_provider is not None:
             if config_update.fallback_provider not in config_manager.providers:
-                raise ValidationException(message='', code='BAD_REQUEST')
+                raise ValidationException(message='', error_code='BAD_REQUEST')
             routing_config.fallback_provider = config_update.fallback_provider
         config_manager.save_configuration('routing')
         return APIResponseHelper.success(data={'enabled': routing_config.enabled, 'default_strategy': routing_config.default_strategy, 'fallback_provider': routing_config.fallback_provider}, message='Routing configuration updated successfully')
     except HTTPException:
         raise
     except Exception as e:
-        raise FynloException(message='', code='INTERNAL_ERROR')
+        raise FynloException(message='', error_code='INTERNAL_ERROR')
 
 @router.get('/features')
 async def get_feature_flags(current_user: User=Depends(get_current_user)):
@@ -131,7 +131,7 @@ async def get_feature_flags(current_user: User=Depends(get_current_user)):
         feature_flags = {'smart_routing_enabled': features.smart_routing_enabled, 'analytics_enabled': features.analytics_enabled, 'volume_tracking_enabled': features.volume_tracking_enabled, 'qr_payments_enabled': features.qr_payments_enabled, 'cash_payments_enabled': features.cash_payments_enabled, 'auto_refunds_enabled': features.auto_refunds_enabled, 'webhook_retries_enabled': features.webhook_retries_enabled, 'cost_optimization_alerts': features.cost_optimization_alerts}
         return APIResponseHelper.success(data=feature_flags, message='Feature flags retrieved successfully')
     except Exception as e:
-        raise FynloException(message='', code='INTERNAL_ERROR')
+        raise FynloException(message='', error_code='INTERNAL_ERROR')
 
 @router.put('/features')
 async def update_feature_flag(feature_update: FeatureFlagRequest, current_user: User=Depends(get_current_user)):
@@ -141,7 +141,7 @@ async def update_feature_flag(feature_update: FeatureFlagRequest, current_user: 
         config_manager.save_configuration('features')
         return APIResponseHelper.success(data={'feature_name': feature_update.feature_name, 'enabled': feature_update.enabled}, message=f"Feature flag '{feature_update.feature_name}' updated successfully")
     except Exception as e:
-        raise FynloException(message='', code='INTERNAL_ERROR')
+        raise FynloException(message='', error_code='INTERNAL_ERROR')
 
 @router.get('/security')
 async def get_security_configuration(current_user: User=Depends(get_current_user)):
@@ -151,7 +151,7 @@ async def get_security_configuration(current_user: User=Depends(get_current_user
         config_data = {'encrypt_api_keys': security_config.encrypt_api_keys, 'webhook_signature_validation': security_config.webhook_signature_validation, 'rate_limiting_enabled': security_config.rate_limiting_enabled, 'max_requests_per_minute': security_config.max_requests_per_minute, 'allowed_origins': security_config.allowed_origins, 'ssl_required': security_config.ssl_required}
         return APIResponseHelper.success(data=config_data, message='Security configuration retrieved successfully')
     except Exception as e:
-        raise FynloException(message='', code='INTERNAL_ERROR')
+        raise FynloException(message='', error_code='INTERNAL_ERROR')
 
 @router.post('/validate')
 async def validate_configuration(current_user: User=Depends(get_current_user)):
@@ -169,7 +169,7 @@ async def validate_configuration(current_user: User=Depends(get_current_user)):
         validation_result = {'valid': len(issues) == 0, 'issues': issues, 'enabled_providers': enabled_providers, 'routing_enabled': config_manager.routing.enabled, 'features_enabled': {name: getattr(config_manager.features, name) for name in dir(config_manager.features) if not name.startswith('_')}}
         return APIResponseHelper.success(data=validation_result, message='Configuration validation completed')
     except Exception as e:
-        raise FynloException(message='', code='INTERNAL_ERROR')
+        raise FynloException(message='', error_code='INTERNAL_ERROR')
 
 @router.get('/monitoring/health')
 async def get_system_health(db: Session=Depends(get_db), current_user: User=Depends(get_current_user)):
@@ -179,21 +179,21 @@ async def get_system_health(db: Session=Depends(get_db), current_user: User=Depe
         health_status = await monitoring_service.check_system_health()
         return APIResponseHelper.success(data=health_status, message='System health status retrieved successfully')
     except Exception as e:
-        raise FynloException(message='', code='INTERNAL_ERROR')
+        raise FynloException(message='', error_code='INTERNAL_ERROR')
 
 @router.get('/monitoring/metrics')
 async def get_system_metrics(hours: int=24, db: Session=Depends(get_db), current_user: User=Depends(get_current_user)):
     """Get system metrics for specified time period"""
     try:
         if hours < 1 or hours > 168:
-            raise ValidationException(message='Hours must be between 1 and 168', code='INVALID_VALUE', field='Hours')
+            raise ValidationException(message='Hours must be between 1 and 168', error_code='INVALID_VALUE', field='Hours')
         monitoring_service = get_monitoring_service(db)
         metrics = await monitoring_service.get_system_metrics(hours)
         return APIResponseHelper.success(data=metrics, message=f'System metrics for last {hours} hours retrieved successfully')
     except HTTPException:
         raise
     except Exception as e:
-        raise FynloException(message='', code='INTERNAL_ERROR')
+        raise FynloException(message='', error_code='INTERNAL_ERROR')
 
 @router.put('/monitoring/thresholds')
 async def update_monitoring_thresholds(threshold_update: ThresholdUpdateRequest, db: Session=Depends(get_db), current_user: User=Depends(get_current_user)):
@@ -203,7 +203,7 @@ async def update_monitoring_thresholds(threshold_update: ThresholdUpdateRequest,
         await monitoring_service.update_thresholds(threshold_update.thresholds)
         return APIResponseHelper.success(data=threshold_update.thresholds, message='Monitoring thresholds updated successfully')
     except Exception as e:
-        raise FynloException(message='', code='INTERNAL_ERROR')
+        raise FynloException(message='', error_code='INTERNAL_ERROR')
 
 @router.post('/test/routing')
 async def test_routing_simulation(restaurant_id: str, strategy: str, db: Session=Depends(get_db), current_user: User=Depends(get_current_user)):
@@ -212,13 +212,13 @@ async def test_routing_simulation(restaurant_id: str, strategy: str, db: Session
         try:
             routing_strategy = RoutingStrategy(strategy)
         except ValueError:
-            raise ValidationException(message='', code='BAD_REQUEST')
+            raise ValidationException(message='', error_code='BAD_REQUEST')
         simulation_result = await payment_factory.simulate_routing_impact(restaurant_id=restaurant_id, strategy=routing_strategy, db_session=db)
         return APIResponseHelper.success(data=simulation_result, message='Routing simulation completed successfully')
     except HTTPException:
         raise
     except Exception as e:
-        raise FynloException(message='', code='INTERNAL_ERROR')
+        raise FynloException(message='', error_code='INTERNAL_ERROR')
 
 @router.post('/backup')
 async def backup_configuration(current_user: User=Depends(get_current_user)):
@@ -228,4 +228,4 @@ async def backup_configuration(current_user: User=Depends(get_current_user)):
         summary = config_manager.get_configuration_summary()
         return APIResponseHelper.success(data={'backup_timestamp': summary, 'backup_location': f'config/payment_config_{config_manager.environment.value}.json'}, message='Configuration backup created successfully')
     except Exception as e:
-        raise FynloException(message='', code='INTERNAL_ERROR')
+        raise FynloException(message='', error_code='INTERNAL_ERROR')

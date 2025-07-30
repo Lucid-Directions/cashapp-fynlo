@@ -61,7 +61,7 @@ async def calculate_fees_for_order(request: FeeCalculationRequest, db: Session=D
         if payment_method_setting.allow_toggle_by_merchant:
             customer_pays_processor_fees = request.force_customer_pays_processor_fees
         else:
-            raise ValidationException(message='', code='BAD_REQUEST')
+            raise ValidationException(message='', error_code='BAD_REQUEST')
     include_processor_fee_in_sc = payment_method_setting.include_processor_fee_in_service_charge
     final_service_charge_amount = 0.0
     service_charge_breakdown_details: Optional[ServiceChargeBreakdown] = None
@@ -70,14 +70,14 @@ async def calculate_fees_for_order(request: FeeCalculationRequest, db: Session=D
             service_charge_breakdown_details = await service_charge_calc.calculate_service_charge_with_fees(order_subtotal=request.subtotal, service_charge_config_rate=request.service_charge_config_rate, payment_method=request.payment_method, customer_pays_processor_fees=customer_pays_processor_fees, include_processor_fee_in_service_charge=include_processor_fee_in_sc, restaurant_id=request.restaurant_id, monthly_volume_for_restaurant=request.monthly_volume_for_restaurant)
             final_service_charge_amount = service_charge_breakdown_details['final_service_charge_amount']
         except Exception as e:
-            raise FynloException(message='', code='INTERNAL_ERROR')
+            raise FynloException(message='', error_code='INTERNAL_ERROR')
     try:
         customer_total_breakdown = await platform_fee_service.calculate_customer_total(subtotal=request.subtotal, vat_amount=request.vat_amount, service_charge_final_amount=final_service_charge_amount, payment_method=request.payment_method, customer_pays_processor_fees=customer_pays_processor_fees, restaurant_id=request.restaurant_id, monthly_volume_for_restaurant=request.monthly_volume_for_restaurant)
         return customer_total_breakdown
     except ValueError as ve:
-        raise ValidationException(message='', code='BAD_REQUEST')
+        raise ValidationException(message='', error_code='BAD_REQUEST')
     except Exception as e:
-        raise FynloException(message='', code='INTERNAL_ERROR')
+        raise FynloException(message='', error_code='INTERNAL_ERROR')
 
 @router.post('/platform-fees/record', response_model=PlatformFeeRecordSchema, status_code=201)
 async def record_platform_fee(fee_data_input: PlatformFeeRecordInput, financial_records_service: FinancialRecordsService=Depends(get_financial_records_service)):
@@ -90,6 +90,6 @@ async def record_platform_fee(fee_data_input: PlatformFeeRecordInput, financial_
         db_record = financial_records_service.create_platform_fee_record(fee_data_schema)
         return PlatformFeeRecordSchema(id=db_record.id, order_id=db_record.order_reference, platform_fee_amount=float(db_record.platform_fee_amount), processor_fee_amount=float(db_record.processor_fee_amount), customer_paid_processor=db_record.customer_paid_processor_fee, payment_method=PaymentMethodEnum(db_record.payment_method), transaction_timestamp=db_record.transaction_timestamp.isoformat())
     except ValueError as ve:
-        raise ValidationException(message='', code='BAD_REQUEST')
+        raise ValidationException(message='', error_code='BAD_REQUEST')
     except Exception as e:
-        raise FynloException(message='', code='INTERNAL_ERROR')
+        raise FynloException(message='', error_code='INTERNAL_ERROR')

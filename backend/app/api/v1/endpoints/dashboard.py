@@ -22,7 +22,7 @@ router = APIRouter()
 async def get_dashboard_metrics(request: Request, restaurant_id: str, period: str=Query('today', regex='^(today|week|month|year)$'), db: Session=Depends(get_db), current_user: User=Depends(get_current_user), redis: RedisClient=Depends(get_redis)):
     """Get aggregated dashboard metrics for a restaurant"""
     if str(current_user.restaurant_id) != restaurant_id and current_user.role != 'platform_owner':
-        raise AuthenticationException(message='Not authorized to view this dashboard', code='UNAUTHORIZED')
+        raise AuthenticationException(message='Not authorized to view this dashboard', error_code='UNAUTHORIZED')
     cache_key = f'dashboard:{restaurant_id}:{period}'
     cached_data = await redis.get(cache_key)
     if cached_data:

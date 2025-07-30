@@ -34,7 +34,7 @@ def verify_platform_owner_access(current_user: User, verification_token: Optiona
     Verify that the current user is a platform owner with proper authentication
     """
     if current_user.role != 'platform_owner':
-        raise AuthenticationException(message='Access denied: Platform owner role required', code='UNAUTHORIZED')
+        raise AuthenticationException(message='Access denied: Platform owner role required', error_code='UNAUTHORIZED')
     if settings.PLATFORM_OWNER_SECRET_KEY and verification_token:
         expected_token = hmac.new(settings.PLATFORM_OWNER_SECRET_KEY.encode(), f"{current_user.id}:{datetime.utcnow().strftime('%Y-%m-%d')}".encode(), hashlib.sha256).hexdigest()
         if not hmac.compare_digest(verification_token, expected_token):
@@ -49,10 +49,10 @@ async def grant_platform_owner_role(request: GrantPlatformOwnerRequest, db: Sess
     """
     verify_platform_owner_access(current_user, verification_token)
     if not request.verification_code or len(request.verification_code) < 6:
-        raise ValidationException(message='Invalid verification code', code='BAD_REQUEST')
+        raise ValidationException(message='Invalid verification code', error_code='BAD_REQUEST')
     target_user = db.query(User).filter(User.email == request.user_email).first()
     if not target_user:
-        raise ResourceNotFoundException(message='User not found', code='NOT_FOUND', resource_type='user')
+        raise ResourceNotFoundException(message='User not found', error_code='NOT_FOUND', resource_type='user')
     if target_user.role == 'platform_owner':
         return APIResponseHelper.success(message='User already has platform owner role')
     target_user.role = 'platform_owner'
@@ -72,7 +72,7 @@ async def revoke_platform_owner_role(request: RevokePlatformOwnerRequest, db: Se
         raise BusinessLogicException(message='Cannot revoke your own platform owner role', code='OPERATION_NOT_ALLOWED')
     target_user = db.query(User).filter(User.email == request.user_email).first()
     if not target_user:
-        raise ResourceNotFoundException(message='User not found', code='NOT_FOUND', resource_type='user')
+        raise ResourceNotFoundException(message='User not found', error_code='NOT_FOUND', resource_type='user')
     if target_user.role != 'platform_owner':
         return APIResponseHelper.success(message='User does not have platform owner role')
     platform_owner_count = db.query(User).filter(User.role == 'platform_owner').count()
@@ -91,6 +91,6 @@ async def list_platform_owners(db: Session=Depends(get_db), current_user: User=D
     Requires: Current user must be platform owner
     """
     if current_user.role != 'platform_owner':
-        raise AuthenticationException(message='Access denied: Platform owner role required', code='UNAUTHORIZED')
+        raise AuthenticationException(message='Access denied: Platform owner role required', error_code='UNAUTHORIZED')
     platform_owners = db.query(User).filter(User.role == 'platform_owner').all()
     return APIResponseHelper.success(data=[{'id': str(owner.id), 'email': owner.email, 'name': f'{owner.first_name} {owner.last_name}'.strip() or owner.email, 'created_at': owner.created_at.isoformat() if owner.created_at else None} for owner in platform_owners], message=f'Found {len(platform_owners)} platform owners')

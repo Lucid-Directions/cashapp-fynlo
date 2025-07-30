@@ -113,7 +113,7 @@ async def generate_qr_payment(payment_request: QRPaymentRequest, request: Reques
     user_agent = request.headers.get('user-agent', 'unknown')
     order = db.query(Order).filter(Order.id == payment_request.order_id).first()
     if not order:
-        raise ResourceNotFoundException(message='Order not found', code='NOT_FOUND', resource_type='order')
+        raise ResourceNotFoundException(message='Order not found', error_code='NOT_FOUND', resource_type='order')
     fee_amount = calculate_payment_fee(payment_request.amount, 'qr_code')
     net_amount = payment_request.amount - fee_amount
     internal_qr_payment_id = str(uuid.uuid4())
@@ -137,23 +137,23 @@ async def confirm_qr_payment(request: Request, qr_payment_id: str, db: Session=D
     qr_payment_db_record = db.query(QRPayment).filter(QRPayment.id == qr_payment_id).first()
     if not qr_payment_db_record:
         await audit_service.create_audit_log(event_type=AuditEventType.PAYMENT_FAILURE, event_status=AuditEventStatus.FAILURE, action_performed='QR payment confirmation failed: QR payment record not found.', user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent, resource_type='QRPayment', resource_id=qr_payment_id, details={'reason': 'QR payment record not found.'}, commit=True)
-        raise ResourceNotFoundException(message='QR payment not found', code='NOT_FOUND', resource_type='payment')
+        raise ResourceNotFoundException(message='QR payment not found', error_code='NOT_FOUND', resource_type='payment')
     if qr_payment_db_record.expires_at < datetime.utcnow():
         await audit_service.create_audit_log(event_type=AuditEventType.PAYMENT_FAILURE, event_status=AuditEventStatus.FAILURE, action_performed='QR payment confirmation failed: QR payment expired.', user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent, resource_type='QRPayment', resource_id=qr_payment_id, details={'order_id': str(qr_payment_db_record.order_id), 'amount': qr_payment_db_record.amount, 'reason': 'QR payment expired.'}, commit=True)
-        raise ValidationException(message='QR payment expired', code='BAD_REQUEST')
+        raise ValidationException(message='QR payment expired', error_code='BAD_REQUEST')
     if qr_payment_db_record.status == 'completed':
         await audit_service.create_audit_log(event_type=AuditEventType.PAYMENT_FAILURE, event_status=AuditEventStatus.INFO, action_performed='QR payment confirmation attempt: Already processed.', user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent, resource_type='QRPayment', resource_id=qr_payment_id, details={'order_id': str(qr_payment_db_record.order_id), 'amount': qr_payment_db_record.amount, 'reason': 'QR payment already processed.'}, commit=True)
-        raise ValidationException(message='QR payment already processed', code='BAD_REQUEST')
+        raise ValidationException(message='QR payment already processed', error_code='BAD_REQUEST')
     if qr_payment_db_record.status != 'pending':
         await audit_service.create_audit_log(event_type=AuditEventType.PAYMENT_FAILURE, event_status=AuditEventStatus.FAILURE, action_performed=f"QR payment confirmation failed: Invalid status '{qr_payment_db_record.status}'.", user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent, resource_type='QRPayment', resource_id=qr_payment_id, details={'order_id': str(qr_payment_db_record.order_id), 'amount': qr_payment_db_record.amount, 'reason': f'Cannot confirm QR payment with status: {qr_payment_db_record.status}'}, commit=True)
-        raise ValidationException(message='', code='BAD_REQUEST')
+        raise ValidationException(message='', error_code='BAD_REQUEST')
     order = db.query(Order).filter(Order.id == qr_payment_db_record.order_id).first()
     if not order:
         await audit_service.create_audit_log(event_type=AuditEventType.PAYMENT_FAILURE, event_status=AuditEventStatus.FAILURE, action_performed='QR payment confirmation failed: Associated order not found.', user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent, resource_type='QRPayment', resource_id=qr_payment_id, details={'order_id': str(qr_payment_db_record.order_id), 'reason': 'Associated order not found internally.'}, commit=True)
-        raise ResourceNotFoundException(message='Associated order not found', code='NOT_FOUND', resource_type='order')
+        raise ResourceNotFoundException(message='Associated order not found', error_code='NOT_FOUND', resource_type='order')
     if order.payment_status == 'completed':
         await audit_service.create_audit_log(event_type=AuditEventType.PAYMENT_FAILURE, event_status=AuditEventStatus.INFO, action_performed='QR payment confirmation failed: Order already paid.', user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent, resource_type='Order', resource_id=str(order.id), details={'qr_payment_id': qr_payment_id, 'reason': 'Order already marked as paid.'}, commit=True)
-        raise ValidationException(message='Order already paid', code='BAD_REQUEST')
+        raise ValidationException(message='Order already paid', error_code='BAD_REQUEST')
     payment_record = None
     try:
         qr_payment_db_record.status = 'completed'
@@ -165,7 +165,7 @@ async def confirm_qr_payment(request: Request, qr_payment_id: str, db: Session=D
     except Exception as e:
         await audit_service.create_audit_log(event_type=AuditEventType.PAYMENT_FAILURE, event_status=AuditEventStatus.FAILURE, action_performed='QR payment confirmation failed during processing.', user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent, resource_type='QRPayment', resource_id=qr_payment_id, details={'order_id': str(qr_payment_db_record.order_id), 'error': str(e)}, commit=False)
         logger.error(f'QR payment confirmation failed for {qr_payment_id}: {e}')
-        raise FynloException(message='Payment confirmation failed', code='INTERNAL_ERROR')
+        raise FynloException(message='Payment confirmation failed', error_code='INTERNAL_ERROR')
     logger.info(f'QR payment confirmed: {qr_payment_id}')
     return APIResponseHelper.success(message='QR payment confirmed successfully', data={'payment_id': str(payment_record.id) if payment_record and payment_record.id else None})
 
@@ -180,10 +180,10 @@ async def process_stripe_payment(payment_request_data: StripePaymentRequest, req
     order = db.query(Order).filter(Order.id == payment_request_data.order_id).first()
     if not order:
         await audit_service.create_audit_log(event_type=AuditEventType.PAYMENT_FAILURE, event_status=AuditEventStatus.FAILURE, action_performed='Stripe payment failed: Order not found.', user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent, details={'order_id': payment_request_data.order_id, 'amount': payment_request_data.amount, 'reason': 'Order not found'}, commit=True)
-        raise ResourceNotFoundException(message='Order not found', code='NOT_FOUND', resource_type='order')
+        raise ResourceNotFoundException(message='Order not found', error_code='NOT_FOUND', resource_type='order')
     if order.payment_status == 'completed':
         await audit_service.create_audit_log(event_type=AuditEventType.PAYMENT_FAILURE, event_status=AuditEventStatus.INFO, action_performed='Stripe payment attempt failed: Order already paid.', user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent, resource_type='Order', resource_id=str(order.id), details={'reason': 'Order already marked as paid.'}, commit=True)
-        raise ValidationException(message='Order already paid', code='BAD_REQUEST')
+        raise ValidationException(message='Order already paid', error_code='BAD_REQUEST')
     fee_amount = calculate_payment_fee(payment_request_data.amount, 'card')
     net_amount = payment_request_data.amount - fee_amount
     payment_db_record = Payment(order_id=payment_request_data.order_id, payment_method='stripe', amount=payment_request_data.amount, fee_amount=fee_amount, net_amount=net_amount, status='pending', payment_metadata={'stripe_payment_method_id': payment_request_data.payment_method_id})
@@ -212,12 +212,12 @@ async def process_stripe_payment(payment_request_data: StripePaymentRequest, req
         payment_db_record.payment_metadata.update({'stripe_error': str(e)})
         await audit_service.create_audit_log(event_type=AuditEventType.PAYMENT_FAILURE, event_status=AuditEventStatus.FAILURE, action_performed='Stripe payment failed due to Stripe API error.', user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent, resource_type='Payment', resource_id=str(payment_db_record.id), details={'order_id': payment_request_data.order_id, 'error': str(e), 'error_type': e.__class__.__name__}, commit=False)
         logger.error(f'Stripe payment failed: {str(e)}')
-        raise ValidationException(message='', code='BAD_REQUEST')
+        raise ValidationException(message='', error_code='BAD_REQUEST')
     except Exception as e:
         payment_db_record.status = 'failed'
         await audit_service.create_audit_log(event_type=AuditEventType.PAYMENT_FAILURE, event_status=AuditEventStatus.FAILURE, action_performed='Stripe payment failed due to unexpected server error.', user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent, resource_type='Payment', resource_id=str(payment_db_record.id), details={'order_id': payment_request_data.order_id, 'error': str(e)}, commit=False)
         logger.error(f'Unexpected error during Stripe payment: {e}')
-        raise FynloException(message='Payment processing failed', code='INTERNAL_ERROR')
+        raise FynloException(message='Payment processing failed', error_code='INTERNAL_ERROR')
 
 @router.post('/cash', response_model=PaymentResponse)
 async def process_cash_payment(payment_request_data: CashPaymentRequest, request: Request, db: Session=Depends(get_db), current_user: User=Depends(get_current_user)):
@@ -227,12 +227,12 @@ async def process_cash_payment(payment_request_data: CashPaymentRequest, request
     user_agent = request.headers.get('user-agent', 'unknown')
     order = db.query(Order).filter(Order.id == payment_request_data.order_id).first()
     if not order:
-        raise ResourceNotFoundException(message='Order not found', code='NOT_FOUND', resource_type='order')
+        raise ResourceNotFoundException(message='Order not found', error_code='NOT_FOUND', resource_type='order')
     if order.payment_status == 'completed':
         await audit_service.create_audit_log(event_type=AuditEventType.PAYMENT_FAILURE, event_status=AuditEventStatus.INFO, action_performed='Cash payment attempt failed: Order already paid.', user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent, resource_type='Order', resource_id=str(order.id), details={'reason': 'Order already marked as paid.'}, commit=True)
-        raise ValidationException(message='Order already paid', code='BAD_REQUEST')
+        raise ValidationException(message='Order already paid', error_code='BAD_REQUEST')
     if payment_request_data.received_amount < payment_request_data.amount:
-        raise ValidationException(message='Insufficient cash received', code='BAD_REQUEST')
+        raise ValidationException(message='Insufficient cash received', error_code='BAD_REQUEST')
     change_amount = payment_request_data.received_amount - payment_request_data.amount
     payment_db_record = Payment(order_id=payment_request_data.order_id, payment_method='cash', amount=payment_request_data.amount, fee_amount=0.0, net_amount=payment_request_data.amount, status='completed', processed_at=datetime.utcnow(), payment_metadata={'received_amount': payment_request_data.received_amount, 'change_amount': change_amount})
     db.add(payment_db_record)
@@ -256,7 +256,7 @@ async def check_qr_payment_status(qr_payment_id: str, db: Session=Depends(get_db
     """Check QR payment status (public endpoint for payment checking)"""
     qr_payment = db.query(QRPayment).filter(QRPayment.id == qr_payment_id).first()
     if not qr_payment:
-        raise ResourceNotFoundException(message='QR payment not found', code='NOT_FOUND', resource_type='payment')
+        raise ResourceNotFoundException(message='QR payment not found', error_code='NOT_FOUND', resource_type='payment')
     data = {'qr_payment_id': str(qr_payment.id), 'status': qr_payment.status, 'amount': qr_payment.amount, 'expires_at': qr_payment.expires_at, 'expired': qr_payment.expires_at < datetime.utcnow()}
     return APIResponseHelper.success(data=data, message='QR payment status retrieved')
 
@@ -282,10 +282,10 @@ async def process_payment(payment_data_req: PaymentRequest, request: Request, pr
         order = db.query(Order).filter(Order.id == payment_data_req.order_id).first()
         if not order:
             await audit_service.create_audit_log(event_type=AuditEventType.PAYMENT_FAILURE, event_status=AuditEventStatus.FAILURE, action_performed='Payment processing failed: Order not found.', user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent, details={'order_id': payment_data_req.order_id, 'amount': payment_data_req.amount, 'reason': 'Order not found'}, commit=True)
-            raise ResourceNotFoundException(message='Order not found', code='NOT_FOUND', resource_type='order')
+            raise ResourceNotFoundException(message='Order not found', error_code='NOT_FOUND', resource_type='order')
         if order.payment_status == 'completed':
             await audit_service.create_audit_log(event_type=AuditEventType.PAYMENT_FAILURE, event_status=AuditEventStatus.INFO, action_performed='Payment processing attempt failed: Order already paid.', user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent, resource_type='Order', resource_id=str(order.id), details={'reason': 'Order already marked as paid.'}, commit=True)
-            raise ValidationException(message='Order already paid', code='BAD_REQUEST')
+            raise ValidationException(message='Order already paid', error_code='BAD_REQUEST')
         monthly_volume = Decimal('2000')
         provider_instance = await payment_factory.select_optimal_provider(amount=Decimal(str(payment_data_req.amount)), restaurant_id=str(order.restaurant_id) if hasattr(order, 'restaurant_id') else 'default', monthly_volume=monthly_volume, force_provider=provider_query, db_session=db)
         await audit_service.create_audit_log(event_type=AuditEventType.PAYMENT_INITIATED, event_status=AuditEventStatus.PENDING, action_performed=f"Payment processing initiated with provider: {(provider_instance.name if provider_instance else 'N/A')}.", user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent, resource_type='Order', resource_id=str(order.id), details={'order_id': payment_data_req.order_id, 'amount': payment_data_req.amount, 'currency': payment_data_req.currency, 'provider_selected': provider_instance.name if provider_instance else 'N/A', 'customer_id': payment_data_req.customer_id}, commit=False)
@@ -313,7 +313,7 @@ async def process_payment(payment_data_req: PaymentRequest, request: Request, pr
         if payment_db_record and payment_db_record.id:
             details_for_error_log['payment_id_attempted'] = str(payment_db_record.id)
         await audit_service.create_audit_log(event_type=AuditEventType.PAYMENT_FAILURE, event_status=AuditEventStatus.FAILURE, action_performed='Payment processing failed due to server error.', user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent, resource_type='Order', resource_id=str(payment_data_req.order_id), details=details_for_error_log, commit=True)
-        raise FynloException(message='', code='INTERNAL_ERROR')
+        raise FynloException(message='', error_code='INTERNAL_ERROR')
 
 @router.post('/refund/{transaction_id}')
 async def refund_payment(transaction_id: str, refund_data_req: RefundRequest, request: Request, db: Session=Depends(get_db), current_user: User=Depends(get_current_user)):
@@ -324,19 +324,19 @@ async def refund_payment(transaction_id: str, refund_data_req: RefundRequest, re
     payment_db_record = db.query(Payment).filter(Payment.external_id == transaction_id).first()
     if not payment_db_record:
         await audit_service.create_audit_log(event_type=AuditEventType.REFUND_FAILURE, event_status=AuditEventStatus.FAILURE, action_performed='Refund attempt failed: Original payment not found.', user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent, details={'external_transaction_id': transaction_id, 'reason': 'Payment not found'}, commit=True)
-        raise ResourceNotFoundException(message='Payment not found', code='NOT_FOUND', resource_type='payment')
+        raise ResourceNotFoundException(message='Payment not found', error_code='NOT_FOUND', resource_type='payment')
     provider_name_from_meta = payment_db_record.payment_metadata.get('provider', payment_db_record.payment_method)
     provider_name = provider_name_from_meta.lower().replace('_payment', '') if isinstance(provider_name_from_meta, str) else 'unknown'
     provider_instance = payment_factory.get_provider(provider_name)
     if not provider_instance:
         await audit_service.create_audit_log(event_type=AuditEventType.REFUND_FAILURE, event_status=AuditEventStatus.FAILURE, action_performed=f"Refund attempt failed: Provider '{provider_name}' not available/found.", user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent, resource_type='Payment', resource_id=str(payment_db_record.id), details={'external_transaction_id': transaction_id, 'provider_name_attempted': provider_name}, commit=True)
-        raise ValidationException(message='', code='BAD_REQUEST')
+        raise ValidationException(message='', error_code='BAD_REQUEST')
     await audit_service.create_audit_log(event_type=AuditEventType.REFUND_INITIATED, event_status=AuditEventStatus.PENDING, action_performed=f'Refund initiated with provider: {provider_instance.name}.', user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent, resource_type='Payment', resource_id=str(payment_db_record.id), details={'external_transaction_id': transaction_id, 'amount_requested': refund_data_req.amount, 'reason': refund_data_req.reason, 'provider': provider_instance.name}, commit=False)
     try:
         result = await provider_instance.refund_payment(transaction_id=payment_db_record.external_id, amount=Decimal(str(refund_data_req.amount)) if refund_data_req.amount is not None else None, reason=refund_data_req.reason)
     except Exception as e:
         await audit_service.create_audit_log(event_type=AuditEventType.REFUND_FAILURE, event_status=AuditEventStatus.FAILURE, action_performed=f'Refund processing by {provider_instance.name} failed with exception.', user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent, resource_type='Payment', resource_id=str(payment_db_record.id), details={'external_transaction_id': transaction_id, 'error': str(e)}, commit=True)
-        raise FynloException(message='', code='INTERNAL_ERROR')
+        raise FynloException(message='', error_code='INTERNAL_ERROR')
     if result['status'] == 'refunded':
         payment_db_record.status = 'refunded'
         payment_db_record.payment_metadata.update({'refund_id': result.get('refund_id'), 'refunded_amount': result.get('amount', 0) / 100, 'refund_reason': refund_data_req.reason, 'refunded_at': datetime.utcnow().isoformat()})
@@ -415,7 +415,7 @@ async def square_create_payment_endpoint(http_request: Request, payment_create_r
                 raise ResourceNotFoundException(message="Order {payment_create_req.order_id} not found.", resource_type="Order")
             if order.payment_status == 'completed':
                 await audit_service.create_audit_log(event_type=AuditEventType.PAYMENT_FAILURE, event_status=AuditEventStatus.INFO, action_performed='Square payment creation attempt: Order already paid.', user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent, resource_type='Order', resource_id=str(order.id), details={'reason': 'Order already marked as paid.'}, commit=True)
-                raise ValidationException(message='Order already paid.', code='BAD_REQUEST')
+                raise ValidationException(message='Order already paid.', error_code='BAD_REQUEST')
         await audit_service.create_audit_log(event_type=AuditEventType.PAYMENT_INITIATED, event_status=AuditEventStatus.PENDING, action_performed='Square payment creation initiated.', user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent, details={**payment_create_req.model_dump(), 'provider': 'square'}, commit=False)
         provider_response = await square_provider.create_payment(amount=Decimal(str(payment_create_req.amount)), currency=payment_create_req.currency, source_id=payment_create_req.source_id, customer_id=payment_create_req.customer_id, order_id=payment_create_req.order_id, note=payment_create_req.note, metadata=payment_create_req.metadata)
         internal_payment_id = None
@@ -431,14 +431,14 @@ async def square_create_payment_endpoint(http_request: Request, payment_create_r
             internal_payment_id = str(payment_db.id)
         else:
             await audit_service.create_audit_log(event_type=AuditEventType.PAYMENT_FAILURE, event_status=AuditEventStatus.FAILURE, action_performed='Square payment creation failed by provider.', user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent, details={'error': provider_response.get('error', 'Unknown'), 'provider_response': provider_response.get('raw_response')}, commit=True)
-            raise ValidationException(message='', code='BAD_REQUEST')
+            raise ValidationException(message='', error_code='BAD_REQUEST')
         return SquarePaymentResponseData(payment_id=internal_payment_id, provider='square', transaction_id=provider_response.get('transaction_id'), status=provider_response['status'], amount=float(provider_response.get('amount', payment_create_req.amount)), currency=provider_response.get('currency', payment_create_req.currency), fee=float(Decimal(str(provider_response.get('fee', 0))) / 100) if provider_response.get('fee') is not None else None, net_amount=float(Decimal(str(provider_response.get('net_amount', 0))) / 100) if provider_response.get('net_amount') is not None else None, message=provider_response.get('message', 'Payment processed by Square.'), raw_response=provider_response.get('raw_response'))
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f'Square payment creation error: {str(e)}', exc_info=True)
         await audit_service.create_audit_log(event_type=AuditEventType.PAYMENT_FAILURE, event_status=AuditEventStatus.FAILURE, action_performed='Square payment creation failed due to server error.', user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent, details={'error': str(e)}, commit=True)
-        raise FynloException(message='', code='INTERNAL_ERROR')
+        raise FynloException(message='', error_code='INTERNAL_ERROR')
 
 @router.post('/square/process', response_model=SquarePaymentResponseData, tags=['Payments - Square'])
 async def square_process_payment_endpoint(http_request: Request, payment_process_req: SquareProcessPaymentRequest, db: Session=Depends(get_db), current_user: User=Depends(get_current_user)):
@@ -479,7 +479,7 @@ async def square_process_payment_endpoint(http_request: Request, payment_process
     except Exception as e:
         logger.error(f'Square payment processing error: {str(e)}', exc_info=True)
         await audit_service.create_audit_log(event_type=AuditEventType.PAYMENT_FAILURE, event_status=AuditEventStatus.FAILURE, action_performed='Square payment processing failed due to server error.', user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent, details={'external_payment_id': payment_process_req.payment_id, 'error': str(e)}, commit=True)
-        raise FynloException(message='', code='INTERNAL_ERROR')
+        raise FynloException(message='', error_code='INTERNAL_ERROR')
 
 @router.get('/square/status/{payment_id}', response_model=SquarePaymentResponseData, tags=['Payments - Square'])
 async def square_get_payment_status_endpoint(http_request: Request, payment_id: str, db: Session=Depends(get_db), current_user: User=Depends(get_current_user)):
@@ -501,7 +501,7 @@ async def square_get_payment_status_endpoint(http_request: Request, payment_id: 
     except Exception as e:
         logger.error(f'Square payment status retrieval error: {str(e)}', exc_info=True)
         await audit_service.create_audit_log(event_type=AuditEventType.PAYMENT_FAILURE, event_status=AuditEventStatus.FAILURE, action_performed='Square payment status retrieval failed due to server error.', user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent, details={'external_payment_id': payment_id, 'error': str(e)}, commit=True)
-        raise FynloException(message='', code='INTERNAL_ERROR')
+        raise FynloException(message='', error_code='INTERNAL_ERROR')
 
 @router.post('/webhooks/stripe', include_in_schema=False)
 async def stripe_webhook_endpoint(http_request: Request, db: Session=Depends(get_db)):
@@ -514,21 +514,21 @@ async def stripe_webhook_endpoint(http_request: Request, db: Session=Depends(get
     if not settings.STRIPE_WEBHOOK_SECRET:
         logger.error('Stripe webhook secret is not configured.')
         await audit_service.create_audit_log(event_type=AuditEventType.SYSTEM_ERROR, event_status=AuditEventStatus.FAILURE, action_performed='Stripe webhook processing failed: Missing webhook secret.', user_id='SYSTEM', username_or_email='system@fynlo.com', ip_address=ip_address, user_agent='Stripe Webhook', details={'reason': 'STRIPE_WEBHOOK_SECRET not set in environment.'}, commit=True)
-        raise FynloException(message='Webhook secret not configured.', code='INTERNAL_ERROR')
+        raise FynloException(message='Webhook secret not configured.', error_code='INTERNAL_ERROR')
     try:
         event = stripe.Webhook.construct_event(payload, sig_header, settings.STRIPE_WEBHOOK_SECRET)
     except ValueError as e:
         logger.error(f'Stripe webhook error: Invalid payload. {str(e)}')
         await audit_service.create_audit_log(event_type=AuditEventType.WEBHOOK_PROCESSING_ERROR, event_status=AuditEventStatus.FAILURE, action_performed='Stripe webhook processing failed: Invalid payload.', user_id='SYSTEM', username_or_email='system@fynlo.com', ip_address=ip_address, details={'error': str(e), 'payload_start': payload[:200].decode('utf-8', errors='replace')}, commit=True)
-        raise ValidationException(message='Invalid payload', code='BAD_REQUEST')
+        raise ValidationException(message='Invalid payload', error_code='BAD_REQUEST')
     except stripe.error.SignatureVerificationError as e:
         logger.error(f'Stripe webhook error: Invalid signature. {str(e)}')
         await audit_service.create_audit_log(event_type=AuditEventType.WEBHOOK_PROCESSING_ERROR, event_status=AuditEventStatus.FAILURE, action_performed='Stripe webhook processing failed: Invalid signature.', user_id='SYSTEM', username_or_email='system@fynlo.com', ip_address=ip_address, details={'error': str(e), 'signature_header': sig_header}, commit=True)
-        raise ValidationException(message='Invalid signature', code='BAD_REQUEST')
+        raise ValidationException(message='Invalid signature', error_code='BAD_REQUEST')
     except Exception as e:
         logger.error(f'Stripe webhook event construction error: {str(e)}')
         await audit_service.create_audit_log(event_type=AuditEventType.WEBHOOK_PROCESSING_ERROR, event_status=AuditEventStatus.FAILURE, action_performed='Stripe webhook processing failed: Event construction error.', user_id='SYSTEM', username_or_email='system@fynlo.com', ip_address=ip_address, details={'error': str(e)}, commit=True)
-        raise FynloException(message='Webhook event construction error', code='INTERNAL_ERROR')
+        raise FynloException(message='Webhook event construction error', error_code='INTERNAL_ERROR')
     logger.info(f'Received Stripe event: id={event.id}, type={event.type}')
     await audit_service.create_audit_log(event_type=AuditEventType.WEBHOOK_RECEIVED, event_status=AuditEventStatus.SUCCESS, action_performed=f'Stripe webhook event received: {event.type}', user_id='SYSTEM', username_or_email='stripe_webhook@fynlo.com', ip_address=ip_address, resource_type='StripeEvent', resource_id=event.id, details={'event_type': event.type, 'event_id': event.id, 'livemode': event.livemode}, commit=True)
     try:

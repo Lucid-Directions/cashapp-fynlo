@@ -98,7 +98,7 @@ def get_menu_items_optimized(restaurant_id: str=Query(..., description='Restaura
         return APIResponseHelper.success(data=response_data, message='Menu retrieved successfully', meta={'page': page, 'limit': limit, 'has_more': len(products) == limit})
     except Exception as e:
         logger.error(f'Menu query error for restaurant {restaurant_id}: {str(e)}')
-        raise FynloException(message='Failed to retrieve menu items', error_code=ErrorCodes.INTERNAL_ERROR, status_code=500)
+        raise FynloException(message='Failed to retrieve menu items', error_code=ErrorCodes.INTERNAL_ERROR, status_error_code=500)
 
 @router.get('/menu/categories', response_model=List[dict])
 def get_menu_categories(restaurant_id: str=Query(...), db: Session=Depends(get_db), redis_client: RedisClient=Depends(get_redis), current_user: User=Depends(get_current_user)):
@@ -123,14 +123,14 @@ def get_menu_categories(restaurant_id: str=Query(...), db: Session=Depends(get_d
         return APIResponseHelper.success(data=response_data, message='Categories retrieved successfully')
     except Exception as e:
         logger.error(f'Category query error for restaurant {restaurant_id}: {str(e)}')
-        raise FynloException(message='Failed to retrieve categories', error_code=ErrorCodes.INTERNAL_ERROR, status_code=500)
+        raise FynloException(message='Failed to retrieve categories', error_code=ErrorCodes.INTERNAL_ERROR, status_error_code=500)
 
 @router.post('/menu/cache/invalidate')
 def invalidate_menu_cache(restaurant_id: str=Query(...), current_user: User=Depends(get_current_user), redis_client: RedisClient=Depends(get_redis)):
     """Invalidate menu cache for a restaurant"""
     try:
         if current_user.restaurant_id != restaurant_id and current_user.role not in ['platform_owner', 'restaurant_owner']:
-            raise AuthenticationException(message='Permission denied', code='UNAUTHORIZED')
+            raise AuthenticationException(message='Permission denied', error_code='UNAUTHORIZED')
         if not redis_client:
             return APIResponseHelper.success(message='Cache not available')
         patterns = [f'menu:*:{restaurant_id}:*', f'menu_categories:*:{restaurant_id}']
@@ -147,4 +147,4 @@ def invalidate_menu_cache(restaurant_id: str=Query(...), current_user: User=Depe
         raise
     except Exception as e:
         logger.error(f'Cache invalidation error: {str(e)}')
-        raise FynloException(message='Failed to invalidate cache', error_code=ErrorCodes.INTERNAL_ERROR, status_code=500)
+        raise FynloException(message='Failed to invalidate cache', error_code=ErrorCodes.INTERNAL_ERROR, status_error_code=500)

@@ -339,8 +339,8 @@ async def get_payment_status(
 
 @router.post("/webhook/{provider}")
 async def handle_payment_webhook(
-    provider: str = Path(..., description="Payment provider name"),
     request: Request,
+    provider: str = Path(..., description="Payment provider name"),
     db: Session = Depends(get_db),
     webhook_signature: Optional[str] = Header(None, alias="stripe-signature")
 ):

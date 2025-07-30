@@ -23,12 +23,16 @@ from app.main import app
 from app.core.database import Base
 from app.core.config import settings
 from app.core.database import Restaurant, User, Product, Category, Order
-from app.core.auth import create_access_token
+from app.api.v1.endpoints.auth_backup import create_access_token
+from app.middleware.rate_limit_middleware import limiter
 from datetime import datetime, timedelta
 import uuid
 
+# Initialize limiter for tests
+app.state.limiter = limiter
+
 # Verify we're using test database
-assert "test" in settings.DATABASE_URL, "Test database URL must contain 'test' to prevent accidental data loss"
+assert ("test" in settings.DATABASE_URL or "memory" in settings.DATABASE_URL), "Test database URL must contain 'test' or use in-memory database to prevent accidental data loss"
 assert settings.ENVIRONMENT == "test", "Environment must be set to 'test'"
 
 # Configure pytest-asyncio
