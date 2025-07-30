@@ -147,8 +147,9 @@ class SupabaseAuthService {
     try {
       const { error } = await supabase.auth.signOut();
 
-      if (__error) {
-      }
+      if(__error) {
+    // No action needed
+  }
 
       // Clear all stored data
       await AsyncStorage.multiRemove([
@@ -216,7 +217,9 @@ class SupabaseAuthService {
         '@auth_user',
         '@auth_business',
       ]);
-    } catch (__error) {}
+    } catch (__error) {
+    // Error handled silently
+  }
   }
 
   /**

@@ -81,8 +81,9 @@ class RestaurantDataService {
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         const result = await apiCall();
-        if (attempt > 1) {
-        }
+        if(attempt > 1) {
+    // No action needed
+  }
         return result;
       } catch (__error) {
         lastError = error instanceof Error ? error : new Error('Unknown error');
@@ -212,11 +213,13 @@ class RestaurantDataService {
           });
 
           // If it's a timeout error, provide specific feedback
-          if (apiError instanceof Error && apiError.name === 'AbortError') {
-          }
+          if(apiError instanceof Error && apiError.name === 'AbortError') {
+    // No action needed
+  }
         }
       } else {
-      }
+    // No action needed
+  }
 
       // FALLBACK: Get from shared data store (local storage)
       const restaurants =

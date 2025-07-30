@@ -25,7 +25,9 @@ try {
   const SquareSDK = require('react-native-square-in-app-payments');
   SQIPApplePay = SquareSDK.SQIPApplePay;
   SQIPGooglePay = SquareSDK.SQIPGooglePay;
-} catch (__error) {}
+} catch (__error) {
+    // Error handled silently
+  }
 
 interface SquareContactlessPaymentScreenProps {
   navigation: unknown;

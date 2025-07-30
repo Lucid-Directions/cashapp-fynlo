@@ -284,6 +284,8 @@ export const useAuthStore = create<AuthState>((__set, _get) => ({
           error: 'Session expired - please log in again',
         });
       }
-    } catch (__error) {}
+    } catch (__error) {
+    // Error handled silently
+  }
   },
 }));

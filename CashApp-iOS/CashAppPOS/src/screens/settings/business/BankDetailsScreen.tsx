@@ -61,7 +61,9 @@ const BankDetailsScreen: React.FC = () => {
         setBankDetails(__existingDetails);
         setHasExistingDetails(__true);
       }
-    } catch (__error) {}
+    } catch (__error) {
+    // Error handled silently
+  }
   };
 
   const getMockBankDetails = async (): Promise<BankDetails | null> => {

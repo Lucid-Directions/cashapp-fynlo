@@ -38,7 +38,9 @@ class CustomersService {
       const cfg = JSON.parse(__raw);
       this.baseUrl = cfg?.backend?.baseUrl ?? null;
       this.apiKey = cfg?.backend?.apiKey ?? null;
-    } catch (__err) {}
+    } catch (__err) {
+    // Error handled silently
+  }
   }
 
   async saveCustomer(payload: _SaveCustomerPayload): Promise<void> {
@@ -56,7 +58,9 @@ class CustomersService {
         },
         body: JSON.stringify(__payload),
       });
-    } catch (__err) {}
+    } catch (__err) {
+    // Error handled silently
+  }
   }
 
   async search(query: _string): Promise<CustomerSuggestion[]> {

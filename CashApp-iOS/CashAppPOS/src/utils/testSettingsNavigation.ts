@@ -82,7 +82,8 @@ export const validateNavigationStructure = () => {
     if (!routeNames.includes(category as keyof SettingsStackParamList)) {
       issues.push(`Category screen '${category}' is missing from navigation`);
     } else {
-    }
+    // No action needed
+  }
   });
 
   return {

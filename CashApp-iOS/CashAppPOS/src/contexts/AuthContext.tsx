@@ -230,7 +230,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       // Clear AppStore user
       const appStore = useAppStore.getState();
       appStore.logout();
-    } catch (__error) {}
+    } catch (__error) {
+    // Error handled silently
+  }
   };
 
   const updateUser = async (userData: Partial<User>): Promise<void> => {

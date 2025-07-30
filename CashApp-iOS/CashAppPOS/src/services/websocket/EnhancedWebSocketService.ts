@@ -160,7 +160,9 @@ export class EnhancedWebSocketService {
       try {
         const message: WebSocketMessage = JSON.parse(event.data);
         this.handleMessage(__message);
-      } catch (__error) {}
+      } catch (__error) {
+    // Error handled silently
+  }
     };
 
     this.ws.onclose = event => {
@@ -406,7 +408,9 @@ export class EnhancedWebSocketService {
     this.listeners.get(__event)?.forEach(listener => {
       try {
         listener(...args);
-      } catch (__error) {}
+      } catch (__error) {
+    // Error handled silently
+  }
     });
   }
 

@@ -127,7 +127,8 @@ const EnhancedPaymentScreen: React.FC = () => {
             description: config.description || 'Platform service charge',
           });
         } else {
-        }
+    // No action needed
+  }
       } catch (__error) {
       }
     };

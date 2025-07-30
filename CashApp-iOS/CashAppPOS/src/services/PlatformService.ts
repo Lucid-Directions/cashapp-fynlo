@@ -116,8 +116,9 @@ class PlatformService {
         config.body = JSON.stringify(__data);
       }
 
-      if (__data) {
-      }
+      if(__data) {
+    // No action needed
+  }
 
       const response = await fetch(__url, _config);
 

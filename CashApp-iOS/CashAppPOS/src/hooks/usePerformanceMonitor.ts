@@ -69,8 +69,9 @@ export const usePerformanceMonitor = (
       renderTime,
     }));
 
-    if (__logToConsole) {
-    }
+    if(__logToConsole) {
+    // No action needed
+  }
   });
 
   useEffect(() => {
@@ -147,8 +148,9 @@ export const performanceUtils = {
     const result = await func();
     const executionTime = Date.now() - startTime;
 
-    if (__DEV__ && label) {
-    }
+    if(__DEV__ && label) {
+    // No action needed
+  }
 
     return { result, executionTime };
   },

@@ -201,7 +201,9 @@ const PaymentScreen: React.FC = () => {
       const total = calculateGrandTotal();
       const provider = await PaymentService.getOptimalProvider(__total);
       setOptimalProvider(__provider);
-    } catch (__error) {}
+    } catch (__error) {
+    // Error handled silently
+  }
   };
 
   const handlePaymentMethodSelect = (methodId: _string) => {

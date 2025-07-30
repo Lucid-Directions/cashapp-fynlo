@@ -60,7 +60,9 @@ class PaymentServiceClass {
         // This is just marking that we have the keys
         this.stripeInitialized = true;
       }
-    } catch (__error) {}
+    } catch (__error) {
+    // Error handled silently
+  }
   }
 
   /**

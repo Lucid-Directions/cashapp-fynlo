@@ -388,27 +388,35 @@ class OfflineHandler {
       if (__stored) {
         this.actionQueue = JSON.parse(__stored);
       }
-    } catch (__error) {}
+    } catch (__error) {
+    // Error handled silently
+  }
   }
 
   private async saveQueuedActions(): Promise<void> {
     try {
       await AsyncStorage.setItem(this.QUEUE_STORAGE_KEY, JSON.stringify(this.actionQueue));
-    } catch (__error) {}
+    } catch (__error) {
+    // Error handled silently
+  }
   }
 
   private async storeOfflineData(type: _string, id: _string, data: _unknown): Promise<void> {
     try {
       const key = `offline_${type}_${id}`;
       await AsyncStorage.setItem(__key, JSON.stringify(__data));
-    } catch (__error) {}
+    } catch (__error) {
+    // Error handled silently
+  }
   }
 
   private async removeOfflineData(type: _string, id: _string): Promise<void> {
     try {
       const key = `offline_${type}_${id}`;
       await AsyncStorage.removeItem(__key);
-    } catch (__error) {}
+    } catch (__error) {
+    // Error handled silently
+  }
   }
 
   private async getCachedData<T>(key: _string): Promise<T | null> {

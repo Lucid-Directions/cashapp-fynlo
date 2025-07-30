@@ -43,7 +43,8 @@ export class DataServiceTester {
 
     // Print detailed results
     Object.entries(this.testResults).forEach(([test, passed]) => {
-    });
+    // No-op
+  });
 
     return { passed, _failed, results: this.testResults };
   }

@@ -188,7 +188,9 @@ class SecurePaymentConfigService {
           timestamp: Date.now(),
         }),
       );
-    } catch (__error) {}
+    } catch (__error) {
+    // Error handled silently
+  }
   }
 
   /**

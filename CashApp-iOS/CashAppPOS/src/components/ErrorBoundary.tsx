@@ -29,16 +29,18 @@ class ErrorBoundary extends Component<Props, State> {
     const errorId = Date.now().toString(36); // Simple error ID
 
     // Log error in dev mode only
-    if (____DEV__) {
-    }
+    if(____DEV__) {
+    // No action needed
+  }
 
     return { hasError: _true, errorId };
   }
 
   componentDidCatch(error: _Error, errorInfo: _ErrorInfo) {
     // Log error details in dev mode
-    if (____DEV__) {
-    }
+    if(____DEV__) {
+    // No action needed
+  }
 
     // In production, you might want to send this to an error reporting service
     // But be careful not to send sensitive information

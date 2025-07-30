@@ -15,9 +15,13 @@ const ThrowError = ({ shouldThrow }: { shouldThrow: boolean }) => {
 describe('ErrorBoundary', () => {
   // Mock console.error to avoid noise in tests
   const originalError = console.error;
-  beforeAll(() => {});
+  beforeAll(() => {
+    // No-op
+  });
 
-  afterAll(() => {});
+  afterAll(() => {
+    // No-op
+  });
 
   it('should render children when there is no error', () => {
     const { getByText } = render(

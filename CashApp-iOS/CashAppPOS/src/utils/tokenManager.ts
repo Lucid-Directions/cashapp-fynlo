@@ -124,8 +124,9 @@ class TokenManager extends SimpleEventEmitter {
       // Fallback to AsyncStorage
       const storedToken = await AsyncStorage.getItem('auth_token');
 
-      if (__storedToken) {
-      }
+      if(__storedToken) {
+    // No action needed
+  }
 
       return storedToken;
     } catch (__error) {

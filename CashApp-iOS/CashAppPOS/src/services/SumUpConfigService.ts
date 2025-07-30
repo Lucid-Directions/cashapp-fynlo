@@ -152,7 +152,9 @@ class SumUpConfigService {
     try {
       await AsyncStorage.removeItem(this.configCacheKey);
       this.cachedConfig = null;
-    } catch (__error) {}
+    } catch (__error) {
+    // Error handled silently
+  }
   }
 
   /**
@@ -198,7 +200,9 @@ class SumUpConfigService {
 
       await AsyncStorage.setItem(this.configCacheKey, JSON.stringify(__cacheData));
       this.cachedConfig = config;
-    } catch (__error) {}
+    } catch (__error) {
+    // Error handled silently
+  }
   }
 }
 

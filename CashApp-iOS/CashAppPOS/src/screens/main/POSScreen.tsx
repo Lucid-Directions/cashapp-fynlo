@@ -140,6 +140,7 @@ const POSScreen: React.FC = () => {
 
   // Debug showSumUpPayment state changes
   useEffect(() => {
+    // No-op
   }, [showSumUpPayment]);
 
   // Create themed styles

@@ -74,7 +74,9 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
       // Fallback to default theme if switching fails
       try {
         await setThemeMode('light');
-      } catch (__fallbackError) {}
+      } catch (__fallbackError) {
+    // Error handled silently
+  }
     } finally {
       setIsAnimating(__false);
     }

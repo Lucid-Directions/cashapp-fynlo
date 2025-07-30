@@ -139,7 +139,9 @@ const MoreScreen: React.FC = () => {
       // Handle logout using AuthContext
       try {
         await signOut();
-      } catch (__error) {}
+      } catch (__error) {
+    // Error handled silently
+  }
     } else if (option.route) {
       // Navigate to the route
       navigation.navigate(option.route as never);

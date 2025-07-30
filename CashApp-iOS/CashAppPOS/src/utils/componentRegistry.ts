@@ -21,9 +21,11 @@ export const ensureComponentsLoaded = () => {
   const components = ['TextInput', 'ScrollView', 'KeyboardAvoidingView', 'FlatList'];
 
   components.forEach(name => {
-    if (ComponentRegistry[name as keyof typeof ComponentRegistry]) {
-    } else {
-    }
+    if(ComponentRegistry[name as keyof typeof ComponentRegistry]) {
+    // No action needed
+  } else {
+    // No action needed
+  }
   });
 };
 

@@ -207,7 +207,9 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
             setColorThemeState(savedColorTheme as ColorTheme);
           }
         }
-      } catch (__error) {}
+      } catch (__error) {
+    // Error handled silently
+  }
     };
 
     loadThemePreferences();
@@ -233,7 +235,9 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
     try {
       setThemeModeState(__mode);
       await AsyncStorage.setItem(__THEME_STORAGE_KEY, _mode);
-    } catch (__error) {}
+    } catch (__error) {
+    // Error handled silently
+  }
   };
 
   // Set color theme and persist to storage
@@ -241,7 +245,9 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
     try {
       setColorThemeState(__colorThemeId);
       await AsyncStorage.setItem(__COLOR_THEME_STORAGE_KEY, _colorThemeId);
-    } catch (__error) {}
+    } catch (__error) {
+    // Error handled silently
+  }
   };
 
   // Toggle between light and dark mode

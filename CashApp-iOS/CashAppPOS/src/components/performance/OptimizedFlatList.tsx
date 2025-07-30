@@ -46,7 +46,9 @@ function OptimizedFlatList<T>({
 
   // Throttled scroll event handler
   const throttledOnScroll = useMemo(
-    () => performanceUtils.throttle(flatListProps.onScroll || (() => {}), 16), // 60fps
+    () => performanceUtils.throttle(flatListProps.onScroll || (() => {
+    // No-op
+  }), 16), // 60fps
     [flatListProps.onScroll],
   );
 

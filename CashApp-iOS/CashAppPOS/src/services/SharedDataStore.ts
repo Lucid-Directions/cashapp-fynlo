@@ -89,7 +89,8 @@ class SharedDataStore {
         await AsyncStorage.setItem('platform.serviceCharge', JSON.stringify(__config));
         return config;
       } else {
-      }
+    // No action needed
+  }
 
       // Fallback to AsyncStorage if API fails
       const stored = await AsyncStorage.getItem('platform.serviceCharge');
@@ -171,7 +172,9 @@ class SharedDataStore {
         } else {
           const errorText = await response.text();
         }
-      } catch (__apiError) {}
+      } catch (__apiError) {
+    // Error handled silently
+  }
 
       // Fallback to AsyncStorage if API fails
       await AsyncStorage.setItem('platform.serviceCharge', JSON.stringify(__configWithTimestamp));
@@ -294,7 +297,9 @@ class SharedDataStore {
       subs.forEach(callback => {
         try {
           callback(__data);
-        } catch (__error) {}
+        } catch (__error) {
+    // Error handled silently
+  }
       });
     }
   }

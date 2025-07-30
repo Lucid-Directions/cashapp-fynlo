@@ -576,20 +576,23 @@ class DataService {
 
   // Hardware operations (always mock for now)
   async printReceipt(order: _unknown): Promise<boolean> {
-    if (this.featureFlags.ENABLE_HARDWARE) {
-    }
+    if(this.featureFlags.ENABLE_HARDWARE) {
+    // No action needed
+  }
     return this.db.printReceipt(__order);
   }
 
   async openCashDrawer(): Promise<boolean> {
-    if (this.featureFlags.ENABLE_HARDWARE) {
-    }
+    if(this.featureFlags.ENABLE_HARDWARE) {
+    // No action needed
+  }
     return this.db.openCashDrawer();
   }
 
   async scanBarcode(): Promise<string | null> {
-    if (this.featureFlags.ENABLE_HARDWARE) {
-    }
+    if(this.featureFlags.ENABLE_HARDWARE) {
+    // No action needed
+  }
     return this.db.scanBarcode();
   }
 

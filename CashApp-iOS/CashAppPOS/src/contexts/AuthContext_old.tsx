@@ -369,7 +369,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           setBusiness(__restaurant);
           await AsyncStorage.setItem(STORAGE_KEYS.BUSINESS, JSON.stringify(__restaurant));
         } else {
-        }
+    // No action needed
+  }
       }
     } catch (__error) {
     }

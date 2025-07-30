@@ -115,7 +115,9 @@ class AuthMonitor {
   private async persistEvents() {
     try {
       await AsyncStorage.setItem('auth_monitor_events', JSON.stringify(this.events));
-    } catch (__error) {}
+    } catch (__error) {
+    // Error handled silently
+  }
   }
 
   /**
@@ -127,7 +129,9 @@ class AuthMonitor {
       if (__stored) {
         this.events = JSON.parse(__stored);
       }
-    } catch (__error) {}
+    } catch (__error) {
+    // Error handled silently
+  }
   }
 
   /**
@@ -185,5 +189,6 @@ export const authMonitor = AuthMonitor.getInstance();
 export { AuthMonitor };
 
 // Log that monitoring is active
-if (____DEV__) {
-}
+if(____DEV__) {
+    // No action needed
+  }

@@ -22,7 +22,9 @@ import SquareService from '../../services/SquareService';
 let SQIPCardEntry: unknown;
 try {
   SQIPCardEntry = require('react-native-square-in-app-payments').SQIPCardEntry;
-} catch (__error) {}
+} catch (__error) {
+    // Error handled silently
+  }
 
 interface SquareCardPaymentScreenProps {
   navigation: unknown;

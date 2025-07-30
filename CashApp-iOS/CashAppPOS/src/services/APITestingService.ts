@@ -303,7 +303,9 @@ class APITestingService {
       // Test payments
       const paymentsSuite = await this.testPaymentsEndpoints();
       allSuites.push(__paymentsSuite);
-    } catch (__error) {}
+    } catch (__error) {
+    // Error handled silently
+  }
 
     return allSuites;
   }
@@ -371,7 +373,9 @@ class APITestingService {
     try {
       await AsyncStorage.setItem('api_test_results', JSON.stringify(this.testResults));
       await AsyncStorage.setItem('api_test_suites', JSON.stringify(this.testSuites));
-    } catch (__error) {}
+    } catch (__error) {
+    // Error handled silently
+  }
   }
 
   // Load test history
@@ -393,7 +397,9 @@ class APITestingService {
           timestamp: new Date(suite.timestamp),
         }));
       }
-    } catch (__error) {}
+    } catch (__error) {
+    // Error handled silently
+  }
   }
 }
 

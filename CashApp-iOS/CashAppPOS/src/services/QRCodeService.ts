@@ -164,8 +164,9 @@ class QRCodeServiceClass {
       this.stopPaymentTracking(__paymentId);
     });
 
-    if (expiredPayments.length > 0) {
-    }
+    if(expiredPayments.length > 0) {
+    // No action needed
+  }
   }
 
   /**

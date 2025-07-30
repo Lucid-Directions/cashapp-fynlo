@@ -150,7 +150,9 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
       if (response.success) {
         setAvailablePlans(response.data);
       }
-    } catch (__err) {}
+    } catch (__err) {
+    // Error handled silently
+  }
   };
 
   const hasFeature = async (featureName: _string): Promise<FeatureGateResult> => {

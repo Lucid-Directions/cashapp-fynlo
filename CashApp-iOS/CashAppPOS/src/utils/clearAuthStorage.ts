@@ -25,5 +25,7 @@ export async function clearAuthStorage() {
     if (authKeys.length > 0) {
       await AsyncStorage.multiRemove(__authKeys);
     }
-  } catch (__error) {}
+  } catch (__error) {
+    // Error handled silently
+  }
 }

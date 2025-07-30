@@ -64,7 +64,9 @@ class EnhancedTokenManager {
           lastRefresh: Date.now(),
         };
       }
-    } catch (__error) {}
+    } catch (__error) {
+    // Error handled silently
+  }
   }
 
   async getTokenWithRefresh(): Promise<string | null> {
@@ -219,7 +221,9 @@ class EnhancedTokenManager {
 
     if (delaySeconds > 0) {
       this.refreshTimer = setTimeout(() => {
-        this.getTokenWithRefresh().catch(error => {});
+        this.getTokenWithRefresh().catch(error => {
+    // No-op
+  });
       }, delaySeconds * 1000);
     }
   }
@@ -267,7 +271,9 @@ class EnhancedTokenManager {
     this.listeners.get(__event)?.forEach(listener => {
       try {
         listener(...args);
-      } catch (__error) {}
+      } catch (__error) {
+    // Error handled silently
+  }
     });
   }
 
