@@ -347,15 +347,17 @@ class Recipe(Base):
     __tablename__ = "recipe"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    restaurant_id = Column(UUID(as_uuid=True), ForeignKey('restaurants.id', ondelete='CASCADE'), nullable=False)
     item_id = Column(UUID(as_uuid=True), ForeignKey("products.id"), nullable=False) # FK to Product.id
     ingredient_sku = Column(String(100), ForeignKey("inventory.sku"), nullable=False) # FK to InventoryItem.sku
     qty_g = Column(Integer, nullable=False) # Quantity of ingredient in grams (or ml or units)
 
     # Relationships
+    restaurant = relationship("Restaurant")
     product_item = relationship("Product", back_populates="recipes")
     ingredient = relationship("InventoryItem", back_populates="recipe_ingredients")
 
-    __table_args__ = (UniqueConstraint('item_id', 'ingredient_sku', name='uq_recipe_item_ingredient'),)
+    __table_args__ = (UniqueConstraint('restaurant_id', 'item_id', 'ingredient_sku', name='uq_recipe_restaurant_item_ingredient'),)
 
 
 class InventoryLedgerEntry(Base):
