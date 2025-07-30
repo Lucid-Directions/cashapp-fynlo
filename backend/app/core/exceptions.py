@@ -166,6 +166,30 @@ class PaymentException(FynloException):
         )
 
 
+class ServiceUnavailableError(FynloException):
+    """Service unavailable exceptions for critical infrastructure failures"""
+    
+    def __init__(
+        self,
+        message: str = "Service temporarily unavailable",
+        service_name: Optional[str] = None,
+        retry_after: Optional[int] = None,
+        details: Optional[Dict[str, Any]] = None
+    ):
+        service_details = details or {}
+        if service_name:
+            service_details["service"] = service_name
+        if retry_after:
+            service_details["retry_after_seconds"] = retry_after
+            
+        super().__init__(
+            message=message,
+            error_code=ErrorCodes.SERVICE_UNAVAILABLE,
+            details=service_details,
+            status_code=503
+        )
+
+
 class InventoryException(FynloException):
     """Inventory related exceptions"""
     

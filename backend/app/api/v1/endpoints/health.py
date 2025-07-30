@@ -14,7 +14,7 @@ from typing import Dict, Any, Optional
 import logging
 
 from app.core.response_helper import APIResponseHelper
-from app.core.redis_client import get_redis, RedisClient
+from app.core.redis_client import get_redis, RedisClient, get_redis_health
 from app.core.security import (
     SafeEnvironmentFilter, 
     SecurityLevel, 
@@ -142,10 +142,12 @@ async def health_detailed(
         logger.error(f"Unexpected database error: {type(e).__name__}")
         db_error = "UnexpectedError"
     
-    # Check Redis health
+    # Check Redis health with enhanced monitoring
     redis_healthy = False
     redis_latency_ms = None
     redis_error = None
+    redis_health_details = await get_redis_health()
+    
     try:
         start = datetime.now()
         test_key = f"health_check_{get_instance_id()}"
@@ -183,12 +185,15 @@ async def health_detailed(
             "redis": {
                 "healthy": redis_healthy,
                 "latency_ms": redis_latency_ms,
-                "error": redis_error
+                "error": redis_error,
+                "circuit_state": redis_health_details.get("circuit_state"),
+                "failure_count": redis_health_details.get("failure_count"),
+                "is_mock": redis_health_details.get("is_mock", False)
             }
         },
         "services": {
             "database": "healthy" if db_healthy else "unhealthy",
-            "redis": "healthy" if redis_healthy else "unhealthy",
+            "redis": redis_health_details.get("status", "unknown"),
             "storage": await _check_storage_health()
         }
     }

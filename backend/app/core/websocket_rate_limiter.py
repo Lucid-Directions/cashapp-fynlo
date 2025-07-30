@@ -11,6 +11,7 @@ from typing import Dict, Optional, Set, Tuple
 import logging
 
 from app.core.redis_client import RedisClient
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -78,12 +79,19 @@ class WebSocketRateLimiter:
                     await self._record_violation(ip_address)
                     return False, "Too many connection attempts from this IP"
                 
-                await self.redis.setex(key, self.CONNECTION_WINDOW, current_count + 1)
+                await self.redis.set(key, current_count + 1, expire=self.CONNECTION_WINDOW)
             except Exception as e:
                 logger.error(f"Redis error in connection rate limit: {e}")
-                # Fall back to in-memory
+                # In production, fail closed
+                if settings.ENVIRONMENT not in ["development", "testing", "local"]:
+                    return False, "Rate limiting service temporarily unavailable"
+                # Fall back to in-memory in dev
         else:
-            # In-memory rate limiting
+            # In-memory rate limiting (dev only)
+            if settings.ENVIRONMENT not in ["development", "testing", "local"]:
+                # Production without Redis - fail closed
+                return False, "Rate limiting service unavailable"
+                
             now = time.time()
             tracker = self.connection_attempts[ip_address]
             
@@ -131,12 +139,19 @@ class WebSocketRateLimiter:
                 if current_count >= self.MAX_MESSAGES_PER_CONNECTION:
                     return False, "Message rate limit exceeded"
                 
-                await self.redis.setex(key, self.MESSAGE_WINDOW, current_count + 1)
+                await self.redis.set(key, current_count + 1, expire=self.MESSAGE_WINDOW)
             except Exception as e:
                 logger.error(f"Redis error in message rate limit: {e}")
-                # Fall back to in-memory
+                # In production, fail closed
+                if settings.ENVIRONMENT not in ["development", "testing", "local"]:
+                    return False, "Rate limiting service temporarily unavailable"
+                # Fall back to in-memory in dev
         else:
-            # In-memory rate limiting
+            # In-memory rate limiting (dev only)
+            if settings.ENVIRONMENT not in ["development", "testing", "local"]:
+                # Production without Redis - fail closed
+                return False, "Rate limiting service unavailable"
+                
             now = time.time()
             tracker = self.message_counts[connection_id]
             
