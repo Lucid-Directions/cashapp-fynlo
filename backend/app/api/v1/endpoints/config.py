@@ -4,11 +4,12 @@ Provides endpoints for managing payment system configuration
 """
 
 from typing import Dict, Any, Optional, List
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 
 from app.core.database import get_db, User
+from app.core.exceptions import FynloException, ResourceNotFoundException, ValidationException
 from app.core.auth import get_current_user
 from app.core.responses import APIResponseHelper
 from app.services.config_manager import config_manager, ProviderConfig, RoutingConfig, FeatureFlags
@@ -62,7 +63,7 @@ async def get_configuration_summary(
         )
         
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise FynloException(message="", status_code=500)
 
 @router.get("/providers")
 async def get_provider_configurations(
@@ -91,7 +92,7 @@ async def get_provider_configurations(
         )
         
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise FynloException(message="", status_code=500)
 
 @router.get("/providers/{provider_name}")
 async def get_provider_configuration(
@@ -103,7 +104,7 @@ async def get_provider_configuration(
         config = config_manager.get_provider_config(provider_name)
         
         if not config:
-            raise HTTPException(status_code=404, detail=f"Provider {provider_name} not found")
+            raise ResourceNotFoundException(resource="Resource", message=f"Provider {provider_name} not found")
         
         # Don't expose sensitive information
         provider_config = {
@@ -126,7 +127,7 @@ async def get_provider_configuration(
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise FynloException(message="", status_code=500)
 
 @router.put("/providers/{provider_name}")
 async def update_provider_configuration(
@@ -146,7 +147,7 @@ async def update_provider_configuration(
         }
         
         if not update_data:
-            raise HTTPException(status_code=400, detail="No configuration changes provided")
+            raise ValidationException(message="No configuration changes provided")
         
         # Update configuration
         config_manager.update_provider_config(provider_name, **update_data)
@@ -173,7 +174,7 @@ async def update_provider_configuration(
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise FynloException(message="", status_code=500)
 
 @router.get("/routing")
 async def get_routing_configuration(
@@ -198,7 +199,7 @@ async def get_routing_configuration(
         )
         
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise FynloException(message="", status_code=500)
 
 @router.put("/routing")
 async def update_routing_configuration(
@@ -219,18 +220,12 @@ async def update_routing_configuration(
                 RoutingStrategy(config_update.default_strategy)
                 routing_config.default_strategy = config_update.default_strategy
             except ValueError:
-                raise HTTPException(
-                    status_code=400, 
-                    detail=f"Invalid routing strategy: {config_update.default_strategy}"
-                )
+                raise ValidationException(message=f"Invalid routing strategy: {config_update.default_strategy}")
         
         if config_update.fallback_provider is not None:
             # Validate provider exists
             if config_update.fallback_provider not in config_manager.providers:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Fallback provider '{config_update.fallback_provider}' not configured"
-                )
+                raise ValidationException(message=f"Fallback provider ")
             routing_config.fallback_provider = config_update.fallback_provider
         
         # Save configuration
@@ -248,7 +243,7 @@ async def update_routing_configuration(
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise FynloException(message="", status_code=500)
 
 @router.get("/features")
 async def get_feature_flags(
@@ -275,7 +270,7 @@ async def get_feature_flags(
         )
         
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise FynloException(message="", status_code=500)
 
 @router.put("/features")
 async def update_feature_flag(
@@ -298,7 +293,7 @@ async def update_feature_flag(
         )
         
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise FynloException(message="", status_code=500)
 
 @router.get("/security")
 async def get_security_configuration(
@@ -323,7 +318,7 @@ async def get_security_configuration(
         )
         
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise FynloException(message="", status_code=500)
 
 @router.post("/validate")
 async def validate_configuration(
@@ -368,7 +363,7 @@ async def validate_configuration(
         )
         
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise FynloException(message="", status_code=500)
 
 @router.get("/monitoring/health")
 async def get_system_health(
@@ -386,7 +381,7 @@ async def get_system_health(
         )
         
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise FynloException(message="", status_code=500)
 
 @router.get("/monitoring/metrics")
 async def get_system_metrics(
@@ -397,7 +392,7 @@ async def get_system_metrics(
     """Get system metrics for specified time period"""
     try:
         if hours < 1 or hours > 168:  # Max 1 week
-            raise HTTPException(status_code=400, detail="Hours must be between 1 and 168")
+            raise ValidationException(message="Hours must be between 1 and 168", field="hours")
         
         monitoring_service = get_monitoring_service(db)
         metrics = await monitoring_service.get_system_metrics(hours)
@@ -410,7 +405,7 @@ async def get_system_metrics(
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise FynloException(message="", status_code=500)
 
 @router.put("/monitoring/thresholds")
 async def update_monitoring_thresholds(
@@ -429,7 +424,7 @@ async def update_monitoring_thresholds(
         )
         
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise FynloException(message="", status_code=500)
 
 @router.post("/test/routing")
 async def test_routing_simulation(
@@ -444,7 +439,7 @@ async def test_routing_simulation(
         try:
             routing_strategy = RoutingStrategy(strategy)
         except ValueError:
-            raise HTTPException(status_code=400, detail=f"Invalid routing strategy: {strategy}")
+            raise ValidationException(message=f"Invalid routing strategy: {strategy}")
         
         # Run simulation
         simulation_result = await payment_factory.simulate_routing_impact(
@@ -461,7 +456,7 @@ async def test_routing_simulation(
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise FynloException(message="", status_code=500)
 
 @router.post("/backup")
 async def backup_configuration(
@@ -484,4 +479,4 @@ async def backup_configuration(
         )
         
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise FynloException(message="", status_code=500)

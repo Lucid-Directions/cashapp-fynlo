@@ -4,12 +4,13 @@ Provides real-time visibility into replica counts and system health.
 Enhanced with strict input validation and security measures.
 """
 
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Query, Body, Request
+from fastapi import APIRouter, Depends, BackgroundTasks, Query, Body, Request
 from datetime import datetime, timezone
 from typing import Dict, Any, List
 import logging
 
 from app.core.response_helper import APIResponseHelper
+from app.core.exceptions import AuthorizationException
 from app.core.redis_client import get_redis, RedisClient
 from app.core.auth import get_current_user
 from app.core.database import User
@@ -144,10 +145,7 @@ async def get_monitoring_metrics(
     Requires platform owner role.
     """
     if current_user.role != "platform_owner":
-        raise HTTPException(
-            status_code=403,
-            detail="Only platform owners can access detailed metrics"
-        )
+        raise AuthorizationException(message="Only platform owners can access detailed metrics")
     
     metrics = await do_monitor.get_metrics_summary()
     
@@ -177,10 +175,7 @@ async def refresh_replica_count(
     Requires platform owner role.
     """
     if current_user.role != "platform_owner":
-        raise HTTPException(
-            status_code=403,
-            detail="Only platform owners can refresh replica status"
-        )
+        raise AuthorizationException(message="Only platform owners can refresh replica status")
     
     # Clear DO cache and get fresh data if requested
     if request_body.clear_cache:
@@ -218,10 +213,7 @@ async def get_recent_deployments(
     Requires platform owner role.
     """
     if current_user.role != "platform_owner":
-        raise HTTPException(
-            status_code=403,
-            detail="Only platform owners can view deployment history"
-        )
+        raise AuthorizationException(message="Only platform owners can view deployment history")
     
     deployments = await do_monitor.get_deployments(limit=query_params.limit)
     
@@ -264,10 +256,7 @@ async def trigger_deployment(
     Requires platform owner role and explicit confirmation.
     """
     if current_user.role != "platform_owner":
-        raise HTTPException(
-            status_code=403,
-            detail="Only platform owners can trigger deployments"
-        )
+        raise AuthorizationException(message="Only platform owners can trigger deployments")
     
     # Log deployment trigger with reason
     logger.warning(f"Deployment triggered by {current_user.email}. Reason: {request_body.reason}")

@@ -3,7 +3,7 @@ Platform administration endpoints for secure management
 Only accessible by existing platform owners with proper authentication
 """
 
-from fastapi import APIRouter, Depends, HTTPException, Header
+from fastapi import APIRouter, Depends, Header
 from sqlalchemy.orm import Session
 from typing import Optional
 from datetime import datetime
@@ -13,6 +13,7 @@ import hmac
 import hashlib
 
 from app.core.database import get_db, User
+from app.core.exceptions import AuthorizationException, ResourceNotFoundException, ValidationException
 from app.core.auth import get_current_user
 from app.core.config import settings
 from app.core.responses import APIResponseHelper
@@ -39,10 +40,7 @@ def verify_platform_owner_access(current_user: User, verification_token: Optiona
     Verify that the current user is a platform owner with proper authentication
     """
     if current_user.role != 'platform_owner':
-        raise HTTPException(
-            status_code=403,
-            detail="Access denied: Platform owner role required"
-        )
+        raise AuthorizationException(message="Access denied: Platform owner role required")
     
     # Additional verification for sensitive operations
     if settings.PLATFORM_OWNER_SECRET_KEY and verification_token:
@@ -55,10 +53,7 @@ def verify_platform_owner_access(current_user: User, verification_token: Optiona
         
         if not hmac.compare_digest(verification_token, expected_token):
             logger.warning(f"Invalid platform owner verification token for user {current_user.id}")
-            raise HTTPException(
-                status_code=403,
-                detail="Invalid verification token"
-            )
+            raise ValidationException(message="Invalid verification token", field="verification")
 
 
 @router.post("/grant-platform-owner")
@@ -77,18 +72,12 @@ async def grant_platform_owner_role(
     # Verify the verification code (this should be sent via secure channel)
     # In production, this would check against a time-limited code sent via SMS/email
     if not request.verification_code or len(request.verification_code) < 6:
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid verification code"
-        )
+        raise ValidationException(message="Invalid verification code", field="verification")
     
     # Find the target user
     target_user = db.query(User).filter(User.email == request.user_email).first()
     if not target_user:
-        raise HTTPException(
-            status_code=404,
-            detail="User not found"
-        )
+        raise ResourceNotFoundException(resource="User")
     
     if target_user.role == 'platform_owner':
         return APIResponseHelper.success(
@@ -125,18 +114,12 @@ async def revoke_platform_owner_role(
     
     # Prevent self-revocation
     if request.user_email == current_user.email:
-        raise HTTPException(
-            status_code=400,
-            detail="Cannot revoke your own platform owner role"
-        )
+        raise ValidationException(message="Cannot revoke your own platform owner role")
     
     # Find the target user
     target_user = db.query(User).filter(User.email == request.user_email).first()
     if not target_user:
-        raise HTTPException(
-            status_code=404,
-            detail="User not found"
-        )
+        raise ResourceNotFoundException(resource="User")
     
     if target_user.role != 'platform_owner':
         return APIResponseHelper.success(
@@ -146,10 +129,7 @@ async def revoke_platform_owner_role(
     # Check if this would leave no platform owners
     platform_owner_count = db.query(User).filter(User.role == 'platform_owner').count()
     if platform_owner_count <= 1:
-        raise HTTPException(
-            status_code=400,
-            detail="Cannot revoke: This would leave no platform owners in the system"
-        )
+        raise ValidationException(message="Cannot revoke: This would leave no platform owners in the system")
     
     # Update user role to restaurant_owner
     target_user.role = 'restaurant_owner'
@@ -176,10 +156,7 @@ async def list_platform_owners(
     Requires: Current user must be platform owner
     """
     if current_user.role != 'platform_owner':
-        raise HTTPException(
-            status_code=403,
-            detail="Access denied: Platform owner role required"
-        )
+        raise AuthorizationException(message="Access denied: Platform owner role required")
     
     platform_owners = db.query(User).filter(User.role == 'platform_owner').all()
     

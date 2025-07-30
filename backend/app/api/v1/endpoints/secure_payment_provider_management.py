@@ -3,7 +3,7 @@ Payment Provider Management Endpoints
 Handles configuration and testing of payment providers
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, status, Query
 from typing import Dict, Any, List, Optional
 from decimal import Decimal
 from sqlalchemy.orm import Session
@@ -12,6 +12,7 @@ from app.core.database import get_db
 from app.core.dependencies import get_current_user
 from app.core.responses import APIResponseHelper
 from app.core.database import User
+from app.core.exceptions import AuthorizationException
 from app.services.secure_payment_config import SecurePaymentConfigService
 from app.services.payment_factory import PaymentProviderFactory
 from app.core.tenant_security import TenantSecurity
@@ -45,10 +46,7 @@ async def configure_payment_provider(
         
         # Check user permissions
         if current_user.role not in ['platform_owner', 'restaurant_owner']:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Only owners can configure payment providers"
-            )
+            raise AuthorizationException(message="Only owners can configure payment providers")
         
         # Initialize config service
         config_service = SecurePaymentConfigService(db)
@@ -148,10 +146,7 @@ async def test_payment_provider(
         
         # Check permissions
         if current_user.role not in ['platform_owner', 'restaurant_owner', 'manager']:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Insufficient permissions"
-            )
+            raise AuthorizationException(message="Insufficient permissions")
         
         # Initialize provider factory
         factory = PaymentProviderFactory()

@@ -3,7 +3,7 @@ Customer Management API endpoints for Fynlo POS
 """
 
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, status, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_, desc, func
 from pydantic import BaseModel, EmailStr
@@ -13,7 +13,7 @@ from app.core.database import get_db, Customer, Order, User
 from app.core.auth import get_current_user
 from app.core.redis_client import get_redis, RedisClient
 from app.core.responses import APIResponseHelper
-from app.core.exceptions import FynloException, ErrorCodes
+from app.core.exceptions import ConflictException, InventoryException, ResourceNotFoundException, ValidationException
 from app.core.security_utils import sanitize_sql_like_pattern, sanitize_search_term
 from app.schemas.search_schemas import CustomerSearchRequest
 
@@ -80,7 +80,7 @@ async def get_customers(
     # Use current user's restaurant context
     user_restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
     if not user_restaurant_id:
-        raise HTTPException(status_code=400, detail="User must be assigned to a restaurant")
+        raise ValidationException(message="User must be assigned to a restaurant", field="user")
     
     # Use provided restaurant_id or fallback to user's current restaurant
     if not restaurant_id:
@@ -155,7 +155,7 @@ async def get_customer_stats(
     # Use current user's restaurant context
     user_restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
     if not user_restaurant_id:
-        raise HTTPException(status_code=400, detail="User must be assigned to a restaurant")
+        raise ValidationException(message="User must be assigned to a restaurant", field="user")
     
     # Use provided restaurant_id or fallback to user's current restaurant
     if not restaurant_id:
@@ -242,7 +242,7 @@ async def create_customer(
     # Use current user's restaurant context
     user_restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
     if not user_restaurant_id:
-        raise HTTPException(status_code=400, detail="User must be assigned to a restaurant")
+        raise ValidationException(message="User must be assigned to a restaurant", field="user")
     
     # Use provided restaurant_id or fallback to user's current restaurant
     if not restaurant_id:
@@ -278,7 +278,7 @@ async def create_customer(
         ).first()
     
     if existing_customer:
-        raise HTTPException(status_code=400, detail="Customer already exists")
+        raise ConflictException(message="Customer already exists")
     
     new_customer = Customer(
         restaurant_id=restaurant_id,
@@ -321,7 +321,7 @@ async def get_customer(
     
     customer = db.query(Customer).filter(Customer.id == customer_id).first()
     if not customer:
-        raise HTTPException(status_code=404, detail="Customer not found")
+        raise ResourceNotFoundException(resource="Customer")
     
     # Verify tenant access
     from app.core.tenant_security import TenantSecurity
@@ -366,7 +366,7 @@ async def update_customer(
     
     customer = db.query(Customer).filter(Customer.id == customer_id).first()
     if not customer:
-        raise HTTPException(status_code=404, detail="Customer not found")
+        raise ResourceNotFoundException(resource="Customer")
     
     # Verify tenant access
     from app.core.tenant_security import TenantSecurity
@@ -421,7 +421,7 @@ async def update_loyalty_points(
     
     customer = db.query(Customer).filter(Customer.id == customer_id).first()
     if not customer:
-        raise HTTPException(status_code=404, detail="Customer not found")
+        raise ResourceNotFoundException(resource="Customer")
     
     # Verify tenant access
     from app.core.tenant_security import TenantSecurity
@@ -436,7 +436,7 @@ async def update_loyalty_points(
     
     # Validate transaction
     if loyalty_data.transaction_type == "redeemed" and customer.loyalty_points < abs(loyalty_data.points):
-        raise HTTPException(status_code=400, detail="Insufficient loyalty points")
+        raise InventoryException(message="Insufficient loyalty points")
     
     # Update points
     if loyalty_data.transaction_type == "earned":
@@ -475,7 +475,7 @@ async def get_customer_orders(
     
     customer = db.query(Customer).filter(Customer.id == customer_id).first()
     if not customer:
-        raise HTTPException(status_code=404, detail="Customer not found")
+        raise ResourceNotFoundException(resource="Customer")
     
     # Verify tenant access
     from app.core.tenant_security import TenantSecurity
@@ -515,7 +515,7 @@ async def search_customers(
     # Use current user's restaurant context
     user_restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
     if not user_restaurant_id:
-        raise HTTPException(status_code=400, detail="User must be assigned to a restaurant")
+        raise ValidationException(message="User must be assigned to a restaurant", field="user")
     
     # Use provided restaurant_id from search_data or fallback to user's current restaurant
     if not search_data.restaurant_id:
