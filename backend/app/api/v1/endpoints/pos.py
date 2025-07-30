@@ -43,11 +43,13 @@ async def get_current_session(
     """Get the current active POS session"""
     
     # Validate restaurant access
-    restaurant_id = TenantSecurity.validate_restaurant_access(
+    await TenantSecurity.validate_restaurant_access(
         current_user, 
-        current_restaurant_id, 
-        db
+        current_restaurant_id or current_user.restaurant_id, 
+        db=db
     )
+    # Use the provided restaurant_id or fall back to user's default
+    restaurant_id = current_restaurant_id or current_user.restaurant_id
     
     # Find the active session for this user
     active_session = db.query(PosSession).filter(
@@ -92,11 +94,13 @@ async def create_session(
     """Create a new POS session"""
     
     # Validate restaurant access
-    restaurant_id = TenantSecurity.validate_restaurant_access(
+    await TenantSecurity.validate_restaurant_access(
         current_user, 
-        current_restaurant_id, 
-        db
+        current_restaurant_id or current_user.restaurant_id, 
+        db=db
     )
+    # Use the provided restaurant_id or fall back to user's default
+    restaurant_id = current_restaurant_id or current_user.restaurant_id
     
     # Check if user already has an active session
     existing_session = db.query(PosSession).filter(
@@ -165,10 +169,10 @@ async def update_session_state(
         )
     
     # Validate restaurant access
-    TenantSecurity.validate_restaurant_access(
+    await TenantSecurity.validate_restaurant_access(
         current_user, 
         str(session.restaurant_id), 
-        db
+        db=db
     )
     
     # Check if user owns this session
@@ -223,11 +227,13 @@ async def get_sessions(
     """Get POS sessions for the current user"""
     
     # Validate restaurant access
-    restaurant_id = TenantSecurity.validate_restaurant_access(
+    await TenantSecurity.validate_restaurant_access(
         current_user, 
-        current_restaurant_id, 
-        db
+        current_restaurant_id or current_user.restaurant_id, 
+        db=db
     )
+    # Use the provided restaurant_id or fall back to user's default
+    restaurant_id = current_restaurant_id or current_user.restaurant_id
     
     sessions = db.query(PosSession).filter(
         and_(

@@ -91,9 +91,11 @@ async def initialize_sumup(
     """
     try:
         # Validate restaurant access for multi-tenant
-        restaurant_id = await TenantSecurity.validate_restaurant_access(
-            db, current_user, current_restaurant_id
+        await TenantSecurity.validate_restaurant_access(
+            current_user, current_restaurant_id or current_user.restaurant_id, db=db
         )
+        # Use the provided restaurant_id or fall back to user's default
+        restaurant_id = current_restaurant_id or current_user.restaurant_id
         
         # Check if restaurant has active subscription
         # TODO: Add subscription validation when subscription service is available
@@ -192,9 +194,11 @@ async def get_sumup_status(
     """
     try:
         # Validate restaurant access for multi-tenant
-        restaurant_id = await TenantSecurity.validate_restaurant_access(
-            db, current_user, current_restaurant_id
+        await TenantSecurity.validate_restaurant_access(
+            current_user, current_restaurant_id or current_user.restaurant_id, db=db
         )
+        # Use the provided restaurant_id or fall back to user's default
+        restaurant_id = current_restaurant_id or current_user.restaurant_id
         
         # Check SumUp configuration
         sumup_api_key = os.getenv("SUMUP_API_KEY")
@@ -244,9 +248,11 @@ async def validate_merchant_code(
     """
     try:
         # Validate restaurant access for multi-tenant
-        restaurant_id = await TenantSecurity.validate_restaurant_access(
-            db, current_user, current_restaurant_id
+        await TenantSecurity.validate_restaurant_access(
+            current_user, current_restaurant_id or current_user.restaurant_id, db=db
         )
+        # Use the provided restaurant_id or fall back to user's default
+        restaurant_id = current_restaurant_id or current_user.restaurant_id
         
         # Check permissions
         if current_user.role not in ['platform_owner', 'restaurant_owner', 'manager']:

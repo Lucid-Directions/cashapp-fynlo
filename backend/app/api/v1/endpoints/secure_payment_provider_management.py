@@ -38,9 +38,10 @@ async def configure_payment_provider(
     """
     try:
         # Validate restaurant access for multi-tenant
-        restaurant_id = await TenantSecurity.validate_restaurant_access(
-            db, current_user, current_restaurant_id
+        await TenantSecurity.validate_restaurant_access(
+            current_user, current_restaurant_id or current_user.restaurant_id, db=db
         )
+        restaurant_id = current_restaurant_id or current_user.restaurant_id
         
         # Check user permissions
         if current_user.role not in ['platform_owner', 'restaurant_owner']:
@@ -86,9 +87,10 @@ async def list_payment_providers(
     """Get all configured payment providers for the restaurant"""
     try:
         # Validate restaurant access for multi-tenant
-        restaurant_id = await TenantSecurity.validate_restaurant_access(
-            db, current_user, current_restaurant_id
+        await TenantSecurity.validate_restaurant_access(
+            current_user, current_restaurant_id or current_user.restaurant_id, db=db
         )
+        restaurant_id = current_restaurant_id or current_user.restaurant_id
         
         config_service = SecurePaymentConfigService(db)
         
@@ -139,9 +141,10 @@ async def test_payment_provider(
     """Test a payment provider connection"""
     try:
         # Validate restaurant access for multi-tenant
-        restaurant_id = await TenantSecurity.validate_restaurant_access(
-            db, current_user, current_restaurant_id
+        await TenantSecurity.validate_restaurant_access(
+            current_user, current_restaurant_id or current_user.restaurant_id, db=db
         )
+        restaurant_id = current_restaurant_id or current_user.restaurant_id
         
         # Check permissions
         if current_user.role not in ['platform_owner', 'restaurant_owner', 'manager']:
@@ -189,9 +192,10 @@ async def calculate_provider_fee(
     """Calculate fees for a specific provider and amount"""
     try:
         # Validate restaurant access for multi-tenant
-        restaurant_id = await TenantSecurity.validate_restaurant_access(
-            db, current_user, current_restaurant_id
+        await TenantSecurity.validate_restaurant_access(
+            current_user, current_restaurant_id or current_user.restaurant_id, db=db
         )
+        restaurant_id = current_restaurant_id or current_user.restaurant_id
         
         # Initialize provider factory
         factory = PaymentProviderFactory()
@@ -239,9 +243,10 @@ async def get_best_provider(
     """Get the best provider for a transaction based on fees and performance"""
     try:
         # Validate restaurant access for multi-tenant
-        restaurant_id = await TenantSecurity.validate_restaurant_access(
-            db, current_user, current_restaurant_id
+        await TenantSecurity.validate_restaurant_access(
+            current_user, current_restaurant_id or current_user.restaurant_id, db=db
         )
+        restaurant_id = current_restaurant_id or current_user.restaurant_id
         
         # Initialize provider factory
         factory = PaymentProviderFactory()

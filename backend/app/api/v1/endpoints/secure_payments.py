@@ -112,9 +112,10 @@ async def process_payment(
     """
     try:
         # Validate restaurant access for multi-tenant
-        restaurant_id = await TenantSecurity.validate_restaurant_access(
-            db, current_user, current_restaurant_id
+        await TenantSecurity.validate_restaurant_access(
+            current_user, current_restaurant_id or current_user.restaurant_id, db=db
         )
+        restaurant_id = current_restaurant_id or current_user.restaurant_id
         
         # Add user context to request
         request_context = get_request_context(request)
@@ -189,9 +190,10 @@ async def get_payment_methods(
     """
     try:
         # Validate restaurant access for multi-tenant
-        restaurant_id = await TenantSecurity.validate_restaurant_access(
-            db, current_user, current_restaurant_id
+        await TenantSecurity.validate_restaurant_access(
+            current_user, current_restaurant_id or current_user.restaurant_id, db=db
         )
+        restaurant_id = current_restaurant_id or current_user.restaurant_id
         
         # Get configured payment providers
         config_service = SecurePaymentConfigService(db)
@@ -286,9 +288,10 @@ async def process_refund(
     """
     try:
         # Validate restaurant access for multi-tenant
-        restaurant_id = await TenantSecurity.validate_restaurant_access(
-            db, current_user, current_restaurant_id
+        await TenantSecurity.validate_restaurant_access(
+            current_user, current_restaurant_id or current_user.restaurant_id, db=db
         )
+        restaurant_id = current_restaurant_id or current_user.restaurant_id
         
         # Check permissions - only managers and above can process refunds
         if current_user.role not in ['manager', 'restaurant_owner', 'platform_owner']:
@@ -333,9 +336,10 @@ async def get_payment_status(
     """
     try:
         # Validate restaurant access for multi-tenant
-        restaurant_id = await TenantSecurity.validate_restaurant_access(
-            db, current_user, current_restaurant_id
+        await TenantSecurity.validate_restaurant_access(
+            current_user, current_restaurant_id or current_user.restaurant_id, db=db
         )
+        restaurant_id = current_restaurant_id or current_user.restaurant_id
         
         # Get payment from database
         from app.services.secure_payment_processor import Payment

@@ -31,7 +31,7 @@ async def get_current_user_with_tenant_validation(
     """
     if restaurant_id:
         # Validate access to specified restaurant
-        TenantSecurity.validate_restaurant_access(
+        await TenantSecurity.validate_restaurant_access(
             user=current_user,
             restaurant_id=restaurant_id,
             operation="access"
@@ -80,7 +80,7 @@ async def validate_resource_access(
     
     # Validate restaurant access if resource has restaurant_id
     if hasattr(resource, 'restaurant_id'):
-        TenantSecurity.validate_restaurant_access(
+        await TenantSecurity.validate_restaurant_access(
             user=current_user,
             restaurant_id=str(resource.restaurant_id),
             operation="access"

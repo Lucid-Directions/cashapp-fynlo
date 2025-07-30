@@ -36,7 +36,7 @@ async def update_product_secure(
         )
     
     # CRITICAL SECURITY CHECK: Validate user can access this product's restaurant
-    TenantSecurity.validate_restaurant_access(
+    await TenantSecurity.validate_restaurant_access(
         user=current_user,
         restaurant_id=str(product.restaurant_id),
         operation="modify"
@@ -54,7 +54,7 @@ async def update_product_secure(
                 detail="Only platform owners can move products between restaurants"
             )
         # Validate access to target restaurant
-        TenantSecurity.validate_restaurant_access(
+        await TenantSecurity.validate_restaurant_access(
             user=current_user,
             restaurant_id=product_data["restaurant_id"],
             operation="create"
@@ -82,7 +82,7 @@ async def delete_product_secure(
         )
     
     # CRITICAL: Validate access before deletion
-    TenantSecurity.validate_restaurant_access(
+    await TenantSecurity.validate_restaurant_access(
         user=current_user,
         restaurant_id=str(product.restaurant_id),
         operation="delete"
@@ -118,7 +118,7 @@ async def get_products_secure(
     
     # If restaurant_id specified, validate access
     if restaurant_id:
-        TenantSecurity.validate_restaurant_access(
+        await TenantSecurity.validate_restaurant_access(
             user=current_user,
             restaurant_id=restaurant_id,
             operation="view"
@@ -187,7 +187,7 @@ async def bulk_update_products_secure(
         
         # Validate access for each product
         try:
-            TenantSecurity.validate_restaurant_access(
+            await TenantSecurity.validate_restaurant_access(
                 user=current_user,
                 restaurant_id=str(product.restaurant_id),
                 operation="modify"

@@ -128,12 +128,9 @@ async def list_restaurant_settings(
             raise HTTPException(status_code=403, detail="Cannot access settings for a different restaurant")
         
         # Validate the user has access to this restaurant
-        validated_restaurant_id = await TenantSecurity.validate_restaurant_access(
-            db, current_user, restaurant_id
+        await TenantSecurity.validate_restaurant_access(
+            current_user, restaurant_id, db=db
         )
-        
-        if validated_restaurant_id != restaurant_id:
-            raise HTTPException(status_code=403, detail="Access denied to this restaurant's settings")
     
     db_settings = service.get_all_settings_for_restaurant(restaurant_id)
     return [convert_db_model_to_schema(s) for s in db_settings]
@@ -154,12 +151,9 @@ async def create_or_update_restaurant_setting(
         raise HTTPException(status_code=403, detail="Cannot modify settings for a different restaurant")
     
     # Validate the user has access to this restaurant
-    validated_restaurant_id = await TenantSecurity.validate_restaurant_access(
-        db, current_user, restaurant_id
+    await TenantSecurity.validate_restaurant_access(
+        current_user, restaurant_id, db=db
     )
-    
-    if validated_restaurant_id != restaurant_id:
-        raise HTTPException(status_code=403, detail="Access denied to modify this restaurant's settings")
     
     # Check permissions - only owners and managers can modify settings
     if current_user.role not in ['platform_owner', 'restaurant_owner', 'manager']:
@@ -199,12 +193,9 @@ async def delete_restaurant_setting(
         raise HTTPException(status_code=403, detail="Cannot delete settings for a different restaurant")
     
     # Validate the user has access to this restaurant
-    validated_restaurant_id = await TenantSecurity.validate_restaurant_access(
-        db, current_user, restaurant_id
+    await TenantSecurity.validate_restaurant_access(
+        current_user, restaurant_id, db=db
     )
-    
-    if validated_restaurant_id != restaurant_id:
-        raise HTTPException(status_code=403, detail="Access denied to delete this restaurant's settings")
     
     # Check permissions - only owners and managers can delete settings
     if current_user.role not in ['platform_owner', 'restaurant_owner', 'manager']:

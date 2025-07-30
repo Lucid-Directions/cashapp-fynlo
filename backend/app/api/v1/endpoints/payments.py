@@ -131,9 +131,10 @@ async def generate_qr_payment(
 ):
     """Generate QR code for payment with 1.2% fee advantage"""
     # Validate restaurant access for multi-tenant
-    restaurant_id = await TenantSecurity.validate_restaurant_access(
-        db, current_user, current_restaurant_id
+    await TenantSecurity.validate_restaurant_access(
+        current_user, current_restaurant_id or current_user.restaurant_id, db=db
     )
+    restaurant_id = current_restaurant_id or current_user.restaurant_id
     
     audit_service = AuditLoggerService(db)
     ip_address = request.client.host if request.client else "unknown"
@@ -238,9 +239,10 @@ async def confirm_qr_payment(
 ):
     """Confirm QR payment completion"""
     # Validate restaurant access for multi-tenant
-    restaurant_id = await TenantSecurity.validate_restaurant_access(
-        db, current_user, current_restaurant_id
+    await TenantSecurity.validate_restaurant_access(
+        current_user, current_restaurant_id or current_user.restaurant_id, db=db
     )
+    restaurant_id = current_restaurant_id or current_user.restaurant_id
     
     audit_service = AuditLoggerService(db)
     ip_address = request.client.host if request.client else "unknown"
@@ -411,9 +413,10 @@ async def process_stripe_payment(
 ):
     """Process Stripe payment"""
     # Validate restaurant access for multi-tenant
-    restaurant_id = await TenantSecurity.validate_restaurant_access(
-        db, current_user, current_restaurant_id
+    await TenantSecurity.validate_restaurant_access(
+        current_user, current_restaurant_id or current_user.restaurant_id, db=db
     )
+    restaurant_id = current_restaurant_id or current_user.restaurant_id
     
     audit_service = AuditLoggerService(db)
     ip_address = request.client.host if request.client else "unknown"
@@ -590,9 +593,10 @@ async def process_cash_payment(
 ):
     """Process cash payment"""
     # Validate restaurant access for multi-tenant
-    restaurant_id = await TenantSecurity.validate_restaurant_access(
-        db, current_user, current_restaurant_id
+    await TenantSecurity.validate_restaurant_access(
+        current_user, current_restaurant_id or current_user.restaurant_id, db=db
     )
+    restaurant_id = current_restaurant_id or current_user.restaurant_id
     
     audit_service = AuditLoggerService(db)
     ip_address = request.client.host if request.client else "unknown"
@@ -680,9 +684,10 @@ async def get_order_payments(
 ):
     """Get all payments for an order"""
     # Validate restaurant access for multi-tenant
-    restaurant_id = await TenantSecurity.validate_restaurant_access(
-        db, current_user, current_restaurant_id
+    await TenantSecurity.validate_restaurant_access(
+        current_user, current_restaurant_id or current_user.restaurant_id, db=db
     )
+    restaurant_id = current_restaurant_id or current_user.restaurant_id
     
     # Verify order belongs to the restaurant
     order = db.query(Order).filter(
@@ -767,9 +772,10 @@ async def process_payment(
 
     try:
         # Validate restaurant access for multi-tenant
-        restaurant_id = await TenantSecurity.validate_restaurant_access(
-            db, current_user, current_restaurant_id
+        await TenantSecurity.validate_restaurant_access(
+            current_user, current_restaurant_id or current_user.restaurant_id, db=db
         )
+        restaurant_id = current_restaurant_id or current_user.restaurant_id
         
         order = db.query(Order).filter(
             Order.id == payment_data_req.order_id,
@@ -933,9 +939,10 @@ async def refund_payment(
 ):
     """Refund a payment"""
     # Validate restaurant access for multi-tenant
-    restaurant_id = await TenantSecurity.validate_restaurant_access(
-        db, current_user, current_restaurant_id
+    await TenantSecurity.validate_restaurant_access(
+        current_user, current_restaurant_id or current_user.restaurant_id, db=db
     )
+    restaurant_id = current_restaurant_id or current_user.restaurant_id
     
     audit_service = AuditLoggerService(db)
     ip_address = request.client.host if request.client else "unknown"
@@ -1063,9 +1070,10 @@ async def get_available_providers(
 ):
     """Get list of available payment providers and their costs"""
     # Validate restaurant access for multi-tenant
-    restaurant_id = await TenantSecurity.validate_restaurant_access(
-        db, current_user, current_restaurant_id
+    await TenantSecurity.validate_restaurant_access(
+        current_user, current_restaurant_id or current_user.restaurant_id, db=db
     )
+    restaurant_id = current_restaurant_id or current_user.restaurant_id
     
     providers = payment_factory.get_available_providers()
     
@@ -1150,9 +1158,10 @@ async def square_create_payment_endpoint(
 ):
     """Create a Square payment. If auto_complete is true, this attempts to finalize the payment."""
     # Validate restaurant access for multi-tenant
-    restaurant_id = await TenantSecurity.validate_restaurant_access(
-        db, current_user, current_restaurant_id
+    await TenantSecurity.validate_restaurant_access(
+        current_user, current_restaurant_id or current_user.restaurant_id, db=db
     )
+    restaurant_id = current_restaurant_id or current_user.restaurant_id
     
     audit_service = AuditLoggerService(db)
     ip_address = http_request.client.host if http_request.client else "unknown"
@@ -1286,9 +1295,10 @@ async def square_process_payment_endpoint(
 ):
     """Process (complete) a Square payment that was created with auto_complete=false."""
     # Validate restaurant access for multi-tenant
-    restaurant_id = await TenantSecurity.validate_restaurant_access(
-        db, current_user, current_restaurant_id
+    await TenantSecurity.validate_restaurant_access(
+        current_user, current_restaurant_id or current_user.restaurant_id, db=db
     )
+    restaurant_id = current_restaurant_id or current_user.restaurant_id
     
     audit_service = AuditLoggerService(db)
     ip_address = http_request.client.host if http_request.client else "unknown"
@@ -1400,9 +1410,10 @@ async def square_get_payment_status_endpoint(
 ):
     """Get the status of a Square payment by its Square Payment ID."""
     # Validate restaurant access for multi-tenant
-    restaurant_id = await TenantSecurity.validate_restaurant_access(
-        db, current_user, current_restaurant_id
+    await TenantSecurity.validate_restaurant_access(
+        current_user, current_restaurant_id or current_user.restaurant_id, db=db
     )
+    restaurant_id = current_restaurant_id or current_user.restaurant_id
     
     audit_service = AuditLoggerService(db)
     ip_address = http_request.client.host if http_request.client else "unknown"

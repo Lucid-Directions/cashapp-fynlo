@@ -168,11 +168,13 @@ async def get_current_restaurant(
     """Get current restaurant (supports multi-restaurant access)"""
     
     # Validate restaurant access
-    restaurant_id = TenantSecurity.validate_restaurant_access(
+    await TenantSecurity.validate_restaurant_access(
         current_user, 
-        current_restaurant_id, 
-        db
+        current_restaurant_id or current_user.restaurant_id, 
+        db=db
     )
+    # Use the provided restaurant_id or fall back to user's default
+    restaurant_id = current_restaurant_id or current_user.restaurant_id
     
     restaurant = db.query(Restaurant).filter(
         Restaurant.id == restaurant_id
@@ -482,10 +484,10 @@ async def update_restaurant(
             raise HTTPException(status_code=403, detail="Access denied")
     else:
         # Restaurant users - validate access to the specific restaurant
-        TenantSecurity.validate_restaurant_access(
+        await TenantSecurity.validate_restaurant_access(
             current_user, 
             restaurant_id,  # Must match the restaurant being updated
-            db
+            db=db
         )
         
         # Additional check for managers - they can only update settings, not critical fields
@@ -586,10 +588,10 @@ async def get_restaurant_stats(
             raise HTTPException(status_code=403, detail="Access denied")
     else:
         # Restaurant users - validate access to the specific restaurant
-        TenantSecurity.validate_restaurant_access(
+        await TenantSecurity.validate_restaurant_access(
             current_user, 
             restaurant_id,  # Must match the restaurant being queried
-            db
+            db=db
         )
     
     # Date ranges
@@ -771,10 +773,10 @@ async def get_restaurant(
             raise HTTPException(status_code=403, detail="Access denied")
     else:
         # Restaurant users - validate access to the specific restaurant
-        TenantSecurity.validate_restaurant_access(
+        await TenantSecurity.validate_restaurant_access(
             current_user, 
             restaurant_id,  # Must match the restaurant being queried
-            db
+            db=db
         )
     
     return RestaurantResponse(
@@ -836,11 +838,13 @@ async def get_floor_plan(
     """Get restaurant floor plan with tables and sections"""
     
     # Validate restaurant access
-    restaurant_id = TenantSecurity.validate_restaurant_access(
+    await TenantSecurity.validate_restaurant_access(
         current_user, 
-        current_restaurant_id, 
-        db
+        current_restaurant_id or current_user.restaurant_id, 
+        db=db
     )
+    # Use the provided restaurant_id or fall back to user's default
+    restaurant_id = current_restaurant_id or current_user.restaurant_id
     
     # Get sections
     sections_query = db.query(Section).filter(
@@ -922,11 +926,13 @@ async def get_sections(
     """Get all restaurant sections"""
     
     # Validate restaurant access
-    restaurant_id = TenantSecurity.validate_restaurant_access(
+    await TenantSecurity.validate_restaurant_access(
         current_user, 
-        current_restaurant_id, 
-        db
+        current_restaurant_id or current_user.restaurant_id, 
+        db=db
     )
+    # Use the provided restaurant_id or fall back to user's default
+    restaurant_id = current_restaurant_id or current_user.restaurant_id
     
     sections = db.query(Section).filter(
         and_(
@@ -960,11 +966,13 @@ async def create_section(
     """Create a new section"""
     
     # Validate restaurant access
-    restaurant_id = TenantSecurity.validate_restaurant_access(
+    await TenantSecurity.validate_restaurant_access(
         current_user, 
-        current_restaurant_id, 
-        db
+        current_restaurant_id or current_user.restaurant_id, 
+        db=db
     )
+    # Use the provided restaurant_id or fall back to user's default
+    restaurant_id = current_restaurant_id or current_user.restaurant_id
     
     new_section = Section(
         restaurant_id=restaurant_id,
@@ -998,11 +1006,13 @@ async def create_table(
     """Create a new table"""
     
     # Validate restaurant access
-    restaurant_id = TenantSecurity.validate_restaurant_access(
+    await TenantSecurity.validate_restaurant_access(
         current_user, 
-        current_restaurant_id, 
-        db
+        current_restaurant_id or current_user.restaurant_id, 
+        db=db
     )
+    # Use the provided restaurant_id or fall back to user's default
+    restaurant_id = current_restaurant_id or current_user.restaurant_id
     
     # Verify section exists and belongs to restaurant
     section = db.query(Section).filter(
@@ -1066,11 +1076,13 @@ async def update_table_status(
         )
     
     # Validate restaurant access
-    restaurant_id = TenantSecurity.validate_restaurant_access(
+    await TenantSecurity.validate_restaurant_access(
         current_user, 
-        current_restaurant_id, 
-        db
+        current_restaurant_id or current_user.restaurant_id, 
+        db=db
     )
+    # Use the provided restaurant_id or fall back to user's default
+    restaurant_id = current_restaurant_id or current_user.restaurant_id
     
     # Find table
     table = db.query(Table).filter(
@@ -1130,11 +1142,13 @@ async def update_table_server(
     """Assign server to table"""
     
     # Validate restaurant access
-    restaurant_id = TenantSecurity.validate_restaurant_access(
+    await TenantSecurity.validate_restaurant_access(
         current_user, 
-        current_restaurant_id, 
-        db
+        current_restaurant_id or current_user.restaurant_id, 
+        db=db
     )
+    # Use the provided restaurant_id or fall back to user's default
+    restaurant_id = current_restaurant_id or current_user.restaurant_id
     
     # Find table
     table = db.query(Table).filter(
@@ -1207,11 +1221,13 @@ async def get_floor_plan_layout(
     """Get restaurant floor plan layout"""
     
     # Validate restaurant access
-    restaurant_id = TenantSecurity.validate_restaurant_access(
+    await TenantSecurity.validate_restaurant_access(
         current_user, 
-        current_restaurant_id, 
-        db
+        current_restaurant_id or current_user.restaurant_id, 
+        db=db
     )
+    # Use the provided restaurant_id or fall back to user's default
+    restaurant_id = current_restaurant_id or current_user.restaurant_id
     
     restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
     
@@ -1239,11 +1255,13 @@ async def update_floor_plan_layout(
     """Update restaurant floor plan layout"""
     
     # Validate restaurant access
-    restaurant_id = TenantSecurity.validate_restaurant_access(
+    await TenantSecurity.validate_restaurant_access(
         current_user, 
-        current_restaurant_id, 
-        db
+        current_restaurant_id or current_user.restaurant_id, 
+        db=db
     )
+    # Use the provided restaurant_id or fall back to user's default
+    restaurant_id = current_restaurant_id or current_user.restaurant_id
     
     restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
     
@@ -1294,11 +1312,13 @@ async def update_table_position(
     """Update table position and dimensions"""
     
     # Validate restaurant access
-    restaurant_id = TenantSecurity.validate_restaurant_access(
+    await TenantSecurity.validate_restaurant_access(
         current_user, 
-        current_restaurant_id, 
-        db
+        current_restaurant_id or current_user.restaurant_id, 
+        db=db
     )
+    # Use the provided restaurant_id or fall back to user's default
+    restaurant_id = current_restaurant_id or current_user.restaurant_id
     
     # Find table
     table = db.query(Table).filter(
@@ -1388,11 +1408,13 @@ async def merge_tables(
     """Merge multiple tables into one"""
     
     # Validate restaurant access
-    restaurant_id = TenantSecurity.validate_restaurant_access(
+    await TenantSecurity.validate_restaurant_access(
         current_user, 
-        current_restaurant_id, 
-        db
+        current_restaurant_id or current_user.restaurant_id, 
+        db=db
     )
+    # Use the provided restaurant_id or fall back to user's default
+    restaurant_id = current_restaurant_id or current_user.restaurant_id
     
     # Validate primary table
     primary_table = db.query(Table).filter(
@@ -1487,11 +1509,13 @@ async def get_revenue_by_table(
     """Get revenue breakdown by table"""
     
     # Validate restaurant access
-    restaurant_id = TenantSecurity.validate_restaurant_access(
+    await TenantSecurity.validate_restaurant_access(
         current_user, 
-        current_restaurant_id, 
-        db
+        current_restaurant_id or current_user.restaurant_id, 
+        db=db
     )
+    # Use the provided restaurant_id or fall back to user's default
+    restaurant_id = current_restaurant_id or current_user.restaurant_id
     
     # Set default date range (today if not specified)
     if not start_date:
