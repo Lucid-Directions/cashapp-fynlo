@@ -506,7 +506,7 @@ export const darkThemeConfig: Theme = {
 };
 
 // Utility Functions
-export const getResponsiveValue = <T>(
+export function getResponsiveValue<T>(
   values: {
     xs?: T;
     sm?: T;
@@ -515,7 +515,7 @@ export const getResponsiveValue = <T>(
     xl?: T;
   },
   fallback: T,
-): T => {
+): T {
   if (screenWidth >= breakpoints.xl && values.xl !== undefined) {
     return values.xl;
   }
@@ -532,7 +532,7 @@ export const getResponsiveValue = <T>(
     return values.xs;
   }
   return fallback;
-};
+}
 
 export const isTablet = () => deviceTypes.tablet || deviceTypes.desktop;
 export const isPhone = () => deviceTypes.phone;

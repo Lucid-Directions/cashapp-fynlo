@@ -68,7 +68,7 @@ export const useResponsive = (): ResponsiveHookReturn => {
 };
 
 // Hook for responsive values based on breakpoints
-export const useResponsiveValue = <T>(
+export function useResponsiveValue<T>(
   values: {
     xs?: T;
     sm?: T;
@@ -78,7 +78,7 @@ export const useResponsiveValue = <T>(
     xxl?: T;
   },
   fallback: T,
-): T => {
+): T {
   const { breakpoint } = useResponsive();
 
   // Return value based on current breakpoint, falling back to smaller breakpoints
@@ -98,7 +98,7 @@ export const useResponsiveValue = <T>(
   }
 
   return fallback;
-};
+}
 
 // Hook for responsive grid columns
 export const useResponsiveColumns = (

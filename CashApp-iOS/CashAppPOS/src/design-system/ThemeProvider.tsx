@@ -5,7 +5,17 @@ import { Theme, lightTheme, darkThemeConfig } from './theme';
 
 // Theme mode types
 export type ThemeMode = 'light' | 'dark' | 'auto';
-export type ColorTheme = 'default' | 'blue' | 'purple' | 'orange' | 'red' | 'teal' | 'indigo' | 'pink' | 'lime' | 'amber';
+export type ColorTheme =
+  | 'default'
+  | 'blue'
+  | 'purple'
+  | 'orange'
+  | 'red'
+  | 'teal'
+  | 'indigo'
+  | 'pink'
+  | 'lime'
+  | 'amber';
 
 // Color theme options interface
 export interface ColorThemeOption {
@@ -129,12 +139,12 @@ interface ThemeProviderProps {
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({
   children,
   defaultTheme = 'light',
-  defaultColorTheme = 'default'
+  defaultColorTheme = 'default',
 }) => {
   const [themeMode, setThemeModeState] = useState<ThemeMode>(defaultTheme);
   const [colorTheme, setColorThemeState] = useState<ColorTheme>(defaultColorTheme);
   const [systemColorScheme, setSystemColorScheme] = useState<ColorSchemeName>(
-    Appearance.getColorScheme()
+    Appearance.getColorScheme(),
   );
 
   // Apply color theme to base theme
@@ -149,24 +159,28 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
         primary: colorOption.primary,
         secondary: colorOption.secondary,
         accent: colorOption.accent,
-      }
+      },
     };
   };
 
   // Calculate current theme based on mode, system preference, and color theme
-  const calculateCurrentTheme = (mode: ThemeMode, systemScheme: ColorSchemeName, colorThemeId: ColorTheme): Theme => {
+  const calculateCurrentTheme = (
+    mode: ThemeMode,
+    systemScheme: ColorSchemeName,
+    colorThemeId: ColorTheme,
+  ): Theme => {
     let baseTheme: Theme;
     if (mode === 'auto') {
       baseTheme = systemScheme === 'dark' ? darkThemeConfig : lightTheme;
     } else {
       baseTheme = mode === 'dark' ? darkThemeConfig : lightTheme;
     }
-    
+
     return applyColorTheme(baseTheme, colorThemeId);
   };
 
   const [currentTheme, setCurrentTheme] = useState<Theme>(
-    calculateCurrentTheme(themeMode, systemColorScheme, colorTheme)
+    calculateCurrentTheme(themeMode, systemColorScheme, colorTheme),
   );
 
   // Load theme preferences from storage
@@ -175,13 +189,13 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
       try {
         const [savedTheme, savedColorTheme] = await Promise.all([
           AsyncStorage.getItem(THEME_STORAGE_KEY),
-          AsyncStorage.getItem(COLOR_THEME_STORAGE_KEY)
+          AsyncStorage.getItem(COLOR_THEME_STORAGE_KEY),
         ]);
-        
+
         if (savedTheme && ['light', 'dark', 'auto'].includes(savedTheme)) {
           setThemeModeState(savedTheme as ThemeMode);
         }
-        
+
         if (savedColorTheme && colorThemeOptions.find(option => option.id === savedColorTheme)) {
           // If orange theme is stored, reset to default green theme
           if (savedColorTheme === 'orange') {
@@ -250,11 +264,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
     toggleTheme,
   };
 
-  return (
-    <ThemeContext.Provider value={contextValue}>
-      {children}
-    </ThemeContext.Provider>
-  );
+  return <ThemeContext.Provider value={contextValue}>{children}</ThemeContext.Provider>;
 };
 
 // Hook to use theme context
@@ -267,9 +277,7 @@ export const useTheme = (): ThemeContextType => {
 };
 
 // HOC for components that need theme
-export function withTheme<P extends object>(
-  Component: React.ComponentType<P & { theme: Theme }>
-) {
+export function withTheme<P extends object>(Component: React.ComponentType<P & { theme: Theme }>) {
   return function ThemedComponent(props: P) {
     const { theme } = useTheme();
     return <Component {...props} theme={theme} />;
@@ -277,19 +285,15 @@ export function withTheme<P extends object>(
 }
 
 // Utility hook for creating themed styles
-export function useThemedStyles<T>(
-  createStyles: (theme: Theme) => T
-): T {
+export function useThemedStyles<T>(createStyles: (theme: Theme) => T): T {
   const { theme } = useTheme();
   return React.useMemo(() => createStyles(theme), [theme, createStyles]);
 }
 
 // Style factory helper
-export const createThemedStyles = <T>(
-  styleFactory: (theme: Theme) => T
-) => {
+export function createThemedStyles<T>(styleFactory: (theme: Theme) => T) {
   return (theme: Theme): T => styleFactory(theme);
-};
+}
 
 // Export color theme options for use in components
 export { colorThemeOptions };
