@@ -91,30 +91,41 @@ def adjust_inventory_item_quantity(db: Session, sku: str, change_qty_g: int, sou
 
 # --- Recipe CRUD ---
 
-def get_recipe_by_item_id(db: Session, item_id: UUID) -> List[Recipe]:
-    """Gets all recipe ingredient entries for a given product (item_id)"""
-    return db.query(Recipe).filter(Recipe.item_id == item_id).all()
+def get_recipe_by_item_id(db: Session, item_id: UUID, restaurant_id: UUID) -> List[Recipe]:
+    """Gets all recipe ingredient entries for a given product (item_id) and restaurant"""
+    return db.query(Recipe).filter(
+        Recipe.item_id == item_id,
+        Recipe.restaurant_id == restaurant_id
+    ).all()
 
-def get_recipe_ingredient(db: Session, item_id: UUID, ingredient_sku: str) -> Optional[Recipe]:
-    return db.query(Recipe).filter(Recipe.item_id == item_id, Recipe.ingredient_sku == ingredient_sku).first()
+def get_recipe_ingredient(db: Session, item_id: UUID, ingredient_sku: str, restaurant_id: UUID) -> Optional[Recipe]:
+    return db.query(Recipe).filter(
+        Recipe.item_id == item_id,
+        Recipe.ingredient_sku == ingredient_sku,
+        Recipe.restaurant_id == restaurant_id
+    ).first()
 
-def create_recipe_for_item(db: Session, item_id: UUID, ingredients: List[schemas.RecipeIngredientCreate]) -> List[Recipe]:
+def create_recipe_for_item(db: Session, item_id: UUID, ingredients: List[schemas.RecipeIngredientCreate], restaurant_id: UUID) -> List[Recipe]:
     """
     Creates or updates recipe ingredients for a given item_id.
     This will replace all existing ingredients for the item.
     """
-    # First, delete existing recipe ingredients for this item
-    db.query(Recipe).filter(Recipe.item_id == item_id).delete()
+    # First, delete existing recipe ingredients for this item and restaurant
+    db.query(Recipe).filter(
+        Recipe.item_id == item_id,
+        Recipe.restaurant_id == restaurant_id
+    ).delete()
 
     db_recipes = []
     for ingredient_data in ingredients:
-        # Ensure ingredient exists in inventory
-        inv_item = get_inventory_item(db, ingredient_data.ingredient_sku)
+        # Ensure ingredient exists in inventory for this restaurant
+        inv_item = get_inventory_item(db, ingredient_data.ingredient_sku, restaurant_id)
         if not inv_item:
             # Or raise an exception, depending on desired behavior
             continue
 
         db_recipe_ingredient = Recipe(
+            restaurant_id=restaurant_id,
             item_id=item_id,
             ingredient_sku=ingredient_data.ingredient_sku,
             qty_g=ingredient_data.qty_g
@@ -128,7 +139,7 @@ def create_recipe_for_item(db: Session, item_id: UUID, ingredients: List[schemas
     return db_recipes
 
 
-def create_or_update_recipe_ingredients(db: Session, item_id: UUID, ingredients_data: List[schemas.RecipeIngredientCreate]) -> List[Recipe]:
+def create_or_update_recipe_ingredients(db: Session, item_id: UUID, ingredients_data: List[schemas.RecipeIngredientCreate], restaurant_id: UUID) -> List[Recipe]:
     """
     Creates new recipe ingredients or updates existing ones for a product.
     Uses PostgreSQL's ON CONFLICT DO UPDATE (upsert).
@@ -141,8 +152,11 @@ def create_or_update_recipe_ingredients(db: Session, item_id: UUID, ingredients_
         # db.commit()
         return []
 
-    # Fetch existing ingredients for this item to compare and delete if necessary
-    existing_db_ingredients = db.query(Recipe).filter(Recipe.item_id == item_id).all()
+    # Fetch existing ingredients for this item and restaurant to compare and delete if necessary
+    existing_db_ingredients = db.query(Recipe).filter(
+        Recipe.item_id == item_id,
+        Recipe.restaurant_id == restaurant_id
+    ).all()
     existing_ingredient_skus = {ing.ingredient_sku for ing in existing_db_ingredients}
 
     input_ingredient_skus = {ing_data.ingredient_sku for ing_data in ingredients_data}
@@ -150,7 +164,11 @@ def create_or_update_recipe_ingredients(db: Session, item_id: UUID, ingredients_
     # Ingredients to delete (present in DB but not in input)
     skus_to_delete = existing_ingredient_skus - input_ingredient_skus
     if skus_to_delete:
-        db.query(Recipe).filter(Recipe.item_id == item_id, Recipe.ingredient_sku.in_(skus_to_delete)).delete(synchronize_session=False)
+        db.query(Recipe).filter(
+            Recipe.item_id == item_id,
+            Recipe.restaurant_id == restaurant_id,
+            Recipe.ingredient_sku.in_(skus_to_delete)
+        ).delete(synchronize_session=False)
 
     # Prepare data for upsert
     insert_values = []
@@ -161,6 +179,7 @@ def create_or_update_recipe_ingredients(db: Session, item_id: UUID, ingredients_
         #     raise ValueError(f"Ingredient SKU {ingredient_data.ingredient_sku} not found in inventory.")
 
         insert_values.append({
+            "restaurant_id": restaurant_id,
             "item_id": item_id,
             "ingredient_sku": ingredient_data.ingredient_sku,
             "qty_g": ingredient_data.qty_g,
@@ -173,7 +192,7 @@ def create_or_update_recipe_ingredients(db: Session, item_id: UUID, ingredients_
     # Upsert statement for PostgreSQL
     stmt = pg_insert(Recipe).values(insert_values)
     stmt = stmt.on_conflict_do_update(
-        index_elements=['item_id', 'ingredient_sku'],  # Use the unique constraint name if available and preferred
+        index_elements=['restaurant_id', 'item_id', 'ingredient_sku'],  # Use the unique constraint name if available and preferred
         set_={
             "qty_g": stmt.excluded.qty_g,
         }
@@ -182,18 +201,24 @@ def create_or_update_recipe_ingredients(db: Session, item_id: UUID, ingredients_
     db.commit()
 
     # Re-fetch the ingredients to return them with current state
-    return db.query(Recipe).filter(Recipe.item_id == item_id).all()
+    return db.query(Recipe).filter(
+        Recipe.item_id == item_id,
+        Recipe.restaurant_id == restaurant_id
+    ).all()
 
 
-def delete_recipe_for_item(db: Session, item_id: UUID) -> int:
-    """Deletes all recipe ingredients for a given item_id. Returns count of deleted ingredients."""
-    deleted_count = db.query(Recipe).filter(Recipe.item_id == item_id).delete()
+def delete_recipe_for_item(db: Session, item_id: UUID, restaurant_id: UUID) -> int:
+    """Deletes all recipe ingredients for a given item_id and restaurant. Returns count of deleted ingredients."""
+    deleted_count = db.query(Recipe).filter(
+        Recipe.item_id == item_id,
+        Recipe.restaurant_id == restaurant_id
+    ).delete()
     db.commit()
     return deleted_count
 
-def delete_specific_ingredient_from_recipe(db: Session, item_id: UUID, ingredient_sku: str) -> Optional[Recipe]:
+def delete_specific_ingredient_from_recipe(db: Session, item_id: UUID, ingredient_sku: str, restaurant_id: UUID) -> Optional[Recipe]:
     """Deletes a specific ingredient from an item's recipe."""
-    db_ingredient = get_recipe_ingredient(db, item_id, ingredient_sku)
+    db_ingredient = get_recipe_ingredient(db, item_id, ingredient_sku, restaurant_id)
     if db_ingredient:
         db.delete(db_ingredient)
         db.commit()
@@ -314,7 +339,7 @@ def get_low_stock_items(db: Session, restaurant_id: UUID, threshold_percentage: 
         ))
     return response_items
 
-def get_product_details_with_recipe(db: Session, item_id: UUID) -> Optional[dict]:
+def get_product_details_with_recipe(db: Session, item_id: UUID, restaurant_id: UUID) -> Optional[dict]:
     """
     Retrieves a product and its associated recipe ingredients, including ingredient names.
     """
@@ -328,7 +353,11 @@ def get_product_details_with_recipe(db: Session, item_id: UUID) -> Optional[dict
         InventoryItem.name.label("ingredient_name"),
         InventoryItem.unit.label("ingredient_unit")
     ).join(InventoryItem, Recipe.ingredient_sku == InventoryItem.sku)\
-     .filter(Recipe.item_id == item_id).all()
+     .filter(
+        Recipe.item_id == item_id,
+        Recipe.restaurant_id == restaurant_id,
+        InventoryItem.restaurant_id == restaurant_id
+     ).all()
 
     return {
         "item_id": product.id,
@@ -343,7 +372,7 @@ def get_product_details_with_recipe(db: Session, item_id: UUID) -> Optional[dict
         ]
     }
 
-def get_all_products_with_recipes(db: Session, skip: int = 0, limit: int = 100) -> List[dict]:
+def get_all_products_with_recipes(db: Session, restaurant_id: UUID, skip: int = 0, limit: int = 100) -> List[dict]:
     """
     Retrieves all products that have recipes, along with their recipe details.
     This can be heavy; consider pagination or specific filtering for real-world use.
@@ -351,11 +380,14 @@ def get_all_products_with_recipes(db: Session, skip: int = 0, limit: int = 100) 
     # This is a simplified version. A more optimized query might be needed for performance
     # on large datasets, possibly using subqueries or window functions if complexity grows.
 
-    products_with_recipes_query = db.query(Product).filter(Product.recipes.any()).offset(skip).limit(limit).all()
+    products_with_recipes_query = db.query(Product).filter(
+        Product.restaurant_id == restaurant_id,
+        Product.recipes.any(Recipe.restaurant_id == restaurant_id)
+    ).offset(skip).limit(limit).all()
 
     result_list = []
     for product in products_with_recipes_query:
-        recipe_data = get_product_details_with_recipe(db, product.id) # Reuse existing function
+        recipe_data = get_product_details_with_recipe(db, product.id, restaurant_id) # Reuse existing function
         if recipe_data: # Should always be true due to the filter, but good practice
              result_list.append(recipe_data)
 
