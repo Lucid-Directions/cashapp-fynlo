@@ -1,0 +1,11 @@
+{
+  "scan_date": "2025-07-31T17:02:13.029636",
+  "stats": {
+    "files_scanned": 0,
+    "total_issues": 0,
+    "critical_issues": 0,
+    "warnings": 0
+  },
+  "critical_issues": [],
+  "warnings": []
+}
