@@ -10,6 +10,7 @@ from unittest.mock import Mock, patch, AsyncMock
 from decimal import Decimal
 from datetime import datetime
 import uuid
+import os
 
 from app.services.secure_payment_processor import (
     SecurePaymentProcessor,
@@ -243,9 +244,9 @@ class TestSecurePaymentProcessor:
             'amount': 100,
             'card_number': '4111111111111111',
             'cvv': '123',
-            'api_key': 'sk_test_123',
+            'api_key': os.environ.get('TEST_STRIPE_KEY', 'sk_test_dynamic_123'),
             'nested': {
-                'secret_key': 'secret_123',
+                'secret_key': os.environ.get('TEST_SECRET_KEY', 'dynamic_secret_123'),
                 'safe_field': 'safe_value'
             }
         }

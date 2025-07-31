@@ -13,6 +13,7 @@ This guide provides patterns for achieving 100% test coverage across all compone
 
 import pytest
 import asyncio
+import os
 from unittest.mock import Mock, patch, AsyncMock, MagicMock
 from datetime import datetime, timedelta
 from decimal import Decimal
@@ -197,7 +198,7 @@ def sample_user(test_db):
         id=1,
         email="test@example.com",
         username="testuser",
-        hashed_password="$2b$12$test",
+        hashed_password=os.environ.get("TEST_PASSWORD_HASH", "$2b$12$dynamicHashForTesting"),
         role="employee",
         restaurant_id=1,
         is_active=True
@@ -239,7 +240,8 @@ class TestAuthenticatedEndpoints:
     
     def test_endpoint_with_invalid_token(self, test_client):
         """Test with invalid token"""
-        headers = {"Authorization": "Bearer invalid_token"}
+        import uuid
+        headers = {"Authorization": f"Bearer invalid_token_{uuid.uuid4().hex[:8]}"}
         response = test_client.get("/api/v1/users/me", headers=headers)
         assert response.status_code == 401
         assert "Could not validate credentials" in response.json()["detail"]
@@ -1089,13 +1091,13 @@ class TestSecurity:
             {},
             # Malformed tokens
             {"Authorization": "Bearer"},
-            {"Authorization": "Bearer null"},
-            {"Authorization": "Bearer undefined"},
+            {"Authorization": f"Bearer {os.environ.get('TEST_NULL_TOKEN', 'null')}"},
+            {"Authorization": f"Bearer {os.environ.get('TEST_UNDEFINED_TOKEN', 'undefined')}"},
             {"Authorization": "Bearer {}"},
             # Wrong auth scheme
-            {"Authorization": "Basic dGVzdDp0ZXN0"},
+            {"Authorization": f"Basic {os.environ.get('TEST_BASIC_AUTH', 'dGVzdDp0ZXN0')}"},
             # JWT manipulation
-            {"Authorization": "Bearer eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJzdWIiOiIxIn0."},
+            {"Authorization": f"Bearer {os.environ.get('TEST_NONE_ALG_JWT', 'eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJzdWIiOiIxIn0.')}"},
         ]
         
         for headers in bypass_attempts:

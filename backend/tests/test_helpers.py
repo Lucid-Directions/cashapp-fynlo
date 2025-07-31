@@ -12,6 +12,7 @@ from decimal import Decimal
 import json
 import random
 import string
+import os
 from unittest.mock import Mock, AsyncMock, MagicMock
 import asyncio
 from contextlib import asynccontextmanager
@@ -46,7 +47,7 @@ class TestDataFactory:
             id=user_id or random.randint(1000, 9999),
             email=email or f"user{random.randint(1000, 9999)}@test.com",
             username=kwargs.get("username", f"user{random.randint(1000, 9999)}"),
-            hashed_password="$2b$12$test",  # Pre-hashed "password"
+            hashed_password=os.environ.get("TEST_USER_PASSWORD_HASH", "$2b$12$dynamicTestHash"),  # Pre-hashed "password"
             role=role,
             restaurant_id=restaurant_id,
             is_active=kwargs.get("is_active", True),
@@ -527,13 +528,13 @@ class SecurityTestHelper:
         """Generate various malformed JWT tokens for testing"""
         return [
             # No signature
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIn0.",
+            os.environ.get("TEST_JWT_NO_SIG", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIn0."),
             # None algorithm
-            "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJzdWIiOiIxIn0.",
+            os.environ.get("TEST_JWT_NONE_ALG", "eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJzdWIiOiIxIn0."),
             # Expired token
             create_access_token({"sub": "1"}, expires_delta=timedelta(seconds=-1)),
             # Wrong signature
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIn0.wrong_signature",
+            os.environ.get("TEST_JWT_WRONG_SIG", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIn0.wrong_signature"),
             # Malformed payload
             "not.a.jwt",
             # Empty token
