@@ -175,7 +175,7 @@ async def adjust_stock_api(
         source_id=str(current_user.id)
     )
     if not updated_item:
-        raise ResourceNotFoundException(detail=f"Inventory item with SKU {sku} not found.")
+        raise ResourceNotFoundException(resource="Inventory item", resource_id=sku)
     return schemas.StockAdjustmentResult(
         sku=updated_item.sku,
         new_qty_g=updated_item.qty_g,
@@ -224,7 +224,7 @@ async def read_ledger_entries_for_sku_api(
     # Check if SKU exists and user has access
     item = crud_inventory.get_inventory_item(db, sku, restaurant_id=restaurant_id)
     if not item:
-        raise ResourceNotFoundException(detail=f"Inventory item with SKU {sku} not found.")    
+        raise ResourceNotFoundException(resource="Inventory item", resource_id=sku)    
     # Verify tenant access
     await TenantSecurity.validate_restaurant_access(
         user=current_user,

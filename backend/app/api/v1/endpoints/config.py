@@ -101,7 +101,7 @@ async def get_provider_configuration(
         config = config_manager.get_provider_config(provider_name)
         
         if not config:
-            raise ResourceNotFoundException(detail=f"Provider {provider_name} not found")        
+            raise ResourceNotFoundException(resource="Provider", resource_id=provider_name)        
         # Don't expose sensitive information
         provider_config = {
             'name': config.name,
@@ -217,7 +217,8 @@ async def update_routing_configuration(
             if config_update.fallback_provider not in config_manager.providers:
                 raise ValidationException(
                     message=f"Fallback provider '{config_update.fallback_provider}' not configured"
-                )            routing_config.fallback_provider = config_update.fallback_provider
+                )
+            routing_config.fallback_provider = config_update.fallback_provider
         
         # Save configuration
         config_manager.save_configuration("routing")
@@ -412,7 +413,7 @@ async def test_routing_simulation(
         # Validate strategy
         try:
             routing_strategy = RoutingStrategy(strategy)
-    except ValueError:
+        except ValueError:
             raise ValidationException(message=f"Invalid routing strategy: {strategy}")        
         # Run simulation
         simulation_result = await payment_factory.simulate_routing_impact(

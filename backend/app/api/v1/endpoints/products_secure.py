@@ -29,8 +29,7 @@ async def update_product_secure(
     product = db.query(Product).filter(Product.id == product_id).first()
     
     if not product:
-        raise ResourceNotFoundException(detail="Product not found"
-        )    
+        raise ResourceNotFoundException(resource="Product", resource_id=product_id)    
     # CRITICAL SECURITY CHECK: Validate user can access this product's restaurant
     await TenantSecurity.validate_restaurant_access(
         user=current_user,
@@ -71,8 +70,7 @@ async def delete_product_secure(
     product = db.query(Product).filter(Product.id == product_id).first()
     
     if not product:
-        raise ResourceNotFoundException(detail="Product not found"
-        )    
+        raise ResourceNotFoundException(resource="Product", resource_id=product_id)    
     # CRITICAL: Validate access before deletion
     await TenantSecurity.validate_restaurant_access(
         user=current_user,

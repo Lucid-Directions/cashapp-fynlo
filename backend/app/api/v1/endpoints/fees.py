@@ -99,7 +99,10 @@ async def calculate_fees_for_order(
 
     if not payment_method_setting:
         # This should ideally not happen if defaults are seeded for all PaymentMethodEnums
-        raise ResourceNotFoundException(detail=f"Fee configuration not found for payment method {request.payment_method.value} for restaurant {request.restaurant_id or 'platform default'}."
+        raise ResourceNotFoundException(
+            resource="Fee configuration",
+            resource_id=request.payment_method.value,
+            details={"restaurant_id": request.restaurant_id or "platform default"}
         )
     # Determine who pays processor fees
     customer_pays_processor_fees = payment_method_setting.customer_pays_default
