@@ -1314,7 +1314,8 @@ const createDynamicStyles = (theme: unknown, serviceChargeConfig: { enabled: boo
       marginRight: 8,
     },
     animatedScale: {
-      transform: [{ scale: 1 }],
+      justifyContent: 'center',
+      alignItems: 'center',
     },
     categorySearchWrapper: {
       marginBottom: 16,
