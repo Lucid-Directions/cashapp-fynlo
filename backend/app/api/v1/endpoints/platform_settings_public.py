@@ -2,11 +2,11 @@
 Public Platform Settings Endpoints
 Non-admin endpoints for reading platform configurations
 """
-from typing import 
-from pydantic import 
+from typing import Optional
+from pydantic import BaseModel
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from concurrent.futures import 
+from concurrent.futures import TimeoutError as FuturesTimeoutError
 
 from app.core.database import get_db
 from app.core.exceptions import FynloException

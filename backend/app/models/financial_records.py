@@ -1,5 +1,5 @@
 from sqlalchemy import Column, String, Boolean, Integer, DateTime, Numeric, Index
-from sqlalchemy.dialects.postgresql import 
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import func # For server-side default timestamps
 
 from app.core.database import Base # Assuming Base is correctly defined

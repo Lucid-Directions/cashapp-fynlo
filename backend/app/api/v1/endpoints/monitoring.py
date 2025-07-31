@@ -5,7 +5,7 @@ Enhanced with strict input validation and security measures.
 """
 
 from fastapi import APIRouter, Depends, BackgroundTasks, Body, Request
-from pydantic import 
+from pydantic import BaseModel, Field
 from datetime import datetime, timezone
 from typing import Dict, Any, List
 import logging

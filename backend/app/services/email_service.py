@@ -115,13 +115,13 @@ class EmailService:
             return False
     
     def send_custom_email(
-        """Execute send_custom_email operation."""
         self, 
         to_email: str, 
         subject: str, 
         html_content: str,
         tags: Optional[Dict[str, str]] = None
     ) -> bool:
+        """Execute send_custom_email operation."""
         """
         Send custom email with HTML content
         

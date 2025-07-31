@@ -82,11 +82,11 @@ class SafeEnvironmentFilter:
     
     @classmethod
     def get_safe_environment(
-        """Execute get_safe_environment operation."""
         cls, 
         security_level: SecurityLevel = SecurityLevel.PUBLIC,
         additional_safe_vars: Optional[Set[str]] = None
     ) -> Dict[str, str]:
+        """Execute get_safe_environment operation."""
         """
         Get filtered environment variables based on security level.
         
@@ -172,12 +172,12 @@ class InputValidator:
     
     @classmethod
     def sanitize_string(
-        """Execute sanitize_string operation."""
         cls, 
         value: str, 
         context: str = "general",
         max_length: int = 1000
     ) -> str:
+        """Execute sanitize_string operation."""
         """
         Sanitize string input based on context.
         
@@ -322,7 +322,6 @@ class WebhookSecurity:
     
     @staticmethod
     def verify_signature(
-        """Execute verify_signature operation."""
         payload: bytes,
         signature: str,
         secret: str,
@@ -330,6 +329,7 @@ class WebhookSecurity:
         timestamp: Optional[int] = None,
         tolerance_seconds: int = 300
     ) -> bool:
+        """Execute verify_signature operation."""
         """
         Verify webhook signature with timing attack protection.
         

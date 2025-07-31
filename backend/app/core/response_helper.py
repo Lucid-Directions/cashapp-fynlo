@@ -14,12 +14,12 @@ class APIResponseHelper:
 
     @staticmethod
     def success(
-        """Execute success operation."""
         data: Optional[Union[Dict[str, Any], List[Any]]] = None,
         message: str = "Success",
         status_code: int = status.HTTP_200_OK,
         meta: Optional[Dict[str, Any]] = None
     ) -> JSONResponse:
+        """Execute success operation."""
         """
         Create a successful API response
         
@@ -51,12 +51,12 @@ class APIResponseHelper:
 
     @staticmethod
     def error(
-        """Execute error operation."""
         message: str = "An error occurred",
         status_code: int = status.HTTP_400_BAD_REQUEST,
         error_code: Optional[str] = None,
         details: Optional[Dict[str, Any]] = None
     ) -> JSONResponse:
+        """Execute error operation."""
         """
         Create an error API response
         
@@ -88,13 +88,13 @@ class APIResponseHelper:
 
     @staticmethod
     def paginated(
-        """Execute paginated operation."""
         data: List[Any],
         page: int,
         page_size: int,
         total: int,
         message: str = "Success"
     ) -> JSONResponse:
+        """Execute paginated operation."""
         """
         Create a paginated API response
         
@@ -127,10 +127,10 @@ class APIResponseHelper:
 
     @staticmethod
     def onboarding_required(
-        """Execute onboarding_required operation."""
         user_data: Dict[str, Any],
         message: str = "Restaurant setup required"
     ) -> JSONResponse:
+        """Execute onboarding_required operation."""
         """
         Create response for users who need to complete onboarding
         

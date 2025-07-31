@@ -2,7 +2,7 @@
 API Endpoints for Recipe Management
 """
 from fastapi import APIRouter, Depends, Query
-from pydantic import 
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from typing import List
 from uuid import UUID

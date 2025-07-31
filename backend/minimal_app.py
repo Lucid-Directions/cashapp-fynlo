@@ -3,11 +3,15 @@ Minimal FastAPI server to get essential endpoints working
 This bypasses complex payment provider imports and focuses on core data endpoints
 """
 
-from fastapi import FastAPI, 
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Dict, Any
 import json
 from datetime import datetime
+
+class NotFoundException(HTTPException):
+    def __init__(self, message: str):
+        super().__init__(status_code=404, detail=message)
 
 app = FastAPI(
     title="Fynlo POS API - Minimal",

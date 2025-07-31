@@ -34,7 +34,6 @@ class ActivityLogger:
     
     @staticmethod
     def log_activity(
-        """Execute log_activity operation."""
         db: Session,
         user_id: str,
         restaurant_id: Optional[str],
@@ -43,6 +42,7 @@ class ActivityLogger:
         ip_address: Optional[str] = None,
         user_agent: Optional[str] = None
     ) -> Optional[PortalActivityLog]:
+        """Execute log_activity operation."""
         """
         Log a portal activity
         
@@ -83,7 +83,6 @@ class ActivityLogger:
     
     @staticmethod
     def log_export(
-        """Execute log_export operation."""
         db: Session,
         user_id: str,
         restaurant_id: str,
@@ -91,6 +90,7 @@ class ActivityLogger:
         format: str,
         record_count: int = 0
     ):
+        """Execute log_export operation."""
         """Log export activity"""
         ActivityLogger.log_activity(
             db=db,
@@ -107,13 +107,13 @@ class ActivityLogger:
     
     @staticmethod
     def log_dashboard_view(
-        """Execute log_dashboard_view operation."""
         db: Session,
         user_id: str,
         restaurant_id: Optional[str],
         dashboard_type: str,
         period: str
     ):
+        """Execute log_dashboard_view operation."""
         """Log dashboard viewing activity"""
         ActivityLogger.log_activity(
             db=db,
@@ -129,7 +129,6 @@ class ActivityLogger:
     
     @staticmethod
     def log_settings_change(
-        """Execute log_settings_change operation."""
         db: Session,
         user_id: str,
         restaurant_id: str,
@@ -137,6 +136,7 @@ class ActivityLogger:
         old_value: Any,
         new_value: Any
     ):
+        """Execute log_settings_change operation."""
         """Log settings change activity"""
         ActivityLogger.log_activity(
             db=db,
@@ -153,7 +153,6 @@ class ActivityLogger:
     
     @staticmethod
     def log_user_management(
-        """Execute log_user_management operation."""
         db: Session,
         user_id: str,
         restaurant_id: str,
@@ -161,6 +160,7 @@ class ActivityLogger:
         target_user_id: str,
         changes: Optional[Dict[str, Any]] = None
     ):
+        """Execute log_user_management operation."""
         """Log user management activity"""
         action_map = {
             "create": ActivityLogger.CREATE_USER,
@@ -182,13 +182,13 @@ class ActivityLogger:
     
     @staticmethod
     def log_restaurant_management(
-        """Execute log_restaurant_management operation."""
         db: Session,
         user_id: str,
         restaurant_id: str,
         action_type: str,
         changes: Optional[Dict[str, Any]] = None
     ):
+        """Execute log_restaurant_management operation."""
         """Log restaurant management activity"""
         action_map = {
             "create": ActivityLogger.CREATE_RESTAURANT,
@@ -210,7 +210,6 @@ class ActivityLogger:
     
     @staticmethod
     def get_activity_logs(
-        """Execute get_activity_logs operation."""
         db: Session,
         restaurant_id: Optional[str] = None,
         user_id: Optional[str] = None,
@@ -220,6 +219,7 @@ class ActivityLogger:
         limit: int = 100,
         offset: int = 0
     ) -> list:
+        """Execute get_activity_logs operation."""
         """
         Retrieve activity logs with filtering
         

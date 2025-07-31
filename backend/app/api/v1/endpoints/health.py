@@ -4,7 +4,6 @@ Enhanced with security best practices and proper authentication.
 """
 
 from fastapi import APIRouter, Request, Depends
-from pydantic import 
 from datetime import datetime, timezone
 import os
 import platform

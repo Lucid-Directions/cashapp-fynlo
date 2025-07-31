@@ -73,12 +73,12 @@ class FinancialRecordsService:
         ).all()
 
     def get_staff_tip_distributions_for_staff_member(
-        """Execute get_staff_tip_distributions_for_staff_member operation."""
         self,
         staff_id: str,
         start_date: Optional[str] = None,
         end_date: Optional[str] = None
     ) -> List[StaffTipDistributionRecord]:
+        """Execute get_staff_tip_distributions_for_staff_member operation."""
         """
         Retrieves staff tip distribution records for a specific staff member.
         (This functionality might also live in StaffTipService)

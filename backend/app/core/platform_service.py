@@ -7,7 +7,7 @@ from typing import List, Dict, Any
 from sqlalchemy.orm import Session
 from sqlalchemy import func, and_, desc
 from datetime import datetime, timedelta
-from decimal import 
+from decimal import Decimal
 
 from app.core.database import Platform, Restaurant, Order, Customer
 from app.core.exceptions import FynloException, ErrorCodes

@@ -4,7 +4,7 @@ Provides automatic version detection and backward compatibility
 """
 
 from fastapi import Request, Response
-from fastapi.responses import 
+from fastapi.responses import JSONResponse
 import re
 from typing import Optional
 import logging

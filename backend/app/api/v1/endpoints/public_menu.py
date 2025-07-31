@@ -4,10 +4,10 @@ These endpoints don't require authentication to allow menu loading before login
 """
 
 from typing import Optional
-from pydantic import 
+from pydantic import BaseModel
 from fastapi import APIRouter, Depends, Query 
 from sqlalchemy.orm import Session
-from sqlalchemy import 
+from sqlalchemy import and_
 import time
 import logging
 

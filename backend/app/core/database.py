@@ -8,7 +8,7 @@ from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session, relationship
 from sqlalchemy.sql import func
-from sqlalchemy.sql.elements import  # For GIN index
+from sqlalchemy.sql.elements import TextClause  # For GIN index
 import uuid
 from typing import Generator, Optional
 from contextlib import contextmanager

@@ -112,7 +112,6 @@ def get_rls_context() -> dict:
 
 # Helper function for manual RLS context management
 def with_rls_context(user_id: Optional[str] = None, 
-    """Execute with_rls_context operation."""
                     restaurant_id: Optional[str] = None, 
                     role: Optional[str] = None):
     """
@@ -125,7 +124,6 @@ def with_rls_context(user_id: Optional[str] = None,
             # All database queries will be filtered by restaurant_id
     """
     def decorator(func):
-        """Execute decorator operation."""
         async def wrapper(*args, **kwargs):
             # Set RLS context
             RLSContext.set(user_id=user_id, restaurant_id=restaurant_id, role=role)

@@ -93,7 +93,7 @@ async def get_dashboard_metrics(
     avg_order_value = total_revenue / total_orders if total_orders > 0 else 0
     
     # Get top products - TEMPORARILY DISABLED (OrderItem model not available)
-        top_products_query = []
+    top_products_query = []
     # top_products_query = db.query(
     #     Product.name,
     #     func.sum(OrderItem.quantity).label('total_quantity'),

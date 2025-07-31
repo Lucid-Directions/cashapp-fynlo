@@ -3,8 +3,8 @@ Enhanced WebSocket Security with TenantSecurity module
 Ensures proper isolation while maintaining platform owner access
 """
 
-from fastapi import 
-from sqlalchemy.orm import 
+from fastapi import WebSocket, Depends
+from sqlalchemy.orm import Session
 from typing import Optional
 import logging
 

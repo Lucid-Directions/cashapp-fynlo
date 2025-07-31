@@ -450,11 +450,11 @@ class PushNotificationService:
             )
     
     def update_user_preferences(
-        """Execute update_user_preferences operation."""
         self,
         user_id: str,
         preferences: NotificationPreferences
     ) -> bool:
+        """Execute update_user_preferences operation."""
         """Update user notification preferences"""
         try:
             preferences.user_id = user_id
@@ -473,11 +473,11 @@ class PushNotificationService:
         return self.user_preferences.get(user_id)
     
     def get_notification_history(
-        """Execute get_notification_history operation."""
         self,
         user_id: Optional[str] = None,
         limit: int = 100
     ) -> List[NotificationResult]:
+        """Execute get_notification_history operation."""
         """Get notification history"""
         history = self.notification_history
         

@@ -2,7 +2,7 @@ from sqlalchemy import Column, String, DateTime, ForeignKey, Enum as SQLAlchemyE
 from sqlalchemy.dialects.postgresql import UUID, INET, JSONB
 from sqlalchemy.sql import func
 from sqlalchemy.sql.elements import quoted_name
-from sqlalchemy.orm import  # Added for potential future use
+from sqlalchemy.orm import relationship  # Added for potential future use
 import uuid
 import enum
 

@@ -1,19 +1,133 @@
 {
-  "timestamp": "2025-07-31T11:52:50.198314",
+  "timestamp": "2025-07-31T12:57:53.379985",
   "pr_number": 455,
-  "score": 80,
-  "status": "PASS",
+  "score": 0,
+  "status": "FAIL",
   "stats": {
     "total_files": 183,
     "files_analyzed": 183,
     "httpexception_count": 0,
     "fynloexception_count": 53,
     "empty_messages": 0,
-    "syntax_errors": 0,
-    "security_issues": 2,
+    "syntax_errors": 85,
+    "security_issues": 1,
     "test_coverage": "PASS"
   },
   "issues": [
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/main_minimal.py",
+      "line": 127,
+      "issue": "Syntax Error: unexpected indent",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/main.py",
+      "line": 20,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/middleware/version_middleware.py",
+      "line": 7,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/middleware/rate_limit_middleware.py",
+      "line": 11,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/middleware/rls_middleware.py",
+      "line": 115,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/middleware/feature_gate.py",
+      "line": 133,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/core/production_guard.py",
+      "line": 8,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/core/responses.py",
+      "line": 51,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/core/config.py",
+      "line": 277,
+      "issue": "Syntax Error: unexpected indent",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/core/tenant_security.py",
+      "line": 139,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/core/database.py",
+      "line": 11,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/core/security.py",
+      "line": 85,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/core/rate_limiter.py",
+      "line": 138,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/core/cache.py",
+      "line": 8,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/core/websocket_rate_limiter.py",
+      "line": 8,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/core/sync_manager.py",
+      "line": 124,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/core/platform_service.py",
+      "line": 10,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/core/feature_gate.py",
+      "line": 2,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/core/response_helper.py",
+      "line": 17,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
     {
       "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/core/two_factor_auth.py",
       "line": "N/A",
@@ -21,18 +135,408 @@
       "severity": "HIGH"
     },
     {
-      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/api/v1/endpoints/auth.py",
-      "line": "N/A",
-      "issue": "Potential token exposure in logs",
-      "severity": "HIGH"
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/core/rate_limit_config.py",
+      "line": 6,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/core/security_monitor.py",
+      "line": 11,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/core/onboarding_helper.py",
+      "line": 79,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/core/cache_service.py",
+      "line": 235,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/core/cache_warmer.py",
+      "line": 9,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/core/mobile_id_mapping.py",
+      "line": 10,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/core/file_upload.py",
+      "line": 24,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/core/websocket.py",
+      "line": 14,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/core/push_notifications.py",
+      "line": 453,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/core/analytics_engine.py",
+      "line": 73,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/integration/websocket_events.py",
+      "line": 7,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/models/platform_audit.py",
+      "line": 48,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/models/financial_records.py",
+      "line": 2,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/models/payment_config.py",
+      "line": 2,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/models/audit_log.py",
+      "line": 5,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/scripts/migrate_to_platform_settings.py",
+      "line": 330,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/scripts/initialize_platform_defaults.py",
+      "line": 187,
+      "issue": "Syntax Error: unexpected indent",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/scripts/validate_migration.py",
+      "line": 556,
+      "issue": "Syntax Error: unexpected indent",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/api/v1/endpoints/sumup.py",
+      "line": 129,
+      "issue": "Syntax Error: unexpected indent",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/api/v1/endpoints/platform_settings_public.py",
+      "line": 5,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/api/v1/endpoints/secure_payment_provider_management.py",
+      "line": 7,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/api/v1/endpoints/exports.py",
+      "line": 6,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/api/v1/endpoints/websocket_enhanced.py",
+      "line": 10,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/api/v1/endpoints/fees.py",
+      "line": 64,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/api/v1/endpoints/payment_configurations.py",
+      "line": 58,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/api/v1/endpoints/storage_health.py",
+      "line": 7,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/api/v1/endpoints/websocket_secure.py",
+      "line": 6,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/api/v1/endpoints/restaurants.py",
+      "line": 109,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/api/v1/endpoints/health.py",
+      "line": 7,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/api/v1/endpoints/websocket_portal.py",
+      "line": 5,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/api/v1/endpoints/monitoring.py",
+      "line": 8,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/api/v1/endpoints/restaurant_switch.py",
+      "line": 7,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/api/v1/endpoints/public_menu.py",
+      "line": 7,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/api/v1/endpoints/secure_payments.py",
+      "line": 8,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/api/v1/endpoints/menu_optimized.py",
+      "line": 6,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/api/v1/endpoints/platform.py",
+      "line": 17,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/api/v1/endpoints/tips.py",
+      "line": 46,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/api/v1/endpoints/dashboard.py",
+      "line": 96,
+      "issue": "Syntax Error: unexpected indent",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/api/v1/endpoints/menu.py",
+      "line": 6,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/api/v1/endpoints/platform_settings_optimized.py",
+      "line": 6,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/api/v1/endpoints/recipes.py",
+      "line": 5,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/api/v1/endpoints/employees.py",
+      "line": 7,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/api/v1/endpoints/customers.py",
+      "line": 15,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/api/v1/endpoints/products_secure.py",
+      "line": 7,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/api/v1/endpoints/websocket.py",
+      "line": 11,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/api/v1/endpoints/restaurant_deletion.py",
+      "line": 7,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/api/v1/endpoints/inventory.py",
+      "line": 5,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/services/payment_factory.py",
+      "line": 191,
+      "issue": "Syntax Error: unexpected indent",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/services/monitoring.py",
+      "line": 9,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/services/financial_records_service.py",
+      "line": 76,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/services/activity_logger.py",
+      "line": 37,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/services/secure_payment_processor.py",
+      "line": 12,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/services/secure_payment_config.py",
+      "line": 58,
+      "issue": "Syntax Error: unexpected indent",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/services/sync_service.py",
+      "line": 10,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/services/payment_providers.py",
+      "line": 82,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/services/email_service.py",
+      "line": 118,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/services/audit_logger.py",
+      "line": 9,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/services/cache_service.py",
+      "line": 8,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/services/staff_tip_service.py",
+      "line": 27,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/services/digitalocean_monitor.py",
+      "line": 12,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/services/employee_service.py",
+      "line": 8,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/services/payment_config_service.py",
+      "line": 21,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/services/payment_analytics.py",
+      "line": 15,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/services/payment_providers/payment_factory.py",
+      "line": 14,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/services/payment_providers/square_provider.py",
+      "line": 8,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/services/payment_providers/sumup_provider.py",
+      "line": 8,
+      "issue": "Syntax Error: invalid syntax",
+      "severity": "CRITICAL"
     }
   ],
   "summary": {
     "httpexception_remaining": 0,
     "migration_complete": true,
-    "syntax_errors": 0,
+    "syntax_errors": 85,
     "empty_messages": 0,
-    "security_issues": 2,
+    "security_issues": 1,
     "test_status": "PASS"
   }
 }

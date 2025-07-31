@@ -106,7 +106,6 @@ async def get_restaurants(
     # Restaurant users - handle multi-restaurant access
     else:
         from app.core.tenant_security import TenantSecurity
-from app.core.database import 
         
         # Get all accessible restaurants for the user
         accessible_restaurants = TenantSecurity.get_accessible_restaurant_ids(current_user, db)

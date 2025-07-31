@@ -122,11 +122,11 @@ async def initialize_sumup(
                 message="SumUp is not configured for this restaurant"
             )
         
-                # For now, use a placeholder or environment variable
+        # For now, use a placeholder or environment variable
         merchant_code = os.getenv("SUMUP_MERCHANT_CODE")
         
         # Determine feature availability based on subscription plan
-                features = {
+        features = {
             "card_reader": True,  # Physical card reader support
             "tap_to_pay": True,   # Tap to pay on phone
             "refunds": True       # Refund capabilities

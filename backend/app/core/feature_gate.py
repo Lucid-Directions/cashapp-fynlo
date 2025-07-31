@@ -1,6 +1,6 @@
 # app/core/feature_gate.py
-from typing import 
-from fastapi import 
+from typing import Dict, List, Optional
+from fastapi import Depends
 from sqlalchemy.orm import Session
 from app.core.database import Restaurant
 

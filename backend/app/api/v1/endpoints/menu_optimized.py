@@ -3,9 +3,7 @@ Optimized Menu API endpoints with caching and performance improvements
 """
 
 from typing import List, Optional
-from pydantic import 
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy.ext.asyncio import 
 from sqlalchemy.orm import selectinload, Session
 from sqlalchemy import func, and_
 import json

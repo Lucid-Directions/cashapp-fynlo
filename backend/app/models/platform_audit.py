@@ -45,7 +45,6 @@ class PlatformAuditLog(Base):
 
 
 def create_audit_log(
-    """Execute create_audit_log operation."""
     db: Session,
     user_id: str,
     action: str,
@@ -58,6 +57,7 @@ def create_audit_log(
     http_method: Optional[str] = None,
     endpoint: Optional[str] = None
 ) -> PlatformAuditLog:
+    """Execute create_audit_log operation."""
     """
     Create an audit log entry.
     
@@ -190,10 +190,10 @@ async def get_audit_logs(
 
 
 def get_audit_summary(
-    """Execute get_audit_summary operation."""
     db: Session,
     days: int = 30
 ) -> Dict[str, Any]:
+    """Execute get_audit_summary operation."""
     """
     Get summary of audit logs for dashboard.
     

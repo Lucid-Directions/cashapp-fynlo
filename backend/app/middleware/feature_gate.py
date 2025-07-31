@@ -13,6 +13,7 @@ from typing import Callable, Optional, List, Tuple
 from app.core.database import get_db
 from app.models.subscription import RestaurantSubscription, SubscriptionUsage
 from app.core.auth import get_current_user
+from app.core.exceptions import FynloException
 
 
 class FeatureGateError(FynloException):
@@ -130,7 +131,6 @@ def require_feature(feature_name: str):
     from fastapi import Query
     
     def feature_dependency(
-        """Execute feature_dependency operation."""
         restaurant_id: int = Query(..., description="Restaurant ID"),
         db: Session = Depends(get_db)
     ):
@@ -167,7 +167,6 @@ def require_usage_limit(limit_type: str, increment: int = 1):
     from fastapi import Query
     
     def usage_dependency(
-        """Execute usage_dependency operation."""
         restaurant_id: int = Query(..., description="Restaurant ID"),
         db: Session = Depends(get_db)
     ):

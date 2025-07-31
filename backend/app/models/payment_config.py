@@ -1,9 +1,9 @@
 from sqlalchemy import Column, String, Boolean, Integer, UniqueConstraint, Index
-from sqlalchemy.orm import 
-from sqlalchemy.dialects.postgresql import 
+from sqlalchemy.orm import relationship
+from sqlalchemy.dialects.postgresql import UUID
 
 from app.core.database import Base # Assuming Base is correctly defined in app.core.database
-from app.schemas.fee_schemas import  # Reusing the enum
+from app.schemas.fee_schemas import PaymentMethodEnum  # Reusing the enum
 
 class PaymentMethodSetting(Base):
     __tablename__ = "payment_method_settings"

@@ -55,21 +55,21 @@ def convert_db_model_to_schema(db_setting: PaymentMethodSetting) -> PaymentMetho
 
 @router.get("/settings/platform-defaults", response_model=List[PaymentMethodFeeSettingSchema])
 def list_platform_default_settings(
-    """Execute list_platform_default_settings operation."""
     service: PaymentConfigService = Depends(get_payment_config_service_dep),
     current_user: User = Depends(get_current_user)
 ):
+    """Execute list_platform_default_settings operation."""
     """Lists all platform default payment method settings."""
     db_settings = service.get_all_platform_default_settings()
     return [convert_db_model_to_schema(s) for s in db_settings]
 
 @router.post("/settings/platform-defaults", response_model=PaymentMethodFeeSettingSchema, status_code=201)
 def create_platform_default_setting(
-    """Execute create_platform_default_setting operation."""
     setting_data: PaymentMethodSettingCreateInput,
     service: PaymentConfigService = Depends(get_payment_config_service_dep),
     current_user: User = Depends(get_current_user)
 ):
+    """Execute create_platform_default_setting operation."""
     """Creates a new platform default payment method setting."""
     # Only platform owners can create platform defaults
     if current_user.role != 'platform_owner':
@@ -100,12 +100,12 @@ def create_platform_default_setting(
 
 @router.put("/settings/platform-defaults/{payment_method}", response_model=PaymentMethodFeeSettingSchema)
 def update_platform_default_setting(
-    """Execute update_platform_default_setting operation."""
     payment_method: PaymentMethodEnum = Path(...),
     updates: PaymentMethodSettingUpdateInput = Body(...),
     service: PaymentConfigService = Depends(get_payment_config_service_dep),
     current_user: User = Depends(get_current_user)
 ):
+    """Execute update_platform_default_setting operation."""
     """Updates an existing platform default payment method setting."""
     # Only platform owners can update platform defaults
     if current_user.role != 'platform_owner':

@@ -232,12 +232,12 @@ cache_service = CacheService()
 
 
 def cached(
+):
     """Execute cached operation."""
     ttl: int = 3600,
     prefix: Optional[str] = None,
     key_params: Optional[List[str]] = None,
     invalidate_on: Optional[List[str]] = None
-):
     """
     Decorator for caching function results.
     

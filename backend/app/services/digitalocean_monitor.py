@@ -9,7 +9,7 @@ import logging
 from typing import Dict, List, Optional, Any, Tuple
 from datetime import datetime, timezone
 import httpx
-from functools import 
+from functools import lru_cache
 from pybreaker import CircuitBreaker, CircuitBreakerError
 
 from app.core.config import settings

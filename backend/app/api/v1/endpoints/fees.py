@@ -61,21 +61,20 @@ def get_payment_config_service(db: Session = Depends(get_db)) -> PaymentConfigSe
     return PaymentConfigService(db=db)
 
 def get_payment_fee_calculator(
-    """Execute get_payment_fee_calculator operation."""
     pss: PlatformSettingsService = Depends(get_platform_settings_service)
 ) -> PaymentFeeCalculator:
     return PaymentFeeCalculator(platform_settings_service=pss)
 
 def get_service_charge_calculator(
-    """Execute get_service_charge_calculator operation."""
-    pfc: PaymentFeeCalculator = Depends(get_payment_fee_calculator),
-    pss: PlatformSettingsService = Depends(get_platform_settings_service)) -> ServiceChargeCalculator:
+    pss: PlatformSettingsService = Depends(get_platform_settings_service),
+    pfc: PaymentFeeCalculator = Depends(get_payment_fee_calculator)
+) -> ServiceChargeCalculator:
     return ServiceChargeCalculator(payment_fee_calculator=pfc, platform_settings_service=pss)
 
 def get_platform_fee_service(
-    """Execute get_platform_fee_service operation."""
-    pfc: PaymentFeeCalculator = Depends(get_payment_fee_calculator),
-    pss: PlatformSettingsService = Depends(get_platform_settings_service)) -> PlatformFeeService:
+    pss: PlatformSettingsService = Depends(get_platform_settings_service),
+    pfc: PaymentFeeCalculator = Depends(get_payment_fee_calculator)
+) -> PlatformFeeService:
     return PlatformFeeService(payment_fee_calculator=pfc, platform_settings_service=pss)
 
 def get_financial_records_service(db: Session = Depends(get_db)) -> FinancialRecordsService:

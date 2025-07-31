@@ -2,8 +2,8 @@
 WebSocket endpoints for Fynlo Portal - Real-time updates for web dashboard
 """
 
-from typing import 
-from pydantic import 
+from typing import Optional, Dict, Any
+from pydantic import BaseModel
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, Query, Path
 from sqlalchemy.orm import Session
 import json

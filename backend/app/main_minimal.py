@@ -10,29 +10,29 @@ from datetime import datetime
 
 # Create minimal FastAPI app
 app = FastAPI(
-    title="Fynlo POS Backend",
-    description="Hardware-Free Restaurant Management Platform",
-    version="1.0.0"
+title="Fynlo POS Backend",
+description="Hardware-Free Restaurant Management Platform",
+version="1.0.0"
 )
 
 # Add CORS middleware
 app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Permissive for now
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+CORSMiddleware,
+allow_origins=["*"],  # Permissive for now
+allow_credentials=True,
+allow_methods=["*"],
+allow_headers=["*"],
 )
 
 @app.get("/")
 async def root():
     """Root endpoint"""
     return {
-        "service": "Fynlo POS Backend API",
-        "version": "1.0.0",
-        "status": "healthy",
-        "timestamp": datetime.now().isoformat(),
-        "message": "Fynlo POS API is running"
+    "service": "Fynlo POS Backend API",
+    "version": "1.0.0",
+    "status": "healthy",
+    "timestamp": datetime.now().isoformat(),
+    "message": "Fynlo POS API is running"
     }
 
 @app.get("/health")
@@ -108,7 +108,7 @@ async def get_employees():
             },
             {
                 "id": 2,
-                "name": "Sarah Cashier", 
+                "name": "Sarah Cashier",
                 "email": "sarah@restaurant.com",
                 "role": "cashier",
                 "hourlyRate": 15.50,
@@ -124,4 +124,4 @@ async def get_employees():
 if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 8000))
-        uvicorn.run(app, host="0.0.0.0", port=port)
+    uvicorn.run(app, host="0.0.0.0", port=port)

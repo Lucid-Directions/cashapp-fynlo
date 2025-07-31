@@ -7,7 +7,6 @@ import asyncio
 import json
 import logging
 from datetime import datetime
-from pydantic import 
 from typing import Dict, Optional, Set
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
 from fastapi.websockets import WebSocketState

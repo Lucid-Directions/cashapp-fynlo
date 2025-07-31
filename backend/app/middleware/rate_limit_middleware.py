@@ -8,9 +8,8 @@ from fastapi import Request, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from slowapi import Limiter
 from slowapi.util import get_remote_address
-from slowapi.errors import 
-from slowapi.middleware import 
-from slowapi.extension import 
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
 from jose import JWTError, jwt
 
 from app.core.config import settings

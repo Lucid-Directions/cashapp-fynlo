@@ -4,10 +4,10 @@ Only restaurant owners with multiple restaurants can use this endpoint
 """
 
 from fastapi import APIRouter, Depends, status
-from pydantic import 
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from sqlalchemy import 
-from typing import 
+from sqlalchemy import and_, or_
+from typing import Optional, List
 from datetime import datetime
 
 from app.core.database import get_db

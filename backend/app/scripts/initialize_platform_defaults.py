@@ -184,7 +184,7 @@ DATABASE STATE:
 STATUS: {'SUCCESS' if self.stats['errors'] == 0 else 'COMPLETED WITH ERRORS'}
 """
         
-                logger.info("Platform initialization report generated")
+        logger.info("Platform initialization report generated")
 
 
 def main():

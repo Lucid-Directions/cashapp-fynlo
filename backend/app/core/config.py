@@ -274,7 +274,7 @@ def validate_production_settings(s: Settings):
             )
             # In a real scenario, you might want to log this with high priority as well.
             # For now, raising an exception is the primary goal to prevent startup.
-                                                raise ValueError(f"Application startup aborted due to insecure production configuration: {'; '.join(errors)}")
+            raise ValueError(f"Application startup aborted due to insecure production configuration: {'; '.join(errors)}")
 
 # Perform validation after settings are fully initialized
 validate_production_settings(settings)

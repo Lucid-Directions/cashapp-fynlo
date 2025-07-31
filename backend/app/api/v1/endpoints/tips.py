@@ -43,7 +43,6 @@ def convert_db_tip_dist_to_schema(record: StaffTipDistributionRecord) -> StaffTi
 
 @router.post("/orders/{order_reference}/distribute-tips", response_model=List[StaffTipDistribution])
 def trigger_tip_distribution(
-    """Execute trigger_tip_distribution operation."""
     order_reference: str = Path(..., description="The reference ID of the order for which tips are being distributed."),
     request_data: TipDistributionRequestInput = Body(...),
     service: StaffTipService = Depends(get_staff_tip_service_dep)
@@ -76,7 +75,6 @@ def trigger_tip_distribution(
 
 @router.get("/orders/{order_reference}/tip-distributions", response_model=List[StaffTipDistributionRecordSchema])
 def get_tip_distributions_for_order_api(
-    """Execute get_tip_distributions_for_order_api operation."""
     order_reference: str = Path(..., description="The reference ID of the order."),
     service: StaffTipService = Depends(get_staff_tip_service_dep)
 ):
@@ -89,7 +87,6 @@ def get_tip_distributions_for_order_api(
 
 @router.get("/staff/{staff_id}/tip-distributions", response_model=List[StaffTipDistributionRecordSchema])
 def get_tip_distributions_for_staff_api(
-    """Execute get_tip_distributions_for_staff_api operation."""
     staff_id: str = Path(..., description="The ID of the staff member."),
     start_date: Optional[str] = None, # Query param, e.g., YYYY-MM-DD
     end_date: Optional[str] = None,   # Query param, e.g., YYYY-MM-DD
@@ -99,7 +96,7 @@ def get_tip_distributions_for_staff_api(
     Retrieves all recorded tip distributions for a specific staff member,
     optionally filtered by a date range (ISO format dates expected).
     """
-        db_records = service.get_tip_distributions_for_staff(
+    db_records = service.get_tip_distributions_for_staff(
         staff_id=staff_id,
         start_date=start_date,
         end_date=end_date

@@ -5,7 +5,7 @@ Ensures test/debug code is not executed in production environment
 
 from functools import wraps
 import asyncio
-from fastapi import 
+from fastapi import HTTPException
 from app.core.config import settings
 
 

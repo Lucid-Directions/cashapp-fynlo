@@ -121,13 +121,13 @@ class OfflineSyncManager:
         self.conflicts: List[SyncConflict] = []
         
     def batch_upload(
-        """Execute batch_upload operation."""
         self,
         sync_actions: List[Dict[str, Any]],
         restaurant_id: str,
         user_id: str,
         device_id: Optional[str] = None
     ) -> Dict[str, Any]:
+        """Execute batch_upload operation."""
         """
         Process batch upload of offline actions
         """
@@ -193,12 +193,12 @@ class OfflineSyncManager:
             )
     
     def download_changes(
-        """Execute download_changes operation."""
         self,
         restaurant_id: str,
         last_sync_timestamp: Optional[datetime] = None,
         entity_types: Optional[List[str]] = None
     ) -> Dict[str, Any]:
+        """Execute download_changes operation."""
         """
         Download server changes since last sync
         """
@@ -242,12 +242,12 @@ class OfflineSyncManager:
             )
     
     def resolve_conflict(
-        """Execute resolve_conflict operation."""
         self,
         conflict_id: str,
         resolution_strategy: ConflictResolution,
         merged_data: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
+        """Execute resolve_conflict operation."""
         """
         Resolve sync conflict with specified strategy
         """
@@ -310,11 +310,11 @@ class OfflineSyncManager:
             )
     
     def get_sync_status(
-        """Execute get_sync_status operation."""
         self,
         restaurant_id: str,
         device_id: Optional[str] = None
     ) -> Dict[str, Any]:
+        """Execute get_sync_status operation."""
         """
         Get synchronization status for restaurant/device
         """

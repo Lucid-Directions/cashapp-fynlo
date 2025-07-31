@@ -4,7 +4,7 @@ This demonstrates how to fix the vulnerability in the existing products.py
 """
 
 from fastapi import APIRouter, Depends, Query
-from pydantic import 
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from typing import List, Optional
 

@@ -136,13 +136,13 @@ class TenantSecurity:
     
     @staticmethod
     def apply_tenant_filter(
-        """Execute apply_tenant_filter operation."""
         query: Query,
         user: User,
         model_class: type,
         restaurant_field: str = "restaurant_id",
         db: Optional[Session] = None
     ) -> Query:
+        """Execute apply_tenant_filter operation."""
         """
         Apply tenant filtering to a SQLAlchemy query
         
@@ -212,12 +212,12 @@ class TenantSecurity:
     
     @staticmethod
     def validate_cross_restaurant_operation(
-        """Execute validate_cross_restaurant_operation operation."""
         user: User,
         source_restaurant_id: str,
         target_restaurant_id: str,
         operation: str = "transfer"
     ) -> None:
+        """Execute validate_cross_restaurant_operation operation."""
         """
         Validate operations that involve multiple restaurants
         
