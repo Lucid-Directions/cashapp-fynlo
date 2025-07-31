@@ -4,6 +4,8 @@
 
 import { useEffect, useCallback, useState } from 'react';
 
+import { logger } from '../utils/logger';
+
 import { webSocketService } from '../services/websocket/EnhancedWebSocketService';
 import { useAuthStore } from '../store/useAuthStore';
 import { WebSocketEvent } from '../types/websocket';
@@ -32,7 +34,7 @@ export const useWebSocket = (options: UseWebSocketOptions = {}) => {
   // Handle connection
   const connect = useCallback(async () => {
     if (!user?.restaurant_id) {
-      console.warn('⚠️ Cannot connect WebSocket - no restaurant ID');
+      logger.warn('⚠️ Cannot connect WebSocket - no restaurant ID');
       return;
     }
 

@@ -5,6 +5,8 @@
  * DEVELOPMENT: Uses LAN IP for physical device testing
  */
 
+import { logger } from '../utils/logger';
+
 // Get the current environment
 const _isDevelopment = __DEV__;
 
@@ -97,7 +99,7 @@ export const checkAPIHealth = async (): Promise<boolean> => {
     clearTimeout(timeoutId);
     return response.ok;
   } catch (error) {
-    console.warn('API health check failed:', error.message);
+    logger.warn('API health check failed:', error.message);
     return false;
   }
 };

@@ -2,6 +2,8 @@ import React from 'react';
 
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 
+import { logger } from '../utils/logger';
+
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
@@ -26,7 +28,7 @@ const AppNavigator: React.FC = () => {
     authStoreUser?.needs_onboarding ||
     (!authStoreUser?.restaurant_id && authStoreUser?.role !== 'platform_owner');
 
-  console.log(
+  logger.info(
     'AppNavigator - User:',
     user?.email,
     'Role:',

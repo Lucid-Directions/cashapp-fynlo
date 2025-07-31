@@ -6,6 +6,7 @@ import { Appearance } from 'react-native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import { logger } from '../utils/logger';
 import { lightTheme, darkThemeConfig } from './theme';
 
 import type { Theme } from './theme';
@@ -213,7 +214,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
           }
         }
       } catch (error) {
-        console.warn('Failed to load theme preferences:', error);
+        logger.warn('Failed to load theme preferences:', error);
       }
     };
 
@@ -241,7 +242,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
       setThemeModeState(mode);
       await AsyncStorage.setItem(THEME_STORAGE_KEY, mode);
     } catch (error) {
-      console.warn('Failed to save theme preference:', error);
+      logger.warn('Failed to save theme preference:', error);
     }
   };
 
@@ -251,7 +252,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({
       setColorThemeState(colorThemeId);
       await AsyncStorage.setItem(COLOR_THEME_STORAGE_KEY, colorThemeId);
     } catch (error) {
-      console.warn('Failed to save color theme preference:', error);
+      logger.warn('Failed to save color theme preference:', error);
     }
   };
 
