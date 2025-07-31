@@ -44,6 +44,33 @@
 - **fynlo-infrastructure-manager** - DigitalOcean ops
 - **general-purpose** - Complex research & multi-step tasks
 
+### Development Workflow Agents (in .claude/agents/)
+- **planning-agent** - Architecture design, feature planning, technical decisions
+- **research-agent** - Problem investigation, documentation search, solution discovery
+- **setup-agent** - Environment configuration, dependency management, toolchain setup
+- **development-agent** - Code implementation, building, deployment fixes
+- **testing-agent** - Test creation, quality assurance, coverage improvement
+- **version-control-agent** - Git operations, PR management, deployment coordination
+- **documentation-agent** - Technical documentation, knowledge management, context preservation
+
+## 🤖 USING DEVELOPMENT AGENTS
+
+### When to Use Which Agent
+1. **Planning Agent** - Start here for new features or major changes
+2. **Research Agent** - When stuck or need to understand existing code
+3. **Setup Agent** - For environment issues or new tool installation
+4. **Development Agent** - For implementing features and fixing bugs
+5. **Testing Agent** - After code changes or when tests fail
+6. **Version Control Agent** - For PRs, deployments, and git issues
+7. **Documentation Agent** - To update docs or save important context
+
+### How to Invoke Agents
+```bash
+# Use the Task tool with the agent name
+# Example: "Act as the planning-agent"
+# Or: "I need the testing-agent to help with this"
+```
+
 ## 7 Working Rules
 1. Read problem → Find files → Write plan to tasks/todo.md
 2. Create checklist of todos
