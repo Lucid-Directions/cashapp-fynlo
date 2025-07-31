@@ -288,7 +288,7 @@ async def get_low_stock_items_api(
 #     # current_user = Depends(get_current_active_user)
 #     # if not all(permission in current_user.permissions for permission in required_permissions):
 #     #     raise AuthenticationException(message="Not enough permissions", error_code="ACCESS_DENIED")#     # return current_user
-#     print(f"Auth check for permissions: {required_permissions}") # Placeholder log
+#     logger.info(f"Auth check for permissions: {required_permissions}") # Placeholder log
 #     pass # Allow all for now for easier testing without setting up full auth
 
 # --- Receipt Scanning Endpoint ---
@@ -332,6 +332,10 @@ async def scan_receipt_api(
     
     # Integration with OCRService
     from app.services.ocr_service import OCRService
+import logging
+
+logger = logging.getLogger(__name__)
+
     ocr_service = OCRService()
 
     try:

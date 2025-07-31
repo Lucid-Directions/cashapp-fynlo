@@ -6,6 +6,10 @@ Generate detailed exception usage analysis with file and line information
 import os
 import re
 from collections import defaultdict
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 def find_exception_issues(directory):
     """Find all exception calls with 'code=' parameter"""
@@ -28,7 +32,7 @@ def find_exception_issues(directory):
                                     relative_path = filepath.replace(directory + '/', '')
                                     issues[relative_path].append((i, line.strip()))
                 except Exception as e:
-                    print(f"Error reading {filepath}: {e}")
+                    logger.error(f"Error reading {filepath}: {e}")
     
     return issues
 
@@ -64,22 +68,22 @@ def main():
     app_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'app')
     app_dir = os.path.normpath(app_dir)
     
-    print("Detailed Exception Usage Analysis")
-    print("=" * 80)
+    logger.error("Detailed Exception Usage Analysis")
+    logger.info("=" * 80)
     
     issues = find_exception_issues(app_dir)
     categorized = categorize_issues(issues)
     
     # Print summary
     total_issues = sum(len(lines) for lines in issues.values())
-    print(f"\nTotal issues found: {total_issues}")
-    print(f"Files affected: {len(issues)}\n")
+    logger.info(f"\nTotal issues found: {total_issues}")
+    logger.info(f"Files affected: {len(issues)}\n")
     
     # Print by category
     for category, items in categorized.items():
         if items:
-            print(f"\n## {category.replace('_', ' ')} ({len(items)} issues)")
-            print("-" * 80)
+            logger.info(f"\n## {category.replace('_', ' ')} ({len(items)} issues)")
+            logger.info("-" * 80)
             
             # Group by file
             by_file = defaultdict(list)
@@ -87,26 +91,26 @@ def main():
                 by_file[file].append((line_no, line))
             
             for file in sorted(by_file.keys()):
-                print(f"\n### {file}")
+                logger.info(f"\n### {file}")
                 for line_no, line in sorted(by_file[file]):
-                    print(f"  Line {line_no}: {line[:100]}...")
+                    logger.info(f"  Line {line_no}: {line[:100]}...")
     
     # Generate fix commands
-    print("\n\n## Automated Fix Commands")
-    print("-" * 80)
-    print("\n1. Fix FynloException (change 'code=' to 'error_code='):")
-    print("   find app -name '*.py' -exec sed -i '' 's/FynloException(\\(.*\\)code=/FynloException(\\1error_code=/g' {} +")
+    logger.info("\n\n## Automated Fix Commands")
+    logger.info("-" * 80)
+    logger.error("\n1. Fix FynloException (change 'code=' to 'error_code='):")
+    logger.error("   find app -name '*.py' -exec sed -i '' 's/FynloException(\\(.*\\)code=/FynloException(\\1error_code=/g' {} +")
     
-    print("\n2. Fix AuthenticationException (remove 'code' parameter):")
-    print("   Manual review recommended - patterns vary")
+    logger.error("\n2. Fix AuthenticationException (remove 'code' parameter):")
+    logger.info("   Manual review recommended - patterns vary")
     
-    print("\n3. Fix ValidationException (remove 'code' parameter):")
-    print("   Manual review recommended - patterns vary")
+    logger.error("\n3. Fix ValidationException (remove 'code' parameter):")
+    logger.info("   Manual review recommended - patterns vary")
     
-    print("\n\n## Files to Review (sorted by issue count):")
+    logger.info("\n\n## Files to Review (sorted by issue count):")
     file_issue_counts = [(file, len(lines)) for file, lines in issues.items()]
     for file, count in sorted(file_issue_counts, key=lambda x: x[1], reverse=True):
-        print(f"  {count:3d} issues: {file}")
+        logger.info(f"  {count:3d} issues: {file}")
 
 if __name__ == "__main__":
     main()

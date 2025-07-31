@@ -6,6 +6,10 @@ Fix all remaining HTTPExceptions in core modules
 import os
 import re
 from typing import Dict, List, Tuple
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 def get_exception_mappings() -> Dict[str, Tuple[str, str]]:
     """Map error messages to appropriate FynloException types and error codes"""
@@ -145,7 +149,7 @@ def fix_file_httpexceptions(file_path: str) -> int:
     if content != original_content:
         with open(file_path, 'w') as f:
             f.write(content)
-        print(f"✅ Fixed {fixes_made} HTTPExceptions in {file_path}")
+        logger.error(f"✅ Fixed {fixes_made} HTTPExceptions in {file_path}")
         return fixes_made
     
     return 0
@@ -163,21 +167,21 @@ def main():
     
     total_fixed = 0
     
-    print("🔧 Fixing remaining HTTPExceptions in core modules...")
-    print("=" * 60)
+    logger.error("🔧 Fixing remaining HTTPExceptions in core modules...")
+    logger.info("=" * 60)
     
     for module in core_modules:
         if os.path.exists(module):
             fixed = fix_file_httpexceptions(module)
             total_fixed += fixed
         else:
-            print(f"⚠️  File not found: {module}")
+            logger.info(f"⚠️  File not found: {module}")
     
-    print("=" * 60)
-    print(f"✅ Total HTTPExceptions fixed: {total_fixed}")
+    logger.info("=" * 60)
+    logger.error(f"✅ Total HTTPExceptions fixed: {total_fixed}")
     
     # Also check for any other files with HTTPException
-    print("\n🔍 Checking for other files with HTTPException...")
+    logger.error("\n🔍 Checking for other files with HTTPException...")
     
     for root, dirs, files in os.walk('app'):
         # Skip test directories
@@ -198,13 +202,13 @@ def main():
                         content = f.read()
                     
                     if 'HTTPException' in content and 'raise HTTPException' in content:
-                        print(f"\n📍 Found HTTPException in: {file_path}")
+                        logger.error(f"\n📍 Found HTTPException in: {file_path}")
                         fixed = fix_file_httpexceptions(file_path)
                         total_fixed += fixed
                 except:
                     pass
     
-    print(f"\n🎉 Grand total HTTPExceptions fixed: {total_fixed}")
+    logger.error(f"\n🎉 Grand total HTTPExceptions fixed: {total_fixed}")
 
 if __name__ == "__main__":
     main()

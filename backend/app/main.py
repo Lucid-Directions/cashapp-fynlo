@@ -297,7 +297,7 @@ async def get_employees(
                 message=f"Retrieved {len(employees)} employees"
             )
     except Exception as e:
-        print(f"Error fetching employees: {str(e)}")
+        logger.error(f"Error fetching employees: {str(e)}")
     
     # Fallback to mock data if no real data
     base_date = datetime.now() - timedelta(days=365)

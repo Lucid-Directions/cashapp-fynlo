@@ -20,6 +20,10 @@ from app.core.database import get_db, engine, SessionLocal
 from app.models import Order, Payment, Customer, Restaurant, Product, User, EmployeeProfile
 from sqlalchemy.orm import Session
 from sqlalchemy import select, text
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class OrderCustomerSeeder:
     """Create realistic orders and customers for report functionality"""
@@ -33,9 +37,9 @@ class OrderCustomerSeeder:
         
     async def run(self):
         """Execute the seeding process"""
-        print("📊 Creating Orders & Customers for Reports...")
-        print("🎯 Target: Generate 90 days of transaction history")
-        print("-" * 50)
+        logger.info("📊 Creating Orders & Customers for Reports...")
+        logger.info("🎯 Target: Generate 90 days of transaction history")
+        logger.info("-" * 50)
         
         try:
             # Create database session
@@ -46,10 +50,10 @@ class OrderCustomerSeeder:
             await self.create_order_history()
             
             self.session.commit()
-            print("✅ Order and customer seeding completed successfully!")
+            logger.info("✅ Order and customer seeding completed successfully!")
             
         except Exception as e:
-            print(f"❌ Error: {e}")
+            logger.error(f"❌ Error: {e}")
             if self.session:
                 self.session.rollback()
             raise
@@ -59,7 +63,7 @@ class OrderCustomerSeeder:
     
     async def load_existing_data(self):
         """Load existing restaurants, employees, and products"""
-        print("1️⃣ Loading existing data...")
+        logger.info("1️⃣ Loading existing data...")
         
         # Get restaurant
         restaurant = self.session.execute(select(Restaurant).limit(1)).scalar_one_or_none()
@@ -67,7 +71,7 @@ class OrderCustomerSeeder:
             raise Exception("No restaurant found. Please run the main seeding script first.")
         
         self.restaurant_id = str(restaurant.id)
-        print(f"   ✓ Using restaurant: {restaurant.name}")
+        logger.info(f"   ✓ Using restaurant: {restaurant.name}")
         
         # Get employees
         employees = self.session.execute(
@@ -83,7 +87,7 @@ class OrderCustomerSeeder:
             }
             for emp in employees
         ]
-        print(f"   ✓ Found {len(self.employees)} employees")
+        logger.info(f"   ✓ Found {len(self.employees)} employees")
         
         # Get products
         products = self.session.execute(
@@ -99,11 +103,11 @@ class OrderCustomerSeeder:
             }
             for prod in products
         ]
-        print(f"   ✓ Found {len(self.products)} products")
+        logger.info(f"   ✓ Found {len(self.products)} products")
         
     async def create_customers(self):
         """Create realistic customer base"""
-        print("2️⃣ Creating customer base...")
+        logger.info("2️⃣ Creating customer base...")
         
         customer_data = [
             {"name": "James Thompson", "email": "james.t@email.com", "phone": "+44 7911 123456"},
@@ -141,11 +145,11 @@ class OrderCustomerSeeder:
                 "email": customer.email
             })
         
-        print(f"   ✓ Created {len(customer_data)} customers")
+        logger.info(f"   ✓ Created {len(customer_data)} customers")
     
     async def create_order_history(self):
         """Create 90 days of realistic order history"""
-        print("3️⃣ Creating 90 days of order history...")
+        logger.info("3️⃣ Creating 90 days of order history...")
         
         if not self.employees:
             raise Exception("No employees found")
@@ -286,9 +290,9 @@ class OrderCustomerSeeder:
                 # Commit in batches to avoid memory issues
                 if total_orders % 100 == 0:
                     self.session.commit()
-                    print(f"   📈 Created {total_orders} orders...")
+                    logger.info(f"   📈 Created {total_orders} orders...")
         
-        print(f"   ✅ Created {total_orders} orders over 90 days")
+        logger.info(f"   ✅ Created {total_orders} orders over 90 days")
 
 async def main():
     """Main execution function"""

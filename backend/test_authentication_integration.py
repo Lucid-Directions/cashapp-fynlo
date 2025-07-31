@@ -20,6 +20,10 @@ sys.path.insert(0, str(project_root))
 from app.core.config import settings
 from app.core.database import SessionLocal, User
 from app.api.v1.endpoints.auth import create_access_token, authenticate_user
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class AuthenticationTester:
     def __init__(self, base_url="http://localhost:8000"):
@@ -38,11 +42,11 @@ class AuthenticationTester:
             "message": message,
             "data": data
         })
-        print(f"{status}: {test_name}")
+        logger.info(f"{status}: {test_name}")
         if message:
-            print(f"    {message}")
+            logger.info(f"    {message}")
         if data and isinstance(data, dict) and len(str(data)) < 200:
-            print(f"    Data: {json.dumps(data, indent=2, default=str)}")
+            logger.info(f"    Data: {json.dumps(data, indent=2, default=str)}")
     
     async def test_server_connectivity(self):
         """Test basic server connectivity"""
@@ -406,21 +410,21 @@ class AuthenticationTester:
     
     async def run_all_tests(self):
         """Run all authentication integration tests"""
-        print("🔐 Starting Authentication Integration Tests")
-        print("=" * 55)
+        logger.info("🔐 Starting Authentication Integration Tests")
+        logger.info("=" * 55)
         
         # Basic connectivity
         server_ok = await self.test_server_connectivity()
         if not server_ok:
-            print("\n❌ Server not running. Please start the backend server:")
-            print("   python -m uvicorn app.main:app --reload")
+            logger.info("\n❌ Server not running. Please start the backend server:")
+            logger.info("   python -m uvicorn app.main:app --reload")
             return False
         
         # Database and user setup
         users_ok = self.test_database_users()
         if not users_ok:
-            print("\n⚠️ Database users missing. Please run database setup:")
-            print("   python setup_database.py")
+            logger.info("\n⚠️ Database users missing. Please run database setup:")
+            logger.info("   python setup_database.py")
         
         # Core authentication tests
         token_ok = self.test_token_generation()
@@ -442,30 +446,30 @@ class AuthenticationTester:
         failed = sum(1 for result in self.test_results if "❌ FAIL" in result["status"])
         total = len(self.test_results)
         
-        print(f"\n📊 Authentication Test Results")
-        print("=" * 40)
-        print(f"Total Tests: {total}")
-        print(f"Passed: {passed}")
-        print(f"Failed: {failed}")
-        print(f"Success Rate: {(passed/total*100):.1f}%" if total > 0 else "0%")
+        logger.info(f"\n📊 Authentication Test Results")
+        logger.info("=" * 40)
+        logger.info(f"Total Tests: {total}")
+        logger.info(f"Passed: {passed}")
+        logger.error(f"Failed: {failed}")
+        logger.info(f"Success Rate: {(passed/total*100):.1f}%" if total > 0 else "0%")
         
         if failed == 0:
-            print("\n🎉 All authentication tests passed!")
-            print("\n✅ Ready for frontend integration:")
-            print("   - JWT token generation working")
-            print("   - Role-based access control validated")
-            print("   - Login/logout flow functional")
-            print("   - Protected endpoints secured")
+            logger.info("\n🎉 All authentication tests passed!")
+            logger.info("\n✅ Ready for frontend integration:")
+            logger.info("   - JWT token generation working")
+            logger.info("   - Role-based access control validated")
+            logger.info("   - Login/logout flow functional")
+            logger.info("   - Protected endpoints secured")
         else:
-            print(f"\n⚠️ {failed} test(s) failed. Review issues above.")
+            logger.error(f"\n⚠️ {failed} test(s) failed. Review issues above.")
         
         return failed == 0
 
 async def main():
     """Main test runner"""
-    print("Starting authentication integration tests...")
-    print("Ensure backend server is running and database is set up.")
-    print()
+    logger.info("Starting authentication integration tests...")
+    logger.info("Ensure backend server is running and database is set up.")
+    logger.info()
     
     tester = AuthenticationTester()
     success = await tester.run_all_tests()

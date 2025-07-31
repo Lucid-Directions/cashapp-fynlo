@@ -123,6 +123,10 @@ async def get_employees():
 
 if __name__ == "__main__":
     import uvicorn
+import logging
+
+logger = logging.getLogger(__name__)
+
     port = int(os.environ.get("PORT", 8000))
-    print(f"🚀 Starting Fynlo POS Backend on 0.0.0.0:{port}")
+    logger.info(f"🚀 Starting Fynlo POS Backend on 0.0.0.0:{port}")
     uvicorn.run(app, host="0.0.0.0", port=port)

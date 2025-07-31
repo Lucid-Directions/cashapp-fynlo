@@ -8,6 +8,10 @@ import os
 import re
 from typing import List, Tuple
 from pathlib import Path
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 # Define the replacements for each file
 REPLACEMENTS = {
@@ -122,7 +126,7 @@ def fix_file(file_path: str, replacements: List[Tuple[str, str]], imports_to_add
     full_path = Path("/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend") / file_path
     
     if not full_path.exists():
-        print(f"❌ File not found: {full_path}")
+        logger.info(f"❌ File not found: {full_path}")
         return 0
     
     with open(full_path, 'r') as f:
@@ -168,30 +172,30 @@ def fix_file(file_path: str, replacements: List[Tuple[str, str]], imports_to_add
     if content != original_content:
         with open(full_path, 'w') as f:
             f.write(content)
-        print(f"✅ Fixed {changes} issues in {file_path}")
+        logger.info(f"✅ Fixed {changes} issues in {file_path}")
         return changes
     else:
-        print(f"ℹ️  No changes needed in {file_path}")
+        logger.info(f"ℹ️  No changes needed in {file_path}")
         return 0
 
 def main():
     """Main function to fix all remaining HTTPExceptions."""
-    print("🔧 Fixing final HTTPExceptions in core modules...")
-    print("=" * 60)
+    logger.error("🔧 Fixing final HTTPExceptions in core modules...")
+    logger.info("=" * 60)
     
     total_changes = 0
     
     # First, let's check production_guard.py
     prod_guard_path = Path("/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/core/production_guard.py")
     if prod_guard_path.exists():
-        print("\n📄 Checking production_guard.py...")
+        logger.info("\n📄 Checking production_guard.py...")
         with open(prod_guard_path, 'r') as f:
             content = f.read()
         
         # Check for HTTPException usage
         http_exceptions = re.findall(r'raise HTTPException.*', content)
         if http_exceptions:
-            print(f"Found {len(http_exceptions)} HTTPExceptions in production_guard.py")
+            logger.error(f"Found {len(http_exceptions)} HTTPExceptions in production_guard.py")
             # Add replacements for production_guard.py
             REPLACEMENTS["app/core/production_guard.py"] = []
             for exc in http_exceptions:
@@ -219,11 +223,11 @@ def main():
             changes = fix_file(file_path, replacements, imports)
             total_changes += changes
     
-    print("\n" + "=" * 60)
-    print(f"✅ Total changes made: {total_changes}")
+    logger.info("\n" + "=" * 60)
+    logger.info(f"✅ Total changes made: {total_changes}")
     
     # Final check for any remaining HTTPExceptions
-    print("\n🔍 Scanning for any remaining HTTPExceptions...")
+    logger.error("\n🔍 Scanning for any remaining HTTPExceptions...")
     remaining = []
     
     for file_path in REPLACEMENTS.keys():
@@ -238,11 +242,11 @@ def main():
                 remaining.append((file_path, len(matches)))
     
     if remaining:
-        print("\n⚠️  Still found HTTPExceptions in:")
+        logger.error("\n⚠️  Still found HTTPExceptions in:")
         for file_path, count in remaining:
-            print(f"  - {file_path}: {count} instances")
+            logger.info(f"  - {file_path}: {count} instances")
     else:
-        print("✅ No HTTPExceptions found in core modules!")
+        logger.error("✅ No HTTPExceptions found in core modules!")
 
 if __name__ == "__main__":
     main()

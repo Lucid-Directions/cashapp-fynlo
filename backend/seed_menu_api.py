@@ -21,6 +21,10 @@ import json
 import sys
 import os
 from decimal import Decimal
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 # Configuration
 API_BASE_URL = os.environ.get('API_BASE_URL', 'https://fynlopos-9eg2c.ondigitalocean.app')
@@ -62,7 +66,7 @@ def login():
     if not AUTH_EMAIL or not AUTH_PASSWORD:
         raise ValueError("AUTH_EMAIL and AUTH_PASSWORD must be set")
     
-    print(f"🔐 Logging in as {AUTH_EMAIL}...")
+    logger.info(f"🔐 Logging in as {AUTH_EMAIL}...")
     
     response = requests.post(
         f"{API_BASE_URL}/api/v1/auth/login",
@@ -71,16 +75,16 @@ def login():
     )
     
     if response.status_code != 200:
-        print(f"❌ Login failed: {response.text}")
+        logger.error(f"❌ Login failed: {response.text}")
         sys.exit(1)
     
     data = response.json()
     if not data.get('success'):
-        print(f"❌ Login failed: {data.get('message', 'Unknown error')}")
+        logger.error(f"❌ Login failed: {data.get('message', 'Unknown error')}")
         sys.exit(1)
     
     token = data['data']['access_token']
-    print("✅ Login successful")
+    logger.info("✅ Login successful")
     return token
 
 def create_categories(token, restaurant_id):
@@ -92,7 +96,7 @@ def create_categories(token, restaurant_id):
     
     category_mapping = {}
     
-    print("🏷️  Creating categories...")
+    logger.info("🏷️  Creating categories...")
     for cat_data in CHUCHO_CATEGORIES:
         payload = {
             "name": cat_data['name'],
@@ -114,11 +118,11 @@ def create_categories(token, restaurant_id):
             if data.get('success'):
                 category_id = data['data']['id']
                 category_mapping[cat_data['name']] = category_id
-                print(f"   ✅ Created category: {cat_data['name']}")
+                logger.info(f"   ✅ Created category: {cat_data['name']}")
             else:
-                print(f"   ⚠️  Failed to create category {cat_data['name']}: {data.get('message')}")
+                logger.error(f"   ⚠️  Failed to create category {cat_data['name']}: {data.get('message')}")
         else:
-            print(f"   ❌ Error creating category {cat_data['name']}: {response.text}")
+            logger.error(f"   ❌ Error creating category {cat_data['name']}: {response.text}")
     
     return category_mapping
 
@@ -129,11 +133,11 @@ def create_products(token, category_mapping):
         "Content-Type": "application/json"
     }
     
-    print("🍽️  Creating menu items...")
+    logger.info("🍽️  Creating menu items...")
     for idx, item_data in enumerate(CHUCHO_MENU_ITEMS):
         category_id = category_mapping.get(item_data['category'])
         if not category_id:
-            print(f"   ⚠️  Skipping {item_data['name']} - category not found")
+            logger.info(f"   ⚠️  Skipping {item_data['name']} - category not found")
             continue
         
         payload = {
@@ -157,16 +161,16 @@ def create_products(token, category_mapping):
         if response.status_code == 200:
             data = response.json()
             if data.get('success'):
-                print(f"   ✅ Created product: {item_data['name']} (£{item_data['price']})")
+                logger.info(f"   ✅ Created product: {item_data['name']} (£{item_data['price']})")
             else:
-                print(f"   ⚠️  Failed to create product {item_data['name']}: {data.get('message')}")
+                logger.error(f"   ⚠️  Failed to create product {item_data['name']}: {data.get('message')}")
         else:
-            print(f"   ❌ Error creating product {item_data['name']}: {response.text}")
+            logger.error(f"   ❌ Error creating product {item_data['name']}: {response.text}")
 
 def main():
     """Main seeding function"""
-    print("🚀 Starting Chucho Restaurant Menu Seeding via API...")
-    print(f"📍 API URL: {API_BASE_URL}")
+    logger.info("🚀 Starting Chucho Restaurant Menu Seeding via API...")
+    logger.info(f"📍 API URL: {API_BASE_URL}")
     
     # Login
     token = login()
@@ -176,46 +180,46 @@ def main():
     response = requests.get(f"{API_BASE_URL}/api/v1/auth/me", headers=headers)
     
     if response.status_code != 200:
-        print(f"❌ Failed to get user info: {response.text}")
+        logger.error(f"❌ Failed to get user info: {response.text}")
         sys.exit(1)
     
     user_data = response.json()['data']
     restaurant_id = user_data.get('restaurant_id')
     
     if not restaurant_id:
-        print("❌ User has no associated restaurant")
+        logger.info("❌ User has no associated restaurant")
         sys.exit(1)
     
-    print(f"🏪 Restaurant ID: {restaurant_id}")
+    logger.info(f"🏪 Restaurant ID: {restaurant_id}")
     
     # Create categories
     category_mapping = create_categories(token, restaurant_id)
     
     if not category_mapping:
-        print("❌ No categories created, cannot create products")
+        logger.info("❌ No categories created, cannot create products")
         sys.exit(1)
     
     # Create products
     create_products(token, category_mapping)
     
-    print("\n✅ Menu seeding completed!")
-    print(f"   📋 Categories: {len(category_mapping)}")
-    print(f"   🍽️  Products: {len(CHUCHO_MENU_ITEMS)}")
-    print(f"   🔗 Menu should now be visible in the POS screen")
+    logger.info("\n✅ Menu seeding completed!")
+    logger.info(f"   📋 Categories: {len(category_mapping)}")
+    logger.info(f"   🍽️  Products: {len(CHUCHO_MENU_ITEMS)}")
+    logger.info(f"   🔗 Menu should now be visible in the POS screen")
 
 if __name__ == "__main__":
     # Check for required credentials
     if not AUTH_EMAIL:
-        print("Error: AUTH_EMAIL environment variable is required")
-        print("Usage: AUTH_EMAIL=<email> AUTH_PASSWORD=<password> python seed_menu_api.py")
+        logger.error("Error: AUTH_EMAIL environment variable is required")
+        logger.info("Usage: AUTH_EMAIL=<email> AUTH_PASSWORD=<password> python seed_menu_api.py")
         sys.exit(1)
     
     if len(sys.argv) > 1:
         AUTH_PASSWORD = sys.argv[1]
     elif not AUTH_PASSWORD:
-        print("Error: AUTH_PASSWORD is required")
-        print("Usage: python seed_menu_api.py <password>")
-        print("Or set AUTH_PASSWORD environment variable")
+        logger.error("Error: AUTH_PASSWORD is required")
+        logger.info("Usage: python seed_menu_api.py <password>")
+        logger.info("Or set AUTH_PASSWORD environment variable")
         sys.exit(1)
     
     main()

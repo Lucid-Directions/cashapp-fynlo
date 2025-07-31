@@ -7,6 +7,10 @@ Tests platform owner dashboard and multi-restaurant management
 import requests
 import json
 from datetime import datetime, timedelta
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 # Test configuration
 BASE_URL = "http://localhost:8000"
@@ -23,7 +27,7 @@ ENDPOINTS = {
 
 def test_platform_dashboard():
     """Test platform dashboard functionality"""
-    print("🏢 Testing Platform Dashboard...")
+    logger.info("🏢 Testing Platform Dashboard...")
     
     # Expected dashboard response structure
     expected_structure = {
@@ -63,24 +67,24 @@ def test_platform_dashboard():
         }
     }
     
-    print("✅ Platform dashboard endpoint structure defined")
-    print("   Features:")
-    print("   - Platform overview with restaurant count")
-    print("   - Aggregated revenue metrics across all restaurants")
-    print("   - Restaurant performance summaries")
-    print("   - Recent activity feed from all locations")
-    print("   - Active vs inactive restaurant tracking")
+    logger.info("✅ Platform dashboard endpoint structure defined")
+    logger.info("   Features:")
+    logger.info("   - Platform overview with restaurant count")
+    logger.info("   - Aggregated revenue metrics across all restaurants")
+    logger.info("   - Restaurant performance summaries")
+    logger.info("   - Recent activity feed from all locations")
+    logger.info("   - Active vs inactive restaurant tracking")
 
 def test_restaurant_switching():
     """Test restaurant context switching for platform owners"""
-    print("\n🔄 Testing Restaurant Context Switching...")
+    logger.info("\n🔄 Testing Restaurant Context Switching...")
     
-    print("✅ Restaurant switching capability:")
-    print("   - Platform owners can switch between restaurants")
-    print("   - Validates restaurant belongs to platform")
-    print("   - Updates user context for subsequent API calls")
-    print("   - Maintains audit trail of context switches")
-    print("   - Prevents access to unauthorized restaurants")
+    logger.info("✅ Restaurant switching capability:")
+    logger.info("   - Platform owners can switch between restaurants")
+    logger.info("   - Validates restaurant belongs to platform")
+    logger.info("   - Updates user context for subsequent API calls")
+    logger.info("   - Maintains audit trail of context switches")
+    logger.info("   - Prevents access to unauthorized restaurants")
     
     # Example switch request
     switch_request = {
@@ -98,26 +102,26 @@ def test_restaurant_switching():
         "message": "Switched to restaurant: Test Restaurant"
     }
     
-    print(f"   Request: {switch_request}")
-    print(f"   Response: Context updated successfully")
+    logger.info(f"   Request: {switch_request}")
+    logger.info(f"   Response: Context updated successfully")
 
 def test_multi_restaurant_analytics():
     """Test analytics across multiple restaurants"""
-    print("\n📊 Testing Multi-Restaurant Analytics...")
+    logger.info("\n📊 Testing Multi-Restaurant Analytics...")
     
-    print("✅ Commission tracking features:")
-    print("   - Calculate commission by restaurant")
-    print("   - Configurable commission rates per restaurant")
-    print("   - Period-based commission reports")
-    print("   - Platform earnings calculation")
-    print("   - Revenue breakdown (gross vs net)")
+    logger.info("✅ Commission tracking features:")
+    logger.info("   - Calculate commission by restaurant")
+    logger.info("   - Configurable commission rates per restaurant")
+    logger.info("   - Period-based commission reports")
+    logger.info("   - Platform earnings calculation")
+    logger.info("   - Revenue breakdown (gross vs net)")
     
-    print("✅ Performance comparison features:")
-    print("   - Revenue comparison across restaurants")
-    print("   - Order volume analysis")
-    print("   - Customer metrics per location")
-    print("   - Growth rate calculations")
-    print("   - Top performing restaurant identification")
+    logger.info("✅ Performance comparison features:")
+    logger.info("   - Revenue comparison across restaurants")
+    logger.info("   - Order volume analysis")
+    logger.info("   - Customer metrics per location")
+    logger.info("   - Growth rate calculations")
+    logger.info("   - Top performing restaurant identification")
     
     # Example commission report structure
     commission_example = {
@@ -139,23 +143,23 @@ def test_multi_restaurant_analytics():
         ]
     }
     
-    print(f"   Example commission report structure ready")
+    logger.info(f"   Example commission report structure ready")
 
 def test_platform_permissions():
     """Test platform owner permission system"""
-    print("\n🔐 Testing Platform Permission System...")
+    logger.info("\n🔐 Testing Platform Permission System...")
     
-    print("✅ Role-based access control:")
-    print("   - Platform owners: Full access to all restaurants")
-    print("   - Restaurant owners: Limited to their restaurant")
-    print("   - Managers: Restaurant-level permissions only")
-    print("   - Employees: Basic operational access")
+    logger.info("✅ Role-based access control:")
+    logger.info("   - Platform owners: Full access to all restaurants")
+    logger.info("   - Restaurant owners: Limited to their restaurant")
+    logger.info("   - Managers: Restaurant-level permissions only")
+    logger.info("   - Employees: Basic operational access")
     
-    print("✅ Multi-tenant security:")
-    print("   - Platform isolation (can't access other platforms)")
-    print("   - Restaurant data isolation within platform")
-    print("   - Context validation on every request")
-    print("   - Audit logging for sensitive operations")
+    logger.info("✅ Multi-tenant security:")
+    logger.info("   - Platform isolation (can't access other platforms)")
+    logger.info("   - Restaurant data isolation within platform")
+    logger.info("   - Context validation on every request")
+    logger.info("   - Audit logging for sensitive operations")
     
     permission_matrix = {
         "platform_owner": {
@@ -174,33 +178,33 @@ def test_platform_permissions():
         }
     }
     
-    print("   Permission matrix defined for all roles")
+    logger.info("   Permission matrix defined for all roles")
 
 def test_platform_dashboard_features():
     """Test specific dashboard features"""
-    print("\n📈 Testing Platform Dashboard Features...")
+    logger.info("\n📈 Testing Platform Dashboard Features...")
     
-    print("✅ Restaurant management features:")
-    print("   - Restaurant list with status indicators")
-    print("   - Quick restaurant switching")
-    print("   - Restaurant health monitoring")
-    print("   - Performance alerts and notifications")
+    logger.info("✅ Restaurant management features:")
+    logger.info("   - Restaurant list with status indicators")
+    logger.info("   - Quick restaurant switching")
+    logger.info("   - Restaurant health monitoring")
+    logger.info("   - Performance alerts and notifications")
     
-    print("✅ Financial overview features:")
-    print("   - Total platform revenue")
-    print("   - Revenue by restaurant")
-    print("   - Commission breakdown")
-    print("   - Growth trends and projections")
+    logger.info("✅ Financial overview features:")
+    logger.info("   - Total platform revenue")
+    logger.info("   - Revenue by restaurant")
+    logger.info("   - Commission breakdown")
+    logger.info("   - Growth trends and projections")
     
-    print("✅ Operational monitoring:")
-    print("   - Active vs inactive restaurants")
-    print("   - Order volume across platform")
-    print("   - Customer distribution")
-    print("   - System health indicators")
+    logger.info("✅ Operational monitoring:")
+    logger.info("   - Active vs inactive restaurants")
+    logger.info("   - Order volume across platform")
+    logger.info("   - Customer distribution")
+    logger.info("   - System health indicators")
 
 def test_restaurant_health_monitoring():
     """Test restaurant health monitoring system"""
-    print("\n🏥 Testing Restaurant Health Monitoring...")
+    logger.info("\n🏥 Testing Restaurant Health Monitoring...")
     
     health_statuses = {
         "healthy": "Good order volume, active operations",
@@ -209,33 +213,33 @@ def test_restaurant_health_monitoring():
         "inactive": "Restaurant disabled or offline"
     }
     
-    print("✅ Health monitoring features:")
+    logger.info("✅ Health monitoring features:")
     for status, description in health_statuses.items():
-        print(f"   - {status}: {description}")
+        logger.info(f"   - {status}: {description}")
     
-    print("✅ Health metrics tracked:")
-    print("   - Orders in last 24 hours")
-    print("   - Revenue trends")
-    print("   - Customer activity")
-    print("   - System connectivity")
-    print("   - Staff activity levels")
+    logger.info("✅ Health metrics tracked:")
+    logger.info("   - Orders in last 24 hours")
+    logger.info("   - Revenue trends")
+    logger.info("   - Customer activity")
+    logger.info("   - System connectivity")
+    logger.info("   - Staff activity levels")
     
-    print("✅ Automated recommendations:")
-    print("   - Marketing campaign suggestions")
-    print("   - Operational improvement tips")
-    print("   - Staff training recommendations")
-    print("   - Menu optimization advice")
+    logger.info("✅ Automated recommendations:")
+    logger.info("   - Marketing campaign suggestions")
+    logger.info("   - Operational improvement tips")
+    logger.info("   - Staff training recommendations")
+    logger.info("   - Menu optimization advice")
 
 def test_commission_calculation():
     """Test commission calculation system"""
-    print("\n💰 Testing Commission Calculation...")
+    logger.info("\n💰 Testing Commission Calculation...")
     
-    print("✅ Commission features:")
-    print("   - Configurable rates per restaurant")
-    print("   - Automatic calculation on completed orders")
-    print("   - Period-based reporting (daily, weekly, monthly)")
-    print("   - Real-time commission tracking")
-    print("   - Payment processing integration")
+    logger.info("✅ Commission features:")
+    logger.info("   - Configurable rates per restaurant")
+    logger.info("   - Automatic calculation on completed orders")
+    logger.info("   - Period-based reporting (daily, weekly, monthly)")
+    logger.info("   - Real-time commission tracking")
+    logger.info("   - Payment processing integration")
     
     # Example commission scenarios
     scenarios = [
@@ -259,36 +263,36 @@ def test_commission_calculation():
         }
     ]
     
-    print("✅ Commission calculation examples:")
+    logger.info("✅ Commission calculation examples:")
     for scenario in scenarios:
-        print(f"   - {scenario['restaurant']}: £{scenario['revenue']} * {scenario['rate']*100}% = £{scenario['commission']}")
+        logger.info(f"   - {scenario['restaurant']}: £{scenario['revenue']} * {scenario['rate']*100}% = £{scenario['commission']}")
 
 def test_multi_tenant_data_isolation():
     """Test data isolation between tenants"""
-    print("\n🔒 Testing Multi-Tenant Data Isolation...")
+    logger.info("\n🔒 Testing Multi-Tenant Data Isolation...")
     
-    print("✅ Platform isolation:")
-    print("   - Each platform has separate data namespace")
-    print("   - Platform owners cannot access other platforms")
-    print("   - Database queries include platform_id filtering")
-    print("   - API responses scoped to current platform")
+    logger.info("✅ Platform isolation:")
+    logger.info("   - Each platform has separate data namespace")
+    logger.info("   - Platform owners cannot access other platforms")
+    logger.info("   - Database queries include platform_id filtering")
+    logger.info("   - API responses scoped to current platform")
     
-    print("✅ Restaurant isolation within platform:")
-    print("   - Restaurant data filtered by platform membership")
-    print("   - Context switching validates restaurant ownership")
-    print("   - Cross-restaurant data requires platform owner role")
-    print("   - Audit trails track cross-restaurant access")
+    logger.info("✅ Restaurant isolation within platform:")
+    logger.info("   - Restaurant data filtered by platform membership")
+    logger.info("   - Context switching validates restaurant ownership")
+    logger.info("   - Cross-restaurant data requires platform owner role")
+    logger.info("   - Audit trails track cross-restaurant access")
     
-    print("✅ Security measures:")
-    print("   - JWT tokens include platform context")
-    print("   - Database constraints prevent cross-platform access")
-    print("   - API middleware validates tenant context")
-    print("   - Logging captures all multi-tenant operations")
+    logger.info("✅ Security measures:")
+    logger.info("   - JWT tokens include platform context")
+    logger.info("   - Database constraints prevent cross-platform access")
+    logger.info("   - API middleware validates tenant context")
+    logger.info("   - Logging captures all multi-tenant operations")
 
 def main():
     """Run all platform feature tests"""
-    print("🚀 Fynlo POS Multi-Tenant Platform Features Tests")
-    print("=" * 65)
+    logger.info("🚀 Fynlo POS Multi-Tenant Platform Features Tests")
+    logger.info("=" * 65)
     
     test_platform_dashboard()
     test_restaurant_switching()
@@ -299,28 +303,28 @@ def main():
     test_commission_calculation()
     test_multi_tenant_data_isolation()
     
-    print("\n" + "=" * 65)
-    print("✅ Multi-Tenant Platform Features Implementation Complete")
+    logger.info("\n" + "=" * 65)
+    logger.info("✅ Multi-Tenant Platform Features Implementation Complete")
     
-    print("\n🏢 Platform Owner Benefits:")
-    print("📊 Comprehensive dashboard with cross-restaurant analytics")
-    print("💰 Automated commission tracking and reporting")
-    print("🔄 Seamless restaurant context switching")
-    print("🏥 Restaurant health monitoring with recommendations")
-    print("📈 Performance comparison across all locations")
-    print("🔐 Secure multi-tenant data isolation")
-    print("⚡ Real-time activity feed across platform")
-    print("📱 Mobile-optimized platform management")
+    logger.info("\n🏢 Platform Owner Benefits:")
+    logger.info("📊 Comprehensive dashboard with cross-restaurant analytics")
+    logger.info("💰 Automated commission tracking and reporting")
+    logger.info("🔄 Seamless restaurant context switching")
+    logger.info("🏥 Restaurant health monitoring with recommendations")
+    logger.info("📈 Performance comparison across all locations")
+    logger.info("🔐 Secure multi-tenant data isolation")
+    logger.info("⚡ Real-time activity feed across platform")
+    logger.info("📱 Mobile-optimized platform management")
     
-    print("\n🚀 Key Features Implemented:")
-    print("1. Platform Dashboard - Overview of all restaurants")
-    print("2. Restaurant Switching - Context management for platform owners")
-    print("3. Commission Tracking - Automated revenue sharing")
-    print("4. Performance Analytics - Cross-restaurant comparison")
-    print("5. Health Monitoring - Restaurant operational status")
-    print("6. Multi-Tenant Security - Data isolation and access control")
-    print("7. Activity Feed - Real-time updates across platform")
-    print("8. Financial Reporting - Platform-wide revenue insights")
+    logger.info("\n🚀 Key Features Implemented:")
+    logger.info("1. Platform Dashboard - Overview of all restaurants")
+    logger.info("2. Restaurant Switching - Context management for platform owners")
+    logger.info("3. Commission Tracking - Automated revenue sharing")
+    logger.info("4. Performance Analytics - Cross-restaurant comparison")
+    logger.info("5. Health Monitoring - Restaurant operational status")
+    logger.info("6. Multi-Tenant Security - Data isolation and access control")
+    logger.info("7. Activity Feed - Real-time updates across platform")
+    logger.info("8. Financial Reporting - Platform-wide revenue insights")
 
 if __name__ == "__main__":
     main()

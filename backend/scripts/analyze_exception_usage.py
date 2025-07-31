@@ -6,6 +6,10 @@ Analyze exception usage to find migration issues
 import os
 import re
 from collections import defaultdict
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 def find_exception_issues(directory):
     """Find all exception calls with 'code=' parameter"""
@@ -28,7 +32,7 @@ def find_exception_issues(directory):
                                     relative_path = filepath.replace(directory + '/', '')
                                     issues[relative_path].append((i, line.strip()))
                 except Exception as e:
-                    print(f"Error reading {filepath}: {e}")
+                    logger.error(f"Error reading {filepath}: {e}")
     
     return issues
 
@@ -36,8 +40,8 @@ def main():
     app_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'app')
     app_dir = os.path.normpath(app_dir)
     
-    print("Analyzing exception usage in:", app_dir)
-    print("=" * 80)
+    logger.error("Analyzing exception usage in:", app_dir)
+    logger.info("=" * 80)
     
     issues = find_exception_issues(app_dir)
     
@@ -53,19 +57,19 @@ def main():
             if match:
                 exception_counts[match.group(1)] += 1
     
-    print(f"\nTotal issues found: {total_issues}")
-    print(f"Files affected: {len(issues)}")
-    print(f"\nIssues by exception type:")
+    logger.info(f"\nTotal issues found: {total_issues}")
+    logger.info(f"Files affected: {len(issues)}")
+    logger.error(f"\nIssues by exception type:")
     for exc_type, count in sorted(exception_counts.items()):
-        print(f"  {exc_type}: {count}")
+        logger.info(f"  {exc_type}: {count}")
     
-    print(f"\n\nFiles with issues:")
+    logger.info(f"\n\nFiles with issues:")
     for file in sorted(issues.keys()):
-        print(f"\n{file}: {len(issues[file])} issues")
+        logger.info(f"\n{file}: {len(issues[file])} issues")
         for line_no, line in issues[file][:3]:  # Show first 3 issues per file
-            print(f"  Line {line_no}: {line[:100]}...")
+            logger.info(f"  Line {line_no}: {line[:100]}...")
         if len(issues[file]) > 3:
-            print(f"  ... and {len(issues[file]) - 3} more")
+            logger.info(f"  ... and {len(issues[file]) - 3} more")
 
 if __name__ == "__main__":
     main()

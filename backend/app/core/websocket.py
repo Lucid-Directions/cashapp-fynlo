@@ -13,6 +13,10 @@ from enum import Enum
 
 from app.core.exceptions import FynloException, ErrorCodes
 from app.core.responses import APIResponseHelper
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class EventType(str, Enum):
     """WebSocket event types"""
@@ -224,7 +228,7 @@ class WebSocketManager:
             
         except Exception as e:
             # Log error but don't raise to prevent cascade failures
-            print(f"Error disconnecting WebSocket {connection_id}: {str(e)}")
+            logger.error(f"Error disconnecting WebSocket {connection_id}: {str(e)}")
     
     async def send_to_connection(self, connection_id: str, message: WebSocketMessage):
         """Send message to specific connection"""
@@ -248,7 +252,7 @@ class WebSocketManager:
             return False
         except Exception as e:
             self.stats["messages_failed"] += 1
-            print(f"Failed to send message to connection {connection_id}: {str(e)}")
+            logger.error(f"Failed to send message to connection {connection_id}: {str(e)}")
             return False
     
     async def send_to_restaurant(self, restaurant_id: str, message: WebSocketMessage):

@@ -184,7 +184,7 @@ DATABASE STATE:
 STATUS: {'SUCCESS' if self.stats['errors'] == 0 else 'COMPLETED WITH ERRORS'}
 """
         
-        print(report)
+        logger.info(report)
         logger.info("Platform initialization report generated")
 
 
@@ -200,21 +200,21 @@ def main():
     args = parser.parse_args()
     
     if args.update_existing:
-        print("⚠️  WARNING: This will update existing platform configurations!")
+        logger.warning("⚠️  WARNING: This will update existing platform configurations!")
         confirmation = input("Are you sure you want to update existing configs? (yes/no): ")
         if confirmation.lower() != 'yes':
-            print("Initialization cancelled.")
+            logger.info("Initialization cancelled.")
             return
     
-    print("Starting platform defaults initialization...")
+    logger.info("Starting platform defaults initialization...")
     
     with PlatformDefaultsInitializer(update_existing=args.update_existing) as initializer:
         success = initializer.initialize()
         
         if success:
-            print("✅ Platform initialization completed successfully!")
+            logger.info("✅ Platform initialization completed successfully!")
         else:
-            print("❌ Platform initialization completed with errors. Check logs for details.")
+            logger.error("❌ Platform initialization completed with errors. Check logs for details.")
             sys.exit(1)
 
 

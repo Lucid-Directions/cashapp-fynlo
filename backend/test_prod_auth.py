@@ -5,6 +5,10 @@ Test production authentication endpoint
 
 import requests
 import json
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 # Test the production verify endpoint
 url = 'https://fynlopos-9eg2c.ondigitalocean.app/api/v1/auth/verify'
@@ -15,21 +19,21 @@ headers = {
     'Content-Type': 'application/json'
 }
 
-print("Testing production auth verify endpoint...")
-print(f"URL: {url}")
-print(f"Headers: {headers}")
+logger.info("Testing production auth verify endpoint...")
+logger.info(f"URL: {url}")
+logger.info(f"Headers: {headers}")
 
 try:
     response = requests.post(url, headers=headers)
-    print(f"\nStatus Code: {response.status_code}")
-    print(f"Response: {json.dumps(response.json(), indent=2)}")
+    logger.info(f"\nStatus Code: {response.status_code}")
+    logger.info(f"Response: {json.dumps(response.json(), indent=2)}")
     
     # Also test the Supabase config endpoint
-    print("\n\nTesting Supabase config endpoint...")
+    logger.info("\n\nTesting Supabase config endpoint...")
     config_url = 'https://fynlopos-9eg2c.ondigitalocean.app/api/v1/test/supabase-config'
     config_response = requests.get(config_url)
-    print(f"Config Status: {config_response.status_code}")
-    print(f"Config Response: {json.dumps(config_response.json(), indent=2)}")
+    logger.info(f"Config Status: {config_response.status_code}")
+    logger.info(f"Config Response: {json.dumps(config_response.json(), indent=2)}")
     
 except Exception as e:
-    print(f"Error: {e}")
+    logger.error(f"Error: {e}")

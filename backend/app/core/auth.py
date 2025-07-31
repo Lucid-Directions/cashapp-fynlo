@@ -136,7 +136,7 @@ async def get_current_user(
             details={"error": str(e), "reason": "Unexpected error during authentication"},
             commit=True
         )
-        print(f"Auth error: {str(e)}")
+        logger.error(f"Auth error: {str(e)}")
         raise AuthenticationException(
             message="Authentication failed",
             details={"error_code": "AUTHENTICATION_FAILED"}

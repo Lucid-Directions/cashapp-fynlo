@@ -146,9 +146,9 @@ class PlatformFeeService:
 #             customer_pays_processor_fees=True,
 #             restaurant_id="some-restaurant-id"
 #         )
-#         print("Customer Total Breakdown (Stripe, Customer Pays Fees):")
+#         logger.info("Customer Total Breakdown (Stripe, Customer Pays Fees):")
 #         for key, value in breakdown.items():
-#             print(f"  {key}: {value}")
+#             logger.info(f"  {key}: {value}")
 #
 #         # Example: Customer pays with Cash
 #         breakdown_cash = await platform_fee_service.calculate_customer_total(
@@ -159,9 +159,9 @@ class PlatformFeeService:
 #             customer_pays_processor_fees=False, # Doesn't matter for cash
 #             restaurant_id="some-restaurant-id"
 #         )
-#         print("\nCustomer Total Breakdown (Cash):")
+#         logger.info("\nCustomer Total Breakdown (Cash):")
 #         for key, value in breakdown_cash.items():
-#             print(f"  {key}: {value}")
+#             logger.info(f"  {key}: {value}")
 #
 #     finally:
 #         db.close()

@@ -3,6 +3,10 @@
 import os
 from sqlalchemy import create_engine, text
 from dotenv import load_dotenv
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL")
@@ -13,17 +17,17 @@ with engine.connect() as conn:
     result = conn.execute(text("SELECT id, name FROM restaurants WHERE name LIKE '%Chucho%'"))
     restaurant = result.fetchone()
     if restaurant:
-        print(f"✅ Restaurant: {restaurant[1]} (ID: {restaurant[0]})")
+        logger.info(f"✅ Restaurant: {restaurant[1]} (ID: {restaurant[0]})")
         
         # Count products
         result = conn.execute(text("SELECT COUNT(*) FROM products WHERE restaurant_id = :rid"), {"rid": restaurant[0]})
         count = result.scalar()
-        print(f"✅ Products: {count}")
+        logger.info(f"✅ Products: {count}")
         
         # Count categories
         result = conn.execute(text("SELECT COUNT(*) FROM categories WHERE restaurant_id = :rid"), {"rid": restaurant[0]})
         count = result.scalar()
-        print(f"✅ Categories: {count}")
+        logger.info(f"✅ Categories: {count}")
         
         # Show sample
         result = conn.execute(text("""
@@ -34,8 +38,8 @@ with engine.connect() as conn:
             LIMIT 5
         """), {"rid": restaurant[0]})
         
-        print("\nSample items:")
+        logger.info("\nSample items:")
         for item in result:
-            print(f"  - {item[0]}: £{item[1]} ({item[2]})")
+            logger.info(f"  - {item[0]}: £{item[1]} ({item[2]})")
     else:
-        print("❌ No Chucho restaurant found in database")
+        logger.info("❌ No Chucho restaurant found in database")

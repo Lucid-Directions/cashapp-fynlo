@@ -8,6 +8,10 @@ import requests
 import json
 from datetime import datetime, timedelta
 import uuid
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 # Test configuration
 BASE_URL = "http://localhost:8000"
@@ -29,33 +33,33 @@ NOTIFICATION_ENDPOINTS = {
 
 def test_push_notification_core_features():
     """Test core push notification functionality"""
-    print("📱 Testing Push Notification Core Features...")
+    logger.info("📱 Testing Push Notification Core Features...")
     
-    print("✅ APNs Integration Features:")
-    print("   - Apple Push Notification Service (APNs) integration")
-    print("   - Device token registration and management")
-    print("   - Notification payload creation and sending")
-    print("   - Template-based notification system")
-    print("   - User preference management")
-    print("   - Notification history tracking")
+    logger.info("✅ APNs Integration Features:")
+    logger.info("   - Apple Push Notification Service (APNs) integration")
+    logger.info("   - Device token registration and management")
+    logger.info("   - Notification payload creation and sending")
+    logger.info("   - Template-based notification system")
+    logger.info("   - User preference management")
+    logger.info("   - Notification history tracking")
     
-    print("✅ Notification Types Supported:")
+    logger.info("✅ Notification Types Supported:")
     notification_types = [
         "order_created", "order_status_changed", "payment_completed", "payment_failed",
         "kitchen_alert", "inventory_low", "shift_reminder", "system_maintenance",
         "customer_order_ready", "delivery_update"
     ]
     for notification_type in notification_types:
-        print(f"   - {notification_type}")
+        logger.info(f"   - {notification_type}")
     
-    print("✅ Priority Levels:")
+    logger.info("✅ Priority Levels:")
     priority_levels = ["low", "normal", "high", "critical"]
     for priority in priority_levels:
-        print(f"   - {priority}: Appropriate for different notification urgency")
+        logger.info(f"   - {priority}: Appropriate for different notification urgency")
 
 def test_device_registration():
     """Test device token registration functionality"""
-    print("\n📲 Testing Device Registration...")
+    logger.info("\n📲 Testing Device Registration...")
     
     # Example device registration request
     registration_request = {
@@ -64,24 +68,24 @@ def test_device_registration():
         "device_name": "iPhone 14 Pro"
     }
     
-    print("✅ Device Registration Features:")
-    print("   - APNs device token validation (64-character hex)")
-    print("   - Device type and name tracking")
-    print("   - User association with device tokens")
-    print("   - Restaurant-based device organization")
-    print("   - Active/inactive token management")
+    logger.info("✅ Device Registration Features:")
+    logger.info("   - APNs device token validation (64-character hex)")
+    logger.info("   - Device type and name tracking")
+    logger.info("   - User association with device tokens")
+    logger.info("   - Restaurant-based device organization")
+    logger.info("   - Active/inactive token management")
     
-    print("✅ Token Management:")
-    print("   - Automatic token validation and formatting")
-    print("   - Duplicate token handling")
-    print("   - Token expiration and cleanup")
-    print("   - Device switching and updates")
+    logger.info("✅ Token Management:")
+    logger.info("   - Automatic token validation and formatting")
+    logger.info("   - Duplicate token handling")
+    logger.info("   - Token expiration and cleanup")
+    logger.info("   - Device switching and updates")
     
-    print(f"   Example registration: {registration_request}")
+    logger.info(f"   Example registration: {registration_request}")
 
 def test_notification_sending():
     """Test notification sending capabilities"""
-    print("\n📤 Testing Notification Sending...")
+    logger.info("\n📤 Testing Notification Sending...")
     
     # Example manual notification request
     manual_notification = {
@@ -98,12 +102,12 @@ def test_notification_sending():
         }
     }
     
-    print("✅ Manual Notification Features:")
-    print("   - Custom title and body text")
-    print("   - Notification type and priority selection")
-    print("   - Target selection (users, restaurants, tokens)")
-    print("   - Custom sound and data payload")
-    print("   - Management permission requirements")
+    logger.info("✅ Manual Notification Features:")
+    logger.info("   - Custom title and body text")
+    logger.info("   - Notification type and priority selection")
+    logger.info("   - Target selection (users, restaurants, tokens)")
+    logger.info("   - Custom sound and data payload")
+    logger.info("   - Management permission requirements")
     
     # Example templated notification request
     templated_notification = {
@@ -118,25 +122,25 @@ def test_notification_sending():
         "target_restaurants": ["restaurant_456"]
     }
     
-    print("✅ Templated Notification Features:")
-    print("   - Predefined templates for consistent messaging")
-    print("   - Dynamic data insertion with template formatting")
-    print("   - Automatic priority and sound assignment")
-    print("   - Custom data payload generation")
+    logger.info("✅ Templated Notification Features:")
+    logger.info("   - Predefined templates for consistent messaging")
+    logger.info("   - Dynamic data insertion with template formatting")
+    logger.info("   - Automatic priority and sound assignment")
+    logger.info("   - Custom data payload generation")
     
-    print(f"   Example manual notification ready")
-    print(f"   Example templated notification ready")
+    logger.info(f"   Example manual notification ready")
+    logger.info(f"   Example templated notification ready")
 
 def test_notification_templates():
     """Test notification template system"""
-    print("\n📝 Testing Notification Templates...")
+    logger.info("\n📝 Testing Notification Templates...")
     
-    print("✅ Template Features:")
-    print("   - Predefined templates for all notification types")
-    print("   - Dynamic data insertion with placeholders")
-    print("   - Consistent formatting and styling")
-    print("   - Priority and sound configuration")
-    print("   - Custom data payload templates")
+    logger.info("✅ Template Features:")
+    logger.info("   - Predefined templates for all notification types")
+    logger.info("   - Dynamic data insertion with placeholders")
+    logger.info("   - Consistent formatting and styling")
+    logger.info("   - Priority and sound configuration")
+    logger.info("   - Custom data payload templates")
     
     # Example template structures
     template_examples = {
@@ -160,13 +164,13 @@ def test_notification_templates():
         }
     }
     
-    print("✅ Template Examples:")
+    logger.info("✅ Template Examples:")
     for template_type, template in template_examples.items():
-        print(f"   - {template_type}: {template['title_template']}")
+        logger.info(f"   - {template_type}: {template['title_template']}")
 
 def test_user_preferences():
     """Test user notification preferences"""
-    print("\n⚙️ Testing User Preferences...")
+    logger.info("\n⚙️ Testing User Preferences...")
     
     # Example preferences request
     preferences_request = {
@@ -180,37 +184,37 @@ def test_user_preferences():
         "badge_enabled": True
     }
     
-    print("✅ Preference Features:")
-    print("   - Selective notification type enabling/disabling")
-    print("   - Quiet hours configuration (start/end times)")
-    print("   - Sound and badge control")
-    print("   - Per-user customization")
-    print("   - Default preference fallback")
+    logger.info("✅ Preference Features:")
+    logger.info("   - Selective notification type enabling/disabling")
+    logger.info("   - Quiet hours configuration (start/end times)")
+    logger.info("   - Sound and badge control")
+    logger.info("   - Per-user customization")
+    logger.info("   - Default preference fallback")
     
-    print("✅ Quiet Hours Logic:")
-    print("   - Time-based notification filtering")
-    print("   - Same-day and overnight quiet periods")
-    print("   - Priority override for critical notifications")
-    print("   - User timezone consideration")
+    logger.info("✅ Quiet Hours Logic:")
+    logger.info("   - Time-based notification filtering")
+    logger.info("   - Same-day and overnight quiet periods")
+    logger.error("   - Priority override for critical notifications")
+    logger.info("   - User timezone consideration")
     
-    print(f"   Example preferences: Enabled types, quiet 22:00-08:00")
+    logger.info(f"   Example preferences: Enabled types, quiet 22:00-08:00")
 
 def test_notification_targeting():
     """Test notification targeting capabilities"""
-    print("\n🎯 Testing Notification Targeting...")
+    logger.info("\n🎯 Testing Notification Targeting...")
     
-    print("✅ Targeting Options:")
-    print("   - Specific user IDs for personal notifications")
-    print("   - Restaurant IDs for location-based alerts")
-    print("   - Device tokens for direct device targeting")
-    print("   - Role-based targeting (managers, kitchen staff)")
-    print("   - Multi-target broadcasting")
+    logger.info("✅ Targeting Options:")
+    logger.info("   - Specific user IDs for personal notifications")
+    logger.info("   - Restaurant IDs for location-based alerts")
+    logger.info("   - Device tokens for direct device targeting")
+    logger.info("   - Role-based targeting (managers, kitchen staff)")
+    logger.info("   - Multi-target broadcasting")
     
-    print("✅ Targeting Logic:")
-    print("   - User preference filtering")
-    print("   - Active device token validation")
-    print("   - Restaurant association verification")
-    print("   - Permission-based access control")
+    logger.info("✅ Targeting Logic:")
+    logger.info("   - User preference filtering")
+    logger.info("   - Active device token validation")
+    logger.info("   - Restaurant association verification")
+    logger.info("   - Permission-based access control")
     
     targeting_examples = [
         "Send order alerts to all kitchen staff in restaurant",
@@ -221,18 +225,18 @@ def test_notification_targeting():
     ]
     
     for example in targeting_examples:
-        print(f"   - {example}")
+        logger.info(f"   - {example}")
 
 def test_notification_history():
     """Test notification history tracking"""
-    print("\n📊 Testing Notification History...")
+    logger.info("\n📊 Testing Notification History...")
     
-    print("✅ History Features:")
-    print("   - Complete notification delivery tracking")
-    print("   - Success/failure status recording")
-    print("   - Error code and message logging")
-    print("   - Timestamp and device tracking")
-    print("   - User-specific history filtering")
+    logger.info("✅ History Features:")
+    logger.info("   - Complete notification delivery tracking")
+    logger.error("   - Success/failure status recording")
+    logger.error("   - Error code and message logging")
+    logger.info("   - Timestamp and device tracking")
+    logger.info("   - User-specific history filtering")
     
     # Example history record
     history_example = {
@@ -244,27 +248,27 @@ def test_notification_history():
         "sent_at": datetime.now().isoformat()
     }
     
-    print("✅ History Analytics:")
-    print("   - Delivery success rates")
-    print("   - Failed delivery analysis")
-    print("   - Device performance tracking")
-    print("   - Notification engagement metrics")
+    logger.info("✅ History Analytics:")
+    logger.info("   - Delivery success rates")
+    logger.error("   - Failed delivery analysis")
+    logger.info("   - Device performance tracking")
+    logger.info("   - Notification engagement metrics")
     
-    print(f"   Example history record structure ready")
+    logger.info(f"   Example history record structure ready")
 
 def test_apns_integration():
     """Test APNs integration specifics"""
-    print("\n🍎 Testing APNs Integration...")
+    logger.info("\n🍎 Testing APNs Integration...")
     
-    print("✅ APNs Features:")
-    print("   - Production and sandbox environment support")
-    print("   - JWT-based authentication with APNs")
-    print("   - Proper payload format and size limits")
-    print("   - Badge count management")
-    print("   - Sound file specification")
-    print("   - Custom data payload support")
+    logger.info("✅ APNs Features:")
+    logger.info("   - Production and sandbox environment support")
+    logger.info("   - JWT-based authentication with APNs")
+    logger.info("   - Proper payload format and size limits")
+    logger.info("   - Badge count management")
+    logger.info("   - Sound file specification")
+    logger.info("   - Custom data payload support")
     
-    print("✅ APNs Configuration:")
+    logger.info("✅ APNs Configuration:")
     apns_config = {
         "key_id": "APNs Key ID",
         "team_id": "Apple Developer Team ID", 
@@ -273,9 +277,9 @@ def test_apns_integration():
     }
     
     for key, description in apns_config.items():
-        print(f"   - {key}: {description}")
+        logger.info(f"   - {key}: {description}")
     
-    print("✅ Payload Structure:")
+    logger.info("✅ Payload Structure:")
     apns_payload = {
         "aps": {
             "alert": {
@@ -291,13 +295,13 @@ def test_apns_integration():
         }
     }
     
-    print(f"   Standard APNs payload format implemented")
+    logger.info(f"   Standard APNs payload format implemented")
 
 def test_error_handling():
     """Test notification error handling"""
-    print("\n❌ Testing Error Handling...")
+    logger.error("\n❌ Testing Error Handling...")
     
-    print("✅ Error Categories:")
+    logger.error("✅ Error Categories:")
     error_types = [
         "Invalid device token format",
         "Device token expired or unregistered",
@@ -308,88 +312,88 @@ def test_error_handling():
     ]
     
     for error_type in error_types:
-        print(f"   - {error_type}")
+        logger.error(f"   - {error_type}")
     
-    print("✅ Recovery Mechanisms:")
-    print("   - Automatic retry with exponential backoff")
-    print("   - Failed notification logging and analysis")
-    print("   - Device token cleanup and validation")
-    print("   - Fallback notification methods")
-    print("   - Service health monitoring")
+    logger.info("✅ Recovery Mechanisms:")
+    logger.info("   - Automatic retry with exponential backoff")
+    logger.error("   - Failed notification logging and analysis")
+    logger.info("   - Device token cleanup and validation")
+    logger.info("   - Fallback notification methods")
+    logger.info("   - Service health monitoring")
 
 def test_performance_features():
     """Test notification performance optimizations"""
-    print("\n⚡ Testing Performance Features...")
+    logger.info("\n⚡ Testing Performance Features...")
     
-    print("✅ Performance Optimizations:")
-    print("   - Batch notification processing")
-    print("   - Asynchronous sending with concurrent connections")
-    print("   - Connection pooling for APNs")
-    print("   - Efficient device token management")
-    print("   - Memory-optimized notification queuing")
+    logger.info("✅ Performance Optimizations:")
+    logger.info("   - Batch notification processing")
+    logger.info("   - Asynchronous sending with concurrent connections")
+    logger.info("   - Connection pooling for APNs")
+    logger.info("   - Efficient device token management")
+    logger.info("   - Memory-optimized notification queuing")
     
-    print("✅ Scalability Features:")
-    print("   - Multi-restaurant notification support")
-    print("   - Horizontal scaling compatibility")
-    print("   - Database optimization for large token sets")
-    print("   - Efficient preference filtering")
+    logger.info("✅ Scalability Features:")
+    logger.info("   - Multi-restaurant notification support")
+    logger.info("   - Horizontal scaling compatibility")
+    logger.info("   - Database optimization for large token sets")
+    logger.info("   - Efficient preference filtering")
     
-    print("✅ Mobile Optimization:")
-    print("   - Minimal payload sizes for bandwidth efficiency")
-    print("   - Smart retry mechanisms")
-    print("   - Battery-conscious notification frequency")
-    print("   - Background app state considerations")
+    logger.info("✅ Mobile Optimization:")
+    logger.info("   - Minimal payload sizes for bandwidth efficiency")
+    logger.info("   - Smart retry mechanisms")
+    logger.info("   - Battery-conscious notification frequency")
+    logger.info("   - Background app state considerations")
 
 def test_security_features():
     """Test notification security implementation"""
-    print("\n🔒 Testing Security Features...")
+    logger.info("\n🔒 Testing Security Features...")
     
-    print("✅ Security Measures:")
-    print("   - Secure device token storage and handling")
-    print("   - APNs JWT authentication")
-    print("   - User authentication for all operations")
-    print("   - Restaurant-based data isolation")
-    print("   - Role-based notification permissions")
+    logger.info("✅ Security Measures:")
+    logger.info("   - Secure device token storage and handling")
+    logger.info("   - APNs JWT authentication")
+    logger.info("   - User authentication for all operations")
+    logger.info("   - Restaurant-based data isolation")
+    logger.info("   - Role-based notification permissions")
     
-    print("✅ Privacy Protection:")
-    print("   - Device token masking in logs and responses")
-    print("   - User preference privacy")
-    print("   - Notification content filtering")
-    print("   - Audit trails for notification sending")
+    logger.info("✅ Privacy Protection:")
+    logger.info("   - Device token masking in logs and responses")
+    logger.info("   - User preference privacy")
+    logger.info("   - Notification content filtering")
+    logger.info("   - Audit trails for notification sending")
     
-    print("✅ Data Protection:")
-    print("   - Encrypted communication with APNs")
-    print("   - Secure token validation")
-    print("   - Access control for management functions")
-    print("   - Compliance with iOS privacy requirements")
+    logger.info("✅ Data Protection:")
+    logger.info("   - Encrypted communication with APNs")
+    logger.info("   - Secure token validation")
+    logger.info("   - Access control for management functions")
+    logger.info("   - Compliance with iOS privacy requirements")
 
 def test_integration_features():
     """Test backend integration capabilities"""
-    print("\n🔗 Testing Backend Integration...")
+    logger.info("\n🔗 Testing Backend Integration...")
     
-    print("✅ Event Integration:")
-    print("   - Automatic notifications from order events")
-    print("   - Payment processing notifications")
-    print("   - Inventory level alerts")
-    print("   - Kitchen workflow notifications")
-    print("   - System maintenance alerts")
+    logger.info("✅ Event Integration:")
+    logger.info("   - Automatic notifications from order events")
+    logger.info("   - Payment processing notifications")
+    logger.info("   - Inventory level alerts")
+    logger.info("   - Kitchen workflow notifications")
+    logger.info("   - System maintenance alerts")
     
-    print("✅ Service Integration:")
-    print("   - WebSocket event integration")
-    print("   - Database trigger notifications")
-    print("   - Scheduled notification support")
-    print("   - Third-party service webhooks")
+    logger.info("✅ Service Integration:")
+    logger.info("   - WebSocket event integration")
+    logger.info("   - Database trigger notifications")
+    logger.info("   - Scheduled notification support")
+    logger.info("   - Third-party service webhooks")
     
-    print("✅ Workflow Integration:")
-    print("   - Order lifecycle notifications")
-    print("   - Staff shift reminders")
-    print("   - Customer pickup alerts")
-    print("   - Delivery status updates")
+    logger.info("✅ Workflow Integration:")
+    logger.info("   - Order lifecycle notifications")
+    logger.info("   - Staff shift reminders")
+    logger.info("   - Customer pickup alerts")
+    logger.info("   - Delivery status updates")
 
 def main():
     """Run all push notification implementation tests"""
-    print("🚀 Fynlo POS Push Notification Service Implementation Tests")
-    print("=" * 70)
+    logger.info("🚀 Fynlo POS Push Notification Service Implementation Tests")
+    logger.info("=" * 70)
     
     test_push_notification_core_features()
     test_device_registration()
@@ -404,36 +408,36 @@ def main():
     test_security_features()
     test_integration_features()
     
-    print("\n" + "=" * 70)
-    print("✅ Push Notification Service Implementation Complete")
+    logger.info("\n" + "=" * 70)
+    logger.info("✅ Push Notification Service Implementation Complete")
     
-    print("\n📱 Push Notification Benefits:")
-    print("🍎 Native iOS APNs integration for reliable delivery")
-    print("📤 Comprehensive notification system for all business events")
-    print("🎯 Smart targeting with user preferences and quiet hours")
-    print("📝 Template-based notifications for consistency")
-    print("📊 Complete history tracking and analytics")
-    print("🔒 Secure token management and privacy protection")
-    print("⚡ High-performance async processing")
-    print("🔗 Seamless backend event integration")
+    logger.info("\n📱 Push Notification Benefits:")
+    logger.info("🍎 Native iOS APNs integration for reliable delivery")
+    logger.info("📤 Comprehensive notification system for all business events")
+    logger.info("🎯 Smart targeting with user preferences and quiet hours")
+    logger.info("📝 Template-based notifications for consistency")
+    logger.info("📊 Complete history tracking and analytics")
+    logger.info("🔒 Secure token management and privacy protection")
+    logger.info("⚡ High-performance async processing")
+    logger.info("🔗 Seamless backend event integration")
     
-    print("\n🚀 Key Features Implemented:")
-    print("1. APNs Integration - Native iOS push notification support")
-    print("2. Device Management - Token registration and lifecycle")
-    print("3. Notification Templates - Consistent messaging system")
-    print("4. User Preferences - Customizable notification settings")
-    print("5. Smart Targeting - User, restaurant, and device targeting")
-    print("6. History Tracking - Complete delivery analytics")
-    print("7. Error Handling - Robust failure management")
-    print("8. Security Features - Token protection and access control")
-    print("9. Performance Optimization - Async and batch processing")
-    print("10. Backend Integration - Event-driven notifications")
+    logger.info("\n🚀 Key Features Implemented:")
+    logger.info("1. APNs Integration - Native iOS push notification support")
+    logger.info("2. Device Management - Token registration and lifecycle")
+    logger.info("3. Notification Templates - Consistent messaging system")
+    logger.info("4. User Preferences - Customizable notification settings")
+    logger.info("5. Smart Targeting - User, restaurant, and device targeting")
+    logger.info("6. History Tracking - Complete delivery analytics")
+    logger.error("7. Error Handling - Robust failure management")
+    logger.info("8. Security Features - Token protection and access control")
+    logger.info("9. Performance Optimization - Async and batch processing")
+    logger.info("10. Backend Integration - Event-driven notifications")
     
-    print("\n📡 Notification API Endpoints:")
+    logger.info("\n📡 Notification API Endpoints:")
     for name, endpoint in NOTIFICATION_ENDPOINTS.items():
-        print(f"- {name.replace('_', ' ').title()}: {endpoint}")
+        logger.info(f"- {name.replace('_', ' ').title()}: {endpoint}")
     
-    print("\n📱 Notification Types Available:")
+    logger.info("\n📱 Notification Types Available:")
     notification_types = [
         "Order Created - Kitchen and management alerts",
         "Order Status Changed - Workflow progress updates", 
@@ -448,7 +452,7 @@ def main():
     ]
     
     for notification_type in notification_types:
-        print(f"- {notification_type}")
+        logger.info(f"- {notification_type}")
 
 if __name__ == "__main__":
     main()

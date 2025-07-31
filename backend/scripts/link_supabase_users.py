@@ -14,6 +14,10 @@ from app.core.database import SessionLocal, User
 from app.core.supabase import get_supabase_client
 from datetime import datetime
 import uuid
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 def link_supabase_users():
     """Link existing Supabase users to database records"""
@@ -26,32 +30,32 @@ def link_supabase_users():
         supabase = get_supabase_client()
         
         # Get all users from Supabase
-        print("Fetching users from Supabase...")
+        logger.info("Fetching users from Supabase...")
         response = supabase.auth.admin.list_users()
         
         # Extract users from response object
         supabase_users = response.users if hasattr(response, 'users') else []
         
         if not supabase_users:
-            print("No users found in Supabase")
+            logger.info("No users found in Supabase")
             return
         
-        print(f"Found {len(supabase_users)} users in Supabase")
+        logger.info(f"Found {len(supabase_users)} users in Supabase")
         
         for su_user in supabase_users:
             # Skip users without email (e.g., phone-only auth)
             email = getattr(su_user, 'email', None)
             if not email:
-                print(f"\nSkipping user without email (ID: {getattr(su_user, 'id', 'unknown')})")
+                logger.info(f"\nSkipping user without email (ID: {getattr(su_user, 'id', 'unknown')})")
                 continue
             
             # Safely get user ID
             user_id = getattr(su_user, 'id', None)
             if not user_id:
-                print(f"\nSkipping user without ID (Email: {email})")
+                logger.info(f"\nSkipping user without ID (Email: {email})")
                 continue
                 
-            print(f"\nProcessing user: {email}")
+            logger.info(f"\nProcessing user: {email}")
             
             # Check if user exists in database (case-insensitive)
             db_user = db.query(User).filter(func.lower(User.email) == func.lower(email)).first()
@@ -62,9 +66,9 @@ def link_supabase_users():
                     db_user.supabase_id = user_id
                     db_user.auth_provider = 'supabase'
                     db_user.updated_at = datetime.utcnow()
-                    print(f"  ✓ Updated existing user with Supabase ID")
+                    logger.info(f"  ✓ Updated existing user with Supabase ID")
                 else:
-                    print(f"  - User already linked to Supabase")
+                    logger.info(f"  - User already linked to Supabase")
             else:
                 # Create new user record for Supabase user
                 # Safe extraction of name from email
@@ -113,18 +117,18 @@ def link_supabase_users():
                 )
                 
                 db.add(new_user)
-                print(f"  ✓ Created new user record for Supabase user")
+                logger.info(f"  ✓ Created new user record for Supabase user")
         
         # Commit all changes
         db.commit()
-        print("\n✅ Successfully linked all Supabase users to database")
+        logger.info("\n✅ Successfully linked all Supabase users to database")
         
         # Show summary
         total_users = db.query(User).filter(User.supabase_id.isnot(None)).count()
-        print(f"\nTotal users linked to Supabase: {total_users}")
+        logger.info(f"\nTotal users linked to Supabase: {total_users}")
         
     except Exception as e:
-        print(f"\n❌ Error linking users: {str(e)}")
+        logger.error(f"\n❌ Error linking users: {str(e)}")
         db.rollback()
         raise
     finally:
@@ -132,14 +136,14 @@ def link_supabase_users():
 
 def main():
     """Main entry point"""
-    print("=== Supabase User Linking Script ===")
-    print("This script will link existing Supabase users to database records")
-    print()
+    logger.info("=== Supabase User Linking Script ===")
+    logger.info("This script will link existing Supabase users to database records")
+    logger.info()
     
     # Confirm before proceeding
     response = input("Continue? (y/n): ")
     if response.lower() != 'y':
-        print("Cancelled")
+        logger.info("Cancelled")
         return
     
     link_supabase_users()

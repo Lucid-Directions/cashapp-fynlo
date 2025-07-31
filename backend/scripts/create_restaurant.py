@@ -39,17 +39,17 @@ def create_restaurant(
         existing = result.fetchone()
         
         if existing:
-            print(f"✅ {name} already exists with ID: {existing[0]}")
+            logger.info(f"✅ {name} already exists with ID: {existing[0]}")
             return existing[0]
         
         # Get the platform ID
         result = db.execute(text("SELECT id FROM platforms LIMIT 1"))
         platform = result.fetchone()
         if not platform:
-            print("❌ No platform found. Please create a platform first.")
+            logger.info("❌ No platform found. Please create a platform first.")
             return None
         platform_id = platform[0]
-        print(f"✅ Found platform: {platform_id}")
+        logger.info(f"✅ Found platform: {platform_id}")
         
         # Find platform owner or use existing admin
         result = db.execute(
@@ -58,11 +58,11 @@ def create_restaurant(
         platform_owner = result.fetchone()
         
         if not platform_owner:
-            print("❌ No platform owner found. Please create a platform owner first.")
+            logger.info("❌ No platform owner found. Please create a platform owner first.")
             return None
         
         owner_id = platform_owner[0]
-        print(f"✅ Found platform owner: {owner_id}")
+        logger.info(f"✅ Found platform owner: {owner_id}")
         
         # Create restaurant
         restaurant_id = str(uuid.uuid4())
@@ -125,7 +125,7 @@ def create_restaurant(
             }
         )
         
-        print(f"✅ Created {name} with ID: {restaurant_id}")
+        logger.info(f"✅ Created {name} with ID: {restaurant_id}")
         
         # Commit the transaction
         db.commit()
@@ -133,7 +133,7 @@ def create_restaurant(
         
     except Exception as e:
         db.rollback()
-        print(f"❌ Error creating restaurant: {str(e)}")
+        logger.error(f"❌ Error creating restaurant: {str(e)}")
         raise
     finally:
         db.close()
@@ -141,6 +141,10 @@ def create_restaurant(
 
 if __name__ == "__main__":
     import argparse
+import logging
+
+logger = logging.getLogger(__name__)
+
     
     parser = argparse.ArgumentParser(description="Create a restaurant")
     parser.add_argument("--name", default="Chucho Restaurant", help="Restaurant name")

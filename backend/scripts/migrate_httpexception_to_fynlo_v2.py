@@ -12,6 +12,10 @@ from datetime import datetime
 import argparse
 import json
 from pathlib import Path
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 # Migration mapping based on status codes and patterns
 STATUS_CODE_MAPPING = {
@@ -289,7 +293,7 @@ class HTTPExceptionMigratorV2:
             return f"{indent}raise {exception_type}({param_str})"
             
         except Exception as e:
-            print(f"Error migrating exception: {e}")
+            logger.error(f"Error migrating exception: {e}")
             return None
     
     def _update_imports(self, content: str, filepath: str) -> str:
@@ -379,16 +383,16 @@ class HTTPExceptionMigratorV2:
     
     def run_migration(self, target_files: List[str]):
         """Run migration on specified files"""
-        print(f"\n{'DRY RUN - ' if self.dry_run else ''}Starting HTTPException to FynloException migration...")
-        print(f"Target files: {len(target_files)}")
+        logger.error(f"\n{'DRY RUN - ' if self.dry_run else ''}Starting HTTPException to FynloException migration...")
+        logger.info(f"Target files: {len(target_files)}")
         
         self.migration_report["total_files"] = len(target_files)
         
         for filepath in target_files:
-            print(f"\nProcessing: {filepath}")
+            logger.info(f"\nProcessing: {filepath}")
             
             if not os.path.exists(filepath):
-                print(f"  ⚠️  File not found, skipping")
+                logger.info(f"  ⚠️  File not found, skipping")
                 self.migration_report["skipped"].append({
                     "file": filepath,
                     "reason": "File not found"
@@ -398,7 +402,7 @@ class HTTPExceptionMigratorV2:
             success, message, count = self.migrate_file(filepath)
             
             if success and count > 0:
-                print(f"  ✅ {message}")
+                logger.info(f"  ✅ {message}")
                 self.migration_report["migrated"].append({
                     "file": filepath,
                     "exceptions_migrated": count,
@@ -407,13 +411,13 @@ class HTTPExceptionMigratorV2:
                 })
                 self.migration_report["total_exceptions"] += count
             elif not success:
-                print(f"  ❌ {message}")
+                logger.info(f"  ❌ {message}")
                 self.migration_report["errors"].append({
                     "file": filepath,
                     "error": message
                 })
             else:
-                print(f"  ⏭️  {message}")
+                logger.info(f"  ⏭️  {message}")
                 self.migration_report["skipped"].append({
                     "file": filepath,
                     "reason": message
@@ -424,14 +428,14 @@ class HTTPExceptionMigratorV2:
         with open(report_path, 'w') as f:
             json.dump(self.migration_report, f, indent=2)
         
-        print(f"\n{'='*60}")
-        print(f"Migration {'(DRY RUN) ' if self.dry_run else ''}Complete!")
-        print(f"Total files processed: {self.migration_report['total_files']}")
-        print(f"Total exceptions migrated: {self.migration_report['total_exceptions']}")
-        print(f"Files successfully migrated: {len(self.migration_report['migrated'])}")
-        print(f"Files with errors: {len(self.migration_report['errors'])}")
-        print(f"Files skipped: {len(self.migration_report['skipped'])}")
-        print(f"\nDetailed report saved to: {report_path}")
+        logger.info(f"\n{'='*60}")
+        logger.info(f"Migration {'(DRY RUN) ' if self.dry_run else ''}Complete!")
+        logger.info(f"Total files processed: {self.migration_report['total_files']}")
+        logger.error(f"Total exceptions migrated: {self.migration_report['total_exceptions']}")
+        logger.info(f"Files successfully migrated: {len(self.migration_report['migrated'])}")
+        logger.error(f"Files with errors: {len(self.migration_report['errors'])}")
+        logger.info(f"Files skipped: {len(self.migration_report['skipped'])}")
+        logger.info(f"\nDetailed report saved to: {report_path}")
 
 
 def main():
@@ -500,7 +504,7 @@ def main():
     elif args.all:
         target_files = all_files
     else:
-        print("Please specify --file <filepath>, --critical, or --all")
+        logger.error("Please specify --file <filepath>, --critical, or --all")
         return
     
     migrator.run_migration(target_files)

@@ -19,6 +19,10 @@ from app.core.config import settings
 from app.api.v1.endpoints.auth import authenticate_user, create_access_token
 from sqlalchemy.exc import IntegrityError
 import uuid
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class DatabaseTester:
     def __init__(self):
@@ -34,11 +38,11 @@ class DatabaseTester:
             "message": message,
             "data": data
         })
-        print(f"{status}: {test_name}")
+        logger.info(f"{status}: {test_name}")
         if message:
-            print(f"    {message}")
+            logger.info(f"    {message}")
         if data and isinstance(data, dict):
-            print(f"    Data: {json.dumps(data, indent=2, default=str)}")
+            logger.info(f"    Data: {json.dumps(data, indent=2, default=str)}")
     
     def test_connection(self):
         """Test basic database connection"""
@@ -338,8 +342,8 @@ class DatabaseTester:
     
     def run_all_tests(self):
         """Run all database tests"""
-        print("🧪 Starting Database Functionality Tests")
-        print("=" * 50)
+        logger.info("🧪 Starting Database Functionality Tests")
+        logger.info("=" * 50)
         
         tests = [
             self.test_connection,
@@ -361,25 +365,25 @@ class DatabaseTester:
                 else:
                     failed += 1
             except Exception as e:
-                print(f"❌ FAIL: {test.__name__} - Exception: {e}")
+                logger.error(f"❌ FAIL: {test.__name__} - Exception: {e}")
                 failed += 1
-            print()  # Add space between tests
+            logger.info()  # Add space between tests
         
         # Summary
         total = passed + failed
         success_rate = (passed / total * 100) if total > 0 else 0
         
-        print("📊 Test Results Summary")
-        print("=" * 30)
-        print(f"Total Tests: {total}")
-        print(f"Passed: {passed}")
-        print(f"Failed: {failed}")
-        print(f"Success Rate: {success_rate:.1f}%")
+        logger.info("📊 Test Results Summary")
+        logger.info("=" * 30)
+        logger.info(f"Total Tests: {total}")
+        logger.info(f"Passed: {passed}")
+        logger.error(f"Failed: {failed}")
+        logger.info(f"Success Rate: {success_rate:.1f}%")
         
         if failed == 0:
-            print("\n🎉 All database tests passed! Database is fully functional.")
+            logger.info("\n🎉 All database tests passed! Database is fully functional.")
         else:
-            print(f"\n⚠️ {failed} test(s) failed. Please review the issues above.")
+            logger.error(f"\n⚠️ {failed} test(s) failed. Please review the issues above.")
         
         return failed == 0
     

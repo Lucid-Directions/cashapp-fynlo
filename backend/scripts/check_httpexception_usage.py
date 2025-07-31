@@ -7,6 +7,10 @@ import os
 import re
 from pathlib import Path
 from typing import List, Tuple
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 def find_httpexception_usage(file_path: Path) -> List[Tuple[int, str, int]]:
     """Find all HTTPException usages in a file"""
@@ -47,7 +51,7 @@ def main():
     """Main function"""
     api_dir = Path(__file__).parent.parent / 'app' / 'api'
     
-    print("Checking HTTPException usage in API endpoints...\n")
+    logger.error("Checking HTTPException usage in API endpoints...\n")
     
     total_findings = 0
     files_with_issues = []
@@ -62,33 +66,33 @@ def main():
             files_with_issues.append((file_path, findings))
     
     # Report findings
-    print(f"Found {total_findings} HTTPException usages in {len(files_with_issues)} files\n")
+    logger.error(f"Found {total_findings} HTTPException usages in {len(files_with_issues)} files\n")
     
     # Show detailed findings for a few files
     for file_path, findings in files_with_issues[:5]:  # Show first 5 files
-        print(f"\n{file_path.relative_to(api_dir.parent.parent)}:")
+        logger.info(f"\n{file_path.relative_to(api_dir.parent.parent)}:")
         for line_no, line, status_code in findings[:3]:  # Show first 3 issues per file
-            print(f"  Line {line_no}: {line}")
+            logger.info(f"  Line {line_no}: {line}")
             if status_code:
-                print(f"    Suggested: {suggest_replacement(status_code, line)}")
-            print()
+                logger.info(f"    Suggested: {suggest_replacement(status_code, line)}")
+            logger.info()
     
     if len(files_with_issues) > 5:
-        print(f"\n... and {len(files_with_issues) - 5} more files")
+        logger.info(f"\n... and {len(files_with_issues) - 5} more files")
     
     # Generate import suggestions
-    print("\n\nRequired imports for FynloException usage:")
-    print("from app.core.exceptions import (")
-    print("    FynloException, AuthenticationException, AuthorizationException,")
-    print("    ValidationException, ResourceNotFoundException, ConflictException,")
-    print("    BusinessLogicException, PaymentException, InventoryException")
-    print(")")
-    print("from app.core.responses import ErrorCodes")
+    logger.error("\n\nRequired imports for FynloException usage:")
+    logger.error("from app.core.exceptions import (")
+    logger.error("    FynloException, AuthenticationException, AuthorizationException,")
+    logger.error("    ValidationException, ResourceNotFoundException, ConflictException,")
+    logger.error("    BusinessLogicException, PaymentException, InventoryException")
+    logger.info(")")
+    logger.error("from app.core.responses import ErrorCodes")
     
     # List all files that need updating
-    print(f"\n\nFiles that need updating ({len(files_with_issues)} total):")
+    logger.info(f"\n\nFiles that need updating ({len(files_with_issues)} total):")
     for file_path, findings in files_with_issues:
-        print(f"  - {file_path.relative_to(api_dir.parent.parent)} ({len(findings)} occurrences)")
+        logger.info(f"  - {file_path.relative_to(api_dir.parent.parent)} ({len(findings)} occurrences)")
 
 if __name__ == "__main__":
     main()

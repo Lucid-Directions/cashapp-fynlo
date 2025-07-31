@@ -14,7 +14,7 @@ try:
 except (ImportError, OSError):
     # This should not happen with python-magic-bin, but keep fallback for safety
     MAGIC_AVAILABLE = False
-    print("Warning: libmagic not available. Using fallback MIME type detection.")
+    logger.warning("Warning: libmagic not available. Using fallback MIME type detection.")
 from typing import Optional, Tuple, List
 from PIL import Image, ImageOps
 from io import BytesIO

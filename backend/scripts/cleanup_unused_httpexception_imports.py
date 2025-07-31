@@ -5,6 +5,10 @@ Cleanup unused HTTPException imports from API endpoints
 import os
 import re
 from pathlib import Path
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 def remove_httpexception_from_imports(content):
     """Remove HTTPException from import statements if not used in the file"""
@@ -57,7 +61,7 @@ def process_file(filepath):
             return True
         return False
     except Exception as e:
-        print(f"Error processing {filepath}: {e}")
+        logger.error(f"Error processing {filepath}: {e}")
         return False
 
 def main():
@@ -65,7 +69,7 @@ def main():
     endpoints_dir = Path('app/api/v1/endpoints')
     
     if not endpoints_dir.exists():
-        print(f"Directory {endpoints_dir} not found!")
+        logger.info(f"Directory {endpoints_dir} not found!")
         return
     
     total_files = 0
@@ -78,14 +82,14 @@ def main():
         total_files += 1
         if process_file(py_file):
             cleaned_files += 1
-            print(f"✓ Cleaned: {py_file}")
+            logger.info(f"✓ Cleaned: {py_file}")
         else:
-            print(f"  No changes: {py_file}")
+            logger.info(f"  No changes: {py_file}")
     
-    print(f"\nSummary:")
-    print(f"- Files checked: {total_files}")
-    print(f"- Files cleaned: {cleaned_files}")
-    print(f"- Unused HTTPException imports removed: {cleaned_files}")
+    logger.info(f"\nSummary:")
+    logger.info(f"- Files checked: {total_files}")
+    logger.info(f"- Files cleaned: {cleaned_files}")
+    logger.error(f"- Unused HTTPException imports removed: {cleaned_files}")
 
 if __name__ == "__main__":
     main()

@@ -33,9 +33,13 @@ try:
     from app.models.platform import Platform
     from app.core.security import get_password_hash, verify_password
     from sqlalchemy.orm import Session
+import logging
+
+logger = logging.getLogger(__name__)
+
 except ImportError as e:
-    print(f"❌ Import error: {e}")
-    print("Make sure you're running this from the backend directory with proper dependencies installed")
+    logger.error(f"❌ Import error: {e}")
+    logger.info("Make sure you're running this from the backend directory with proper dependencies installed")
     sys.exit(1)
 
 def load_test_users_data():
@@ -43,17 +47,17 @@ def load_test_users_data():
     frontend_users_file = backend_root.parent / "CashApp-iOS" / "CashAppPOS" / "test_users.json"
     
     if not frontend_users_file.exists():
-        print(f"❌ Test users file not found: {frontend_users_file}")
-        print("Make sure test_users.json exists in the frontend directory")
+        logger.info(f"❌ Test users file not found: {frontend_users_file}")
+        logger.info("Make sure test_users.json exists in the frontend directory")
         return None
     
     try:
         with open(frontend_users_file, 'r', encoding='utf-8') as f:
             data = json.load(f)
-        print(f"✅ Loaded test users data: {len(data['test_users'])} users")
+        logger.info(f"✅ Loaded test users data: {len(data['test_users'])} users")
         return data
     except Exception as e:
-        print(f"❌ Error loading test users data: {e}")
+        logger.error(f"❌ Error loading test users data: {e}")
         return None
 
 def ensure_platform_exists(db: Session):
@@ -73,9 +77,9 @@ def ensure_platform_exists(db: Session):
         db.add(platform)
         db.commit()
         db.refresh(platform)
-        print(f"✅ Created platform: {platform.name} (ID: {platform.id})")
+        logger.info(f"✅ Created platform: {platform.name} (ID: {platform.id})")
     else:
-        print(f"✅ Platform exists: {platform.name} (ID: {platform.id})")
+        logger.info(f"✅ Platform exists: {platform.name} (ID: {platform.id})")
     
     return platform
 
@@ -99,9 +103,9 @@ def ensure_restaurant_exists(db: Session):
         db.add(restaurant)
         db.commit()
         db.refresh(restaurant)
-        print(f"✅ Created restaurant: {restaurant.name} (ID: {restaurant.id})")
+        logger.info(f"✅ Created restaurant: {restaurant.name} (ID: {restaurant.id})")
     else:
-        print(f"✅ Restaurant exists: {restaurant.name} (ID: {restaurant.id})")
+        logger.info(f"✅ Restaurant exists: {restaurant.name} (ID: {restaurant.id})")
     
     return restaurant
 
@@ -122,7 +126,7 @@ def create_test_user(db: Session, user_data: dict, restaurant_id: int = None, pl
     ).first()
     
     if existing_user:
-        print(f"ℹ️  User exists: {existing_user.username} ({existing_user.name})")
+        logger.info(f"ℹ️  User exists: {existing_user.username} ({existing_user.name})")
         # Update password and other details if needed
         existing_user.password_hash = get_password_hash(user_data['password'])
         existing_user.email = user_data['email']
@@ -140,7 +144,7 @@ def create_test_user(db: Session, user_data: dict, restaurant_id: int = None, pl
             existing_user.platform_id = None
         
         db.commit()
-        print(f"🔄 Updated user: {existing_user.username}")
+        logger.info(f"🔄 Updated user: {existing_user.username}")
         return existing_user
     
     # Create new user
@@ -166,23 +170,23 @@ def create_test_user(db: Session, user_data: dict, restaurant_id: int = None, pl
     db.commit()
     db.refresh(user)
     
-    print(f"✅ Created user: {user.username} ({user.name}) - Role: {user.role.value}")
+    logger.info(f"✅ Created user: {user.username} ({user.name}) - Role: {user.role.value}")
     return user
 
 def verify_test_user_login(db: Session, username: str, password: str):
     """Verify that a test user can authenticate"""
     user = db.query(User).filter(User.username == username).first()
     if user and verify_password(password, user.password_hash):
-        print(f"✅ Login verification successful: {username}")
+        logger.info(f"✅ Login verification successful: {username}")
         return True
     else:
-        print(f"❌ Login verification failed: {username}")
+        logger.error(f"❌ Login verification failed: {username}")
         return False
 
 def main():
     """Main migration function"""
-    print("👥 Starting Test Users Migration...")
-    print("=" * 50)
+    logger.info("👥 Starting Test Users Migration...")
+    logger.info("=" * 50)
     
     # Load test users data
     users_data = load_test_users_data()
@@ -192,9 +196,9 @@ def main():
     # Connect to database
     try:
         db = SessionLocal()
-        print("✅ Connected to database")
+        logger.info("✅ Connected to database")
     except Exception as e:
-        print(f"❌ Database connection failed: {e}")
+        logger.error(f"❌ Database connection failed: {e}")
         return False
     
     try:
@@ -203,7 +207,7 @@ def main():
         restaurant = ensure_restaurant_exists(db)
         
         # Create test users
-        print("\n👤 Creating test users...")
+        logger.info("\n👤 Creating test users...")
         created_users = []
         
         for user_data in users_data['test_users']:
@@ -216,36 +220,36 @@ def main():
                 )
                 created_users.append(user)
             except Exception as e:
-                print(f"❌ Failed to create user {user_data['username']}: {e}")
+                logger.error(f"❌ Failed to create user {user_data['username']}: {e}")
                 continue
         
         # Verify authentication for all users
-        print("\n🔐 Verifying authentication...")
+        logger.info("\n🔐 Verifying authentication...")
         auth_success = True
         for user_data in users_data['test_users']:
             if not verify_test_user_login(db, user_data['username'], user_data['password']):
                 auth_success = False
         
         # Summary
-        print(f"\n📊 Migration Summary:")
-        print(f"Users created/updated: {len(created_users)}")
-        print(f"Authentication verification: {'✅ PASSED' if auth_success else '❌ FAILED'}")
+        logger.info(f"\n📊 Migration Summary:")
+        logger.info(f"Users created/updated: {len(created_users)}")
+        logger.error(f"Authentication verification: {'✅ PASSED' if auth_success else '❌ FAILED'}")
         
         # Display login credentials for testing
-        print(f"\n🧪 Test Login Credentials:")
-        print("=" * 40)
+        logger.info(f"\n🧪 Test Login Credentials:")
+        logger.info("=" * 40)
         for user_data in users_data['test_users']:
             user_info = f"{user_data['name']} ({user_data['role']})"
-            print(f"Username: {user_data['username']}")
-            print(f"Password: {user_data['password']}")
-            print(f"Name: {user_info}")
-            print("-" * 30)
+            logger.info(f"Username: {user_data['username']}")
+            logger.info(f"Password: {user_data['password']}")
+            logger.info(f"Name: {user_info}")
+            logger.info("-" * 30)
         
-        print("\n🎉 Test users migration completed successfully!")
+        logger.info("\n🎉 Test users migration completed successfully!")
         return True
         
     except Exception as e:
-        print(f"❌ Migration failed: {e}")
+        logger.error(f"❌ Migration failed: {e}")
         db.rollback()
         return False
     finally:
@@ -255,4 +259,4 @@ if __name__ == "__main__":
     success = main()
     if not success:
         sys.exit(1)
-    print("\n✅ Frontend can now authenticate with real users!")
+    logger.info("\n✅ Frontend can now authenticate with real users!")

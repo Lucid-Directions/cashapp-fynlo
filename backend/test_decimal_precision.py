@@ -16,7 +16,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '.'))
 async def test_decimal_precision():
     """Test that all monetary fields use DECIMAL with proper precision"""
     
-    print("🧪 Testing Financial Data DECIMAL Precision...")
+    logger.info("🧪 Testing Financial Data DECIMAL Precision...")
     
     # Database connection parameters
     DB_CONFIG = {
@@ -32,7 +32,7 @@ async def test_decimal_precision():
         conn = psycopg2.connect(**DB_CONFIG, cursor_factory=RealDictCursor)
         cursor = conn.cursor()
         
-        print("✅ Database connection established")
+        logger.info("✅ Database connection established")
         
         # Expected monetary fields with DECIMAL(10,2)
         expected_decimal_fields = [
@@ -79,15 +79,15 @@ async def test_decimal_precision():
                 incorrect_fields.append(field)
         
         if incorrect_fields:
-            print("❌ Fields with incorrect precision/scale:")
+            logger.info("❌ Fields with incorrect precision/scale:")
             for field in incorrect_fields:
-                print(f"   - {field['table_name']}.{field['column_name']}: {field['data_type']}({field['numeric_precision']},{field['numeric_scale']})")
+                logger.info(f"   - {field['table_name']}.{field['column_name']}: {field['data_type']}({field['numeric_precision']},{field['numeric_scale']})")
             return False
         
-        print(f"✅ All {len(actual_fields)} monetary fields use DECIMAL(10,2)")
+        logger.info(f"✅ All {len(actual_fields)} monetary fields use DECIMAL(10,2)")
         
         # Test precision with actual calculations
-        print("\n🔢 Testing precision calculations...")
+        logger.info("\n🔢 Testing precision calculations...")
         
         # Test that we can store precise decimal values
         test_cases = [
@@ -110,13 +110,13 @@ async def test_decimal_precision():
             
             # Verify no precision loss
             if Decimal(str(result['test_value'])) != test_value:
-                print(f"❌ Precision loss for {test_value}: got {result['test_value']}")
+                logger.info(f"❌ Precision loss for {test_value}: got {result['test_value']}")
                 return False
         
-        print("✅ All precision calculations maintain accuracy")
+        logger.info("✅ All precision calculations maintain accuracy")
         
         # Test financial calculations that would lose precision with FLOAT
-        print("\n💰 Testing financial calculation accuracy...")
+        logger.info("\n💰 Testing financial calculation accuracy...")
         
         # This would lose precision with FLOAT but should be accurate with DECIMAL
         price1 = Decimal('19.99')
@@ -142,39 +142,43 @@ async def test_decimal_precision():
         if (Decimal(str(result['subtotal'])) != expected_subtotal or
             abs(Decimal(str(result['tax'])) - expected_tax) > Decimal('0.01') or
             abs(Decimal(str(result['total'])) - expected_total) > Decimal('0.01')):
-            print(f"❌ Financial calculation inaccuracy:")
-            print(f"   Expected: subtotal={expected_subtotal}, tax={expected_tax}, total={expected_total}")
-            print(f"   Got: subtotal={result['subtotal']}, tax={result['tax']}, total={result['total']}")
+            logger.info(f"❌ Financial calculation inaccuracy:")
+            logger.info(f"   Expected: subtotal={expected_subtotal}, tax={expected_tax}, total={expected_total}")
+            logger.info(f"   Got: subtotal={result['subtotal']}, tax={result['tax']}, total={result['total']}")
             return False
         
-        print("✅ Financial calculations are accurate to the cent")
+        logger.info("✅ Financial calculations are accurate to the cent")
         
-        print("\n🎉 All DECIMAL precision tests passed!")
-        print("\nPrecision Benefits:")
-        print("- ✅ No floating-point rounding errors")
-        print("- ✅ Accurate currency calculations")
-        print("- ✅ Precise tax and fee computations")
-        print("- ✅ Compliance with financial standards")
+        logger.info("\n🎉 All DECIMAL precision tests passed!")
+        logger.info("\nPrecision Benefits:")
+        logger.error("- ✅ No floating-point rounding errors")
+        logger.info("- ✅ Accurate currency calculations")
+        logger.info("- ✅ Precise tax and fee computations")
+        logger.info("- ✅ Compliance with financial standards")
         
         cursor.close()
         conn.close()
         return True
         
     except Exception as e:
-        print(f"❌ Test failed: {e}")
+        logger.error(f"❌ Test failed: {e}")
         return False
 
 
 async def test_model_compatibility():
     """Test that the database models are compatible with the DECIMAL changes"""
     
-    print("\n🔍 Testing Model Compatibility...")
+    logger.info("\n🔍 Testing Model Compatibility...")
     
     try:
         # Import the models to verify they load correctly
         from app.core.database import Product, Order, Payment, QRPayment, Customer
+import logging
+
+logger = logging.getLogger(__name__)
+
         
-        print("✅ All database models import successfully")
+        logger.info("✅ All database models import successfully")
         
         # Verify that the DECIMAL fields are defined correctly
         decimal_fields = {
@@ -188,7 +192,7 @@ async def test_model_compatibility():
         for model_class, fields in decimal_fields.items():
             for field_name in fields:
                 if not hasattr(model_class, field_name):
-                    print(f"❌ Missing field {field_name} in {model_class.__name__}")
+                    logger.info(f"❌ Missing field {field_name} in {model_class.__name__}")
                     return False
                 
                 # Check that the field is defined as DECIMAL
@@ -198,23 +202,23 @@ async def test_model_compatibility():
                     
                 column = field.property.columns[0]
                 if column.type.__class__.__name__ != 'DECIMAL':
-                    print(f"❌ Field {model_class.__name__}.{field_name} is not DECIMAL: {column.type}")
+                    logger.info(f"❌ Field {model_class.__name__}.{field_name} is not DECIMAL: {column.type}")
                     return False
         
-        print("✅ All model fields use DECIMAL type correctly")
+        logger.info("✅ All model fields use DECIMAL type correctly")
         
         return True
         
     except Exception as e:
-        print(f"❌ Model compatibility test failed: {e}")
+        logger.error(f"❌ Model compatibility test failed: {e}")
         return False
 
 
 async def main():
     """Main test function"""
     
-    print("🚀 Financial Data DECIMAL Precision - Test Suite")
-    print("=" * 60)
+    logger.info("🚀 Financial Data DECIMAL Precision - Test Suite")
+    logger.info("=" * 60)
     
     # Test 1: Database DECIMAL precision
     precision_test = await test_decimal_precision()
@@ -222,19 +226,19 @@ async def main():
     # Test 2: Model compatibility
     model_test = await test_model_compatibility()
     
-    print("\n" + "=" * 60)
+    logger.info("\n" + "=" * 60)
     
     if precision_test and model_test:
-        print("🎉 ALL TESTS PASSED - Financial data precision is correctly implemented!")
-        print("\nSummary of Implementation:")
-        print("1. All 14 monetary fields converted to DECIMAL(10,2)")
-        print("2. Database schema updated with precise numeric types")
-        print("3. Models updated to use DECIMAL instead of FLOAT")
-        print("4. Financial calculations maintain cent-level accuracy")
-        print("5. Compliance with financial data standards achieved")
+        logger.info("🎉 ALL TESTS PASSED - Financial data precision is correctly implemented!")
+        logger.info("\nSummary of Implementation:")
+        logger.info("1. All 14 monetary fields converted to DECIMAL(10,2)")
+        logger.info("2. Database schema updated with precise numeric types")
+        logger.info("3. Models updated to use DECIMAL instead of FLOAT")
+        logger.info("4. Financial calculations maintain cent-level accuracy")
+        logger.info("5. Compliance with financial data standards achieved")
         return True
     else:
-        print("❌ SOME TESTS FAILED - Please review the issues above")
+        logger.error("❌ SOME TESTS FAILED - Please review the issues above")
         return False
 
 
