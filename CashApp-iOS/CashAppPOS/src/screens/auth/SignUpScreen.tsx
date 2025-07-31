@@ -596,31 +596,6 @@ const styles = StyleSheet.create({
   inputContainer: {
     marginBottom: 20,
   },
-  inputLabel: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: Colors.text,
-    marginBottom: 8,
-  },
-  inputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.background,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    gap: 12,
-  },
-  inputError: {
-    borderColor: Colors.danger,
-  },
-  textInput: {
-    flex: 1,
-    fontSize: 16,
-    color: Colors.text,
-  },
   textArea: {
     minHeight: 60,
     textAlignVertical: 'top',

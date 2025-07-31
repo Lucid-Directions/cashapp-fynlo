@@ -192,7 +192,15 @@ const RefundScreen: React.FC = () => {
         <Text style={styles.transactionDate}>
           {transaction.date.toLocaleTimeString()} - {transaction.paymentMethod}
         </Text>
-        <View style={[styles.statusBadge, styles[`status${transaction.status.replace('_', '')}`]]}>
+        <View
+          style={[
+            styles.statusBadge,
+            transaction.status === 'completed' && styles.statuscompleted,
+            transaction.status === 'refunded' && styles.statusrefunded,
+            transaction.status === 'partially_refunded' && styles.statuspartiallyrefunded,
+            transaction.status === 'voided' && styles.statusvoided,
+          ]}
+        >
           <Text style={styles.statusText}>
             {transaction.status.replace('_', ' ').toUpperCase()}
           </Text>

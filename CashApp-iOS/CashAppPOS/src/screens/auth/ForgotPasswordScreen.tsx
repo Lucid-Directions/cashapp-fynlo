@@ -180,15 +180,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 2,
   },
-  inputIcon: {
-    marginRight: 12,
-  },
-  textInput: {
-    flex: 1,
-    fontSize: 16,
-    color: Colors.text,
-    paddingVertical: 16,
-  },
   resetButton: {
     backgroundColor: Colors.secondary,
     borderRadius: 12,
