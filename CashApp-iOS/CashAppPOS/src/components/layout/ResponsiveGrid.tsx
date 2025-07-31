@@ -55,56 +55,65 @@ const ResponsiveGrid: React.FC<ResponsiveGridProps> = ({
   const { theme } = useTheme();
   const currentColumns = useResponsiveColumns(columns, 1);
   const currentSpacing = useResponsiveSpacing(spacingProp, 4);
-  const styles = createStyles(theme);
+  const spacingValue = theme.spacing[currentSpacing];
+  
+  // Create dynamic styles based on current values
+  const dynamicStyles = createDynamicStyles(theme, currentColumns, spacingValue);
 
   // Convert children to array for processing
   const childArray = React.Children.toArray(children);
-
-  // Calculate item width based on columns and spacing
-  const itemWidth = `${100 / currentColumns}%`;
-  const spacingValue = theme.spacing[currentSpacing];
 
   // Group children into rows
   const rows: React.ReactNode[][] = [];
   for (let i = 0; i < childArray.length; i += currentColumns) {
     rows.push(childArray.slice(i, i + currentColumns));
   }
+  
+  const isLastRow = (rowIndex: number) => rowIndex === rows.length - 1;
 
   return (
-    <View style={[styles.grid, style]} testID={testID}>
+    <View style={[dynamicStyles.grid, style]} testID={testID}>
       {rows.map((row, rowIndex) => (
-        <View key={rowIndex} style={[styles.row, { marginBottom: spacingValue }]}>
-          {row.map((child, itemIndex) => (
-            <View
-              key={itemIndex}
-              style={[
-                styles.item,
-                {
-                  width: itemWidth,
-                  paddingLeft: itemIndex > 0 ? spacingValue / 2 : 0,
-                  paddingRight: itemIndex < row.length - 1 ? spacingValue / 2 : 0,
-                },
-              ]}
-            >
-              {child}
-            </View>
-          ))}
+        <View 
+          key={rowIndex} 
+          style={[
+            dynamicStyles.row, 
+            !isLastRow(rowIndex) && dynamicStyles.rowWithMargin
+          ]}
+        >
+          {row.map((child, itemIndex) => {
+            const isFirstItem = itemIndex === 0;
+            const isLastItem = itemIndex === row.length - 1;
+            
+            return (
+              <View
+                key={itemIndex}
+                style={[
+                  dynamicStyles.item,
+                  !isFirstItem && dynamicStyles.itemWithLeftPadding,
+                  !isLastItem && dynamicStyles.itemWithRightPadding,
+                ]}
+              >
+                {child}
+              </View>
+            );
+          })}
           {/* Fill empty columns in the last row */}
           {row.length < currentColumns &&
-            Array.from({ length: currentColumns - row.length }).map((_, emptyIndex) => (
-              <View
-                key={`empty-${emptyIndex}`}
-                style={[
-                  styles.item,
-                  {
-                    width: itemWidth,
-                    paddingLeft: spacingValue / 2,
-                    paddingRight:
-                      emptyIndex < currentColumns - row.length - 1 ? spacingValue / 2 : 0,
-                  },
-                ]}
-              />
-            ))}
+            Array.from({ length: currentColumns - row.length }).map((_, emptyIndex) => {
+              const isLastEmpty = emptyIndex === currentColumns - row.length - 1;
+              
+              return (
+                <View
+                  key={`empty-${emptyIndex}`}
+                  style={[
+                    dynamicStyles.item,
+                    dynamicStyles.itemWithLeftPadding,
+                    !isLastEmpty && dynamicStyles.itemWithRightPadding,
+                  ]}
+                />
+              );
+            })}
         </View>
       ))}
     </View>
@@ -118,8 +127,11 @@ export const GridItem: React.FC<GridItemProps> = ({ children, _span, style }) =>
   return <View style={style}>{children}</View>;
 };
 
-const createStyles = (_theme: Theme) =>
-  StyleSheet.create({
+const createDynamicStyles = (_theme: Theme, columns: number, spacing: number) => {
+  const itemWidth = `${100 / columns}%`;
+  const halfSpacing = spacing / 2;
+  
+  return StyleSheet.create({
     grid: {
       // Base grid container
     },
@@ -127,9 +139,19 @@ const createStyles = (_theme: Theme) =>
       flexDirection: 'row',
       alignItems: 'stretch',
     },
+    rowWithMargin: {
+      marginBottom: spacing,
+    },
     item: {
-      // Individual grid item
+      width: itemWidth,
+    },
+    itemWithLeftPadding: {
+      paddingLeft: halfSpacing,
+    },
+    itemWithRightPadding: {
+      paddingRight: halfSpacing,
     },
   });
+};
 
 export default ResponsiveGrid;

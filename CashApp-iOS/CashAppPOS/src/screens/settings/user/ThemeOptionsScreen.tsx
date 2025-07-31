@@ -248,9 +248,8 @@ const ThemeOptionsScreen: React.FC = () => {
                   <View
                     style={[
                       styles.previewButton,
+                      styles.previewButtonSecondary,
                       {
-                        backgroundColor: 'transparent',
-                        borderWidth: 1,
                         borderColor: theme.colors.primary,
                       },
                     ]}
@@ -433,6 +432,10 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 6,
+  },
+  previewButtonSecondary: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
   },
   previewButtonText: {
     fontSize: 14,

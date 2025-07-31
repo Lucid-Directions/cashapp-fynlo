@@ -79,6 +79,11 @@ const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
     outputRange: [1, 1.1, 1],
   });
 
+  const dynamicStyles = React.useMemo(
+    () => createDynamicStyles(config, disabled),
+    [config, disabled]
+  );
+
   return (
     <TouchableOpacity
       onPress={handlePress}
@@ -86,19 +91,15 @@ const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
       activeOpacity={0.8}
       style={[
         styles.container,
-        {
-          width: config.width,
-          height: config.height,
-          opacity: disabled ? 0.5 : 1,
-        },
+        dynamicStyles.container,
+        disabled && styles.containerDisabled,
       ]}
     >
       <Animated.View
         style={[
           styles.track,
+          dynamicStyles.track,
           {
-            width: config.width,
-            height: config.height,
             backgroundColor: trackColor,
           },
         ]}
@@ -106,13 +107,10 @@ const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
       <Animated.View
         style={[
           styles.thumb,
+          dynamicStyles.thumb,
           {
-            width: config.thumbSize,
-            height: config.thumbSize,
             backgroundColor: thumbColor,
             transform: [{ translateX: thumbTranslate }, { scale: thumbScale }],
-            top: config.padding,
-            left: config.padding,
           },
         ]}
       />
@@ -120,10 +118,31 @@ const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
   );
 };
 
+const createDynamicStyles = (config: any, disabled: boolean) =>
+  StyleSheet.create({
+    container: {
+      width: config.width,
+      height: config.height,
+    },
+    track: {
+      width: config.width,
+      height: config.height,
+    },
+    thumb: {
+      width: config.thumbSize,
+      height: config.thumbSize,
+      top: config.padding,
+      left: config.padding,
+    },
+  });
+
 const styles = StyleSheet.create({
   container: {
     position: 'relative',
     justifyContent: 'center',
+  },
+  containerDisabled: {
+    opacity: 0.5,
   },
   track: {
     borderRadius: 100,
