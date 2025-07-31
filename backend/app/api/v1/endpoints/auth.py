@@ -115,7 +115,7 @@ async def verify_supabase_user(
                     db_user.supabase_id = supabase_user.id  # Use UUID object, not string
                     db.commit()
                     logger.info(f"Updated user {db_user.id} with Supabase ID: {supabase_user.id}")
-                except SQLAlchemyError as e:
+        except SQLAlchemyError as e:
             logger.error(f"Database query error when finding user: {str(e)}")
             db.rollback()
             raise ServiceUnavailableError(message="Database error while retrieving user information", service_name="Database")        
@@ -169,11 +169,11 @@ async def verify_supabase_user(
                                 # Continue with the user even if update fails
                     if not db_user:
                         raise ServiceUnavailableError(message="Failed to create user account. Please try again.", service_name="Database")
-                    except SQLAlchemyError as retry_error:
+                except SQLAlchemyError as retry_error:
                     logger.error(f"Failed to fetch user after IntegrityError: {str(retry_error)}")
                     db.rollback()
                     raise ServiceUnavailableError(message="Database error while creating user account", service_name="Database")
-                except SQLAlchemyError as e:
+            except SQLAlchemyError as e:
                 logger.error(f"Database error creating user: {str(e)}")
                 db.rollback()
                 raise ServiceUnavailableError(message="Database error while creating user account", service_name="Database")
@@ -244,11 +244,11 @@ async def verify_supabase_user(
                     response_data["user"]["enabled_features"] = get_plan_features(
                         restaurant.subscription_plan or 'alpha'
                     )
-                except SQLAlchemyError as e:
+            except SQLAlchemyError as e:
                 logger.error(f"Error retrieving restaurant info: {str(e)}")
                 db.rollback()
                 # Continue without restaurant info rather than failing
-    else:
+        else:
             # User has no restaurant yet - they need to complete onboarding
             logger.info(f"User {db_user.id} has no restaurant - needs onboarding")
             
@@ -350,7 +350,7 @@ async def verify_supabase_user(
                 risk_score=80  # High risk - unexpected error
             )
             raise AuthenticationException(message="Authentication failed. Please sign in again.")
-        except Exception as e:
+    except Exception as e:
         # Check if this is actually an AuthApiError wrapped in another exception
         error_str = str(e)
         logger.error(f"Auth verification error - Type: {type(e).__name__}, Message: {error_str}")
@@ -600,7 +600,7 @@ async def register_restaurant(
             db.rollback()
             raise FynloException(message="Failed to register restaurant. Please try again.")
         except HTTPException:
-        raise
+            raise
     except Exception as e:
         logger.error(f"Restaurant registration error: {str(e)}")
         db.rollback()

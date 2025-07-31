@@ -86,7 +86,8 @@ def create_platform_default_setting(
     try:
         created_setting = service.create_platform_default_setting(typed_dict_data)
         if not created_setting: # Should not happen if service raises error on failure
-            raise FynloException(message="Failed to create platform default setting.")        return convert_db_model_to_schema(created_setting)
+            raise FynloException(message="Failed to create platform default setting.")
+        return convert_db_model_to_schema(created_setting)
     except ValueError as ve:
         raise ValidationException(message=str(ve))
     except Exception as e: # Catches IntegrityError from service if duplicate
@@ -109,7 +110,8 @@ def update_platform_default_setting(
         raise ResourceNotFoundException(
             resource="Platform default setting",
             message=f"Platform default setting for {payment_method.value} not found."
-        )    return convert_db_model_to_schema(updated_setting)
+        )
+    return convert_db_model_to_schema(updated_setting)
 
 
 @router.get("/settings/restaurants/{restaurant_id}", response_model=List[PaymentMethodFeeSettingSchema])
@@ -174,7 +176,8 @@ async def create_or_update_restaurant_setting(
     try:
         saved_setting = service.create_or_update_restaurant_setting(restaurant_id, typed_dict_data)
         if not saved_setting: # Should not happen if service raises specific errors
-            raise FynloException(message="Failed to save restaurant setting.")        return convert_db_model_to_schema(saved_setting)
+            raise FynloException(message="Failed to save restaurant setting.")
+        return convert_db_model_to_schema(saved_setting)
     except ValueError as ve:
         raise ValidationException(message=str(ve))
     except Exception as e: # Catches IntegrityError from service
@@ -207,7 +210,8 @@ async def delete_restaurant_setting(
         raise ResourceNotFoundException(
             resource="Restaurant payment setting",
             message=f"Setting for restaurant {restaurant_id}, method {payment_method.value} not found."
-        )    return None # No content for 204
+        )
+    return None # No content for 204
 
 
 # To include this router in the main application:

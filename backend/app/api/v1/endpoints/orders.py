@@ -18,7 +18,8 @@ from app.core.auth import get_current_user
 from app.api.v1.endpoints.customers import CustomerCreate as CustomerCreateSchema # Renamed to avoid conflict
 from app.core.redis_client import get_redis, RedisClient
 from app.core.responses import APIResponseHelper
-from app.core.exceptions import ValidationException, AuthenticationException, FynloException, ResourceNotFoundException, ConflictExceptionfrom app.core.onboarding_helper import OnboardingHelper
+from app.core.exceptions import ValidationException, AuthenticationException, FynloException, ResourceNotFoundException, ConflictException
+from app.core.onboarding_helper import OnboardingHelper
 from app.core.websocket import (
     websocket_manager, 
     notify_order_created, 
@@ -162,7 +163,7 @@ async def get_orders(
         user_restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
         if user_restaurant_id is None:
             raise AuthenticationException(message="Access denied: No restaurant assigned to user"
-            , error_code="ACCESS_DENIED")        
+            , error_code="ACCESS_DENIED")
         # Use provided restaurant_id or fallback to user's current restaurant
         if not restaurant_id:
             restaurant_id = str(user_restaurant_id)
@@ -259,13 +260,13 @@ async def get_todays_orders(
         # Platform owners can access any restaurant
         if not restaurant_id:
             # Platform owner must specify which restaurant to view
-            raise ValidationException(message="Restaurant ID is required for platform owners"
-            )    else:
+            raise ValidationException(message="Restaurant ID is required for platform owners")
+    else:
         # Restaurant owners, managers, and employees can only access their own restaurant(s)
         user_restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
         if user_restaurant_id is None:
             raise AuthenticationException(message="Access denied: No restaurant assigned to user"
-            , error_code="ACCESS_DENIED")        
+            , error_code="ACCESS_DENIED")
         # Use provided restaurant_id or fallback to user's current restaurant
         if not restaurant_id:
             restaurant_id = str(user_restaurant_id)
@@ -362,13 +363,13 @@ async def create_order(
     if current_user.role == 'platform_owner':
         # Platform owners must specify which restaurant
         if not restaurant_id:
-            raise ValidationException(message="Restaurant ID is required for platform owners"
-            )    else:
+            raise ValidationException(message="Restaurant ID is required for platform owners")
+    else:
         # Restaurant owners, managers, and employees can only create orders for their own restaurant(s)
         user_restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
         if user_restaurant_id is None:
             raise AuthenticationException(message="Access denied: No restaurant assigned to user"
-            , error_code="ACCESS_DENIED")        
+            , error_code="ACCESS_DENIED")
         # Use provided restaurant_id or fallback to user's current restaurant
         if not restaurant_id:
             restaurant_id = str(user_restaurant_id)
@@ -432,7 +433,7 @@ async def create_order(
     ).all()
     
     if len(products) != len(product_ids):
-        raise ValidationException(message="One or more products not found")    
+        raise ValidationException(message="One or more products not found")
     # Calculate totals
     totals = calculate_order_totals(order_data.items)
     

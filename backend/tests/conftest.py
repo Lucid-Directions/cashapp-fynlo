@@ -23,7 +23,7 @@ from app.main import app
 from app.core.database import Base
 from app.core.config import settings
 from app.core.database import Restaurant, User, Product, Category, Order
-from app.api.v1.endpoints.auth_backup import create_access_token
+from app.core.auth import create_access_token
 from app.middleware.rate_limit_middleware import limiter
 from datetime import datetime, timedelta
 import uuid
