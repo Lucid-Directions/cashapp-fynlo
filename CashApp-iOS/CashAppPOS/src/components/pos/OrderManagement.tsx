@@ -83,7 +83,7 @@ const { cart, updateCartItem, removeFromCart, clearCart, _cartTotal, _cartItemCo
   useEffect(() => {
     const loadPlatformServiceCharge = async () => {
       try {
-        console.log('💰 OrderManagement - Loading platform service charge...');
+        logger.info('💰 OrderManagement - Loading platform service charge...');
         const dataStore = SharedDataStore.getInstance();
         const config = await dataStore.getServiceChargeConfig();
 
@@ -93,12 +93,12 @@ const { cart, updateCartItem, removeFromCart, clearCart, _cartTotal, _cartItemCo
             rate: config.rate,
             description: config.description || 'Platform service charge',
           });
-          console.log('✅ Platform service charge loaded in OrderManagement:', config);
+          logger.info('✅ Platform service charge loaded in OrderManagement:', config);
         } else {
-          console.log('⚠️ No platform service charge config found in OrderManagement');
+          logger.info('⚠️ No platform service charge config found in OrderManagement');
         }
       } catch (error) {
-        console.error('❌ Failed to load platform service charge in OrderManagement:', error);
+        logger.error('❌ Failed to load platform service charge in OrderManagement:', error);
       }
     };
 
@@ -107,7 +107,7 @@ const { cart, updateCartItem, removeFromCart, clearCart, _cartTotal, _cartItemCo
     // Subscribe to real-time updates
     const dataStore = SharedDataStore.getInstance();
     const unsubscribe = dataStore.subscribe('serviceCharge', (updatedConfig) => {
-      console.log('🔄 Platform service charge updated in OrderManagement:', updatedConfig);
+      logger.info('🔄 Platform service charge updated in OrderManagement:', updatedConfig);
       setPlatformServiceCharge({
         enabled: updatedConfig.enabled,
         rate: updatedConfig.rate,

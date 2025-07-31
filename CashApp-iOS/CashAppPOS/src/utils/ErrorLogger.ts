@@ -29,7 +29,7 @@ export class ErrorLogger {
     const timestamp = new Date().toISOString();
     const errorDetails = this.formatError(error);
 
-    console.error(`
+    logger.error(`
 ❌ ============ ERROR DETAILS ============
 🕐 Timestamp: ${timestamp}
 📍 Operation: ${context.operation}
@@ -51,14 +51,14 @@ ${JSON.stringify(context.metadata || {}, null, 2)}
     `);
 
     // Also log a simplified version for quick scanning
-    console.log(`🚨 ${context.operation} failed: ${errorDetails.message}`);
+    logger.info(`🚨 ${context.operation} failed: ${errorDetails.message}`);
   }
 
   /**
    * Log API request details for debugging
    */
   logAPIRequest(method: string, url: string, options?: unknown): void {
-    console.log(`
+    logger.info(`
 🌐 ======== API REQUEST ========
 📍 ${method} ${url}
 ⏰ Time: ${new Date().toISOString()}
@@ -73,7 +73,7 @@ ${JSON.stringify(context.metadata || {}, null, 2)}
    */
   logAPIResponse(url: string, status: number, duration: number, data?: unknown): void {
     const statusEmoji = status >= 200 && status < 300 ? '✅' : '❌';
-    console.log(`
+    logger.info(`
 ${statusEmoji} ======== API RESPONSE ========
 📍 URL: ${url}
 📊 Status: ${status}

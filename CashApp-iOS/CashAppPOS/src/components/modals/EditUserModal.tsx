@@ -127,7 +127,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ visible, user, onClose, o
       const templates = await userManagementService.getPermissionTemplates();
       setPermissionTemplates(templates);
     } catch (error) {
-      console.error('Failed to load permission templates:', error);
+      logger.error('Failed to load permission templates:', error);
     }
   };
 

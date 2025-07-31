@@ -16,6 +16,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import { useTheme } from '../../design-system/ThemeProvider';
 import DataService from '../../services/DataService';
+import { logger } from '../../utils/logger';
 
 const Colors = {
   primary: '#00A651',
@@ -121,7 +122,7 @@ data.employees?.map((emp: unknown) => ({
       setLaborData(processedData);
       setSummary(summaryData);
     } catch (error) {
-      console.error('Failed to load labor data:', error);
+      logger.error('Failed to load labor data:', error);
       setError('Failed to load labor data. Please try again.');
       Alert.alert(
         'Error',

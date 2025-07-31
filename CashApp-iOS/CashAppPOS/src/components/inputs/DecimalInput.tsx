@@ -41,7 +41,7 @@ const DecimalInput: React.FC<DecimalInputProps> = ({
   }, [value, decimalPlaces, isFocused]);
 
   const handleTextChange = (text: string) => {
-    console.log('💰 DecimalInput - Raw input:', text);
+    logger.info('💰 DecimalInput - Raw input:', text);
 
     // Allow empty string - don't call onValueChange yet
     if (text === '') {
@@ -77,17 +77,17 @@ const DecimalInput: React.FC<DecimalInputProps> = ({
     // Only update parent if we have a valid number and it's not just a decimal point
     if (!isNaN(numericValue) && cleaned !== '.') {
       const clampedValue = Math.max(minValue, Math.min(maxValue, numericValue));
-      console.log('💰 DecimalInput - Calling onValueChange with:', clampedValue);
+      logger.info('💰 DecimalInput - Calling onValueChange with:', clampedValue);
       onValueChange(clampedValue);
     }
 
-    console.log('💰 DecimalInput - Display value set to:', cleaned);
+    logger.info('💰 DecimalInput - Display value set to:', cleaned);
   };
 
   const handleFocus = () => {
     setIsFocused(true);
     // Don't clear the input - keep the current value visible for editing
-    console.log('💰 DecimalInput - Focus gained, keeping value:', displayValue);
+    logger.info('💰 DecimalInput - Focus gained, keeping value:', displayValue);
   };
 
   const handleBlur = () => {
@@ -107,7 +107,7 @@ const DecimalInput: React.FC<DecimalInputProps> = ({
       }
     }
 
-    console.log('💰 DecimalInput - Blur with final value:', clampedValue);
+    logger.info('💰 DecimalInput - Blur with final value:', clampedValue);
   };
 
   const handleClear = () => {

@@ -306,7 +306,7 @@ const _assignServer = (tableId: string, serverName: string) => {
       layout,
     };
 
-    console.log('Saving layout:', layoutData);
+    logger.info('Saving layout:', layoutData);
     // In real app: await saveFloorPlanLayout(layoutData);
 
     Alert.alert('Layout Saved', 'Floor plan layout has been saved successfully.');

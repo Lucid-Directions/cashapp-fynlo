@@ -38,14 +38,14 @@ const SumUpPaymentSheet: React.FC<SumUpPaymentComponentProps> = ({
   const { initPaymentSheet, presentPaymentSheet } = sumUpHooks;
   const [isInitialized, setIsInitialized] = useState(false);
 
-  console.log('🔧 SumUp hooks received:', {
+  logger.info('🔧 SumUp hooks received:', {
     sumUpHooks,
     initPaymentSheet: typeof initPaymentSheet,
     presentPaymentSheet: typeof presentPaymentSheet,
   });
 
   useEffect(() => {
-    console.log('🔧 SumUpPaymentSheet useEffect triggered with:', { amount, currency, title });
+    logger.info('🔧 SumUpPaymentSheet useEffect triggered with:', { amount, currency, title });
 
     // Add a small delay to ensure SumUp provider is fully initialized
     const initTimer = setTimeout(() => {
@@ -59,7 +59,7 @@ const SumUpPaymentSheet: React.FC<SumUpPaymentComponentProps> = ({
 
   const initializeSumUp = async () => {
     try {
-      console.log('🔧 Initializing SumUp payment sheet...', {
+      logger.info('🔧 Initializing SumUp payment sheet...', {
         amount,
         currency,
         title,
@@ -70,7 +70,7 @@ const SumUpPaymentSheet: React.FC<SumUpPaymentComponentProps> = ({
       const compatibility = await compatibilityService.checkCompatibility();
 
       if (!compatibility.isSupported) {
-        console.warn('⚠️ SumUp not supported:', compatibility.fallbackMessage);
+        logger.warn('⚠️ SumUp not supported:', compatibility.fallbackMessage);
         runOnMainThread(() => {
           compatibilityService.showCompatibilityError(compatibility);
           onPaymentComplete(false, undefined, compatibility.fallbackMessage);
@@ -80,7 +80,7 @@ const SumUpPaymentSheet: React.FC<SumUpPaymentComponentProps> = ({
 
       // Check if useSumUp hook is properly initialized
       if (!initPaymentSheet || !presentPaymentSheet) {
-        console.error('❌ SumUp hooks not available:', {
+        logger.error('❌ SumUp hooks not available:', {
           initPaymentSheet: !!initPaymentSheet,
           presentPaymentSheet: !!presentPaymentSheet,
           initPaymentSheetType: typeof initPaymentSheet,
@@ -103,7 +103,7 @@ const SumUpPaymentSheet: React.FC<SumUpPaymentComponentProps> = ({
         return;
       }
 
-      console.log('🔧 Preparing SumUp payment with params:', { amount, currency, title });
+      logger.info('🔧 Preparing SumUp payment with params:', { amount, currency, title });
 
       // Create the most basic params possible to test SumUp initialization
       const params: InitPaymentSheetProps = {
@@ -116,38 +116,38 @@ const SumUpPaymentSheet: React.FC<SumUpPaymentComponentProps> = ({
 
       // Validate params before calling SumUp
       if (!params.amount || params.amount <= 0) {
-        console.error('❌ Invalid amount for SumUp payment:', params.amount);
+        logger.error('❌ Invalid amount for SumUp payment:', params.amount);
         runOnMainThread(() => {
           onPaymentComplete(false, undefined, 'Invalid payment amount');
         });
         return;
       }
 
-      console.log('🔧 Calling initPaymentSheet with params:', params);
+      logger.info('🔧 Calling initPaymentSheet with params:', params);
       const result: InitPaymentSheetResult = await initPaymentSheet(params);
 
-      console.log('🔧 InitPaymentSheet result:', result);
+      logger.info('🔧 InitPaymentSheet result:', result);
 
       if (result.error) {
-        console.error('❌ SumUp initialization failed:', result.error);
+        logger.error('❌ SumUp initialization failed:', result.error);
         runOnMainThread(() => {
           onPaymentComplete(false, undefined, result.error.message);
         });
         return;
       }
 
-      console.log('✅ SumUp payment sheet initialized successfully');
+      logger.info('✅ SumUp payment sheet initialized successfully');
       runOnMainThread(() => {
         setIsInitialized(true);
       });
 
       // Automatically present the payment sheet on main thread
-      console.log('🔧 About to call presentPayment...');
+      logger.info('🔧 About to call presentPayment...');
       runOnMainThread(() => {
         presentPayment();
       });
     } catch (error) {
-      console.error('❌ SumUp initialization error:', error);
+      logger.error('❌ SumUp initialization error:', error);
       runOnMainThread(() => {
         onPaymentComplete(false, undefined, error?.message || 'Initialization failed');
       });
@@ -156,28 +156,28 @@ const SumUpPaymentSheet: React.FC<SumUpPaymentComponentProps> = ({
 
   const presentPayment = async () => {
     try {
-      console.log('💳 presentPayment called, isInitialized:', isInitialized);
+      logger.info('💳 presentPayment called, isInitialized:', isInitialized);
 
       if (!isInitialized) {
-        console.warn('⚠️ SumUp not initialized, cannot present payment sheet');
+        logger.warn('⚠️ SumUp not initialized, cannot present payment sheet');
         return;
       }
 
       if (!presentPaymentSheet) {
-        console.error('❌ presentPaymentSheet function not available');
+        logger.error('❌ presentPaymentSheet function not available');
         runOnMainThread(() => {
           onPaymentComplete(false, undefined, 'presentPaymentSheet not available');
         });
         return;
       }
 
-      console.log('💳 Presenting SumUp payment sheet...');
+      logger.info('💳 Presenting SumUp payment sheet...');
       const result = await presentPaymentSheet();
 
-      console.log('💳 PresentPaymentSheet result:', result);
+      logger.info('💳 PresentPaymentSheet result:', result);
 
       if (result.error) {
-        console.error('❌ Payment failed:', result.error);
+        logger.error('❌ Payment failed:', result.error);
         runOnMainThread(() => {
           onPaymentComplete(false, undefined, result.error.message);
         });
@@ -185,18 +185,18 @@ const SumUpPaymentSheet: React.FC<SumUpPaymentComponentProps> = ({
       }
 
       if (result.paymentResult) {
-        console.log('✅ Payment successful:', result.paymentResult);
+        logger.info('✅ Payment successful:', result.paymentResult);
         runOnMainThread(() => {
           onPaymentComplete(true, result.paymentResult.transactionCode, undefined);
         });
       } else {
-        console.log('❌ Payment cancelled by user');
+        logger.info('❌ Payment cancelled by user');
         runOnMainThread(() => {
           onPaymentCancel();
         });
       }
     } catch (error) {
-      console.error('❌ Payment presentation error:', error);
+      logger.error('❌ Payment presentation error:', error);
       runOnMainThread(() => {
         onPaymentComplete(false, undefined, error?.message || 'Payment failed');
       });
@@ -208,7 +208,7 @@ const SumUpPaymentSheet: React.FC<SumUpPaymentComponentProps> = ({
 
 // Main component that provides the SumUp context
 const SumUpPaymentComponent: React.FC<SumUpPaymentComponentProps> = (props) => {
-  console.log('🔧 SumUpPaymentComponent rendered with props:', {
+  logger.info('🔧 SumUpPaymentComponent rendered with props:', {
     amount: props.amount,
     currency: props.currency,
     title: props.title,
@@ -225,7 +225,7 @@ const SumUpPaymentComponent: React.FC<SumUpPaymentComponentProps> = (props) => {
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        console.log('🔄 Fetching SumUp configuration from backend...');
+        logger.info('🔄 Fetching SumUp configuration from backend...');
         const config = await sumUpConfigService.fetchConfiguration();
 
         setSumUpConfig({
@@ -233,9 +233,9 @@ const SumUpPaymentComponent: React.FC<SumUpPaymentComponentProps> = (props) => {
           environment: config.environment,
         });
         setIsLoadingConfig(false);
-        console.log('✅ SumUp configuration loaded successfully');
+        logger.info('✅ SumUp configuration loaded successfully');
       } catch (error) {
-        console.error('❌ Failed to fetch SumUp configuration:', error);
+        logger.error('❌ Failed to fetch SumUp configuration:', error);
         setConfigError(error?.message || 'Failed to load payment configuration');
         setIsLoadingConfig(false);
 
@@ -251,12 +251,12 @@ const SumUpPaymentComponent: React.FC<SumUpPaymentComponentProps> = (props) => {
 
   // Show loading or error states
   if (isLoadingConfig) {
-    console.log('⏳ Waiting for SumUp configuration...');
+    logger.info('⏳ Waiting for SumUp configuration...');
     return <View style={styles.hidden} />;
   }
 
   if (configError || !sumUpConfig) {
-    console.error('❌ Cannot proceed without SumUp configuration:', configError);
+    logger.error('❌ Cannot proceed without SumUp configuration:', configError);
     return <View style={styles.hidden} />;
   }
 
@@ -273,7 +273,7 @@ const SumUpPaymentComponent: React.FC<SumUpPaymentComponentProps> = (props) => {
       </SumUpProvider>
     );
   } catch (error) {
-    console.error('❌ SumUpProvider initialization failed:', error);
+    logger.error('❌ SumUpProvider initialization failed:', error);
     // Fallback to show error to user
     runOnMainThread(() => {
       props.onPaymentComplete(false, undefined, 'SumUp provider initialization failed');

@@ -79,7 +79,7 @@ export const TableSelectionScreen: React.FC = () => {
         setSections(response.sections || []);
       }
     } catch (error) {
-      console.error('Error fetching floor plan:', error);
+      logger.error('Error fetching floor plan:', error);
       Alert.alert('Error', 'Failed to load tables');
     } finally {
       setLoading(false);

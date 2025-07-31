@@ -163,10 +163,10 @@ const _isAuthenticated = useAuthStore((state) => state.isAuthenticated);
       setIsLoading(true);
 
       // Check auth state from Supabase
-      console.log('🔐 Checking Supabase authentication state...');
+      logger.info('🔐 Checking Supabase authentication state...');
       await checkAuthStore();
     } catch (error) {
-      console.error('Error loading stored auth:', error);
+      logger.error('Error loading stored auth:', error);
     } finally {
       setIsLoading(false);
     }
@@ -183,7 +183,7 @@ const _isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
       return true;
     } catch (error) {
-      console.error('Sign in error:', error);
+      logger.error('Sign in error:', error);
       return false;
     }
   };
@@ -251,7 +251,7 @@ _password: string
 
       return true;
     } catch (error) {
-      console.error('Error signing up:', error);
+      logger.error('Error signing up:', error);
       return false;
     } finally {
       setIsLoading(false);
@@ -273,7 +273,7 @@ _password: string
       setUser(null);
       setBusiness(null);
     } catch (error) {
-      console.error('Error signing out:', error);
+      logger.error('Error signing out:', error);
     } finally {
       setIsLoading(false);
     }
@@ -287,7 +287,7 @@ _password: string
       setUser(updatedUser);
       await AsyncStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(updatedUser));
     } catch (error) {
-      console.error('Error updating user:', error);
+      logger.error('Error updating user:', error);
     }
   };
 
@@ -299,7 +299,7 @@ _password: string
       setBusiness(updatedBusiness);
       await AsyncStorage.setItem(STORAGE_KEYS.BUSINESS, JSON.stringify(updatedBusiness));
     } catch (error) {
-      console.error('Error updating business:', error);
+      logger.error('Error updating business:', error);
     }
   };
 
@@ -314,7 +314,7 @@ _password: string
       const biometricEnabled = await AsyncStorage.getItem(STORAGE_KEYS.BIOMETRIC_ENABLED);
       return biometricEnabled === 'true';
     } catch (error) {
-      console.error('Error checking biometric:', error);
+      logger.error('Error checking biometric:', error);
       return false;
     }
   };
@@ -331,7 +331,7 @@ _password: string
 
       return !!userExists;
     } catch (error) {
-      console.error('Error resetting password:', error);
+      logger.error('Error resetting password:', error);
       return false;
     }
   };
@@ -339,7 +339,7 @@ _password: string
   const loadPlatformData = async (): Promise<void> => {
     try {
       if (user?.role === 'platform_owner') {
-        console.log('🏢 Loading REAL platform data for platform owner');
+        logger.info('🏢 Loading REAL platform data for platform owner');
 
         // Load REAL restaurant data first
         const restaurantDataService = RestaurantDataService.getInstance();
@@ -362,32 +362,32 @@ _password: string
         };
 
         setPlatform(realPlatformData);
-        console.log(
+        logger.info(
           `✅ Platform data loaded: ${realRestaurants.length} restaurants, £${totalRevenue} total revenue`
         );
       }
     } catch (error) {
-      console.error('Error loading platform data:', error);
+      logger.error('Error loading platform data:', error);
     }
   };
 
   const switchRestaurant = async (restaurantId: string): Promise<void> => {
     try {
       if (user?.role === 'platform_owner') {
-        console.log(`🔄 Switching to restaurant: ${restaurantId}`);
+        logger.info(`🔄 Switching to restaurant: ${restaurantId}`);
 
         // Find restaurant in the REAL managed restaurants data
         const restaurant = managedRestaurants.find((r) => r.id === restaurantId);
         if (restaurant) {
           setBusiness(restaurant);
           await AsyncStorage.setItem(STORAGE_KEYS.BUSINESS, JSON.stringify(restaurant));
-          console.log(`✅ Switched to restaurant: ${restaurant.name}`);
+          logger.info(`✅ Switched to restaurant: ${restaurant.name}`);
         } else {
-          console.error(`❌ Restaurant ${restaurantId} not found in managed restaurants`);
+          logger.error(`❌ Restaurant ${restaurantId} not found in managed restaurants`);
         }
       }
     } catch (error) {
-      console.error('Error switching restaurant:', error);
+      logger.error('Error switching restaurant:', error);
     }
   };
 
@@ -400,7 +400,7 @@ _password: string
       const unsubscribe = restaurantDataService.subscribeToPlatformRestaurants(
         'platform_owner_1',
         (updatedRestaurants) => {
-          console.log('🔄 Platform restaurants updated in real-time:', updatedRestaurants.length);
+          logger.info('🔄 Platform restaurants updated in real-time:', updatedRestaurants.length);
           const businesses = updatedRestaurants.map((r) => restaurantDataService.toBusinessType(r));
           setManagedRestaurants(businesses);
         }

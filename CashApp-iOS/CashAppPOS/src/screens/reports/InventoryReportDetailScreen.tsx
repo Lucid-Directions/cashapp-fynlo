@@ -16,6 +16,7 @@ import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import DataService from '../../services/DataService';
+import { logger } from '../../utils/logger';
 
 const Colors = {
   primary: '#00A651',
@@ -82,7 +83,7 @@ const InventoryReportDetailScreen = () => {
 
       setInventoryData(transformedData);
     } catch (error) {
-      console.error('Failed to load inventory data:', error);
+      logger.error('Failed to load inventory data:', error);
       setError('Failed to load inventory data. Please try again.');
       Alert.alert(
         'Error',

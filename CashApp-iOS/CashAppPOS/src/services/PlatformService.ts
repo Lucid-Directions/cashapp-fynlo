@@ -88,7 +88,7 @@ class PlatformService {
     try {
       this.authToken = await tokenManager.getTokenWithRefresh();
     } catch (_error) {
-      console.log('No auth token found');
+      logger.info('No auth token found');
     }
   }
 
@@ -120,25 +120,25 @@ class PlatformService {
         config.body = JSON.stringify(data);
       }
 
-      console.log(`🌐 Making ${method} request to: ${url}`);
+      logger.info(`🌐 Making ${method} request to: ${url}`);
       if (data) {
-        console.log('📦 Request data:', JSON.stringify(data, null, 2));
+        logger.info('📦 Request data:', JSON.stringify(data, null, 2));
       }
 
       const response = await fetch(url, config);
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error(`❌ HTTP ${response.status}: ${response.statusText}`);
-        console.error('❌ Error response:', errorText);
+        logger.error(`❌ HTTP ${response.status}: ${response.statusText}`);
+        logger.error('❌ Error response:', errorText);
         throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
       }
 
       const result = await response.json();
-      console.log('✅ API Response:', result);
+      logger.info('✅ API Response:', result);
       return result.data || result;
     } catch (error) {
-      console.error(`❌ API request failed for ${endpoint}:`, error);
+      logger.error(`❌ API request failed for ${endpoint}:`, error);
       throw error;
     }
   }
@@ -179,7 +179,7 @@ let settingsObject: Record<string, unknown>;
         updated_at: config?.updated_at ?? null,
       }));
     } catch (error) {
-      console.error('❌ Failed to fetch platform settings:', error);
+      logger.error('❌ Failed to fetch platform settings:', error);
       // Return mock data for demo purposes
       return this.getMockPlatformSettings(category);
     }
@@ -197,7 +197,7 @@ let settingsObject: Record<string, unknown>;
         updated_at: settingData.updated_at,
       };
     } catch (error) {
-      console.error(`Failed to fetch setting ${configKey}:`, error);
+      logger.error(`Failed to fetch setting ${configKey}:`, error);
       return null;
     }
   }
@@ -214,7 +214,7 @@ configValue: unknown,
       });
       return true;
     } catch (error) {
-      console.error(`Failed to update setting ${configKey}:`, error);
+      logger.error(`Failed to update setting ${configKey}:`, error);
       return false;
     }
   }
@@ -235,10 +235,10 @@ updates: Record<string, unknown>,
         errors: result.errors || {},
       };
     } catch (error) {
-      console.error('❌ Failed to bulk update settings:', error);
+      logger.error('❌ Failed to bulk update settings:', error);
 
       // If the bulk endpoint fails, try individual updates as fallback
-      console.log('🔄 Attempting individual updates as fallback...');
+      logger.info('🔄 Attempting individual updates as fallback...');
       let successful = 0;
       let failed = 0;
       const errors: Record<string, string> = {};
@@ -267,7 +267,7 @@ updates: Record<string, unknown>,
     try {
       return await this.makeRequest('/platform/payment-fees');
     } catch (error) {
-      console.error('Failed to fetch payment fees:', error);
+      logger.error('Failed to fetch payment fees:', error);
       // Return mock data for demo
       return this.getMockPaymentFees();
     }
@@ -291,7 +291,7 @@ updates: Record<string, unknown>,
         'POST'
       );
     } catch (error) {
-      console.error('Failed to calculate payment fee:', error);
+      logger.error('Failed to calculate payment fee:', error);
       // Return mock calculation
       return this.getMockFeeCalculation(paymentMethod, amount);
     }
@@ -303,7 +303,7 @@ updates: Record<string, unknown>,
       const params = restaurantId ? `?restaurant_id=${restaurantId}` : '';
       return await this.makeRequest(`/platform/feature-flags${params}`);
     } catch (error) {
-      console.error('Failed to fetch feature flags:', error);
+      logger.error('Failed to fetch feature flags:', error);
       return this.getMockFeatureFlags();
     }
   }
@@ -322,7 +322,7 @@ updates: Record<string, unknown>,
       });
       return true;
     } catch (error) {
-      console.error(`Failed to update feature flag ${featureKey}:`, error);
+      logger.error(`Failed to update feature flag ${featureKey}:`, error);
       return false;
     }
   }
@@ -338,7 +338,7 @@ updates: Record<string, unknown>,
         `/platform/restaurants/${restaurantId}/effective-settings${params}`
       );
     } catch (error) {
-      console.error('Failed to fetch restaurant effective settings:', error);
+      logger.error('Failed to fetch restaurant effective settings:', error);
       return {};
     }
   }
@@ -360,7 +360,7 @@ updates: Record<string, unknown>,
       );
       return true;
     } catch (error) {
-      console.error('Failed to set restaurant override:', error);
+      logger.error('Failed to set restaurant override:', error);
       return false;
     }
   }
@@ -379,7 +379,7 @@ updates: Record<string, unknown>,
       const result = await this.makeRequest(`/platform/audit-trail?${params.toString()}`);
       return result.audit_records || [];
     } catch (error) {
-      console.error('Failed to fetch audit trail:', error);
+      logger.error('Failed to fetch audit trail:', error);
       return [];
     }
   }
@@ -401,7 +401,7 @@ updates: Record<string, unknown>,
 
       return await this.makeRequest(`/platform/sync/platform-config?${params.toString()}`);
     } catch (error) {
-      console.error('Failed to sync platform config:', error);
+      logger.error('Failed to sync platform config:', error);
       return {
         platform_settings: {},
         feature_flags: {},
@@ -417,7 +417,7 @@ updates: Record<string, unknown>,
       await this.makeRequest('/platform/initialize-defaults', 'POST');
       return true;
     } catch (error) {
-      console.error('Failed to initialize default settings:', error);
+      logger.error('Failed to initialize default settings:', error);
       return false;
     }
   }
@@ -544,10 +544,10 @@ updates: Record<string, unknown>,
     description: string;
   }> {
     try {
-      console.log('📊 Getting service charge config from real data store...');
+      logger.info('📊 Getting service charge config from real data store...');
       return await this.dataStore.getServiceChargeConfig();
     } catch (error) {
-      console.error('❌ Failed to get service charge config:', error);
+      logger.error('❌ Failed to get service charge config:', error);
       throw error;
     }
   }
@@ -558,7 +558,7 @@ updates: Record<string, unknown>,
     description?: string
   ): Promise<boolean> {
     try {
-      console.log('💾 Updating service charge config in real data store...', {
+      logger.info('💾 Updating service charge config in real data store...', {
         enabled,
         rate,
         description,
@@ -572,10 +572,10 @@ updates: Record<string, unknown>,
       };
 
       await this.dataStore.setServiceChargeConfig(config);
-      console.log('✅ Service charge config updated successfully');
+      logger.info('✅ Service charge config updated successfully');
       return true;
     } catch (error) {
-      console.error('❌ Failed to update service charge config:', error);
+      logger.error('❌ Failed to update service charge config:', error);
       return false;
     }
   }

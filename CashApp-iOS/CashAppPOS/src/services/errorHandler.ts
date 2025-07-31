@@ -77,7 +77,7 @@ setNavigation(navigation: NavigationProp<unknown>) {
   handle(error: unknown): UserFriendlyError {
     // Log full error for debugging (in dev only)
     if (__DEV__) {
-      console.error('Full error:', error);
+      logger.error('Full error:', error);
     }
 
     // Extract error information safely

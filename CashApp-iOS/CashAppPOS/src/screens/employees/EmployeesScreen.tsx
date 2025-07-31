@@ -218,7 +218,7 @@ const EmployeesScreen: React.FC = () => {
         `${employeeData.name} has been added to your team and saved to the system!`
       );
 } catch (error: unknown) {
-      console.error('Failed to create employee:', error);
+      logger.error('Failed to create employee:', error);
       Alert.alert(
         'Error',
         error.message || 'Failed to add employee. Please check your connection and try again.'
@@ -270,7 +270,7 @@ const EmployeesScreen: React.FC = () => {
               // Show success message
               Alert.alert('Success', `${employee.name} has been removed from your team.`);
 } catch (error: unknown) {
-              console.error('Failed to delete employee:', error);
+              logger.error('Failed to delete employee:', error);
               Alert.alert('Error', error.message || 'Failed to delete employee. Please try again.');
               // Reopen modal on error
               setSelectedEmployee(employee);

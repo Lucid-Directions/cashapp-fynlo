@@ -47,14 +47,14 @@ class NetworkUtils {
 
     for (let attempt = 0; attempt <= retryAttempts; attempt++) {
       try {
-        console.log(
+        logger.info(
           `🌐 Network request (attempt ${attempt + 1}/${retryAttempts + 1}): ${method} ${url}`
         );
 
         const controller = new AbortController();
         const timeoutId = setTimeout(() => {
           controller.abort();
-          console.warn(`⏰ Request timeout after ${timeout}ms: ${url}`);
+          logger.warn(`⏰ Request timeout after ${timeout}ms: ${url}`);
         }, timeout);
 
         const response = await fetch(url, {
@@ -68,7 +68,7 @@ class NetworkUtils {
 
         if (response.ok) {
           const data = await response.json();
-          console.log(`✅ Network request successful: ${method} ${url}`);
+          logger.info(`✅ Network request successful: ${method} ${url}`);
           return {
             success: true,
             data,
@@ -76,7 +76,7 @@ class NetworkUtils {
           };
         } else {
           const errorText = await response.text();
-          console.warn(
+          logger.warn(
             `⚠️ Network request failed: ${response.status} ${response.statusText} - ${errorText}`
           );
           return {
@@ -87,11 +87,11 @@ class NetworkUtils {
         }
       } catch (error) {
         lastError = error as Error;
-        console.warn(`❌ Network request attempt ${attempt + 1} failed:`, error.message);
+        logger.warn(`❌ Network request attempt ${attempt + 1} failed:`, error.message);
 
         // Don't retry on the last attempt
         if (attempt < retryAttempts) {
-          console.log(`🔄 Retrying in ${retryDelay}ms...`);
+          logger.info(`🔄 Retrying in ${retryDelay}ms...`);
           await this.delay(retryDelay);
         }
       }
@@ -115,7 +115,7 @@ class NetworkUtils {
       });
       return result.success;
     } catch (error) {
-      console.warn('Backend health check failed:', error);
+      logger.warn('Backend health check failed:', error);
       return false;
     }
   }
@@ -159,7 +159,7 @@ class NetworkUtils {
         headers.Authorization = `Bearer ${authToken}`;
       }
     } catch (error) {
-      console.warn('Failed to get auth token:', error);
+      logger.warn('Failed to get auth token:', error);
     }
 
     return headers;

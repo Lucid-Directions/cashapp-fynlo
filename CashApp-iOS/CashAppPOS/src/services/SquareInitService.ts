@@ -34,7 +34,7 @@ class SquareInitService {
 
       // Check if we have valid configuration
       if (config.applicationId.includes('YOUR_') || locationId.includes('YOUR_')) {
-        console.warn('Square SDK not configured with real credentials. Using demo mode.');
+        logger.warn('Square SDK not configured with real credentials. Using demo mode.');
         // Return true to allow development but warn about configuration
         return true;
       }
@@ -47,10 +47,10 @@ class SquareInitService {
       });
 
       this.initialized = true;
-      console.log('Square SDK initialized successfully');
+      logger.info('Square SDK initialized successfully');
       return true;
     } catch (error) {
-      console.error('Failed to initialize Square SDK:', error);
+      logger.error('Failed to initialize Square SDK:', error);
       return false;
     }
   }

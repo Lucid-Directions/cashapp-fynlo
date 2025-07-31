@@ -144,7 +144,7 @@ const XeroSyncDashboard: React.FC = () => {
         },
       ]);
     } catch (error) {
-      console.error('Failed to load dashboard data:', error);
+      logger.error('Failed to load dashboard data:', error);
       Alert.alert('Error', 'Failed to load sync dashboard data');
     }
   }, [customerSyncService, itemsSyncService, salesSyncService, apiClient]);
@@ -168,7 +168,7 @@ const XeroSyncDashboard: React.FC = () => {
             Alert.alert('Success', `${entityType} sync completed successfully`);
             await loadDashboardData();
           } catch (error) {
-            console.error('Manual sync failed:', error);
+            logger.error('Manual sync failed:', error);
             Alert.alert('Error', 'Manual sync failed');
           } finally {
             setSyncInProgress(false);

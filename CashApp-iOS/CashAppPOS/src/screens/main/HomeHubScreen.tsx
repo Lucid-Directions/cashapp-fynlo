@@ -181,7 +181,7 @@ const HomeHubScreen: React.FC = () => {
 
   const handleIconPress = (icon: HubIcon) => {
     // Analytics tracking for icon tap
-    console.log('📊 Analytics: HomeHubIconTapped', {
+    logger.info('📊 Analytics: HomeHubIconTapped', {
       iconId: icon.id,
       iconTitle: icon.title,
       iconCategory: icon.category,
@@ -199,14 +199,14 @@ const HomeHubScreen: React.FC = () => {
     try {
       await signOut();
     } catch (error) {
-      console.error('Error signing out:', error);
+      logger.error('Error signing out:', error);
     }
   };
 
   // Track analytics for hub view
   useEffect(() => {
     // Analytics tracking for HomeHubViewed event
-    console.log('📊 Analytics: HomeHubViewed', {
+    logger.info('📊 Analytics: HomeHubViewed', {
       userId: user?.id,
       userEmail: user?.email,
       userRole: user?.role,

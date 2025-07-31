@@ -170,7 +170,7 @@ subscriptionTier: (authStoreUser.subscription_plan as unknown) || 'premium',
           });
         }
       } catch (error) {
-        console.error('Error syncing auth user:', error);
+        logger.error('Error syncing auth user:', error);
         // Reset to safe state on error
         setUser(null);
         setBusiness(null);
@@ -200,7 +200,7 @@ subscriptionTier: (authStoreUser.subscription_plan as unknown) || 'premium',
 
       return true;
     } catch (error) {
-      console.error('Sign in error:', error);
+      logger.error('Sign in error:', error);
       return false;
     }
   };
@@ -216,7 +216,7 @@ subscriptionTier: (authStoreUser.subscription_plan as unknown) || 'premium',
       await authStore.signUp(userData.email || '', password, businessData.name);
       return true;
     } catch (error) {
-      console.error('Sign up error:', error);
+      logger.error('Sign up error:', error);
       return false;
     }
   };
@@ -233,7 +233,7 @@ subscriptionTier: (authStoreUser.subscription_plan as unknown) || 'premium',
       const appStore = useAppStore.getState();
       appStore.logout();
     } catch (error) {
-      console.error('Sign out error:', error);
+      logger.error('Sign out error:', error);
     }
   };
 
@@ -268,13 +268,13 @@ subscriptionTier: (authStoreUser.subscription_plan as unknown) || 'premium',
 
   const resetPassword = async (email: string): Promise<boolean> => {
     // Placeholder for password reset
-    console.log('Password reset requested for:', email);
+    logger.info('Password reset requested for:', email);
     return true;
   };
 
   const loadPlatformData = async (): Promise<void> => {
     // This will be implemented when platform features are needed
-    console.log('Loading platform data...');
+    logger.info('Loading platform data...');
   };
 
   const switchRestaurant = async (restaurantId: string): Promise<void> => {

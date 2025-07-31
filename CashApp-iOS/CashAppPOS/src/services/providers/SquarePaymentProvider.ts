@@ -25,9 +25,9 @@ class SquarePaymentProviderClass {
       // await SQIPCore.setSquareApplicationId(config.applicationId);
 
       this.initialized = true;
-      console.log('Square payment provider initialized (placeholder)');
+      logger.info('Square payment provider initialized (placeholder)');
     } catch (error) {
-      console.error('Failed to initialize Square:', error);
+      logger.error('Failed to initialize Square:', error);
       throw error;
     }
   }

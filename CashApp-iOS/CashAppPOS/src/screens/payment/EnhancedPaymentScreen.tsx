@@ -117,7 +117,7 @@ _calculateOrderTotal,
   useEffect(() => {
     const loadPlatformServiceCharge = async () => {
       try {
-        console.log('💰 EnhancedPaymentScreen - Loading platform service charge...');
+        logger.info('💰 EnhancedPaymentScreen - Loading platform service charge...');
         const dataStore = SharedDataStore.getInstance();
         const config = await dataStore.getServiceChargeConfig();
 
@@ -127,12 +127,12 @@ _calculateOrderTotal,
             rate: config.rate,
             description: config.description || 'Platform service charge',
           });
-          console.log('✅ Platform service charge loaded:', config);
+          logger.info('✅ Platform service charge loaded:', config);
         } else {
-          console.log('⚠️ No platform service charge config found');
+          logger.info('⚠️ No platform service charge config found');
         }
       } catch (error) {
-        console.error('❌ Failed to load platform service charge:', error);
+        logger.error('❌ Failed to load platform service charge:', error);
       }
     };
 
@@ -141,7 +141,7 @@ _calculateOrderTotal,
     // Subscribe to real-time updates
     const dataStore = SharedDataStore.getInstance();
     const unsubscribe = dataStore.subscribe('serviceCharge', (updatedConfig) => {
-      console.log('🔄 Platform service charge updated in real-time:', updatedConfig);
+      logger.info('🔄 Platform service charge updated in real-time:', updatedConfig);
       setPlatformServiceCharge({
         enabled: updatedConfig.enabled,
         rate: updatedConfig.rate,
@@ -190,14 +190,14 @@ _calculateOrderTotal,
       // Simulate QR code expiration after 5 minutes with safer state checking
       setTimeout(() => {
         setQRPaymentStatus((current) => {
-          console.log('⏰ QR Code expiration check - current status:', current);
+          logger.info('⏰ QR Code expiration check - current status:', current);
           return current === 'waiting' ? 'expired' : current;
         });
       }, 300000); // 5 minutes
 
-      console.log('✅ QR Code generated successfully:', qrString.substring(0, 50) + '...');
+      logger.info('✅ QR Code generated successfully:', qrString.substring(0, 50) + '...');
     } catch (error) {
-      console.error('❌ Failed to generate QR code:', error);
+      logger.error('❌ Failed to generate QR code:', error);
       setQRPaymentStatus('expired');
       Alert.alert('Error', 'Failed to generate QR code. Please try again.');
     }
@@ -388,7 +388,7 @@ _calculateOrderTotal,
         notes: undefined,
       };
 
-      console.log('💳 Processing payment and saving order...', {
+      logger.info('💳 Processing payment and saving order...', {
         total,
         customer: customerEmail,
         method: selectedPaymentMethod,
@@ -415,7 +415,7 @@ const _savedOrder = await orderService.saveOrder(orderData);
       );
     } catch (error) {
       setProcessing(false);
-      console.error('❌ Payment processing failed:', error);
+      logger.error('❌ Payment processing failed:', error);
 
       Alert.alert(
         'Payment Failed',
