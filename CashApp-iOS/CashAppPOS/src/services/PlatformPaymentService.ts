@@ -390,7 +390,7 @@ class PlatformPaymentService {
    */
   async getFeeSummary(
     restaurantId?: string,
-    dateRange?: { start: Date; end: Date }
+    _dateRange?: { start: Date; end: Date }
   ): Promise<{
     totalFees: number;
     feesByMethod: Record<string, number>;

@@ -12,7 +12,7 @@ export interface ErrorInfo {
   userId?: string;
   deviceInfo?: unknown;
   stackTrace?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export enum ErrorType {
@@ -72,7 +72,7 @@ class ErrorHandler {
     type: ErrorType = ErrorType.SYSTEM,
     severity: ErrorSeverity = ErrorSeverity.MEDIUM,
     context?: string,
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>
   ): Promise<void> {
     const errorInfo = this.createErrorInfo(error, type, severity, context, metadata);
 
@@ -155,7 +155,7 @@ class ErrorHandler {
     message: string,
     code?: string,
     context?: string,
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>
   ): Promise<void> {
     const error = new Error(message);
     await this.handleError(error, ErrorType.BUSINESS_LOGIC, ErrorSeverity.MEDIUM, context, {
@@ -231,7 +231,7 @@ class ErrorHandler {
     type: ErrorType,
     severity: ErrorSeverity,
     context?: string,
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>
   ): ErrorInfo {
     const errorMessage = typeof error === 'string' ? error : error.message;
     const stackTrace = typeof error === 'object' ? error.stack : undefined;

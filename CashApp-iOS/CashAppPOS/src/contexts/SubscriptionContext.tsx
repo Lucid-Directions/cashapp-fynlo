@@ -20,7 +20,7 @@ export interface SubscriptionPlan {
   max_orders_per_month: number | null;
   max_staff_accounts: number | null;
   max_menu_items: number | null;
-  features: Record<string, any>;
+  features: Record<string, unknown>;
   yearly_savings?: number;
   yearly_discount_percentage?: number;
 }

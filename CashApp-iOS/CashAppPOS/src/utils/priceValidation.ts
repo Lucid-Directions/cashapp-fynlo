@@ -13,7 +13,7 @@ export interface PriceValidationResult {
 
 export interface CalculationContext {
   operation: string;
-  inputValues: Record<string, any>;
+  inputValues: Record<string, unknown>;
   screenName?: string;
   component?: string;
 }

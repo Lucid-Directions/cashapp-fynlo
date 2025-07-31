@@ -48,7 +48,7 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
   const { theme } = useTheme();
   const styles = useThemedStyles(createStyles);
   const [step, setStep] = useState<'capture' | 'spinning' | 'review' | 'submitting'>('capture');
-  const [_capturedImage, setCapturedImage] = useState<unknown>(null); // Placeholder for image data
+  const [_capturedImage, _setCapturedImage] = useState<unknown>(null); // Placeholder for image data
   const [parsedItems, setParsedItems] = useState<ReceiptItem[]>([]);
 
   const _requestCameraPermission = async () => {

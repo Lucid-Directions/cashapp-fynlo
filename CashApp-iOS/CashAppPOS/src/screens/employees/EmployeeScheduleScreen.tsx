@@ -77,7 +77,7 @@ const EmployeeScheduleScreen: React.FC = () => {
   const [showAddShiftModal, setShowAddShiftModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string>('');
   // const [selectedEmployee, setSelectedEmployee] = useState<EmployeeData | null>(null); // Likely managed by newShift.employeeId
-  const [_viewMode, setViewMode] = useState<'week' | 'month'>('week');
+  const [_viewMode, _setViewMode] = useState<'week' | 'month'>('week');
   const [isLoadingEmployees, setIsLoadingEmployees] = useState<boolean>(true);
   const [isLoadingSchedule, setIsLoadingSchedule] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);

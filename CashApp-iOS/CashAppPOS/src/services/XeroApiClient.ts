@@ -405,7 +405,7 @@ export class XeroApiClient {
   /**
    * Get contacts (customers)
    */
-  public async getContacts(params: Record<string, any> = {}): Promise<unknown> {
+  public async getContacts(params: Record<string, unknown> = {}): Promise<unknown> {
     const queryString = new URLSearchParams(params).toString();
     const endpoint = `/Contacts${queryString ? `?${queryString}` : ''}`;
     const response = await this.makeRequest(endpoint);
@@ -415,7 +415,7 @@ export class XeroApiClient {
   /**
    * Get items (products)
    */
-  public async getItems(params: Record<string, any> = {}): Promise<unknown> {
+  public async getItems(params: Record<string, unknown> = {}): Promise<unknown> {
     const queryString = new URLSearchParams(params).toString();
     const endpoint = `/Items${queryString ? `?${queryString}` : ''}`;
     const response = await this.makeRequest(endpoint);
@@ -425,7 +425,7 @@ export class XeroApiClient {
   /**
    * Get invoices
    */
-  public async getInvoices(params: Record<string, any> = {}): Promise<unknown> {
+  public async getInvoices(params: Record<string, unknown> = {}): Promise<unknown> {
     const queryString = new URLSearchParams(params).toString();
     const endpoint = `/Invoices${queryString ? `?${queryString}` : ''}`;
     const response = await this.makeRequest(endpoint);

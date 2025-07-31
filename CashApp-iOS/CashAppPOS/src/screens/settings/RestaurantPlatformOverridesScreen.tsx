@@ -56,7 +56,7 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [_pendingOverrides, setPendingOverrides] = useState<OverrideRequest[]>([]);
+  const [_pendingOverrides, _setPendingOverrides] = useState<OverrideRequest[]>([]);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
 
   const platformService = PlatformService.getInstance();

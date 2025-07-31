@@ -95,7 +95,7 @@ class PlatformService {
   private async makeRequest(
     endpoint: string,
     method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'GET',
-    data?: any
+    data?: unknown
   ): Promise<unknown> {
     try {
       const url = `${BASE_URL}${endpoint}`;
@@ -159,7 +159,7 @@ class PlatformService {
       const settingsData = await this.makeRequest(endpoint);
 
       // Handle different API response formats
-      let settingsObject: Record<string, any>;
+      let settingsObject: Record<string, unknown>;
 
       if (settingsData && typeof settingsData === 'object') {
         // If it's already an object, use it directly
@@ -220,7 +220,7 @@ class PlatformService {
   }
 
   async bulkUpdatePlatformSettings(
-    updates: Record<string, any>,
+    updates: Record<string, unknown>,
     changeReason?: string
   ): Promise<{ successful: number; failed: number; errors: Record<string, string> }> {
     try {
@@ -389,9 +389,9 @@ class PlatformService {
     restaurantId?: string,
     categories?: string[]
   ): Promise<{
-    platform_settings: Record<string, any>;
+    platform_settings: Record<string, unknown>;
     feature_flags: Record<string, boolean>;
-    effective_settings: Record<string, any>;
+    effective_settings: Record<string, unknown>;
     sync_timestamp: string;
   }> {
     try {

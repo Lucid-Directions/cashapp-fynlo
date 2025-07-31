@@ -73,7 +73,7 @@ const MenuManagementScreen: React.FC = () => {
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
-  const [_refreshing, setRefreshing] = useState(false);
+  const [_refreshing, _setRefreshing] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);

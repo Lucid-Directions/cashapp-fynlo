@@ -52,7 +52,7 @@ interface AnalyticsData {
   cost_savings: {
     potential_savings: number;
     savings_percentage: number;
-    optimal_mix: Record<string, any>;
+    optimal_mix: Record<string, unknown>;
   };
   recommendations: Array<{
     type: string;
@@ -70,7 +70,7 @@ interface VolumeData {
     total_volume: number;
     total_transactions: number;
     total_fees: number;
-    providers: Record<string, any>;
+    providers: Record<string, unknown>;
   }>;
   growth_metrics: {
     volume_growth: number;

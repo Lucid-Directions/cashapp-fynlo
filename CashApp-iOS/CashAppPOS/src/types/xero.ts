@@ -82,7 +82,7 @@ export interface BaseEntityMapping {
   syncDirection: XeroSyncDirection;
   syncStatus: XeroSyncStatus;
   conflictResolution?: XeroConflictResolution;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -144,7 +144,7 @@ export interface XeroSyncFilters {
   };
   status?: string[];
   categories?: string[];
-  customFilters?: Record<string, any>;
+  customFilters?: Record<string, unknown>;
 }
 
 // Sync Session Models
@@ -160,7 +160,7 @@ export interface XeroSyncSession {
   endTime?: Date;
   duration?: number;
   triggeredBy: string; // User ID or 'system'
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 // Audit and Logging Models
@@ -175,7 +175,7 @@ export interface XeroSyncAuditLog {
   errorDetails?: XeroSyncError;
   timestamp: Date;
   duration?: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface XeroSyncChange {
@@ -227,7 +227,7 @@ export interface XeroWebhookEvent {
   error?: string;
   retryCount: number;
   maxRetries: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 // Data Validation Models

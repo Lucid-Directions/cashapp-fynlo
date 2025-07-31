@@ -7,7 +7,7 @@ export interface ErrorContext {
   operation: string;
   component?: string;
   userId?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export class ErrorLogger {

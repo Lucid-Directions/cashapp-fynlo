@@ -84,7 +84,7 @@ export const VALID_ROUTES = {
 export function validateNavigation(
   currentScreen: string,
   targetScreen: string,
-  params?: any
+  params?: unknown
 ): { valid: boolean; error?: string } {
   // Check if target screen exists in any navigator
   const allRoutes = [

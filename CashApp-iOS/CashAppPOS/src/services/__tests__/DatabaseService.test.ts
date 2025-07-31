@@ -135,7 +135,7 @@ describe('DatabaseService', () => {
       const mockFetch = createMockFetch([mockApiResponses.productsSuccess]);
       global.fetch = mockFetch;
 
-      const products = await service.getProductsByCategory(1);
+      const _products = await service.getProductsByCategory(1);
 
       expect(mockFetch).toHaveBeenCalledWith(
         expect.stringContaining('/api/v1/products/category/1'),

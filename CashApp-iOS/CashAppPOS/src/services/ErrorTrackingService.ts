@@ -7,13 +7,13 @@ export interface ErrorContext {
   userRole?: string;
   screenName?: string;
   action?: string;
-  additionalData?: Record<string, any>;
+  additionalData?: Record<string, unknown>;
 }
 
 export interface PerformanceContext {
   operation: string;
   description?: string;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
 }
 
 class ErrorTrackingService {
@@ -51,7 +51,7 @@ class ErrorTrackingService {
     this.simpleTracker.captureMessage(message, level, context);
   }
 
-  trackEvent(event: string, data?: Record<string, any>): void {
+  trackEvent(event: string, data?: Record<string, unknown>): void {
     this.simpleTracker.trackEvent(event, data);
   }
 
@@ -111,7 +111,7 @@ class ErrorTrackingService {
   }
 
   // Debug helpers
-  addBreadcrumb(message: string, category: string = 'debug', data?: Record<string, any>): void {
+  addBreadcrumb(message: string, category: string = 'debug', data?: Record<string, unknown>): void {
     this.simpleTracker.addBreadcrumb(message, category, data);
   }
 
@@ -119,7 +119,7 @@ class ErrorTrackingService {
     this.simpleTracker.setTag(key, value);
   }
 
-  setContext(key: string, context: Record<string, any>): void {
+  setContext(key: string, context: Record<string, unknown>): void {
     this.simpleTracker.setContext(key, context);
   }
 

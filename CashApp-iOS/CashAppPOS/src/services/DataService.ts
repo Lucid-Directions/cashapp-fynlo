@@ -111,7 +111,7 @@ class DataService {
   private async testAPIEndpoint(
     endpoint: string,
     method: string = 'GET',
-    data?: any
+    data?: unknown
   ): Promise<void> {
     if (this.featureFlags.TEST_API_MODE) {
       try {
