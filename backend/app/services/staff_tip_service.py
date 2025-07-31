@@ -24,7 +24,6 @@ class StaffTipService:
         return float(amount.quantize(quantizer, rounding=ROUND_HALF_UP))
 
     def distribute_order_tips(
-        """Execute distribute_order_tips operation."""
         self,
         order_reference: str,
         total_tips_collected: float,
@@ -35,6 +34,7 @@ class StaffTipService:
         assigned_staff: List[StaffMember],
         tip_distribution_strategy: str = "equal_split" # e.g., "equal_split", "points_based"
     ) -> List[StaffTipDistribution]:
+        """Execute distribute_order_tips operation."""
         """
         Distributes tips collected from an order to the assigned staff members.
 
@@ -42,11 +42,11 @@ class StaffTipService:
             order_reference: Reference for the order.
             total_tips_collected: The gross amount of tips collected for this order.
             service_charge_amount_on_order: The total amount of service charge applied to the order.
-                                            If tips are given on top of SC, this might not reduce tips.
-                                            If SC is "in lieu of tips", this is critical.
+                If tips are given on top of SC, this might not reduce tips.
+                If SC is "in lieu of tips", this is critical.
             processor_fee_covered_by_service_charge: The portion of the service charge that was
-                                                     used to cover payment processor fees. This amount
-                                                     effectively reduces the "service" portion of SC.
+                used to cover payment processor fees. This amount
+                effectively reduces the "service" portion of SC.
             assigned_staff: A list of staff members assigned to this order.
             tip_distribution_strategy: The strategy to use for distributing tips.
 
@@ -136,7 +136,7 @@ class StaffTipService:
                         staff_id=staff_member.id,
                         tip_amount_gross=self._round_currency(allocated_tip), # Gross tip share
                         service_charge_deduction=0.0, # Assuming SC doesn't directly reduce this tip amount here
-                                                      # This field might be used if SC is pooled with tips then distributed
+                            # This field might be used if SC is pooled with tips then distributed
                         transaction_fee_impact_on_tip=self._round_currency(impact_per_staff), # Share of SC's fee burden
                         tip_amount_net=self._round_currency(allocated_tip), # Net from tips. If SC also for staff, their total income is this + SC_share
                         # distribution_timestamp is server_default

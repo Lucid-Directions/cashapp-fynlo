@@ -37,7 +37,7 @@ class PlatformFeeService:
 
         Args:
             amount_subject_to_platform_fee: The amount on which the platform fee is calculated.
-                                            This is typically (subtotal + VAT + service_charge + processor_fee_if_customer_pays).
+                This is typically (subtotal + VAT + service_charge + processor_fee_if_customer_pays).
         Returns:
             The calculated platform fee as a Decimal.
         """
@@ -70,7 +70,7 @@ class PlatformFeeService:
             subtotal: The order subtotal (before VAT, service charge, and other fees).
             vat_amount: The total VAT amount for the order.
             service_charge_final_amount: The final service charge amount. This amount might already
-                                         include processor fees if that's the configuration.
+                include processor fees if that's the configuration.
             payment_method: The payment method chosen by the customer.
             customer_pays_processor_fees: Boolean indicating if the customer bears the processor fee.
             restaurant_id: Optional ID of the restaurant.

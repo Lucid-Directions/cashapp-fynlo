@@ -45,7 +45,7 @@ class CustomerSearchRequest(BaseSearchRequest):
     restaurant_id: Optional[str] = None
     
     ALLOWED_SORT_FIELDS: ClassVar[List[str]] = ['created_at', 'updated_at', 'total_spent', 'order_count', 
-                                                'first_name', 'last_name', 'email']
+        'first_name', 'last_name', 'email']
     
     @validator('email', 'phone', 'name', pre=True)
     def validate_search_fields(cls, v):

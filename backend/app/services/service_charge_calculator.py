@@ -49,7 +49,7 @@ class ServiceChargeCalculator:
             payment_method: The payment method used.
             customer_pays_processor_fees: True if the customer is intended to pay processor fees.
             include_processor_fee_in_service_charge: True if the service charge amount should
-                                                     also cover the processor fee (when customer pays fees).
+                also cover the processor fee (when customer pays fees).
             restaurant_id: Optional restaurant ID.
             monthly_volume_for_restaurant: Optional monthly transaction volume.
 
