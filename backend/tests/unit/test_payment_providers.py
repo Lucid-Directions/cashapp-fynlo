@@ -4,19 +4,19 @@ Unit tests for payment providers
 import pytest
 from unittest.mock import Mock, patch
 from decimal import Decimal
-from app.services.payment_providers.base import BasePaymentProvider
+from app.services.payment_providers.base import PaymentProvider
 from app.services.payment_providers.cash_provider import CashPaymentProvider
 from app.services.payment_providers.stripe_provider import StripePaymentProvider
 from app.services.payment_providers.sumup_provider import SumUpPaymentProvider
 from app.services.payment_providers import PaymentStatus, PaymentMethod
 
 
-class TestBasePaymentProvider:
+class TestPaymentProvider:
     """Test base payment provider functionality"""
     
     def test_fee_calculation(self):
         """Test fee calculation methods"""
-        provider = BasePaymentProvider()
+        provider = PaymentProvider()
         
         # Test percentage fee
         provider.fee_percentage = 2.9
@@ -30,7 +30,7 @@ class TestBasePaymentProvider:
         
     def test_validate_amount(self):
         """Test amount validation"""
-        provider = BasePaymentProvider()
+        provider = PaymentProvider()
         
         # Valid amounts
         assert provider.validate_amount(Decimal("10.00")) is True

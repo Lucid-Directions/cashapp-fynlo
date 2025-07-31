@@ -1,6 +1,6 @@
 # app/core/feature_gate.py
 from typing import Callable
-from fastapi import Depends, HTTPException, Request
+from fastapi import Depends, Request
 from sqlalchemy.orm import Session
 from app.core.database import get_db, Restaurant, User
 
@@ -66,7 +66,7 @@ async def check_user_has_feature(
             db: Session = Depends(get_db)
         ):
             if not await check_user_has_feature("inventory_management", current_user, db):
-                raise HTTPException(status_code=403, detail="Feature not available in your plan")
+                raise AuthorizationException(message="Feature not available in your plan")
             # ... rest of endpoint logic
     """
     if not hasattr(current_user, 'restaurant_id') or not current_user.restaurant_id:

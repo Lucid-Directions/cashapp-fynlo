@@ -3,7 +3,7 @@ Minimal FastAPI server to get essential endpoints working
 This bypasses complex payment provider imports and focuses on core data endpoints
 """
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, 
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Dict, Any
 import json
@@ -21,8 +21,7 @@ app.add_middleware(
     allow_origins=["*"],  # Configure appropriately for production
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"],
-)
+    allow_headers=["*"])
 
 # Mock data - Casa Estrella Mexican Restaurant
 MOCK_EMPLOYEES = [
@@ -218,7 +217,7 @@ def get_employees():
 def get_employee(employee_id: int):
     employee = next((emp for emp in MOCK_EMPLOYEES if emp["id"] == employee_id), None)
     if not employee:
-        raise HTTPException(status_code=404, detail="Employee not found")
+        raise NotFoundException(message="Employee not found")
     return success_response(employee, "Employee retrieved successfully")
 
 # Inventory endpoints

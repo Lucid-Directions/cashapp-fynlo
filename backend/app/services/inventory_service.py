@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func, and_
 from typing import List, Optional, Dict, Tuple
 from uuid import UUID
+from app.core.exceptions import FynloException
 import logging # For logging stock_overdrawn events
 
 from app.models import Order as OrderModel, Product as ProductModel, Recipe as RecipeModel, InventoryItem as InventoryItemModel, InventoryLedgerEntry as InventoryLedgerModel
@@ -35,7 +36,7 @@ async def apply_recipe_deductions_for_order(
         Returns an empty list if the order is not found or has no processable items.
 
     Raises:
-        HTTPException or custom exceptions for critical errors (e.g., if an item in order has no product entry).
+        FynloException for critical errors (e.g., if an item in order has no product entry).
     """
     order = db.query(OrderModel).filter(OrderModel.id == order_id).first()
     if not order:

@@ -6,7 +6,7 @@ to features based on subscription plans.
 """
 
 from functools import wraps
-from fastapi import HTTPException, Request, Depends
+from fastapi import Request, Depends
 from sqlalchemy.orm import Session
 from typing import Callable, Optional, List, Tuple
 
@@ -15,7 +15,7 @@ from app.models.subscription import RestaurantSubscription, SubscriptionUsage
 from app.core.auth import get_current_user
 
 
-class FeatureGateError(HTTPException):
+class FeatureGateError(FynloException):
     """Custom exception for feature gate violations"""
     
     def __init__(self, feature_name: str, current_plan: str = None, required_plans: List[str] = None):
@@ -35,7 +35,7 @@ class FeatureGateError(HTTPException):
         super().__init__(status_code=403, detail=detail)
 
 
-class UsageLimitError(HTTPException):
+class UsageLimitError(FynloException):
     """Custom exception for usage limit violations"""
     
     def __init__(self, limit_type: str, current_usage: int, limit: int, current_plan: str = None):

@@ -26,7 +26,7 @@ class AuthenticationSecurityTester:
         self.test_results = []
         self.valid_token = None
         
-    def log_test(self, test_name, success, message="", severity="INFO"):
+    def log_test(self, test_name, success, message="An error occurred processing the request", severity="INFO"):
         """Log security test results"""
         status = "✅ SECURE" if success else "🔒 VULNERABLE"
         if severity == "CRITICAL":

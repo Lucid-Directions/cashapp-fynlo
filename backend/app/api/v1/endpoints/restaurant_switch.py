@@ -3,7 +3,7 @@ Restaurant Switching API for Multi-Restaurant Owners
 Only restaurant owners with multiple restaurants can use this endpoint
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from typing import List

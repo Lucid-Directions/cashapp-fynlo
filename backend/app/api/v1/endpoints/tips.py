@@ -65,10 +65,10 @@ def trigger_tip_distribution(
         # which matches the response_model.
         return distributions
     except ValueError as ve:
-        raise ValidationException(message="")
+        raise ValidationException(message="Invalid tip configuration")
     except Exception as e:
         # logger.error(f"Error distributing tips for order {order_reference}: {e}", exc_info=True)
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message="Failed to update tip settings", status_code=500)
 
 
 @router.get("/orders/{order_reference}/tip-distributions", response_model=List[StaffTipDistributionRecordSchema])

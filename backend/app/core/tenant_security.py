@@ -7,13 +7,14 @@ All other users are restricted to their own restaurant's data.
 """
 
 from typing import Optional, Union, List
-from fastapi import HTTPException, status, Request
+from fastapi import status, Request
 from sqlalchemy.orm import Session, Query
 from sqlalchemy import select, func
 from app.models import User, Restaurant, UserRestaurant
 from app.core.security_monitor import security_monitor, SecurityEventType
 from app.core.config import settings
 from app.core.validators import validate_uuid_format
+from app.core.exceptions import FynloException, ValidationException, AuthorizationException
 
 
 class TenantSecurity:
@@ -55,16 +56,13 @@ class TenantSecurity:
             db: Database session (required for multi-restaurant check)
             
         Raises:
-            HTTPException: If access is denied
+            FynloException: If access is denied
         """
         # Validate restaurant_id format to prevent SQL injection
         try:
             validate_uuid_format(str(restaurant_id))
         except ValueError:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid restaurant ID format"
-            )
+            raise ValidationException(message="Invalid restaurant ID format")
         # Get client IP for logging
         client_ip = None
         if request:
@@ -133,10 +131,8 @@ class TenantSecurity:
                 ip_address=client_ip or "unknown",
                 reason=reason
             )
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"Access denied: You don't have permission to {operation} data from this restaurant"
-            )
+            raise AuthorizationException(message=f"Access denied: You don't have permission to {operation} data from this restaurant")
+            
     
     @staticmethod
     def apply_tenant_filter(
@@ -230,14 +226,12 @@ class TenantSecurity:
             operation: Type of operation
             
         Raises:
-            HTTPException: If operation is not allowed
+            FynloException: If operation is not allowed
         """
         # Only platform owners can perform cross-restaurant operations
         if not TenantSecurity.is_platform_owner(user):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"Access denied: Only platform owners can {operation} data between restaurants"
-            )
+            raise AuthorizationException(message=f"Access denied: Only platform owners can {operation} data between restaurants")
+            
     
     @staticmethod
     def sanitize_response_data(data: dict, user: User) -> dict:

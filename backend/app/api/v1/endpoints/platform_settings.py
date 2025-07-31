@@ -4,7 +4,7 @@ Admin-only endpoints for managing platform-wide configurations
 """
 from datetime import datetime # Added missing import
 from typing import Dict, Any, Optional, List
-from fastapi import APIRouter, Depends, HTTPException, status, Query, Request
+from fastapi import APIRouter, Depends, status, Query, Request
 import logging # Added for logging in new endpoints
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field
@@ -54,10 +54,7 @@ def require_admin_user(current_user: User = Depends(get_current_user)) -> User:
     # TODO: Implement proper role-based access control
     # For now, check if user has admin role or specific permissions
     if not hasattr(current_user, 'is_admin') or not current_user.is_admin:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Admin privileges required for platform settings"
-        )
+        raise FynloException(message="Admin privileges required for platform settings")
     return current_user
 
 @router.get("/settings")
@@ -81,7 +78,7 @@ async def get_platform_settings(
         )
         
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message="An error occurred processing the request", status_code=500)
 
 # Service Charge Specific Endpoints
 @router.get(
@@ -132,7 +129,7 @@ async def update_service_charge_configuration(
         updated_config = await service.get_service_charge_config()
         return updated_config
     except ValueError as e: # Catch validation errors from the service layer
-        raise ValidationException(message="")
+        raise ValidationException(message="An error occurred processing the request")
     except Exception as e:
         logging.error(f"Error updating service charge configuration: {e}", exc_info=True)
         raise PaymentException(message="Failed to update service charge configuration")
@@ -156,10 +153,10 @@ async def get_platform_setting(
             message=f"Retrieved platform setting '{config_key}'"
         )
         
-    except HTTPException:
+    except FynloException:
         raise
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message="An error occurred processing the request", status_code=500)
 
 @router.put("/settings/{config_key}")
 async def update_platform_setting(
@@ -195,11 +192,11 @@ async def update_platform_setting(
         )
         
     except ValueError as e:
-        raise ValidationException(message="")
-    except HTTPException:
+        raise ValidationException(message="An error occurred processing the request")
+    except FynloException:
         raise
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message="An error occurred processing the request", status_code=500)
 
 @router.post("/settings/bulk-update")
 async def bulk_update_platform_settings(
@@ -246,7 +243,7 @@ async def bulk_update_platform_settings(
             )
         
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message="An error occurred processing the request", status_code=500)
 
 @router.get("/payment-fees")
 async def get_payment_fees(
@@ -264,7 +261,7 @@ async def get_payment_fees(
         )
         
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message="An error occurred processing the request", status_code=500)
 
 @router.post("/payment-fees/calculate")
 async def calculate_payment_fee(
@@ -294,9 +291,9 @@ async def calculate_payment_fee(
         )
         
     except ValueError as e:
-        raise ValidationException(message="")
+        raise ValidationException(message="An error occurred processing the request")
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message="An error occurred processing the request", status_code=500)
 
 @router.get("/feature-flags")
 async def get_feature_flags(
@@ -315,7 +312,7 @@ async def get_feature_flags(
         )
         
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message="An error occurred processing the request", status_code=500)
 
 @router.put("/feature-flags/{feature_key}")
 async def update_feature_flag(
@@ -344,10 +341,10 @@ async def update_feature_flag(
             message=f"Feature flag '{feature_key}' updated successfully"
         )
         
-    except HTTPException:
+    except FynloException:
         raise
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message="An error occurred processing the request", status_code=500)
 
 @router.get("/audit-trail")
 async def get_configuration_audit_trail(
@@ -375,7 +372,7 @@ async def get_configuration_audit_trail(
         )
         
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message="An error occurred processing the request", status_code=500)
 
 @router.post("/initialize-defaults")
 async def initialize_default_settings(
@@ -396,7 +393,7 @@ async def initialize_default_settings(
             raise FynloException(message="Failed to initialize default settings", status_code=500)
         
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message="An error occurred processing the request", status_code=500)
 
 # Restaurant override endpoints (for restaurant users)
 @router.get("/restaurants/{restaurant_id}/effective-settings")
@@ -422,7 +419,7 @@ async def get_restaurant_effective_settings(
         )
         
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message="An error occurred processing the request", status_code=500)
 
 @router.put("/restaurants/{restaurant_id}/overrides/{config_key}")
 async def set_restaurant_override(
@@ -460,9 +457,9 @@ async def set_restaurant_override(
             raise FynloException(message="Failed to set restaurant override", status_code=500)
         
     except ValueError as e:
-        raise ValidationException(message="")
+        raise ValidationException(message="An error occurred processing the request")
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message="An error occurred processing the request", status_code=500)
 
 # Public sync endpoint for mobile apps
 @router.get("/sync/platform-config")
@@ -508,7 +505,7 @@ async def sync_platform_config(
         )
         
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message="An error occurred processing the request", status_code=500)
 
 @router.get("/categories")
 async def get_setting_categories(
@@ -530,4 +527,4 @@ async def get_setting_categories(
         )
         
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message="An error occurred processing the request", status_code=500)

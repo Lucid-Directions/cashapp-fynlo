@@ -47,7 +47,7 @@ class FileUploadTester:
             except Exception as e:
                 print(f"⚠️ FileUploadService initialization failed: {e}")
     
-    def log_test(self, test_name, success, message="", details=None):
+    def log_test(self, test_name, success, message="An error occurred processing the request", details=None):
         """Log test results"""
         status = "✅ PASS" if success else "❌ FAIL"
         self.test_results.append({

@@ -4,7 +4,7 @@ Authentication endpoints for Fynlo POS
 
 from datetime import datetime, timedelta
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, status, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from jose import JWTError, jwt
@@ -114,11 +114,8 @@ async def get_current_user(
     user_agent = request.headers.get("user-agent", "unknown")
     action_prefix = f"Access to {request.url.path} denied"
 
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
+    credentials_exception = AuthenticationException(
+        message="Could not validate credentials")
     
     user_id_from_token: Optional[str] = None
     try:

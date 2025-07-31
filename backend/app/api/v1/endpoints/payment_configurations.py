@@ -89,9 +89,9 @@ def create_platform_default_setting(
             raise FynloException(message="Failed to create platform default setting.", status_code=500)
         return convert_db_model_to_schema(created_setting)
     except ValueError as ve:
-        raise ValidationException(message="")
+        raise ValidationException(message="Invalid payment configuration data")
     except Exception as e: # Catches IntegrityError from service if duplicate
-        raise ConflictException(message="")
+        raise ConflictException(message="Payment configuration already exists")
 
 
 @router.put("/settings/platform-defaults/{payment_method}", response_model=PaymentMethodFeeSettingSchema)
@@ -180,9 +180,9 @@ async def create_or_update_restaurant_setting(
             raise FynloException(message="Failed to save restaurant setting.", status_code=500)
         return convert_db_model_to_schema(saved_setting)
     except ValueError as ve:
-        raise ValidationException(message="")
+        raise ValidationException(message="Invalid payment provider settings")
     except Exception as e: # Catches IntegrityError from service
-        raise ConflictException(message="")
+        raise ConflictException(message="Payment provider already configured")
 
 
 @router.delete("/settings/restaurants/{restaurant_id}/{payment_method}", status_code=204)

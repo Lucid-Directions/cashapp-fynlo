@@ -4,7 +4,7 @@ Platform restaurant management endpoints.
 
 from datetime import datetime
 from typing import List, Optional
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Depends, Query 
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 

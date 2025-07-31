@@ -5,7 +5,7 @@ Ensures test/debug code is not executed in production environment
 
 from functools import wraps
 import asyncio
-from fastapi import HTTPException, status
+from fastapi import status
 from app.core.config import settings
 
 
@@ -19,20 +19,14 @@ def production_guard(func):
         @wraps(func)
         async def async_wrapper(*args, **kwargs):
             if settings.ENVIRONMENT == "production":
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="This endpoint is not available in production environment"
-                )
+                raise FynloException(message="This endpoint is not available in production environment")
             return await func(*args, **kwargs)
         return async_wrapper
     else:
         @wraps(func)
         def sync_wrapper(*args, **kwargs):
             if settings.ENVIRONMENT == "production":
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="This endpoint is not available in production environment"
-                )
+                raise FynloException(message="This endpoint is not available in production environment")
             return func(*args, **kwargs)
         return sync_wrapper
 

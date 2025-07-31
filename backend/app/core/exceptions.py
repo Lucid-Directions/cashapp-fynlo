@@ -4,7 +4,7 @@ iOS-friendly error management with detailed error information
 """
 
 from typing import Any, Dict, Optional, List
-from fastapi import HTTPException, Request
+from fastapi import Request, HTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError

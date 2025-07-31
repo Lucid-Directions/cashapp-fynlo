@@ -1,0 +1,12 @@
+{
+  "total_files": 1,
+  "total_exceptions": 0,
+  "migrated": [],
+  "errors": [
+    {
+      "file": "app/api/v1/endpoints/secure_payment_provider_management.py",
+      "error": "No exceptions could be migrated"
+    }
+  ],
+  "skipped": []
+}

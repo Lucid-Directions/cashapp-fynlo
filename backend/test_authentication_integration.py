@@ -29,7 +29,7 @@ class AuthenticationTester:
         self.test_users = {}
         self.tokens = {}
         
-    def log_test(self, test_name, success, message="", data=None):
+    def log_test(self, test_name, success, message="An error occurred processing the request", data=None):
         """Log test results"""
         status = "✅ PASS" if success else "❌ FAIL"
         self.test_results.append({

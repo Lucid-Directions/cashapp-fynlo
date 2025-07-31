@@ -3,7 +3,7 @@ Safe Restaurant Deletion Endpoint
 Validates that a restaurant can be safely deleted without breaking critical dependencies
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, func
 from datetime import datetime, timedelta
@@ -51,25 +51,16 @@ async def delete_restaurant(
     try:
         validate_uuid_format(restaurant_id)
     except ValueError:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid restaurant ID format"
-        )
+        raise ValidationException(message="Invalid restaurant ID format")
     
     # Only platform owners can delete restaurants
     if not TenantSecurity.is_platform_owner(current_user):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only platform owners can delete restaurants"
-        )
+        raise FynloException(message="Only platform owners can delete restaurants")
     
     # Get restaurant
     restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
     if not restaurant:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Restaurant not found"
-        )
+        raise NotFoundException(message="Restaurant not found")
     
     # Perform deletion safety checks
     check_result = await check_deletion_safety(restaurant_id, db)
@@ -155,10 +146,7 @@ async def delete_restaurant(
                 "error": str(e)
             }
         )
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to delete restaurant"
-        )
+        raise FynloException(message="Failed to delete restaurant")
 
 
 async def check_deletion_safety(restaurant_id: str, db: Session) -> DeletionCheckResult:
@@ -291,10 +279,7 @@ async def archive_restaurant(
     try:
         validate_uuid_format(restaurant_id)
     except ValueError:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid restaurant ID format"
-        )
+        raise ValidationException(message="Invalid restaurant ID format")
     
     # Check permissions
     if not TenantSecurity.is_platform_owner(current_user):
@@ -308,18 +293,12 @@ async def archive_restaurant(
         
         # Additional check: restaurant owners can only archive if they own it
         if current_user.role != "restaurant_owner":
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Only restaurant owners or platform owners can archive restaurants"
-            )
+            raise FynloException(message="Only restaurant owners or platform owners can archive restaurants")
     
     # Get restaurant
     restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
     if not restaurant:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Restaurant not found"
-        )
+        raise NotFoundException(message="Restaurant not found")
     
     if not restaurant.is_active:
         return APIResponseHelper.error(
@@ -366,7 +345,4 @@ async def archive_restaurant(
         
     except Exception as e:
         db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to archive restaurant"
-        )
+        raise FynloException(message="Failed to archive restaurant")

@@ -1,0 +1,108 @@
+{
+  "summary": {
+    "pr_number": 455,
+    "files_changed": 0,
+    "lines_changed": 0,
+    "type": "refactoring",
+    "risk_level": "medium",
+    "breaking_changes": false
+  },
+  "code_quality": {
+    "checks": {
+      "consistent_patterns": false,
+      "proper_imports": true,
+      "error_handling": false,
+      "code_duplication": false,
+      "complexity": "low"
+    },
+    "issues": [
+      "Empty error messages found - should be populated with meaningful messages",
+      "HTTPException still found in codebase"
+    ],
+    "score": 20.0
+  },
+  "security": {
+    "checks": {
+      "auth_preserved": false,
+      "no_bypasses": true,
+      "error_leakage": true,
+      "input_validation": true,
+      "rbac_intact": true
+    },
+    "vulnerabilities": [
+      "Potential information leakage through str(e) in error messages",
+      "401 errors might not be properly mapped to AuthenticationException"
+    ],
+    "critical_files_reviewed": [
+      "auth.py",
+      "payments.py",
+      "secure_payments.py",
+      "platform_admin.py",
+      "restaurants.py"
+    ],
+    "security_score": 80.0
+  },
+  "testing": {
+    "test_suite_run": false,
+    "reason": "Test database configuration issue",
+    "manual_testing": true,
+    "import_verification": true,
+    "modules_tested": 44,
+    "modules_total": 45,
+    "recommendation": "Run full test suite before merging"
+  },
+  "documentation": {
+    "files_created": [
+      "MIGRATION_REPORT.md",
+      "SECURITY_AUDIT_HTTPEXCEPTION_TO_FYNLOEXCEPTION.md",
+      "HTTPEXCEPTION_MIGRATION_COMPLETE.md"
+    ],
+    "pr_description": "comprehensive",
+    "inline_comments": false,
+    "migration_guide": true,
+    "security_audit": true,
+    "score": 90
+  },
+  "risks": [
+    {
+      "level": "medium",
+      "type": "scope",
+      "description": "Large refactoring affecting 24 files with 169 exceptions",
+      "mitigation": "Thorough testing and staged rollout recommended"
+    },
+    {
+      "level": "medium",
+      "type": "testing",
+      "description": "Full test suite not run due to database configuration",
+      "mitigation": "Run complete test suite before production deployment"
+    },
+    {
+      "level": "low",
+      "type": "ux",
+      "description": "Some exceptions have empty messages",
+      "mitigation": "Add meaningful error messages in follow-up PR"
+    }
+  ],
+  "recommendations": [
+    {
+      "priority": "high",
+      "action": "Run full test suite",
+      "description": "Configure test database and run complete test suite before merging"
+    },
+    {
+      "priority": "medium",
+      "action": "Populate empty error messages",
+      "description": "Replace empty message=\"\" with meaningful, safe error messages"
+    },
+    {
+      "priority": "medium",
+      "action": "Add exception monitoring",
+      "description": "Set up monitoring for new exception types to track patterns"
+    },
+    {
+      "priority": "high",
+      "action": "Staged deployment",
+      "description": "Deploy to staging environment first and monitor for 24-48 hours"
+    }
+  ]
+}

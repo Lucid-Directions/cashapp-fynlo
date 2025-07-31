@@ -3,7 +3,7 @@ Optimized Menu API endpoints with caching and performance improvements
 """
 
 from typing import List, Optional
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload, Session
 from sqlalchemy import select, func, and_
@@ -372,7 +372,7 @@ async def invalidate_menu_cache(
             meta={"deleted_keys": deleted_count}
         )
         
-    except HTTPException:
+    except FynloException:
         raise
     except Exception as e:
         logger.error(f"Cache invalidation error: {str(e)}")

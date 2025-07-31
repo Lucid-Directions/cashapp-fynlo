@@ -65,14 +65,12 @@ def get_payment_fee_calculator(
 
 def get_service_charge_calculator(
     pfc: PaymentFeeCalculator = Depends(get_payment_fee_calculator),
-    pss: PlatformSettingsService = Depends(get_platform_settings_service),
-) -> ServiceChargeCalculator:
+    pss: PlatformSettingsService = Depends(get_platform_settings_service)) -> ServiceChargeCalculator:
     return ServiceChargeCalculator(payment_fee_calculator=pfc, platform_settings_service=pss)
 
 def get_platform_fee_service(
     pfc: PaymentFeeCalculator = Depends(get_payment_fee_calculator),
-    pss: PlatformSettingsService = Depends(get_platform_settings_service),
-) -> PlatformFeeService:
+    pss: PlatformSettingsService = Depends(get_platform_settings_service)) -> PlatformFeeService:
     return PlatformFeeService(payment_fee_calculator=pfc, platform_settings_service=pss)
 
 def get_financial_records_service(db: Session = Depends(get_db)) -> FinancialRecordsService:
@@ -132,7 +130,7 @@ async def calculate_fees_for_order(
         except Exception as e:
             # Log the exception details
             # logger.error(f"Error in ServiceChargeCalculator: {e}", exc_info=True)
-            raise FynloException(message="", status_code=500)
+            raise FynloException(message="An error occurred processing the request", status_code=500)
 
 
     # 3. Calculate final Customer Total Breakdown using PlatformFeeService
@@ -151,10 +149,10 @@ async def calculate_fees_for_order(
         return customer_total_breakdown
 
     except ValueError as ve: # From underlying services if config is missing etc.
-        raise ValidationException(message="")
+        raise ValidationException(message="An error occurred processing the request")
     except Exception as e:
         # logger.error(f"Error in PlatformFeeService's calculate_customer_total: {e}", exc_info=True)
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message="An error occurred processing the request", status_code=500)
 
 # To include this router in the main application:
 # In backend/app/api/v1/api.py (or equivalent main router aggregation file):
@@ -208,7 +206,7 @@ async def record_platform_fee(
             transaction_timestamp=db_record.transaction_timestamp.isoformat()
         )
     except ValueError as ve: # Catch specific errors if service raises them
-        raise ValidationException(message="")
+        raise ValidationException(message="An error occurred processing the request")
     except Exception as e:
         # logger.error(f"Error recording platform fee for order {fee_data_input.order_id}: {e}", exc_info=True)
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message="An error occurred processing the request", status_code=500)

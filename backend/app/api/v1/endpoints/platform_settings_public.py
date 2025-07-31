@@ -144,4 +144,4 @@ async def get_payment_methods_public():
         
     except Exception as e:
         logger.error(f"Error in get_payment_methods_public: {e}")
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message="Failed to retrieve public settings", status_code=500)

@@ -193,7 +193,7 @@ async def bulk_update_products_secure(
             # Update product...
             results.append({"id": product_id, "status": "updated"})
             
-        except HTTPException as e:
+        except FynloException as e:
             errors.append({"id": product_id, "error": str(e.detail)})
     
     db.commit()

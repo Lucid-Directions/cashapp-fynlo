@@ -4,7 +4,7 @@ Platform analytics endpoints for dashboard insights.
 
 from datetime import datetime, timedelta
 from typing import List, Optional, Dict, Any
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Depends, Query 
 from sqlalchemy.orm import Session
 from sqlalchemy import func, and_, desc
 

@@ -1,0 +1,175 @@
+{
+  "total_files": 20,
+  "total_exceptions": 153,
+  "migrated": [
+    {
+      "file": "app/api/v1/endpoints/platform_settings_public.py",
+      "exceptions_migrated": 1,
+      "message": "Migrated 1 exceptions",
+      "exceptions_used": [
+        "FynloException"
+      ]
+    },
+    {
+      "file": "app/api/v1/endpoints/fees.py",
+      "exceptions_migrated": 7,
+      "message": "Migrated 7 exceptions",
+      "exceptions_used": [
+        "FynloException",
+        "ResourceNotFoundException",
+        "ValidationException"
+      ]
+    },
+    {
+      "file": "app/api/v1/endpoints/config.py",
+      "exceptions_migrated": 21,
+      "message": "Migrated 21 exceptions",
+      "exceptions_used": [
+        "FynloException",
+        "ResourceNotFoundException",
+        "ValidationException"
+      ]
+    },
+    {
+      "file": "app/api/v1/endpoints/restaurants.py",
+      "exceptions_migrated": 13,
+      "message": "Migrated 13 exceptions",
+      "exceptions_used": [
+        "FynloException",
+        "ResourceNotFoundException",
+        "AuthorizationException",
+        "ValidationException"
+      ]
+    },
+    {
+      "file": "app/api/v1/endpoints/monitoring.py",
+      "exceptions_migrated": 4,
+      "message": "Migrated 4 exceptions",
+      "exceptions_used": [
+        "AuthorizationException"
+      ]
+    },
+    {
+      "file": "app/api/v1/endpoints/orders.py",
+      "exceptions_migrated": 11,
+      "message": "Migrated 11 exceptions",
+      "exceptions_used": [
+        "AuthorizationException",
+        "FynloException",
+        "ResourceNotFoundException",
+        "ValidationException"
+      ]
+    },
+    {
+      "file": "app/api/v1/endpoints/tips.py",
+      "exceptions_migrated": 3,
+      "message": "Migrated 3 exceptions",
+      "exceptions_used": [
+        "FynloException",
+        "ValidationException"
+      ]
+    },
+    {
+      "file": "app/api/v1/endpoints/dashboard.py",
+      "exceptions_migrated": 3,
+      "message": "Migrated 3 exceptions",
+      "exceptions_used": [
+        "ValidationException"
+      ]
+    },
+    {
+      "file": "app/api/v1/endpoints/platform_admin.py",
+      "exceptions_migrated": 8,
+      "message": "Migrated 8 exceptions",
+      "exceptions_used": [
+        "ResourceNotFoundException",
+        "AuthorizationException",
+        "ValidationException"
+      ]
+    },
+    {
+      "file": "app/api/v1/endpoints/admin.py",
+      "exceptions_migrated": 9,
+      "message": "Migrated 9 exceptions",
+      "exceptions_used": [
+        "FynloException",
+        "ResourceNotFoundException",
+        "AuthorizationException"
+      ]
+    },
+    {
+      "file": "app/api/v1/endpoints/platform_settings.py",
+      "exceptions_migrated": 27,
+      "message": "Migrated 27 exceptions",
+      "exceptions_used": [
+        "FynloException",
+        "PaymentException",
+        "ResourceNotFoundException",
+        "ValidationException"
+      ]
+    },
+    {
+      "file": "app/api/v1/endpoints/recipes.py",
+      "exceptions_migrated": 9,
+      "message": "Migrated 9 exceptions",
+      "exceptions_used": [
+        "ResourceNotFoundException",
+        "AuthorizationException",
+        "ValidationException"
+      ]
+    },
+    {
+      "file": "app/api/v1/endpoints/customers.py",
+      "exceptions_migrated": 10,
+      "message": "Migrated 10 exceptions",
+      "exceptions_used": [
+        "ConflictException",
+        "ResourceNotFoundException",
+        "ValidationException",
+        "InventoryException"
+      ]
+    },
+    {
+      "file": "app/api/v1/endpoints/products_secure.py",
+      "exceptions_migrated": 3,
+      "message": "Migrated 3 exceptions",
+      "exceptions_used": [
+        "ResourceNotFoundException",
+        "AuthorizationException"
+      ]
+    },
+    {
+      "file": "app/api/v1/endpoints/inventory.py",
+      "exceptions_migrated": 24,
+      "message": "Migrated 24 exceptions",
+      "exceptions_used": [
+        "AuthorizationException",
+        "ResourceNotFoundException",
+        "ValidationException"
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "file": "app/api/v1/endpoints/auth.py",
+      "error": "No HTTPException found"
+    },
+    {
+      "file": "app/api/v1/endpoints/secure_payment_provider_management.py",
+      "error": "No exceptions could be migrated"
+    },
+    {
+      "file": "app/api/v1/endpoints/payments.py",
+      "error": "No exceptions could be migrated"
+    },
+    {
+      "file": "app/api/v1/endpoints/payment_configurations.py",
+      "error": "No HTTPException found"
+    },
+    {
+      "file": "app/api/v1/endpoints/secure_payments.py",
+      "error": "No HTTPException found"
+    }
+  ],
+  "skipped": []
+}

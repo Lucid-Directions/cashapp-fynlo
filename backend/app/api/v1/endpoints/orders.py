@@ -3,7 +3,7 @@ Orders Management API endpoints for Fynlo POS
 """
 
 from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, status, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_, desc
 from pydantic import BaseModel, EmailStr
@@ -505,7 +505,7 @@ async def create_order(
             # Log WebSocket errors but don't fail the order creation
             logger.warning(f"WebSocket notification failed for order {new_order.id}: {ws_error}")
         
-    except HTTPException:
+    except FynloException:
         # Re-raise HTTP exceptions (validation errors)
         raise
     except Exception as e:
@@ -755,7 +755,7 @@ async def confirm_order(
     except Exception as e:
         db.rollback() # Rollback order status change if deductions fail
         logger.error(f"Failed to apply recipe deductions for order {order.id}: {e}. Order status not confirmed.")
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message="Failed to process order update", status_code=500)
 
     # Update cache
     await redis.cache_order(str(order.id), {
@@ -860,10 +860,7 @@ async def refund_order(
     # It's better to use a dependency for role checks, e.g., Depends(RoleChecker(["Manager", "Admin"]))
     db_user = db.query(UserModel).filter(UserModel.id == current_user.id).first()
     if not db_user or db_user.role not in ["Manager", "Admin"]: # TODO: Confirm role names
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not authorized to perform refunds."
-        )
+        raise FynloException(message="Not authorized to perform refunds.")
 
     order = db.query(Order).filter(Order.id == order_id).first()
     if not order:

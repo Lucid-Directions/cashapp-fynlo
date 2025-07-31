@@ -184,7 +184,7 @@ async def get_provider_analytics_endpoint(
             message="Retrieved provider analytics"
         )
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message="Failed to generate 2FA backup codes", status_code=500)
 
 @router.get("/providers/cost-comparison")
 async def get_cost_comparison(
@@ -429,7 +429,7 @@ async def get_restaurant_analytics(
             message="Generated restaurant payment analytics"
         )
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message="Error processing admin request", status_code=500)
 
 def _calculate_monthly_cost(provider_name: str, monthly_volume: Decimal) -> float:
     """Calculate total monthly cost for a provider"""

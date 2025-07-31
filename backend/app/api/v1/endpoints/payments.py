@@ -7,7 +7,7 @@ import uuid
 from datetime import datetime, timedelta
 from typing import Optional, List
 from decimal import Decimal
-from fastapi import APIRouter, Depends, HTTPException, status, Query, Request
+from fastapi import APIRouter, Depends, status, Query, Request
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 import qrcode
@@ -20,7 +20,7 @@ from app.core.database import get_db, Payment, QRPayment, Order, User
 from app.core.config import settings
 from app.core.auth import get_current_user
 from app.core.responses import APIResponseHelper
-from app.core.exceptions import FynloException, InventoryException, PaymentException, ResourceNotFoundException, ValidationException
+from app.core.exceptions import FynloException, InventoryException, PaymentException, ResourceNotFoundException, ValidationException, BusinessLogicException
 from app.core.transaction_manager import transactional, transaction_manager
 from app.core.tenant_security import TenantSecurity
 from app.services.payment_factory import payment_factory
@@ -106,8 +106,7 @@ def generate_qr_code(data: str) -> str:
         version=1,
         error_correction=qrcode.constants.ERROR_CORRECT_L,
         box_size=10,
-        border=4,
-    )
+        border=4)
     qr.add_data(data)
     qr.make(fit=True)
     
@@ -494,8 +493,7 @@ async def process_stripe_payment(
                 "restaurant_id": str(restaurant_id)
             },
             confirmation_method='manual',
-            confirm=True,
-        )
+            confirm=True)
 
         payment_db_record.external_id = payment_intent.id
         payment_db_record.payment_metadata.update({"stripe_payment_intent": payment_intent.id})
@@ -567,7 +565,7 @@ async def process_stripe_payment(
             commit=False
         )
         logger.error(f"Stripe payment failed: {str(e)}")
-        raise ValidationException(message="")
+        raise ValidationException(message="An error occurred processing the request")
     except Exception as e:
         payment_db_record.status = "failed" # Ensure status is marked failed
         await audit_service.create_audit_log(
@@ -926,7 +924,7 @@ async def process_payment(
             details=details_for_error_log,
             commit=True # Attempt to commit this log even if outer transaction (if any) rolls back
         )
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message="An error occurred processing the request", status_code=500)
 
 @router.post("/refund/{transaction_id}")
 async def refund_payment(
@@ -1009,7 +1007,7 @@ async def refund_payment(
             details={"external_transaction_id": transaction_id, "error": str(e)},
             commit=True # Commit this failure log
         )
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message="An error occurred processing the request", status_code=500)
 
 
     if result["status"] == "refunded":
@@ -1170,7 +1168,7 @@ async def square_create_payment_endpoint(
     try:
         square_provider = await payment_factory.get_provider_instance("square", db_session=db)
         if not square_provider:
-            raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Square provider not available.")
+            raise ServiceUnavailableError(message="Square provider not available.")
 
         # Validate order if order_id is provided
         order = None
@@ -1186,14 +1184,14 @@ async def square_create_payment_endpoint(
                     action_performed="Square payment creation failed: Order not found.",
                     user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent,
                     details={"order_id": payment_create_req.order_id, "reason": "Order not found"}, commit=True)
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Order {payment_create_req.order_id} not found.")
+                raise ResourceNotFoundException(message=f"Order {payment_create_req.order_id} not found.")
             if order.payment_status == "completed":
                 await audit_service.create_audit_log(
                     event_type=AuditEventType.PAYMENT_FAILURE, event_status=AuditEventStatus.INFO,
                     action_performed="Square payment creation attempt: Order already paid.",
                     user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent,
                     resource_type="Order", resource_id=str(order.id), details={"reason": "Order already marked as paid."}, commit=True)
-                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Order already paid.")
+                raise ValidationException(message="Order already paid.")
 
         await audit_service.create_audit_log(
             event_type=AuditEventType.PAYMENT_INITIATED, event_status=AuditEventStatus.PENDING,
@@ -1257,7 +1255,7 @@ async def square_create_payment_endpoint(
                 user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent,
                 details={"error": provider_response.get("error", "Unknown"), "provider_response": provider_response.get("raw_response")}, commit=True)
             # db.commit() # Commit only audit log for failure
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=provider_response.get("error", "Square payment creation failed"))
+            raise BusinessLogicException(message=provider_response.get("error", "Square payment creation failed"))
 
         return SquarePaymentResponseData(
             payment_id=internal_payment_id,
@@ -1272,8 +1270,8 @@ async def square_create_payment_endpoint(
             raw_response=provider_response.get("raw_response")
         )
 
-    except HTTPException:
-        raise # Re-raise HTTPException to preserve status code and detail
+    except FynloException:
+        raise # Re-raise FynloException to preserve status code and detail
     except Exception as e:
         logger.error(f"Square payment creation error: {str(e)}", exc_info=True)
         await audit_service.create_audit_log(
@@ -1282,7 +1280,7 @@ async def square_create_payment_endpoint(
             user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent,
             details={"error": str(e)}, commit=True)
         # db.commit() # Commit audit log
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+        raise PaymentException(message=str(e))
 
 
 @router.post("/square/process", response_model=SquarePaymentResponseData, tags=["Payments - Square"])
@@ -1307,7 +1305,7 @@ async def square_process_payment_endpoint(
     try:
         square_provider = await payment_factory.get_provider_instance("square", db_session=db)
         if not square_provider:
-            raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Square provider not available.")
+            raise ServiceUnavailableError(message="Square provider not available.")
 
         # Find the original payment record in our DB by external_id (Square Payment ID)
         # Ensure it belongs to the restaurant
@@ -1322,7 +1320,7 @@ async def square_process_payment_endpoint(
                 action_performed="Square payment process failed: Original payment record not found.",
                 user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent,
                 details={"external_payment_id": payment_process_req.payment_id}, commit=True)
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Payment with Square ID {payment_process_req.payment_id} not found in local records.")
+            raise ResourceNotFoundException(message=f"Payment with Square ID {payment_process_req.payment_id} not found in local records.")
 
         if payment_db.status == PaymentStatus.SUCCESS.value: # Already completed
              await audit_service.create_audit_log(
@@ -1388,7 +1386,7 @@ async def square_process_payment_endpoint(
             raw_response=provider_response.get("raw_response")
         )
 
-    except HTTPException:
+    except FynloException:
         raise
     except Exception as e:
         logger.error(f"Square payment processing error: {str(e)}", exc_info=True)
@@ -1397,7 +1395,7 @@ async def square_process_payment_endpoint(
             action_performed="Square payment processing failed due to server error.",
             user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent,
             details={"external_payment_id": payment_process_req.payment_id, "error": str(e)}, commit=True)
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+        raise PaymentException(message=str(e))
 
 
 @router.get("/square/status/{payment_id}", response_model=SquarePaymentResponseData, tags=["Payments - Square"])
@@ -1422,7 +1420,7 @@ async def square_get_payment_status_endpoint(
     try:
         square_provider = await payment_factory.get_provider_instance("square", db_session=db)
         if not square_provider:
-            raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Square provider not available.")
+            raise ServiceUnavailableError(message="Square provider not available.")
 
         # Optional: Log audit for status check initiation
         # await audit_service.create_audit_log(...)
@@ -1448,7 +1446,7 @@ async def square_get_payment_status_endpoint(
                 action_performed="Square payment status check: Payment not found by provider.",
                 user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent,
                 details={"external_payment_id": payment_id, "error": provider_response.get("error")}, commit=True)
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Square payment with ID {payment_id} not found by provider.")
+            raise ResourceNotFoundException(message=f"Square payment with ID {payment_id} not found by provider.")
 
         return SquarePaymentResponseData(
             # payment_id=internal_payment_id, # Our internal ID, if fetched
@@ -1462,7 +1460,7 @@ async def square_get_payment_status_endpoint(
             message=provider_response.get("message", f"Square payment status: {provider_response['status']}"),
             raw_response=provider_response.get("raw_response")
         )
-    except HTTPException:
+    except FynloException:
         raise
     except Exception as e:
         logger.error(f"Square payment status retrieval error: {str(e)}", exc_info=True)
@@ -1471,7 +1469,7 @@ async def square_get_payment_status_endpoint(
             action_performed="Square payment status retrieval failed due to server error.",
             user_id=current_user.id, username_or_email=current_user.email, ip_address=ip_address, user_agent=user_agent,
             details={"external_payment_id": payment_id, "error": str(e)}, commit=True)
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+        raise PaymentException(message=str(e))
 
 # --- Stripe Webhook Endpoint ---
 
@@ -1499,7 +1497,7 @@ async def stripe_webhook_endpoint(
             details={"reason": "STRIPE_WEBHOOK_SECRET not set in environment."},
             commit=True
         )
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Webhook secret not configured.")
+        raise FynloException(message="Webhook secret not configured.")
 
     try:
         event = stripe.Webhook.construct_event(
@@ -1513,7 +1511,7 @@ async def stripe_webhook_endpoint(
             user_id="SYSTEM", username_or_email="system@fynlo.com", ip_address=ip_address,
             details={"error": str(e), "payload_start": payload[:200].decode('utf-8', errors='replace')}, commit=True
         )
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid payload")
+        raise ValidationException(message="Invalid payload")
     except stripe.error.SignatureVerificationError as e: # Invalid signature
         logger.error(f"Stripe webhook error: Invalid signature. {str(e)}")
         await audit_service.create_audit_log(
@@ -1522,7 +1520,7 @@ async def stripe_webhook_endpoint(
             user_id="SYSTEM", username_or_email="system@fynlo.com", ip_address=ip_address,
             details={"error": str(e), "signature_header": sig_header}, commit=True
         )
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid signature")
+        raise ValidationException(message="Invalid signature")
     except Exception as e: # Other construction errors
         logger.error(f"Stripe webhook event construction error: {str(e)}")
         await audit_service.create_audit_log(
@@ -1531,7 +1529,7 @@ async def stripe_webhook_endpoint(
             user_id="SYSTEM", username_or_email="system@fynlo.com", ip_address=ip_address,
             details={"error": str(e)}, commit=True
         )
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Webhook event construction error")
+        raise FynloException(message="Webhook event construction error")
 
     # At this point, event is trusted.
     logger.info(f"Received Stripe event: id={event.id}, type={event.type}")
@@ -1683,6 +1681,6 @@ async def stripe_webhook_endpoint(
         # that are unlikely to be resolved by retrying the same event (e.g., bugs in handler).
         # For transient errors (DB down), a 5xx might be appropriate to trigger retries.
         # For now, let's return 200 to acknowledge receipt and avoid excessive retries for handler bugs.
-        # If a specific error should trigger retries, raise FynloException(message="", status_code=500) here.
+        # If a specific error should trigger retries, raise FynloException(message="An error occurred processing the request", status_code=500) here.
 
     return {"status": "success", "message": "Webhook received"}

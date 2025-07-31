@@ -1,0 +1,13 @@
+{
+  "total_files": 1,
+  "total_exceptions": 28,
+  "migrated": [
+    {
+      "file": "app/api/v1/endpoints/auth.py",
+      "exceptions_migrated": 28,
+      "message": "Migrated 28 exceptions"
+    }
+  ],
+  "errors": [],
+  "skipped": []
+}

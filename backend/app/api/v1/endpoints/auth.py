@@ -280,7 +280,7 @@ async def verify_supabase_user(
         
         return response_data
         
-    except HTTPException:
+    except FynloException:
         # Re-raise HTTP exceptions without modification
         raise
     except (AuthApiError, PostgrestAPIError) as e:
@@ -607,7 +607,7 @@ async def register_restaurant(
             db.rollback()
             raise FynloException(message="Failed to register restaurant. Please try again.", status_code=500)
         
-    except HTTPException:
+    except FynloException:
         raise
     except Exception as e:
         logger.error(f"Restaurant registration error: {str(e)}")

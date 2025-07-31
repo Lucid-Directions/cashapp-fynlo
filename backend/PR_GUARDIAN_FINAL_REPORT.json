@@ -1,0 +1,38 @@
+{
+  "timestamp": "2025-07-31T11:52:50.198314",
+  "pr_number": 455,
+  "score": 80,
+  "status": "PASS",
+  "stats": {
+    "total_files": 183,
+    "files_analyzed": 183,
+    "httpexception_count": 0,
+    "fynloexception_count": 53,
+    "empty_messages": 0,
+    "syntax_errors": 0,
+    "security_issues": 2,
+    "test_coverage": "PASS"
+  },
+  "issues": [
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/core/two_factor_auth.py",
+      "line": "N/A",
+      "issue": "Potential token exposure in logs",
+      "severity": "HIGH"
+    },
+    {
+      "file": "/Users/ryandavidson/Desktop/cashapp-fynlo-main/backend/app/api/v1/endpoints/auth.py",
+      "line": "N/A",
+      "issue": "Potential token exposure in logs",
+      "severity": "HIGH"
+    }
+  ],
+  "summary": {
+    "httpexception_remaining": 0,
+    "migration_complete": true,
+    "syntax_errors": 0,
+    "empty_messages": 0,
+    "security_issues": 2,
+    "test_status": "PASS"
+  }
+}
