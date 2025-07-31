@@ -1,9 +1,16 @@
-from fastapi import APIRouter, Depends, HTTPException, Body, Path, Query
+from fastapi import APIRouter, Depends, Body, Path, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional, Dict, Any
 from pydantic import BaseModel
 
 from app.core.database import get_db, User
+from app.core.exceptions import (
+    AuthorizationException,
+    ConflictException,
+    FynloException,
+    ResourceNotFoundException,
+    ValidationException
+)
 from app.core.auth import get_current_user
 from app.schemas.fee_schemas import PaymentMethodEnum, PaymentMethodFeeSettingSchema
 from app.services.payment_config_service import PaymentConfigService
@@ -62,10 +69,10 @@ def create_platform_default_setting(
     """Creates a new platform default payment method setting."""
     # Only platform owners can create platform defaults
     if current_user.role != 'platform_owner':
-        raise HTTPException(status_code=403, detail="Only platform owners can create platform default settings")
+        raise AuthorizationException(message="Only platform owners can create platform default settings")
     
     if setting_data.restaurant_id is not None:
-        raise HTTPException(status_code=400, detail="Platform default settings cannot have a restaurant_id.")
+        raise ValidationException(message="Platform default settings cannot have a restaurant_id.")
 
     # Convert Pydantic input to the TypedDict schema service might expect
     # (If service directly uses Pydantic, this conversion might be simpler)
@@ -79,12 +86,12 @@ def create_platform_default_setting(
     try:
         created_setting = service.create_platform_default_setting(typed_dict_data)
         if not created_setting: # Should not happen if service raises error on failure
-            raise HTTPException(status_code=500, detail="Failed to create platform default setting.")
+            raise FynloException(message="Failed to create platform default setting.", status_code=500)
         return convert_db_model_to_schema(created_setting)
     except ValueError as ve:
-        raise HTTPException(status_code=400, detail=str(ve))
+        raise ValidationException(message=str(ve))
     except Exception as e: # Catches IntegrityError from service if duplicate
-        raise HTTPException(status_code=409, detail=f"Failed to create setting: {str(e)}")
+        raise ConflictException(message=f"Conflict error: {str(e)}")
 
 
 @router.put("/settings/platform-defaults/{payment_method}", response_model=PaymentMethodFeeSettingSchema)
@@ -97,11 +104,11 @@ def update_platform_default_setting(
     """Updates an existing platform default payment method setting."""
     # Only platform owners can update platform defaults
     if current_user.role != 'platform_owner':
-        raise HTTPException(status_code=403, detail="Only platform owners can update platform default settings")
+        raise AuthorizationException(message="Only platform owners can update platform default settings")
     
     updated_setting = service.update_platform_default_setting(payment_method, updates.dict(exclude_unset=True))
     if not updated_setting:
-        raise HTTPException(status_code=404, detail=f"Platform default setting for {payment_method.value} not found.")
+        raise ResourceNotFoundException(resource="Resource", message=f"Platform default setting for {payment_method.value} not found.")
     return convert_db_model_to_schema(updated_setting)
 
 
@@ -125,7 +132,7 @@ async def list_restaurant_settings(
     if restaurant_id:
         # If current_restaurant_id is provided, validate it matches
         if current_restaurant_id and current_restaurant_id != restaurant_id:
-            raise HTTPException(status_code=403, detail="Cannot access settings for a different restaurant")
+            raise AuthorizationException(message="Cannot access settings for a different restaurant")
         
         # Validate the user has access to this restaurant
         await TenantSecurity.validate_restaurant_access(
@@ -148,7 +155,7 @@ async def create_or_update_restaurant_setting(
     """Creates or updates a restaurant-specific payment method setting (override)."""
     # Validate access
     if current_restaurant_id and current_restaurant_id != restaurant_id:
-        raise HTTPException(status_code=403, detail="Cannot modify settings for a different restaurant")
+        raise AuthorizationException(message="Cannot modify settings for a different restaurant")
     
     # Validate the user has access to this restaurant
     await TenantSecurity.validate_restaurant_access(
@@ -157,7 +164,7 @@ async def create_or_update_restaurant_setting(
     
     # Check permissions - only owners and managers can modify settings
     if current_user.role not in ['platform_owner', 'restaurant_owner', 'manager']:
-        raise HTTPException(status_code=403, detail="Insufficient permissions to modify payment settings")
+        raise AuthorizationException(message="Insufficient permissions to modify payment settings")
 
     # Use the restaurant_id from the path
     typed_dict_data = PaymentMethodFeeSettingSchema(
@@ -170,12 +177,12 @@ async def create_or_update_restaurant_setting(
     try:
         saved_setting = service.create_or_update_restaurant_setting(restaurant_id, typed_dict_data)
         if not saved_setting: # Should not happen if service raises specific errors
-            raise HTTPException(status_code=500, detail="Failed to save restaurant setting.")
+            raise FynloException(message="Failed to save restaurant setting.", status_code=500)
         return convert_db_model_to_schema(saved_setting)
     except ValueError as ve:
-        raise HTTPException(status_code=400, detail=str(ve))
+        raise ValidationException(message=str(ve))
     except Exception as e: # Catches IntegrityError from service
-        raise HTTPException(status_code=409, detail=f"Failed to save setting for restaurant {restaurant_id}: {str(e)}")
+        raise ConflictException(message=f"Conflict error: {str(e)}")
 
 
 @router.delete("/settings/restaurants/{restaurant_id}/{payment_method}", status_code=204)
@@ -190,7 +197,7 @@ async def delete_restaurant_setting(
     """Deletes a restaurant-specific payment method setting (override)."""
     # Validate access
     if current_restaurant_id and current_restaurant_id != restaurant_id:
-        raise HTTPException(status_code=403, detail="Cannot delete settings for a different restaurant")
+        raise AuthorizationException(message="Cannot delete settings for a different restaurant")
     
     # Validate the user has access to this restaurant
     await TenantSecurity.validate_restaurant_access(
@@ -199,11 +206,11 @@ async def delete_restaurant_setting(
     
     # Check permissions - only owners and managers can delete settings
     if current_user.role not in ['platform_owner', 'restaurant_owner', 'manager']:
-        raise HTTPException(status_code=403, detail="Insufficient permissions to delete payment settings")
+        raise AuthorizationException(message="Insufficient permissions to delete payment settings")
     
     deleted = service.delete_restaurant_setting(restaurant_id, payment_method)
     if not deleted:
-        raise HTTPException(status_code=404, detail=f"Setting for restaurant {restaurant_id}, method {payment_method.value} not found.")
+        raise ResourceNotFoundException(resource="Resource", message=f"Setting for restaurant {restaurant_id}, method {payment_method.value} not found.")
     return None # No content for 204
 
 

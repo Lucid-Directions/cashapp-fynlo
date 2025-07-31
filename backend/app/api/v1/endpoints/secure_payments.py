@@ -6,7 +6,7 @@ import uuid
 from typing import Dict, Any, Optional, List
 from decimal import Decimal
 from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException, Request, Header, Query, Path
+from fastapi import APIRouter, Depends, Request, Header, Query, Path
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field, validator
@@ -15,7 +15,7 @@ import logging
 from app.core.database import get_db, User
 from app.core.auth import get_current_user
 from app.core.responses import APIResponseHelper
-from app.core.exceptions import FynloException
+from app.core.exceptions import PaymentException
 from app.services.secure_payment_processor import SecurePaymentProcessor, PaymentProcessingError
 from app.services.secure_payment_config import SecurePaymentConfigService
 from app.middleware.rate_limit_middleware import limiter
@@ -265,7 +265,7 @@ async def get_payment_methods(
         
     except Exception as e:
         logger.error(f"Error getting payment methods: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to get payment methods")
+        raise PaymentException(message="Failed to get payment methods")
 
 
 @router.post("/refund", response_model=Dict[str, Any])

@@ -2,13 +2,14 @@
 Admin endpoints for payment provider management and analytics
 """
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, Query, Request
 from typing import List, Dict, Any, Optional
 from decimal import Decimal
 from datetime import datetime, timedelta
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from app.services.payment_factory import payment_factory
+from app.core.exceptions import AuthorizationException, FynloException, ResourceNotFoundException
 from app.services.payment_analytics import PaymentAnalyticsService
 from app.services.smart_routing import RoutingStrategy
 from app.core.database import get_db, User
@@ -48,7 +49,7 @@ async def get_providers_status(
             details={"required_roles": ADMIN_ROLES, "reason": f"User role '{current_user.role}' not authorized."},
             commit=True
         )
-        raise HTTPException(status_code=403, detail="Forbidden: Insufficient privileges.")
+        raise AuthorizationException(message="Forbidden: Insufficient privileges.")
 
     await audit_service.create_audit_log(
         event_type=AuditEventType.ACCESS_GRANTED,
@@ -103,7 +104,7 @@ async def test_provider(
             ip_address=ip_address, user_agent=user_agent,
             details={"required_roles": ADMIN_ROLES, "reason": f"User role '{current_user.role}' not authorized."}, commit=True
         )
-        raise HTTPException(status_code=403, detail="Forbidden: Insufficient privileges.")
+        raise AuthorizationException(message="Forbidden: Insufficient privileges.")
 
     await audit_service.create_audit_log(
         event_type=AuditEventType.ACCESS_GRANTED, event_status=AuditEventStatus.SUCCESS,
@@ -115,7 +116,10 @@ async def test_provider(
     if not provider:
         # Log this attempt to test non-existent provider as a form of admin action failure?
         # For now, let the HTTP exception suffice.
-        raise HTTPException(status_code=404, detail="Provider not found")
+        raise ResourceNotFoundException(
+            resource="Provider",
+            message=f"Provider '{provider_name}' not found"
+        )
     
     try:
         # Test with small amount
@@ -161,7 +165,7 @@ async def get_provider_analytics_endpoint(
             ip_address=ip_address, user_agent=user_agent,
             details={"required_roles": ADMIN_ROLES, "reason": f"User role '{current_user.role}' not authorized."}, commit=True
         )
-        raise HTTPException(status_code=403, detail="Forbidden: Insufficient privileges.")
+        raise AuthorizationException(message="Forbidden: Insufficient privileges.")
 
     await audit_service.create_audit_log(
         event_type=AuditEventType.ACCESS_GRANTED, event_status=AuditEventStatus.SUCCESS,
@@ -183,7 +187,7 @@ async def get_provider_analytics_endpoint(
             message="Retrieved provider analytics"
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Analytics error: {str(e)}")
+        raise FynloException(message=f"Analytics error: {str(e)}", status_code=500)
 
 @router.get("/providers/cost-comparison")
 async def get_cost_comparison(
@@ -206,7 +210,7 @@ async def get_cost_comparison(
             ip_address=ip_address, user_agent=user_agent,
             details={"required_roles": ADMIN_ROLES, "reason": f"User role '{current_user.role}' not authorized."}, commit=True
         )
-        raise HTTPException(status_code=403, detail="Forbidden: Insufficient privileges.")
+        raise AuthorizationException(message="Forbidden: Insufficient privileges.")
 
     await audit_service.create_audit_log(
         event_type=AuditEventType.ACCESS_GRANTED, event_status=AuditEventStatus.SUCCESS,
@@ -270,7 +274,7 @@ async def get_provider_performance(
             ip_address=ip_address, user_agent=user_agent,
             details={"required_roles": ADMIN_ROLES, "reason": f"User role '{current_user.role}' not authorized."}, commit=True
         )
-        raise HTTPException(status_code=403, detail="Forbidden: Insufficient privileges.")
+        raise AuthorizationException(message="Forbidden: Insufficient privileges.")
 
     await audit_service.create_audit_log(
         event_type=AuditEventType.ACCESS_GRANTED, event_status=AuditEventStatus.SUCCESS,
@@ -313,7 +317,7 @@ async def get_cost_optimization(
             ip_address=ip_address, user_agent=user_agent,
             details={"required_roles": ADMIN_ROLES, "reason": f"User role '{current_user.role}' not authorized."}, commit=True
         )
-        raise HTTPException(status_code=403, detail="Forbidden: Insufficient privileges.")
+        raise AuthorizationException(message="Forbidden: Insufficient privileges.")
 
     await audit_service.create_audit_log(
         event_type=AuditEventType.ACCESS_GRANTED, event_status=AuditEventStatus.SUCCESS,
@@ -428,7 +432,7 @@ async def get_restaurant_analytics(
             message="Generated restaurant payment analytics"
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Analytics error: {str(e)}")
+        raise FynloException(message=f"Analytics error: {str(e)}", status_code=500)
 
 def _calculate_monthly_cost(provider_name: str, monthly_volume: Decimal) -> float:
     """Calculate total monthly cost for a provider"""
