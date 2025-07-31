@@ -5,8 +5,6 @@ import pytest
 from httpx import AsyncClient
 from sqlalchemy import text
 from app.main import app
-from tests.fixtures.database import test_db, test_restaurant, test_user
-from tests.fixtures.auth import auth_headers
 
 
 @pytest.mark.asyncio

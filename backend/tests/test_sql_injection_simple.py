@@ -15,14 +15,12 @@ from app.core.validators import (
     validate_search_input,
     validate_sort_field,
     validate_uuid_format,
-    validate_alphanumeric,
     validate_no_sql_injection
 )
 from app.core.security_utils import (
     sanitize_sql_like_pattern,
     sanitize_sql_identifier,
-    is_valid_uuid,
-    sanitize_search_term
+    is_valid_uuid
 )
 
 

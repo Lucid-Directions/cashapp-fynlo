@@ -5,7 +5,7 @@ Orders Management API endpoints for Fynlo POS
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, or_, desc
+from sqlalchemy import and_, desc
 from pydantic import BaseModel, EmailStr
 from datetime import datetime, timedelta
 import uuid
@@ -18,7 +18,7 @@ from app.core.auth import get_current_user
 from app.api.v1.endpoints.customers import CustomerCreate as CustomerCreateSchema # Renamed to avoid conflict
 from app.core.redis_client import get_redis, RedisClient
 from app.core.responses import APIResponseHelper
-from app.core.exceptions import ValidationException, AuthenticationException, FynloException, ResourceNotFoundException, ConflictException
+from app.core.exceptions import ValidationException, AuthenticationException, FynloException
 from app.core.onboarding_helper import OnboardingHelper
 from app.core.websocket import (
     websocket_manager, 

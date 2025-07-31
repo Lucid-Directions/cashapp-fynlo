@@ -7,7 +7,6 @@ Create Date: YYYY-MM-DD HH:MM:SS.MS
 """
 from alembic import op
 import sqlalchemy as sa
-from sqlalchemy.dialects import postgresql
 
 # It's good practice to try and make revision IDs somewhat descriptive if manually naming
 # For example, if previous was 'e8f9d5c7b2a1_add_platform_configuration_schema'

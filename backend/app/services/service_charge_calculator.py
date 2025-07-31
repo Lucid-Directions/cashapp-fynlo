@@ -164,9 +164,9 @@ class ServiceChargeCalculator:
 #             include_processor_fee_in_service_charge=True,
 #             restaurant_id="some-restaurant-id"
 #         )
-#         print("Service Charge Breakdown (Stripe, Customer Pays, SC includes Proc Fee):")
+#         logger.info("Service Charge Breakdown (Stripe, Customer Pays, SC includes Proc Fee):")
 #         for key, value in breakdown.items():
-#             print(f"  {key}: {value}")
+#             logger.info(f"  {key}: {value}")
 #         # Expected: base_sc = 10.0. proc_fee_on_110 (approx) = (0.014 * 110) + 0.20 = 1.54 + 0.20 = 1.74
 #         # final_sc = 10.0 + 1.74 = 11.74
 #         # proc_fee_added = 1.74
@@ -179,9 +179,9 @@ class ServiceChargeCalculator:
 #             include_processor_fee_in_service_charge=False, # SC does NOT include processor fee
 #             restaurant_id="some-restaurant-id"
 #         )
-#         print("\nService Charge Breakdown (Stripe, Customer Pays, SC NOT includes Proc Fee):")
+#         logger.info("\nService Charge Breakdown (Stripe, Customer Pays, SC NOT includes Proc Fee):")
 #         for key, value in breakdown_no_include.items():
-#             print(f"  {key}: {value}")
+#             logger.info(f"  {key}: {value}")
 #         # Expected: base_sc = 10.0. proc_fee_added = 0.0. final_sc = 10.0.
 
 #     finally:

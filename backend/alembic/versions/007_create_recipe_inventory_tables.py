@@ -7,7 +7,10 @@ Create Date: 2024-07-29 10:00:00.000000
 """
 from alembic import op
 import sqlalchemy as sa
-from sqlalchemy.dialects import postgresql
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 # revision identifiers, used by Alembic.
 revision = '007'
@@ -66,7 +69,7 @@ def upgrade():
             batch_op.add_column(sa.Column('par_level_g', sa.Integer(), nullable=True, server_default="0"))
     except Exception as e:
         # This will fail if the table was just created, which is fine.
-        print(f"Could not alter inventory (likely already created with par_level_g): {e}")
+        logger.info(f"Could not alter inventory (likely already created with par_level_g): {e}")
 
     # ### end Alembic commands ###
 
@@ -85,7 +88,7 @@ def downgrade():
         with op.batch_alter_table('inventory') as batch_op:
             batch_op.drop_column('par_level_g')
     except Exception as e:
-         print(f"Could not drop par_level_g from inventory (table might be dropped or column not exist): {e}")
+         logger.info(f"Could not drop par_level_g from inventory (table might be dropped or column not exist): {e}")
 
     # If inventory table itself was created by this migration, uncomment next line
     # op.drop_table('inventory')

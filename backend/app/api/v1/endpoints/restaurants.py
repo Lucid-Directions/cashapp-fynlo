@@ -3,9 +3,9 @@ Restaurant Management API endpoints for Fynlo POS
 """
 
 from typing import List, Optional
-from fastapi import APIRouter, Depends, status, Query
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, desc, func
+from sqlalchemy import and_, func
 from pydantic import BaseModel, EmailStr
 from datetime import datetime, timedelta
 import logging
@@ -13,7 +13,7 @@ import logging
 from app.core.database import get_db, Restaurant, Platform, User, Order, Customer, Section, Table
 from app.core.auth import get_current_user
 from app.core.responses import APIResponseHelper
-from app.core.exceptions import ValidationException, AuthenticationException, FynloException, ResourceNotFoundException, ConflictException, ServiceUnavailableError, AuthorizationException
+from app.core.exceptions import ValidationException, FynloException, ResourceNotFoundException, ServiceUnavailableError, AuthorizationException
 from app.core.validation import (
     validate_model_jsonb_fields,
     validate_email,
@@ -106,7 +106,6 @@ async def get_restaurants(
     # Restaurant users - handle multi-restaurant access
     else:
         from app.core.tenant_security import TenantSecurity
-        from app.core.database import UserRestaurant
         
         # Get all accessible restaurants for the user
         accessible_restaurants = TenantSecurity.get_accessible_restaurant_ids(current_user, db)

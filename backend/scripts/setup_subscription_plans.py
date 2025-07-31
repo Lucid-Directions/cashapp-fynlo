@@ -92,6 +92,10 @@ def create_subscription_plans():
     
     # Get database session synchronously
     from app.core.database import SessionLocal
+import logging
+
+logger = logging.getLogger(__name__)
+
     db = SessionLocal()
     
     try:
@@ -102,7 +106,7 @@ def create_subscription_plans():
             ).first()
             
             if existing_plan:
-                print(f"✅ Plan '{plan_data['name']}' already exists, skipping...")
+                logger.info(f"✅ Plan '{plan_data['name']}' already exists, skipping...")
                 continue
             
             # Create new plan
@@ -122,23 +126,23 @@ def create_subscription_plans():
             )
             
             db.add(plan)
-            print(f"✅ Created subscription plan: {plan_data['display_name']}")
+            logger.info(f"✅ Created subscription plan: {plan_data['display_name']}")
         
         # Commit all changes
         db.commit()
-        print(f"\n🎉 Successfully created {len(SUBSCRIPTION_PLANS)} subscription plans!")
+        logger.info(f"\n🎉 Successfully created {len(SUBSCRIPTION_PLANS)} subscription plans!")
         
         # Display summary
-        print("\n📋 Subscription Plans Summary:")
+        logger.info("\n📋 Subscription Plans Summary:")
         for plan_data in SUBSCRIPTION_PLANS:
             fee_info = f" (+ {plan_data['transaction_fee_percentage']}% transaction fee)"
             if plan_data['price_monthly'] == 0:
-                print(f"  • {plan_data['display_name']}: Free{fee_info}")
+                logger.info(f"  • {plan_data['display_name']}: Free{fee_info}")
             else:
-                print(f"  • {plan_data['display_name']}: £{plan_data['price_monthly']}/month{fee_info}")
+                logger.info(f"  • {plan_data['display_name']}: £{plan_data['price_monthly']}/month{fee_info}")
         
     except Exception as e:
-        print(f"❌ Error creating subscription plans: {e}")
+        logger.error(f"❌ Error creating subscription plans: {e}")
         db.rollback()
         raise
     finally:
@@ -147,19 +151,19 @@ def create_subscription_plans():
 
 def main():
     """Main function to run the setup script"""
-    print("🚀 Setting up default subscription plans for Fynlo POS...")
-    print("=" * 60)
+    logger.info("🚀 Setting up default subscription plans for Fynlo POS...")
+    logger.info("=" * 60)
     
     try:
         create_subscription_plans()
-        print("\n✅ Subscription plans setup completed successfully!")
-        print("\nNext steps:")
-        print("1. Run the application to test subscription functionality")
-        print("2. Configure Stripe integration for payment processing")
-        print("3. Test subscription flows in the mobile app")
+        logger.info("\n✅ Subscription plans setup completed successfully!")
+        logger.info("\nNext steps:")
+        logger.info("1. Run the application to test subscription functionality")
+        logger.info("2. Configure Stripe integration for payment processing")
+        logger.info("3. Test subscription flows in the mobile app")
         
     except Exception as e:
-        print(f"\n❌ Failed to setup subscription plans: {e}")
+        logger.error(f"\n❌ Failed to setup subscription plans: {e}")
         sys.exit(1)
 
 

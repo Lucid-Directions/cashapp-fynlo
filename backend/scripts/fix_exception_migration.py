@@ -81,7 +81,7 @@ def scan_file(filepath: str) -> List[Tuple[int, str, str]]:
                     issues.append((i + 1, line.strip(), info['fix_type']))
                     
     except Exception as e:
-        print(f"Error scanning {filepath}: {e}")
+        logger.error(f"Error scanning {filepath}: {e}")
         
     return issues
 
@@ -105,55 +105,59 @@ def generate_report(issues: Dict[str, List[Tuple[int, str, str]]]) -> None:
     """Generate a report of all issues found."""
     total_issues = sum(len(file_issues) for file_issues in issues.values())
     
-    print(f"# Exception Migration Issues Report")
-    print(f"\nTotal issues found: {total_issues}")
-    print(f"Files affected: {len(issues)}")
-    print(f"\n## Issues by File:\n")
+    logger.error(f"# Exception Migration Issues Report")
+    logger.info(f"\nTotal issues found: {total_issues}")
+    logger.info(f"Files affected: {len(issues)}")
+    logger.info(f"\n## Issues by File:\n")
     
     for filepath, file_issues in sorted(issues.items()):
-        print(f"\n### {filepath}")
-        print(f"Issues: {len(file_issues)}\n")
+        logger.info(f"\n### {filepath}")
+        logger.info(f"Issues: {len(file_issues)}\n")
         
         for line_no, line, fix_type in file_issues:
-            print(f"Line {line_no}: {line}")
+            logger.info(f"Line {line_no}: {line}")
             suggested = suggest_fix(line, fix_type)
             if suggested != line:
-                print(f"Suggested: {suggested}")
-            print()
+                logger.info(f"Suggested: {suggested}")
+            logger.info()
 
 
 def main():
     """Main function to run the exception migration fixer."""
     import sys
+import logging
+
+logger = logging.getLogger(__name__)
+
     
     # Get the app directory
     app_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'app')
     app_dir = os.path.normpath(app_dir)
     
-    print(f"Scanning directory: {app_dir}")
-    print("=" * 60)
+    logger.info(f"Scanning directory: {app_dir}")
+    logger.info("=" * 60)
     
     # Find all issues
     issues = find_issues(app_dir)
     
     if not issues:
-        print("No exception migration issues found!")
+        logger.error("No exception migration issues found!")
         return
     
     # Generate report
     generate_report(issues)
     
     # Summary
-    print("\n## Summary:")
-    print("\nTo fix these issues:")
-    print("1. AuthenticationException and ValidationException: Remove 'code' parameter")
-    print("2. FynloException: Change 'code=' to 'error_code='")
-    print("3. Consider using specialized exception classes instead of FynloException")
-    print("\nExample fixes:")
-    print("  Before: AuthenticationException(message='Failed', code='INVALID')")
-    print("  After:  AuthenticationException(message='Failed')")
-    print("\n  Before: FynloException(message='Error', code='CUSTOM_CODE')")
-    print("  After:  FynloException(message='Error', error_code='CUSTOM_CODE')")
+    logger.info("\n## Summary:")
+    logger.info("\nTo fix these issues:")
+    logger.error("1. AuthenticationException and ValidationException: Remove 'code' parameter")
+    logger.error("2. FynloException: Change 'code=' to 'error_code='")
+    logger.error("3. Consider using specialized exception classes instead of FynloException")
+    logger.info("\nExample fixes:")
+    logger.error("  Before: AuthenticationException(message='Failed', code='INVALID')")
+    logger.error("  After:  AuthenticationException(message='Failed')")
+    logger.error("\n  Before: FynloException(message='Error', code='CUSTOM_CODE')")
+    logger.error("  After:  FynloException(message='Error', error_code='CUSTOM_CODE')")
 
 
 if __name__ == "__main__":

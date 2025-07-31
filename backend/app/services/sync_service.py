@@ -3,16 +3,13 @@ Bidirectional Sync Service
 Handles data synchronization between platform dashboard and restaurant mobile apps
 """
 from typing import Dict, List, Optional, Any, TYPE_CHECKING
-from datetime import datetime, timedelta
+from datetime import datetime
 import asyncio
 import json
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, or_
 from redis import Redis
 
-from app.core.database import get_db
 from app.core.redis_client import redis_client as global_redis_client
-from app.models import Restaurant, Product, Category, Order, User
 from app.core.exceptions import FynloException
 import logging
 

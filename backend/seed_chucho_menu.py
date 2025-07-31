@@ -109,7 +109,7 @@ def find_chucho_restaurant(db: Session) -> Restaurant:
 
 def clear_existing_menu(db: Session, restaurant_id: str):
     """Clear existing menu items and categories for the restaurant"""
-    print(f"🧹 Clearing existing menu data for restaurant {restaurant_id}...")
+    logger.info(f"🧹 Clearing existing menu data for restaurant {restaurant_id}...")
     
     # Delete existing products
     from sqlalchemy import text
@@ -125,11 +125,11 @@ def clear_existing_menu(db: Session, restaurant_id: str):
     )
     
     db.commit()
-    print("   ✅ Existing menu data cleared")
+    logger.info("   ✅ Existing menu data cleared")
 
 def clear_all_menu_data(db: Session):
     """Clear ALL menu data from all restaurants"""
-    print("🧹 Clearing ALL menu data from database...")
+    logger.info("🧹 Clearing ALL menu data from database...")
     
     from sqlalchemy import text
     
@@ -142,11 +142,11 @@ def clear_all_menu_data(db: Session):
     category_count = result.rowcount
     
     db.commit()
-    print(f"   ✅ Deleted {product_count} products and {category_count} categories")
+    logger.info(f"   ✅ Deleted {product_count} products and {category_count} categories")
 
 def remove_other_restaurants(db: Session, chucho_restaurant_id: str):
     """Remove all restaurants except the specified Chucho restaurant"""
-    print("🧹 Removing all non-Chucho restaurants...")
+    logger.info("🧹 Removing all non-Chucho restaurants...")
     
     from sqlalchemy import text
     
@@ -159,34 +159,34 @@ def remove_other_restaurants(db: Session, chucho_restaurant_id: str):
     
     if other_restaurants:
         other_ids = [r[0] for r in other_restaurants]  # Keep as UUID objects
-        print(f"   Found {len(other_ids)} other restaurants to remove")
+        logger.info(f"   Found {len(other_ids)} other restaurants to remove")
         
         # Clear dependent data first to avoid foreign key violations
         # 1. Clear products from other restaurants using SQLAlchemy's safe in_ operator
         products_deleted = db.query(Product).filter(
             Product.restaurant_id.in_(other_ids)
         ).delete(synchronize_session=False)
-        print(f"   ✅ Deleted {products_deleted} products from other restaurants")
+        logger.info(f"   ✅ Deleted {products_deleted} products from other restaurants")
         
         # 2. Clear categories from other restaurants
         categories_deleted = db.query(Category).filter(
             Category.restaurant_id.in_(other_ids)
         ).delete(synchronize_session=False)
-        print(f"   ✅ Deleted {categories_deleted} categories from other restaurants")
+        logger.info(f"   ✅ Deleted {categories_deleted} categories from other restaurants")
         
         # 3. Now safe to delete the restaurants
         restaurants_deleted = db.query(Restaurant).filter(
             Restaurant.id.in_(other_ids)
         ).delete(synchronize_session=False)
-        print(f"   ✅ Deleted {restaurants_deleted} other restaurants")
+        logger.info(f"   ✅ Deleted {restaurants_deleted} other restaurants")
     else:
-        print("   ✅ No other restaurants found - only Chucho exists")
+        logger.info("   ✅ No other restaurants found - only Chucho exists")
     
     db.commit()
 
 def ensure_restaurant_owner(db: Session, restaurant_id: str):
     """Ensure Chucho restaurant is owned by arnaud@luciddirections.co.uk"""
-    print("🔧 Setting restaurant owner...")
+    logger.info("🔧 Setting restaurant owner...")
     
     from sqlalchemy import text
     
@@ -202,9 +202,9 @@ def ensure_restaurant_owner(db: Session, restaurant_id: str):
             text("UPDATE users SET restaurant_id = :restaurant_id WHERE id = :user_id"),
             {"restaurant_id": restaurant_id, "user_id": user[0]}
         )
-        print(f"   ✅ Updated arnaud@luciddirections.co.uk to own Chucho restaurant")
+        logger.info(f"   ✅ Updated arnaud@luciddirections.co.uk to own Chucho restaurant")
     else:
-        print(f"   ⚠️  User arnaud@luciddirections.co.uk not found - please ensure user exists in Supabase")
+        logger.info(f"   ⚠️  User arnaud@luciddirections.co.uk not found - please ensure user exists in Supabase")
     
     db.commit()
 
@@ -212,7 +212,7 @@ def seed_categories(db: Session, restaurant_id: str) -> dict:
     """Seed menu categories and return mapping"""
     category_mapping = {}
     
-    print(f"🏷️  Creating categories for restaurant {restaurant_id}...")
+    logger.info(f"🏷️  Creating categories for restaurant {restaurant_id}...")
     
     for cat_data in CHUCHO_CATEGORIES:
         # Check if category already exists
@@ -221,7 +221,7 @@ def seed_categories(db: Session, restaurant_id: str) -> dict:
         ).first()
         
         if existing:
-            print(f"   ✅ Category '{cat_data['name']}' already exists")
+            logger.info(f"   ✅ Category '{cat_data['name']}' already exists")
             category_mapping[cat_data['name']] = existing.id
             continue
         
@@ -240,19 +240,19 @@ def seed_categories(db: Session, restaurant_id: str) -> dict:
         db.flush()  # Get the ID
         
         category_mapping[cat_data['name']] = category.id
-        print(f"   ✅ Created category: {cat_data['name']}")
+        logger.info(f"   ✅ Created category: {cat_data['name']}")
     
     return category_mapping
 
 def seed_products(db: Session, restaurant_id: str, category_mapping: dict):
     """Seed menu products"""
     
-    print(f"🍽️  Creating menu items for restaurant {restaurant_id}...")
+    logger.info(f"🍽️  Creating menu items for restaurant {restaurant_id}...")
     
     for idx, item_data in enumerate(CHUCHO_MENU_ITEMS):
         category_id = category_mapping.get(item_data['category'])
         if not category_id:
-            print(f"   ⚠️  Warning: Category '{item_data['category']}' not found for item '{item_data['name']}'")
+            logger.warning(f"   ⚠️  Warning: Category '{item_data['category']}' not found for item '{item_data['name']}'")
             continue
         
         # Check if product already exists
@@ -261,7 +261,7 @@ def seed_products(db: Session, restaurant_id: str, category_mapping: dict):
         ).first()
         
         if existing:
-            print(f"   ✅ Product '{item_data['name']}' already exists")
+            logger.info(f"   ✅ Product '{item_data['name']}' already exists")
             continue
         
         # Create new product
@@ -284,12 +284,12 @@ def seed_products(db: Session, restaurant_id: str, category_mapping: dict):
         )
         
         db.add(product)
-        print(f"   ✅ Created product: {item_data['name']} (£{item_data['price']})")
+        logger.info(f"   ✅ Created product: {item_data['name']} (£{item_data['price']})")
 
 def main():
     """Main seeding function"""
-    print("🚀 Starting Chucho Restaurant Menu Seeding...")
-    print(f"📍 Database: {settings.DATABASE_URL[:50]}...")
+    logger.info("🚀 Starting Chucho Restaurant Menu Seeding...")
+    logger.info(f"📍 Database: {settings.DATABASE_URL[:50]}...")
     
     db = SessionLocal()
     
@@ -298,7 +298,7 @@ def main():
         restaurant = find_chucho_restaurant(db)
         restaurant_id = str(restaurant.id)
         
-        print(f"🏪 Found restaurant: {restaurant.name} (ID: {restaurant_id})")
+        logger.info(f"🏪 Found restaurant: {restaurant.name} (ID: {restaurant_id})")
         
         # Step 2: Remove all OTHER restaurants (now that we have Chucho's ID)
         remove_other_restaurants(db, restaurant_id)
@@ -322,20 +322,24 @@ def main():
         total_categories = len(CHUCHO_CATEGORIES)
         total_products = len(CHUCHO_MENU_ITEMS)
         
-        print(f"")
-        print(f"✅ SUCCESS: Chucho restaurant menu seeded!")
-        print(f"   📋 Categories: {total_categories}")
-        print(f"   🍽️  Products: {total_products}")
-        print(f"   🏪 Restaurant: {restaurant.name}")
-        print(f"   🔗 Menu API endpoints now available:")
-        print(f"      GET /api/v1/menu/categories")
-        print(f"      GET /api/v1/menu/items")
-        print(f"      GET /api/v1/products/mobile")
+        logger.info(f"")
+        logger.info(f"✅ SUCCESS: Chucho restaurant menu seeded!")
+        logger.info(f"   📋 Categories: {total_categories}")
+        logger.info(f"   🍽️  Products: {total_products}")
+        logger.info(f"   🏪 Restaurant: {restaurant.name}")
+        logger.info(f"   🔗 Menu API endpoints now available:")
+        logger.info(f"      GET /api/v1/menu/categories")
+        logger.info(f"      GET /api/v1/menu/items")
+        logger.info(f"      GET /api/v1/products/mobile")
         
     except Exception as e:
-        print(f"❌ Error seeding menu: {e}")
+        logger.error(f"❌ Error seeding menu: {e}")
         db.rollback()
         import traceback
+import logging
+
+logger = logging.getLogger(__name__)
+
         traceback.print_exc()
         sys.exit(1)
         

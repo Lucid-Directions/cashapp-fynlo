@@ -3,7 +3,7 @@ WebSocket schemas for Fynlo POS
 """
 
 from pydantic import BaseModel, Field
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any
 from datetime import datetime
 from enum import Enum
 

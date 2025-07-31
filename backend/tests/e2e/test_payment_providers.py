@@ -6,10 +6,9 @@ import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 import os
-from decimal import Decimal
 
 from app.services.payment_service import PaymentService
-from app.models import Order, Payment
+from app.models import Payment
 
 
 @pytest.mark.asyncio

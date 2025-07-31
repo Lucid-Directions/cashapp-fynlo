@@ -4,11 +4,9 @@ Provides collision-resistant UUID to integer conversion for mobile compatibility
 """
 
 import hashlib
-import uuid
 from typing import Dict, Optional, Any
 from sqlalchemy.orm import Session
-from sqlalchemy import Table, Column, String, Integer, DateTime, func, create_engine, PrimaryKeyConstraint
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, String, Integer, DateTime, func, PrimaryKeyConstraint
 from app.core.database import Base, engine
 from app.core.redis_client import RedisClient
 import logging

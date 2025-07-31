@@ -770,33 +770,37 @@ class TestOrderManagementFullCoverage:
 def generate_coverage_report():
     """Generate detailed coverage report with recommendations"""
     import coverage
+import logging
+
+logger = logging.getLogger(__name__)
+
     
     cov = coverage.Coverage()
     cov.load()
     
-    print("\n" + "="*70)
-    print("COVERAGE REPORT - Order Management Feature")
-    print("="*70)
+    logger.info("\n" + "="*70)
+    logger.info("COVERAGE REPORT - Order Management Feature")
+    logger.info("="*70)
     
     # Get coverage data
     total = cov.report()
     
-    print(f"\nTotal Coverage: {total:.2f}%")
+    logger.info(f"\nTotal Coverage: {total:.2f}%")
     
     if total < 100:
-        print("\nUncovered Areas:")
-        print("-" * 50)
+        logger.info("\nUncovered Areas:")
+        logger.info("-" * 50)
         
         # Analyze uncovered lines
         for filename in cov.get_data().measured_files():
             if "order" in filename:
                 analysis = cov.analysis2(filename)
                 if analysis and analysis[3]:  # Missing lines
-                    print(f"\n{filename}:")
-                    print(f"  Missing lines: {analysis[3]}")
-                    print(f"  Suggestion: Add tests for error conditions and edge cases")
+                    logger.info(f"\n{filename}:")
+                    logger.info(f"  Missing lines: {analysis[3]}")
+                    logger.error(f"  Suggestion: Add tests for error conditions and edge cases")
     
-    print("\n" + "="*70)
+    logger.info("\n" + "="*70)
 
 
 if __name__ == "__main__":

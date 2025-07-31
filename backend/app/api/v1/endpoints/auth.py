@@ -27,7 +27,7 @@ from app.core.feature_gate import get_plan_features
 from app.services.audit_logger import AuditLoggerService
 from app.models.audit_log import AuditEventType, AuditEventStatus
 from app.middleware.rate_limit_middleware import limiter, AUTH_RATE
-from app.core.exceptions import ValidationException, AuthenticationException, FynloException, ResourceNotFoundException, ConflictException, ServiceUnavailableError, AuthorizationException
+from app.core.exceptions import ValidationException, AuthenticationException, FynloException, ResourceNotFoundException, ServiceUnavailableError
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -500,7 +500,6 @@ async def register_restaurant(
             # Validate inputs
             from app.core.validation import (
                 validate_model_jsonb_fields,
-                validate_email,
                 validate_phone,
                 sanitize_string,
                 ValidationError as ValidationErr

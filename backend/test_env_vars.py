@@ -5,11 +5,15 @@ Test environment variable loading
 
 import os
 from dotenv import load_dotenv
+import logging
 
-print("=== Environment Variable Loading Test ===")
+logger = logging.getLogger(__name__)
+
+
+logger.info("=== Environment Variable Loading Test ===")
 
 # Force load .env
-print("\nLoading .env file...")
+logger.info("\nLoading .env file...")
 load_dotenv(dotenv_path=".env", override=True)
 
 # Check key variables
@@ -26,22 +30,22 @@ for var in key_vars:
     value = os.getenv(var)
     if value:
         if "KEY" in var or "PASSWORD" in var:
-            print(f"{var}: ✅ SET (hidden)")
+            logger.info(f"{var}: ✅ SET (hidden)")
         else:
-            print(f"{var}: ✅ SET - {value[:30]}...")
+            logger.info(f"{var}: ✅ SET - {value[:30]}...")
     else:
-        print(f"{var}: ❌ NOT SET")
+        logger.info(f"{var}: ❌ NOT SET")
 
 # Check if .env.production is being loaded
-print("\n\nChecking .env.production...")
+logger.info("\n\nChecking .env.production...")
 load_dotenv(dotenv_path=".env.production", override=True)
 
 for var in key_vars:
     value = os.getenv(var)
     if value:
         if "KEY" in var or "PASSWORD" in var:
-            print(f"{var}: ✅ SET (hidden)")
+            logger.info(f"{var}: ✅ SET (hidden)")
         else:
-            print(f"{var}: ✅ SET - {value[:30]}...")
+            logger.info(f"{var}: ✅ SET - {value[:30]}...")
     else:
-        print(f"{var}: ❌ NOT SET")
+        logger.info(f"{var}: ❌ NOT SET")

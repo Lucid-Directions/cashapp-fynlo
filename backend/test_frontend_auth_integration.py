@@ -31,11 +31,11 @@ class FrontendAuthIntegrationTester:
             "message": message,
             "data": data
         })
-        print(f"{status}: {test_name}")
+        logger.info(f"{status}: {test_name}")
         if message:
-            print(f"    {message}")
+            logger.info(f"    {message}")
         if data and isinstance(data, dict) and len(str(data)) < 300:
-            print(f"    Response: {json.dumps(data, indent=2, default=str)}")
+            logger.info(f"    Response: {json.dumps(data, indent=2, default=str)}")
     
     async def simulate_ios_login_flow(self, email: str, password: str, device_info: Dict[str, Any] = None):
         """Simulate iOS app login flow"""
@@ -373,6 +373,10 @@ class FrontendAuthIntegrationTester:
         try:
             from app.api.v1.endpoints.auth import create_access_token
             from datetime import timedelta
+import logging
+
+logger = logging.getLogger(__name__)
+
             
             short_token = create_access_token(
                 data={"sub": "test-user"},
@@ -452,8 +456,8 @@ class FrontendAuthIntegrationTester:
     
     async def run_all_tests(self):
         """Run all frontend-backend authentication integration tests"""
-        print("📱 Starting Frontend-Backend Authentication Integration Tests")
-        print("=" * 65)
+        logger.info("📱 Starting Frontend-Backend Authentication Integration Tests")
+        logger.info("=" * 65)
         
         # Test iOS login flows
         login_ok = await self.test_ios_login_scenarios()
@@ -479,31 +483,31 @@ class FrontendAuthIntegrationTester:
         failed = sum(1 for result in self.test_results if "❌ FAIL" in result["status"])
         total = len(self.test_results)
         
-        print(f"\n📊 Frontend Integration Test Results")
-        print("=" * 45)
-        print(f"Total Tests: {total}")
-        print(f"Passed: {passed}")
-        print(f"Failed: {failed}")
-        print(f"Success Rate: {(passed/total*100):.1f}%" if total > 0 else "0%")
+        logger.info(f"\n📊 Frontend Integration Test Results")
+        logger.info("=" * 45)
+        logger.info(f"Total Tests: {total}")
+        logger.info(f"Passed: {passed}")
+        logger.error(f"Failed: {failed}")
+        logger.info(f"Success Rate: {(passed/total*100):.1f}%" if total > 0 else "0%")
         
         if failed == 0:
-            print("\n🎉 All frontend-backend integration tests passed!")
-            print("\n✅ iOS App Integration Ready:")
-            print("   - Authentication flow compatible")
-            print("   - Response formats match iOS expectations") 
-            print("   - Error handling iOS-friendly")
-            print("   - Token management working")
-            print("   - CORS headers configured")
+            logger.info("\n🎉 All frontend-backend integration tests passed!")
+            logger.info("\n✅ iOS App Integration Ready:")
+            logger.info("   - Authentication flow compatible")
+            logger.info("   - Response formats match iOS expectations") 
+            logger.error("   - Error handling iOS-friendly")
+            logger.info("   - Token management working")
+            logger.info("   - CORS headers configured")
         else:
-            print(f"\n⚠️ {failed} test(s) failed. Check integration issues above.")
+            logger.error(f"\n⚠️ {failed} test(s) failed. Check integration issues above.")
         
         return failed == 0
 
 async def main():
     """Main integration test runner"""
-    print("Starting frontend-backend authentication integration tests...")
-    print("Testing authentication flow from iOS app perspective.")
-    print()
+    logger.info("Starting frontend-backend authentication integration tests...")
+    logger.info("Testing authentication flow from iOS app perspective.")
+    logger.info()
     
     tester = FrontendAuthIntegrationTester()
     success = await tester.run_all_tests()

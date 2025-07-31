@@ -12,6 +12,10 @@ from pathlib import Path
 from io import BytesIO
 import httpx
 from PIL import Image
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 # Add the project root to Python path
 project_root = Path(__file__).parent
@@ -33,12 +37,12 @@ class FileUploadAPITester:
             "message": message,
             "data": data
         })
-        print(f"{status}: {test_name}")
+        logger.info(f"{status}: {test_name}")
         if message:
-            print(f"    {message}")
+            logger.info(f"    {message}")
         if data and isinstance(data, dict):
             # Pretty print JSON data
-            print(f"    Data: {json.dumps(data, indent=2, default=str)}")
+            logger.info(f"    Data: {json.dumps(data, indent=2, default=str)}")
     
     def create_test_image_base64(self, size=(200, 200), color='blue', format='JPEG'):
         """Create a test image in base64 format"""
@@ -291,7 +295,7 @@ class FileUploadAPITester:
                     
             except Exception as e:
                 format_results[fmt] = False
-                print(f"    {fmt} format test error: {e}")
+                logger.error(f"    {fmt} format test error: {e}")
         
         success_count = sum(format_results.values())
         if success_count == len(formats):
@@ -305,14 +309,14 @@ class FileUploadAPITester:
     
     async def run_all_tests(self):
         """Run all file upload API tests"""
-        print("🧪 Starting File Upload API Tests")
-        print("=" * 45)
+        logger.info("🧪 Starting File Upload API Tests")
+        logger.info("=" * 45)
         
         # Basic connectivity tests
         server_ok = await self.test_server_status()
         if not server_ok:
-            print("\\n❌ Server not running. Please start the backend server:")
-            print("   python -m uvicorn app.main:app --reload")
+            logger.info("\\n❌ Server not running. Please start the backend server:")
+            logger.info("   python -m uvicorn app.main:app --reload")
             return False
         
         await self.test_api_docs()
@@ -320,7 +324,7 @@ class FileUploadAPITester:
         # Authentication
         auth_ok = await self.authenticate()
         if not auth_ok:
-            print("\\n⚠️ Authentication failed. Check if database is set up with sample data.")
+            logger.error("\\n⚠️ Authentication failed. Check if database is set up with sample data.")
         
         # File upload tests
         await self.test_file_upload_endpoint()
@@ -334,44 +338,44 @@ class FileUploadAPITester:
         failed = sum(1 for result in self.test_results if "❌ FAIL" in result["status"])
         total = len(self.test_results)
         
-        print(f"\\n📊 API Test Results Summary")
-        print("=" * 35)
-        print(f"Total Tests: {total}")
-        print(f"Passed: {passed}")
-        print(f"Failed: {failed}")
-        print(f"Success Rate: {(passed/total*100):.1f}%" if total > 0 else "0%")
+        logger.info(f"\\n📊 API Test Results Summary")
+        logger.info("=" * 35)
+        logger.info(f"Total Tests: {total}")
+        logger.info(f"Passed: {passed}")
+        logger.error(f"Failed: {failed}")
+        logger.info(f"Success Rate: {(passed/total*100):.1f}%" if total > 0 else "0%")
         
         if failed == 0:
-            print("\\n🎉 All file upload API tests passed!")
+            logger.info("\\n🎉 All file upload API tests passed!")
         else:
-            print(f"\\n⚠️ {failed} test(s) failed. Check server logs for details.")
+            logger.error(f"\\n⚠️ {failed} test(s) failed. Check server logs for details.")
         
         return failed == 0
 
 async def main():
     """Main test runner"""
-    print("Starting API endpoint tests...")
-    print("Make sure the backend server is running on http://localhost:8000")
-    print()
+    logger.info("Starting API endpoint tests...")
+    logger.info("Make sure the backend server is running on http://localhost:8000")
+    logger.info()
     
     tester = FileUploadAPITester()
     success = await tester.run_all_tests()
     
     if success:
-        print("\\n✅ File upload system is fully functional!")
-        print("\\n📋 What works:")
-        print("   ✅ File upload endpoints")
-        print("   ✅ Image format validation")
-        print("   ✅ Authentication integration")
-        print("   ✅ Error handling")
-        print("\\n📋 Ready for iOS app integration!")
+        logger.info("\\n✅ File upload system is fully functional!")
+        logger.info("\\n📋 What works:")
+        logger.info("   ✅ File upload endpoints")
+        logger.info("   ✅ Image format validation")
+        logger.info("   ✅ Authentication integration")
+        logger.error("   ✅ Error handling")
+        logger.info("\\n📋 Ready for iOS app integration!")
     else:
-        print("\\n❌ Some tests failed. Check the issues above.")
-        print("\\n💡 Common fixes:")
-        print("   1. Make sure the backend server is running")
-        print("   2. Ensure database is set up with sample data")
-        print("   3. Check that upload directories exist")
-        print("   4. Verify all dependencies are installed")
+        logger.error("\\n❌ Some tests failed. Check the issues above.")
+        logger.info("\\n💡 Common fixes:")
+        logger.info("   1. Make sure the backend server is running")
+        logger.info("   2. Ensure database is set up with sample data")
+        logger.info("   3. Check that upload directories exist")
+        logger.info("   4. Verify all dependencies are installed")
     
     return success
 

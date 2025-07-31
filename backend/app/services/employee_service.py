@@ -3,11 +3,10 @@ Employee Service - Business logic for employee management
 Handles employee CRUD operations, scheduling, time tracking, and performance metrics
 """
 
-from typing import List, Optional, Dict, Any
-from datetime import datetime, date, time, timedelta
-from decimal import Decimal
+from typing import List, Optional
+from datetime import datetime, date, timedelta
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, or_, func, desc
+from sqlalchemy import and_, func, desc
 from app.core.database import User, UserRestaurant
 from app.models.employee import EmployeeProfile, Schedule, Shift, TimeEntry, PerformanceMetric
 from app.core.database import Restaurant
@@ -17,7 +16,7 @@ from app.schemas.employee_schemas import (
     ShiftResponse, PerformanceMetricResponse, EmployeeSummary,
     WeeklyScheduleResponse, WeeklyScheduleDay
 )
-from app.core.exceptions import ValidationException, AuthenticationException, FynloException, ResourceNotFoundException, ConflictException
+from app.core.exceptions import AuthenticationException, FynloException, ResourceNotFoundException
 from app.core.security import get_password_hash
 from app.core.tenant_security import TenantSecurity
 import logging

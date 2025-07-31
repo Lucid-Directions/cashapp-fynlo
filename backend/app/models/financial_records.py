@@ -1,5 +1,4 @@
-from sqlalchemy import Column, String, Boolean, Integer, ForeignKey, DateTime, Numeric, Index
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Column, String, Boolean, Integer, DateTime, Numeric, Index
 from sqlalchemy.sql import func # For server-side default timestamps
 import uuid # For client-side default UUID generation if needed
 

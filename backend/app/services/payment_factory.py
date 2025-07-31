@@ -1,14 +1,12 @@
-from typing import Dict, Any, Optional, List
+from typing import Dict, Optional, List
 from decimal import Decimal
 from .payment_providers.base_provider import BasePaymentProvider, IGatewayRefund
 from .payment_providers.stripe_provider import StripeProvider
-from .payment_providers.square_provider import SquareProvider
 from .payment_providers.sumup_provider import SumUpProvider
 from .payment_providers.cash_provider import CashProvider
 from .smart_routing import SmartRoutingService, RoutingStrategy
 from .payment_analytics import PaymentAnalyticsService
 from ..core.config import settings
-from ..core.database import get_db
 import logging
 
 logger = logging.getLogger(__name__)

@@ -5,10 +5,9 @@ Tests real user journeys without mocks
 import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
-from datetime import datetime
 import uuid
 
-from app.models import Order, OrderItem, Payment
+from app.models import Order
 
 
 @pytest.mark.asyncio

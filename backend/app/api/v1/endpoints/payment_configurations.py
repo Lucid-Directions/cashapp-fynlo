@@ -1,11 +1,10 @@
 from fastapi import APIRouter, Depends, Body, Path, Query
 from sqlalchemy.orm import Session
-from typing import List, Optional, Dict, Any
+from typing import List, Optional
 from pydantic import BaseModel
 
 from app.core.database import get_db, User
 from app.core.exceptions import (
-    AuthorizationException,
     ConflictException,
     FynloException,
     ResourceNotFoundException,

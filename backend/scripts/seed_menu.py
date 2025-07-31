@@ -100,11 +100,11 @@ def seed_menu(restaurant_name: str = "Chucho Restaurant"):
         restaurant = result.fetchone()
         
         if not restaurant:
-            print(f"❌ {restaurant_name} not found. Please create the restaurant first.")
+            logger.info(f"❌ {restaurant_name} not found. Please create the restaurant first.")
             return
         
         restaurant_id = restaurant[0]
-        print(f"✅ Found {restaurant_name}: {restaurant_id}")
+        logger.info(f"✅ Found {restaurant_name}: {restaurant_id}")
         
         # Create categories
         category_map = {}
@@ -118,7 +118,7 @@ def seed_menu(restaurant_name: str = "Chucho Restaurant"):
             
             if existing_cat:
                 category_map[cat_data['name']] = existing_cat[0]
-                print(f"✓ Category '{cat_data['name']}' already exists")
+                logger.info(f"✓ Category '{cat_data['name']}' already exists")
             else:
                 # Create new category
                 cat_id = str(uuid.uuid4())
@@ -137,7 +137,7 @@ def seed_menu(restaurant_name: str = "Chucho Restaurant"):
                     }
                 )
                 category_map[cat_data['name']] = cat_id
-                print(f"✅ Created category: {cat_data['name']}")
+                logger.info(f"✅ Created category: {cat_data['name']}")
         
         # Create products
         created_count = 0
@@ -152,7 +152,7 @@ def seed_menu(restaurant_name: str = "Chucho Restaurant"):
             existing_product = result.fetchone()
             
             if existing_product:
-                print(f"✓ Product '{item['name']}' already exists")
+                logger.info(f"✓ Product '{item['name']}' already exists")
                 skipped_count += 1
             else:
                 # Create new product
@@ -160,7 +160,7 @@ def seed_menu(restaurant_name: str = "Chucho Restaurant"):
                 category_id = category_map.get(item['category'])
                 
                 if not category_id:
-                    print(f"⚠️  Category '{item['category']}' not found for product '{item['name']}'")
+                    logger.info(f"⚠️  Category '{item['category']}' not found for product '{item['name']}'")
                     skipped_count += 1  # Count skipped products due to missing category
                     continue
                 
@@ -184,20 +184,20 @@ def seed_menu(restaurant_name: str = "Chucho Restaurant"):
                         'restaurant_id': restaurant_id
                     }
                 )
-                print(f"✅ Created product: {item['name']} (£{item['price']})")
+                logger.info(f"✅ Created product: {item['name']} (£{item['price']})")
                 created_count += 1
         
         # Commit the transaction
         db.commit()
         
-        print(f"\n🎉 Successfully seeded menu for {restaurant_name}!")
-        print(f"   Created: {created_count} products")
-        print(f"   Skipped: {skipped_count} products (existing or missing category)")
-        print(f"   Total processed: {len(CHUCHO_MENU_ITEMS)}")
+        logger.info(f"\n🎉 Successfully seeded menu for {restaurant_name}!")
+        logger.info(f"   Created: {created_count} products")
+        logger.info(f"   Skipped: {skipped_count} products (existing or missing category)")
+        logger.info(f"   Total processed: {len(CHUCHO_MENU_ITEMS)}")
         
     except Exception as e:
         db.rollback()
-        print(f"\n❌ Error seeding menu: {str(e)}")
+        logger.error(f"\n❌ Error seeding menu: {str(e)}")
         raise
     finally:
         db.close()
@@ -205,6 +205,10 @@ def seed_menu(restaurant_name: str = "Chucho Restaurant"):
 
 if __name__ == "__main__":
     import argparse
+import logging
+
+logger = logging.getLogger(__name__)
+
     
     parser = argparse.ArgumentParser(description="Seed menu data for a restaurant")
     parser.add_argument("--restaurant", default="Chucho Restaurant", help="Restaurant name")

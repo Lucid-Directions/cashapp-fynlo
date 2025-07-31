@@ -4,14 +4,12 @@ Tests encryption, storage, and retrieval of payment provider credentials
 """
 
 import pytest
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 from cryptography.fernet import Fernet
 import json
-from decimal import Decimal
 from datetime import datetime
 
 from app.services.secure_payment_config import SecurePaymentConfigService
-from app.core.exceptions import FynloException
 
 
 class TestSecurePaymentConfigService:
@@ -275,13 +273,11 @@ class TestSecurePaymentConfigService:
         """Test handling of concurrent configuration updates"""
         # This would test database locking/transaction handling
         # Implementation depends on specific database locking strategy
-        pass
     
     def test_encryption_key_rotation(self, service, mock_db):
         """Test ability to rotate encryption keys"""
         # This would test the key rotation functionality
         # Implementation depends on key rotation strategy
-        pass
 
 
 class TestSecurePaymentConfigIntegration:
@@ -292,4 +288,3 @@ class TestSecurePaymentConfigIntegration:
         """Test complete lifecycle of payment configuration"""
         # This would test with actual database
         # Create -> Retrieve -> Update -> Disable -> List
-        pass

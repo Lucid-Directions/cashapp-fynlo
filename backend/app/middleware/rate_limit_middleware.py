@@ -4,13 +4,10 @@ Rate limiting middleware using fastapi-limiter.
 import logging
 from typing import Optional
 
-from fastapi import Request, HTTPException, status, Depends
+from fastapi import Request, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi import Limiter
 from slowapi.util import get_remote_address
-from slowapi.errors import RateLimitExceeded
-from slowapi.middleware import SlowAPIMiddleware
-from slowapi.extension import RateLimiter
 from jose import JWTError, jwt
 
 from app.core.config import settings

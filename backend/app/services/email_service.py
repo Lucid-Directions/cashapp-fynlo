@@ -3,7 +3,6 @@ Email Service using Resend API for Fynlo POS
 Handles transactional emails including receipt delivery
 """
 
-import os
 import logging
 from typing import Literal, Optional, Dict, Any
 from pathlib import Path

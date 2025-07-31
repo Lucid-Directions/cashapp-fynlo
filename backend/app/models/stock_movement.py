@@ -8,7 +8,7 @@ from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 import uuid
 import enum
-from app.core.database import Base, Restaurant, User, Order, InventoryItem
+from app.core.database import Base
 
 
 class MovementType(enum.Enum):

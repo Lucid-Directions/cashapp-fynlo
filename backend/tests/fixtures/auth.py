@@ -2,7 +2,7 @@
 Authentication fixtures for testing
 """
 import pytest
-from unittest.mock import Mock, AsyncMock
+from unittest.mock import Mock
 from datetime import datetime, timedelta
 import jwt
 import uuid

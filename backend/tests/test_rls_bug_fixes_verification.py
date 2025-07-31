@@ -4,17 +4,11 @@ Ensures all fixes work correctly
 """
 
 import pytest
-import asyncio
-import threading
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock, patch
 from sqlalchemy.orm import Session
-from sqlalchemy import text, create_engine
-from sqlalchemy.pool import StaticPool
-from contextlib import contextmanager
 
 from app.core.rls_context import RLSContext
-from app.core.rls_session_context import RLSSessionContext
-from app.core.database import get_db, RLSContext as DatabaseRLSContext
+from app.core.database import RLSContext as DatabaseRLSContext
 from app.core.websocket_rate_limiter import WebSocketRateLimiter
 from app.models import User
 

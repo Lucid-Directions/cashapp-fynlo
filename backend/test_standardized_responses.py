@@ -8,6 +8,10 @@ import json
 from datetime import datetime
 from app.core.responses import APIResponseHelper, iOSResponseHelper, ErrorCodes
 from app.core.exceptions import (
+import logging
+
+logger = logging.getLogger(__name__)
+
     AuthenticationException,
     ValidationException,
     ResourceNotFoundException,
@@ -18,38 +22,38 @@ from app.core.exceptions import (
 async def test_standardized_responses():
     """Test all standardized response types"""
     
-    print("🧪 Testing Standardized API Responses\n")
+    logger.info("🧪 Testing Standardized API Responses\n")
     
     # Test success response
-    print("✅ SUCCESS RESPONSE:")
+    logger.info("✅ SUCCESS RESPONSE:")
     success_response = APIResponseHelper.success(
         data={"user_id": "123", "name": "John Doe"},
         message="User retrieved successfully"
     )
-    print(json.dumps(json.loads(success_response.body), indent=2))
-    print()
+    logger.info(json.dumps(json.loads(success_response.body), indent=2))
+    logger.info()
     
     # Test created response
-    print("✅ CREATED RESPONSE:")
+    logger.info("✅ CREATED RESPONSE:")
     created_response = APIResponseHelper.created(
         data={"order_id": "ORD-456", "status": "pending"},
         message="Order created successfully"
     )
-    print(json.dumps(json.loads(created_response.body), indent=2))
-    print()
+    logger.info(json.dumps(json.loads(created_response.body), indent=2))
+    logger.info()
     
     # Test error response
-    print("❌ ERROR RESPONSE:")
+    logger.error("❌ ERROR RESPONSE:")
     error_response = APIResponseHelper.error(
         message="Product not found",
         error_code=ErrorCodes.NOT_FOUND,
         details={"product_id": "prod-789"}
     )
-    print(json.dumps(json.loads(error_response.body), indent=2))
-    print()
+    logger.error(json.dumps(json.loads(error_response.body), indent=2))
+    logger.info()
     
     # Test validation error
-    print("❌ VALIDATION ERROR:")
+    logger.error("❌ VALIDATION ERROR:")
     validation_response = APIResponseHelper.validation_error(
         message="Request validation failed",
         errors=[
@@ -57,11 +61,11 @@ async def test_standardized_responses():
             {"field": "password", "message": "Password too short"}
         ]
     )
-    print(json.dumps(json.loads(validation_response.body), indent=2))
-    print()
+    logger.info(json.dumps(json.loads(validation_response.body), indent=2))
+    logger.info()
     
     # Test iOS login response
-    print("📱 iOS LOGIN RESPONSE:")
+    logger.info("📱 iOS LOGIN RESPONSE:")
     ios_login = iOSResponseHelper.login_success(
         access_token="jwt_token_here",
         user_data={
@@ -72,11 +76,11 @@ async def test_standardized_responses():
             "role": "employee"
         }
     )
-    print(json.dumps(json.loads(ios_login.body), indent=2))
-    print()
+    logger.info(json.dumps(json.loads(ios_login.body), indent=2))
+    logger.info()
     
     # Test paginated response
-    print("📄 PAGINATED RESPONSE:")
+    logger.info("📄 PAGINATED RESPONSE:")
     paginated_response = APIResponseHelper.paginated(
         data=[
             {"id": "1", "name": "Product 1"},
@@ -86,10 +90,10 @@ async def test_standardized_responses():
         limit=10,
         total=25
     )
-    print(json.dumps(json.loads(paginated_response.body), indent=2))
-    print()
+    logger.info(json.dumps(json.loads(paginated_response.body), indent=2))
+    logger.info()
     
-    print("✅ All response formats validated successfully!")
+    logger.info("✅ All response formats validated successfully!")
 
 
 if __name__ == "__main__":

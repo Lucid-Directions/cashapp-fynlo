@@ -9,7 +9,6 @@ from decimal import Decimal
 from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
 from enum import Enum
-import asyncio
 
 from app.services.payment_analytics import PaymentAnalyticsService
 

@@ -30,9 +30,13 @@ try:
     from app.models.restaurant import Restaurant
     from sqlalchemy.orm import Session
     from datetime import datetime
+import logging
+
+logger = logging.getLogger(__name__)
+
 except ImportError as e:
-    print(f"❌ Import error: {e}")
-    print("Make sure you're running this from the backend directory with proper dependencies installed")
+    logger.error(f"❌ Import error: {e}")
+    logger.info("Make sure you're running this from the backend directory with proper dependencies installed")
     sys.exit(1)
 
 # Load the menu data from the frontend migration file
@@ -41,17 +45,17 @@ def load_menu_data():
     frontend_menu_file = backend_root.parent / "CashApp-iOS" / "CashAppPOS" / "mexican_menu_migration.json"
     
     if not frontend_menu_file.exists():
-        print(f"❌ Menu data file not found: {frontend_menu_file}")
-        print("Make sure mexican_menu_migration.json exists in the frontend directory")
+        logger.info(f"❌ Menu data file not found: {frontend_menu_file}")
+        logger.info("Make sure mexican_menu_migration.json exists in the frontend directory")
         return None
     
     try:
         with open(frontend_menu_file, 'r', encoding='utf-8') as f:
             data = json.load(f)
-        print(f"✅ Loaded menu data: {len(data['menu_items'])} items, {len(data['categories'])} categories")
+        logger.info(f"✅ Loaded menu data: {len(data['menu_items'])} items, {len(data['categories'])} categories")
         return data
     except Exception as e:
-        print(f"❌ Error loading menu data: {e}")
+        logger.error(f"❌ Error loading menu data: {e}")
         return None
 
 def ensure_mexican_restaurant(db: Session):
@@ -74,9 +78,9 @@ def ensure_mexican_restaurant(db: Session):
         db.add(restaurant)
         db.commit()
         db.refresh(restaurant)
-        print(f"✅ Created Mexican restaurant: {restaurant.name} (ID: {restaurant.id})")
+        logger.info(f"✅ Created Mexican restaurant: {restaurant.name} (ID: {restaurant.id})")
     else:
-        print(f"✅ Mexican restaurant exists: {restaurant.name} (ID: {restaurant.id})")
+        logger.info(f"✅ Mexican restaurant exists: {restaurant.name} (ID: {restaurant.id})")
     
     return restaurant
 
@@ -104,10 +108,10 @@ def migrate_categories(db: Session, restaurant_id: int, categories_data: list):
             db.commit()
             db.refresh(category)
             category_map[cat_data['id']] = category.id
-            print(f"✅ Created category: {category.name}")
+            logger.info(f"✅ Created category: {category.name}")
         else:
             category_map[cat_data['id']] = existing_category.id
-            print(f"ℹ️  Category exists: {existing_category.name}")
+            logger.info(f"ℹ️  Category exists: {existing_category.name}")
     
     return category_map
 
@@ -124,7 +128,7 @@ def migrate_menu_items(db: Session, restaurant_id: int, menu_items_data: list, c
         
         category_id = category_map.get(item_data['category_id'])
         if not category_id:
-            print(f"⚠️  Warning: Category not found for item {item_data['name']}")
+            logger.warning(f"⚠️  Warning: Category not found for item {item_data['name']}")
             continue
         
         if not existing_item:
@@ -146,7 +150,7 @@ def migrate_menu_items(db: Session, restaurant_id: int, menu_items_data: list, c
             )
             db.add(menu_item)
             items_created += 1
-            print(f"✅ Created menu item: {menu_item.name} - £{menu_item.price}")
+            logger.info(f"✅ Created menu item: {menu_item.name} - £{menu_item.price}")
         else:
             # Update existing item with new data
             existing_item.price = float(item_data['price'])
@@ -155,15 +159,15 @@ def migrate_menu_items(db: Session, restaurant_id: int, menu_items_data: list, c
             existing_item.is_available = item_data.get('available', existing_item.is_available)
             existing_item.updated_at = datetime.utcnow()
             items_updated += 1
-            print(f"🔄 Updated menu item: {existing_item.name} - £{existing_item.price}")
+            logger.info(f"🔄 Updated menu item: {existing_item.name} - £{existing_item.price}")
     
     db.commit()
-    print(f"📊 Migration summary: {items_created} items created, {items_updated} items updated")
+    logger.info(f"📊 Migration summary: {items_created} items created, {items_updated} items updated")
 
 def main():
     """Main migration function"""
-    print("🚀 Starting Mexican Restaurant Menu Migration...")
-    print("=" * 60)
+    logger.info("🚀 Starting Mexican Restaurant Menu Migration...")
+    logger.info("=" * 60)
     
     # Load menu data
     menu_data = load_menu_data()
@@ -173,9 +177,9 @@ def main():
     # Connect to database
     try:
         db = SessionLocal()
-        print("✅ Connected to database")
+        logger.info("✅ Connected to database")
     except Exception as e:
-        print(f"❌ Database connection failed: {e}")
+        logger.error(f"❌ Database connection failed: {e}")
         return False
     
     try:
@@ -183,22 +187,22 @@ def main():
         restaurant = ensure_mexican_restaurant(db)
         
         # Migrate categories
-        print("\n📁 Migrating menu categories...")
+        logger.info("\n📁 Migrating menu categories...")
         category_map = migrate_categories(db, restaurant.id, menu_data['categories'])
         
         # Migrate menu items
-        print("\n🍽️  Migrating menu items...")
+        logger.info("\n🍽️  Migrating menu items...")
         migrate_menu_items(db, restaurant.id, menu_data['menu_items'], category_map)
         
-        print("\n🎉 Mexican restaurant menu migration completed successfully!")
-        print(f"Restaurant: {restaurant.name}")
-        print(f"Categories: {len(menu_data['categories'])}")
-        print(f"Menu Items: {len(menu_data['menu_items'])}")
+        logger.info("\n🎉 Mexican restaurant menu migration completed successfully!")
+        logger.info(f"Restaurant: {restaurant.name}")
+        logger.info(f"Categories: {len(menu_data['categories'])}")
+        logger.info(f"Menu Items: {len(menu_data['menu_items'])}")
         
         return True
         
     except Exception as e:
-        print(f"❌ Migration failed: {e}")
+        logger.error(f"❌ Migration failed: {e}")
         db.rollback()
         return False
     finally:
@@ -208,4 +212,4 @@ if __name__ == "__main__":
     success = main()
     if not success:
         sys.exit(1)
-    print("\n✅ Ready for frontend testing!")
+    logger.info("\n✅ Ready for frontend testing!")

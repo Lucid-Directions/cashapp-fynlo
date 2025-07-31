@@ -2,12 +2,12 @@
 Service layer for advanced inventory operations, including recipe deductions.
 """
 from sqlalchemy.orm import Session
-from sqlalchemy import func, and_
+from sqlalchemy import func
 from typing import List, Optional, Dict, Tuple
 from uuid import UUID
 import logging # For logging stock_overdrawn events
 
-from app.models import Order as OrderModel, Product as ProductModel, Recipe as RecipeModel, InventoryItem as InventoryItemModel, InventoryLedgerEntry as InventoryLedgerModel
+from app.models import Order as OrderModel, Recipe as RecipeModel, InventoryItem as InventoryItemModel, InventoryLedgerEntry as InventoryLedgerModel
 from app.crud import inventory as crud_inventory
 from app.core.websocket import WebSocketManager
 # from app.services.audit_logger import AuditLoggerService # Assuming an audit logger service

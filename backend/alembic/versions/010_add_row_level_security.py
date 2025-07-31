@@ -8,7 +8,6 @@ Platform owners (users with role 'platform_owner' AND specific emails) have full
 All other users can only access their own restaurant's data.
 """
 from alembic import op
-import sqlalchemy as sa
 
 
 # revision identifiers

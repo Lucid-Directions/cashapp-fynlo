@@ -5,14 +5,12 @@ This module provides decorators and middleware for restricting access
 to features based on subscription plans.
 """
 
-from functools import wraps
-from fastapi import HTTPException, Request, Depends
+from fastapi import HTTPException, Depends
 from sqlalchemy.orm import Session
-from typing import Callable, Optional, List, Tuple
+from typing import Optional, List, Tuple
 
 from app.core.database import get_db
 from app.models.subscription import RestaurantSubscription, SubscriptionUsage
-from app.core.auth import get_current_user
 
 
 class FeatureGateError(HTTPException):

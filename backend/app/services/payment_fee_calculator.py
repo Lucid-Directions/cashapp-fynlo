@@ -133,16 +133,16 @@ class PaymentFeeCalculator:
 #         # await pss.initialize_default_settings()
 #
 #         fee_stripe = await pfc.calculate_processor_fee(100.0, PaymentMethodEnum.STRIPE)
-#         print(f"Stripe processor fee on 100.00: {fee_stripe}")
+#         logger.info(f"Stripe processor fee on 100.00: {fee_stripe}")
 #
 #         fee_sumup = await pfc.calculate_processor_fee(100.0, PaymentMethodEnum.SUMUP, monthly_volume_for_restaurant=3000)
-#         print(f"SumUp processor fee on 100.00 (high volume): {fee_sumup}")
+#         logger.info(f"SumUp processor fee on 100.00 (high volume): {fee_sumup}")
 #
 #         fee_sumup_low = await pfc.calculate_processor_fee(100.0, PaymentMethodEnum.SUMUP, monthly_volume_for_restaurant=1000)
-#         print(f"SumUp processor fee on 100.00 (low volume): {fee_sumup_low}")
+#         logger.info(f"SumUp processor fee on 100.00 (low volume): {fee_sumup_low}")
 #
 #         stripe_config = await pfc.get_payment_method_fee_config(PaymentMethodEnum.STRIPE)
-#         print(f"Stripe fee config: {stripe_config}")
+#         logger.info(f"Stripe fee config: {stripe_config}")
 #
 #     finally:
 #         db.close()

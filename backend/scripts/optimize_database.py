@@ -42,7 +42,7 @@ def get_connection():
 
 def analyze_table_sizes(cursor):
     """Check actual table sizes to determine if we can downsize the database"""
-    print("\n=== TABLE SIZE ANALYSIS ===")
+    logger.info("\n=== TABLE SIZE ANALYSIS ===")
     
     query = """
     SELECT 
@@ -62,18 +62,18 @@ def analyze_table_sizes(cursor):
     
     total_size = 0
     for row in results:
-        print(f"{row['table']:30} | Total: {row['total_size']:>10} | Table: {row['table_size']:>10} | Indexes: {row['indexes_size']:>10}")
+        logger.info(f"{row['table']:30} | Total: {row['total_size']:>10} | Table: {row['table_size']:>10} | Indexes: {row['indexes_size']:>10}")
     
     # Get total database size
     cursor.execute("SELECT pg_database_size(current_database()) as size")
     db_size = cursor.fetchone()['size']
-    print(f"\nTotal Database Size: {db_size / 1024 / 1024:.2f} MB")
+    logger.info(f"\nTotal Database Size: {db_size / 1024 / 1024:.2f} MB")
     
     return db_size
 
 def check_missing_indexes(cursor):
     """Identify tables that might benefit from indexes"""
-    print("\n=== MISSING INDEX ANALYSIS ===")
+    logger.info("\n=== MISSING INDEX ANALYSIS ===")
     
     # Check for foreign key columns without indexes
     query = """
@@ -102,17 +102,17 @@ def check_missing_indexes(cursor):
     missing_fk_indexes = cursor.fetchall()
     
     if missing_fk_indexes:
-        print("\nForeign keys without indexes:")
+        logger.info("\nForeign keys without indexes:")
         for row in missing_fk_indexes:
-            print(f"  - {row['table_name']}.{row['column_name']}")
+            logger.info(f"  - {row['table_name']}.{row['column_name']}")
     else:
-        print("\n✅ All foreign keys have indexes")
+        logger.info("\n✅ All foreign keys have indexes")
     
     return missing_fk_indexes
 
 def create_optimized_indexes(cursor):
     """Create performance-critical indexes"""
-    print("\n=== CREATING OPTIMIZED INDEXES ===")
+    logger.info("\n=== CREATING OPTIMIZED INDEXES ===")
     
     indexes = [
         # Orders - most queried table
@@ -169,20 +169,20 @@ def create_optimized_indexes(cursor):
                 if where_clause:
                     index_sql += f" {where_clause}"
                 
-                print(f"Creating index: {index_name}...")
+                logger.info(f"Creating index: {index_name}...")
                 cursor.execute(index_sql)
                 created_count += 1
-                print(f"  ✅ Created: {index_name}")
+                logger.info(f"  ✅ Created: {index_name}")
             except Exception as e:
-                print(f"  ❌ Error creating {index_name}: {str(e)}")
+                logger.error(f"  ❌ Error creating {index_name}: {str(e)}")
         else:
-            print(f"  ℹ️  Index already exists: {index_name}")
+            logger.info(f"  ℹ️  Index already exists: {index_name}")
     
-    print(f"\n✅ Created {created_count} new indexes")
+    logger.info(f"\n✅ Created {created_count} new indexes")
 
 def analyze_slow_queries(cursor):
     """Check for slow queries using pg_stat_statements"""
-    print("\n=== SLOW QUERY ANALYSIS ===")
+    logger.info("\n=== SLOW QUERY ANALYSIS ===")
     
     # Check if pg_stat_statements is available
     cursor.execute("""
@@ -192,7 +192,7 @@ def analyze_slow_queries(cursor):
     """)
     
     if not cursor.fetchone()[0]:
-        print("pg_stat_statements extension not available")
+        logger.info("pg_stat_statements extension not available")
         return
     
     # Get top slow queries
@@ -215,18 +215,18 @@ def analyze_slow_queries(cursor):
         slow_queries = cursor.fetchall()
         
         if slow_queries:
-            print("\nTop slow queries (>100ms average):")
+            logger.info("\nTop slow queries (>100ms average):")
             for i, row in enumerate(slow_queries, 1):
-                print(f"\n{i}. Mean: {row['mean_time_ms']}ms, Max: {row['max_time_ms']}ms, Calls: {row['calls']}")
-                print(f"   Query: {row['query'][:100]}...")
+                logger.info(f"\n{i}. Mean: {row['mean_time_ms']}ms, Max: {row['max_time_ms']}ms, Calls: {row['calls']}")
+                logger.info(f"   Query: {row['query'][:100]}...")
         else:
-            print("\n✅ No slow queries found")
+            logger.info("\n✅ No slow queries found")
     except Exception as e:
-        print(f"Could not analyze slow queries: {str(e)}")
+        logger.info(f"Could not analyze slow queries: {str(e)}")
 
 def vacuum_and_analyze(cursor):
     """Run VACUUM and ANALYZE on all tables"""
-    print("\n=== VACUUM AND ANALYZE ===")
+    logger.info("\n=== VACUUM AND ANALYZE ===")
     
     # Get all tables
     cursor.execute("""
@@ -249,11 +249,11 @@ def vacuum_and_analyze(cursor):
     for table in tables:
         table_name = table['tablename']
         try:
-            print(f"Vacuuming and analyzing {table_name}...")
+            logger.info(f"Vacuuming and analyzing {table_name}...")
             cursor.execute(f"VACUUM ANALYZE {table_name}")
-            print(f"  ✅ Completed: {table_name}")
+            logger.info(f"  ✅ Completed: {table_name}")
         except Exception as e:
-            print(f"  ❌ Error on {table_name}: {str(e)}")
+            logger.error(f"  ❌ Error on {table_name}: {str(e)}")
     
     # Restore isolation level
     conn.set_isolation_level(old_isolation_level)
@@ -262,7 +262,7 @@ def vacuum_and_analyze(cursor):
 
 def check_connection_stats(cursor):
     """Check database connection usage"""
-    print("\n=== CONNECTION STATISTICS ===")
+    logger.info("\n=== CONNECTION STATISTICS ===")
     
     cursor.execute("""
         SELECT 
@@ -277,9 +277,9 @@ def check_connection_stats(cursor):
     """)
     
     conn_stats = cursor.fetchone()
-    print(f"Max connections: {conn_stats['max_conn']}")
-    print(f"Used connections: {conn_stats['used']}")
-    print(f"Available connections: {conn_stats['available']}")
+    logger.info(f"Max connections: {conn_stats['max_conn']}")
+    logger.info(f"Used connections: {conn_stats['used']}")
+    logger.info(f"Available connections: {conn_stats['available']}")
     
     # Check connection states
     cursor.execute("""
@@ -292,18 +292,18 @@ def check_connection_stats(cursor):
         ORDER BY count DESC
     """)
     
-    print("\nConnection states:")
+    logger.info("\nConnection states:")
     for row in cursor.fetchall():
         state = row['state'] or 'unknown'
-        print(f"  {state}: {row['count']}")
+        logger.info(f"  {state}: {row['count']}")
     
     return conn_stats
 
 def generate_optimization_report(db_size, conn_stats):
     """Generate recommendations based on analysis"""
-    print("\n" + "="*60)
-    print("OPTIMIZATION RECOMMENDATIONS")
-    print("="*60)
+    logger.info("\n" + "="*60)
+    logger.info("OPTIMIZATION RECOMMENDATIONS")
+    logger.info("="*60)
     
     recommendations = []
     
@@ -340,24 +340,24 @@ def generate_optimization_report(db_size, conn_stats):
     with open("database-optimization-report.json", "w") as f:
         json.dump(report, f, indent=2)
     
-    print("\nRecommendations:")
+    logger.info("\nRecommendations:")
     for rec in recommendations:
-        print(f"\n{rec['type']}:")
-        print(f"  Action: {rec['action']}")
-        print(f"  Current: {rec['current']}")
-        print(f"  Recommended: {rec['recommended']}")
+        logger.info(f"\n{rec['type']}:")
+        logger.info(f"  Action: {rec['action']}")
+        logger.info(f"  Current: {rec['current']}")
+        logger.info(f"  Recommended: {rec['recommended']}")
         if 'monthly_savings' in rec:
-            print(f"  Savings: {rec['monthly_savings']}/month")
-        print(f"  Reason: {rec['reason']}")
+            logger.info(f"  Savings: {rec['monthly_savings']}/month")
+        logger.info(f"  Reason: {rec['reason']}")
     
-    print(f"\nReport saved to: database-optimization-report.json")
+    logger.info(f"\nReport saved to: database-optimization-report.json")
 
 def main():
     """Run database optimization"""
-    print("="*60)
-    print("Fynlo POS Database Optimization")
-    print(f"Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    print("="*60)
+    logger.info("="*60)
+    logger.info("Fynlo POS Database Optimization")
+    logger.info(f"Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    logger.info("="*60)
     
     try:
         conn = get_connection()
@@ -389,11 +389,15 @@ def main():
         cursor.close()
         conn.close()
         
-        print("\n✅ Database optimization complete!")
+        logger.info("\n✅ Database optimization complete!")
         
     except Exception as e:
-        print(f"\n❌ Error during optimization: {str(e)}")
+        logger.error(f"\n❌ Error during optimization: {str(e)}")
         import traceback
+import logging
+
+logger = logging.getLogger(__name__)
+
         traceback.print_exc()
         sys.exit(1)
 

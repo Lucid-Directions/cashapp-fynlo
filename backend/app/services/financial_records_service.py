@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from decimal import Decimal
 
 from app.models.financial_records import PlatformFeeRecord, StaffTipDistributionRecord
-from app.schemas.fee_schemas import PlatformFeeRecordSchema, StaffTipDistributionRecordSchema, PaymentMethodEnum
+from app.schemas.fee_schemas import PlatformFeeRecordSchema
 
 logger = logging.getLogger(__name__)
 

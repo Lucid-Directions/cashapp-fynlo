@@ -1,8 +1,6 @@
 # app/core/feature_gate.py
-from typing import Callable
 from sqlalchemy.orm import Session
-from app.core.database import get_db, Restaurant, User
-from app.core.exceptions import AuthenticationException
+from app.core.database import Restaurant
 
 FEATURE_KEYS = {
     # Basic POS Features (Alpha - all plans)

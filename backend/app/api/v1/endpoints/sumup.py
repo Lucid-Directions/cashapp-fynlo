@@ -5,8 +5,8 @@ Provides secure configuration for mobile app without exposing API keys
 Last updated: 2025-07-29 - Force rebuild after rate limiter fix
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status, Request
-from typing import Dict, Any, Optional
+from fastapi import APIRouter, Depends, Request
+from typing import Dict, Optional
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field
 import os
@@ -15,8 +15,7 @@ from fastapi import Query
 
 from app.core.database import get_db, User
 from app.core.auth import get_current_user
-from app.core.responses import APIResponseHelper, ErrorCodes
-from app.core.exceptions import FynloException
+from app.core.responses import APIResponseHelper
 from app.middleware.rate_limit_middleware import limiter
 from app.core.tenant_security import TenantSecurity
 

@@ -8,7 +8,7 @@ import os
 import sys
 from typing import AsyncGenerator
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
-from sqlalchemy import event, text
+from sqlalchemy import text
 from httpx import AsyncClient
 import redis.asyncio as redis
 

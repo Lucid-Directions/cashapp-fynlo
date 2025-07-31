@@ -158,6 +158,10 @@ class Settings(BaseSettings):
         # Try to parse as JSON first
         try:
             import json
+import logging
+
+logger = logging.getLogger(__name__)
+
             parsed = json.loads(v)
             if isinstance(parsed, list):
                 return [str(item) for item in parsed if item]
@@ -274,13 +278,13 @@ def validate_production_settings(s: Settings):
             )
             # In a real scenario, you might want to log this with high priority as well.
             # For now, raising an exception is the primary goal to prevent startup.
-            print("\n" + "="*80)
-            print(error_message)
-            print("="*80 + "\n")
+            logger.info("\n" + "="*80)
+            logger.error(error_message)
+            logger.info("="*80 + "\n")
             raise ValueError(f"Application startup aborted due to insecure production configuration: {'; '.join(errors)}")
 
 # Perform validation after settings are fully initialized
 validate_production_settings(settings)
 
-# print(f"Settings validated for {settings.ENVIRONMENT} environment.")
-# print(f"Settings.SECRET_KEY: {settings.SECRET_KEY[:10]}...") # Print only a part for security
+# logger.info(f"Settings validated for {settings.ENVIRONMENT} environment.")
+# logger.info(f"Settings.SECRET_KEY: {settings.SECRET_KEY[:10]}...") # Print only a part for security

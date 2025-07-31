@@ -37,7 +37,7 @@ def get_connection(database_url):
 
 def analyze_table_sizes(cursor):
     """Check actual table sizes to determine if we can downsize the database"""
-    print("\n=== TABLE SIZE ANALYSIS ===")
+    logger.info("\n=== TABLE SIZE ANALYSIS ===")
     
     query = """
     SELECT 
@@ -57,29 +57,29 @@ def analyze_table_sizes(cursor):
     results = cursor.fetchall()
     
     total_size = 0
-    print(f"{'Table':30} | {'Total':>10} | {'Table':>10} | {'Indexes':>10}")
-    print("-" * 70)
+    logger.info(f"{'Table':30} | {'Total':>10} | {'Table':>10} | {'Indexes':>10}")
+    logger.info("-" * 70)
     
     for row in results:
-        print(f"{row['table']:30} | {row['total_size']:>10} | {row['table_size']:>10} | {row['indexes_size']:>10}")
+        logger.info(f"{row['table']:30} | {row['total_size']:>10} | {row['table_size']:>10} | {row['indexes_size']:>10}")
         total_size += row['total_bytes']
     
     # Get total database size
     cursor.execute("SELECT pg_database_size(current_database()) as size")
     db_size = cursor.fetchone()['size']
     
-    print(f"\nTotal Database Size: {db_size / 1024 / 1024:.2f} MB")
-    print(f"Total Tables Size: {total_size / 1024 / 1024:.2f} MB")
+    logger.info(f"\nTotal Database Size: {db_size / 1024 / 1024:.2f} MB")
+    logger.info(f"Total Tables Size: {total_size / 1024 / 1024:.2f} MB")
     
     # Check row counts for major tables
-    print("\n=== ROW COUNTS ===")
+    logger.info("\n=== ROW COUNTS ===")
     major_tables = ['orders', 'order_items', 'payments', 'products', 'users', 'customers']
     
     for table in major_tables:
         try:
             cursor.execute(f"SELECT COUNT(*) as count FROM {table}")
             count = cursor.fetchone()['count']
-            print(f"{table:20}: {count:,} rows")
+            logger.info(f"{table:20}: {count:,} rows")
         except:
             pass
     
@@ -87,7 +87,7 @@ def analyze_table_sizes(cursor):
 
 def check_existing_indexes(cursor):
     """List all existing indexes"""
-    print("\n=== EXISTING INDEXES ===")
+    logger.info("\n=== EXISTING INDEXES ===")
     
     query = """
     SELECT 
@@ -107,12 +107,12 @@ def check_existing_indexes(cursor):
     for idx in indexes:
         if idx['tablename'] != current_table:
             current_table = idx['tablename']
-            print(f"\n{current_table}:")
-        print(f"  - {idx['indexname']}")
+            logger.info(f"\n{current_table}:")
+        logger.info(f"  - {idx['indexname']}")
 
 def check_connection_stats(cursor):
     """Check database connection usage"""
-    print("\n=== CONNECTION STATISTICS ===")
+    logger.info("\n=== CONNECTION STATISTICS ===")
     
     cursor.execute("""
         SELECT 
@@ -127,9 +127,9 @@ def check_connection_stats(cursor):
     """)
     
     conn_stats = cursor.fetchone()
-    print(f"Max connections: {conn_stats['max_conn']}")
-    print(f"Used connections: {conn_stats['used']}")
-    print(f"Available connections: {conn_stats['available']}")
+    logger.info(f"Max connections: {conn_stats['max_conn']}")
+    logger.info(f"Used connections: {conn_stats['used']}")
+    logger.info(f"Available connections: {conn_stats['available']}")
     
     # Check active queries
     cursor.execute("""
@@ -150,15 +150,15 @@ def check_connection_stats(cursor):
     
     active_queries = cursor.fetchall()
     if active_queries:
-        print(f"\nActive queries: {len(active_queries)}")
+        logger.info(f"\nActive queries: {len(active_queries)}")
         for q in active_queries[:5]:  # Show first 5
-            print(f"  - {q['state']}: {q['query_snippet'][:50]}...")
+            logger.info(f"  - {q['state']}: {q['query_snippet'][:50]}...")
     
     return conn_stats
 
 def check_cache_hit_rates(cursor):
     """Check database cache hit rates"""
-    print("\n=== CACHE HIT RATES ===")
+    logger.info("\n=== CACHE HIT RATES ===")
     
     cursor.execute("""
         SELECT 
@@ -173,82 +173,82 @@ def check_cache_hit_rates(cursor):
     """)
     
     cache_stats = cursor.fetchone()
-    print(f"Cache hit ratio: {cache_stats['cache_hit_ratio']}%")
+    logger.info(f"Cache hit ratio: {cache_stats['cache_hit_ratio']}%")
     
     if cache_stats['cache_hit_ratio'] < 90:
-        print("⚠️  Cache hit ratio is below 90% - consider increasing shared_buffers")
+        logger.info("⚠️  Cache hit ratio is below 90% - consider increasing shared_buffers")
     else:
-        print("✅ Cache hit ratio is good")
+        logger.info("✅ Cache hit ratio is good")
 
 def generate_recommendations(db_size, conn_stats):
     """Generate optimization recommendations"""
-    print("\n" + "="*70)
-    print("OPTIMIZATION RECOMMENDATIONS")
-    print("="*70)
+    logger.info("\n" + "="*70)
+    logger.info("OPTIMIZATION RECOMMENDATIONS")
+    logger.info("="*70)
     
     db_size_mb = db_size / 1024 / 1024
     recommendations = []
     
     # Database size recommendation
     if db_size_mb < 200:
-        print(f"\n1. DATABASE SIZE")
-        print(f"   Current: 1GB plan ($15/month)")
-        print(f"   Actual usage: {db_size_mb:.2f} MB")
-        print(f"   Recommendation: Downsize to 512MB plan ($7/month)")
-        print(f"   Monthly savings: $8")
+        logger.info(f"\n1. DATABASE SIZE")
+        logger.info(f"   Current: 1GB plan ($15/month)")
+        logger.info(f"   Actual usage: {db_size_mb:.2f} MB")
+        logger.info(f"   Recommendation: Downsize to 512MB plan ($7/month)")
+        logger.info(f"   Monthly savings: $8")
         recommendations.append("Downsize database from 1GB to 512MB")
     elif db_size_mb < 500:
-        print(f"\n1. DATABASE SIZE")
-        print(f"   Current: 1GB plan")
-        print(f"   Actual usage: {db_size_mb:.2f} MB")
-        print(f"   Status: Appropriately sized with room for growth")
+        logger.info(f"\n1. DATABASE SIZE")
+        logger.info(f"   Current: 1GB plan")
+        logger.info(f"   Actual usage: {db_size_mb:.2f} MB")
+        logger.info(f"   Status: Appropriately sized with room for growth")
     
     # Connection pool recommendation
     if conn_stats['used'] < 10:
-        print(f"\n2. CONNECTION POOL")
-        print(f"   Current: Likely over-provisioned")
-        print(f"   Active connections: {conn_stats['used']}")
-        print(f"   Recommendation: Reduce connection pool size to 10")
+        logger.info(f"\n2. CONNECTION POOL")
+        logger.info(f"   Current: Likely over-provisioned")
+        logger.info(f"   Active connections: {conn_stats['used']}")
+        logger.info(f"   Recommendation: Reduce connection pool size to 10")
         recommendations.append("Reduce connection pool from 20 to 10")
     
     # App Platform recommendation
-    print(f"\n3. APP PLATFORM")
-    print(f"   Current: basic-s instance ($12/month)")
-    print(f"   Performance: Response times < 200ms (excellent)")
-    print(f"   Recommendation: Monitor CPU/memory in DigitalOcean dashboard")
-    print(f"   If CPU < 50% and memory < 50%: Downsize to basic-xs ($5/month)")
-    print(f"   Potential savings: $7/month")
+    logger.info(f"\n3. APP PLATFORM")
+    logger.info(f"   Current: basic-s instance ($12/month)")
+    logger.info(f"   Performance: Response times < 200ms (excellent)")
+    logger.info(f"   Recommendation: Monitor CPU/memory in DigitalOcean dashboard")
+    logger.info(f"   If CPU < 50% and memory < 50%: Downsize to basic-xs ($5/month)")
+    logger.info(f"   Potential savings: $7/month")
     
     # Redis recommendation
-    print(f"\n4. REDIS CACHE")
-    print(f"   Current: 1GB instance ($15/month)")
-    print(f"   Recommendation: Check memory usage in DigitalOcean dashboard")
-    print(f"   If < 200MB used: Downsize to 512MB plan ($7/month)")
-    print(f"   Potential savings: $8/month")
+    logger.info(f"\n4. REDIS CACHE")
+    logger.info(f"   Current: 1GB instance ($15/month)")
+    logger.info(f"   Recommendation: Check memory usage in DigitalOcean dashboard")
+    logger.info(f"   If < 200MB used: Downsize to 512MB plan ($7/month)")
+    logger.info(f"   Potential savings: $8/month")
     
     # Load Balancer recommendation
-    print(f"\n5. LOAD BALANCER")
-    print(f"   Current: Standard load balancer ($12/month)")
-    print(f"   Recommendation: With single app instance, this may be unnecessary")
-    print(f"   Alternative: Use App Platform's built-in routing")
-    print(f"   Potential savings: $12/month")
+    logger.info(f"\n5. LOAD BALANCER")
+    logger.info(f"   Current: Standard load balancer ($12/month)")
+    logger.info(f"   Recommendation: With single app instance, this may be unnecessary")
+    logger.info(f"   Alternative: Use App Platform's built-in routing")
+    logger.info(f"   Potential savings: $12/month")
     
     # Total potential savings
-    print(f"\n" + "="*70)
-    print(f"TOTAL POTENTIAL SAVINGS")
-    print(f"="*70)
-    print(f"Conservative estimate: $20-30/month")
-    print(f"Aggressive estimate: $35/month")
-    print(f"Percentage reduction: 40-57%")
+    logger.info(f"\n" + "="*70)
+    logger.info(f"TOTAL POTENTIAL SAVINGS")
+    logger.info(f"="*70)
+    logger.info(f"Conservative estimate: $20-30/month")
+    logger.info(f"Aggressive estimate: $35/month")
+    logger.info(f"Percentage reduction: 40-57%")
     
     # Safety recommendations
-    print(f"\n" + "="*70)
-    print(f"SAFETY RECOMMENDATIONS")
-    print(f"="*70)
-    print("1. Monitor performance for 24-48 hours after each change")
-    print("2. Keep backups before downsizing")
-    print("3. Test changes during low-traffic periods")
-    print("4. Have a rollback plan ready")
+    logger.info(f"\n" + "="*70)
+    logger.info(f"SAFETY RECOMMENDATIONS")
+    logger.info(f"="*70)
+    logger.info("1. Monitor performance for 24-48 hours after each change")
+    logger.info("2. Keep backups before downsizing")
+    logger.info("3. Test changes during low-traffic periods")
+    logger.info("4. Have a rollback plan ready")
     
     return recommendations
 
@@ -259,10 +259,10 @@ def main():
     
     args = parser.parse_args()
     
-    print("="*70)
-    print("Fynlo POS Database Optimization Analysis")
-    print(f"Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    print("="*70)
+    logger.info("="*70)
+    logger.info("Fynlo POS Database Optimization Analysis")
+    logger.info(f"Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    logger.info("="*70)
     
     try:
         conn = get_connection(args.database_url)
@@ -289,14 +289,18 @@ def main():
         with open(report_file, 'w') as f:
             json.dump(report, f, indent=2)
         
-        print(f"\n✅ Analysis complete! Report saved to: {report_file}")
+        logger.info(f"\n✅ Analysis complete! Report saved to: {report_file}")
         
         cursor.close()
         conn.close()
         
     except Exception as e:
-        print(f"\n❌ Error: {str(e)}")
+        logger.error(f"\n❌ Error: {str(e)}")
         import traceback
+import logging
+
+logger = logging.getLogger(__name__)
+
         traceback.print_exc()
 
 if __name__ == "__main__":

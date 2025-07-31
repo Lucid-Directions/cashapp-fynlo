@@ -8,7 +8,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 import json
 
-from app.core.database import Customer, User, Restaurant, Product
+from app.core.database import Customer, User, Restaurant
 
 
 # OWASP Top SQL Injection Payloads

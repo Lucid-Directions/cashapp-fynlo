@@ -7,7 +7,6 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, func
 from datetime import datetime, timedelta
-from typing import Dict, List
 
 from app.core.database import get_db, Restaurant, User, Order, Payment, InventoryItem, UserRestaurant
 from app.core.auth import get_current_user

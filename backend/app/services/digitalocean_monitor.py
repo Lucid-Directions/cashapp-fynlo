@@ -7,14 +7,12 @@ Enhanced with security best practices and resilience patterns.
 import os
 import logging
 from typing import Dict, List, Optional, Any, Tuple
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 import httpx
-from functools import lru_cache
-import asyncio
 from pybreaker import CircuitBreaker, CircuitBreakerError
 
 from app.core.config import settings
-from app.core.security import TokenEncryption, InputValidator, SafeEnvironmentFilter
+from app.core.security import TokenEncryption, InputValidator
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +27,6 @@ do_circuit_breaker = CircuitBreaker(
 
 class DigitalOceanMonitorError(Exception):
     """Base exception for DigitalOcean monitoring errors."""
-    pass
 
 
 class DigitalOceanAPIError(DigitalOceanMonitorError):
@@ -41,7 +38,6 @@ class DigitalOceanAPIError(DigitalOceanMonitorError):
 
 class DigitalOceanConfigError(DigitalOceanMonitorError):
     """Raised when DigitalOcean monitoring is not properly configured."""
-    pass
 
 
 class DigitalOceanMonitor:

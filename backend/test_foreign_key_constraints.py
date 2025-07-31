@@ -8,6 +8,10 @@ import sys
 import os
 import psycopg2
 from psycopg2.extras import RealDictCursor
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 # Add the backend directory to the Python path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '.'))
@@ -15,7 +19,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '.'))
 async def test_foreign_key_constraints():
     """Test that all foreign key constraints are properly implemented"""
     
-    print("🧪 Testing Foreign Key Constraints...")
+    logger.info("🧪 Testing Foreign Key Constraints...")
     
     # Database connection parameters
     DB_CONFIG = {
@@ -31,7 +35,7 @@ async def test_foreign_key_constraints():
         conn = psycopg2.connect(**DB_CONFIG, cursor_factory=RealDictCursor)
         cursor = conn.cursor()
         
-        print("✅ Database connection established")
+        logger.info("✅ Database connection established")
         
         # Expected foreign key constraints
         expected_constraints = [
@@ -85,12 +89,12 @@ async def test_foreign_key_constraints():
                 missing_constraints.append(expected)
         
         if missing_constraints:
-            print("❌ Missing foreign key constraints:")
+            logger.info("❌ Missing foreign key constraints:")
             for constraint in missing_constraints:
-                print(f"   - {constraint[0]}.{constraint[2]} -> {constraint[3]}.{constraint[4]}")
+                logger.info(f"   - {constraint[0]}.{constraint[2]} -> {constraint[3]}.{constraint[4]}")
             return False
         
-        print(f"✅ All {len(expected_constraints)} foreign key constraints are present")
+        logger.info(f"✅ All {len(expected_constraints)} foreign key constraints are present")
         
         # Check performance indexes
         expected_indexes = [
@@ -122,40 +126,40 @@ async def test_foreign_key_constraints():
         missing_indexes = [idx for idx in expected_indexes if idx not in existing_indexes]
         
         if missing_indexes:
-            print("❌ Missing performance indexes:")
+            logger.info("❌ Missing performance indexes:")
             for index in missing_indexes:
-                print(f"   - {index}")
+                logger.info(f"   - {index}")
             return False
         
-        print(f"✅ All {len(expected_indexes)} performance indexes are present")
+        logger.info(f"✅ All {len(expected_indexes)} performance indexes are present")
         
-        print("\n🎉 All foreign key constraints and indexes successfully implemented!")
-        print("\nData Integrity Features:")
-        print("- ✅ Referential integrity enforced")
-        print("- ✅ Cascade delete rules configured")
-        print("- ✅ Performance indexes on all foreign keys")
-        print("- ✅ Composite indexes for common query patterns")
+        logger.info("\n🎉 All foreign key constraints and indexes successfully implemented!")
+        logger.info("\nData Integrity Features:")
+        logger.info("- ✅ Referential integrity enforced")
+        logger.info("- ✅ Cascade delete rules configured")
+        logger.info("- ✅ Performance indexes on all foreign keys")
+        logger.info("- ✅ Composite indexes for common query patterns")
         
         cursor.close()
         conn.close()
         return True
         
     except Exception as e:
-        print(f"❌ Test failed: {e}")
+        logger.error(f"❌ Test failed: {e}")
         return False
 
 
 async def test_referential_integrity():
     """Test that referential integrity is actually enforced"""
     
-    print("\n🔍 Testing Referential Integrity Enforcement...")
+    logger.info("\n🔍 Testing Referential Integrity Enforcement...")
     
     # This would require creating test data to verify constraints are enforced
     # For now, we'll just confirm the constraints exist
-    print("✅ Referential integrity constraints are in place")
-    print("   - Categories cannot be deleted if products reference them")
-    print("   - Restaurants deletion cascades to related data")
-    print("   - Orders maintain proper relationships")
+    logger.info("✅ Referential integrity constraints are in place")
+    logger.info("   - Categories cannot be deleted if products reference them")
+    logger.info("   - Restaurants deletion cascades to related data")
+    logger.info("   - Orders maintain proper relationships")
     
     return True
 
@@ -163,8 +167,8 @@ async def test_referential_integrity():
 async def main():
     """Main test function"""
     
-    print("🚀 Foreign Key Constraints - Test Suite")
-    print("=" * 50)
+    logger.info("🚀 Foreign Key Constraints - Test Suite")
+    logger.info("=" * 50)
     
     # Test 1: Foreign key constraints existence
     constraints_test = await test_foreign_key_constraints()
@@ -172,18 +176,18 @@ async def main():
     # Test 2: Referential integrity enforcement
     integrity_test = await test_referential_integrity()
     
-    print("\n" + "=" * 50)
+    logger.info("\n" + "=" * 50)
     
     if constraints_test and integrity_test:
-        print("🎉 ALL TESTS PASSED - Foreign key constraints are fully implemented!")
-        print("\nSummary of Implementation:")
-        print("1. All 12 foreign key constraints are present")
-        print("2. All 15 performance indexes are configured")
-        print("3. Proper cascade/restrict rules are in place")
-        print("4. Data integrity is fully enforced")
+        logger.info("🎉 ALL TESTS PASSED - Foreign key constraints are fully implemented!")
+        logger.info("\nSummary of Implementation:")
+        logger.info("1. All 12 foreign key constraints are present")
+        logger.info("2. All 15 performance indexes are configured")
+        logger.info("3. Proper cascade/restrict rules are in place")
+        logger.info("4. Data integrity is fully enforced")
         return True
     else:
-        print("❌ SOME TESTS FAILED - Please review the issues above")
+        logger.error("❌ SOME TESTS FAILED - Please review the issues above")
         return False
 
 

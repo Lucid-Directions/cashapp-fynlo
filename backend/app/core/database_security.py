@@ -2,7 +2,7 @@
 Database Security Hardening Configuration
 Implements security best practices for PostgreSQL connections
 """
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 import logging
 from sqlalchemy.engine import Engine
 from sqlalchemy import event, text

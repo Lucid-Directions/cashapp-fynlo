@@ -3,14 +3,11 @@ Optimized Platform Settings Endpoints
 Performance improvements for mobile app connectivity
 """
 from typing import Dict, Any, Optional
-from fastapi import APIRouter, Depends, HTTPException, Response
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, Response
 import asyncio
-import json
 from datetime import datetime, timedelta
 from asyncio import Lock
 
-from app.core.database import get_db
 from app.core.responses import APIResponseHelper
 from app.services.cache_service import PlatformCacheService
 import logging

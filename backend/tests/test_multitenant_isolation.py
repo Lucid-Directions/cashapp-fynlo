@@ -4,7 +4,6 @@ Tests data isolation between restaurants and prevents cross-tenant access
 """
 
 import pytest
-from datetime import datetime
 from decimal import Decimal
 from unittest.mock import MagicMock, patch
 from fastapi.testclient import TestClient

@@ -11,7 +11,6 @@ from .base import PaymentProvider, PaymentStatus
 from .stripe_provider import StripeProvider
 from .square_provider import SquareProvider
 from .sumup_provider import SumUpProvider
-from ..secure_payment_config import SecurePaymentConfigService
 from ...core.database import get_db
 from ..secure_payment_config import PaymentProviderConfig
 
@@ -186,7 +185,6 @@ class PaymentProviderFactory:
     
     async def _get_provider_configs(self, restaurant_id: str) -> List[PaymentProviderConfig]:
         """Get all provider configurations for a restaurant"""
-        from sqlalchemy.orm import Session
         from sqlalchemy import select
         
         async with get_db() as db:
@@ -202,7 +200,6 @@ class PaymentProviderFactory:
     async def _get_provider_metrics(self, provider_name: str) -> Dict[str, Any]:
         """Get performance metrics for a provider"""
         from sqlalchemy import select, func
-        from sqlalchemy.orm import Session
         
         # Calculate metrics for last 30 days
         cutoff_date = datetime.utcnow() - timedelta(days=30)

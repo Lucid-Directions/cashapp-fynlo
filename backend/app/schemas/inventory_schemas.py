@@ -1,7 +1,7 @@
 """
 Pydantic Schemas for Inventory, Recipes, and Ledger
 """
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field
 from typing import List, Optional
 from uuid import UUID
 from datetime import datetime

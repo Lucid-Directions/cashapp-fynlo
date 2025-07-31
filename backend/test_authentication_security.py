@@ -38,9 +38,9 @@ class AuthenticationSecurityTester:
             "message": message,
             "severity": severity
         })
-        print(f"{status}: {test_name}")
+        logger.info(f"{status}: {test_name}")
         if message:
-            print(f"    {message}")
+            logger.info(f"    {message}")
     
     async def get_valid_token(self):
         """Get a valid authentication token for testing"""
@@ -240,6 +240,10 @@ class AuthenticationSecurityTester:
             
             # Decode and modify payload
             import base64
+import logging
+
+logger = logging.getLogger(__name__)
+
             decoded_payload = base64.urlsafe_b64decode(payload + '==')
             payload_data = json.loads(decoded_payload)
             payload_data["role"] = "admin"  # Try to escalate privileges
@@ -415,13 +419,13 @@ class AuthenticationSecurityTester:
     
     async def run_all_security_tests(self):
         """Run all authentication security tests"""
-        print("🔒 Starting Authentication Security Tests")
-        print("=" * 50)
+        logger.info("🔒 Starting Authentication Security Tests")
+        logger.info("=" * 50)
         
         # Get valid token for testing
         token_ok = await self.get_valid_token()
         if not token_ok:
-            print("⚠️ Could not obtain valid token. Some tests may be skipped.")
+            logger.info("⚠️ Could not obtain valid token. Some tests may be skipped.")
         
         # Run security tests
         await self.test_sql_injection_protection()
@@ -440,35 +444,35 @@ class AuthenticationSecurityTester:
         total_tests = len(self.test_results)
         secure_tests = len([r for r in self.test_results if "SECURE" in r["status"]])
         
-        print(f"\n🛡️ Security Assessment Results")
-        print("=" * 40)
-        print(f"Total Security Tests: {total_tests}")
-        print(f"Secure: {secure_tests}")
-        print(f"Critical Issues: {len(critical_issues)}")
-        print(f"High Risk Issues: {len(high_issues)}")
-        print(f"Medium Risk Issues: {len(medium_issues)}")
+        logger.info(f"\n🛡️ Security Assessment Results")
+        logger.info("=" * 40)
+        logger.info(f"Total Security Tests: {total_tests}")
+        logger.info(f"Secure: {secure_tests}")
+        logger.error(f"Critical Issues: {len(critical_issues)}")
+        logger.info(f"High Risk Issues: {len(high_issues)}")
+        logger.info(f"Medium Risk Issues: {len(medium_issues)}")
         
         if critical_issues:
-            print(f"\n🚨 CRITICAL SECURITY ISSUES:")
+            logger.error(f"\n🚨 CRITICAL SECURITY ISSUES:")
             for issue in critical_issues:
-                print(f"   - {issue['test']}: {issue['message']}")
+                logger.info(f"   - {issue['test']}: {issue['message']}")
         
         if high_issues:
-            print(f"\n⚠️ HIGH RISK ISSUES:")
+            logger.info(f"\n⚠️ HIGH RISK ISSUES:")
             for issue in high_issues:
-                print(f"   - {issue['test']}: {issue['message']}")
+                logger.info(f"   - {issue['test']}: {issue['message']}")
         
         if len(critical_issues) == 0 and len(high_issues) == 0:
-            print("\n✅ No critical or high-risk security issues found!")
-            print("Authentication system follows security best practices.")
+            logger.error("\n✅ No critical or high-risk security issues found!")
+            logger.info("Authentication system follows security best practices.")
         
         return len(critical_issues) == 0 and len(high_issues) == 0
 
 async def main():
     """Main security test runner"""
-    print("Starting authentication security tests...")
-    print("This will test for common security vulnerabilities.")
-    print()
+    logger.info("Starting authentication security tests...")
+    logger.info("This will test for common security vulnerabilities.")
+    logger.info()
     
     tester = AuthenticationSecurityTester()
     success = await tester.run_all_security_tests()

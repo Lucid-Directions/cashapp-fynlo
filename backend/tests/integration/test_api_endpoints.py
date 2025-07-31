@@ -4,11 +4,6 @@ API Endpoint Integration Tests
 import pytest
 from httpx import AsyncClient
 from app.main import app
-from tests.fixtures.database import (
-    test_db, test_restaurant, test_user, 
-    test_product, test_category, test_order
-)
-from tests.fixtures.auth import auth_headers, manager_headers, employee_headers
 
 
 @pytest.mark.asyncio

@@ -49,7 +49,6 @@ class PaymentProvider(ABC):
             "metadata": {...}
         }
         """
-        pass
     
     @abstractmethod
     async def refund_payment(
@@ -59,7 +58,6 @@ class PaymentProvider(ABC):
         reason: Optional[str] = None
     ) -> Dict[str, Any]:
         """Process a refund for a previous payment"""
-        pass
     
     @abstractmethod
     async def create_checkout(
@@ -71,12 +69,10 @@ class PaymentProvider(ABC):
         metadata: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """Create a checkout session for web/mobile payments"""
-        pass
     
     @abstractmethod
     def calculate_fee(self, amount: Decimal) -> Decimal:
         """Calculate the provider fee for a given amount"""
-        pass
     
     def standardize_response(
         self,

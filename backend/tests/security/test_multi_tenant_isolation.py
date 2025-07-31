@@ -5,9 +5,7 @@ import pytest
 from httpx import AsyncClient
 import uuid
 from app.main import app
-from tests.fixtures.database import test_db, test_restaurant
-from tests.fixtures.auth import restaurant_owner_headers
-from app.models import Restaurant, Order, Product, User
+from app.models import Restaurant, Order, Product
 
 
 @pytest.mark.asyncio

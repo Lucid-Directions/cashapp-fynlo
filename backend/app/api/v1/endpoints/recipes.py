@@ -3,17 +3,21 @@ API Endpoints for Recipe Management
 """
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
-from typing import List, Optional
+from typing import List
 from uuid import UUID
 
 from app.core.database import get_db, Product # Import Product model
-from app.core.exceptions import AuthorizationException, ResourceNotFoundException, ValidationException
+from app.core.exceptions import ResourceNotFoundException, ValidationException
 from app.core.database import User # Assuming User model for authentication/authorization
 from app.crud import inventory as crud_inventory # Using the same CRUD module
 from app.schemas import inventory_schemas as schemas # Using the same schemas module
 from app.core.dependencies import get_current_user
 from app.core.tenant_security import TenantSecurity
-from app.core.exceptions import ValidationException, AuthenticationException, FynloException, ResourceNotFoundException, ConflictException
+from app.core.exceptions import ValidationException, ResourceNotFoundException
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 router = APIRouter()
 
@@ -181,5 +185,5 @@ async def delete_recipe_for_item_api(
 #     # current_user = Depends(get_current_active_user) # Your actual user dependency
 #     # if current_user.role != required_role and current_user.role != "admin": # Example admin override
 #     #     raise AuthenticationException(message=f"User does not have the required role: {required_role}", error_code="ACCESS_DENIED")#     # return current_user
-#     print(f"Auth check for role: {required_role}") # Placeholder log
+#     logger.info(f"Auth check for role: {required_role}") # Placeholder log
 #     pass # Allow all for now

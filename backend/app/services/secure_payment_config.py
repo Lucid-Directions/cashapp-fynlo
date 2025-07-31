@@ -55,7 +55,7 @@ class SecurePaymentConfigService:
             if os.environ.get('ENVIRONMENT', 'development') == 'development':
                 # Fixed development key - prevents losing encrypted data on restart
                 encryption_key = "8J5AOuMMykQkzj6EU5Z8QgPYLE1Aye4OuIjUER2b8w0="
-                print(f"WARNING: Using fixed development encryption key. Set PAYMENT_CONFIG_ENCRYPTION_KEY in production!")
+                logger.warning(f"WARNING: Using fixed development encryption key. Set PAYMENT_CONFIG_ENCRYPTION_KEY in production!")
             else:
                 raise ValueError("PAYMENT_CONFIG_ENCRYPTION_KEY environment variable not set")
         
@@ -64,6 +64,10 @@ class SecurePaymentConfigService:
             try:
                 # Try to decode as base64 first (Fernet key format)
                 import base64
+import logging
+
+logger = logging.getLogger(__name__)
+
                 base64.b64decode(encryption_key)
                 encryption_key = encryption_key.encode()
             except Exception:
@@ -343,7 +347,7 @@ class SecurePaymentConfigService:
                 count += 1
                 
             except Exception as e:
-                print(f"Failed to rotate key for config {config.id}: {str(e)}")
+                logger.error(f"Failed to rotate key for config {config.id}: {str(e)}")
                 continue
         
         # Commit all changes

@@ -14,18 +14,21 @@ import sys
 import os
 from datetime import datetime, date, time, timedelta
 from decimal import Decimal
-from typing import List, Dict, Any
+from typing import List, Dict
 import uuid
 import random
 
 # Add the parent directory to the Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from app.core.database import get_db, Base, engine
+from app.core.database import get_db
 from app.models import *
 from sqlalchemy.orm import Session
-from sqlalchemy import select
 import bcrypt
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 
 class ProductionSeeder:
@@ -44,10 +47,10 @@ class ProductionSeeder:
         
     async def run(self):
         """Execute the complete seeding process"""
-        print("🌮 Starting Production Seed Data for Fynlo POS...")
-        print("📍 Target: ONE Mexican Restaurant (Casa Estrella)")
-        print("🚨 NO MOCK DATA - Only realistic production data")
-        print("-" * 50)
+        logger.info("🌮 Starting Production Seed Data for Fynlo POS...")
+        logger.info("📍 Target: ONE Mexican Restaurant (Casa Estrella)")
+        logger.info("🚨 NO MOCK DATA - Only realistic production data")
+        logger.info("-" * 50)
         
         # Get database session
         db_gen = get_db()
@@ -94,25 +97,25 @@ class ProductionSeeder:
             await self._create_restaurant_settings()
             
             self.session.commit()
-            print("\n✅ Production seed data created successfully!")
-            print(f"🏪 Restaurant: Casa Estrella Mexican Cuisine")
-            print(f"👥 Staff: {len(self.employees)} employees")
-            print(f"🍽️ Menu: {len(self.products)} authentic Mexican dishes")
-            print(f"📦 Inventory: {len(self.inventory_items)} tracked items")
-            print(f"🚚 Suppliers: {len(self.suppliers)} vendors")
-            print(f"📊 30 days of realistic order history")
-            print(f"📅 Current week + next week schedules")
+            logger.info("\n✅ Production seed data created successfully!")
+            logger.info(f"🏪 Restaurant: Casa Estrella Mexican Cuisine")
+            logger.info(f"👥 Staff: {len(self.employees)} employees")
+            logger.info(f"🍽️ Menu: {len(self.products)} authentic Mexican dishes")
+            logger.info(f"📦 Inventory: {len(self.inventory_items)} tracked items")
+            logger.info(f"🚚 Suppliers: {len(self.suppliers)} vendors")
+            logger.info(f"📊 30 days of realistic order history")
+            logger.info(f"📅 Current week + next week schedules")
             
         except Exception as e:
             self.session.rollback()
-            print(f"❌ Error creating seed data: {e}")
+            logger.error(f"❌ Error creating seed data: {e}")
             raise
         finally:
             self.session.close()
 
     async def _create_platform_owner(self):
         """Create the platform owner account"""
-        print("1️⃣ Creating Platform Owner...")
+        logger.info("1️⃣ Creating Platform Owner...")
         
         # Create platform
         platform = Platform(
@@ -136,11 +139,11 @@ class ProductionSeeder:
             password_hash=hashed_password.decode('utf-8')
         )
         self.session.add(platform_owner)
-        print("   ✓ Platform owner created")
+        logger.info("   ✓ Platform owner created")
 
     async def _create_restaurant(self):
         """Create Casa Estrella Mexican Restaurant"""
-        print("2️⃣ Creating Mexican Restaurant...")
+        logger.info("2️⃣ Creating Mexican Restaurant...")
         
         restaurant = Restaurant(
             id=str(uuid.uuid4()),
@@ -195,11 +198,11 @@ class ProductionSeeder:
         
         self.session.add(restaurant)
         self.restaurant_id = restaurant.id
-        print("   ✓ Casa Estrella Mexican Cuisine created")
+        logger.info("   ✓ Casa Estrella Mexican Cuisine created")
 
     async def _create_restaurant_management(self):
         """Create restaurant owner and manager accounts"""
-        print("3️⃣ Creating Restaurant Management...")
+        logger.info("3️⃣ Creating Restaurant Management...")
         
         # Restaurant Owner
         owner_password = bcrypt.hashpw("CasaEstrella2025!".encode('utf-8'), bcrypt.gensalt())
@@ -230,12 +233,12 @@ class ProductionSeeder:
         )
         self.session.add(manager)
         
-        print("   ✓ Owner: Carlos Hernández")
-        print("   ✓ Manager: María González")
+        logger.info("   ✓ Owner: Carlos Hernández")
+        logger.info("   ✓ Manager: María González")
 
     async def _create_employees(self):
         """Create 8-10 realistic restaurant employees"""
-        print("4️⃣ Creating Restaurant Staff...")
+        logger.info("4️⃣ Creating Restaurant Staff...")
         
         staff_data = [
             {
@@ -355,11 +358,11 @@ class ProductionSeeder:
                 "employment_type": staff["employment_type"]
             })
             
-            print(f"   ✓ {staff['first_name']} {staff['last_name']} - {staff['employee_role']}")
+            logger.info(f"   ✓ {staff['first_name']} {staff['last_name']} - {staff['employee_role']}")
 
     async def _create_categories(self):
         """Create authentic Mexican menu categories"""
-        print("5️⃣ Creating Menu Categories...")
+        logger.info("5️⃣ Creating Menu Categories...")
         
         categories_data = [
             {
@@ -415,11 +418,11 @@ class ProductionSeeder:
                 "name": cat_data["name"],
                 "display_order": cat_data["display_order"]
             })
-            print(f"   ✓ {cat_data['name']} ({cat_data['name_es']})")
+            logger.info(f"   ✓ {cat_data['name']} ({cat_data['name_es']})")
 
     async def _create_menu_items(self):
         """Create 30-40 authentic Mexican menu items"""
-        print("6️⃣ Creating Menu Items...")
+        logger.info("6️⃣ Creating Menu Items...")
         
         # Get category IDs
         antojitos_id = next(c["id"] for c in self.categories if c["name"] == "Antojitos")
@@ -653,11 +656,11 @@ class ProductionSeeder:
                 "category": item_data["category_id"]
             })
             
-        print(f"   ✓ Created {len(menu_items)} authentic Mexican dishes")
+        logger.info(f"   ✓ Created {len(menu_items)} authentic Mexican dishes")
 
     async def _create_inventory_items(self):
         """Create inventory items that a Mexican restaurant would track"""
-        print("7️⃣ Creating Inventory Items...")
+        logger.info("7️⃣ Creating Inventory Items...")
         
         inventory_data = [
             # Proteins
@@ -725,11 +728,11 @@ class ProductionSeeder:
                 "unit_cost": inv_data["cost"]
             })
             
-        print(f"   ✓ Created {len(inventory_data)} inventory items")
+        logger.info(f"   ✓ Created {len(inventory_data)} inventory items")
 
     async def _create_suppliers(self):
         """Create realistic suppliers for a Mexican restaurant"""
-        print("8️⃣ Creating Suppliers...")
+        logger.info("8️⃣ Creating Suppliers...")
         
         suppliers_data = [
             {
@@ -830,11 +833,11 @@ class ProductionSeeder:
                 "code": sup_data["code"],
                 "categories": sup_data["categories"]
             })
-            print(f"   ✓ {sup_data['name']} ({sup_data['code']})")
+            logger.info(f"   ✓ {sup_data['name']} ({sup_data['code']})")
 
     async def _create_order_history(self):
         """Create 30 days of realistic order history"""
-        print("9️⃣ Creating Order History (30 days)...")
+        logger.info("9️⃣ Creating Order History (30 days)...")
         
         # Get some employees for order assignments
         server_employees = [emp for emp in self.employees if emp["role"] in ["server", "cashier"]]
@@ -949,11 +952,11 @@ class ProductionSeeder:
                 if total_orders % 50 == 0:
                     self.session.commit()
         
-        print(f"   ✓ Created {total_orders} orders over 30 days")
+        logger.info(f"   ✓ Created {total_orders} orders over 30 days")
 
     async def _create_schedules(self):
         """Create employee schedules for current week and next week"""
-        print("🔟 Creating Employee Schedules...")
+        logger.info("🔟 Creating Employee Schedules...")
         
         # Get current week start (Monday)
         today = date.today()
@@ -1028,11 +1031,11 @@ class ProductionSeeder:
                     self.session.add(schedule)
                     schedules_created += 1
         
-        print(f"   ✓ Created {schedules_created} shifts (current week + next week)")
+        logger.info(f"   ✓ Created {schedules_created} shifts (current week + next week)")
 
     async def _create_stock_movements(self):
         """Create realistic stock movements"""
-        print("1️⃣1️⃣ Creating Stock Movements...")
+        logger.info("1️⃣1️⃣ Creating Stock Movements...")
         
         movements_created = 0
         
@@ -1090,11 +1093,11 @@ class ProductionSeeder:
                 self.session.add(movement)
                 movements_created += 1
         
-        print(f"   ✓ Created {movements_created} stock movements")
+        logger.info(f"   ✓ Created {movements_created} stock movements")
 
     async def _generate_reports(self):
         """Generate daily reports for the last 30 days"""
-        print("1️⃣2️⃣ Generating Reports...")
+        logger.info("1️⃣2️⃣ Generating Reports...")
         
         reports_created = 0
         
@@ -1141,11 +1144,11 @@ class ProductionSeeder:
             self.session.add(daily_report)
             reports_created += 1
         
-        print(f"   ✓ Generated {reports_created} daily reports")
+        logger.info(f"   ✓ Generated {reports_created} daily reports")
 
     async def _create_restaurant_settings(self):
         """Create restaurant-specific settings"""
-        print("1️⃣3️⃣ Creating Restaurant Settings...")
+        logger.info("1️⃣3️⃣ Creating Restaurant Settings...")
         
         # Create sections (tables/areas)
         sections_data = [
@@ -1166,8 +1169,8 @@ class ProductionSeeder:
             )
             self.session.add(section)
         
-        print("   ✓ Restaurant sections created")
-        print("   ✓ All restaurant settings configured")
+        logger.info("   ✓ Restaurant sections created")
+        logger.info("   ✓ All restaurant settings configured")
 
 
 async def main():

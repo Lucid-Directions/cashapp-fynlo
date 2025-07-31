@@ -7,7 +7,7 @@ from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 import uuid
-from app.core.database import Base, User, Restaurant, Section
+from app.core.database import Base
 
 
 class EmployeeProfile(Base):

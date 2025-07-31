@@ -2,7 +2,7 @@
 Restaurant schemas for Fynlo POS
 """
 
-from typing import Optional, Dict, Any, List
+from typing import Optional, List
 from datetime import datetime
 from pydantic import BaseModel, EmailStr
 
@@ -20,7 +20,6 @@ class RestaurantBase(BaseModel):
 
 class RestaurantCreate(RestaurantBase):
     """Schema for creating a restaurant"""
-    pass
 
 
 class RestaurantOnboardingCreate(BaseModel):

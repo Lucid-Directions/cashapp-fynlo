@@ -7,7 +7,6 @@ import pytest
 from unittest.mock import Mock, patch, AsyncMock
 from decimal import Decimal
 from datetime import datetime
-import json
 from fastapi.testclient import TestClient
 from jose import jwt
 
@@ -349,10 +348,8 @@ class TestPaymentEndpointIntegration:
     def test_full_payment_flow(self, test_client, test_db):
         """Test complete payment flow from API to database"""
         # This would test the full integration
-        pass
     
     @pytest.mark.integration
     def test_concurrent_payment_requests(self, test_client, test_db):
         """Test handling of concurrent payment requests"""
         # This would test race conditions
-        pass

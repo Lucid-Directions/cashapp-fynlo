@@ -204,14 +204,18 @@ async def process_payment():
 
 if __name__ == "__main__":
     import uvicorn
-    print("🚀 Starting Fynlo POS Backend Server...")
-    print("📡 Network Configuration:")
-    print("   • Host: 0.0.0.0 (accepting all network interfaces)")
-    print("   • Port: 8000")
-    print("   • LAN Access: http://192.168.68.101:8000")
-    print("   • Local Access: http://localhost:8000")
-    print("   • Health Check: /health")
-    print("🔧 CORS: Enabled for all origins")
+import logging
+
+logger = logging.getLogger(__name__)
+
+    logger.info("🚀 Starting Fynlo POS Backend Server...")
+    logger.info("📡 Network Configuration:")
+    logger.info("   • Host: 0.0.0.0 (accepting all network interfaces)")
+    logger.info("   • Port: 8000")
+    logger.info("   • LAN Access: http://192.168.68.101:8000")
+    logger.info("   • Local Access: http://localhost:8000")
+    logger.info("   • Health Check: /health")
+    logger.info("🔧 CORS: Enabled for all origins")
     
     # Bind to 0.0.0.0 to accept all connections
     uvicorn.run(

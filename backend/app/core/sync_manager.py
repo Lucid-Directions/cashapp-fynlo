@@ -3,17 +3,15 @@ Offline Sync Manager for Fynlo POS
 Handles batch upload, conflict resolution, and offline synchronization
 """
 
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Dict, List, Any, Optional
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, or_, desc
+from sqlalchemy import and_, desc
 import uuid
-import json
 from enum import Enum
 
-from app.core.database import get_db, Order, Product, Customer, Payment, User
+from app.core.database import Order, Product, Customer, Payment
 from app.core.exceptions import FynloException, ErrorCodes
-from app.core.responses import APIResponseHelper
 
 class SyncAction(str, Enum):
     """Sync action types"""

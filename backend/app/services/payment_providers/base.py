@@ -45,7 +45,6 @@ class PaymentProvider(ABC):
         Returns:
             bool: True if initialization successful
         """
-        pass
     
     @abstractmethod
     async def create_payment(
@@ -76,7 +75,6 @@ class PaymentProvider(ABC):
                 - net_amount: Amount after fees
                 - raw_response: Full provider response
         """
-        pass
     
     @abstractmethod
     async def capture_payment(
@@ -94,7 +92,6 @@ class PaymentProvider(ABC):
         Returns:
             Dict with capture details
         """
-        pass
     
     @abstractmethod
     async def refund_payment(
@@ -114,7 +111,6 @@ class PaymentProvider(ABC):
         Returns:
             Dict with refund details
         """
-        pass
     
     @abstractmethod
     async def get_transaction_status(
@@ -130,7 +126,6 @@ class PaymentProvider(ABC):
         Returns:
             Dict with transaction status and details
         """
-        pass
     
     @abstractmethod
     async def validate_webhook(
@@ -148,7 +143,6 @@ class PaymentProvider(ABC):
         Returns:
             bool: True if webhook is valid
         """
-        pass
     
     @abstractmethod
     async def parse_webhook(
@@ -164,7 +158,6 @@ class PaymentProvider(ABC):
         Returns:
             Dict with parsed webhook data
         """
-        pass
     
     def calculate_fee(self, amount: Decimal) -> Decimal:
         """

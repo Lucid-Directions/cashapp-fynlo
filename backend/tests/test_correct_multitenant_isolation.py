@@ -6,9 +6,8 @@ The vulnerability is between restaurants, not with platform owners
 
 import pytest
 import uuid
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from fastapi.testclient import TestClient
-from sqlalchemy.orm import Session
 
 from app.main import app
 

@@ -3,14 +3,12 @@ Platform Management Service for Fynlo POS
 Handles multi-tenant operations and platform owner features
 """
 
-from typing import List, Dict, Any, Optional, Tuple
+from typing import List, Dict, Any
 from sqlalchemy.orm import Session
 from sqlalchemy import func, and_, desc
 from datetime import datetime, timedelta
-import uuid
-from decimal import Decimal
 
-from app.core.database import Platform, Restaurant, User, Order, Customer
+from app.core.database import Platform, Restaurant, Order, Customer
 from app.core.exceptions import FynloException, ErrorCodes
 
 class PlatformService:

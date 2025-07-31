@@ -10,14 +10,14 @@ import sys
 import logging
 import json
 from datetime import datetime
-from typing import Dict, Any, List, Tuple, Optional
+from typing import Dict, Any, List
 from sqlalchemy.orm import Session
-from sqlalchemy import text, and_
+from sqlalchemy import and_
 
 # Add parent directory to path to import app modules
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from app.core.database import SessionLocal, Restaurant, Platform
+from app.core.database import SessionLocal, Restaurant
 from app.models.platform_config import (
     PlatformConfiguration, 
     RestaurantOverride, 
@@ -462,7 +462,7 @@ For support, contact the development team with this report.
             f.write(report_content)
             
         logger.info(f"Migration report generated: {report_filename}")
-        print(report_content)
+        logger.info(report_content)
 
 
 def main():
@@ -482,24 +482,24 @@ def main():
     dry_run = not args.execute
     
     if not dry_run:
-        print("⚠️  WARNING: This will modify your database!")
-        print("⚠️  Make sure you have a backup before proceeding!")
+        logger.warning("⚠️  WARNING: This will modify your database!")
+        logger.info("⚠️  Make sure you have a backup before proceeding!")
         confirmation = input("Are you sure you want to execute the migration? (yes/no): ")
         if confirmation.lower() != 'yes':
-            print("Migration cancelled.")
+            logger.info("Migration cancelled.")
             return
     
-    print(f"Starting migration (DRY RUN: {dry_run})...")
+    logger.info(f"Starting migration (DRY RUN: {dry_run})...")
     
     with PlatformSettingsMigration(dry_run=dry_run) as migration:
         success = migration.run_migration()
         
         if success:
-            print("✅ Migration completed successfully!")
+            logger.info("✅ Migration completed successfully!")
             if dry_run:
-                print("🔄 Run with --execute to perform actual migration")
+                logger.info("🔄 Run with --execute to perform actual migration")
         else:
-            print("❌ Migration failed. Check logs for details.")
+            logger.error("❌ Migration failed. Check logs for details.")
             sys.exit(1)
 
 

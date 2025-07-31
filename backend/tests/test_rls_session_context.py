@@ -3,9 +3,8 @@ Test RLS Session Context Management
 """
 
 import pytest
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock, patch
 from sqlalchemy.orm import Session
-from sqlalchemy import text
 
 from app.core.rls_session_context import RLSSessionContext, current_tenant_context
 from app.core.tenant_security import TenantSecurity
@@ -227,8 +226,6 @@ class TestRLSDependency:
     @pytest.mark.asyncio
     async def test_rls_dependency_lifecycle(self):
         """Test that RLS dependency sets and clears context"""
-        from app.core.auth import get_current_user
-        from app.core.database import get_db
         
         # Mock dependencies
         mock_user = MagicMock(spec=User)
