@@ -8,6 +8,7 @@ from app.schemas.fee_schemas import StaffMember, StaffTipDistribution, StaffTipD
 from app.services.staff_tip_service import StaffTipService
 from app.models.financial_records import StaffTipDistributionRecord # For ORM response conversion
 from pydantic import BaseModel, Field
+from app.core.exceptions import ValidationException, AuthenticationException, FynloException, ResourceNotFoundException, ConflictException
 
 router = APIRouter()
 
@@ -51,7 +52,6 @@ def trigger_tip_distribution(
     """
     if not request_data.assigned_staff and request_data.total_tips_collected > 0:
         raise ValidationException(message="Cannot distribute tips: No staff members assigned to the order.")
-
     try:
         distributions = service.distribute_order_tips(
             order_reference=order_reference,
@@ -68,9 +68,7 @@ def trigger_tip_distribution(
         raise ValidationException(message=str(ve))
     except Exception as e:
         # logger.error(f"Error distributing tips for order {order_reference}: {e}", exc_info=True)
-        raise FynloException(message=f"Error distributing tips: {str(e)}", status_code=500)
-
-
+        raise FynloException(message=f"Failed to distribute tips: {str(e)}")
 @router.get("/orders/{order_reference}/tip-distributions", response_model=List[StaffTipDistributionRecordSchema])
 def get_tip_distributions_for_order_api(
     order_reference: str = Path(..., description="The reference ID of the order."),

@@ -20,8 +20,7 @@ from app.core.database import get_db, Payment, QRPayment, Order, User
 from app.core.config import settings
 from app.core.auth import get_current_user
 from app.core.responses import APIResponseHelper
-from app.core.exceptions import FynloException, InventoryException, PaymentException, ResourceNotFoundException, ValidationException
-from app.core.transaction_manager import transactional, transaction_manager
+from app.core.exceptions import ValidationException, AuthenticationException, FynloException, ResourceNotFoundException, ConflictExceptionfrom app.core.transaction_manager import transactional, transaction_manager
 from app.core.tenant_security import TenantSecurity
 from app.services.payment_factory import payment_factory
 from app.services.audit_logger import AuditLoggerService
@@ -106,8 +105,7 @@ def generate_qr_code(data: str) -> str:
         version=1,
         error_correction=qrcode.constants.ERROR_CORRECT_L,
         box_size=10,
-        border=4,
-    )
+        border=4)
     qr.add_data(data)
     qr.make(fit=True)
     
@@ -161,8 +159,7 @@ async def generate_qr_payment(
         #     details={"order_id": payment_request.order_id, "amount": payment_request.amount, "reason": "Order not found"},
         #     commit=True
         # )
-        raise ResourceNotFoundException(resource="Order")
-    
+        raise ResourceNotFoundException(resource="Order", resource_id=payment_request_data.order_id)    
     # Calculate fees
     fee_amount = calculate_payment_fee(payment_request.amount, "qr_code")
     net_amount = payment_request.amount - fee_amount
@@ -261,8 +258,7 @@ async def confirm_qr_payment(
             details={"reason": "QR payment record not found."},
             commit=True
         )
-        raise ResourceNotFoundException(resource="Payment", message="QR payment not found")
-    
+        raise ResourceNotFoundException(resource="QR payment", resource_id=qr_payment_id)    
     if qr_payment_db_record.expires_at < datetime.utcnow():
         await audit_service.create_audit_log(
             event_type=AuditEventType.PAYMENT_FAILURE,
@@ -274,8 +270,7 @@ async def confirm_qr_payment(
             details={"order_id": str(qr_payment_db_record.order_id), "amount": qr_payment_db_record.amount, "reason": "QR payment expired."},
             commit=True
         )
-        raise PaymentException(message="QR payment expired")
-    
+        raise ValidationException(message="QR payment expired", field="qr_payment_id")    
     if qr_payment_db_record.status == "completed":
         await audit_service.create_audit_log(
             event_type=AuditEventType.PAYMENT_FAILURE, # Or INFO, as it's not a new failure
@@ -287,8 +282,7 @@ async def confirm_qr_payment(
             details={"order_id": str(qr_payment_db_record.order_id), "amount": qr_payment_db_record.amount, "reason": "QR payment already processed."},
             commit=True
         )
-        raise PaymentException(message="QR payment already processed")
-    
+        raise ValidationException(message="QR payment already processed")    
     if qr_payment_db_record.status != "pending":
         await audit_service.create_audit_log(
             event_type=AuditEventType.PAYMENT_FAILURE,
@@ -319,8 +313,7 @@ async def confirm_qr_payment(
             details={"order_id": str(qr_payment_db_record.order_id), "reason": "Associated order not found internally."},
             commit=True
         )
-        raise ResourceNotFoundException(resource="Order", message="Associated order not found")
-    
+        raise ResourceNotFoundException(resource="Associated order", resource_id=qr_payment_db_record.order_id)    
     if order.payment_status == "completed":
         await audit_service.create_audit_log(
             event_type=AuditEventType.PAYMENT_FAILURE, event_status=AuditEventStatus.INFO, # Info, as order already paid
@@ -389,8 +382,7 @@ async def confirm_qr_payment(
             commit=False # Will be rolled back by @transactional
         )
         logger.error(f"QR payment confirmation failed for {qr_payment_id}: {e}")
-        raise PaymentException(message="Payment confirmation failed")
-    
+        raise FynloException(message="Payment confirmation failed")    
     logger.info(f"QR payment confirmed: {qr_payment_id}")
     
     # The payment_record might not have its ID fully populated here if there was an error
@@ -437,8 +429,7 @@ async def process_stripe_payment(
             details={"order_id": payment_request_data.order_id, "amount": payment_request_data.amount, "reason": "Order not found"},
             commit=True
         )
-        raise ResourceNotFoundException(resource="Order")
-
+        raise ResourceNotFoundException(resource="Order", resource_id=payment_request_data.order_id)
     if order.payment_status == "completed":
         await audit_service.create_audit_log(
             event_type=AuditEventType.PAYMENT_FAILURE, event_status=AuditEventStatus.INFO,
@@ -494,8 +485,7 @@ async def process_stripe_payment(
                 "restaurant_id": str(restaurant_id)
             },
             confirmation_method='manual',
-            confirm=True,
-        )
+            confirm=True)
 
         payment_db_record.external_id = payment_intent.id
         payment_db_record.payment_metadata.update({"stripe_payment_intent": payment_intent.id})
@@ -567,8 +557,7 @@ async def process_stripe_payment(
             commit=False
         )
         logger.error(f"Stripe payment failed: {str(e)}")
-        raise ValidationException(message=f"Stripe payment failed: {str(e)}")
-    except Exception as e:
+        raise ValidationException(message=f"Payment failed: {str(e)}")    except Exception as e:
         payment_db_record.status = "failed" # Ensure status is marked failed
         await audit_service.create_audit_log(
             event_type=AuditEventType.PAYMENT_FAILURE,
@@ -581,8 +570,7 @@ async def process_stripe_payment(
             commit=False
         )
         logger.error(f"Unexpected error during Stripe payment: {e}")
-        raise PaymentException(message="Payment processing failed")
-
+        raise FynloException(message="Payment processing failed")
 @router.post("/cash", response_model=PaymentResponse)
 async def process_cash_payment(
     payment_request_data: CashPaymentRequest, # Renamed from 'request'
@@ -608,8 +596,7 @@ async def process_cash_payment(
     ).first()
     if not order:
         # No audit log here as it's a basic validation, not a payment process failure yet.
-        raise ResourceNotFoundException(resource="Order")
-
+        raise ResourceNotFoundException(resource="Order", resource_id=payment_request_data.order_id)
     if order.payment_status == "completed":
          await audit_service.create_audit_log(
             event_type=AuditEventType.PAYMENT_FAILURE, event_status=AuditEventStatus.INFO,
@@ -625,8 +612,7 @@ async def process_cash_payment(
     if payment_request_data.received_amount < payment_request_data.amount:
         # Log this specific failure if desired, though it's a validation error.
         # For now, let the HTTP exception handle it.
-        raise InventoryException(message="Insufficient cash received")
-    
+        raise ValidationException(message="Insufficient cash received")    
     change_amount = payment_request_data.received_amount - payment_request_data.amount
     
     payment_db_record = Payment(
@@ -695,8 +681,7 @@ async def get_order_payments(
         Order.restaurant_id == restaurant_id
     ).first()
     if not order:
-        raise ResourceNotFoundException(resource="Order")
-    
+        raise ResourceNotFoundException(resource="Order", resource_id=order_id)    
     payments = db.query(Payment).filter(Payment.order_id == order_id).all()
     
     payment_data = [
@@ -727,8 +712,7 @@ async def check_qr_payment_status(
     
     qr_payment = db.query(QRPayment).filter(QRPayment.id == qr_payment_id).first()
     if not qr_payment:
-        raise ResourceNotFoundException(resource="Payment", message="QR payment not found")
-    
+        raise ResourceNotFoundException(resource="QR payment", resource_id=qr_payment_id)    
     data = {
         "qr_payment_id": str(qr_payment.id),
         "status": qr_payment.status,
@@ -789,8 +773,7 @@ async def process_payment(
                 details={"order_id": payment_data_req.order_id, "amount": payment_data_req.amount, "reason": "Order not found"},
                 commit=True
             )
-            raise ResourceNotFoundException(resource="Order")
-
+            raise ResourceNotFoundException(resource="Order", resource_id=payment_data_req.order_id)
         if order.payment_status == "completed":
             await audit_service.create_audit_log(
                 event_type=AuditEventType.PAYMENT_FAILURE, event_status=AuditEventStatus.INFO,
@@ -926,8 +909,7 @@ async def process_payment(
             details=details_for_error_log,
             commit=True # Attempt to commit this log even if outer transaction (if any) rolls back
         )
-        raise FynloException(message=f"Payment processing failed: {str(e)}", status_code=500)
-
+        raise FynloException(message=str(e))
 @router.post("/refund/{transaction_id}")
 async def refund_payment(
     transaction_id: str,
@@ -961,8 +943,7 @@ async def refund_payment(
             details={"external_transaction_id": transaction_id, "reason": "Payment not found"},
             commit=True
         )
-        raise ResourceNotFoundException(resource="Payment")
-
+        raise ResourceNotFoundException(resource="Payment", resource_id=payment_id)
     provider_name_from_meta = payment_db_record.payment_metadata.get("provider", payment_db_record.payment_method)
     # Ensure provider_name is a string, e.g. if payment_method was 'stripe_payment'
     provider_name = provider_name_from_meta.lower().replace("_payment","") if isinstance(provider_name_from_meta, str) else "unknown"
@@ -1009,8 +990,7 @@ async def refund_payment(
             details={"external_transaction_id": transaction_id, "error": str(e)},
             commit=True # Commit this failure log
         )
-        raise FynloException(message=f"Payment processing failed: {str(e)}", status_code=500)
-
+        raise FynloException(message=f"Refund processing error: {str(e)}")
 
     if result["status"] == "refunded":
         payment_db_record.status = "refunded" # Update local payment status

@@ -17,6 +17,7 @@ from app.core.redis_client import get_redis, RedisClient
 from app.core.responses import APIResponseHelper
 from app.services.activity_logger import ActivityLogger
 from app.middleware.rate_limit_middleware import limiter, PORTAL_DASHBOARD_RATE
+from app.core.exceptions import ValidationException, AuthenticationException, FynloException, ResourceNotFoundException, ConflictException
 
 router = APIRouter()
 
@@ -213,8 +214,7 @@ async def get_platform_dashboard(
     
     # Check if user is platform owner
     if current_user.role != 'platform_owner':
-        raise AuthorizationException(
-            message="Platform owner access required",
+        raise AuthenticationException(            message="Platform owner access required",
             error_code="ACCESS_DENIED"
         )
     
@@ -249,8 +249,7 @@ async def get_platform_dashboard(
         ).all()
     else:
         # Non-platform owners shouldn't access this endpoint
-        raise AuthorizationException(
-            message="Platform owner access required",
+        raise AuthenticationException(            message="Platform owner access required",
             error_code="ACCESS_DENIED"
         )
     
@@ -371,8 +370,7 @@ async def get_restaurant_comparison(
     
     # Check if user is platform owner
     if current_user.role != 'platform_owner':
-        raise AuthorizationException(
-            message="Platform owner access required",
+        raise AuthenticationException(            message="Platform owner access required",
             error_code="ACCESS_DENIED"
         )
     

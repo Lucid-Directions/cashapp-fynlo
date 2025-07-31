@@ -19,6 +19,13 @@
 - **SemGrep** (`mcp__semgrep__`) - Security scanning, code analysis
 - **Ref** (`mcp__Ref__`) - Search documentation, GitHub, private resources
 - **DigitalOcean** (`mcp__digitalocean-mcp-local__`) - Infrastructure management
+- **SQLite** (`mcp__sqlite__`) - Test local databases, query Supabase data locally
+- **Terminal** (`mcp__terminal__`) - Run Xcode builds, iOS simulator commands, shell operations
+- **Homebrew** (`mcp__homebrew__`) - Manage iOS dev tools (CocoaPods, fastlane, etc.)
+- **DuckDuckGo** (`mcp__duckduckgo__`) - Search iOS docs, Swift references (no API limits)
+- **Mermaid** (`mcp__mermaid__`) - Create architecture diagrams, database schemas, flow charts
+- **Git** (`mcp__git__`) - Advanced git operations beyond basic commands
+- **HTTP Client** (`mcp__http-client__`) - Test backend APIs and Supabase endpoints
 
 ### CLI Tools
 - **Pieces**: `pieces` - Context management (`pieces search`, `pieces ask`, `pieces create`)

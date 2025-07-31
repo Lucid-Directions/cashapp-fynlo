@@ -81,7 +81,7 @@ class SyncService:
             
         except Exception as e:
             logger.error(f"Error queuing sync event: {str(e)}")
-            raise FynloException(f"Sync failed: {str(e)}", status_code=500)
+            raise FynloException(f"Sync failed: {str(e)}", status_error_code=500)
     
     async def _process_sync_queue(self):
         """Background task to process sync events"""

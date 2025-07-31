@@ -11,8 +11,7 @@ from app.core.database import get_db
 from app.core.auth import get_current_user
 from app.models import User, Product, Category
 from app.core.tenant_security import TenantSecurity
-from app.core.exceptions import AuthorizationException, ResourceNotFoundException
-
+from app.core.exceptions import ValidationException, AuthenticationException, FynloException, ResourceNotFoundException, ConflictException
 router = APIRouter()
 
 
@@ -30,8 +29,7 @@ async def update_product_secure(
     product = db.query(Product).filter(Product.id == product_id).first()
     
     if not product:
-        raise ResourceNotFoundException(resource="Product")
-    
+        raise ResourceNotFoundException(resource="Product", resource_id=product_id)    
     # CRITICAL SECURITY CHECK: Validate user can access this product's restaurant
     await TenantSecurity.validate_restaurant_access(
         user=current_user,
@@ -47,8 +45,8 @@ async def update_product_secure(
     if "restaurant_id" in product_data and product_data["restaurant_id"] != str(product.restaurant_id):
         # Only platform owners can move products between restaurants
         if not TenantSecurity.is_platform_owner(current_user):
-            raise AuthorizationException(message="Only platform owners can move products between restaurants")
-        # Validate access to target restaurant
+            raise AuthenticationException(message="Only platform owners can move products between restaurants"
+            , error_code="ACCESS_DENIED")        # Validate access to target restaurant
         await TenantSecurity.validate_restaurant_access(
             user=current_user,
             restaurant_id=product_data["restaurant_id"],
@@ -72,8 +70,7 @@ async def delete_product_secure(
     product = db.query(Product).filter(Product.id == product_id).first()
     
     if not product:
-        raise ResourceNotFoundException(resource="Product")
-    
+        raise ResourceNotFoundException(resource="Product", resource_id=product_id)    
     # CRITICAL: Validate access before deletion
     await TenantSecurity.validate_restaurant_access(
         user=current_user,

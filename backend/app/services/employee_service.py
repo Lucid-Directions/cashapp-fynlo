@@ -17,7 +17,7 @@ from app.schemas.employee_schemas import (
     ShiftResponse, PerformanceMetricResponse, EmployeeSummary,
     WeeklyScheduleResponse, WeeklyScheduleDay
 )
-from app.core.exceptions import FynloException
+from app.core.exceptions import ValidationException, AuthenticationException, FynloException, ResourceNotFoundException, ConflictException
 from app.core.security import get_password_hash
 from app.core.tenant_security import TenantSecurity
 import logging
@@ -108,8 +108,7 @@ class EmployeeService:
                 resource_type="employee",
                 resource_id=str(employee_id),
                 db=db
-            )
-            
+            )            
             return EmployeeResponse.from_orm(employee)
             
         except FynloException:
@@ -248,8 +247,7 @@ class EmployeeService:
                 resource_type="employee",
                 resource_id=str(employee_id),
                 db=db
-            )
-            
+            )            
             # Update fields if provided
             update_data = employee_data.dict(exclude_unset=True)
             for field, value in update_data.items():
@@ -293,8 +291,7 @@ class EmployeeService:
                 resource_type="employee",
                 resource_id=str(employee_id),
                 db=db
-            )
-            
+            )            
             # Soft delete - mark as inactive
             employee.is_active = False
             employee.updated_at = datetime.utcnow()
@@ -332,7 +329,7 @@ class EmployeeService:
             # Verify employee exists and user has access
             employee = await self.get_employee_by_id(db, employee_id, current_user)
             if not employee:
-                raise FynloException("Employee not found", status_code=404)
+                raise ResourceNotFoundException("Employee not found")
             
             query = db.query(Schedule).filter(Schedule.employee_id == employee_id)
             
@@ -363,7 +360,7 @@ class EmployeeService:
             # Verify employee exists and user has access
             employee = await self.get_employee_by_id(db, employee_id, current_user)
             if not employee:
-                raise FynloException("Employee not found", status_code=404)
+                raise ResourceNotFoundException("Employee not found")
             
             # Check for conflicts if recurring
             if schedule_data.is_recurring:
@@ -417,7 +414,7 @@ class EmployeeService:
             # Verify employee exists and user has access
             employee = await self.get_employee_by_id(db, employee_id, current_user)
             if not employee:
-                raise FynloException("Employee not found", status_code=404)
+                raise ResourceNotFoundException("Employee not found")
             
             # Check if already clocked in
             existing_shift = db.query(Shift).filter(
@@ -484,7 +481,7 @@ class EmployeeService:
             # Verify employee exists and user has access
             employee = await self.get_employee_by_id(db, employee_id, current_user)
             if not employee:
-                raise FynloException("Employee not found", status_code=404)
+                raise ResourceNotFoundException("Employee not found")
                 
             # Find active shift
             active_shift = db.query(Shift).filter(
@@ -550,8 +547,7 @@ class EmployeeService:
                 restaurant_ids = [restaurant_id]
             else:
                 # Use all accessible restaurants
-                restaurant_ids = accessible_restaurants
-            
+                restaurant_ids = accessible_restaurants            
             # Get basic counts
             total_employees = db.query(EmployeeProfile).filter(
                 EmployeeProfile.restaurant_id.in_(restaurant_ids)
@@ -630,8 +626,7 @@ class EmployeeService:
                 operation="access",
                 resource_type="weekly_schedule",
                 db=db
-            )
-            
+            )            
             if not week_start:
                 # Default to current week (Monday as start)
                 today = date.today()
@@ -724,7 +719,7 @@ class EmployeeService:
             # Verify employee exists and user has access
             employee = await self.get_employee_by_id(db, employee_id, current_user)
             if not employee:
-                raise FynloException("Employee not found", status_code=404)
+                raise ResourceNotFoundException("Employee not found")
             
             query = db.query(Shift).filter(Shift.employee_id == employee_id)
             
@@ -756,7 +751,7 @@ class EmployeeService:
             # Verify employee exists and user has access
             employee = await self.get_employee_by_id(db, employee_id, current_user)
             if not employee:
-                raise FynloException("Employee not found", status_code=404)
+                raise ResourceNotFoundException("Employee not found")
             
             query = db.query(PerformanceMetric).filter(
                 PerformanceMetric.employee_id == employee_id
@@ -795,7 +790,7 @@ class EmployeeService:
             # Check access through employee
             employee = await self.get_employee_by_id(db, schedule.employee_id, current_user)
             if not employee:
-                raise FynloException("Access denied", status_code=403)
+                raise AuthenticationException(message="Access denied", error_code="ACCESS_DENIED")
             
             # Update fields if provided
             update_data = schedule_data.dict(exclude_unset=True)
@@ -831,7 +826,7 @@ class EmployeeService:
             # Check access through employee
             employee = await self.get_employee_by_id(db, schedule.employee_id, current_user)
             if not employee:
-                raise FynloException("Access denied", status_code=403)
+                raise AuthenticationException(message="Access denied", error_code="ACCESS_DENIED")
             
             db.delete(schedule)
             db.commit()

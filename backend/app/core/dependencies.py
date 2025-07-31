@@ -4,8 +4,9 @@ Reusable dependencies that enforce tenant isolation
 """
 
 from typing import Optional, Any
-from fastapi import Depends, HTTPException, Query
+from fastapi import Query, Depends
 from sqlalchemy.orm import Session
+from app.core.exceptions import AuthenticationException, ResourceNotFoundException, FynloException
 
 from app.core.database import get_db
 from app.core.auth import get_current_user
@@ -39,10 +40,7 @@ async def get_current_user_with_tenant_validation(
         )
     elif not TenantSecurity.is_platform_owner(current_user) and not current_user.restaurant_id:
         # Non-platform owners must have a restaurant
-        raise HTTPException(
-            status_code=403,
-            detail="User has no restaurant assigned"
-        )
+        raise AuthenticationException(message="Authentication failed", error_code="ACCESS_DENIED")
     
     # Set RLS context for the database session
     RLSContext.get_db_with_context(db, current_user)
@@ -74,10 +72,7 @@ async def validate_resource_access(
     ).first()
     
     if not resource:
-        raise HTTPException(
-            status_code=404,
-            detail=f"{resource_model.__name__} not found"
-        )
+        raise ResourceNotFoundException(message=f'{resource_model.__name__} not found', resource_type=resource_model.__name__)
     
     # Validate restaurant access if resource has restaurant_id
     if hasattr(resource, 'restaurant_id'):
@@ -124,10 +119,7 @@ class TenantFilter:
         else:
             # Regular users can only see their restaurant
             if restaurant_id and str(restaurant_id) != str(current_user.restaurant_id):
-                raise HTTPException(
-                    status_code=403,
-                    detail="You can only access your own restaurant's data"
-                )
+                raise AuthenticationException(message='Access denied', error_code='ACCESS_DENIED')
             filters["restaurant_id"] = str(current_user.restaurant_id)
         
         return filters
@@ -183,10 +175,7 @@ async def platform_owner_required(
             # Only Ryan and Arnaud can access this
     """
     if not TenantSecurity.is_platform_owner(current_user):
-        raise HTTPException(
-            status_code=403,
-            detail="This endpoint is restricted to platform owners only"
-        )
+        raise AuthenticationException(message="Authentication failed", error_code="ACCESS_DENIED")
     
     return current_user
 

@@ -14,7 +14,6 @@ from app.core.websocket import websocket_manager
 
 logger = logging.getLogger(__name__)
 
-
 async def verify_websocket_access_secure(
     restaurant_id: str,
     user: User,
@@ -59,7 +58,6 @@ async def verify_websocket_access_secure(
     
     # User has access to their own restaurant
     return True
-
 
 async def handle_websocket_message_secure(
     message: dict,
@@ -117,7 +115,6 @@ async def handle_websocket_message_secure(
         message=message,
         restaurant_id=restaurant_id
     )
-
 
 class SecureWebSocketManager:
     """

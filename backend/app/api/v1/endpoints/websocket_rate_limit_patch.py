@@ -182,7 +182,6 @@ async def websocket_endpoint_general_with_rate_limit(
             
         logger.info(f"WebSocket disconnected: {connection_id}")
 
-
 # Add a periodic cleanup task for rate limiter
 async def rate_limit_cleanup_task():
     """Periodic cleanup of rate limiter data"""
@@ -193,7 +192,6 @@ async def rate_limit_cleanup_task():
             logger.debug("Rate limiter cleanup completed")
         except Exception as e:
             logger.error(f"Rate limiter cleanup error: {e}")
-
 
 # Start the cleanup task on app startup
 # Add this to your FastAPI app startup event:

@@ -9,16 +9,16 @@ import io
 import base64
 from datetime import datetime, timedelta
 from typing import Optional, Tuple
-from fastapi import HTTPException, status
+from fastapi import status
 
 from app.core.redis_client import RedisClient
 from app.models import User
 from app.core.tenant_security import TenantSecurity
+from app.core.exceptions import ValidationException, AuthenticationException, FynloException, ResourceNotFoundException, ConflictException
 
 # 2FA Configuration
 TOTP_ISSUER = "Fynlo POS"
-TOTP_WINDOW = 1  # Allow 1 time window before/after for clock skew
-BACKUP_CODES_COUNT = 10
+TOTP_WINDOW = 1  # Allow 1 time window before/after for clock skewBACKUP_CODES_COUNT = 10
 RECOVERY_CODE_LENGTH = 8
 
 
@@ -80,13 +80,12 @@ class TwoFactorAuth:
         """
         # Only platform owners require 2FA
         if not TenantSecurity.is_platform_owner(user):
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="2FA is only required for platform owners"
+            raise AuthenticationException(
+                message="2FA is only required for platform owners",
+                error_code="ACCESS_DENIED"
             )
         
-        # Generate secret and backup codes
-        secret = self.generate_secret()
+        # Generate secret and backup codes        secret = self.generate_secret()
         backup_codes = self.generate_backup_codes()
         qr_code = self.generate_qr_code(user, secret)
         
@@ -117,22 +116,20 @@ class TwoFactorAuth:
         Confirm 2FA setup with a valid token
         """
         if not self.redis:
-            raise HTTPException(
-                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="2FA service unavailable"
+            raise FynloException(
+                "2FA service unavailable", 
+                status_code=503
             )
         
         # Get setup data
         setup_data = await self.redis.get(setup_key)
         if not setup_data:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
+            raise ValidationException(
                 detail="2FA setup expired or invalid"
             )
         
         # Verify token
-        secret = setup_data.get("secret")
-        if not self.verify_totp(secret, token):
+        secret = setup_data.get("secret")        if not self.verify_totp(secret, token):
             return False
         
         # Store 2FA data permanently
@@ -218,12 +215,10 @@ class TwoFactorAuth:
         # Verify current token first
         valid, _ = await self.verify_2fa(user, current_token)
         if not valid:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
+            raise AuthenticationException(
                 detail="Invalid 2FA token"
             )
-        
-        if self.redis:
+                if self.redis:
             user_2fa_key = f"2fa:user:{user.id}"
             await self.redis.delete(user_2fa_key)
         
@@ -240,19 +235,17 @@ class TwoFactorAuth:
         # Verify current token
         valid, _ = await self.verify_2fa(user, current_token)
         if not valid:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
+            raise AuthenticationException(
                 detail="Invalid 2FA token"
             )
         
         if not self.redis:
-            raise HTTPException(
-                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="2FA service unavailable"
+            raise FynloException(
+                "2FA service unavailable", 
+                status_code=503
             )
         
-        # Generate new codes
-        new_codes = self.generate_backup_codes()
+        # Generate new codes        new_codes = self.generate_backup_codes()
         
         # Update stored data
         user_2fa_key = f"2fa:user:{user.id}"
