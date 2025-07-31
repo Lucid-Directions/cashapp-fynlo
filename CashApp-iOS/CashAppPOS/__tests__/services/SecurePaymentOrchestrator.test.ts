@@ -6,7 +6,6 @@ import { Alert } from 'react-native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { API_CONFIG } from '../../src/config/api';
 import SecurePaymentConfig from '../../src/services/SecurePaymentConfig';
 import SecurePaymentOrchestrator from '../../src/services/SecurePaymentOrchestrator';
 

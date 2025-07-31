@@ -2,6 +2,29 @@ import { fireEvent, waitFor } from '@testing-library/react-native';
 
 import type { ReactTestInstance } from 'react-test-renderer';
 
+// Validation interfaces
+interface TestOrder {
+  id: string | number;
+  items: unknown[];
+  total: number;
+  status?: string;
+}
+
+interface TestCustomer {
+  id: string | number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+}
+
+interface TestPayment {
+  id: string | number;
+  amount: number;
+  method: string;
+  status: string;
+}
+
 export interface TestScenario {
   name: string;
   description: string;
@@ -14,7 +37,7 @@ export interface TestScenario {
 export interface TestStep {
   action: string;
   target?: string;
-  data?: any;
+  data?: Record<string, unknown> | string | number | boolean | null;
   waitFor?: number;
   description: string;
 }
@@ -50,7 +73,7 @@ class TestingUtils {
    */
   static generateTestData = {
     // Generate test orders
-    orders: (count: number = 10, config?: MockDataGeneratorConfig) => {
+    orders: (count: number = 10, _config?: MockDataGeneratorConfig) => {
       const orders = [];
       for (let i = 0; i < count; i++) {
         orders.push({
@@ -360,8 +383,8 @@ class TestingUtils {
 
     // Simulate validation error
     simulateValidationError: (field: string, message: string) => {
-      const error = new Error(`Validation failed: ${message}`);
-      (error as any).field = field;
+      const error = new Error(`Validation failed: ${message}`) as Error & { field: string };
+      error.field = field;
       return Promise.reject(error);
     },
   };
@@ -371,37 +394,44 @@ class TestingUtils {
    */
   static validation = {
     // Validate order structure
-    isValidOrder: (order: any): boolean => {
+    isValidOrder: (order: unknown): order is TestOrder => {
       return !!(
         order &&
-        order.id &&
-        order.items &&
-        Array.isArray(order.items) &&
-        typeof order.total === 'number' &&
-        order.status
+        typeof order === 'object' &&
+        'id' in order &&
+        'items' in order &&
+        'total' in order &&
+        Array.isArray((order as TestOrder).items) &&
+        typeof (order as TestOrder).total === 'number'
       );
     },
 
     // Validate customer structure
-    isValidCustomer: (customer: any): boolean => {
+    isValidCustomer: (customer: unknown): customer is TestCustomer => {
       return !!(
         customer &&
-        customer.id &&
-        customer.firstName &&
-        customer.lastName &&
-        customer.email &&
-        customer.phone
+        typeof customer === 'object' &&
+        'id' in customer &&
+        'firstName' in customer &&
+        'lastName' in customer &&
+        'email' in customer &&
+        'phone' in customer &&
+        typeof (customer as TestCustomer).firstName === 'string' &&
+        typeof (customer as TestCustomer).lastName === 'string'
       );
     },
 
     // Validate payment structure
-    isValidPayment: (payment: any): boolean => {
+    isValidPayment: (payment: unknown): payment is TestPayment => {
       return !!(
         payment &&
-        payment.id &&
-        payment.method &&
-        typeof payment.amount === 'number' &&
-        payment.status
+        typeof payment === 'object' &&
+        'id' in payment &&
+        'method' in payment &&
+        'amount' in payment &&
+        'status' in payment &&
+        typeof (payment as TestPayment).amount === 'number' &&
+        typeof (payment as TestPayment).method === 'string'
       );
     },
   };
@@ -421,8 +451,8 @@ class TestingUtils {
     error: (message: string, status: number = 500, delay: number = 100): Promise<never> => {
       return new Promise((_, reject) => {
         setTimeout(() => {
-          const error = new Error(message);
-          (error as any).status = status;
+          const error = new Error(message) as Error & { status: number };
+          error.status = status;
           reject(error);
         }, delay);
       });
