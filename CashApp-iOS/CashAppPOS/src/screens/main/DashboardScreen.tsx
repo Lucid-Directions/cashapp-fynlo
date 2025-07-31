@@ -340,7 +340,7 @@ const createDynamicStyles = (theme: unknown) => ({
         ? theme.colors.warning
         : type === 'success'
         ? theme.colors.success
-        : theme.colors.info,
+        : theme.colors.secondary,
   }),
 });
 
