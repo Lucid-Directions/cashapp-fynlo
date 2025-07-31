@@ -23,7 +23,7 @@ const UserProfileScreen: React.FC = () => {
   const { user, updateUser, signOut } = useAuth();
   const { theme } = useTheme();
   const styles = useThemedStyles(createStyles);
-const [_isEditing, setIsEditing] = useState(false);
+  const [_isEditing, setIsEditing] = useState(false);
   const [_isLoading, setIsLoading] = useState(false);
 
   // Safe user data with fallbacks
@@ -519,9 +519,6 @@ const createStyles = (theme: unknown) =>
       fontWeight: 'bold',
       color: theme.colors.white,
     },
-    editButton: {
-      padding: 8,
-    },
     content: {
       flex: 1,
     },
@@ -558,19 +555,6 @@ const createStyles = (theme: unknown) =>
       backgroundColor: theme.colors.lightGray,
       justifyContent: 'center',
       alignItems: 'center',
-    },
-    photoEditOverlay: {
-      position: 'absolute',
-      bottom: 0,
-      right: 0,
-      width: 28,
-      height: 28,
-      borderRadius: 14,
-      backgroundColor: theme.colors.primary,
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderWidth: 2,
-      borderColor: theme.colors.white,
     },
     profileInfo: {
       flex: 1,
@@ -628,56 +612,6 @@ const createStyles = (theme: unknown) =>
       color: theme.colors.darkGray,
       flex: 2,
       textAlign: 'right',
-    },
-    textInput: {
-      flex: 2,
-      borderWidth: 1,
-      borderColor: theme.colors.border,
-      borderRadius: 8,
-      paddingHorizontal: 12,
-      paddingVertical: 8,
-      fontSize: 16,
-      color: theme.colors.text,
-      backgroundColor: theme.colors.white,
-      textAlign: 'right',
-    },
-    editActions: {
-      flexDirection: 'row',
-      paddingHorizontal: 16,
-      paddingTop: 16,
-      gap: 12,
-    },
-    cancelButton: {
-      flex: 1,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingVertical: 12,
-      backgroundColor: theme.colors.white,
-      borderRadius: 8,
-      borderWidth: 1,
-      borderColor: theme.colors.mediumGray,
-      gap: 8,
-    },
-    cancelButtonText: {
-      fontSize: 16,
-      fontWeight: '500',
-      color: theme.colors.mediumGray,
-    },
-    saveButton: {
-      flex: 1,
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingVertical: 12,
-      backgroundColor: theme.colors.primary,
-      borderRadius: 8,
-      gap: 8,
-    },
-    saveButtonText: {
-      fontSize: 16,
-      fontWeight: '500',
-      color: theme.colors.white,
     },
     settingsCard: {
       paddingHorizontal: 16,

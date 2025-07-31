@@ -33,6 +33,7 @@
 - **GitHub**: `gh` - Repository & PR management
 - **DigitalOcean**: `doctl` - Infrastructure control
 - **Vercel**: `vercel` - Deployment (requires VERCEL_TOKEN env var)
+- **Xcode CLI**: Full Xcode command line integration (see Xcode CLI section below)
 
 ### Specialized Sub-Agents (via Task tool)
 - **fynlo-test-runner** - Run tests, fix failures, improve coverage
@@ -181,6 +182,79 @@ cd backend && source venv/bin/activate
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 # Seeds: python seed_chucho_menu.py
 ```
+
+## 🔨 Xcode CLI Integration
+
+### Available Commands
+- **Xcode version**: 16.4, Build 16F6
+- **Command Line Tools**: `/Applications/Xcode.app/Contents/Developer`
+- **xcrun**: version 70
+
+### Build & Test Commands
+```bash
+# Build iOS app
+xcodebuild -workspace CashAppPOS.xcworkspace -scheme CashAppPOS -destination 'platform=iOS Simulator,name=iPhone 15' build
+
+# Run tests
+xcodebuild -workspace CashAppPOS.xcworkspace -scheme CashAppPOS -destination 'platform=iOS Simulator,name=iPhone 15' test
+
+# Clean build
+xcodebuild clean -workspace CashAppPOS.xcworkspace -scheme CashAppPOS
+
+# Archive for App Store
+xcodebuild archive -workspace CashAppPOS.xcworkspace -scheme CashAppPOS -archivePath CashAppPOS.xcarchive
+
+# Export archive
+xcodebuild -exportArchive -archivePath CashAppPOS.xcarchive -exportPath Export -exportOptionsPlist ExportOptions.plist
+```
+
+### iOS Simulator Control
+```bash
+# List available simulators
+xcrun simctl list devices
+
+# Boot specific simulator
+xcrun simctl boot "iPhone 15"
+
+# Install app on booted simulator
+xcrun simctl install booted /path/to/CashAppPOS.app
+
+# Launch app
+xcrun simctl launch booted com.fynlo.CashAppPOS
+
+# Take screenshot
+xcrun simctl io booted screenshot screenshot.png
+
+# Stream logs
+xcrun simctl spawn booted log stream --predicate 'process == "CashAppPOS"'
+
+# Reset all simulators
+xcrun simctl erase all
+```
+
+### Debugging & Logs
+```bash
+# Access build logs
+ls ~/Library/Developer/Xcode/DerivedData/*/Logs/Build/*.xcactivitylog
+
+# Parse crash logs
+ls ~/Library/Logs/DiagnosticReports/
+
+# Clean derived data
+rm -rf ~/Library/Developer/Xcode/DerivedData/CashAppPOS-*
+
+# Stream device console logs
+xcrun simctl spawn booted log stream --level=debug
+
+# Filter logs by app
+xcrun simctl spawn booted log stream --predicate 'processImagePath endswith "CashAppPOS"'
+```
+
+### Common Build Issues & Solutions
+- **Code signing**: Check provisioning profiles with `security find-identity -p codesigning`
+- **Missing frameworks**: Verify with `xcodebuild -showBuildSettings | grep FRAMEWORK_SEARCH_PATHS`
+- **Simulator issues**: Reset with `xcrun simctl erase all`
+- **Build failures**: Clean derived data and rebuild
 
 ## 🏗️ Architecture Overview
 

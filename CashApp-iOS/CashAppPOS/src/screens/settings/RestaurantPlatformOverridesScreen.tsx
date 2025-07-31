@@ -50,7 +50,7 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
 
   // Mock restaurant ID - in real app, this would come from auth context
   const restaurantId = 'restaurant-123';
-const _userRole = 'restaurant_owner'; // This would come from auth context
+  const _userRole = 'restaurant_owner'; // This would come from auth context
 
   const [effectiveSettings, setEffectiveSettings] = useState<Record<string, EffectiveSetting>>({});
   const [loading, setLoading] = useState(true);
@@ -325,12 +325,9 @@ const _userRole = 'restaurant_owner'; // This would come from auth context
             </View>
             <TouchableOpacity
               onPress={loadEffectiveSettings}
-              style={[
-                styles.retryButton,
-                { backgroundColor: theme.colors.primary, padding: 8, borderRadius: 4 },
-              ]}
+              style={styles.retryButton}
             >
-              <Text style={{ color: theme.colors.white }}>Retry</Text>
+              <Text style={styles.retryButtonText}>Retry</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -360,8 +357,8 @@ const _userRole = 'restaurant_owner'; // This would come from auth context
         {categorizedSettings.payment_fees && (
           <View style={styles.categorySection}>
             <Text style={styles.sectionTitle}>Payment Processing Fees</Text>
-            <View style={[{ backgroundColor: theme.colors.surface, padding: 16, borderRadius: 8 }]}>
-              <Text style={[{ color: theme.colors.text, fontSize: 14 }]}>
+            <View style={styles.paymentFeesInfo}>
+              <Text style={styles.paymentFeesText}>
                 Payment fees are controlled by the platform and cannot be modified by restaurants.
               </Text>
             </View>
@@ -379,10 +376,7 @@ const _userRole = 'restaurant_owner'; // This would come from auth context
           return (
             <View
               key={category}
-              style={[
-                styles.categoryCard,
-                { backgroundColor: theme.colors.surface, borderRadius: 8 },
-              ]}
+              style={styles.categoryCard}
             >
               <TouchableOpacity
                 style={styles.categoryHeader}
@@ -449,26 +443,22 @@ const _userRole = 'restaurant_owner'; // This would come from auth context
                           <TouchableOpacity
                             onPress={() => showOverrideDialog(setting)}
                             style={[
-                              {
-                                backgroundColor:
-                                  setting.source === 'restaurant'
-                                    ? theme.colors.border
-                                    : theme.colors.primary,
-                                padding: 8,
-                                borderRadius: 4,
-                                borderWidth: setting.source === 'restaurant' ? 1 : 0,
-                                borderColor: theme.colors.primary,
-                              },
+                              styles.overrideButton,
+                              setting.source === 'restaurant'
+                                ? styles.overrideButtonRestaurant
+                                : styles.overrideButtonPlatform,
                             ]}
                           >
                             <Text
-                              style={{
-                                color:
-                                  setting.source === 'restaurant'
-                                    ? theme.colors.primary
-                                    : theme.colors.white,
-                                fontSize: 12,
-                              }}
+                              style={[
+                                styles.overrideButtonText,
+                                {
+                                  color:
+                                    setting.source === 'restaurant'
+                                      ? theme.colors.primary
+                                      : theme.colors.white,
+                                },
+                              ]}
                             >
                               {setting.source === 'restaurant'
                                 ? 'Modify Override'
@@ -553,6 +543,12 @@ const createStyles = (theme: unknown) =>
     },
     retryButton: {
       alignSelf: 'flex-start',
+      backgroundColor: theme.colors.primary,
+      padding: 8,
+      borderRadius: 4,
+    },
+    retryButtonText: {
+      color: theme.colors.white,
     },
     infoCard: {
       marginTop: 16,
@@ -602,9 +598,20 @@ const createStyles = (theme: unknown) =>
       color: theme.colors.text,
       marginBottom: 12,
     },
+    paymentFeesInfo: {
+      backgroundColor: theme.colors.surface,
+      padding: 16,
+      borderRadius: 8,
+    },
+    paymentFeesText: {
+      color: theme.colors.text,
+      fontSize: 14,
+    },
     categoryCard: {
       marginTop: 16,
       overflow: 'hidden',
+      backgroundColor: theme.colors.surface,
+      borderRadius: 8,
     },
     categoryHeader: {
       flexDirection: 'row',
@@ -682,6 +689,21 @@ const createStyles = (theme: unknown) =>
     },
     actionContainer: {
       alignItems: 'flex-start',
+    },
+    overrideButton: {
+      padding: 8,
+      borderRadius: 4,
+    },
+    overrideButtonPlatform: {
+      backgroundColor: theme.colors.primary,
+    },
+    overrideButtonRestaurant: {
+      backgroundColor: theme.colors.border,
+      borderWidth: 1,
+      borderColor: theme.colors.primary,
+    },
+    overrideButtonText: {
+      fontSize: 12,
     },
     lockedContainer: {
       flexDirection: 'row',
