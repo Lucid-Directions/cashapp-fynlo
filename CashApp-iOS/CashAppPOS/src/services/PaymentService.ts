@@ -62,7 +62,7 @@ class PaymentServiceClass {
         this.stripeInitialized = true;
       }
     } catch (error) {
-      console.error('Failed to initialize Stripe:', error);
+      logger.error('Failed to initialize Stripe:', error);
     }
   }
 
@@ -159,7 +159,7 @@ class PaymentServiceClass {
       const data = await response.json();
       return data.provider;
     } catch (error) {
-      console.error('Failed to get optimal provider:', error);
+      logger.error('Failed to get optimal provider:', error);
       // Fallback to SumUp as primary, then QR code
       return 'sumup';
     }
@@ -201,7 +201,7 @@ class PaymentServiceClass {
         fee: data.fee,
       };
     } catch (error) {
-      console.error('Payment processing failed:', error);
+      logger.error('Payment processing failed:', error);
       return {
         success: false,
         provider: 'unknown',
@@ -251,7 +251,7 @@ class PaymentServiceClass {
         status: data.status,
       };
     } catch (error) {
-      console.error('QR payment generation failed:', error);
+      logger.error('QR payment generation failed:', error);
       throw error;
     }
   }
@@ -285,7 +285,7 @@ class PaymentServiceClass {
         expired: data.data.expired,
       };
     } catch (error) {
-      console.error('QR payment status check failed:', error);
+      logger.error('QR payment status check failed:', error);
       throw error;
     }
   }
@@ -325,7 +325,7 @@ class PaymentServiceClass {
         fee: 0,
       };
     } catch (error) {
-      console.error('QR payment confirmation failed:', error);
+      logger.error('QR payment confirmation failed:', error);
       return {
         success: false,
         provider: 'qr_code',
@@ -382,7 +382,7 @@ class PaymentServiceClass {
         fee: data.fee_amount,
       };
     } catch (error) {
-      console.error('Cash payment processing failed:', error);
+      logger.error('Cash payment processing failed:', error);
       return {
         success: false,
         provider: 'cash',
@@ -431,7 +431,7 @@ class PaymentServiceClass {
         fee: data.fee,
       };
     } catch (error) {
-      console.error('Refund processing failed:', error);
+      logger.error('Refund processing failed:', error);
       return {
         success: false,
         provider: 'unknown',
@@ -467,7 +467,7 @@ class PaymentServiceClass {
 
       return await response.json();
     } catch (error) {
-      console.error('Failed to get payment analytics:', error);
+      logger.error('Failed to get payment analytics:', error);
       throw error;
     }
   }
@@ -480,7 +480,7 @@ class PaymentServiceClass {
       await AsyncStorage.setItem('payment_config', JSON.stringify(config));
       this.config = config;
     } catch (error) {
-      console.error('Failed to save payment config:', error);
+      logger.error('Failed to save payment config:', error);
       throw error;
     }
   }
@@ -498,7 +498,7 @@ class PaymentServiceClass {
       }
       return null;
     } catch (error) {
-      console.error('Failed to load payment config:', error);
+      logger.error('Failed to load payment config:', error);
       return null;
     }
   }

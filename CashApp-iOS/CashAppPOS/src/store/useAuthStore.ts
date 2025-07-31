@@ -143,7 +143,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       // This ensures users start at the login screen
       const hasMockAuth = await AsyncStorage.getItem('mock_session');
       if (hasMockAuth) {
-        console.log('Clearing stored mock authentication...');
+        logger.info('Clearing stored mock authentication...');
         await AsyncStorage.multiRemove([
           'userInfo',
           'mock_session',
@@ -229,7 +229,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   setupTokenListeners: () => {
-    console.log('🎧 Setting up token event listeners...');
+    logger.info('🎧 Setting up token event listeners...');
 
     // Remove any existing listeners first to prevent duplicates
     if (tokenRefreshedHandler) {
@@ -243,12 +243,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     // Create new handler functions with current store references
     tokenRefreshedHandler = async () => {
-      console.log('🔄 Token refreshed, updating auth state...');
+      logger.info('🔄 Token refreshed, updating auth state...');
       await get().handleTokenRefresh();
     };
 
     tokenClearedHandler = () => {
-      console.log('🔒 Tokens cleared, updating auth state...');
+      logger.info('🔒 Tokens cleared, updating auth state...');
       set({
         user: null,
         session: null,
@@ -263,7 +263,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     // Mark listeners as set up
     set({ tokenRefreshListenerSetup: true });
-    console.log('✅ Token listeners successfully set up');
+    logger.info('✅ Token listeners successfully set up');
   },
 
   handleTokenRefresh: async () => {
@@ -274,10 +274,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       if (session) {
         // Update session in store
         set({ session });
-        console.log('✅ Auth store session updated after token refresh');
+        logger.info('✅ Auth store session updated after token refresh');
       } else {
         // No valid session after refresh - user needs to log in again
-        console.log('⚠️ No valid session after token refresh');
+        logger.info('⚠️ No valid session after token refresh');
         set({
           user: null,
           session: null,
@@ -286,7 +286,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         });
       }
     } catch (error) {
-      console.error('❌ Error handling token refresh in auth store:', error);
+      logger.error('❌ Error handling token refresh in auth store:', error);
     }
   },
 }));

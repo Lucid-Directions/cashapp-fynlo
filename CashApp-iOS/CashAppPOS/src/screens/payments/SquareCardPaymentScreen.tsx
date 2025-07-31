@@ -26,7 +26,7 @@ try {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   SQIPCardEntry = require('react-native-square-in-app-payments').SQIPCardEntry;
 } catch (_error) {
-  console.warn('Square SDK not available in SquareCardPaymentScreen');
+  logger.warn('Square SDK not available in SquareCardPaymentScreen');
 }
 
 interface SquareCardPaymentScreenProps {
@@ -99,7 +99,7 @@ const SquareCardPaymentScreen: React.FC<SquareCardPaymentScreenProps> = ({ navig
         errorMessage: null,
       }));
     } catch (error) {
-      console.error('Failed to initialize Square:', error);
+      logger.error('Failed to initialize Square:', error);
       setPaymentState((prev) => ({
         ...prev,
         loading: false,
@@ -173,7 +173,7 @@ const SquareCardPaymentScreen: React.FC<SquareCardPaymentScreenProps> = ({ navig
         }));
       }
     } catch (error) {
-      console.error('Payment processing failed:', error);
+      logger.error('Payment processing failed:', error);
       setPaymentState((prev) => ({
         ...prev,
         processing: false,

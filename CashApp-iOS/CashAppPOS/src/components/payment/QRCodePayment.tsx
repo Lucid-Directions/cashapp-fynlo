@@ -39,7 +39,7 @@ const QRCodeWrapper: React.FC<{ qrCodeData: string }> = ({ qrCodeData }) => {
       />
     );
   } catch (error) {
-    console.error('QR Code generation error:', error);
+    logger.error('QR Code generation error:', error);
     return (
       <View style={{ alignItems: 'center', justifyContent: 'center', width: 180, height: 180 }}>
         <Icon name="qr-code" size={60} color={Colors.lightText} />
@@ -191,7 +191,7 @@ export const QRCodePayment: React.FC<QRCodePaymentProps> = ({
       setQrData(data);
       setStatus('waiting');
     } catch (err) {
-      console.error('❌ QR Payment generation failed:', err);
+      logger.error('❌ QR Payment generation failed:', err);
 
       if (isMountedRef.current) {
         setStatus('error');
@@ -233,7 +233,7 @@ export const QRCodePayment: React.FC<QRCodePaymentProps> = ({
         }
       }
     } catch (err) {
-      console.error('❌ Failed to check QR payment status:', err);
+      logger.error('❌ Failed to check QR payment status:', err);
 
       if (isMountedRef.current) {
         setError('Failed to check payment status');

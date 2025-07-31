@@ -130,7 +130,7 @@ class RestaurantConfigService {
       this.notifyListeners();
       return this.config;
     } catch (error) {
-      console.error('Error loading restaurant config:', error);
+      logger.error('Error loading restaurant config:', error);
       throw error;
     }
   }
@@ -146,7 +146,7 @@ class RestaurantConfigService {
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(this.config));
       this.notifyListeners();
     } catch (error) {
-      console.error('Error saving restaurant config:', error);
+      logger.error('Error saving restaurant config:', error);
       throw error;
     }
   }
@@ -206,15 +206,15 @@ class RestaurantConfigService {
         });
 
         if (response.ok) {
-          console.log('✅ Restaurant config saved to API');
+          logger.info('✅ Restaurant config saved to API');
         } else {
           const errorData = await response.json();
-          console.error('❌ API save failed:', errorData);
+          logger.error('❌ API save failed:', errorData);
           throw new Error(errorData.detail || 'Failed to save to API');
         }
       }
     } catch (apiError) {
-      console.error('❌ Failed to save to API, saving locally:', apiError);
+      logger.error('❌ Failed to save to API, saving locally:', apiError);
       // Continue with local save
     }
 
@@ -274,9 +274,9 @@ class RestaurantConfigService {
         });
       }
 
-      console.log('✅ Restaurant config synced to platform');
+      logger.info('✅ Restaurant config synced to platform');
     } catch (error) {
-      console.error('❌ Failed to sync restaurant to platform:', error);
+      logger.error('❌ Failed to sync restaurant to platform:', error);
       // Don't fail the update if sync fails
     }
 
@@ -401,7 +401,7 @@ class RestaurantConfigService {
 
       return this.config;
     } catch (error) {
-      console.error('Error importing configuration:', error);
+      logger.error('Error importing configuration:', error);
       throw error;
     }
   }

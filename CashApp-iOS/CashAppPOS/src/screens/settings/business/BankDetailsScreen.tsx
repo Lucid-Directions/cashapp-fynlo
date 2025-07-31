@@ -65,7 +65,7 @@ const { _user } = useAuth();
         setHasExistingDetails(true);
       }
     } catch (error) {
-      console.error('Failed to load bank details:', error);
+      logger.error('Failed to load bank details:', error);
     }
   };
 
@@ -128,7 +128,7 @@ const { _user } = useAuth();
         [{ text: 'OK', onPress: () => navigation.goBack() }]
       );
     } catch (error) {
-      console.error('Failed to save bank details:', error);
+      logger.error('Failed to save bank details:', error);
       Alert.alert('Error', 'Failed to save bank details. Please try again.');
     } finally {
       setIsLoading(false);
@@ -139,7 +139,7 @@ const { _user } = useAuth();
     // Simulate API call
     return new Promise((resolve) => {
       setTimeout(() => {
-        console.log('Bank details saved:', details);
+        logger.info('Bank details saved:', details);
         resolve();
       }, 1500);
     });

@@ -53,7 +53,7 @@ const RecipesScreen = () => {
       const fetchedRecipes: Recipe[] = await fetchRecipes(); // Using simplified fetch for now
       setRecipes(fetchedRecipes);
     } catch (error) {
-      console.error('Failed to load recipes:', error);
+      logger.error('Failed to load recipes:', error);
       Alert.alert('Error', 'Failed to load recipes. Please try again.');
     } finally {
       setIsLoading(false);
@@ -93,7 +93,7 @@ const RecipesScreen = () => {
             Alert.alert('Success', 'Recipe deleted successfully.');
             loadRecipes(); // Refresh list
           } catch (error) {
-            console.error('Failed to delete recipe:', error);
+            logger.error('Failed to delete recipe:', error);
             Alert.alert('Error', 'Failed to delete recipe.');
             setIsLoading(false);
           }

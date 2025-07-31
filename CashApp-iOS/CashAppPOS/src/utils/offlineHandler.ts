@@ -221,7 +221,7 @@ class OfflineHandler {
       const stored = await AsyncStorage.getItem('offline_orders');
       return stored ? JSON.parse(stored) : [];
     } catch (error) {
-      console.warn('Failed to retrieve offline orders:', error);
+      logger.warn('Failed to retrieve offline orders:', error);
       return [];
     }
   }
@@ -231,7 +231,7 @@ class OfflineHandler {
    */
   async syncOfflineData(): Promise<void> {
     if (!this.isOnline) {
-      console.warn('Cannot sync offline data: device is offline');
+      logger.warn('Cannot sync offline data: device is offline');
       return;
     }
 
@@ -245,7 +245,7 @@ class OfflineHandler {
         // Remove from offline storage after successful sync
         await this.removeOfflineData('orders', order.id);
       } catch (error) {
-        console.warn(`Failed to sync order ${order.id}:`, error);
+        logger.warn(`Failed to sync order ${order.id}:`, error);
 
         // Queue for retry
         await this.queueAction('sync_order', order, 'high');
@@ -286,11 +286,11 @@ class OfflineHandler {
 
     if (!wasOnline && this.isOnline) {
       // Just came back online
-      console.log('Device back online - processing queued actions');
+      logger.info('Device back online - processing queued actions');
       this.onBackOnline();
     } else if (wasOnline && !this.isOnline) {
       // Just went offline
-      console.log('Device went offline');
+      logger.info('Device went offline');
       this.onGoOffline();
     }
   }
@@ -373,13 +373,13 @@ class OfflineHandler {
         await this.syncInventoryToServer(action.data);
         break;
       default:
-        console.warn(`Unknown action type: ${action.type}`);
+        logger.warn(`Unknown action type: ${action.type}`);
     }
   }
 
   private async syncOrderToServer(orderData: unknown): Promise<void> {
     // This would be replaced with actual API call
-    console.log('Syncing order to server:', orderData);
+    logger.info('Syncing order to server:', orderData);
 
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -387,12 +387,12 @@ class OfflineHandler {
 
   private async syncCustomerToServer(customerData: unknown): Promise<void> {
     // This would be replaced with actual API call
-    console.log('Syncing customer to server:', customerData);
+    logger.info('Syncing customer to server:', customerData);
   }
 
   private async syncInventoryToServer(inventoryData: unknown): Promise<void> {
     // This would be replaced with actual API call
-    console.log('Syncing inventory to server:', inventoryData);
+    logger.info('Syncing inventory to server:', inventoryData);
   }
 
   private async loadQueuedActions(): Promise<void> {
@@ -402,7 +402,7 @@ class OfflineHandler {
         this.actionQueue = JSON.parse(stored);
       }
     } catch (error) {
-      console.warn('Failed to load queued actions:', error);
+      logger.warn('Failed to load queued actions:', error);
     }
   }
 
@@ -410,7 +410,7 @@ class OfflineHandler {
     try {
       await AsyncStorage.setItem(this.QUEUE_STORAGE_KEY, JSON.stringify(this.actionQueue));
     } catch (error) {
-      console.warn('Failed to save queued actions:', error);
+      logger.warn('Failed to save queued actions:', error);
     }
   }
 
@@ -419,7 +419,7 @@ class OfflineHandler {
       const key = `offline_${type}_${id}`;
       await AsyncStorage.setItem(key, JSON.stringify(data));
     } catch (error) {
-      console.warn(`Failed to store offline ${type}:`, error);
+      logger.warn(`Failed to store offline ${type}:`, error);
     }
   }
 
@@ -428,7 +428,7 @@ class OfflineHandler {
       const key = `offline_${type}_${id}`;
       await AsyncStorage.removeItem(key);
     } catch (error) {
-      console.warn(`Failed to remove offline ${type}:`, error);
+      logger.warn(`Failed to remove offline ${type}:`, error);
     }
   }
 

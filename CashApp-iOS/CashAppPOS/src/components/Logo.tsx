@@ -76,7 +76,7 @@ const Logo: React.FC<LogoProps> = ({
             imageStyle,
           ]}
           resizeMode="contain"
-          onError={() => console.log('Logo failed to load')}
+          onError={() => logger.info('Logo failed to load')}
         />
       ) : (
         <View style={styles.logoTextContainer}>

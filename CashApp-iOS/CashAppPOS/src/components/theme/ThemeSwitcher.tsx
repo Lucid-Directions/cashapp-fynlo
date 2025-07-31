@@ -76,12 +76,12 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
       // Additional delay to ensure theme is fully applied
       await new Promise((resolve) => setTimeout(resolve, 200));
     } catch (error) {
-      console.error('Theme switching error:', error);
+      logger.error('Theme switching error:', error);
       // Fallback to default theme if switching fails
       try {
         await setThemeMode('light');
       } catch (fallbackError) {
-        console.error('Fallback theme setting failed:', fallbackError);
+        logger.error('Fallback theme setting failed:', fallbackError);
       }
     } finally {
       setIsAnimating(false);
@@ -131,7 +131,7 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
         // Add animation delay for smooth transition
         await new Promise((resolve) => setTimeout(resolve, 200));
       } catch (error) {
-        console.error('Color theme switching error:', error);
+        logger.error('Color theme switching error:', error);
       } finally {
         setIsAnimating(false);
       }

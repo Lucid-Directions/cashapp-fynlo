@@ -160,7 +160,7 @@ export class XeroItemsSyncService {
               });
             }
           } catch (error) {
-            console.error(`Failed to sync item ${item.id}:`, error);
+            logger.error(`Failed to sync item ${item.id}:`, error);
             result.recordsFailed++;
             result.errors.push({
               entityId: item.id,
@@ -181,7 +181,7 @@ export class XeroItemsSyncService {
       await this.updateLastSyncTime();
       result.success = result.recordsFailed === 0;
     } catch (error) {
-      console.error('Items sync to Xero failed:', error);
+      logger.error('Items sync to Xero failed:', error);
       result.success = false;
       result.errors.push({
         entityId: 'batch',
@@ -254,7 +254,7 @@ export class XeroItemsSyncService {
             });
           }
         } catch (error) {
-          console.error(`Failed to process Xero item ${xeroItem.ItemID}:`, error);
+          logger.error(`Failed to process Xero item ${xeroItem.ItemID}:`, error);
           result.recordsFailed++;
           result.errors.push({
             entityId: xeroItem.ItemID || 'unknown',
@@ -269,7 +269,7 @@ export class XeroItemsSyncService {
       await this.updateLastSyncTime();
       result.success = result.recordsFailed === 0;
     } catch (error) {
-      console.error('Items sync from Xero failed:', error);
+      logger.error('Items sync from Xero failed:', error);
       result.success = false;
       result.errors.push({
         entityId: 'batch',
@@ -437,7 +437,7 @@ export class XeroItemsSyncService {
       const mappingsJson = await AsyncStorage.getItem(`${this.STORAGE_PREFIX}${this.MAPPING_KEY}`);
       return mappingsJson ? JSON.parse(mappingsJson) : [];
     } catch (error) {
-      console.error('Failed to get item mappings:', error);
+      logger.error('Failed to get item mappings:', error);
       return [];
     }
   }
@@ -461,7 +461,7 @@ export class XeroItemsSyncService {
         JSON.stringify(mappings)
       );
     } catch (error) {
-      console.error('Failed to save item mapping:', error);
+      logger.error('Failed to save item mapping:', error);
       throw error;
     }
   }
@@ -476,7 +476,7 @@ export class XeroItemsSyncService {
       );
       return mappingsJson ? JSON.parse(mappingsJson) : [];
     } catch (error) {
-      console.error('Failed to get category mappings:', error);
+      logger.error('Failed to get category mappings:', error);
       return [];
     }
   }
@@ -500,7 +500,7 @@ export class XeroItemsSyncService {
         JSON.stringify(mappings)
       );
     } catch (error) {
-      console.error('Failed to save category mapping:', error);
+      logger.error('Failed to save category mapping:', error);
       throw error;
     }
   }
@@ -513,7 +513,7 @@ export class XeroItemsSyncService {
       const lastSyncStr = await AsyncStorage.getItem(`${this.STORAGE_PREFIX}${this.LAST_SYNC_KEY}`);
       return lastSyncStr ? new Date(lastSyncStr) : null;
     } catch (error) {
-      console.error('Failed to get last sync time:', error);
+      logger.error('Failed to get last sync time:', error);
       return null;
     }
   }
@@ -528,7 +528,7 @@ export class XeroItemsSyncService {
         new Date().toISOString()
       );
     } catch (error) {
-      console.error('Failed to update last sync time:', error);
+      logger.error('Failed to update last sync time:', error);
     }
   }
 
@@ -575,7 +575,7 @@ export class XeroItemsSyncService {
       const response = await this.apiClient.makeRequest('/Accounts');
       return response.data.Accounts || [];
     } catch (error) {
-      console.error('Failed to fetch Xero accounts:', error);
+      logger.error('Failed to fetch Xero accounts:', error);
       return [];
     }
   }
@@ -654,7 +654,7 @@ export class XeroItemsSyncService {
 
           result.recordsUpdated++;
         } catch (error) {
-          console.error(`Failed to update inventory for item ${update.itemId}:`, error);
+          logger.error(`Failed to update inventory for item ${update.itemId}:`, error);
           result.recordsFailed++;
           result.errors.push({
             entityId: update.itemId,
@@ -668,7 +668,7 @@ export class XeroItemsSyncService {
 
       result.success = result.recordsFailed === 0;
     } catch (error) {
-      console.error('Bulk inventory update failed:', error);
+      logger.error('Bulk inventory update failed:', error);
       result.success = false;
     }
 
