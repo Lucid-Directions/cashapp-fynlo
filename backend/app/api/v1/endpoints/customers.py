@@ -436,7 +436,7 @@ async def update_loyalty_points(
     
     # Validate transaction
     if loyalty_data.transaction_type == "redeemed" and customer.loyalty_points < abs(loyalty_data.points):
-        raise InventoryException(message="Insufficient loyalty points")
+        raise ValidationException(message="Insufficient loyalty points")
     
     # Update points
     if loyalty_data.transaction_type == "earned":

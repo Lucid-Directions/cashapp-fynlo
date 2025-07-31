@@ -755,7 +755,7 @@ async def confirm_order(
     except Exception as e:
         db.rollback() # Rollback order status change if deductions fail
         logger.error(f"Failed to apply recipe deductions for order {order.id}: {e}. Order status not confirmed.")
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message=f"Failed to apply recipe deductions: {str(e)}", status_code=500)
 
     # Update cache
     await redis.cache_order(str(order.id), {
