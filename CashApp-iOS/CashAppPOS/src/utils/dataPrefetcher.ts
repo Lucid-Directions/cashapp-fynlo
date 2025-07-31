@@ -13,7 +13,7 @@ const queryClient = {
     } catch (error) {
       console.error(`[dataPrefetcher] Error prefetching ${queryKey.join('/')}:`, error);
     }
-  }
+  },
 };
 
 export async function prefetchInitialData() {
@@ -35,7 +35,9 @@ export async function prefetchUserData() {
   const dataService = DataService.getInstance();
   // Example:
   // await queryClient.prefetchQuery(['userOrders'], () => dataService.getRecentOrders(5));
-  console.log('[dataPrefetcher] prefetchUserData called (currently no specific user data to prefetch here).');
+  console.log(
+    '[dataPrefetcher] prefetchUserData called (currently no specific user data to prefetch here).'
+  );
 }
 
 /**

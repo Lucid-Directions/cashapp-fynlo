@@ -11,10 +11,13 @@ module.exports = {
   globalTeardown: 'detox/runners/jest/globalTeardown',
   reporters: [
     'default',
-    ['detox/runners/jest/reporter', {
-      specs: 'logs/detox_specs',
-      cleanup: true,
-    }]
+    [
+      'detox/runners/jest/reporter',
+      {
+        specs: 'logs/detox_specs',
+        cleanup: true,
+      },
+    ],
   ],
   testEnvironment: 'detox/runners/jest/testEnvironment',
   verbose: true,

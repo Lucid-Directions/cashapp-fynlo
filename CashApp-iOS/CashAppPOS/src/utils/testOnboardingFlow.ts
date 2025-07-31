@@ -12,9 +12,9 @@ export const onboardingTestCases = [
       '2. Look for "Restaurant Setup" section',
       '3. Click "Continue Setup" button',
       '4. Should navigate to Restaurant Setup screen',
-      '5. Verify back button returns to Settings Main screen'
+      '5. Verify back button returns to Settings Main screen',
     ],
-    expectedResult: 'Successfully navigate to Restaurant Setup and back'
+    expectedResult: 'Successfully navigate to Restaurant Setup and back',
   },
   {
     id: 'test-2',
@@ -26,9 +26,9 @@ export const onboardingTestCases = [
       '4. Fill in Phone and Email, click Next',
       '5. Fill in Address details',
       '6. Click Complete Setup',
-      '7. Alert should show with options for Menu or Settings'
+      '7. Alert should show with options for Menu or Settings',
     ],
-    expectedResult: 'Setup completes and saves restaurant data'
+    expectedResult: 'Setup completes and saves restaurant data',
   },
   {
     id: 'test-3',
@@ -39,9 +39,9 @@ export const onboardingTestCases = [
       '3. Click Restaurant Profile (first option)',
       '4. Verify form loads with saved data',
       '5. Make a change and verify Save button appears',
-      '6. Save and verify success message'
+      '6. Save and verify success message',
     ],
-    expectedResult: 'Restaurant profile loads and saves correctly'
+    expectedResult: 'Restaurant profile loads and saves correctly',
   },
   {
     id: 'test-4',
@@ -53,9 +53,9 @@ export const onboardingTestCases = [
       '4. Go back to POS screen',
       '5. Verify header shows restaurant name',
       '6. Check Settings screen header',
-      '7. Check Dashboard header'
+      '7. Check Dashboard header',
     ],
-    expectedResult: 'All headers show restaurant name with "Powered by Fynlo"'
+    expectedResult: 'All headers show restaurant name with "Powered by Fynlo"',
   },
   {
     id: 'test-5',
@@ -66,19 +66,19 @@ export const onboardingTestCases = [
       '3. Enter Hardware Settings and press back',
       '4. Enter User Settings and press back',
       '5. Enter App Settings and press back',
-      '6. All should return to Settings Main'
+      '6. All should return to Settings Main',
     ],
-    expectedResult: 'All back buttons work correctly'
-  }
+    expectedResult: 'All back buttons work correctly',
+  },
 ];
 
-export function logTestStart(testCase: typeof onboardingTestCases[0]) {
+export function logTestStart(testCase: (typeof onboardingTestCases)[0]) {
   console.log(`\n========================================`);
   console.log(`TEST: ${testCase.name}`);
   console.log(`ID: ${testCase.id}`);
   console.log(`========================================`);
   console.log('\nSteps to perform:');
-  testCase.steps.forEach(step => console.log(step));
+  testCase.steps.forEach((step) => console.log(step));
   console.log(`\nExpected Result: ${testCase.expectedResult}`);
   console.log(`========================================\n`);
 }
@@ -87,7 +87,7 @@ export function runAllTests() {
   console.log('ONBOARDING FLOW TEST SUITE');
   console.log('===========================');
   console.log('Please perform each test manually and verify results\n');
-  
+
   onboardingTestCases.forEach((testCase, index) => {
     setTimeout(() => {
       logTestStart(testCase);

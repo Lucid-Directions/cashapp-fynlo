@@ -1,4 +1,5 @@
 import React from 'react';
+
 import {
   StyleSheet,
   Text,
@@ -8,8 +9,9 @@ import {
   TouchableOpacity,
   FlatList,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 // Clover POS Color Scheme
 const Colors = {
@@ -126,16 +128,16 @@ const HardwareSettingsScreen: React.FC = () => {
       <View style={[styles.settingIcon, { backgroundColor: `${Colors.secondary}15` }]}>
         <Icon name={item.icon} size={24} color={Colors.secondary} />
       </View>
-      
+
       <View style={styles.settingContent}>
         <View style={styles.settingHeader}>
           <Text style={styles.settingTitle}>{item.title}</Text>
           {item.status && (
             <View style={styles.statusIndicator}>
-              <Icon 
-                name={getStatusIcon(item.status)} 
-                size={16} 
-                color={getStatusColor(item.status)} 
+              <Icon
+                name={getStatusIcon(item.status)}
+                size={16}
+                color={getStatusColor(item.status)}
               />
             </View>
           )}
@@ -147,7 +149,7 @@ const HardwareSettingsScreen: React.FC = () => {
           </Text>
         )}
       </View>
-      
+
       <Icon name="chevron-right" size={24} color={Colors.lightGray} />
     </TouchableOpacity>
   );
@@ -155,22 +157,22 @@ const HardwareSettingsScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor={Colors.secondary} barStyle="light-content" />
-      
+
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
           testID="back-button"
         >
           <Icon name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>
-        
+
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle}>Hardware Configuration</Text>
           <Text style={styles.headerSubtitle}>Manage connected devices</Text>
         </View>
-        
+
         <TouchableOpacity style={styles.helpButton}>
           <Icon name="help-outline" size={24} color={Colors.white} />
         </TouchableOpacity>
@@ -196,7 +198,7 @@ const HardwareSettingsScreen: React.FC = () => {
       <FlatList
         data={hardwareSettings}
         renderItem={renderSettingItem}
-        keyExtractor={item => item.id}
+        keyExtractor={(item) => item.id}
         contentContainerStyle={styles.settingsList}
         showsVerticalScrollIndicator={false}
         ItemSeparatorComponent={() => <View style={styles.separator} />}

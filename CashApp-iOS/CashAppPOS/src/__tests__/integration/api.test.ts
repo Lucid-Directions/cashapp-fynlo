@@ -32,12 +32,13 @@ describe('API Integration Tests', () => {
       // Mock successful login
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({
-          result: {
-            uid: 1,
-            session_id: 'session-123',
-          },
-        }),
+        json: () =>
+          Promise.resolve({
+            result: {
+              uid: 1,
+              session_id: 'session-123',
+            },
+          }),
       });
 
       const loginResult = await service.login('test@example.com', 'password123');
@@ -76,9 +77,10 @@ describe('API Integration Tests', () => {
       mockFetch.mockResolvedValueOnce({
         ok: false,
         status: 401,
-        json: () => Promise.resolve({
-          error: 'Invalid credentials',
-        }),
+        json: () =>
+          Promise.resolve({
+            error: 'Invalid credentials',
+          }),
       });
 
       const loginResult = await service.login('wrong@example.com', 'wrongpass');
@@ -87,9 +89,8 @@ describe('API Integration Tests', () => {
 
     it('should handle network timeouts', async () => {
       mockFetch.mockImplementationOnce(
-        () => new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Network timeout')), 100)
-        )
+        () =>
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Network timeout')), 100))
       );
 
       const loginResult = await service.login('test@example.com', 'password123');
@@ -101,14 +102,15 @@ describe('API Integration Tests', () => {
     it('should fetch and process product data', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({
-          success: true,
-          data: mockMenuItems,
-        }),
+        json: () =>
+          Promise.resolve({
+            success: true,
+            data: mockMenuItems,
+          }),
       });
 
       const products = await service.getProducts();
-      
+
       expect(products).toEqual(mockMenuItems);
       expect(mockFetch).toHaveBeenCalledWith(
         expect.stringContaining('/api/v1/products/mobile'),
@@ -119,18 +121,19 @@ describe('API Integration Tests', () => {
     });
 
     it('should filter products by category', async () => {
-      const mainItems = mockMenuItems.filter(item => item.category === 'Main');
-      
+      const mainItems = mockMenuItems.filter((item) => item.category === 'Main');
+
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({
-          success: true,
-          data: mainItems,
-        }),
+        json: () =>
+          Promise.resolve({
+            success: true,
+            data: mainItems,
+          }),
       });
 
       const products = await service.getProductsByCategory(1);
-      
+
       expect(products).toEqual(mainItems);
       expect(mockFetch).toHaveBeenCalledWith(
         expect.stringContaining('/api/v1/products/category/1'),
@@ -142,7 +145,7 @@ describe('API Integration Tests', () => {
       mockFetch.mockRejectedValueOnce(new Error('API Error'));
 
       const products = await service.getProducts();
-      
+
       // Should return mock data
       expect(Array.isArray(products)).toBe(true);
       expect(products.length).toBeGreaterThan(0);
@@ -160,14 +163,15 @@ describe('API Integration Tests', () => {
 
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({
-          success: true,
-          data: { id: 1, ...newOrder, state: 'draft' },
-        }),
+        json: () =>
+          Promise.resolve({
+            success: true,
+            data: { id: 1, ...newOrder, state: 'draft' },
+          }),
       });
 
       const createdOrder = await service.createOrder(newOrder);
-      
+
       expect(createdOrder).toMatchObject({
         id: 1,
         state: 'draft',
@@ -176,14 +180,15 @@ describe('API Integration Tests', () => {
       // Mock order update
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({
-          success: true,
-          data: { id: 1, state: 'confirmed' },
-        }),
+        json: () =>
+          Promise.resolve({
+            success: true,
+            data: { id: 1, state: 'confirmed' },
+          }),
       });
 
       const updatedOrder = await service.updateOrder(1, { state: 'confirmed' });
-      
+
       expect(updatedOrder).toMatchObject({
         id: 1,
         state: 'confirmed',
@@ -202,28 +207,31 @@ describe('API Integration Tests', () => {
       mockFetch
         .mockResolvedValueOnce({
           ok: true,
-          json: () => Promise.resolve({
-            success: true,
-            data: { id: 1, state: 'draft' },
-          }),
+          json: () =>
+            Promise.resolve({
+              success: true,
+              data: { id: 1, state: 'draft' },
+            }),
         })
         .mockResolvedValueOnce({
           ok: true,
-          json: () => Promise.resolve({
-            success: true,
-            data: { id: 2, state: 'draft' },
-          }),
+          json: () =>
+            Promise.resolve({
+              success: true,
+              data: { id: 2, state: 'draft' },
+            }),
         })
         .mockResolvedValueOnce({
           ok: true,
-          json: () => Promise.resolve({
-            success: true,
-            data: [{ id: 1 }, { id: 2 }],
-          }),
+          json: () =>
+            Promise.resolve({
+              success: true,
+              data: [{ id: 1 }, { id: 2 }],
+            }),
         });
 
       const results = await Promise.all(orderPromises);
-      
+
       expect(results[0]).toMatchObject({ id: 1 });
       expect(results[1]).toMatchObject({ id: 2 });
       expect(results[2]).toHaveLength(2);
@@ -234,17 +242,18 @@ describe('API Integration Tests', () => {
     it('should process payment successfully', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({
-          success: true,
-          data: {
-            transaction_id: 'txn_123',
-            status: 'completed',
-          },
-        }),
+        json: () =>
+          Promise.resolve({
+            success: true,
+            data: {
+              transaction_id: 'txn_123',
+              status: 'completed',
+            },
+          }),
       });
 
       const result = await service.processPayment(1, 'card', 25.99);
-      
+
       expect(result).toBe(true);
       expect(mockFetch).toHaveBeenCalledWith(
         expect.stringContaining('/api/v1/payments'),
@@ -258,28 +267,30 @@ describe('API Integration Tests', () => {
     it('should handle payment failures gracefully', async () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({
-          success: false,
-          error: 'Payment declined',
-        }),
+        json: () =>
+          Promise.resolve({
+            success: false,
+            error: 'Payment declined',
+          }),
       });
 
       const result = await service.processPayment(1, 'card', 25.99);
-      
+
       expect(result).toBe(false);
     });
 
     it('should retry failed payments', async () => {
       // First attempt fails
       mockFetch.mockRejectedValueOnce(new Error('Network error'));
-      
+
       // Second attempt succeeds
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({
-          success: true,
-          data: { transaction_id: 'txn_123' },
-        }),
+        json: () =>
+          Promise.resolve({
+            success: true,
+            data: { transaction_id: 'txn_123' },
+          }),
       });
 
       // Manual retry logic (would be implemented in actual service)
@@ -296,14 +307,15 @@ describe('API Integration Tests', () => {
       // Get current session
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({
-          success: true,
-          data: {
-            id: 1,
-            state: 'opened',
-            user_id: 1,
-          },
-        }),
+        json: () =>
+          Promise.resolve({
+            success: true,
+            data: {
+              id: 1,
+              state: 'opened',
+              user_id: 1,
+            },
+          }),
       });
 
       const currentSession = await service.getCurrentSession();
@@ -312,14 +324,15 @@ describe('API Integration Tests', () => {
       // Create new session
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({
-          success: true,
-          data: {
-            id: 2,
-            state: 'opened',
-            config_id: 1,
-          },
-        }),
+        json: () =>
+          Promise.resolve({
+            success: true,
+            data: {
+              id: 2,
+              state: 'opened',
+              config_id: 1,
+            },
+          }),
       });
 
       const newSession = await service.createSession(1);
@@ -332,13 +345,14 @@ describe('API Integration Tests', () => {
       mockFetch.mockResolvedValueOnce({
         ok: false,
         status: 500,
-        json: () => Promise.resolve({
-          error: 'Internal server error',
-        }),
+        json: () =>
+          Promise.resolve({
+            error: 'Internal server error',
+          }),
       });
 
       const products = await service.getProducts();
-      
+
       // Should fallback to mock data
       expect(Array.isArray(products)).toBe(true);
     });
@@ -350,22 +364,20 @@ describe('API Integration Tests', () => {
       });
 
       const products = await service.getProducts();
-      
+
       // Should fallback to mock data
       expect(Array.isArray(products)).toBe(true);
     });
 
     it('should handle request timeouts', async () => {
       mockFetch.mockImplementationOnce(
-        () => new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Request timeout')), 50)
-        )
+        () => new Promise((_, reject) => setTimeout(() => reject(new Error('Request timeout')), 50))
       );
 
       const startTime = Date.now();
       const products = await service.getProducts();
       const endTime = Date.now();
-      
+
       // Should fail quickly and fallback
       expect(endTime - startTime).toBeLessThan(1000);
       expect(Array.isArray(products)).toBe(true);
@@ -377,10 +389,11 @@ describe('API Integration Tests', () => {
       // Create order
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({
-          success: true,
-          data: { id: 1, state: 'draft', total: 25.99 },
-        }),
+        json: () =>
+          Promise.resolve({
+            success: true,
+            data: { id: 1, state: 'draft', total: 25.99 },
+          }),
       });
 
       const order = await service.createOrder({
@@ -390,14 +403,15 @@ describe('API Integration Tests', () => {
       // Process payment for the same amount
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({
-          success: true,
-          data: { transaction_id: 'txn_123' },
-        }),
+        json: () =>
+          Promise.resolve({
+            success: true,
+            data: { transaction_id: 'txn_123' },
+          }),
       });
 
       const paymentResult = await service.processPayment(1, 'card', 25.99);
-      
+
       expect(order?.total).toBe(25.99);
       expect(paymentResult).toBe(true);
     });
@@ -406,10 +420,11 @@ describe('API Integration Tests', () => {
       // Order creation succeeds
       mockFetch.mockResolvedValueOnce({
         ok: true,
-        json: () => Promise.resolve({
-          success: true,
-          data: { id: 1, state: 'draft' },
-        }),
+        json: () =>
+          Promise.resolve({
+            success: true,
+            data: { id: 1, state: 'draft' },
+          }),
       });
 
       const order = await service.createOrder({
@@ -422,9 +437,9 @@ describe('API Integration Tests', () => {
       mockFetch.mockRejectedValueOnce(new Error('Payment service unavailable'));
 
       const paymentResult = await service.processPayment(1, 'card', 12.99);
-      
+
       expect(paymentResult).toBe(false);
-      
+
       // Order should still exist (would need to be handled in real app)
       expect(order?.id).toBe(1);
     });
@@ -435,10 +450,11 @@ describe('API Integration Tests', () => {
       const requests = Array.from({ length: 10 }, (_, i) => {
         mockFetch.mockResolvedValueOnce({
           ok: true,
-          json: () => Promise.resolve({
-            success: true,
-            data: mockMenuItems,
-          }),
+          json: () =>
+            Promise.resolve({
+              success: true,
+              data: mockMenuItems,
+            }),
         });
         return service.getProducts();
       });
@@ -449,7 +465,7 @@ describe('API Integration Tests', () => {
 
       expect(results).toHaveLength(10);
       expect(endTime - startTime).toBeLessThan(5000); // Should complete within 5 seconds
-      results.forEach(result => {
+      results.forEach((result) => {
         expect(Array.isArray(result)).toBe(true);
       });
     });

@@ -2,24 +2,26 @@
  * Test suite for Secure Payment Orchestrator Service
  */
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert } from 'react-native';
-import SecurePaymentOrchestrator from '../../src/services/SecurePaymentOrchestrator';
-import SecurePaymentConfig from '../../src/services/SecurePaymentConfig';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import { API_CONFIG } from '../../src/config/api';
+import SecurePaymentConfig from '../../src/services/SecurePaymentConfig';
+import SecurePaymentOrchestrator from '../../src/services/SecurePaymentOrchestrator';
 
 // Mock dependencies
 jest.mock('@react-native-async-storage/async-storage');
 jest.mock('react-native', () => ({
   Alert: {
-    alert: jest.fn()
-  }
+    alert: jest.fn(),
+  },
 }));
 jest.mock('../../src/services/SecurePaymentConfig');
 jest.mock('../../src/config/api', () => ({
   API_CONFIG: {
-    FULL_API_URL: 'http://test.api'
-  }
+    FULL_API_URL: 'http://test.api',
+  },
 }));
 
 // Mock fetch
@@ -36,9 +38,9 @@ describe('SecurePaymentOrchestrator', () => {
   describe('processPayment', () => {
     const mockPaymentRequest = {
       orderId: 'order_123',
-      amount: 100.50,
+      amount: 100.5,
       paymentMethod: 'card' as const,
-      paymentDetails: { source: 'tok_visa' }
+      paymentDetails: { source: 'tok_visa' },
     };
 
     it('should process payment successfully', async () => {
@@ -46,28 +48,28 @@ describe('SecurePaymentOrchestrator', () => {
       (AsyncStorage.getItem as jest.Mock).mockResolvedValue('auth_token');
       (SecurePaymentConfig.isMethodAvailable as jest.Mock).mockResolvedValue(true);
       (SecurePaymentConfig.validateAmount as jest.Mock).mockReturnValue({ valid: true });
-      
+
       const mockResponse = {
         data: {
           payment_id: 'pay_123',
           transaction_id: 'txn_123',
           provider: 'stripe',
-          amount: 100.50,
+          amount: 100.5,
           fees: {
             percentageFee: 1.41,
-            fixedFee: 0.20,
+            fixedFee: 0.2,
             totalFee: 1.61,
-            ratePercentage: 1.4
+            ratePercentage: 1.4,
           },
           net_amount: 98.89,
           status: 'completed',
-          completed_at: '2025-01-07T10:00:00Z'
-        }
+          completed_at: '2025-01-07T10:00:00Z',
+        },
       };
 
       (fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
-        json: async () => mockResponse
+        json: async () => mockResponse,
       });
 
       // Act
@@ -84,15 +86,15 @@ describe('SecurePaymentOrchestrator', () => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer auth_token'
+            Authorization: 'Bearer auth_token',
           },
           body: JSON.stringify({
             order_id: 'order_123',
-            amount: 100.50,
+            amount: 100.5,
             payment_method: 'card',
             payment_details: { source: 'tok_visa' },
-            metadata: undefined
-          })
+            metadata: undefined,
+          }),
         })
       );
     });
@@ -127,7 +129,7 @@ describe('SecurePaymentOrchestrator', () => {
       (SecurePaymentConfig.isMethodAvailable as jest.Mock).mockResolvedValue(true);
       (SecurePaymentConfig.validateAmount as jest.Mock).mockReturnValue({
         valid: false,
-        error: 'Amount too high'
+        error: 'Amount too high',
       });
 
       // Act
@@ -158,11 +160,11 @@ describe('SecurePaymentOrchestrator', () => {
       (AsyncStorage.getItem as jest.Mock).mockResolvedValue('auth_token');
       (SecurePaymentConfig.isMethodAvailable as jest.Mock).mockResolvedValue(true);
       (SecurePaymentConfig.validateAmount as jest.Mock).mockReturnValue({ valid: true });
-      
+
       (fetch as jest.Mock).mockResolvedValueOnce({
         ok: false,
         status: 429,
-        json: async () => ({ message: 'Rate limited' })
+        json: async () => ({ message: 'Rate limited' }),
       });
 
       // Act
@@ -179,7 +181,7 @@ describe('SecurePaymentOrchestrator', () => {
       (AsyncStorage.getItem as jest.Mock).mockResolvedValue('auth_token');
       (SecurePaymentConfig.isMethodAvailable as jest.Mock).mockResolvedValue(true);
       (SecurePaymentConfig.validateAmount as jest.Mock).mockReturnValue({ valid: true });
-      
+
       (fetch as jest.Mock).mockRejectedValueOnce(new TypeError('Network request failed'));
 
       // Act
@@ -200,7 +202,7 @@ describe('SecurePaymentOrchestrator', () => {
         cvv: '123',
         pin: '1234',
         source: 'tok_visa',
-        customer_email: 'test@example.com'
+        customer_email: 'test@example.com',
       };
 
       // Act
@@ -217,7 +219,7 @@ describe('SecurePaymentOrchestrator', () => {
     it('should mask card numbers', () => {
       // Arrange
       const details = {
-        masked_card_number: '4111111111111111'
+        masked_card_number: '4111111111111111',
       };
 
       // Act
@@ -231,24 +233,24 @@ describe('SecurePaymentOrchestrator', () => {
   describe('processRefund', () => {
     const mockRefundRequest = {
       transactionId: 'txn_123',
-      amount: 50.00,
-      reason: 'Customer request'
+      amount: 50.0,
+      reason: 'Customer request',
     };
 
     it('should process refund successfully', async () => {
       // Arrange
       (AsyncStorage.getItem as jest.Mock).mockResolvedValue('auth_token');
-      
+
       const mockResponse = {
         data: {
           refund_id: 'ref_123',
-          status: 'pending'
-        }
+          status: 'pending',
+        },
       };
 
       (fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
-        json: async () => mockResponse
+        json: async () => mockResponse,
       });
 
       // Act
@@ -263,11 +265,11 @@ describe('SecurePaymentOrchestrator', () => {
     it('should handle permission denied for refunds', async () => {
       // Arrange
       (AsyncStorage.getItem as jest.Mock).mockResolvedValue('auth_token');
-      
+
       (fetch as jest.Mock).mockResolvedValueOnce({
         ok: false,
         status: 403,
-        json: async () => ({ message: 'Insufficient permissions' })
+        json: async () => ({ message: 'Insufficient permissions' }),
       });
 
       // Act
@@ -284,12 +286,12 @@ describe('SecurePaymentOrchestrator', () => {
     it('should show confirmation dialog with fees', async () => {
       // Arrange
       const mockFees = {
-        percentageFee: 1.40,
-        fixedFee: 0.20,
-        totalFee: 1.60,
-        netAmount: 98.40
+        percentageFee: 1.4,
+        fixedFee: 0.2,
+        totalFee: 1.6,
+        netAmount: 98.4,
       };
-      
+
       (SecurePaymentConfig.calculateFees as jest.Mock).mockReturnValue(mockFees);
       (SecurePaymentConfig.formatFeeDisplay as jest.Mock).mockReturnValue('1.4% + 20p');
 
@@ -297,12 +299,7 @@ describe('SecurePaymentOrchestrator', () => {
       const onCancel = jest.fn();
 
       // Act
-      await SecurePaymentOrchestrator.showPaymentConfirmation(
-        100,
-        'card',
-        onConfirm,
-        onCancel
-      );
+      await SecurePaymentOrchestrator.showPaymentConfirmation(100, 'card', onConfirm, onCancel);
 
       // Assert
       expect(Alert.alert).toHaveBeenCalledWith(
@@ -310,7 +307,7 @@ describe('SecurePaymentOrchestrator', () => {
         expect.stringContaining('Amount: £100.00'),
         expect.arrayContaining([
           expect.objectContaining({ text: 'Cancel' }),
-          expect.objectContaining({ text: 'Confirm' })
+          expect.objectContaining({ text: 'Confirm' }),
         ])
       );
     });
@@ -321,19 +318,14 @@ describe('SecurePaymentOrchestrator', () => {
         percentageFee: 0,
         fixedFee: 0,
         totalFee: 0,
-        netAmount: 100
+        netAmount: 100,
       };
-      
+
       (SecurePaymentConfig.calculateFees as jest.Mock).mockReturnValue(mockFees);
       (SecurePaymentConfig.formatFeeDisplay as jest.Mock).mockReturnValue('No fees');
 
       // Act
-      await SecurePaymentOrchestrator.showPaymentConfirmation(
-        100,
-        'cash',
-        jest.fn(),
-        jest.fn()
-      );
+      await SecurePaymentOrchestrator.showPaymentConfirmation(100, 'cash', jest.fn(), jest.fn());
 
       // Assert
       expect(Alert.alert).toHaveBeenCalledWith(
@@ -346,24 +338,29 @@ describe('SecurePaymentOrchestrator', () => {
 
   describe('formatPaymentError', () => {
     it('should format known error codes', () => {
-      expect(SecurePaymentOrchestrator.formatPaymentError('', 'CARD_DECLINED'))
-        .toBe('Card was declined. Please try another card.');
-      
-      expect(SecurePaymentOrchestrator.formatPaymentError('', 'INSUFFICIENT_FUNDS'))
-        .toBe('Insufficient funds');
-      
-      expect(SecurePaymentOrchestrator.formatPaymentError('', 'NETWORK_ERROR'))
-        .toBe('Network error. Please check your connection.');
+      expect(SecurePaymentOrchestrator.formatPaymentError('', 'CARD_DECLINED')).toBe(
+        'Card was declined. Please try another card.'
+      );
+
+      expect(SecurePaymentOrchestrator.formatPaymentError('', 'INSUFFICIENT_FUNDS')).toBe(
+        'Insufficient funds'
+      );
+
+      expect(SecurePaymentOrchestrator.formatPaymentError('', 'NETWORK_ERROR')).toBe(
+        'Network error. Please check your connection.'
+      );
     });
 
     it('should use provided error message for unknown codes', () => {
-      expect(SecurePaymentOrchestrator.formatPaymentError('Custom error', 'UNKNOWN'))
-        .toBe('Custom error');
+      expect(SecurePaymentOrchestrator.formatPaymentError('Custom error', 'UNKNOWN')).toBe(
+        'Custom error'
+      );
     });
 
     it('should provide default message when no error provided', () => {
-      expect(SecurePaymentOrchestrator.formatPaymentError('', ''))
-        .toBe('Payment failed. Please try again.');
+      expect(SecurePaymentOrchestrator.formatPaymentError('', '')).toBe(
+        'Payment failed. Please try again.'
+      );
     });
   });
 
@@ -371,22 +368,22 @@ describe('SecurePaymentOrchestrator', () => {
     it('should retrieve payment status successfully', async () => {
       // Arrange
       (AsyncStorage.getItem as jest.Mock).mockResolvedValue('auth_token');
-      
+
       const mockResponse = {
         data: {
           payment_id: 'pay_123',
           status: 'completed',
           provider: 'stripe',
-          amount: 100.50,
+          amount: 100.5,
           currency: 'GBP',
           created_at: '2025-01-07T10:00:00Z',
-          completed_at: '2025-01-07T10:01:00Z'
-        }
+          completed_at: '2025-01-07T10:01:00Z',
+        },
       };
 
       (fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
-        json: async () => mockResponse
+        json: async () => mockResponse,
       });
 
       // Act
@@ -397,11 +394,11 @@ describe('SecurePaymentOrchestrator', () => {
         paymentId: 'pay_123',
         status: 'completed',
         provider: 'stripe',
-        amount: 100.50,
+        amount: 100.5,
         currency: 'GBP',
         createdAt: '2025-01-07T10:00:00Z',
         completedAt: '2025-01-07T10:01:00Z',
-        errorMessage: undefined
+        errorMessage: undefined,
       });
     });
 

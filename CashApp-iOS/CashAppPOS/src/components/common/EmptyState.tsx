@@ -1,10 +1,7 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-} from 'react-native';
+
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+
 import { useTheme } from '../../context/ThemeProvider';
 
 interface EmptyStateProps {
@@ -31,16 +28,14 @@ const EmptyState: React.FC<EmptyStateProps> = ({
       <Text style={styles.icon}>{icon}</Text>
       <Text style={[styles.title, { color: theme.colors.text }]}>{title}</Text>
       <Text style={[styles.message, { color: theme.colors.textSecondary }]}>{message}</Text>
-      
+
       {actionText && onAction && (
         <TouchableOpacity
           style={[styles.actionButton, { backgroundColor: theme.colors.primary }]}
           onPress={onAction}
           testID={`${testID}-action-button`}
         >
-          <Text style={[styles.actionText, { color: theme.colors.background }]}>
-            {actionText}
-          </Text>
+          <Text style={[styles.actionText, { color: theme.colors.background }]}>{actionText}</Text>
         </TouchableOpacity>
       )}
     </View>

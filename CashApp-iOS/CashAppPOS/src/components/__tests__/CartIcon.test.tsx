@@ -1,17 +1,21 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react-native';
+
 import { StyleSheet } from 'react-native';
-import CartIcon from '../cart/CartIcon';
+
+import { render, screen, fireEvent } from '@testing-library/react-native';
+
 import { Colors } from '../../constants/Colors';
 import { ThemeProvider, defaultTheme } from '../../design-system/ThemeProvider'; // Assuming ThemeProvider is needed
+import CartIcon from '../cart/CartIcon';
 
 // Mock react-native-vector-icons/MaterialIcons
 jest.mock('react-native-vector-icons/MaterialIcons', () => {
   const RealIcon = jest.requireActual('react-native-vector-icons/MaterialIcons');
   // Mock the specific icon being used in CartIcon
-  return (props: any) => <RealIcon name={props.name} size={props.size} color={props.color} testID="mock-icon" />;
+  return (props: any) => (
+    <RealIcon name={props.name} size={props.size} color={props.color} testID="mock-icon" />
+  );
 });
-
 
 const mockTheme = {
   colors: {
@@ -27,11 +31,7 @@ const mockTheme = {
 
 // Helper to render with ThemeProvider if your component uses useTheme
 const renderWithProviders = (ui: React.ReactElement) => {
-  return render(
-    <ThemeProvider theme={mockTheme}>
-      {ui}
-    </ThemeProvider>
-  );
+  return render(<ThemeProvider theme={mockTheme}>{ui}</ThemeProvider>);
 };
 
 describe('CartIcon', () => {

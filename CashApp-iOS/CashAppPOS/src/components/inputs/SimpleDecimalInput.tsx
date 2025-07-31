@@ -1,11 +1,7 @@
 import React, { useState, useRef } from 'react';
-import {
-  View,
-  TextInput,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-} from 'react-native';
+
+import { View, TextInput, Text, StyleSheet, TouchableOpacity } from 'react-native';
+
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 interface SimpleDecimalInputProps {
@@ -24,8 +20,8 @@ interface SimpleDecimalInputProps {
 const SimpleDecimalInput: React.FC<SimpleDecimalInputProps> = ({
   value,
   onValueChange,
-  placeholder = "0.00",
-  suffix = "",
+  placeholder = '0.00',
+  suffix = '',
   maxValue = 999.99,
   minValue = 0,
   decimalPlaces = 2,
@@ -50,10 +46,10 @@ const SimpleDecimalInput: React.FC<SimpleDecimalInputProps> = ({
 
   const handleBlur = () => {
     setIsFocused(false);
-    
+
     // Clean and validate the input
     let cleaned = internalValue.replace(/[^0-9.]/g, '');
-    
+
     // Handle multiple decimal points
     const decimalIndex = cleaned.indexOf('.');
     if (decimalIndex !== -1) {
@@ -65,10 +61,10 @@ const SimpleDecimalInput: React.FC<SimpleDecimalInputProps> = ({
     // Convert to number
     const numericValue = parseFloat(cleaned) || 0;
     const clampedValue = Math.max(minValue, Math.min(maxValue, numericValue));
-    
+
     // Update internal value with formatted result
     setInternalValue(clampedValue.toString());
-    
+
     // ONLY call onValueChange on blur - this prevents keyboard dismissal
     onValueChange(clampedValue);
   };
@@ -79,17 +75,23 @@ const SimpleDecimalInput: React.FC<SimpleDecimalInputProps> = ({
   };
 
   // Display value: show internal value while focused, formatted value when not focused
-  const displayValue = isFocused ? internalValue : (value % 1 === 0 ? value.toString() : value.toFixed(decimalPlaces));
+  const displayValue = isFocused
+    ? internalValue
+    : value % 1 === 0
+    ? value.toString()
+    : value.toFixed(decimalPlaces);
 
   return (
     <View style={[styles.container, style]}>
       {label && <Text style={styles.label}>{label}</Text>}
-      
-      <View style={[
-        styles.inputContainer,
-        isFocused && styles.inputContainerFocused,
-        disabled && styles.inputContainerDisabled,
-      ]}>
+
+      <View
+        style={[
+          styles.inputContainer,
+          isFocused && styles.inputContainerFocused,
+          disabled && styles.inputContainerDisabled,
+        ]}
+      >
         <TextInput
           ref={inputRef}
           style={[styles.input, disabled && styles.inputDisabled]}
@@ -107,16 +109,14 @@ const SimpleDecimalInput: React.FC<SimpleDecimalInputProps> = ({
           maxLength={10}
           selectTextOnFocus={true}
         />
-        
+
         {displayValue !== '' && !disabled && (
           <TouchableOpacity onPress={handleClear} style={styles.clearButton}>
             <Icon name="clear" size={20} color="#666" />
           </TouchableOpacity>
         )}
-        
-        {suffix && (
-          <Text style={[styles.suffix, disabled && styles.suffixDisabled]}>{suffix}</Text>
-        )}
+
+        {suffix && <Text style={[styles.suffix, disabled && styles.suffixDisabled]}>{suffix}</Text>}
       </View>
     </View>
   );

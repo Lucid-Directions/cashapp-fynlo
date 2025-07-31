@@ -61,9 +61,12 @@ class CustomersService {
     try {
       await this.ensureConfig();
       if (!this.baseUrl || !this.apiKey) return [];
-      const res = await fetch(`${this.baseUrl}/api/v1/customers?query=${encodeURIComponent(query)}`, {
-        headers: { Authorization: `Bearer ${this.apiKey}` },
-      });
+      const res = await fetch(
+        `${this.baseUrl}/api/v1/customers?query=${encodeURIComponent(query)}`,
+        {
+          headers: { Authorization: `Bearer ${this.apiKey}` },
+        }
+      );
       if (!res.ok) return [];
       const json = await res.json();
       return json.items ?? [];
@@ -74,4 +77,4 @@ class CustomersService {
   }
 }
 
-export default CustomersService.getInstance(); 
+export default CustomersService.getInstance();

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+
 import {
   StyleSheet,
   Text,
@@ -9,16 +10,20 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { useNavigation } from '@react-navigation/native';
-import useAppStore from '../../store/useAppStore';
-import useSettingsStore from '../../store/useSettingsStore';
-import PaymentService, { PaymentRequest, PaymentResult } from '../../services/PaymentService';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import QRCodePayment from '../../components/payment/QRCodePayment';
+import SumUpPaymentComponent from '../../components/payment/SumUpPaymentComponent';
+import PaymentService from '../../services/PaymentService';
 import SquarePaymentProvider from '../../services/providers/SquarePaymentProvider';
 import SumUpPaymentProvider from '../../services/providers/SumUpPaymentProvider';
 import SumUpNativeService from '../../services/SumUpNativeService';
-import SumUpPaymentComponent from '../../components/payment/SumUpPaymentComponent';
+import useAppStore from '../../store/useAppStore';
+import useSettingsStore from '../../store/useSettingsStore';
+
+import type { PaymentRequest, PaymentResult } from '../../services/PaymentService';
 
 // Clover POS Color Scheme
 const Colors = {
@@ -52,7 +57,7 @@ const PaymentScreen: React.FC = () => {
   const { cart, clearCart } = useAppStore();
   const { paymentMethods, taxConfiguration } = useSettingsStore();
   const sumUpService = SumUpNativeService.getInstance();
-  
+
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('');
   const [showQRModal, setShowQRModal] = useState(false);
   const [processing, setProcessing] = useState(false);
@@ -63,7 +68,7 @@ const PaymentScreen: React.FC = () => {
 
   // Calculate totals
   const calculateSubtotal = () => {
-    return cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    return cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   };
 
   const calculateTax = (subtotal: number) => {
@@ -151,7 +156,7 @@ const PaymentScreen: React.FC = () => {
     // },
   ];
 
-  const enabledPaymentMethods = availablePaymentMethods.filter(m => m.enabled);
+  const enabledPaymentMethods = availablePaymentMethods.filter((m) => m.enabled);
 
   useEffect(() => {
     // Initialize PaymentService and get optimal provider
@@ -161,7 +166,7 @@ const PaymentScreen: React.FC = () => {
   useEffect(() => {
     // Auto-select optimal payment method (prioritize Tap to Pay for best user experience)
     if (enabledPaymentMethods.length > 0) {
-      const tapToPayMethod = enabledPaymentMethods.find(m => m.id === 'tapToPay');
+      const tapToPayMethod = enabledPaymentMethods.find((m) => m.id === 'tapToPay');
       if (tapToPayMethod) {
         setSelectedPaymentMethod('tapToPay');
         setOptimalProvider('tapToPay');
@@ -205,20 +210,20 @@ const PaymentScreen: React.FC = () => {
   };
 
   const handlePaymentMethodSelect = (methodId: string) => {
-    const method = availablePaymentMethods.find(m => m.id === methodId);
+    const method = availablePaymentMethods.find((m) => m.id === methodId);
     if (method?.requiresAuth) {
       Alert.alert(
         'Authorization Required',
         'Manager authorization is required for this payment method.',
         [
           { text: 'Cancel', style: 'cancel' },
-          { 
-            text: 'Authorize', 
+          {
+            text: 'Authorize',
             onPress: () => {
               setSelectedPaymentMethod(methodId);
               processPaymentMethod(methodId);
-            }
-          }
+            },
+          },
         ]
       );
     } else {
@@ -256,20 +261,20 @@ const PaymentScreen: React.FC = () => {
       `Amount due: £${calculateGrandTotal().toFixed(2)}\nEnter cash received:`,
       [
         { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Process', 
+        {
+          text: 'Process',
           onPress: (value) => {
             const received = parseFloat(value || '0');
             const total = calculateGrandTotal();
-            
+
             if (received < total) {
               Alert.alert('Error', 'Insufficient cash received');
               return;
             }
 
             handleCashPayment(received);
-          }
-        }
+          },
+        },
       ],
       'plain-text'
     );
@@ -277,7 +282,7 @@ const PaymentScreen: React.FC = () => {
 
   const handleCashPayment = async (receivedAmount: number) => {
     setProcessing(true);
-    
+
     try {
       const request: PaymentRequest = {
         amount: calculateGrandTotal(),
@@ -287,7 +292,7 @@ const PaymentScreen: React.FC = () => {
       };
 
       const result = await PaymentService.processCashPayment(request, receivedAmount);
-      
+
       if (result.success) {
         setPaymentResult(result);
         showPaymentSuccess(result);
@@ -304,7 +309,7 @@ const PaymentScreen: React.FC = () => {
   // New SumUp Payment Method Handler
   const processSumUpPaymentMethod = async (methodId: string) => {
     setProcessing(true);
-    
+
     try {
       const request: PaymentRequest = {
         amount: calculateGrandTotal(),
@@ -325,20 +330,23 @@ const PaymentScreen: React.FC = () => {
   };
 
   // SumUp Payment Function - React Hook Based Integration
-  const processSumUpPayment = async (request: PaymentRequest, paymentMethod: string = 'tapToPay') => {
+  const processSumUpPayment = async (
+    request: PaymentRequest,
+    paymentMethod: string = 'tapToPay'
+  ) => {
     try {
       console.log('🏦 Starting SumUp payment flow with React hooks...');
-      
+
       // Initialize SumUp service (configuration will be fetched from backend)
       const initSuccess = await sumUpService.initialize();
       if (!initSuccess) {
         throw new Error('Failed to initialize SumUp service');
       }
-      
+
       // Set the current payment request and show the SumUp component
       setCurrentPaymentRequest(request);
       setShowSumUpPayment(true);
-      
+
       console.log('💳 SumUp payment component will handle the payment flow');
     } catch (error) {
       console.error('❌ SumUp payment error:', error);
@@ -348,33 +356,37 @@ const PaymentScreen: React.FC = () => {
   };
 
   // Handle SumUp payment completion from the React component
-  const handleSumUpPaymentComplete = (success: boolean, transactionCode?: string, error?: string) => {
+  const handleSumUpPaymentComplete = (
+    success: boolean,
+    transactionCode?: string,
+    error?: string
+  ) => {
     setShowSumUpPayment(false);
     setProcessing(false);
-    
+
     if (success && transactionCode && currentPaymentRequest) {
       console.log('🎉 SumUp payment completed successfully!', transactionCode);
-      
+
       // Calculate SumUp fee (0.69% for high volume)
       const fee = currentPaymentRequest.amount * 0.0069;
-      
+
       // Create a successful payment result
       const paymentResult: PaymentResult = {
         success: true,
         transactionId: transactionCode,
         amount: currentPaymentRequest.amount,
-        fee: fee,
+        fee,
         provider: 'sumup',
         error: undefined,
       };
-      
+
       setPaymentResult(paymentResult);
       showPaymentSuccess(paymentResult);
     } else {
       console.error('❌ SumUp payment failed:', error);
       Alert.alert('Payment Failed', error || 'Payment was not completed');
     }
-    
+
     setCurrentPaymentRequest(null);
   };
 
@@ -388,7 +400,7 @@ const PaymentScreen: React.FC = () => {
 
   const processCardPayment = async (provider: string) => {
     setProcessing(true);
-    
+
     try {
       const request: PaymentRequest = {
         amount: calculateGrandTotal(),
@@ -400,7 +412,7 @@ const PaymentScreen: React.FC = () => {
 
       // Route to appropriate payment provider
       console.log(`Processing ${provider} payment for £${request.amount.toFixed(2)}`);
-      
+
       if (provider === 'sumup') {
         // Process SumUp payment with card detection modal
         await processSumUpPayment(request);
@@ -434,15 +446,17 @@ const PaymentScreen: React.FC = () => {
   const showPaymentSuccess = (result: PaymentResult) => {
     Alert.alert(
       'Payment Successful',
-      `Payment of £${result.amount.toFixed(2)} processed successfully via ${result.provider}!\n\nTransaction ID: ${result.transactionId}\nFee: £${result.fee.toFixed(2)}`,
+      `Payment of £${result.amount.toFixed(2)} processed successfully via ${
+        result.provider
+      }!\n\nTransaction ID: ${result.transactionId}\nFee: £${result.fee.toFixed(2)}`,
       [
         {
           text: 'OK',
           onPress: () => {
             clearCart();
             navigation.goBack();
-          }
-        }
+          },
+        },
       ]
     );
   };
@@ -467,7 +481,7 @@ const PaymentScreen: React.FC = () => {
               <Text style={styles.summaryLabel}>Subtotal ({cart.length} items)</Text>
               <Text style={styles.summaryValue}>£{calculateSubtotal().toFixed(2)}</Text>
             </View>
-            
+
             {taxConfiguration.vatEnabled && (
               <View style={styles.summaryRow}>
                 <Text style={styles.summaryLabel}>VAT ({taxConfiguration.vatRate}%)</Text>
@@ -476,7 +490,7 @@ const PaymentScreen: React.FC = () => {
                 </Text>
               </View>
             )}
-            
+
             {taxConfiguration.serviceTaxEnabled && (
               <View style={styles.summaryRow}>
                 <Text style={styles.summaryLabel}>
@@ -487,7 +501,7 @@ const PaymentScreen: React.FC = () => {
                 </Text>
               </View>
             )}
-            
+
             <View style={[styles.summaryRow, styles.totalRow]}>
               <Text style={styles.totalLabel}>Total</Text>
               <Text style={styles.totalValue}>£{calculateGrandTotal().toFixed(2)}</Text>
@@ -514,7 +528,7 @@ const PaymentScreen: React.FC = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Select Payment Method</Text>
           <View style={styles.paymentMethods}>
-            {enabledPaymentMethods.map(method => (
+            {enabledPaymentMethods.map((method) => (
               <TouchableOpacity
                 key={method.id}
                 style={[
@@ -524,21 +538,25 @@ const PaymentScreen: React.FC = () => {
                 ]}
                 onPress={() => handlePaymentMethodSelect(method.id)}
               >
-                <Icon 
-                  name={method.icon} 
-                  size={32} 
-                  color={selectedPaymentMethod === method.id ? Colors.white : method.color} 
+                <Icon
+                  name={method.icon}
+                  size={32}
+                  color={selectedPaymentMethod === method.id ? Colors.white : method.color}
                 />
-                <Text style={[
-                  styles.paymentMethodName,
-                  selectedPaymentMethod === method.id && styles.paymentMethodNameActive
-                ]}>
+                <Text
+                  style={[
+                    styles.paymentMethodName,
+                    selectedPaymentMethod === method.id && styles.paymentMethodNameActive,
+                  ]}
+                >
                   {method.name}
                 </Text>
-                <Text style={[
-                  styles.paymentMethodFee,
-                  selectedPaymentMethod === method.id && styles.paymentMethodFeeActive
-                ]}>
+                <Text
+                  style={[
+                    styles.paymentMethodFee,
+                    selectedPaymentMethod === method.id && styles.paymentMethodFeeActive,
+                  ]}
+                >
                   {method.feeInfo}
                 </Text>
                 {method.id === optimalProvider && (
@@ -547,10 +565,10 @@ const PaymentScreen: React.FC = () => {
                   </View>
                 )}
                 {method.requiresAuth && (
-                  <Icon 
-                    name="lock" 
-                    size={16} 
-                    color={selectedPaymentMethod === method.id ? Colors.white : Colors.warning} 
+                  <Icon
+                    name="lock"
+                    size={16}
+                    color={selectedPaymentMethod === method.id ? Colors.white : Colors.warning}
                     style={styles.authIcon}
                   />
                 )}
@@ -563,10 +581,10 @@ const PaymentScreen: React.FC = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Fee Comparison</Text>
           <View style={styles.feeComparison}>
-            {enabledPaymentMethods.map(method => {
+            {enabledPaymentMethods.map((method) => {
               let fee = 0;
               const total = calculateGrandTotal();
-              
+
               switch (method.id) {
                 case 'tapToPay':
                 case 'applePaySumUp':
@@ -581,7 +599,7 @@ const PaymentScreen: React.FC = () => {
                   fee = total * 0.0175; // 1.75%
                   break;
               }
-              
+
               return (
                 <View key={method.id} style={styles.feeRow}>
                   <Text style={styles.feeMethodName}>{method.name}</Text>

@@ -1,8 +1,10 @@
 import React from 'react';
+
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
-import OrdersScreen from '../OrdersScreen'; // Adjust path as necessary
-import DataService from '../../../services/DataService'; // Adjust path
+
 import { ThemeProvider, defaultTheme } from '../../../design-system/ThemeProvider'; // Adjust path
+import DataService from '../../../services/DataService'; // Adjust path
+import OrdersScreen from '../OrdersScreen'; // Adjust path as necessary
 
 // Mock react-navigation
 jest.mock('@react-navigation/native', () => {
@@ -56,9 +58,7 @@ const mockOrders = [
 ];
 
 const AllProviders = ({ children }: { children: React.ReactNode }) => (
-  <ThemeProvider theme={defaultTheme}>
-    {children}
-  </ThemeProvider>
+  <ThemeProvider theme={defaultTheme}>{children}</ThemeProvider>
 );
 
 describe('OrdersScreen', () => {
@@ -103,7 +103,9 @@ describe('OrdersScreen', () => {
   it('filters orders by search query (customer name)', async () => {
     (DataService.getInstance().getOrders as jest.Mock).mockResolvedValue(mockOrders);
 
-    const { getByPlaceholderText, findByText, queryByText } = render(<OrdersScreen />, { wrapper: AllProviders });
+    const { getByPlaceholderText, findByText, queryByText } = render(<OrdersScreen />, {
+      wrapper: AllProviders,
+    });
 
     await waitFor(() => expect(DataService.getInstance().getOrders).toHaveBeenCalled());
 
@@ -118,7 +120,9 @@ describe('OrdersScreen', () => {
   it('filters orders by search query (customer email)', async () => {
     (DataService.getInstance().getOrders as jest.Mock).mockResolvedValue(mockOrders);
 
-    const { getByPlaceholderText, findByText, queryByText } = render(<OrdersScreen />, { wrapper: AllProviders });
+    const { getByPlaceholderText, findByText, queryByText } = render(<OrdersScreen />, {
+      wrapper: AllProviders,
+    });
 
     await waitFor(() => expect(DataService.getInstance().getOrders).toHaveBeenCalled());
 
@@ -129,9 +133,10 @@ describe('OrdersScreen', () => {
     expect(queryByText('Charlie Brown')).toBeNull();
   });
 
-
   it('shows an error message if fetching orders fails', async () => {
-    (DataService.getInstance().getOrders as jest.Mock).mockRejectedValue(new Error('Network Error'));
+    (DataService.getInstance().getOrders as jest.Mock).mockRejectedValue(
+      new Error('Network Error')
+    );
 
     const { findByText } = render(<OrdersScreen />, { wrapper: AllProviders });
 

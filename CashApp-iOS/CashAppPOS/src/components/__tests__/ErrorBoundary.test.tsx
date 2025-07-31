@@ -1,8 +1,11 @@
 // ErrorBoundary.test.tsx - Test error boundary functionality
 import React from 'react';
-import { render } from '@testing-library/react-native';
-import ErrorBoundary from '../ErrorBoundary';
+
 import { Text } from 'react-native';
+
+import { render } from '@testing-library/react-native';
+
+import ErrorBoundary from '../ErrorBoundary';
 
 // Component that throws an error
 const ThrowError = ({ shouldThrow }: { shouldThrow: boolean }) => {
@@ -18,7 +21,7 @@ describe('ErrorBoundary', () => {
   beforeAll(() => {
     console.error = jest.fn();
   });
-  
+
   afterAll(() => {
     console.error = originalError;
   });
@@ -46,7 +49,7 @@ describe('ErrorBoundary', () => {
 
   it('should render custom fallback when provided', () => {
     const customFallback = <Text>Custom error message</Text>;
-    
+
     const { getByText } = render(
       <ErrorBoundary fallback={customFallback}>
         <ThrowError shouldThrow={true} />
@@ -58,7 +61,7 @@ describe('ErrorBoundary', () => {
 
   it('should call onError callback when error occurs', () => {
     const onError = jest.fn();
-    
+
     render(
       <ErrorBoundary onError={onError}>
         <ThrowError shouldThrow={true} />

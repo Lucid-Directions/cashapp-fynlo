@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+
 import {
   StyleSheet,
   Text,
@@ -9,11 +10,15 @@ import {
   Alert,
   Modal,
 } from 'react-native';
+
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { OrderItem, Order } from '../../types';
+
+import SharedDataStore from '../../services/SharedDataStore';
 import useAppStore from '../../store/useAppStore';
 import useSettingsStore from '../../store/useSettingsStore';
-import SharedDataStore from '../../services/SharedDataStore';
+import { Order } from '../../types';
+
+import type { OrderItem } from '../../types';
 
 // Clover POS Color Scheme
 const Colors = {
@@ -38,19 +43,9 @@ interface OrderManagementProps {
   onCheckout: () => void;
 }
 
-const OrderManagement: React.FC<OrderManagementProps> = ({
-  visible,
-  onClose,
-  onCheckout,
-}) => {
-  const {
-    cart,
-    updateCartItem,
-    removeFromCart,
-    clearCart,
-    cartTotal,
-    cartItemCount,
-  } = useAppStore();
+const OrderManagement: React.FC<OrderManagementProps> = ({ visible, onClose, onCheckout }) => {
+  const { cart, updateCartItem, removeFromCart, clearCart, cartTotal, cartItemCount } =
+    useAppStore();
 
   const { taxConfiguration } = useSettingsStore();
 
@@ -60,7 +55,7 @@ const OrderManagement: React.FC<OrderManagementProps> = ({
   const [customerName, setCustomerName] = useState('');
   const [tableNumber, setTableNumber] = useState('');
   const [orderNotes, setOrderNotes] = useState('');
-  
+
   // Platform service charge configuration (real-time from platform owner)
   const [platformServiceCharge, setPlatformServiceCharge] = useState({
     enabled: false,
@@ -70,7 +65,7 @@ const OrderManagement: React.FC<OrderManagementProps> = ({
 
   // Calculate totals
   const calculateSubtotal = () => {
-    return cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    return cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   };
 
   const calculateTax = (subtotal: number) => {
@@ -83,7 +78,7 @@ const OrderManagement: React.FC<OrderManagementProps> = ({
     if (!platformServiceCharge.enabled) return 0;
     return subtotal * (platformServiceCharge.rate / 100);
   };
-  
+
   // Load platform service charge configuration on component mount
   useEffect(() => {
     const loadPlatformServiceCharge = async () => {
@@ -91,7 +86,7 @@ const OrderManagement: React.FC<OrderManagementProps> = ({
         console.log('💰 OrderManagement - Loading platform service charge...');
         const dataStore = SharedDataStore.getInstance();
         const config = await dataStore.getServiceChargeConfig();
-        
+
         if (config) {
           setPlatformServiceCharge({
             enabled: config.enabled,
@@ -106,9 +101,9 @@ const OrderManagement: React.FC<OrderManagementProps> = ({
         console.error('❌ Failed to load platform service charge in OrderManagement:', error);
       }
     };
-    
+
     loadPlatformServiceCharge();
-    
+
     // Subscribe to real-time updates
     const dataStore = SharedDataStore.getInstance();
     const unsubscribe = dataStore.subscribe('serviceCharge', (updatedConfig) => {
@@ -119,7 +114,7 @@ const OrderManagement: React.FC<OrderManagementProps> = ({
         description: updatedConfig.description || 'Platform service charge',
       });
     });
-    
+
     return () => {
       unsubscribe();
     };
@@ -157,29 +152,25 @@ const OrderManagement: React.FC<OrderManagementProps> = ({
       Alert.alert('Select Items', 'Please select items to split into a new order');
       return;
     }
-    
-    Alert.alert(
-      'Split Order',
-      `Split ${selectedItems.length} items into a new order?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Split',
-          onPress: () => {
-            // In a real app, this would create a new order
-            setSplitMode(false);
-            setSelectedItems([]);
-            Alert.alert('Success', 'Order split successfully');
-          },
+
+    Alert.alert('Split Order', `Split ${selectedItems.length} items into a new order?`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Split',
+        onPress: () => {
+          // In a real app, this would create a new order
+          setSplitMode(false);
+          setSelectedItems([]);
+          Alert.alert('Success', 'Order split successfully');
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const toggleItemSelection = (itemId: number) => {
-    setSelectedItems(prev => {
+    setSelectedItems((prev) => {
       if (prev.includes(itemId)) {
-        return prev.filter(id => id !== itemId);
+        return prev.filter((id) => id !== itemId);
       } else {
         return [...prev, itemId];
       }
@@ -187,21 +178,17 @@ const OrderManagement: React.FC<OrderManagementProps> = ({
   };
 
   const handleVoidOrder = () => {
-    Alert.alert(
-      'Void Order',
-      'Are you sure you want to void this entire order?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Void',
-          style: 'destructive',
-          onPress: () => {
-            clearCart();
-            onClose();
-          },
+    Alert.alert('Void Order', 'Are you sure you want to void this entire order?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Void',
+        style: 'destructive',
+        onPress: () => {
+          clearCart();
+          onClose();
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const handlePrintOrder = () => {
@@ -210,7 +197,7 @@ const OrderManagement: React.FC<OrderManagementProps> = ({
 
   const renderOrderItem = (item: OrderItem) => {
     const isSelected = selectedItems.includes(item.id);
-    
+
     return (
       <View key={item.id} style={styles.orderItem}>
         {splitMode && (
@@ -221,17 +208,13 @@ const OrderManagement: React.FC<OrderManagementProps> = ({
             {isSelected && <Icon name="check" size={16} color={Colors.white} />}
           </TouchableOpacity>
         )}
-        
+
         <View style={styles.itemDetails}>
           <Text style={styles.itemName}>{item.name}</Text>
           {item.modifications && item.modifications.length > 0 && (
-            <Text style={styles.itemModifications}>
-              {item.modifications.join(', ')}
-            </Text>
+            <Text style={styles.itemModifications}>{item.modifications.join(', ')}</Text>
           )}
-          {item.notes && (
-            <Text style={styles.itemNotes}>Note: {item.notes}</Text>
-          )}
+          {item.notes && <Text style={styles.itemNotes}>Note: {item.notes}</Text>}
         </View>
 
         <View style={styles.itemActions}>
@@ -250,15 +233,10 @@ const OrderManagement: React.FC<OrderManagementProps> = ({
               <Icon name="add" size={18} color={Colors.primary} />
             </TouchableOpacity>
           </View>
-          
-          <Text style={styles.itemPrice}>
-            £{(item.price * item.quantity).toFixed(2)}
-          </Text>
-          
-          <TouchableOpacity
-            style={styles.editButton}
-            onPress={() => handleEditItem(item)}
-          >
+
+          <Text style={styles.itemPrice}>£{(item.price * item.quantity).toFixed(2)}</Text>
+
+          <TouchableOpacity style={styles.editButton} onPress={() => handleEditItem(item)}>
             <Icon name="edit" size={18} color={Colors.secondary} />
           </TouchableOpacity>
         </View>
@@ -287,15 +265,13 @@ const OrderManagement: React.FC<OrderManagementProps> = ({
 
             <View style={styles.editModalBody}>
               <Text style={styles.editItemName}>{editingItem.name}</Text>
-              
+
               <View style={styles.editSection}>
                 <Text style={styles.editLabel}>Special Instructions</Text>
                 <TextInput
                   style={styles.editInput}
                   value={editingItem.notes || ''}
-                  onChangeText={(text) => 
-                    setEditingItem({ ...editingItem, notes: text })
-                  }
+                  onChangeText={(text) => setEditingItem({ ...editingItem, notes: text })}
                   placeholder="Add special instructions..."
                   multiline
                   numberOfLines={3}
@@ -307,10 +283,10 @@ const OrderManagement: React.FC<OrderManagementProps> = ({
                 <View style={styles.editQuantityControls}>
                   <TouchableOpacity
                     style={styles.editQuantityButton}
-                    onPress={() => 
-                      setEditingItem({ 
-                        ...editingItem, 
-                        quantity: Math.max(1, editingItem.quantity - 1) 
+                    onPress={() =>
+                      setEditingItem({
+                        ...editingItem,
+                        quantity: Math.max(1, editingItem.quantity - 1),
                       })
                     }
                   >
@@ -319,10 +295,10 @@ const OrderManagement: React.FC<OrderManagementProps> = ({
                   <Text style={styles.editQuantityText}>{editingItem.quantity}</Text>
                   <TouchableOpacity
                     style={styles.editQuantityButton}
-                    onPress={() => 
-                      setEditingItem({ 
-                        ...editingItem, 
-                        quantity: editingItem.quantity + 1 
+                    onPress={() =>
+                      setEditingItem({
+                        ...editingItem,
+                        quantity: editingItem.quantity + 1,
                       })
                     }
                   >
@@ -342,7 +318,7 @@ const OrderManagement: React.FC<OrderManagementProps> = ({
               >
                 <Text style={styles.deleteButtonText}>Remove Item</Text>
               </TouchableOpacity>
-              
+
               <TouchableOpacity
                 style={[styles.editButton, styles.saveButton]}
                 onPress={handleSaveEdit}
@@ -369,21 +345,15 @@ const OrderManagement: React.FC<OrderManagementProps> = ({
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
             <Icon name="close" size={24} color={Colors.white} />
           </TouchableOpacity>
-          
+
           <Text style={styles.headerTitle}>Current Order</Text>
-          
+
           <View style={styles.headerActions}>
-            <TouchableOpacity
-              style={styles.headerButton}
-              onPress={handlePrintOrder}
-            >
+            <TouchableOpacity style={styles.headerButton} onPress={handlePrintOrder}>
               <Icon name="print" size={20} color={Colors.white} />
             </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={styles.headerButton}
-              onPress={() => setSplitMode(!splitMode)}
-            >
+
+            <TouchableOpacity style={styles.headerButton} onPress={() => setSplitMode(!splitMode)}>
               <Icon name="call-split" size={20} color={Colors.white} />
             </TouchableOpacity>
           </View>
@@ -406,7 +376,7 @@ const OrderManagement: React.FC<OrderManagementProps> = ({
               keyboardType="numeric"
             />
           </View>
-          
+
           {splitMode && (
             <View style={styles.splitModeBar}>
               <Text style={styles.splitModeText}>
@@ -460,11 +430,15 @@ const OrderManagement: React.FC<OrderManagementProps> = ({
             </View>
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>VAT (20%)</Text>
-              <Text style={styles.summaryValue}>£{calculateTax(calculateSubtotal()).toFixed(2)}</Text>
+              <Text style={styles.summaryValue}>
+                £{calculateTax(calculateSubtotal()).toFixed(2)}
+              </Text>
             </View>
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>Service (12.5%)</Text>
-              <Text style={styles.summaryValue}>£{calculateServiceCharge(calculateSubtotal()).toFixed(2)}</Text>
+              <Text style={styles.summaryValue}>
+                £{calculateServiceCharge(calculateSubtotal()).toFixed(2)}
+              </Text>
             </View>
             <View style={[styles.summaryRow, styles.totalRow]}>
               <Text style={styles.totalLabel}>Total</Text>
@@ -483,7 +457,7 @@ const OrderManagement: React.FC<OrderManagementProps> = ({
               <Icon name="delete" size={20} color={Colors.danger} />
               <Text style={styles.voidButtonText}>Void Order</Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity
               style={[styles.actionButton, styles.checkoutButton]}
               onPress={onCheckout}

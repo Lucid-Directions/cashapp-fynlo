@@ -1,5 +1,6 @@
 // APITestScreen.tsx - Developer API testing interface
 import React, { useState, useEffect } from 'react';
+
 import {
   View,
   Text,
@@ -10,15 +11,18 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from 'react-native';
+
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-import APITestingService, { APITestResult, APITestSuite } from '../../services/APITestingService';
 import { Colors, Typography } from '../../design-system/theme';
+import APITestingService from '../../services/APITestingService';
+
+import type { APITestResult, APITestSuite } from '../../services/APITestingService';
 
 /**
  * APITestScreen - Developer interface for testing backend APIs
- * 
+ *
  * Features:
  * - Test individual endpoints
  * - Run comprehensive test suites
@@ -75,21 +79,17 @@ const APITestScreen: React.FC = () => {
   };
 
   const clearTestHistory = async () => {
-    Alert.alert(
-      'Clear Test History',
-      'Are you sure you want to clear all test results?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Clear',
-          style: 'destructive',
-          onPress: async () => {
-            await apiTestService.clearTestHistory();
-            await loadTestData();
-          },
+    Alert.alert('Clear Test History', 'Are you sure you want to clear all test results?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Clear',
+        style: 'destructive',
+        onPress: async () => {
+          await apiTestService.clearTestHistory();
+          await loadTestData();
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const getStatusColor = (success: boolean) => {
@@ -102,54 +102,52 @@ const APITestScreen: React.FC = () => {
 
   const renderHealthTab = () => {
     const health = apiTestService.getAPIHealthSummary();
-    
+
     return (
       <View style={styles.tabContent}>
         <View style={styles.healthCard}>
           <Text style={styles.cardTitle}>API Health Summary</Text>
-          
+
           <View style={styles.healthRow}>
             <Text style={styles.healthLabel}>Total Tests:</Text>
             <Text style={styles.healthValue}>{health.totalTests}</Text>
           </View>
-          
+
           <View style={styles.healthRow}>
             <Text style={styles.healthLabel}>Successful:</Text>
             <Text style={[styles.healthValue, { color: Colors.success }]}>
               {health.successfulTests}
             </Text>
           </View>
-          
+
           <View style={styles.healthRow}>
             <Text style={styles.healthLabel}>Failed:</Text>
-            <Text style={[styles.healthValue, { color: Colors.error }]}>
-              {health.failedTests}
-            </Text>
+            <Text style={[styles.healthValue, { color: Colors.error }]}>{health.failedTests}</Text>
           </View>
-          
+
           <View style={styles.healthRow}>
             <Text style={styles.healthLabel}>Success Rate:</Text>
-            <Text style={[
-              styles.healthValue,
-              { color: health.successRate > 80 ? Colors.success : Colors.error }
-            ]}>
+            <Text
+              style={[
+                styles.healthValue,
+                { color: health.successRate > 80 ? Colors.success : Colors.error },
+              ]}
+            >
               {health.successRate.toFixed(1)}%
             </Text>
           </View>
-          
+
           {health.lastTestTime && (
             <View style={styles.healthRow}>
               <Text style={styles.healthLabel}>Last Test:</Text>
-              <Text style={styles.healthValue}>
-                {health.lastTestTime.toLocaleTimeString()}
-              </Text>
+              <Text style={styles.healthValue}>{health.lastTestTime.toLocaleTimeString()}</Text>
             </View>
           )}
         </View>
 
         <View style={styles.quickTestsCard}>
           <Text style={styles.cardTitle}>Quick Tests</Text>
-          
+
           <TouchableOpacity
             style={styles.testButton}
             onPress={() => testIndividualEndpoint('/health')}
@@ -191,41 +189,44 @@ const APITestScreen: React.FC = () => {
             <Text style={styles.emptySubtext}>Run some API tests to see results here</Text>
           </View>
         ) : (
-          testResults.slice().reverse().map((result, index) => (
-            <View key={index} style={styles.resultCard}>
-              <View style={styles.resultHeader}>
-                <View style={styles.resultMethod}>
-                  <Text style={styles.methodText}>{result.method}</Text>
+          testResults
+            .slice()
+            .reverse()
+            .map((result, index) => (
+              <View key={index} style={styles.resultCard}>
+                <View style={styles.resultHeader}>
+                  <View style={styles.resultMethod}>
+                    <Text style={styles.methodText}>{result.method}</Text>
+                  </View>
+                  <Text style={styles.resultEndpoint}>{result.endpoint}</Text>
+                  <Icon
+                    name={getStatusIcon(result.success)}
+                    size={24}
+                    color={getStatusColor(result.success)}
+                  />
                 </View>
-                <Text style={styles.resultEndpoint}>{result.endpoint}</Text>
-                <Icon
-                  name={getStatusIcon(result.success)}
-                  size={24}
-                  color={getStatusColor(result.success)}
-                />
-              </View>
-              
-              <View style={styles.resultDetails}>
-                <Text style={styles.resultTime}>
-                  {result.timestamp.toLocaleTimeString()} 
-                  {result.responseTime && ` • ${result.responseTime}ms`}
-                </Text>
-                
-                {result.status && (
-                  <Text style={[
-                    styles.resultStatus,
-                    { color: result.success ? Colors.success : Colors.error }
-                  ]}>
-                    Status: {result.status}
+
+                <View style={styles.resultDetails}>
+                  <Text style={styles.resultTime}>
+                    {result.timestamp.toLocaleTimeString()}
+                    {result.responseTime && ` • ${result.responseTime}ms`}
                   </Text>
-                )}
-                
-                {result.error && (
-                  <Text style={styles.resultError}>{result.error}</Text>
-                )}
+
+                  {result.status && (
+                    <Text
+                      style={[
+                        styles.resultStatus,
+                        { color: result.success ? Colors.success : Colors.error },
+                      ]}
+                    >
+                      Status: {result.status}
+                    </Text>
+                  )}
+
+                  {result.error && <Text style={styles.resultError}>{result.error}</Text>}
+                </View>
               </View>
-            </View>
-          ))
+            ))
         )}
       </View>
     );
@@ -238,42 +239,45 @@ const APITestScreen: React.FC = () => {
           <View style={styles.emptyState}>
             <Icon name="assessment" size={64} color={Colors.textSecondary} />
             <Text style={styles.emptyText}>No test suites run yet</Text>
-            <Text style={styles.emptySubtext}>Run the full test suite to see comprehensive results</Text>
+            <Text style={styles.emptySubtext}>
+              Run the full test suite to see comprehensive results
+            </Text>
           </View>
         ) : (
-          testSuites.slice().reverse().map((suite, index) => (
-            <View key={index} style={styles.suiteCard}>
-              <View style={styles.suiteHeader}>
-                <Text style={styles.suiteName}>{suite.name}</Text>
-                <Icon
-                  name={getStatusIcon(suite.overallSuccess)}
-                  size={24}
-                  color={getStatusColor(suite.overallSuccess)}
-                />
-              </View>
-              
-              <Text style={styles.suiteTime}>
-                {suite.timestamp.toLocaleString()}
-              </Text>
-              
-              <Text style={styles.suiteStats}>
-                {suite.tests.filter(t => t.success).length}/{suite.tests.length} tests passed
-              </Text>
-              
-              {suite.tests.map((test, testIndex) => (
-                <View key={testIndex} style={styles.suiteTest}>
+          testSuites
+            .slice()
+            .reverse()
+            .map((suite, index) => (
+              <View key={index} style={styles.suiteCard}>
+                <View style={styles.suiteHeader}>
+                  <Text style={styles.suiteName}>{suite.name}</Text>
                   <Icon
-                    name={getStatusIcon(test.success)}
-                    size={16}
-                    color={getStatusColor(test.success)}
+                    name={getStatusIcon(suite.overallSuccess)}
+                    size={24}
+                    color={getStatusColor(suite.overallSuccess)}
                   />
-                  <Text style={styles.suiteTestText}>
-                    {test.method} {test.endpoint}
-                  </Text>
                 </View>
-              ))}
-            </View>
-          ))
+
+                <Text style={styles.suiteTime}>{suite.timestamp.toLocaleString()}</Text>
+
+                <Text style={styles.suiteStats}>
+                  {suite.tests.filter((t) => t.success).length}/{suite.tests.length} tests passed
+                </Text>
+
+                {suite.tests.map((test, testIndex) => (
+                  <View key={testIndex} style={styles.suiteTest}>
+                    <Icon
+                      name={getStatusIcon(test.success)}
+                      size={16}
+                      color={getStatusColor(test.success)}
+                    />
+                    <Text style={styles.suiteTestText}>
+                      {test.method} {test.endpoint}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            ))
         )}
       </View>
     );
@@ -320,7 +324,7 @@ const APITestScreen: React.FC = () => {
             Health
           </Text>
         </TouchableOpacity>
-        
+
         <TouchableOpacity
           style={[styles.tab, selectedTab === 'results' && styles.activeTab]}
           onPress={() => setSelectedTab('results')}
@@ -329,7 +333,7 @@ const APITestScreen: React.FC = () => {
             Results ({testResults.length})
           </Text>
         </TouchableOpacity>
-        
+
         <TouchableOpacity
           style={[styles.tab, selectedTab === 'suites' && styles.activeTab]}
           onPress={() => setSelectedTab('suites')}
@@ -342,9 +346,7 @@ const APITestScreen: React.FC = () => {
 
       <ScrollView
         style={styles.content}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
       >
         {selectedTab === 'health' && renderHealthTab()}
         {selectedTab === 'results' && renderResultsTab()}

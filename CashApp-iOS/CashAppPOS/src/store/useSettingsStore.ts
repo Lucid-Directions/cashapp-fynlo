@@ -1,6 +1,6 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Business Settings Types
 interface BusinessInfo {
@@ -229,7 +229,10 @@ interface SettingsState {
   loadSettings: () => Promise<void>;
   saveSettings: () => Promise<void>;
   initializeStore: () => void;
-  updatePaymentMethod: (methodId: keyof PaymentMethods, config: Partial<PaymentMethodConfig>) => void;
+  updatePaymentMethod: (
+    methodId: keyof PaymentMethods,
+    config: Partial<PaymentMethodConfig>
+  ) => void;
 }
 
 // Default settings values
@@ -561,9 +564,9 @@ const useSettingsStore = create<SettingsState>()(
           // Settings are automatically loaded by Zustand persist middleware
           set({ isLoading: false });
         } catch (error) {
-          set({ 
-            isLoading: false, 
-            error: error instanceof Error ? error.message : 'Failed to load settings' 
+          set({
+            isLoading: false,
+            error: error instanceof Error ? error.message : 'Failed to load settings',
           });
         }
       },
@@ -574,9 +577,9 @@ const useSettingsStore = create<SettingsState>()(
           // Settings are automatically saved by Zustand persist middleware
           set({ isLoading: false });
         } catch (error) {
-          set({ 
-            isLoading: false, 
-            error: error instanceof Error ? error.message : 'Failed to save settings' 
+          set({
+            isLoading: false,
+            error: error instanceof Error ? error.message : 'Failed to save settings',
           });
         }
       },
@@ -590,7 +593,10 @@ const useSettingsStore = create<SettingsState>()(
       },
 
       // Update payment method configuration
-      updatePaymentMethod: (methodId: keyof PaymentMethods, config: Partial<PaymentMethodConfig>) => {
+      updatePaymentMethod: (
+        methodId: keyof PaymentMethods,
+        config: Partial<PaymentMethodConfig>
+      ) => {
         set((state) => ({
           paymentMethods: {
             ...state.paymentMethods,

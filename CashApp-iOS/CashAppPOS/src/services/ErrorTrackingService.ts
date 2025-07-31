@@ -43,7 +43,11 @@ class ErrorTrackingService {
     this.simpleTracker.captureError(error, context);
   }
 
-  captureMessage(message: string, level: 'info' | 'warning' | 'error' = 'info', context?: ErrorContext): void {
+  captureMessage(
+    message: string,
+    level: 'info' | 'warning' | 'error' = 'info',
+    context?: ErrorContext
+  ): void {
     this.simpleTracker.captureMessage(message, level, context);
   }
 
@@ -59,7 +63,11 @@ class ErrorTrackingService {
   finishTransaction(transaction: any, success: boolean = true): void {
     if (transaction) {
       const duration = Date.now() - transaction.startTime;
-      console.log(`📊 Transaction finished: ${transaction.operation} (${duration}ms) - ${success ? 'success' : 'failed'}`);
+      console.log(
+        `📊 Transaction finished: ${transaction.operation} (${duration}ms) - ${
+          success ? 'success' : 'failed'
+        }`
+      );
     }
   }
 
@@ -85,7 +93,7 @@ class ErrorTrackingService {
     return this.startTransaction({
       operation: 'screen_load',
       description: `Loading ${screenName}`,
-      data: { screenName }
+      data: { screenName },
     });
   }
 
@@ -93,7 +101,7 @@ class ErrorTrackingService {
     return this.startTransaction({
       operation: 'api_call',
       description: `${method} ${endpoint}`,
-      data: { endpoint, method }
+      data: { endpoint, method },
     });
   }
 
