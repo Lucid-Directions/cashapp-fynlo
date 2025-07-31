@@ -409,7 +409,7 @@ import mockAsyncStorage from '@react-native-async-storage/async-storage';
   describe('API Request Helper', () => {
     it('should include authentication headers when token is available', async () => {
       // Set auth token
-      import mockAsyncStorage from '@react-native-async-storage/async-storage';
+      const mockAsyncStorage = require('@react-native-async-storage/async-storage');
       mockAsyncStorage.getItem.mockResolvedValue('test-token-123');
 
       // Reinitialize service to load token

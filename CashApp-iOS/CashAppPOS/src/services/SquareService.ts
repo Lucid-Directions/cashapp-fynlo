@@ -18,7 +18,8 @@ let SQIPApplePay: unknown;
 let SQIPGooglePay: unknown;
 
 try {
-  import SquareSDK from 'react-native-square-in-app-payments';
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const SquareSDK = require('react-native-square-in-app-payments');
   SQIPCore = SquareSDK.SQIPCore;
   SQIPCardEntry = SquareSDK.SQIPCardEntry;
   SQIPApplePay = SquareSDK.SQIPApplePay;
