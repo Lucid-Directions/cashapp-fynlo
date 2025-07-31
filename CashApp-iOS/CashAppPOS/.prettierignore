@@ -1,0 +1,50 @@
+# Dependencies
+node_modules/
+ios/Pods/
+
+# Build outputs
+android/build/
+ios/build/
+build/
+coverage/
+*.log
+
+# Generated files
+ios/main.jsbundle
+android/app/src/main/assets/
+
+# Metro
+.metro-health-check*
+
+# Native code - we don't want to format native iOS/Android code
+android/
+ios/
+
+# Test artifacts
+__tests__/fixtures/
+coverage/
+*.lcov
+
+# Temporary files
+.tmp/
+temp/
+*.tmp
+
+# Third-party libraries
+patches/
+
+# IDE
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Bundle files
+*.bundle
+*.jsbundle
+
+# Package lock files - these are auto-generated
+package-lock.json
+yarn.lock
