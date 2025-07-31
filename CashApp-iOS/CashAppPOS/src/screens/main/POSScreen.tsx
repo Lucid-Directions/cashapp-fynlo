@@ -23,6 +23,7 @@ import { Swipeable } from 'react-native-gesture-handler';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import ErrorTrackingService from '../../services/ErrorTrackingService';
+import { logger } from '../../utils/logger';
 import {
   validatePrice,
   calculatePercentageFee,
@@ -37,24 +38,17 @@ import SimpleTextInput from '../../components/inputs/SimpleTextInput';
 import { QuantityPill } from '../../components/inputs';
 import CartIcon from '../../components/cart/CartIcon';
 import HeaderWithBackButton from '../../components/navigation/HeaderWithBackButton';
-import CategorySearchBubble from '../../components/search/CategorySearchBubble'; // Import CategorySearchBubble
+import CategorySearchBubble from '../../components/search/CategorySearchBubble';
 import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
-import { IS_DEV } from '../../env'; // Import IS_DEV
+import { IS_DEV } from '../../env';
 import { useRestaurantDisplayName } from '../../hooks/useRestaurantConfig';
 import CustomersService from '../../services/CustomersService';
 import DatabaseService from '../../services/DatabaseService';
 import DataService from '../../services/DataService';
 import PlatformService from '../../services/PlatformService';
-// TODO: Unused import - import PlatformService from '../../services/PlatformService';
 import useAppStore from '../../store/useAppStore';
 import useSettingsStore from '../../store/useSettingsStore';
 import useUIStore from '../../store/useUIStore';
-import {
-  _validatePrice,
-  calculatePercentageFee,
-  validateCartCalculation,
-  formatPrice,
-} from '../../utils/priceValidation';
 
 import type { MenuItem, OrderItem } from '../../types';
 
@@ -150,6 +144,9 @@ const POSScreen: React.FC = () => {
   const [showSumUpTest, setShowSumUpTest] = useState(false);
   const [serviceChargeDebugInfo, setServiceChargeDebugInfo] = useState('');
   const [searchQuery, setSearchQuery] = useState(''); // State for search query
+  
+  // Dynamic styles that depend on state
+  const dynamicStyles = createDynamicStyles(theme, serviceChargeConfig);
 
   // Dynamic menu state
   const [dynamicMenuItems, setDynamicMenuItems] = useState<MenuItem[]>([]);
@@ -180,7 +177,7 @@ const POSScreen: React.FC = () => {
       try {
         const config = await dataStore.getServiceChargeConfig();
         setServiceChargeConfig(config);
-        logger.info('✅ Service charge config loaded from real data store:', config);
+        // Sensitive data removed - do not log service charge config
       } catch (error) {
         logger.error('❌ Failed to load service charge config:', error);
       }
@@ -730,7 +727,7 @@ const handlePaymentComplete = (result: unknown) => {
 
       return (
         <TouchableOpacity style={styles.deleteButton} onPress={() => removeFromCart(item.id)}>
-          <Animated.View style={{ transform: [{ scale }] }}>
+          <Animated.View style={[dynamicStyles.animatedScale, { transform: [{ scale }] }]}>
             <Icon name="delete" size={24} color={theme.colors.white} />
             <Text style={styles.deleteButtonText}>Delete</Text>
           </Animated.View>
@@ -805,7 +802,7 @@ const handlePaymentComplete = (result: unknown) => {
             {IS_DEV && (
               <TouchableOpacity
                 testID="dev-mode-toggle-button"
-                style={[styles.devButton, { marginRight: 8 }]}
+                style={dynamicStyles.devButtonWithMargin}
                 onPress={() => {
                   setShowSumUpTest(!showSumUpTest);
                   logger.info('🧪 SumUp Test toggled:', !showSumUpTest);
@@ -853,14 +850,7 @@ const handlePaymentComplete = (result: unknown) => {
           {/* Service Charge Sync Indicator */}
           <View style={[styles.statItem, styles.serviceChargeIndicator]}>
             <Text
-              style={[
-                styles.statValue,
-                {
-                  color: serviceChargeConfig.enabled ? '#00D4AA' : '#999',
-                  fontSize: 14,
-                  fontWeight: '600',
-                },
-              ]}
+              style={[styles.statValue, dynamicStyles.serviceChargeValue]}
             >
               {serviceChargeConfig.enabled ? `${serviceChargeConfig.rate}%` : 'OFF'}
             </Text>
@@ -910,10 +900,10 @@ const handlePaymentComplete = (result: unknown) => {
               name="restaurant-menu"
               size={48}
               color={theme.colors.primary}
-              style={{ marginBottom: 16 }}
+              style={dynamicStyles.categorySearchWrapper}
             />
             <Text style={styles.loadingText}>Loading menu...</Text>
-            <Text style={[styles.loadingText, { fontSize: 14, opacity: 0.7, marginTop: 8 }]}>
+            <Text style={[styles.loadingText, dynamicStyles.loadingTextSmall]}>
               Connecting to backend...
             </Text>
           </View>
@@ -923,9 +913,9 @@ const handlePaymentComplete = (result: unknown) => {
               name="restaurant-menu"
               size={48}
               color={theme.colors.mediumGray}
-              style={{ marginBottom: 16 }}
+              style={dynamicStyles.categorySearchWrapper}
             />
-            <Text style={[styles.loadingText, { color: theme.colors.text }]}>
+            <Text style={[styles.loadingText, dynamicStyles.loadingTextColored]}>
               No menu items available
             </Text>
             <Text
@@ -937,7 +927,7 @@ const handlePaymentComplete = (result: unknown) => {
               Please contact support to set up your menu
             </Text>
             <TouchableOpacity
-              style={[styles.retryButton, { backgroundColor: theme.colors.primary }]}
+              style={[styles.retryButton, dynamicStyles.retryButtonPrimary]}
               onPress={async () => {
                 setMenuLoading(true);
                 // Reset states to ensure clean retry
@@ -974,7 +964,7 @@ const handlePaymentComplete = (result: unknown) => {
                 }
               }}
             >
-              <Text style={{ color: theme.colors.white, fontWeight: '600' }}>Retry</Text>
+              <Text style={dynamicStyles.retryButtonText}>Retry</Text>
             </TouchableOpacity>
           </View>
         ) : filteredItems.length === 0 ? (
@@ -983,9 +973,9 @@ const handlePaymentComplete = (result: unknown) => {
               name="search-off"
               size={48}
               color={theme.colors.mediumGray}
-              style={{ marginBottom: 16 }}
+              style={dynamicStyles.categorySearchWrapper}
             />
-            <Text style={[styles.loadingText, { color: theme.colors.text }]}>No items found</Text>
+            <Text style={[styles.loadingText, dynamicStyles.loadingTextColored]}>No items found</Text>
             <Text
               style={[
                 styles.loadingText,
@@ -1310,138 +1300,49 @@ const handlePaymentComplete = (result: unknown) => {
   );
 };
 
+// Dynamic styles creator for conditional styling
+const createDynamicStyles = (theme: unknown, serviceChargeConfig: { enabled: boolean }) => 
+  StyleSheet.create({
+    serviceChargeValue: {
+      color: serviceChargeConfig.enabled ? '#00D4AA' : '#999',
+      fontSize: 14,
+      fontWeight: '600',
+    },
+    devButtonWithMargin: {
+      padding: 8,
+      borderRadius: 8,
+      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+      marginRight: 8,
+    },
+    animatedScale: {
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    categorySearchWrapper: {
+      marginBottom: 16,
+    },
+    loadingTextSmall: {
+      fontSize: 14,
+      opacity: 0.7,
+      marginTop: 8,
+    },
+    loadingTextColored: {
+      color: theme.colors.text,
+    },
+    retryButtonPrimary: {
+      backgroundColor: theme.colors.primary,
+    },
+    retryButtonText: {
+      color: theme.colors.white,
+      fontWeight: '600',
+    },
+  });
+
 const createStyles = (theme: unknown) =>
   StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: theme.colors.background,
-    },
-    header: {
-      backgroundColor: theme.colors.primary,
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingHorizontal: 20,
-      paddingVertical: 8,
-      height: 48, // Reduced for more professional look
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 4,
-      elevation: 5,
-    },
-    headerLeft: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      flex: 1,
-    },
-    logoContainer: {
-      marginLeft: 16,
-      flexDirection: 'row',
-      alignItems: 'baseline',
-    },
-    logoText: {
-      fontSize: 24,
-      fontWeight: 'bold',
-      color: theme.colors.white,
-      letterSpacing: -0.5,
-    },
-    logoOrange: {
-      color: '#FF6B35',
-    },
-    posSubtext: {
-      fontSize: 12,
-      fontWeight: '500',
-      color: 'rgba(255, 255, 255, 0.8)',
-      marginLeft: 4,
-    },
-    cloverLogo: {
-      fontSize: 24,
-      fontWeight: 'bold',
-      color: theme.colors.white,
-      letterSpacing: -0.5,
-    },
-    headerSubtitle: {
-      fontSize: 12,
-      color: 'rgba(255, 255, 255, 0.8)',
-      marginTop: 2,
-    },
-    headerTitle: {
-      fontSize: 20,
-      fontWeight: '600',
-      color: theme.colors.white,
-    },
-    headerRight: {
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    headerActions: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 12,
-    },
-    headerIconButton: {
-      padding: 8,
-      marginRight: 12,
-    },
-    headerButton: {
-      marginLeft: 20,
-      padding: 4,
-    },
-    menuButton: {
-      padding: 8,
-    },
-    headerCenter: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    logoContainer: {
-      marginLeft: 16,
-      flexDirection: 'column',
-      alignItems: 'flex-start',
-    },
-    restaurantName: {
-      fontSize: 20,
-      fontWeight: 'bold',
-      color: theme.colors.white,
-      letterSpacing: -0.5,
-    },
-    poweredBy: {
-      fontSize: 10,
-      fontWeight: '400',
-      color: 'rgba(255, 255, 255, 0.7)',
-      marginTop: 2,
-    },
-    headerLogo: {
-      width: 125,
-      height: 125,
-    },
-    logoText: {
-      fontSize: 24,
-      fontWeight: 'bold',
-      color: theme.colors.white,
-    },
-    logoOrange: {
-      color: theme.colors.warning,
-    },
-    headerActions: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 12,
-    },
-    scannerButton: {
-      padding: 8,
-      borderRadius: 8,
-      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    },
-    devButton: {
-      padding: 8,
-      borderRadius: 8,
-      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    },
-    mainContent: {
-      flex: 1,
     },
     fullWidthPanel: {
       flex: 1,
@@ -1481,10 +1382,6 @@ const createStyles = (theme: unknown) =>
       textAlign: 'center',
       marginTop: 2,
       fontWeight: '500',
-    },
-    fullPanel: {
-      flex: 1,
-      backgroundColor: theme.colors.white,
     },
     categoryTabs: {
       backgroundColor: theme.colors.white,
@@ -1604,15 +1501,6 @@ const createStyles = (theme: unknown) =>
       marginHorizontal: 8,
       minWidth: 20,
       textAlign: 'center',
-    },
-    cartHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      padding: 20,
-      backgroundColor: theme.colors.white,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.colors.border,
     },
     cartTitleSection: {
       flex: 1,
@@ -1735,12 +1623,6 @@ const createStyles = (theme: unknown) =>
       fontSize: 12,
       fontWeight: '600',
       marginTop: 4,
-    },
-    cartFooter: {
-      borderTopWidth: 1,
-      borderTopColor: theme.colors.border,
-      backgroundColor: theme.colors.white,
-      padding: 20,
     },
     cartFooterFixed: {
       position: 'absolute',
@@ -2024,25 +1906,6 @@ const createStyles = (theme: unknown) =>
       color: theme.colors.white,
       fontSize: 16,
       fontWeight: '600',
-    },
-    cartButton: {
-      position: 'relative',
-    },
-    cartBadge: {
-      position: 'absolute',
-      top: -4,
-      right: -4,
-      backgroundColor: theme.colors.warning,
-      borderRadius: 10,
-      minWidth: 20,
-      height: 20,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    cartBadgeText: {
-      color: theme.colors.white,
-      fontSize: 12,
-      fontWeight: 'bold',
     },
     searchBubbleStyle: {
       marginRight: 8,
