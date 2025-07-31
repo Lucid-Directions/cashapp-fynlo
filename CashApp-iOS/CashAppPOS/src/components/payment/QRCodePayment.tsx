@@ -5,6 +5,7 @@ import { View, Text, StyleSheet, TouchableOpacity, _Alert, ActivityIndicator } f
 import QRCode from 'react-native-qrcode-svg';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
+import { logger } from '../../utils/logger';
 import PaymentService from '../../services/PaymentService';
 
 import QRPaymentErrorBoundary from './QRPaymentErrorBoundary';
@@ -14,6 +15,7 @@ import type { PaymentRequest, QRPaymentData } from '../../services/PaymentServic
 // Error-safe QR Code Wrapper Component
 const QRCodeWrapper: React.FC<{ qrCodeData: string }> = ({ qrCodeData }) => {
   const [hasError, setHasError] = useState(false);
+  const wrapperStyles = createQRWrapperStyles();
 
   try {
     if (!qrCodeData || qrCodeData.length === 0) {
@@ -22,9 +24,9 @@ const QRCodeWrapper: React.FC<{ qrCodeData: string }> = ({ qrCodeData }) => {
 
     if (hasError) {
       return (
-        <View style={{ alignItems: 'center', justifyContent: 'center', width: 180, height: 180 }}>
+        <View style={wrapperStyles.errorContainer}>
           <Icon name="error" size={60} color={Colors.danger} />
-          <Text style={{ color: Colors.danger, fontSize: 12, marginTop: 8 }}>QR Error</Text>
+          <Text style={wrapperStyles.errorText}>QR Error</Text>
         </View>
       );
     }
@@ -41,9 +43,9 @@ const QRCodeWrapper: React.FC<{ qrCodeData: string }> = ({ qrCodeData }) => {
   } catch (error) {
     logger.error('QR Code generation error:', error);
     return (
-      <View style={{ alignItems: 'center', justifyContent: 'center', width: 180, height: 180 }}>
+      <View style={wrapperStyles.unavailableContainer}>
         <Icon name="qr-code" size={60} color={Colors.lightText} />
-        <Text style={{ color: Colors.lightText, fontSize: 12, marginTop: 8 }}>QR Unavailable</Text>
+        <Text style={wrapperStyles.unavailableText}>QR Unavailable</Text>
       </View>
     );
   }
@@ -555,5 +557,31 @@ const styles = StyleSheet.create({
     color: Colors.white,
   },
 });
+
+const createQRWrapperStyles = () =>
+  StyleSheet.create({
+    errorContainer: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      width: 180,
+      height: 180,
+    },
+    errorText: {
+      color: Colors.danger,
+      fontSize: 12,
+      marginTop: 8,
+    },
+    unavailableContainer: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      width: 180,
+      height: 180,
+    },
+    unavailableText: {
+      color: Colors.lightText,
+      fontSize: 12,
+      marginTop: 8,
+    },
+  });
 
 export default QRCodePayment;

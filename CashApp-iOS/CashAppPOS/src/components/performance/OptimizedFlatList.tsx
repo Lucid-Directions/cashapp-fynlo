@@ -1,9 +1,10 @@
 import React, { useMemo, useCallback, memo } from 'react';
 
 import type { FlatListProps, ViewToken } from 'react-native';
-import { FlatList } from 'react-native';
+import { FlatList, StyleSheet } from 'react-native';
 
 import { performanceUtils } from '../../hooks/usePerformanceMonitor';
+import { logger } from '../../utils/logger';
 
 interface OptimizedFlatListProps<T> extends Omit<FlatListProps<T>, 'renderItem' | 'keyExtractor'> {
   data: T[];
@@ -170,6 +171,8 @@ export function OptimizedGrid<T>({
     [itemHeight, numColumns, spacing]
   );
 
+  const styles = useMemo(() => createGridStyles(spacing), [spacing]);
+
   return (
     <OptimizedFlatList
       data={data}
@@ -180,8 +183,18 @@ export function OptimizedGrid<T>({
       enableChunking={data.length > 50}
       chunkSize={numColumns * 5} // 5 rows at a time
       enableViewabilityTracking={__DEV__}
-      contentContainerStyle={{ padding: spacing / 2 }}
-      columnWrapperStyle={numColumns > 1 ? { justifyContent: 'space-between' } : undefined}
+      contentContainerStyle={styles.contentContainer}
+      columnWrapperStyle={numColumns > 1 ? styles.columnWrapper : undefined}
     />
   );
 }
+
+const createGridStyles = (spacing: number) =>
+  StyleSheet.create({
+    contentContainer: {
+      padding: spacing / 2,
+    },
+    columnWrapper: {
+      justifyContent: 'space-between',
+    },
+  });

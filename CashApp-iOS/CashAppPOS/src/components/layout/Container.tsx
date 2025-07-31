@@ -212,6 +212,7 @@ export const Row: React.FC<RowProps> = ({
   style,
 }) => {
   const { theme } = useTheme();
+  const styles = createStyles(theme);
   const currentSpacing = useResponsiveValue(spacingProp, 3);
   const spacingValue = theme.spacing[currentSpacing];
 
@@ -229,12 +230,18 @@ export const Row: React.FC<RowProps> = ({
   return (
     <View
       style={[
-        {
-          flexDirection: 'row',
-          alignItems: align,
-          justifyContent: justify,
-          flexWrap: wrap ? 'wrap' : 'nowrap',
-        },
+        styles.row,
+        wrap && styles.rowWrap,
+        align === 'flex-start' && styles.rowAlignStart,
+        align === 'center' && styles.rowAlignCenter,
+        align === 'flex-end' && styles.rowAlignEnd,
+        align === 'stretch' && styles.rowAlignStretch,
+        justify === 'flex-start' && styles.rowJustifyStart,
+        justify === 'center' && styles.rowJustifyCenter,
+        justify === 'flex-end' && styles.rowJustifyEnd,
+        justify === 'space-between' && styles.rowJustifyBetween,
+        justify === 'space-around' && styles.rowJustifyAround,
+        justify === 'space-evenly' && styles.rowJustifyEvenly,
         style,
       ]}
     >
@@ -263,6 +270,43 @@ const createStyles = (theme: Theme) =>
     sectionSubtitle: {
       fontSize: theme.typography.fontSize.lg,
       color: theme.colors.neutral[600],
+    },
+    row: {
+      flexDirection: 'row',
+      flexWrap: 'nowrap',
+    },
+    rowWrap: {
+      flexWrap: 'wrap',
+    },
+    rowAlignStart: {
+      alignItems: 'flex-start',
+    },
+    rowAlignCenter: {
+      alignItems: 'center',
+    },
+    rowAlignEnd: {
+      alignItems: 'flex-end',
+    },
+    rowAlignStretch: {
+      alignItems: 'stretch',
+    },
+    rowJustifyStart: {
+      justifyContent: 'flex-start',
+    },
+    rowJustifyCenter: {
+      justifyContent: 'center',
+    },
+    rowJustifyEnd: {
+      justifyContent: 'flex-end',
+    },
+    rowJustifyBetween: {
+      justifyContent: 'space-between',
+    },
+    rowJustifyAround: {
+      justifyContent: 'space-around',
+    },
+    rowJustifyEvenly: {
+      justifyContent: 'space-evenly',
     },
   });
 

@@ -17,6 +17,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
+import { logger } from '../../utils/logger';
 // import { scanReceipt, ScannedItemAPIResponse } from '../../services/InventoryApiService'; // Temporarily disabled
 // import { launchCamera, ImagePickerResponse, MediaType } from 'react-native-image-picker'; // Temporarily disabled
 
@@ -437,7 +438,6 @@ const createStyles = (theme: unknown) =>
     itemInputs: {
       flex: 1,
       flexDirection: 'row',
-      gap: 8,
     },
     input: {
       borderWidth: 1,
@@ -450,14 +450,17 @@ const createStyles = (theme: unknown) =>
     },
     nameInput: {
       flex: 0.5, // Takes 50% of space in itemInputs
+      marginRight: 4,
     },
     quantityInput: {
       flex: 0.2, // Takes 20%
       textAlign: 'center',
+      marginHorizontal: 4,
     },
     priceInput: {
       flex: 0.3, // Takes 30%
       textAlign: 'right',
+      marginLeft: 4,
     },
     deleteButton: {
       padding: 5,
