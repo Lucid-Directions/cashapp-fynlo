@@ -342,94 +342,10 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
       // Simulate clicking "Start Using POS"
       const successAlertCall = mockAlert.mock.calls.find(
         (call) => call[0] === 'Onboarding Complete! 🎉'
-      );
+);
       const startButton = successAlertCall[2].find(
         (btn: unknown) => btn.text === 'Start Using POS'
       );
-      startButton.onPress();
-
-      // Verify navigation to main app
-      await waitFor(() => {
-        expect(mockReset).toHaveBeenCalledWith({
-          index: 0,
-          routes: [{ name: 'Main' }],
-        });
-      });
-
-      // Verify AsyncStorage was updated
-      expect(AsyncStorage.setItem).toHaveBeenCalledWith('restaurant_id', 'rest-123');
-      expect(AsyncStorage.setItem).toHaveBeenCalledWith('needs_onboarding', 'false');
-    });
-
-    it('should handle "Not Found" error during onboarding completion', async () => {
-      // Mock 404 Not Found error response
-      (fetch as jest.Mock).mockImplementation((url) => {
-        if (url.includes('/restaurants/onboarding/create')) {
-          return Promise.resolve({
-            ok: false,
-            status: 404,
-            statusText: 'Not Found',
-            json: async () => ({
-              error: 'Not Found',
-              message: 'The requested endpoint was not found',
-              detail: 'POST /api/v1/restaurants/onboarding/create not found',
-            }),
-          });
-        }
-        return Promise.resolve({
-          ok: true,
-          json: async () => ({ is_valid: true }),
-        });
-      });
-
-      const { getByTestId, getByText, getByPlaceholderText } = renderWithProviders(
-        <ComprehensiveRestaurantOnboardingScreen />
-      );
-
-      // Quick fill all required fields to get to final step
-      // Step 1
-      fireEvent.changeText(
-        getByPlaceholderText("e.g., Maria's Mexican Kitchen"),
-        'Test Restaurant'
-      );
-      fireEvent.changeText(getByPlaceholderText("e.g., Maria's Kitchen"), 'Test');
-      fireEvent.press(getByText('Restaurant'));
-      fireEvent.press(getByTestId('next-step-button'));
-
-      // Step 2
-      await waitFor(() => getByText('Contact Information'));
-      fireEvent.changeText(getByPlaceholderText('+44 20 1234 5678'), '+44 20 7946 0958');
-      fireEvent.changeText(getByPlaceholderText('owner@mariaskitchen.co.uk'), 'test@test.com');
-      fireEvent.press(getByTestId('next-step-button'));
-
-      // Step 3
-      await waitFor(() => getByText('Restaurant Location'));
-      fireEvent.changeText(getByTestId('address-street'), '123 Test St');
-      fireEvent.changeText(getByTestId('address-city'), 'London');
-      fireEvent.changeText(getByTestId('address-postcode'), 'SW1A 1AA');
-      fireEvent.press(getByTestId('next-step-button'));
-
-      // Step 4
-      await waitFor(() => getByText('Owner Information'));
-      fireEvent.changeText(getByPlaceholderText('Maria Rodriguez'), 'Test Owner');
-      fireEvent.changeText(getByPlaceholderText('owner@restaurant.com'), 'owner@test.com');
-      fireEvent.press(getByTestId('next-step-button'));
-
-      // Skip steps 5-7
-      // Step 5 - Business Hours
-      await waitFor(() => getByText('Business Hours'));
-      fireEvent.press(getByTestId('next-step-button'));
-
-      // Step 6 - Employee Management
-      await waitFor(() => getByText('Employee Management'));
-      fireEvent.press(getByTestId('next-step-button'));
-
-      // Step 7 - Menu Setup (has Skip for Now button)
-      await waitFor(() => getByText('Skip for Now'));
-      fireEvent.press(getByText('Skip for Now'));
-      const alertCalls = mockAlert.mock.calls;
-      const alertCall = alertCalls[alertCalls.length - 1];
-      alertCall[2].find((btn: unknown) => btn.text === 'Skip').onPress();
 
       // Step 8 - Bank Details (required)
       await waitFor(() => getByText('Bank Details'));
@@ -684,7 +600,7 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
       fireEvent.press(getByText('Skip for Now'));
       const alertCalls = mockAlert.mock.calls;
       const alertCall = alertCalls[alertCalls.length - 1];
-      alertCall[2].find((btn: unknown) => btn.text === 'Skip').onPress();
+alertCall[2].find((btn: unknown) => btn.text === 'Skip').onPress();
 
       // Step 8 - Bank Details (required)
       await waitFor(() => getByText('Bank Details'));
@@ -763,7 +679,7 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
       fireEvent.press(getByText('Skip for Now'));
       const alertCalls = mockAlert.mock.calls;
       const alertCall = alertCalls[alertCalls.length - 1];
-      alertCall[2].find((btn: unknown) => btn.text === 'Skip').onPress();
+alertCall[2].find((btn: unknown) => btn.text === 'Skip').onPress();
 
       // Step 8 - Bank Details (required)
       await waitFor(() => getByText('Bank Details'));

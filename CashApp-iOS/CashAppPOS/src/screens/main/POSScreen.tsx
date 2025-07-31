@@ -22,12 +22,21 @@ import { useNavigation } from '@react-navigation/native';
 import { Swipeable } from 'react-native-gesture-handler';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-// TODO: Unused import - import SumUpTestComponent from '../../components/payment/SumUpTestComponent';
-import CartIcon from '../../components/cart/CartIcon';
-import { QuantityPill } from '../../components/inputs';
-import SimpleTextInput from '../../components/inputs/SimpleTextInput';
-import HeaderWithBackButton from '../../components/navigation/HeaderWithBackButton';
+import ErrorTrackingService from '../../services/ErrorTrackingService';
+import {
+  validatePrice,
+  calculatePercentageFee,
+  validateCartCalculation,
+  formatPrice,
+} from '../../utils/priceValidation';
 import SumUpPaymentComponent from '../../components/payment/SumUpPaymentComponent';
+import SumUpTestComponent from '../../components/payment/SumUpTestComponent';
+import SumUpCompatibilityService from '../../services/SumUpCompatibilityService';
+import SharedDataStore from '../../services/SharedDataStore';
+import SimpleTextInput from '../../components/inputs/SimpleTextInput';
+import { QuantityPill } from '../../components/inputs';
+import CartIcon from '../../components/cart/CartIcon';
+import HeaderWithBackButton from '../../components/navigation/HeaderWithBackButton';
 import CategorySearchBubble from '../../components/search/CategorySearchBubble'; // Import CategorySearchBubble
 import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
 import { IS_DEV } from '../../env'; // Import IS_DEV
@@ -68,7 +77,7 @@ const ExportedMenuItemCard = ({
   handleUpdateQuantity,
 }: {
   item: MenuItem;
-  theme: unknown;
+theme: unknown;
   styles: unknown;
   cart: OrderItem[];
   handleAddToCart: (item: MenuItem) => void;
@@ -463,7 +472,7 @@ const POSScreen: React.FC = () => {
             setShowSumUpPayment(true);
           } else {
             console.warn('⚠️ SumUp not compatible, showing alternatives');
-            const _fallbackMethods = compatibilityService.getFallbackPaymentMethods();
+const _fallbackMethods = compatibilityService.getFallbackPaymentMethods();
 
             Alert.alert(
               'Tap to Pay Unavailable',
@@ -572,7 +581,7 @@ const POSScreen: React.FC = () => {
     }
   };
 
-  const handlePaymentComplete = (result: unknown) => {
+const handlePaymentComplete = (result: unknown) => {
     if (result.success) {
       Alert.alert(
         'Payment Successful',

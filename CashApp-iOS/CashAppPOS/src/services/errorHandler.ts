@@ -57,7 +57,7 @@ export interface BackendError {
 
 class ErrorHandler {
   private static instance: ErrorHandler;
-  private navigation: NavigationProp<unknown> | null = null;
+private navigation: NavigationProp<unknown> | null = null;
 
   static getInstance(): ErrorHandler {
     if (!ErrorHandler.instance) {
@@ -66,7 +66,7 @@ class ErrorHandler {
     return ErrorHandler.instance;
   }
 
-  setNavigation(navigation: NavigationProp<unknown>) {
+setNavigation(navigation: NavigationProp<unknown>) {
     this.navigation = navigation;
   }
 
@@ -207,7 +207,7 @@ class ErrorHandler {
     const userError = this.handle(error);
     const title = customTitle || userError.title;
 
-    const buttons: unknown[] = [];
+const buttons: unknown[] = [];
 
     // Add action button based on error type
     switch (userError.action) {

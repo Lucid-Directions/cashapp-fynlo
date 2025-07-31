@@ -5,7 +5,7 @@
 
 import React, { useEffect, useState } from 'react';
 
-import { LogBox, View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { LogBox, View, Text, StyleSheet, ActivityIndicator, TextInput } from 'react-native';
 
 import 'react-native-gesture-handler';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -18,6 +18,7 @@ import AppNavigator from './src/navigation/AppNavigator';
 import ErrorTrackingService from './src/services/ErrorTrackingService';
 import SumUpNativeService from './src/services/SumUpNativeService';
 import { useAuthStore } from './src/store/useAuthStore';
+import { clearAuthStorage } from './src/utils/clearAuthStorage';
 import { ensureComponentsLoaded } from './src/utils/componentRegistry';
 import tokenManager from './src/utils/tokenManager';
 

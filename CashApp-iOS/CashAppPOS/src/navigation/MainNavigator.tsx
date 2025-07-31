@@ -5,32 +5,33 @@ import { createStackNavigator } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import { useTheme } from '../design-system/ThemeProvider';
-import CustomersScreen from '../screens/customers/CustomersScreen';
+import CostAnalysisReportDetailScreen from '../screens/reports/CostAnalysisReportDetailScreen';
 import EmployeesScreen from '../screens/employees/EmployeesScreen';
 import EnhancedEmployeeScheduleScreen from '../screens/employees/EnhancedEmployeeScheduleScreen';
+import QRScannerScreen from '../screens/scanner/QRScannerScreen';
+import CustomersScreen from '../screens/customers/CustomersScreen';
 import InventoryScreen from '../screens/inventory/InventoryScreen';
+import MenuManagementScreen from '../screens/settings/app/MenuManagementScreen';
+import TableManagementScreen from '../screens/table/TableManagementScreen';
+import { TableSelectionScreen } from '../screens/main/TableSelectionScreen';
 import DashboardScreen from '../screens/main/DashboardScreen';
 import HomeHubScreen from '../screens/main/HomeHubScreen';
 import POSScreen from '../screens/main/POSScreen';
 import ProfileScreen from '../screens/main/ProfileScreen';
-import { TableSelectionScreen } from '../screens/main/TableSelectionScreen';
 import OrdersScreen from '../screens/orders/OrdersScreen';
+
 import EnhancedPaymentScreen from '../screens/payment/EnhancedPaymentScreen';
 import ServiceChargeSelectionScreen from '../screens/payment/ServiceChargeSelectionScreen';
 import QRCodePaymentScreen from '../screens/payments/QRCodePaymentScreen';
 import SquareCardPaymentScreen from '../screens/payments/SquareCardPaymentScreen';
 import SquareContactlessPaymentScreen from '../screens/payments/SquareContactlessPaymentScreen';
-import CostAnalysisReportDetailScreen from '../screens/reports/CostAnalysisReportDetailScreen';
 import FinancialReportDetailScreen from '../screens/reports/FinancialReportDetailScreen';
 import InventoryReportDetailScreen from '../screens/reports/InventoryReportDetailScreen';
 import LaborReportDetailScreen from '../screens/reports/LaborReportDetailScreen';
 import ReportsScreen from '../screens/reports/ReportsScreenSimple';
 import SalesReportDetailScreen from '../screens/reports/SalesReportDetailScreen';
 import StaffReportDetailScreen from '../screens/reports/StaffReportDetailScreen';
-import QRScannerScreen from '../screens/scanner/QRScannerScreen';
-import MenuManagementScreen from '../screens/settings/app/MenuManagementScreen';
 import HelpScreen from '../screens/support/HelpScreen';
-import TableManagementScreen from '../screens/table/TableManagementScreen';
 
 import SettingsNavigator from './SettingsNavigator';
 

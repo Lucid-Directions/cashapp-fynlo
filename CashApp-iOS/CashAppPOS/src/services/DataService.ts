@@ -111,7 +111,7 @@ class DataService {
   private async testAPIEndpoint(
     endpoint: string,
     method: string = 'GET',
-    data?: unknown
+data?: unknown
   ): Promise<void> {
     if (this.featureFlags.TEST_API_MODE) {
       try {
@@ -167,7 +167,7 @@ class DataService {
           `Backend status changed: ${this.isBackendAvailable ? 'Available' : 'Unavailable'}`
         );
       }
-    } catch (_error) {
+} catch (_error) {
       this.isBackendAvailable = false;
       console.log('Backend not available, using mock data');
 
@@ -339,7 +339,7 @@ class DataService {
       sort_order?: number;
       is_active?: boolean;
     }>
-  ): Promise<unknown> {
+): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         const result = await this.db.updateCategory(categoryId, categoryData);
@@ -419,12 +419,12 @@ class DataService {
       sku?: string;
       prep_time?: number;
       dietary_info?: string[];
-      modifiers?: unknown[];
+modifiers?: unknown[];
       stock_tracking?: boolean;
       stock_quantity?: number;
       is_active?: boolean;
     }>
-  ): Promise<unknown> {
+): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         return await this.db.updateProduct(productId, productData);

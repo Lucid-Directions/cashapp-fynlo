@@ -71,7 +71,7 @@ class DatabaseService {
   private authToken: string | null = null;
   private currentSession: PosSession | null = null;
   private menuCache: {
-    items: unknown[] | null;
+items: unknown[] | null;
     categories: unknown[] | null;
     itemsTimestamp: number;
     categoriesTimestamp: number;
@@ -133,7 +133,7 @@ class DatabaseService {
     options: RequestInit = {},
     retryCount: number = 0,
     initialStartTime?: number
-  ): Promise<unknown> {
+): Promise<unknown> {
     const url = `${API_BASE_URL}${endpoint}`;
     const startTime = initialStartTime || Date.now();
     const elapsedTime = Date.now() - startTime;
@@ -601,7 +601,7 @@ class DatabaseService {
       sort_order?: number;
       is_active?: boolean;
     }>
-  ): Promise<unknown> {
+): Promise<unknown> {
     try {
       const response = await this.authRequest(
         `${this.baseUrl}/api/v1/products/categories/${categoryId}`,
@@ -697,12 +697,12 @@ class DatabaseService {
       sku?: string;
       prep_time?: number;
       dietary_info?: string[];
-      modifiers?: unknown[];
+modifiers?: unknown[];
       stock_tracking?: boolean;
       stock_quantity?: number;
       is_active?: boolean;
     }>
-  ): Promise<unknown> {
+): Promise<unknown> {
     try {
       const response = await this.apiRequest(`/api/v1/products/${productId}`, {
         method: 'PUT',
@@ -1100,7 +1100,7 @@ class DatabaseService {
     }
   }
 
-  async getOrdersByDateRange(_dateRange: string): Promise<any[]> {
+async getOrdersByDateRange(_dateRange: string): Promise<any[]> {
     // Renamed to match DataService call intent
     console.warn('DatabaseService.getOrdersByDateRange is a stub and not implemented.');
     throw new Error('DatabaseService.getOrdersByDateRange not implemented yet');

@@ -242,7 +242,7 @@ const OperatingHoursScreen: React.FC = () => {
       updateOperatingHours(formData);
       setHasChanges(false);
       Alert.alert('Success', 'Operating hours have been saved successfully.', [{ text: 'OK' }]);
-    } catch (_error) {
+} catch (_error) {
       Alert.alert('Error', 'Failed to save operating hours. Please try again.', [{ text: 'OK' }]);
     }
   };
@@ -262,7 +262,7 @@ const OperatingHoursScreen: React.FC = () => {
   };
 
   const renderDayCard = (day: { key: string; label: string }) => {
-    const dayData = formData[day.key as keyof typeof formData] as unknown;
+const dayData = formData[day.key as keyof typeof formData] as unknown;
     const isToday =
       new Date().toLocaleDateString('en', { weekday: 'long' }).toLowerCase() === day.key;
 
