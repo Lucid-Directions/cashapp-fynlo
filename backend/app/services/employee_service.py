@@ -152,7 +152,8 @@ class EmployeeService:
             if not restaurant:
                 raise ValueError("Restaurant not found")
             
-            # Check if email already exists for this restaurant            existing_employee = db.query(EmployeeProfile).filter(
+            # Check if email already exists for this restaurant
+            existing_employee = db.query(EmployeeProfile).filter(
                 and_(
                     EmployeeProfile.email == employee_data.email,
                     EmployeeProfile.restaurant_id == target_restaurant_id

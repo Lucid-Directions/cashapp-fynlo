@@ -160,7 +160,7 @@ async def generate_qr_payment(
         #     details={"order_id": payment_request.order_id, "amount": payment_request.amount, "reason": "Order not found"},
         #     commit=True
         # )
-        raise ResourceNotFoundException(resource="Order", resource_id=payment_request.order_id)
+        raise ResourceNotFoundException(resource="Order", resource_id=payment_request_data.order_id)
     
     # Calculate fees
     fee_amount = calculate_payment_fee(payment_request.amount, "qr_code")
@@ -436,7 +436,7 @@ async def process_stripe_payment(
             details={"order_id": payment_request_data.order_id, "amount": payment_request_data.amount, "reason": "Order not found"},
             commit=True
         )
-        raise ResourceNotFoundException(resource="Order", resource_id=payment_request.order_id)
+        raise ResourceNotFoundException(resource="Order", resource_id=payment_request_data.order_id)
 
     if order.payment_status == "completed":
         await audit_service.create_audit_log(
@@ -606,7 +606,7 @@ async def process_cash_payment(
     ).first()
     if not order:
         # No audit log here as it's a basic validation, not a payment process failure yet.
-        raise ResourceNotFoundException(resource="Order", resource_id=payment_request.order_id)
+        raise ResourceNotFoundException(resource="Order", resource_id=payment_request_data.order_id)
 
     if order.payment_status == "completed":
          await audit_service.create_audit_log(
@@ -693,7 +693,7 @@ async def get_order_payments(
         Order.restaurant_id == restaurant_id
     ).first()
     if not order:
-        raise ResourceNotFoundException(resource="Order", resource_id=payment_request.order_id)
+        raise ResourceNotFoundException(resource="Order", resource_id=order_id)
     
     payments = db.query(Payment).filter(Payment.order_id == order_id).all()
     
@@ -787,7 +787,7 @@ async def process_payment(
                 details={"order_id": payment_data_req.order_id, "amount": payment_data_req.amount, "reason": "Order not found"},
                 commit=True
             )
-            raise ResourceNotFoundException(resource="Order", resource_id=payment_request.order_id)
+            raise ResourceNotFoundException(resource="Order", resource_id=payment_data_req.order_id)
 
         if order.payment_status == "completed":
             await audit_service.create_audit_log(
