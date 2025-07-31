@@ -10,14 +10,14 @@ import sys
 import logging
 import json
 from datetime import datetime
-from typing import Dict, Any, List, Tuple, Optional
+from typing import Dict, Any, List
 from sqlalchemy.orm import Session
-from sqlalchemy import text, and_
+from sqlalchemy import and_
 
 # Add parent directory to path to import app modules
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from app.core.database import SessionLocal, Restaurant, Platform
+from app.core.database import SessionLocal, Restaurant
 from app.models.platform_config import (
     PlatformConfiguration, 
     RestaurantOverride, 

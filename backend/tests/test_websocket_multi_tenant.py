@@ -12,7 +12,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import User, Restaurant, UserRestaurant, Order
 from app.core.auth import create_access_token
-from app.core.config import settings
 
 
 class TestWebSocketMultiTenant:

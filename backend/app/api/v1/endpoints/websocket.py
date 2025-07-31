@@ -322,7 +322,6 @@ async def verify_websocket_access(
             if restaurant_id == "onboarding":
                 # For onboarding connections, allow any authenticated user
                 logger.info(f"Onboarding connection for user: {user.id}")
-                pass
             elif user.role == "restaurant_owner":
                 # Handle restaurant owners
                 if not user.restaurant_id:

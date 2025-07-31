@@ -5,7 +5,6 @@ Implements token bucket algorithm for message rate limiting
 
 import time
 from typing import Dict, Tuple
-from datetime import datetime, timedelta
 import logging
 
 logger = logging.getLogger(__name__)

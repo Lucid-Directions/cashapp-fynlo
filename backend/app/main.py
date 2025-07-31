@@ -4,7 +4,7 @@ Clean FastAPI implementation for hardware-free restaurant management
 Version: 2.1.0 - Portal alignment with optional PDF exports
 """
 
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer
 from sqlalchemy.orm import Session
@@ -13,22 +13,15 @@ import logging
 from contextlib import asynccontextmanager
 
 from app.core.config import settings
-from app.core.database import init_db, get_db, User
+from app.core.database import get_db, User
 from app.api.v1.api import api_router
 from app.api.mobile.endpoints import router as mobile_router
-from app.core.redis_client import init_redis, close_redis
-from app.core.websocket import websocket_manager
-from app.core.exceptions import register_exception_handlers
+from app.core.redis_client import close_redis
 from app.middleware.rate_limit_middleware import init_fastapi_limiter
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 from app.core.responses import APIResponseHelper
-from app.core.mobile_middleware import (
-    MobileCompatibilityMiddleware,
-    MobileDataOptimizationMiddleware
-)
-from app.middleware.version_middleware import APIVersionMiddleware
 from app.middleware.security_headers_middleware import SecurityHeadersMiddleware # Added import
 from app.middleware.sql_injection_waf import SQLInjectionWAFMiddleware
 from app.core.auth import get_current_user

@@ -11,7 +11,6 @@ from typing import List, Dict, Tuple, Optional, Set
 from datetime import datetime
 import argparse
 import json
-from pathlib import Path
 import logging
 
 logger = logging.getLogger(__name__)

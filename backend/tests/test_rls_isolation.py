@@ -5,13 +5,11 @@ Ensures that database connections properly isolate tenant data
 
 import pytest
 import asyncio
-import threading
 from concurrent.futures import ThreadPoolExecutor
 from sqlalchemy import text
-from sqlalchemy.orm import Session
 from uuid import uuid4
 
-from app.core.database import engine, SessionLocal, RLSContext, get_db_with_rls
+from app.core.database import SessionLocal, RLSContext, get_db_with_rls
 
 
 class TestRLSIsolation:

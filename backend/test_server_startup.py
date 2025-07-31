@@ -3,9 +3,7 @@
 Test server startup and basic API endpoints
 """
 
-import asyncio
 import uvicorn
-import signal
 import sys
 import time
 import requests

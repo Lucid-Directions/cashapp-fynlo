@@ -1,10 +1,9 @@
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
-from typing import Dict
 
 from app.main import app  # Assuming your FastAPI app instance is here
-from app.core.database import Customer, Order, Product
+from app.core.database import Customer, Product
 from app.api.v1.endpoints.auth import create_access_token # For generating tokens
 from app.core.config import settings # For JWT settings
 from datetime import timedelta

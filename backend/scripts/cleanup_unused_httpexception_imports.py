@@ -2,7 +2,6 @@
 """
 Cleanup unused HTTPException imports from API endpoints
 """
-import os
 import re
 from pathlib import Path
 import logging

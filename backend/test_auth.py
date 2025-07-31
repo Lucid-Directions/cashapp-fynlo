@@ -4,7 +4,6 @@ Test authentication endpoint with a sample Supabase token
 """
 
 import requests
-import json
 import logging
 
 logger = logging.getLogger(__name__)

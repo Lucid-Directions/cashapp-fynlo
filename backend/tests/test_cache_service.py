@@ -3,9 +3,7 @@ Test suite for CacheService and caching functionality
 """
 
 import pytest
-import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
-from datetime import datetime
 
 from app.core.cache_service import CacheService, CacheMetrics, cached, cache_service
 from app.core.redis_client import RedisClient
@@ -342,4 +340,3 @@ async def test_cache_integration():
     """Integration test with real cache operations"""
     # This would require a test Redis instance
     # Skipping for now as it requires infrastructure
-    pass

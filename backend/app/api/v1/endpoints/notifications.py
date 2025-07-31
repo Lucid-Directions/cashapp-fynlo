@@ -4,7 +4,7 @@ Device registration, notification sending, and preference management
 """
 
 from typing import List, Optional, Dict, Any
-from fastapi import APIRouter, Depends, Query, Body, Path
+from fastapi import APIRouter, Depends, Query, Body
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field
 from datetime import datetime

@@ -7,7 +7,6 @@ from fastapi import APIRouter, Depends, Header
 from sqlalchemy.orm import Session
 from typing import Optional
 from datetime import datetime
-import uuid
 import logging
 import hmac
 import hashlib
@@ -18,7 +17,7 @@ from app.core.auth import get_current_user
 from app.core.config import settings
 from app.core.responses import APIResponseHelper
 from pydantic import BaseModel, EmailStr
-from app.core.exceptions import ValidationException, AuthenticationException, FynloException, ResourceNotFoundException, ConflictException
+from app.core.exceptions import ValidationException, ResourceNotFoundException
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

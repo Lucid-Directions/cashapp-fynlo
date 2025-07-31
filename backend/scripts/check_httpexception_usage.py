@@ -3,7 +3,6 @@
 Script to check HTTPException usage and suggest FynloException replacements
 """
 
-import os
 import re
 from pathlib import Path
 from typing import List, Tuple

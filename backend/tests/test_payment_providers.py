@@ -5,10 +5,10 @@ Comprehensive tests for payment providers
 import pytest
 import asyncio
 from decimal import Decimal
-from unittest.mock import Mock, patch, AsyncMock
-from datetime import datetime, timedelta
+from unittest.mock import Mock, patch
+from datetime import datetime
 
-from app.services.payment_providers import PaymentProvider, StripeProvider, SquareProvider, SumUpProvider
+from app.services.payment_providers import StripeProvider, SquareProvider, SumUpProvider
 from app.services.payment_factory import PaymentProviderFactory
 from app.services.smart_routing import SmartRoutingService, RoutingStrategy
 from app.services.payment_analytics import PaymentAnalyticsService

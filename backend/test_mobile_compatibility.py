@@ -4,9 +4,6 @@ Test script for Mobile API Compatibility
 Tests Odoo-style endpoints and mobile optimization features
 """
 
-import requests
-import json
-import base64
 from datetime import datetime
 import logging
 

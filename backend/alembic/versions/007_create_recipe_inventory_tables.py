@@ -7,7 +7,6 @@ Create Date: 2024-07-29 10:00:00.000000
 """
 from alembic import op
 import sqlalchemy as sa
-from sqlalchemy.dialects import postgresql
 import logging
 
 logger = logging.getLogger(__name__)

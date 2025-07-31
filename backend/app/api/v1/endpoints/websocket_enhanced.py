@@ -8,12 +8,12 @@ import json
 import logging
 from datetime import datetime
 from typing import Dict, Optional, Set
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, Query
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
 from fastapi.websockets import WebSocketState
 from sqlalchemy.orm import Session
 
 from app.core.auth import verify_websocket_token
-from app.core.database import get_db, User
+from app.core.database import get_db
 from app.schemas.websocket import WebSocketMessage, WebSocketEventType
 from app.services.sync_service import sync_service
 from app.core.rate_limiter import RateLimiter, ConnectionLimiter

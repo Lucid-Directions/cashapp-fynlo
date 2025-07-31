@@ -2,18 +2,14 @@
 Tests for enhanced WebSocket functionality including heartbeat and reconnection
 """
 
-import asyncio
-import json
 import pytest
 from unittest.mock import Mock, AsyncMock, patch
 from datetime import datetime, timedelta
-from fastapi.testclient import TestClient
 from fastapi import WebSocketDisconnect
 
 from app.api.v1.endpoints.websocket_enhanced import (
     EnhancedWebSocketManager,
-    ConnectionInfo,
-    manager
+    ConnectionInfo
 )
 from app.schemas.websocket import WebSocketEventType
 from app.core.rate_limiter import RateLimiter, ConnectionLimiter
@@ -353,7 +349,6 @@ class TestExponentialBackoff:
     
     def test_backoff_calculation(self):
         """Test exponential backoff with jitter"""
-        from app.api.v1.endpoints.websocket_enhanced import EnhancedWebSocketManager
         
         # Can't directly test the frontend TypeScript, but we can verify the concept
         max_delay = 64000

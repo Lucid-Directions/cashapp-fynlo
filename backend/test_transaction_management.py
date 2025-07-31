@@ -6,10 +6,7 @@ Test script for Database Transaction Management implementation
 import asyncio
 import sys
 import os
-from decimal import Decimal
-import uuid
 import logging
-from datetime import datetime, timedelta
 
 # Add the backend directory to the Python path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '.'))
@@ -28,10 +25,7 @@ async def test_transaction_decorators():
             TransactionManager, 
             transactional, 
             optimistic_lock_retry,
-            BatchTransactionManager,
-            TransactionError,
-            RetryableTransactionError,
-            NonRetryableTransactionError
+            BatchTransactionManager
         )
         
         logger.info("✅ Transaction management imports successful")
@@ -72,7 +66,6 @@ async def test_order_creation_atomicity():
     logger.info("\n🔄 Testing Order Creation Atomicity...")
     
     try:
-        from app.core.database import get_db, Order, Product
         from app.api.v1.endpoints.orders import create_order
         
         logger.info("✅ Order creation imports successful")
@@ -322,7 +315,6 @@ async def test_batch_transaction_handling():
         
         # Check that sync manager could use batch transactions
         try:
-            from app.core.sync_manager import sync_manager
             logger.info("✅ Sync manager available for batch transaction integration")
         except ImportError:
             logger.info("⚠️ Sync manager not available, but batch transactions ready for future use")

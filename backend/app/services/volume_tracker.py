@@ -6,12 +6,12 @@ Tracks payment volumes, patterns, and triggers for routing optimization
 import logging
 from datetime import datetime, timedelta
 from decimal import Decimal
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 from dataclasses import dataclass
 from sqlalchemy.orm import Session
-from sqlalchemy import func, text
+from sqlalchemy import func
 
-from app.core.database import Payment, Order, Restaurant
+from app.core.database import Payment, Order
 
 logger = logging.getLogger(__name__)
 

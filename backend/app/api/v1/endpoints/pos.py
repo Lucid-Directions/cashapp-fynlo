@@ -2,12 +2,11 @@
 POS Session Management API endpoints for Fynlo POS
 """
 
-from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from typing import Optional
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 from pydantic import BaseModel
-import uuid
 from datetime import datetime
 
 from app.core.database import get_db, PosSession, User

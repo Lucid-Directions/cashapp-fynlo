@@ -9,9 +9,9 @@ from typing import List, Optional
 
 from app.core.database import get_db
 from app.core.auth import get_current_user
-from app.models import User, Product, Category
+from app.models import User, Product
 from app.core.tenant_security import TenantSecurity
-from app.core.exceptions import ValidationException, AuthenticationException, FynloException, ResourceNotFoundException, ConflictException
+from app.core.exceptions import AuthenticationException, ResourceNotFoundException
 router = APIRouter()
 
 

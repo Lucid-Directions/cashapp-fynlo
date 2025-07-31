@@ -6,15 +6,15 @@ Platform Owners (Ryan and Arnaud) have FULL access to everything.
 All other users are restricted to their own restaurant's data.
 """
 
-from typing import Optional, Union, List
-from fastapi import status, Request
+from typing import Optional, List
+from fastapi import Request
 from sqlalchemy.orm import Session, Query
-from sqlalchemy import select, func
-from app.models import User, Restaurant, UserRestaurant
+from sqlalchemy import func
+from app.models import User, UserRestaurant
 from app.core.security_monitor import security_monitor, SecurityEventType
 from app.core.config import settings
 from app.core.validators import validate_uuid_format
-from app.core.exceptions import ValidationException, AuthenticationException, FynloException, ResourceNotFoundException, ConflictException
+from app.core.exceptions import ValidationException, AuthenticationException
 
 
 class TenantSecurity:

@@ -2,22 +2,20 @@
 Dashboard API endpoints for Fynlo POS - Portal dashboard aggregation
 """
 
-from typing import Optional, List
-from datetime import datetime, date, timedelta
+from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, func, case
-from collections import defaultdict
+from sqlalchemy import func
 import json
 
-from app.core.database import get_db, Restaurant, Order, Product, User, Customer, InventoryItem
-from app.core.exceptions import ValidationException, AuthenticationException, AuthorizationException
+from app.core.database import get_db, Restaurant, Order, User, InventoryItem
+from app.core.exceptions import AuthenticationException
 from app.core.auth import get_current_user
 from app.core.redis_client import get_redis, RedisClient
 from app.core.responses import APIResponseHelper
 from app.services.activity_logger import ActivityLogger
 from app.middleware.rate_limit_middleware import limiter, PORTAL_DASHBOARD_RATE
-from app.core.exceptions import ValidationException, AuthenticationException, FynloException, ResourceNotFoundException, ConflictException
+from app.core.exceptions import AuthenticationException
 
 router = APIRouter()
 

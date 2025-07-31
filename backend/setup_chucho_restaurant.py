@@ -7,7 +7,6 @@ import os
 from sqlalchemy import create_engine, text
 from dotenv import load_dotenv
 from decimal import Decimal
-import json
 import logging
 
 logger = logging.getLogger(__name__)

@@ -4,11 +4,7 @@ Order Processing Business Logic Tests
 import pytest
 from httpx import AsyncClient
 from decimal import Decimal
-import uuid
 from app.main import app
-from tests.fixtures.database import test_db, test_restaurant, test_product, test_user
-from tests.fixtures.auth import auth_headers
-from app.models import Order, OrderItem
 
 
 @pytest.mark.asyncio

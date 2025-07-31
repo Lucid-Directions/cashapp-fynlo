@@ -4,20 +4,17 @@ Database Functionality Test Suite for Fynlo POS
 Tests all database operations and API endpoints after setup
 """
 
-import asyncio
 import sys
 import json
 from pathlib import Path
-from datetime import datetime, timedelta
+from datetime import datetime
 
 # Add the project root to Python path
 project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
 
 from app.core.database import SessionLocal, User, Restaurant, Platform, Product, Order, Category
-from app.core.config import settings
 from app.api.v1.endpoints.auth import authenticate_user, create_access_token
-from sqlalchemy.exc import IntegrityError
 import uuid
 import logging
 

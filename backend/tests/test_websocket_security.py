@@ -6,14 +6,11 @@ Tests authentication, authorization, rate limiting, and multi-tenant isolation
 import asyncio
 import json
 import pytest
-from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock, patch
-from fastapi import WebSocket
+from unittest.mock import MagicMock, patch
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
 from app.main import app
-from app.core.websocket import websocket_manager, WebSocketMessage, EventType
 from app.api.v1.endpoints.websocket import (
     MAX_CONNECTIONS_PER_IP,
     MAX_CONNECTIONS_PER_USER,

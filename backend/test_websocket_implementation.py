@@ -4,11 +4,7 @@ Test script for WebSocket Real-time Events Implementation
 Tests WebSocket connections, message broadcasting, and event handling
 """
 
-import asyncio
-import websockets
 import json
-from datetime import datetime
-import uuid
 import logging
 
 logger = logging.getLogger(__name__)

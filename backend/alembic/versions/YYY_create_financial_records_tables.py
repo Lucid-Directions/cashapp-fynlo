@@ -7,7 +7,6 @@ Create Date: YYYY-MM-DD HH:MM:SS.MS
 """
 from alembic import op
 import sqlalchemy as sa
-from sqlalchemy.dialects import postgresql
 
 revision = 'YYY_create_financial_records_tables' # Placeholder
 down_revision = 'XXX_create_payment_method_settings' # Should be the actual ID of the previous migration

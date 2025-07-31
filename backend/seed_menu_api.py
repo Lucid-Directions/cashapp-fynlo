@@ -17,10 +17,8 @@ Environment Variables:
 """
 
 import requests
-import json
 import sys
 import os
-from decimal import Decimal
 import logging
 
 logger = logging.getLogger(__name__)

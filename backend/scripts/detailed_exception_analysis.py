@@ -4,7 +4,6 @@ Generate detailed exception usage analysis with file and line information
 """
 
 import os
-import re
 from collections import defaultdict
 import logging
 

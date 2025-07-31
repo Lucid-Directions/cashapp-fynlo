@@ -6,7 +6,7 @@ Monitors instance counts and sends alerts for discrepancies.
 import asyncio
 import logging
 from datetime import datetime, timezone
-from typing import Dict, List, Optional, Any
+from typing import Dict, Optional, Any
 import httpx
 
 from app.services.instance_tracker import InstanceTracker

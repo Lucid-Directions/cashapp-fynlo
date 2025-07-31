@@ -6,13 +6,11 @@ Real-time communication for orders, payments, kitchen updates, and notifications
 from typing import Dict, List, Optional, Any
 from fastapi import WebSocket, WebSocketDisconnect
 import json
-import asyncio
 from datetime import datetime
 import uuid
 from enum import Enum
 
 from app.core.exceptions import FynloException, ErrorCodes
-from app.core.responses import APIResponseHelper
 import logging
 
 logger = logging.getLogger(__name__)

@@ -7,19 +7,18 @@ Creates realistic historical transaction data for reports to function properly
 import asyncio
 import sys
 import os
-from datetime import datetime, date, timedelta
+from datetime import datetime, timedelta
 from decimal import Decimal
 import uuid
 import random
-import json
 
 # Add the parent directory to the Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from app.core.database import get_db, engine, SessionLocal
-from app.models import Order, Payment, Customer, Restaurant, Product, User, EmployeeProfile
+from app.core.database import SessionLocal
+from app.models import Order, Payment, Customer, Restaurant, Product, EmployeeProfile
 from sqlalchemy.orm import Session
-from sqlalchemy import select, text
+from sqlalchemy import select
 import logging
 
 logger = logging.getLogger(__name__)

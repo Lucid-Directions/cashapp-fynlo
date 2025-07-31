@@ -7,7 +7,6 @@ Create Date: 2024-01-29 10:00:00.000000
 """
 
 from alembic import op
-import sqlalchemy as sa
 
 # revision identifiers
 revision = '011_add_rls_session_variables'

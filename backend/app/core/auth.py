@@ -5,7 +5,6 @@ Authentication middleware for Supabase integration
 from fastapi import Depends, Header, Request
 from sqlalchemy.orm import Session
 from typing import Optional
-import uuid
 import logging
 from datetime import datetime, timedelta
 from jose import jwt

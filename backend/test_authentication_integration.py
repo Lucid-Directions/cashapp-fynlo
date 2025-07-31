@@ -9,7 +9,7 @@ import json
 import sys
 import time
 from pathlib import Path
-from datetime import datetime, timedelta
+from datetime import timedelta
 import httpx
 import jwt as jwt_lib
 

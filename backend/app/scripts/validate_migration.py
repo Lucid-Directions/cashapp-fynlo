@@ -8,17 +8,15 @@ Checks data integrity, API functionality, and configuration consistency
 import os
 import sys
 import logging
-import json
 import asyncio
 from datetime import datetime, timedelta
-from typing import Dict, Any, List, Tuple, Optional
 from sqlalchemy.orm import Session
-from sqlalchemy import text, and_, func
+from sqlalchemy import text, and_
 
 # Add parent directory to path to import app modules
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from app.core.database import SessionLocal, Restaurant, Platform
+from app.core.database import SessionLocal, Restaurant
 from app.models.platform_config import (
     PlatformConfiguration, 
     RestaurantOverride, 

@@ -12,14 +12,13 @@ from pydantic import BaseModel, Field
 from app.core.database import get_db, User
 from app.core.exceptions import (
     FynloException,
-    PaymentException,
     ResourceNotFoundException,
     ValidationException
 )
 from app.core.auth import get_current_user
 from app.core.responses import APIResponseHelper
 from app.services.platform_service import PlatformSettingsService
-from app.core.exceptions import ValidationException, AuthenticationException, FynloException, ResourceNotFoundException, ConflictException
+from app.core.exceptions import ValidationException, FynloException, ResourceNotFoundException
 
 router = APIRouter()
 

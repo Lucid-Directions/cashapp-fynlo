@@ -14,17 +14,16 @@ import sys
 import os
 from datetime import datetime, date, time, timedelta
 from decimal import Decimal
-from typing import List, Dict, Any
+from typing import List, Dict
 import uuid
 import random
 
 # Add the parent directory to the Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from app.core.database import get_db, Base, engine
+from app.core.database import get_db
 from app.models import *
 from sqlalchemy.orm import Session
-from sqlalchemy import select
 import bcrypt
 import logging
 

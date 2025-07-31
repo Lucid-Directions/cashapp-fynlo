@@ -6,7 +6,7 @@ import re
 import json
 import logging
 from typing import Dict, List, Any, Optional
-from fastapi import Request, Response
+from fastapi import Request
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.datastructures import QueryParams
