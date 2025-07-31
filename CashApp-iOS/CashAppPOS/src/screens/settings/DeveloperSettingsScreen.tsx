@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+
 import {
   StyleSheet,
   Text,
@@ -9,8 +10,10 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import DataService from '../../services/DataService';
 
 const Colors = {
@@ -80,7 +83,7 @@ const DeveloperSettingsScreen: React.FC = () => {
             await dataService.enableRealAPI();
             setFlags(dataService.getFeatureFlags());
             setConnectionStatus(dataService.getConnectionStatus());
-            
+
             if (!connectionStatus.backend) {
               Alert.alert('Warning', 'Backend server is not available. Falling back to mock data.');
             }
@@ -93,10 +96,7 @@ const DeveloperSettingsScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <Icon name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Developer Settings</Text>
@@ -109,18 +109,33 @@ const DeveloperSettingsScreen: React.FC = () => {
           <Text style={styles.sectionTitle}>Connection Status</Text>
           <View style={styles.statusRow}>
             <Text style={styles.statusLabel}>Data Mode:</Text>
-            <View style={[styles.statusBadge, { backgroundColor: connectionStatus.mode === 'REAL' ? Colors.success : Colors.warning }]}>
+            <View
+              style={[
+                styles.statusBadge,
+                {
+                  backgroundColor:
+                    connectionStatus.mode === 'REAL' ? Colors.success : Colors.warning,
+                },
+              ]}
+            >
               <Text style={styles.statusBadgeText}>{connectionStatus.mode}</Text>
             </View>
           </View>
           <View style={styles.statusRow}>
             <Text style={styles.statusLabel}>Backend Available:</Text>
-            <View style={[styles.statusBadge, { backgroundColor: connectionStatus.backend ? Colors.success : Colors.danger }]}>
-              <Text style={styles.statusBadgeText}>{connectionStatus.backend ? 'ONLINE' : 'OFFLINE'}</Text>
+            <View
+              style={[
+                styles.statusBadge,
+                { backgroundColor: connectionStatus.backend ? Colors.success : Colors.danger },
+              ]}
+            >
+              <Text style={styles.statusBadgeText}>
+                {connectionStatus.backend ? 'ONLINE' : 'OFFLINE'}
+              </Text>
             </View>
           </View>
           <Text style={styles.statusHint}>
-            {connectionStatus.backend 
+            {connectionStatus.backend
               ? 'Backend server is running at http://localhost:8000'
               : 'Backend server is not available. Using mock data.'}
           </Text>
@@ -129,7 +144,7 @@ const DeveloperSettingsScreen: React.FC = () => {
         {/* Feature Flags */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Feature Flags</Text>
-          
+
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
               <Text style={styles.settingLabel}>Use Real API</Text>
@@ -194,7 +209,7 @@ const DeveloperSettingsScreen: React.FC = () => {
         {/* Quick Actions */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Quick Actions</Text>
-          
+
           <TouchableOpacity
             style={[styles.actionButton, { backgroundColor: Colors.warning }]}
             onPress={resetToMock}
@@ -216,9 +231,9 @@ const DeveloperSettingsScreen: React.FC = () => {
         <View style={styles.infoCard}>
           <Icon name="info" size={24} color={Colors.secondary} />
           <Text style={styles.infoText}>
-            Developer settings allow you to switch between mock data (for demos) and real API connections. 
-            Changes take effect immediately. Mock data provides a beautiful showcase experience, 
-            while real API connects to your backend server.
+            Developer settings allow you to switch between mock data (for demos) and real API
+            connections. Changes take effect immediately. Mock data provides a beautiful showcase
+            experience, while real API connects to your backend server.
           </Text>
         </View>
       </ScrollView>

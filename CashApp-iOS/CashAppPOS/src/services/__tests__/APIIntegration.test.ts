@@ -26,7 +26,7 @@ describe('API Integration Tests', () => {
       try {
         const response = await fetch(`${API_BASE_URL}/health`);
         expect(response.ok).toBe(true);
-        
+
         const data = await response.json();
         expect(data).toHaveProperty('status');
         expect(data.status).toBe('healthy');
@@ -70,10 +70,10 @@ describe('API Integration Tests', () => {
 
       try {
         const products = await databaseService.getProducts();
-        
+
         // Should return an array (might be empty if no products in DB)
         expect(Array.isArray(products)).toBe(true);
-        
+
         // If products exist, check structure
         if (products.length > 0) {
           const product = products[0];
@@ -82,7 +82,9 @@ describe('API Integration Tests', () => {
           expect(product).toHaveProperty('price');
         }
       } catch (error) {
-        console.log('Products API test failed - this is expected if backend is not fully implemented');
+        console.log(
+          'Products API test failed - this is expected if backend is not fully implemented'
+        );
         // Don't fail the test if endpoint doesn't exist yet
         expect(error).toBeDefined();
       }
@@ -93,16 +95,18 @@ describe('API Integration Tests', () => {
 
       try {
         const categories = await databaseService.getCategories();
-        
+
         expect(Array.isArray(categories)).toBe(true);
-        
+
         if (categories.length > 0) {
           const category = categories[0];
           expect(category).toHaveProperty('id');
           expect(category).toHaveProperty('name');
         }
       } catch (error) {
-        console.log('Categories API test failed - this is expected if backend is not fully implemented');
+        console.log(
+          'Categories API test failed - this is expected if backend is not fully implemented'
+        );
         expect(error).toBeDefined();
       }
     });
@@ -120,20 +124,22 @@ describe('API Integration Tests', () => {
             qty: 1,
             price_unit: 10.99,
             price_subtotal: 10.99,
-          }
+          },
         ],
         amount_total: 10.99,
       };
 
       try {
         const order = await databaseService.createOrder(orderData);
-        
+
         if (order) {
           expect(order).toHaveProperty('id');
           expect(order).toHaveProperty('state');
         }
       } catch (error) {
-        console.log('Order creation API test failed - this is expected if backend is not fully implemented');
+        console.log(
+          'Order creation API test failed - this is expected if backend is not fully implemented'
+        );
         expect(error).toBeDefined();
       }
     });
@@ -143,16 +149,18 @@ describe('API Integration Tests', () => {
 
       try {
         const orders = await databaseService.getRecentOrders(5);
-        
+
         expect(Array.isArray(orders)).toBe(true);
-        
+
         if (orders.length > 0) {
           const order = orders[0];
           expect(order).toHaveProperty('id');
           expect(order).toHaveProperty('date_order');
         }
       } catch (error) {
-        console.log('Recent orders API test failed - this is expected if backend is not fully implemented');
+        console.log(
+          'Recent orders API test failed - this is expected if backend is not fully implemented'
+        );
         expect(error).toBeDefined();
       }
     });
@@ -164,13 +172,15 @@ describe('API Integration Tests', () => {
 
       try {
         const floorPlan = await databaseService.getRestaurantFloorPlan();
-        
+
         expect(floorPlan).toHaveProperty('tables');
         expect(floorPlan).toHaveProperty('sections');
         expect(Array.isArray(floorPlan.tables)).toBe(true);
         expect(Array.isArray(floorPlan.sections)).toBe(true);
       } catch (error) {
-        console.log('Floor plan API test failed - this is expected if backend is not fully implemented');
+        console.log(
+          'Floor plan API test failed - this is expected if backend is not fully implemented'
+        );
         expect(error).toBeDefined();
       }
     });
@@ -182,13 +192,15 @@ describe('API Integration Tests', () => {
 
       try {
         const report = await databaseService.getDailySalesReport();
-        
+
         if (report) {
           expect(report).toHaveProperty('summary');
           expect(report.summary).toHaveProperty('total_sales');
         }
       } catch (error) {
-        console.log('Daily report API test failed - this is expected if backend is not fully implemented');
+        console.log(
+          'Daily report API test failed - this is expected if backend is not fully implemented'
+        );
         expect(error).toBeDefined();
       }
     });
@@ -198,13 +210,15 @@ describe('API Integration Tests', () => {
 
       try {
         const summary = await databaseService.getSalesSummary();
-        
+
         if (summary) {
           expect(summary).toHaveProperty('summary');
           expect(summary).toHaveProperty('period');
         }
       } catch (error) {
-        console.log('Sales summary API test failed - this is expected if backend is not fully implemented');
+        console.log(
+          'Sales summary API test failed - this is expected if backend is not fully implemented'
+        );
         expect(error).toBeDefined();
       }
     });
@@ -216,10 +230,12 @@ describe('API Integration Tests', () => {
 
       try {
         const result = await databaseService.processPayment(123, 'card', 25.99);
-        
+
         expect(typeof result).toBe('boolean');
       } catch (error) {
-        console.log('Payment API test failed - this is expected if backend is not fully implemented');
+        console.log(
+          'Payment API test failed - this is expected if backend is not fully implemented'
+        );
         expect(error).toBeDefined();
       }
     });
@@ -248,7 +264,7 @@ describe('API Integration Tests', () => {
           },
           body: 'invalid json',
         });
-        
+
         // Should return 4xx error for malformed request
         expect(response.status).toBeGreaterThanOrEqual(400);
         expect(response.status).toBeLessThan(500);

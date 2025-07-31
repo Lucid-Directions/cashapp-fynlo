@@ -1,26 +1,41 @@
 import React from 'react';
+
+import { View, ActivityIndicator, StyleSheet } from 'react-native';
+
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
-import { useAuth } from '../contexts/AuthContext';
-import { useAuthStore } from '../store/useAuthStore';
-import { useTheme } from '../design-system/ThemeProvider';
+
 import { isFeatureEnabled } from '../config/featureFlags';
+import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../design-system/ThemeProvider';
 import AuthScreen from '../screens/auth/AuthScreen';
-import MainNavigator from './MainNavigator';
 import ComprehensiveRestaurantOnboardingScreen from '../screens/onboarding/ComprehensiveRestaurantOnboardingScreen';
+import { useAuthStore } from '../store/useAuthStore';
+
+import MainNavigator from './MainNavigator';
 
 const Stack = createStackNavigator();
 
 const AppNavigator: React.FC = () => {
   const { isAuthenticated, isLoading, isPlatformOwner, user } = useAuth();
-  const authStoreUser = useAuthStore(state => state.user);
+  const authStoreUser = useAuthStore((state) => state.user);
   const { theme } = useTheme();
-  
+
   // Check if user needs onboarding
-  const needsOnboarding = authStoreUser?.needs_onboarding || (!authStoreUser?.restaurant_id && authStoreUser?.role !== 'platform_owner');
-  
-  console.log('AppNavigator - User:', user?.email, 'Role:', user?.role, 'isPlatformOwner:', isPlatformOwner, 'needsOnboarding:', needsOnboarding);
+  const needsOnboarding =
+    authStoreUser?.needs_onboarding ||
+    (!authStoreUser?.restaurant_id && authStoreUser?.role !== 'platform_owner');
+
+  console.log(
+    'AppNavigator - User:',
+    user?.email,
+    'Role:',
+    user?.role,
+    'isPlatformOwner:',
+    isPlatformOwner,
+    'needsOnboarding:',
+    needsOnboarding
+  );
 
   if (isLoading) {
     return (

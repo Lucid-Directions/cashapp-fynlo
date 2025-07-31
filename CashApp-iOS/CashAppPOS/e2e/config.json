@@ -5,11 +5,14 @@
   "testRegex": "\\.e2e\\.js$",
   "reporters": [
     "default",
-    ["jest-junit", {
-      "outputDirectory": "e2e/reports",
-      "outputName": "e2e-results.xml",
-      "suiteName": "E2E Tests"
-    }]
+    [
+      "jest-junit",
+      {
+        "outputDirectory": "e2e/reports",
+        "outputName": "e2e-results.xml",
+        "suiteName": "E2E Tests"
+      }
+    ]
   ],
   "setupFilesAfterEnv": ["./e2e/setup.js"],
   "verbose": true

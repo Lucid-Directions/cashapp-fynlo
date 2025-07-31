@@ -1,16 +1,13 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ViewStyle,
-  TextStyle,
-  GestureResponderEvent,
-} from 'react-native';
+
+import type { ViewStyle, GestureResponderEvent } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, TextStyle } from 'react-native';
+
 import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { useTheme } from '../../design-system/ThemeProvider';
-import { Theme } from '../../design-system/theme';
+
+import type { Theme } from '../../design-system/theme';
 
 // List variants
 export type ListVariant = 'default' | 'card' | 'inset';
@@ -68,17 +65,13 @@ export const ListItem: React.FC<ListItemProps> = ({
     >
       {/* Left Content */}
       <View style={styles.leftSection}>
-        {leftContent && (
-          <View style={styles.leftContent}>
-            {leftContent}
-          </View>
-        )}
+        {leftContent && <View style={styles.leftContent}>{leftContent}</View>}
         {leftIcon && !leftContent && (
           <View style={styles.leftIconContainer}>
-            <Icon 
-              name={leftIcon} 
-              size={24} 
-              color={disabled ? theme.colors.neutral[300] : theme.colors.neutral[600]} 
+            <Icon
+              name={leftIcon}
+              size={24}
+              color={disabled ? theme.colors.neutral[300] : theme.colors.neutral[600]}
             />
           </View>
         )}
@@ -86,34 +79,19 @@ export const ListItem: React.FC<ListItemProps> = ({
 
       {/* Main Content */}
       <View style={styles.mainContent}>
-        <Text 
-          style={[
-            styles.title, 
-            disabled && styles.titleDisabled
-          ]}
-          numberOfLines={1}
-        >
+        <Text style={[styles.title, disabled && styles.titleDisabled]} numberOfLines={1}>
           {title}
         </Text>
-        
+
         {subtitle && (
-          <Text 
-            style={[
-              styles.subtitle, 
-              disabled && styles.subtitleDisabled
-            ]}
-            numberOfLines={1}
-          >
+          <Text style={[styles.subtitle, disabled && styles.subtitleDisabled]} numberOfLines={1}>
             {subtitle}
           </Text>
         )}
-        
+
         {description && (
-          <Text 
-            style={[
-              styles.description, 
-              disabled && styles.descriptionDisabled
-            ]}
+          <Text
+            style={[styles.description, disabled && styles.descriptionDisabled]}
             numberOfLines={2}
           >
             {description}
@@ -123,17 +101,13 @@ export const ListItem: React.FC<ListItemProps> = ({
 
       {/* Right Content */}
       <View style={styles.rightSection}>
-        {rightContent && (
-          <View style={styles.rightContent}>
-            {rightContent}
-          </View>
-        )}
+        {rightContent && <View style={styles.rightContent}>{rightContent}</View>}
         {rightIcon && !rightContent && (
           <View style={styles.rightIconContainer}>
-            <Icon 
-              name={rightIcon} 
-              size={20} 
-              color={disabled ? theme.colors.neutral[300] : theme.colors.neutral[400]} 
+            <Icon
+              name={rightIcon}
+              size={20}
+              color={disabled ? theme.colors.neutral[300] : theme.colors.neutral[400]}
             />
           </View>
         )}
@@ -150,12 +124,7 @@ export interface ListHeaderProps {
   style?: ViewStyle;
 }
 
-export const ListHeader: React.FC<ListHeaderProps> = ({
-  title,
-  subtitle,
-  rightContent,
-  style,
-}) => {
+export const ListHeader: React.FC<ListHeaderProps> = ({ title, subtitle, rightContent, style }) => {
   const { theme } = useTheme();
   const styles = createStyles(theme);
 
@@ -163,15 +132,9 @@ export const ListHeader: React.FC<ListHeaderProps> = ({
     <View style={[styles.listHeader, style]}>
       <View style={styles.headerMainContent}>
         <Text style={styles.headerTitle}>{title}</Text>
-        {subtitle && (
-          <Text style={styles.headerSubtitle}>{subtitle}</Text>
-        )}
+        {subtitle && <Text style={styles.headerSubtitle}>{subtitle}</Text>}
       </View>
-      {rightContent && (
-        <View style={styles.headerRightContent}>
-          {rightContent}
-        </View>
-      )}
+      {rightContent && <View style={styles.headerRightContent}>{rightContent}</View>}
     </View>
   );
 };
@@ -184,26 +147,15 @@ export interface ListSectionProps {
   style?: ViewStyle;
 }
 
-export const ListSection: React.FC<ListSectionProps> = ({
-  children,
-  header,
-  footer,
-  style,
-}) => {
+export const ListSection: React.FC<ListSectionProps> = ({ children, header, footer, style }) => {
   const { theme } = useTheme();
   const styles = createStyles(theme);
 
   return (
     <View style={[styles.listSection, style]}>
-      {header && (
-        <Text style={styles.sectionHeader}>{header}</Text>
-      )}
-      <View style={styles.sectionContent}>
-        {children}
-      </View>
-      {footer && (
-        <Text style={styles.sectionFooter}>{footer}</Text>
-      )}
+      {header && <Text style={styles.sectionHeader}>{header}</Text>}
+      <View style={styles.sectionContent}>{children}</View>
+      {footer && <Text style={styles.sectionFooter}>{footer}</Text>}
     </View>
   );
 };
@@ -248,13 +200,11 @@ const List: React.FC<ListProps> = ({
   // Add dividers between children if showDividers is true
   const childrenWithDividers = React.Children.map(children, (child, index) => {
     const isLastChild = index === React.Children.count(children) - 1;
-    
+
     return (
       <React.Fragment key={index}>
         {child}
-        {showDividers && !isLastChild && (
-          <View style={styles.divider} />
-        )}
+        {showDividers && !isLastChild && <View style={styles.divider} />}
       </React.Fragment>
     );
   });

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+
 import {
   StyleSheet,
   Text,
@@ -13,14 +14,17 @@ import {
   RefreshControl,
   ActivityIndicator, // Added
 } from 'react-native';
+
 import DateTimePicker from '@react-native-community/datetimepicker';
-import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
 // import { generateEmployees, EmployeeData } from '../../utils/mockDataGenerator'; // Removed
-import DataService from '../../services/DataService'; // Added
-import { EmployeeData } from '../../types'; // Updated import path
-import { useTheme } from '../../design-system/ThemeProvider';
 import Colors from '../../constants/Colors';
+import { useTheme } from '../../design-system/ThemeProvider';
+import DataService from '../../services/DataService'; // Added
+
+import type { EmployeeData } from '../../types'; // Updated import path
 
 // Get screen dimensions for responsive design
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
@@ -58,11 +62,11 @@ type ViewMode = 'week' | 'day' | 'list' | 'month';
 
 const ROLE_COLORS = {
   Manager: '#00A651',
-  Cashier: '#0066CC', 
+  Cashier: '#0066CC',
   Server: '#F39C12',
   Kitchen: '#E74C3C',
   Cleaner: '#9B59B6',
-  default: '#95A5A6'
+  default: '#95A5A6',
 };
 
 const STATUS_COLORS = {
@@ -85,7 +89,7 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
   const [isLoadingEmployees, setIsLoadingEmployees] = useState<boolean>(true); // Added
   const [isLoadingSchedule, setIsLoadingSchedule] = useState<boolean>(true); // Added
   const [error, setError] = useState<string | null>(null); // Added
-  
+
   // Enhanced Modal States
   const [showAddShiftModal, setShowAddShiftModal] = useState(false);
   const [showEditShiftModal, setShowEditShiftModal] = useState(false);
@@ -93,7 +97,7 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
   const [selectedTimeType, setSelectedTimeType] = useState<'start' | 'end'>('start');
   const [selectedEmployee, setSelectedEmployee] = useState<EmployeeData | null>(null);
   const [showOptionsMenu, setShowOptionsMenu] = useState(false);
-  
+
   // Enhanced Form State
   const [newShift, setNewShift] = useState({
     employeeId: '',
@@ -138,22 +142,22 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
       // Then fetch schedule
       const weekStart = getWeekStart(currentWeek);
       const scheduleData = await dataService.getWeekSchedule(weekStart, employeeData || []);
-      
+
       // Ensure weekStart is properly formatted as a Date object
       if (scheduleData && scheduleData.weekStart) {
         // Convert string date to Date object if needed
-        const weekStartDate = scheduleData.weekStart instanceof Date 
-          ? scheduleData.weekStart 
-          : new Date(scheduleData.weekStart);
-        
+        const weekStartDate =
+          scheduleData.weekStart instanceof Date
+            ? scheduleData.weekStart
+            : new Date(scheduleData.weekStart);
+
         setWeekSchedule({
           weekStart: weekStartDate,
-          shifts: scheduleData.shifts || []
+          shifts: scheduleData.shifts || [],
         });
       } else {
         setWeekSchedule({ weekStart, shifts: [] });
       }
-
     } catch (e: any) {
       setError(e.message || 'Failed to load schedule data.');
       setEmployees([]);
@@ -176,7 +180,8 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
   //   setWeekSchedule({ weekStart, shifts });
   // };
 
-  const onRefresh = async () => { // Modified to call loadData
+  const onRefresh = async () => {
+    // Modified to call loadData
     loadData();
   };
 
@@ -186,7 +191,7 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
       console.error('Invalid date passed to getWeekStart:', date);
       return new Date(); // Return current date as fallback
     }
-    
+
     const weekStart = new Date(date);
     const day = weekStart.getDay();
     const diff = weekStart.getDate() - day + (day === 0 ? -6 : 1); // Monday start
@@ -198,13 +203,13 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
   // const generateEnhancedMockShifts = (weekStart: Date): Shift[] => { // Removed
   //   const shifts: Shift[] = [];
   //   const employeeIds = employees.map(emp => emp.id);
-    
+
   //   // Generate more realistic shifts with breaks, costs, and better coverage
   //   for (let day = 0; day < 7; day++) {
   //     const currentDate = new Date(weekStart);
   //     currentDate.setDate(weekStart.getDate() + day);
   //     const dateStr = currentDate.toISOString().split('T')[0];
-      
+
   //     if (day < 6) { // Monday to Saturday - Full service
   //       // Morning Manager Shift
   //       shifts.push({
@@ -331,24 +336,25 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
   //       });
   //     }
   //   }
-    
+
   //   return shifts;
   // };
 
   const getWeekDays = (): string[] => {
     if (!weekSchedule || !weekSchedule.weekStart) return [];
-    
+
     const days = [];
     // Ensure weekStart is a valid Date object
-    const startDate = weekSchedule.weekStart instanceof Date 
-      ? weekSchedule.weekStart 
-      : new Date(weekSchedule.weekStart);
-    
+    const startDate =
+      weekSchedule.weekStart instanceof Date
+        ? weekSchedule.weekStart
+        : new Date(weekSchedule.weekStart);
+
     if (isNaN(startDate.getTime())) {
       console.error('Invalid weekStart date:', weekSchedule.weekStart);
       return [];
     }
-    
+
     for (let i = 0; i < 7; i++) {
       const day = new Date(startDate);
       day.setDate(startDate.getDate() + i);
@@ -370,7 +376,7 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
   const getShiftsForDay = (dateStr: string): Shift[] => {
     if (!weekSchedule) return [];
     return weekSchedule.shifts
-      .filter(shift => shift.date === dateStr)
+      .filter((shift) => shift.date === dateStr)
       .sort((a, b) => a.startTime.localeCompare(b.startTime));
   };
 
@@ -382,70 +388,71 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
 
   const formatWeekRange = (): string => {
     if (!weekSchedule || !weekSchedule.weekStart) return '';
-    
+
     // Ensure weekStart is a valid Date object
-    const startDate = weekSchedule.weekStart instanceof Date 
-      ? weekSchedule.weekStart 
-      : new Date(weekSchedule.weekStart);
-    
+    const startDate =
+      weekSchedule.weekStart instanceof Date
+        ? weekSchedule.weekStart
+        : new Date(weekSchedule.weekStart);
+
     if (isNaN(startDate.getTime())) {
       console.error('Invalid weekStart date in formatWeekRange:', weekSchedule.weekStart);
       return 'Invalid Date';
     }
-    
+
     const weekEnd = new Date(startDate);
     weekEnd.setDate(startDate.getDate() + 6);
-    
-    const start = startDate.toLocaleDateString('en-US', { 
-      month: 'short', 
-      day: 'numeric' 
-    });
-    const end = weekEnd.toLocaleDateString('en-US', { 
-      month: 'short', 
+
+    const start = startDate.toLocaleDateString('en-US', {
+      month: 'short',
       day: 'numeric',
-      year: 'numeric'
     });
-    
+    const end = weekEnd.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+
     return `${start} - ${end}`;
   };
 
   const calculateWeekSummary = () => {
     if (!weekSchedule) return { totalHours: 0, totalCost: 0, coverage: 0 };
-    
+
     const totalHours = weekSchedule.shifts.reduce((sum, shift) => sum + shift.duration, 0);
     const totalCost = weekSchedule.shifts.reduce((sum, shift) => sum + (shift.laborCost || 0), 0);
-    
+
     // Calculate coverage percentage (simplified)
     const expectedHours = 7 * 14; // 14 hours per day for 7 days
     const coverage = Math.min((totalHours / expectedHours) * 100, 100);
-    
+
     return { totalHours, totalCost, coverage };
   };
 
   const handleAddShift = (date: string) => {
     setSelectedDate(date);
-    setNewShift({ 
-      ...newShift, 
+    setNewShift({
+      ...newShift,
       date,
       startTime: new Date(new Date().setHours(9, 0, 0, 0)),
-      endTime: new Date(new Date().setHours(17, 0, 0, 0))
+      endTime: new Date(new Date().setHours(17, 0, 0, 0)),
     });
     setShowAddShiftModal(true);
   };
 
   const handleShiftPress = (shift: Shift) => {
     setSelectedShift(shift);
-    
+
     // Parse times for editing
     const [startHour, startMin] = shift.startTime.split(':').map(Number);
     const [endHour, endMin] = shift.endTime.split(':').map(Number);
-    
+
     const startTime = new Date();
     startTime.setHours(startHour, startMin, 0, 0);
-    
+
     const endTime = new Date();
     endTime.setHours(endHour, endMin, 0, 0);
-    
+
     setEditShift({
       employeeId: shift.employeeId,
       date: shift.date,
@@ -456,11 +463,11 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
       breakTime: shift.breakTime || 30,
       status: shift.status,
     });
-    
+
     // Find and set the selected employee
-    const employee = employees.find(emp => emp.id === shift.employeeId);
+    const employee = employees.find((emp) => emp.id === shift.employeeId);
     setSelectedEmployee(employee || null);
-    
+
     setShowEditShiftModal(true);
   };
 
@@ -486,7 +493,7 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
       return;
     }
 
-    const employee = employees.find(emp => emp.id === newShift.employeeId);
+    const employee = employees.find((emp) => emp.id === newShift.employeeId);
     if (!employee) return;
 
     // Calculate duration
@@ -511,7 +518,7 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
     if (weekSchedule) {
       setWeekSchedule({
         ...weekSchedule,
-        shifts: [...weekSchedule.shifts, shift]
+        shifts: [...weekSchedule.shifts, shift],
       });
     }
 
@@ -526,11 +533,12 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
       return;
     }
 
-    const employee = employees.find(emp => emp.id === editShift.employeeId);
+    const employee = employees.find((emp) => emp.id === editShift.employeeId);
     if (!employee) return;
 
     // Calculate duration
-    const duration = (editShift.endTime.getTime() - editShift.startTime.getTime()) / (1000 * 60 * 60);
+    const duration =
+      (editShift.endTime.getTime() - editShift.startTime.getTime()) / (1000 * 60 * 60);
     const laborCost = duration * employee.hourlyRate;
 
     const updatedShift: Shift = {
@@ -550,9 +558,9 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
     if (weekSchedule) {
       setWeekSchedule({
         ...weekSchedule,
-        shifts: weekSchedule.shifts.map(shift => 
+        shifts: weekSchedule.shifts.map((shift) =>
           shift.id === selectedShift.id ? updatedShift : shift
-        )
+        ),
       });
     }
 
@@ -564,28 +572,24 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
   const deleteShift = () => {
     if (!selectedShift) return;
 
-    Alert.alert(
-      'Delete Shift',
-      'Are you sure you want to delete this shift?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Delete', 
-          style: 'destructive',
-          onPress: () => {
-            if (weekSchedule) {
-              setWeekSchedule({
-                ...weekSchedule,
-                shifts: weekSchedule.shifts.filter(shift => shift.id !== selectedShift.id)
-              });
-            }
-            setShowEditShiftModal(false);
-            setSelectedShift(null);
-            Alert.alert('Success', 'Shift deleted successfully');
+    Alert.alert('Delete Shift', 'Are you sure you want to delete this shift?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () => {
+          if (weekSchedule) {
+            setWeekSchedule({
+              ...weekSchedule,
+              shifts: weekSchedule.shifts.filter((shift) => shift.id !== selectedShift.id),
+            });
           }
-        }
-      ]
-    );
+          setShowEditShiftModal(false);
+          setSelectedShift(null);
+          Alert.alert('Success', 'Shift deleted successfully');
+        },
+      },
+    ]);
   };
 
   const resetForm = () => {
@@ -603,23 +607,35 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
 
   const getRoleColor = (role: string) => {
     switch (role) {
-      case 'Manager': return Colors.primary;
-      case 'Cashier': return Colors.secondary;
-      case 'Server': return Colors.warning;
-      case 'Kitchen': return Colors.danger;
-      case 'Cleaner': return Colors.mediumGray;
-      default: return Colors.darkGray;
+      case 'Manager':
+        return Colors.primary;
+      case 'Cashier':
+        return Colors.secondary;
+      case 'Server':
+        return Colors.warning;
+      case 'Kitchen':
+        return Colors.danger;
+      case 'Cleaner':
+        return Colors.mediumGray;
+      default:
+        return Colors.darkGray;
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'scheduled': return Colors.warning;
-      case 'confirmed': return Colors.secondary;
-      case 'completed': return Colors.success;
-      case 'absent': return Colors.danger;
-      case 'break': return Colors.mediumGray;
-      default: return Colors.warning;
+      case 'scheduled':
+        return Colors.warning;
+      case 'confirmed':
+        return Colors.secondary;
+      case 'completed':
+        return Colors.success;
+      case 'absent':
+        return Colors.danger;
+      case 'break':
+        return Colors.mediumGray;
+      default:
+        return Colors.warning;
     }
   };
 
@@ -628,21 +644,15 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
       {(['week', 'day', 'list'] as ViewMode[]).map((mode) => (
         <TouchableOpacity
           key={mode}
-          style={[
-            styles.viewModeButton,
-            viewMode === mode && styles.viewModeButtonActive
-          ]}
+          style={[styles.viewModeButton, viewMode === mode && styles.viewModeButtonActive]}
           onPress={() => setViewMode(mode)}
         >
-          <Icon 
-            name={mode === 'week' ? 'view-week' : mode === 'day' ? 'today' : 'list'} 
-            size={20} 
-            color={viewMode === mode ? theme.colors.white : theme.colors.primary} 
+          <Icon
+            name={mode === 'week' ? 'view-week' : mode === 'day' ? 'today' : 'list'}
+            size={20}
+            color={viewMode === mode ? theme.colors.white : theme.colors.primary}
           />
-          <Text style={[
-            styles.viewModeText,
-            viewMode === mode && styles.viewModeTextActive
-          ]}>
+          <Text style={[styles.viewModeText, viewMode === mode && styles.viewModeTextActive]}>
             {mode.charAt(0).toUpperCase() + mode.slice(1)}
           </Text>
         </TouchableOpacity>
@@ -652,7 +662,7 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
 
   const renderWeekSummary = () => {
     const summary = calculateWeekSummary();
-    
+
     return (
       <View style={styles.weekSummary}>
         <View style={styles.summaryItem}>
@@ -664,10 +674,19 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
           <Text style={styles.summaryLabel}>Labor Cost</Text>
         </View>
         <View style={styles.summaryItem}>
-          <Text style={[
-            styles.summaryValue,
-            { color: summary.coverage >= 80 ? '#27AE60' : summary.coverage >= 60 ? '#F39C12' : '#E74C3C' }
-          ]}>
+          <Text
+            style={[
+              styles.summaryValue,
+              {
+                color:
+                  summary.coverage >= 80
+                    ? '#27AE60'
+                    : summary.coverage >= 60
+                    ? '#F39C12'
+                    : '#E74C3C',
+              },
+            ]}
+          >
             {summary.coverage.toFixed(0)}%
           </Text>
           <Text style={styles.summaryLabel}>Coverage</Text>
@@ -679,11 +698,11 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
   const renderDayView = () => {
     const selectedDay = selectedDate || new Date().toISOString().split('T')[0];
     const dayShifts = getShiftsForDay(selectedDay);
-    const dayName = new Date(selectedDay).toLocaleDateString('en-US', { 
-      weekday: 'long', 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
+    const dayName = new Date(selectedDay).toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
     });
 
     // Create hourly timeline
@@ -693,17 +712,14 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
       <ScrollView style={styles.dayViewContainer}>
         <View style={styles.dayViewHeader}>
           <Text style={styles.dayViewTitle}>{dayName}</Text>
-          <TouchableOpacity 
-            style={styles.addShiftFab}
-            onPress={() => handleAddShift(selectedDay)}
-          >
+          <TouchableOpacity style={styles.addShiftFab} onPress={() => handleAddShift(selectedDay)}>
             <Icon name="add" size={24} color={theme.colors.white} />
           </TouchableOpacity>
         </View>
 
         <View style={styles.timelineContainer}>
-          {hours.map(hour => {
-            const hourShifts = dayShifts.filter(shift => {
+          {hours.map((hour) => {
+            const hourShifts = dayShifts.filter((shift) => {
               const startHour = parseInt(shift.startTime.split(':')[0]);
               const endHour = parseInt(shift.endTime.split(':')[0]);
               return hour >= startHour && hour < endHour;
@@ -717,19 +733,17 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
                   </Text>
                 </View>
                 <View style={styles.timelineContent}>
-                  {hourShifts.map(shift => (
+                  {hourShifts.map((shift) => (
                     <TouchableOpacity
                       key={shift.id}
                       style={[
                         styles.timelineShift,
                         { backgroundColor: getRoleColor(shift.role) + '20' },
-                        { borderLeftColor: getRoleColor(shift.role) }
+                        { borderLeftColor: getRoleColor(shift.role) },
                       ]}
                       onPress={() => handleShiftPress(shift)}
                     >
-                      <Text style={styles.timelineShiftEmployee}>
-                        {shift.employeeName}
-                      </Text>
+                      <Text style={styles.timelineShiftEmployee}>{shift.employeeName}</Text>
                       <Text style={styles.timelineShiftDetails}>
                         {shift.startTime} - {shift.endTime} • {shift.role}
                       </Text>
@@ -746,10 +760,10 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
 
   const renderListView = () => {
     const weekDays = getWeekDays();
-    
+
     return (
       <ScrollView style={styles.listViewContainer}>
-        {weekDays.map(date => {
+        {weekDays.map((date) => {
           const dayShifts = getShiftsForDay(date);
           const dayName = getDayName(date);
           const dayNumber = getDayNumber(date);
@@ -760,19 +774,21 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
 
           return (
             <View key={date} style={styles.listDaySection}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={[styles.listDayHeader, (isSelected || isToday) && styles.listTodayHeader]}
                 onPress={() => setSelectedDate(date)}
               >
                 <Text style={[styles.listDayName, (isSelected || isToday) && styles.listTodayText]}>
                   {dayName}, {dayNumber}
                 </Text>
-                <Text style={[styles.listDayCount, (isSelected || isToday) && styles.listTodayText]}>
+                <Text
+                  style={[styles.listDayCount, (isSelected || isToday) && styles.listTodayText]}
+                >
                   {dayShifts.length} shifts
                 </Text>
               </TouchableOpacity>
 
-              {dayShifts.map(shift => (
+              {dayShifts.map((shift) => (
                 <TouchableOpacity
                   key={shift.id}
                   style={styles.listShiftCard}
@@ -782,33 +798,27 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
                     <Text style={styles.listShiftTime}>
                       {shift.startTime} - {shift.endTime}
                     </Text>
-                    <Text style={styles.listShiftDuration}>
-                      {shift.duration}h
-                    </Text>
+                    <Text style={styles.listShiftDuration}>{shift.duration}h</Text>
                   </View>
 
                   <View style={styles.listShiftCenter}>
-                    <Text style={styles.listShiftEmployee}>
-                      {shift.employeeName}
-                    </Text>
+                    <Text style={styles.listShiftEmployee}>{shift.employeeName}</Text>
                     <Text style={[styles.listShiftRole, { color: getRoleColor(shift.role) }]}>
                       {shift.role}
                     </Text>
                   </View>
 
                   <View style={styles.listShiftRight}>
-                    <View style={[
-                      styles.listShiftStatus,
-                      { backgroundColor: getStatusColor(shift.status) }
-                    ]}>
-                      <Text style={styles.listShiftStatusText}>
-                        {shift.status}
-                      </Text>
+                    <View
+                      style={[
+                        styles.listShiftStatus,
+                        { backgroundColor: getStatusColor(shift.status) },
+                      ]}
+                    >
+                      <Text style={styles.listShiftStatusText}>{shift.status}</Text>
                     </View>
                     {shift.laborCost && (
-                      <Text style={styles.listShiftCost}>
-                        £{shift.laborCost.toFixed(0)}
-                      </Text>
+                      <Text style={styles.listShiftCost}>£{shift.laborCost.toFixed(0)}</Text>
                     )}
                   </View>
                 </TouchableOpacity>
@@ -821,23 +831,21 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
   };
 
   const renderEnhancedWeekView = () => (
-    <ScrollView 
-      horizontal 
+    <ScrollView
+      horizontal
       showsHorizontalScrollIndicator={false}
       style={styles.weekViewContainer}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
       {getWeekDays().map((date, index) => {
         const dayShifts = getShiftsForDay(date);
         const isToday = date === new Date().toISOString().split('T')[0];
         const isSelected = date === selectedDate;
         const totalDayHours = dayShifts.reduce((sum, shift) => sum + shift.duration, 0);
-        
+
         return (
           <View key={date} style={styles.enhancedDayColumn}>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[styles.enhancedDayHeader, (isSelected || isToday) && styles.todayHeader]}
               onPress={() => setSelectedDate(date)}
             >
@@ -851,10 +859,10 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
                 {totalDayHours}h
               </Text>
             </TouchableOpacity>
-            
+
             <ScrollView style={styles.enhancedDayContent} showsVerticalScrollIndicator={false}>
               {dayShifts.length === 0 ? (
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.enhancedEmptyDay}
                   onPress={() => handleAddShift(date)}
                 >
@@ -864,11 +872,11 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
               ) : (
                 <>
                   {dayShifts.map((shift) => (
-                    <TouchableOpacity 
-                      key={shift.id} 
+                    <TouchableOpacity
+                      key={shift.id}
                       style={[
                         styles.enhancedShiftCard,
-                        { borderLeftColor: getRoleColor(shift.role) }
+                        { borderLeftColor: getRoleColor(shift.role) },
                       ]}
                       onPress={() => handleShiftPress(shift)}
                     >
@@ -876,38 +884,36 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
                         <Text style={styles.shiftEmployeeName} numberOfLines={1}>
                           {shift.employeeName}
                         </Text>
-                        <View style={[
-                          styles.shiftStatusBadge,
-                          { backgroundColor: getStatusColor(shift.status) }
-                        ]}>
+                        <View
+                          style={[
+                            styles.shiftStatusBadge,
+                            { backgroundColor: getStatusColor(shift.status) },
+                          ]}
+                        >
                           <Text style={styles.shiftStatusText}>
                             {shift.status.charAt(0).toUpperCase()}
                           </Text>
                         </View>
                       </View>
-                      
+
                       <Text style={styles.shiftTime}>
                         {shift.startTime} - {shift.endTime}
                       </Text>
-                      
+
                       <View style={styles.shiftCardFooter}>
                         <Text style={[styles.shiftRole, { color: getRoleColor(shift.role) }]}>
                           {shift.role}
                         </Text>
-                        <Text style={styles.shiftDuration}>
-                          {shift.duration}h
-                        </Text>
+                        <Text style={styles.shiftDuration}>{shift.duration}h</Text>
                       </View>
-                      
+
                       {shift.laborCost && (
-                        <Text style={styles.shiftCost}>
-                          £{shift.laborCost.toFixed(0)}
-                        </Text>
+                        <Text style={styles.shiftCost}>£{shift.laborCost.toFixed(0)}</Text>
                       )}
                     </TouchableOpacity>
                   ))}
-                  
-                  <TouchableOpacity 
+
+                  <TouchableOpacity
                     style={styles.addMoreShiftButton}
                     onPress={() => handleAddShift(date)}
                   >
@@ -932,17 +938,14 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
     >
       <SafeAreaView style={styles.modalContainer}>
         <View style={styles.modalHeader}>
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={() => setShowAddShiftModal(false)}
             style={styles.modalCloseButton}
           >
             <Icon name="close" size={24} color={theme.colors.text} />
           </TouchableOpacity>
           <Text style={styles.modalTitle}>Add New Shift</Text>
-          <TouchableOpacity 
-            onPress={saveShift}
-            style={styles.modalSaveButton}
-          >
+          <TouchableOpacity onPress={saveShift} style={styles.modalSaveButton}>
             <Text style={styles.modalSaveText}>Save</Text>
           </TouchableOpacity>
         </View>
@@ -953,27 +956,31 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
             <Text style={styles.sectionTitle}>Select Employee</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               {employees.map((employee) => (
-                <TouchableOpacity 
+                <TouchableOpacity
                   key={employee.id}
                   style={[
                     styles.employeeSelectionCard,
-                    newShift.employeeId === employee.id && styles.selectedEmployeeCard
+                    newShift.employeeId === employee.id && styles.selectedEmployeeCard,
                   ]}
                   onPress={() => {
                     setNewShift({ ...newShift, employeeId: employee.id });
                     setSelectedEmployee(employee);
                   }}
                 >
-                  <Text style={[
-                    styles.employeeCardName,
-                    newShift.employeeId === employee.id && styles.selectedEmployeeText
-                  ]}>
+                  <Text
+                    style={[
+                      styles.employeeCardName,
+                      newShift.employeeId === employee.id && styles.selectedEmployeeText,
+                    ]}
+                  >
                     {employee.name}
                   </Text>
-                  <Text style={[
-                    styles.employeeCardRole,
-                    newShift.employeeId === employee.id && styles.selectedEmployeeText
-                  ]}>
+                  <Text
+                    style={[
+                      styles.employeeCardRole,
+                      newShift.employeeId === employee.id && styles.selectedEmployeeText,
+                    ]}
+                  >
                     {employee.role} • £{employee.hourlyRate}/hr
                   </Text>
                 </TouchableOpacity>
@@ -986,12 +993,14 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
             <Text style={styles.sectionTitle}>Date</Text>
             <View style={styles.dateDisplay}>
               <Text style={styles.dateDisplayText}>
-                {selectedDate ? new Date(selectedDate).toLocaleDateString('en-US', { 
-                  weekday: 'long', 
-                  year: 'numeric', 
-                  month: 'long', 
-                  day: 'numeric' 
-                }) : 'No date selected'}
+                {selectedDate
+                  ? new Date(selectedDate).toLocaleDateString('en-US', {
+                      weekday: 'long',
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    })
+                  : 'No date selected'}
               </Text>
             </View>
           </View>
@@ -1000,48 +1009,54 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
           <View style={styles.formSection}>
             <Text style={styles.sectionTitle}>Shift Times</Text>
             <View style={styles.timeSelectionRow}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.timeSelector}
                 onPress={() => handleTimePress('start')}
               >
                 <Text style={styles.timeSelectorLabel}>Start Time</Text>
                 <Text style={styles.timeSelectorValue}>
-                  {newShift.startTime.toLocaleTimeString('en-US', { 
-                    hour: '2-digit', 
+                  {newShift.startTime.toLocaleTimeString('en-US', {
+                    hour: '2-digit',
                     minute: '2-digit',
-                    hour12: false 
+                    hour12: false,
                   })}
                 </Text>
               </TouchableOpacity>
-              
-              <TouchableOpacity 
-                style={styles.timeSelector}
-                onPress={() => handleTimePress('end')}
-              >
+
+              <TouchableOpacity style={styles.timeSelector} onPress={() => handleTimePress('end')}>
                 <Text style={styles.timeSelectorLabel}>End Time</Text>
                 <Text style={styles.timeSelectorValue}>
-                  {newShift.endTime.toLocaleTimeString('en-US', { 
-                    hour: '2-digit', 
+                  {newShift.endTime.toLocaleTimeString('en-US', {
+                    hour: '2-digit',
                     minute: '2-digit',
-                    hour12: false 
+                    hour12: false,
                   })}
                 </Text>
               </TouchableOpacity>
             </View>
-            
+
             {/* Duration and Cost Display */}
             {selectedEmployee && (
               <View style={styles.shiftCalculations}>
                 <View style={styles.calculationItem}>
                   <Text style={styles.calculationLabel}>Duration</Text>
                   <Text style={styles.calculationValue}>
-                    {((newShift.endTime.getTime() - newShift.startTime.getTime()) / (1000 * 60 * 60)).toFixed(1)}h
+                    {(
+                      (newShift.endTime.getTime() - newShift.startTime.getTime()) /
+                      (1000 * 60 * 60)
+                    ).toFixed(1)}
+                    h
                   </Text>
                 </View>
                 <View style={styles.calculationItem}>
                   <Text style={styles.calculationLabel}>Labor Cost</Text>
                   <Text style={styles.calculationValue}>
-                    £{(((newShift.endTime.getTime() - newShift.startTime.getTime()) / (1000 * 60 * 60)) * selectedEmployee.hourlyRate).toFixed(2)}
+                    £
+                    {(
+                      ((newShift.endTime.getTime() - newShift.startTime.getTime()) /
+                        (1000 * 60 * 60)) *
+                      selectedEmployee.hourlyRate
+                    ).toFixed(2)}
                   </Text>
                 </View>
               </View>
@@ -1052,24 +1067,28 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
           <View style={styles.formSection}>
             <Text style={styles.sectionTitle}>Role</Text>
             <View style={styles.roleSelection}>
-              {Object.keys(ROLE_COLORS).filter(role => role !== 'default').map((role) => (
-                <TouchableOpacity 
-                  key={role}
-                  style={[
-                    styles.roleButton,
-                    { borderColor: getRoleColor(role) },
-                    newShift.role === role && { backgroundColor: getRoleColor(role) }
-                  ]}
-                  onPress={() => setNewShift({ ...newShift, role })}
-                >
-                  <Text style={[
-                    styles.roleButtonText,
-                    { color: newShift.role === role ? theme.colors.white : getRoleColor(role) }
-                  ]}>
-                    {role}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+              {Object.keys(ROLE_COLORS)
+                .filter((role) => role !== 'default')
+                .map((role) => (
+                  <TouchableOpacity
+                    key={role}
+                    style={[
+                      styles.roleButton,
+                      { borderColor: getRoleColor(role) },
+                      newShift.role === role && { backgroundColor: getRoleColor(role) },
+                    ]}
+                    onPress={() => setNewShift({ ...newShift, role })}
+                  >
+                    <Text
+                      style={[
+                        styles.roleButtonText,
+                        { color: newShift.role === role ? theme.colors.white : getRoleColor(role) },
+                      ]}
+                    >
+                      {role}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
             </View>
           </View>
         </ScrollView>
@@ -1097,7 +1116,7 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
     >
       <SafeAreaView style={styles.editModalContainer}>
         <View style={styles.editModalHeader}>
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={() => setShowEditShiftModal(false)}
             style={styles.modalCloseButton}
           >
@@ -1105,16 +1124,10 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
           </TouchableOpacity>
           <Text style={styles.editModalTitle}>Edit Shift</Text>
           <View style={styles.editModalActions}>
-            <TouchableOpacity 
-              onPress={deleteShift}
-              style={styles.editModalDeleteButton}
-            >
+            <TouchableOpacity onPress={deleteShift} style={styles.editModalDeleteButton}>
               <Text style={styles.editModalDeleteText}>Delete</Text>
             </TouchableOpacity>
-            <TouchableOpacity 
-              onPress={saveEditShift}
-              style={styles.editModalSaveButton}
-            >
+            <TouchableOpacity onPress={saveEditShift} style={styles.editModalSaveButton}>
               <Text style={styles.editModalSaveText}>Save</Text>
             </TouchableOpacity>
           </View>
@@ -1126,27 +1139,31 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
             <Text style={styles.sectionTitle}>Employee</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               {employees.map((employee) => (
-                <TouchableOpacity 
+                <TouchableOpacity
                   key={employee.id}
                   style={[
                     styles.employeeSelectionCard,
-                    editShift.employeeId === employee.id && styles.selectedEmployeeCard
+                    editShift.employeeId === employee.id && styles.selectedEmployeeCard,
                   ]}
                   onPress={() => {
                     setEditShift({ ...editShift, employeeId: employee.id });
                     setSelectedEmployee(employee);
                   }}
                 >
-                  <Text style={[
-                    styles.employeeCardName,
-                    editShift.employeeId === employee.id && styles.selectedEmployeeText
-                  ]}>
+                  <Text
+                    style={[
+                      styles.employeeCardName,
+                      editShift.employeeId === employee.id && styles.selectedEmployeeText,
+                    ]}
+                  >
                     {employee.name}
                   </Text>
-                  <Text style={[
-                    styles.employeeCardRole,
-                    editShift.employeeId === employee.id && styles.selectedEmployeeText
-                  ]}>
+                  <Text
+                    style={[
+                      styles.employeeCardRole,
+                      editShift.employeeId === employee.id && styles.selectedEmployeeText,
+                    ]}
+                  >
                     {employee.role} • £{employee.hourlyRate}/hr
                   </Text>
                 </TouchableOpacity>
@@ -1158,7 +1175,7 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
           <View style={styles.formSection}>
             <Text style={styles.sectionTitle}>Shift Times</Text>
             <View style={styles.timeSelectionRow}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.timeSelector}
                 onPress={() => {
                   setSelectedTimeType('start');
@@ -1167,15 +1184,15 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
               >
                 <Text style={styles.timeSelectorLabel}>Start Time</Text>
                 <Text style={styles.timeSelectorValue}>
-                  {editShift.startTime.toLocaleTimeString('en-US', { 
-                    hour: '2-digit', 
+                  {editShift.startTime.toLocaleTimeString('en-US', {
+                    hour: '2-digit',
                     minute: '2-digit',
-                    hour12: false 
+                    hour12: false,
                   })}
                 </Text>
               </TouchableOpacity>
-              
-              <TouchableOpacity 
+
+              <TouchableOpacity
                 style={styles.timeSelector}
                 onPress={() => {
                   setSelectedTimeType('end');
@@ -1184,28 +1201,37 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
               >
                 <Text style={styles.timeSelectorLabel}>End Time</Text>
                 <Text style={styles.timeSelectorValue}>
-                  {editShift.endTime.toLocaleTimeString('en-US', { 
-                    hour: '2-digit', 
+                  {editShift.endTime.toLocaleTimeString('en-US', {
+                    hour: '2-digit',
                     minute: '2-digit',
-                    hour12: false 
+                    hour12: false,
                   })}
                 </Text>
               </TouchableOpacity>
             </View>
-            
+
             {/* Duration and Cost Display */}
             {selectedEmployee && (
               <View style={styles.shiftCalculations}>
                 <View style={styles.calculationItem}>
                   <Text style={styles.calculationLabel}>Duration</Text>
                   <Text style={styles.calculationValue}>
-                    {((editShift.endTime.getTime() - editShift.startTime.getTime()) / (1000 * 60 * 60)).toFixed(1)}h
+                    {(
+                      (editShift.endTime.getTime() - editShift.startTime.getTime()) /
+                      (1000 * 60 * 60)
+                    ).toFixed(1)}
+                    h
                   </Text>
                 </View>
                 <View style={styles.calculationItem}>
                   <Text style={styles.calculationLabel}>Labor Cost</Text>
                   <Text style={styles.calculationValue}>
-                    £{(((editShift.endTime.getTime() - editShift.startTime.getTime()) / (1000 * 60 * 60)) * selectedEmployee.hourlyRate).toFixed(2)}
+                    £
+                    {(
+                      ((editShift.endTime.getTime() - editShift.startTime.getTime()) /
+                        (1000 * 60 * 60)) *
+                      selectedEmployee.hourlyRate
+                    ).toFixed(2)}
                   </Text>
                 </View>
               </View>
@@ -1216,24 +1242,28 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
           <View style={styles.formSection}>
             <Text style={styles.sectionTitle}>Role</Text>
             <View style={styles.roleSelection}>
-              {Object.keys(ROLE_COLORS).filter(role => role !== 'default').map((role) => (
-                <TouchableOpacity 
-                  key={role}
-                  style={[
-                    styles.roleButton,
-                    { borderColor: getRoleColor(role) },
-                    editShift.role === role && { backgroundColor: getRoleColor(role) }
-                  ]}
-                  onPress={() => setEditShift({ ...editShift, role })}
-                >
-                  <Text style={[
-                    styles.roleButtonText,
-                    { color: editShift.role === role ? Colors.white : getRoleColor(role) }
-                  ]}>
-                    {role}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+              {Object.keys(ROLE_COLORS)
+                .filter((role) => role !== 'default')
+                .map((role) => (
+                  <TouchableOpacity
+                    key={role}
+                    style={[
+                      styles.roleButton,
+                      { borderColor: getRoleColor(role) },
+                      editShift.role === role && { backgroundColor: getRoleColor(role) },
+                    ]}
+                    onPress={() => setEditShift({ ...editShift, role })}
+                  >
+                    <Text
+                      style={[
+                        styles.roleButtonText,
+                        { color: editShift.role === role ? Colors.white : getRoleColor(role) },
+                      ]}
+                    >
+                      {role}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
             </View>
           </View>
 
@@ -1242,19 +1272,23 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
             <Text style={styles.sectionTitle}>Status</Text>
             <View style={styles.roleSelection}>
               {Object.keys(STATUS_COLORS).map((status) => (
-                <TouchableOpacity 
+                <TouchableOpacity
                   key={status}
                   style={[
                     styles.roleButton,
                     { borderColor: getStatusColor(status) },
-                    editShift.status === status && { backgroundColor: getStatusColor(status) }
+                    editShift.status === status && { backgroundColor: getStatusColor(status) },
                   ]}
                   onPress={() => setEditShift({ ...editShift, status: status as any })}
                 >
-                  <Text style={[
-                    styles.roleButtonText,
-                    { color: editShift.status === status ? Colors.white : getStatusColor(status) }
-                  ]}>
+                  <Text
+                    style={[
+                      styles.roleButtonText,
+                      {
+                        color: editShift.status === status ? Colors.white : getStatusColor(status),
+                      },
+                    ]}
+                  >
                     {status.charAt(0).toUpperCase() + status.slice(1)}
                   </Text>
                 </TouchableOpacity>
@@ -1293,21 +1327,18 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
       animationType="fade"
       onRequestClose={() => setShowOptionsMenu(false)}
     >
-      <TouchableOpacity 
-        style={styles.optionsOverlay}
-        onPress={() => setShowOptionsMenu(false)}
-      >
+      <TouchableOpacity style={styles.optionsOverlay} onPress={() => setShowOptionsMenu(false)}>
         <View style={styles.optionsMenu}>
           <TouchableOpacity style={styles.optionItem}>
             <Icon name="content-copy" size={20} color={theme.colors.primary} />
             <Text style={[styles.optionText, { color: theme.colors.text }]}>Copy Week</Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity style={styles.optionItem}>
             <Icon name="publish" size={20} color={theme.colors.success} />
             <Text style={[styles.optionText, { color: theme.colors.text }]}>Publish Schedule</Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity style={styles.optionItem}>
             <Icon name="share" size={20} color={theme.colors.secondary} />
             <Text style={[styles.optionText, { color: theme.colors.text }]}>Share Schedule</Text>
@@ -1324,9 +1355,11 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
 
   if (isLoadingEmployees || isLoadingSchedule) {
     return (
-      <SafeAreaView style={[styles.container, styles.centered, { backgroundColor: theme.colors.background }]}>
+      <SafeAreaView
+        style={[styles.container, styles.centered, { backgroundColor: theme.colors.background }]}
+      >
         <ActivityIndicator size="large" color={theme.colors.primary} />
-        <Text style={[styles.loadingText, {color: theme.colors.text}]}>
+        <Text style={[styles.loadingText, { color: theme.colors.text }]}>
           {isLoadingEmployees ? 'Loading Employees...' : 'Loading Schedule...'}
         </Text>
       </SafeAreaView>
@@ -1335,12 +1368,19 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
 
   if (error) {
     return (
-      <SafeAreaView style={[styles.container, styles.centered, { backgroundColor: theme.colors.background }]}>
+      <SafeAreaView
+        style={[styles.container, styles.centered, { backgroundColor: theme.colors.background }]}
+      >
         <Icon name="error-outline" size={64} color={theme.colors.danger} />
-        <Text style={[styles.errorTextHeader, {color: theme.colors.danger}]}>Error Loading Data</Text>
-        <Text style={[styles.errorText, {color: theme.colors.text}]}>{error}</Text>
-        <TouchableOpacity onPress={loadData} style={[styles.retryButton, {backgroundColor: theme.colors.primary}]}>
-          <Text style={[styles.retryButtonText, {color: theme.colors.white}]}>Try Again</Text>
+        <Text style={[styles.errorTextHeader, { color: theme.colors.danger }]}>
+          Error Loading Data
+        </Text>
+        <Text style={[styles.errorText, { color: theme.colors.text }]}>{error}</Text>
+        <TouchableOpacity
+          onPress={loadData}
+          style={[styles.retryButton, { backgroundColor: theme.colors.primary }]}
+        >
+          <Text style={[styles.retryButtonText, { color: theme.colors.white }]}>Try Again</Text>
         </TouchableOpacity>
       </SafeAreaView>
     );
@@ -1349,25 +1389,21 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <StatusBar barStyle="light-content" backgroundColor={theme.colors.primary} />
-      
+
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <Icon name="arrow-back" size={24} color={theme.colors.white} />
         </TouchableOpacity>
-        
+
         <View style={styles.headerCenter}>
           <Text style={[styles.headerTitle, { color: theme.colors.white }]}>Employee Schedule</Text>
-          <Text style={[styles.headerSubtitle, { color: theme.colors.white }]}>{formatWeekRange()}</Text>
+          <Text style={[styles.headerSubtitle, { color: theme.colors.white }]}>
+            {formatWeekRange()}
+          </Text>
         </View>
-        
-        <TouchableOpacity 
-          style={styles.headerAction}
-          onPress={() => setShowOptionsMenu(true)}
-        >
+
+        <TouchableOpacity style={styles.headerAction} onPress={() => setShowOptionsMenu(true)}>
           <Icon name="more-vert" size={24} color={theme.colors.white} />
         </TouchableOpacity>
       </View>
@@ -1377,21 +1413,13 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
 
       {/* Week Navigation */}
       <View style={[styles.weekNavigation, { backgroundColor: theme.colors.white }]}>
-        <TouchableOpacity 
-          style={styles.navButton}
-          onPress={() => navigateWeek('prev')}
-        >
+        <TouchableOpacity style={styles.navButton} onPress={() => navigateWeek('prev')}>
           <Icon name="chevron-left" size={28} color={theme.colors.primary} />
         </TouchableOpacity>
-        
-        <View style={styles.weekInfo}>
-          {renderWeekSummary()}
-        </View>
-        
-        <TouchableOpacity 
-          style={styles.navButton}
-          onPress={() => navigateWeek('next')}
-        >
+
+        <View style={styles.weekInfo}>{renderWeekSummary()}</View>
+
+        <TouchableOpacity style={styles.navButton} onPress={() => navigateWeek('next')}>
           <Icon name="chevron-right" size={28} color={theme.colors.primary} />
         </TouchableOpacity>
       </View>
@@ -1449,7 +1477,7 @@ const styles = StyleSheet.create({
   headerAction: {
     padding: 8,
   },
-  
+
   // View Mode Selector
   viewModeSelector: {
     flexDirection: 'row',
@@ -1698,7 +1726,7 @@ const styles = StyleSheet.create({
     color: Colors.text,
     marginBottom: 12,
   },
-  
+
   // Employee Selection
   employeeSelectionCard: {
     backgroundColor: Colors.white,
@@ -2070,18 +2098,21 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: Colors.white,
   },
-  centered: { // Added
+  centered: {
+    // Added
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
   },
-  loadingText: { // Added
+  loadingText: {
+    // Added
     marginTop: 10,
     fontSize: getFontSize(16),
     // color: Colors.darkGray, // Theme controlled
   },
-  errorTextHeader: { // Added
+  errorTextHeader: {
+    // Added
     fontSize: getFontSize(18),
     fontWeight: 'bold',
     // color: Colors.danger, // Theme controlled
@@ -2089,19 +2120,22 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     textAlign: 'center',
   },
-  errorText: { // Added
+  errorText: {
+    // Added
     fontSize: getFontSize(14),
     // color: Colors.text, // Theme controlled
     textAlign: 'center',
     marginBottom: 20,
   },
-  retryButton: { // Added
+  retryButton: {
+    // Added
     // backgroundColor: Colors.primary, // Theme controlled
     paddingVertical: 12,
     paddingHorizontal: 30,
     borderRadius: 8,
   },
-  retryButtonText: { // Added
+  retryButtonText: {
+    // Added
     // color: Colors.white, // Theme controlled
     fontSize: getFontSize(16),
     fontWeight: '600',

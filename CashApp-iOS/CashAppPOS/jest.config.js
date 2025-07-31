@@ -6,7 +6,7 @@ module.exports = {
     '<rootDir>/src/**/*.{test,spec}.{js,jsx,ts,tsx}',
     '<rootDir>/__tests__/**/*.{js,jsx,ts,tsx}',
   ],
-  
+
   // Module name mapping for TypeScript paths
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
@@ -19,12 +19,10 @@ module.exports = {
     '^@/utils/(.*)$': '<rootDir>/src/utils/$1',
     '^@/store/(.*)$': '<rootDir>/src/store/$1',
   },
-  
+
   // Setup files
-  setupFilesAfterEnv: [
-    '<rootDir>/jest.setup.js',
-  ],
-  
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+
   // Coverage configuration
   collectCoverage: true,
   collectCoverageFrom: [
@@ -35,7 +33,7 @@ module.exports = {
     '!src/**/*.spec.{js,jsx,ts,tsx}',
     '!src/**/index.{js,jsx,ts,tsx}',
   ],
-  
+
   // Coverage thresholds
   coverageThreshold: {
     global: {
@@ -57,35 +55,30 @@ module.exports = {
       statements: 85,
     },
   },
-  
+
   // Coverage reporters
-  coverageReporters: [
-    'html',
-    'text',
-    'text-summary',
-    'lcov',
-  ],
-  
+  coverageReporters: ['html', 'text', 'text-summary', 'lcov'],
+
   // Coverage directory
   coverageDirectory: '<rootDir>/coverage',
-  
+
   // Transform ignore patterns for node_modules
   transformIgnorePatterns: [
     'node_modules/(?!(react-native|@react-native|react-native-vector-icons|react-native-gesture-handler|react-native-reanimated|@react-navigation|react-native-screens|react-native-safe-area-context)/)',
   ],
-  
+
   // Test environment
   testEnvironment: 'node',
-  
+
   // Clear mocks between tests
   clearMocks: true,
-  
+
   // Restore mocks after each test
   restoreMocks: true,
-  
+
   // Verbose output
   verbose: true,
-  
+
   // Test timeout
   testTimeout: 10000,
 };

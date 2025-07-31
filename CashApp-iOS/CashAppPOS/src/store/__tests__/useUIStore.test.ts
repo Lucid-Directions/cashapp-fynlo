@@ -4,6 +4,7 @@
  */
 
 import { renderHook, act } from '@testing-library/react-native';
+
 import useUIStore from '../useUIStore';
 
 describe('useUIStore', () => {
@@ -21,7 +22,7 @@ describe('useUIStore', () => {
   describe('Initial State', () => {
     it('should have correct initial state', () => {
       const { result } = renderHook(() => useUIStore());
-      
+
       expect(result.current.selectedCategory).toBe('All');
       expect(result.current.showPaymentModal).toBe(false);
       expect(result.current.showOfflineIndicator).toBe(false);
@@ -44,7 +45,7 @@ describe('useUIStore', () => {
       const { result } = renderHook(() => useUIStore());
       const categories = ['All', 'Main', 'Appetizers', 'Salads', 'Sides', 'Desserts', 'Drinks'];
 
-      categories.forEach(category => {
+      categories.forEach((category) => {
         act(() => {
           result.current.setSelectedCategory(category);
         });

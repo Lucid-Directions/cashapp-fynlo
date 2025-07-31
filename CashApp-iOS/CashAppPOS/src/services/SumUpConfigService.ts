@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import { API_CONFIG } from '../config/api';
 import tokenManager from '../utils/tokenManager';
 
@@ -59,7 +60,7 @@ class SumUpConfigService {
       const response = await fetch(`${API_CONFIG.FULL_API_URL}/sumup/initialize`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ mode: 'production' }),
@@ -71,14 +72,14 @@ class SumUpConfigService {
       }
 
       const result: SumUpInitResponse = await response.json();
-      
+
       // Check for success using the actual API response format
       if (result.success && result.data?.config) {
         const config = result.data.config;
-        
+
         // Cache the configuration
         await this.cacheConfig(config);
-        
+
         console.log('✅ SumUp configuration fetched successfully');
         return config;
       } else {
@@ -103,7 +104,7 @@ class SumUpConfigService {
       const response = await fetch(`${API_CONFIG.FULL_API_URL}/sumup/status`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
@@ -133,7 +134,7 @@ class SumUpConfigService {
       const response = await fetch(`${API_CONFIG.FULL_API_URL}/sumup/validate-merchant`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ merchant_code: merchantCode }),
@@ -181,7 +182,7 @@ class SumUpConfigService {
       }
 
       const { config, timestamp } = JSON.parse(cached);
-      
+
       // Check if cache is expired
       if (Date.now() - timestamp > this.configCacheDuration) {
         await AsyncStorage.removeItem(this.configCacheKey);
@@ -205,7 +206,7 @@ class SumUpConfigService {
         config,
         timestamp: Date.now(),
       };
-      
+
       await AsyncStorage.setItem(this.configCacheKey, JSON.stringify(cacheData));
       this.cachedConfig = config;
     } catch (error) {

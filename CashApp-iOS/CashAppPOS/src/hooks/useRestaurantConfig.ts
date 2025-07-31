@@ -1,5 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import RestaurantConfigService, { RestaurantConfig } from '../services/RestaurantConfigService';
+
+import RestaurantConfigService from '../services/RestaurantConfigService';
+
+import type { RestaurantConfig } from '../services/RestaurantConfigService';
 
 export interface UseRestaurantConfigReturn {
   config: RestaurantConfig | null;
@@ -9,7 +12,7 @@ export interface UseRestaurantConfigReturn {
   isOnboardingCompleted: boolean;
   setupProgress: number;
   nextSetupStep: keyof RestaurantConfig['setupSteps'] | null;
-  
+
   // Actions
   updateConfig: (updates: Partial<RestaurantConfig>) => Promise<void>;
   completeSetupStep: (step: keyof RestaurantConfig['setupSteps']) => Promise<void>;
@@ -122,7 +125,7 @@ export const useRestaurantConfig = (): UseRestaurantConfigReturn => {
     isOnboardingCompleted: configService.isOnboardingCompleted(),
     setupProgress: configService.getSetupProgress(),
     nextSetupStep: configService.getNextSetupStep(),
-    
+
     // Actions
     updateConfig,
     completeSetupStep,

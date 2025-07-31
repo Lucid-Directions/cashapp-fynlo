@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+
 import {
   StyleSheet,
   Text,
@@ -10,11 +11,13 @@ import {
   TextInput,
   FlatList,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { useNavigation } from '@react-navigation/native';
-import { useRestaurantDisplayName } from '../../hooks/useRestaurantConfig';
-import Colors from '../../constants/Colors';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { SubscriptionStatusCard } from '../../components/subscription/SubscriptionStatusBadge';
+import Colors from '../../constants/Colors';
+import { useRestaurantDisplayName } from '../../hooks/useRestaurantConfig';
 
 interface SettingsCategory {
   id: string;
@@ -244,13 +247,17 @@ const SettingsScreen: React.FC = () => {
           icon: 'bug-report',
           route: 'SystemDiagnostics',
         },
-        ...__DEV__ ? [{
-          id: 'developer-settings',
-          title: 'Developer Settings',
-          description: 'Mock data, API toggles, and debug options',
-          icon: 'developer-mode',
-          route: 'DeveloperSettings',
-        }] : [],
+        ...(__DEV__
+          ? [
+              {
+                id: 'developer-settings',
+                title: 'Developer Settings',
+                description: 'Mock data, API toggles, and debug options',
+                icon: 'developer-mode',
+                route: 'DeveloperSettings',
+              },
+            ]
+          : []),
       ],
     },
     {
@@ -281,13 +288,15 @@ const SettingsScreen: React.FC = () => {
     if (query.trim() === '') {
       setFilteredCategories(settingsCategories);
     } else {
-      const filtered = settingsCategories.filter(category =>
-        category.title.toLowerCase().includes(query.toLowerCase()) ||
-        category.description.toLowerCase().includes(query.toLowerCase()) ||
-        category.settings.some(setting =>
-          setting.title.toLowerCase().includes(query.toLowerCase()) ||
-          setting.description.toLowerCase().includes(query.toLowerCase())
-        )
+      const filtered = settingsCategories.filter(
+        (category) =>
+          category.title.toLowerCase().includes(query.toLowerCase()) ||
+          category.description.toLowerCase().includes(query.toLowerCase()) ||
+          category.settings.some(
+            (setting) =>
+              setting.title.toLowerCase().includes(query.toLowerCase()) ||
+              setting.description.toLowerCase().includes(query.toLowerCase())
+          )
       );
       setFilteredCategories(filtered);
     }
@@ -306,7 +315,7 @@ const SettingsScreen: React.FC = () => {
       <View style={[styles.categoryIcon, { backgroundColor: `${item.color}15` }]}>
         <Icon name={item.icon} size={32} color={item.color} />
       </View>
-      
+
       <View style={styles.categoryContent}>
         <View style={styles.categoryHeader}>
           <Text style={styles.categoryTitle}>{item.title}</Text>
@@ -317,11 +326,9 @@ const SettingsScreen: React.FC = () => {
           )}
         </View>
         <Text style={styles.categoryDescription}>{item.description}</Text>
-        <Text style={styles.categoryItemCount}>
-          {item.settings.length} settings
-        </Text>
+        <Text style={styles.categoryItemCount}>{item.settings.length} settings</Text>
       </View>
-      
+
       <Icon name="chevron-right" size={24} color={Colors.lightGray} />
     </TouchableOpacity>
   );
@@ -329,22 +336,22 @@ const SettingsScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor={Colors.primary} barStyle="light-content" />
-      
+
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
           activeOpacity={0.7}
         >
           <Icon name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>
-        
+
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle}>{restaurantDisplayName} Settings</Text>
           <Text style={styles.headerSubtitle}>Configure your POS system</Text>
         </View>
-        
+
         <TouchableOpacity style={styles.helpButton}>
           <Icon name="help-outline" size={24} color={Colors.white} />
         </TouchableOpacity>
@@ -373,7 +380,7 @@ const SettingsScreen: React.FC = () => {
       <FlatList
         data={filteredCategories}
         renderItem={renderSettingsCategory}
-        keyExtractor={item => item.id}
+        keyExtractor={(item) => item.id}
         contentContainerStyle={styles.categoriesList}
         showsVerticalScrollIndicator={false}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
@@ -386,9 +393,7 @@ const SettingsScreen: React.FC = () => {
           <View style={styles.emptyState}>
             <Icon name="search-off" size={64} color={Colors.lightGray} />
             <Text style={styles.emptyStateText}>No settings found</Text>
-            <Text style={styles.emptyStateSubtext}>
-              Try adjusting your search terms
-            </Text>
+            <Text style={styles.emptyStateSubtext}>Try adjusting your search terms</Text>
           </View>
         }
       />

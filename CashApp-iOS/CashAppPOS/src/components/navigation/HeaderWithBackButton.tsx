@@ -1,7 +1,10 @@
 import React from 'react';
+
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { useTheme } from '../../design-system/ThemeProvider';
 
 interface HeaderWithBackButtonProps {
@@ -39,20 +42,12 @@ export const HeaderWithBackButton: React.FC<HeaderWithBackButtonProps> = ({
     <View style={[styles.header, { backgroundColor: headerBackgroundColor }]}>
       <View style={styles.leftSection}>
         {showBackButton && (
-          <TouchableOpacity
-            onPress={handleBackPress}
-            style={styles.backButton}
-            activeOpacity={0.7}
-          >
-            <Icon
-              name="arrow-back"
-              size={24}
-              color={headerTextColor}
-            />
+          <TouchableOpacity onPress={handleBackPress} style={styles.backButton} activeOpacity={0.7}>
+            <Icon name="arrow-back" size={24} color={headerTextColor} />
           </TouchableOpacity>
         )}
       </View>
-      
+
       <View style={styles.centerSection}>
         <Text
           style={[styles.title, { color: headerTextColor }]}
@@ -62,10 +57,8 @@ export const HeaderWithBackButton: React.FC<HeaderWithBackButtonProps> = ({
           {title}
         </Text>
       </View>
-      
-      <View style={styles.rightSection}>
-        {rightComponent}
-      </View>
+
+      <View style={styles.rightSection}>{rightComponent}</View>
     </View>
   );
 };

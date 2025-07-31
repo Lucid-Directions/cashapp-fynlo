@@ -1,6 +1,9 @@
 import React, { useState, useRef } from 'react';
+
 import { View, Text, TouchableOpacity, TextInput, StyleSheet, Keyboard } from 'react-native';
+
 import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
 
 interface Props {
@@ -61,7 +64,10 @@ const CategorySearchBubble: React.FC<Props> = ({ onSearchChange, onFocus, style 
   }
 
   return (
-    <View style={[styles.searchContainer, styles.bubbleActive, style]} testID="category-search-bubble-active">
+    <View
+      style={[styles.searchContainer, styles.bubbleActive, style]}
+      testID="category-search-bubble-active"
+    >
       <Icon name="search" size={20} color={theme.colors.primary} style={styles.iconStyle} />
       <TextInput
         ref={inputRef}
@@ -77,7 +83,11 @@ const CategorySearchBubble: React.FC<Props> = ({ onSearchChange, onFocus, style 
         autoFocus={isFocused} // Keep focused if it was programmatically focused
       />
       {query.length > 0 && (
-        <TouchableOpacity onPress={handleClear} style={styles.clearButton} testID="clear-search-button">
+        <TouchableOpacity
+          onPress={handleClear}
+          style={styles.clearButton}
+          testID="clear-search-button"
+        >
           <Icon name="close" size={20} color={theme.colors.textSecondary} />
         </TouchableOpacity>
       )}

@@ -12,23 +12,23 @@ export interface ErrorContext {
 
 export class ErrorLogger {
   private static instance: ErrorLogger;
-  
+
   private constructor() {}
-  
+
   static getInstance(): ErrorLogger {
     if (!ErrorLogger.instance) {
       ErrorLogger.instance = new ErrorLogger();
     }
     return ErrorLogger.instance;
   }
-  
+
   /**
    * Log an error with full context
    */
   logError(error: Error | unknown, context: ErrorContext): void {
     const timestamp = new Date().toISOString();
     const errorDetails = this.formatError(error);
-    
+
     console.error(`
 ❌ ============ ERROR DETAILS ============
 🕐 Timestamp: ${timestamp}
@@ -49,11 +49,11 @@ ${JSON.stringify(context.metadata || {}, null, 2)}
 - App State: ${this.getAppState()}
 ========================================
     `);
-    
+
     // Also log a simplified version for quick scanning
     console.log(`🚨 ${context.operation} failed: ${errorDetails.message}`);
   }
-  
+
   /**
    * Log API request details for debugging
    */
@@ -67,7 +67,7 @@ ${JSON.stringify(context.metadata || {}, null, 2)}
 ==============================
     `);
   }
-  
+
   /**
    * Log API response details
    */
@@ -82,7 +82,7 @@ ${statusEmoji} ======== API RESPONSE ========
 ===============================
     `);
   }
-  
+
   /**
    * Format error object for consistent logging
    */
@@ -95,25 +95,25 @@ ${statusEmoji} ======== API RESPONSE ========
       return {
         type: error.constructor.name,
         message: error.message,
-        stack: error.stack || 'No stack trace available'
+        stack: error.stack || 'No stack trace available',
       };
     }
-    
+
     if (typeof error === 'string') {
       return {
         type: 'String',
         message: error,
-        stack: 'No stack trace available'
+        stack: 'No stack trace available',
       };
     }
-    
+
     return {
       type: 'Unknown',
       message: JSON.stringify(error),
-      stack: 'No stack trace available'
+      stack: 'No stack trace available',
     };
   }
-  
+
   /**
    * Truncate long request/response bodies for logging
    */
@@ -124,7 +124,7 @@ ${statusEmoji} ======== API RESPONSE ========
     }
     return `${body.substring(0, maxLength)}... (truncated, ${body.length} total chars)`;
   }
-  
+
   /**
    * Get current network status (placeholder - implement actual check)
    */
@@ -132,7 +132,7 @@ ${statusEmoji} ======== API RESPONSE ========
     // TODO: Implement actual network status check
     return 'Unknown';
   }
-  
+
   /**
    * Get current app state (placeholder - implement actual check)
    */

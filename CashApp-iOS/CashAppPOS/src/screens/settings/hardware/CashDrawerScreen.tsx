@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+
 import {
   StyleSheet,
   Text,
@@ -9,8 +10,9 @@ import {
   Switch,
   TextInput,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 // Clover POS Color Scheme
 const Colors = {
@@ -41,7 +43,7 @@ interface CashDrawer {
 
 const CashDrawerScreen: React.FC = () => {
   const navigation = useNavigation();
-  
+
   const [cashDrawers, setCashDrawers] = useState<CashDrawer[]>([
     {
       id: 'drawer1',
@@ -116,30 +118,28 @@ const CashDrawerScreen: React.FC = () => {
       return;
     }
 
-    Alert.alert(
-      'Test Cash Drawer',
-      `Open ${drawer.name} for testing?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Open Drawer', onPress: () => {
+    Alert.alert('Test Cash Drawer', `Open ${drawer.name} for testing?`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Open Drawer',
+        onPress: () => {
           Alert.alert('Success', 'Cash drawer opened successfully!');
-        }}
-      ]
-    );
+        },
+      },
+    ]);
   };
 
   const handleManualOpen = () => {
-    Alert.alert(
-      'Manual Open',
-      'Enter manager PIN to manually open cash drawer:',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Open', onPress: () => {
+    Alert.alert('Manual Open', 'Enter manager PIN to manually open cash drawer:', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Open',
+        onPress: () => {
           // In real app, would verify PIN
           Alert.alert('Success', 'Cash drawer opened manually');
-        }}
-      ]
-    );
+        },
+      },
+    ]);
   };
 
   const handleEmergencyOpen = () => {
@@ -148,22 +148,28 @@ const CashDrawerScreen: React.FC = () => {
       'This will open all connected cash drawers immediately. Continue?',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Emergency Open', style: 'destructive', onPress: () => {
-          Alert.alert('Success', 'All cash drawers opened in emergency mode');
-        }}
+        {
+          text: 'Emergency Open',
+          style: 'destructive',
+          onPress: () => {
+            Alert.alert('Success', 'All cash drawers opened in emergency mode');
+          },
+        },
       ]
     );
   };
 
   const toggleDrawerStatus = (drawerId: string) => {
-    setCashDrawers(prev => prev.map(drawer => 
-      drawer.id === drawerId 
-        ? { 
-            ...drawer, 
-            status: drawer.status === 'connected' ? 'disconnected' : 'connected' 
-          }
-        : drawer
-    ));
+    setCashDrawers((prev) =>
+      prev.map((drawer) =>
+        drawer.id === drawerId
+          ? {
+              ...drawer,
+              status: drawer.status === 'connected' ? 'disconnected' : 'connected',
+            }
+          : drawer
+      )
+    );
   };
 
   const CashDrawerCard = ({ drawer }: { drawer: CashDrawer }) => (
@@ -172,33 +178,23 @@ const CashDrawerScreen: React.FC = () => {
         <View style={styles.drawerInfo}>
           <Text style={styles.drawerName}>{drawer.name}</Text>
           <View style={styles.drawerDetails}>
-            <Icon 
-              name={getConnectionIcon(drawer.connection)} 
-              size={16} 
-              color={Colors.lightText} 
-            />
+            <Icon name={getConnectionIcon(drawer.connection)} size={16} color={Colors.lightText} />
             <Text style={styles.drawerConnection}>
-              {drawer.connection === 'printer' ? `Via ${drawer.printerName}` : drawer.connection.toUpperCase()}
+              {drawer.connection === 'printer'
+                ? `Via ${drawer.printerName}`
+                : drawer.connection.toUpperCase()}
             </Text>
           </View>
-          {drawer.model && (
-            <Text style={styles.drawerModel}>{drawer.model}</Text>
-          )}
+          {drawer.model && <Text style={styles.drawerModel}>{drawer.model}</Text>}
           <Text style={styles.drawerLocation}>📍 {drawer.location}</Text>
         </View>
-        
+
         <View style={styles.drawerStatus}>
           <View style={[styles.statusBadge, { backgroundColor: getStatusColor(drawer.status) }]}>
-            <Icon 
-              name={getStatusIcon(drawer.status)} 
-              size={12} 
-              color={Colors.white} 
-            />
-            <Text style={styles.statusText}>
-              {drawer.status.toUpperCase()}
-            </Text>
+            <Icon name={getStatusIcon(drawer.status)} size={12} color={Colors.white} />
+            <Text style={styles.statusText}>{drawer.status.toUpperCase()}</Text>
           </View>
-          
+
           <Switch
             value={drawer.status === 'connected'}
             onValueChange={() => toggleDrawerStatus(drawer.id)}
@@ -210,16 +206,28 @@ const CashDrawerScreen: React.FC = () => {
 
       <View style={styles.drawerActions}>
         <TouchableOpacity
-          style={[styles.actionButton, drawer.status !== 'connected' && styles.actionButtonDisabled]}
+          style={[
+            styles.actionButton,
+            drawer.status !== 'connected' && styles.actionButtonDisabled,
+          ]}
           onPress={() => handleTestDrawer(drawer)}
           disabled={drawer.status !== 'connected'}
         >
-          <Icon name="input" size={16} color={drawer.status === 'connected' ? Colors.primary : Colors.mediumGray} />
-          <Text style={[styles.actionButtonText, drawer.status !== 'connected' && styles.actionButtonTextDisabled]}>
+          <Icon
+            name="input"
+            size={16}
+            color={drawer.status === 'connected' ? Colors.primary : Colors.mediumGray}
+          />
+          <Text
+            style={[
+              styles.actionButtonText,
+              drawer.status !== 'connected' && styles.actionButtonTextDisabled,
+            ]}
+          >
             Test Open
           </Text>
         </TouchableOpacity>
-        
+
         <TouchableOpacity
           style={styles.actionButton}
           onPress={() => Alert.alert('Info', 'Drawer configuration would open here')}
@@ -227,20 +235,20 @@ const CashDrawerScreen: React.FC = () => {
           <Icon name="settings" size={16} color={Colors.secondary} />
           <Text style={styles.actionButtonText}>Configure</Text>
         </TouchableOpacity>
-        
+
         <TouchableOpacity
           style={[styles.actionButton, styles.removeButton]}
           onPress={() => {
-            Alert.alert(
-              'Remove Drawer',
-              `Remove ${drawer.name}?`,
-              [
-                { text: 'Cancel', style: 'cancel' },
-                { text: 'Remove', style: 'destructive', onPress: () => {
-                  setCashDrawers(prev => prev.filter(d => d.id !== drawer.id));
-                }}
-              ]
-            );
+            Alert.alert('Remove Drawer', `Remove ${drawer.name}?`, [
+              { text: 'Cancel', style: 'cancel' },
+              {
+                text: 'Remove',
+                style: 'destructive',
+                onPress: () => {
+                  setCashDrawers((prev) => prev.filter((d) => d.id !== drawer.id));
+                },
+              },
+            ]);
           }}
         >
           <Icon name="delete" size={16} color={Colors.danger} />
@@ -258,7 +266,7 @@ const CashDrawerScreen: React.FC = () => {
           <Icon name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Cash Drawer</Text>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.addButton}
           onPress={() => Alert.alert('Info', 'Add cash drawer functionality coming soon')}
         >
@@ -271,19 +279,13 @@ const CashDrawerScreen: React.FC = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Emergency Controls</Text>
           <View style={styles.emergencyControls}>
-            <TouchableOpacity
-              style={styles.emergencyButton}
-              onPress={handleEmergencyOpen}
-            >
+            <TouchableOpacity style={styles.emergencyButton} onPress={handleEmergencyOpen}>
               <Icon name="warning" size={24} color={Colors.danger} />
               <Text style={styles.emergencyButtonText}>Emergency Open</Text>
               <Text style={styles.emergencyButtonSubtext}>Opens all drawers</Text>
             </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={styles.manualButton}
-              onPress={handleManualOpen}
-            >
+
+            <TouchableOpacity style={styles.manualButton} onPress={handleManualOpen}>
               <Icon name="input" size={24} color={Colors.warning} />
               <Text style={styles.manualButtonText}>Manual Open</Text>
               <Text style={styles.manualButtonSubtext}>Requires PIN</Text>
@@ -405,7 +407,7 @@ const CashDrawerScreen: React.FC = () => {
         {/* Connected Cash Drawers */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Cash Drawers ({cashDrawers.length})</Text>
-          {cashDrawers.map(drawer => (
+          {cashDrawers.map((drawer) => (
             <CashDrawerCard key={drawer.id} drawer={drawer} />
           ))}
         </View>
