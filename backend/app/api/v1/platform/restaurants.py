@@ -3,15 +3,15 @@ Platform restaurant management endpoints.
 """
 
 from datetime import datetime
-from typing import List, Optional
-from fastapi import APIRouter, Depends, Query 
+from typing import Optional
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 
 from app.core.database import get_db, Restaurant, User
 from app.core.auth import get_current_platform_owner
 from app.core.responses import APIResponseHelper
-from app.schemas.restaurant import RestaurantCreate, RestaurantUpdate
+from app.schemas.restaurant import RestaurantResponse
 from app.core.security_utils import sanitize_sql_like_pattern
 
 router = APIRouter(prefix="/restaurants", tags=["platform-restaurants"])

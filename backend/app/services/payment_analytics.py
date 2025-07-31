@@ -6,13 +6,13 @@ Provides detailed insights into payment performance, cost optimization, and prov
 import logging
 from datetime import datetime, timedelta
 from decimal import Decimal
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 from sqlalchemy.orm import Session
-from sqlalchemy import func, text
+from sqlalchemy import func
 from collections import defaultdict
 
-from app.core.database import Payment, Order, Restaurant
-from app.services.payment_providers import PaymentProvider
+from app.core.database import Payment, Order
+from app.services.payment_providers import 
 
 logger = logging.getLogger(__name__)
 

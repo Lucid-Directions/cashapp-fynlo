@@ -2,7 +2,8 @@
 WebSocket endpoints for Fynlo Portal - Real-time updates for web dashboard
 """
 
-from typing import Optional
+from typing import 
+from pydantic import 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, Query, Path
 from sqlalchemy.orm import Session
 import json
@@ -118,7 +119,7 @@ async def websocket_portal_endpoint(
     except Exception as e:
         try:
             await websocket.close(code=4000, reason=f"Connection error: {str(e)}")
-        except:
+        except Exception as e:
             pass
     finally:
         if connection_id:
@@ -232,7 +233,7 @@ async def websocket_platform_endpoint(
     except Exception as e:
         try:
             await websocket.close(code=4000, reason=f"Platform connection error: {str(e)}")
-        except:
+        except Exception as e:
             pass
     finally:
         if connection_id:
@@ -275,7 +276,7 @@ async def handle_portal_update_request(
             }))
             
     except Exception as e:
-        print(f"Portal update request error: {str(e)}")
+        logger.error(f"Portal update request error: {str(e)}")
 
 
 async def handle_platform_stats_request(websocket: WebSocket, db: Session):
@@ -300,4 +301,4 @@ async def handle_platform_stats_request(websocket: WebSocket, db: Session):
         await websocket.send_text(json.dumps(stats))
         
     except Exception as e:
-        print(f"Platform stats request error: {str(e)}")
+        logger.error(f"Platform stats request error: {str(e)}")

@@ -1,4 +1,3 @@
-import base64
 from typing import List, Dict, Any
 
 # Placeholder for ScannedItemResponse if not centrally defined
@@ -26,7 +25,7 @@ class OCRService:
         #     pass # self.client = vision.ImageAnnotatorClient()
         # else:
         #     self.client = None # Mock client or raise error
-        print("OCRService initialized (mock).")
+        logger.info("OCRService initialized (mock).")
 
     async def parse_receipt_image(self, image_bytes: bytes) -> List[Dict[str, Any]]:
         """
@@ -40,7 +39,7 @@ class OCRService:
             A list of dictionaries, where each dictionary represents a parsed line item.
             Example: [{"raw_text": "Milk 1L", "quantity": 1, "price": 2.50}, ...]
         """
-        print(f"OCRService: Received image_bytes of length {len(image_bytes)}")
+        logger.debug(f"OCRService: Received image_bytes of length {len(image_bytes)}")
 
         # Simulate OCR processing delay
         # import asyncio
@@ -94,9 +93,7 @@ class OCRService:
 # ocr_service_instance = OCRService(ocr_provider_config={"provider": "mock"})
 # image_content = b"some image data"
 # parsed_data = await ocr_service_instance.parse_receipt_image(image_content)
-# print(parsed_data)
-
-# Fuzzy matching service would be separate, e.g., in product_service.py or a new fuzzy_matching_service.py
+# # Fuzzy matching service would be separate, e.g., in product_service.py or a new fuzzy_matching_service.py
 # It would take the parsed item names and try to match them against existing product names/SKUs in the database.
 # from fuzzywuzzy import fuzz, process # Example library
 # def find_sku_match(parsed_name: str, product_list: List[Dict[str, str]]) -> Optional[str]:
@@ -112,6 +109,7 @@ class OCRService:
 #     return None
 
 def get_ocr_service():
+    """Execute get_ocr_service operation."""
     # This function can be used for dependency injection in FastAPI
     # It can load configuration for the OCR provider from environment variables or a config file
     # For now, returns a mock instance

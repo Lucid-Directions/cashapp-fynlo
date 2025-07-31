@@ -327,6 +327,7 @@ class PlatformSettingsMigration:
         return False
     
     def create_fee_override(self, restaurant: Restaurant, payment_method: str, 
+        """Execute create_fee_override operation."""
                           restaurant_fee: Any, platform_fee: Any) -> None:
         """Create a restaurant override for custom payment fees"""
         
@@ -462,10 +463,7 @@ For support, contact the development team with this report.
             f.write(report_content)
             
         logger.info(f"Migration report generated: {report_filename}")
-        print(report_content)
-
-
-def main():
+        def main():
     """Main function to run the migration"""
     
     import argparse
@@ -482,12 +480,9 @@ def main():
     dry_run = not args.execute
     
     if not dry_run:
-        print("⚠️  WARNING: This will modify your database!")
-        print("⚠️  Make sure you have a backup before proceeding!")
-        confirmation = input("Are you sure you want to execute the migration? (yes/no): ")
+                        confirmation = input("Are you sure you want to execute the migration? (yes/no): ")
         if confirmation.lower() != 'yes':
-            print("Migration cancelled.")
-            return
+                        return
     
     print(f"Starting migration (DRY RUN: {dry_run})...")
     
@@ -495,12 +490,9 @@ def main():
         success = migration.run_migration()
         
         if success:
-            print("✅ Migration completed successfully!")
-            if dry_run:
-                print("🔄 Run with --execute to perform actual migration")
-        else:
-            print("❌ Migration failed. Check logs for details.")
-            sys.exit(1)
+                        if dry_run:
+                        else:
+                        sys.exit(1)
 
 
 if __name__ == "__main__":

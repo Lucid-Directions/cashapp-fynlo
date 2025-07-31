@@ -128,4 +128,5 @@ class CashProvider(BasePaymentProvider):
         }
 
     def calculate_fee(self, amount: Decimal) -> Decimal:
+        """Execute calculate_fee operation."""
         return Decimal(0) # No processing fees for cash

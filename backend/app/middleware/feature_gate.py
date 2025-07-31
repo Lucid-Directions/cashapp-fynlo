@@ -130,6 +130,7 @@ def require_feature(feature_name: str):
     from fastapi import Query
     
     def feature_dependency(
+        """Execute feature_dependency operation."""
         restaurant_id: int = Query(..., description="Restaurant ID"),
         db: Session = Depends(get_db)
     ):
@@ -166,6 +167,7 @@ def require_usage_limit(limit_type: str, increment: int = 1):
     from fastapi import Query
     
     def usage_dependency(
+        """Execute usage_dependency operation."""
         restaurant_id: int = Query(..., description="Restaurant ID"),
         db: Session = Depends(get_db)
     ):

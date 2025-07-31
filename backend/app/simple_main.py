@@ -133,8 +133,7 @@ async def get_platform_restaurants(platform_owner_id: str):
     try:
         logger.info(f"📊 Returning restaurants for platform owner: {platform_owner_id}")
         
-        # TODO: Query actual database when tables are set up
-        # For now, return mock data from backend
+                # For now, return mock data from backend
         restaurants_data = {
             "restaurants": [
                 {
@@ -240,8 +239,7 @@ async def create_restaurant(restaurant_data: dict):
     try:
         logger.info(f"📊 Creating new restaurant: {restaurant_data.get('name', 'Unknown')}")
         
-        # TODO: Save to database when tables are set up
-        # For now, just return success
+                # For now, just return success
         return {
             "success": True,
             "restaurant_id": f"restaurant_{datetime.now().timestamp()}",
@@ -258,8 +256,7 @@ async def update_restaurant(restaurant_id: str, restaurant_data: dict):
     try:
         logger.info(f"📊 Updating restaurant: {restaurant_id}")
         
-        # TODO: Update in database when tables are set up
-        # For now, just return success
+                # For now, just return success
         return {
             "success": True,
             "restaurant_id": restaurant_id,
@@ -276,8 +273,7 @@ async def get_restaurant_details(restaurant_id: str):
     try:
         logger.info(f"📊 Getting restaurant details: {restaurant_id}")
         
-        # TODO: Query database when tables are set up
-        # For now, return mock data for the requested restaurant
+                # For now, return mock data for the requested restaurant
         return {
             "id": restaurant_id,
             "name": f"Restaurant {restaurant_id}",

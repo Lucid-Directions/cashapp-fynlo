@@ -3,6 +3,7 @@ Dashboard API endpoints for Fynlo POS - Portal dashboard aggregation
 """
 
 from typing import Optional, List
+from pydantic import Field, validator
 from datetime import datetime, date, timedelta
 from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
@@ -92,8 +93,7 @@ async def get_dashboard_metrics(
     avg_order_value = total_revenue / total_orders if total_orders > 0 else 0
     
     # Get top products - TEMPORARILY DISABLED (OrderItem model not available)
-    # TODO: Implement when OrderItem model is added to database
-    top_products_query = []
+        top_products_query = []
     # top_products_query = db.query(
     #     Product.name,
     #     func.sum(OrderItem.quantity).label('total_quantity'),

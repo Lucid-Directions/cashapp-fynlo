@@ -4,7 +4,7 @@ Clean FastAPI implementation for hardware-free restaurant management
 Version: 2.1.0 - Portal alignment with optional PDF exports
 """
 
-from fastapi import FastAPI, Depends, status
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer
 from sqlalchemy.orm import Session
@@ -13,12 +13,12 @@ import logging
 from contextlib import asynccontextmanager
 
 from app.core.config import settings
-from app.core.database import init_db, get_db, User
+from app.core.database import get_db, User
 from app.api.v1.api import api_router
 from app.api.mobile.endpoints import router as mobile_router
-from app.core.redis_client import init_redis, close_redis
-from app.core.websocket import websocket_manager
-from app.core.exceptions import register_exception_handlers
+from app.core.redis_client import close_redis
+from app.core.websocket import 
+from app.core.exceptions import 
 from app.middleware.rate_limit_middleware import init_fastapi_limiter
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -28,8 +28,8 @@ from app.core.mobile_middleware import (
     MobileCompatibilityMiddleware,
     MobileDataOptimizationMiddleware
 )
-from app.middleware.version_middleware import APIVersionMiddleware
-from app.middleware.security_headers_middleware import SecurityHeadersMiddleware # Added import
+from app.middleware.version_middleware import 
+from app.middleware.security_headers_middleware import  # Added import
 from app.middleware.sql_injection_waf import SQLInjectionWAFMiddleware
 from app.core.auth import get_current_user
 from datetime import datetime
@@ -155,6 +155,18 @@ else:
 
 # Ensure unique origins
 allowed_origins = list(set(allowed_origins))
+
+
+# Security headers middleware
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    return response
 
 app.add_middleware(
     CORSMiddleware,
@@ -297,7 +309,7 @@ async def get_employees(
                 message=f"Retrieved {len(employees)} employees"
             )
     except Exception as e:
-        print(f"Error fetching employees: {str(e)}")
+        logger.error(f"Error fetching employees: {str(e)}")
     
     # Fallback to mock data if no real data
     base_date = datetime.now() - timedelta(days=365)

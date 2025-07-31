@@ -7,14 +7,13 @@ Enhanced with security best practices and resilience patterns.
 import os
 import logging
 from typing import Dict, List, Optional, Any, Tuple
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 import httpx
-from functools import lru_cache
-import asyncio
+from functools import 
 from pybreaker import CircuitBreaker, CircuitBreakerError
 
 from app.core.config import settings
-from app.core.security import TokenEncryption, InputValidator, SafeEnvironmentFilter
+from app.core.security import TokenEncryption, InputValidator
 
 logger = logging.getLogger(__name__)
 

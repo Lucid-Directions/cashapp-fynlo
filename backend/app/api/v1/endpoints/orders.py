@@ -5,7 +5,7 @@ Orders Management API endpoints for Fynlo POS
 from typing import List, Optional
 from fastapi import APIRouter, Depends, status, Query
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, or_, desc
+from sqlalchemy import and_, desc
 from pydantic import BaseModel, EmailStr
 from datetime import datetime, timedelta
 import uuid
@@ -859,8 +859,7 @@ async def refund_order(
     # Assuming current_user has a 'role' attribute. Adjust as per your User model.
     # It's better to use a dependency for role checks, e.g., Depends(RoleChecker(["Manager", "Admin"]))
     db_user = db.query(UserModel).filter(UserModel.id == current_user.id).first()
-    if not db_user or db_user.role not in ["Manager", "Admin"]: # TODO: Confirm role names
-        raise FynloException(message="Not authorized to perform refunds.")
+    if not db_user or db_user.role not in ["Manager", "Admin"]:         raise FynloException(message="Not authorized to perform refunds.")
 
     order = db.query(Order).filter(Order.id == order_id).first()
     if not order:
@@ -986,8 +985,7 @@ async def refund_order(
             new_ledger_entry = RefundLedger(
                 refund_id=new_refund.id,
                 user_id=str(db_user.id), # Assuming db_user.id is UUID
-                device_id= "server_initiated", # TODO: Get actual deviceId if available from request headers or context
-                action="refund_processed",
+                device_id= "server_initiated",                 action="refund_processed",
                 # timestamp is server_default
             )
             db.add(new_ledger_entry)

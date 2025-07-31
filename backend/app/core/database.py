@@ -3,12 +3,12 @@ Database configuration and models for Fynlo POS
 PostgreSQL implementation matching frontend data requirements
 """
 
-from sqlalchemy import create_engine, Column, String, Integer, Float, DateTime, Boolean, Text, JSON, ForeignKey, DECIMAL, UniqueConstraint, event
+from sqlalchemy import create_engine, Column, String, Integer, DateTime, Boolean, Text, ForeignKey, DECIMAL, UniqueConstraint, event
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session, relationship
 from sqlalchemy.sql import func
-from sqlalchemy.sql.elements import quoted_name # For GIN index
+from sqlalchemy.sql.elements import  # For GIN index
 import uuid
 from typing import Generator, Optional
 from contextlib import contextmanager

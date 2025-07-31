@@ -7,7 +7,7 @@ subscription plans, and usage tracking.
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
-from typing import List, Optional
+from typing import Optional
 from datetime import datetime, timedelta
 
 from app.core.database import get_db

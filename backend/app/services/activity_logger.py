@@ -34,6 +34,7 @@ class ActivityLogger:
     
     @staticmethod
     def log_activity(
+        """Execute log_activity operation."""
         db: Session,
         user_id: str,
         restaurant_id: Optional[str],
@@ -76,12 +77,13 @@ class ActivityLogger:
             
         except Exception as e:
             db.rollback()
-            print(f"Failed to log activity: {str(e)}")
+            logger.error(f"Failed to log activity: {str(e)}")
             # Don't raise - logging should not break the main operation
             return None
     
     @staticmethod
     def log_export(
+        """Execute log_export operation."""
         db: Session,
         user_id: str,
         restaurant_id: str,
@@ -105,6 +107,7 @@ class ActivityLogger:
     
     @staticmethod
     def log_dashboard_view(
+        """Execute log_dashboard_view operation."""
         db: Session,
         user_id: str,
         restaurant_id: Optional[str],
@@ -126,6 +129,7 @@ class ActivityLogger:
     
     @staticmethod
     def log_settings_change(
+        """Execute log_settings_change operation."""
         db: Session,
         user_id: str,
         restaurant_id: str,
@@ -149,6 +153,7 @@ class ActivityLogger:
     
     @staticmethod
     def log_user_management(
+        """Execute log_user_management operation."""
         db: Session,
         user_id: str,
         restaurant_id: str,
@@ -177,6 +182,7 @@ class ActivityLogger:
     
     @staticmethod
     def log_restaurant_management(
+        """Execute log_restaurant_management operation."""
         db: Session,
         user_id: str,
         restaurant_id: str,
@@ -204,6 +210,7 @@ class ActivityLogger:
     
     @staticmethod
     def get_activity_logs(
+        """Execute get_activity_logs operation."""
         db: Session,
         restaurant_id: Optional[str] = None,
         user_id: Optional[str] = None,

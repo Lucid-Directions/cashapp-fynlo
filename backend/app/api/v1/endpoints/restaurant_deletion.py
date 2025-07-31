@@ -4,10 +4,11 @@ Validates that a restaurant can be safely deleted without breaking critical depe
 """
 
 from fastapi import APIRouter, Depends, status
+from pydantic import 
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, func
 from datetime import datetime, timedelta
-from typing import Dict, List
+from typing import 
 
 from app.core.database import get_db, Restaurant, User, Order, Payment, InventoryItem, UserRestaurant
 from app.core.auth import get_current_user

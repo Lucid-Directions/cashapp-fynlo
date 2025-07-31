@@ -5,10 +5,10 @@ Provides fast access to frequently requested configuration
 import json
 import logging
 from typing import Dict, Any, Optional
-from datetime import timedelta
+from datetime import 
 
 from app.core.redis_client import get_redis
-from app.core.config import settings
+from app.core.config import 
 
 logger = logging.getLogger(__name__)
 

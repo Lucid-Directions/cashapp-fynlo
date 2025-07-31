@@ -3,11 +3,11 @@ Enhanced Exception Handling for Fynlo POS
 iOS-friendly error management with detailed error information
 """
 
-from typing import Any, Dict, Optional, List
+from typing import Any, Dict, Optional
 from fastapi import Request, HTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from pydantic import ValidationError
+from pydantic import BaseModel
 import logging
 import traceback
 import uuid

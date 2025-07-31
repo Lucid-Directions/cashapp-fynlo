@@ -2,15 +2,14 @@
 Secure Payment Processing Service
 Handles payment processing with automatic fallback and comprehensive security
 """
-import asyncio
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional
 from decimal import Decimal
 from datetime import datetime
 from sqlalchemy.orm import Session
-from sqlalchemy import Column, String, DateTime, DECIMAL, Text, Boolean, Enum as SQLEnum
+from sqlalchemy import Column, String, DateTime, DECIMAL, Text
 import uuid
 import logging
-from enum import Enum
+from enum import 
 
 from app.core.database import Base
 from app.core.exceptions import FynloException

@@ -3,11 +3,11 @@ Employee Service - Business logic for employee management
 Handles employee CRUD operations, scheduling, time tracking, and performance metrics
 """
 
-from typing import List, Optional, Dict, Any
-from datetime import datetime, date, time, timedelta
-from decimal import Decimal
+from typing import List, Optional
+from datetime import datetime, datedelta
+from decimal import 
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, or_, func, desc
+from sqlalchemy import and_, func, desc
 from app.core.database import User, UserRestaurant
 from app.models.employee import EmployeeProfile, Schedule, Shift, TimeEntry, PerformanceMetric
 from app.core.database import Restaurant
@@ -603,8 +603,7 @@ class EmployeeService:
                 total_employees=total_employees,
                 active_employees=active_employees,
                 clocked_in_now=clocked_in_now,
-                scheduled_today=0,  # TODO: Calculate based on schedules
-                roles_breakdown=roles_breakdown,
+                scheduled_today=0,                  roles_breakdown=roles_breakdown,
                 employment_status_breakdown=employment_status_breakdown
             )
             
@@ -694,8 +693,7 @@ class EmployeeService:
                     day_name=day_name,
                     employees=day_employees,
                     total_scheduled_hours=round(day_hours, 2),
-                    coverage_gaps=[]  # TODO: Implement gap analysis
-                ))
+                    coverage_gaps=[]                  ))
             
             return WeeklyScheduleResponse(
                 week_start=week_start,

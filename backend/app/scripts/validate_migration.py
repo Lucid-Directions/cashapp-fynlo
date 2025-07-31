@@ -553,23 +553,18 @@ For support, contact the development team with this report.
         with open(report_filename, 'w') as f:
             f.write(report_content)
         
-        print(report_content)
-        logger.info(f"Validation report generated: {report_filename}")
+                logger.info(f"Validation report generated: {report_filename}")
 
 
 def main():
     """Main function to run the validation"""
     
-    print("Starting migration validation...")
-    
-    with MigrationValidator() as validator:
+        with MigrationValidator() as validator:
         success = validator.run_validation()
         
         if success:
-            print("✅ Migration validation passed!")
-        else:
-            print("❌ Migration validation failed. Check the report for details.")
-            sys.exit(1)
+                    else:
+                        sys.exit(1)
 
 
 if __name__ == "__main__":

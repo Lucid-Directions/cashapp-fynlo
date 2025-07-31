@@ -55,8 +55,7 @@ class SecurePaymentConfigService:
             if os.environ.get('ENVIRONMENT', 'development') == 'development':
                 # Fixed development key - prevents losing encrypted data on restart
                 encryption_key = "8J5AOuMMykQkzj6EU5Z8QgPYLE1Aye4OuIjUER2b8w0="
-                print(f"WARNING: Using fixed development encryption key. Set PAYMENT_CONFIG_ENCRYPTION_KEY in production!")
-            else:
+                            else:
                 raise ValueError("PAYMENT_CONFIG_ENCRYPTION_KEY environment variable not set")
         
         # Handle both string and bytes format
@@ -80,6 +79,7 @@ class SecurePaymentConfigService:
         self.cipher = Fernet(encryption_key)
     
     def store_provider_config(
+        """Execute store_provider_config operation."""
         self,
         provider: str,
         restaurant_id: str,
@@ -147,6 +147,7 @@ class SecurePaymentConfigService:
             raise FynloException(f"Failed to store payment config: {str(e)}")
     
     def get_provider_config(
+        """Execute get_provider_config operation."""
         self,
         provider: str,
         restaurant_id: str,
@@ -198,6 +199,7 @@ class SecurePaymentConfigService:
         }
     
     def list_provider_configs(
+        """Execute list_provider_configs operation."""
         self,
         restaurant_id: str,
         include_disabled: bool = False
@@ -343,7 +345,7 @@ class SecurePaymentConfigService:
                 count += 1
                 
             except Exception as e:
-                print(f"Failed to rotate key for config {config.id}: {str(e)}")
+                logger.error(f"Failed to rotate key for config {config.id}: {str(e)}")
                 continue
         
         # Commit all changes

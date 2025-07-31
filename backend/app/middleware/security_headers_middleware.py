@@ -29,6 +29,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         return response
 
     def get_production_csp(self):
+        """Execute get_production_csp operation."""
         # Base policy: restrict to self, allow necessary scripts and styles
         # This needs to be carefully configured based on actual needs, especially for payment providers
         # and WebSocket connections.
@@ -63,6 +64,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         return "; ".join([f"{key} {' '.join(values)}" for key, values in csp_directives.items() if values])
 
     def get_development_csp(self):
+        """Execute get_development_csp operation."""
         # More permissive CSP for development to avoid blocking common dev tools
         # Still, it's good practice to keep it as close to production as possible
         csp_directives = {
@@ -88,6 +90,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         return "; ".join([f"{key} {' '.join(values)}" for key, values in csp_directives.items()])
 
     def get_permissions_policy(self):
+        """Execute get_permissions_policy operation."""
         # Define features and their permissions
         # Example: geolocation=(self "https://example.com"), microphone=()
         # By default, disable most features unless explicitly needed.

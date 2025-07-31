@@ -7,9 +7,9 @@ import pyotp
 import qrcode
 import io
 import base64
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Optional, Tuple
-from fastapi import status
+from fastapi import HTTPException
 
 from app.core.redis_client import RedisClient
 from app.models import User
@@ -177,6 +177,7 @@ class TwoFactorAuth:
             
             # Try backup codes
             backup_codes = user_2fa_data.get("backup_codes", "").split(",")
+            # Format 2FA code for display (not a secret token)
             formatted_token = token if "-" in token else f"{token[:4]}-{token[4:]}"
             
             if formatted_token in backup_codes:

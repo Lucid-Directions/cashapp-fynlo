@@ -4,18 +4,16 @@ Tracks metrics, health, and sends alerts for payment-related issues
 """
 
 import logging
-import asyncio
 import time
 from datetime import datetime, timedelta
-from decimal import Decimal
+from decimal import 
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 from enum import Enum
-import json
 import httpx
 from sqlalchemy.orm import Session
 
-from app.core.database import Payment, Order, Restaurant
+from app.core.database import Restaurant
 from app.services.payment_analytics import PaymentAnalyticsService
 from app.services.volume_tracker import VolumeTracker
 from app.services.config_manager import config_manager

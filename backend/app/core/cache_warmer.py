@@ -6,14 +6,14 @@ Pre-populates cache with frequently accessed data to improve performance.
 import asyncio
 import logging
 from datetime import datetime
-from typing import Optional
+from typing import 
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 
 from app.core.cache_service import cache_service
-from app.core.database import get_db
+from app.core.database import 
 from app.models import Restaurant, Product, Category
-from app.core.config import settings
+from app.core.config import 
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +50,7 @@ class CacheWarmer:
         
         try:
             # Get all active restaurants - avoid User model to prevent relationship issues
-            from sqlalchemy.orm import Query
+from sqlalchemy.orm import 
             restaurants = db.query(Restaurant).filter(
                 Restaurant.is_active == True
             ).all()

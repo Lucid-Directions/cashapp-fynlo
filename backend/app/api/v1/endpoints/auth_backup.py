@@ -4,7 +4,7 @@ Authentication endpoints for Fynlo POS
 
 from datetime import datetime, timedelta
 from typing import Optional
-from fastapi import APIRouter, Depends, status, Request
+from fastapi import APIRouter, Depends, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from jose import JWTError, jwt

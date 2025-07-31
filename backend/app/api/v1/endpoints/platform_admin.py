@@ -7,7 +7,6 @@ from fastapi import APIRouter, Depends, Header
 from sqlalchemy.orm import Session
 from typing import Optional
 from datetime import datetime
-import uuid
 import logging
 import hmac
 import hashlib

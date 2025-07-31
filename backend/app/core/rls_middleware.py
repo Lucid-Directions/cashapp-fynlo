@@ -106,14 +106,14 @@ class RLSMiddleware(BaseHTTPMiddleware):
             if db and user:
                 try:
                     await RLSSessionContext.clear_tenant_context(db)
-                except:
+                except Exception as e:
                     pass  # Don't break on cleanup errors
             
             # Close DB session if we opened it
             if db:
                 try:
                     db.close()
-                except:
+                except Exception as e:
                     pass
 
 

@@ -76,6 +76,7 @@ class OnboardingHelper:
     
     @staticmethod
     def handle_onboarding_response(user: Optional[User], resource_type: str, 
+        """Execute handle_onboarding_response operation."""
                                    endpoint_requires_restaurant: bool = True):
         """
         Handle API response for onboarding users

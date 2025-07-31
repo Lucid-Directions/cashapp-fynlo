@@ -79,6 +79,7 @@ class PaymentProvider(ABC):
         pass
     
     def standardize_response(
+        """Execute standardize_response operation."""
         self,
         provider_response: Dict[str, Any],
         status: PaymentStatus,

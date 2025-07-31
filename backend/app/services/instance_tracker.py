@@ -4,7 +4,7 @@ Tracks instances using Redis with heartbeat mechanism.
 """
 
 import asyncio
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 import os
 import socket
 import secrets

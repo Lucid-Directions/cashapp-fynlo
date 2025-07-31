@@ -7,10 +7,10 @@ from datetime import datetime, date, timedelta
 from decimal import Decimal
 from typing import Dict, List, Optional
 from sqlalchemy.orm import Session
-from sqlalchemy import func, and_, or_
+from sqlalchemy import func, and_
 import logging
 
-from app.core.database import Order, OrderItem, User, DailyReport, HourlyMetric
+from app.core.database import Order, User, DailyReport, HourlyMetric
 from app.models.reports import DailyReport, HourlyMetric
 
 logger = logging.getLogger(__name__)

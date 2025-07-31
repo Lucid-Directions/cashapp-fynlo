@@ -6,7 +6,7 @@ Provides decorators and utilities for atomic operations and rollback handling.
 import functools
 import logging
 from contextlib import asynccontextmanager
-from typing import Any, Callable, Optional, Type, Union
+from typing import Any, Callable
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError, DisconnectionError
 import asyncio
@@ -170,6 +170,7 @@ def transactional(max_retries: int = 3, retry_delay: float = 0.1):
             # etc.
     """
     def decorator(func: Callable) -> Callable:
+        """Execute decorator operation."""
         @functools.wraps(func)
         async def wrapper(*args, **kwargs):
             # Extract db session from arguments
@@ -211,6 +212,7 @@ def optimistic_lock_retry(version_field: str = 'version', max_retries: int = 5):
             # If another process updated the product, this will fail and retry
     """
     def decorator(func: Callable) -> Callable:
+        """Execute decorator operation."""
         @functools.wraps(func)
         async def wrapper(*args, **kwargs):
             for attempt in range(max_retries + 1):

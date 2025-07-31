@@ -4,7 +4,8 @@ Provides real-time visibility into replica counts and system health.
 Enhanced with strict input validation and security measures.
 """
 
-from fastapi import APIRouter, Depends, BackgroundTasks, Query, Body, Request
+from fastapi import APIRouter, Depends, BackgroundTasks, Body, Request
+from pydantic import 
 from datetime import datetime, timezone
 from typing import Dict, Any, List
 import logging
@@ -334,7 +335,7 @@ def _is_instance_active(instance: Dict[str, Any]) -> bool:
         last_heartbeat = datetime.fromisoformat(last_heartbeat_str)
         age_seconds = (datetime.now(timezone.utc) - last_heartbeat).total_seconds()
         return age_seconds <= 60  # Active if heartbeat within 60 seconds
-    except:
+    except Exception as e:
         return False
 
 

@@ -4,12 +4,13 @@ This demonstrates how to fix the vulnerability in the existing products.py
 """
 
 from fastapi import APIRouter, Depends, Query
+from pydantic import 
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
 from app.core.database import get_db
 from app.core.auth import get_current_user
-from app.models import User, Product, Category
+from app.models import User, Product
 from app.core.tenant_security import TenantSecurity
 from app.core.exceptions import AuthorizationException, ResourceNotFoundException
 

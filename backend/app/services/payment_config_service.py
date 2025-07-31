@@ -18,6 +18,7 @@ class PaymentConfigService:
         self.db = db
 
     def get_payment_method_setting(
+        """Execute get_payment_method_setting operation."""
         self,
         payment_method: PaymentMethodEnum,
         restaurant_id: Optional[str] = None

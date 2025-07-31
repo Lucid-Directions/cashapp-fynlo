@@ -8,7 +8,7 @@ import logging
 from datetime import datetime
 from enum import Enum
 from typing import Optional, Dict, Any
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import 
 
 from app.core.redis_client import RedisClient
 from app.models import User

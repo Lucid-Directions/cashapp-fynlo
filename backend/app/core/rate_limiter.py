@@ -135,6 +135,7 @@ class ConnectionLimiter:
         self.user_connections: Dict[str, set] = {}
         
     def check_connection_allowed(
+        """Execute check_connection_allowed operation."""
         self, 
         ip_address: str, 
         user_id: str,

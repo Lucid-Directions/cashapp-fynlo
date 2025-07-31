@@ -3,12 +3,12 @@ Optimized Menu API endpoints with caching and performance improvements
 """
 
 from typing import List, Optional
+from pydantic import 
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import 
 from sqlalchemy.orm import selectinload, Session
-from sqlalchemy import select, func, and_
+from sqlalchemy import func, and_
 import json
-import asyncio
 from datetime import datetime
 import logging
 
@@ -52,6 +52,7 @@ class MenuItemResponse:
         self.updated_at = product.updated_at.isoformat()
     
     def dict(self):
+        """Execute dict operation."""
         return {
             "id": self.id,
             "name": self.name,
@@ -85,6 +86,7 @@ class CategoryResponse:
         self.updated_at = category.updated_at.isoformat() if hasattr(category, 'updated_at') else datetime.now().isoformat()
     
     def dict(self):
+        """Execute dict operation."""
         return {
             "id": self.id,
             "name": self.name,

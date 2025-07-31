@@ -2,7 +2,7 @@
 Restaurant schemas for Fynlo POS
 """
 
-from typing import Optional, Dict, Any, List
+from typing import Optional, List
 from datetime import datetime
 from pydantic import BaseModel, EmailStr
 

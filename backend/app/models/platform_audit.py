@@ -45,6 +45,7 @@ class PlatformAuditLog(Base):
 
 
 def create_audit_log(
+    """Execute create_audit_log operation."""
     db: Session,
     user_id: str,
     action: str,
@@ -189,6 +190,7 @@ async def get_audit_logs(
 
 
 def get_audit_summary(
+    """Execute get_audit_summary operation."""
     db: Session,
     days: int = 30
 ) -> Dict[str, Any]:

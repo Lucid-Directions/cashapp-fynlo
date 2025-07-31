@@ -3,12 +3,12 @@ Enhanced WebSocket Security with TenantSecurity module
 Ensures proper isolation while maintaining platform owner access
 """
 
-from fastapi import WebSocket, WebSocketDisconnect, Path, Query, Depends
-from sqlalchemy.orm import Session
-from typing import Optional, Tuple
+from fastapi import 
+from sqlalchemy.orm import 
+from typing import Optional
 import logging
 
-from app.core.database import get_db, User, Restaurant
+from app.core.database import User
 from app.core.tenant_security import TenantSecurity
 from app.core.websocket import websocket_manager
 

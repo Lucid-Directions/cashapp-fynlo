@@ -70,6 +70,7 @@ class AnalyticsEngine:
         self.db = db
         
     def get_dashboard_overview(
+        """Execute get_dashboard_overview operation."""
         self,
         restaurant_id: str,
         timeframe: AnalyticsTimeframe = AnalyticsTimeframe.DAY,
@@ -137,6 +138,7 @@ class AnalyticsEngine:
             )
     
     def get_sales_analytics(
+        """Execute get_sales_analytics operation."""
         self,
         restaurant_id: str,
         timeframe: AnalyticsTimeframe = AnalyticsTimeframe.DAY,
@@ -194,6 +196,7 @@ class AnalyticsEngine:
             )
     
     def get_employee_performance(
+        """Execute get_employee_performance operation."""
         self,
         restaurant_id: str,
         timeframe: AnalyticsTimeframe = AnalyticsTimeframe.DAY,
@@ -275,6 +278,7 @@ class AnalyticsEngine:
             )
     
     def get_customer_analytics(
+        """Execute get_customer_analytics operation."""
         self,
         restaurant_id: str,
         timeframe: AnalyticsTimeframe = AnalyticsTimeframe.DAY,
@@ -379,6 +383,7 @@ class AnalyticsEngine:
             )
     
     def get_inventory_analytics(
+        """Execute get_inventory_analytics operation."""
         self,
         restaurant_id: str,
         timeframe: AnalyticsTimeframe = AnalyticsTimeframe.DAY,

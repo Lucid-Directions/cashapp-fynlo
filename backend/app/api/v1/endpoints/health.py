@@ -3,14 +3,15 @@ Health monitoring endpoints for tracking instance status and system health.
 Enhanced with security best practices and proper authentication.
 """
 
-from fastapi import APIRouter, Request, Depends, Query
+from fastapi import APIRouter, Request, Depends
+from pydantic import 
 from datetime import datetime, timezone
 import os
 import platform
 import socket
 import psutil
 import secrets
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 import logging
 
 from app.core.response_helper import APIResponseHelper
@@ -23,7 +24,7 @@ from app.core.security import (
 )
 from app.core.database import get_db
 from app.middleware.rate_limit_middleware import limiter, DEFAULT_RATE
-from app.core.auth import get_current_user, get_current_user_optional
+from app.core.auth import get_current_user
 from app.core.database import User
 from sqlalchemy.orm import Session
 from sqlalchemy import text

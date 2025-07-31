@@ -1,7 +1,6 @@
-from sqlalchemy import Column, String, Boolean, Integer, ForeignKey, DateTime, Numeric, Index
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Column, String, Boolean, Integer, DateTime, Numeric, Index
+from sqlalchemy.dialects.postgresql import 
 from sqlalchemy.sql import func # For server-side default timestamps
-import uuid # For client-side default UUID generation if needed
 
 from app.core.database import Base # Assuming Base is correctly defined
 # from app.schemas.fee_schemas import PaymentMethodEnum # Not strictly needed for model def, but for context

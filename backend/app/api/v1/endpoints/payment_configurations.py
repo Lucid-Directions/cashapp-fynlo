@@ -21,6 +21,7 @@ router = APIRouter()
 
 # --- Dependency for Service ---
 def get_payment_config_service_dep(db: Session = Depends(get_db)) -> PaymentConfigService:
+    """Execute get_payment_config_service_dep operation."""
     return PaymentConfigService(db=db)
 
 # --- Pydantic Models for Input/Output ---
@@ -40,6 +41,7 @@ class PaymentMethodSettingUpdateInput(BaseModel):
 
 # Helper to convert SQLAlchemy model to Pydantic schema for response
 def convert_db_model_to_schema(db_setting: PaymentMethodSetting) -> PaymentMethodFeeSettingSchema:
+    """Execute convert_db_model_to_schema operation."""
     return PaymentMethodFeeSettingSchema(
         id=db_setting.id,
         restaurant_id=db_setting.restaurant_id,
@@ -53,6 +55,7 @@ def convert_db_model_to_schema(db_setting: PaymentMethodSetting) -> PaymentMetho
 
 @router.get("/settings/platform-defaults", response_model=List[PaymentMethodFeeSettingSchema])
 def list_platform_default_settings(
+    """Execute list_platform_default_settings operation."""
     service: PaymentConfigService = Depends(get_payment_config_service_dep),
     current_user: User = Depends(get_current_user)
 ):
@@ -62,6 +65,7 @@ def list_platform_default_settings(
 
 @router.post("/settings/platform-defaults", response_model=PaymentMethodFeeSettingSchema, status_code=201)
 def create_platform_default_setting(
+    """Execute create_platform_default_setting operation."""
     setting_data: PaymentMethodSettingCreateInput,
     service: PaymentConfigService = Depends(get_payment_config_service_dep),
     current_user: User = Depends(get_current_user)
@@ -96,6 +100,7 @@ def create_platform_default_setting(
 
 @router.put("/settings/platform-defaults/{payment_method}", response_model=PaymentMethodFeeSettingSchema)
 def update_platform_default_setting(
+    """Execute update_platform_default_setting operation."""
     payment_method: PaymentMethodEnum = Path(...),
     updates: PaymentMethodSettingUpdateInput = Body(...),
     service: PaymentConfigService = Depends(get_payment_config_service_dep),

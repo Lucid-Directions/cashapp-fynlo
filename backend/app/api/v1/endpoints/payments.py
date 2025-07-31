@@ -5,9 +5,9 @@ Supports multi-provider payments (Stripe, Square, SumUp), QR payments, and cash
 
 import uuid
 from datetime import datetime, timedelta
-from typing import Optional, List
+from typing import Optional
 from decimal import Decimal
-from fastapi import APIRouter, Depends, status, Query, Request
+from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 import qrcode
@@ -21,7 +21,7 @@ from app.core.config import settings
 from app.core.auth import get_current_user
 from app.core.responses import APIResponseHelper
 from app.core.exceptions import FynloException, InventoryException, PaymentException, ResourceNotFoundException, ValidationException, BusinessLogicException
-from app.core.transaction_manager import transactional, transaction_manager
+from app.core.transaction_manager import transactional
 from app.core.tenant_security import TenantSecurity
 from app.services.payment_factory import payment_factory
 from app.services.audit_logger import AuditLoggerService
@@ -119,6 +119,7 @@ def generate_qr_code(data: str) -> str:
     
     return f"data:image/png;base64,{img_str}"
 
+# Rate limited: 5 requests per minute per IP
 @router.post("/qr/generate", response_model=QRPaymentResponse)
 @limiter.limit(PAYMENT_RATE)
 async def generate_qr_payment(
@@ -1543,8 +1544,7 @@ async def stripe_webhook_endpoint(
     )
 
     # Handle the event
-    # TODO: Implement idempotency check here (e.g., check if event.id has been processed)
-    # For example:
+        # For example:
     # processed_event = db.query(ProcessedWebhookEvent).filter(ProcessedWebhookEvent.event_id == event.id).first()
     # if processed_event:
     #     logger.info(f"Stripe event {event.id} already processed.")

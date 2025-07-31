@@ -1,8 +1,8 @@
 # app/core/feature_gate.py
-from typing import Callable
-from fastapi import Depends, Request
+from typing import 
+from fastapi import 
 from sqlalchemy.orm import Session
-from app.core.database import get_db, Restaurant, User
+from app.core.database import Restaurant
 
 FEATURE_KEYS = {
     # Basic POS Features (Alpha - all plans)

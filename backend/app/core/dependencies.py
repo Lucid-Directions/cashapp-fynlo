@@ -6,7 +6,7 @@ Reusable dependencies that enforce tenant isolation
 from typing import Optional, Any
 from fastapi import Depends, Query
 from sqlalchemy.orm import Session
-from app.core.exceptions import FynloException, AuthorizationException, ResourceNotFoundException
+from app.core.exceptions import AuthorizationException, ResourceNotFoundException
 
 from app.core.database import get_db
 from app.core.auth import get_current_user

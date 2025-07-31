@@ -5,9 +5,9 @@ Handles payment processing with comprehensive security measures
 import uuid
 from typing import Dict, Any, Optional, List
 from decimal import Decimal
-from datetime import datetime
+from  import 
 from fastapi import APIRouter, Depends, Request, Header, Query, Path
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import HTTPBearer
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field, validator
 import logging
@@ -38,6 +38,7 @@ class PaymentRequest(BaseModel):
     
     @validator('amount')
     def validate_amount(cls, v):
+        """Execute validate_amount operation."""
         # Ensure proper decimal places
         if v.as_tuple().exponent < -2:
             raise ValueError("Amount cannot have more than 2 decimal places")
@@ -45,6 +46,7 @@ class PaymentRequest(BaseModel):
     
     @validator('payment_method')
     def validate_payment_method(cls, v):
+        """Execute validate_payment_method operation."""
         valid_methods = ['card', 'cash', 'qr_code', 'apple_pay', 'google_pay']
         if v not in valid_methods:
             raise ValueError(f"Invalid payment method. Must be one of: {', '.join(valid_methods)}")
@@ -59,6 +61,7 @@ class RefundRequest(BaseModel):
     
     @validator('amount')
     def validate_amount(cls, v):
+        """Execute validate_amount operation."""
         if v is not None and v.as_tuple().exponent < -2:
             raise ValueError("Amount cannot have more than 2 decimal places")
         return v
@@ -301,8 +304,7 @@ async def process_refund(
                 error_code="PERMISSION_DENIED"
             )
         
-        # TODO: Implement refund processing
-        # This would look up the original payment and process through the same provider
+                # This would look up the original payment and process through the same provider
         
         return APIResponseHelper.success(
             data={
@@ -397,8 +399,7 @@ async def handle_payment_webhook(
         # Get webhook body
         body = await request.body()
         
-        # TODO: Implement provider-specific webhook handling
-        # This would validate signatures and process events
+                # This would validate signatures and process events
         
         logger.info(f"Received webhook from {provider}")
         

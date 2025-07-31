@@ -115,6 +115,7 @@ class EmailService:
             return False
     
     def send_custom_email(
+        """Execute send_custom_email operation."""
         self, 
         to_email: str, 
         subject: str, 

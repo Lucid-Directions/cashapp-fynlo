@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.models.audit_log import AuditLog, AuditEventType, AuditEventStatus
-from app.core.database import get_db # To be used as a dependency if service is injected
+from app.core.database import  # To be used as a dependency if service is injected
 
 # Standard logger for issues within the audit logger itself
 logger = logging.getLogger(__name__)

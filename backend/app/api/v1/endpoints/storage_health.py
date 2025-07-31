@@ -4,6 +4,7 @@ Monitor DigitalOcean Spaces integration status
 """
 
 from fastapi import APIRouter, Depends
+from pydantic import 
 from app.core.auth import get_current_user
 from app.models import User
 from app.core.responses import APIResponseHelper

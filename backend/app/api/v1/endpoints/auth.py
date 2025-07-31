@@ -3,6 +3,7 @@ Supabase Authentication endpoints for Fynlo POS
 """
 
 from fastapi import APIRouter, Depends, Header, Request
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from typing import Optional
@@ -50,6 +51,7 @@ def ensure_uuid(value) -> uuid.UUID:
 
 
 
+# Rate limited: 5 requests per minute per IP
 @router.post("/verify", response_model=AuthVerifyResponse)
 @limiter.limit(AUTH_RATE)
 async def verify_supabase_user(
@@ -313,7 +315,7 @@ async def verify_supabase_user(
                 action_performed="Invalid JWT token presented",
                 ip_address=client_ip,
                 user_agent=user_agent,
-                details={"error": "invalid_jwt", "token_prefix": authorization[:20] + "..." if authorization else None},
+                details={"error": "invalid_jwt", "token_provided": bool(authorization)},
                 risk_score=70  # High risk - invalid token
             )
             raise AuthenticationException(message="Invalid authentication token")

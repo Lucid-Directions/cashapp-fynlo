@@ -136,6 +136,7 @@ class TenantSecurity:
     
     @staticmethod
     def apply_tenant_filter(
+        """Execute apply_tenant_filter operation."""
         query: Query,
         user: User,
         model_class: type,
@@ -211,6 +212,7 @@ class TenantSecurity:
     
     @staticmethod
     def validate_cross_restaurant_operation(
+        """Execute validate_cross_restaurant_operation operation."""
         user: User,
         source_restaurant_id: str,
         target_restaurant_id: str,

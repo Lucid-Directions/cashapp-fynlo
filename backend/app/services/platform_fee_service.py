@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Dict, Any
+from typing import Optional
 from decimal import Decimal, ROUND_HALF_UP
 
 from app.services.platform_service import PlatformSettingsService
@@ -146,10 +146,7 @@ class PlatformFeeService:
 #             customer_pays_processor_fees=True,
 #             restaurant_id="some-restaurant-id"
 #         )
-#         print("Customer Total Breakdown (Stripe, Customer Pays Fees):")
-#         for key, value in breakdown.items():
-#             print(f"  {key}: {value}")
-#
+
 #         # Example: Customer pays with Cash
 #         breakdown_cash = await platform_fee_service.calculate_customer_total(
 #             subtotal=100.0,
@@ -159,10 +156,7 @@ class PlatformFeeService:
 #             customer_pays_processor_fees=False, # Doesn't matter for cash
 #             restaurant_id="some-restaurant-id"
 #         )
-#         print("\nCustomer Total Breakdown (Cash):")
-#         for key, value in breakdown_cash.items():
-#             print(f"  {key}: {value}")
-#
+
 #     finally:
 #         db.close()
 

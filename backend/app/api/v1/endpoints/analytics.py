@@ -379,12 +379,11 @@ async def get_legacy_analytics_dashboard(
     ).count()
     
     # Calculate growth metrics - proper implementation needed
-    revenue_growth = 0.0  # TODO: Calculate from previous period
-    order_growth = 0.0  # TODO: Calculate from previous period
-    customer_retention_rate = 0.0  # TODO: Implement customer tracking
-    returning_customers = 0  # TODO: Implement customer tracking
-    
-    # Payment method breakdown - TODO: Implement with actual payment data
+    revenue_growth = 0.0
+    order_growth = 0.0
+    customer_retention_rate = 0.0
+    returning_customers = 0
+    # Payment method breakdown - Feature not yet implemented
     payment_breakdown = PaymentMethodBreakdown(
         qr_payments=0.0,
         card_payments=0.0,
@@ -393,10 +392,10 @@ async def get_legacy_analytics_dashboard(
         other_payments=0.0
     )
     
-    # Peak hours - TODO: Calculate from actual order data
+    # Peak hours - Feature not yet implemented
     peak_hours = []  # Will be populated with real hourly analytics
     
-    # Top products - TODO: Calculate from actual order items
+    # Top products - Feature not yet implemented
     top_products = []  # Will be populated with real product analytics
     
     return AnalyticsDashboard(

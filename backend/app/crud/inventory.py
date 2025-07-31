@@ -14,17 +14,20 @@ from app.schemas import inventory_schemas as schemas
 # --- InventoryItem CRUD ---
 
 def get_inventory_item(db: Session, sku: str, restaurant_id: UUID) -> Optional[InventoryItem]:
+    """Execute get_inventory_item operation."""
     return db.query(InventoryItem).filter(
         InventoryItem.sku == sku,
         InventoryItem.restaurant_id == restaurant_id
     ).first()
 
 def get_inventory_items(db: Session, restaurant_id: UUID, skip: int = 0, limit: int = 100) -> List[InventoryItem]:
+    """Execute get_inventory_items operation."""
     return db.query(InventoryItem).filter(
         InventoryItem.restaurant_id == restaurant_id
     ).offset(skip).limit(limit).all()
 
 def create_inventory_item(db: Session, item: schemas.InventoryItemCreate, restaurant_id: UUID) -> InventoryItem:
+    """Execute create_inventory_item operation."""
     db_item = InventoryItem(**item.dict(exclude={'restaurant_id'}), restaurant_id=restaurant_id)
     db.add(db_item)
     db.commit()
@@ -32,6 +35,7 @@ def create_inventory_item(db: Session, item: schemas.InventoryItemCreate, restau
     return db_item
 
 def update_inventory_item(db: Session, sku: str, item_update: schemas.InventoryItemUpdate, restaurant_id: UUID) -> Optional[InventoryItem]:
+    """Execute update_inventory_item operation."""
     db_item = get_inventory_item(db, sku, restaurant_id)
     if db_item:
         update_data = item_update.dict(exclude_unset=True)
@@ -43,6 +47,7 @@ def update_inventory_item(db: Session, sku: str, item_update: schemas.InventoryI
     return db_item
 
 def delete_inventory_item(db: Session, sku: str, restaurant_id: UUID) -> Optional[InventoryItem]:
+    """Execute delete_inventory_item operation."""
     db_item = get_inventory_item(db, sku, restaurant_id)
     if db_item:
         # Consider safety: prevent deletion if item is in recipes or has ledger entries?
@@ -99,6 +104,7 @@ def get_recipe_by_item_id(db: Session, item_id: UUID, restaurant_id: UUID) -> Li
     ).all()
 
 def get_recipe_ingredient(db: Session, item_id: UUID, ingredient_sku: str, restaurant_id: UUID) -> Optional[Recipe]:
+    """Execute get_recipe_ingredient operation."""
     return db.query(Recipe).filter(
         Recipe.item_id == item_id,
         Recipe.ingredient_sku == ingredient_sku,
@@ -228,6 +234,7 @@ def delete_specific_ingredient_from_recipe(db: Session, item_id: UUID, ingredien
 # --- InventoryLedgerEntry CRUD ---
 
 def create_inventory_ledger_entry(db: Session, entry: schemas.InventoryLedgerEntryCreate, restaurant_id: UUID) -> InventoryLedgerEntry:
+    """Execute create_inventory_ledger_entry operation."""
     db_entry = InventoryLedgerEntry(**entry.dict(), restaurant_id=restaurant_id)
     db.add(db_entry)
     db.commit()
@@ -235,6 +242,7 @@ def create_inventory_ledger_entry(db: Session, entry: schemas.InventoryLedgerEnt
     return db_entry
 
 def get_ledger_entries_for_sku(db: Session, sku: str, restaurant_id: UUID, skip: int = 0, limit: int = 100, start_date: Optional[datetime] = None, end_date: Optional[datetime] = None) -> List[InventoryLedgerEntry]:
+    """Execute get_ledger_entries_for_sku operation."""
     query = db.query(InventoryLedgerEntry).filter(
         InventoryLedgerEntry.sku == sku,
         InventoryLedgerEntry.restaurant_id == restaurant_id
@@ -246,6 +254,7 @@ def get_ledger_entries_for_sku(db: Session, sku: str, restaurant_id: UUID, skip:
     return query.order_by(InventoryLedgerEntry.ts.desc()).offset(skip).limit(limit).all()
 
 def get_all_ledger_entries(db: Session, restaurant_id: UUID, skip: int = 0, limit: int = 100, start_date: Optional[datetime] = None, end_date: Optional[datetime] = None) -> List[InventoryLedgerEntry]:
+    """Execute get_all_ledger_entries operation."""
     query = db.query(InventoryLedgerEntry).filter(
         InventoryLedgerEntry.restaurant_id == restaurant_id
     )

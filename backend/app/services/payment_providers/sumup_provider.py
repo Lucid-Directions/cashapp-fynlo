@@ -5,9 +5,8 @@ SumUp Payment Provider Implementation
 from decimal import Decimal
 from typing import Dict, Any, Optional
 import logging
-from datetime import datetime
+from  import 
 import httpx
-import uuid
 
 from .base import PaymentProvider, PaymentStatus
 

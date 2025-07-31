@@ -1,7 +1,7 @@
 """Enhanced input validators for security."""
 import re
 from typing import Any, Optional
-from pydantic import validator, ValidationError
+from pydantic import validator
 from app.core.security_utils import sanitize_search_term, is_valid_uuid
 
 
@@ -166,12 +166,14 @@ def validate_decimal_amount(value: Any, min_value: float = 0.0) -> float:
 class SearchValidator:
     @validator('search', 'query', 'q', pre=True, always=True)
     def validate_search(cls, v):
+        """Execute validate_search operation."""
         return validate_search_input(v)
 
 
 class UUIDValidator:
     @validator('id', 'user_id', 'restaurant_id', 'order_id', 'customer_id', pre=True)
     def validate_uuid(cls, v):
+        """Execute validate_uuid operation."""
         if v:
             return validate_uuid_format(v)
         return v
@@ -180,6 +182,7 @@ class UUIDValidator:
 class EmailValidator:
     @validator('email', pre=True)
     def validate_email(cls, v):
+        """Execute validate_email operation."""
         if v:
             return validate_email_format(v)
         return v
@@ -188,6 +191,7 @@ class EmailValidator:
 class PhoneValidator:
     @validator('phone', 'phone_number', pre=True)
     def validate_phone(cls, v):
+        """Execute validate_phone operation."""
         if v:
             return validate_phone_format(v)
         return v
@@ -196,12 +200,14 @@ class PhoneValidator:
 class NameValidator:
     @validator('first_name', pre=True)
     def validate_first_name(cls, v):
+        """Execute validate_first_name operation."""
         if v:
             return validate_name_field(v, "First name")
         return v
     
     @validator('last_name', pre=True)
     def validate_last_name(cls, v):
+        """Execute validate_last_name operation."""
         if v:
             return validate_name_field(v, "Last name")
         return v

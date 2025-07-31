@@ -98,6 +98,7 @@ class SensitiveDataFilter(logging.Filter):
         return clean_dict
 
     def filter(self, record):
+        """Execute filter operation."""
         # Redact sensitive data in 'extra' dictionary fields
         if hasattr(record, 'extra') and isinstance(record.extra, dict):
             record.extra = self._redact_dict(record.extra.copy())

@@ -3,12 +3,12 @@ Platform analytics endpoints for dashboard insights.
 """
 
 from datetime import datetime, timedelta
-from typing import List, Optional, Dict, Any
-from fastapi import APIRouter, Depends, Query 
+from typing import Optional
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
-from sqlalchemy import func, and_, desc
+from sqlalchemy import func, desc
 
-from app.core.database import get_db, Restaurant, Order, Payment, User
+from app.core.database import get_db, Restaurant, Order, User
 from app.core.auth import get_current_platform_owner
 from app.core.cache import get_cached_data_async, cache_data
 from app.core.responses import APIResponseHelper

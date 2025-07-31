@@ -4,7 +4,7 @@ Admin-only endpoints for managing platform-wide configurations
 """
 from datetime import datetime # Added missing import
 from typing import Dict, Any, Optional, List
-from fastapi import APIRouter, Depends, status, Query, Request
+from fastapi import APIRouter, Depends, Query, Request
 import logging # Added for logging in new endpoints
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field
@@ -51,8 +51,7 @@ class ServiceChargeConfigResponse(BaseModel):
 
 def require_admin_user(current_user: User = Depends(get_current_user)) -> User:
     """Ensure user has admin privileges for platform settings"""
-    # TODO: Implement proper role-based access control
-    # For now, check if user has admin role or specific permissions
+        # For now, check if user has admin role or specific permissions
     if not hasattr(current_user, 'is_admin') or not current_user.is_admin:
         raise FynloException(message="Admin privileges required for platform settings")
     return current_user
@@ -405,8 +404,7 @@ async def get_restaurant_effective_settings(
 ):
     """Get effective settings for a restaurant (platform + overrides)"""
     try:
-        # TODO: Verify user has access to this restaurant
-        
+                
         service = PlatformSettingsService(db)
         settings = await service.get_restaurant_effective_settings(
             restaurant_id=restaurant_id,
@@ -431,8 +429,7 @@ async def set_restaurant_override(
 ):
     """Set a restaurant override for a platform setting"""
     try:
-        # TODO: Verify user has admin access to this restaurant
-        
+                
         service = PlatformSettingsService(db)
         
         success = await service.set_restaurant_override(

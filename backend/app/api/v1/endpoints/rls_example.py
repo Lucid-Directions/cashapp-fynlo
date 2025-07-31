@@ -4,6 +4,7 @@ This file demonstrates how to use RLS session variable isolation
 """
 
 from typing import List
+from pydantic import BaseModel
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import text

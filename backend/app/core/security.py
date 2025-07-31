@@ -82,6 +82,7 @@ class SafeEnvironmentFilter:
     
     @classmethod
     def get_safe_environment(
+        """Execute get_safe_environment operation."""
         cls, 
         security_level: SecurityLevel = SecurityLevel.PUBLIC,
         additional_safe_vars: Optional[Set[str]] = None
@@ -171,6 +172,7 @@ class InputValidator:
     
     @classmethod
     def sanitize_string(
+        """Execute sanitize_string operation."""
         cls, 
         value: str, 
         context: str = "general",
@@ -320,6 +322,7 @@ class WebhookSecurity:
     
     @staticmethod
     def verify_signature(
+        """Execute verify_signature operation."""
         payload: bytes,
         signature: str,
         secret: str,
@@ -389,6 +392,7 @@ class InstanceIdentifier(BaseModel):
     
     @validator('instance_id')
     def validate_instance_id(cls, v):
+        """Execute validate_instance_id operation."""
         return InputValidator.validate_instance_id(v)
 
 
@@ -399,6 +403,7 @@ class RefreshRequest(BaseModel):
     
     @validator('reason')
     def sanitize_reason(cls, v):
+        """Execute sanitize_reason operation."""
         if v:
             return InputValidator.sanitize_string(v, context="general", max_length=200)
         return v
@@ -451,10 +456,12 @@ class DeploymentTriggerRequest(BaseModel):
     
     @validator('reason')
     def sanitize_reason(cls, v):
+        """Execute sanitize_reason operation."""
         return InputValidator.sanitize_string(v, context="general", max_length=500)
     
     @validator('confirm')
     def validate_confirm(cls, v):
+        """Execute validate_confirm operation."""
         if not v:
             raise ValueError("Explicit confirmation required for deployment trigger")
         return v
@@ -492,10 +499,12 @@ class InstanceHeartbeatRequest(BaseModel):
     
     @validator('instance_id')
     def validate_instance_id(cls, v):
+        """Execute validate_instance_id operation."""
         return InputValidator.validate_instance_id(v)
     
     @validator('hostname')
     def sanitize_hostname(cls, v):
+        """Execute sanitize_hostname operation."""
         return InputValidator.sanitize_string(v, context="general", max_length=255)
     
     class Config:
@@ -511,6 +520,7 @@ class RedisPatternQuery(BaseModel):
     
     @validator('pattern')
     def validate_pattern(cls, v):
+        """Execute validate_pattern operation."""
         return InputValidator.validate_redis_pattern(v)
     
     class Config:
@@ -536,6 +546,7 @@ class FilePathValidator(BaseModel):
     
     @validator('path')
     def validate_path(cls, v):
+        """Execute validate_path operation."""
         return InputValidator.sanitize_string(v, context="path", max_length=500)
     
     class Config:

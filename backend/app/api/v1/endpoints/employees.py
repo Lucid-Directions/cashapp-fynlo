@@ -4,21 +4,22 @@ Handles employee CRUD operations, scheduling, time tracking, and performance met
 """
 
 from typing import List, Optional
-from datetime import datetime, date
-from fastapi import APIRouter, Depends, Query, Request
+from pydantic import 
+from datetime import date
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from app.core.database import get_db, User
 from app.core.responses import APIResponseHelper
 from app.core.auth import get_current_user
 from app.core.onboarding_helper import OnboardingHelper
-from app.models.employee import EmployeeProfile, Schedule, Shift, TimeEntry, PerformanceMetric
+from app.models.employee import 
 from app.schemas.employee_schemas import (
     EmployeeCreateRequest, EmployeeUpdateRequest, EmployeeResponse,
     ScheduleCreateRequest, ScheduleUpdateRequest, ScheduleResponse,
     ShiftResponse, TimeEntryResponse, PerformanceMetricResponse
 )
 from app.services.employee_service import EmployeeService
-from app.middleware.rate_limit_middleware import limiter
+from app.middleware.rate_limit_middleware import 
 
 router = APIRouter()
 

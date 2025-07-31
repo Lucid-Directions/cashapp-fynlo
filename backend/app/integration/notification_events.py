@@ -41,7 +41,7 @@ class NotificationEventService:
             )
             
         except Exception as e:
-            print(f"Failed to send order created notification: {str(e)}")
+            logger.error(f"Failed to send order created notification: {str(e)}")
     
     @staticmethod
     async def on_order_status_changed(order_id: str, restaurant_id: str, old_status: str, new_status: str, order_data: Dict[str, Any]):
@@ -78,7 +78,7 @@ class NotificationEventService:
             )
             
         except Exception as e:
-            print(f"Failed to send order status change notification: {str(e)}")
+            logger.error(f"Failed to send order status change notification: {str(e)}")
     
     @staticmethod
     async def on_payment_completed(payment_data: Dict[str, Any]):
@@ -102,7 +102,7 @@ class NotificationEventService:
             )
             
         except Exception as e:
-            print(f"Failed to send payment completed notification: {str(e)}")
+            logger.error(f"Failed to send payment completed notification: {str(e)}")
     
     @staticmethod
     async def on_payment_failed(payment_data: Dict[str, Any]):
@@ -127,7 +127,7 @@ class NotificationEventService:
             )
             
         except Exception as e:
-            print(f"Failed to send payment failed notification: {str(e)}")
+            logger.error(f"Failed to send payment failed notification: {str(e)}")
     
     @staticmethod
     async def on_inventory_low(product_id: str, restaurant_id: str, product_name: str, current_stock: int, min_stock: int):
@@ -151,7 +151,7 @@ class NotificationEventService:
             )
             
         except Exception as e:
-            print(f"Failed to send inventory low notification: {str(e)}")
+            logger.error(f"Failed to send inventory low notification: {str(e)}")
     
     @staticmethod
     async def on_kitchen_alert(order_id: str, restaurant_id: str, alert_type: str, alert_message: str):
@@ -174,7 +174,7 @@ class NotificationEventService:
             )
             
         except Exception as e:
-            print(f"Failed to send kitchen alert notification: {str(e)}")
+            logger.error(f"Failed to send kitchen alert notification: {str(e)}")
     
     @staticmethod
     async def on_shift_reminder(user_id: str, restaurant_id: str, shift_data: Dict[str, Any]):
@@ -201,7 +201,7 @@ class NotificationEventService:
             )
             
         except Exception as e:
-            print(f"Failed to send shift reminder notification: {str(e)}")
+            logger.error(f"Failed to send shift reminder notification: {str(e)}")
     
     @staticmethod
     async def on_system_maintenance(restaurant_ids: List[str], maintenance_data: Dict[str, Any]):
@@ -223,7 +223,7 @@ class NotificationEventService:
             )
             
         except Exception as e:
-            print(f"Failed to send system maintenance notification: {str(e)}")
+            logger.error(f"Failed to send system maintenance notification: {str(e)}")
     
     @staticmethod
     async def on_delivery_update(order_id: str, customer_id: str, delivery_status: str, estimated_arrival: Optional[str] = None):
@@ -245,7 +245,7 @@ class NotificationEventService:
             )
             
         except Exception as e:
-            print(f"Failed to send delivery update notification: {str(e)}")
+            logger.error(f"Failed to send delivery update notification: {str(e)}")
     
     @staticmethod
     async def schedule_shift_reminders(restaurant_id: str, shifts: List[Dict[str, Any]]):
@@ -269,7 +269,7 @@ class NotificationEventService:
                     )
             
         except Exception as e:
-            print(f"Failed to schedule shift reminders: {str(e)}")
+            logger.error(f"Failed to schedule shift reminders: {str(e)}")
     
     @staticmethod
     async def _delayed_shift_reminder(delay: float, user_id: str, restaurant_id: str, shift_data: Dict[str, Any]):
@@ -278,7 +278,7 @@ class NotificationEventService:
             await asyncio.sleep(delay)
             await NotificationEventService.on_shift_reminder(user_id, restaurant_id, shift_data)
         except Exception as e:
-            print(f"Failed to send delayed shift reminder: {str(e)}")
+            logger.error(f"Failed to send delayed shift reminder: {str(e)}")
 
 # Global event service instance
 notification_events = NotificationEventService()

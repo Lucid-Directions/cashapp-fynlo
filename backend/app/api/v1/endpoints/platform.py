@@ -7,15 +7,14 @@ from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, Depends, Query, Path
 from sqlalchemy.orm import Session
 from sqlalchemy import func, and_, desc
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from datetime import datetime, timedelta
-import uuid
 
 from app.core.database import get_db, Platform, Restaurant, User, Order, Customer
 from app.core.auth import get_current_user
 from app.core.responses import APIResponseHelper
 from app.core.exceptions import FynloException, ErrorCodes
-from app.core.validation import BusinessValidator, validate_customer_or_raise
+from app.core.validation import 
 from app.api.v1.endpoints import platform_settings
 
 router = APIRouter()

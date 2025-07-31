@@ -3,7 +3,8 @@ Export API endpoints for Fynlo POS - Portal export functionality
 TEMPORARILY DISABLED DUE TO MISSING DEPENDENCIES
 """
 
-from typing import Optional
+from typing import 
+from pydantic import 
 from datetime import date
 from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.orm import Session

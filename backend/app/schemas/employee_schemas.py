@@ -57,6 +57,7 @@ class EmployeeCreateRequest(EmployeeBase):
     @field_validator('hire_date')
     @classmethod
     def validate_hire_date(cls, v):
+        """Execute validate_hire_date operation."""
         if v is None:
             return date.today()
         if v > date.today():
@@ -110,6 +111,7 @@ class ScheduleBase(BaseModel):
     @field_validator('end_time')
     @classmethod
     def validate_end_time(cls, v, info):
+        """Execute validate_end_time operation."""
         if info.data and 'start_time' in info.data and v <= info.data['start_time']:
             raise ValueError('End time must be after start time')
         return v
@@ -121,6 +123,7 @@ class ScheduleCreateRequest(ScheduleBase):
     @field_validator('effective_date')
     @classmethod
     def validate_effective_date(cls, v):
+        """Execute validate_effective_date operation."""
         if v < date.today():
             raise ValueError('Effective date cannot be in the past')
         return v
@@ -136,6 +139,7 @@ class ScheduleUpdateRequest(BaseModel):
     @field_validator('end_time')
     @classmethod
     def validate_end_time(cls, v, info):
+        """Execute validate_end_time operation."""
         if v and info.data and 'start_time' in info.data and info.data['start_time'] and v <= info.data['start_time']:
             raise ValueError('End time must be after start time')
         return v

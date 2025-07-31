@@ -67,6 +67,7 @@ class SyncRecord:
         self.error_message = None
 
     def to_dict(self) -> Dict[str, Any]:
+        """Execute to_dict operation."""
         return {
             "id": self.id,
             "entity_type": self.entity_type,
@@ -100,6 +101,7 @@ class SyncConflict:
         self.detected_at = datetime.now()
 
     def to_dict(self) -> Dict[str, Any]:
+        """Execute to_dict operation."""
         return {
             "sync_record_id": self.sync_record.id,
             "conflict_type": self.conflict_type,
@@ -119,6 +121,7 @@ class OfflineSyncManager:
         self.conflicts: List[SyncConflict] = []
         
     def batch_upload(
+        """Execute batch_upload operation."""
         self,
         sync_actions: List[Dict[str, Any]],
         restaurant_id: str,
@@ -190,6 +193,7 @@ class OfflineSyncManager:
             )
     
     def download_changes(
+        """Execute download_changes operation."""
         self,
         restaurant_id: str,
         last_sync_timestamp: Optional[datetime] = None,
@@ -238,6 +242,7 @@ class OfflineSyncManager:
             )
     
     def resolve_conflict(
+        """Execute resolve_conflict operation."""
         self,
         conflict_id: str,
         resolution_strategy: ConflictResolution,
@@ -305,6 +310,7 @@ class OfflineSyncManager:
             )
     
     def get_sync_status(
+        """Execute get_sync_status operation."""
         self,
         restaurant_id: str,
         device_id: Optional[str] = None

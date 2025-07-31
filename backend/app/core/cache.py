@@ -3,10 +3,9 @@ Cache utilities for platform analytics and data caching.
 Uses Valkey (Redis) for high-performance caching.
 """
 
-import json
 import logging
-from typing import Any, Optional, Dict, List
-from datetime import timedelta
+from typing import Any, Optional, Dict
+from datetime import 
 
 from app.core.redis_client import redis_client
 

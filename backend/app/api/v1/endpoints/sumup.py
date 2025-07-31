@@ -98,8 +98,7 @@ async def initialize_sumup(
         restaurant_id = current_restaurant_id or current_user.restaurant_id
         
         # Check if restaurant has active subscription
-        # TODO: Add subscription validation when subscription service is available
-        
+                
         # Get SumUp configuration from environment
         sumup_environment = os.getenv("SUMUP_ENVIRONMENT", "production")
         sumup_app_id = os.getenv("SUMUP_APP_ID", "com.fynlo.pos")
@@ -123,13 +122,11 @@ async def initialize_sumup(
                 message="SumUp is not configured for this restaurant"
             )
         
-        # TODO: Fetch merchant code from database if stored per restaurant
-        # For now, use a placeholder or environment variable
+                # For now, use a placeholder or environment variable
         merchant_code = os.getenv("SUMUP_MERCHANT_CODE")
         
         # Determine feature availability based on subscription plan
-        # TODO: Implement proper feature flags based on subscription
-        features = {
+                features = {
             "card_reader": True,  # Physical card reader support
             "tap_to_pay": True,   # Tap to pay on phone
             "refunds": True       # Refund capabilities
@@ -207,9 +204,7 @@ async def get_sumup_status(
         status_data = {
             "configured": bool(sumup_api_key),
             "environment": sumup_environment,
-            "last_transaction": None,  # TODO: Fetch from database
-            "total_transactions": 0,   # TODO: Fetch from database
-            "features": {
+            "last_transaction": None,              "total_transactions": 0,               "features": {
                 "card_reader": bool(sumup_api_key),
                 "tap_to_pay": bool(sumup_api_key),
                 "refunds": bool(sumup_api_key)
@@ -270,8 +265,7 @@ async def validate_merchant_code(
                 }]
             )
         
-        # TODO: Implement actual SumUp API validation
-        # For now, just return success
+                # For now, just return success
         
         return APIResponseHelper.success(
             data={

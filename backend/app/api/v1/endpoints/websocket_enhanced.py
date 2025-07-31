@@ -7,13 +7,14 @@ import asyncio
 import json
 import logging
 from datetime import datetime
+from pydantic import 
 from typing import Dict, Optional, Set
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, Query
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
 from fastapi.websockets import WebSocketState
 from sqlalchemy.orm import Session
 
 from app.core.auth import verify_websocket_token
-from app.core.database import get_db, User
+from app.core.database import get_db
 from app.schemas.websocket import WebSocketMessage, WebSocketEventType
 from app.services.sync_service import sync_service
 from app.core.rate_limiter import RateLimiter, ConnectionLimiter
@@ -551,8 +552,7 @@ async def process_message(connection_id: str, message: dict, db: Session):
         order_id = data.get("order_id")
         new_status = data.get("status")
         
-        # TODO: Update order in database
-        
+                
         # Broadcast to restaurant
         await manager.broadcast_to_restaurant(
             conn_info.restaurant_id,
