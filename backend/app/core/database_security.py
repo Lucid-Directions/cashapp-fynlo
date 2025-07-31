@@ -73,8 +73,12 @@ class DatabaseSecurityConfig:
                 # Set statement timeout
                 cursor.execute("SET statement_timeout = '30s'")
                 
-                # Log slow queries
-                cursor.execute("SET log_min_duration_statement = '1000'")  # 1 second
+                # Try to log slow queries (requires SUPERUSER in some environments)
+                try:
+                    cursor.execute("SET log_min_duration_statement = '1000'")  # 1 second
+                except Exception:
+                    # Ignore if we don't have permission (e.g., DigitalOcean managed DB)
+                    pass
         
         @event.listens_for(engine, "connect")
         def receive_connect(dbapi_conn, connection_record):
