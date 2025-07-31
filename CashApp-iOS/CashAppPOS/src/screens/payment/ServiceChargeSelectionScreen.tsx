@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+
 import {
   StyleSheet,
   Text,
@@ -8,8 +9,10 @@ import {
   SafeAreaView,
   Alert,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { useTheme } from '../../design-system/ThemeProvider';
 import useAppStore from '../../store/useAppStore';
 import { formatPrice } from '../../utils/priceValidation';
@@ -53,13 +56,13 @@ const serviceChargeOptions: ServiceChargeOption[] = [
 const ServiceChargeSelectionScreen: React.FC = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
-  const { 
-    cart, 
-    cartTotal, 
-    setServiceChargePercentage, 
+  const {
+    cart,
+    cartTotal,
+    setServiceChargePercentage,
     setAddTransactionFee,
     serviceChargePercentage,
-    addTransactionFee 
+    addTransactionFee,
   } = useAppStore();
 
   const [selectedOption, setSelectedOption] = useState<number>(serviceChargePercentage);
@@ -120,23 +123,23 @@ const ServiceChargeSelectionScreen: React.FC = () => {
     // Update global state
     setServiceChargePercentage(selectedOption);
     setAddTransactionFee(localAddTransactionFee);
-    
+
     // Navigate to payment method selection
     // @ts-ignore
     navigation.navigate('EnhancedPayment');
   };
 
-  const totals = calculateTotals(selectedOption, showTransactionFeeToggle ? localAddTransactionFee : false);
+  const totals = calculateTotals(
+    selectedOption,
+    showTransactionFeeToggle ? localAddTransactionFee : false
+  );
 
   const styles = createStyles(theme);
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <Icon name="arrow-back" size={24} color={theme.colors.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Service Options</Text>
@@ -147,8 +150,8 @@ const ServiceChargeSelectionScreen: React.FC = () => {
         <View style={styles.explanationSection}>
           <Text style={styles.explanationTitle}>Support Great Service</Text>
           <Text style={styles.explanationText}>
-            Service charges help cover processing costs and support the staff who made your experience great. 
-            Choose what feels right for your visit.
+            Service charges help cover processing costs and support the staff who made your
+            experience great. Choose what feels right for your visit.
           </Text>
         </View>
 
@@ -167,13 +170,15 @@ const ServiceChargeSelectionScreen: React.FC = () => {
                   <Text style={styles.recommendedText}>RECOMMENDED</Text>
                 </View>
               )}
-              
+
               <View style={styles.optionHeader}>
                 <View style={styles.optionLeft}>
-                  <View style={[
-                    styles.radioButton,
-                    selectedOption === option.percentage && styles.radioButtonSelected,
-                  ]}>
+                  <View
+                    style={[
+                      styles.radioButton,
+                      selectedOption === option.percentage && styles.radioButtonSelected,
+                    ]}
+                  >
                     {selectedOption === option.percentage && (
                       <Icon name="check" size={16} color={theme.colors.white} />
                     )}
@@ -183,20 +188,17 @@ const ServiceChargeSelectionScreen: React.FC = () => {
                     <Text style={styles.optionDescription}>{option.description}</Text>
                   </View>
                 </View>
-                
+
                 <View style={styles.optionRight}>
                   <Text style={styles.optionAmount}>
-                    {option.percentage === 0 
-                      ? '£0.00' 
-                      : formatPrice(calculateTotals(option.percentage).serviceCharge, '£')
-                    }
+                    {option.percentage === 0
+                      ? '£0.00'
+                      : formatPrice(calculateTotals(option.percentage).serviceCharge, '£')}
                   </Text>
                 </View>
               </View>
-              
-              <Text style={styles.feeExplanation}>
-                {option.coversTransactionFee}
-              </Text>
+
+              <Text style={styles.feeExplanation}>{option.coversTransactionFee}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -205,20 +207,20 @@ const ServiceChargeSelectionScreen: React.FC = () => {
           <View style={styles.transactionFeeSection}>
             <Text style={styles.sectionTitle}>Processing Fees</Text>
             <Text style={styles.feeExplanationText}>
-              Payment processing requires a small fee (2.9%). You can choose to add this to your bill.
+              Payment processing requires a small fee (2.9%). You can choose to add this to your
+              bill.
             </Text>
-            
-            <TouchableOpacity 
-              style={[
-                styles.toggleButton,
-                localAddTransactionFee && styles.toggleButtonSelected,
-              ]}
+
+            <TouchableOpacity
+              style={[styles.toggleButton, localAddTransactionFee && styles.toggleButtonSelected]}
               onPress={handleTransactionFeeToggle}
             >
-              <View style={[
-                styles.toggleIndicator,
-                localAddTransactionFee && styles.toggleIndicatorSelected,
-              ]}>
+              <View
+                style={[
+                  styles.toggleIndicator,
+                  localAddTransactionFee && styles.toggleIndicatorSelected,
+                ]}
+              >
                 {localAddTransactionFee && (
                   <Icon name="check" size={16} color={theme.colors.white} />
                 )}
@@ -227,13 +229,11 @@ const ServiceChargeSelectionScreen: React.FC = () => {
                 Add processing fee ({formatPrice(totals.transactionFee, '£')})
               </Text>
             </TouchableOpacity>
-            
+
             {!localAddTransactionFee && (
               <View style={styles.warningSection}>
                 <Icon name="info" size={20} color={theme.colors.warning} />
-                <Text style={styles.warningText}>
-                  Restaurant will cover processing costs
-                </Text>
+                <Text style={styles.warningText}>Restaurant will cover processing costs</Text>
               </View>
             )}
           </View>
@@ -241,26 +241,26 @@ const ServiceChargeSelectionScreen: React.FC = () => {
 
         <View style={styles.summarySection}>
           <Text style={styles.summaryTitle}>Order Summary</Text>
-          
+
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>Subtotal</Text>
             <Text style={styles.summaryValue}>{formatPrice(totals.subtotal, '£')}</Text>
           </View>
-          
+
           {totals.serviceCharge > 0 && (
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>Service Charge ({selectedOption}%)</Text>
               <Text style={styles.summaryValue}>{formatPrice(totals.serviceCharge, '£')}</Text>
             </View>
           )}
-          
+
           {totals.transactionFee > 0 && (
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>Processing Fee (2.9%)</Text>
               <Text style={styles.summaryValue}>{formatPrice(totals.transactionFee, '£')}</Text>
             </View>
           )}
-          
+
           <View style={[styles.summaryRow, styles.totalRow]}>
             <Text style={styles.totalLabel}>Total</Text>
             <Text style={styles.totalValue}>{formatPrice(totals.total, '£')}</Text>
@@ -269,10 +269,7 @@ const ServiceChargeSelectionScreen: React.FC = () => {
       </ScrollView>
 
       <View style={styles.footer}>
-        <TouchableOpacity
-          style={styles.continueButton}
-          onPress={handleContinue}
-        >
+        <TouchableOpacity style={styles.continueButton} onPress={handleContinue}>
           <Text style={styles.continueButtonText}>
             Continue to Payment • {formatPrice(totals.total, '£')}
           </Text>
@@ -282,260 +279,261 @@ const ServiceChargeSelectionScreen: React.FC = () => {
   );
 };
 
-const createStyles = (theme: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: theme.colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
-  },
-  backButton: {
-    padding: 8,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: theme.colors.text,
-  },
-  placeholder: {
-    width: 40,
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: 16,
-  },
-  explanationSection: {
-    paddingVertical: 20,
-  },
-  explanationTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: theme.colors.text,
-    marginBottom: 8,
-  },
-  explanationText: {
-    fontSize: 16,
-    color: theme.colors.textSecondary,
-    lineHeight: 22,
-  },
-  optionsSection: {
-    marginBottom: 24,
-  },
-  optionCard: {
-    backgroundColor: theme.colors.surface,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    borderWidth: 2,
-    borderColor: theme.colors.border,
-    position: 'relative',
-  },
-  optionCardSelected: {
-    borderColor: theme.colors.primary,
-    backgroundColor: `${theme.colors.primary}08`,
-  },
-  recommendedBadge: {
-    position: 'absolute',
-    top: -8,
-    right: 12,
-    backgroundColor: theme.colors.success,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  recommendedText: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: theme.colors.white,
-    letterSpacing: 0.5,
-  },
-  optionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  optionLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  radioButton: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: theme.colors.border,
-    marginRight: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  radioButtonSelected: {
-    borderColor: theme.colors.primary,
-    backgroundColor: theme.colors.primary,
-  },
-  optionInfo: {
-    flex: 1,
-  },
-  optionLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: theme.colors.text,
-  },
-  optionDescription: {
-    fontSize: 14,
-    color: theme.colors.textSecondary,
-    marginTop: 2,
-  },
-  optionRight: {
-    alignItems: 'flex-end',
-  },
-  optionAmount: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: theme.colors.text,
-  },
-  feeExplanation: {
-    fontSize: 12,
-    color: theme.colors.textSecondary,
-    fontStyle: 'italic',
-  },
-  transactionFeeSection: {
-    backgroundColor: theme.colors.surface,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 24,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: theme.colors.text,
-    marginBottom: 8,
-  },
-  feeExplanationText: {
-    fontSize: 14,
-    color: theme.colors.textSecondary,
-    marginBottom: 16,
-    lineHeight: 20,
-  },
-  toggleButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    backgroundColor: theme.colors.background,
-  },
-  toggleButtonSelected: {
-    borderColor: theme.colors.primary,
-    backgroundColor: `${theme.colors.primary}08`,
-  },
-  toggleIndicator: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: theme.colors.border,
-    marginRight: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  toggleIndicatorSelected: {
-    borderColor: theme.colors.primary,
-    backgroundColor: theme.colors.primary,
-  },
-  toggleText: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: theme.colors.text,
-  },
-  warningSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 12,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
-  },
-  warningText: {
-    fontSize: 14,
-    color: theme.colors.warning,
-    marginLeft: 8,
-    fontWeight: '500',
-  },
-  summarySection: {
-    backgroundColor: theme.colors.surface,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 24,
-  },
-  summaryTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: theme.colors.text,
-    marginBottom: 12,
-  },
-  summaryRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 6,
-  },
-  summaryLabel: {
-    fontSize: 16,
-    color: theme.colors.textSecondary,
-  },
-  summaryValue: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: theme.colors.text,
-  },
-  totalRow: {
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
-    marginTop: 8,
-    paddingTop: 12,
-  },
-  totalLabel: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: theme.colors.text,
-  },
-  totalValue: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: theme.colors.primary,
-  },
-  footer: {
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    backgroundColor: theme.colors.surface,
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
-  },
-  continueButton: {
-    backgroundColor: theme.colors.primary,
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: 'center',
-  },
-  continueButtonText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: theme.colors.white,
-  },
-});
+const createStyles = (theme: any) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      backgroundColor: theme.colors.surface,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
+    },
+    backButton: {
+      padding: 8,
+    },
+    headerTitle: {
+      fontSize: 18,
+      fontWeight: '600',
+      color: theme.colors.text,
+    },
+    placeholder: {
+      width: 40,
+    },
+    content: {
+      flex: 1,
+      paddingHorizontal: 16,
+    },
+    explanationSection: {
+      paddingVertical: 20,
+    },
+    explanationTitle: {
+      fontSize: 24,
+      fontWeight: '700',
+      color: theme.colors.text,
+      marginBottom: 8,
+    },
+    explanationText: {
+      fontSize: 16,
+      color: theme.colors.textSecondary,
+      lineHeight: 22,
+    },
+    optionsSection: {
+      marginBottom: 24,
+    },
+    optionCard: {
+      backgroundColor: theme.colors.surface,
+      borderRadius: 12,
+      padding: 16,
+      marginBottom: 12,
+      borderWidth: 2,
+      borderColor: theme.colors.border,
+      position: 'relative',
+    },
+    optionCardSelected: {
+      borderColor: theme.colors.primary,
+      backgroundColor: `${theme.colors.primary}08`,
+    },
+    recommendedBadge: {
+      position: 'absolute',
+      top: -8,
+      right: 12,
+      backgroundColor: theme.colors.success,
+      paddingHorizontal: 12,
+      paddingVertical: 4,
+      borderRadius: 12,
+    },
+    recommendedText: {
+      fontSize: 10,
+      fontWeight: '700',
+      color: theme.colors.white,
+      letterSpacing: 0.5,
+    },
+    optionHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 8,
+    },
+    optionLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flex: 1,
+    },
+    radioButton: {
+      width: 24,
+      height: 24,
+      borderRadius: 12,
+      borderWidth: 2,
+      borderColor: theme.colors.border,
+      marginRight: 12,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    radioButtonSelected: {
+      borderColor: theme.colors.primary,
+      backgroundColor: theme.colors.primary,
+    },
+    optionInfo: {
+      flex: 1,
+    },
+    optionLabel: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: theme.colors.text,
+    },
+    optionDescription: {
+      fontSize: 14,
+      color: theme.colors.textSecondary,
+      marginTop: 2,
+    },
+    optionRight: {
+      alignItems: 'flex-end',
+    },
+    optionAmount: {
+      fontSize: 18,
+      fontWeight: '700',
+      color: theme.colors.text,
+    },
+    feeExplanation: {
+      fontSize: 12,
+      color: theme.colors.textSecondary,
+      fontStyle: 'italic',
+    },
+    transactionFeeSection: {
+      backgroundColor: theme.colors.surface,
+      borderRadius: 12,
+      padding: 16,
+      marginBottom: 24,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    sectionTitle: {
+      fontSize: 18,
+      fontWeight: '600',
+      color: theme.colors.text,
+      marginBottom: 8,
+    },
+    feeExplanationText: {
+      fontSize: 14,
+      color: theme.colors.textSecondary,
+      marginBottom: 16,
+      lineHeight: 20,
+    },
+    toggleButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      backgroundColor: theme.colors.background,
+    },
+    toggleButtonSelected: {
+      borderColor: theme.colors.primary,
+      backgroundColor: `${theme.colors.primary}08`,
+    },
+    toggleIndicator: {
+      width: 20,
+      height: 20,
+      borderRadius: 10,
+      borderWidth: 2,
+      borderColor: theme.colors.border,
+      marginRight: 12,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    toggleIndicatorSelected: {
+      borderColor: theme.colors.primary,
+      backgroundColor: theme.colors.primary,
+    },
+    toggleText: {
+      fontSize: 16,
+      fontWeight: '500',
+      color: theme.colors.text,
+    },
+    warningSection: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: 12,
+      paddingTop: 12,
+      borderTopWidth: 1,
+      borderTopColor: theme.colors.border,
+    },
+    warningText: {
+      fontSize: 14,
+      color: theme.colors.warning,
+      marginLeft: 8,
+      fontWeight: '500',
+    },
+    summarySection: {
+      backgroundColor: theme.colors.surface,
+      borderRadius: 12,
+      padding: 16,
+      marginBottom: 24,
+    },
+    summaryTitle: {
+      fontSize: 18,
+      fontWeight: '600',
+      color: theme.colors.text,
+      marginBottom: 12,
+    },
+    summaryRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: 6,
+    },
+    summaryLabel: {
+      fontSize: 16,
+      color: theme.colors.textSecondary,
+    },
+    summaryValue: {
+      fontSize: 16,
+      fontWeight: '500',
+      color: theme.colors.text,
+    },
+    totalRow: {
+      borderTopWidth: 1,
+      borderTopColor: theme.colors.border,
+      marginTop: 8,
+      paddingTop: 12,
+    },
+    totalLabel: {
+      fontSize: 18,
+      fontWeight: '700',
+      color: theme.colors.text,
+    },
+    totalValue: {
+      fontSize: 20,
+      fontWeight: '700',
+      color: theme.colors.primary,
+    },
+    footer: {
+      paddingHorizontal: 16,
+      paddingVertical: 16,
+      backgroundColor: theme.colors.surface,
+      borderTopWidth: 1,
+      borderTopColor: theme.colors.border,
+    },
+    continueButton: {
+      backgroundColor: theme.colors.primary,
+      borderRadius: 12,
+      paddingVertical: 16,
+      alignItems: 'center',
+    },
+    continueButtonText: {
+      fontSize: 18,
+      fontWeight: '600',
+      color: theme.colors.white,
+    },
+  });
 
 export default ServiceChargeSelectionScreen;

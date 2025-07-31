@@ -47,7 +47,9 @@ describe('Cart Icon State', () => {
     if (typeof addItemToCart === 'function') {
       await addItemToCart(testItemName);
     } else {
-      console.warn(`addItemToCart helper not found. Cannot add item: ${testItemName}. Test assertion for item addition will likely fail.`);
+      console.warn(
+        `addItemToCart helper not found. Cannot add item: ${testItemName}. Test assertion for item addition will likely fail.`
+      );
       // As a fallback, manually navigate and add an item if possible:
       // await element(by.text('Some Category')).tap();
       // await element(by.text(testItemName)).multiTap(1); // or single tap if one adds

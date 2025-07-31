@@ -4,10 +4,13 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import SharedDataStore from './SharedDataStore';
-import NetworkDiagnosticsService from './NetworkDiagnosticsService';
-import { Business } from '../types';
+
 import API_CONFIG from '../config/api';
+
+import NetworkDiagnosticsService from './NetworkDiagnosticsService';
+import SharedDataStore from './SharedDataStore';
+
+import type { Business } from '../types';
 
 interface RestaurantData {
   // Core restaurant info
@@ -15,7 +18,7 @@ interface RestaurantData {
   name: string;
   displayName: string;
   businessType: string;
-  
+
   // Contact & Legal
   address: string;
   phone: string;
@@ -23,28 +26,28 @@ interface RestaurantData {
   website?: string;
   vatNumber: string;
   registrationNumber: string;
-  
+
   // Platform relationship
   platformOwnerId: string;
   ownerId: string;
   subscriptionTier: 'basic' | 'premium' | 'enterprise';
-  
+
   // Financial
   currency: string;
   monthlyRevenue: number;
   commissionRate: number;
-  
+
   // Status
   isActive: boolean;
   onboardingCompleted: boolean;
   joinedDate: Date;
   lastActivity: Date;
-  
+
   // Settings
   timezone: string;
   theme?: string;
   primaryColor?: string;
-  
+
   // Operational metrics
   todayTransactions: number;
   todayRevenue: number;
@@ -77,7 +80,7 @@ class RestaurantDataService {
     baseDelay: number = API_CONFIG.RETRY_DELAY
   ): Promise<T> {
     let lastError: Error | null = null;
-    
+
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         console.log(`🔄 API call attempt ${attempt}/${maxRetries}`);
@@ -89,22 +92,22 @@ class RestaurantDataService {
       } catch (error) {
         lastError = error instanceof Error ? error : new Error('Unknown error');
         console.log(`❌ API call attempt ${attempt} failed:`, lastError.message);
-        
+
         // Don't retry on timeout errors - they indicate longer network issues
         if (lastError.name === 'AbortError') {
           console.log('⏱️ Timeout error detected, skipping remaining retries');
           break;
         }
-        
+
         // Don't wait after the last attempt
         if (attempt < maxRetries) {
           const delay = baseDelay * Math.pow(2, attempt - 1); // Exponential backoff
           console.log(`⏳ Waiting ${delay}ms before retry...`);
-          await new Promise(resolve => setTimeout(resolve, delay));
+          await new Promise((resolve) => setTimeout(resolve, delay));
         }
       }
     }
-    
+
     console.error(`❌ All ${maxRetries} API call attempts failed`);
     throw lastError || new Error('All retry attempts failed');
   }
@@ -123,63 +126,66 @@ class RestaurantDataService {
   async getPlatformRestaurants(platformOwnerId: string): Promise<RestaurantData[]> {
     try {
       console.log('📊 Getting restaurants for platform:', platformOwnerId);
-      
+
       // FIRST: Perform network diagnostics to identify any connectivity issues
       const networkDiagnostics = NetworkDiagnosticsService.getInstance();
       const diagnostics = await networkDiagnostics.performFullNetworkDiagnostics();
-      
+
       console.log('🔍 Network diagnostics results:', {
         isConnected: diagnostics.isConnected,
         connectionType: diagnostics.connectionType,
         apiServerReachable: diagnostics.apiServerReachable,
         specificEndpointReachable: diagnostics.specificEndpointReachable,
         latency: diagnostics.latency,
-        error: diagnostics.error
+        error: diagnostics.error,
       });
-      
+
       // If network issues detected, show user-friendly error dialog
       if (!diagnostics.apiServerReachable || !diagnostics.specificEndpointReachable) {
         console.log('⚠️ Network connectivity issues detected, showing error dialog...');
         await networkDiagnostics.showNetworkErrorDialog(diagnostics);
       }
-      
+
       // SECOND: Try to get from real backend API with enhanced error handling and retry logic
       if (diagnostics.apiServerReachable && diagnostics.specificEndpointReachable) {
         try {
           console.log('🌐 Attempting API call with network confirmed available...');
-          
+
           // Use retry mechanism for robust API calls
           const apiResult = await this.retryAPICall(async () => {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), API_CONFIG.TIMEOUT);
-            
-            const response = await fetch(`${API_CONFIG.BASE_URL}/api/v1/platform/restaurants/${platformOwnerId}`, {
-              method: 'GET',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              signal: controller.signal,
-            });
-            
+
+            const response = await fetch(
+              `${API_CONFIG.BASE_URL}/api/v1/platform/restaurants/${platformOwnerId}`,
+              {
+                method: 'GET',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                signal: controller.signal,
+              }
+            );
+
             clearTimeout(timeoutId);
-            
+
             if (!response.ok) {
               throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
-            
+
             const data = await response.json();
-            
+
             if (!data || !data.restaurants || !Array.isArray(data.restaurants)) {
               throw new Error('Invalid API response structure - data.restaurants is not an array');
             }
-            
+
             return data;
           });
-          
+
           console.log(`✅ Got ${apiResult.restaurants?.length || 0} restaurants from backend API`);
           console.log('🔗 Data source:', apiResult.source);
           console.log('🔍 Response data structure:', typeof apiResult, apiResult);
-          
+
           // Convert backend format to RestaurantData format
           const restaurants: RestaurantData[] = apiResult.restaurants.map((r: any) => ({
             id: r.id,
@@ -210,17 +216,19 @@ class RestaurantDataService {
             activeOrders: r.activeOrders || 0,
             averageOrderValue: r.averageOrderValue || 0,
           }));
-          
-          console.log('✅ Successfully retrieved platform restaurants from API with retry mechanism');
+
+          console.log(
+            '✅ Successfully retrieved platform restaurants from API with retry mechanism'
+          );
           return restaurants;
         } catch (apiError) {
           console.error('⚠️ Backend API call failed after all retries:', {
             error: apiError,
             message: apiError instanceof Error ? apiError.message : 'Unknown error',
             url: `${API_CONFIG.BASE_URL}/api/v1/platform/restaurants/${platformOwnerId}`,
-            errorName: apiError instanceof Error ? apiError.name : 'Unknown'
+            errorName: apiError instanceof Error ? apiError.name : 'Unknown',
           });
-          
+
           // If it's a timeout error, provide specific feedback
           if (apiError instanceof Error && apiError.name === 'AbortError') {
             console.log('⏱️ API requests timed out after', API_CONFIG.TIMEOUT, 'ms per attempt');
@@ -229,10 +237,11 @@ class RestaurantDataService {
       } else {
         console.log('🚫 Skipping API call due to network connectivity issues');
       }
-      
+
       // FALLBACK: Get from shared data store (local storage)
-      const restaurants = await this.dataStore.getPlatformSetting(`restaurants.${platformOwnerId}`) || [];
-      
+      const restaurants =
+        (await this.dataStore.getPlatformSetting(`restaurants.${platformOwnerId}`)) || [];
+
       // If no restaurants exist, check if we have a current restaurant to add
       if (restaurants.length === 0) {
         const currentRestaurant = await this.getCurrentRestaurantData();
@@ -241,7 +250,7 @@ class RestaurantDataService {
           await this.savePlatformRestaurants(platformOwnerId, restaurants);
         }
       }
-      
+
       console.log('✅ Found restaurants (from fallback):', restaurants.length);
       return restaurants;
     } catch (error) {
@@ -253,7 +262,10 @@ class RestaurantDataService {
   /**
    * Save restaurants for a platform owner
    */
-  async savePlatformRestaurants(platformOwnerId: string, restaurants: RestaurantData[]): Promise<void> {
+  async savePlatformRestaurants(
+    platformOwnerId: string,
+    restaurants: RestaurantData[]
+  ): Promise<void> {
     try {
       await this.dataStore.setPlatformSetting(`restaurants.${platformOwnerId}`, restaurants);
       console.log('✅ Saved platform restaurants:', restaurants.length);
@@ -275,7 +287,9 @@ class RestaurantDataService {
       }
 
       // Try to get from shared data store first
-      const restaurantData = await this.dataStore.getPlatformSetting(`restaurant.${this.currentRestaurantId}`);
+      const restaurantData = await this.dataStore.getPlatformSetting(
+        `restaurant.${this.currentRestaurantId}`
+      );
       if (restaurantData) {
         return restaurantData;
       }
@@ -311,18 +325,18 @@ class RestaurantDataService {
 
       // Save to shared data store
       await this.dataStore.setPlatformSetting(`restaurant.${current.id}`, updated);
-      
+
       // Update in platform restaurants list
       if (current.platformOwnerId) {
         const platformRestaurants = await this.getPlatformRestaurants(current.platformOwnerId);
-        const index = platformRestaurants.findIndex(r => r.id === current.id);
-        
+        const index = platformRestaurants.findIndex((r) => r.id === current.id);
+
         if (index >= 0) {
           platformRestaurants[index] = updated;
         } else {
           platformRestaurants.push(updated);
         }
-        
+
         await this.savePlatformRestaurants(current.platformOwnerId, platformRestaurants);
       }
 
@@ -369,7 +383,7 @@ class RestaurantDataService {
 
       // Save to shared data store
       await this.dataStore.setPlatformSetting(`restaurant.${newRestaurant.id}`, newRestaurant);
-      
+
       // Add to platform restaurants
       const platformRestaurants = await this.getPlatformRestaurants(newRestaurant.platformOwnerId);
       platformRestaurants.push(newRestaurant);
@@ -409,14 +423,20 @@ class RestaurantDataService {
   /**
    * Subscribe to restaurant data changes
    */
-  subscribeToRestaurant(restaurantId: string, callback: (data: RestaurantData) => void): () => void {
+  subscribeToRestaurant(
+    restaurantId: string,
+    callback: (data: RestaurantData) => void
+  ): () => void {
     return this.dataStore.subscribe(`restaurant.${restaurantId}`, callback);
   }
 
   /**
    * Subscribe to platform restaurants changes
    */
-  subscribeToPlatformRestaurants(platformOwnerId: string, callback: (restaurants: RestaurantData[]) => void): () => void {
+  subscribeToPlatformRestaurants(
+    platformOwnerId: string,
+    callback: (restaurants: RestaurantData[]) => void
+  ): () => void {
     return this.dataStore.subscribe(`restaurants.${platformOwnerId}`, callback);
   }
 

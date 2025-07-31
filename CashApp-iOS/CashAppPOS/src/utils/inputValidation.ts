@@ -9,21 +9,21 @@ export const parseNumericInput = (value: string | number | undefined | null): nu
   if (value === undefined || value === null || value === '') {
     return 0;
   }
-  
+
   // If already a number, return it
   if (typeof value === 'number' && !isNaN(value)) {
     return value;
   }
-  
+
   // Convert to string and clean
   const stringValue = String(value);
   const cleaned = stringValue.replace(/[^0-9.-]/g, '');
-  
+
   // Handle empty or invalid strings
   if (!cleaned || cleaned === '-' || cleaned === '.') {
     return 0;
   }
-  
+
   const parsed = parseFloat(cleaned);
   return isNaN(parsed) ? 0 : parsed;
 };
@@ -35,16 +35,16 @@ export const parseCurrencyInput = (value: string | number | undefined | null): n
   if (value === undefined || value === null || value === '') {
     return 0;
   }
-  
+
   // If already a number, return it
   if (typeof value === 'number' && !isNaN(value)) {
     return value;
   }
-  
+
   // Convert to string and clean
   const stringValue = String(value);
   const cleaned = stringValue.replace(/[£$€,]/g, '').trim();
-  
+
   return parseNumericInput(cleaned);
 };
 
@@ -55,16 +55,16 @@ export const parsePercentageInput = (value: string | number | undefined | null):
   if (value === undefined || value === null || value === '') {
     return 0;
   }
-  
+
   // If already a number, return it
   if (typeof value === 'number' && !isNaN(value)) {
     return value;
   }
-  
+
   // Convert to string and clean
   const stringValue = String(value);
   const cleaned = stringValue.replace(/%/g, '').trim();
-  
+
   return parseNumericInput(cleaned);
 };
 
@@ -74,12 +74,12 @@ export const parsePercentageInput = (value: string | number | undefined | null):
 export const validateUKPhone = (phone: string): boolean => {
   // Remove all non-numeric characters
   const cleaned = phone.replace(/\D/g, '');
-  
+
   // UK phone numbers should be 10 or 11 digits
   // Starting with 0 for landlines or 07 for mobiles
   // Or +44 for international format
   const ukPattern = /^(0[0-9]{9,10}|44[0-9]{9,10})$/;
-  
+
   return ukPattern.test(cleaned);
 };
 
@@ -88,13 +88,13 @@ export const validateUKPhone = (phone: string): boolean => {
  */
 export const formatUKPhone = (phone: string): string => {
   const cleaned = phone.replace(/\D/g, '');
-  
+
   // Handle +44 format
   if (cleaned.startsWith('44')) {
     const number = cleaned.substring(2);
     return `+44 ${number.substring(0, 4)} ${number.substring(4)}`;
   }
-  
+
   // Handle UK format
   if (cleaned.startsWith('0')) {
     if (cleaned.length === 11) {
@@ -102,7 +102,7 @@ export const formatUKPhone = (phone: string): string => {
     }
     return cleaned;
   }
-  
+
   return phone;
 };
 
@@ -165,7 +165,7 @@ export const formatPostcode = (postcode: string): string => {
  */
 export const sanitizeInput = (input: string, maxLength: number = 255): string => {
   if (!input || typeof input !== 'string') return '';
-  
+
   return input
     .replace(/[<>\"'();`\\]/g, '') // Remove dangerous characters
     .trim()
@@ -191,12 +191,12 @@ export const validateIBAN = (iban: string): boolean => {
   // Basic IBAN validation - can be enhanced with country-specific rules
   const cleaned = iban.replace(/\s/g, '').toUpperCase();
   const ibanRegex = /^[A-Z]{2}[0-9]{2}[A-Z0-9]+$/;
-  
+
   if (!ibanRegex.test(cleaned)) return false;
-  
+
   // Length varies by country, but GB (UK) should be 22 characters
   if (cleaned.startsWith('GB') && cleaned.length !== 22) return false;
-  
+
   return true;
 };
 
@@ -218,7 +218,7 @@ export const debounceValidation = (
   delay: number = 300
 ): ((...args: any[]) => void) => {
   let timeoutId: NodeJS.Timeout;
-  
+
   return (...args: any[]) => {
     clearTimeout(timeoutId);
     timeoutId = setTimeout(() => fn(...args), delay);

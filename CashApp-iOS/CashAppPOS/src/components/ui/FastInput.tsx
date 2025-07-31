@@ -1,13 +1,8 @@
 import React, { useState, useCallback } from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  TextInput,
-  TextInputProps,
-  ViewStyle,
-  TextStyle,
-} from 'react-native';
+
+import type { TextInputProps, ViewStyle, TextStyle } from 'react-native';
+import { StyleSheet, Text, View, TextInput } from 'react-native';
+
 import { useTheme } from '../../design-system/ThemeProvider';
 
 export interface FastInputProps extends Omit<TextInputProps, 'onChangeText'> {
@@ -63,7 +58,11 @@ const FastInput: React.FC<FastInputProps> = ({
       alignItems: 'center',
       backgroundColor: editable ? theme.colors.background : theme.colors.lightGray,
       borderWidth: 1,
-      borderColor: error ? theme.colors.error : (isFocused ? theme.colors.primary : theme.colors.border),
+      borderColor: error
+        ? theme.colors.error
+        : isFocused
+        ? theme.colors.primary
+        : theme.colors.border,
       borderRadius: 8,
       paddingHorizontal: 12,
       paddingVertical: 12,
@@ -79,7 +78,13 @@ const FastInput: React.FC<FastInputProps> = ({
       fontSize: 16,
       color: theme.colors.text,
       padding: 0,
-      textAlign: inputType === 'number' || inputType === 'decimal' || inputType === 'percentage' || inputType === 'currency' ? 'right' : 'left',
+      textAlign:
+        inputType === 'number' ||
+        inputType === 'decimal' ||
+        inputType === 'percentage' ||
+        inputType === 'currency'
+          ? 'right'
+          : 'left',
     },
     unitRight: {
       fontSize: 16,
@@ -110,83 +115,89 @@ const FastInput: React.FC<FastInputProps> = ({
     }
   }, [inputType]);
 
-  const formatAndValidateInput = useCallback((text: string) => {
-    let cleanText = text;
+  const formatAndValidateInput = useCallback(
+    (text: string) => {
+      let cleanText = text;
 
-    switch (inputType) {
-      case 'number':
-        // Only allow integers
-        cleanText = text.replace(/[^0-9]/g, '');
-        if (!allowNegative) {
-          cleanText = cleanText.replace(/-/g, '');
-        }
-        break;
+      switch (inputType) {
+        case 'number':
+          // Only allow integers
+          cleanText = text.replace(/[^0-9]/g, '');
+          if (!allowNegative) {
+            cleanText = cleanText.replace(/-/g, '');
+          }
+          break;
 
-      case 'decimal':
-      case 'currency':
-        // Allow decimal numbers
-        cleanText = text.replace(/[^0-9.-]/g, '');
-        if (!allowNegative) {
-          cleanText = cleanText.replace(/-/g, '');
-        }
-        
-        // Ensure only one decimal point
-        const parts = cleanText.split('.');
-        if (parts.length > 2) {
-          cleanText = parts[0] + '.' + parts.slice(1).join('');
-        }
-        
-        // Limit decimal places
-        if (parts[1] && parts[1].length > maxDecimalPlaces) {
-          cleanText = parts[0] + '.' + parts[1].substring(0, maxDecimalPlaces);
-        }
-        break;
+        case 'decimal':
+        case 'currency':
+          // Allow decimal numbers
+          cleanText = text.replace(/[^0-9.-]/g, '');
+          if (!allowNegative) {
+            cleanText = cleanText.replace(/-/g, '');
+          }
 
-      case 'percentage':
-        // Allow decimal numbers for percentages
-        cleanText = text.replace(/[^0-9.]/g, '');
-        
-        // Ensure only one decimal point
-        const percentParts = cleanText.split('.');
-        if (percentParts.length > 2) {
-          cleanText = percentParts[0] + '.' + percentParts.slice(1).join('');
-        }
-        
-        // Limit decimal places to 2 for percentages (e.g., 12.75%)
-        if (percentParts[1] && percentParts[1].length > 2) {
-          cleanText = percentParts[0] + '.' + percentParts[1].substring(0, 2);
-        }
-        
-        // Optionally limit percentage to 100%
-        const percentValue = parseFloat(cleanText);
-        if (percentValue > 100) {
-          cleanText = '100';
-        }
-        break;
+          // Ensure only one decimal point
+          const parts = cleanText.split('.');
+          if (parts.length > 2) {
+            cleanText = parts[0] + '.' + parts.slice(1).join('');
+          }
 
-      case 'email':
-        // Basic email validation - allow common email characters
-        cleanText = text.replace(/[^a-zA-Z0-9@._-]/g, '');
-        break;
+          // Limit decimal places
+          if (parts[1] && parts[1].length > maxDecimalPlaces) {
+            cleanText = parts[0] + '.' + parts[1].substring(0, maxDecimalPlaces);
+          }
+          break;
 
-      case 'phone':
-        // Allow numbers, spaces, dashes, parentheses, plus
-        cleanText = text.replace(/[^0-9\s\-\(\)\+]/g, '');
-        break;
+        case 'percentage':
+          // Allow decimal numbers for percentages
+          cleanText = text.replace(/[^0-9.]/g, '');
 
-      default:
-        // No formatting for text input
-        cleanText = text;
-        break;
-    }
+          // Ensure only one decimal point
+          const percentParts = cleanText.split('.');
+          if (percentParts.length > 2) {
+            cleanText = percentParts[0] + '.' + percentParts.slice(1).join('');
+          }
 
-    return cleanText;
-  }, [inputType, maxDecimalPlaces, allowNegative]);
+          // Limit decimal places to 2 for percentages (e.g., 12.75%)
+          if (percentParts[1] && percentParts[1].length > 2) {
+            cleanText = percentParts[0] + '.' + percentParts[1].substring(0, 2);
+          }
 
-  const handleChangeText = useCallback((text: string) => {
-    const formattedText = formatAndValidateInput(text);
-    onChangeText(formattedText);
-  }, [formatAndValidateInput, onChangeText]);
+          // Optionally limit percentage to 100%
+          const percentValue = parseFloat(cleanText);
+          if (percentValue > 100) {
+            cleanText = '100';
+          }
+          break;
+
+        case 'email':
+          // Basic email validation - allow common email characters
+          cleanText = text.replace(/[^a-zA-Z0-9@._-]/g, '');
+          break;
+
+        case 'phone':
+          // Allow numbers, spaces, dashes, parentheses, plus
+          cleanText = text.replace(/[^0-9\s\-\(\)\+]/g, '');
+          break;
+
+        default:
+          // No formatting for text input
+          cleanText = text;
+          break;
+      }
+
+      return cleanText;
+    },
+    [inputType, maxDecimalPlaces, allowNegative]
+  );
+
+  const handleChangeText = useCallback(
+    (text: string) => {
+      const formattedText = formatAndValidateInput(text);
+      onChangeText(formattedText);
+    },
+    [formatAndValidateInput, onChangeText]
+  );
 
   const handleFocus = useCallback(() => {
     setIsFocused(true);
@@ -198,19 +209,13 @@ const FastInput: React.FC<FastInputProps> = ({
 
   return (
     <View style={[styles.container, containerStyle]}>
-      {label && (
-        <Text style={[styles.label, labelStyle]}>
-          {label}
-        </Text>
-      )}
-      
+      {label && <Text style={[styles.label, labelStyle]}>{label}</Text>}
+
       <View style={styles.inputContainer}>
         {unit && unitPosition === 'left' && (
-          <Text style={styles.unitLeft}>
-            {inputType === 'currency' ? currencySymbol : unit}
-          </Text>
+          <Text style={styles.unitLeft}>{inputType === 'currency' ? currencySymbol : unit}</Text>
         )}
-        
+
         <TextInput
           {...textInputProps}
           style={[styles.input, inputStyle]}
@@ -230,19 +235,13 @@ const FastInput: React.FC<FastInputProps> = ({
           blurOnSubmit={true}
           clearButtonMode="while-editing"
         />
-        
+
         {unit && unitPosition === 'right' && (
-          <Text style={styles.unitRight}>
-            {inputType === 'percentage' ? '%' : unit}
-          </Text>
+          <Text style={styles.unitRight}>{inputType === 'percentage' ? '%' : unit}</Text>
         )}
       </View>
-      
-      {error && (
-        <Text style={[styles.error, errorStyle]}>
-          {error}
-        </Text>
-      )}
+
+      {error && <Text style={[styles.error, errorStyle]}>{error}</Text>}
     </View>
   );
 };

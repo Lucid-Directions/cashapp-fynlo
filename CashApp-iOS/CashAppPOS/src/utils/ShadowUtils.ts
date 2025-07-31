@@ -3,7 +3,7 @@
  * Fixes performance warnings by providing efficient shadow configurations
  */
 
-import { ViewStyle } from 'react-native';
+import type { ViewStyle } from 'react-native';
 
 export interface ShadowStyle extends ViewStyle {
   shadowColor?: string;
@@ -70,16 +70,14 @@ export const ShadowUtils = {
   }),
 
   // Custom shadow with optimized defaults
-  custom: (
-    options: {
-      backgroundColor?: string;
-      shadowColor?: string;
-      offset?: { width: number; height: number };
-      opacity?: number;
-      radius?: number;
-      elevation?: number;
-    }
-  ): ShadowStyle => ({
+  custom: (options: {
+    backgroundColor?: string;
+    shadowColor?: string;
+    offset?: { width: number; height: number };
+    opacity?: number;
+    radius?: number;
+    elevation?: number;
+  }): ShadowStyle => ({
     backgroundColor: options.backgroundColor || '#FFFFFF',
     shadowColor: options.shadowColor || '#000000',
     shadowOffset: options.offset || { width: 0, height: 2 },

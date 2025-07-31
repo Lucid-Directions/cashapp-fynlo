@@ -49,7 +49,12 @@ const DataService = {
   processPayment: jest.fn().mockResolvedValue(true),
   getRestaurantFloorPlan: jest.fn().mockResolvedValue({ tables: [], sections: [] }),
   updateTableStatus: jest.fn().mockResolvedValue({ success: true }),
-  getDailySalesReport: jest.fn().mockResolvedValue({ summary: {}, hourly_breakdown: [], payment_methods: [], top_products: [] }),
+  getDailySalesReport: jest.fn().mockResolvedValue({
+    summary: {},
+    hourly_breakdown: [],
+    payment_methods: [],
+    top_products: [],
+  }),
   getSalesSummary: jest.fn().mockResolvedValue({ summary: {}, order_types: {} }),
   getCurrentSession: jest.fn().mockResolvedValue(null),
   createSession: jest.fn().mockResolvedValue({ id: 'mock-session-456' }),
@@ -70,7 +75,8 @@ const DataService = {
   getFinancialReportDetail: jest.fn().mockResolvedValue(null), // Takes period
   getSalesReportDetail: jest.fn().mockResolvedValue([]), // Takes period, returns SalesData[]
   getStaffReportDetail: jest.fn().mockResolvedValue([]), // Takes period
-  getReportsDashboardData: jest.fn().mockResolvedValue({ // Structure based on ReportsScreenSimple
+  getReportsDashboardData: jest.fn().mockResolvedValue({
+    // Structure based on ReportsScreenSimple
     todaySummary: { totalSales: 0, transactions: 0, averageOrder: 0 },
     weeklyLabor: { totalActualHours: 0, totalLaborCost: 0, efficiency: 0 },
     topItemsToday: [],

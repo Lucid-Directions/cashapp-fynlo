@@ -42,19 +42,19 @@ export class XeroApiClient {
   private authService: XeroAuthService;
   private requestQueue: QueuedRequest[] = [];
   private processingQueue = false;
-  
+
   // Rate limiting configuration
   private readonly MAX_REQUESTS_PER_MINUTE = 60;
   private readonly MAX_REQUESTS_PER_DAY = 5000;
   private readonly MAX_CONCURRENT_REQUESTS = 5;
-  
+
   // Rate limiting state
   private requestsThisMinute = 0;
   private requestsToday = 0;
   private activeRequests = 0;
   private minuteResetTime = 0;
   private dayResetTime = 0;
-  
+
   // Configuration
   private readonly BASE_URL = 'https://api.xero.com/api.xro/2.0';
   private readonly DEFAULT_TIMEOUT = 30000; // 30 seconds
@@ -107,7 +107,7 @@ export class XeroApiClient {
         resolve: resolve as (value: XeroApiResponse) => void,
         reject,
         timestamp: Date.now(),
-        retryCount: 0
+        retryCount: 0,
       };
 
       this.requestQueue.push(queuedRequest);
@@ -149,7 +149,7 @@ export class XeroApiClient {
       if (Date.now() - request.timestamp > 300000) {
         request.reject({
           message: 'Request expired in queue',
-          code: 'REQUEST_EXPIRED'
+          code: 'REQUEST_EXPIRED',
         });
         continue;
       }
@@ -189,34 +189,36 @@ export class XeroApiClient {
     if (!accessToken) {
       throw {
         message: 'No valid access token available',
-        code: 'AUTH_REQUIRED'
+        code: 'AUTH_REQUIRED',
       } as XeroApiError;
     }
 
     const url = endpoint.startsWith('http') ? endpoint : `${this.BASE_URL}${endpoint}`;
-    
+
     const headers = {
-      'Authorization': `Bearer ${accessToken}`,
-      'Accept': 'application/json',
+      Authorization: `Bearer ${accessToken}`,
+      Accept: 'application/json',
       'Content-Type': 'application/json',
-      'Xero-tenant-id': await this.getTenantId() || '',
-      ...options.headers
+      'Xero-tenant-id': (await this.getTenantId()) || '',
+      ...options.headers,
     };
 
     const requestConfig: RequestInit = {
       method: options.method || 'GET',
       headers,
-      signal: AbortSignal.timeout(options.timeout || this.DEFAULT_TIMEOUT)
+      signal: AbortSignal.timeout(options.timeout || this.DEFAULT_TIMEOUT),
     };
 
-    if (options.body && (options.method === 'POST' || options.method === 'PUT' || options.method === 'PATCH')) {
-      requestConfig.body = typeof options.body === 'string' 
-        ? options.body 
-        : JSON.stringify(options.body);
+    if (
+      options.body &&
+      (options.method === 'POST' || options.method === 'PUT' || options.method === 'PATCH')
+    ) {
+      requestConfig.body =
+        typeof options.body === 'string' ? options.body : JSON.stringify(options.body);
     }
 
     const response = await fetch(url, requestConfig);
-    
+
     // Update rate limit info from headers
     this.updateRateLimitInfo(response.headers);
 
@@ -226,16 +228,16 @@ export class XeroApiClient {
         message: errorData.message || `HTTP ${response.status}`,
         status: response.status,
         code: errorData.code,
-        details: errorData
+        details: errorData,
       } as XeroApiError;
     }
 
     const data = await response.json();
-    
+
     return {
       data,
       status: response.status,
-      headers: this.headersToObject(response.headers)
+      headers: this.headersToObject(response.headers),
     };
   }
 
@@ -244,13 +246,13 @@ export class XeroApiClient {
    */
   private async handleRequestError(error: XeroApiError, request: QueuedRequest): Promise<void> {
     const shouldRetry = this.shouldRetryRequest(error, request);
-    
+
     if (shouldRetry && request.retryCount < (request.options.retries || this.MAX_RETRIES)) {
       request.retryCount++;
       const delay = this.calculateRetryDelay(request.retryCount);
-      
+
       console.log(`Retrying request in ${delay}ms (attempt ${request.retryCount})`);
-      
+
       setTimeout(() => {
         this.requestQueue.unshift(request); // Add back to front of queue
         this.processQueue();
@@ -281,8 +283,10 @@ export class XeroApiClient {
    * Check if request can be made based on rate limits
    */
   private canMakeRequest(): boolean {
-    return this.requestsThisMinute < this.MAX_REQUESTS_PER_MINUTE &&
-           this.requestsToday < this.MAX_REQUESTS_PER_DAY;
+    return (
+      this.requestsThisMinute < this.MAX_REQUESTS_PER_MINUTE &&
+      this.requestsToday < this.MAX_REQUESTS_PER_DAY
+    );
   }
 
   /**
@@ -309,7 +313,7 @@ export class XeroApiClient {
       ),
       resetTime: Math.min(this.minuteResetTime, this.dayResetTime),
       dailyLimit: this.MAX_REQUESTS_PER_DAY,
-      minuteLimit: this.MAX_REQUESTS_PER_MINUTE
+      minuteLimit: this.MAX_REQUESTS_PER_MINUTE,
     };
   }
 
@@ -319,13 +323,13 @@ export class XeroApiClient {
   private updateRateLimitInfo(headers: Headers): void {
     const remaining = headers.get('X-RateLimit-Remaining');
     const reset = headers.get('X-RateLimit-Reset');
-    
+
     if (remaining) {
       // Adjust internal counters based on server response
       const serverRemaining = parseInt(remaining, 10);
       this.requestsThisMinute = Math.max(0, this.MAX_REQUESTS_PER_MINUTE - serverRemaining);
     }
-    
+
     if (reset) {
       this.minuteResetTime = parseInt(reset, 10) * 1000; // Convert to milliseconds
     }
@@ -374,7 +378,7 @@ export class XeroApiClient {
    * Utility delay function
    */
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**
@@ -434,7 +438,7 @@ export class XeroApiClient {
   public async createInvoice(invoice: any): Promise<any> {
     const response = await this.makeRequest('/Invoices', {
       method: 'POST',
-      body: invoice
+      body: invoice,
     });
     return response.data;
   }
@@ -445,7 +449,7 @@ export class XeroApiClient {
   public async createContact(contact: any): Promise<any> {
     const response = await this.makeRequest('/Contacts', {
       method: 'POST',
-      body: contact
+      body: contact,
     });
     return response.data;
   }
@@ -463,7 +467,7 @@ export class XeroApiClient {
       queueLength: this.requestQueue.length,
       activeRequests: this.activeRequests,
       requestsThisMinute: this.requestsThisMinute,
-      requestsToday: this.requestsToday
+      requestsToday: this.requestsToday,
     };
   }
 }

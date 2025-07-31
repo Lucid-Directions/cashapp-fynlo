@@ -30,15 +30,8 @@
       "@config/*": ["src/config/*"],
       "@assets/*": ["src/assets/*"]
     },
-    "types": [
-      "react",
-      "react-native",
-      "jest"
-    ],
-    "typeRoots": [
-      "./node_modules/@types",
-      "./src/types"
-    ]
+    "types": ["react", "react-native", "jest"],
+    "typeRoots": ["./node_modules/@types", "./src/types"]
   },
   "include": [
     "src/**/*",

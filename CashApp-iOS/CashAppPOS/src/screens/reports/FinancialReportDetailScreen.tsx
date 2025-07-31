@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+
 import {
   StyleSheet,
   Text,
@@ -10,13 +11,14 @@ import {
   Dimensions,
   Alert,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
+import ComingSoon from '../../components/feedback/ComingSoon';
+import LoadingView from '../../components/feedback/LoadingView';
 import { useTheme } from '../../design-system/ThemeProvider';
 import DataService from '../../services/DataService';
-import LoadingView from '../../components/feedback/LoadingView';
-import ComingSoon from '../../components/feedback/ComingSoon';
-
 
 const { width } = Dimensions.get('window');
 
@@ -75,16 +77,21 @@ const FinancialReportDetailScreen = () => {
   const [selectedPeriod, setSelectedPeriod] = useState('month');
 
   const handleExportReport = () => {
-    Alert.alert(
-      'Export Financial Report',
-      'Choose export format',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'PDF P&L Statement', onPress: () => Alert.alert('PDF Export', 'P&L PDF coming soon') },
-        { text: 'Excel Spreadsheet', onPress: () => Alert.alert('Excel Export', 'Excel export coming soon') },
-        { text: 'Email to Accountant', onPress: () => Alert.alert('Email Report', 'Email functionality coming soon') }
-      ]
-    );
+    Alert.alert('Export Financial Report', 'Choose export format', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'PDF P&L Statement',
+        onPress: () => Alert.alert('PDF Export', 'P&L PDF coming soon'),
+      },
+      {
+        text: 'Excel Spreadsheet',
+        onPress: () => Alert.alert('Excel Export', 'Excel export coming soon'),
+      },
+      {
+        text: 'Email to Accountant',
+        onPress: () => Alert.alert('Email Report', 'Email functionality coming soon'),
+      },
+    ]);
   };
 
   useEffect(() => {
@@ -95,7 +102,8 @@ const FinancialReportDetailScreen = () => {
     }
   }, [selectedPeriod]);
 
-  const loadReportData = async () => { // Renamed and made async
+  const loadReportData = async () => {
+    // Renamed and made async
     setIsLoading(true);
     setError(null);
     try {
@@ -118,7 +126,10 @@ const FinancialReportDetailScreen = () => {
   // For this refactor's scope, we assume the service provides the necessary FinancialData structure.
 
   const formatCurrency = (amount: number) => {
-    return `£${amount.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    return `£${amount.toLocaleString('en-GB', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
   };
 
   const formatPercentage = (value: number) => {
@@ -159,16 +170,19 @@ const FinancialReportDetailScreen = () => {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
-           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-             <Icon name="arrow-back" size={24} color={Colors.white} />
-           </TouchableOpacity>
-           <Text style={styles.headerTitle}>Financial Report</Text>
-           <View style={{width: 24}} />{/* Placeholder for balance */}
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+            <Icon name="arrow-back" size={24} color={Colors.white} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Financial Report</Text>
+          <View style={{ width: 24 }} />
+          {/* Placeholder for balance */}
         </View>
         <View style={styles.centeredError}>
           <Icon name="error-outline" size={64} color={Colors.danger} />
           <Text style={styles.errorTextHeader}>Error Loading Report</Text>
-          <Text style={styles.errorText}>{error || 'No data available for the selected period.'}</Text>
+          <Text style={styles.errorText}>
+            {error || 'No data available for the selected period.'}
+          </Text>
           <TouchableOpacity onPress={loadReportData} style={styles.retryButton}>
             <Text style={styles.retryButtonText}>Try Again</Text>
           </TouchableOpacity>
@@ -181,13 +195,10 @@ const FinancialReportDetailScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={Colors.primary} />
-      
+
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <Icon name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Financial Report</Text>
@@ -198,19 +209,13 @@ const FinancialReportDetailScreen = () => {
 
       {/* Period Selector */}
       <View style={styles.periodSelector}>
-        {['week', 'month', 'quarter', 'year'].map(period => (
+        {['week', 'month', 'quarter', 'year'].map((period) => (
           <TouchableOpacity
             key={period}
-            style={[
-              styles.periodButton,
-              selectedPeriod === period && styles.periodButtonActive
-            ]}
+            style={[styles.periodButton, selectedPeriod === period && styles.periodButtonActive]}
             onPress={() => setSelectedPeriod(period)}
           >
-            <Text style={[
-              styles.periodText,
-              selectedPeriod === period && styles.periodTextActive
-            ]}>
+            <Text style={[styles.periodText, selectedPeriod === period && styles.periodTextActive]}>
               {period.charAt(0).toUpperCase() + period.slice(1)}
             </Text>
           </TouchableOpacity>
@@ -225,7 +230,8 @@ const FinancialReportDetailScreen = () => {
             <Text style={styles.summaryLabel}>Gross Revenue</Text>
             <View style={[styles.trendIndicator, { backgroundColor: Colors.success }]}>
               <Icon name="trending-up" size={12} color={Colors.white} />
-              <Text style={styles.trendText}>+15.2%</Text>{/* Placeholder trend */}
+              <Text style={styles.trendText}>+15.2%</Text>
+              {/* Placeholder trend */}
             </View>
           </View>
 
@@ -236,7 +242,8 @@ const FinancialReportDetailScreen = () => {
             <Text style={styles.summaryLabel}>Net Profit</Text>
             <View style={[styles.trendIndicator, { backgroundColor: Colors.success }]}>
               <Icon name="trending-up" size={12} color={Colors.white} />
-              <Text style={styles.trendText}>+8.5%</Text>{/* Placeholder trend */}
+              <Text style={styles.trendText}>+8.5%</Text>
+              {/* Placeholder trend */}
             </View>
           </View>
 
@@ -247,7 +254,8 @@ const FinancialReportDetailScreen = () => {
             <Text style={styles.summaryLabel}>Profit Margin</Text>
             <View style={[styles.trendIndicator, { backgroundColor: Colors.warning }]}>
               <Icon name="trending-flat" size={12} color={Colors.white} />
-              <Text style={styles.trendText}>-1.2%</Text>{/* Placeholder trend */}
+              <Text style={styles.trendText}>-1.2%</Text>
+              {/* Placeholder trend */}
             </View>
           </View>
 
@@ -258,7 +266,8 @@ const FinancialReportDetailScreen = () => {
             <Text style={styles.summaryLabel}>Total Expenses</Text>
             <View style={[styles.trendIndicator, { backgroundColor: Colors.danger }]}>
               <Icon name="trending-up" size={12} color={Colors.white} />
-              <Text style={styles.trendText}>+12.1%</Text>{/* Placeholder trend */}
+              <Text style={styles.trendText}>+12.1%</Text>
+              {/* Placeholder trend */}
             </View>
           </View>
         </View>
@@ -273,45 +282,47 @@ const FinancialReportDetailScreen = () => {
                 {formatCurrency(reportData.grossRevenue)}
               </Text>
             </View>
-            
+
             <View style={styles.plRow}>
               <Text style={styles.plLabel}>Less: VAT ({formatPercentage(20)})</Text>
               <Text style={[styles.plValue, { color: Colors.danger }]}>
                 -{formatCurrency(reportData.taxData.vatCollected)}
               </Text>
             </View>
-            
+
             <View style={styles.plRow}>
               <Text style={styles.plLabel}>Less: Service Tax ({formatPercentage(12.5)})</Text>
               <Text style={[styles.plValue, { color: Colors.danger }]}>
                 -{formatCurrency(reportData.taxData.serviceTax)}
               </Text>
             </View>
-            
+
             <View style={[styles.plRow, styles.plRowDivider]}>
               <Text style={[styles.plLabel, { fontWeight: 'bold' }]}>Net Revenue</Text>
               <Text style={[styles.plValue, { fontWeight: 'bold', color: Colors.primary }]}>
                 {formatCurrency(reportData.netRevenue)}
               </Text>
             </View>
-            
+
             <View style={styles.plRow}>
               <Text style={styles.plLabel}>Total Expenses</Text>
               <Text style={[styles.plValue, { color: Colors.danger }]}>
                 -{formatCurrency(reportData.totalExpenses)}
               </Text>
             </View>
-            
+
             <View style={[styles.plRow, styles.plRowFinal]}>
               <Text style={[styles.plLabel, { fontWeight: 'bold', fontSize: 16 }]}>Net Profit</Text>
-              <Text style={[
-                styles.plValue, 
-                { 
-                  fontWeight: 'bold', 
-                  fontSize: 16,
-                  color: reportData.profit >= 0 ? Colors.success : Colors.danger
-                }
-              ]}>
+              <Text
+                style={[
+                  styles.plValue,
+                  {
+                    fontWeight: 'bold',
+                    fontSize: 16,
+                    color: reportData.profit >= 0 ? Colors.success : Colors.danger,
+                  },
+                ]}
+              >
                 {formatCurrency(reportData.profit)}
               </Text>
             </View>
@@ -327,31 +338,28 @@ const FinancialReportDetailScreen = () => {
               return (
                 <View key={key} style={styles.expenseRow}>
                   <View style={styles.expenseInfo}>
-                    <View 
-                      style={[
-                        styles.expenseColorDot, 
-                        { backgroundColor: getExpenseColor(key) }
-                      ]} 
+                    <View
+                      style={[styles.expenseColorDot, { backgroundColor: getExpenseColor(key) }]}
                     />
                     <Text style={styles.expenseLabel}>
-                      {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                      {key.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase())}
                     </Text>
                   </View>
-                  
+
                   <View style={styles.expenseValues}>
                     <Text style={styles.expenseAmount}>{formatCurrency(value)}</Text>
                     <Text style={styles.expensePercentage}>({formatPercentage(percentage)})</Text>
                   </View>
-                  
+
                   <View style={styles.expenseBar}>
-                    <View 
+                    <View
                       style={[
                         styles.expenseBarFill,
-                        { 
+                        {
                           width: `${percentage}%`,
-                          backgroundColor: getExpenseColor(key)
-                        }
-                      ]} 
+                          backgroundColor: getExpenseColor(key),
+                        },
+                      ]}
                     />
                   </View>
                 </View>
@@ -369,31 +377,31 @@ const FinancialReportDetailScreen = () => {
               return (
                 <View key={key} style={styles.revenueRow}>
                   <View style={styles.revenueInfo}>
-                    <View 
+                    <View
                       style={[
-                        styles.revenueColorDot, 
-                        { backgroundColor: getRevenueSourceColor(key) }
-                      ]} 
+                        styles.revenueColorDot,
+                        { backgroundColor: getRevenueSourceColor(key) },
+                      ]}
                     />
                     <Text style={styles.revenueLabel}>
-                      {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                      {key.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase())}
                     </Text>
                   </View>
-                  
+
                   <View style={styles.revenueValues}>
                     <Text style={styles.revenueAmount}>{formatCurrency(value)}</Text>
                     <Text style={styles.revenuePercentage}>({formatPercentage(percentage)})</Text>
                   </View>
-                  
+
                   <View style={styles.revenueBar}>
-                    <View 
+                    <View
                       style={[
                         styles.revenueBarFill,
-                        { 
+                        {
                           width: `${percentage}%`,
-                          backgroundColor: getRevenueSourceColor(key)
-                        }
-                      ]} 
+                          backgroundColor: getRevenueSourceColor(key),
+                        },
+                      ]}
                     />
                   </View>
                 </View>
@@ -410,24 +418,22 @@ const FinancialReportDetailScreen = () => {
               <Text style={styles.taxLabel}>VAT Collected (20%)</Text>
               <Text style={styles.taxValue}>{formatCurrency(reportData.taxData.vatCollected)}</Text>
             </View>
-            
+
             <View style={styles.taxRow}>
               <Text style={styles.taxLabel}>Service Tax (12.5%)</Text>
               <Text style={styles.taxValue}>{formatCurrency(reportData.taxData.serviceTax)}</Text>
             </View>
-            
+
             <View style={[styles.taxRow, styles.taxRowTotal]}>
               <Text style={[styles.taxLabel, { fontWeight: 'bold' }]}>Total Taxes</Text>
               <Text style={[styles.taxValue, { fontWeight: 'bold', color: Colors.primary }]}>
                 {formatCurrency(reportData.taxData.totalTaxes)}
               </Text>
             </View>
-            
+
             <View style={styles.taxNote}>
               <Icon name="info" size={16} color={Colors.warning} />
-              <Text style={styles.taxNoteText}>
-                Tax remittance due by the 20th of next month
-              </Text>
+              <Text style={styles.taxNoteText}>Tax remittance due by the 20th of next month</Text>
             </View>
           </View>
         </View>
@@ -715,13 +721,15 @@ const styles = StyleSheet.create({
   spacer: {
     height: 40,
   },
-  centeredError: { // Added
+  centeredError: {
+    // Added
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
   },
-  errorTextHeader: { // Added
+  errorTextHeader: {
+    // Added
     fontSize: 18,
     fontWeight: 'bold',
     color: Colors.danger,
@@ -729,19 +737,22 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     textAlign: 'center',
   },
-  errorText: { // Added
+  errorText: {
+    // Added
     fontSize: 14,
     color: Colors.text,
     textAlign: 'center',
     marginBottom: 20,
   },
-  retryButton: { // Added
+  retryButton: {
+    // Added
     backgroundColor: Colors.primary,
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
   },
-  retryButtonText: { // Added
+  retryButtonText: {
+    // Added
     color: Colors.white,
     fontSize: 16,
     fontWeight: '600',

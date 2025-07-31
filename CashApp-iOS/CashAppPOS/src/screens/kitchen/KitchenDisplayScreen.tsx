@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+
 import {
   StyleSheet,
   Text,
@@ -10,8 +11,9 @@ import {
   Modal,
   TextInput,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 // Clover POS Color Scheme
 const Colors = {
@@ -59,7 +61,7 @@ interface KitchenOrder {
 
 const KitchenDisplayScreen: React.FC = () => {
   const navigation = useNavigation();
-  
+
   const [orders, setOrders] = useState<KitchenOrder[]>([]);
   const [selectedStation, setSelectedStation] = useState<string>('all');
   const [selectedOrder, setSelectedOrder] = useState<KitchenOrder | null>(null);
@@ -162,7 +164,7 @@ const KitchenDisplayScreen: React.FC = () => {
 
   useEffect(() => {
     setOrders(sampleOrders);
-    
+
     // Update current time every minute
     const timer = setInterval(() => {
       setCurrentTime(new Date());
@@ -174,7 +176,7 @@ const KitchenDisplayScreen: React.FC = () => {
   const getTimeSinceOrder = (orderTime: Date) => {
     const diffMs = currentTime.getTime() - orderTime.getTime();
     const diffMins = Math.floor(diffMs / 60000);
-    
+
     if (diffMins < 1) return 'Just now';
     if (diffMins === 1) return '1 min ago';
     return `${diffMins} mins ago`;
@@ -183,7 +185,7 @@ const KitchenDisplayScreen: React.FC = () => {
   const getTimeUntilReady = (completionTime: Date) => {
     const diffMs = completionTime.getTime() - currentTime.getTime();
     const diffMins = Math.floor(diffMs / 60000);
-    
+
     if (diffMins <= 0) return 'Overdue';
     if (diffMins === 1) return '1 min';
     return `${diffMins} mins`;
@@ -232,41 +234,51 @@ const KitchenDisplayScreen: React.FC = () => {
     }
   };
 
-  const updateItemStatus = (orderId: string, itemId: string, newStatus: KitchenOrderItem['status']) => {
-    setOrders(prev => prev.map(order => {
-      if (order.id === orderId) {
-        const updatedItems = order.items.map(item => 
-          item.id === itemId ? { ...item, status: newStatus } : item
-        );
-        
-        // Update order status based on item statuses
-        let orderStatus: KitchenOrder['status'] = 'received';
-        const allReady = updatedItems.every(item => item.status === 'ready' || item.status === 'served');
-        const anyInProgress = updatedItems.some(item => item.status === 'in_progress');
-        
-        if (allReady) {
-          orderStatus = 'ready';
-        } else if (anyInProgress) {
-          orderStatus = 'preparing';
+  const updateItemStatus = (
+    orderId: string,
+    itemId: string,
+    newStatus: KitchenOrderItem['status']
+  ) => {
+    setOrders((prev) =>
+      prev.map((order) => {
+        if (order.id === orderId) {
+          const updatedItems = order.items.map((item) =>
+            item.id === itemId ? { ...item, status: newStatus } : item
+          );
+
+          // Update order status based on item statuses
+          let orderStatus: KitchenOrder['status'] = 'received';
+          const allReady = updatedItems.every(
+            (item) => item.status === 'ready' || item.status === 'served'
+          );
+          const anyInProgress = updatedItems.some((item) => item.status === 'in_progress');
+
+          if (allReady) {
+            orderStatus = 'ready';
+          } else if (anyInProgress) {
+            orderStatus = 'preparing';
+          }
+
+          return { ...order, items: updatedItems, status: orderStatus };
         }
-        
-        return { ...order, items: updatedItems, status: orderStatus };
-      }
-      return order;
-    }));
+        return order;
+      })
+    );
   };
 
   const markOrderComplete = (orderId: string) => {
-    setOrders(prev => prev.map(order => 
-      order.id === orderId 
-        ? { 
-            ...order, 
-            status: 'served',
-            items: order.items.map(item => ({ ...item, status: 'served' }))
-          }
-        : order
-    ));
-    
+    setOrders((prev) =>
+      prev.map((order) =>
+        order.id === orderId
+          ? {
+              ...order,
+              status: 'served',
+              items: order.items.map((item) => ({ ...item, status: 'served' })),
+            }
+          : order
+      )
+    );
+
     Alert.alert('Order Complete', 'Order has been marked as served!');
   };
 
@@ -280,24 +292,24 @@ const KitchenDisplayScreen: React.FC = () => {
 
   const getFilteredOrders = () => {
     if (selectedStation === 'all') {
-      return orders.filter(order => order.status !== 'served');
+      return orders.filter((order) => order.status !== 'served');
     }
-    
-    return orders.filter(order => 
-      order.status !== 'served' && 
-      order.items.some(item => item.station === selectedStation)
+
+    return orders.filter(
+      (order) =>
+        order.status !== 'served' && order.items.some((item) => item.station === selectedStation)
     );
   };
 
   const OrderCard = ({ order }: { order: KitchenOrder }) => {
     const isOverdue = order.estimatedCompletionTime.getTime() < currentTime.getTime();
-    
+
     return (
       <TouchableOpacity
         style={[
           styles.orderCard,
           { borderLeftColor: getOrderStatusColor(order.status) },
-          order.priority === 'urgent' && styles.urgentOrder
+          order.priority === 'urgent' && styles.urgentOrder,
         ]}
         onPress={() => {
           setSelectedOrder(order);
@@ -312,12 +324,9 @@ const KitchenDisplayScreen: React.FC = () => {
               {order.tableName && ` • ${order.tableName}`}
             </Text>
           </View>
-          
+
           <View style={styles.orderTiming}>
-            <Text style={[
-              styles.timeText,
-              isOverdue && styles.overdueText
-            ]}>
+            <Text style={[styles.timeText, isOverdue && styles.overdueText]}>
               {isOverdue ? 'OVERDUE' : getTimeUntilReady(order.estimatedCompletionTime)}
             </Text>
             <Text style={styles.orderAge}>{getTimeSinceOrder(order.orderTime)}</Text>
@@ -328,58 +337,56 @@ const KitchenDisplayScreen: React.FC = () => {
           {order.customerName && (
             <Text style={styles.customerName}>Customer: {order.customerName}</Text>
           )}
-          
+
           <View style={styles.itemsList}>
-            {order.items.slice(0, 3).map(item => (
+            {order.items.slice(0, 3).map((item) => (
               <View key={item.id} style={styles.itemRow}>
                 <TouchableOpacity
                   onPress={() => {
-                    const statuses: KitchenOrderItem['status'][] = ['pending', 'in_progress', 'ready'];
+                    const statuses: KitchenOrderItem['status'][] = [
+                      'pending',
+                      'in_progress',
+                      'ready',
+                    ];
                     const currentIndex = statuses.indexOf(item.status);
                     const nextStatus = statuses[(currentIndex + 1) % statuses.length];
                     updateItemStatus(order.id, item.id, nextStatus);
                   }}
                 >
-                  <Icon 
-                    name={getItemStatusIcon(item.status)} 
-                    size={20} 
-                    color={getOrderStatusColor(item.status)} 
+                  <Icon
+                    name={getItemStatusIcon(item.status)}
+                    size={20}
+                    color={getOrderStatusColor(item.status)}
                   />
                 </TouchableOpacity>
-                
+
                 <View style={styles.itemDetails}>
                   <Text style={styles.itemName}>
                     {item.quantity}x {item.name}
                   </Text>
                   {item.modifiers.length > 0 && (
-                    <Text style={styles.itemModifiers}>
-                      {item.modifiers.join(', ')}
-                    </Text>
+                    <Text style={styles.itemModifiers}>{item.modifiers.join(', ')}</Text>
                   )}
                 </View>
-                
+
                 <View style={styles.itemStation}>
                   <Text style={styles.stationText}>{item.station.toUpperCase()}</Text>
                 </View>
               </View>
             ))}
-            
+
             {order.items.length > 3 && (
-              <Text style={styles.moreItems}>
-                +{order.items.length - 3} more items
-              </Text>
+              <Text style={styles.moreItems}>+{order.items.length - 3} more items</Text>
             )}
           </View>
         </View>
 
         <View style={styles.orderFooter}>
           <View style={styles.orderMeta}>
-            {order.server && (
-              <Text style={styles.serverText}>Server: {order.server}</Text>
-            )}
+            {order.server && <Text style={styles.serverText}>Server: {order.server}</Text>}
             <Text style={styles.totalItems}>{order.totalItems} items total</Text>
           </View>
-          
+
           <TouchableOpacity
             style={[styles.completeButton, { backgroundColor: getOrderStatusColor(order.status) }]}
             onPress={() => markOrderComplete(order.id)}
@@ -413,24 +420,26 @@ const KitchenDisplayScreen: React.FC = () => {
       {/* Station Filter */}
       <View style={styles.stationFilter}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          {stations.map(station => (
+          {stations.map((station) => (
             <TouchableOpacity
               key={station.id}
               style={[
                 styles.stationButton,
-                selectedStation === station.id && styles.stationButtonActive
+                selectedStation === station.id && styles.stationButtonActive,
               ]}
               onPress={() => setSelectedStation(station.id)}
             >
-              <Icon 
-                name={station.icon} 
-                size={20} 
-                color={selectedStation === station.id ? Colors.white : Colors.primary} 
+              <Icon
+                name={station.icon}
+                size={20}
+                color={selectedStation === station.id ? Colors.white : Colors.primary}
               />
-              <Text style={[
-                styles.stationButtonText,
-                selectedStation === station.id && styles.stationButtonTextActive
-              ]}>
+              <Text
+                style={[
+                  styles.stationButtonText,
+                  selectedStation === station.id && styles.stationButtonTextActive,
+                ]}
+              >
                 {station.name}
               </Text>
             </TouchableOpacity>
@@ -466,9 +475,7 @@ const KitchenDisplayScreen: React.FC = () => {
             {selectedOrder && (
               <>
                 <View style={styles.modalHeader}>
-                  <Text style={styles.modalTitle}>
-                    Order {selectedOrder.orderNumber} Details
-                  </Text>
+                  <Text style={styles.modalTitle}>Order {selectedOrder.orderNumber} Details</Text>
                   <TouchableOpacity onPress={() => setShowOrderModal(false)}>
                     <Icon name="close" size={24} color={Colors.text} />
                   </TouchableOpacity>
@@ -477,7 +484,9 @@ const KitchenDisplayScreen: React.FC = () => {
                 <ScrollView style={styles.modalBody}>
                   <View style={styles.orderDetailsSection}>
                     <Text style={styles.sectionTitle}>Order Information</Text>
-                    <Text style={styles.detailText}>Type: {selectedOrder.orderType.replace('_', ' ')}</Text>
+                    <Text style={styles.detailText}>
+                      Type: {selectedOrder.orderType.replace('_', ' ')}
+                    </Text>
                     {selectedOrder.tableName && (
                       <Text style={styles.detailText}>Table: {selectedOrder.tableName}</Text>
                     )}
@@ -494,24 +503,28 @@ const KitchenDisplayScreen: React.FC = () => {
 
                   <View style={styles.orderDetailsSection}>
                     <Text style={styles.sectionTitle}>Items</Text>
-                    {selectedOrder.items.map(item => (
+                    {selectedOrder.items.map((item) => (
                       <View key={item.id} style={styles.modalItemRow}>
                         <TouchableOpacity
                           style={styles.modalItemStatus}
                           onPress={() => {
-                            const statuses: KitchenOrderItem['status'][] = ['pending', 'in_progress', 'ready'];
+                            const statuses: KitchenOrderItem['status'][] = [
+                              'pending',
+                              'in_progress',
+                              'ready',
+                            ];
                             const currentIndex = statuses.indexOf(item.status);
                             const nextStatus = statuses[(currentIndex + 1) % statuses.length];
                             updateItemStatus(selectedOrder.id, item.id, nextStatus);
                           }}
                         >
-                          <Icon 
-                            name={getItemStatusIcon(item.status)} 
-                            size={24} 
-                            color={getOrderStatusColor(item.status)} 
+                          <Icon
+                            name={getItemStatusIcon(item.status)}
+                            size={24}
+                            color={getOrderStatusColor(item.status)}
                           />
                         </TouchableOpacity>
-                        
+
                         <View style={styles.modalItemDetails}>
                           <Text style={styles.modalItemName}>
                             {item.quantity}x {item.name}

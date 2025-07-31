@@ -1,4 +1,5 @@
 import { Alert, Platform } from 'react-native';
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export interface ErrorInfo {
@@ -74,7 +75,7 @@ class ErrorHandler {
     metadata?: Record<string, any>
   ): Promise<void> {
     const errorInfo = this.createErrorInfo(error, type, severity, context, metadata);
-    
+
     // Log the error
     if (this.config.enableLogging) {
       this.logError(errorInfo);
@@ -100,11 +101,7 @@ class ErrorHandler {
   /**
    * Handle network errors with retry logic
    */
-  async handleNetworkError(
-    error: Error,
-    requestConfig?: any,
-    context?: string
-  ): Promise<void> {
+  async handleNetworkError(error: Error, requestConfig?: any, context?: string): Promise<void> {
     const errorInfo = this.createErrorInfo(
       error,
       ErrorType.NETWORK,
@@ -113,13 +110,9 @@ class ErrorHandler {
       { requestConfig }
     );
 
-    await this.handleError(
-      error,
-      ErrorType.NETWORK,
-      this.getNetworkErrorSeverity(error),
-      context,
-      { requestConfig }
-    );
+    await this.handleError(error, ErrorType.NETWORK, this.getNetworkErrorSeverity(error), context, {
+      requestConfig,
+    });
 
     // Automatic retry for network errors
     if (requestConfig && this.shouldRetry(errorInfo)) {
@@ -139,31 +132,20 @@ class ErrorHandler {
     context?: string
   ): Promise<void> {
     const error = new Error(`Validation failed for ${field}: ${message}`);
-    await this.handleError(
-      error,
-      ErrorType.VALIDATION,
-      ErrorSeverity.LOW,
-      context,
-      { field, value }
-    );
+    await this.handleError(error, ErrorType.VALIDATION, ErrorSeverity.LOW, context, {
+      field,
+      value,
+    });
   }
 
   /**
    * Handle payment errors
    */
-  async handlePaymentError(
-    error: Error,
-    paymentData?: any,
-    context?: string
-  ): Promise<void> {
+  async handlePaymentError(error: Error, paymentData?: any, context?: string): Promise<void> {
     // Payment errors are always high severity
-    await this.handleError(
-      error,
-      ErrorType.PAYMENT,
-      ErrorSeverity.HIGH,
-      context,
-      { paymentData: this.sanitizePaymentData(paymentData) }
-    );
+    await this.handleError(error, ErrorType.PAYMENT, ErrorSeverity.HIGH, context, {
+      paymentData: this.sanitizePaymentData(paymentData),
+    });
   }
 
   /**
@@ -176,13 +158,10 @@ class ErrorHandler {
     metadata?: Record<string, any>
   ): Promise<void> {
     const error = new Error(message);
-    await this.handleError(
-      error,
-      ErrorType.BUSINESS_LOGIC,
-      ErrorSeverity.MEDIUM,
-      context,
-      { errorCode: code, ...metadata }
-    );
+    await this.handleError(error, ErrorType.BUSINESS_LOGIC, ErrorSeverity.MEDIUM, context, {
+      errorCode: code,
+      ...metadata,
+    });
   }
 
   /**
@@ -226,13 +205,13 @@ class ErrorHandler {
     const bySeverity = {} as Record<ErrorSeverity, number>;
     let recent = 0;
 
-    this.errorQueue.forEach(error => {
+    this.errorQueue.forEach((error) => {
       // Count by type
       byType[error.type] = (byType[error.type] || 0) + 1;
-      
+
       // Count by severity
       bySeverity[error.severity] = (bySeverity[error.severity] || 0) + 1;
-      
+
       // Count recent errors
       if (error.timestamp.getTime() > oneDayAgo) {
         recent++;
@@ -273,7 +252,7 @@ class ErrorHandler {
   private logError(errorInfo: ErrorInfo): void {
     const logLevel = this.getLogLevel(errorInfo.severity);
     const logMessage = `[${errorInfo.type.toUpperCase()}] ${errorInfo.message}`;
-    
+
     switch (logLevel) {
       case 'error':
         console.error(logMessage, errorInfo);
@@ -289,7 +268,7 @@ class ErrorHandler {
   private async storeError(errorInfo: ErrorInfo): Promise<void> {
     try {
       this.errorQueue.push(errorInfo);
-      
+
       // Limit stored errors
       if (this.errorQueue.length > this.config.maxStoredErrors) {
         this.errorQueue = this.errorQueue.slice(-this.config.maxStoredErrors);
@@ -336,11 +315,15 @@ class ErrorHandler {
         userMessage,
         [
           { text: 'OK', style: 'default' },
-          ...(this.canRetry(errorInfo) ? [{ 
-            text: 'Retry', 
-            style: 'default',
-            onPress: () => this.attemptRecovery(errorInfo)
-          }] : []),
+          ...(this.canRetry(errorInfo)
+            ? [
+                {
+                  text: 'Retry',
+                  style: 'default',
+                  onPress: () => this.attemptRecovery(errorInfo),
+                },
+              ]
+            : []),
         ],
         { cancelable: true }
       );
@@ -387,15 +370,15 @@ class ErrorHandler {
 
   private getNetworkErrorSeverity(error: Error): ErrorSeverity {
     const message = error.message.toLowerCase();
-    
+
     if (message.includes('timeout') || message.includes('network')) {
       return ErrorSeverity.MEDIUM;
     }
-    
+
     if (message.includes('unauthorized') || message.includes('forbidden')) {
       return ErrorSeverity.HIGH;
     }
-    
+
     return ErrorSeverity.MEDIUM;
   }
 
@@ -412,8 +395,7 @@ class ErrorHandler {
   }
 
   private shouldRetry(errorInfo: ErrorInfo): boolean {
-    return errorInfo.type === ErrorType.NETWORK && 
-           errorInfo.severity !== ErrorSeverity.CRITICAL;
+    return errorInfo.type === ErrorType.NETWORK && errorInfo.severity !== ErrorSeverity.CRITICAL;
   }
 
   private canRetry(errorInfo: ErrorInfo): boolean {
@@ -449,13 +431,13 @@ class ErrorHandler {
 
   private sanitizePaymentData(paymentData: any): any {
     if (!paymentData) return null;
-    
+
     // Remove sensitive payment information
     const sanitized = { ...paymentData };
     delete sanitized.cardNumber;
     delete sanitized.cvv;
     delete sanitized.pin;
-    
+
     return sanitized;
   }
 
@@ -476,7 +458,7 @@ class ErrorHandler {
 export const errorHandler = new ErrorHandler();
 
 // Convenience functions for common error scenarios
-export const handleNetworkError = (error: Error, context?: string) => 
+export const handleNetworkError = (error: Error, context?: string) =>
   errorHandler.handleNetworkError(error, undefined, context);
 
 export const handleValidationError = (field: string, message: string, value?: any) =>

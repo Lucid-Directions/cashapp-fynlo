@@ -1,13 +1,11 @@
 import React from 'react';
-import {
-  View,
-  TouchableOpacity,
-  StyleSheet,
-  ViewStyle,
-  GestureResponderEvent,
-} from 'react-native';
+
+import type { ViewStyle, GestureResponderEvent } from 'react-native';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
+
 import { useTheme } from '../../design-system/ThemeProvider';
-import { Theme } from '../../design-system/theme';
+
+import type { Theme } from '../../design-system/theme';
 
 // Card variants
 export type CardVariant = 'default' | 'elevated' | 'outlined' | 'flat';
@@ -121,11 +119,7 @@ export const CardHeader: React.FC<CardHeaderProps> = ({ children, style }) => {
   const { theme } = useTheme();
   const styles = createStyles(theme);
 
-  return (
-    <View style={[styles.header, style]}>
-      {children}
-    </View>
-  );
+  return <View style={[styles.header, style]}>{children}</View>;
 };
 
 // Card Body Component
@@ -138,11 +132,7 @@ export const CardBody: React.FC<CardBodyProps> = ({ children, style }) => {
   const { theme } = useTheme();
   const styles = createStyles(theme);
 
-  return (
-    <View style={[styles.body, style]}>
-      {children}
-    </View>
-  );
+  return <View style={[styles.body, style]}>{children}</View>;
 };
 
 // Card Footer Component
@@ -155,11 +145,7 @@ export const CardFooter: React.FC<CardFooterProps> = ({ children, style }) => {
   const { theme } = useTheme();
   const styles = createStyles(theme);
 
-  return (
-    <View style={[styles.footer, style]}>
-      {children}
-    </View>
-  );
+  return <View style={[styles.footer, style]}>{children}</View>;
 };
 
 const createStyles = (theme: Theme) =>

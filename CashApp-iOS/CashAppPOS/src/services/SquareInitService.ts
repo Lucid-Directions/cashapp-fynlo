@@ -3,8 +3,9 @@
  * This service handles the setup and initialization of Square payments
  */
 
-import SquareService from './SquareService';
 import { getSquareConfig, getSquareLocationId } from '../config/square';
+
+import SquareService from './SquareService';
 
 class SquareInitService {
   private static instance: SquareInitService;
@@ -40,7 +41,7 @@ class SquareInitService {
 
       await SquareService.initialize({
         applicationId: config.applicationId,
-        locationId: locationId,
+        locationId,
         environment: config.environment,
         baseUrl: config.baseUrl,
       });
@@ -48,7 +49,6 @@ class SquareInitService {
       this.initialized = true;
       console.log('Square SDK initialized successfully');
       return true;
-
     } catch (error) {
       console.error('Failed to initialize Square SDK:', error);
       return false;
@@ -61,9 +61,8 @@ class SquareInitService {
   isConfigured(): boolean {
     const config = getSquareConfig();
     const locationId = getSquareLocationId();
-    
-    return !config.applicationId.includes('YOUR_') && 
-           !locationId.includes('YOUR_');
+
+    return !config.applicationId.includes('YOUR_') && !locationId.includes('YOUR_');
   }
 
   /**
@@ -72,7 +71,7 @@ class SquareInitService {
   getConfigurationStatus() {
     const config = getSquareConfig();
     const locationId = getSquareLocationId();
-    
+
     return {
       hasApplicationId: !config.applicationId.includes('YOUR_'),
       hasLocationId: !locationId.includes('YOUR_'),

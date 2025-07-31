@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+
 import {
   StyleSheet,
   Text,
@@ -12,8 +13,10 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { useRestaurantConfig } from '../../hooks/useRestaurantConfig';
 
 const Colors = {
@@ -79,14 +82,14 @@ const RestaurantSetupScreen: React.FC = () => {
   ];
 
   const updateField = (field: keyof RestaurantFormData, value: string) => {
-    setFormData(prev => {
+    setFormData((prev) => {
       const updated = { ...prev, [field]: value };
-      
+
       // Auto-generate display name from restaurant name if not manually set
       if (field === 'restaurantName' && !prev.displayName) {
         updated.displayName = value;
       }
-      
+
       return updated;
     });
   };
@@ -109,7 +112,7 @@ const RestaurantSetupScreen: React.FC = () => {
       Alert.alert('Missing Information', 'Please fill in all required fields before continuing.');
       return;
     }
-    
+
     if (currentStep < 3) {
       setCurrentStep(currentStep + 1);
     } else {
@@ -126,7 +129,7 @@ const RestaurantSetupScreen: React.FC = () => {
   const saveRestaurantInfo = async () => {
     try {
       setLoading(true);
-      
+
       await updateConfig({
         restaurantName: formData.restaurantName,
         displayName: formData.displayName,
@@ -143,7 +146,7 @@ const RestaurantSetupScreen: React.FC = () => {
       });
 
       await completeSetupStep('restaurantInfo');
-      
+
       Alert.alert(
         'Setup Complete!',
         'Your restaurant information has been saved successfully. Your restaurant name will now appear throughout the app.',
@@ -169,27 +172,23 @@ const RestaurantSetupScreen: React.FC = () => {
     <View style={styles.stepIndicator}>
       {[1, 2, 3].map((step) => (
         <View key={step} style={styles.stepIndicatorItem}>
-          <View style={[
-            styles.stepCircle,
-            currentStep >= step && styles.stepCircleActive,
-            currentStep > step && styles.stepCircleCompleted,
-          ]}>
+          <View
+            style={[
+              styles.stepCircle,
+              currentStep >= step && styles.stepCircleActive,
+              currentStep > step && styles.stepCircleCompleted,
+            ]}
+          >
             {currentStep > step ? (
               <Icon name="check" size={16} color={Colors.white} />
             ) : (
-              <Text style={[
-                styles.stepNumber,
-                currentStep >= step && styles.stepNumberActive,
-              ]}>
+              <Text style={[styles.stepNumber, currentStep >= step && styles.stepNumberActive]}>
                 {step}
               </Text>
             )}
           </View>
           {step < 3 && (
-            <View style={[
-              styles.stepLine,
-              currentStep > step && styles.stepLineCompleted,
-            ]} />
+            <View style={[styles.stepLine, currentStep > step && styles.stepLineCompleted]} />
           )}
         </View>
       ))}
@@ -228,7 +227,11 @@ const RestaurantSetupScreen: React.FC = () => {
 
       <View style={styles.inputGroup}>
         <Text style={styles.inputLabel}>Business Type *</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.businessTypeScroll}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.businessTypeScroll}
+        >
           {businessTypes.map((type) => (
             <TouchableOpacity
               key={type}
@@ -238,10 +241,12 @@ const RestaurantSetupScreen: React.FC = () => {
               ]}
               onPress={() => updateField('businessType', type)}
             >
-              <Text style={[
-                styles.businessTypeText,
-                formData.businessType === type && styles.businessTypeTextActive,
-              ]}>
+              <Text
+                style={[
+                  styles.businessTypeText,
+                  formData.businessType === type && styles.businessTypeTextActive,
+                ]}
+              >
                 {type}
               </Text>
             </TouchableOpacity>
@@ -254,9 +259,7 @@ const RestaurantSetupScreen: React.FC = () => {
   const renderStep2 = () => (
     <View style={styles.stepContent}>
       <Text style={styles.stepTitle}>Contact Information</Text>
-      <Text style={styles.stepDescription}>
-        How can customers and Fynlo support reach you?
-      </Text>
+      <Text style={styles.stepDescription}>How can customers and Fynlo support reach you?</Text>
 
       <View style={styles.inputGroup}>
         <Text style={styles.inputLabel}>Phone Number *</Text>
@@ -370,32 +373,32 @@ const RestaurantSetupScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor={Colors.primary} barStyle="light-content" />
-      
+
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
           testID="back-button"
         >
           <Icon name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>
-        
+
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle}>Restaurant Setup</Text>
           <Text style={styles.headerSubtitle}>Step {currentStep} of 3</Text>
         </View>
-        
+
         <View style={styles.headerSpacer} />
       </View>
 
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         style={styles.content}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         {renderStepIndicator()}
 
-        <ScrollView 
+        <ScrollView
           style={styles.scrollContainer}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
@@ -406,22 +409,16 @@ const RestaurantSetupScreen: React.FC = () => {
         {/* Navigation Buttons */}
         <View style={styles.navigationBar}>
           {currentStep > 1 && (
-            <TouchableOpacity
-              style={styles.prevButton}
-              onPress={prevStep}
-            >
+            <TouchableOpacity style={styles.prevButton} onPress={prevStep}>
               <Icon name="arrow-back" size={20} color={Colors.darkGray} />
               <Text style={styles.prevButtonText}>Previous</Text>
             </TouchableOpacity>
           )}
-          
+
           <View style={styles.navigationSpacer} />
-          
+
           <TouchableOpacity
-            style={[
-              styles.nextButton,
-              !validateStep(currentStep) && styles.nextButtonDisabled,
-            ]}
+            style={[styles.nextButton, !validateStep(currentStep) && styles.nextButtonDisabled]}
             onPress={nextStep}
             disabled={loading || !validateStep(currentStep)}
           >
@@ -429,10 +426,10 @@ const RestaurantSetupScreen: React.FC = () => {
               {loading ? 'Saving...' : currentStep === 3 ? 'Complete Setup' : 'Next'}
             </Text>
             {!loading && (
-              <Icon 
-                name={currentStep === 3 ? "check" : "arrow-forward"} 
-                size={20} 
-                color={Colors.white} 
+              <Icon
+                name={currentStep === 3 ? 'check' : 'arrow-forward'}
+                size={20}
+                color={Colors.white}
               />
             )}
           </TouchableOpacity>

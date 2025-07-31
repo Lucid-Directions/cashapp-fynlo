@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+
 import {
   View,
   Text,
@@ -10,12 +11,15 @@ import {
   RefreshControl,
   SegmentedControl,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { MainStackParamList } from '../../navigation/MainNavigator';
-import useAppStore from '../../store/useAppStore';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
 import { DatabaseService } from '../../services/DatabaseService';
+import useAppStore from '../../store/useAppStore';
+
+import type { MainStackParamList } from '../../navigation/MainNavigator';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 type NavigationProp = NativeStackNavigationProp<MainStackParamList, 'TableSelection'>;
 
@@ -151,24 +155,22 @@ export const TableSelectionScreen: React.FC = () => {
           <Text style={styles.tableName}>{item.name}</Text>
           <Text style={styles.tableCapacity}>{item.capacity} seats</Text>
         </View>
-        
+
         <View style={styles.tableBody}>
           <Text style={styles.tableSection}>{item.section.name}</Text>
           <Text style={[styles.tableStatus, { color: statusColor }]}>
             {item.status.toUpperCase()}
           </Text>
-          
+
           {isOccupied && item.current_order && (
             <View style={styles.orderInfo}>
               <Text style={styles.orderText}>Order: {item.current_order.name}</Text>
               <Text style={styles.orderAmount}>£{item.current_order.amount.toFixed(2)}</Text>
             </View>
           )}
-          
-          {item.server && (
-            <Text style={styles.serverText}>Server: {item.server.name}</Text>
-          )}
-          
+
+          {item.server && <Text style={styles.serverText}>Server: {item.server.name}</Text>}
+
           {item.stats && (
             <View style={styles.statsRow}>
               <Text style={styles.statText}>Today: {item.stats.orders_today} orders</Text>
@@ -184,15 +186,12 @@ export const TableSelectionScreen: React.FC = () => {
     <TouchableOpacity
       style={[
         styles.sectionChip,
-        { backgroundColor: selectedSection === item.id ? item.color : '#ecf0f1' }
+        { backgroundColor: selectedSection === item.id ? item.color : '#ecf0f1' },
       ]}
       onPress={() => setSelectedSection(item.id === selectedSection ? null : item.id)}
     >
       <Text
-        style={[
-          styles.sectionText,
-          { color: selectedSection === item.id ? '#fff' : '#2c3e50' }
-        ]}
+        style={[styles.sectionText, { color: selectedSection === item.id ? '#fff' : '#2c3e50' }]}
       >
         {item.name} ({item.table_count})
       </Text>
@@ -200,7 +199,7 @@ export const TableSelectionScreen: React.FC = () => {
   );
 
   const filteredTables = selectedSection
-    ? tables.filter(table => table.section.id === selectedSection)
+    ? tables.filter((table) => table.section.id === selectedSection)
     : tables;
 
   if (loading) {
@@ -218,7 +217,7 @@ export const TableSelectionScreen: React.FC = () => {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Select Table</Text>
-        
+
         <SegmentedControl
           values={OrderTypeSegment}
           selectedIndex={orderType}
@@ -245,9 +244,7 @@ export const TableSelectionScreen: React.FC = () => {
           keyExtractor={(item) => item.id}
           numColumns={2}
           contentContainerStyle={styles.tableList}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          }
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyText}>No tables available</Text>
@@ -256,9 +253,7 @@ export const TableSelectionScreen: React.FC = () => {
         />
       ) : (
         <View style={styles.takeoutContainer}>
-          <Text style={styles.takeoutTitle}>
-            {OrderTypeSegment[orderType]} Order
-          </Text>
+          <Text style={styles.takeoutTitle}>{OrderTypeSegment[orderType]} Order</Text>
           <Text style={styles.takeoutDescription}>
             No table selection required for {OrderTypeSegment[orderType].toLowerCase()} orders.
           </Text>
