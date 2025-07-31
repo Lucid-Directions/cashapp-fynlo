@@ -372,7 +372,7 @@ async def invalidate_menu_cache(
             meta={"deleted_keys": deleted_count}
         )
         
-    except HTTPException:
+    except FynloException:
         raise
     except Exception as e:
         logger.error(f"Cache invalidation error: {str(e)}")

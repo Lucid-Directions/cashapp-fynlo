@@ -1,9 +1,9 @@
 {
-  "scan_date": "2025-07-31T17:22:30.397591",
+  "scan_date": "2025-07-31T17:31:26.035720",
   "stats": {
     "files_scanned": 342,
-    "total_issues": 2835,
-    "critical_issues": 198,
+    "total_issues": 2815,
+    "critical_issues": 178,
     "warnings": 2637
   },
   "critical_issues": [
@@ -39,32 +39,12 @@
     },
     {
       "severity": "critical",
-      "location": "test_transaction_management.py:105",
-      "message": "HTTPException found - should be FynloException"
-    },
-    {
-      "severity": "critical",
-      "location": "app/core/exceptions.py:258",
-      "message": "HTTPException found - should be FynloException"
-    },
-    {
-      "severity": "critical",
       "location": "app/core/exceptions.py:389",
       "message": "HTTPException found - should be FynloException"
     },
     {
       "severity": "critical",
       "location": "app/core/exceptions.py:392",
-      "message": "HTTPException found - should be FynloException"
-    },
-    {
-      "severity": "critical",
-      "location": "app/api/v1/subscriptions.py:8",
-      "message": "HTTPException found - should be FynloException"
-    },
-    {
-      "severity": "critical",
-      "location": "app/api/v1/endpoints/sumup.py:8",
       "message": "HTTPException found - should be FynloException"
     },
     {
@@ -84,17 +64,7 @@
     },
     {
       "severity": "critical",
-      "location": "app/api/v1/endpoints/exports.py:8",
-      "message": "HTTPException found - should be FynloException"
-    },
-    {
-      "severity": "critical",
       "location": "app/api/v1/endpoints/files.py:7",
-      "message": "HTTPException found - should be FynloException"
-    },
-    {
-      "severity": "critical",
-      "location": "app/api/v1/endpoints/payments.py:10",
       "message": "HTTPException found - should be FynloException"
     },
     {
@@ -194,31 +164,6 @@
     },
     {
       "severity": "critical",
-      "location": "app/api/v1/endpoints/config.py:122",
-      "message": "HTTPException found - should be FynloException"
-    },
-    {
-      "severity": "critical",
-      "location": "app/api/v1/endpoints/config.py:166",
-      "message": "HTTPException found - should be FynloException"
-    },
-    {
-      "severity": "critical",
-      "location": "app/api/v1/endpoints/config.py:234",
-      "message": "HTTPException found - should be FynloException"
-    },
-    {
-      "severity": "critical",
-      "location": "app/api/v1/endpoints/config.py:383",
-      "message": "HTTPException found - should be FynloException"
-    },
-    {
-      "severity": "critical",
-      "location": "app/api/v1/endpoints/config.py:429",
-      "message": "HTTPException found - should be FynloException"
-    },
-    {
-      "severity": "critical",
       "location": "app/api/v1/endpoints/rls_example.py:7",
       "message": "HTTPException found - should be FynloException"
     },
@@ -249,11 +194,6 @@
     },
     {
       "severity": "critical",
-      "location": "app/api/v1/endpoints/orders.py:6",
-      "message": "HTTPException found - should be FynloException"
-    },
-    {
-      "severity": "critical",
       "location": "app/api/v1/endpoints/orders.py:508",
       "message": "HTTPException found - should be FynloException"
     },
@@ -264,47 +204,7 @@
     },
     {
       "severity": "critical",
-      "location": "app/api/v1/endpoints/menu_optimized.py:6",
-      "message": "HTTPException found - should be FynloException"
-    },
-    {
-      "severity": "critical",
-      "location": "app/api/v1/endpoints/menu_optimized.py:375",
-      "message": "HTTPException found - should be FynloException"
-    },
-    {
-      "severity": "critical",
       "location": "app/api/v1/endpoints/platform_settings_optimized.py:6",
-      "message": "HTTPException found - should be FynloException"
-    },
-    {
-      "severity": "critical",
-      "location": "app/api/v1/endpoints/platform_settings.py:7",
-      "message": "HTTPException found - should be FynloException"
-    },
-    {
-      "severity": "critical",
-      "location": "app/api/v1/endpoints/platform_settings.py:58",
-      "message": "HTTPException found - should be FynloException"
-    },
-    {
-      "severity": "critical",
-      "location": "app/api/v1/endpoints/platform_settings.py:159",
-      "message": "HTTPException found - should be FynloException"
-    },
-    {
-      "severity": "critical",
-      "location": "app/api/v1/endpoints/platform_settings.py:201",
-      "message": "HTTPException found - should be FynloException"
-    },
-    {
-      "severity": "critical",
-      "location": "app/api/v1/endpoints/platform_settings.py:346",
-      "message": "HTTPException found - should be FynloException"
-    },
-    {
-      "severity": "critical",
-      "location": "app/api/v1/endpoints/employees.py:8",
       "message": "HTTPException found - should be FynloException"
     },
     {

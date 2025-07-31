@@ -249,13 +249,13 @@ async def fynlo_exception_handler(request: Request, exc: FynloException) -> JSON
 async def http_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     """Handle FastAPI HTTP exceptions with standardized format"""
     
-    # HTTPException has status_code and detail attributes
+    # FastAPI exceptions have status_code and detail attributes
     status_code = getattr(exc, 'status_code', 500)
     detail = getattr(exc, 'detail', 'Internal server error')
     
     error_id = str(uuid.uuid4())
     logger.error(
-        f"HTTPException [{error_id}]: {status_code} - {detail}",
+        f"HTTP Exception [{error_id}]: {status_code} - {detail}",
         extra={
             "error_id": error_id,
             "status_code": status_code,
@@ -385,11 +385,11 @@ async def general_exception_handler(request: Request, exc: Exception) -> JSONRes
 def register_exception_handlers(app):
     """Register all exception handlers with the FastAPI app"""
     
-    # Import HTTPException here only for registration
-    from fastapi import HTTPException
+    # Import the FastAPI exception class here only for registration
+    from fastapi.exceptions import HTTPException as FastAPIHTTPException
     
     app.add_exception_handler(FynloException, fynlo_exception_handler)
-    app.add_exception_handler(HTTPException, http_exception_handler)
+    app.add_exception_handler(FastAPIHTTPException, http_exception_handler)
     app.add_exception_handler(RequestValidationError, validation_exception_handler)
     app.add_exception_handler(Exception, general_exception_handler)
 

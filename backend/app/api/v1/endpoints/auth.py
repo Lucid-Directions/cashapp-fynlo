@@ -276,8 +276,8 @@ async def verify_supabase_user(
         
         return response_data
         
-    except HTTPException:
-        # Re-raise HTTP exceptions without modification
+    except FynloException:
+        # Re-raise Fynlo exceptions without modification
         raise
     except (AuthApiError, PostgrestAPIError) as e:
         # Handle Supabase authentication errors
