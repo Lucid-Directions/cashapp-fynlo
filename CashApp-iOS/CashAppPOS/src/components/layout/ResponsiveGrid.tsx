@@ -69,7 +69,6 @@ const ResponsiveGrid: React.FC<ResponsiveGridProps> = ({
     rows.push(childArray.slice(i, i + currentColumns));
   }
   
-  const isLastRow = (rowIndex: number) => rowIndex === rows.length - 1;
 
   return (
     <View style={[dynamicStyles.grid, style]} testID={testID}>
@@ -78,7 +77,7 @@ const ResponsiveGrid: React.FC<ResponsiveGridProps> = ({
           key={rowIndex} 
           style={[
             dynamicStyles.row, 
-            !isLastRow(rowIndex) && dynamicStyles.rowWithMargin
+            dynamicStyles.rowWithMargin
           ]}
         >
           {row.map((child, itemIndex) => {
