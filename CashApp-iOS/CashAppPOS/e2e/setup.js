@@ -3,11 +3,11 @@
  * Global setup and utilities for end-to-end testing
  */
 
-const detox = require('detox');
+import detox from 'detox';
 
-const config = require('../package.json').detox;
+import config from '../package.json'.detox;
 
-const adapter = require('detox/runners/jest/adapter');
+import adapter from 'detox/runners/jest/adapter';
 
 jest.setTimeout(120000);
 jasmine.getEnv().addReporter(adapter);

@@ -5,14 +5,14 @@ import { StyleSheet } from 'react-native';
 import { render, screen, fireEvent } from '@testing-library/react-native';
 
 import { Colors } from '../../constants/Colors';
-import { ThemeProvider, defaultTheme } from '../../design-system/ThemeProvider'; // Assuming ThemeProvider is needed
+import { ThemeProvider, _defaultTheme } from '../../design-system/ThemeProvider'; // Assuming ThemeProvider is needed
 import CartIcon from '../cart/CartIcon';
 
 // Mock react-native-vector-icons/MaterialIcons
 jest.mock('react-native-vector-icons/MaterialIcons', () => {
   const RealIcon = jest.requireActual('react-native-vector-icons/MaterialIcons');
   // Mock the specific icon being used in CartIcon
-  return (props: any) => (
+  return (props: unknown) => (
     <RealIcon name={props.name} size={props.size} color={props.color} testID="mock-icon" />
   );
 });

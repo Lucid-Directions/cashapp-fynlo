@@ -261,7 +261,7 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
         setError(response.message);
         return false;
       }
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to create subscription');
       return false;
     } finally {
@@ -289,7 +289,7 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
         setError(response.message);
         return false;
       }
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to change subscription plan');
       return false;
     } finally {
@@ -313,7 +313,7 @@ export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({
         setError(response.message);
         return false;
       }
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to cancel subscription');
       return false;
     } finally {

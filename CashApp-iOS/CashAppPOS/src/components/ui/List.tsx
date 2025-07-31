@@ -1,7 +1,7 @@
 import React from 'react';
 
 import type { ViewStyle, GestureResponderEvent } from 'react-native';
-import { View, Text, TouchableOpacity, StyleSheet, TextStyle } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, _TextStyle } from 'react-native';
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
 

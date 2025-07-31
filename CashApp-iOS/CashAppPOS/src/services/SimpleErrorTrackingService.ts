@@ -116,7 +116,7 @@ class SimpleErrorTrackingService {
   }
 
   // Specific tracking methods for common issues
-  trackPricingError(error: Error, itemData?: any, calculationContext?: any): void {
+  trackPricingError(error: Error, itemData?: unknown, calculationContext?: unknown): void {
     this.captureError(error, {
       action: 'pricing_calculation',
       screenName: 'POS',
@@ -139,7 +139,7 @@ class SimpleErrorTrackingService {
     });
   }
 
-  trackUIError(error: Error, component?: string, props?: any): void {
+  trackUIError(error: Error, component?: string, props?: unknown): void {
     this.captureError(error, {
       action: 'ui_render',
       additionalData: {
@@ -150,7 +150,7 @@ class SimpleErrorTrackingService {
     });
   }
 
-  trackBusinessLogicError(error: Error, operation?: string, data?: any): void {
+  trackBusinessLogicError(error: Error, operation?: string, data?: unknown): void {
     this.captureError(error, {
       action: 'business_logic',
       additionalData: {
@@ -197,7 +197,7 @@ class SimpleErrorTrackingService {
   }
 
   // Get error log for debugging
-  getErrorLog(): Array<any> {
+  getErrorLog(): Array<unknown> {
     return [...this.errorLog];
   }
 
@@ -208,7 +208,7 @@ class SimpleErrorTrackingService {
   }
 
   // Flush pending events (placeholder)
-  flush(timeout: number = 2000): Promise<boolean> {
+  flush(_timeout: number = 2000): Promise<boolean> {
     try {
       console.log('🚽 Flushing error events...');
       return Promise.resolve(true);

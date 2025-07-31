@@ -24,7 +24,7 @@ export interface ItemSyncError {
   entityType: 'item';
   operation: 'create' | 'update' | 'delete';
   error: string;
-  data?: any;
+  data?: unknown;
 }
 
 export interface POSMenuItem {
@@ -199,7 +199,7 @@ export class XeroItemsSyncService {
    * Sync items from Xero (Xero -> POS)
    */
   public async syncItemsFromXero(
-    options: ItemSyncOptions = { direction: 'from_xero' }
+    _options: ItemSyncOptions = { direction: 'from_xero' }
   ): Promise<{ result: ItemSyncResult; items: POSMenuItem[] }> {
     const startTime = Date.now();
     const result: ItemSyncResult = {

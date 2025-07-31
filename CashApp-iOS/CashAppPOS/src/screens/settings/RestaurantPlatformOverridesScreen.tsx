@@ -12,8 +12,8 @@ import {
   Alert,
   ActivityIndicator,
   RefreshControl,
-  Switch,
-  TextInput,
+  _Switch,
+  _TextInput,
   Text,
   TouchableOpacity,
 } from 'react-native';
@@ -27,7 +27,7 @@ import PlatformService from '../../services/PlatformService';
 
 interface EffectiveSetting {
   key: string;
-  value: any;
+  value: unknown;
   source: 'platform' | 'restaurant';
   category: string;
   description: string;
@@ -37,8 +37,8 @@ interface EffectiveSetting {
 
 interface OverrideRequest {
   configKey: string;
-  currentValue: any;
-  requestedValue: any;
+  currentValue: unknown;
+  requestedValue: unknown;
   reason: string;
   requiresApproval: boolean;
 }
@@ -50,13 +50,13 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
 
   // Mock restaurant ID - in real app, this would come from auth context
   const restaurantId = 'restaurant-123';
-  const userRole = 'restaurant_owner'; // This would come from auth context
+  const _userRole = 'restaurant_owner'; // This would come from auth context
 
   const [effectiveSettings, setEffectiveSettings] = useState<Record<string, EffectiveSetting>>({});
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [pendingOverrides, setPendingOverrides] = useState<OverrideRequest[]>([]);
+  const [_pendingOverrides, setPendingOverrides] = useState<OverrideRequest[]>([]);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
 
   const platformService = PlatformService.getInstance();
@@ -159,7 +159,7 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
     setExpandedCategories(newExpanded);
   };
 
-  const requestOverride = async (setting: EffectiveSetting, newValue: any, reason: string) => {
+  const requestOverride = async (setting: EffectiveSetting, newValue: unknown, _reason: string) => {
     try {
       const requiresApproval = shouldRequireApproval(setting.key, newValue);
 
@@ -189,7 +189,7 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
     }
   };
 
-  const shouldRequireApproval = (configKey: string, value: any): boolean => {
+  const shouldRequireApproval = (configKey: string, value: unknown): boolean => {
     // Define rules for when approval is required
     if (configKey.includes('payment.markup') && value.percentage > 0.5) {
       return true;
@@ -236,7 +236,7 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
                   },
                 ]
               );
-            } catch (error) {
+            } catch (_error) {
               Alert.alert('Error', 'Invalid value format');
             }
           },
@@ -498,7 +498,7 @@ const RestaurantPlatformOverridesScreen: React.FC = () => {
   );
 };
 
-const createStyles = (theme: any) =>
+const createStyles = (theme: unknown) =>
   StyleSheet.create({
     container: {
       flex: 1,

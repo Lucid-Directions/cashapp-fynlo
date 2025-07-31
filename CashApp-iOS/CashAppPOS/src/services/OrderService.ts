@@ -119,7 +119,7 @@ class OrderService {
         tableNumber: orderData.tableNumber,
         createdAt: new Date(savedOrder.created_at),
         status: savedOrder.status,
-        paymentMethod: orderData.paymentMethod as any,
+        paymentMethod: orderData.paymentMethod as unknown,
         paymentTransactionId: orderData.paymentTransactionId,
         paymentProvider: orderData.paymentProvider,
         serviceCharge: orderData.serviceCharge,
@@ -157,7 +157,7 @@ class OrderService {
         tableNumber: orderData.tableNumber,
         createdAt: new Date(),
         status: 'confirmed',
-        paymentMethod: orderData.paymentMethod as any,
+        paymentMethod: orderData.paymentMethod as unknown,
         paymentTransactionId: orderData.paymentTransactionId,
         serviceCharge: orderData.serviceCharge,
         transactionFee: orderData.transactionFee,
@@ -201,7 +201,7 @@ class OrderService {
       }
 
       const data = await response.json();
-      const orders: Order[] = data.orders.map((o: any) => ({
+      const orders: Order[] = data.orders.map((o: unknown) => ({
         id: o.id,
         items: o.items || [],
         subtotal: o.subtotal,
@@ -403,7 +403,7 @@ class OrderService {
 
       // Remove successfully synced orders from queue
       const remainingQueue = queueData.filter(
-        (item: any) => !processedIds.includes(item.timestamp)
+        (item: unknown) => !processedIds.includes(item.timestamp)
       );
 
       await AsyncStorage.setItem('order_sync_queue', JSON.stringify(remainingQueue));
@@ -415,7 +415,7 @@ class OrderService {
   /**
    * Subscribe to order events
    */
-  subscribeToOrderEvents(callback: (event: string, data: any) => void): () => void {
+  subscribeToOrderEvents(_callback: (event: string, data: unknown) => void): () => void {
     // TEMPORARY: WebSocket disabled until service is created
     // const unsubscribeCreated = webSocketService.subscribe('order_created', (data) => {
     //   callback('order_created', data);

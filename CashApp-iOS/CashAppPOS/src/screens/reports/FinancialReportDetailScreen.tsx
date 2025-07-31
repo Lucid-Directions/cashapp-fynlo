@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+// TODO: Unused import - import React, { useState, useEffect } from 'react';
 
 import {
   StyleSheet,
@@ -20,7 +20,7 @@ import LoadingView from '../../components/feedback/LoadingView';
 import { useTheme } from '../../design-system/ThemeProvider';
 import DataService from '../../services/DataService';
 
-const { width } = Dimensions.get('window');
+const { _width } = Dimensions.get('window');
 
 // Mock ENV flag
 const ENV = {
@@ -70,7 +70,7 @@ interface FinancialData {
 
 const FinancialReportDetailScreen = () => {
   const navigation = useNavigation();
-  const { theme } = useTheme();
+  const { _theme } = useTheme();
   const [reportData, setReportData] = useState<FinancialData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -111,7 +111,7 @@ const FinancialReportDetailScreen = () => {
       // Assuming getFinancialReportDetail returns data in FinancialData shape for the selectedPeriod
       const data = await dataService.getFinancialReportDetail(selectedPeriod);
       setReportData(data);
-    } catch (e: any) {
+    } catch (e: unknown) {
       setError(e.message || 'Failed to load financial report.');
       setReportData(null);
     } finally {

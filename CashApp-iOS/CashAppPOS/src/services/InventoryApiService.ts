@@ -2,7 +2,7 @@ import axios from 'axios';
 
 import API_CONFIG from '../config/api';
 import useAppStore from '../store/useAppStore'; // For token
-import { RecipeIngredientClient } from '../types'; // Assuming Recipe is the backend type for creation
+// TODO: Unused import - import { RecipeIngredientClient } from '../types'; // Assuming Recipe is the backend type for creation
 
 import type { InventoryItem, RecipeClient, InventoryLedgerEntry, Recipe } from '../types';
 
@@ -97,7 +97,7 @@ export const adjustStock = async (
   sku: string,
   change_qty_g: number,
   reason: string = 'manual_adjustment'
-): Promise<any> => {
+): Promise<unknown> => {
   try {
     const response = await apiClient.post(`/inventory/items/${sku}/adjust-stock`, {
       sku,
@@ -202,7 +202,7 @@ export const fetchInventoryLedger = async (
   endDate?: string
 ): Promise<InventoryLedgerEntry[]> => {
   try {
-    const params: any = { skip, limit };
+    const params: unknown = { skip, limit };
     if (startDate) params.start_date = startDate;
     if (endDate) params.end_date = endDate;
 

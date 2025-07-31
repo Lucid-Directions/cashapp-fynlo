@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+// TODO: Unused import - import React, { useState, useEffect } from 'react';
 
 import {
   StyleSheet,
@@ -64,7 +64,7 @@ const InventoryReportDetailScreen = () => {
       const inventory = await dataService.getInventoryReport();
 
       // Transform API data to match InventoryItem interface if needed
-      const transformedData: InventoryItem[] = inventory.map((item: any) => ({
+      const transformedData: InventoryItem[] = inventory.map((item: unknown) => ({
         id: item.id || item.sku,
         name: item.name || item.product_name,
         category: item.category || 'Other',
@@ -263,7 +263,7 @@ const InventoryReportDetailScreen = () => {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Inventory Items ({filteredData.length})</Text>
 
-            {filteredData.map((item, index) => (
+            {filteredData.map((item, _index) => (
               <View key={item.id} style={styles.itemCard}>
                 <View style={styles.itemHeader}>
                   <View style={styles.itemInfo}>

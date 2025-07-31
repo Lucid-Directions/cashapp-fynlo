@@ -21,7 +21,7 @@ import XeroAuthService from '../../services/XeroAuthService';
 
 interface ConnectionStatus {
   isConnected: boolean;
-  organization?: any;
+  organization?: unknown;
   lastSync?: number;
   error?: string;
 }

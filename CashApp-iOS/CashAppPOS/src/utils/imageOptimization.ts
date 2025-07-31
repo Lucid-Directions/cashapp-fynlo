@@ -214,7 +214,7 @@ export interface OptimizedImageProps {
 }
 
 // Helper function to create optimized image props
-export const createOptimizedImageProps = (props: OptimizedImageProps): any => {
+export const createOptimizedImageProps = (props: OptimizedImageProps): unknown => {
   const { source, width, height, useCase, quality, format, cache } = props;
 
   let optimalSize = { width: width || 200, height: height || 200 };

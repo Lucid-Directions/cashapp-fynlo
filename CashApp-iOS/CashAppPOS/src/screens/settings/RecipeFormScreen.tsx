@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+// TODO: Unused import - import React, { useState, useEffect, useCallback } from 'react';
 
 import {
   View,
@@ -141,7 +141,7 @@ const RecipeFormScreen = () => {
 
   const [isProductModalVisible, setIsProductModalVisible] = useState(false);
   const [isIngredientModalVisible, setIsIngredientModalVisible] = useState(false);
-  const [editingIngredientIndex, setEditingIngredientIndex] = useState<number | null>(null);
+  const [_editingIngredientIndex, setEditingIngredientIndex] = useState<number | null>(null);
 
   const [isLoading, setIsLoading] = useState(false);
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});

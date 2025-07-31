@@ -1,4 +1,4 @@
-import { Platform, NativeModules } from 'react-native';
+import { Platform, _NativeModules } from 'react-native';
 
 // Note: This service provides a bridge between our existing architecture
 // and the React hook-based SumUp SDK. The actual SumUp functionality
@@ -15,7 +15,7 @@ export interface SumUpCheckoutRequest {
 export interface SumUpCheckoutResult {
   success: boolean;
   transactionCode?: string;
-  additionalInfo?: any;
+  additionalInfo?: unknown;
   error?: string;
 }
 
@@ -73,7 +73,7 @@ export class SumUpNativeService {
    * Login with access token
    * Note: Handled by React components in hook-based architecture
    */
-  async loginWithToken(token: string): Promise<boolean> {
+  async loginWithToken(_token: string): Promise<boolean> {
     console.log('🔑 SumUp token login will be handled by React component');
     return true;
   }

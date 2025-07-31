@@ -24,7 +24,7 @@ import DataService from '../../services/DataService'; // Added
 import type { EmployeeData } from '../../types'; // Updated import path
 
 // Get screen dimensions for responsive design
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const { width: screenWidth, height: _screenHeight } = Dimensions.get('window');
 const isTablet = screenWidth > 768;
 const isSmallDevice = screenWidth < 380;
 
@@ -77,7 +77,7 @@ const EmployeeScheduleScreen: React.FC = () => {
   const [showAddShiftModal, setShowAddShiftModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string>('');
   // const [selectedEmployee, setSelectedEmployee] = useState<EmployeeData | null>(null); // Likely managed by newShift.employeeId
-  const [viewMode, setViewMode] = useState<'week' | 'month'>('week');
+  const [_viewMode, setViewMode] = useState<'week' | 'month'>('week');
   const [isLoadingEmployees, setIsLoadingEmployees] = useState<boolean>(true);
   const [isLoadingSchedule, setIsLoadingSchedule] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -113,7 +113,7 @@ const EmployeeScheduleScreen: React.FC = () => {
       // Assuming getWeekSchedule takes weekStart and possibly employee list or fetches all
       const scheduleData = await dataService.getWeekSchedule(weekStart, employeeData || []);
       setWeekSchedule(scheduleData || { weekStart, shifts: [] });
-    } catch (e: any) {
+    } catch (e: unknown) {
       setError(e.message || 'Failed to load schedule data.');
       setEmployees([]);
       setWeekSchedule({ weekStart: getWeekStart(currentWeek), shifts: [] });
@@ -332,7 +332,7 @@ const EmployeeScheduleScreen: React.FC = () => {
     }
   };
 
-  const getStatusText = (status: string) => {
+  const _getStatusText = (status: string) => {
     switch (status) {
       case 'completed':
         return 'Completed';
@@ -417,7 +417,7 @@ const EmployeeScheduleScreen: React.FC = () => {
       <ScrollView style={styles.content}>
         {/* Week Grid */}
         <View style={styles.weekGrid}>
-          {getWeekDays().map((date, index) => {
+          {getWeekDays().map((date, _index) => {
             const dayShifts = getShiftsForDay(date);
             const isToday = date === new Date().toISOString().split('T')[0];
 

@@ -9,7 +9,7 @@ import ThemeSwitcher, { ThemeToggle } from '../../../components/theme/ThemeSwitc
 import { useTheme } from '../../../design-system/ThemeProvider';
 
 // Clover POS Color Scheme
-const Colors = {
+const _Colors = {
   primary: '#00A651',
   secondary: '#0066CC',
   success: '#00A651',

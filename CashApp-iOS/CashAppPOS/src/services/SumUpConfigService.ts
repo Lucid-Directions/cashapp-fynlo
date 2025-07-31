@@ -94,7 +94,7 @@ class SumUpConfigService {
   /**
    * Get SumUp status from backend
    */
-  async getStatus(): Promise<any> {
+  async getStatus(): Promise<unknown> {
     try {
       const token = await tokenManager.getAuthToken();
       if (!token) {

@@ -112,13 +112,13 @@ const ResponsiveGrid: React.FC<ResponsiveGridProps> = ({
 };
 
 // Grid Item Component with span support
-export const GridItem: React.FC<GridItemProps> = ({ children, span, style }) => {
+export const GridItem: React.FC<GridItemProps> = ({ children, _span, style }) => {
   // Note: Span functionality would require more complex layout calculations
   // For now, this is a simple wrapper that can be extended
   return <View style={style}>{children}</View>;
 };
 
-const createStyles = (theme: Theme) =>
+const createStyles = (_theme: Theme) =>
   StyleSheet.create({
     grid: {
       // Base grid container

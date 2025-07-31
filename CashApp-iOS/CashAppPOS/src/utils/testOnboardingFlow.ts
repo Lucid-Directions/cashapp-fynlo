@@ -96,11 +96,11 @@ export function runAllTests() {
 }
 
 // Navigation state logger for debugging
-export function logCurrentNavigationState(navigation: any) {
+export function logCurrentNavigationState(navigation: unknown) {
   const state = navigation.getState();
   console.log('\nCurrent Navigation State:');
   console.log('-------------------------');
   console.log('Current Route:', state.routes[state.index].name);
-  console.log('Route Stack:', state.routes.map((r: any) => r.name).join(' -> '));
+  console.log('Route Stack:', state.routes.map((r: unknown) => r.name).join(' -> '));
   console.log('-------------------------\n');
 }

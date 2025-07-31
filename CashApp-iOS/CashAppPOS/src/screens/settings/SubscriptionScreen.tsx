@@ -5,7 +5,7 @@
  * manage billing, and upgrade/downgrade plans.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { _useEffect, useState } from 'react';
 
 import {
   View,

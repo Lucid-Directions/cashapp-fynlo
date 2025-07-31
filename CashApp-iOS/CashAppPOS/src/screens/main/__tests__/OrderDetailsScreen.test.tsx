@@ -2,7 +2,7 @@ import React from 'react';
 
 import { Linking } from 'react-native';
 
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import { render, fireEvent, _waitFor } from '@testing-library/react-native';
 
 import { ThemeProvider, defaultTheme } from '../../../design-system/ThemeProvider'; // Adjust path
 import OrderDetailsScreen from '../OrderDetailsScreen'; // Adjust path
@@ -129,7 +129,7 @@ describe('OrderDetailsScreen', () => {
   });
 
   it('navigates back when back button is pressed', () => {
-    const { getByTestId } = render(
+    const { _getByTestId } = render(
       // Assuming back button has a testID or accessible label
       <View>{/* Minimal structure to allow finding the button if it's part of header */}</View>
     );

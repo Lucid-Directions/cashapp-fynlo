@@ -81,7 +81,7 @@ const ProfileScreenContent: React.FC = () => {
 
       setShowEditModal(false);
       Alert.alert('Success', 'Profile updated successfully!');
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', 'Failed to update profile. Please try again.');
     }
   };
@@ -123,7 +123,7 @@ const ProfileScreenContent: React.FC = () => {
       Alert.alert('Success', 'Password changed successfully!', [
         { text: 'OK', onPress: () => setShowPasswordModal(false) },
       ]);
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', 'Failed to change password. Please try again.');
     }
   };
@@ -392,7 +392,7 @@ const ProfileScreenContent: React.FC = () => {
   );
 };
 
-const createStyles = (theme: any) =>
+const createStyles = (theme: unknown) =>
   StyleSheet.create({
     container: {
       flex: 1,

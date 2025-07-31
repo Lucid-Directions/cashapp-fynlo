@@ -348,7 +348,7 @@ class TestingUtils {
     },
 
     // Simulate scroll to element
-    scrollToElement: (scrollView: ReactTestInstance, element: ReactTestInstance) => {
+    scrollToElement: (scrollView: ReactTestInstance, _element: ReactTestInstance) => {
       fireEvent.scroll(scrollView, {
         nativeEvent: {
           contentOffset: { y: 100 }, // Simplified scroll position

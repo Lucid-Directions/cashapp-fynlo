@@ -62,8 +62,8 @@ const OrderTypeSegment = ['Dine In', 'Takeout', 'Pickup', 'Delivery'];
 
 export const TableSelectionScreen: React.FC = () => {
   const navigation = useNavigation<NavigationProp>();
-  const route = useRoute();
-  const { user } = useAppStore();
+  const _route = useRoute();
+  const { _user } = useAppStore();
   const [tables, setTables] = useState<Table[]>([]);
   const [sections, setSections] = useState<Section[]>([]);
   const [selectedSection, setSelectedSection] = useState<string | null>(null);

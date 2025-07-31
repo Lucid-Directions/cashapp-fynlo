@@ -27,10 +27,10 @@ class MockWebSocket {
   static CLOSED = 3;
 
   readyState = MockWebSocket.CONNECTING;
-  onopen: ((event: any) => void) | null = null;
-  onclose: ((event: any) => void) | null = null;
-  onerror: ((event: any) => void) | null = null;
-  onmessage: ((event: any) => void) | null = null;
+  onopen: ((event: unknown) => void) | null = null;
+  onclose: ((event: unknown) => void) | null = null;
+  onerror: ((event: unknown) => void) | null = null;
+  onmessage: ((event: unknown) => void) | null = null;
 
   constructor(public url: string) {
     // Simulate connection
@@ -40,7 +40,7 @@ class MockWebSocket {
     }, 10);
   }
 
-  send(data: string) {
+  send(_data: string) {
     // Mock send
   }
 
@@ -50,7 +50,7 @@ class MockWebSocket {
   }
 }
 
-// @ts-ignore
+// @ts-expect-error
 global.WebSocket = MockWebSocket;
 
 describe('EnhancedWebSocketService', () => {

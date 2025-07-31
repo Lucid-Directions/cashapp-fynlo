@@ -461,7 +461,7 @@ class SumUpServiceClass {
   /**
    * Detect payment method from SumUp result
    */
-  private detectPaymentMethod(result: any): 'nfc' | 'apple_pay' | 'google_pay' {
+  private detectPaymentMethod(result: unknown): 'nfc' | 'apple_pay' | 'google_pay' {
     // This would analyze the payment result to determine method
     // For now, default to NFC
     if (result.paymentMethod?.includes('apple_pay')) {

@@ -8,7 +8,7 @@ import type { NetInfoState } from '@react-native-community/netinfo';
 export interface OfflineAction {
   id: string;
   type: string;
-  data: any;
+  data: unknown;
   timestamp: Date;
   retryCount: number;
   maxRetries: number;
@@ -94,7 +94,7 @@ class OfflineHandler {
    */
   async queueAction(
     type: string,
-    data: any,
+    data: unknown,
     priority: 'high' | 'medium' | 'low' = 'medium'
   ): Promise<string> {
     const action: OfflineAction = {
@@ -135,7 +135,7 @@ class OfflineHandler {
   async executeOrQueue<T>(
     actionType: string,
     executeFunction: () => Promise<T>,
-    fallbackData?: any,
+    fallbackData?: unknown,
     priority?: 'high' | 'medium' | 'low'
   ): Promise<T | null> {
     if (this.isOnline) {
@@ -194,7 +194,7 @@ class OfflineHandler {
   /**
    * Handle offline order creation
    */
-  async createOfflineOrder(orderData: any): Promise<string> {
+  async createOfflineOrder(orderData: unknown): Promise<string> {
     const offlineOrderId = `offline_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     // Store order locally with offline ID
@@ -335,7 +335,7 @@ class OfflineHandler {
 
         // Remove from queue on success
         await this.removeFromQueue(action.id);
-      } catch (error) {
+      } catch (_error) {
         // Increment retry count
         action.retryCount++;
 
@@ -377,7 +377,7 @@ class OfflineHandler {
     }
   }
 
-  private async syncOrderToServer(orderData: any): Promise<void> {
+  private async syncOrderToServer(orderData: unknown): Promise<void> {
     // This would be replaced with actual API call
     console.log('Syncing order to server:', orderData);
 
@@ -385,12 +385,12 @@ class OfflineHandler {
     await new Promise((resolve) => setTimeout(resolve, 1000));
   }
 
-  private async syncCustomerToServer(customerData: any): Promise<void> {
+  private async syncCustomerToServer(customerData: unknown): Promise<void> {
     // This would be replaced with actual API call
     console.log('Syncing customer to server:', customerData);
   }
 
-  private async syncInventoryToServer(inventoryData: any): Promise<void> {
+  private async syncInventoryToServer(inventoryData: unknown): Promise<void> {
     // This would be replaced with actual API call
     console.log('Syncing inventory to server:', inventoryData);
   }
@@ -414,7 +414,7 @@ class OfflineHandler {
     }
   }
 
-  private async storeOfflineData(type: string, id: string, data: any): Promise<void> {
+  private async storeOfflineData(type: string, id: string, data: unknown): Promise<void> {
     try {
       const key = `offline_${type}_${id}`;
       await AsyncStorage.setItem(key, JSON.stringify(data));
@@ -436,7 +436,7 @@ class OfflineHandler {
     try {
       const stored = await AsyncStorage.getItem(`cache_${key}`);
       return stored ? JSON.parse(stored) : null;
-    } catch (error) {
+    } catch (_error) {
       return null;
     }
   }
@@ -495,6 +495,6 @@ export const useOfflineStatus = () => {
 };
 
 // Add React import for the hook
-import React from 'react';
+// TODO: Unused import - import React from 'react';
 
 export default offlineHandler;

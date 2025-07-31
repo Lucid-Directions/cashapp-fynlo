@@ -1,7 +1,10 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import RestaurantDataService from '../services/RestaurantDataService';
-import API_CONFIG from '../config/api';
+// TODO: Unused import - import API_CONFIG from '../config/api';
 import { useAuthStore } from '../store/useAuthStore';
 
 export interface User {
@@ -92,10 +95,10 @@ const STORAGE_KEYS = {
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   // Get auth state from Zustand store
   const authStoreUser = useAuthStore((state) => state.user);
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  const authLoading = useAuthStore((state) => state.isLoading);
+  const _isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const _authLoading = useAuthStore((state) => state.isLoading);
   const signInStore = useAuthStore((state) => state.signIn);
-  const signOutStore = useAuthStore((state) => state.signOut);
+  const _signOutStore = useAuthStore((state) => state.signOut);
   const checkAuthStore = useAuthStore((state) => state.checkAuth);
 
   // Legacy state for compatibility
@@ -114,7 +117,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         lastName: authStoreUser.name.split(' ')[1] || '',
         email: authStoreUser.email,
         phone: '',
-        role: authStoreUser.role as any,
+        role: authStoreUser.role as unknown,
         pin: '0000',
         employeeId: `EMP${authStoreUser.id}`,
         businessId: authStoreUser.restaurant_id || '',
@@ -188,7 +191,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const signUp = async (
     userData: Partial<User>,
     businessData: Partial<Business>,
-    password: string
+    _password: string
   ): Promise<boolean> => {
     try {
       setIsLoading(true);
@@ -354,7 +357,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           ownerId: 'platform_owner_1',
           createdDate: new Date(2024, 0, 1),
           totalRestaurants: realRestaurants.length, // REAL count from backend
-          totalRevenue: totalRevenue, // REAL revenue from backend
+          totalRevenue, // REAL revenue from backend
           isActive: true,
         };
 

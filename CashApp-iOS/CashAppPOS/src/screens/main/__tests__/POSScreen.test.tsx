@@ -3,7 +3,7 @@
  * Testing the main point-of-sale interface
  */
 
-// @ts-nocheck
+// // @ts-nocheck
 import React from 'react';
 
 import { fireEvent, waitFor, act } from '@testing-library/react-native';
@@ -12,7 +12,7 @@ import { customRenderWithStores, useTestTheme } from '../../../__tests__/utils/t
 import { ThemeProvider } from '../../../design-system/ThemeProvider'; // Import ThemeProvider
 import useAppStore from '../../../store/useAppStore';
 import useUIStore from '../../../store/useUIStore';
-import POSScreen, { ExportedMenuItemCard } from '../POSScreen'; // Import ExportedMenuItemCard
+import POSScreen, { _ExportedMenuItemCard } from '../POSScreen'; // Import ExportedMenuItemCard
 
 // Mock navigation
 const mockNavigation = {
@@ -22,7 +22,7 @@ const mockNavigation = {
 };
 
 // Mock menu items directly from POSScreen for consistency
-const menuItems = [
+const _menuItems = [
   {
     id: 1,
     name: 'Nachos',
@@ -144,7 +144,7 @@ describe('POSScreen', () => {
     // Verify magnifier icon is not present
     // This depends on how the magnifier was implemented (e.g., by icon name or testID)
     // Assuming it was an Icon with name "search"
-    const allIcons = UNSAFE_getByProps({ name: 'search' });
+    const _allIcons = UNSAFE_getByProps({ name: 'search' });
     // If the search icon was only in the header, and now we have one in the bubble,
     // we need a more specific way to check the header.
     // For now, let's assume the header search icon was unique or had a specific testID not present now.
@@ -187,7 +187,7 @@ describe('POSScreen', () => {
   });
 
   it('CartIcon color is orange when empty, red when not empty', () => {
-    const { getByTestId, UNSAFE_getByProps, rerender } = customRenderWithStores(<POSScreen />, {
+    const { _getByTestId, UNSAFE_getByProps, rerender } = customRenderWithStores(<POSScreen />, {
       navigationProps: { navigation: mockNavigation },
     });
 
@@ -372,7 +372,7 @@ describe('POSScreen Header Actions Conditional Rendering Snapshots', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    // @ts-ignore
+    // @ts-expect-error
     global.FLAGS = { SHOW_DEV_MENU: true }; // Default for these tests
   });
 
@@ -394,7 +394,7 @@ describe('POSScreen Header Actions Conditional Rendering Snapshots', () => {
 
   it('snapshot: no bug icon if FLAGS.SHOW_DEV_MENU = false (dev)', () => {
     mockIS_DEV = true;
-    // @ts-ignore
+    // @ts-expect-error
     global.FLAGS.SHOW_DEV_MENU = false;
     const { toJSON } = customRenderWithStores(<POSScreen />, {
       navigationProps: { navigation: mockNavigation },
@@ -404,7 +404,7 @@ describe('POSScreen Header Actions Conditional Rendering Snapshots', () => {
 
   it('snapshot: no bug icon if FLAGS.SHOW_DEV_MENU = false (prod)', () => {
     mockIS_DEV = false;
-    // @ts-ignore
+    // @ts-expect-error
     global.FLAGS.SHOW_DEV_MENU = false;
     const { toJSON } = customRenderWithStores(<POSScreen />, {
       navigationProps: { navigation: mockNavigation },

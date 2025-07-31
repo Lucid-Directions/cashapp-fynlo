@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import React, { Component } from 'react';
+// TODO: Unused import - import React, { Component } from 'react';
 
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
@@ -30,7 +30,7 @@ class QRPaymentErrorBoundary extends Component<
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: any) {
+  componentDidCatch(error: Error, errorInfo: unknown) {
     console.error('🚨 QR Payment Error Details:', {
       error: error.message,
       stack: error.stack,

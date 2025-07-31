@@ -59,7 +59,7 @@ const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlan> = {
 };
 
 export const SubscriptionStatusBadge: React.FC = () => {
-  const { theme } = useTheme();
+  const { _theme } = useTheme();
   const { user } = useAuthStore();
 
   const subscriptionPlan = user?.subscription_plan || 'alpha';

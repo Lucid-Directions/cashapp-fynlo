@@ -27,7 +27,7 @@ import DataService from '../../services/DataService'; // Added
 import type { EmployeeData } from '../../types'; // Updated import path
 
 // Get screen dimensions for responsive design
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const { width: screenWidth, height: _screenHeight } = Dimensions.get('window');
 const isTablet = screenWidth > 768;
 const isSmallDevice = screenWidth < 380;
 
@@ -158,7 +158,7 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
       } else {
         setWeekSchedule({ weekStart, shifts: [] });
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
       setError(e.message || 'Failed to load schedule data.');
       setEmployees([]);
       setWeekSchedule({ weekStart: getWeekStart(currentWeek), shifts: [] });
@@ -476,7 +476,7 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
     setShowTimePicker(true);
   };
 
-  const handleTimeChange = (event: any, selectedDate?: Date) => {
+  const handleTimeChange = (event: unknown, selectedDate?: Date) => {
     setShowTimePicker(false);
     if (selectedDate) {
       if (selectedTimeType === 'start') {
@@ -837,7 +837,7 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
       style={styles.weekViewContainer}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
     >
-      {getWeekDays().map((date, index) => {
+      {getWeekDays().map((date, _index) => {
         const dayShifts = getShiftsForDay(date);
         const isToday = date === new Date().toISOString().split('T')[0];
         const isSelected = date === selectedDate;
@@ -1279,7 +1279,7 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
                     { borderColor: getStatusColor(status) },
                     editShift.status === status && { backgroundColor: getStatusColor(status) },
                   ]}
-                  onPress={() => setEditShift({ ...editShift, status: status as any })}
+                  onPress={() => setEditShift({ ...editShift, status: status as unknown })}
                 >
                   <Text
                     style={[

@@ -58,7 +58,7 @@ export interface XeroSyncError {
   operation: 'create' | 'update' | 'delete' | 'sync';
   errorCode?: string;
   error: string;
-  data?: any;
+  data?: unknown;
   timestamp: Date;
   retryable: boolean;
 }
@@ -68,7 +68,7 @@ export interface XeroSyncWarning {
   entityId: string;
   entityType: XeroEntityType;
   message: string;
-  data?: any;
+  data?: unknown;
   timestamp: Date;
 }
 
@@ -180,8 +180,8 @@ export interface XeroSyncAuditLog {
 
 export interface XeroSyncChange {
   field: string;
-  oldValue: any;
-  newValue: any;
+  oldValue: unknown;
+  newValue: unknown;
   source: 'pos' | 'xero';
 }
 
@@ -236,7 +236,7 @@ export interface XeroValidationRule {
   entityType: XeroEntityType;
   field: string;
   rule: 'required' | 'format' | 'range' | 'custom';
-  parameters?: any;
+  parameters?: unknown;
   errorMessage: string;
   isActive: boolean;
 }
@@ -251,20 +251,20 @@ export interface XeroValidationError {
   field: string;
   rule: string;
   message: string;
-  value?: any;
+  value?: unknown;
 }
 
 export interface XeroValidationWarning {
   field: string;
   message: string;
-  value?: any;
+  value?: unknown;
 }
 
 // Cache Models
 export interface XeroCacheEntry {
   key: string;
   entityType: XeroEntityType;
-  data: any;
+  data: unknown;
   timestamp: Date;
   expiresAt: Date;
   size: number; // In bytes

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Alert, Switch } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Alert, _Switch } from 'react-native';
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
@@ -53,7 +53,7 @@ const TaxConfigurationScreen: React.FC = () => {
     { rate: 0, description: 'Zero Rate (0%)', category: "Books, food, children's clothes, etc." },
   ];
 
-  const handleFieldChange = (field: string, value: any) => {
+  const handleFieldChange = (field: string, value: unknown) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     setHasChanges(true);
   };
@@ -104,7 +104,7 @@ const TaxConfigurationScreen: React.FC = () => {
       updateTaxConfiguration(formData);
       setHasChanges(false);
       Alert.alert('Success', 'Tax configuration has been saved successfully.', [{ text: 'OK' }]);
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', 'Failed to save tax configuration. Please try again.', [{ text: 'OK' }]);
     }
   };

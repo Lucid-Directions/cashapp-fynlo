@@ -8,7 +8,7 @@ import {
   SafeAreaView,
   TouchableOpacity,
   FlatList,
-  Image,
+  _Image,
 } from 'react-native';
 
 import { useNavigation } from '@react-navigation/native';

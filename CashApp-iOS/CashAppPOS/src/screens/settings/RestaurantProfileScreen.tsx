@@ -10,7 +10,7 @@ import {
   ScrollView,
   TextInput,
   Alert,
-  Switch,
+  _Switch,
 } from 'react-native';
 
 import { useNavigation } from '@react-navigation/native';
@@ -36,7 +36,7 @@ const Colors = {
 
 const RestaurantProfileScreen: React.FC = () => {
   const navigation = useNavigation();
-  const { config, updateConfig, loading, error } = useRestaurantConfig();
+  const { config, updateConfig, _loading, _error } = useRestaurantConfig();
 
   const [formData, setFormData] = useState({
     restaurantName: '',
@@ -110,7 +110,7 @@ const RestaurantProfileScreen: React.FC = () => {
 
       setHasChanges(false);
       Alert.alert('Success', 'Restaurant profile updated successfully!');
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', 'Failed to update restaurant profile. Please try again.');
     } finally {
       setSaving(false);

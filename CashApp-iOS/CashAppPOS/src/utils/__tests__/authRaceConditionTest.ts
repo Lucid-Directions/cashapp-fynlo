@@ -110,21 +110,21 @@ describe('Authentication Race Condition Tests', () => {
 
   describe('WebSocket Auth Error Detection', () => {
     it('should correctly identify auth errors', () => {
-      const mockCloseEvent = {
+      const _mockCloseEvent = {
         code: 4001, // AUTH_ERROR_CODE
         reason: 'Authentication failed',
         wasClean: false,
       };
 
       // Spy on console.log to check detection
-      const consoleSpy = jest.spyOn(console, 'log');
+      const _consoleSpy = jest.spyOn(console, 'log');
 
       // Trigger close event handler
       (webSocketService as any).connectionStartTime = Date.now() - 1000;
       (webSocketService as any).ws = { readyState: WebSocket.CLOSED };
 
       // Simulate close event
-      const handler = (webSocketService as any).setupEventHandlers;
+      const _handler = (webSocketService as any).setupEventHandlers;
       // Would need to actually trigger the handler here
 
       // Check that auth error was detected
@@ -132,7 +132,7 @@ describe('Authentication Race Condition Tests', () => {
     });
 
     it('should not treat quick network failures as auth errors', () => {
-      const mockCloseEvent = {
+      const _mockCloseEvent = {
         code: 1006, // Abnormal closure
         reason: '', // No reason provided
         wasClean: false,

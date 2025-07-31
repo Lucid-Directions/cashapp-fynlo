@@ -49,7 +49,7 @@ export interface BackendError {
   message?: string;
   error?: string;
   error_code?: string;
-  details?: any;
+  details?: unknown;
   error_id?: string;
   request_id?: string;
   status_code?: number;
@@ -57,7 +57,7 @@ export interface BackendError {
 
 class ErrorHandler {
   private static instance: ErrorHandler;
-  private navigation: NavigationProp<any> | null = null;
+  private navigation: NavigationProp<unknown> | null = null;
 
   static getInstance(): ErrorHandler {
     if (!ErrorHandler.instance) {
@@ -66,7 +66,7 @@ class ErrorHandler {
     return ErrorHandler.instance;
   }
 
-  setNavigation(navigation: NavigationProp<any>) {
+  setNavigation(navigation: NavigationProp<unknown>) {
     this.navigation = navigation;
   }
 
@@ -74,7 +74,7 @@ class ErrorHandler {
    * Maps backend errors to user-friendly messages
    * Never exposes technical details in production
    */
-  handle(error: any): UserFriendlyError {
+  handle(error: unknown): UserFriendlyError {
     // Log full error for debugging (in dev only)
     if (__DEV__) {
       console.error('Full error:', error);
@@ -203,11 +203,11 @@ class ErrorHandler {
   /**
    * Shows user-friendly error alert
    */
-  showError(error: any, customTitle?: string) {
+  showError(error: unknown, customTitle?: string) {
     const userError = this.handle(error);
     const title = customTitle || userError.title;
 
-    const buttons: any[] = [];
+    const buttons: unknown[] = [];
 
     // Add action button based on error type
     switch (userError.action) {
@@ -246,7 +246,7 @@ class ErrorHandler {
   /**
    * Extracts error data from various error formats
    */
-  private extractErrorData(error: any): BackendError {
+  private extractErrorData(error: unknown): BackendError {
     // API response error
     if (error?.response?.data) {
       return error.response.data;
@@ -283,7 +283,7 @@ class ErrorHandler {
   /**
    * Checks if error is network-related
    */
-  private isNetworkError(error: any): boolean {
+  private isNetworkError(error: unknown): boolean {
     const errorData = this.extractErrorData(error);
     return (
       errorData.error === 'NETWORK_ERROR' ||
@@ -300,7 +300,7 @@ class ErrorHandler {
   private handleLogout() {
     // This should be implemented based on your auth context
     // For now, navigate to login
-    this.navigation?.navigate('Login' as any);
+    this.navigation?.navigate('Login' as unknown);
   }
 
   /**
@@ -317,7 +317,7 @@ class ErrorHandler {
   /**
    * Formats error for logging (dev only)
    */
-  formatForLogging(error: any): string {
+  formatForLogging(error: unknown): string {
     if (!__DEV__) {
       return '[Error logging disabled in production]';
     }

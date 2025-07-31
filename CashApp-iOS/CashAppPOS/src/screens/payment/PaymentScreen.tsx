@@ -17,8 +17,8 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import QRCodePayment from '../../components/payment/QRCodePayment';
 import SumUpPaymentComponent from '../../components/payment/SumUpPaymentComponent';
 import PaymentService from '../../services/PaymentService';
-import SquarePaymentProvider from '../../services/providers/SquarePaymentProvider';
-import SumUpPaymentProvider from '../../services/providers/SumUpPaymentProvider';
+// TODO: Unused import - import SquarePaymentProvider from '../../services/providers/SquarePaymentProvider';
+// TODO: Unused import - import SumUpPaymentProvider from '../../services/providers/SumUpPaymentProvider';
 import SumUpNativeService from '../../services/SumUpNativeService';
 import useAppStore from '../../store/useAppStore';
 import useSettingsStore from '../../store/useSettingsStore';
@@ -61,7 +61,7 @@ const PaymentScreen: React.FC = () => {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string>('');
   const [showQRModal, setShowQRModal] = useState(false);
   const [processing, setProcessing] = useState(false);
-  const [paymentResult, setPaymentResult] = useState<PaymentResult | null>(null);
+  const [_paymentResult, setPaymentResult] = useState<PaymentResult | null>(null);
   const [optimalProvider, setOptimalProvider] = useState<string>('');
   const [showSumUpPayment, setShowSumUpPayment] = useState(false);
   const [currentPaymentRequest, setCurrentPaymentRequest] = useState<PaymentRequest | null>(null);
@@ -299,7 +299,7 @@ const PaymentScreen: React.FC = () => {
       } else {
         Alert.alert('Payment Failed', result.error || 'Cash payment failed');
       }
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Payment Error', 'Failed to process cash payment');
     } finally {
       setProcessing(false);
@@ -332,7 +332,7 @@ const PaymentScreen: React.FC = () => {
   // SumUp Payment Function - React Hook Based Integration
   const processSumUpPayment = async (
     request: PaymentRequest,
-    paymentMethod: string = 'tapToPay'
+    _paymentMethod: string = 'tapToPay'
   ) => {
     try {
       console.log('🏦 Starting SumUp payment flow with React hooks...');
@@ -426,7 +426,7 @@ const PaymentScreen: React.FC = () => {
           Alert.alert('Payment Failed', result.error || 'Card payment failed');
         }
       }
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Payment Error', 'Failed to process card payment');
     } finally {
       setProcessing(false);

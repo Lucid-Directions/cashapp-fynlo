@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+// TODO: Unused import - import React, { useState, useEffect, useCallback } from 'react';
 
 import {
   View,
@@ -71,12 +71,12 @@ const RecipesScreen = () => {
   }, [loadRecipes]);
 
   const handleAddRecipe = () => {
-    // @ts-ignore
+    // @ts-expect-error
     navigation.navigate('RecipeFormScreen'); // Navigate to form for new recipe
   };
 
   const handleEditRecipe = (recipe: Recipe) => {
-    // @ts-ignore
+    // @ts-expect-error
     navigation.navigate('RecipeFormScreen', { recipe }); // Navigate to form with existing recipe data
   };
 

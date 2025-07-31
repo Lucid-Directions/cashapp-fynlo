@@ -14,7 +14,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-import useAppStore from '../../store/useAppStore';
+// TODO: Unused import - import useAppStore from '../../store/useAppStore';
 
 // Clover POS Color Scheme
 const Colors = {
@@ -246,7 +246,7 @@ const RefundScreen: React.FC = () => {
                       styles.refundTypeButton,
                       refundType === option.key && styles.refundTypeButtonActive,
                     ]}
-                    onPress={() => setRefundType(option.key as any)}
+                    onPress={() => setRefundType(option.key as unknown)}
                   >
                     <Icon
                       name={option.icon}

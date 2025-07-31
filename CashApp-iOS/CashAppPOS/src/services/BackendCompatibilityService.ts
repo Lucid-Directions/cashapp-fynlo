@@ -8,7 +8,7 @@
  * TODO: Remove this service once backend is fully deployed with correct data structures
  */
 
-import { OrderItem } from '../types';
+// TODO: Unused import - import { OrderItem } from '../types';
 
 import type { MenuItem } from '../types';
 
@@ -59,10 +59,10 @@ export class BackendCompatibilityService {
   /**
    * Transform backend employee data to match frontend expectations
    */
-  static transformEmployee(backendEmployee: BackendEmployee): any {
+  static transformEmployee(backendEmployee: BackendEmployee): unknown {
     const now = new Date();
     const oneYearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
-    const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 6, now.getDate());
+    const _sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 6, now.getDate());
 
     return {
       ...backendEmployee,
@@ -89,14 +89,14 @@ export class BackendCompatibilityService {
   /**
    * Transform employees array
    */
-  static transformEmployees(backendEmployees: BackendEmployee[]): any[] {
+  static transformEmployees(backendEmployees: BackendEmployee[]): unknown[] {
     return backendEmployees.map((emp) => this.transformEmployee(emp));
   }
 
   /**
    * Check if backend response needs transformation
    */
-  static needsMenuTransformation(items: any[]): boolean {
+  static needsMenuTransformation(items: unknown[]): boolean {
     if (!items || items.length === 0) return false;
 
     // Check if first item has 'available' field
@@ -107,7 +107,7 @@ export class BackendCompatibilityService {
   /**
    * Check if employee data needs transformation
    */
-  static needsEmployeeTransformation(employees: any[]): boolean {
+  static needsEmployeeTransformation(employees: unknown[]): boolean {
     if (!employees || employees.length === 0) return false;
 
     // Check if first employee has 'hireDate' field

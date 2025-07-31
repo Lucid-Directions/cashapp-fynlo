@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 
 import { useNavigation } from '@react-navigation/native';
-import { LineChart, BarChart, PieChart } from 'react-native-chart-kit';
+import { LineChart, _BarChart, PieChart } from 'react-native-chart-kit';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -105,7 +105,7 @@ const PaymentAnalyticsScreen: React.FC = () => {
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
   const [volumeData, setVolumeData] = useState<VolumeData | null>(null);
   const [healthScores, setHealthScores] = useState<HealthScores | null>(null);
-  const [error, setError] = useState<string>('');
+  const [_error, setError] = useState<string>('');
 
   useEffect(() => {
     loadAnalyticsData();
@@ -301,7 +301,7 @@ const PaymentAnalyticsScreen: React.FC = () => {
     </View>
   );
 
-  const renderProviderHealth = (provider: string, health: any) => {
+  const renderProviderHealth = (provider: string, health: unknown) => {
     const getStatusColor = (status: string) => {
       switch (status) {
         case 'excellent':

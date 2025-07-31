@@ -17,7 +17,7 @@ const mockPerformance = {
   now: jest.fn(() => Date.now()),
 };
 
-// @ts-ignore
+// @ts-expect-error
 global.performance = mockPerformance;
 
 describe('Performance Tests', () => {

@@ -5,7 +5,7 @@ import DataService from '../services/DataService';
 // Placeholder for queryClient if not fully set up yet.
 // In a real scenario, this would be imported from a React Query setup.
 const queryClient = {
-  prefetchQuery: async (queryKey: any, queryFn: any) => {
+  prefetchQuery: async (queryKey: unknown, queryFn: unknown) => {
     console.log(`[dataPrefetcher] Attempting to prefetch ${queryKey.join('/')}`);
     try {
       await queryFn();
@@ -32,7 +32,7 @@ export async function prefetchInitialData() {
 
 // It's also common to prefetch user-specific data after login.
 export async function prefetchUserData() {
-  const dataService = DataService.getInstance();
+  const _dataService = DataService.getInstance();
   // Example:
   // await queryClient.prefetchQuery(['userOrders'], () => dataService.getRecentOrders(5));
   console.log(

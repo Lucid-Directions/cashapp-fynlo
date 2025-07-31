@@ -1,9 +1,9 @@
-import React from 'react';
+// TODO: Unused import - import React from 'react';
 
 import { Alert } from 'react-native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { NavigationContainer } from '@react-navigation/native';
+// TODO: Unused import - import { NavigationContainer } from '@react-navigation/native';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
 
 // Mock the navigation
@@ -196,8 +196,7 @@ describe('Onboarding Navigation Tests', () => {
 
   describe('RestaurantProfileScreen', () => {
     it('should load restaurant data from config', async () => {
-      const RestaurantProfileScreen =
-        require('../screens/settings/RestaurantProfileScreen').default;
+      const RestaurantProfileScreen = require('../screens/settings/RestaurantProfileScreen').default;
 
       // Mock existing restaurant data
       (AsyncStorage.getItem as jest.Mock).mockResolvedValue(
@@ -220,8 +219,7 @@ describe('Onboarding Navigation Tests', () => {
     });
 
     it('should save changes when Save button is pressed', async () => {
-      const RestaurantProfileScreen =
-        require('../screens/settings/RestaurantProfileScreen').default;
+      const RestaurantProfileScreen = require('../screens/settings/RestaurantProfileScreen').default;
 
       const { getByText, getByDisplayValue } = render(<RestaurantProfileScreen />);
 

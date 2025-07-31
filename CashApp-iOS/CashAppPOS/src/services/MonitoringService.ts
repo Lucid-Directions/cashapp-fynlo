@@ -64,7 +64,7 @@ class MonitoringService {
   private incidents: Incident[] = [];
   private performance: PerformanceMetrics | null = null;
   private alertRules: AlertRule[] = [];
-  private listeners: Map<string, (data: any) => void> = new Map();
+  private listeners: Map<string, (data: unknown) => void> = new Map();
 
   static getInstance(): MonitoringService {
     if (!MonitoringService.instance) {
@@ -197,7 +197,7 @@ class MonitoringService {
   }
 
   // Real-time subscriptions
-  subscribe(eventType: string, callback: (data: any) => void): () => void {
+  subscribe(eventType: string, callback: (data: unknown) => void): () => void {
     const listenerId = `${eventType}-${Date.now()}`;
     this.listeners.set(listenerId, callback);
 
@@ -206,7 +206,7 @@ class MonitoringService {
     };
   }
 
-  private notifyListeners(eventType: string, data: any): void {
+  private notifyListeners(eventType: string, data: unknown): void {
     this.listeners.forEach((callback, listenerId) => {
       if (listenerId.startsWith(eventType)) {
         callback(data);
@@ -335,9 +335,9 @@ class MonitoringService {
       const restaurant = restaurants[Math.floor(Math.random() * restaurants.length)];
       const error: ErrorLog = {
         id: `error-${Date.now()}-${i}`,
-        type: errorTypes[Math.floor(Math.random() * errorTypes.length)] as any,
+        type: errorTypes[Math.floor(Math.random() * errorTypes.length)] as unknown,
         message: this.generateErrorMessage(),
-        severity: severities[Math.floor(Math.random() * severities.length)] as any,
+        severity: severities[Math.floor(Math.random() * severities.length)] as unknown,
         timestamp: new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000),
         restaurantId: restaurant.id,
         restaurantName: restaurant.name,
@@ -457,9 +457,9 @@ class MonitoringService {
     const restaurant = restaurants[Math.floor(Math.random() * restaurants.length)];
     const error: ErrorLog = {
       id: `error-${Date.now()}`,
-      type: errorTypes[Math.floor(Math.random() * errorTypes.length)] as any,
+      type: errorTypes[Math.floor(Math.random() * errorTypes.length)] as unknown,
       message: this.generateErrorMessage(),
-      severity: severities[Math.floor(Math.random() * severities.length)] as any,
+      severity: severities[Math.floor(Math.random() * severities.length)] as unknown,
       timestamp: new Date(),
       restaurantId: restaurant.id,
       restaurantName: restaurant.name,

@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import QRCode from 'react-native-qrcode-svg';
+// TODO: Unused import - import QRCode from 'react-native-qrcode-svg';
 
 export interface PaymentRequest {
   amount: number;
@@ -445,7 +445,7 @@ class PaymentServiceClass {
   /**
    * Get payment analytics
    */
-  async getPaymentAnalytics(startDate: string, endDate: string): Promise<any> {
+  async getPaymentAnalytics(startDate: string, endDate: string): Promise<unknown> {
     try {
       if (!this.config) {
         throw new Error('PaymentService not initialized');

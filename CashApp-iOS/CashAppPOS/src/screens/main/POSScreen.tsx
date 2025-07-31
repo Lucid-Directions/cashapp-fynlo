@@ -10,11 +10,11 @@ import {
   ScrollView,
   FlatList,
   Modal,
-  TextInput,
+  _TextInput,
   Alert,
   Dimensions,
   Platform,
-  Image,
+  _Image,
   Animated,
 } from 'react-native';
 
@@ -22,21 +22,12 @@ import { useNavigation } from '@react-navigation/native';
 import { Swipeable } from 'react-native-gesture-handler';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-import ErrorTrackingService from '../../services/ErrorTrackingService';
-import {
-  validatePrice,
-  calculatePercentageFee,
-  validateCartCalculation,
-  formatPrice,
-} from '../../utils/priceValidation';
-import SumUpPaymentComponent from '../../components/payment/SumUpPaymentComponent';
-import SumUpTestComponent from '../../components/payment/SumUpTestComponent';
-import SumUpCompatibilityService from '../../services/SumUpCompatibilityService';
-import SharedDataStore from '../../services/SharedDataStore';
-import SimpleTextInput from '../../components/inputs/SimpleTextInput';
-import { QuantityPill } from '../../components/inputs';
+// TODO: Unused import - import SumUpTestComponent from '../../components/payment/SumUpTestComponent';
 import CartIcon from '../../components/cart/CartIcon';
+import { QuantityPill } from '../../components/inputs';
+import SimpleTextInput from '../../components/inputs/SimpleTextInput';
 import HeaderWithBackButton from '../../components/navigation/HeaderWithBackButton';
+import SumUpPaymentComponent from '../../components/payment/SumUpPaymentComponent';
 import CategorySearchBubble from '../../components/search/CategorySearchBubble'; // Import CategorySearchBubble
 import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
 import { IS_DEV } from '../../env'; // Import IS_DEV
@@ -44,10 +35,19 @@ import { useRestaurantDisplayName } from '../../hooks/useRestaurantConfig';
 import CustomersService from '../../services/CustomersService';
 import DatabaseService from '../../services/DatabaseService';
 import DataService from '../../services/DataService';
-import PlatformService from '../../services/PlatformService';
+import ErrorTrackingService from '../../services/ErrorTrackingService';
+import SharedDataStore from '../../services/SharedDataStore';
+import SumUpCompatibilityService from '../../services/SumUpCompatibilityService';
+// TODO: Unused import - import PlatformService from '../../services/PlatformService';
 import useAppStore from '../../store/useAppStore';
 import useSettingsStore from '../../store/useSettingsStore';
 import useUIStore from '../../store/useUIStore';
+import {
+  _validatePrice,
+  calculatePercentageFee,
+  validateCartCalculation,
+  formatPrice,
+} from '../../utils/priceValidation';
 
 import type { MenuItem, OrderItem } from '../../types';
 
@@ -68,8 +68,8 @@ const ExportedMenuItemCard = ({
   handleUpdateQuantity,
 }: {
   item: MenuItem;
-  theme: any;
-  styles: any;
+  theme: unknown;
+  styles: unknown;
   cart: OrderItem[];
   handleAddToCart: (item: MenuItem) => void;
   handleUpdateQuantity: (id: number, quantity: number) => void;
@@ -463,7 +463,7 @@ const POSScreen: React.FC = () => {
             setShowSumUpPayment(true);
           } else {
             console.warn('⚠️ SumUp not compatible, showing alternatives');
-            const fallbackMethods = compatibilityService.getFallbackPaymentMethods();
+            const _fallbackMethods = compatibilityService.getFallbackPaymentMethods();
 
             Alert.alert(
               'Tap to Pay Unavailable',
@@ -572,7 +572,7 @@ const POSScreen: React.FC = () => {
     }
   };
 
-  const handlePaymentComplete = (result: any) => {
+  const handlePaymentComplete = (result: unknown) => {
     if (result.success) {
       Alert.alert(
         'Payment Successful',
@@ -1112,7 +1112,7 @@ const POSScreen: React.FC = () => {
                     style={styles.chargeButton}
                     onPress={() => {
                       setShowCartModal(false);
-                      // @ts-ignore
+                      // @ts-expect-error
                       navigation.navigate('ServiceChargeSelection');
                     }}
                     testID="charge-button" // Added testID
@@ -1303,7 +1303,7 @@ const POSScreen: React.FC = () => {
   );
 };
 
-const createStyles = (theme: any) =>
+const createStyles = (theme: unknown) =>
   StyleSheet.create({
     container: {
       flex: 1,

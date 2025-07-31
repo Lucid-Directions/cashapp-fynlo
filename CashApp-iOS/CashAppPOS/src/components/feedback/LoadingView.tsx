@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { View, Text, StyleSheet, ActivityIndicator, SafeAreaView } from 'react-native';
+import { _View, Text, StyleSheet, ActivityIndicator, SafeAreaView } from 'react-native';
 
 import { useTheme } from '../../design-system/ThemeProvider';
 

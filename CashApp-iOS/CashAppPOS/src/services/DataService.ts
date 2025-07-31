@@ -2,9 +2,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import API_CONFIG from '../config/api';
-import { AUTH_CONFIG } from '../config/auth.config';
+// TODO: Unused import - import { AUTH_CONFIG } from '../config/auth.config';
 import { envBool, IS_DEV } from '../env';
-import { supabase } from '../lib/supabase';
+// TODO: Unused import - import { supabase } from '../lib/supabase';
 import { useAuthStore } from '../store/useAuthStore';
 import tokenManager from '../utils/tokenManager';
 
@@ -83,7 +83,7 @@ class DataService {
       if (stored) {
         this.featureFlags = { ...DEFAULT_FLAGS, ...JSON.parse(stored) };
       }
-    } catch (error) {
+    } catch (_error) {
       console.log('Using default feature flags');
     }
   }
@@ -167,7 +167,7 @@ class DataService {
           `Backend status changed: ${this.isBackendAvailable ? 'Available' : 'Unavailable'}`
         );
       }
-    } catch (error) {
+    } catch (_error) {
       this.isBackendAvailable = false;
       console.log('Backend not available, using mock data');
 
@@ -218,7 +218,7 @@ class DataService {
         if (products && products.length > 0) {
           return products;
         }
-      } catch (error) {
+      } catch (_error) {
         console.log('Failed to fetch products from API, using mock data');
       }
     }
@@ -229,7 +229,7 @@ class DataService {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         return await this.db.getProductsByCategory(categoryId);
-      } catch (error) {
+      } catch (_error) {
         console.log('Failed to fetch products by category, using mock data');
       }
     }
@@ -278,7 +278,7 @@ class DataService {
           }
           return menuItems;
         }
-      } catch (error) {
+      } catch (_error) {
         console.log('Failed to fetch menu items from API, using mock data');
       }
     }
@@ -297,7 +297,7 @@ class DataService {
         if (categories && categories.length > 0) {
           return categories;
         }
-      } catch (error) {
+      } catch (_error) {
         console.log('Failed to fetch menu categories from API, using mock data');
       }
     }
@@ -311,7 +311,7 @@ class DataService {
     color?: string;
     icon?: string;
     sort_order?: number;
-  }): Promise<any> {
+  }): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         const result = await this.db.createCategory(categoryData);
@@ -339,7 +339,7 @@ class DataService {
       sort_order?: number;
       is_active?: boolean;
     }>
-  ): Promise<any> {
+  ): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         const result = await this.db.updateCategory(categoryId, categoryData);
@@ -387,10 +387,10 @@ class DataService {
     sku?: string;
     prep_time?: number;
     dietary_info?: string[];
-    modifiers?: any[];
+    modifiers?: unknown[];
     stock_tracking?: boolean;
     stock_quantity?: number;
-  }): Promise<any> {
+  }): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         return await this.db.createProduct(productData);
@@ -419,12 +419,12 @@ class DataService {
       sku?: string;
       prep_time?: number;
       dietary_info?: string[];
-      modifiers?: any[];
+      modifiers?: unknown[];
       stock_tracking?: boolean;
       stock_quantity?: number;
       is_active?: boolean;
     }>
-  ): Promise<any> {
+  ): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         return await this.db.updateProduct(productId, productData);
@@ -458,23 +458,23 @@ class DataService {
   }
 
   // Order operations
-  async createOrder(order: any): Promise<any> {
+  async createOrder(order: unknown): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         const result = await this.db.createOrder(order);
         if (result) return result;
-      } catch (error) {
+      } catch (_error) {
         console.log('Failed to create order via API, using mock');
       }
     }
     return this.db.createOrder(order);
   }
 
-  async updateOrder(orderId: number, updates: any): Promise<any> {
+  async updateOrder(orderId: number, updates: unknown): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         return await this.db.updateOrder(orderId, updates);
-      } catch (error) {
+      } catch (_error) {
         console.log('Failed to update order via API');
       }
     }
@@ -488,7 +488,7 @@ class DataService {
         if (orders && orders.length > 0) {
           return orders;
         }
-      } catch (error) {
+      } catch (_error) {
         console.log('Failed to fetch orders from API, using mock data');
       }
     }
@@ -541,25 +541,29 @@ class DataService {
   }
 
   // Restaurant operations
-  async getRestaurantFloorPlan(sectionId?: string | null): Promise<any> {
+  async getRestaurantFloorPlan(sectionId?: string | null): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         const floorPlan = await this.db.getRestaurantFloorPlan(sectionId ?? undefined);
         if (floorPlan && floorPlan.tables && floorPlan.tables.length > 0) {
           return floorPlan;
         }
-      } catch (error) {
+      } catch (_error) {
         console.log('Failed to fetch floor plan from API, using mock data');
       }
     }
     return this.db.getRestaurantFloorPlan(sectionId ?? undefined);
   }
 
-  async updateTableStatus(tableId: string, status: string, additionalData?: any): Promise<any> {
+  async updateTableStatus(
+    tableId: string,
+    status: string,
+    additionalData?: unknown
+  ): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         return await this.db.updateTableStatus(tableId, status, additionalData);
-      } catch (error) {
+      } catch (_error) {
         console.log('Failed to update table status via API');
       }
     }
@@ -567,28 +571,28 @@ class DataService {
   }
 
   // Analytics and Reporting
-  async getDailySalesReport(date?: string): Promise<any> {
+  async getDailySalesReport(date?: string): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         const report = await this.db.getDailySalesReport(date);
         if (report && report.summary) {
           return report;
         }
-      } catch (error) {
+      } catch (_error) {
         console.log('Failed to fetch daily report from API, using mock data');
       }
     }
     return this.db.getDailySalesReport(date);
   }
 
-  async getSalesSummary(dateFrom?: string, dateTo?: string): Promise<any> {
+  async getSalesSummary(dateFrom?: string, dateTo?: string): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         const summary = await this.db.getSalesSummary(dateFrom ?? undefined, dateTo ?? undefined);
         if (summary && summary.summary) {
           return summary;
         }
-      } catch (error) {
+      } catch (_error) {
         console.log('Failed to fetch sales summary from API, using mock data');
       }
     }
@@ -596,22 +600,22 @@ class DataService {
   }
 
   // Session management
-  async getCurrentSession(): Promise<any> {
+  async getCurrentSession(): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         return await this.db.getCurrentSession();
-      } catch (error) {
+      } catch (_error) {
         console.log('Failed to get session from API');
       }
     }
     return this.db.getCurrentSession();
   }
 
-  async createSession(configId: number): Promise<any> {
+  async createSession(configId: number): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         return await this.db.createSession(configId);
-      } catch (error) {
+      } catch (_error) {
         console.log('Failed to create session via API');
       }
     }
@@ -619,7 +623,7 @@ class DataService {
   }
 
   // Hardware operations (always mock for now)
-  async printReceipt(order: any): Promise<boolean> {
+  async printReceipt(order: unknown): Promise<boolean> {
     if (this.featureFlags.ENABLE_HARDWARE) {
       console.log('Hardware printing not yet implemented');
     }
@@ -754,7 +758,7 @@ class DataService {
     }
   }
 
-  async getWeekSchedule(weekStart: Date, employees: any[]): Promise<any | null> {
+  async getWeekSchedule(weekStart: Date, employees: unknown[]): Promise<any | null> {
     console.log('🌐 DataService.getWeekSchedule - fetching from API', { weekStart });
 
     try {
@@ -889,7 +893,7 @@ class DataService {
    * Transform API response data to SalesData array format
    * Handles various API response formats and converts to frontend interface
    */
-  private transformApiDataToArray(apiData: any, period: string): any[] {
+  private transformApiDataToArray(apiData: unknown, _period: string): unknown[] {
     try {
       // If API returns object with sales data, extract it
       if (apiData && typeof apiData === 'object') {
@@ -955,7 +959,7 @@ class DataService {
     }
   }
 
-  async getLaborReport(period: string): Promise<any> {
+  async getLaborReport(period: string): Promise<unknown> {
     console.log('DataService.getLaborReport called', {
       period,
       USE_REAL_API: this.featureFlags.USE_REAL_API,
@@ -1060,7 +1064,7 @@ class DataService {
     hourlyRate?: number;
     startDate?: string;
     permissions?: string[];
-  }): Promise<any> {
+  }): Promise<unknown> {
     console.log('🌐 DataService.createEmployee - creating employee via API', employeeData);
 
     try {
@@ -1158,7 +1162,7 @@ class DataService {
   // SUBSCRIPTION MANAGEMENT METHODS
   // ===========================================================================
 
-  async getSubscriptionPlans(): Promise<any> {
+  async getSubscriptionPlans(): Promise<unknown> {
     console.log('DataService.getSubscriptionPlans called');
 
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
@@ -1191,7 +1195,7 @@ class DataService {
     throw new Error('Subscription plans require API connection');
   }
 
-  async getCurrentSubscription(restaurantId: number): Promise<any> {
+  async getCurrentSubscription(restaurantId: number): Promise<unknown> {
     console.log('DataService.getCurrentSubscription called', { restaurantId });
 
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
@@ -1233,7 +1237,7 @@ class DataService {
     throw new Error('Subscription data requires API connection');
   }
 
-  async createSubscription(subscriptionData: any): Promise<any> {
+  async createSubscription(subscriptionData: unknown): Promise<unknown> {
     console.log('DataService.createSubscription called', subscriptionData);
 
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
@@ -1276,7 +1280,7 @@ class DataService {
     throw new Error('Subscription creation requires API connection');
   }
 
-  async changeSubscriptionPlan(changeData: any): Promise<any> {
+  async changeSubscriptionPlan(changeData: unknown): Promise<unknown> {
     console.log('DataService.changeSubscriptionPlan called', changeData);
 
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
@@ -1319,7 +1323,7 @@ class DataService {
     throw new Error('Plan change requires API connection');
   }
 
-  async cancelSubscription(restaurantId: number): Promise<any> {
+  async cancelSubscription(restaurantId: number): Promise<unknown> {
     console.log('DataService.cancelSubscription called', { restaurantId });
 
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
@@ -1364,7 +1368,11 @@ class DataService {
     throw new Error('Subscription cancellation requires API connection');
   }
 
-  async incrementUsage(restaurantId: number, usageType: string, amount: number = 1): Promise<any> {
+  async incrementUsage(
+    restaurantId: number,
+    usageType: string,
+    amount: number = 1
+  ): Promise<unknown> {
     console.log('DataService.incrementUsage called', { restaurantId, usageType, amount });
 
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {

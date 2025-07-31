@@ -161,7 +161,7 @@ const RestaurantSetupScreen: React.FC = () => {
           },
         ]
       );
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', 'Failed to save restaurant information. Please try again.');
     } finally {
       setLoading(false);

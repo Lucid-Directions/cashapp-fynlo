@@ -366,7 +366,7 @@ describe('DatabaseService', () => {
   describe('Offline Data Sync', () => {
     it('should sync offline data when available', async () => {
       // Mock AsyncStorage with offline orders
-      const mockAsyncStorage = require('@react-native-async-storage/async-storage');
+      import mockAsyncStorage from '@react-native-async-storage/async-storage';
       mockAsyncStorage.getItem.mockResolvedValue(
         JSON.stringify([
           { items: [{ product_id: 1, quantity: 1 }] },
@@ -388,7 +388,7 @@ describe('DatabaseService', () => {
     });
 
     it('should handle sync when no offline data exists', async () => {
-      const mockAsyncStorage = require('@react-native-async-storage/async-storage');
+      import mockAsyncStorage from '@react-native-async-storage/async-storage';
       mockAsyncStorage.getItem.mockResolvedValue(null);
 
       await service.syncOfflineData();
@@ -398,7 +398,7 @@ describe('DatabaseService', () => {
     });
 
     it('should handle sync errors gracefully', async () => {
-      const mockAsyncStorage = require('@react-native-async-storage/async-storage');
+      import mockAsyncStorage from '@react-native-async-storage/async-storage';
       mockAsyncStorage.getItem.mockRejectedValue(new Error('Storage error'));
 
       // Should not throw error
@@ -409,7 +409,7 @@ describe('DatabaseService', () => {
   describe('API Request Helper', () => {
     it('should include authentication headers when token is available', async () => {
       // Set auth token
-      const mockAsyncStorage = require('@react-native-async-storage/async-storage');
+      import mockAsyncStorage from '@react-native-async-storage/async-storage';
       mockAsyncStorage.getItem.mockResolvedValue('test-token-123');
 
       // Reinitialize service to load token

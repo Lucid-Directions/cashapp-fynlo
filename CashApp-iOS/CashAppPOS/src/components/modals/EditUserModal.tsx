@@ -54,7 +54,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ visible, user, onClose, o
   const [formData, setFormData] = useState<UpdateUserRequest>({});
   const [permissionTemplates, setPermissionTemplates] = useState<PermissionTemplate[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
-  const [showPermissions, setShowPermissions] = useState(false);
+  const [_showPermissions, setShowPermissions] = useState(false);
   const [activeTab, setActiveTab] = useState<'basic' | 'permissions' | 'security'>('basic');
 
   const userManagementService = UserManagementService.getInstance();
@@ -186,7 +186,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ visible, user, onClose, o
               Alert.alert('Success', 'User suspended successfully');
               onUserUpdated();
               handleClose();
-            } catch (error) {
+            } catch (_error) {
               Alert.alert('Error', 'Failed to suspend user');
             } finally {
               setLoading(false);
@@ -206,7 +206,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ visible, user, onClose, o
       Alert.alert('Success', 'User activated successfully');
       onUserUpdated();
       handleClose();
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', 'Failed to activate user');
     } finally {
       setLoading(false);
@@ -231,7 +231,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ visible, user, onClose, o
               Alert.alert('Success', 'User deleted successfully');
               onUserUpdated();
               handleClose();
-            } catch (error) {
+            } catch (_error) {
               Alert.alert('Error', 'Failed to delete user');
             } finally {
               setLoading(false);
@@ -302,7 +302,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ visible, user, onClose, o
             <TouchableOpacity
               key={tab.key}
               style={[styles.tabButton, activeTab === tab.key && styles.tabButtonActive]}
-              onPress={() => setActiveTab(tab.key as any)}
+              onPress={() => setActiveTab(tab.key as unknown)}
             >
               <Icon
                 name={tab.icon}
@@ -409,7 +409,9 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ visible, user, onClose, o
                           styles.statusOption,
                           formData.status === status && styles.statusOptionSelected,
                         ]}
-                        onPress={() => setFormData((prev) => ({ ...prev, status: status as any }))}
+                        onPress={() =>
+                          setFormData((prev) => ({ ...prev, status: status as unknown }))
+                        }
                       >
                         <Text
                           style={[

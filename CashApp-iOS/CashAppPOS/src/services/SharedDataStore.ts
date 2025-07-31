@@ -30,7 +30,7 @@ interface PaymentConfig {
 interface PlatformSettings {
   serviceCharge: ServiceChargeConfig;
   payments: PaymentConfig;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 class SharedDataStore {
@@ -140,7 +140,7 @@ class SharedDataStore {
       try {
         // Get auth token for API requests
         const authToken = await tokenManager.getTokenWithRefresh();
-        const headers: any = {
+        const headers: unknown = {
           'Content-Type': 'application/json',
         };
 
@@ -249,7 +249,7 @@ class SharedDataStore {
   }
 
   // Generic platform setting management
-  async getPlatformSetting(key: string): Promise<any> {
+  async getPlatformSetting(key: string): Promise<unknown> {
     try {
       const cached = this.cache.get(key);
       if (cached) {
@@ -270,7 +270,7 @@ class SharedDataStore {
     }
   }
 
-  async setPlatformSetting(key: string, value: any): Promise<void> {
+  async setPlatformSetting(key: string, value: unknown): Promise<void> {
     try {
       const valueWithTimestamp = {
         data: value,
@@ -289,9 +289,9 @@ class SharedDataStore {
   }
 
   // Real-time subscription system
-  private subscribers: Map<string, Set<(data: any) => void>> = new Map();
+  private subscribers: Map<string, Set<(data: unknown) => void>> = new Map();
 
-  subscribe(key: string, callback: (data: any) => void): () => void {
+  subscribe(key: string, callback: (data: unknown) => void): () => void {
     if (!this.subscribers.has(key)) {
       this.subscribers.set(key, new Set());
     }
@@ -307,7 +307,7 @@ class SharedDataStore {
     };
   }
 
-  private notifySubscribers(key: string, data: any): void {
+  private notifySubscribers(key: string, data: unknown): void {
     const subs = this.subscribers.get(key);
     if (subs) {
       subs.forEach((callback) => {

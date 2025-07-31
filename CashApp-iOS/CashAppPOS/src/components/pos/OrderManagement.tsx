@@ -16,7 +16,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import SharedDataStore from '../../services/SharedDataStore';
 import useAppStore from '../../store/useAppStore';
 import useSettingsStore from '../../store/useSettingsStore';
-import { Order } from '../../types';
+import { _Order } from '../../types';
 
 import type { OrderItem } from '../../types';
 
@@ -44,7 +44,7 @@ interface OrderManagementProps {
 }
 
 const OrderManagement: React.FC<OrderManagementProps> = ({ visible, onClose, onCheckout }) => {
-  const { cart, updateCartItem, removeFromCart, clearCart, cartTotal, cartItemCount } =
+  const { cart, updateCartItem, removeFromCart, clearCart, _cartTotal, _cartItemCount } =
     useAppStore();
 
   const { taxConfiguration } = useSettingsStore();

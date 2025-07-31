@@ -5,7 +5,7 @@ import {
   Text,
   View,
   ScrollView,
-  TextInput,
+  _TextInput,
   TouchableOpacity,
   Alert,
   KeyboardAvoidingView,
@@ -15,7 +15,7 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import SimpleTextInput from '../../../components/inputs/SimpleTextInput';
-import { SettingsHeader, SettingsSection, SettingsCard } from '../../../components/settings';
+import { SettingsHeader, SettingsSection, _SettingsCard } from '../../../components/settings';
 import { useRestaurantConfig } from '../../../hooks/useRestaurantConfig';
 import useSettingsStore from '../../../store/useSettingsStore';
 
@@ -259,7 +259,7 @@ const BusinessInformationScreen: React.FC = () => {
         'Business information has been saved successfully. The restaurant name will now appear in your headers.',
         [{ text: 'OK' }]
       );
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', 'Failed to save business information. Please try again.', [
         { text: 'OK' },
       ]);

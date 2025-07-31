@@ -10,7 +10,7 @@ interface SimpleTextInputProps {
   onValueChange: (value: string) => void;
   placeholder?: string;
   label?: string;
-  style?: any;
+  style?: unknown;
   disabled?: boolean;
   multiline?: boolean;
   keyboardType?: KeyboardTypeOptions;

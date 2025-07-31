@@ -12,7 +12,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Dimensions,
-  Image,
+  _Image,
 } from 'react-native';
 
 import { useNavigation } from '@react-navigation/native';
@@ -21,7 +21,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import Logo from '../../components/Logo';
 import { useAuthStore } from '../../store/useAuthStore';
 
-const { width, height } = Dimensions.get('window');
+const { _width, _height } = Dimensions.get('window');
 
 // Clover POS Color Scheme
 const Colors = {
@@ -62,7 +62,7 @@ const LoginScreen: React.FC = () => {
       await signIn(loginUsername.trim(), loginPassword);
       console.log('✅ Login successful, navigation will happen automatically');
       // Navigation happens automatically via AppNavigator
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Login error:', error);
       Alert.alert('Login Failed', error.message || 'Invalid username or password');
     } finally {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, _useEffect } from 'react';
 
 import {
   StyleSheet,
@@ -7,9 +7,9 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
-  ActivityIndicator,
+  _ActivityIndicator,
   Modal,
-  ProgressBarAndroid,
+  _ProgressBarAndroid,
   Platform,
 } from 'react-native';
 

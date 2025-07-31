@@ -50,7 +50,7 @@ class SumUpPaymentProviderClass {
 
   async processPayment(
     amount: number,
-    currency: string = 'GBP',
+    _currency: string = 'GBP',
     title?: string
   ): Promise<SumUpPaymentResult> {
     try {
@@ -77,7 +77,7 @@ class SumUpPaymentProviderClass {
     }
   }
 
-  async getCardReaderSettings(): Promise<any> {
+  async getCardReaderSettings(): Promise<unknown> {
     try {
       if (!this.initialized) {
         throw new Error('SumUp not initialized');

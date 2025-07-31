@@ -3,7 +3,7 @@
  * Extends existing PaymentService patterns while adding platform fee management
  */
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
+// TODO: Unused import - import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import PaymentService from './PaymentService';
 import PlatformService from './PlatformService';
@@ -152,7 +152,7 @@ class PlatformPaymentService {
       );
 
       const allMethods = await this.getPaymentMethodsWithFees(amount, restaurantId);
-      const currentMethod = allMethods.find((m) => m.id === paymentMethod);
+      const _currentMethod = allMethods.find((m) => m.id === paymentMethod);
       const lowestFee = Math.min(...allMethods.map((m) => m.effectiveFee?.effective_fee || 0));
 
       return {
@@ -190,7 +190,7 @@ class PlatformPaymentService {
 
       // Check if any payment fee settings come from restaurant level
       return Object.values(effectiveSettings).some(
-        (setting: any) => setting.source === 'restaurant'
+        (setting: unknown) => setting.source === 'restaurant'
       );
     } catch (error) {
       console.error('Failed to check restaurant overrides:', error);
@@ -287,7 +287,7 @@ class PlatformPaymentService {
    * Generate short fee description for UI
    */
   private generateShortFeeDescription(feeCalculation: FeeCalculation): string {
-    const { effective_fee, currency, fee_percentage } = feeCalculation;
+    const { effective_fee, _currency, fee_percentage } = feeCalculation;
 
     if (effective_fee === 0) {
       return 'No fee';
