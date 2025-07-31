@@ -1,12 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import {
-  View,
-  TextInput,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Dimensions,
-} from 'react-native';
+
+import { View, TextInput, Text, StyleSheet, TouchableOpacity, _Dimensions } from 'react-native';
+
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 interface DecimalInputProps {
@@ -18,15 +13,15 @@ interface DecimalInputProps {
   minValue?: number;
   decimalPlaces?: number;
   label?: string;
-  style?: any;
+  style?: unknown;
   disabled?: boolean;
 }
 
 const DecimalInput: React.FC<DecimalInputProps> = ({
   value,
   onValueChange,
-  placeholder = "0.00",
-  suffix = "",
+  placeholder = '0.00',
+  suffix = '',
   maxValue = 999.99,
   minValue = 0,
   decimalPlaces = 2,
@@ -46,8 +41,8 @@ const DecimalInput: React.FC<DecimalInputProps> = ({
   }, [value, decimalPlaces, isFocused]);
 
   const handleTextChange = (text: string) => {
-    console.log('💰 DecimalInput - Raw input:', text);
-    
+    logger.info('💰 DecimalInput - Raw input:', text);
+
     // Allow empty string - don't call onValueChange yet
     if (text === '') {
       setDisplayValue('');
@@ -56,7 +51,7 @@ const DecimalInput: React.FC<DecimalInputProps> = ({
 
     // Remove any non-numeric characters except decimal point
     let cleaned = text.replace(/[^0-9.]/g, '');
-    
+
     // Handle multiple decimal points - keep only the first one
     const decimalIndex = cleaned.indexOf('.');
     if (decimalIndex !== -1) {
@@ -78,41 +73,41 @@ const DecimalInput: React.FC<DecimalInputProps> = ({
 
     // Convert to number to validate range - only if it's a complete number
     const numericValue = parseFloat(cleaned);
-    
+
     // Only update parent if we have a valid number and it's not just a decimal point
     if (!isNaN(numericValue) && cleaned !== '.') {
       const clampedValue = Math.max(minValue, Math.min(maxValue, numericValue));
-      console.log('💰 DecimalInput - Calling onValueChange with:', clampedValue);
+      logger.info('💰 DecimalInput - Calling onValueChange with:', clampedValue);
       onValueChange(clampedValue);
     }
 
-    console.log('💰 DecimalInput - Display value set to:', cleaned);
+    logger.info('💰 DecimalInput - Display value set to:', cleaned);
   };
 
   const handleFocus = () => {
     setIsFocused(true);
     // Don't clear the input - keep the current value visible for editing
-    console.log('💰 DecimalInput - Focus gained, keeping value:', displayValue);
+    logger.info('💰 DecimalInput - Focus gained, keeping value:', displayValue);
   };
 
   const handleBlur = () => {
     setIsFocused(false);
-    
+
     // Convert to number and validate
     const numericValue = parseFloat(displayValue) || 0;
     const clampedValue = Math.max(minValue, Math.min(maxValue, numericValue));
-    
+
     // Format the display value nicely when losing focus - only format if it's a valid number
     if (!isNaN(numericValue) && displayValue !== '') {
       setDisplayValue(clampedValue.toFixed(decimalPlaces));
-      
+
       // Only call onValueChange if the value actually changed
       if (clampedValue !== value) {
         onValueChange(clampedValue);
       }
     }
-    
-    console.log('💰 DecimalInput - Blur with final value:', clampedValue);
+
+    logger.info('💰 DecimalInput - Blur with final value:', clampedValue);
   };
 
   const handleClear = () => {
@@ -128,17 +123,20 @@ const DecimalInput: React.FC<DecimalInputProps> = ({
 
   // Common preset values for service charges
   const presetValues = [0, 2.5, 5, 10, 12.5, 15, 20];
-  const showPresets = label?.toLowerCase().includes('service') || label?.toLowerCase().includes('charge');
+  const showPresets =
+    label?.toLowerCase().includes('service') || label?.toLowerCase().includes('charge');
 
   return (
     <View style={[styles.container, style]}>
       {label && <Text style={styles.label}>{label}</Text>}
-      
-      <View style={[
-        styles.inputContainer,
-        isFocused && styles.inputContainerFocused,
-        disabled && styles.inputContainerDisabled,
-      ]}>
+
+      <View
+        style={[
+          styles.inputContainer,
+          isFocused && styles.inputContainerFocused,
+          disabled && styles.inputContainerDisabled,
+        ]}
+      >
         <TextInput
           ref={inputRef}
           style={[styles.input, disabled && styles.inputDisabled]}
@@ -157,16 +155,14 @@ const DecimalInput: React.FC<DecimalInputProps> = ({
           blurOnSubmit={true}
           multiline={false}
         />
-        
+
         {displayValue !== '' && !disabled && (
           <TouchableOpacity onPress={handleClear} style={styles.clearButton}>
             <Icon name="clear" size={20} color="#666" />
           </TouchableOpacity>
         )}
-        
-        {suffix && (
-          <Text style={[styles.suffix, disabled && styles.suffixDisabled]}>{suffix}</Text>
-        )}
+
+        {suffix && <Text style={[styles.suffix, disabled && styles.suffixDisabled]}>{suffix}</Text>}
       </View>
 
       {/* Preset buttons for service charges */}
@@ -177,16 +173,15 @@ const DecimalInput: React.FC<DecimalInputProps> = ({
             {presetValues.map((preset) => (
               <TouchableOpacity
                 key={preset}
-                style={[
-                  styles.presetButton,
-                  value === preset && styles.presetButtonActive,
-                ]}
+                style={[styles.presetButton, value === preset && styles.presetButtonActive]}
                 onPress={() => handlePresetValue(preset)}
               >
-                <Text style={[
-                  styles.presetButtonText,
-                  value === preset && styles.presetButtonTextActive,
-                ]}>
+                <Text
+                  style={[
+                    styles.presetButtonText,
+                    value === preset && styles.presetButtonTextActive,
+                  ]}
+                >
                   {preset}%
                 </Text>
               </TouchableOpacity>

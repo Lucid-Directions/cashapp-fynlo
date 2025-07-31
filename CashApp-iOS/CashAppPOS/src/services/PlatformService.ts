@@ -3,18 +3,20 @@
  * Handles communication with the platform settings API while maintaining existing patterns
  */
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import SharedDataStore from './SharedDataStore';
+// TODO: Unused import - import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import API_CONFIG from '../config/api';
 import tokenManager from '../utils/tokenManager';
 
+import SharedDataStore from './SharedDataStore';
+
 // Base API URL - FIXED: Uses LAN IP for device testing
-import API_CONFIG from '../config/api';
 
 const BASE_URL = API_CONFIG.FULL_API_URL;
 
 export interface PlatformSetting {
   key: string;
-  value: any;
+  value: unknown;
   category: string;
   description: string;
   is_sensitive: boolean;
@@ -45,8 +47,8 @@ export interface AuditRecord {
   config_type: string;
   config_key: string;
   entity_id?: string;
-  old_value: any;
-  new_value: any;
+  old_value: unknown;
+  new_value: unknown;
   change_reason?: string;
   change_source: string;
   changed_by: string;
@@ -85,27 +87,27 @@ class PlatformService {
   private async loadAuthToken(): Promise<void> {
     try {
       this.authToken = await tokenManager.getTokenWithRefresh();
-    } catch (error) {
-      console.log('No auth token found');
+    } catch (_error) {
+      logger.info('No auth token found');
     }
   }
 
   private async makeRequest(
-    endpoint: string, 
+    endpoint: string,
     method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'GET',
-    data?: any
-  ): Promise<any> {
+    data?: unknown
+  ): Promise<unknown> {
     try {
       const url = `${BASE_URL}${endpoint}`;
-      const headers: any = {
+      const headers: unknown = {
         'Content-Type': 'application/json',
       };
 
       // Always reload auth token for fresh requests
       await this.loadAuthToken();
-      
+
       if (this.authToken) {
-        headers['Authorization'] = `Bearer ${this.authToken}`;
+        headers.Authorization = `Bearer ${this.authToken}`;
       }
 
       const config: RequestInit = {
@@ -118,44 +120,47 @@ class PlatformService {
         config.body = JSON.stringify(data);
       }
 
-      console.log(`🌐 Making ${method} request to: ${url}`);
+      logger.info(`🌐 Making ${method} request to: ${url}`);
       if (data) {
-        console.log('📦 Request data:', JSON.stringify(data, null, 2));
+        logger.info('📦 Request data:', JSON.stringify(data, null, 2));
       }
 
       const response = await fetch(url, config);
-      
+
       if (!response.ok) {
         const errorText = await response.text();
-        console.error(`❌ HTTP ${response.status}: ${response.statusText}`);
-        console.error('❌ Error response:', errorText);
+        logger.error(`❌ HTTP ${response.status}: ${response.statusText}`);
+        logger.error('❌ Error response:', errorText);
         throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
       }
 
       const result = await response.json();
-      console.log('✅ API Response:', result);
+      logger.info('✅ API Response:', result);
       return result.data || result;
     } catch (error) {
-      console.error(`❌ API request failed for ${endpoint}:`, error);
+      logger.error(`❌ API request failed for ${endpoint}:`, error);
       throw error;
     }
   }
 
   // Platform Settings Management
-  async getPlatformSettings(category?: string, includeSensitive: boolean = false): Promise<PlatformSetting[]> {
+  async getPlatformSettings(
+    category?: string,
+    includeSensitive: boolean = false
+  ): Promise<PlatformSetting[]> {
     try {
       const params = new URLSearchParams();
       if (category) params.append('category', category);
       if (includeSensitive) params.append('include_sensitive', 'true');
-      
+
       const queryString = params.toString();
       const endpoint = `/platform/settings${queryString ? `?${queryString}` : ''}`;
-      
+
       const settingsData = await this.makeRequest(endpoint);
-      
+
       // Handle different API response formats
-      let settingsObject: Record<string, any>;
-      
+let settingsObject: Record<string, unknown>;
+
       if (settingsData && typeof settingsData === 'object') {
         // If it's already an object, use it directly
         settingsObject = settingsData;
@@ -163,7 +168,7 @@ class PlatformService {
         // If it's an array or other format, create an empty object
         settingsObject = {};
       }
-      
+
       // Convert object to array format for easier handling
       return Object.entries(settingsObject).map(([key, config]: [string, any]) => ({
         key,
@@ -174,7 +179,7 @@ class PlatformService {
         updated_at: config?.updated_at ?? null,
       }));
     } catch (error) {
-      console.error('❌ Failed to fetch platform settings:', error);
+      logger.error('❌ Failed to fetch platform settings:', error);
       // Return mock data for demo purposes
       return this.getMockPlatformSettings(category);
     }
@@ -192,14 +197,14 @@ class PlatformService {
         updated_at: settingData.updated_at,
       };
     } catch (error) {
-      console.error(`Failed to fetch setting ${configKey}:`, error);
+      logger.error(`Failed to fetch setting ${configKey}:`, error);
       return null;
     }
   }
 
   async updatePlatformSetting(
-    configKey: string, 
-    configValue: any, 
+    configKey: string,
+configValue: unknown,
     changeReason?: string
   ): Promise<boolean> {
     try {
@@ -209,13 +214,13 @@ class PlatformService {
       });
       return true;
     } catch (error) {
-      console.error(`Failed to update setting ${configKey}:`, error);
+      logger.error(`Failed to update setting ${configKey}:`, error);
       return false;
     }
   }
 
   async bulkUpdatePlatformSettings(
-    updates: Record<string, any>, 
+updates: Record<string, unknown>,
     changeReason?: string
   ): Promise<{ successful: number; failed: number; errors: Record<string, string> }> {
     try {
@@ -223,21 +228,21 @@ class PlatformService {
         updates,
         change_reason: changeReason,
       });
-      
+
       return {
         successful: result.successful_updates || 0,
         failed: result.failed_updates || 0,
         errors: result.errors || {},
       };
     } catch (error) {
-      console.error('❌ Failed to bulk update settings:', error);
-      
+      logger.error('❌ Failed to bulk update settings:', error);
+
       // If the bulk endpoint fails, try individual updates as fallback
-      console.log('🔄 Attempting individual updates as fallback...');
+      logger.info('🔄 Attempting individual updates as fallback...');
       let successful = 0;
       let failed = 0;
       const errors: Record<string, string> = {};
-      
+
       for (const [key, value] of Object.entries(updates)) {
         try {
           const success = await this.updatePlatformSetting(key, value, changeReason);
@@ -252,7 +257,7 @@ class PlatformService {
           errors[key] = error.message || 'Unknown error';
         }
       }
-      
+
       return { successful, failed, errors };
     }
   }
@@ -262,7 +267,7 @@ class PlatformService {
     try {
       return await this.makeRequest('/platform/payment-fees');
     } catch (error) {
-      console.error('Failed to fetch payment fees:', error);
+      logger.error('Failed to fetch payment fees:', error);
       // Return mock data for demo
       return this.getMockPaymentFees();
     }
@@ -286,7 +291,7 @@ class PlatformService {
         'POST'
       );
     } catch (error) {
-      console.error('Failed to calculate payment fee:', error);
+      logger.error('Failed to calculate payment fee:', error);
       // Return mock calculation
       return this.getMockFeeCalculation(paymentMethod, amount);
     }
@@ -298,7 +303,7 @@ class PlatformService {
       const params = restaurantId ? `?restaurant_id=${restaurantId}` : '';
       return await this.makeRequest(`/platform/feature-flags${params}`);
     } catch (error) {
-      console.error('Failed to fetch feature flags:', error);
+      logger.error('Failed to fetch feature flags:', error);
       return this.getMockFeatureFlags();
     }
   }
@@ -317,7 +322,7 @@ class PlatformService {
       });
       return true;
     } catch (error) {
-      console.error(`Failed to update feature flag ${featureKey}:`, error);
+      logger.error(`Failed to update feature flag ${featureKey}:`, error);
       return false;
     }
   }
@@ -333,7 +338,7 @@ class PlatformService {
         `/platform/restaurants/${restaurantId}/effective-settings${params}`
       );
     } catch (error) {
-      console.error('Failed to fetch restaurant effective settings:', error);
+      logger.error('Failed to fetch restaurant effective settings:', error);
       return {};
     }
   }
@@ -341,7 +346,7 @@ class PlatformService {
   async setRestaurantOverride(
     restaurantId: string,
     configKey: string,
-    overrideValue: any,
+    overrideValue: unknown,
     requiresApproval: boolean = false
   ): Promise<boolean> {
     try {
@@ -355,7 +360,7 @@ class PlatformService {
       );
       return true;
     } catch (error) {
-      console.error('Failed to set restaurant override:', error);
+      logger.error('Failed to set restaurant override:', error);
       return false;
     }
   }
@@ -374,7 +379,7 @@ class PlatformService {
       const result = await this.makeRequest(`/platform/audit-trail?${params.toString()}`);
       return result.audit_records || [];
     } catch (error) {
-      console.error('Failed to fetch audit trail:', error);
+      logger.error('Failed to fetch audit trail:', error);
       return [];
     }
   }
@@ -384,9 +389,9 @@ class PlatformService {
     restaurantId?: string,
     categories?: string[]
   ): Promise<{
-    platform_settings: Record<string, any>;
+    platform_settings: Record<string, unknown>;
     feature_flags: Record<string, boolean>;
-    effective_settings: Record<string, any>;
+    effective_settings: Record<string, unknown>;
     sync_timestamp: string;
   }> {
     try {
@@ -396,7 +401,7 @@ class PlatformService {
 
       return await this.makeRequest(`/platform/sync/platform-config?${params.toString()}`);
     } catch (error) {
-      console.error('Failed to sync platform config:', error);
+      logger.error('Failed to sync platform config:', error);
       return {
         platform_settings: {},
         feature_flags: {},
@@ -412,7 +417,7 @@ class PlatformService {
       await this.makeRequest('/platform/initialize-defaults', 'POST');
       return true;
     } catch (error) {
-      console.error('Failed to initialize default settings:', error);
+      logger.error('Failed to initialize default settings:', error);
       return false;
     }
   }
@@ -430,7 +435,7 @@ class PlatformService {
       },
       {
         key: 'payment.fees.stripe',
-        value: { percentage: 1.4, fixed_fee: 0.20, currency: 'GBP' },
+        value: { percentage: 1.4, fixed_fee: 0.2, currency: 'GBP' },
         category: 'payment_fees',
         description: 'Stripe payment processing fee',
         is_sensitive: false,
@@ -449,7 +454,7 @@ class PlatformService {
         value: {
           standard: { percentage: 1.95 },
           high_volume: { threshold: 2714, percentage: 0.95, monthly_fee: 39 },
-          currency: 'GBP'
+          currency: 'GBP',
         },
         category: 'payment_fees',
         description: 'SumUp payment processing fee',
@@ -490,23 +495,23 @@ class PlatformService {
       },
     ];
 
-    return category ? allSettings.filter(s => s.category === category) : allSettings;
+    return category ? allSettings.filter((s) => s.category === category) : allSettings;
   }
 
   private getMockPaymentFees(): Record<string, PaymentFee> {
     return {
       qr_code: { percentage: 1.2, currency: 'GBP' },
-      stripe: { percentage: 1.4, fixed_fee: 0.20, currency: 'GBP' },
-      square: { 
-        percentage: 1.75, 
+      stripe: { percentage: 1.4, fixed_fee: 0.2, currency: 'GBP' },
+      square: {
+        percentage: 1.75,
         currency: 'GBP',
         // Additional Square fee structures
-        high_volume: { threshold: 0, percentage: 1.75, monthly_fee: 0 } // No monthly fee
+        high_volume: { threshold: 0, percentage: 1.75, monthly_fee: 0 }, // No monthly fee
       },
       sumup: {
         percentage: 1.95,
         currency: 'GBP',
-        high_volume: { threshold: 2714, percentage: 0.95, monthly_fee: 39 }
+        high_volume: { threshold: 2714, percentage: 0.95, monthly_fee: 39 },
       },
     };
   }
@@ -514,13 +519,13 @@ class PlatformService {
   private getMockFeeCalculation(paymentMethod: string, amount: number): FeeCalculation {
     const fees = this.getMockPaymentFees();
     const feeConfig = fees[paymentMethod];
-    
+
     if (!feeConfig) {
       throw new Error(`Unknown payment method: ${paymentMethod}`);
     }
 
-    const platformFee = (amount * feeConfig.percentage / 100) + (feeConfig.fixed_fee || 0);
-    
+    const platformFee = (amount * feeConfig.percentage) / 100 + (feeConfig.fixed_fee || 0);
+
     return {
       payment_method: paymentMethod,
       amount,
@@ -539,10 +544,10 @@ class PlatformService {
     description: string;
   }> {
     try {
-      console.log('📊 Getting service charge config from real data store...');
+      logger.info('📊 Getting service charge config from real data store...');
       return await this.dataStore.getServiceChargeConfig();
     } catch (error) {
-      console.error('❌ Failed to get service charge config:', error);
+      logger.error('❌ Failed to get service charge config:', error);
       throw error;
     }
   }
@@ -553,8 +558,12 @@ class PlatformService {
     description?: string
   ): Promise<boolean> {
     try {
-      console.log('💾 Updating service charge config in real data store...', { enabled, rate, description });
-      
+      logger.info('💾 Updating service charge config in real data store...', {
+        enabled,
+        rate,
+        description,
+      });
+
       const config = {
         enabled,
         rate,
@@ -563,14 +572,13 @@ class PlatformService {
       };
 
       await this.dataStore.setServiceChargeConfig(config);
-      console.log('✅ Service charge config updated successfully');
+      logger.info('✅ Service charge config updated successfully');
       return true;
     } catch (error) {
-      console.error('❌ Failed to update service charge config:', error);
+      logger.error('❌ Failed to update service charge config:', error);
       return false;
     }
   }
-
 
   private getMockFeatureFlags(): Record<string, boolean> {
     return {

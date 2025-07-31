@@ -25,46 +25,46 @@ class MockAuthService {
   ];
 
   async signIn({ email, password }: { email: string; password: string }) {
-    console.log('🔐 Mock sign in for:', email);
-    
-    const mockUser = this.mockUsers.find(u => u.email === email && u.password === password);
-    
+    logger.info('🔐 Mock sign in for:', email);
+
+    const mockUser = this.mockUsers.find((u) => u.email === email && u.password === password);
+
     if (!mockUser) {
       throw new Error('Invalid credentials');
     }
-    
+
     // Generate mock session
     const mockSession = {
       access_token: `mock-jwt-${mockUser.user.id}-${Date.now()}`,
       refresh_token: `mock-refresh-${mockUser.user.id}`,
       expires_in: 3600,
-      user: mockUser.user
+      user: mockUser.user,
     };
-    
+
     // Store user info and session
     await AsyncStorage.setItem('userInfo', JSON.stringify(mockUser.user));
     await AsyncStorage.setItem('mock_session', JSON.stringify(mockSession));
     await AsyncStorage.setItem('auth_token', mockSession.access_token);
-    
-    console.log('✅ Mock sign in successful');
-    
+
+    logger.info('✅ Mock sign in successful');
+
     return {
       user: mockUser.user,
-      session: mockSession
+      session: mockSession,
     };
   }
-  
+
   async signOut() {
-    console.log('👋 Mock sign out');
+    logger.info('👋 Mock sign out');
     await AsyncStorage.multiRemove([
       'userInfo',
       'mock_session',
       'auth_token',
       '@auth_user',
-      '@auth_business'
+      '@auth_business',
     ]);
   }
-  
+
   async getSession() {
     const sessionStr = await AsyncStorage.getItem('mock_session');
     if (sessionStr) {
@@ -77,7 +77,7 @@ class MockAuthService {
     }
     return null;
   }
-  
+
   async getStoredUser() {
     const userInfo = await AsyncStorage.getItem('userInfo');
     if (userInfo) {
@@ -85,25 +85,25 @@ class MockAuthService {
     }
     return null;
   }
-  
+
   async refreshSession() {
     const session = await this.getSession();
     if (!session) {
       throw new Error('No session to refresh');
     }
-    
+
     // Extend expiration
     session.expires_at = new Date(Date.now() + 3600 * 1000).toISOString();
     await AsyncStorage.setItem('mock_session', JSON.stringify(session));
-    
+
     return session;
   }
-  
-  onAuthStateChange(callback: (event: string, session: any) => void) {
+
+onAuthStateChange(_callback: (event: string, session: unknown) => void) {
     // Mock implementation - just return unsubscribe function
     return {
       data: { subscription: null },
-      error: null
+      error: null,
     };
   }
 }

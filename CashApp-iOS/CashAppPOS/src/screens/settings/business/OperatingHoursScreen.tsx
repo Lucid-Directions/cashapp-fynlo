@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-  Modal,
-} from 'react-native';
+
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Alert, Modal } from 'react-native';
+
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { SettingsHeader, SettingsSection, SettingsCard, ToggleSwitch } from '../../../components/settings';
+
+import {
+  SettingsHeader,
+  SettingsSection,
+  SettingsCard,
+  ToggleSwitch,
+} from '../../../components/settings';
 import useSettingsStore from '../../../store/useSettingsStore';
 
 // Clover POS Color Scheme
@@ -55,7 +55,9 @@ const TimePickerModal: React.FC<TimePickerModalProps> = ({
   const minutes = [0, 15, 30, 45];
 
   const handleConfirm = () => {
-    const timeString = `${selectedHour.toString().padStart(2, '0')}:${selectedMinute.toString().padStart(2, '0')}`;
+    const timeString = `${selectedHour.toString().padStart(2, '0')}:${selectedMinute
+      .toString()
+      .padStart(2, '0')}`;
     onTimeSelect(timeString);
     onClose();
   };
@@ -129,7 +131,10 @@ const TimePickerModal: React.FC<TimePickerModalProps> = ({
             <TouchableOpacity style={styles.modalButton} onPress={onClose}>
               <Text style={styles.modalButtonTextSecondary}>Cancel</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.modalButton, styles.modalButtonPrimary]} onPress={handleConfirm}>
+            <TouchableOpacity
+              style={[styles.modalButton, styles.modalButtonPrimary]}
+              onPress={handleConfirm}
+            >
               <Text style={styles.modalButtonTextPrimary}>Confirm</Text>
             </TouchableOpacity>
           </View>
@@ -162,7 +167,7 @@ const OperatingHoursScreen: React.FC = () => {
   ];
 
   const handleDayToggle = (day: string, closed: boolean) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [day]: {
         ...prev[day as keyof typeof prev],
@@ -173,11 +178,13 @@ const OperatingHoursScreen: React.FC = () => {
   };
 
   const handleTimePress = (day: string, type: 'open' | 'close') => {
-    const dayData = formData[day as keyof typeof formData] as any;
+    const dayData = formData[day as keyof typeof formData] as { open: string; close: string; closed: boolean };
     setTimePickerConfig({
       day,
       type,
-      title: `${type === 'open' ? 'Opening' : 'Closing'} Time - ${daysOfWeek.find(d => d.key === day)?.label}`,
+      title: `${type === 'open' ? 'Opening' : 'Closing'} Time - ${
+        daysOfWeek.find((d) => d.key === day)?.label
+      }`,
       currentTime: dayData[type],
     });
     setTimePickerVisible(true);
@@ -185,7 +192,7 @@ const OperatingHoursScreen: React.FC = () => {
 
   const handleTimeSelect = (time: string) => {
     if (timePickerConfig) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         [timePickerConfig.day]: {
           ...prev[timePickerConfig.day as keyof typeof prev],
@@ -205,17 +212,17 @@ const OperatingHoursScreen: React.FC = () => {
   };
 
   const copyToAllDays = (sourceDay: string) => {
-    const sourceDayData = formData[sourceDay as keyof typeof formData] as any;
+    const sourceDayData = formData[sourceDay as keyof typeof formData] as { open: string; close: string; closed: boolean };
     Alert.alert(
       'Copy Hours',
-      `Copy ${daysOfWeek.find(d => d.key === sourceDay)?.label} hours to all other days?`,
+      `Copy ${daysOfWeek.find((d) => d.key === sourceDay)?.label} hours to all other days?`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Copy',
           onPress: () => {
             const updatedData = { ...formData };
-            daysOfWeek.forEach(day => {
+            daysOfWeek.forEach((day) => {
               if (day.key !== sourceDay) {
                 updatedData[day.key as keyof typeof updatedData] = {
                   ...sourceDayData,
@@ -234,41 +241,30 @@ const OperatingHoursScreen: React.FC = () => {
     try {
       updateOperatingHours(formData);
       setHasChanges(false);
-      Alert.alert(
-        'Success',
-        'Operating hours have been saved successfully.',
-        [{ text: 'OK' }]
-      );
-    } catch (error) {
-      Alert.alert(
-        'Error',
-        'Failed to save operating hours. Please try again.',
-        [{ text: 'OK' }]
-      );
+      Alert.alert('Success', 'Operating hours have been saved successfully.', [{ text: 'OK' }]);
+} catch (_error) {
+      Alert.alert('Error', 'Failed to save operating hours. Please try again.', [{ text: 'OK' }]);
     }
   };
 
   const handleReset = () => {
-    Alert.alert(
-      'Reset Changes',
-      'Are you sure you want to discard all unsaved changes?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Reset',
-          style: 'destructive',
-          onPress: () => {
-            setFormData(operatingHours);
-            setHasChanges(false);
-          },
+    Alert.alert('Reset Changes', 'Are you sure you want to discard all unsaved changes?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Reset',
+        style: 'destructive',
+        onPress: () => {
+          setFormData(operatingHours);
+          setHasChanges(false);
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const renderDayCard = (day: { key: string; label: string }) => {
-    const dayData = formData[day.key as keyof typeof formData] as any;
-    const isToday = new Date().toLocaleDateString('en', { weekday: 'long' }).toLowerCase() === day.key;
+    const dayData = formData[day.key as keyof typeof formData] as { open: string; close: string; closed: boolean };
+    const isToday =
+      new Date().toLocaleDateString('en', { weekday: 'long' }).toLowerCase() === day.key;
 
     return (
       <View key={day.key} style={[styles.dayCard, isToday && styles.todayCard]}>
@@ -279,7 +275,9 @@ const OperatingHoursScreen: React.FC = () => {
               {isToday && <Text style={styles.todayIndicator}> (Today)</Text>}
             </Text>
             <Text style={styles.dayStatus}>
-              {dayData.closed ? 'Closed' : `${formatTime(dayData.open)} - ${formatTime(dayData.close)}`}
+              {dayData.closed
+                ? 'Closed'
+                : `${formatTime(dayData.open)} - ${formatTime(dayData.close)}`}
             </Text>
           </View>
 
@@ -307,10 +305,7 @@ const OperatingHoursScreen: React.FC = () => {
               <Text style={styles.timeButtonText}>Close: {formatTime(dayData.close)}</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.copyButton}
-              onPress={() => copyToAllDays(day.key)}
-            >
+            <TouchableOpacity style={styles.copyButton} onPress={() => copyToAllDays(day.key)}>
               <Icon name="content-copy" size={16} color={Colors.secondary} />
               <Text style={styles.copyButtonText}>Copy to all</Text>
             </TouchableOpacity>
@@ -321,9 +316,7 @@ const OperatingHoursScreen: React.FC = () => {
   };
 
   const getOpenDaysCount = () => {
-    return daysOfWeek.filter(day => 
-      !formData[day.key as keyof typeof formData].closed
-    ).length;
+    return daysOfWeek.filter((day) => !formData[day.key as keyof typeof formData].closed).length;
   };
 
   return (
@@ -350,16 +343,32 @@ const OperatingHoursScreen: React.FC = () => {
               <Text style={styles.summaryTitle}>Open Days</Text>
               <Text style={styles.summaryValue}>{getOpenDaysCount()}/7</Text>
             </View>
-            
+
             <View style={styles.summaryCard}>
               <Icon name="today" size={32} color={Colors.secondary} />
               <Text style={styles.summaryTitle}>Today Status</Text>
-              <Text style={[
-                styles.summaryValue,
-                styles.statusText,
-                { color: formData[new Date().toLocaleDateString('en', { weekday: 'long' }).toLowerCase() as keyof typeof formData]?.closed ? Colors.danger : Colors.success }
-              ]}>
-                {formData[new Date().toLocaleDateString('en', { weekday: 'long' }).toLowerCase() as keyof typeof formData]?.closed ? 'Closed' : 'Open'}
+              <Text
+                style={[
+                  styles.summaryValue,
+                  styles.statusText,
+                  {
+                    color: formData[
+                      new Date()
+                        .toLocaleDateString('en', { weekday: 'long' })
+                        .toLowerCase() as keyof typeof formData
+                    ]?.closed
+                      ? Colors.danger
+                      : Colors.success,
+                  },
+                ]}
+              >
+                {formData[
+                  new Date()
+                    .toLocaleDateString('en', { weekday: 'long' })
+                    .toLowerCase() as keyof typeof formData
+                ]?.closed
+                  ? 'Closed'
+                  : 'Open'}
               </Text>
             </View>
           </View>
@@ -370,16 +379,11 @@ const OperatingHoursScreen: React.FC = () => {
           title="Weekly Schedule"
           subtitle="Set opening and closing times for each day"
         >
-          <View style={styles.scheduleContainer}>
-            {daysOfWeek.map(renderDayCard)}
-          </View>
+          <View style={styles.scheduleContainer}>{daysOfWeek.map(renderDayCard)}</View>
         </SettingsSection>
 
         {/* Quick Actions */}
-        <SettingsSection
-          title="Quick Actions"
-          subtitle="Common schedule adjustments"
-        >
+        <SettingsSection title="Quick Actions" subtitle="Common schedule adjustments">
           <SettingsCard
             title="Open All Days"
             description="Set all days to open with standard hours"
@@ -388,7 +392,7 @@ const OperatingHoursScreen: React.FC = () => {
             onPress={() => {
               const standardHours = { open: '09:00', close: '22:00', closed: false };
               const updatedData = { ...formData };
-              daysOfWeek.forEach(day => {
+              daysOfWeek.forEach((day) => {
                 updatedData[day.key as keyof typeof updatedData] = standardHours;
               });
               setFormData(updatedData);
@@ -426,7 +430,7 @@ const OperatingHoursScreen: React.FC = () => {
             onPress={() => {
               const restaurantHours = { open: '09:00', close: '23:00', closed: false };
               const updatedData = { ...formData };
-              daysOfWeek.forEach(day => {
+              daysOfWeek.forEach((day) => {
                 updatedData[day.key as keyof typeof updatedData] = restaurantHours;
               });
               setFormData(updatedData);
@@ -447,10 +451,7 @@ const OperatingHoursScreen: React.FC = () => {
           </TouchableOpacity>
 
           {hasChanges && (
-            <TouchableOpacity
-              style={[styles.button, styles.resetButton]}
-              onPress={handleReset}
-            >
+            <TouchableOpacity style={[styles.button, styles.resetButton]} onPress={handleReset}>
               <Icon name="refresh" size={20} color={Colors.danger} />
               <Text style={styles.resetButtonText}>Reset</Text>
             </TouchableOpacity>

@@ -43,10 +43,10 @@ class EmailReceiptService {
       });
       return res.ok;
     } catch (err) {
-      console.error('EmailReceiptService.sendReceipt', err);
+      logger.error('EmailReceiptService.sendReceipt', err);
       return false;
     }
   }
 }
 
-export default EmailReceiptService.getInstance(); 
+export default EmailReceiptService.getInstance();

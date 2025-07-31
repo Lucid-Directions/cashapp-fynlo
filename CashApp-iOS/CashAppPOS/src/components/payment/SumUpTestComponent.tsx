@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
+
 import { View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+
 import { SumUpProvider, useSumUp } from 'sumup-react-native-alpha';
+
 import sumUpConfigService from '../../services/SumUpConfigService';
 
 interface SumUpTestProps {
@@ -9,14 +12,14 @@ interface SumUpTestProps {
 
 const SumUpTestInner: React.FC<SumUpTestProps> = ({ onResult }) => {
   const sumUpHooks = useSumUp();
-  
+
   useEffect(() => {
-    console.log('🧪 SumUp Test - Hooks available:', {
+    logger.info('🧪 SumUp Test - Hooks available:', {
       hasHooks: !!sumUpHooks,
       initPaymentSheet: typeof sumUpHooks?.initPaymentSheet,
       presentPaymentSheet: typeof sumUpHooks?.presentPaymentSheet,
     });
-    
+
     if (sumUpHooks?.initPaymentSheet && sumUpHooks?.presentPaymentSheet) {
       onResult('✅ SumUp hooks are available and working');
     } else {
@@ -31,18 +34,18 @@ const SumUpTestInner: React.FC<SumUpTestProps> = ({ onResult }) => {
         return;
       }
 
-      console.log('🧪 Testing SumUp initialization...');
-      
+      logger.info('🧪 Testing SumUp initialization...');
+
       const result = await sumUpHooks.initPaymentSheet({
-        amount: 1.00,
+        amount: 1.0,
         currencyCode: 'GBP',
         tipAmount: 0,
         title: 'Test Payment',
         skipScreenOptions: false,
       });
 
-      console.log('🧪 SumUp init result:', result);
-      
+      logger.info('🧪 SumUp init result:', result);
+
       if (result.error) {
         Alert.alert('SumUp Init Failed', result.error.message);
         onResult(`❌ Init failed: ${result.error.message}`);
@@ -51,7 +54,7 @@ const SumUpTestInner: React.FC<SumUpTestProps> = ({ onResult }) => {
         onResult('✅ SumUp initialization successful');
       }
     } catch (error) {
-      console.error('🧪 SumUp test error:', error);
+      logger.error('🧪 SumUp test error:', error);
       Alert.alert('Test Error', error?.toString() || 'Unknown error');
       onResult(`❌ Test error: ${error}`);
     }
@@ -60,35 +63,38 @@ const SumUpTestInner: React.FC<SumUpTestProps> = ({ onResult }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>SumUp SDK Test</Text>
-      
+
       <TouchableOpacity style={styles.testButton} onPress={testSumUpInit}>
         <Text style={styles.buttonText}>Test SumUp Initialization</Text>
       </TouchableOpacity>
-      
+
       <Text style={styles.info}>
-        This will test if SumUp SDK is properly configured without actually presenting the payment sheet.
+        This will test if SumUp SDK is properly configured without actually presenting the payment
+        sheet.
       </Text>
     </View>
   );
 };
 
 const SumUpTestComponent: React.FC<SumUpTestProps> = (props) => {
-  const [sumUpConfig, setSumUpConfig] = useState<{ appId: string; environment: string } | null>(null);
+  const [sumUpConfig, setSumUpConfig] = useState<{ appId: string; environment: string } | null>(
+    null
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        console.log('🔄 Fetching SumUp configuration for test component...');
+        logger.info('🔄 Fetching SumUp configuration for test component...');
         const config = await sumUpConfigService.fetchConfiguration();
         setSumUpConfig({
           appId: config.appId,
-          environment: config.environment
+          environment: config.environment,
         });
         setIsLoading(false);
       } catch (err) {
-        console.error('❌ Failed to fetch SumUp configuration:', err);
+        logger.error('❌ Failed to fetch SumUp configuration:', err);
         setError(err?.message || 'Failed to load configuration');
         setIsLoading(false);
         props.onResult('❌ Failed to load SumUp configuration');
@@ -118,7 +124,7 @@ const SumUpTestComponent: React.FC<SumUpTestProps> = (props) => {
 
   return (
     <SumUpProvider
-      affiliateKey=""  // Empty string as the SDK requires this prop but we don't use it
+      affiliateKey="" // Empty string as the SDK requires this prop but we don't use it
       sumUpAppId={sumUpConfig.appId}
     >
       <SumUpTestInner {...props} />

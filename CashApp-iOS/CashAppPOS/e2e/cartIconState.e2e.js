@@ -3,7 +3,7 @@
 // Assuming helper functions like loginAsTestUser and addItemToCart are globally available
 // or can be imported from a common helper file.
 // For example:
-// const { loginAsTestUser, addItemToCart, clearCart } = require('./helpers'); // Adjust path as needed
+// import { loginAsTestUser, addItemToCart, clearCart } from './helpers'; // Adjust path as needed
 
 describe('Cart Icon State', () => {
   beforeAll(async () => {
@@ -47,7 +47,9 @@ describe('Cart Icon State', () => {
     if (typeof addItemToCart === 'function') {
       await addItemToCart(testItemName);
     } else {
-      console.warn(`addItemToCart helper not found. Cannot add item: ${testItemName}. Test assertion for item addition will likely fail.`);
+      console.warn(
+        `addItemToCart helper not found. Cannot add item: ${testItemName}. Test assertion for item addition will likely fail.`
+      );
       // As a fallback, manually navigate and add an item if possible:
       // await element(by.text('Some Category')).tap();
       // await element(by.text(testItemName)).multiTap(1); // or single tap if one adds

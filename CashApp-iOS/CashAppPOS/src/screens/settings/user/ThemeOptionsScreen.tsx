@@ -1,19 +1,15 @@
 import React, { useState } from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-  ScrollView,
-  Switch,
-} from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Switch } from 'react-native';
+
 import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import ThemeSwitcher, { ThemeToggle } from '../../../components/theme/ThemeSwitcher';
 import { useTheme } from '../../../design-system/ThemeProvider';
 
 // Clover POS Color Scheme
-const Colors = {
+const _Colors = {
   primary: '#00A651',
   secondary: '#0066CC',
   success: '#00A651',
@@ -32,7 +28,7 @@ const Colors = {
 const ThemeOptionsScreen: React.FC = () => {
   const navigation = useNavigation();
   const { theme, themeMode, isDark } = useTheme();
-  
+
   // Display preferences
   const [highContrast, setHighContrast] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
@@ -67,13 +63,11 @@ const ThemeOptionsScreen: React.FC = () => {
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Color Theme Selection */}
         <View style={[styles.section, { backgroundColor: theme.colors.white }]}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
-            Color Theme
-          </Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Color Theme</Text>
           <Text style={[styles.sectionDescription, { color: theme.colors.neutral[600] }]}>
             Choose your preferred color scheme for the app interface.
           </Text>
-          
+
           <View style={styles.themeContainer}>
             <ThemeSwitcher variant="colors" showLabels={true} />
           </View>
@@ -81,13 +75,11 @@ const ThemeOptionsScreen: React.FC = () => {
 
         {/* Theme Mode Selection */}
         <View style={[styles.section, { backgroundColor: theme.colors.white }]}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
-            Brightness Mode
-          </Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Brightness Mode</Text>
           <Text style={[styles.sectionDescription, { color: theme.colors.neutral[600] }]}>
             Choose how the app appears. Auto mode follows your device settings.
           </Text>
-          
+
           <View style={styles.themeContainer}>
             <ThemeSwitcher variant="expanded" showLabels={true} />
           </View>
@@ -95,14 +87,10 @@ const ThemeOptionsScreen: React.FC = () => {
 
         {/* Quick Theme Toggle */}
         <View style={[styles.section, { backgroundColor: theme.colors.white }]}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
-            Quick Toggle
-          </Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Quick Toggle</Text>
           <View style={styles.quickToggleContainer}>
             <View style={styles.quickToggleInfo}>
-              <Text style={[styles.settingLabel, { color: theme.colors.text }]}>
-                Dark Mode
-              </Text>
+              <Text style={[styles.settingLabel, { color: theme.colors.text }]}>Dark Mode</Text>
               <Text style={[styles.settingDescription, { color: theme.colors.neutral[600] }]}>
                 Toggle between light and dark themes
               </Text>
@@ -116,7 +104,7 @@ const ThemeOptionsScreen: React.FC = () => {
           <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
             Display Preferences
           </Text>
-          
+
           <View style={styles.settingsCard}>
             <View style={styles.settingRow}>
               <View style={styles.settingInfo}>
@@ -137,9 +125,7 @@ const ThemeOptionsScreen: React.FC = () => {
 
             <View style={styles.settingRow}>
               <View style={styles.settingInfo}>
-                <Text style={[styles.settingLabel, { color: theme.colors.text }]}>
-                  Large Text
-                </Text>
+                <Text style={[styles.settingLabel, { color: theme.colors.text }]}>Large Text</Text>
                 <Text style={[styles.settingDescription, { color: theme.colors.neutral[600] }]}>
                   Use larger font sizes throughout the app
                 </Text>
@@ -191,46 +177,42 @@ const ThemeOptionsScreen: React.FC = () => {
 
         {/* Screen Timeout */}
         <View style={[styles.section, { backgroundColor: theme.colors.white }]}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
-            Screen Timeout
-          </Text>
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Screen Timeout</Text>
           <Text style={[styles.sectionDescription, { color: theme.colors.neutral[600] }]}>
             Automatically turn off the screen after inactivity
           </Text>
-          
+
           <View style={styles.timeoutOptions}>
-            {displayOptions.map(option => (
+            {displayOptions.map((option) => (
               <TouchableOpacity
                 key={option.id}
                 style={[
                   styles.timeoutOption,
                   {
-                    backgroundColor: screenTimeout === option.id 
-                      ? theme.colors.primary + '20' 
-                      : theme.colors.neutral[50],
-                    borderColor: screenTimeout === option.id 
-                      ? theme.colors.primary 
-                      : theme.colors.neutral[200],
-                  }
+                    backgroundColor:
+                      screenTimeout === option.id
+                        ? theme.colors.primary + '20'
+                        : theme.colors.neutral[50],
+                    borderColor:
+                      screenTimeout === option.id
+                        ? theme.colors.primary
+                        : theme.colors.neutral[200],
+                  },
                 ]}
                 onPress={() => handleScreenTimeoutChange(option.id)}
               >
-                <Text style={[
-                  styles.timeoutOptionText,
-                  {
-                    color: screenTimeout === option.id 
-                      ? theme.colors.primary 
-                      : theme.colors.text
-                  }
-                ]}>
+                <Text
+                  style={[
+                    styles.timeoutOptionText,
+                    {
+                      color: screenTimeout === option.id ? theme.colors.primary : theme.colors.text,
+                    },
+                  ]}
+                >
                   {option.label}
                 </Text>
                 {screenTimeout === option.id && (
-                  <Icon 
-                    name="check-circle" 
-                    size={20} 
-                    color={theme.colors.primary} 
-                  />
+                  <Icon name="check-circle" size={20} color={theme.colors.primary} />
                 )}
               </TouchableOpacity>
             ))}
@@ -242,7 +224,7 @@ const ThemeOptionsScreen: React.FC = () => {
           <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
             Current Theme Preview
           </Text>
-          
+
           <View style={styles.previewContainer}>
             <View style={[styles.previewCard, { backgroundColor: theme.colors.neutral[50] }]}>
               <View style={[styles.previewHeader, { backgroundColor: theme.colors.primary }]}>
@@ -263,11 +245,16 @@ const ThemeOptionsScreen: React.FC = () => {
                       Primary
                     </Text>
                   </View>
-                  <View style={[styles.previewButton, { 
-                    backgroundColor: 'transparent',
-                    borderWidth: 1,
-                    borderColor: theme.colors.primary,
-                  }]}>
+                  <View
+                    style={[
+                      styles.previewButton,
+                      {
+                        backgroundColor: 'transparent',
+                        borderWidth: 1,
+                        borderColor: theme.colors.primary,
+                      },
+                    ]}
+                  >
                     <Text style={[styles.previewButtonText, { color: theme.colors.primary }]}>
                       Secondary
                     </Text>
@@ -280,10 +267,8 @@ const ThemeOptionsScreen: React.FC = () => {
 
         {/* Theme Information */}
         <View style={[styles.section, { backgroundColor: theme.colors.white }]}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
-            Theme Information
-          </Text>
-          
+          <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Theme Information</Text>
+
           <View style={styles.infoCard}>
             <View style={styles.infoRow}>
               <Text style={[styles.infoLabel, { color: theme.colors.neutral[600] }]}>

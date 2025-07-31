@@ -2,6 +2,8 @@
  * Simple test to verify Jest setup is working
  */
 
+import { View, Text, TouchableOpacity } from 'react-native';
+
 import { render, fireEvent } from '@testing-library/react-native';
 
 describe('Jest Setup Verification', () => {
@@ -10,7 +12,6 @@ describe('Jest Setup Verification', () => {
   });
 
   it('should have React Native components available', () => {
-    const { View, Text, TouchableOpacity } = require('react-native');
     expect(View).toBeDefined();
     expect(Text).toBeDefined();
     expect(TouchableOpacity).toBeDefined();

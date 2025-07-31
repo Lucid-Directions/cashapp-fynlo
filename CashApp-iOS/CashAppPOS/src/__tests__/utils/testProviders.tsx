@@ -1,8 +1,11 @@
-// @ts-nocheck
+// // @ts-nocheck
 import React from 'react';
+
 import { NavigationContainer } from '@react-navigation/native';
+import { render } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { render, RenderOptions } from '@testing-library/react-native';
+
+import type { RenderOptions } from '@testing-library/react-native';
 
 // Lazy-import stores to avoid circular deps in Jest
 const appStoreModule = jest.requireActual('../../store/useAppStore');
@@ -57,8 +60,8 @@ export const createTestWrapper = ({ appState = {}, uiState = {} }: StoreOverride
 
 export const customRenderWithStores = (
   ui: React.ReactElement,
-  { appState, uiState, ...options }: StoreOverrides & RenderOptions = {},
+  { appState, uiState, ...options }: StoreOverrides & RenderOptions = {}
 ) => {
   const Wrapper = createTestWrapper({ appState, uiState });
   return render(ui, { wrapper: Wrapper, ...options });
-}; 
+};

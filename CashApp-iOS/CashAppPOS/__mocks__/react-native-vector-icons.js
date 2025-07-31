@@ -3,12 +3,15 @@ import React from 'react';
 const mockComponent = (name) => {
   return React.forwardRef((props, ref) => {
     const { testID, ...otherProps } = props;
-    return React.createElement('Text', {
-      ...otherProps,
-      ref,
-      testID: testID || `mock-${name}`,
-      children: name,
-    });
+    return React.createElement(
+      'Text',
+      {
+        ...otherProps,
+        ref,
+        testID: testID || `mock-${name}`,
+      },
+      name
+    );
   });
 };
 

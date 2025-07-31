@@ -35,7 +35,7 @@ class CustomersService {
       this.baseUrl = cfg?.backend?.baseUrl ?? null;
       this.apiKey = cfg?.backend?.apiKey ?? null;
     } catch (err) {
-      console.warn('CustomersService: failed loading config', err);
+      logger.warn('CustomersService: failed loading config', err);
     }
   }
 
@@ -53,7 +53,7 @@ class CustomersService {
         body: JSON.stringify(payload),
       });
     } catch (err) {
-      console.error('CustomersService.saveCustomer error', err);
+      logger.error('CustomersService.saveCustomer error', err);
     }
   }
 
@@ -61,17 +61,20 @@ class CustomersService {
     try {
       await this.ensureConfig();
       if (!this.baseUrl || !this.apiKey) return [];
-      const res = await fetch(`${this.baseUrl}/api/v1/customers?query=${encodeURIComponent(query)}`, {
-        headers: { Authorization: `Bearer ${this.apiKey}` },
-      });
+      const res = await fetch(
+        `${this.baseUrl}/api/v1/customers?query=${encodeURIComponent(query)}`,
+        {
+          headers: { Authorization: `Bearer ${this.apiKey}` },
+        }
+      );
       if (!res.ok) return [];
       const json = await res.json();
       return json.items ?? [];
     } catch (err) {
-      console.error('CustomersService.search error', err);
+      logger.error('CustomersService.search error', err);
       return [];
     }
   }
 }
 
-export default CustomersService.getInstance(); 
+export default CustomersService.getInstance();

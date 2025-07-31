@@ -1,5 +1,8 @@
 import React, { useMemo, useCallback, memo } from 'react';
-import { FlatList, FlatListProps, ViewToken } from 'react-native';
+
+import type { FlatListProps, ViewToken } from 'react-native';
+import { FlatList } from 'react-native';
+
 import { performanceUtils } from '../../hooks/usePerformanceMonitor';
 
 interface OptimizedFlatListProps<T> extends Omit<FlatListProps<T>, 'renderItem' | 'keyExtractor'> {
@@ -22,7 +25,6 @@ function OptimizedFlatList<T>({
   onViewableItemsChanged,
   ...flatListProps
 }: OptimizedFlatListProps<T>) {
-  
   // Chunk data for better performance with large lists
   const chunkedData = useMemo(() => {
     if (!enableChunking || data.length <= chunkSize) {
@@ -52,18 +54,23 @@ function OptimizedFlatList<T>({
   );
 
   // Viewability config for performance tracking
-  const viewabilityConfig = useMemo(() => ({
-    itemVisiblePercentThreshold: 50,
-    minimumViewTime: 100,
-  }), []);
+  const viewabilityConfig = useMemo(
+    () => ({
+      itemVisiblePercentThreshold: 50,
+      minimumViewTime: 100,
+    }),
+    []
+  );
 
   // Enhanced viewability change handler
   const handleViewableItemsChanged = useCallback(
     ({ viewableItems, changed }: { viewableItems: ViewToken[]; changed: ViewToken[] }) => {
       if (enableViewabilityTracking && __DEV__) {
-        console.log(`[OptimizedFlatList] Viewable items: ${viewableItems.length}, Changed: ${changed.length}`);
+        logger.info(
+          `[OptimizedFlatList] Viewable items: ${viewableItems.length}, Changed: ${changed.length}`
+        );
       }
-      
+
       if (onViewableItemsChanged) {
         onViewableItemsChanged(viewableItems, changed);
       }
@@ -104,12 +111,12 @@ export default memo(OptimizedFlatList) as <T>(
 // Higher-order component for adding performance monitoring to any FlatList
 export function withPerformanceMonitoring<T>(
   Component: React.ComponentType<FlatListProps<T>>,
-  componentName: string = 'FlatList'
+  _componentName: string = 'FlatList'
 ) {
   return memo((props: FlatListProps<T>) => {
     const enhancedOnScroll = useMemo(() => {
       if (!props.onScroll) return undefined;
-      
+
       return performanceUtils.throttle(props.onScroll, 16);
     }, [props.onScroll]);
 
@@ -146,15 +153,14 @@ export function OptimizedGrid<T>({
   itemHeight,
   spacing = 8,
 }: OptimizedGridProps<T>) {
-  
   // Calculate item layout for better performance
   const getItemLayout = useCallback(
-    (_: any, index: number) => {
+    (_: unknown, index: number) => {
       if (!itemHeight) return undefined;
-      
+
       const rowIndex = Math.floor(index / numColumns);
       const totalHeight = itemHeight + spacing;
-      
+
       return {
         length: totalHeight,
         offset: totalHeight * rowIndex,

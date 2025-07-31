@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+
 import { View, StyleSheet, Animated, Dimensions } from 'react-native';
 
 // Clover POS Color Scheme
@@ -15,7 +16,7 @@ interface SkeletonLoaderProps {
   width?: number | string;
   height?: number;
   borderRadius?: number;
-  style?: any;
+  style?: unknown;
 }
 
 const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({

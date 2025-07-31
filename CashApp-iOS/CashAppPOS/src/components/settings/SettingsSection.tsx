@@ -1,10 +1,7 @@
 import React from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  ViewStyle,
-} from 'react-native';
+
+import type { ViewStyle } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 // Clover POS Color Scheme
 const Colors = {
@@ -44,18 +41,12 @@ const SettingsSection: React.FC<SettingsSectionProps> = ({
     <View style={[styles.wrapper, style]}>
       {(title || subtitle) && (
         <View style={[styles.header, headerStyle]}>
-          {title && (
-            <Text style={styles.title}>{title}</Text>
-          )}
-          {subtitle && (
-            <Text style={styles.subtitle}>{subtitle}</Text>
-          )}
+          {title && <Text style={styles.title}>{title}</Text>}
+          {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
         </View>
       )}
-      
-      <View style={[styles.container, containerStyle]}>
-        {children}
-      </View>
+
+      <View style={[styles.container, containerStyle]}>{children}</View>
     </View>
   );
 };

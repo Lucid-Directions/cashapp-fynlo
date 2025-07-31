@@ -1,12 +1,9 @@
 import React from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  ScrollView,
-  TouchableOpacity,
-} from 'react-native';
+
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
+
 import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { SettingsHeader, SettingsSection } from '../../../components/settings';
 
 // Clover POS Color Scheme
@@ -70,28 +67,30 @@ const PaymentMethodsInfoScreen: React.FC = () => {
     },
   ];
 
-  const renderPaymentMethod = (method: any) => (
+  const renderPaymentMethod = (method: unknown) => (
     <View key={method.id} style={styles.methodCard}>
       <View style={styles.methodHeader}>
-        <Icon 
-          name={method.icon} 
-          size={32} 
-          color={method.enabled ? method.iconColor : Colors.lightGray} 
+        <Icon
+          name={method.icon}
+          size={32}
+          color={method.enabled ? method.iconColor : Colors.lightGray}
         />
         <View style={styles.methodInfo}>
           <Text style={styles.methodName}>{method.name}</Text>
           <Text style={styles.methodDescription}>{method.description}</Text>
         </View>
         <View style={styles.statusContainer}>
-          <Icon 
-            name={method.enabled ? 'check-circle' : 'radio-button-unchecked'} 
-            size={24} 
-            color={method.enabled ? Colors.success : Colors.lightGray} 
+          <Icon
+            name={method.enabled ? 'check-circle' : 'radio-button-unchecked'}
+            size={24}
+            color={method.enabled ? Colors.success : Colors.lightGray}
           />
-          <Text style={[
-            styles.statusText,
-            { color: method.enabled ? Colors.success : Colors.lightGray }
-          ]}>
+          <Text
+            style={[
+              styles.statusText,
+              { color: method.enabled ? Colors.success : Colors.lightGray },
+            ]}
+          >
             {method.enabled ? 'Enabled' : 'Disabled'}
           </Text>
         </View>
@@ -101,10 +100,7 @@ const PaymentMethodsInfoScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <SettingsHeader
-        title="Payment Methods"
-        subtitle="Platform-managed payment configuration"
-      />
+      <SettingsHeader title="Payment Methods" subtitle="Platform-managed payment configuration" />
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Platform Control Notice */}
@@ -117,7 +113,7 @@ const PaymentMethodsInfoScreen: React.FC = () => {
               <Icon name="lock" size={48} color={Colors.primary} />
               <Text style={styles.noticeTitle}>Platform Controlled</Text>
               <Text style={styles.noticeText}>
-                Payment methods and processing fees are managed centrally by the platform owner. 
+                Payment methods and processing fees are managed centrally by the platform owner.
                 This ensures consistent rates and compliance across all restaurants.
               </Text>
             </View>
@@ -182,7 +178,7 @@ const PaymentMethodsInfoScreen: React.FC = () => {
               <Icon name="support" size={24} color={Colors.white} />
               <Text style={styles.supportButtonText}>Contact Platform Support</Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity style={[styles.supportButton, styles.secondaryButton]}>
               <Icon name="help-outline" size={24} color={Colors.primary} />
               <Text style={[styles.supportButtonText, styles.secondaryButtonText]}>

@@ -1,4 +1,4 @@
-// @ts-nocheck
+// // @ts-nocheck
 import fetchMock from 'jest-fetch-mock';
 
 describe('Backend Health Endpoint', () => {
@@ -16,4 +16,4 @@ describe('Backend Health Endpoint', () => {
     expect(json).toHaveProperty('data');
     expect(json.data).toHaveProperty('status', 'healthy');
   });
-}); 
+});

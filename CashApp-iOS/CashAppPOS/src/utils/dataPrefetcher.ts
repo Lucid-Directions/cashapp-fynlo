@@ -5,15 +5,15 @@ import DataService from '../services/DataService';
 // Placeholder for queryClient if not fully set up yet.
 // In a real scenario, this would be imported from a React Query setup.
 const queryClient = {
-  prefetchQuery: async (queryKey: any, queryFn: any) => {
-    console.log(`[dataPrefetcher] Attempting to prefetch ${queryKey.join('/')}`);
+  prefetchQuery: async (queryKey: unknown, queryFn: unknown) => {
+    logger.info(`[dataPrefetcher] Attempting to prefetch ${queryKey.join('/')}`);
     try {
       await queryFn();
-      console.log(`[dataPrefetcher] Successfully prefetched ${queryKey.join('/')}`);
+      logger.info(`[dataPrefetcher] Successfully prefetched ${queryKey.join('/')}`);
     } catch (error) {
-      console.error(`[dataPrefetcher] Error prefetching ${queryKey.join('/')}:`, error);
+      logger.error(`[dataPrefetcher] Error prefetching ${queryKey.join('/')}:`, error);
     }
-  }
+  },
 };
 
 export async function prefetchInitialData() {
@@ -32,10 +32,12 @@ export async function prefetchInitialData() {
 
 // It's also common to prefetch user-specific data after login.
 export async function prefetchUserData() {
-  const dataService = DataService.getInstance();
+  const _dataService = DataService.getInstance();
   // Example:
   // await queryClient.prefetchQuery(['userOrders'], () => dataService.getRecentOrders(5));
-  console.log('[dataPrefetcher] prefetchUserData called (currently no specific user data to prefetch here).');
+  logger.info(
+    '[dataPrefetcher] prefetchUserData called (currently no specific user data to prefetch here).'
+  );
 }
 
 /**

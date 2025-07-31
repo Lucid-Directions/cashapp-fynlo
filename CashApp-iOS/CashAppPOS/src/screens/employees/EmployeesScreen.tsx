@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+
 import {
   StyleSheet,
   Text,
@@ -13,18 +14,21 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import { CalendarClock } from 'lucide-react-native';
+
 import { useNavigation } from '@react-navigation/native';
+import { CalendarClock } from 'lucide-react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
 // import { generateEmployees, EmployeeData } from '../../utils/mockDataGenerator'; // Removed
 import Colors from '../../constants/Colors';
-import DataService from '../../services/DataService'; // Added
-import { EmployeeData } from '../../types'; // Updated import path
 import { useTheme } from '../../design-system/ThemeProvider';
+import DataService from '../../services/DataService'; // Added
+
+import type { EmployeeData } from '../../types'; // Updated import path
 
 const EmployeesScreen: React.FC = () => {
   const navigation = useNavigation();
-  const { theme } = useTheme();
+  const { _theme } = useTheme();
   const [employees, setEmployees] = useState<EmployeeData[]>([]);
   const [filteredEmployees, setFilteredEmployees] = useState<EmployeeData[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -33,7 +37,7 @@ const EmployeesScreen: React.FC = () => {
   const [selectedEmployee, setSelectedEmployee] = useState<EmployeeData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true); // Added
   const [error, setError] = useState<string | null>(null); // Added
-  
+
   // Add Employee Form State
   const [newEmployee, setNewEmployee] = useState({
     name: '',
@@ -57,7 +61,8 @@ const EmployeesScreen: React.FC = () => {
     }
   }, [employees, searchQuery, selectedRole, isLoading, error]);
 
-  const loadEmployees = async () => { // Modified
+  const loadEmployees = async () => {
+    // Modified
     setIsLoading(true);
     setError(null);
     try {
@@ -65,7 +70,7 @@ const EmployeesScreen: React.FC = () => {
       // Assuming a getEmployees method will be added to DataService
       const employeeData = await dataService.getEmployees();
       setEmployees(employeeData || []);
-    } catch (e: any) {
+    } catch (e: unknown) {
       setError(e.message || 'Failed to load employees.');
       setEmployees([]); // Clear employees on error
     } finally {
@@ -78,15 +83,16 @@ const EmployeesScreen: React.FC = () => {
 
     // Apply role filter
     if (selectedRole !== 'all') {
-      filtered = filtered.filter(employee => employee.role === selectedRole);
+      filtered = filtered.filter((employee) => employee.role === selectedRole);
     }
 
     // Apply search query
     if (searchQuery) {
-      filtered = filtered.filter(employee =>
-        employee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        employee.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        employee.role.toLowerCase().includes(searchQuery.toLowerCase())
+      filtered = filtered.filter(
+        (employee) =>
+          employee.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          employee.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          employee.role.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
@@ -95,11 +101,16 @@ const EmployeesScreen: React.FC = () => {
 
   const getRoleColor = (role: string) => {
     switch (role) {
-      case 'Manager': return Colors.primary;
-      case 'Cashier': return Colors.secondary;
-      case 'Server': return Colors.warning;
-      case 'Cook': return Colors.danger;
-      default: return Colors.darkGray;
+      case 'Manager':
+        return Colors.primary;
+      case 'Cashier':
+        return Colors.secondary;
+      case 'Server':
+        return Colors.warning;
+      case 'Cook':
+        return Colors.danger;
+      default:
+        return Colors.darkGray;
     }
   };
 
@@ -137,8 +148,8 @@ const EmployeesScreen: React.FC = () => {
     }
 
     // Check if email already exists
-    const emailExists = employees.some(emp => 
-      emp.email.toLowerCase() === newEmployee.email.trim().toLowerCase()
+    const emailExists = employees.some(
+      (emp) => emp.email.toLowerCase() === newEmployee.email.trim().toLowerCase()
     );
     if (emailExists) {
       Alert.alert('Error', 'An employee with this email already exists');
@@ -163,7 +174,7 @@ const EmployeesScreen: React.FC = () => {
         email: newEmployee.email.trim(),
         phone: newEmployee.phone.trim() || undefined,
         role: newEmployee.role.toLowerCase(), // API expects lowercase roles
-        hourlyRate: parseFloat(newEmployee.hourlyRate) || 12.00,
+        hourlyRate: parseFloat(newEmployee.hourlyRate) || 12.0,
         startDate: new Date().toISOString(),
       });
 
@@ -173,9 +184,13 @@ const EmployeesScreen: React.FC = () => {
         name: `${createdEmployee.first_name} ${createdEmployee.last_name}`,
         email: createdEmployee.email,
         phone: createdEmployee.phone || `+44 ${Math.floor(Math.random() * 900000000) + 100000000}`,
-        role: (createdEmployee.role.charAt(0).toUpperCase() + createdEmployee.role.slice(1)) as 'Manager' | 'Cashier' | 'Server' | 'Cook',
+        role: (createdEmployee.role.charAt(0).toUpperCase() + createdEmployee.role.slice(1)) as
+          | 'Manager'
+          | 'Cashier'
+          | 'Server'
+          | 'Cook',
         hireDate: new Date(createdEmployee.start_date || createdEmployee.created_at),
-        hourlyRate: createdEmployee.hourly_rate || 12.00,
+        hourlyRate: createdEmployee.hourly_rate || 12.0,
         totalSales: 0,
         averageSalesPerDay: 0,
         performanceScore: 85 + Math.random() * 10, // Initial score between 85-95
@@ -187,7 +202,7 @@ const EmployeesScreen: React.FC = () => {
 
       // Add to local state
       setEmployees([...employees, employeeData]);
-      
+
       // Reset form
       setNewEmployee({
         name: '',
@@ -196,17 +211,19 @@ const EmployeesScreen: React.FC = () => {
         role: 'Cashier',
         hourlyRate: '12.00',
       });
-      
+
       // Show success message
-      Alert.alert('Success', `${employeeData.name} has been added to your team and saved to the system!`);
-      
-    } catch (error: any) {
-      console.error('Failed to create employee:', error);
       Alert.alert(
-        'Error', 
+        'Success',
+        `${employeeData.name} has been added to your team and saved to the system!`
+      );
+} catch (error: unknown) {
+      logger.error('Failed to create employee:', error);
+      Alert.alert(
+        'Error',
         error.message || 'Failed to add employee. Please check your connection and try again.'
       );
-      
+
       // Reopen modal on error
       setShowAddModal(true);
     } finally {
@@ -242,23 +259,19 @@ const EmployeesScreen: React.FC = () => {
               // Close modal first
               setSelectedEmployee(null);
               setIsLoading(true);
-              
+
               // Delete from backend
               const dataService = DataService.getInstance();
               await dataService.deleteEmployee(employee.id);
-              
+
               // Remove from local state
-              setEmployees(employees.filter(emp => emp.id !== employee.id));
-              
+              setEmployees(employees.filter((emp) => emp.id !== employee.id));
+
               // Show success message
               Alert.alert('Success', `${employee.name} has been removed from your team.`);
-              
-            } catch (error: any) {
-              console.error('Failed to delete employee:', error);
-              Alert.alert(
-                'Error',
-                error.message || 'Failed to delete employee. Please try again.'
-              );
+} catch (error: unknown) {
+              logger.error('Failed to delete employee:', error);
+              Alert.alert('Error', error.message || 'Failed to delete employee. Please try again.');
               // Reopen modal on error
               setSelectedEmployee(employee);
             } finally {
@@ -272,7 +285,7 @@ const EmployeesScreen: React.FC = () => {
   };
 
   const renderEmployee = ({ item }: { item: EmployeeData }) => (
-    <TouchableOpacity 
+    <TouchableOpacity
       style={styles.employeeCard}
       onPress={() => handleEmployeePress(item)}
       activeOpacity={0.7}
@@ -284,9 +297,7 @@ const EmployeesScreen: React.FC = () => {
         <View style={styles.employeeInfo}>
           <Text style={styles.employeeName}>{item.name}</Text>
           <View style={[styles.roleBadge, { backgroundColor: `${getRoleColor(item.role)}20` }]}>
-            <Text style={[styles.roleText, { color: getRoleColor(item.role) }]}>
-              {item.role}
-            </Text>
+            <Text style={[styles.roleText, { color: getRoleColor(item.role) }]}>{item.role}</Text>
           </View>
           <Text style={styles.employeeEmail}>{item.email}</Text>
         </View>
@@ -319,9 +330,12 @@ const EmployeesScreen: React.FC = () => {
 
   const stats = {
     total: employees.length,
-    active: employees.filter(e => e.actualHours >= e.scheduledHours * 0.9).length,
-    managers: employees.filter(e => e.role === 'Manager').length,
-    avgPerformance: employees.length > 0 ? employees.reduce((sum, e) => sum + e.performanceScore, 0) / employees.length : 0,
+    active: employees.filter((e) => e.actualHours >= e.scheduledHours * 0.9).length,
+    managers: employees.filter((e) => e.role === 'Manager').length,
+    avgPerformance:
+      employees.length > 0
+        ? employees.reduce((sum, e) => sum + e.performanceScore, 0) / employees.length
+        : 0,
   };
 
   if (isLoading) {
@@ -360,35 +374,32 @@ const EmployeesScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor={Colors.primary} barStyle="light-content" />
-      
+
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
           activeOpacity={0.7}
         >
           <Icon name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>
-        
+
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle}>Employees</Text>
           <Text style={styles.headerSubtitle}>{filteredEmployees.length} staff members</Text>
         </View>
-        
+
         <View style={styles.headerActions}>
           <TouchableOpacity
             style={styles.scheduleButton}
             onPress={() => navigation.navigate('EmployeeSchedule')}
           >
-  <CalendarClock size={28} color={Colors.primary} />
-  <Text style={styles.scheduleLabel}>Schedule</Text>
+            <CalendarClock size={28} color={Colors.primary} />
+            <Text style={styles.scheduleLabel}>Schedule</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.addButton}
-            onPress={() => setShowAddModal(true)}
-          >
+          <TouchableOpacity style={styles.addButton} onPress={() => setShowAddModal(true)}>
             <Icon name="add" size={24} color={Colors.white} />
           </TouchableOpacity>
         </View>
@@ -429,24 +440,19 @@ const EmployeesScreen: React.FC = () => {
           />
         </View>
 
-        <ScrollView 
-          horizontal 
-          showsHorizontalScrollIndicator={false}
-          style={styles.roleFilters}
-        >
-          {['all', 'Manager', 'Cashier', 'Server', 'Cook'].map(role => (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.roleFilters}>
+          {['all', 'Manager', 'Cashier', 'Server', 'Cook'].map((role) => (
             <TouchableOpacity
               key={role}
-              style={[
-                styles.roleFilter,
-                selectedRole === role && styles.roleFilterActive
-              ]}
+              style={[styles.roleFilter, selectedRole === role && styles.roleFilterActive]}
               onPress={() => setSelectedRole(role)}
             >
-              <Text style={[
-                styles.roleFilterText,
-                selectedRole === role && styles.roleFilterTextActive
-              ]}>
+              <Text
+                style={[
+                  styles.roleFilterText,
+                  selectedRole === role && styles.roleFilterTextActive,
+                ]}
+              >
                 {role === 'all' ? 'All Roles' : role}
               </Text>
             </TouchableOpacity>
@@ -458,7 +464,7 @@ const EmployeesScreen: React.FC = () => {
       <FlatList
         data={filteredEmployees}
         renderItem={renderEmployee}
-        keyExtractor={item => item.id.toString()}
+        keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={styles.employeesList}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={renderEmptyListComponent}
@@ -481,7 +487,7 @@ const EmployeesScreen: React.FC = () => {
                 <Icon name="close" size={24} color={Colors.text} />
               </TouchableOpacity>
             </View>
-            
+
             {selectedEmployee && (
               <ScrollView style={styles.modalContent}>
                 <View style={styles.employeeProfile}>
@@ -489,8 +495,18 @@ const EmployeesScreen: React.FC = () => {
                     <Icon name="account-circle" size={80} color={Colors.primary} />
                   </View>
                   <Text style={styles.profileName}>{selectedEmployee.name}</Text>
-                  <View style={[styles.profileRole, { backgroundColor: `${getRoleColor(selectedEmployee.role)}20` }]}>
-                    <Text style={[styles.profileRoleText, { color: getRoleColor(selectedEmployee.role) }]}>
+                  <View
+                    style={[
+                      styles.profileRole,
+                      { backgroundColor: `${getRoleColor(selectedEmployee.role)}20` },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.profileRoleText,
+                        { color: getRoleColor(selectedEmployee.role) },
+                      ]}
+                    >
                       {selectedEmployee.role}
                     </Text>
                   </View>
@@ -518,7 +534,9 @@ const EmployeesScreen: React.FC = () => {
                   </View>
                   <View style={styles.detailRow}>
                     <Icon name="attach-money" size={20} color={Colors.darkGray} />
-                    <Text style={styles.detailText}>£{selectedEmployee.hourlyRate.toFixed(2)} per hour</Text>
+                    <Text style={styles.detailText}>
+                      £{selectedEmployee.hourlyRate.toFixed(2)} per hour
+                    </Text>
                   </View>
                 </View>
 
@@ -526,21 +544,35 @@ const EmployeesScreen: React.FC = () => {
                   <Text style={styles.sectionTitle}>Performance Metrics</Text>
                   <View style={styles.performanceGrid}>
                     <View style={styles.performanceCard}>
-                      <Text style={styles.performanceValue}>£{selectedEmployee.totalSales.toFixed(0)}</Text>
+                      <Text style={styles.performanceValue}>
+                        £{selectedEmployee.totalSales.toFixed(0)}
+                      </Text>
                       <Text style={styles.performanceLabel}>Total Sales</Text>
                     </View>
                     <View style={styles.performanceCard}>
-                      <Text style={styles.performanceValue}>£{selectedEmployee.averageSalesPerDay.toFixed(0)}</Text>
+                      <Text style={styles.performanceValue}>
+                        £{selectedEmployee.averageSalesPerDay.toFixed(0)}
+                      </Text>
                       <Text style={styles.performanceLabel}>Daily Avg</Text>
                     </View>
                     <View style={styles.performanceCard}>
-                      <Text style={[styles.performanceValue, { color: getPerformanceColor(selectedEmployee.performanceScore) }]}>
+                      <Text
+                        style={[
+                          styles.performanceValue,
+                          { color: getPerformanceColor(selectedEmployee.performanceScore) },
+                        ]}
+                      >
                         {selectedEmployee.performanceScore.toFixed(1)}%
                       </Text>
                       <Text style={styles.performanceLabel}>Performance</Text>
                     </View>
                     <View style={styles.performanceCard}>
-                      <Text style={[styles.performanceValue, { color: getPerformanceColor(selectedEmployee.punctualityScore) }]}>
+                      <Text
+                        style={[
+                          styles.performanceValue,
+                          { color: getPerformanceColor(selectedEmployee.punctualityScore) },
+                        ]}
+                      >
                         {selectedEmployee.punctualityScore.toFixed(1)}%
                       </Text>
                       <Text style={styles.performanceLabel}>Punctuality</Text>
@@ -557,7 +589,7 @@ const EmployeesScreen: React.FC = () => {
                     <Icon name="schedule" size={20} color={Colors.white} />
                     <Text style={styles.actionButtonText}>Schedule</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity 
+                  <TouchableOpacity
                     style={[styles.actionButton, styles.deleteButton]}
                     onPress={() => handleDeleteEmployee(selectedEmployee)}
                   >
@@ -586,7 +618,7 @@ const EmployeesScreen: React.FC = () => {
                 <Icon name="close" size={24} color={Colors.text} />
               </TouchableOpacity>
             </View>
-            
+
             <ScrollView style={styles.addEmployeeForm}>
               <View style={styles.formGroup}>
                 <Text style={styles.formLabel}>Full Name *</Text>
@@ -594,7 +626,7 @@ const EmployeesScreen: React.FC = () => {
                   style={styles.formInput}
                   placeholder="Enter employee's full name"
                   value={newEmployee.name}
-                  onChangeText={(text) => setNewEmployee({...newEmployee, name: text})}
+                  onChangeText={(text) => setNewEmployee({ ...newEmployee, name: text })}
                   placeholderTextColor={Colors.darkGray}
                 />
               </View>
@@ -605,7 +637,7 @@ const EmployeesScreen: React.FC = () => {
                   style={styles.formInput}
                   placeholder="employee@restaurant.com"
                   value={newEmployee.email}
-                  onChangeText={(text) => setNewEmployee({...newEmployee, email: text})}
+                  onChangeText={(text) => setNewEmployee({ ...newEmployee, email: text })}
                   keyboardType="email-address"
                   autoCapitalize="none"
                   placeholderTextColor={Colors.darkGray}
@@ -618,7 +650,7 @@ const EmployeesScreen: React.FC = () => {
                   style={styles.formInput}
                   placeholder="+44 7700 900123"
                   value={newEmployee.phone}
-                  onChangeText={(text) => setNewEmployee({...newEmployee, phone: text})}
+                  onChangeText={(text) => setNewEmployee({ ...newEmployee, phone: text })}
                   keyboardType="phone-pad"
                   placeholderTextColor={Colors.darkGray}
                 />
@@ -627,19 +659,21 @@ const EmployeesScreen: React.FC = () => {
               <View style={styles.formGroup}>
                 <Text style={styles.formLabel}>Role</Text>
                 <View style={styles.roleSelector}>
-                  {['Manager', 'Cashier', 'Server', 'Cook'].map(role => (
+                  {['Manager', 'Cashier', 'Server', 'Cook'].map((role) => (
                     <TouchableOpacity
                       key={role}
                       style={[
                         styles.roleOption,
-                        newEmployee.role === role && styles.roleOptionSelected
+                        newEmployee.role === role && styles.roleOptionSelected,
                       ]}
-                      onPress={() => setNewEmployee({...newEmployee, role})}
+                      onPress={() => setNewEmployee({ ...newEmployee, role })}
                     >
-                      <Text style={[
-                        styles.roleOptionText,
-                        newEmployee.role === role && styles.roleOptionTextSelected
-                      ]}>
+                      <Text
+                        style={[
+                          styles.roleOptionText,
+                          newEmployee.role === role && styles.roleOptionTextSelected,
+                        ]}
+                      >
                         {role}
                       </Text>
                     </TouchableOpacity>
@@ -656,7 +690,7 @@ const EmployeesScreen: React.FC = () => {
                   onChangeText={(text) => {
                     // Only allow numbers and decimal point
                     const cleanText = text.replace(/[^0-9.]/g, '');
-                    setNewEmployee({...newEmployee, hourlyRate: cleanText});
+                    setNewEmployee({ ...newEmployee, hourlyRate: cleanText });
                   }}
                   keyboardType="decimal-pad"
                   placeholderTextColor={Colors.darkGray}
@@ -664,14 +698,14 @@ const EmployeesScreen: React.FC = () => {
               </View>
 
               <View style={styles.formActions}>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={[styles.formButton, styles.cancelButton]}
                   onPress={handleCancelAdd}
                 >
                   <Text style={styles.cancelButtonText}>Cancel</Text>
                 </TouchableOpacity>
-                
-                <TouchableOpacity 
+
+                <TouchableOpacity
                   style={[styles.formButton, styles.addButton]}
                   onPress={handleAddEmployee}
                 >
@@ -732,9 +766,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 12, // Increased padding
-    paddingVertical: 8,    // Increased padding
-    minHeight: 44,         // Ensure min tap target height
-    minWidth: 44,          // Ensure min tap target width
+    paddingVertical: 8, // Increased padding
+    minHeight: 44, // Ensure min tap target height
+    minWidth: 44, // Ensure min tap target width
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     borderRadius: 8, // Slightly larger radius
   },
@@ -749,8 +783,8 @@ const styles = StyleSheet.create({
     color: Colors.white,
     fontSize: 14,
     fontWeight: '600', // Semibold
-    marginLeft: 8,     // Space between icon and text
-    numberOfLines: 1,  // Ensure text ellipsizes if too long
+    marginLeft: 8, // Space between icon and text
+    numberOfLines: 1, // Ensure text ellipsizes if too long
   },
   addButton: {
     padding: 8,
@@ -1124,24 +1158,28 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginLeft: 8,
   },
-  centered: { // Added
+  centered: {
+    // Added
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  loadingText: { // Added
+  loadingText: {
+    // Added
     marginTop: 10,
     fontSize: 16,
     color: Colors.darkGray,
   },
-  retryButton: { // Added
+  retryButton: {
+    // Added
     marginTop: 20,
     backgroundColor: Colors.primary,
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 8,
   },
-  retryButtonText: { // Added
+  retryButtonText: {
+    // Added
     color: Colors.white,
     fontSize: 16,
     fontWeight: '600',

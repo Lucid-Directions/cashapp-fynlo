@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+
 import {
   StyleSheet,
   Text,
@@ -10,8 +11,9 @@ import {
   TextInput,
   Modal,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 // Clover POS Color Scheme
 const Colors = {
@@ -50,14 +52,14 @@ interface PricingRule {
   id: string;
   name: string;
   type: 'bulk_discount' | 'happy_hour' | 'loyalty_tier';
-  conditions: any;
+  conditions: unknown;
   discountValue: number;
   isActive: boolean;
 }
 
 const PricingDiscountsScreen: React.FC = () => {
   const navigation = useNavigation();
-  
+
   const [discounts, setDiscounts] = useState<Discount[]>([
     {
       id: 'disc1',
@@ -92,7 +94,11 @@ const PricingDiscountsScreen: React.FC = () => {
       id: 'rule1',
       name: 'Happy Hour',
       type: 'happy_hour',
-      conditions: { startTime: '15:00', endTime: '17:00', days: ['Monday', 'Tuesday', 'Wednesday'] },
+      conditions: {
+        startTime: '15:00',
+        endTime: '17:00',
+        days: ['Monday', 'Tuesday', 'Wednesday'],
+      },
       discountValue: 20,
       isActive: true,
     },
@@ -155,16 +161,14 @@ const PricingDiscountsScreen: React.FC = () => {
 
     if (editingDiscount.id) {
       // Update existing discount
-      setDiscounts(prev => prev.map(d => 
-        d.id === editingDiscount.id ? editingDiscount : d
-      ));
+      setDiscounts((prev) => prev.map((d) => (d.id === editingDiscount.id ? editingDiscount : d)));
     } else {
       // Add new discount
       const newDiscount = {
         ...editingDiscount,
-        id: Date.now().toString()
+        id: Date.now().toString(),
       };
-      setDiscounts(prev => [...prev, newDiscount]);
+      setDiscounts((prev) => [...prev, newDiscount]);
     }
 
     setShowDiscountModal(false);
@@ -172,39 +176,37 @@ const PricingDiscountsScreen: React.FC = () => {
   };
 
   const handleDeleteDiscount = (discountId: string) => {
-    const discount = discounts.find(d => d.id === discountId);
-    Alert.alert(
-      'Delete Discount',
-      `Delete "${discount?.name}"?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', style: 'destructive', onPress: () => {
-          setDiscounts(prev => prev.filter(d => d.id !== discountId));
-        }}
-      ]
-    );
+    const discount = discounts.find((d) => d.id === discountId);
+    Alert.alert('Delete Discount', `Delete "${discount?.name}"?`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () => {
+          setDiscounts((prev) => prev.filter((d) => d.id !== discountId));
+        },
+      },
+    ]);
   };
 
   const toggleDiscountStatus = (discountId: string) => {
-    setDiscounts(prev => prev.map(discount => 
-      discount.id === discountId 
-        ? { ...discount, isActive: !discount.isActive }
-        : discount
-    ));
+    setDiscounts((prev) =>
+      prev.map((discount) =>
+        discount.id === discountId ? { ...discount, isActive: !discount.isActive } : discount
+      )
+    );
   };
 
   const togglePricingRule = (ruleId: string) => {
-    setPricingRules(prev => prev.map(rule => 
-      rule.id === ruleId 
-        ? { ...rule, isActive: !rule.isActive }
-        : rule
-    ));
+    setPricingRules((prev) =>
+      prev.map((rule) => (rule.id === ruleId ? { ...rule, isActive: !rule.isActive } : rule))
+    );
   };
 
   const toggleDiscountSetting = (setting: keyof typeof discountSettings) => {
-    setDiscountSettings(prev => ({
+    setDiscountSettings((prev) => ({
       ...prev,
-      [setting]: !prev[setting]
+      [setting]: !prev[setting],
     }));
   };
 
@@ -244,23 +246,22 @@ const PricingDiscountsScreen: React.FC = () => {
   };
 
   const DiscountCard = ({ discount }: { discount: Discount }) => (
-    <View style={[
-      styles.discountCard,
-      !discount.isActive && styles.inactiveCard,
-      isDiscountExpired(discount) && styles.expiredCard
-    ]}>
+    <View
+      style={[
+        styles.discountCard,
+        !discount.isActive && styles.inactiveCard,
+        isDiscountExpired(discount) && styles.expiredCard,
+      ]}
+    >
       <View style={styles.discountHeader}>
         <View style={styles.discountInfo}>
           <View style={styles.discountTitleRow}>
-            <Icon 
-              name={getDiscountTypeIcon(discount.type)} 
-              size={20} 
-              color={isDiscountActive(discount) ? Colors.primary : Colors.mediumGray} 
+            <Icon
+              name={getDiscountTypeIcon(discount.type)}
+              size={20}
+              color={isDiscountActive(discount) ? Colors.primary : Colors.mediumGray}
             />
-            <Text style={[
-              styles.discountName,
-              !isDiscountActive(discount) && styles.inactiveText
-            ]}>
+            <Text style={[styles.discountName, !isDiscountActive(discount) && styles.inactiveText]}>
               {discount.name}
             </Text>
             {isDiscountExpired(discount) && (
@@ -269,14 +270,13 @@ const PricingDiscountsScreen: React.FC = () => {
               </View>
             )}
           </View>
-          
-          <Text style={[
-            styles.discountDescription,
-            !isDiscountActive(discount) && styles.inactiveText
-          ]}>
+
+          <Text
+            style={[styles.discountDescription, !isDiscountActive(discount) && styles.inactiveText]}
+          >
             {discount.description}
           </Text>
-          
+
           <View style={styles.discountDetails}>
             <Text style={styles.discountValue}>{formatDiscountValue(discount)}</Text>
             {discount.minimumAmount && (
@@ -288,14 +288,15 @@ const PricingDiscountsScreen: React.FC = () => {
 
           <View style={styles.discountStats}>
             <Text style={styles.discountStat}>
-              Used: {discount.timesUsed}{discount.maxUses ? `/${discount.maxUses}` : ''}
+              Used: {discount.timesUsed}
+              {discount.maxUses ? `/${discount.maxUses}` : ''}
             </Text>
             <Text style={styles.discountStat}>
               Valid until: {discount.validTo.toLocaleDateString()}
             </Text>
           </View>
         </View>
-        
+
         <View style={styles.discountActions}>
           <Switch
             value={discount.isActive}
@@ -315,7 +316,7 @@ const PricingDiscountsScreen: React.FC = () => {
           <Icon name="edit" size={16} color={Colors.secondary} />
           <Text style={styles.discountButtonText}>Edit</Text>
         </TouchableOpacity>
-        
+
         <TouchableOpacity
           style={[styles.discountButton, styles.deleteButton]}
           onPress={() => handleDeleteDiscount(discount.id)}
@@ -323,7 +324,7 @@ const PricingDiscountsScreen: React.FC = () => {
           <Icon name="delete" size={16} color={Colors.danger} />
           <Text style={[styles.discountButtonText, styles.deleteButtonText]}>Delete</Text>
         </TouchableOpacity>
-        
+
         <TouchableOpacity
           style={styles.discountButton}
           onPress={() => Alert.alert('Analytics', `View analytics for ${discount.name}`)}
@@ -339,13 +340,11 @@ const PricingDiscountsScreen: React.FC = () => {
     <View style={[styles.ruleCard, !rule.isActive && styles.inactiveCard]}>
       <View style={styles.ruleHeader}>
         <View style={styles.ruleInfo}>
-          <Text style={[styles.ruleName, !rule.isActive && styles.inactiveText]}>
-            {rule.name}
-          </Text>
+          <Text style={[styles.ruleName, !rule.isActive && styles.inactiveText]}>{rule.name}</Text>
           <Text style={styles.ruleType}>{rule.type.replace('_', ' ').toUpperCase()}</Text>
           <Text style={styles.ruleDiscount}>{rule.discountValue}% discount</Text>
         </View>
-        
+
         <Switch
           value={rule.isActive}
           onValueChange={() => togglePricingRule(rule.id)}
@@ -375,7 +374,7 @@ const PricingDiscountsScreen: React.FC = () => {
           <Text style={styles.sectionTitle}>Overview</Text>
           <View style={styles.statsContainer}>
             <View style={styles.statCard}>
-              <Text style={styles.statValue}>{discounts.filter(d => d.isActive).length}</Text>
+              <Text style={styles.statValue}>{discounts.filter((d) => d.isActive).length}</Text>
               <Text style={styles.statLabel}>Active Discounts</Text>
             </View>
             <View style={styles.statCard}>
@@ -385,7 +384,7 @@ const PricingDiscountsScreen: React.FC = () => {
               <Text style={styles.statLabel}>Total Uses</Text>
             </View>
             <View style={styles.statCard}>
-              <Text style={styles.statValue}>{pricingRules.filter(r => r.isActive).length}</Text>
+              <Text style={styles.statValue}>{pricingRules.filter((r) => r.isActive).length}</Text>
               <Text style={styles.statLabel}>Active Rules</Text>
             </View>
           </View>
@@ -400,8 +399,8 @@ const PricingDiscountsScreen: React.FC = () => {
               <Text style={styles.createButtonText}>Create</Text>
             </TouchableOpacity>
           </View>
-          
-          {discounts.map(discount => (
+
+          {discounts.map((discount) => (
             <DiscountCard key={discount.id} discount={discount} />
           ))}
 
@@ -419,7 +418,7 @@ const PricingDiscountsScreen: React.FC = () => {
         {/* Pricing Rules */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Pricing Rules</Text>
-          {pricingRules.map(rule => (
+          {pricingRules.map((rule) => (
             <PricingRuleCard key={rule.id} rule={rule} />
           ))}
         </View>
@@ -446,9 +445,7 @@ const PricingDiscountsScreen: React.FC = () => {
             <View style={styles.settingRow}>
               <View style={styles.settingInfo}>
                 <Text style={styles.settingLabel}>Require manager approval</Text>
-                <Text style={styles.settingDescription}>
-                  Manager must approve large discounts
-                </Text>
+                <Text style={styles.settingDescription}>Manager must approve large discounts</Text>
               </View>
               <Switch
                 value={discountSettings.requireManagerApproval}
@@ -494,7 +491,7 @@ const PricingDiscountsScreen: React.FC = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Actions</Text>
           <View style={styles.actionCard}>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.actionButton}
               onPress={() => Alert.alert('Info', 'Import discounts from file')}
             >
@@ -503,7 +500,7 @@ const PricingDiscountsScreen: React.FC = () => {
               <Icon name="chevron-right" size={24} color={Colors.lightText} />
             </TouchableOpacity>
 
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.actionButton}
               onPress={() => Alert.alert('Info', 'Export current discounts')}
             >
@@ -512,7 +509,7 @@ const PricingDiscountsScreen: React.FC = () => {
               <Icon name="chevron-right" size={24} color={Colors.lightText} />
             </TouchableOpacity>
 
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.actionButton}
               onPress={() => Alert.alert('Info', 'View discount analytics')}
             >
@@ -547,7 +544,9 @@ const PricingDiscountsScreen: React.FC = () => {
               <TextInput
                 style={styles.textInput}
                 value={editingDiscount?.name || ''}
-                onChangeText={(text) => setEditingDiscount(prev => prev ? { ...prev, name: text } : null)}
+                onChangeText={(text) =>
+                  setEditingDiscount((prev) => (prev ? { ...prev, name: text } : null))
+                }
                 placeholder="Enter discount name"
               />
 
@@ -555,7 +554,9 @@ const PricingDiscountsScreen: React.FC = () => {
               <TextInput
                 style={[styles.textInput, styles.textArea]}
                 value={editingDiscount?.description || ''}
-                onChangeText={(text) => setEditingDiscount(prev => prev ? { ...prev, description: text } : null)}
+                onChangeText={(text) =>
+                  setEditingDiscount((prev) => (prev ? { ...prev, description: text } : null))
+                }
                 placeholder="Enter discount description"
                 multiline
                 numberOfLines={3}
@@ -565,7 +566,11 @@ const PricingDiscountsScreen: React.FC = () => {
               <TextInput
                 style={styles.textInput}
                 value={editingDiscount?.value?.toString() || ''}
-                onChangeText={(text) => setEditingDiscount(prev => prev ? { ...prev, value: parseFloat(text) || 0 } : null)}
+                onChangeText={(text) =>
+                  setEditingDiscount((prev) =>
+                    prev ? { ...prev, value: parseFloat(text) || 0 } : null
+                  )
+                }
                 placeholder={editingDiscount?.type === 'percentage' ? '10' : '5.00'}
                 keyboardType="decimal-pad"
               />
@@ -573,12 +578,16 @@ const PricingDiscountsScreen: React.FC = () => {
               <View style={styles.checkboxRow}>
                 <TouchableOpacity
                   style={styles.checkbox}
-                  onPress={() => setEditingDiscount(prev => prev ? { ...prev, isActive: !prev.isActive } : null)}
+                  onPress={() =>
+                    setEditingDiscount((prev) =>
+                      prev ? { ...prev, isActive: !prev.isActive } : null
+                    )
+                  }
                 >
-                  <Icon 
-                    name={editingDiscount?.isActive ? "check-box" : "check-box-outline-blank"} 
-                    size={24} 
-                    color={Colors.primary} 
+                  <Icon
+                    name={editingDiscount?.isActive ? 'check-box' : 'check-box-outline-blank'}
+                    size={24}
+                    color={Colors.primary}
                   />
                   <Text style={styles.checkboxLabel}>Active</Text>
                 </TouchableOpacity>
@@ -586,8 +595,8 @@ const PricingDiscountsScreen: React.FC = () => {
             </ScrollView>
 
             <View style={styles.modalActions}>
-              <TouchableOpacity 
-                style={styles.cancelButton} 
+              <TouchableOpacity
+                style={styles.cancelButton}
                 onPress={() => setShowDiscountModal(false)}
               >
                 <Text style={styles.cancelButtonText}>Cancel</Text>

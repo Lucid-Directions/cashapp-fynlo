@@ -2,11 +2,12 @@
  * Tests for EnhancedWebSocketService
  */
 
-import { EnhancedWebSocketService } from '../EnhancedWebSocketService';
-import { WebSocketEvent } from '../../../types/websocket';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
+
+import { WebSocketEvent } from '../../../types/websocket';
 import tokenManager from '../../../utils/enhancedTokenManager';
+import { EnhancedWebSocketService } from '../EnhancedWebSocketService';
 
 // Mock dependencies
 jest.mock('@react-native-async-storage/async-storage');
@@ -14,8 +15,8 @@ jest.mock('@react-native-community/netinfo');
 jest.mock('../../../utils/enhancedTokenManager');
 jest.mock('../../../config/api', () => ({
   default: {
-    BASE_URL: 'https://api.test.com'
-  }
+    BASE_URL: 'https://api.test.com',
+  },
 }));
 
 // Mock WebSocket
@@ -26,10 +27,10 @@ class MockWebSocket {
   static CLOSED = 3;
 
   readyState = MockWebSocket.CONNECTING;
-  onopen: ((event: any) => void) | null = null;
-  onclose: ((event: any) => void) | null = null;
-  onerror: ((event: any) => void) | null = null;
-  onmessage: ((event: any) => void) | null = null;
+  onopen: ((event: unknown) => void) | null = null;
+  onclose: ((event: unknown) => void) | null = null;
+  onerror: ((event: unknown) => void) | null = null;
+  onmessage: ((event: unknown) => void) | null = null;
 
   constructor(public url: string) {
     // Simulate connection
@@ -39,7 +40,7 @@ class MockWebSocket {
     }, 10);
   }
 
-  send(data: string) {
+  send(_data: string) {
     // Mock send
   }
 
@@ -49,7 +50,7 @@ class MockWebSocket {
   }
 }
 
-// @ts-ignore
+// @ts-expect-error
 global.WebSocket = MockWebSocket;
 
 describe('EnhancedWebSocketService', () => {
@@ -65,7 +66,7 @@ describe('EnhancedWebSocketService', () => {
       JSON.stringify({
         id: 'user123',
         restaurant_id: 'restaurant123',
-        email: 'test@test.com'
+        email: 'test@test.com',
       })
     );
 
@@ -136,8 +137,8 @@ describe('EnhancedWebSocketService', () => {
       ws.onmessage?.({
         data: JSON.stringify({
           type: WebSocketEvent.AUTHENTICATED,
-          data: {}
-        })
+          data: {},
+        }),
       });
 
       expect(service.getState()).toBe('CONNECTED');
@@ -155,8 +156,8 @@ describe('EnhancedWebSocketService', () => {
       ws.onmessage?.({
         data: JSON.stringify({
           type: WebSocketEvent.AUTH_ERROR,
-          data: { error: 'Invalid token' }
-        })
+          data: { error: 'Invalid token' },
+        }),
       });
 
       expect(tokenManager.forceRefresh).toHaveBeenCalled();
@@ -175,8 +176,8 @@ describe('EnhancedWebSocketService', () => {
       ws.onmessage?.({
         data: JSON.stringify({
           type: WebSocketEvent.AUTHENTICATED,
-          data: {}
-        })
+          data: {},
+        }),
       });
 
       // Clear previous calls
@@ -198,8 +199,8 @@ describe('EnhancedWebSocketService', () => {
       ws.onmessage?.({
         data: JSON.stringify({
           type: WebSocketEvent.AUTHENTICATED,
-          data: {}
-        })
+          data: {},
+        }),
       });
 
       // Send ping
@@ -209,8 +210,8 @@ describe('EnhancedWebSocketService', () => {
       ws.onmessage?.({
         data: JSON.stringify({
           type: WebSocketEvent.PONG,
-          data: {}
-        })
+          data: {},
+        }),
       });
 
       // Verify missed pongs is reset
@@ -226,14 +227,14 @@ describe('EnhancedWebSocketService', () => {
       ws.onmessage?.({
         data: JSON.stringify({
           type: WebSocketEvent.AUTHENTICATED,
-          data: {}
-        })
+          data: {},
+        }),
       });
 
       // Miss 3 pongs
       for (let i = 0; i < 3; i++) {
         jest.advanceTimersByTime(15000); // Send ping
-        jest.advanceTimersByTime(5000);  // Wait for pong timeout
+        jest.advanceTimersByTime(5000); // Wait for pong timeout
       }
 
       expect(service.getState()).toBe('RECONNECTING');
@@ -292,7 +293,7 @@ describe('EnhancedWebSocketService', () => {
     it('should queue messages when disconnected', () => {
       service.send({
         type: WebSocketEvent.ORDER_CREATED,
-        data: { order_id: '123' }
+        data: { order_id: '123' },
       });
 
       expect((service as any).messageQueue.length).toBe(1);
@@ -304,11 +305,11 @@ describe('EnhancedWebSocketService', () => {
       // Queue messages while disconnected
       service.send({
         type: WebSocketEvent.ORDER_CREATED,
-        data: { order_id: '123' }
+        data: { order_id: '123' },
       });
       service.send({
         type: WebSocketEvent.ORDER_UPDATED,
-        data: { order_id: '123' }
+        data: { order_id: '123' },
       });
 
       await service.connect();
@@ -319,15 +320,17 @@ describe('EnhancedWebSocketService', () => {
       ws.onmessage?.({
         data: JSON.stringify({
           type: WebSocketEvent.AUTHENTICATED,
-          data: {}
-        })
+          data: {},
+        }),
       });
 
       // Check that queued messages were sent
       const sentMessages = sendSpy.mock.calls
-        .map(call => JSON.parse(call[0]))
-        .filter(msg => msg.type === WebSocketEvent.ORDER_CREATED || 
-                       msg.type === WebSocketEvent.ORDER_UPDATED);
+        .map((call) => JSON.parse(call[0]))
+        .filter(
+          (msg) =>
+            msg.type === WebSocketEvent.ORDER_CREATED || msg.type === WebSocketEvent.ORDER_UPDATED
+        );
 
       expect(sentMessages.length).toBe(2);
     });
@@ -337,7 +340,7 @@ describe('EnhancedWebSocketService', () => {
       for (let i = 0; i < 150; i++) {
         service.send({
           type: WebSocketEvent.DATA_UPDATED,
-          data: { index: i }
+          data: { index: i },
         });
       }
 
@@ -351,11 +354,11 @@ describe('EnhancedWebSocketService', () => {
 
       // Simulate network state change
       const networkListener = (NetInfo.addEventListener as jest.Mock).mock.calls[0][0];
-      
+
       // Network restored
       networkListener({
         isConnected: true,
-        isInternetReachable: true
+        isInternetReachable: true,
       });
 
       expect(connectSpy).toHaveBeenCalled();
@@ -370,15 +373,15 @@ describe('EnhancedWebSocketService', () => {
       ws.onmessage?.({
         data: JSON.stringify({
           type: WebSocketEvent.AUTHENTICATED,
-          data: {}
-        })
+          data: {},
+        }),
       });
 
       // Simulate network loss
       const networkListener = (NetInfo.addEventListener as jest.Mock).mock.calls[0][0];
       networkListener({
         isConnected: false,
-        isInternetReachable: false
+        isInternetReachable: false,
       });
 
       expect(service.getState()).toBe('DISCONNECTED');
@@ -407,7 +410,7 @@ describe('EnhancedWebSocketService', () => {
         ['AUTHENTICATING', 'CONNECTED'],
         ['CONNECTED', 'DISCONNECTED'],
         ['DISCONNECTED', 'RECONNECTING'],
-        ['RECONNECTING', 'CONNECTING']
+        ['RECONNECTING', 'CONNECTING'],
       ];
 
       validTransitions.forEach(([from, to]) => {
@@ -421,7 +424,7 @@ describe('EnhancedWebSocketService', () => {
   describe('Cleanup', () => {
     it('should clean up resources on disconnect', async () => {
       await service.connect();
-      
+
       const ws = (service as any).ws;
       const closeSpy = jest.spyOn(ws, 'close');
 
@@ -442,8 +445,8 @@ describe('EnhancedWebSocketService', () => {
       ws.onmessage?.({
         data: JSON.stringify({
           type: WebSocketEvent.AUTHENTICATED,
-          data: {}
-        })
+          data: {},
+        }),
       });
 
       service.disconnect();

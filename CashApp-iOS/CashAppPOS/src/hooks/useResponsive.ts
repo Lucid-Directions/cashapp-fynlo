@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Dimensions, ScaledSize } from 'react-native';
-import { breakpoints, deviceTypes } from '../design-system/theme';
+
+import { Dimensions, _ScaledSize } from 'react-native';
+
+import { breakpoints, _deviceTypes } from '../design-system/theme';
 
 interface ResponsiveHookReturn {
   width: number;
@@ -73,16 +75,16 @@ export const useResponsiveValue = <T>(
 
   // Return value based on current breakpoint, falling back to smaller breakpoints
   if (values[breakpoint] !== undefined) return values[breakpoint]!;
-  
+
   // Fallback logic
   const breakpointOrder: Array<keyof typeof values> = ['xxl', 'xl', 'lg', 'md', 'sm', 'xs'];
   const currentIndex = breakpointOrder.indexOf(breakpoint);
-  
+
   for (let i = currentIndex + 1; i < breakpointOrder.length; i++) {
     const key = breakpointOrder[i];
     if (values[key] !== undefined) return values[key]!;
   }
-  
+
   return fallback;
 };
 

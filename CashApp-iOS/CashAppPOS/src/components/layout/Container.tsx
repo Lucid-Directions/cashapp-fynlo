@@ -1,13 +1,12 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ViewStyle,
-} from 'react-native';
+
+import type { ViewStyle } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
+
 import { useTheme } from '../../design-system/ThemeProvider';
 import { useResponsive, useResponsiveValue } from '../../hooks/useResponsive';
-import { Theme, spacing } from '../../design-system/theme';
+
+import type { Theme, spacing } from '../../design-system/theme';
 
 // Container variants
 export type ContainerVariant = 'fluid' | 'constrained';
@@ -141,12 +140,8 @@ export const Section: React.FC<SectionProps> = ({
       <Container>
         {(title || subtitle) && (
           <View style={styles.sectionHeader}>
-            {title && (
-              <Text style={styles.sectionTitle}>{title}</Text>
-            )}
-            {subtitle && (
-              <Text style={styles.sectionSubtitle}>{subtitle}</Text>
-            )}
+            {title && <Text style={styles.sectionTitle}>{title}</Text>}
+            {subtitle && <Text style={styles.sectionSubtitle}>{subtitle}</Text>}
           </View>
         )}
         {children}
@@ -197,7 +192,13 @@ export interface RowProps {
     xxl?: keyof typeof spacing;
   };
   align?: 'flex-start' | 'center' | 'flex-end' | 'stretch';
-  justify?: 'flex-start' | 'center' | 'flex-end' | 'space-between' | 'space-around' | 'space-evenly';
+  justify?:
+    | 'flex-start'
+    | 'center'
+    | 'flex-end'
+    | 'space-between'
+    | 'space-around'
+    | 'space-evenly';
   wrap?: boolean;
   style?: ViewStyle;
 }

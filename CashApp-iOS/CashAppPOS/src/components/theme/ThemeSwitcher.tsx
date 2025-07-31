@@ -1,14 +1,14 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ViewStyle,
-} from 'react-native';
+
+import type { ViewStyle } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useTheme, ThemeMode, ColorTheme, ColorThemeOption, colorThemeOptions } from '../../design-system/ThemeProvider';
-import { Theme } from '../../design-system/theme';
+
+import { useTheme, _ColorTheme, colorThemeOptions } from '../../design-system/ThemeProvider';
+
+import type { Theme } from '../../design-system/theme';
+import type { ThemeMode, ColorThemeOption } from '../../design-system/ThemeProvider';
 
 // Remove duplicate interface since it's imported from ThemeProvider
 
@@ -63,26 +63,25 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
   // Safe theme switching with error handling
   const handleThemeToggle = useCallback(async () => {
     if (isAnimating) return;
-    
+
     try {
       setIsAnimating(true);
       const newTheme = isDark ? 'light' : 'dark';
-      
+
       // Add animation delay for smooth transition
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
       await setThemeMode(newTheme);
-      
+
       // Additional delay to ensure theme is fully applied
-      await new Promise(resolve => setTimeout(resolve, 200));
-      
+      await new Promise((resolve) => setTimeout(resolve, 200));
     } catch (error) {
-      console.error('Theme switching error:', error);
+      logger.error('Theme switching error:', error);
       // Fallback to default theme if switching fails
       try {
         await setThemeMode('light');
       } catch (fallbackError) {
-        console.error('Fallback theme setting failed:', fallbackError);
+        logger.error('Fallback theme setting failed:', fallbackError);
       }
     } finally {
       setIsAnimating(false);
@@ -96,9 +95,9 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
       return {
         colors: {
           primary: '#00A651',
-          neutral: { 
+          neutral: {
             50: '#F9F9F9',
-            100: '#F5F5F5', 
+            100: '#F5F5F5',
             200: '#E5E5E5',
             400: '#A3A3A3',
             600: '#525252',
@@ -111,7 +110,7 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
         borderRadius: { sm: 4, md: 8, lg: 12, xl: 16 },
         typography: {
           fontSize: { xs: 10, sm: 12, base: 14, lg: 16 },
-          fontWeight: { medium: '500', semibold: '600' }
+          fontWeight: { medium: '500', semibold: '600' },
         },
         isDark: false,
       };
@@ -121,22 +120,24 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
 
   const styles = createStyles(safeTheme);
 
-  const handleColorThemeChange = useCallback(async (colorThemeOption: ColorThemeOption) => {
-    if (isAnimating) return;
-    
-    try {
-      setIsAnimating(true);
-      await setColorTheme(colorThemeOption.id);
-      
-      // Add animation delay for smooth transition
-      await new Promise(resolve => setTimeout(resolve, 200));
-      
-    } catch (error) {
-      console.error('Color theme switching error:', error);
-    } finally {
-      setIsAnimating(false);
-    }
-  }, [setColorTheme, isAnimating]);
+  const handleColorThemeChange = useCallback(
+    async (colorThemeOption: ColorThemeOption) => {
+      if (isAnimating) return;
+
+      try {
+        setIsAnimating(true);
+        await setColorTheme(colorThemeOption.id);
+
+        // Add animation delay for smooth transition
+        await new Promise((resolve) => setTimeout(resolve, 200));
+      } catch (error) {
+        logger.error('Color theme switching error:', error);
+      } finally {
+        setIsAnimating(false);
+      }
+    },
+    [setColorTheme, isAnimating]
+  );
 
   // Colors variant - color theme grid
   if (variant === 'colors') {
@@ -158,29 +159,27 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
             >
               <View style={styles.colorPreview}>
                 <View style={[styles.colorSwatch, { backgroundColor: colorThemeOption.primary }]} />
-                <View style={[styles.colorSwatch, { backgroundColor: colorThemeOption.secondary }]} />
+                <View
+                  style={[styles.colorSwatch, { backgroundColor: colorThemeOption.secondary }]}
+                />
                 <View style={[styles.colorSwatch, { backgroundColor: colorThemeOption.accent }]} />
               </View>
               {showLabels && (
                 <>
-                  <Text style={[
-                    styles.colorLabel,
-                    colorTheme === colorThemeOption.id && styles.colorLabelActive,
-                  ]}>
+                  <Text
+                    style={[
+                      styles.colorLabel,
+                      colorTheme === colorThemeOption.id && styles.colorLabelActive,
+                    ]}
+                  >
                     {colorThemeOption.label}
                   </Text>
-                  <Text style={styles.colorDescription}>
-                    {colorThemeOption.description}
-                  </Text>
+                  <Text style={styles.colorDescription}>{colorThemeOption.description}</Text>
                 </>
               )}
               {colorTheme === colorThemeOption.id && (
                 <View style={styles.colorCheckmark}>
-                  <Icon
-                    name="check-circle"
-                    size={16}
-                    color={safeTheme.colors.primary}
-                  />
+                  <Icon name="check-circle" size={16} color={safeTheme.colors.primary} />
                 </View>
               )}
             </TouchableOpacity>
@@ -197,10 +196,7 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
         {themeOptions.map((option) => (
           <TouchableOpacity
             key={option.mode}
-            style={[
-              styles.compactButton,
-              themeMode === option.mode && styles.compactButtonActive,
-            ]}
+            style={[styles.compactButton, themeMode === option.mode && styles.compactButtonActive]}
             onPress={() => handleThemeToggle()}
             accessibilityRole="button"
             accessibilityLabel={option.label}
@@ -211,9 +207,7 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
               name={option.icon}
               size={20}
               color={
-                themeMode === option.mode
-                  ? safeTheme.colors.white
-                  : safeTheme.colors.neutral[600]
+                themeMode === option.mode ? safeTheme.colors.white : safeTheme.colors.neutral[600]
               }
             />
             {showLabels && (
@@ -239,10 +233,7 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
         {themeOptions.map((option) => (
           <TouchableOpacity
             key={option.mode}
-            style={[
-              styles.expandedCard,
-              themeMode === option.mode && styles.expandedCardActive,
-            ]}
+            style={[styles.expandedCard, themeMode === option.mode && styles.expandedCardActive]}
             onPress={() => handleThemeToggle()}
             accessibilityRole="button"
             accessibilityLabel={option.label}
@@ -268,16 +259,10 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
             >
               {option.label}
             </Text>
-            <Text style={styles.expandedDescription}>
-              {option.description}
-            </Text>
+            <Text style={styles.expandedDescription}>{option.description}</Text>
             {themeMode === option.mode && (
               <View style={styles.expandedCheckmark}>
-                <Icon
-                  name="check-circle"
-                  size={20}
-                  color={safeTheme.colors.primary}
-                />
+                <Icon name="check-circle" size={20} color={safeTheme.colors.primary} />
               </View>
             )}
           </TouchableOpacity>
@@ -292,10 +277,7 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
       {themeOptions.map((option) => (
         <TouchableOpacity
           key={option.mode}
-          style={[
-            styles.listItem,
-            themeMode === option.mode && styles.listItemActive,
-          ]}
+          style={[styles.listItem, themeMode === option.mode && styles.listItemActive]}
           onPress={() => handleThemeToggle()}
           accessibilityRole="button"
           accessibilityLabel={option.label}
@@ -307,39 +289,22 @@ const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({
               name={option.icon}
               size={24}
               color={
-                themeMode === option.mode
-                  ? safeTheme.colors.primary
-                  : safeTheme.colors.neutral[600]
+                themeMode === option.mode ? safeTheme.colors.primary : safeTheme.colors.neutral[600]
               }
             />
           </View>
           <View style={styles.listContent}>
-            <Text
-              style={[
-                styles.listTitle,
-                themeMode === option.mode && styles.listTitleActive,
-              ]}
-            >
+            <Text style={[styles.listTitle, themeMode === option.mode && styles.listTitleActive]}>
               {option.label}
             </Text>
-            <Text style={styles.listDescription}>
-              {option.description}
-            </Text>
+            <Text style={styles.listDescription}>{option.description}</Text>
           </View>
           <View style={styles.listTrailing}>
             {themeMode === option.mode && (
-              <Icon
-                name="radio-button-checked"
-                size={20}
-                color={safeTheme.colors.primary}
-              />
+              <Icon name="radio-button-checked" size={20} color={safeTheme.colors.primary} />
             )}
             {themeMode !== option.mode && (
-              <Icon
-                name="radio-button-unchecked"
-                size={20}
-                color={safeTheme.colors.neutral[400]}
-              />
+              <Icon name="radio-button-unchecked" size={20} color={safeTheme.colors.neutral[400]} />
             )}
           </View>
         </TouchableOpacity>
@@ -380,12 +345,7 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
 
   return (
     <TouchableOpacity
-      style={[
-        styles.toggleButton,
-        { padding },
-        isDark && styles.toggleButtonDark,
-        style,
-      ]}
+      style={[styles.toggleButton, { padding }, isDark && styles.toggleButtonDark, style]}
       onPress={toggleTheme}
       accessibilityRole="switch"
       accessibilityLabel={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
@@ -397,11 +357,7 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
         size={iconSize}
         color={isDark ? theme.colors.warning[500] : theme.colors.neutral[600]}
       />
-      {showLabels && (
-        <Text style={styles.toggleLabel}>
-          {isDark ? 'Light' : 'Dark'}
-        </Text>
-      )}
+      {showLabels && <Text style={styles.toggleLabel}>{isDark ? 'Light' : 'Dark'}</Text>}
     </TouchableOpacity>
   );
 };

@@ -1,5 +1,6 @@
-import { errorHandler, ErrorType, ErrorSeverity } from '../../src/utils/errorHandler';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import { errorHandler, ErrorType, ErrorSeverity } from '../../src/utils/errorHandler';
 
 // Mock AsyncStorage
 jest.mock('@react-native-async-storage/async-storage');
@@ -19,18 +20,18 @@ describe('ErrorHandler', () => {
   describe('handleError', () => {
     it('should handle basic error', async () => {
       const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
-      
+
       await errorHandler.handleError(
         new Error('Test error'),
         ErrorType.SYSTEM,
         ErrorSeverity.MEDIUM
       );
-      
+
       expect(consoleSpy).toHaveBeenCalledWith(
         expect.stringContaining('[SYSTEM] Test error'),
         expect.any(Object)
       );
-      
+
       consoleSpy.mockRestore();
     });
 
@@ -40,27 +41,24 @@ describe('ErrorHandler', () => {
         ErrorType.NETWORK,
         ErrorSeverity.HIGH
       );
-      
-      expect(AsyncStorage.setItem).toHaveBeenCalledWith(
-        'app_errors',
-        expect.any(String)
-      );
+
+      expect(AsyncStorage.setItem).toHaveBeenCalledWith('app_errors', expect.any(String));
     });
 
     it('should categorize errors correctly', async () => {
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-      
+
       await errorHandler.handleError(
         new Error('Critical error'),
         ErrorType.PAYMENT,
         ErrorSeverity.CRITICAL
       );
-      
+
       expect(consoleSpy).toHaveBeenCalledWith(
         expect.stringContaining('[PAYMENT] Critical error'),
         expect.any(Object)
       );
-      
+
       consoleSpy.mockRestore();
     });
   });
@@ -68,18 +66,18 @@ describe('ErrorHandler', () => {
   describe('handleNetworkError', () => {
     it('should handle timeout errors', async () => {
       const timeoutError = new Error('Request timeout');
-      
+
       await errorHandler.handleNetworkError(timeoutError, {}, 'api_call');
-      
+
       expect(AsyncStorage.setItem).toHaveBeenCalled();
     });
 
     it('should determine severity correctly', async () => {
       const unauthorizedError = new Error('Unauthorized access');
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-      
+
       await errorHandler.handleNetworkError(unauthorizedError);
-      
+
       expect(consoleSpy).toHaveBeenCalled();
       consoleSpy.mockRestore();
     });
@@ -88,19 +86,19 @@ describe('ErrorHandler', () => {
   describe('handleValidationError', () => {
     it('should handle validation errors', async () => {
       const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-      
+
       await errorHandler.handleValidationError(
         'email',
         'Invalid email format',
         'invalid@',
         'user_form'
       );
-      
+
       expect(consoleSpy).toHaveBeenCalledWith(
         expect.stringContaining('[VALIDATION]'),
         expect.any(Object)
       );
-      
+
       consoleSpy.mockRestore();
     });
   });
@@ -109,37 +107,34 @@ describe('ErrorHandler', () => {
     it('should handle payment errors with high severity', async () => {
       const paymentError = new Error('Card declined');
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-      
+
       await errorHandler.handlePaymentError(paymentError, {
-        amount: 50.00,
+        amount: 50.0,
         cardNumber: '1234****',
       });
-      
+
       expect(consoleSpy).toHaveBeenCalledWith(
         expect.stringContaining('[PAYMENT]'),
         expect.any(Object)
       );
-      
+
       consoleSpy.mockRestore();
     });
 
     it('should sanitize payment data', async () => {
       const paymentData = {
-        amount: 50.00,
+        amount: 50.0,
         cardNumber: '1234567890123456',
         cvv: '123',
         pin: '1234',
       };
-      
-      await errorHandler.handlePaymentError(
-        new Error('Payment failed'),
-        paymentData
-      );
-      
+
+      await errorHandler.handlePaymentError(new Error('Payment failed'), paymentData);
+
       // Verify sensitive data is not stored
       const storedData = (AsyncStorage.setItem as jest.Mock).mock.calls[0][1];
       const parsedData = JSON.parse(storedData);
-      
+
       expect(parsedData[0].metadata.paymentData).not.toHaveProperty('cardNumber');
       expect(parsedData[0].metadata.paymentData).not.toHaveProperty('cvv');
       expect(parsedData[0].metadata.paymentData).not.toHaveProperty('pin');
@@ -157,22 +152,20 @@ describe('ErrorHandler', () => {
           timestamp: new Date(),
         },
       ];
-      
-      (AsyncStorage.getItem as jest.Mock).mockResolvedValue(
-        JSON.stringify(mockErrors)
-      );
-      
+
+      (AsyncStorage.getItem as jest.Mock).mockResolvedValue(JSON.stringify(mockErrors));
+
       const errors = await errorHandler.getStoredErrors();
-      
+
       expect(errors).toHaveLength(1);
       expect(errors[0].message).toBe('Test error');
     });
 
     it('should return empty array when no errors stored', async () => {
       (AsyncStorage.getItem as jest.Mock).mockResolvedValue(null);
-      
+
       const errors = await errorHandler.getStoredErrors();
-      
+
       expect(errors).toEqual([]);
     });
   });
@@ -180,7 +173,7 @@ describe('ErrorHandler', () => {
   describe('clearStoredErrors', () => {
     it('should clear all stored errors', async () => {
       await errorHandler.clearStoredErrors();
-      
+
       expect(AsyncStorage.removeItem).toHaveBeenCalledWith('app_errors');
     });
   });
@@ -194,11 +187,15 @@ describe('ErrorHandler', () => {
     it('should return correct error statistics', async () => {
       // Add some test errors
       await errorHandler.handleError(new Error('Error 1'), ErrorType.NETWORK, ErrorSeverity.HIGH);
-      await errorHandler.handleError(new Error('Error 2'), ErrorType.PAYMENT, ErrorSeverity.CRITICAL);
+      await errorHandler.handleError(
+        new Error('Error 2'),
+        ErrorType.PAYMENT,
+        ErrorSeverity.CRITICAL
+      );
       await errorHandler.handleError(new Error('Error 3'), ErrorType.NETWORK, ErrorSeverity.MEDIUM);
-      
+
       const stats = errorHandler.getErrorStats();
-      
+
       expect(stats.total).toBeGreaterThan(0);
       expect(stats.byType[ErrorType.NETWORK]).toBeGreaterThan(0);
       expect(stats.bySeverity[ErrorSeverity.HIGH]).toBeGreaterThan(0);
@@ -208,13 +205,13 @@ describe('ErrorHandler', () => {
   describe('Error Recovery', () => {
     it('should attempt recovery for storage errors', async () => {
       const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-      
+
       await errorHandler.handleError(
         new Error('Storage failed'),
         ErrorType.STORAGE,
         ErrorSeverity.MEDIUM
       );
-      
+
       // Should trigger recovery attempt
       expect(consoleSpy).toHaveBeenCalled();
       consoleSpy.mockRestore();
@@ -225,25 +222,25 @@ describe('ErrorHandler', () => {
     it('should generate unique error IDs', async () => {
       await errorHandler.handleError(new Error('Error 1'), ErrorType.SYSTEM, ErrorSeverity.LOW);
       await errorHandler.handleError(new Error('Error 2'), ErrorType.SYSTEM, ErrorSeverity.LOW);
-      
+
       const errors = await errorHandler.getStoredErrors();
-      
+
       expect(errors[0].id).not.toBe(errors[1].id);
       expect(errors[0].id).toMatch(/^error_\d+_[a-z0-9]+$/);
     });
 
     it('should include stack trace for Error objects', async () => {
       const error = new Error('Test error with stack');
-      
+
       await errorHandler.handleError(error, ErrorType.SYSTEM, ErrorSeverity.MEDIUM);
-      
+
       const errors = await errorHandler.getStoredErrors();
       expect(errors[0].stackTrace).toBeTruthy();
     });
 
     it('should handle string errors', async () => {
       await errorHandler.handleError('String error message', ErrorType.SYSTEM, ErrorSeverity.LOW);
-      
+
       const errors = await errorHandler.getStoredErrors();
       expect(errors[0].message).toBe('String error message');
       expect(errors[0].stackTrace).toBeUndefined();
@@ -253,21 +250,17 @@ describe('ErrorHandler', () => {
   describe('Performance', () => {
     it('should handle high volume of errors efficiently', async () => {
       const startTime = Date.now();
-      
+
       // Generate many errors quickly
       const promises = Array.from({ length: 50 }, (_, i) =>
-        errorHandler.handleError(
-          new Error(`Error ${i}`),
-          ErrorType.SYSTEM,
-          ErrorSeverity.LOW
-        )
+        errorHandler.handleError(new Error(`Error ${i}`), ErrorType.SYSTEM, ErrorSeverity.LOW)
       );
-      
+
       await Promise.all(promises);
-      
+
       const endTime = Date.now();
       const duration = endTime - startTime;
-      
+
       // Should complete within reasonable time (2 seconds)
       expect(duration).toBeLessThan(2000);
     });
@@ -275,17 +268,13 @@ describe('ErrorHandler', () => {
     it('should limit stored errors to prevent memory issues', async () => {
       // Add more errors than the limit
       const promises = Array.from({ length: 150 }, (_, i) =>
-        errorHandler.handleError(
-          new Error(`Error ${i}`),
-          ErrorType.SYSTEM,
-          ErrorSeverity.LOW
-        )
+        errorHandler.handleError(new Error(`Error ${i}`), ErrorType.SYSTEM, ErrorSeverity.LOW)
       );
-      
+
       await Promise.all(promises);
-      
+
       const errors = await errorHandler.getStoredErrors();
-      
+
       // Should be limited to max size (100)
       expect(errors.length).toBeLessThanOrEqual(100);
     });

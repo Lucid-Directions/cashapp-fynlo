@@ -1,4 +1,5 @@
 import React from 'react';
+
 import {
   StyleSheet,
   Text,
@@ -8,10 +9,12 @@ import {
   ScrollView,
   TouchableOpacity,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { useNavigation } from '@react-navigation/native';
-import { useRestaurantDisplayName } from '../../hooks/useRestaurantConfig';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
+import { useRestaurantDisplayName } from '../../hooks/useRestaurantConfig';
 
 interface KPICardProps {
   title: string;
@@ -40,43 +43,43 @@ const DashboardScreen: React.FC = () => {
   const kpiData: KPICardProps[] = [
     {
       title: "Today's Revenue",
-      value: "£1,247.50",
-      change: "+12.5%",
-      changeType: "positive",
-      icon: "attach-money",
+      value: '£1,247.50',
+      change: '+12.5%',
+      changeType: 'positive',
+      icon: 'attach-money',
       color: theme.colors.success,
     },
     {
-      title: "Orders Today",
-      value: "23",
-      change: "+8.2%",
-      changeType: "positive",
-      icon: "receipt",
+      title: 'Orders Today',
+      value: '23',
+      change: '+8.2%',
+      changeType: 'positive',
+      icon: 'receipt',
       color: theme.colors.secondary,
     },
     {
-      title: "Avg Order Value",
-      value: "£54.24",
-      change: "-2.1%",
-      changeType: "negative",
-      icon: "trending-up",
+      title: 'Avg Order Value',
+      value: '£54.24',
+      change: '-2.1%',
+      changeType: 'negative',
+      icon: 'trending-up',
       color: theme.colors.warning,
     },
     {
-      title: "Customer Satisfaction",
-      value: "4.8",
-      change: "+0.2",
-      changeType: "positive",
-      icon: "star",
+      title: 'Customer Satisfaction',
+      value: '4.8',
+      change: '+0.2',
+      changeType: 'positive',
+      icon: 'star',
       color: theme.colors.primary,
     },
   ];
 
   // Mock goals data
   const goalsData = [
-    { label: "Daily Sales Target", current: 1247.50, target: 1500.00, percentage: 83.2 },
-    { label: "Monthly Revenue", current: 28650.00, target: 35000.00, percentage: 81.9 },
-    { label: "Customer Retention", current: 94.5, target: 95.0, percentage: 99.5 },
+    { label: 'Daily Sales Target', current: 1247.5, target: 1500.0, percentage: 83.2 },
+    { label: 'Monthly Revenue', current: 28650.0, target: 35000.0, percentage: 81.9 },
+    { label: 'Customer Retention', current: 94.5, target: 95.0, percentage: 99.5 },
   ];
 
   // Mock alerts data
@@ -116,15 +119,36 @@ const DashboardScreen: React.FC = () => {
         </View>
       </View>
       <View style={styles.kpiChange}>
-        <Icon 
-          name={changeType === 'positive' ? 'trending-up' : changeType === 'negative' ? 'trending-down' : 'trending-flat'} 
-          size={16} 
-          color={changeType === 'positive' ? theme.colors.success : changeType === 'negative' ? theme.colors.danger : theme.colors.lightText} 
+        <Icon
+          name={
+            changeType === 'positive'
+              ? 'trending-up'
+              : changeType === 'negative'
+              ? 'trending-down'
+              : 'trending-flat'
+          }
+          size={16}
+          color={
+            changeType === 'positive'
+              ? theme.colors.success
+              : changeType === 'negative'
+              ? theme.colors.danger
+              : theme.colors.lightText
+          }
         />
-        <Text style={[
-          styles.kpiChangeText,
-          { color: changeType === 'positive' ? theme.colors.success : changeType === 'negative' ? theme.colors.danger : theme.colors.lightText }
-        ]}>
+        <Text
+          style={[
+            styles.kpiChangeText,
+            {
+              color:
+                changeType === 'positive'
+                  ? theme.colors.success
+                  : changeType === 'negative'
+                  ? theme.colors.danger
+                  : theme.colors.lightText,
+            },
+          ]}
+        >
           {change}
         </Text>
         <Text style={styles.kpiChangeLabel}>vs yesterday</Text>
@@ -132,7 +156,12 @@ const DashboardScreen: React.FC = () => {
     </View>
   );
 
-  const GoalCard = ({ label, current, target, percentage }: {
+  const GoalCard = ({
+    label,
+    current,
+    target,
+    percentage,
+  }: {
     label: string;
     current: number;
     target: number;
@@ -150,10 +179,15 @@ const DashboardScreen: React.FC = () => {
       </View>
       <View style={styles.goalValues}>
         <Text style={styles.goalCurrent}>
-          {label.includes('Revenue') || label.includes('Sales') ? `£${current.toLocaleString()}` : current}
+          {label.includes('Revenue') || label.includes('Sales')
+            ? `£${current.toLocaleString()}`
+            : current}
         </Text>
         <Text style={styles.goalTarget}>
-          of {label.includes('Revenue') || label.includes('Sales') ? `£${target.toLocaleString()}` : target}
+          of{' '}
+          {label.includes('Revenue') || label.includes('Sales')
+            ? `£${target.toLocaleString()}`
+            : target}
         </Text>
       </View>
     </View>
@@ -161,14 +195,29 @@ const DashboardScreen: React.FC = () => {
 
   const AlertCard = ({ alert }: { alert: AlertItem }) => (
     <View style={styles.alertCard}>
-      <View style={[
-        styles.alertIcon,
-        { backgroundColor: alert.type === 'warning' ? theme.colors.warning : alert.type === 'success' ? theme.colors.success : theme.colors.secondary }
-      ]}>
-        <Icon 
-          name={alert.type === 'warning' ? 'warning' : alert.type === 'success' ? 'check-circle' : 'info'} 
-          size={20} 
-          color={theme.colors.white} 
+      <View
+        style={[
+          styles.alertIcon,
+          {
+            backgroundColor:
+              alert.type === 'warning'
+                ? theme.colors.warning
+                : alert.type === 'success'
+                ? theme.colors.success
+                : theme.colors.secondary,
+          },
+        ]}
+      >
+        <Icon
+          name={
+            alert.type === 'warning'
+              ? 'warning'
+              : alert.type === 'success'
+              ? 'check-circle'
+              : 'info'
+          }
+          size={20}
+          color={theme.colors.white}
         />
       </View>
       <View style={styles.alertContent}>
@@ -184,7 +233,7 @@ const DashboardScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={theme.colors.primary} />
-      
+
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
@@ -221,19 +270,31 @@ const DashboardScreen: React.FC = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Quick Actions</Text>
           <View style={styles.quickActions}>
-            <TouchableOpacity style={styles.actionButton} onPress={() => navigation.navigate('Reports' as never)}>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => navigation.navigate('Reports' as never)}
+            >
               <Icon name="bar-chart" size={24} color={theme.colors.secondary} />
               <Text style={styles.actionText}>View Reports</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.actionButton} onPress={() => navigation.navigate('Inventory' as never)}>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => navigation.navigate('Inventory' as never)}
+            >
               <Icon name="inventory" size={24} color={theme.colors.warning} />
               <Text style={styles.actionText}>Check Inventory</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.actionButton} onPress={() => navigation.navigate('Employees' as never)}>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => navigation.navigate('Employees' as never)}
+            >
               <Icon name="people" size={24} color={theme.colors.success} />
               <Text style={styles.actionText}>Manage Staff</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.actionButton} onPress={() => navigation.navigate('Settings' as never)}>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => navigation.navigate('Settings' as never)}
+            >
               <Icon name="settings" size={24} color={theme.colors.darkGray} />
               <Text style={styles.actionText}>Settings</Text>
             </TouchableOpacity>
@@ -257,7 +318,8 @@ const DashboardScreen: React.FC = () => {
             <View style={styles.backendNoticeContent}>
               <Text style={styles.backendNoticeTitle}>Development Mode</Text>
               <Text style={styles.backendNoticeText}>
-                This dashboard shows mock data for testing. Real-time data will be available once the backend is connected.
+                This dashboard shows mock data for testing. Real-time data will be available once
+                the backend is connected.
               </Text>
             </View>
           </View>
@@ -267,256 +329,257 @@ const DashboardScreen: React.FC = () => {
   );
 };
 
-const createStyles = (theme: any) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-  },
-  header: {
-    backgroundColor: theme.colors.primary,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    paddingTop: 48,
-  },
-  backButton: {
-    padding: 8,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: theme.colors.white,
-  },
-  refreshButton: {
-    padding: 8,
-  },
-  content: {
-    flex: 1,
-    padding: 16,
-  },
-  section: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: theme.colors.text,
-    marginBottom: 16,
-  },
-  kpiGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  kpiCard: {
-    backgroundColor: theme.colors.white,
-    borderRadius: 12,
-    padding: 16,
-    width: '48%',
-    marginBottom: 12,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-  },
-  kpiHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  kpiIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  kpiContent: {
-    flex: 1,
-  },
-  kpiTitle: {
-    fontSize: 12,
-    color: theme.colors.lightText,
-    marginBottom: 2,
-  },
-  kpiValue: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: theme.colors.text,
-  },
-  kpiChange: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  kpiChangeText: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginLeft: 4,
-  },
-  kpiChangeLabel: {
-    fontSize: 12,
-    color: theme.colors.lightText,
-    marginLeft: 4,
-  },
-  goalsContainer: {
-    backgroundColor: theme.colors.white,
-    borderRadius: 12,
-    padding: 16,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-  },
-  goalCard: {
-    marginBottom: 20,
-  },
-  goalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  goalLabel: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: theme.colors.text,
-  },
-  goalPercentage: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: theme.colors.primary,
-  },
-  goalProgress: {
-    marginBottom: 8,
-  },
-  goalProgressTrack: {
-    height: 8,
-    backgroundColor: theme.colors.lightGray,
-    borderRadius: 4,
-  },
-  goalProgressFill: {
-    height: 8,
-    backgroundColor: theme.colors.primary,
-    borderRadius: 4,
-  },
-  goalValues: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  goalCurrent: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: theme.colors.text,
-  },
-  goalTarget: {
-    fontSize: 14,
-    color: theme.colors.lightText,
-  },
-  quickActions: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  actionButton: {
-    backgroundColor: theme.colors.white,
-    borderRadius: 12,
-    padding: 16,
-    width: '48%',
-    alignItems: 'center',
-    marginBottom: 12,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-  },
-  actionText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: theme.colors.text,
-    marginTop: 8,
-    textAlign: 'center',
-  },
-  alertsContainer: {
-    backgroundColor: theme.colors.white,
-    borderRadius: 12,
-    padding: 16,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-  },
-  alertCard: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.lightGray,
-  },
-  alertIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
-  },
-  alertContent: {
-    flex: 1,
-  },
-  alertHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  alertTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: theme.colors.text,
-  },
-  alertTime: {
-    fontSize: 12,
-    color: theme.colors.lightText,
-  },
-  alertMessage: {
-    fontSize: 13,
-    color: theme.colors.lightText,
-    lineHeight: 18,
-  },
-  backendNotice: {
-    backgroundColor: theme.colors.white,
-    borderRadius: 12,
-    padding: 16,
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-  },
-  backendNoticeContent: {
-    flex: 1,
-    marginLeft: 12,
-  },
-  backendNoticeTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: theme.colors.text,
-    marginBottom: 4,
-  },
-  backendNoticeText: {
-    fontSize: 14,
-    color: theme.colors.lightText,
-    lineHeight: 20,
-  },
-});
+const createStyles = (theme: unknown) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    header: {
+      backgroundColor: theme.colors.primary,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      paddingTop: 48,
+    },
+    backButton: {
+      padding: 8,
+    },
+    headerTitle: {
+      fontSize: 20,
+      fontWeight: 'bold',
+      color: theme.colors.white,
+    },
+    refreshButton: {
+      padding: 8,
+    },
+    content: {
+      flex: 1,
+      padding: 16,
+    },
+    section: {
+      marginBottom: 24,
+    },
+    sectionTitle: {
+      fontSize: 20,
+      fontWeight: 'bold',
+      color: theme.colors.text,
+      marginBottom: 16,
+    },
+    kpiGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      justifyContent: 'space-between',
+    },
+    kpiCard: {
+      backgroundColor: theme.colors.white,
+      borderRadius: 12,
+      padding: 16,
+      width: '48%',
+      marginBottom: 12,
+      elevation: 2,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.1,
+      shadowRadius: 2,
+    },
+    kpiHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 12,
+    },
+    kpiIcon: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: 12,
+    },
+    kpiContent: {
+      flex: 1,
+    },
+    kpiTitle: {
+      fontSize: 12,
+      color: theme.colors.lightText,
+      marginBottom: 2,
+    },
+    kpiValue: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      color: theme.colors.text,
+    },
+    kpiChange: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    kpiChangeText: {
+      fontSize: 14,
+      fontWeight: '600',
+      marginLeft: 4,
+    },
+    kpiChangeLabel: {
+      fontSize: 12,
+      color: theme.colors.lightText,
+      marginLeft: 4,
+    },
+    goalsContainer: {
+      backgroundColor: theme.colors.white,
+      borderRadius: 12,
+      padding: 16,
+      elevation: 2,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.1,
+      shadowRadius: 2,
+    },
+    goalCard: {
+      marginBottom: 20,
+    },
+    goalHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 8,
+    },
+    goalLabel: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text,
+    },
+    goalPercentage: {
+      fontSize: 16,
+      fontWeight: 'bold',
+      color: theme.colors.primary,
+    },
+    goalProgress: {
+      marginBottom: 8,
+    },
+    goalProgressTrack: {
+      height: 8,
+      backgroundColor: theme.colors.lightGray,
+      borderRadius: 4,
+    },
+    goalProgressFill: {
+      height: 8,
+      backgroundColor: theme.colors.primary,
+      borderRadius: 4,
+    },
+    goalValues: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+    },
+    goalCurrent: {
+      fontSize: 16,
+      fontWeight: 'bold',
+      color: theme.colors.text,
+    },
+    goalTarget: {
+      fontSize: 14,
+      color: theme.colors.lightText,
+    },
+    quickActions: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      justifyContent: 'space-between',
+    },
+    actionButton: {
+      backgroundColor: theme.colors.white,
+      borderRadius: 12,
+      padding: 16,
+      width: '48%',
+      alignItems: 'center',
+      marginBottom: 12,
+      elevation: 2,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.1,
+      shadowRadius: 2,
+    },
+    actionText: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: theme.colors.text,
+      marginTop: 8,
+      textAlign: 'center',
+    },
+    alertsContainer: {
+      backgroundColor: theme.colors.white,
+      borderRadius: 12,
+      padding: 16,
+      elevation: 2,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.1,
+      shadowRadius: 2,
+    },
+    alertCard: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      paddingVertical: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.lightGray,
+    },
+    alertIcon: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: 12,
+    },
+    alertContent: {
+      flex: 1,
+    },
+    alertHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 4,
+    },
+    alertTitle: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: theme.colors.text,
+    },
+    alertTime: {
+      fontSize: 12,
+      color: theme.colors.lightText,
+    },
+    alertMessage: {
+      fontSize: 13,
+      color: theme.colors.lightText,
+      lineHeight: 18,
+    },
+    backendNotice: {
+      backgroundColor: theme.colors.white,
+      borderRadius: 12,
+      padding: 16,
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      elevation: 2,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.1,
+      shadowRadius: 2,
+    },
+    backendNoticeContent: {
+      flex: 1,
+      marginLeft: 12,
+    },
+    backendNoticeTitle: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: theme.colors.text,
+      marginBottom: 4,
+    },
+    backendNoticeText: {
+      fontSize: 14,
+      color: theme.colors.lightText,
+      lineHeight: 20,
+    },
+  });
 
 export default DashboardScreen;

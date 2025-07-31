@@ -1,4 +1,5 @@
 import React from 'react';
+
 import {
   StyleSheet,
   Text,
@@ -7,10 +8,11 @@ import {
   SafeAreaView,
   TouchableOpacity,
   FlatList,
-  Image,
+  _Image,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 // Clover POS Color Scheme
 const Colors = {
@@ -81,15 +83,13 @@ const UserSettingsScreen: React.FC = () => {
       <View style={[styles.settingIcon, { backgroundColor: `${Colors.warning}15` }]}>
         <Icon name={item.icon} size={24} color={Colors.warning} />
       </View>
-      
+
       <View style={styles.settingContent}>
         <Text style={styles.settingTitle}>{item.title}</Text>
         <Text style={styles.settingDescription}>{item.description}</Text>
-        {item.value && (
-          <Text style={styles.settingValue}>{item.value}</Text>
-        )}
+        {item.value && <Text style={styles.settingValue}>{item.value}</Text>}
       </View>
-      
+
       <Icon name="chevron-right" size={24} color={Colors.lightGray} />
     </TouchableOpacity>
   );
@@ -97,22 +97,22 @@ const UserSettingsScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor={Colors.warning} barStyle="light-content" />
-      
+
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
           testID="back-button"
         >
           <Icon name="arrow-back" size={24} color={Colors.white} />
         </TouchableOpacity>
-        
+
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle}>User Preferences</Text>
           <Text style={styles.headerSubtitle}>Personalize your experience</Text>
         </View>
-        
+
         <TouchableOpacity style={styles.helpButton}>
           <Icon name="help-outline" size={24} color={Colors.white} />
         </TouchableOpacity>
@@ -137,7 +137,7 @@ const UserSettingsScreen: React.FC = () => {
       <FlatList
         data={userSettings}
         renderItem={renderSettingItem}
-        keyExtractor={item => item.id}
+        keyExtractor={(item) => item.id}
         contentContainerStyle={styles.settingsList}
         showsVerticalScrollIndicator={false}
         ItemSeparatorComponent={() => <View style={styles.separator} />}

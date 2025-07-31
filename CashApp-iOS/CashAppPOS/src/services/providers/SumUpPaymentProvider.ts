@@ -20,14 +20,14 @@ class SumUpPaymentProviderClass {
   async initialize(config: SumUpConfig): Promise<void> {
     try {
       this.config = config;
-      
+
       // TODO: Initialize SumUp SDK when available
       // await SumUpSDK.init(config.affiliateKey);
-      
+
       this.initialized = true;
-      console.log('SumUp payment provider initialized (placeholder)');
+      logger.info('SumUp payment provider initialized (placeholder)');
     } catch (error) {
-      console.error('Failed to initialize SumUp:', error);
+      logger.error('Failed to initialize SumUp:', error);
       throw error;
     }
   }
@@ -40,17 +40,17 @@ class SumUpPaymentProviderClass {
 
       // TODO: Implement SumUp login when SDK is available
       // const result = await SumUpSDK.login();
-      
+
       return false; // Placeholder
     } catch (error) {
-      console.error('SumUp login failed:', error);
+      logger.error('SumUp login failed:', error);
       return false;
     }
   }
 
   async processPayment(
     amount: number,
-    currency: string = 'GBP',
+    _currency: string = 'GBP',
     title?: string
   ): Promise<SumUpPaymentResult> {
     try {
@@ -64,7 +64,7 @@ class SumUpPaymentProviderClass {
       //   currency,
       //   title: title || 'Payment',
       // });
-      
+
       return {
         success: false,
         error: 'SumUp SDK not available - placeholder implementation',
@@ -77,7 +77,7 @@ class SumUpPaymentProviderClass {
     }
   }
 
-  async getCardReaderSettings(): Promise<any> {
+  async getCardReaderSettings(): Promise<unknown> {
     try {
       if (!this.initialized) {
         throw new Error('SumUp not initialized');
@@ -85,10 +85,10 @@ class SumUpPaymentProviderClass {
 
       // TODO: Get card reader settings when SDK is available
       // return await SumUpSDK.getCardReaderSettings();
-      
+
       return null;
     } catch (error) {
-      console.error('Failed to get SumUp card reader settings:', error);
+      logger.error('Failed to get SumUp card reader settings:', error);
       return null;
     }
   }
@@ -98,7 +98,7 @@ class SumUpPaymentProviderClass {
    */
   calculateFee(amount: number, monthlyVolume: number = 0): number {
     const volumeThreshold = 2714; // £2,714/month
-    
+
     if (monthlyVolume >= volumeThreshold) {
       // High volume: 0.69% + £19/month
       const percentage = 0.0069; // 0.69%
@@ -115,7 +115,7 @@ class SumUpPaymentProviderClass {
    */
   getMonthlyFee(monthlyVolume: number): number {
     const volumeThreshold = 2714; // £2,714/month
-    return monthlyVolume >= volumeThreshold ? 19.00 : 0; // £19/month
+    return monthlyVolume >= volumeThreshold ? 19.0 : 0; // £19/month
   }
 
   /**

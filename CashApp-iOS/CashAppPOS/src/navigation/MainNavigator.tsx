@@ -1,18 +1,10 @@
 import React from 'react';
+
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import { useTheme } from '../design-system/ThemeProvider';
-import { MainTabParamList, MainStackParamList } from '../types';
-import POSScreen from '../screens/main/POSScreen';
-import HomeHubScreen from '../screens/main/HomeHubScreen';
-import OrdersScreen from '../screens/orders/OrdersScreen';
-import ReportsScreen from '../screens/reports/ReportsScreenSimple';
-import SalesReportDetailScreen from '../screens/reports/SalesReportDetailScreen';
-import InventoryReportDetailScreen from '../screens/reports/InventoryReportDetailScreen';
-import StaffReportDetailScreen from '../screens/reports/StaffReportDetailScreen';
-import FinancialReportDetailScreen from '../screens/reports/FinancialReportDetailScreen';
-import LaborReportDetailScreen from '../screens/reports/LaborReportDetailScreen';
 import CostAnalysisReportDetailScreen from '../screens/reports/CostAnalysisReportDetailScreen';
 import EmployeesScreen from '../screens/employees/EmployeesScreen';
 import EnhancedEmployeeScheduleScreen from '../screens/employees/EnhancedEmployeeScheduleScreen';
@@ -23,14 +15,27 @@ import MenuManagementScreen from '../screens/settings/app/MenuManagementScreen';
 import TableManagementScreen from '../screens/table/TableManagementScreen';
 import { TableSelectionScreen } from '../screens/main/TableSelectionScreen';
 import DashboardScreen from '../screens/main/DashboardScreen';
+import HomeHubScreen from '../screens/main/HomeHubScreen';
+import POSScreen from '../screens/main/POSScreen';
 import ProfileScreen from '../screens/main/ProfileScreen';
-import HelpScreen from '../screens/support/HelpScreen';
-import SettingsNavigator from './SettingsNavigator';
+import OrdersScreen from '../screens/orders/OrdersScreen';
+
 import EnhancedPaymentScreen from '../screens/payment/EnhancedPaymentScreen';
 import ServiceChargeSelectionScreen from '../screens/payment/ServiceChargeSelectionScreen';
 import QRCodePaymentScreen from '../screens/payments/QRCodePaymentScreen';
 import SquareCardPaymentScreen from '../screens/payments/SquareCardPaymentScreen';
 import SquareContactlessPaymentScreen from '../screens/payments/SquareContactlessPaymentScreen';
+import FinancialReportDetailScreen from '../screens/reports/FinancialReportDetailScreen';
+import InventoryReportDetailScreen from '../screens/reports/InventoryReportDetailScreen';
+import LaborReportDetailScreen from '../screens/reports/LaborReportDetailScreen';
+import ReportsScreen from '../screens/reports/ReportsScreenSimple';
+import SalesReportDetailScreen from '../screens/reports/SalesReportDetailScreen';
+import StaffReportDetailScreen from '../screens/reports/StaffReportDetailScreen';
+import HelpScreen from '../screens/support/HelpScreen';
+
+import SettingsNavigator from './SettingsNavigator';
+
+import type { MainTabParamList, MainStackParamList } from '../types';
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 const Stack = createStackNavigator<MainStackParamList>();
@@ -41,7 +46,7 @@ const MainTabNavigator: React.FC = () => {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
+        tabBarIcon: ({ _focused, color, size }) => {
           let iconName: string;
 
           switch (route.name) {
@@ -85,7 +90,7 @@ const MainTabNavigator: React.FC = () => {
 
 const MainNavigator: React.FC = () => {
   const { theme } = useTheme();
-  
+
   return (
     <Stack.Navigator
       screenOptions={{
@@ -93,10 +98,7 @@ const MainNavigator: React.FC = () => {
         cardStyle: { backgroundColor: theme.colors.background },
       }}
     >
-      <Stack.Screen
-        name="MainTabs"
-        component={MainTabNavigator}
-      />
+      <Stack.Screen name="MainTabs" component={MainTabNavigator} />
       <Stack.Screen
         name="TableSelection"
         component={TableSelectionScreen}

@@ -1,15 +1,18 @@
 // DataService.ts - Unified data service with mock/real data switching
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import DatabaseService from './DatabaseService';
-import APITestingService from './APITestingService';
+
 import API_CONFIG from '../config/api';
+import { logger } from '../utils/logger';
+// TODO: Unused import - import { AUTH_CONFIG } from '../config/auth.config';
 import { envBool, IS_DEV } from '../env';
+// TODO: Unused import - import { supabase } from '../lib/supabase';
 import { useAuthStore } from '../store/useAuthStore';
-import BackendCompatibilityService from './BackendCompatibilityService';
-import { supabase } from '../lib/supabase';
-import { AUTH_CONFIG } from '../config/auth.config';
 import tokenManager from '../utils/tokenManager';
+
+import APITestingService from './APITestingService';
 import authInterceptor from './auth/AuthInterceptor';
+import BackendCompatibilityService from './BackendCompatibilityService';
+import DatabaseService from './DatabaseService';
 
 // Feature flags for controlling data sources
 export interface FeatureFlags {
@@ -38,7 +41,7 @@ const DEFAULT_FLAGS: FeatureFlags = {
 
 /**
  * DataService - Unified service that intelligently switches between mock and real data
- * 
+ *
  * This allows us to:
  * 1. Keep beautiful mock data for client demos
  * 2. Gradually implement real API integration
@@ -59,7 +62,7 @@ class DataService {
     this.loadFeatureFlags();
     this.checkBackendAvailability();
     this.db = DatabaseService.getInstance();
-    
+
     // Configure authInterceptor with base URL
     authInterceptor.configure({
       baseURL: API_CONFIG.FULL_API_URL,
@@ -81,8 +84,8 @@ class DataService {
       if (stored) {
         this.featureFlags = { ...DEFAULT_FLAGS, ...JSON.parse(stored) };
       }
-    } catch (error) {
-      console.log('Using default feature flags');
+    } catch (_error) {
+      logger.info('Using default feature flags');
     }
   }
 
@@ -106,12 +109,16 @@ class DataService {
   }
 
   // Test API endpoint in background without affecting UI
-  private async testAPIEndpoint(endpoint: string, method: string = 'GET', data?: any): Promise<void> {
+  private async testAPIEndpoint(
+    endpoint: string,
+    method: string = 'GET',
+data?: unknown
+  ): Promise<void> {
     if (this.featureFlags.TEST_API_MODE) {
       try {
         await this.apiTestingService.testEndpoint(endpoint, method, data);
       } catch (error) {
-        console.log(`API test failed for ${endpoint}:`, error);
+        logger.info(`API test failed for ${endpoint}:`, error);
       }
     }
   }
@@ -137,7 +144,7 @@ class DataService {
       // Use AbortController for timeout instead of timeout property
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 2000);
-      
+
       const response = await fetch(`${API_CONFIG.BASE_URL}/health`, {
         method: 'GET',
         signal: controller.signal,
@@ -145,25 +152,26 @@ class DataService {
           'Content-Type': 'application/json',
         },
       });
-      
+
       clearTimeout(timeoutId);
       const wasAvailable = this.isBackendAvailable;
       this.isBackendAvailable = response.ok;
-      
+
       // Test health endpoint when in test mode
       if (this.featureFlags.TEST_API_MODE && this.isBackendAvailable) {
         await this.testAPIEndpoint('/health');
       }
-      
+
       // Log status changes
       if (wasAvailable !== this.isBackendAvailable) {
-        console.log(`Backend status changed: ${this.isBackendAvailable ? 'Available' : 'Unavailable'}`);
+        logger.info(
+          `Backend status changed: ${this.isBackendAvailable ? 'Available' : 'Unavailable'}`
+        );
       }
-      
-    } catch (error) {
+} catch (_error) {
       this.isBackendAvailable = false;
-      console.log('Backend not available, using mock data');
-      
+      logger.info('Backend not available, using mock data');
+
       // Still test the endpoint in test mode to record the failure
       if (this.featureFlags.TEST_API_MODE) {
         await this.testAPIEndpoint('/health');
@@ -182,7 +190,7 @@ class DataService {
       await authStore.signIn(username, password);
       return true;
     } catch (error) {
-      console.error('Supabase login failed:', error);
+      logger.error('Supabase login failed:', error);
       return false;
     }
   }
@@ -192,7 +200,7 @@ class DataService {
       const authStore = useAuthStore.getState();
       await authStore.signOut();
     } catch (error) {
-      console.error('Logout failed:', error);
+      logger.error('Logout failed:', error);
     }
     // Clear any legacy tokens
     await AsyncStorage.multiRemove(['auth_token', 'user_data']);
@@ -211,8 +219,8 @@ class DataService {
         if (products && products.length > 0) {
           return products;
         }
-      } catch (error) {
-        console.log('Failed to fetch products from API, using mock data');
+      } catch (_error) {
+        logger.info('Failed to fetch products from API, using mock data');
       }
     }
     return this.db.getProducts();
@@ -222,8 +230,8 @@ class DataService {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         return await this.db.getProductsByCategory(categoryId);
-      } catch (error) {
-        console.log('Failed to fetch products by category, using mock data');
+      } catch (_error) {
+        logger.info('Failed to fetch products by category, using mock data');
       }
     }
     return this.db.getProductsByCategory(categoryId);
@@ -235,17 +243,17 @@ class DataService {
       try {
         const categories = await this.db.getCategories();
         if (!categories) {
-          console.warn('⚠️ API returned null/undefined categories');
+          logger.warn('⚠️ API returned null/undefined categories');
           return [];
         }
-        console.log('✅ Loaded categories from API:', categories.length);
+        logger.info('✅ Loaded categories from API:', categories.length);
         return categories;
       } catch (error) {
-        console.error('❌ Failed to fetch categories from API:', error);
+        logger.error('❌ Failed to fetch categories from API:', error);
         throw error;
       }
     }
-    
+
     if (!this.featureFlags.USE_REAL_API) {
       throw new Error('Real API is disabled. Enable USE_REAL_API flag to access category data.');
     } else {
@@ -266,13 +274,13 @@ class DataService {
         if (menuItems && menuItems.length > 0) {
           // Apply compatibility transformation if needed
           if (BackendCompatibilityService.needsMenuTransformation(menuItems)) {
-            console.log('🔄 Applying menu compatibility transformation');
+            logger.info('🔄 Applying menu compatibility transformation');
             return BackendCompatibilityService.transformMenuItems(menuItems);
           }
           return menuItems;
         }
-      } catch (error) {
-        console.log('Failed to fetch menu items from API, using mock data');
+      } catch (_error) {
+        logger.info('Failed to fetch menu items from API, using mock data');
       }
     }
     return this.db.getMenuItems();
@@ -290,8 +298,8 @@ class DataService {
         if (categories && categories.length > 0) {
           return categories;
         }
-      } catch (error) {
-        console.log('Failed to fetch menu categories from API, using mock data');
+      } catch (_error) {
+        logger.info('Failed to fetch menu categories from API, using mock data');
       }
     }
     return this.db.getMenuCategories();
@@ -304,14 +312,14 @@ class DataService {
     color?: string;
     icon?: string;
     sort_order?: number;
-  }): Promise<any> {
+  }): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         const result = await this.db.createCategory(categoryData);
-        console.log('✅ Category created via API:', result);
+        logger.info('✅ Category created via API:', result);
         return result;
       } catch (error) {
-        console.error('❌ API category creation failed:', error);
+        logger.error('❌ API category creation failed:', error);
         throw error;
       }
     }
@@ -322,21 +330,24 @@ class DataService {
     }
   }
 
-  async updateCategory(categoryId: string, categoryData: Partial<{
-    name: string;
-    description?: string;
-    color?: string;
-    icon?: string;
-    sort_order?: number;
-    is_active?: boolean;
-  }>): Promise<any> {
+  async updateCategory(
+    categoryId: string,
+    categoryData: Partial<{
+      name: string;
+      description?: string;
+      color?: string;
+      icon?: string;
+      sort_order?: number;
+      is_active?: boolean;
+    }>
+): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         const result = await this.db.updateCategory(categoryId, categoryData);
-        console.log('✅ Category updated via API:', result);
+        logger.info('✅ Category updated via API:', result);
         return result;
       } catch (error) {
-        console.error('❌ API category update failed:', error);
+        logger.error('❌ API category update failed:', error);
         throw error;
       }
     }
@@ -351,10 +362,10 @@ class DataService {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         await this.db.deleteCategory(categoryId);
-        console.log('✅ Category deleted via API:', categoryId);
+        logger.info('✅ Category deleted via API:', categoryId);
         return;
       } catch (error) {
-        console.error('❌ API category deletion failed:', error);
+        logger.error('❌ API category deletion failed:', error);
         throw error;
       }
     }
@@ -377,15 +388,15 @@ class DataService {
     sku?: string;
     prep_time?: number;
     dietary_info?: string[];
-    modifiers?: any[];
+    modifiers?: unknown[];
     stock_tracking?: boolean;
     stock_quantity?: number;
-  }): Promise<any> {
+  }): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         return await this.db.createProduct(productData);
       } catch (error) {
-        console.error('Failed to create product:', error);
+        logger.error('Failed to create product:', error);
         throw error;
       }
     }
@@ -396,27 +407,30 @@ class DataService {
     }
   }
 
-  async updateProduct(productId: string, productData: Partial<{
-    category_id?: string;
-    name?: string;
-    description?: string;
-    price?: number;
-    cost?: number;
-    image_url?: string;
-    barcode?: string;
-    sku?: string;
-    prep_time?: number;
-    dietary_info?: string[];
-    modifiers?: any[];
-    stock_tracking?: boolean;
-    stock_quantity?: number;
-    is_active?: boolean;
-  }>): Promise<any> {
+  async updateProduct(
+    productId: string,
+    productData: Partial<{
+      category_id?: string;
+      name?: string;
+      description?: string;
+      price?: number;
+      cost?: number;
+      image_url?: string;
+      barcode?: string;
+      sku?: string;
+      prep_time?: number;
+      dietary_info?: string[];
+modifiers?: unknown[];
+      stock_tracking?: boolean;
+      stock_quantity?: number;
+      is_active?: boolean;
+    }>
+): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         return await this.db.updateProduct(productId, productData);
       } catch (error) {
-        console.error('Failed to update product:', error);
+        logger.error('Failed to update product:', error);
         throw error;
       }
     }
@@ -432,7 +446,7 @@ class DataService {
       try {
         await this.db.deleteProduct(productId);
       } catch (error) {
-        console.error('Failed to delete product:', error);
+        logger.error('Failed to delete product:', error);
         throw error;
       }
     } else {
@@ -445,24 +459,24 @@ class DataService {
   }
 
   // Order operations
-  async createOrder(order: any): Promise<any> {
+  async createOrder(order: unknown): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         const result = await this.db.createOrder(order);
         if (result) return result;
-      } catch (error) {
-        console.log('Failed to create order via API, using mock');
+      } catch (_error) {
+        logger.info('Failed to create order via API, using mock');
       }
     }
     return this.db.createOrder(order);
   }
 
-  async updateOrder(orderId: number, updates: any): Promise<any> {
+  async updateOrder(orderId: number, updates: unknown): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         return await this.db.updateOrder(orderId, updates);
-      } catch (error) {
-        console.log('Failed to update order via API');
+      } catch (_error) {
+        logger.info('Failed to update order via API');
       }
     }
     return this.db.updateOrder(orderId, updates);
@@ -475,8 +489,8 @@ class DataService {
         if (orders && orders.length > 0) {
           return orders;
         }
-      } catch (error) {
-        console.log('Failed to fetch orders from API, using mock data');
+      } catch (_error) {
+        logger.info('Failed to fetch orders from API, using mock data');
       }
     }
     return this.db.getRecentOrders(limit);
@@ -486,27 +500,31 @@ class DataService {
   async processPayment(orderId: number, paymentMethod: string, amount: number): Promise<boolean> {
     // Test payment endpoint in background when in test mode
     if (this.featureFlags.TEST_API_MODE) {
-      await this.testAPIEndpoint('/api/v1/payments/process', 'POST', { 
-        orderId, 
-        paymentMethod, 
-        amount 
+      await this.testAPIEndpoint('/api/v1/payments/process', 'POST', {
+        orderId,
+        paymentMethod,
+        amount,
       });
     }
 
-    if (this.featureFlags.ENABLE_PAYMENTS && this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
+    if (
+      this.featureFlags.ENABLE_PAYMENTS &&
+      this.featureFlags.USE_REAL_API &&
+      this.isBackendAvailable
+    ) {
       try {
-        console.log(`Processing real payment: ${paymentMethod} for £${amount} (Order: ${orderId})`);
+        logger.info(`Processing real payment: ${paymentMethod} for £${amount} (Order: ${orderId})`);
         const result = await this.db.processPayment(orderId, paymentMethod, amount);
-        
+
         if (result) {
-          console.log('✅ Real payment processed successfully');
+          logger.info('✅ Real payment processed successfully');
           return true;
         } else {
-          console.log('❌ Real payment failed - no result returned');
+          logger.info('❌ Real payment failed - no result returned');
           throw new Error('Payment processing failed');
         }
       } catch (error) {
-        console.log('❌ Real payment failed, falling back to mock:', error);
+        logger.info('❌ Real payment failed, falling back to mock:', error);
         // Don't fall back for payment processing - we want to see the real error
         throw error;
       }
@@ -514,111 +532,115 @@ class DataService {
 
     // If payments disabled or no backend, simulate success for demo
     if (!this.featureFlags.ENABLE_PAYMENTS) {
-      console.log(`🎭 Demo mode payment: ${paymentMethod} for £${amount}`);
+      logger.info(`🎭 Demo mode payment: ${paymentMethod} for £${amount}`);
       return this.db.processPayment(orderId, paymentMethod, amount);
     }
-    
+
     // Fallback to mock if no backend available
-    console.log(`⚠️  No backend available, using mock payment: ${paymentMethod} for £${amount}`);
+    logger.info(`⚠️  No backend available, using mock payment: ${paymentMethod} for £${amount}`);
     return this.db.processPayment(orderId, paymentMethod, amount);
   }
 
   // Restaurant operations
-  async getRestaurantFloorPlan(sectionId?: string | null): Promise<any> {
+  async getRestaurantFloorPlan(sectionId?: string | null): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         const floorPlan = await this.db.getRestaurantFloorPlan(sectionId ?? undefined);
         if (floorPlan && floorPlan.tables && floorPlan.tables.length > 0) {
           return floorPlan;
         }
-      } catch (error) {
-        console.log('Failed to fetch floor plan from API, using mock data');
+      } catch (_error) {
+        logger.info('Failed to fetch floor plan from API, using mock data');
       }
     }
     return this.db.getRestaurantFloorPlan(sectionId ?? undefined);
   }
 
-  async updateTableStatus(tableId: string, status: string, additionalData?: any): Promise<any> {
+  async updateTableStatus(
+    tableId: string,
+    status: string,
+    additionalData?: unknown
+  ): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         return await this.db.updateTableStatus(tableId, status, additionalData);
-      } catch (error) {
-        console.log('Failed to update table status via API');
+      } catch (_error) {
+        logger.info('Failed to update table status via API');
       }
     }
     return this.db.updateTableStatus(tableId, status, additionalData);
   }
 
   // Analytics and Reporting
-  async getDailySalesReport(date?: string): Promise<any> {
+  async getDailySalesReport(date?: string): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         const report = await this.db.getDailySalesReport(date);
         if (report && report.summary) {
           return report;
         }
-      } catch (error) {
-        console.log('Failed to fetch daily report from API, using mock data');
+      } catch (_error) {
+        logger.info('Failed to fetch daily report from API, using mock data');
       }
     }
     return this.db.getDailySalesReport(date);
   }
 
-  async getSalesSummary(dateFrom?: string, dateTo?: string): Promise<any> {
+  async getSalesSummary(dateFrom?: string, dateTo?: string): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         const summary = await this.db.getSalesSummary(dateFrom ?? undefined, dateTo ?? undefined);
         if (summary && summary.summary) {
           return summary;
         }
-      } catch (error) {
-        console.log('Failed to fetch sales summary from API, using mock data');
+      } catch (_error) {
+        logger.info('Failed to fetch sales summary from API, using mock data');
       }
     }
     return this.db.getSalesSummary(dateFrom ?? undefined, dateTo ?? undefined);
   }
 
   // Session management
-  async getCurrentSession(): Promise<any> {
+  async getCurrentSession(): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         return await this.db.getCurrentSession();
-      } catch (error) {
-        console.log('Failed to get session from API');
+      } catch (_error) {
+        logger.info('Failed to get session from API');
       }
     }
     return this.db.getCurrentSession();
   }
 
-  async createSession(configId: number): Promise<any> {
+  async createSession(configId: number): Promise<unknown> {
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         return await this.db.createSession(configId);
-      } catch (error) {
-        console.log('Failed to create session via API');
+      } catch (_error) {
+        logger.info('Failed to create session via API');
       }
     }
     return this.db.createSession(configId);
   }
 
   // Hardware operations (always mock for now)
-  async printReceipt(order: any): Promise<boolean> {
+  async printReceipt(order: unknown): Promise<boolean> {
     if (this.featureFlags.ENABLE_HARDWARE) {
-      console.log('Hardware printing not yet implemented');
+      logger.info('Hardware printing not yet implemented');
     }
     return this.db.printReceipt(order);
   }
 
   async openCashDrawer(): Promise<boolean> {
     if (this.featureFlags.ENABLE_HARDWARE) {
-      console.log('Hardware cash drawer not yet implemented');
+      logger.info('Hardware cash drawer not yet implemented');
     }
     return this.db.openCashDrawer();
   }
 
   async scanBarcode(): Promise<string | null> {
     if (this.featureFlags.ENABLE_HARDWARE) {
-      console.log('Hardware barcode scanning not yet implemented');
+      logger.info('Hardware barcode scanning not yet implemented');
     }
     return this.db.scanBarcode();
   }
@@ -637,13 +659,13 @@ class DataService {
     await this.updateFeatureFlag('USE_REAL_API', false);
     await this.updateFeatureFlag('ENABLE_PAYMENTS', false);
     await this.updateFeatureFlag('ENABLE_HARDWARE', false);
-    console.log('Reset to mock data mode');
+    logger.info('Reset to mock data mode');
   }
 
   async enableRealAPI(): Promise<void> {
     await this.updateFeatureFlag('USE_REAL_API', true);
     await this.checkBackendAvailability();
-    console.log('Enabled real API mode');
+    logger.info('Enabled real API mode');
   }
 
   getConnectionStatus(): { mode: string; backend: boolean; flags: FeatureFlags } {
@@ -658,194 +680,212 @@ class DataService {
   // TODO(real API): Implement actual API calls for these methods
 
   async getCustomers(): Promise<any[]> {
-    console.log('🌐 DataService.getCustomers - fetching from API');
-    
+    logger.info('🌐 DataService.getCustomers - fetching from API');
+
     try {
       const response = await authInterceptor.get(`${API_CONFIG.FULL_API_URL}/customers`);
-      
+
       if (response.ok) {
         const result = await response.json();
         const customers = result.data || result;
-        console.log('✅ API customers received:', Array.isArray(customers) ? customers.length : 'not an array');
+        logger.info(
+          '✅ API customers received:',
+          Array.isArray(customers) ? customers.length : 'not an array'
+        );
         return Array.isArray(customers) ? customers : [];
       } else {
-        console.error('❌ API error:', response.status, response.statusText);
+        logger.error('❌ API error:', response.status, response.statusText);
         throw new Error(`API error: ${response.status}`);
       }
     } catch (error) {
-      console.error('❌ Failed to fetch customers from API:', error);
+      logger.error('❌ Failed to fetch customers from API:', error);
       throw error; // No fallback - API must work for production readiness
     }
   }
 
   async getInventory(): Promise<any[]> {
-    console.log('🌐 DataService.getInventory - fetching from API');
-    
+    logger.info('🌐 DataService.getInventory - fetching from API');
+
     try {
       const inventoryItems = await this.db.getInventoryItems();
-      if (inventoryItems && inventoryItems.length >= 0) { // Allow empty arrays
-        console.log('✅ API inventory received:', inventoryItems.length, 'items');
+      if (inventoryItems && inventoryItems.length >= 0) {
+        // Allow empty arrays
+        logger.info('✅ API inventory received:', inventoryItems.length, 'items');
         return inventoryItems;
       } else {
         throw new Error('Invalid inventory data received from API');
       }
     } catch (error) {
-      console.error('❌ Failed to fetch inventory from API:', error);
+      logger.error('❌ Failed to fetch inventory from API:', error);
       throw error; // No fallback - API must work for production readiness
     }
   }
 
   async getEmployees(): Promise<any[]> {
-    console.log('🌐 DataService.getEmployees - fetching from API');
-    
+    logger.info('🌐 DataService.getEmployees - fetching from API');
+
     try {
       const response = await authInterceptor.get(`${API_CONFIG.FULL_API_URL}/employees`);
-      
+
       if (response.ok) {
         const result = await response.json();
         const employees = result.data || result;
-        console.log('✅ API employees received:', Array.isArray(employees) ? employees.length : 'not an array');
-        
+        logger.info(
+          '✅ API employees received:',
+          Array.isArray(employees) ? employees.length : 'not an array'
+        );
+
         // Apply compatibility transformation if needed
-        if (Array.isArray(employees) && BackendCompatibilityService.needsEmployeeTransformation(employees)) {
-          console.log('🔄 Applying employee compatibility transformation');
+        if (
+          Array.isArray(employees) &&
+          BackendCompatibilityService.needsEmployeeTransformation(employees)
+        ) {
+          logger.info('🔄 Applying employee compatibility transformation');
           return BackendCompatibilityService.transformEmployees(employees);
         }
-        
+
         return Array.isArray(employees) ? employees : [];
       } else {
-        console.error('❌ API error:', response.status, response.statusText);
+        logger.error('❌ API error:', response.status, response.statusText);
         throw new Error(`API error: ${response.status} - ${response.statusText}`);
       }
     } catch (error) {
-      console.error('❌ Failed to fetch employees from API:', error);
-      console.warn('🚨 Production Mode: Returning empty employee list instead of mock data');
-      
+      logger.error('❌ Failed to fetch employees from API:', error);
+      logger.warn('🚨 Production Mode: Returning empty employee list instead of mock data');
+
       // PRODUCTION READY: Return empty array instead of mock data
       // Screens should handle empty state gracefully with EmptyState component
       return [];
     }
   }
 
-  async getWeekSchedule(weekStart: Date, employees: any[]): Promise<any | null> {
-    console.log('🌐 DataService.getWeekSchedule - fetching from API', { weekStart });
-    
+  async getWeekSchedule(weekStart: Date, employees: unknown[]): Promise<any | null> {
+    logger.info('🌐 DataService.getWeekSchedule - fetching from API', { weekStart });
+
     try {
       const schedule = await this.db.getWeekSchedule(weekStart, employees);
-      console.log('✅ API schedule received:', schedule?.shifts?.length || 0, 'shifts');
+      logger.info('✅ API schedule received:', schedule?.shifts?.length || 0, 'shifts');
       return schedule;
     } catch (error) {
-      console.error('❌ Failed to fetch schedule from API:', error);
+      logger.error('❌ Failed to fetch schedule from API:', error);
       throw error; // No fallback - API must work for production readiness
     }
   }
 
   async getOrders(dateRange: string): Promise<any[]> {
-    console.log('DataService.getOrders called', {
+    logger.info('DataService.getOrders called', {
       dateRange,
       USE_REAL_API: this.featureFlags.USE_REAL_API,
-      isBackendAvailable: this.isBackendAvailable
+      isBackendAvailable: this.isBackendAvailable,
     });
-    
+
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        console.log('🌐 Attempting to fetch orders from API...');
+        logger.info('🌐 Attempting to fetch orders from API...');
         const authToken = await this.getAuthToken();
         const response = await fetch(`${API_CONFIG.FULL_API_URL}/orders?date_range=${dateRange}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
+            ...(authToken && { Authorization: `Bearer ${authToken}` }),
           },
         });
-        
+
         if (response.ok) {
           const result = await response.json();
           const orders = result.data || result;
-          console.log('✅ API orders received:', Array.isArray(orders) ? orders.length : 'not an array');
+          logger.info(
+            '✅ API orders received:',
+            Array.isArray(orders) ? orders.length : 'not an array'
+          );
           return Array.isArray(orders) ? orders : [];
         } else {
-          console.error('❌ API error:', response.status, response.statusText);
+          logger.error('❌ API error:', response.status, response.statusText);
           throw new Error(`API error: ${response.status}`);
         }
       } catch (error) {
-        console.error('❌ Failed to fetch orders from API:', error);
+        logger.error('❌ Failed to fetch orders from API:', error);
         throw error; // No fallback - API must work for production readiness
       }
     }
   }
 
   async getFinancialReportDetail(period: string): Promise<any | null> {
-    console.log('DataService.getFinancialReportDetail called', {
+    logger.info('DataService.getFinancialReportDetail called', {
       period,
       USE_REAL_API: this.featureFlags.USE_REAL_API,
-      isBackendAvailable: this.isBackendAvailable
+      isBackendAvailable: this.isBackendAvailable,
     });
-    
+
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        console.log('🌐 Attempting to fetch financial data from API...');
+        logger.info('🌐 Attempting to fetch financial data from API...');
         const authToken = await this.getAuthToken();
-        const response = await fetch(`${API_CONFIG.FULL_API_URL}/analytics/financial?period=${period}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
-          },
-        });
-        
+        const response = await fetch(
+          `${API_CONFIG.FULL_API_URL}/analytics/financial?period=${period}`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(authToken && { Authorization: `Bearer ${authToken}` }),
+            },
+          }
+        );
+
         if (response.ok) {
           const result = await response.json();
           const financialData = result.data || result; // Handle both wrapped and unwrapped responses
-          console.log('✅ API financial data received');
+          logger.info('✅ API financial data received');
           return financialData;
         } else {
-          console.error('❌ API error:', response.status, response.statusText);
+          logger.error('❌ API error:', response.status, response.statusText);
           throw new Error(`API error: ${response.status}`);
         }
       } catch (error) {
-        console.error('❌ Failed to fetch financial data from API:', error);
+        logger.error('❌ Failed to fetch financial data from API:', error);
         throw error; // No fallback - API must work for production readiness
       }
     }
-    
   }
 
   async getSalesReportDetail(period: string): Promise<any[]> {
-    console.log('🌐 DataService.getSalesReportDetail - fetching from API', { period });
-    
+    logger.info('🌐 DataService.getSalesReportDetail - fetching from API', { period });
+
     try {
       const authToken = await this.getAuthToken();
-      const response = await fetch(`${API_CONFIG.FULL_API_URL}/analytics/sales?timeframe=${period}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
-        },
-      });
-      
+      const response = await fetch(
+        `${API_CONFIG.FULL_API_URL}/analytics/sales?timeframe=${period}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(authToken && { Authorization: `Bearer ${authToken}` }),
+          },
+        }
+      );
+
       if (response.ok) {
         const result = await response.json();
-        let salesData = result.data || result;
-        
+        const salesData = result.data || result;
+
         // Transform API data to match frontend SalesData[] interface
         if (salesData && !Array.isArray(salesData)) {
           // Convert API format to SalesData array format
           const transformedData = this.transformApiDataToArray(salesData, period);
-          console.log('✅ API sales data transformed for frontend');
+          logger.info('✅ API sales data transformed for frontend');
           return transformedData;
         } else if (Array.isArray(salesData)) {
-          console.log('✅ API sales data received in array format');
+          logger.info('✅ API sales data received in array format');
           return salesData;
         } else {
           throw new Error('Invalid sales data format received from API');
         }
       } else {
-        console.error('❌ API error:', response.status, response.statusText);
+        logger.error('❌ API error:', response.status, response.statusText);
         throw new Error(`API error: ${response.status}`);
       }
     } catch (error) {
-      console.error('❌ Failed to fetch sales data from API:', error);
+      logger.error('❌ Failed to fetch sales data from API:', error);
       throw error; // No fallback - API must work for production readiness
     }
   }
@@ -854,7 +894,7 @@ class DataService {
    * Transform API response data to SalesData array format
    * Handles various API response formats and converts to frontend interface
    */
-  private transformApiDataToArray(apiData: any, period: string): any[] {
+  private transformApiDataToArray(apiData: unknown, _period: string): unknown[] {
     try {
       // If API returns object with sales data, extract it
       if (apiData && typeof apiData === 'object') {
@@ -868,137 +908,148 @@ class DataService {
         if (apiData.data && Array.isArray(apiData.data)) {
           return apiData.data;
         }
-        
+
         // Convert single object to array format
         return [apiData];
       }
-      
+
       // Return empty array if no valid data
       return [];
     } catch (error) {
-      console.error('❌ Error transforming API data:', error);
+      logger.error('❌ Error transforming API data:', error);
       return [];
     }
   }
 
-  async getStaffReportDetail(period: string): Promise<any[]> { // Should return StaffMember[]
-    console.log('DataService.getStaffReportDetail called', {
+  async getStaffReportDetail(period: string): Promise<any[]> {
+    // Should return StaffMember[]
+    logger.info('DataService.getStaffReportDetail called', {
       period,
       USE_REAL_API: this.featureFlags.USE_REAL_API,
-      isBackendAvailable: this.isBackendAvailable
+      isBackendAvailable: this.isBackendAvailable,
     });
-    
+
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        console.log('🌐 Attempting to fetch staff data from API...');
+        logger.info('🌐 Attempting to fetch staff data from API...');
         const authToken = await this.getAuthToken();
-        const response = await fetch(`${API_CONFIG.FULL_API_URL}/analytics/employees?timeframe=${period}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
-          },
-        });
-        
+        const response = await fetch(
+          `${API_CONFIG.FULL_API_URL}/analytics/employees?timeframe=${period}`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(authToken && { Authorization: `Bearer ${authToken}` }),
+            },
+          }
+        );
+
         if (response.ok) {
           const result = await response.json();
           const staffData = result.data || result; // Handle both wrapped and unwrapped responses
-          console.log('✅ API staff data received');
+          logger.info('✅ API staff data received');
           return staffData;
         } else {
-          console.error('❌ API error:', response.status, response.statusText);
+          logger.error('❌ API error:', response.status, response.statusText);
           throw new Error(`API error: ${response.status}`);
         }
       } catch (error) {
-        console.error('❌ Failed to fetch staff data from API:', error);
+        logger.error('❌ Failed to fetch staff data from API:', error);
         throw error; // No fallback - API must work for production readiness
       }
     }
-    
   }
 
-  async getLaborReport(period: string): Promise<any> {
-    console.log('DataService.getLaborReport called', {
+  async getLaborReport(period: string): Promise<unknown> {
+    logger.info('DataService.getLaborReport called', {
       period,
       USE_REAL_API: this.featureFlags.USE_REAL_API,
-      isBackendAvailable: this.isBackendAvailable
+      isBackendAvailable: this.isBackendAvailable,
     });
-    
+
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        console.log('🌐 Attempting to fetch labor data from API...');
+        logger.info('🌐 Attempting to fetch labor data from API...');
         const authToken = await this.getAuthToken();
-        const response = await fetch(`${API_CONFIG.FULL_API_URL}/analytics/labor?period=${period}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
-          },
-        });
-        
+        const response = await fetch(
+          `${API_CONFIG.FULL_API_URL}/analytics/labor?period=${period}`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(authToken && { Authorization: `Bearer ${authToken}` }),
+            },
+          }
+        );
+
         if (response.ok) {
           const result = await response.json();
           const laborData = result.data || result; // Handle both wrapped and unwrapped responses
-          console.log('✅ API labor data received');
+          logger.info('✅ API labor data received');
           return laborData;
         } else {
-          console.error('❌ API error:', response.status, response.statusText);
+          logger.error('❌ API error:', response.status, response.statusText);
           throw new Error(`API error: ${response.status}`);
         }
       } catch (error) {
-        console.error('❌ Failed to fetch labor data from API:', error);
+        logger.error('❌ Failed to fetch labor data from API:', error);
         throw error; // No fallback - API must work for production readiness
       }
     }
-    
+
     // This should never be reached in production
     throw new Error('Labor report requires backend API connection');
   }
 
   async getReportsDashboardData(): Promise<any | null> {
-    console.log('DataService.getReportsDashboardData called', {
+    logger.info('DataService.getReportsDashboardData called', {
       USE_REAL_API: this.featureFlags.USE_REAL_API,
-      isBackendAvailable: this.isBackendAvailable
+      isBackendAvailable: this.isBackendAvailable,
     });
-    
+
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        console.log('🌐 Attempting to fetch reports from API...');
+        logger.info('🌐 Attempting to fetch reports from API...');
         const authToken = await this.getAuthToken();
         const response = await fetch(`${API_CONFIG.FULL_API_URL}/analytics/dashboard/mobile`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
+            ...(authToken && { Authorization: `Bearer ${authToken}` }),
           },
         });
-        
+
         if (response.ok) {
           const result = await response.json();
           const dashboardData = result.data || result; // Handle both wrapped and unwrapped responses
-          console.log('✅ API reports received');
+          logger.info('✅ API reports received');
           return dashboardData;
         } else {
-          console.error('❌ API error:', response.status, response.statusText);
+          logger.error('❌ API error:', response.status, response.statusText);
           throw new Error(`API error: ${response.status}`);
         }
       } catch (error) {
-        console.error('❌ Failed to fetch reports dashboard from API:', error);
+        logger.error('❌ Failed to fetch reports dashboard from API:', error);
         throw error; // No fallback - API must work for production readiness
       }
     }
-    
+
     // This should never be reached in production
     throw new Error('Reports dashboard requires backend API connection');
   }
 
   async getUserProfile(): Promise<any | null> {
-    console.warn('DataService.getUserProfile is a stub and not implemented.');
+    logger.warn('DataService.getUserProfile is a stub and not implemented.');
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       // return this.db.getUserProfile();
       throw new Error('DataService.getUserProfile not implemented yet');
     }
-    return Promise.resolve({ id: 1, name: 'Default User', email: 'user@example.com', role: 'admin' });
+    return Promise.resolve({
+      id: 1,
+      name: 'Default User',
+      email: 'user@example.com',
+      role: 'admin',
+    });
   }
 
   /**
@@ -1014,37 +1065,34 @@ class DataService {
     hourlyRate?: number;
     startDate?: string;
     permissions?: string[];
-  }): Promise<any> {
-    console.log('🌐 DataService.createEmployee - creating employee via API', employeeData);
-    
+  }): Promise<unknown> {
+    logger.info('🌐 DataService.createEmployee - creating employee via API', employeeData);
+
     try {
-      const response = await authInterceptor.post(
-        `${API_CONFIG.FULL_API_URL}/employees`,
-        {
-          first_name: employeeData.firstName,
-          last_name: employeeData.lastName,
-          email: employeeData.email,
-          phone: employeeData.phone,
-          role: employeeData.role,
-          hourly_rate: employeeData.hourlyRate,
-          start_date: employeeData.startDate,
-          permissions: employeeData.permissions || [],
-          is_active: true,
-        }
-      );
-      
+      const response = await authInterceptor.post(`${API_CONFIG.FULL_API_URL}/employees`, {
+        first_name: employeeData.firstName,
+        last_name: employeeData.lastName,
+        email: employeeData.email,
+        phone: employeeData.phone,
+        role: employeeData.role,
+        hourly_rate: employeeData.hourlyRate,
+        start_date: employeeData.startDate,
+        permissions: employeeData.permissions || [],
+        is_active: true,
+      });
+
       if (response.ok) {
         const result = await response.json();
         const newEmployee = result.data || result;
-        console.log('✅ Employee created successfully:', newEmployee.id);
+        logger.info('✅ Employee created successfully:', newEmployee.id);
         return newEmployee;
       } else {
         const errorText = await response.text();
-        console.error('❌ Failed to create employee:', response.status, errorText);
+        logger.error('❌ Failed to create employee:', response.status, errorText);
         throw new Error(`Failed to create employee: ${response.status} - ${errorText}`);
       }
     } catch (error) {
-      console.error('❌ Employee creation failed:', error);
+      logger.error('❌ Employee creation failed:', error);
       throw new Error(`Employee creation failed: ${error.message}`);
     }
   }
@@ -1053,60 +1101,60 @@ class DataService {
    * Delete an employee from the system
    */
   async deleteEmployee(employeeId: number | string): Promise<void> {
-    console.log('🌐 DataService.deleteEmployee - deleting employee via API', { employeeId });
-    
+    logger.info('🌐 DataService.deleteEmployee - deleting employee via API', { employeeId });
+
     try {
       const response = await authInterceptor.delete(
         `${API_CONFIG.FULL_API_URL}/employees/${employeeId}`
       );
-      
+
       if (response.ok) {
-        console.log('✅ Employee deleted successfully');
+        logger.info('✅ Employee deleted successfully');
         return;
       } else {
         const errorText = await response.text();
-        console.error('❌ Failed to delete employee:', response.status, errorText);
+        logger.error('❌ Failed to delete employee:', response.status, errorText);
         throw new Error(`Failed to delete employee: ${response.status} - ${errorText}`);
       }
     } catch (error) {
-      console.error('❌ Employee deletion failed:', error);
+      logger.error('❌ Employee deletion failed:', error);
       throw new Error(`Employee deletion failed: ${error.message}`);
     }
   }
 
   async getInventoryReport(): Promise<any[]> {
-    console.log('DataService.getInventoryReport called', {
+    logger.info('DataService.getInventoryReport called', {
       USE_REAL_API: this.featureFlags.USE_REAL_API,
-      isBackendAvailable: this.isBackendAvailable
+      isBackendAvailable: this.isBackendAvailable,
     });
-    
+
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        console.log('🌐 Attempting to fetch inventory data from API...');
+        logger.info('🌐 Attempting to fetch inventory data from API...');
         const authToken = await this.getAuthToken();
         const response = await fetch(`${API_CONFIG.FULL_API_URL}/inventory`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
+            ...(authToken && { Authorization: `Bearer ${authToken}` }),
           },
         });
-        
+
         if (response.ok) {
           const result = await response.json();
           const inventoryData = result.data || result;
-          console.log('✅ API inventory data received');
+          logger.info('✅ API inventory data received');
           return Array.isArray(inventoryData) ? inventoryData : [];
         } else {
-          console.error('❌ API error:', response.status, response.statusText);
+          logger.error('❌ API error:', response.status, response.statusText);
           throw new Error(`API error: ${response.status}`);
         }
       } catch (error) {
-        console.error('❌ Failed to fetch inventory data from API:', error);
+        logger.error('❌ Failed to fetch inventory data from API:', error);
         throw error; // No fallback - API must work for production readiness
       }
     }
-    
+
     // Throw error if not using real API
     throw new Error('Inventory data requires API connection');
   }
@@ -1115,9 +1163,9 @@ class DataService {
   // SUBSCRIPTION MANAGEMENT METHODS
   // ===========================================================================
 
-  async getSubscriptionPlans(): Promise<any> {
-    console.log('DataService.getSubscriptionPlans called');
-    
+  async getSubscriptionPlans(): Promise<unknown> {
+    logger.info('DataService.getSubscriptionPlans called');
+
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         const authToken = await this.getAuthToken();
@@ -1125,71 +1173,74 @@ class DataService {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
+            ...(authToken && { Authorization: `Bearer ${authToken}` }),
           },
         });
-        
+
         if (response.ok) {
           const result = await response.json();
           return {
             success: true,
             data: result.data || result,
-            message: 'Plans retrieved successfully'
+            message: 'Plans retrieved successfully',
           };
         } else {
           throw new Error(`API error: ${response.status}`);
         }
       } catch (error) {
-        console.error('❌ Failed to fetch subscription plans:', error);
+        logger.error('❌ Failed to fetch subscription plans:', error);
         throw error;
       }
     }
-    
+
     throw new Error('Subscription plans require API connection');
   }
 
-  async getCurrentSubscription(restaurantId: number): Promise<any> {
-    console.log('DataService.getCurrentSubscription called', { restaurantId });
-    
+  async getCurrentSubscription(restaurantId: number): Promise<unknown> {
+    logger.info('DataService.getCurrentSubscription called', { restaurantId });
+
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         const authToken = await this.getAuthToken();
-        const response = await fetch(`${API_CONFIG.FULL_API_URL}/subscriptions/current?restaurant_id=${restaurantId}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
-          },
-        });
-        
+        const response = await fetch(
+          `${API_CONFIG.FULL_API_URL}/subscriptions/current?restaurant_id=${restaurantId}`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(authToken && { Authorization: `Bearer ${authToken}` }),
+            },
+          }
+        );
+
         if (response.ok) {
           const result = await response.json();
           return {
             success: true,
             data: result.data || result,
-            message: 'Subscription retrieved successfully'
+            message: 'Subscription retrieved successfully',
           };
         } else if (response.status === 404) {
           return {
             success: false,
             data: null,
-            message: 'No active subscription found'
+            message: 'No active subscription found',
           };
         } else {
           throw new Error(`API error: ${response.status}`);
         }
       } catch (error) {
-        console.error('❌ Failed to fetch current subscription:', error);
+        logger.error('❌ Failed to fetch current subscription:', error);
         throw error;
       }
     }
-    
+
     throw new Error('Subscription data requires API connection');
   }
 
-  async createSubscription(subscriptionData: any): Promise<any> {
-    console.log('DataService.createSubscription called', subscriptionData);
-    
+  async createSubscription(subscriptionData: unknown): Promise<unknown> {
+    logger.info('DataService.createSubscription called', subscriptionData);
+
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         const authToken = await this.getAuthToken();
@@ -1197,42 +1248,42 @@ class DataService {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
+            ...(authToken && { Authorization: `Bearer ${authToken}` }),
           },
           body: JSON.stringify(subscriptionData),
         });
-        
+
         if (response.ok) {
           const result = await response.json();
           return {
             success: true,
             data: result.data || result,
-            message: result.message || 'Subscription created successfully'
+            message: result.message || 'Subscription created successfully',
           };
         } else {
           const errorData = await response.json();
           return {
             success: false,
             data: null,
-            message: errorData.message || `Failed to create subscription: ${response.status}`
+            message: errorData.message || `Failed to create subscription: ${response.status}`,
           };
         }
       } catch (error) {
-        console.error('❌ Failed to create subscription:', error);
+        logger.error('❌ Failed to create subscription:', error);
         return {
           success: false,
           data: null,
-          message: error.message || 'Failed to create subscription'
+          message: error.message || 'Failed to create subscription',
         };
       }
     }
-    
+
     throw new Error('Subscription creation requires API connection');
   }
 
-  async changeSubscriptionPlan(changeData: any): Promise<any> {
-    console.log('DataService.changeSubscriptionPlan called', changeData);
-    
+  async changeSubscriptionPlan(changeData: unknown): Promise<unknown> {
+    logger.info('DataService.changeSubscriptionPlan called', changeData);
+
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         const authToken = await this.getAuthToken();
@@ -1240,120 +1291,130 @@ class DataService {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
-            ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
+            ...(authToken && { Authorization: `Bearer ${authToken}` }),
           },
           body: JSON.stringify(changeData),
         });
-        
+
         if (response.ok) {
           const result = await response.json();
           return {
             success: true,
             data: result.data || result,
-            message: result.message || 'Plan changed successfully'
+            message: result.message || 'Plan changed successfully',
           };
         } else {
           const errorData = await response.json();
           return {
             success: false,
             data: null,
-            message: errorData.message || `Failed to change plan: ${response.status}`
+            message: errorData.message || `Failed to change plan: ${response.status}`,
           };
         }
       } catch (error) {
-        console.error('❌ Failed to change subscription plan:', error);
+        logger.error('❌ Failed to change subscription plan:', error);
         return {
           success: false,
           data: null,
-          message: error.message || 'Failed to change subscription plan'
+          message: error.message || 'Failed to change subscription plan',
         };
       }
     }
-    
+
     throw new Error('Plan change requires API connection');
   }
 
-  async cancelSubscription(restaurantId: number): Promise<any> {
-    console.log('DataService.cancelSubscription called', { restaurantId });
-    
+  async cancelSubscription(restaurantId: number): Promise<unknown> {
+    logger.info('DataService.cancelSubscription called', { restaurantId });
+
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         const authToken = await this.getAuthToken();
-        const response = await fetch(`${API_CONFIG.FULL_API_URL}/subscriptions/cancel?restaurant_id=${restaurantId}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
-          },
-        });
-        
+        const response = await fetch(
+          `${API_CONFIG.FULL_API_URL}/subscriptions/cancel?restaurant_id=${restaurantId}`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(authToken && { Authorization: `Bearer ${authToken}` }),
+            },
+          }
+        );
+
         if (response.ok) {
           const result = await response.json();
           return {
             success: true,
             data: result.data || result,
-            message: result.message || 'Subscription cancelled successfully'
+            message: result.message || 'Subscription cancelled successfully',
           };
         } else {
           const errorData = await response.json();
           return {
             success: false,
             data: null,
-            message: errorData.message || `Failed to cancel subscription: ${response.status}`
+            message: errorData.message || `Failed to cancel subscription: ${response.status}`,
           };
         }
       } catch (error) {
-        console.error('❌ Failed to cancel subscription:', error);
+        logger.error('❌ Failed to cancel subscription:', error);
         return {
           success: false,
           data: null,
-          message: error.message || 'Failed to cancel subscription'
+          message: error.message || 'Failed to cancel subscription',
         };
       }
     }
-    
+
     throw new Error('Subscription cancellation requires API connection');
   }
 
-  async incrementUsage(restaurantId: number, usageType: string, amount: number = 1): Promise<any> {
-    console.log('DataService.incrementUsage called', { restaurantId, usageType, amount });
-    
+  async incrementUsage(
+    restaurantId: number,
+    usageType: string,
+    amount: number = 1
+  ): Promise<unknown> {
+    logger.info('DataService.incrementUsage called', { restaurantId, usageType, amount });
+
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         const authToken = await this.getAuthToken();
-        const response = await fetch(`${API_CONFIG.FULL_API_URL}/subscriptions/usage/increment?restaurant_id=${restaurantId}&usage_type=${usageType}&amount=${amount}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(authToken && { 'Authorization': `Bearer ${authToken}` }),
-          },
-        });
-        
+        const response = await fetch(
+          `${API_CONFIG.FULL_API_URL}/subscriptions/usage/increment?restaurant_id=${restaurantId}&usage_type=${usageType}&amount=${amount}`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(authToken && { Authorization: `Bearer ${authToken}` }),
+            },
+          }
+        );
+
         if (response.ok) {
           const result = await response.json();
           return {
             success: true,
             data: result.data || result,
-            message: result.message || 'Usage incremented successfully'
+            message: result.message || 'Usage incremented successfully',
           };
         } else {
           const errorData = await response.json();
           return {
             success: false,
             data: null,
-            message: errorData.message || `Failed to increment usage: ${response.status}`
+            message: errorData.message || `Failed to increment usage: ${response.status}`,
           };
         }
       } catch (error) {
-        console.error('❌ Failed to increment usage:', error);
+        logger.error('❌ Failed to increment usage:', error);
         return {
           success: false,
           data: null,
-          message: error.message || 'Failed to increment usage'
+          message: error.message || 'Failed to increment usage',
         };
       }
     }
-    
+
     throw new Error('Usage tracking requires API connection');
   }
 }

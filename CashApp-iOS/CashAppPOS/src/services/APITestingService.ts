@@ -1,5 +1,6 @@
 // APITestingService.ts - Frontend API testing without affecting demo data
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import API_CONFIG from '../config/api';
 
 // API Test Result Interface
@@ -8,7 +9,7 @@ export interface APITestResult {
   method: string;
   success: boolean;
   status?: number;
-  response?: any;
+  response?: unknown;
   error?: string;
   timestamp: Date;
   responseTime?: number;
@@ -24,7 +25,7 @@ export interface APITestSuite {
 
 /**
  * APITestingService - Test backend APIs without affecting demo data
- * 
+ *
  * This service allows us to:
  * 1. Test real API endpoints independently
  * 2. Keep mock data intact for demos
@@ -50,14 +51,14 @@ class APITestingService {
 
   // Test individual API endpoint
   async testEndpoint(
-    endpoint: string, 
-    method: string = 'GET', 
-    body?: any,
+    endpoint: string,
+    method: string = 'GET',
+body?: unknown,
     headers?: Record<string, string>
   ): Promise<APITestResult> {
     const startTime = Date.now();
     const url = `${this.baseUrl}${endpoint}`;
-    
+
     const testResult: APITestResult = {
       endpoint,
       method,
@@ -70,7 +71,7 @@ class APITestingService {
         method,
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
+          Accept: 'application/json',
           ...headers,
         },
       };
@@ -81,10 +82,10 @@ class APITestingService {
 
       const response = await fetch(url, requestOptions);
       const endTime = Date.now();
-      
+
       testResult.status = response.status;
       testResult.responseTime = endTime - startTime;
-      
+
       try {
         testResult.response = await response.json();
       } catch {
@@ -92,11 +93,10 @@ class APITestingService {
       }
 
       testResult.success = response.ok;
-      
+
       if (!response.ok) {
         testResult.error = `HTTP ${response.status}: ${response.statusText}`;
       }
-
     } catch (error) {
       const endTime = Date.now();
       testResult.responseTime = endTime - startTime;
@@ -125,19 +125,19 @@ class APITestingService {
     // Test login endpoint
     const loginTest = await this.testEndpoint('/api/v1/auth/login', 'POST', {
       email: 'test@example.com',
-      password: 'password123'
+      password: 'password123',
     });
     suite.tests.push(loginTest);
 
     // Test logout endpoint (if login was successful)
     if (loginTest.success && loginTest.response?.data?.access_token) {
       const logoutTest = await this.testEndpoint('/api/v1/auth/logout', 'POST', null, {
-        'Authorization': `Bearer ${loginTest.response.data.access_token}`
+        Authorization: `Bearer ${loginTest.response.data.access_token}`,
       });
       suite.tests.push(logoutTest);
     }
 
-    suite.overallSuccess = suite.tests.every(test => test.success);
+    suite.overallSuccess = suite.tests.every((test) => test.success);
     this.testSuites.push(suite);
     return suite;
   }
@@ -162,11 +162,13 @@ class APITestingService {
     // Test products by category (if categories exist)
     if (categoriesTest.success && categoriesTest.response?.data?.length > 0) {
       const firstCategoryId = categoriesTest.response.data[0].id;
-      const categoryProductsTest = await this.testEndpoint(`/api/v1/products/category/${firstCategoryId}`);
+      const categoryProductsTest = await this.testEndpoint(
+        `/api/v1/products/category/${firstCategoryId}`
+      );
       suite.tests.push(categoryProductsTest);
     }
 
-    suite.overallSuccess = suite.tests.every(test => test.success);
+    suite.overallSuccess = suite.tests.every((test) => test.success);
     this.testSuites.push(suite);
     return suite;
   }
@@ -186,11 +188,11 @@ class APITestingService {
 
     // Test create session endpoint
     const createSessionTest = await this.testEndpoint('/api/v1/pos/sessions', 'POST', {
-      config_id: 1
+      config_id: 1,
     });
     suite.tests.push(createSessionTest);
 
-    suite.overallSuccess = suite.tests.every(test => test.success);
+    suite.overallSuccess = suite.tests.every((test) => test.success);
     this.testSuites.push(suite);
     return suite;
   }
@@ -207,11 +209,11 @@ class APITestingService {
     // Test floor plan and restaurant data
     const floorPlanTest = await this.testEndpoint('/api/v1/restaurants/floor-plan');
     suite.tests.push(floorPlanTest);
-    
+
     const sectionsTest = await this.testEndpoint('/api/v1/restaurants/sections');
     suite.tests.push(sectionsTest);
 
-    suite.overallSuccess = suite.tests.every(test => test.success);
+    suite.overallSuccess = suite.tests.every((test) => test.success);
     this.testSuites.push(suite);
     return suite;
   }
@@ -241,13 +243,13 @@ class APITestingService {
           product_name: 'Test Product',
           qty: 1,
           price_unit: 25.99,
-          price_subtotal: 25.99
-        }
-      ]
+          price_subtotal: 25.99,
+        },
+      ],
     });
     suite.tests.push(createOrderTest);
 
-    suite.overallSuccess = suite.tests.every(test => test.success);
+    suite.overallSuccess = suite.tests.every((test) => test.success);
     this.testSuites.push(suite);
     return suite;
   }
@@ -265,70 +267,69 @@ class APITestingService {
     const paymentTest = await this.testEndpoint('/api/v1/payments', 'POST', {
       order_id: 1,
       payment_method: 'cash',
-      amount: 25.99
+      amount: 25.99,
     });
     suite.tests.push(paymentTest);
 
-    suite.overallSuccess = suite.tests.every(test => test.success);
+    suite.overallSuccess = suite.tests.every((test) => test.success);
     this.testSuites.push(suite);
     return suite;
   }
 
   // Run comprehensive API test suite
   async runFullAPITestSuite(): Promise<APITestSuite[]> {
-    console.log('🧪 Starting comprehensive API test suite...');
-    
+    logger.info('🧪 Starting comprehensive API test suite...');
+
     const allSuites: APITestSuite[] = [];
 
     try {
       // Test authentication first
       const authSuite = await this.testAuthenticationFlow();
       allSuites.push(authSuite);
-      console.log(`✅ Authentication tests: ${authSuite.overallSuccess ? 'PASSED' : 'FAILED'}`);
+      logger.info(`✅ Authentication tests: ${authSuite.overallSuccess ? 'PASSED' : 'FAILED'}`);
 
       // Test products
       const productsSuite = await this.testProductsEndpoints();
       allSuites.push(productsSuite);
-      console.log(`✅ Products tests: ${productsSuite.overallSuccess ? 'PASSED' : 'FAILED'}`);
+      logger.info(`✅ Products tests: ${productsSuite.overallSuccess ? 'PASSED' : 'FAILED'}`);
 
       // Test POS sessions
       const sessionsSuite = await this.testPOSSessionsEndpoints();
       allSuites.push(sessionsSuite);
-      console.log(`✅ POS Sessions tests: ${sessionsSuite.overallSuccess ? 'PASSED' : 'FAILED'}`);
+      logger.info(`✅ POS Sessions tests: ${sessionsSuite.overallSuccess ? 'PASSED' : 'FAILED'}`);
 
       // Test restaurant
       const restaurantSuite = await this.testRestaurantEndpoints();
       allSuites.push(restaurantSuite);
-      console.log(`✅ Restaurant tests: ${restaurantSuite.overallSuccess ? 'PASSED' : 'FAILED'}`);
+      logger.info(`✅ Restaurant tests: ${restaurantSuite.overallSuccess ? 'PASSED' : 'FAILED'}`);
 
       // Test orders
       const ordersSuite = await this.testOrdersEndpoints();
       allSuites.push(ordersSuite);
-      console.log(`✅ Orders tests: ${ordersSuite.overallSuccess ? 'PASSED' : 'FAILED'}`);
+      logger.info(`✅ Orders tests: ${ordersSuite.overallSuccess ? 'PASSED' : 'FAILED'}`);
 
       // Test payments
       const paymentsSuite = await this.testPaymentsEndpoints();
       allSuites.push(paymentsSuite);
-      console.log(`✅ Payments tests: ${paymentsSuite.overallSuccess ? 'PASSED' : 'FAILED'}`);
-
+      logger.info(`✅ Payments tests: ${paymentsSuite.overallSuccess ? 'PASSED' : 'FAILED'}`);
     } catch (error) {
-      console.error('❌ API test suite failed:', error);
+      logger.error('❌ API test suite failed:', error);
     }
 
-    console.log('🎯 API test suite completed');
+    logger.info('🎯 API test suite completed');
     return allSuites;
   }
 
   // Validate response format matches frontend expectations
-  validateResponseFormat(response: any, endpoint: string): boolean {
+  validateResponseFormat(response: unknown, endpoint: string): boolean {
     if (!response) return false;
 
     // Check for standardized response format
     const hasSuccessField = typeof response.success === 'boolean';
     const hasDataOrError = response.data !== undefined || response.error !== undefined;
-    
+
     if (!hasSuccessField || !hasDataOrError) {
-      console.warn(`⚠️ ${endpoint}: Response format doesn't match frontend expectations`);
+      logger.warn(`⚠️ ${endpoint}: Response format doesn't match frontend expectations`);
       return false;
     }
 
@@ -353,10 +354,11 @@ class APITestingService {
     lastTestTime: Date | null;
   } {
     const totalTests = this.testResults.length;
-    const successfulTests = this.testResults.filter(test => test.success).length;
+    const successfulTests = this.testResults.filter((test) => test.success).length;
     const failedTests = totalTests - successfulTests;
     const successRate = totalTests > 0 ? (successfulTests / totalTests) * 100 : 0;
-    const lastTestTime = totalTests > 0 ? this.testResults[this.testResults.length - 1].timestamp : null;
+    const lastTestTime =
+      totalTests > 0 ? this.testResults[this.testResults.length - 1].timestamp : null;
 
     return {
       totalTests,
@@ -381,7 +383,7 @@ class APITestingService {
       await AsyncStorage.setItem('api_test_results', JSON.stringify(this.testResults));
       await AsyncStorage.setItem('api_test_suites', JSON.stringify(this.testSuites));
     } catch (error) {
-      console.error('Failed to save test history:', error);
+      logger.error('Failed to save test history:', error);
     }
   }
 
@@ -390,22 +392,22 @@ class APITestingService {
     try {
       const results = await AsyncStorage.getItem('api_test_results');
       const suites = await AsyncStorage.getItem('api_test_suites');
-      
+
       if (results) {
-        this.testResults = JSON.parse(results).map((result: any) => ({
+        this.testResults = JSON.parse(results).map((result: unknown) => ({
           ...result,
-          timestamp: new Date(result.timestamp)
+          timestamp: new Date(result.timestamp),
         }));
       }
-      
+
       if (suites) {
-        this.testSuites = JSON.parse(suites).map((suite: any) => ({
+        this.testSuites = JSON.parse(suites).map((suite: unknown) => ({
           ...suite,
-          timestamp: new Date(suite.timestamp)
+          timestamp: new Date(suite.timestamp),
         }));
       }
     } catch (error) {
-      console.error('Failed to load test history:', error);
+      logger.error('Failed to load test history:', error);
     }
   }
 }

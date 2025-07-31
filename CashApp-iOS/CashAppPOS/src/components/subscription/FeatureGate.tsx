@@ -1,45 +1,59 @@
 /**
  * Feature Gate Component
- * 
+ *
  * This component conditionally renders children based on subscription features
  * and displays upgrade prompts when features are not available.
  */
 
 import React, { useEffect, useState } from 'react';
+
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-import { useSubscription, FeatureGateResult } from '../../contexts/SubscriptionContext';
-import { useTheme } from '../../contexts/ThemeContext';
+
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+
+import { useSubscription } from '../../contexts/SubscriptionContext';
+import { useTheme } from '../../contexts/ThemeContext';
+
+import type { FeatureGateResult } from '../../contexts/SubscriptionContext';
 
 // Helper function to safely add transparency to any color format
 const addColorTransparency = (color: string, opacity: number): string => {
   // If it's already a hex color, convert to rgba
   if (color.startsWith('#')) {
     const cleanHex = color.replace('#', '');
-    
+
     // Handle both 3 and 6 character hex codes
-    const r = parseInt(cleanHex.length === 3 ? cleanHex[0] + cleanHex[0] : cleanHex.substring(0, 2), 16);
-    const g = parseInt(cleanHex.length === 3 ? cleanHex[1] + cleanHex[1] : cleanHex.substring(2, 4), 16);
-    const b = parseInt(cleanHex.length === 3 ? cleanHex[2] + cleanHex[2] : cleanHex.substring(4, 6), 16);
-    
+    const r = parseInt(
+      cleanHex.length === 3 ? cleanHex[0] + cleanHex[0] : cleanHex.substring(0, 2),
+      16
+    );
+    const g = parseInt(
+      cleanHex.length === 3 ? cleanHex[1] + cleanHex[1] : cleanHex.substring(2, 4),
+      16
+    );
+    const b = parseInt(
+      cleanHex.length === 3 ? cleanHex[2] + cleanHex[2] : cleanHex.substring(4, 6),
+      16
+    );
+
     // Check for invalid values
     if (isNaN(r) || isNaN(g) || isNaN(b)) {
       return `rgba(255, 193, 7, ${opacity})`; // Fallback warning color
     }
-    
+
     return `rgba(${r}, ${g}, ${b}, ${opacity})`;
   }
-  
+
   // If it's already an rgb() format, convert to rgba
   if (color.startsWith('rgb(')) {
     return color.replace('rgb(', 'rgba(').replace(')', `, ${opacity})`);
   }
-  
+
   // If it's already rgba, just return as is
   if (color.startsWith('rgba(')) {
     return color;
   }
-  
+
   // For any other format (named colors, hsl, etc.), use a safe fallback
   return `rgba(255, 193, 7, ${opacity})`; // Default warning color with transparency
 };
@@ -59,7 +73,7 @@ export const FeatureGate: React.FC<FeatureGateProps> = ({
   fallback,
   showUpgradePrompt = true,
   onUpgradePress,
-  silentMode = false
+  silentMode = false,
 }) => {
   const { theme } = useTheme();
   const { hasFeature } = useSubscription();
@@ -76,11 +90,11 @@ export const FeatureGate: React.FC<FeatureGateProps> = ({
       const result = await hasFeature(feature);
       setGateResult(result);
     } catch (error) {
-      console.error('Feature gate check failed:', error);
+      logger.error('Feature gate check failed:', error);
       setGateResult({
         hasAccess: false,
         reason: 'Failed to check feature access',
-        upgradeRequired: true
+        upgradeRequired: true,
       });
     } finally {
       setLoading(false);
@@ -96,7 +110,12 @@ export const FeatureGate: React.FC<FeatureGateProps> = ({
         `To access ${feature}, please upgrade your subscription plan.`,
         [
           { text: 'Cancel', style: 'cancel' },
-          { text: 'View Plans', onPress: () => {/* Navigate to plans */ } }
+          {
+            text: 'View Plans',
+            onPress: () => {
+              /* Navigate to plans */
+            },
+          },
         ]
       );
     }
@@ -105,9 +124,7 @@ export const FeatureGate: React.FC<FeatureGateProps> = ({
   if (loading) {
     return (
       <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>
-        <Text style={[styles.loadingText, { color: theme.colors.text }]}>
-          Checking access...
-        </Text>
+        <Text style={[styles.loadingText, { color: theme.colors.text }]}>Checking access...</Text>
       </View>
     );
   }
@@ -140,17 +157,15 @@ export const FeatureGate: React.FC<FeatureGateProps> = ({
   }
 
   return (
-    <View style={[styles.upgradeContainer, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+    <View
+      style={[
+        styles.upgradeContainer,
+        { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
+      ]}
+    >
       <View style={styles.upgradeContent}>
-        <Icon 
-          name="lock" 
-          size={24} 
-          color={theme.colors.warning} 
-          style={styles.lockIcon}
-        />
-        <Text style={[styles.upgradeTitle, { color: theme.colors.text }]}>
-          Premium Feature
-        </Text>
+        <Icon name="lock" size={24} color={theme.colors.warning} style={styles.lockIcon} />
+        <Text style={[styles.upgradeTitle, { color: theme.colors.text }]}>Premium Feature</Text>
         <Text style={[styles.upgradeMessage, { color: theme.colors.textSecondary }]}>
           {gateResult.reason || `This feature requires a subscription upgrade.`}
         </Text>
@@ -191,11 +206,11 @@ export const UsageLimitGate: React.FC<UsageLimitGateProps> = ({
   showLimitWarning = true,
   warningThreshold = 80,
   onLimitReached,
-  silentMode = false
+  silentMode = false,
 }) => {
   const { theme } = useTheme();
   const { checkUsageLimit } = useSubscription();
-  const [limitResult, setLimitResult] = useState<any>(null);
+  const [limitResult, setLimitResult] = useState<unknown>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -208,7 +223,7 @@ export const UsageLimitGate: React.FC<UsageLimitGateProps> = ({
       const result = await checkUsageLimit(limitType, increment);
       setLimitResult(result);
     } catch (error) {
-      console.error('Usage limit check failed:', error);
+      logger.error('Usage limit check failed:', error);
     } finally {
       setLoading(false);
     }
@@ -223,7 +238,12 @@ export const UsageLimitGate: React.FC<UsageLimitGateProps> = ({
         `You've reached your ${limitType} limit. Please upgrade your plan to continue.`,
         [
           { text: 'Cancel', style: 'cancel' },
-          { text: 'Upgrade Plan', onPress: () => {/* Navigate to plans */ } }
+          {
+            text: 'Upgrade Plan',
+            onPress: () => {
+              /* Navigate to plans */
+            },
+          },
         ]
       );
     }
@@ -232,9 +252,7 @@ export const UsageLimitGate: React.FC<UsageLimitGateProps> = ({
   if (loading) {
     return silentMode ? null : (
       <View style={[styles.container, { backgroundColor: theme.colors.surface }]}>
-        <Text style={[styles.loadingText, { color: theme.colors.text }]}>
-          Checking usage...
-        </Text>
+        <Text style={[styles.loadingText, { color: theme.colors.text }]}>Checking usage...</Text>
       </View>
     );
   }
@@ -260,14 +278,14 @@ export const UsageLimitGate: React.FC<UsageLimitGateProps> = ({
     }
 
     return (
-      <View style={[styles.upgradeContainer, { backgroundColor: theme.colors.surface, borderColor: theme.colors.error }]}>
+      <View
+        style={[
+          styles.upgradeContainer,
+          { backgroundColor: theme.colors.surface, borderColor: theme.colors.error },
+        ]}
+      >
         <View style={styles.upgradeContent}>
-          <Icon 
-            name="alert-circle" 
-            size={24} 
-            color={theme.colors.error} 
-            style={styles.lockIcon}
-          />
+          <Icon name="alert-circle" size={24} color={theme.colors.error} style={styles.lockIcon} />
           <Text style={[styles.upgradeTitle, { color: theme.colors.text }]}>
             Usage Limit Reached
           </Text>
@@ -288,22 +306,27 @@ export const UsageLimitGate: React.FC<UsageLimitGateProps> = ({
   }
 
   // Show warning if approaching limit
-  const shouldShowWarning = showLimitWarning && 
-    limitResult.percentageUsed >= warningThreshold && 
+  const shouldShowWarning =
+    showLimitWarning &&
+    limitResult.percentageUsed >= warningThreshold &&
     limitResult.limit !== null;
 
   if (shouldShowWarning && !silentMode) {
     return (
       <View>
-        <View style={[styles.warningContainer, { backgroundColor: addColorTransparency(theme.colors.warning, 0.12), borderColor: theme.colors.warning }]}>
-          <Icon 
-            name="alert" 
-            size={16} 
-            color={theme.colors.warning} 
-            style={styles.warningIcon}
-          />
+        <View
+          style={[
+            styles.warningContainer,
+            {
+              backgroundColor: addColorTransparency(theme.colors.warning, 0.12),
+              borderColor: theme.colors.warning,
+            },
+          ]}
+        >
+          <Icon name="alert" size={16} color={theme.colors.warning} style={styles.warningIcon} />
           <Text style={[styles.warningText, { color: theme.colors.warning }]}>
-            {limitResult.remaining} {limitType} remaining ({Math.round(limitResult.percentageUsed)}% used)
+            {limitResult.remaining} {limitType} remaining ({Math.round(limitResult.percentageUsed)}%
+            used)
           </Text>
         </View>
         {children}

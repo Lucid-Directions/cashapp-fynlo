@@ -8,7 +8,7 @@ export {
   APIError,
   HTTPMethod,
   RequestConfig,
-  
+
   // Auth types
   User,
   UserRole,
@@ -16,7 +16,7 @@ export {
   LoginRequest,
   LoginResponse,
   AuthState,
-  
+
   // Business types
   Restaurant,
   RestaurantSettings,
@@ -26,13 +26,13 @@ export {
   OrderItem,
   Product,
   ProductCategory,
-  
+
   // Constants
   API_ENDPOINTS,
   WebSocketEvent,
   ERROR_CODES,
   ERROR_MESSAGES,
-  
+
   // Utils
   formatCurrency,
   formatDate,
@@ -44,7 +44,7 @@ export {
 // Legacy type mappings for backward compatibility
 // TODO: Update components to use Product instead of MenuItem
 export interface MenuItem {
-  id: string;  // Changed from number to match Product
+  id: string; // Changed from number to match Product
   name: string;
   price: number;
   category: string;
@@ -58,7 +58,7 @@ export interface MenuItem {
 
 // TODO: Update components to use ProductCategory
 export interface Category {
-  id: string;  // Changed from number to match ProductCategory
+  id: string; // Changed from number to match ProductCategory
   name: string;
   active: boolean;
   color?: string;
@@ -66,8 +66,8 @@ export interface Category {
 }
 
 export interface PosSession {
-  id: string;  // Changed from number for consistency
-  userId: string;  // Changed from number to match User.id
+  id: string; // Changed from number for consistency
+  userId: string; // Changed from number to match User.id
   userName: string;
   startTime: Date;
   endTime?: Date;
@@ -129,9 +129,9 @@ export type MainStackParamList = {
   Profile: undefined;
   Help: undefined;
   TableSelection: undefined;
-  POS: { 
-    tableId?: string; 
-    tableName?: string; 
+  POS: {
+    tableId?: string;
+    tableName?: string;
     orderType?: 'dine_in' | 'takeout' | 'pickup' | 'delivery';
   };
   OrderDetails: { orderId: string };
@@ -140,26 +140,26 @@ export type MainStackParamList = {
     amount: number;
     orderItems: OrderItem[];
     customerName: string;
-    onPaymentComplete: (result: any) => void;
+    onPaymentComplete: (result: unknown) => void;
   };
   QRCodePayment: {
     amount: number;
     orderItems: OrderItem[];
     customerName: string;
-    onPaymentComplete: (result: any) => void;
+    onPaymentComplete: (result: unknown) => void;
   };
   SquareCardPayment: {
     amount: number;
     currency?: string;
     description?: string;
-    onPaymentComplete: (result: any) => void;
+    onPaymentComplete: (result: unknown) => void;
     onPaymentCancelled: () => void;
   };
   SquareContactlessPayment: {
     amount: number;
     currency?: string;
     description?: string;
-    onPaymentComplete: (result: any) => void;
+    onPaymentComplete: (result: unknown) => void;
     onPaymentCancelled: () => void;
   };
 };
@@ -208,14 +208,16 @@ export interface InventoryItem {
   last_updated: string; // ISO datetime string
 }
 
-export interface RecipeIngredientClient { // Renamed to avoid conflict if RecipeIngredient is used elsewhere
+export interface RecipeIngredientClient {
+  // Renamed to avoid conflict if RecipeIngredient is used elsewhere
   ingredient_sku: string;
   qty_g: number;
   ingredient_name?: string; // For display purposes on client
   ingredient_unit?: string; // For display
 }
 
-export interface RecipeClient { // Renamed to avoid conflict
+export interface RecipeClient {
+  // Renamed to avoid conflict
   item_id: string; // Product UUID
   item_name?: string; // Product name, joined from Product table
   ingredients: RecipeIngredientClient[];
@@ -239,7 +241,6 @@ export interface InventoryState {
   lowStockThreshold: number; // Percentage, e.g., 0.1 for 10%
 }
 
-
 // Utility types
 export type DeepPartial<T> = {
   [P in keyof T]?: DeepPartial<T[P]>;
@@ -251,7 +252,7 @@ export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
 // Data types previously in mockDataGenerator.ts
 export interface CustomerData {
-  id: string;  // Changed from number to match backend UUID
+  id: string; // Changed from number to match backend UUID
   name: string;
   email: string;
   phone: string;
@@ -308,7 +309,8 @@ export interface InventoryData {
   unit?: string;
 }
 
-export interface SalesDataReportItem { // Renamed to avoid conflict if SalesData is a more generic term elsewhere
+export interface SalesDataReportItem {
+  // Renamed to avoid conflict if SalesData is a more generic term elsewhere
   date: Date;
   total: number; // daily total sales
   transactions: number;
@@ -321,7 +323,8 @@ export interface SalesDataReportItem { // Renamed to avoid conflict if SalesData
     giftCard?: number; // Was used as qrCode placeholder in SalesReportDetail
     qrCode?: number;
   };
-  hourlyData?: Array<{ // Made optional as not all reports might need it
+  hourlyData?: Array<{
+    // Made optional as not all reports might need it
     hour: number;
     sales: number;
     transactions: number;

@@ -1,5 +1,8 @@
-import React, { Component, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+// TODO: Unused import - import React, { Component } from 'react';
+
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 interface QRPaymentErrorBoundaryProps {
@@ -13,19 +16,22 @@ interface QRPaymentErrorBoundaryState {
   error: Error | null;
 }
 
-class QRPaymentErrorBoundary extends Component<QRPaymentErrorBoundaryProps, QRPaymentErrorBoundaryState> {
+class QRPaymentErrorBoundary extends Component<
+  QRPaymentErrorBoundaryProps,
+  QRPaymentErrorBoundaryState
+> {
   constructor(props: QRPaymentErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false, error: null };
   }
 
   static getDerivedStateFromError(error: Error): QRPaymentErrorBoundaryState {
-    console.error('🚨 QR Payment Error Boundary caught error:', error);
+    logger.error('🚨 QR Payment Error Boundary caught error:', error);
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: any) {
-    console.error('🚨 QR Payment Error Details:', {
+  componentDidCatch(error: Error, errorInfo: unknown) {
+    logger.error('🚨 QR Payment Error Details:', {
       error: error.message,
       stack: error.stack,
       componentStack: errorInfo.componentStack,

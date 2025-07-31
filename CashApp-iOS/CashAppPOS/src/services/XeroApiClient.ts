@@ -1,4 +1,4 @@
-import XeroAuthService, { XeroTokens } from './XeroAuthService';
+import XeroAuthService, { _XeroTokens } from './XeroAuthService';
 
 export interface XeroApiResponse<T = any> {
   data: T;
@@ -10,7 +10,7 @@ export interface XeroApiError {
   message: string;
   status?: number;
   code?: string;
-  details?: any;
+  details?: unknown;
 }
 
 export interface RateLimitInfo {
@@ -23,7 +23,7 @@ export interface RateLimitInfo {
 interface RequestOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   headers?: Record<string, string>;
-  body?: any;
+  body?: unknown;
   timeout?: number;
   retries?: number;
 }
@@ -42,19 +42,19 @@ export class XeroApiClient {
   private authService: XeroAuthService;
   private requestQueue: QueuedRequest[] = [];
   private processingQueue = false;
-  
+
   // Rate limiting configuration
   private readonly MAX_REQUESTS_PER_MINUTE = 60;
   private readonly MAX_REQUESTS_PER_DAY = 5000;
   private readonly MAX_CONCURRENT_REQUESTS = 5;
-  
+
   // Rate limiting state
   private requestsThisMinute = 0;
   private requestsToday = 0;
   private activeRequests = 0;
   private minuteResetTime = 0;
   private dayResetTime = 0;
-  
+
   // Configuration
   private readonly BASE_URL = 'https://api.xero.com/api.xro/2.0';
   private readonly DEFAULT_TIMEOUT = 30000; // 30 seconds
@@ -107,7 +107,7 @@ export class XeroApiClient {
         resolve: resolve as (value: XeroApiResponse) => void,
         reject,
         timestamp: Date.now(),
-        retryCount: 0
+        retryCount: 0,
       };
 
       this.requestQueue.push(queuedRequest);
@@ -129,7 +129,7 @@ export class XeroApiClient {
       // Check rate limits
       if (!this.canMakeRequest()) {
         const waitTime = this.getWaitTime();
-        console.log(`Rate limit reached. Waiting ${waitTime}ms`);
+        logger.info(`Rate limit reached. Waiting ${waitTime}ms`);
         await this.delay(waitTime);
         continue;
       }
@@ -149,7 +149,7 @@ export class XeroApiClient {
       if (Date.now() - request.timestamp > 300000) {
         request.reject({
           message: 'Request expired in queue',
-          code: 'REQUEST_EXPIRED'
+          code: 'REQUEST_EXPIRED',
         });
         continue;
       }
@@ -189,34 +189,36 @@ export class XeroApiClient {
     if (!accessToken) {
       throw {
         message: 'No valid access token available',
-        code: 'AUTH_REQUIRED'
+        code: 'AUTH_REQUIRED',
       } as XeroApiError;
     }
 
     const url = endpoint.startsWith('http') ? endpoint : `${this.BASE_URL}${endpoint}`;
-    
+
     const headers = {
-      'Authorization': `Bearer ${accessToken}`,
-      'Accept': 'application/json',
+      Authorization: `Bearer ${accessToken}`,
+      Accept: 'application/json',
       'Content-Type': 'application/json',
-      'Xero-tenant-id': await this.getTenantId() || '',
-      ...options.headers
+      'Xero-tenant-id': (await this.getTenantId()) || '',
+      ...options.headers,
     };
 
     const requestConfig: RequestInit = {
       method: options.method || 'GET',
       headers,
-      signal: AbortSignal.timeout(options.timeout || this.DEFAULT_TIMEOUT)
+      signal: AbortSignal.timeout(options.timeout || this.DEFAULT_TIMEOUT),
     };
 
-    if (options.body && (options.method === 'POST' || options.method === 'PUT' || options.method === 'PATCH')) {
-      requestConfig.body = typeof options.body === 'string' 
-        ? options.body 
-        : JSON.stringify(options.body);
+    if (
+      options.body &&
+      (options.method === 'POST' || options.method === 'PUT' || options.method === 'PATCH')
+    ) {
+      requestConfig.body =
+        typeof options.body === 'string' ? options.body : JSON.stringify(options.body);
     }
 
     const response = await fetch(url, requestConfig);
-    
+
     // Update rate limit info from headers
     this.updateRateLimitInfo(response.headers);
 
@@ -226,16 +228,16 @@ export class XeroApiClient {
         message: errorData.message || `HTTP ${response.status}`,
         status: response.status,
         code: errorData.code,
-        details: errorData
+        details: errorData,
       } as XeroApiError;
     }
 
     const data = await response.json();
-    
+
     return {
       data,
       status: response.status,
-      headers: this.headersToObject(response.headers)
+      headers: this.headersToObject(response.headers),
     };
   }
 
@@ -244,13 +246,13 @@ export class XeroApiClient {
    */
   private async handleRequestError(error: XeroApiError, request: QueuedRequest): Promise<void> {
     const shouldRetry = this.shouldRetryRequest(error, request);
-    
+
     if (shouldRetry && request.retryCount < (request.options.retries || this.MAX_RETRIES)) {
       request.retryCount++;
       const delay = this.calculateRetryDelay(request.retryCount);
-      
-      console.log(`Retrying request in ${delay}ms (attempt ${request.retryCount})`);
-      
+
+      logger.info(`Retrying request in ${delay}ms (attempt ${request.retryCount})`);
+
       setTimeout(() => {
         this.requestQueue.unshift(request); // Add back to front of queue
         this.processQueue();
@@ -263,7 +265,7 @@ export class XeroApiClient {
   /**
    * Check if request should be retried
    */
-  private shouldRetryRequest(error: XeroApiError, request: QueuedRequest): boolean {
+  private shouldRetryRequest(error: XeroApiError, _request: QueuedRequest): boolean {
     // Retry on network errors, timeouts, and specific HTTP status codes
     const retryableStatuses = [429, 500, 502, 503, 504];
     return !error.status || retryableStatuses.includes(error.status);
@@ -281,8 +283,10 @@ export class XeroApiClient {
    * Check if request can be made based on rate limits
    */
   private canMakeRequest(): boolean {
-    return this.requestsThisMinute < this.MAX_REQUESTS_PER_MINUTE &&
-           this.requestsToday < this.MAX_REQUESTS_PER_DAY;
+    return (
+      this.requestsThisMinute < this.MAX_REQUESTS_PER_MINUTE &&
+      this.requestsToday < this.MAX_REQUESTS_PER_DAY
+    );
   }
 
   /**
@@ -309,7 +313,7 @@ export class XeroApiClient {
       ),
       resetTime: Math.min(this.minuteResetTime, this.dayResetTime),
       dailyLimit: this.MAX_REQUESTS_PER_DAY,
-      minuteLimit: this.MAX_REQUESTS_PER_MINUTE
+      minuteLimit: this.MAX_REQUESTS_PER_MINUTE,
     };
   }
 
@@ -319,13 +323,13 @@ export class XeroApiClient {
   private updateRateLimitInfo(headers: Headers): void {
     const remaining = headers.get('X-RateLimit-Remaining');
     const reset = headers.get('X-RateLimit-Reset');
-    
+
     if (remaining) {
       // Adjust internal counters based on server response
       const serverRemaining = parseInt(remaining, 10);
       this.requestsThisMinute = Math.max(0, this.MAX_REQUESTS_PER_MINUTE - serverRemaining);
     }
-    
+
     if (reset) {
       this.minuteResetTime = parseInt(reset, 10) * 1000; // Convert to milliseconds
     }
@@ -346,7 +350,7 @@ export class XeroApiClient {
   /**
    * Parse error response
    */
-  private async parseErrorResponse(response: Response): Promise<any> {
+  private async parseErrorResponse(response: Response): Promise<unknown> {
     try {
       const contentType = response.headers.get('content-type');
       if (contentType?.includes('application/json')) {
@@ -374,7 +378,7 @@ export class XeroApiClient {
    * Utility delay function
    */
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**
@@ -385,7 +389,7 @@ export class XeroApiClient {
       const response = await this.makeRequest('/Organisation');
       return response.status === 200;
     } catch (error) {
-      console.error('Connection test failed:', error);
+      logger.error('Connection test failed:', error);
       return false;
     }
   }
@@ -393,7 +397,7 @@ export class XeroApiClient {
   /**
    * Get organization information
    */
-  public async getOrganisation(): Promise<any> {
+  public async getOrganisation(): Promise<unknown> {
     const response = await this.makeRequest('/Organisation');
     return response.data;
   }
@@ -401,7 +405,7 @@ export class XeroApiClient {
   /**
    * Get contacts (customers)
    */
-  public async getContacts(params: Record<string, any> = {}): Promise<any> {
+  public async getContacts(params: Record<string, unknown> = {}): Promise<unknown> {
     const queryString = new URLSearchParams(params).toString();
     const endpoint = `/Contacts${queryString ? `?${queryString}` : ''}`;
     const response = await this.makeRequest(endpoint);
@@ -411,7 +415,7 @@ export class XeroApiClient {
   /**
    * Get items (products)
    */
-  public async getItems(params: Record<string, any> = {}): Promise<any> {
+  public async getItems(params: Record<string, unknown> = {}): Promise<unknown> {
     const queryString = new URLSearchParams(params).toString();
     const endpoint = `/Items${queryString ? `?${queryString}` : ''}`;
     const response = await this.makeRequest(endpoint);
@@ -421,7 +425,7 @@ export class XeroApiClient {
   /**
    * Get invoices
    */
-  public async getInvoices(params: Record<string, any> = {}): Promise<any> {
+  public async getInvoices(params: Record<string, unknown> = {}): Promise<unknown> {
     const queryString = new URLSearchParams(params).toString();
     const endpoint = `/Invoices${queryString ? `?${queryString}` : ''}`;
     const response = await this.makeRequest(endpoint);
@@ -431,10 +435,10 @@ export class XeroApiClient {
   /**
    * Create invoice
    */
-  public async createInvoice(invoice: any): Promise<any> {
+  public async createInvoice(invoice: unknown): Promise<unknown> {
     const response = await this.makeRequest('/Invoices', {
       method: 'POST',
-      body: invoice
+      body: invoice,
     });
     return response.data;
   }
@@ -442,10 +446,10 @@ export class XeroApiClient {
   /**
    * Create contact
    */
-  public async createContact(contact: any): Promise<any> {
+  public async createContact(contact: unknown): Promise<unknown> {
     const response = await this.makeRequest('/Contacts', {
       method: 'POST',
-      body: contact
+      body: contact,
     });
     return response.data;
   }
@@ -463,7 +467,7 @@ export class XeroApiClient {
       queueLength: this.requestQueue.length,
       activeRequests: this.activeRequests,
       requestsThisMinute: this.requestsThisMinute,
-      requestsToday: this.requestsToday
+      requestsToday: this.requestsToday,
     };
   }
 }

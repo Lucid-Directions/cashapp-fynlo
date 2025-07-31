@@ -3,7 +3,7 @@
 export interface WebSocketMessage {
   id: string;
   type: string;
-  data?: any;
+  data?: unknown;
   restaurant_id: string;
   timestamp: string;
 }
@@ -24,21 +24,21 @@ export enum WebSocketEvent {
   DISCONNECT = 'DISCONNECT',
   ERROR = 'ERROR',
   RECONNECTING = 'RECONNECTING',
-  
+
   // Authentication events
   AUTHENTICATE = 'AUTHENTICATE',
   AUTHENTICATED = 'AUTHENTICATED',
   AUTH_ERROR = 'AUTH_ERROR',
-  
+
   // Heartbeat events
   PING = 'PING',
   PONG = 'PONG',
-  
+
   // Business events
   ORDER_CREATED = 'ORDER_CREATED',
   ORDER_UPDATED = 'ORDER_UPDATED',
   ORDER_STATUS_CHANGED = 'ORDER_STATUS_CHANGED',
   INVENTORY_UPDATED = 'INVENTORY_UPDATED',
   MENU_UPDATED = 'MENU_UPDATED',
-  SYSTEM_NOTIFICATION = 'SYSTEM_NOTIFICATION'
+  SYSTEM_NOTIFICATION = 'SYSTEM_NOTIFICATION',
 }

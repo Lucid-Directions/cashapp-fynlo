@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+
 import {
   StyleSheet,
   Text,
@@ -10,9 +11,11 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import { SimpleTextInput } from '../../components/inputs';
+
 import { useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
+import { SimpleTextInput } from '../../components/inputs';
 
 const Colors = {
   primary: '#2C3E50',
@@ -40,8 +43,8 @@ const ForgotPasswordScreen: React.FC = () => {
 
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       Alert.alert(
         'Reset Link Sent',
         'If an account with this email exists, you will receive a password reset link shortly.',
@@ -49,10 +52,10 @@ const ForgotPasswordScreen: React.FC = () => {
           {
             text: 'OK',
             onPress: () => navigation.goBack(),
-          }
+          },
         ]
       );
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', 'Failed to send reset link. Please try again.');
     } finally {
       setIsLoading(false);
@@ -62,17 +65,14 @@ const ForgotPasswordScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={Colors.background} />
-      
+
       <KeyboardAvoidingView
         style={styles.keyboardView}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => navigation.goBack()}
-          >
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <Icon name="arrow-back" size={24} color={Colors.text} />
           </TouchableOpacity>
         </View>
@@ -118,10 +118,7 @@ const ForgotPasswordScreen: React.FC = () => {
           </TouchableOpacity>
 
           {/* Back to Login */}
-          <TouchableOpacity
-            style={styles.backToLoginButton}
-            onPress={() => navigation.goBack()}
-          >
+          <TouchableOpacity style={styles.backToLoginButton} onPress={() => navigation.goBack()}>
             <Text style={styles.backToLoginText}>Back to Login</Text>
           </TouchableOpacity>
         </View>

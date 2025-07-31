@@ -1,7 +1,8 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import XeroApiClient from './XeroApiClient';
 import XeroCustomerSyncService from './XeroCustomerSyncService';
 import XeroItemsSyncService from './XeroItemsSyncService';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export interface SalesSyncOptions {
   syncPayments?: boolean;
@@ -27,7 +28,7 @@ export interface SalesSyncError {
   entityType: 'invoice' | 'payment' | 'contact';
   operation: 'create' | 'update';
   error: string;
-  data?: any;
+  data?: unknown;
 }
 
 export interface POSOrder {
@@ -136,7 +137,7 @@ export class XeroSalesSyncService {
   private apiClient: XeroApiClient;
   private customerSyncService: XeroCustomerSyncService;
   private itemsSyncService: XeroItemsSyncService;
-  
+
   private readonly STORAGE_PREFIX = 'xero_sales_sync_';
   private readonly MAPPING_KEY = 'sales_mappings';
   private readonly LAST_SYNC_KEY = 'last_sales_sync';
@@ -179,7 +180,7 @@ export class XeroSalesSyncService {
       paymentsCreated: 0,
       paymentsFailed: 0,
       errors: [],
-      duration: 0
+      duration: 0,
     };
 
     try {
@@ -187,25 +188,26 @@ export class XeroSalesSyncService {
       const batchSize = options.batchSize || 10;
 
       // Filter orders that haven't been synced yet
-      const completedOrders = orders.filter(order => 
-        order.status === 'completed' && 
-        !mappings.find(m => m.posOrderId === order.id && m.syncStatus === 'synced')
+      const completedOrders = orders.filter(
+        (order) =>
+          order.status === 'completed' &&
+          !mappings.find((m) => m.posOrderId === order.id && m.syncStatus === 'synced')
       );
 
       // Process orders in batches
       for (let i = 0; i < completedOrders.length; i += batchSize) {
         const batch = completedOrders.slice(i, i + batchSize);
-        
+
         for (const order of batch) {
           try {
             result.invoicesProcessed++;
-            
+
             // Create invoice in Xero
             const invoiceId = await this.createInvoiceFromOrder(order, options);
             result.invoicesCreated++;
-            
+
             let paymentId: string | undefined;
-            
+
             // Create payment if order is paid
             if (options.syncPayments !== false && order.status === 'completed') {
               try {
@@ -213,43 +215,45 @@ export class XeroSalesSyncService {
                 paymentId = await this.createPaymentForOrder(order, invoiceId);
                 result.paymentsCreated++;
               } catch (paymentError) {
-                console.error(`Failed to create payment for order ${order.id}:`, paymentError);
+                logger.error(`Failed to create payment for order ${order.id}:`, paymentError);
                 result.paymentsFailed++;
                 result.errors.push({
                   entityId: order.id,
                   entityType: 'payment',
                   operation: 'create',
-                  error: paymentError instanceof Error ? paymentError.message : 'Payment creation failed',
-                  data: order
+                  error:
+                    paymentError instanceof Error
+                      ? paymentError.message
+                      : 'Payment creation failed',
+                  data: order,
                 });
               }
             }
-            
+
             // Save mapping
             await this.saveSalesMapping({
               posOrderId: order.id,
               xeroInvoiceId: invoiceId,
               xeroPaymentId: paymentId,
               lastSyncedAt: new Date(),
-              syncStatus: 'synced'
+              syncStatus: 'synced',
             });
-            
           } catch (error) {
-            console.error(`Failed to sync order ${order.id}:`, error);
+            logger.error(`Failed to sync order ${order.id}:`, error);
             result.invoicesFailed++;
             result.errors.push({
               entityId: order.id,
               entityType: 'invoice',
               operation: 'create',
               error: error instanceof Error ? error.message : 'Unknown error',
-              data: order
+              data: order,
             });
-            
+
             // Mark as failed in mapping
             await this.saveSalesMapping({
               posOrderId: order.id,
               lastSyncedAt: new Date(),
-              syncStatus: 'failed'
+              syncStatus: 'failed',
             });
           }
         }
@@ -262,15 +266,14 @@ export class XeroSalesSyncService {
 
       await this.updateLastSyncTime();
       result.success = result.invoicesFailed === 0 && result.paymentsFailed === 0;
-      
     } catch (error) {
-      console.error('Sales sync to Xero failed:', error);
+      logger.error('Sales sync to Xero failed:', error);
       result.success = false;
       result.errors.push({
         entityId: 'batch',
         entityType: 'invoice',
         operation: 'create',
-        error: error instanceof Error ? error.message : 'Batch sync failed'
+        error: error instanceof Error ? error.message : 'Batch sync failed',
       });
     }
 
@@ -281,16 +284,19 @@ export class XeroSalesSyncService {
   /**
    * Create invoice from POS order
    */
-  private async createInvoiceFromOrder(order: POSOrder, options: SalesSyncOptions): Promise<string> {
+  private async createInvoiceFromOrder(
+    order: POSOrder,
+    options: SalesSyncOptions
+  ): Promise<string> {
     // Get or create contact
     const contactId = await this.getOrCreateContact(order, options);
-    
+
     // Transform order to Xero invoice
     const xeroInvoice = await this.transformOrderToXeroInvoice(order, contactId);
-    
+
     // Create invoice in Xero
     const response = await this.apiClient.createInvoice({
-      Invoices: [xeroInvoice]
+      Invoices: [xeroInvoice],
     });
 
     if (!response.Invoices || response.Invoices.length === 0) {
@@ -305,23 +311,23 @@ export class XeroSalesSyncService {
    */
   private async createPaymentForOrder(order: POSOrder, invoiceId: string): Promise<string> {
     const accountCode = this.getPaymentAccountCode(order.paymentMethod);
-    
+
     const xeroPayment: XeroPayment = {
       Invoice: {
-        InvoiceID: invoiceId
+        InvoiceID: invoiceId,
       },
       Account: {
-        Code: accountCode
+        Code: accountCode,
       },
       Date: (order.completedAt || order.createdAt).toISOString().split('T')[0],
       Amount: order.totalAmount,
       Reference: order.paymentReference || `POS-${order.orderNumber}`,
-      IsReconciled: false
+      IsReconciled: false,
     };
 
     const response = await this.apiClient.makeRequest('/Payments', {
       method: 'POST',
-      body: { Payments: [xeroPayment] }
+      body: { Payments: [xeroPayment] },
     });
 
     if (!response.data.Payments || response.data.Payments.length === 0) {
@@ -338,8 +344,8 @@ export class XeroSalesSyncService {
     // If customer exists, try to find their Xero contact ID
     if (order.customerId) {
       const customerMappings = await this.customerSyncService.getCustomerMappings();
-      const mapping = customerMappings.find(m => m.posCustomerId === order.customerId);
-      
+      const mapping = customerMappings.find((m) => m.posCustomerId === order.customerId);
+
       if (mapping?.xeroContactId) {
         return mapping.xeroContactId;
       }
@@ -360,11 +366,11 @@ export class XeroSalesSyncService {
       Name: contactName,
       EmailAddress: contactEmail,
       IsCustomer: true,
-      IsSupplier: false
+      IsSupplier: false,
     };
 
     const response = await this.apiClient.createContact({
-      Contacts: [xeroContact]
+      Contacts: [xeroContact],
     });
 
     if (!response.Contacts || response.Contacts.length === 0) {
@@ -381,7 +387,7 @@ export class XeroSalesSyncService {
     try {
       // Try to find existing cash customer
       const response = await this.apiClient.getContacts({ where: 'Name=="Cash Customer"' });
-      
+
       if (response.Contacts && response.Contacts.length > 0) {
         return response.Contacts[0].ContactID!;
       }
@@ -390,16 +396,16 @@ export class XeroSalesSyncService {
       const cashContact = {
         Name: 'Cash Customer',
         IsCustomer: true,
-        IsSupplier: false
+        IsSupplier: false,
       };
 
       const createResponse = await this.apiClient.createContact({
-        Contacts: [cashContact]
+        Contacts: [cashContact],
       });
 
       return createResponse.Contacts[0].ContactID!;
     } catch (error) {
-      console.error('Failed to get or create cash customer:', error);
+      logger.error('Failed to get or create cash customer:', error);
       throw error;
     }
   }
@@ -407,7 +413,10 @@ export class XeroSalesSyncService {
   /**
    * Transform POS order to Xero invoice
    */
-  private async transformOrderToXeroInvoice(order: POSOrder, contactId: string): Promise<XeroInvoice> {
+  private async transformOrderToXeroInvoice(
+    order: POSOrder,
+    contactId: string
+  ): Promise<XeroInvoice> {
     const lineItems: XeroLineItem[] = [];
 
     // Add order items as line items
@@ -418,7 +427,7 @@ export class XeroSalesSyncService {
         UnitAmount: item.unitPrice,
         LineAmount: item.totalPrice,
         TaxType: this.getTaxType(item.taxRate),
-        AccountCode: this.DEFAULT_ACCOUNTS.SALES
+        AccountCode: this.DEFAULT_ACCOUNTS.SALES,
       };
 
       // Add item code if available
@@ -443,7 +452,7 @@ export class XeroSalesSyncService {
             UnitAmount: modifier.price,
             LineAmount: modifier.price * item.quantity,
             TaxType: this.getTaxType(item.taxRate),
-            AccountCode: this.DEFAULT_ACCOUNTS.SALES
+            AccountCode: this.DEFAULT_ACCOUNTS.SALES,
           });
         }
       }
@@ -457,7 +466,7 @@ export class XeroSalesSyncService {
         UnitAmount: -order.discountAmount,
         LineAmount: -order.discountAmount,
         TaxType: 'NONE',
-        AccountCode: this.DEFAULT_ACCOUNTS.SALES
+        AccountCode: this.DEFAULT_ACCOUNTS.SALES,
       });
     }
 
@@ -469,7 +478,7 @@ export class XeroSalesSyncService {
         UnitAmount: order.tipAmount,
         LineAmount: order.tipAmount,
         TaxType: 'NONE',
-        AccountCode: this.DEFAULT_ACCOUNTS.SALES
+        AccountCode: this.DEFAULT_ACCOUNTS.SALES,
       });
     }
 
@@ -477,7 +486,7 @@ export class XeroSalesSyncService {
       Type: 'ACCREC',
       Contact: {
         ContactID: contactId,
-        Name: order.customerName || 'Cash Customer'
+        Name: order.customerName || 'Cash Customer',
       },
       Date: order.createdAt.toISOString().split('T')[0],
       DueDate: order.createdAt.toISOString().split('T')[0], // Due immediately
@@ -485,7 +494,7 @@ export class XeroSalesSyncService {
       LineItems: lineItems,
       Reference: `POS-${order.orderNumber}`,
       Status: 'AUTHORISED',
-      CurrencyCode: 'GBP' // Default to GBP, should be configurable
+      CurrencyCode: 'GBP', // Default to GBP, should be configurable
     };
 
     return invoice;
@@ -498,7 +507,7 @@ export class XeroSalesSyncService {
     if (!taxRate || taxRate === 0) {
       return 'NONE';
     }
-    
+
     // Common UK VAT rates
     if (taxRate === 20) {
       return 'OUTPUT2'; // Standard VAT 20%
@@ -506,7 +515,7 @@ export class XeroSalesSyncService {
     if (taxRate === 5) {
       return 'OUTPUT'; // Reduced VAT 5%
     }
-    
+
     return 'NONE';
   }
 
@@ -515,11 +524,11 @@ export class XeroSalesSyncService {
    */
   private getPaymentAccountCode(paymentMethod: string): string {
     const accountMap: Record<string, string> = {
-      'cash': this.DEFAULT_ACCOUNTS.CASH,
-      'card': this.DEFAULT_ACCOUNTS.CARD,
-      'contactless': this.DEFAULT_ACCOUNTS.CARD,
-      'mobile': this.DEFAULT_ACCOUNTS.CARD,
-      'other': this.DEFAULT_ACCOUNTS.CASH
+      cash: this.DEFAULT_ACCOUNTS.CASH,
+      card: this.DEFAULT_ACCOUNTS.CARD,
+      contactless: this.DEFAULT_ACCOUNTS.CARD,
+      mobile: this.DEFAULT_ACCOUNTS.CARD,
+      other: this.DEFAULT_ACCOUNTS.CASH,
     };
 
     return accountMap[paymentMethod] || this.DEFAULT_ACCOUNTS.CASH;
@@ -530,8 +539,8 @@ export class XeroSalesSyncService {
    */
   public async createCreditNote(order: POSOrder, refundAmount?: number): Promise<string> {
     try {
-      const mapping = (await this.getSalesMappings()).find(m => m.posOrderId === order.id);
-      
+      const mapping = (await this.getSalesMappings()).find((m) => m.posOrderId === order.id);
+
       if (!mapping?.xeroInvoiceId) {
         throw new Error('Original invoice not found in Xero');
       }
@@ -540,23 +549,25 @@ export class XeroSalesSyncService {
       const creditNote = {
         Type: 'ACCRECCREDIT',
         Contact: {
-          ContactID: await this.getOrCreateCashCustomer()
+          ContactID: await this.getOrCreateCashCustomer(),
         },
         Date: new Date().toISOString().split('T')[0],
         LineAmountTypes: 'Inclusive',
-        LineItems: [{
-          Description: `Refund for Order ${order.orderNumber}`,
-          Quantity: 1,
-          UnitAmount: refundAmount || order.totalAmount,
-          AccountCode: this.DEFAULT_ACCOUNTS.SALES
-        }],
+        LineItems: [
+          {
+            Description: `Refund for Order ${order.orderNumber}`,
+            Quantity: 1,
+            UnitAmount: refundAmount || order.totalAmount,
+            AccountCode: this.DEFAULT_ACCOUNTS.SALES,
+          },
+        ],
         Reference: `REFUND-${order.orderNumber}`,
-        Status: 'AUTHORISED'
+        Status: 'AUTHORISED',
       };
 
       const response = await this.apiClient.makeRequest('/CreditNotes', {
         method: 'POST',
-        body: { CreditNotes: [creditNote] }
+        body: { CreditNotes: [creditNote] },
       });
 
       if (!response.data.CreditNotes || response.data.CreditNotes.length === 0) {
@@ -565,7 +576,7 @@ export class XeroSalesSyncService {
 
       return response.data.CreditNotes[0].CreditNoteID!;
     } catch (error) {
-      console.error('Failed to create credit note:', error);
+      logger.error('Failed to create credit note:', error);
       throw error;
     }
   }
@@ -581,7 +592,7 @@ export class XeroSalesSyncService {
   }> {
     const startOfDay = new Date(date);
     startOfDay.setHours(0, 0, 0, 0);
-    
+
     const endOfDay = new Date(date);
     endOfDay.setHours(23, 59, 59, 999);
 
@@ -595,8 +606,8 @@ export class XeroSalesSyncService {
         cash: 0,
         card: 0,
         contactless: 0,
-        mobile: 0
-      }
+        mobile: 0,
+      },
     };
   }
 
@@ -608,7 +619,7 @@ export class XeroSalesSyncService {
       const mappingsJson = await AsyncStorage.getItem(`${this.STORAGE_PREFIX}${this.MAPPING_KEY}`);
       return mappingsJson ? JSON.parse(mappingsJson) : [];
     } catch (error) {
-      console.error('Failed to get sales mappings:', error);
+      logger.error('Failed to get sales mappings:', error);
       return [];
     }
   }
@@ -619,17 +630,20 @@ export class XeroSalesSyncService {
   private async saveSalesMapping(mapping: SalesMapping): Promise<void> {
     try {
       const mappings = await this.getSalesMappings();
-      const existingIndex = mappings.findIndex(m => m.posOrderId === mapping.posOrderId);
-      
+      const existingIndex = mappings.findIndex((m) => m.posOrderId === mapping.posOrderId);
+
       if (existingIndex >= 0) {
         mappings[existingIndex] = mapping;
       } else {
         mappings.push(mapping);
       }
 
-      await AsyncStorage.setItem(`${this.STORAGE_PREFIX}${this.MAPPING_KEY}`, JSON.stringify(mappings));
+      await AsyncStorage.setItem(
+        `${this.STORAGE_PREFIX}${this.MAPPING_KEY}`,
+        JSON.stringify(mappings)
+      );
     } catch (error) {
-      console.error('Failed to save sales mapping:', error);
+      logger.error('Failed to save sales mapping:', error);
       throw error;
     }
   }
@@ -642,7 +656,7 @@ export class XeroSalesSyncService {
       const lastSyncStr = await AsyncStorage.getItem(`${this.STORAGE_PREFIX}${this.LAST_SYNC_KEY}`);
       return lastSyncStr ? new Date(lastSyncStr) : null;
     } catch (error) {
-      console.error('Failed to get last sync time:', error);
+      logger.error('Failed to get last sync time:', error);
       return null;
     }
   }
@@ -652,9 +666,12 @@ export class XeroSalesSyncService {
    */
   private async updateLastSyncTime(): Promise<void> {
     try {
-      await AsyncStorage.setItem(`${this.STORAGE_PREFIX}${this.LAST_SYNC_KEY}`, new Date().toISOString());
+      await AsyncStorage.setItem(
+        `${this.STORAGE_PREFIX}${this.LAST_SYNC_KEY}`,
+        new Date().toISOString()
+      );
     } catch (error) {
-      console.error('Failed to update last sync time:', error);
+      logger.error('Failed to update last sync time:', error);
     }
   }
 
@@ -662,7 +679,7 @@ export class XeroSalesSyncService {
    * Utility delay function
    */
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**
@@ -680,10 +697,10 @@ export class XeroSalesSyncService {
 
     return {
       totalMappings: mappings.length,
-      syncedOrders: mappings.filter(m => m.syncStatus === 'synced').length,
-      failedOrders: mappings.filter(m => m.syncStatus === 'failed').length,
-      pendingOrders: mappings.filter(m => m.syncStatus === 'pending').length,
-      lastSyncTime: lastSync
+      syncedOrders: mappings.filter((m) => m.syncStatus === 'synced').length,
+      failedOrders: mappings.filter((m) => m.syncStatus === 'failed').length,
+      pendingOrders: mappings.filter((m) => m.syncStatus === 'pending').length,
+      lastSyncTime: lastSync,
     };
   }
 
@@ -692,10 +709,10 @@ export class XeroSalesSyncService {
    */
   public async retryFailedSyncs(orders: POSOrder[]): Promise<SalesSyncResult> {
     const mappings = await this.getSalesMappings();
-    const failedMappings = mappings.filter(m => m.syncStatus === 'failed');
-    
-    const failedOrders = orders.filter(order => 
-      failedMappings.some(m => m.posOrderId === order.id)
+    const failedMappings = mappings.filter((m) => m.syncStatus === 'failed');
+
+    const failedOrders = orders.filter((order) =>
+      failedMappings.some((m) => m.posOrderId === order.id)
     );
 
     return this.syncOrdersToXero(failedOrders);

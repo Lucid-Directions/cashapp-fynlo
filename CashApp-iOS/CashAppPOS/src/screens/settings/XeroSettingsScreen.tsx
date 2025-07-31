@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+
 import {
   View,
   Text,
@@ -10,15 +11,17 @@ import {
   Linking,
   RefreshControl,
 } from 'react-native';
+
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import XeroAuthService from '../../services/XeroAuthService';
-import XeroApiClient from '../../services/XeroApiClient';
+
 import { Colors } from '../../design-system/theme';
+import XeroApiClient from '../../services/XeroApiClient';
+import XeroAuthService from '../../services/XeroAuthService';
 
 interface ConnectionStatus {
   isConnected: boolean;
-  organization?: any;
+  organization?: unknown;
   lastSync?: number;
   error?: string;
 }
@@ -32,7 +35,7 @@ interface SyncStatus {
 const XeroSettingsScreen: React.FC = () => {
   const navigation = useNavigation();
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>({
-    isConnected: false
+    isConnected: false,
   });
   const [syncStatus, setSyncStatus] = useState<SyncStatus>({ inProgress: false });
   const [loading, setLoading] = useState(true);
@@ -47,30 +50,30 @@ const XeroSettingsScreen: React.FC = () => {
   const checkConnectionStatus = useCallback(async () => {
     try {
       const isConnected = await authService.isConnected();
-      
+
       if (isConnected) {
         try {
           const orgData = await apiClient.getOrganisation();
           setConnectionStatus({
             isConnected: true,
             organization: orgData?.Organisations?.[0],
-            lastSync: Date.now()
+            lastSync: Date.now(),
           });
         } catch (error) {
-          console.error('Error fetching organization:', error);
+          logger.error('Error fetching organization:', error);
           setConnectionStatus({
             isConnected: true,
-            error: 'Connected but unable to fetch organization data'
+            error: 'Connected but unable to fetch organization data',
           });
         }
       } else {
         setConnectionStatus({ isConnected: false });
       }
     } catch (error) {
-      console.error('Error checking connection:', error);
+      logger.error('Error checking connection:', error);
       setConnectionStatus({
         isConnected: false,
-        error: 'Unable to check connection status'
+        error: 'Unable to check connection status',
       });
     }
   }, [authService, apiClient]);
@@ -81,7 +84,7 @@ const XeroSettingsScreen: React.FC = () => {
   const handleConnectToXero = async () => {
     try {
       setLoading(true);
-      
+
       Alert.alert(
         'Connect to Xero',
         'You will be redirected to Xero to authorize the connection. Please return to the app after completing the authorization.',
@@ -92,7 +95,7 @@ const XeroSettingsScreen: React.FC = () => {
             onPress: async () => {
               try {
                 await authService.openAuthUrl();
-                
+
                 // Listen for app returning from OAuth flow
                 const handleURL = (url: string) => {
                   if (url.includes('oauth/xero/callback')) {
@@ -101,22 +104,21 @@ const XeroSettingsScreen: React.FC = () => {
                 };
 
                 const subscription = Linking.addEventListener('url', handleURL);
-                
+
                 // Clean up listener after 5 minutes
                 setTimeout(() => {
                   subscription?.remove();
                 }, 300000);
-                
               } catch (error) {
-                console.error('OAuth error:', error);
+                logger.error('OAuth error:', error);
                 Alert.alert('Error', 'Failed to open Xero authorization. Please try again.');
               }
-            }
-          }
+            },
+          },
         ]
       );
     } catch (error) {
-      console.error('Connection error:', error);
+      logger.error('Connection error:', error);
       Alert.alert('Error', 'Failed to initiate connection to Xero');
     } finally {
       setLoading(false);
@@ -145,13 +147,13 @@ const XeroSettingsScreen: React.FC = () => {
 
       setLoading(true);
       const tokens = await authService.exchangeCodeForTokens(code, state);
-      
+
       if (tokens) {
         Alert.alert('Success', 'Successfully connected to Xero!');
         await checkConnectionStatus();
       }
     } catch (error) {
-      console.error('OAuth callback error:', error);
+      logger.error('OAuth callback error:', error);
       Alert.alert('Error', 'Failed to complete Xero authorization');
     } finally {
       setLoading(false);
@@ -177,13 +179,13 @@ const XeroSettingsScreen: React.FC = () => {
               setConnectionStatus({ isConnected: false });
               Alert.alert('Disconnected', 'Successfully disconnected from Xero');
             } catch (error) {
-              console.error('Disconnect error:', error);
+              logger.error('Disconnect error:', error);
               Alert.alert('Error', 'Failed to disconnect from Xero');
             } finally {
               setLoading(false);
             }
-          }
-        }
+          },
+        },
       ]
     );
   };
@@ -195,14 +197,14 @@ const XeroSettingsScreen: React.FC = () => {
     try {
       setLoading(true);
       const isConnected = await apiClient.testConnection();
-      
+
       if (isConnected) {
         Alert.alert('Success', 'Connection to Xero is working properly');
       } else {
         Alert.alert('Failed', 'Unable to connect to Xero API');
       }
     } catch (error) {
-      console.error('Test connection error:', error);
+      logger.error('Test connection error:', error);
       Alert.alert('Error', 'Connection test failed');
     } finally {
       setLoading(false);
@@ -215,21 +217,21 @@ const XeroSettingsScreen: React.FC = () => {
   const handleManualSync = async () => {
     try {
       setSyncStatus({ inProgress: true });
-      
+
       // This is a placeholder - actual sync implementation would go here
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       setSyncStatus({
         inProgress: false,
-        lastSync: Date.now()
+        lastSync: Date.now(),
       });
-      
+
       Alert.alert('Success', 'Manual sync completed');
     } catch (error) {
-      console.error('Manual sync error:', error);
+      logger.error('Manual sync error:', error);
       setSyncStatus({
         inProgress: false,
-        error: 'Sync failed'
+        error: 'Sync failed',
       });
       Alert.alert('Error', 'Manual sync failed');
     }
@@ -291,162 +293,153 @@ const XeroSettingsScreen: React.FC = () => {
 
       <ScrollView
         style={styles.content}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
-      {/* Connection Status Card */}
-      <View style={styles.card}>
-        <View style={styles.cardHeader}>
-          <Icon 
-            name={connectionStatus.isConnected ? 'check-circle' : 'error'} 
-            size={24} 
-            color={connectionStatus.isConnected ? Colors.success : Colors.error} 
-          />
-          <Text style={styles.cardTitle}>
-            {connectionStatus.isConnected ? 'Connected to Xero' : 'Not Connected'}
-          </Text>
-        </View>
-
-        {connectionStatus.isConnected && connectionStatus.organization && (
-          <View style={styles.orgInfo}>
-            <Text style={styles.orgName}>{connectionStatus.organization.Name}</Text>
-            <Text style={styles.orgDetails}>
-              {connectionStatus.organization.CountryCode} • {connectionStatus.organization.BaseCurrency}
+        {/* Connection Status Card */}
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <Icon
+              name={connectionStatus.isConnected ? 'check-circle' : 'error'}
+              size={24}
+              color={connectionStatus.isConnected ? Colors.success : Colors.error}
+            />
+            <Text style={styles.cardTitle}>
+              {connectionStatus.isConnected ? 'Connected to Xero' : 'Not Connected'}
             </Text>
           </View>
-        )}
 
-        {connectionStatus.error && (
-          <Text style={styles.errorText}>{connectionStatus.error}</Text>
-        )}
+          {connectionStatus.isConnected && connectionStatus.organization && (
+            <View style={styles.orgInfo}>
+              <Text style={styles.orgName}>{connectionStatus.organization.Name}</Text>
+              <Text style={styles.orgDetails}>
+                {connectionStatus.organization.CountryCode} •{' '}
+                {connectionStatus.organization.BaseCurrency}
+              </Text>
+            </View>
+          )}
 
-        <View style={styles.buttonContainer}>
-          {connectionStatus.isConnected ? (
-            <>
-              <TouchableOpacity style={styles.button} onPress={handleTestConnection}>
-                <Icon name="wifi" size={20} color={Colors.white} />
-                <Text style={styles.buttonText}>Test Connection</Text>
+          {connectionStatus.error && <Text style={styles.errorText}>{connectionStatus.error}</Text>}
+
+          <View style={styles.buttonContainer}>
+            {connectionStatus.isConnected ? (
+              <>
+                <TouchableOpacity style={styles.button} onPress={handleTestConnection}>
+                  <Icon name="wifi" size={20} color={Colors.white} />
+                  <Text style={styles.buttonText}>Test Connection</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.button, styles.disconnectButton]}
+                  onPress={handleDisconnect}
+                >
+                  <Icon name="link-off" size={20} color={Colors.white} />
+                  <Text style={styles.buttonText}>Disconnect</Text>
+                </TouchableOpacity>
+              </>
+            ) : (
+              <TouchableOpacity style={styles.button} onPress={handleConnectToXero}>
+                <Icon name="link" size={20} color={Colors.white} />
+                <Text style={styles.buttonText}>Connect to Xero</Text>
               </TouchableOpacity>
-              <TouchableOpacity 
-                style={[styles.button, styles.disconnectButton]} 
-                onPress={handleDisconnect}
+            )}
+          </View>
+        </View>
+
+        {/* Sync Status Card */}
+        {connectionStatus.isConnected && (
+          <View style={styles.card}>
+            <View style={styles.cardHeader}>
+              <Icon name="sync" size={24} color={Colors.primary} />
+              <Text style={styles.cardTitle}>Synchronization</Text>
+            </View>
+
+            {syncStatus.inProgress && (
+              <View style={styles.syncProgress}>
+                <ActivityIndicator size="small" color={Colors.primary} />
+                <Text style={styles.syncText}>Syncing data...</Text>
+              </View>
+            )}
+
+            {syncStatus.lastSync && (
+              <Text style={styles.lastSyncText}>Last sync: {formatDate(syncStatus.lastSync)}</Text>
+            )}
+
+            {syncStatus.error && <Text style={styles.errorText}>{syncStatus.error}</Text>}
+
+            <View style={styles.buttonRow}>
+              <TouchableOpacity
+                style={[styles.button, syncStatus.inProgress && styles.disabledButton]}
+                onPress={handleManualSync}
+                disabled={syncStatus.inProgress}
               >
-                <Icon name="link-off" size={20} color={Colors.white} />
-                <Text style={styles.buttonText}>Disconnect</Text>
+                <Icon name="sync" size={20} color={Colors.white} />
+                <Text style={styles.buttonText}>Manual Sync</Text>
               </TouchableOpacity>
-            </>
-          ) : (
-            <TouchableOpacity style={styles.button} onPress={handleConnectToXero}>
-              <Icon name="link" size={20} color={Colors.white} />
-              <Text style={styles.buttonText}>Connect to Xero</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      </View>
 
-      {/* Sync Status Card */}
-      {connectionStatus.isConnected && (
+              <TouchableOpacity
+                style={[styles.button, styles.dashboardButton]}
+                onPress={() => navigation.navigate('XeroSyncDashboard' as never)}
+              >
+                <Icon name="dashboard" size={20} color={Colors.white} />
+                <Text style={styles.buttonText}>Dashboard</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+
+        {/* Rate Limit Info Card */}
+        {connectionStatus.isConnected && (
+          <View style={styles.card}>
+            <View style={styles.cardHeader}>
+              <Icon name="speed" size={24} color={Colors.primary} />
+              <Text style={styles.cardTitle}>API Usage</Text>
+            </View>
+
+            <View style={styles.rateLimitInfo}>
+              <View style={styles.rateLimitItem}>
+                <Text style={styles.rateLimitLabel}>Remaining Requests</Text>
+                <Text style={styles.rateLimitValue}>{rateLimitInfo.remainingRequests}</Text>
+              </View>
+              <View style={styles.rateLimitItem}>
+                <Text style={styles.rateLimitLabel}>Daily Limit</Text>
+                <Text style={styles.rateLimitValue}>{rateLimitInfo.dailyLimit}</Text>
+              </View>
+              <View style={styles.rateLimitItem}>
+                <Text style={styles.rateLimitLabel}>Minute Limit</Text>
+                <Text style={styles.rateLimitValue}>{rateLimitInfo.minuteLimit}</Text>
+              </View>
+            </View>
+          </View>
+        )}
+
+        {/* Information Card */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <Icon name="sync" size={24} color={Colors.primary} />
-            <Text style={styles.cardTitle}>Synchronization</Text>
+            <Icon name="info" size={24} color={Colors.primary} />
+            <Text style={styles.cardTitle}>About Xero Integration</Text>
           </View>
 
-          {syncStatus.inProgress && (
-            <View style={styles.syncProgress}>
-              <ActivityIndicator size="small" color={Colors.primary} />
-              <Text style={styles.syncText}>Syncing data...</Text>
+          <Text style={styles.infoText}>Connect your Fynlo POS to Xero to automatically sync:</Text>
+
+          <View style={styles.featureList}>
+            <View style={styles.featureItem}>
+              <Icon name="check" size={16} color={Colors.success} />
+              <Text style={styles.featureText}>Sales transactions as invoices</Text>
             </View>
-          )}
-
-          {syncStatus.lastSync && (
-            <Text style={styles.lastSyncText}>
-              Last sync: {formatDate(syncStatus.lastSync)}
-            </Text>
-          )}
-
-          {syncStatus.error && (
-            <Text style={styles.errorText}>{syncStatus.error}</Text>
-          )}
-
-          <View style={styles.buttonRow}>
-            <TouchableOpacity 
-              style={[styles.button, syncStatus.inProgress && styles.disabledButton]} 
-              onPress={handleManualSync}
-              disabled={syncStatus.inProgress}
-            >
-              <Icon name="sync" size={20} color={Colors.white} />
-              <Text style={styles.buttonText}>Manual Sync</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={[styles.button, styles.dashboardButton]} 
-              onPress={() => navigation.navigate('XeroSyncDashboard' as never)}
-            >
-              <Icon name="dashboard" size={20} color={Colors.white} />
-              <Text style={styles.buttonText}>Dashboard</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      )}
-
-      {/* Rate Limit Info Card */}
-      {connectionStatus.isConnected && (
-        <View style={styles.card}>
-          <View style={styles.cardHeader}>
-            <Icon name="speed" size={24} color={Colors.primary} />
-            <Text style={styles.cardTitle}>API Usage</Text>
-          </View>
-
-          <View style={styles.rateLimitInfo}>
-            <View style={styles.rateLimitItem}>
-              <Text style={styles.rateLimitLabel}>Remaining Requests</Text>
-              <Text style={styles.rateLimitValue}>{rateLimitInfo.remainingRequests}</Text>
+            <View style={styles.featureItem}>
+              <Icon name="check" size={16} color={Colors.success} />
+              <Text style={styles.featureText}>Customer information</Text>
             </View>
-            <View style={styles.rateLimitItem}>
-              <Text style={styles.rateLimitLabel}>Daily Limit</Text>
-              <Text style={styles.rateLimitValue}>{rateLimitInfo.dailyLimit}</Text>
+            <View style={styles.featureItem}>
+              <Icon name="check" size={16} color={Colors.success} />
+              <Text style={styles.featureText}>Product catalog</Text>
             </View>
-            <View style={styles.rateLimitItem}>
-              <Text style={styles.rateLimitLabel}>Minute Limit</Text>
-              <Text style={styles.rateLimitValue}>{rateLimitInfo.minuteLimit}</Text>
+            <View style={styles.featureItem}>
+              <Icon name="check" size={16} color={Colors.success} />
+              <Text style={styles.featureText}>Payment records</Text>
             </View>
           </View>
         </View>
-      )}
-
-      {/* Information Card */}
-      <View style={styles.card}>
-        <View style={styles.cardHeader}>
-          <Icon name="info" size={24} color={Colors.primary} />
-          <Text style={styles.cardTitle}>About Xero Integration</Text>
-        </View>
-
-        <Text style={styles.infoText}>
-          Connect your Fynlo POS to Xero to automatically sync:
-        </Text>
-
-        <View style={styles.featureList}>
-          <View style={styles.featureItem}>
-            <Icon name="check" size={16} color={Colors.success} />
-            <Text style={styles.featureText}>Sales transactions as invoices</Text>
-          </View>
-          <View style={styles.featureItem}>
-            <Icon name="check" size={16} color={Colors.success} />
-            <Text style={styles.featureText}>Customer information</Text>
-          </View>
-          <View style={styles.featureItem}>
-            <Icon name="check" size={16} color={Colors.success} />
-            <Text style={styles.featureText}>Product catalog</Text>
-          </View>
-          <View style={styles.featureItem}>
-            <Icon name="check" size={16} color={Colors.success} />
-            <Text style={styles.featureText}>Payment records</Text>
-          </View>
-        </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
     </View>
   );
 };

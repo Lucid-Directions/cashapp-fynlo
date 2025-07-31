@@ -3,12 +3,17 @@
  * Provides helpers for rendering components with all necessary providers
  */
 
-import React, { ReactElement } from 'react';
-import { render, RenderOptions } from '@testing-library/react-native';
+import type { ReactElement } from 'react';
+import React from 'react';
+
 import { NavigationContainer } from '@react-navigation/native';
-import { ThemeProvider } from './design-system/ThemeProvider';
-import { AuthProvider } from './contexts/AuthContext';
+import { render } from '@testing-library/react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+
+import { AuthProvider } from './contexts/AuthContext';
+import { ThemeProvider } from './design-system/ThemeProvider';
+
+import type { RenderOptions } from '@testing-library/react-native';
 
 // Mock navigation
 export const createMockNavigation = () => ({
@@ -62,24 +67,26 @@ export const createMockDataService = () => ({
 // Custom render options
 interface CustomRenderOptions extends Omit<RenderOptions, 'wrapper'> {
   navigationProps?: {
-    navigation?: any;
-    route?: any;
+    navigation?: unknown;
+    route?: unknown;
   };
 }
 
 // All providers wrapper
-const AllTheProviders = ({ children, navigationProps = {} }: any) => {
+const AllTheProviders = ({ children, navigationProps = {} }: unknown) => {
   const mockNavigation = navigationProps.navigation || createMockNavigation();
   const mockRoute = navigationProps.route || createMockRoute();
 
   // Create navigation state
-  const navigationRef = React.createRef<any>();
-  
+const navigationRef = React.createRef<unknown>();
+
   return (
-    <SafeAreaProvider initialMetrics={{
-      frame: { x: 0, y: 0, width: 375, height: 812 },
-      insets: { top: 44, left: 0, right: 0, bottom: 34 },
-    }}>
+    <SafeAreaProvider
+      initialMetrics={{
+        frame: { x: 0, y: 0, width: 375, height: 812 },
+        insets: { top: 44, left: 0, right: 0, bottom: 34 },
+      }}
+    >
       <ThemeProvider>
         <AuthProvider>
           <NavigationContainer ref={navigationRef}>
@@ -95,16 +102,11 @@ const AllTheProviders = ({ children, navigationProps = {} }: any) => {
 };
 
 // Custom render function
-export const renderWithProviders = (
-  ui: ReactElement,
-  options: CustomRenderOptions = {}
-) => {
+export const renderWithProviders = (ui: ReactElement, options: CustomRenderOptions = {}) => {
   const { navigationProps, ...renderOptions } = options;
 
   return render(ui, {
-    wrapper: (props) => (
-      <AllTheProviders {...props} navigationProps={navigationProps} />
-    ),
+    wrapper: (props) => <AllTheProviders {...props} navigationProps={navigationProps} />,
     ...renderOptions,
   });
 };

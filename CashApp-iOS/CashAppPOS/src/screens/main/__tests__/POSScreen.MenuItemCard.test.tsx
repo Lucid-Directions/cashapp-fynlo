@@ -1,10 +1,14 @@
 import React from 'react';
-import { render } from '@testing-library/react-native';
-import { ThemeProvider, useTheme } from '../../../design-system/ThemeProvider'; // Adjust path as needed
-import { ExportedMenuItemCard } from '../POSScreen'; // Import the correctly named exported component
-import useAppStore from '../../../store/useAppStore'; // Adjust path as needed
-import { MenuItem, OrderItem } from '../../../types'; // OrderItem needed for cart
+
 import { StyleSheet } from 'react-native'; // Import StyleSheet
+
+import { render } from '@testing-library/react-native';
+
+import { ThemeProvider, useTheme } from '../../../design-system/ThemeProvider'; // Adjust path as needed
+import useAppStore from '../../../store/useAppStore'; // Adjust path as needed
+import { ExportedMenuItemCard } from '../POSScreen'; // Import the correctly named exported component
+
+import type { MenuItem, OrderItem } from '../../../types'; // OrderItem needed for cart
 
 // Mock useAppStore
 jest.mock('../../../store/useAppStore');
@@ -19,16 +23,23 @@ jest.mock('@react-native-community/netinfo', () => ({
 // Mock QuantityPill component
 jest.mock('../../../components/inputs', () => ({
   QuantityPill: ({ quantity, onIncrease, onDecrease }: any) => {
-    const React = require('react');
-    const { View, Text, TouchableOpacity } = require('react-native');
+    import React from 'react';
+
+    import { View, Text, TouchableOpacity } from 'react-native';
     return React.createElement(View, { testID: 'quantity-pill' }, [
-      React.createElement(TouchableOpacity, { key: 'decrease', onPress: onDecrease, testID: 'quantity-decrease' }, 
-        React.createElement(Text, {}, '-')),
+      React.createElement(
+        TouchableOpacity,
+        { key: 'decrease', onPress: onDecrease, testID: 'quantity-decrease' },
+        React.createElement(Text, {}, '-')
+      ),
       React.createElement(Text, { key: 'quantity', testID: 'quantity-text' }, quantity),
-      React.createElement(TouchableOpacity, { key: 'increase', onPress: onIncrease, testID: 'quantity-increase' }, 
-        React.createElement(Text, {}, '+'))
+      React.createElement(
+        TouchableOpacity,
+        { key: 'increase', onPress: onIncrease, testID: 'quantity-increase' },
+        React.createElement(Text, {}, '+')
+      ),
     ]);
-  }
+  },
 }));
 
 // Mock useNavigation
@@ -40,21 +51,21 @@ jest.mock('@react-navigation/native', () => ({
 }));
 
 // Minimal styles mock - replace with actual createStyles if needed for visual accuracy
-const mockCreateStyles = (theme: any) => StyleSheet.create({
-  menuCard: { backgroundColor: 'white', padding: 10 },
-  menuCardDisabled: { opacity: 0.5 },
-  menuCardContent: {},
-  menuItemEmoji: {},
-  menuItemName: {},
-  menuItemPrice: { overflow: 'hidden' },
-  quantityPillContainer: { alignItems: 'center', justifyContent: 'center', marginTop: 8 },
-});
-
+const mockCreateStyles = (_theme: unknown) =>
+  StyleSheet.create({
+    menuCard: { backgroundColor: 'white', padding: 10 },
+    menuCardDisabled: { opacity: 0.5 },
+    menuCardContent: {},
+    menuItemEmoji: {},
+    menuItemName: {},
+    menuItemPrice: { overflow: 'hidden' },
+    quantityPillContainer: { alignItems: 'center', justifyContent: 'center', marginTop: 8 },
+  });
 
 const mockMenuItem: MenuItem = {
   id: 1,
   name: 'Test Item',
-  price: 10.00,
+  price: 10.0,
   category: 'Test Category',
   emoji: '🧪',
   available: true,
@@ -66,7 +77,8 @@ const TestWrapper = ({ quantity }: { quantity: number }) => {
   const { theme } = useTheme();
   const styles = mockCreateStyles(theme);
 
-  const mockCart: OrderItem[] = quantity > 0 ? [{ ...mockMenuItem, quantity, modifications: [], notes: '' }] : [];
+  const mockCart: OrderItem[] =
+    quantity > 0 ? [{ ...mockMenuItem, quantity, modifications: [], notes: '' }] : [];
   const mockAddToCart = jest.fn();
   const mockUpdateCartItem = jest.fn();
   const mockRemoveFromCart = jest.fn();
@@ -95,7 +107,6 @@ const TestWrapper = ({ quantity }: { quantity: number }) => {
     />
   );
 };
-
 
 const renderMenuItemCardWithQuantity = (quantity: number) => {
   return render(

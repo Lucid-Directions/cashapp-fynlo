@@ -1,11 +1,6 @@
 import React from 'react';
-import {
-  StyleSheet,
-  View,
-  TouchableOpacity,
-  Animated,
-  Easing,
-} from 'react-native';
+
+import { StyleSheet, _View, TouchableOpacity, Animated, Easing } from 'react-native';
 
 // Clover POS Color Scheme
 const Colors = {
@@ -115,10 +110,7 @@ const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
             width: config.thumbSize,
             height: config.thumbSize,
             backgroundColor: thumbColor,
-            transform: [
-              { translateX: thumbTranslate },
-              { scale: thumbScale },
-            ],
+            transform: [{ translateX: thumbTranslate }, { scale: thumbScale }],
             top: config.padding,
             left: config.padding,
           },

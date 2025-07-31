@@ -64,7 +64,7 @@ class MonitoringService {
   private incidents: Incident[] = [];
   private performance: PerformanceMetrics | null = null;
   private alertRules: AlertRule[] = [];
-  private listeners: Map<string, (data: any) => void> = new Map();
+  private listeners: Map<string, (data: unknown) => void> = new Map();
 
   static getInstance(): MonitoringService {
     if (!MonitoringService.instance) {
@@ -81,37 +81,37 @@ class MonitoringService {
   // Real-time health monitoring
   async getSystemHealth(): Promise<SystemHealth> {
     // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
     // Generate dynamic health data
     this.updateHealthMetrics();
     return this.healthData!;
   }
 
   async getPerformanceMetrics(): Promise<PerformanceMetrics> {
-    await new Promise(resolve => setTimeout(resolve, 300));
+    await new Promise((resolve) => setTimeout(resolve, 300));
     this.updatePerformanceMetrics();
     return this.performance!;
   }
 
   // Error monitoring
   async getRecentErrors(limit: number = 10): Promise<ErrorLog[]> {
-    await new Promise(resolve => setTimeout(resolve, 200));
+    await new Promise((resolve) => setTimeout(resolve, 200));
     return this.errors
       .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
       .slice(0, limit);
   }
 
   async getErrorsByType(type: string): Promise<ErrorLog[]> {
-    return this.errors.filter(error => error.type === type);
+    return this.errors.filter((error) => error.type === type);
   }
 
   async getErrorsBySeverity(severity: string): Promise<ErrorLog[]> {
-    return this.errors.filter(error => error.severity === severity);
+    return this.errors.filter((error) => error.severity === severity);
   }
 
   async resolveError(errorId: string): Promise<boolean> {
-    const errorIndex = this.errors.findIndex(e => e.id === errorId);
+    const errorIndex = this.errors.findIndex((e) => e.id === errorId);
     if (errorIndex !== -1) {
       this.errors[errorIndex].resolved = true;
       return true;
@@ -121,9 +121,9 @@ class MonitoringService {
 
   // Incident management
   async getActiveIncidents(): Promise<Incident[]> {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    return this.incidents.filter(incident => 
-      incident.status !== 'resolved' && incident.status !== 'closed'
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    return this.incidents.filter(
+      (incident) => incident.status !== 'resolved' && incident.status !== 'closed'
     );
   }
 
@@ -158,14 +158,14 @@ class MonitoringService {
     status: 'investigating' | 'monitoring' | 'resolved' | 'closed',
     resolution?: string
   ): Promise<boolean> {
-    const incidentIndex = this.incidents.findIndex(i => i.id === incidentId);
+    const incidentIndex = this.incidents.findIndex((i) => i.id === incidentId);
     if (incidentIndex !== -1) {
       this.incidents[incidentIndex].status = status;
       this.incidents[incidentIndex].updatedAt = new Date();
       if (resolution) {
         this.incidents[incidentIndex].resolution = resolution;
       }
-      
+
       this.notifyListeners('incident-updated', this.incidents[incidentIndex]);
       return true;
     }
@@ -182,13 +182,13 @@ class MonitoringService {
       ...rule,
       id: `alert-${Date.now()}`,
     };
-    
+
     this.alertRules.push(alertRule);
     return alertRule;
   }
 
   async updateAlertRule(ruleId: string, updates: Partial<AlertRule>): Promise<boolean> {
-    const ruleIndex = this.alertRules.findIndex(r => r.id === ruleId);
+    const ruleIndex = this.alertRules.findIndex((r) => r.id === ruleId);
     if (ruleIndex !== -1) {
       this.alertRules[ruleIndex] = { ...this.alertRules[ruleIndex], ...updates };
       return true;
@@ -197,16 +197,16 @@ class MonitoringService {
   }
 
   // Real-time subscriptions
-  subscribe(eventType: string, callback: (data: any) => void): () => void {
+  subscribe(eventType: string, callback: (data: unknown) => void): () => void {
     const listenerId = `${eventType}-${Date.now()}`;
     this.listeners.set(listenerId, callback);
-    
+
     return () => {
       this.listeners.delete(listenerId);
     };
   }
 
-  private notifyListeners(eventType: string, data: any): void {
+  private notifyListeners(eventType: string, data: unknown): void {
     this.listeners.forEach((callback, listenerId) => {
       if (listenerId.startsWith(eventType)) {
         callback(data);
@@ -269,13 +269,13 @@ class MonitoringService {
     if (!this.healthData) return;
 
     // Simulate real-time updates
-    Object.keys(this.healthData).forEach(key => {
+    Object.keys(this.healthData).forEach((key) => {
       const metric = this.healthData![key as keyof SystemHealth];
-      const variation = -5 + (Math.random() * 10); // -5% to +5%
-      
+      const variation = -5 + Math.random() * 10; // -5% to +5%
+
       if (metric.name.includes('Response Time') || metric.name.includes('Latency')) {
         const currentValue = parseInt(metric.value);
-        const newValue = Math.max(10, currentValue + Math.round(currentValue * variation / 100));
+        const newValue = Math.max(10, currentValue + Math.round((currentValue * variation) / 100));
         metric.value = `${newValue}ms`;
         metric.status = newValue > 200 ? 'error' : newValue > 100 ? 'warning' : 'good';
       } else if (metric.name.includes('Performance') || metric.name.includes('Gateway')) {
@@ -284,7 +284,7 @@ class MonitoringService {
         metric.value = `${newValue.toFixed(1)}%`;
         metric.status = newValue < 95 ? 'error' : newValue < 98 ? 'warning' : 'good';
       }
-      
+
       metric.trend = variation;
       metric.lastUpdated = new Date();
     });
@@ -294,18 +294,18 @@ class MonitoringService {
     if (!this.performance) return;
 
     const variations = {
-      uptime: -0.1 + (Math.random() * 0.2),
-      requestsPerDay: -50000 + (Math.random() * 100000),
-      errorRate: -0.005 + (Math.random() * 0.01),
-      avgResponseTime: -10 + (Math.random() * 20),
-      memoryUsage: -5 + (Math.random() * 10),
-      cpuUsage: -10 + (Math.random() * 20),
+      uptime: -0.1 + Math.random() * 0.2,
+      requestsPerDay: -50000 + Math.random() * 100000,
+      errorRate: -0.005 + Math.random() * 0.01,
+      avgResponseTime: -10 + Math.random() * 20,
+      memoryUsage: -5 + Math.random() * 10,
+      cpuUsage: -10 + Math.random() * 20,
     };
 
-    Object.keys(variations).forEach(key => {
+    Object.keys(variations).forEach((key) => {
       const currentValue = this.performance![key as keyof PerformanceMetrics];
       const variation = variations[key as keyof typeof variations];
-      
+
       let newValue: number;
       if (key === 'uptime') {
         newValue = Math.min(100, Math.max(95, currentValue + variation));
@@ -316,7 +316,7 @@ class MonitoringService {
       } else {
         newValue = Math.max(0, currentValue + variation);
       }
-      
+
       this.performance![key as keyof PerformanceMetrics] = newValue;
     });
   }
@@ -335,15 +335,15 @@ class MonitoringService {
       const restaurant = restaurants[Math.floor(Math.random() * restaurants.length)];
       const error: ErrorLog = {
         id: `error-${Date.now()}-${i}`,
-        type: errorTypes[Math.floor(Math.random() * errorTypes.length)] as any,
+        type: errorTypes[Math.floor(Math.random() * errorTypes.length)] as unknown,
         message: this.generateErrorMessage(),
-        severity: severities[Math.floor(Math.random() * severities.length)] as any,
+        severity: severities[Math.floor(Math.random() * severities.length)] as unknown,
         timestamp: new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000),
         restaurantId: restaurant.id,
         restaurantName: restaurant.name,
         resolved: Math.random() > 0.7,
       };
-      
+
       this.errors.push(error);
     }
   }
@@ -353,7 +353,8 @@ class MonitoringService {
       {
         id: 'incident-1',
         title: 'Payment Processing Delay',
-        description: 'Multiple restaurants experiencing slower than normal payment processing times',
+        description:
+          'Multiple restaurants experiencing slower than normal payment processing times',
         status: 'investigating',
         severity: 'high',
         affectedRestaurants: ['1', '2', '3'],
@@ -417,7 +418,7 @@ class MonitoringService {
       'Disk space low on server instance',
       'Invalid payment method configuration',
     ];
-    
+
     return messages[Math.floor(Math.random() * messages.length)];
   }
 
@@ -436,7 +437,8 @@ class MonitoringService {
 
     // Simulate new errors occasionally
     setInterval(() => {
-      if (Math.random() < 0.3) { // 30% chance every minute
+      if (Math.random() < 0.3) {
+        // 30% chance every minute
         this.generateNewError();
       }
     }, 60000);
@@ -455,9 +457,9 @@ class MonitoringService {
     const restaurant = restaurants[Math.floor(Math.random() * restaurants.length)];
     const error: ErrorLog = {
       id: `error-${Date.now()}`,
-      type: errorTypes[Math.floor(Math.random() * errorTypes.length)] as any,
+      type: errorTypes[Math.floor(Math.random() * errorTypes.length)] as unknown,
       message: this.generateErrorMessage(),
-      severity: severities[Math.floor(Math.random() * severities.length)] as any,
+      severity: severities[Math.floor(Math.random() * severities.length)] as unknown,
       timestamp: new Date(),
       restaurantId: restaurant.id,
       restaurantName: restaurant.name,
@@ -475,11 +477,4 @@ class MonitoringService {
 }
 
 export { MonitoringService };
-export type {
-  SystemHealth,
-  HealthMetric,
-  ErrorLog,
-  Incident,
-  PerformanceMetrics,
-  AlertRule,
-};
+export type { SystemHealth, HealthMetric, ErrorLog, Incident, PerformanceMetrics, AlertRule };
