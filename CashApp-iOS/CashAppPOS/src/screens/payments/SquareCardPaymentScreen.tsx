@@ -23,6 +23,7 @@ import SquareService from '../../services/SquareService';
 // Square SDK imports - conditionally loaded
 let SQIPCardEntry: unknown;
 try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   SQIPCardEntry = require('react-native-square-in-app-payments').SQIPCardEntry;
 } catch (_error) {
   console.warn('Square SDK not available in SquareCardPaymentScreen');
