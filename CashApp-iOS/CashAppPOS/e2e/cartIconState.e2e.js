@@ -3,7 +3,7 @@
 // Assuming helper functions like loginAsTestUser and addItemToCart are globally available
 // or can be imported from a common helper file.
 // For example:
-// const { loginAsTestUser, addItemToCart, clearCart } = require('./helpers'); // Adjust path as needed
+// import { loginAsTestUser, addItemToCart, clearCart } from './helpers'; // Adjust path as needed
 
 describe('Cart Icon State', () => {
   beforeAll(async () => {

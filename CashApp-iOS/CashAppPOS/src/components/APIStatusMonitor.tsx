@@ -68,7 +68,7 @@ const APIStatusMonitor: React.FC<APIStatusMonitorProps> = ({
       const apiTestService = dataService.getAPITestingService();
       await apiTestService.runFullAPITestSuite();
       Alert.alert('API Test Complete', 'Check the API Test screen for detailed results.');
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('API Test Failed', 'Error running API test suite.');
     } finally {
       setIsTesting(false);

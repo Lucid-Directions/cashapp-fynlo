@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
-  KeyboardAvoidingView,
+  _KeyboardAvoidingView,
   Platform,
   Switch,
   TextInput,
@@ -95,13 +95,13 @@ interface Employee {
 }
 
 // Fix for iOS keyboard handling to prevent NaN errors
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+const { height: _SCREEN_HEIGHT } = Dimensions.get('window');
 const KEYBOARD_VERTICAL_OFFSET = Platform.OS === 'ios' ? 90 : 0;
 
 const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
-  const { updateConfig, completeSetupStep } = useRestaurantConfig();
+  const { _updateConfig, _completeSetupStep } = useRestaurantConfig();
 
   const [currentStep, setCurrentStep] = useState(1);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
@@ -231,7 +231,7 @@ const ComprehensiveRestaurantOnboardingScreen: React.FC = () => {
   const dayNames = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
   const dayLabels = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-  const updateField = (field: keyof RestaurantFormData, value: any) => {
+const updateField = (field: keyof RestaurantFormData, value: unknown) => {
     setFormData((prev) => {
       const updated = { ...prev, [field]: value };
 

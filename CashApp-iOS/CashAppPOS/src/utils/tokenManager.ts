@@ -22,23 +22,26 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AUTH_CONFIG } from '../config/auth.config';
 import { supabase } from '../lib/supabase';
 
+// Event listener types
+type EventListener = (...args: unknown[]) => void;
+
 // Simple EventEmitter for React Native (similar to WebSocketService)
 class SimpleEventEmitter {
-  private listeners: { [key: string]: Function[] } = {};
+  private listeners: { [key: string]: EventListener[] } = {};
 
-  on(event: string, listener: Function) {
+  on(event: string, listener: EventListener) {
     if (!this.listeners[event]) {
       this.listeners[event] = [];
     }
     this.listeners[event].push(listener);
   }
 
-  off(event: string, listener: Function) {
+  off(event: string, listener: EventListener) {
     if (!this.listeners[event]) return;
     this.listeners[event] = this.listeners[event].filter((l) => l !== listener);
   }
 
-  emit(event: string, ...args: any[]) {
+  emit(event: string, ...args: unknown[]) {
     if (!this.listeners[event]) return;
     this.listeners[event].forEach((listener) => {
       try {

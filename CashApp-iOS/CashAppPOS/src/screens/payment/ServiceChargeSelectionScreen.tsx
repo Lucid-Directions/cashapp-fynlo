@@ -57,7 +57,7 @@ const ServiceChargeSelectionScreen: React.FC = () => {
   const navigation = useNavigation();
   const { theme } = useTheme();
   const {
-    cart,
+_cart,
     cartTotal,
     setServiceChargePercentage,
     setAddTransactionFee,
@@ -125,7 +125,7 @@ const ServiceChargeSelectionScreen: React.FC = () => {
     setAddTransactionFee(localAddTransactionFee);
 
     // Navigate to payment method selection
-    // @ts-ignore
+    // @ts-expect-error
     navigation.navigate('EnhancedPayment');
   };
 
@@ -279,7 +279,7 @@ const ServiceChargeSelectionScreen: React.FC = () => {
   );
 };
 
-const createStyles = (theme: any) =>
+const createStyles = (theme: unknown) =>
   StyleSheet.create({
     container: {
       flex: 1,

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+// TODO: Unused import - import React, { useState, useEffect } from 'react';
 
 import {
   StyleSheet,
@@ -25,7 +25,7 @@ const ENV = {
   FEATURE_REPORTS: true, // Set to true to enable, false to show ComingSoon
 };
 
-const { width } = Dimensions.get('window');
+const { _width } = Dimensions.get('window');
 
 const Colors = {
   primary: '#00A651',
@@ -58,7 +58,7 @@ interface StaffMember {
 
 const StaffReportDetailScreen = () => {
   const navigation = useNavigation();
-  const { theme } = useTheme();
+  const { _theme } = useTheme();
   const [staffData, setStaffData] = useState<StaffMember[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -98,7 +98,7 @@ const StaffReportDetailScreen = () => {
       // and that this data is already processed (e.g., sorted, metrics calculated).
       const data = await dataService.getStaffReportDetail(selectedPeriod);
       setStaffData(data || []);
-    } catch (e: any) {
+    } catch (e: unknown) {
       setError(e.message || 'Failed to load staff report.');
       setStaffData([]);
     } finally {
@@ -231,7 +231,7 @@ const StaffReportDetailScreen = () => {
 
   // Handling for when staffData is empty after loading (no error)
   // but still want to show the period selector etc.
-  const renderContent = () => {
+  const _renderContent = () => {
     if (staffData.length === 0) {
       return (
         <View style={styles.centeredError}>

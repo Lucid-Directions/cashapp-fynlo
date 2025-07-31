@@ -10,23 +10,30 @@ import PricingDiscountsScreen from '../screens/settings/app/PricingDiscountsScre
 import SystemDiagnosticsScreen from '../screens/settings/app/SystemDiagnosticsScreen';
 import AppSettingsScreen from '../screens/settings/AppSettingsScreen';
 import BusinessInformationScreen from '../screens/settings/business/BusinessInformationScreen';
+import OperatingHoursScreen from '../screens/settings/business/OperatingHoursScreen';
+import PaymentMethodsInfoScreen from '../screens/settings/business/PaymentMethodsInfoScreen';
+import PaymentMethodsScreen from '../screens/settings/business/PaymentMethodsScreen';
+import ReceiptCustomizationScreen from '../screens/settings/business/ReceiptCustomizationScreen';
 import TaxConfigurationScreen from '../screens/settings/business/TaxConfigurationScreen';
 import BusinessSettingsScreen from '../screens/settings/BusinessSettingsScreen';
+import DeveloperSettingsScreen from '../screens/settings/DeveloperSettingsScreen';
+import BarcodeScannerScreen from '../screens/settings/hardware/BarcodeScannerScreen';
+import CardReaderScreen from '../screens/settings/hardware/CardReaderScreen';
+import CashDrawerScreen from '../screens/settings/hardware/CashDrawerScreen';
+import HardwareDiagnosticsScreen from '../screens/settings/hardware/HardwareDiagnosticsScreen';
+import PrinterSetupScreen from '../screens/settings/hardware/PrinterSetupScreen';
+import HardwareSettingsScreen from '../screens/settings/HardwareSettingsScreen';
+import RecipeFormScreen from '../screens/settings/RecipeFormScreen';
+import RecipesScreen from '../screens/settings/RecipesScreen';
+import RestaurantPlatformOverridesScreen from '../screens/settings/RestaurantPlatformOverridesScreen';
+import RestaurantProfileScreen from '../screens/settings/RestaurantProfileScreen';
 import SettingsScreen from '../screens/settings/SettingsScreen';
 
 // Import actual screens
-import PaymentMethodsScreen from '../screens/settings/business/PaymentMethodsScreen';
-import PaymentMethodsInfoScreen from '../screens/settings/business/PaymentMethodsInfoScreen';
-import ReceiptCustomizationScreen from '../screens/settings/business/ReceiptCustomizationScreen';
-import OperatingHoursScreen from '../screens/settings/business/OperatingHoursScreen';
 
 // Import Hardware screens
-import HardwareSettingsScreen from '../screens/settings/HardwareSettingsScreen';
-import PrinterSetupScreen from '../screens/settings/hardware/PrinterSetupScreen';
-import CashDrawerScreen from '../screens/settings/hardware/CashDrawerScreen';
-import BarcodeScannerScreen from '../screens/settings/hardware/BarcodeScannerScreen';
-import CardReaderScreen from '../screens/settings/hardware/CardReaderScreen';
-import HardwareDiagnosticsScreen from '../screens/settings/hardware/HardwareDiagnosticsScreen';
+import AccessibilityScreen from '../screens/settings/user/AccessibilityScreen';
+import LocalizationScreen from '../screens/settings/user/LocalizationScreen';
 import NotificationSettingsScreen from '../screens/settings/user/NotificationSettingsScreen';
 import UserProfileScreen from '../screens/settings/user/UserProfileScreen';
 import UserSettingsScreen from '../screens/settings/UserSettingsScreen';
@@ -40,8 +47,6 @@ import RestaurantProfileScreen from '../screens/settings/RestaurantProfileScreen
 import RestaurantPlatformOverridesScreen from '../screens/settings/RestaurantPlatformOverridesScreen';
 
 // Recipe Management Screens
-import RecipesScreen from '../screens/settings/RecipesScreen';
-import RecipeFormScreen from '../screens/settings/RecipeFormScreen';
 
 export type SettingsStackParamList = {
   SettingsMain: undefined;
@@ -93,7 +98,7 @@ export type SettingsStackParamList = {
 
   // Recipe Management
   RecipesScreen: undefined;
-  RecipeFormScreen: { recipe?: any }; // Using 'any' for recipe type placeholder
+  RecipeFormScreen: { recipe?: unknown }; // Using 'any' for recipe type placeholder
 };
 
 const Stack = createStackNavigator<SettingsStackParamList>();

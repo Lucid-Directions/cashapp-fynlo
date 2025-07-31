@@ -22,7 +22,7 @@ import SumUpService from '../../services/SumUpService';
 import type { SumUpQRPayment } from '../../services/SumUpService';
 import type { RouteProp } from '@react-navigation/native';
 
-const { width: screenWidth } = Dimensions.get('window');
+const { width: _screenWidth } = Dimensions.get('window');
 
 type QRCodePaymentRouteProp = RouteProp<
   {

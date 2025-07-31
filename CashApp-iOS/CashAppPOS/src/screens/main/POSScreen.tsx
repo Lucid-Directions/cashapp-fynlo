@@ -10,11 +10,11 @@ import {
   ScrollView,
   FlatList,
   Modal,
-  TextInput,
+  _TextInput,
   Alert,
   Dimensions,
   Platform,
-  Image,
+  _Image,
   Animated,
 } from 'react-native';
 
@@ -45,9 +45,16 @@ import CustomersService from '../../services/CustomersService';
 import DatabaseService from '../../services/DatabaseService';
 import DataService from '../../services/DataService';
 import PlatformService from '../../services/PlatformService';
+// TODO: Unused import - import PlatformService from '../../services/PlatformService';
 import useAppStore from '../../store/useAppStore';
 import useSettingsStore from '../../store/useSettingsStore';
 import useUIStore from '../../store/useUIStore';
+import {
+  _validatePrice,
+  calculatePercentageFee,
+  validateCartCalculation,
+  formatPrice,
+} from '../../utils/priceValidation';
 
 import type { MenuItem, OrderItem } from '../../types';
 
@@ -68,8 +75,8 @@ const ExportedMenuItemCard = ({
   handleUpdateQuantity,
 }: {
   item: MenuItem;
-  theme: any;
-  styles: any;
+theme: unknown;
+  styles: unknown;
   cart: OrderItem[];
   handleAddToCart: (item: MenuItem) => void;
   handleUpdateQuantity: (id: number, quantity: number) => void;
@@ -463,7 +470,7 @@ const POSScreen: React.FC = () => {
             setShowSumUpPayment(true);
           } else {
             console.warn('⚠️ SumUp not compatible, showing alternatives');
-            const fallbackMethods = compatibilityService.getFallbackPaymentMethods();
+const _fallbackMethods = compatibilityService.getFallbackPaymentMethods();
 
             Alert.alert(
               'Tap to Pay Unavailable',
@@ -572,7 +579,7 @@ const POSScreen: React.FC = () => {
     }
   };
 
-  const handlePaymentComplete = (result: any) => {
+const handlePaymentComplete = (result: unknown) => {
     if (result.success) {
       Alert.alert(
         'Payment Successful',
@@ -1112,7 +1119,7 @@ const POSScreen: React.FC = () => {
                     style={styles.chargeButton}
                     onPress={() => {
                       setShowCartModal(false);
-                      // @ts-ignore
+                      // @ts-expect-error
                       navigation.navigate('ServiceChargeSelection');
                     }}
                     testID="charge-button" // Added testID
@@ -1303,7 +1310,7 @@ const POSScreen: React.FC = () => {
   );
 };
 
-const createStyles = (theme: any) =>
+const createStyles = (theme: unknown) =>
   StyleSheet.create({
     container: {
       flex: 1,

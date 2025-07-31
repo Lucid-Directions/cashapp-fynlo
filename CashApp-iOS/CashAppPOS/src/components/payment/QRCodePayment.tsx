@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, _Alert, ActivityIndicator } from 'react-native';
 
 import QRCode from 'react-native-qrcode-svg';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -51,7 +51,7 @@ const QRCodeWrapper: React.FC<{ qrCodeData: string }> = ({ qrCodeData }) => {
 
 interface QRCodePaymentProps {
   request: PaymentRequest;
-  onPaymentComplete: (result: any) => void;
+  onPaymentComplete: (result: unknown) => void;
   onCancel: () => void;
 }
 

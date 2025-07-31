@@ -1,9 +1,8 @@
 import 'react-native-gesture-handler/jestSetup';
+import asyncStorageMock from '@react-native-async-storage/async-storage/jest/async-storage-mock';
 
 // Mock AsyncStorage
-jest.mock('@react-native-async-storage/async-storage', () =>
-  require('@react-native-async-storage/async-storage/jest/async-storage-mock')
-);
+jest.mock('@react-native-async-storage/async-storage', () => asyncStorageMock);
 
 // Mock react-native-vector-icons
 jest.mock('react-native-vector-icons/MaterialIcons', () => 'MockedIcon');
@@ -86,7 +85,7 @@ global.mockAsyncStorage = {
 };
 
 // Mock timers
-global.setTimeout = jest.fn((callback, delay) => {
+global.setTimeout = jest.fn((callback, _delay) => {
   if (typeof callback === 'function') {
     callback();
   }

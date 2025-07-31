@@ -9,7 +9,7 @@ export interface ErrorContext {
   userRole?: string;
   screenName?: string;
   action?: string;
-  additionalData?: Record<string, any>;
+  additionalData?: Record<string, unknown>;
 }
 
 class SimpleErrorTrackingService {
@@ -107,7 +107,7 @@ class SimpleErrorTrackingService {
     }
   }
 
-  trackEvent(event: string, data?: Record<string, any>): void {
+  trackEvent(event: string, data?: Record<string, unknown>): void {
     try {
       console.log('📊 Event tracked:', event, data);
     } catch (error) {
@@ -116,7 +116,7 @@ class SimpleErrorTrackingService {
   }
 
   // Specific tracking methods for common issues
-  trackPricingError(error: Error, itemData?: any, calculationContext?: any): void {
+  trackPricingError(error: Error, itemData?: unknown, calculationContext?: unknown): void {
     this.captureError(error, {
       action: 'pricing_calculation',
       screenName: 'POS',
@@ -139,7 +139,7 @@ class SimpleErrorTrackingService {
     });
   }
 
-  trackUIError(error: Error, component?: string, props?: any): void {
+  trackUIError(error: Error, component?: string, props?: unknown): void {
     this.captureError(error, {
       action: 'ui_render',
       additionalData: {
@@ -150,7 +150,7 @@ class SimpleErrorTrackingService {
     });
   }
 
-  trackBusinessLogicError(error: Error, operation?: string, data?: any): void {
+  trackBusinessLogicError(error: Error, operation?: string, data?: unknown): void {
     this.captureError(error, {
       action: 'business_logic',
       additionalData: {
@@ -172,7 +172,7 @@ class SimpleErrorTrackingService {
   }
 
   // Debug helpers
-  addBreadcrumb(message: string, category: string = 'debug', data?: Record<string, any>): void {
+  addBreadcrumb(message: string, category: string = 'debug', data?: Record<string, unknown>): void {
     try {
       console.log(`🍞 Breadcrumb [${category}]:`, message, data);
     } catch (error) {
@@ -188,7 +188,7 @@ class SimpleErrorTrackingService {
     }
   }
 
-  setContext(key: string, context: Record<string, any>): void {
+  setContext(key: string, context: Record<string, unknown>): void {
     try {
       console.log(`📝 Context set: ${key}`, context);
     } catch (error) {
@@ -197,7 +197,7 @@ class SimpleErrorTrackingService {
   }
 
   // Get error log for debugging
-  getErrorLog(): Array<any> {
+  getErrorLog(): Array<unknown> {
     return [...this.errorLog];
   }
 
@@ -208,7 +208,7 @@ class SimpleErrorTrackingService {
   }
 
   // Flush pending events (placeholder)
-  flush(timeout: number = 2000): Promise<boolean> {
+  flush(_timeout: number = 2000): Promise<boolean> {
     try {
       console.log('🚽 Flushing error events...');
       return Promise.resolve(true);

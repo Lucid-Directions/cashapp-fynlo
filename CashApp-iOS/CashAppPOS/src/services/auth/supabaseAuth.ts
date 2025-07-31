@@ -101,7 +101,7 @@ class SupabaseAuthService {
         user: normalizedUser,
         session: data.session,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Sign in error:', error);
 
       // Log failed login
@@ -146,7 +146,7 @@ class SupabaseAuthService {
       }
 
       return data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Sign up error:', error);
       throw new Error(error.message || 'Failed to sign up');
     }
@@ -276,7 +276,7 @@ class SupabaseAuthService {
   /**
    * Listen to auth state changes
    */
-  onAuthStateChange(callback: (event: string, session: any) => void) {
+  onAuthStateChange(callback: (event: string, session: unknown) => void) {
     // Use mock auth if configured
     if (AUTH_CONFIG.USE_MOCK_AUTH) {
       return mockAuthService.onAuthStateChange(callback);

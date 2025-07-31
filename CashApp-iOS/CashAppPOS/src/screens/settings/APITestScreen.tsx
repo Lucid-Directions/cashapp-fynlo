@@ -59,7 +59,7 @@ const APITestScreen: React.FC = () => {
       await apiTestService.runFullAPITestSuite();
       await loadTestData();
       Alert.alert('Test Complete', 'API test suite finished. Check results below.');
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Test Failed', 'Error running API test suite');
     } finally {
       setIsRunning(false);
@@ -71,7 +71,7 @@ const APITestScreen: React.FC = () => {
     try {
       await apiTestService.testEndpoint(endpoint, method);
       await loadTestData();
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Test Failed', `Error testing ${endpoint}`);
     } finally {
       setIsRunning(false);

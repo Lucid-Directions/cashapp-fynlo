@@ -9,21 +9,22 @@ import { Platform } from 'react-native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { PaymentRequest, PaymentResult } from './PaymentService';
+import { _PaymentRequest, _PaymentResult } from './PaymentService';
 
 // Square SDK imports - conditionally loaded to prevent crashes
-let SQIPCore: any;
-let SQIPCardEntry: any;
-let SQIPApplePay: any;
-let SQIPGooglePay: any;
+let SQIPCore: unknown;
+let SQIPCardEntry: unknown;
+let SQIPApplePay: unknown;
+let SQIPGooglePay: unknown;
 
 try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const SquareSDK = require('react-native-square-in-app-payments');
   SQIPCore = SquareSDK.SQIPCore;
   SQIPCardEntry = SquareSDK.SQIPCardEntry;
   SQIPApplePay = SquareSDK.SQIPApplePay;
   SQIPGooglePay = SquareSDK.SQIPGooglePay;
-} catch (error) {
+} catch (_error) {
   console.warn(
     'Square SDK not available. Square payments will be disabled. Please install dependencies with: npm install && cd ios && pod install'
   );
@@ -601,7 +602,7 @@ class SquareServiceClass {
   /**
    * Get payment details
    */
-  async getPaymentDetails(paymentId: string): Promise<any> {
+  async getPaymentDetails(paymentId: string): Promise<unknown> {
     try {
       if (!this.config) {
         throw new Error('Square service not initialized');
@@ -633,7 +634,7 @@ class SquareServiceClass {
   private isSDKAvailable(): boolean {
     try {
       return typeof SQIPCore !== 'undefined' && SQIPCore !== null;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+// TODO: Unused import - import React, { useState, useEffect } from 'react';
 
 import {
   StyleSheet,
@@ -25,7 +25,7 @@ const ENV = {
   FEATURE_REPORTS: true, // Set to true to enable, false to show ComingSoon
 };
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const { width: screenWidth, height: _screenHeight } = Dimensions.get('window');
 const isTablet = screenWidth > 768;
 const isSmallDevice = screenWidth < 380;
 
@@ -116,7 +116,7 @@ const SalesReportDetailScreen = () => {
         setTotalSales(0);
         setTotalTransactions(0);
       }
-    } catch (e: any) {
+} catch (e: unknown) {
       setError(e.message || 'Failed to load sales report.');
       setSalesData([]);
       setTotalSales(0);

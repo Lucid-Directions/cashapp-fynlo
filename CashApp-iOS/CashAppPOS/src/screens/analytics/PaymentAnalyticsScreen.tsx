@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 
 import { useNavigation } from '@react-navigation/native';
-import { LineChart, BarChart, PieChart } from 'react-native-chart-kit';
+import { LineChart, _BarChart, PieChart } from 'react-native-chart-kit';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -52,7 +52,7 @@ interface AnalyticsData {
   cost_savings: {
     potential_savings: number;
     savings_percentage: number;
-    optimal_mix: Record<string, any>;
+    optimal_mix: Record<string, unknown>;
   };
   recommendations: Array<{
     type: string;
@@ -70,7 +70,7 @@ interface VolumeData {
     total_volume: number;
     total_transactions: number;
     total_fees: number;
-    providers: Record<string, any>;
+    providers: Record<string, unknown>;
   }>;
   growth_metrics: {
     volume_growth: number;
@@ -105,7 +105,7 @@ const PaymentAnalyticsScreen: React.FC = () => {
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
   const [volumeData, setVolumeData] = useState<VolumeData | null>(null);
   const [healthScores, setHealthScores] = useState<HealthScores | null>(null);
-  const [error, setError] = useState<string>('');
+  const [_error, setError] = useState<string>('');
 
   useEffect(() => {
     loadAnalyticsData();
@@ -301,7 +301,7 @@ const PaymentAnalyticsScreen: React.FC = () => {
     </View>
   );
 
-  const renderProviderHealth = (provider: string, health: any) => {
+  const renderProviderHealth = (provider: string, health: unknown) => {
     const getStatusColor = (status: string) => {
       switch (status) {
         case 'excellent':

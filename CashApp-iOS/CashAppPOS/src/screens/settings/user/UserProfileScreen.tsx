@@ -8,7 +8,7 @@ import {
   ScrollView,
   Alert,
   Switch,
-  TextInput,
+  _TextInput,
   Image,
 } from 'react-native';
 
@@ -23,8 +23,8 @@ const UserProfileScreen: React.FC = () => {
   const { user, updateUser, signOut } = useAuth();
   const { theme } = useTheme();
   const styles = useThemedStyles(createStyles);
-  const [isEditing, setIsEditing] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+const [_isEditing, setIsEditing] = useState(false);
+  const [_isLoading, setIsLoading] = useState(false);
 
   // Safe user data with fallbacks
   const safeUser = useMemo(() => {
@@ -71,7 +71,7 @@ const UserProfileScreen: React.FC = () => {
     }
   }, [user, safeUser]);
 
-  const handleSave = async () => {
+  const _handleSave = async () => {
     if (!user) {
       Alert.alert('Error', 'User data not available');
       return;
@@ -496,7 +496,7 @@ const UserProfileScreen: React.FC = () => {
   );
 };
 
-const createStyles = (theme: any) =>
+const createStyles = (theme: unknown) =>
   StyleSheet.create({
     container: {
       flex: 1,

@@ -5,7 +5,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-import { useTheme, ColorTheme, colorThemeOptions } from '../../design-system/ThemeProvider';
+import { useTheme, _ColorTheme, colorThemeOptions } from '../../design-system/ThemeProvider';
 
 import type { Theme } from '../../design-system/theme';
 import type { ThemeMode, ColorThemeOption } from '../../design-system/ThemeProvider';

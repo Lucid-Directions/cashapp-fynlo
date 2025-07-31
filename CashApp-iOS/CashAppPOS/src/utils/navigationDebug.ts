@@ -84,7 +84,7 @@ export const VALID_ROUTES = {
 export function validateNavigation(
   currentScreen: string,
   targetScreen: string,
-  params?: any
+  params?: unknown
 ): { valid: boolean; error?: string } {
   // Check if target screen exists in any navigator
   const allRoutes = [
@@ -142,7 +142,7 @@ export function logNavigationState(state: NavigationState | undefined, depth = 0
 export function getNestedNavigationParams(
   fromNavigator: 'MAIN' | 'SETTINGS' | 'PLATFORM',
   toScreen: string
-): { screen?: string; params?: any } | null {
+): { screen?: string; params?: unknown } | null {
   // From Main to Settings screens
   if (fromNavigator === 'MAIN' && Object.values(VALID_ROUTES.SETTINGS).includes(toScreen)) {
     if (toScreen === 'Settings') {
@@ -159,7 +159,7 @@ export function getNestedNavigationParams(
 /**
  * Safe navigation helper
  */
-export function safeNavigate(navigation: any, targetScreen: string, params?: any) {
+export function safeNavigate(navigation: unknown, targetScreen: string, params?: unknown) {
   try {
     const validation = validateNavigation(
       navigation.getState()?.routes[navigation.getState()?.index]?.name || '',

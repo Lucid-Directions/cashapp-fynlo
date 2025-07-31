@@ -175,7 +175,7 @@ export const sanitizeInput = (input: string, maxLength: number = 255): string =>
 /**
  * Validate required field
  */
-export const isRequired = (value: any): boolean => {
+export const isRequired = (value: unknown): boolean => {
   if (value === undefined || value === null) return false;
   if (typeof value === 'string') return value.trim().length > 0;
   if (typeof value === 'number') return !isNaN(value);
@@ -214,12 +214,12 @@ export const validateSWIFT = (swift: string): boolean => {
  * Create a debounced validation function
  */
 export const debounceValidation = (
-  fn: (...args: any[]) => any,
+  fn: (...args: unknown[]) => any,
   delay: number = 300
-): ((...args: any[]) => void) => {
+): ((...args: unknown[]) => void) => {
   let timeoutId: NodeJS.Timeout;
 
-  return (...args: any[]) => {
+return (...args: unknown[]) => {
     clearTimeout(timeoutId);
     timeoutId = setTimeout(() => fn(...args), delay);
   };

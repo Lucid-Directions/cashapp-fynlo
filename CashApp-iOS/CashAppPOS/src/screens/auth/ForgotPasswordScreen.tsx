@@ -55,7 +55,7 @@ const ForgotPasswordScreen: React.FC = () => {
           },
         ]
       );
-    } catch (error) {
+    } catch (_error) {
       Alert.alert('Error', 'Failed to send reset link. Please try again.');
     } finally {
       setIsLoading(false);

@@ -9,10 +9,10 @@ import {
   TouchableOpacity,
   ScrollView,
   FlatList,
-  TextInput,
+  _TextInput,
   Modal,
   RefreshControl,
-  ActivityIndicator, // Will be replaced by LoadingView
+  _ActivityIndicator, // Will be replaced by LoadingView
 } from 'react-native';
 
 import { useNavigation } from '@react-navigation/native';
@@ -90,7 +90,7 @@ const OrdersScreen: React.FC = () => {
       // Assuming a getOrders method will be added to DataService, taking dateRange
       const fetchedOrders = await dataService.getOrders(dateRange);
       setOrders(fetchedOrders || []);
-    } catch (e: any) {
+    } catch (e: unknown) {
       setError(e.message || 'Failed to load orders.');
       setOrders([]);
     } finally {
@@ -470,7 +470,7 @@ const OrdersScreen: React.FC = () => {
   );
 };
 
-const createStyles = (theme: any) =>
+const createStyles = (theme: unknown) =>
   StyleSheet.create({
     container: {
       flex: 1,

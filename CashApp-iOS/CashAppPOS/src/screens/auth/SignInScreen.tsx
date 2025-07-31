@@ -11,7 +11,7 @@ import {
   ScrollView,
   ActivityIndicator,
   Switch,
-  Image,
+  _Image,
 } from 'react-native';
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -48,7 +48,7 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(true);
-  const [showPassword, setShowPassword] = useState(false);
+  const [_showPassword, _setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
 
@@ -85,7 +85,7 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
           [{ text: 'OK' }]
         );
       }
-    } catch (error) {
+} catch (_error) {
       Alert.alert('Error', 'An unexpected error occurred. Please try again.', [{ text: 'OK' }]);
     } finally {
       setIsLoading(false);
@@ -117,7 +117,7 @@ const SignInScreen: React.FC<SignInScreenProps> = ({ onSwitchToSignUp }) => {
           { text: 'OK' },
         ]);
       }
-    } catch (error) {
+} catch (_error) {
       Alert.alert('Error', 'Unable to send password reset email. Please try again.', [
         { text: 'OK' },
       ]);

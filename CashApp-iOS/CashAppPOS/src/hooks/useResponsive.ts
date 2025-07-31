@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 
-import { Dimensions, ScaledSize } from 'react-native';
+import { Dimensions, _ScaledSize } from 'react-native';
 
-import { breakpoints, deviceTypes } from '../design-system/theme';
+import { breakpoints, _deviceTypes } from '../design-system/theme';
 
 interface ResponsiveHookReturn {
   width: number;

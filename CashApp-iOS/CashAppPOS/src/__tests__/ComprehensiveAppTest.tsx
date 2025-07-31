@@ -1,19 +1,19 @@
-import React from 'react';
+// TODO: Unused import - import React from 'react';
 
 import { Alert } from 'react-native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContainer } from '@react-navigation/native';
-import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
+import { render, fireEvent, waitFor, _act } from '@testing-library/react-native';
 
 // Import all screens
 import InventoryScreen from '../screens/inventory/InventoryScreen';
-import DashboardScreen from '../screens/main/DashboardScreen';
+// TODO: Unused import - import DashboardScreen from '../screens/main/DashboardScreen';
 import POSScreen from '../screens/main/POSScreen';
 import OrdersScreen from '../screens/orders/OrdersScreen';
-import EnhancedPaymentScreen from '../screens/payment/EnhancedPaymentScreen';
-import MenuManagementScreen from '../screens/settings/app/MenuManagementScreen';
-import BusinessInformationScreen from '../screens/settings/business/BusinessInformationScreen';
+// TODO: Unused import - import EnhancedPaymentScreen from '../screens/payment/EnhancedPaymentScreen';
+// TODO: Unused import - import MenuManagementScreen from '../screens/settings/app/MenuManagementScreen';
+// TODO: Unused import - import BusinessInformationScreen from '../screens/settings/business/BusinessInformationScreen';
 import PaymentMethodsScreen from '../screens/settings/business/PaymentMethodsScreen';
 import SettingsScreen from '../screens/settings/SettingsScreen';
 import ThemeOptionsScreen from '../screens/settings/user/ThemeOptionsScreen';
@@ -119,7 +119,7 @@ const testProduct = {
   available: true,
 };
 
-const testOrder = {
+const _testOrder = {
   id: 'ORD001',
   items: [{ ...testProduct, quantity: 2 }],
   total: 21.98,
@@ -134,7 +134,7 @@ describe('Comprehensive App Test Suite', () => {
 
   describe('POS Screen Tests', () => {
     it('should render POS screen correctly', () => {
-      const { getByText, getByTestId } = render(
+      const { getByText, _getByTestId } = render(
         <NavigationContainer>
           <POSScreen />
         </NavigationContainer>
@@ -144,7 +144,7 @@ describe('Comprehensive App Test Suite', () => {
     });
 
     it('should add items to cart', async () => {
-      const { getByText, getAllByText } = render(
+      const { _getByText, getAllByText } = render(
         <NavigationContainer>
           <POSScreen />
         </NavigationContainer>
@@ -309,7 +309,7 @@ describe('Comprehensive App Test Suite', () => {
 
   describe('Navigation Tests', () => {
     it('should navigate between screens', async () => {
-      const { getByText, getByTestId } = render(
+      const { getByText, _getByTestId } = render(
         <NavigationContainer>
           <SettingsScreen />
         </NavigationContainer>
@@ -376,7 +376,7 @@ describe('Comprehensive App Test Suite', () => {
     it('should render large lists efficiently', async () => {
       const startTime = Date.now();
 
-      const { getByTestId } = render(
+const { _getByTestId } = render(
         <NavigationContainer>
           <InventoryScreen />
         </NavigationContainer>

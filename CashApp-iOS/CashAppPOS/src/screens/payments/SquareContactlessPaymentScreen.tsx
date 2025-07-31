@@ -21,24 +21,25 @@ import { useTheme } from '../../design-system/ThemeProvider';
 import SquareService from '../../services/SquareService';
 
 // Square SDK imports - conditionally loaded
-let SQIPApplePay: any;
-let SQIPGooglePay: any;
+let SQIPApplePay: unknown;
+let SQIPGooglePay: unknown;
 try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const SquareSDK = require('react-native-square-in-app-payments');
   SQIPApplePay = SquareSDK.SQIPApplePay;
   SQIPGooglePay = SquareSDK.SQIPGooglePay;
-} catch (error) {
+} catch (_error) {
   console.warn('Square SDK not available in SquareContactlessPaymentScreen');
 }
 
 interface SquareContactlessPaymentScreenProps {
-  navigation: any;
+  navigation: unknown;
   route: {
     params: {
       amount: number;
       currency?: string;
       description?: string;
-      onPaymentComplete: (result: any) => void;
+      onPaymentComplete: (result: unknown) => void;
       onPaymentCancelled: () => void;
     };
   };

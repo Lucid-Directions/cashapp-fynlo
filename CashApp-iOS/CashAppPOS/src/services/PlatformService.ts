@@ -3,7 +3,7 @@
  * Handles communication with the platform settings API while maintaining existing patterns
  */
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
+// TODO: Unused import - import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import API_CONFIG from '../config/api';
 import tokenManager from '../utils/tokenManager';
@@ -16,7 +16,7 @@ const BASE_URL = API_CONFIG.FULL_API_URL;
 
 export interface PlatformSetting {
   key: string;
-  value: any;
+  value: unknown;
   category: string;
   description: string;
   is_sensitive: boolean;
@@ -47,8 +47,8 @@ export interface AuditRecord {
   config_type: string;
   config_key: string;
   entity_id?: string;
-  old_value: any;
-  new_value: any;
+  old_value: unknown;
+  new_value: unknown;
   change_reason?: string;
   change_source: string;
   changed_by: string;
@@ -87,7 +87,7 @@ class PlatformService {
   private async loadAuthToken(): Promise<void> {
     try {
       this.authToken = await tokenManager.getTokenWithRefresh();
-    } catch (error) {
+    } catch (_error) {
       console.log('No auth token found');
     }
   }
@@ -95,11 +95,11 @@ class PlatformService {
   private async makeRequest(
     endpoint: string,
     method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'GET',
-    data?: any
-  ): Promise<any> {
+    data?: unknown
+  ): Promise<unknown> {
     try {
       const url = `${BASE_URL}${endpoint}`;
-      const headers: any = {
+      const headers: unknown = {
         'Content-Type': 'application/json',
       };
 
@@ -159,7 +159,7 @@ class PlatformService {
       const settingsData = await this.makeRequest(endpoint);
 
       // Handle different API response formats
-      let settingsObject: Record<string, any>;
+let settingsObject: Record<string, unknown>;
 
       if (settingsData && typeof settingsData === 'object') {
         // If it's already an object, use it directly
@@ -204,7 +204,7 @@ class PlatformService {
 
   async updatePlatformSetting(
     configKey: string,
-    configValue: any,
+configValue: unknown,
     changeReason?: string
   ): Promise<boolean> {
     try {
@@ -220,7 +220,7 @@ class PlatformService {
   }
 
   async bulkUpdatePlatformSettings(
-    updates: Record<string, any>,
+updates: Record<string, unknown>,
     changeReason?: string
   ): Promise<{ successful: number; failed: number; errors: Record<string, string> }> {
     try {
@@ -346,7 +346,7 @@ class PlatformService {
   async setRestaurantOverride(
     restaurantId: string,
     configKey: string,
-    overrideValue: any,
+    overrideValue: unknown,
     requiresApproval: boolean = false
   ): Promise<boolean> {
     try {
@@ -389,9 +389,9 @@ class PlatformService {
     restaurantId?: string,
     categories?: string[]
   ): Promise<{
-    platform_settings: Record<string, any>;
+    platform_settings: Record<string, unknown>;
     feature_flags: Record<string, boolean>;
-    effective_settings: Record<string, any>;
+    effective_settings: Record<string, unknown>;
     sync_timestamp: string;
   }> {
     try {

@@ -62,8 +62,8 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
   const [vatNumber, setVatNumber] = useState('');
 
   const [currentStep, setCurrentStep] = useState(1);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showPassword, _setShowPassword] = useState(false);
+  const [showConfirmPassword, _setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [acceptedTerms, setAcceptedTerms] = useState(false);
@@ -154,7 +154,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSwitchToSignIn }) => {
           [{ text: 'OK' }]
         );
       }
-    } catch (error) {
+} catch (_error) {
       Alert.alert('Error', 'An unexpected error occurred during registration. Please try again.', [
         { text: 'OK' },
       ]);

@@ -231,7 +231,7 @@ const DataExportScreen: React.FC = () => {
       // Reset selections
       setSelectedDataTypes([]);
       setDateRange({ start: '', end: '' });
-    } catch (error) {
+} catch (_error) {
       Alert.alert('Error', 'Failed to export data. Please try again.');
     } finally {
       setIsExporting(false);
@@ -413,7 +413,7 @@ const DataExportScreen: React.FC = () => {
                   styles.formatButton,
                   selectedFormat === format && styles.formatButtonSelected,
                 ]}
-                onPress={() => setSelectedFormat(format as any)}
+                onPress={() => setSelectedFormat(format as unknown)}
               >
                 <Icon
                   name={getFormatIcon(format)}

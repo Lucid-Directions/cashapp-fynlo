@@ -6,7 +6,7 @@
  */
 
 // Get the current environment
-const isDevelopment = __DEV__;
+const _isDevelopment = __DEV__;
 
 // DigitalOcean App Platform backend URL (Production) - VERIFIED WORKING
 const PRODUCTION_API_URL = 'https://fynlopos-9eg2c.ondigitalocean.app';
@@ -15,11 +15,11 @@ const PRODUCTION_API_URL = 'https://fynlopos-9eg2c.ondigitalocean.app';
 const MAC_LAN_IP = '192.168.0.109';
 
 // Determine if running on simulator or device
-const isSimulator =
+const _isSimulator =
   __DEV__ &&
   // iOS Simulator detection
-  ((global as any).navigator?.userAgent?.includes('iPhone Simulator') ||
-    (global as any).navigator?.userAgent?.includes('iPad Simulator') ||
+  ((global as unknown).navigator?.userAgent?.includes('iPhone Simulator') ||
+    (global as unknown).navigator?.userAgent?.includes('iPad Simulator') ||
     // React Native development mode detection
     typeof __DEV__ !== 'undefined');
 

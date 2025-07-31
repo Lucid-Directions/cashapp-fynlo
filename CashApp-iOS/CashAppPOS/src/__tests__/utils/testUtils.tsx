@@ -1,11 +1,11 @@
-// @ts-nocheck
+// // @ts-nocheck
 /**
  * Test Utilities for Fynlo POS
  * Provides common testing helpers, wrappers, and utilities
  */
 
 import type { ReactElement } from 'react';
-import React from 'react';
+// TODO: Unused import - import React from 'react';
 
 import { NavigationContainer } from '@react-navigation/native';
 import { render } from '@testing-library/react-native';
@@ -120,12 +120,12 @@ export const createMockRoute = (overrides = {}) => ({
 });
 
 // Test assertion helpers
-export const expectToBeVisible = (element: any) => {
+export const expectToBeVisible = (element: unknown) => {
   expect(element).toBeTruthy();
   expect(element.props.style).not.toContainEqual({ display: 'none' });
 };
 
-export const expectToBeHidden = (element: any) => {
+export const expectToBeHidden = (element: unknown) => {
   expect(element).toBeFalsy();
 };
 
@@ -211,7 +211,7 @@ export const pressButton = async (getByTestId: any, testId: string) => {
 };
 
 // Mock fetch for API testing
-export const createMockFetch = (responses: any[] = []) => {
+export const createMockFetch = (responses: unknown[] = []) => {
   let callCount = 0;
 
   return jest.fn(() => {

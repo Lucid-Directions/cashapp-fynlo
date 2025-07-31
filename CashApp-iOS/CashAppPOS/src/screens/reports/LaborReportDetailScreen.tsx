@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+// TODO: Unused import - import React, { useState, useEffect } from 'react';
 
 import {
   StyleSheet,
@@ -86,7 +86,7 @@ const LaborReportDetailScreen = () => {
 
       // Process the data
       const processedData: LaborData[] =
-        data.employees?.map((emp: any) => ({
+data.employees?.map((emp: unknown) => ({
           employeeId: emp.id,
           employeeName: emp.name || `${emp.first_name} ${emp.last_name}`,
           role: emp.role,
@@ -133,7 +133,7 @@ const LaborReportDetailScreen = () => {
     }
   };
 
-  const handleExportReport = () => {
+  const _handleExportReport = () => {
     Alert.alert('Export Labor Report', 'Export functionality will be available soon');
   };
 

@@ -7,7 +7,7 @@ export interface ErrorContext {
   operation: string;
   component?: string;
   userId?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export class ErrorLogger {
@@ -57,7 +57,7 @@ ${JSON.stringify(context.metadata || {}, null, 2)}
   /**
    * Log API request details for debugging
    */
-  logAPIRequest(method: string, url: string, options?: any): void {
+  logAPIRequest(method: string, url: string, options?: unknown): void {
     console.log(`
 🌐 ======== API REQUEST ========
 📍 ${method} ${url}
@@ -71,7 +71,7 @@ ${JSON.stringify(context.metadata || {}, null, 2)}
   /**
    * Log API response details
    */
-  logAPIResponse(url: string, status: number, duration: number, data?: any): void {
+  logAPIResponse(url: string, status: number, duration: number, data?: unknown): void {
     const statusEmoji = status >= 200 && status < 300 ? '✅' : '❌';
     console.log(`
 ${statusEmoji} ======== API RESPONSE ========

@@ -48,10 +48,10 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
   const { theme } = useTheme();
   const styles = useThemedStyles(createStyles);
   const [step, setStep] = useState<'capture' | 'spinning' | 'review' | 'submitting'>('capture');
-  const [capturedImage, setCapturedImage] = useState<any>(null); // Placeholder for image data
+  const [_capturedImage, _setCapturedImage] = useState<unknown>(null); // Placeholder for image data
   const [parsedItems, setParsedItems] = useState<ReceiptItem[]>([]);
 
-  const requestCameraPermission = async () => {
+  const _requestCameraPermission = async () => {
     if (Platform.OS === 'android') {
       try {
         const granted = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.CAMERA, {
@@ -132,7 +132,7 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
     */
   };
 
-  const processReceiptImage = async (base64Image: string) => {
+  const _processReceiptImage = async (_base64Image: string) => {
     // Temporarily disabled API call to prevent crashes
     try {
       // Simulate processing delay
@@ -274,7 +274,7 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
     <View style={styles.stepContainer}>
       <Text style={styles.modalTitle}>Review Items</Text>
       <ScrollView style={styles.itemList}>
-        {parsedItems.map((item, index) => (
+        {parsedItems.map((item, _index) => (
           <View key={item.id} style={styles.itemRow}>
             <View style={styles.itemInputs}>
               <TextInput
@@ -338,7 +338,7 @@ const ReceiptScanModal: React.FC<ReceiptScanModalProps> = ({ visible, onClose, o
   );
 };
 
-const createStyles = (theme: any) =>
+const createStyles = (theme: unknown) =>
   StyleSheet.create({
     modalOverlay: {
       flex: 1,

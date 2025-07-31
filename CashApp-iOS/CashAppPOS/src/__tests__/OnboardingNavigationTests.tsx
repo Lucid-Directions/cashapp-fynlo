@@ -1,9 +1,9 @@
-import React from 'react';
+// TODO: Unused import - import React from 'react';
 
 import { Alert } from 'react-native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { NavigationContainer } from '@react-navigation/native';
+// TODO: Unused import - import { NavigationContainer } from '@react-navigation/native';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
 
 // Mock the navigation
@@ -35,6 +35,7 @@ describe('Onboarding Navigation Tests', () => {
 
   describe('HelpScreen Onboarding Section', () => {
     it('should navigate to RestaurantSetup through Settings when Continue Setup is pressed', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const HelpScreen = require('../screens/support/HelpScreen').default;
 
       // Mock restaurant config not completed
@@ -67,6 +68,7 @@ describe('Onboarding Navigation Tests', () => {
     });
 
     it('should show Edit Setup when onboarding is completed', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const HelpScreen = require('../screens/support/HelpScreen').default;
 
       // Mock restaurant config completed
@@ -93,6 +95,7 @@ describe('Onboarding Navigation Tests', () => {
 
   describe('RestaurantSetupScreen Navigation', () => {
     it('should have working back button', () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const RestaurantSetupScreen = require('../screens/onboarding/RestaurantSetupScreen').default;
 
       const { getByTestId } = render(<RestaurantSetupScreen />);
@@ -105,6 +108,7 @@ describe('Onboarding Navigation Tests', () => {
     });
 
     it('should navigate through all 3 steps', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const RestaurantSetupScreen = require('../screens/onboarding/RestaurantSetupScreen').default;
 
       const { getByText, getByPlaceholderText } = render(<RestaurantSetupScreen />);
@@ -155,6 +159,7 @@ describe('Onboarding Navigation Tests', () => {
     });
 
     it('should validate required fields before allowing navigation', () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const RestaurantSetupScreen = require('../screens/onboarding/RestaurantSetupScreen').default;
 
       const { getByText } = render(<RestaurantSetupScreen />);
@@ -172,6 +177,7 @@ describe('Onboarding Navigation Tests', () => {
 
   describe('Business Settings Navigation', () => {
     it('should navigate to RestaurantProfile when clicked', () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const BusinessSettingsScreen = require('../screens/settings/BusinessSettingsScreen').default;
 
       const { getByText } = render(<BusinessSettingsScreen />);
@@ -183,6 +189,7 @@ describe('Onboarding Navigation Tests', () => {
     });
 
     it('should navigate to BusinessInformation when clicked', () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const BusinessSettingsScreen = require('../screens/settings/BusinessSettingsScreen').default;
 
       const { getByText } = render(<BusinessSettingsScreen />);
@@ -196,8 +203,8 @@ describe('Onboarding Navigation Tests', () => {
 
   describe('RestaurantProfileScreen', () => {
     it('should load restaurant data from config', async () => {
-      const RestaurantProfileScreen =
-        require('../screens/settings/RestaurantProfileScreen').default;
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+      const RestaurantProfileScreen = require('../screens/settings/RestaurantProfileScreen').default;
 
       // Mock existing restaurant data
       (AsyncStorage.getItem as jest.Mock).mockResolvedValue(
@@ -220,8 +227,8 @@ describe('Onboarding Navigation Tests', () => {
     });
 
     it('should save changes when Save button is pressed', async () => {
-      const RestaurantProfileScreen =
-        require('../screens/settings/RestaurantProfileScreen').default;
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+      const RestaurantProfileScreen = require('../screens/settings/RestaurantProfileScreen').default;
 
       const { getByText, getByDisplayValue } = render(<RestaurantProfileScreen />);
 
@@ -254,6 +261,7 @@ describe('Onboarding Navigation Tests', () => {
 
     screensToTest.forEach(({ name, path }) => {
       it(`${name} should have working back button`, () => {
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
         const Screen = require(path).default;
         const { getAllByTestId } = render(<Screen />);
 

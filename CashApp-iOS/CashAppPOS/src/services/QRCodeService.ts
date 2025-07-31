@@ -216,7 +216,7 @@ class QRCodeServiceClass {
 
       // Add other validation patterns as needed
       return false;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }

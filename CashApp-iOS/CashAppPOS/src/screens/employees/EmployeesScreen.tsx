@@ -28,7 +28,7 @@ import type { EmployeeData } from '../../types'; // Updated import path
 
 const EmployeesScreen: React.FC = () => {
   const navigation = useNavigation();
-  const { theme } = useTheme();
+  const { _theme } = useTheme();
   const [employees, setEmployees] = useState<EmployeeData[]>([]);
   const [filteredEmployees, setFilteredEmployees] = useState<EmployeeData[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -70,7 +70,7 @@ const EmployeesScreen: React.FC = () => {
       // Assuming a getEmployees method will be added to DataService
       const employeeData = await dataService.getEmployees();
       setEmployees(employeeData || []);
-    } catch (e: any) {
+    } catch (e: unknown) {
       setError(e.message || 'Failed to load employees.');
       setEmployees([]); // Clear employees on error
     } finally {
@@ -217,7 +217,7 @@ const EmployeesScreen: React.FC = () => {
         'Success',
         `${employeeData.name} has been added to your team and saved to the system!`
       );
-    } catch (error: any) {
+} catch (error: unknown) {
       console.error('Failed to create employee:', error);
       Alert.alert(
         'Error',
@@ -269,7 +269,7 @@ const EmployeesScreen: React.FC = () => {
 
               // Show success message
               Alert.alert('Success', `${employee.name} has been removed from your team.`);
-            } catch (error: any) {
+} catch (error: unknown) {
               console.error('Failed to delete employee:', error);
               Alert.alert('Error', error.message || 'Failed to delete employee. Please try again.');
               // Reopen modal on error

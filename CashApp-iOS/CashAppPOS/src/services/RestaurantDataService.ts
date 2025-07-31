@@ -187,7 +187,7 @@ class RestaurantDataService {
           console.log('🔍 Response data structure:', typeof apiResult, apiResult);
 
           // Convert backend format to RestaurantData format
-          const restaurants: RestaurantData[] = apiResult.restaurants.map((r: any) => ({
+          const restaurants: RestaurantData[] = apiResult.restaurants.map((r: unknown) => ({
             id: r.id,
             name: r.name,
             displayName: r.displayName || r.name,

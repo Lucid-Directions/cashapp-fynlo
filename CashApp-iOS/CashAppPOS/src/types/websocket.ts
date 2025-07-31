@@ -3,7 +3,7 @@
 export interface WebSocketMessage {
   id: string;
   type: string;
-  data?: any;
+  data?: unknown;
   restaurant_id: string;
   timestamp: string;
 }

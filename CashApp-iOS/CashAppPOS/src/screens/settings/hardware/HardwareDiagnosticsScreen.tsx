@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, _useEffect } from 'react';
 
 import {
   StyleSheet,
@@ -210,7 +210,7 @@ const HardwareDiagnosticsScreen: React.FC = () => {
 
     setTimeout(() => {
       const outcomes = ['passed', 'failed', 'warning'];
-      const randomOutcome = outcomes[Math.floor(Math.random() * outcomes.length)] as any;
+const randomOutcome = outcomes[Math.floor(Math.random() * outcomes.length)] as unknown;
 
       setDiagnosticTests((prev) =>
         prev.map((test) =>

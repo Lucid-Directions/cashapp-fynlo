@@ -5,7 +5,7 @@ import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
-import { isFeatureEnabled } from '../config/featureFlags';
+// TODO: Unused import - import { isFeatureEnabled } from '../config/featureFlags';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../design-system/ThemeProvider';
 import AuthScreen from '../screens/auth/AuthScreen';

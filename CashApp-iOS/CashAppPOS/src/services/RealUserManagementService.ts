@@ -176,7 +176,7 @@ class RealUserManagementService {
     }
   }
 
-  async createUser(userData: any): Promise<UserDisplayData> {
+  async createUser(userData: unknown): Promise<UserDisplayData> {
     try {
       const response = await fetch(`${this.baseUrl}/users`, {
         method: 'POST',
@@ -199,7 +199,7 @@ class RealUserManagementService {
     }
   }
 
-  async updateUser(userId: string, updates: any): Promise<UserDisplayData> {
+  async updateUser(userId: string, updates: unknown): Promise<UserDisplayData> {
     try {
       const response = await fetch(`${this.baseUrl}/users/${userId}`, {
         method: 'PUT',
@@ -222,7 +222,7 @@ class RealUserManagementService {
     }
   }
 
-  async suspendUser(userId: string, reason?: string): Promise<UserDisplayData> {
+  async suspendUser(userId: string, _reason?: string): Promise<UserDisplayData> {
     return this.updateUser(userId, { isActive: false });
   }
 
@@ -231,12 +231,12 @@ class RealUserManagementService {
   }
 
   // Mock access logs since backend doesn't have this yet
-  async getAccessLogs(limit?: number): Promise<AccessLog[]> {
+  async getAccessLogs(_limit?: number): Promise<AccessLog[]> {
     console.log('📝 Access logs not implemented in backend yet, returning empty array');
     return [];
   }
 
-  async getAccessLogsByUser(userId: string, limit?: number): Promise<AccessLog[]> {
+  async getAccessLogsByUser(_userId: string, _limit?: number): Promise<AccessLog[]> {
     return [];
   }
 

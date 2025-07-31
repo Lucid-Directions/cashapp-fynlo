@@ -21,21 +21,22 @@ import { useTheme } from '../../design-system/ThemeProvider';
 import SquareService from '../../services/SquareService';
 
 // Square SDK imports - conditionally loaded
-let SQIPCardEntry: any;
+let SQIPCardEntry: unknown;
 try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   SQIPCardEntry = require('react-native-square-in-app-payments').SQIPCardEntry;
-} catch (error) {
+} catch (_error) {
   console.warn('Square SDK not available in SquareCardPaymentScreen');
 }
 
 interface SquareCardPaymentScreenProps {
-  navigation: any;
+  navigation: unknown;
   route: {
     params: {
       amount: number;
       currency?: string;
       description?: string;
-      onPaymentComplete: (result: any) => void;
+      onPaymentComplete: (result: unknown) => void;
       onPaymentCancelled: () => void;
     };
   };
@@ -311,7 +312,7 @@ const SquareCardPaymentScreen: React.FC<SquareCardPaymentScreenProps> = ({ navig
   );
 };
 
-const { width } = Dimensions.get('window');
+const { _width } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {

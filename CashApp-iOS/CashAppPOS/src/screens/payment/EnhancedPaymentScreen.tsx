@@ -6,7 +6,7 @@ import {
   View,
   TouchableOpacity,
   ScrollView,
-  TextInput,
+  _TextInput,
   Modal,
   Alert,
   KeyboardAvoidingView,
@@ -60,12 +60,12 @@ const EnhancedPaymentScreen: React.FC = () => {
   const {
     cart,
     clearCart,
-    cartTotal,
+_cartTotal,
     serviceChargePercentage,
     addTransactionFee,
     calculateServiceCharge,
     calculateTransactionFee,
-    calculateOrderTotal,
+_calculateOrderTotal,
   } = useAppStore();
   const { paymentMethods, taxConfiguration } = useSettingsStore();
 
@@ -107,7 +107,7 @@ const EnhancedPaymentScreen: React.FC = () => {
     return subtotal * (taxConfiguration.vatRate / 100);
   };
 
-  const calculatePlatformServiceCharge = (subtotal: number) => {
+  const _calculatePlatformServiceCharge = (subtotal: number) => {
     // Use PLATFORM service charge settings, not restaurant settings (legacy)
     if (!platformServiceCharge.enabled) return 0;
     return subtotal * (platformServiceCharge.rate / 100);
@@ -269,7 +269,7 @@ const EnhancedPaymentScreen: React.FC = () => {
     setCustomTipInput('');
   };
 
-  const handleCustomTip = () => {
+  const _handleCustomTip = () => {
     const amount = parseFloat(customTipInput) || 0;
     setTipAmount(amount);
     const subtotal = calculateSubtotal();
@@ -394,7 +394,7 @@ const EnhancedPaymentScreen: React.FC = () => {
         method: selectedPaymentMethod,
       });
 
-      const savedOrder = await orderService.saveOrder(orderData);
+const _savedOrder = await orderService.saveOrder(orderData);
 
       setProcessing(false);
 

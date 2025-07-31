@@ -16,7 +16,7 @@ interface SkeletonLoaderProps {
   width?: number | string;
   height?: number;
   borderRadius?: number;
-  style?: any;
+  style?: unknown;
 }
 
 const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({

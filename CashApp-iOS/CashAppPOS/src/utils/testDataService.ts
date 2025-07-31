@@ -13,7 +13,7 @@ export class DataServiceTester {
     this.dataService = DataService.getInstance();
   }
 
-  async runAllTests(): Promise<{ passed: number; failed: number; results: any }> {
+  async runAllTests(): Promise<{ passed: number; failed: number; results: unknown }> {
     console.log('🧪 Starting DataService comprehensive tests...\n');
 
     // Test 1: Feature flags functionality
@@ -307,6 +307,6 @@ export const quickTestDataService = async () => {
 
 // For debugging in React Native debugger
 if (__DEV__) {
-  (global as any).testDataService = runDataServiceTests;
-  (global as any).quickTestDataService = quickTestDataService;
+(global as unknown).testDataService = runDataServiceTests;
+  (global as unknown).quickTestDataService = quickTestDataService;
 }

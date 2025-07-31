@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback, memo } from 'react';
+import React, { useState, useEffect, _useMemo, useCallback, _memo } from 'react';
 
 import type { GestureEvent, PanGestureHandlerGestureEvent } from 'react-native';
 import {
@@ -18,10 +18,10 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-import LazyLoadingWrapper from '../../components/performance/LazyLoadingWrapper';
-import { TableSkeleton } from '../../components/performance/SkeletonLoader';
+// TODO: Unused import - import LazyLoadingWrapper from '../../components/performance/LazyLoadingWrapper';
+// TODO: Unused import - import { TableSkeleton } from '../../components/performance/SkeletonLoader';
 import { useTheme } from '../../design-system/ThemeProvider';
-import { usePerformanceMonitor, performanceUtils } from '../../hooks/usePerformanceMonitor';
+import { _usePerformanceMonitor, _performanceUtils } from '../../hooks/usePerformanceMonitor';
 
 // Get screen dimensions
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
@@ -255,7 +255,7 @@ const TableManagementScreen: React.FC = () => {
     );
   };
 
-  const assignServer = (tableId: string, serverName: string) => {
+const _assignServer = (tableId: string, serverName: string) => {
     setTables((prev) =>
       prev.map((table) => (table.id === tableId ? { ...table, server: serverName } : table))
     );
@@ -271,7 +271,7 @@ const TableManagementScreen: React.FC = () => {
   };
 
   const handleTableDrag = useCallback(
-    (tableId: string, gestureState: any) => {
+(tableId: string, gestureState: unknown) => {
       if (!editMode) return;
 
       // Snap to grid

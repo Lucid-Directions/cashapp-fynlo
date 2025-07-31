@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, _useEffect } from 'react';
 
 import {
   StyleSheet,
@@ -13,14 +13,14 @@ import {
   TextInput,
   Alert,
   Dimensions,
-  Platform,
-  Image,
+  _Platform,
+  _Image,
 } from 'react-native';
 
 import { useNavigation, DrawerActions } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-import DatabaseService from '../../services/DatabaseService';
+// TODO: Unused import - import DatabaseService from '../../services/DatabaseService';
 import useAppStore from '../../store/useAppStore';
 import useUIStore from '../../store/useUIStore';
 
@@ -29,7 +29,7 @@ import type { DrawerNavigationProp } from '@react-navigation/drawer';
 // import Logo from '../../components/Logo';
 
 // Get screen dimensions
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
+const { width: screenWidth, height: _screenHeight } = Dimensions.get('window');
 const isTablet = screenWidth > 768;
 
 // Modern POS Color Scheme (matching screenshots)

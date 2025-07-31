@@ -7,13 +7,13 @@ export interface ErrorContext {
   userRole?: string;
   screenName?: string;
   action?: string;
-  additionalData?: Record<string, any>;
+  additionalData?: Record<string, unknown>;
 }
 
 export interface PerformanceContext {
   operation: string;
   description?: string;
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
 }
 
 class ErrorTrackingService {
@@ -51,16 +51,16 @@ class ErrorTrackingService {
     this.simpleTracker.captureMessage(message, level, context);
   }
 
-  trackEvent(event: string, data?: Record<string, any>): void {
+  trackEvent(event: string, data?: Record<string, unknown>): void {
     this.simpleTracker.trackEvent(event, data);
   }
 
-  startTransaction(context: PerformanceContext): any {
+  startTransaction(context: PerformanceContext): unknown {
     console.log('📊 Transaction started:', context.operation);
     return { operation: context.operation, startTime: Date.now() };
   }
 
-  finishTransaction(transaction: any, success: boolean = true): void {
+  finishTransaction(transaction: unknown, success: boolean = true): void {
     if (transaction) {
       const duration = Date.now() - transaction.startTime;
       console.log(
@@ -72,7 +72,7 @@ class ErrorTrackingService {
   }
 
   // Specific tracking methods for common issues
-  trackPricingError(error: Error, itemData?: any, calculationContext?: any): void {
+  trackPricingError(error: Error, itemData?: unknown, calculationContext?: unknown): void {
     this.simpleTracker.trackPricingError(error, itemData, calculationContext);
   }
 
@@ -80,16 +80,16 @@ class ErrorTrackingService {
     this.simpleTracker.trackNetworkError(error, endpoint, method);
   }
 
-  trackUIError(error: Error, component?: string, props?: any): void {
+  trackUIError(error: Error, component?: string, props?: unknown): void {
     this.simpleTracker.trackUIError(error, component, props);
   }
 
-  trackBusinessLogicError(error: Error, operation?: string, data?: any): void {
+  trackBusinessLogicError(error: Error, operation?: string, data?: unknown): void {
     this.simpleTracker.trackBusinessLogicError(error, operation, data);
   }
 
   // Performance monitoring
-  trackScreenLoad(screenName: string): any {
+  trackScreenLoad(screenName: string): unknown {
     return this.startTransaction({
       operation: 'screen_load',
       description: `Loading ${screenName}`,
@@ -97,7 +97,7 @@ class ErrorTrackingService {
     });
   }
 
-  trackApiCall(endpoint: string, method: string): any {
+  trackApiCall(endpoint: string, method: string): unknown {
     return this.startTransaction({
       operation: 'api_call',
       description: `${method} ${endpoint}`,
@@ -111,7 +111,7 @@ class ErrorTrackingService {
   }
 
   // Debug helpers
-  addBreadcrumb(message: string, category: string = 'debug', data?: Record<string, any>): void {
+  addBreadcrumb(message: string, category: string = 'debug', data?: Record<string, unknown>): void {
     this.simpleTracker.addBreadcrumb(message, category, data);
   }
 
@@ -119,7 +119,7 @@ class ErrorTrackingService {
     this.simpleTracker.setTag(key, value);
   }
 
-  setContext(key: string, context: Record<string, any>): void {
+  setContext(key: string, context: Record<string, unknown>): void {
     this.simpleTracker.setContext(key, context);
   }
 

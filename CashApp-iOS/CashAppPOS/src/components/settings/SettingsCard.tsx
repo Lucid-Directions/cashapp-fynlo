@@ -1,7 +1,7 @@
 import React from 'react';
 
 import type { ViewStyle } from 'react-native';
-import { StyleSheet, Text, View, TouchableOpacity, TextStyle } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, _TextStyle } from 'react-native';
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
 

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-import { View, TextInput, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import { View, TextInput, Text, StyleSheet, TouchableOpacity, _Dimensions } from 'react-native';
 
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
@@ -13,7 +13,7 @@ interface DecimalInputProps {
   minValue?: number;
   decimalPlaces?: number;
   label?: string;
-  style?: any;
+  style?: unknown;
   disabled?: boolean;
 }
 

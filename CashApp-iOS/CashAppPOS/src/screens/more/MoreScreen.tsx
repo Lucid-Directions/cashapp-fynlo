@@ -194,7 +194,7 @@ const MoreScreen: React.FC = () => {
         </View>
 
         {/* Menu Sections */}
-        {menuSections.map((section, sectionIndex) => (
+        {menuSections.map((section, _sectionIndex) => (
           <View key={section.title} style={styles.section}>
             <Text style={styles.sectionTitle}>{section.title}</Text>
 
@@ -246,7 +246,7 @@ const MoreScreen: React.FC = () => {
   );
 };
 
-const createStyles = (theme: any) =>
+const createStyles = (theme: unknown) =>
   StyleSheet.create({
     container: {
       flex: 1,

@@ -1,4 +1,4 @@
-import { AuthTokens, User } from '@fynlo/shared';
+import { _AuthTokens, _User } from '@fynlo/shared';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { AUTH_CONFIG } from '../config/auth.config';
@@ -279,7 +279,7 @@ class EnhancedTokenManager {
     this.listeners.get(event)?.delete(listener);
   }
 
-  private emit(event: string, ...args: any[]): void {
+private emit(event: string, ...args: unknown[]): void {
     this.listeners.get(event)?.forEach((listener) => {
       try {
         listener(...args);

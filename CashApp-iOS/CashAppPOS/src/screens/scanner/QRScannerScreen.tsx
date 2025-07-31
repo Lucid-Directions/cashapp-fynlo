@@ -21,9 +21,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import Colors from '../../constants/Colors';
 
 import type { RouteProp } from '@react-navigation/native';
-
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
-
+const { width: _screenWidth, height: _screenHeight } = Dimensions.get('window');
 type QRScannerRouteProp = RouteProp<
   {
     QRScanner: {

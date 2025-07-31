@@ -3,11 +3,11 @@
  * Custom Jest environment for Detox testing
  */
 
-const {
+import {
   DetoxCircusEnvironment,
   SpecReporter,
   WorkerAssignReporter,
-} = require('detox/runners/jest-circus');
+} from 'detox/runners/jest-circus';
 
 class CustomDetoxEnvironment extends DetoxCircusEnvironment {
   constructor(config, context) {
