@@ -116,7 +116,10 @@ async def test_provider(
     if not provider:
         # Log this attempt to test non-existent provider as a form of admin action failure?
         # For now, let the HTTP exception suffice.
-        raise ResourceNotFoundException(resource="Provider")
+        raise ResourceNotFoundException(
+            resource="Provider",
+            message=f"Provider '{provider_name}' not found"
+        )
     
     try:
         # Test with small amount
@@ -184,7 +187,7 @@ async def get_provider_analytics_endpoint(
             message="Retrieved provider analytics"
         )
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message=f"Analytics error: {str(e)}", status_code=500)
 
 @router.get("/providers/cost-comparison")
 async def get_cost_comparison(
@@ -429,7 +432,7 @@ async def get_restaurant_analytics(
             message="Generated restaurant payment analytics"
         )
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message=f"Analytics error: {str(e)}", status_code=500)
 
 def _calculate_monthly_cost(provider_name: str, monthly_volume: Decimal) -> float:
     """Calculate total monthly cost for a provider"""

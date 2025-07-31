@@ -63,7 +63,7 @@ async def get_configuration_summary(
         )
         
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message=f"Failed to process configuration: {str(e)}", status_code=500)
 
 @router.get("/providers")
 async def get_provider_configurations(
@@ -92,7 +92,7 @@ async def get_provider_configurations(
         )
         
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message=f"Failed to process configuration: {str(e)}", status_code=500)
 
 @router.get("/providers/{provider_name}")
 async def get_provider_configuration(
@@ -104,7 +104,10 @@ async def get_provider_configuration(
         config = config_manager.get_provider_config(provider_name)
         
         if not config:
-            raise ResourceNotFoundException(resource="Resource", message=f"Provider {provider_name} not found")
+            raise ResourceNotFoundException(
+                resource="Provider",
+                message=f"Provider {provider_name} not found"
+            )
         
         # Don't expose sensitive information
         provider_config = {
@@ -127,7 +130,7 @@ async def get_provider_configuration(
     except HTTPException:
         raise
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message=f"Failed to process configuration: {str(e)}", status_code=500)
 
 @router.put("/providers/{provider_name}")
 async def update_provider_configuration(
@@ -174,7 +177,7 @@ async def update_provider_configuration(
     except HTTPException:
         raise
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message=f"Failed to process configuration: {str(e)}", status_code=500)
 
 @router.get("/routing")
 async def get_routing_configuration(
@@ -199,7 +202,7 @@ async def get_routing_configuration(
         )
         
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message=f"Failed to process configuration: {str(e)}", status_code=500)
 
 @router.put("/routing")
 async def update_routing_configuration(
@@ -225,7 +228,7 @@ async def update_routing_configuration(
         if config_update.fallback_provider is not None:
             # Validate provider exists
             if config_update.fallback_provider not in config_manager.providers:
-                raise ValidationException(message=f"Fallback provider ")
+                raise ValidationException(message=f"Fallback provider '{config_update.fallback_provider}' not found")
             routing_config.fallback_provider = config_update.fallback_provider
         
         # Save configuration
@@ -243,7 +246,7 @@ async def update_routing_configuration(
     except HTTPException:
         raise
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message=f"Failed to process configuration: {str(e)}", status_code=500)
 
 @router.get("/features")
 async def get_feature_flags(
@@ -270,7 +273,7 @@ async def get_feature_flags(
         )
         
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message=f"Failed to process configuration: {str(e)}", status_code=500)
 
 @router.put("/features")
 async def update_feature_flag(
@@ -293,7 +296,7 @@ async def update_feature_flag(
         )
         
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message=f"Failed to process configuration: {str(e)}", status_code=500)
 
 @router.get("/security")
 async def get_security_configuration(
@@ -318,7 +321,7 @@ async def get_security_configuration(
         )
         
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message=f"Failed to process configuration: {str(e)}", status_code=500)
 
 @router.post("/validate")
 async def validate_configuration(
@@ -363,7 +366,7 @@ async def validate_configuration(
         )
         
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message=f"Failed to process configuration: {str(e)}", status_code=500)
 
 @router.get("/monitoring/health")
 async def get_system_health(
@@ -381,7 +384,7 @@ async def get_system_health(
         )
         
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message=f"Failed to process configuration: {str(e)}", status_code=500)
 
 @router.get("/monitoring/metrics")
 async def get_system_metrics(
@@ -405,7 +408,7 @@ async def get_system_metrics(
     except HTTPException:
         raise
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message=f"Failed to process configuration: {str(e)}", status_code=500)
 
 @router.put("/monitoring/thresholds")
 async def update_monitoring_thresholds(
@@ -424,7 +427,7 @@ async def update_monitoring_thresholds(
         )
         
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message=f"Failed to process configuration: {str(e)}", status_code=500)
 
 @router.post("/test/routing")
 async def test_routing_simulation(
@@ -456,7 +459,7 @@ async def test_routing_simulation(
     except HTTPException:
         raise
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message=f"Failed to process configuration: {str(e)}", status_code=500)
 
 @router.post("/backup")
 async def backup_configuration(
@@ -479,4 +482,4 @@ async def backup_configuration(
         )
         
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message=f"Failed to process configuration: {str(e)}", status_code=500)

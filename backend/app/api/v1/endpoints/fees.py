@@ -132,7 +132,7 @@ async def calculate_fees_for_order(
         except Exception as e:
             # Log the exception details
             # logger.error(f"Error in ServiceChargeCalculator: {e}", exc_info=True)
-            raise FynloException(message="", status_code=500)
+            raise FynloException(message=f"Service charge calculation error: {str(e)}", status_code=500)
 
 
     # 3. Calculate final Customer Total Breakdown using PlatformFeeService
@@ -151,10 +151,10 @@ async def calculate_fees_for_order(
         return customer_total_breakdown
 
     except ValueError as ve: # From underlying services if config is missing etc.
-        raise ValidationException(message="")
+        raise ValidationException(message=str(ve))
     except Exception as e:
         # logger.error(f"Error in PlatformFeeService's calculate_customer_total: {e}", exc_info=True)
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message=f"Customer total calculation error: {str(e)}", status_code=500)
 
 # To include this router in the main application:
 # In backend/app/api/v1/api.py (or equivalent main router aggregation file):
@@ -208,7 +208,7 @@ async def record_platform_fee(
             transaction_timestamp=db_record.transaction_timestamp.isoformat()
         )
     except ValueError as ve: # Catch specific errors if service raises them
-        raise ValidationException(message="")
+        raise ValidationException(message=str(ve))
     except Exception as e:
         # logger.error(f"Error recording platform fee for order {fee_data_input.order_id}: {e}", exc_info=True)
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message=f"Error recording platform fee: {str(e)}", status_code=500)

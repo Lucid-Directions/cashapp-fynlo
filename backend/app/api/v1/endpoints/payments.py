@@ -567,7 +567,7 @@ async def process_stripe_payment(
             commit=False
         )
         logger.error(f"Stripe payment failed: {str(e)}")
-        raise ValidationException(message="")
+        raise ValidationException(message=f"Stripe payment failed: {str(e)}")
     except Exception as e:
         payment_db_record.status = "failed" # Ensure status is marked failed
         await audit_service.create_audit_log(
@@ -926,7 +926,7 @@ async def process_payment(
             details=details_for_error_log,
             commit=True # Attempt to commit this log even if outer transaction (if any) rolls back
         )
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message=f"Payment processing failed: {str(e)}", status_code=500)
 
 @router.post("/refund/{transaction_id}")
 async def refund_payment(
@@ -1009,7 +1009,7 @@ async def refund_payment(
             details={"external_transaction_id": transaction_id, "error": str(e)},
             commit=True # Commit this failure log
         )
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message=f"Payment processing failed: {str(e)}", status_code=500)
 
 
     if result["status"] == "refunded":

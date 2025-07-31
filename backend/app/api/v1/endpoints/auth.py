@@ -95,7 +95,7 @@ async def verify_supabase_user(
         
         if not supabase_user:
             logger.warning("Supabase returned no user for the provided token")
-            raise ValidationException(message="Invalid or expired token", field="or")
+            raise ValidationException(message="Invalid or expired token", field="token")
         
         logger.info(f"Successfully verified Supabase user: {supabase_user.email}")
         

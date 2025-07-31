@@ -81,7 +81,7 @@ async def get_platform_settings(
         )
         
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message=f"Failed to get platform settings: {str(e)}", status_code=500)
 
 # Service Charge Specific Endpoints
 @router.get(
@@ -132,7 +132,7 @@ async def update_service_charge_configuration(
         updated_config = await service.get_service_charge_config()
         return updated_config
     except ValueError as e: # Catch validation errors from the service layer
-        raise ValidationException(message="")
+        raise ValidationException(message=str(e))
     except Exception as e:
         logging.error(f"Error updating service charge configuration: {e}", exc_info=True)
         raise PaymentException(message="Failed to update service charge configuration")
@@ -149,7 +149,10 @@ async def get_platform_setting(
         setting = await service.get_platform_setting(config_key)
         
         if not setting:
-            raise ResourceNotFoundException(resource="Resource", message=f"Platform setting ")
+            raise ResourceNotFoundException(
+                resource="Platform setting",
+                message=f"Platform setting '{config_key}' not found"
+            )
         
         return APIResponseHelper.success(
             data=setting,
@@ -159,7 +162,7 @@ async def get_platform_setting(
     except HTTPException:
         raise
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message=f"Failed to get platform settings: {str(e)}", status_code=500)
 
 @router.put("/settings/{config_key}")
 async def update_platform_setting(
@@ -182,7 +185,10 @@ async def update_platform_setting(
         )
         
         if not success:
-            raise ResourceNotFoundException(resource="Resource", message=f"Platform setting ")
+            raise ResourceNotFoundException(
+                resource="Platform setting",
+                message=f"Platform setting '{config_key}' not found"
+            )
         
         # Log the change for audit
         if http_request:
@@ -195,11 +201,11 @@ async def update_platform_setting(
         )
         
     except ValueError as e:
-        raise ValidationException(message="")
+        raise ValidationException(message=str(e))
     except HTTPException:
         raise
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message=f"Failed to get platform settings: {str(e)}", status_code=500)
 
 @router.post("/settings/bulk-update")
 async def bulk_update_platform_settings(
@@ -246,7 +252,7 @@ async def bulk_update_platform_settings(
             )
         
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message=f"Failed to get platform settings: {str(e)}", status_code=500)
 
 @router.get("/payment-fees")
 async def get_payment_fees(
@@ -264,7 +270,7 @@ async def get_payment_fees(
         )
         
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message=f"Failed to get platform settings: {str(e)}", status_code=500)
 
 @router.post("/payment-fees/calculate")
 async def calculate_payment_fee(
@@ -294,9 +300,9 @@ async def calculate_payment_fee(
         )
         
     except ValueError as e:
-        raise ValidationException(message="")
+        raise ValidationException(message=str(e))
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message=f"Failed to get platform settings: {str(e)}", status_code=500)
 
 @router.get("/feature-flags")
 async def get_feature_flags(
@@ -315,7 +321,7 @@ async def get_feature_flags(
         )
         
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message=f"Failed to get platform settings: {str(e)}", status_code=500)
 
 @router.put("/feature-flags/{feature_key}")
 async def update_feature_flag(
@@ -337,7 +343,10 @@ async def update_feature_flag(
         )
         
         if not success:
-            raise ResourceNotFoundException(resource="Resource", message=f"Feature flag ")
+            raise ResourceNotFoundException(
+                resource="Feature flag",
+                message=f"Feature flag '{feature_key}' not found"
+            )
         
         return APIResponseHelper.success(
             data={'feature_key': feature_key, 'is_enabled': request.is_enabled},
@@ -347,7 +356,7 @@ async def update_feature_flag(
     except HTTPException:
         raise
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message=f"Failed to get platform settings: {str(e)}", status_code=500)
 
 @router.get("/audit-trail")
 async def get_configuration_audit_trail(
@@ -375,7 +384,7 @@ async def get_configuration_audit_trail(
         )
         
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message=f"Failed to get platform settings: {str(e)}", status_code=500)
 
 @router.post("/initialize-defaults")
 async def initialize_default_settings(
@@ -396,7 +405,7 @@ async def initialize_default_settings(
             raise FynloException(message="Failed to initialize default settings", status_code=500)
         
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message=f"Failed to get platform settings: {str(e)}", status_code=500)
 
 # Restaurant override endpoints (for restaurant users)
 @router.get("/restaurants/{restaurant_id}/effective-settings")
@@ -422,7 +431,7 @@ async def get_restaurant_effective_settings(
         )
         
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message=f"Failed to get platform settings: {str(e)}", status_code=500)
 
 @router.put("/restaurants/{restaurant_id}/overrides/{config_key}")
 async def set_restaurant_override(
@@ -460,9 +469,9 @@ async def set_restaurant_override(
             raise FynloException(message="Failed to set restaurant override", status_code=500)
         
     except ValueError as e:
-        raise ValidationException(message="")
+        raise ValidationException(message=str(e))
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message=f"Failed to get platform settings: {str(e)}", status_code=500)
 
 # Public sync endpoint for mobile apps
 @router.get("/sync/platform-config")
@@ -508,7 +517,7 @@ async def sync_platform_config(
         )
         
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message=f"Failed to get platform settings: {str(e)}", status_code=500)
 
 @router.get("/categories")
 async def get_setting_categories(
@@ -530,4 +539,4 @@ async def get_setting_categories(
         )
         
     except Exception as e:
-        raise FynloException(message="", status_code=500)
+        raise FynloException(message=f"Failed to get platform settings: {str(e)}", status_code=500)
