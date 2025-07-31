@@ -4,11 +4,12 @@ Provides endpoints for managing payment system configuration
 """
 
 from typing import Dict, Any, Optional, List
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 
 from app.core.database import get_db, User
+from app.core.exceptions import FynloException, ResourceNotFoundException, ValidationException
 from app.core.auth import get_current_user
 from app.core.responses import APIResponseHelper
 from app.services.config_manager import config_manager, ProviderConfig, RoutingConfig, FeatureFlags
@@ -61,10 +62,8 @@ async def get_configuration_summary(
             data=summary,
             message="Configuration summary retrieved successfully"
         )
-        
     except Exception as e:
-        raise FynloException(detail=str(e))
-
+        raise FynloException(message=str(e))
 @router.get("/providers")
 async def get_provider_configurations(
     current_user: User = Depends(get_current_user)
@@ -90,10 +89,8 @@ async def get_provider_configurations(
             data=providers_config,
             message=f"Retrieved configuration for {len(providers_config)} providers"
         )
-        
     except Exception as e:
-        raise FynloException(detail=str(e))
-
+        raise FynloException(message=str(e))
 @router.get("/providers/{provider_name}")
 async def get_provider_configuration(
     provider_name: str,
@@ -104,8 +101,7 @@ async def get_provider_configuration(
         config = config_manager.get_provider_config(provider_name)
         
         if not config:
-            raise ResourceNotFoundException(detail=f"Provider {provider_name} not found")
-        
+            raise ResourceNotFoundException(detail=f"Provider {provider_name} not found")        
         # Don't expose sensitive information
         provider_config = {
             'name': config.name,
@@ -123,12 +119,10 @@ async def get_provider_configuration(
             data=provider_config,
             message=f"Configuration for {provider_name} retrieved successfully"
         )
-        
     except HTTPException:
         raise
     except Exception as e:
-        raise FynloException(detail=str(e))
-
+        raise FynloException(message=str(e))
 @router.put("/providers/{provider_name}")
 async def update_provider_configuration(
     provider_name: str,
@@ -147,8 +141,7 @@ async def update_provider_configuration(
         }
         
         if not update_data:
-            raise ValidationException(detail="No configuration changes provided")
-        
+            raise ValidationException(message="No configuration changes provided")        
         # Update configuration
         config_manager.update_provider_config(provider_name, **update_data)
         
@@ -170,12 +163,10 @@ async def update_provider_configuration(
             },
             message=f"Configuration for {provider_name} updated successfully"
         )
-        
     except HTTPException:
         raise
     except Exception as e:
-        raise FynloException(detail=str(e))
-
+        raise FynloException(message=str(e))
 @router.get("/routing")
 async def get_routing_configuration(
     current_user: User = Depends(get_current_user)
@@ -197,10 +188,8 @@ async def get_routing_configuration(
             data=config_data,
             message="Routing configuration retrieved successfully"
         )
-        
     except Exception as e:
-        raise FynloException(detail=str(e))
-
+        raise FynloException(message=str(e))
 @router.put("/routing")
 async def update_routing_configuration(
     config_update: RoutingConfigRequest,
@@ -222,15 +211,13 @@ async def update_routing_configuration(
             except ValueError:
                 raise ValidationException(
                     message=f"Invalid routing strategy: {config_update.default_strategy}"
-                )
-        
+                )        
         if config_update.fallback_provider is not None:
             # Validate provider exists
             if config_update.fallback_provider not in config_manager.providers:
                 raise ValidationException(
                     message=f"Fallback provider '{config_update.fallback_provider}' not configured"
-                )
-            routing_config.fallback_provider = config_update.fallback_provider
+                )            routing_config.fallback_provider = config_update.fallback_provider
         
         # Save configuration
         config_manager.save_configuration("routing")
@@ -243,12 +230,10 @@ async def update_routing_configuration(
             },
             message="Routing configuration updated successfully"
         )
-        
     except HTTPException:
         raise
     except Exception as e:
-        raise FynloException(detail=str(e))
-
+        raise FynloException(message=str(e))
 @router.get("/features")
 async def get_feature_flags(
     current_user: User = Depends(get_current_user)
@@ -272,10 +257,8 @@ async def get_feature_flags(
             data=feature_flags,
             message="Feature flags retrieved successfully"
         )
-        
     except Exception as e:
-        raise FynloException(detail=str(e))
-
+        raise FynloException(message=str(e))
 @router.put("/features")
 async def update_feature_flag(
     feature_update: FeatureFlagRequest,
@@ -295,10 +278,8 @@ async def update_feature_flag(
             },
             message=f"Feature flag '{feature_update.feature_name}' updated successfully"
         )
-        
     except Exception as e:
-        raise FynloException(detail=str(e))
-
+        raise FynloException(message=str(e))
 @router.get("/security")
 async def get_security_configuration(
     current_user: User = Depends(get_current_user)
@@ -320,10 +301,8 @@ async def get_security_configuration(
             data=config_data,
             message="Security configuration retrieved successfully"
         )
-        
     except Exception as e:
-        raise FynloException(detail=str(e))
-
+        raise FynloException(message=str(e))
 @router.post("/validate")
 async def validate_configuration(
     current_user: User = Depends(get_current_user)
@@ -365,10 +344,8 @@ async def validate_configuration(
             data=validation_result,
             message="Configuration validation completed"
         )
-        
     except Exception as e:
-        raise FynloException(detail=str(e))
-
+        raise FynloException(message=str(e))
 @router.get("/monitoring/health")
 async def get_system_health(
     db: Session = Depends(get_db),
@@ -383,10 +360,8 @@ async def get_system_health(
             data=health_status,
             message="System health status retrieved successfully"
         )
-        
     except Exception as e:
-        raise FynloException(detail=str(e))
-
+        raise FynloException(message=str(e))
 @router.get("/monitoring/metrics")
 async def get_system_metrics(
     hours: int = 24,
@@ -396,8 +371,7 @@ async def get_system_metrics(
     """Get system metrics for specified time period"""
     try:
         if hours < 1 or hours > 168:  # Max 1 week
-            raise ValidationException(detail="Hours must be between 1 and 168")
-        
+            raise ValidationException(message="Hours must be between 1 and 168")        
         monitoring_service = get_monitoring_service(db)
         metrics = await monitoring_service.get_system_metrics(hours)
         
@@ -405,12 +379,10 @@ async def get_system_metrics(
             data=metrics,
             message=f"System metrics for last {hours} hours retrieved successfully"
         )
-        
     except HTTPException:
         raise
     except Exception as e:
-        raise FynloException(detail=str(e))
-
+        raise FynloException(message=str(e))
 @router.put("/monitoring/thresholds")
 async def update_monitoring_thresholds(
     threshold_update: ThresholdUpdateRequest,
@@ -426,10 +398,8 @@ async def update_monitoring_thresholds(
             data=threshold_update.thresholds,
             message="Monitoring thresholds updated successfully"
         )
-        
     except Exception as e:
-        raise FynloException(detail=str(e))
-
+        raise FynloException(message=str(e))
 @router.post("/test/routing")
 async def test_routing_simulation(
     restaurant_id: str,
@@ -442,9 +412,8 @@ async def test_routing_simulation(
         # Validate strategy
         try:
             routing_strategy = RoutingStrategy(strategy)
-        except ValueError:
-            raise ValidationException(detail=f"Invalid routing strategy: {strategy}")
-        
+    except ValueError:
+            raise ValidationException(message=f"Invalid routing strategy: {strategy}")        
         # Run simulation
         simulation_result = await payment_factory.simulate_routing_impact(
             restaurant_id=restaurant_id,
@@ -456,12 +425,10 @@ async def test_routing_simulation(
             data=simulation_result,
             message="Routing simulation completed successfully"
         )
-        
     except HTTPException:
         raise
     except Exception as e:
-        raise FynloException(detail=str(e))
-
+        raise FynloException(message=str(e))
 @router.post("/backup")
 async def backup_configuration(
     current_user: User = Depends(get_current_user)
@@ -481,6 +448,5 @@ async def backup_configuration(
             },
             message="Configuration backup created successfully"
         )
-        
     except Exception as e:
-        raise FynloException(detail=str(e))
+        raise FynloException(message=str(e))

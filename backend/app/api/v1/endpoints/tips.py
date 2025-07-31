@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 
 from app.core.database import get_db
+from app.core.exceptions import FynloException, ValidationException
 from app.schemas.fee_schemas import StaffMember, StaffTipDistribution, StaffTipDistributionRecordSchema
 from app.services.staff_tip_service import StaffTipService
 from app.models.financial_records import StaffTipDistributionRecord # For ORM response conversion
@@ -50,8 +51,7 @@ def trigger_tip_distribution(
     Returns the breakdown of how tips were allocated per staff member.
     """
     if not request_data.assigned_staff and request_data.total_tips_collected > 0:
-        raise ValidationException(detail="Cannot distribute tips: No staff members assigned to the order.")
-
+        raise ValidationException(message="Cannot distribute tips: No staff members assigned to the order.")
     try:
         distributions = service.distribute_order_tips(
             order_reference=order_reference,
@@ -65,11 +65,10 @@ def trigger_tip_distribution(
         # which matches the response_model.
         return distributions
     except ValueError as ve:
-        raise ValidationException(detail=str(ve))
+        raise ValidationException(message=str(ve))
     except Exception as e:
         # logger.error(f"Error distributing tips for order {order_reference}: {e}", exc_info=True)
-        raise FynloException(detail=f"Failed to distribute tips: {str(e)}")
-
+        raise FynloException(message=f"Failed to distribute tips: {str(e)}")
 @router.get("/orders/{order_reference}/tip-distributions", response_model=List[StaffTipDistributionRecordSchema])
 def get_tip_distributions_for_order_api(
     order_reference: str = Path(..., description="The reference ID of the order."),

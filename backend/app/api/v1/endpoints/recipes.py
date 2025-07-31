@@ -1,12 +1,13 @@
 """
 API Endpoints for Recipe Management
 """
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from uuid import UUID
 
 from app.core.database import get_db, Product # Import Product model
+from app.core.exceptions import AuthorizationException, ResourceNotFoundException, ValidationException
 from app.core.database import User # Assuming User model for authentication/authorization
 from app.crud import inventory as crud_inventory # Using the same CRUD module
 from app.schemas import inventory_schemas as schemas # Using the same schemas module
@@ -33,16 +34,14 @@ async def create_or_update_recipe_for_item_api(
     # Use current user's restaurant
     restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
     if not restaurant_id:
-        raise ValidationException(detail="User must be assigned to a restaurant")
-    
+        raise ValidationException(message="User must be assigned to a restaurant")    
     # Check if product (item_id) exists for this restaurant
     product = db.query(Product).filter(
         Product.id == recipe_in.item_id,
         Product.restaurant_id == restaurant_id
     ).first()
     if not product:
-        raise ResourceNotFoundException(detail=f"Product with ID {recipe_in.item_id} not found.")
-    
+        raise ResourceNotFoundException(resource="Product", message=f"Product with ID {recipe_in.item_id} not found.")    
     # Verify tenant access
     await TenantSecurity.validate_restaurant_access(
         user=current_user,
@@ -57,8 +56,7 @@ async def create_or_update_recipe_for_item_api(
     for ingredient in recipe_in.ingredients:
         inv_item = crud_inventory.get_inventory_item(db, sku=ingredient.ingredient_sku, restaurant_id=restaurant_id)
         if not inv_item:
-            raise ValidationException(detail=f"Ingredient with SKU {ingredient.ingredient_sku} not found in inventory.")
-        # qty_g validation (gt=0, le=1000) is handled by Pydantic schema (RecipeIngredientCreate)
+            raise ValidationException(message=f"Ingredient with SKU {ingredient.ingredient_sku} not found in inventory.")        # qty_g validation (gt=0, le=1000) is handled by Pydantic schema (RecipeIngredientCreate)
 
     # The CRUD function `create_or_update_recipe_ingredients` handles upsert logic
     # and deletion of ingredients not present in the new list.
@@ -90,8 +88,7 @@ async def read_recipe_for_item_api(
     # Use current user's restaurant
     restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
     if not restaurant_id:
-        raise ValidationException(detail="User must be assigned to a restaurant")
-    
+        raise ValidationException(message="User must be assigned to a restaurant")    
     recipe_details = crud_inventory.get_product_details_with_recipe(db, item_id=item_id, restaurant_id=restaurant_id)
     if not recipe_details:
         # Check if product exists but has no recipe vs product does not exist
@@ -100,8 +97,7 @@ async def read_recipe_for_item_api(
             Product.restaurant_id == restaurant_id
         ).first()
         if not product:
-            raise ResourceNotFoundException(detail=f"Product with ID {item_id} not found.")
-        
+            raise ResourceNotFoundException(resource="Product", message=f"Product with ID {item_id} not found.")        
         # Verify tenant access
         await TenantSecurity.validate_restaurant_access(
             user=current_user,
@@ -131,8 +127,7 @@ async def read_all_recipes_api(
     # Use current user's restaurant
     restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
     if not restaurant_id:
-        raise ValidationException(detail="User must be assigned to a restaurant")
-    
+        raise ValidationException(message="User must be assigned to a restaurant")    
     all_recipes_details = crud_inventory.get_all_products_with_recipes(
         db,
         restaurant_id=restaurant_id,
@@ -154,16 +149,14 @@ async def delete_recipe_for_item_api(
     # Use current user's restaurant
     restaurant_id = current_user.current_restaurant_id or current_user.restaurant_id
     if not restaurant_id:
-        raise ValidationException(detail="User must be assigned to a restaurant")
-    
+        raise ValidationException(message="User must be assigned to a restaurant")    
     # Check if product exists first
     product = db.query(Product).filter(
         Product.id == item_id,
         Product.restaurant_id == restaurant_id
     ).first()
     if not product:
-        raise ResourceNotFoundException(detail=f"Product with ID {item_id} not found, cannot delete its recipe.")
-    
+        raise ResourceNotFoundException(resource="Product", message=f"Product with ID {item_id} not found, cannot delete its recipe.")    
     # Verify tenant access - require owner/manager role for deletion
     await TenantSecurity.validate_restaurant_access(
         user=current_user,
@@ -187,7 +180,6 @@ async def delete_recipe_for_item_api(
 #     # from app.api.v1.dependencies import get_current_active_user
 #     # current_user = Depends(get_current_active_user) # Your actual user dependency
 #     # if current_user.role != required_role and current_user.role != "admin": # Example admin override
-#     #     raise AuthenticationException(detail=f"User does not have the required role: {required_role}", error_code="ACCESS_DENIED")
-#     # return current_user
+#     #     raise AuthenticationException(message=f"User does not have the required role: {required_role}", error_code="ACCESS_DENIED")#     # return current_user
 #     print(f"Auth check for role: {required_role}") # Placeholder log
 #     pass # Allow all for now

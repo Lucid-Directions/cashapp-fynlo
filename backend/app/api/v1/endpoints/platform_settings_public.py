@@ -3,12 +3,13 @@ Public Platform Settings Endpoints
 Non-admin endpoints for reading platform configurations
 """
 from typing import Dict, Any
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 import asyncio
 from concurrent.futures import TimeoutError as FuturesTimeoutError
 
 from app.core.database import get_db
+from app.core.exceptions import FynloException
 from app.core.responses import APIResponseHelper
 from app.services.cache_service import PlatformCacheService
 import logging
@@ -144,4 +145,4 @@ async def get_payment_methods_public():
         
     except Exception as e:
         logger.error(f"Error in get_payment_methods_public: {e}")
-        raise FynloException(detail=str(e))
+        raise FynloException(message=str(e))

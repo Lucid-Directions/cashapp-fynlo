@@ -54,7 +54,7 @@ class Payment(Base):
     error_message = Column(Text)
     
     # Metadata
-    metadata = Column(Text)  # JSON
+    payment_metadata = Column(Text)  # JSON
     
     __table_args__ = (
         {'extend_existing': True},

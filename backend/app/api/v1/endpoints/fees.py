@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, Body
+from fastapi import APIRouter, Depends, Body
 from sqlalchemy.orm import Session
 from typing import Dict, Any, Optional
 
 from app.core.database import get_db
+from app.core.exceptions import FynloException, ResourceNotFoundException, ValidationException
 from app.schemas.fee_schemas import (
     PaymentMethodEnum,
     CustomerTotalBreakdown,
@@ -100,7 +101,6 @@ async def calculate_fees_for_order(
         # This should ideally not happen if defaults are seeded for all PaymentMethodEnums
         raise ResourceNotFoundException(detail=f"Fee configuration not found for payment method {request.payment_method.value} for restaurant {request.restaurant_id or 'platform default'}."
         )
-
     # Determine who pays processor fees
     customer_pays_processor_fees = payment_method_setting.customer_pays_default
     if request.force_customer_pays_processor_fees is not None:
@@ -108,9 +108,8 @@ async def calculate_fees_for_order(
             customer_pays_processor_fees = request.force_customer_pays_processor_fees
         else:
             # Client tried to override but not allowed
-            raise ValidationException(detail=f"Toggling who pays processor fee is not allowed for payment method {request.payment_method.value}."
+            raise ValidationException(message=f"Toggling who pays processor fee is not allowed for payment method {request.payment_method.value}."
             )
-
     include_processor_fee_in_sc = payment_method_setting.include_processor_fee_in_service_charge
 
     # 2. Calculate final Service Charge
@@ -132,8 +131,7 @@ async def calculate_fees_for_order(
         except Exception as e:
             # Log the exception details
             # logger.error(f"Error in ServiceChargeCalculator: {e}", exc_info=True)
-            raise FynloException(detail=f"Error calculating service charge: {str(e)}")
-
+            raise FynloException(message=f"Error calculating service charge: {str(e)}")
 
     # 3. Calculate final Customer Total Breakdown using PlatformFeeService
     try:
@@ -151,11 +149,10 @@ async def calculate_fees_for_order(
         return customer_total_breakdown
 
     except ValueError as ve: # From underlying services if config is missing etc.
-        raise ValidationException(detail=str(ve))
+        raise ValidationException(message=str(ve))
     except Exception as e:
         # logger.error(f"Error in PlatformFeeService's calculate_customer_total: {e}", exc_info=True)
-        raise FynloException(detail=f"Error calculating final customer total: {str(e)}")
-
+        raise FynloException(message=f"Error calculating final customer total: {str(e)}")
 # To include this router in the main application:
 # In backend/app/api/v1/api.py (or equivalent main router aggregation file):
 # from .endpoints import fees
@@ -208,7 +205,7 @@ async def record_platform_fee(
             transaction_timestamp=db_record.transaction_timestamp.isoformat()
         )
     except ValueError as ve: # Catch specific errors if service raises them
-        raise ValidationException(detail=str(ve))
+        raise ValidationException(message=str(ve))
     except Exception as e:
         # logger.error(f"Error recording platform fee for order {fee_data_input.order_id}: {e}", exc_info=True)
-        raise FynloException(detail=f"Failed to record platform fee: {str(e)}")
+        raise FynloException(message=f"Failed to record platform fee: {str(e)}")

@@ -10,6 +10,12 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field
 
 from app.core.database import get_db, User
+from app.core.exceptions import (
+    FynloException,
+    PaymentException,
+    ResourceNotFoundException,
+    ValidationException
+)
 from app.core.auth import get_current_user
 from app.core.responses import APIResponseHelper
 from app.services.platform_service import PlatformSettingsService
@@ -76,8 +82,7 @@ async def get_platform_settings(
         )
         
     except Exception as e:
-        raise FynloException(detail=str(e))
-
+        raise FynloException(message=str(e))
 # Service Charge Specific Endpoints
 @router.get(
     "/service-charge",
@@ -96,8 +101,7 @@ async def get_service_charge_configuration(
         return config # FastAPI will wrap this in the response_model
     except Exception as e:
         logging.error(f"Error retrieving service charge configuration: {e}", exc_info=True)
-        raise FynloException(detail="Failed to retrieve service charge configuration")
-
+        raise FynloException(message="Failed to retrieve service charge configuration")
 @router.put(
     "/service-charge",
     response_model=ServiceChargeConfigResponse,
@@ -121,17 +125,15 @@ async def update_service_charge_configuration(
             # This case might be tricky if partial updates occurred.
             # The service method tries to update all and returns True if all succeed.
             # If it returns False, it implies one or more updates failed but didn't raise an exception (e.g. key not found).
-            raise FynloException(detail="Failed to update some service charge settings")
-
+            raise FynloException(message="Failed to update some service charge settings")
         # Fetch the updated configuration to return
         updated_config = await service.get_service_charge_config()
         return updated_config
     except ValueError as e: # Catch validation errors from the service layer
-        raise ValidationException(detail=str(e))
+        raise ValidationException(message=str(e))
     except Exception as e:
         logging.error(f"Error updating service charge configuration: {e}", exc_info=True)
-        raise FynloException(detail="Failed to update service charge configuration")
-
+        raise FynloException(message="Failed to update service charge configuration")
 @router.get("/settings/{config_key}")
 async def get_platform_setting(
     config_key: str,
@@ -157,8 +159,7 @@ async def get_platform_setting(
     except HTTPException:
         raise
     except Exception as e:
-        raise FynloException(detail=str(e))
-
+        raise FynloException(message=str(e))
 @router.put("/settings/{config_key}")
 async def update_platform_setting(
     config_key: str,
@@ -196,12 +197,11 @@ async def update_platform_setting(
         )
         
     except ValueError as e:
-        raise ValidationException(detail=str(e))
+        raise ValidationException(message=str(e))
     except HTTPException:
         raise
     except Exception as e:
-        raise FynloException(detail=str(e))
-
+        raise FynloException(message=str(e))
 @router.post("/settings/bulk-update")
 async def bulk_update_platform_settings(
     request: BulkUpdateRequest,
@@ -247,8 +247,7 @@ async def bulk_update_platform_settings(
             )
         
     except Exception as e:
-        raise FynloException(detail=str(e))
-
+        raise FynloException(message=str(e))
 @router.get("/payment-fees")
 async def get_payment_fees(
     db: Session = Depends(get_db),
@@ -265,8 +264,7 @@ async def get_payment_fees(
         )
         
     except Exception as e:
-        raise FynloException(detail=str(e))
-
+        raise FynloException(message=str(e))
 @router.post("/payment-fees/calculate")
 async def calculate_payment_fee(
     payment_method: str,
@@ -279,8 +277,7 @@ async def calculate_payment_fee(
     """Calculate effective payment fee for given parameters"""
     try:
         if amount <= 0:
-            raise ValidationException(detail="Amount must be positive")
-        
+            raise ValidationException(message="Amount must be positive")        
         service = PlatformSettingsService(db)
         fee_calculation = await service.calculate_effective_fee(
             payment_method=payment_method,
@@ -295,10 +292,9 @@ async def calculate_payment_fee(
         )
         
     except ValueError as e:
-        raise ValidationException(detail=str(e))
+        raise ValidationException(message=str(e))
     except Exception as e:
-        raise FynloException(detail=str(e))
-
+        raise FynloException(message=str(e))
 @router.get("/feature-flags")
 async def get_feature_flags(
     restaurant_id: Optional[str] = Query(None, description="Filter for specific restaurant"),
@@ -316,8 +312,7 @@ async def get_feature_flags(
         )
         
     except Exception as e:
-        raise FynloException(detail=str(e))
-
+        raise FynloException(message=str(e))
 @router.put("/feature-flags/{feature_key}")
 async def update_feature_flag(
     feature_key: str,
@@ -351,8 +346,7 @@ async def update_feature_flag(
     except HTTPException:
         raise
     except Exception as e:
-        raise FynloException(detail=str(e))
-
+        raise FynloException(message=str(e))
 @router.get("/audit-trail")
 async def get_configuration_audit_trail(
     config_key: Optional[str] = Query(None, description="Filter by configuration key"),
@@ -379,8 +373,7 @@ async def get_configuration_audit_trail(
         )
         
     except Exception as e:
-        raise FynloException(detail=str(e))
-
+        raise FynloException(message=str(e))
 @router.post("/initialize-defaults")
 async def initialize_default_settings(
     db: Session = Depends(get_db),
@@ -397,12 +390,11 @@ async def initialize_default_settings(
                 message="Default platform settings initialized successfully"
             )
         else:
-            raise FynloException(detail="Failed to initialize default settings"
+            raise FynloException(message="Failed to initialize default settings"
             )
         
     except Exception as e:
-        raise FynloException(detail=str(e))
-
+        raise FynloException(message=str(e))
 # Restaurant override endpoints (for restaurant users)
 @router.get("/restaurants/{restaurant_id}/effective-settings")
 async def get_restaurant_effective_settings(
@@ -427,8 +419,7 @@ async def get_restaurant_effective_settings(
         )
         
     except Exception as e:
-        raise FynloException(detail=str(e))
-
+        raise FynloException(message=str(e))
 @router.put("/restaurants/{restaurant_id}/overrides/{config_key}")
 async def set_restaurant_override(
     restaurant_id: str,
@@ -462,14 +453,13 @@ async def set_restaurant_override(
                 message=f"Restaurant override set successfully ({status_msg})"
             )
         else:
-            raise FynloException(detail="Failed to set restaurant override"
+            raise FynloException(message="Failed to set restaurant override"
             )
         
     except ValueError as e:
-        raise ValidationException(detail=str(e))
+        raise ValidationException(message=str(e))
     except Exception as e:
-        raise FynloException(detail=str(e))
-
+        raise FynloException(message=str(e))
 # Public sync endpoint for mobile apps
 @router.get("/sync/platform-config")
 async def sync_platform_config(
@@ -514,8 +504,7 @@ async def sync_platform_config(
         )
         
     except Exception as e:
-        raise FynloException(detail=str(e))
-
+        raise FynloException(message=str(e))
 @router.get("/categories")
 async def get_setting_categories(
     db: Session = Depends(get_db),
@@ -536,4 +525,4 @@ async def get_setting_categories(
         )
         
     except Exception as e:
-        raise FynloException(detail=str(e))
+        raise FynloException(message=str(e))

@@ -2,7 +2,7 @@
 Supabase Authentication endpoints for Fynlo POS
 """
 
-from fastapi import APIRouter, Depends, HTTPException, Header, Request
+from fastapi import APIRouter, Depends, Header, Request
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from typing import Optional
@@ -13,6 +13,12 @@ from gotrue.errors import AuthApiError
 from postgrest.exceptions import APIError as PostgrestAPIError
 
 from app.core.database import get_db
+from app.core.exceptions import (
+    AuthenticationException,
+    FynloException,
+    ResourceNotFoundException,
+    ValidationException
+)
 from app.core.supabase import supabase_admin, get_admin_client
 from app.core.config import settings
 from app.core.database import User, Restaurant
@@ -61,16 +67,14 @@ async def verify_supabase_user(
     token = authorization.replace("Bearer ", "")
     
     if not token or token == authorization:
-        raise AuthenticationException(message="Invalid authorization format. Expected: Bearer <token>")
-    
+        raise AuthenticationException(message="Invalid authorization format. Expected: Bearer <token>")    
     # Get Supabase client (will initialize if needed)
     client = supabase_admin or get_admin_client()
     if not client:
         logger.error("Supabase admin client not available")
         logger.error(f"SUPABASE_URL set: {bool(settings.SUPABASE_URL)}")
         logger.error(f"SUPABASE_SERVICE_ROLE_KEY set: {bool(settings.SUPABASE_SERVICE_ROLE_KEY)}")
-        raise ServiceUnavailableError(message="Authentication service temporarily unavailable. Please check backend configuration.", service_name="Supabase")
-    
+        raise ServiceUnavailableError(message="Authentication service temporarily unavailable. Please check backend configuration.", service_name="Supabase")    
     try:
         # Verify token with Supabase Admin API
         logger.info(f"Verifying token with Supabase (token length: {len(token)})")
@@ -84,14 +88,12 @@ async def verify_supabase_user(
         # Check if we got a valid response
         if not user_response:
             logger.error("Supabase returned None response for get_user")
-            raise ServiceUnavailableError(message="Authentication service returned invalid response", service_name="Supabase")
-        
+            raise ServiceUnavailableError(message="Authentication service returned invalid response", service_name="Supabase")        
         supabase_user = user_response.user
         
         if not supabase_user:
             logger.warning("Supabase returned no user for the provided token")
-            raise AuthenticationException(message="Invalid or expired token")
-        
+            raise AuthenticationException(message="Invalid or expired token")        
         logger.info(f"Successfully verified Supabase user: {supabase_user.email}")
         
         # Find or create user in our database with proper error handling
@@ -113,11 +115,10 @@ async def verify_supabase_user(
                     db_user.supabase_id = supabase_user.id  # Use UUID object, not string
                     db.commit()
                     logger.info(f"Updated user {db_user.id} with Supabase ID: {supabase_user.id}")
-        except SQLAlchemyError as e:
+                except SQLAlchemyError as e:
             logger.error(f"Database query error when finding user: {str(e)}")
             db.rollback()
-            raise ServiceUnavailableError(message="Database error while retrieving user information", service_name="Database")
-        
+            raise ServiceUnavailableError(message="Database error while retrieving user information", service_name="Database")        
         if not db_user:
             # First time login - create user with proper transaction handling
             logger.info(f"First time login for user: {supabase_user.email}")
@@ -168,11 +169,11 @@ async def verify_supabase_user(
                                 # Continue with the user even if update fails
                     if not db_user:
                         raise ServiceUnavailableError(message="Failed to create user account. Please try again.", service_name="Database")
-                except SQLAlchemyError as retry_error:
+                    except SQLAlchemyError as retry_error:
                     logger.error(f"Failed to fetch user after IntegrityError: {str(retry_error)}")
                     db.rollback()
                     raise ServiceUnavailableError(message="Database error while creating user account", service_name="Database")
-            except SQLAlchemyError as e:
+                except SQLAlchemyError as e:
                 logger.error(f"Database error creating user: {str(e)}")
                 db.rollback()
                 raise ServiceUnavailableError(message="Database error while creating user account", service_name="Database")
@@ -243,11 +244,11 @@ async def verify_supabase_user(
                     response_data["user"]["enabled_features"] = get_plan_features(
                         restaurant.subscription_plan or 'alpha'
                     )
-            except SQLAlchemyError as e:
+                except SQLAlchemyError as e:
                 logger.error(f"Error retrieving restaurant info: {str(e)}")
                 db.rollback()
                 # Continue without restaurant info rather than failing
-        else:
+    else:
             # User has no restaurant yet - they need to complete onboarding
             logger.info(f"User {db_user.id} has no restaurant - needs onboarding")
             
@@ -311,8 +312,7 @@ async def verify_supabase_user(
                 details={"error": "invalid_jwt", "token_prefix": authorization[:20] + "..." if authorization else None},
                 risk_score=70  # High risk - invalid token
             )
-            raise AuthenticationException(detail="Invalid authentication token"
-            )
+            raise AuthenticationException(message="Invalid authentication token")
         elif "expired" in error_msg_lower:
             # Log expired token attempt
             await audit_logger.create_audit_log(
@@ -324,8 +324,7 @@ async def verify_supabase_user(
                 details={"error": "expired_token"},
                 risk_score=30  # Low risk - just expired
             )
-            raise AuthenticationException(detail="Token has expired. Please sign in again."
-            )
+            raise AuthenticationException(message="Token has expired. Please sign in again.")
         elif "not found" in error_msg_lower:
             # Log user not found attempt
             await audit_logger.create_audit_log(
@@ -337,8 +336,7 @@ async def verify_supabase_user(
                 details={"error": "user_not_found"},
                 risk_score=50  # Medium risk
             )
-            raise AuthenticationException(detail="User not found. Please sign up first."
-            )
+            raise AuthenticationException(message="User not found. Please sign up first.")
         else:
             # Log unexpected auth errors with full details
             logger.error(f"Unexpected Supabase auth error: {type(e).__name__}: {str(e)}")
@@ -351,9 +349,8 @@ async def verify_supabase_user(
                 details={"error": "unexpected_auth_error", "error_type": type(e).__name__},
                 risk_score=80  # High risk - unexpected error
             )
-            raise AuthenticationException(detail="Authentication failed. Please sign in again."
-            )
-    except Exception as e:
+            raise AuthenticationException(message="Authentication failed. Please sign in again.")
+        except Exception as e:
         # Check if this is actually an AuthApiError wrapped in another exception
         error_str = str(e)
         logger.error(f"Auth verification error - Type: {type(e).__name__}, Message: {error_str}")
@@ -375,8 +372,7 @@ async def verify_supabase_user(
                 details={"error": "jwt_error_wrapped", "exception_type": type(e).__name__},
                 risk_score=70
             )
-            raise AuthenticationException(detail="Invalid authentication token"
-            )
+            raise AuthenticationException(message="Invalid authentication token")
         elif "user not found" in error_str.lower():
             logger.warning("Detected user not found error in generic exception")
             await audit_logger.create_audit_log(
@@ -388,9 +384,7 @@ async def verify_supabase_user(
                 details={"error": "user_not_found_wrapped", "exception_type": type(e).__name__},
                 risk_score=50
             )
-            raise AuthenticationException(detail="User not found. Please sign up first."
-            )
-        
+            raise AuthenticationException(message="User not found. Please sign up first.")        
         # Log the full exception type chain for debugging
         import traceback
         logger.error(f"Full exception details: {traceback.format_exc()}")
@@ -406,9 +400,8 @@ async def verify_supabase_user(
                 details={"error": "service_config_error", "exception_type": type(e).__name__},
                 risk_score=90  # Very high risk - config error
             )
-            raise FynloException(detail="Authentication service configuration error. Please contact support."
-            , status_code=503)
-        
+            raise FynloException(message="Authentication service configuration error. Please contact support."
+            , status_code=503)        
         # Log generic authentication service error
         await audit_logger.create_audit_log(
             event_type=AuditEventType.AUTHENTICATION,
@@ -420,9 +413,7 @@ async def verify_supabase_user(
             risk_score=60
         )
         
-        raise FynloException(detail="Authentication service error. Please try again later."
-        )
-
+        raise FynloException(message="Authentication service error. Please try again later.")
 
 @router.post("/register-restaurant")
 @limiter.limit(AUTH_RATE)
@@ -435,8 +426,7 @@ async def register_restaurant(
     """Register a new restaurant after Supabase signup"""
     
     if not authorization:
-        raise AuthenticationException(detail="No authorization header")
-    
+        raise AuthenticationException(message="No authorization header")    
     token = authorization.replace("Bearer ", "")
     
     # Get Supabase client (will initialize if needed)
@@ -445,16 +435,14 @@ async def register_restaurant(
         logger.error("Supabase admin client not available")
         logger.error(f"SUPABASE_URL set: {bool(settings.SUPABASE_URL)}")
         logger.error(f"SUPABASE_SERVICE_ROLE_KEY set: {bool(settings.SUPABASE_SERVICE_ROLE_KEY)}")
-        raise ServiceUnavailableError(message="Authentication service temporarily unavailable. Please check backend configuration.", service_name="Supabase")
-    
+        raise ServiceUnavailableError(message="Authentication service temporarily unavailable. Please check backend configuration.", service_name="Supabase")    
     try:
         # Verify token
         user_response = client.auth.get_user(token)
         supabase_user = user_response.user
         
         if not supabase_user:
-            raise AuthenticationException(detail="Invalid token")
-        
+            raise AuthenticationException(message="Invalid token")        
         # Get user from database by Supabase ID
         db_user = db.query(User).filter(
             User.supabase_id == supabase_user.id
@@ -477,8 +465,7 @@ async def register_restaurant(
                     # Continue with registration even if update fails
         
         if not db_user:
-            raise ResourceNotFoundException(detail="User not found")
-        
+            raise ResourceNotFoundException(resource="User", message="User not found")        
         # Check if user already has a restaurant
         if db_user.restaurant_id:
             raise ValidationException(message="User already has a restaurant")
@@ -500,9 +487,7 @@ async def register_restaurant(
                     platform_id = str(default_platform.id)
                 else:
                     # No platform found - this is a critical error
-                    raise FynloException(detail="No platform found. Please contact support."
-                    )
-            
+                    raise FynloException(message="No platform found. Please contact support.")            
             # Create properly structured address
             address_data = {
                 "street": data.address or "",
@@ -532,16 +517,14 @@ async def register_restaurant(
             if data.phone and not validate_phone(data.phone):
                 raise ValidationException(
                     message="Invalid phone number format"
-                )
-            
+                )            
             # Validate address structure
             try:
                 validated_address = validate_model_jsonb_fields('restaurant', 'address', address_data)
             except ValidationErr as e:
                 raise ValidationException(
                     message=f"Address validation failed: {str(e)}"
-                )
-            
+                )            
             restaurant = Restaurant(
                 id=uuid.uuid4(),
                 platform_id=platform_id,
@@ -615,12 +598,10 @@ async def register_restaurant(
         except SQLAlchemyError as e:
             logger.error(f"Database error creating restaurant: {str(e)}")
             db.rollback()
-            raise FynloException(detail="Failed to register restaurant. Please try again."
-            )
-        
-    except HTTPException:
+            raise FynloException(message="Failed to register restaurant. Please try again.")
+        except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Restaurant registration error: {str(e)}")
         db.rollback()
-        raise FynloException(detail="Failed to register restaurant")
+        raise FynloException(message="Failed to register restaurant")

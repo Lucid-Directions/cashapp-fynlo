@@ -4,6 +4,10 @@ This module shows how to integrate rate limiting into the existing websocket.py
 """
 
 # Add these imports to websocket.py
+from fastapi import Path, Query, WebSocket, Depends
+from typing import Optional
+from sqlalchemy.orm import Session
+from app.core.database import get_db
 from app.core.websocket_rate_limiter import websocket_rate_limiter
 from app.core.redis_client import get_redis
 

@@ -1,9 +1,16 @@
-from fastapi import APIRouter, Depends, HTTPException, Body, Path, Query
+from fastapi import APIRouter, Depends, Body, Path, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional, Dict, Any
 from pydantic import BaseModel
 
 from app.core.database import get_db, User
+from app.core.exceptions import (
+    AuthorizationException,
+    ConflictException,
+    FynloException,
+    ResourceNotFoundException,
+    ValidationException
+)
 from app.core.auth import get_current_user
 from app.schemas.fee_schemas import PaymentMethodEnum, PaymentMethodFeeSettingSchema
 from app.services.payment_config_service import PaymentConfigService
@@ -63,8 +70,7 @@ def create_platform_default_setting(
     """Creates a new platform default payment method setting."""
     # Only platform owners can create platform defaults
     if current_user.role != 'platform_owner':
-        raise AuthenticationException(message="Only platform owners can create platform default settings", error_code="ACCESS_DENIED")
-    
+        raise AuthenticationException(message="Only platform owners can create platform default settings", error_code="ACCESS_DENIED")    
     if setting_data.restaurant_id is not None:
         raise ValidationException(message="Platform default settings cannot have a restaurant_id.")
 
@@ -80,13 +86,11 @@ def create_platform_default_setting(
     try:
         created_setting = service.create_platform_default_setting(typed_dict_data)
         if not created_setting: # Should not happen if service raises error on failure
-            raise FynloException(message="Failed to create platform default setting.")
-        return convert_db_model_to_schema(created_setting)
+            raise FynloException(message="Failed to create platform default setting.")        return convert_db_model_to_schema(created_setting)
     except ValueError as ve:
         raise ValidationException(message=str(ve))
     except Exception as e: # Catches IntegrityError from service if duplicate
         raise ConflictException(message=f"Failed to create setting: {str(e)}")
-
 
 @router.put("/settings/platform-defaults/{payment_method}", response_model=PaymentMethodFeeSettingSchema)
 def update_platform_default_setting(
@@ -105,8 +109,7 @@ def update_platform_default_setting(
         raise ResourceNotFoundException(
             resource="Platform default setting",
             message=f"Platform default setting for {payment_method.value} not found."
-        )
-    return convert_db_model_to_schema(updated_setting)
+        )    return convert_db_model_to_schema(updated_setting)
 
 
 @router.get("/settings/restaurants/{restaurant_id}", response_model=List[PaymentMethodFeeSettingSchema])
@@ -129,8 +132,7 @@ async def list_restaurant_settings(
     if restaurant_id:
         # If current_restaurant_id is provided, validate it matches
         if current_restaurant_id and current_restaurant_id != restaurant_id:
-            raise AuthenticationException(message="Cannot access settings for a different restaurant", error_code="ACCESS_DENIED")
-        
+            raise AuthenticationException(message="Cannot access settings for a different restaurant", error_code="ACCESS_DENIED")        
         # Validate the user has access to this restaurant
         await TenantSecurity.validate_restaurant_access(
             current_user, restaurant_id, db=db
@@ -152,8 +154,7 @@ async def create_or_update_restaurant_setting(
     """Creates or updates a restaurant-specific payment method setting (override)."""
     # Validate access
     if current_restaurant_id and current_restaurant_id != restaurant_id:
-        raise AuthenticationException(message="Cannot modify settings for a different restaurant", error_code="ACCESS_DENIED")
-    
+        raise AuthenticationException(message="Cannot modify settings for a different restaurant", error_code="ACCESS_DENIED")    
     # Validate the user has access to this restaurant
     await TenantSecurity.validate_restaurant_access(
         current_user, restaurant_id, db=db
@@ -162,7 +163,6 @@ async def create_or_update_restaurant_setting(
     # Check permissions - only owners and managers can modify settings
     if current_user.role not in ['platform_owner', 'restaurant_owner', 'manager']:
         raise AuthenticationException(message="Insufficient permissions to modify payment settings", error_code="ACCESS_DENIED")
-
     # Use the restaurant_id from the path
     typed_dict_data = PaymentMethodFeeSettingSchema(
         restaurant_id=restaurant_id, # Set from path
@@ -174,13 +174,11 @@ async def create_or_update_restaurant_setting(
     try:
         saved_setting = service.create_or_update_restaurant_setting(restaurant_id, typed_dict_data)
         if not saved_setting: # Should not happen if service raises specific errors
-            raise FynloException(message="Failed to save restaurant setting.")
-        return convert_db_model_to_schema(saved_setting)
+            raise FynloException(message="Failed to save restaurant setting.")        return convert_db_model_to_schema(saved_setting)
     except ValueError as ve:
         raise ValidationException(message=str(ve))
     except Exception as e: # Catches IntegrityError from service
         raise ConflictException(message=f"Failed to save setting for restaurant {restaurant_id}: {str(e)}")
-
 
 @router.delete("/settings/restaurants/{restaurant_id}/{payment_method}", status_code=204)
 async def delete_restaurant_setting(
@@ -194,8 +192,7 @@ async def delete_restaurant_setting(
     """Deletes a restaurant-specific payment method setting (override)."""
     # Validate access
     if current_restaurant_id and current_restaurant_id != restaurant_id:
-        raise AuthenticationException(message="Cannot delete settings for a different restaurant", error_code="ACCESS_DENIED")
-    
+        raise AuthenticationException(message="Cannot delete settings for a different restaurant", error_code="ACCESS_DENIED")    
     # Validate the user has access to this restaurant
     await TenantSecurity.validate_restaurant_access(
         current_user, restaurant_id, db=db
@@ -210,8 +207,7 @@ async def delete_restaurant_setting(
         raise ResourceNotFoundException(
             resource="Restaurant payment setting",
             message=f"Setting for restaurant {restaurant_id}, method {payment_method.value} not found."
-        )
-    return None # No content for 204
+        )    return None # No content for 204
 
 
 # To include this router in the main application:
