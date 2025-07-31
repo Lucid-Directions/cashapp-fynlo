@@ -247,8 +247,12 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
       // Simulate pressing Skip in the alert
       const alertCalls = mockAlert.mock.calls;
       const alertCall = alertCalls[alertCalls.length - 1];
-      const skipButton = alertCall[2].find((btn: unknown) => btn.text === 'Skip');
-      skipButton.onPress();
+      const skipButton = alertCall[2].find(
+        (btn: unknown): btn is { text: string; onPress: () => void } => 
+          typeof btn === 'object' && btn !== null && 
+          'text' in btn && (btn as any).text === 'Skip'
+      );
+      skipButton?.onPress();
 
       // Step 8: Bank Details - CANNOT BE SKIPPED
       await waitFor(() => {
@@ -344,7 +348,9 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
         (call) => call[0] === 'Onboarding Complete! 🎉'
 );
       const startButton = successAlertCall[2].find(
-        (btn: unknown) => btn.text === 'Start Using POS'
+        (btn: unknown): btn is { text: string; onPress: () => void } => 
+          typeof btn === 'object' && btn !== null && 
+          'text' in btn && (btn as any).text === 'Start Using POS'
       );
 
       // Step 8 - Bank Details (required)
@@ -429,7 +435,12 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
       await waitFor(() => expect(Alert.alert).toHaveBeenCalled());
       const alertCalls = mockAlert.mock.calls;
       const alertCall = alertCalls[alertCalls.length - 1];
-      alertCall[2].find((btn: unknown) => btn.text === 'Skip').onPress();
+      const skipBtn = alertCall[2].find(
+        (btn: unknown): btn is { text: string; onPress: () => void } => 
+          typeof btn === 'object' && btn !== null && 
+          'text' in btn && (btn as any).text === 'Skip'
+      );
+      skipBtn?.onPress();
 
       // Step 8 - Bank Details (REQUIRED - NO SKIP)
       await waitFor(() => getByText('Bank Details'));
@@ -600,7 +611,12 @@ describe('ComprehensiveRestaurantOnboardingScreen - Complete User Journey', () =
       fireEvent.press(getByText('Skip for Now'));
       const alertCalls = mockAlert.mock.calls;
       const alertCall = alertCalls[alertCalls.length - 1];
-alertCall[2].find((btn: unknown) => btn.text === 'Skip').onPress();
+      const skipBtn = alertCall[2].find(
+        (btn: unknown): btn is { text: string; onPress: () => void } => 
+          typeof btn === 'object' && btn !== null && 
+          'text' in btn && (btn as any).text === 'Skip'
+      );
+      skipBtn?.onPress();
 
       // Step 8 - Bank Details (required)
       await waitFor(() => getByText('Bank Details'));
@@ -679,7 +695,12 @@ alertCall[2].find((btn: unknown) => btn.text === 'Skip').onPress();
       fireEvent.press(getByText('Skip for Now'));
       const alertCalls = mockAlert.mock.calls;
       const alertCall = alertCalls[alertCalls.length - 1];
-alertCall[2].find((btn: unknown) => btn.text === 'Skip').onPress();
+      const skipBtn = alertCall[2].find(
+        (btn: unknown): btn is { text: string; onPress: () => void } => 
+          typeof btn === 'object' && btn !== null && 
+          'text' in btn && (btn as any).text === 'Skip'
+      );
+      skipBtn?.onPress();
 
       // Step 8 - Bank Details (required)
       await waitFor(() => getByText('Bank Details'));
@@ -835,7 +856,12 @@ alertCall[2].find((btn: unknown) => btn.text === 'Skip').onPress();
       fireEvent.press(getByText('Skip for Now'));
       const alertCalls = mockAlert.mock.calls;
       const alertCall = alertCalls[alertCalls.length - 1];
-      alertCall[2].find((btn: unknown) => btn.text === 'Skip').onPress();
+      const skipBtn = alertCall[2].find(
+        (btn: unknown): btn is { text: string; onPress: () => void } => 
+          typeof btn === 'object' && btn !== null && 
+          'text' in btn && (btn as any).text === 'Skip'
+      );
+      skipBtn?.onPress();
 
       // Step 8 - Bank Details
       await waitFor(() => getByText('Bank Details'));
