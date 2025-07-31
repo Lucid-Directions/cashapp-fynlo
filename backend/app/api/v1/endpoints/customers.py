@@ -13,7 +13,8 @@ from app.core.database import get_db, Customer, Order, User
 from app.core.auth import get_current_user
 from app.core.redis_client import get_redis, RedisClient
 from app.core.responses import APIResponseHelper
-from app.core.exceptions import ValidationException, AuthenticationException, FynloException, ResourceNotFoundException, ConflictExceptionfrom app.core.security_utils import sanitize_sql_like_pattern, sanitize_search_term
+from app.core.exceptions import ValidationException, AuthenticationException, FynloException, ResourceNotFoundException, ConflictException
+from app.core.security_utils import sanitize_sql_like_pattern, sanitize_search_term
 from app.schemas.search_schemas import CustomerSearchRequest
 
 router = APIRouter()
