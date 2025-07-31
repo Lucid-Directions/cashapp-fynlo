@@ -558,7 +558,8 @@ async def process_stripe_payment(
             commit=False
         )
         logger.error(f"Stripe payment failed: {str(e)}")
-        raise ValidationException(message=f"Payment failed: {str(e)}")    except Exception as e:
+        raise ValidationException(message=f"Payment failed: {str(e)}")
+    except Exception as e:
         payment_db_record.status = "failed" # Ensure status is marked failed
         await audit_service.create_audit_log(
             event_type=AuditEventType.PAYMENT_FAILURE,
