@@ -23,6 +23,7 @@ import { Swipeable } from 'react-native-gesture-handler';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import ErrorTrackingService from '../../services/ErrorTrackingService';
+import { logger } from '../../utils/logger';
 import {
   validatePrice,
   calculatePercentageFee,

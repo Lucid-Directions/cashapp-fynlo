@@ -17,6 +17,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import EmptyState from '../../components/common/EmptyState';
 import HeaderWithBackButton from '../../components/navigation/HeaderWithBackButton';
 import { useTheme, useThemedStyles } from '../../design-system/ThemeProvider';
+import { logger } from '../../utils/logger';
 import OrderService from '../../services/OrderService';
 
 import type { Order } from '../../types';
