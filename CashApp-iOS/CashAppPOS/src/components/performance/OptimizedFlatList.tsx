@@ -66,7 +66,7 @@ function OptimizedFlatList<T>({
   const handleViewableItemsChanged = useCallback(
     ({ viewableItems, changed }: { viewableItems: ViewToken[]; changed: ViewToken[] }) => {
       if (enableViewabilityTracking && __DEV__) {
-        console.log(
+        logger.info(
           `[OptimizedFlatList] Viewable items: ${viewableItems.length}, Changed: ${changed.length}`
         );
       }

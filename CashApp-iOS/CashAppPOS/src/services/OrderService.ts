@@ -67,7 +67,7 @@ class OrderService {
    */
   async saveOrder(orderData: OrderCreateRequest): Promise<Order> {
     try {
-      console.log('💾 Saving order to backend...', {
+      logger.info('💾 Saving order to backend...', {
         items: orderData.items.length,
         total: orderData.total,
         customer: orderData.customerMetadata.email,
@@ -103,7 +103,7 @@ class OrderService {
       }
 
       const savedOrder = await response.json();
-      console.log('✅ Order saved successfully:', savedOrder.id);
+      logger.info('✅ Order saved successfully:', savedOrder.id);
 
       // Convert backend response to frontend Order format
       const order: Order = {
@@ -142,7 +142,7 @@ class OrderService {
 
       return order;
     } catch (error) {
-      console.error('❌ Failed to save order:', error);
+      logger.error('❌ Failed to save order:', error);
 
       // Fallback: Save to local storage for later sync
       const fallbackOrder: Order = {
@@ -168,7 +168,7 @@ class OrderService {
       await this.cacheOrder(fallbackOrder);
       await this.saveToSyncQueue(orderData);
 
-      console.log('💾 Order saved locally for later sync');
+      logger.info('💾 Order saved locally for later sync');
       return fallbackOrder;
     }
   }
@@ -178,7 +178,7 @@ class OrderService {
    */
   async getOrders(filters?: OrderFilters): Promise<Order[]> {
     try {
-      console.log('📋 Fetching orders...', filters);
+      logger.info('📋 Fetching orders...', filters);
 
       const params = new URLSearchParams();
       if (filters?.status) params.append('status', filters.status);
@@ -223,10 +223,10 @@ class OrderService {
         notes: o.notes,
       }));
 
-      console.log(`✅ Fetched ${orders.length} orders`);
+      logger.info(`✅ Fetched ${orders.length} orders`);
       return orders;
     } catch (error) {
-      console.error('❌ Failed to fetch orders:', error);
+      logger.error('❌ Failed to fetch orders:', error);
 
       // Fallback to cached orders
       return await this.getCachedOrders();
@@ -272,7 +272,7 @@ class OrderService {
         notes: data.notes,
       };
     } catch (error) {
-      console.error('❌ Failed to fetch order:', error);
+      logger.error('❌ Failed to fetch order:', error);
       return null;
     }
   }
@@ -302,7 +302,7 @@ class OrderService {
 
       return updatedOrder;
     } catch (error) {
-      console.error('❌ Failed to update order status:', error);
+      logger.error('❌ Failed to update order status:', error);
       return null;
     }
   }
@@ -312,7 +312,7 @@ class OrderService {
    */
   private async sendEmailReceipt(order: Order): Promise<void> {
     try {
-      console.log('📧 Sending email receipt to:', order.customerEmail);
+      logger.info('📧 Sending email receipt to:', order.customerEmail);
 
       await fetch(`${API_CONFIG.BASE_URL}/api/v1/receipts/email`, {
         method: 'POST',
@@ -326,9 +326,9 @@ class OrderService {
         }),
       });
 
-      console.log('✅ Email receipt sent successfully');
+      logger.info('✅ Email receipt sent successfully');
     } catch (error) {
-      console.error('❌ Failed to send email receipt:', error);
+      logger.error('❌ Failed to send email receipt:', error);
     }
   }
 
@@ -345,7 +345,7 @@ class OrderService {
 
       await AsyncStorage.setItem('cached_orders', JSON.stringify(trimmedOrders));
     } catch (error) {
-      console.error('❌ Failed to cache order:', error);
+      logger.error('❌ Failed to cache order:', error);
     }
   }
 
@@ -357,7 +357,7 @@ class OrderService {
       const cached = await AsyncStorage.getItem('cached_orders');
       return cached ? JSON.parse(cached) : [];
     } catch (error) {
-      console.error('❌ Failed to get cached orders:', error);
+      logger.error('❌ Failed to get cached orders:', error);
       return [];
     }
   }
@@ -377,7 +377,7 @@ class OrderService {
 
       await AsyncStorage.setItem('order_sync_queue', JSON.stringify(queueData));
     } catch (error) {
-      console.error('❌ Failed to save to sync queue:', error);
+      logger.error('❌ Failed to save to sync queue:', error);
     }
   }
 
@@ -397,7 +397,7 @@ class OrderService {
           await this.saveOrder(orderData);
           processedIds.push(orderData.timestamp);
         } catch (error) {
-          console.error('❌ Failed to sync order:', error);
+          logger.error('❌ Failed to sync order:', error);
         }
       }
 
@@ -408,7 +408,7 @@ class OrderService {
 
       await AsyncStorage.setItem('order_sync_queue', JSON.stringify(remainingQueue));
     } catch (error) {
-      console.error('❌ Failed to process sync queue:', error);
+      logger.error('❌ Failed to process sync queue:', error);
     }
   }
 

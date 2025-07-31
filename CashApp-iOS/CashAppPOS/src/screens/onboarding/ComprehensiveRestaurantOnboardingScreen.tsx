@@ -569,7 +569,7 @@ const updateField = (field: keyof RestaurantFormData, value: unknown) => {
         ]
       );
     } catch (error) {
-      console.error('Onboarding error:', error);
+      logger.error('Onboarding error:', error);
       Alert.alert(
         'Error',
         error instanceof Error ? error.message : 'Failed to complete onboarding. Please try again.'

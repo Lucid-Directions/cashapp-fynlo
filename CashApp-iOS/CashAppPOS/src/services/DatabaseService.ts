@@ -100,7 +100,7 @@ items: unknown[] | null;
       // Use tokenManager for consistent token retrieval
       this.authToken = await tokenManager.getTokenWithRefresh();
     } catch (error) {
-      console.error('Error loading auth token:', error);
+      logger.error('Error loading auth token:', error);
     }
   }
 
@@ -109,9 +109,9 @@ items: unknown[] | null;
       this.authToken = token;
       // CRITICAL: Must persist token for tokenManager to access it
       await AsyncStorage.setItem('auth_token', token);
-      console.log('✅ Auth token saved to storage');
+      logger.info('✅ Auth token saved to storage');
     } catch (error) {
-      console.error('Error saving auth token:', error);
+      logger.error('Error saving auth token:', error);
     }
   }
 
@@ -180,7 +180,7 @@ items: unknown[] | null;
 
       // Handle 401 Unauthorized - token might be expired
       if (response.status === 401) {
-        console.log('Token expired, attempting to refresh...');
+        logger.info('Token expired, attempting to refresh...');
 
         // Try to refresh the token using token manager
         const newToken = await tokenManager.refreshAuthToken();
@@ -252,7 +252,7 @@ items: unknown[] | null;
 
       // Check if it's a timeout error
       if (error.name === 'AbortError') {
-        console.warn(
+        logger.warn(
           `⏰ API request timeout for ${endpoint} (attempt ${retryCount + 1}/${retryAttempts})`
         );
 
@@ -260,7 +260,7 @@ items: unknown[] | null;
         if (retryCount < retryAttempts - 1) {
           const retryDelay = API_CONFIG.RETRY_DELAY || 1000;
           const delay = retryDelay * Math.pow(2, retryCount);
-          console.log(`🔄 Retrying after ${delay}ms...`);
+          logger.info(`🔄 Retrying after ${delay}ms...`);
           await new Promise((resolve) => setTimeout(resolve, delay));
           return this.apiRequest(endpoint, options, retryCount + 1, startTime);
         }
@@ -290,7 +290,7 @@ items: unknown[] | null;
       }
       return false;
     } catch (error) {
-      console.error('Login failed, trying test users:', error);
+      logger.error('Login failed, trying test users:', error);
 
       // Fallback to test users for development/testing
       return await this.authenticateTestUser(username, password);
@@ -324,11 +324,11 @@ items: unknown[] | null;
         })
       );
 
-      console.log('✅ Test user authenticated:', user.name, `(${user.role})`);
+      logger.info('✅ Test user authenticated:', user.name, `(${user.role})`);
       return true;
     }
 
-    console.log('❌ Invalid test user credentials');
+    logger.info('❌ Invalid test user credentials');
     return false;
   }
 
@@ -338,7 +338,7 @@ items: unknown[] | null;
       const userData = await AsyncStorage.getItem('user_data');
       return userData ? JSON.parse(userData) : null;
     } catch (error) {
-      console.error('Failed to get current user:', error);
+      logger.error('Failed to get current user:', error);
       return null;
     }
   }
@@ -414,12 +414,12 @@ items: unknown[] | null;
     try {
       await this.apiRequest('/api/v1/auth/logout', { method: 'POST' });
     } catch (error) {
-      console.log('API logout failed (expected for test users):', error);
+      logger.info('API logout failed (expected for test users):', error);
     } finally {
       // Always clear local session data
       this.authToken = null;
       await AsyncStorage.multiRemove(['auth_token', 'user_data']);
-      console.log('✅ User session cleared');
+      logger.info('✅ User session cleared');
     }
   }
 
@@ -433,7 +433,7 @@ items: unknown[] | null;
 
       return response.data || [];
     } catch (error) {
-      console.error('Failed to fetch products:', error);
+      logger.error('Failed to fetch products:', error);
       throw error; // Re-throw the error
     }
   }
@@ -446,7 +446,7 @@ items: unknown[] | null;
 
       return response.data || [];
     } catch (error) {
-      console.error('Failed to fetch products by category:', error);
+      logger.error('Failed to fetch products by category:', error);
       throw error; // Re-throw the error
     }
   }
@@ -460,7 +460,7 @@ items: unknown[] | null;
 
       return response.data || [];
     } catch (error) {
-      console.error('Failed to fetch categories:', error);
+      logger.error('Failed to fetch categories:', error);
       throw error; // Re-throw the error
     }
   }
@@ -470,12 +470,12 @@ items: unknown[] | null;
     // Check cache first
     const now = Date.now();
     if (this.menuCache.items && now - this.menuCache.itemsTimestamp < this.CACHE_DURATION) {
-      console.log('✅ Returning cached menu items');
+      logger.info('✅ Returning cached menu items');
       return this.menuCache.items;
     }
 
     try {
-      console.log('🔄 Fetching menu items from API...');
+      logger.info('🔄 Fetching menu items from API...');
       // Use public endpoint that doesn't require authentication
       const response = await this.apiRequest('/api/v1/public/menu/items', {
         method: 'GET',
@@ -484,7 +484,7 @@ items: unknown[] | null;
       if (response.data) {
         // Apply compatibility transformation if needed
         if (BackendCompatibilityService.needsMenuTransformation(response.data)) {
-          console.log('🔄 Applying menu compatibility transformation in DatabaseService');
+          logger.info('🔄 Applying menu compatibility transformation in DatabaseService');
           const transformedData = BackendCompatibilityService.transformMenuItems(response.data);
           // Cache the transformed data with current timestamp
           this.menuCache.items = transformedData;
@@ -494,22 +494,22 @@ items: unknown[] | null;
         // Cache the data with current timestamp
         this.menuCache.items = response.data;
         this.menuCache.itemsTimestamp = Date.now();
-        console.log(`✅ Menu items loaded and cached (${response.data.length} items)`);
+        logger.info(`✅ Menu items loaded and cached (${response.data.length} items)`);
         return response.data;
       }
 
-      console.warn('🚨 Production Mode: API returned no menu data');
+      logger.warn('🚨 Production Mode: API returned no menu data');
       return [];
     } catch (error) {
-      console.error('❌ Failed to fetch menu items from API:', error.message || error);
+      logger.error('❌ Failed to fetch menu items from API:', error.message || error);
 
       // If we have cached data that's expired, use it as fallback
       if (this.menuCache.items) {
-        console.warn('⚠️ Using expired cache data due to API failure');
+        logger.warn('⚠️ Using expired cache data due to API failure');
         return this.menuCache.items;
       }
 
-      console.warn('🍮 TEMPORARY: Using Chucho menu data while API is being fixed');
+      logger.warn('🍮 TEMPORARY: Using Chucho menu data while API is being fixed');
       // TEMPORARY: Return Chucho menu while we fix the API timeout issue
       const fallbackData = this.getChuchoMenuData();
       // Cache the fallback data too with current timestamp
@@ -526,12 +526,12 @@ items: unknown[] | null;
       this.menuCache.categories &&
       now - this.menuCache.categoriesTimestamp < this.CACHE_DURATION
     ) {
-      console.log('✅ Returning cached menu categories');
+      logger.info('✅ Returning cached menu categories');
       return this.menuCache.categories;
     }
 
     try {
-      console.log('🔄 Fetching menu categories from API...');
+      logger.info('🔄 Fetching menu categories from API...');
       // Use public endpoint that doesn't require authentication
       const response = await this.apiRequest('/api/v1/public/menu/categories', {
         method: 'GET',
@@ -541,7 +541,7 @@ items: unknown[] | null;
         // Cache the categories with current timestamp
         this.menuCache.categories = response.data;
         this.menuCache.categoriesTimestamp = Date.now();
-        console.log(`✅ Menu categories loaded and cached (${response.data.length} categories)`);
+        logger.info(`✅ Menu categories loaded and cached (${response.data.length} categories)`);
         return response.data;
       }
 
@@ -551,11 +551,11 @@ items: unknown[] | null;
       this.menuCache.categoriesTimestamp = Date.now();
       return fallback;
     } catch (error) {
-      console.error('❌ Failed to fetch menu categories:', error.message || error);
+      logger.error('❌ Failed to fetch menu categories:', error.message || error);
 
       // If we have cached data that's expired, use it as fallback
       if (this.menuCache.categories) {
-        console.warn('⚠️ Using expired cache data for categories due to API failure');
+        logger.warn('⚠️ Using expired cache data for categories due to API failure');
         return this.menuCache.categories;
       }
 
@@ -586,7 +586,7 @@ items: unknown[] | null;
 
       return response.data;
     } catch (error) {
-      console.error('Failed to create category:', error);
+      logger.error('Failed to create category:', error);
       throw error;
     }
   }
@@ -620,10 +620,10 @@ items: unknown[] | null;
       }
 
       const result = await response.json();
-      console.log('✅ Category updated successfully:', result);
+      logger.info('✅ Category updated successfully:', result);
       return result.data || result;
     } catch (error) {
-      console.error('❌ Error updating category:', error);
+      logger.error('❌ Error updating category:', error);
       throw error;
     }
   }
@@ -645,9 +645,9 @@ items: unknown[] | null;
         throw new Error(`Failed to delete category: ${error}`);
       }
 
-      console.log('✅ Category deleted successfully');
+      logger.info('✅ Category deleted successfully');
     } catch (error) {
-      console.error('❌ Error deleting category:', error);
+      logger.error('❌ Error deleting category:', error);
       throw error;
     }
   }
@@ -679,7 +679,7 @@ items: unknown[] | null;
 
       return response.data;
     } catch (error) {
-      console.error('Failed to create product:', error);
+      logger.error('Failed to create product:', error);
       throw error;
     }
   }
@@ -714,7 +714,7 @@ modifiers?: unknown[];
 
       return response.data;
     } catch (error) {
-      console.error('Failed to update product:', error);
+      logger.error('Failed to update product:', error);
       throw error;
     }
   }
@@ -725,7 +725,7 @@ modifiers?: unknown[];
         method: 'DELETE',
       });
     } catch (error) {
-      console.error('Failed to delete product:', error);
+      logger.error('Failed to delete product:', error);
       throw error;
     }
   }
@@ -738,7 +738,7 @@ modifiers?: unknown[];
       itemsTimestamp: 0,
       categoriesTimestamp: 0,
     };
-    console.log('🧹 Menu cache cleared');
+    logger.info('🧹 Menu cache cleared');
   }
 
   // Import Chucho menu data
@@ -778,7 +778,7 @@ modifiers?: unknown[];
       this.currentSession = response.data;
       return this.currentSession;
     } catch (error) {
-      console.error('Failed to get current session:', error);
+      logger.error('Failed to get current session:', error);
       return null;
     }
   }
@@ -795,7 +795,7 @@ modifiers?: unknown[];
       this.currentSession = response.data;
       return this.currentSession;
     } catch (error) {
-      console.error('Failed to create session:', error);
+      logger.error('Failed to create session:', error);
       return null;
     }
   }
@@ -817,7 +817,7 @@ modifiers?: unknown[];
 
       return response.data;
     } catch (error) {
-      console.error('Failed to create order:', error);
+      logger.error('Failed to create order:', error);
       return null;
     }
   }
@@ -831,7 +831,7 @@ modifiers?: unknown[];
 
       return response.data;
     } catch (error) {
-      console.error('Failed to update order:', error);
+      logger.error('Failed to update order:', error);
       return null;
     }
   }
@@ -844,7 +844,7 @@ modifiers?: unknown[];
 
       return response.data || [];
     } catch (error) {
-      console.error('Failed to fetch recent orders:', error);
+      logger.error('Failed to fetch recent orders:', error);
       return [];
     }
   }
@@ -852,7 +852,7 @@ modifiers?: unknown[];
   // Payment processing - PHASE 3: Updated to match backend multi-provider endpoint
   async processPayment(orderId: number, paymentMethod: string, amount: number): Promise<boolean> {
     try {
-      console.log(`🔄 Processing ${paymentMethod} payment for £${amount} (Order: ${orderId})`);
+      logger.info(`🔄 Processing ${paymentMethod} payment for £${amount} (Order: ${orderId})`);
 
       const response = await this.apiRequest('/api/v1/payments/process', {
         method: 'POST',
@@ -868,17 +868,17 @@ modifiers?: unknown[];
       });
 
       if (response.success && response.data) {
-        console.log(`✅ Payment processed successfully via ${response.data.provider}`);
-        console.log(
+        logger.info(`✅ Payment processed successfully via ${response.data.provider}`);
+        logger.info(
           `💰 Amount: £${response.data.amount}, Fee: £${response.data.fee}, Net: £${response.data.net_amount}`
         );
         return true;
       } else {
-        console.log(`❌ Payment failed:`, response.message || 'Unknown error');
+        logger.info(`❌ Payment failed:`, response.message || 'Unknown error');
         return false;
       }
     } catch (error) {
-      console.error('❌ Payment processing failed:', error);
+      logger.error('❌ Payment processing failed:', error);
       return false;
     }
   }
@@ -896,7 +896,7 @@ modifiers?: unknown[];
 
       return response.data || null;
     } catch (error) {
-      console.error('Failed to fetch floor plan:', error);
+      logger.error('Failed to fetch floor plan:', error);
       throw error;
     }
   }
@@ -917,7 +917,7 @@ modifiers?: unknown[];
 
       return response.data;
     } catch (error) {
-      console.error('Failed to update table status:', error);
+      logger.error('Failed to update table status:', error);
       return null;
     }
   }
@@ -933,7 +933,7 @@ modifiers?: unknown[];
 
       return response.data;
     } catch (error) {
-      console.error('Failed to assign server to table:', error);
+      logger.error('Failed to assign server to table:', error);
       return null;
     }
   }
@@ -946,7 +946,7 @@ modifiers?: unknown[];
 
       return response.data || [];
     } catch (error) {
-      console.error('Failed to fetch restaurant sections:', error);
+      logger.error('Failed to fetch restaurant sections:', error);
       return [];
     }
   }
@@ -960,7 +960,7 @@ modifiers?: unknown[];
 
       return response.data || null;
     } catch (error) {
-      console.error('Failed to fetch daily sales report:', error);
+      logger.error('Failed to fetch daily sales report:', error);
       throw error;
     }
   }
@@ -981,7 +981,7 @@ modifiers?: unknown[];
 
       return response.data || null;
     } catch (error) {
-      console.error('Failed to fetch sales summary:', error);
+      logger.error('Failed to fetch sales summary:', error);
       throw error;
     }
   }
@@ -999,7 +999,7 @@ modifiers?: unknown[];
         await AsyncStorage.removeItem('offline_orders');
       }
     } catch (error) {
-      console.error('Failed to sync offline data:', error);
+      logger.error('Failed to sync offline data:', error);
     }
   }
 
@@ -1008,19 +1008,19 @@ modifiers?: unknown[];
   async scanBarcode(): Promise<string | null> {
     // Placeholder for real barcode scanner integration (e.g., ML Kit)
     // Returns the scanned barcode string or null if cancelled
-    console.warn('scanBarcode() not yet implemented in DatabaseService');
+    logger.warn('scanBarcode() not yet implemented in DatabaseService');
     return null;
   }
 
   async printReceipt(_order: Order): Promise<boolean> {
     // TODO: integrate with AirPrint / ESC-POS printers
-    console.warn('printReceipt() not yet implemented in DatabaseService');
+    logger.warn('printReceipt() not yet implemented in DatabaseService');
     return true; // pretend success so caller flow continues
   }
 
   async openCashDrawer(): Promise<boolean> {
     // TODO: integrate with connected cash drawer hardware
-    console.warn('openCashDrawer() not yet implemented in DatabaseService');
+    logger.warn('openCashDrawer() not yet implemented in DatabaseService');
     return true;
   }
 
@@ -1035,7 +1035,7 @@ modifiers?: unknown[];
 
       return response.data || [];
     } catch (error) {
-      console.error('Failed to fetch customers:', error);
+      logger.error('Failed to fetch customers:', error);
       // Return empty array instead of throwing to prevent app crashes
       return [];
     }
@@ -1054,7 +1054,7 @@ modifiers?: unknown[];
 
       return response.data || [];
     } catch (error) {
-      console.error('Failed to fetch inventory items:', error);
+      logger.error('Failed to fetch inventory items:', error);
       throw new Error('Backend connection required for inventory data');
     }
   }
@@ -1067,7 +1067,7 @@ modifiers?: unknown[];
 
       return response.data || [];
     } catch (error) {
-      console.error('Failed to fetch employees from API:', error);
+      logger.error('Failed to fetch employees from API:', error);
       throw new Error('Backend connection required for employee data');
     }
   }
@@ -1079,10 +1079,10 @@ modifiers?: unknown[];
         method: 'GET',
       });
 
-      console.log('✅ Schedule API response received:', response);
+      logger.info('✅ Schedule API response received:', response);
       return response.data || null;
     } catch (error) {
-      console.error('Failed to fetch week schedule:', error);
+      logger.error('Failed to fetch week schedule:', error);
       throw new Error('Backend connection required for schedule data');
     }
   }
@@ -1095,29 +1095,29 @@ modifiers?: unknown[];
 
       return response.data || [];
     } catch (error) {
-      console.error('Failed to fetch orders:', error);
+      logger.error('Failed to fetch orders:', error);
       return [];
     }
   }
 
 async getOrdersByDateRange(_dateRange: string): Promise<any[]> {
     // Renamed to match DataService call intent
-    console.warn('DatabaseService.getOrdersByDateRange is a stub and not implemented.');
+    logger.warn('DatabaseService.getOrdersByDateRange is a stub and not implemented.');
     throw new Error('DatabaseService.getOrdersByDateRange not implemented yet');
   }
 
   async getFinancialReportDetail(_period: string): Promise<any | null> {
-    console.warn('DatabaseService.getFinancialReportDetail is a stub and not implemented.');
+    logger.warn('DatabaseService.getFinancialReportDetail is a stub and not implemented.');
     throw new Error('DatabaseService.getFinancialReportDetail not implemented yet');
   }
 
   async getSalesReportDetail(_period: string): Promise<any[]> {
-    console.warn('DatabaseService.getSalesReportDetail is a stub and not implemented.');
+    logger.warn('DatabaseService.getSalesReportDetail is a stub and not implemented.');
     throw new Error('DatabaseService.getSalesReportDetail not implemented yet');
   }
 
   async getStaffReportDetail(_period: string): Promise<any[]> {
-    console.warn('DatabaseService.getStaffReportDetail is a stub and not implemented.');
+    logger.warn('DatabaseService.getStaffReportDetail is a stub and not implemented.');
     throw new Error('DatabaseService.getStaffReportDetail not implemented yet');
   }
 
@@ -1134,13 +1134,13 @@ async getOrdersByDateRange(_dateRange: string): Promise<any[]> {
 
       return response.data || null;
     } catch (error) {
-      console.error('Failed to fetch analytics dashboard:', error);
+      logger.error('Failed to fetch analytics dashboard:', error);
       throw new Error('Backend connection required for analytics dashboard data');
     }
   }
 
   async getUserProfile(): Promise<any | null> {
-    console.warn('DatabaseService.getUserProfile is a stub and not implemented.');
+    logger.warn('DatabaseService.getUserProfile is a stub and not implemented.');
     // Example: return this.apiRequest('/api/v1/users/profile');
     throw new Error('DatabaseService.getUserProfile not implemented yet');
   }

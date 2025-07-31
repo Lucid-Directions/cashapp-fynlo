@@ -93,11 +93,11 @@ const useInventoryStore = create<InventoryStore>()(
         // } catch (e) {
         //   const errorMsg = e instanceof Error ? e.message : "Failed to load inventory data";
         //   get().setError(errorMsg);
-        //   console.error("Error loading initial inventory:", errorMsg);
+        //   logger.error("Error loading initial inventory:", errorMsg);
         // } finally {
         //  set({ isLoadingInventory: false });
         // }
-        console.log('loadInitialInventory called - placeholder implementation');
+        logger.info('loadInitialInventory called - placeholder implementation');
         set({ isLoadingInventory: true });
         // Simulate API call
         setTimeout(() => {

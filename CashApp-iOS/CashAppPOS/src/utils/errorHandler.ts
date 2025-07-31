@@ -172,7 +172,7 @@ async handlePaymentError(error: Error, paymentData?: unknown, context?: string):
       const stored = await AsyncStorage.getItem(this.STORAGE_KEY);
       return stored ? JSON.parse(stored) : [];
     } catch (error) {
-      console.warn('Failed to retrieve stored errors:', error);
+      logger.warn('Failed to retrieve stored errors:', error);
       return [];
     }
   }
@@ -185,7 +185,7 @@ async handlePaymentError(error: Error, paymentData?: unknown, context?: string):
       await AsyncStorage.removeItem(this.STORAGE_KEY);
       this.errorQueue = [];
     } catch (error) {
-      console.warn('Failed to clear stored errors:', error);
+      logger.warn('Failed to clear stored errors:', error);
     }
   }
 
@@ -255,13 +255,13 @@ async handlePaymentError(error: Error, paymentData?: unknown, context?: string):
 
     switch (logLevel) {
       case 'error':
-        console.error(logMessage, errorInfo);
+        logger.error(logMessage, errorInfo);
         break;
       case 'warn':
-        console.warn(logMessage, errorInfo);
+        logger.warn(logMessage, errorInfo);
         break;
       default:
-        console.log(logMessage, errorInfo);
+        logger.info(logMessage, errorInfo);
     }
   }
 
@@ -276,7 +276,7 @@ async handlePaymentError(error: Error, paymentData?: unknown, context?: string):
 
       await AsyncStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.errorQueue));
     } catch (error) {
-      console.warn('Failed to store error:', error);
+      logger.warn('Failed to store error:', error);
     }
   }
 
@@ -287,7 +287,7 @@ async handlePaymentError(error: Error, paymentData?: unknown, context?: string):
         this.errorQueue = JSON.parse(stored);
       }
     } catch (error) {
-      console.warn('Failed to load stored errors:', error);
+      logger.warn('Failed to load stored errors:', error);
     }
   }
 
@@ -404,7 +404,7 @@ async handlePaymentError(error: Error, paymentData?: unknown, context?: string):
 
   private async retryRequest(requestConfig: unknown, _errorInfo: ErrorInfo): Promise<void> {
     // This would integrate with your API layer to retry requests
-    console.log('Retrying request:', requestConfig);
+    logger.info('Retrying request:', requestConfig);
   }
 
   private attemptRecovery(errorInfo: ErrorInfo): void {
@@ -415,17 +415,17 @@ async handlePaymentError(error: Error, paymentData?: unknown, context?: string):
         break;
       case ErrorType.AUTHENTICATION:
         // Redirect to login
-        console.log('Redirecting to authentication...');
+        logger.info('Redirecting to authentication...');
         break;
       default:
-        console.log('No automatic recovery available for this error type');
+        logger.info('No automatic recovery available for this error type');
     }
   }
 
   private sendToCrashReporting(errorInfo: ErrorInfo): void {
     // This would integrate with crash reporting services like Crashlytics
     if (__DEV__) {
-      console.log('Would send to crash reporting:', errorInfo);
+      logger.info('Would send to crash reporting:', errorInfo);
     }
   }
 

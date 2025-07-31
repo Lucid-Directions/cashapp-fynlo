@@ -126,7 +126,7 @@ class RealUserManagementService {
   // API methods
   async getAllUsers(): Promise<UserDisplayData[]> {
     try {
-      console.log('🔍 Fetching users from real backend...');
+      logger.info('🔍 Fetching users from real backend...');
       const response = await fetch(`${this.baseUrl}/users`);
 
       if (!response.ok) {
@@ -134,14 +134,14 @@ class RealUserManagementService {
       }
 
       const realUsers: RealUser[] = await response.json();
-      console.log('✅ Found real users:', realUsers.length);
+      logger.info('✅ Found real users:', realUsers.length);
 
       // Convert to display format
       const displayUsers = realUsers.map((user) => this.convertToDisplayFormat(user));
 
       return displayUsers;
     } catch (error) {
-      console.error('❌ Failed to fetch users from backend:', error);
+      logger.error('❌ Failed to fetch users from backend:', error);
       // Return empty array instead of mock data
       return [];
     }
@@ -171,7 +171,7 @@ class RealUserManagementService {
       const realUser: RealUser = await response.json();
       return this.convertToDisplayFormat(realUser);
     } catch (error) {
-      console.error('❌ Failed to fetch user by ID:', error);
+      logger.error('❌ Failed to fetch user by ID:', error);
       return null;
     }
   }
@@ -194,7 +194,7 @@ class RealUserManagementService {
       const result = await response.json();
       return this.convertToDisplayFormat(result.user);
     } catch (error) {
-      console.error('❌ Failed to create user:', error);
+      logger.error('❌ Failed to create user:', error);
       throw error;
     }
   }
@@ -217,7 +217,7 @@ class RealUserManagementService {
       const result = await response.json();
       return this.convertToDisplayFormat(result.user);
     } catch (error) {
-      console.error('❌ Failed to update user:', error);
+      logger.error('❌ Failed to update user:', error);
       throw error;
     }
   }
@@ -232,7 +232,7 @@ class RealUserManagementService {
 
   // Mock access logs since backend doesn't have this yet
   async getAccessLogs(_limit?: number): Promise<AccessLog[]> {
-    console.log('📝 Access logs not implemented in backend yet, returning empty array');
+    logger.info('📝 Access logs not implemented in backend yet, returning empty array');
     return [];
   }
 
@@ -249,7 +249,7 @@ class RealUserManagementService {
     details?: string
   ): Promise<void> {
     // Will implement when backend supports it
-    console.log(`📝 Would log: ${userEmail} - ${action} - ${status}`);
+    logger.info(`📝 Would log: ${userEmail} - ${action} - ${status}`);
   }
 
   // Search functionality

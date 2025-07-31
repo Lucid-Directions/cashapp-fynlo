@@ -46,7 +46,7 @@ class NFCServiceClass {
       }
       return false;
     } catch (error) {
-      console.error('Failed to check NFC support:', error);
+      logger.error('Failed to check NFC support:', error);
       return false;
     }
   }
@@ -61,7 +61,7 @@ class NFCServiceClass {
       const isSupported = await this.isNFCSupported();
       return isSupported;
     } catch (error) {
-      console.error('Failed to check NFC status:', error);
+      logger.error('Failed to check NFC status:', error);
       return false;
     }
   }
@@ -91,7 +91,7 @@ class NFCServiceClass {
         supportedMethods,
       };
     } catch (error) {
-      console.error('Failed to get NFC capabilities:', error);
+      logger.error('Failed to get NFC capabilities:', error);
       return {
         isSupported: false,
         isEnabled: false,
@@ -109,7 +109,7 @@ class NFCServiceClass {
 
     // This would typically start native NFC proximity monitoring
     // For now, we'll simulate proximity detection for demo purposes
-    console.log('Started NFC proximity detection');
+    logger.info('Started NFC proximity detection');
   }
 
   /**
@@ -117,7 +117,7 @@ class NFCServiceClass {
    */
   stopProximityDetection(): void {
     this.proximityCallback = null;
-    console.log('Stopped NFC proximity detection');
+    logger.info('Stopped NFC proximity detection');
   }
 
   /**
@@ -155,7 +155,7 @@ class NFCServiceClass {
       // This would typically use Apple Pay SDK to check availability
       return true;
     } catch (error) {
-      console.error('Failed to check Apple Pay availability:', error);
+      logger.error('Failed to check Apple Pay availability:', error);
       return false;
     }
   }
@@ -172,7 +172,7 @@ class NFCServiceClass {
       // This would typically use Google Pay SDK to check availability
       return true;
     } catch (error) {
-      console.error('Failed to check Google Pay availability:', error);
+      logger.error('Failed to check Google Pay availability:', error);
       return false;
     }
   }
@@ -201,7 +201,7 @@ class NFCServiceClass {
 
       return 'none';
     } catch (error) {
-      console.error('Failed to get optimal payment method:', error);
+      logger.error('Failed to get optimal payment method:', error);
       return 'none';
     }
   }

@@ -81,7 +81,7 @@ const useAppStore = create<AppStore>()(
             typeof newItem.price !== 'number' ||
             typeof newItem.quantity !== 'number'
           ) {
-            console.error('Invalid item being added to cart:', newItem);
+            logger.error('Invalid item being added to cart:', newItem);
             return state;
           }
 

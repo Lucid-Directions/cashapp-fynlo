@@ -29,7 +29,7 @@ try {
   SQIPApplePay = SquareSDK.SQIPApplePay;
   SQIPGooglePay = SquareSDK.SQIPGooglePay;
 } catch (_error) {
-  console.warn('Square SDK not available in SquareContactlessPaymentScreen');
+  logger.warn('Square SDK not available in SquareContactlessPaymentScreen');
 }
 
 interface SquareContactlessPaymentScreenProps {
@@ -113,7 +113,7 @@ const SquareContactlessPaymentScreen: React.FC<SquareContactlessPaymentScreenPro
         errorMessage: null,
       }));
     } catch (error) {
-      console.error('Failed to initialize contactless payments:', error);
+      logger.error('Failed to initialize contactless payments:', error);
       setContactlessState((prev) => ({
         ...prev,
         loading: false,
@@ -187,7 +187,7 @@ const SquareContactlessPaymentScreen: React.FC<SquareContactlessPaymentScreenPro
         }));
       }
     } catch (error) {
-      console.error('Apple Pay payment failed:', error);
+      logger.error('Apple Pay payment failed:', error);
       setContactlessState((prev) => ({
         ...prev,
         processing: false,
@@ -232,7 +232,7 @@ const SquareContactlessPaymentScreen: React.FC<SquareContactlessPaymentScreenPro
         }));
       }
     } catch (error) {
-      console.error('Google Pay payment failed:', error);
+      logger.error('Google Pay payment failed:', error);
       setContactlessState((prev) => ({
         ...prev,
         processing: false,

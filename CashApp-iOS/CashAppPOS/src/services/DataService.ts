@@ -2,6 +2,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import API_CONFIG from '../config/api';
+import { logger } from '../utils/logger';
 // TODO: Unused import - import { AUTH_CONFIG } from '../config/auth.config';
 import { envBool, IS_DEV } from '../env';
 // TODO: Unused import - import { supabase } from '../lib/supabase';
@@ -84,7 +85,7 @@ class DataService {
         this.featureFlags = { ...DEFAULT_FLAGS, ...JSON.parse(stored) };
       }
     } catch (_error) {
-      console.log('Using default feature flags');
+      logger.info('Using default feature flags');
     }
   }
 
@@ -117,7 +118,7 @@ data?: unknown
       try {
         await this.apiTestingService.testEndpoint(endpoint, method, data);
       } catch (error) {
-        console.log(`API test failed for ${endpoint}:`, error);
+        logger.info(`API test failed for ${endpoint}:`, error);
       }
     }
   }
@@ -163,13 +164,13 @@ data?: unknown
 
       // Log status changes
       if (wasAvailable !== this.isBackendAvailable) {
-        console.log(
+        logger.info(
           `Backend status changed: ${this.isBackendAvailable ? 'Available' : 'Unavailable'}`
         );
       }
 } catch (_error) {
       this.isBackendAvailable = false;
-      console.log('Backend not available, using mock data');
+      logger.info('Backend not available, using mock data');
 
       // Still test the endpoint in test mode to record the failure
       if (this.featureFlags.TEST_API_MODE) {
@@ -189,7 +190,7 @@ data?: unknown
       await authStore.signIn(username, password);
       return true;
     } catch (error) {
-      console.error('Supabase login failed:', error);
+      logger.error('Supabase login failed:', error);
       return false;
     }
   }
@@ -199,7 +200,7 @@ data?: unknown
       const authStore = useAuthStore.getState();
       await authStore.signOut();
     } catch (error) {
-      console.error('Logout failed:', error);
+      logger.error('Logout failed:', error);
     }
     // Clear any legacy tokens
     await AsyncStorage.multiRemove(['auth_token', 'user_data']);
@@ -219,7 +220,7 @@ data?: unknown
           return products;
         }
       } catch (_error) {
-        console.log('Failed to fetch products from API, using mock data');
+        logger.info('Failed to fetch products from API, using mock data');
       }
     }
     return this.db.getProducts();
@@ -230,7 +231,7 @@ data?: unknown
       try {
         return await this.db.getProductsByCategory(categoryId);
       } catch (_error) {
-        console.log('Failed to fetch products by category, using mock data');
+        logger.info('Failed to fetch products by category, using mock data');
       }
     }
     return this.db.getProductsByCategory(categoryId);
@@ -242,13 +243,13 @@ data?: unknown
       try {
         const categories = await this.db.getCategories();
         if (!categories) {
-          console.warn('⚠️ API returned null/undefined categories');
+          logger.warn('⚠️ API returned null/undefined categories');
           return [];
         }
-        console.log('✅ Loaded categories from API:', categories.length);
+        logger.info('✅ Loaded categories from API:', categories.length);
         return categories;
       } catch (error) {
-        console.error('❌ Failed to fetch categories from API:', error);
+        logger.error('❌ Failed to fetch categories from API:', error);
         throw error;
       }
     }
@@ -273,13 +274,13 @@ data?: unknown
         if (menuItems && menuItems.length > 0) {
           // Apply compatibility transformation if needed
           if (BackendCompatibilityService.needsMenuTransformation(menuItems)) {
-            console.log('🔄 Applying menu compatibility transformation');
+            logger.info('🔄 Applying menu compatibility transformation');
             return BackendCompatibilityService.transformMenuItems(menuItems);
           }
           return menuItems;
         }
       } catch (_error) {
-        console.log('Failed to fetch menu items from API, using mock data');
+        logger.info('Failed to fetch menu items from API, using mock data');
       }
     }
     return this.db.getMenuItems();
@@ -298,7 +299,7 @@ data?: unknown
           return categories;
         }
       } catch (_error) {
-        console.log('Failed to fetch menu categories from API, using mock data');
+        logger.info('Failed to fetch menu categories from API, using mock data');
       }
     }
     return this.db.getMenuCategories();
@@ -315,10 +316,10 @@ data?: unknown
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         const result = await this.db.createCategory(categoryData);
-        console.log('✅ Category created via API:', result);
+        logger.info('✅ Category created via API:', result);
         return result;
       } catch (error) {
-        console.error('❌ API category creation failed:', error);
+        logger.error('❌ API category creation failed:', error);
         throw error;
       }
     }
@@ -343,10 +344,10 @@ data?: unknown
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         const result = await this.db.updateCategory(categoryId, categoryData);
-        console.log('✅ Category updated via API:', result);
+        logger.info('✅ Category updated via API:', result);
         return result;
       } catch (error) {
-        console.error('❌ API category update failed:', error);
+        logger.error('❌ API category update failed:', error);
         throw error;
       }
     }
@@ -361,10 +362,10 @@ data?: unknown
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
         await this.db.deleteCategory(categoryId);
-        console.log('✅ Category deleted via API:', categoryId);
+        logger.info('✅ Category deleted via API:', categoryId);
         return;
       } catch (error) {
-        console.error('❌ API category deletion failed:', error);
+        logger.error('❌ API category deletion failed:', error);
         throw error;
       }
     }
@@ -395,7 +396,7 @@ data?: unknown
       try {
         return await this.db.createProduct(productData);
       } catch (error) {
-        console.error('Failed to create product:', error);
+        logger.error('Failed to create product:', error);
         throw error;
       }
     }
@@ -429,7 +430,7 @@ modifiers?: unknown[];
       try {
         return await this.db.updateProduct(productId, productData);
       } catch (error) {
-        console.error('Failed to update product:', error);
+        logger.error('Failed to update product:', error);
         throw error;
       }
     }
@@ -445,7 +446,7 @@ modifiers?: unknown[];
       try {
         await this.db.deleteProduct(productId);
       } catch (error) {
-        console.error('Failed to delete product:', error);
+        logger.error('Failed to delete product:', error);
         throw error;
       }
     } else {
@@ -464,7 +465,7 @@ modifiers?: unknown[];
         const result = await this.db.createOrder(order);
         if (result) return result;
       } catch (_error) {
-        console.log('Failed to create order via API, using mock');
+        logger.info('Failed to create order via API, using mock');
       }
     }
     return this.db.createOrder(order);
@@ -475,7 +476,7 @@ modifiers?: unknown[];
       try {
         return await this.db.updateOrder(orderId, updates);
       } catch (_error) {
-        console.log('Failed to update order via API');
+        logger.info('Failed to update order via API');
       }
     }
     return this.db.updateOrder(orderId, updates);
@@ -489,7 +490,7 @@ modifiers?: unknown[];
           return orders;
         }
       } catch (_error) {
-        console.log('Failed to fetch orders from API, using mock data');
+        logger.info('Failed to fetch orders from API, using mock data');
       }
     }
     return this.db.getRecentOrders(limit);
@@ -512,18 +513,18 @@ modifiers?: unknown[];
       this.isBackendAvailable
     ) {
       try {
-        console.log(`Processing real payment: ${paymentMethod} for £${amount} (Order: ${orderId})`);
+        logger.info(`Processing real payment: ${paymentMethod} for £${amount} (Order: ${orderId})`);
         const result = await this.db.processPayment(orderId, paymentMethod, amount);
 
         if (result) {
-          console.log('✅ Real payment processed successfully');
+          logger.info('✅ Real payment processed successfully');
           return true;
         } else {
-          console.log('❌ Real payment failed - no result returned');
+          logger.info('❌ Real payment failed - no result returned');
           throw new Error('Payment processing failed');
         }
       } catch (error) {
-        console.log('❌ Real payment failed, falling back to mock:', error);
+        logger.info('❌ Real payment failed, falling back to mock:', error);
         // Don't fall back for payment processing - we want to see the real error
         throw error;
       }
@@ -531,12 +532,12 @@ modifiers?: unknown[];
 
     // If payments disabled or no backend, simulate success for demo
     if (!this.featureFlags.ENABLE_PAYMENTS) {
-      console.log(`🎭 Demo mode payment: ${paymentMethod} for £${amount}`);
+      logger.info(`🎭 Demo mode payment: ${paymentMethod} for £${amount}`);
       return this.db.processPayment(orderId, paymentMethod, amount);
     }
 
     // Fallback to mock if no backend available
-    console.log(`⚠️  No backend available, using mock payment: ${paymentMethod} for £${amount}`);
+    logger.info(`⚠️  No backend available, using mock payment: ${paymentMethod} for £${amount}`);
     return this.db.processPayment(orderId, paymentMethod, amount);
   }
 
@@ -549,7 +550,7 @@ modifiers?: unknown[];
           return floorPlan;
         }
       } catch (_error) {
-        console.log('Failed to fetch floor plan from API, using mock data');
+        logger.info('Failed to fetch floor plan from API, using mock data');
       }
     }
     return this.db.getRestaurantFloorPlan(sectionId ?? undefined);
@@ -564,7 +565,7 @@ modifiers?: unknown[];
       try {
         return await this.db.updateTableStatus(tableId, status, additionalData);
       } catch (_error) {
-        console.log('Failed to update table status via API');
+        logger.info('Failed to update table status via API');
       }
     }
     return this.db.updateTableStatus(tableId, status, additionalData);
@@ -579,7 +580,7 @@ modifiers?: unknown[];
           return report;
         }
       } catch (_error) {
-        console.log('Failed to fetch daily report from API, using mock data');
+        logger.info('Failed to fetch daily report from API, using mock data');
       }
     }
     return this.db.getDailySalesReport(date);
@@ -593,7 +594,7 @@ modifiers?: unknown[];
           return summary;
         }
       } catch (_error) {
-        console.log('Failed to fetch sales summary from API, using mock data');
+        logger.info('Failed to fetch sales summary from API, using mock data');
       }
     }
     return this.db.getSalesSummary(dateFrom ?? undefined, dateTo ?? undefined);
@@ -605,7 +606,7 @@ modifiers?: unknown[];
       try {
         return await this.db.getCurrentSession();
       } catch (_error) {
-        console.log('Failed to get session from API');
+        logger.info('Failed to get session from API');
       }
     }
     return this.db.getCurrentSession();
@@ -616,7 +617,7 @@ modifiers?: unknown[];
       try {
         return await this.db.createSession(configId);
       } catch (_error) {
-        console.log('Failed to create session via API');
+        logger.info('Failed to create session via API');
       }
     }
     return this.db.createSession(configId);
@@ -625,21 +626,21 @@ modifiers?: unknown[];
   // Hardware operations (always mock for now)
   async printReceipt(order: unknown): Promise<boolean> {
     if (this.featureFlags.ENABLE_HARDWARE) {
-      console.log('Hardware printing not yet implemented');
+      logger.info('Hardware printing not yet implemented');
     }
     return this.db.printReceipt(order);
   }
 
   async openCashDrawer(): Promise<boolean> {
     if (this.featureFlags.ENABLE_HARDWARE) {
-      console.log('Hardware cash drawer not yet implemented');
+      logger.info('Hardware cash drawer not yet implemented');
     }
     return this.db.openCashDrawer();
   }
 
   async scanBarcode(): Promise<string | null> {
     if (this.featureFlags.ENABLE_HARDWARE) {
-      console.log('Hardware barcode scanning not yet implemented');
+      logger.info('Hardware barcode scanning not yet implemented');
     }
     return this.db.scanBarcode();
   }
@@ -658,13 +659,13 @@ modifiers?: unknown[];
     await this.updateFeatureFlag('USE_REAL_API', false);
     await this.updateFeatureFlag('ENABLE_PAYMENTS', false);
     await this.updateFeatureFlag('ENABLE_HARDWARE', false);
-    console.log('Reset to mock data mode');
+    logger.info('Reset to mock data mode');
   }
 
   async enableRealAPI(): Promise<void> {
     await this.updateFeatureFlag('USE_REAL_API', true);
     await this.checkBackendAvailability();
-    console.log('Enabled real API mode');
+    logger.info('Enabled real API mode');
   }
 
   getConnectionStatus(): { mode: string; backend: boolean; flags: FeatureFlags } {
@@ -679,7 +680,7 @@ modifiers?: unknown[];
   // TODO(real API): Implement actual API calls for these methods
 
   async getCustomers(): Promise<any[]> {
-    console.log('🌐 DataService.getCustomers - fetching from API');
+    logger.info('🌐 DataService.getCustomers - fetching from API');
 
     try {
       const response = await authInterceptor.get(`${API_CONFIG.FULL_API_URL}/customers`);
@@ -687,41 +688,41 @@ modifiers?: unknown[];
       if (response.ok) {
         const result = await response.json();
         const customers = result.data || result;
-        console.log(
+        logger.info(
           '✅ API customers received:',
           Array.isArray(customers) ? customers.length : 'not an array'
         );
         return Array.isArray(customers) ? customers : [];
       } else {
-        console.error('❌ API error:', response.status, response.statusText);
+        logger.error('❌ API error:', response.status, response.statusText);
         throw new Error(`API error: ${response.status}`);
       }
     } catch (error) {
-      console.error('❌ Failed to fetch customers from API:', error);
+      logger.error('❌ Failed to fetch customers from API:', error);
       throw error; // No fallback - API must work for production readiness
     }
   }
 
   async getInventory(): Promise<any[]> {
-    console.log('🌐 DataService.getInventory - fetching from API');
+    logger.info('🌐 DataService.getInventory - fetching from API');
 
     try {
       const inventoryItems = await this.db.getInventoryItems();
       if (inventoryItems && inventoryItems.length >= 0) {
         // Allow empty arrays
-        console.log('✅ API inventory received:', inventoryItems.length, 'items');
+        logger.info('✅ API inventory received:', inventoryItems.length, 'items');
         return inventoryItems;
       } else {
         throw new Error('Invalid inventory data received from API');
       }
     } catch (error) {
-      console.error('❌ Failed to fetch inventory from API:', error);
+      logger.error('❌ Failed to fetch inventory from API:', error);
       throw error; // No fallback - API must work for production readiness
     }
   }
 
   async getEmployees(): Promise<any[]> {
-    console.log('🌐 DataService.getEmployees - fetching from API');
+    logger.info('🌐 DataService.getEmployees - fetching from API');
 
     try {
       const response = await authInterceptor.get(`${API_CONFIG.FULL_API_URL}/employees`);
@@ -729,7 +730,7 @@ modifiers?: unknown[];
       if (response.ok) {
         const result = await response.json();
         const employees = result.data || result;
-        console.log(
+        logger.info(
           '✅ API employees received:',
           Array.isArray(employees) ? employees.length : 'not an array'
         );
@@ -739,18 +740,18 @@ modifiers?: unknown[];
           Array.isArray(employees) &&
           BackendCompatibilityService.needsEmployeeTransformation(employees)
         ) {
-          console.log('🔄 Applying employee compatibility transformation');
+          logger.info('🔄 Applying employee compatibility transformation');
           return BackendCompatibilityService.transformEmployees(employees);
         }
 
         return Array.isArray(employees) ? employees : [];
       } else {
-        console.error('❌ API error:', response.status, response.statusText);
+        logger.error('❌ API error:', response.status, response.statusText);
         throw new Error(`API error: ${response.status} - ${response.statusText}`);
       }
     } catch (error) {
-      console.error('❌ Failed to fetch employees from API:', error);
-      console.warn('🚨 Production Mode: Returning empty employee list instead of mock data');
+      logger.error('❌ Failed to fetch employees from API:', error);
+      logger.warn('🚨 Production Mode: Returning empty employee list instead of mock data');
 
       // PRODUCTION READY: Return empty array instead of mock data
       // Screens should handle empty state gracefully with EmptyState component
@@ -759,20 +760,20 @@ modifiers?: unknown[];
   }
 
   async getWeekSchedule(weekStart: Date, employees: unknown[]): Promise<any | null> {
-    console.log('🌐 DataService.getWeekSchedule - fetching from API', { weekStart });
+    logger.info('🌐 DataService.getWeekSchedule - fetching from API', { weekStart });
 
     try {
       const schedule = await this.db.getWeekSchedule(weekStart, employees);
-      console.log('✅ API schedule received:', schedule?.shifts?.length || 0, 'shifts');
+      logger.info('✅ API schedule received:', schedule?.shifts?.length || 0, 'shifts');
       return schedule;
     } catch (error) {
-      console.error('❌ Failed to fetch schedule from API:', error);
+      logger.error('❌ Failed to fetch schedule from API:', error);
       throw error; // No fallback - API must work for production readiness
     }
   }
 
   async getOrders(dateRange: string): Promise<any[]> {
-    console.log('DataService.getOrders called', {
+    logger.info('DataService.getOrders called', {
       dateRange,
       USE_REAL_API: this.featureFlags.USE_REAL_API,
       isBackendAvailable: this.isBackendAvailable,
@@ -780,7 +781,7 @@ modifiers?: unknown[];
 
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        console.log('🌐 Attempting to fetch orders from API...');
+        logger.info('🌐 Attempting to fetch orders from API...');
         const authToken = await this.getAuthToken();
         const response = await fetch(`${API_CONFIG.FULL_API_URL}/orders?date_range=${dateRange}`, {
           method: 'GET',
@@ -793,24 +794,24 @@ modifiers?: unknown[];
         if (response.ok) {
           const result = await response.json();
           const orders = result.data || result;
-          console.log(
+          logger.info(
             '✅ API orders received:',
             Array.isArray(orders) ? orders.length : 'not an array'
           );
           return Array.isArray(orders) ? orders : [];
         } else {
-          console.error('❌ API error:', response.status, response.statusText);
+          logger.error('❌ API error:', response.status, response.statusText);
           throw new Error(`API error: ${response.status}`);
         }
       } catch (error) {
-        console.error('❌ Failed to fetch orders from API:', error);
+        logger.error('❌ Failed to fetch orders from API:', error);
         throw error; // No fallback - API must work for production readiness
       }
     }
   }
 
   async getFinancialReportDetail(period: string): Promise<any | null> {
-    console.log('DataService.getFinancialReportDetail called', {
+    logger.info('DataService.getFinancialReportDetail called', {
       period,
       USE_REAL_API: this.featureFlags.USE_REAL_API,
       isBackendAvailable: this.isBackendAvailable,
@@ -818,7 +819,7 @@ modifiers?: unknown[];
 
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        console.log('🌐 Attempting to fetch financial data from API...');
+        logger.info('🌐 Attempting to fetch financial data from API...');
         const authToken = await this.getAuthToken();
         const response = await fetch(
           `${API_CONFIG.FULL_API_URL}/analytics/financial?period=${period}`,
@@ -834,21 +835,21 @@ modifiers?: unknown[];
         if (response.ok) {
           const result = await response.json();
           const financialData = result.data || result; // Handle both wrapped and unwrapped responses
-          console.log('✅ API financial data received');
+          logger.info('✅ API financial data received');
           return financialData;
         } else {
-          console.error('❌ API error:', response.status, response.statusText);
+          logger.error('❌ API error:', response.status, response.statusText);
           throw new Error(`API error: ${response.status}`);
         }
       } catch (error) {
-        console.error('❌ Failed to fetch financial data from API:', error);
+        logger.error('❌ Failed to fetch financial data from API:', error);
         throw error; // No fallback - API must work for production readiness
       }
     }
   }
 
   async getSalesReportDetail(period: string): Promise<any[]> {
-    console.log('🌐 DataService.getSalesReportDetail - fetching from API', { period });
+    logger.info('🌐 DataService.getSalesReportDetail - fetching from API', { period });
 
     try {
       const authToken = await this.getAuthToken();
@@ -871,20 +872,20 @@ modifiers?: unknown[];
         if (salesData && !Array.isArray(salesData)) {
           // Convert API format to SalesData array format
           const transformedData = this.transformApiDataToArray(salesData, period);
-          console.log('✅ API sales data transformed for frontend');
+          logger.info('✅ API sales data transformed for frontend');
           return transformedData;
         } else if (Array.isArray(salesData)) {
-          console.log('✅ API sales data received in array format');
+          logger.info('✅ API sales data received in array format');
           return salesData;
         } else {
           throw new Error('Invalid sales data format received from API');
         }
       } else {
-        console.error('❌ API error:', response.status, response.statusText);
+        logger.error('❌ API error:', response.status, response.statusText);
         throw new Error(`API error: ${response.status}`);
       }
     } catch (error) {
-      console.error('❌ Failed to fetch sales data from API:', error);
+      logger.error('❌ Failed to fetch sales data from API:', error);
       throw error; // No fallback - API must work for production readiness
     }
   }
@@ -915,14 +916,14 @@ modifiers?: unknown[];
       // Return empty array if no valid data
       return [];
     } catch (error) {
-      console.error('❌ Error transforming API data:', error);
+      logger.error('❌ Error transforming API data:', error);
       return [];
     }
   }
 
   async getStaffReportDetail(period: string): Promise<any[]> {
     // Should return StaffMember[]
-    console.log('DataService.getStaffReportDetail called', {
+    logger.info('DataService.getStaffReportDetail called', {
       period,
       USE_REAL_API: this.featureFlags.USE_REAL_API,
       isBackendAvailable: this.isBackendAvailable,
@@ -930,7 +931,7 @@ modifiers?: unknown[];
 
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        console.log('🌐 Attempting to fetch staff data from API...');
+        logger.info('🌐 Attempting to fetch staff data from API...');
         const authToken = await this.getAuthToken();
         const response = await fetch(
           `${API_CONFIG.FULL_API_URL}/analytics/employees?timeframe=${period}`,
@@ -946,21 +947,21 @@ modifiers?: unknown[];
         if (response.ok) {
           const result = await response.json();
           const staffData = result.data || result; // Handle both wrapped and unwrapped responses
-          console.log('✅ API staff data received');
+          logger.info('✅ API staff data received');
           return staffData;
         } else {
-          console.error('❌ API error:', response.status, response.statusText);
+          logger.error('❌ API error:', response.status, response.statusText);
           throw new Error(`API error: ${response.status}`);
         }
       } catch (error) {
-        console.error('❌ Failed to fetch staff data from API:', error);
+        logger.error('❌ Failed to fetch staff data from API:', error);
         throw error; // No fallback - API must work for production readiness
       }
     }
   }
 
   async getLaborReport(period: string): Promise<unknown> {
-    console.log('DataService.getLaborReport called', {
+    logger.info('DataService.getLaborReport called', {
       period,
       USE_REAL_API: this.featureFlags.USE_REAL_API,
       isBackendAvailable: this.isBackendAvailable,
@@ -968,7 +969,7 @@ modifiers?: unknown[];
 
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        console.log('🌐 Attempting to fetch labor data from API...');
+        logger.info('🌐 Attempting to fetch labor data from API...');
         const authToken = await this.getAuthToken();
         const response = await fetch(
           `${API_CONFIG.FULL_API_URL}/analytics/labor?period=${period}`,
@@ -984,14 +985,14 @@ modifiers?: unknown[];
         if (response.ok) {
           const result = await response.json();
           const laborData = result.data || result; // Handle both wrapped and unwrapped responses
-          console.log('✅ API labor data received');
+          logger.info('✅ API labor data received');
           return laborData;
         } else {
-          console.error('❌ API error:', response.status, response.statusText);
+          logger.error('❌ API error:', response.status, response.statusText);
           throw new Error(`API error: ${response.status}`);
         }
       } catch (error) {
-        console.error('❌ Failed to fetch labor data from API:', error);
+        logger.error('❌ Failed to fetch labor data from API:', error);
         throw error; // No fallback - API must work for production readiness
       }
     }
@@ -1001,14 +1002,14 @@ modifiers?: unknown[];
   }
 
   async getReportsDashboardData(): Promise<any | null> {
-    console.log('DataService.getReportsDashboardData called', {
+    logger.info('DataService.getReportsDashboardData called', {
       USE_REAL_API: this.featureFlags.USE_REAL_API,
       isBackendAvailable: this.isBackendAvailable,
     });
 
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        console.log('🌐 Attempting to fetch reports from API...');
+        logger.info('🌐 Attempting to fetch reports from API...');
         const authToken = await this.getAuthToken();
         const response = await fetch(`${API_CONFIG.FULL_API_URL}/analytics/dashboard/mobile`, {
           method: 'GET',
@@ -1021,14 +1022,14 @@ modifiers?: unknown[];
         if (response.ok) {
           const result = await response.json();
           const dashboardData = result.data || result; // Handle both wrapped and unwrapped responses
-          console.log('✅ API reports received');
+          logger.info('✅ API reports received');
           return dashboardData;
         } else {
-          console.error('❌ API error:', response.status, response.statusText);
+          logger.error('❌ API error:', response.status, response.statusText);
           throw new Error(`API error: ${response.status}`);
         }
       } catch (error) {
-        console.error('❌ Failed to fetch reports dashboard from API:', error);
+        logger.error('❌ Failed to fetch reports dashboard from API:', error);
         throw error; // No fallback - API must work for production readiness
       }
     }
@@ -1038,7 +1039,7 @@ modifiers?: unknown[];
   }
 
   async getUserProfile(): Promise<any | null> {
-    console.warn('DataService.getUserProfile is a stub and not implemented.');
+    logger.warn('DataService.getUserProfile is a stub and not implemented.');
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       // return this.db.getUserProfile();
       throw new Error('DataService.getUserProfile not implemented yet');
@@ -1065,7 +1066,7 @@ modifiers?: unknown[];
     startDate?: string;
     permissions?: string[];
   }): Promise<unknown> {
-    console.log('🌐 DataService.createEmployee - creating employee via API', employeeData);
+    logger.info('🌐 DataService.createEmployee - creating employee via API', employeeData);
 
     try {
       const response = await authInterceptor.post(`${API_CONFIG.FULL_API_URL}/employees`, {
@@ -1083,15 +1084,15 @@ modifiers?: unknown[];
       if (response.ok) {
         const result = await response.json();
         const newEmployee = result.data || result;
-        console.log('✅ Employee created successfully:', newEmployee.id);
+        logger.info('✅ Employee created successfully:', newEmployee.id);
         return newEmployee;
       } else {
         const errorText = await response.text();
-        console.error('❌ Failed to create employee:', response.status, errorText);
+        logger.error('❌ Failed to create employee:', response.status, errorText);
         throw new Error(`Failed to create employee: ${response.status} - ${errorText}`);
       }
     } catch (error) {
-      console.error('❌ Employee creation failed:', error);
+      logger.error('❌ Employee creation failed:', error);
       throw new Error(`Employee creation failed: ${error.message}`);
     }
   }
@@ -1100,7 +1101,7 @@ modifiers?: unknown[];
    * Delete an employee from the system
    */
   async deleteEmployee(employeeId: number | string): Promise<void> {
-    console.log('🌐 DataService.deleteEmployee - deleting employee via API', { employeeId });
+    logger.info('🌐 DataService.deleteEmployee - deleting employee via API', { employeeId });
 
     try {
       const response = await authInterceptor.delete(
@@ -1108,28 +1109,28 @@ modifiers?: unknown[];
       );
 
       if (response.ok) {
-        console.log('✅ Employee deleted successfully');
+        logger.info('✅ Employee deleted successfully');
         return;
       } else {
         const errorText = await response.text();
-        console.error('❌ Failed to delete employee:', response.status, errorText);
+        logger.error('❌ Failed to delete employee:', response.status, errorText);
         throw new Error(`Failed to delete employee: ${response.status} - ${errorText}`);
       }
     } catch (error) {
-      console.error('❌ Employee deletion failed:', error);
+      logger.error('❌ Employee deletion failed:', error);
       throw new Error(`Employee deletion failed: ${error.message}`);
     }
   }
 
   async getInventoryReport(): Promise<any[]> {
-    console.log('DataService.getInventoryReport called', {
+    logger.info('DataService.getInventoryReport called', {
       USE_REAL_API: this.featureFlags.USE_REAL_API,
       isBackendAvailable: this.isBackendAvailable,
     });
 
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
-        console.log('🌐 Attempting to fetch inventory data from API...');
+        logger.info('🌐 Attempting to fetch inventory data from API...');
         const authToken = await this.getAuthToken();
         const response = await fetch(`${API_CONFIG.FULL_API_URL}/inventory`, {
           method: 'GET',
@@ -1142,14 +1143,14 @@ modifiers?: unknown[];
         if (response.ok) {
           const result = await response.json();
           const inventoryData = result.data || result;
-          console.log('✅ API inventory data received');
+          logger.info('✅ API inventory data received');
           return Array.isArray(inventoryData) ? inventoryData : [];
         } else {
-          console.error('❌ API error:', response.status, response.statusText);
+          logger.error('❌ API error:', response.status, response.statusText);
           throw new Error(`API error: ${response.status}`);
         }
       } catch (error) {
-        console.error('❌ Failed to fetch inventory data from API:', error);
+        logger.error('❌ Failed to fetch inventory data from API:', error);
         throw error; // No fallback - API must work for production readiness
       }
     }
@@ -1163,7 +1164,7 @@ modifiers?: unknown[];
   // ===========================================================================
 
   async getSubscriptionPlans(): Promise<unknown> {
-    console.log('DataService.getSubscriptionPlans called');
+    logger.info('DataService.getSubscriptionPlans called');
 
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
@@ -1187,7 +1188,7 @@ modifiers?: unknown[];
           throw new Error(`API error: ${response.status}`);
         }
       } catch (error) {
-        console.error('❌ Failed to fetch subscription plans:', error);
+        logger.error('❌ Failed to fetch subscription plans:', error);
         throw error;
       }
     }
@@ -1196,7 +1197,7 @@ modifiers?: unknown[];
   }
 
   async getCurrentSubscription(restaurantId: number): Promise<unknown> {
-    console.log('DataService.getCurrentSubscription called', { restaurantId });
+    logger.info('DataService.getCurrentSubscription called', { restaurantId });
 
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
@@ -1229,7 +1230,7 @@ modifiers?: unknown[];
           throw new Error(`API error: ${response.status}`);
         }
       } catch (error) {
-        console.error('❌ Failed to fetch current subscription:', error);
+        logger.error('❌ Failed to fetch current subscription:', error);
         throw error;
       }
     }
@@ -1238,7 +1239,7 @@ modifiers?: unknown[];
   }
 
   async createSubscription(subscriptionData: unknown): Promise<unknown> {
-    console.log('DataService.createSubscription called', subscriptionData);
+    logger.info('DataService.createSubscription called', subscriptionData);
 
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
@@ -1268,7 +1269,7 @@ modifiers?: unknown[];
           };
         }
       } catch (error) {
-        console.error('❌ Failed to create subscription:', error);
+        logger.error('❌ Failed to create subscription:', error);
         return {
           success: false,
           data: null,
@@ -1281,7 +1282,7 @@ modifiers?: unknown[];
   }
 
   async changeSubscriptionPlan(changeData: unknown): Promise<unknown> {
-    console.log('DataService.changeSubscriptionPlan called', changeData);
+    logger.info('DataService.changeSubscriptionPlan called', changeData);
 
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
@@ -1311,7 +1312,7 @@ modifiers?: unknown[];
           };
         }
       } catch (error) {
-        console.error('❌ Failed to change subscription plan:', error);
+        logger.error('❌ Failed to change subscription plan:', error);
         return {
           success: false,
           data: null,
@@ -1324,7 +1325,7 @@ modifiers?: unknown[];
   }
 
   async cancelSubscription(restaurantId: number): Promise<unknown> {
-    console.log('DataService.cancelSubscription called', { restaurantId });
+    logger.info('DataService.cancelSubscription called', { restaurantId });
 
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
@@ -1356,7 +1357,7 @@ modifiers?: unknown[];
           };
         }
       } catch (error) {
-        console.error('❌ Failed to cancel subscription:', error);
+        logger.error('❌ Failed to cancel subscription:', error);
         return {
           success: false,
           data: null,
@@ -1373,7 +1374,7 @@ modifiers?: unknown[];
     usageType: string,
     amount: number = 1
   ): Promise<unknown> {
-    console.log('DataService.incrementUsage called', { restaurantId, usageType, amount });
+    logger.info('DataService.incrementUsage called', { restaurantId, usageType, amount });
 
     if (this.featureFlags.USE_REAL_API && this.isBackendAvailable) {
       try {
@@ -1405,7 +1406,7 @@ modifiers?: unknown[];
           };
         }
       } catch (error) {
-        console.error('❌ Failed to increment usage:', error);
+        logger.error('❌ Failed to increment usage:', error);
         return {
           success: false,
           data: null,

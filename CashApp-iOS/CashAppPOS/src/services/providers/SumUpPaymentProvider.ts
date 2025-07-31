@@ -25,9 +25,9 @@ class SumUpPaymentProviderClass {
       // await SumUpSDK.init(config.affiliateKey);
 
       this.initialized = true;
-      console.log('SumUp payment provider initialized (placeholder)');
+      logger.info('SumUp payment provider initialized (placeholder)');
     } catch (error) {
-      console.error('Failed to initialize SumUp:', error);
+      logger.error('Failed to initialize SumUp:', error);
       throw error;
     }
   }
@@ -43,7 +43,7 @@ class SumUpPaymentProviderClass {
 
       return false; // Placeholder
     } catch (error) {
-      console.error('SumUp login failed:', error);
+      logger.error('SumUp login failed:', error);
       return false;
     }
   }
@@ -88,7 +88,7 @@ class SumUpPaymentProviderClass {
 
       return null;
     } catch (error) {
-      console.error('Failed to get SumUp card reader settings:', error);
+      logger.error('Failed to get SumUp card reader settings:', error);
       return null;
     }
   }

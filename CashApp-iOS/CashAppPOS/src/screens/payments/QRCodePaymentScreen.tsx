@@ -102,7 +102,7 @@ const QRCodePaymentScreen: React.FC = () => {
       // Start polling for payment status
       startStatusPolling(payment);
     } catch (error) {
-      console.error('❌ QR Payment initialization failed:', error);
+      logger.error('❌ QR Payment initialization failed:', error);
 
       // Only update state if component is still mounted
       if (isMountedRef.current) {
@@ -204,7 +204,7 @@ const QRCodePaymentScreen: React.FC = () => {
           }
         }
       } catch (error) {
-        console.error('❌ Failed to poll QR payment status:', error);
+        logger.error('❌ Failed to poll QR payment status:', error);
 
         // Only update state if mounted
         if (isMountedRef.current) {
@@ -259,7 +259,7 @@ const QRCodePaymentScreen: React.FC = () => {
       // Reinitialize payment
       initializeQRPayment();
     } catch (error) {
-      console.error('❌ Failed to retry QR payment:', error);
+      logger.error('❌ Failed to retry QR payment:', error);
       setErrorMessage('Failed to retry payment. Please try again.');
     }
   };

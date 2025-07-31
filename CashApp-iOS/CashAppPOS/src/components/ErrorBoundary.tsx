@@ -8,6 +8,7 @@ import type { ErrorInfo, ReactNode } from 'react';
 // TODO: Unused import - import React, { Component } from 'react';
 
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
+import { logger } from '../utils/logger';
 
 import { errorHandler } from '../services/errorHandler';
 
@@ -33,7 +34,7 @@ class ErrorBoundary extends Component<Props, State> {
 
     // Log error in dev mode only
     if (__DEV__) {
-      console.error('ErrorBoundary caught:', error);
+      logger.error('ErrorBoundary caught:', error);
     }
 
     return { hasError: true, errorId };
@@ -42,7 +43,7 @@ class ErrorBoundary extends Component<Props, State> {
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Log error details in dev mode
     if (__DEV__) {
-      console.error('Error details:', errorInfo);
+      logger.error('Error details:', errorInfo);
     }
 
     // In production, you might want to send this to an error reporting service

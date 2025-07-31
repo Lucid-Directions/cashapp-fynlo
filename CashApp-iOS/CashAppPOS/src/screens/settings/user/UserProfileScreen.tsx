@@ -83,7 +83,7 @@ const [_isEditing, setIsEditing] = useState(false);
       setIsEditing(false);
       Alert.alert('Success', 'Profile updated successfully');
     } catch (error) {
-      console.error('Profile update error:', error);
+      logger.error('Profile update error:', error);
       Alert.alert('Error', 'Failed to update profile. Please try again.');
     } finally {
       setIsLoading(false);
@@ -102,7 +102,7 @@ const [_isEditing, setIsEditing] = useState(false);
             // Use goBack instead of reset to avoid navigation errors
             navigation.goBack();
           } catch (error) {
-            console.error('Logout error:', error);
+            logger.error('Logout error:', error);
             Alert.alert('Error', 'Failed to logout. Please try again.');
           }
         },

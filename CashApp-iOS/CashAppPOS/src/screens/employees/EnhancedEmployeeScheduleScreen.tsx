@@ -188,7 +188,7 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
   const getWeekStart = (date: Date): Date => {
     // Ensure date is valid
     if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
-      console.error('Invalid date passed to getWeekStart:', date);
+      logger.error('Invalid date passed to getWeekStart:', date);
       return new Date(); // Return current date as fallback
     }
 
@@ -351,7 +351,7 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
         : new Date(weekSchedule.weekStart);
 
     if (isNaN(startDate.getTime())) {
-      console.error('Invalid weekStart date:', weekSchedule.weekStart);
+      logger.error('Invalid weekStart date:', weekSchedule.weekStart);
       return [];
     }
 
@@ -396,7 +396,7 @@ const EnhancedEmployeeScheduleScreen: React.FC = () => {
         : new Date(weekSchedule.weekStart);
 
     if (isNaN(startDate.getTime())) {
-      console.error('Invalid weekStart date in formatWeekRange:', weekSchedule.weekStart);
+      logger.error('Invalid weekStart date in formatWeekRange:', weekSchedule.weekStart);
       return 'Invalid Date';
     }
 

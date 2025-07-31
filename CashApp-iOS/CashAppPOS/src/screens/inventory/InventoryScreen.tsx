@@ -182,7 +182,7 @@ const InventoryScreen: React.FC = () => {
   };
 
   const handleReceiptSubmit = async (items: ScannedReceiptItem[]) => {
-    console.log('Receipt items submitted to InventoryScreen:', items);
+    logger.info('Receipt items submitted to InventoryScreen:', items);
     // Here, you would typically call an API service to process these items.
     // For example, update inventory based on these items.
     // This is a placeholder for the actual logic (INT-1).
@@ -201,7 +201,7 @@ const InventoryScreen: React.FC = () => {
     for (const item of items) {
       const quantity = parseFloat(item.quantity);
       if (isNaN(quantity) || quantity <= 0) {
-        console.warn(`Invalid quantity for item ${item.name}, skipping.`);
+        logger.warn(`Invalid quantity for item ${item.name}, skipping.`);
         errorCount++;
         continue;
       }
@@ -210,17 +210,17 @@ const InventoryScreen: React.FC = () => {
         // SKU matched by backend
         try {
           // TODO: Implement InventoryApiService.adjustStock when backend is properly connected
-          console.log(`Would adjust stock for SKU ${item.sku} by ${quantity} (simulated)`);
+          logger.info(`Would adjust stock for SKU ${item.sku} by ${quantity} (simulated)`);
           // await InventoryApiService.adjustStock(item.sku, quantity, 'receipt_scan_import');
           successCount++;
         } catch (apiError) {
-          console.error(`Failed to adjust stock for SKU ${item.sku}:`, apiError);
+          logger.error(`Failed to adjust stock for SKU ${item.sku}:`, apiError);
           Alert.alert('API Error', `Could not adjust stock for ${item.name} (SKU: ${item.sku}).`);
           errorCount++;
         }
       } else {
         // No SKU match, pre-populate New Item form (placeholder)
-        console.log(
+        logger.info(
           `Item "${item.name}" (Qty: ${quantity}, Price: ${item.price}) has no SKU. Would pre-populate new item form.`
         );
         // In a real app, you'd navigate to a "Create New Item" screen/modal here,

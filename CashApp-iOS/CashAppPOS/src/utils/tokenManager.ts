@@ -47,7 +47,7 @@ class SimpleEventEmitter {
       try {
         listener(...args);
       } catch (error) {
-        console.error(`Error in event listener for ${event}:`, error);
+        logger.error(`Error in event listener for ${event}:`, error);
       }
     });
   }
@@ -126,12 +126,12 @@ class TokenManager extends SimpleEventEmitter {
       const storedToken = await AsyncStorage.getItem('auth_token');
 
       if (storedToken) {
-        console.log('⚠️ Using stored token - Supabase session might be expired');
+        logger.info('⚠️ Using stored token - Supabase session might be expired');
       }
 
       return storedToken;
     } catch (error) {
-      console.error('❌ Error getting auth token:', error);
+      logger.error('❌ Error getting auth token:', error);
       return null;
     }
   }
@@ -167,7 +167,7 @@ class TokenManager extends SimpleEventEmitter {
     // Check if we're refreshing too frequently
     const now = Date.now();
     if (now - this.lastRefreshAttempt < this.minRefreshInterval) {
-      console.log('⏳ Refresh attempt too soon, checking conditions...');
+      logger.info('⏳ Refresh attempt too soon, checking conditions...');
 
       // If there's an ongoing refresh, wait for it
       if (this.refreshPromise) {
@@ -179,20 +179,20 @@ class TokenManager extends SimpleEventEmitter {
       const lastRefreshFailed = !this.lastRefreshSuccessful;
 
       if (tokenExpired || lastRefreshFailed) {
-        console.log(
+        logger.info(
           `⚠️ Forcing refresh despite interval - Token expired: ${tokenExpired}, Last refresh failed: ${lastRefreshFailed}`
         );
         // Must refresh regardless of interval
       } else {
         // Token is still valid and last refresh was successful
-        console.log('✅ Token still valid and last refresh successful, returning existing token');
+        logger.info('✅ Token still valid and last refresh successful, returning existing token');
         return this.getAuthToken();
       }
     }
 
     // If already refreshing, add to queue
     if (this.refreshPromise) {
-      console.log('🔄 Token refresh already in progress, adding to queue...');
+      logger.info('🔄 Token refresh already in progress, adding to queue...');
 
       return new Promise<string | null>((resolve, reject) => {
         this.requestQueue.push({ resolve, reject });
@@ -265,13 +265,13 @@ class TokenManager extends SimpleEventEmitter {
 
       if (!currentSession) {
         // No session to refresh - user is logged out
-        console.log('⚠️ No session to refresh - user may be logged out');
+        logger.info('⚠️ No session to refresh - user may be logged out');
         this.consecutiveRefreshFailures++;
         this.emit('token:refresh:failed', new Error('No active session'));
         return null;
       }
 
-      console.log('🔄 Refreshing authentication token...');
+      logger.info('🔄 Refreshing authentication token...');
 
       // Apply exponential backoff if we've had failures
       if (this.consecutiveRefreshFailures > 0) {
@@ -279,7 +279,7 @@ class TokenManager extends SimpleEventEmitter {
           this.refreshBackoffMs * Math.pow(2, this.consecutiveRefreshFailures - 1),
           this.maxBackoffMs
         );
-        console.log(`⏳ Waiting ${backoffTime}ms before refresh (backoff)...`);
+        logger.info(`⏳ Waiting ${backoffTime}ms before refresh (backoff)...`);
         await new Promise((resolve) => setTimeout(resolve, backoffTime));
       }
 
@@ -289,7 +289,7 @@ class TokenManager extends SimpleEventEmitter {
       } = await supabase.auth.refreshSession();
 
       if (error) {
-        console.error('❌ Token refresh failed:', error);
+        logger.error('❌ Token refresh failed:', error);
         this.consecutiveRefreshFailures++;
         this.emit('token:refresh:failed', error);
 
@@ -310,7 +310,7 @@ class TokenManager extends SimpleEventEmitter {
         await AsyncStorage.setItem('auth_token', session.access_token);
         await AsyncStorage.setItem('supabase_session', JSON.stringify(session));
 
-        console.log('✅ Token refreshed successfully');
+        logger.info('✅ Token refreshed successfully');
 
         // Emit success event
         this.emit('token:refreshed', session.access_token);
@@ -320,7 +320,7 @@ class TokenManager extends SimpleEventEmitter {
 
       return null;
     } catch (error) {
-      console.error('❌ Error refreshing token:', error);
+      logger.error('❌ Error refreshing token:', error);
       this.consecutiveRefreshFailures++;
       this.emit('token:refresh:failed', error);
       throw error;
@@ -386,7 +386,7 @@ class TokenManager extends SimpleEventEmitter {
 
       if (!session) {
         // No session means user is logged out - don't attempt refresh
-        console.log('⚠️ No active session - user may be logged out');
+        logger.info('⚠️ No active session - user may be logged out');
         return null;
       }
 
@@ -396,7 +396,7 @@ class TokenManager extends SimpleEventEmitter {
 
       if (expiresAt && now >= expiresAt - 60) {
         // Token is expired or will expire within 60 seconds
-        console.log('🔄 Token expired or expiring soon, refreshing...');
+        logger.info('🔄 Token expired or expiring soon, refreshing...');
         const newToken = await this.refreshAuthToken();
         return newToken;
       }
@@ -404,7 +404,7 @@ class TokenManager extends SimpleEventEmitter {
       // Token is still valid
       return session.access_token;
     } catch (error) {
-      console.error('❌ Error in getTokenWithRefresh:', error);
+      logger.error('❌ Error in getTokenWithRefresh:', error);
       // Fall back to stored token if available
       return await AsyncStorage.getItem('auth_token');
     }
@@ -414,7 +414,7 @@ class TokenManager extends SimpleEventEmitter {
    * Force a token refresh (useful for testing or manual refresh)
    */
   async forceRefresh(): Promise<string | null> {
-    console.log('🔄 Forcing token refresh...');
+    logger.info('🔄 Forcing token refresh...');
     // Clear cached expiry to force refresh
     this.tokenExpiryTime = null;
     return this.refreshAuthToken();
