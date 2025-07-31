@@ -1,4 +1,5 @@
-"""Add subscription fields to restaurants table
+"""
+Add subscription fields to restaurants table
 
 Revision ID: add_subscription_fields
 Revises: 

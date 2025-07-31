@@ -14,7 +14,7 @@ Requirements:
     - SQLAlchemy models for users and authentication
     - Password hashing utilities
     - Restaurant and platform models
-"""
+"""TODO: Add docstring."""
 
 import json
 import sys

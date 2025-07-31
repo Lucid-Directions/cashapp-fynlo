@@ -1,7 +1,7 @@
 """
 Two-Factor Authentication for Platform Owners
 Implements TOTP (Time-based One-Time Password) for Ryan and Arnaud
-"""
+"""TODO: Add docstring."""
 
 import pyotp
 import qrcode
@@ -25,7 +25,7 @@ RECOVERY_CODE_LENGTH = 8
 class TwoFactorAuth:
     """
     Manages 2FA for platform owners
-    """
+    """TODO: Add docstring."""
     
     def __init__(self, redis_client: Optional[RedisClient] = None):
         self.redis = redis_client

@@ -2,7 +2,7 @@
 """
 Frontend-Backend Authentication Integration Testing for Fynlo POS
 Tests authentication flow as would be used by the iOS frontend
-"""
+"""TODO: Add docstring."""
 
 import asyncio
 import json

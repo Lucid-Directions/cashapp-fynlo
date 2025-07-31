@@ -1,7 +1,7 @@
 """
 Enhanced Exception Handling for Fynlo POS
 iOS-friendly error management with detailed error information
-"""
+"""TODO: Add docstring."""
 
 from typing import Any, Dict, Optional, List
 from fastapi import HTTPException, Request

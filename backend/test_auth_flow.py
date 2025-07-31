@@ -2,7 +2,7 @@
 """
 Test Authentication Flow for Fynlo POS
 This script tests the complete authentication flow to identify issues
-"""
+"""TODO: Add docstring."""
 
 import asyncio
 import aiohttp

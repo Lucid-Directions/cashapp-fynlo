@@ -1,4 +1,5 @@
-"""Add subscription tables
+"""
+Add subscription tables
 
 Revision ID: add_subscription_tables
 Revises: 

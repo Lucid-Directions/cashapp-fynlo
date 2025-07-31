@@ -1,7 +1,7 @@
 """
 Platform audit logging model and functions.
 Tracks all platform admin actions for compliance and security.
-"""
+"""TODO: Add docstring."""
 
 from datetime import datetime
 from typing import Optional, Dict, Any

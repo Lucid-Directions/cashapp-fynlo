@@ -3,7 +3,7 @@ Subscription management API endpoints
 
 This module provides REST API endpoints for managing restaurant subscriptions,
 subscription plans, and usage tracking.
-"""
+"""TODO: Add docstring."""
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session

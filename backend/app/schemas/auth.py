@@ -1,6 +1,6 @@
 """
 Authentication schemas for Supabase integration
-"""
+"""TODO: Add docstring."""
 
 from pydantic import BaseModel
 from typing import Optional, List

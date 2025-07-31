@@ -1,6 +1,6 @@
 """
 Authentication middleware for Supabase integration
-"""
+"""TODO: Add docstring."""
 
 from fastapi import Depends, Header, Request
 from sqlalchemy.orm import Session

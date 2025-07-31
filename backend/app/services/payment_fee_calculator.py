@@ -11,7 +11,7 @@ class PaymentFeeCalculator:
     """
     Calculates the actual payment processor fees.
     This fee is what the platform itself is charged by the payment provider (e.g., Stripe, SumUp).
-    """
+    """TODO: Add docstring."""
 
     def __init__(self, platform_settings_service: PlatformSettingsService):
         self.platform_settings_service = platform_settings_service

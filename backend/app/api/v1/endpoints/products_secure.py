@@ -1,7 +1,7 @@
 """
 Secure version of products endpoint with proper tenant isolation
 This demonstrates how to fix the vulnerability in the existing products.py
-"""
+"""TODO: Add docstring."""
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session

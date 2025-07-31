@@ -2,7 +2,7 @@
 Fynlo POS Backend API
 Clean FastAPI implementation for hardware-free restaurant management
 Version: 2.1.0 - Portal alignment with optional PDF exports
-"""
+"""TODO: Add docstring."""
 
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware

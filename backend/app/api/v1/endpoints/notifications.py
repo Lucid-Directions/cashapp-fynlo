@@ -1,7 +1,7 @@
 """
 Push Notification API endpoints for Fynlo POS
 Device registration, notification sending, and preference management
-"""
+"""TODO: Add docstring."""
 
 from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, Depends, Query, Body, Path

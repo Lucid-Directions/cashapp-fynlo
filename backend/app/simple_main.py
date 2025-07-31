@@ -1,7 +1,7 @@
 """
 Minimal Fynlo Backend for Immediate Cross-Device Sync Testing
 This version starts with just PostgreSQL connection to prove the concept
-"""
+"""TODO: Add docstring."""
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware

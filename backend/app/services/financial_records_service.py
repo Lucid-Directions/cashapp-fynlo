@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 class FinancialRecordsService:
     """
     Service for managing financial records like platform fees and staff tip distributions.
-    """
+    """TODO: Add docstring."""
 
     def __init__(self, db: Session):
         self.db = db

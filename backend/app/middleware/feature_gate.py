@@ -3,7 +3,7 @@ Feature gating middleware for subscription-based access control
 
 This module provides decorators and middleware for restricting access
 to features based on subscription plans.
-"""
+"""TODO: Add docstring."""
 
 from functools import wraps
 from fastapi import HTTPException, Request, Depends

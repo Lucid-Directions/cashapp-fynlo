@@ -2,7 +2,7 @@
 """
 Authentication Integration Testing for Fynlo POS
 Comprehensive end-to-end testing of JWT authentication flow
-"""
+"""TODO: Add docstring."""
 
 import asyncio
 import json

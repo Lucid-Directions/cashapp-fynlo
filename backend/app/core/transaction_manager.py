@@ -1,7 +1,7 @@
 """
 Database Transaction Management for Fynlo POS
 Provides decorators and utilities for atomic operations and rollback handling.
-"""
+"""TODO: Add docstring."""
 
 import functools
 import logging
@@ -31,7 +31,7 @@ class TransactionManager:
     """
     Manages database transactions with retry logic, rollback handling,
     and atomic operation support.
-    """
+    """TODO: Add docstring."""
     
     def __init__(self, max_retries: int = 3, retry_delay: float = 0.1):
         self.max_retries = max_retries
@@ -232,7 +232,7 @@ def optimistic_lock_retry(version_field: str = 'version', max_retries: int = 5):
 class BatchTransactionManager:
     """
     Manages batch operations with transaction boundaries and partial failure handling.
-    """
+    """TODO: Add docstring."""
     
     def __init__(self, batch_size: int = 100, rollback_on_partial_failure: bool = True):
         self.batch_size = batch_size

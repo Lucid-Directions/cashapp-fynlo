@@ -1,7 +1,7 @@
 """
 Mobile ID Mapping System for Fynlo POS
 Provides collision-resistant UUID to integer conversion for mobile compatibility
-"""
+"""TODO: Add docstring."""
 
 import hashlib
 import uuid
@@ -36,7 +36,7 @@ class MobileIDService:
     """
     Service for converting UUIDs to mobile-friendly integer IDs
     Uses hash-based approach with collision detection and database persistence
-    """
+    """TODO: Add docstring."""
     
     # Maximum mobile ID value (9 digits for mobile compatibility)
     MAX_MOBILE_ID = 999999999

@@ -1,6 +1,6 @@
 """
 Activity logging service for Fynlo Portal - Audit trail for portal actions
-"""
+"""TODO: Add docstring."""
 
 from typing import Optional, Dict, Any
 from datetime import datetime

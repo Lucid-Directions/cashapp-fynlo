@@ -1,7 +1,7 @@
 """
 Safe Restaurant Deletion Endpoint
 Validates that a restaurant can be safely deleted without breaking critical dependencies
-"""
+"""TODO: Add docstring."""
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session

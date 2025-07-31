@@ -2,7 +2,7 @@
 """
 Minimal startup script for DigitalOcean deployment
 Uses minimal app without external dependencies
-"""
+"""TODO: Add docstring."""
 
 import os
 import uvicorn

@@ -7,7 +7,7 @@ This script replaces all mock/demo data with production-ready seed data that can
 for testing reports, employee management, inventory tracking, and all other features.
 
 NO MOCK DATA - Only realistic data a Mexican restaurant would actually have.
-"""
+"""TODO: Add docstring."""
 
 import asyncio
 import sys

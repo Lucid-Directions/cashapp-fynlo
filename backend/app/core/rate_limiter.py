@@ -1,7 +1,7 @@
 """
 Rate limiter for WebSocket connections
 Implements token bucket algorithm for message rate limiting
-"""
+"""TODO: Add docstring."""
 
 import time
 from typing import Dict, Tuple

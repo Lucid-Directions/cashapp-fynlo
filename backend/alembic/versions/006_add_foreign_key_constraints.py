@@ -1,4 +1,5 @@
-"""Add missing foreign key constraints
+"""
+Add missing foreign key constraints
 
 Revision ID: 006_add_foreign_key_constraints
 Revises: 005_fix_mobile_id_primary_key

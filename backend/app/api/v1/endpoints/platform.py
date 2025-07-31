@@ -1,7 +1,7 @@
 """
 Platform Management API endpoints for Fynlo POS
 Multi-tenant platform owner features for managing multiple restaurants
-"""
+"""TODO: Add docstring."""
 
 from typing import List, Optional, Dict, Any
 from fastapi import APIRouter, Depends, Query, Path

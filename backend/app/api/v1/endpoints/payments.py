@@ -1,7 +1,7 @@
 """
 Payment processing endpoints for Fynlo POS
 Supports multi-provider payments (Stripe, Square, SumUp), QR payments, and cash
-"""
+"""TODO: Add docstring."""
 
 import uuid
 from datetime import datetime, timedelta
