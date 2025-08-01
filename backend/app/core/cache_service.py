@@ -1,7 +1,7 @@
 """
 Enhanced cache service for Fynlo POS with comprehensive caching strategies.
 Implements decorator pattern for easy endpoint caching and cache invalidation.
-
+"""
 
 import hashlib
 import json

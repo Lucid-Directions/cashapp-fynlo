@@ -1,7 +1,7 @@
 """
 Cache utilities for platform analytics and data caching.
 Uses Valkey (Redis) for high-performance caching.
-
+"""
 
 import json
 import logging
