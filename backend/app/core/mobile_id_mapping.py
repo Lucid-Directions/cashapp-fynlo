@@ -38,13 +38,11 @@ class MobileIDService:
     """
     Service for converting UUIDs to mobile-friendly integer IDs
     Uses hash-based approach with collision detection and database persistence
-    
+    """
     
     # Maximum mobile ID value (9 digits for mobile compatibility)
     MAX_MOBILE_ID = 999999999
     MIN_MOBILE_ID = 100000000
-    
-    """
     def __init__(self, db: Session, redis: Optional[RedisClient] = None):
         self.db = db
         self.redis = redis
