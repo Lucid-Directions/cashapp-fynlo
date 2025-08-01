@@ -49,7 +49,7 @@ class DatabaseSecurityConfig:
         
         Args:
             engine: SQLAlchemy engine instance
-        
+        """
         
         @event.listens_for(Pool, "connect")
         def set_security_parameters(dbapi_conn, connection_record):
