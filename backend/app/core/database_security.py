@@ -218,7 +218,7 @@ class DatabaseSecurityConfig:
         
         Args:
             engine: SQLAlchemy engine instance
-        
+        """
         
         @event.listens_for(engine, "before_cursor_execute")
         def receive_before_cursor_execute(conn, cursor, statement, parameters, context, executemany):
@@ -249,7 +249,7 @@ class DatabaseSecurityConfig:
         
         Args:
             engine: SQLAlchemy engine instance
-        
+        """
         
         @event.listens_for(engine, "before_cursor_execute")
         def receive_before_cursor_execute(conn, cursor, statement, parameters, context, executemany):
