@@ -10,28 +10,28 @@
 
 ## 🛠️ AVAILABLE TOOLS & AGENTS
 
-### MCP Tools
-- **Desktop Commander** (`mcp__desktop-commander__`) - System file operations, process management
+### MCP Servers (Model Context Protocol)
 - **File System** (`mcp__filesystem__`) - Project file operations
 - **Sequential Thinking** (`mcp__sequential-thinking__`) - Break down complex problems
 - **Memory Bank** (`mcp__memory-bank__`) - Persist context across conversations
-- **Playwright/Puppeteer** (`mcp__playwright__`, `mcp__puppeteer__`) - Browser automation
+- **Playwright** (`mcp__playwright__`) - Browser automation with Playwright
+- **Puppeteer** (`mcp__puppeteer__`) - Browser automation with Puppeteer
 - **SemGrep** (`mcp__semgrep__`) - Security scanning, code analysis
 - **Ref** (`mcp__Ref__`) - Search documentation, GitHub, private resources
-- **DigitalOcean** (`mcp__digitalocean-mcp-local__`) - Infrastructure management
-- **SQLite** (`mcp__sqlite__`) - Test local databases, query Supabase data locally
-- **Terminal** (`mcp__terminal__`) - Run Xcode builds, iOS simulator commands, shell operations
-- **Homebrew** (`mcp__homebrew__`) - Manage iOS dev tools (CocoaPods, fastlane, etc.)
-- **DuckDuckGo** (`mcp__duckduckgo__`) - Search iOS docs, Swift references (no API limits)
-- **Mermaid** (`mcp__mermaid__`) - Create architecture diagrams, database schemas, flow charts
-- **Git** (`mcp__git__`) - Advanced git operations beyond basic commands
-- **HTTP Client** (`mcp__http-client__`) - Test backend APIs and Supabase endpoints
+
+### Built-in Claude Tools
+- **Bash** - Execute shell commands, git operations, terminal tasks
+- **Read/Write/Edit** - File operations
+- **Grep/Glob** - Search files and content
+- **WebFetch/WebSearch** - HTTP requests and web searches
+- **Task** - Launch specialized sub-agents
+- **TodoWrite** - Task management
 
 ### CLI Tools
 - **Pieces**: `pieces` - Context management (`pieces search`, `pieces ask`, `pieces create`)
 - **Supabase**: `/opt/homebrew/bin/supabase` - Auth & database management
 - **GitHub**: `gh` - Repository & PR management
-- **DigitalOcean**: `doctl` - Infrastructure control
+- **DigitalOcean**: `doctl` - Infrastructure control (configured with API token)
 - **Vercel**: `vercel` - Deployment (requires VERCEL_TOKEN env var)
 
 ### Specialized Sub-Agents (via Task tool)
