@@ -717,7 +717,4 @@ def test_{function_name}_edge_cases():
     # - Concurrent access
     # - Permission edge cases
     pass
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)

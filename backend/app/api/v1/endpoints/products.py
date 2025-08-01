@@ -1,9 +1,6 @@
 """
 Products and Menu Management API endpoints for Fynlo POS
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

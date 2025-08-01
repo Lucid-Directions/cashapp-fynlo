@@ -1,11 +1,7 @@
 #!/usr/bin/env python3
 """
 Fix all remaining HTTPExceptions in core modules
-<<<<<<< HEAD
-
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 import os
 import re

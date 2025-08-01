@@ -1,10 +1,7 @@
 """
 Enhanced WebSocket API endpoints for Fynlo POS
 Implements heartbeat, reconnection, and improved connection management
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

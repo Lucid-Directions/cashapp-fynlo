@@ -2,10 +2,7 @@
 """
 Test script for Offline Sync Endpoints Implementation
 Tests batch upload, conflict resolution, and offline synchronization
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

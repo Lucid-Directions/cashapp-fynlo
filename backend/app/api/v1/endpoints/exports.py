@@ -1,10 +1,7 @@
 """
 Export API endpoints for Fynlo POS - Portal export functionality
 TEMPORARILY DISABLED DUE TO MISSING DEPENDENCIES
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

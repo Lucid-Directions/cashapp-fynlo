@@ -1,10 +1,7 @@
 """
 WebSocket API endpoints for Fynlo POS
 Real-time communication endpoints
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

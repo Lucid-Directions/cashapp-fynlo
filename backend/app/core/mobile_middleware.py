@@ -1,11 +1,7 @@
 """
 Mobile Compatibility Middleware for Fynlo POS
 Handles port compatibility and mobile-specific request processing
-<<<<<<< HEAD
-
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -18,11 +14,7 @@ logger = logging.getLogger(__name__)
 class MobileCompatibilityMiddleware(BaseHTTPMiddleware):
     """
     Middleware to handle mobile app compatibility requirements
-<<<<<<< HEAD
-    
-=======
     """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
     
     def __init__(self, app, enable_cors: bool = True, enable_port_redirect: bool = True):
         super().__init__(app)
@@ -93,11 +85,7 @@ class MobileCompatibilityMiddleware(BaseHTTPMiddleware):
 class JSONRPCCompatibilityMiddleware(BaseHTTPMiddleware):
     """
     Middleware to handle JSONRPC requests for Odoo compatibility
-<<<<<<< HEAD
-    
-=======
     """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
     
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """
@@ -145,11 +133,7 @@ class JSONRPCCompatibilityMiddleware(BaseHTTPMiddleware):
 class MobileDataOptimizationMiddleware(BaseHTTPMiddleware):
     """
     Middleware to optimize data payloads for mobile devices
-<<<<<<< HEAD
-    
-=======
     """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
     
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """

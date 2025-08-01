@@ -1,10 +1,7 @@
 """
 Push Notification Service for Fynlo POS
 Apple Push Notification Service (APNs) integration for iOS alerts
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

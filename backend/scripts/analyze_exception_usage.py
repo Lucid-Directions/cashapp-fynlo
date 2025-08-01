@@ -1,10 +1,7 @@
 #!/usr/bin/env python3
 """
 Analyze exception usage to find migration issues
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

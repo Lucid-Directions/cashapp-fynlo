@@ -2,10 +2,7 @@
 """
 Test script for Mobile API Compatibility
 Tests Odoo-style endpoints and mobile optimization features
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

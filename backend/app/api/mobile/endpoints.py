@@ -1,10 +1,7 @@
 """
 Mobile API Compatibility Layer for Fynlo POS
 Provides Odoo-style endpoints and mobile-optimized responses for iOS app
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

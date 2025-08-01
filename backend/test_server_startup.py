@@ -1,10 +1,7 @@
 #!/usr/bin/env python3
 """
 Test server startup and basic API endpoints
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

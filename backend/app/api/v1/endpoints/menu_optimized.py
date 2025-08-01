@@ -1,9 +1,6 @@
 """
 Optimized Menu API endpoints with caching and performance improvements
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

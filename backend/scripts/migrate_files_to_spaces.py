@@ -2,10 +2,7 @@
 """
 File migration script - Move existing local files to DigitalOcean Spaces
 Run this script to migrate existing uploads to cloud storage
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

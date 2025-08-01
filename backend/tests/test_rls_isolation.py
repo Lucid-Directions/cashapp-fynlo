@@ -1,10 +1,7 @@
 """
 Tests for RLS (Row Level Security) session variable isolation
 Ensures that database connections properly isolate tenant data
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

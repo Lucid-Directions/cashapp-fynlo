@@ -2,11 +2,7 @@
 """
 Seed Menu Script
 Seeds menu data (categories and products) for a restaurant
-<<<<<<< HEAD
-
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 import os
 import sys

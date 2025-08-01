@@ -1,10 +1,6 @@
 """
 WebSocket endpoints for Fynlo Portal - Real-time updates for web dashboard
-<<<<<<< HEAD
-
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 from typing import Optional
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, Query, Path

@@ -2,10 +2,7 @@
 """
 Test script for File Upload System
 Tests base64 image upload functionality for iOS integration
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

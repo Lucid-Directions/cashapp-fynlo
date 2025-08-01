@@ -1,11 +1,7 @@
 """
 Restaurant Switching API for Multi-Restaurant Owners
 Only restaurant owners with multiple restaurants can use this endpoint
-<<<<<<< HEAD
-
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session

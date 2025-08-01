@@ -1,11 +1,7 @@
 """
 Secure version of products endpoint with proper tenant isolation
 This demonstrates how to fix the vulnerability in the existing products.py
-<<<<<<< HEAD
-
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session

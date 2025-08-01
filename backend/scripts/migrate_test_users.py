@@ -15,11 +15,7 @@ Requirements:
     - SQLAlchemy models for users and authentication
     - Password hashing utilities
     - Restaurant and platform models
-<<<<<<< HEAD
-
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 import json
 import sys

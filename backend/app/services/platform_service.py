@@ -1,10 +1,7 @@
 """
 Platform Settings Service
 Manages centralized platform configurations and restaurant overrides
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

@@ -1,9 +1,6 @@
 """
 Tests for enhanced WebSocket functionality including heartbeat and reconnection
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

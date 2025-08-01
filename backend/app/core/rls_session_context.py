@@ -1,11 +1,7 @@
 """
 RLS Session Context Management
 Ensures proper tenant isolation in connection pooling environments
-<<<<<<< HEAD
-
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 import contextvars
 from typing import Optional, Dict, Any
@@ -28,11 +24,7 @@ class RLSSessionContext:
     """
     Manages Row Level Security (RLS) session variables for proper tenant isolation
     in connection pooling environments
-<<<<<<< HEAD
-    
-=======
     """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
     
     @staticmethod
     async def set_tenant_context(

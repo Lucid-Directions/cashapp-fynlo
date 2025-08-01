@@ -1,10 +1,7 @@
 """
 Configuration Manager for Payment Providers
 Centralized configuration management with environment support and validation
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

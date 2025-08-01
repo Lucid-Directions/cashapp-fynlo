@@ -2,10 +2,7 @@
 """
 Database Functionality Test Suite for Fynlo POS
 Tests all database operations and API endpoints after setup
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

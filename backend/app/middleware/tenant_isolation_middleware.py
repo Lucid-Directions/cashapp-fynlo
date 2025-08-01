@@ -2,11 +2,6 @@
 Tenant Isolation Middleware
 Ensures all API requests are properly isolated by restaurant
 Platform owners (Ryan and Arnaud) bypass all restrictions
-<<<<<<< HEAD
-
-
-=======
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 """
 
 from fastapi import Request, Response
@@ -24,10 +19,7 @@ logger = logging.getLogger(__name__)
 class TenantIsolationMiddleware(BaseHTTPMiddleware):
     """
     Middleware to enforce tenant isolation across all API endpoints
-<<<<<<< HEAD
-=======
     """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
     
     
     """
@@ -88,10 +80,7 @@ class TenantIsolationMiddleware(BaseHTTPMiddleware):
 class TenantValidationMiddleware:
     """
     Additional middleware to validate tenant access in request payloads
-<<<<<<< HEAD
-=======
     """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
     
     
     """

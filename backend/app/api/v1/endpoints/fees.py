@@ -89,11 +89,7 @@ async def calculate_fees_for_order(
     """
     Calculates the detailed fee breakdown for a given order's subtotal and payment method.
     This endpoint determines processor fees, platform fees, and service charges.
-<<<<<<< HEAD
-    
-=======
     """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
     # 1. Determine fee payment rules (who pays processor fee, is it part of SC)
     payment_method_setting = payment_config_service.get_payment_method_setting(

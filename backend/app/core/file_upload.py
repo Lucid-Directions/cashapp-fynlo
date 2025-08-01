@@ -1,10 +1,7 @@
 """
 File Upload System for Fynlo POS
 Handles base64 image uploads from iOS with validation and processing
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

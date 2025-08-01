@@ -3,10 +3,7 @@ Feature gating middleware for subscription-based access control
 
 This module provides decorators and middleware for restricting access
 to features based on subscription plans.
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

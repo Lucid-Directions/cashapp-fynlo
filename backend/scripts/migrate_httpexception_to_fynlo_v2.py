@@ -2,10 +2,7 @@
 """
 Enhanced Migration Script: HTTPException to FynloException
 Version 2.0 - Improved import handling and file integrity
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

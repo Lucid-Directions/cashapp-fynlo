@@ -1,10 +1,7 @@
 """
 Employee Management API endpoints for Fynlo POS Backend
 Handles employee CRUD operations, scheduling, time tracking, and performance metrics
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

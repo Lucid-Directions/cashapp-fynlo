@@ -1,11 +1,6 @@
 """
 Instance tracking service for monitoring active backend instances.
 Tracks instances using Redis with heartbeat mechanism.
-<<<<<<< HEAD
-
-
-=======
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 """
 
 import asyncio
@@ -29,10 +24,7 @@ class InstanceTracker:
     
     Each instance registers itself with Redis and maintains a heartbeat.
     Stale instances are automatically cleaned up based on TTL.
-<<<<<<< HEAD
-=======
     """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
     
     
     """

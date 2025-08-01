@@ -2,10 +2,7 @@
 """
 Test Authentication Flow for Fynlo POS
 This script tests the complete authentication flow to identify issues
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

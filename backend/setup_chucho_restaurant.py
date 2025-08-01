@@ -1,11 +1,7 @@
 #!/usr/bin/env python3
 """
 Setup Chucho Restaurant with correct name and menu
-<<<<<<< HEAD
-
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 import os
 from sqlalchemy import create_engine, text

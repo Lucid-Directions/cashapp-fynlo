@@ -3,11 +3,7 @@
 Platform Defaults Initialization Script
 Sets up the platform with production-ready default configurations
 Safe to run multiple times - will not overwrite existing configurations
-<<<<<<< HEAD
-
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 import os
 import sys
@@ -186,11 +182,7 @@ DATABASE STATE:
 - Total Feature Flags: {self.db.query(PlatformFeatureFlag).count()}
 
 STATUS: {'SUCCESS' if self.stats['errors'] == 0 else 'COMPLETED WITH ERRORS'}
-<<<<<<< HEAD
-
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
         
         print(report)
         logger.info("Platform initialization report generated")

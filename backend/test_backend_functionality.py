@@ -2,10 +2,7 @@
 """
 Backend Functionality Test Script
 Tests core functionality without requiring external dependencies
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

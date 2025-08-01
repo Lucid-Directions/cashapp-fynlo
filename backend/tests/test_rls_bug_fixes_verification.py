@@ -1,10 +1,7 @@
 """
 Verification tests for RLS bug fixes
-<<<<<<< HEAD
-=======
 Ensures all fixes work correctly
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

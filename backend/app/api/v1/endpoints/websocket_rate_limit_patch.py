@@ -1,11 +1,7 @@
 """
 WebSocket Rate Limiting Integration
 This module shows how to integrate rate limiting into the existing websocket.py
-<<<<<<< HEAD
-
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 # Add these imports to websocket.py
 from fastapi import Path, Query, WebSocket, Depends

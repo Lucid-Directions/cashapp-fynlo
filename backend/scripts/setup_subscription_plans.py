@@ -7,10 +7,7 @@ to restaurants when they sign up for the platform.
 
 Run this script after running the database migration:
 python backend/scripts/setup_subscription_plans.py
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

@@ -1,11 +1,7 @@
 """
 Example endpoint showing proper RLS implementation
 This file demonstrates how to use RLS session variable isolation
-<<<<<<< HEAD
-
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException

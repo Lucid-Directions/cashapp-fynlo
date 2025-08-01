@@ -1,10 +1,7 @@
 """
 Minimal FastAPI server to get essential endpoints working
 This bypasses complex payment provider imports and focuses on core data endpoints
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

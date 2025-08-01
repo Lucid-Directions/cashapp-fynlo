@@ -10,10 +10,7 @@ This module provides endpoints for platform owners to manage:
 
 Note: These endpoints are NOT used by the mobile app.
 Mobile apps use the standard v1 API endpoints.
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

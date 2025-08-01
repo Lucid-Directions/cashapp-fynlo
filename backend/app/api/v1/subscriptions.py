@@ -3,10 +3,7 @@ Subscription management API endpoints
 
 This module provides REST API endpoints for managing restaurant subscriptions,
 subscription plans, and usage tracking.
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 from fastapi import APIRouter, Depends, Query

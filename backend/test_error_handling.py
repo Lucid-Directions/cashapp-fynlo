@@ -2,10 +2,7 @@
 """
 Test script for Enhanced Error Handling
 Tests comprehensive error handling and validation for iOS integration
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

@@ -1,10 +1,7 @@
 """
 Offline Sync Manager for Fynlo POS
 Handles batch upload, conflict resolution, and offline synchronization
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

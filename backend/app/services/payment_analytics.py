@@ -1,10 +1,7 @@
 """
 Advanced Payment Analytics Service
 Provides detailed insights into payment performance, cost optimization, and provider analytics
-<<<<<<< HEAD
-=======
 """
->>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """
