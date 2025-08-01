@@ -6,7 +6,6 @@ Test script to verify UUID type consistency for Supabase authentication
 """
 import sys
 import os
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from sqlalchemy.orm import Session
 from app.core.database import SessionLocal, User
@@ -93,7 +92,6 @@ def test_uuid_consistency():
         # Test column type
         print("\n=== Database Column Type Check ===")
         from sqlalchemy import inspect
-        inspector = inspect(db.bind)
         columns = inspector.get_columns('users')
         
         supabase_id_col = next((col for col in columns if col['name'] == 'supabase_id'), None)
@@ -103,7 +101,6 @@ def test_uuid_consistency():
     except Exception as e:
         print(f"\n❌ Test error: {str(e)}")
         import traceback
-        traceback.print_exc()
     finally:
         db.close()
 
