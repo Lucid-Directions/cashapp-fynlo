@@ -1,0 +1,30 @@
+name: fynlopos
+region: lon
+services:
+- name: cashapp-fynlo
+  environment_slug: python
+  github:
+    branch: main
+    deploy_on_push: true
+    repo: Lucid-Directions/cashapp-fynlo
+  source_dir: /backend
+  http_port: 8080
+  instance_count: 2
+  instance_size_slug: apps-s-1vcpu-1gb
+  run_command: python -m uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8080} --log-level info
+  envs:
+  - key: DATABASE_URL
+    scope: RUN_TIME
+    value: ${fynlo-pos-db.DATABASE_URL}
+  - key: REDIS_URL
+    scope: RUN_TIME
+    value: ${fynlo-pos-cache.DATABASE_URL}
+databases:
+- name: fynlo-pos-cache
+  engine: REDIS
+  production: true
+  version: "7"
+- name: fynlo-pos-db
+  engine: PG
+  production: true
+  version: "15"

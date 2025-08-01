@@ -1,0 +1,9 @@
+Deployment trigger file
+Last updated: 2025-08-01 13:50:00 UTC
+
+This file forces DigitalOcean to create a new deployment.
+The backend has been failing to deploy due to:
+1. Syntax errors in Python files (fixed in PR #485)
+2. Incorrect run command in app spec (should be app.main:app not backend.app.main:app)
+
+This deployment should succeed with all fixes applied.
