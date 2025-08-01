@@ -1,6 +1,10 @@
 """
 Platform Management API endpoints for Fynlo POS
 Multi-tenant platform owner features for managing multiple restaurants
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

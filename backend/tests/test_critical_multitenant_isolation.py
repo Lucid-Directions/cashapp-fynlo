@@ -2,6 +2,10 @@
 Critical Multi-tenant Isolation Test Suite for Issue #361
 Tests to verify complete data isolation between restaurants
 Written BEFORE implementing fixes to ensure we catch any vulnerabilities
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

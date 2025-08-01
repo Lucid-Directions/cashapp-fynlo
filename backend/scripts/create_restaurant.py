@@ -2,7 +2,11 @@
 """
 Create Restaurant Script
 Creates a restaurant with proper configuration in the database
+<<<<<<< HEAD
 
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 import os
 import sys

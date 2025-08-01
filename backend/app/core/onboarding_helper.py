@@ -1,6 +1,10 @@
 """
 Onboarding Helper for Fynlo POS
 Handles API responses for users without restaurants
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

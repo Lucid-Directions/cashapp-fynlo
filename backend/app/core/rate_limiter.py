@@ -1,6 +1,10 @@
 """
 Rate limiter for WebSocket connections
 Implements token bucket algorithm for message rate limiting
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

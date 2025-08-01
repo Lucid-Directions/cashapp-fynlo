@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """
 Test script to verify UUID type consistency for Supabase authentication
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

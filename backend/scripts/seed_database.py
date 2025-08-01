@@ -2,6 +2,10 @@
 """
 Master Database Seeding Script for Fynlo POS
 Creates comprehensive production-like data for testing and development
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

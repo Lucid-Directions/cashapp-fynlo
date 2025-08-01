@@ -1,7 +1,11 @@
 """
 Cache warming strategies for Fynlo POS.
 Pre-populates cache with frequently accessed data to improve performance.
+<<<<<<< HEAD
 
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 import asyncio
 import logging

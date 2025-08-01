@@ -1,6 +1,10 @@
 """
 DigitalOcean Spaces Storage Service
 Handles file uploads, downloads, and management with CDN delivery
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

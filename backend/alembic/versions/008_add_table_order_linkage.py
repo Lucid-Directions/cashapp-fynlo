@@ -1,5 +1,4 @@
-"""
-Add table_id foreign key to orders and layout storage
+"""Add table_id foreign key to orders and layout storage
 
 Revision ID: 008_add_table_order_linkage
 Revises: 007_create_recipe_inventory_tables

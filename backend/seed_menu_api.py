@@ -14,6 +14,10 @@ Environment Variables:
     API_BASE_URL - API endpoint (defaults to production)
     AUTH_EMAIL - User email for authentication (required)
     AUTH_PASSWORD - User password for authentication (required)
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

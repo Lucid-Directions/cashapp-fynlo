@@ -2,6 +2,10 @@
 """
 File Upload API Endpoints Testing for Fynlo POS
 Tests the actual API endpoints with real HTTP requests
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

@@ -2,6 +2,10 @@
 """
 Database Setup Script for Fynlo POS
 Automatically sets up PostgreSQL database with proper schema and sample data
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

@@ -11,7 +11,11 @@ logger = logging.getLogger(__name__)
 class ServiceChargeCalculator:
     """
     Calculates the service charge, potentially including transaction fees.
+<<<<<<< HEAD
     
+=======
+    """
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 """
     def __init__(

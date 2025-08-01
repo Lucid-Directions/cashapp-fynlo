@@ -2,6 +2,10 @@
 """
 Standalone Database Optimization Script for Fynlo POS
 Works without app dependencies
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """
@@ -52,7 +56,11 @@ def analyze_table_sizes(cursor):
     WHERE schemaname = 'public'
     ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC
     LIMIT 20;
+<<<<<<< HEAD
     
+=======
+    """
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
     
     cursor.execute(query)
     results = cursor.fetchall()
@@ -99,7 +107,11 @@ def check_existing_indexes(cursor):
     FROM pg_indexes
     WHERE schemaname = 'public'
     ORDER BY tablename, indexname;
+<<<<<<< HEAD
     
+=======
+    """
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
     
     cursor.execute(query)
     indexes = cursor.fetchall()

@@ -1,5 +1,4 @@
-"""
-Add username field to users table
+"""Add username field to users table
 
 Revises: 
 Create Date: 2025-01-31 12:00:00.000000

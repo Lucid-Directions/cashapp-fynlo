@@ -1,5 +1,4 @@
-"""
-Add portal-specific tables and fields
+"""Add portal-specific tables and fields
 
 Revision ID: add_portal_tables_2025
 Revises: c9882ae130a2

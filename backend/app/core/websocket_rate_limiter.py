@@ -1,7 +1,11 @@
 """
 WebSocket Rate Limiting System
 Prevents DoS attacks by limiting connections and messages
+<<<<<<< HEAD
 
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 import asyncio
 import time
@@ -19,7 +23,11 @@ logger = logging.getLogger(__name__)
 class WebSocketRateLimiter:
     """
     Comprehensive rate limiting for WebSocket connections and messages
+<<<<<<< HEAD
     
+=======
+    """
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
     
     def __init__(self, redis_client: Optional[RedisClient] = None):
         self.redis = redis_client

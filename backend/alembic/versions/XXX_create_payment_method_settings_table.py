@@ -1,5 +1,4 @@
-"""
-create_payment_method_settings_table
+"""create_payment_method_settings_table
 
 Revision ID: XXX
 Revises: (ID of the previous migration, e.g., e8f9d5c7b2a1)

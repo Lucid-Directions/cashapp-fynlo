@@ -2,6 +2,10 @@
 """
 Test script for Analytics API Enhancement Implementation
 Tests real-time dashboard metrics optimized for mobile consumption
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

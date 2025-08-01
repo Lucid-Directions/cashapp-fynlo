@@ -1,6 +1,10 @@
 """
 Minimal FastAPI app for DigitalOcean deployment
 No external dependencies, immediate startup
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

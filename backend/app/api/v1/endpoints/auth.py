@@ -1,8 +1,7 @@
 """
 Supabase Authentication endpoints for Fynlo POS
-
-
 """
+
 from fastapi import APIRouter, Depends, Header, Request
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
@@ -277,8 +276,8 @@ async def verify_supabase_user(
         
         return response_data
         
-    except FynloException:
-        # Re-raise Fynlo exceptions without modification
+    except HTTPException:
+        # Re-raise HTTP exceptions without modification
         raise
     except (AuthApiError, PostgrestAPIError) as e:
         # Handle Supabase authentication errors

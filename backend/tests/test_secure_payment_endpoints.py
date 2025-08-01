@@ -1,6 +1,10 @@
 """
 Test suite for Secure Payment API Endpoints
 Tests authentication, rate limiting, permissions, and payment flows
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

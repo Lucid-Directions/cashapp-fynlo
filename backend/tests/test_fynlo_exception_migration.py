@@ -3,6 +3,10 @@ Test HTTPException to FynloException migration
 
 This test module verifies that all core security modules properly use
 FynloException instead of HTTPException.
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

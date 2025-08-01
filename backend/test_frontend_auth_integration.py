@@ -2,6 +2,10 @@
 """
 Frontend-Backend Authentication Integration Testing for Fynlo POS
 Tests authentication flow as would be used by the iOS frontend
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

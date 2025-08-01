@@ -1,7 +1,11 @@
 """
 Enhanced WebSocket Security with TenantSecurity module
 Ensures proper isolation while maintaining platform owner access
+<<<<<<< HEAD
 
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 from fastapi import WebSocket, WebSocketDisconnect, Path, Query, Depends
 from sqlalchemy.orm import Session
@@ -119,7 +123,11 @@ async def handle_websocket_message_secure(
 class SecureWebSocketManager:
     """
     Enhanced WebSocket manager with tenant isolation
+<<<<<<< HEAD
     
+=======
+    """
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
     
     @staticmethod
     async def broadcast_to_restaurant_secure(

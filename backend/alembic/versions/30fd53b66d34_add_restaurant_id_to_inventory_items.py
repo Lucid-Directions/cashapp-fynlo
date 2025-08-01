@@ -1,5 +1,4 @@
-"""
-add_restaurant_id_to_inventory_items
+"""add_restaurant_id_to_inventory_items
 
 Revision ID: 30fd53b66d34
 Revises: d92292f7ec1d

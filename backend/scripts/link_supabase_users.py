@@ -2,6 +2,10 @@
 """
 Script to link existing Supabase users to database records
 This ensures users can authenticate with Supabase while maintaining data integrity
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

@@ -11,7 +11,11 @@ logger = logging.getLogger(__name__)
 class FinancialRecordsService:
     """
     Service for managing financial records like platform fees and staff tip distributions.
+<<<<<<< HEAD
     
+=======
+    """
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
     def __init__(self, db: Session):
         self.db = db

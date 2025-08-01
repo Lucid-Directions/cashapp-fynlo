@@ -1,5 +1,4 @@
-"""
-Initial database schema
+"""Initial database schema
 
 Revision ID: 000_initial_schema
 Revises: 

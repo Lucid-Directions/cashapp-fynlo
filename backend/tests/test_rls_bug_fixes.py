@@ -1,6 +1,10 @@
 """
 Comprehensive tests for RLS bug fixes
 Tests all issues identified by CursorBugBot
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

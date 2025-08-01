@@ -2,6 +2,10 @@
 """
 Fix final remaining HTTPExceptions in core modules.
 This script targets the last HTTPExceptions that need to be migrated to FynloException.
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

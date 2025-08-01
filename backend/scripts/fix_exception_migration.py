@@ -8,6 +8,10 @@ HTTPException to FynloException migration.
 The main issue is that specialized exception classes (AuthenticationException,
 ValidationException, etc.) don't accept a 'code' parameter, but many files
 are still trying to pass it.
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

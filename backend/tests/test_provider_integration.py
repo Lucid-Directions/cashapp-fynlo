@@ -1,6 +1,10 @@
 """
 Provider Integration Tests
 Real integration tests for payment providers (requires test credentials)
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

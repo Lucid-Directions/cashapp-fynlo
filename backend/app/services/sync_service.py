@@ -24,6 +24,10 @@ if TYPE_CHECKING:
 class SyncService:
     """
     Manages bidirectional data synchronization between platform and restaurants
+<<<<<<< HEAD
+=======
+    """
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
     
     
 """

@@ -1,5 +1,4 @@
-"""
-add platform audit logs table
+"""add platform audit logs table
 
 Revision ID: 569b8ab547cb
 Revises: 11cec540dd38

@@ -1,5 +1,4 @@
-"""
-Fix mobile ID mappings primary key
+"""Fix mobile ID mappings primary key
 
 Revision ID: 005_fix_mobile_id_primary_key
 Revises: 004_create_mobile_id_mappings

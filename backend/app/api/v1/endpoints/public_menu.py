@@ -1,6 +1,10 @@
 """
 Public Menu API endpoints for Fynlo POS
 These endpoints don't require authentication to allow menu loading before login
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

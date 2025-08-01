@@ -1,5 +1,4 @@
-"""
-Add floor plan and POS session tables
+"""Add floor plan and POS session tables
 
 Revision ID: 003_add_floor_plan_and_pos_tables
 Revises: 002_add_categories_table

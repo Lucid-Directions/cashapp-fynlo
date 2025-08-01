@@ -23,7 +23,11 @@ class SQLInjectionWAFMiddleware(BaseHTTPMiddleware):
     """
     Web Application Firewall middleware to detect and block SQL injection attempts.
     This provides defense-in-depth security in addition to parameterized queries.
+<<<<<<< HEAD
     
+=======
+    """
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
     
     # SQL injection patterns to detect
     SQL_INJECTION_PATTERNS = [

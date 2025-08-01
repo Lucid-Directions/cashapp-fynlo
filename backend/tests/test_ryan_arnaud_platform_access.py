@@ -1,6 +1,10 @@
 """
 Test Platform Owner Access for Ryan and Arnaud
 Ensures platform owners maintain full access while others are restricted
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

@@ -2,7 +2,11 @@
 """
 Database Optimization Script for Fynlo POS
 Adds indexes, analyzes tables, and optimizes performance
+<<<<<<< HEAD
 
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 import psycopg2
 from psycopg2.extras import RealDictCursor
@@ -55,7 +59,11 @@ def analyze_table_sizes(cursor):
     WHERE schemaname = 'public'
     ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC
     LIMIT 20;
+<<<<<<< HEAD
     
+=======
+    """
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
     
     cursor.execute(query)
     results = cursor.fetchall()
@@ -96,7 +104,11 @@ def check_missing_indexes(cursor):
                 AND indexdef LIKE '%' || kcu.column_name || '%'
         )
     ORDER BY tc.table_name, kcu.column_name;
+<<<<<<< HEAD
     
+=======
+    """
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
     
     cursor.execute(query)
     missing_fk_indexes = cursor.fetchall()
@@ -208,7 +220,11 @@ def analyze_slow_queries(cursor):
         AND mean_exec_time > 100  -- Queries averaging over 100ms
     ORDER BY mean_exec_time DESC
     LIMIT 10;
+<<<<<<< HEAD
     
+=======
+    """
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
     
     try:
         cursor.execute(query)

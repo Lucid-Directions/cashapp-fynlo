@@ -2,6 +2,10 @@
 """
 Authentication Security Testing for Fynlo POS
 Tests security aspects of the authentication system
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

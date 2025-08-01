@@ -1,6 +1,10 @@
 """
 Email Service using Resend API for Fynlo POS
 Handles transactional emails including receipt delivery
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """

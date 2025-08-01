@@ -2,7 +2,11 @@
 Comprehensive monitoring endpoints for instance and deployment tracking.
 Provides real-time visibility into replica counts and system health.
 Enhanced with strict input validation and security measures.
+<<<<<<< HEAD
 
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 from fastapi import APIRouter, Depends, BackgroundTasks, Query, Body, Request
 from datetime import datetime, timezone

@@ -1,6 +1,10 @@
 """
 Safe Restaurant Deletion Endpoint
 Validates that a restaurant can be safely deleted without breaking critical dependencies
+<<<<<<< HEAD
+=======
+"""
+>>>>>>> parent of af057592 (fix: docstring syntax and formatting issues across backend)
 
 
 """
